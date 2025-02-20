@@ -36,7 +36,14 @@ declare namespace Cypress {
     (task: 'protocol:page:loading', input: any): Promise<void>
   }
 
+  interface Devices {
+    keyboard: Keyboard
+    mouse: Mouse
+  }
+
   interface cy {
+    devices: Devices
+    getAll: (tag: string, events: string) => Events
     /**
      * If `as` is chained to the current command, return the alias name used.
      */
@@ -58,5 +65,6 @@ declare namespace Cypress {
 
     createSnapshot: ISnapshots['createSnapshot']
     getStyles: ISnapshots['getStyles']
+    timeout: ITimeouts['timeout']
   }
 }

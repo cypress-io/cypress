@@ -104,6 +104,18 @@ export const createCommonRoutes = ({
     next()
   })
 
+  // We need to handle the case where the studio is not defined or loaded properly.
+  // Module federation still tries to load the dynamic asset, but since we do not
+  // have anything to load, we return a blank file.
+  if (!getCtx().coreData.studio || getCtx().coreData.studio?.status === 'IN_ERROR') {
+    router.get('/__cypress-studio/app-studio.js', (req, res) => {
+      res.setHeader('Content-Type', 'application/javascript')
+      res.status(200).send('')
+    })
+  } else {
+    getCtx().coreData.studio?.initializeRoutes(router)
+  }
+
   router.get(`/${config.namespace}/tests`, (req, res, next) => {
     // slice out the cache buster
     const test = CacheBuster.strip(req.query.p)

@@ -22,7 +22,6 @@
       "@packages/*": ["../*"]
     },
     "target": "ES2022",
-    "allowJs": true,
     "types": [
       "cypress", 
       "cypress-real-events", 

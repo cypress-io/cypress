@@ -1346,7 +1346,7 @@ describe('Routes', () => {
         app.use(compression({ chunkSize: 64, threshold: 1 }))
 
         app.get('/', (req, res) => {
-          res.setHeader('content-type', 'application/javascript; charset=UTF-8')
+          res.setHeader('content-type', 'text/javascript; charset=UTF-8')
           res.setHeader('transfer-encoding', 'chunked')
 
           const write = (chunk) => {
@@ -3549,7 +3549,7 @@ describe('Routes', () => {
           nock(this.server.remoteStates.current().origin)
           .get('/app.js')
           .reply(200, 'if (top !== self) { }', {
-            'Content-Type': 'application/javascript',
+            'Content-Type': 'text/javascript',
           })
 
           return this.rp({
@@ -3605,7 +3605,7 @@ describe('Routes', () => {
             nock(this.server.remoteStates.current().origin)
             .get('/index.js')
             .reply(200, resp, {
-              'Content-Type': 'application/javascript',
+              'Content-Type': 'text/javascript',
               'Content-Encoding': 'gzip',
             })
 
@@ -3634,7 +3634,7 @@ describe('Routes', () => {
             // truncates the CRC checksum and size check
             // at the end of the stream
             .reply(200, resp.slice(0, -8), {
-              'Content-Type': 'application/javascript',
+              'Content-Type': 'text/javascript',
               'Content-Encoding': 'gzip',
             })
 
@@ -3685,7 +3685,7 @@ describe('Routes', () => {
           .get('/app.js')
           .delayBody(100)
           .replyWithFile(200, Fixtures.path('server/gzip-bad.html.gz'), {
-            'Content-Type': 'application/javascript',
+            'Content-Type': 'text/javascript',
             'Content-Encoding': 'gzip',
           })
 
@@ -3728,7 +3728,7 @@ describe('Routes', () => {
             nock(this.server.remoteStates.current().origin)
             .get('/app.js')
             .reply(200, hugeJsFile, {
-              'Content-Type': 'application/javascript',
+              'Content-Type': 'text/javascript',
             })
 
             let reqTime = new Date()
@@ -3784,7 +3784,7 @@ describe('Routes', () => {
           nock(this.server.remoteStates.current().origin)
           .get('/app.js')
           .reply(200, 'if (top !== self) { }', {
-            'Content-Type': 'application/javascript',
+            'Content-Type': 'text/javascript',
           })
 
           return this.rp({
@@ -4332,7 +4332,7 @@ describe('Routes', () => {
             })
 
             res.writeHead(200, {
-              'Content-Type': 'application/javascript',
+              'Content-Type': 'text/javascript',
             })
 
             // write some bytes, causing

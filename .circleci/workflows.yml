@@ -1,5 +1,12 @@
 version: 2.1
 
+chrome-stable-version: &chrome-stable-version "133.0.6943.126"
+chrome-beta-version: &chrome-beta-version "134.0.6998.15"
+firefox-stable-version: &firefox-stable-version "135.0"
+
+orbs:
+  browser-tools: circleci/browser-tools@1.5.2
+
 defaults: &defaults
   parallelism: 1
   working_directory: ~/cypress
@@ -11,8 +18,9 @@ defaults: &defaults
       type: boolean
       default: false
   executor: <<parameters.executor>>
-  environment: &defaultsEnvironment
+  environment:
     ## set specific timezone
+    &defaultsEnvironment
     TZ: "/usr/share/zoneinfo/America/New_York"
 
     ## store artifacts here
@@ -28,11 +36,10 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - /^release\/\d+\.\d+\.\d+$/
+        - chore/update_wdio_deps
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'update-v8-snapshot-cache-on-develop'
-        - 'chore/update_vue_test_utils'
-        - 'publish-binary'
-        - 'cacie/29590/document-domain-subdomains'
+        - 'ryanm/chore/add_internal_studio'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -40,75 +47,72 @@ mainBuildFilters: &mainBuildFilters
 macWorkflowFilters: &darwin-workflow-filters
   when:
     or:
-    - equal: [ develop, << pipeline.git.branch >> ]
-    # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
-    - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'chore/update_vue_test_utils', << pipeline.git.branch >> ]
-    - equal: [ 'cacie/fix-hook-test-stack-analysis', << pipeline.git.branch >> ]
-    - matches:
-        pattern: /^release\/\d+\.\d+\.\d+$/
-        value: << pipeline.git.branch >>
+      - equal: [ develop, << pipeline.git.branch >> ]
+      # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
+      - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
+      - equal: [ 'ryanm/chore/add_internal_studio', << pipeline.git.branch >> ]
+      - matches:
+          pattern: /^release\/\d+\.\d+\.\d+$/
+          value: << pipeline.git.branch >>
 
 linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
-    - equal: [ develop, << pipeline.git.branch >> ]
-    # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
-    - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'chore/update_binary_branch', << pipeline.git.branch >> ]
-    - equal: [ 'cacie/fix-hook-test-stack-analysis', << pipeline.git.branch >> ]
-    - matches:
-        pattern: /^release\/\d+\.\d+\.\d+$/
-        value: << pipeline.git.branch >>
+      - equal: [ develop, << pipeline.git.branch >> ]
+      # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
+      - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
+      - equal: [ 'ryanm/chore/add_internal_studio', << pipeline.git.branch >> ]
+      - matches:
+          pattern: /^release\/\d+\.\d+\.\d+$/
+          value: << pipeline.git.branch >>
 
 # uncomment & add to the branch conditions below to disable the main linux
 # flow if we don't want to test it for a certain branch
 linuxWorkflowExcludeFilters: &linux-x64-workflow-exclude-filters
   unless:
     or:
-    - matches:
-        pattern: /^pull\/[0-9]+/
-        value: << pipeline.git.branch >>
-    - false
+      - matches:
+          pattern: /^pull\/[0-9]+/
+          value: << pipeline.git.branch >>
+      - false
 
 # windows is slow and expensive in CI, so it normally only runs on main branches
 # add your branch to this list to run the full Windows build on your PR
 windowsWorkflowFilters: &windows-workflow-filters
   when:
     or:
-    - equal: [ develop, << pipeline.git.branch >> ]
-    # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
-    - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/chore/electron-33-upgrade', << pipeline.git.branch >> ]
-    - equal: [ 'cacie/fix-hook-test-stack-analysis', << pipeline.git.branch >> ]
-    - matches:
-        pattern: /^release\/\d+\.\d+\.\d+$/
-        value: << pipeline.git.branch >>
+      - equal: [ develop, << pipeline.git.branch >> ]
+      # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
+      - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
+      - equal: [ 'ryanm/chore/add_internal_studio', << pipeline.git.branch >> ]
+      - matches:
+          pattern: /^release\/\d+\.\d+\.\d+$/
+          value: << pipeline.git.branch >>
 
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers-internal:node20.18.1-bullseye-chrome131-ff133
+      - image: cypress/base-internal:20.18.1-bullseye
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
       PLATFORM: linux
       CI_DOCKER: "true"
-  
+
   kitchensink-executor:
     docker:
-      - image: cypress/browsers-internal:node20.18.1-bullseye-chrome131-ff133
+      - image: cypress/base-internal:20.18.1-bullseye
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
       PLATFORM: linux
       CI_DOCKER: "true"
-  
+
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers-internal:node20.18.1-bullseye-chrome131-ff133
+      - image: cypress/base-internal:20.18.1-bullseye
         user: node
     environment:
       PLATFORM: linux
@@ -156,7 +160,7 @@ commands:
           name: Set environment variable to determine whether or not to persist artifacts
           command: |
             echo "Setting SHOULD_PERSIST_ARTIFACTS variable"
-            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "chore/update_vue_test_utils" && "$CIRCLE_BRANCH" != cacie/fix-hook-test-stack-analysis ]]; then
+            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "ryanm/chore/add_internal_studio" ]]; then
                 export SHOULD_PERSIST_ARTIFACTS=true
             fi' >> "$BASH_ENV"
   # You must run `setup_should_persist_artifacts` command and be using bash before running this command
@@ -260,7 +264,8 @@ commands:
           # Dependencies needed by circle-cache.js, before we "yarn" or unpack cached node_modules
           name: Cache Helper Dependencies
           working_directory: ~/
-          command: npm i glob@7.1.6 fs-extra@10.0.0 minimist@1.2.5 fast-json-stable-stringify@2.1.0
+          command: npm i glob@7.1.6 fs-extra@10.0.0 minimist@1.2.5
+            fast-json-stable-stringify@2.1.0
 
   unpack-dependencies:
     description: 'Unpacks dependencies associated with the current workflow'
@@ -274,7 +279,8 @@ commands:
           command: node ./scripts/get-platform-key.js > platform_key
       - restore_cache:
           name: Restore cache state, to check for known modules cache existence
-          key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-node-modules-cache-{{ checksum "circle_cache_key" }}
+          key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key"
+            }}-node-modules-cache-{{ checksum "circle_cache_key" }}
       - run:
           name: Move node_modules back from /tmp
           command: |
@@ -290,7 +296,8 @@ commands:
           command: node scripts/circle-cache.js --action unpack
 
   restore_cached_system_tests_deps:
-    description: 'Restore the cached node_modules for projects in "system-tests/projects/**"'
+    description: 'Restore the cached node_modules for projects in
+      "system-tests/projects/**"'
     steps:
       - run:
           name: Generate Circle Cache key for system tests
@@ -301,7 +308,9 @@ commands:
       - restore_cache:
           name: Restore system tests node_modules cache
           keys:
-            - v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+            - v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum
+              "platform_key" }}-system-tests-projects-node-modules-cache-{{
+              checksum "system_tests_cache_key" }}
 
   update_cached_system_tests_deps:
     description: 'Update the cached node_modules for projects in "system-tests/projects/**"'
@@ -315,7 +324,10 @@ commands:
       - restore_cache:
           name: Restore cache state, to check for known modules cache existence
           keys:
-            - v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-state-of-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+            - v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum
+              "platform_key"
+              }}-state-of-system-tests-projects-node-modules-cache-{{ checksum
+              "system_tests_cache_key" }}
       - run:
           name: Bail if specific cache exists
           command: |
@@ -326,25 +338,33 @@ commands:
       - restore_cache:
           name: Restore system tests node_modules cache
           keys:
-            - v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
-            - v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-system-tests-projects-node-modules-cache-
+            - v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum
+              "platform_key" }}-system-tests-projects-node-modules-cache-{{
+              checksum "system_tests_cache_key" }}
+            - v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum
+              "platform_key" }}-system-tests-projects-node-modules-cache-
       - run:
           name: Update system-tests node_modules cache
           command: yarn workspace @tooling/system-tests projects:yarn:install
       - save_cache:
           name: Save system tests node_modules cache
-          key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+          key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key"
+            }}-system-tests-projects-node-modules-cache-{{ checksum
+            "system_tests_cache_key" }}
           paths:
             - /tmp/cy-system-tests-node-modules
       - run: touch /tmp/system_tests_node_modules_installed
       - save_cache:
           name: Save system tests node_modules cache state key
-          key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-state-of-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+          key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key"
+            }}-state-of-system-tests-projects-node-modules-cache-{{ checksum
+            "system_tests_cache_key" }}
           paths:
             - /tmp/system_tests_node_modules_installed
 
   caching-dependency-installer:
-    description: 'Installs & caches the dependencies based on yarn lock & package json dependencies'
+    description: 'Installs & caches the dependencies based on yarn lock & package
+      json dependencies'
     parameters:
       only-cache-for-root-user:
         type: boolean
@@ -365,13 +385,17 @@ commands:
           steps:
             - restore_cache:
                 name: Restore cache state, to check for known modules cache existence
-                key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-state-of-node-modules-cache-{{ checksum "circle_cache_key" }}-better-sqlite3
+                key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key"
+                  }}-state-of-node-modules-cache-{{ checksum "circle_cache_key"
+                  }}-better-sqlite3
       - unless:
           condition: <<parameters.build-better-sqlite3>>
           steps:
             - restore_cache:
                 name: Restore cache state, to check for known modules cache existence
-                key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-state-of-node-modules-cache-{{ checksum "circle_cache_key" }}
+                key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key"
+                  }}-state-of-node-modules-cache-{{ checksum "circle_cache_key"
+                  }}
       - run:
           name: Bail if cache exists
           command: |
@@ -383,7 +407,8 @@ commands:
       - restore_cache:
           name: Restore weekly yarn cache
           keys:
-            - v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-deps-root-weekly-{{ checksum "cache_date" }}
+            - v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum
+              "platform_key" }}-deps-root-weekly-{{ checksum "cache_date" }}
       - run:
           name: Install Node Modules
           command: |
@@ -422,7 +447,8 @@ commands:
           steps:
             - save_cache:
                 name: Saving node modules for root, cli, and all globbed workspace packages
-                key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-node-modules-cache-{{ checksum "circle_cache_key" }}
+                key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key"
+                  }}-node-modules-cache-{{ checksum "circle_cache_key" }}
                 paths:
                   - node_modules
                   - cli/node_modules
@@ -433,7 +459,8 @@ commands:
           steps:
             - save_cache:
                 name: Saving node modules for root, cli, and all globbed workspace packages
-                key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-node-modules-cache-{{ checksum "circle_cache_key" }}
+                key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key"
+                  }}-node-modules-cache-{{ checksum "circle_cache_key" }}
                 paths:
                   - /tmp/node_modules_cache
       - run: touch node_modules_installed
@@ -442,7 +469,9 @@ commands:
           steps:
             - save_cache:
                 name: Saving node-modules cache state key
-                key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-state-of-node-modules-cache-{{ checksum "circle_cache_key" }}-better-sqlite3
+                key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key"
+                  }}-state-of-node-modules-cache-{{ checksum "circle_cache_key"
+                  }}-better-sqlite3
                 paths:
                   - node_modules_installed
       - unless:
@@ -450,12 +479,15 @@ commands:
           steps:
             - save_cache:
                 name: Saving node-modules cache state key
-                key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-state-of-node-modules-cache-{{ checksum "circle_cache_key" }}
+                key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key"
+                  }}-state-of-node-modules-cache-{{ checksum "circle_cache_key"
+                  }}
                 paths:
                   - node_modules_installed
       - save_cache:
           name: Save weekly yarn cache
-          key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-deps-root-weekly-{{ checksum "cache_date" }}
+          key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key"
+            }}-deps-root-weekly-{{ checksum "cache_date" }}
           paths:
             - ~/.yarn
             - ~/.cy-npm-cache
@@ -480,8 +512,7 @@ commands:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
             - run:
-                name: Stop .only
-                 # this will catch ".only"s in js/coffee as well
+                name: Stop .only # this will catch ".only"s in js/coffee as well
                 command: |
                   source ./scripts/ensure-node.sh
                   yarn stop-only-all
@@ -513,27 +544,69 @@ commands:
             source ./scripts/ensure-node.sh
             yarn check-node-version
 
-  install-chrome:
-    description: Install Google Chrome
+  install-browsers:
+    description: Install Google Chrome or Firefox
     parameters:
-      channel:
-        description: browser channel to install
+      executor:
+        description: The executor in use. Only used if Windows for workaround purposes
+        type: executor
+        default: cy-doc
+      install-chrome:
+        description: whether or not to install google chrome
+        type: boolean
+        default: false
+      google-chrome-channel:
+        description: Google Chrome channel to install
         type: string
-      version:
-        description: browser version to install
+        # can be stable, beta, dev, or canary
+        default: stable
+      google-chrome-version:
+        description: Google Chrome version to install
         type: string
+        # latest can also be used here
+        default: *chrome-stable-version
+      install-firefox:
+        description: whether or not to install firefox
+        type: boolean
+        default: false
+      firefox-version:
+        description: Firefox version to install
+        type: string
+        # latest can also be used here
+        default: *firefox-stable-version
     steps:
-      - run:
-          name: Install Google Chrome (<<parameters.channel>>)
-          command: |
-            echo "Installing Chrome (<<parameters.channel>>) v<<parameters.version>>"
-            wget -O /usr/src/google-chrome-<<parameters.channel>>_<<parameters.version>>_amd64.deb "http://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-<<parameters.channel>>/google-chrome-<<parameters.channel>>_<<parameters.version>>-1_amd64.deb" && \
-            dpkg -i /usr/src/google-chrome-<<parameters.channel>>_<<parameters.version>>_amd64.deb ; \
-            apt-get install -f -y && \
-            rm -f /usr/src/google-chrome-<<parameters.channel>>_<<parameters.version>>_amd64.deb
-            which google-chrome-<<parameters.channel>> || (printf "\n\033[0;31mChrome was not successfully downloaded - bailing\033[0m\n\n" && exit 1)
-            echo "Location of Google Chrome Installation: `which google-chrome-<<parameters.channel>>`"
-            echo "Google Chrome Version: `google-chrome-<<parameters.channel>> --version`"
+      - when:
+          condition:
+            not:
+              equal: [ *windows-executor, << parameters.executor >> ]
+          # see https://circleci.com/developer/orbs/orb/circleci/browser-tools
+          steps:
+            - when:
+                condition:
+                  equal: [ true, << parameters.install-firefox >> ]
+                steps:
+                  - browser-tools/install-firefox:
+                      # https://download-installer.cdn.mozilla.net/pub/firefox/releases/
+                      version: << parameters.firefox-version >>
+            - when:
+                condition:
+                  equal: [ true, << parameters.install-chrome >> ]
+                steps:
+                  - browser-tools/install-chrome:
+                      # https://www.ubuntuupdates.org/package/google_chrome/stable/main/base/google-chrome-stable
+                      channel: << parameters.google-chrome-channel >>
+                      chrome-version: << parameters.google-chrome-version >>
+                  - when:
+                      condition:
+                        equal: [ 'beta', << parameters.google-chrome-channel>> ]
+                      steps:
+                        - run:
+                            # When the beta is downloaded with this orb,
+                            # google-chrome-beta is linked in addition to google-chrome,
+                            # which we do not expect and errors out when running Cypress
+                            name: remove linked google-chrome binary
+                            command: |
+                              rm /usr/bin/google-chrome           
 
   # This code builds better-sqlite3 on Debian 10 (Buster). This is necessary because Debian 10 has the oldest glibc version (2.28) that we support.
   #
@@ -560,7 +633,8 @@ commands:
               cp ~/cypress/better_sqlite3.node ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
             fi
       - save_cache:
-          key: better-sqlite3-{{ checksum "node_modules/better-sqlite3/package.json" }}-{{ checksum "node_modules/electron/package.json" }}
+          key: better-sqlite3-{{ checksum "node_modules/better-sqlite3/package.json" }}-{{
+            checksum "node_modules/electron/package.json" }}
           paths:
             - better_sqlite3.node
       - run:
@@ -576,7 +650,7 @@ commands:
       install-chrome-channel:
         description: chrome channel to install
         type: string
-        default: ''
+        default: 'stable'
       inject-document-domain:
         description: run subset of tests with injectDocumentDomain config enabled
         type: boolean
@@ -585,11 +659,25 @@ commands:
     steps:
       - restore_cached_workspace
       - when:
-          condition: <<parameters.install-chrome-channel>>
+          condition:
+            equal: [ chrome, << parameters.browser >> ]
           steps:
-            - install-chrome:
-                channel: <<parameters.install-chrome-channel>>
-                version: $(node ./scripts/get-browser-version.js chrome:<<parameters.install-chrome-channel>>)
+            - install-browsers:
+                install-chrome: true
+      - when:
+          condition:
+            equal: [ chrome:beta, << parameters.browser >> ]
+          steps:
+            - install-browsers:
+                install-chrome: true
+                google-chrome-channel: << parameters.install-chrome-channel >>
+                google-chrome-version: *chrome-beta-version
+      - when:
+          condition:
+            equal: [ firefox, << parameters.browser >> ]
+          steps:
+            - install-browsers:
+                install-firefox: true
       - when:
           condition:
             equal: [ webkit, << parameters.browser >> ]
@@ -654,7 +742,7 @@ commands:
       package:
         description: package to target
         type: enum
-        enum: ['frontend-shared', 'launchpad', 'app', 'reporter']
+        enum: [ 'frontend-shared', 'launchpad', 'app', 'reporter' ]
       browser:
         description: browser shortname to target
         type: string
@@ -668,7 +756,7 @@ commands:
       type:
         description: ct or e2e
         type: enum
-        enum: ['ct', 'e2e']
+        enum: [ 'ct', 'e2e' ]
       debug:
         description: debug option
         type: string
@@ -685,6 +773,10 @@ commands:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
                 command: rm -rf node_modules && yarn
+      - install-browsers:
+          install-chrome: true
+          install-firefox: true
+          executor: << parameters.executor >>
       - windows-install-chrome:
           browser: <<parameters.browser>>
       - run:
@@ -758,6 +850,9 @@ commands:
             equal: [ webkit, << parameters.browser >> ]
           steps:
             - install-webkit-deps
+      - install-browsers:
+          install-chrome: true
+          install-firefox: true
       - run:
           name: Run system tests
           environment:
@@ -830,7 +925,8 @@ commands:
     description: Double-check that Mocha tests ran as expected.
     parameters:
       expectedResultCount:
-        description: The number of result files to expect, ie, the number of Mocha test suites that ran.
+        description: The number of result files to expect, ie, the number of Mocha test
+          suites that ran.
         type: integer
         ## by default, assert that at least 1 test ran
         default: 0
@@ -855,7 +951,8 @@ commands:
     steps:
       - restore_cached_binary
       - run:
-          name: "Cloning test project and checking out release branch: <<parameters.repo>>"
+          name: "Cloning test project and checking out release branch:
+            <<parameters.repo>>"
           working_directory: /tmp/<<parameters.repo>>
           command: |
             git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git .
@@ -889,12 +986,14 @@ commands:
       browser:
         description: Name of the browser to use, like "electron", "chrome", "firefox"
         type: enum
-        enum: ["", "electron", "chrome", "firefox"]
+        enum: [ "", "electron", "chrome", "firefox" ]
         default: ""
       command:
         description: Test command to run to start Cypress tests
         type: string
-        default: "CYPRESS_INTERNAL_ENABLE_TELEMETRY=1 CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY CYPRESS_PROJECT_ID=ypt4pf yarn cypress:run"
+        default: "CYPRESS_INTERNAL_ENABLE_TELEMETRY=1
+          CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY CYPRESS_PROJECT_ID=ypt4pf yarn
+          cypress:run"
       # if the repo to clone and test is a monorepo, you can
       # run tests inside a specific subfolder
       folder:
@@ -908,10 +1007,6 @@ commands:
         description: Pull request number to check out before installing and testing
         type: integer
         default: 0
-      wait-on:
-        description: Whether to use wait-on to wait on a server to be booted
-        type: string
-        default: ""
       server-start-command:
         description: Server start command for repo
         type: string
@@ -938,6 +1033,8 @@ commands:
           # force installing the freshly built binary
           command: |
             CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i --legacy-peer-deps ~/cypress/cypress.tgz && [[ -f yarn.lock ]] && yarn
+      - install-browsers:
+          install-chrome: true
       - run:
           name: Print Cypress version
           working_directory: /tmp/<<parameters.repo>>
@@ -999,7 +1096,7 @@ commands:
       browser:
         description: Name of the browser to use, like "electron", "chrome", "firefox"
         type: enum
-        enum: ["", "electron", "chrome", "firefox"]
+        enum: [ "", "electron", "chrome", "firefox" ]
         default: ""
       command:
         description: Test command to run to start Cypress tests
@@ -1030,6 +1127,10 @@ commands:
         description: Server start command for repo
         type: string
         default: "npm start --if-present"
+      executor:
+        description: The executor in use. Only used if Windows for workaround purposes
+        type: executor
+        default: cy-doc
     steps:
       - run:
           name: Install yarn if not already installed
@@ -1101,23 +1202,32 @@ commands:
       - when:
           condition: <<parameters.build-project>>
           steps:
-          - run:
-              name: Build 🏗 (maybe)
-              working_directory: /tmp/<<parameters.repo>>
-              command: |
-                source ./ci-ensure-node.sh
-                [[ -f yarn.lock ]] && yarn build || npm run build --if-present
+            - run:
+                name: Build 🏗 (maybe)
+                working_directory: /tmp/<<parameters.repo>>
+                command: |
+                  source ./ci-ensure-node.sh
+                  [[ -f yarn.lock ]] && yarn build || npm run build --if-present
       - run:
           working_directory: /tmp/<<parameters.repo>>
           command: |
             source ./ci-ensure-node.sh
             <<parameters.server-start-command>>
           background: true
-      - run:
-          condition: <<parameters.wait-on>>
-          name: "Waiting on server to boot: <<parameters.wait-on>>"
-          command: |
-            npx wait-on <<parameters.wait-on>> --timeout 120000
+      - when:
+          condition:
+            not:
+              equal: [ "", <<parameters.wait-on>> ]
+          steps:
+            - run:
+                name: "Waiting on server to boot: <<parameters.wait-on>>"
+                command: |
+                  npm i -g wait-on
+                  npx wait-on <<parameters.wait-on>> --timeout 120000
+      - install-browsers:
+          install-chrome: true
+          install-firefox: true
+          executor: << parameters.executor >>
       - windows-install-chrome:
           browser: <<parameters.browser>>
       - when:
@@ -1367,13 +1477,14 @@ commands:
             - cypress/npm-package-url.json
 
   update_known_hosts:
-    description: Ensures that we have the latest Git public keys to prevent git+ssh from failing.
+    description: Ensures that we have the latest Git public keys to prevent git+ssh
+      from failing.
     steps:
-    - run:
-        name: Update known_hosts with github.com keys
-        command: |
-          mkdir -p ~/.ssh
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
+      - run:
+          name: Update known_hosts with github.com keys
+          command: |
+            mkdir -p ~/.ssh
+            ssh-keyscan github.com >> ~/.ssh/known_hosts
 
 jobs:
   ## Checks if we already have a valid cache for the node_modules_install and if it has,
@@ -1536,11 +1647,14 @@ jobs:
       - restore_cached_workspace
       - run: mkdir -p cli/visual-snapshots
       - run:
-          command: node cli/bin/cypress info --dev | yarn --silent term-to-html | node scripts/sanitize --type cli-info > cli/visual-snapshots/cypress-info.html
+          command: node cli/bin/cypress info --dev | yarn --silent term-to-html | node
+            scripts/sanitize --type cli-info >
+            cli/visual-snapshots/cypress-info.html
           environment:
             FORCE_COLOR: 2
       - run:
-          command: node cli/bin/cypress help | yarn --silent term-to-html > cli/visual-snapshots/cypress-help.html
+          command: node cli/bin/cypress help | yarn --silent term-to-html >
+            cli/visual-snapshots/cypress-help.html
           environment:
             FORCE_COLOR: 2
       - store_artifacts:
@@ -1664,6 +1778,9 @@ jobs:
     parallelism: 1
     steps:
       - restore_cached_workspace
+      - install-browsers:
+          install-chrome: true
+          executor: << parameters.executor >>
       - when:
           condition:
             # several snapshots fails for windows due to paths.
@@ -1772,6 +1889,8 @@ jobs:
     parallelism: 1
     steps:
       - restore_cached_workspace
+      - install-browsers:
+          install-chrome: true
       - run: yarn test-integration --scope=@packages/server
       - verify-mocha-results:
           expectedResultCount: 1
@@ -1783,6 +1902,9 @@ jobs:
     <<: *defaults
     steps:
       - restore_cached_workspace
+      - install-browsers:
+          install-chrome: true
+          install-firefox: true
       - run:
           command: yarn workspace @packages/server test-performance
       - verify-mocha-results:
@@ -1837,7 +1959,8 @@ jobs:
             yarn set version 1.22.22
             yarn install --ignore-scripts
       - run:
-          name: install dependencies in yarn-v4.3.1-pnp-dep-resolution with yarn berry 4.3.1
+          name: install dependencies in yarn-v4.3.1-pnp-dep-resolution with yarn berry
+            4.3.1
           command: |
             yarn set version 4.3.1
             cd ./system-tests/projects/yarn-v4.3.1-pnp-dep-resolution && yarn
@@ -1851,7 +1974,7 @@ jobs:
     parallelism: 1
     working_directory: ~/cypress
     docker:
-      - image: cypress/browsers-internal:node20.18.1-bullseye-chrome131-ff133
+      - image: cypress/base-internal:20.18.1-bullseye
     environment:
       # needed to inform the bootstrap-docker-container.sh script to link the binary in the system-test project directory
       REPO_DIR: /root/cypress
@@ -1912,7 +2035,8 @@ jobs:
       - run:
           environment:
             CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
-          command: yarn workspace @tooling/system-tests test:ci "test/non_root*spec*" --browser electron
+          command: yarn workspace @tooling/system-tests test:ci "test/non_root*spec*"
+            --browser electron
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
@@ -2020,7 +2144,7 @@ jobs:
       - run-driver-integration-tests:
           browser: chrome
           install-chrome-channel: stable
-            
+
   driver-integration-tests-chrome-inject-document-domain:
     <<: *defaults
     parallelism: 5
@@ -2124,6 +2248,8 @@ jobs:
     steps:
       - restore_cached_workspace
       - restore_cached_system_tests_deps
+      - install-browsers:
+          install-chrome: true
       - run:
           command: |
             CYPRESS_CONFIG_ENV=production \
@@ -2146,6 +2272,8 @@ jobs:
     steps:
       - restore_cached_workspace
       - restore_cached_system_tests_deps
+      - install-browsers:
+          install-chrome: true
       - run:
           command: |
             CYPRESS_CONFIG_ENV=production \
@@ -2256,6 +2384,8 @@ jobs:
     steps:
       - restore_cached_workspace
       - restore_cached_system_tests_deps
+      - install-browsers:
+          install-chrome: true
       - run:
           command: yarn cypress:run
           working_directory: npm/puppeteer
@@ -2520,7 +2650,8 @@ jobs:
           name: Install Cypress
           working_directory: test-binary
           # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip npm i /root/cypress/cypress.tgz
+          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip npm i
+            /root/cypress/cypress.tgz
       - run:
           name: Cypress version
           working_directory: test-binary
@@ -2555,7 +2686,8 @@ jobs:
       - run:
           name: Install Cypress
           working_directory: test-binary
-          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip npm install /root/cypress/cypress.tgz
+          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip npm install
+            /root/cypress/cypress.tgz
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
@@ -2650,7 +2782,8 @@ jobs:
           name: Install Cypress
           working_directory: /tmp/cypress-test-tiny
           # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i --legacy-peer-deps ~/cypress/cypress.tgz
+          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i --legacy-peer-deps
+            ~/cypress/cypress.tgz
       - run:
           name: Run test project
           working_directory: /tmp/cypress-test-tiny
@@ -2684,7 +2817,8 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-recipes
           # Split the specs up across 4 different machines to run in parallel
-          command: npm run test:ci -- --chunk $CIRCLE_NODE_INDEX --total-chunks $CIRCLE_NODE_TOTAL
+          command: npm run test:ci -- --chunk $CIRCLE_NODE_INDEX --total-chunks
+            $CIRCLE_NODE_TOTAL
           browser: electron
 
   # This is a special job. It allows you to test the current
@@ -2729,6 +2863,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
           browser: chrome
+          executor: << parameters.executor >>
 
   test-binary-against-todomvc-firefox:
     <<: *defaults
@@ -2769,7 +2904,6 @@ jobs:
       - test-binary-against-rwa:
           repo: cypress-realworld-app
           browser: chrome
-          wait-on: http://localhost:3000
 
   test-binary-as-specific-user:
     <<: *defaults
@@ -2793,7 +2927,8 @@ jobs:
           name: Install Cypress
           working_directory: /tmp/cypress-test-tiny
           # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
+          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i
+            ~/cypress/cypress.tgz
       - run:
           name: Cypress help
           working_directory: /tmp/cypress-test-tiny
@@ -2942,45 +3077,70 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
     - run-frontend-shared-component-tests-chrome:
-        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+        context:
+          [
+            test-runner:cypress-record-key,
+            test-runner:launchpad-tests,
+            test-runner:percy
+          ]
         percy: true
         requires:
           - build
     - run-launchpad-integration-tests-chrome:
-        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+        context:
+          [
+            test-runner:cypress-record-key,
+            test-runner:launchpad-tests,
+            test-runner:percy
+          ]
         percy: true
         requires:
           - build
     - run-launchpad-component-tests-chrome:
-        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+        context:
+          [
+            test-runner:cypress-record-key,
+            test-runner:launchpad-tests,
+            test-runner:percy
+          ]
         percy: true
         requires:
           - build
     - run-app-integration-tests-chrome:
-        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+        context:
+          [
+            test-runner:cypress-record-key,
+            test-runner:launchpad-tests,
+            test-runner:percy
+          ]
         percy: true
         requires:
           - build
     - run-webpack-dev-server-integration-tests:
-        context: [test-runner:cypress-record-key, test-runner:percy]
+        context: [ test-runner:cypress-record-key, test-runner:percy ]
         requires:
           - system-tests-node-modules-install
     - run-vite-dev-server-integration-tests:
-        context: [test-runner:cypress-record-key, test-runner:percy]
+        context: [ test-runner:cypress-record-key, test-runner:percy ]
         requires:
           - system-tests-node-modules-install
     - run-app-component-tests-chrome:
-        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+        context:
+          [
+            test-runner:cypress-record-key,
+            test-runner:launchpad-tests,
+            test-runner:percy
+          ]
         percy: true
         requires:
           - build
     - run-reporter-component-tests-chrome:
-        context: [test-runner:cypress-record-key, test-runner:percy]
+        context: [ test-runner:cypress-record-key, test-runner:percy ]
         percy: true
         requires:
           - build
     - reporter-integration-tests:
-        context: [test-runner:cypress-record-key, test-runner:percy]
+        context: [ test-runner:cypress-record-key, test-runner:percy ]
         requires:
           - build
     - npm-webpack-dev-server:
@@ -3313,45 +3473,70 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
         requires:
           - build
     - run-frontend-shared-component-tests-chrome:
-        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+        context:
+          [
+            test-runner:cypress-record-key,
+            test-runner:launchpad-tests,
+            test-runner:percy
+          ]
         percy: true
         requires:
           - contributor-pr
     - run-launchpad-integration-tests-chrome:
-        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+        context:
+          [
+            test-runner:cypress-record-key,
+            test-runner:launchpad-tests,
+            test-runner:percy
+          ]
         percy: true
         requires:
           - contributor-pr
     - run-launchpad-component-tests-chrome:
-        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+        context:
+          [
+            test-runner:cypress-record-key,
+            test-runner:launchpad-tests,
+            test-runner:percy
+          ]
         percy: true
         requires:
           - contributor-pr
     - run-app-integration-tests-chrome:
-        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+        context:
+          [
+            test-runner:cypress-record-key,
+            test-runner:launchpad-tests,
+            test-runner:percy
+          ]
         percy: true
         requires:
           - contributor-pr
     - run-webpack-dev-server-integration-tests:
-        context: [test-runner:cypress-record-key, test-runner:percy]
+        context: [ test-runner:cypress-record-key, test-runner:percy ]
         requires:
           - system-tests-node-modules-install
     - run-vite-dev-server-integration-tests:
-        context: [test-runner:cypress-record-key, test-runner:percy]
+        context: [ test-runner:cypress-record-key, test-runner:percy ]
         requires:
           - system-tests-node-modules-install
     - run-app-component-tests-chrome:
-        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+        context:
+          [
+            test-runner:cypress-record-key,
+            test-runner:launchpad-tests,
+            test-runner:percy
+          ]
         percy: true
         requires:
           - contributor-pr
     - run-reporter-component-tests-chrome:
-        context: [test-runner:cypress-record-key, test-runner:percy]
+        context: [ test-runner:cypress-record-key, test-runner:percy ]
         percy: true
         requires:
           - contributor-pr
     - reporter-integration-tests:
-        context: [test-runner:cypress-record-key, test-runner:percy]
+        context: [ test-runner:cypress-record-key, test-runner:percy ]
         requires:
           - contributor-pr
     - npm-webpack-dev-server:
@@ -3448,11 +3633,11 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
           - ready-to-release
 
     - create-and-trigger-packaging-artifacts:
-        context: [test-runner:upload, test-runner:build-binary, publish-binary]
+        context: [ test-runner:upload, test-runner:build-binary, publish-binary ]
         requires:
           - contributor-pr
     - get-published-artifacts:
-        context: [publish-binary, test-runner:commit-status-checks]
+        context: [ publish-binary, test-runner:commit-status-checks ]
         requires:
           - create-and-trigger-packaging-artifacts
     # various testing scenarios, like building full binary
@@ -3559,7 +3744,13 @@ linux-arm64-workflow: &linux-arm64-workflow
 
     - create-and-trigger-packaging-artifacts:
         name: linux-arm64-create-and-trigger-packaging-artifacts
-        context: [test-runner:upload, test-runner:commit-status-checks, test-runner:build-binary, publish-binary]
+        context:
+          [
+            test-runner:upload,
+            test-runner:commit-status-checks,
+            test-runner:build-binary,
+            publish-binary
+          ]
         executor: linux-arm64
         resource_class: arm.medium
         requires:
@@ -3573,7 +3764,7 @@ linux-arm64-workflow: &linux-arm64-workflow
 
     - get-published-artifacts:
         name: linux-arm64-get-published-artifacts
-        context: [publish-binary, test-runner:commit-status-checks]
+        context: [ publish-binary, test-runner:commit-status-checks ]
         executor: linux-arm64
         resource_class: arm.medium
         requires:
@@ -3636,7 +3827,7 @@ darwin-x64-workflow: &darwin-x64-workflow
         resource_class: cypress-io/intel-macstadium
         requires:
           - darwin-x64-build
-  
+
     - server-unit-tests-cloud-environment:
         name: darwin-x64-driver-server-unit-tests-cloud-environment
         executor: darwin-amd64
@@ -3710,7 +3901,7 @@ windows-workflow: &windows-workflow
         name: windows-run-app-integration-tests-chrome
         executor: windows
         resource_class: windows.large
-        context: [test-runner:cypress-record-key, test-runner:launchpad-tests]
+        context: [ test-runner:cypress-record-key, test-runner:launchpad-tests ]
         requires:
           - windows-build
 
@@ -3718,7 +3909,7 @@ windows-workflow: &windows-workflow
         name: windows-run-launchpad-integration-tests-chrome
         executor: windows
         resource_class: windows.large
-        context: [test-runner:cypress-record-key, test-runner:launchpad-tests]
+        context: [ test-runner:cypress-record-key, test-runner:launchpad-tests ]
         requires:
           - windows-build
 
@@ -3769,8 +3960,7 @@ windows-workflow: &windows-workflow
 
 workflows:
   linux-x64:
-    <<: *linux-x64-workflow
-    <<: *linux-x64-workflow-exclude-filters
+    <<: [ *linux-x64-workflow, *linux-x64-workflow-exclude-filters ]
   linux-x64-contributor:
     <<: *linux-x64-contributor-workflow
     when:
@@ -3778,14 +3968,10 @@ workflows:
         pattern: /^pull\/[0-9]+/
         value: << pipeline.git.branch >>
   linux-arm64:
-    <<: *linux-arm64-workflow
-    <<: *linux-arm64-workflow-filters
+    <<: [ *linux-arm64-workflow, *linux-arm64-workflow-filters ]
   darwin-x64:
-    <<: *darwin-x64-workflow
-    <<: *darwin-workflow-filters
+    <<: [ *darwin-x64-workflow, *darwin-workflow-filters ]
   darwin-arm64:
-    <<: *darwin-arm64-workflow
-    <<: *darwin-workflow-filters
+    <<: [ *darwin-arm64-workflow, *darwin-workflow-filters ]
   windows:
-    <<: *windows-workflow
-    <<: *windows-workflow-filters
+    <<: [ *windows-workflow, *windows-workflow-filters ]

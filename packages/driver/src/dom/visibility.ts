@@ -5,7 +5,7 @@ import $elements from './elements'
 import $coordinates from './coordinates'
 import * as $transform from './transform'
 
-const { isElement, isSelect, isBody, isHTML, isOption, isOptgroup, getParent, getFirstParentWithTagName, isAncestor, isChild, getAllParents, isDescendent, isUndefinedOrHTMLBodyDoc, elOrAncestorIsFixedOrSticky, isDetached, isFocusable, stringify: stringifyElement } = $elements
+const { isElement, isBody, isHTML, isOption, isOptgroup, getParent, getFirstParentWithTagName, isAncestor, isChild, getAllParents, isDescendent, isUndefinedOrHTMLBodyDoc, elOrAncestorIsFixedOrSticky, isDetached, isFocusable, stringify: stringifyElement } = $elements
 
 const fixedOrAbsoluteRe = /(fixed|absolute)/
 
@@ -36,6 +36,18 @@ const ensureEl = (el, methodName) => {
   }
 }
 
+const getFirstSelectParentFromEl = ($el: JQuery) => {
+  const $select = getFirstParentWithTagName($el, 'select')
+
+  // check $select.length here first
+  // they may have not put the option into a select el
+  if ($select?.length) {
+    return $select
+  }
+
+  return null
+}
+
 const isStrictlyHidden = (el: HTMLElement, methodName = 'isStrictlyHidden()', options = { checkOpacity: true }, recurse?) => {
   ensureEl(el, methodName)
   const $el = $jquery.wrap(el)
@@ -53,13 +65,9 @@ const isStrictlyHidden = (el: HTMLElement, methodName = 'isStrictlyHidden()', op
     }
 
     // if its parent select is visible, then it's not hidden
-    const $select = getFirstParentWithTagName($el, 'select')
+    const $select = getFirstSelectParentFromEl($el)
 
-    // check $select.length here first
-    // they may have not put the option into a select el,
-    // in which case it will fall through to regular visibility logic
-    if ($select && $select.length) {
-      // if the select is hidden, the options in it are hidden too
+    if ($select) {
       return recurse ? recurse($select[0], methodName, options) : isStrictlyHidden($select[0], methodName, options)
     }
   }
@@ -102,6 +110,15 @@ const isHiddenByAncestors = (el, methodName = 'isHiddenByAncestors()', options =
   ensureEl(el, methodName)
   const $el = $jquery.wrap(el)
 
+  // an option is considered hidden by ancestors if its parent select is hidden
+  if (isOption(el) || isOptgroup(el)) {
+    const $select = getFirstSelectParentFromEl($el)
+
+    if ($select) {
+      return isHiddenByAncestors($select[0], methodName, options)
+    }
+  }
+
   // we do some calculations taking into account the parents
   // to see if its hidden by a parent
   if (elIsHiddenByAncestors($el, options.checkOpacity)) {
@@ -130,13 +147,11 @@ const elHasNoEffectiveWidthOrHeight = ($el: JQuery) => {
   // display:none elements, and generally any elements that are not directly rendered,
   // an empty list is returned.
   const el = $el[0]
-  let transform
 
-  if ($el[0].style.transform) {
-    const style = getComputedStyle(el)
+  const style = getComputedStyle(el)
+  let transform = style.getPropertyValue('transform')
 
-    transform = style.getPropertyValue('transform')
-  } else {
+  if (!transform.length) {
     transform = 'none'
   }
 
@@ -234,11 +249,6 @@ const canClipContent = function ($el: JQuery<HTMLElement>, $ancestor: JQuery<HTM
     return false
   }
 
-  // can't clip if it's a select element
-  if (isSelect($ancestor[0])) {
-    return false
-  }
-
   // the closest parent with position relative, absolute, or fixed
   const $offsetParent = $el.offsetParent()
 
@@ -258,10 +268,14 @@ const canClipContent = function ($el: JQuery<HTMLElement>, $ancestor: JQuery<HTM
 
   // even if ancestors' overflow is clippable,
   // if the element is position static or relative,
-  // and the element's offset parent is positioned absolute, a descendent of the ancestor, and has no clippable overflow,
+  // and the element's offset parent is positioned absolute, a descendent of the ancestor, has no clippable overflow, and
+  // the offsetParent's offset parent is not descendent of the ancestor,
   // then the ancestor will not clip the element
+  const $offsetParentOffsetParent = $offsetParent.offsetParent()
+
   if ((elHasPositionStatic($el) || elHasPositionRelative($el))
-    && elHasPositionAbsolute($offsetParent) && isDescendent($ancestor, $offsetParent) && !elHasClippableOverflow($offsetParent)
+    && elHasPositionAbsolute($offsetParent) && isDescendent($ancestor, $offsetParent)
+    && !elHasClippableOverflow($offsetParent) && !isDescendent($ancestor, $offsetParentOffsetParent)
   ) {
     return false
   }
@@ -360,19 +374,23 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el: JQuery<any>, $ancestor
 
     const elProps = $el.get(0).getBoundingClientRect()
 
+    // only check if the target el is out of bounds if the overflow is clippable in that direction
+    const checkXOverflow = OVERFLOW_PROPS.includes($ancestor.css('overflow-x'))
+    const checkYOverflow = OVERFLOW_PROPS.includes($ancestor.css('overflow-y'))
+
     // target el is out of bounds
     if (
       // target el is to the right of the ancestor's visible area
-      (elProps.left >= (ancestorProps.width + ancestorProps.left)) ||
+      (checkXOverflow && (elProps.left >= (ancestorProps.width + ancestorProps.left))) ||
 
       // target el is to the left of the ancestor's visible area
-      ((elProps.left + elProps.width) <= ancestorProps.left) ||
+      (checkXOverflow && ((elProps.left + elProps.width) <= ancestorProps.left)) ||
 
       // target el is under the ancestor's visible area
-      (elProps.top >= (ancestorProps.height + ancestorProps.top)) ||
+      (checkYOverflow && (elProps.top >= (ancestorProps.height + ancestorProps.top))) ||
 
       // target el is above the ancestor's visible area
-      ((elProps.top + elProps.height) <= ancestorProps.top)
+      (checkYOverflow && ((elProps.top + elProps.height) <= ancestorProps.top))
     ) {
       return true
     }
@@ -508,6 +526,13 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
   let height = elClientHeight($el)
   let $parent
   let parentNode
+  let $select
+
+  // if the element is an option or optgroup then we need to get the
+  // select so it can be used when determining the hidden reason
+  if (isOption($el[0]) || isOptgroup($el[0])) {
+    $select = getFirstSelectParentFromEl($el)
+  }
 
   // returns the reason in human terms why an element is considered not visible
   if (elHasDisplayNone($el)) {
@@ -560,7 +585,7 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
     return `This element \`${node}\` is not visible because it is hidden by transform.`
   }
 
-  if (elHasNoClientWidthOrHeight($el)) {
+  if (elHasNoClientWidthOrHeight($select || $el)) {
     return `This element \`${node}\` is not visible because it has an effective width and height of: \`${width} x ${height}\` pixels.`
   }
 

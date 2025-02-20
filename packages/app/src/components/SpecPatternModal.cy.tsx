@@ -1,5 +1,6 @@
 import { SpecPatternModalFragmentDoc } from '../generated/graphql-test'
 import SpecPatternModal from './SpecPatternModal.vue'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 
 describe('<SpecPatternModal />', () => {

@@ -2,8 +2,8 @@ import Debug from 'debug'
 import _ from 'lodash'
 import send from 'send'
 import { getPathToIndex, getPathToDist } from '@packages/resolve-dist'
-import type { Cfg } from '@packages/server/lib/project-base'
-import type { Browser } from '@packages/server/lib/browsers/types'
+import type { Cfg } from './project-base'
+import type { Browser } from './browsers/types'
 
 interface ServeOptions {
   config: Cfg

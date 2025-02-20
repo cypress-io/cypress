@@ -6,7 +6,21 @@ const path = require('path')
 const { setupV8Snapshots } = require('@tooling/v8-snapshot')
 const { flipFuses, FuseVersion, FuseV1Options } = require('@electron/fuses')
 const { buildEntryPointAndCleanup, cleanupUnneededDependencies } = require('./binary/binary-cleanup')
-const { getIntegrityCheckSource, getBinaryEntryPointSource, getBinaryByteNodeEntryPointSource, getEncryptionFileSource, getCloudEnvironmentFileSource, validateEncryptionFile, getProtocolFileSource, validateCloudEnvironmentFile, validateProtocolFile, getIndexJscHash, DUMMY_INDEX_JSC_HASH } = require('./binary/binary-sources')
+const {
+  getIntegrityCheckSource,
+  getBinaryEntryPointSource,
+  getBinaryByteNodeEntryPointSource,
+  getEncryptionFileSource,
+  getCloudEnvironmentFileSource,
+  validateEncryptionFile,
+  getProtocolFileSource,
+  validateCloudEnvironmentFile,
+  validateProtocolFile,
+  getStudioFileSource,
+  validateStudioFile,
+  getIndexJscHash,
+  DUMMY_INDEX_JSC_HASH,
+} = require('./binary/binary-sources')
 const verify = require('../cli/lib/tasks/verify')
 const execa = require('execa')
 const meta = require('./binary/meta')
@@ -81,12 +95,18 @@ module.exports = async function (params) {
       const cloudApiFileSource = await getProtocolFileSource(cloudApiFilePath)
       const cloudProtocolFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/protocol.ts')
       const cloudProtocolFileSource = await getProtocolFileSource(cloudProtocolFilePath)
+      const projectBaseFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/project-base.ts')
+      const projectBaseFileSource = await getStudioFileSource(projectBaseFilePath)
+      const getAppStudioFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/api/get_app_studio.ts')
+      const getAppStudioFileSource = await getStudioFileSource(getAppStudioFilePath)
 
       await Promise.all([
         fs.writeFile(encryptionFilePath, encryptionFileSource),
         fs.writeFile(cloudEnvironmentFilePath, cloudEnvironmentFileSource),
         fs.writeFile(cloudApiFilePath, cloudApiFileSource),
         fs.writeFile(cloudProtocolFilePath, cloudProtocolFileSource),
+        fs.writeFile(projectBaseFilePath, projectBaseFileSource),
+        fs.writeFile(getAppStudioFilePath, getAppStudioFileSource),
         fs.writeFile(path.join(outputFolder, 'index.js'), binaryEntryPointSource),
       ])
 
@@ -99,6 +119,8 @@ module.exports = async function (params) {
         validateCloudEnvironmentFile(cloudEnvironmentFilePath),
         validateProtocolFile(cloudApiFilePath),
         validateProtocolFile(cloudProtocolFilePath),
+        validateStudioFile(projectBaseFilePath),
+        validateStudioFile(getAppStudioFilePath),
       ])
 
       await flipFuses(

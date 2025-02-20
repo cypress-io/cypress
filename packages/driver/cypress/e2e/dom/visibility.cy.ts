@@ -6,7 +6,7 @@ describe('src/cypress/dom/visibility', () => {
     return $(el).appendTo(cy.$$('body'))
   }
 
-  const reasonIs = ($el, str) => {
+  const reasonIs = ($el: JQuery, str: string) => {
     expect(dom.getReasonIsHidden($el)).to.eq(str)
   }
 
@@ -995,10 +995,6 @@ describe('src/cypress/dom/visibility', () => {
       })
 
       it('is visible when element is statically positioned and parent element is absolutely positioned and ancestor has overflow hidden', function () {
-        const add = (el) => {
-          return $(el).appendTo(cy.$$('body'))
-        }
-
         cy.$$('body').empty()
 
         const el = add(`
@@ -1015,10 +1011,6 @@ describe('src/cypress/dom/visibility', () => {
       })
 
       it('is visible when element is relatively positioned and parent element is absolutely positioned and ancestor has overflow auto', function () {
-        const add = (el) => {
-          return $(el).appendTo(cy.$$('body'))
-        }
-
         cy.$$('body').empty()
 
         const el = add(`
@@ -1042,6 +1034,185 @@ describe('src/cypress/dom/visibility', () => {
         `)
 
         expect(el.find('#visible-button')).to.be.visible
+      })
+
+      it('is hidden when parent element is absolutely position and offset parent is a decendent of the ancestor', function () {
+        cy.$$('body').empty()
+
+        add(`
+          <div style="display: grid; grid-template-columns: 332px 1fr; grid-template-rows: 62px 1fr;">
+            <div style="overflow-y: auto;">
+              <div style="height: 297px; position: relative;">
+                <div style="height: 96px; position: absolute; left: 0; top: 0;">
+                  <a href="">test test-1</a>
+                </div>
+                <div style="height: 36px; position: absolute; left: 0; top: 96px; background-color: red;">
+                  <a href="">test test-2</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        `)
+
+        cy.contains('test-2').should('not.be.visible')
+        cy.contains('test-1').should('be.visible')
+      })
+
+      it('is hidden when element is an option and the parent has overflow clip', function () {
+        cy.$$('body').empty()
+
+        add(`
+          <div style="width: 150px; height: 20px; overflow: clip;">
+            <div style="width: 150px; height: 25px;"></div>
+            <select>
+              <optgroup label='Shinobi'>
+                <option>Naruto</option>
+              </optgroup>
+            </select>
+          </div>
+        `)
+
+        cy.get('option').should('not.be.visible').then(($el) => {
+          reasonIs($el, 'This element `<option>` is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: `hidden`, `clip`, `scroll` or `auto`')
+        })
+
+        cy.get('optgroup').should('not.be.visible').then(($el) => {
+          reasonIs($el, 'This element `<optgroup>` is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: `hidden`, `clip`, `scroll` or `auto`')
+        })
+
+        cy.get('select').should('not.be.visible').then(($el) => {
+          reasonIs($el, 'This element `<select>` is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: `hidden`, `clip`, `scroll` or `auto`')
+        })
+      })
+
+      it('is visible when element is an option and the parent has overflow clip but is within the bounds', function () {
+        cy.$$('body').empty()
+
+        add(`
+          <div style="width: 150px; height: 20px; overflow: clip;">
+            <select>
+              <optgroup label='Shinobi'>
+                <option>Naruto</option>
+              </optgroup>
+            </select>
+          </div>
+        `)
+
+        cy.get('option').should('be.visible')
+        cy.get('optgroup').should('be.visible')
+        cy.get('select').should('be.visible')
+      })
+
+      it('is visible when x direction is clip but element is visible in y direction', () => {
+        cy.$$('body').empty()
+
+        add(`
+          <div style="overflow-x: clip">
+            <div style="height: 100px; width: 500px;">
+              <div style="height: 100px; width: 500px;"></div>
+              <input type="radio"/>
+              <label>Visible</label>
+            </div>
+          </div>
+        `)
+
+        cy.get('label').should('be.visible')
+      })
+
+      it('is hidden when x direction is hidden and y direction is coerced by browser to auto', () => {
+        cy.$$('body').empty()
+
+        add(`
+          <div style="overflow-x: hidden">
+            <div style="height: 100px; width: 500px;">
+              <div style="height: 100px; width: 500px;"></div>
+              <input type="radio"/>
+              <label>Hidden</label>
+            </div>
+          </div>
+        `)
+
+        cy.get('label').should('not.be.visible')
+      })
+
+      it('is hidden when x direction is auto and y direction is coerced by browser to auto', () => {
+        cy.$$('body').empty()
+
+        add(`
+          <div style="overflow-x: auto">
+            <div style="height: 100px; width: 500px;">
+              <div style="height: 100px; width: 500px;"></div>
+              <input type="radio"/>
+              <label>Hidden</label>
+            </div>
+          </div>
+        `)
+
+        cy.get('label').should('not.be.visible')
+      })
+
+      it('is hidden when y direction is hidden and x direction is set to clip but coerced by browser to hidden', () => {
+        cy.$$('body').empty()
+
+        add(`
+          <div style="overflow-x: clip; overflow-y: hidden">
+            <div style="height: 100px; width: 500px;">
+              <div style="height: 100px; width: 500px;"></div>
+              <input type="radio"/>
+              <label>Hidden</label>
+            </div>
+          </div>
+        `)
+
+        cy.get('label').should('not.be.visible')
+      })
+
+      it('is hidden when y direction is auto and x direction is set to clip but coerced by browser to hidden', () => {
+        cy.$$('body').empty()
+
+        add(`
+          <div style="overflow-x: clip; overflow-y: auto">
+            <div style="height: 100px; width: 500px;">
+              <div style="height: 100px; width: 500px;"></div>
+              <input type="radio"/>
+              <label>Hidden</label>
+            </div>
+          </div>
+        `)
+
+        cy.get('label').should('not.be.visible')
+      })
+
+      it('is visible when x direction is clip and y direction is visible', () => {
+        cy.$$('body').empty()
+
+        add(`
+          <div style="overflow-x: clip; overflow-y: visible">
+            <div style="height: 100px; width: 500px;">
+              <div style="height: 100px; width: 500px;"></div>
+              <input type="radio"/>
+              <label>Visible</label>
+            </div>
+          </div>
+        `)
+
+        cy.get('label').should('be.visible')
+      })
+
+      it('is hidden when y direction is overriden by setting overflow to clip', () => {
+        cy.$$('body').empty()
+
+        add(`
+          <div style="overflow-y: visible; overflow: clip;">
+            <div style="height: 100px; width: 500px;">
+              <div style="height: 100px; width: 500px;"></div>
+              <input type="radio"/>
+              <label>Hidden</label>
+            </div>
+          </div>
+        `)
+
+        cy.get('label').should('not.be.visible')
       })
     })
 

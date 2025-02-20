@@ -92,7 +92,17 @@
         script = replace.call(script, queryStringRegex, '')
       }
 
-      return stringIncludes.call(err.stack, script)
+      // stack URLs come in encoded by default (similar to URI but not entirely accurate).
+      // we need to make sure our script and stack are both decoded entirely to make sure the comparisons are accurate.
+      try {
+        const decodedScript = decodeURIComponent(script)
+
+        const decodedStack = decodeURIComponent(err.stack)
+
+        return stringIncludes.call(decodedStack, decodedScript)
+      } catch (e) {
+        return false
+      }
     })
 
     return filteredLines.length > 0

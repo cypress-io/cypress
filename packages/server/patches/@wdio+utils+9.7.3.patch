@@ -1,0 +1,40 @@
+diff --git a/node_modules/@wdio/utils/README.md b/node_modules/@wdio/utils/README.md
+deleted file mode 100644
+index 3e8048a..0000000
+--- a/node_modules/@wdio/utils/README.md
++++ /dev/null
+@@ -1,4 +0,0 @@
+-WDIO Repl
+-=========
+-
+-> A WDIO helper utility to provide a repl interface WebdriverIO
+diff --git a/node_modules/@wdio/utils/build/node.js b/node_modules/@wdio/utils/build/node.js
+index 9c003aa..53cc9d7 100644
+--- a/node_modules/@wdio/utils/build/node.js
++++ b/node_modules/@wdio/utils/build/node.js
+@@ -5,6 +5,7 @@ import cp2 from "node:child_process";
+ import getPort from "get-port";
+ import waitPort from "wait-port";
+ import logger2 from "@wdio/logger";
++import debugModule from 'debug';
+ import split2 from "split2";
+ import { deepmerge } from "deepmerge-ts";
+ import { start as startSafaridriver } from "safaridriver";
+@@ -32,6 +33,8 @@ import { download as downloadGeckodriver } from "geckodriver";
+ import { download as downloadEdgedriver } from "edgedriver";
+ import { locateChrome, locateFirefox, locateApp } from "locate-app";
+ var log = logger("webdriver");
++// wrap in cypress debugger statement to avoid extraneous messages to the console
++log.setLevel(debugModule.enabled('cypress-verbose:server:browsers:webdriver') ? 'info' : 'silent')
+ var EXCLUDED_PARAMS = ["version", "help"];
+ var canAccess = (file) => {
+   if (!file) {
+@@ -283,6 +286,8 @@ function isEdge(browserName) {
+ 
+ // src/node/startWebDriver.ts
+ var log2 = logger2("@wdio/utils");
++// wrap in cypress debugger statement to avoid extraneous messages to the console
++log2.setLevel(debugModule.enabled('cypress-verbose:server:browsers:webdriver') ? 'info' : 'silent')
+ var DRIVER_WAIT_TIMEOUT = 10 * 1e3;
+ async function startWebDriver(options) {
+   if (process.env.WDIO_SKIP_DRIVER_SETUP) {

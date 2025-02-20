@@ -11,6 +11,7 @@ import { Wizard } from './gql-Wizard'
 import { ErrorWrapper } from './gql-ErrorWrapper'
 import { CachedUser } from './gql-CachedUser'
 import { Cohort } from './gql-Cohorts'
+import { Studio } from './gql-Studio'
 
 export const Query = objectType({
   name: 'Query',
@@ -99,6 +100,12 @@ export const Query = objectType({
       type: AuthState,
       description: 'The latest state of the auth process',
       resolve: (source, args, ctx) => ctx.coreData.authState,
+    })
+
+    t.field('studio', {
+      type: Studio,
+      description: 'Data pertaining to studio and the studio manager that is loaded from the cloud',
+      resolve: (source, args, ctx) => ctx.coreData.studio,
     })
 
     t.nonNull.field('localSettings', {

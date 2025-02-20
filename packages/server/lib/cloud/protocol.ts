@@ -4,13 +4,13 @@ import fetch from 'cross-fetch'
 import crypto from 'crypto'
 import Debug from 'debug'
 import fs from 'fs-extra'
-import Module from 'module'
 import os from 'os'
 import path from 'path'
 import { agent } from '@packages/network'
 import pkg from '@packages/root'
 import env from '../util/env'
 import { putProtocolArtifact } from './api/put_protocol_artifact'
+import { requireScript } from './require_script'
 
 import type { Readable } from 'stream'
 import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions, ResponseEndedWithEmptyBodyOptions, ResponseStreamTimedOutOptions, AfterSpecDurations, SpecWithRelativeRoot } from '@packages/types'
@@ -30,24 +30,6 @@ export const DEFAULT_STREAM_SAMPLING_INTERVAL = 10000
 const dbSizeLimit = () => {
   return env.get('CYPRESS_INTERNAL_SYSTEM_TESTS') === '1' ?
     200 : DB_SIZE_LIMIT
-}
-
-/**
- * requireScript, does just that, requires the passed in script as if it was a module.
- * @param script - string
- * @returns exports
- */
-const requireScript = (script: string) => {
-  const mod = new Module('id', module)
-
-  mod.filename = ''
-  // _compile is a private method
-  // @ts-expect-error
-  mod._compile(script, mod.filename)
-
-  module.children.splice(module.children.indexOf(mod), 1)
-
-  return mod.exports
 }
 
 export class ProtocolManager implements ProtocolManagerShape {

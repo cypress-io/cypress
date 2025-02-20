@@ -1,7 +1,7 @@
 import type { RunnerUiState } from '../store'
 import { useRunnerUiStore } from '../store'
 import { useMutation, gql } from '@urql/vue'
-import { Preferences_SetPreferencesDocument } from '@packages/app/src/generated/graphql'
+import { Preferences_SetPreferencesDocument } from '../generated/graphql'
 
 gql`
 mutation Preferences_SetPreferences ($value: String!) {
