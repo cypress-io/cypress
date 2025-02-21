@@ -5179,19 +5179,6 @@
   resolved "https://registry.yarnpkg.com/@module-federation/error-codes/-/error-codes-0.8.11.tgz#4aaa925f29603454eade1232945ac963611570fd"
   integrity sha512-mqt8/BQq11Cc/zbuHtojTwbZ78LJiy4f/cm9UsQPWf65Pqxi4Ticn40wccVFq8O9gee/QEi2Mf3XiwSf2SHl0A==
 
-"@module-federation/error-codes@0.8.9":
-  version "0.8.9"
-  resolved "https://registry.yarnpkg.com/@module-federation/error-codes/-/error-codes-0.8.9.tgz#28fa89b7502f4105ddbc767597edbddcccdf3ef0"
-  integrity sha512-yUA3GZjOy8Ll6l193faXir2veexDaUiLdmptbzC9tIee/iSQiSwIlibdTafCfqaJ62cLZaytOUdmAFAKLv8QQw==
-
-"@module-federation/runtime-core@0.6.17":
-  version "0.6.17"
-  resolved "https://registry.yarnpkg.com/@module-federation/runtime-core/-/runtime-core-0.6.17.tgz#8dd7ccce44e85072b7ed90f456b1cca4b5915c79"
-  integrity sha512-PXFN/TT9f64Un6NQYqH1Z0QLhpytW15jkZvTEOV8W7Ed319BECFI0Rv4xAsAGa8zJGFoaM/c7QOQfdFXtKj5Og==
-  dependencies:
-    "@module-federation/error-codes" "0.8.9"
-    "@module-federation/sdk" "0.8.9"
-
 "@module-federation/runtime-core@0.6.19":
   version "0.6.19"
   resolved "https://registry.yarnpkg.com/@module-federation/runtime-core/-/runtime-core-0.6.19.tgz#177034ce903d04c7c51e7792005eae1130157533"
@@ -5213,13 +5200,6 @@
   version "0.8.11"
   resolved "https://registry.yarnpkg.com/@module-federation/sdk/-/sdk-0.8.11.tgz#de79ebc876a386653affbf99b5a3d5d374d6ab0f"
   integrity sha512-h9oXuOABJ5O77TeWZoLO3KNq7HywdZkX2c2rmYEQRRrkuXHgHAQu0nEs7ZuL5YDWNQLUMxoOyTH+sK+JWgvnKQ==
-  dependencies:
-    isomorphic-rslog "0.0.7"
-
-"@module-federation/sdk@0.8.9":
-  version "0.8.9"
-  resolved "https://registry.yarnpkg.com/@module-federation/sdk/-/sdk-0.8.9.tgz#da0746610e8c470a4cf5ee094537ea6901a0aed9"
-  integrity sha512-QJ60itWC/SPjqduT7wDiF8UGwVU/yJ/Sz+QbnoxB9b7gNLzvI//swAXTo9eOtKsCy/V2BMwjt0F3eOcfnaqllA==
   dependencies:
     isomorphic-rslog "0.0.7"
 

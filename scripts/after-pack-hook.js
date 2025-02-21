@@ -97,8 +97,8 @@ module.exports = async function (params) {
       const cloudProtocolFileSource = await getProtocolFileSource(cloudProtocolFilePath)
       const projectBaseFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/project-base.ts')
       const projectBaseFileSource = await getStudioFileSource(projectBaseFilePath)
-      const getAppStudioFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/api/get_app_studio.ts')
-      const getAppStudioFileSource = await getStudioFileSource(getAppStudioFilePath)
+      const getAndInitializeStudioManagerFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/api/get_and_initialize_studio_manager.ts')
+      const getAndInitializeStudioManagerFileSource = await getStudioFileSource(getAndInitializeStudioManagerFilePath)
 
       await Promise.all([
         fs.writeFile(encryptionFilePath, encryptionFileSource),
@@ -106,7 +106,7 @@ module.exports = async function (params) {
         fs.writeFile(cloudApiFilePath, cloudApiFileSource),
         fs.writeFile(cloudProtocolFilePath, cloudProtocolFileSource),
         fs.writeFile(projectBaseFilePath, projectBaseFileSource),
-        fs.writeFile(getAppStudioFilePath, getAppStudioFileSource),
+        fs.writeFile(getAndInitializeStudioManagerFilePath, getAndInitializeStudioManagerFileSource),
         fs.writeFile(path.join(outputFolder, 'index.js'), binaryEntryPointSource),
       ])
 
@@ -120,7 +120,7 @@ module.exports = async function (params) {
         validateProtocolFile(cloudApiFilePath),
         validateProtocolFile(cloudProtocolFilePath),
         validateStudioFile(projectBaseFilePath),
-        validateStudioFile(getAppStudioFilePath),
+        validateStudioFile(getAndInitializeStudioManagerFilePath),
       ])
 
       await flipFuses(

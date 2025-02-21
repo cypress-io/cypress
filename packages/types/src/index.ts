@@ -48,4 +48,4 @@ export * from './proxy'
 
 export * from './cloud'
 
-export * from './appStudio'
+export * from './studio'

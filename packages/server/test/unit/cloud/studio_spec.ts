@@ -1,6 +1,6 @@
 import { proxyquire, sinon } from '../../spec_helper'
 import path from 'path'
-import type { AppStudioShape } from '@packages/types'
+import type { StudioServerShape } from '@packages/types'
 import { expect } from 'chai'
 import esbuild from 'esbuild'
 import type { StudioManager as StudioManagerShape } from '@packages/server/lib/cloud/studio'
@@ -20,7 +20,7 @@ const stubStudio = new TextDecoder('utf-8').decode(stubStudioRaw)
 describe('lib/cloud/studio', () => {
   let stubbedCrossFetch: sinon.SinonStub
   let studioManager: StudioManagerShape
-  let studio: AppStudioShape
+  let studio: StudioServerShape
   let StudioManager: typeof import('@packages/server/lib/cloud/studio').StudioManager
 
   beforeEach(() => {
@@ -31,7 +31,7 @@ describe('lib/cloud/studio', () => {
 
     studioManager = new StudioManager()
     studioManager.setup({ script: stubStudio, studioPath: 'path', studioHash: 'abcdefg' })
-    studio = (studioManager as any)._appStudio
+    studio = (studioManager as any)._studioServer
 
     sinon.stub(os, 'platform').returns('darwin')
     sinon.stub(os, 'arch').returns('x64')

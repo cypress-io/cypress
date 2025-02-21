@@ -69,7 +69,7 @@ export class ProtocolManager implements ProtocolManagerShape {
 
         await fs.ensureDir(cypressProtocolDirectory)
 
-        const { AppCaptureProtocol } = requireScript(script)
+        const { AppCaptureProtocol } = requireScript<{ AppCaptureProtocol }>(script)
 
         this._protocol = new AppCaptureProtocol(options)
       }

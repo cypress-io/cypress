@@ -1,7 +1,7 @@
-import type { AppStudioShape } from '@packages/types'
+import type { StudioServerShape } from '@packages/types'
 import type { Router } from 'express'
 
-export class AppStudio implements AppStudioShape {
+export class StudioServer implements StudioServerShape {
   initializeRoutes (router: Router): void {
 
   }

@@ -17,11 +17,12 @@ const routes = require('../routes')
 
 const _delay = linearDelay(500)
 
-const studioPath = path.join(os.tmpdir(), 'cypress', 'studio')
+export const studioPath = path.join(os.tmpdir(), 'cypress', 'studio')
+
 const bundlePath = path.join(studioPath, 'bundle.tar')
 const serverFilePath = path.join(studioPath, 'server', 'index.js')
 
-const downloadAppStudioBundleToTempDirectory = async (projectId?: string): Promise<void> => {
+const downloadStudioBundleToTempDirectory = async (projectId?: string): Promise<void> => {
   let responseSignature: string | null = null
 
   await (asyncRetry(async () => {
@@ -87,40 +88,44 @@ const getTarHash = (): Promise<string> => {
   })
 }
 
-export const getAppStudio = async (projectId?: string): Promise<StudioManager> => {
+export const retrieveAndExtractStudioBundle = async (projectId?: string): Promise<void> => {
+  // First remove studioPath to ensure we have a clean slate
+  await fs.promises.rm(studioPath, { recursive: true, force: true })
+  await ensureDir(studioPath)
+
+  // Note: CYPRESS_LOCAL_STUDIO_PATH is stripped from the binary, effectively removing this code path
+  if (process.env.CYPRESS_LOCAL_STUDIO_PATH) {
+    const appPath = path.join(process.env.CYPRESS_LOCAL_STUDIO_PATH, 'app')
+    const serverPath = path.join(process.env.CYPRESS_LOCAL_STUDIO_PATH, 'server')
+
+    await copy(appPath, path.join(studioPath, 'app'))
+    await copy(serverPath, path.join(studioPath, 'server'))
+  } else {
+    await downloadStudioBundleToTempDirectory(projectId)
+
+    await tar.extract({
+      file: bundlePath,
+      cwd: studioPath,
+    })
+  }
+}
+
+export const getAndInitializeStudioManager = async (projectId?: string): Promise<StudioManager> => {
+  let script: string
+  let studioHash: string | undefined
+
   try {
-    let script: string
-    let studioHash: string | undefined
+    await retrieveAndExtractStudioBundle(projectId)
 
-    // First remove studioPath to ensure we have a clean slate
-    await fs.promises.rm(studioPath, { recursive: true, force: true })
-    await ensureDir(studioPath)
-
-    // Note: CYPRESS_LOCAL_STUDIO_PATH is stripped from the binary, effectively removing this code path
-    if (process.env.CYPRESS_LOCAL_STUDIO_PATH) {
-      const appPath = path.join(process.env.CYPRESS_LOCAL_STUDIO_PATH, 'app')
-      const serverPath = path.join(process.env.CYPRESS_LOCAL_STUDIO_PATH, 'server')
-
-      await copy(appPath, path.join(studioPath, 'app'))
-      await copy(serverPath, path.join(studioPath, 'server'))
-    } else {
-      await downloadAppStudioBundleToTempDirectory(projectId)
-
-      studioHash = await getTarHash()
-
-      await tar.extract({
-        file: bundlePath,
-        cwd: studioPath,
-      })
-    }
+    studioHash = await getTarHash()
 
     script = await readFile(serverFilePath, 'utf8')
 
-    const appStudio = new StudioManager()
+    const studioManager = new StudioManager()
 
-    appStudio.setup({ script, studioPath, studioHash })
+    studioManager.setup({ script, studioPath, studioHash })
 
-    return appStudio
+    return studioManager
   } catch (error: unknown) {
     let actualError: Error
 
@@ -131,5 +136,7 @@ export const getAppStudio = async (projectId?: string): Promise<StudioManager> =
     }
 
     return StudioManager.createInErrorManager(actualError)
+  } finally {
+    await fs.promises.rm(bundlePath, { force: true })
   }
 }

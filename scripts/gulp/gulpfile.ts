@@ -19,6 +19,7 @@ import { webpackReporter, webpackRunner } from './tasks/gulpWebpack'
 import { e2eTestScaffold, e2eTestScaffoldWatch } from './tasks/gulpE2ETestScaffold'
 import dedent from 'dedent'
 import { ensureCloudValidations, syncCloudValidations } from './tasks/gulpSyncValidations'
+import { downloadStudioTypes } from './tasks/gulpCloudDeliveredTypes'
 
 if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
   process.env.CYPRESS_INTERNAL_VITE_APP_PORT ??= '3333'
@@ -254,6 +255,8 @@ gulp.task(e2eTestScaffold)
 gulp.task(startCypressWatch)
 gulp.task(openCypressApp)
 gulp.task(openCypressLaunchpad)
+
+gulp.task(downloadStudioTypes)
 
 // If we want to run individually, for debugging/testing
 gulp.task('cyOpenLaunchpadOnly', cyOpenLaunchpad)
