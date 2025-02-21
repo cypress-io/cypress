@@ -6,6 +6,7 @@ _Released 2/25/2025 (PENDING)_
 **Misc:**
 
 - Updated types around `.readFile()` and `.scrollTo()` arguments and `Cypress.dom` methods. Addressed in [#31055](https://github.com/cypress-io/cypress/pull/31055).
+- Updates types around `.shadow()` and `.root()` options. Addressed in [#31154](https://github.com/cypress-io/cypress/pull/31154).
 
 **Dependency Updates:**
 
