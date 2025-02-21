@@ -2,9 +2,9 @@ import { allowTsModuleStubbing } from '../../support/helpers'
 
 allowTsModuleStubbing()
 
-import $stackUtils from '@packages/driver/src/cypress/stack_utils'
-import $errUtils, { CypressError } from '@packages/driver/src/cypress/error_utils'
-import $errorMessages from '@packages/driver/src/cypress/error_messages'
+import $stackUtils from '../../../src/cypress/stack_utils'
+import $errUtils, { CypressError } from '../../../src/cypress/error_utils'
+import $errorMessages from '../../../src/cypress/error_messages'
 
 const { sinon } = Cypress
 

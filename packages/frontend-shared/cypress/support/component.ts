@@ -1,3 +1,4 @@
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these tsconfig compiler paths
 import { defaultMessages } from '@cy/i18n'
 import { registerMountFn, addVueCommand } from './common'
 import '../../src/styles/shared.scss'

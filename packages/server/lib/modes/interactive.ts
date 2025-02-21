@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import os from 'os'
+// tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
 import { app, nativeImage as image } from 'electron'
 
 import * as cyIcons from '@packages/icons'
@@ -11,6 +12,7 @@ import { globalPubSub, getCtx, clearCtx } from '@packages/data-context'
 import { telemetry } from '@packages/telemetry'
 
 // eslint-disable-next-line no-duplicate-imports
+// tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
 import type { WebContents } from 'electron'
 import type { LaunchArgs, Preferences } from '@packages/types'
 

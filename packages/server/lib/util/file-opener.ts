@@ -19,6 +19,7 @@ export const openFile = (fileDetails: OpenFileDetails) => {
 
   if (binary === 'computer') {
     try {
+      // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
       require('electron').shell.showItemInFolder(fileDetails.file)
     } catch (err: any) {
       debug('error opening file: %s', err.stack)

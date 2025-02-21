@@ -2,7 +2,7 @@ import type {
   CypressIncomingRequest,
   BrowserPreRequest,
   BrowserPreRequestWithTimings,
-} from '@packages/proxy'
+} from '../../types'
 import type { ProtocolManagerShape } from '@packages/types'
 import Debug from 'debug'
 

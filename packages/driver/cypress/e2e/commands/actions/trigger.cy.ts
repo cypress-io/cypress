@@ -1,4 +1,5 @@
-const { assertLogLength } = require('../../../support/utils')
+import { assertLogLength } from '../../../support/utils'
+
 const { _, $ } = Cypress
 
 describe('src/cy/commands/actions/trigger', () => {
@@ -150,12 +151,12 @@ describe('src/cy/commands/actions/trigger', () => {
     })
 
     it('requeries the dom while waiting for actionability', () => {
-      const $input = cy.$$('input:first').attr('disabled', true)
+      const $input = cy.$$('input:first').prop('disabled', true)
 
       cy.on('command:retry', () => {
         // Replace the input with a copy of itself, to ensure trigger is requerying the DOM
         $input.replaceWith($input[0].outerHTML)
-        cy.$$('input:first').attr('disabled', false)
+        cy.$$('input:first').prop('disabled', false)
       })
 
       cy.get('input:first').trigger('keydown')
@@ -262,7 +263,7 @@ describe('src/cy/commands/actions/trigger', () => {
       })
 
       it('does not scroll when being forced', () => {
-        const scrolled = []
+        const scrolled: any[] = []
 
         cy.on('scrolled', ($el, type) => {
           scrolled.push(type)
@@ -286,9 +287,16 @@ describe('src/cy/commands/actions/trigger', () => {
       it('can forcibly trigger even when being covered by another element', () => {
         const $btn = $('<button>button covered</button>').attr('id', 'button-covered-in-span').prependTo(cy.$$('body'))
 
-        $('<span>span on button</span>').css({ position: 'absolute', left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo(cy.$$('body'))
+        $('<span>span on button</span>')
+        .css('position', 'absolute')
+        .css('left', `${$btn.offset()?.left}`)
+        .css('top', `${$btn.offset()?.top}`)
+        .css('padding', '5px')
+        .css('display', 'inline-block')
+        .css('backgroundColor', 'yellow')
+        .prependTo(cy.$$('body'))
 
-        const scrolled = []
+        const scrolled: any[] = []
         let tapped = false
 
         cy.on('scrolled', ($el, type) => {
@@ -311,17 +319,16 @@ describe('src/cy/commands/actions/trigger', () => {
         .attr('id', 'button-covered-in-span')
         .prependTo(cy.$$('body'))
 
-        const $span = $('<span>span on button</span>').css({
-          position: 'absolute',
-          left: $btn.offset().left,
-          top: $btn.offset().top,
-          padding: 5,
-          display: 'inline-block',
-          backgroundColor: 'yellow',
-        })
+        const $span = $('<span>span on button</span>')
+        .css('position', 'absolute')
+        .css('left', `${$btn.offset()?.left}`)
+        .css('top', `${$btn.offset()?.top}`)
+        .css('padding', 5)
+        .css('display', 'inline-block')
+        .css('backgroundColor', 'yellow')
         .prependTo(cy.$$('body'))
 
-        const scrolled = []
+        const scrolled: any[] = []
 
         cy.on('scrolled', ($el, type) => {
           return scrolled.push(type)
@@ -405,17 +412,15 @@ describe('src/cy/commands/actions/trigger', () => {
         .appendTo(cy.$$('#fixed-nav-test'))
 
         $('<nav>nav on button</nav>')
-        .css({
-          position: 'fixed',
-          left: 0,
-          top: 0,
-          padding: 20,
-          backgroundColor: 'yellow',
-          zIndex: 1,
-        })
+        .css('position', 'fixed')
+        .css('left', 0)
+        .css('top', 0)
+        .css('padding', 20)
+        .css('backgroundColor', 'yellow')
+        .css('zIndex', 1)
         .prependTo(cy.$$('body'))
 
-        const scrolled = []
+        const scrolled: any[] = []
 
         cy.on('scrolled', ($el, type) => {
           return scrolled.push(type)
@@ -435,28 +440,24 @@ describe('src/cy/commands/actions/trigger', () => {
         .appendTo(cy.$$('#fixed-nav-test'))
 
         $('<nav>nav on button</nav>')
-        .css({
-          position: 'fixed',
-          left: 0,
-          top: 0,
-          padding: 20,
-          backgroundColor: 'yellow',
-          zIndex: 1,
-        })
+        .css('position', 'fixed')
+        .css('left', 0)
+        .css('top', 0)
+        .css('padding', 20)
+        .css('backgroundColor', 'yellow')
+        .css('zIndex', 1)
         .prependTo(cy.$$('body'))
 
         $('<nav>nav2 on button</nav>')
-        .css({
-          position: 'fixed',
-          left: 0,
-          top: 40,
-          padding: 20,
-          backgroundColor: 'red',
-          zIndex: 1,
-        })
+        .css('position', 'fixed')
+        .css('left', 0)
+        .css('top', 40)
+        .css('padding', 20)
+        .css('backgroundColor', 'red')
+        .css('zIndex', 1)
         .prependTo(cy.$$('body'))
 
-        const scrolled = []
+        const scrolled: any[] = []
 
         cy.on('scrolled', ($el, type) => {
           return scrolled.push(type)
@@ -483,14 +484,12 @@ describe('src/cy/commands/actions/trigger', () => {
         // this tests that our container properly scrolls!
         const $container = $('<div></div>')
         .attr('id', 'scrollable-container')
-        .css({
-          position: 'relative',
-          width: 300,
-          height: 200,
-          marginBottom: 100,
-          backgroundColor: 'green',
-          overflow: 'auto',
-        })
+        .css('position', 'relative')
+        .css('width', 300)
+        .css('height', 200)
+        .css('marginBottom', 100)
+        .css('backgroundColor', 'green')
+        .css('overflow', 'auto')
         .prependTo($body)
 
         $('<button>button covered</button>')
@@ -503,17 +502,15 @@ describe('src/cy/commands/actions/trigger', () => {
         .appendTo($container)
 
         $('<nav>nav on button</nav>')
-        .css({
-          position: 'fixed',
-          left: 0,
-          top: 0,
-          padding: 20,
-          backgroundColor: 'yellow',
-          zIndex: 1,
-        })
+        .css('position', 'fixed')
+        .css('left', 0)
+        .css('top', 0)
+        .css('padding', 20)
+        .css('backgroundColor', 'yellow')
+        .css('zIndex', 1)
         .prependTo($container)
 
-        const scrolled = []
+        const scrolled: any[] = []
 
         cy.on('scrolled', ($el, type) => {
           scrolled.push(type)
@@ -1118,6 +1115,7 @@ describe('src/cy/commands/actions/trigger', () => {
           done()
         })
 
+        // @ts-expect-error - testing invalid argument
         cy.get('button:first').trigger('mouseover', 'foo')
       })
 
@@ -1262,7 +1260,7 @@ describe('src/cy/commands/actions/trigger', () => {
       })
 
       it('logs only 1 event', () => {
-        const logs = []
+        const logs: any[] = []
 
         cy.on('log:added', (attrs, log) => {
           if (log.get('name') === 'trigger') {
@@ -1280,7 +1278,7 @@ describe('src/cy/commands/actions/trigger', () => {
           const { lastLog } = this
           const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
-          expect(lastLog.get('coords')).to.deep.eq(fromElWindow, 'x', 'y')
+          expect(lastLog.get('coords')).to.deep.eq(fromElWindow)
         })
       })
 

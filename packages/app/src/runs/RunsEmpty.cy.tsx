@@ -1,4 +1,5 @@
 import RunsEmpty from './RunsEmpty.vue'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 
 describe('RunsEmpty', () => {

@@ -1,3 +1,4 @@
+// @ts-expect-error - this is declared multiple times
 const { $ } = Cypress
 
 describe('src/cy/commands/actions/mount', () => {
@@ -24,6 +25,7 @@ describe('src/cy/commands/actions/mount', () => {
         done()
       })
 
+      // @ts-expect-error: We're testing that this is not implemented
       cy.mount()
     })
   })

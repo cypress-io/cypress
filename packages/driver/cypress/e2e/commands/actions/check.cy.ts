@@ -1,4 +1,5 @@
-const { assertLogLength } = require('../../../support/utils')
+import { assertLogLength } from '../../../support/utils'
+
 const { _, Promise, $ } = Cypress
 
 describe('src/cy/commands/actions/check', () => {
@@ -167,7 +168,14 @@ describe('src/cy/commands/actions/check', () => {
     it('can forcibly click even when being covered by another element', () => {
       const checkbox = $('<input type=\'checkbox\' />').attr('id', 'checkbox-covered-in-span').prependTo($('body'))
 
-      $('<span>span on checkbox</span>').css({ position: 'absolute', left: checkbox.offset().left, top: checkbox.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo($('body'))
+      $('<span>span on checkbox</span>')
+      .css('position', 'absolute')
+      .css('left', `${checkbox.offset()?.left }px`)
+      .css('top', `${checkbox.offset()?.top }px`)
+      .css('padding', '5px')
+      .css('display', 'inline-block')
+      .css('background-color', 'yellow')
+      .prependTo($('body'))
 
       let clicked = false
 
@@ -186,14 +194,12 @@ describe('src/cy/commands/actions/check', () => {
       .prependTo($('body'))
 
       $('<span>span on checkbox</span>')
-      .css({
-        position: 'absolute',
-        left: checkbox.offset().left,
-        top: checkbox.offset().top,
-        padding: 5,
-        display: 'inline-block',
-        backgroundColor: 'yellow',
-      })
+      .css('position', 'absolute')
+      .css('left', `${checkbox.offset()?.left }px`)
+      .css('top', `${checkbox.offset()?.top }px`)
+      .css('padding', '5px')
+      .css('display', 'inline-block')
+      .css('background-color', 'yellow')
       .prependTo($('body'))
 
       cy.on('command:retry', _.once((options) => {
@@ -203,6 +209,7 @@ describe('src/cy/commands/actions/check', () => {
         done()
       }))
 
+      // @ts-expect-error: TODO: Internal types for check should accept interval
       cy.get('#checkbox-covered-in-span').check({ timeout: 1000, interval: 60 })
     })
 
@@ -558,7 +565,14 @@ describe('src/cy/commands/actions/check', () => {
       it('throws when input cannot be clicked', function (done) {
         const checkbox = $('<input type=\'checkbox\' />').attr('id', 'checkbox-covered-in-span').prependTo($('body'))
 
-        $('<span>span on button</span>').css({ position: 'absolute', left: checkbox.offset().left, top: checkbox.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo($('body'))
+        $('<span>span on button</span>')
+        .css('position', 'absolute')
+        .css('left', `${checkbox.offset()?.left }px`)
+        .css('top', `${checkbox.offset()?.top }px`)
+        .css('padding', '5px')
+        .css('display', 'inline-block')
+        .css('background-color', 'yellow')
+        .prependTo($('body'))
 
         cy.on('fail', (err) => {
           assertLogLength(this.logs, 2)
@@ -691,8 +705,8 @@ describe('src/cy/commands/actions/check', () => {
       })
 
       it('logs only 1 check event on click of 1 checkbox', () => {
-        const logs = []
-        const checks = []
+        const logs: any[] = []
+        const checks: any[] = []
 
         cy.on('log:added', (attrs, log) => {
           logs.push(log)
@@ -708,8 +722,8 @@ describe('src/cy/commands/actions/check', () => {
       })
 
       it('logs only 1 check event on click of 1 radio', () => {
-        const logs = []
-        const radios = []
+        const logs: any[] = []
+        const radios: any[] = []
 
         cy.on('log:added', (attrs, log) => {
           logs.push(log)
@@ -725,8 +739,8 @@ describe('src/cy/commands/actions/check', () => {
       })
 
       it('logs only 1 check event on checkbox with 1 matching value arg', () => {
-        const logs = []
-        const checks = []
+        const logs: any[] = []
+        const checks: any[] = []
 
         cy.on('log:added', (attrs, log) => {
           logs.push(log)
@@ -742,8 +756,8 @@ describe('src/cy/commands/actions/check', () => {
       })
 
       it('logs only 1 check event on radio with 1 matching value arg', () => {
-        const logs = []
-        const radios = []
+        const logs: any[] = []
+        const radios: any[] = []
 
         cy.on('log:added', (attrs, log) => {
           logs.push(log)
@@ -988,7 +1002,14 @@ describe('src/cy/commands/actions/check', () => {
       let clicked = false
       const checkbox = $('<input type=\'checkbox\' />').attr('id', 'checkbox-covered-in-span').prop('checked', true).prependTo($('body'))
 
-      $('<span>span on checkbox</span>').css({ position: 'absolute', left: checkbox.offset().left, top: checkbox.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo($('body'))
+      $('<span>span on checkbox</span>')
+      .css('position', 'absolute')
+      .css('left', `${checkbox.offset()?.left }px`)
+      .css('top', `${checkbox.offset()?.top }px`)
+      .css('padding', '5px')
+      .css('display', 'inline-block')
+      .css('background-color', 'yellow')
+      .prependTo($('body'))
 
       checkbox.on('click', () => {
         clicked = true
@@ -1002,7 +1023,14 @@ describe('src/cy/commands/actions/check', () => {
     it('passes timeout and interval down to click', (done) => {
       const checkbox = $('<input type=\'checkbox\' />').attr('id', 'checkbox-covered-in-span').prop('checked', true).prependTo($('body'))
 
-      $('<span>span on checkbox</span>').css({ position: 'absolute', left: checkbox.offset().left, top: checkbox.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo($('body'))
+      $('<span>span on checkbox</span>')
+      .css('position', 'absolute')
+      .css('left', `${checkbox.offset()?.left }px`)
+      .css('top', `${checkbox.offset()?.top }px`)
+      .css('padding', '5px')
+      .css('display', 'inline-block')
+      .css('background-color', 'yellow')
+      .prependTo($('body'))
 
       cy.on('command:retry', (options) => {
         expect(options.timeout).to.eq(1000)
@@ -1011,6 +1039,7 @@ describe('src/cy/commands/actions/check', () => {
         done()
       })
 
+      // @ts-expect-error: TODO: Internal types for uncheck should accept interval
       cy.get('#checkbox-covered-in-span').uncheck({ timeout: 1000, interval: 60 })
     })
 
@@ -1171,7 +1200,14 @@ describe('src/cy/commands/actions/check', () => {
       it('throws when input cannot be clicked', function (done) {
         const checkbox = $('<input type=\'checkbox\' />').attr('id', 'checkbox-covered-in-span').prop('checked', true).prependTo($('body'))
 
-        $('<span>span on button</span>').css({ position: 'absolute', left: checkbox.offset().left, top: checkbox.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo($('body'))
+        $('<span>span on button</span>')
+        .css('position', 'absolute')
+        .css('left', `${checkbox.offset()?.left }px`)
+        .css('top', `${checkbox.offset()?.top }px`)
+        .css('padding', '5px')
+        .css('display', 'inline-block')
+        .css('background-color', 'yellow')
+        .prependTo($('body'))
 
         cy.on('fail', (err) => {
           assertLogLength(this.logs, 2)
@@ -1330,8 +1366,8 @@ describe('src/cy/commands/actions/check', () => {
       })
 
       it('logs only 1 uncheck event', () => {
-        const logs = []
-        const unchecks = []
+        const logs: any[] = []
+        const unchecks: any[] = []
 
         cy.on('log:added', (attrs, log) => {
           logs.push(log)
@@ -1347,8 +1383,8 @@ describe('src/cy/commands/actions/check', () => {
       })
 
       it('logs only 1 uncheck event on uncheck with 1 matching value arg', () => {
-        const logs = []
-        const unchecks = []
+        const logs: any[] = []
+        const unchecks: any[] = []
 
         cy.on('log:added', (attrs, log) => {
           logs.push(log)

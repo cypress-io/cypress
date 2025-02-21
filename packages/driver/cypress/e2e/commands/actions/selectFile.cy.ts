@@ -1,3 +1,4 @@
+// @ts-expect-error - this is being redeclared
 const { _, $ } = Cypress
 
 // Reading and decoding files from an input element would, in the real world,
@@ -30,10 +31,13 @@ describe('src/cy/commands/actions/selectFile', () => {
 
       cy.get('#basic')
       .then((input) => {
-        expect(input[0].files.length).to.eq(1)
-        expect(input[0].files[0].name).to.eq('foo.txt')
-        expect(input[0].files[0].type).to.eq('text/plain')
-        expect(input[0].files[0].lastModified).to.be.closeTo(Date.now(), 1000)
+        const $input = input[0] as HTMLInputElement
+        const $file = $input.files?.[0]
+
+        expect($input.files?.length).to.eq(1)
+        expect($file?.name).to.eq('foo.txt')
+        expect($file?.type).to.eq('text/plain')
+        expect($file?.lastModified).to.be.closeTo(Date.now(), 1000)
       })
 
       cy.get('#basic')
@@ -61,10 +65,12 @@ describe('src/cy/commands/actions/selectFile', () => {
       cy.get('#multiple')
       .should('include.value', 'foo.txt')
       .then((input) => {
-        expect(input[0].files[0].name).to.eq('foo.txt')
-        expect(input[0].files[1].name).to.eq('bar.json')
-        expect(input[0].files[2].name).to.eq('')
-        expect(input[0].files[3].name).to.eq('')
+        const $input = input[0] as HTMLInputElement
+
+        expect($input.files?.[0].name).to.eq('foo.txt')
+        expect($input.files?.[1].name).to.eq('bar.json')
+        expect($input.files?.[2].name).to.eq('')
+        expect($input.files?.[3].name).to.eq('')
       })
 
       cy.get('#multiple')
@@ -84,7 +90,9 @@ describe('src/cy/commands/actions/selectFile', () => {
       })
 
       cy.get('#basic').then((input) => {
-        expect(input[0].files[0].lastModified).to.eq(1234)
+        const $input = input[0] as HTMLInputElement
+
+        expect($input.files?.[0].lastModified).to.eq(1234)
       })
     })
 
@@ -167,7 +175,9 @@ describe('src/cy/commands/actions/selectFile', () => {
       cy.get('#basic').selectFile({ contents: '@foo' })
       cy.get('#basic').selectFile([])
       .then((input) => {
-        expect(input[0].files.length).to.eq(0)
+        const $input = input[0] as HTMLInputElement
+
+        expect($input.files?.length).to.eq(0)
       })
     })
 
@@ -188,11 +198,15 @@ describe('src/cy/commands/actions/selectFile', () => {
     it('uses the AUT\'s File constructor', () => {
       cy.window().then(($autWindow) => {
         cy.get('#basic').selectFile('@foo', { action: 'select' }).then((input) => {
-          expect(input[0].files[0]).to.be.instanceOf($autWindow.File)
+          const $input = input[0] as HTMLInputElement
+
+          expect($input.files?.[0]).to.be.instanceOf($autWindow.File)
         })
 
         cy.get('#basic').selectFile('@foo', { action: 'drag-drop' }).then((input) => {
-          expect(input[0].files[0]).to.be.instanceOf($autWindow.File)
+          const $input = input[0] as HTMLInputElement
+
+          expect($input.files?.[0]).to.be.instanceOf($autWindow.File)
         })
       })
     })
@@ -231,8 +245,10 @@ describe('src/cy/commands/actions/selectFile', () => {
 
         cy.get('#basic').selectFile('@myFixture')
         .then((input) => {
-          expect(input[0].files[0].name).to.eq('valid.json')
-          expect(input[0].files[0].type).to.eq('application/json')
+          const $input = input[0] as HTMLInputElement
+
+          expect($input.files?.[0].name).to.eq('valid.json')
+          expect($input.files?.[0].type).to.eq('application/json')
         })
         .then(getFileContents)
         .then((contents) => {
@@ -249,8 +265,10 @@ describe('src/cy/commands/actions/selectFile', () => {
 
         cy.get('#basic').selectFile('@myFile')
         .then((input) => {
-          expect(input[0].files[0].name).to.eq('valid.json')
-          expect(input[0].files[0].type).to.eq('application/json')
+          const $input = input[0] as HTMLInputElement
+
+          expect($input.files?.[0].name).to.eq('valid.json')
+          expect($input.files?.[0].type).to.eq('application/json')
         })
         .then(getFileContents)
         .then((contents) => {
@@ -269,10 +287,12 @@ describe('src/cy/commands/actions/selectFile', () => {
         cy.get('#multiple')
         .should('include.value', 'valid.json')
         .then((input) => {
-          expect(input[0].files[0].name).to.eq('valid.json')
-          expect(input[0].files[1].name).to.eq('app.js')
-          expect(input[0].files[0].type).to.eq('application/json')
-          expect(input[0].files[1].type).to.eq('application/javascript')
+          const $input = input[0] as HTMLInputElement
+
+          expect($input.files?.[0].name).to.eq('valid.json')
+          expect($input.files?.[1].name).to.eq('app.js')
+          expect($input.files?.[0].type).to.eq('application/json')
+          expect($input.files?.[1].type).to.eq('application/javascript')
         })
       })
 
@@ -289,14 +309,16 @@ describe('src/cy/commands/actions/selectFile', () => {
           mimeType: 'text/plain',
         }])
         .then((input) => {
-          expect(input[0].files[0].name).to.eq('1.png')
-          expect(input[0].files[1].name).to.eq('2.png')
+          const $input = input[0] as HTMLInputElement
+
+          expect($input.files?.[0].name).to.eq('1.png')
+          expect($input.files?.[1].name).to.eq('2.png')
           // The mimetype should be inferred from the user-supplied filename,
           // rather than the actual path
-          expect(input[0].files[0].type).to.eq('image/png')
+          expect($input.files?.[0].type).to.eq('image/png')
           // And ever if they supply a filename, explicit mimetype
           // should always take precedent.
-          expect(input[0].files[1].type).to.eq('text/plain')
+          expect($input.files?.[1].type).to.eq('text/plain')
         })
       })
     })
@@ -306,7 +328,7 @@ describe('src/cy/commands/actions/selectFile', () => {
         cy.get('#basic')
         .selectFile({ contents: '@foo', fileName: 'foo.barbaz' })
         .then((input) => {
-          expect(input[0].files[0].type).to.eq('')
+          expect((input[0] as HTMLInputElement).files?.[0].type).to.eq('')
         })
       })
 
@@ -321,7 +343,7 @@ describe('src/cy/commands/actions/selectFile', () => {
           cy.get('#basic')
           .selectFile({ contents: '@foo', fileName: `foo.${extension}` })
           .then((input) => {
-            expect(input[0].files[0].type).to.eq(mimeType)
+            expect((input[0] as HTMLInputElement).files?.[0].type).to.eq(mimeType)
           })
         })
       })
@@ -330,7 +352,7 @@ describe('src/cy/commands/actions/selectFile', () => {
         cy.get('#basic')
         .selectFile({ contents: '@foo', fileName: 'foo.zip', mimeType: 'image/png' })
         .then((input) => {
-          expect(input[0].files[0].type).to.eq('image/png')
+          expect((input[0] as HTMLInputElement).files?.[0].type).to.eq('image/png')
         })
       })
     })
@@ -415,6 +437,7 @@ describe('src/cy/commands/actions/selectFile', () => {
           done()
         })
 
+        // @ts-expect-error - testing invalid argument
         cy.get('#basic').selectFile()
       })
 
@@ -425,6 +448,7 @@ describe('src/cy/commands/actions/selectFile', () => {
           done()
         })
 
+        // @ts-expect-error - testing invalid argument
         cy.get('#basic').selectFile(null)
       })
 
@@ -497,6 +521,7 @@ describe('src/cy/commands/actions/selectFile', () => {
           done()
         })
 
+        // @ts-expect-error - testing invalid argument
         cy.get('#basic').selectFile([{ contents: '@foo' }, {}])
       })
 
@@ -507,6 +532,7 @@ describe('src/cy/commands/actions/selectFile', () => {
           done()
         })
 
+        // @ts-expect-error - testing invalid argument
         cy.get('#basic').selectFile({ contents: '@foo' }, { action: 'foobar' })
       })
     })
@@ -583,7 +609,7 @@ describe('src/cy/commands/actions/selectFile', () => {
 
         disabled.replaceWith(disabled[0].outerHTML)
 
-        cy.$$('#disabled').attr('disabled', false)
+        cy.$$('#disabled').prop('disabled', false)
       })
 
       cy.get('#disabled-label').selectFile({ contents: '@foo' })
@@ -668,7 +694,7 @@ is being covered by another element:
 
       // TODO(webkit): fix+unskip for experimental webkit
       it('can scroll to input', { browser: '!webkit' }, () => {
-        const scrolled = []
+        const scrolled: any[] = []
 
         cy.on('scrolled', ($el, type) => {
           scrolled.push(type)
@@ -681,7 +707,7 @@ is being covered by another element:
       })
 
       it('can scroll to label', () => {
-        const scrolled = []
+        const scrolled: any[] = []
 
         cy.on('scrolled', ($el, type) => {
           scrolled.push(type)
@@ -694,7 +720,7 @@ is being covered by another element:
       })
 
       it('does not scroll when forced', () => {
-        const scrolled = []
+        const scrolled: any[] = []
 
         cy.on('scrolled', ($el, type) => {
           scrolled.push(type)
@@ -767,20 +793,20 @@ is being covered by another element:
         cy.get('#basic-label').selectFile({ contents: '@foo' }, { action: 'drag-drop' })
 
         cy.get('#basic').then((input) => {
-          expect(input[0].files.length).to.eql(0)
+          expect((input[0] as HTMLInputElement).files?.length).to.eql(0)
         })
       })
 
       it('does not select multiple files with a single-file input', () => {
         cy.get('#basic').selectFile(['@foo', '@foo'], { action: 'drag-drop' })
         cy.get('#basic').then((input) => {
-          expect(input[0].files.length).to.eql(0)
+          expect((input[0] as HTMLInputElement).files?.length).to.eql(0)
         })
       })
 
       it('drops files onto any element and triggers events', (done) => {
         const $body = cy.$$('body')
-        let events = []
+        let events: any[] = []
 
         $body.on('input', (e) => {
           throw new Error('should not trigger input')
@@ -795,7 +821,7 @@ is being covered by another element:
         $body.on('dragover', (e) => events.push(e))
         $body.on('drop', (e) => {
           events.push(e)
-          expect(_.map(events, 'originalEvent.type')).to.deep.eql(['drag', 'dragenter', 'dragover', 'drop'])
+          expect(_.map(events, 'originalEvent.type')).to.deep.eq(['drag', 'dragenter', 'dragover', 'drop'])
           expect(_.every(events, ['originalEvent.bubbles', true])).to.be.true
           expect(_.every(events, ['originalEvent.cancelable', true])).to.be.true
           expect(_.every(events, ['originalEvent.composed', true])).to.be.true
@@ -809,7 +835,7 @@ is being covered by another element:
 
       it('includes an entry in `dataTransfer.types`', (done) => {
         cy.$$('#multiple').on('drop', (e) => {
-          expect(e.originalEvent.dataTransfer.types).to.contain('Files')
+          expect(e.originalEvent?.dataTransfer?.types).to.contain('Files')
           done()
         })
 

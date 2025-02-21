@@ -1,10 +1,28 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 14.0.3
+## 14.0.4
 
-_Released 2/11/2025 (PENDING)_
+_Released 2/25/2025 (PENDING)_
+
+**Misc:**
+
+- Updated types around `.readFile()` and `.scrollTo()` arguments and `Cypress.dom` methods. Addressed in [#31055](https://github.com/cypress-io/cypress/pull/31055).
 
 **Dependency Updates:**
 
+- Upgraded `chrome-remote-interface` from `0.33.2` to `0.33.3`. Addressed in [#31128](https://github.com/cypress-io/cypress/pull/31128).
+- Upgraded `ci-info` from `4.0.0` to `4.1.0`. Addressed in [#31132](https://github.com/cypress-io/cypress/pull/31132).
+
+## 14.0.3
+
+_Released 2/11/2025_
+
+**Bugfixes:**
+
+- Fixed an issue in Cypress [`14.0.2`](https://docs.cypress.io/guides/references/changelog#14-0-2) where privileged commands did not run correctly when a spec file or support file contained certain encoded characters. Fixes [#31034](https://github.com/cypress-io/cypress/issues/31034) and [#31060](https://github.com/cypress-io/cypress/issues/31060).
+
+**Dependency Updates:**
+
+- Upgraded `@cypress/request` from `3.0.6` to `3.0.7`. Addressed in [#31063](https://github.com/cypress-io/cypress/pull/31063).
 - Upgraded `compression` from `1.7.4` to `1.7.5`. Addressed in [#31004](https://github.com/cypress-io/cypress/pull/31004).
 
 ## 14.0.2

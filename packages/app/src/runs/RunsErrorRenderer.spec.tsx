@@ -1,5 +1,6 @@
 import { RunsErrorRendererFragmentDoc } from '../generated/graphql-test'
 import RunsErrorRenderer from './RunsErrorRenderer.vue'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 

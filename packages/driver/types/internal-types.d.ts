@@ -1,6 +1,8 @@
 // NOTE: this is for internal Cypress types that we don't want exposed in the public API but want for development
 // TODO: find a better place for this
 /// <reference path="./internal-types-lite.d.ts" />
+/// <reference path="./spec-types.d.ts" />
+/// <reference path="./cypress/log.d.ts" />
 
 interface InternalWindowLoadDetails {
   type: 'same:origin' | 'cross:origin' | 'cross:origin:failure'
@@ -8,9 +10,34 @@ interface InternalWindowLoadDetails {
   window?: AUTWindow
 }
 
+interface InternalTypeOptions extends Partial<Cypress.TypeOptions> {
+  _log?: Log
+  $el: JQuery
+  ensure?: object
+  verify: boolean
+  interval?: number
+}
+
+interface InternalClearOptions extends Partial<Cypress.CheckClearOptions> {
+  _log?: Log
+  ensure?: object
+  interval?: number
+}
+
+interface InternalCheckOptions extends Partial<Cypress.CheckClearOptions> {
+  interval?: number
+}
+
+interface InternalKeyboard extends Partial<Keyboard> {
+  getMap: () => object
+  reset: () => void
+}
+
 declare namespace Cypress {
   interface Cypress {
+    browserMajorVersion: () => number
     backend: (eventName: string, ...args: any[]) => Promise<any>
+    Keyboard: InternalKeyboard
     // TODO: how to pull this from proxy-logging.ts? can't import in a d.ts file...
     ProxyLogging: any
     // TODO: how to pull these from resolvers.ts? can't import in a d.ts file...
@@ -20,6 +47,7 @@ declare namespace Cypress {
       [routeId: string]: any
     }
     sinon: sinon.SinonApi
+    stop: () => void
     utils: CypressUtils
     state: State
     events: Events
@@ -37,6 +65,7 @@ declare namespace Cypress {
   }
 
   interface CypressUtils {
+    getDistanceBetween: (point1: { x: number, y: number }, point2: { x: number, y: number }) => number
     throwErrByPath: (path: string, obj?: { args: object }) => void
     warnByPath: (path: string, obj?: { args: object }) => void
     warning: (message: string) => void

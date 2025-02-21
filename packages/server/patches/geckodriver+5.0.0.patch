@@ -1,9 +1,3 @@
-diff --git a/node_modules/geckodriver/AUTHORS b/node_modules/geckodriver/AUTHORS
-old mode 100644
-new mode 100755
-diff --git a/node_modules/geckodriver/LICENSE b/node_modules/geckodriver/LICENSE
-old mode 100644
-new mode 100755
 diff --git a/node_modules/geckodriver/README.md b/node_modules/geckodriver/README.md
 deleted file mode 100644
 index 95e3ef0..0000000
@@ -249,58 +243,14 @@ index 95e3ef0..0000000
 ----
 -
 -For more information on WebdriverIO see the [homepage](https://webdriver.io).
-diff --git a/node_modules/geckodriver/dist/cjs/index.d.ts b/node_modules/geckodriver/dist/cjs/index.d.ts
-old mode 100644
-new mode 100755
-diff --git a/node_modules/geckodriver/dist/cjs/index.d.ts.map b/node_modules/geckodriver/dist/cjs/index.d.ts.map
-old mode 100644
-new mode 100755
-diff --git a/node_modules/geckodriver/dist/cjs/index.js b/node_modules/geckodriver/dist/cjs/index.js
-old mode 100644
-new mode 100755
-diff --git a/node_modules/geckodriver/dist/cjs/index.js.map b/node_modules/geckodriver/dist/cjs/index.js.map
-old mode 100644
-new mode 100755
-diff --git a/node_modules/geckodriver/dist/cli.d.ts b/node_modules/geckodriver/dist/cli.d.ts
-old mode 100644
-new mode 100755
-diff --git a/node_modules/geckodriver/dist/cli.d.ts.map b/node_modules/geckodriver/dist/cli.d.ts.map
-old mode 100644
-new mode 100755
-diff --git a/node_modules/geckodriver/dist/cli.js b/node_modules/geckodriver/dist/cli.js
-old mode 100644
-new mode 100755
-diff --git a/node_modules/geckodriver/dist/cli.js.map b/node_modules/geckodriver/dist/cli.js.map
-old mode 100644
-new mode 100755
-diff --git a/node_modules/geckodriver/dist/constants.d.ts b/node_modules/geckodriver/dist/constants.d.ts
-old mode 100644
-new mode 100755
-diff --git a/node_modules/geckodriver/dist/constants.d.ts.map b/node_modules/geckodriver/dist/constants.d.ts.map
-old mode 100644
-new mode 100755
-diff --git a/node_modules/geckodriver/dist/constants.js b/node_modules/geckodriver/dist/constants.js
-old mode 100644
-new mode 100755
-diff --git a/node_modules/geckodriver/dist/constants.js.map b/node_modules/geckodriver/dist/constants.js.map
-old mode 100644
-new mode 100755
-diff --git a/node_modules/geckodriver/dist/index.d.ts b/node_modules/geckodriver/dist/index.d.ts
-old mode 100644
-new mode 100755
-diff --git a/node_modules/geckodriver/dist/index.d.ts.map b/node_modules/geckodriver/dist/index.d.ts.map
-old mode 100644
-new mode 100755
 diff --git a/node_modules/geckodriver/dist/index.js b/node_modules/geckodriver/dist/index.js
-old mode 100644
-new mode 100755
-index 2edc6d2..d0b456e
+index 2edc6d2..a24617e 100644
 --- a/node_modules/geckodriver/dist/index.js
 +++ b/node_modules/geckodriver/dist/index.js
 @@ -1,10 +1,14 @@
  import cp from 'node:child_process';
  import logger from '@wdio/logger';
-+import debugModule from 'debug'
++import debugModule from 'debug';
  import { download as downloadDriver } from './install.js';
  import { hasAccess, parseParams } from './utils.js';
  import { DEFAULT_HOSTNAME } from './constants.js';
@@ -312,19 +262,8 @@ index 2edc6d2..d0b456e
      const { cacheDir, customGeckoDriverPath, spawnOpts, ...startArgs } = params;
      let geckoDriverPath = (customGeckoDriverPath ||
          process.env.GECKODRIVER_PATH ||
-diff --git a/node_modules/geckodriver/dist/index.js.map b/node_modules/geckodriver/dist/index.js.map
-old mode 100644
-new mode 100755
-diff --git a/node_modules/geckodriver/dist/install.d.ts b/node_modules/geckodriver/dist/install.d.ts
-old mode 100644
-new mode 100755
-diff --git a/node_modules/geckodriver/dist/install.d.ts.map b/node_modules/geckodriver/dist/install.d.ts.map
-old mode 100644
-new mode 100755
 diff --git a/node_modules/geckodriver/dist/install.js b/node_modules/geckodriver/dist/install.js
-old mode 100644
-new mode 100755
-index c27c805..ac53518
+index c27c805..ac53518 100644
 --- a/node_modules/geckodriver/dist/install.js
 +++ b/node_modules/geckodriver/dist/install.js
 @@ -70,6 +70,8 @@ async function downloadZip(res, cacheDir) {
@@ -338,33 +277,3 @@ index c27c805..ac53518
  }
  //# sourceMappingURL=install.js.map
 \ No newline at end of file
-diff --git a/node_modules/geckodriver/dist/install.js.map b/node_modules/geckodriver/dist/install.js.map
-old mode 100644
-new mode 100755
-diff --git a/node_modules/geckodriver/dist/types.d.ts b/node_modules/geckodriver/dist/types.d.ts
-old mode 100644
-new mode 100755
-diff --git a/node_modules/geckodriver/dist/types.d.ts.map b/node_modules/geckodriver/dist/types.d.ts.map
-old mode 100644
-new mode 100755
-diff --git a/node_modules/geckodriver/dist/types.js b/node_modules/geckodriver/dist/types.js
-old mode 100644
-new mode 100755
-diff --git a/node_modules/geckodriver/dist/types.js.map b/node_modules/geckodriver/dist/types.js.map
-old mode 100644
-new mode 100755
-diff --git a/node_modules/geckodriver/dist/utils.d.ts b/node_modules/geckodriver/dist/utils.d.ts
-old mode 100644
-new mode 100755
-diff --git a/node_modules/geckodriver/dist/utils.d.ts.map b/node_modules/geckodriver/dist/utils.d.ts.map
-old mode 100644
-new mode 100755
-diff --git a/node_modules/geckodriver/dist/utils.js b/node_modules/geckodriver/dist/utils.js
-old mode 100644
-new mode 100755
-diff --git a/node_modules/geckodriver/dist/utils.js.map b/node_modules/geckodriver/dist/utils.js.map
-old mode 100644
-new mode 100755
-diff --git a/node_modules/geckodriver/tsconfig.tsbuildinfo b/node_modules/geckodriver/tsconfig.tsbuildinfo
-old mode 100644
-new mode 100755
