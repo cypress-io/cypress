@@ -411,19 +411,11 @@ export function clearInstanceState (options: GracefulShutdownOptions = {}) {
 
 function shouldUseBiDi (browser: Browser): boolean {
   try {
-    if (browser.family === 'firefox' && !process.env.FORCE_FIREFOX_CDP) {
-      if (browser.majorVersion) {
-        const majorVersion = parseInt(browser.majorVersion)
-
-        // Gating on firefox version 135 to turn on BiDi as this is when all of our internal Cypress tests were able to pass.
-        return majorVersion >= 135
-      }
-    }
+    // Gating on firefox version 135 to turn on BiDi as this is when all of our internal Cypress tests were able to pass.
+    return (browser.family === 'firefox' && !process.env.FORCE_FIREFOX_CDP && Number(browser.majorVersion) >= 135)
   } catch (err: unknown) {
     return false
   }
-
-  return false
 }
 
 export async function connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {

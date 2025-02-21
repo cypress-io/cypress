@@ -39,7 +39,7 @@ const isBiDiEnabled = async (config) => {
 
   const { version } = await browser.runtime.getBrowserInfo()
 
-  const majorVersion = parseInt(version)
+  const [majorVersion] = version.split('.').map(Number)
 
   return majorVersion >= 135
 }
