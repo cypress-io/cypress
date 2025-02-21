@@ -335,6 +335,22 @@ const defaultPreferences = {
   'browser.helperApps.neverAsk.saveToDisk': downloadMimeTypes,
 }
 
+// CDP is deprecated in Firefox 129 and up.
+// To enable BiDi (without CDP), we need to set
+//    remote.active-protocol=1
+// In order to enable CDP (without BiDi), we need to set
+//    remote.active-protocol=2
+// both can be enabled via
+//    remote.active-protocol=3
+// @see https://fxdx.dev/deprecating-cdp-support-in-firefox-embracing-the-future-with-webdriver-bidi/
+// @see https://github.com/cypress-io/cypress/issues/29713
+const ACTIVE_PROTOCOLS = Object.freeze({
+  BIDI: 1,
+  CDP: 2,
+  // this key isn't actively used but checked in here if we need to turn it on for internal debugging
+  CDP_AND_BIDI: 3,
+})
+
 const FIREFOX_HEADED_USERCSS = `\
 #urlbar:not(.megabar), #urlbar.megabar > #urlbar-background, #searchbar {
   background: -moz-Field !important;
@@ -451,14 +467,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     ],
   })
 
-  // CDP is deprecated in Firefox 129 and up.
-  // In order to enable CDP (without BiDi), we need to set
-  // remote.active-protocol=2
-  // To enable BiDi (without CDP), we need to set
-  // remote.active-protocol=1
-  // @see https://fxdx.dev/deprecating-cdp-support-in-firefox-embracing-the-future-with-webdriver-bidi/
-  // @see https://github.com/cypress-io/cypress/issues/29713
-  defaultLaunchOptions.preferences['remote.active-protocols'] = USE_WEBDRIVER_BIDI ? 1 : 2
+  defaultLaunchOptions.preferences['remote.active-protocols'] = USE_WEBDRIVER_BIDI ? ACTIVE_PROTOCOLS.BIDI : ACTIVE_PROTOCOLS.CDP
 
   if (browser.isHeadless) {
     defaultLaunchOptions.args.push('-headless')
