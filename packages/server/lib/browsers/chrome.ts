@@ -351,12 +351,12 @@ export = {
 
     // https://chromium.googlesource.com/chromium/src/+/da790f920bbc169a6805a4fb83b4c2ab09532d91
     // https://github.com/cypress-io/cypress/issues/1872
-    if (majorVersion >= CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK) {
+    if (Number(majorVersion) >= CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK) {
       args.push('--proxy-bypass-list=<-loopback>')
     }
 
     if (isHeadless) {
-      if (majorVersion >= CHROME_VERSION_INTRODUCING_HEADLESS_NEW) {
+      if (Number(majorVersion) >= CHROME_VERSION_INTRODUCING_HEADLESS_NEW) {
         args.push('--headless=new')
       } else {
         args.push('--headless')

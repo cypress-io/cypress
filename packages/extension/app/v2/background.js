@@ -39,9 +39,13 @@ const isBiDiEnabled = async (config) => {
 
   const { version } = await browser.runtime.getBrowserInfo()
 
-  const [majorVersion] = version.split('.').map(Number)
+  if (version) {
+    const [majorVersion] = version.split('.').map(Number)
 
-  return majorVersion >= 135
+    return majorVersion >= 135
+  }
+
+  return false
 }
 
 const connect = function (host, path, extraOpts) {
