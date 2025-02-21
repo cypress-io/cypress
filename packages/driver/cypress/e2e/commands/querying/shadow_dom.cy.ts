@@ -1,3 +1,4 @@
+// @ts-expect-error TODO: fix this reference
 const { _ } = Cypress
 
 describe('src/cy/commands/querying - shadow dom', () => {
