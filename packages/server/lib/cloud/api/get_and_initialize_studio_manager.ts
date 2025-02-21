@@ -1,7 +1,6 @@
 import path from 'path'
 import os from 'os'
 import { ensureDir, copy, readFile } from 'fs-extra'
-import cloudApi from '.'
 import { StudioManager } from '../studio'
 import tar from 'tar'
 import { verifySignatureFromFile } from '../encryption'
@@ -11,6 +10,7 @@ import fetch from 'cross-fetch'
 import { agent } from '@packages/network'
 import { asyncRetry, linearDelay } from '../../util/async_retry'
 import { isRetryableError } from '../network/is_retryable_error'
+import { PUBLIC_KEY_VERSION } from '../constants'
 
 const pkg = require('@packages/root')
 const routes = require('../routes')
@@ -32,7 +32,7 @@ const downloadStudioBundleToTempDirectory = async (projectId?: string): Promise<
       method: 'GET',
       headers: {
         'x-route-version': '1',
-        'x-cypress-signature': cloudApi.publicKeyVersion,
+        'x-cypress-signature': PUBLIC_KEY_VERSION,
         ...(projectId ? { 'x-cypress-project-slug': projectId } : {}),
         'x-cypress-studio-mount-version': '1',
         'x-os-name': os.platform(),

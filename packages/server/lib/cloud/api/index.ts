@@ -23,12 +23,11 @@ import { fs } from '../../util/fs'
 import ProtocolManager from '../protocol'
 import type { ProjectBase } from '../../project-base'
 import type { AfterSpecDurations } from '@packages/types'
+import { PUBLIC_KEY_VERSION } from '../constants'
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
 const TWO_MINUTES = humanInterval('2 minutes')
-
-const PUBLIC_KEY_VERSION = '1'
 
 const DELAYS: number[] = process.env.API_RETRY_INTERVALS
   ? process.env.API_RETRY_INTERVALS.split(',').map(_.toNumber)
@@ -692,6 +691,4 @@ export default {
   },
 
   retryWithBackoff,
-
-  publicKeyVersion: PUBLIC_KEY_VERSION,
 }
