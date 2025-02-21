@@ -10,14 +10,14 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, onMounted, onUpdated, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { init, loadRemote } from '@module-federation/runtime'
 
 const root = ref<HTMLElement | null>(null)
 const error = ref<string | null>(null)
 const Panel = ref<ReturnType<any> | null>(null)
 
-const updateComponent = () => {
+const maybeRenderReactComponent = () => {
   if (!Panel.value || !!error.value) {
     return
   }
@@ -58,8 +58,7 @@ init({
   name: 'app',
 })
 
-onMounted(updateComponent)
-onUpdated(updateComponent)
+onMounted(maybeRenderReactComponent)
 onBeforeUnmount(unmountReactComponent)
 
 loadRemote<typeof import('app-studio')>('app-studio').then((module) => {
@@ -70,7 +69,7 @@ loadRemote<typeof import('app-studio')>('app-studio').then((module) => {
   }
 
   Panel.value = module.default
-  updateComponent()
+  maybeRenderReactComponent()
 }).catch((e) => {
   error.value = e.message
 })
