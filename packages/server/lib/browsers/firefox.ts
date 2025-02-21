@@ -394,10 +394,8 @@ export function clearInstanceState (options: GracefulShutdownOptions = {}) {
 }
 
 function shouldUseBiDi (browser: Browser): boolean {
-  const isCDPForced = !!process.env.FORCE_FIREFOX_CDP
-
   try {
-    if (browser.family === 'firefox' && !isCDPForced) {
+    if (browser.family === 'firefox' && !process.env.FORCE_FIREFOX_CDP) {
       if (browser.majorVersion) {
         const majorVersion = parseInt(browser.majorVersion)
 
