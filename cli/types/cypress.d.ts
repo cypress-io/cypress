@@ -1898,7 +1898,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/root
      */
-    root<E extends Node = HTMLHtmlElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>> // can't do better typing unless we ignore the `.within()` case
+    root<E extends Node = HTMLHtmlElement>(options?: Partial<LogTimeoutOptions>): Chainable<JQuery<E>> // can't do better typing unless we ignore the `.within()` case
 
     /**
      * Take a screenshot of the application under test and the Cypress Command Log.
