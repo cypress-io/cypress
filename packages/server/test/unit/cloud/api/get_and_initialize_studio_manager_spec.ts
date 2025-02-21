@@ -30,7 +30,7 @@ describe('getAndInitializeStudioManager', () => {
     createInErrorManagerStub = sinon.stub()
     studioManagerSetupStub = sinon.stub()
 
-    getAndInitializeStudioManager = (proxyquire('../lib/cloud/api/get_app_studio', {
+    getAndInitializeStudioManager = (proxyquire('../lib/cloud/api/get_and_initialize_studio_manager', {
       fs: {
         promises: {
           rm: rmStub.resolves(),
