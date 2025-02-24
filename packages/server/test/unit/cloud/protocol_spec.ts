@@ -37,7 +37,18 @@ describe('lib/cloud/protocol', () => {
   beforeEach(async () => {
     protocolManager = new ProtocolManager()
 
-    await protocolManager.setupProtocol(stubProtocol, { runId: '1', testingType: 'e2e', projectId: '1', cloudApi: { url: 'http://localhost:1234', retryWithBackoff: async () => {}, requestPromise: { get: async () => {} } } })
+    await protocolManager.setupProtocol(stubProtocol, {
+      runId: '1',
+      testingType: 'e2e',
+      projectId: '1',
+      cloudApi: { url: 'http://localhost:1234', retryWithBackoff: async () => {}, requestPromise: { get: async () => {} } },
+      projectConfig: {
+        devServerPublicPathRoute: '/__cypress-app/src',
+        namespace: '__cypress-app',
+        port: 1234,
+        proxyUrl: 'http://localhost:1234',
+      },
+    })
 
     protocol = (protocolManager as any)._protocol
     expect((protocol as any)).not.to.be.undefined

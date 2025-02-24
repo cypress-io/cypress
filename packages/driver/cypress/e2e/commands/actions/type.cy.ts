@@ -1,13 +1,14 @@
-const { _, $ } = Cypress
-const { Promise } = Cypress
-const {
+import {
   clickCommandLog,
   attachKeyListeners,
   keyEvents,
   trimInnerText,
   shouldBeCalledWithCount,
   shouldBeCalledOnce,
-} = require('../../../support/utils')
+} from '../../../support/utils'
+
+const { _, $ } = Cypress
+const { Promise } = Cypress
 
 const expectTextEndsWith = (expected) => {
   return ($el) => {
@@ -33,7 +34,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     const input = cy.$$('input:first')
 
     cy.get('input:first').type('foo').then(($input) => {
-      expect($input).to.match(input)
+      expect($input[0]).to.eq(input[0])
     })
   })
 
@@ -60,7 +61,9 @@ describe('src/cy/commands/actions/type - #type', () => {
     cy
     .get('input:first').type('123')
     .then(($el) => {
-      $el[0].setSelectionRange(0, 0)
+      const el = $el[0] as unknown as HTMLInputElement
+
+      el.setSelectionRange(0, 0)
     })
     .blur()
     .type('456')
@@ -72,7 +75,9 @@ describe('src/cy/commands/actions/type - #type', () => {
     .get('input:first')
     .type('123')
     .then(($input) => {
-      $input[0].value += '-'
+      const input = $input[0] as unknown as HTMLInputElement
+
+      input.value += '-'
 
       return $input
     }).type('456')
@@ -80,6 +85,7 @@ describe('src/cy/commands/actions/type - #type', () => {
   })
 
   it('can type numbers', () => {
+    // @ts-expect-error - numbers work in text inputs only and error in other inputs
     cy.get(':text:first').type(123).then(($text) => {
       expect($text).to.have.value('123')
     })
@@ -191,7 +197,8 @@ describe('src/cy/commands/actions/type - #type', () => {
   // https://github.com/cypress-io/cypress/issues/5650
   it('should trigger KeyboardEvent, not Event, for event listeners', (done) => {
     cy.$$('input:first').on('keydown', (e) => {
-      if (e.originalEvent instanceof e.currentTarget.ownerDocument.defaultView.KeyboardEvent) {
+      // @ts-expect-error - TODO: Need to get this to not throw error
+      if (e.originalEvent instanceof e.currentTarget.ownerDocument.defaultView?.KeyboardEvent) {
         done()
 
         return
@@ -244,14 +251,12 @@ describe('src/cy/commands/actions/type - #type', () => {
       .prependTo(cy.$$('body'))
 
       $('<span>span on input</span>')
-      .css({
-        position: 'absolute',
-        left: $input.offset().left,
-        top: $input.offset().top,
-        padding: 5,
-        display: 'inline-block',
-        backgroundColor: 'yellow',
-      })
+      .css('position', 'absolute')
+      .css('left', `${$input.offset()?.left}`)
+      .css('top', `${$input.offset()?.top}`)
+      .css('padding', '5px')
+      .css('display', 'inline-block')
+      .css('backgroundColor', 'yellow')
       .prependTo(cy.$$('body'))
 
       const clicked = cy.stub()
@@ -766,6 +771,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       .then(() => {
         expect(cy.timeout).to.be.calledWith(5 * 8, true, 'type')
 
+        // @ts-expect-error - TODO: Get this to use the internal Keyboard types
         Cypress.Keyboard.reset()
       })
     })
@@ -796,9 +802,11 @@ describe('src/cy/commands/actions/type - #type', () => {
           done()
         })
 
+        // @ts-expect-error - testing invalid input
         cy.get(':text:first').type('foo', { delay: false })
       })
 
+      // @ts-expect-error - testing invalid input
       it('throws when test config keystrokeDelay is invalid', { keystrokeDelay: false }, (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.eq('The test configuration `keystrokeDelay` option must be 0 (zero) or a positive number. You passed: `false`')
@@ -880,7 +888,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     it('maxlength=0 events', () => {
-      const events = []
+      const events: any[] = []
 
       const push = (evt) => {
         return () => {
@@ -907,7 +915,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     it('maxlength=1 events', () => {
-      const events = []
+      const events: any[] = []
 
       const push = (evt) => {
         return () => {
@@ -963,7 +971,9 @@ describe('src/cy/commands/actions/type - #type', () => {
 
     it('overwrites text when currently has selection', () => {
       cy.get('#input-without-value').invoke('val', '0').then((el) => {
-        return el.select()
+        const input = el as unknown as HTMLInputElement
+
+        return input.select()
       })
 
       cy.get('#input-without-value').type('50').then(($input) => {
@@ -983,7 +993,9 @@ describe('src/cy/commands/actions/type - #type', () => {
       .then(($el) => {
         $el.val('foo')
         .on('focus', function (e) {
-          e.currentTarget.setSelectionRange(0, 1)
+          const input = e.currentTarget as HTMLInputElement
+
+          input.setSelectionRange(0, 1)
         })
       })
       .type('bar')
@@ -1002,7 +1014,9 @@ describe('src/cy/commands/actions/type - #type', () => {
       .then(($el) => {
         $el.val('foo')
         $el.get(0).addEventListener('focus', (e) => {
-          e.currentTarget.setSelectionRange(0, 1)
+          const input = e.currentTarget as HTMLInputElement
+
+          input.setSelectionRange(0, 1)
         }, { capture: true })
       })
       .type('bar')
@@ -1022,7 +1036,9 @@ describe('src/cy/commands/actions/type - #type', () => {
       input
       .val('f')
       .on('focus', (e) => {
-        e.currentTarget.select()
+        const input = e.currentTarget as HTMLInputElement
+
+        input.select()
       })
 
       cy.get('#input-without-value')
@@ -1036,7 +1052,9 @@ describe('src/cy/commands/actions/type - #type', () => {
       input
       .val('1')
       .on('focus', (e) => {
-        e.currentTarget.select()
+        const input = e.currentTarget as HTMLInputElement
+
+        input.select()
       })
 
       cy.get('#number-without-value')
@@ -1050,7 +1068,9 @@ describe('src/cy/commands/actions/type - #type', () => {
       input
       .val('b')
       .on('focus', (e) => {
-        e.currentTarget.select()
+        const input = e.currentTarget as HTMLInputElement
+
+        input.select()
       })
 
       cy.get('#email-without-value')
@@ -1066,7 +1086,9 @@ describe('src/cy/commands/actions/type - #type', () => {
 
     it('responsive to keydown handler', () => {
       cy.$$('#input-without-value').val('1234').keydown(function () {
-        $(this).get(0).setSelectionRange(0, 0)
+        const input = $(this).get(0) as HTMLInputElement
+
+        input.setSelectionRange(0, 0)
       })
 
       cy.get('#input-without-value').type('56').then(($input) => {
@@ -1076,7 +1098,9 @@ describe('src/cy/commands/actions/type - #type', () => {
 
     it('responsive to keyup handler', () => {
       cy.$$('#input-without-value').val('1234').keyup(function () {
-        $(this).get(0).setSelectionRange(0, 0)
+        const input = $(this).get(0) as HTMLInputElement
+
+        input.setSelectionRange(0, 0)
       })
 
       cy.get('#input-without-value').type('56').then(($input) => {
@@ -1086,7 +1110,9 @@ describe('src/cy/commands/actions/type - #type', () => {
 
     it('responsive to input handler', () => {
       cy.$$('#input-without-value').val('1234').keyup(function () {
-        $(this).get(0).setSelectionRange(0, 0)
+        const input = $(this).get(0) as HTMLInputElement
+
+        input.setSelectionRange(0, 0)
       })
 
       cy.get('#input-without-value').type('56').then(($input) => {
@@ -1096,7 +1122,9 @@ describe('src/cy/commands/actions/type - #type', () => {
 
     it('responsive to change handler', () => {
       cy.$$('#input-without-value').val('1234').change(function () {
-        $(this).get(0).setSelectionRange(0, 0)
+        const input = $(this).get(0) as HTMLInputElement
+
+        input.setSelectionRange(0, 0)
       })
 
       // no change event should be fired
@@ -1264,7 +1292,9 @@ describe('src/cy/commands/actions/type - #type', () => {
 
       it('overwrites text on input[type=number] when input has existing text selected', () => {
         cy.get('#number-without-value').invoke('val', '0').then((el) => {
-          return el.get(0).select()
+          const input = el as unknown as HTMLInputElement
+
+          return input.select()
         })
 
         cy.get('#number-without-value').type('50').then(($input) => {
@@ -1435,7 +1465,9 @@ describe('src/cy/commands/actions/type - #type', () => {
       it('overwrites text when input has selected range of text in click handler', () => {
         // e.preventDefault()
         cy.$$('#input-with-value').mouseup((e) => {
-          e.target.setSelectionRange(1, 1)
+          const input = e.target as HTMLInputElement
+
+          input.setSelectionRange(1, 1)
         })
 
         const select = (e) => {
@@ -1447,11 +1479,13 @@ describe('src/cy/commands/actions/type - #type', () => {
         .val('secret')
         .click(select)
         .keyup((e) => {
+          const input = e.target as HTMLInputElement
+
           switch (e.key) {
             case 'g':
               return select(e)
             case 'n':
-              return e.target.setSelectionRange(0, 1)
+              return input.setSelectionRange(0, 1)
             default:
           }
         })
@@ -1823,7 +1857,7 @@ describe('src/cy/commands/actions/type - #type', () => {
         cy.get('#generic-iframe').then(($iframe) => {
           cy.wrap($iframe.contents().find('html').first().find('body'))
           .then(($body) => {
-            $body.attr('contenteditable', true)
+            $body.prop('contenteditable', true)
           })
           .type('111')
           .then(expectTextEndsWith('111'))
@@ -1836,17 +1870,23 @@ describe('src/cy/commands/actions/type - #type', () => {
         // type text into iframe
         cy.get('#generic-iframe')
         .then(($iframe) => {
-          $iframe[0].contentDocument.designMode = 'on'
-          const iframe = $iframe.contents()
+          const iframe = $iframe[0] as unknown as HTMLIFrameElement
+          const iframeContents = $iframe.contents()
+          const iframeContentDocument = iframe.contentDocument
 
-          cy.wrap(iframe.find('html')).first()
+          if (iframeContentDocument) {
+            iframeContentDocument.designMode = 'on'
+          }
+
+          cy.wrap(iframeContents.find('html')).first()
           .type('{selectall}{del} foo bar baz{enter}ac{leftarrow}b')
         })
 
         // assert that text was typed
         cy.get('#generic-iframe')
         .then(($iframe) => {
-          const iframeText = $iframe[0].contentDocument.body.innerText
+          const iframe = $iframe[0] as unknown as HTMLIFrameElement
+          const iframeText = iframe.contentDocument?.body.innerText
 
           expect(iframeText).to.include('foo bar baz\nabc')
         })
@@ -1897,8 +1937,10 @@ describe('src/cy/commands/actions/type - #type', () => {
         .type(' f\n{backspace}')
         .type('{moveToStart}{del}')
         .then(($el) => {
+          const el = $el[0] as HTMLInputElement
+
           expect(stub).callCount(5)
-          expect($el[0].value).eq('oo bar baz ')
+          expect(el.value).eq('oo bar baz ')
         })
       })
 
@@ -1941,8 +1983,10 @@ describe('src/cy/commands/actions/type - #type', () => {
         .type(' f\n{backspace}')
         .type('{moveToStart}{del}')
         .then(($el) => {
+          const el = $el[0] as HTMLTextAreaElement
+
           expect(stub).callCount(5)
-          expect($el[0].value).eq('oo bar baz f')
+          expect(el.value).eq('oo bar baz f')
         })
       })
 
@@ -2098,8 +2142,10 @@ describe('src/cy/commands/actions/type - #type', () => {
         })
         .type('foo')
         .then(($el) => {
+          const el = $el[0] as HTMLInputElement
+
           expect(callCount).eq(3)
-          expect($el[0].value).eq('foo bar baz')
+          expect(el.value).eq('foo bar baz')
         })
       })
     })
@@ -2162,7 +2208,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     describe('activating modifiers', () => {
       it('sends keydown event for modifiers in order', (done) => {
         const $input = cy.$$('input:text:first')
-        const events = []
+        const events: any[] = []
 
         $input.on('keydown', (e) => {
           return events.push(e)
@@ -2183,7 +2229,7 @@ describe('src/cy/commands/actions/type - #type', () => {
 
       it('maintains modifiers for subsequent characters', (done) => {
         const $input = cy.$$('input:text:first')
-        const events = []
+        const events: any[] = []
 
         $input.on('keydown', (e) => {
           return events.push(e)
@@ -2206,7 +2252,7 @@ describe('src/cy/commands/actions/type - #type', () => {
 
       it('does not maintain modifiers for subsequent type commands', (done) => {
         const $input = cy.$$('input:text:first')
-        const events = []
+        const events: any[] = []
 
         $input.on('keydown', (e) => {
           return events.push(e)
@@ -2239,7 +2285,7 @@ describe('src/cy/commands/actions/type - #type', () => {
 
       // https://github.com/cypress-io/cypress/issues/5622
       it('ignores duplicate modifiers in one command', () => {
-        const events = []
+        const events: any[] = []
 
         cy.$$('input:first').on('keydown', (e) => {
           events.push(['keydown', e.key])
@@ -2266,9 +2312,9 @@ describe('src/cy/commands/actions/type - #type', () => {
 
       it('does not maintain modifiers for subsequent click commands', (done) => {
         const $button = cy.$$('button:first')
-        let mouseDownEvent = null
-        let mouseUpEvent = null
-        let clickEvent = null
+        let mouseDownEvent: null | JQuery.MouseDownEvent = null
+        let mouseUpEvent: null | JQuery.MouseUpEvent = null
+        let clickEvent: null | JQuery.ClickEvent = null
 
         $button.on('mousedown', (e) => {
           mouseDownEvent = e
@@ -2286,14 +2332,14 @@ describe('src/cy/commands/actions/type - #type', () => {
         .get('input:text:first')
         .type('{cmd}{option}')
         .get('button:first').click().then(() => {
-          expect(mouseDownEvent.metaKey).to.be.false
-          expect(mouseDownEvent.altKey).to.be.false
+          expect(mouseDownEvent?.metaKey).to.be.false
+          expect(mouseDownEvent?.altKey).to.be.false
 
-          expect(mouseUpEvent.metaKey).to.be.false
-          expect(mouseUpEvent.altKey).to.be.false
+          expect(mouseUpEvent?.metaKey).to.be.false
+          expect(mouseUpEvent?.altKey).to.be.false
 
-          expect(clickEvent.metaKey).to.be.false
-          expect(clickEvent.altKey).to.be.false
+          expect(clickEvent?.metaKey).to.be.false
+          expect(clickEvent?.altKey).to.be.false
 
           $button.off('mousedown')
           $button.off('mouseup')
@@ -2308,7 +2354,9 @@ describe('src/cy/commands/actions/type - #type', () => {
         cy
         .get('input:first').type('123')
         .then(($el) => {
-          $el[0].setSelectionRange(0, 3)
+          const input = $el[0] as HTMLInputElement
+
+          input.setSelectionRange(0, 3)
         })
         .type('{ctrl}')
         .should('have.value', '123')
@@ -2317,7 +2365,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       // sends keyboard events for modifiers https://github.com/cypress-io/cypress/issues/3316
       it('sends keyup event for activated modifiers when typing is finished', (done) => {
         const $input = cy.$$('input:text:first')
-        const events = []
+        const events: any[] = []
 
         $input.on('keyup', (e) => {
           return events.push(e)
@@ -2346,7 +2394,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     describe('release: false', () => {
       it('maintains modifiers for subsequent type commands', (done) => {
         const $input = cy.$$('input:text:first')
-        const events = []
+        const events: any[] = []
 
         $input.on('keydown', (e) => {
           return events.push(e)
@@ -2371,9 +2419,9 @@ describe('src/cy/commands/actions/type - #type', () => {
 
       it('maintains modifiers for subsequent click commands', (done) => {
         const $button = cy.$$('button:first')
-        let mouseDownEvent = null
-        let mouseUpEvent = null
-        let clickEvent = null
+        let mouseDownEvent: null | JQuery.MouseDownEvent = null
+        let mouseUpEvent: null | JQuery.MouseUpEvent = null
+        let clickEvent: null | JQuery.ClickEvent = null
 
         $button.on('mousedown', (e) => {
           mouseDownEvent = e
@@ -2391,14 +2439,14 @@ describe('src/cy/commands/actions/type - #type', () => {
         .get('input:text:first')
         .type('{meta}{alt}', { release: false })
         .get('button:first').click().then(() => {
-          expect(mouseDownEvent.metaKey).to.be.true
-          expect(mouseDownEvent.altKey).to.be.true
+          expect(mouseDownEvent?.metaKey).to.be.true
+          expect(mouseDownEvent?.altKey).to.be.true
 
-          expect(mouseUpEvent.metaKey).to.be.true
-          expect(mouseUpEvent.altKey).to.be.true
+          expect(mouseUpEvent?.metaKey).to.be.true
+          expect(mouseUpEvent?.altKey).to.be.true
 
-          expect(clickEvent.metaKey).to.be.true
-          expect(clickEvent.altKey).to.be.true
+          expect(clickEvent?.metaKey).to.be.true
+          expect(clickEvent?.altKey).to.be.true
 
           done()
         })
@@ -2409,7 +2457,7 @@ describe('src/cy/commands/actions/type - #type', () => {
         // keyboard.resetModifiers
 
         const $input = cy.$$('input:text:first')
-        const events = []
+        const events: any[] = []
 
         $input.on('keyup', (e) => {
           return events.push(e)
@@ -2986,8 +3034,8 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     it('logs only one type event', () => {
-      const logs = []
-      const types = []
+      const logs: any[] = []
+      const types: any[] = []
 
       cy.on('log:added', (attrs, log) => {
         logs.push(log)
@@ -3153,7 +3201,9 @@ describe('src/cy/commands/actions/type - #type', () => {
     it('can print table of keys on click', () => {
       cy.get('input:first').type('foo')
 
+      // @ts-expect-error - TODO: Not sure how to handle this
       const spyTableName = cy.spy(top.console, 'group')
+      // @ts-expect-error - TODO: Not sure how to handle this
       const spyTableData = cy.spy(top.console, 'table')
 
       clickCommandLog('foo', 'message-text')

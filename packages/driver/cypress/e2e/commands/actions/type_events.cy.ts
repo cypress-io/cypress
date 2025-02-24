@@ -1,3 +1,4 @@
+// @ts-expect-error - redeclared variable needs to be handled
 const { _, $ } = Cypress
 
 describe('src/cy/commands/actions/type - #type events', () => {
@@ -93,15 +94,18 @@ describe('src/cy/commands/actions/type - #type events', () => {
       cy.get(':text:first').type('a')
     })
 
-    // TODO fix this test in Webkit https://github.com/cypress-io/cypress/issues/26438
+    // TODO: fix this test in Webkit https://github.com/cypress-io/cypress/issues/26438
     it('receives textInput event', { browser: '!webkit' }, (done) => {
       const $txt = cy.$$(':text:first')
 
       $txt[0].addEventListener('textInput', (e) => {
+        const textInputEvent = e as UIEvent
+
         // FIXME: (firefox) firefox cannot access window objects else throw cross-origin error
-        expect(Object.prototype.toString.call(e.view)).eq('[object Window]')
-        e.view = null
-        expect(_.toPlainObject(e)).to.include({
+        expect(Object.prototype.toString.call(textInputEvent.view)).eq('[object Window]')
+        // @ts-expect-error - TODO: view is readonly and should not be assigned
+        textInputEvent.view = null
+        expect(_.toPlainObject(textInputEvent)).to.include({
           bubbles: true,
           cancelable: true,
           data: 'a',
@@ -250,14 +254,12 @@ describe('src/cy/commands/actions/type - #type events', () => {
       const input = $('<input />').attr('id', 'input-covered-in-span').prependTo(cy.$$('body'))
 
       $('<span>span on input</span>')
-      .css({
-        position: 'absolute',
-        left: input.offset().left,
-        top: input.offset().top,
-        padding: 5,
-        display: 'inline-block',
-        backgroundColor: 'yellow',
-      })
+      .css('position', 'absolute')
+      .css('left', `${input.offset()?.left}`)
+      .css('top', `${input.offset()?.top}`)
+      .css('padding', '5px')
+      .css('display', 'inline-block')
+      .css('backgroundColor', 'yellow')
       .prependTo(cy.$$('body'))
 
       cy.on('command:retry', (options) => {
@@ -267,6 +269,7 @@ describe('src/cy/commands/actions/type - #type events', () => {
         done()
       })
 
+      // @ts-expect-error - TODO: This should see the InternalTypeOptions type
       cy.get('#input-covered-in-span').type('foobar', { timeout: 1000, interval: 60 })
     })
 
@@ -433,7 +436,7 @@ describe('src/cy/commands/actions/type - #type events', () => {
       })
     })
 
-    it('does not fire when enter is pressed and value hasnt changed', () => {
+    it('does not fire when enter is pressed and value has not changed', () => {
       const changed = cy.stub()
 
       cy.$$(':text:first').change(changed)
@@ -683,7 +686,7 @@ describe('src/cy/commands/actions/type - #type events', () => {
     describe(`triggers with single space`, () => {
       targets.forEach((target) => {
         it(target, () => {
-          const events = []
+          const events: any[] = []
 
           $(target).on('keydown keypress keyup click', (evt) => {
             events.push(evt.type)
@@ -709,7 +712,7 @@ describe('src/cy/commands/actions/type - #type events', () => {
     describe(`does not trigger if keyup prevented`, () => {
       targets.forEach((target) => {
         it(`${target} does not fire click event`, () => {
-          const events = []
+          const events: any[] = []
 
           $(target)
           .on('keydown keypress keyup click', (evt) => {
@@ -738,7 +741,7 @@ describe('src/cy/commands/actions/type - #type events', () => {
     describe('triggers after other characters', () => {
       targets.forEach((target) => {
         it(target, () => {
-          const events = []
+          const events: any[] = []
 
           $(target).on('keydown keypress keyup click', (evt) => {
             events.push(evt.type)

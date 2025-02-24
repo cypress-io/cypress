@@ -656,4 +656,6 @@ export default {
   },
 
   retryWithBackoff,
+
+  publicKeyVersion: PUBLIC_KEY_VERSION,
 }

@@ -756,8 +756,10 @@ declare namespace Cypress {
       getCoordsByPosition(left: number, top: number, xPosition?: string, yPosition?: string): number
       getElementPositioning(element: JQuery | HTMLElement): ElementPositioning
       getElementAtPointFromViewport(doc: Document, x: number, y: number): Element | null
-      getElementCoordinatesByPosition(element: JQuery | HTMLElement, position: string): ElementCoordinates
+      getElementCoordinatesByPosition(element: JQuery | HTMLElement, position?: string): ElementCoordinates
       getElementCoordinatesByPositionRelativeToXY(element: JQuery | HTMLElement, x: number, y: number): ElementPositioning
+      getHostContenteditable(element: HTMLElement): HTMLElement
+      getSelectionBounds(element: HTMLElement): { start: number, end: number }
     }
 
     /**
@@ -874,7 +876,7 @@ declare namespace Cypress {
      *    // Check first radio element
      *    cy.get('[type="radio"]').first().check()
      */
-    check(options?: Partial<CheckOptions>): Chainable<Subject>
+    check(options?: Partial<CheckClearOptions>): Chainable<Subject>
     /**
      * Check checkbox(es) or radio(s). This element must be an `<input>` with type `checkbox` or `radio`.
      *
@@ -885,7 +887,7 @@ declare namespace Cypress {
      *    // Check the checkboxes with the values 'ga' and 'ca'
      *    cy.get('[type="checkbox"]').check(['ga', 'ca'])
      */
-    check(value: string | string[], options?: Partial<CheckOptions>): Chainable<Subject>
+    check(value: string | string[], options?: Partial<CheckClearOptions>): Chainable<Subject>
 
     /**
      * Get the children of each DOM element within a set of DOM elements.
@@ -902,7 +904,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/clear
      */
-    clear(options?: Partial<ClearOptions>): Chainable<Subject>
+    clear(options?: Partial<CheckClearOptions>): Chainable<Subject>
 
     /**
      * Clear a specific browser cookie for a domain.
@@ -1806,7 +1808,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/readfile
      */
-    readFile<Contents = any>(filePath: string, options?: Partial<Loggable & Timeoutable>): Chainable<Contents>
+    readFile<Contents = any>(filePath: string, options?: Partial<ReadFileOptions & Loggable & Timeoutable>): Chainable<Contents>
     /**
      * Read a file with given encoding and yield its contents.
      *
@@ -1930,7 +1932,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/scrollto
      */
-    scrollTo(position: PositionType, options?: Partial<ScrollToOptions>): Chainable<Subject>
+    scrollTo(positionOrX: PositionType | number | string, options?: Partial<ScrollToOptions>): Chainable<Subject>
     /**
      * Scroll to a specific X,Y position.
      *
@@ -2326,7 +2328,7 @@ declare namespace Cypress {
      *    // Uncheck the checkbox with the value of 'ga'
      *    cy.get('input[type="checkbox"]').uncheck(['ga'])
      */
-    uncheck(options?: Partial<CheckOptions>): Chainable<Subject>
+    uncheck(options?: Partial<CheckClearOptions>): Chainable<Subject>
     /**
      * Uncheck specific checkbox.
      *
@@ -2335,7 +2337,7 @@ declare namespace Cypress {
      *    // Uncheck the checkbox with the value of 'ga'
      *    cy.get('input[type="checkbox"]').uncheck('ga')
      */
-    uncheck(value: string, options?: Partial<CheckOptions>): Chainable<Subject>
+    uncheck(value: string, options?: Partial<CheckClearOptions>): Chainable<Subject>
     /**
      * Uncheck specific checkboxes.
      *
@@ -2344,7 +2346,7 @@ declare namespace Cypress {
      *    // Uncheck the checkbox with the value of 'ga', 'ma'
      *    cy.get('input[type="checkbox"]').uncheck(['ga', 'ma'])
      */
-    uncheck(values: string[], options?: Partial<CheckOptions>): Chainable<Subject>
+    uncheck(values: string[], options?: Partial<CheckClearOptions>): Chainable<Subject>
 
     /**
      * Get the current URL of the page that is currently active.
@@ -2556,6 +2558,8 @@ declare namespace Cypress {
      *    expect(s).to.have.been.calledOnce
      */
     withArgs(...args: any[]): Omit<A, 'withArgs'> & Agent<A>
+
+    callsFake(func: (...args: any[]) => any): Omit<A, 'withArgs'> & Agent<A>
   }
 
   type Agent<T extends sinon.SinonSpy> = SinonSpyAgent<T> & T
@@ -2726,13 +2730,7 @@ declare namespace Cypress {
 
   interface BlurOptions extends Loggable, Timeoutable, Forceable { }
 
-  interface CheckOptions extends Loggable, Timeoutable, ActionableOptions {
-    interval: number
-  }
-
-  interface ClearOptions extends Loggable, Timeoutable, ActionableOptions {
-    interval: number
-  }
+  interface CheckClearOptions extends Loggable, Timeoutable, ActionableOptions { }
 
   /**
    * Object to change the default behavior of .click().
@@ -3695,7 +3693,7 @@ declare namespace Cypress {
      *
      * @default 0
      */
-    duration: number
+    duration: number | string
     /**
      * Will scroll with the easing animation
      *
@@ -3984,6 +3982,11 @@ declare namespace Cypress {
      * @default false
      */
     decode: boolean
+  }
+
+  /** Options to change the default behavior of .readFile */
+  interface ReadFileOptions extends Loggable {
+    encoding: Encodings
   }
 
   /** Options to change the default behavior of .writeFile */
