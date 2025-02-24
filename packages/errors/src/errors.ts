@@ -604,13 +604,14 @@ export const AllCypressErrors = {
 
         ${fmt.highlightSecondary(error)}`
   },
-  CLOUD_PROTOCOL_UPLOAD_STREAM_STALL_FAILURE: (error: Error & { chunkSizeKB: number, maxActivityDwellTime: number }) => {
-    const kbpsThreshold = (error.chunkSizeKB * 8) / (error.maxActivityDwellTime / 1000)
+  CLOUD_PROTOCOL_UPLOAD_STREAM_STALL_FAILURE: (error: Error & { chunkSizeBytes: number, maxActivityDwellTime: number }) => {
+    const dwellTimeSeconds = error.maxActivityDwellTime / 1000
+    const kbpsThreshold = (error.chunkSizeBytes / 1024) / dwellTimeSeconds
 
     return errTemplate`\
         Warning: We encountered slow network conditions while uploading the Test Replay recording for this spec.
 
-        The upload transfer rate fell below ${fmt.highlightSecondary(`${kbpsThreshold}kbps`)} over a sampling period of ${fmt.highlightSecondary(`${error.maxActivityDwellTime}ms`)}.
+        The upload transfer rate fell below ${fmt.highlightSecondary(`${kbpsThreshold}kbps`)} over a sampling period of ${fmt.highlightSecondary(`${dwellTimeSeconds} seconds`)}.
 
         To prevent long CI execution durations, this Test Replay recording will not be uploaded.
 

@@ -697,10 +697,10 @@ describe('visual error templates', () => {
     },
     CLOUD_PROTOCOL_UPLOAD_STREAM_STALL_FAILURE: () => {
       // @ts-expect-error
-      const err: Error & { chunkSizeKB: number, maxActivityDwellTime: number } = new Error('stream stall')
+      const err: Error & { chunkSizeBytes: number, maxActivityDwellTime: number } = new Error('stream stall')
 
-      err.chunkSizeKB = 64
-      err.maxActivityDwellTime = 5000
+      err.chunkSizeBytes = 65536
+      err.maxActivityDwellTime = 10000
 
       return {
         default: [err],
