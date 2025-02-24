@@ -14,10 +14,11 @@ import utils from './utils'
 import type { Browser, BrowserInstance, GracefulShutdownOptions } from './types'
 import os from 'os'
 import mimeDb from 'mime-db'
-import type { BrowserCriClient } from './browser-cri-client'
+import { BrowserCriClient } from './browser-cri-client'
+import type { BidiAutomation } from './bidi_automation'
 import type { Automation } from '../automation'
 import { getCtx } from '@packages/data-context'
-import { getError, SerializedError } from '@packages/errors'
+import { getError, SerializedError, CypressError } from '@packages/errors'
 import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
 import type { RemoteConfig } from 'webdriver'
 import type { GeckodriverParameters } from 'geckodriver'
@@ -219,12 +220,6 @@ const defaultPreferences = {
 
   'privacy.trackingprotection.enabled': false,
 
-  // CDP is deprecated in Firefox 129 and up.
-  // In order to enable CDP, we need to set
-  // remote.active-protocol=2
-  // @see https://fxdx.dev/deprecating-cdp-support-in-firefox-embracing-the-future-with-webdriver-bidi/
-  // @see https://github.com/cypress-io/cypress/issues/29713
-  'remote.active-protocols': 2,
   // Enable Remote Agent
   // https://bugzilla.mozilla.org/show_bug.cgi?id=1544393
   'remote.enabled': true,
@@ -340,6 +335,22 @@ const defaultPreferences = {
   'browser.helperApps.neverAsk.saveToDisk': downloadMimeTypes,
 }
 
+// CDP is deprecated in Firefox 129 and up.
+// To enable BiDi (without CDP), we need to set
+//    remote.active-protocol=1
+// In order to enable CDP (without BiDi), we need to set
+//    remote.active-protocol=2
+// both can be enabled via
+//    remote.active-protocol=3
+// @see https://fxdx.dev/deprecating-cdp-support-in-firefox-embracing-the-future-with-webdriver-bidi/
+// @see https://github.com/cypress-io/cypress/issues/29713
+const ACTIVE_PROTOCOLS = Object.freeze({
+  BIDI: 1,
+  CDP: 2,
+  // this key isn't actively used but checked in here if we need to turn it on for internal debugging
+  CDP_AND_BIDI: 3,
+})
+
 const FIREFOX_HEADED_USERCSS = `\
 #urlbar:not(.megabar), #urlbar.megabar > #urlbar-background, #searchbar {
   background: -moz-Field !important;
@@ -377,6 +388,7 @@ toolbox {
 `
 
 let browserCriClient: BrowserCriClient | undefined
+let browserBidiClient: BidiAutomation | undefined
 
 /**
 * Clear instance state for the chrome instance, this is normally called in on kill or on exit.
@@ -389,10 +401,29 @@ export function clearInstanceState (options: GracefulShutdownOptions = {}) {
     browserCriClient.close(options.gracefulShutdown).catch(() => {})
     browserCriClient = undefined
   }
+
+  if (browserBidiClient) {
+    debug('unbinding bidi client events')
+    browserBidiClient.close()
+    browserBidiClient = undefined
+  }
+}
+
+function shouldUseBiDi (browser: Browser): boolean {
+  try {
+    // Gating on firefox version 135 to turn on BiDi as this is when all of our internal Cypress tests were able to pass.
+    return (browser.family === 'firefox' && !process.env.FORCE_FIREFOX_CDP && Number(browser.majorVersion) >= 135)
+  } catch (err: unknown) {
+    return false
+  }
 }
 
 export async function connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
-  await firefoxUtil.connectToNewSpec(options, automation, browserCriClient!)
+  if (shouldUseBiDi(browser)) {
+    await firefoxUtil.connectToNewSpecBiDi(options, automation, browserBidiClient!)
+  } else {
+    await firefoxUtil.connectToNewSpecCDP(options, automation, browserCriClient!)
+  }
 }
 
 export function connectToExisting () {
@@ -410,6 +441,12 @@ async function recordVideo (videoApi: RunModeVideoApi) {
 }
 
 export async function open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance> {
+  const USE_WEBDRIVER_BIDI = shouldUseBiDi(browser)
+
+  if (!USE_WEBDRIVER_BIDI) {
+    errors.warning('CDP_FIREFOX_DEPRECATED')
+  }
+
   const defaultLaunchOptions = utils.getDefaultLaunchOptions({
     extensions: [] as string[],
     preferences: _.extend({}, defaultPreferences),
@@ -421,6 +458,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
       '-no-remote', // @see https://github.com/cypress-io/cypress/issues/6380
     ],
   })
+
+  defaultLaunchOptions.preferences['remote.active-protocols'] = USE_WEBDRIVER_BIDI ? ACTIVE_PROTOCOLS.BIDI : ACTIVE_PROTOCOLS.CDP
 
   if (browser.isHeadless) {
     defaultLaunchOptions.args.push('-headless')
@@ -635,7 +674,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
           },
           // @see https://firefox-source-docs.mozilla.org/testing/geckodriver/Capabilities.html#moz-debuggeraddress
           // we specify the debugger address option for Webdriver, which will return us the CDP address when the capability is returned.
-          'moz:debuggerAddress': true,
+          'moz:debuggerAddress': !USE_WEBDRIVER_BIDI,
           // @see https://webdriver.io/docs/capabilities/#wdiogeckodriveroptions
           // webdriver starts geckodriver with the correct options on behalf of Cypress
           'wdio:geckodriverOptions': geckoDriverOptions,
@@ -676,11 +715,11 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
       try {
         browserReturnStatus = process.kill(browserPID)
-      } catch (e) {
-        if (e.code === 'ESRCH') {
+      } catch (error: unknown) {
+        if ((error as CypressError)?.code === 'ESRCH') {
           debugVerbose('browser process no longer exists. continuing...')
         } else {
-          throw e
+          throw error
         }
       }
 
@@ -690,11 +729,11 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
       try {
         driverReturnStatus = process.kill(driverPID)
-      } catch (e) {
-        if (e.code === 'ESRCH') {
+      } catch (error: unknown) {
+        if ((error as CypressError)?.code === 'ESRCH') {
           debugVerbose('geckodriver/webdriver process no longer exists. continuing...')
         } else {
-          throw e
+          throw error
         }
       }
 
@@ -705,23 +744,27 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
       return browserReturnStatus || driverReturnStatus
     }
 
+    let cdpPort: number | undefined
+
+    if (!USE_WEBDRIVER_BIDI) {
     // In some cases, the webdriver session will NOT return the moz:debuggerAddress capability even though
     // we set it to true in the capabilities. This is out of our control, so when this happens, we fail the browser
     // and gracefully terminate the related processes and attempt to relaunch the browser in the hopes we get a
     // CDP address. @see https://github.com/cypress-io/cypress/issues/30352#issuecomment-2405701867 for more details.
-    if (!webdriverClient.capabilities['moz:debuggerAddress']) {
-      debug(`firefox failed to spawn with CDP connection. Failing current instance and retrying`)
-      // since this fails before the instance is created, we need to kill the processes here or else they will stay open
-      browserInstanceWrapper.kill()
-      throw new CDPFailedToStartFirefox(`webdriver session failed to start CDP even though "moz:debuggerAddress" was provided. Please try to relaunch the browser`)
+      if (!webdriverClient.capabilities['moz:debuggerAddress']) {
+        debugVerbose(`firefox failed to spawn with CDP connection. Failing current instance and retrying`)
+        // since this fails before the instance is created, we need to kill the processes here or else they will stay open
+        browserInstanceWrapper.kill()
+        throw new CDPFailedToStartFirefox(`webdriver session failed to start CDP even though "moz:debuggerAddress" was provided. Please try to relaunch the browser`)
+      }
+
+      cdpPort = parseInt(new URL(`ws://${webdriverClient.capabilities['moz:debuggerAddress']}`).port)
+
+      debug(`CDP running on port ${cdpPort}`)
+
+      // makes it so get getRemoteDebuggingPort() is calculated correctly
+      process.env.CYPRESS_REMOTE_DEBUGGING_PORT = cdpPort.toString()
     }
-
-    const cdpPort = parseInt(new URL(`ws://${webdriverClient.capabilities['moz:debuggerAddress']}`).port)
-
-    debug(`CDP running on port ${cdpPort}`)
-
-    // makes it so get getRemoteDebuggingPort() is calculated correctly
-    process.env.CYPRESS_REMOTE_DEBUGGING_PORT = cdpPort.toString()
 
     // install the browser extensions
     await Promise.all(_.map(launchOptions.extensions, async (path) => {
@@ -734,13 +777,18 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     }))
 
     debug('setting up firefox utils')
-    browserCriClient = await firefoxUtil.setup({ automation, url, webdriverClient, remotePort: cdpPort, onError: options.onError })
+    const client = await firefoxUtil.setup({ automation, url, webdriverClient, remotePort: cdpPort, useWebDriverBiDi: USE_WEBDRIVER_BIDI, onError: options.onError })
 
-    await utils.executeAfterBrowserLaunch(browser, {
-      webSocketDebuggerUrl: browserCriClient.getWebSocketDebuggerUrl(),
-    })
-  } catch (err) {
-    errors.throwErr('FIREFOX_COULD_NOT_CONNECT', err)
+    if (client instanceof BrowserCriClient) {
+      browserCriClient = client
+      await utils.executeAfterBrowserLaunch(browser, {
+        webSocketDebuggerUrl: browserCriClient.getWebSocketDebuggerUrl(),
+      })
+    } else {
+      browserBidiClient = client
+    }
+  } catch (err: unknown) {
+    errors.throwErr('FIREFOX_COULD_NOT_CONNECT', err as Error)
   }
 
   return browserInstanceWrapper

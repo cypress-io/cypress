@@ -1,7 +1,7 @@
+declare module 'components/StudioPanel' {
+  export const StudioPanel: () => JSX.Element
+}
 declare module 'app-studio' {
-  export const mountTestGenerationPanel = (
-    reactInstance: any,
-    reactDOMInstance: any,
-    container: HTMLElement,
-  ) => {}
+  import { StudioPanel } from 'components/StudioPanel'
+  export default StudioPanel
 }

@@ -34,7 +34,7 @@
     "@headlessui/vue": "1.4.0",
     "@iconify-json/mdi": "1.1.63",
     "@intlify/unplugin-vue-i18n": "4.0.0",
-    "@module-federation/vite": "^1.2.2",
+    "@module-federation/runtime": "^0.8.11",
     "@packages/data-context": "0.0.0-development",
     "@packages/frontend-shared": "0.0.0-development",
     "@packages/graphql": "0.0.0-development",
