@@ -238,6 +238,7 @@
     "./node_modules/colors/lib/colors.js",
     "./node_modules/colors/safe.js",
     "./node_modules/combined-stream/lib/combined_stream.js",
+    "./node_modules/compression/index.js",
     "./node_modules/compression/node_modules/debug/src/browser.js",
     "./node_modules/compression/node_modules/debug/src/index.js",
     "./node_modules/concat-stream/index.js",
@@ -1720,7 +1721,6 @@
     "./node_modules/common-tags/lib/trimResultTransformer/trimResultTransformer.js",
     "./node_modules/component-emitter/index.js",
     "./node_modules/compressible/index.js",
-    "./node_modules/compression/index.js",
     "./node_modules/compression/node_modules/debug/src/debug.js",
     "./node_modules/compression/node_modules/ms/index.js",
     "./node_modules/concat-map/index.js",
@@ -4244,5 +4244,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "e15b4a61229e49736f840edb7a1fd8725f0cab04b66d55320023ca3bc66595be"
+  "deferredHash": "b377c8006f02f9c15e47d8cbc616321317f4c560db51516492f85747c95efad3"
 }
