@@ -6446,6 +6446,7 @@ declare namespace Cypress {
   }
 
   interface Log {
+    id: string
     end(): Log
     error(error: Error): Log
     finish(): void
