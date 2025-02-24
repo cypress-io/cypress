@@ -3,6 +3,10 @@
 
 _Released 2/25/2025 (PENDING)_
 
+**Bugfixes:**
+
+- Fixed the calculation of upload throughput units when displaying the 'stream stalled' error message during Test Replay archive uploads. Fixes [#31075](https://github.com/cypress-io/cypress/issues/31075). Addressed in [#31160](https://github.com/cypress-io/cypress/pull/31160).
+
 **Misc:**
 
 - Viewport width, height, and scale now display in a badge above the application under test. The dropdown describing how to set viewport height and width has been removed from the UI. Additionally, component tests now show a notice about URL navigation being disabled in component tests. Addresses [#30999](https://github.com/cypress-io/cypress/issues/30999). Addressed in [#31119](https://github.com/cypress-io/cypress/pull/31119).
