@@ -112,6 +112,11 @@ const getDefaultWebpackOptions = () => {
         exclude: [/browserslist/],
         type: 'javascript/auto',
       }, {
+        test: /\.m?js$/,
+        resolve: {
+          fullySpecified: false
+        }
+      }, {
         test: /(\.jsx?|\.mjs)$/,
         exclude: [/node_modules/, /browserslist/],
         type: 'javascript/auto',
