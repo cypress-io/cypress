@@ -55,6 +55,8 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
 
       // Temporarily removed from CT since it doesn't work. Invert this assertion when completing https://github.com/cypress-io/cypress/issues/24549
       cy.get('.hook-open-in-ide').should('not.exist')
+
+      cy.get('#unified-runner').should('have.attr', 'style', 'width: 500px; height: 500px; transform: scale(1); position: absolute; margin-left: 225px;')
     })
 
     it('navigation between specs and other parts of the app works', () => {

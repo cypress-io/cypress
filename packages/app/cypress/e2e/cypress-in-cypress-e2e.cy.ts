@@ -71,6 +71,8 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     })
 
     cy.get('.hook-open-in-ide').should('exist')
+
+    cy.get('#unified-runner').should('have.attr', 'style', 'width: 1000px; height: 660px; transform: scale(0.769697); position: absolute; margin-left: -25px;')
   })
 
   it('navigation between specs and other parts of the app works', () => {
