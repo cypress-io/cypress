@@ -15,8 +15,11 @@ describe('component testing', () => {
 
   beforeEach(() => {
     uncaughtExceptionStub.resetHistory()
-    // @ts-expect-error - TODO: it thinks this could be null, but a null check didn't help
-    document.querySelector('[data-cy-root]').innerHTML = ''
+    const root = document.querySelector('[data-cy-root]')
+
+    if (root) {
+      root.innerHTML = ''
+    }
   })
 
   it('fails and shows an error', () => {
