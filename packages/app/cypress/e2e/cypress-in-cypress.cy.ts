@@ -104,8 +104,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       })
     })
 
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23307
-    it(`scales the AUT correctly in ${testingType}`, { retries: 15 }, () => {
+    it(`scales the AUT correctly in ${testingType}`, () => {
       const assertNoScaleShown = () => {
         // check that no message about scale % is shown,
         // meaning the AUT is at 100% scale
@@ -216,7 +215,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.get('@selectBrowser')
       .should('be.visible') // now that we have reduced the specs list, we should be able to see this
 
-      cy.contains(testingTypeExpectedScales[`${ testingType }NarrowViewport`]).should('be.visible')
+      cy.contains(testingTypeExpectedScales[`${ testingType }NarrowViewport`])
     })
 
     it(`resets selector playground validity when selecting element with playground selector in ${testingType}`, () => {

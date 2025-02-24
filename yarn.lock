@@ -2714,6 +2714,11 @@
   dependencies:
     "@cypress-design/constants-tabs" "^1.2.1"
 
+"@cypress-design/vue-tag@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-tag/-/vue-tag-1.0.1.tgz#dd4c820c635d614ab64097bfe2bb77742037508a"
+  integrity sha512-+Ampbv/NBnwLOBRx/jiyyfMKYeKcWYs+0IMk85HgSyjhPVlMiwZRiLIQLfJGKMf7elNNiqna37RZEsgJJfJX8Q==
+
 "@cypress/commit-info@2.2.0":
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/@cypress/commit-info/-/commit-info-2.2.0.tgz#6086d478975edb7ac7c9ffdd5cfd5be2b9fe44f2"
