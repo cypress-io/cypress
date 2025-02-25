@@ -66,6 +66,7 @@ declare namespace Cypress {
 
   interface CypressUtils {
     getDistanceBetween: (point1: { x: number, y: number }, point2: { x: number, y: number }) => number
+    isInstanceOf: (instance: any, constructor: any) => boolean
     throwErrByPath: (path: string, obj?: { args: object }) => void
     warnByPath: (path: string, obj?: { args: object }) => void
     warning: (message: string) => void
