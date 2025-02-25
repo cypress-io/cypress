@@ -1,7 +1,15 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 14.1.1
+
+_Released 3/11/2025 (PENDING)_
+
+**Dependency Updates:**
+
+- Upgraded `cli-table3` from `0.5.1` to `0.6.5`. Addressed in [#31166](https://github.com/cypress-io/cypress/pull/31166).
+
 ## 14.1.0
 
-_Released 2/25/2025 (PENDING)_
+_Released 2/25/2025_
 
 **Features:**
 
