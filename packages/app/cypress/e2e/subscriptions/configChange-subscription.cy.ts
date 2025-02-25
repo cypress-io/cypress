@@ -55,7 +55,7 @@ describe('configChange subscription', () => {
 
       // wait until it has passed
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
-      cy.get('button').contains('1000x660')
+      cy.get('[data-cy="viewport-size"]').contains('1000x660')
 
       // update the config - the spec should re-execute with the new viewportHeight
       updateViewportHeightInCypressConfig(777)
@@ -67,7 +67,7 @@ describe('configChange subscription', () => {
 
       cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
-      cy.get('button').contains('1000x777')
+      cy.get('[data-cy="viewport-size"]').contains('1000x777')
     })
   })
 })

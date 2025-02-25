@@ -1,17 +1,27 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 14.0.4
+## 14.1.0
 
-_Released 2/25/2025 (PENDING)_
+_Released 2/25/2025_
+
+**Features:**
+
+- Firefox versions 135 and up are now automated with [WebDriver BiDi](https://www.w3.org/TR/webdriver-bidi/) instead of [Chrome Devtools Protocol](https://chromedevtools.github.io/devtools-protocol/). Addresses [#30220](https://github.com/cypress-io/cypress/issues/30220).
+
+**Bugfixes:**
+
+- Fixed the calculation of upload throughput units when displaying the 'stream stalled' error message during Test Replay archive uploads. Fixes [#31075](https://github.com/cypress-io/cypress/issues/31075). Addressed in [#31160](https://github.com/cypress-io/cypress/pull/31160).
 
 **Misc:**
 
 - Viewport width, height, and scale now display in a badge above the application under test. The dropdown describing how to set viewport height and width has been removed from the UI. Additionally, component tests now show a notice about URL navigation being disabled in component tests. Addresses [#30999](https://github.com/cypress-io/cypress/issues/30999). Addressed in [#31119](https://github.com/cypress-io/cypress/pull/31119).
 - Updated types around `.readFile()` and `.scrollTo()` arguments and `Cypress.dom` methods. Addressed in [#31055](https://github.com/cypress-io/cypress/pull/31055).
+- Updated types around `.shadow()` and `.root()` options. Addressed in [#31154](https://github.com/cypress-io/cypress/pull/31154).
 
 **Dependency Updates:**
 
 - Upgraded `chrome-remote-interface` from `0.33.2` to `0.33.3`. Addressed in [#31128](https://github.com/cypress-io/cypress/pull/31128).
 - Upgraded `ci-info` from `4.0.0` to `4.1.0`. Addressed in [#31132](https://github.com/cypress-io/cypress/pull/31132).
+- Upgraded `compression` from `1.7.5` to `1.8.0`. Addressed in [#31151](https://github.com/cypress-io/cypress/pull/31151).
 
 ## 14.0.3
 

@@ -1,4 +1,4 @@
-const { assertLogLength } = require('../../../support/utils')
+import { assertLogLength } from '../../../support/utils'
 
 const { _, $, Promise } = Cypress
 
@@ -22,56 +22,16 @@ describe('src/cy/commands/querying', () => {
       const options = { timeout: {} }
       const getErrMsgForTimeout = (timeout) => `\`cy.get()\` only accepts a \`number\` for its \`timeout\` option. You passed: \`${timeout}\``
 
-      it('timeout passed as plain object {}', (done) => {
-        cy.get('#some-el', options)
-        cy.on('fail', (err) => {
-          expect(err.message).to.eq(getErrMsgForTimeout(options.timeout))
-          done()
-        })
-      })
-
-      it('timeout passed as some string', (done) => {
-        options.timeout = 'abc'
-        cy.get('#some-el', options)
-        cy.on('fail', (err) => {
-          expect(err.message).to.eq(getErrMsgForTimeout(options.timeout))
-          done()
-        })
-      })
-
-      it('timeout passed as null', (done) => {
-        options.timeout = null
-        cy.get('#some-el', options)
-        cy.on('fail', (err) => {
-          expect(err.message).to.eq(getErrMsgForTimeout(options.timeout))
-          done()
-        })
-      })
-
-      it('timeout passed as NaN', (done) => {
-        options.timeout = NaN
-        cy.get('#some-el', options)
-        cy.on('fail', (err) => {
-          expect(err.message).to.eq(getErrMsgForTimeout(options.timeout))
-          done()
-        })
-      })
-
-      it('timeout passed as Boolean', (done) => {
-        options.timeout = false
-        cy.get('#some-el', options)
-        cy.on('fail', (err) => {
-          expect(err.message).to.eq(getErrMsgForTimeout(options.timeout))
-          done()
-        })
-      })
-
-      it('timeout passed as array', (done) => {
-        options.timeout = []
-        cy.get('#some-el', options)
-        cy.on('fail', (err) => {
-          expect(err.message).to.eq(getErrMsgForTimeout(options.timeout))
-          done()
+      _.each([{}, 'abc', null, NaN, false, []], (value) => {
+        it(`timeout throws if passed anything other invalid arg, such as: ${value}`, (done) => {
+          // @ts-expect-error - testing invalid timeout value
+          options.timeout = value
+          // @ts-expect-error - testing invalid timeout value
+          cy.get('#some-el', options)
+          cy.on('fail', (err) => {
+            expect(err.message).to.eq(getErrMsgForTimeout(options.timeout))
+            done()
+          })
         })
       })
     })
@@ -255,13 +215,15 @@ describe('src/cy/commands/querying', () => {
         let button = null
 
         const retry = _.after(3, () => {
+          // @ts-expect-error TODO: Figure out types for this
           button = cy.$$('#button').hide()
         })
 
         cy.on('command:retry', retry)
 
         cy.get('#button').should('not.be.visible').then(($button) => {
-          expect($button.get(0)).to.eq(button.get(0))
+          // @ts-expect-error TODO: Figure out types for this
+          expect($button.get(0)).to.eq(button?.get(0))
         })
       })
     })
@@ -616,7 +578,7 @@ describe('src/cy/commands/querying', () => {
       })
 
       it('can get alias with logging off', { protocolEnabled: true }, () => {
-        const logs = []
+        const logs: any = []
         let hiddenLog
 
         cy.on('log:added', (attrs, log) => {
@@ -663,7 +625,7 @@ describe('src/cy/commands/querying', () => {
           .window().then({ timeout: 2000 }, (win) => {
             return win.$.get('/users')
           }).wait('@getUsers').get('@getUsers').then((xhr) => {
-            expect(xhr.response.url).to.include('/users')
+            expect((xhr as unknown as XMLHttpRequest).response.url).to.include('/users')
           })
         })
 
@@ -675,7 +637,7 @@ describe('src/cy/commands/querying', () => {
           })
 
           cy.wait('@get.users').get('@get.users').then((xhr) => {
-            expect(xhr.response.url).to.include('/users')
+            expect((xhr as unknown as XMLHttpRequest).response.url).to.include('/users')
           })
         })
 
@@ -698,10 +660,12 @@ describe('src/cy/commands/querying', () => {
               win.$.get('/users', { num: 2 }),
             ])
           }).wait('@getUsers').wait('@getUsers').get('@getUsers.all').then((xhrs) => {
-            expect(xhrs).to.be.an('array')
-            expect(xhrs[0].response.url).to.include('/users?num=1')
+            const xhrsArray = xhrs as unknown as XMLHttpRequest
 
-            expect(xhrs[1].response.url).to.include('/users?num=2')
+            expect(xhrsArray).to.be.an('array')
+            expect(xhrsArray[0].response.url).to.include('/users?num=1')
+
+            expect(xhrsArray[1].response.url).to.include('/users?num=2')
           })
         })
 
@@ -716,10 +680,11 @@ describe('src/cy/commands/querying', () => {
           })
 
           cy.wait('@get.users').wait('@get.users').get('@get.users.all').then((xhrs) => {
-            expect(xhrs).to.be.an('array')
-            expect(xhrs[0].response.url).to.include('/users?num=1')
+            const xhrsArray = xhrs as unknown as XMLHttpRequest
 
-            expect(xhrs[1].response.url).to.include('/users?num=2')
+            expect(xhrsArray).to.be.an('array')
+            expect(xhrsArray[0].response.url).to.include('/users?num=1')
+            expect(xhrsArray[1].response.url).to.include('/users?num=2')
           })
         })
 
@@ -733,7 +698,7 @@ describe('src/cy/commands/querying', () => {
               win.$.get('/users', { num: 2 }),
             ])
           }).wait('@getUsers').wait('@getUsers').get('@getUsers.1').then((xhr1) => {
-            expect(xhr1.response.url).to.include('/users?num=1')
+            expect((xhr1 as unknown as XMLHttpRequest).response.url).to.include('/users?num=1')
           })
         })
 
@@ -746,8 +711,11 @@ describe('src/cy/commands/querying', () => {
               win.$.get('/users', { num: 1 }),
               win.$.get('/users', { num: 2 }),
             ])
-          }).wait('@getUsers').wait('@getUsers').get('@getUsers.2').then((xhr2) => {
-            expect(xhr2.response.url).to.include('/users?num=2')
+          })
+          .wait('@getUsers')
+          .wait('@getUsers')
+          .get('@getUsers.2').then((xhr2) => {
+            expect((xhr2 as unknown as XMLHttpRequest).response.url).to.include('/users?num=2')
           })
         })
 
@@ -762,7 +730,7 @@ describe('src/cy/commands/querying', () => {
           })
 
           cy.wait('@get.users').wait('@get.users').get('@get.users.2').then((xhr2) => {
-            expect(xhr2.response.url).to.include('/users?num=2')
+            expect((xhr2 as unknown as XMLHttpRequest).response.url).to.include('/users?num=2')
           })
         })
 
@@ -1059,6 +1027,7 @@ describe('src/cy/commands/querying', () => {
             done()
           })
 
+          // @ts-expect-error - we are testing invalid input
           cy.get('foobar', value)
         })
       })
@@ -1114,8 +1083,7 @@ describe('src/cy/commands/querying', () => {
 
     it('finds the nearest element by :contains selector', () => {
       cy.contains('li 0').then(($el) => {
-        expect($el.length).to.eq(1)
-
+        expect(($el as unknown as JQuery<HTMLLIElement>)?.length).to.eq(1)
         expect($el).to.match('li')
       })
     })
@@ -1136,7 +1104,9 @@ describe('src/cy/commands/querying', () => {
       })
 
       cy.contains('Quality Control').then(($span) => {
-        expect($span.get(0)).to.eq(span.get(0))
+        const el = $span?.[0] as unknown as HTMLSpanElement
+
+        expect(el).to.eq(span.get(0))
       })
     })
 
@@ -1144,8 +1114,10 @@ describe('src/cy/commands/querying', () => {
       const span = cy.$$('#click-me a span')
 
       cy.get('#click-me a').contains('click').then(($span) => {
+        const el = $span?.[0] as unknown as HTMLSpanElement
+
         expect($span.length).to.eq(1)
-        expect($span.get(0)).to.eq(span.get(0))
+        expect(el).to.eq(span.get(0))
       })
     })
 
@@ -1165,7 +1137,7 @@ describe('src/cy/commands/querying', () => {
 
     it('can find input type=submits by value', () => {
       cy.contains('input contains submit').then(($el) => {
-        expect($el.length).to.eq(1)
+        expect(($el as unknown as JQuery<HTMLInputElement>)?.length).to.eq(1)
         expect($el).to.match('input[type=submit]')
       })
     })
@@ -1173,14 +1145,14 @@ describe('src/cy/commands/querying', () => {
     // https://github.com/cypress-io/cypress/issues/21166
     it('can find input type=submits by Regex', () => {
       cy.contains(/input contains submit/).then(($el) => {
-        expect($el.length).to.eq(1)
+        expect(($el as unknown as JQuery<HTMLInputElement>)?.length).to.eq(1)
         expect($el).to.match('input[type=submit]')
       })
     })
 
     it('has an optional filter argument', () => {
       cy.contains('ul', 'li 0').then(($el) => {
-        expect($el.length).to.eq(1)
+        expect(($el as unknown as JQuery<HTMLUListElement>)?.length).to.eq(1)
         expect($el).to.match('ul')
       })
     })
@@ -1195,13 +1167,12 @@ describe('src/cy/commands/querying', () => {
 
     it('searches all els in comma separated filter', () => {
       cy.contains('a,button', 'Naruto').then(($el) => {
-        expect($el.length).to.eq(1)
+        expect(($el as unknown as JQuery<HTMLAnchorElement>)?.length).to.eq(1)
         expect($el).to.match('a')
       })
 
       cy.contains('a,button', 'Boruto').then(($el) => {
-        expect($el.length).to.eq(1)
-
+        expect(($el as unknown as JQuery<HTMLButtonElement>)?.length).to.eq(1)
         expect($el).to.match('button')
       })
     })
@@ -1211,16 +1182,16 @@ describe('src/cy/commands/querying', () => {
       const bText = 'Boruto'
 
       cy.contains('a, button', aText).then(($el) => {
-        expect($el.length).to.eq(1)
+        $el as unknown as JQuery<HTMLAnchorElement>
+        expect($el?.length).to.eq(1)
         expect($el).to.match('a')
-
         expect($el.text()).to.eq(aText)
       })
 
       cy.contains('a, button', bText).then(($el) => {
-        expect($el.length).to.eq(1)
+        $el as unknown as JQuery<HTMLButtonElement>
+        expect($el?.length).to.eq(1)
         expect($el).to.match('button')
-
         expect($el.text()).to.eq(bText)
       })
     })
@@ -1229,7 +1200,9 @@ describe('src/cy/commands/querying', () => {
       const input = cy.$$('#input-type-submit input')
 
       cy.contains('click me').then(($input) => {
-        expect($input.get(0)).to.eq(input.get(0))
+        const el = $input?.[0] as unknown as HTMLInputElement
+
+        expect(el).to.eq(input.get(0))
       })
     })
 
@@ -1237,14 +1210,15 @@ describe('src/cy/commands/querying', () => {
       const button = cy.$$('#button-inside-a button')
 
       cy.contains('click button').then(($btn) => {
-        expect($btn.get(0)).to.eq(button.get(0))
+        const btn = $btn?.[0] as unknown as HTMLButtonElement
+
+        expect(btn).to.eq(button.get(0))
       })
     })
 
     it('favors anchors next', () => {
       cy.contains('Home Page').then(($el) => {
-        expect($el.length).to.eq(1)
-
+        expect(($el as unknown as JQuery<HTMLAnchorElement>)?.length).to.eq(1)
         expect($el).to.match('a')
       })
     })
@@ -1271,7 +1245,9 @@ describe('src/cy/commands/querying', () => {
       cy.on('command:retry', retry)
 
       cy.contains('brand new content').then(($span) => {
-        expect($span.get(0)).to.eq(span.get(0))
+        const el = $span?.[0] as unknown as HTMLSpanElement
+
+        expect(el).to.eq(span.get(0))
       })
     })
 
@@ -1286,9 +1262,11 @@ describe('src/cy/commands/querying', () => {
       const item = cy.$$('#upper .item')
 
       cy.contains('New York').then(($item) => {
+        const el = $item?.[0] as unknown as HTMLElement
+
         expect($item).to.be.ok
 
-        expect($item.get(0)).to.eq(item.get(0))
+        expect(el).to.eq(item.get(0))
       })
     })
 
@@ -1389,7 +1367,9 @@ describe('src/cy/commands/querying', () => {
         const span = cy.$$('#not-hidden').hide()
 
         cy.contains('span', 'my hidden content').should('not.be.visible').then(($span) => {
-          expect($span.get(0)).to.eq(span.get(0))
+          const el = $span?.[0] as unknown as HTMLElement
+
+          expect(el).to.eq(span.get(0))
         })
       })
 
@@ -1409,7 +1389,9 @@ space
 
         cy.get('#whitespace1').contains('White space')
         cy.contains('White space').then(($btn) => {
-          expect($btn.get(0)).to.eq(btn.get(0))
+          const button = $btn?.[0] as unknown as HTMLButtonElement
+
+          expect(button).to.eq(btn.get(0))
         })
       })
 
@@ -1423,7 +1405,9 @@ space
 
         cy.get('#whitespace2').contains('White space')
         cy.contains('White space').then(($btn) => {
-          expect($btn.get(0)).to.eq(btn.get(0))
+          const button = $btn?.[0] as unknown as HTMLButtonElement
+
+          expect(button).to.eq(btn.get(0))
         })
       })
 
@@ -1436,7 +1420,9 @@ White   space
 
         cy.get('#whitespace3').contains('White space')
         cy.contains('White space').then(($btn) => {
-          expect($btn.get(0)).to.eq(btn.get(0))
+          const button = $btn?.[0] as unknown as HTMLButtonElement
+
+          expect(button).to.eq(btn.get(0))
         })
       })
 
@@ -1449,7 +1435,9 @@ White   space
 
         cy.get('#whitespace4').contains('White space')
         cy.contains(/White space/).then(($btn) => {
-          expect($btn.get(0)).to.eq(btn.get(0))
+          const button = $btn?.[0] as unknown as HTMLButtonElement
+
+          expect(button).to.eq(btn.get(0))
         })
       })
 
@@ -1470,7 +1458,9 @@ space
 
         cy.get('#whitespace6').contains('White space')
         cy.contains('White space').then(($btn) => {
-          expect($btn.get(0)).to.eq(btn.get(0))
+          const button = $btn?.[0] as unknown as HTMLButtonElement
+
+          expect(button).to.eq(btn.get(0))
         })
       })
     })
@@ -1678,7 +1668,9 @@ space
           const span = $(`<span>special char ${char} content</span>`).appendTo(cy.$$('body'))
 
           cy.contains('span', new RegExp(_.escapeRegExp(char))).then(($span) => {
-            expect($span.get(0)).to.eq(span.get(0))
+            const el = $span?.[0] as unknown as HTMLElement
+
+            expect(el).to.eq(span.get(0))
           })
         })
       })
@@ -1822,6 +1814,7 @@ space
             done()
           })
 
+          // @ts-expect-error - testing invalid argument
           cy.contains(val)
         })
       })
@@ -1845,6 +1838,7 @@ space
           done()
         })
 
+        // @ts-expect-error - testing invalid argument
         cy.contains(undefined)
       })
 

@@ -4,7 +4,7 @@ import type { Automation } from '../automation'
 import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
 
 export type Browser = FoundBrowser & {
-  majorVersion: number
+  majorVersion: number | string
   isHeadless: boolean
   isHeaded: boolean
 }

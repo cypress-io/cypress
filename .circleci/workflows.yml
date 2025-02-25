@@ -36,7 +36,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - /^release\/\d+\.\d+\.\d+$/
-        - chore/update_wdio_deps
+        - feat/implement_bidi
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'update-v8-snapshot-cache-on-develop'
         - 'ryanm/chore/add_internal_studio'
@@ -50,7 +50,7 @@ macWorkflowFilters: &darwin-workflow-filters
       - equal: [ develop, << pipeline.git.branch >> ]
       # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-      - equal: [ 'ryanm/chore/add_internal_studio', << pipeline.git.branch >> ]
+      - equal: [ 'feat/implement_bidi', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
@@ -61,7 +61,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
       - equal: [ develop, << pipeline.git.branch >> ]
       # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-      - equal: [ 'ryanm/chore/add_internal_studio', << pipeline.git.branch >> ]
+      - equal: [ 'feat/implement_bidi', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
@@ -84,7 +84,7 @@ windowsWorkflowFilters: &windows-workflow-filters
       - equal: [ develop, << pipeline.git.branch >> ]
       # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-      - equal: [ 'ryanm/chore/add_internal_studio', << pipeline.git.branch >> ]
+      - equal: [ 'feat/implement_bidi', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
@@ -160,7 +160,7 @@ commands:
           name: Set environment variable to determine whether or not to persist artifacts
           command: |
             echo "Setting SHOULD_PERSIST_ARTIFACTS variable"
-            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "ryanm/chore/add_internal_studio" ]]; then
+            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "feat/implement_bidi" ]]; then
                 export SHOULD_PERSIST_ARTIFACTS=true
             fi' >> "$BASH_ENV"
   # You must run `setup_should_persist_artifacts` command and be using bash before running this command
@@ -651,8 +651,17 @@ commands:
         description: chrome channel to install
         type: string
         default: 'stable'
+      firefox-version:
+        description: firefox version to install
+        type: string
+        default: *firefox-stable-version
       inject-document-domain:
         description: run subset of tests with injectDocumentDomain config enabled
+        type: boolean
+        default: false
+      is-firefox-cdp:
+        description: whether or not the group should be associated to the firefox CDP
+          run or not. This is determined by the browser version.
         type: boolean
         default: false
 
@@ -678,6 +687,7 @@ commands:
           steps:
             - install-browsers:
                 install-firefox: true
+                firefox-version: << parameters.firefox-version >>
       - when:
           condition:
             equal: [ webkit, << parameters.browser >> ]
@@ -695,6 +705,9 @@ commands:
             if << parameters.inject-document-domain >> ; then
               YARN_CMD="cypress:run:inject-document-domain"
               PARALLEL="--parallel --group 5x-driver-inject-document-domain-<<parameters.browser>>"
+            elif << parameters.is-firefox-cdp >> ; then
+              YARN_CMD="cypress:run"
+              PARALLEL="--parallel --group 5x-driver-cdp-<<parameters.browser>>"
             else
               YARN_CMD="cypress:run"
               PARALLEL="--parallel --group 5x-driver-<<parameters.browser>>"
@@ -2182,6 +2195,18 @@ jobs:
       - run-driver-integration-tests:
           browser: firefox
 
+  # Runs the driver tests using firefox 134, which does NOT use WebDriver BiDi
+  # This is to test and make sure there aren't regressions with the old CDP driver
+  driver-integration-tests-firefox-cdp:
+    <<: *defaults
+    resource_class: medium+
+    parallelism: 5
+    steps:
+      - run-driver-integration-tests:
+          browser: firefox
+          firefox-version: "134.0.2"
+          is-firefox-cdp: true
+
   driver-integration-tests-electron:
     <<: *defaults
     parallelism: 5
@@ -2990,6 +3015,7 @@ linux-x64-workflow: &linux-x64-workflow
           - run-webpack-dev-server-integration-tests
           - run-vite-dev-server-integration-tests
           - driver-integration-tests-firefox
+          - driver-integration-tests-firefox-cdp
           - driver-integration-tests-chrome
           - driver-integration-tests-chrome-inject-document-domain
           - driver-integration-tests-chrome-beta-inject-document-domain
@@ -3062,6 +3088,10 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
     - driver-integration-tests-firefox:
+        context: test-runner:cypress-record-key
+        requires:
+          - build
+    - driver-integration-tests-firefox-cdp:
         context: test-runner:cypress-record-key
         requires:
           - build
@@ -3207,6 +3237,7 @@ linux-x64-workflow: &linux-x64-workflow
           - linux-lint
           - percy-finalize
           - driver-integration-tests-firefox
+          - driver-integration-tests-firefox-cdp
           - driver-integration-tests-chrome
           - driver-integration-tests-chrome-beta
           - driver-integration-tests-chrome-inject-document-domain
@@ -3461,6 +3492,10 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
         context: test-runner:cypress-record-key
         requires:
           - contributor-pr
+    - driver-integration-tests-firefox-cdp:
+        context: test-runner:cypress-record-key
+        requires:
+          - contributor-pr
     - driver-integration-tests-electron:
         context: test-runner:cypress-record-key
         requires:
@@ -3602,6 +3637,7 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
           - linux-lint
           - percy-finalize
           - driver-integration-tests-firefox
+          - driver-integration-tests-firefox-cdp
           - driver-integration-tests-chrome
           - driver-integration-tests-chrome-beta
           - driver-integration-tests-electron
