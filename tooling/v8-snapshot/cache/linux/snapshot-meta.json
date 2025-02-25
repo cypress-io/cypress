@@ -3939,6 +3939,7 @@
     "./packages/server/lib/automation/index.ts",
     "./packages/server/lib/automation/screenshot.ts",
     "./packages/server/lib/automation/util.ts",
+    "./packages/server/lib/browsers/bidi_automation.ts",
     "./packages/server/lib/browsers/browser-cri-client.ts",
     "./packages/server/lib/browsers/cdp-command-queue.ts",
     "./packages/server/lib/browsers/cdp-connection.ts",
@@ -4247,5 +4248,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "eb8a7e2f3466b04b25d8c3521f6722aacacd9a1288aa247f1574da0f43237563"
+  "deferredHash": "2cadd604931b453715a273e1e36bf98ab4a18e4324dbbfbddaaffef404a45d52"
 }
