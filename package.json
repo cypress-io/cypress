@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "14.0.3",
+  "version": "14.1.0",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
