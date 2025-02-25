@@ -1,5 +1,5 @@
 import semverMajor from 'semver/functions/major'
-import { version } from '../../../package.json'
+import packageInfo from '../../../package.json'
 
 import type { SpecFile } from './spec'
 
@@ -28,7 +28,7 @@ export const PACKAGE_MANAGERS = ['npm', 'yarn', 'pnpm'] as const
 
 // Note: ONLY change this in code that will be merged into a release branch
 // for a new major version of Cypress
-export const GET_MAJOR_VERSION_FOR_CONTENT = () => semverMajor(version).toString()
+export const GET_MAJOR_VERSION_FOR_CONTENT = () => semverMajor(packageInfo.version).toString()
 
 export const RUN_ALL_SPECS_KEY = '__all' as const
 
