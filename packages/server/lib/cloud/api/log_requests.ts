@@ -2,15 +2,18 @@ import type { InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axio
 import Debug from 'debug'
 
 const debug = Debug('cypress:server:cloud:api')
+const debugVerbose = Debug('cypress-verbose:server:cloud:api')
 
 export const logRequest = (req: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
   debug(`${req.method} ${req.url}`)
+  debugVerbose(`Headers: %O`, req.headers)
 
   return req
 }
 
 export const logResponse = (res: AxiosResponse): AxiosResponse => {
-  debug(`${res.config.method} ${res.config.url}: %d %s -> \n  %o`, res.status, res.statusText, res.data)
+  debug(`${res.config.method} ${res.config.url}: %d %s -> \n  %o`, res.status, res.statusText)
+  debugVerbose(`Response: %O`, res.data)
 
   return res
 }

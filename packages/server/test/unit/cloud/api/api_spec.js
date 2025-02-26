@@ -880,8 +880,8 @@ describe('lib/cloud/api', () => {
   })
 
   context('.createInstance', () => {
-    const runId = 'run-id-123'
     let nocked
+    const runId = 'run-id-123'
     const osName = 'darwin'
 
     const instanceRequestData = {
