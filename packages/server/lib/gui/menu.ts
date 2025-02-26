@@ -1,17 +1,16 @@
-const _ = require('lodash')
-const os = require('os')
-const { Menu } = require('electron')
-const { shell } = require('electron')
-
-const appData = require('../util/app_data')
+import _ from 'lodash'
+import os from 'os'
+// tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
+import { Menu, shell } from 'electron'
+import appData from '../util/app_data'
 
 // hoist up options and allow calling menu.set({})
 // to override existing options or be called multiple
 // times to preserve existing options
 let options = {}
 
-module.exports = {
-  set (opts = {}) {
+export = {
+  set (opts) {
     _.extend(options, opts)
 
     const template = [
@@ -35,6 +34,7 @@ module.exports = {
           },
           {
             label: 'Log Out',
+            // @ts-expect-error TODO: Fix this type error
             click: options.onLogOutClicked,
           },
           {
@@ -160,6 +160,7 @@ module.exports = {
     if (os.platform() === 'darwin') {
       const name = 'Cypress'
 
+      // @ts-expect-error TODO: Update so types sees this as valid
       template.unshift({
         label: name,
         role: 'appMenu',
@@ -170,7 +171,7 @@ module.exports = {
       {
         label: 'Reload',
         accelerator: 'CmdOrCtrl+R',
-        click: (item, focusedWindow) => {
+        click: (item, focusedWindow: any) => {
           if (focusedWindow) {
             return focusedWindow.reload()
           }
@@ -185,7 +186,7 @@ module.exports = {
 
           return 'Ctrl+Shift+I'
         })(),
-        click: (item, focusedWindow) => {
+        click: (item, focusedWindow: any) => {
           if (focusedWindow) {
             return focusedWindow.toggleDevTools()
           }
@@ -199,7 +200,9 @@ module.exports = {
       },
     ]
 
+    // @ts-expect-error TODO: Update so types sees this as valid
     if (options.withInternalDevTools) {
+      // @ts-expect-error TODO: Update so types sees this as valid
       devToolsSubmenu = devToolsSubmenu.concat([
         {
           label: `GraphQL requests over Fetch (${process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET ? 'on' : 'off'})`,
@@ -216,6 +219,7 @@ module.exports = {
         {
           label: 'GraphiQL',
           click () {
+            // @ts-expect-error TODO: Update so types sees this as valid
             return shell.openExternal(`http://localhost:${options.getGraphQLPort()}/__launchpad/graphql`)
           },
         },
@@ -225,10 +229,12 @@ module.exports = {
     template.push(
       {
         label: 'Developer Tools',
+        // @ts-expect-error TODO: Update so types sees this as valid
         submenu: devToolsSubmenu,
       },
     )
 
+    // @ts-expect-error TODO: Update so types sees this as valid
     const menu = Menu.buildFromTemplate(template)
 
     return Menu.setApplicationMenu(menu)

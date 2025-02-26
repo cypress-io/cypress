@@ -22,7 +22,7 @@ interface CT extends IFramesController {
 }
 
 export const iframesController = {
-  e2e: ({ getSpec, remoteStates, config }: E2E, req: Request, res: Response) => {
+  e2e: async ({ getSpec, remoteStates, config }: E2E, req: Request, res: Response) => {
     const extraOptions = {
       specType: 'integration',
     }
@@ -38,7 +38,7 @@ export const iframesController = {
     // https://github.com/cypress-io/cypress/issues/20147
     res.setHeader('Origin-Agent-Cluster', '?0')
 
-    files.handleIframe(req, res, config, remoteStates, extraOptions)
+    await files.handleIframe(req, res, config, remoteStates, extraOptions)
   },
 
   component: ({ config, nodeProxy }: CT, req: Request, res: Response) => {

@@ -1,17 +1,21 @@
-const _ = require('lodash')
-const path = require('path')
-const cwd = require('../cwd')
-const debug = require('debug')('cypress:server:controllers')
-const { escapeFilenameInUrl } = require('../util/escape_filename')
-const { getCtx } = require('@packages/data-context')
-const { DocumentDomainInjection } = require('@packages/network/lib/document-domain-injection')
-const { privilegedCommandsManager } = require('../privileged-commands/privileged-commands-manager')
+import _ from 'lodash'
+import path from 'path'
+import cwd from '../cwd'
+import Debug from 'debug'
+import { escapeFilenameInUrl } from '../util/escape_filename'
+import { getCtx } from '@packages/data-context'
+import { DocumentDomainInjection } from '@packages/network/lib/document-domain-injection'
+import { privilegedCommandsManager } from '../privileged-commands/privileged-commands-manager'
+import type { Cfg } from '../project-base'
+import type { RemoteStates } from '../remote_states'
 
-module.exports = {
+const debug = Debug('cypress:server:controllers')
 
-  async handleIframe (req, res, config, remoteStates, extraOptions) {
+export = {
+
+  async handleIframe (req: any, res: any, config: Cfg, remoteStates: RemoteStates, extraOptions: any) {
     const test = req.params[0]
-    const iframePath = cwd('lib', 'html', 'iframe.html')
+    const iframePath: string = cwd('lib', 'html', 'iframe.html')
     const specFilter = _.get(extraOptions, 'specFilter')
 
     debug('handle iframe %o', { test, specFilter, config })
@@ -54,8 +58,8 @@ module.exports = {
     res.render(iframePath, iframeOptions)
   },
 
-  async handleCrossOriginIframe (req, res, config) {
-    const iframePath = cwd('lib', 'html', 'spec-bridge-iframe.html')
+  async handleCrossOriginIframe (req: any, res: any, config: Cfg) {
+    const iframePath: string = cwd('lib', 'html', 'spec-bridge-iframe.html')
     const documentDomainInjection = DocumentDomainInjection.InjectionBehavior(config)
     const superDomain = documentDomainInjection.shouldInjectDocumentDomain(req.proxiedUrl) ?
       documentDomainInjection.getHostname(req.proxiedUrl) :
@@ -84,12 +88,12 @@ module.exports = {
     res.render(iframePath, iframeOptions)
   },
 
-  getSpecs (spec, config, extraOptions = {}) {
+  getSpecs (spec: any, config: Cfg, extraOptions = {}) {
     // when asking for all specs: spec = "__all"
     // otherwise it is a relative spec filename like "integration/spec.js"
     debug('get specs %o', { spec, extraOptions })
 
-    const convertSpecPath = (spec) => {
+    const convertSpecPath = (spec: any) => {
       // get the absolute path to this spec and
       // get the browser url + cache buster
       const convertedSpec = path.join(config.projectRoot, spec)
@@ -109,7 +113,7 @@ module.exports = {
         // In case the user clicked "run all specs" and deleted a spec in the list, we will
         // only include specs we know to exist
         const existingSpecs = new Set(ctx.project.specs.map(({ relative }) => relative))
-        const filteredSpecs = ctx.project.runAllSpecs.reduce((acc, relSpec) => {
+        const filteredSpecs = ctx.project.runAllSpecs.reduce((acc: any, relSpec) => {
           if (existingSpecs.has(relSpec)) {
             acc.push(convertSpecPath(relSpec))
           }
@@ -129,7 +133,7 @@ module.exports = {
     return getSpecsHelper()
   },
 
-  prepareForBrowser (filePath, projectRoot, namespace) {
+  prepareForBrowser (filePath: string, projectRoot: string, namespace: string) {
     const SPEC_URL_PREFIX = `/${namespace}/tests?p`
 
     filePath = filePath.replace(SPEC_URL_PREFIX, '__CYPRESS_SPEC_URL_PREFIX__')
@@ -143,7 +147,7 @@ module.exports = {
     }
   },
 
-  getTestUrl (file, namespace) {
+  getTestUrl (file: string, namespace: string) {
     const url = `/${namespace}/tests?p=${file}`
 
     debug('test url for file %o', { file, url })
@@ -151,7 +155,7 @@ module.exports = {
     return url
   },
 
-  getTitle (test) {
+  getTitle (test: string) {
     if (test === '__all') {
       return 'All Tests'
     }
@@ -159,7 +163,7 @@ module.exports = {
     return test
   },
 
-  getSupportFile (config) {
+  getSupportFile (config: Cfg) {
     const { projectRoot, supportFile, namespace } = config
 
     if (!supportFile) {
