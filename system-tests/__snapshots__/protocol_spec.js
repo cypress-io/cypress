@@ -1,5 +1,6 @@
 exports['e2e events'] = `
 {
+  "debugData": {},
   "beforeSpec": [
     {
       "name": "/path/to/name",
@@ -6138,6 +6139,7 @@ exports['e2e events'] = `
 
 exports['component events - experimentalSingleTabRunMode: true'] = `
 {
+  "debugData": {},
   "beforeSpec": [
     {
       "name": "/path/to/name",
@@ -7956,6 +7958,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
 
 exports['component events - experimentalSingleTabRunMode: false'] = `
 {
+  "debugData": {},
   "beforeSpec": [
     {
       "name": "/path/to/name",

@@ -199,8 +199,4 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   async cdpReconnect (): Promise<void> {
 
   }
-
-  uploadStallSamplingInterval (): number {
-    return 0
-  }
 }
