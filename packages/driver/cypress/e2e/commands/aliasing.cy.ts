@@ -40,7 +40,7 @@ describe('src/cy/commands/aliasing', () => {
       const li = cy.$$('#list li').eq(0)
 
       cy.get('#list li').eq(0).as('firstLi').then(($li) => {
-        expect($li.get(0)).to.eq(li)
+        expect($li[0]).to.eq(li[0])
       })
     })
 
