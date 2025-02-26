@@ -31,7 +31,7 @@
       :min-panel3-width="minWidths.aut"
       :show-panel1="runnerUiStore.isSpecsListOpen && !screenshotStore.isScreenshotting"
       :show-panel2="!screenshotStore.isScreenshotting && !hideCommandLog"
-      :show-panel4="studioStatus === 'INITIALIZED' && studioStore.isActive"
+      :show-panel4="shouldShowStudioPanel"
       @resize-end="handleResizeEnd"
       @panel-width-updated="handlePanelWidthUpdated"
     >
@@ -98,7 +98,7 @@
         <ScreenshotHelperPixels />
       </template>
       <template #panel4>
-        <StudioPanel v-if="studioStatus === 'INITIALIZED' && studioStore.isActive" />
+        <StudioPanel v-show="shouldShowStudioPanel" />
       </template>
     </ResizablePanels>
   </AdjustRunnerStyleDuringScreenshot>
@@ -236,6 +236,10 @@ const isSpecsListOpenPreferences = computed(() => {
 
 const studioStatus = computed(() => {
   return props.gql.studio?.status
+})
+
+const shouldShowStudioPanel = computed(() => {
+  return studioStatus.value === 'INITIALIZED' && studioStore.isActive
 })
 
 const hideCommandLog = runnerUiStore.hideCommandLog

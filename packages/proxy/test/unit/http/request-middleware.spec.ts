@@ -33,6 +33,7 @@ describe('http/request-middleware', () => {
       'MaybeSimulateSecHeaders',
       'CorrelateBrowserPreRequest',
       'CalculateCredentialLevelIfApplicable',
+      'FormatCookiesIfApplicable',
       'MaybeAttachCrossOriginCookies',
       'MaybeEndRequestWithBufferedResponse',
       'SetMatchingRoutes',
@@ -233,6 +234,70 @@ describe('http/request-middleware', () => {
       .then(() => {
         expect(ctx.req.resourceType).to.equal('fetch')
         expect(ctx.req.credentialsLevel).to.equal('same-origin')
+      })
+    })
+  })
+
+  describe('FormatCookiesIfApplicable', () => {
+    const { FormatCookiesIfApplicable } = RequestMiddleware
+
+    it('does nothing if "x-cypress-is-webdriver-bidi" header is not present', async () => {
+      const ctx = {
+        req: {
+          headers: {
+            cookie: 'foo=bar;bar=baz;qux=quux',
+          },
+        },
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
+      }
+
+      await testMiddleware([FormatCookiesIfApplicable], ctx)
+
+      expect(ctx.req.headers['cookie']).to.equal('foo=bar;bar=baz;qux=quux')
+    })
+
+    describe('header present', () => {
+      it('does nothing if cookie header is already formatted correctly', async () => {
+        const ctx = {
+          req: {
+            headers: {
+              'x-cypress-is-webdriver-bidi': true,
+              cookie: 'foo=bar; bar=baz; qux=quux',
+            },
+          },
+          res: {
+            on: (event, listener) => {},
+            off: (event, listener) => {},
+          },
+        }
+
+        await testMiddleware([FormatCookiesIfApplicable], ctx)
+
+        expect(ctx.req.headers['cookie']).to.equal('foo=bar; bar=baz; qux=quux')
+        expect(ctx.req.headers!['x-cypress-is-webdriver-bidi']).not.to.exist
+      })
+
+      it('delimits cookie headers by "; " if no space exists between cookie values', async () => {
+        const ctx = {
+          req: {
+            headers: {
+              'x-cypress-is-webdriver-bidi': true,
+              cookie: 'foo=bar;bar=baz;qux=quux',
+            },
+          },
+          res: {
+            on: (event, listener) => {},
+            off: (event, listener) => {},
+          },
+        }
+
+        await testMiddleware([FormatCookiesIfApplicable], ctx)
+
+        expect(ctx.req.headers['cookie']).to.equal('foo=bar; bar=baz; qux=quux')
+        expect(ctx.req.headers!['x-cypress-is-webdriver-bidi']).not.to.exist
       })
     })
   })

@@ -51,7 +51,7 @@
     "chalk": "2.4.2",
     "chokidar": "3.5.1",
     "common-tags": "1.8.0",
-    "compression": "1.7.5",
+    "compression": "1.8.0",
     "cookie-parser": "1.4.5",
     "cors": "2.8.5",
     "dayjs": "^1.9.3",

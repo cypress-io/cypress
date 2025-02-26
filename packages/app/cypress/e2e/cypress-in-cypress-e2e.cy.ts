@@ -23,7 +23,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
 
     cy.contains('Canary').should('be.visible')
     cy.findByTestId('select-browser').click()
-    cy.get('[data-cy="viewport"]').click()
+    cy.get('[data-cy="viewport-size"]').should('be.visible')
 
     cy.contains('Chrome 1')
     .focus()
@@ -33,14 +33,6 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     // snapshotAUTPanel('browsers open')
 
     cy.contains('Canary').should('be.hidden')
-
-    cy.get('[data-cy="viewport"]').click()
-    cy.contains('The viewport determines the width and height of your application under test. By default the viewport will be 1000px by 660px for end-to-end testing.')
-    .should('be.visible')
-
-    // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
-    // snapshotAUTPanel('viewport info open')
-
     cy.get('body').click()
 
     cy.findByTestId('playground-activator').click()
