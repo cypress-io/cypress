@@ -238,6 +238,7 @@
     "./node_modules/colors/lib/colors.js",
     "./node_modules/colors/safe.js",
     "./node_modules/combined-stream/lib/combined_stream.js",
+    "./node_modules/compression/index.js",
     "./node_modules/compression/node_modules/debug/src/browser.js",
     "./node_modules/compression/node_modules/debug/src/index.js",
     "./node_modules/concat-stream/index.js",
@@ -1721,7 +1722,6 @@
     "./node_modules/common-tags/lib/trimResultTransformer/trimResultTransformer.js",
     "./node_modules/component-emitter/index.js",
     "./node_modules/compressible/index.js",
-    "./node_modules/compression/index.js",
     "./node_modules/compression/node_modules/debug/src/debug.js",
     "./node_modules/compression/node_modules/ms/index.js",
     "./node_modules/concat-map/index.js",
@@ -3939,6 +3939,7 @@
     "./packages/server/lib/automation/index.ts",
     "./packages/server/lib/automation/screenshot.ts",
     "./packages/server/lib/automation/util.ts",
+    "./packages/server/lib/browsers/bidi_automation.ts",
     "./packages/server/lib/browsers/browser-cri-client.ts",
     "./packages/server/lib/browsers/cdp-command-queue.ts",
     "./packages/server/lib/browsers/cdp-connection.ts",
@@ -4247,5 +4248,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "7dab0a04f0d7d79fc14e6f53fb56244d12fa8b8688a7e512c4d24422483824d4"
+  "deferredHash": "2cadd604931b453715a273e1e36bf98ab4a18e4324dbbfbddaaffef404a45d52"
 }

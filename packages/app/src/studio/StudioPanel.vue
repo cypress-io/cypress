@@ -10,7 +10,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, onMounted, onUpdated, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { init, loadRemote } from '@module-federation/runtime'
 import type { StudioAppDefaultShape, StudioPanelShape } from './studio-app-types'
 
@@ -20,7 +20,7 @@ const root = ref<HTMLElement | null>(null)
 const error = ref<string | null>(null)
 const Panel = ref<StudioPanelShape | null>(null)
 
-const updateComponent = () => {
+const maybeRenderReactComponent = () => {
   if (!Panel.value || !!error.value) {
     return
   }
@@ -61,8 +61,7 @@ init({
   name: 'app',
 })
 
-onMounted(updateComponent)
-onUpdated(updateComponent)
+onMounted(maybeRenderReactComponent)
 onBeforeUnmount(unmountReactComponent)
 
 loadRemote<StudioApp>('app-studio').then((module) => {
@@ -73,7 +72,7 @@ loadRemote<StudioApp>('app-studio').then((module) => {
   }
 
   Panel.value = module.default.StudioPanel
-  updateComponent()
+  maybeRenderReactComponent()
 }).catch((e) => {
   error.value = e.message
 })

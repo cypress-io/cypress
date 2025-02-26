@@ -31,7 +31,7 @@
     "cachedir": "^2.3.0",
     "chalk": "^4.1.0",
     "check-more-types": "^2.24.0",
-    "ci-info": "^4.0.0",
+    "ci-info": "^4.1.0",
     "cli-cursor": "^3.1.0",
     "cli-table3": "~0.6.1",
     "commander": "^6.2.1",

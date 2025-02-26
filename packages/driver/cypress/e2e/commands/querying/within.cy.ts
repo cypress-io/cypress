@@ -1,4 +1,4 @@
-const { assertLogLength } = require('../../../support/utils')
+import { assertLogLength } from '../../../support/utils'
 
 const { _ } = Cypress
 
@@ -30,12 +30,16 @@ describe('src/cy/commands/querying/within', () => {
       const span = cy.$$('#nested-div span:contains(foo)')
 
       cy.contains('foo').then(($span) => {
-        expect($span.get(0)).not.to.eq(span.get(0))
+        const firstSpan = $span?.[0] as unknown as HTMLElement
+
+        expect(firstSpan).not.to.eq(span.get(0))
       })
 
       cy.get('#nested-div').within(() => {
         cy.contains('foo').then(($span) => {
-          expect($span.get(0)).to.eq(span.get(0))
+          const firstSpan = $span?.[0] as unknown as HTMLElement
+
+          expect(firstSpan).to.eq(span.get(0))
         })
       })
     })
@@ -129,6 +133,7 @@ describe('src/cy/commands/querying/within', () => {
       })
 
       cy.then(() => {
+        // @ts-expect-error - TODO: Look at where cy._events would be defined
         expect(cy._events).not.to.have.property('command:start')
       })
     })
@@ -309,6 +314,7 @@ describe('src/cy/commands/querying/within', () => {
             done()
           })
 
+          // @ts-expect-error - testing invalid input
           cy.get('body').within(value)
         })
       })
