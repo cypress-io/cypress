@@ -20,6 +20,7 @@ describe('ProjectConfigIpc', () => {
         false,
         (error) => {},
         () => {},
+        () => {},
       )
     })
 
@@ -74,6 +75,7 @@ describe('ProjectConfigIpc', () => {
                 false,
                 (error) => {},
                 () => {},
+                () => {},
               )
 
               expect(forkSpy).to.have.been.calledWith(sinon.match.string, sinon.match.array, sinon.match({
@@ -115,6 +117,7 @@ describe('ProjectConfigIpc', () => {
                 'cypress.config.js',
                 false,
                 (error) => {},
+                () => {},
                 () => {},
               )
 

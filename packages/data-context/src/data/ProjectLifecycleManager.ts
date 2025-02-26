@@ -102,6 +102,10 @@ export class ProjectLifecycleManager {
     return this.ctx.coreData.currentProjectGitInfo
   }
 
+  get configDebugData () {
+    return this._configManager?.debugData
+  }
+
   async getProjectId (): Promise<string | null> {
     try {
       // No need to kick off config initialization if we need to migrate
