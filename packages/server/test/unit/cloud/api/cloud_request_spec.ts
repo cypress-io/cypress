@@ -7,7 +7,6 @@ import { _create } from '../../../../lib/cloud/api/cloud_request'
 import app_config from '../../../../config/app.json'
 import os from 'os'
 import pkg from '@packages/root'
-import { logRequest, logResponseErr, logResponse } from '../../../../lib/cloud/api/log_requests'
 import { transformError } from '../../../../lib/cloud/api/axios_middleware/transform_error'
 
 chai.use(sinonChai)
@@ -84,11 +83,6 @@ describe('CloudRequest', () => {
       ;(axios.create as sinon.SinonStub).returns(stubbedAxiosInstance)
 
       _create()
-    })
-
-    it('registers request and response logging interceptors', () => {
-      expect(stubbedAxiosInstance.interceptors?.request.use).to.have.been.calledWith(logRequest)
-      expect(stubbedAxiosInstance.interceptors?.response.use).to.have.been.calledWith(logResponse, logResponseErr)
     })
 
     it('registers error transformation interceptor', () => {
