@@ -1856,7 +1856,7 @@ jobs:
     parallelism: 1
     steps:
       - restore_cached_workspace
-      - run: DEBUG=cypress*:server:cloud:api yarn test-unit --scope=@packages/server
+      - run: yarn test-unit --scope=@packages/server
       - verify-mocha-results:
           expectedResultCount: 1
       - store_test_results:
