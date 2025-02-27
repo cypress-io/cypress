@@ -5,15 +5,16 @@ import { isAxiosError } from 'axios'
 
 const MAX_RETRIES = 3
 
-type CreateInstanceResponse = {
-  instanceId: string
+interface CreateInstanceResponse {
+  spec: string | null
+  instanceId: string | null
   claimedInstances: number
   estimatedWallClockDuration: number | null
-  spec: string | null
   totalInstances: number
 }
 
-type CreateInstanceRequestData = {
+interface CreateInstanceRequestBody {
+  spec: string | null
   groupId: string
   machineId: string
   platform: {
@@ -26,7 +27,7 @@ type CreateInstanceRequestData = {
   }
 }
 
-export const createInstance = async (runId: string, instanceData: CreateInstanceRequestData, timeout: number = 0): Promise<CreateInstanceResponse> => {
+export const createInstance = async (runId: string, instanceData: CreateInstanceRequestBody, timeout: number = 0): Promise<CreateInstanceResponse> => {
   let attemptNumber = 0
 
   return asyncRetry(async () => {
