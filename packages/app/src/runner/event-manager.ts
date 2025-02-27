@@ -419,7 +419,7 @@ export class EventManager {
 
           const hideCommandLog = Cypress.config('hideCommandLog')
 
-          this.studioStore.initialize(config, runState)
+          this.studioStore.initialize(config)
 
           const runnables = Cypress.runner.normalizeAll(runState.tests, hideCommandLog, testFilter)
 
@@ -485,14 +485,7 @@ export class EventManager {
 
       return new Bluebird((resolve) => {
         this.reporterBus.emit('reporter:collect:run:state', (reporterState: ReporterRunState) => {
-          resolve({
-            ...reporterState,
-            studio: {
-              testId: this.studioStore.testId,
-              suiteId: this.studioStore.suiteId,
-              url: this.studioStore.url,
-            },
-          })
+          resolve({ reporterState })
         })
       })
     })

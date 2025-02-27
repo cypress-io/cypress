@@ -1,9 +1,3 @@
-export interface StudioRecorderState {
-  suiteId?: string
-  testId?: string
-  url?: string
-}
-
 export interface ReporterRunState {
   autoScrollingEnabled?: boolean
   scrollTop?: number

@@ -138,11 +138,13 @@ export const useStudioStore = defineStore('studioRecorder', {
   actions: {
     setTestId (testId: string) {
       this.testId = testId
+      this._updateUrlParams()
     },
 
     setSuiteId (suiteId: string) {
       this.suiteId = suiteId
       this.testId = undefined
+      this._updateUrlParams()
     },
 
     clearRunnableIds () {
@@ -182,21 +184,15 @@ export const useStudioStore = defineStore('studioRecorder', {
       this.isFailed = true
     },
 
-    initialize (config, state) {
-      const { studio } = state
+    initialize (config) {
+      const studio = this._getUrlParams()
 
-      if (studio) {
-        if (studio.testId) {
-          this.setTestId(studio.testId)
-        }
+      if (studio.testId) {
+        this.setTestId(studio.testId)
+      }
 
-        if (studio.suiteId) {
-          this.setSuiteId(studio.suiteId)
-        }
-
-        if (studio.url) {
-          this.setUrl(studio.url)
-        }
+      if (studio.suiteId) {
+        this.setSuiteId(studio.suiteId)
       }
 
       if (this.testId || this.suiteId) {
@@ -271,6 +267,7 @@ export const useStudioStore = defineStore('studioRecorder', {
     cancel () {
       this.reset()
       this.clearRunnableIds()
+      this._removeUrlParams()
     },
 
     startSave () {
@@ -284,6 +281,7 @@ export const useStudioStore = defineStore('studioRecorder', {
     save (testName?: string) {
       this.closeSaveModal()
       this.stop()
+      this._removeUrlParams()
 
       assertNonNullish(this.absoluteFile, `absoluteFile should exist`)
 
@@ -525,6 +523,54 @@ export const useStudioStore = defineStore('studioRecorder', {
       textArea.remove()
 
       return Promise.resolve()
+    },
+
+    _getUrlParams () {
+      const url = new URL(window.location.href)
+      const hashParams = new URLSearchParams(url.hash)
+
+      const testId = hashParams.get('testId')
+      const suiteId = hashParams.get('suiteId')
+
+      return { testId, suiteId }
+    },
+
+    _updateUrlParams () {
+      // if we don't have studio params, we don't need to update them
+      if (!this.testId && !this.suiteId) return
+
+      // if we have studio params, we need to remove them before adding them back
+      this._removeUrlParams()
+
+      const url = new URL(window.location.href)
+      const hashParams = new URLSearchParams(url.hash)
+
+      // set the studio params
+      hashParams.set('studio', '')
+      if (this.testId) hashParams.set('testId', this.testId)
+
+      if (this.suiteId) hashParams.set('suiteId', this.suiteId)
+
+      // update the url
+      url.hash = decodeURIComponent(hashParams.toString())
+      window.history.replaceState({}, '', url.toString())
+    },
+
+    _removeUrlParams () {
+      const url = new URL(window.location.href)
+      const hashParams = new URLSearchParams(url.hash)
+
+      // if we don't have studio params, we don't need to remove them
+      if (!hashParams.has('studio')) return
+
+      // remove the studio params
+      hashParams.delete('studio')
+      hashParams.delete('testId')
+      hashParams.delete('suiteId')
+
+      // update the url
+      url.hash = decodeURIComponent(hashParams.toString())
+      window.history.replaceState({}, '', url.toString())
     },
 
     _trustEvent (event) {
