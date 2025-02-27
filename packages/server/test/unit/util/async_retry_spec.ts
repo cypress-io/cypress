@@ -139,7 +139,7 @@ describe('asyncRetry', () => {
 
       await clock.tickAsync(1)
       expect(onRetryFn).to.have.been.calledOnceWith(delay, err)
-      await clock.tickAsync(delay * 2)
+      await clock.runAllAsync()
       await p
     })
   })
