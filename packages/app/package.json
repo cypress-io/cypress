@@ -72,7 +72,7 @@
     "javascript-time-ago": "2.3.8",
     "just-my-luck": "3.0.0",
     "lodash": "4.17.21",
-    "mobx": "6.13.5",
+    "mobx": "6.13.6",
     "nanoid": "3.3.4",
     "p-defer": "^3.0.0",
     "pinia": "2.0.0-rc.14",
