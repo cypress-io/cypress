@@ -1,7 +1,7 @@
-const {
+import {
   getConsoleProps,
   navigateAboutBlank,
-} = require('@packages/driver/src/cy/commands/sessions/utils')
+} from '../../../../src/cy/commands/sessions/utils'
 
 describe('src/cy/commands/sessions/utils.ts', () => {
   const logForDebugging = (consoleProps) => {
@@ -17,6 +17,9 @@ describe('src/cy/commands/sessions/utils.ts', () => {
     it('for one domain with neither cookies or localStorage set', () => {
       const sessionState = {
         id: 'session1',
+        hydrated: false,
+        cacheAcrossSpecs: false,
+        setup: () => {},
       }
 
       const consoleProps = getConsoleProps(sessionState)
@@ -30,6 +33,9 @@ describe('src/cy/commands/sessions/utils.ts', () => {
     it('for one domain with only cookies set', () => {
       const sessionState = {
         id: 'session1',
+        hydrated: true,
+        cacheAcrossSpecs: false,
+        setup: () => {},
         cookies: [
           { name: 'foo', value: 'f', path: '/', domain: 'localhost', secure: true, httpOnly: true, expiry: 123 },
         ],
@@ -55,6 +61,9 @@ describe('src/cy/commands/sessions/utils.ts', () => {
     it('for one domain with only localStorage set', () => {
       const sessionState = {
         id: 'session1',
+        hydrated: true,
+        cacheAcrossSpecs: false,
+        setup: () => {},
         localStorage: [
           { origin: 'localhost', value: { 'stor-foo': 's-f' } },
         ],
@@ -79,6 +88,9 @@ describe('src/cy/commands/sessions/utils.ts', () => {
     it('for one domain with only sessionStorage set', () => {
       const sessionState = {
         id: 'session1',
+        hydrated: true,
+        cacheAcrossSpecs: false,
+        setup: () => {},
         sessionStorage: [
           { origin: 'localhost', value: { 'stor-foo': 's-f' } },
         ],
@@ -103,6 +115,9 @@ describe('src/cy/commands/sessions/utils.ts', () => {
     it('for one domain with both cookies and localStorage set', () => {
       const sessionState = {
         id: 'session1',
+        hydrated: true,
+        cacheAcrossSpecs: false,
+        setup: () => {},
         cookies: [
           { name: 'foo', value: 'f', path: '/', domain: 'localhost', secure: true, httpOnly: true, expiry: 123 },
         ],
@@ -135,6 +150,9 @@ describe('src/cy/commands/sessions/utils.ts', () => {
     it('for multiple domains', () => {
       const sessionState = {
         id: 'session1',
+        hydrated: true,
+        cacheAcrossSpecs: false,
+        setup: () => {},
         cookies: [
           { name: 'foo', value: 'f', path: '/', domain: 'localhost', secure: true, httpOnly: true, expiry: 123 },
           { name: 'bar', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expiry: 456 },
@@ -145,6 +163,7 @@ describe('src/cy/commands/sessions/utils.ts', () => {
         ],
       }
 
+      // @ts-expect-error TODO: sessionState needs more accurate types or this test data needs updating.
       const consoleProps = getConsoleProps(sessionState)
 
       logForDebugging(consoleProps)
@@ -180,9 +199,9 @@ describe('src/cy/commands/sessions/utils.ts', () => {
       const spy = cy.spy(Cypress, 'action').log(false)
       .withArgs('cy:visit:blank')
 
-      cy.then(() => {
-        navigateAboutBlank()
-        navigateAboutBlank(true)
+      cy.then(async () => {
+        await navigateAboutBlank()
+        await navigateAboutBlank({ inBetweenTestsAndNextTestHasTestIsolationOn: true })
         expect(spy).to.have.been.calledTwice
         expect(spy.args[0]).to.deep.eq(['cy:visit:blank', { testIsolation: true }])
         expect(spy.args[1]).to.deep.eq(['cy:visit:blank', { testIsolation: true }])

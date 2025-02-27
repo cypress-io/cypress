@@ -2571,7 +2571,9 @@ declare namespace Cypress {
      */
     withArgs(...args: any[]): Omit<A, 'withArgs'> & Agent<A>
 
-    callsFake(func: (...args: any[]) => any): Omit<A, 'withArgs'> & Agent<A>
+    callsFake(func: (...args: any[]) => any): Agent<A>
+
+    callThroughWithNew(): Agent<A>
   }
 
   type Agent<T extends sinon.SinonSpy> = SinonSpyAgent<T> & T
@@ -6446,6 +6448,7 @@ declare namespace Cypress {
   }
 
   interface Log {
+    id: string
     end(): Log
     error(error: Error): Log
     finish(): void

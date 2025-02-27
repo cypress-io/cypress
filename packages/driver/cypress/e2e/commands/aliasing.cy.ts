@@ -1,4 +1,4 @@
-const { assertLogLength } = require('../../support/utils')
+import { assertLogLength } from '../../support/utils'
 const { _ } = Cypress
 
 describe('src/cy/commands/aliasing', () => {
@@ -40,13 +40,15 @@ describe('src/cy/commands/aliasing', () => {
       const li = cy.$$('#list li').eq(0)
 
       cy.get('#list li').eq(0).as('firstLi').then(($li) => {
-        expect($li).to.match(li)
+        expect($li[0]).to.eq(li[0])
       })
     })
 
     it('retries previous commands invoked inside custom commands', () => {
-      Cypress.Commands.add('get2', (selector) => cy.get(selector))
+      // @ts-expect-error TODO: add types need updating to not error with string here
+      Cypress.Commands.add('get2', (selector: string) => cy.get(selector))
 
+      // @ts-expect-error - we are testing custom command, ignore types for now
       cy.get2('body').children('div').as('divs')
       cy.visit('/fixtures/dom.html')
 
@@ -54,7 +56,7 @@ describe('src/cy/commands/aliasing', () => {
     })
 
     it('retries primitives and assertions', () => {
-      const obj = {}
+      const obj: any = {}
 
       cy.on('command:retry', _.after(2, () => {
         obj.foo = 'bar'
@@ -105,8 +107,10 @@ describe('src/cy/commands/aliasing', () => {
     })
 
     it('retries previous commands invoked inside custom commands', () => {
-      Cypress.Commands.add('get2', (selector) => cy.get(selector))
+      // @ts-expect-error TODO: add types need updating to not error with string here
+      Cypress.Commands.add('get2', (selector: string) => cy.get(selector))
 
+      // @ts-expect-error - we are testing custom command, ignore types for now
       cy.get2('body').children('div').as('divs')
       cy.visit('/fixtures/dom.html')
 
@@ -120,6 +124,7 @@ describe('src/cy/commands/aliasing', () => {
 
       afterEach(function () {
         if (!this.foo) {
+          // @ts-expect-error TODO: mocha Runnable is not expecting error here
           this.test.error(new Error('this.foo not defined'))
         }
       })
@@ -140,10 +145,12 @@ describe('src/cy/commands/aliasing', () => {
       describe('nested hooks', () => {
         afterEach(function () {
           if (!this.bar) {
+            // @ts-expect-error TODO: mocha Runnable is not expecting error here
             this.test.error(new Error('this.bar not defined'))
           }
 
           if (!this.foo) {
+            // @ts-expect-error TODO: mocha Runnable is not expecting error here
             this.test.error(new Error('this.foo not defined'))
           }
         })
@@ -162,6 +169,7 @@ describe('src/cy/commands/aliasing', () => {
 
         afterEach(function () {
           if (!this.quux) {
+            // @ts-expect-error TODO: mocha Runnable is not expecting error here
             this.test.error(new Error('this.quux not defined'))
           }
         })
@@ -195,6 +203,7 @@ describe('src/cy/commands/aliasing', () => {
             done()
           })
 
+          // @ts-expect-error - testing invalid value
           cy.get('div:first').as(value)
         })
       })
@@ -259,6 +268,7 @@ describe('src/cy/commands/aliasing', () => {
           done()
         })
 
+        // @ts-expect-error - testing invalid options
         cy.wrap({}).as('value', 'wut?')
       })
 
@@ -270,6 +280,7 @@ describe('src/cy/commands/aliasing', () => {
           done()
         })
 
+        // @ts-expect-error - testing invalid options
         cy.wrap({}).as('value', { type: 'wut?' })
       })
     })
@@ -309,13 +320,14 @@ describe('src/cy/commands/aliasing', () => {
             const cmd = Cypress.log({})
 
             cy.get('ul:first li', { log: false }).first({ log: false }).then(($li) => {
-              cmd.snapshot().end()
+              cmd?.snapshot().end()
 
               return undefined
             })
           },
         })
 
+        // @ts-expect-error - testing custom command so not worried about types here
         cy.foo().as('foo').then(function () {
           const { lastLog } = this
 
@@ -436,6 +448,7 @@ describe('src/cy/commands/aliasing', () => {
       it('works with .then function overwrite', () => {
         // use explicit arguments and Function.prototype.call
         Cypress.Commands.overwrite('then', function (originalCommand, subject, fn, options = {}) {
+          // @ts-expect-error TODO: not expecting 4 args here
           return originalCommand.call(null, subject, options, fn)
         })
 
