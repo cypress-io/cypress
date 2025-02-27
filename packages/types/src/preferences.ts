@@ -29,6 +29,7 @@ export const allowedKeys: Readonly<Array<keyof AllowedState>> = [
   'isBrowserDevToolsOpen',
   'reporterWidth',
   'specListWidth',
+  'studioWidth',
   'showedNewProjectBanner',
   'firstOpenedCypress',
   'showedStudioModal',
@@ -70,6 +71,7 @@ export type AllowedState = Partial<{
   isBrowserDevToolsOpen: Maybe<boolean>
   reporterWidth: Maybe<number>
   specListWidth: Maybe<number>
+  studioWidth: Maybe<number>
   showedNewProjectBanner: Maybe<boolean>
   firstOpenedCypress: Maybe<number>
   showedStudioModal: Maybe<boolean>

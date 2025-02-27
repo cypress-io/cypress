@@ -31,6 +31,7 @@
       :min-panel3-width="minWidths.aut"
       :show-panel1="runnerUiStore.isSpecsListOpen && !screenshotStore.isScreenshotting"
       :show-panel2="!screenshotStore.isScreenshotting && !hideCommandLog"
+      :show-panel4="shouldShowStudioPanel"
       @resize-end="handleResizeEnd"
       @panel-width-updated="handlePanelWidthUpdated"
     >
@@ -96,12 +97,15 @@
         />
         <ScreenshotHelperPixels />
       </template>
+      <template #panel4>
+        <StudioPanel v-show="shouldShowStudioPanel" />
+      </template>
     </ResizablePanels>
   </AdjustRunnerStyleDuringScreenshot>
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, onMounted, watchEffect } from 'vue'
+import { computed, onBeforeUnmount, onMounted } from 'vue'
 import { REPORTER_ID, RUNNER_ID } from './utils'
 import InlineSpecList from '../specs/InlineSpecList.vue'
 import { getAutIframeModel, getEventManager } from '.'
@@ -130,6 +134,7 @@ import { runnerConstants } from './runner-constants'
 import StudioInstructionsModal from './studio/StudioInstructionsModal.vue'
 import StudioSaveModal from './studio/StudioSaveModal.vue'
 import { useStudioStore } from '../store/studio-store'
+import StudioPanel from '../studio/StudioPanel.vue'
 
 const {
   preferredMinimumPanelWidth,
@@ -148,6 +153,7 @@ fragment SpecRunner_Preferences on Query {
       autoScrollingEnabled
       reporterWidth
       specListWidth
+      studioWidth
     }
   }
 }
@@ -220,12 +226,20 @@ const reporterWidthPreferences = computed(() => {
   return props.gql.localSettings.preferences.reporterWidth ?? runnerUiStore.reporterWidth
 })
 
+const studioWidthPreferences = computed(() => {
+  return props.gql.localSettings.preferences.studioWidth ?? runnerUiStore.studioWidth
+})
+
 const isSpecsListOpenPreferences = computed(() => {
   return props.gql.localSettings.preferences.isSpecsListOpen ?? false
 })
 
 const studioStatus = computed(() => {
   return props.gql.studio?.status
+})
+
+const shouldShowStudioPanel = computed(() => {
+  return studioStatus.value === 'INITIALIZED' && studioStore.isActive
 })
 
 const hideCommandLog = runnerUiStore.hideCommandLog
@@ -245,6 +259,7 @@ if (!hideCommandLog) {
   preferences.update('isSpecsListOpen', isSpecsListOpenPreferences.value)
   preferences.update('reporterWidth', reporterWidthPreferences.value)
   preferences.update('specListWidth', specsListWidthPreferences.value)
+  preferences.update('studioWidth', studioWidthPreferences.value)
   // 👆 we must update these preferences before calling useRunnerStyle, to make sure that values from GQL
   // will be available during the initial calculation that useRunnerStyle does
 }
@@ -299,18 +314,6 @@ function openFile () {
     },
   })
 }
-
-watchEffect(() => {
-  if (studioStatus.value === 'INITIALIZED') {
-    import('app-studio').then(({ mountTestGenerationPanel }) => {
-      // eslint-disable-next-line no-console
-      console.log('Studio loaded', mountTestGenerationPanel)
-    }).catch((err) => {
-      // eslint-disable-next-line no-console
-      console.error('Error loading Studio', err)
-    })
-  }
-})
 
 onMounted(() => {
   const eventManager = getEventManager()

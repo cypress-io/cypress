@@ -244,7 +244,6 @@ export function displayRunStarting (options: { browser: Browser, config: Cfg, gr
   .filter(_.property(1))
   .value()
 
-  // @ts-expect-error incorrect type in Table
   table.push(...data)
 
   const heading = table.toString()

@@ -5179,46 +5179,34 @@
   resolved "https://registry.yarnpkg.com/@microsoft/fetch-event-source/-/fetch-event-source-2.0.1.tgz#9ceecc94b49fbaa15666e38ae8587f64acce007d"
   integrity sha512-W6CLUJ2eBMw3Rec70qrsEW0jOm/3twwJv21mrmj2yORiaVmVYGS4sSS5yUwvQc1ZlDLYGPnClVWmUUMagKNsfA==
 
-"@module-federation/error-codes@0.8.9":
-  version "0.8.9"
-  resolved "https://registry.yarnpkg.com/@module-federation/error-codes/-/error-codes-0.8.9.tgz#28fa89b7502f4105ddbc767597edbddcccdf3ef0"
-  integrity sha512-yUA3GZjOy8Ll6l193faXir2veexDaUiLdmptbzC9tIee/iSQiSwIlibdTafCfqaJ62cLZaytOUdmAFAKLv8QQw==
+"@module-federation/error-codes@0.8.11":
+  version "0.8.11"
+  resolved "https://registry.yarnpkg.com/@module-federation/error-codes/-/error-codes-0.8.11.tgz#4aaa925f29603454eade1232945ac963611570fd"
+  integrity sha512-mqt8/BQq11Cc/zbuHtojTwbZ78LJiy4f/cm9UsQPWf65Pqxi4Ticn40wccVFq8O9gee/QEi2Mf3XiwSf2SHl0A==
 
-"@module-federation/runtime-core@0.6.17":
-  version "0.6.17"
-  resolved "https://registry.yarnpkg.com/@module-federation/runtime-core/-/runtime-core-0.6.17.tgz#8dd7ccce44e85072b7ed90f456b1cca4b5915c79"
-  integrity sha512-PXFN/TT9f64Un6NQYqH1Z0QLhpytW15jkZvTEOV8W7Ed319BECFI0Rv4xAsAGa8zJGFoaM/c7QOQfdFXtKj5Og==
+"@module-federation/runtime-core@0.6.19":
+  version "0.6.19"
+  resolved "https://registry.yarnpkg.com/@module-federation/runtime-core/-/runtime-core-0.6.19.tgz#177034ce903d04c7c51e7792005eae1130157533"
+  integrity sha512-PDMQIkxEWlF9c1ezDl1f+DwzoNoWan/jfhtBoOjp0JiMtPNPe3ZUH0v2++Cbaxc/BRtHT+ILCSDEezC4zF98uw==
   dependencies:
-    "@module-federation/error-codes" "0.8.9"
-    "@module-federation/sdk" "0.8.9"
+    "@module-federation/error-codes" "0.8.11"
+    "@module-federation/sdk" "0.8.11"
 
-"@module-federation/runtime@^0.8.0":
-  version "0.8.9"
-  resolved "https://registry.yarnpkg.com/@module-federation/runtime/-/runtime-0.8.9.tgz#e72623e888f387699a76633bd3bdb500cdb07374"
-  integrity sha512-i+a+/hoT/c+EE52mT+gJrbA6DhL86PY9cd/dIv/oKpLz9i+yYBlG+RA+puc7YsUEO4irbFLvnIMq6AGDUKVzYA==
+"@module-federation/runtime@^0.8.11":
+  version "0.8.11"
+  resolved "https://registry.yarnpkg.com/@module-federation/runtime/-/runtime-0.8.11.tgz#c8b4f72fd473452a5f63dacc716ac9775c326b30"
+  integrity sha512-07aBwU5AJltbspOot0gVYDA0PAMNkjBBaIRIUMsLNj9MGx01/YKl13z239UdC0Fk4hFlexpkef8ZvnMPgp4YFA==
   dependencies:
-    "@module-federation/error-codes" "0.8.9"
-    "@module-federation/runtime-core" "0.6.17"
-    "@module-federation/sdk" "0.8.9"
+    "@module-federation/error-codes" "0.8.11"
+    "@module-federation/runtime-core" "0.6.19"
+    "@module-federation/sdk" "0.8.11"
 
-"@module-federation/sdk@0.8.9":
-  version "0.8.9"
-  resolved "https://registry.yarnpkg.com/@module-federation/sdk/-/sdk-0.8.9.tgz#da0746610e8c470a4cf5ee094537ea6901a0aed9"
-  integrity sha512-QJ60itWC/SPjqduT7wDiF8UGwVU/yJ/Sz+QbnoxB9b7gNLzvI//swAXTo9eOtKsCy/V2BMwjt0F3eOcfnaqllA==
+"@module-federation/sdk@0.8.11":
+  version "0.8.11"
+  resolved "https://registry.yarnpkg.com/@module-federation/sdk/-/sdk-0.8.11.tgz#de79ebc876a386653affbf99b5a3d5d374d6ab0f"
+  integrity sha512-h9oXuOABJ5O77TeWZoLO3KNq7HywdZkX2c2rmYEQRRrkuXHgHAQu0nEs7ZuL5YDWNQLUMxoOyTH+sK+JWgvnKQ==
   dependencies:
     isomorphic-rslog "0.0.7"
-
-"@module-federation/vite@^1.2.2":
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/@module-federation/vite/-/vite-1.2.2.tgz#e8040ca5f7bc7e0e3633b88291ea140e791d625e"
-  integrity sha512-0RWkB8aE69BqjuZjl5Q1aITW3ntMSHh6jlBSe07ThDamQm1VBINU9VMkOhdjnhaTPCxjVnYG4lpnNb2dTvpdDA==
-  dependencies:
-    "@module-federation/runtime" "^0.8.0"
-    "@rollup/pluginutils" "^5.1.0"
-    defu "^6.1.4"
-    estree-walker "^2"
-    magic-string "^0.30.11"
-    pathe "^1.1.2"
 
 "@n1ru4l/graphql-live-query@0.8.1":
   version "0.8.1"
@@ -12569,17 +12557,7 @@ cli-spinners@2.6.1, cli-spinners@^2.5.0:
   resolved "https://registry.yarnpkg.com/cli-spinners/-/cli-spinners-2.6.1.tgz#adc954ebe281c37a6319bfa401e6dd2488ffb70d"
   integrity sha512-x/5fWmGMnbKQAaNwN+UZlV79qBLM9JFnJuJ03gIi5whrob0xV0ofNVHy9DhwGdsMJQc2OKv0oGmLzvaqvAVv+g==
 
-cli-table3@0.5.1:
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/cli-table3/-/cli-table3-0.5.1.tgz#0252372d94dfc40dbd8df06005f48f31f656f202"
-  integrity sha512-7Qg2Jrep1S/+Q3EceiZtQcDPWxhAvBw+ERf1162v4sikJrvojMHFqXt8QIVha8UlH9rgU0BeWPytZ9/TzYqlUw==
-  dependencies:
-    object-assign "^4.1.0"
-    string-width "^2.1.1"
-  optionalDependencies:
-    colors "^1.1.2"
-
-cli-table3@^0.6.3, cli-table3@~0.6.1:
+cli-table3@0.6.5, cli-table3@^0.6.3, cli-table3@~0.6.5:
   version "0.6.5"
   resolved "https://registry.npmjs.org/cli-table3/-/cli-table3-0.6.5.tgz#013b91351762739c16a9567c21a04632e449bf2f"
   integrity sha512-+W/5efTR7y5HRD7gACw9yQjqMVvEMLBHmboM/kPWam+H+Hmyrgjh6YncVKK122YZkXrLudzTuAukUw9FnMf7IQ==
@@ -12859,7 +12837,7 @@ colorette@^2.0.10, colorette@^2.0.14, colorette@^2.0.20:
   resolved "https://registry.yarnpkg.com/colorette/-/colorette-2.0.20.tgz#9eb793e6833067f7235902fcd3b09917a000a95a"
   integrity sha512-IfEDxwoWIjkeXL1eXcDiow4UbKjhLdq6/EuSVR9GMN7KVH3r9gQ83e73hsz1Nd1T3ijd5xv1wcWRYO+D6kCI2w==
 
-colors@^1.1.2, colors@^1.4.0:
+colors@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/colors/-/colors-1.4.0.tgz#c50491479d4c1bdaed2c9ced32cf7c7dc2360f78"
   integrity sha512-a+UqTh4kgZg/SlGvfbzDHpgRu7AAQOmmqRHJnxhRZICKFUT91brVhNNt58CMWU9PsBbv3PDCZUHbVxuDiH2mtA==
@@ -13026,10 +13004,10 @@ compression@1.7.4:
     safe-buffer "5.1.2"
     vary "~1.1.2"
 
-compression@1.7.5, compression@^1.7.4:
-  version "1.7.5"
-  resolved "https://registry.yarnpkg.com/compression/-/compression-1.7.5.tgz#fdd256c0a642e39e314c478f6c2cd654edd74c93"
-  integrity sha512-bQJ0YRck5ak3LgtnpKkiabX5pNF7tMUh1BSy2ZBOTh0Dim0BUu6aPPwByIns6/A5Prh8PufSPerMDUklpzes2Q==
+compression@1.8.0, compression@^1.7.4:
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/compression/-/compression-1.8.0.tgz#09420efc96e11a0f44f3a558de59e321364180f7"
+  integrity sha512-k6WLKfunuqCYD3t6AsuPGvQWaKwuLLh2/xHNcX4qE+vIfDNXpSqnrhwA7O53R7WVQUnt8dVAIW+YHr7xTgOgGA==
   dependencies:
     bytes "3.1.2"
     compressible "~2.0.18"
@@ -14336,11 +14314,6 @@ defined@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/defined/-/defined-1.0.0.tgz#c98d9bcef75674188e110969151199e39b1fa693"
   integrity sha1-yY2bzvdWdBiOEQlpFRGZ45sfppM=
-
-defu@^6.1.4:
-  version "6.1.4"
-  resolved "https://registry.yarnpkg.com/defu/-/defu-6.1.4.tgz#4e0c9cf9ff68fe5f3d7f2765cc1a012dfdcb0479"
-  integrity sha512-mEQCMmwJu317oSz8CwdIOdwf3xMif1ttiM8LTufzc3g6kR+9Pe236twL8j3IYT1F7GfRgGcW6MWxzZjLIkuHIg==
 
 degenerator@^5.0.0:
   version "5.0.1"
@@ -16161,7 +16134,7 @@ estree-walker@^1.0.1:
   resolved "https://registry.yarnpkg.com/estree-walker/-/estree-walker-1.0.1.tgz#31bc5d612c96b704106b477e6dd5d8aa138cb700"
   integrity sha512-1fMXF3YP4pZZVozF8j/ZLfvnR8NSIljt56UhbZ5PeeDmmGHpgpdwQt7ITlGvYaQukCvuBRMLEiKiYC+oeIg4cg==
 
-estree-walker@^2, estree-walker@^2.0.1, estree-walker@^2.0.2:
+estree-walker@^2.0.1, estree-walker@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/estree-walker/-/estree-walker-2.0.2.tgz#52f010178c2a4c117a7757cfe942adb7d2da4cac"
   integrity sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w==
@@ -22814,10 +22787,10 @@ mobx-react@9.1.1:
   dependencies:
     mobx-react-lite "^4.0.7"
 
-mobx@6.13.5:
-  version "6.13.5"
-  resolved "https://registry.npmjs.org/mobx/-/mobx-6.13.5.tgz#957d9df88c7f8b4baa7c6f8bdcb6d68b432a6ed5"
-  integrity sha512-/HTWzW2s8J1Gqt+WmUj5Y0mddZk+LInejADc79NJadrWla3rHzmRHki/mnEUH1AvOmbNTZ1BRbKxr8DSgfdjMA==
+mobx@6.13.6:
+  version "6.13.6"
+  resolved "https://registry.yarnpkg.com/mobx/-/mobx-6.13.6.tgz#3b80895c7c9df456efc86ae0b6983ccea1da6cc6"
+  integrity sha512-r19KNV0uBN4b+ER8Z0gA4y+MzDYIQ2SvOmn3fUrqPnWXdQfakd9yfbPBDBF/p5I+bd3N5Rk1fHONIvMay+bJGA==
 
 "mocha-7.0.1@npm:mocha@7.0.1":
   version "7.0.1"

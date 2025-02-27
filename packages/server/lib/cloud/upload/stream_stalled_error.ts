@@ -5,9 +5,9 @@ export class StreamStalledError extends Error {
 
   constructor (
     public readonly maxActivityDwellTime: number,
-    public readonly chunkSizeKB: number,
+    public readonly chunkSizeBytes: number,
   ) {
-    super(`Stream stalled: failed to transfer ${chunkSizeKB} kilobytes over the previous ${maxActivityDwellTime}ms`)
+    super(`Stream stalled: failed to transfer ${chunkSizeBytes} bytes over the previous ${maxActivityDwellTime}ms`)
   }
 
   public static isStreamStalledError (error: Error & {kind?: any}): error is StreamStalledError {

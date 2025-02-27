@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "14.0.3",
+  "version": "14.1.0",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -177,7 +177,7 @@
     "listr2": "3.8.3",
     "lodash": "^4.17.21",
     "minimist": "1.2.8",
-    "mobx": "6.13.5",
+    "mobx": "6.13.6",
     "mobx-react": "9.1.1",
     "mocha": "3.5.3",
     "mocha-banner": "1.1.2",

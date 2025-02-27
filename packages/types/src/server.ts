@@ -56,7 +56,7 @@ export interface LaunchArgs {
   onFocusTests?: () => any
 }
 
-type NullableMiddlewareHook = (() => void) | null
+type NullableMiddlewareHook = ((message: unknown, data: unknown) => void) | null
 
 export type OnRequestEvent = (eventName: string, data: any) => void
 
