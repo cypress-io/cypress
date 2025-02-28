@@ -3,6 +3,7 @@ import Promise from 'bluebird'
 import { get as errorsGet } from '../errors'
 import preprocessor from '../plugins/preprocessor'
 import type { Cfg } from '../project-base'
+import type { Request, Response } from 'express'
 
 const debug = Debug('cypress:server:controllers:spec')
 
