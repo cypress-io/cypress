@@ -601,7 +601,7 @@ describe('lib/cloud/api', () => {
         },
         get configDebugData () {
           return {
-            filePreprocessorHandlerString: 'function () {}',
+            filePreprocessorHandlerText: 'function () {}',
           }
         },
       }
@@ -637,7 +637,7 @@ describe('lib/cloud/api', () => {
               namespace: '__cypress',
             },
             debugData: {
-              filePreprocessorHandlerString: 'function () {}',
+              filePreprocessorHandlerText: 'function () {}',
             },
           },
         )
@@ -697,7 +697,7 @@ describe('lib/cloud/api', () => {
           }
         },
         configDebugData: {
-          filePreprocessorHandlerString: 'function () {}',
+          filePreprocessorHandlerText: 'function () {}',
         },
       }
 
@@ -732,7 +732,7 @@ describe('lib/cloud/api', () => {
               namespace: '__cypress',
             },
             debugData: {
-              filePreprocessorHandlerString: 'function () {}',
+              filePreprocessorHandlerText: 'function () {}',
             },
           },
         )

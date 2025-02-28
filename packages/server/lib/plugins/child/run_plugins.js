@@ -128,7 +128,7 @@ class RunPlugins {
       } else {
         const handler = this.registeredEventsById[this.registeredEventsByName['file:preprocessor']].handler
 
-        this.ipc.send('file:preprocessor:overridden', { handlerString: handler.toString() })
+        this.ipc.send('file:preprocessor:overridden', { handlerText: handler.toString() })
       }
     })
     .then((modifiedCfg) => {
