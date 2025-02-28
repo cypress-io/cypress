@@ -28,7 +28,7 @@ const ignoreEPIPE = () => {
 }
 
 export = {
-  handle (spec: any, req: any, res: any, config: Cfg, next: any, onError: any) {
+  handle (spec: any, req: Request, res: Response, config: Cfg, next: any, onError: any) {
     debug('request for %o', { spec })
 
     res.set({
