@@ -49,7 +49,7 @@
     "chokidar": "3.5.1",
     "chrome-remote-interface": "0.33.3",
     "ci-info": "^4.1.0",
-    "cli-table3": "0.5.1",
+    "cli-table3": "0.6.5",
     "coffeescript": "2.6.0",
     "color-string": "1.5.5",
     "command-exists": "1.2.9",

@@ -58,7 +58,7 @@
     "resolve": "1.22.8",
     "semver": "7.3.2",
     "server-destroy": "1.0.1",
-    "simple-git": "3.25.0",
+    "simple-git": "^3.27.0",
     "stringify-object": "^3.0.0",
     "underscore.string": "^3.3.6",
     "wonka": "^4.0.15"
