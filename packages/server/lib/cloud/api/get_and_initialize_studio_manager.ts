@@ -88,7 +88,7 @@ const getTarHash = (): Promise<string> => {
   })
 }
 
-export const retrieveAndExtractStudioBundle = async (projectId?: string): Promise<{ studioHash: string | undefined }> => {
+export const retrieveAndExtractStudioBundle = async ({ projectId }: { projectId?: string } = {}): Promise<{ studioHash: string | undefined }> => {
   // First remove studioPath to ensure we have a clean slate
   await fs.promises.rm(studioPath, { recursive: true, force: true })
   await ensureDir(studioPath)
@@ -116,11 +116,11 @@ export const retrieveAndExtractStudioBundle = async (projectId?: string): Promis
   return { studioHash }
 }
 
-export const getAndInitializeStudioManager = async (projectId?: string): Promise<StudioManager> => {
+export const getAndInitializeStudioManager = async ({ projectId }: { projectId?: string } = {}): Promise<StudioManager> => {
   let script: string
 
   try {
-    const { studioHash } = await retrieveAndExtractStudioBundle(projectId)
+    const { studioHash } = await retrieveAndExtractStudioBundle({ projectId })
 
     script = await readFile(serverFilePath, 'utf8')
 

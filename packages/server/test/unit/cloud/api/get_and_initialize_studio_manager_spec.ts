@@ -126,7 +126,7 @@ describe('getAndInitializeStudioManager', () => {
 
       const projectId = '12345'
 
-      await getAndInitializeStudioManager(projectId)
+      await getAndInitializeStudioManager({ projectId })
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
       expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')
@@ -180,7 +180,7 @@ describe('getAndInitializeStudioManager', () => {
 
       const projectId = '12345'
 
-      await getAndInitializeStudioManager(projectId)
+      await getAndInitializeStudioManager({ projectId })
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
       expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')
@@ -224,7 +224,7 @@ describe('getAndInitializeStudioManager', () => {
 
       const projectId = '12345'
 
-      await getAndInitializeStudioManager(projectId)
+      await getAndInitializeStudioManager({ projectId })
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
       expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')
@@ -263,7 +263,7 @@ describe('getAndInitializeStudioManager', () => {
 
       const projectId = '12345'
 
-      await getAndInitializeStudioManager(projectId)
+      await getAndInitializeStudioManager({ projectId })
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
       expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')
@@ -297,7 +297,7 @@ describe('getAndInitializeStudioManager', () => {
 
       const projectId = '12345'
 
-      await getAndInitializeStudioManager(projectId)
+      await getAndInitializeStudioManager({ projectId })
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
       expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')
