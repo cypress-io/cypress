@@ -31,23 +31,6 @@ const checkIfFirefox = async () => {
   return name === 'Firefox'
 }
 
-// this check only applies to firefox versioning!
-const isBiDiEnabled = async (config) => {
-  if (!browser || !get(browser, 'runtime.getBrowserInfo') || config.IS_CDP_FORCED_FOR_FIREFOX) {
-    return false
-  }
-
-  const { version } = await browser.runtime.getBrowserInfo()
-
-  if (version) {
-    const [majorVersion] = version.split('.').map(Number)
-
-    return majorVersion >= 135
-  }
-
-  return false
-}
-
 const connect = function (host, path, extraOpts) {
   const listenToCookieChanges = once(() => {
     return browser.cookies.onChanged.addListener((info) => {
@@ -82,30 +65,6 @@ const connect = function (host, path, extraOpts) {
         })
       }
     })
-  })
-
-  const listenToOnBeforeHeaders = once(() => {
-    // adds a header to the request to mark it as a request for the AUT frame
-    // itself, so the proxy can utilize that for injection purposes
-    browser.webRequest.onBeforeSendHeaders.addListener((details) => {
-      if (
-        // parentFrameId: 0 means the parent is the top-level, so if it isn't
-        // 0, it's nested inside the AUT and can't be the AUT itself
-        details.parentFrameId !== 0
-        // is the spec frame, not the AUT
-        || details.url.includes('__cypress')
-      ) return
-
-      return {
-        requestHeaders: [
-          ...details.requestHeaders,
-          {
-            name: 'X-Cypress-Is-AUT-Frame',
-            value: 'true',
-          },
-        ],
-      }
-    }, { urls: ['<all_urls>'], types: ['sub_frame'] }, ['blocking', 'requestHeaders'])
   })
 
   const fail = (id, err) => {
@@ -167,13 +126,6 @@ const connect = function (host, path, extraOpts) {
     if (isFirefox) {
       // Non-Firefox browsers use CDP for this instead
       listenToDownloads()
-      // if BiDi is enabled, BiDi will handle the network interception.
-      // Otherwise, CDP does not support it for Firefox and we need to listen for it here.
-      const isBiDiTurnedOn = await isBiDiEnabled(config)
-
-      if (!isBiDiTurnedOn) {
-        listenToOnBeforeHeaders()
-      }
     }
   })
 

@@ -1193,9 +1193,6 @@ export const AllCypressErrors = {
   CDP_RETRYING_CONNECTION: (attempt: string | number, browserName: string, connectRetryThreshold: number) => {
     return errTemplate`Still waiting to connect to ${fmt.off(_.capitalize(browserName))}, retrying in 1 second ${fmt.meta(`(attempt ${attempt}/${connectRetryThreshold})`)}`
   },
-  CDP_FIREFOX_DEPRECATED: () => {
-    return errTemplate`Since Firefox 129, Chrome DevTools Protocol (CDP) has been deprecated in Firefox. In Firefox 135 and above, Cypress defaults to automating the Firefox browser with WebDriver BiDi. Cypress will no longer support CDP within Firefox in the future and is planned for removal in Cypress 15.`
-  },
   BROWSER_PROCESS_CLOSED_UNEXPECTEDLY: (browserName: string) => {
     return errTemplate`\
       We detected that the ${fmt.highlight(browserName)} browser process closed unexpectedly.
