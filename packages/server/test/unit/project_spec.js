@@ -435,7 +435,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       await this.project.open()
 
-      expect(studio.getAndInitializeStudioManager).to.be.calledWith('abc123')
+      expect(studio.getAndInitializeStudioManager).to.be.calledWith({ projectId: 'abc123' })
       expect(ctx.coreData.studio).to.eq(this.testStudioManager)
     })
 
@@ -444,7 +444,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       await this.project.open()
 
-      expect(studio.getAndInitializeStudioManager).to.be.calledWith('abc123')
+      expect(studio.getAndInitializeStudioManager).to.be.calledWith({ projectId: 'abc123' })
       expect(ctx.coreData.studio).to.eq(this.testStudioManager)
     })
 
