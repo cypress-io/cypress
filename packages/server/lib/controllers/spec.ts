@@ -45,7 +45,6 @@ export = {
       debug('sending spec %o', { filePath })
       const sendFile = Promise.promisify(res.sendFile.bind(res))
 
-      // @ts-expect-error TODO: sendFile doesn't accept any args, yet here one is passed
       return sendFile(filePath)
     })
     .catch({ code: 'ECONNABORTED' }, ignoreECONNABORTED)
@@ -72,6 +71,8 @@ export = {
       err = errorsGet('BUNDLE_ERROR', filePath, preprocessor.errorMessage(err))
 
       onError(err)
+
+      return undefined
     })
   },
 }
