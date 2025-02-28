@@ -172,7 +172,7 @@ it('visits a basic html page', () => {
     })
   })
 
-  it('creates a test using Studio, but cancels and does not write to file', () => {
+  it('updates a test but cancels and does not write to file', () => {
     launchStudio()
 
     cy.getAutIframe().within(() => {
@@ -196,11 +196,9 @@ it('visits a basic html page', () => {
       cy.get('.command-name-click').should('contain.text', 'click')
     })
 
-    cy.get('[data-cy="hook-name-studio commands"]').should('exist')
-
     cy.get('a').contains('Cancel').click()
 
-    // Cyprss re-runs after you cancel Studio.
+    // Cypress re-runs after you cancel Studio.
     // Original spec should pass
     cy.waitForSpecToFinish({ passCount: 1 })
 
@@ -225,7 +223,99 @@ it('visits a basic html page', () => {
     })
   })
 
-  // TODO: Can we somehow do the "Create Test" workflow within Cypress in Cypress?
+  it('removes pending commands when restarting studio', () => {
+    launchStudio()
+
+    cy.get('[data-cy="hook-name-studio commands"]').closest('.hook-studio').within(() => {
+      cy.get('.command').should('have.length', 1)
+      cy.get('.studio-prompt').should('contain.text', 'Interact with your site to add test commands. Right click to add assertions.')
+    })
+
+    cy.getAutIframe().within(() => {
+      cy.get('p').contains('Count is 0')
+
+      // (1) First Studio action - get
+      cy.get('#increment')
+
+      // (2) Second Studio action - click
+      .realClick().then(() => {
+        cy.get('p').contains('Count is 1')
+      })
+    })
+
+    cy.get('[data-cy="hook-name-studio commands"]').closest('.hook-studio').within(() => {
+      cy.get('.command').should('have.length', 2)
+      // (1) Get Command
+      cy.get('.command-name-get').should('contain.text', '#increment')
+
+      // (2) Click Command
+      cy.get('.command-name-click').should('contain.text', 'click')
+    })
+
+    cy.get('[data-cy=studio-toolbar]').get('button[data-cy=restart-studio]').click()
+
+    cy.waitForSpecToFinish()
+
+    // all of the pending studio commands should have been removed
+    cy.get('[data-cy="hook-name-studio commands"]').closest('.hook-studio').within(() => {
+      cy.get('.command').should('have.length', 1)
+      cy.get('.studio-prompt').should('contain.text', 'Interact with your site to add test commands. Right click to add assertions.')
+    })
+
+    cy.withCtx(async (ctx) => {
+      const spec = await ctx.actions.file.readFileInProject('cypress/e2e/spec.cy.js')
+
+      // No change, since we cancelled.
+      expect(spec.trim().replace(/\r/g, '')).to.eq(`
+it('visits a basic html page', () => {
+  cy.visit('cypress/e2e/index.html')
+})`.trim())
+    })
+  })
+
+  it('does not create a new test if the Save test modal is closed', () => {
+    cy.scaffoldProject('experimental-studio')
+    cy.openProject('experimental-studio')
+    cy.startAppServer('e2e')
+    cy.visitApp()
+    cy.specsPageIsVisible()
+    cy.get(`[title="empty.cy.js"]`).should('be.visible').click()
+
+    cy.waitForSpecToFinish()
+
+    cy.contains('Create test with Cypress Studio').click()
+    cy.get('[data-cy="aut-url"]').as('urlPrompt')
+
+    cy.get('@urlPrompt').within(() => {
+      cy.contains('Continue ➜').should('be.disabled')
+    })
+
+    cy.get('@urlPrompt').type('/cypress/e2e/index.html')
+
+    cy.get('@urlPrompt').within(() => {
+      cy.contains('Continue ➜').click()
+    })
+
+    cy.getAutIframe().within(() => {
+      cy.get('p').contains('Count is 0')
+      cy.get('#increment').realClick()
+    })
+
+    cy.get('button').contains('Save Commands').click()
+
+    cy.get('#testName').type('new-test')
+
+    cy.get('button[aria-label=Close]').click()
+
+    // all of the existing studio commands should still be there since we didn't save
+    cy.get('[data-cy="hook-name-studio commands"]').closest('.hook-studio').within(() => {
+      cy.get('.command').should('have.length', 3)
+      cy.get('.command-name-visit').should('contain.text', '/cypress/e2e/index.html')
+      cy.get('.command-name-get').should('contain.text', '#increment')
+      cy.get('.command-name-click').should('contain.text', 'click')
+    })
+  })
+
   it('creates a brand new test', () => {
     cy.scaffoldProject('experimental-studio')
     cy.openProject('experimental-studio')
@@ -243,17 +333,44 @@ it('visits a basic html page', () => {
       cy.contains('Continue ➜').should('be.disabled')
     })
 
-    cy.get('@urlPrompt').type('http://localhost:4455/cypress/e2e/index.html')
+    cy.get('@urlPrompt').type('/cypress/e2e/index.html')
 
     cy.get('@urlPrompt').within(() => {
-      cy.contains('Continue ➜').should('not.be.disabled')
-      cy.contains('Cancel').click()
+      cy.contains('Continue ➜').click()
     })
 
-    // TODO: Can we somehow do the "Create Test" workflow within Cypress in Cypress?
-    // If we hit "Continue" here, it updates the domain (as expected) but since we are
-    // Cypress in Cypress, it redirects us the the spec page, which is not what normally
-    // would happen in production.
+    cy.get('button').contains('Save Commands').click()
+
+    // the save button is disabled until we add a test name
+    cy.get('button[type=submit]').should('be.disabled')
+
+    cy.get('#testName').type('new-test')
+
+    cy.get('button[type=submit]').click()
+
+    // Cypress re-runs after the new test is saved.
+    cy.waitForSpecToFinish({ passCount: 1 })
+
+    cy.get('.command').should('have.length', 1)
+    cy.get('.command-name-visit').within(() => {
+      cy.contains('visit')
+      cy.contains('cypress/e2e/index.html')
+    })
+
+    cy.get('[data-cy="hook-name-studio commands"]').should('not.exist')
+
+    cy.withCtx(async (ctx) => {
+      const spec = await ctx.actions.file.readFileInProject('cypress/e2e/empty.cy.js')
+
+      expect(spec.trim().replace(/\r/g, '')).to.equal(`
+/* ==== Test Created with Cypress Studio ==== */
+it('new-test', function() {
+  /* ==== Generated with Cypress Studio ==== */
+  cy.visit('/cypress/e2e/index.html');
+  /* ==== End Cypress Studio ==== */
+});
+`.trim())
+    })
   })
 
   it('shows menu and submenu correctly', () => {
@@ -276,6 +393,83 @@ it('visits a basic html page', () => {
       .find('.assertion-option')
       .should('have.text', 'Hello, Studio!')
       .should('be.visible')
+    })
+  })
+
+  describe('URL parameters', () => {
+    it('should update the url with the testId and studio parameters', () => {
+      launchStudio()
+
+      cy.location().then((location) => {
+        const hashSearchParams = new URLSearchParams(location.hash)
+        const testId = hashSearchParams.get('testId')
+        const studio = hashSearchParams.get('studio')
+
+        expect(testId).to.equal('r2')
+        expect(studio).to.equal('')
+      })
+    })
+
+    it('should update the url with the suiteId and studio parameters', () => {
+      launchStudio()
+
+      cy.location().then((location) => {
+        const hashSearchParams = new URLSearchParams(location.hash)
+        const testId = hashSearchParams.get('testId')
+        const studio = hashSearchParams.get('studio')
+
+        expect(testId).to.equal('r2')
+        expect(studio).to.equal('')
+      })
+    })
+
+    it('should remove the studio parameters when saving the test', () => {
+      launchStudio()
+
+      cy.getAutIframe().within(() => {
+        cy.get('#increment').realClick()
+      })
+
+      cy.get('button').contains('Save Commands').click()
+
+      cy.location().then((location) => {
+        const hashSearchParams = new URLSearchParams(location.hash)
+        const testId = hashSearchParams.get('testId')
+        const studio = hashSearchParams.get('studio')
+
+        expect(testId).to.be.null
+        expect(studio).to.be.null
+      })
+    })
+
+    it('should remove the studio parameters when cancelling', () => {
+      launchStudio()
+
+      cy.get('a').contains('Cancel').click()
+
+      cy.location().then((location) => {
+        const hashSearchParams = new URLSearchParams(location.hash)
+        const testId = hashSearchParams.get('testId')
+        const studio = hashSearchParams.get('studio')
+
+        expect(testId).to.be.null
+        expect(studio).to.be.null
+      })
+    })
+
+    it('should remove the studio parameters when navigating away', () => {
+      launchStudio()
+
+      cy.visit('/')
+
+      cy.location().then((location) => {
+        const hashSearchParams = new URLSearchParams(location.hash)
+        const testId = hashSearchParams.get('testId')
+        const studio = hashSearchParams.get('studio')
+
+        expect(testId).to.be.null
+        expect(studio).to.be.null
+      })
     })
   })
 })

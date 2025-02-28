@@ -13,8 +13,10 @@ export function launchStudio () {
 
   cy
   .contains('visits a basic html page')
-  .closest('.runnable-wrapper')
+  .closest('.runnable-wrapper').as('runnable-wrapper')
   .realHover()
+
+  cy.get('@runnable-wrapper')
   .findByTestId('launch-studio')
   .click()
 

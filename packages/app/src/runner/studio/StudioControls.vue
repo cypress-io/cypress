@@ -1,5 +1,8 @@
 <template>
-  <div class="border-y flex border-gray-50 w-full justify-between">
+  <div
+    class="border-y flex border-gray-50 w-full justify-between"
+    data-cy="studio-toolbar"
+  >
     <div class="flex">
       <div class="flex pr-5 pl-5 items-center">
         <span
@@ -26,7 +29,10 @@
       </div>
     </div>
 
-    <div class="flex">
+    <div
+      class="flex"
+      data-cy="studio-toolbar-controls"
+    >
       <div class="border rounded-md flex border-gray-100 m-1">
         <Tooltip
           placement="top"
@@ -34,6 +40,7 @@
           <button
             :class="`border-r ${controlsClassName}`"
             :disabled="studioStore.isLoading"
+            data-cy="close-studio"
             @click="handleClose"
           >
             <i-cy-delete_x16 />
@@ -49,6 +56,7 @@
           <button
             :class="`border-r ${controlsClassName}`"
             :disabled="studioStore.isLoading"
+            data-cy="restart-studio"
             @click="handleRestart"
           >
             <i-cy-action-restart_x16 />
@@ -64,6 +72,7 @@
           <button
             :class="controlsClassName"
             :disabled="studioStore.isLoading || studioStore.isEmpty"
+            data-cy="copy-commands"
             @click="handleCopyCommands"
             @mouseleave="() => commandsCopied = false"
           >
@@ -82,6 +91,7 @@
         <button
           class="rounded-md bg-indigo-500 mx-3 text-white py-2 px-3 hover:bg-indigo-400 disabled:opacity-50 disabled:pointer-events-none"
           :disabled="studioStore.isLoading || studioStore.isEmpty || studioStore.isFailed"
+          data-cy="save"
           @click="handleSaveCommands"
         >
           {{ t('runner.studio.saveTestButton') }}
