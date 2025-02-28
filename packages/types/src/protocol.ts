@@ -106,7 +106,7 @@ export type ProtocolManagerOptions = {
   projectConfig: ProjectConfig
   mountVersion?: number
   debugData?: {
-    filePreprocessorHandlerString?: string
+    filePreprocessorHandlerText?: string
   }
 }
 

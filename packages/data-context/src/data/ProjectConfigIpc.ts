@@ -50,7 +50,7 @@ export interface SerializedLoadConfigReply {
 }
 
 export interface DebugData {
-  filePreprocessorHandlerString?: string
+  filePreprocessorHandlerText?: string
 }
 
 /**
@@ -246,7 +246,7 @@ export class ProjectConfigIpc extends EventEmitter {
 
       this.once('file:preprocessor:overridden', ({ handlerString }) => {
         this.onDebugData({
-          filePreprocessorHandlerString: handlerString,
+          filePreprocessorHandlerText: handlerString,
         })
       })
 

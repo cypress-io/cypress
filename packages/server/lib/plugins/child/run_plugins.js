@@ -64,7 +64,7 @@ class RunPlugins {
 
     // we track the register calls and then send them all at once
     // to the parent process
-    const registerChildEvent = (event, handler, isDefaultHandler = false) => {
+    const registerChildEvent = (event, handler) => {
       const { isValid, userEvents, error } = validateEvent(event, handler, initialConfig)
 
       if (!isValid) {
@@ -97,10 +97,6 @@ class RunPlugins {
         }
       }
 
-      if (event === 'file:preprocessor' && !isDefaultHandler) {
-        this.ipc.send('file:preprocessor:overridden', { handlerString: handler.toString() })
-      }
-
       const eventId = this.eventIdCount++
 
       this.registeredEventsById[eventId] = { event, handler }
@@ -128,7 +124,11 @@ class RunPlugins {
     .tap(() => {
       if (!this.registeredEventsByName['file:preprocessor']) {
         debug('register default preprocessor')
-        registerChildEvent('file:preprocessor', this._getDefaultPreprocessor(initialConfig), true)
+        registerChildEvent('file:preprocessor', this._getDefaultPreprocessor(initialConfig))
+      } else {
+        const handler = this.registeredEventsById[this.registeredEventsByName['file:preprocessor']].handler
+
+        this.ipc.send('file:preprocessor:overridden', { handlerString: handler.toString() })
       }
     })
     .then((modifiedCfg) => {
