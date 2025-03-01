@@ -3,6 +3,10 @@
 
 _Released 3/11/2025 (PENDING)_
 
+**Misc:**
+
+- Updated Cypress Studio with url routing to support maintaining state when reloading. Addresses [#31000](https://github.com/cypress-io/cypress/issues/31000) and [#30996](https://github.com/cypress-io/cypress/issues/30996).
+
 **Dependency Updates:**
 
 - Upgraded `cli-table3` from `0.5.1` to `0.6.5`. Addressed in [#31166](https://github.com/cypress-io/cypress/pull/31166).
