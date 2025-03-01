@@ -262,6 +262,8 @@ export const useStudioStore = defineStore('studioRecorder', {
       this._hasStarted = false
       this._currentId = 1
       this.isFailed = false
+
+      this._maybeResetRunnables()
     },
 
     cancel () {
@@ -281,6 +283,7 @@ export const useStudioStore = defineStore('studioRecorder', {
     save (testName?: string) {
       this.closeSaveModal()
       this.stop()
+      // TODO: what happens if the save fails?
       this._removeUrlParams()
 
       assertNonNullish(this.absoluteFile, `absoluteFile should exist`)
@@ -523,6 +526,17 @@ export const useStudioStore = defineStore('studioRecorder', {
       textArea.remove()
 
       return Promise.resolve()
+    },
+
+    _maybeResetRunnables () {
+      const url = new URL(window.location.href)
+      const hashParams = new URLSearchParams(url.hash)
+
+      // if we don't have studio params, then we can reset the runnables
+      // otherwise, we need to keep the runnables since we're still in studio
+      if (!hashParams.has('studio')) {
+        this.clearRunnableIds()
+      }
     },
 
     _getUrlParams () {
