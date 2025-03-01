@@ -315,6 +315,8 @@ export class EventManager {
       this.ws.emit('studio:save', saveInfo, (err) => {
         if (err) {
           this.reporterBus.emit('test:set:state', this.studioStore.saveError(err), noop)
+        } else {
+          this.studioStore.saveSuccess()
         }
       })
     })

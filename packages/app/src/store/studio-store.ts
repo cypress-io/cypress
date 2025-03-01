@@ -282,9 +282,6 @@ export const useStudioStore = defineStore('studioRecorder', {
 
     save (testName?: string) {
       this.closeSaveModal()
-      this.stop()
-      // TODO: what happens if the save fails?
-      this._removeUrlParams()
 
       assertNonNullish(this.absoluteFile, `absoluteFile should exist`)
 
@@ -422,6 +419,11 @@ export const useStudioStore = defineStore('studioRecorder', {
       })
 
       this._closeAssertionsMenu()
+    },
+
+    saveSuccess () {
+      this.stop()
+      this._removeUrlParams()
     },
 
     saveError (err: Error) {
