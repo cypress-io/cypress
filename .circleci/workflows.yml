@@ -1,7 +1,7 @@
 version: 2.1
 
 chrome-stable-version: &chrome-stable-version "133.0.6943.141"
-chrome-beta-version: &chrome-beta-version "134.0.6998.23"
+chrome-beta-version: &chrome-beta-version "134.0.6998.35"
 firefox-stable-version: &firefox-stable-version "135.0"
 
 orbs:

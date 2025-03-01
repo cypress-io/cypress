@@ -13,7 +13,7 @@ const savedState = require(`../../lib/saved_state`)
 const runEvents = require(`../../lib/plugins/run_events`)
 const system = require(`../../lib/util/system`)
 const { getCtx } = require(`../../lib/makeDataContext`)
-const studio = require('../../lib/cloud/api/get_app_studio')
+const studio = require('../../lib/cloud/api/get_and_initialize_studio_manager')
 
 let ctx
 
@@ -34,11 +34,11 @@ describe('lib/project-base', () => {
 
     sinon.stub(runEvents, 'execute').resolves()
 
-    this.testAppStudio = {
+    this.testStudioManager = {
       initializeRoutes: () => {},
     }
 
-    sinon.stub(studio, 'getAppStudio').resolves(this.testAppStudio)
+    sinon.stub(studio, 'getAndInitializeStudioManager').resolves(this.testStudioManager)
 
     await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
     this.config = await ctx.project.getConfig()
@@ -430,27 +430,27 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
     })
 
-    it('gets app studio for the project id if CYPRESS_ENABLE_CLOUD_STUDIO is set', async function () {
+    it('gets studio manager for the project id if CYPRESS_ENABLE_CLOUD_STUDIO is set', async function () {
       process.env.CYPRESS_ENABLE_CLOUD_STUDIO = '1'
 
       await this.project.open()
 
-      expect(studio.getAppStudio).to.be.calledWith('abc123')
-      expect(ctx.coreData.studio).to.eq(this.testAppStudio)
+      expect(studio.getAndInitializeStudioManager).to.be.calledWith({ projectId: 'abc123' })
+      expect(ctx.coreData.studio).to.eq(this.testStudioManager)
     })
 
-    it('gets app studio for the project id if CYPRESS_LOCAL_STUDIO_PATH is set', async function () {
+    it('gets studio manager for the project id if CYPRESS_LOCAL_STUDIO_PATH is set', async function () {
       process.env.CYPRESS_LOCAL_STUDIO_PATH = '/path/to/app/studio'
 
       await this.project.open()
 
-      expect(studio.getAppStudio).to.be.calledWith('abc123')
-      expect(ctx.coreData.studio).to.eq(this.testAppStudio)
+      expect(studio.getAndInitializeStudioManager).to.be.calledWith({ projectId: 'abc123' })
+      expect(ctx.coreData.studio).to.eq(this.testStudioManager)
     })
 
-    it('does not get app studio if neither CYPRESS_ENABLE_CLOUD_STUDIO nor CYPRESS_LOCAL_STUDIO_PATH is set', async function () {
+    it('does not get studio manager if neither CYPRESS_ENABLE_CLOUD_STUDIO nor CYPRESS_LOCAL_STUDIO_PATH is set', async function () {
       await this.project.open()
-      expect(studio.getAppStudio).not.to.be.called
+      expect(studio.getAndInitializeStudioManager).not.to.be.called
       expect(ctx.coreData.studio).to.be.null
     })
 

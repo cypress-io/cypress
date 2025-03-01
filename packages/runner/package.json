@@ -32,7 +32,7 @@
     "common-tags": "1.8.0",
     "cross-env": "6.0.3",
     "lodash": "^4.17.21",
-    "mobx": "6.13.5",
+    "mobx": "6.13.6",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "rimraf": "^5.0.10",
