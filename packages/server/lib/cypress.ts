@@ -1,4 +1,4 @@
-import './environment'
+require('./environment')
 
 // we are not requiring everything up front
 // to optimize how quickly electron boots while
