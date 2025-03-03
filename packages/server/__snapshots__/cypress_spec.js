@@ -2,6 +2,8 @@ exports['RECORD_PARAMS_WITHOUT_RECORDING-ciBuildId 1'] = `
 You passed the --ci-build-id, --group, --tag, --parallel, or --auto-cancel-after-failures flag without also passing the --record flag.
 
 The --ci-build-id flag you passed was: ciBuildId123
+The --parallel flag you passed was: undefined
+The --auto-cancel-after-failures flag you passed was: undefined
 
 These flags can only be used when recording to Cypress Cloud.
 
@@ -22,6 +24,8 @@ exports['RECORD_PARAMS_WITHOUT_RECORDING-group 1'] = `
 You passed the --ci-build-id, --group, --tag, --parallel, or --auto-cancel-after-failures flag without also passing the --record flag.
 
 The --group flag you passed was: e2e-tests
+The --parallel flag you passed was: undefined
+The --auto-cancel-after-failures flag you passed was: undefined
 
 These flags can only be used when recording to Cypress Cloud.
 
@@ -32,6 +36,7 @@ exports['RECORD_PARAMS_WITHOUT_RECORDING-parallel 1'] = `
 You passed the --ci-build-id, --group, --tag, --parallel, or --auto-cancel-after-failures flag without also passing the --record flag.
 
 The --parallel flag you passed was: true
+The --auto-cancel-after-failures flag you passed was: undefined
 
 These flags can only be used when recording to Cypress Cloud.
 
@@ -43,6 +48,7 @@ You passed the --ci-build-id, --group, --tag, --parallel, or --auto-cancel-after
 
 The --group flag you passed was: electron-smoke-tests
 The --parallel flag you passed was: true
+The --auto-cancel-after-failures flag you passed was: undefined
 
 These flags can only be used when recording to Cypress Cloud.
 
@@ -53,6 +59,7 @@ exports['INDETERMINATE_CI_BUILD_ID-group 1'] = `
 You passed the --group or --parallel flag but we could not automatically determine or generate a ciBuildId.
 
 The --group flag you passed was: e2e-tests
+The --parallel flag you passed was: undefined
 
 In order to use either of these features a ciBuildId must be determined.
 
@@ -221,6 +228,7 @@ You passed the --parallel flag, but this run group was originally created withou
 
 The existing run is: https://cloud.cypress.io/runs/12345
 
+The --tag flag you passed was: 
 The --group flag you passed was: electron-smoke-tests
 The --ciBuildId flag you passed was: ciBuildId123
 
@@ -274,6 +282,9 @@ https://on.cypress.io/stale-run
 
 exports['RECORD_PARAMS_WITHOUT_RECORDING-tag 1'] = `
 You passed the --ci-build-id, --group, --tag, --parallel, or --auto-cancel-after-failures flag without also passing the --record flag.
+
+The --parallel flag you passed was: undefined
+The --auto-cancel-after-failures flag you passed was: undefined
 
 These flags can only be used when recording to Cypress Cloud.
 
@@ -422,6 +433,7 @@ https://on.cypress.io/record-params-without-recording
 exports['RECORD_PARAMS_WITHOUT_RECORDING-auto-cancel-after-failures 1'] = `
 You passed the --ci-build-id, --group, --tag, --parallel, or --auto-cancel-after-failures flag without also passing the --record flag.
 
+The --parallel flag you passed was: undefined
 The --auto-cancel-after-failures flag you passed was: 4
 
 These flags can only be used when recording to Cypress Cloud.
