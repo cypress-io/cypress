@@ -10,4 +10,5 @@ export interface StudioServerShape {
 
 export interface StudioServerDefaultShape {
   createStudioServer: (options: StudioServerOptions) => StudioServerShape
+  MOUNT_VERSION: number
 }
