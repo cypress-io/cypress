@@ -1,36 +1,49 @@
-const _ = require('lodash')
-const path = require('path')
-const la = require('lazy-ass')
-const check = require('check-more-types')
-const debug = require('debug')('cypress:server:record')
-const debugCiInfo = require('debug')('cypress:server:record:ci-info')
-const Promise = require('bluebird')
-const isForkPr = require('is-fork-pr')
-const commitInfo = require('@cypress/commit-info')
-const { telemetry } = require('@packages/telemetry')
+import _ from 'lodash'
+import path from 'path'
+import la from 'lazy-ass'
+import check from 'check-more-types'
+import Debug from 'debug'
+import Promise from 'bluebird'
+import isForkPr from 'is-fork-pr'
+import commitInfo from '@cypress/commit-info'
+import { telemetry } from '@packages/telemetry'
+import { hideKeys } from '@packages/config'
 
-const { hideKeys } = require('@packages/config')
+import { default as api } from '../cloud/api'
+import exception from '../cloud/exception'
+import { get as getErrors, warning as errorsWarning, throwErr } from '../errors'
+import capture from '../capture'
+import { getResolvedRuntimeConfig } from '../config'
+import env from '../util/env'
+import ciProvider from '../util/ci_provider'
+import { flattenSuiteIntoRunnables } from '../util/tests_utils'
+import { countStudioUsage } from '../util/spec_writer'
+import { uploadArtifacts } from '../cloud/artifacts/upload_artifacts'
 
-const api = require('../cloud/api').default
-const exception = require('../cloud/exception')
+import type { Cfg } from '../project-base'
+import type { RunResult } from './results'
+import type { ReadyOptions } from './run'
 
-const errors = require('../errors')
-const capture = require('../capture')
-const Config = require('../config')
-const env = require('../util/env')
-const ciProvider = require('../util/ci_provider')
+interface InstanceOptions {
+  spec?: string
+  runId?: string
+  group?: string
+  groupId?: string
+  parallel?: boolean
+  machineId?: string
+  ciBuildId?: string
+  platform?: any
+}
 
-const testsUtils = require('../util/tests_utils')
-const specWriter = require('../util/spec_writer')
-
-const { uploadArtifacts } = require('../cloud/artifacts/upload_artifacts')
+const debug = Debug('cypress:server:record')
+const debugCiInfo = Debug('cypress:server:record:ci-info')
 
 // dont yell about any errors either
 const runningInternalTests = () => {
   return env.get('CYPRESS_INTERNAL_SYSTEM_TESTS') === '1'
 }
 
-const haveProjectIdAndKeyButNoRecordOption = (projectId, options) => {
+const haveProjectIdAndKeyButNoRecordOption = (projectId: Cfg['projectId'], options: ReadyOptions) => {
   // if we have a project id and we have a key
   // and record hasn't been set to true or false
   return (projectId && options.key) && (
@@ -38,20 +51,22 @@ const haveProjectIdAndKeyButNoRecordOption = (projectId, options) => {
   )
 }
 
-const warnIfProjectIdButNoRecordOption = (projectId, options) => {
+const warnIfProjectIdButNoRecordOption = (projectId: Cfg['projectId'], options: ReadyOptions) => {
   if (haveProjectIdAndKeyButNoRecordOption(projectId, options)) {
     // log a warning telling the user
     // that they either need to provide us
     // with a RECORD_KEY or turn off
     // record mode
-    return errors.warning('PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION', projectId)
+    return errorsWarning('PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION', `${projectId}`)
   }
+
+  return undefined
 }
 
 const throwCloudCannotProceed = ({ parallel, ciBuildId, group, err }) => {
   const errMsg = parallel ? 'CLOUD_CANNOT_PROCEED_IN_PARALLEL' : 'CLOUD_CANNOT_PROCEED_IN_SERIAL'
 
-  const errToThrow = errors.get(errMsg, {
+  const errToThrow = getErrors(errMsg, {
     response: err,
     flags: {
       group,
@@ -65,46 +80,46 @@ const throwCloudCannotProceed = ({ parallel, ciBuildId, group, err }) => {
   throw errToThrow
 }
 
-const throwIfIndeterminateCiBuildId = (ciBuildId, parallel, group) => {
+const throwIfIndeterminateCiBuildId = (ciBuildId: ReadyOptions['ciBuildId'], parallel: ReadyOptions['parallel'], group: ReadyOptions['group']) => {
   if ((!ciBuildId && !ciProvider.provider()) && (parallel || group)) {
-    errors.throwErr(
+    throwErr(
       'INDETERMINATE_CI_BUILD_ID',
       {
         group,
-        parallel,
+        parallel: `${parallel}`,
       },
       ciProvider.detectableCiBuildIdProviders(),
     )
   }
 }
 
-const throwIfRecordParamsWithoutRecording = (record, ciBuildId, parallel, group, tag, autoCancelAfterFailures) => {
+const throwIfRecordParamsWithoutRecording = (record: ReadyOptions['record'], ciBuildId: ReadyOptions['ciBuildId'], parallel: ReadyOptions['parallel'], group: ReadyOptions['group'], tag: ReadyOptions['tag'], autoCancelAfterFailures: ReadyOptions['autoCancelAfterFailures']) => {
   if (!record && _.some([ciBuildId, parallel, group, tag, autoCancelAfterFailures !== undefined])) {
-    errors.throwErr('RECORD_PARAMS_WITHOUT_RECORDING', {
+    throwErr('RECORD_PARAMS_WITHOUT_RECORDING', {
       ciBuildId,
       tag,
       group,
-      parallel,
-      autoCancelAfterFailures,
+      parallel: `${parallel}`,
+      autoCancelAfterFailures: `${autoCancelAfterFailures}`,
     })
   }
 }
 
-const throwIfIncorrectCiBuildIdUsage = (ciBuildId, parallel, group) => {
+const throwIfIncorrectCiBuildIdUsage = (ciBuildId: ReadyOptions['ciBuildId'], parallel: ReadyOptions['parallel'], group: ReadyOptions['group']) => {
   // we've been given an explicit ciBuildId
   // but no parallel or group flag
   if (ciBuildId && (!parallel && !group)) {
-    errors.throwErr('INCORRECT_CI_BUILD_ID_USAGE', { ciBuildId })
+    throwErr('INCORRECT_CI_BUILD_ID_USAGE', { ciBuildId })
   }
 }
 
-const throwIfNoProjectId = (projectId, configFile) => {
+const throwIfNoProjectId = (projectId: Cfg['projectId'], configFile: any) => {
   if (!projectId) {
-    errors.throwErr('CANNOT_RECORD_NO_PROJECT_ID', configFile)
+    throwErr('CANNOT_RECORD_NO_PROJECT_ID', configFile)
   }
 }
 
-const getSpecRelativePath = (spec) => {
+const getSpecRelativePath = (spec: ReadyOptions['spec']) => {
   return _.get(spec, 'relative', null)
 }
 
@@ -135,7 +150,7 @@ returns:
 ]
 */
 
-const updateInstanceStdout = async (options = {}) => {
+const updateInstanceStdout = async (options: any = {}) => {
   const { runId, instanceId, captured } = options
 
   const stdout = captured.toString()
@@ -144,21 +159,23 @@ const updateInstanceStdout = async (options = {}) => {
     runId,
     stdout,
     instanceId,
-  }).catch((err) => {
+  }).catch((err: any) => {
     debug('failed updating instance stdout %o', {
       stack: err.stack,
     })
 
-    errors.warning('CLOUD_CANNOT_CREATE_RUN_OR_INSTANCE', err)
+    errorsWarning('CLOUD_CANNOT_CREATE_RUN_OR_INSTANCE', err)
 
     // dont log exceptions if we have a 503 status code
     if (err.statusCode !== 503) {
       return exception.create(err)
     }
+
+    return undefined
   }).finally(capture.restore)
 }
 
-const postInstanceResults = (options = {}) => {
+const postInstanceResults = (options: any = {}) => {
   const { runId, instanceId, results, group, parallel, ciBuildId, metadata } = options
   let { stats, tests, video, screenshots, reporterStats, error } = results
 
@@ -187,7 +204,7 @@ const postInstanceResults = (options = {}) => {
     screenshots,
     metadata,
   })
-  .catch((err) => {
+  .catch((err: any) => {
     debug('failed updating instance %o', {
       stack: err.stack,
     })
@@ -196,7 +213,7 @@ const postInstanceResults = (options = {}) => {
   })
 }
 
-const getCommitFromGitOrCi = (git) => {
+const getCommitFromGitOrCi = (git: any) => {
   la(check.object(git), 'expected git information object', git)
 
   return ciProvider.commitDefaults({
@@ -210,7 +227,7 @@ const getCommitFromGitOrCi = (git) => {
   })
 }
 
-const billingLink = (orgId) => {
+const billingLink = (orgId: any) => {
   if (orgId) {
     return `https://on.cypress.io/dashboard/organizations/${orgId}/billing`
   }
@@ -218,11 +235,11 @@ const billingLink = (orgId) => {
   return 'https://on.cypress.io/set-up-billing'
 }
 
-const gracePeriodMessage = (gracePeriodEnds) => {
+const gracePeriodMessage = (gracePeriodEnds: any) => {
   return gracePeriodEnds || 'the grace period ends'
 }
 
-const createRun = Promise.method((options = {}) => {
+const createRun = Promise.method((options: any = {}) => {
   _.defaults(options, {
     group: null,
     tags: null,
@@ -242,11 +259,11 @@ const createRun = Promise.method((options = {}) => {
     // a PR because this logic triggers unintended here
     if (isForkPr.isForkPr() && !runningInternalTests()) {
       // bail with a warning
-      return errors.warning('RECORDING_FROM_FORK_PR')
+      return errorsWarning('RECORDING_FROM_FORK_PR')
     }
 
     // else throw
-    errors.throwErr('RECORD_KEY_MISSING')
+    throwErr('RECORD_KEY_MISSING')
   }
 
   // go back to being a string
@@ -289,66 +306,66 @@ const createRun = Promise.method((options = {}) => {
     autoCancelAfterFailures,
     project,
   })
-  .tap((response) => {
+  .tap((response: any) => {
     if (!(response && response.warnings && response.warnings.length)) {
       return
     }
 
-    return _.each(response.warnings, (warning) => {
+    return _.each(response.warnings, (warning: any) => {
       switch (warning.code) {
         case 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS':
-          return errors.warning('FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS', {
+          return errorsWarning('FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS', {
             limit: warning.limit,
             usedTestsMessage: 'private test',
             gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds),
             link: billingLink(warning.orgId),
           })
         case 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS':
-          return errors.warning('FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS', {
+          return errorsWarning('FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS', {
             limit: warning.limit,
             usedTestsMessage: 'test',
             gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds),
             link: billingLink(warning.orgId),
           })
         case 'FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE':
-          return errors.warning('FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE', {
+          return errorsWarning('FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE', {
             gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds),
             link: billingLink(warning.orgId),
           })
         case 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS_V2':
-          return errors.warning('PLAN_EXCEEDS_MONTHLY_TESTS', {
+          return errorsWarning('PLAN_EXCEEDS_MONTHLY_TESTS', {
             planType: 'free',
             limit: warning.limit,
             usedTestsMessage: 'test',
             link: billingLink(warning.orgId),
           })
         case 'PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS':
-          return errors.warning('PLAN_EXCEEDS_MONTHLY_TESTS', {
+          return errorsWarning('PLAN_EXCEEDS_MONTHLY_TESTS', {
             planType: 'current',
             limit: warning.limit,
             usedTestsMessage: 'private test',
             link: billingLink(warning.orgId),
           })
         case 'PAID_PLAN_EXCEEDS_MONTHLY_TESTS':
-          return errors.warning('PLAN_EXCEEDS_MONTHLY_TESTS', {
+          return errorsWarning('PLAN_EXCEEDS_MONTHLY_TESTS', {
             planType: 'current',
             limit: warning.limit,
             usedTestsMessage: 'test',
             link: billingLink(warning.orgId),
           })
         case 'PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED':
-          return errors.warning('PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED', {
+          return errorsWarning('PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED', {
             gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds),
             link: billingLink(warning.orgId),
           })
         default:
-          return errors.warning('CLOUD_UNKNOWN_CREATE_RUN_WARNING', {
+          return errorsWarning('CLOUD_UNKNOWN_CREATE_RUN_WARNING', {
             message: warning.message,
             props: _.omit(warning, 'message'),
           })
       }
     })
-  }).catch((err) => {
+  }).catch((err: any) => {
     debug('failed creating run with status %o',
       _.pick(err, ['name', 'message', 'statusCode', 'stack']))
 
@@ -362,7 +379,7 @@ const createRun = Promise.method((options = {}) => {
           recordKey = 'undefined'
         }
 
-        return errors.throwErr('CLOUD_RECORD_KEY_NOT_VALID', recordKey, projectId)
+        return throwErr('CLOUD_RECORD_KEY_NOT_VALID', recordKey, projectId)
       case 402: {
         const { code, payload } = err.error
 
@@ -371,31 +388,31 @@ const createRun = Promise.method((options = {}) => {
 
         switch (code) {
           case 'FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS':
-            return errors.throwErr('FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS', {
+            return throwErr('FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS', {
               limit,
               usedTestsMessage: 'private test',
               link: billingLink(orgId),
             })
           case 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS':
-            return errors.throwErr('FREE_PLAN_EXCEEDS_MONTHLY_TESTS', {
+            return throwErr('FREE_PLAN_EXCEEDS_MONTHLY_TESTS', {
               limit,
               usedTestsMessage: 'test',
               link: billingLink(orgId),
             })
           case 'PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN':
-            return errors.throwErr('PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN', {
+            return throwErr('PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN', {
               link: billingLink(orgId),
             })
           case 'RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN':
-            return errors.throwErr('RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN', {
+            return throwErr('RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN', {
               link: billingLink(orgId),
             })
           case 'AUTO_CANCEL_NOT_AVAILABLE_IN_PLAN':
-            return errors.throwErr('CLOUD_AUTO_CANCEL_NOT_AVAILABLE_IN_PLAN', {
+            return throwErr('CLOUD_AUTO_CANCEL_NOT_AVAILABLE_IN_PLAN', {
               link: billingLink(orgId),
             })
           default:
-            return errors.throwErr('CLOUD_UNKNOWN_INVALID_REQUEST', {
+            return throwErr('CLOUD_UNKNOWN_INVALID_REQUEST', {
               response: err,
               flags: {
                 group,
@@ -407,17 +424,17 @@ const createRun = Promise.method((options = {}) => {
         }
       }
       case 404:
-        return errors.throwErr('CLOUD_PROJECT_NOT_FOUND', projectId, path.basename(options.configFile))
+        return throwErr('CLOUD_PROJECT_NOT_FOUND', projectId, path.basename(options.configFile))
       case 412:
-        return errors.throwErr('CLOUD_INVALID_RUN_REQUEST', err.error)
+        return throwErr('CLOUD_INVALID_RUN_REQUEST', err.error)
       case 422: {
         const { code, payload } = err.error
 
-        const runUrl = _.get(payload, 'runUrl')
+        const runUrl: string = _.get(payload, 'runUrl')
 
         switch (code) {
           case 'RUN_GROUP_NAME_NOT_UNIQUE':
-            return errors.throwErr('CLOUD_RUN_GROUP_NAME_NOT_UNIQUE', {
+            return throwErr('CLOUD_RUN_GROUP_NAME_NOT_UNIQUE', {
               group,
               runUrl,
               ciBuildId,
@@ -425,7 +442,7 @@ const createRun = Promise.method((options = {}) => {
           case 'PARALLEL_GROUP_PARAMS_MISMATCH': {
             const { browserName, browserVersion, osName, osVersion } = platform
 
-            return errors.throwErr('CLOUD_PARALLEL_GROUP_PARAMS_MISMATCH', {
+            return throwErr('CLOUD_PARALLEL_GROUP_PARAMS_MISMATCH', {
               group,
               runUrl,
               ciBuildId,
@@ -440,21 +457,21 @@ const createRun = Promise.method((options = {}) => {
             })
           }
           case 'PARALLEL_DISALLOWED':
-            return errors.throwErr('CLOUD_PARALLEL_DISALLOWED', {
+            return throwErr('CLOUD_PARALLEL_DISALLOWED', {
               tags,
               group,
               runUrl,
               ciBuildId,
             })
           case 'PARALLEL_REQUIRED':
-            return errors.throwErr('CLOUD_PARALLEL_REQUIRED', {
+            return throwErr('CLOUD_PARALLEL_REQUIRED', {
               tags,
               group,
               runUrl,
               ciBuildId,
             })
           case 'ALREADY_COMPLETE':
-            return errors.throwErr('CLOUD_ALREADY_COMPLETE', {
+            return throwErr('CLOUD_ALREADY_COMPLETE', {
               runUrl,
               tags,
               group,
@@ -462,7 +479,7 @@ const createRun = Promise.method((options = {}) => {
               ciBuildId,
             })
           case 'STALE_RUN':
-            return errors.throwErr('CLOUD_STALE_RUN', {
+            return throwErr('CLOUD_STALE_RUN', {
               runUrl,
               tags,
               group,
@@ -470,7 +487,7 @@ const createRun = Promise.method((options = {}) => {
               ciBuildId,
             })
           case 'AUTO_CANCEL_MISMATCH':
-            return errors.throwErr('CLOUD_AUTO_CANCEL_MISMATCH', {
+            return throwErr('CLOUD_AUTO_CANCEL_MISMATCH', {
               runUrl,
               tags,
               group,
@@ -479,7 +496,7 @@ const createRun = Promise.method((options = {}) => {
               autoCancelAfterFailures,
             })
           default:
-            return errors.throwErr('CLOUD_UNKNOWN_INVALID_REQUEST', {
+            return throwErr('CLOUD_UNKNOWN_INVALID_REQUEST', {
               response: err,
               flags: {
                 tags,
@@ -496,10 +513,10 @@ const createRun = Promise.method((options = {}) => {
   })
 })
 
-const createInstance = (options = {}) => {
+const createInstance = (options: InstanceOptions = {}) => {
   let { runId, group, groupId, parallel, machineId, ciBuildId, platform, spec } = options
 
-  spec = getSpecRelativePath(spec)
+  spec = spec ? getSpecRelativePath(spec) : null
 
   return api.createInstance({
     spec,
@@ -508,7 +525,7 @@ const createInstance = (options = {}) => {
     platform,
     machineId,
   })
-  .catch((err) => {
+  .catch((err: any) => {
     debug('failed creating instance %o', {
       stack: err.stack,
     })
@@ -539,12 +556,12 @@ const _postInstanceTests = ({
     tests,
     hooks,
   })
-  .catch((err) => {
+  .catch((err: any) => {
     throwCloudCannotProceed({ parallel, ciBuildId, group, err })
   })
 }
 
-const createRunAndRecordSpecs = (options = {}) => {
+const createRunAndRecordSpecs = (options: any = {}) => {
   const { specPattern,
     specs,
     sys,
@@ -568,7 +585,7 @@ const createRunAndRecordSpecs = (options = {}) => {
   const tags = _.split(options.tag, ',')
 
   return commitInfo.commitInfo(projectRoot)
-  .then((git) => {
+  .then((git: any) => {
     debugCiInfo('found the following git information')
     debugCiInfo(git)
 
@@ -583,6 +600,7 @@ const createRunAndRecordSpecs = (options = {}) => {
 
     telemetry.startSpan({ name: 'record:createRun' })
 
+    // @ts-expect-error TODO: Fix this saying its expecting 0 args
     return createRun({
       projectRoot,
       git,
@@ -600,7 +618,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       autoCancelAfterFailures,
       project,
     })
-    .then((resp) => {
+    .then((resp: any) => {
       telemetry.getSpan('record:createRun')?.end()
       if (!resp) {
         // if a forked run, can't record and can't be parallel
@@ -616,7 +634,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       let captured = null
       let instanceId = null
 
-      const beforeSpecRun = (spec) => {
+      const beforeSpecRun = (spec: any) => {
         telemetry.startSpan({ name: 'record:beforeSpecRun' })
         project.setOnTestsReceived(onTestsReceived)
         capture.restore()
@@ -633,7 +651,7 @@ const createRunAndRecordSpecs = (options = {}) => {
           ciBuildId,
           machineId,
         })
-        .then((resp = {}) => {
+        .then((resp: any = {}) => {
           instanceId = resp.instanceId
 
           // pull off only what we need
@@ -652,7 +670,7 @@ const createRunAndRecordSpecs = (options = {}) => {
         })
       }
 
-      const afterSpecRun = (spec, results, config) => {
+      const afterSpecRun = (spec: any, results: RunResult, config: any) => {
         // don't do anything if we failed to
         // create the instance
         if (!instanceId || results.skippedSpec) {
@@ -663,7 +681,7 @@ const createRunAndRecordSpecs = (options = {}) => {
 
         debug('after spec run %o', { spec })
 
-        return specWriter.countStudioUsage(spec.absolute)
+        return countStudioUsage(spec.absolute)
         .then((metadata) => {
           return postInstanceResults({
             group,
@@ -675,7 +693,7 @@ const createRunAndRecordSpecs = (options = {}) => {
             metadata,
           })
         })
-        .then((resp) => {
+        .then((resp: any) => {
           if (!resp) {
             return
           }
@@ -686,6 +704,7 @@ const createRunAndRecordSpecs = (options = {}) => {
 
           return uploadArtifacts({
             runId,
+            // @ts-expect-error TODO: Fix this saying instanceId cannot be null here - we returned earlier if null
             instanceId,
             video,
             screenshots,
@@ -712,7 +731,7 @@ const createRunAndRecordSpecs = (options = {}) => {
         })
       }
 
-      const onTestsReceived = (async (runnables, cb) => {
+      const onTestsReceived = (async (runnables: any, cb: any) => {
         // we failed createInstance earlier, nothing to do
         if (!instanceId) {
           return cb()
@@ -722,9 +741,9 @@ const createRunAndRecordSpecs = (options = {}) => {
         // this also means runtimeConfig will be missing
         runnables = runnables || {}
 
-        const r = testsUtils.flattenSuiteIntoRunnables(runnables)
+        const r = flattenSuiteIntoRunnables(runnables)
         const runtimeConfig = runnables.runtimeConfig
-        const resolvedRuntimeConfig = Config.getResolvedRuntimeConfig(config, runtimeConfig)
+        const resolvedRuntimeConfig = getResolvedRuntimeConfig(config, runtimeConfig)
 
         const tests = _.chain(r[0])
         .uniqBy('id')
@@ -774,7 +793,7 @@ const createRunAndRecordSpecs = (options = {}) => {
           ciBuildId,
           group,
         })
-        .catch((err) => {
+        .catch((err: any) => {
           onError(err)
 
           return responseDidFail
@@ -788,7 +807,7 @@ const createRunAndRecordSpecs = (options = {}) => {
         }
 
         if (_.some(response.actions, { type: 'SPEC', action: 'SKIP' })) {
-          errors.warning('CLOUD_CANCEL_SKIPPED_SPEC')
+          errorsWarning('CLOUD_CANCEL_SKIPPED_SPEC')
 
           // set a property on the response so the browser runner
           // knows not to start executing tests
@@ -812,7 +831,7 @@ const createRunAndRecordSpecs = (options = {}) => {
   })
 }
 
-module.exports = {
+export = {
   createRun,
 
   createInstance,
