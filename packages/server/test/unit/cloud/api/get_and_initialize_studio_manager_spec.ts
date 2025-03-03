@@ -2,8 +2,8 @@ import { Readable, Writable } from 'stream'
 import { proxyquire, sinon } from '../../../spec_helper'
 import { HttpError } from '../../../../lib/cloud/network/http_error'
 
-describe('getAppStudio', () => {
-  let getAppStudio: typeof import('@packages/server/lib/cloud/api/get_app_studio').getAppStudio
+describe('getAndInitializeStudioManager', () => {
+  let getAndInitializeStudioManager: typeof import('@packages/server/lib/cloud/api/get_and_initialize_studio_manager').getAndInitializeStudioManager
   let rmStub: sinon.SinonStub = sinon.stub()
   let ensureStub: sinon.SinonStub = sinon.stub()
   let copyStub: sinon.SinonStub = sinon.stub()
@@ -30,7 +30,7 @@ describe('getAppStudio', () => {
     createInErrorManagerStub = sinon.stub()
     studioManagerSetupStub = sinon.stub()
 
-    getAppStudio = (proxyquire('../lib/cloud/api/get_app_studio', {
+    getAndInitializeStudioManager = (proxyquire('../lib/cloud/api/get_and_initialize_studio_manager', {
       fs: {
         promises: {
           rm: rmStub.resolves(),
@@ -63,7 +63,7 @@ describe('getAppStudio', () => {
       '@packages/root': {
         version: '1.2.3',
       },
-    }) as typeof import('@packages/server/lib/cloud/api/get_app_studio')).getAppStudio
+    }) as typeof import('@packages/server/lib/cloud/api/get_and_initialize_studio_manager')).getAndInitializeStudioManager
   })
 
   afterEach(() => {
@@ -76,7 +76,7 @@ describe('getAppStudio', () => {
     })
 
     it('gets the studio bundle from the path specified in the environment variable', async () => {
-      await getAppStudio()
+      await getAndInitializeStudioManager()
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
       expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')
@@ -126,7 +126,7 @@ describe('getAppStudio', () => {
 
       const projectId = '12345'
 
-      await getAppStudio(projectId)
+      await getAndInitializeStudioManager({ projectId })
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
       expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')
@@ -180,7 +180,7 @@ describe('getAppStudio', () => {
 
       const projectId = '12345'
 
-      await getAppStudio(projectId)
+      await getAndInitializeStudioManager({ projectId })
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
       expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')
@@ -224,7 +224,7 @@ describe('getAppStudio', () => {
 
       const projectId = '12345'
 
-      await getAppStudio(projectId)
+      await getAndInitializeStudioManager({ projectId })
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
       expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')
@@ -263,7 +263,7 @@ describe('getAppStudio', () => {
 
       const projectId = '12345'
 
-      await getAppStudio(projectId)
+      await getAndInitializeStudioManager({ projectId })
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
       expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')
@@ -297,7 +297,7 @@ describe('getAppStudio', () => {
 
       const projectId = '12345'
 
-      await getAppStudio(projectId)
+      await getAndInitializeStudioManager({ projectId })
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
       expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')

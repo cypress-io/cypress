@@ -78,7 +78,7 @@
     "pinia": "2.0.0-rc.14",
     "rollup-plugin-copy": "3.4.0",
     "rollup-plugin-polyfill-node": "^0.7.0",
-    "simple-git": "3.25.0",
+    "simple-git": "^3.27.0",
     "sinon": "13.0.2",
     "tailwindcss": "^3.3.1",
     "unplugin-icons": "0.19.0",

@@ -25,7 +25,7 @@ import type ProtocolManager from './cloud/protocol'
 import { ServerBase } from './server-base'
 import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/service-worker-manager'
-import { getAppStudio } from './cloud/api/get_app_studio'
+import { getAndInitializeStudioManager } from './cloud/api/get_and_initialize_studio_manager'
 
 export interface Cfg extends ReceivedCypressOptions {
   projectId?: string
@@ -154,12 +154,12 @@ export class ProjectBase extends EE {
 
     this._server = new ServerBase(cfg)
 
-    let appStudio: StudioManagerShape | null
+    let studioManager: StudioManagerShape | null
 
     if (process.env.CYPRESS_ENABLE_CLOUD_STUDIO || process.env.CYPRESS_LOCAL_STUDIO_PATH) {
-      appStudio = await getAppStudio(cfg.projectId)
+      studioManager = await getAndInitializeStudioManager({ projectId: cfg.projectId })
       this.ctx.update((data) => {
-        data.studio = appStudio
+        data.studio = studioManager
       })
     }
 

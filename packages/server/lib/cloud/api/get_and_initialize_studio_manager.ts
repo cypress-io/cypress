@@ -1,7 +1,6 @@
 import path from 'path'
 import os from 'os'
 import { ensureDir, copy, readFile } from 'fs-extra'
-import cloudApi from '.'
 import { StudioManager } from '../studio'
 import tar from 'tar'
 import { verifySignatureFromFile } from '../encryption'
@@ -11,17 +10,19 @@ import fetch from 'cross-fetch'
 import { agent } from '@packages/network'
 import { asyncRetry, linearDelay } from '../../util/async_retry'
 import { isRetryableError } from '../network/is_retryable_error'
+import { PUBLIC_KEY_VERSION } from '../constants'
 
 const pkg = require('@packages/root')
 const routes = require('../routes')
 
 const _delay = linearDelay(500)
 
-const studioPath = path.join(os.tmpdir(), 'cypress', 'studio')
+export const studioPath = path.join(os.tmpdir(), 'cypress', 'studio')
+
 const bundlePath = path.join(studioPath, 'bundle.tar')
 const serverFilePath = path.join(studioPath, 'server', 'index.js')
 
-const downloadAppStudioBundleToTempDirectory = async (projectId?: string): Promise<void> => {
+const downloadStudioBundleToTempDirectory = async (projectId?: string): Promise<void> => {
   let responseSignature: string | null = null
 
   await (asyncRetry(async () => {
@@ -31,7 +32,7 @@ const downloadAppStudioBundleToTempDirectory = async (projectId?: string): Promi
       method: 'GET',
       headers: {
         'x-route-version': '1',
-        'x-cypress-signature': cloudApi.publicKeyVersion,
+        'x-cypress-signature': PUBLIC_KEY_VERSION,
         ...(projectId ? { 'x-cypress-project-slug': projectId } : {}),
         'x-cypress-studio-mount-version': '1',
         'x-os-name': os.platform(),
@@ -87,40 +88,47 @@ const getTarHash = (): Promise<string> => {
   })
 }
 
-export const getAppStudio = async (projectId?: string): Promise<StudioManager> => {
+export const retrieveAndExtractStudioBundle = async ({ projectId }: { projectId?: string } = {}): Promise<{ studioHash: string | undefined }> => {
+  // First remove studioPath to ensure we have a clean slate
+  await fs.promises.rm(studioPath, { recursive: true, force: true })
+  await ensureDir(studioPath)
+
+  // Note: CYPRESS_LOCAL_STUDIO_PATH is stripped from the binary, effectively removing this code path
+  if (process.env.CYPRESS_LOCAL_STUDIO_PATH) {
+    const appPath = path.join(process.env.CYPRESS_LOCAL_STUDIO_PATH, 'app')
+    const serverPath = path.join(process.env.CYPRESS_LOCAL_STUDIO_PATH, 'server')
+
+    await copy(appPath, path.join(studioPath, 'app'))
+    await copy(serverPath, path.join(studioPath, 'server'))
+
+    return { studioHash: undefined }
+  }
+
+  await downloadStudioBundleToTempDirectory(projectId)
+
+  const studioHash = await getTarHash()
+
+  await tar.extract({
+    file: bundlePath,
+    cwd: studioPath,
+  })
+
+  return { studioHash }
+}
+
+export const getAndInitializeStudioManager = async ({ projectId }: { projectId?: string } = {}): Promise<StudioManager> => {
+  let script: string
+
   try {
-    let script: string
-    let studioHash: string | undefined
-
-    // First remove studioPath to ensure we have a clean slate
-    await fs.promises.rm(studioPath, { recursive: true, force: true })
-    await ensureDir(studioPath)
-
-    // Note: CYPRESS_LOCAL_STUDIO_PATH is stripped from the binary, effectively removing this code path
-    if (process.env.CYPRESS_LOCAL_STUDIO_PATH) {
-      const appPath = path.join(process.env.CYPRESS_LOCAL_STUDIO_PATH, 'app')
-      const serverPath = path.join(process.env.CYPRESS_LOCAL_STUDIO_PATH, 'server')
-
-      await copy(appPath, path.join(studioPath, 'app'))
-      await copy(serverPath, path.join(studioPath, 'server'))
-    } else {
-      await downloadAppStudioBundleToTempDirectory(projectId)
-
-      studioHash = await getTarHash()
-
-      await tar.extract({
-        file: bundlePath,
-        cwd: studioPath,
-      })
-    }
+    const { studioHash } = await retrieveAndExtractStudioBundle({ projectId })
 
     script = await readFile(serverFilePath, 'utf8')
 
-    const appStudio = new StudioManager()
+    const studioManager = new StudioManager()
 
-    appStudio.setup({ script, studioPath, studioHash })
+    studioManager.setup({ script, studioPath, studioHash })
 
-    return appStudio
+    return studioManager
   } catch (error: unknown) {
     let actualError: Error
 
@@ -131,5 +139,7 @@ export const getAppStudio = async (projectId?: string): Promise<StudioManager> =
     }
 
     return StudioManager.createInErrorManager(actualError)
+  } finally {
+    await fs.promises.rm(bundlePath, { force: true })
   }
 }
