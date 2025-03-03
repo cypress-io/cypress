@@ -5,7 +5,7 @@ import fs from 'fs-extra'
 import { retrieveAndExtractStudioBundle, studioPath } from '@packages/server/lib/cloud/api/get_and_initialize_studio_manager'
 
 export const downloadStudioTypes = async (): Promise<void> => {
-  await retrieveAndExtractStudioBundle('ypt4pf')
+  await retrieveAndExtractStudioBundle({ projectId: 'ypt4pf' })
 
   await fs.copyFile(
     path.join(studioPath, 'app', 'types.ts'),

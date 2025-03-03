@@ -33,7 +33,7 @@ class PrivilegedCommandsManager {
     scripts: { relativeUrl: string }[]
     browserFamily: string
     namespace: string
-    documentDomainContext: string
+    documentDomainContext: boolean
   }) {
     // setting up a non-spec bridge channel means the beginning of running
     // a spec and is a signal that we should reset state

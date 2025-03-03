@@ -12,7 +12,7 @@ In production, the code used to facilitate Studio functionality will be retrieve
 
 ## Types
 
-The studio bundle provides typing for the `app` and `server` interfaces that are used within the Cypress code. To incorporate the types into the code base, run:
+The studio bundle provides the types for the `app` and `server` interfaces that are used within the Cypress code. To incorporate the types into the code base, run:
 
 ```sh
 yarn gulp downloadStudioTypes

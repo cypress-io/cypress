@@ -1,14 +1,14 @@
 const baseUrl = Cypress.config('baseUrl')
 
-before(() => {
+before(async () => {
   // sessions has logic built in to persists sessions on UI refresh
-  Cypress.session.clearAllSavedSessions()
+  await Cypress.session.clearAllSavedSessions()
 })
 
 const expectCurrentSessionData = async (obj) => {
   return Cypress.session.getCurrentSessionData()
   .then((result) => {
-    expect(result.cookies.map((v) => v.name)).members(obj.cookies || [])
+    expect(result.cookies?.map((v) => v.name)).members(obj.cookies || [])
     expect(result.localStorage).deep.members(obj.localStorage || [])
     expect(result.sessionStorage).deep.members(obj.sessionStorage || [])
   })
@@ -99,6 +99,7 @@ describe('cy.session', { retries: 0 }, () => {
       it('clears the browser cookie after each run', () => {
         cy.window()
         .then((win) => {
+          // @ts-expect-error TODO: cookie doesn't exist on win, usually cookie is set on document
           win.cookie = 'key=value; SameSite=Strict; Secure; Path=/fixtures'
         })
         .then(async () => {
@@ -113,6 +114,7 @@ describe('cy.session', { retries: 0 }, () => {
       it('does not clear the browser cookie after each run if the next test has test isolation off', () => {
         cy.window()
         .then((win) => {
+          // @ts-expect-error TODO: cookie doesn't exist on win, usually cookie is set on document
           win.cookie = 'key=value; SameSite=Strict; Secure; Path=/fixtures'
         })
         .then(async () => {
@@ -169,7 +171,7 @@ describe('cy.session', { retries: 0 }, () => {
     })
 
     describe('session flows', () => {
-      let logs = []
+      let logs: Cypress.Log[] = []
       let clearPageCount = 0
       let sessionGroupId
       let setup
@@ -305,7 +307,12 @@ describe('cy.session', { retries: 0 }, () => {
         })
 
         it('has session details in the consoleProps', () => {
-          const consoleProps = logs[0].get('consoleProps')()
+          let consoleProps
+          const getConsoleProps = logs[0].get('consoleProps')
+
+          if (getConsoleProps) {
+            consoleProps = getConsoleProps()
+          }
 
           expect(consoleProps.name).to.eq('session')
           expect(consoleProps.type).to.eq('command')
@@ -620,7 +627,7 @@ describe('cy.session', { retries: 0 }, () => {
                 return Promise.reject(false)
               }
 
-              handleValidate()
+              return handleValidate()
             })
           })
 
@@ -686,7 +693,7 @@ describe('cy.session', { retries: 0 }, () => {
           })
 
           // this error is associated with the group since the validation rejected
-          expect(logs[4].get('error').message).to.contain('This error occurred while validating the restored session')
+          expect(logs[4].get('error')?.message).to.contain('This error occurred while validating the restored session')
 
           expect(logs[6].get()).to.contain({
             name: 'Clear page',
@@ -793,7 +800,7 @@ describe('cy.session', { retries: 0 }, () => {
             })
 
             // this error is associated with the group since the validation rejected
-            expect(logs[4].get('error').message).to.contain('Your `cy.session` **validate** promise rejected with false.')
+            expect(logs[4].get('error')?.message).to.contain('Your `cy.session` **validate** promise rejected with false.')
 
             expect(logs[6].get()).to.contain({
               name: 'Clear page',
@@ -860,7 +867,8 @@ describe('cy.session', { retries: 0 }, () => {
           expect(Cypress.action).not.to.be.calledWith('cy:url:changed')
           expect(Cypress.action).not.to.be.calledWith('cy:visit:blank')
         })
-        .url('/fixtures/form.html')
+
+        cy.url().should('include', '/fixtures/form.html')
       })
 
       it('does not clear session data before each run', async () => {
@@ -888,6 +896,7 @@ describe('cy.session', { retries: 0 }, () => {
       it('does not clear the browser context before each run', () => {
         cy.window()
         .then((win) => {
+          // @ts-expect-error TODO: cookie doesn't exist on win, usually cookie is set on document
           win.cookie = 'key=value; SameSite=Strict; Secure; Path=/fixtures'
           win.localStorage.setItem('animal', 'bear')
           win.sessionStorage.setItem('food', 'burgers')
@@ -911,7 +920,7 @@ describe('cy.session', { retries: 0 }, () => {
     })
 
     describe('session flows', () => {
-      let logs = []
+      let logs: Cypress.Log[] = []
       let clearPageCount = 0
       let sessionGroupId
       let setup
@@ -1047,7 +1056,12 @@ describe('cy.session', { retries: 0 }, () => {
         })
 
         it('has session details in the consoleProps', () => {
-          const consoleProps = logs[0].get('consoleProps')()
+          let consoleProps
+          const getConsoleProps = logs[0].get('consoleProps')
+
+          if (getConsoleProps) {
+            consoleProps = getConsoleProps()
+          }
 
           expect(consoleProps.name).to.eq('session')
           expect(consoleProps.type).to.eq('command')
@@ -1130,7 +1144,12 @@ describe('cy.session', { retries: 0 }, () => {
         })
 
         it('has session details in the consoleProps', () => {
-          const consoleProps = logs[0].get('consoleProps')()
+          let consoleProps
+          const getConsoleProps = logs[0].get('consoleProps')
+
+          if (getConsoleProps) {
+            consoleProps = getConsoleProps()
+          }
 
           expect(consoleProps.name).to.eq('session')
           expect(consoleProps.type).to.eq('command')
@@ -1353,7 +1372,7 @@ describe('cy.session', { retries: 0 }, () => {
                 return Promise.reject(false)
               }
 
-              handleValidate()
+              return handleValidate()
             })
           })
 
@@ -1413,7 +1432,7 @@ describe('cy.session', { retries: 0 }, () => {
           })
 
           // this error is associated with the group since the validation rejected
-          expect(logs[3].get('error').message).to.contain('Your `cy.session` **validate** promise rejected with false.')
+          expect(logs[3].get('error')?.message).to.contain('Your `cy.session` **validate** promise rejected with false.')
 
           expect(logs[5].get()).to.contain({
             displayName: 'Clear cookies, localStorage and sessionStorage',
@@ -1505,7 +1524,7 @@ describe('cy.session', { retries: 0 }, () => {
             })
 
             // this error is associated with the group since the validation rejected
-            expect(logs[3].get('error').message).to.contain('Your `cy.session` **validate** promise rejected with false.')
+            expect(logs[3].get('error')?.message).to.contain('Your `cy.session` **validate** promise rejected with false.')
 
             expect(logs[5].get()).to.contain({
               displayName: 'Clear cookies, localStorage and sessionStorage',
@@ -1548,9 +1567,9 @@ describe('cy.session', { retries: 0 }, () => {
   })
 
   describe('errors', () => {
-    let lastLog = null
-    let lastSessionLog = null
-    const handleAddLog = (attrs, log) => {
+    let lastLog: Cypress.Log | null = null
+    let lastSessionLog: Cypress.Log | null = null
+    const handleAddLog = (attrs, log: Cypress.Log) => {
       lastLog = log
       if (attrs.name === 'session') {
         lastSessionLog = log
@@ -1570,91 +1589,97 @@ describe('cy.session', { retries: 0 }, () => {
     it('throws when sessionId argument was not provided', function (done) {
       cy.once('fail', (err) => {
         expect(lastSessionLog).to.eq(lastLog)
-        expect(lastLog.get('error')).to.eq(err)
-        expect(lastLog.get('state')).to.eq('failed')
+        expect(lastLog?.get('error')).to.eq(err)
+        expect(lastLog?.get('state')).to.eq('failed')
         expect(err.message).to.eq('`cy.session()` was passed an invalid argument. The first argument `id` must be an string or serializable object.')
         expect(err.docsUrl).to.eq('https://on.cypress.io/session')
 
         done()
       })
 
+      // @ts-expect-error - testing invalid arg
       cy.session()
     })
 
     it('throws when setup function is not provided', function (done) {
       cy.once('fail', (err) => {
-        expect(lastLog.get('error')).to.eq(err)
-        expect(lastLog.get('state')).to.eq('failed')
+        expect(lastLog?.get('error')).to.eq(err)
+        expect(lastLog?.get('state')).to.eq('failed')
         expect(err.message).to.eq('In order to use `cy.session()`, provide a `setup` as the second argument:\n\n`cy.session(id, setup)`')
         expect(err.docsUrl).to.eq('https://on.cypress.io/session')
 
         done()
       })
 
+      // @ts-expect-error - testing invalid arg
       cy.session('some-session')
     })
 
     it('throws when sessionId argument is not an object', function (done) {
       cy.once('fail', (err) => {
         expect(lastSessionLog).to.eq(lastLog)
-        expect(lastLog.get('error')).to.eq(err)
-        expect(lastLog.get('state')).to.eq('failed')
+        expect(lastLog?.get('error')).to.eq(err)
+        expect(lastLog?.get('state')).to.eq('failed')
         expect(err.message).to.eq('`cy.session()` was passed an invalid argument. The first argument `id` must be an string or serializable object.')
         expect(err.docsUrl).to.eq('https://on.cypress.io/session')
 
         done()
       })
 
+      // @ts-expect-error - testing invalid arg
       cy.session(1)
     })
 
     it('throws when options argument is provided and is not an object', function (done) {
       cy.once('fail', (err) => {
         expect(lastSessionLog).to.eq(lastLog)
-        expect(lastLog.get('error')).to.eq(err)
-        expect(lastLog.get('state')).to.eq('failed')
+        expect(lastLog?.get('error')).to.eq(err)
+        expect(lastLog?.get('state')).to.eq('failed')
         expect(err.message).to.eq('`cy.session()` was passed an invalid argument. The optional third argument `options` must be an object.')
         expect(err.docsUrl).to.eq('https://on.cypress.io/session')
 
         done()
       })
 
+      // @ts-expect-error - testing invalid arg
       cy.session('some-session', () => {}, 'invalid_arg')
     })
 
     it('throws when options argument has an invalid option', function (done) {
       cy.once('fail', (err) => {
         expect(lastSessionLog).to.eq(lastLog)
-        expect(lastLog.get('error')).to.eq(err)
-        expect(lastLog.get('state')).to.eq('failed')
+        expect(lastLog?.get('error')).to.eq(err)
+        expect(lastLog?.get('state')).to.eq('failed')
         expect(err.message).to.eq('`cy.session()` was passed an invalid option: **invalid_key**\nAvailable options are: `validate`')
         expect(err.docsUrl).to.eq('https://on.cypress.io/session')
 
         done()
       })
 
+      // @ts-expect-error - testing invalid arg
       cy.session('some-session', () => {}, { invalid_key: 2 })
     })
 
     it('throws when options argument has an option with an invalid type', function (done) {
       cy.once('fail', (err) => {
         expect(lastSessionLog).to.eq(lastLog)
-        expect(lastLog.get('error')).to.eq(err)
-        expect(lastLog.get('state')).to.eq('failed')
+        expect(lastLog?.get('error')).to.eq(err)
+        expect(lastLog?.get('state')).to.eq('failed')
         expect(err.message).to.eq('`cy.session()` was passed an invalid option value. **validate** must be of type **function** but was **number**.')
         expect(err.docsUrl).to.eq('https://on.cypress.io/session')
 
         done()
       })
 
+      // @ts-expect-error - testing invalid arg
       cy.session('some-session', () => {}, { validate: 2 })
     })
 
     it('throws when multiple session calls with same sessionId but different setup', function (done) {
       cy.once('fail', async (err) => {
         expect(lastSessionLog).to.eq(lastLog)
-        expect(lastLog.get('error')).to.eq(err)
-        expect(lastLog.get('state')).to.eq('failed')
+        expect(lastLog?.get('error')).to.eq(err)
+        expect(lastLog?.get('state')).to.eq('failed')
         expect(err.message).to.eq('This session already exists. You may not create a new session with a previously used identifier. If you want to create a new session with a different setup function, please call `cy.session()` with a unique identifier other than **duplicate-session**.')
         expect(err.docsUrl).to.eq('https://on.cypress.io/session')
 
@@ -1683,8 +1708,8 @@ describe('cy.session', { retries: 0 }, () => {
     it('throws when multiple session calls with same sessionId but different validate opt', function (done) {
       cy.once('fail', async (err) => {
         expect(lastSessionLog).to.eq(lastLog)
-        expect(lastLog.get('error')).to.eq(err)
-        expect(lastLog.get('state')).to.eq('failed')
+        expect(lastLog?.get('error')).to.eq(err)
+        expect(lastLog?.get('state')).to.eq('failed')
         expect(err.message).to.eq('This session already exists. You may not create a new session with a previously used identifier. If you want to create a new session with a different validate function, please call `cy.session()` with a unique identifier other than **duplicate-sess**.')
         expect(err.docsUrl).to.eq('https://on.cypress.io/session')
 
@@ -1699,8 +1724,8 @@ describe('cy.session', { retries: 0 }, () => {
     it('throws when multiple session calls with same sessionId but different cacheAcrossSpec opt', function (done) {
       cy.once('fail', async (err) => {
         expect(lastSessionLog).to.eq(lastLog)
-        expect(lastLog.get('error')).to.eq(err)
-        expect(lastLog.get('state')).to.eq('failed')
+        expect(lastLog?.get('error')).to.eq(err)
+        expect(lastLog?.get('state')).to.eq('failed')
         expect(err.message).to.eq('This session already exists. You may not create a new session with a previously used identifier. If you want to create a new session with a different persistence, please call `cy.session()` with a unique identifier other than **duplicate-sess**.')
         expect(err.docsUrl).to.eq('https://on.cypress.io/session')
 
@@ -1715,10 +1740,10 @@ describe('cy.session', { retries: 0 }, () => {
     describe('setup function failures', () => {
       it('throws when setup function has a failing Cypress command', function (done) {
         cy.once('fail', (err) => {
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('state')).to.eq('failed')
+          expect(lastLog?.get('error')).to.eq(err)
+          expect(lastLog?.get('state')).to.eq('failed')
           expect(err.message).to.contain('This error occurred while creating the session. Because the session setup failed, we failed the test.')
-          expect(lastSessionLog.get('state')).to.eq('failed')
+          expect(lastSessionLog?.get('state')).to.eq('failed')
           done()
         })
 
@@ -1729,10 +1754,10 @@ describe('cy.session', { retries: 0 }, () => {
 
       it('throws when setup function has a failing assertion', function (done) {
         cy.once('fail', (err) => {
-          expect(err.message).to.contain(lastLog.get('error').message)
-          expect(lastLog.get('state')).to.eq('failed')
+          expect(err.message).to.contain(lastLog?.get('error')?.message)
+          expect(lastLog?.get('state')).to.eq('failed')
           expect(err.message).to.contain('This error occurred while creating the session. Because the session setup failed, we failed the test.')
-          expect(lastSessionLog.get('state')).to.eq('failed')
+          expect(lastSessionLog?.get('state')).to.eq('failed')
 
           done()
         })
@@ -1845,6 +1870,7 @@ describe('cy.session', { retries: 0 }, () => {
         cy.session(['mock-session', 'Chainer<false>'], () => {
           cy.log('setup')
         }, {
+          // @ts-expect-error - testing invalid arg
           validate () {
             return cy.wrap(false)
           },

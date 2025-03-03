@@ -157,7 +157,7 @@ export class ProjectBase extends EE {
     let studioManager: StudioManagerShape | null
 
     if (process.env.CYPRESS_ENABLE_CLOUD_STUDIO || process.env.CYPRESS_LOCAL_STUDIO_PATH) {
-      studioManager = await getAndInitializeStudioManager(cfg.projectId)
+      studioManager = await getAndInitializeStudioManager({ projectId: cfg.projectId })
       this.ctx.update((data) => {
         data.studio = studioManager
       })
