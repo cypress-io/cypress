@@ -643,8 +643,7 @@ cy.get('#increment').click();
 /* ==== End Cypress Studio ==== */`)
   })
 
-  // TODO: when reloading, we incorrectly go to the spec page of the /app project instead of the /experimental-studio project
-  it.skip('removes pending commands if the page is reloaded', () => {
+  it('removes pending commands if the page is reloaded', () => {
     launchStudio()
 
     incrementCounter(0)
@@ -658,7 +657,13 @@ cy.get('#increment').click();
       cy.get('.command-name-click').should('contain.text', 'click')
     })
 
-    cy.reload()
+    cy.window().then((win) => {
+      // calling cy.reload() or win.location.reload() confuses the test runner
+      // and causes it to go to the spec list of the main runner instead of reloading the inner runner,
+      // so we need to navigate to the same url to trigger a reload
+      // eslint-disable-next-line no-self-assign
+      win.location.href = win.location.href
+    })
 
     cy.waitForSpecToFinish()
 
@@ -695,8 +700,7 @@ cy.get('#increment').click();
       cy.get('.studio-prompt').should('contain.text', 'Interact with your site to add test commands. Right click to add assertions.')
     })
 
-    // TODO: the Save button should be disabled but it is incorrectly enabled
-    cy.findByTestId('studio-toolbar-controls').findByTestId('save').should('be.enabled')
+    cy.findByTestId('studio-toolbar-controls').findByTestId('save').should('be.disabled')
   })
 
   it('does not re-enter studio mode when changing pages and then coming back', () => {

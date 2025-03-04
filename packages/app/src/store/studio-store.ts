@@ -237,7 +237,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       const autStore = useAutStore()
 
       if (this.url) {
-        this.visitUrl()
+        this.visitUrl(this.url, { log: false })
       }
 
       if (!this.url && autStore.url) {
@@ -298,17 +298,19 @@ export const useStudioStore = defineStore('studioRecorder', {
       getEventManager().emit('studio:save', payload)
     },
 
-    visitUrl (url?: string) {
+    visitUrl (url?: string, { log = true } = {}) {
       this.setUrl(url ?? this.url)
 
       getCypress().cy.visit(this.url)
 
-      this.logs.push({
-        id: this._getId(),
-        selector: undefined,
-        name: 'visit',
-        message: this.url,
-      })
+      if (log) {
+        this.logs.push({
+          id: this._getId(),
+          selector: undefined,
+          name: 'visit',
+          message: this.url,
+        })
+      }
     },
 
     _recordEvent (event) {
