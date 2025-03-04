@@ -21,27 +21,25 @@
         alt=""
       />
       <div class="grow">
-        <div>
-          <button
-            class="box-border font-medium focus:outline-none"
-            :class="{
-              'text-indigo-500 group-hover:text-indigo-700': !browser.isSelected && !browser.disabled && browser.isVersionSupported,
-              'text-jade-700': browser.isSelected,
-              'text-gray-500': browser.disabled || !browser.isVersionSupported
-            }"
-          >
-            {{ browser.displayName }}
-          </button>
-          <div
-            class="font-normal mr-[20px] text-gray-500 text-[14px] filter whitespace-nowrap group-focus-within:mix-blend-luminosity
-            group-hover:mix-blend-luminosity
-            "
-          >
-            {{ t('topNav.version') }} {{ browser.majorVersion }}
-            <span v-if="!browser.isVersionSupported">
-              (Unsupported)
-            </span>
-          </div>
+        <button
+          class="box-border font-medium focus:outline-none text-left"
+          :class="{
+            'text-indigo-500 group-hover:text-indigo-700': !browser.isSelected && !browser.disabled && browser.isVersionSupported,
+            'text-jade-700': browser.isSelected,
+            'text-gray-500': browser.disabled || !browser.isVersionSupported
+          }"
+        >
+          {{ browser.displayName }}
+        </button>
+        <div
+          class="font-normal mr-[20px] text-gray-500 text-[14px] filter whitespace-nowrap group-focus-within:mix-blend-luminosity
+          group-hover:mix-blend-luminosity
+          "
+        >
+          {{ t('topNav.version') }} {{ browser.majorVersion }}
+          <span v-if="!browser.isVersionSupported">
+            (Unsupported)
+          </span>
         </div>
       </div>
       <div>
@@ -123,7 +121,12 @@ const props = withDefaults(defineProps <{
 })
 
 const browsers = computed(() => {
-  return (props.gql.browsers ?? []).slice().sort((a, b) => a.displayName > b.displayName ? 1 : -1)
+  const alphaSortedBrowser = (props.gql.browsers ?? []).slice().sort((a, b) => a.displayName > b.displayName ? 1 : -1)
+
+  // move the selected browser to the top to easily see selected browser version at the top when opening the dropdown
+  alphaSortedBrowser.some((browser, i) => browser.isSelected && alphaSortedBrowser.unshift(alphaSortedBrowser.splice(i, 1)[0]))
+
+  return alphaSortedBrowser
 })
 
 const setBrowser = useMutation(VerticalBrowserListItems_SetBrowserDocument)

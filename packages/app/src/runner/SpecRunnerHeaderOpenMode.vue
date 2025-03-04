@@ -15,7 +15,7 @@
         <Button
           data-cy="playground-activator"
           :disabled="isDisabled"
-          class="rounded-none border-gray-100 border-r-[1px] mr-[12px]"
+          class="rounded-none border-gray-100 border-r-[1px]"
           variant="text"
           :aria-label="t('runner.selectorPlayground.toggle')"
           @click="togglePlayground"
@@ -33,7 +33,7 @@
             <component
               :is="allBrowsersIcons[selectedBrowser.displayName?.toLowerCase()] || allBrowsersIcons.generic"
               class="min-w-[16px] w-[16px]"
-              :alt="selectedBrowser.displayName"
+              :alt="selectedBrowser.majorVersion ? `${selectedBrowser.displayName} ${selectedBrowser.majorVersion}` : selectedBrowser.displayName"
             />
           </template>
           <template #default>

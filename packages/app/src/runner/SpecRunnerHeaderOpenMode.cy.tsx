@@ -31,7 +31,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     })
 
     cy.findByTestId('aut-url-input').should('be.visible').should('have.value', autUrl)
-    cy.findByTestId('select-browser').should('be.visible').contains('Electron 73')
+    cy.findByTestId('select-browser').should('be.visible').contains('title', 'Electron 73')
     cy.findByTestId('viewport-size').should('be.visible').contains('500x500')
   })
 
@@ -216,6 +216,18 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     cy.findByTestId('select-browser').contains('Fake Browser')
 
     cy.get('[data-cy="select-browser"] > button svg').eq(0).children().verifyBrowserIconSvg(cyGeneralGlobeX16.data)
+  })
+
+  it('shows selected browser as first browser in dropdown', () => {
+    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+      render: (gqlVal) => {
+        return renderWithGql(gqlVal)
+      },
+    })
+
+    cy.get('[data-cy="select-browser"] > button').should('be.enabled').click()
+    cy.get('[data-browser-id="1"]').should('contain', 'Electron').and('contain', 'Version 73')
+    cy.get('[data-browser-id="1"]').find('[data-cy="top-nav-browser-list-selected-item"]')
   })
 
   it('shows current viewport info', () => {
