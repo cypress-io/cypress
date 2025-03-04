@@ -3,6 +3,11 @@
 
 _Released 3/11/2025 (PENDING)_
 
+**Misc:**
+
+- The browser dropdown now has a more minimal design - showing only the icon of the browser selected to the left of the URL. The currently selected browser also now shows at the top of the browser dropdown. Addresses [#30998](https://github.com/cypress-io/cypress/issues/30998). Addressed in [#31216](https://github.com/cypress-io/cypress/pull/31216).
+- Browsers with longer names will now have their names correctly left aligned in the browser dropdown. Addresses [#21755](https://github.com/cypress-io/cypress/issues/21755). Addressed in [#31216](https://github.com/cypress-io/cypress/pull/31216).
+
 **Dependency Updates:**
 
 - Upgraded `cli-table3` from `0.5.1` to `0.6.5`. Addressed in [#31166](https://github.com/cypress-io/cypress/pull/31166).
