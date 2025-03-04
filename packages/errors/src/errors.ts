@@ -1398,7 +1398,6 @@ export const AllCypressErrors = {
       https://on.cypress.io/test-retries
       `
   },
-  // TODO: test this
   INVALID_CONFIG_OPTION: (arg1: string[]) => {
     const phrase = arg1.length > 1 ? 'options are' : 'option is'
 

@@ -15,15 +15,11 @@ import { getPublicConfigKeys } from '@packages/config'
 import argsUtils from './util/args'
 import { telemetry } from '@packages/telemetry'
 import { getCtx, hasCtx } from '@packages/data-context'
-import type { AllCypressErrorObj } from '@packages/errors/src/errors'
+import { warning as errorsWarning } from './errors'
 
 const debug = Debug('cypress:server:cypress')
 
 type Mode = 'exit' | 'info' | 'interactive' | 'pkg' | 'record' | 'results' | 'run' | 'smokeTest' | 'version' | 'returnPkg' | 'exitWithCode'
-
-const warning = function <Type extends keyof AllCypressErrorObj> (code: Type, ...args: Parameters<AllCypressErrorObj[Type]>) {
-  return require('./errors').warning(code, args)
-}
 
 const exit = async (code = 0) => {
   // TODO: we shouldn't have to do this
@@ -60,8 +56,10 @@ const showWarningForInvalidConfig = (options: any) => {
   }, [])
 
   if (invalidConfigOptions.length && options.invokedFromCli) {
-    return warning('INVALID_CONFIG_OPTION', invalidConfigOptions)
+    return errorsWarning('INVALID_CONFIG_OPTION', invalidConfigOptions)
   }
+
+  return undefined
 }
 
 const exit0 = () => {
@@ -100,7 +98,7 @@ export = {
         // if we weren't invoked from the CLI
         // then display a warning to the user
         if (!options.invokedFromCli) {
-          warning('INVOKED_BINARY_OUTSIDE_NPM_MODULE')
+          errorsWarning('INVOKED_BINARY_OUTSIDE_NPM_MODULE')
         }
 
         debug('running Electron currently')
@@ -136,7 +134,7 @@ export = {
     })
   },
 
-  start (argv = []) {
+  start (argv: any = []) {
     debug('starting cypress with argv %o', argv)
 
     // if the CLI passed "--" somewhere, we need to remove it
