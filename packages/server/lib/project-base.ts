@@ -588,6 +588,10 @@ export class ProjectBase extends EE {
     return getCtx().lifecycleManager.getProjectId()
   }
 
+  get configDebugData () {
+    return this.ctx.lifecycleManager.configDebugData
+  }
+
   // For testing
   // Do not use this method outside of testing
   // pass all your options when you create a new instance!

@@ -1,7 +1,11 @@
-const debug = require('debug')('cypress:server:controllers:spec')
-const Promise = require('bluebird')
-const errors = require('../errors')
-const preprocessor = require('../plugins/preprocessor')
+import Debug from 'debug'
+import Promise from 'bluebird'
+import { get as errorsGet } from '../errors'
+import preprocessor from '../plugins/preprocessor'
+import type { Cfg } from '../project-base'
+import type { Request, Response } from 'express'
+
+const debug = Debug('cypress:server:controllers:spec')
 
 const ignoreECONNABORTED = () => {
   // https://github.com/cypress-io/cypress/issues/1877
@@ -23,8 +27,8 @@ const ignoreEPIPE = () => {
   // be loaded by the browser instead
 }
 
-module.exports = {
-  handle (spec, req, res, config, next, onError) {
+export = {
+  handle (spec: any, req: Request, res: Response, config: Cfg, next: any, onError: any) {
     debug('request for %o', { spec })
 
     res.set({
@@ -37,7 +41,7 @@ module.exports = {
 
     return preprocessor
     .getFile(spec, config)
-    .then((filePath) => {
+    .then((filePath: string) => {
       debug('sending spec %o', { filePath })
       const sendFile = Promise.promisify(res.sendFile.bind(res))
 
@@ -45,7 +49,7 @@ module.exports = {
     })
     .catch({ code: 'ECONNABORTED' }, ignoreECONNABORTED)
     .catch({ code: 'EPIPE' }, ignoreEPIPE)
-    .catch((err) => {
+    .catch((err: any) => {
       debug(`preprocessor error for spec '%s': %s`, spec, err.stack)
 
       if (!config.isTextTerminal) {
@@ -64,9 +68,11 @@ module.exports = {
 
       const filePath = err.filePath != null ? err.filePath : spec
 
-      err = errors.get('BUNDLE_ERROR', filePath, preprocessor.errorMessage(err))
+      err = errorsGet('BUNDLE_ERROR', filePath, preprocessor.errorMessage(err))
 
       onError(err)
+
+      return undefined
     })
   },
 }
