@@ -602,6 +602,11 @@ describe('lib/cloud/api', () => {
             namespace: '__cypress',
           }
         },
+        get configDebugData () {
+          return {
+            filePreprocessorHandlerText: 'function () {}',
+          }
+        },
       }
 
       return api.createRun({
@@ -633,6 +638,9 @@ describe('lib/cloud/api', () => {
               devServerPublicPathRoute: '/dev-server',
               proxyUrl: 'http://localhost:1234',
               namespace: '__cypress',
+            },
+            debugData: {
+              filePreprocessorHandlerText: 'function () {}',
             },
           },
         )
@@ -691,6 +699,9 @@ describe('lib/cloud/api', () => {
             namespace: '__cypress',
           }
         },
+        configDebugData: {
+          filePreprocessorHandlerText: 'function () {}',
+        },
       }
 
       return api.createRun({
@@ -722,6 +733,9 @@ describe('lib/cloud/api', () => {
               devServerPublicPathRoute: '/dev-server',
               proxyUrl: 'http://localhost:1234',
               namespace: '__cypress',
+            },
+            debugData: {
+              filePreprocessorHandlerText: 'function () {}',
             },
           },
         )
