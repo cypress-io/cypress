@@ -125,6 +125,10 @@ class RunPlugins {
       if (!this.registeredEventsByName['file:preprocessor']) {
         debug('register default preprocessor')
         registerChildEvent('file:preprocessor', this._getDefaultPreprocessor(initialConfig))
+      } else {
+        const handler = this.registeredEventsById[this.registeredEventsByName['file:preprocessor']].handler
+
+        this.ipc.send('file:preprocessor:overridden', { handlerText: handler.toString() })
       }
     })
     .then((modifiedCfg) => {

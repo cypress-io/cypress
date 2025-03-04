@@ -442,6 +442,7 @@ export default {
           },
           projectConfig: _.pick(config, ['devServerPublicPathRoute', 'port', 'proxyUrl', 'namespace']),
           mountVersion: runnerCapabilities.protocolMountVersion,
+          debugData: options.project.configDebugData,
         })
       }
 
