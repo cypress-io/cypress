@@ -1,4 +1,4 @@
-const { assertLogLength } = require('../../support/utils')
+import { assertLogLength } from '../../support/utils'
 
 const { _ } = Cypress
 
@@ -72,6 +72,7 @@ describe('src/cy/commands/agents', () => {
           },
         }
 
+        // @ts-expect-error TODO: deprecated: Figure out how to handle types here
         cy.stub(this.obj, 'bar', 'baz')
 
         this.replacementCalled = false
@@ -124,6 +125,7 @@ describe('src/cy/commands/agents', () => {
 
         return obj
         .foo()
+        // @ts-expect-error TODO: Figure out how to handle types here
         .delay(1)
       })
     })
@@ -340,6 +342,7 @@ describe('src/cy/commands/agents', () => {
           _.each([null, undefined, {}, [], 123], (value) => {
             it(`throws when passed: ${value}`, () => {
               expect(() => {
+              // @ts-expect-error Testing invalid inputs
                 cy.stub().as(value)
               }).to.throw('`cy.as()` can only accept a string.')
             })
@@ -417,6 +420,7 @@ describe('src/cy/commands/agents', () => {
           _.each([null, undefined, {}, [], 123], (value) => {
             it(`throws when passed: ${value}`, () => {
               expect(() => {
+                // @ts-expect-error Testing invalid inputs
                 cy.stub().as(value)
               }).to.throw('`cy.as()` can only accept a string.')
             })

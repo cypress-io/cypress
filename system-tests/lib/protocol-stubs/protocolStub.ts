@@ -1,6 +1,6 @@
 import path from 'path'
 import fs from 'fs-extra'
-import type { AppCaptureProtocolInterface, ResponseEndedWithEmptyBodyOptions, ResponseStreamOptions, ResponseStreamTimedOutOptions } from '@packages/types'
+import type { AppCaptureProtocolInterface, ProtocolManagerOptions, ResponseEndedWithEmptyBodyOptions, ResponseStreamOptions, ResponseStreamTimedOutOptions } from '@packages/types'
 import type { Readable } from 'stream'
 
 const getFilePath = (filename) => {
@@ -33,6 +33,7 @@ const DURATIONS = {
 export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   private filename: string
   private events = {
+    debugData: {},
     beforeSpec: [],
     afterSpec: [],
     beforeTest: [],
@@ -51,6 +52,10 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   }
   private cdpClient: any
   private scriptToEvaluateId: any
+
+  constructor (options: ProtocolManagerOptions) {
+    this.events.debugData = options.debugData
+  }
 
   getDbMetadata (): { offset: number, size: number } {
     return {

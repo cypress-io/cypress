@@ -1,4 +1,4 @@
-import type { AppStudioShape, StudioErrorReport, StudioManagerShape, StudioStatus } from '@packages/types'
+import type { StudioErrorReport, StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape } from '@packages/types'
 import type { Router } from 'express'
 import fetch from 'cross-fetch'
 import pkg from '@packages/root'
@@ -7,12 +7,14 @@ import { agent } from '@packages/network'
 import Debug from 'debug'
 import { requireScript } from './require_script'
 
+type StudioServer = { default: StudioServerDefaultShape }
+
 const debug = Debug('cypress:server:studio')
 const routes = require('./routes')
 
 export class StudioManager implements StudioManagerShape {
   status: StudioStatus = 'NOT_INITIALIZED'
-  private _appStudio: AppStudioShape | undefined
+  private _studioServer: StudioServerShape | undefined
   private _studioHash: string | undefined
 
   static createInErrorManager (error: Error): StudioManager {
@@ -26,15 +28,15 @@ export class StudioManager implements StudioManagerShape {
   }
 
   setup ({ script, studioPath, studioHash }: { script: string, studioPath: string, studioHash?: string }): void {
-    const { AppStudio } = requireScript(script)
+    const { createStudioServer } = requireScript<StudioServer>(script).default
 
-    this._appStudio = new AppStudio({ studioPath })
+    this._studioServer = createStudioServer({ studioPath })
     this._studioHash = studioHash
     this.status = 'INITIALIZED'
   }
 
   initializeRoutes (router: Router): void {
-    if (this._appStudio) {
+    if (this._studioServer) {
       this.invokeSync('initializeRoutes', { isEssential: true }, router)
     }
   }
@@ -70,16 +72,16 @@ export class StudioManager implements StudioManagerShape {
   }
 
   /**
-   * Abstracts invoking a synchronous method on the AppStudio instance, so we can handle
+   * Abstracts invoking a synchronous method on the StudioServer instance, so we can handle
    * errors in a uniform way
    */
-  private invokeSync<K extends AppStudioSyncMethods> (method: K, { isEssential }: { isEssential: boolean }, ...args: Parameters<AppStudioShape[K]>): any | void {
-    if (!this._appStudio) {
+  private invokeSync<K extends StudioServerSyncMethods> (method: K, { isEssential }: { isEssential: boolean }, ...args: Parameters<StudioServerShape[K]>): any | void {
+    if (!this._studioServer) {
       return
     }
 
     try {
-      return this._appStudio[method].apply(this._appStudio, args)
+      return this._studioServer[method].apply(this._studioServer, args)
     } catch (error: unknown) {
       let actualError: Error
 
@@ -96,17 +98,17 @@ export class StudioManager implements StudioManagerShape {
   }
 
   /**
-   * Abstracts invoking a synchronous method on the AppStudio instance, so we can handle
+   * Abstracts invoking a synchronous method on the StudioServer instance, so we can handle
    * errors in a uniform way
    */
-  private async invokeAsync <K extends AppStudioAsyncMethods> (method: K, { isEssential }: { isEssential: boolean }, ...args: Parameters<AppStudioShape[K]>): Promise<ReturnType<AppStudioShape[K]> | undefined> {
-    if (!this._appStudio) {
+  private async invokeAsync <K extends StudioServerAsyncMethods> (method: K, { isEssential }: { isEssential: boolean }, ...args: Parameters<StudioServerShape[K]>): Promise<ReturnType<StudioServerShape[K]> | undefined> {
+    if (!this._studioServer) {
       return undefined
     }
 
     try {
       // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
-      return await this._appStudio[method].apply(this._appStudio, args)
+      return await this._studioServer[method].apply(this._studioServer, args)
     } catch (error: unknown) {
       let actualError: Error
 
@@ -127,10 +129,10 @@ export class StudioManager implements StudioManagerShape {
 }
 
 // Helper types for invokeSync / invokeAsync
-type AppStudioSyncMethods = {
-  [K in keyof AppStudioShape]: ReturnType<AppStudioShape[K]> extends Promise<any> ? never : K
-}[keyof AppStudioShape]
+type StudioServerSyncMethods = {
+  [K in keyof StudioServerShape]: ReturnType<StudioServerShape[K]> extends Promise<any> ? never : K
+}[keyof StudioServerShape]
 
-type AppStudioAsyncMethods = {
-  [K in keyof AppStudioShape]: ReturnType<AppStudioShape[K]> extends Promise<any> ? K : never
-}[keyof AppStudioShape]
+type StudioServerAsyncMethods = {
+  [K in keyof StudioServerShape]: ReturnType<StudioServerShape[K]> extends Promise<any> ? K : never
+}[keyof StudioServerShape]
