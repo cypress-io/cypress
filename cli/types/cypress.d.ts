@@ -570,6 +570,14 @@ declare namespace Cypress {
      */
     log(options: Partial<LogConfig>): Log
 
+    /**
+     * Stop the Cypress App on the current machine while tests are running
+     * @see https://on.cypress.io/cypress-stop
+     * @example
+     *    Cypress.stop()
+     */
+    stop(): void
+
     Commands: {
       /**
        * Add a custom command
