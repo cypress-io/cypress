@@ -14,7 +14,7 @@ describe('circle-env', () => {
   beforeEach(() => {
     delete process.env.COPY_CIRCLE_ARTIFACTS
     process.env.CI = 'true'
-    process.env.CIRCLE_INTERNAL_CONFIG = '/foo.json'
+    process.env.CIRCLE_INTERNAL_TASK_DATA = '/foo.json'
   })
 
   context('with missing canaries', () => {

@@ -1,9 +1,9 @@
 const fs = require('fs').promises
 
 async function loadInternalTaskData () {
-  const filename = process.env.CIRCLE_INTERNAL_CONFIG
+  const filename = process.env.CIRCLE_INTERNAL_TASK_DATA
 
-  if (!filename) throw new Error('Missing CIRCLE_INTERNAL_CONFIG environment variable, cannot load Circle task data.')
+  if (!filename) throw new Error('Missing CIRCLE_INTERNAL_TASK_DATA environment variable, cannot load Circle task data.')
 
   const taskDataJson = await fs.readFile(filename, 'utf8')
 
@@ -44,7 +44,7 @@ async function readCircleEnv () {
   const taskData = await loadInternalTaskData()
 
   try {
-    // if this starts failing, try SSHing into a CircleCI job and see what changed in the $CIRCLE_INTERNAL_CONFIG file's schema
+    // if this starts failing, try SSHing into a CircleCI job and see what changed in the $CIRCLE_INTERNAL_TASK_DATA file's schema
     const circleEnv = taskData['Dispatched']['TaskInfo']['Environment']
 
     if (!circleEnv) throw new Error('No Environment object was found.')

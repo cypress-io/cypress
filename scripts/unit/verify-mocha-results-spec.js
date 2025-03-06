@@ -15,7 +15,7 @@ if (process.platform !== 'win32') {
     })
 
     beforeEach(() => {
-      process.env.CIRCLE_INTERNAL_CONFIG = '/foo.json'
+      process.env.CIRCLE_INTERNAL_TASK_DATA = '/foo.json'
       sinon.stub(fs, 'readFile')
       .withArgs('/foo.json').resolves(JSON.stringify({
         Dispatched: { TaskInfo: { Environment: { somekey: 'someval' } } },
