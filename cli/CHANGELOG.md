@@ -3,9 +3,14 @@
 
 _Released 3/11/2025 (PENDING)_
 
+**Misc:**
+
+- Additional CLI options will be displayed in the terminal for some Cloud error messages. Addressed in [#31211](https://github.com/cypress-io/cypress/pull/31211).
+
 **Dependency Updates:**
 
 - Upgraded `cli-table3` from `0.5.1` to `0.6.5`. Addressed in [#31166](https://github.com/cypress-io/cypress/pull/31166).
+- Upgraded `simple-git` from `3.25.0` to `3.27.0`. Addressed in [#31198](https://github.com/cypress-io/cypress/pull/31198).
 
 ## 14.1.0
 

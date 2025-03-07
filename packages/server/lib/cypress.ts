@@ -9,16 +9,17 @@ require('./environment')
 // essentially do it all again when we boot the correct
 // mode.
 
-const Promise = require('bluebird')
-const debug = require('debug')('cypress:server:cypress')
-const { getPublicConfigKeys } = require('@packages/config')
-const argsUtils = require('./util/args')
-const { telemetry } = require('@packages/telemetry')
-const { getCtx, hasCtx } = require('@packages/data-context')
+import Promise from 'bluebird'
+import Debug from 'debug'
+import { getPublicConfigKeys } from '@packages/config'
+import argsUtils from './util/args'
+import { telemetry } from '@packages/telemetry'
+import { getCtx, hasCtx } from '@packages/data-context'
+import { warning as errorsWarning } from './errors'
 
-const warning = (code, args) => {
-  return require('./errors').warning(code, args)
-}
+const debug = Debug('cypress:server:cypress')
+
+type Mode = 'exit' | 'info' | 'interactive' | 'pkg' | 'record' | 'results' | 'run' | 'smokeTest' | 'version' | 'returnPkg' | 'exitWithCode'
 
 const exit = async (code = 0) => {
   // TODO: we shouldn't have to do this
@@ -27,7 +28,7 @@ const exit = async (code = 0) => {
   debug('about to exit with code', code)
 
   if (hasCtx()) {
-    await getCtx().lifecycleManager.mainProcessWillDisconnect().catch((err) => {
+    await getCtx().lifecycleManager.mainProcessWillDisconnect().catch((err: any) => {
       debug('mainProcessWillDisconnect errored with: ', err)
     })
   }
@@ -37,14 +38,14 @@ const exit = async (code = 0) => {
   span?.setAttribute('exitCode', code)
   span?.end()
 
-  await telemetry.shutdown().catch((err) => {
+  await telemetry.shutdown().catch((err: any) => {
     debug('telemetry shutdown errored with: ', err)
   })
 
   return process.exit(code)
 }
 
-const showWarningForInvalidConfig = (options) => {
+const showWarningForInvalidConfig = (options: any) => {
   const publicConfigKeys = getPublicConfigKeys()
   const invalidConfigOptions = require('lodash').keys(options.config).reduce((invalid, option) => {
     if (!publicConfigKeys.find((configKey) => configKey === option)) {
@@ -55,15 +56,17 @@ const showWarningForInvalidConfig = (options) => {
   }, [])
 
   if (invalidConfigOptions.length && options.invokedFromCli) {
-    return warning('INVALID_CONFIG_OPTION', invalidConfigOptions)
+    return errorsWarning('INVALID_CONFIG_OPTION', invalidConfigOptions)
   }
+
+  return undefined
 }
 
 const exit0 = () => {
   return exit(0)
 }
 
-const exitErr = (err) => {
+const exitErr = (err: any) => {
   // log errors to the console
   // and potentially raygun
   // and exit with 1
@@ -77,12 +80,12 @@ const exitErr = (err) => {
   })
 }
 
-module.exports = {
+export = {
   isCurrentlyRunningElectron () {
     return require('./util/electron-app').isRunning()
   },
 
-  runElectron (mode, options) {
+  runElectron (mode: Mode, options: any) {
     // wrap all of this in a promise to force the
     // promise interface - even if it doesn't matter
     // in dev mode due to cp.spawn
@@ -95,7 +98,7 @@ module.exports = {
         // if we weren't invoked from the CLI
         // then display a warning to the user
         if (!options.invokedFromCli) {
-          warning('INVOKED_BINARY_OUTSIDE_NPM_MODULE')
+          errorsWarning('INVOKED_BINARY_OUTSIDE_NPM_MODULE')
         }
 
         debug('running Electron currently')
@@ -107,7 +110,7 @@ module.exports = {
         debug('starting Electron')
         const cypressElectron = require('@packages/electron')
 
-        const fn = (code) => {
+        const fn = (code: number) => {
           // juggle up the totalFailed since our outer
           // promise is expecting this object structure
           debug('electron finished with', code)
@@ -131,7 +134,7 @@ module.exports = {
     })
   },
 
-  start (argv = []) {
+  start (argv: any = []) {
     debug('starting cypress with argv %o', argv)
 
     // if the CLI passed "--" somewhere, we need to remove it
@@ -144,7 +147,7 @@ module.exports = {
       options = argsUtils.toObject(argv)
 
       showWarningForInvalidConfig(options)
-    } catch (argumentsError) {
+    } catch (argumentsError: any) {
       debug('could not parse CLI arguments: %o', argv)
 
       // note - this is promise-returned call
@@ -153,6 +156,7 @@ module.exports = {
 
     debug('from argv %o got options %o', argv, options)
 
+    // @ts-expect-error TODO: Fix type that says attachRecordKey is not a function
     telemetry.exporter()?.attachRecordKey(options.key)
 
     if (options.headless) {
@@ -202,14 +206,14 @@ module.exports = {
     })
   },
 
-  startInMode (mode, options) {
+  startInMode (mode: Mode, options: any) {
     debug('starting in mode %s with options %o', mode, options)
 
     switch (mode) {
       case 'version':
         return require('./modes/pkg')(options)
         .get('version')
-        .then((version) => {
+        .then((version: any) => {
           return console.log(version) // eslint-disable-line no-console
         }).then(exit0)
         .catch(exitErr)
@@ -221,7 +225,7 @@ module.exports = {
 
       case 'smokeTest':
         return this.runElectron(mode, options)
-        .then((pong) => {
+        .then((pong: any) => {
           if (!this.isCurrentlyRunningElectron()) {
             return pong
           }
@@ -236,7 +240,7 @@ module.exports = {
 
       case 'returnPkg':
         return require('./modes/pkg')(options)
-        .then((pkg) => {
+        .then((pkg: any) => {
           return console.log(JSON.stringify(pkg)) // eslint-disable-line no-console
         }).then(exit0)
         .catch(exitErr)
@@ -250,7 +254,7 @@ module.exports = {
         // run headlessly and exit
         // with num of totalFailed
         return this.runElectron(mode, options)
-        .then((results) => {
+        .then((results: any) => {
           if (results.runs) {
             const isCanceled = results.runs.filter((run) => run.skippedSpec).length
 

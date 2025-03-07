@@ -57,6 +57,22 @@ describe('capture-protocol', () => {
         fs.removeSync(getFilePath('e9e81b5e-cc58-4026-b2ff-8ae3161435a6.db'))
       })
     })
+
+    it('verifies that the debug data is correct', async function () {
+      await systemTests.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        project: 'protocol',
+        spec: 'protocol.cy.js',
+        record: true,
+        expectedExitCode: 0,
+        port: 2121,
+        configFile: 'cypress-with-file-preprocessor.config.ts',
+      })
+
+      const protocolEvents = await fs.promises.readFile(getFilePath('e9e81b5e-cc58-4026-b2ff-8ae3161435a6.db'), 'utf8')
+
+      expect(JSON.parse(protocolEvents).debugData.filePreprocessorHandlerText).to.equal('(file) => {\n                return file.filePath;\n            }')
+    })
   })
 
   describe('component', () => {

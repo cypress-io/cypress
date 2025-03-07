@@ -10193,6 +10193,13 @@ ansi-to-html@0.6.14:
   dependencies:
     entities "^1.1.2"
 
+ansi-to-html@0.7.2:
+  version "0.7.2"
+  resolved "https://registry.yarnpkg.com/ansi-to-html/-/ansi-to-html-0.7.2.tgz#a92c149e4184b571eb29a0135ca001a8e2d710cb"
+  integrity sha512-v6MqmEpNlxF+POuyhKkidusCHWWkaLcGRURzivcU3I9tv7k4JVhFcnukrM5Rlk2rUywdZuzYAZ+kbZqWCnfN3g==
+  dependencies:
+    entities "^2.2.0"
+
 ansi-wrap@0.1.0, ansi-wrap@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/ansi-wrap/-/ansi-wrap-0.1.0.tgz#a82250ddb0015e9a27ca82e82ea603bbfa45efaf"
@@ -15224,7 +15231,7 @@ enquirer@~2.3.6:
   dependencies:
     ansi-colors "^4.1.1"
 
-entities@2.2.0, entities@^2.0.0:
+entities@2.2.0, entities@^2.0.0, entities@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/entities/-/entities-2.2.0.tgz#098dc90ebb83d8dffa089d55256b351d34c4da55"
   integrity sha512-p92if5Nz619I0w+akJrLZH0MX0Pb5DX39XOwQTtXSdQQOaYH03S1uIQp4mhOZtAXrxq4ViO67YTiLBo2638o9A==
@@ -28447,10 +28454,10 @@ simple-get@^4.0.0:
     once "^1.3.1"
     simple-concat "^1.0.0"
 
-simple-git@3.25.0:
-  version "3.25.0"
-  resolved "https://registry.yarnpkg.com/simple-git/-/simple-git-3.25.0.tgz#3666e76d6831f0583dc380645945b97e0ac4aab6"
-  integrity sha512-KIY5sBnzc4yEcJXW7Tdv4viEz8KyG+nU0hay+DWZasvdFOYKeUZ6Xc25LUHHjw0tinPT7O1eY6pzX7pRT1K8rw==
+simple-git@^3.27.0:
+  version "3.27.0"
+  resolved "https://registry.yarnpkg.com/simple-git/-/simple-git-3.27.0.tgz#f4b09e807bda56a4a3968f635c0e4888d3decbd5"
+  integrity sha512-ivHoFS9Yi9GY49ogc6/YAi3Fl9ROnF4VyubNylgCkA+RVqLaKWnDSzXOVzya8csELIaWaYNutsEuAhZrtOjozA==
   dependencies:
     "@kwsites/file-exists" "^1.1.1"
     "@kwsites/promise-deferred" "^1.1.1"

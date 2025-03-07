@@ -5,7 +5,7 @@ import Module from 'module'
  * @param script - string
  * @returns exports
  */
-export const requireScript = (script: string) => {
+export const requireScript = <T>(script: string): T => {
   const mod = new Module('id', module)
 
   mod.filename = ''
@@ -15,5 +15,5 @@ export const requireScript = (script: string) => {
 
   module.children.splice(module.children.indexOf(mod), 1)
 
-  return mod.exports
+  return mod.exports as T
 }

@@ -12,10 +12,13 @@
 <script lang="ts" setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { init, loadRemote } from '@module-federation/runtime'
+import type { StudioAppDefaultShape, StudioPanelShape } from './studio-app-types'
+
+interface StudioApp { default: StudioAppDefaultShape }
 
 const root = ref<HTMLElement | null>(null)
 const error = ref<string | null>(null)
-const Panel = ref<ReturnType<any> | null>(null)
+const Panel = ref<StudioPanelShape | null>(null)
 
 const maybeRenderReactComponent = () => {
   if (!Panel.value || !!error.value) {
@@ -61,14 +64,14 @@ init({
 onMounted(maybeRenderReactComponent)
 onBeforeUnmount(unmountReactComponent)
 
-loadRemote<typeof import('app-studio')>('app-studio').then((module) => {
+loadRemote<StudioApp>('app-studio').then((module) => {
   if (!module?.default) {
     error.value = 'The panel was not loaded successfully'
 
     return
   }
 
-  Panel.value = module.default
+  Panel.value = module.default.StudioPanel
   maybeRenderReactComponent()
 }).catch((e) => {
   error.value = e.message

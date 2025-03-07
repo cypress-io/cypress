@@ -105,6 +105,9 @@ export type ProtocolManagerOptions = {
   }
   projectConfig: ProjectConfig
   mountVersion?: number
+  debugData?: {
+    filePreprocessorHandlerText?: string
+  }
 }
 
 type UploadCaptureArtifactResult = {

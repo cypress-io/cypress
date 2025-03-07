@@ -9,3 +9,17 @@ In production, the code used to facilitate Studio functionality will be retrieve
 - Clone the `cypress` repo
   - Run `yarn`
   - Run `yarn cypress:open`
+
+## Types
+
+The studio bundle provides the types for the `app` and `server` interfaces that are used within the Cypress code. To incorporate the types into the code base, run:
+
+```sh
+yarn gulp downloadStudioTypes
+```
+
+or to reference a local `cypress_services` repo:
+
+```sh
+CYPRESS_LOCAL_STUDIO_PATH=<path-to-cypress-services/app/studio/dist/development-directory> yarn gulp downloadStudioTypes
+```
