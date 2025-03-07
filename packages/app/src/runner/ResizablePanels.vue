@@ -13,7 +13,7 @@
     <div
       v-show="showPanel1"
       data-cy="specs-list-panel"
-      class="h-full shrink-0 z-20 relative"
+      class="h-full shrink-0 z-60 relative"
       :style="{width: `${panel1Width}px`}"
     >
       <slot
@@ -23,7 +23,7 @@
 
       <div
         data-cy="panel1ResizeHandle"
-        class="cursor-ew-resize h-full top-0 right-[-6px] w-[10px] z-60 absolute"
+        class="cursor-ew-resize h-full top-0 right-[-6px] w-[10px] z-70 absolute"
         @mousedown="handleMousedown('panel1', $event)"
       />
     </div>
@@ -31,14 +31,14 @@
     <div
       v-show="showPanel2"
       data-cy="reporter-panel"
-      class="h-full shrink-0 z-10 relative"
+      class="h-full shrink-0 z-60 relative"
       :style="{width: `${panel2Width}px`}"
     >
       <slot name="panel2" />
 
       <div
         data-cy="panel2ResizeHandle"
-        class="cursor-ew-resize h-full top-0 right-[-6px] w-[10px] z-60 absolute"
+        class="cursor-ew-resize h-full top-0 right-[-6px] w-[10px] z-70 absolute"
         @mousedown="handleMousedown('panel2', $event)"
       />
     </div>
