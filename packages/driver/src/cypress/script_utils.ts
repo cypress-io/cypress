@@ -11,8 +11,11 @@ const fetchScript = (scriptWindow, script) => {
 }
 
 const extractSourceMap = ([script, contents]) => {
-  if (!Cypress.env('INTERNAL_E2E_TESTING_SELF')) {
+  try {
     script.fullyQualifiedUrl = `${window.top!.location.origin}${script.relativeUrl}`.replace(/ /g, '%20')
+  } catch (error) {
+    // if we can't get the fullyQualifiedUrl, we can't consume source maps, but it shouldn't block Cypress
+    // this can happen in cy-in-cy tests, where the top window is not accessible due to cross-origin restrictions
   }
 
   const sourceMap = $sourceMapUtils.extractSourceMap(contents)
