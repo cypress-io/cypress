@@ -35,7 +35,7 @@ console.log(`Looking for reports in ${REPORTS_PATH}`)
 
 // some env is ok in reports. this is based off of what Circle doesn't mask in stdout:
 // https://circleci.com/blog/keep-environment-variables-private-with-secret-masking/
-function isWhitelistedEnv (key, value) {
+function isAllowlistedEnv (key, value) {
   return ['true', 'false', 'TRUE', 'FALSE'].includes(value)
     || ['nodejs_version', 'CF_DOMAIN', 'SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES'].includes(key)
     || value.length < 4
@@ -52,6 +52,22 @@ async function checkReportFile (filename, circleEnv) {
     throw new Error(`Unable to read the report in ${filename}: ${err.message}`)
   }
 
+  // WARN: go through all the env vars and check if they're in the report,
+  // if they are, delete the report and throw an error.
+  // this needs to be done immediately after reading the file to ensure
+  // that the report is deleted before any other operations are performed
+  for (const key in circleEnv) {
+    const value = circleEnv[key]
+
+    if (!isAllowlistedEnv(key, value) && xml.includes(value)) {
+      await fs.rm(REPORTS_PATH, { recursive: true, force: true })
+      throw new Error(`Report contained the value of ${key}, which is a CI environment variable. This means that a failing test is exposing environment variables. Test reports will not be persisted for this job.`)
+    }
+  }
+
+  // TODO: while we're testing, remove the reports to ensure nothing is leaked
+  await fs.rm(REPORTS_PATH, { recursive: true, force: true })
+
   try {
     result = parseResult(xml)
   } catch (err) {
@@ -65,15 +81,6 @@ async function checkReportFile (filename, circleEnv) {
   la(tests > 0, 'Expected the total number of tests to be >0, but it was', tests, 'instead.')
   la(failures === 0, 'Expected the number of failures to be equal to 0, but it was', failures, '. This stage should not have been reached. Check why the failed test stage did not cause this entire build to fail.')
 
-  for (const key in circleEnv) {
-    const value = circleEnv[key]
-
-    if (!isWhitelistedEnv(key, value) && xml.includes(value)) {
-      await fs.rm(REPORTS_PATH, { recursive: true, force: true })
-      throw new Error(`Report contained the value of ${key}, which is a CI environment variable. This means that a failing test is exposing environment variables. Test reports will not be persisted for this job.`)
-    }
-  }
-
   total.tests += tests
   total.failures += failures
   total.skipped += skipped
@@ -83,7 +90,7 @@ async function checkReportFiles (filenames) {
   let circleEnv
 
   try {
-    circleEnv = await readCircleEnv()
+    circleEnv = readCircleEnv()
   } catch (err) {
     // set SKIP_CIRCLE_ENV to bypass, for local development
     if (!process.env.SKIP_CIRCLE_ENV && process.env.CI_DOCKER) throw err
