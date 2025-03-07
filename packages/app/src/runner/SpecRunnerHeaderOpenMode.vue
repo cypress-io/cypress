@@ -52,7 +52,7 @@
           :value="inputValue"
           :placeholder="inputPlaceholder"
           aria-label="url of the application under test"
-          class="aut-url-input flex grow mr-[12px] leading-normal max-w-full text-indigo-500 z-5 self-center hocus-link-default truncate"
+          class="aut-url-input flex grow mr-[12px] leading-normal max-w-full text-indigo-500 z-51 self-center hocus-link-default truncate"
           @input="setStudioUrl"
           @click="openExternally"
           @keyup.enter="visitUrl"
