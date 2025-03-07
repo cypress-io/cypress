@@ -110,10 +110,10 @@ export class Automation {
       const onReq = this.get('onRequest')
 
       if (onReq) {
-        return Promise.resolve(onReq(resolvedMessage, resolvedData))
+        return Bluebird.resolve(onReq(resolvedMessage, resolvedData))
       }
 
-      return this.requestAutomationResponse(resolvedMessage, resolvedData, fn)
+      return Bluebird.resolve(this.requestAutomationResponse(resolvedMessage, resolvedData, fn))
     }
   }
 
