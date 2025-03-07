@@ -1,3 +1,4 @@
+<!-- Be careful with changing styles of the panels, it can impact our screenshot tests -->
 <template>
   <div
     id="resizable-panels-root"
