@@ -32,7 +32,8 @@ import { CDPFailedToStartFirefox } from '../browsers/firefox'
 import type { CypressError } from '@packages/errors'
 
 type SetScreenshotMetadata = (data: TakeScreenshotProps) => void
-type ScreenshotMetadata = ReturnType<typeof screenshotMetadata>
+export type ScreenshotMetadata = ReturnType<typeof screenshotMetadata>
+
 type TakeScreenshotProps = any
 type RunEachSpec = any
 type BeforeSpecRun = any
@@ -753,7 +754,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
   return results
 }
 
-function screenshotMetadata (data, resp) {
+function screenshotMetadata (data: any, resp: any) {
   return {
     screenshotId: random.id(),
     name: data.name || null,
@@ -1006,7 +1007,7 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
   return { results }
 }
 
-interface ReadyOptions {
+export interface ReadyOptions {
   autoCancelAfterFailures: number | false
   browser: string
   browsers?: FoundBrowser[]

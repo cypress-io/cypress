@@ -239,7 +239,10 @@ const isRetriableError = (err) => {
 
 export type CreateRunOptions = {
   projectRoot: string
-  ci: string
+  ci: {
+    params: string
+    provider: string
+  }
   ciBuildId: string
   projectId: string
   recordKey: string
@@ -253,6 +256,7 @@ export type CreateRunOptions = {
   testingType: 'e2e' | 'component'
   timeout?: number
   project: ProjectBase
+  autoCancelAfterFailures?: number | undefined
 }
 
 type CreateRunResponse = {
