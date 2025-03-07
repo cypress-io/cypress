@@ -55,6 +55,16 @@ describe('Cypress Studio', () => {
 
       expect(spec.trim().replace(/\r/g, '')).to.eq(`
 describe('studio functionality', () => {
+  beforeEach(() => {
+    cy.intercept('GET', 'http://foobar.com:4455/cypress/e2e/index.html', {
+      statusCode: 200,
+      body: '<html><body><h1>hello world</h1></body></html>',
+      headers: {
+        'content-type': 'text/html',
+      },
+    })
+  })
+
   it('visits a basic html page', () => {
     cy.visit('cypress/e2e/index.html')
     /* ==== Generated with Cypress Studio ==== */
@@ -117,6 +127,16 @@ describe('studio functionality', () => {
 
       expect(spec.trim().replace(/\r/g, '')).to.eq(`
 describe('studio functionality', () => {
+  beforeEach(() => {
+    cy.intercept('GET', 'http://foobar.com:4455/cypress/e2e/index.html', {
+      statusCode: 200,
+      body: '<html><body><h1>hello world</h1></body></html>',
+      headers: {
+        'content-type': 'text/html',
+      },
+    })
+  })
+
   it('visits a basic html page', () => {
     cy.visit('cypress/e2e/index.html')
     /* ==== Generated with Cypress Studio ==== */
@@ -224,6 +244,16 @@ describe('studio functionality', () => {
 
       expect(spec.trim().replace(/\r/g, '')).to.eq(`
 describe('studio functionality', () => {
+  beforeEach(() => {
+    cy.intercept('GET', 'http://foobar.com:4455/cypress/e2e/index.html', {
+      statusCode: 200,
+      body: '<html><body><h1>hello world</h1></body></html>',
+      headers: {
+        'content-type': 'text/html',
+      },
+    })
+  })
+
   it('visits a basic html page', () => {
     cy.visit('cypress/e2e/index.html')
     /* ==== Generated with Cypress Studio ==== */
@@ -274,6 +304,16 @@ describe('studio functionality', () => {
       // No change, since we cancelled.
       expect(spec.trim().replace(/\r/g, '')).to.eq(`
 describe('studio functionality', () => {
+  beforeEach(() => {
+    cy.intercept('GET', 'http://foobar.com:4455/cypress/e2e/index.html', {
+      statusCode: 200,
+      body: '<html><body><h1>hello world</h1></body></html>',
+      headers: {
+        'content-type': 'text/html',
+      },
+    })
+  })
+
   it('visits a basic html page', () => {
     cy.visit('cypress/e2e/index.html')
   })
@@ -317,6 +357,16 @@ describe('studio functionality', () => {
       // No change, since we closed studio
       expect(spec.trim().replace(/\r/g, '')).to.eq(`
 describe('studio functionality', () => {
+  beforeEach(() => {
+    cy.intercept('GET', 'http://foobar.com:4455/cypress/e2e/index.html', {
+      statusCode: 200,
+      body: '<html><body><h1>hello world</h1></body></html>',
+      headers: {
+        'content-type': 'text/html',
+      },
+    })
+  })
+
   it('visits a basic html page', () => {
     cy.visit('cypress/e2e/index.html')
   })
@@ -359,6 +409,16 @@ describe('studio functionality', () => {
       // No change, since we cancelled.
       expect(spec.trim().replace(/\r/g, '')).to.eq(`
 describe('studio functionality', () => {
+  beforeEach(() => {
+    cy.intercept('GET', 'http://foobar.com:4455/cypress/e2e/index.html', {
+      statusCode: 200,
+      body: '<html><body><h1>hello world</h1></body></html>',
+      headers: {
+        'content-type': 'text/html',
+      },
+    })
+  })
+
   it('visits a basic html page', () => {
     cy.visit('cypress/e2e/index.html')
   })
@@ -464,6 +524,16 @@ it('new-test', function() {
 
       expect(spec.trim().replace(/\r/g, '')).to.equal(`
 describe('studio functionality', () => {
+  beforeEach(() => {
+    cy.intercept('GET', 'http://foobar.com:4455/cypress/e2e/index.html', {
+      statusCode: 200,
+      body: '<html><body><h1>hello world</h1></body></html>',
+      headers: {
+        'content-type': 'text/html',
+      },
+    })
+  })
+
   it('visits a basic html page', () => {
     cy.visit('cypress/e2e/index.html')
   })
@@ -476,6 +546,80 @@ describe('studio functionality', () => {
   });
 })
 `.trim())
+    })
+  })
+
+  it('creates a new test with a url that changes top', () => {
+    launchStudio({ createNewTest: true })
+
+    cy.origin('http://foobar.com:4455', () => {
+      Cypress.require('../support/execute-spec')
+      Cypress.require('cypress-real-events/support')
+      Cypress.require('@packages/frontend-shared/cypress/support/e2e')
+    })
+
+    cy.findByTestId('aut-url').as('urlPrompt')
+
+    cy.get('@urlPrompt').within(() => {
+      cy.contains('Continue ➜').should('be.disabled')
+    })
+
+    // go to a cross-origin url
+    cy.get('@urlPrompt').type('http://foobar.com:4455/cypress/e2e/index.html')
+
+    cy.get('@urlPrompt').within(() => {
+      cy.contains('Continue ➜').click()
+    })
+
+    cy.origin('http://foobar.com:4455', () => {
+      cy.get('button').contains('Save Commands').click()
+
+      // the save button is disabled until we add a test name
+      cy.get('button[type=submit]').should('be.disabled')
+
+      cy.get('#testName').type('new-test')
+
+      cy.get('button[type=submit]').click()
+
+      // Cypress re-runs after the new test is saved.
+      cy.waitForSpecToFinish({ passCount: 2 })
+
+      cy.contains('new-test').click()
+      cy.get('.command').should('have.length', 1)
+      cy.get('.command-name-visit').within(() => {
+        cy.contains('visit')
+        cy.contains('cypress/e2e/index.html')
+      })
+
+      cy.findByTestId('hook-name-studio commands').should('not.exist')
+    })
+
+    cy.withCtx(async (ctx) => {
+      const spec = await ctx.actions.file.readFileInProject('cypress/e2e/spec.cy.js')
+
+      expect(spec.trim().replace(/\r/g, '')).to.equal(`
+describe('studio functionality', () => {
+  beforeEach(() => {
+    cy.intercept('GET', 'http://foobar.com:4455/cypress/e2e/index.html', {
+      statusCode: 200,
+      body: '<html><body><h1>hello world</h1></body></html>',
+      headers: {
+        'content-type': 'text/html',
+      },
+    })
+  })
+
+  it('visits a basic html page', () => {
+    cy.visit('cypress/e2e/index.html')
+  })
+
+  /* ==== Test Created with Cypress Studio ==== */
+  it('new-test', function() {
+    /* ==== Generated with Cypress Studio ==== */
+    cy.visit('http://foobar.com:4455/cypress/e2e/index.html');
+    /* ==== End Cypress Studio ==== */
+  });
+})`.trim())
     })
   })
 
@@ -739,6 +883,16 @@ cy.get('#increment').click();
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress/e2e/spec.cy.js', `
 describe('studio functionality', () => {
+  beforeEach(() => {
+    cy.intercept('GET', 'http://foobar.com:4455/cypress/e2e/index.html', {
+      statusCode: 200,
+      body: '<html><body><h1>hello world</h1></body></html>',
+      headers: {
+        'content-type': 'text/html',
+      },
+    })
+  })
+
   it('visits a basic html page', () => {
     cy.visit('cypress/e2e/index.html')
 
@@ -812,6 +966,16 @@ describe('studio functionality', () => {
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress/e2e/spec.cy.js', `
 describe('studio functionality', () => {
+  beforeEach(() => {
+    cy.intercept('GET', 'http://foobar.com:4455/cypress/e2e/index.html', {
+      statusCode: 200,
+      body: '<html><body><h1>hello world</h1></body></html>',
+      headers: {
+        'content-type': 'text/html',
+      },
+    })
+  })
+
   it('visits a basic html page', () => {
     cy.visit('cypress/e2e/index.html')
 
@@ -873,6 +1037,16 @@ describe('studio functionality', () => {
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress/e2e/spec.cy.js', `
 describe('studio functionality', () => {
+  beforeEach(() => {
+    cy.intercept('GET', 'http://foobar.com:4455/cypress/e2e/index.html', {
+      statusCode: 200,
+      body: '<html><body><h1>hello world</h1></body></html>',
+      headers: {
+        'content-type': 'text/html',
+      },
+    })
+  })
+
   it('CHANGED - visits a basic html page', () => {
     cy.visit('cypress/e2e/index.html')
 
@@ -998,6 +1172,16 @@ describe('studio functionality', () => {
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress/e2e/spec.cy.js', `
 describe('studio functionality', () => {
+  beforeEach(() => {
+    cy.intercept('GET', 'http://foobar.com:4455/cypress/e2e/index.html', {
+      statusCode: 200,
+      body: '<html><body><h1>hello world</h1></body></html>',
+      headers: {
+        'content-type': 'text/html',
+      },
+    })
+  })
+
   it('CHANGED - visits a basic html page', () => {
     cy.visit('cypress/e2e/index.html')
 

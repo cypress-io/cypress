@@ -11,7 +11,9 @@ const fetchScript = (scriptWindow, script) => {
 }
 
 const extractSourceMap = ([script, contents]) => {
-  script.fullyQualifiedUrl = `${window.top!.location.origin}${script.relativeUrl}`.replace(/ /g, '%20')
+  if (!Cypress.env('INTERNAL_E2E_TESTING_SELF')) {
+    script.fullyQualifiedUrl = `${window.top!.location.origin}${script.relativeUrl}`.replace(/ /g, '%20')
+  }
 
   const sourceMap = $sourceMapUtils.extractSourceMap(contents)
 

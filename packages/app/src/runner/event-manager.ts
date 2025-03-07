@@ -768,14 +768,16 @@ export class EventManager {
      * This is also applicable when a user changes their spec file and hot reloads their spec, in which case we need to rebind onMessage
      * with the newly creates Cypress.primaryOriginCommunicator
      */
-    window?.top?.removeEventListener('message', crossOriginOnMessageRef, false)
-    crossOriginOnMessageRef = ({ data, source }) => {
-      Cypress?.primaryOriginCommunicator.onMessage({ data, source })
+    if (!Cypress.env('INTERNAL_E2E_TESTING_SELF')) {
+      window.top.removeEventListener('message', crossOriginOnMessageRef, false)
+      crossOriginOnMessageRef = ({ data, source }) => {
+        Cypress?.primaryOriginCommunicator.onMessage({ data, source })
 
-      return undefined
+        return undefined
+      }
+
+      window.top.addEventListener('message', crossOriginOnMessageRef, false)
     }
-
-    window.top.addEventListener('message', crossOriginOnMessageRef, false)
   }
 
   _runDriver (runState: RunState, testState: CachedTestState) {
