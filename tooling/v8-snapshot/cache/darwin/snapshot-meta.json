@@ -758,7 +758,7 @@
     "./packages/server/lib/browsers/memory/index.ts",
     "./packages/server/lib/cache.js",
     "./packages/server/lib/cloud/api/cloud_request.ts",
-    "./packages/server/lib/cloud/api/get_and_initialize_studio_manager.ts"
+    "./packages/server/lib/cloud/api/get_and_initialize_studio_manager.ts",
     "./packages/server/lib/cloud/api/index.ts",
     "./packages/server/lib/cloud/api/put_protocol_artifact.ts",
     "./packages/server/lib/cloud/artifacts/protocol_artifact.ts",

@@ -344,7 +344,7 @@ export default {
     .catch(tagError)
   },
 
-  createRun (options: CreateRunOptions) {
+  createRun (options: CreateRunOptions): Bluebird<CreateRunResponse> {
     const preflightOptions = _.pick(options, ['projectId', 'projectRoot', 'ciBuildId', 'browser', 'testingType', 'parallel', 'timeout'])
 
     return this.sendPreflight(preflightOptions)
