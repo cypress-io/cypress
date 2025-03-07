@@ -46,7 +46,7 @@
       data-cy="aut-panel"
       class="grow h-full bg-gray-100 relative"
       :class="{'pointer-events-none':panel2IsDragging}"
-      :style="{ width: `${panel3width}px`, zIndex: 5 }"
+      :style="{ width: `${panel3width}px` }"
     >
       <slot
         name="panel3"
