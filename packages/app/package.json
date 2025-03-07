@@ -62,7 +62,7 @@
     "cypress-real-events": "1.6.0",
     "dayjs": "^1.9.3",
     "debug": "^4.3.4",
-    "disparity": "^3.0.0",
+    "disparity": "^3.2.0",
     "engine.io-client": "3.5.2",
     "fs-extra": "9.1.0",
     "fuzzysort": "^1.1.4",
