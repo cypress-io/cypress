@@ -3,7 +3,7 @@
 
 _Released 3/11/2025 (PENDING)_
 
-**Feature:**
+**Features:**
 
 - [`Cypress.stop()`](https://on.cypress.io/cypress-stop) is now available to stop the Cypress App on the current machine while tests are running. This can be useful for stopping test execution upon failures or other predefined conditions. Addresses [#518](https://github.com/cypress-io/cypress/issues/518). Addressed in [#31225](https://github.com/cypress-io/cypress/pull/31225).
 
