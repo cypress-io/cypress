@@ -10,6 +10,7 @@ import { humanTime, logError, parseResolvedPattern, pluralize } from './errorUti
 import { errPartial, errTemplate, fmt, theme, PartialErr } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
 import type { ClonedError, ConfigValidationFailureInfo, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
+import { normalizeNetworkErrorMessage } from './normalizeNetworkErrorMessage'
 
 const ansi_up = new AU()
 
@@ -161,7 +162,7 @@ export const AllCypressErrors = {
     const time = pluralize('time', arg1.tries)
     const delay = humanTime.long(arg1.delayMs, false)
 
-    const message = arg1.response.name === 'AxiosError' ? arg1.response.message : `${arg1.response.name}: ${arg1.response.message}`
+    const message = normalizeNetworkErrorMessage(arg1.response)
 
     return errTemplate`\
         We encountered an unexpected error communicating with our servers.
@@ -174,7 +175,7 @@ export const AllCypressErrors = {
     /* eslint-disable indent */
   },
   CLOUD_CANNOT_PROCEED_IN_PARALLEL: (arg1: {flags: any, response: Error}) => {
-    const message = arg1.response.name === 'AxiosError' ? arg1.response.message : `${arg1.response.name}: ${arg1.response.message}`
+    const message = normalizeNetworkErrorMessage(arg1.response)
 
     return errTemplate`\
         We encountered an unexpected error communicating with our servers.
@@ -189,7 +190,7 @@ export const AllCypressErrors = {
     })}`
   },
   CLOUD_CANNOT_PROCEED_IN_SERIAL: (arg1: {flags: any, response: Error}) => {
-    const message = arg1.response.name === 'AxiosError' ? arg1.response.message : `${arg1.response.name}: ${arg1.response.message}`
+    const message = normalizeNetworkErrorMessage(arg1.response)
 
     return errTemplate`\
         We encountered an unexpected error communicating with our servers.
@@ -204,7 +205,7 @@ export const AllCypressErrors = {
     })}`
   },
   CLOUD_UNKNOWN_INVALID_REQUEST: (arg1: {flags: any, response: Error}) => {
-    const message = arg1.response.name === 'AxiosError' ? arg1.response.message : `${arg1.response.name}: ${arg1.response.message}`
+    const message = normalizeNetworkErrorMessage(arg1.response)
 
     return errTemplate`\
         We encountered an unexpected error communicating with our servers.
