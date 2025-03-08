@@ -184,6 +184,7 @@ export class ProjectBase extends EE {
         },
         projectConfig: _.pick(cfg, ['devServerPublicPathRoute', 'port', 'proxyUrl', 'namespace']),
         mountVersion: api.runnerCapabilities.protocolMountVersion,
+        debugData: this.configDebugData,
         mode: 'studio',
       })
 
