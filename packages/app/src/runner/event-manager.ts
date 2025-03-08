@@ -767,10 +767,8 @@ export class EventManager {
      *
      * This is also applicable when a user changes their spec file and hot reloads their spec, in which case we need to rebind onMessage
      * with the newly creates Cypress.primaryOriginCommunicator
-     *
-     * (Skip for the inner Cypress in cy-in-cy tests since it's possible for window.top to be cross-origin)
      */
-    if (!Cypress.env('INTERNAL_E2E_TESTING_SELF')) {
+    try {
       window.top.removeEventListener('message', crossOriginOnMessageRef, false)
       crossOriginOnMessageRef = ({ data, source }) => {
         Cypress?.primaryOriginCommunicator.onMessage({ data, source })
@@ -779,6 +777,12 @@ export class EventManager {
       }
 
       window.top.addEventListener('message', crossOriginOnMessageRef, false)
+    } catch (error) {
+      // in cy-in-cy tests, window.top may not be accessible due to cross-origin restrictions
+      if (error.name !== 'SecurityError') {
+        // re-throw any error that's not a cross-origin error
+        throw error
+      }
     }
   }
 

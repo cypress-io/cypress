@@ -14,8 +14,11 @@ const extractSourceMap = ([script, contents]) => {
   try {
     script.fullyQualifiedUrl = `${window.top!.location.origin}${script.relativeUrl}`.replace(/ /g, '%20')
   } catch (error) {
-    // if we can't get the fullyQualifiedUrl, we can't consume source maps, but it shouldn't block Cypress
-    // this can happen in cy-in-cy tests, where the top window is not accessible due to cross-origin restrictions
+    // in cy-in-cy tests, window.top may not be accessible due to cross-origin restrictions
+    if (error.name !== 'SecurityError') {
+      // re-throw any error that's not a cross-origin error
+      throw error
+    }
   }
 
   const sourceMap = $sourceMapUtils.extractSourceMap(contents)
