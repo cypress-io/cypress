@@ -1,12 +1,13 @@
-const debug = require('debug')('cypress:server:controllers:client')
+import Debug from 'debug'
+const debug = Debug('cypress:server:controllers:client')
 const socketIo = require('@packages/socket')
 
 // hold onto the client source + version in memory
 const clientSourcePath = socketIo.getPathToClientSource()
 const clientVersion = socketIo.getClientVersion()
 
-module.exports = {
-  handle (req, res) {
+export = {
+  handle (req: any, res: any) {
     const etag = req.get('if-none-match')
 
     debug('serving socket.io client %o', { etag, clientVersion })
