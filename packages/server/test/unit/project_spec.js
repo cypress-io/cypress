@@ -234,18 +234,18 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
   context('#getConfig', () => {
     it('returns the enabled state of the protocol manager if it is defined', function () {
       this.project.protocolManager = {
-        protocolEnabled: true,
+        isProtocolEnabled: true,
       }
 
       const config = this.project.getConfig()
 
-      expect(config.protocolEnabled).to.be.true
+      expect(config.isProtocolEnabled).to.be.true
     })
 
-    it('returns false for protocolEnabled if the protocol manager is undefined', function () {
+    it('returns false for isProtocolEnabled if the protocol manager is undefined', function () {
       const config = this.project.getConfig()
 
-      expect(config.protocolEnabled).to.be.false
+      expect(config.isProtocolEnabled).to.be.false
     })
 
     context('hideCommandLog', () => {
@@ -296,7 +296,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
 
       it('returns true if runnerUi arg is not set and protocol is enabled', function () {
-        this.project.protocolManager = { protocolEnabled: true }
+        this.project.protocolManager = { isProtocolEnabled: true }
 
         const config = this.project.getConfig()
 
@@ -304,7 +304,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
 
       it('returns false if runnerUi arg is not set and protocol is not enabled', function () {
-        this.project.protocolManager = { protocolEnabled: false }
+        this.project.protocolManager = { isProtocolEnabled: false }
 
         const config = this.project.getConfig()
 
@@ -312,7 +312,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
 
       it('returns false if runnerUi arg is set to true and protocol is enabled', function () {
-        this.project.protocolManager = { protocolEnabled: true }
+        this.project.protocolManager = { isProtocolEnabled: true }
         this.project.options.args.runnerUi = true
 
         const config = this.project.getConfig()

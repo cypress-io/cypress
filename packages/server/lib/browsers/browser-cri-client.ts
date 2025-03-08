@@ -187,6 +187,7 @@ export class BrowserCriClient {
   private fullyManageTabs?: boolean
   onServiceWorkerClientEvent: ServiceWorkerEventHandler
   currentlyAttachedTarget: CriClient | undefined
+  currentlyAttachedProtocolTarget: CriClient | undefined
   // whenever we instantiate the instance we're already connected bc
   // we receive an underlying CRI connection
   // TODO: remove "connected" in favor of closing/closed or disconnected
@@ -558,7 +559,10 @@ export class BrowserCriClient {
         browserClient: this.browserClient,
       })
 
-      await this.protocolManager?.connectToBrowser(this.currentlyAttachedTarget)
+      if (!this.currentlyAttachedProtocolTarget) {
+        this.currentlyAttachedProtocolTarget = await this.currentlyAttachedTarget.clone()
+        await this.protocolManager?.connectToBrowser(this.currentlyAttachedProtocolTarget)
+      }
 
       return this.currentlyAttachedTarget
     }, this.browserName, this.port)
@@ -607,6 +611,10 @@ export class BrowserCriClient {
       this.browserClient.off(subscription.eventName, subscription.cb as any)
     })
 
+    this.currentlyAttachedProtocolTarget?.queue.subscriptions.forEach((subscription) => {
+      this.browserClient.off(subscription.eventName, subscription.cb as any)
+    })
+
     if (target) {
       this.currentlyAttachedTarget = await CriClient.create({
         target: target.targetId,
@@ -617,8 +625,11 @@ export class BrowserCriClient {
         fullyManageTabs: this.fullyManageTabs,
         browserClient: this.browserClient,
       })
+
+      this.currentlyAttachedProtocolTarget = await this.currentlyAttachedTarget.clone()
     } else {
       this.currentlyAttachedTarget = undefined
+      this.currentlyAttachedProtocolTarget = undefined
     }
 
     this.resettingBrowserTargets = false

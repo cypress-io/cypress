@@ -281,18 +281,25 @@ export class EventManager {
     this.reporterBus.on('studio:init:test', (testId) => {
       this.studioStore.setTestId(testId)
 
-      studioInit()
+      this.ws.emit('studio:init', () => {
+        studioInit()
+      })
     })
 
     this.reporterBus.on('studio:init:suite', (suiteId) => {
       this.studioStore.setSuiteId(suiteId)
 
-      studioInit()
+      this.ws.emit('studio:init', () => {
+        studioInit()
+      })
     })
 
     this.reporterBus.on('studio:cancel', () => {
-      this.studioStore.cancel()
-      rerun()
+      this.ws.emit('studio:destroy', () => {
+        this.studioStore.cancel()
+        // Reloading for now. This is the easiest way to clear out the protocol code from the front end
+        window.location.reload()
+      })
     })
 
     this.reporterBus.on('studio:remove:command', (commandId) => {
@@ -300,7 +307,9 @@ export class EventManager {
     })
 
     this.reporterBus.on('studio:save', () => {
-      this.studioStore.startSave()
+      this.ws.emit('studio:destroy', () => {
+        this.studioStore.startSave()
+      })
     })
 
     this.reporterBus.on('studio:copy:to:clipboard', (cb) => {
@@ -317,13 +326,18 @@ export class EventManager {
           this.reporterBus.emit('test:set:state', this.studioStore.saveError(err), noop)
         } else {
           this.studioStore.saveSuccess()
+          // Reloading for now. This is the easiest way to clear out the protocol code from the front end
+          window.location.reload()
         }
       })
     })
 
     this.localBus.on('studio:cancel', () => {
-      this.studioStore.cancel()
-      rerun()
+      this.ws.emit('studio:destroy', () => {
+        this.studioStore.cancel()
+        // Reloading for now. This is the easiest way to clear out the protocol code from the front end
+        window.location.reload()
+      })
     })
 
     this.ws.on('aut:destroy:init', () => {
@@ -396,6 +410,14 @@ export class EventManager {
     // @ts-ignore
     window.Cypress = Cypress
 
+    this.studioStore.setup(config)
+
+    const isDefaultProtocolEnabled = Cypress.config('isProtocolEnabled')
+    const isStudioProtocolEnabled = Cypress.config('isStudioProtocolEnabled')
+    const isStudioInScope = this.studioStore.isActive || this.studioStore.isLoading
+
+    Cypress.state('isProtocolEnabled', isDefaultProtocolEnabled || (isStudioProtocolEnabled && isStudioInScope))
+
     this._addListeners()
   }
 
@@ -421,7 +443,7 @@ export class EventManager {
 
           const hideCommandLog = Cypress.config('hideCommandLog')
 
-          this.studioStore.initialize(config)
+          this.studioStore.initialize()
 
           const runnables = Cypress.runner.normalizeAll(runState.tests, hideCommandLog, testFilter)
 
@@ -466,7 +488,7 @@ export class EventManager {
   _addListeners () {
     addTelemetryListeners(Cypress)
 
-    if (Cypress.config('protocolEnabled')) {
+    if (Cypress.state('isProtocolEnabled')) {
       addCaptureProtocolListeners(Cypress)
     }
 

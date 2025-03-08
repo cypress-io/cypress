@@ -152,6 +152,8 @@ export class SocketBase {
       onSavedStateChanged () {},
       onTestFileChange () {},
       onCaptureVideoFrames () {},
+      onStudioInit () {},
+      onStudioDestroy () {},
     })
 
     let automationClient
@@ -399,6 +401,16 @@ export class SocketBase {
           await devServer.updateSpecs([spec], { neededForJustInTimeCompile: true })
 
           return socket.emit('dev-server:on-spec-updated')
+        })
+
+        socket.on('studio:init', async (cb) => {
+          await options.onStudioInit()
+          cb()
+        })
+
+        socket.on('studio:destroy', async (cb) => {
+          await options.onStudioDestroy()
+          cb()
         })
 
         socket.on('backend:request', (eventName: string, ...args) => {

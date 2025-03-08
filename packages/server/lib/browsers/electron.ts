@@ -470,7 +470,18 @@ export = {
 
     if (!browserCriClient?.currentlyAttachedTarget) throw new Error('Missing pageCriClient in connectProtocolToBrowser')
 
-    await options.protocolManager?.connectToBrowser(browserCriClient.currentlyAttachedTarget)
+    if (!browserCriClient.currentlyAttachedProtocolTarget) {
+      browserCriClient.currentlyAttachedProtocolTarget = await browserCriClient.currentlyAttachedTarget.clone()
+    }
+
+    await options.protocolManager?.connectToBrowser(browserCriClient.currentlyAttachedProtocolTarget)
+  },
+
+  async closeProtocolConnection () {
+    if (browserCriClient?.currentlyAttachedProtocolTarget) {
+      await browserCriClient.currentlyAttachedProtocolTarget.close()
+      browserCriClient.currentlyAttachedProtocolTarget = undefined
+    }
   },
 
   validateLaunchOptions (launchOptions: typeof utils.defaultLaunchOptions) {

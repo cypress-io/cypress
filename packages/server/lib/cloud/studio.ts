@@ -1,4 +1,4 @@
-import type { StudioErrorReport, StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape } from '@packages/types'
+import type { StudioErrorReport, StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape } from '@packages/types'
 import type { Router } from 'express'
 import fetch from 'cross-fetch'
 import pkg from '@packages/root'
@@ -14,6 +14,8 @@ const routes = require('./routes')
 
 export class StudioManager implements StudioManagerShape {
   status: StudioStatus = 'NOT_INITIALIZED'
+  isProtocolEnabled: boolean = false
+  protocolManager: ProtocolManagerShape | undefined
   private _studioServer: StudioServerShape | undefined
   private _studioHash: string | undefined
 

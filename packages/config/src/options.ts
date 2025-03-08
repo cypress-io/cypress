@@ -589,7 +589,12 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     validation: validate.isString,
     isInternal: true,
   }, {
-    name: 'protocolEnabled',
+    name: 'isProtocolEnabled',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isInternal: true,
+  }, {
+    name: 'isStudioProtocolEnabled',
     defaultValue: false,
     validation: validate.isBoolean,
     isInternal: true,

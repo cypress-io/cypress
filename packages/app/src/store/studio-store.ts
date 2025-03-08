@@ -184,7 +184,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       this.isFailed = true
     },
 
-    initialize (config) {
+    setup (config) {
       const studio = this._getUrlParams()
 
       if (studio.testId) {
@@ -198,12 +198,14 @@ export const useStudioStore = defineStore('studioRecorder', {
       if (this.testId || this.suiteId) {
         this.setAbsoluteFile(config.spec.absolute)
         this.startLoading()
+      }
+    },
 
-        if (this.suiteId) {
-          getCypress().runner.setOnlySuiteId(this.suiteId)
-        } else if (this.testId) {
-          getCypress().runner.setOnlyTestId(this.testId)
-        }
+    initialize () {
+      if (this.suiteId) {
+        getCypress().runner.setOnlySuiteId(this.suiteId)
+      } else if (this.testId) {
+        getCypress().runner.setOnlyTestId(this.testId)
       }
     },
 

@@ -17,7 +17,7 @@ import utils from './utils'
 import * as errors from '../errors'
 import { BrowserCriClient } from './browser-cri-client'
 import type { Browser, BrowserInstance, GracefulShutdownOptions } from './types'
-import type { CriClient } from './cri-client'
+import { CriClient } from './cri-client'
 import type { Automation } from '../automation'
 import memory from './memory'
 
@@ -394,7 +394,18 @@ export = {
 
     if (!browserCriClient?.currentlyAttachedTarget) throw new Error('Missing pageCriClient in connectProtocolToBrowser')
 
-    await options.protocolManager?.connectToBrowser(browserCriClient.currentlyAttachedTarget)
+    if (!browserCriClient.currentlyAttachedProtocolTarget) {
+      browserCriClient.currentlyAttachedProtocolTarget = await browserCriClient.currentlyAttachedTarget.clone()
+    }
+
+    await options.protocolManager?.connectToBrowser(browserCriClient.currentlyAttachedProtocolTarget)
+  },
+
+  async closeProtocolConnection () {
+    if (browserCriClient?.currentlyAttachedProtocolTarget) {
+      await browserCriClient.currentlyAttachedProtocolTarget.close()
+      browserCriClient.currentlyAttachedProtocolTarget = undefined
+    }
   },
 
   async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation, socketServer?: CDPSocketServer) {
