@@ -1560,7 +1560,7 @@ jobs:
           command: |
             # only Docker has the required env data for this
             if [[ $CI_DOCKER == 'true' ]]; then
-              node ./scripts/circle-env.js --check-canaries
+              node ./scripts/circle-env.ts --check-canaries
             fi
       - build-and-persist
       - store-npm-logs
