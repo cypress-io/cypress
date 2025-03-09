@@ -180,7 +180,7 @@ context('cy.origin log', { browser: '!webkit' }, () => {
         .wait(1500)
       })
 
-      it('when run mode with protocol disabled', { numTestsKeptInMemory: 0, isProtocolEnabled: false }, () => {
+      it('when run mode with protocol disabled', { numTestsKeptInMemory: 0 }, () => {
         // Verify the log is also fired in the primary origin.
         expect(logsToVerify.length).to.eq(11)
 
@@ -248,7 +248,8 @@ context('cy.origin log', { browser: '!webkit' }, () => {
         .wait(1500)
       })
 
-      it('when run mode with protocol disabled', { numTestsKeptInMemory: 0, isProtocolEnabled: false }, () => {
+      it('when run mode with protocol disabled', { numTestsKeptInMemory: 0 }, () => {
+        cy.state('isProtocolEnabled', false)
         // Verify the log is also fired in the primary origin.
         expect(logsToVerify.length).to.eq(11)
 

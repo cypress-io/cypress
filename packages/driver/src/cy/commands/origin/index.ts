@@ -182,6 +182,7 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
             communicator.toSpecBridge(origin, 'initialize:cypress', {
               config: preprocessConfig(Cypress.config()),
               env: preprocessEnv(Cypress.env()),
+              isProtocolEnabled: Cypress.state('isProtocolEnabled'),
             })
 
             // Attach the spec bridge to the window to be tested.

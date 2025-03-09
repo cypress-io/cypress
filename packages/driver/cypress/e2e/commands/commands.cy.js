@@ -65,7 +65,8 @@ describe('src/cy/commands/commands', () => {
       })
     })
 
-    it('we capture logs from custom commands', { isProtocolEnabled: false }, () => {
+    it('we capture logs from custom commands', () => {
+      cy.state('isProtocolEnabled', false)
       const logs = []
       const addLogs = (attrs, log) => {
         logs.push(log)

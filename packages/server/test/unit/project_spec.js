@@ -234,7 +234,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
   context('#getConfig', () => {
     it('returns the enabled state of the protocol manager if it is defined', function () {
       this.project.protocolManager = {
-        isisProtocolEnabled: false,
+        isProtocolEnabled: false,
       }
 
       const config = this.project.getConfig()
@@ -296,7 +296,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
 
       it('returns true if runnerUi arg is not set and protocol is enabled', function () {
-        this.project.protocolManager = { isisProtocolEnabled: false }
+        this.project.protocolManager = { isProtocolEnabled: false }
 
         const config = this.project.getConfig()
 
@@ -304,7 +304,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
 
       it('returns false if runnerUi arg is not set and protocol is not enabled', function () {
-        this.project.protocolManager = { isisProtocolEnabled: false }
+        this.project.protocolManager = { isProtocolEnabled: false }
 
         const config = this.project.getConfig()
 
@@ -312,7 +312,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
 
       it('returns false if runnerUi arg is set to true and protocol is enabled', function () {
-        this.project.protocolManager = { isisProtocolEnabled: false }
+        this.project.protocolManager = { isProtocolEnabled: false }
         this.project.options.args.runnerUi = true
 
         const config = this.project.getConfig()

@@ -442,7 +442,8 @@ describe('src/cy/commands/storage', () => {
         })
       })
 
-      it('log is disabled without key', { isProtocolEnabled: false }, () => {
+      it('log is disabled without key', () => {
+        cy.state('isProtocolEnabled', false)
         cy.clearLocalStorage({ log: false }).then(function () {
           const { lastLog, hiddenLog } = this
 
