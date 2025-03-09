@@ -116,7 +116,7 @@ context('cy.origin log', { browser: '!webkit' }, () => {
     })
   })
 
-  it('does not send hidden logs to primary origin when protocol is disabled', { protocolEnabled: false }, function () {
+  it('does not send hidden logs to primary origin when protocol is disabled', { isProtocolEnabled: false }, function () {
     cy.on('_log:added', (attrs, log) => {
       this.hiddenLog = log
     })
@@ -133,7 +133,7 @@ context('cy.origin log', { browser: '!webkit' }, () => {
     })
   })
 
-  it('handles sending hidden logs to primary origin when protocol enabled', { protocolEnabled: true }, function () {
+  it('handles sending hidden logs to primary origin when protocol enabled', { isProtocolEnabled: false }, function () {
     cy.on('_log:added', (attrs, log) => {
       this.hiddenLog = log
     })
@@ -177,7 +177,7 @@ context('cy.origin log', { browser: '!webkit' }, () => {
         .wait(1500)
       })
 
-      it('when run mode with protocol disabled', { numTestsKeptInMemory: 0, protocolEnabled: false }, () => {
+      it('when run mode with protocol disabled', { numTestsKeptInMemory: 0, isProtocolEnabled: false }, () => {
         // Verify the log is also fired in the primary origin.
         expect(logsToVerify.length).to.eq(11)
 
@@ -245,7 +245,7 @@ context('cy.origin log', { browser: '!webkit' }, () => {
         .wait(1500)
       })
 
-      it('when run mode with protocol disabled', { numTestsKeptInMemory: 0, protocolEnabled: false }, () => {
+      it('when run mode with protocol disabled', { numTestsKeptInMemory: 0, isProtocolEnabled: false }, () => {
         // Verify the log is also fired in the primary origin.
         expect(logsToVerify.length).to.eq(11)
 

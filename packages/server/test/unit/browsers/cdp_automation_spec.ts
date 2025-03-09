@@ -23,7 +23,7 @@ context('lib/browsers/cdp_automation', () => {
           onRequestEvent: sinon.stub(),
         }
         const localManager = {
-          isProtocolEnabled: true,
+          isisProtocolEnabled: false,
           networkEnableOptions: enabledObject,
         } as ProtocolManagerShape
 
@@ -49,7 +49,7 @@ context('lib/browsers/cdp_automation', () => {
           onRequestEvent: sinon.stub(),
         }
         const localManager = {
-          isProtocolEnabled: false,
+          isisProtocolEnabled: false,
           networkEnableOptions: disabledObject,
         } as ProtocolManagerShape
 

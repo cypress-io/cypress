@@ -17,7 +17,7 @@ import utils from './utils'
 import * as errors from '../errors'
 import { BrowserCriClient } from './browser-cri-client'
 import type { Browser, BrowserInstance, GracefulShutdownOptions } from './types'
-import { CriClient } from './cri-client'
+import type { CriClient } from './cri-client'
 import type { Automation } from '../automation'
 import memory from './memory'
 

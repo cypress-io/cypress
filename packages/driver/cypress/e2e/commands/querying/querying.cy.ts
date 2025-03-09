@@ -361,7 +361,7 @@ describe('src/cy/commands/querying', () => {
         return null
       })
 
-      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+      it('can turn off logging when protocol is disabled', { isProtocolEnabled: false }, function () {
         cy.on('_log:added', (attrs, log) => {
           this.hiddenLog = log
         })
@@ -375,7 +375,7 @@ describe('src/cy/commands/querying', () => {
         })
       })
 
-      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+      it('can send hidden log when protocol is enabled', { isProtocolEnabled: false }, function () {
         cy.on('_log:added', (attrs, log) => {
           this.hiddenLog = log
         })
@@ -577,7 +577,7 @@ describe('src/cy/commands/querying', () => {
         })
       })
 
-      it('can get alias with logging off', { protocolEnabled: true }, () => {
+      it('can get alias with logging off', { isProtocolEnabled: false }, () => {
         const logs: any = []
         let hiddenLog
 

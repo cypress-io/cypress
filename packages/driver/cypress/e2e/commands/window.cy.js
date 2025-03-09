@@ -107,7 +107,7 @@ describe('src/cy/commands/window', () => {
         return null
       })
 
-      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+      it('can turn off logging when protocol is disabled', { isProtocolEnabled: false }, function () {
         cy.on('_log:added', (attrs, log) => {
           this.hiddenLog = log
         })
@@ -120,7 +120,7 @@ describe('src/cy/commands/window', () => {
         })
       })
 
-      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+      it('can send hidden log when protocol is enabled', { isProtocolEnabled: false }, function () {
         cy.on('_log:added', (attrs, log) => {
           this.hiddenLog = log
         })
@@ -309,7 +309,7 @@ describe('src/cy/commands/window', () => {
         return null
       })
 
-      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+      it('can turn off logging when protocol is disabled', { isProtocolEnabled: false }, function () {
         cy.on('_log:added', (attrs, log) => {
           this.hiddenLog = log
         })
@@ -322,7 +322,7 @@ describe('src/cy/commands/window', () => {
         })
       })
 
-      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+      it('can send hidden log when protocol is enabled', { isProtocolEnabled: false }, function () {
         cy.on('_log:added', (attrs, log) => {
           this.hiddenLog = log
         })
@@ -531,7 +531,7 @@ describe('src/cy/commands/window', () => {
         return null
       })
 
-      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+      it('can turn off logging when protocol is disabled', { isProtocolEnabled: false }, function () {
         cy.on('_log:added', (attrs, log) => {
           this.hiddenLog = log
         })
@@ -544,7 +544,7 @@ describe('src/cy/commands/window', () => {
         })
       })
 
-      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+      it('can send hidden log when protocol is enabled', { isProtocolEnabled: false }, function () {
         cy.on('_log:added', (attrs, log) => {
           this.hiddenLog = log
         })
@@ -1048,7 +1048,7 @@ describe('src/cy/commands/window', () => {
         })
       })
 
-      it('can turn off logging viewport command', { protocolEnabled: false }, function () {
+      it('can turn off logging viewport command', { isProtocolEnabled: false }, function () {
         cy.on('_log:added', (attrs, log) => {
           this.hiddenLog = log
         })
@@ -1061,7 +1061,7 @@ describe('src/cy/commands/window', () => {
         })
       })
 
-      it('can turn off logging viewport when using preset', { protocolEnabled: false }, function () {
+      it('can turn off logging viewport when using preset', { isProtocolEnabled: false }, function () {
         cy.on('_log:added', (attrs, log) => {
           this.hiddenLog = log
         })
@@ -1074,7 +1074,7 @@ describe('src/cy/commands/window', () => {
         })
       })
 
-      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+      it('can send hidden log when protocol is enabled', { isProtocolEnabled: false }, function () {
         cy.on('_log:added', (attrs, log) => {
           this.hiddenLog = log
         })

@@ -27,7 +27,7 @@ import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/service-worker-manager'
 import { getAndInitializeStudioManager } from './cloud/api/get_and_initialize_studio_manager'
 import api from './cloud/api'
-import { StudioManager } from './cloud/studio'
+import type { StudioManager } from './cloud/studio'
 import { v4 } from 'uuid'
 
 const routes = require('./cloud/routes')

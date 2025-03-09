@@ -386,7 +386,7 @@ describe('src/cy/commands/clock', () => {
         })
       })
 
-      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+      it('can turn off logging when protocol is disabled', { isProtocolEnabled: false }, function () {
         cy.on('_log:added', (attrs, log) => {
           this.hiddenLogs.push(log)
         })
@@ -399,7 +399,7 @@ describe('src/cy/commands/clock', () => {
         })
       })
 
-      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+      it('can send hidden log when protocol is enabled', { isProtocolEnabled: false }, function () {
         cy.on('_log:added', (attrs, log) => {
           this.hiddenLogs.push(log)
         })
@@ -565,7 +565,7 @@ describe('src/cy/commands/clock', () => {
         })
       })
 
-      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+      it('can turn off logging when protocol is disabled', { isProtocolEnabled: false }, function () {
         cy.on('_log:added', (attrs, log) => {
           this.hiddenLog = log
         })
@@ -581,7 +581,7 @@ describe('src/cy/commands/clock', () => {
         })
       })
 
-      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+      it('can send hidden log when protocol is enabled', { isProtocolEnabled: false }, function () {
         cy.on('_log:added', (attrs, log) => {
           this.hiddenLog = log
         })
@@ -638,7 +638,7 @@ describe('src/cy/commands/clock', () => {
         })
       })
 
-      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+      it('can turn off logging when protocol is disabled', { isProtocolEnabled: false }, function () {
         cy.on('_log:added', (attrs, log) => {
           this.hiddenLog = log
         })
@@ -655,7 +655,7 @@ describe('src/cy/commands/clock', () => {
         })
       })
 
-      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+      it('can send hidden log when protocol is enabled', { isProtocolEnabled: false }, function () {
         cy.on('_log:added', (attrs, log) => {
           this.hiddenLog = log
         })

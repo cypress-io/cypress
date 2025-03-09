@@ -45,7 +45,7 @@ describe('src/cy/commands/debugging', () => {
         return null
       })
 
-      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+      it('can turn off logging when protocol is disabled', { isProtocolEnabled: false }, function () {
         cy.on('_log:added', (attrs, log) => {
           if (attrs.name === 'debug') {
             this.hiddenLog = log
@@ -61,7 +61,7 @@ describe('src/cy/commands/debugging', () => {
         })
       })
 
-      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+      it('can send hidden log when protocol is enabled', { isProtocolEnabled: false }, function () {
         cy.on('_log:added', (attrs, log) => {
           if (attrs.name === 'debug') {
             this.hiddenLog = log
