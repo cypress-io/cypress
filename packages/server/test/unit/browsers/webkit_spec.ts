@@ -77,4 +77,12 @@ describe('lib/browsers/webkit', () => {
       expect(webkit.connectProtocolToBrowser).to.throw('Protocol is not yet supported in WebKit.')
     })
   })
+
+  context('#closeProtocolConnection', () => {
+    it('throws error', async () => {
+      const webkit = getWebkit()
+
+      expect(webkit.closeProtocolConnection).to.throw('Protocol is not yet supported in WebKit.')
+    })
+  })
 })

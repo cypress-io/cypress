@@ -596,7 +596,7 @@ describe('lib/browsers/chrome', () => {
       const mockCurrentlyAttachedProtocolTarget = {}
 
       const pageCriClient = {
-        clone: sinon.stub().returns(mockCurrentlyAttachedProtocolTarget),
+        clone: sinon.stub().resolves(mockCurrentlyAttachedProtocolTarget),
       }
 
       const browserCriClient = {

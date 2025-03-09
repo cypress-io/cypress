@@ -478,6 +478,8 @@ export = {
   },
 
   async closeProtocolConnection () {
+    const browserCriClient = this._getBrowserCriClient()
+
     if (browserCriClient?.currentlyAttachedProtocolTarget) {
       await browserCriClient.currentlyAttachedProtocolTarget.close()
       browserCriClient.currentlyAttachedProtocolTarget = undefined

@@ -434,7 +434,7 @@ export function connectProtocolToBrowser (): Promise<void> {
   throw new Error('Protocol is not yet supported in firefox.')
 }
 
-export async function closeProtocolConnection (): Promise<void> {
+export function closeProtocolConnection (): Promise<void> {
   throw new Error('Protocol is not yet supported in firefox.')
 }
 

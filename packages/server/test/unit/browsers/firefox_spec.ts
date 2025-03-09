@@ -681,6 +681,12 @@ describe('lib/browsers/firefox', () => {
     })
   })
 
+  context('#closeProtocolConnection', () => {
+    it('throws error', () => {
+      expect(firefox.closeProtocolConnection).to.throw('Protocol is not yet supported in firefox.')
+    })
+  })
+
   context('firefox-util', () => {
     context('#setupCDP', function () {
       it('correctly sets up the remote agent', async function () {

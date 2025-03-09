@@ -116,7 +116,8 @@ context('cy.origin log', { browser: '!webkit' }, () => {
     })
   })
 
-  it('does not send hidden logs to primary origin when protocol is disabled', { isProtocolEnabled: false }, function () {
+  it('does not send hidden logs to primary origin when protocol is disabled', function () {
+    cy.state('isProtocolEnabled', false)
     cy.on('_log:added', (attrs, log) => {
       this.hiddenLog = log
     })
@@ -133,7 +134,8 @@ context('cy.origin log', { browser: '!webkit' }, () => {
     })
   })
 
-  it('handles sending hidden logs to primary origin when protocol enabled', { isProtocolEnabled: true }, function () {
+  it('handles sending hidden logs to primary origin when protocol enabled', function () {
+    cy.state('isProtocolEnabled', true)
     cy.on('_log:added', (attrs, log) => {
       this.hiddenLog = log
     })
