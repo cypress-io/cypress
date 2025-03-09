@@ -141,6 +141,7 @@ context('cy.origin log', { browser: '!webkit' }, () => {
     })
 
     cy.origin('http://www.foobar.com:3500', () => {
+      cy.state('isProtocolEnabled', true)
       cy.get('#select-maps').select('train', { log: false })
     }).then((id) => {
       // Verify the log is also fired in the primary origin.
