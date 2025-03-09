@@ -6,6 +6,7 @@ context('cy.origin log', { browser: '!webkit' }, () => {
 
   context('protocol disabled', () => {
     beforeEach(() => {
+      Cypress.state('isProtocolEnabled', false)
       logs = []
 
       cy.on('log:added', (attrs, log) => {
@@ -118,7 +119,6 @@ context('cy.origin log', { browser: '!webkit' }, () => {
     })
 
     it('does not send hidden logs to primary origin when protocol is disabled', function () {
-      cy.state('isProtocolEnabled', false)
       cy.on('_log:added', (attrs, log) => {
         this.hiddenLog = log
       })
@@ -230,7 +230,6 @@ context('cy.origin log', { browser: '!webkit' }, () => {
         })
 
         it('when run mode with protocol disabled', { numTestsKeptInMemory: 0 }, () => {
-          cy.state('isProtocolEnabled', false)
           // Verify the log is also fired in the primary origin.
           expect(logsToVerify.length).to.eq(11)
 
@@ -270,6 +269,7 @@ context('cy.origin log', { browser: '!webkit' }, () => {
 
   context('protocol enabled', () => {
     beforeEach(() => {
+      cy.state('isProtocolEnabled', true)
       logs = []
 
       cy.on('log:added', (attrs, log) => {
@@ -281,7 +281,6 @@ context('cy.origin log', { browser: '!webkit' }, () => {
     })
 
     it('handles sending hidden logs to primary origin when protocol enabled', function () {
-      cy.state('isProtocolEnabled', true)
       cy.on('_log:added', (attrs, log) => {
         this.hiddenLog = log
       })
