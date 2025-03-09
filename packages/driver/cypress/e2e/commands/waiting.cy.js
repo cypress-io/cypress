@@ -1055,7 +1055,7 @@ describe('src/cy/commands/waiting', () => {
       })
 
       it('can turn off logging for wait for xhr', function () {
-        cy.state('isProtocolEnabled', false)
+        cy.state('isProtocolEnabled', true)
         // Starting in Electron 28, we cannot use fetch or XHR from within about:blank. This is a workaround
         // to ensure that we have a valid origin for our tests.
         cy.visit('/fixtures/empty.html')

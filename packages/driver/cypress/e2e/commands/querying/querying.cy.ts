@@ -580,7 +580,7 @@ describe('src/cy/commands/querying', () => {
       })
 
       it('can get alias with logging off', () => {
-        cy.state('isProtocolEnabled', false)
+        cy.state('isProtocolEnabled', true)
         const logs: any = []
         let hiddenLog
 
