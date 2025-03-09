@@ -1202,7 +1202,7 @@ describe('src/cy/commands/actions/trigger', () => {
         })
       })
 
-      it('can send hidden log when protocol is enabled', { isProtocolEnabled: false }, function () {
+      it('can send hidden log when protocol is enabled', { isProtocolEnabled: true }, function () {
         cy.on('_log:added', (attrs, log) => {
           this.hiddenLog = log
         })

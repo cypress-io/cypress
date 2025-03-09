@@ -817,7 +817,7 @@ describe('src/cy/commands/cookies', () => {
         })
       })
 
-      it('can send hidden log when protocol is enabled', { isProtocolEnabled: false }, function () {
+      it('can send hidden log when protocol is enabled', { isProtocolEnabled: true }, function () {
         cy.on('_log:added', (attrs, log) => {
           if (attrs.name === 'getCookies') {
             this.hiddenLog = log
@@ -997,7 +997,7 @@ describe('src/cy/commands/cookies', () => {
         })
       })
 
-      it('can send hidden log when protocol is enabled', { isProtocolEnabled: false }, function () {
+      it('can send hidden log when protocol is enabled', { isProtocolEnabled: true }, function () {
         cy.on('_log:added', (attrs, log) => {
           if (attrs.name === 'getAllCookies') {
             this.hiddenLog = log
@@ -1233,7 +1233,7 @@ describe('src/cy/commands/cookies', () => {
         })
       })
 
-      it('can send hidden log when protocol is enabled', { isProtocolEnabled: false }, function () {
+      it('can send hidden log when protocol is enabled', { isProtocolEnabled: true }, function () {
         cy.on('_log:added', (attrs, log) => {
           if (attrs.name === 'getCookie') {
             this.hiddenLog = log
@@ -1607,7 +1607,7 @@ describe('src/cy/commands/cookies', () => {
         })
       })
 
-      it('can send hidden log when protocol is enabled', { isProtocolEnabled: false }, function () {
+      it('can send hidden log when protocol is enabled', { isProtocolEnabled: true }, function () {
         cy.on('_log:added', (attrs, log) => {
           if (attrs.name === 'setCookie') {
             this.hiddenLog = log
@@ -1824,7 +1824,7 @@ describe('src/cy/commands/cookies', () => {
         })
       })
 
-      it('can send hidden log when protocol is enabled', { isProtocolEnabled: false }, function () {
+      it('can send hidden log when protocol is enabled', { isProtocolEnabled: true }, function () {
         cy.on('_log:added', (attrs, log) => {
           if (attrs.name === 'clearCookie') {
             this.hiddenLog = log
@@ -2107,7 +2107,7 @@ describe('src/cy/commands/cookies', () => {
         })
       })
 
-      it('can send hidden log when protocol is enabled', { isProtocolEnabled: false }, function () {
+      it('can send hidden log when protocol is enabled', { isProtocolEnabled: true }, function () {
         cy.on('_log:added', (attrs, log) => {
           if (attrs.name === 'clearCookies') {
             this.hiddenLog = log
@@ -2418,7 +2418,7 @@ describe('src/cy/commands/cookies', () => {
         })
       })
 
-      it('can send hidden log when protocol is enabled', { isProtocolEnabled: false }, function () {
+      it('can send hidden log when protocol is enabled', { isProtocolEnabled: true }, function () {
         cy.on('_log:added', (attrs, log) => {
           if (attrs.name === 'clearAllCookies') {
             this.hiddenLog = log
