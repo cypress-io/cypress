@@ -424,7 +424,7 @@ export class ProjectBase extends EE {
       closeExtraTargets: this.closeExtraTargets,
 
       onStudioInit: async () => {
-        if (this.spec) {
+        if (this.spec && this.ctx.coreData.studio?.protocolManager) {
           this.protocolManager = this.ctx.coreData.studio?.protocolManager
           this.protocolManager?.setupProtocol()
           this.protocolManager?.beforeSpec({
@@ -437,9 +437,11 @@ export class ProjectBase extends EE {
       },
 
       onStudioDestroy: async () => {
-        await browsers.closeProtocolConnection({ browser: this.browser, foundBrowsers: this.options.browsers })
-        this.protocolManager?.reset()
-        this.protocolManager = undefined
+        if (this.ctx.coreData.studio?.protocolManager) {
+          await browsers.closeProtocolConnection({ browser: this.browser, foundBrowsers: this.options.browsers })
+          this.protocolManager?.reset()
+          this.protocolManager = undefined
+        }
       },
 
       onCaptureVideoFrames: (data: any) => {
