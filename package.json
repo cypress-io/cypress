@@ -211,7 +211,8 @@
     "ts-node": "^10.9.2",
     "typescript": "5.3.3",
     "yaml": "2.7.0",
-    "yarn-deduplicate": "3.1.0"
+    "yarn-deduplicate": "3.1.0",
+    "cypress-xpath": "^2.0.1"
   },
   "engines": {
     "node": ">=20.18.1",
