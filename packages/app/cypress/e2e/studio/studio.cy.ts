@@ -22,7 +22,7 @@ describe('Cypress Studio', () => {
   }
 
   it('loads the cloud studio page', () => {
-    launchStudio({ specName: 'spec.cy.js', environmentVariables: { CYPRESS_ENABLE_CLOUD_STUDIO: 'true' } })
+    launchStudio({ specName: 'spec.cy.js', enableCloudStudio: true })
 
     cy.window().then((win) => {
       expect(win.Cypress.config('isProtocolEnabled')).to.be.false
