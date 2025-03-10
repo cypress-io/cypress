@@ -10,8 +10,6 @@ export const baseConfig: Cypress.ConfigOptions = {
   hosts: {
     'foobar.com': '127.0.0.1',
     '*.foobar.com': '127.0.0.1',
-    'foobar-protocol-enabled.com': '127.0.0.1',
-    '*.foobar-protocol-enabled.com': '127.0.0.1',
     'barbaz.com': '127.0.0.1',
     '*.barbaz.com': '127.0.0.1',
     '*.idp.com': '127.0.0.1',
