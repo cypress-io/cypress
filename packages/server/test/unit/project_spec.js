@@ -39,6 +39,7 @@ describe('lib/project-base', () => {
 
     this.testStudioManager = {
       initializeRoutes: () => {},
+      status: 'INITIALIZED',
     }
 
     sinon.stub(studio, 'getAndInitializeStudioManager').resolves(this.testStudioManager)
@@ -474,6 +475,24 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         debugData: {},
         mode: 'studio',
       })
+    })
+
+    it('gets studio manager for the project id if CYPRESS_ENABLE_CLOUD_STUDIO is set but does not create the protocol manager if it is in error', async function () {
+      process.env.CYPRESS_ENABLE_CLOUD_STUDIO = '1'
+
+      this.testStudioManager.status = 'IN_ERROR'
+
+      sinon.stub(api, 'getCaptureProtocolScript').resolves('console.log("hello")')
+      sinon.stub(ProtocolManager.prototype, 'prepareProtocol').resolves()
+
+      this.config.testingType = 'e2e'
+
+      await this.project.open()
+
+      expect(studio.getAndInitializeStudioManager).to.be.calledWith({ projectId: 'abc123' })
+      expect(ctx.coreData.studio).to.eq(this.testStudioManager)
+      expect(api.getCaptureProtocolScript).not.to.be.called
+      expect(ProtocolManager.prototype.prepareProtocol).not.to.be.called
     })
 
     it('gets studio manager for the project id if CYPRESS_LOCAL_STUDIO_PATH is set', async function () {
