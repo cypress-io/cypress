@@ -53,7 +53,7 @@
           :placeholder="inputPlaceholder"
           aria-label="url of the application under test"
           class="aut-url-input flex grow mr-[12px] leading-normal max-w-full text-indigo-500 self-center hocus-link-default truncate"
-          :style="{ zIndex: 51 }"
+          :style="{ zIndex: inputZIndex }"
           @input="setStudioUrl"
           @click="openExternally"
           @keyup.enter="visitUrl"
@@ -181,6 +181,12 @@ watchEffect(() => {
 })
 
 const autIframe = props.getAutIframe()
+
+const inputZIndex = computed(() => {
+  // input needs to be above the Studio prompt overlay
+  // but other times it needs to be below other resizable panels
+  return studioStore.needsUrl ? 51 : 5
+})
 
 const displayScale = computed(() => {
   return autStore.scale < 1 ? `${Math.round(autStore.scale * 100) }%` : 0
