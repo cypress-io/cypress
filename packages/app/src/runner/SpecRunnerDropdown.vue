@@ -5,10 +5,12 @@
     #="{ open, close }"
   >
     <PopoverButton
-      class=" border border-transparent rounded-[50px] self-center h-full grow px-[5px] group"
+      class="bg-white border rounded-[50px] self-center h-full grow px-[5px] group"
       :class="{
         'hocus-default': !props.disabled,
         'opacity-50 cursor-auto': props.disabled,
+        'rounded-[5px] border-[1px] border-indigo-100': !props.minimal,
+        'border-transparent': props.minimal,
       }"
       :disabled="props.disabled"
     >
@@ -24,6 +26,15 @@
           name="heading"
           :open="open"
           :close="close"
+        />
+        <i-cy-chevron-down
+          v-if="!props.minimal"
+          class="transform transition-all w-[10px] duration-300"
+          :class="{
+            'group-hocus:icon-dark-indigo-500': !props.disabled,
+            'icon-dark-gray-200': !open,
+            'rotate-180 icon-dark-indigo-500': open,
+          }"
         />
       </div>
     </PopoverButton>
@@ -53,12 +64,13 @@ import { Popover, PopoverButton, PopoverPanel } from '@headlessui/vue'
 const props = withDefaults(defineProps<{
   variant?: 'panel'
   align?: 'left' | 'right'
-
+  minimal?: boolean
   // The disabled prop is used as the Popover key so that changes to the prop
   // cause the Popover component to mount again. This re-mounting ensures that
   // the PopoverPanel is closed if an enabled dropdown later becomes disabled.
   disabled?: boolean
 }>(), {
+  minimal: true,
   variant: undefined,
   align: 'left',
   disabled: false,
