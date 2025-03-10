@@ -571,6 +571,9 @@ describe('studio functionality', () => {
       cy.contains('Continue ➜').click()
     })
 
+    // need to wait for top to reload
+    cy.wait(10000)
+
     cy.origin('http://foobar.com:4455', () => {
       cy.get('button').contains('Save Commands').click()
 
