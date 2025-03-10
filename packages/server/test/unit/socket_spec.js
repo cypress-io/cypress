@@ -64,6 +64,8 @@ describe('lib/socket', () => {
       .then(() => {
         this.options = {
           onSavedStateChanged: sinon.spy(),
+          onStudioInit: sinon.spy(),
+          onStudioDestroy: sinon.spy(),
         }
 
         this.automation = new Automation({
@@ -519,6 +521,30 @@ describe('lib/socket', () => {
           expect(this.options.onSavedStateChanged).to.be.calledWith({ reporterWidth: 500 })
 
           return done()
+        })
+      })
+    })
+
+    context('on(studio:init)', () => {
+      it('calls onStudioInit with the state', async function () {
+        await new Promise((resolve) => {
+          this.client.emit('studio:init', () => {
+            expect(this.options.onStudioInit).to.be.called
+
+            resolve()
+          })
+        })
+      })
+    })
+
+    context('on(studio:destroy)', () => {
+      it('calls onStudioDestroy with the state', async function () {
+        await new Promise((resolve) => {
+          this.client.emit('studio:destroy', () => {
+            expect(this.options.onStudioDestroy).to.be.called
+
+            resolve()
+          })
         })
       })
     })

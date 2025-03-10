@@ -242,13 +242,13 @@ function openGlobalMode (options: OpenGlobalModeOptions = {}) {
 
 type WithPrefix<T extends string> = `${T}${string}`;
 
-function openProject (projectName: WithPrefix<ProjectFixtureDir>, argv: string[] = []) {
+function openProject (projectName: WithPrefix<ProjectFixtureDir>, argv: string[] = [], environmentVariables: Record<string, string> = {}) {
   if (!fixtureDirs.some((dir) => projectName.startsWith(dir))) {
     throw new Error(`Unknown project ${projectName}`)
   }
 
   return logInternal({ name: 'openProject', message: argv.join(' ') }, () => {
-    return taskInternal('__internal_openProject', { projectName, argv })
+    return taskInternal('__internal_openProject', { projectName, argv, environmentVariables })
   }).then((obj) => {
     Cypress.env('e2e_serverPort', obj.e2eServerPort)
 

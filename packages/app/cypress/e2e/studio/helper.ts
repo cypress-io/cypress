@@ -1,6 +1,6 @@
-export function launchStudio ({ specName = 'spec.cy.js', createNewTest = false, cliArgs = [''] } = {}) {
+export function launchStudio ({ specName = 'spec.cy.js', createNewTest = false, cliArgs = [''], environmentVariables = {} } = {}) {
   cy.scaffoldProject('experimental-studio')
-  cy.openProject('experimental-studio', cliArgs)
+  cy.openProject('experimental-studio', cliArgs, environmentVariables)
   cy.startAppServer('e2e')
   cy.visitApp()
   cy.specsPageIsVisible()

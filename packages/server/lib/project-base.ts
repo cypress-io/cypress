@@ -168,9 +168,8 @@ export class ProjectBase extends EE {
         data.studio = studioManager
       })
 
-      // TODO: handle errors
       const protocolManager = new ProtocolManager()
-      const protocolUrl = routes.apiRoutes.captureProtocolCurrent || process.env.CYPRESS_LOCAL_PROTOCOL_PATH
+      const protocolUrl = routes.apiRoutes.captureProtocolCurrent()
       const script = await api.getCaptureProtocolScript(protocolUrl)
 
       await protocolManager.prepareProtocol(script, {

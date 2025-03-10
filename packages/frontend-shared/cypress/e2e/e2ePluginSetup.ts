@@ -41,6 +41,7 @@ const pkg = require('@packages/root')
 interface InternalOpenProjectArgs {
   argv: string[]
   projectName: string
+  environmentVariables: Record<string, string>
 }
 
 interface InternalAddProjectOpts {
@@ -405,7 +406,12 @@ async function makeE2ETasks () {
         e2eServerPort: ctx.coreData.servers.appServerPort,
       }
     },
-    async __internal_openProject ({ argv, projectName }: InternalOpenProjectArgs): Promise<ResetOptionsResult> {
+    async __internal_openProject ({ argv, projectName, environmentVariables }: InternalOpenProjectArgs): Promise<ResetOptionsResult> {
+      process.env = {
+        ...process.env,
+        ...environmentVariables,
+      }
+
       let projectMatched = false
 
       for (const scaffoldedProject of scaffoldedProjects.keys()) {

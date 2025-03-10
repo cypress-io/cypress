@@ -14,6 +14,9 @@ const runEvents = require(`../../lib/plugins/run_events`)
 const system = require(`../../lib/util/system`)
 const { getCtx } = require(`../../lib/makeDataContext`)
 const studio = require('../../lib/cloud/api/get_and_initialize_studio_manager')
+const api = require('../../lib/cloud/api').default
+const { ProtocolManager } = require('../../lib/cloud/protocol')
+const browsers = require('../../lib/browsers')
 
 let ctx
 
@@ -234,7 +237,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
   context('#getConfig', () => {
     it('returns the enabled state of the protocol manager if it is defined', function () {
       this.project.protocolManager = {
-        isProtocolEnabled: false,
+        isProtocolEnabled: true,
       }
 
       const config = this.project.getConfig()
@@ -285,6 +288,15 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         expect(config.hideRunnerUi).to.be.false
       })
 
+      it('returns false if cloud studio is enabled', function () {
+        this.project.protocolManager = { isProtocolEnabled: true }
+        this.project.ctx.coreData.studio = { isStudioProtocolEnabled: true }
+
+        const config = this.project.getConfig()
+
+        expect(config.hideRunnerUi).to.be.false
+      })
+
       it('sets hideCommandLog to true if hideRunnerUi arg is set to true even if NO_COMMAND_LOG is 0', function () {
         this.project.options.args.runnerUi = false
         this.project._cfg.env.NO_COMMAND_LOG = 0
@@ -296,7 +308,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
 
       it('returns true if runnerUi arg is not set and protocol is enabled', function () {
-        this.project.protocolManager = { isProtocolEnabled: false }
+        this.project.protocolManager = { isProtocolEnabled: true }
 
         const config = this.project.getConfig()
 
@@ -433,19 +445,69 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     it('gets studio manager for the project id if CYPRESS_ENABLE_CLOUD_STUDIO is set', async function () {
       process.env.CYPRESS_ENABLE_CLOUD_STUDIO = '1'
 
+      sinon.stub(api, 'getCaptureProtocolScript').resolves('console.log("hello")')
+      sinon.stub(ProtocolManager.prototype, 'prepareProtocol').resolves()
+
+      this.config.testingType = 'e2e'
+
       await this.project.open()
 
       expect(studio.getAndInitializeStudioManager).to.be.calledWith({ projectId: 'abc123' })
       expect(ctx.coreData.studio).to.eq(this.testStudioManager)
+      expect(api.getCaptureProtocolScript).to.be.calledWith('http://localhost:1234/capture-protocol/script/current.js')
+      expect(ProtocolManager.prototype.prepareProtocol).to.be.calledWith('console.log("hello")', {
+        runId: 'studio',
+        projectId: 'abc123',
+        testingType: 'e2e',
+        cloudApi: {
+          url: 'http://localhost:1234/',
+          retryWithBackoff: api.retryWithBackoff,
+          requestPromise: api.rp,
+        },
+        projectConfig: {
+          devServerPublicPathRoute: '/__cypress/src',
+          namespace: '__cypress',
+          port: 8888,
+          proxyUrl: 'http://localhost:8888',
+        },
+        mountVersion: 2,
+        debugData: {},
+        mode: 'studio',
+      })
     })
 
     it('gets studio manager for the project id if CYPRESS_LOCAL_STUDIO_PATH is set', async function () {
       process.env.CYPRESS_LOCAL_STUDIO_PATH = '/path/to/app/studio'
 
+      sinon.stub(api, 'getCaptureProtocolScript').resolves('console.log("hello")')
+      sinon.stub(ProtocolManager.prototype, 'prepareProtocol').resolves()
+
+      this.config.testingType = 'e2e'
+
       await this.project.open()
 
       expect(studio.getAndInitializeStudioManager).to.be.calledWith({ projectId: 'abc123' })
       expect(ctx.coreData.studio).to.eq(this.testStudioManager)
+      expect(api.getCaptureProtocolScript).to.be.calledWith('http://localhost:1234/capture-protocol/script/current.js')
+      expect(ProtocolManager.prototype.prepareProtocol).to.be.calledWith('console.log("hello")', {
+        runId: 'studio',
+        projectId: 'abc123',
+        testingType: 'e2e',
+        cloudApi: {
+          url: 'http://localhost:1234/',
+          retryWithBackoff: api.retryWithBackoff,
+          requestPromise: api.rp,
+        },
+        projectConfig: {
+          devServerPublicPathRoute: '/__cypress/src',
+          namespace: '__cypress',
+          port: 8888,
+          proxyUrl: 'http://localhost:8888',
+        },
+        mountVersion: 2,
+        debugData: {},
+        mode: 'studio',
+      })
     })
 
     it('does not get studio manager if neither CYPRESS_ENABLE_CLOUD_STUDIO nor CYPRESS_LOCAL_STUDIO_PATH is set', async function () {
@@ -576,10 +638,34 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     it('resets server + automation', function () {
+      this.project._cfg = {}
+      this.project.ctx.coreData.studio = {
+        isStudioProtocolEnabled: false,
+      }
+
       this.project.reset()
       expect(this.project._automation.reset).to.be.calledOnce
 
       expect(this.project.server.reset).to.be.calledOnce
+    })
+
+    it('resets server + automation with studio protocol enabled', function () {
+      this.project._cfg = {}
+      this.project.ctx.coreData.studio = {
+        isProtocolEnabled: true,
+      }
+
+      const mockReset = sinon.stub()
+      const mockSetProtocolManager = sinon.stub()
+
+      sinon.stub(this.project, 'protocolManager').get(() => ({ reset: mockReset })).set(mockSetProtocolManager)
+
+      this.project.reset()
+      expect(this.project._automation.reset).to.be.calledOnce
+
+      expect(this.project.server.reset).to.be.calledOnce
+      expect(mockReset).to.be.calledOnce
+      expect(mockSetProtocolManager).to.be.calledWith(undefined)
     })
   })
 
@@ -611,6 +697,101 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       this.project.startWebsockets({ onReloadBrowser: fn }, {})
 
       expect(fn).to.be.calledOnce
+    })
+
+    it('passes onStudioInit callback', async function () {
+      const mockSetupProtocol = sinon.stub()
+      const mockBeforeSpec = sinon.stub()
+
+      this.project.spec = {}
+      this.project.ctx.coreData.studio = {
+        protocolManager: {
+          setupProtocol: mockSetupProtocol,
+          beforeSpec: mockBeforeSpec,
+        },
+      }
+
+      sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
+      sinon.stub(this.project, 'protocolManager').get(() => {
+        return this.project['_protocolManager']
+      }).set((protocolManager) => {
+        this.project['_protocolManager'] = protocolManager
+      })
+
+      this.project.browser = {
+        name: 'chrome',
+        family: 'chromium',
+      }
+
+      this.project.options.browsers = [{
+        name: 'chrome',
+        family: 'chromium',
+      }]
+
+      let studioInitPromise
+
+      this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
+        studioInitPromise = callbacks.onStudioInit()
+      })
+
+      this.project.startWebsockets({}, {})
+
+      await studioInitPromise
+
+      expect(mockSetupProtocol).to.be.calledOnce
+      expect(mockBeforeSpec).to.be.calledOnce
+      expect(browsers.connectProtocolToBrowser).to.be.calledWith({
+        browser: this.project.browser,
+        foundBrowsers: this.project.options.browsers,
+        protocolManager: this.project.ctx.coreData.studio.protocolManager,
+      })
+    })
+
+    it('passes onStudioDestroy callback', async function () {
+      const mockReset = sinon.stub()
+
+      this.project.ctx.coreData.studio = {
+        protocolManager: {},
+      }
+
+      sinon.stub(browsers, 'closeProtocolConnection').resolves()
+
+      sinon.stub(this.project, 'protocolManager').get(() => {
+        return {
+          reset: mockReset,
+        }
+      }).set((protocolManager) => {
+        this.project['_protocolManager'] = protocolManager
+      })
+
+      this.project.browser = {
+        name: 'chrome',
+        family: 'chromium',
+      }
+
+      this.project.options.browsers = [{
+        name: 'chrome',
+        family: 'chromium',
+      }]
+
+      let studioDestroyPromise
+
+      this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
+        studioDestroyPromise = callbacks.onStudioDestroy()
+      })
+
+      this.project.startWebsockets({}, {})
+
+      await studioDestroyPromise
+
+      expect(browsers.closeProtocolConnection).to.be.calledWith({
+        browser: this.project.browser,
+        foundBrowsers: this.project.options.browsers,
+      })
+
+      expect(mockReset).to.be.calledOnce
+
+      expect(this.project['_protocolManager']).to.be.undefined
     })
   })
 

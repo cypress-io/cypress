@@ -435,7 +435,7 @@ export = {
     debug('connecting to existing chrome instance with url and debugging port', { url: options.url, port })
     if (!options.onError) throw new Error('Missing onError in connectToExisting')
 
-    const browserCriClient = await BrowserCriClient.create({
+    browserCriClient = await BrowserCriClient.create({
       hosts: ['127.0.0.1'],
       port,
       browserName: browser.displayName,
