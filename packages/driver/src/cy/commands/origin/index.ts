@@ -222,6 +222,7 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
                   isStable: Cypress.state('isStable'),
                   autLocation: Cypress.state('autLocation')?.href,
                   crossOriginCookies: Cypress.state('crossOriginCookies'),
+                  isProtocolEnabled: Cypress.state('isProtocolEnabled'),
                 },
                 config: preprocessConfig(Cypress.config()),
                 env: preprocessEnv(Cypress.env()),

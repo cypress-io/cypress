@@ -168,27 +168,29 @@ export class ProjectBase extends EE {
         data.studio = studioManager
       })
 
-      const protocolManager = new ProtocolManager()
-      const protocolUrl = routes.apiRoutes.captureProtocolCurrent()
-      const script = await api.getCaptureProtocolScript(protocolUrl)
+      if (studioManager.status === 'INITIALIZED') {
+        const protocolManager = new ProtocolManager()
+        const protocolUrl = routes.apiRoutes.captureProtocolCurrent()
+        const script = await api.getCaptureProtocolScript(protocolUrl)
 
-      await protocolManager.prepareProtocol(script, {
-        runId: 'studio',
-        projectId: cfg.projectId,
-        testingType: cfg.testingType,
-        cloudApi: {
-          url: routes.apiUrl,
-          retryWithBackoff: api.retryWithBackoff,
-          requestPromise: api.rp,
-        },
-        projectConfig: _.pick(cfg, ['devServerPublicPathRoute', 'port', 'proxyUrl', 'namespace']),
-        mountVersion: api.runnerCapabilities.protocolMountVersion,
-        debugData: this.configDebugData,
-        mode: 'studio',
-      })
+        await protocolManager.prepareProtocol(script, {
+          runId: 'studio',
+          projectId: cfg.projectId,
+          testingType: cfg.testingType,
+          cloudApi: {
+            url: routes.apiUrl,
+            retryWithBackoff: api.retryWithBackoff,
+            requestPromise: api.rp,
+          },
+          projectConfig: _.pick(cfg, ['devServerPublicPathRoute', 'port', 'proxyUrl', 'namespace']),
+          mountVersion: api.runnerCapabilities.protocolMountVersion,
+          debugData: this.configDebugData,
+          mode: 'studio',
+        })
 
-      studioManager.protocolManager = protocolManager
-      studioManager.isProtocolEnabled = true
+        studioManager.protocolManager = protocolManager
+        studioManager.isProtocolEnabled = true
+      }
     }
 
     const [port, warning] = await this._server.open(cfg, {

@@ -204,6 +204,10 @@ beforeEach(() => {
   taskInternal('__internal__beforeEach', undefined)
 })
 
+afterEach(() => {
+  taskInternal('__internal__afterEach', undefined)
+})
+
 after(() => {
   taskInternal('__internal__after', undefined)
 })

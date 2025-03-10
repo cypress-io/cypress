@@ -192,6 +192,15 @@ async function makeE2ETasks () {
     },
 
     /**
+     * Clear out any capability specific environment variables that were set during the test
+     */
+    __internal__afterEach () {
+      delete process.env.CYPRESS_ENABLE_CLOUD_STUDIO
+
+      return null
+    },
+
+    /**
      * Force a reset to the correct CWD after all tests have completed, just incase this
      * was modified by any code under test.
      */
@@ -411,7 +420,9 @@ async function makeE2ETasks () {
       }
     },
     async __internal_openProject ({ argv, projectName, capabilities }: InternalOpenProjectArgs): Promise<ResetOptionsResult> {
-      process.env.CYPRESS_ENABLE_CLOUD_STUDIO = capabilities.cloudStudio ? 'true' : 'false'
+      if (capabilities.cloudStudio) {
+        process.env.CYPRESS_ENABLE_CLOUD_STUDIO = 'true'
+      }
 
       let projectMatched = false
 
