@@ -24,17 +24,6 @@ import type { Cfg } from '../project-base'
 import type { RunResult } from './results'
 import type { ReadyOptions } from './run'
 
-interface InstanceOptions {
-  spec?: string
-  runId?: string
-  group?: string
-  groupId?: string
-  parallel?: boolean
-  machineId?: string
-  ciBuildId?: string
-  platform?: any
-}
-
 const debug = Debug('cypress:server:record')
 const debugCiInfo = Debug('cypress:server:record:ci-info')
 
@@ -63,7 +52,7 @@ const warnIfProjectIdButNoRecordOption = (projectId: Cfg['projectId'], options: 
   return undefined
 }
 
-const throwCloudCannotProceed = ({ parallel, ciBuildId, group, err }) => {
+function cloudCannotProceedErr ({ parallel, ciBuildId, group, err }): ReturnType<typeof getErrors> {
   const errMsg = parallel ? 'CLOUD_CANNOT_PROCEED_IN_PARALLEL' : 'CLOUD_CANNOT_PROCEED_IN_SERIAL'
 
   const errToThrow = getErrors(errMsg, {
@@ -77,7 +66,11 @@ const throwCloudCannotProceed = ({ parallel, ciBuildId, group, err }) => {
   // tells error handler to exit immediately without running anymore specs
   errToThrow.isFatalApiErr = true
 
-  throw errToThrow
+  return errToThrow
+}
+
+const throwCloudCannotProceed = (...args: Parameters<typeof cloudCannotProceedErr>) => {
+  throw cloudCannotProceedErr(...args)
 }
 
 const throwIfIndeterminateCiBuildId = (ciBuildId: ReadyOptions['ciBuildId'], parallel: ReadyOptions['parallel'], group: ReadyOptions['group']) => {
@@ -513,30 +506,50 @@ const createRun = Promise.method((options: any = {}) => {
   })
 })
 
-const createInstance = (options: InstanceOptions = {}) => {
-  let { runId, group, groupId, parallel, machineId, ciBuildId, platform, spec } = options
+interface InstanceOptions {
+  spec?: null | any
+  runId: string
+  group: any
+  groupId: string
+  platform: {
+    osCpus: any
+    osName: any
+    osMemory: any
+    osVersion: any
+    browserName: any
+    browserVersion: any
+  }
+  parallel?: any
+  ciBuildId?: any
+  machineId: string
+}
 
-  spec = spec ? getSpecRelativePath(spec) : null
+async function createInstance (options: InstanceOptions) {
+  let { spec, runId, group, groupId, parallel, machineId, ciBuildId, platform } = options
 
-  return api.createInstance({
-    spec,
-    runId,
-    groupId,
-    platform,
-    machineId,
-  })
-  .catch((err: any) => {
+  const resolvedSpec = spec ? getSpecRelativePath(spec) : null
+
+  try {
+    return await api.createInstance(runId, {
+      spec: resolvedSpec,
+      groupId,
+      platform,
+      machineId,
+    })
+  } catch (thrown: unknown) {
+    const err = thrown instanceof Error ? thrown : new Error(thrown as any)
+
     debug('failed creating instance %o', {
       stack: err.stack,
     })
 
-    throwCloudCannotProceed({
+    throw cloudCannotProceedErr({
       err,
       group,
       ciBuildId,
       parallel,
     })
-  })
+  }
 }
 
 const _postInstanceTests = ({
@@ -618,7 +631,7 @@ const createRunAndRecordSpecs = (options: any = {}) => {
       autoCancelAfterFailures,
       project,
     })
-    .then((resp: any) => {
+    .then((resp) => {
       telemetry.getSpan('record:createRun')?.end()
       if (!resp) {
         // if a forked run, can't record and can't be parallel
@@ -634,7 +647,7 @@ const createRunAndRecordSpecs = (options: any = {}) => {
       let captured = null
       let instanceId = null
 
-      const beforeSpecRun = (spec: any) => {
+      const beforeSpecRun = () => {
         telemetry.startSpan({ name: 'record:beforeSpecRun' })
         project.setOnTestsReceived(onTestsReceived)
         capture.restore()
@@ -642,7 +655,6 @@ const createRunAndRecordSpecs = (options: any = {}) => {
         captured = capture.stdout()
 
         return createInstance({
-          spec,
           runId,
           group,
           groupId,
