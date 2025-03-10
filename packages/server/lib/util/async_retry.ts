@@ -1,7 +1,8 @@
 type RetryOptions = {
   maxAttempts: number
   retryDelay?: (attempt: number) => number
-  shouldRetry?: (err?: Error) => boolean
+  shouldRetry?: (err?: unknown) => boolean
+  onRetry?: (delay: number, err: unknown) => void
 }
 
 export function asyncRetry <
@@ -31,6 +32,10 @@ export function asyncRetry <
 
         const delay = options.retryDelay ? options.retryDelay(attempt) : undefined
 
+        if (options.onRetry) {
+          options.onRetry(delay ?? 0, e)
+        }
+
         if (delay !== undefined) {
           await new Promise((resolve) => {
             return setTimeout(resolve, delay)
@@ -50,5 +55,17 @@ export function asyncRetry <
 export const linearDelay = (inc: number) => {
   return (attempt: number) => {
     return attempt * inc
+  }
+}
+
+export const exponentialBackoff = ({ factor, fuzz } = {
+  factor: 100,
+  fuzz: 0.1,
+}) => {
+  return (attempt: number) => {
+    const exponentialComponent = 2 ** attempt * factor
+    const fuzzComponent = exponentialComponent * fuzz * Math.random()
+
+    return exponentialComponent + fuzzComponent
   }
 }
