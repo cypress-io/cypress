@@ -315,6 +315,8 @@ export class EventManager {
       this.ws.emit('studio:save', saveInfo, (err) => {
         if (err) {
           this.reporterBus.emit('test:set:state', this.studioStore.saveError(err), noop)
+        } else {
+          this.studioStore.saveSuccess()
         }
       })
     })
@@ -419,7 +421,7 @@ export class EventManager {
 
           const hideCommandLog = Cypress.config('hideCommandLog')
 
-          this.studioStore.initialize(config, runState)
+          this.studioStore.initialize(config)
 
           const runnables = Cypress.runner.normalizeAll(runState.tests, hideCommandLog, testFilter)
 
@@ -485,14 +487,7 @@ export class EventManager {
 
       return new Bluebird((resolve) => {
         this.reporterBus.emit('reporter:collect:run:state', (reporterState: ReporterRunState) => {
-          resolve({
-            ...reporterState,
-            studio: {
-              testId: this.studioStore.testId,
-              suiteId: this.studioStore.suiteId,
-              url: this.studioStore.url,
-            },
-          })
+          resolve({ reporterState })
         })
       })
     })
@@ -773,14 +768,22 @@ export class EventManager {
      * This is also applicable when a user changes their spec file and hot reloads their spec, in which case we need to rebind onMessage
      * with the newly creates Cypress.primaryOriginCommunicator
      */
-    window?.top?.removeEventListener('message', crossOriginOnMessageRef, false)
-    crossOriginOnMessageRef = ({ data, source }) => {
-      Cypress?.primaryOriginCommunicator.onMessage({ data, source })
+    try {
+      window.top.removeEventListener('message', crossOriginOnMessageRef, false)
+      crossOriginOnMessageRef = ({ data, source }) => {
+        Cypress?.primaryOriginCommunicator.onMessage({ data, source })
 
-      return undefined
+        return undefined
+      }
+
+      window.top.addEventListener('message', crossOriginOnMessageRef, false)
+    } catch (error) {
+      // in cy-in-cy tests, window.top may not be accessible due to cross-origin restrictions
+      if (error.name !== 'SecurityError') {
+        // re-throw any error that's not a cross-origin error
+        throw error
+      }
     }
-
-    window.top.addEventListener('message', crossOriginOnMessageRef, false)
   }
 
   _runDriver (runState: RunState, testState: CachedTestState) {

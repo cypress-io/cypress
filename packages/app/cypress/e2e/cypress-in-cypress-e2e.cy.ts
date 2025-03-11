@@ -151,7 +151,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
   })
 
   it('shows a compilation error with a malformed spec', { viewportHeight: 596, viewportWidth: 1000 }, () => {
-    const expectedAutHeight = 456 // based on explicitly setting viewport in this test to 596
+    const expectedAutHeight = 500 // based on explicitly setting viewport in this test to 596
 
     cy.visitApp()
     cy.specsPageIsVisible()

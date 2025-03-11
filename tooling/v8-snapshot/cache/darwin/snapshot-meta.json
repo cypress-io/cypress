@@ -1086,8 +1086,6 @@
     "./node_modules/@cypress/commit-info/src/index.js",
     "./node_modules/@cypress/commit-info/src/utils.js",
     "./node_modules/@cypress/get-windows-proxy/node_modules/debug/src/common.js",
-    "./node_modules/@cypress/get-windows-proxy/node_modules/registry-js/dist/lib/index.js",
-    "./node_modules/@cypress/get-windows-proxy/node_modules/registry-js/dist/lib/registry.js",
     "./node_modules/@cypress/get-windows-proxy/src/index.js",
     "./node_modules/@cypress/parse-domain/build/tries/icann.complete.json",
     "./node_modules/@cypress/parse-domain/build/tries/private.complete.json",
@@ -3242,8 +3240,6 @@
     "./node_modules/recast/parsers/babel.js",
     "./node_modules/recast/parsers/esprima.js",
     "./node_modules/recast/parsers/typescript.js",
-    "./node_modules/registry-js/dist/lib/index.js",
-    "./node_modules/registry-js/dist/lib/registry.js",
     "./node_modules/request-promise-core/configure/request2.js",
     "./node_modules/request-promise-core/errors.js",
     "./node_modules/request-promise-core/lib/errors.js",
@@ -3793,6 +3789,7 @@
     "./packages/errors/src/errorUtils.ts",
     "./packages/errors/src/errors.ts",
     "./packages/errors/src/index.ts",
+    "./packages/errors/src/normalizeNetworkErrorMessage.ts",
     "./packages/errors/src/stackUtils.ts",
     "./packages/errors/src/stripIndent.ts",
     "./packages/example/index.js",
@@ -3985,7 +3982,6 @@
     "./packages/server/lib/cloud/api/axios_middleware/logging.ts",
     "./packages/server/lib/cloud/api/axios_middleware/transform_error.ts",
     "./packages/server/lib/cloud/api/create_instance.ts",
-    "./packages/server/lib/cloud/api/get_app_studio.ts",
     "./packages/server/lib/cloud/api/scrub_url.ts",
     "./packages/server/lib/cloud/artifacts/artifact.ts",
     "./packages/server/lib/cloud/artifacts/file_upload_strategy.ts",
@@ -4090,7 +4086,6 @@
     "./packages/server/lib/util/tests_utils.ts",
     "./packages/server/lib/util/trash.js",
     "./packages/server/lib/util/tty.js",
-    "./packages/server/node_modules/ansi-regex/index.js",
     "./packages/server/node_modules/axios/index.js",
     "./packages/server/node_modules/axios/lib/adapters/fetch.js",
     "./packages/server/node_modules/axios/lib/adapters/xhr.js",
@@ -4311,5 +4306,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "e06c1a6deefc2c8da167f59309cec0febfafc6a559f03a62d9bcfa8654f9393c"
+  "deferredHash": "b4897ef479b6a9a8bd238a69e64e4dad90cc97d7d8940fa3a53cbd035b543d97"
 }

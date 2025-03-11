@@ -7,7 +7,7 @@
     <div class="flex flex-wrap grow p-[16px] gap-[12px] justify-end">
       <div
         data-cy="aut-url"
-        class="border rounded flex grow border-gray-100 h-[32px] overflow-hidden align-middle"
+        class="border rounded flex grow border-gray-100 h-[32px] align-middle"
         :class="{
           'bg-gray-50': autStore.isLoadingUrl
         }"
@@ -15,7 +15,7 @@
         <Button
           data-cy="playground-activator"
           :disabled="isDisabled"
-          class="rounded-none border-gray-100 border-r-[1px] mr-[12px]"
+          class="rounded-none border-gray-100 border-r-[1px]"
           variant="text"
           :aria-label="t('runner.selectorPlayground.toggle')"
           @click="togglePlayground"
@@ -24,6 +24,27 @@
             :class="[selectorPlaygroundStore.show ? 'icon-dark-indigo-500' : 'icon-dark-gray-500']"
           />
         </Button>
+        <SpecRunnerDropdown
+          v-if="selectedBrowser?.displayName"
+          data-cy="select-browser"
+          :disabled="autStore.isRunning"
+        >
+          <template #heading>
+            <component
+              :is="allBrowsersIcons[selectedBrowser.displayName?.toLowerCase()] || allBrowsersIcons.generic"
+              class="min-w-[16px] w-[16px]"
+              :alt="selectedBrowser.majorVersion ? `${selectedBrowser.displayName} ${selectedBrowser.majorVersion}` : selectedBrowser.displayName"
+            />
+          </template>
+          <template #default>
+            <div class="max-h-[50vh] overflow-auto">
+              <VerticalBrowserListItems
+                :gql="props.gql"
+                :spec-path="activeSpecPath"
+              />
+            </div>
+          </template>
+        </SpecRunnerDropdown>
         <input
           ref="autUrlInputRef"
           data-cy="aut-url-input"
@@ -31,7 +52,8 @@
           :value="inputValue"
           :placeholder="inputPlaceholder"
           aria-label="url of the application under test"
-          class="aut-url-input flex grow mr-[12px] leading-normal max-w-full text-indigo-500 z-51 self-center hocus-link-default truncate"
+          class="aut-url-input flex grow mr-[12px] leading-normal max-w-full text-indigo-500 self-center hocus-link-default truncate"
+          :style="{ zIndex: inputZIndex }"
           @input="setStudioUrl"
           @click="openExternally"
           @keyup.enter="visitUrl"
@@ -65,30 +87,6 @@
           </span>
         </Tag>
       </div>
-
-      <SpecRunnerDropdown
-        v-if="selectedBrowser?.displayName"
-        data-cy="select-browser"
-        :disabled="autStore.isRunning"
-      >
-        <template #heading>
-          <component
-            :is="allBrowsersIcons[selectedBrowser.displayName?.toLowerCase()] || allBrowsersIcons.generic"
-            class="min-w-[16px] w-[16px]"
-            :alt="selectedBrowser.displayName"
-          />
-          {{ selectedBrowser.displayName }} {{ selectedBrowser.majorVersion }}
-        </template>
-
-        <template #default>
-          <div class="max-h-[50vh] overflow-auto">
-            <VerticalBrowserListItems
-              :gql="props.gql"
-              :spec-path="activeSpecPath"
-            />
-          </div>
-        </template>
-      </SpecRunnerDropdown>
     </div>
 
     <SelectorPlayground
@@ -183,6 +181,12 @@ watchEffect(() => {
 })
 
 const autIframe = props.getAutIframe()
+
+const inputZIndex = computed(() => {
+  // input needs to be above the Studio prompt overlay
+  // but other times it needs to be below other resizable panels
+  return studioStore.needsUrl ? 51 : 5
+})
 
 const displayScale = computed(() => {
   return autStore.scale < 1 ? `${Math.round(autStore.scale * 100) }%` : 0

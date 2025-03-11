@@ -1,3 +1,4 @@
+<!-- Be careful with changing styles of the panels, it can impact our screenshot tests -->
 <template>
   <div
     id="resizable-panels-root"
@@ -46,9 +47,7 @@
       data-cy="aut-panel"
       class="grow h-full bg-gray-100 relative"
       :class="{'pointer-events-none':panel2IsDragging}"
-      :style="{
-        width: `${panel3width}px`
-      }"
+      :style="{ width: `${panel3width}px` }"
     >
       <slot
         name="panel3"
