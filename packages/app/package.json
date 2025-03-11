@@ -59,7 +59,7 @@
     "concurrently": "^6.2.0",
     "cross-env": "6.0.3",
     "cypress-plugin-tab": "1.0.5",
-    "cypress-real-events": "1.6.0",
+    "cypress-real-events": "1.14.0",
     "dayjs": "^1.9.3",
     "debug": "^4.3.4",
     "disparity": "^3.2.0",

@@ -27,7 +27,7 @@
     "classnames": "2.3.1",
     "css-element-queries": "1.2.3",
     "cypress-multi-reporters": "1.4.0",
-    "cypress-real-events": "1.6.0",
+    "cypress-real-events": "1.14.0",
     "lodash": "^4.17.21",
     "markdown-it": "^14.0.0",
     "mobx": "6.13.6",
