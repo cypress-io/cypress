@@ -10,6 +10,7 @@ _Released 3/11/2025 (PENDING)_
 **Misc:**
 
 - Additional CLI options will be displayed in the terminal for some Cloud error messages. Addressed in [#31211](https://github.com/cypress-io/cypress/pull/31211).
+- Updated Cypress Studio with url routing to support maintaining state when reloading. Addresses [#31000](https://github.com/cypress-io/cypress/issues/31000) and [#30996](https://github.com/cypress-io/cypress/issues/30996).
 
 **Dependency Updates:**
 
