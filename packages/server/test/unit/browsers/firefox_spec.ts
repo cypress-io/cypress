@@ -261,6 +261,7 @@ describe('lib/browsers/firefox', () => {
           capabilities: sinon.match({
             alwaysMatch: {
               browserName: 'firefox',
+              webSocketUrl: !!shouldUseBiDi,
               acceptInsecureCerts: true,
               // @see https://developer.mozilla.org/en-US/docs/Web/WebDriver/Capabilities/firefoxOptions
               'moz:firefoxOptions': {

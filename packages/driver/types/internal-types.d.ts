@@ -47,7 +47,6 @@ declare namespace Cypress {
       [routeId: string]: any
     }
     sinon: sinon.SinonApi
-    stop: () => void
     utils: CypressUtils
     state: State
     events: Events

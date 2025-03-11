@@ -771,9 +771,10 @@
     "./packages/server/lib/cloud/routes.ts",
     "./packages/server/lib/cloud/user.ts",
     "./packages/server/lib/config.ts",
-    "./packages/server/lib/cypress.js",
+    "./packages/server/lib/cypress.ts",
     "./packages/server/lib/environment.js",
     "./packages/server/lib/log.js",
+    "./packages/server/lib/modes/record.ts",
     "./packages/server/lib/plugins/dev-server.js",
     "./packages/server/lib/plugins/preprocessor.js",
     "./packages/server/lib/plugins/run_events.js",
@@ -4000,13 +4001,13 @@
     "./packages/server/lib/gui/menu.ts",
     "./packages/server/lib/gui/windows.ts",
     "./packages/server/lib/makeDataContext.ts",
-    "./packages/server/lib/modes/exit.js",
+    "./packages/server/lib/modes/exit.ts",
     "./packages/server/lib/modes/index.ts",
-    "./packages/server/lib/modes/info.js",
+    "./packages/server/lib/modes/info.ts",
     "./packages/server/lib/modes/interactive.ts",
-    "./packages/server/lib/modes/pkg.js",
+    "./packages/server/lib/modes/pkg.ts",
     "./packages/server/lib/modes/results.ts",
-    "./packages/server/lib/modes/smoke_test.js",
+    "./packages/server/lib/modes/smoke_test.ts",
     "./packages/server/lib/override_require.ts",
     "./packages/server/lib/plugins/index.ts",
     "./packages/server/lib/privileged-commands/privileged-commands-manager.ts",
@@ -4246,5 +4247,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "9fb18406e0041c01f225a5917a539b6d3d14510eb35b9830faaf227d489c2ef3"
+  "deferredHash": "6a937af5f25edc6aba6112d7bd2830402aa48f36b5205f36f4ccb7b009f97fd5"
 }

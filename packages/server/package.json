@@ -38,6 +38,7 @@
     "@types/mime": "^3.0.1",
     "ansi_up": "5.0.0",
     "ast-types": "0.13.3",
+    "axios": "^1.7.9",
     "base64url": "^3.0.1",
     "better-sqlite3": "11.5.0",
     "black-hole-stream": "0.0.1",
@@ -223,6 +224,7 @@
   "productName": "Cypress",
   "workspaces": {
     "nohoist": [
+      "axios",
       "devtools-protocol",
       "edgedriver",
       "geckodriver",
