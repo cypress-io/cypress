@@ -25,6 +25,9 @@ import type { ProjectBase } from '../../project-base'
 import type { AfterSpecDurations } from '@packages/types'
 import { PUBLIC_KEY_VERSION } from '../constants'
 
+import { createInstance } from './create_instance'
+import { transformError } from './axios_middleware/transform_error'
+
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
 const TWO_MINUTES = humanInterval('2 minutes')
@@ -207,19 +210,6 @@ const retryWithBackoff = (fn) => {
   return attempt(0)
 }
 
-const formatResponseBody = function (err) {
-  // if the body is JSON object
-  if (_.isObject(err.error)) {
-    // transform the error message to include the
-    // stringified body (represented as the 'error' property)
-    const body = JSON.stringify(err.error, null, 2)
-
-    err.message = [err.statusCode, body].join('\n\n')
-  }
-
-  throw err
-}
-
 const tagError = function (err) {
   err.isApiError = true
   throw err
@@ -239,7 +229,10 @@ const isRetriableError = (err) => {
 
 export type CreateRunOptions = {
   projectRoot: string
-  ci: string
+  ci: {
+    params: string
+    provider: string
+  }
   ciBuildId: string
   projectId: string
   recordKey: string
@@ -253,6 +246,7 @@ export type CreateRunOptions = {
   testingType: 'e2e' | 'component'
   timeout?: number
   project: ProjectBase
+  autoCancelAfterFailures?: number | undefined
 }
 
 type CreateRunResponse = {
@@ -350,7 +344,7 @@ export default {
     .catch(tagError)
   },
 
-  createRun (options: CreateRunOptions) {
+  createRun (options: CreateRunOptions): Bluebird<CreateRunResponse> {
     const preflightOptions = _.pick(options, ['projectId', 'projectRoot', 'ciBuildId', 'browser', 'testingType', 'parallel', 'timeout'])
 
     return this.sendPreflight(preflightOptions)
@@ -444,37 +438,11 @@ export default {
 
       return result
     })
-    .catch(RequestErrors.StatusCodeError, formatResponseBody)
+    .catch(RequestErrors.StatusCodeError, transformError)
     .catch(tagError)
   },
 
-  createInstance (options) {
-    const { runId, timeout } = options
-
-    const body = _.pick(options, [
-      'spec',
-      'groupId',
-      'machineId',
-      'platform',
-    ])
-
-    return retryWithBackoff((attemptIndex) => {
-      return rp.post({
-        body,
-        url: recordRoutes.instances(runId),
-        json: true,
-        encrypt: preflightResult.encrypt,
-        timeout: timeout ?? SIXTY_SECONDS,
-        headers: {
-          'x-route-version': '5',
-          'x-cypress-run-id': runId,
-          'x-cypress-request-attempt': attemptIndex,
-        },
-      })
-    })
-    .catch(RequestErrors.StatusCodeError, formatResponseBody)
-    .catch(tagError)
-  },
+  createInstance,
 
   postInstanceTests (options) {
     const { instanceId, runId, timeout, ...body } = options
@@ -492,7 +460,7 @@ export default {
         },
         body,
       })
-      .catch(RequestErrors.StatusCodeError, formatResponseBody)
+      .catch(RequestErrors.StatusCodeError, transformError)
       .catch(tagError)
     })
   },
@@ -512,7 +480,7 @@ export default {
 
         },
       })
-      .catch(RequestErrors.StatusCodeError, formatResponseBody)
+      .catch(RequestErrors.StatusCodeError, transformError)
       .catch(tagError)
     })
   },
@@ -532,7 +500,7 @@ export default {
           'x-cypress-request-attempt': attemptIndex,
         },
       })
-      .catch(RequestErrors.StatusCodeError, formatResponseBody)
+      .catch(RequestErrors.StatusCodeError, transformError)
       .catch(tagError)
     })
   },
@@ -559,7 +527,7 @@ export default {
           'metadata',
         ]),
       })
-      .catch(RequestErrors.StatusCodeError, formatResponseBody)
+      .catch(RequestErrors.StatusCodeError, transformError)
       .catch(tagError)
     })
   },

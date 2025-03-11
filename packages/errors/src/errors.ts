@@ -10,6 +10,7 @@ import { humanTime, logError, parseResolvedPattern, pluralize } from './errorUti
 import { errPartial, errTemplate, fmt, theme, PartialErr } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
 import type { ClonedError, ConfigValidationFailureInfo, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
+import { normalizeNetworkErrorMessage } from './normalizeNetworkErrorMessage'
 
 const ansi_up = new AU()
 
@@ -155,14 +156,18 @@ export const AllCypressErrors = {
   CLOUD_CANCEL_SKIPPED_SPEC: () => {
     return errTemplate`${fmt.off(`\n  `)}This spec and its tests were skipped because the run has been canceled.`
   },
-  CLOUD_API_RESPONSE_FAILED_RETRYING: (arg1: {tries: number, delayMs: number, response: Error}) => {
+  CLOUD_API_RESPONSE_FAILED_RETRYING: (
+    arg1: {tries: number, delayMs: number, response: Error },
+  ) => {
     const time = pluralize('time', arg1.tries)
     const delay = humanTime.long(arg1.delayMs, false)
+
+    const message = normalizeNetworkErrorMessage(arg1.response)
 
     return errTemplate`\
         We encountered an unexpected error communicating with our servers.
 
-        ${fmt.highlightSecondary(arg1.response)}
+        ${fmt.highlightSecondary(message)}
 
         We will retry ${fmt.off(arg1.tries)} more ${fmt.off(time)} in ${fmt.off(delay)}...
         `
@@ -170,10 +175,12 @@ export const AllCypressErrors = {
     /* eslint-disable indent */
   },
   CLOUD_CANNOT_PROCEED_IN_PARALLEL: (arg1: {flags: any, response: Error}) => {
+    const message = normalizeNetworkErrorMessage(arg1.response)
+
     return errTemplate`\
         We encountered an unexpected error communicating with our servers.
 
-        ${fmt.highlightSecondary(arg1.response)}
+        ${fmt.highlightSecondary(message)}
 
         Because you passed the ${fmt.flag(`--parallel`)} flag, this run cannot proceed since it requires a valid response from our servers.
 
@@ -183,10 +190,12 @@ export const AllCypressErrors = {
     })}`
   },
   CLOUD_CANNOT_PROCEED_IN_SERIAL: (arg1: {flags: any, response: Error}) => {
+    const message = normalizeNetworkErrorMessage(arg1.response)
+
     return errTemplate`\
         We encountered an unexpected error communicating with our servers.
 
-        ${fmt.highlightSecondary(arg1.response)}
+        ${fmt.highlightSecondary(message)}
 
         Because you passed the ${fmt.flag(`--record`)} flag, this run cannot proceed since it requires a valid response from our servers.
 
@@ -196,10 +205,12 @@ export const AllCypressErrors = {
     })}`
   },
   CLOUD_UNKNOWN_INVALID_REQUEST: (arg1: {flags: any, response: Error}) => {
+    const message = normalizeNetworkErrorMessage(arg1.response)
+
     return errTemplate`\
         We encountered an unexpected error communicating with our servers.
 
-        ${fmt.highlightSecondary(arg1.response)}
+        ${fmt.highlightSecondary(message)}
 
         There is likely something wrong with the request.
 
@@ -240,7 +251,7 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/stale-run`
   },
-  CLOUD_ALREADY_COMPLETE: (props: {runUrl: string}) => {
+  CLOUD_ALREADY_COMPLETE: (props: {runUrl: string, tags: string, group: string, parallel: string, ciBuildId: string}) => {
     return errTemplate`\
         The run you are attempting to access is already complete and will not accept new groups.
 
@@ -257,7 +268,7 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/already-complete`
   },
-  CLOUD_PARALLEL_REQUIRED: (arg1: {runUrl: string}) => {
+  CLOUD_PARALLEL_REQUIRED: (arg1: {tags: string, group: string, runUrl: string, ciBuildId: string }) => {
     return errTemplate`\
         You did not pass the ${fmt.flag(`--parallel`)} flag, but this run's group was originally created with the --parallel flag.
 
@@ -274,13 +285,14 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/parallel-required`
   },
-  CLOUD_PARALLEL_DISALLOWED: (arg1: {runUrl: string}) => {
+  CLOUD_PARALLEL_DISALLOWED: (arg1: {tags: string, group: string, runUrl: string, ciBuildId: string}) => {
     return errTemplate`\
         You passed the ${fmt.flag(`--parallel`)} flag, but this run group was originally created without the --parallel flag.
 
         The existing run is: ${fmt.url(arg1.runUrl)}
 
         ${fmt.listFlags(arg1, {
+      tags: '--tag',
       group: '--group',
       parallel: '--parallel',
       ciBuildId: '--ciBuildId',
@@ -290,7 +302,7 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/parallel-disallowed`
   },
-  CLOUD_PARALLEL_GROUP_PARAMS_MISMATCH: (arg1: {runUrl: string, parameters: any, payload: any }) => {
+  CLOUD_PARALLEL_GROUP_PARAMS_MISMATCH: (arg1: {group: string, runUrl: string, ciBuildId: string, parameters: any, payload: any }) => {
     let params: any = arg1.parameters
 
     if (arg1.payload?.differentParams) {
@@ -344,7 +356,7 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/parallel-group-params-mismatch`
   },
-  CLOUD_RUN_GROUP_NAME_NOT_UNIQUE: (arg1: {runUrl: string, ciBuildId?: string | null}) => {
+  CLOUD_RUN_GROUP_NAME_NOT_UNIQUE: (arg1: {group: string, runUrl: string, ciBuildId?: string | null}) => {
     return errTemplate`\
         You passed the ${fmt.flag(`--group`)} flag, but this group name has already been used for this run.
 
@@ -370,7 +382,7 @@ export const AllCypressErrors = {
 
       ${fmt.off(arg1.link)}`
   },
-  CLOUD_AUTO_CANCEL_MISMATCH: (arg1: {runUrl: string}) => {
+  CLOUD_AUTO_CANCEL_MISMATCH: (arg1: {runUrl: string, tags: string, group: string, parallel: string, ciBuildId: string, autoCancelAfterFailures: string }) => {
     return errTemplate`\
         You passed the ${fmt.flag(`--auto-cancel-after-failures`)} flag, but this run originally started with a different value for the ${fmt.flag(`--auto-cancel-after-failures`)} flag.
 
@@ -1397,7 +1409,6 @@ export const AllCypressErrors = {
       https://on.cypress.io/test-retries
       `
   },
-  // TODO: test this
   INVALID_CONFIG_OPTION: (arg1: string[]) => {
     const phrase = arg1.length > 1 ? 'options are' : 'option is'
 
@@ -1886,7 +1897,7 @@ export const AllCypressErrors = {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _typeCheck: Record<keyof AllCypressErrorObj, (...args: any[]) => ErrTemplateResult> = AllCypressErrors
 
-type AllCypressErrorObj = typeof AllCypressErrors
+export type AllCypressErrorObj = typeof AllCypressErrors
 
 export type AllCypressErrorNames = keyof typeof AllCypressErrors
 
