@@ -593,7 +593,7 @@ export class ProjectBase extends EE {
 
     const isProtocolEnabled = this._protocolManager?.isProtocolEnabled ?? false
 
-    // hide the runner if explicitly requested or if the protocol is enabled and the runner is not explicitly enabled
+    // hide the runner if explicitly requested or if the protocol is enabled outside of studio and the runner is not explicitly enabled
     const hideRunnerUi = this.options?.args?.runnerUi === false || (isProtocolEnabled && !this.ctx.coreData.studio && !this.options?.args?.runnerUi)
 
     // hide the command log if explicitly requested or if we are hiding the runner
