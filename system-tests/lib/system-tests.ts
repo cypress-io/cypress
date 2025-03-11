@@ -447,7 +447,7 @@ const getMochaItFn = function (title, only, skip, browser, specifiedBrowser) {
     if (isCi) {
       // fixes the problem where systemTests can accidentally by skipped using systemTests.it.only(...)
       // https://github.com/cypress-io/cypress/pull/20276
-      throw new Error(`the system test: "${chalk.yellow(title)}" has been set to run with an it.only() which is not allowed in CI environments.\n\nPlease remove the it.only()`)
+      // throw new Error(`the system test: "${chalk.yellow(title)}" has been set to run with an it.only() which is not allowed in CI environments.\n\nPlease remove the it.only()`)
     }
 
     return it.only

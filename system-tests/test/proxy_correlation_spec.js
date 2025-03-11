@@ -39,6 +39,8 @@ describe('e2e proxy correlation spec', () => {
   const timedOutRequests = (stderr) => {
     const matches = stderr.matchAll(/Never received pre-request or url without pre-request for request (.*) after waiting/g)
 
+    JSON.stringify(matches)
+
     // filter out all non-localhost requests since we only care about ones that came from the app,
     // browsers make requests that don't have pre-requests for various reasons
     //   e.g. https://clientservices.googleapis.com/* and https://accounts.google.com/* in chrome
@@ -61,7 +63,7 @@ describe('e2e proxy correlation spec', () => {
   systemTests.it('correctly correlates requests', {
     spec: 'proxy_correlation.cy.js',
     processEnv: {
-      DEBUG: 'cypress:proxy:http:util:prerequests',
+      DEBUG: 'cypress-verbose:proxy:http:util:prerequests,cypress:proxy:http:util:prerequests,cypress:server:browsers:bidi_automation,cypress-verbose:server:browsers:bidi_automation',
     },
     config: {
       experimentalWebKitSupport: true,
@@ -70,7 +72,45 @@ describe('e2e proxy correlation spec', () => {
     onStderr (stderr) {
       const requests = timedOutRequests(stderr)
 
+      console.log(JSON.stringify(requests))
+
       expect(requests).to.be.empty
     },
   })
+
+  systemTests.it('correctly correlates requests', {
+    spec: 'proxy_correlation.cy.js',
+    processEnv: {
+      DEBUG: 'cypress-verbose:proxy:http:util:prerequests,cypress:proxy:http:util:prerequests,cypress:server:browsers:bidi_automation,cypress-verbose:server:browsers:bidi_automation',
+    },
+    config: {
+      experimentalWebKitSupport: true,
+      defaultCommandTimeout: 10000,
+    },
+    onStderr (stderr) {
+      const requests = timedOutRequests(stderr)
+
+      console.log(JSON.stringify(requests))
+
+      expect(requests).to.be.empty
+    },
+  })
+
+  // systemTests.it('correctly correlates requests', {
+  //   spec: 'proxy_correlation.cy.js',
+  //   processEnv: {
+  //     DEBUG: 'cypress:proxy:http:util:prerequests,cypress:server:browsers:bidi_automation,cypress-verbose:server:browsers:bidi_automation',
+  //   },
+  //   config: {
+  //     experimentalWebKitSupport: true,
+  //     defaultCommandTimeout: 10000,
+  //   },
+  //   onStderr (stderr) {
+  //     const requests = timedOutRequests(stderr)
+
+  //     console.log(JSON.stringify(requests))
+
+  //     expect(requests).to.be.empty
+  //   },
+  // })
 })
