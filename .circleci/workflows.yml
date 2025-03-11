@@ -36,7 +36,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - /^release\/\d+\.\d+\.\d+$/
-        - feat/implement_bidi
+        - ryanm/chore/fix-binary-due-to-proxy-from-env
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'update-v8-snapshot-cache-on-develop'
         - 'ryanm/chore/add_internal_studio'
@@ -50,7 +50,7 @@ macWorkflowFilters: &darwin-workflow-filters
       - equal: [ develop, << pipeline.git.branch >> ]
       # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-      - equal: [ 'feat/implement_bidi', << pipeline.git.branch >> ]
+      - equal: [ 'ryanm/chore/fix-binary-due-to-proxy-from-env', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
@@ -61,7 +61,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
       - equal: [ develop, << pipeline.git.branch >> ]
       # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-      - equal: [ 'feat/implement_bidi', << pipeline.git.branch >> ]
+      - equal: [ 'ryanm/chore/fix-binary-due-to-proxy-from-env', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
@@ -84,7 +84,7 @@ windowsWorkflowFilters: &windows-workflow-filters
       - equal: [ develop, << pipeline.git.branch >> ]
       # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-      - equal: [ 'mschile/studio/windows_url_fix', << pipeline.git.branch >> ]
+      - equal: [ 'ryanm/chore/fix-binary-due-to-proxy-from-env', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
@@ -160,7 +160,7 @@ commands:
           name: Set environment variable to determine whether or not to persist artifacts
           command: |
             echo "Setting SHOULD_PERSIST_ARTIFACTS variable"
-            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "feat/implement_bidi" ]]; then
+            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "ryanm/chore/fix-binary-due-to-proxy-from-env" ]]; then
                 export SHOULD_PERSIST_ARTIFACTS=true
             fi' >> "$BASH_ENV"
   # You must run `setup_should_persist_artifacts` command and be using bash before running this command
@@ -251,7 +251,7 @@ commands:
           command: |
             source ./scripts/ensure-node.sh
             # Minification takes some time. We only really need to do that for the binary (and we regenerate snapshots separately there)
-            V8_SNAPSHOT_DISABLE_MINIFY=1 yarn build-v8-snapshot-prod
+            V8_UPDATE_METAFILE=1 V8_SNAPSHOT_DISABLE_MINIFY=1 yarn build-v8-snapshot-prod
       - prepare-modules-cache # So we don't throw these in the workspace cache
       - persist_to_workspace:
           root: ~/
