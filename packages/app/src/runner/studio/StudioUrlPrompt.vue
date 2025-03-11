@@ -29,7 +29,7 @@
   <div
     cy-data="studio-url-overlay"
     class="bg-black h-full w-full opacity-[.35] top-0 right-0 bottom-0 left-0 fixed"
-    :class="`z-${props.overlayZIndex}`"
+    :style="{ zIndex: props.overlayZIndex }"
   />
 </template>
 
