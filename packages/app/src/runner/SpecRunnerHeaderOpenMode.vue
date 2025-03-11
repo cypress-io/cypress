@@ -62,6 +62,7 @@
           v-if="studioStore.needsUrl && !urlDisabled"
           :aut-url-input-ref="autUrlInputRef"
           :url-in-progress="urlInProgress"
+          :overlay-z-index="studioOverlayZIndex"
           @submit="visitUrl"
           @cancel="() => eventManager.emit('studio:cancel', undefined)"
         />
@@ -182,10 +183,12 @@ watchEffect(() => {
 
 const autIframe = props.getAutIframe()
 
+const studioOverlayZIndex = 50
+
 const inputZIndex = computed(() => {
   // input needs to be above the Studio prompt overlay
   // but other times it needs to be below other resizable panels
-  return studioStore.needsUrl ? 51 : 5
+  return studioStore.needsUrl ? studioOverlayZIndex + 1 : 5
 })
 
 const displayScale = computed(() => {

@@ -64,6 +64,8 @@ import { Popover, PopoverButton, PopoverPanel } from '@headlessui/vue'
 const props = withDefaults(defineProps<{
   variant?: 'panel'
   align?: 'left' | 'right'
+  // The minimal prop is used to style the dropdown as a minimal button with
+  // no border, background, or chevron icon.
   minimal?: boolean
   // The disabled prop is used as the Popover key so that changes to the prop
   // cause the Popover component to mount again. This re-mounting ensures that
