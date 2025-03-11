@@ -38,6 +38,8 @@ console.log(`Looking for reports in ${REPORTS_PATH}`)
 function isAllowlistedEnv (key, value) {
   return ['true', 'false', 'TRUE', 'FALSE'].includes(value)
     || ['nodejs_version', 'CF_DOMAIN', 'SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES'].includes(key)
+    // ignore npm_package_ envs https://docs.npmjs.com/cli/v11/using-npm/scripts#packagejson-vars
+    || key.startsWith('npm_package_')
     || value.length < 4
 }
 
