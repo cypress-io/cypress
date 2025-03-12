@@ -946,6 +946,7 @@ commands:
     steps:
       - run:
           name: 'Verify Mocha Results'
+          when: always
           command: |
             source ./scripts/ensure-node.sh
             yarn verify:mocha:results <<parameters.expectedResultCount>>
