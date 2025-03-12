@@ -1,6 +1,9 @@
 import { Readable, Writable } from 'stream'
 import { proxyquire, sinon } from '../../../spec_helper'
 import { HttpError } from '../../../../lib/cloud/network/http_error'
+import { CloudRequest } from '../../../../lib/cloud/api/cloud_request'
+import { isRetryableError } from '../../../../lib/cloud/network/is_retryable_error'
+import { asyncRetry } from '../../../../lib/util/async_retry'
 
 describe('getAndInitializeStudioManager', () => {
   let getAndInitializeStudioManager: typeof import('@packages/server/lib/cloud/api/get_and_initialize_studio_manager').getAndInitializeStudioManager
@@ -76,7 +79,14 @@ describe('getAndInitializeStudioManager', () => {
     })
 
     it('gets the studio bundle from the path specified in the environment variable', async () => {
-      await getAndInitializeStudioManager()
+      await getAndInitializeStudioManager({
+        projectId: '12345',
+        cloudUrl: 'http://localhost:1234',
+        cloudHeaders: {
+          a: 'b',
+          c: 'd',
+        },
+      })
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
       expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')
@@ -87,6 +97,17 @@ describe('getAndInitializeStudioManager', () => {
         script: 'console.log("studio script")',
         studioPath: '/tmp/cypress/studio',
         studioHash: undefined,
+        projectSlug: '12345',
+        cloudApi: {
+          cloudUrl: 'http://localhost:1234',
+          cloudHeaders: {
+            a: 'b',
+            c: 'd',
+          },
+          CloudRequest,
+          isRetryableError,
+          asyncRetry,
+        },
       })
     })
   })

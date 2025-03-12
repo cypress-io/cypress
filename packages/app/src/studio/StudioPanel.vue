@@ -13,12 +13,14 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { init, loadRemote } from '@module-federation/runtime'
 import type { StudioAppDefaultShape, StudioPanelShape } from './studio-app-types'
+import type { Root } from 'react-dom/client'
 
 interface StudioApp { default: StudioAppDefaultShape }
 
 const root = ref<HTMLElement | null>(null)
 const error = ref<string | null>(null)
 const Panel = ref<StudioPanelShape | null>(null)
+const reactRoot = ref<Root | null>(null)
 
 const maybeRenderReactComponent = () => {
   if (!Panel.value || !!error.value) {
@@ -27,7 +29,8 @@ const maybeRenderReactComponent = () => {
 
   const panel = window.UnifiedRunner.React.createElement(Panel.value)
 
-  window.UnifiedRunner.ReactDOM.createRoot(root.value).render(panel)
+  reactRoot.value = window.UnifiedRunner.ReactDOM.createRoot(root.value)
+  reactRoot.value?.render(panel)
 }
 
 const unmountReactComponent = () => {
@@ -35,7 +38,7 @@ const unmountReactComponent = () => {
     return
   }
 
-  window.UnifiedRunner.ReactDOM.unmountComponentAtNode(root.value)
+  reactRoot.value?.unmount()
 }
 
 init({

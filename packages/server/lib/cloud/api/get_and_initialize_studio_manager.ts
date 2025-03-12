@@ -11,6 +11,7 @@ import { agent } from '@packages/network'
 import { asyncRetry, linearDelay } from '../../util/async_retry'
 import { isRetryableError } from '../network/is_retryable_error'
 import { PUBLIC_KEY_VERSION } from '../constants'
+import { CloudRequest } from './cloud_request'
 
 const pkg = require('@packages/root')
 const routes = require('../routes')
@@ -116,7 +117,7 @@ export const retrieveAndExtractStudioBundle = async ({ projectId }: { projectId?
   return { studioHash }
 }
 
-export const getAndInitializeStudioManager = async ({ projectId }: { projectId?: string } = {}): Promise<StudioManager> => {
+export const getAndInitializeStudioManager = async ({ projectId, cloudUrl, cloudHeaders }: { projectId?: string, cloudUrl: string, cloudHeaders: Record<string, string> }): Promise<StudioManager> => {
   let script: string
 
   try {
@@ -126,7 +127,19 @@ export const getAndInitializeStudioManager = async ({ projectId }: { projectId?:
 
     const studioManager = new StudioManager()
 
-    studioManager.setup({ script, studioPath, studioHash })
+    await studioManager.setup({
+      script,
+      studioPath,
+      studioHash,
+      projectSlug: projectId,
+      cloudApi: {
+        cloudUrl,
+        cloudHeaders,
+        CloudRequest,
+        isRetryableError,
+        asyncRetry,
+      },
+    })
 
     return studioManager
   } catch (error: unknown) {

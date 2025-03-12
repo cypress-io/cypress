@@ -23,6 +23,9 @@ let ctx
 // NOTE: todo: come back to this
 describe('lib/project-base', () => {
   beforeEach(async function () {
+    delete process.env.CYPRESS_ENABLE_CLOUD_STUDIO
+    delete process.env.CYPRESS_LOCAL_STUDIO_PATH
+
     ctx = getCtx()
     Fixtures.scaffold()
 
@@ -448,12 +451,26 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       sinon.stub(api, 'getCaptureProtocolScript').resolves('console.log("hello")')
       sinon.stub(ProtocolManager.prototype, 'prepareProtocol').resolves()
+      sinon.stub(ctx.cloud, 'additionalHeaders').resolves({
+        a: 'b',
+        c: 'd',
+      })
+
+      sinon.stub(ctx.cloud, 'getCloudUrl').resolves('https://localhost:1234')
 
       this.config.testingType = 'e2e'
 
       await this.project.open()
 
-      expect(studio.getAndInitializeStudioManager).to.be.calledWith({ projectId: 'abc123' })
+      expect(studio.getAndInitializeStudioManager).to.be.calledWith({
+        projectId: 'abc123',
+        cloudUrl: 'https://localhost:1234',
+        cloudHeaders: {
+          a: 'b',
+          c: 'd',
+        },
+      })
+
       expect(ctx.coreData.studio).to.eq(this.testStudioManager)
       expect(api.getCaptureProtocolScript).to.be.calledWith('http://localhost:1234/capture-protocol/script/current.js')
       expect(ProtocolManager.prototype.prepareProtocol).to.be.calledWith('console.log("hello")', {
@@ -484,12 +501,26 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       sinon.stub(api, 'getCaptureProtocolScript').resolves('console.log("hello")')
       sinon.stub(ProtocolManager.prototype, 'prepareProtocol').resolves()
+      sinon.stub(ctx.cloud, 'additionalHeaders').resolves({
+        a: 'b',
+        c: 'd',
+      })
+
+      sinon.stub(ctx.cloud, 'getCloudUrl').resolves('https://localhost:1234')
 
       this.config.testingType = 'e2e'
 
       await this.project.open()
 
-      expect(studio.getAndInitializeStudioManager).to.be.calledWith({ projectId: 'abc123' })
+      expect(studio.getAndInitializeStudioManager).to.be.calledWith({
+        projectId: 'abc123',
+        cloudUrl: 'https://localhost:1234',
+        cloudHeaders: {
+          a: 'b',
+          c: 'd',
+        },
+      })
+
       expect(ctx.coreData.studio).to.eq(this.testStudioManager)
       expect(api.getCaptureProtocolScript).not.to.be.called
       expect(ProtocolManager.prototype.prepareProtocol).not.to.be.called
@@ -500,12 +531,26 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       sinon.stub(api, 'getCaptureProtocolScript').resolves('console.log("hello")')
       sinon.stub(ProtocolManager.prototype, 'prepareProtocol').resolves()
+      sinon.stub(ctx.cloud, 'additionalHeaders').resolves({
+        a: 'b',
+        c: 'd',
+      })
+
+      sinon.stub(ctx.cloud, 'getCloudUrl').resolves('https://localhost:1234')
 
       this.config.testingType = 'e2e'
 
       await this.project.open()
 
-      expect(studio.getAndInitializeStudioManager).to.be.calledWith({ projectId: 'abc123' })
+      expect(studio.getAndInitializeStudioManager).to.be.calledWith({
+        projectId: 'abc123',
+        cloudUrl: 'https://localhost:1234',
+        cloudHeaders: {
+          a: 'b',
+          c: 'd',
+        },
+      })
+
       expect(ctx.coreData.studio).to.eq(this.testStudioManager)
       expect(api.getCaptureProtocolScript).to.be.calledWith('http://localhost:1234/capture-protocol/script/current.js')
       expect(ProtocolManager.prototype.prepareProtocol).to.be.calledWith('console.log("hello")', {
@@ -718,12 +763,14 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       expect(fn).to.be.calledOnce
     })
 
-    it('passes onStudioInit callback', async function () {
+    it('passes onStudioInit callback with llm enabled and a protocol manager', async function () {
       const mockSetupProtocol = sinon.stub()
       const mockBeforeSpec = sinon.stub()
+      const mockAccessStudioLLM = sinon.stub().resolves(true)
 
       this.project.spec = {}
       this.project.ctx.coreData.studio = {
+        canAccessStudioLLM: mockAccessStudioLLM,
         protocolManager: {
           setupProtocol: mockSetupProtocol,
           beforeSpec: mockBeforeSpec,
@@ -740,11 +787,13 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       this.project.browser = {
         name: 'chrome',
         family: 'chromium',
+        channel: 'stable',
       }
 
       this.project.options.browsers = [{
         name: 'chrome',
         family: 'chromium',
+        channel: 'stable',
       }]
 
       let studioInitPromise
@@ -759,11 +808,106 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       expect(mockSetupProtocol).to.be.calledOnce
       expect(mockBeforeSpec).to.be.calledOnce
+      expect(mockAccessStudioLLM).to.be.calledWith({
+        family: 'chromium',
+        name: 'chrome',
+        channel: 'stable',
+      })
+
       expect(browsers.connectProtocolToBrowser).to.be.calledWith({
         browser: this.project.browser,
         foundBrowsers: this.project.options.browsers,
         protocolManager: this.project.ctx.coreData.studio.protocolManager,
       })
+
+      expect(this.project['_protocolManager']).to.eq(this.project.ctx.coreData.studio.protocolManager)
+    })
+
+    it('passes onStudioInit callback with llm enabled but no protocol manager', async function () {
+      const mockSetupProtocol = sinon.stub()
+      const mockBeforeSpec = sinon.stub()
+      const mockAccessStudioLLM = sinon.stub().resolves(true)
+
+      this.project.spec = {}
+      this.project.ctx.coreData.studio = {
+        canAccessStudioLLM: mockAccessStudioLLM,
+      }
+
+      this.project.browser = {
+        name: 'chrome',
+        family: 'chromium',
+        channel: 'stable',
+      }
+
+      sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
+      sinon.stub(this.project, 'protocolManager').get(() => {
+        return this.project['_protocolManager']
+      }).set((protocolManager) => {
+        this.project['_protocolManager'] = protocolManager
+      })
+
+      let studioInitPromise
+
+      this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
+        studioInitPromise = callbacks.onStudioInit()
+      })
+
+      this.project.startWebsockets({}, {})
+
+      await studioInitPromise
+
+      expect(mockSetupProtocol).not.to.be.called
+      expect(mockBeforeSpec).not.to.be.called
+      expect(mockAccessStudioLLM).to.be.calledWith({
+        family: 'chromium',
+        name: 'chrome',
+        channel: 'stable',
+      })
+
+      expect(browsers.connectProtocolToBrowser).not.to.be.called
+      expect(this.project['_protocolManager']).to.be.undefined
+    })
+
+    it('passes onStudioInit callback with llm disabled', async function () {
+      const mockSetupProtocol = sinon.stub()
+      const mockBeforeSpec = sinon.stub()
+      const mockAccessStudioLLM = sinon.stub().resolves(false)
+
+      this.project.spec = {}
+      this.project.ctx.coreData.studio = {
+        canAccessStudioLLM: mockAccessStudioLLM,
+        protocolManager: {
+          setupProtocol: mockSetupProtocol,
+          beforeSpec: mockBeforeSpec,
+        },
+      }
+
+      this.project.browser = {
+        name: 'chrome',
+        family: 'chromium',
+      }
+
+      sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
+      sinon.stub(this.project, 'protocolManager').get(() => {
+        return this.project['_protocolManager']
+      }).set((protocolManager) => {
+        this.project['_protocolManager'] = protocolManager
+      })
+
+      let studioInitPromise
+
+      this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
+        studioInitPromise = callbacks.onStudioInit()
+      })
+
+      this.project.startWebsockets({}, {})
+
+      await studioInitPromise
+
+      expect(mockSetupProtocol).not.to.be.called
+      expect(mockBeforeSpec).not.to.be.called
+      expect(browsers.connectProtocolToBrowser).not.to.be.called
+      expect(this.project['_protocolManager']).to.be.undefined
     })
 
     it('passes onStudioDestroy callback', async function () {
