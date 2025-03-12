@@ -29,8 +29,13 @@ export const overrideSourceMaps = (sourceMap: boolean, typescriptPath?: string) 
     const { createProgram } = typescript
 
     debug('typescript found, overriding typescript.createProgram()')
-    // NOTE: typescript.createProgram is only called in typescript versions 4 and under
-    // For Typescript 5, please see the @cypress/webpack-batteries-included-preprocessor package
+    // NOTE: typescript.createProgram can only be monkey-patched in TypeScript versions 4 and under.
+    // This is due to TypeScript v5 being an ESM package build with ESBuild, meaning the exports are
+    // unmodifiable.
+
+    // For TypeScript 5, we are currently setting sourceMaps in @cypress/webpack-batteries-included-preprocessor.
+    // If you are using @cypress/webpack-preprocessor as a standalone package, you will need to set sourceMaps=true
+    // inside your cypress/tsconfig.json file in order to get full codeFrame support.
     typescript.createProgram = (...args: any[]) => {
       const [rootNamesOrOptions, _options] = args
       const options = getProgramOptions(rootNamesOrOptions, _options)
