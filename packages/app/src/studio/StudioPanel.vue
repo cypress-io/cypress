@@ -13,7 +13,6 @@
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { init, loadRemote } from '@module-federation/runtime'
 import type { StudioAppDefaultShape, StudioPanelShape } from './studio-app-types'
-import type { Root } from 'react-dom/client'
 
 const props = defineProps<{
   canAccessStudioLLM: boolean
@@ -24,7 +23,7 @@ interface StudioApp { default: StudioAppDefaultShape }
 const root = ref<HTMLElement | null>(null)
 const error = ref<string | null>(null)
 const Panel = ref<StudioPanelShape | null>(null)
-const reactRoot = ref<Root | null>(null)
+const reactRoot = ref<any | null>(null)
 
 const maybeRenderReactComponent = () => {
   if (!Panel.value || !!error.value) {

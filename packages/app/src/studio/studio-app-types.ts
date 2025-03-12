@@ -2,6 +2,10 @@ export interface StudioPanelProps {
   canAccessStudioLLM: boolean
 }
 
+export type StudioPanelShape = (props: StudioPanelProps) => JSX.Element
+
 export interface StudioAppDefaultShape {
-  StudioPanel: (props: StudioPanelProps) => JSX.Element
+  // Purposefully do not use React in this signature to avoid conflicts when this type gets
+  // transferred to the Cypress app
+  StudioPanel: StudioPanelShape
 }
