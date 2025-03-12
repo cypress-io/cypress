@@ -125,6 +125,9 @@ async function verifyMochaResults () {
 
     console.log(`Found ${resultCount} files in ${REPORTS_PATH}:`, filenames)
 
+    // WARN: check the report files before anything else to ensure that no secrets are leaked
+    await checkReportFiles(filenames)
+
     if (!expectedResultCount) {
       console.log('Expecting at least 1 report...')
       la(resultCount > 0, 'Expected at least 1 report, but found', resultCount, '. Verify that all tests ran as expected.')
@@ -132,8 +135,6 @@ async function verifyMochaResults () {
       console.log(`Expecting exactly ${expectedResultCount} reports...`)
       la(expectedResultCount === resultCount, 'Expected', expectedResultCount, 'reports, but found', resultCount, '. Verify that all tests ran as expected.')
     }
-
-    await checkReportFiles(filenames)
   } catch (err) {
     throw new Error(`Problem reading from ${REPORTS_PATH}: ${err.message}`)
   }

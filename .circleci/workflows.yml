@@ -846,6 +846,7 @@ commands:
             else
               echo "skipping percy screenshots uploading"
             fi
+      - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
@@ -1775,6 +1776,7 @@ jobs:
             DEBUG=cypress*memory \
             yarn cypress:run --browser electron --spec "cypress/e2e/memory/*.cy.*"
           working_directory: packages/driver
+      - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
@@ -1802,6 +1804,7 @@ jobs:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
             - run: yarn test-scripts scripts/**/*spec.js
+            - verify-mocha-results
       - unless:
           condition:
             equal: [ *windows-executor, << parameters.executor >> ]
@@ -2286,6 +2289,7 @@ jobs:
             yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group webpack-dev-server
           working_directory: npm/webpack-dev-server
+      - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -2310,6 +2314,7 @@ jobs:
             yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group vite-dev-server
           working_directory: npm/vite-dev-server
+      - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -2348,6 +2353,7 @@ jobs:
           name: Run tests
           command: yarn test
           working_directory: npm/vite-dev-server
+      - verify-mocha-results
       - store_test_results:
           path: npm/vite-dev-server/test_results
       - store-npm-logs
@@ -2372,6 +2378,7 @@ jobs:
           name: Run tests
           command: yarn test
           working_directory: npm/vue
+      - verify-mocha-results
       - store_test_results:
           path: npm/vue/test_results
       - store_artifacts:
@@ -2398,6 +2405,7 @@ jobs:
           name: Run tests
           command: yarn test
           working_directory: npm/puppeteer
+      - verify-mocha-results
       - store_test_results:
           path: npm/puppeteer/test_results
       - store_artifacts:
@@ -2415,6 +2423,7 @@ jobs:
       - run:
           command: yarn cypress:run
           working_directory: npm/puppeteer
+      - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -2432,6 +2441,7 @@ jobs:
           name: Run tests
           command: yarn test
           working_directory: npm/react
+      - verify-mocha-results
       - store_test_results:
           path: npm/react/test_results
       - store_artifacts:
@@ -2449,6 +2459,7 @@ jobs:
           name: Run tests
           command: yarn test
           working_directory: npm/vite-plugin-cypress-esm
+      - verify-mocha-results
       - store_test_results:
           path: npm/vite-plugin-cypress-esm/test_results
       - store_artifacts:
@@ -2472,6 +2483,7 @@ jobs:
       - run:
           name: Run tests
           command: yarn workspace @cypress/grep cy:run
+      - verify-mocha-results
       - store_test_results:
           path: npm/grep/test_results
       - store_artifacts:
