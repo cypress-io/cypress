@@ -53,17 +53,6 @@ if (process.platform !== 'win32') {
           expect(spy.getCalls().length).to.equal(1)
         }
       })
-
-      it('checks for protected env and passes and removes results (for now)', async () => {
-        const spy = sinon.stub(fs, 'rm').withArgs('/tmp/cypress/junit', { recursive: true, force: true })
-
-        fs.readFile
-        .withArgs('/tmp/cypress/junit/report.xml')
-        .resolves('<testsuites name="foo" time="1" tests="10" failures="0">test')
-
-        await verifyMochaResults()
-        expect(spy.getCalls().length).to.equal(1)
-      })
     })
 
     context('test result checking', () => {

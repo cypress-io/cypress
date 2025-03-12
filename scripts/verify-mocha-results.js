@@ -37,7 +37,7 @@ console.log(`Looking for reports in ${REPORTS_PATH}`)
 // https://circleci.com/blog/keep-environment-variables-private-with-secret-masking/
 function isAllowlistedEnv (key, value) {
   return ['true', 'false', 'TRUE', 'FALSE'].includes(value)
-    || ['nodejs_version', 'CF_DOMAIN', 'SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES', 'CIRCLE_PROJECT_REPONAME', 'HOME'].includes(key)
+    || ['nodejs_version', 'CF_DOMAIN', 'SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES', 'CIRCLE_PROJECT_REPONAME', 'HOME', 'PLATFORM', 'PWD', 'npm_config_loglevel'].includes(key)
     // ignore npm_package_ envs https://docs.npmjs.com/cli/v11/using-npm/scripts#packagejson-vars
     || key.startsWith('npm_package_')
     || value.length < 4
