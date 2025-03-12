@@ -67,9 +67,6 @@ async function checkReportFile (filename, circleEnv) {
     }
   }
 
-  // TODO: while we're testing, remove the reports to ensure nothing is leaked
-  await fs.rm(REPORTS_PATH, { recursive: true, force: true })
-
   try {
     result = parseResult(xml)
   } catch (err) {
