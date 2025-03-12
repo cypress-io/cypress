@@ -58,13 +58,19 @@ async function checkReportFile (filename, circleEnv) {
   // if they are, delete the report and throw an error.
   // this needs to be done immediately after reading the file to ensure
   // that the report is deleted before any other operations are performed
+  const foundKeys = []
+
   for (const key in circleEnv) {
     const value = circleEnv[key]
 
     if (!isAllowlistedEnv(key, value) && xml.includes(value)) {
-      await fs.rm(REPORTS_PATH, { recursive: true, force: true })
-      throw new Error(`Report contained the value of ${key}, which is a CI environment variable. This means that a failing test is exposing environment variables. Test reports will not be persisted for this job.`)
+      foundKeys.push(key)
     }
+  }
+
+  if (foundKeys.length) {
+    await fs.rm(REPORTS_PATH, { recursive: true, force: true })
+    throw new Error(`Report contained the value of ${foundKeys}}, which is a CI environment variable. This means that a failing test is exposing environment variables. Test reports will not be persisted for this job.`)
   }
 
   try {
