@@ -2279,7 +2279,7 @@ jobs:
           command: yarn test
           working_directory: npm/vite-dev-server
       - verify-and-store-mocha-results:
-        testResultsPath: npm/vite-dev-server/test_results
+          testResultsPath: npm/vite-dev-server/test_results
 
   npm-webpack-batteries-included-preprocessor:
     <<: *defaults
