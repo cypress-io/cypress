@@ -701,7 +701,6 @@ commands:
             echo Current working directory is $PWD
             echo Total containers $CIRCLE_NODE_TOTAL
 
-
             if << parameters.inject-document-domain >> ; then
               YARN_CMD="cypress:run:inject-document-domain"
               PARALLEL="--parallel --group 5x-driver-inject-document-domain-<<parameters.browser>>"
@@ -729,12 +728,7 @@ commands:
               yarn $YARN_CMD --browser <<parameters.browser>> --spec $TESTFILES --runner-ui
             fi
           working_directory: packages/driver
-      - verify-mocha-results
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
+      - verify-and-store-mocha-results
 
   windows-install-chrome:
     parameters:
@@ -846,10 +840,7 @@ commands:
             else
               echo "skipping percy screenshots uploading"
             fi
-      - verify-mocha-results
-      - store_test_results:
-          path: /tmp/cypress
-      - store-npm-logs
+      - verify-and-store-mocha-results
 
   run-system-tests:
     parameters:
@@ -885,12 +876,7 @@ commands:
             SPECS=`echo $SPECS | xargs -n 1 | circleci tests split --split-by=timings`
             echo SPECS=$SPECS
             yarn workspace @tooling/system-tests test:ci $SPECS --browser <<parameters.browser>>
-      - verify-mocha-results
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
+      - verify-and-store-mocha-results
 
   run-binary-system-tests:
     steps:
@@ -905,18 +891,7 @@ commands:
             SPECS=`echo $ALL_SPECS | xargs -n 1 | circleci tests split --split-by=timings`
             echo SPECS=$SPECS
             yarn workspace @tooling/system-tests test:ci $SPECS
-      - verify-mocha-results
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
-
-  store-npm-logs:
-    description: Saves any NPM debug logs as artifacts in case there is a problem
-    steps:
-      - store_artifacts:
-          path: ~/.npm/_logs
+      - verify-and-store-mocha-results
 
   post-install-comment:
     parameters:
@@ -935,7 +910,7 @@ commands:
               --npm << parameters.package_url_path >> \
               --binary << parameters.binary_url_path >>
 
-  verify-mocha-results:
+  verify-and-store-mocha-results:
     description: Double-check that Mocha tests ran as expected.
     parameters:
       expectedResultCount:
@@ -944,6 +919,10 @@ commands:
         type: integer
         ## pass a default magic number of 0 to assert that at least 1 test ran
         default: 0
+      testResultsPath:
+        description: The path to the test results
+        type: string
+        default: /tmp/cypress
     steps:
       - run:
           name: 'Verify Mocha Results'
@@ -957,6 +936,8 @@ commands:
           command: |
             source ./scripts/ensure-node.sh
             yarn verify:mocha:results <<parameters.expectedResultCount>> false
+      - store_test_results:
+          path: <<parameters.testResultsPath>>
 
   clone-repo-and-checkout-branch:
     description: |
@@ -1104,7 +1085,6 @@ commands:
                       name: Run tests using command
                       working_directory: /tmp/<<parameters.repo>>
                       command: <<parameters.command>>
-      - store-npm-logs
 
   test-binary-against-repo:
     description: |
@@ -1290,7 +1270,6 @@ commands:
                       command: |
                         source ./ci-ensure-node.sh
                         <<parameters.command>>
-      - store-npm-logs
 
   check-if-binary-exists:
     steps:
@@ -1407,7 +1386,6 @@ commands:
             fi
             source ./scripts/ensure-node.sh
             yarn binary-zip
-      - store-npm-logs
       - persist_to_workspace:
           root: ~/
           paths:
@@ -1464,7 +1442,6 @@ commands:
       - run:
           name: list created NPM package
           command: ls -l
-      - store-npm-logs
       - persist_to_workspace:
           root: ~/
           paths:
@@ -1487,7 +1464,6 @@ commands:
               --type npm-package \
               --file cypress.tgz \
               --version $(node -p "require('./package.json').version")
-      - store-npm-logs
       - run: ls -l
       - run: cat binary-url.json
       - run: cat npm-package-url.json
@@ -1537,7 +1513,6 @@ jobs:
       - caching-dependency-installer:
           only-cache-for-root-user: <<parameters.only-cache-for-root-user>>
           build-better-sqlite3: <<parameters.build-better-sqlite3>>
-      - store-npm-logs
 
   ## restores node_modules from previous step & builds if first step skipped
   build:
@@ -1571,7 +1546,6 @@ jobs:
               node ./scripts/circle-env.js --check-canaries
             fi
       - build-and-persist
-      - store-npm-logs
 
   lint:
     <<: *defaults
@@ -1586,7 +1560,6 @@ jobs:
       - run:
           name: cypress info (dev)
           command: node cli/bin/cypress info --dev
-      - store-npm-logs
 
   check-ts:
     <<: *defaults
@@ -1678,8 +1651,6 @@ jobs:
             cli/visual-snapshots/cypress-help.html
           environment:
             FORCE_COLOR: 2
-      - store_artifacts:
-          path: cli/visual-snapshots
       - run:
           name: Upload CLI snapshots for diffing
           command: |
@@ -1726,7 +1697,7 @@ jobs:
                 command: |
                   source ./scripts/ensure-node.sh
                   yarn test-integration --scope=@tooling/{packherd,v8-snapshot,electron-mksnapshot}
-            - verify-mocha-results:
+            - verify-and-store-mocha-results:
                 expectedResultCount: 3
       - when:
           condition:
@@ -1738,11 +1709,8 @@ jobs:
                 command: |
                   source ./scripts/ensure-node.sh
                   yarn test-integration --scope=@tooling/packherd
-            - verify-mocha-results:
+            - verify-and-store-mocha-results:
                 expectedResultCount: 1
-      - store_test_results:
-          path: /tmp/cypress
-      - store-npm-logs
 
   driver-integration-memory-tests:
     <<: *defaults
@@ -1782,12 +1750,7 @@ jobs:
             DEBUG=cypress*memory \
             yarn cypress:run --browser electron --spec "cypress/e2e/memory/*.cy.*"
           working_directory: packages/driver
-      - verify-mocha-results
-      - store_test_results:
-          path: /tmp/cypress
-      - store-npm-logs
-      - store_artifacts:
-          path: packages/driver/cypress/logs/memory
+      - verify-and-store-mocha-results
 
   unit-tests:
     <<: *defaults
@@ -1810,7 +1773,7 @@ jobs:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
             - run: yarn test-scripts scripts/**/*spec.js
-            - verify-mocha-results
+            - verify-and-store-mocha-results
       - unless:
           condition:
             equal: [ *windows-executor, << parameters.executor >> ]
@@ -1820,16 +1783,8 @@ jobs:
             - run: yarn test
             # run type checking for each individual package
             - run: yarn lerna run types
-            - verify-mocha-results:
+            - verify-and-store-mocha-results:
                 expectedResultCount: 20
-      - store_test_results:
-          path: /tmp/cypress
-      # CLI tests generate HTML files with sample CLI command output
-      - store_artifacts:
-          path: cli/test/html
-      - store_artifacts:
-          path: packages/errors/__snapshot-images__
-      - store-npm-logs
 
   verify-release-readiness:
     <<: *defaults
@@ -1859,7 +1814,6 @@ jobs:
       - run:
           name: "Lint types 🧹"
           command: yarn workspace cypress dtslint
-      - store-npm-logs
 
   server-unit-tests:
     <<: *defaults
@@ -1867,11 +1821,8 @@ jobs:
     steps:
       - restore_cached_workspace
       - run: yarn test-unit --scope=@packages/server
-      - verify-mocha-results:
+      - verify-and-store-mocha-results:
           expectedResultCount: 1
-      - store_test_results:
-          path: /tmp/cypress
-      - store-npm-logs
 
   server-unit-tests-cloud-environment:
     <<: *defaults
@@ -1901,11 +1852,8 @@ jobs:
                 name: reinstall dependencies to work around cache issue (Windows only)
                 command: rm -rf node_modules && yarn
       - run: yarn workspace @packages/server test-unit cloud/environment_spec.ts
-      - verify-mocha-results:
+      - verify-and-store-mocha-results:
           expectedResultCount: 1
-      - store_test_results:
-          path: /tmp/cypress
-      - store-npm-logs
 
   server-integration-tests:
     <<: *defaults
@@ -1915,11 +1863,8 @@ jobs:
       - install-browsers:
           install-chrome: true
       - run: yarn test-integration --scope=@packages/server
-      - verify-mocha-results:
+      - verify-and-store-mocha-results:
           expectedResultCount: 1
-      - store_test_results:
-          path: /tmp/cypress
-      - store-npm-logs
 
   server-performance-tests:
     <<: *defaults
@@ -1930,13 +1875,8 @@ jobs:
           install-firefox: true
       - run:
           command: yarn workspace @packages/server test-performance
-      - verify-mocha-results:
+      - verify-and-store-mocha-results:
           expectedResultCount: 1
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
 
   system-tests-node-modules-install:
     <<: *defaults
@@ -2060,12 +2000,7 @@ jobs:
             CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
           command: yarn workspace @tooling/system-tests test:ci "test/non_root*spec*"
             --browser electron
-      - verify-mocha-results
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
+      - verify-and-store-mocha-results
 
   run-frontend-shared-component-tests-chrome:
     <<: *defaults
@@ -2269,12 +2204,7 @@ jobs:
             yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group reporter --runner-ui
           working_directory: packages/reporter
-      - verify-mocha-results
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
+      - verify-and-store-mocha-results
 
   run-webpack-dev-server-integration-tests:
     <<: *defaults
@@ -2295,12 +2225,7 @@ jobs:
             yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group webpack-dev-server
           working_directory: npm/webpack-dev-server
-      - verify-mocha-results
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
+      - verify-and-store-mocha-results
 
   run-vite-dev-server-integration-tests:
     <<: *defaults
@@ -2320,12 +2245,7 @@ jobs:
             yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group vite-dev-server
           working_directory: npm/vite-dev-server
-      - verify-mocha-results
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
+      - verify-and-store-mocha-results
 
   npm-webpack-preprocessor:
     <<: *defaults
@@ -2337,7 +2257,6 @@ jobs:
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-preprocessor test
-      - store-npm-logs
 
   npm-webpack-dev-server:
     <<: *defaults
@@ -2359,10 +2278,8 @@ jobs:
           name: Run tests
           command: yarn test
           working_directory: npm/vite-dev-server
-      - verify-mocha-results
-      - store_test_results:
-          path: npm/vite-dev-server/test_results
-      - store-npm-logs
+      - verify-and-store-mocha-results:
+        testResultsPath: npm/vite-dev-server/test_results
 
   npm-webpack-batteries-included-preprocessor:
     <<: *defaults
@@ -2384,12 +2301,8 @@ jobs:
           name: Run tests
           command: yarn test
           working_directory: npm/vue
-      - verify-mocha-results
-      - store_test_results:
-          path: npm/vue/test_results
-      - store_artifacts:
-          path: npm/vue/test_results
-      - store-npm-logs
+      - verify-and-store-mocha-results:
+          testResultsPath: npm/vue/test_results
 
   npm-angular:
     <<: *defaults
@@ -2398,7 +2311,6 @@ jobs:
       - run:
           name: Build
           command: yarn lerna run build --scope=@cypress/angular
-      - store-npm-logs
 
   npm-puppeteer-unit-tests:
     <<: *defaults
@@ -2411,12 +2323,8 @@ jobs:
           name: Run tests
           command: yarn test
           working_directory: npm/puppeteer
-      - verify-mocha-results
-      - store_test_results:
-          path: npm/puppeteer/test_results
-      - store_artifacts:
-          path: npm/puppeteer/test_results
-      - store-npm-logs
+      - verify-and-store-mocha-results:
+          testResultsPath: npm/puppeteer/test_results
 
   npm-puppeteer-cypress-tests:
     <<: *defaults
@@ -2429,12 +2337,7 @@ jobs:
       - run:
           command: yarn cypress:run
           working_directory: npm/puppeteer
-      - verify-mocha-results
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
+      - verify-and-store-mocha-results
 
   npm-react:
     <<: *defaults
@@ -2447,12 +2350,8 @@ jobs:
           name: Run tests
           command: yarn test
           working_directory: npm/react
-      - verify-mocha-results
-      - store_test_results:
-          path: npm/react/test_results
-      - store_artifacts:
-          path: npm/react/test_results
-      - store-npm-logs
+      - verify-and-store-mocha-results:
+          testResultsPath: npm/react/test_results
 
   npm-vite-plugin-cypress-esm:
     <<: *defaults
@@ -2465,12 +2364,8 @@ jobs:
           name: Run tests
           command: yarn test
           working_directory: npm/vite-plugin-cypress-esm
-      - verify-mocha-results
-      - store_test_results:
-          path: npm/vite-plugin-cypress-esm/test_results
-      - store_artifacts:
-          path: npm/vite-plugin-cypress-esm/test_results
-      - store-npm-logs
+      - verify-and-store-mocha-results:
+          testResultsPath: npm/vite-plugin-cypress-esm/test_results
 
   npm-mount-utils:
     <<: *defaults
@@ -2479,7 +2374,6 @@ jobs:
       - run:
           name: Build
           command: yarn lerna run build --scope=@cypress/mount-utils
-      - store-npm-logs
 
   npm-grep:
     <<: *defaults
@@ -2489,12 +2383,8 @@ jobs:
       - run:
           name: Run tests
           command: yarn workspace @cypress/grep cy:run
-      - verify-mocha-results
-      - store_test_results:
-          path: npm/grep/test_results
-      - store_artifacts:
-          path: npm/grep/test_results
-      - store-npm-logs
+      - verify-and-store-mocha-results:
+          testResultsPath: npm/grep/test_results
 
   npm-eslint-plugin-dev:
     <<: *defaults
@@ -2517,7 +2407,6 @@ jobs:
           command: |
             yarn test
           working_directory: npm/cypress-schematic
-      - store-npm-logs
 
   npm-release:
     <<: *defaults
@@ -2633,7 +2522,6 @@ jobs:
           name: Run Kitchensink example project
           command: |
             yarn cypress:run --project /tmp/cypress-example-kitchensink
-      - store-npm-logs
 
   test-kitchensink-against-staging:
     <<: *defaults
@@ -2659,7 +2547,6 @@ jobs:
             CYPRESS_RECORD_KEY=$TEST_KITCHENSINK_RECORD_KEY \
             CYPRESS_INTERNAL_ENV=staging \
             yarn cypress:run --project /tmp/cypress-example-kitchensink --record
-      - store-npm-logs
 
   test-against-staging:
     <<: *defaults
@@ -2674,7 +2561,6 @@ jobs:
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             CYPRESS_INTERNAL_ENV=staging \
             yarn cypress:run --project /tmp/cypress-test-tiny --record
-      - store-npm-logs
 
   test-npm-module-and-verify-binary:
     <<: *defaults
@@ -2712,7 +2598,6 @@ jobs:
           name: Cypress info
           working_directory: test-binary
           command: $(yarn bin cypress) info
-      - store-npm-logs
 
   test-npm-module-on-minimum-node-version:
     <<: *defaults
@@ -2836,7 +2721,6 @@ jobs:
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             CYPRESS_INTERNAL_ENV=staging \
             $(yarn bin cypress) run --record
-      - store-npm-logs
 
   test-binary-against-recipes-firefox:
     <<: *defaults
@@ -2989,7 +2873,6 @@ jobs:
           name: Run Cypress binary
           working_directory: /tmp/cypress-test-tiny
           command: DEBUG=cypress:cli $(yarn bin cypress) run
-      - store-npm-logs
 
 linux-x64-workflow: &linux-x64-workflow
   jobs:
