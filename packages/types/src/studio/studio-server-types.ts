@@ -39,6 +39,8 @@ export interface StudioServerShape {
 }
 
 export interface StudioServerDefaultShape {
-  createStudioServer: (options: StudioServerOptions) => Promise<StudioServerShape>
+  createStudioServer: (
+    options: StudioServerOptions
+  ) => Promise<StudioServerShape>
   MOUNT_VERSION: number
 }

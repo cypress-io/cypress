@@ -1,5 +1,11 @@
+import type React from 'react'
+
+export interface StudioPanelProps {
+  canAccessStudioLLM: boolean
+}
+
 export interface StudioPanelShape {
-  (): JSX.Element
+  (): React.FC<StudioPanelProps>
 }
 
 export interface StudioAppDefaultShape {

@@ -281,7 +281,8 @@ export class EventManager {
     this.reporterBus.on('studio:init:test', (testId) => {
       this.studioStore.setTestId(testId)
 
-      this.ws.emit('studio:init', () => {
+      this.ws.emit('studio:init', ({ canAccessStudioLLM }) => {
+        this.studioStore.setCanAccessStudioLLM(canAccessStudioLLM)
         studioInit()
       })
     })
@@ -289,7 +290,8 @@ export class EventManager {
     this.reporterBus.on('studio:init:suite', (suiteId) => {
       this.studioStore.setSuiteId(suiteId)
 
-      this.ws.emit('studio:init', () => {
+      this.ws.emit('studio:init', ({ canAccessStudioLLM }) => {
+        this.studioStore.setCanAccessStudioLLM(canAccessStudioLLM)
         studioInit()
       })
     })

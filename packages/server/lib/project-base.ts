@@ -432,13 +432,17 @@ export class ProjectBase extends EE {
       closeExtraTargets: this.closeExtraTargets,
 
       onStudioInit: async () => {
-        const canAccessStudioLLM = await this.ctx.coreData.studio?.canAccessStudioLLM({
-          family: this.browser.family,
-          name: this.browser.name,
-          channel: this.browser.channel,
-        }) ?? false
+        if (this.spec && this.ctx.coreData.studio?.protocolManager) {
+          const canAccessStudioLLM = await this.ctx.coreData.studio?.canAccessStudioLLM({
+            family: this.browser.family,
+            name: this.browser.name,
+            channel: this.browser.channel,
+          }) ?? false
 
-        if (this.spec && canAccessStudioLLM && this.ctx.coreData.studio?.protocolManager) {
+          if (!canAccessStudioLLM) {
+            return { canAccessStudioLLM }
+          }
+
           this.protocolManager = this.ctx.coreData.studio?.protocolManager
           this.protocolManager?.setupProtocol()
           this.protocolManager?.beforeSpec({
@@ -447,9 +451,13 @@ export class ProjectBase extends EE {
           })
 
           await browsers.connectProtocolToBrowser({ browser: this.browser, foundBrowsers: this.options.browsers, protocolManager: this.protocolManager })
-        } else {
-          this.protocolManager = undefined
+
+          return { canAccessStudioLLM: true }
         }
+
+        this.protocolManager = undefined
+
+        return { canAccessStudioLLM: false }
       },
 
       onStudioDestroy: async () => {

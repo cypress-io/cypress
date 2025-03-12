@@ -10,10 +10,14 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { init, loadRemote } from '@module-federation/runtime'
 import type { StudioAppDefaultShape, StudioPanelShape } from './studio-app-types'
 import type { Root } from 'react-dom/client'
+
+const props = defineProps<{
+  canAccessStudioLLM: boolean
+}>()
 
 interface StudioApp { default: StudioAppDefaultShape }
 
@@ -27,11 +31,13 @@ const maybeRenderReactComponent = () => {
     return
   }
 
-  const panel = window.UnifiedRunner.React.createElement(Panel.value)
+  const panel = window.UnifiedRunner.React.createElement(Panel.value, { canAccessStudioLLM: props.canAccessStudioLLM })
 
   reactRoot.value = window.UnifiedRunner.ReactDOM.createRoot(root.value)
   reactRoot.value?.render(panel)
 }
+
+watch(() => props.canAccessStudioLLM, maybeRenderReactComponent)
 
 const unmountReactComponent = () => {
   if (!Panel.value || !root.value) {

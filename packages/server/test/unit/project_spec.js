@@ -456,7 +456,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         c: 'd',
       })
 
-      sinon.stub(ctx.cloud, 'getCloudUrl').resolves('https://localhost:1234')
+      sinon.stub(ctx.cloud, 'getCloudUrl').returns('https://localhost:1234')
 
       this.config.testingType = 'e2e'
 
@@ -506,7 +506,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         c: 'd',
       })
 
-      sinon.stub(ctx.cloud, 'getCloudUrl').resolves('https://localhost:1234')
+      sinon.stub(ctx.cloud, 'getCloudUrl').returns('https://localhost:1234')
 
       this.config.testingType = 'e2e'
 
@@ -536,7 +536,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         c: 'd',
       })
 
-      sinon.stub(ctx.cloud, 'getCloudUrl').resolves('https://localhost:1234')
+      sinon.stub(ctx.cloud, 'getCloudUrl').returns('https://localhost:1234')
 
       this.config.testingType = 'e2e'
 
@@ -804,7 +804,9 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       this.project.startWebsockets({}, {})
 
-      await studioInitPromise
+      const { canAccessStudioLLM } = await studioInitPromise
+
+      expect(canAccessStudioLLM).to.be.true
 
       expect(mockSetupProtocol).to.be.calledOnce
       expect(mockBeforeSpec).to.be.calledOnce
@@ -854,15 +856,13 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       this.project.startWebsockets({}, {})
 
-      await studioInitPromise
+      const { canAccessStudioLLM } = await studioInitPromise
+
+      expect(canAccessStudioLLM).to.be.false
 
       expect(mockSetupProtocol).not.to.be.called
       expect(mockBeforeSpec).not.to.be.called
-      expect(mockAccessStudioLLM).to.be.calledWith({
-        family: 'chromium',
-        name: 'chrome',
-        channel: 'stable',
-      })
+      expect(mockAccessStudioLLM).not.to.be.called
 
       expect(browsers.connectProtocolToBrowser).not.to.be.called
       expect(this.project['_protocolManager']).to.be.undefined
@@ -902,8 +902,9 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       this.project.startWebsockets({}, {})
 
-      await studioInitPromise
+      const { canAccessStudioLLM } = await studioInitPromise
 
+      expect(canAccessStudioLLM).to.be.false
       expect(mockSetupProtocol).not.to.be.called
       expect(mockBeforeSpec).not.to.be.called
       expect(browsers.connectProtocolToBrowser).not.to.be.called
