@@ -3392,7 +3392,7 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
     - node_modules_install
     - build:
         environment:
-          IS_CONTIBUTOR_PR: true
+          IS_CONTRIBUTOR_PR: true
         requires:
           - node_modules_install
     # In subsequent jobs, we use some contexts that are restricted to members of the Cypress organization.
