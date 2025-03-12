@@ -942,15 +942,21 @@ commands:
         description: The number of result files to expect, ie, the number of Mocha test
           suites that ran.
         type: integer
-        ## by default, assert that at least 1 test ran
+        ## pass a default magic number of 0 to assert that at least 1 test ran
         default: 0
     steps:
       - run:
           name: 'Verify Mocha Results'
-          when: always
+          when: on_fail
           command: |
             source ./scripts/ensure-node.sh
-            yarn verify:mocha:results <<parameters.expectedResultCount>>
+            yarn verify:mocha:results <<parameters.expectedResultCount>> true
+      - run:
+          name: 'Verify Mocha Results'
+          when: on_success
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn verify:mocha:results <<parameters.expectedResultCount>> false
 
   clone-repo-and-checkout-branch:
     description: |

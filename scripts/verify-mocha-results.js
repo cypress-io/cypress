@@ -14,7 +14,7 @@ const { XMLParser } = require('fast-xml-parser')
 
 const REPORTS_PATH = '/tmp/cypress/junit'
 
-const expectedResultCount = Number(process.argv[process.argv.length - 1])
+const total = { tests: 0, failures: 0, skipped: 0 }
 
 const parseResult = (xml) => {
   const { testsuites } = new XMLParser({
@@ -29,21 +29,17 @@ const parseResult = (xml) => {
   }
 }
 
-const total = { tests: 0, failures: 0, skipped: 0 }
-
-console.log(`Looking for reports in ${REPORTS_PATH}`)
-
 // some env is ok in reports. this is based off of what Circle doesn't mask in stdout:
 // https://circleci.com/blog/keep-environment-variables-private-with-secret-masking/
 function isAllowlistedEnv (key, value) {
   return ['true', 'false', 'TRUE', 'FALSE'].includes(value)
-    || ['nodejs_version', 'CF_DOMAIN', 'SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES', 'CIRCLE_PROJECT_REPONAME', 'HOME', 'PLATFORM', 'PWD', 'INIT_CWD', 'npm_config_loglevel'].includes(key)
+    || ['nodejs_version', 'CF_DOMAIN', 'SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES', 'CIRCLE_PROJECT_REPONAME', 'HOME', 'PLATFORM', 'HOSTNAME', 'PWD', 'INIT_CWD', 'USER', 'LOGNAME', 'npm_config_loglevel'].includes(key)
     // ignore npm_package_ envs https://docs.npmjs.com/cli/v11/using-npm/scripts#packagejson-vars
     || key.startsWith('npm_package_')
     || value.length < 4
 }
 
-async function checkReportFile (filename, circleEnv) {
+async function checkReportFile (filename, circleEnv, expectFailures) {
   console.log(`Checking that ${filename} contains a valid report...`)
 
   let xml; let result
@@ -70,7 +66,7 @@ async function checkReportFile (filename, circleEnv) {
 
   if (foundKeys.length) {
     await fs.rm(REPORTS_PATH, { recursive: true, force: true })
-    throw new Error(`Report contained the value of ${foundKeys}, which is a CI environment variable. This means that a failing test is exposing environment variables. Test reports will not be persisted for this job.`)
+    throw new Error(`Report contained the value of ${foundKeys.join(' ,')}, which is a CI environment variable. This means that a failing test is exposing environment variables. Test reports will not be persisted for this job.`)
   }
 
   try {
@@ -84,14 +80,14 @@ async function checkReportFile (filename, circleEnv) {
   console.log(`Report parsed successfully. Name: ${name}\tTests ran: ${tests}\tFailing: ${failures}\tSkipped: ${skipped}\tTotal time: ${time}`)
 
   la(tests > 0, 'Expected the total number of tests to be >0, but it was', tests, 'instead.')
-  la(failures === 0, 'Expected the number of failures to be equal to 0, but it was', failures, '. This stage should not have been reached. Check why the failed test stage did not cause this entire build to fail.')
+  la(failures === 0 || (expectFailures && failures > 0), 'Expected the number of failures to be equal to 0, but it was', failures, 'instead. This stage should not have been reached. Check why the failed test stage did not cause this entire build to fail.')
 
   total.tests += tests
   total.failures += failures
   total.skipped += skipped
 }
 
-async function checkReportFiles (filenames) {
+async function checkReportFiles (filenames, expectFailures) {
   let circleEnv
 
   try {
@@ -103,13 +99,16 @@ async function checkReportFiles (filenames) {
     circleEnv = {}
   }
 
-  await Bluebird.mapSeries(filenames, (f) => checkReportFile(f, circleEnv))
+  await Bluebird.mapSeries(filenames, (f) => checkReportFile(f, circleEnv, expectFailures))
 
   console.log('All reports are valid.')
   console.log(`Total tests ran: ${total.tests}\tTotal failing: ${total.failures}\tTotal skipped: ${total.skipped}`)
 }
 
-async function verifyMochaResults () {
+async function verifyMochaResults ({ expectedResultCount, expectFailures }) {
+  console.log(`Verifying Mocha results, expecting ${expectedResultCount} reports and ${expectFailures ? 'failing' : 'passing'} tests.`)
+  console.log(`Looking for reports in ${REPORTS_PATH}`)
+
   try {
     try {
       await fs.access(REPORTS_PATH)
@@ -126,20 +125,29 @@ async function verifyMochaResults () {
     console.log(`Found ${resultCount} files in ${REPORTS_PATH}:`, filenames)
 
     // WARN: check the report files before anything else to ensure that no secrets are leaked
-    await checkReportFiles(filenames)
+    await checkReportFiles(filenames, expectFailures)
 
     if (!expectedResultCount) {
       console.log('Expecting at least 1 report...')
-      la(resultCount > 0, 'Expected at least 1 report, but found', resultCount, '. Verify that all tests ran as expected.')
+      la(resultCount > 0, 'Expected at least 1 report, but found', resultCount, 'instead. Verify that all tests ran as expected.')
     } else {
       console.log(`Expecting exactly ${expectedResultCount} reports...`)
-      la(expectedResultCount === resultCount, 'Expected', expectedResultCount, 'reports, but found', resultCount, '. Verify that all tests ran as expected.')
+      la(expectedResultCount === resultCount, 'Expected', expectedResultCount, 'reports, but found', resultCount, 'instead. Verify that all tests ran as expected.')
     }
   } catch (err) {
+    console.log('Error:', err.message)
     throw new Error(`Problem reading from ${REPORTS_PATH}: ${err.message}`)
   }
 }
 
-if (require.main === module) verifyMochaResults()
+if (require.main === module) {
+  const args = process.argv.slice(2)
+
+  if (args.length !== 2) {
+    throw new Error(`Usage: ${path.basename(process.argv[1])} <expectedResultCount> <expectFailures>`)
+  }
+
+  verifyMochaResults({ expectedResultCount: Number(args[0]), expectFailures: Boolean(args[1]) })
+}
 
 module.exports = { verifyMochaResults }
