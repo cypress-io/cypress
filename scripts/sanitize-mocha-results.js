@@ -59,7 +59,7 @@ async function checkReportFiles (filenames) {
 }
 
 async function sanitizeMochaResults () {
-  console.log(`Sanitizing Mocha results...`)
+  console.log('Sanitizing Mocha results...')
   console.log(`Looking for reports in ${REPORTS_PATH}`)
 
   try {

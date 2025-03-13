@@ -63,7 +63,7 @@ async function checkReportFiles (filenames) {
 }
 
 async function verifyMochaResults ({ expectedResultCount }) {
-  console.log(`Verifying Mocha results, expecting ${expectedResultCount} reports.`)
+  console.log(`Verifying Mocha results...`)
   console.log(`Looking for reports in ${REPORTS_PATH}`)
 
   try {
