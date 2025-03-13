@@ -5,7 +5,7 @@ _Released 3/31/2025 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed an issue in NodeJS 22 when building Cypress from source and running it in dev mode by updating `systeminformation`
+- Fixed an issue in NodeJS 22 when building Cypress from source and running it in dev mode by updating the `systeminformation` dependency
 
 **Dependency Updates:**
 
