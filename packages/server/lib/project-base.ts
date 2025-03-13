@@ -280,7 +280,7 @@ export class ProjectBase extends EE {
   reset () {
     debug('resetting project instance %s', this.projectRoot)
 
-    // if we're in studio mode, we need to reset the protocol manager
+    // if we're in studio mode, we need to close the protocol manager
     // to ensure the config is initialized properly on browser relaunch
     if (this.getConfig().isStudioProtocolEnabled) {
       this.protocolManager?.close()
