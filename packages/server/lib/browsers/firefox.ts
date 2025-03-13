@@ -665,6 +665,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
         alwaysMatch: {
           browserName: 'firefox',
           acceptInsecureCerts: true,
+          webSocketUrl: USE_WEBDRIVER_BIDI,
           // @see https://developer.mozilla.org/en-US/docs/Web/WebDriver/Capabilities/firefoxOptions
           'moz:firefoxOptions': {
             profile: base64EncodedProfile,

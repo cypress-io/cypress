@@ -10,6 +10,7 @@ import { humanTime, logError, parseResolvedPattern, pluralize } from './errorUti
 import { errPartial, errTemplate, fmt, theme, PartialErr } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
 import type { ClonedError, ConfigValidationFailureInfo, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
+import { normalizeNetworkErrorMessage } from './normalizeNetworkErrorMessage'
 
 const ansi_up = new AU()
 
@@ -155,14 +156,18 @@ export const AllCypressErrors = {
   CLOUD_CANCEL_SKIPPED_SPEC: () => {
     return errTemplate`${fmt.off(`\n  `)}This spec and its tests were skipped because the run has been canceled.`
   },
-  CLOUD_API_RESPONSE_FAILED_RETRYING: (arg1: {tries: number, delayMs: number, response: Error}) => {
+  CLOUD_API_RESPONSE_FAILED_RETRYING: (
+    arg1: {tries: number, delayMs: number, response: Error },
+  ) => {
     const time = pluralize('time', arg1.tries)
     const delay = humanTime.long(arg1.delayMs, false)
+
+    const message = normalizeNetworkErrorMessage(arg1.response)
 
     return errTemplate`\
         We encountered an unexpected error communicating with our servers.
 
-        ${fmt.highlightSecondary(arg1.response)}
+        ${fmt.highlightSecondary(message)}
 
         We will retry ${fmt.off(arg1.tries)} more ${fmt.off(time)} in ${fmt.off(delay)}...
         `
@@ -170,10 +175,12 @@ export const AllCypressErrors = {
     /* eslint-disable indent */
   },
   CLOUD_CANNOT_PROCEED_IN_PARALLEL: (arg1: {flags: any, response: Error}) => {
+    const message = normalizeNetworkErrorMessage(arg1.response)
+
     return errTemplate`\
         We encountered an unexpected error communicating with our servers.
 
-        ${fmt.highlightSecondary(arg1.response)}
+        ${fmt.highlightSecondary(message)}
 
         Because you passed the ${fmt.flag(`--parallel`)} flag, this run cannot proceed since it requires a valid response from our servers.
 
@@ -183,10 +190,12 @@ export const AllCypressErrors = {
     })}`
   },
   CLOUD_CANNOT_PROCEED_IN_SERIAL: (arg1: {flags: any, response: Error}) => {
+    const message = normalizeNetworkErrorMessage(arg1.response)
+
     return errTemplate`\
         We encountered an unexpected error communicating with our servers.
 
-        ${fmt.highlightSecondary(arg1.response)}
+        ${fmt.highlightSecondary(message)}
 
         Because you passed the ${fmt.flag(`--record`)} flag, this run cannot proceed since it requires a valid response from our servers.
 
@@ -196,10 +205,12 @@ export const AllCypressErrors = {
     })}`
   },
   CLOUD_UNKNOWN_INVALID_REQUEST: (arg1: {flags: any, response: Error}) => {
+    const message = normalizeNetworkErrorMessage(arg1.response)
+
     return errTemplate`\
         We encountered an unexpected error communicating with our servers.
 
-        ${fmt.highlightSecondary(arg1.response)}
+        ${fmt.highlightSecondary(message)}
 
         There is likely something wrong with the request.
 

@@ -40,7 +40,7 @@ declare module 'http' {
       proxy: Optional<string>
       servername: Optional<string>
       socket: Optional<Socket>
-      uri: Url
+      uri?: Url
     }
 
     interface OutgoingMessage {
