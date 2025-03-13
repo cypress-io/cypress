@@ -51,7 +51,7 @@
     "@vitejs/plugin-legacy": "5.4.0",
     "@vitejs/plugin-vue": "5.0.4",
     "@vitejs/plugin-vue-jsx": "3.1.0",
-    "@vueuse/core": "7.2.2",
+    "@vueuse/core": "7.7.1",
     "ansi-to-html": "0.7.2",
     "bluebird": "3.5.3",
     "classnames": "2.3.1",
