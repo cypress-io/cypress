@@ -291,17 +291,23 @@ export class EventManager {
     this.reporterBus.on('studio:init:suite', (suiteId) => {
       this.studioStore.setSuiteId(suiteId)
 
-      this.ws.emit('studio:init', ({ error }) => {
-        // eslint-disable-next-line no-console
-        console.error(error)
+      this.ws.emit('studio:init', (error) => {
+        if (error) {
+          // eslint-disable-next-line no-console
+          console.error(error)
+        }
+
         studioInit()
       })
     })
 
     this.reporterBus.on('studio:cancel', () => {
-      this.ws.emit('studio:destroy', ({ error }) => {
-        // eslint-disable-next-line no-console
-        console.error(error)
+      this.ws.emit('studio:destroy', (error) => {
+        if (error) {
+          // eslint-disable-next-line no-console
+          console.error(error)
+        }
+
         this.studioStore.cancel()
         // Reloading for now. This is the easiest way to clear out the protocol code from the front end
         window.location.reload()

@@ -407,9 +407,9 @@ export class SocketBase {
           try {
             await options.onStudioInit()
 
-            cb({})
+            cb()
           } catch (error) {
-            cb({ error: errors.cloneErr(error) })
+            cb(errors.cloneErr(error))
           }
         })
 
@@ -417,9 +417,9 @@ export class SocketBase {
           try {
             await options.onStudioDestroy()
 
-            cb({})
+            cb()
           } catch (error) {
-            cb({ error: errors.cloneErr(error) })
+            cb(errors.cloneErr(error))
           }
         })
 
