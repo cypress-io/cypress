@@ -16,7 +16,6 @@ describe('circle-env', () => {
     context('internal PR', () => {
       it('fails when neither canary is set', () => {
         try {
-          console.log('before', process.env.MAIN_CANARY)
           _checkCanaries()
           throw new Error('should not reach')
         } catch (err) {
