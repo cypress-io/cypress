@@ -76,7 +76,7 @@ declare namespace Cypress {
   }
 
   interface TestConfigOverrides extends Cypress.TestConfigOverrides {
-    isProtocolEnabled?: boolean
+    isDefaultProtocolEnabled?: boolean
     isStudioProtocolEnabled?: boolean
   }
 

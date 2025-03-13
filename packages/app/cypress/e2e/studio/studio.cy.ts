@@ -25,7 +25,7 @@ describe('Cypress Studio', () => {
     launchStudio({ specName: 'spec.cy.js', enableCloudStudio: true })
 
     cy.window().then((win) => {
-      expect(win.Cypress.config('isProtocolEnabled')).to.be.false
+      expect(win.Cypress.config('isDefaultProtocolEnabled')).to.be.false
       expect(win.Cypress.config('isStudioProtocolEnabled')).to.be.true
       expect(win.Cypress.state('isProtocolEnabled')).to.be.true
     })

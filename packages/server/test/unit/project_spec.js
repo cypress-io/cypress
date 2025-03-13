@@ -243,13 +243,13 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       const config = this.project.getConfig()
 
-      expect(config.isProtocolEnabled).to.be.true
+      expect(config.isDefaultProtocolEnabled).to.be.true
     })
 
-    it('returns false for isProtocolEnabled if the protocol manager is undefined', function () {
+    it('returns false for isDefaultProtocolEnabled if the protocol manager is undefined', function () {
       const config = this.project.getConfig()
 
-      expect(config.isProtocolEnabled).to.be.false
+      expect(config.isDefaultProtocolEnabled).to.be.false
     })
 
     context('hideCommandLog', () => {
@@ -674,16 +674,16 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         isProtocolEnabled: true,
       }
 
-      const mockReset = sinon.stub()
+      const mockClose = sinon.stub()
       const mockSetProtocolManager = sinon.stub()
 
-      sinon.stub(this.project, 'protocolManager').get(() => ({ reset: mockReset })).set(mockSetProtocolManager)
+      sinon.stub(this.project, 'protocolManager').get(() => ({ close: mockClose })).set(mockSetProtocolManager)
 
       this.project.reset()
       expect(this.project._automation.reset).to.be.calledOnce
 
       expect(this.project.server.reset).to.be.calledOnce
-      expect(mockReset).to.be.calledOnce
+      expect(mockClose).to.be.calledOnce
       expect(mockSetProtocolManager).to.be.calledWith(undefined)
     })
   })
@@ -767,7 +767,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     it('passes onStudioDestroy callback', async function () {
-      const mockReset = sinon.stub()
+      const mockClose = sinon.stub()
 
       this.project.ctx.coreData.studio = {
         protocolManager: {},
@@ -777,7 +777,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       sinon.stub(this.project, 'protocolManager').get(() => {
         return {
-          reset: mockReset,
+          close: mockClose,
         }
       }).set((protocolManager) => {
         this.project['_protocolManager'] = protocolManager
@@ -808,7 +808,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         foundBrowsers: this.project.options.browsers,
       })
 
-      expect(mockReset).to.be.calledOnce
+      expect(mockClose).to.be.calledOnce
 
       expect(this.project['_protocolManager']).to.be.undefined
     })

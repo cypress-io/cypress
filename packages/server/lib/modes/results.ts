@@ -175,7 +175,7 @@ const omitConfigKeys = [
   'specs',
   'state',
   'supportFolder',
-  'isProtocolEnabled',
+  'isDefaultProtocolEnabled',
   'isStudioProtocolEnabled',
   'hideCommandLog',
   'hideRunnerUi',

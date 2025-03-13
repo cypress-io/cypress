@@ -428,7 +428,7 @@ export class ProtocolManager implements ProtocolManagerShape {
     this._errors = []
   }
 
-  reset (): void {
+  close (): void {
     this._db?.close()
     this._db = undefined
 

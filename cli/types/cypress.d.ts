@@ -3314,7 +3314,7 @@ declare namespace Cypress {
     socketIoRoute: string
     spec: Cypress['spec'] | null
     specs: Array<Cypress['spec']>
-    isProtocolEnabled: boolean
+    isDefaultProtocolEnabled: boolean
     isStudioProtocolEnabled: boolean
     hideCommandLog: boolean
     hideRunnerUi: boolean

@@ -137,7 +137,7 @@ export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
   reportNonFatalErrors (clientMetadata: any): Promise<void>
   uploadCaptureArtifact(artifact: CaptureArtifact): Promise<UploadCaptureArtifactResult | undefined>
   connectToBrowser (cdpClient: CDPClient): Promise<void>
-  reset (): void
+  close (): void
 }
 
 type Response = {

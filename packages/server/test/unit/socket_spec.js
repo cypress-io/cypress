@@ -64,8 +64,8 @@ describe('lib/socket', () => {
       .then(() => {
         this.options = {
           onSavedStateChanged: sinon.spy(),
-          onStudioInit: sinon.spy(),
-          onStudioDestroy: sinon.spy(),
+          onStudioInit: sinon.stub(),
+          onStudioDestroy: sinon.stub(),
         }
 
         this.automation = new Automation({
@@ -526,7 +526,9 @@ describe('lib/socket', () => {
     })
 
     context('on(studio:init)', () => {
-      it('calls onStudioInit with the state', async function () {
+      it('calls onStudioInit', async function () {
+        this.options.onStudioInit.resolves()
+
         await new Promise((resolve) => {
           this.client.emit('studio:init', () => {
             expect(this.options.onStudioInit).to.be.called
@@ -535,13 +537,41 @@ describe('lib/socket', () => {
           })
         })
       })
+
+      it('handles errors thrown by onStudioInit', async function () {
+        this.options.onStudioInit.rejects(new Error('foo'))
+
+        await new Promise((resolve) => {
+          this.client.emit('studio:init', ({ error }) => {
+            expect(this.options.onStudioInit).to.be.called
+            expect(error.message).to.eq('foo')
+
+            resolve()
+          })
+        })
+      })
     })
 
     context('on(studio:destroy)', () => {
-      it('calls onStudioDestroy with the state', async function () {
+      it('calls onStudioDestroy', async function () {
+        this.options.onStudioDestroy.resolves()
+
         await new Promise((resolve) => {
           this.client.emit('studio:destroy', () => {
             expect(this.options.onStudioDestroy).to.be.called
+
+            resolve()
+          })
+        })
+      })
+
+      it('handles errors thrown by onStudioDestroy', async function () {
+        this.options.onStudioDestroy.rejects(new Error('foo'))
+
+        await new Promise((resolve) => {
+          this.client.emit('studio:destroy', ({ error }) => {
+            expect(this.options.onStudioDestroy).to.be.called
+            expect(error.message).to.eq('foo')
 
             resolve()
           })

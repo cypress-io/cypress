@@ -281,7 +281,9 @@ export class EventManager {
     this.reporterBus.on('studio:init:test', (testId) => {
       this.studioStore.setTestId(testId)
 
-      this.ws.emit('studio:init', () => {
+      this.ws.emit('studio:init', ({ error }) => {
+        // eslint-disable-next-line no-console
+        console.error(error)
         studioInit()
       })
     })
@@ -289,13 +291,17 @@ export class EventManager {
     this.reporterBus.on('studio:init:suite', (suiteId) => {
       this.studioStore.setSuiteId(suiteId)
 
-      this.ws.emit('studio:init', () => {
+      this.ws.emit('studio:init', ({ error }) => {
+        // eslint-disable-next-line no-console
+        console.error(error)
         studioInit()
       })
     })
 
     this.reporterBus.on('studio:cancel', () => {
-      this.ws.emit('studio:destroy', () => {
+      this.ws.emit('studio:destroy', ({ error }) => {
+        // eslint-disable-next-line no-console
+        console.error(error)
         this.studioStore.cancel()
         // Reloading for now. This is the easiest way to clear out the protocol code from the front end
         window.location.reload()
@@ -307,7 +313,9 @@ export class EventManager {
     })
 
     this.reporterBus.on('studio:save', () => {
-      this.ws.emit('studio:destroy', () => {
+      this.ws.emit('studio:destroy', ({ error }) => {
+        // eslint-disable-next-line no-console
+        console.error(error)
         this.studioStore.startSave()
       })
     })
@@ -333,7 +341,9 @@ export class EventManager {
     })
 
     this.localBus.on('studio:cancel', () => {
-      this.ws.emit('studio:destroy', () => {
+      this.ws.emit('studio:destroy', ({ error }) => {
+        // eslint-disable-next-line no-console
+        console.error(error)
         this.studioStore.cancel()
         // Reloading for now. This is the easiest way to clear out the protocol code from the front end
         window.location.reload()
@@ -412,7 +422,7 @@ export class EventManager {
 
     this.studioStore.setup(config)
 
-    const isDefaultProtocolEnabled = Cypress.config('isProtocolEnabled')
+    const isDefaultProtocolEnabled = Cypress.config('isDefaultProtocolEnabled')
     const isStudioProtocolEnabled = Cypress.config('isStudioProtocolEnabled')
     const isStudioInScope = this.studioStore.isActive || this.studioStore.isLoading
 
