@@ -1,11 +1,17 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 14.1.1
+## 14.2.0
 
-_Released 3/11/2025 (PENDING)_
+_Released 3/12/2025_
+
+**Features:**
+
+- [`Cypress.stop()`](https://on.cypress.io/cypress-stop) is now available to stop the Cypress App on the current machine while tests are running. This can be useful for stopping test execution upon failures or other predefined conditions. Addresses [#518](https://github.com/cypress-io/cypress/issues/518). Addressed in [#31225](https://github.com/cypress-io/cypress/pull/31225).
 
 **Misc:**
 
+- The browser dropdown now has a more minimal design - showing only the icon of the browser selected to the left of the URL. The currently selected browser also now shows at the top of the browser dropdown. Browsers with longer names will now have their names correctly left aligned in the browser dropdown. Addresses [#21755](https://github.com/cypress-io/cypress/issues/21755) and [#30998](https://github.com/cypress-io/cypress/issues/30998). Addressed in [#31216](https://github.com/cypress-io/cypress/pull/31216).
 - Additional CLI options will be displayed in the terminal for some Cloud error messages. Addressed in [#31211](https://github.com/cypress-io/cypress/pull/31211).
+- Updated Cypress Studio with url routing to support maintaining state when reloading. Addresses [#31000](https://github.com/cypress-io/cypress/issues/31000) and [#30996](https://github.com/cypress-io/cypress/issues/30996).
 
 **Dependency Updates:**
 

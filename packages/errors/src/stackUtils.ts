@@ -7,7 +7,7 @@ type MessageLines = [string[], string[]] & {messageEnded?: boolean}
 
 // returns tuple of [message, stack]
 export const splitStack = (stack: string) => {
-  const lines = stack.split('\n')
+  const lines = stack?.split('\n')
 
   return _.reduce(lines, (memo, line) => {
     if (memo.messageEnded || stackLineRegex.test(line)) {

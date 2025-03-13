@@ -13,7 +13,17 @@
           'bg-gray-50': autStore.isLoadingUrl
         }"
       >
-        <div class="mx-[12px] flex grow text-gray-600 items-center truncate">
+        <SpecRunnerDropdown data-cy="select-browser">
+          <template #heading>
+            <component
+              :is="allBrowsersIcons[selectedBrowser.displayName?.toLowerCase()] || allBrowsersIcons.generic"
+              v-if="selectedBrowser.displayName"
+              class="min-w-[16px] w-[16px]"
+              :alt="selectedBrowser.majorVersion ? `${selectedBrowser.displayName} ${selectedBrowser.majorVersion}` : selectedBrowser.displayName"
+            />
+          </template>
+        </SpecRunnerDropdown>
+        <div class="mr-[12px] flex grow text-gray-600 items-center truncate">
           {{ testingType === 'e2e' ? autStore.url : 'URL navigation disabled in component testing' }}
         </div>
         <Tag
@@ -38,20 +48,6 @@
           </span>
         </Tag>
       </div>
-      <SpecRunnerDropdown
-        data-cy="select-browser"
-        :disabled="autStore.isRunning"
-      >
-        <template #heading>
-          <component
-            :is="allBrowsersIcons[selectedBrowser.displayName?.toLowerCase()] || allBrowsersIcons.generic"
-            v-if="selectedBrowser.displayName"
-            class="min-w-[16px] w-[16px]"
-            alt=""
-          /> {{ selectedBrowser.displayName }}
-          {{ selectedBrowser.majorVersion }}
-        </template>
-      </SpecRunnerDropdown>
     </div>
   </div>
 </template>
