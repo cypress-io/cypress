@@ -15,34 +15,19 @@ describe('circle-env', () => {
   context('with missing canaries', () => {
     context('internal PR', () => {
       it('fails when neither canary is set', () => {
-        try {
-          _checkCanaries()
-          throw new Error('should not reach')
-        } catch (err) {
-          expect(err.message).to.include('Missing MAIN_CANARY')
-        }
+        expect(_checkCanaries).to.throw('Missing MAIN_CANARY')
       })
 
       it('fails when only MAIN_CANARY is set', () => {
         process.env.MAIN_CANARY = true
 
-        try {
-          _checkCanaries()
-          throw new Error('should not reach')
-        } catch (err) {
-          expect(err.message).to.include('Missing CONTEXT_CANARY')
-        }
+        expect(_checkCanaries).to.throw('Missing CONTEXT_CANARY')
       })
 
       it('fails when only CONTEXT_CANARY is set', () => {
         process.env.CONTEXT_CANARY = true
 
-        try {
-          _checkCanaries()
-          throw new Error('should not reach')
-        } catch (err) {
-          expect(err.message).to.include('Missing MAIN_CANARY')
-        }
+        expect(_checkCanaries).to.throw('Missing MAIN_CANARY')
       })
     })
 
@@ -51,24 +36,14 @@ describe('circle-env', () => {
         process.env.IS_CONTRIBUTOR_PR = true
         process.env.MAIN_CANARY = true
 
-        try {
-          _checkCanaries()
-          throw new Error('should not reach')
-        } catch (err) {
-          expect(err.message).to.include('MAIN_CANARY should not be present in a contributor PR.')
-        }
+        expect(_checkCanaries).to.throw('MAIN_CANARY should not be present in a contributor PR.')
       })
 
       it('fails when CONTEXT_CANARY is set', () => {
         process.env.IS_CONTRIBUTOR_PR = true
         process.env.CONTEXT_CANARY = true
 
-        try {
-          _checkCanaries()
-          throw new Error('should not reach')
-        } catch (err) {
-          expect(err.message).to.include('CONTEXT_CANARY should not be present in a contributor PR.')
-        }
+        expect(_checkCanaries).to.throw('CONTEXT_CANARY should not be present in a contributor PR.')
       })
     })
   })

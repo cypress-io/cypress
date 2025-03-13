@@ -46,13 +46,8 @@ if (process.platform !== 'win32') {
       .withArgs('/tmp/cypress/junit/report.xml')
       .resolves('<testsuites name="foo" time="1" tests="10" failures="0">someval')
 
-      try {
-        await sanitizeMochaResults()
-        throw new Error('should not reach')
-      } catch (err) {
-        expect(err.message).to.include('somekey').and.not.include('someval')
-        expect(spy.getCalls().length).to.equal(1)
-      }
+      await expect(sanitizeMochaResults()).to.be.rejectedWith('Report contained the value of somekey, which is a CI environment variable. This means that a failing test is exposing environment variables. Test reports will not be persisted for this job.')
+      expect(spy.getCalls().length).to.equal(1)
     })
 
     it('checks for allowlisted env and passes when found', async () => {

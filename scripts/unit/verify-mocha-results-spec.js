@@ -39,12 +39,7 @@ if (process.platform !== 'win32') {
       .withArgs('/tmp/cypress/junit/report.xml')
       .resolves('<testsuites name="foo" time="1" tests="10" failures="3">')
 
-      try {
-        await verifyMochaResults({ expectedResultCount: 0 })
-        throw new Error('should not reach')
-      } catch (err) {
-        expect(err.message).to.include('Expected the number of failures to be equal to 0')
-      }
+      await expect(verifyMochaResults({ expectedResultCount: 0 })).to.be.rejectedWith('Expected the number of failures to be equal to 0')
     })
 
     it('checks for 0 tests run and fails when found', async () => {
@@ -52,12 +47,7 @@ if (process.platform !== 'win32') {
       .withArgs('/tmp/cypress/junit/report.xml')
       .resolves('<testsuites name="foo" time="1" tests="0" failures="0">')
 
-      try {
-        await verifyMochaResults({ expectedResultCount: 0 })
-        throw new Error('should not reach')
-      } catch (err) {
-        expect(err.message).to.include('Expected the total number of tests to be >0')
-      }
+      await expect(verifyMochaResults({ expectedResultCount: 0 })).to.be.rejectedWith('Expected the total number of tests to be >0')
     })
 
     it('checks if the expectedResultCount matches and fails when different', async () => {
@@ -65,12 +55,7 @@ if (process.platform !== 'win32') {
       .withArgs('/tmp/cypress/junit/report.xml')
       .resolves('<testsuites name="foo" time="1" tests="10" failures="0">')
 
-      try {
-        await verifyMochaResults({ expectedResultCount: 2 })
-        throw new Error('should not reach')
-      } catch (err) {
-        expect(err.message).to.include('Expected 2 reports, but found 1 instead. Verify that all tests ran as expected.')
-      }
+      await expect(verifyMochaResults({ expectedResultCount: 2 })).to.be.rejectedWith('Expected 2 reports, but found 1 instead. Verify that all tests ran as expected.')
     })
   })
 }
