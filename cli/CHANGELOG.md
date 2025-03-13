@@ -5,11 +5,8 @@ _Released 3/31/2025 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed an issue in NodeJS 22 when building Cypress from source and running it in dev mode by updating the `systeminformation` dependency
-
-**Dependency Updates:**
-
-- Upgraded `systeminformation` from `5.21.7` to `5.22.8`. Addressed in [#31281](https://github.com/cypress-io/cypress/pull/31281).
+- Fixed an issue in NodeJS 22 when building Cypress from source and running it in dev mode by upgrading the `systeminformation` dependency
+from `5.21.7` to `5.22.8`. Addressed in [#31281](https://github.com/cypress-io/cypress/pull/31281).
 
 ## 14.2.0
 
