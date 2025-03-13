@@ -542,7 +542,7 @@ describe('lib/socket', () => {
         this.options.onStudioInit.rejects(new Error('foo'))
 
         await new Promise((resolve) => {
-          this.client.emit('studio:init', ({ error }) => {
+          this.client.emit('studio:init', (error) => {
             expect(this.options.onStudioInit).to.be.called
             expect(error.message).to.eq('foo')
 
@@ -569,7 +569,7 @@ describe('lib/socket', () => {
         this.options.onStudioDestroy.rejects(new Error('foo'))
 
         await new Promise((resolve) => {
-          this.client.emit('studio:destroy', ({ error }) => {
+          this.client.emit('studio:destroy', (error) => {
             expect(this.options.onStudioDestroy).to.be.called
             expect(error.message).to.eq('foo')
 
