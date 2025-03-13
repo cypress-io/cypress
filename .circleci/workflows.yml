@@ -925,17 +925,16 @@ commands:
         default: /tmp/cypress
     steps:
       - run:
-          name: 'Verify Mocha Results'
-          when: on_fail
+          name: 'Sanitize Mocha Results'
+          when: always
           command: |
             source ./scripts/ensure-node.sh
-            yarn verify:mocha:results <<parameters.expectedResultCount>> true
+            yarn sanitize:mocha:results
       - run:
           name: 'Verify Mocha Results'
-          when: on_success
           command: |
             source ./scripts/ensure-node.sh
-            yarn verify:mocha:results <<parameters.expectedResultCount>> false
+            yarn verify:mocha:results <<parameters.expectedResultCount>>
       - store_test_results:
           path: <<parameters.testResultsPath>>
 

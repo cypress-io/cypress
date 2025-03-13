@@ -49,6 +49,7 @@
     "prepare": "husky install",
     "prepare-release-artifacts": "node ./scripts/prepare-release-artifacts.js",
     "pretest-e2e": "yarn ensure-deps",
+    "sanitize:mocha:results": "node ./scripts/sanitize-mocha-results",
     "prestart": "yarn ensure-deps",
     "start": "cypress open --dev --global",
     "stop-only": "npx stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,src,__snapshots__ --exclude cypress-tests.ts,*only.cy.js",
