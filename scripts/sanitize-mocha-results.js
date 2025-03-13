@@ -9,14 +9,17 @@ const { readCircleEnv } = require('./circle-env')
 
 const REPORTS_PATH = '/tmp/cypress/junit'
 
-// some env is ok in reports. this is based off of what Circle doesn't mask in stdout:
-// https://circleci.com/blog/keep-environment-variables-private-with-secret-masking/
 function isAllowlistedEnv (key, value) {
-  return ['true', 'false', 'TRUE', 'FALSE'].includes(value)
+  return (
+    // allow some env values that are not sensitive. this is based off of what Circle doesn't mask in stdout:
+    // https://circleci.com/blog/keep-environment-variables-private-with-secret-masking/
+    ['true', 'false', 'TRUE', 'FALSE'].includes(value)
+    || value.length < 4
+    // allow some envs that are not sensitive
     || ['nodejs_version', 'CF_DOMAIN', 'SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES', 'CIRCLE_PROJECT_REPONAME', 'HOME', 'PLATFORM', 'HOSTNAME', 'PWD', 'INIT_CWD', 'USER', 'LOGNAME', 'npm_config_loglevel'].includes(key)
     // ignore npm_package_ envs https://docs.npmjs.com/cli/v11/using-npm/scripts#packagejson-vars
     || key.startsWith('npm_package_')
-    || value.length < 4
+  )
 }
 
 async function checkReportFile (filename, circleEnv) {
