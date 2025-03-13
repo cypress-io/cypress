@@ -12,7 +12,10 @@ const REPORTS_PATH = '/tmp/cypress/junit'
 function isAllowlistedEnv (key, value) {
   return (
     // allow some env values that are not sensitive. this is based off of what Circle doesn't mask in stdout:
-    // https://circleci.com/blog/keep-environment-variables-private-with-secret-masking/
+    // https://circleci.com/docs/env-vars/#secrets-masking
+    // > The value of the environment variable or context will not be masked in the job output if:
+    // >   * the value of the environment variable is less than 4 characters
+    // >   * the value of the environment variable is equal to one of true, True, false, or False
     ['true', 'false', 'TRUE', 'FALSE'].includes(value)
     || value.length < 4
     // allow some envs that are not sensitive
