@@ -728,7 +728,7 @@ commands:
               yarn $YARN_CMD --browser <<parameters.browser>> --spec $TESTFILES --runner-ui
             fi
           working_directory: packages/driver
-      - verify-and-store-mocha-results
+      - sanitize-verify-and-store-mocha-results
 
   windows-install-chrome:
     parameters:
@@ -840,7 +840,7 @@ commands:
             else
               echo "skipping percy screenshots uploading"
             fi
-      - verify-and-store-mocha-results
+      - sanitize-verify-and-store-mocha-results
 
   run-system-tests:
     parameters:
@@ -876,7 +876,7 @@ commands:
             SPECS=`echo $SPECS | xargs -n 1 | circleci tests split --split-by=timings`
             echo SPECS=$SPECS
             yarn workspace @tooling/system-tests test:ci $SPECS --browser <<parameters.browser>>
-      - verify-and-store-mocha-results
+      - sanitize-verify-and-store-mocha-results
 
   run-binary-system-tests:
     steps:
@@ -891,7 +891,7 @@ commands:
             SPECS=`echo $ALL_SPECS | xargs -n 1 | circleci tests split --split-by=timings`
             echo SPECS=$SPECS
             yarn workspace @tooling/system-tests test:ci $SPECS
-      - verify-and-store-mocha-results
+      - sanitize-verify-and-store-mocha-results
 
   post-install-comment:
     parameters:
@@ -910,7 +910,7 @@ commands:
               --npm << parameters.package_url_path >> \
               --binary << parameters.binary_url_path >>
 
-  verify-and-store-mocha-results:
+  sanitize-verify-and-store-mocha-results:
     description: Double-check that Mocha tests ran as expected.
     parameters:
       expectedResultCount:
@@ -1696,7 +1696,7 @@ jobs:
                 command: |
                   source ./scripts/ensure-node.sh
                   yarn test-integration --scope=@tooling/{packherd,v8-snapshot,electron-mksnapshot}
-            - verify-and-store-mocha-results:
+            - sanitize-verify-and-store-mocha-results:
                 expectedResultCount: 3
       - when:
           condition:
@@ -1708,7 +1708,7 @@ jobs:
                 command: |
                   source ./scripts/ensure-node.sh
                   yarn test-integration --scope=@tooling/packherd
-            - verify-and-store-mocha-results:
+            - sanitize-verify-and-store-mocha-results:
                 expectedResultCount: 1
 
   driver-integration-memory-tests:
@@ -1749,7 +1749,7 @@ jobs:
             DEBUG=cypress*memory \
             yarn cypress:run --browser electron --spec "cypress/e2e/memory/*.cy.*"
           working_directory: packages/driver
-      - verify-and-store-mocha-results
+      - sanitize-verify-and-store-mocha-results
 
   unit-tests:
     <<: *defaults
@@ -1772,7 +1772,7 @@ jobs:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
             - run: yarn test-scripts scripts/**/*spec.js
-            - verify-and-store-mocha-results
+            - sanitize-verify-and-store-mocha-results
       - unless:
           condition:
             equal: [ *windows-executor, << parameters.executor >> ]
@@ -1782,7 +1782,7 @@ jobs:
             - run: yarn test
             # run type checking for each individual package
             - run: yarn lerna run types
-            - verify-and-store-mocha-results:
+            - sanitize-verify-and-store-mocha-results:
                 expectedResultCount: 20
 
   verify-release-readiness:
@@ -1820,7 +1820,7 @@ jobs:
     steps:
       - restore_cached_workspace
       - run: yarn test-unit --scope=@packages/server
-      - verify-and-store-mocha-results:
+      - sanitize-verify-and-store-mocha-results:
           expectedResultCount: 1
 
   server-unit-tests-cloud-environment:
@@ -1851,7 +1851,7 @@ jobs:
                 name: reinstall dependencies to work around cache issue (Windows only)
                 command: rm -rf node_modules && yarn
       - run: yarn workspace @packages/server test-unit cloud/environment_spec.ts
-      - verify-and-store-mocha-results:
+      - sanitize-verify-and-store-mocha-results:
           expectedResultCount: 1
 
   server-integration-tests:
@@ -1862,7 +1862,7 @@ jobs:
       - install-browsers:
           install-chrome: true
       - run: yarn test-integration --scope=@packages/server
-      - verify-and-store-mocha-results:
+      - sanitize-verify-and-store-mocha-results:
           expectedResultCount: 1
 
   server-performance-tests:
@@ -1874,7 +1874,7 @@ jobs:
           install-firefox: true
       - run:
           command: yarn workspace @packages/server test-performance
-      - verify-and-store-mocha-results:
+      - sanitize-verify-and-store-mocha-results:
           expectedResultCount: 1
 
   system-tests-node-modules-install:
@@ -1999,7 +1999,7 @@ jobs:
             CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
           command: yarn workspace @tooling/system-tests test:ci "test/non_root*spec*"
             --browser electron
-      - verify-and-store-mocha-results
+      - sanitize-verify-and-store-mocha-results
 
   run-frontend-shared-component-tests-chrome:
     <<: *defaults
@@ -2203,7 +2203,7 @@ jobs:
             yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group reporter --runner-ui
           working_directory: packages/reporter
-      - verify-and-store-mocha-results
+      - sanitize-verify-and-store-mocha-results
 
   run-webpack-dev-server-integration-tests:
     <<: *defaults
@@ -2224,7 +2224,7 @@ jobs:
             yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group webpack-dev-server
           working_directory: npm/webpack-dev-server
-      - verify-and-store-mocha-results
+      - sanitize-verify-and-store-mocha-results
 
   run-vite-dev-server-integration-tests:
     <<: *defaults
@@ -2244,7 +2244,7 @@ jobs:
             yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group vite-dev-server
           working_directory: npm/vite-dev-server
-      - verify-and-store-mocha-results
+      - sanitize-verify-and-store-mocha-results
 
   npm-webpack-preprocessor:
     <<: *defaults
@@ -2277,7 +2277,7 @@ jobs:
           name: Run tests
           command: yarn test
           working_directory: npm/vite-dev-server
-      - verify-and-store-mocha-results:
+      - sanitize-verify-and-store-mocha-results:
           testResultsPath: npm/vite-dev-server/test_results
 
   npm-webpack-batteries-included-preprocessor:
@@ -2300,7 +2300,7 @@ jobs:
           name: Run tests
           command: yarn test
           working_directory: npm/vue
-      - verify-and-store-mocha-results:
+      - sanitize-verify-and-store-mocha-results:
           testResultsPath: npm/vue/test_results
 
   npm-angular:
@@ -2322,7 +2322,7 @@ jobs:
           name: Run tests
           command: yarn test
           working_directory: npm/puppeteer
-      - verify-and-store-mocha-results:
+      - sanitize-verify-and-store-mocha-results:
           testResultsPath: npm/puppeteer/test_results
 
   npm-puppeteer-cypress-tests:
@@ -2336,7 +2336,7 @@ jobs:
       - run:
           command: yarn cypress:run
           working_directory: npm/puppeteer
-      - verify-and-store-mocha-results
+      - sanitize-verify-and-store-mocha-results
 
   npm-react:
     <<: *defaults
@@ -2349,7 +2349,7 @@ jobs:
           name: Run tests
           command: yarn test
           working_directory: npm/react
-      - verify-and-store-mocha-results:
+      - sanitize-verify-and-store-mocha-results:
           testResultsPath: npm/react/test_results
 
   npm-vite-plugin-cypress-esm:
@@ -2363,7 +2363,7 @@ jobs:
           name: Run tests
           command: yarn test
           working_directory: npm/vite-plugin-cypress-esm
-      - verify-and-store-mocha-results:
+      - sanitize-verify-and-store-mocha-results:
           testResultsPath: npm/vite-plugin-cypress-esm/test_results
 
   npm-mount-utils:
@@ -2382,7 +2382,7 @@ jobs:
       - run:
           name: Run tests
           command: yarn workspace @cypress/grep cy:run
-      - verify-and-store-mocha-results:
+      - sanitize-verify-and-store-mocha-results:
           testResultsPath: npm/grep/test_results
 
   npm-eslint-plugin-dev:
