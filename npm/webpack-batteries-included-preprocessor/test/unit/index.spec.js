@@ -67,7 +67,7 @@ describe('webpack-batteries-included-preprocessor', () => {
       mock.stop('@cypress/webpack-preprocessor')
     })
 
-    it('always returns compilerOptions and sets sourceMap=true even if there is an error discovering the user\'s tsconfig.json', () => {
+    it('always returns loader options even if there is an error discovering the user\'s tsconfig.json', () => {
       getTsConfigMock.returns(null)
 
       const preprocessorCB = preprocessor({
@@ -89,46 +89,8 @@ describe('webpack-batteries-included-preprocessor', () => {
       expect(tsLoader.options.silent).to.be.true
       expect(tsLoader.options.transpileOnly).to.be.true
 
-      const compilerOptions = tsLoader.options.compilerOptions
-
-      expect(compilerOptions.downlevelIteration).to.be.true
-      expect(compilerOptions.inlineSources).to.be.false
-      expect(compilerOptions.inlineSources).to.be.false
-      expect(compilerOptions.sourceMap).to.be.true
-    })
-
-    // NOTE: this test doesn't really verify much except a side effect until https://github.com/cypress-io/cypress/issues/31282 is complete
-    it('turns inlineSourceMaps off by default and sourceMaps on regardless of user config', () => {
-      getTsConfigMock.returns({
-        path: '/path/to/fully/resolved/tsconfig.json',
-        config: {
-          compilerOptions: {
-            sourceMap: false,
-            inlineSourceMap: true,
-          },
-        },
-      })
-
-      const preprocessorCB = preprocessor({
-        typescript: true,
-        webpackOptions,
-      })
-
-      preprocessorCB({
-        filePath: 'foo.ts',
-        outputPath: '.js',
-      })
-
-      const tsLoader = webpackOptions.module.rules[0].use[0]
-
-      expect(tsLoader.loader).to.contain('ts-loader')
-
-      const compilerOptions = tsLoader.options.compilerOptions
-
-      expect(compilerOptions.downlevelIteration).to.be.true
-      expect(compilerOptions.inlineSourceMap).to.be.false
-      expect(compilerOptions.inlineSources).to.be.false
-      expect(compilerOptions.sourceMap).to.be.true
+      // compilerOptions are set by `@cypress/webpack-preprocessor` if ts-loader is present
+      expect(tsLoader.options.compilerOptions).to.be.undefined
     })
   })
 })

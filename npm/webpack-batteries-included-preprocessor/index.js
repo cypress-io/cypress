@@ -42,21 +42,6 @@ const addTypeScriptConfig = (file, options) => {
 
   configFile ? debug(`found user tsconfig.json at ${configFile?.path} with compilerOptions: ${JSON.stringify(configFile?.config?.compilerOptions)}`) : debug('no user tsconfig.json found')
 
-  // FIXME: To prevent disruption, we are only passing in these 4 options to the ts-loader.
-  // We will be passing in the entire compilerOptions object from the tsconfig.json in Cypress 15.
-  // @see https://github.com/cypress-io/cypress/issues/29614#issuecomment-2722071332
-  // @see https://github.com/cypress-io/cypress/issues/31282
-  // Cypress ALWAYS wants sourceMap set to true, regardless of the user configuration.
-  // This is because we want to display a correct code frame in the test runner.
-  const compilerOptions = {
-    sourceMap: true,
-    inlineSourceMap: false,
-    inlineSources: false,
-    downlevelIteration: true,
-  }
-
-  debug(`overriding tsconfig to use sourceMap:true, inlineSourceMap:false, inlineSources:false, downlevelIteration:true`)
-
   webpackOptions.module.rules.push({
     test: /\.tsx?$/,
     exclude: [/node_modules/],
@@ -65,7 +50,6 @@ const addTypeScriptConfig = (file, options) => {
         loader: require.resolve('ts-loader'),
         options: {
           compiler: options.typescript,
-          compilerOptions,
           logLevel: 'error',
           silent: true,
           transpileOnly: true,
