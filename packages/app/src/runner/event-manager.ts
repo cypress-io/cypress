@@ -322,14 +322,7 @@ export class EventManager {
     })
 
     this.reporterBus.on('studio:save', () => {
-      this.ws.emit('studio:destroy', (error) => {
-        if (error) {
-          // eslint-disable-next-line no-console
-          console.error(error)
-        }
-
-        this.studioStore.startSave()
-      })
+      this.studioStore.startSave()
     })
 
     this.reporterBus.on('studio:copy:to:clipboard', (cb) => {
@@ -345,9 +338,16 @@ export class EventManager {
         if (err) {
           this.reporterBus.emit('test:set:state', this.studioStore.saveError(err), noop)
         } else {
-          this.studioStore.saveSuccess()
-          // Reloading for now. This is the easiest way to clear out the protocol code from the front end
-          window.location.reload()
+          this.ws.emit('studio:destroy', (error) => {
+            if (error) {
+              // eslint-disable-next-line no-console
+              console.error(error)
+            }
+
+            this.studioStore.saveSuccess()
+            // Reloading for now. This is the easiest way to clear out the protocol code from the front end
+            window.location.reload()
+          })
         }
       })
     })
