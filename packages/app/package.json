@@ -29,7 +29,7 @@
     "@cypress-design/vue-tabs": "^1.2.2",
     "@cypress-design/vue-tag": "^1.0.1",
     "@cypress/mount-utils": "0.0.0-development",
-    "@faker-js/faker": "8.4.1",
+    "@faker-js/faker": "9.6.0",
     "@graphql-typed-document-node/core": "^3.1.0",
     "@headlessui/vue": "1.4.0",
     "@iconify-json/mdi": "1.1.63",
