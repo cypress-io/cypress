@@ -1,11 +1,10 @@
 // this is a safety script to ensure that Mocha test reports don't contain any environment variables
-// this script is executed from the verify-mocha-results.js script
 // usage: yarn sanitize:mocha:results
 
 const Bluebird = require('bluebird')
 const fs = require('fs').promises
 const path = require('path')
-const { readCircleEnv } = require('./circle-env')
+const { readProcessEnv } = require('./circle-env')
 
 const REPORTS_PATH = '/tmp/cypress/junit'
 
@@ -16,7 +15,7 @@ function isAllowlistedEnv (key, value) {
     // > The value of the environment variable or context will not be masked in the job output if:
     // >   * the value of the environment variable is less than 4 characters
     // >   * the value of the environment variable is equal to one of true, True, false, or False
-    ['true', 'false', 'TRUE', 'FALSE'].includes(value)
+    ['true', 'false', 'TRUE', 'FALSE', 'True', 'False'].includes(value)
     || value.length < 4
     // allow some envs that are not sensitive
     || ['nodejs_version', 'CF_DOMAIN', 'SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES', 'CIRCLE_PROJECT_REPONAME', 'HOME', 'PLATFORM', 'HOSTNAME', 'PWD', 'INIT_CWD', 'USER', 'LOGNAME', 'npm_config_loglevel'].includes(key)
@@ -28,10 +27,10 @@ function isAllowlistedEnv (key, value) {
 async function checkReportFile (filename, circleEnv) {
   console.log(`Checking that ${filename} doesn't contains any environment variables...`)
 
-  let xml
+  let report
 
   try {
-    xml = await fs.readFile(path.join(REPORTS_PATH, filename))
+    report = await fs.readFile(path.join(REPORTS_PATH, filename))
   } catch (err) {
     throw new Error(`Unable to read the report in ${filename}: ${err.message}`)
   }
@@ -43,7 +42,7 @@ async function checkReportFile (filename, circleEnv) {
   for (const key in circleEnv) {
     const value = circleEnv[key]
 
-    if (!isAllowlistedEnv(key, value) && xml.includes(value)) {
+    if (!isAllowlistedEnv(key, value) && report.includes(value)) {
       foundKeys.push(key)
     }
   }
@@ -57,7 +56,7 @@ async function checkReportFile (filename, circleEnv) {
 }
 
 async function checkReportFiles (filenames) {
-  const circleEnv = readCircleEnv()
+  const circleEnv = readProcessEnv()
 
   await Bluebird.mapSeries(filenames, (f) => checkReportFile(f, circleEnv))
 
@@ -81,7 +80,6 @@ async function sanitizeMochaResults () {
   try {
     filenames = await fs.readdir(REPORTS_PATH)
   } catch (err) {
-    console.log('Error:', err.message)
     throw new Error(`Problem reading from ${REPORTS_PATH}: ${err.message}`)
   }
 

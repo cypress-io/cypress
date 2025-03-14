@@ -79,7 +79,6 @@ async function verifyMochaResults ({ expectedResultCount }) {
   try {
     filenames = await fs.readdir(REPORTS_PATH)
   } catch (err) {
-    console.log('Error:', err.message)
     throw new Error(`Problem reading from ${REPORTS_PATH}: ${err.message}`)
   }
 
