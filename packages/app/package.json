@@ -32,7 +32,7 @@
     "@faker-js/faker": "9.6.0",
     "@graphql-typed-document-node/core": "^3.1.0",
     "@headlessui/vue": "1.4.0",
-    "@iconify-json/mdi": "1.1.63",
+    "@iconify-json/mdi": "^1.2.3",
     "@intlify/unplugin-vue-i18n": "4.0.0",
     "@module-federation/runtime": "^0.8.11",
     "@packages/data-context": "0.0.0-development",
