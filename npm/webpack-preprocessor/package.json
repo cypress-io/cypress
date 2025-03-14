@@ -22,8 +22,7 @@
     "bluebird": "3.7.1",
     "debug": "^4.3.4",
     "lodash": "^4.17.20",
-    "semver": "^7.3.2",
-    "webpack": "^5.39.0"
+    "semver": "^7.3.2"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
@@ -42,7 +41,8 @@
     "sinon": "^9.0.0",
     "sinon-chai": "^3.5.0",
     "snap-shot-it": "7.9.2",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "webpack": "^5.39.0"
   },
   "peerDependencies": {
     "@babel/core": "^7.25.2",
