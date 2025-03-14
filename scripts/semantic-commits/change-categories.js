@@ -78,8 +78,8 @@ const changeCatagories = {
     description: 'Adding missing or correcting existing tests',
     release: false,
   },
-  wip: {
-    description: 'Work in progress that is not visible to the user',
+  internal: {
+    description: 'Features or fixes available to internal Cypress users only',
     release: false,
   },
 }
