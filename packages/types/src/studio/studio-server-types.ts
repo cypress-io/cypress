@@ -1,3 +1,5 @@
+/// <reference types="cypress" />
+
 import type { Router } from 'express'
 import type { AxiosInstance } from 'axios'
 
@@ -27,15 +29,9 @@ export interface StudioServerOptions {
   cloudApi: StudioCloudApi
 }
 
-export interface StudioBrowser {
-  name: 'electron' | 'chrome' | 'chromium' | 'firefox' | 'edge' | string
-  channel: 'stable' | 'canary' | 'beta' | 'dev' | 'nightly' | string
-  family: 'chromium' | 'firefox' | 'webkit'
-}
-
 export interface StudioServerShape {
   initializeRoutes(router: Router): void
-  canAccessStudioAI(browser: StudioBrowser): Promise<boolean>
+  canAccessStudioAI(browser: Cypress.Browser): Promise<boolean>
 }
 
 export interface StudioServerDefaultShape {

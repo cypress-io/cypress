@@ -4,6 +4,7 @@ import { HttpError } from '../../../../lib/cloud/network/http_error'
 import { CloudRequest } from '../../../../lib/cloud/api/cloud_request'
 import { isRetryableError } from '../../../../lib/cloud/network/is_retryable_error'
 import { asyncRetry } from '../../../../lib/util/async_retry'
+import { CloudDataSource } from '@packages/data-context/src/sources'
 
 describe('getAndInitializeStudioManager', () => {
   let getAndInitializeStudioManager: typeof import('@packages/server/lib/cloud/api/get_and_initialize_studio_manager').getAndInitializeStudioManager
@@ -79,13 +80,22 @@ describe('getAndInitializeStudioManager', () => {
     })
 
     it('gets the studio bundle from the path specified in the environment variable', async () => {
+      const mockGetCloudUrl = sinon.stub()
+      const mockAdditionalHeaders = sinon.stub()
+      const cloud = {
+        getCloudUrl: mockGetCloudUrl,
+        additionalHeaders: mockAdditionalHeaders,
+      } as unknown as CloudDataSource
+
+      mockGetCloudUrl.returns('http://localhost:1234')
+      mockAdditionalHeaders.resolves({
+        a: 'b',
+        c: 'd',
+      })
+
       await getAndInitializeStudioManager({
         projectId: '12345',
-        cloudUrl: 'http://localhost:1234',
-        cloudHeaders: {
-          a: 'b',
-          c: 'd',
-        },
+        cloudDataSource: cloud,
       })
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
@@ -132,6 +142,19 @@ describe('getAndInitializeStudioManager', () => {
     })
 
     it('downloads the studio bundle and extracts it', async () => {
+      const mockGetCloudUrl = sinon.stub()
+      const mockAdditionalHeaders = sinon.stub()
+      const cloud = {
+        getCloudUrl: mockGetCloudUrl,
+        additionalHeaders: mockAdditionalHeaders,
+      } as unknown as CloudDataSource
+
+      mockGetCloudUrl.returns('http://localhost:1234')
+      mockAdditionalHeaders.resolves({
+        a: 'b',
+        c: 'd',
+      })
+
       crossFetchStub.resolves({
         body: readStream,
         headers: {
@@ -147,7 +170,7 @@ describe('getAndInitializeStudioManager', () => {
 
       const projectId = '12345'
 
-      await getAndInitializeStudioManager({ projectId })
+      await getAndInitializeStudioManager({ projectId, cloudDataSource: cloud })
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
       expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')
@@ -185,6 +208,19 @@ describe('getAndInitializeStudioManager', () => {
     })
 
     it('downloads the studio bundle and extracts it after 1 fetch failure', async () => {
+      const mockGetCloudUrl = sinon.stub()
+      const mockAdditionalHeaders = sinon.stub()
+      const cloud = {
+        getCloudUrl: mockGetCloudUrl,
+        additionalHeaders: mockAdditionalHeaders,
+      } as unknown as CloudDataSource
+
+      mockGetCloudUrl.returns('http://localhost:1234')
+      mockAdditionalHeaders.resolves({
+        a: 'b',
+        c: 'd',
+      })
+
       crossFetchStub.onFirstCall().rejects(new HttpError('Failed to fetch', 'url', 502, 'Bad Gateway', 'Bad Gateway', sinon.stub()))
       crossFetchStub.onSecondCall().resolves({
         body: readStream,
@@ -201,7 +237,7 @@ describe('getAndInitializeStudioManager', () => {
 
       const projectId = '12345'
 
-      await getAndInitializeStudioManager({ projectId })
+      await getAndInitializeStudioManager({ projectId, cloudDataSource: cloud })
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
       expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')
@@ -239,13 +275,26 @@ describe('getAndInitializeStudioManager', () => {
     })
 
     it('throws an error and returns a studio manager in error state if the fetch fails more than twice', async () => {
+      const mockGetCloudUrl = sinon.stub()
+      const mockAdditionalHeaders = sinon.stub()
+      const cloud = {
+        getCloudUrl: mockGetCloudUrl,
+        additionalHeaders: mockAdditionalHeaders,
+      } as unknown as CloudDataSource
+
+      mockGetCloudUrl.returns('http://localhost:1234')
+      mockAdditionalHeaders.resolves({
+        a: 'b',
+        c: 'd',
+      })
+
       const error = new HttpError('Failed to fetch', 'url', 502, 'Bad Gateway', 'Bad Gateway', sinon.stub())
 
       crossFetchStub.rejects(error)
 
       const projectId = '12345'
 
-      await getAndInitializeStudioManager({ projectId })
+      await getAndInitializeStudioManager({ projectId, cloudDataSource: cloud })
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
       expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')
@@ -269,6 +318,19 @@ describe('getAndInitializeStudioManager', () => {
     })
 
     it('throws an error and returns a studio manager in error state if the signature verification fails', async () => {
+      const mockGetCloudUrl = sinon.stub()
+      const mockAdditionalHeaders = sinon.stub()
+      const cloud = {
+        getCloudUrl: mockGetCloudUrl,
+        additionalHeaders: mockAdditionalHeaders,
+      } as unknown as CloudDataSource
+
+      mockGetCloudUrl.returns('http://localhost:1234')
+      mockAdditionalHeaders.resolves({
+        a: 'b',
+        c: 'd',
+      })
+
       crossFetchStub.resolves({
         body: readStream,
         headers: {
@@ -284,7 +346,7 @@ describe('getAndInitializeStudioManager', () => {
 
       const projectId = '12345'
 
-      await getAndInitializeStudioManager({ projectId })
+      await getAndInitializeStudioManager({ projectId, cloudDataSource: cloud })
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
       expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')
@@ -309,6 +371,19 @@ describe('getAndInitializeStudioManager', () => {
     })
 
     it('throws an error if there is no signature in the response headers', async () => {
+      const mockGetCloudUrl = sinon.stub()
+      const mockAdditionalHeaders = sinon.stub()
+      const cloud = {
+        getCloudUrl: mockGetCloudUrl,
+        additionalHeaders: mockAdditionalHeaders,
+      } as unknown as CloudDataSource
+
+      mockGetCloudUrl.returns('http://localhost:1234')
+      mockAdditionalHeaders.resolves({
+        a: 'b',
+        c: 'd',
+      })
+
       crossFetchStub.resolves({
         body: readStream,
         headers: {
@@ -318,7 +393,7 @@ describe('getAndInitializeStudioManager', () => {
 
       const projectId = '12345'
 
-      await getAndInitializeStudioManager({ projectId })
+      await getAndInitializeStudioManager({ projectId, cloudDataSource: cloud })
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
       expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')

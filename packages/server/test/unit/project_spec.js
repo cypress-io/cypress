@@ -451,12 +451,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       sinon.stub(api, 'getCaptureProtocolScript').resolves('console.log("hello")')
       sinon.stub(ProtocolManager.prototype, 'prepareProtocol').resolves()
-      sinon.stub(ctx.cloud, 'additionalHeaders').resolves({
-        a: 'b',
-        c: 'd',
-      })
-
-      sinon.stub(ctx.cloud, 'getCloudUrl').returns('https://localhost:1234')
 
       this.config.testingType = 'e2e'
 
@@ -464,11 +458,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       expect(studio.getAndInitializeStudioManager).to.be.calledWith({
         projectId: 'abc123',
-        cloudUrl: 'https://localhost:1234',
-        cloudHeaders: {
-          a: 'b',
-          c: 'd',
-        },
+        cloudDataSource: ctx.cloud,
       })
 
       expect(ctx.coreData.studio).to.eq(this.testStudioManager)
@@ -501,12 +491,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       sinon.stub(api, 'getCaptureProtocolScript').resolves('console.log("hello")')
       sinon.stub(ProtocolManager.prototype, 'prepareProtocol').resolves()
-      sinon.stub(ctx.cloud, 'additionalHeaders').resolves({
-        a: 'b',
-        c: 'd',
-      })
-
-      sinon.stub(ctx.cloud, 'getCloudUrl').returns('https://localhost:1234')
 
       this.config.testingType = 'e2e'
 
@@ -514,11 +498,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       expect(studio.getAndInitializeStudioManager).to.be.calledWith({
         projectId: 'abc123',
-        cloudUrl: 'https://localhost:1234',
-        cloudHeaders: {
-          a: 'b',
-          c: 'd',
-        },
+        cloudDataSource: ctx.cloud,
       })
 
       expect(ctx.coreData.studio).to.eq(this.testStudioManager)
@@ -531,12 +511,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       sinon.stub(api, 'getCaptureProtocolScript').resolves('console.log("hello")')
       sinon.stub(ProtocolManager.prototype, 'prepareProtocol').resolves()
-      sinon.stub(ctx.cloud, 'additionalHeaders').resolves({
-        a: 'b',
-        c: 'd',
-      })
-
-      sinon.stub(ctx.cloud, 'getCloudUrl').returns('https://localhost:1234')
 
       this.config.testingType = 'e2e'
 
@@ -544,11 +518,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       expect(studio.getAndInitializeStudioManager).to.be.calledWith({
         projectId: 'abc123',
-        cloudUrl: 'https://localhost:1234',
-        cloudHeaders: {
-          a: 'b',
-          c: 'd',
-        },
+        cloudDataSource: ctx.cloud,
       })
 
       expect(ctx.coreData.studio).to.eq(this.testStudioManager)

@@ -163,12 +163,9 @@ export class ProjectBase extends EE {
     let studioManager: StudioManager | null
 
     if (process.env.CYPRESS_ENABLE_CLOUD_STUDIO || process.env.CYPRESS_LOCAL_STUDIO_PATH) {
-      const cloudEnv = (process.env.CYPRESS_INTERNAL_ENV || 'production') as 'development' | 'staging' | 'production'
-
       studioManager = await getAndInitializeStudioManager({
         projectId: cfg.projectId,
-        cloudUrl: this.ctx.cloud.getCloudUrl(cloudEnv),
-        cloudHeaders: await this.ctx.cloud.additionalHeaders(),
+        cloudDataSource: this.ctx.cloud,
       })
 
       this.ctx.update((data) => {
