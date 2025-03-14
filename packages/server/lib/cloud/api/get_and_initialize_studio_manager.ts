@@ -12,7 +12,7 @@ import { asyncRetry, linearDelay } from '../../util/async_retry'
 import { isRetryableError } from '../network/is_retryable_error'
 import { PUBLIC_KEY_VERSION } from '../constants'
 import { CloudRequest } from './cloud_request'
-import { CloudDataSource } from '@packages/data-context/src/sources'
+import type { CloudDataSource } from '@packages/data-context/src/sources'
 
 const pkg = require('@packages/root')
 const routes = require('../routes')
