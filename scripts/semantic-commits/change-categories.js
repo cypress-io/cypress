@@ -78,6 +78,10 @@ const changeCatagories = {
     description: 'Adding missing or correcting existing tests',
     release: false,
   },
+  wip: {
+    description: 'Work in progress that is not visible to the user',
+    release: false,
+  },
 }
 
 // Used by @semantic-release/commit-analyzer to determine next version for npm packages
