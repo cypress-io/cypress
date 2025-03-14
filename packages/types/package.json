@@ -15,6 +15,7 @@
   },
   "devDependencies": {
     "@types/node": "20.16.0",
+    "axios": "^1.8.3",
     "better-sqlite3": "11.5.0",
     "devtools-protocol": "0.0.1413303",
     "express": "4.21.0",

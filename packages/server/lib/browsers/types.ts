@@ -46,6 +46,10 @@ export type BrowserLauncher = {
    */
   connectProtocolToBrowser: (options: { protocolManager?: ProtocolManagerShape }) => Promise<void>
   /**
+   * Closes the protocol connection to the browser.
+   */
+  closeProtocolConnection: () => Promise<void>
+  /**
    * Closes any targets that are not the currently-attached Cypress target
    */
   closeExtraTargets: () => Promise<void>

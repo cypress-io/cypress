@@ -1079,6 +1079,7 @@ describe('lib/cypress', () => {
             ensureMinimumProtocolVersion: sinon.stub().resolves(),
             attachToTargetUrl: sinon.stub().resolves(criClient),
             currentlyAttachedTarget: criClient,
+            currentlyAttachedProtocolTarget: criClient,
             close: sinon.stub().resolves(),
             getWebSocketDebuggerUrl: sinon.stub().returns('ws://debugger'),
           }

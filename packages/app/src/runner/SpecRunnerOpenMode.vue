@@ -98,7 +98,10 @@
         <ScreenshotHelperPixels />
       </template>
       <template #panel4>
-        <StudioPanel v-show="shouldShowStudioPanel" />
+        <StudioPanel
+          v-show="shouldShowStudioPanel"
+          :can-access-studio-a-i="studioStore.canAccessStudioAI"
+        />
       </template>
     </ResizablePanels>
   </AdjustRunnerStyleDuringScreenshot>
