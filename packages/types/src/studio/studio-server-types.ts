@@ -1,5 +1,3 @@
-/// <reference types="cypress" />
-
 import type { Router } from 'express'
 import type { AxiosInstance } from 'axios'
 
