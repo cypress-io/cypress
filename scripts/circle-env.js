@@ -4,7 +4,7 @@ function checkCanaries () {
 
   const circleEnv = readProcessEnv()
 
-  if (circleEnv.hasOwnProperty('IS_CONTRIBUTOR_PR')) {
+  if (circleEnv.IS_CONTRIBUTOR_PR === 'true') {
     console.log('Contributor PR detected. Verifying canary envs are not available.')
     if (circleEnv.MAIN_CANARY) throw new Error('MAIN_CANARY should not be present in a contributor PR. Investigate why the CircleCI project level env var is being applied to this job.')
 
