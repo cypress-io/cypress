@@ -100,7 +100,7 @@
       <template #panel4>
         <StudioPanel
           v-show="shouldShowStudioPanel"
-          :can-access-studio-l-l-m="studioStore.canAccessStudioLLM"
+          :can-access-studio-a-i="studioStore.canAccessStudioAI"
         />
       </template>
     </ResizablePanels>

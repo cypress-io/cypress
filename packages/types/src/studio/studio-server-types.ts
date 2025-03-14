@@ -8,12 +8,6 @@ interface RetryOptions {
   onRetry?: (delay: number, err: unknown) => void
 }
 
-export interface StudioBrowser {
-  name: 'electron' | 'chrome' | 'chromium' | 'firefox' | 'edge' | string
-  channel: 'stable' | 'canary' | 'beta' | 'dev' | 'nightly' | string
-  family: 'chromium' | 'firefox' | 'webkit'
-}
-
 export interface StudioCloudApi {
   cloudUrl: string
   cloudHeaders: Record<string, string>
@@ -35,7 +29,7 @@ export interface StudioServerOptions {
 
 export interface StudioServerShape {
   initializeRoutes(router: Router): void
-  canAccessStudioLLM(browser: StudioBrowser): Promise<boolean>
+  canAccessStudioAI(browser: Cypress.Browser): Promise<boolean>
 }
 
 export interface StudioServerDefaultShape {

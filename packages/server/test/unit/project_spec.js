@@ -770,7 +770,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       this.project.spec = {}
       this.project.ctx.coreData.studio = {
-        canAccessStudioLLM: mockAccessStudioLLM,
+        canAccessStudioAI: mockAccessStudioLLM,
         protocolManager: {
           setupProtocol: mockSetupProtocol,
           beforeSpec: mockBeforeSpec,
@@ -804,9 +804,9 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       this.project.startWebsockets({}, {})
 
-      const { canAccessStudioLLM } = await studioInitPromise
+      const { canAccessStudioAI } = await studioInitPromise
 
-      expect(canAccessStudioLLM).to.be.true
+      expect(canAccessStudioAI).to.be.true
 
       expect(mockSetupProtocol).to.be.calledOnce
       expect(mockBeforeSpec).to.be.calledOnce
@@ -832,7 +832,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       this.project.spec = {}
       this.project.ctx.coreData.studio = {
-        canAccessStudioLLM: mockAccessStudioLLM,
+        canAccessStudioAI: mockAccessStudioLLM,
       }
 
       this.project.browser = {
@@ -856,9 +856,9 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       this.project.startWebsockets({}, {})
 
-      const { canAccessStudioLLM } = await studioInitPromise
+      const { canAccessStudioAI } = await studioInitPromise
 
-      expect(canAccessStudioLLM).to.be.false
+      expect(canAccessStudioAI).to.be.false
 
       expect(mockSetupProtocol).not.to.be.called
       expect(mockBeforeSpec).not.to.be.called
@@ -875,7 +875,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       this.project.spec = {}
       this.project.ctx.coreData.studio = {
-        canAccessStudioLLM: mockAccessStudioLLM,
+        canAccessStudioAI: mockAccessStudioLLM,
         protocolManager: {
           setupProtocol: mockSetupProtocol,
           beforeSpec: mockBeforeSpec,
@@ -902,9 +902,9 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       this.project.startWebsockets({}, {})
 
-      const { canAccessStudioLLM } = await studioInitPromise
+      const { canAccessStudioAI } = await studioInitPromise
 
-      expect(canAccessStudioLLM).to.be.false
+      expect(canAccessStudioAI).to.be.false
       expect(mockSetupProtocol).not.to.be.called
       expect(mockBeforeSpec).not.to.be.called
       expect(browsers.connectProtocolToBrowser).not.to.be.called

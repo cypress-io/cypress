@@ -6,7 +6,7 @@ class StudioServer implements StudioServerShape {
 
   }
 
-  canAccessStudioLLM (browser: StudioBrowser): Promise<boolean> {
+  canAccessStudioAI (browser: StudioBrowser): Promise<boolean> {
     return Promise.resolve(true)
   }
 }

@@ -84,9 +84,9 @@ describe('lib/cloud/studio', () => {
     it('reports an error when a asynchronous method fails', async () => {
       const error = new Error('foo')
 
-      sinon.stub(studio, 'canAccessStudioLLM').throws(error)
+      sinon.stub(studio, 'canAccessStudioAI').throws(error)
 
-      await studioManager.canAccessStudioLLM({} as any)
+      await studioManager.canAccessStudioAI({} as any)
 
       expect(studioManager.status).to.eq('IN_ERROR')
       expect(stubbedCrossFetch).to.be.calledWithMatch(sinon.match((url: string) => url.endsWith('/studio/errors')), {
@@ -152,11 +152,11 @@ describe('lib/cloud/studio', () => {
     })
   })
 
-  describe('canAccessStudioLLM', () => {
+  describe('canAccessStudioAI', () => {
     it('returns true', async () => {
-      sinon.stub(studio, 'canAccessStudioLLM').resolves(true)
+      sinon.stub(studio, 'canAccessStudioAI').resolves(true)
 
-      const result = await studioManager.canAccessStudioLLM({
+      const result = await studioManager.canAccessStudioAI({
         name: 'chrome',
         family: 'chromium',
         channel: 'stable',

@@ -404,9 +404,9 @@ export class SocketBase {
         })
 
         socket.on('studio:init', async (cb) => {
-          const { canAccessStudioLLM } = await options.onStudioInit()
+          const { canAccessStudioAI } = await options.onStudioInit()
 
-          cb({ canAccessStudioLLM })
+          cb({ canAccessStudioAI })
         })
 
         socket.on('studio:destroy', async (cb) => {

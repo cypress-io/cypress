@@ -64,7 +64,7 @@ describe('lib/socket', () => {
       .then(() => {
         this.options = {
           onSavedStateChanged: sinon.spy(),
-          onStudioInit: sinon.stub().resolves({ canAccessStudioLLM: true }),
+          onStudioInit: sinon.stub().resolves({ canAccessStudioAI: true }),
           onStudioDestroy: sinon.spy(),
         }
 
@@ -528,9 +528,9 @@ describe('lib/socket', () => {
     context('on(studio:init)', () => {
       it('calls onStudioInit with the state', async function () {
         await new Promise((resolve) => {
-          this.client.emit('studio:init', ({ canAccessStudioLLM }) => {
+          this.client.emit('studio:init', ({ canAccessStudioAI }) => {
             expect(this.options.onStudioInit).to.be.called
-            expect(canAccessStudioLLM).to.be.true
+            expect(canAccessStudioAI).to.be.true
 
             resolve()
           })
