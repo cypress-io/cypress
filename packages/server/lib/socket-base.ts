@@ -152,6 +152,8 @@ export class SocketBase {
       onSavedStateChanged () {},
       onTestFileChange () {},
       onCaptureVideoFrames () {},
+      onStudioInit () {},
+      onStudioDestroy () {},
     })
 
     let automationClient
@@ -402,6 +404,26 @@ export class SocketBase {
           await devServer.updateSpecs([spec], { neededForJustInTimeCompile: true })
 
           return socket.emit('dev-server:on-spec-updated')
+        })
+
+        socket.on('studio:init', async (cb) => {
+          try {
+            const { canAccessStudioAI } = await options.onStudioInit()
+
+            cb({ canAccessStudioAI })
+          } catch (error) {
+            cb({ error: errors.cloneErr(error) })
+          }
+        })
+
+        socket.on('studio:destroy', async (cb) => {
+          try {
+            await options.onStudioDestroy()
+
+            cb({})
+          } catch (error) {
+            cb({ error: errors.cloneErr(error) })
+          }
         })
 
         socket.on('backend:request', (eventName: string, ...args) => {

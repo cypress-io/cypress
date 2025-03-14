@@ -102,7 +102,7 @@ export class CloudDataSource {
     return this.params.getUser()
   }
 
-  async #additionalHeaders () {
+  async additionalHeaders () {
     return {
       'Authorization': this.#user ? `bearer ${this.#user.authToken}` : '',
       'x-cypress-version': pkg.version,
@@ -160,7 +160,7 @@ export class CloudDataSource {
           ...init,
           headers: {
             ...init?.headers,
-            ...await this.#additionalHeaders(),
+            ...await this.additionalHeaders(),
           },
         })
       },

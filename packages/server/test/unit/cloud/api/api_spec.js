@@ -533,7 +533,7 @@ describe('lib/cloud/api', () => {
   context('.createRun', () => {
     beforeEach(function () {
       this.protocolManager = {
-        setupProtocol: sinon.stub(),
+        prepareAndSetupProtocol: sinon.stub(),
       }
 
       this.buildProps = {
@@ -621,7 +621,7 @@ describe('lib/cloud/api', () => {
           },
         })
 
-        expect(this.protocolManager.setupProtocol).to.be.calledWith(
+        expect(this.protocolManager.prepareAndSetupProtocol).to.be.calledWith(
           PROTOCOL_STUB_VALID.value,
           {
             runId: 'new-run-id-123',
@@ -642,6 +642,7 @@ describe('lib/cloud/api', () => {
             debugData: {
               filePreprocessorHandlerText: 'function () {}',
             },
+            mode: 'record',
           },
         )
       })
@@ -716,7 +717,7 @@ describe('lib/cloud/api', () => {
           },
         })
 
-        expect(this.protocolManager.setupProtocol).to.be.calledWith(
+        expect(this.protocolManager.prepareAndSetupProtocol).to.be.calledWith(
           PROTOCOL_STUB_VALID.value,
           {
             runId: 'new-run-id-123',
@@ -737,12 +738,13 @@ describe('lib/cloud/api', () => {
             debugData: {
               filePreprocessorHandlerText: 'function () {}',
             },
+            mode: 'record',
           },
         )
       })
     })
 
-    it('POST /runs does not call setupProtocol with invalid signature', function () {
+    it('POST /runs does not call prepareAndSetupProtocol with invalid signature', function () {
       nock(API_BASEURL)
       .get('/capture-protocol/script/protocolStub.js')
       .reply(200, PROTOCOL_STUB_VALID.compressed, {
@@ -784,7 +786,7 @@ describe('lib/cloud/api', () => {
           },
         })
 
-        expect(this.protocolManager.setupProtocol).not.to.be.called
+        expect(this.protocolManager.prepareAndSetupProtocol).not.to.be.called
       })
     })
 
@@ -819,7 +821,7 @@ describe('lib/cloud/api', () => {
 }\
 `)
 
-        expect(this.protocolManager.setupProtocol).not.to.be.called
+        expect(this.protocolManager.prepareAndSetupProtocol).not.to.be.called
       })
     })
 
@@ -877,7 +879,7 @@ describe('lib/cloud/api', () => {
         throw new Error('should have thrown here')
       }).catch((err) => {
         expect(err.isApiError).to.be.true
-        expect(this.protocolManager.setupProtocol).not.to.be.called
+        expect(this.protocolManager.prepareAndSetupProtocol).not.to.be.called
       })
     })
 

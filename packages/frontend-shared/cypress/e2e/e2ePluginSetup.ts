@@ -38,9 +38,14 @@ import pDefer from 'p-defer'
 
 const pkg = require('@packages/root')
 
+export interface InternalOpenProjectCapabilities {
+  cloudStudio: boolean
+}
+
 interface InternalOpenProjectArgs {
   argv: string[]
   projectName: string
+  capabilities: InternalOpenProjectCapabilities
 }
 
 interface InternalAddProjectOpts {
@@ -184,6 +189,15 @@ async function makeE2ETasks () {
       process.chdir(cachedCwd)
 
       return { launchpadPort }
+    },
+
+    /**
+     * Clear out any capability specific environment variables that were set during the test
+     */
+    __internal__afterEach () {
+      delete process.env.CYPRESS_ENABLE_CLOUD_STUDIO
+
+      return null
     },
 
     /**
@@ -405,7 +419,11 @@ async function makeE2ETasks () {
         e2eServerPort: ctx.coreData.servers.appServerPort,
       }
     },
-    async __internal_openProject ({ argv, projectName }: InternalOpenProjectArgs): Promise<ResetOptionsResult> {
+    async __internal_openProject ({ argv, projectName, capabilities }: InternalOpenProjectArgs): Promise<ResetOptionsResult> {
+      if (capabilities.cloudStudio) {
+        process.env.CYPRESS_ENABLE_CLOUD_STUDIO = 'true'
+      }
+
       let projectMatched = false
 
       for (const scaffoldedProject of scaffoldedProjects.keys()) {

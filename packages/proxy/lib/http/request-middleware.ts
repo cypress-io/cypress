@@ -348,7 +348,8 @@ const RedirectToClientRouteIfUnloaded: RequestMiddleware = function () {
 
   // if we have an unload header it means our parent app has been navigated away
   // directly and we need to automatically redirect to the clientRoute
-  if (hasAppUnloaded) {
+  // We do not redirect if we are in cypress in cypress since this can be caused by a reload of the internal Cypress app
+  if (hasAppUnloaded && !process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
     span?.setAttributes({
       redirectedTo: this.config.clientRoute,
     })

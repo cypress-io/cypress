@@ -434,6 +434,10 @@ export function connectProtocolToBrowser (): Promise<void> {
   throw new Error('Protocol is not yet supported in firefox.')
 }
 
+export function closeProtocolConnection (): Promise<void> {
+  throw new Error('Protocol is not yet supported in firefox.')
+}
+
 async function recordVideo (videoApi: RunModeVideoApi) {
   const { writeVideoFrame } = await videoApi.useFfmpegVideoController({ webmInput: true })
 

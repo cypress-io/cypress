@@ -23,14 +23,21 @@ describe('lib/cloud/studio', () => {
   let studio: StudioServerShape
   let StudioManager: typeof import('@packages/server/lib/cloud/studio').StudioManager
 
-  beforeEach(() => {
+  beforeEach(async () => {
     stubbedCrossFetch = sinon.stub()
     StudioManager = (proxyquire('../lib/cloud/studio', {
       'cross-fetch': stubbedCrossFetch,
     }) as typeof import('@packages/server/lib/cloud/studio')).StudioManager
 
     studioManager = new StudioManager()
-    studioManager.setup({ script: stubStudio, studioPath: 'path', studioHash: 'abcdefg' })
+    await studioManager.setup({
+      script: stubStudio,
+      studioPath: 'path',
+      studioHash: 'abcdefg',
+      projectSlug: '1234',
+      cloudApi: {} as any,
+    })
+
     studio = (studioManager as any)._studioServer
 
     sinon.stub(os, 'platform').returns('darwin')
@@ -42,12 +49,44 @@ describe('lib/cloud/studio', () => {
   })
 
   describe('synchronous method invocation', () => {
-    it('reports an error when a synchronous method fails', async () => {
+    it('reports an error when a synchronous method fails', () => {
       const error = new Error('foo')
 
       sinon.stub(studio, 'initializeRoutes').throws(error)
 
-      await studioManager.initializeRoutes({} as any)
+      studioManager.initializeRoutes({} as any)
+
+      expect(studioManager.status).to.eq('IN_ERROR')
+      expect(stubbedCrossFetch).to.be.calledWithMatch(sinon.match((url: string) => url.endsWith('/studio/errors')), {
+        agent: sinon.match.any,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-cypress-version': pkg.version,
+          'x-os-name': 'darwin',
+          'x-arch': 'x64',
+        },
+        body: sinon.match((body) => {
+          const parsedBody = JSON.parse(body)
+
+          expect(parsedBody.studioHash).to.eq('abcdefg')
+          expect(parsedBody.errors[0].name).to.eq(error.name)
+          expect(parsedBody.errors[0].stack).to.eq(error.stack)
+          expect(parsedBody.errors[0].message).to.eq(error.message)
+
+          return true
+        }),
+      })
+    })
+  })
+
+  describe('asynchronous method invocation', () => {
+    it('reports an error when a asynchronous method fails', async () => {
+      const error = new Error('foo')
+
+      sinon.stub(studio, 'canAccessStudioAI').throws(error)
+
+      await studioManager.canAccessStudioAI({} as any)
 
       expect(studioManager.status).to.eq('IN_ERROR')
       expect(stubbedCrossFetch).to.be.calledWithMatch(sinon.match((url: string) => url.endsWith('/studio/errors')), {
@@ -110,6 +149,20 @@ describe('lib/cloud/studio', () => {
       studioManager.initializeRoutes(mockRouter)
 
       expect(studio.initializeRoutes).to.be.calledWith(mockRouter)
+    })
+  })
+
+  describe('canAccessStudioAI', () => {
+    it('returns true', async () => {
+      sinon.stub(studio, 'canAccessStudioAI').resolves(true)
+
+      const result = await studioManager.canAccessStudioAI({
+        name: 'chrome',
+        family: 'chromium',
+        channel: 'stable',
+      })
+
+      expect(result).to.be.true
     })
   })
 })

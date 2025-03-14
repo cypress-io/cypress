@@ -21,6 +21,16 @@ describe('Cypress Studio', () => {
     })
   }
 
+  it('loads the cloud studio page', () => {
+    launchStudio({ specName: 'spec.cy.js', enableCloudStudio: true })
+
+    cy.window().then((win) => {
+      expect(win.Cypress.config('isDefaultProtocolEnabled')).to.be.false
+      expect(win.Cypress.config('isStudioProtocolEnabled')).to.be.true
+      expect(win.Cypress.state('isProtocolEnabled')).to.be.true
+    })
+  })
+
   it('updates an existing test with an action', () => {
     launchStudio()
 

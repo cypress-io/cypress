@@ -302,6 +302,22 @@ describe('lib/browsers/cri-client', function () {
     })
   })
 
+  context('clone', () => {
+    it('returns a new CriClient with the same options', async () => {
+      const client = await getClient()
+
+      const cloned = await client.clone()
+
+      expect(cloned['targetId']).to.equal(client['targetId'])
+      expect(cloned['onAsynchronousError']).to.equal(client['onAsynchronousError'])
+      expect(cloned['host']).to.equal(client['host'])
+      expect(cloned['port']).to.equal(client['port'])
+      expect(cloned['protocolManager']).to.equal(client['protocolManager'])
+      expect(cloned['fullyManageTabs']).to.equal(client['fullyManageTabs'])
+      expect(cloned['browserClient']).to.equal(client['browserClient'])
+    })
+  })
+
   describe('on reconnect', () => {
     it('resends *.enable commands and notifies protocol manager', async () => {
       criStub._notifier.on = sinon.stub()

@@ -31,9 +31,9 @@ const createCypress = () => {
   // @ts-ignore
   const Cypress = window.Cypress = new $Cypress() as Cypress.Cypress
 
-  Cypress.specBridgeCommunicator.once('initialize:cypress', ({ config, env }) => {
+  Cypress.specBridgeCommunicator.once('initialize:cypress', ({ config, env, isProtocolEnabled }) => {
     // eventually, setup will get called again on rerun and cy will get re-created
-    setup(config, env)
+    setup({ cypressConfig: config, env, isProtocolEnabled })
   })
 
   Cypress.specBridgeCommunicator.on('attach:to:window', () => {
@@ -85,7 +85,7 @@ const createCypress = () => {
   Cypress.specBridgeCommunicator.toPrimary('bridge:ready')
 }
 
-const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
+const setup = ({ cypressConfig, env, isProtocolEnabled }: { cypressConfig: Cypress.Config, env: Cypress.ObjectLike, isProtocolEnabled: boolean }) => {
   const Cypress = window.Cypress
 
   Cypress.configure({
@@ -98,6 +98,8 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
     // This value is not synced with the config because it is omitted on big Cypress creation, as well as a few other key properties
     testingType: 'e2e',
   })
+
+  Cypress.state('isProtocolEnabled', isProtocolEnabled)
 
   // @ts-ignore
   const cy = window.cy = new $Cy(window, Cypress, Cypress.Cookies, Cypress.state, Cypress.config, false)

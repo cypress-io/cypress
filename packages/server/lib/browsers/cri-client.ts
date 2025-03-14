@@ -117,7 +117,7 @@ export class CriClient implements ICriClient {
 
   private constructor (
     public targetId: string,
-    onAsynchronousError: (err: CypressError) => void,
+    private onAsynchronousError: (err: CypressError) => void,
     private host?: string,
     private port?: number,
     private onReconnect?: (client: CriClient) => void,
@@ -350,6 +350,18 @@ export class CriClient implements ICriClient {
     } catch (e) {
       debug('error closing cri client targeting %s: %o', this.targetId, e)
     }
+  }
+
+  async clone (): Promise<CriClient> {
+    return CriClient.create({
+      target: this.targetId,
+      onAsynchronousError: this.onAsynchronousError,
+      host: this.host,
+      port: this.port,
+      protocolManager: this.protocolManager,
+      fullyManageTabs: this.fullyManageTabs,
+      browserClient: this.browserClient,
+    })
   }
 
   private _onAttachedToTarget = async (event: ProtocolMapping.Events['Target.attachedToTarget'][0]) => {
