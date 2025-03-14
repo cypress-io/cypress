@@ -281,8 +281,13 @@ export class EventManager {
     this.reporterBus.on('studio:init:test', (testId) => {
       this.studioStore.setTestId(testId)
 
-      this.ws.emit('studio:init', ({ canAccessStudioAI }) => {
-        this.studioStore.setcanAccessStudioAI(canAccessStudioAI)
+      this.ws.emit('studio:init', ({ canAccessStudioAI, error }) => {
+        if (error) {
+          // eslint-disable-next-line no-console
+          console.error(error)
+        }
+
+        this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
         studioInit()
       })
     })
@@ -290,14 +295,24 @@ export class EventManager {
     this.reporterBus.on('studio:init:suite', (suiteId) => {
       this.studioStore.setSuiteId(suiteId)
 
-      this.ws.emit('studio:init', ({ canAccessStudioAI }) => {
-        this.studioStore.setcanAccessStudioAI(canAccessStudioAI)
+      this.ws.emit('studio:init', ({ canAccessStudioAI, error }) => {
+        if (error) {
+          // eslint-disable-next-line no-console
+          console.error(error)
+        }
+
+        this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
         studioInit()
       })
     })
 
     this.reporterBus.on('studio:cancel', () => {
-      this.ws.emit('studio:destroy', () => {
+      this.ws.emit('studio:destroy', ({ error }) => {
+        if (error) {
+          // eslint-disable-next-line no-console
+          console.error(error)
+        }
+
         this.studioStore.cancel()
         // Reloading for now. This is the easiest way to clear out the protocol code from the front end
         window.location.reload()
@@ -309,9 +324,7 @@ export class EventManager {
     })
 
     this.reporterBus.on('studio:save', () => {
-      this.ws.emit('studio:destroy', () => {
-        this.studioStore.startSave()
-      })
+      this.studioStore.startSave()
     })
 
     this.reporterBus.on('studio:copy:to:clipboard', (cb) => {
@@ -327,15 +340,27 @@ export class EventManager {
         if (err) {
           this.reporterBus.emit('test:set:state', this.studioStore.saveError(err), noop)
         } else {
-          this.studioStore.saveSuccess()
-          // Reloading for now. This is the easiest way to clear out the protocol code from the front end
-          window.location.reload()
+          this.ws.emit('studio:destroy', ({ error }) => {
+            if (error) {
+              // eslint-disable-next-line no-console
+              console.error(error)
+            }
+
+            this.studioStore.saveSuccess()
+            // Reloading for now. This is the easiest way to clear out the protocol code from the front end
+            window.location.reload()
+          })
         }
       })
     })
 
     this.localBus.on('studio:cancel', () => {
-      this.ws.emit('studio:destroy', () => {
+      this.ws.emit('studio:destroy', ({ error }) => {
+        if (error) {
+          // eslint-disable-next-line no-console
+          console.error(error)
+        }
+
         this.studioStore.cancel()
         // Reloading for now. This is the easiest way to clear out the protocol code from the front end
         window.location.reload()
@@ -414,7 +439,7 @@ export class EventManager {
 
     this.studioStore.setup(config)
 
-    const isDefaultProtocolEnabled = Cypress.config('isProtocolEnabled')
+    const isDefaultProtocolEnabled = Cypress.config('isDefaultProtocolEnabled')
     const isStudioProtocolEnabled = Cypress.config('isStudioProtocolEnabled')
     const isStudioInScope = this.studioStore.isActive || this.studioStore.isLoading
 

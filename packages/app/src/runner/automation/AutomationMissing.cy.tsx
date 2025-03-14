@@ -53,4 +53,18 @@ describe('AutomationMissing', () => {
     cy.get('[data-cy="select-browser"] > button svg').eq(0).children().verifyBrowserIconSvg(cyGeneralGlobeX16.data)
     cy.percySnapshot()
   })
+
+  it('browser dropdown displays on click', () => {
+    cy.mountFragment(AutomationMissingFragmentDoc, {
+      render (gql) {
+        return (<AutomationMissing gql={gql} />)
+      },
+    })
+
+    cy.get('[data-cy="select-browser"]').click()
+    cy.contains('li', 'Chrome').should('be.visible')
+    cy.contains('li', 'Version 80').should('be.visible')
+    cy.get('[data-browser-id=1]').contains('Electron').should('be.visible')
+    cy.percySnapshot()
+  })
 })

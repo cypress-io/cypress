@@ -151,7 +151,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       this._updateUrlParams(['testId', 'suiteId'])
     },
 
-    setcanAccessStudioAI (canAccessStudioAI: boolean) {
+    setCanAccessStudioAI (canAccessStudioAI: boolean) {
       this.canAccessStudioAI = canAccessStudioAI
     },
 

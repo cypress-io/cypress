@@ -25,7 +25,7 @@ describe('Cypress Studio', () => {
     launchStudio({ specName: 'spec.cy.js', enableCloudStudio: true })
 
     cy.window().then((win) => {
-      expect(win.Cypress.config('isProtocolEnabled')).to.be.false
+      expect(win.Cypress.config('isDefaultProtocolEnabled')).to.be.false
       expect(win.Cypress.config('isStudioProtocolEnabled')).to.be.true
       expect(win.Cypress.state('isProtocolEnabled')).to.be.true
     })
@@ -705,10 +705,11 @@ describe('studio functionality', () => {
 
     cy.get('button.studio-copy').click()
 
-    cy.get('@writeText').should('have.been.calledOnceWith',
-`/* ==== Generated with Cypress Studio ==== */
-cy.get('#increment').click();
-/* ==== End Cypress Studio ==== */`)
+    if (Cypress.platform === 'win32') {
+      cy.get('@writeText').should('have.been.calledOnceWith', '/* ==== Generated with Cypress Studio ==== */\r\ncy.get(\'#increment\').click();\r\n/* ==== End Cypress Studio ==== */')
+    } else {
+      cy.get('@writeText').should('have.been.calledOnceWith', '/* ==== Generated with Cypress Studio ==== */\ncy.get(\'#increment\').click();\n/* ==== End Cypress Studio ==== */')
+    }
   })
 
   it('copies the studio commands to the clipboard using studio toolbar', () => {
@@ -723,10 +724,11 @@ cy.get('#increment').click();
 
     cy.findByTestId('studio-toolbar-controls').findByTestId('copy-commands').click()
 
-    cy.get('@writeText').should('have.been.calledOnceWith',
-`/* ==== Generated with Cypress Studio ==== */
-cy.get('#increment').click();
-/* ==== End Cypress Studio ==== */`)
+    if (Cypress.platform === 'win32') {
+      cy.get('@writeText').should('have.been.calledOnceWith', '/* ==== Generated with Cypress Studio ==== */\r\ncy.get(\'#increment\').click();\r\n/* ==== End Cypress Studio ==== */')
+    } else {
+      cy.get('@writeText').should('have.been.calledOnceWith', '/* ==== Generated with Cypress Studio ==== */\ncy.get(\'#increment\').click();\n/* ==== End Cypress Studio ==== */')
+    }
   })
 
   it('removes pending commands if the page is reloaded', () => {
@@ -877,7 +879,12 @@ describe('studio functionality', () => {
 
     cy.location().its('hash').should('equal', '#/specs').and('not.contain', 'testId=').and('not.contain', 'studio=')
     cy.findByTestId('alert').should('contain.text', 'Spec not found')
-    cy.findByTestId('alert-body').should('contain.text', 'There is no spec matching the following location: cypress/e2e/spec.cy.js')
+
+    if (Cypress.platform === 'win32') {
+      cy.findByTestId('alert-body').should('contain.text', 'There is no spec matching the following location: cypress\\e2e\\spec.cy.js')
+    } else {
+      cy.findByTestId('alert-body').should('contain.text', 'There is no spec matching the following location: cypress/e2e/spec.cy.js')
+    }
   })
 
   it('appends the studio commands to the commands added to the test on the file system when file watching is disabled', () => {

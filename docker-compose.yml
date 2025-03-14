@@ -31,7 +31,7 @@ services:
       - .:/opt/cypress
   ci:
     # This should mirror the image used in workflows.yml
-    image: cypress/browsers-internal:node20.18.1-bullseye-chrome131-ff133
+    image: cypress/base-internal:20.18.1-bullseye
     ports:
       - 5566:5566
       - 5567:5567

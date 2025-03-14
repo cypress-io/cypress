@@ -467,6 +467,7 @@ export class BrowserCriClient {
 
     // always close the connection to the page target because it was destroyed
     browserCriClient.currentlyAttachedTarget.close().catch(() => { }),
+    browserCriClient.currentlyAttachedProtocolTarget?.close().catch(() => {})
 
     new Bluebird((resolve) => {
       // this event could fire either expectedly or unexpectedly
@@ -559,6 +560,9 @@ export class BrowserCriClient {
         browserClient: this.browserClient,
       })
 
+      // Clone the target here so that we separate the protocol client and the main client.
+      // This allows us to close the protocol client independently of the main client
+      // which we do when we exit out of studio in open mode.
       if (!this.currentlyAttachedProtocolTarget) {
         this.currentlyAttachedProtocolTarget = await this.currentlyAttachedTarget.clone()
         await this.protocolManager?.connectToBrowser(this.currentlyAttachedProtocolTarget)
@@ -627,6 +631,9 @@ export class BrowserCriClient {
         browserClient: this.browserClient,
       })
 
+      // Clone the target here so that we separate the protocol client and the main client.
+      // This allows us to close the protocol client independently of the main client
+      // which we do when we exit out of studio in open mode.
       this.currentlyAttachedProtocolTarget = await this.currentlyAttachedTarget.clone()
     } else {
       this.currentlyAttachedTarget = undefined
@@ -690,6 +697,7 @@ export class BrowserCriClient {
 
     if (this.currentlyAttachedTarget) {
       await this.currentlyAttachedTarget.close()
+      await this.currentlyAttachedProtocolTarget?.close()
     }
 
     await this.browserClient.close()

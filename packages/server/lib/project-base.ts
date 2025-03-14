@@ -38,7 +38,7 @@ export interface Cfg extends ReceivedCypressOptions {
   proxyServer?: Cypress.RuntimeConfigOptions['proxyUrl']
   fileServerFolder?: Cypress.ResolvedConfigOptions['fileServerFolder']
   testingType: TestingType
-  isProtocolEnabled?: boolean
+  isDefaultProtocolEnabled?: boolean
   isStudioProtocolEnabled?: boolean
   hideCommandLog?: boolean
   hideRunnerUi?: boolean
@@ -287,10 +287,10 @@ export class ProjectBase extends EE {
   reset () {
     debug('resetting project instance %s', this.projectRoot)
 
-    // if we're in studio mode, we need to reset the protocol manager
+    // if we're in studio mode, we need to close the protocol manager
     // to ensure the config is initialized properly on browser relaunch
     if (this.getConfig().isStudioProtocolEnabled) {
-      this.protocolManager?.reset()
+      this.protocolManager?.close()
       this.protocolManager = undefined
     }
 
@@ -459,7 +459,7 @@ export class ProjectBase extends EE {
       onStudioDestroy: async () => {
         if (this.ctx.coreData.studio?.protocolManager) {
           await browsers.closeProtocolConnection({ browser: this.browser, foundBrowsers: this.options.browsers })
-          this.protocolManager?.reset()
+          this.protocolManager?.close()
           this.protocolManager = undefined
         }
       },
@@ -610,10 +610,10 @@ export class ProjectBase extends EE {
 
     debug('project has config %o', this._cfg)
 
-    const isProtocolEnabled = this._protocolManager?.isProtocolEnabled ?? false
+    const isDefaultProtocolEnabled = this._protocolManager?.isProtocolEnabled ?? false
 
     // hide the runner if explicitly requested or if the protocol is enabled outside of studio and the runner is not explicitly enabled
-    const hideRunnerUi = this.options?.args?.runnerUi === false || (isProtocolEnabled && !this.ctx.coreData.studio && !this.options?.args?.runnerUi)
+    const hideRunnerUi = this.options?.args?.runnerUi === false || (isDefaultProtocolEnabled && !this.ctx.coreData.studio && !this.options?.args?.runnerUi)
 
     // hide the command log if explicitly requested or if we are hiding the runner
     const hideCommandLog = this._cfg.env?.NO_COMMAND_LOG === 1 || hideRunnerUi
@@ -624,7 +624,7 @@ export class ProjectBase extends EE {
       browser: this.browser,
       testingType: this.ctx.coreData.currentTestingType ?? 'e2e',
       specs: [],
-      isProtocolEnabled,
+      isDefaultProtocolEnabled,
       isStudioProtocolEnabled: this.ctx.coreData.studio?.isProtocolEnabled ?? false,
       hideCommandLog,
       hideRunnerUi,

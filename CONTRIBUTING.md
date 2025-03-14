@@ -381,7 +381,7 @@ Sometimes tests pass locally, but fail in CI. Our CI environment is dockerized. 
 2. Run the following command from the root of the project:
 
 ```shell
-$ yarn docker
+yarn docker
 ```
 
 There is a script [scripts/run-docker-local.sh](scripts/run-docker-local.sh) that runs the cypress image (see [CircleCI config](.circleci/config.yml) for the current image name).

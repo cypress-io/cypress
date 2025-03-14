@@ -19,7 +19,7 @@ import { cookieJar, SameSiteContext, automationCookieToToughCookie, Serializable
 import runEvents from './plugins/run_events'
 import type { OTLPTraceExporterCloud } from '@packages/telemetry'
 import { telemetry } from '@packages/telemetry'
-import type { Automation } from './automation'
+import type { Automation, AutomationCommands } from './automation'
 // eslint-disable-next-line no-duplicate-imports
 import type { Socket } from '@packages/socket'
 
@@ -182,7 +182,10 @@ export class SocketBase {
       return this.onAutomation(automationClient, message, data, id)
     }
 
-    const automationRequest = (message: string, data: Record<string, unknown>) => {
+    const automationRequest = <T extends keyof AutomationCommands>(
+      message: T,
+      data: AutomationCommands[T]['dataType'],
+    ) => {
       return automation.request(message, data, onAutomationClientRequestCallback)
     }
 
@@ -261,12 +264,12 @@ export class SocketBase {
             })
           })
 
-          socket.on('automation:push:request', (
-            message: string,
+          socket.on('automation:push:request', async (
+            message: keyof AutomationCommands,
             data: Record<string, unknown>,
             cb: (...args: unknown[]) => any,
           ) => {
-            automation.push(message, data)
+            await automation.push(message, data)
 
             // just immediately callback because there
             // is not really an 'ack' here
@@ -278,7 +281,7 @@ export class SocketBase {
           socket.on('automation:response', automation.response)
         })
 
-        socket.on('automation:request', (message, data, cb) => {
+        socket.on('automation:request', (message: keyof AutomationCommands, data, cb) => {
           debug('automation:request %s %o', message, data)
 
           return automationRequest(message, data)
@@ -404,14 +407,23 @@ export class SocketBase {
         })
 
         socket.on('studio:init', async (cb) => {
-          const { canAccessStudioAI } = await options.onStudioInit()
+          try {
+            const { canAccessStudioAI } = await options.onStudioInit()
 
-          cb({ canAccessStudioAI })
+            cb({ canAccessStudioAI })
+          } catch (error) {
+            cb({ error: errors.cloneErr(error) })
+          }
         })
 
         socket.on('studio:destroy', async (cb) => {
-          await options.onStudioDestroy()
-          cb()
+          try {
+            await options.onStudioDestroy()
+
+            cb({})
+          } catch (error) {
+            cb({ error: errors.cloneErr(error) })
+          }
         })
 
         socket.on('backend:request', (eventName: string, ...args) => {

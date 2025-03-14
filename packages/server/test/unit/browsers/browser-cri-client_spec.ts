@@ -367,6 +367,9 @@ describe('lib/browsers/browser-cri-client', function () {
               targetId: 'main-target-id',
               close: sinon.stub().resolves(),
             },
+            currentlyAttachedProtocolTarget: {
+              close: sinon.stub().resolves(),
+            },
             resettingBrowserTargets: false,
           },
           event: {
@@ -382,6 +385,7 @@ describe('lib/browsers/browser-cri-client', function () {
 
         expect(options.browserCriClient.getExtraTargetClient).not.to.be.called
         expect(options.browserCriClient.currentlyAttachedTarget.close).not.to.be.called
+        expect(options.browserCriClient.currentlyAttachedProtocolTarget.close).not.to.be.called
       })
 
       it('closes the extra target client', () => {

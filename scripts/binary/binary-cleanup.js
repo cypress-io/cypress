@@ -57,6 +57,7 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
     'node_modules/esutils/lib/utils.js',
     'node_modules/through/index.js',
     'node_modules/string-width/index.js',
+    'node_modules/proxy-from-env/index.js',
     // end needed deps for geckodriver
   ]
 

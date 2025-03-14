@@ -321,7 +321,7 @@ describe('lib/cloud/protocol', () => {
   })
 
   describe('.reset', () => {
-    it('resets the protocol manager', () => {
+    it('closes the protocol manager', () => {
       const mockClose = sinon.stub()
 
       protocolManager['_db'] = {
@@ -335,7 +335,7 @@ describe('lib/cloud/protocol', () => {
       protocolManager['_runId'] = '1'
       protocolManager['_errors'] = [{ captureMethod: 'cdpClient.on' }]
 
-      protocolManager.reset()
+      protocolManager.close()
 
       expect(mockClose).to.be.called
       expect(protocolManager['_db']).to.be.undefined
@@ -381,7 +381,7 @@ describe('lib/cloud/protocol', () => {
 
         sinon.stub(protocol, 'getDbMetadata').returns({ offset, size })
         sinon.stub(fs, 'unlink').withArgs(filePath).resolves()
-        protocolManager.beforeSpec({ instanceId, absolute: '/path/to/spec', relative: 'spec', relativeToCommonRoot: 'common/root', specFileExtension: '.ts', fileExtension: '.ts', specType: 'integration', baseName: 'spec', name: 'spec', fileName: 'spec.ts' })
+        protocolManager.beforeSpec({ instanceId, absolute: '/path/to/spec', relative: 'spec', specFileExtension: '.ts', fileExtension: '.ts', specType: 'integration', baseName: 'spec', name: 'spec', fileName: 'spec.ts' })
 
         expectedAfterSpecTotal = 225
 
