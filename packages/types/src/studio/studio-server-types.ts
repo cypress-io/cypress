@@ -27,9 +27,15 @@ export interface StudioServerOptions {
   cloudApi: StudioCloudApi
 }
 
+export interface StudioBrowser {
+  name: 'electron' | 'chrome' | 'chromium' | 'firefox' | 'edge' | string
+  channel: 'stable' | 'canary' | 'beta' | 'dev' | 'nightly' | string
+  family: 'chromium' | 'firefox' | 'webkit'
+}
+
 export interface StudioServerShape {
   initializeRoutes(router: Router): void
-  canAccessStudioAI(browser: Cypress.Browser): Promise<boolean>
+  canAccessStudioAI(browser: StudioBrowser): Promise<boolean>
 }
 
 export interface StudioServerDefaultShape {

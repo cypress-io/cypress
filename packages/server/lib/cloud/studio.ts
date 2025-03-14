@@ -1,4 +1,4 @@
-import type { StudioErrorReport, StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape, StudioCloudApi } from '@packages/types'
+import type { StudioErrorReport, StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape, StudioCloudApi, StudioBrowser } from '@packages/types'
 import type { Router } from 'express'
 import fetch from 'cross-fetch'
 import pkg from '@packages/root'
@@ -56,7 +56,7 @@ export class StudioManager implements StudioManagerShape {
     }
   }
 
-  async canAccessStudioAI (browser: Cypress.Browser): Promise<boolean> {
+  async canAccessStudioAI (browser: StudioBrowser): Promise<boolean> {
     return (await this.invokeAsync('canAccessStudioAI', { isEssential: true }, browser)) ?? false
   }
 
