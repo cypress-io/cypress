@@ -75,16 +75,6 @@ linuxWorkflowExcludeFilters: &linux-x64-workflow-exclude-filters
           value: << pipeline.git.branch >>
       - false
 
-# linux contributor workflow runs on contributor PRs
-# add your branch to this list to run the linux contributor build on your PR
-linuxContributorWorkflowFilters: &linux-x64-contributor-workflow-filters
-  when:
-    or:
-      - matches:
-          pattern: /^pull\/[0-9]+/
-          value: << pipeline.git.branch >>
-      - equal: [ 'mschile/circle_ci_env', << pipeline.git.branch >> ]
-
 # windows is slow and expensive in CI, so it normally only runs on main branches
 # add your branch to this list to run the full Windows build on your PR
 windowsWorkflowFilters: &windows-workflow-filters
@@ -3884,7 +3874,11 @@ workflows:
   linux-x64:
     <<: [ *linux-x64-workflow, *linux-x64-workflow-exclude-filters ]
   linux-x64-contributor:
-    <<: [ *linux-x64-contributor-workflow, *linux-x64-contributor-workflow-filters ]
+    <<: *linux-x64-contributor-workflow
+    when:
+      matches:
+        pattern: /^pull\/[0-9]+/
+        value: << pipeline.git.branch >>
   linux-arm64:
     <<: [ *linux-arm64-workflow, *linux-arm64-workflow-filters ]
   darwin-x64:
