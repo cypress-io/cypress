@@ -33,10 +33,12 @@ module.exports = {
 if (require.main === module) {
   const args = process.argv.slice(2)
 
-  if (args[0] === '--check-canaries') {
-    checkCanaries({ isContributorPR: args[1] === 'true' })
-  } else {
-    console.error(`No options were passed, but ${__filename} was invoked as a script.`)
+  if (args.length !== 3 || args[0] !== '--check-canaries' || args[1] !== '--is-contributor-pr') {
+    console.error(`Invalid arguments. Usage: ${__filename} --check-canaries --is-contributor-pr <isContributorPR>`)
     process.exit(1)
   }
+
+  const isContributorPR = args[2] === 'true'
+
+  checkCanaries({ isContributorPR })
 }

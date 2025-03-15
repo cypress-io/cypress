@@ -1539,7 +1539,7 @@ jobs:
           command: yarn list --depth=0 || true
       - run:
           name: Check env canaries
-          command: node ./scripts/circle-env.js --check-canaries <<
+          command: node ./scripts/circle-env.js --check-canaries --is-contributor-pr <<
             parameters.is_contributor_pr >>
       - build-and-persist
 
