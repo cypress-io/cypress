@@ -1,10 +1,10 @@
 // check if the project env canary and context canary are both present to verify that this script is reading the right env
-function checkCanaries () {
+function checkCanaries ({ isContributorPR }) {
   if (!process.env.CI) console.warn('This script will not work outside of CI.')
 
   const circleEnv = readProcessEnv()
 
-  if (circleEnv.IS_CONTRIBUTOR_PR === 'true') {
+  if (isContributorPR) {
     console.log('Contributor PR detected. Verifying canary envs are not available.')
     if (circleEnv.MAIN_CANARY) throw new Error('MAIN_CANARY should not be present in a contributor PR. Investigate why the CircleCI project level env var is being applied to this job.')
 
@@ -31,8 +31,10 @@ module.exports = {
 }
 
 if (require.main === module) {
-  if (process.argv.includes('--check-canaries')) {
-    checkCanaries()
+  const args = process.argv.slice(2)
+
+  if (args[0] === '--check-canaries') {
+    checkCanaries({ isContributorPR: args[1] === 'true' })
   } else {
     console.error(`No options were passed, but ${__filename} was invoked as a script.`)
     process.exit(1)

@@ -1522,9 +1522,6 @@ jobs:
         type: boolean
         default: false
     resource_class: << parameters.resource_class >>
-    environment:
-      <<: *defaultsEnvironment
-      IS_CONTRIBUTOR_PR: << parameters.is_contributor_pr >>
     steps:
       - restore_cached_workspace
       # this is a temporary work around while we wait for circle to resolve issues with packages
@@ -1542,7 +1539,8 @@ jobs:
           command: yarn list --depth=0 || true
       - run:
           name: Check env canaries
-          command: node ./scripts/circle-env.js --check-canaries
+          command: node ./scripts/circle-env.js --check-canaries <<
+            parameters.is_contributor_pr >>
       - build-and-persist
 
   lint:
