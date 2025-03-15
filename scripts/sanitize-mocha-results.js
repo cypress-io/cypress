@@ -18,7 +18,8 @@ function isAllowlistedEnv (key, value) {
     ['true', 'false', 'TRUE', 'FALSE', 'True', 'False'].includes(value)
     || value.length < 4
     // allow some envs that are not sensitive
-    || ['nodejs_version', 'CF_DOMAIN', 'SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES', 'CIRCLE_PROJECT_REPONAME', 'HOME', 'PLATFORM', 'HOSTNAME', 'PWD', 'INIT_CWD', 'USER', 'LOGNAME', 'npm_config_loglevel'].includes(key)
+    || ['nodejs_version', 'CF_DOMAIN', 'SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES', 'CIRCLE_PROJECT_REPONAME', 'CIRCLE_BRANCH',
+      'HOME', 'HOMEPATH', 'PLATFORM', 'HOSTNAME', 'PWD', 'INIT_CWD', 'USER', 'SUDO_USER', 'USERNAME', 'USERPROFILE', 'LOGNAME', 'npm_config_loglevel'].includes(key)
     // ignore npm_package_ envs https://docs.npmjs.com/cli/v11/using-npm/scripts#packagejson-vars
     || key.startsWith('npm_package_')
   )
@@ -49,7 +50,7 @@ async function checkReportFile (filename, circleEnv) {
 
   if (foundKeys.length) {
     await fs.rm(REPORTS_PATH, { recursive: true, force: true })
-    throw new Error(`Report contained the value of ${foundKeys.join(' ,')}, which is a CI environment variable. This means that a failing test is exposing environment variables. Test reports will not be persisted for this job.`)
+    throw new Error(`Report contained the value of ${foundKeys.join(', ')}, which is a CI environment variable. This means that a failing test is exposing environment variables. Test reports will not be persisted for this job.`)
   }
 
   console.log('Report parsed successfully.')

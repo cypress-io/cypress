@@ -1,4 +1,5 @@
 import { launchStudio } from './helper'
+import pDefer from 'p-defer'
 
 describe('Cypress Studio', () => {
   function incrementCounter (initialCount: number) {
@@ -21,13 +22,59 @@ describe('Cypress Studio', () => {
     })
   }
 
-  it('loads the cloud studio page', () => {
-    launchStudio({ specName: 'spec.cy.js', enableCloudStudio: true })
+  context('cloud studio', () => {
+    it('loads the studio page', () => {
+      launchStudio({ enableCloudStudio: true })
 
-    cy.window().then((win) => {
-      expect(win.Cypress.config('isDefaultProtocolEnabled')).to.be.false
-      expect(win.Cypress.config('isStudioProtocolEnabled')).to.be.true
-      expect(win.Cypress.state('isProtocolEnabled')).to.be.true
+      cy.window().then((win) => {
+        expect(win.Cypress.config('isDefaultProtocolEnabled')).to.be.false
+        expect(win.Cypress.config('isStudioProtocolEnabled')).to.be.true
+        expect(win.Cypress.state('isProtocolEnabled')).to.be.true
+      })
+    })
+
+    it('immediately loads the studio panel', () => {
+      const deferred = pDefer()
+
+      cy.scaffoldProject('experimental-studio')
+      cy.openProject('experimental-studio', [], {
+        cloudStudio: true,
+      })
+
+      cy.startAppServer('e2e')
+      cy.visitApp()
+      cy.specsPageIsVisible()
+      cy.get('[data-cy-row="spec.cy.js"]').click()
+
+      cy.waitForSpecToFinish()
+
+      cy.intercept('/cypress/e2e/index.html', () => {
+        // wait for the promise to resolve before responding
+        // this will ensure the studio panel is loaded before the test finishes
+        return deferred.promise
+      }).as('indexHtml')
+
+      cy.contains('visits a basic html page')
+      .closest('.runnable-wrapper')
+      .findByTestId('launch-studio')
+      .click()
+
+      // regular studio is not loaded until after the test finishes
+      cy.get('[data-cy="hook-name-studio commands"]').should('not.exist')
+      // cloud studio is loaded immediately
+      cy.findByTestId('studio-panel').should('exist').then(() => {
+        // we've verified the studio panel is loaded, now resolve the promise so the test can finish
+        deferred.resolve()
+      })
+
+      cy.wait('@indexHtml')
+
+      // Studio re-executes spec before waiting for commands - wait for the spec to finish executing.
+      cy.waitForSpecToFinish()
+
+      // Verify the studio panel is still open
+      cy.findByTestId('studio-panel').should('exist')
+      cy.get('[data-cy="hook-name-studio commands"]').should('exist')
     })
   })
 

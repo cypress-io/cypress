@@ -242,7 +242,7 @@ const studioStatus = computed(() => {
 })
 
 const shouldShowStudioPanel = computed(() => {
-  return studioStatus.value === 'INITIALIZED' && studioStore.isActive
+  return studioStatus.value === 'INITIALIZED' && (studioStore.isLoading || studioStore.isActive)
 })
 
 const hideCommandLog = runnerUiStore.hideCommandLog
