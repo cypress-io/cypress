@@ -36,10 +36,9 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - /^release\/\d+\.\d+\.\d+$/
-        - ryanm/chore/fix-binary-due-to-proxy-from-env
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'update-v8-snapshot-cache-on-develop'
-        - 'ryanm/chore/add_internal_studio'
+        - 'mschile/circle_ci_env'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -50,7 +49,7 @@ macWorkflowFilters: &darwin-workflow-filters
       - equal: [ develop, << pipeline.git.branch >> ]
       # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-      - equal: [ 'ryanm/chore/fix-binary-due-to-proxy-from-env', << pipeline.git.branch >> ]
+      - equal: [ 'mschile/circle_ci_env', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
@@ -61,7 +60,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
       - equal: [ develop, << pipeline.git.branch >> ]
       # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-      - equal: [ 'ryanm/chore/fix-binary-due-to-proxy-from-env', << pipeline.git.branch >> ]
+      - equal: [ 'mschile/circle_ci_env', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
@@ -84,7 +83,7 @@ windowsWorkflowFilters: &windows-workflow-filters
       - equal: [ develop, << pipeline.git.branch >> ]
       # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-      - equal: [ 'ryanm/chore/fix-binary-due-to-proxy-from-env', << pipeline.git.branch >> ]
+      - equal: [ 'mschile/circle_ci_env', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
@@ -1519,6 +1518,9 @@ jobs:
       resource_class:
         type: string
         default: large
+      is_contributor_pr:
+        type: boolean
+        default: false
     resource_class: << parameters.resource_class >>
     steps:
       - restore_cached_workspace
@@ -1537,7 +1539,8 @@ jobs:
           command: yarn list --depth=0 || true
       - run:
           name: Check env canaries
-          command: node ./scripts/circle-env.js --check-canaries
+          command: node ./scripts/circle-env.js --check-canaries --is-contributor-pr <<
+            parameters.is_contributor_pr >>
       - build-and-persist
 
   lint:
@@ -2793,31 +2796,6 @@ jobs:
           repo: cypress-example-todomvc
           browser: firefox
 
-  test-binary-against-conduit-chrome:
-    <<: *defaults
-    steps:
-      - test-binary-against-repo:
-          repo: cypress-example-conduit-app
-          browser: chrome
-          command: "npm run cypress:run"
-          wait-on: http://localhost:3000
-
-  test-binary-against-api-testing-firefox:
-    <<: *defaults
-    steps:
-      - test-binary-against-repo:
-          repo: cypress-example-api-testing
-          browser: firefox
-          command: "npm run cy:run"
-
-  test-binary-against-piechopper-firefox:
-    <<: *defaults
-    steps:
-      - test-binary-against-repo:
-          repo: cypress-example-piechopper
-          browser: firefox
-          command: "npm run cypress:run"
-
   test-binary-against-cypress-realworld-app:
     <<: *defaults
     resource_class: medium+
@@ -3286,8 +3264,7 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
   jobs:
     - node_modules_install
     - build:
-        environment:
-          IS_CONTRIBUTOR_PR: true
+        is_contributor_pr: true
         requires:
           - node_modules_install
     # In subsequent jobs, we use some contexts that are restricted to members of the Cypress organization.
