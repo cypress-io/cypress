@@ -771,15 +771,20 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
       process.env.CYPRESS_REMOTE_DEBUGGING_PORT = cdpPort.toString()
     }
 
-    // install the browser extensions
-    await Promise.all(_.map(launchOptions.extensions, async (path) => {
-      debug(`installing extension at path: ${path}`)
-      const id = await webdriverClient.installAddOn(path, true)
+    // Check if extension installation is enabled
+    const shouldInstallExtensions = process.env.CYPRESS_FIREFOX_EXTENSION_INSTALL !== 'false'
 
-      debug(`extension with id ${id} installed!`)
+    if (shouldInstallExtensions) {
+      // Install the browser extensions
+      await Promise.all(_.map(launchOptions.extensions, async (path) => {
+        debug(`installing extension at path: ${path}`)
+        const id = await webdriverClient.installAddOn(path, true)
 
-      return
-    }))
+        debug(`extension with id ${id} installed!`)
+      }))
+    } else {
+      debug('Skipping Firefox extension installation due to CYPRESS_FIREFOX_EXTENSION_INSTALL=false')
+    }
 
     debug('setting up firefox utils')
     const client = await firefoxUtil.setup({ automation, url, webdriverClient, remotePort: cdpPort, useWebDriverBiDi: USE_WEBDRIVER_BIDI, onError: options.onError })
