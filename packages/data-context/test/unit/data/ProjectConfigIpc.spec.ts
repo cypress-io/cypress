@@ -38,7 +38,7 @@ describe('ProjectConfigIpc', () => {
   context('forkChildProcess', () => {
     // some of these node versions may not exist, but we want to verify
     // the experimental flags are correctly disabled for future versions
-    const NODE_VERSIONS = ['18.20.4', '20.17.0', '20.19.0', '21.0.0', '22.7.0', '22.11.4', '22.12.0', '22.15.0']
+    const NODE_VERSIONS = ['18.20.4', '20.17.0', '20.19.0', '22.0.0', '22.7.0', '22.11.4', '22.12.0', '22.15.0']
     const experimentalDetectModuleIntroduced = '22.7.0'
     const experimentalRequireModuleIntroduced = '22.12.0'
     const minorPatchExperimentalModuleIntroduced = '>= 20.19.0 < 21.0.0'
@@ -101,7 +101,7 @@ describe('ProjectConfigIpc', () => {
                 }))
               }
 
-              if (semver.eq(nodeVersion, '21.0.0')) {
+              if (semver.eq(nodeVersion, '22.0.0')) {
                 expect(forkSpy).to.not.have.been.calledWith(sinon.match.string, sinon.match.array, sinon.match({
                   env: {
                     NODE_OPTIONS: sinon.match('--no-experimental-detect-module'),
