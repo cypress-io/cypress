@@ -3,6 +3,10 @@
 
 _Released 3/25/2025 (PENDING)_
 
+**Bugfixes:**
+
+- Fixed an issue where Firefox BiDi was not correctly removing prerequests on expected network request failures. Fixes [#31325](https://github.com/cypress-io/cypress/issues/31325).
+
 **Dependency Updates:**
 
 - Upgraded `@cypress/request` from `3.0.7` to `3.0.8`. Addressed in [#31311](https://github.com/cypress-io/cypress/pull/31311).
