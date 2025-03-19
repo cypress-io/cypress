@@ -29,7 +29,7 @@
     "chalk": "4.1.2",
     "chokidar": "3.5.1",
     "common-path-prefix": "3.0.0",
-    "cross-fetch": "^3.1.8",
+    "cross-fetch": "^4.1.0",
     "dataloader": "^2.0.0",
     "dayjs": "^1.9.3",
     "debug": "^4.4.0",
