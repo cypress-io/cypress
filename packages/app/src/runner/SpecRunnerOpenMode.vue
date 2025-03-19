@@ -98,7 +98,10 @@
         <ScreenshotHelperPixels />
       </template>
       <template #panel4>
-        <StudioPanel v-show="shouldShowStudioPanel" />
+        <StudioPanel
+          v-show="shouldShowStudioPanel"
+          :can-access-studio-a-i="studioStore.canAccessStudioAI"
+        />
       </template>
     </ResizablePanels>
   </AdjustRunnerStyleDuringScreenshot>
@@ -239,7 +242,7 @@ const studioStatus = computed(() => {
 })
 
 const shouldShowStudioPanel = computed(() => {
-  return studioStatus.value === 'INITIALIZED' && studioStore.isActive
+  return studioStatus.value === 'INITIALIZED' && (studioStore.isLoading || studioStore.isActive)
 })
 
 const hideCommandLog = runnerUiStore.hideCommandLog

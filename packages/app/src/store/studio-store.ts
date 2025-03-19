@@ -119,6 +119,8 @@ interface StudioRecorderState {
   }
   _body?: Element
   _currentId: number
+
+  canAccessStudioAI: boolean
 }
 
 export const useStudioStore = defineStore('studioRecorder', {
@@ -133,6 +135,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       isFailed: false,
       _hasStarted: false,
       _currentId: 1,
+      canAccessStudioAI: false,
     }
   },
 
@@ -146,6 +149,10 @@ export const useStudioStore = defineStore('studioRecorder', {
       this.suiteId = suiteId
       this.testId = undefined
       this._updateUrlParams(['testId', 'suiteId'])
+    },
+
+    setCanAccessStudioAI (canAccessStudioAI: boolean) {
+      this.canAccessStudioAI = canAccessStudioAI
     },
 
     clearRunnableIds () {

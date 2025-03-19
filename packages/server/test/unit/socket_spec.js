@@ -527,11 +527,12 @@ describe('lib/socket', () => {
 
     context('on(studio:init)', () => {
       it('calls onStudioInit', async function () {
-        this.options.onStudioInit.resolves()
+        this.options.onStudioInit.resolves({ canAccessStudioAI: true })
 
         await new Promise((resolve) => {
-          this.client.emit('studio:init', () => {
+          this.client.emit('studio:init', ({ canAccessStudioAI }) => {
             expect(this.options.onStudioInit).to.be.called
+            expect(canAccessStudioAI).to.be.true
 
             resolve()
           })
@@ -542,7 +543,7 @@ describe('lib/socket', () => {
         this.options.onStudioInit.rejects(new Error('foo'))
 
         await new Promise((resolve) => {
-          this.client.emit('studio:init', (error) => {
+          this.client.emit('studio:init', ({ error }) => {
             expect(this.options.onStudioInit).to.be.called
             expect(error.message).to.eq('foo')
 
@@ -569,7 +570,7 @@ describe('lib/socket', () => {
         this.options.onStudioDestroy.rejects(new Error('foo'))
 
         await new Promise((resolve) => {
-          this.client.emit('studio:destroy', (error) => {
+          this.client.emit('studio:destroy', ({ error }) => {
             expect(this.options.onStudioDestroy).to.be.called
             expect(error.message).to.eq('foo')
 

@@ -1,4 +1,4 @@
-import type { StudioErrorReport, StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape } from '@packages/types'
+import type { StudioErrorReport, StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape, StudioCloudApi } from '@packages/types'
 import type { Router } from 'express'
 import fetch from 'cross-fetch'
 import pkg from '@packages/root'
@@ -7,7 +7,15 @@ import { agent } from '@packages/network'
 import Debug from 'debug'
 import { requireScript } from './require_script'
 
-type StudioServer = { default: StudioServerDefaultShape }
+interface StudioServer { default: StudioServerDefaultShape }
+
+interface SetupOptions {
+  script: string
+  studioPath: string
+  studioHash?: string
+  projectSlug?: string
+  cloudApi: StudioCloudApi
+}
 
 const debug = Debug('cypress:server:studio')
 const routes = require('./routes')
@@ -29,10 +37,15 @@ export class StudioManager implements StudioManagerShape {
     return manager
   }
 
-  setup ({ script, studioPath, studioHash }: { script: string, studioPath: string, studioHash?: string }): void {
+  async setup ({ script, studioPath, studioHash, projectSlug, cloudApi }: SetupOptions): Promise<void> {
     const { createStudioServer } = requireScript<StudioServer>(script).default
 
-    this._studioServer = createStudioServer({ studioPath })
+    this._studioServer = await createStudioServer({
+      studioPath,
+      projectSlug,
+      cloudApi,
+    })
+
     this._studioHash = studioHash
     this.status = 'INITIALIZED'
   }
@@ -41,6 +54,10 @@ export class StudioManager implements StudioManagerShape {
     if (this._studioServer) {
       this.invokeSync('initializeRoutes', { isEssential: true }, router)
     }
+  }
+
+  async canAccessStudioAI (browser: Cypress.Browser): Promise<boolean> {
+    return (await this.invokeAsync('canAccessStudioAI', { isEssential: true }, browser)) ?? false
   }
 
   private async reportError (error: Error): Promise<void> {

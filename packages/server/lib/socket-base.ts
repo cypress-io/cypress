@@ -408,11 +408,11 @@ export class SocketBase {
 
         socket.on('studio:init', async (cb) => {
           try {
-            await options.onStudioInit()
+            const { canAccessStudioAI } = await options.onStudioInit()
 
-            cb()
+            cb({ canAccessStudioAI })
           } catch (error) {
-            cb(errors.cloneErr(error))
+            cb({ error: errors.cloneErr(error) })
           }
         })
 
@@ -420,9 +420,9 @@ export class SocketBase {
           try {
             await options.onStudioDestroy()
 
-            cb()
+            cb({})
           } catch (error) {
-            cb(errors.cloneErr(error))
+            cb({ error: errors.cloneErr(error) })
           }
         })
 

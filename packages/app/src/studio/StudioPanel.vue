@@ -10,32 +10,47 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { init, loadRemote } from '@module-federation/runtime'
 import type { StudioAppDefaultShape, StudioPanelShape } from './studio-app-types'
+
+// Mirrors the ReactDOM.Root type since incorporating those types
+// messes up vue typing elsewhere
+interface Root {
+  render: (element: JSX.Element) => void
+  unmount: () => void
+}
+
+const props = defineProps<{
+  canAccessStudioAI: boolean
+}>()
 
 interface StudioApp { default: StudioAppDefaultShape }
 
 const root = ref<HTMLElement | null>(null)
 const error = ref<string | null>(null)
 const Panel = ref<StudioPanelShape | null>(null)
+const reactRoot = ref<Root | null>(null)
 
 const maybeRenderReactComponent = () => {
   if (!Panel.value || !!error.value) {
     return
   }
 
-  const panel = window.UnifiedRunner.React.createElement(Panel.value)
+  const panel = window.UnifiedRunner.React.createElement(Panel.value, { canAccessStudioAI: props.canAccessStudioAI })
 
-  window.UnifiedRunner.ReactDOM.createRoot(root.value).render(panel)
+  reactRoot.value = window.UnifiedRunner.ReactDOM.createRoot(root.value)
+  reactRoot.value?.render(panel)
 }
+
+watch(() => props.canAccessStudioAI, maybeRenderReactComponent)
 
 const unmountReactComponent = () => {
   if (!Panel.value || !root.value) {
     return
   }
 
-  window.UnifiedRunner.ReactDOM.unmountComponentAtNode(root.value)
+  reactRoot.value?.unmount()
 }
 
 init({

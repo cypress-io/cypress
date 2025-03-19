@@ -163,7 +163,11 @@ export class ProjectBase extends EE {
     let studioManager: StudioManager | null
 
     if (process.env.CYPRESS_ENABLE_CLOUD_STUDIO || process.env.CYPRESS_LOCAL_STUDIO_PATH) {
-      studioManager = await getAndInitializeStudioManager({ projectId: cfg.projectId })
+      studioManager = await getAndInitializeStudioManager({
+        projectId: cfg.projectId,
+        cloudDataSource: this.ctx.cloud,
+      })
+
       this.ctx.update((data) => {
         data.studio = studioManager
       })
@@ -426,6 +430,12 @@ export class ProjectBase extends EE {
 
       onStudioInit: async () => {
         if (this.spec && this.ctx.coreData.studio?.protocolManager) {
+          const canAccessStudioAI = await this.ctx.coreData.studio?.canAccessStudioAI(this.browser) ?? false
+
+          if (!canAccessStudioAI) {
+            return { canAccessStudioAI }
+          }
+
           this.protocolManager = this.ctx.coreData.studio?.protocolManager
           this.protocolManager?.setupProtocol()
           this.protocolManager?.beforeSpec({
@@ -434,7 +444,13 @@ export class ProjectBase extends EE {
           })
 
           await browsers.connectProtocolToBrowser({ browser: this.browser, foundBrowsers: this.options.browsers, protocolManager: this.protocolManager })
+
+          return { canAccessStudioAI: true }
         }
+
+        this.protocolManager = undefined
+
+        return { canAccessStudioAI: false }
       },
 
       onStudioDestroy: async () => {
