@@ -56,7 +56,7 @@
     "react-docgen": "6.0.4",
     "recast": "0.20.4",
     "resolve": "^1.22.10",
-    "semver": "7.3.2",
+    "semver": "^7.7.1",
     "server-destroy": "1.0.1",
     "simple-git": "^3.27.0",
     "stringify-object": "^3.0.0",
