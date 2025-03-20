@@ -10,7 +10,14 @@ _Released 3/25/2025 (PENDING)_
 **Dependency Updates:**
 
 - Upgraded `@cypress/request` from `3.0.7` to `3.0.8`. Addressed in [#31311](https://github.com/cypress-io/cypress/pull/31311).
+- Upgraded `cross-fetch` from `3.1.8` to `4.1.0`. Addressed in [#31327](https://github.com/cypress-io/cypress/pull/31327).
+- Upgraded `micromatch` from `4.0.6` to `4.0.8`. Addressed in [#31330](https://github.com/cypress-io/cypress/pull/31330).
 - Upgraded `systeminformation` from `5.21.7` to `5.22.8`. Addressed in [#31281](https://github.com/cypress-io/cypress/pull/31281).
+
+**Bugfixes:**
+
+- Applies a fix from [#30730](https://github.com/cypress-io/cypress/pull/30730) and [#30099](https://github.com/cypress-io/cypress/pull/30099) related to Node.js turning on ESM flags by default in Node.js version `20.19.0`. Fixed in [#31308](https://github.com/cypress-io/cypress/pull/31308).
+
 
 ## 14.2.0
 

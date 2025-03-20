@@ -59,7 +59,7 @@
     "content-type": "1.0.4",
     "cookie-parser": "1.4.5",
     "cors": "2.8.5",
-    "cross-fetch": "3.1.8",
+    "cross-fetch": "^4.1.0",
     "data-uri-to-buffer": "2.0.1",
     "dayjs": "^1.9.3",
     "debug": "^4.3.4",
