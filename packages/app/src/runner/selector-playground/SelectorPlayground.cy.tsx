@@ -183,13 +183,8 @@ describe('SelectorPlayground', () => {
   })
 
   // TODO: fix this flaky test
-  it.skip('shows tooltips when buttons are focused', () => {
+  it('shows tooltips when buttons are focused', () => {
     mountSelectorPlayground()
-
-    cy.get('[data-cy="playground-toggle"]').focus()
-    cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Click an element to see a suggested selector')
-    cy.get('[data-cy="playground-toggle"]').trigger('mouseleave')
-    cy.get('[data-cy="selector-playground-tooltip"]').should('not.exist')
 
     cy.get('[data-cy="playground-copy"]').focus()
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Copy to clipboard')
