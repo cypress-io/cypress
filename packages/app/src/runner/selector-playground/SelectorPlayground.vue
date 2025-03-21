@@ -1,7 +1,7 @@
 <template>
   <div
     id="selector-playground"
-    class="border-t border-b bg-gray-900 border-gray-800 h-[56px] grid py-[12px] px-[16px] gap-[12px] grid-cols-[40px,1fr,auto] items-center "
+    class="border-t border-b bg-gray-1000 border-gray-800 h-[56px] grid py-[12px] px-[16px] gap-[12px] grid-cols-[40px,1fr,auto] items-center "
   >
     <SelectorPlaygroundTooltip
       color="light"
@@ -10,10 +10,10 @@
       class="flex h-full"
     >
       <button
-        class="border rounded-md flex h-full border-gray-800 outline-solid outline-indigo-500 transition w-[40px] duration-150 items-center justify-center hover:bg-gray-800"
+        class="border rounded-md flex h-full outline-solid outline-indigo-500 transition w-[40px] duration-150 items-center justify-center hover:bg-gray-800"
         :aria-label="selectorPlaygroundStore.isEnabled ? 'click to interact with the application and build test cases' : 'click to exit interactive test building mode'"
         data-cy="playground-toggle"
-        :class="{ 'bg-gray-800 border-gray-700': selectorPlaygroundStore.isEnabled, 'bg-gray-900': !selectorPlaygroundStore.isEnabled }"
+        :class="{ 'bg-gray-800 border-gray-700': selectorPlaygroundStore.isEnabled, 'bg-gray-900 border-gray-800': !selectorPlaygroundStore.isEnabled }"
         @click="toggleEnabled"
       >
         <i-cy-selector_x16 class="icon-dark-gray-300" />

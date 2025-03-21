@@ -2,7 +2,7 @@
   <div
     id="spec-runner-header"
     ref="autHeaderEl"
-    class="h-full bg-gray-1000 min-h-[64px] text-[14px]"
+    class="h-full bg-gray-1000 border-l-[1px] border-gray-900 min-h-[64px] text-[14px]"
   >
     <div class="flex flex-wrap grow p-[16px] gap-[12px] justify-end h-[64px]">
       <button
