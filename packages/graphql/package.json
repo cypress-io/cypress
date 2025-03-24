@@ -52,7 +52,7 @@
     "@packages/types": "0.0.0-development",
     "@types/dedent": "^0.7.0",
     "@types/graphql-resolve-batch": "1.1.6",
-    "@types/micromatch": "4.0.2",
+    "@types/micromatch": "4.0.9",
     "@types/server-destroy": "^1.0.1",
     "chai": "^4.2.0",
     "chokidar": "3.6.0",

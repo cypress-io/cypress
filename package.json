@@ -197,7 +197,7 @@
     "rimraf": "5.0.10",
     "semantic-release": "22.0.12",
     "semantic-release-monorepo": "8.0.2",
-    "semver": "7.5.3",
+    "semver": "^7.7.1",
     "shelljs": "0.8.5",
     "sinon": "7.3.2",
     "snap-shot-it": "7.9.10",

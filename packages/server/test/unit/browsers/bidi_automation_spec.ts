@@ -370,7 +370,7 @@ describe('lib/browsers/bidi_automation', () => {
           })
         })
 
-        it('swallows "no such request" messages if thrown via killing the Cypress app', () => {
+        it('swallows "no such request" messages if thrown via killing the Cypress app and removes the related prerequest', async () => {
           BidiAutomation.create(mockWebdriverClient, mockAutomationClient)
 
           mockWebdriverClient.networkContinueRequest = sinon.stub().throws('no such request')
@@ -378,6 +378,10 @@ describe('lib/browsers/bidi_automation', () => {
           expect(() => {
             mockWebdriverClient.emit('network.beforeRequestSent', mockRequest)
           }).not.to.throw()
+
+          await flushPromises()
+
+          expect(mockAutomationClient.onRemoveBrowserPreRequest).to.have.been.calledWith('request1')
         })
       })
 
