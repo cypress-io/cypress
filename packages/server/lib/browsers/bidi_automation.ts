@@ -1,6 +1,8 @@
 import debugModule from 'debug'
 import type { Automation } from '../automation'
+import { AutomationNotImplemented } from '../automation/automation_not_implemented'
 import type { BrowserPreRequest, BrowserResponseReceived, ResourceType } from '@packages/proxy'
+import type { AutomationMiddleware, AutomationCommands } from '@packages/types'
 import type { Client as WebDriverClient } from 'webdriver'
 import type {
   NetworkBeforeRequestSentParameters,
@@ -9,6 +11,9 @@ import type {
   NetworkFetchErrorParameters,
   BrowsingContextInfo,
 } from 'webdriver/build/bidi/localTypes'
+
+import { bidiKeyPress } from '../automation/commands/key_press'
+
 const debug = debugModule('cypress:server:browsers:bidi_automation')
 const debugVerbose = debugModule('cypress-verbose:server:browsers:bidi_automation')
 
@@ -86,6 +91,9 @@ export class BidiAutomation {
     this.webDriverClient.on('network.fetchError', this.onFetchError)
     this.webDriverClient.on('browsingContext.contextCreated', this.onBrowsingContextCreated)
     this.webDriverClient.on('browsingContext.contextDestroyed', this.onBrowsingContextDestroyed)
+
+    debug('registering middleware')
+    automation.use(this.automationMiddleware)
   }
 
   setTopLevelContextId = (contextId?: string) => {
@@ -273,5 +281,25 @@ export class BidiAutomation {
 
   static create (webdriverClient: WebDriverClient, automation: Automation) {
     return new BidiAutomation(webdriverClient, automation)
+  }
+
+  public readonly automationMiddleware: AutomationMiddleware = {
+    onRequest: async <T extends keyof AutomationCommands> (message: T, data: AutomationCommands[T]['dataType']): Promise<AutomationCommands[T]['returnType']> => {
+      debugVerbose('automation command \'%s\' requested with data: %O', message, data)
+
+      switch (message) {
+        case 'key:press':
+          if (this.topLevelContextId) {
+            await bidiKeyPress(data, this.webDriverClient, this.topLevelContextId)
+          } else {
+            throw new Error('Cannot emit key press: no top level context initialized')
+          }
+
+          return
+        default:
+          debug('BiDi automation not implemented for message: %s', message)
+          throw new AutomationNotImplemented(message, 'BiDiAutomation')
+      }
+    },
   }
 }

@@ -26,13 +26,14 @@ describe('lib/browsers/bidi_automation', () => {
         onRequestEvent: sinon.stub(),
         onBrowserPreRequest: sinon.stub().resolves(),
         onRemoveBrowserPreRequest: sinon.stub().resolves(),
+        use: sinon.stub(),
       } as unknown as Automation
     })
 
     it('binds BIDI_EVENTS when a new instance is created', () => {
       mockWebdriverClient.on = sinon.stub()
 
-      BidiAutomation.create(mockWebdriverClient, mockAutomationClient)
+      const bidiAutoInstance = BidiAutomation.create(mockWebdriverClient, mockAutomationClient)
 
       expect(mockWebdriverClient.on).to.have.been.calledWith('network.beforeRequestSent')
       expect(mockWebdriverClient.on).to.have.been.calledWith('network.responseStarted')
@@ -40,6 +41,7 @@ describe('lib/browsers/bidi_automation', () => {
       expect(mockWebdriverClient.on).to.have.been.calledWith('network.fetchError')
       expect(mockWebdriverClient.on).to.have.been.calledWith('browsingContext.contextCreated')
       expect(mockWebdriverClient.on).to.have.been.calledWith('browsingContext.contextDestroyed')
+      expect(mockAutomationClient.use).to.have.been.calledWith(bidiAutoInstance.automationMiddleware)
     })
 
     it('unbinds BIDI_EVENTS when close() is called', () => {

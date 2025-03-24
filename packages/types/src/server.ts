@@ -90,10 +90,10 @@ export interface AutomationCommands {
   'is:automation:client:connected': CommandSignature
   'remote:debugger:protocol': CommandSignature
   'response:received': CommandSignature
-  'key:press': CommandSignature<KeyPressParams, Promise<void>>
+  'key:press': CommandSignature<KeyPressParams, void>
 }
 
-export type OnRequestEvent = <T extends keyof AutomationCommands>(eventName: T, data: AutomationCommands[T]['dataType']) => void
+export type OnRequestEvent = <T extends keyof AutomationCommands>(message: T, data: AutomationCommands[T]['dataType']) => Promise<AutomationCommands[T]['returnType']>
 
 export type OnServiceWorkerRegistrationUpdated = (data: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) => void
 

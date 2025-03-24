@@ -7,6 +7,7 @@ import type { AutomationCommands, AutomationMiddleware, OnRequestEvent, OnServic
 import { cookieJar } from '../util/cookies'
 import type { ServiceWorkerEventHandler } from '@packages/proxy/lib/http/util/service-worker-manager'
 import Debug from 'debug'
+import { AutomationNotImplemented } from './automation_not_implemented'
 
 const debug = Debug('cypress:server:automation')
 
@@ -29,6 +30,7 @@ export type AutomationOptions = {
 export class Automation {
   private requests: Record<number, (any) => void>
   private middleware: AutomationMiddleware
+  private preferredMiddleware?: AutomationMiddleware
   private cookies: Cookies
   private screenshot: { capture: (data: any, automate: any) => any }
   public onBrowserPreRequest: OnBrowserPreRequest | undefined
@@ -77,17 +79,27 @@ export class Automation {
     return (
       msg: T | AutomationCommands[T]['dataType'],
       data: T extends keyof AutomationCommands ? AutomationCommands[T]['dataType'] : never,
-    ) => {
+    ): Bluebird<AutomationCommands[T]['returnType']> => {
       const resolvedData = data ?? msg as AutomationCommands[T]['dataType']
       const resolvedMessage = data ? msg : message
 
       const onReq = this.get('onRequest')
 
       if (onReq) {
-        return Bluebird.resolve(onReq(resolvedMessage, resolvedData))
+        return Bluebird.try(() => {
+          return onReq(resolvedMessage, resolvedData)
+        }).catch((e) => {
+          if (AutomationNotImplemented.isAutomationNotImplementedErr(e)) {
+            debug(`${e.message}. Falling back to emit via socket.`)
+
+            return this.requestAutomationResponse(resolvedMessage, resolvedData, fn)
+          }
+
+          throw e
+        })
       }
 
-      return Bluebird.resolve(this.requestAutomationResponse(resolvedMessage, resolvedData, fn))
+      return this.requestAutomationResponse(resolvedMessage, resolvedData, fn)
     }
   }
 
@@ -130,11 +142,13 @@ export class Automation {
   }
 
   normalize<T extends keyof AutomationCommands> (message: T, data: AutomationCommands[T]['dataType'], automate?): Promise<AutomationCommands[T]['returnType']> {
-    debug('normalize', message)
+    debug('normalize', message, data)
 
     return Bluebird.try(() => {
       switch (message) {
         case 'take:screenshot':
+          debug(automate.toString())
+
           return this.screenshot.capture(data, automate)
         case 'get:cookies':
           return this.cookies.getCookies(data, automate)
@@ -179,6 +193,8 @@ export class Automation {
   }
 
   use (middlewares: AutomationMiddleware) {
+    debug('using middleware with fns', Object.keys(this.middleware), new Error().stack)
+
     return this.middleware = {
       ...this.middleware,
       ...middlewares,

@@ -1,10 +1,13 @@
 import type Sinon from 'sinon'
+import type { KeyPressSupportedKeys } from '@packages/types'
 import type { SendDebuggerCommand } from '../../../../lib/browsers/cdp_automation'
-import { cdpKeyPress, CDP_KEYCODE } from '../../../../lib/automation/commands/key_press'
+import { cdpKeyPress, bidiKeyPress, BIDI_VALUE, CDP_KEYCODE } from '../../../../lib/automation/commands/key_press'
+import { Client as WebdriverClient } from 'webdriver'
+
 const { expect, sinon } = require('../../../spec_helper')
 
 describe('key:press automation command', () => {
-  describe('cdp codepath', () => {
+  describe('cdp()', () => {
     let sendFn: Sinon.SinonStub<Parameters<SendDebuggerCommand>, ReturnType<SendDebuggerCommand>>
 
     beforeEach(() => {
@@ -35,6 +38,42 @@ describe('key:press automation command', () => {
         // been checked for correctness since being received by automation
         // @ts-expect-error
         await expect(cdpKeyPress({ key: 'foo' })).to.be.rejectedWith('foo is not supported by \'cy.press()\'.')
+      })
+    })
+  })
+
+  describe('bidi', () => {
+    let client: Sinon.SinonStubbedInstance<WebdriverClient>
+    let context: string
+    let key: KeyPressSupportedKeys
+
+    beforeEach(() => {
+      // can't create a sinon stubbed instance because webdriver doesn't export the constructor. Because it's known that
+      // bidiKeypress only invokes inputPerformActions, and inputPerformActions is properly typed, this is okay.
+      // @ts-expect-error
+      client = {
+        inputPerformActions: (sinon as Sinon.SinonSandbox).stub<Parameters<WebdriverClient['inputPerformActions']>, ReturnType<WebdriverClient['inputPerformActions']>>(),
+      }
+
+      context = 'someContextId'
+
+      key = 'Tab'
+    })
+
+    it('calls client.inputPerformActions with a keydown, pause, and keyup action', () => {
+      bidiKeyPress({ key }, client as WebdriverClient, context, 'idSuffix')
+
+      expect(client.inputPerformActions.firstCall.args[0]).to.deep.equal({
+        context,
+        actions: [{
+          type: 'key',
+          id: 'someContextId-Tab-idSuffix',
+          actions: [
+            { type: 'keyDown', value: BIDI_VALUE[key] },
+            { type: 'pause', duration: 20 },
+            { type: 'keyUp', value: BIDI_VALUE[key] },
+          ],
+        }],
       })
     })
   })
