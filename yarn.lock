@@ -2683,10 +2683,10 @@
   dependencies:
     "@cypress-design/color-constants" "^1.0.0"
 
-"@cypress-design/vue-button@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/vue-button/-/vue-button-1.1.0.tgz#447cfee08c15186f6ba04928bbc14d4e95639de7"
-  integrity sha512-SLgYtpjsT8SgzbxpK/Me2aSFCRiB0K/K8WeDHw9kcpDR9St4rEmRUYNcKBCPL0knanOZEOspEmaGzyWcfsLDpQ==
+"@cypress-design/vue-button@^1.1.0", "@cypress-design/vue-button@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-button/-/vue-button-1.3.0.tgz#402230743d35daf99af8bde728a5b4c93d61f74e"
+  integrity sha512-zBxgzYL6+i8qz6KfbJRyq4oVBh+JSCT8OQ9NA2t0TL2frTvY2mutjZZjXoSkiACvw6sA/W9QcWh5SXyvHUWrqA==
 
 "@cypress-design/vue-icon@^1.0.0", "@cypress-design/vue-icon@^1.6.0":
   version "1.6.0"
