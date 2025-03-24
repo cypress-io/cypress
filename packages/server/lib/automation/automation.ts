@@ -193,8 +193,6 @@ export class Automation {
   }
 
   use (middlewares: AutomationMiddleware) {
-    debug('using middleware with fns', Object.keys(this.middleware), new Error().stack)
-
     return this.middleware = {
       ...this.middleware,
       ...middlewares,

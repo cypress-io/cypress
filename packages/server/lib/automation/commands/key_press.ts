@@ -65,16 +65,21 @@ export async function bidiKeyPress ({ key }: KeyPressParams, client: Client, con
     throw new InvalidKeyError(key)
   }
 
-  await client.inputPerformActions({
-    context,
-    actions: [{
-      type: 'key',
-      id: `${context}-${key}-${idSuffix || Date.now()}`,
-      actions: [
-        { type: 'keyDown', value },
-        { type: 'pause', duration: 20 },
-        { type: 'keyUp', value },
-      ],
-    }],
-  })
+  try {
+    await client.inputPerformActions({
+      context,
+      actions: [{
+        type: 'key',
+        id: `${context}-${key}-${idSuffix || Date.now()}`,
+        actions: [
+          { type: 'keyDown', value },
+          { type: 'pause', duration: 20 },
+          { type: 'keyUp', value },
+        ],
+      }],
+    })
+  } catch (e) {
+    debug(e)
+    throw e
+  }
 }
