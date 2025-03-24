@@ -18,19 +18,52 @@ const getTsLoaderIfExists = (rules) => {
         return use.loader && use.loader.includes('ts-loader')
       })
 
+      /**
+       * If the rule is found, it will look like this:
+       * rules: [
+       *  {
+       *    test: /\.tsx?$/,
+       *    exclude: [/node_modules/],
+       *    use: [{
+       *      loader: 'ts-loader'
+       *    }]
+       *  }
+       * ]
+       */
       tsLoaderRule = foundRule
 
       return tsLoaderRule
     }
 
     if (_.isObject(rule.use) && rule.use.loader && rule.use.loader.includes('ts-loader')) {
-      // it's an Object
+      /**
+       * If the rule is found, it will look like this:
+       * rules: [
+       *  {
+       *    test: /\.tsx?$/,
+       *    exclude: [/node_modules/],
+       *    use: {
+       *      loader: 'ts-loader'
+       *    }
+       *  }
+       * ]
+       */
       tsLoaderRule = rule.use
 
       return tsLoaderRule
     }
 
     tsLoaderRule = rules.find((rule) => {
+      /**
+       * If the rule is found, it will look like this:
+       * rules: [
+       *  {
+       *    test: /\.tsx?$/,
+       *    exclude: [/node_modules/],
+       *    loader: 'ts-loader'
+       *  }
+       * ]
+       */
       return rule.loader && rule.loader.includes('ts-loader')
     })
 

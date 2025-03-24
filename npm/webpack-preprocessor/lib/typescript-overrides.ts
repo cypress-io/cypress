@@ -57,7 +57,6 @@ export const overrideSourceMaps = (sourceMap: boolean, typescriptPath?: string) 
 
           debug('typescript modified createProgram options %o', options)
 
-          // @ts-ignore
           return createProgram.apply(typescript, args)
         }
 
