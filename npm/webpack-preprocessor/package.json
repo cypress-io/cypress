@@ -28,7 +28,6 @@
     "@babel/core": "^7.25.2",
     "@babel/preset-env": "^7.25.3",
     "@types/mocha": "9.0.0",
-    "@types/webpack": "^4.41.12",
     "babel-loader": "^10.0.0",
     "chai": "4.1.2",
     "chalk": "3.0.0",

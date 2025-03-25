@@ -174,7 +174,7 @@
     "@types/node": "20.16.0",
     "@types/request-promise": "^4.1.48",
     "@types/tar": "^6.1.0",
-    "babel-loader": "9.1.3",
+    "babel-loader": "10.0.0",
     "chai": "1.10.0",
     "chai-as-promised": "7.1.1",
     "chai-subset": "1.6.0",
