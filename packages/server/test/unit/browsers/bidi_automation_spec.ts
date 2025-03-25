@@ -282,8 +282,8 @@ describe('lib/browsers/bidi_automation', () => {
               type: 'other',
             },
             headers: {},
-            cdpRequestWillBeSentTimestamp: -1,
-            cdpRequestWillBeSentReceivedTimestamp: -1,
+            cdpRequestWillBeSentTimestamp: 0,
+            cdpRequestWillBeSentReceivedTimestamp: 0,
           })
 
           expect(mockWebdriverClient.networkContinueRequest).to.have.been.calledWith({
@@ -327,8 +327,8 @@ describe('lib/browsers/bidi_automation', () => {
             headers: {
               foo: 'bar',
             },
-            cdpRequestWillBeSentTimestamp: -1,
-            cdpRequestWillBeSentReceivedTimestamp: -1,
+            cdpRequestWillBeSentTimestamp: 0,
+            cdpRequestWillBeSentReceivedTimestamp: 0,
           })
 
           expect(mockWebdriverClient.networkContinueRequest).to.have.been.calledWith({

@@ -174,9 +174,10 @@ export class BidiAutomation {
       resourceType,
       originalResourceType: params.request.initiatorType || params.request.destination,
       initiator: params.initiator,
-      // Since we are NOT using CDP, we set the values to -1 to indicate that we do not have this information.
-      cdpRequestWillBeSentTimestamp: -1,
-      cdpRequestWillBeSentReceivedTimestamp: -1,
+      // Since we are NOT using CDP, we set the values to 0 to indicate that we do not have this information.
+      // This is important when determining pre-request timeout and removal behavior
+      cdpRequestWillBeSentTimestamp: 0,
+      cdpRequestWillBeSentReceivedTimestamp: 0,
     }
 
     debugVerbose(`prerequest received for request ID ${params.request.request}: %o`, browserPreRequest)
