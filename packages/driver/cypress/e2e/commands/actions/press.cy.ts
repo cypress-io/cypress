@@ -1,7 +1,7 @@
 describe('__placeholder__/commands/actions/press', () => {
   it('dispatches the tab keypress to the AUT', () => {
     cy.visit('/fixtures/input_events.html')
-    cy.screenshot()
+
     cy.get('#focus').focus().then(async () => {
       try {
         await Cypress.automation('key:press', { key: 'Tab' })

@@ -5,7 +5,6 @@
   <script defer>
     ['keydown', 'keyup'].forEach((ev) => {
       document.addEventListener(ev, (data) => {
-        document.body.appendChild(document.createTextNode(`${ev}:${data.key}`))
         document.getElementById(ev).value = data.key
       })
     })
