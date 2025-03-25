@@ -680,7 +680,8 @@ describe('studio functionality', () => {
     cy.startAppServer('e2e')
     cy.visitApp()
     cy.specsPageIsVisible()
-    cy.get(`[title="empty.cy.js"]`).should('be.visible').click()
+    cy.get(`[title="empty.cy.js"]`).should('be.visible')
+    cy.get(`[title="empty.cy.js"]`).click()
 
     cy.waitForSpecToFinish()
 
@@ -702,7 +703,7 @@ describe('studio functionality', () => {
       cy.get('#increment').realClick()
     })
 
-    cy.get('button').contains('Save Commands').click()
+    cy.contains('button', 'Save Commands').click()
 
     cy.get('#testName').type('new-test')
 
