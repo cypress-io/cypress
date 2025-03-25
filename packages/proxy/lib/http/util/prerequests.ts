@@ -141,7 +141,7 @@ export class PreRequests {
       const now = Date.now()
 
       this.pendingPreRequests.removeMatching(({ cdpRequestWillBeSentReceivedTimestamp, browserPreRequest }) => {
-        if (cdpRequestWillBeSentReceivedTimestamp + this.sweepInterval < now) {
+        if ((cdpRequestWillBeSentReceivedTimestamp + this.sweepInterval < now) && cdpRequestWillBeSentReceivedTimestamp !== -1) {
           debugVerbose('timed out unmatched pre-request: %o', browserPreRequest)
           metrics.unmatchedPreRequests++
 
