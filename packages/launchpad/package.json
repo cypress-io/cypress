@@ -50,7 +50,7 @@
     "@vue/compiler-sfc": "3.2.47",
     "@vueuse/core": "7.7.1",
     "bluebird": "3.5.3",
-    "classnames": "2.3.1",
+    "classnames": "^2.5.1",
     "concurrently": "^6.2.0",
     "cross-env": "6.0.3",
     "cypress-plugin-tab": "1.0.5",

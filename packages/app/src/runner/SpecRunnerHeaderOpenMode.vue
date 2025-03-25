@@ -2,28 +2,26 @@
   <div
     id="spec-runner-header"
     ref="autHeaderEl"
-    class="min-h-[64px] text-[14px]"
+    class="h-full bg-gray-1000 border-l-[1px] border-gray-900 min-h-[64px] text-[14px]"
   >
-    <div class="flex flex-wrap grow p-[16px] gap-[12px] justify-end">
+    <div class="flex flex-wrap grow p-[16px] gap-[12px] justify-end h-[64px]">
+      <button
+        data-cy="playground-activator"
+        :disabled="isDisabled"
+        class="bg-gray-900 border rounded-md flex h-full border-gray-800 outline-solid outline-indigo-500 transition w-[40px] duration-150 items-center justify-center hover:bg-gray-800"
+        :aria-label="t('runner.selectorPlayground.toggle')"
+        :class="[selectorPlaygroundStore.show ? 'bg-gray-800 border-gray-700' : 'bg-gray-900']"
+        @click="togglePlayground"
+      >
+        <i-cy-crosshairs_x16 class="icon-dark-gray-300" />
+      </button>
       <div
         data-cy="aut-url"
-        class="border rounded flex grow border-gray-100 h-[32px] align-middle"
+        class="border rounded bg-gray-950 flex grow border-gray-800 h-[32px] align-middle"
         :class="{
           'bg-gray-50': autStore.isLoadingUrl
         }"
       >
-        <Button
-          data-cy="playground-activator"
-          :disabled="isDisabled"
-          class="rounded-none border-gray-100 border-r-[1px]"
-          variant="text"
-          :aria-label="t('runner.selectorPlayground.toggle')"
-          @click="togglePlayground"
-        >
-          <i-cy-crosshairs_x16
-            :class="[selectorPlaygroundStore.show ? 'icon-dark-indigo-500' : 'icon-dark-gray-500']"
-          />
-        </Button>
         <SpecRunnerDropdown
           v-if="selectedBrowser?.displayName"
           data-cy="select-browser"
@@ -52,7 +50,7 @@
           :value="inputValue"
           :placeholder="inputPlaceholder"
           aria-label="url of the application under test"
-          class="aut-url-input flex grow mr-[12px] leading-normal max-w-full text-indigo-500 self-center hocus-link-default truncate"
+          class="aut-url-input bg-gray-950 flex grow mr-[12px] leading-normal max-w-full text-gray-300 self-center hocus-link-default truncate"
           :style="{ zIndex: inputZIndex }"
           @input="setStudioUrl"
           @click="openExternally"
@@ -69,7 +67,8 @@
         <Tag
           data-cy="viewport-size"
           size="20"
-          color="white"
+          color="gray"
+          :dark="true"
           class="self-center rounded-[10px] mr-[5px] pr-[6px] pl-[6px]"
         >
           <span class="whitespace-nowrap text-[12px]">{{ autStore.viewportWidth }}x{{
@@ -80,7 +79,8 @@
           v-if="displayScale"
           data-cy="viewport-scale"
           size="20"
-          color="white"
+          color="gray"
+          :dark="true"
           class="self-center rounded-[10px] mr-[5px] pr-[6px] pl-[6px]"
         >
           <span class="text-[12px]">
@@ -129,7 +129,6 @@ import Tag from '@cypress-design/vue-tag'
 import SelectorPlayground from './selector-playground/SelectorPlayground.vue'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 import Alert from '@packages/frontend-shared/src/components/Alert.vue'
-import Button from '@packages/frontend-shared/src/components/Button.vue'
 import StudioControls from './studio/StudioControls.vue'
 import StudioUrlPrompt from './studio/StudioUrlPrompt.vue'
 import VerticalBrowserListItems from '@packages/frontend-shared/src/gql-components/topnav/VerticalBrowserListItems.vue'

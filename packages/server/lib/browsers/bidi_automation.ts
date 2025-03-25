@@ -216,6 +216,10 @@ export class BidiAutomation {
           cookies: params.request.cookies,
         })
       } catch (err: unknown) {
+        debugVerbose(`error continuing request: %o`, err)
+        debugVerbose(`removing prerequest for request ID: ${params.request.request}`)
+        // if the continueRequest fails for any reason, we need to remove the prerequest from the automation client
+        this.automation.onRemoveBrowserPreRequest?.(params.request.request)
         // happens if you kill the Cypress app in the middle of request interception. This error can be ignored
         if (!(err as Error)?.message.includes('no such request')) {
           throw err

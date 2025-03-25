@@ -27,8 +27,8 @@ context('validation errors', function () {
   })
 
   verify('validation error', this, {
-    line: 19,
-    isPreprocessorWithTypescript: true,
+    line: 26,
+    column: 8,
     message: 'can only accept a string preset or',
     stack: ['throwErrBadArgs', 'From Your Spec Code:'],
   })
