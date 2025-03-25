@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 14.2.2
+
+_Released 4/8/2025 (PENDING)_
+
+**Misc:**
+
+- Updated error message around `injectDocumentDomain` removal to mention a future version of Cypress instead of Cypress 15. Addresses [#31373](https://github.com/cypress-io/cypress/issues/31373). Addressed in [#31375](https://github.com/cypress-io/cypress/pull/31375).
+
 ## 14.2.1
 
 _Released 3/25/2025_
