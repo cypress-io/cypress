@@ -34,13 +34,11 @@ export async function cdpKeyPress ({ key }: KeyPressParams, send: SendDebuggerCo
 
   try {
     await send('Input.dispatchKeyEvent', {
-      type: 'rawKeyDown',
+      type: 'keyDown',
       key,
       code: key,
       keyIdentifier,
     })
-
-    await new Promise((resolve) => setTimeout(resolve, 20))
 
     await send('Input.dispatchKeyEvent', {
       type: 'keyUp',
@@ -73,7 +71,6 @@ export async function bidiKeyPress ({ key }: KeyPressParams, client: Client, con
         id: `${context}-${key}-${idSuffix || Date.now()}`,
         actions: [
           { type: 'keyDown', value },
-          { type: 'pause', duration: 20 },
           { type: 'keyUp', value },
         ],
       }],

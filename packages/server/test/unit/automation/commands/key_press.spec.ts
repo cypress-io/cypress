@@ -18,7 +18,7 @@ describe('key:press automation command', () => {
       await cdpKeyPress({ key: 'Tab' }, sendFn)
 
       expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
-        type: 'rawKeyDown',
+        type: 'keyDown',
         keyIdentifier: CDP_KEYCODE.Tab,
         key: 'Tab',
         code: 'Tab',
@@ -70,7 +70,6 @@ describe('key:press automation command', () => {
           id: 'someContextId-Tab-idSuffix',
           actions: [
             { type: 'keyDown', value: BIDI_VALUE[key] },
-            { type: 'pause', duration: 20 },
             { type: 'keyUp', value: BIDI_VALUE[key] },
           ],
         }],
