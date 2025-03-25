@@ -1,6 +1,4 @@
 const path = require('path')
-const fs = require('fs-extra')
-const JSON5 = require('json5')
 const webpack = require('webpack')
 const Debug = require('debug')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
@@ -17,38 +15,6 @@ const hasTsLoader = (rules) => {
   })
 }
 
-const getTSCompilerOptionsForUser = (configFilePath) => {
-  const compilerOptions = {
-    sourceMap: false,
-    inlineSourceMap: true,
-    inlineSources: true,
-    downlevelIteration: true,
-  }
-
-  if (!configFilePath) {
-    return compilerOptions
-  }
-
-  try {
-    // If possible, try to read the user's tsconfig.json and see if sourceMap is configured
-    // eslint-disable-next-line no-restricted-syntax
-    const tsconfigJSON = fs.readFileSync(configFilePath, 'utf8')
-    // file might have trailing commas, new lines, etc. JSON5 can parse those correctly
-    const parsedJSON = JSON5.parse(tsconfigJSON)
-
-    // if the user has sourceMap's configured, set the option to true and turn off inlineSourceMaps
-    if (parsedJSON?.compilerOptions?.sourceMap) {
-      compilerOptions.sourceMap = true
-      compilerOptions.inlineSourceMap = false
-      compilerOptions.inlineSources = false
-    }
-  } catch (e) {
-    debug(`error in getTSCompilerOptionsForUser. Returning default...`, e)
-  } finally {
-    return compilerOptions
-  }
-}
-
 const addTypeScriptConfig = (file, options) => {
   // shortcut if we know we've already added typescript support
   if (options.__typescriptSupportAdded) return options
@@ -60,14 +26,21 @@ const addTypeScriptConfig = (file, options) => {
   if (!rules || !Array.isArray(rules)) return options
 
   // if we find ts-loader configured, don't add it again
-  if (hasTsLoader(rules)) return options
+  if (hasTsLoader(rules)) {
+    debug('ts-loader already configured, not adding again')
+
+    return options
+  }
 
   const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
   // node will try to load a projects tsconfig.json instead of the node
-  // package using require('tsconfig'), so we alias it as 'tsconfig-aliased-for-wbip'
-  const configFile = require('tsconfig-aliased-for-wbip').findSync(path.dirname(file.filePath))
 
-  const compilerOptions = getTSCompilerOptionsForUser(configFile)
+  const getTsConfig = require('get-tsconfig')
+
+  // returns null if tsconfig cannot be found in the path/parent hierarchy
+  const configFile = getTsConfig.getTsconfig(file.filePath)
+
+  configFile ? debug(`found user tsconfig.json at ${configFile?.path} with compilerOptions: ${JSON.stringify(configFile?.config?.compilerOptions)}`) : debug('no user tsconfig.json found')
 
   webpackOptions.module.rules.push({
     test: /\.tsx?$/,
@@ -77,7 +50,6 @@ const addTypeScriptConfig = (file, options) => {
         loader: require.resolve('ts-loader'),
         options: {
           compiler: options.typescript,
-          compilerOptions,
           logLevel: 'error',
           silent: true,
           transpileOnly: true,
@@ -88,7 +60,7 @@ const addTypeScriptConfig = (file, options) => {
 
   webpackOptions.resolve.extensions = webpackOptions.resolve.extensions.concat(['.ts', '.tsx'])
   webpackOptions.resolve.plugins = [new TsconfigPathsPlugin({
-    configFile,
+    configFile: configFile?.path,
     silent: true,
   })]
 

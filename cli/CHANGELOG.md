@@ -7,6 +7,7 @@ _Released 3/25/2025 (PENDING)_
 
 - Applies a fix from [#30730](https://github.com/cypress-io/cypress/pull/30730) and [#30099](https://github.com/cypress-io/cypress/pull/30099) related to Node.js turning on ESM flags by default in Node.js version `20.19.0`. Fixed in [#31308](https://github.com/cypress-io/cypress/pull/31308).
 - Fixed an issue where Firefox BiDi was not correctly removing prerequests on expected network request failures. Fixes [#31325](https://github.com/cypress-io/cypress/issues/31325).
+- Fixed an issue in `@cypress/webpack-batteries-included-preprocessor` and `@cypress/webpack-preprocessor` where sourceMaps were not being set correctly in TypeScript 5. This should now make error code frames accurate for TypeScript 5 users. Fixes [#29614](https://github.com/cypress-io/cypress/issues/29614).
 
 **Misc:**
 
