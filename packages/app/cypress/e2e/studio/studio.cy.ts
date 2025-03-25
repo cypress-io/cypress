@@ -37,7 +37,7 @@ describe('Cypress Studio', () => {
       launchStudio({ enableCloudStudio: true })
 
       cy.viewport(1500, 1000)
-      cy.get('data-cy=studio-header').should('be.visible')
+      cy.get('data-cy="studio-toolbar"').should('be.visible')
       cy.percySnapshot()
     })
 
