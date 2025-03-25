@@ -95,7 +95,6 @@ export class SocketBase {
   }
 
   onAutomation (socket, message, data, id) {
-    debug('onAutomation', message)
     // instead of throwing immediately here perhaps we need
     // to make this more resilient by automatically retrying
     // up to 1 second in the case where our automation room

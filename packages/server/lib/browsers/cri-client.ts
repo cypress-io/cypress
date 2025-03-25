@@ -250,7 +250,6 @@ export class CriClient implements ICriClient {
     params?: CmdParams<TCmd>,
     sessionId?: string,
   ): Promise<ProtocolMapping.Commands[TCmd]['returnType']> => {
-    debug('preparing to send command %s to target %s', command, this.targetId)
     if (this._crashed) {
       return Promise.reject(new Error(`${command} will not run as the target browser or tab CRI connection has crashed`))
     }
