@@ -1,3 +1,5 @@
+# [@cypress/react-v9.0.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v9.0.0...@cypress/react-v9.0.1) (2025-03-25)
+
 # [@cypress/react-v9.0.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v8.0.2...@cypress/react-v9.0.0) (2025-01-08)
 
 

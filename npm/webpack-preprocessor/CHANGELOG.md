@@ -1,3 +1,10 @@
+# [@cypress/webpack-preprocessor-v6.0.3](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v6.0.2...@cypress/webpack-preprocessor-v6.0.3) (2025-03-25)
+
+
+### Bug Fixes
+
+* change default options for sourceMaps inside WBIP ([#31270](https://github.com/cypress-io/cypress/issues/31270)) ([7bdf1e9](https://github.com/cypress-io/cypress/commit/7bdf1e98707329157c7149b5b26fcb5bf799b8bc))
+
 # [@cypress/webpack-preprocessor-v6.0.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v6.0.1...@cypress/webpack-preprocessor-v6.0.2) (2024-06-07)
 
 
