@@ -1,7 +1,19 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 14.2.2
+
+_Released 4/8/2025 (PENDING)_
+
+**Misc:**
+
+- Updated error message around `injectDocumentDomain` removal to mention a future version of Cypress instead of Cypress 15. Addresses [#31373](https://github.com/cypress-io/cypress/issues/31373). Addressed in [#31375](https://github.com/cypress-io/cypress/pull/31375).
+
+**Dependency Updates:**
+
+- Upgraded `win-version-info` from `5.0.1` to `6.0.1`. Addressed in [#31358](https://github.com/cypress-io/cypress/pull/31358).
+
 ## 14.2.1
 
-_Released 3/25/2025 (PENDING)_
+_Released 3/26/2025_
 
 **Bugfixes:**
 
@@ -21,6 +33,7 @@ _Released 3/25/2025 (PENDING)_
 - Upgraded `resolve` from `1.17.0` to `1.22.10`. Addressed in [#31333](https://github.com/cypress-io/cypress/pull/31333).
 - Upgraded `semver` from `7.5.3` to `7.7.1`. Addressed in [#31341](https://github.com/cypress-io/cypress/pull/31341).
 - Upgraded `systeminformation` from `5.21.7` to `5.22.8`. Addressed in [#31281](https://github.com/cypress-io/cypress/pull/31281).
+- Upgraded `win-version-info` from `5.0.1` to `6.0.1`. Addressed in [#31358](https://github.com/cypress-io/cypress/pull/31358).
 
 ## 14.2.0
 
@@ -124,7 +137,7 @@ _Released 1/16/2025_
 - Upgraded bundled Node.js version from `18.17.0` to `20.18.1`. Addresses [#29547](https://github.com/cypress-io/cypress/issues/29547).
 - Prebuilt binaries for Linux are no longer compatible with Linux distributions based on glibc <2.28, for example: Ubuntu 14-18, RHEL 7, CentOS 7, Amazon Linux 2. Addresses [#29601](https://github.com/cypress-io/cypress/issues/29601).
 - Cypress now only officially supports the latest 3 major versions of Chrome, Firefox, and Edge - older browser versions may still work, but we recommend keeping your browsers up to date to ensure compatibility with Cypress. A warning will no longer be displayed on browser selection in the Launchpad for any 'unsupported' browser versions. Additionally, the undocumented `minSupportedVersion` property has been removed from `Cypress.browser`. Addressed in [#30462](https://github.com/cypress-io/cypress/pull/30462).
-- The `cy.origin()` command must now be used when navigating between subdomains. Because this is a fairly disruptive change for users who frequently navigate between subdomains, a new configuration option is being introduced. `injectDocumentDomain` can be set to `true` in order to re-enable the injection of `document.domain` by Cypress. This configuration option is marked as deprecated and you will receive a warning when Cypress is launched with this option set to `true`. It will be removed in Cypress 15. Addressed in [#30770](https://github.com/cypress-io/cypress/pull/30770). Addresses [#25806](https://github.com/cypress-io/cypress/issues/25806), [#25987](https://github.com/cypress-io/cypress/issues/25987), [#27528](https://github.com/cypress-io/cypress/issues/27528), [#29445](https://github.com/cypress-io/cypress/issues/29445), [#29590](https://github.com/cypress-io/cypress/issues/29590) and [#30571](https://github.com/cypress-io/cypress/issues/30571).
+- The `cy.origin()` command must now be used when navigating between subdomains. Because this is a fairly disruptive change for users who frequently navigate between subdomains, a new configuration option is being introduced. `injectDocumentDomain` can be set to `true` in order to re-enable the injection of `document.domain` by Cypress. This configuration option is marked as deprecated and you will receive a warning when Cypress is launched with this option set to `true`. It will be removed in a future version of Cypress. Addressed in [#30770](https://github.com/cypress-io/cypress/pull/30770). Addresses [#25806](https://github.com/cypress-io/cypress/issues/25806), [#25987](https://github.com/cypress-io/cypress/issues/25987), [#27528](https://github.com/cypress-io/cypress/issues/27528), [#29445](https://github.com/cypress-io/cypress/issues/29445), [#29590](https://github.com/cypress-io/cypress/issues/29590) and [#30571](https://github.com/cypress-io/cypress/issues/30571).
 - It is no longer possible to make a `fetch` or `XMLHttpRequest` request from the `about:blank` page in Electron (i.e. `cy.window().then((win) => win.fetch('<some-url>'))`). You must use `cy.request` instead or perform some form of initial navigation via `cy.visit()`. Addressed in [#30394](https://github.com/cypress-io/cypress/pull/30394).
 - The `experimentalJustInTimeCompile` configuration option for component testing has been replaced with a `justInTimeCompile` option that is `true` by default. This option will only compile resources directly related to your spec, compiling them 'just-in-time' before spec execution. This should result in improved memory management and performance for component tests in `cypress open` and `cypress run` modes, in particular for large component testing suites. `justInTimeCompile` is now only supported for [`webpack`](https://www.npmjs.com/package/webpack). Addresses [#30234](https://github.com/cypress-io/cypress/issues/30234). Addressed in [#30641](https://github.com/cypress-io/cypress/pull/30641).
 - Cypress Component Testing no longer supports:
@@ -151,7 +164,7 @@ _Released 1/16/2025_
 
 - The `resourceType` option on `cy.intercept` has been deprecated. We anticipate the resource types to change or be completely removed in the future. Our intention is to replace essential functionality dependent on the `resourceType` within Cypress in a future version (like hiding network logs that are not fetch/xhr). Please leave feedback on any essential uses of `resourceType`
 in this [GitHub issue](https://github.com/cypress-io/cypress/issues/30447). Addresses [#30433](https://github.com/cypress-io/cypress/issues/30433).
-- The new `injectDocumentDomain` configuration option is released as deprecated. It will be removed in Cypress 15. Addressed in [#30770](https://github.com/cypress-io/cypress/pull/30770).
+- The new `injectDocumentDomain` configuration option is released as deprecated. It will be removed in a future version of Cypress. Addressed in [#30770](https://github.com/cypress-io/cypress/pull/30770).
 
 **Features:**
 
