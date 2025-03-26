@@ -7,6 +7,10 @@ _Released 4/8/2025 (PENDING)_
 
 - Updated error message around `injectDocumentDomain` removal to mention a future version of Cypress instead of Cypress 15. Addresses [#31373](https://github.com/cypress-io/cypress/issues/31373). Addressed in [#31375](https://github.com/cypress-io/cypress/pull/31375).
 
+**Dependency Updates:**
+
+- Upgraded `win-version-info` from `5.0.1` to `6.0.1`. Addressed in [#31358](https://github.com/cypress-io/cypress/pull/31358).
+
 ## 14.2.1
 
 _Released 3/26/2025_
