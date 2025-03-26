@@ -3,6 +3,10 @@
 
 _Released 4/8/2025 (PENDING)_
 
+**Bugfixes:**
+
+- Allows for `babel-loader` version 10 to be a peer dependency of `@cypress/webpack-preprocessor`.
+
 **Misc:**
 
 - Updated error message around `injectDocumentDomain` removal to mention a future version of Cypress instead of Cypress 15. Addresses [#31373](https://github.com/cypress-io/cypress/issues/31373). Addressed in [#31375](https://github.com/cypress-io/cypress/pull/31375).
