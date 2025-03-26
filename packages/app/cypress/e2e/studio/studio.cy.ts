@@ -33,6 +33,14 @@ describe('Cypress Studio', () => {
       })
     })
 
+    it('displays Studio header', () => {
+      launchStudio({ enableCloudStudio: true })
+
+      cy.viewport(1500, 1000)
+      cy.get('[data-cy="studio-toolbar"]').should('be.visible')
+      cy.percySnapshot()
+    })
+
     it('immediately loads the studio panel', () => {
       const deferred = pDefer()
 
