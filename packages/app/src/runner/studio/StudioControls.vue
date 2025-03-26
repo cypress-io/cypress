@@ -1,6 +1,6 @@
 <template>
   <div
-    class="border-y flex border-gray-50 w-full justify-between"
+    class="border-y flex border-gray-50 bg-white w-full justify-between"
     data-cy="studio-toolbar"
   >
     <div class="flex">
