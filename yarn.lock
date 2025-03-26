@@ -32893,10 +32893,10 @@ wildcard@^2.0.0:
   resolved "https://registry.yarnpkg.com/wildcard/-/wildcard-2.0.0.tgz#a77d20e5200c6faaac979e4b3aadc7b3dd7f8fec"
   integrity sha512-JcKqAHLPxcdb9KM49dufGXn2x3ssnfjbcaQdLlfZsL9rH9wgDQjUtDxbo8NE0F6SFvydeu1VhZe7hZuHsB2/pw==
 
-win-version-info@5.0.1:
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/win-version-info/-/win-version-info-5.0.1.tgz#6da02e2e7c2f9676ad884f7c8f6e5e959e7b14aa"
-  integrity sha512-Xamzgusk6IUvoT2bXsoVntO1S86gCd1Sjmfw718WsV4JV8lgf2QbaRIVHYHLHtqIKB8oVoVEDPnjw+u4jZ82AA==
+win-version-info@^6.0.1:
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/win-version-info/-/win-version-info-6.0.1.tgz#cf09e2d961e2a16424360cd02f5d9a9086e3e49f"
+  integrity sha512-Z6060xUh9UwPxAjKOcEUybw93jnMtpERcdlb933bGfpBOlRtLYlYlzWk1YoGzofX3yB3pvPuwXrTsWQ4ClMZKQ==
   dependencies:
     napi-macros "^2.0.0"
     node-gyp-build "^4.3.0"
