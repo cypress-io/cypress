@@ -20,7 +20,7 @@ import trash from '../util/trash'
 import random from '../util/random'
 import system from '../util/system'
 import chromePolicyCheck from '../util/chrome_policy_check'
-import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser, BrowserVideoController, VideoRecording, ProcessOptions, ProtocolManagerShape } from '@packages/types'
+import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser, BrowserVideoController, VideoRecording, ProcessOptions, ProtocolManagerShape, AutomationCommands } from '@packages/types'
 import type { Cfg, ProjectBase } from '../project-base'
 import type { Browser } from '../browsers/types'
 import * as printResults from '../util/print-run'
@@ -373,10 +373,12 @@ function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot,
     onError,
     videoApi: options.videoRecording?.api,
     automationMiddleware: {
-      onBeforeRequest (message, data) {
+      onBeforeRequest<T extends keyof AutomationCommands> (message: T, data: AutomationCommands[T]['dataType']): Promise<AutomationCommands[T]['returnType']> {
         if (message === 'take:screenshot') {
-          return setScreenshotMetadata(data)
+          setScreenshotMetadata(data)
         }
+
+        return Promise.resolve()
       },
       onAfterResponse: (message, data, resp) => {
         if (message === 'take:screenshot' && resp) {

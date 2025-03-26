@@ -10,10 +10,11 @@ import { URL } from 'url'
 import { performance } from 'perf_hooks'
 
 import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
-import type { CDPClient, ProtocolManagerShape, WriteVideoFrame } from '@packages/types'
+import type { CDPClient, ProtocolManagerShape, WriteVideoFrame, AutomationMiddleware, AutomationCommands } from '@packages/types'
 import type { Automation } from '../automation'
 import { cookieMatches, CyCookie, CyCookieFilter } from '../automation/util'
 import { DEFAULT_NETWORK_ENABLE_OPTIONS, CriClient } from './cri-client'
+import { cdpKeyPress } from '../automation/commands/key_press'
 
 export type CdpCommand = keyof ProtocolMapping.Commands
 
@@ -161,7 +162,7 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
   'webmanifest': 'manifest',
 }
 
-export class CdpAutomation implements CDPClient {
+export class CdpAutomation implements CDPClient, AutomationMiddleware {
   on: OnFn
   off: OffFn
   send: SendDebuggerCommand
@@ -482,7 +483,7 @@ export class CdpAutomation implements CDPClient {
     client.on('Page.frameDetached', this._updateFrameTree(client, 'Page.frameDetached'))
   }
 
-  onRequest = async (message, data) => {
+  onRequest = async <T extends keyof AutomationCommands>(message: T, data: AutomationCommands[T]['dataType']): Promise<AutomationCommands[T]['returnType']> => {
     let setCookie
 
     switch (message) {
@@ -586,6 +587,8 @@ export class CdpAutomation implements CDPClient {
         return this.sendDebuggerCommandFn('Runtime.evaluate', { expression: 'performance.memory.jsHeapSizeLimit' })
       case 'collect:garbage':
         return this.sendDebuggerCommandFn('HeapProfiler.collectGarbage')
+      case 'key:press':
+        return cdpKeyPress(data, this.sendDebuggerCommandFn)
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }
