@@ -10,10 +10,14 @@ interface KeyCodeLookup extends Record<KeyPressSupportedKeys, string> {}
 
 const invalidKeyErrorKind = 'InvalidKeyError'
 
+export function invalidKeyErrorMessage (key: string) {
+  return `${key} is not supported by 'cy.press()'.`
+}
+
 export class InvalidKeyError extends Error {
   kind = invalidKeyErrorKind
   constructor (key: string) {
-    super(`${key} is not supported by 'cy.press()'.`)
+    super(invalidKeyErrorMessage(key))
   }
   static isInvalidKeyError (e: any): e is InvalidKeyError {
     return e.kind === invalidKeyErrorKind
