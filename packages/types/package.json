@@ -11,7 +11,7 @@
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "dependencies": {
-    "semver": "^7.6.3"
+    "semver": "^7.7.1"
   },
   "devDependencies": {
     "@types/node": "20.16.0",

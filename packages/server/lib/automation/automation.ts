@@ -3,10 +3,11 @@ import { v4 as uuidv4 } from 'uuid'
 import { Cookies } from './cookies'
 import { Screenshot } from './screenshot'
 import type { BrowserPreRequest } from '@packages/proxy'
-import type { AutomationMiddleware, OnRequestEvent, OnServiceWorkerClientSideRegistrationUpdated, OnServiceWorkerRegistrationUpdated, OnServiceWorkerVersionUpdated } from '@packages/types'
+import type { AutomationCommands, AutomationMiddleware, OnRequestEvent, OnServiceWorkerClientSideRegistrationUpdated, OnServiceWorkerRegistrationUpdated, OnServiceWorkerVersionUpdated } from '@packages/types'
 import { cookieJar } from '../util/cookies'
 import type { ServiceWorkerEventHandler } from '@packages/proxy/lib/http/util/service-worker-manager'
 import Debug from 'debug'
+import { AutomationNotImplemented } from './automation_not_implemented'
 
 const debug = Debug('cypress:server:automation')
 
@@ -26,35 +27,10 @@ export type AutomationOptions = {
   onServiceWorkerClientEvent: ServiceWorkerEventHandler
 }
 
-interface CommandSignature<P = any, R = any> {
-  dataType: P
-  returnType: R
-}
-
-export interface AutomationCommands {
-  'take:screenshot': CommandSignature
-  'get:cookies': CommandSignature
-  'get:cookie': CommandSignature
-  'set:cookie': CommandSignature
-  'set:cookies': CommandSignature
-  'add:cookies': CommandSignature
-  'clear:cookies': CommandSignature
-  'clear:cookie': CommandSignature
-  'change:cookie': CommandSignature
-  'create:download': CommandSignature
-  'canceled:download': CommandSignature
-  'complete:download': CommandSignature
-  'get:heap:size:limit': CommandSignature
-  'collect:garbage': CommandSignature
-  'reset:browser:tabs:for:next:spec': CommandSignature
-  'reset:browser:state': CommandSignature
-  'focus:browser:window': CommandSignature
-  'is:automation:client:connected': CommandSignature
-}
-
 export class Automation {
   private requests: Record<number, (any) => void>
   private middleware: AutomationMiddleware
+  private preferredMiddleware?: AutomationMiddleware
   private cookies: Cookies
   private screenshot: { capture: (data: any, automate: any) => any }
   public onBrowserPreRequest: OnBrowserPreRequest | undefined
@@ -103,17 +79,27 @@ export class Automation {
     return (
       msg: T | AutomationCommands[T]['dataType'],
       data: T extends keyof AutomationCommands ? AutomationCommands[T]['dataType'] : never,
-    ) => {
+    ): Bluebird<AutomationCommands[T]['returnType']> => {
       const resolvedData = data ?? msg as AutomationCommands[T]['dataType']
       const resolvedMessage = data ? msg : message
 
       const onReq = this.get('onRequest')
 
       if (onReq) {
-        return Bluebird.resolve(onReq(resolvedMessage, resolvedData))
+        return Bluebird.try(() => {
+          return onReq(resolvedMessage, resolvedData)
+        }).catch((e) => {
+          if (AutomationNotImplemented.isAutomationNotImplementedErr(e)) {
+            debug(`${e.message}. Falling back to emit via socket.`)
+
+            return this.requestAutomationResponse(resolvedMessage, resolvedData, fn)
+          }
+
+          throw e
+        })
       }
 
-      return Bluebird.resolve(this.requestAutomationResponse(resolvedMessage, resolvedData, fn))
+      return this.requestAutomationResponse(resolvedMessage, resolvedData, fn)
     }
   }
 

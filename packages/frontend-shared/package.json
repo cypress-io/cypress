@@ -69,7 +69,7 @@
     "chai-subset": "1.6.0",
     "combine-properties": "0.1.0",
     "cross-env": "6.0.3",
-    "cross-fetch": "^3.1.8",
+    "cross-fetch": "^4.1.0",
     "cypress-plugin-tab": "1.0.5",
     "cypress-real-events": "1.14.0",
     "dayjs": "^1.9.3",

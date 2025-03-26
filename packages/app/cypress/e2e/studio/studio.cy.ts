@@ -33,6 +33,14 @@ describe('Cypress Studio', () => {
       })
     })
 
+    it('displays Studio header', () => {
+      launchStudio({ enableCloudStudio: true })
+
+      cy.viewport(1500, 1000)
+      cy.get('[data-cy="studio-toolbar"]').should('be.visible')
+      cy.percySnapshot()
+    })
+
     it('immediately loads the studio panel', () => {
       const deferred = pDefer()
 
@@ -680,7 +688,8 @@ describe('studio functionality', () => {
     cy.startAppServer('e2e')
     cy.visitApp()
     cy.specsPageIsVisible()
-    cy.get(`[title="empty.cy.js"]`).should('be.visible').click()
+    cy.get(`[title="empty.cy.js"]`).should('be.visible')
+    cy.get(`[title="empty.cy.js"]`).click()
 
     cy.waitForSpecToFinish()
 
@@ -702,7 +711,7 @@ describe('studio functionality', () => {
       cy.get('#increment').realClick()
     })
 
-    cy.get('button').contains('Save Commands').click()
+    cy.contains('button', 'Save Commands').click()
 
     cy.get('#testName').type('new-test')
 
