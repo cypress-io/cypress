@@ -313,7 +313,12 @@ export = {
       if (!pageCriClient) throw new Error('Missing pageCriClient in _launch')
 
       const startAndStopScreencast = async () => {
-        await pageCriClient.send('Page.startScreencast', screencastOpts())
+        await pageCriClient.send('Page.startScreencast', {
+          format: 'jpeg',
+          everyNthFrame: 30000,
+          quality: 0,
+        })
+
         await pageCriClient.send('Page.stopScreencast')
       }
 
