@@ -10,18 +10,18 @@ interface KeyCodeLookup extends Record<KeyPressSupportedKeys, string> {}
 
 const invalidKeyErrorKind = 'InvalidKeyError'
 
-export function invalidKeyErrorMessage (key: string) {
-  return `${key} is not supported by 'cy.press()'.`
-}
-
 export class InvalidKeyError extends Error {
   kind = invalidKeyErrorKind
   constructor (key: string) {
-    super(invalidKeyErrorMessage(key))
+    super(`${key} is not supported by 'cy.press()'.`)
   }
   static isInvalidKeyError (e: any): e is InvalidKeyError {
     return e.kind === invalidKeyErrorKind
   }
+}
+
+export function isSupportedKey (key: string): key is KeyPressSupportedKeys {
+  return CDP_KEYCODE[key] && BIDI_VALUE[key]
 }
 
 export const CDP_KEYCODE: KeyCodeLookup = {
