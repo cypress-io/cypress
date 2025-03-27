@@ -316,11 +316,11 @@ export = {
         // To prevent https://github.com/electron/electron/issues/45398, we start a dummy screen cast with a quality of 0
         // and only capture every 2^32 - 1 frames without listening to any frames. This is effectively a no-op, but it
         // prevents the issue from occurring.
-        // await pageCriClient.send('Page.startScreencast', {
-        //   format: 'jpeg',
-        //   everyNthFrame: 2 ^ 32 - 1,
-        //   quality: 0,
-        // })
+        await pageCriClient.send('Page.startScreencast', {
+          format: 'jpeg',
+          everyNthFrame: 2 ^ 32 - 1,
+          quality: 0,
+        })
       }
 
       await Promise.all([
