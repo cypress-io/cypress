@@ -39,7 +39,6 @@
             v-if="!hideRunnerUi"
             :event-manager="eventManager"
             :get-aut-iframe="getAutIframeModel"
-            class="bg-white"
           />
         </HideDuringScreenshot>
         <RemoveClassesDuringScreenshotting
