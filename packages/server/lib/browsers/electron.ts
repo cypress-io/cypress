@@ -315,7 +315,7 @@ export = {
       const startAndStopScreencast = async () => {
         await pageCriClient.send('Page.startScreencast', {
           format: 'jpeg',
-          everyNthFrame: 300,
+          everyNthFrame: 2 ^ 31 - 1,
           quality: 0,
         })
       }
