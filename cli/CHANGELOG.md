@@ -16,6 +16,8 @@ _Released 4/8/2025 (PENDING)_
 
 **Dependency Updates:**
 
+- Upgraded `mocha` from `7.0.1` to `7.1.0`. Addressed in [#31387](https://github.com/cypress-io/cypress/pull/31387).
+- Upgraded `webdriver` from `9.7.3` to `9.11.0`. Addressed in [#31315](https://github.com/cypress-io/cypress/pull/31315).
 - Upgraded `win-version-info` from `5.0.1` to `6.0.1`. Addressed in [#31358](https://github.com/cypress-io/cypress/pull/31358).
 
 ## 14.2.1
@@ -40,7 +42,6 @@ _Released 3/26/2025_
 - Upgraded `resolve` from `1.17.0` to `1.22.10`. Addressed in [#31333](https://github.com/cypress-io/cypress/pull/31333).
 - Upgraded `semver` from `7.5.3` to `7.7.1`. Addressed in [#31341](https://github.com/cypress-io/cypress/pull/31341).
 - Upgraded `systeminformation` from `5.21.7` to `5.22.8`. Addressed in [#31281](https://github.com/cypress-io/cypress/pull/31281).
-- Upgraded `win-version-info` from `5.0.1` to `6.0.1`. Addressed in [#31358](https://github.com/cypress-io/cypress/pull/31358).
 
 ## 14.2.0
 
