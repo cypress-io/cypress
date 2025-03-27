@@ -1,9 +1,23 @@
 diff --git a/node_modules/mocha/CHANGELOG.md b/node_modules/mocha/CHANGELOG.md
 deleted file mode 100644
-index 4cf0b4e..0000000
+index 8c2f86a..0000000
 --- a/node_modules/mocha/CHANGELOG.md
 +++ /dev/null
-@@ -1,609 +0,0 @@
+@@ -1,623 +0,0 @@
+-# 7.1.1 / 2020-03-18
+-
+-## :lock: Security Fixes
+-
+-- [#4204](https://github.com/mochajs/mocha/issues/4204): Update dependencies mkdirp, yargs-parser and yargs ([**@juergba**](https://github.com/juergba))
+-
+-## :bug: Fixes
+-
+-- [#3660](https://github.com/mochajs/mocha/issues/3660): Fix `runner` listening to `start` and `end` events ([**@juergba**](https://github.com/juergba))
+-
+-## :book: Documentation
+-
+-- [#4190](https://github.com/mochajs/mocha/issues/4190): Show Netlify badge on footer ([**@outsideris**](https://github.com/outsideris))
+-
 -# 7.1.0 / 2020-02-26
 -
 -## :tada: Enhancements
@@ -746,7 +760,7 @@ index 740e1fd..0cd2769 100644
    runner.fullStackTrace = options.fullTrace;
    runner.asyncOnly = options.asyncOnly;
 diff --git a/node_modules/mocha/lib/runner.js b/node_modules/mocha/lib/runner.js
-index 17fa290..52f437e 100644
+index 8e7c873..5208e60 100644
 --- a/node_modules/mocha/lib/runner.js
 +++ b/node_modules/mocha/lib/runner.js
 @@ -682,9 +682,43 @@ Runner.prototype.runTests = function(suite, fn) {
