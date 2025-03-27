@@ -317,7 +317,7 @@ export = {
         pageCriClient.send('ServiceWorker.enable'),
         this.connectProtocolToBrowser({ protocolManager }),
         cdpSocketServer?.attachCDPClient(cdpAutomation),
-        videoApi && recordVideo(cdpAutomation, videoApi),
+        videoApi ? recordVideo(cdpAutomation, videoApi) : options.isTextTerminal ? pageCriClient.send('Page.startScreencast', screencastOpts()) : undefined,
         this._handleDownloads(win, options.downloadsFolder, automation),
         utils.initializeCDP(pageCriClient, automation),
         // Ensure to clear browser state in between runs. This is handled differently in browsers when we launch new tabs, but we don't have that concept in electron
