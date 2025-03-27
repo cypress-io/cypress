@@ -318,7 +318,7 @@ export = {
         // prevents the issue from occurring.
         await pageCriClient.send('Page.startScreencast', {
           format: 'jpeg',
-          everyNthFrame: 2 ^ 32 - 1,
+          everyNthFrame: 2 ** 32 - 1,
           quality: 0,
         })
       }
