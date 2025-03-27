@@ -1,12 +1,13 @@
 /**
  * @vitest-environment jsdom
  */
-import { vi, describe, it, expect, afterEach, beforeEach, Mock, MockedObject } from 'vitest'
+import { vi, describe, it, expect, beforeEach, Mock, MockedObject } from 'vitest'
 import type { KeyPressSupportedKeys } from '@packages/types'
 import addCommand, { PressCommand } from '../../../../../src/cy/commands/actions/press'
 import type { $Cy } from '../../../../../src/cypress/cy'
 import type { StateFunc } from '../../../../../src/cypress/state'
 import $errUtils from '../../../../../src/cypress/error_utils'
+import Keyboard from '../../../../../src/cy/keyboard'
 
 vi.mock('../../../../../src/cypress/error_utils', async () => {
   const original = await vi.importActual('../../../../../src/cypress/error_utils')
@@ -39,6 +40,8 @@ describe('cy/commands/actions/press', () => {
     automation = vi.fn<typeof Cypress['automation']>()
 
     Cypress = {
+      // The overloads for `log` don't get applied correctly here
+      // @ts-expect-error
       log,
       automation,
       // @ts-expect-error
@@ -48,8 +51,8 @@ describe('cy/commands/actions/press', () => {
       },
     }
 
+    // @ts-expect-error - this is a generic mock impl
     Commands = {
-      // @ts-expect-error - this is a generic mock impl
       add: vi.fn(),
     }
 
@@ -81,20 +84,18 @@ describe('cy/commands/actions/press', () => {
 
     addCommand(Commands, Cypress, cy, state, config)
 
-    const [[cmdName, cmd]] = Commands.add.mock.calls
+    expect(Commands.add).toHaveBeenCalledOnce()
+
+    // @ts-expect-error
+    const [[cmdName, cmd]]: [[string, PressCommand]] = Commands.add.mock.calls
 
     expect(cmdName).toEqual('press')
 
-    // @ts-expect-error - typescript can't determine which overload to use to destructure the mock's args
     press = cmd as PressCommand
   })
 
-  afterEach(() => {
-    //vi.resetAllMocks()
-  })
-
   describe('with a valid key', () => {
-    const key: KeyPressSupportedKeys = 'Tab'
+    const key: KeyPressSupportedKeys = Keyboard.Keys.TAB
 
     it('dispatches a key:press automation command', async () => {
       await press(key)
@@ -116,7 +117,7 @@ describe('cy/commands/actions/press', () => {
         expect(Cypress.log).toBeCalledWith({
           timeout: options.timeout,
           hidden: true,
-          message: options,
+          message: [key, { timeout: 2000 }],
           consoleProps: expect.any(Function),
         })
       })

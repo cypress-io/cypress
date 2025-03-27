@@ -4,6 +4,7 @@ import type { KeyPressSupportedKeys, AutomationCommands } from '@packages/types'
 import { defaults } from 'lodash'
 import { isSupportedKey } from '@packages/server/lib/automation/commands/key_press'
 import $errUtils from '../../../cypress/error_utils'
+import $utils from '../../../cypress/utils'
 
 export interface PressCommand {
   (key: KeyPressSupportedKeys, userOptions?: Partial<Cypress.Loggable> & Partial<Cypress.Timeoutable>): void
@@ -14,11 +15,12 @@ export default function (Commands: Cypress.Commands, Cypress: Cypress.Cypress, c
     const options: Cypress.Loggable & Partial<Cypress.Timeoutable> = defaults({}, userOptions, {
       log: true,
     })
+    const deltaOptions = $utils.filterOutOptions(options)
 
     const log = Cypress.log({
       timeout: options.timeout,
       hidden: options.log === false,
-      message: options,
+      message: [key, deltaOptions],
       consoleProps () {
         return {
           'Key': key,

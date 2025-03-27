@@ -683,6 +683,9 @@ declare namespace Cypress {
      */
     Keyboard: {
       defaults(options: Partial<KeyboardDefaultsOptions>): void
+      Keys: {
+        TAB: 'Tab',
+      },
     }
 
     /**
