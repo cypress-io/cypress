@@ -10,10 +10,7 @@ package.json
 
 # these are all copied from dist'd builds from the individual libs
 /angular
-/angular-signals
 /react
-/react18
 /vue
-/vue2
 /svelte
 /mount-utils

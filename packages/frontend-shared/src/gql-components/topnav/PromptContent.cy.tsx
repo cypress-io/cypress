@@ -1,4 +1,5 @@
 import PromptContent from './PromptContent.vue'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 
 describe('<PromptContent />', { viewportWidth: 500, viewportHeight: 800 }, () => {

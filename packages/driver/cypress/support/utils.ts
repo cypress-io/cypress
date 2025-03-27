@@ -1,6 +1,10 @@
 const { $, _, Promise } = Cypress
 
-export const getCommandLogWithText = (command, type = 'method') => {
+export const getCommandLogWithText = (command, type?) => {
+  if (!type) {
+    type = 'method'
+  }
+
   // Open current test if not already open, so we can find the command log
   cy.$$('.runnable-active .collapsible:not(.is-open) .collapsible-header', top?.document).click()
 
@@ -10,7 +14,7 @@ export const getCommandLogWithText = (command, type = 'method') => {
 }
 
 export const findReactInstance = function (dom) {
-  let key = _.keys(dom).find((key) => key.startsWith('__reactInternalInstance$')) as string
+  let key = _.keys(dom).find((key) => key.startsWith('__reactFiber')) as string
   let internalInstance = dom[key]
 
   if (internalInstance == null) return null
@@ -20,40 +24,29 @@ export const findReactInstance = function (dom) {
     : internalInstance.return.stateNode
 }
 
-export const clickCommandLog = (sel, type) => {
-  return cy.wait(10)
+export const clickCommandLog = (sel, type?) => {
+  // trigger the LONG_RUNNING_THRESHOLD to display the command line
+  // this adds time to test but makes a more accurate test as React 18+ does not rerender when setting internals
+  return cy.wait(2000)
   .then(() => {
-    return withMutableReporterState(() => {
-      const commandLogEl = getCommandLogWithText(sel, type)
-      const reactCommandInstance = findReactInstance(commandLogEl[0])
+    const commandLogEl = getCommandLogWithText(sel, type)
 
-      if (!reactCommandInstance) {
-        assert(false, 'failed to get command log React instance')
-      }
+    const reactCommandInstance = findReactInstance(commandLogEl[0])
 
-      reactCommandInstance.props.appState.isRunning = false
-      const inner = $(commandLogEl).find('.command-wrapper-text')
+    if (!reactCommandInstance) {
+      assert(false, 'failed to get command log React instance')
+    }
 
-      inner.get(0).click()
+    reactCommandInstance.props.appState.isRunning = false
+    const inner = $(commandLogEl).find('.command-wrapper-text')
 
+    inner.get(0).click()
+
+    // wait slightly for a repaint of the reporter
+    cy.wait(10).then(() => {
       // make sure command was pinned, otherwise throw a better error message
       expect(cy.$$('.runnable-active .command-pin', top?.document).length, 'command should be pinned').ok
     })
-  })
-}
-
-export const withMutableReporterState = (fn) => {
-  // @ts-ignore
-  top?.UnifiedRunner.MobX.configure({ enforceActions: 'never' })
-
-  const currentTestLog = findReactInstance(cy.$$('.runnable-active', top?.document)[0])
-
-  currentTestLog.props.model._isOpen = true
-
-  return Promise.try(fn)
-  .then(() => {
-    // @ts-ignore
-    top?.UnifiedRunner.MobX.configure({ enforceActions: 'always' })
   })
 }
 
@@ -132,10 +125,10 @@ export const trimInnerText = ($el) => {
   return _.trimEnd($el.get(0).innerText, '\n')
 }
 
-export const expectCaret = (start, end) => {
+export const expectCaret = (start: number) => {
   return ($el) => {
-    end = end == null ? start : end
-    // @ts-ignore
+    const end = start
+
     expect(Cypress.dom.getSelectionBounds($el.get(0))).to.deep.eq({ start, end })
   }
 }

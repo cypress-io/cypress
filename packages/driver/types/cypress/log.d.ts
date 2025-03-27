@@ -26,6 +26,14 @@ declare namespace Cypress {
   }
 
   type ConsoleProps = {
+    name?: string
+    type?: string
+    error?: Error
+    snapshot?: string
+    args?: any
+    groups?: any
+    table?: any
+    props?: any
     Command?: string
     Snapshot?: string
     Elements?: number

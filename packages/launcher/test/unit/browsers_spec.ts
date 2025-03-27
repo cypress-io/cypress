@@ -1,7 +1,6 @@
 import _ from 'lodash'
-import { knownBrowsers, validateMinVersion } from '../../lib/known-browsers'
+import { knownBrowsers } from '../../lib/known-browsers'
 import { expect } from 'chai'
-import { FoundBrowser } from '@packages/types'
 const snapshot = require('snap-shot-it')
 
 describe('browsers', () => {
@@ -16,178 +15,62 @@ describe('browsers', () => {
     }))).to.be.true
   })
 
-  describe('firefox-stable validator', () => {
+  describe('browser.validator', () => {
     const firefoxBrowser = {
       ...knownBrowsers.find(({ name, channel }) => name === 'firefox' && channel === 'stable'),
       path: '/path/to/firefox',
     }
 
-    context('Windows', () => {
-      it('validates against version 101', () => {
+    context('validator defined', () => {
+      it('when conditions met: marks browser as not supported and generates warning message', () => {
         const foundBrowser = {
           ...firefoxBrowser,
           version: '101.1.0',
           majorVersion: '101',
-        } as FoundBrowser
+          validator: (browser, platform) => {
+            if (platform === 'win32' && browser.majorVersion && ['101', '102'].includes(browser.majorVersion)) {
+              return {
+                isSupported: false,
+                warningMessage: `Cypress does not support running ${browser.displayName} version ${browser.majorVersion} on Windows due to a blocking bug in ${browser.displayName}. To use ${browser.displayName} with Cypress on Windows, install version 103 or newer.`,
+              }
+            }
 
-        const result = firefoxBrowser.validator(foundBrowser, 'win32')
+            return {
+              isSupported: true,
+            }
+          },
+        }
+
+        const result = foundBrowser.validator(foundBrowser, 'win32')
 
         expect(result.isSupported).to.be.false
         expect(result.warningMessage).to.contain('Cypress does not support running Firefox version 101 on Windows due to a blocking bug in Firefox.')
       })
 
-      it('validates against version 102', () => {
-        const foundBrowser = {
-          ...firefoxBrowser,
-          version: '102.1.0',
-          majorVersion: '102',
-          path: '/path/to/firefox',
-        } as FoundBrowser
-
-        const result = firefoxBrowser.validator(foundBrowser, 'win32')
-
-        expect(result.isSupported).to.be.false
-        expect(result.warningMessage).to.contain('Cypress does not support running Firefox version 102 on Windows due to a blocking bug in Firefox.')
-      })
-
-      it('validates against minimum supported version', () => {
-        const foundBrowser = {
-          ...firefoxBrowser,
-          version: '85.1.0',
-          majorVersion: '85',
-        } as FoundBrowser
-
-        const result = firefoxBrowser.validator(foundBrowser, 'win32')
-
-        expect(result.isSupported).to.be.false
-        expect(result.warningMessage).to.contain('Cypress does not support running Firefox version 85.')
-      })
-
-      it('successfully validates a version equal to the minimum', () => {
-        const foundBrowser = {
-          ...firefoxBrowser,
-          version: '86.1.0',
-          majorVersion: '86',
-        } as FoundBrowser
-
-        const result = firefoxBrowser.validator(foundBrowser, 'win32')
-
-        expect(result.isSupported).to.be.true
-        expect(result.warningMessage).to.be.undefined
-      })
-
-      it('successfully validates a version greater than the minimum', () => {
-        const foundBrowser = {
-          ...firefoxBrowser,
-          version: '103.1.0',
-          majorVersion: '103',
-        } as FoundBrowser
-
-        const result = firefoxBrowser.validator(foundBrowser, 'win32')
-
-        expect(result.isSupported).to.be.true
-        expect(result.warningMessage).to.be.undefined
-      })
-    })
-
-    context('Not Windows', () => {
-      it('validates 101 as supported', () => {
+      it('when conditions not met: marks browser as not supported and generates warning message', () => {
         const foundBrowser = {
           ...firefoxBrowser,
           version: '101.1.0',
-          majorVersion: '101',
-        } as FoundBrowser
+          majorVersion: '140',
+          validator: (browser, platform) => {
+            if (platform === 'win32' && browser.majorVersion && ['101', '102'].includes(browser.majorVersion)) {
+              return {
+                isSupported: false,
+                warningMessage: `Cypress does not support running ${browser.displayName} version ${browser.majorVersion} on Windows due to a blocking bug in ${browser.displayName}. To use ${browser.displayName} with Cypress on Windows, install version 103 or newer.`,
+              }
+            }
 
-        const result = firefoxBrowser.validator(foundBrowser, 'darwin')
+            return {
+              isSupported: true,
+            }
+          },
+        }
+
+        const result = foundBrowser.validator(foundBrowser, 'win32')
 
         expect(result.isSupported).to.be.true
         expect(result.warningMessage).to.be.undefined
       })
-
-      it('validates 102 as supported', () => {
-        const foundBrowser = {
-          ...firefoxBrowser,
-          version: '102.2.0',
-          majorVersion: '102',
-        } as FoundBrowser
-
-        const result = firefoxBrowser.validator(foundBrowser, 'darwin')
-
-        expect(result.isSupported).to.be.true
-        expect(result.warningMessage).to.be.undefined
-      })
-    })
-  })
-
-  describe('#validateMinVersion', () => {
-    const testBrowser = {
-      displayName: 'Test Browser',
-      minSupportedVersion: 50,
-      path: '/path/to/browser',
-    }
-
-    it('validates against minimum supported version', () => {
-      const foundBrowser = {
-        ...testBrowser,
-        version: '40.1.0',
-        majorVersion: '40',
-      } as FoundBrowser
-
-      const result = validateMinVersion(foundBrowser)
-
-      expect(result.isSupported).to.be.false
-      expect(result.warningMessage).to.contain('Cypress does not support running Test Browser version 40.')
-    })
-
-    it('successfully validates a version equal to the minimum', () => {
-      const foundBrowser = {
-        ...testBrowser,
-        version: '50.1.0',
-        majorVersion: '50',
-      } as FoundBrowser
-
-      const result = validateMinVersion(foundBrowser)
-
-      expect(result.isSupported).to.be.true
-      expect(result.warningMessage).to.be.undefined
-    })
-
-    it('successfully validates a version greater than the minimum', () => {
-      const foundBrowser = {
-        ...testBrowser,
-        version: '90.1.0',
-        majorVersion: '90',
-      } as FoundBrowser
-
-      const result = validateMinVersion(foundBrowser)
-
-      expect(result.isSupported).to.be.true
-      expect(result.warningMessage).to.be.undefined
-    })
-
-    it('does not validate with missing minSupportedVersion', () => {
-      const foundBrowser = {
-        ...testBrowser,
-        version: '90.1.0',
-      } as FoundBrowser
-
-      const result = validateMinVersion(foundBrowser)
-
-      expect(result.isSupported).to.be.true
-      expect(result.warningMessage).to.be.undefined
-    })
-
-    it('does not validate with missing majorVersion', () => {
-      const foundBrowser = {
-        ...testBrowser,
-        minSupportedVersion: 90,
-        version: '90.1.0',
-      } as FoundBrowser
-
-      const result = validateMinVersion(foundBrowser)
-
-      expect(result.isSupported).to.be.true
-      expect(result.warningMessage).to.be.undefined
     })
   })
 })

@@ -32,10 +32,10 @@ describe('lib/ca', () => {
   })
 
   context('#generateServerCertificateKeys', () => {
-    it('generates certs for each host', function () {
+    it('generates certs for each host', async function () {
       console.time('generating cert')
 
-      return this.ca.generateServerCertificateKeys('www.cypress.io')
+      await this.ca.generateServerCertificateKeys('www.cypress.io')
       .spread((certPem, keyPrivatePem) => {
         console.timeEnd('generating cert')
         expect(certPem).to.include('-----BEGIN CERTIFICATE-----')

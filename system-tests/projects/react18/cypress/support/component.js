@@ -1,4 +1,4 @@
-import { mount } from 'cypress/react18'
+import { mount } from 'cypress/react'
 
 import './backgroundColor.css'
 

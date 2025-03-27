@@ -1,8 +1,10 @@
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 import { h } from 'vue'
 
 // Subject Under Test
 import Select from './Select.vue'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these module imports
 import IconHeart from '~icons/mdi/heart'
 
 const selectText = defaultMessages.components.select
@@ -35,9 +37,11 @@ const mountSelect = (props: any = {}) => {
   // a click on the body dismisses the options
   return cy.mount(() => (
     <div class="p-12 w-[300px]">
+      <label id="mock-label">Mock Label</label>
       <Select
         options={defaultOptions}
         modelValue={value}
+        labelId="mock-label"
         {...props}
         v-slots={props.vSlots}
       />
@@ -165,6 +169,8 @@ describe('<Select />', () => {
             'onUpdate:modelValue': (value: any) => this.model = value,
             options: defaultOptions,
             placeholder: 'A placeholder',
+            label: 'Pick a color',
+            'label-id': 'label',
           })
         },
       }).then(() => {

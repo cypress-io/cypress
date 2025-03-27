@@ -20,15 +20,13 @@ describe('Counter with access', () => {
     // the window.counter was set from the Counter's constructor
     cy.window()
     .should('have.property', 'counter')
-    .its('state')
-    .should('deep.equal', { count: 0 })
+    .its('count')
+    .should('equal', 0)
 
     // let's change the state of the component
     cy.window()
     .its('counter')
-    .invoke('setState', {
-      count: 101,
-    })
+    .invoke('setCount', 101)
 
     // the UI should update to reflect the new count
     cy.contains('count: 101').should('be.visible')

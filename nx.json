@@ -1,39 +1,30 @@
 {
-  "tasksRunnerOptions": {
-    "default": {
-      "runner": "nx-cloud",
-      "options": {
-        "cacheableOperations": [
-          "lint",
-          "check-ts",
-          "build"
-        ],
-        "accessToken": "ZmNlNjA0YzAtNTM1NS00MDIwLWFlMWItNWYxYzNiMjQ4N2VkfHJlYWQtb25seQ=="
-      }
-    }
-  },
   "targetDefaults": {
     "lint": {
       "inputs": [
         "default",
         "{workspaceRoot}/.eslintrc.js"
-      ]
+      ],
+      "cache": false
     },
     "check-ts": {
       "inputs": [
         "default",
         "sharedGlobals"
-      ]
+      ],
+      "cache": false
     },
     "build": {
       "dependsOn": [
         "^build"
-      ]
+      ],
+      "cache": false
     },
     "build-prod": {
       "dependsOn": [
         "^build-prod"
-      ]
+      ],
+      "cache": false
     }
   },
   "namedInputs": {
@@ -42,7 +33,8 @@
     ],
     "default": [
       "{projectRoot}/**/*",
-      "sharedGlobals"
+      "sharedGlobals",
+      "{workspaceRoot}/.circleci/cache-version.txt"
     ],
     "production": [
       "default",
@@ -54,5 +46,6 @@
       "!{projectRoot/cypress.config.{ts,js}",
       "!{projectRoot/**/*.cy.ts"
     ]
-  }
+  },
+  "nxCloudAccessToken": "ZmNlNjA0YzAtNTM1NS00MDIwLWFlMWItNWYxYzNiMjQ4N2VkfHJlYWQtb25seQ=="
 }

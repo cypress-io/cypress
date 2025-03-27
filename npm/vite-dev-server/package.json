@@ -18,7 +18,7 @@
     "debug": "^4.3.4",
     "find-up": "6.3.0",
     "node-html-parser": "5.3.3",
-    "semver": "^7.5.3"
+    "semver": "^7.7.1"
   },
   "devDependencies": {
     "chai": "^4.3.6",
@@ -29,7 +29,11 @@
     "ts-node": "^10.9.2",
     "vite-4": "npm:vite@^4.5.3",
     "vite-5": "npm:vite@^5.2.8",
+    "vite-6": "npm:vite@^6.0.0",
     "vite-plugin-inspect": "0.8.4"
+  },
+  "peerDependencies": {
+    "cypress": ">=14.0.0"
   },
   "files": [
     "dist",

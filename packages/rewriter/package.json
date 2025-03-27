@@ -6,11 +6,12 @@
   "scripts": {
     "build-prod": "tsc --project .",
     "build-test": "yarn build-prod --noEmit",
-    "check-ts": "tsc --noEmit",
+    "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean": "rimraf 'lib/**/*.js'",
     "clean-deps": "rimraf node_modules",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
-    "test": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json"
+    "test": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
+    "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "dependencies": {
     "ast-types": "0.13.3",
@@ -29,7 +30,7 @@
     "nock": "13.2.9",
     "sinon": "9.0.2",
     "sinon-chai": "3.5.0",
-    "snap-shot-it": "7.9.3"
+    "snap-shot-it": "7.9.10"
   },
   "files": [
     "lib"
@@ -42,5 +43,6 @@
       "@types/parse5-html-rewriting-stream",
       "@types/parse5-html-rewriting-stream/**"
     ]
-  }
+  },
+  "nx": {}
 }

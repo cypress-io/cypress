@@ -2,6 +2,7 @@
 // Defining emits for "Button.vue" removes the native handler on the
 // <button> element. vue-tsc just can't handle this yet.
 import CreateSpecCard from './CreateSpecCard.vue'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import DocumentCode from '~icons/cy/document-code_x48'
 
 const iconSelector = '[data-cy=card-icon]'

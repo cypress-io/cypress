@@ -43,7 +43,7 @@ export class NetworkProxy {
     this.http.handleServiceWorkerClientEvent(event)
   }
 
-  handleHttpRequest (req, res) {
+  async handleHttpRequest (req, res) {
     const span = telemetry.startSpan({
       name: 'network:proxy:handleHttpRequest',
       opts: {
@@ -55,13 +55,13 @@ export class NetworkProxy {
       isVerbose: true,
     })
 
-    this.http.handleHttpRequest(req, res, span).finally(() => {
+    await this.http.handleHttpRequest(req, res, span).finally(() => {
       span?.end()
     })
   }
 
-  handleSourceMapRequest (req, res) {
-    this.http.handleSourceMapRequest(req, res)
+  async handleSourceMapRequest (req, res) {
+    await this.http.handleSourceMapRequest(req, res)
   }
 
   setHttpBuffer (buffer) {

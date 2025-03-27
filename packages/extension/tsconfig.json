@@ -1,12 +1,8 @@
 {
+  "extends": "../ts/tsconfig.json",
   "compilerOptions": {
-    "target": "es2015",
-    "module": "commonjs",
+    "target": "es2020",
     "allowJs": true,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "noImplicitAny": false,
-    "importHelpers": true,
     "strict": false
   }
 }

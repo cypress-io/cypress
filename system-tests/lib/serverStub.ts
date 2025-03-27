@@ -269,7 +269,7 @@ export const routeHandlers: Record<string, RouteHandler> = {
   },
 }
 
-export const createRoutes = (props: DeepPartial<typeof routeHandlers>) => {
+export const createRoutes = (props: DeepPartial<typeof routeHandlers> = {}) => {
   return _.values(_.merge(_.cloneDeep(routeHandlers), props))
 }
 

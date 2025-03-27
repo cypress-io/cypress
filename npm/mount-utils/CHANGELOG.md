@@ -1,3 +1,5 @@
+# [@cypress/mount-utils-v4.1.2](https://github.com/cypress-io/cypress/compare/@cypress/mount-utils-v4.1.1...@cypress/mount-utils-v4.1.2) (2025-01-08)
+
 # [@cypress/mount-utils-v4.1.1](https://github.com/cypress-io/cypress/compare/@cypress/mount-utils-v4.1.0...@cypress/mount-utils-v4.1.1) (2024-06-07)
 
 

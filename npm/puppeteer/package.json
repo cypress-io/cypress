@@ -21,10 +21,10 @@
     "puppeteer-core": "^21.2.1"
   },
   "devDependencies": {
-    "@types/node": "^18.17.5",
+    "@types/node": "^20.16.0",
     "chai-as-promised": "^7.1.1",
     "chokidar": "^3.5.3",
-    "express": "4.19.2",
+    "express": "4.21.0",
     "mocha": "^9.2.2",
     "rimraf": "^5.0.10",
     "semantic-release": "22.0.12",
@@ -50,5 +50,6 @@
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fpuppeteer&template=1-bug-report.md&title=",
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "nx": {}
 }

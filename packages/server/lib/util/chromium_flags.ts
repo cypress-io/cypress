@@ -36,7 +36,7 @@ const DEFAULT_FLAGS = [
   'enable-automation',
   'disable-print-preview',
   'disable-component-extensions-with-background-pages',
-
+  'disable-infobars',
   'disable-device-discovery-notifications',
 
   // https://github.com/cypress-io/cypress/issues/2376

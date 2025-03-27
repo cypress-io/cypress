@@ -8,8 +8,8 @@ const errors = require('../errors')
 const baseEmitter = new EE()
 
 plugins.registerHandler((ipc) => {
-  baseEmitter.on('dev-server:specs:changed', (specs) => {
-    ipc.send('dev-server:specs:changed', specs)
+  baseEmitter.on('dev-server:specs:changed', (specsAndOptions) => {
+    ipc.send('dev-server:specs:changed', specsAndOptions)
   })
 
   ipc.on('dev-server:compile:success', ({ specFile } = {}) => {
@@ -29,8 +29,8 @@ const API = {
     return plugins.execute('dev-server:start', { specs, config })
   },
 
-  updateSpecs (specs) {
-    baseEmitter.emit('dev-server:specs:changed', specs)
+  updateSpecs (specs, options) {
+    baseEmitter.emit('dev-server:specs:changed', { specs, options })
   },
 
   close () {

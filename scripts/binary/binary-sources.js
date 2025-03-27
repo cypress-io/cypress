@@ -109,11 +109,29 @@ const getProtocolFileSource = async (protocolFilePath) => {
   return fileContents.replaceAll('process.env.CYPRESS_LOCAL_PROTOCOL_PATH', 'undefined')
 }
 
+const getStudioFileSource = async (studioFilePath) => {
+  const fileContents = await fs.readFile(studioFilePath, 'utf8')
+
+  if (!fileContents.includes('process.env.CYPRESS_LOCAL_STUDIO_PATH')) {
+    throw new Error(`Expected to find CYPRESS_LOCAL_STUDIO_PATH in studio file`)
+  }
+
+  return fileContents.replaceAll('process.env.CYPRESS_LOCAL_STUDIO_PATH', 'undefined')
+}
+
 const validateProtocolFile = async (protocolFilePath) => {
   const afterReplaceProtocol = await fs.readFile(protocolFilePath, 'utf8')
 
   if (afterReplaceProtocol.includes('process.env.CYPRESS_LOCAL_PROTOCOL_PATH')) {
     throw new Error(`Expected process.env.CYPRESS_LOCAL_PROTOCOL_PATH to be stripped from protocol file`)
+  }
+}
+
+const validateStudioFile = async (studioFilePath) => {
+  const afterReplaceStudio = await fs.readFile(studioFilePath, 'utf8')
+
+  if (afterReplaceStudio.includes('process.env.CYPRESS_LOCAL_STUDIO_PATH')) {
+    throw new Error(`Expected process.env.CYPRESS_LOCAL_STUDIO_PATH to be stripped from studio file`)
   }
 }
 
@@ -127,6 +145,8 @@ module.exports = {
   validateCloudEnvironmentFile,
   getProtocolFileSource,
   validateProtocolFile,
+  getStudioFileSource,
+  validateStudioFile,
   getIndexJscHash,
   DUMMY_INDEX_JSC_HASH,
 }

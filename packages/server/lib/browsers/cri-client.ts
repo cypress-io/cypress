@@ -117,7 +117,7 @@ export class CriClient implements ICriClient {
 
   private constructor (
     public targetId: string,
-    onAsynchronousError: (err: CypressError) => void,
+    private onAsynchronousError: (err: CypressError) => void,
     private host?: string,
     private port?: number,
     private onReconnect?: (client: CriClient) => void,
@@ -161,8 +161,7 @@ export class CriClient implements ICriClient {
     this._isChildTarget = !!this.host
 
     if (this._isChildTarget) {
-      // If crash listeners are added at the browser level, tabs/page connections do not
-      // emit them.
+      // If crash listeners are added at the browser level, tabs/page connections do not emit them.
       this.cdpConnection.on('Target.targetCrashed', async (event) => {
         debug('crash event detected', event)
         if (event.targetId !== this.targetId) {
@@ -353,6 +352,18 @@ export class CriClient implements ICriClient {
     }
   }
 
+  async clone (): Promise<CriClient> {
+    return CriClient.create({
+      target: this.targetId,
+      onAsynchronousError: this.onAsynchronousError,
+      host: this.host,
+      port: this.port,
+      protocolManager: this.protocolManager,
+      fullyManageTabs: this.fullyManageTabs,
+      browserClient: this.browserClient,
+    })
+  }
+
   private _onAttachedToTarget = async (event: ProtocolMapping.Events['Target.attachedToTarget'][0]) => {
     // We're only interested in child target traffic. Browser cri traffic is
     // handled in browser-cri-client.ts. The basic approach here is we attach
@@ -368,13 +379,18 @@ export class CriClient implements ICriClient {
       if (event.targetInfo.type !== 'service_worker' && event.targetInfo.type !== 'page' && event.targetInfo.type !== 'other') {
         await this.cdpConnection.send('Network.enable', this.protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId)
       }
-
-      if (event.waitingForDebugger) {
-        await this.cdpConnection.send('Runtime.runIfWaitingForDebugger', undefined, event.sessionId)
-      }
     } catch (error) {
-      // it's possible that the target was closed before we could enable network and continue, in that case, just ignore
-      debug('error attaching to target cri', error)
+      // it's possible that the target was closed before we could enable network, in that case, just ignore
+      debug('error attaching to target cri: %o', { error, event })
+    }
+
+    if (event.waitingForDebugger) {
+      try {
+        await this.cdpConnection.send('Runtime.runIfWaitingForDebugger', undefined, event.sessionId)
+      } catch (error) {
+        // it's possible that the target was closed before we could tell it to run, in that case, just ignore
+        debug('error running Runtime.runIfWaitingForDebugger: %o', { error, event })
+      }
     }
   }
 

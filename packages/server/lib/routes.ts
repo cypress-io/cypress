@@ -18,7 +18,6 @@ import path from 'path'
 import AppData from './util/app_data'
 import CacheBuster from './util/cache_buster'
 import specController from './controllers/spec'
-import reporter from './controllers/reporter'
 import client from './controllers/client'
 import files from './controllers/files'
 import * as plugins from './plugins'
@@ -104,6 +103,24 @@ export const createCommonRoutes = ({
     next()
   })
 
+  // If we are in cypress in cypress we need to pass along the studio routes
+  // to the child project.
+  if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
+    router.get('/__cypress-studio/*', async (req, res) => {
+      await networkProxy.handleHttpRequest(req, res)
+    })
+  // We need to handle the case where the studio is not defined or loaded properly.
+  // Module federation still tries to load the dynamic asset, but since we do not
+  // have anything to load, we return a blank file.
+  } else if (!getCtx().coreData.studio || getCtx().coreData.studio?.status === 'IN_ERROR') {
+    router.get('/__cypress-studio/app-studio.js', (req, res) => {
+      res.setHeader('Content-Type', 'application/javascript')
+      res.status(200).send('')
+    })
+  } else {
+    getCtx().coreData.studio?.initializeRoutes(router)
+  }
+
   router.get(`/${config.namespace}/tests`, (req, res, next) => {
     // slice out the cache buster
     const test = CacheBuster.strip(req.query.p)
@@ -135,10 +152,6 @@ export const createCommonRoutes = ({
     client.handle(req, res)
   })
 
-  router.get(`/${config.namespace}/reporter/*`, (req, res) => {
-    reporter.handle(req, res)
-  })
-
   router.get(`/${config.namespace}/automation/getLocalStorage`, (req, res) => {
     res.sendFile(path.join(__dirname, './html/get-local-storage.html'))
   })
@@ -151,8 +164,8 @@ export const createCommonRoutes = ({
     res.sendFile(path.join(__dirname, './html/set-local-storage.html'))
   })
 
-  router.get(`/${config.namespace}/source-maps/:id.map`, (req, res) => {
-    networkProxy.handleSourceMapRequest(req, res)
+  router.get(`/${config.namespace}/source-maps/:id.map`, async (req, res) => {
+    await networkProxy.handleSourceMapRequest(req, res)
   })
 
   // special fallback - serve dist'd (bundled/static) files from the project path folder
@@ -164,13 +177,7 @@ export const createCommonRoutes = ({
     res.sendFile(file, { etag: false })
   })
 
-  // TODO: The below route is not technically correct for cypress in cypress tests.
-  // We should be using 'config.namespace' to provide the namespace instead of hard coding __cypress, however,
-  // In the runner when we create the spec bridge we have no knowledge of the namespace used by the server so
-  // we create a spec bridge for the namespace of the server specified in the config, but that server hasn't been created.
-  // To fix this I think we need to find a way to listen in the cypress in cypress server for routes from the server the
-  // cypress instance thinks should exist, but that's outside the current scope.
-  router.get('/__cypress/spec-bridge-iframes', (req, res) => {
+  router.get(`/${config.namespace}/spec-bridge-iframes`, async (req, res) => {
     debug('handling cross-origin iframe for domain: %s', req.hostname)
 
     // Chrome plans to make document.domain immutable in Chrome 109, with the default value
@@ -180,7 +187,7 @@ export const createCommonRoutes = ({
     // @see https://github.com/cypress-io/cypress/issues/25010
     res.setHeader('Origin-Agent-Cluster', '?0')
 
-    files.handleCrossOriginIframe(req, res, config)
+    await files.handleCrossOriginIframe(req, res, config)
   })
 
   router.post(`/${config.namespace}/add-verified-command`, bodyParser.json(), (req, res) => {
@@ -215,9 +222,9 @@ export const createCommonRoutes = ({
     xhrs.handle(req, res, config, next)
   })
 
-  router.get(`/${namespace}/iframes/*`, (req, res) => {
+  router.get(`/${namespace}/iframes/*`, async (req, res) => {
     if (testingType === 'e2e') {
-      iframesController.e2e({ config, getSpec, remoteStates }, req, res)
+      await iframesController.e2e({ config, getSpec, remoteStates }, req, res)
     }
 
     if (testingType === 'component') {
@@ -274,8 +281,8 @@ export const createCommonRoutes = ({
     })
   }
 
-  router.all('*', (req, res) => {
-    networkProxy.handleHttpRequest(req, res)
+  router.all('*', async (req, res) => {
+    await networkProxy.handleHttpRequest(req, res)
   })
 
   // when we experience uncaught errors

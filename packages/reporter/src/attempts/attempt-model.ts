@@ -1,16 +1,16 @@
 import _ from 'lodash'
-import { action, computed, observable } from 'mobx'
+import { action, computed, observable, makeObservable } from 'mobx'
 
 import Agent, { AgentProps } from '../agents/agent-model'
 import Command, { CommandProps } from '../commands/command-model'
 import Err from '../errors/err-model'
 import Route, { RouteProps } from '../routes/route-model'
-import Test, { UpdatableTestProps, TestProps } from '../test/test-model'
-import type { TestState } from '@packages/types'
+import type Test from '../test/test-model'
+import type { UpdatableTestProps, TestProps } from '../test/test-model'
+import type { TestState, FileDetails } from '@packages/types'
 import Hook, { HookName } from '../hooks/hook-model'
-import { FileDetails } from '@packages/types'
-import { LogProps } from '../runnables/runnables-store'
-import Log from '../instruments/instrument-model'
+import type { LogProps } from '../runnables/runnables-store'
+import type Log from '../instruments/instrument-model'
 import Session, { SessionProps } from '../sessions/sessions-model'
 
 export default class Attempt {
@@ -47,6 +47,7 @@ export default class Attempt {
   _logs: {[key: string]: Log} = {}
 
   constructor (props: TestProps, test: Test) {
+    makeObservable(this)
     this.testId = props.id
     this.id = props.currentRetry || 0
     this.test = test

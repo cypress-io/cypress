@@ -15,6 +15,7 @@
       "@/*": ["src/*"]
     },
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
+    "types": ["cypress", "node"],
     "skipLibCheck": true
   },
   "include": ["vite.config.*", "env.d.ts", "src/**/*", "cypress/**/*"]

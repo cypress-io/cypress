@@ -8,7 +8,7 @@ export interface UnmountArgs {
 export type MountOptions = Partial<MountReactComponentOptions>
 
 export interface MountReactComponentOptions {
-  ReactDom: typeof import('react-dom')
+  ReactDom: typeof import('react-dom/client')
   /**
    * Log the mounting command into Cypress Command Log,
    * true by default.
@@ -22,11 +22,11 @@ export interface MountReactComponentOptions {
 }
 
 export interface InternalMountOptions {
-  reactDom: typeof import('react-dom')
+  reactDom: typeof import('react-dom/client')
   render: (
     reactComponent: ReturnType<typeof React.createElement>,
     el: HTMLElement,
-    reactDomToUse: typeof import('react-dom')
+    reactDomToUse: typeof import('react-dom/client')
   ) => void
   unmount: (options: UnmountArgs) => void
   cleanup: () => boolean
@@ -44,11 +44,4 @@ export interface MountReturn {
    * or have asynchronous updates (`useEffect`, `useLayoutEffect`).
    */
   rerender: (component: React.ReactNode) => globalThis.Cypress.Chainable<MountReturn>
-  /**
-   * Removes the mounted component.
-   *
-   * Removed as of Cypress 11.0.0.
-   * @see https://on.cypress.io/migration-11-0-0-component-testing-updates
-   */
-  unmount: (payload: UnmountArgs) => void // globalThis.Cypress.Chainable<JQuery<HTMLElement>>
 }

@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import { registerFetch } from 'unfetch'
 import $selection from '../dom/selection'
 
 import type { ICypress } from '../cypress'
@@ -55,14 +54,6 @@ export const create = (state: StateFunc, config: ICypress['config'], focused: IF
 
       contentWindow.CSSStyleSheet.prototype.insertRule = _.wrap(insertRule, cssModificationSpy)
       contentWindow.CSSStyleSheet.prototype.deleteRule = _.wrap(deleteRule, cssModificationSpy)
-
-      if (config('experimentalFetchPolyfill')) {
-        // drop "fetch" polyfill that replaces it with XMLHttpRequest
-        // from the app iframe that we wrap for network stubbing
-        contentWindow.fetch = registerFetch(contentWindow)
-        // flag the polyfill to test this experimental feature easier
-        state('fetchPolyfilled', true)
-      }
     } catch (error) {} // eslint-disable-line no-empty
   }
 

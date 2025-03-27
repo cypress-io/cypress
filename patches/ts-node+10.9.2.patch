@@ -1,0 +1,30 @@
+diff --git a/node_modules/ts-node/dist/index.js b/node_modules/ts-node/dist/index.js
+index c03afbf..eb5bd16 100644
+--- a/node_modules/ts-node/dist/index.js
++++ b/node_modules/ts-node/dist/index.js
+@@ -93,8 +93,11 @@ exports.DEFAULTS = {
+ };
+ /**
+  * TypeScript diagnostics error.
++ * 
++ * Note: this is patched to extend Error instead of makeError.BaseError. This is to get around this issue:
++ * https://github.com/TypeStrong/ts-node/issues/2026
+  */
+-class TSError extends make_error_1.BaseError {
++class TSError extends Error {
+     constructor(diagnosticText, diagnosticCodes, diagnostics = []) {
+         super(`⨯ Unable to compile TypeScript:\n${diagnosticText}`);
+         this.diagnosticCodes = diagnosticCodes;
+@@ -110,12 +113,6 @@ class TSError extends make_error_1.BaseError {
+             value: diagnostics,
+         });
+     }
+-    /**
+-     * @internal
+-     */
+-    [exports.INSPECT_CUSTOM]() {
+-        return this.diagnosticText;
+-    }
+ }
+ exports.TSError = TSError;
+ const TS_NODE_SERVICE_BRAND = Symbol('TS_NODE_SERVICE_BRAND');

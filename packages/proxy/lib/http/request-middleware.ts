@@ -185,6 +185,24 @@ const CalculateCredentialLevelIfApplicable: RequestMiddleware = function () {
   this.next()
 }
 
+const FormatCookiesIfApplicable: RequestMiddleware = function () {
+  if (this.req.headers['x-cypress-is-webdriver-bidi'] && this.req.headers.cookie) {
+    const cookies = this.req.headers.cookie
+    // in the case of BiDi, cookies come in as foo=bar;bar=baz and not foo=bar; bar=baz,
+    // i.e. they are delimited differently, which impacts some of our tests and our cookie splicing.
+    // this regex is to help make sure the cookies are fed in consistently
+    const bidiStyleCookie = /;\S/gm
+
+    if (cookies.match(bidiStyleCookie)) {
+      this.req.headers.cookie = cookies.replaceAll(';', '; ')
+    }
+  }
+
+  delete this.req.headers['x-cypress-is-webdriver-bidi']
+
+  return this.next()
+}
+
 const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
   const span = telemetry.startSpan({ name: 'maybe:attach:cross:origin:cookies', parentSpan: this.reqMiddlewareSpan, isVerbose })
 
@@ -300,7 +318,7 @@ const MaybeEndRequestWithBufferedResponse: RequestMiddleware = function () {
   })
 
   if (buffer) {
-    this.debug('ending request with buffered response')
+    this.debug('ending request with buffered response', { policyMatch: buffer.urlDoesNotMatchPolicyBasedOnDomain })
 
     // NOTE: Only inject fullCrossOrigin here if the super domain origins do not match in order to keep parity with cypress application reloads
     this.res.wantsInjection = buffer.urlDoesNotMatchPolicyBasedOnDomain ? 'fullCrossOrigin' : 'full'
@@ -330,7 +348,8 @@ const RedirectToClientRouteIfUnloaded: RequestMiddleware = function () {
 
   // if we have an unload header it means our parent app has been navigated away
   // directly and we need to automatically redirect to the clientRoute
-  if (hasAppUnloaded) {
+  // We do not redirect if we are in cypress in cypress since this can be caused by a reload of the internal Cypress app
+  if (hasAppUnloaded && !process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
     span?.setAttributes({
       redirectedTo: this.config.clientRoute,
     })
@@ -560,6 +579,7 @@ export default {
   MaybeSimulateSecHeaders,
   CorrelateBrowserPreRequest,
   CalculateCredentialLevelIfApplicable,
+  FormatCookiesIfApplicable,
   MaybeAttachCrossOriginCookies,
   MaybeEndRequestWithBufferedResponse,
   SetMatchingRoutes,

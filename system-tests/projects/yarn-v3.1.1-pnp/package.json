@@ -1,12 +1,11 @@
 {
   "name": "yarn-v3.1.1-pnp",
-  "version": "1.0.0",
+  "version": "0.0.0-test",
   "dependencies": {
     "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "typescript": "^4.2.4"
+    "typescript": "^5.6.3"
   },
-  "license": "MIT",
   "_cyYarnV311": true
 }

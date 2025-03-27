@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>All Tests</title>
+  </head>
+  <body>
+    <script type="text/javascript">
+      document.domain = 'localhost';
+
+      (function(parent) {
+        var Cypress = window.Cypress = parent.Cypress;
+        if (!Cypress) {
+          throw new Error("Tests cannot run without a reference to Cypress!");
+        }
+        return Cypress.onSpecWindow(window, [{"absolute":"/<path-to-project>/todos/tests/_support/spec_helper.js","relative":"tests/_support/spec_helper.js","relativeUrl":"/__cypress/tests?p=tests/_support/spec_helper.js"},{"absolute":"/<path-to-project>/todos/tests/etc/etc.js","relative":"tests/etc/etc.js","relativeUrl":"/__cypress/tests?p=tests/etc/etc.js"},{"absolute":"/<path-to-project>/todos/tests/sub/a%26b%25c.js","relative":"tests/sub/a%26b%25c.js","relativeUrl":"/__cypress/tests?p=tests/sub/a%26b%25c.js"},{"absolute":"/<path-to-project>/todos/tests/sub/sub_test.coffee","relative":"tests/sub/sub_test.coffee","relativeUrl":"/__cypress/tests?p=tests/sub/sub_test.coffee"},{"absolute":"/<path-to-project>/todos/tests/test1.js","relative":"tests/test1.js","relativeUrl":"/__cypress/tests?p=tests/test1.js"},{"absolute":"/<path-to-project>/todos/tests/test2.coffee","relative":"tests/test2.coffee","relativeUrl":"/__cypress/tests?p=tests/test2.coffee"}]);
+      })(window.opener || window.parent);
+    </script>
+  </body>
+</html>

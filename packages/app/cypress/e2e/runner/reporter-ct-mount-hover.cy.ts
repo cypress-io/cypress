@@ -3,13 +3,13 @@ import type { fixtureDirs } from '@tooling/system-tests'
 type ProjectDirs = typeof fixtureDirs
 
 const PROJECTS: {projectName: ProjectDirs[number], test: string}[] = [
-  // TODO: Flaky { projectName: 'angular-14', test: 'app.component' },
-  // TODO: Flaky. { projectName: 'vueclivue2-configured', test: 'HelloWorld.cy' },
+  { projectName: 'angular-19', test: 'app.component' },
   { projectName: 'react-vite-ts-configured', test: 'App.cy' },
   { projectName: 'react18', test: 'App.cy' },
-  { projectName: 'create-react-app-configured', test: 'App.cy' },
-  { projectName: 'vueclivue3-configured', test: 'HelloWorld.cy' },
-  { projectName: 'nuxtjs-vue2-configured', test: 'Tutorial.cy' },
+  { projectName: 'next-14', test: 'index.cy' },
+  { projectName: 'vue3-vite-ts-configured', test: 'HelloWorld.cy' },
+  { projectName: 'vue3-webpack-ts-configured', test: 'HelloWorld.cy' },
+  { projectName: 'svelte-vite-configured', test: 'App.cy' },
 ]
 
 // These are especially flaky on windows, skipping them there.
@@ -24,7 +24,7 @@ for (const { projectName, test } of PROJECTS) {
       cy.findBrowsers()
     }),
     it(`While hovering on Mount(), shows component on AUT for ${projectName}`, () => {
-      if (`${projectName}` === 'react18') {
+      if (projectName === 'react18') {
         cy.openProject(projectName, ['--config-file', 'cypress-vite-default.config.ts', '--component'])
         cy.startAppServer('component')
         cy.visitApp()
@@ -43,6 +43,7 @@ for (const { projectName, test } of PROJECTS) {
         cy.specsPageIsVisible()
         cy.contains(`${test}`).click()
         cy.waitForSpecToFinish(undefined)
+
         cy.get('.command.command-name-mount > .command-wrapper').click().then(() => {
           cy.get('iframe.aut-iframe').its('0.contentDocument.body').then(cy.wrap).within(() => {
             cy.get('[data-cy-root]').children().should('have.length.at.least', 1)

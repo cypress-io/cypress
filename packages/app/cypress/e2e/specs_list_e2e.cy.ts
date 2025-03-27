@@ -127,6 +127,26 @@ describe('App: Spec List (E2E)', () => {
       cy.findByTestId('runnable-header').should('be.visible')
     })
 
+    it('updates the spec filename when a new spec is selected', () => {
+      // load the first spec
+      cy.findAllByTestId('spec-item-link').contains('accounts_list.spec.js').click()
+
+      // ensure the tests are loaded
+      cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
+      cy.findByText('Your tests are loading...').should('not.be.visible')
+
+      // open the inline spec list
+      cy.get('body').type('f')
+
+      // verify the first spec filename
+      cy.findByTestId('runnable-header').contains('accounts_list.spec.js')
+
+      // select the second spec from the inline spec list
+      cy.findAllByTestId('spec-file-item').contains('accounts_new.spec.js').click()
+      // verify the spec filename was updated
+      cy.findByTestId('runnable-header').contains('accounts_new.spec.js')
+    })
+
     it('cannot open the Spec File Row link in a new tab with "cmd + click"', (done) => {
       let numTargets
       let newNumTargets

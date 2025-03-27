@@ -131,6 +131,43 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "invocationDetails": "{Object 9}",
+        "final": false,
+        "currentRetry": 0,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -271,6 +308,42 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 1,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -409,6 +482,42 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 2,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -547,6 +656,42 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 3,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -682,6 +827,42 @@
         "_slow": 10000
       },
       null
+    ],
+    [
+      "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 4,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
     ],
     [
       "mocha",
@@ -1251,6 +1432,64 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before all": [
+            {
+              "hookId": "h1",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "invocationDetails": "{Object 9}",
+        "final": false,
+        "currentRetry": 0,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -1523,6 +1762,56 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 1,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -1779,6 +2068,56 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 2,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -2035,6 +2374,56 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 3,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -2287,6 +2676,56 @@
         "currentRetry": 0,
         "retries": -1,
         "_slow": 10000
+      }
+    ],
+    [
+      "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 4,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
       }
     ],
     [
@@ -3082,6 +3521,64 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 2",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before all": [
+            {
+              "hookId": "h1",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "invocationDetails": "{Object 9}",
+        "final": false,
+        "currentRetry": 0,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -3354,6 +3851,56 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 2",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 1,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -3610,6 +4157,56 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 2",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 2,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -3866,6 +4463,56 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 2",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 3,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -4118,6 +4765,56 @@
         "currentRetry": 0,
         "retries": -1,
         "_slow": 10000
+      }
+    ],
+    [
+      "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 2",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 4,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
       }
     ],
     [
@@ -4998,6 +5695,71 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "hookName": "before each",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "failedFromHookId": "h3",
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before all": [
+            {
+              "hookId": "h1",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            },
+            {
+              "hookId": "h3",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h6",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "invocationDetails": "{Object 9}",
+        "final": false,
+        "currentRetry": 0,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -5369,6 +6131,66 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            },
+            {
+              "hookId": "h3",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            },
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h6",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 1,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -5731,6 +6553,66 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            },
+            {
+              "hookId": "h3",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            },
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h6",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 2,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -6093,6 +6975,66 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            },
+            {
+              "hookId": "h3",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            },
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h6",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 3,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -6451,6 +7393,66 @@
         "currentRetry": 0,
         "retries": -1,
         "_slow": 10000
+      }
+    ],
+    [
+      "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            },
+            {
+              "hookId": "h3",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            },
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h6",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 4,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
       }
     ],
     [
@@ -17147,6 +18149,43 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r2",
+        "order": 1,
+        "title": "visits",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "invocationDetails": "{Object 9}",
+        "final": false,
+        "currentRetry": 0,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r2",
@@ -17292,6 +18331,42 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r2",
+        "order": 1,
+        "title": "visits",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 1,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r2",
@@ -17435,6 +18510,42 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r2",
+        "order": 1,
+        "title": "visits",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 2,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r2",
@@ -17578,6 +18689,42 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r2",
+        "order": 1,
+        "title": "visits",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 3,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r2",
@@ -17717,6 +18864,42 @@
         "name": "AssertionError",
         "stack": "match.string",
         "parsedStack": "match.array"
+      }
+    ],
+    [
+      "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r2",
+        "order": 1,
+        "title": "visits",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 4,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
       }
     ],
     [
@@ -18141,6 +19324,43 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "invocationDetails": "{Object 9}",
+        "final": false,
+        "currentRetry": 0,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -18281,6 +19501,42 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 1,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -18419,6 +19675,42 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 2,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -18557,6 +19849,42 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 3,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -18695,6 +20023,42 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 4,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -18833,6 +20197,42 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 5,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -18971,6 +20371,42 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 6,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -19109,6 +20545,42 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 7,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -19244,6 +20716,42 @@
         "_slow": 10000
       },
       null
+    ],
+    [
+      "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 8,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
     ],
     [
       "mocha",
@@ -19843,6 +21351,64 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before all": [
+            {
+              "hookId": "h1",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "invocationDetails": "{Object 9}",
+        "final": false,
+        "currentRetry": 0,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -20115,6 +21681,56 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 1,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -20371,6 +21987,56 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 2,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -20627,6 +22293,56 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 3,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -20883,6 +22599,56 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 4,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -21139,6 +22905,56 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 5,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -21395,6 +23211,56 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 6,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -21651,6 +23517,56 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 7,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -21903,6 +23819,56 @@
         "currentRetry": 0,
         "retries": -1,
         "_slow": 10000
+      }
+    ],
+    [
+      "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 8,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
       }
     ],
     [
@@ -22728,6 +24694,64 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 2",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before all": [
+            {
+              "hookId": "h1",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "invocationDetails": "{Object 9}",
+        "final": false,
+        "currentRetry": 0,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -23000,6 +25024,56 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 2",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 1,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -23256,6 +25330,56 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 2",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 2,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -23512,6 +25636,56 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 2",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 3,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -23768,6 +25942,56 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 2",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 4,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -24024,6 +26248,56 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 2",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 5,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -24280,6 +26554,56 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 2",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 6,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -24536,6 +26860,56 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 2",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 7,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -24788,6 +27162,56 @@
         "currentRetry": 0,
         "retries": -1,
         "_slow": 10000
+      }
+    ],
+    [
+      "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 2",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 8,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
       }
     ],
     [
@@ -25698,6 +28122,71 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "hookName": "before each",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "failedFromHookId": "h3",
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before all": [
+            {
+              "hookId": "h1",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            },
+            {
+              "hookId": "h3",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h6",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "invocationDetails": "{Object 9}",
+        "final": false,
+        "currentRetry": 0,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -26069,6 +28558,66 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            },
+            {
+              "hookId": "h3",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            },
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h6",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 1,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -26431,6 +28980,66 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            },
+            {
+              "hookId": "h3",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            },
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h6",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 2,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -26793,6 +29402,66 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            },
+            {
+              "hookId": "h3",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            },
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h6",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 3,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -27155,6 +29824,66 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            },
+            {
+              "hookId": "h3",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            },
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h6",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 4,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -27517,6 +30246,66 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            },
+            {
+              "hookId": "h3",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            },
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h6",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 5,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -27879,6 +30668,66 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            },
+            {
+              "hookId": "h3",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            },
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h6",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 6,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -28241,6 +31090,66 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            },
+            {
+              "hookId": "h3",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            },
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h6",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 7,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r3",
@@ -28599,6 +31508,66 @@
         "currentRetry": 0,
         "retries": -1,
         "_slow": 10000
+      }
+    ],
+    [
+      "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "passed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            },
+            {
+              "hookId": "h3",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            },
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h6",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 8,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
       }
     ],
     [
@@ -42933,6 +45902,43 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r2",
+        "order": 1,
+        "title": "visits",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "invocationDetails": "{Object 9}",
+        "final": false,
+        "currentRetry": 0,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r2",
@@ -43078,6 +46084,42 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r2",
+        "order": 1,
+        "title": "visits",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 1,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r2",
@@ -43221,6 +46263,42 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r2",
+        "order": 1,
+        "title": "visits",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 2,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r2",
@@ -43364,6 +46442,42 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r2",
+        "order": 1,
+        "title": "visits",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 3,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r2",
@@ -43507,6 +46621,42 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r2",
+        "order": 1,
+        "title": "visits",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 4,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r2",
@@ -43650,6 +46800,42 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r2",
+        "order": 1,
+        "title": "visits",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 5,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r2",
@@ -43793,6 +46979,42 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r2",
+        "order": 1,
+        "title": "visits",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 6,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r2",
@@ -43936,6 +47158,42 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r2",
+        "order": 1,
+        "title": "visits",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 7,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r2",
@@ -44075,6 +47333,42 @@
         "name": "AssertionError",
         "stack": "match.string",
         "parsedStack": "match.array"
+      }
+    ],
+    [
+      "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r2",
+        "order": 1,
+        "title": "visits",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 8,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
       }
     ],
     [
@@ -44495,6 +47789,43 @@
         "name": "AssertionError",
         "stack": "match.string",
         "parsedStack": "match.array"
+      }
+    ],
+    [
+      "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "invocationDetails": "{Object 9}",
+        "final": false,
+        "currentRetry": 0,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
       }
     ],
     [
@@ -45093,6 +48424,64 @@
         "currentRetry": 0,
         "retries": -1,
         "_slow": 10000
+      }
+    ],
+    [
+      "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before all": [
+            {
+              "hookId": "h1",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "invocationDetails": "{Object 9}",
+        "final": false,
+        "currentRetry": 0,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
       }
     ],
     [
@@ -45930,6 +49319,64 @@
         "currentRetry": 0,
         "retries": -1,
         "_slow": 10000
+      }
+    ],
+    [
+      "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 2",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before all": [
+            {
+              "hookId": "h1",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h4",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "invocationDetails": "{Object 9}",
+        "final": false,
+        "currentRetry": 0,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
       }
     ],
     [
@@ -46852,6 +50299,71 @@
         "currentRetry": 0,
         "retries": -1,
         "_slow": 10000
+      }
+    ],
+    [
+      "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r3",
+        "order": 1,
+        "title": "test 1",
+        "hookName": "before each",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "failedFromHookId": "h3",
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "before all": [
+            {
+              "hookId": "h1",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "before each": [
+            {
+              "hookId": "h2",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            },
+            {
+              "hookId": "h3",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ],
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          },
+          "after each": [
+            {
+              "hookId": "h6",
+              "fnDuration": "match.number",
+              "afterFnDuration": "match.number"
+            }
+          ]
+        },
+        "file": null,
+        "invocationDetails": "{Object 9}",
+        "final": false,
+        "currentRetry": 0,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
       }
     ],
     [
@@ -53545,6 +57057,43 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r2",
+        "order": 1,
+        "title": "visits",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "invocationDetails": "{Object 9}",
+        "final": false,
+        "currentRetry": 0,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r2",
@@ -53690,6 +57239,42 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r2",
+        "order": 1,
+        "title": "visits",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 1,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r2",
@@ -53833,6 +57418,42 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r2",
+        "order": 1,
+        "title": "visits",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 2,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r2",
@@ -53976,6 +57597,42 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r2",
+        "order": 1,
+        "title": "visits",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 3,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r2",
@@ -54119,6 +57776,42 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r2",
+        "order": 1,
+        "title": "visits",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 4,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r2",
@@ -54262,6 +57955,42 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r2",
+        "order": 1,
+        "title": "visits",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 5,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r2",
@@ -54405,6 +58134,42 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r2",
+        "order": 1,
+        "title": "visits",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 6,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r2",
@@ -54548,6 +58313,42 @@
     ],
     [
       "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r2",
+        "order": 1,
+        "title": "visits",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 7,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
+      }
+    ],
+    [
+      "mocha",
       "test:after:run",
       {
         "id": "r2",
@@ -54687,6 +58488,42 @@
         "name": "AssertionError",
         "stack": "match.string",
         "parsedStack": "match.array"
+      }
+    ],
+    [
+      "mocha",
+      "test:before:after:run:async",
+      {
+        "id": "r2",
+        "order": 1,
+        "title": "visits",
+        "err": {
+          "message": "[error message]",
+          "name": "AssertionError",
+          "stack": "match.string",
+          "parsedStack": "match.array"
+        },
+        "state": "failed",
+        "pending": false,
+        "body": "[body]",
+        "type": "test",
+        "duration": "match.number",
+        "wallClockStartedAt": "match.date",
+        "timings": {
+          "lifecycle": "match.number",
+          "test": {
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        },
+        "file": null,
+        "final": false,
+        "currentRetry": 8,
+        "retries": 9,
+        "_slow": 10000
+      },
+      {
+        "nextTestHasTestIsolationOn": true
       }
     ],
     [

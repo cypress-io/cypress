@@ -29,10 +29,7 @@ const stubChromeVersionResult = (channel, result) => {
 
 const stubRepoVersions = ({ betaVersion, stableVersion }) => {
   mockfs({
-    './browser-versions.json': JSON.stringify({
-      'chrome:beta': betaVersion,
-      'chrome:stable': stableVersion,
-    }),
+    './.circleci/workflows.yml': `chrome-stable-version: &chrome-stable-version "${stableVersion}"\nchrome-beta-version: &chrome-beta-version "${betaVersion}"\n`,
   })
 }
 
@@ -245,11 +242,10 @@ describe('update browser version github action', () => {
 
   context('.updateBrowserVersionsFile', () => {
     it('updates browser-versions.json with specified versions, leaving other entries in place', () => {
-      sinon.stub(fs, 'readFileSync').returns(`{
-        "chrome:beta": "1.1",
-        "chrome:stable": "1.0",
-        "chrome:other": "0.4"
-      }`)
+      stubRepoVersions({
+        betaVersion: '1.1',
+        stableVersion: '1.0',
+      })
 
       sinon.stub(fs, 'writeFileSync')
 
@@ -258,12 +254,7 @@ describe('update browser version github action', () => {
         latestStableVersion: '2.0',
       })
 
-      expect(fs.writeFileSync).to.be.calledWith('./browser-versions.json', `{
-  "chrome:beta": "2.1",
-  "chrome:stable": "2.0",
-  "chrome:other": "0.4"
-}
-`)
+      expect(fs.writeFileSync).to.be.calledWith('./.circleci/workflows.yml', `chrome-stable-version: &chrome-stable-version "2.0"\nchrome-beta-version: &chrome-beta-version "2.1"\n`, 'utf8')
     })
   })
 

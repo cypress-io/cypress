@@ -4,7 +4,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build": "node ./bin/cypress-electron --install",
+    "build-binary": "node ./bin/cypress-electron --install",
     "clean-deps": "rimraf node_modules",
     "postinstall": "echo '@packages/electron needs: yarn build'",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
@@ -23,10 +23,11 @@
     "minimist": "1.2.8"
   },
   "devDependencies": {
-    "electron-packager": "17.1.2",
+    "@electron/fuses": "1.8.0",
+    "@electron/packager": "18.3.4",
     "execa": "4.1.0",
     "mocha": "3.5.3",
-    "systeminformation": "5.21.7"
+    "systeminformation": "5.22.8"
   },
   "files": [
     "dist",
@@ -34,5 +35,6 @@
   ],
   "bin": {
     "cypress-electron": "./bin/cypress-electron"
-  }
+  },
+  "nx": {}
 }

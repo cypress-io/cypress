@@ -23,7 +23,6 @@
         "displayName": "Chrome",
         "version": "97.0.4692.71",
         "path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-        "minSupportedVersion": 64,
         "majorVersion": 97
       },
       {
@@ -33,7 +32,6 @@
         "displayName": "Firefox",
         "version": "95.0.2",
         "path": "/Applications/Firefox.app/Contents/MacOS/firefox",
-        "minSupportedVersion": 86,
         "majorVersion": 95
       },
       {
@@ -86,11 +84,6 @@
     "value": false,
     "from": "default",
     "field": "experimentalCspAllowList"
-  },
-  {
-    "value": false,
-    "from": "default",
-    "field": "experimentalFetchPolyfill"
   },
   {
     "value": true,

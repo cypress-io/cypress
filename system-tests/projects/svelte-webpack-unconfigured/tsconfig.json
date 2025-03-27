@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "allowJs": true,
+    "checkJs": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "types": ["cypress"] 
+  },
+  "include": ["src/**/*.ts", "src/**/*.js", "src/**/*.svelte"],
+}

@@ -3,7 +3,7 @@ export {} // make typescript see this as a module
 const { $ } = Cypress
 
 describe('src/cypress/dom/visibility - shadow dom', () => {
-  let add
+  let add: (el: string, shadowEl: string, rootIdentifier: string) => JQuery<HTMLElement>
 
   beforeEach(() => {
     cy.visit('/fixtures/empty.html').then((win) => {
@@ -11,7 +11,6 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
         constructor () {
           super()
 
-          // @ts-ignore
           this.attachShadow({ mode: 'open' })
           this.style.display = 'block'
         }
@@ -20,14 +19,13 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
       add = (el, shadowEl, rootIdentifier) => {
         const $el = $(el).appendTo(cy.$$('body'))
 
-        // @ts-ignore
-        $(shadowEl).appendTo(cy.$$(rootIdentifier)[0].shadowRoot)
+        $(shadowEl).appendTo(cy.$$(rootIdentifier)[0].shadowRoot!)
 
         return $el
       }
 
       // ensure all tests run against a scrollable window
-      const scrollThisIntoView = $(`<div style='height: 1000px; width: 10px;' /><div>Should be in view</div>`).appendTo(cy.$$('body'))
+      const scrollThisIntoView = $(`<div style='height: 1000px; width: 10px;'></div><div>Should be in view</div>`).appendTo(cy.$$('body'))
 
       // scroll the 2nd element into view so that
       // there is always a scrollTop so we ensure
@@ -573,6 +571,48 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
 
       cy.wrap($outsideParentOutOfBoundsButElInBounds).find('span', { includeShadowDom: true }).should('be.visible')
       cy.wrap($outsideParentOutOfBoundsButElInBounds).find('span', { includeShadowDom: true }).should('not.be.hidden')
+    })
+
+    it('is visible when element is statically positioned and parent element is absolutely positioned and ancestor has overflow hidden', function () {
+      const el = add(
+        `<div id="breaking-container" style="overflow: hidden">
+          <div>
+            <shadow-root id="shadow"></shadow-root>
+          </div>
+        </div>`,
+        `<div style="position: absolute; bottom: 5px">
+          <button id="visible-button">Try me</button>
+        </div>`,
+        '#shadow',
+      )
+
+      cy.wrap(el).find('#visible-button', { includeShadowDom: true }).should('be.visible')
+      cy.wrap(el).find('#visible-button', { includeShadowDom: true }).should('not.be.hidden')
+    })
+
+    it('is visible when element is relatively positioned and parent element is absolutely positioned and ancestor has overflow auto', function () {
+      const el = add(
+        `<div style="height: 200px; position: relative; display: flex">
+          <div style="border: 5px solid red">
+            <div
+              id="breaking-container"
+              style="overflow: auto; border: 5px solid green"
+            >
+              <div>
+                <h1>Example</h1>
+                <shadow-root id="shadow"></shadow-root>
+              </div>
+            </div>
+          </div>
+        </div>`,
+        `<div style="position: absolute; bottom: 5px">
+          <button id="visible-button">Try me</button>
+        </div>`,
+        '#shadow',
+      )
+
+      cy.wrap(el).find('#visible-button', { includeShadowDom: true }).should('be.visible')
+      cy.wrap(el).find('#visible-button', { includeShadowDom: true }).should('not.be.hidden')
     })
   })
 

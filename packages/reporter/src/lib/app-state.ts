@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { observable } from 'mobx'
+import { observable, makeObservable } from 'mobx'
 
 interface DefaultAppState {
   isPaused: boolean
@@ -35,6 +35,10 @@ class AppState {
   isStopped = false
   _resetAutoScrollingEnabledTo = true;
   [key: string]: any
+
+  constructor () {
+    makeObservable(this)
+  }
 
   startRunning () {
     this.isRunning = true

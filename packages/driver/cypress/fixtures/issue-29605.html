@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>29605 repro</title>
+</head>
+
+<body>
+  <div id="parent" style="overflow: hidden; height: 0; width: 0; display: contents;">
+    <div id="child" style="height:200px; width: 200px; background: #f00"></div>
+  </div>
+  <input id="input" type="text" id="name" name="name" style="overflow: hidden; height: 0; width: 0; display: contents;" />
+  <select name="pets" id="select" style="display: contents;">
+    <option value="">--Please choose an option--</option>
+    <option value="dog">Dog</option>
+    <option value="cat">Cat</option>
+  </select>
+</body>
+</html>

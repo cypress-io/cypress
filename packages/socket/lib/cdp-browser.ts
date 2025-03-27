@@ -22,14 +22,14 @@ export class CDPBrowserSocket extends Emitter implements SocketShape {
 
     this._namespace = namespace
 
-    const send = (payload: string) => {
+    const send = async (payload: string) => {
       const parsed = JSON.parse(payload)
 
-      decode(parsed).then((decoded: any) => {
+      await decode(parsed).then(async (decoded: any) => {
         const [event, callbackEvent, args] = decoded
 
         super.emit(event, ...args)
-        this.emit(callbackEvent)
+        await this.emit(callbackEvent)
       })
     }
 
@@ -52,7 +52,8 @@ export class CDPBrowserSocket extends Emitter implements SocketShape {
     }, 0)
   }
 
-  emit = (event: string, ...args: any[]) => {
+  // @ts-expect-error TODO: fix emit type
+  emit = async (event: string, ...args: any[]) => {
     // Generate a unique key for this event
     const uuid = uuidv4()
     let callback
@@ -65,7 +66,7 @@ export class CDPBrowserSocket extends Emitter implements SocketShape {
       this.once(uuid, callback)
     }
 
-    encode([event, uuid, args], this._namespace).then((encoded: any) => {
+    await encode([event, uuid, args], this._namespace).then((encoded: any) => {
       window[`cypressSendToServer-${this._namespace}`](JSON.stringify(encoded))
     })
 

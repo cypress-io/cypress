@@ -14,4 +14,11 @@ export default defineConfig({
       allow: ['/root/cypress/', '/root/.cache/', '/tmp/', '/Users/', '/private/'],
     },
   },
+  resolve: {
+    alias: {
+      // since we run this inside the context of the monorepo,
+      // we need to make sure we resolve to the react-dom that is in THIS project and not the monorepo root.
+      'react-dom/client': require.resolve('react-dom/client'),
+    },
+  },
 })

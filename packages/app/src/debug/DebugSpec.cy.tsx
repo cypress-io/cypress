@@ -1,4 +1,5 @@
 import DebugSpec, { Spec, TestResults } from './DebugSpec.vue'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 
 const resultCounts = (min: number, max: number) => {

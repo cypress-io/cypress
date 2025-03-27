@@ -2,6 +2,7 @@ import Chai, { expect } from 'chai'
 import { EventEmitter } from 'events'
 import * as vite4 from 'vite-4'
 import * as vite5 from 'vite-5'
+import * as vite6 from 'vite-6'
 import { scaffoldSystemTestProject } from './test-helpers/scaffoldProject'
 import { createViteDevServerConfig } from '../src/resolveConfig'
 import sinon from 'sinon'
@@ -22,7 +23,7 @@ const getViteDevServerConfig = (projectRoot: string) => {
     framework: 'react',
   } as unknown as ViteDevServerConfig
 }
-const MAJOR_VERSIONS: ({version: 4, vite: any } | {version: 5, vite: any })[] = [
+const MAJOR_VERSIONS: ({version: 4, vite: any } | {version: 5, vite: any } | {version: 6, vite: any })[] = [
   {
     version: 4,
     vite: vite4,
@@ -30,6 +31,10 @@ const MAJOR_VERSIONS: ({version: 4, vite: any } | {version: 5, vite: any })[] = 
   {
     version: 5,
     vite: vite5,
+  },
+  {
+    version: 6,
+    vite: vite6,
   },
 ]
 
@@ -107,41 +112,6 @@ describe('resolveConfig', function () {
 
         expect(viteConfig.server?.watch?.ignored).to.be.undefined
         expect(viteConfig.server?.hmr).to.be.undefined
-      })
-    })
-
-    describe('experimentalJustInTimeCompile', () => {
-      let viteDevServerConfig: ViteDevServerConfig
-
-      beforeEach(async () => {
-        const projectRoot = await scaffoldSystemTestProject(`vite${version}-inspect`)
-
-        viteDevServerConfig = getViteDevServerConfig(projectRoot)
-        viteDevServerConfig.cypressConfig.experimentalJustInTimeCompile = true
-      })
-
-      describe('open mode', () => {
-        beforeEach(() => {
-          viteDevServerConfig.cypressConfig.isTextTerminal = false
-        })
-
-        it('enables hmr and watching', async () => {
-          const viteConfig = await createViteDevServerConfig(viteDevServerConfig, discoveredVite)
-
-          expect(viteConfig.server.watch).to.be.undefined
-        })
-      })
-
-      describe('run mode', () => {
-        beforeEach(() => {
-          viteDevServerConfig.cypressConfig.isTextTerminal = true
-        })
-
-        it('enables hmr and watching', async () => {
-          const viteConfig = await createViteDevServerConfig(viteDevServerConfig, discoveredVite)
-
-          expect(viteConfig.server.watch).to.be.undefined
-        })
       })
     })
   })

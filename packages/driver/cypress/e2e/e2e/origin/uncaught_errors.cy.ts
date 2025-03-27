@@ -229,6 +229,7 @@ describe('cy.origin - uncaught errors', { browser: '!webkit' }, () => {
       })
 
       cy.origin('http://www.foobar.com:3500', () => {
+        // tslint:disable:no-floating-promises
         Promise.reject(new Error('rejected promise'))
 
         // add the cy.wait here to keep commands streaming in, forcing the
@@ -249,6 +250,7 @@ describe('cy.origin - uncaught errors', { browser: '!webkit' }, () => {
       })
 
       cy.origin('http://www.foobar.com:3500', () => {
+        // tslint:disable:no-floating-promises
         Promise.reject(new Error('rejected promise'))
       })
 

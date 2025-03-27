@@ -15,7 +15,7 @@ process.env.CYPRESS_INTERNAL_ENV = 'test'
 
 // require'd so the unsafe types from the server / missing types don't mix in here
 const termToHtml = require('term-to-html')
-const isCi = require('is-ci')
+const isCi = require('ci-info').isCI
 const { terminalBanner } = require('terminal-banner')
 const ciProvider = require('@packages/server/lib/util/ci_provider')
 const browsers = require('@packages/server/lib/browsers')
@@ -375,6 +375,11 @@ describe('visual error templates', () => {
         retryingAgain: ['Retrying again...'],
       }
     },
+    FIREFOX_CDP_FAILED_TO_CONNECT: () => {
+      return {
+        default: ['Retrying...'],
+      }
+    },
     TESTS_DID_NOT_START_FAILED: () => {
       return {
         default: [],
@@ -565,11 +570,6 @@ describe('visual error templates', () => {
         }],
       }
     },
-    DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS: () => {
-      return {
-        default: [],
-      }
-    },
     DUPLICATE_TASK_KEY: () => {
       const tasks = ['foo', 'bar', 'baz']
 
@@ -685,11 +685,22 @@ describe('visual error templates', () => {
         default: [err],
       }
     },
-    CLOUD_PROTOCOL_UPLOAD_NEWORK_FAILURE: () => {
+    CLOUD_PROTOCOL_UPLOAD_NETWORK_FAILURE: () => {
       // @ts-expect-error
       const err: Error & { url: string } = makeErr()
 
       err.url = 'https://some/url'
+
+      return {
+        default: [err],
+      }
+    },
+    CLOUD_PROTOCOL_UPLOAD_STREAM_STALL_FAILURE: () => {
+      // @ts-expect-error
+      const err: Error & { chunkSizeBytes: number, maxActivityDwellTime: number } = new Error('stream stall')
+
+      err.chunkSizeBytes = 65536
+      err.maxActivityDwellTime = 10000
 
       return {
         default: [err],
@@ -717,6 +728,13 @@ describe('visual error templates', () => {
       return {
         default: [aggregateError],
         withSystemError: [aggregateErrorWithSystemError],
+      }
+    },
+    CLOUD_PROTOCOL_UPLOAD_UNKNOWN_ERROR: () => {
+      const error = makeErr()
+
+      return {
+        default: [error],
       }
     },
     CLOUD_RECORD_KEY_NOT_VALID: () => {
@@ -1094,6 +1112,11 @@ describe('visual error templates', () => {
         default: [1, 'chrome', 62],
       }
     },
+    CDP_FIREFOX_DEPRECATED: () => {
+      return {
+        default: [],
+      }
+    },
     BROWSER_PROCESS_CLOSED_UNEXPECTEDLY: () => {
       return {
         default: ['chrome'],
@@ -1116,7 +1139,7 @@ describe('visual error templates', () => {
         default: ['spec', '1', 'spec must be a string or comma-separated list'],
       }
     },
-    FIREFOX_MARIONETTE_FAILURE: () => {
+    FIREFOX_GECKODRIVER_FAILURE: () => {
       const err = makeErr()
 
       return {
@@ -1129,6 +1152,11 @@ describe('visual error templates', () => {
       }
     },
     EXPERIMENTAL_SAMESITE_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
+    EXPERIMENTAL_JIT_COMPILE_REMOVED: () => {
       return {
         default: [],
       }
@@ -1259,7 +1287,7 @@ describe('visual error templates', () => {
         default: [{ name: 'indexHtmlFile', configFile: '/path/to/cypress.config.js.ts' }],
       }
     },
-    EXPERIMENTAL_JIT_COMPONENT_TESTING: () => {
+    JIT_COMPONENT_TESTING: () => {
       return {
         default: [],
       }
@@ -1377,12 +1405,6 @@ describe('visual error templates', () => {
       }
     },
 
-    EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY: () => {
-      return {
-        default: [],
-      }
-    },
-
     PROXY_ENCOUNTERED_INVALID_HEADER_NAME: () => {
       const err = makeErr()
 
@@ -1396,6 +1418,24 @@ describe('visual error templates', () => {
 
       return {
         default: [{ invalidHeaderValue: 'Value' }, 'GET', 'http://localhost:8080', err],
+      }
+    },
+
+    EXPERIMENTAL_SKIP_DOMAIN_INJECTION_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
+
+    INJECT_DOCUMENT_DOMAIN_DEPRECATION: () => {
+      return {
+        default: [],
+      }
+    },
+
+    INJECT_DOCUMENT_DOMAIN_E2E_ONLY: () => {
+      return {
+        default: [],
       }
     },
   })

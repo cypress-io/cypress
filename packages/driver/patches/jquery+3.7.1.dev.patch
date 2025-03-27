@@ -1,0 +1,283 @@
+diff --git a/node_modules/jquery/README.md b/node_modules/jquery/README.md
+deleted file mode 100644
+index fcc11f3..0000000
+--- a/node_modules/jquery/README.md
++++ /dev/null
+@@ -1,60 +0,0 @@
+-# jQuery
+-
+-> jQuery is a fast, small, and feature-rich JavaScript library.
+-
+-For information on how to get started and how to use jQuery, please see [jQuery's documentation](https://api.jquery.com/).
+-For source files and issues, please visit the [jQuery repo](https://github.com/jquery/jquery).
+-
+-If upgrading, please see the [blog post for 3.7.1](https://blog.jquery.com/2023/08/28/jquery-3-7-1-released-reliable-table-row-dimensions/). This includes notable differences from the previous version and a more readable changelog.
+-
+-## Including jQuery
+-
+-Below are some of the most common ways to include jQuery.
+-
+-### Browser
+-
+-#### Script tag
+-
+-```html
+-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+-```
+-
+-#### Webpack / Browserify / Babel
+-
+-There are several ways to use [Webpack](https://webpack.js.org/), [Browserify](http://browserify.org/) or [Babel](https://babeljs.io/). For more information on using these tools, please refer to the corresponding project's documentation. In the script, including jQuery will usually look like this:
+-
+-```js
+-import $ from "jquery";
+-```
+-
+-If you need to use jQuery in a file that's not an ECMAScript module, you can use the CommonJS syntax:
+-
+-```js
+-var $ = require( "jquery" );
+-```
+-
+-#### AMD (Asynchronous Module Definition)
+-
+-AMD is a module format built for the browser. For more information, we recommend [require.js' documentation](https://requirejs.org/docs/whyamd.html).
+-
+-```js
+-define( [ "jquery" ], function( $ ) {
+-
+-} );
+-```
+-
+-### Node
+-
+-To include jQuery in [Node](https://nodejs.org/), first install with npm.
+-
+-```sh
+-npm install jquery
+-```
+-
+-For jQuery to work in Node, a window with a document is required. Since no such window exists natively in Node, one can be mocked by tools such as [jsdom](https://github.com/jsdom/jsdom). This can be useful for testing purposes.
+-
+-```js
+-const { JSDOM } = require( "jsdom" );
+-const { window } = new JSDOM( "" );
+-const $ = require( "jquery" )( window );
+-```
+diff --git a/node_modules/jquery/dist/jquery.js b/node_modules/jquery/dist/jquery.js
+index 1a86433..1c417b1 100644
+--- a/node_modules/jquery/dist/jquery.js
++++ b/node_modules/jquery/dist/jquery.js
+@@ -1419,29 +1419,45 @@ find.matches = function( expr, elements ) {
+ };
+ 
+ find.matchesSelector = function( elem, expr ) {
+-	setDocument( elem );
++	try {
++		// this prevents `is` from calling into the native .matchesSelector method
++		// which would prevent our `focus` code from ever being called during is(:focus).
++		const isUsingFocus = _.includes(expr, ':focus')
+ 
+-	if ( documentIsHTML &&
+-		!nonnativeSelectorCache[ expr + " " ] &&
+-		( !rbuggyQSA || !rbuggyQSA.test( expr ) ) ) {
++		setDocument( elem );
+ 	
+-		try {
+-			var ret = matches.call( elem, expr );
++		if (!isUsingFocus && documentIsHTML &&
++			!nonnativeSelectorCache[ expr + " " ] &&
++			( !rbuggyQSA || !rbuggyQSA.test( expr ) ) ) {
+ 	
+-			// IE 9's matchesSelector returns false on disconnected nodes
+-			if ( ret || support.disconnectedMatch ||
++			try {
++				var ret = matches.call( elem, expr );
+ 	
+-					// As well, disconnected nodes are said to be in a document
+-					// fragment in IE 9
+-					elem.document && elem.document.nodeType !== 11 ) {
+-				return ret;
++				// IE 9's matchesSelector returns false on disconnected nodes
++				if ( ret || support.disconnectedMatch ||
++	
++						// As well, disconnected nodes are said to be in a document
++						// fragment in IE 9
++						elem.document && elem.document.nodeType !== 11 ) {
++					return ret;
++				}
++			} catch ( e ) {
++				nonnativeSelectorCache( expr, true );
+ 			}
+-		} catch ( e ) {
+-			nonnativeSelectorCache( expr, true );
+ 		}
+-	}
+ 
+-	return find( expr, document, null, [ elem ] ).length > 0;
++		return find( expr, document, null, [ elem ] ).length > 0;
++	} catch (e) {
++			// https://github.com/cypress-io/cypress/issues/21108
++      // When regex starts with =, it is a syntax error when nothing found.
++      // Because Sizzle internally escapes = to handle attribute selectors.
++      // @see https://github.com/jquery/sizzle/blob/20390f05731af380833b5aa805db97de0b91268a/external/jquery/jquery.js#L4363-L4370
++      if (e.message.includes(`Syntax error, unrecognized expression: :cy-contains`)) {
++        return false
++      }
++
++      throw e
++	}
+ };
+ 
+ find.contains = function( context, elem ) {
+@@ -6647,78 +6663,100 @@ function boxModelAdjustment( elem, dimension, box, isBorderBox, styles, computed
+ 	return delta + marginDelta;
+ }
+ 
+-function getWidthOrHeight( elem, dimension, extra ) {
++function augmentWidthOrHeight( elem, dimension, extra, isBorderBox, styles ) {
++	var i,
++		val = 0;
+ 
+-	// Start with computed style
+-	var styles = getStyles( elem ),
++	// If we already have the right measurement, avoid augmentation
++	if ( extra === ( isBorderBox ? "border" : "content" ) ) {
++		i = 4;
+ 
+-		// To avoid forcing a reflow, only fetch boxSizing if we need it (gh-4322).
+-		// Fake content-box until we know it's needed to know the true value.
+-		boxSizingNeeded = !support.boxSizingReliable() || extra,
+-		isBorderBox = boxSizingNeeded &&
+-			jQuery.css( elem, "boxSizing", false, styles ) === "border-box",
+-		valueIsBorderBox = isBorderBox,
++	// Otherwise initialize for horizontal or vertical properties
++	} else {
++		i = dimension === "width" ? 1 : 0;
++	}
+ 
+-		val = curCSS( elem, dimension, styles ),
+-		offsetProp = "offset" + dimension[ 0 ].toUpperCase() + dimension.slice( 1 );
++	for ( ; i < 4; i += 2 ) {
+ 
+-	// Support: Firefox <=54
+-	// Return a confounding non-pixel value or feign ignorance, as appropriate.
+-	if ( rnumnonpx.test( val ) ) {
+-		if ( !extra ) {
+-			return val;
++		// Both box models exclude margin, so add it if we want it
++		if ( extra === "margin" ) {
++			val += jQuery.css( elem, extra + cssExpand[ i ], true, styles );
+ 		}
+-		val = "auto";
+-	}
+ 
++		if ( isBorderBox ) {
+ 
+-	// Support: IE 9 - 11 only
+-	// Use offsetWidth/offsetHeight for when box sizing is unreliable.
+-	// In those cases, the computed value can be trusted to be border-box.
+-	if ( ( !support.boxSizingReliable() && isBorderBox ||
++			// border-box includes padding, so remove it if we want content
++			if ( extra === "content" ) {
++				val -= jQuery.css( elem, "padding" + cssExpand[ i ], true, styles );
++			}
+ 
+-		// Support: IE 10 - 11+, Edge 15 - 18+
+-		// IE/Edge misreport `getComputedStyle` of table rows with width/height
+-		// set in CSS while `offset*` properties report correct values.
+-		// Interestingly, in some cases IE 9 doesn't suffer from this issue.
+-		!support.reliableTrDimensions() && nodeName( elem, "tr" ) ||
++			// At this point, extra isn't border nor margin, so remove border
++			if ( extra !== "margin" ) {
++				val -= jQuery.css( elem, "border" + cssExpand[ i ] + "Width", true, styles );
++			}
++		} else {
++
++			// At this point, extra isn't content, so add padding
++			val += jQuery.css( elem, "padding" + cssExpand[ i ], true, styles );
+ 
+-		// Fall back to offsetWidth/offsetHeight when value is "auto"
+-		// This happens for inline elements with no explicit setting (gh-3571)
+-		val === "auto" ||
++			// At this point, extra isn't content nor padding, so add border
++			if ( extra !== "padding" ) {
++				val += jQuery.css( elem, "border" + cssExpand[ i ] + "Width", true, styles );
++			}
++		}
++	}
+ 
+-		// Support: Android <=4.1 - 4.3 only
+-		// Also use offsetWidth/offsetHeight for misreported inline dimensions (gh-3602)
+-		!parseFloat( val ) && jQuery.css( elem, "display", false, styles ) === "inline" ) &&
++	return val;
++}
+ 
+-		// Make sure the element is visible & connected
+-		elem.getClientRects().length ) {
++function getWidthOrHeight( elem, dimension, extra ) {
+ 
++	// Start with offset property, which is equivalent to the border-box value
++	var val,
++		valueIsBorderBox = true,
++		styles = getStyles( elem ),
+ 		isBorderBox = jQuery.css( elem, "boxSizing", false, styles ) === "border-box";
+ 
+-		// Where available, offsetWidth/offsetHeight approximate border box dimensions.
+-		// Where not available (e.g., SVG), assume unreliable box-sizing and interpret the
+-		// retrieved value as a content box dimension.
+-		valueIsBorderBox = offsetProp in elem;
+-		if ( valueIsBorderBox ) {
+-			val = elem[ offsetProp ];
+-		}
++	// Support: IE <=11 only
++	// Running getBoundingClientRect on a disconnected node
++	// in IE throws an error.
++	if ( elem.getClientRects().length ) {
++		val = elem.getBoundingClientRect()[ dimension ];
+ 	}
+ 
+-	// Normalize "" and auto
+-	val = parseFloat( val ) || 0;
++	// Some non-html elements return undefined for offsetWidth, so check for null/undefined
++	// svg - https://bugzilla.mozilla.org/show_bug.cgi?id=649285
++	// MathML - https://bugzilla.mozilla.org/show_bug.cgi?id=491668
++	if ( val <= 0 || val == null ) {
++
++		// Fall back to computed then uncomputed css if necessary
++		val = curCSS( elem, dimension, styles );
++		if ( val < 0 || val == null ) {
++			val = elem.style[ dimension ];
++		}
+ 
+-	// Adjust for the element's box model
++		// Computed unit is not pixels. Stop here and return.
++		if ( rnumnonpx.test( val ) ) {
++			return val;
++		}
++
++		// Check for style in case a browser which returns unreliable values
++		// for getComputedStyle silently falls back to the reliable elem.style
++		valueIsBorderBox = isBorderBox &&
++			( support.boxSizingReliable() || val === elem.style[ dimension ] );
++
++		// Normalize "", auto, and prepare for extra
++		val = parseFloat( val ) || 0;
++	}
++
++	// Use the active box-sizing model to add/subtract irrelevant styles
+ 	return ( val +
+-		boxModelAdjustment(
++		augmentWidthOrHeight(
+ 			elem,
+ 			dimension,
+ 			extra || ( isBorderBox ? "border" : "content" ),
+ 			valueIsBorderBox,
+-			styles,
+-
+-			// Provide the current computed size to request scroll gutter calculation (gh-3589)
+-			val
++			styles
+ 		)
+ 	) + "px";
+ }

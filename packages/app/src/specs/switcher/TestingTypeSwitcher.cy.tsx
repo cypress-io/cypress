@@ -37,7 +37,7 @@ describe('<TestingTypeSwitcher />', () => {
     />)
 
     cy.findByTestId('testing-type-switch').contains('button', 'E2E').should('have.attr', 'aria-selected', 'true')
-    cy.findByTestId('testing-type-switch').contains('button', 'Component').should('not.have.attr', 'aria-selected')
+    cy.findByTestId('testing-type-switch').contains('button', 'Component').should('have.attr', 'aria-selected', 'false')
   })
 
   it('selects current testing type when it is component', () => {
@@ -50,7 +50,7 @@ describe('<TestingTypeSwitcher />', () => {
       onSelectTestingType={stub}
     />)
 
-    cy.findByTestId('testing-type-switch').contains('button', 'E2E').should('not.have.attr', 'aria-selected')
+    cy.findByTestId('testing-type-switch').contains('button', 'E2E').should('have.attr', 'aria-selected', 'false')
     cy.findByTestId('testing-type-switch').contains('button', 'Component').should('have.attr', 'aria-selected', 'true')
   })
 })

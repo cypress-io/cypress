@@ -1,6 +1,6 @@
 import { basename } from 'path'
 import _ from 'lodash'
-import mime from 'mime-types'
+import mime from 'mime'
 
 import $dom from '../../../dom'
 import $errUtils from '../../../cypress/error_utils'
@@ -44,7 +44,7 @@ const createDataTransfer = (files: Cypress.FileReferenceObject[], eventTarget: J
   files.forEach(({
     contents,
     fileName = '',
-    mimeType = mime.lookup(fileName) || '',
+    mimeType = mime.getType(fileName) || '',
     lastModified = Date.now(),
   }) => {
     const file = new targetWindow.File([contents], fileName, { lastModified, type: mimeType })

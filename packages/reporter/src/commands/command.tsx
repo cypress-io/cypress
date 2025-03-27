@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import cs from 'classnames'
 import Markdown from 'markdown-it'
-import { action, observable } from 'mobx'
+import { action, observable, makeObservable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
@@ -11,12 +11,13 @@ import events, { Events } from '../lib/events'
 import FlashOnClick from '../lib/flash-on-click'
 import StateIcon from '../lib/state-icon'
 import Tag from '../lib/tag'
-import { TimeoutID } from '../lib/types'
+import type { TimeoutID } from '../lib/types'
 import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
-import { Alias, AliasObject } from '../instruments/instrument-model'
+import type { Alias, AliasObject } from '../instruments/instrument-model'
 import { determineTagType } from '../sessions/utils'
 
-import CommandModel, { RenderProps } from './command-model'
+import type CommandModel from './command-model'
+import type { RenderProps } from './command-model'
 import TestError from '../errors/test-error'
 
 import ChevronIcon from '@packages/frontend-shared/src/assets/icons/chevron-down-small_x8.svg'
@@ -377,6 +378,11 @@ class Command extends Component<Props> {
     appState,
     events,
     runnablesStore,
+  }
+
+  constructor (props: Props) {
+    super(props)
+    makeObservable(this)
   }
 
   render () {

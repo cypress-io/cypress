@@ -1,8 +1,0 @@
-{
-  "name": "@test-project/ts-proj-4-5",
-  "version": "0.0.0-test",
-  "private": true,
-  "dependencies": {
-    "typescript": "4.5.2"
-  }
-}

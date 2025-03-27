@@ -1,3 +1,4 @@
+// tslint:disable-next-line: no-implicit-dependencies - requires cypress
 import { defineConfig } from 'cypress'
 
 export default defineConfig({

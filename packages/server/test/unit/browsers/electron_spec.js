@@ -79,6 +79,7 @@ describe('lib/browsers/electron', () => {
     this.pageCriClient = {
       send: sinon.stub().resolves(),
       on: sinon.stub(),
+      clone: sinon.stub().resolves(),
     }
 
     this.browserCriClient = {
@@ -239,10 +240,26 @@ describe('lib/browsers/electron', () => {
 
   context('.connectProtocolToBrowser', () => {
     it('connects to the browser cri client', async function () {
+      const mockCurrentlyAttachedProtocolTarget = {}
+
+      this.browserCriClient.currentlyAttachedProtocolTarget = mockCurrentlyAttachedProtocolTarget
       sinon.stub(electron, '_getBrowserCriClient').returns(this.browserCriClient)
 
       await electron.connectProtocolToBrowser({ protocolManager: this.protocolManager })
-      expect(this.protocolManager.connectToBrowser).to.be.calledWith(this.pageCriClient)
+      expect(this.pageCriClient.clone).not.to.be.called
+      expect(this.protocolManager.connectToBrowser).to.be.calledWith(mockCurrentlyAttachedProtocolTarget)
+    })
+
+    it('connects to the browser cri client when the protocol target has not been created', async function () {
+      const mockCurrentlyAttachedProtocolTarget = {}
+
+      this.pageCriClient.clone.resolves(mockCurrentlyAttachedProtocolTarget)
+      sinon.stub(electron, '_getBrowserCriClient').returns(this.browserCriClient)
+
+      await electron.connectProtocolToBrowser({ protocolManager: this.protocolManager })
+      expect(this.pageCriClient.clone).to.be.called
+      expect(this.protocolManager.connectToBrowser).to.be.calledWith(mockCurrentlyAttachedProtocolTarget)
+      expect(this.browserCriClient.currentlyAttachedProtocolTarget).to.eq(mockCurrentlyAttachedProtocolTarget)
     })
 
     it('throws error if there is no browser cri client', function () {
@@ -259,6 +276,25 @@ describe('lib/browsers/electron', () => {
 
       expect(electron.connectProtocolToBrowser({ protocolManager: this.protocolManager })).to.be.rejectedWith('Missing pageCriClient in connectProtocolToBrowser')
       expect(this.protocolManager.connectToBrowser).not.to.be.called
+    })
+  })
+
+  context('#closeProtocolConnection', () => {
+    it('closes the protocol connection', async function () {
+      const mockCurrentlyAttachedProtocolTarget = {
+        close: sinon.stub().resolves(),
+      }
+
+      const browserCriClient = {
+        currentlyAttachedProtocolTarget: mockCurrentlyAttachedProtocolTarget,
+      }
+
+      sinon.stub(electron, '_getBrowserCriClient').returns(browserCriClient)
+
+      await electron.closeProtocolConnection()
+
+      expect(mockCurrentlyAttachedProtocolTarget.close).to.be.called
+      expect(browserCriClient.currentlyAttachedProtocolTarget).to.be.undefined
     })
   })
 
@@ -581,9 +617,13 @@ describe('lib/browsers/electron', () => {
       })
 
       it('connects the protocol manager to the browser', async function () {
+        const mockCurrentlyAttachedProtocolTarget = {}
+
+        this.pageCriClient.clone.resolves(mockCurrentlyAttachedProtocolTarget)
+
         await electron._launch(this.win, this.url, this.automation, this.options, undefined, this.protocolManager, { attachCDPClient: sinon.stub() })
 
-        expect(this.protocolManager.connectToBrowser).to.be.calledWith(this.pageCriClient)
+        expect(this.protocolManager.connectToBrowser).to.be.calledWith(mockCurrentlyAttachedProtocolTarget)
       })
     })
   })

@@ -1,4 +1,4 @@
-import { mountCallback } from '@cypress/vue'
+import { mount } from '@cypress/vue'
 
 const template = `
     <div id="app">
@@ -6,7 +6,8 @@ const template = `
     </div>
   `
 
-describe('Mount component', () => {
+// TODO: fix with https://github.com/cypress-io/cypress/issues/30706
+describe.skip('Mount component', () => {
   // hmm, there are no more options to pass
 
   const component = {
@@ -18,7 +19,9 @@ describe('Mount component', () => {
     },
   }
 
-  beforeEach(mountCallback(component))
+  beforeEach(() => {
+    mount(component)
+  })
 
   it('shows hello', () => {
     cy.contains('Hello Vue!')

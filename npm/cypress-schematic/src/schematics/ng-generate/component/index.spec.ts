@@ -1,5 +1,5 @@
+import { describe, beforeEach, it, expect } from 'vitest'
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing'
-import { expect } from 'chai'
 import { join } from 'path'
 
 describe('ng-generate @cypress/schematic:component', () => {
@@ -12,10 +12,10 @@ describe('ng-generate @cypress/schematic:component', () => {
   const workspaceOptions = {
     name: 'workspace',
     newProjectRoot: 'projects',
-    version: '12.0.0',
+    version: '18.0.0',
   }
 
-  const appOptions: Parameters<typeof schematicRunner['runExternalSchematicAsync']>[2] = {
+  const appOptions: Parameters<typeof schematicRunner['runExternalSchematic']>[2] = {
     name: 'sandbox',
     inlineTemplate: false,
     routing: false,
@@ -24,12 +24,12 @@ describe('ng-generate @cypress/schematic:component', () => {
   }
 
   beforeEach(async () => {
-    appTree = await schematicRunner.runExternalSchematicAsync('@schematics/angular', 'workspace', workspaceOptions).toPromise()
-    appTree = await schematicRunner.runExternalSchematicAsync('@schematics/angular', 'application', appOptions, appTree).toPromise()
+    appTree = await schematicRunner.runExternalSchematic('@schematics/angular', 'workspace', workspaceOptions)
+    appTree = await schematicRunner.runExternalSchematic('@schematics/angular', 'application', appOptions, appTree)
   })
 
   it('should create cypress ct alongside the generated component', async () => {
-    const tree = await schematicRunner.runSchematicAsync('component', { name: 'foo', project: 'sandbox' }, appTree).toPromise()
+    const tree = await schematicRunner.runSchematic('component', { name: 'foo', project: 'sandbox', skipImport: true }, appTree)
 
     expect(tree.files).to.contain('/projects/sandbox/src/app/foo/foo.component.ts')
     expect(tree.files).to.contain('/projects/sandbox/src/app/foo/foo.component.html')
@@ -39,9 +39,9 @@ describe('ng-generate @cypress/schematic:component', () => {
   })
 
   it('should not generate component which does exist already', async () => {
-    let tree = await schematicRunner.runSchematicAsync('component', { name: 'foo', project: 'sandbox' }, appTree).toPromise()
+    let tree = await schematicRunner.runSchematic('component', { name: 'foo', project: 'sandbox', skipImport: true }, appTree)
 
-    tree = await schematicRunner.runSchematicAsync('component', { name: 'foo', project: 'sandbox' }, appTree).toPromise()
+    tree = await schematicRunner.runSchematic('component', { name: 'foo', project: 'sandbox', skipImport: true }, appTree)
 
     expect(tree.files.filter((f) => f === '/projects/sandbox/src/app/foo/foo.component.ts').length).to.eq(1)
     expect(tree.files.filter((f) => f === '/projects/sandbox/src/app/foo/foo.component.html').length).to.eq(1)
@@ -50,7 +50,7 @@ describe('ng-generate @cypress/schematic:component', () => {
   })
 
   it('should generate component given a component containing a directory', async () => {
-    const tree = await schematicRunner.runSchematicAsync('component', { name: 'foo/bar', project: 'sandbox' }, appTree).toPromise()
+    const tree = await schematicRunner.runSchematic('component', { name: 'foo/bar', project: 'sandbox', skipImport: true }, appTree)
 
     expect(tree.files).to.contain('/projects/sandbox/src/app/foo/bar/bar.component.ts')
     expect(tree.files).to.contain('/projects/sandbox/src/app/foo/bar/bar.component.html')

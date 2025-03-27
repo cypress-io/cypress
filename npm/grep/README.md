@@ -51,14 +51,10 @@ Table of Contents
   - [Debugging in the plugin](#debugging-in-the-plugin)
   - [Debugging in the browser](#debugging-in-the-browser)
 - [Examples](#examples)
-- [See also](#see-also)
 - [Migration guide](#migration-guide)
   - [from v1 to v2](#from-v1-to-v2)
   - [from v2 to v3](#from-v2-to-v3)
-- [Videos & Blog Posts](#videos--blog-posts)
-- [Blog posts](#blog-posts)
 - [Small print](#small-print)
-- [MIT License](#mit-license)
 
 <!-- /MarkdownTOC -->
 
@@ -117,7 +113,7 @@ registerCypressGrep()
 }
 ```
 
-Installing the plugin via `setupNodeEvents()` is required to enable the [grepFilterSpecs](#grepfilterspecs) feature.
+Installing the plugin via `setupNodeEvents()` is required to enable the [grepFilterSpecs](#pre-filter-specs-grepfilterspecs) feature.
 
 ## Usage Overview
 
@@ -320,7 +316,7 @@ describe('block with config tag', { tags: '@smoke' }, () => {})
 --env grepTags=-@smoke
 ```
 
-See the [cypress/integration/describe-tags-spec.js](./cypress/integration/describe-tags-spec.js) file.
+See the [cypress/e2e/describe-tags-spec.js](./cypress/e2e/describe-tags-spec.js) file.
 
 **Note:** global function `describe` and `context` are aliases and both supported by this plugin.
 
@@ -424,7 +420,7 @@ it('runs on deploy', { tags: 'smoke' }, () => {
 This package comes with [src/index.d.ts](./src/index.d.ts) definition file that adds the property `tags` to the Cypress test overrides interface. Include this file in your specs or TS config settings. For example, you can load it using a reference comment
 
 ```js
-// cypress/integration/my-spec.js
+// cypress/e2e/my-spec.js
 /// <reference types="@cypress/grep" />
 ```
 
@@ -559,11 +555,6 @@ To see how to debug this plugin, watch the video [Debug @cypress/grep Plugin](ht
 - [cypress-grep-example](https://github.com/bahmutov/cypress-grep-example)
 - [todo-graphql-example](https://github.com/bahmutov/todo-graphql-example)
 
-## See also
-
-- [cypress-select-tests](https://github.com/bahmutov/cypress-select-tests)
-- [cypress-skip-test](https://github.com/cypress-io/cypress-skip-test)
-
 ## Migration guide
 
 ### from v1 to v2
@@ -599,5 +590,5 @@ Version >= 3 of @cypress/grep _only_ supports Cypress >= 10.
 
 License: MIT - do anything with the code, but don't blame me if it does not work.
 
-Support: if you find any problems with this module, email / tweet /
-[open issue](https://github.com/cypress-io/cypress/issues) on Github.
+Support: if you find any problems with this module,
+[open issue](https://github.com/cypress-io/cypress/issues) on GitHub.

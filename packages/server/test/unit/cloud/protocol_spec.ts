@@ -16,7 +16,7 @@ const mockDb = sinon.stub()
 const mockDatabase = sinon.stub().returns(mockDb)
 const mockPutProtocolArtifact = sinon.stub()
 
-const { ProtocolManager, DB_SIZE_LIMIT } = proxyquire('../lib/cloud/protocol', {
+const { ProtocolManager, DB_SIZE_LIMIT, DEFAULT_STREAM_SAMPLING_INTERVAL } = proxyquire('../lib/cloud/protocol', {
   'better-sqlite3': mockDatabase,
   './api/put_protocol_artifact': { putProtocolArtifact: mockPutProtocolArtifact },
 }) as typeof import('@packages/server/lib/cloud/protocol')
@@ -37,7 +37,19 @@ describe('lib/cloud/protocol', () => {
   beforeEach(async () => {
     protocolManager = new ProtocolManager()
 
-    await protocolManager.setupProtocol(stubProtocol, { runId: '1', testingType: 'e2e' })
+    await protocolManager.prepareAndSetupProtocol(stubProtocol, {
+      runId: '1',
+      testingType: 'e2e',
+      projectId: '1',
+      cloudApi: { url: 'http://localhost:1234', retryWithBackoff: async () => {}, requestPromise: { get: async () => {} } },
+      projectConfig: {
+        devServerPublicPathRoute: '/__cypress-app/src',
+        namespace: '__cypress-app',
+        port: 1234,
+        proxyUrl: 'http://localhost:1234',
+      },
+      mode: 'record',
+    })
 
     protocol = (protocolManager as any)._protocol
     expect((protocol as any)).not.to.be.undefined
@@ -90,9 +102,20 @@ describe('lib/cloud/protocol', () => {
       },
     ]
 
-    protocolManager.beforeSpec({
+    const spec = {
       instanceId: 'instanceId',
-    })
+      absolute: '/path/to/spec',
+      relative: 'spec',
+      relativeToCommonRoot: 'common/root',
+      specFileExtension: '.ts',
+      fileExtension: '.ts',
+      specType: 'integration' as Cypress.CypressSpecType,
+      baseName: 'spec',
+      name: 'spec',
+      fileName: 'spec.ts',
+    }
+
+    protocolManager.beforeSpec(spec)
 
     expect((protocolManager as any)._errors).to.be.empty
 
@@ -101,6 +124,7 @@ describe('lib/cloud/protocol', () => {
       archivePath: path.join(os.tmpdir(), 'cypress', 'protocol', 'instanceId.tar'),
       dbPath: path.join(os.tmpdir(), 'cypress', 'protocol', 'instanceId.db'),
       db: mockDb,
+      spec,
     })
 
     expect(mockDatabase).to.be.calledWith(path.join(os.tmpdir(), 'cypress', 'protocol', 'instanceId.db'), {
@@ -296,6 +320,36 @@ describe('lib/cloud/protocol', () => {
     expect(protocol.resetTest).to.be.calledWith(testId)
   })
 
+  describe('.reset', () => {
+    it('closes the protocol manager', () => {
+      const mockClose = sinon.stub()
+
+      protocolManager['_db'] = {
+        close: mockClose,
+      }
+
+      protocolManager['_dbPath'] = '/path/to/db'
+      sinon.stub(fs, 'unlink').resolves()
+      protocolManager['_archivePath'] = '/path/to/archive'
+      protocolManager['_instanceId'] = 'abc123'
+      protocolManager['_runId'] = '1'
+      protocolManager['_errors'] = [{ captureMethod: 'cdpClient.on' }]
+
+      protocolManager.close()
+
+      expect(mockClose).to.be.called
+      expect(protocolManager['_db']).to.be.undefined
+      expect(protocolManager['_dbPath']).to.be.undefined
+      expect(fs.unlink).to.be.calledWith('/path/to/db')
+      expect(protocolManager['_archivePath']).to.be.undefined
+      expect(fs.unlink).to.be.calledWith('/path/to/archive')
+      expect(protocolManager['_instanceId']).to.be.undefined
+      expect(protocolManager['_runId']).to.be.undefined
+      expect(protocolManager['_errors']).to.be.empty
+      expect(protocolManager['_protocol']).to.be.undefined
+    })
+  })
+
   describe('.uploadCaptureArtifact()', () => {
     let filePath: string
     let fileSize: number
@@ -327,7 +381,7 @@ describe('lib/cloud/protocol', () => {
 
         sinon.stub(protocol, 'getDbMetadata').returns({ offset, size })
         sinon.stub(fs, 'unlink').withArgs(filePath).resolves()
-        protocolManager.beforeSpec({ instanceId })
+        protocolManager.beforeSpec({ instanceId, absolute: '/path/to/spec', relative: 'spec', specFileExtension: '.ts', fileExtension: '.ts', specType: 'integration', baseName: 'spec', name: 'spec', fileName: 'spec.ts' })
 
         expectedAfterSpecTotal = 225
 
@@ -347,30 +401,102 @@ describe('lib/cloud/protocol', () => {
       })
 
       describe('when upload succeeds', () => {
+        let defaultInterval
+
         beforeEach(() => {
-          mockPutProtocolArtifact.withArgs(filePath, DB_SIZE_LIMIT, uploadUrl).resolves()
+          defaultInterval = DEFAULT_STREAM_SAMPLING_INTERVAL
         })
 
-        it('unlinks the db & returns fileSize, afterSpec durations, success=true, and the db metadata', async () => {
-          const res = await protocolManager.uploadCaptureArtifact({ uploadUrl, filePath, fileSize })
-
-          expect(res).not.to.be.undefined
-          expect(res).to.include({
-            fileSize,
-            success: true,
+        describe('with default sampling rate', () => {
+          beforeEach(() => {
+            mockPutProtocolArtifact.withArgs(filePath, DB_SIZE_LIMIT, uploadUrl, defaultInterval).resolves()
           })
 
-          expect(res?.afterSpecDurations).to.include({
-            afterSpecTotal: expectedAfterSpecTotal,
-            ...expectedAfterSpecDurations.durations,
+          it('uses 5000ms as the default stream monitoring sample rate', async () => {
+            await protocolManager.uploadCaptureArtifact({ uploadUrl, filePath, fileSize })
+
+            expect(mockPutProtocolArtifact).to.have.been.calledWith(filePath, DB_SIZE_LIMIT, uploadUrl, defaultInterval)
           })
 
-          // @ts-ignore
-          expect(res?.specAccess.offset).to.eq(offset)
-          // @ts-ignore
-          expect(res?.specAccess.size).to.eq(size)
+          it('unlinks the db & returns fileSize, afterSpec durations, success=true, and the db metadata', async () => {
+            const res = await protocolManager.uploadCaptureArtifact({ uploadUrl, filePath, fileSize })
 
-          expect(fs.unlink).to.have.been.called
+            expect(res).not.to.be.undefined
+            expect(res).to.include({
+              fileSize,
+              success: true,
+            })
+
+            expect(res?.afterSpecDurations).to.include({
+              afterSpecTotal: expectedAfterSpecTotal,
+              ...expectedAfterSpecDurations.durations,
+            })
+
+            // @ts-ignore
+            expect(res?.specAccess.offset).to.eq(offset)
+            // @ts-ignore
+            expect(res?.specAccess.size).to.eq(size)
+
+            expect(fs.unlink).to.have.been.called
+          })
+        })
+
+        describe('when protocol exports a sampling rate', () => {
+          let appCaptureProtocolInterval
+
+          beforeEach(() => {
+            appCaptureProtocolInterval = 7500
+
+            protocol.uploadStallSamplingInterval = sinon.stub().callsFake(() => {
+              return appCaptureProtocolInterval
+            })
+          })
+
+          afterEach(() => {
+            // @ts-ignore
+            protocol.uploadStallSamplingInterval = undefined
+          })
+
+          it('uses the sampling rate defined by protocol', async () => {
+            mockPutProtocolArtifact.withArgs(filePath, DB_SIZE_LIMIT, uploadUrl, appCaptureProtocolInterval).resolves()
+            await protocolManager.uploadCaptureArtifact({ uploadUrl, filePath, fileSize })
+            expect(mockPutProtocolArtifact).to.have.been.calledWith(filePath, DB_SIZE_LIMIT, uploadUrl, appCaptureProtocolInterval)
+          })
+
+          describe('and the user specifies a sampling rate env var', () => {
+            let userDefinedInterval
+
+            beforeEach(() => {
+              userDefinedInterval = 10000
+              process.env.CYPRESS_TEST_REPLAY_UPLOAD_SAMPLING_INTERVAL = '10000'
+            })
+
+            afterEach(() => {
+              process.env.CYPRESS_TEST_REPLAY_UPLOAD_SAMPLING_INTERVAL = undefined
+            })
+
+            it('uses the override value from the env var', async () => {
+              mockPutProtocolArtifact.withArgs(filePath, DB_SIZE_LIMIT, uploadUrl, userDefinedInterval).resolves()
+              await protocolManager.uploadCaptureArtifact({ uploadUrl, filePath, fileSize })
+              expect(mockPutProtocolArtifact).to.have.been.calledWith(filePath, DB_SIZE_LIMIT, uploadUrl, userDefinedInterval)
+            })
+          })
+
+          describe('and the user specifies a sampling rate env var that parses to NaN', () => {
+            beforeEach(() => {
+              process.env.CYPRESS_TEST_REPLAY_UPLOAD_SAMPLING_INTERVAL = 'not-a-number'
+            })
+
+            afterEach(() => {
+              process.env.CYPRESS_TEST_REPLAY_UPLOAD_SAMPLING_INTERVAL = undefined
+            })
+
+            it('uses the value from app capture protocol', async () => {
+              mockPutProtocolArtifact.withArgs(filePath, DB_SIZE_LIMIT, uploadUrl, appCaptureProtocolInterval).resolves()
+              await protocolManager.uploadCaptureArtifact({ uploadUrl, filePath, fileSize })
+              expect(mockPutProtocolArtifact).to.have.been.calledWith(filePath, DB_SIZE_LIMIT, uploadUrl, appCaptureProtocolInterval)
+            })
+          })
         })
       })
 
@@ -380,7 +506,7 @@ describe('lib/cloud/protocol', () => {
         beforeEach(() => {
           err = new Error()
 
-          ;(mockPutProtocolArtifact as SinonStub).withArgs(filePath, DB_SIZE_LIMIT, uploadUrl).rejects(err)
+          ;(mockPutProtocolArtifact as SinonStub).withArgs(filePath, DB_SIZE_LIMIT, uploadUrl, DEFAULT_STREAM_SAMPLING_INTERVAL).rejects(err)
         })
 
         describe('and there is no local protocol path in env', () => {

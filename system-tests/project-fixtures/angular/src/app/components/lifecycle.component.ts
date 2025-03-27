@@ -2,6 +2,7 @@ import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/cor
 
 @Component({
   selector: 'app-lifecycle',
+  standalone: false,
   template: `<p>Hi {{ name }}. ngOnInit fired: {{ ngOnInitFired }} and ngOnChanges fired: {{ ngOnChangesFired }} and conditionalName: {{ conditionalName }}</p>`,
 })
 export class LifecycleComponent implements OnInit, OnChanges {

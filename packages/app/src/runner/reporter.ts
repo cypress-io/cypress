@@ -11,12 +11,6 @@ export function setInitializedReporter (val: boolean) {
   hasInitializeReporter = val
 }
 
-async function unmountReporter () {
-  // We do not need to unmount the reporter at any point right now,
-  // but this will likely be useful for cleaning up at some point.
-  window.UnifiedRunner.ReactDOM.unmountComponentAtNode(getReporterElement())
-}
-
 async function resetReporter () {
   if (hasInitializeReporter) {
     await getEventManager().resetReporter()
@@ -56,11 +50,12 @@ function renderReporter (
     testFilter: specsStore.testFilter,
   })
 
-  window.UnifiedRunner.ReactDOM.render(reporter, root)
+  const reactDomRoot = window.UnifiedRunner.ReactDOM.createRoot(root)
+
+  reactDomRoot.render(reporter)
 }
 
 export const UnifiedReporterAPI = {
-  unmountReporter,
   setupReporter,
   hasInitializeReporter,
   resetReporter,

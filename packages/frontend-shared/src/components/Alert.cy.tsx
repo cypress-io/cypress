@@ -1,9 +1,12 @@
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these module imports
 import CoffeeIcon from '~icons/mdi/coffee'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these module imports
 import LoadingIcon from '~icons/mdi/loading'
 import { faker } from '@faker-js/faker'
 import Alert from './Alert.vue'
 import { defaultMessages } from '../locales/i18n'
 import { ref } from 'vue'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these module imports
 import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 
 const messages = defaultMessages.components.alert

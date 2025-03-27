@@ -1,4 +1,4 @@
-import { action } from 'mobx'
+import { action, makeObservable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
@@ -15,6 +15,11 @@ class Switch extends Component<Props> {
     const { onUpdate } = this.props
 
     onUpdate(e)
+  }
+
+  constructor (props: Props) {
+    super(props)
+    makeObservable(this)
   }
 
   render () {

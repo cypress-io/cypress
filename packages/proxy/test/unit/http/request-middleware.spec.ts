@@ -8,8 +8,24 @@ import { HttpBuffer, HttpBuffers } from '../../../lib/http/util/buffers'
 import { RemoteStates } from '@packages/server/lib/remote_states'
 import { CookieJar } from '@packages/server/lib/util/cookies'
 import { HttpMiddlewareThis } from '../../../lib/http'
+import { DocumentDomainInjection } from '@packages/network'
 
 describe('http/request-middleware', () => {
+  const serverPort = 3030
+  const fileServerPort = 3030
+
+  const remoteStateConfig = () => {
+    return { server: serverPort, fileServer: fileServerPort }
+  }
+
+  let remoteStates: RemoteStates
+  let documentDomainInjection
+
+  beforeEach(() => {
+    documentDomainInjection = DocumentDomainInjection.InjectionBehavior({ injectDocumentDomain: false, testingType: 'e2e' })
+    remoteStates = new RemoteStates(remoteStateConfig, documentDomainInjection)
+  })
+
   it('exports the members in the correct order', () => {
     expect(_.keys(RequestMiddleware)).to.have.ordered.members([
       'LogRequest',
@@ -17,6 +33,7 @@ describe('http/request-middleware', () => {
       'MaybeSimulateSecHeaders',
       'CorrelateBrowserPreRequest',
       'CalculateCredentialLevelIfApplicable',
+      'FormatCookiesIfApplicable',
       'MaybeAttachCrossOriginCookies',
       'MaybeEndRequestWithBufferedResponse',
       'SetMatchingRoutes',
@@ -217,6 +234,70 @@ describe('http/request-middleware', () => {
       .then(() => {
         expect(ctx.req.resourceType).to.equal('fetch')
         expect(ctx.req.credentialsLevel).to.equal('same-origin')
+      })
+    })
+  })
+
+  describe('FormatCookiesIfApplicable', () => {
+    const { FormatCookiesIfApplicable } = RequestMiddleware
+
+    it('does nothing if "x-cypress-is-webdriver-bidi" header is not present', async () => {
+      const ctx = {
+        req: {
+          headers: {
+            cookie: 'foo=bar;bar=baz;qux=quux',
+          },
+        },
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
+      }
+
+      await testMiddleware([FormatCookiesIfApplicable], ctx)
+
+      expect(ctx.req.headers['cookie']).to.equal('foo=bar;bar=baz;qux=quux')
+    })
+
+    describe('header present', () => {
+      it('does nothing if cookie header is already formatted correctly', async () => {
+        const ctx = {
+          req: {
+            headers: {
+              'x-cypress-is-webdriver-bidi': true,
+              cookie: 'foo=bar; bar=baz; qux=quux',
+            },
+          },
+          res: {
+            on: (event, listener) => {},
+            off: (event, listener) => {},
+          },
+        }
+
+        await testMiddleware([FormatCookiesIfApplicable], ctx)
+
+        expect(ctx.req.headers['cookie']).to.equal('foo=bar; bar=baz; qux=quux')
+        expect(ctx.req.headers!['x-cypress-is-webdriver-bidi']).not.to.exist
+      })
+
+      it('delimits cookie headers by "; " if no space exists between cookie values', async () => {
+        const ctx = {
+          req: {
+            headers: {
+              'x-cypress-is-webdriver-bidi': true,
+              cookie: 'foo=bar;bar=baz;qux=quux',
+            },
+          },
+          res: {
+            on: (event, listener) => {},
+            off: (event, listener) => {},
+          },
+        }
+
+        await testMiddleware([FormatCookiesIfApplicable], ctx)
+
+        expect(ctx.req.headers['cookie']).to.equal('foo=bar; bar=baz; qux=quux')
+        expect(ctx.req.headers!['x-cypress-is-webdriver-bidi']).not.to.exist
       })
     })
   })
@@ -615,7 +696,6 @@ describe('http/request-middleware', () => {
 
     it('adds auth header from remote state', async () => {
       const headers = {}
-      const remoteStates = new RemoteStates(() => {})
 
       remoteStates.set('https://www.cypress.io/', { auth: { username: 'u', password: 'p' } })
 
@@ -641,7 +721,6 @@ describe('http/request-middleware', () => {
 
     it('does not add auth header if origins do not match', async () => {
       const headers = {}
-      const remoteStates = new RemoteStates(() => {})
 
       remoteStates.set('https://cypress.io/', { auth: { username: 'u', password: 'p' } }) // does not match due to subdomain
 
@@ -665,7 +744,6 @@ describe('http/request-middleware', () => {
 
     it('does not add auth header if remote does not have auth', async () => {
       const headers = {}
-      const remoteStates = new RemoteStates(() => {})
 
       remoteStates.set('https://www.cypress.io/')
 
@@ -689,7 +767,6 @@ describe('http/request-middleware', () => {
 
     it('does not add auth header if remote not found', async () => {
       const headers = {}
-      const remoteStates = new RemoteStates(() => {})
 
       remoteStates.set('http://localhost:3500', { auth: { username: 'u', password: 'p' } })
 
@@ -715,7 +792,6 @@ describe('http/request-middleware', () => {
       const headers = {
         authorization: 'token',
       }
-      const remoteStates = new RemoteStates(() => {})
 
       remoteStates.set('https://www.cypress.io/', { auth: { username: 'u', password: 'p' } })
 
@@ -847,7 +923,6 @@ describe('http/request-middleware', () => {
 
     beforeEach(() => {
       const headers = {}
-      const remoteStates = new RemoteStates(() => {})
 
       ctx = {
         onError: sinon.stub(),

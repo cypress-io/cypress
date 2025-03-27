@@ -29,7 +29,7 @@ export const create = (cy: $Cy) => ({
     ctx[alias] = cy.getSubjectFromChain(aliasObj.subjectChain)
   },
 
-  getAlias (name, cmd, log) {
+  getAlias (name: string, cmd?: string, log?: any) {
     const aliases = cy.state('aliases') || {}
 
     // bail if the name doesn't reference an alias

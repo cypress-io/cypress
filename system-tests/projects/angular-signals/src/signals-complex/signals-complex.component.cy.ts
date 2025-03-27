@@ -1,6 +1,6 @@
 import { signal } from '@angular/core'
 import { SignalsComplexComponent } from './signals-complex.component'
-import { createOutputSpy } from 'cypress/angular-signals'
+import { createOutputSpy } from 'cypress/angular'
 import cloneDeep from 'lodash/cloneDeep'
 
 const user = {

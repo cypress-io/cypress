@@ -1,23 +1,49 @@
 require('../spec_helper')
+import chai, { expect } from 'chai'
+import chaiAsPromised from 'chai-as-promised'
+import chaiSubset from 'chai-subset'
+import sinonChai from '@cypress/sinon-chai'
+import Sinon from 'sinon'
+import { OriginBehavior } from '@packages/network/lib/document-domain-injection'
 
-import { RemoteStates } from '../../lib/remote_states'
+import { RemoteStates, DEFAULT_DOMAIN_NAME } from '../../lib/remote_states'
+
+chai.use(chaiAsPromised)
+chai.use(chaiSubset)
+chai.use(sinonChai)
 
 describe('remote states', () => {
-  beforeEach(function () {
-    this.remoteStates = new RemoteStates(() => {
-      return {
-        serverPort: 9999,
-        fileServerPort: 9998,
-      }
+  const serverPorts = {
+    server: 3030,
+    fileServer: 3030,
+  }
+
+  const remoteStatesServerPorts = () => {
+    return serverPorts
+  }
+
+  let remoteStates: RemoteStates
+  let documentDomainInjection: Sinon.SinonStubbedInstance<OriginBehavior>
+
+  beforeEach(() => {
+    documentDomainInjection = Sinon.createStubInstance(OriginBehavior)
+
+    // While the behavior of this class is partially determined by DocumentDomainInjection,
+    // it's not necessary to test multiple permutations of its getOriginKey - as long as it's
+    // returning an appropriate origin key, this class will behave as expected.
+    documentDomainInjection.getOrigin.callsFake((url) => {
+      return new URL(url).origin
     })
 
+    remoteStates = new RemoteStates(remoteStatesServerPorts, documentDomainInjection)
     // set the initial state
-    this.remoteStates.set('http://localhost:3500')
+    remoteStates.set('http://localhost:3500')
   })
 
   context('#get', () => {
-    it('returns the remote state by for requested origin policy', function () {
-      const state = this.remoteStates.get('http://localhost:3500/foobar')
+    it('returns the remote state for an origin when a matching origin key is returned from DocumentDomainInjection', function () {
+      documentDomainInjection.getOrigin.returns('http://localhost:3500')
+      const state = remoteStates.get('http://localhost:3500/foobar')
 
       expect(state).to.deep.equal({
         auth: undefined,
@@ -36,13 +62,13 @@ describe('remote states', () => {
     })
 
     it('returns undefined when the remote state is not found', function () {
-      const state = this.remoteStates.get('http://notfound.com')
+      const state = remoteStates.get('http://notfound.com')
 
       expect(state).to.be.undefined
     })
 
     it('changing returned state does not mutate remote state', function () {
-      const originalState = this.remoteStates.get('http://localhost:3500/foobar')
+      const originalState = remoteStates.get('http://localhost:3500/foobar')
 
       expect(originalState).to.deep.equal({
         auth: undefined,
@@ -61,7 +87,7 @@ describe('remote states', () => {
 
       originalState.auth = { username: 'u', password: 'p' }
 
-      const currentState = this.remoteStates.get('http://localhost:3500/foobar')
+      const currentState = remoteStates.get('http://localhost:3500/foobar')
 
       expect(currentState).to.deep.equal({
         auth: undefined,
@@ -82,7 +108,7 @@ describe('remote states', () => {
 
   context('#getPrimary', () => {
     it('returns the primary when there is only the primary in remote states', function () {
-      const state = this.remoteStates.getPrimary()
+      const state = remoteStates.getPrimary()
 
       expect(state).to.deep.equal({
         auth: undefined,
@@ -101,9 +127,9 @@ describe('remote states', () => {
     })
 
     it('returns the primary when there are multiple remote states', function () {
-      this.remoteStates.set('https://staging.google.com/foo/bar', {}, false)
+      remoteStates.set('https://staging.google.com/foo/bar', {}, false)
 
-      const state = this.remoteStates.getPrimary()
+      const state = remoteStates.getPrimary()
 
       expect(state).to.deep.equal({
         auth: undefined,
@@ -124,14 +150,14 @@ describe('remote states', () => {
 
   context('#isPrimarySuperDomainOrigin', () => {
     it('returns true when the requested url is the primary origin', function () {
-      const isPrimarySuperDomainOrigin = this.remoteStates.isPrimarySuperDomainOrigin('http://localhost:3500')
+      const isPrimarySuperDomainOrigin = remoteStates.isPrimarySuperDomainOrigin('http://localhost:3500')
 
       expect(isPrimarySuperDomainOrigin).to.be.true
     })
 
     it('returns false when the requested url is not the primary origin', function () {
-      this.remoteStates.set('https://google.com', {}, false)
-      const isPrimarySuperDomainOrigin = this.remoteStates.isPrimarySuperDomainOrigin('http://google.com')
+      remoteStates.set('https://google.com', {}, false)
+      const isPrimarySuperDomainOrigin = remoteStates.isPrimarySuperDomainOrigin('http://google.com')
 
       expect(isPrimarySuperDomainOrigin).to.be.false
     })
@@ -139,22 +165,22 @@ describe('remote states', () => {
 
   context('#reset', () => {
     it('resets the origin stack and remote states to the primary', function () {
-      this.remoteStates.set('https://google.com', {}, false)
+      remoteStates.set('https://google.com', {}, false)
 
-      expect(this.remoteStates.get('https://google.com')).to.not.be.undefined
+      expect(remoteStates.get('https://google.com')).to.not.be.undefined
 
-      this.remoteStates.reset()
+      remoteStates.reset()
 
-      expect(this.remoteStates.get('https://google.com')).to.be.undefined
+      expect(remoteStates.get('https://google.com')).to.be.undefined
     })
   })
 
   context('#current', () => {
     it('returns the remote state for the current origin in the stack', function () {
-      this.remoteStates.set('https://google.com', {})
-      this.remoteStates.set('https://staging.google.com/foo/bar', {}, false)
+      remoteStates.set('https://google.com', {})
+      remoteStates.set('https://staging.google.com/foo/bar', {}, false)
 
-      const state = this.remoteStates.current()
+      const state = remoteStates.current()
 
       expect(state).to.deep.equal({
         auth: undefined,
@@ -175,9 +201,9 @@ describe('remote states', () => {
 
   context('#set', () => {
     it('sets primary state and origin when isPrimarySuperDomainOrigin is true', function () {
-      expect(this.remoteStates.isPrimarySuperDomainOrigin('http://localhost:3500')).to.be.true
+      expect(remoteStates.isPrimarySuperDomainOrigin('http://localhost:3500')).to.be.true
 
-      const state = this.remoteStates.set('https://staging.google.com/foo/bar', {}, true)
+      const state = remoteStates.set('https://staging.google.com/foo/bar', {}, true)
 
       expect(state).to.deep.equal({
         auth: undefined,
@@ -194,41 +220,15 @@ describe('remote states', () => {
         },
       })
 
-      expect(this.remoteStates.get('https://staging.google.com')).to.deep.equal(state)
+      expect(remoteStates.get('https://staging.google.com')).to.deep.equal(state)
 
-      expect(this.remoteStates.isPrimarySuperDomainOrigin('https://staging.google.com')).to.be.true
+      expect(remoteStates.isPrimarySuperDomainOrigin('https://staging.google.com')).to.be.true
     })
 
     it('sets a secondary state when isPrimarySuperDomainOrigin is false', function () {
-      expect(this.remoteStates.isPrimarySuperDomainOrigin('http://localhost:3500')).to.be.true
+      expect(remoteStates.isPrimarySuperDomainOrigin('http://localhost:3500')).to.be.true
 
-      const state = this.remoteStates.set('https://staging.google.com/foo/bar', {}, false)
-
-      expect(state).to.deep.equal({
-        auth: undefined,
-        origin: 'https://staging.google.com',
-        strategy: 'http',
-        domainName: 'google.com',
-        fileServer: null,
-        props: {
-          port: '443',
-          domain: 'google',
-          tld: 'com',
-          subdomain: 'staging',
-          protocol: 'https:',
-        },
-      })
-
-      expect(this.remoteStates.get('https://staging.google.com')).to.deep.equal(state)
-
-      expect(this.remoteStates.isPrimarySuperDomainOrigin('http://localhost:3500')).to.be.true
-      expect(this.remoteStates.isPrimarySuperDomainOrigin('https://staging.google.com')).to.be.false
-    })
-
-    it('overrides the existing state', function () {
-      this.remoteStates.set('https://staging.google.com/foo/bar')
-
-      let state = this.remoteStates.get('https://google.com')
+      const state = remoteStates.set('https://staging.google.com/foo/bar', {}, false)
 
       expect(state).to.deep.equal({
         auth: undefined,
@@ -245,28 +245,14 @@ describe('remote states', () => {
         },
       })
 
-      this.remoteStates.set('https://prod.google.com/foo/bar')
+      expect(remoteStates.get('https://staging.google.com')).to.deep.equal(state)
 
-      state = this.remoteStates.get('https://google.com')
-
-      expect(state).to.deep.equal({
-        auth: undefined,
-        origin: 'https://prod.google.com',
-        strategy: 'http',
-        domainName: 'google.com',
-        fileServer: null,
-        props: {
-          port: '443',
-          domain: 'google',
-          tld: 'com',
-          subdomain: 'prod',
-          protocol: 'https:',
-        },
-      })
+      expect(remoteStates.isPrimarySuperDomainOrigin('http://localhost:3500')).to.be.true
+      expect(remoteStates.isPrimarySuperDomainOrigin('https://staging.google.com')).to.be.false
     })
 
     it('sets port to 443 when omitted and https:', function () {
-      const state = this.remoteStates.set('https://staging.google.com/foo/bar')
+      const state = remoteStates.set('https://staging.google.com/foo/bar')
 
       expect(state).to.deep.equal({
         auth: undefined,
@@ -285,7 +271,7 @@ describe('remote states', () => {
     })
 
     it('sets port to 80 when omitted and http:', function () {
-      const state = this.remoteStates.set('http://staging.google.com/foo/bar')
+      const state = remoteStates.set('http://staging.google.com/foo/bar')
 
       expect(state).to.deep.equal({
         auth: undefined,
@@ -304,7 +290,7 @@ describe('remote states', () => {
     })
 
     it('sets host + port to localhost', function () {
-      const state = this.remoteStates.set('http://localhost:4200/a/b?q=1#asdf')
+      const state = remoteStates.set('http://localhost:4200/a/b?q=1#asdf')
 
       expect(state).to.deep.equal({
         auth: undefined,
@@ -323,27 +309,27 @@ describe('remote states', () => {
     })
 
     it('sets local file', function () {
-      const state = this.remoteStates.set('/index.html')
+      const state = remoteStates.set('/index.html')
 
       expect(state).to.deep.equal({
         auth: undefined,
-        origin: 'http://localhost:9999',
+        origin: `http://${DEFAULT_DOMAIN_NAME}:${serverPorts.server}`,
         strategy: 'file',
-        domainName: 'localhost',
-        fileServer: 'http://localhost:9998',
+        domainName: DEFAULT_DOMAIN_NAME,
+        fileServer: `http://${DEFAULT_DOMAIN_NAME}:${serverPorts.fileServer}`,
         props: null,
       })
     })
 
     it('sets <root>', function () {
-      const state = this.remoteStates.set('<root>')
+      const state = remoteStates.set('<root>')
 
       expect(state).to.deep.equal({
         auth: undefined,
-        origin: 'http://localhost:9999',
+        origin: `http://${DEFAULT_DOMAIN_NAME}:${serverPorts.server}`,
         strategy: 'file',
-        domainName: 'localhost',
-        fileServer: 'http://localhost:9998',
+        domainName: DEFAULT_DOMAIN_NAME,
+        fileServer: `http://${DEFAULT_DOMAIN_NAME}:${serverPorts.fileServer}`,
         props: null,
       })
     })
@@ -364,9 +350,9 @@ describe('remote states', () => {
         },
       }
 
-      this.remoteStates.set(state)
+      remoteStates.set(state)
 
-      const actualState = this.remoteStates.get('http://www.foobar.com')
+      const actualState = remoteStates.get('http://www.foobar.com')
 
       expect(actualState).to.deep.equal(state)
     })

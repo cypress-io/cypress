@@ -46,9 +46,6 @@ Note: you may need to enable "Verbose" or "Debug" log levels inside the browser'
 
 ## Patches
 
-- `sinon`
-- `unfetch` to polyfill `fetch`. Added constructor function to point XMLHttpRequest to the application under test window.
-
 Note: when creating a patch, make sure there is no `package-lock.json` file! Also rename the patch to have ".dev.patch" extension.
 
 ## Cross-origin Testing

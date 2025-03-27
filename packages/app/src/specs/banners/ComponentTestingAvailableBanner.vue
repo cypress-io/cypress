@@ -16,7 +16,7 @@
   >
     <template #default="{ dismiss, bannerInstanceId }">
       <p class="pb-[16px] text-gray-700">
-        {{ t('specPage.banners.ct.content') }}
+        {{ t('specPage.banners.componentTesting.content') }}
       </p>
       <div class="flex flex-row items-center text-sm border-t border-gray-100 pt-[8px] -mb-[8px] -mx-[16px] px-[16px]">
         <Button
@@ -26,14 +26,14 @@
           class="mr-[16px]"
           @click="handlePrimary(bannerInstanceId)"
         >
-          {{ t('specPage.banners.ct.primaryAction') }}
+          {{ t('specPage.banners.componentTesting.primaryAction') }}
         </Button>
         <ExternalLink
           data-cy="docs-link"
           :href="docsLink"
           @click="handleDocsClick(bannerInstanceId)"
         >
-          <span class="font-medium">{{ t('specPage.banners.ct.secondaryAction') }}</span>
+          <span class="font-medium">{{ t('specPage.banners.componentTesting.secondaryAction') }}</span>
         </ExternalLink>
         <span class="flex-grow" />
         <ExternalLink
@@ -41,7 +41,7 @@
           :href="surveyLink"
           @click="handleSurveyClick(bannerInstanceId, dismiss)"
         >
-          <span class="font-medium">{{ t('specPage.banners.ct.dismissAction') }}</span>
+          <span class="font-medium">{{ t('specPage.banners.componentTesting.dismissAction') }}</span>
         </ExternalLink>
       </div>
     </template>
@@ -89,7 +89,7 @@ const props = defineProps<{
 const { t } = useI18n()
 const bannerId = BannerIds.CT_052023_AVAILABLE
 
-const title = computed(() => t('specPage.banners.ct.title', [props.framework?.name]))
+const title = computed(() => t('specPage.banners.componentTesting.title', [props.framework?.name]))
 const iconFromType = computed(() => FrameworkBundlerLogos[props.framework?.type])
 
 const handlePrimary = async (bannerInstanceId: string) => {

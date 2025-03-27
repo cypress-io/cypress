@@ -47,7 +47,6 @@ Upgrading `electron` involves more than just bumping this package's `package.jso
       - The [NodeJS](https://nodejs.org/en) version is not the active LTS.
 - [ ] **Update `workflows.yml`**
     - [ ] Ensure it references the new `base-internal` and `browsers-internal` Docker images
-    - [ ] Ensure the new Electron version is used as a build target in the `Build better-sqlite3 for CentOS 7` step
 
 - [ ] **Ensure that a matching Node.js version is enforced in the monorepo for local development and CI.** When Electron is upgraded, oftentimes, the bundled Node.js version that comes with Electron is updated as well. Because all unit and integration tests run in normal Node.js (not Electron's Node.js), it's important for this Node.js version to be synced with the monorepo. There are a few places where this needs to be done:
     - [ ] [`/.node-version`](../../.node-version) - used by `nvm` and other Node version managers
@@ -56,9 +55,6 @@ Upgrading `electron` involves more than just bumping this package's `package.jso
     - [ ] [`/package.json`](../../package.json) - update `engines`
     - [ ] [`docker-compose.yml`](../../docker-compose.yml) - update Docker image to the new matching `browsers` image
     - [ ] [`/system-tests/test-binary/*`](../../system-tests/test-binary) - update binary system tests to use the newly published Ubuntu and Node images mentioned above, if applicable
-    - [ ] [`/.circleci/config.yml`](../../.circleci/config.yml)
-        - Update the Docker `image`s to the new matching `browsers` image.
-        - Update the `xcode` version to one with the same major Node.js version bundled. There is usually not an exact match, this is ok as long as the major version number as the same.
     - [ ] Do a global search for the old Node.js version to identify any new areas that may need updating/unification, and update those locations (and this document!)  
 
 - [ ] **Update `cypress-publish-binary`** For **binary publishing**, make sure the `electron` version that we updated in [`/package.json`](../../package.json) matches the `electron` version inside the [publish binary project](https://github.com/cypress-io/cypress-publish-binary/blob/main/package.json). This is to make sure add-on tests inside the publish-binary repository work locally, but are not required to install the correct version of `electron` in CI when publishing the binary. Ensure the `electron` target in this project's `.circleci` configuration is updated as well. Set the Remove this before merging, and ensure that branch is merged as well.

@@ -1,6 +1,6 @@
 import debugFn from 'debug'
 import semverMajor from 'semver/functions/major'
-import type { UserConfig } from 'vite-5'
+import type { UserConfig } from 'vite-6'
 import { getVite, Vite } from './getVite'
 import { createViteDevServerConfig } from './resolveConfig'
 

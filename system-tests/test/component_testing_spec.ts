@@ -3,34 +3,18 @@ import systemTests from '../lib/system-tests'
 describe('component testing projects', function () {
   systemTests.setup()
 
-  systemTests.it('create-react-app-configured', {
-    project: 'create-react-app-configured',
-    testingType: 'component',
-    spec: 'src/App.cy.jsx',
-    browser: 'chrome',
-    expectedExitCode: 0,
-  })
-
-  systemTests.it('vueclivue2-configured', {
-    project: 'vueclivue2-configured',
-    testingType: 'component',
-    spec: 'src/**/*.cy.js',
-    browser: 'electron',
-    expectedExitCode: 0,
-  })
-
-  systemTests.it('vueclivue3-configured', {
-    project: 'vueclivue3-configured',
-    testingType: 'component',
-    spec: 'src/components/HelloWorld.cy.js',
-    browser: 'chrome',
-    expectedExitCode: 0,
-  })
-
   systemTests.it('react-vite-ts-configured', {
     project: 'react-vite-ts-configured',
     testingType: 'component',
     spec: 'src/App.cy.tsx',
+    browser: 'chrome',
+    expectedExitCode: 0,
+  })
+
+  systemTests.it('vue3-webpack-ts-configured', {
+    project: 'vue3-webpack-ts-configured',
+    testingType: 'component',
+    spec: 'src/components/HelloWorld.cy.ts',
     browser: 'chrome',
     expectedExitCode: 0,
   })
@@ -50,33 +34,9 @@ describe('component testing projects', function () {
     browser: 'chrome',
     expectedExitCode: 0,
   })
-
-  systemTests.it('issue-25951-next-app', {
-    project: 'issue-25951-next-app',
-    testingType: 'component',
-    spec: 'src/pages/_app.cy.tsx',
-    browser: 'chrome',
-    expectedExitCode: 0,
-  })
-
-  systemTests.it('nuxtjs-vue2-configured', {
-    project: 'nuxtjs-vue2-configured',
-    testingType: 'component',
-    spec: 'components/Tutorial.cy.js',
-    browser: 'chrome',
-    expectedExitCode: 0,
-  })
-
-  systemTests.it('vuecli5vue3-configured', {
-    project: 'vuecli5vue3-configured',
-    testingType: 'component',
-    spec: 'src/components/HelloWorld.cy.js',
-    browser: 'chrome',
-    expectedExitCode: 0,
-  })
 })
 
-const REACT_MAJOR_VERSIONS = ['17', '18'] as const
+const REACT_MAJOR_VERSIONS = ['18', '19'] as const
 
 describe(`React major versions with Vite`, function () {
   systemTests.setup()
@@ -86,7 +46,7 @@ describe(`React major versions with Vite`, function () {
       return systemTests.exec(this, {
         project: `react${majorVersion}`,
         configFile: 'cypress-vite-default.config.ts',
-        spec: 'src/App.cy.jsx,src/Unmount.cy.jsx,src/UsingLegacyMount.cy.jsx,src/Rerendering.cy.jsx,src/mount.cy.jsx',
+        spec: 'src/App.cy.jsx,src/Unmount.cy.jsx,src/Rerendering.cy.jsx,src/mount.cy.jsx',
         testingType: 'component',
         browser: 'chrome',
         snapshot: true,
@@ -104,7 +64,7 @@ describe(`React major versions with Webpack`, function () {
       return systemTests.exec(this, {
         project: `react${majorVersion}`,
         configFile: 'cypress-webpack.config.ts',
-        spec: 'src/App.cy.jsx,src/Unmount.cy.jsx,src/UsingLegacyMount.cy.jsx,src/Rerendering.cy.jsx,src/mount.cy.jsx',
+        spec: 'src/App.cy.jsx,src/Unmount.cy.jsx,src/Rerendering.cy.jsx,src/mount.cy.jsx',
         testingType: 'component',
         browser: 'chrome',
         snapshot: true,
@@ -114,32 +74,22 @@ describe(`React major versions with Webpack`, function () {
   }
 })
 
-const ANGULAR_VERSIONS = ['13', '14', '15', '16', '17']
+const ANGULAR_VERSIONS = ['17', '18', '19']
 
 describe(`Angular CLI versions`, () => {
   systemTests.setup()
 
   for (const version of ANGULAR_VERSIONS) {
-    let spec = 'src/**/*.cy.ts,!src/app/errors.cy.ts'
-
-    if (version === '13') {
-      spec = `${spec},!src/app/components/standalone.component.cy.ts,!src/app/components/signals.component.cy.ts`
-    }
-
-    if (version === '14' || version === '15') {
-      spec = `${spec},!src/app/components/signals.component.cy.ts`
-    }
-
     systemTests.it(`v${version} with mount tests`, {
       project: `angular-${version}`,
-      spec,
+      spec: 'src/**/*.cy.ts,!src/app/errors.cy.ts',
       testingType: 'component',
       browser: 'chrome',
       expectedExitCode: 0,
     })
   }
 
-  systemTests.it('angular 14 custom config', {
+  systemTests.it('angular 19 custom config', {
     project: 'angular-custom-config',
     spec: 'src/app/my-component.cy.ts',
     testingType: 'component',
@@ -154,32 +104,41 @@ describe(`Angular CLI versions`, () => {
     browser: 'chrome',
     expectedExitCode: 0,
   })
+
+  systemTests.it('angular signals', {
+    project: 'angular-signals',
+    testingType: 'component',
+    browser: 'chrome',
+    expectedExitCode: 0,
+  })
 })
 
 describe('svelte component testing', () => {
   systemTests.setup()
 
-  for (const bundler of ['webpack', 'vite']) {
-    systemTests.it(`svelte + ${bundler}`, {
-      project: `svelte-${bundler}`,
-      testingType: 'component',
-      spec: '**/*.cy.js,!src/errors.cy.js',
-      browser: 'chrome',
-      expectedExitCode: 0,
-    })
-  }
+  // svelte-webpack-configured is currently difficult to test.
+  // This is currently tested as a binary-like system-test inside CI.
+  // We can unskip this test and remove the binary-like CircleCI test
+  // once https://github.com/sveltejs/svelte-loader/issues/243 is resolved.
+  systemTests.it.skip(`svelte + webpack`, {
+    project: `svelte-webpack-configured`,
+    testingType: 'component',
+    spec: '**/*.cy.ts,!src/lib/errors.cy.ts',
+    browser: 'chrome',
+    expectedExitCode: 0,
+  })
+
+  systemTests.it(`svelte + vite`, {
+    project: `svelte-vite-configured`,
+    testingType: 'component',
+    spec: '**/*.cy.ts,!src/lib/errors.cy.ts',
+    browser: 'chrome',
+    expectedExitCode: 0,
+  })
 })
 
 describe('Vue major versions with Vite', () => {
   systemTests.setup()
-
-  systemTests.it('vue 2', {
-    project: `vue2`,
-    testingType: 'component',
-    spec: '**/*.cy.js',
-    browser: 'chrome',
-    expectedExitCode: 0,
-  })
 
   systemTests.it('vue 3', {
     project: `vue3`,

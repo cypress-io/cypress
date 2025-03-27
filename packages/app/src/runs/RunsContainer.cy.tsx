@@ -1,7 +1,7 @@
 import RunsContainer from './RunsContainer.vue'
 import { RunsContainerFragmentDoc } from '../generated/graphql-test'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
-
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 
 describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {

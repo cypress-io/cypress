@@ -15,50 +15,6 @@ Chai.use(SinonChai)
 const WEBPACK_DEV_SERVER_VERSIONS: (4 | 5)[] = [4, 5]
 
 describe('makeWebpackConfig', () => {
-  it('ignores userland webpack `output.publicPath` and `devServer.overlay` with webpack-dev-server v3', async () => {
-    const devServerConfig: WebpackDevServerConfig = {
-      specs: [],
-      cypressConfig: {
-        isTextTerminal: false,
-        projectRoot: '.',
-        supportFile: '/support.js',
-        devServerPublicPathRoute: '/test-public-path',
-      } as Cypress.PluginConfigOptions,
-      webpackConfig: {
-        output: {
-          publicPath: '/this-will-be-ignored', // This will be overridden by makeWebpackConfig.ts
-        },
-        devServer: {
-          progress: true,
-          overlay: true, // This will be overridden by makeWebpackConfig.ts
-        } as any,
-        optimization: {
-          noEmitOnErrors: true, // This will be overridden by makeWebpackConfig.ts
-        },
-        devtool: 'eval', // This will be overridden by makeWebpackConfig.ts
-      },
-      devServerEvents: new EventEmitter(),
-    }
-    const actual = await makeWebpackConfig({
-      devServerConfig,
-      sourceWebpackModulesResult: createModuleMatrixResult({
-        webpack: 4,
-        webpackDevServer: 3,
-      }),
-    })
-
-    // plugins contain circular deps which cannot be serialized in a snapshot.
-    // instead just compare the name and order of the plugins.
-    ;(actual as any).plugins = actual.plugins.map((p) => p.constructor.name)
-
-    // these will include paths from the user's local file system, so we should not include them the snapshot
-    delete actual.output.path
-    delete actual.entry
-
-    expect(actual.output.publicPath).to.eq('/test-public-path/')
-    snapshot(actual)
-  })
-
   it('ignores userland webpack `output.publicPath` and `devServer.overlay` with webpack-dev-server v4', async () => {
     const devServerConfig: WebpackDevServerConfig = {
       specs: [],
@@ -73,7 +29,6 @@ describe('makeWebpackConfig', () => {
           publicPath: '/this-will-be-ignored',
         },
         devServer: {
-          magicHtml: true,
           client: {
             progress: false,
             overlay: true, // This will be overridden by makeWebpackConfig.ts
@@ -120,7 +75,6 @@ describe('makeWebpackConfig', () => {
           publicPath: '/this-will-be-ignored',
         },
         devServer: {
-          magicHtml: true,
           client: {
             progress: false,
             overlay: true, // This will be overridden by makeWebpackConfig.ts
@@ -438,17 +392,13 @@ describe('makeWebpackConfig', () => {
     })
   })
 
-  describe('experimentalJustInTimeCompile', () => {
+  describe('justInTimeCompile', () => {
     let devServerConfig: WebpackDevServerConfig
 
     const WEBPACK_MATRIX: {
       webpack: 4 | 5
-      wds: 3 | 4 | 5
+      wds: 4 | 5
     }[] = [
-      {
-        webpack: 4,
-        wds: 3,
-      },
       {
         webpack: 4,
         wds: 4,
@@ -469,7 +419,7 @@ describe('makeWebpackConfig', () => {
         cypressConfig: {
           projectRoot: '.',
           devServerPublicPathRoute: '/test-public-path',
-          experimentalJustInTimeCompile: true,
+          justInTimeCompile: true,
           baseUrl: null,
         } as Cypress.PluginConfigOptions,
         webpackConfig: {

@@ -30,7 +30,7 @@ export default defineConfig({
       bundler: 'webpack',
       webpackConfig: {
         ...webpackConfig,
-        stats: 'minimal',
+        stats: 'errors-only',
       },
     },
   },

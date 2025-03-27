@@ -2,7 +2,7 @@ import cs from 'classnames'
 import { observer } from 'mobx-react'
 import React from 'react'
 
-import { StatsStore } from './stats-store'
+import type { StatsStore } from './stats-store'
 
 import FailedIcon from '@packages/frontend-shared/src/assets/icons/status-failed_x12.svg'
 import PassedIcon from '@packages/frontend-shared/src/assets/icons/status-passed_x12.svg'

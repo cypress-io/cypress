@@ -4,6 +4,7 @@ import 'tailwindcss/tailwind.css'
 import urql from '@urql/vue'
 import App from './App.vue'
 import { makeUrqlClient } from '@packages/frontend-shared/src/graphql/urqlClient'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { createI18n } from '@cy/i18n'
 import { createRouter } from './router/router'
 import { injectBundle } from './runner/injectBundle'
@@ -40,7 +41,7 @@ app.use(Toast, {
   closeOnClick: false,
 })
 
-makeUrqlClient({ target: 'app', namespace: config.namespace, socketIoRoute: config.socketIoRoute }).then((client) => {
+await makeUrqlClient({ target: 'app', namespace: config.namespace, socketIoRoute: config.socketIoRoute }).then((client) => {
   app.use(urql, client)
   app.use(createRouter())
   app.use(createI18n())

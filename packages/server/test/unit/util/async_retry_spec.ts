@@ -1,6 +1,10 @@
 import { asyncRetry } from '../../../lib/util/async_retry'
 import sinon from 'sinon'
-import { expect } from 'chai'
+import chai from 'chai'
+import sinonChai from '@cypress/sinon-chai'
+
+chai.use(sinonChai)
+const { expect } = chai
 
 describe('asyncRetry', () => {
   let asyncFn
@@ -58,9 +62,9 @@ describe('asyncRetry', () => {
           thrown = e
         }
         expect(thrown).not.to.be.undefined
-        expect(thrown.errors.length).to.be.eq(2)
-        expect(thrown.errors[0].message).to.eq('first call rejection')
-        expect(thrown.errors[1].message).to.eq('second call rejection')
+        expect(thrown?.errors.length).to.be.eq(2)
+        expect(thrown?.errors[0].message).to.eq('first call rejection')
+        expect(thrown?.errors[1].message).to.eq('second call rejection')
         expect(asyncFn).to.have.been.calledTwice
       })
     })
@@ -74,7 +78,7 @@ describe('asyncRetry', () => {
       })
 
       it('throws a non-aggregate error', async () => {
-        let thrown: Error & { errors?: any[] }
+        let thrown: Error & { errors?: any[] } | undefined = undefined
 
         try {
           await asyncRetry(asyncFn, { maxAttempts: 1 })()
@@ -82,8 +86,8 @@ describe('asyncRetry', () => {
           thrown = e
         }
 
-        expect(thrown.message).to.eq(err.message)
-        expect(thrown.errors).to.be.undefined
+        expect(thrown?.message).to.eq(err.message)
+        expect(thrown?.errors).to.be.undefined
       })
     })
   })
@@ -111,6 +115,32 @@ describe('asyncRetry', () => {
       await clock.tickAsync(delay)
       await asyncP
       expect(asyncFn).to.have.been.calledTwice
+    })
+  })
+
+  describe('onRetry option', () => {
+    let clock: sinon.SinonFakeTimers
+    let err: Error
+
+    beforeEach(() => {
+      err = new Error('Some Error')
+      asyncFn.rejects(err)
+      clock = sinon.useFakeTimers()
+    })
+
+    afterEach(() => {
+      sinon.restore()
+    })
+
+    it('is called with the delay and the error that occurred, before the next retry', async () => {
+      const onRetryFn = sinon.stub<[number, unknown], void>()
+      const delay = 500
+      const p = asyncRetry(asyncFn, { maxAttempts: 2, retryDelay: () => delay, onRetry: onRetryFn })().catch((e) => {})
+
+      await clock.tickAsync(1)
+      expect(onRetryFn).to.have.been.calledOnceWith(delay, err)
+      await clock.runAllAsync()
+      await p
     })
   })
 })

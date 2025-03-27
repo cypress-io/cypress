@@ -3,7 +3,7 @@
 /// <reference types="cypress" />
 import React from 'react'
 import { mount } from '@cypress/react'
-import { Game } from './tic-tac-toe.jsx'
+import Game from './tic-tac-toe.jsx'
 import './tic-tac-toe.css'
 
 describe('Tic Tac Toe', () => {

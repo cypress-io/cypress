@@ -7,7 +7,7 @@
   "scripts": {
     "build": "../../scripts/run-if-ci.sh tsc || echo 'type errors'",
     "build-prod": "tsc",
-    "check-ts": "tsc --noEmit",
+    "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean": "rimraf ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
     "clean-deps": "rimraf node_modules",
     "comparison": "node -r @packages/ts/register test/support/error-comparison-tool.ts",
@@ -15,25 +15,31 @@
     "test": "yarn test-unit",
     "test-electron": "HTML_IMAGE_CONVERSION=1 xvfb-maybe electron --no-sandbox ./node_modules/.bin/_mocha",
     "pretest-unit": "yarn clean",
-    "test-unit": "mocha"
+    "test-unit": "mocha",
+    "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "dependencies": {
     "ansi_up": "5.0.0",
+    "axios": "^1.7.9",
+    "chalk": "^2.4.2",
+    "lodash": "^4.17.21",
+    "pluralize": "8.0.0",
     "strip-ansi": "6.0.1"
   },
   "devDependencies": {
+    "@packages/server": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
     "@packages/types": "0.0.0-development",
     "@types/chai": "4.2.15",
     "@types/mocha": "8.2.2",
-    "@types/node": "18.17.5",
+    "@types/node": "20.16.0",
     "@types/pngjs": "^6.0.1",
     "ansi-styles": "^5",
     "chai": "4.2.0",
+    "ci-info": "^4.1.0",
     "globby": "^11.1.0",
-    "is-ci": "^3.0.1",
     "mocha": "7.0.1",
-    "pngjs": "^6.0.0",
+    "pngjs": "^7.0.0",
     "rimraf": "5.0.10",
     "sinon": "7.5.0",
     "terminal-banner": "^1.1.0",
@@ -43,5 +49,6 @@
     "src",
     "dist"
   ],
-  "types": "src/index.ts"
+  "types": "src/index.ts",
+  "nx": {}
 }

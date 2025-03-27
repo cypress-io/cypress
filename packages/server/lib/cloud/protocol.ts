@@ -4,17 +4,16 @@ import fetch from 'cross-fetch'
 import crypto from 'crypto'
 import Debug from 'debug'
 import fs from 'fs-extra'
-import Module from 'module'
 import os from 'os'
 import path from 'path'
 import { agent } from '@packages/network'
 import pkg from '@packages/root'
-import { performance } from 'perf_hooks'
 import env from '../util/env'
 import { putProtocolArtifact } from './api/put_protocol_artifact'
+import { requireScript } from './require_script'
 
 import type { Readable } from 'stream'
-import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions, ResponseEndedWithEmptyBodyOptions, ResponseStreamTimedOutOptions, AfterSpecDurations } from '@packages/types'
+import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions, ResponseEndedWithEmptyBodyOptions, ResponseStreamTimedOutOptions, AfterSpecDurations, FoundSpec } from '@packages/types'
 
 const routes = require('./routes')
 
@@ -26,33 +25,20 @@ const DELETE_DB = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 
 export const DB_SIZE_LIMIT = 5000000000
 
+export const DEFAULT_STREAM_SAMPLING_INTERVAL = 10000
+
 const dbSizeLimit = () => {
   return env.get('CYPRESS_INTERNAL_SYSTEM_TESTS') === '1' ?
     200 : DB_SIZE_LIMIT
 }
 
-/**
- * requireScript, does just that, requires the passed in script as if it was a module.
- * @param script - string
- * @returns exports
- */
-const requireScript = (script: string) => {
-  const mod = new Module('id', module)
-
-  mod.filename = ''
-  // _compile is a private method
-  // @ts-expect-error
-  mod._compile(script, mod.filename)
-
-  module.children.splice(module.children.indexOf(mod), 1)
-
-  return mod.exports
-}
+type AppCaptureProtocolConstructor = new (options: ProtocolManagerOptions) => AppCaptureProtocolInterface
 
 export class ProtocolManager implements ProtocolManagerShape {
   private _runId?: string
   private _instanceId?: string
   private _db?: Database.Database
+  private _dbPath?: string
   private _archivePath?: string
   private _errors: ProtocolError[] = []
   private _protocol: AppCaptureProtocolInterface | undefined
@@ -61,23 +47,25 @@ export class ProtocolManager implements ProtocolManagerShape {
   private _afterSpecDurations: AfterSpecDurations & {
     afterSpecTotal: number
   } | undefined
+  private AppCaptureProtocol: AppCaptureProtocolConstructor | undefined
+  private options: ProtocolManagerOptions | undefined
 
-  get protocolEnabled (): boolean {
+  get isProtocolEnabled (): boolean {
     return !!this._protocol
   }
 
   get networkEnableOptions () {
-    return this.protocolEnabled ? {
+    return this.isProtocolEnabled ? {
       maxTotalBufferSize: 0,
       maxResourceBufferSize: 0,
       maxPostDataSize: 64 * 1024,
     } : undefined
   }
 
-  async setupProtocol (script: string, options: ProtocolManagerOptions) {
+  async prepareProtocol (script: string, options: ProtocolManagerOptions) {
     this._captureHash = base64url.fromBase64(crypto.createHash('SHA256').update(script).digest('base64'))
 
-    debug('setting up protocol via script')
+    debug('preparing protocol via script')
 
     try {
       this._runId = options.runId
@@ -86,15 +74,38 @@ export class ProtocolManager implements ProtocolManagerShape {
 
         await fs.ensureDir(cypressProtocolDirectory)
 
-        const { AppCaptureProtocol } = requireScript(script)
+        const { AppCaptureProtocol } = requireScript<{ AppCaptureProtocol: AppCaptureProtocolConstructor }>(script)
 
-        this._protocol = new AppCaptureProtocol(options)
+        this.AppCaptureProtocol = AppCaptureProtocol
+        this.options = options
       }
     } catch (error) {
       if (CAPTURE_ERRORS) {
         this._errors.push({
           error,
           args: [script],
+          captureMethod: 'prepareProtocol',
+          fatal: true,
+        })
+      } else {
+        throw error
+      }
+    }
+  }
+
+  setupProtocol () {
+    debug('setting up protocol')
+
+    try {
+      if (!this.AppCaptureProtocol || !this.options) {
+        throw new Error('Cannot setup protocol without a prepared protocol')
+      }
+
+      this._protocol = new this.AppCaptureProtocol(this.options)
+    } catch (error) {
+      if (CAPTURE_ERRORS) {
+        this._errors.push({
+          error,
           captureMethod: 'setupProtocol',
           fatal: true,
         })
@@ -102,6 +113,11 @@ export class ProtocolManager implements ProtocolManagerShape {
         throw error
       }
     }
+  }
+
+  async prepareAndSetupProtocol (script: string, options: ProtocolManagerOptions) {
+    await this.prepareProtocol(script, options)
+    this.setupProtocol()
   }
 
   async connectToBrowser (cdpClient: CDPClient) {
@@ -131,7 +147,7 @@ export class ProtocolManager implements ProtocolManagerShape {
     this.invokeSync('addRunnables', { isEssential: true }, runnables)
   }
 
-  beforeSpec (spec: { instanceId: string }) {
+  beforeSpec (spec: FoundSpec & { instanceId: string }) {
     this._afterSpecDurations = undefined
 
     if (!this._protocol) {
@@ -155,7 +171,7 @@ export class ProtocolManager implements ProtocolManagerShape {
     }
   }
 
-  private _beforeSpec (spec: { instanceId: string }) {
+  private _beforeSpec (spec: FoundSpec & { instanceId: string }) {
     this._instanceId = spec.instanceId
     const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
     const archivePath = path.join(cypressProtocolDirectory, `${spec.instanceId}.tar`)
@@ -169,8 +185,9 @@ export class ProtocolManager implements ProtocolManagerShape {
     })
 
     this._db = db
+    this._dbPath = dbPath
     this._archivePath = archivePath
-    this.invokeSync('beforeSpec', { isEssential: true }, { workingDirectory: cypressProtocolDirectory, archivePath, dbPath, db })
+    this.invokeSync('beforeSpec', { isEssential: true }, { workingDirectory: cypressProtocolDirectory, archivePath, dbPath, db, spec })
   }
 
   async afterSpec () {
@@ -320,7 +337,12 @@ export class ProtocolManager implements ProtocolManagerShape {
     debug(`uploading %s to %s with a file size of %s`, filePath, uploadUrl, fileSize)
 
     try {
-      await putProtocolArtifact(filePath, dbSizeLimit(), uploadUrl)
+      const environmentSuppliedInterval = parseInt(process.env.CYPRESS_TEST_REPLAY_UPLOAD_SAMPLING_INTERVAL || '', 10)
+      const samplingInterval = !Number.isNaN(environmentSuppliedInterval) ?
+        environmentSuppliedInterval :
+        this._protocol.uploadStallSamplingInterval ? this._protocol.uploadStallSamplingInterval() : DEFAULT_STREAM_SAMPLING_INTERVAL
+
+      await putProtocolArtifact(filePath, dbSizeLimit(), uploadUrl, samplingInterval)
 
       return {
         fileSize,
@@ -404,6 +426,27 @@ export class ProtocolManager implements ProtocolManagerShape {
     }
 
     this._errors = []
+  }
+
+  close (): void {
+    this._db?.close()
+    this._db = undefined
+
+    if (this._dbPath) {
+      fs.unlink(this._dbPath).catch(() => {})
+    }
+
+    this._dbPath = undefined
+
+    if (this._archivePath) {
+      fs.unlink(this._archivePath).catch(() => {})
+    }
+
+    this._archivePath = undefined
+    this._instanceId = undefined
+    this._runId = undefined
+    this._errors = []
+    this._protocol = undefined
   }
 
   /**

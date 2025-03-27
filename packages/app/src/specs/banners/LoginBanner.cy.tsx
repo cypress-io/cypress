@@ -1,3 +1,4 @@
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 import LoginBanner from './LoginBanner.vue'
 import { TrackedBanner_RecordBannerSeenDocument } from '../../generated/graphql'

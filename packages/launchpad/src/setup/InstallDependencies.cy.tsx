@@ -1,3 +1,4 @@
+// tslint:disable-next-line: no-implicit-dependencies - need to handle this
 import { defaultMessages } from '@cy/i18n'
 import InstallDependencies from './InstallDependencies.vue'
 import { InstallDependenciesFragmentDoc } from '../generated/graphql-test'
@@ -15,9 +16,13 @@ describe('<InstallDependencies />', () => {
       },
     })
 
-    cy.contains('a', 'react-scripts')
+    cy.contains('a', 'react')
     .should('be.visible')
-    .and('have.attr', 'href', 'https://www.npmjs.com/package/react-scripts')
+    .and('have.attr', 'href', 'https://www.npmjs.com/package/react')
+
+    cy.contains('a', 'react-dom')
+    .should('be.visible')
+    .and('have.attr', 'href', 'https://www.npmjs.com/package/react-dom')
 
     cy.contains('a', 'typescript')
     .should('be.visible')
@@ -65,10 +70,17 @@ describe('<InstallDependencies />', () => {
         gqlVal.wizard.packagesToInstall = [
           {
             __typename: 'WizardNpmPackage',
-            id: 'cra',
+            id: 'react',
             satisfied: true,
-            detectedVersion: '1.0.1',
-            ...wizardDeps.WIZARD_DEPENDENCY_REACT_SCRIPTS,
+            detectedVersion: '18.3.1',
+            ...wizardDeps.WIZARD_DEPENDENCY_REACT,
+          },
+          {
+            __typename: 'WizardNpmPackage',
+            id: 'react-dom',
+            satisfied: true,
+            detectedVersion: '18.3.1',
+            ...wizardDeps.WIZARD_DEPENDENCY_REACT_DOM,
           },
           {
             __typename: 'WizardNpmPackage',

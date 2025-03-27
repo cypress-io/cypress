@@ -1,7 +1,8 @@
 /// <reference types="cypress" />
 import { add } from './calc'
 
-describe('Code coverage', () => {
+// TODO: fix with https://github.com/cypress-io/cypress/issues/30706
+describe.skip('Code coverage', () => {
   it('has code coverage object', () => {
     // there is an object created by Istanbul plugin
     cy.wrap(window)

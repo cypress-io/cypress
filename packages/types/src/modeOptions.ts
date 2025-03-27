@@ -24,6 +24,7 @@ export interface RunModeOptions extends CommonModeOptions {
   parallel?: boolean | null
   ciBuildId?: string | null
   tag?: (string)[] | null
+  isBrowserGivenByCli: boolean
 }
 
 export type TestingType = 'e2e' | 'component'

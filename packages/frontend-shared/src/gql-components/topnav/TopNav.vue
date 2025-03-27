@@ -105,14 +105,14 @@
     v-if="props.gql?.currentProject?.activeBrowser && showBrowsers"
   >
     <template #heading="{ open }">
-      <img
+      <component
+        :is="allBrowsersIcons[props.gql.currentProject.activeBrowser.displayName?.toLowerCase()] || allBrowsersIcons.generic"
         v-if="props.gql?.currentProject?.activeBrowser?.displayName"
         class="w-[16px] filter group-hocus:grayscale-0"
         data-cy="top-nav-active-browser-icon"
         :alt="props.gql?.currentProject?.activeBrowser?.displayName"
         :class="open ? 'grayscale-0' : 'grayscale'"
-        :src="allBrowsersIcons[props.gql.currentProject.activeBrowser.displayName] || allBrowsersIcons.generic"
-      >
+      />
       <span
         data-cy="top-nav-active-browser"
         class="font-medium whitespace-nowrap"

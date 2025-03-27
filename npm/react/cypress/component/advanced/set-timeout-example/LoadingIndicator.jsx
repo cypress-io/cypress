@@ -1,37 +1,26 @@
-import React, { Component } from 'react'
-import PropTypes from 'prop-types'
+import React, { useState, useEffect } from 'react'
 
-export default class LoadingIndicator extends Component {
-  static propTypes = {
-    isLoading: PropTypes.bool.isRequired,
-  }
+export default function LoadingIndicator ({ isLoading, children }) {
+  const [isPastDelay, setIsPastDelay] = useState(false)
 
-  state = {
-    isPastDelay: false,
-  }
-
-  componentDidMount () {
-    console.log('component did mount')
-    this._delayTimer = setTimeout(() => {
+  useEffect(() => {
+    const _delayTimer = setTimeout(() => {
       console.log('2000ms passed')
-      this.setState({ isPastDelay: true })
+      setIsPastDelay(true)
     }, 2000)
-  }
 
-  componentWillUnmount () {
-    console.log('componentWillUnmount')
-    clearTimeout(this._delayTimer)
-  }
+    return () => {
+      clearTimeout(_delayTimer)
+    }
+  }, [])
 
-  render () {
-    if (this.props.isLoading) {
-      if (!this.state.isPastDelay) {
-        return null
-      }
-
-      return <div>loading...</div>
+  if (isLoading) {
+    if (!isPastDelay) {
+      return null
     }
 
-    return this.props.children
+    return <div>loading...</div>
   }
+
+  return children
 }

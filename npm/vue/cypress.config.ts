@@ -5,7 +5,6 @@ export default defineConfig({
   'viewportHeight': 500,
   'responseTimeout': 2500,
   'projectId': '134ej7',
-  'experimentalFetchPolyfill': true,
   'e2e': {
     'supportFile': false,
   },

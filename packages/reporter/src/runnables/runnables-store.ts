@@ -1,14 +1,17 @@
-import { TestFilter } from '@packages/types'
+import type { TestFilter } from '@packages/types'
 import _ from 'lodash'
-import { action, observable } from 'mobx'
-import AgentModel, { AgentProps } from '../agents/agent-model'
-import CommandModel, { CommandProps } from '../commands/command-model'
-import { HookProps } from '../hooks/hook-model'
+import { action, observable, makeObservable } from 'mobx'
+import type AgentModel from '../agents/agent-model'
+import type { AgentProps } from '../agents/agent-model'
+import type CommandModel from '../commands/command-model'
+import type { CommandProps } from '../commands/command-model'
+import type { HookProps } from '../hooks/hook-model'
 import appState, { AppState } from '../lib/app-state'
 import scroller, { Scroller } from '../lib/scroller'
-import RouteModel, { RouteProps } from '../routes/route-model'
+import type RouteModel from '../routes/route-model'
+import type { RouteProps } from '../routes/route-model'
 import TestModel, { TestProps, UpdatableTestProps, UpdateTestCallback } from '../test/test-model'
-import RunnableModel from './runnable-model'
+import type RunnableModel from './runnable-model'
 import SuiteModel, { SuiteProps } from './suite-model'
 
 const defaults = {
@@ -74,6 +77,7 @@ export class RunnablesStore {
   showingSnapshot = defaults.showingSnapshot
 
   constructor ({ appState, scroller }: Props) {
+    makeObservable(this)
     this.appState = appState
     this.scroller = scroller
   }

@@ -28,9 +28,9 @@ declare global {
   }
 }
 
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these tsconfig compiler paths
 import { initHighlighter } from '@cy/components/highlight'
 
 // Make sure highlighter is initialized before
 // we show any code to avoid jank at rendering
-// @ts-ignore
-initHighlighter()
+await initHighlighter()

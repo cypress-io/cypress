@@ -1,5 +1,6 @@
 import type { CloudRunInstance } from '@packages/data-context/src/gen/graphcache-config.gen'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import type { useI18n } from '@cy/i18n'
 import { DEBUG_TAB_MEDIUM } from './constants'
 

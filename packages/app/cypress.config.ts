@@ -26,9 +26,13 @@ export default defineConfig({
       framework: 'vue',
     },
   },
+  hosts: {
+    'foobar.com': '127.0.0.1',
+  },
   'e2e': {
     experimentalRunAllSpecs: true,
     experimentalStudio: true,
+    experimentalOriginDependencies: true,
     baseUrl: 'http://localhost:5555',
     supportFile: 'cypress/e2e/support/e2eSupport.ts',
     async setupNodeEvents (on, config) {

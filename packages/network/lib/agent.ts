@@ -223,9 +223,7 @@ export class CombinedAgent {
       }) + options.path
     }
 
-    if (!options.uri) {
-      options.uri = url.parse(options.href)
-    }
+    const uri = options.uri = options.uri ?? url.parse(options.href)
 
     debug('addRequest called %o', { isHttps, ..._.pick(options, 'href') })
 
@@ -235,12 +233,12 @@ export class CombinedAgent {
       debug('got family %o', _.pick(options, 'family', 'href'))
 
       if (isHttps) {
-        _.assign(options, clientCertificateStore.getClientCertificateAgentOptionsForUrl(options.uri))
+        _.assign(options, clientCertificateStore.getClientCertificateAgentOptionsForUrl(uri))
 
         return this.httpsAgent.addRequest(req, options as https.RequestOptions)
       }
 
-      this.httpAgent.addRequest(req, options)
+      return this.httpAgent.addRequest(req, options)
     })
   }
 }
@@ -325,20 +323,24 @@ class HttpsAgent extends https.Agent {
     super(opts)
   }
 
-  addRequest (req: http.ClientRequest, options: https.RequestOptions) {
+  async addRequest (req: http.ClientRequest, options: https.RequestOptions) {
     // Ensure we have a proper port defined otherwise node has assumed we are port 80
     // (https://github.com/nodejs/node/blob/master/lib/_http_client.js#L164) since we are a combined agent
     // rather than an http or https agent. This will cause issues with fetch requests (@cypress/request already handles it:
     // https://github.com/cypress-io/request/blob/master/request.js#L301-L303)
-    if (!options.uri.port && options.uri.protocol === 'https:') {
-      options.uri.port = String(443)
+    if (!options?.uri?.port && options?.uri?.protocol === 'https:') {
+      options.uri = {
+        ...options.uri,
+        port: String(443),
+      }
+
       options.port = 443
     }
 
     if (baseCaOptions) {
       super.addRequest(req, mergeCAOptions(options, baseCaOptions))
     } else {
-      baseCaOptionsPromise.then((caOptions) => {
+      await baseCaOptionsPromise.then((caOptions) => {
         super.addRequest(req, mergeCAOptions(options, caOptions))
       })
     }
@@ -365,8 +367,8 @@ class HttpsAgent extends https.Agent {
     debug(`Creating proxied socket for ${options.href} through ${options.proxy}`)
 
     const proxy = url.parse(options.proxy)
-    const port = options.uri.port || '443'
-    const hostname = options.uri.hostname || 'localhost'
+    const port = options.uri?.port || '443'
+    const hostname = options.uri?.hostname || 'localhost'
 
     createProxySock({ proxy, shouldRetry: options.shouldRetry }, (originalErr?, proxySocket?, triggerRetry?) => {
       if (originalErr) {
@@ -441,3 +443,7 @@ class HttpsAgent extends https.Agent {
 const agent = new CombinedAgent()
 
 export default agent
+
+export const httpsAgent = new HttpsAgent()
+
+export const httpAgent = new HttpAgent()

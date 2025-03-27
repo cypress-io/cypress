@@ -1,8 +1,10 @@
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these tsconfig compiler paths
 import { defaultMessages } from '@cy/i18n'
 import { registerMountFn, addVueCommand } from './common'
 import '../../src/styles/shared.scss'
 import 'tailwindcss/tailwind.css'
 import 'cypress-real-events/support'
+import './browserIconCommands'
 import { installCustomPercyCommand } from './customPercyCommand'
 import { addNetworkCommands } from './onlineNetwork'
 import { GQLStubRegistry } from './mock-graphql/stubgql-Registry'

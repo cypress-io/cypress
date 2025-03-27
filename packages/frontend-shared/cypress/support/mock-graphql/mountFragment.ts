@@ -2,7 +2,9 @@ import type { ClientTestContext } from './clientTestContext'
 import { makeClientTestContext } from './clientTestContext'
 import '@testing-library/cypress/add-commands'
 import type { MountingOptions } from '@vue/test-utils'
+// tslint:disable-next-line: no-implicit-dependencies - requires cypress
 import type { CyMountOptions } from 'cypress/vue'
+// tslint:disable-next-line: no-implicit-dependencies - requires cypress
 import { mount } from 'cypress/vue'
 import urql, { useQuery } from '@urql/vue'
 import type { TypedDocumentNode } from '@urql/vue'
@@ -13,6 +15,7 @@ import type { MutationResolverCallback as MutationResolver } from './clientTestU
 import type { Component } from 'vue'
 import { computed, watch, defineComponent, h, toRaw } from 'vue'
 import { each } from 'lodash'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these tsconfig compiler paths
 import { createI18n } from '@cy/i18n'
 import type { ResultOf, VariablesOf } from '@graphql-typed-document-node/core'
 import { getOperationNameFromDocument } from './clientTestUtils'

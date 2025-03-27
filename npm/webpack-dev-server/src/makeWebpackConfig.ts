@@ -75,14 +75,17 @@ export async function makeWebpackConfig (
 ) {
   let userWebpackConfig = config.devServerConfig.webpackConfig
   const frameworkWebpackConfig = config.frameworkConfig as Partial<Configuration>
+
   const {
     cypressConfig: {
       projectRoot,
       supportFile,
+      justInTimeCompile,
     },
-    specs: files,
     framework,
   } = config.devServerConfig
+
+  config.devServerConfig.specs = justInTimeCompile ? [] : config.devServerConfig.specs
 
   if (!userWebpackConfig && !frameworkWebpackConfig) {
     debug('Not user or framework webpack config received. Trying to automatically source it')
@@ -121,7 +124,7 @@ export async function makeWebpackConfig (
   )
 
   debug(`User passed in user and framework webpack config with values %o`, userAndFrameworkWebpackConfig)
-  debug(`New webpack entries %o`, files)
+  debug(`New webpack entries %o`, config.devServerConfig.specs)
   debug(`Project root`, projectRoot)
   debug(`Support file`, supportFile)
 

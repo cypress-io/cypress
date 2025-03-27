@@ -5,7 +5,6 @@ module.exports = {
   'env': {
     'reactDevtools': true,
   },
-  'experimentalFetchPolyfill': true,
   'component': {
     experimentalSingleTabRunMode: true,
     'excludeSpecPattern': [

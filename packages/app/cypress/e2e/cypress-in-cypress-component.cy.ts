@@ -19,25 +19,19 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
 
-      cy.findByTestId('aut-url').should('not.exist')
+      cy.findByTestId('aut-url-input').should('be.disabled')
       cy.findByTestId('select-browser').click()
 
       cy.contains('Canary').should('be.visible')
-      cy.findByTestId('viewport').click()
-
       // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
       // snapshotAUTPanel('browsers open')
-      cy.contains('Canary').should('be.hidden')
-      cy.contains('The viewport determines the width and height of your application under test. By default the viewport will be 500px by 500px for component testing.')
-      .should('be.visible')
-
-      // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
-      // snapshotAUTPanel('viewport info open')
+      cy.findByTestId('viewport-size').should('be.visible')
 
       cy.get('body').click()
 
       cy.findByTestId('playground-activator').click()
-      cy.findByTestId('playground-selector').clear().type('[data-cy-root]')
+      cy.findByTestId('playground-selector').clear()
+      cy.findByTestId('playground-selector').type('[data-cy-root]')
 
       // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
       // snapshotAUTPanel('cy.get selector')
@@ -61,6 +55,8 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
 
       // Temporarily removed from CT since it doesn't work. Invert this assertion when completing https://github.com/cypress-io/cypress/issues/24549
       cy.get('.hook-open-in-ide').should('not.exist')
+
+      cy.get('#unified-runner').should('have.attr', 'style', 'width: 500px; height: 500px; transform: scale(1); position: absolute; margin-left: 225px;')
     })
 
     it('navigation between specs and other parts of the app works', () => {

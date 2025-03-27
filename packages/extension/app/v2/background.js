@@ -31,6 +31,23 @@ const checkIfFirefox = async () => {
   return name === 'Firefox'
 }
 
+// this check only applies to firefox versioning!
+const isBiDiEnabled = async (config) => {
+  if (!browser || !get(browser, 'runtime.getBrowserInfo') || config.IS_CDP_FORCED_FOR_FIREFOX) {
+    return false
+  }
+
+  const { version } = await browser.runtime.getBrowserInfo()
+
+  if (version) {
+    const [majorVersion] = version.split('.').map(Number)
+
+    return majorVersion >= 135
+  }
+
+  return false
+}
+
 const connect = function (host, path, extraOpts) {
   const listenToCookieChanges = once(() => {
     return browser.cookies.onChanged.addListener((info) => {
@@ -147,10 +164,16 @@ const connect = function (host, path, extraOpts) {
     const isFirefox = await checkIfFirefox()
 
     listenToCookieChanges()
-    // Non-Firefox browsers use CDP for these instead
     if (isFirefox) {
+      // Non-Firefox browsers use CDP for this instead
       listenToDownloads()
-      listenToOnBeforeHeaders()
+      // if BiDi is enabled, BiDi will handle the network interception.
+      // Otherwise, CDP does not support it for Firefox and we need to listen for it here.
+      const isBiDiTurnedOn = await isBiDiEnabled(config)
+
+      if (!isBiDiTurnedOn) {
+        listenToOnBeforeHeaders()
+      }
     }
   })
 
@@ -293,6 +316,7 @@ const automation = {
       for (const window of windows) {
         // remove/close the window if it's not the current window
         if (window.id !== currentWindowInfo.id) {
+          // tslint:disable-next-line:no-empty
           await browser.windows.remove(window.id).catch(() => {})
         }
       }
@@ -308,8 +332,9 @@ const automation = {
         const newAboutBlankTab = await browser.tabs.create({ url: 'about:blank', active: false })
 
         newTabId = newAboutBlankTab.id
-      // eslint-disable-next-line no-empty
-      } catch (e) {}
+      } catch (e) {
+        undefined
+      }
 
       return browser.tabs.remove(currentWindowInfo.tabs.map((tab) => tab.id).filter((tab) => tab.id !== newTabId))
     }).then(callback)

@@ -1,4 +1,5 @@
 import SettingsCard from './SettingsCard.vue'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import IconLaptop from '~icons/mdi/laptop'
 
 describe('<SettingsCard />', () => {

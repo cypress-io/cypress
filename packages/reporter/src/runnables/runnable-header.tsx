@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react'
 import React, { Component, ReactElement } from 'react'
 
-import { StatsStore } from '../header/stats-store'
+import type { StatsStore } from '../header/stats-store'
 import { formatDuration, getFilenameParts } from '../lib/util'
 import FileNameOpener from '../lib/file-name-opener'
 

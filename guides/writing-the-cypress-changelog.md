@@ -57,4 +57,4 @@ At the time of the release, the releaser will:
 - ensure the change sections are in the correct order
 - ensure that the entries are ordered by impact
 
-Each Cypress release results in an update to the [changelog.mdx](https://github.com/cypress-io/cypress-documentation/blob/main/docs/guides/references/changelog.mdx) file in the [cypress-documentation](https://github.com/cypress-io/cypress-documentation) repository to be published on the [doc site](https://docs.cypress.io/guides/references/changelog). See [Example pull request](https://github.com/cypress-io/cypress-documentation/pull/5874) adding a new changelog section to the repository.
+Each Cypress release results in an update to the [changelog.mdx](https://github.com/cypress-io/cypress-documentation/blob/main/docs/app/references/changelog.mdx) file in the [cypress-documentation](https://github.com/cypress-io/cypress-documentation) repository to be published on the [doc site](https://docs.cypress.io/guides/references/changelog). See [Example pull request](https://github.com/cypress-io/cypress-documentation/pull/5965) adding a new changelog section to the repository.

@@ -8,28 +8,14 @@ import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
 import $Keyboard from '../../../cy/keyboard'
-import type { Log } from '../../../cypress/log'
 
 import debugFn from 'debug'
 const debug = debugFn('cypress:driver:command:type')
 
-interface InternalTypeOptions extends Partial<Cypress.TypeOptions> {
-  _log?: Log
-  $el: JQuery
-  ensure?: object
-  verify: boolean
-  interval?: number
-}
-
-interface InternalClearOptions extends Partial<Cypress.ClearOptions> {
-  _log?: Log
-  ensure?: object
-}
-
 export default function (Commands, Cypress, cy, state, config) {
   const { keyboard } = cy.devices
 
-  function type (subject, chars, userOptions: Partial<Cypress.TypeOptions> = {}) {
+  function type (subject: any, chars: any, userOptions: Partial<InternalTypeOptions> = {}) {
     let updateTable
 
     // allow the el we're typing into to be
@@ -192,6 +178,7 @@ export default function (Commands, Cypress, cy, state, config) {
       const isFirefoxBefore91 = Cypress.isBrowser('firefox') && Cypress.browserMajorVersion() < 91
       const isFirefoxBefore98 = Cypress.isBrowser('firefox') && Cypress.browserMajorVersion() < 98
       const isFirefox106OrLater = Cypress.isBrowser('firefox') && Cypress.browserMajorVersion() >= 106
+      const isFirefox129OrLater = Cypress.isBrowser('firefox') && Cypress.browserMajorVersion() >= 129
 
       const simulateSubmitHandler = function () {
         const form = options.$el.parents('form')
@@ -385,9 +372,9 @@ export default function (Commands, Cypress, cy, state, config) {
 
             keydownEvents = []
 
-            // After Firefox 98,
+            // After Firefox 98 and before 129
             // Firefox doesn't update checkbox automatically even if the click event is sent.
-            if (Cypress.isBrowser('firefox')) {
+            if (Cypress.isBrowser('firefox') && !isFirefox129OrLater) {
               if (event.target.type === 'checkbox') {
                 event.target.checked = !event.target.checked
               } else if (event.target.type === 'radio') { // when checked is false, here cannot be reached because of the above condition
@@ -604,7 +591,7 @@ export default function (Commands, Cypress, cy, state, config) {
     })
   }
 
-  function clear (subject, userOptions: Partial<Cypress.ClearOptions> = {}) {
+  function clear (subject, userOptions: Partial<InternalClearOptions> = {}) {
     const options: InternalClearOptions = _.defaults({}, userOptions, {
       log: true,
       force: false,

@@ -15,7 +15,7 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
     })
 
     cy.findByRole('button', {
-      name: 'Front-end framework Pick a framework',
+      name: 'Pick a framework',
       expanded: false,
     })
     .should('have.attr', 'aria-haspopup', 'true')
@@ -23,7 +23,7 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
     .should('have.attr', 'aria-expanded', 'true')
 
     cy.get('li').spread(($firstLi, $secondLi) => {
-      cy.wrap($firstLi).should('contain', 'Create React App (v5) Support is in  Alpha')
+      cy.wrap($firstLi).should('contain', 'React.js')
       cy.wrap($firstLi).find('svg').should('have.attr', 'data-cy', 'react-logo')
 
       cy.wrap($secondLi).should('contain', 'Vue.js (v3)')
@@ -55,11 +55,11 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
     })
 
     cy.findByRole('button', {
-      name: 'Front-end framework Pick a framework',
+      name: 'Pick a framework',
       expanded: false,
     }).click()
 
-    cy.findByRole('option', { name: 'Create React App (v5) Support is in Alpha (detected)' }).should('be.visible').click()
+    cy.findByRole('option', { name: 'React.js (detected)' }).should('be.visible').click()
   })
 
   it('shows the description of bundler', () => {
@@ -80,7 +80,6 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
       ),
     })
 
-    cy.findByLabelText('Bundler').should('be.visible')
     cy.findByLabelText('Pick a bundler').should('be.visible')
   })
 

@@ -62,7 +62,7 @@ module.exports = {
 
         assertLoadingIntoErrorWorks('SyntaxError')
         cy.contains('Your configFile is invalid').should('be.visible')
-        cy.contains('Unexpected token \',\'').should('be.visible')
+        cy.contains('Unexpected token \',\'').scrollIntoView().should('be.visible')
         cy.withCtx(async (ctx) => {
           await ctx.actions.file.writeFileInProject('cypress.config.js',
 `   

@@ -1,7 +1,11 @@
 import Card from './Card.vue'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these module imports
 import IconE2E from '~icons/cy/testing-type-e2e_x64.svg'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these module imports
 import IconE2ESolid from '~icons/cy/testing-type-e2e-solid_x64.svg'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these module imports
 import IconComponent from '~icons/cy/testing-type-component_x64.svg'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these module imports
 import IconComponentSolid from '~icons/cy/testing-type-component-solid_x64.svg'
 
 describe('Card', { viewportHeight: 400 }, () => {

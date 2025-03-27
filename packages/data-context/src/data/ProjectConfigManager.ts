@@ -1,5 +1,5 @@
 import { CypressError, getError } from '@packages/errors'
-import { IpcHandler, LoadConfigReply, ProjectConfigIpc, SetupNodeEventsReply } from './ProjectConfigIpc'
+import { DebugData, IpcHandler, LoadConfigReply, ProjectConfigIpc, SetupNodeEventsReply } from './ProjectConfigIpc'
 import assert from 'assert'
 import type { AllModeOptions, FullConfig, TestingType } from '@packages/types'
 import debugLib from 'debug'
@@ -57,6 +57,7 @@ export class ProjectConfigManager {
   private _loadConfigPromise: Promise<LoadConfigReply> | undefined
   private _cachedLoadConfig: LoadConfigReply | undefined
   private _cypressEnv: CypressEnv
+  private _debugData: DebugData
 
   constructor (private options: ProjectConfigManagerOptions) {
     this._cypressEnv = new CypressEnv({
@@ -66,7 +67,13 @@ export class ProjectConfigManager {
       },
     })
 
+    this._debugData = {}
+
     return autoBindDebug(this)
+  }
+
+  get debugData () {
+    return this._debugData
   }
 
   get isLoadingNodeEvents () {
@@ -192,7 +199,7 @@ export class ProjectConfigManager {
     const bundler = WIZARD_BUNDLERS.find((x) => x.type === devServerOptions.bundler)
 
     // Use a map since sometimes the same dependency can appear in `bundler` and `framework`,
-    // for example webpack appears in both `bundler: 'webpack', framework: 'react-scripts'`
+    // for example webpack appears in both `bundler: 'webpack', framework: 'next.js'`
     const unsupportedDeps = new Map<Cypress.DependencyToInstall['dependency']['type'], Cypress.DependencyToInstall>()
 
     if (!bundler) {
@@ -372,6 +379,12 @@ export class ProjectConfigManager {
           this.options.ctx.onError(cypressError, title)
         },
         this.options.ctx.onWarning,
+        (debugData: DebugData) => {
+          this._debugData = {
+            ...this._debugData,
+            ...debugData,
+          }
+        },
       )
 
       this._loadConfigPromise = this._eventsIpc.loadConfig()

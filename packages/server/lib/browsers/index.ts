@@ -147,6 +147,12 @@ export = {
     await browserLauncher.connectProtocolToBrowser(options)
   },
 
+  async closeProtocolConnection (options: { browser: Browser, foundBrowsers?: FoundBrowser[] }) {
+    const browserLauncher = await getBrowserLauncher(options.browser, options.foundBrowsers || [])
+
+    await browserLauncher.closeProtocolConnection()
+  },
+
   async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation, cdpSocketServer?: CDPSocketServer): Promise<BrowserInstance | null> {
     const browserLauncher = await getBrowserLauncher(browser, options.browsers)
 

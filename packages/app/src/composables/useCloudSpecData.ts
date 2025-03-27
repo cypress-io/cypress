@@ -105,8 +105,8 @@ export function useCloudSpecData (
   */
   watch(
     [debouncedDisplayedSpecIds, isOffline, isProjectDisconnected, mostRecentUpdate],
-    () => {
-      fetchDisplayedCloudData()
+    async () => {
+      await fetchDisplayedCloudData()
     },
     { flush: 'post' },
   )

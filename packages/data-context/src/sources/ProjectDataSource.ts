@@ -382,22 +382,9 @@ export class ProjectDataSource {
         additionalIgnorePattern,
       })
 
-      try {
-        const config = await this.ctx.project.getConfig()
-
-        // If running the experimentalJustInTimeCompile for CT,
-        // ignore this watcher since we only handle one spec at a time and do not need to recompile any time the file system changes.
-        if (config.experimentalJustInTimeCompile && testingType === 'component') {
-          this.ctx.actions.project.refreshSpecs(specs)
-
-          // If no differences are found, we do not need to emit events
-          return
-        }
-      } catch (e) {
-        // for cy-in-cy tests the config is the second instance of cypress isn't considered initialized yet.
-        // in this case since we only need it for experimental JIT in open mode, swallow the error
-      }
-
+      // with JIT, since we are unable to deterministically determine the dev-server in use, the test will recompile
+      // any time the spec directory has contents added/removed. This means a recompile when it is not needed, but this should
+      // only be applicable in open mode and seldomly experienced.
       if (_.isEqual(this.specs, specs)) {
         this.ctx.actions.project.refreshSpecs(specs)
 

@@ -83,14 +83,14 @@ export const bindToListeners = (contentWindow, callbacks: BoundCallbacks) => {
     callbacks.onLoad(e)
   })
 
-  addListener(contentWindow, 'beforeunload', (e) => {
+  addListener(contentWindow, 'beforeunload', async (e) => {
     // bail if we've canceled this event (from another source)
     // or we've set a returnValue on the original event
     if (e.defaultPrevented || eventHasReturnValue(e)) {
       return
     }
 
-    callbacks.onBeforeUnload(e)
+    await callbacks.onBeforeUnload(e)
   })
 
   // While we must move to pagehide for Chromium, it does not work for our

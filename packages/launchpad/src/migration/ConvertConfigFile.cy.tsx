@@ -1,3 +1,4 @@
+// tslint:disable-next-line: no-implicit-dependencies - need to handle this
 import { defaultMessages } from '@cy/i18n'
 import { ConvertConfigFileFragmentDoc } from '../generated/graphql-test'
 import ConvertConfigFile from './ConvertConfigFile.vue'

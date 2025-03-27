@@ -1,3 +1,43 @@
+# [@cypress/vite-dev-server-v6.0.3](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v6.0.2...@cypress/vite-dev-server-v6.0.3) (2025-03-25)
+
+# [@cypress/vite-dev-server-v6.0.2](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v6.0.1...@cypress/vite-dev-server-v6.0.2) (2025-01-27)
+
+
+### Bug Fixes
+
+* avoid source map plugin from replacing valid code ([#30890](https://github.com/cypress-io/cypress/issues/30890)) ([3149a8f](https://github.com/cypress-io/cypress/commit/3149a8f1841c59e9578958c181b66ec39a27ea37))
+
+# [@cypress/vite-dev-server-v6.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v6.0.0...@cypress/vite-dev-server-v6.0.1) (2025-01-15)
+
+
+### Bug Fixes
+
+* add cypress 14 as a peer dependency for vite-dev-server ([#30857](https://github.com/cypress-io/cypress/issues/30857)) ([107d3ed](https://github.com/cypress-io/cypress/commit/107d3eda5e71029d879f5d21289c0aca16af3091))
+
+# [@cypress/vite-dev-server-v6.0.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v5.2.1...@cypress/vite-dev-server-v6.0.0) (2025-01-08)
+
+
+### breaking
+
+* release version 6.0.0 of @cypress/vite-dev-server. ([dd21af5](https://github.com/cypress-io/cypress/commit/dd21af581240dcd2f2b0d5663c75e018864f888e))
+
+
+### Features
+
+* component testing now supports vite 6 [run ci] ([#30679](https://github.com/cypress-io/cypress/issues/30679)) ([4efd932](https://github.com/cypress-io/cypress/commit/4efd932eac4a0936d67fe8f62add1d81b92e0121))
+
+
+### BREAKING CHANGES
+
+* Cypress 14 drops support forVite 2-3. Vite 4 and up is supported.
+
+# [@cypress/vite-dev-server-v5.2.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v5.2.0...@cypress/vite-dev-server-v5.2.1) (2024-11-19)
+
+
+### Bug Fixes
+
+* ensure that each js file served up by vite dev server has an inline sourcemap ([#30606](https://github.com/cypress-io/cypress/issues/30606)) ([4bf8e58](https://github.com/cypress-io/cypress/commit/4bf8e585cd68e0f5bb879a960073ed30791ebc37))
+
 # [@cypress/vite-dev-server-v5.2.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v5.1.1...@cypress/vite-dev-server-v5.2.0) (2024-08-27)
 
 

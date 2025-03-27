@@ -1,6 +1,8 @@
 import Input from './Input.vue'
 import { ref } from 'vue'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these module imports
 import CoffeeIcon from '~icons/mdi/coffee'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these module imports
 import LoadingIcon from '~icons/mdi/loading'
 
 describe('<Input/>', { viewportWidth: 400, viewportHeight: 80 }, () => {
@@ -9,7 +11,7 @@ describe('<Input/>', { viewportWidth: 400, viewportHeight: 80 }, () => {
     const textToType = 'My wonderful input text'
 
     // @ts-ignore = vModel is v-model in vue
-    cy.mount(() => <Input vModel={value.value}/>)
+    cy.mount(() => <Input vModel={value.value} aria-label="status"/>)
     cy.get('input').type(textToType, { delay: 0 })
 
     cy.should(() => {
@@ -40,7 +42,7 @@ describe('<Input/>', { viewportWidth: 400, viewportHeight: 80 }, () => {
     const value = ref('')
 
     // @ts-ignore = vModel is v-model in vue
-    cy.mount(() => <Input vModel={value.value}/>)
+    cy.mount(() => <Input vModel={value.value} aria-label="status"/>)
     cy.get('input').should('have.attr', 'autocomplete', 'off')
   })
 })

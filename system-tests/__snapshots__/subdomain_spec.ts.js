@@ -1,4 +1,4 @@
-exports['e2e subdomain / passes'] = `
+exports['e2e subdomain w/ cy.origin and injectDocumentDomain disabled / passes'] = `
 
 ====================================================================================================
 
@@ -7,19 +7,19 @@ exports['e2e subdomain / passes'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (subdomain.cy.js)                                                          │
-  │ Searched:   cypress/e2e/subdomain.cy.js                                                        │
+  │ Specs:      1 found (subdomain_origin.cy.js)                                                   │
+  │ Searched:   cypress/e2e/subdomain_origin.cy.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  subdomain.cy.js                                                                 (1 of 1)
+  Running:  subdomain_origin.cy.js                                                          (1 of 1)
 
 
   subdomains
     ✓ can swap to help.foobar.com:2292
-    ✓ can directly visit a subdomain in another test
+    ✓ can visit a subdomain in another test with cy.origin
     ✓ issue: #207: does not duplicate or hostOnly cookies as a domain cookie
     ✓ correctly sets domain based cookies
     ✓ does not set domain based (non hostOnly) cookies by default
@@ -43,7 +43,7 @@ exports['e2e subdomain / passes'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     subdomain.cy.js                                                                  │
+  │ Spec Ran:     subdomain_origin.cy.js                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -54,7 +54,7 @@ exports['e2e subdomain / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  subdomain.cy.js                          XX:XX        9        9        -        -        - │
+  │ ✔  subdomain_origin.cy.js                   XX:XX        9        9        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        9        9        -        -        -  
 

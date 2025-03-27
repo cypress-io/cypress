@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import type { AutSnapshot } from './iframe-model'
 import type { AutIframe } from './aut-iframe'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 
 interface SnapshotStoreState {

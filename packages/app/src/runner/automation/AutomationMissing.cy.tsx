@@ -1,6 +1,6 @@
-import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import { AutomationMissingFragmentDoc, VerticalBrowserListItems_SetBrowserDocument } from '../../generated/graphql-test'
 import AutomationMissing from './AutomationMissing.vue'
+import { cyGeneralGlobeX16 } from '@cypress-design/icon-registry'
 
 describe('AutomationMissing', () => {
   it('should render', () => {
@@ -50,7 +50,21 @@ describe('AutomationMissing', () => {
       },
     })
 
-    cy.get('[data-cy="select-browser"] > button img').should('have.attr', 'src', allBrowsersIcons.generic)
+    cy.get('[data-cy="select-browser"] > button svg').eq(0).children().verifyBrowserIconSvg(cyGeneralGlobeX16.data)
+    cy.percySnapshot()
+  })
+
+  it('browser dropdown displays on click', () => {
+    cy.mountFragment(AutomationMissingFragmentDoc, {
+      render (gql) {
+        return (<AutomationMissing gql={gql} />)
+      },
+    })
+
+    cy.get('[data-cy="select-browser"]').click()
+    cy.contains('li', 'Chrome').should('be.visible')
+    cy.contains('li', 'Version 80').should('be.visible')
+    cy.get('[data-browser-id=1]').contains('Electron').should('be.visible')
     cy.percySnapshot()
   })
 })

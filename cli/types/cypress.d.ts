@@ -70,18 +70,10 @@ declare namespace Cypress {
     strategy: 'file' | 'http'
     origin: string
     fileServer: string | null
-    props: Record<string, any>
-    visiting: string
+    props: Record<string, any> | null
   }
 
   interface Backend {
-    /**
-     * Firefox only: Force Cypress to run garbage collection routines.
-     * No-op if not running in Firefox.
-     *
-     * @see https://on.cypress.io/firefox-gc-issue
-     */
-    (task: 'firefox:force:gc'): Promise<void>
     (task: 'net', eventName: string, frame: any): Promise<void>
   }
 
@@ -125,11 +117,7 @@ declare namespace Cypress {
      */
     warning?: string
     /**
-     * The minimum majorVersion of this browser supported by Cypress.
-     */
-    minSupportedVersion?: number
-    /**
-     * If `true`, this browser is too old to be supported by Cypress.
+     * If `true`, this browser version is not supported in Cypress.
      */
     unsupportedVersion?: boolean
   }
@@ -582,6 +570,14 @@ declare namespace Cypress {
      */
     log(options: Partial<LogConfig>): Log
 
+    /**
+     * Stop the Cypress App on the current machine while tests are running
+     * @see https://on.cypress.io/cypress-stop
+     * @example
+     *    Cypress.stop()
+     */
+    stop(): void
+
     Commands: {
       /**
        * Add a custom command
@@ -768,8 +764,10 @@ declare namespace Cypress {
       getCoordsByPosition(left: number, top: number, xPosition?: string, yPosition?: string): number
       getElementPositioning(element: JQuery | HTMLElement): ElementPositioning
       getElementAtPointFromViewport(doc: Document, x: number, y: number): Element | null
-      getElementCoordinatesByPosition(element: JQuery | HTMLElement, position: string): ElementCoordinates
+      getElementCoordinatesByPosition(element: JQuery | HTMLElement, position?: string): ElementCoordinates
       getElementCoordinatesByPositionRelativeToXY(element: JQuery | HTMLElement, x: number, y: number): ElementPositioning
+      getHostContenteditable(element: HTMLElement): HTMLElement
+      getSelectionBounds(element: HTMLElement): { start: number, end: number }
     }
 
     /**
@@ -886,7 +884,7 @@ declare namespace Cypress {
      *    // Check first radio element
      *    cy.get('[type="radio"]').first().check()
      */
-    check(options?: Partial<CheckOptions>): Chainable<Subject>
+    check(options?: Partial<CheckClearOptions>): Chainable<Subject>
     /**
      * Check checkbox(es) or radio(s). This element must be an `<input>` with type `checkbox` or `radio`.
      *
@@ -897,7 +895,7 @@ declare namespace Cypress {
      *    // Check the checkboxes with the values 'ga' and 'ca'
      *    cy.get('[type="checkbox"]').check(['ga', 'ca'])
      */
-    check(value: string | string[], options?: Partial<CheckOptions>): Chainable<Subject>
+    check(value: string | string[], options?: Partial<CheckClearOptions>): Chainable<Subject>
 
     /**
      * Get the children of each DOM element within a set of DOM elements.
@@ -914,7 +912,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/clear
      */
-    clear(options?: Partial<ClearOptions>): Chainable<Subject>
+    clear(options?: Partial<CheckClearOptions>): Chainable<Subject>
 
     /**
      * Clear a specific browser cookie for a domain.
@@ -1818,7 +1816,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/readfile
      */
-    readFile<Contents = any>(filePath: string, options?: Partial<Loggable & Timeoutable>): Chainable<Contents>
+    readFile<Contents = any>(filePath: string, options?: Partial<ReadFileOptions & Loggable & Timeoutable>): Chainable<Contents>
     /**
      * Read a file with given encoding and yield its contents.
      *
@@ -1908,7 +1906,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/root
      */
-    root<E extends Node = HTMLHtmlElement>(options?: Partial<Loggable>): Chainable<JQuery<E>> // can't do better typing unless we ignore the `.within()` case
+    root<E extends Node = HTMLHtmlElement>(options?: Partial<LogTimeoutOptions>): Chainable<JQuery<E>> // can't do better typing unless we ignore the `.within()` case
 
     /**
      * Take a screenshot of the application under test and the Cypress Command Log.
@@ -1942,7 +1940,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/scrollto
      */
-    scrollTo(position: PositionType, options?: Partial<ScrollToOptions>): Chainable<Subject>
+    scrollTo(positionOrX: PositionType | number | string, options?: Partial<ScrollToOptions>): Chainable<Subject>
     /**
      * Scroll to a specific X,Y position.
      *
@@ -1989,6 +1987,18 @@ declare namespace Cypress {
      * @see https://on.cypress.io/shadow
      */
     shadow(): Chainable<Subject>
+
+      /**
+     * Traverse into an element's shadow root.
+     *
+     * @example
+     *    cy.get('my-component')
+     *    .shadow({ timeout: 10000, log: false })
+     *    .find('.my-button')
+     *    .click()
+     * @see https://on.cypress.io/shadow
+     */
+    shadow(options?: Partial<LogTimeoutOptions>): Chainable<Subject>
 
     /**
      * Create an assertion. Assertions are automatically retried until they pass or time out.
@@ -2338,7 +2348,7 @@ declare namespace Cypress {
      *    // Uncheck the checkbox with the value of 'ga'
      *    cy.get('input[type="checkbox"]').uncheck(['ga'])
      */
-    uncheck(options?: Partial<CheckOptions>): Chainable<Subject>
+    uncheck(options?: Partial<CheckClearOptions>): Chainable<Subject>
     /**
      * Uncheck specific checkbox.
      *
@@ -2347,7 +2357,7 @@ declare namespace Cypress {
      *    // Uncheck the checkbox with the value of 'ga'
      *    cy.get('input[type="checkbox"]').uncheck('ga')
      */
-    uncheck(value: string, options?: Partial<CheckOptions>): Chainable<Subject>
+    uncheck(value: string, options?: Partial<CheckClearOptions>): Chainable<Subject>
     /**
      * Uncheck specific checkboxes.
      *
@@ -2356,7 +2366,7 @@ declare namespace Cypress {
      *    // Uncheck the checkbox with the value of 'ga', 'ma'
      *    cy.get('input[type="checkbox"]').uncheck(['ga', 'ma'])
      */
-    uncheck(values: string[], options?: Partial<CheckOptions>): Chainable<Subject>
+    uncheck(values: string[], options?: Partial<CheckClearOptions>): Chainable<Subject>
 
     /**
      * Get the current URL of the page that is currently active.
@@ -2568,6 +2578,10 @@ declare namespace Cypress {
      *    expect(s).to.have.been.calledOnce
      */
     withArgs(...args: any[]): Omit<A, 'withArgs'> & Agent<A>
+
+    callsFake(func: (...args: any[]) => any): Agent<A>
+
+    callThroughWithNew(): Agent<A>
   }
 
   type Agent<T extends sinon.SinonSpy> = SinonSpyAgent<T> & T
@@ -2738,14 +2752,9 @@ declare namespace Cypress {
 
   interface BlurOptions extends Loggable, Timeoutable, Forceable { }
 
-  interface CheckOptions extends Loggable, Timeoutable, ActionableOptions {
-    interval: number
-  }
+  interface CheckClearOptions extends Loggable, Timeoutable, ActionableOptions { }
 
-  interface ClearOptions extends Loggable, Timeoutable, ActionableOptions {
-    interval: number
-  }
-
+  interface LogTimeoutOptions extends Loggable, Timeoutable { }
   /**
    * Object to change the default behavior of .click().
    */
@@ -3114,24 +3123,16 @@ declare namespace Cypress {
      */
     experimentalModifyObstructiveThirdPartyCode: boolean
     /**
-     * Disables setting document.domain to the applications super domain on injection.
-     * This experiment is to be used for sites that do not work with setting document.domain
-     * due to cross-origin issues. Enabling this option no longer allows for default subdomain
-     * navigations, and will require the use of cy.origin(). This option takes an array of
-     * strings/string globs.
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/Document/domain
-     * @see https://on.cypress.io/experiments#Experimental-Skip-Domain-Injection
-     * @default null
+     * Enables setting document.domain to the superdomain on code injection. This option is
+     * disabled by default. Enabling this option allows for navigating between subdomains in
+     * the same test without the use of cy.origin(). Setting document.domain is deprecated in Chrome.
+     * Enabling this may result in incompatibilities with sites that leverage origin-agent-cluster
+     * headers. Enabling this when a browser does not support setting document.domain will not result
+     * in the browser allowing document.domain to be set. In these cases, this configuration option
+     * must be set to false, to allow cy.origin() to be used on subdomains.
+     * @default false
      */
-    experimentalSkipDomainInjection: string[] | null
-    /**
-     * Allows for just-in-time compiling of a component test, which will only compile assets related to the component.
-     * This results in a smaller bundle under test, reducing resource constraints on a given machine. This option is recommended
-     * for users with large component testing projects and those who are running into webpack 'chunk load error' issues.
-     * Supported for vite and webpack. For component testing only.
-     * @see https://on.cypress.io/experiments#Configuration
-     */
-    experimentalJustInTimeCompile: boolean
+    injectDocumentDomain: boolean
     /**
      * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.
      * @default false
@@ -3152,6 +3153,14 @@ declare namespace Cypress {
      * @default false
      */
     experimentalMemoryManagement: boolean
+    /**
+     * Allows for just-in-time compiling of a component test, which will only compile assets related to the component.
+     * This results in a smaller bundle under test, reducing resource constraints on a given machine. This option is recommended
+     * for users with large component testing projects and those who are running into webpack 'chunk load error' issues.
+     * Supported for webpack-dev-server only. For component testing only.
+     * @see https://on.cypress.io/experiments#Configuration
+     */
+    justInTimeCompile: boolean
     /**
      * Number of times to retry a failed test.
      * If a number is set, tests will retry in both runMode and openMode.
@@ -3188,10 +3197,6 @@ declare namespace Cypress {
      * The user agent the browser sends in all request headers.
      */
     userAgent: null | string
-    /**
-     * Polyfills `window.fetch` to enable Network spying and stubbing
-     */
-    experimentalFetchPolyfill: boolean
 
     /**
      * Override default config options for Component Testing runner.
@@ -3216,6 +3221,11 @@ declare namespace Cypress {
     setupNodeEvents: (on: PluginEvents, config: PluginConfigOptions) => Promise<PluginConfigOptions | void> | PluginConfigOptions | void
 
     indexHtmlFile: string
+
+    /**
+     * The default browser to launch if the "--browser" command line option is not provided.
+     */
+    defaultBrowser: string
   }
 
   interface EndToEndConfigOptions extends Omit<CoreConfigOptions, 'indexHtmlFile'> {
@@ -3304,7 +3314,8 @@ declare namespace Cypress {
     socketIoRoute: string
     spec: Cypress['spec'] | null
     specs: Array<Cypress['spec']>
-    protocolEnabled: boolean
+    isDefaultProtocolEnabled: boolean
+    isStudioProtocolEnabled: boolean
     hideCommandLog: boolean
     hideRunnerUi: boolean
   }
@@ -3355,19 +3366,19 @@ declare namespace Cypress {
   interface CypressComponentDependency {
     /**
      * Unique identifier.
-     * @example 'reactscripts'
+     * @example 'react'
      */
     type: string
 
     /**
      * Name to display in the user interface.
-     * @example "React Scripts"
+     * @example "React.js"
      */
     name: string
 
     /**
      * Package name on npm.
-     * @example react-scripts
+     * @example react
      */
     package: string
 
@@ -3378,21 +3389,20 @@ declare namespace Cypress {
      *
      * @example `react`
      * @example `react@18`
-     * @example `react-scripts`
      */
     installer: string
 
     /**
      * Description shown in UI. It is recommended to use the same one the package uses on npm.
-     * @example  'Create React apps with no build configuration'
+     * @example  'A JavaScript library for building user interfaces'
      */
     description: string
 
     /**
      * Minimum version supported. Should conform to Semantic Versioning as used in `package.json`.
      * @see https://docs.npmjs.com/cli/v9/configuring-npm/package-json#dependencies
-     * @example '^=4.0.0 || ^=5.0.0'
-     * @example '^2.0.0'
+     * @example '^=17.0.0 || ^=8.0.0'
+     * @example '^4.0.0'
      */
     minVersion: string
   }
@@ -3401,21 +3411,21 @@ declare namespace Cypress {
     /**
      * A semantic, unique identifier.
      * Must begin with `cypress-ct-` or `@org/cypress-ct-` for third party implementations.
-     * @example 'reactscripts'
+     * @example 'react'
      * @example 'nextjs'
      * @example 'cypress-ct-solid-js'
      */
     type: string
 
     /**
-     * Used as the flag for `getPreset` for meta framworks, such as finding the webpack config for CRA, Angular, etc.
+     * Used as the flag for `getPreset` for meta frameworks, such as finding the webpack config for CRA, Angular, etc.
      * It is also the name of the string added to `cypress.config`
      *
      * @example
      *   export default {
      *     component: {
      *       devServer: {
-     *         framework: 'create-react-app' // can be 'next', 'create-react-app', etc etc.
+     *         framework: 'react' // can be 'next', 'vue', etc etc.
      *       }
      *     }
      *   }
@@ -3430,7 +3440,7 @@ declare namespace Cypress {
     /**
      * Name displayed in Launchpad when doing initial setup.
      * @example 'Solid.js'
-     * @example 'Create React App'
+     * @example 'React.js'
      */
     name: string
 
@@ -3460,12 +3470,12 @@ declare namespace Cypress {
     dependencies: (bundler: 'webpack' | 'vite', projectPath: string) => Promise<DependencyToInstall[]>
 
     /**
-     * This is used interally by Cypress for the "Create From Component" feature.
+     * This is used internally by Cypress for the "Create From Component" feature.
      */
     codeGenFramework?: 'react' | 'vue' | 'svelte' | 'angular'
 
     /**
-     * This is used interally by Cypress for the "Create From Component" feature.
+     * This is used internally by Cypress for the "Create From Component" feature.
      * @example '*.{js,jsx,tsx}'
      */
     glob?: string
@@ -3531,7 +3541,7 @@ declare namespace Cypress {
 
   type DevServerConfigOptions = {
     bundler: 'webpack'
-    framework: 'react' | 'vue' | 'vue-cli' | 'nuxt' | 'create-react-app' | 'next' | 'svelte'
+    framework: 'react' | 'vue' | 'next' | 'svelte'
     webpackConfig?: ConfigHandler<PickConfigOpt<'webpackConfig'>>
   } | {
     bundler: 'vite'
@@ -3707,7 +3717,7 @@ declare namespace Cypress {
      *
      * @default 0
      */
-    duration: number
+    duration: number | string
     /**
      * Will scroll with the easing animation
      *
@@ -3996,6 +4006,11 @@ declare namespace Cypress {
      * @default false
      */
     decode: boolean
+  }
+
+  /** Options to change the default behavior of .readFile */
+  interface ReadFileOptions extends Loggable {
+    encoding: Encodings
   }
 
   /** Options to change the default behavior of .writeFile */
@@ -6442,6 +6457,7 @@ declare namespace Cypress {
   }
 
   interface Log {
+    id: string
     end(): Log
     error(error: Error): Log
     finish(): void

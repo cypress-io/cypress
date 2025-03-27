@@ -1,7 +1,9 @@
 {
+  "name": "webpack-react-nested-config",
+  "version": "0.0.0-test",
   "devDependencies": {
     "@cypress/webpack-dev-server": "file:../../../npm/webpack-dev-server",
-    "webpack": "^5",
-    "webpack-dev-server": "^4"
+    "webpack": "^5.96.1",
+    "webpack-dev-server": "^5.1.0"
   }
 }

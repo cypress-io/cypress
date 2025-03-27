@@ -1,4 +1,4 @@
-import { action, observable } from 'mobx'
+import { action, observable, makeObservable } from 'mobx'
 import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
 import React, { Children, cloneElement, Component, MouseEvent, ReactElement, ReactNode } from 'react'
@@ -26,6 +26,11 @@ class FlashOnClick extends Component<Props> {
   }
 
   @observable _show = false
+
+  constructor (props: Props) {
+    super(props)
+    makeObservable(this)
+  }
 
   render () {
     const child = Children.only<ReactNode>(this.props.children)

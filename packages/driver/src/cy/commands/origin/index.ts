@@ -2,6 +2,7 @@ import Bluebird from 'bluebird'
 import $errUtils from '../../../cypress/error_utils'
 import $stackUtils from '../../../cypress/stack_utils'
 import { Validator } from './validator'
+import { isFunction } from 'lodash'
 import { createUnserializableSubjectProxy } from './unserializable_subject_proxy'
 import { serializeRunnable } from './util'
 import { preprocessConfig, preprocessEnv, syncConfigToCurrentOrigin, syncEnvToCurrentOrigin } from '../../../util/config'
@@ -181,12 +182,12 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
             communicator.toSpecBridge(origin, 'initialize:cypress', {
               config: preprocessConfig(Cypress.config()),
               env: preprocessEnv(Cypress.env()),
+              isProtocolEnabled: Cypress.state('isProtocolEnabled'),
             })
 
             // Attach the spec bridge to the window to be tested.
             communicator.toSpecBridge(origin, 'attach:to:window')
-
-            const fn = _.isFunction(callbackFn) ? callbackFn.toString() : callbackFn
+            const fn = isFunction(callbackFn) ? callbackFn.toString() : callbackFn
             const file = $stackUtils.getSourceDetailsForFirstLine(userInvocationStack, config('projectRoot'))?.absoluteFile
 
             try {
@@ -221,6 +222,7 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
                   isStable: Cypress.state('isStable'),
                   autLocation: Cypress.state('autLocation')?.href,
                   crossOriginCookies: Cypress.state('crossOriginCookies'),
+                  isProtocolEnabled: Cypress.state('isProtocolEnabled'),
                 },
                 config: preprocessConfig(Cypress.config()),
                 env: preprocessEnv(Cypress.env()),

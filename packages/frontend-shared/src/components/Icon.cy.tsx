@@ -1,5 +1,7 @@
 import Icon from './Icon.vue'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these module imports
 import IconCoffee from '~icons/mdi/coffee'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these module imports
 import IconHeart from '~icons/mdi/heart'
 
 describe('<Icon />', () => {

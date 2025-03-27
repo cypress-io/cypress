@@ -21,8 +21,9 @@ import { scaffoldMigrationProject } from '../test-helpers/scaffoldProject'
 chai.use(chaiPromise)
 describe('angularHandler', function () {
   this.timeout(1000 * 60)
-  it('sources the config from angular-13', async () => {
-    const projectRoot = await scaffoldMigrationProject('angular-13')
+
+  it('sources the config from angular-17', async () => {
+    const projectRoot = await scaffoldMigrationProject('angular-17')
 
     process.chdir(projectRoot)
     const devServerConfig = {
@@ -45,32 +46,8 @@ describe('angularHandler', function () {
     expectLoadsAngularBuildOptions(buildOptions)
   })
 
-  it('sources the config from angular-14', async () => {
-    const projectRoot = await scaffoldMigrationProject('angular-14')
-
-    process.chdir(projectRoot)
-    const devServerConfig = {
-      cypressConfig: {
-        projectRoot,
-        specPattern: 'src/**/*.cy.ts',
-      } as Cypress.PluginConfigOptions,
-      framework: 'angular',
-    } as AngularWebpackDevServerConfig
-    const { frameworkConfig: webpackConfig, sourceWebpackModulesResult } = await angularHandler(devServerConfig)
-
-    expect(webpackConfig).to.exist
-    expect((webpackConfig?.entry as any).main).to.be.undefined
-    expect(sourceWebpackModulesResult.framework?.importPath).to.include(path.join('@angular-devkit', 'build-angular'))
-    const { buildOptions } = await expectNormalizeProjectConfig(projectRoot)
-
-    await expectLoadsAngularJson(projectRoot)
-    await expectLoadsAngularCLiModules(projectRoot)
-    await expectGeneratesTsConfig(devServerConfig, buildOptions)
-    expectLoadsAngularBuildOptions(buildOptions)
-  })
-
-  it('sources the config from angular-15', async () => {
-    const projectRoot = await scaffoldMigrationProject('angular-15')
+  it('sources the config from angular-19', async () => {
+    const projectRoot = await scaffoldMigrationProject('angular-19')
 
     process.chdir(projectRoot)
     const devServerConfig = {

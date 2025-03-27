@@ -187,6 +187,7 @@ export class BrowserCriClient {
   private fullyManageTabs?: boolean
   onServiceWorkerClientEvent: ServiceWorkerEventHandler
   currentlyAttachedTarget: CriClient | undefined
+  currentlyAttachedProtocolTarget: CriClient | undefined
   // whenever we instantiate the instance we're already connected bc
   // we receive an underlying CRI connection
   // TODO: remove "connected" in favor of closing/closed or disconnected
@@ -216,7 +217,7 @@ export class BrowserCriClient {
    *
    * @param {BrowserCriClientCreateOptions} options the options for creating the browser cri client
    * @param options.browserName the display name of the browser being launched
-   * @param options.fullyManageTabs whether or not to fully manage tabs. This is useful for firefox where some work is done with marionette and some with CDP. We don't want to handle disconnections in this class in those scenarios
+   * @param options.fullyManageTabs whether or not to fully manage tabs. This is useful for firefox where some work is done with GeckoDriver and some with CDP. We don't want to handle disconnections in this class in those scenarios
    * @param options.hosts the hosts to which to attempt to connect
    * @param options.onAsynchronousError callback for any cdp fatal errors
    * @param options.onReconnect callback for when the browser cri client reconnects to the browser
@@ -342,9 +343,8 @@ export class BrowserCriClient {
       try {
         await browserClient.send('Runtime.runIfWaitingForDebugger', undefined, sessionId)
       } catch (error) {
-        // it's possible that the target was closed before we could enable
-        // network and continue, in that case, just ignore
-        debug('error running Runtime.runIfWaitingForDebugger:', error)
+        // it's possible that the target was closed before we could tell it to run, in that case, just ignore
+        debug('error running Runtime.runIfWaitingForDebugger: %o', error)
       }
     }
 
@@ -467,6 +467,7 @@ export class BrowserCriClient {
 
     // always close the connection to the page target because it was destroyed
     browserCriClient.currentlyAttachedTarget.close().catch(() => { }),
+    browserCriClient.currentlyAttachedProtocolTarget?.close().catch(() => {})
 
     new Bluebird((resolve) => {
       // this event could fire either expectedly or unexpectedly
@@ -559,7 +560,13 @@ export class BrowserCriClient {
         browserClient: this.browserClient,
       })
 
-      await this.protocolManager?.connectToBrowser(this.currentlyAttachedTarget)
+      // Clone the target here so that we separate the protocol client and the main client.
+      // This allows us to close the protocol client independently of the main client
+      // which we do when we exit out of studio in open mode.
+      if (!this.currentlyAttachedProtocolTarget) {
+        this.currentlyAttachedProtocolTarget = await this.currentlyAttachedTarget.clone()
+        await this.protocolManager?.connectToBrowser(this.currentlyAttachedProtocolTarget)
+      }
 
       return this.currentlyAttachedTarget
     }, this.browserName, this.port)
@@ -600,11 +607,16 @@ export class BrowserCriClient {
       debug('target closed', this.currentlyAttachedTarget.targetId)
 
       await this.currentlyAttachedTarget.close().catch(() => {})
+      await this.currentlyAttachedProtocolTarget?.close().catch(() => {})
 
       debug('target client closed', this.currentlyAttachedTarget.targetId)
     }
 
     this.currentlyAttachedTarget.queue.subscriptions.forEach((subscription) => {
+      this.browserClient.off(subscription.eventName, subscription.cb as any)
+    })
+
+    this.currentlyAttachedProtocolTarget?.queue.subscriptions.forEach((subscription) => {
       this.browserClient.off(subscription.eventName, subscription.cb as any)
     })
 
@@ -618,8 +630,14 @@ export class BrowserCriClient {
         fullyManageTabs: this.fullyManageTabs,
         browserClient: this.browserClient,
       })
+
+      // Clone the target here so that we separate the protocol client and the main client.
+      // This allows us to close the protocol client independently of the main client
+      // which we do when we exit out of studio in open mode.
+      this.currentlyAttachedProtocolTarget = await this.currentlyAttachedTarget.clone()
     } else {
       this.currentlyAttachedTarget = undefined
+      this.currentlyAttachedProtocolTarget = undefined
     }
 
     this.resettingBrowserTargets = false
@@ -679,6 +697,7 @@ export class BrowserCriClient {
 
     if (this.currentlyAttachedTarget) {
       await this.currentlyAttachedTarget.close()
+      await this.currentlyAttachedProtocolTarget?.close()
     }
 
     await this.browserClient.close()

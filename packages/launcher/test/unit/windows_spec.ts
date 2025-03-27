@@ -43,12 +43,20 @@ describe('windows browser detection', () => {
   })
 
   it('detects browsers as expected', async () => {
+    // chrome
     stubBrowser('C:/Program Files (x86)/Google/Chrome/Application/chrome.exe', '1.2.3')
+    // chromium - 32-bit will be preferred for passivity
     stubBrowser('C:/Program Files (x86)/Google/chrome-win32/chrome.exe', '2.3.4')
+    stubBrowser('C:/Program Files/Google/chrome-win/chrome.exe', '2.3.4')
 
+    // chrome-for-testing - 64-bit will be preferred
+    stubBrowser('C:/Program Files (x86)/Google/Chrome for Testing/chrome.exe', '1.2.3')
+    stubBrowser('C:/Program Files/Google/Chrome for Testing/chrome.exe', '1.2.3')
+
+    // chrome beta
     stubBrowser('C:/Program Files (x86)/Google/Chrome Beta/Application/chrome.exe', '6.7.8')
 
-    // canary is installed in homedir
+    // chrome canary is installed in homedir
     stubBrowser(`${HOMEDIR}/AppData/Local/Google/Chrome SxS/Application/chrome.exe`, '3.4.5')
 
     // have 32-bit and 64-bit ff - 64-bit will be preferred
@@ -71,23 +79,30 @@ describe('windows browser detection', () => {
     snapshot(await detect(knownBrowsers))
   })
 
-  it('detects 64-bit Chrome Beta app path', async () => {
+  it('detects Chrome Beta 64-bit install', async () => {
     stubBrowser('C:/Program Files/Google/Chrome Beta/Application/chrome.exe', '9.0.1')
-    const chrome = _.find(knownBrowsers, { name: 'chrome', channel: 'beta' })
+    const chrome = _.find(knownBrowsers, { name: 'chrome', channel: 'beta' })!
 
-    snapshot(await windowsHelper.detect(chrome))
+    snapshot(await detect([chrome]))
   })
 
   // @see https://github.com/cypress-io/cypress/issues/8425
-  it('detects new Chrome 64-bit app path', async () => {
+  it('detects Chrome 64-bit install', async () => {
     stubBrowser('C:/Program Files/Google/Chrome/Application/chrome.exe', '4.4.4')
-    const chrome = _.find(knownBrowsers, { name: 'chrome', channel: 'stable' })
+    const chrome = _.find(knownBrowsers, { name: 'chrome', channel: 'stable' })!
 
-    snapshot(await windowsHelper.detect(chrome))
+    snapshot(await detect([chrome]))
+  })
+
+  it('detects Chrome for Testing 32-bit install', async () => {
+    stubBrowser('C:/Program Files (x86)/Google/Chrome for Testing/chrome.exe', '5.5.5')
+    const chromeForTesting = _.find(knownBrowsers, { name: 'chrome-for-testing' })!
+
+    snapshot(await detect([chromeForTesting]))
   })
 
   // @see https://github.com/cypress-io/cypress/issues/8432
-  it('detects local Firefox installs', async () => {
+  it('detects Firefox local installs', async () => {
     stubBrowser(`${HOMEDIR}/AppData/Local/Mozilla Firefox/firefox.exe`, '100')
     stubBrowser(`${HOMEDIR}/AppData/Local/Firefox Nightly/firefox.exe`, '200')
     stubBrowser(`${HOMEDIR}/AppData/Local/Firefox Developer Edition/firefox.exe`, '300')
@@ -95,6 +110,27 @@ describe('windows browser detection', () => {
     const firefoxes = _.filter(knownBrowsers, { family: 'firefox' })
 
     snapshot(await detect(firefoxes))
+  })
+
+  it('detects Chromium 64-bit install', async () => {
+    stubBrowser('C:/Program Files/Google/chrome-win/chrome.exe', '6.6.6')
+    const chromium = _.find(knownBrowsers, { name: 'chromium' })!
+
+    snapshot(await detect([chromium]))
+  })
+
+  it('detects Chromium 32-bit install in Chromium folder', async () => {
+    stubBrowser('C:/Program Files (x86)/Google/Chromium/chrome.exe', '7.7.7')
+    const chromium = _.find(knownBrowsers, { name: 'chromium' })!
+
+    snapshot(await detect([chromium]))
+  })
+
+  it('detects Chromium 64-bit install in Chromium folder', async () => {
+    stubBrowser('C:/Program Files/Google/Chromium/chrome.exe', '8.8.8')
+    const chromium = _.find(knownBrowsers, { name: 'chromium' })!
+
+    snapshot(await detect([chromium]))
   })
 
   it('works with :browserName format in Windows', () => {

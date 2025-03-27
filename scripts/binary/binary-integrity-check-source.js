@@ -94,7 +94,7 @@ function validateElectron (electron) {
 
 function validateFs (fs) {
   // Hard coded function as this is electron code and there's not an easy way to get the function string at package time. If this fails on an updated version of electron, we'll need to update this.
-  if (originalToString.call(fs.readFileSync) !== `function(e,s){const n=splitPath(e);if(!n.isAsar)return F.apply(this,arguments);const{asarPath:a,filePath:i}=n,o=getOrCreateArchive(a);if(!o)throw createError("INVALID_ARCHIVE",{asarPath:a});const c=o.getFileInfo(i);if(!c)throw createError("NOT_FOUND",{asarPath:a,filePath:i});if(0===c.size)return s?"":r.Buffer.alloc(0);if(c.unpacked){const e=o.copyFileOut(i);return t.readFileSync(e,s)}if(s){if("string"==typeof s)s={encoding:s};else if("object"!=typeof s)throw new TypeError("Bad arguments")}else s={encoding:null};const{encoding:f}=s,l=r.Buffer.alloc(c.size),u=o.getFdAndValidateIntegrityLater();if(!(u>=0))throw createError("NOT_FOUND",{asarPath:a,filePath:i});return logASARAccess(a,i,c.offset),t.readSync(u,l,0,c.size,c.offset),validateBufferIntegrity(l,c.integrity),f?l.toString(f):l}`) {
+  if (originalToString.call(fs.readFileSync) !== `function(e,r){const n=splitPath(e);if(!n.isAsar)return w.apply(this,arguments);const{asarPath:i,filePath:a}=n,o=getOrCreateArchive(i);if(!o)throw createError("INVALID_ARCHIVE",{asarPath:i});const c=o.getFileInfo(a);if(!c)throw createError("NOT_FOUND",{asarPath:i,filePath:a});if(0===c.size)return r?"":s.Buffer.alloc(0);if(c.unpacked){const e=o.copyFileOut(a);return t.readFileSync(e,r)}if(r){if("string"==typeof r)r={encoding:r};else if("object"!=typeof r)throw new TypeError("Bad arguments")}else r={encoding:null};const{encoding:f}=r,l=s.Buffer.alloc(c.size),u=o.getFdAndValidateIntegrityLater();if(!(u>=0))throw createError("NOT_FOUND",{asarPath:i,filePath:a});return logASARAccess(i,a,c.offset),t.readSync(u,l,0,c.size,c.offset),validateBufferIntegrity(l,c.integrity),f?l.toString(f):l}`) {
     console.error(`Integrity check failed for toString.call(fs.readFileSync)`)
     throw new Error(integrityErrorMessage)
   }
@@ -155,22 +155,27 @@ function integrityCheck (options) {
       },
       {
         functionName: 'snapshotRequire',
-        fileName: 'evalmachine.<anonymous>',
+        // eslint-disable-next-line no-undef
+        fileName: [appPath, 'packages', 'server', 'index.jsc'].join(PATH_SEP),
       },
       {
         functionName: 'runWithSnapshot',
-        fileName: 'evalmachine.<anonymous>',
+        // eslint-disable-next-line no-undef
+        fileName: [appPath, 'packages', 'server', 'index.jsc'].join(PATH_SEP),
       },
       {
         functionName: 'hookRequire',
-        fileName: 'evalmachine.<anonymous>',
+        // eslint-disable-next-line no-undef
+        fileName: [appPath, 'packages', 'server', 'index.jsc'].join(PATH_SEP),
       },
       {
         functionName: 'startCypress',
-        fileName: 'evalmachine.<anonymous>',
+        // eslint-disable-next-line no-undef
+        fileName: [appPath, 'packages', 'server', 'index.jsc'].join(PATH_SEP),
       },
       {
-        fileName: 'evalmachine.<anonymous>',
+        // eslint-disable-next-line no-undef
+        fileName: [appPath, 'packages', 'server', 'index.jsc'].join(PATH_SEP),
       },
       {
         functionName: 'v',

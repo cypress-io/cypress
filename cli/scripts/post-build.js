@@ -9,11 +9,8 @@ shell.set('-e') // any error is fatal
 const npmModulesToCopy = [
   'mount-utils',
   'react',
-  'react18',
   'vue',
-  'vue2',
   'angular',
-  'angular-signals',
   'svelte',
 ]
 

@@ -1,16 +1,15 @@
 import Hello from './Hello.vue'
-import { mountCallback } from '@cypress/vue'
+import { mount } from '@cypress/vue'
 
-/* eslint-env mocha */
 describe('Hello.vue', () => {
-  beforeEach(mountCallback(Hello))
-
   it('shows hello', () => {
+    mount(Hello)
     cy.contains('Hello World!')
   })
 })
 
-describe('Several components', () => {
+// TODO: fix with https://github.com/cypress-io/cypress/issues/30706
+describe.skip('Several components', () => {
   const template = `
     <div>
       <hello></hello>
@@ -22,9 +21,8 @@ describe('Several components', () => {
     hello: Hello,
   }
 
-  beforeEach(mountCallback({ template, components }))
-
   it('greets the world 3 times', () => {
+    mount({ template, components })
     cy.get('p').should('have.length', 3)
   })
 })
