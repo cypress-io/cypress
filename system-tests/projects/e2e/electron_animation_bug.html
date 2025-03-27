@@ -7,14 +7,12 @@
       <div>hello</div>
       <div>world</div>
     </div>
-    <button id="add">add</button>
     <button id="remove">remove</button>
     <script>
       const remove = document.getElementById('remove')
       remove.addEventListener('click', () => {
         const app = document.getElementById('app')
         app.animate([
-          {},
           { transform: 'translate(5px, 10px)', opacity: 0 }
         ], {
           duration: 500,
@@ -22,14 +20,6 @@
         }).finished.then(() => {
           app.remove()
         })
-      })
-
-      const add = document.getElementById('add')
-      add.addEventListener('click', () => {
-        const app = document.createElement('div')
-        app.id = 'app'
-        app.innerHTML = '<div>hello</div><div>world</div>'
-        document.body.appendChild(app)
       })
     </script>
   </body>

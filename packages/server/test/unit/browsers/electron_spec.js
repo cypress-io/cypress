@@ -498,14 +498,18 @@ describe('lib/browsers/electron', () => {
       await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
 
       expect(this.pageCriClient.on).not.to.be.calledWith('Page.screencastFrame', sinon.match.func)
-      expect(this.pageCriClient.send).to.be.calledWith('Page.startScreencast', screencastOpts())
+      expect(this.pageCriClient.send).to.be.calledWith('Page.startScreencast', {
+        format: 'jpeg',
+        everyNthFrame: 2 ^ 32 - 1,
+        quality: 0,
+      })
     })
 
     it('does not start the screencast if video is not enabled and the app is not in run mode', async function () {
       await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
 
       expect(this.pageCriClient.on).not.to.be.calledWith('Page.screencastFrame', sinon.match.func)
-      expect(this.pageCriClient.send).not.to.be.calledWith('Page.startScreencast', screencastOpts())
+      expect(this.pageCriClient.send).not.to.be.calledWith('Page.startScreencast', sinon.match.any)
     })
 
     it('registers onRequest automation middleware and calls show when requesting to be focused', function () {

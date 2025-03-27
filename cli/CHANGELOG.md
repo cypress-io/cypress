@@ -7,6 +7,7 @@ _Released 4/8/2025 (PENDING)_
 
 - Allows for `babel-loader` version 10 to be a peer dependency of `@cypress/webpack-preprocessor`. Fixed in [#31218](https://github.com/cypress-io/cypress/pull/31218).
 - Fixed an issue where Firefox BiDi was prematurely removing prerequests on pending requests. Fixes [#31376](https://github.com/cypress-io/cypress/issues/31376).
+- Works around an Electron [bug](https://github.com/electron/electron/issues/45398) by starting CDP screencast with essentially a noop configuration. Fixed in [#31391](https://github.com/cypress-io/cypress/pull/31391).
 
 **Misc:**
 

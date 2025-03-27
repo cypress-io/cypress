@@ -312,12 +312,15 @@ export = {
 
       if (!pageCriClient) throw new Error('Missing pageCriClient in _launch')
 
-      const startAndStopScreencast = async () => {
-        await pageCriClient.send('Page.startScreencast', {
-          format: 'jpeg',
-          everyNthFrame: 2 ^ 31 - 1,
-          quality: 0,
-        })
+      const startDummyScreencast = async () => {
+        // To prevent https://github.com/electron/electron/issues/45398, we start a dummy screen cast with a quality of 0
+        // and only capture every 2^32 - 1 frames without listening to any frames. This is effectively a no-op, but it
+        // prevents the issue from occurring.
+        // await pageCriClient.send('Page.startScreencast', {
+        //   format: 'jpeg',
+        //   everyNthFrame: 2 ^ 32 - 1,
+        //   quality: 0,
+        // })
       }
 
       await Promise.all([
@@ -325,7 +328,9 @@ export = {
         pageCriClient.send('ServiceWorker.enable'),
         this.connectProtocolToBrowser({ protocolManager }),
         cdpSocketServer?.attachCDPClient(cdpAutomation),
-        videoApi ? recordVideo(cdpAutomation, videoApi) : options.isTextTerminal ? startAndStopScreencast() : undefined,
+        // Start video legitimately if we have a video api. Otherwise, if we're in run mode, start a dummy screencast to prevent:
+        // https://github.com/electron/electron/issues/45398
+        videoApi ? recordVideo(cdpAutomation, videoApi) : options.isTextTerminal ? startDummyScreencast() : undefined,
         this._handleDownloads(win, options.downloadsFolder, automation),
         utils.initializeCDP(pageCriClient, automation),
         // Ensure to clear browser state in between runs. This is handled differently in browsers when we launch new tabs, but we don't have that concept in electron
