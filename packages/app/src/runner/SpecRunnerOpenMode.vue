@@ -1,9 +1,11 @@
 <template>
   <StudioInstructionsModal
+    v-if="studioStore.instructionModalIsOpen"
     :open="studioStore.instructionModalIsOpen"
     @close="studioStore.closeInstructionModal"
   />
   <StudioSaveModal
+    v-if="studioStore.saveModalIsOpen"
     :open="studioStore.saveModalIsOpen"
     @close="studioStore.closeSaveModal"
   />
@@ -99,7 +101,8 @@
       </template>
       <template #panel4>
         <StudioPanel
-          v-show="shouldShowStudioPanel"
+          v-if="shouldShowStudioPanel"
+          data-cy="studio-panel"
           :can-access-studio-a-i="studioStore.canAccessStudioAI"
         />
       </template>
