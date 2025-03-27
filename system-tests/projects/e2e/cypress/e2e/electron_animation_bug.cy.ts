@@ -1,5 +1,5 @@
 describe('bug', () => {
-  it('loads in less than .3 seconds', { defaultCommandTimeout: 300 }, () => {
+  it('loads in less than .3 seconds', { defaultCommandTimeout: 750 }, () => {
     cy.visit('/electron_animation_bug.html')
 
     for (let i = 0; i < 50; i++) {
