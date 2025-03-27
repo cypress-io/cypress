@@ -17,7 +17,7 @@ import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
 import memory from './memory'
 import { BrowserCriClient } from './browser-cri-client'
 import { getRemoteDebuggingPort } from '../util/electron-app'
-import { CriClient } from './cri-client'
+import type { CriClient } from './cri-client'
 
 // TODO: unmix these two types
 type ElectronOpts = Windows.WindowOptions & BrowserLaunchOpts
@@ -145,7 +145,7 @@ async function handleVideo (handleVideoOptions: { pageCriClient: CriClient, cdpA
     // prevents the issue from occurring.
     await pageCriClient.send('Page.startScreencast', {
       format: 'jpeg',
-      everyNthFrame: 2 ** 32 - 1,
+      everyNthFrame: 2 ** 31 - 1,
       quality: 0,
     })
   }
