@@ -15,7 +15,7 @@ _Released 4/8/2025 (PENDING)_
 
 **Dependency Updates:**
 
-- Upgraded `mocha` from `7.0.1` to `7.1.0`. Addressed in [#31387](https://github.com/cypress-io/cypress/pull/31387).
+- Upgraded `mocha` from `7.0.1` to `7.1.1`. Addressed in [#31401](https://github.com/cypress-io/cypress/pull/31401).
 - Upgraded `webdriver` from `9.7.3` to `9.11.0`. Addressed in [#31315](https://github.com/cypress-io/cypress/pull/31315).
 - Upgraded `win-version-info` from `5.0.1` to `6.0.1`. Addressed in [#31358](https://github.com/cypress-io/cypress/pull/31358).
 
