@@ -1,4 +1,4 @@
-describe('bug', () => {
+describe('electron animation bug', () => {
   it('loads in less than .3 seconds', { defaultCommandTimeout: 750 }, () => {
     cy.visit('/electron_animation_bug.html')
 
