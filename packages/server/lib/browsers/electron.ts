@@ -318,8 +318,6 @@ export = {
           everyNthFrame: 30000,
           quality: 0,
         })
-
-        await pageCriClient.send('Page.stopScreencast')
       }
 
       await Promise.all([
