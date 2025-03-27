@@ -501,7 +501,7 @@ describe('lib/browsers/electron', () => {
       expect(this.pageCriClient.send).to.be.calledWith('Page.startScreencast', screencastOpts())
     })
 
-    it('does not start the screencast if video is not enabled and the app is not in run ode', async function () {
+    it('does not start the screencast if video is not enabled and the app is not in run mode', async function () {
       await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
 
       expect(this.pageCriClient.on).not.to.be.calledWith('Page.screencastFrame', sinon.match.func)
