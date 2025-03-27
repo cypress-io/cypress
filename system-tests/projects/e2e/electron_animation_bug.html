@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  </head>
+  <body>
+    <div id="app">
+      <div>hello</div>
+      <div>world</div>
+    </div>
+    <button id="remove">remove</button>
+    <script>
+      const remove = document.getElementById('remove')
+      remove.addEventListener('click', () => {
+        const app = document.getElementById('app')
+        app.animate([
+          {},
+          { transform: 'translate(5px, 10px)', opacity: 0 }
+        ], {
+          duration: 125,
+          easing: 'cubic-bezier(0.4, 0, 1, 1)'
+        }).finished.then(() => {
+          app.remove()
+        })
+      })
+    </script>
+  </body>
+</html>
