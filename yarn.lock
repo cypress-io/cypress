@@ -9282,14 +9282,14 @@
   dependencies:
     vue-demi "*"
 
-"@wdio/config@9.7.3":
-  version "9.7.3"
-  resolved "https://registry.npmjs.org/@wdio/config/-/config-9.7.3.tgz#fb612cdee5acba250f536f90d25bc4e2910080e8"
-  integrity sha512-rWiGR0WMcUpGTTMn3XP9OzNW3WH64AcNK93b9kSwq9WzVGVIzMBCZK8LPXpdQ+pFwizq/ExIXTx/Z39kc0LCyw==
+"@wdio/config@9.11.0":
+  version "9.11.0"
+  resolved "https://registry.yarnpkg.com/@wdio/config/-/config-9.11.0.tgz#d16ba92ad0fdde2573e5861d1bd1642f8fb53d5e"
+  integrity sha512-lBcmd7r+3nHJwIWDZ/cLIXcIL9rCmQmMvMWQ+Ykcrlc2khePX92VZyd0igptrZATJGD3tQ7VySR5Bozz6uMzyA==
   dependencies:
     "@wdio/logger" "9.4.4"
-    "@wdio/types" "9.6.3"
-    "@wdio/utils" "9.7.3"
+    "@wdio/types" "9.10.1"
+    "@wdio/utils" "9.11.0"
     deepmerge-ts "^7.0.3"
     glob "^10.2.2"
     import-meta-resolve "^4.0.0"
@@ -9309,21 +9309,21 @@
   resolved "https://registry.npmjs.org/@wdio/protocols/-/protocols-9.7.0.tgz#2f2c0a7e371d65305e0d64980f63caa98ba5a4de"
   integrity sha512-5DI8cqJqT9K6oQn8UpaSTmcGAl4ufkUWC5FoPT3oXdLjILfxvweZDf/2XNBCbGMk4+VOMKqB2ofOqKhDIB2nAg==
 
-"@wdio/types@9.6.3":
-  version "9.6.3"
-  resolved "https://registry.npmjs.org/@wdio/types/-/types-9.6.3.tgz#2fbbb5fcdec32f9d9953ee9d73c659052c0fb6b1"
-  integrity sha512-K3Lu7K5g5bsUcQV6/95XaS3jMwcGUn2pDdryYibKZafklhHjVt3o/xnw6Vgd/JzoSneCKHdwj941n+yDpTJHAw==
+"@wdio/types@9.10.1":
+  version "9.10.1"
+  resolved "https://registry.yarnpkg.com/@wdio/types/-/types-9.10.1.tgz#89d3eb936ac2dc5675b01652ee9475e1ff31f325"
+  integrity sha512-/t1VXPU5Ad1FQjRUP0WlK7IR0dCTX5hSkul8SpCuUpWbeyI4Iol/Wx2b1YU6nS+Ydh78rJCyHxtV0eE5TM1rbw==
   dependencies:
     "@types/node" "^20.1.0"
 
-"@wdio/utils@9.7.3":
-  version "9.7.3"
-  resolved "https://registry.npmjs.org/@wdio/utils/-/utils-9.7.3.tgz#9b1d59e3cfb8e14cb541d28a0f790fee0e2e32aa"
-  integrity sha512-gScYudyuq/aOmiPTz7vTvEhWtmiUMdrrzkOSQqGCQk0AMy7WpAzKM19NESPe9iPTN96i11jLJnpLOXwm2j+6LQ==
+"@wdio/utils@9.11.0":
+  version "9.11.0"
+  resolved "https://registry.yarnpkg.com/@wdio/utils/-/utils-9.11.0.tgz#006234c865579e86b121998c78e47e86013de57d"
+  integrity sha512-chVbHqrjDlIKCLoAPLdrFK8Qozu/S+fbubqlyazohAKnouCUCa2goYs7faYR0lkmLqm92PllJS+KBRAha9V/tg==
   dependencies:
     "@puppeteer/browsers" "^2.2.0"
     "@wdio/logger" "9.4.4"
-    "@wdio/types" "9.6.3"
+    "@wdio/types" "9.10.1"
     decamelize "^6.0.0"
     deepmerge-ts "^7.0.3"
     edgedriver "^6.1.1"
@@ -10319,11 +10319,6 @@ are-we-there-yet@~1.1.2:
   dependencies:
     delegates "^1.0.0"
     readable-stream "^2.0.6"
-
-arg@4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/arg/-/arg-4.1.0.tgz#583c518199419e0037abb74062c37f8519e575f0"
-  integrity sha512-ZWc51jO3qegGkVh8Hwpv636EkbesNV5ZNQPCtRa+0qytRYPEs9IYT9qITY9buezqUH5uqyzlWLcufrzU2rffdg==
 
 arg@4.1.3, arg@^4.1.0:
   version "4.1.3"
@@ -26552,11 +26547,6 @@ ramda@0.26.1:
   resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.26.1.tgz#8d41351eb8111c55353617fc3bbffad8e4d35d06"
   integrity sha512-hLWjpy7EnsDBb0p+Z3B7rPi3GDeRG5ZtiI33kJhTt+ORCd38AbAIjB/9zRIUoeTbE/AVX5ZkU7m6bznsvrf8eQ==
 
-ramda@0.27.0:
-  version "0.27.0"
-  resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.27.0.tgz#915dc29865c0800bf3f69b8fd6c279898b59de43"
-  integrity sha512-pVzZdDpWwWqEVVLshWUHjNwuVP7SfcmPraYuqocJp1yo2U1R7P+5QAfDhdItkuoGqIBnBYrtPp7rEPqDn9HlZA==
-
 ramda@0.27.1:
   version "0.27.1"
   resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.27.1.tgz#66fc2df3ef873874ffc2da6aa8984658abacf5c9"
@@ -28894,25 +28884,6 @@ snap-shot-compare@3.0.0:
     strip-ansi "5.2.0"
     variable-diff "1.1.0"
 
-snap-shot-core@10.2.0:
-  version "10.2.0"
-  resolved "https://registry.yarnpkg.com/snap-shot-core/-/snap-shot-core-10.2.0.tgz#e98e02f1d3868107e1445bd4ae7aab226d86ed0f"
-  integrity sha512-FsP+Wd4SCA4bLSm3vi6OVgfmGQcAQkUhwy45zDjZDm/6dZ5SDIgP40ORHg7z6MgMAK2+fj2DmhW7SXyvMU55Vw==
-  dependencies:
-    arg "4.1.0"
-    check-more-types "2.24.0"
-    common-tags "1.8.0"
-    debug "4.1.1"
-    escape-quotes "1.0.2"
-    folktale "2.3.2"
-    is-ci "2.0.0"
-    jsesc "2.5.2"
-    lazy-ass "1.6.0"
-    mkdirp "0.5.1"
-    pluralize "8.0.0"
-    quote "0.4.0"
-    ramda "0.26.1"
-
 snap-shot-core@10.2.4:
   version "10.2.4"
   resolved "https://registry.yarnpkg.com/snap-shot-core/-/snap-shot-core-10.2.4.tgz#feacadc77f2e83e9eee52fc4aaff31c25a1790c3"
@@ -28932,7 +28903,7 @@ snap-shot-core@10.2.4:
     quote "0.4.0"
     ramda "0.27.1"
 
-snap-shot-it@7.9.10, snap-shot-it@^7.9.6:
+snap-shot-it@7.9.10, snap-shot-it@^7.9.10:
   version "7.9.10"
   resolved "https://registry.yarnpkg.com/snap-shot-it/-/snap-shot-it-7.9.10.tgz#6198a19f6281fa701254fabfa7c895783cee09b1"
   integrity sha512-9USmsI2jc2kQslRhqkzFX+2K23o6v3VEzlQHwUNpZbbnEdU0ommReg2+Px7260sd+P/6CtaDx+LXadzt4caMVQ==
@@ -28946,57 +28917,6 @@ snap-shot-it@7.9.10, snap-shot-it@^7.9.6:
     lazy-ass "1.6.0"
     pluralize "8.0.0"
     ramda "0.28.0"
-    snap-shot-compare "3.0.0"
-    snap-shot-core "10.2.4"
-
-snap-shot-it@7.9.2:
-  version "7.9.2"
-  resolved "https://registry.yarnpkg.com/snap-shot-it/-/snap-shot-it-7.9.2.tgz#575302f8b3881fde851bdaa99c65e1fd9760bb98"
-  integrity sha512-MYrlKx9zLDizbOkqyW1dIagwBwDqecu+jlcxpTKXZA+t2Q+D7m5BU45+Z3zhb2JPtWo+t7sieZks5nW0dw0rQw==
-  dependencies:
-    "@bahmutov/data-driven" "1.0.0"
-    check-more-types "2.24.0"
-    common-tags "1.8.0"
-    debug "4.1.1"
-    has-only "1.1.1"
-    its-name "1.0.0"
-    lazy-ass "1.6.0"
-    pluralize "8.0.0"
-    ramda "0.26.1"
-    snap-shot-compare "3.0.0"
-    snap-shot-core "10.2.0"
-
-snap-shot-it@7.9.3:
-  version "7.9.3"
-  resolved "https://registry.yarnpkg.com/snap-shot-it/-/snap-shot-it-7.9.3.tgz#7eadbe78e2f1e180998d50620290840d2cb532cf"
-  integrity sha512-S5e59fbbc02AGA94LFWGVl/y/+jLMLr0/aykCtPYBE5rcyV9pSa63Aoik66/L8SkZ9piqqSmBmRAYm46+QvqBA==
-  dependencies:
-    "@bahmutov/data-driven" "1.0.0"
-    check-more-types "2.24.0"
-    common-tags "1.8.0"
-    debug "4.1.1"
-    has-only "1.1.1"
-    its-name "1.0.0"
-    lazy-ass "1.6.0"
-    pluralize "8.0.0"
-    ramda "0.27.0"
-    snap-shot-compare "3.0.0"
-    snap-shot-core "10.2.0"
-
-snap-shot-it@7.9.6:
-  version "7.9.6"
-  resolved "https://registry.yarnpkg.com/snap-shot-it/-/snap-shot-it-7.9.6.tgz#042c168980a1dc3ba7ffe2bb2beeaa8e9512772d"
-  integrity sha512-t/ADZfQ8EUk4J76S5cmynye7qg1ecUFqQfANiOMNy0sFmYUaqfx9K/AWwpdcpr3vFsDptM+zSuTtKD0A1EOLqA==
-  dependencies:
-    "@bahmutov/data-driven" "1.0.0"
-    check-more-types "2.24.0"
-    common-tags "1.8.0"
-    debug "4.3.1"
-    has-only "1.1.1"
-    its-name "1.0.0"
-    lazy-ass "1.6.0"
-    pluralize "8.0.0"
-    ramda "0.27.1"
     snap-shot-compare "3.0.0"
     snap-shot-core "10.2.4"
 
@@ -32428,18 +32348,18 @@ web-streams-polyfill@^3.0.3:
   resolved "https://registry.npmjs.org/web-streams-polyfill/-/web-streams-polyfill-3.3.3.tgz#2073b91a2fdb1fbfbd401e7de0ac9f8214cecb4b"
   integrity sha512-d2JWLCivmZYTSIoge9MsgFCZrt571BikcWGYkjC1khllbTeDlGqZ2D8vD8E/lJa8WGWbb7Plm8/XJYV7IJHZZw==
 
-webdriver@9.7.3:
-  version "9.7.3"
-  resolved "https://registry.npmjs.org/webdriver/-/webdriver-9.7.3.tgz#faaa212b891a29cf15c2102d8c9daa5c518540d2"
-  integrity sha512-Mpi277WKw37Yg5xZ0MT2BcG/Q/5Y5reYA0wDXOMldVI1nLxA7eOzAvsBA8NpjPbi/+yZijZhNMrXRAtQ5Eu8NQ==
+webdriver@9.11.0:
+  version "9.11.0"
+  resolved "https://registry.yarnpkg.com/webdriver/-/webdriver-9.11.0.tgz#12c33e6481ca3ddfbda61ca07fb445615b8f4c45"
+  integrity sha512-KQdI5sK+YwnUqol8MhvW9y6V+fhaW82KRhqMYnVCOrG4sJFWg7A9OIqR11Buco804HpzxyocRO6MnOQrNvP0vQ==
   dependencies:
     "@types/node" "^20.1.0"
     "@types/ws" "^8.5.3"
-    "@wdio/config" "9.7.3"
+    "@wdio/config" "9.11.0"
     "@wdio/logger" "9.4.4"
     "@wdio/protocols" "9.7.0"
-    "@wdio/types" "9.6.3"
-    "@wdio/utils" "9.7.3"
+    "@wdio/types" "9.10.1"
+    "@wdio/utils" "9.11.0"
     deepmerge-ts "^7.0.3"
     undici "^6.20.1"
     ws "^8.8.0"
