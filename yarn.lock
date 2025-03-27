@@ -10320,11 +10320,6 @@ are-we-there-yet@~1.1.2:
     delegates "^1.0.0"
     readable-stream "^2.0.6"
 
-arg@4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/arg/-/arg-4.1.0.tgz#583c518199419e0037abb74062c37f8519e575f0"
-  integrity sha512-ZWc51jO3qegGkVh8Hwpv636EkbesNV5ZNQPCtRa+0qytRYPEs9IYT9qITY9buezqUH5uqyzlWLcufrzU2rffdg==
-
 arg@4.1.3, arg@^4.1.0:
   version "4.1.3"
   resolved "https://registry.yarnpkg.com/arg/-/arg-4.1.3.tgz#269fc7ad5b8e42cb63c896d5666017261c144089"
@@ -26552,11 +26547,6 @@ ramda@0.26.1:
   resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.26.1.tgz#8d41351eb8111c55353617fc3bbffad8e4d35d06"
   integrity sha512-hLWjpy7EnsDBb0p+Z3B7rPi3GDeRG5ZtiI33kJhTt+ORCd38AbAIjB/9zRIUoeTbE/AVX5ZkU7m6bznsvrf8eQ==
 
-ramda@0.27.0:
-  version "0.27.0"
-  resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.27.0.tgz#915dc29865c0800bf3f69b8fd6c279898b59de43"
-  integrity sha512-pVzZdDpWwWqEVVLshWUHjNwuVP7SfcmPraYuqocJp1yo2U1R7P+5QAfDhdItkuoGqIBnBYrtPp7rEPqDn9HlZA==
-
 ramda@0.27.1:
   version "0.27.1"
   resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.27.1.tgz#66fc2df3ef873874ffc2da6aa8984658abacf5c9"
@@ -28894,25 +28884,6 @@ snap-shot-compare@3.0.0:
     strip-ansi "5.2.0"
     variable-diff "1.1.0"
 
-snap-shot-core@10.2.0:
-  version "10.2.0"
-  resolved "https://registry.yarnpkg.com/snap-shot-core/-/snap-shot-core-10.2.0.tgz#e98e02f1d3868107e1445bd4ae7aab226d86ed0f"
-  integrity sha512-FsP+Wd4SCA4bLSm3vi6OVgfmGQcAQkUhwy45zDjZDm/6dZ5SDIgP40ORHg7z6MgMAK2+fj2DmhW7SXyvMU55Vw==
-  dependencies:
-    arg "4.1.0"
-    check-more-types "2.24.0"
-    common-tags "1.8.0"
-    debug "4.1.1"
-    escape-quotes "1.0.2"
-    folktale "2.3.2"
-    is-ci "2.0.0"
-    jsesc "2.5.2"
-    lazy-ass "1.6.0"
-    mkdirp "0.5.1"
-    pluralize "8.0.0"
-    quote "0.4.0"
-    ramda "0.26.1"
-
 snap-shot-core@10.2.4:
   version "10.2.4"
   resolved "https://registry.yarnpkg.com/snap-shot-core/-/snap-shot-core-10.2.4.tgz#feacadc77f2e83e9eee52fc4aaff31c25a1790c3"
@@ -28932,7 +28903,7 @@ snap-shot-core@10.2.4:
     quote "0.4.0"
     ramda "0.27.1"
 
-snap-shot-it@7.9.10, snap-shot-it@^7.9.6:
+snap-shot-it@7.9.10, snap-shot-it@^7.9.10:
   version "7.9.10"
   resolved "https://registry.yarnpkg.com/snap-shot-it/-/snap-shot-it-7.9.10.tgz#6198a19f6281fa701254fabfa7c895783cee09b1"
   integrity sha512-9USmsI2jc2kQslRhqkzFX+2K23o6v3VEzlQHwUNpZbbnEdU0ommReg2+Px7260sd+P/6CtaDx+LXadzt4caMVQ==
@@ -28946,57 +28917,6 @@ snap-shot-it@7.9.10, snap-shot-it@^7.9.6:
     lazy-ass "1.6.0"
     pluralize "8.0.0"
     ramda "0.28.0"
-    snap-shot-compare "3.0.0"
-    snap-shot-core "10.2.4"
-
-snap-shot-it@7.9.2:
-  version "7.9.2"
-  resolved "https://registry.yarnpkg.com/snap-shot-it/-/snap-shot-it-7.9.2.tgz#575302f8b3881fde851bdaa99c65e1fd9760bb98"
-  integrity sha512-MYrlKx9zLDizbOkqyW1dIagwBwDqecu+jlcxpTKXZA+t2Q+D7m5BU45+Z3zhb2JPtWo+t7sieZks5nW0dw0rQw==
-  dependencies:
-    "@bahmutov/data-driven" "1.0.0"
-    check-more-types "2.24.0"
-    common-tags "1.8.0"
-    debug "4.1.1"
-    has-only "1.1.1"
-    its-name "1.0.0"
-    lazy-ass "1.6.0"
-    pluralize "8.0.0"
-    ramda "0.26.1"
-    snap-shot-compare "3.0.0"
-    snap-shot-core "10.2.0"
-
-snap-shot-it@7.9.3:
-  version "7.9.3"
-  resolved "https://registry.yarnpkg.com/snap-shot-it/-/snap-shot-it-7.9.3.tgz#7eadbe78e2f1e180998d50620290840d2cb532cf"
-  integrity sha512-S5e59fbbc02AGA94LFWGVl/y/+jLMLr0/aykCtPYBE5rcyV9pSa63Aoik66/L8SkZ9piqqSmBmRAYm46+QvqBA==
-  dependencies:
-    "@bahmutov/data-driven" "1.0.0"
-    check-more-types "2.24.0"
-    common-tags "1.8.0"
-    debug "4.1.1"
-    has-only "1.1.1"
-    its-name "1.0.0"
-    lazy-ass "1.6.0"
-    pluralize "8.0.0"
-    ramda "0.27.0"
-    snap-shot-compare "3.0.0"
-    snap-shot-core "10.2.0"
-
-snap-shot-it@7.9.6:
-  version "7.9.6"
-  resolved "https://registry.yarnpkg.com/snap-shot-it/-/snap-shot-it-7.9.6.tgz#042c168980a1dc3ba7ffe2bb2beeaa8e9512772d"
-  integrity sha512-t/ADZfQ8EUk4J76S5cmynye7qg1ecUFqQfANiOMNy0sFmYUaqfx9K/AWwpdcpr3vFsDptM+zSuTtKD0A1EOLqA==
-  dependencies:
-    "@bahmutov/data-driven" "1.0.0"
-    check-more-types "2.24.0"
-    common-tags "1.8.0"
-    debug "4.3.1"
-    has-only "1.1.1"
-    its-name "1.0.0"
-    lazy-ass "1.6.0"
-    pluralize "8.0.0"
-    ramda "0.27.1"
     snap-shot-compare "3.0.0"
     snap-shot-core "10.2.4"
 
