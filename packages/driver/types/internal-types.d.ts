@@ -31,6 +31,9 @@ interface InternalCheckOptions extends Partial<Cypress.CheckClearOptions> {
 interface InternalKeyboard extends Partial<Keyboard> {
   getMap: () => object
   reset: () => void
+  Keys: {
+    TAB: 'Tab'
+  }
 }
 
 declare namespace Cypress {
