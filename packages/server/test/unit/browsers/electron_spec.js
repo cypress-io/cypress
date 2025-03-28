@@ -500,7 +500,7 @@ describe('lib/browsers/electron', () => {
       expect(this.pageCriClient.on).not.to.be.calledWith('Page.screencastFrame', sinon.match.func)
       expect(this.pageCriClient.send).to.be.calledWith('Page.startScreencast', {
         format: 'jpeg',
-        everyNthFrame: 2 ** 32 - 1,
+        everyNthFrame: 2 ** 31 - 1,
         quality: 0,
       })
     })
