@@ -294,10 +294,10 @@ export class BidiAutomation {
 
       switch (message) {
         case 'key:press':
-          if (this.topLevelContextId) {
-            await bidiKeyPress(data, this.webDriverClient, this.topLevelContextId)
+          if (this.autContextId) {
+            await bidiKeyPress(data, this.webDriverClient, this.autContextId, this.topLevelContextId)
           } else {
-            throw new Error('Cannot emit key press: no top level context initialized')
+            throw new Error('Cannot emit key press: no AUT context initialized')
           }
 
           return

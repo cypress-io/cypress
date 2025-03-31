@@ -4,8 +4,8 @@ describe('src/cy/commands/actions/press', () => {
 
     cy.press(Cypress.Keyboard.Keys.TAB)
 
-    cy.get('#keyup').should('have.value', 'Tab')
-
     cy.get('#keydown').should('have.value', 'Tab')
+
+    cy.get('#keyup').should('have.value', 'Tab')
   })
 })

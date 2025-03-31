@@ -1,3 +1,4 @@
+import { isEqual } from 'lodash'
 import type { KeyPressParams, KeyPressSupportedKeys } from '@packages/types'
 import type { SendDebuggerCommand } from '../../browsers/cdp_automation'
 import type { Client } from 'webdriver'
@@ -103,19 +104,32 @@ export const BIDI_VALUE: KeyCodeLookup = {
   'Tab': '\uE004',
 }
 
-export async function bidiKeyPress ({ key }: KeyPressParams, client: Client, context: string, idSuffix?: string): Promise<void> {
+export async function bidiKeyPress ({ key }: KeyPressParams, client: Client, autContext: string, topContext, idSuffix?: string): Promise<void> {
   const value = BIDI_VALUE[key]
 
   if (!value) {
     throw new InvalidKeyError(key)
   }
 
+  const autFrameElement = await client.findElement('css selector', 'iframe.aut-iframe')
+  const activeElement = await client.getActiveElement()
+
+  if (!isEqual(autFrameElement, activeElement)) {
+    await client.scriptEvaluate(
+      {
+        expression: `window.focus()`,
+        target: { context: autContext },
+        awaitPromise: false,
+      },
+    )
+  }
+
   try {
     await client.inputPerformActions({
-      context,
+      context: autContext,
       actions: [{
         type: 'key',
-        id: `${context}-${key}-${idSuffix || Date.now()}`,
+        id: `${autContext}-${key}-${idSuffix || Date.now()}`,
         actions: [
           { type: 'keyDown', value },
           { type: 'keyUp', value },
