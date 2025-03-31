@@ -159,7 +159,6 @@ describe('key:press automation command', () => {
       }
 
       autContext = 'someContextId'
-      topContext = 'someOtherContextId'
 
       key = 'Tab'
 
