@@ -1755,7 +1755,7 @@ declare namespace Cypress {
      *    cy.press(Cypress.Keyboard.Keys.TAB) // dispatches a keydown and press event to the browser, followed by a keyup event.
      * @see https://on.cypress.io/press
      */
-    press(key: 'Tab' /* todo */, options?: Partial<Loggable & Timeoutable>): void
+    press(key: keyof typeof Cypress.Keyboard.Keys, options?: Partial<Loggable & Timeoutable>): void
     
     /**
      * Get the immediately preceding sibling of each element in a set of the elements.
