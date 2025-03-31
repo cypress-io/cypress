@@ -47,7 +47,6 @@ declare namespace Cypress {
       [routeId: string]: any
     }
     sinon: sinon.SinonApi
-    stop: () => void
     utils: CypressUtils
     state: State
     events: Events
@@ -66,6 +65,7 @@ declare namespace Cypress {
 
   interface CypressUtils {
     getDistanceBetween: (point1: { x: number, y: number }, point2: { x: number, y: number }) => number
+    isInstanceOf: (instance: any, constructor: any) => boolean
     throwErrByPath: (path: string, obj?: { args: object }) => void
     warnByPath: (path: string, obj?: { args: object }) => void
     warning: (message: string) => void
@@ -76,7 +76,8 @@ declare namespace Cypress {
   }
 
   interface TestConfigOverrides extends Cypress.TestConfigOverrides {
-    protocolEnabled?: boolean
+    isDefaultProtocolEnabled?: boolean
+    isStudioProtocolEnabled?: boolean
   }
 
   interface ResolvedConfigOptions {

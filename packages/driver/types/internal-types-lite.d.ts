@@ -47,8 +47,9 @@ declare namespace Cypress {
     /**
      * If `as` is chained to the current command, return the alias name used.
      */
+    getAlias: IAliases['getAlias']
     getNextAlias: IAliases['getNextAlias']
-    noop: <T>(v: T) => Cypress.Chainable<T>
+    noop: <T>(v?: T) => Cypress.Chainable<T>
     now: <T>(string, v: T) => Cypress.Chainable<T>
     queue: CommandQueue
     retry: IRetries['retry']

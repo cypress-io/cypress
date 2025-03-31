@@ -17,6 +17,7 @@
           align="left"
           class="max-w-max"
           data-cy="select-browser"
+          :minimal="false"
         >
           <template #heading>
             <component

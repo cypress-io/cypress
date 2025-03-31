@@ -55,6 +55,11 @@ namespace CypressEnvTests {
   })
 }
 
+namespace CypressStopTests {
+  Cypress.stop()       // $ExpectType void
+  Cypress.stop('foo')  // $ExpectError
+}
+
 namespace CypressIsCyTests {
   Cypress.isCy(cy) // $ExpectType boolean
   Cypress.isCy(undefined) // $ExpectType boolean

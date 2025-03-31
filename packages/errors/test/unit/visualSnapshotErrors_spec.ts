@@ -697,10 +697,10 @@ describe('visual error templates', () => {
     },
     CLOUD_PROTOCOL_UPLOAD_STREAM_STALL_FAILURE: () => {
       // @ts-expect-error
-      const err: Error & { chunkSizeKB: number, maxActivityDwellTime: number } = new Error('stream stall')
+      const err: Error & { chunkSizeBytes: number, maxActivityDwellTime: number } = new Error('stream stall')
 
-      err.chunkSizeKB = 64
-      err.maxActivityDwellTime = 5000
+      err.chunkSizeBytes = 65536
+      err.maxActivityDwellTime = 10000
 
       return {
         default: [err],
@@ -1110,6 +1110,11 @@ describe('visual error templates', () => {
     CDP_RETRYING_CONNECTION: () => {
       return {
         default: [1, 'chrome', 62],
+      }
+    },
+    CDP_FIREFOX_DEPRECATED: () => {
+      return {
+        default: [],
       }
     },
     BROWSER_PROCESS_CLOSED_UNEXPECTEDLY: () => {

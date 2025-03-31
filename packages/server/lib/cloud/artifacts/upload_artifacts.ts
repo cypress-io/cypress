@@ -68,7 +68,7 @@ const toUploadReportPayload = (acc: {
 type UploadArtifactOptions = {
   protocolManager?: ProtocolManager
   videoUploadUrl?: string
-  video?: string // filepath to the video artifact
+  video?: string | null // filepath to the video artifact
   screenshots?: {
     screenshotId: string
     path: string

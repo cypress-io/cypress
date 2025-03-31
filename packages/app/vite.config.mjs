@@ -4,7 +4,6 @@ import Pages from 'vite-plugin-pages'
 import Copy from 'rollup-plugin-copy'
 import Legacy from '@vitejs/plugin-legacy'
 import { resolve } from 'path'
-import { federation } from '@module-federation/vite'
 
 const config = makeConfig({
   optimizeDeps: {
@@ -45,24 +44,5 @@ const config = makeConfig({
     }),
   ],
 })
-
-// With some trial and error, it appears that the module federation plugin needs to be added 
-// to the plugins array first so that the dynamic modules are available properly with respect 
-// to the other plugins.
-config.plugins.unshift(
-  ...federation({
-    name: 'host',
-    remotes: {
-      'app-studio': {
-        type: 'module',
-        name: 'app-studio',
-        entryGlobalName: 'app-studio',
-        entry: '/__cypress-studio/app-studio.js',
-        shareScope: 'default',
-      },
-    },
-    filename: 'assets/app-studio.js',
-  }),
-)
 
 export default config

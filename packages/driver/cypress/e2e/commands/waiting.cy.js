@@ -946,7 +946,8 @@ describe('src/cy/commands/waiting', () => {
       })
 
       describe('explicit wait time', function () {
-        it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        it('can turn off logging when protocol is disabled', function () {
+          cy.state('isProtocolEnabled', false)
           // Starting in Electron 28, we cannot use fetch or XHR from within about:blank. This is a workaround
           // to ensure that we have a valid origin for our tests.
           cy.visit('/fixtures/empty.html')
@@ -963,7 +964,8 @@ describe('src/cy/commands/waiting', () => {
           })
         })
 
-        it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        it('can send hidden log when protocol is enabled', function () {
+          cy.state('isProtocolEnabled', true)
           // Starting in Electron 28, we cannot use fetch or XHR from within about:blank. This is a workaround
           // to ensure that we have a valid origin for our tests.
           cy.visit('/fixtures/empty.html')
@@ -984,7 +986,8 @@ describe('src/cy/commands/waiting', () => {
       })
 
       describe('wait for xhr', function () {
-        it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+        it('can turn off logging when protocol is disabled', function () {
+          cy.state('isProtocolEnabled', false)
           // Starting in Electron 28, we cannot use fetch or XHR from within about:blank. This is a workaround
           // to ensure that we have a valid origin for our tests.
           cy.visit('/fixtures/empty.html')
@@ -1015,7 +1018,8 @@ describe('src/cy/commands/waiting', () => {
           })
         })
 
-        it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+        it('can send hidden log when protocol is enabled', function () {
+          cy.state('isProtocolEnabled', true)
           // Starting in Electron 28, we cannot use fetch or XHR from within about:blank. This is a workaround
           // to ensure that we have a valid origin for our tests.
           cy.visit('/fixtures/empty.html')
@@ -1050,7 +1054,8 @@ describe('src/cy/commands/waiting', () => {
         })
       })
 
-      it('can turn off logging for wait for xhr', { protocolEnabled: true }, function () {
+      it('can turn off logging for wait for xhr', function () {
+        cy.state('isProtocolEnabled', true)
         // Starting in Electron 28, we cannot use fetch or XHR from within about:blank. This is a workaround
         // to ensure that we have a valid origin for our tests.
         cy.visit('/fixtures/empty.html')

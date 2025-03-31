@@ -570,6 +570,14 @@ declare namespace Cypress {
      */
     log(options: Partial<LogConfig>): Log
 
+    /**
+     * Stop the Cypress App on the current machine while tests are running
+     * @see https://on.cypress.io/cypress-stop
+     * @example
+     *    Cypress.stop()
+     */
+    stop(): void
+
     Commands: {
       /**
        * Add a custom command
@@ -1898,7 +1906,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/root
      */
-    root<E extends Node = HTMLHtmlElement>(options?: Partial<Loggable>): Chainable<JQuery<E>> // can't do better typing unless we ignore the `.within()` case
+    root<E extends Node = HTMLHtmlElement>(options?: Partial<LogTimeoutOptions>): Chainable<JQuery<E>> // can't do better typing unless we ignore the `.within()` case
 
     /**
      * Take a screenshot of the application under test and the Cypress Command Log.
@@ -1979,6 +1987,18 @@ declare namespace Cypress {
      * @see https://on.cypress.io/shadow
      */
     shadow(): Chainable<Subject>
+
+      /**
+     * Traverse into an element's shadow root.
+     *
+     * @example
+     *    cy.get('my-component')
+     *    .shadow({ timeout: 10000, log: false })
+     *    .find('.my-button')
+     *    .click()
+     * @see https://on.cypress.io/shadow
+     */
+    shadow(options?: Partial<LogTimeoutOptions>): Chainable<Subject>
 
     /**
      * Create an assertion. Assertions are automatically retried until they pass or time out.
@@ -2559,7 +2579,9 @@ declare namespace Cypress {
      */
     withArgs(...args: any[]): Omit<A, 'withArgs'> & Agent<A>
 
-    callsFake(func: (...args: any[]) => any): Omit<A, 'withArgs'> & Agent<A>
+    callsFake(func: (...args: any[]) => any): Agent<A>
+
+    callThroughWithNew(): Agent<A>
   }
 
   type Agent<T extends sinon.SinonSpy> = SinonSpyAgent<T> & T
@@ -2732,6 +2754,7 @@ declare namespace Cypress {
 
   interface CheckClearOptions extends Loggable, Timeoutable, ActionableOptions { }
 
+  interface LogTimeoutOptions extends Loggable, Timeoutable { }
   /**
    * Object to change the default behavior of .click().
    */
@@ -3291,7 +3314,8 @@ declare namespace Cypress {
     socketIoRoute: string
     spec: Cypress['spec'] | null
     specs: Array<Cypress['spec']>
-    protocolEnabled: boolean
+    isDefaultProtocolEnabled: boolean
+    isStudioProtocolEnabled: boolean
     hideCommandLog: boolean
     hideRunnerUi: boolean
   }
@@ -6433,6 +6457,7 @@ declare namespace Cypress {
   }
 
   interface Log {
+    id: string
     end(): Log
     error(error: Error): Log
     finish(): void

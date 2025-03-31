@@ -12,7 +12,7 @@ import runEvents from './plugins/run_events'
 import * as session from './session'
 import { cookieJar } from './util/cookies'
 import { getSpecUrl } from './project_utils'
-import type { BrowserLaunchOpts, OpenProjectLaunchOptions, InitializeProjectOptions, OpenProjectLaunchOpts, FoundBrowser } from '@packages/types'
+import type { BrowserLaunchOpts, OpenProjectLaunchOptions, InitializeProjectOptions, OpenProjectLaunchOpts, FoundBrowser, AutomationCommands } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { autoBindDebug } from '@packages/data-context/src/util'
 import type { BrowserInstance } from './browsers/types'
@@ -121,12 +121,14 @@ export class OpenProject {
 
     if (!am || !am.onBeforeRequest) {
       automation.use({
-        onBeforeRequest (message, data) {
+        onBeforeRequest<T extends keyof AutomationCommands> (message: T, data: AutomationCommands[T]['dataType']): Promise<AutomationCommands[T]['returnType']> {
           if (message === 'take:screenshot') {
             data.specName = spec.name
 
             return data
           }
+
+          return Promise.resolve()
         },
       })
     }

@@ -31,7 +31,7 @@ const debugVerbose = Debug('cypress-verbose:server:cloud:stream-activity-monitor
  *
  */
 
-const DEFAULT_FS_READSTREAM_CHUNK_SIZE = 64 * 1024 // Kilobytes
+const DEFAULT_FS_READSTREAM_CHUNK_SIZE_BYTES = 64 * 1024 // 64 kB
 
 export class StreamActivityMonitor {
   private streamMonitor: Transform | undefined
@@ -78,7 +78,7 @@ export class StreamActivityMonitor {
     debug('marking activity interval')
     clearTimeout(this.activityTimeout)
     this.activityTimeout = setTimeout(() => {
-      this.controller?.abort(new StreamStalledError(this.maxActivityDwellTime, DEFAULT_FS_READSTREAM_CHUNK_SIZE))
+      this.controller?.abort(new StreamStalledError(this.maxActivityDwellTime, DEFAULT_FS_READSTREAM_CHUNK_SIZE_BYTES))
     }, this.maxActivityDwellTime)
   }
 }

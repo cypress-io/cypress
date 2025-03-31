@@ -23,7 +23,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
 
     cy.contains('Canary').should('be.visible')
     cy.findByTestId('select-browser').click()
-    cy.get('[data-cy="viewport"]').click()
+    cy.get('[data-cy="viewport-size"]').should('be.visible')
 
     cy.contains('Chrome 1')
     .focus()
@@ -33,14 +33,6 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     // snapshotAUTPanel('browsers open')
 
     cy.contains('Canary').should('be.hidden')
-
-    cy.get('[data-cy="viewport"]').click()
-    cy.contains('The viewport determines the width and height of your application under test. By default the viewport will be 1000px by 660px for end-to-end testing.')
-    .should('be.visible')
-
-    // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
-    // snapshotAUTPanel('viewport info open')
-
     cy.get('body').click()
 
     cy.findByTestId('playground-activator').click()
@@ -79,6 +71,8 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     })
 
     cy.get('.hook-open-in-ide').should('exist')
+
+    cy.get('#unified-runner').should('have.attr', 'style', 'width: 1000px; height: 660px; transform: scale(0.769697); position: absolute; margin-left: -25px;')
   })
 
   it('navigation between specs and other parts of the app works', () => {
@@ -157,7 +151,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
   })
 
   it('shows a compilation error with a malformed spec', { viewportHeight: 596, viewportWidth: 1000 }, () => {
-    const expectedAutHeight = 456 // based on explicitly setting viewport in this test to 596
+    const expectedAutHeight = 500 // based on explicitly setting viewport in this test to 596
 
     cy.visitApp()
     cy.specsPageIsVisible()

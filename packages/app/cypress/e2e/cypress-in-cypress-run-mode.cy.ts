@@ -25,8 +25,7 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     cy.contains('http://localhost:4455/cypress/e2e/dom-content.html').should('be.visible')
 
     // confirm no interactions are implemented
-    cy.findByTestId('viewport').click()
-    cy.contains('The viewport determines').should('not.exist')
+    cy.findByTestId('viewport-size').should('be.visible')
     cy.contains('Chrome 1').click()
     cy.contains('Firefox').should('not.exist')
 
@@ -41,7 +40,7 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     cy.visitApp(`/specs/runner?file=src/TestComponent.spec.jsx&${CY_IN_CY_SIMULATE_RUN_MODE}`)
 
     cy.waitForSpecToFinish()
-    cy.findByTestId('aut-url').should('not.exist')
+    cy.findByTestId('aut-url').contains('URL navigation disabled in component testing').should('be.visible')
     cy.findByTestId('playground-activator').should('not.exist')
 
     cy.findByLabelText('Stats').within(() => {
@@ -53,8 +52,7 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     cy.contains('Chrome 1').should('be.visible')
 
     // confirm no interactions are implemented
-    cy.findByTestId('viewport').click()
-    cy.contains('The viewport determines').should('not.exist')
+    cy.findByTestId('viewport-size').should('be.visible')
     cy.contains('Chrome 1').click()
     cy.contains('Firefox').should('not.exist')
 

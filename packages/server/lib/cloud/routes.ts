@@ -15,6 +15,7 @@ const CLOUD_ENDPOINTS = {
   instanceStdout: 'instances/:id/stdout',
   instanceArtifacts: 'instances/:id/artifacts',
   captureProtocolErrors: 'capture-protocol/errors',
+  captureProtocolCurrent: 'capture-protocol/script/current.js',
   studio: 'studio/bundle/current.tgz',
   studioErrors: 'studio/errors',
   exceptions: 'exceptions',

@@ -1,19 +1,93 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 14.0.4
+## 14.2.2
 
-_Released 2/25/2025 (PENDING)_
+_Released 4/8/2025 (PENDING)_
+
+**Bugfixes:**
+
+- Allows for `babel-loader` version 10 to be a peer dependency of `@cypress/webpack-preprocessor`. Fixed in [#31218](https://github.com/cypress-io/cypress/pull/31218).
+- Fixed an issue where Firefox BiDi was prematurely removing prerequests on pending requests. Fixes [#31376](https://github.com/cypress-io/cypress/issues/31376).
+- Fixed an [issue](https://github.com/electron/electron/issues/45398) with Electron causing slow animations and increased test times by starting a CDP screencast with a noop configuration. Fixes [#30980](https://github.com/cypress-io/cypress/issues/30980).
 
 **Bugfixes**
 - Fixed an issue where the configuration setting `trashAssetsBeforeRuns=false` was ignored for assets in the `videosfolder` and these assets were incorrectly deleted before running tests with `cypress run`. Addresses [#8280](https://github.com/cypress-io/cypress/issues/8280).
 
 **Misc:**
 
+- Added an automation command for dispatching key press events to CDP and BiDi automated browsers. Addressed in [#31366](https://github.com/cypress-io/cypress/pull/31366).
+- Updated error message around `injectDocumentDomain` removal to mention a future version of Cypress instead of Cypress 15. Addresses [#31373](https://github.com/cypress-io/cypress/issues/31373). Addressed in [#31375](https://github.com/cypress-io/cypress/pull/31375).
+
+**Dependency Updates:**
+
+- Upgraded `mocha` from `7.0.1` to `7.1.1`. Addressed in [#31401](https://github.com/cypress-io/cypress/pull/31401).
+- Upgraded `webdriver` from `9.7.3` to `9.11.0`. Addressed in [#31315](https://github.com/cypress-io/cypress/pull/31315).
+- Upgraded `win-version-info` from `5.0.1` to `6.0.1`. Addressed in [#31358](https://github.com/cypress-io/cypress/pull/31358).
+
+## 14.2.1
+
+_Released 3/26/2025_
+
+**Bugfixes:**
+
+- Applies a fix from [#30730](https://github.com/cypress-io/cypress/pull/30730) and [#30099](https://github.com/cypress-io/cypress/pull/30099) related to Node.js turning on ESM flags by default in Node.js version `20.19.0`. Fixed in [#31308](https://github.com/cypress-io/cypress/pull/31308).
+- Fixed an issue where Firefox BiDi was not correctly removing prerequests on expected network request failures. Fixes [#31325](https://github.com/cypress-io/cypress/issues/31325).
+- Fixed an issue in `@cypress/webpack-batteries-included-preprocessor` and `@cypress/webpack-preprocessor` where sourceMaps were not being set correctly in TypeScript 5. This should now make error code frames accurate for TypeScript 5 users. Fixes [#29614](https://github.com/cypress-io/cypress/issues/29614).
+
+**Misc:**
+
+- The UI above the application under test now displays in dark mode. Addresses [#31106](https://github.com/cypress-io/cypress/issues/31106). Addressed in [#31360](https://github.com/cypress-io/cypress/pull/31360).
+
+**Dependency Updates:**
+
+- Upgraded `@cypress/request` from `3.0.7` to `3.0.8`. Addressed in [#31311](https://github.com/cypress-io/cypress/pull/31311).
+- Upgraded `cross-fetch` from `3.1.8` to `4.1.0`. Addressed in [#31327](https://github.com/cypress-io/cypress/pull/31327).
+- Upgraded `micromatch` from `4.0.6` to `4.0.8`. Addressed in [#31330](https://github.com/cypress-io/cypress/pull/31330).
+- Upgraded `resolve` from `1.17.0` to `1.22.10`. Addressed in [#31333](https://github.com/cypress-io/cypress/pull/31333).
+- Upgraded `semver` from `7.5.3` to `7.7.1`. Addressed in [#31341](https://github.com/cypress-io/cypress/pull/31341).
+- Upgraded `systeminformation` from `5.21.7` to `5.22.8`. Addressed in [#31281](https://github.com/cypress-io/cypress/pull/31281).
+
+## 14.2.0
+
+_Released 3/12/2025_
+
+**Features:**
+
+- [`Cypress.stop()`](https://on.cypress.io/cypress-stop) is now available to stop the Cypress App on the current machine while tests are running. This can be useful for stopping test execution upon failures or other predefined conditions. Addresses [#518](https://github.com/cypress-io/cypress/issues/518). Addressed in [#31225](https://github.com/cypress-io/cypress/pull/31225).
+
+**Misc:**
+
+- The browser dropdown now has a more minimal design - showing only the icon of the browser selected to the left of the URL. The currently selected browser also now shows at the top of the browser dropdown. Browsers with longer names will now have their names correctly left aligned in the browser dropdown. Addresses [#21755](https://github.com/cypress-io/cypress/issues/21755) and [#30998](https://github.com/cypress-io/cypress/issues/30998). Addressed in [#31216](https://github.com/cypress-io/cypress/pull/31216).
+- Additional CLI options will be displayed in the terminal for some Cloud error messages. Addressed in [#31211](https://github.com/cypress-io/cypress/pull/31211).
+- Updated Cypress Studio with url routing to support maintaining state when reloading. Addresses [#31000](https://github.com/cypress-io/cypress/issues/31000) and [#30996](https://github.com/cypress-io/cypress/issues/30996).
+
+**Dependency Updates:**
+
+- Upgraded `cli-table3` from `0.5.1` to `0.6.5`. Addressed in [#31166](https://github.com/cypress-io/cypress/pull/31166).
+- Upgraded `simple-git` from `3.25.0` to `3.27.0`. Addressed in [#31198](https://github.com/cypress-io/cypress/pull/31198).
+
+## 14.1.0
+
+_Released 2/25/2025_
+
+**Features:**
+
+- Firefox versions 135 and up are now automated with [WebDriver BiDi](https://www.w3.org/TR/webdriver-bidi/) instead of [Chrome Devtools Protocol](https://chromedevtools.github.io/devtools-protocol/). Addresses [#30220](https://github.com/cypress-io/cypress/issues/30220).
+
+**Bugfixes:**
+
+- Fixed the calculation of upload throughput units when displaying the 'stream stalled' error message during Test Replay archive uploads. Fixes [#31075](https://github.com/cypress-io/cypress/issues/31075). Addressed in [#31160](https://github.com/cypress-io/cypress/pull/31160).
+
+**Misc:**
+
+- Viewport width, height, and scale now display in a badge above the application under test. The dropdown describing how to set viewport height and width has been removed from the UI. Additionally, component tests now show a notice about URL navigation being disabled in component tests. Addresses [#30999](https://github.com/cypress-io/cypress/issues/30999). Addressed in [#31119](https://github.com/cypress-io/cypress/pull/31119).
 - Updated types around `.readFile()` and `.scrollTo()` arguments and `Cypress.dom` methods. Addressed in [#31055](https://github.com/cypress-io/cypress/pull/31055).
+- Updated types around `.shadow()` and `.root()` options. Addressed in [#31154](https://github.com/cypress-io/cypress/pull/31154).
 
 **Dependency Updates:**
 
 - Upgraded `chrome-remote-interface` from `0.33.2` to `0.33.3`. Addressed in [#31128](https://github.com/cypress-io/cypress/pull/31128).
 - Upgraded `ci-info` from `4.0.0` to `4.1.0`. Addressed in [#31132](https://github.com/cypress-io/cypress/pull/31132).
+- Upgraded `compression` from `1.7.5` to `1.8.0`. Addressed in [#31151](https://github.com/cypress-io/cypress/pull/31151).
 
 ## 14.0.3
 
@@ -74,7 +148,7 @@ _Released 1/16/2025_
 - Upgraded bundled Node.js version from `18.17.0` to `20.18.1`. Addresses [#29547](https://github.com/cypress-io/cypress/issues/29547).
 - Prebuilt binaries for Linux are no longer compatible with Linux distributions based on glibc <2.28, for example: Ubuntu 14-18, RHEL 7, CentOS 7, Amazon Linux 2. Addresses [#29601](https://github.com/cypress-io/cypress/issues/29601).
 - Cypress now only officially supports the latest 3 major versions of Chrome, Firefox, and Edge - older browser versions may still work, but we recommend keeping your browsers up to date to ensure compatibility with Cypress. A warning will no longer be displayed on browser selection in the Launchpad for any 'unsupported' browser versions. Additionally, the undocumented `minSupportedVersion` property has been removed from `Cypress.browser`. Addressed in [#30462](https://github.com/cypress-io/cypress/pull/30462).
-- The `cy.origin()` command must now be used when navigating between subdomains. Because this is a fairly disruptive change for users who frequently navigate between subdomains, a new configuration option is being introduced. `injectDocumentDomain` can be set to `true` in order to re-enable the injection of `document.domain` by Cypress. This configuration option is marked as deprecated and you will receive a warning when Cypress is launched with this option set to `true`. It will be removed in Cypress 15. Addressed in [#30770](https://github.com/cypress-io/cypress/pull/30770). Addresses [#25806](https://github.com/cypress-io/cypress/issues/25806), [#25987](https://github.com/cypress-io/cypress/issues/25987), [#27528](https://github.com/cypress-io/cypress/issues/27528), [#29445](https://github.com/cypress-io/cypress/issues/29445), [#29590](https://github.com/cypress-io/cypress/issues/29590) and [#30571](https://github.com/cypress-io/cypress/issues/30571).
+- The `cy.origin()` command must now be used when navigating between subdomains. Because this is a fairly disruptive change for users who frequently navigate between subdomains, a new configuration option is being introduced. `injectDocumentDomain` can be set to `true` in order to re-enable the injection of `document.domain` by Cypress. This configuration option is marked as deprecated and you will receive a warning when Cypress is launched with this option set to `true`. It will be removed in a future version of Cypress. Addressed in [#30770](https://github.com/cypress-io/cypress/pull/30770). Addresses [#25806](https://github.com/cypress-io/cypress/issues/25806), [#25987](https://github.com/cypress-io/cypress/issues/25987), [#27528](https://github.com/cypress-io/cypress/issues/27528), [#29445](https://github.com/cypress-io/cypress/issues/29445), [#29590](https://github.com/cypress-io/cypress/issues/29590) and [#30571](https://github.com/cypress-io/cypress/issues/30571).
 - It is no longer possible to make a `fetch` or `XMLHttpRequest` request from the `about:blank` page in Electron (i.e. `cy.window().then((win) => win.fetch('<some-url>'))`). You must use `cy.request` instead or perform some form of initial navigation via `cy.visit()`. Addressed in [#30394](https://github.com/cypress-io/cypress/pull/30394).
 - The `experimentalJustInTimeCompile` configuration option for component testing has been replaced with a `justInTimeCompile` option that is `true` by default. This option will only compile resources directly related to your spec, compiling them 'just-in-time' before spec execution. This should result in improved memory management and performance for component tests in `cypress open` and `cypress run` modes, in particular for large component testing suites. `justInTimeCompile` is now only supported for [`webpack`](https://www.npmjs.com/package/webpack). Addresses [#30234](https://github.com/cypress-io/cypress/issues/30234). Addressed in [#30641](https://github.com/cypress-io/cypress/pull/30641).
 - Cypress Component Testing no longer supports:
@@ -101,7 +175,7 @@ _Released 1/16/2025_
 
 - The `resourceType` option on `cy.intercept` has been deprecated. We anticipate the resource types to change or be completely removed in the future. Our intention is to replace essential functionality dependent on the `resourceType` within Cypress in a future version (like hiding network logs that are not fetch/xhr). Please leave feedback on any essential uses of `resourceType`
 in this [GitHub issue](https://github.com/cypress-io/cypress/issues/30447). Addresses [#30433](https://github.com/cypress-io/cypress/issues/30433).
-- The new `injectDocumentDomain` configuration option is released as deprecated. It will be removed in Cypress 15. Addressed in [#30770](https://github.com/cypress-io/cypress/pull/30770).
+- The new `injectDocumentDomain` configuration option is released as deprecated. It will be removed in a future version of Cypress. Addressed in [#30770](https://github.com/cypress-io/cypress/pull/30770).
 
 **Features:**
 

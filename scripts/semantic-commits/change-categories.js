@@ -78,6 +78,10 @@ const changeCatagories = {
     description: 'Adding missing or correcting existing tests',
     release: false,
   },
+  internal: {
+    description: 'Features or fixes available to internal Cypress users only',
+    release: false,
+  },
 }
 
 // Used by @semantic-release/commit-analyzer to determine next version for npm packages

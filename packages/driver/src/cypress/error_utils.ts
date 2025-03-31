@@ -226,7 +226,7 @@ const makeErrFromObj = (obj: any) => {
     return new Error(obj)
   }
 
-  if (_.isObject(obj) && _.isString((obj as any).message) && _.isString((obj as any).name)) {
+  if (_.isObject(obj) && _.isString((obj as any).message)) {
     obj = obj as {
       message: string
       name: string
