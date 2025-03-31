@@ -104,7 +104,7 @@ export const BIDI_VALUE: KeyCodeLookup = {
   'Tab': '\uE004',
 }
 
-export async function bidiKeyPress ({ key }: KeyPressParams, client: Client, autContext: string, topContext, idSuffix?: string): Promise<void> {
+export async function bidiKeyPress ({ key }: KeyPressParams, client: Client, autContext: string, idSuffix?: string): Promise<void> {
   const value = BIDI_VALUE[key]
 
   if (!value) {

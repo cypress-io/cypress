@@ -4,7 +4,6 @@ import type { SendDebuggerCommand } from '../../../../lib/browsers/cdp_automatio
 import { cdpKeyPress, bidiKeyPress, BIDI_VALUE, CDP_KEYCODE } from '../../../../lib/automation/commands/key_press'
 import { Client as WebdriverClient } from 'webdriver'
 import type { Protocol } from 'devtools-protocol'
-
 const { expect, sinon } = require('../../../spec_helper')
 
 describe('key:press automation command', () => {
@@ -139,8 +138,14 @@ describe('key:press automation command', () => {
 
   describe('bidi', () => {
     let client: Sinon.SinonStubbedInstance<WebdriverClient>
-    let context: string
+    let autContext: string
     let key: KeyPressSupportedKeys
+    const iframeElement = {
+      'element-6066-11e4-a52e-4f735466cecf': 'uuid-1',
+    }
+    const otherElement = {
+      'element-6066-11e4-a52e-4f735466cecf': 'uuid-2',
+    }
 
     beforeEach(() => {
       // can't create a sinon stubbed instance because webdriver doesn't export the constructor. Because it's known that
@@ -148,18 +153,56 @@ describe('key:press automation command', () => {
       // @ts-expect-error
       client = {
         inputPerformActions: (sinon as Sinon.SinonSandbox).stub<Parameters<WebdriverClient['inputPerformActions']>, ReturnType<WebdriverClient['inputPerformActions']>>(),
+        getActiveElement: (sinon as Sinon.SinonSandbox).stub<Parameters<WebdriverClient['getActiveElement']>, ReturnType<WebdriverClient['getActiveElement']>>(),
+        findElement: (sinon as Sinon.SinonSandbox).stub<Parameters<WebdriverClient['findElement']>, ReturnType<WebdriverClient['findElement']>>(),
+        scriptEvaluate: (sinon as Sinon.SinonSandbox).stub<Parameters<WebdriverClient['scriptEvaluate']>, ReturnType<WebdriverClient['scriptEvaluate']>>(),
       }
 
-      context = 'someContextId'
+      autContext = 'someContextId'
+      topContext = 'someOtherContextId'
 
       key = 'Tab'
+
+      client.inputPerformActions.resolves()
     })
 
-    it('calls client.inputPerformActions with a keydown, pause, and keyup action', () => {
-      bidiKeyPress({ key }, client as WebdriverClient, context, 'idSuffix')
+    describe('when the aut iframe is not in focus', () => {
+      beforeEach(() => {
+        client.findElement.withArgs('css selector ', 'iframe.aut-iframe').resolves(iframeElement)
+        // @ts-expect-error - webdriver types show this returning a string, but it actually returns an ElementReference, same as findElement
+        client.getActiveElement.resolves(otherElement)
+      })
+
+      it('focuses the frame before dispatching keydown and keyup', async () => {
+        await bidiKeyPress({ key }, client as WebdriverClient, autContext, 'idSuffix')
+        expect(client.scriptEvaluate).to.have.been.calledWith({
+          expression: 'window.focus()',
+          target: { context: autContext },
+          awaitPromise: false,
+        })
+
+        expect(client.inputPerformActions.firstCall.args[0]).to.deep.equal({
+          context: autContext,
+          actions: [{
+            type: 'key',
+            id: 'someContextId-Tab-idSuffix',
+            actions: [
+              { type: 'keyDown', value: BIDI_VALUE[key] },
+              { type: 'keyUp', value: BIDI_VALUE[key] },
+            ],
+          }],
+        })
+      })
+    })
+
+    it('calls client.inputPerformActions with a keydown and keyup action', async () => {
+      client.findElement.withArgs('css selector ', 'iframe.aut-iframe').resolves(iframeElement)
+      // @ts-expect-error - webdriver types show this returning a string, but it actually returns an ElementReference, same as findElement
+      client.getActiveElement.resolves(iframeElement)
+      await bidiKeyPress({ key }, client as WebdriverClient, autContext, 'idSuffix')
 
       expect(client.inputPerformActions.firstCall.args[0]).to.deep.equal({
-        context,
+        context: autContext,
         actions: [{
           type: 'key',
           id: 'someContextId-Tab-idSuffix',
