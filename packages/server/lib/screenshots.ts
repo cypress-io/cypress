@@ -27,7 +27,10 @@ interface Details {
 interface SavedDetails {
   size?: string
   takenAt?: Date
-  dimensions?: string
+  dimensions?: {
+    width: number
+    height: number
+  }
   multipart?: any
   pixelRatio?: number
   name?: any
