@@ -2,6 +2,7 @@ import type { KeyPressParams, KeyPressSupportedKeys } from '@packages/types'
 import type { SendDebuggerCommand } from '../../browsers/cdp_automation'
 import type { Client } from 'webdriver'
 
+import type { Protocol } from 'devtools-protocol'
 import Debug from 'debug'
 
 const debug = Debug('cypress:server:automation:command:keypress')
@@ -28,13 +29,55 @@ export const CDP_KEYCODE: KeyCodeLookup = {
   'Tab': 'U+000009',
 }
 
-export async function cdpKeyPress ({ key }: KeyPressParams, send: SendDebuggerCommand): Promise<void> {
+function executionContextForFrame (contexts: Record<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription>, frame: Protocol.Page.Frame): Protocol.Runtime.ExecutionContextId | undefined {
+  return Object.values(contexts).find((context) => {
+    return context.auxData?.frameId === frame.id
+  })?.id
+}
+
+export async function cdpKeyPress (
+  { key }: KeyPressParams, send: SendDebuggerCommand,
+  contexts: Record<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription>,
+  frameTree: Protocol.Page.FrameTree,
+): Promise<void> {
   debug('cdp keypress', { key })
   if (!CDP_KEYCODE[key]) {
     throw new InvalidKeyError(key)
   }
 
   const keyIdentifier = CDP_KEYCODE[key]
+
+  const autFrame = frameTree.childFrames?.find(({ frame }) => {
+    return frame.name?.includes('Your project')
+  })
+
+  if (!autFrame) {
+    throw new Error('Could not find AUT frame')
+  }
+
+  const topExecutionContext = executionContextForFrame(contexts, frameTree.frame)
+
+  const autExecutionContext = executionContextForFrame(contexts, autFrame.frame)
+
+  if (!topExecutionContext) {
+    throw new Error('Could not find Cypress\' top execution context')
+  }
+
+  if (!autExecutionContext) {
+    throw new Error('Could not find AUT execution context')
+  }
+
+  const topActiveElement = await send('Runtime.evaluate', {
+    expression: 'document.activeElement',
+    contextId: topExecutionContext,
+  })
+
+  if (topActiveElement.result.description && autFrame.frame.name && !topActiveElement.result.description.includes(autFrame.frame.name)) {
+    await send('Runtime.evaluate', {
+      expression: 'window.focus()',
+      contextId: autExecutionContext,
+    })
+  }
 
   try {
     await send('Input.dispatchKeyEvent', {

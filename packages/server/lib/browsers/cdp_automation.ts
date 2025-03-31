@@ -169,6 +169,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   private frameTree: Protocol.Page.FrameTree | undefined
   private gettingFrameTree: Promise<void> | undefined | null
   private cachedDataUrlRequestIds: Set<string> = new Set()
+  private executionContexts: Record<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription> = {}
 
   private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private offFn: OffFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private focusTabOnScreenshot: boolean = false, private isHeadless: boolean = false) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
@@ -177,6 +178,9 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     onFn('Network.loadingFailed', this.onRequestFailed)
     onFn('ServiceWorker.workerRegistrationUpdated', this.onServiceWorkerRegistrationUpdated)
     onFn('ServiceWorker.workerVersionUpdated', this.onServiceWorkerVersionUpdated)
+
+    onFn('Runtime.executionContextCreated', this.onExecutionContextCreated)
+    onFn('Runtime.executionContextDestroyed', this.onExecutionContextDestroyed)
 
     this.on = onFn
     this.off = offFn
@@ -335,6 +339,16 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
   private onServiceWorkerVersionUpdated = (params: Protocol.ServiceWorker.WorkerVersionUpdatedEvent) => {
     this.automation.onServiceWorkerVersionUpdated?.(params)
+  }
+
+  private onExecutionContextCreated = (event: Protocol.Runtime.ExecutionContextCreatedEvent) => {
+    this.executionContexts[event.context.id] = event.context
+  }
+
+  private onExecutionContextDestroyed = (event: Protocol.Runtime.ExecutionContextDestroyedEvent) => {
+    if (this.executionContexts[event.executionContextId]) {
+      delete this.executionContexts[event.executionContextId]
+    }
   }
 
   private getAllCookies = (filter: CyCookieFilter) => {
@@ -588,7 +602,13 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       case 'collect:garbage':
         return this.sendDebuggerCommandFn('HeapProfiler.collectGarbage')
       case 'key:press':
-        return cdpKeyPress(data, this.sendDebuggerCommandFn)
+        if (this.gettingFrameTree) {
+          debugVerbose('awaiting frame tree')
+
+          await this.gettingFrameTree
+        }
+
+        return cdpKeyPress(data, this.sendDebuggerCommandFn, this.executionContexts, (await this.send('Page.getFrameTree')).frameTree)
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }

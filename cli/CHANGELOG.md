@@ -1,7 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 14.2.2
+## 14.3.0
 
 _Released 4/8/2025 (PENDING)_
+
+**Features:**
+
+- The [`cy.press()`](https://on.cypress.io/api/press) command is now available. It supports dispatching native Tab keyboard events to the browser. Addresses [#31050](https://github.com/cypress-io/cypress/issues/31050). Addressed in [#31398](https://github.com/cypress-io/cypress/pull/31398).
 
 **Bugfixes:**
 
