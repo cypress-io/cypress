@@ -232,6 +232,7 @@ async function startVideoRecording (options: { previous?: VideoRecording, projec
     // tslint:disable-next-line
     const data: Data = {
       name: specPath,
+      startTime: new Date(), // needed for ts-lint
       testFailure: false,
       testAttemptIndex: 0,
       titles: [],
