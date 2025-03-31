@@ -17,6 +17,7 @@ import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
 import memory from './memory'
 import { BrowserCriClient } from './browser-cri-client'
 import { getRemoteDebuggingPort } from '../util/electron-app'
+import type { CriClient } from './cri-client'
 
 // TODO: unmix these two types
 type ElectronOpts = Windows.WindowOptions & BrowserLaunchOpts
@@ -129,6 +130,25 @@ async function recordVideo (cdpAutomation: CdpAutomation, videoApi: RunModeVideo
   const { writeVideoFrame } = await videoApi.useFfmpegVideoController()
 
   await cdpAutomation.startVideoRecording(writeVideoFrame, screencastOpts())
+}
+
+// Start video legitimately if we have a video api. Otherwise, if we're in run mode, start a dummy screencast to prevent:
+// https://github.com/electron/electron/issues/45398
+async function handleVideo (handleVideoOptions: { pageCriClient: CriClient, cdpAutomation: CdpAutomation, videoApi?: RunModeVideoApi, options: BrowserLaunchOpts }) {
+  const { pageCriClient, cdpAutomation, videoApi, options } = handleVideoOptions
+
+  if (videoApi) {
+    await recordVideo(cdpAutomation, videoApi)
+  } else if (options.isTextTerminal) {
+    // To prevent https://github.com/electron/electron/issues/45398, we start a dummy screen cast with a quality of 0
+    // and only capture every 2^32 - 1 frames without listening to any frames. This is effectively a no-op, but it
+    // prevents the issue from occurring.
+    await pageCriClient.send('Page.startScreencast', {
+      format: 'jpeg',
+      everyNthFrame: 2 ** 31 - 1,
+      quality: 0,
+    })
+  }
 }
 
 export = {
@@ -317,7 +337,7 @@ export = {
         pageCriClient.send('ServiceWorker.enable'),
         this.connectProtocolToBrowser({ protocolManager }),
         cdpSocketServer?.attachCDPClient(cdpAutomation),
-        videoApi && recordVideo(cdpAutomation, videoApi),
+        handleVideo({ pageCriClient, cdpAutomation, videoApi, options }),
         this._handleDownloads(win, options.downloadsFolder, automation),
         utils.initializeCDP(pageCriClient, automation),
         // Ensure to clear browser state in between runs. This is handled differently in browsers when we launch new tabs, but we don't have that concept in electron
