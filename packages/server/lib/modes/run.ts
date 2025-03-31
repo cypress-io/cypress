@@ -233,7 +233,12 @@ async function startVideoRecording (options: { previous?: VideoRecording, projec
     const data: Data = {
       name: specPath,
       startTime: new Date(), // needed for ts-lint
-      testFailure: false,
+      viewport: {
+        width: 0,
+        height: 0,
+      },
+      specName: '', // this is optional, the getPath will pick up from specPath
+      testFailure: false, //  this is only applicable for screenshot, not for video
       testAttemptIndex: 0,
       titles: [],
     }

@@ -40,10 +40,10 @@ export type ScreenshotsFolder = string | false | undefined
 
 // TODO: This is likely not representative of the entire Type and should be updated
 export interface Data {
+  specName: string
   name: string
   startTime: Date
-  specName?: string
-  viewport?: {
+  viewport: {
     width: number
     height: number
   }
