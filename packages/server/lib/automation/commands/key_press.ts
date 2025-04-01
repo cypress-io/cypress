@@ -4,7 +4,7 @@ import type { KeyPressParams, KeyPressSupportedKeys } from '@packages/types'
 import type { SendDebuggerCommand } from '../../browsers/cdp_automation'
 import type { Client } from 'webdriver'
 import Debug from 'debug'
-import { isEqual } from 'lodash'
+import { isEqual, isError } from 'lodash'
 
 const debug = Debug('cypress:server:automation:command:keypress')
 
@@ -42,7 +42,7 @@ async function evaluateInFrameContext (expression: string,
           contextId,
         })
       } catch (e) {
-        if ((e as Error).message.includes('Cannot find context with specified id')) {
+        if (isError(e) && (e as Error).message.includes('Cannot find context with specified id')) {
           debug('found invalid context %d, removing', contextId)
           contexts.delete(contextId)
         }
