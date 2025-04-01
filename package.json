@@ -52,7 +52,7 @@
     "sanitize:mocha:results": "node ./scripts/sanitize-mocha-results.js",
     "prestart": "yarn ensure-deps",
     "start": "cypress open --dev --global",
-    "stop-only": "npx stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,src,__snapshots__ --exclude cypress-tests.ts,*only.cy.js",
+    "stop-only": "npx stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,src,__snapshots__,patches --exclude cypress-tests.ts,*only.cy.js",
     "stop-only-all": "yarn stop-only --folder packages",
     "pretest": "yarn ensure-deps",
     "test": "yarn lerna exec yarn test --scope=cypress --scope=@packages/{config,data-context,driver,electron,errors,extension,https-proxy,launcher,net-stubbing,network,packherd-require,proxy,rewriter,scaffold-config,socket,v8-snapshot-require,telemetry} --scope=@tooling/{electron-mksnapshot,v8-snapshot}",
