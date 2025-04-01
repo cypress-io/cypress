@@ -802,7 +802,7 @@ index 1983690..ee096a3 100644
    runner.fullStackTrace = options.fullTrace;
    runner.asyncOnly = options.asyncOnly;
 diff --git a/node_modules/mocha/lib/runner.js b/node_modules/mocha/lib/runner.js
-index 20a6af2..79e89ab 100644
+index 20a6af2..2123646 100644
 --- a/node_modules/mocha/lib/runner.js
 +++ b/node_modules/mocha/lib/runner.js
 @@ -755,9 +755,42 @@ Runner.prototype.runTests = function(suite, fn) {
@@ -850,7 +850,7 @@ index 20a6af2..79e89ab 100644
              var clonedTest = test.clone();
              clonedTest.currentRetry(retry + 1);
              tests.unshift(clonedTest);
-@@ -767,8 +800,26 @@ Runner.prototype.runTests = function(suite, fn) {
+@@ -767,8 +800,25 @@ Runner.prototype.runTests = function(suite, fn) {
              // Early return + hook trigger so that it doesn't
              // increment the count wrong
              return self.hookUp(HOOK_TYPE_AFTER_EACH, next);
@@ -875,7 +875,6 @@ index 20a6af2..79e89ab 100644
 +            // There is no case where a test can 'pass' and the last test attempt be a failure,
 +            // meaning we can assume a 'passed' outerStatus has a final passed test attempt.
 +            self.emit(constants.EVENT_TEST_PASS, test);
-+           }
            }
            self.emit(constants.EVENT_TEST_END, test);
            return self.hookUp(HOOK_TYPE_AFTER_EACH, next);
