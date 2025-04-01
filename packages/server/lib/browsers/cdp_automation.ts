@@ -169,7 +169,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   private frameTree: Protocol.Page.FrameTree | undefined
   private gettingFrameTree: Promise<void> | undefined | null
   private cachedDataUrlRequestIds: Set<string> = new Set()
-  private executionContexts: Record<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription> = {}
+  private executionContexts: Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription> = new Map()
 
   private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private offFn: OffFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private focusTabOnScreenshot: boolean = false, private isHeadless: boolean = false) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
@@ -342,12 +342,14 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   }
 
   private onExecutionContextCreated = (event: Protocol.Runtime.ExecutionContextCreatedEvent) => {
-    this.executionContexts[event.context.id] = event.context
+    debugVerbose('new execution context:', event)
+    this.executionContexts.set(event.context.id, event.context)
   }
 
   private onExecutionContextDestroyed = (event: Protocol.Runtime.ExecutionContextDestroyedEvent) => {
-    if (this.executionContexts[event.executionContextId]) {
-      delete this.executionContexts[event.executionContextId]
+    debugVerbose('removing execution context', event)
+    if (this.executionContexts.has(event.executionContextId)) {
+      this.executionContexts.delete(event.executionContextId)
     }
   }
 

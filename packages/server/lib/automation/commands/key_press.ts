@@ -1,10 +1,10 @@
-import { isEqual } from 'lodash'
+import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
+import type { Protocol } from 'devtools-protocol'
 import type { KeyPressParams, KeyPressSupportedKeys } from '@packages/types'
 import type { SendDebuggerCommand } from '../../browsers/cdp_automation'
 import type { Client } from 'webdriver'
-
-import type { Protocol } from 'devtools-protocol'
 import Debug from 'debug'
+import { isEqual } from 'lodash'
 
 const debug = Debug('cypress:server:automation:command:keypress')
 
@@ -30,15 +30,31 @@ export const CDP_KEYCODE: KeyCodeLookup = {
   'Tab': 'U+000009',
 }
 
-function executionContextForFrame (contexts: Record<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription>, frame: Protocol.Page.Frame): Protocol.Runtime.ExecutionContextId | undefined {
-  return Object.values(contexts).find((context) => {
-    return context.auxData?.frameId === frame.id
-  })?.id
+async function evaluateInFrameContext (expression: string,
+  send: SendDebuggerCommand,
+  contexts: Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription>,
+  frame: Protocol.Page.Frame): Promise<ProtocolMapping.Commands['Runtime.evaluate']['returnType']> {
+  for (const [contextId, context] of contexts.entries()) {
+    if (context.auxData?.frameId === frame.id) {
+      try {
+        return await send('Runtime.evaluate', {
+          expression,
+          contextId,
+        })
+      } catch (e) {
+        if ((e as Error).message.includes('Cannot find context with specified id')) {
+          debug('found invalid context %d, removing', contextId)
+          contexts.delete(contextId)
+        }
+      }
+    }
+  }
+  throw new Error('Unable to find valid context for frame')
 }
 
 export async function cdpKeyPress (
   { key }: KeyPressParams, send: SendDebuggerCommand,
-  contexts: Record<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription>,
+  contexts: Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription>,
   frameTree: Protocol.Page.FrameTree,
 ): Promise<void> {
   debug('cdp keypress', { key })
@@ -56,28 +72,12 @@ export async function cdpKeyPress (
     throw new Error('Could not find AUT frame')
   }
 
-  const topExecutionContext = executionContextForFrame(contexts, frameTree.frame)
+  const topActiveElement = await evaluateInFrameContext('document.activeElement', send, contexts, frameTree.frame)
 
-  const autExecutionContext = executionContextForFrame(contexts, autFrame.frame)
+  const autFrameIsActive = topActiveElement.result.description && autFrame.frame.name && topActiveElement.result.description.includes(autFrame.frame.name)
 
-  if (!topExecutionContext) {
-    throw new Error('Could not find Cypress\' top execution context')
-  }
-
-  if (!autExecutionContext) {
-    throw new Error('Could not find AUT execution context')
-  }
-
-  const topActiveElement = await send('Runtime.evaluate', {
-    expression: 'document.activeElement',
-    contextId: topExecutionContext,
-  })
-
-  if (topActiveElement.result.description && autFrame.frame.name && !topActiveElement.result.description.includes(autFrame.frame.name)) {
-    await send('Runtime.evaluate', {
-      expression: 'window.focus()',
-      contextId: autExecutionContext,
-    })
+  if (!autFrameIsActive) {
+    await evaluateInFrameContext('window.focus()', send, contexts, autFrame.frame)
   }
 
   try {

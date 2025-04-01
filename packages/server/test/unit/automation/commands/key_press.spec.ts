@@ -27,17 +27,14 @@ describe('key:press automation command', () => {
       },
     }
 
-    const executionContexts: Record<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription> = {
-      [topExecutionContext.id]: topExecutionContext,
-      [autExecutionContext.id]: autExecutionContext,
-    }
+    let executionContexts: Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription> = new Map()
 
     const autFrame = {
       frame: {
         id: autFrameId,
         name: 'Your project',
       },
-    },
+    }
 
     const frameTree: Protocol.Page.FrameTree = {
       // @ts-expect-error - partial mock of the frame tree
@@ -52,6 +49,8 @@ describe('key:press automation command', () => {
 
     beforeEach(() => {
       sendFn = sinon.stub()
+      executionContexts.set(topExecutionContext.id, topExecutionContext)
+      executionContexts.set(autExecutionContext.id, autExecutionContext)
     })
 
     describe('when the aut frame does not have focus', () => {
@@ -88,6 +87,39 @@ describe('key:press automation command', () => {
           keyIdentifier: CDP_KEYCODE.Tab,
           key: 'Tab',
           code: 'Tab',
+        })
+      })
+
+      describe('when there are invalid execution contexts associated with the top frame', () => {
+        // @ts-expect-error - this is a "fake" partial
+        const invalidExecutionContext: Protocol.Runtime.ExecutionContextDescription = {
+          id: 9,
+          auxData: {
+            frameId: topFrameId,
+          },
+        }
+
+        beforeEach(() => {
+          executionContexts = new Map()
+          executionContexts.set(invalidExecutionContext.id, invalidExecutionContext)
+          executionContexts.set(topExecutionContext.id, topExecutionContext)
+          executionContexts.set(autExecutionContext.id, autExecutionContext)
+          sendFn.withArgs('Runtime.evaluate', {
+            expression: 'document.activeElement',
+            contextId: invalidExecutionContext.id,
+          }).rejects(new Error('Cannot find context with specified id'))
+        })
+
+        it('does not throw', async () => {
+          let thrown: any = undefined
+
+          try {
+            await cdpKeyPress({ key: 'Tab' }, sendFn, executionContexts, frameTree)
+          } catch (e) {
+            thrown = e
+          }
+
+          expect(thrown).to.be.undefined
         })
       })
     })
