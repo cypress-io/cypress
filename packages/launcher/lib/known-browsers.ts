@@ -3,7 +3,7 @@ import type { Browser, BrowserValidatorResult, FoundBrowser } from '@packages/ty
 const firefoxValidatorFn = (browser: FoundBrowser, platform: NodeJS.Platform): BrowserValidatorResult => {
   try {
     if (browser.majorVersion) {
-      const [majorVersion] = browser.majorVersion.split('.').map(Number)
+      const majorVersion = Number(browser.majorVersion)
 
       if (majorVersion < 135) {
         return {

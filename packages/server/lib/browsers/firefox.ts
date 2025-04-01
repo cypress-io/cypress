@@ -325,7 +325,7 @@ const defaultPreferences = {
 // CDP was deprecated in Firefox 129 and up and was removed in Firefox 141.
 // To enable BiDi (without CDP), we need to set
 //    remote.active-protocol=1
-// In order to enable CDP (without BiDi on firefox older than version 135), we need to set
+// Cypress no longer supports CDP within Firefox. However, it can be enabled if needed (but only on Firefox 141 and lower) by setting
 //    remote.active-protocol=2
 // both can be enabled via
 //    remote.active-protocol=3
