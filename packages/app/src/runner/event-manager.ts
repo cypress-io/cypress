@@ -432,9 +432,9 @@ export class EventManager {
     }
 
     Cypress = this.Cypress = this.$CypressDriver.create(config)
+    this.localBus.emit('cypress:created', Cypress)
 
     // expose Cypress globally
-    // @ts-ignore
     window.Cypress = Cypress
 
     this.studioStore.setup(config)
