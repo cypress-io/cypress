@@ -1,9 +1,20 @@
 diff --git a/node_modules/mocha/CHANGELOG.md b/node_modules/mocha/CHANGELOG.md
 deleted file mode 100644
-index 8c2f86a..0000000
+index c3b33f1..0000000
 --- a/node_modules/mocha/CHANGELOG.md
 +++ /dev/null
-@@ -1,623 +0,0 @@
+@@ -1,634 +0,0 @@
+-# 7.1.2 / 2020-04-26
+-
+-## :nut_and_bolt: Other
+-
+-- [#4251](https://github.com/mochajs/mocha/issues/4251): Prevent karma-mocha from stalling ([**@juergba**](https://github.com/juergba))
+-- [#4222](https://github.com/mochajs/mocha/issues/4222): Update dependency mkdirp to v0.5.5 ([**@outsideris**](https://github.com/outsideris))
+-
+-## :book: Documentation
+-
+-- [#4208](https://github.com/mochajs/mocha/issues/4208): Add Wallaby logo to site ([**@boneskull**](https://github.com/boneskull))
+-
 -# 7.1.1 / 2020-03-18
 -
 -## :lock: Security Fixes
@@ -760,10 +771,10 @@ index 740e1fd..0cd2769 100644
    runner.fullStackTrace = options.fullTrace;
    runner.asyncOnly = options.asyncOnly;
 diff --git a/node_modules/mocha/lib/runner.js b/node_modules/mocha/lib/runner.js
-index 8e7c873..5208e60 100644
+index 25c03b9..f71c992 100644
 --- a/node_modules/mocha/lib/runner.js
 +++ b/node_modules/mocha/lib/runner.js
-@@ -682,9 +682,43 @@ Runner.prototype.runTests = function(suite, fn) {
+@@ -677,9 +677,43 @@ Runner.prototype.runTests = function(suite, fn) {
            }
            self.emit(constants.EVENT_TEST_END, test);
            return self.hookUp(HOOK_TYPE_AFTER_EACH, next);
@@ -809,7 +820,7 @@ index 8e7c873..5208e60 100644
              var clonedTest = test.clone();
              clonedTest.currentRetry(retry + 1);
              tests.unshift(clonedTest);
-@@ -694,8 +728,25 @@ Runner.prototype.runTests = function(suite, fn) {
+@@ -689,8 +723,25 @@ Runner.prototype.runTests = function(suite, fn) {
              // Early return + hook trigger so that it doesn't
              // increment the count wrong
              return self.hookUp(HOOK_TYPE_AFTER_EACH, next);

@@ -56,6 +56,8 @@ describe('Cypress Studio', () => {
 
       cy.waitForSpecToFinish()
 
+      cy.findByTestId('studio-panel').should('not.exist')
+
       cy.intercept('/cypress/e2e/index.html', () => {
         // wait for the promise to resolve before responding
         // this will ensure the studio panel is loaded before the test finishes
@@ -70,7 +72,7 @@ describe('Cypress Studio', () => {
       // regular studio is not loaded until after the test finishes
       cy.get('[data-cy="hook-name-studio commands"]').should('not.exist')
       // cloud studio is loaded immediately
-      cy.findByTestId('studio-panel').should('exist').then(() => {
+      cy.findByTestId('studio-panel').then(() => {
         // we've verified the studio panel is loaded, now resolve the promise so the test can finish
         deferred.resolve()
       })
@@ -81,8 +83,8 @@ describe('Cypress Studio', () => {
       cy.waitForSpecToFinish()
 
       // Verify the studio panel is still open
-      cy.findByTestId('studio-panel').should('exist')
-      cy.get('[data-cy="hook-name-studio commands"]').should('exist')
+      cy.findByTestId('studio-panel')
+      cy.get('[data-cy="hook-name-studio commands"]')
     })
   })
 
@@ -1031,11 +1033,11 @@ describe('studio functionality', () => {
 })`)
     })
 
-    cy.findByTestId('studio-toolbar-controls').should('exist')
+    cy.findByTestId('studio-toolbar-controls')
 
     cy.get('button').contains('Save Commands').click()
 
-    cy.findByTestId('studio-toolbar-controls').should('exist')
+    cy.findByTestId('studio-toolbar-controls')
     cy.get('button').contains('Save Commands')
 
     cy.findByTestId('hook-name-studio commands').closest('.hook-studio').within(() => {
