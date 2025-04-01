@@ -16,7 +16,6 @@ index 71ef0fc..0000000
 -
 -- [#4258](https://github.com/mochajs/mocha/issues/4258): Fix missing dot in name of configuration file ([**@sonicdoe**](https://github.com/sonicdoe))
 -- [#4194](https://github.com/mochajs/mocha/issues/4194): Check if module.paths really exists ([**@ematipico**](https://github.com/ematipico))
--- [#4256](https://github.com/mochajs/mocha/issues/4256): `--forbid-only` does not recognize `it.only` when `before` crashes ([**@arvidOtt**](https://github.com/arvidOtt))
 -- [#4152](https://github.com/mochajs/mocha/issues/4152): Bug with multiple async done() calls ([**@boneskull**](https://github.com/boneskull))
 -- [#4275](https://github.com/mochajs/mocha/issues/4275): Improper warnings for invalid reporters ([**@boneskull**](https://github.com/boneskull))
 -- [#4288](https://github.com/mochajs/mocha/issues/4288): Broken hook.spec.js test for IE11 ([**@boneskull**](https://github.com/boneskull))
