@@ -1,7 +1,7 @@
 import cs from 'classnames'
 import _ from 'lodash'
 import { observer } from 'mobx-react'
-import React, { MouseEvent } from 'react'
+import React, { MouseEvent, useCallback } from 'react'
 
 import { indent } from '../lib/util'
 
@@ -23,12 +23,12 @@ interface SuiteProps {
 }
 
 const Suite = observer(({ eventManager = events, model, studioEnabled, canSaveStudioLogs }: SuiteProps) => {
-  const _launchStudio = (e: MouseEvent) => {
+  const _launchStudio = useCallback((e: MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
 
     eventManager.emit('studio:init:suite', model.id)
-  }
+  }, [eventManager, model.id])
 
   const _header = () => (
     <>

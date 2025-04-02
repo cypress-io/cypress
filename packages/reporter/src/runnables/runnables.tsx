@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
-import React, { MouseEvent, useEffect, useRef } from 'react'
+import React, { MouseEvent, useCallback, useEffect, useRef } from 'react'
 
 import events, { Events } from '../lib/events'
 import { RunnablesError, RunnablesErrorModel } from './runnable-error'
@@ -33,12 +33,12 @@ interface RunnablesEmptyStateProps {
 }
 
 const RunnablesEmptyState = ({ spec, studioEnabled, eventManager = events }: RunnablesEmptyStateProps) => {
-  const _launchStudio = (e: MouseEvent) => {
+  const _launchStudio = useCallback((e: MouseEvent) => {
     e.preventDefault()
 
     // root runnable always has r1 as id
     eventManager.emit('studio:init:suite', 'r1')
-  }
+  }, [eventManager])
 
   const isAllSpecs = spec.absolute === '__all' || spec.relative === '__all'
 

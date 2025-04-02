@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react'
-import React from 'react'
+import React, { useCallback } from 'react'
 
 interface Props {
   value: boolean
@@ -9,9 +9,9 @@ interface Props {
 }
 
 const Switch: React.FC<Props> = observer(({ value, 'data-cy': dataCy, size = 'lg', onUpdate }) => {
-  const _onClick = (e: MouseEvent) => {
+  const _onClick = useCallback((e: MouseEvent) => {
     onUpdate(e)
-  }
+  }, [onUpdate])
 
   return (
     <button

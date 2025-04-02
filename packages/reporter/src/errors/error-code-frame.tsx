@@ -10,7 +10,7 @@ interface Props {
 }
 
 const ErrorCodeFrame: React.FC<Props> = observer(({ codeFrame }) => {
-  const codeFrameRef = useRef(null)
+  const codeFrameRef = useRef<null | HTMLPreElement>(null)
 
   const { line, frame, language } = codeFrame
 

@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react'
-import React, { MouseEvent, useEffect, useRef, useState } from 'react'
+import React, { MouseEvent, useCallback, useEffect, useRef, useState } from 'react'
 // @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
 import cs from 'classnames'
@@ -27,31 +27,31 @@ interface StudioControlsProps {
 const StudioControls: React.FC<StudioControlsProps> = observer(({ events: eventsProps = events, canSaveStudioLogs }) => {
   const [copySuccess, setCopySuccess] = useState(false)
 
-  const _cancel = (e: MouseEvent) => {
+  const _cancel = useCallback((e: MouseEvent) => {
     e.preventDefault()
 
     eventsProps.emit('studio:cancel')
-  }
+  }, [eventsProps])
 
-  const _save = (e: MouseEvent) => {
+  const _save = useCallback((e: MouseEvent) => {
     e.preventDefault()
 
     eventsProps.emit('studio:save')
-  }
+  }, [eventsProps])
 
-  const _copy = (e: MouseEvent) => {
+  const _copy = useCallback((e: MouseEvent) => {
     e.preventDefault()
 
-    events.emit('studio:copy:to:clipboard', () => {
+    eventsProps.emit('studio:copy:to:clipboard', () => {
       setCopySuccess(true)
     })
-  }
+  }, [eventsProps])
 
-  const _endCopySuccess = () => {
+  const _endCopySuccess = useCallback(() => {
     if (copySuccess) {
       setCopySuccess(false)
     }
-  }
+  }, [copySuccess])
 
   return (
     <div className='studio-controls'>
@@ -94,24 +94,23 @@ interface TestProps {
 
 const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = events, appState: appStateProps = appState, scroller: scrollerProps = scroller, studioEnabled, canSaveStudioLogs }) => {
   const containerRef = useRef(null)
-
-  const mounted = useRef<boolean>()
+  const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
     _scrollIntoView()
-    if (!mounted.current) {
-      mounted.current = true
+    if (!isMounted) {
+      setIsMounted(true)
     } else {
       model.callbackAfterUpdate()
     }
   })
 
-  const _launchStudio = (e: MouseEvent) => {
+  const _launchStudio = useCallback((e: MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
 
     eventsProps.emit('studio:init:test', model.id)
-  }
+  }, [eventsProps, model.id])
 
   const _scrollIntoView = () => {
     if (appStateProps.autoScrollingEnabled && (appStateProps.isRunning || appStateProps.studioActive) && model.state !== 'processing') {
@@ -169,15 +168,6 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
     )
   }
 
-  const _contents = () => {
-    return (
-      <div style={{ paddingLeft: indent(model.level) }}>
-        <Attempts studioActive={appStateProps.studioActive} test={model} scrollIntoView={() => _scrollIntoView()} />
-        {appStateProps.studioActive && <StudioControls canSaveStudioLogs={canSaveStudioLogs}/>}
-      </div>
-    )
-  }
-
   return (
     <Collapsible
       containerRef={containerRef}
@@ -188,7 +178,10 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
       isOpen={model.isOpen}
       hideExpander
     >
-      {_contents()}
+      <div style={{ paddingLeft: indent(model.level) }}>
+        <Attempts studioActive={appStateProps.studioActive} test={model} scrollIntoView={() => _scrollIntoView()} />
+        {appStateProps.studioActive && <StudioControls canSaveStudioLogs={canSaveStudioLogs}/>}
+      </div>
     </Collapsible>
   )
 })

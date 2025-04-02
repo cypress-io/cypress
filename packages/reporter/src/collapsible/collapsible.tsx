@@ -1,8 +1,6 @@
 import cs from 'classnames'
-import React, { CSSProperties, MouseEvent, ReactNode, RefObject, useEffect, useState } from 'react'
-
+import React, { CSSProperties, MouseEvent, ReactNode, RefObject, useCallback, useEffect, useState } from 'react'
 import { onEnterOrSpace } from '../lib/util'
-
 import ChevronIcon from '@packages/frontend-shared/src/assets/icons/chevron-down-small_x8.svg'
 
 interface CollapsibleProps {
@@ -24,14 +22,14 @@ const Collapsible: React.FC<CollapsibleProps> = ({ isOpen: isOpenAsProp = false,
     setIsOpen(isOpenAsProp)
   }, [isOpenAsProp])
 
-  const _onClick = (e: MouseEvent) => {
+  const _onClick = useCallback((e: MouseEvent) => {
     e.stopPropagation()
     setIsOpen(!isOpen)
-  }
+  }, [isOpen])
 
-  const _onKeyPress = () => {
+  const _onKeyPress = useCallback(() => {
     setIsOpen(!isOpen)
-  }
+  }, [isOpen])
 
   return (
     <div className={cs('collapsible', { 'is-open': isOpen })} ref={containerRef}>

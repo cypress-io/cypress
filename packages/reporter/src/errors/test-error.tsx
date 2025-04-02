@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import React, { MouseEvent } from 'react'
+import React, { MouseEvent, useCallback } from 'react'
 import cs from 'classnames'
 import { observer } from 'mobx-react'
 import Markdown from 'markdown-it'
@@ -54,15 +54,10 @@ const TestError: React.FC<TestErrorProps> = ({ err, groupLevel = 0, testId, comm
 
   md.enable(['backticks', 'emphasis', 'escape'])
 
-  const onPrint = () => {
-    events.emit('show:error', { err, groupLevel, testId, commandId })
-  }
-
-  const _onPrintClick = (e: MouseEvent) => {
+  const _onPrint = useCallback((e: MouseEvent) => {
     e.stopPropagation()
-
-    onPrint()
-  }
+    events.emit('show:error', { err, groupLevel, testId, commandId })
+  }, [err, groupLevel, testId, commandId])
 
   const { codeFrame } = err
 
@@ -97,10 +92,10 @@ const TestError: React.FC<TestErrorProps> = ({ err, groupLevel = 0, testId, comm
             header='View stack trace'
             headerClass='runnable-err-stack-expander'
             headerExtras={
-              <FlashOnClick onClick={_onPrintClick} message="Printed output to your console">
+              <FlashOnClick onClick={_onPrint} message="Printed output to your console">
                 <div
                   className="runnable-err-print"
-                  onKeyPress={onEnterOrSpace(onPrint)}
+                  onKeyDown={onEnterOrSpace(() => events.emit('show:error', { err, groupLevel, testId, commandId }))}
                   role='button'
                   tabIndex={0}
                 >

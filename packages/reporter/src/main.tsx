@@ -57,7 +57,6 @@ const Reporter: React.FC<SingleReporterProps> = observer(({ appState = appStateD
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
-    // do componentDidMount logic
     if (!runnerStore.spec) {
       throw Error(`Expected runnerStore.spec not to be null.`)
     }
@@ -90,8 +89,6 @@ const Reporter: React.FC<SingleReporterProps> = observer(({ appState = appStateD
   }, [])
 
   useEffect(() => {
-    // do componentDidUpdate logic
-    // TODO: is this in the right place?
     if (!runnerStore.spec) {
       throw Error(`Expected runnerStore.spec not to be null.`)
     }
@@ -103,7 +100,7 @@ const Reporter: React.FC<SingleReporterProps> = observer(({ appState = appStateD
     ) {
       statsStore.reset()
     }
-  }, [runnerStore.spec, resetStatsOnSpecChange, previousSpecRunId])
+  }, [runnerStore.spec, runnerStore.specRunId, resetStatsOnSpecChange, previousSpecRunId])
 
   return (
     <div className={cs(className, 'reporter', {

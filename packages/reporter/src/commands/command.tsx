@@ -2,7 +2,7 @@ import _ from 'lodash'
 import cs from 'classnames'
 import Markdown from 'markdown-it'
 import { observer } from 'mobx-react'
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
 import appState from '../lib/app-state'
@@ -313,12 +313,12 @@ const CommandControls = observer(({ model, commandName, events }) => {
   const isSessionCommand = commandName === 'session'
   const displayNumOfChildren = !isSystemEvent && !isSessionCommand && model.hasChildren && !model.isOpen
 
-  const _removeStudioCommand = (e: React.MouseEvent<HTMLElement, globalThis.MouseEvent>) => {
+  const _removeStudioCommand = useCallback((e: React.MouseEvent<HTMLElement, globalThis.MouseEvent>) => {
     e.preventDefault()
     e.stopPropagation()
 
     events.emit('studio:remove:command', model.number)
-  }
+  }, [events, model.number])
 
   return (
     <span className='command-controls'>
@@ -384,25 +384,6 @@ const Command: React.FC<Props> = observer(({ model, aliasesWithDuplicates, group
     for (let i = 1; i < groupLevel; i++) {
       groupPlaceholder.push(<span key={`${groupId}-${i}`} className='command-group-block' />)
     }
-  }
-
-  const _children = () => {
-    if (!model.hasChildren || !model.isOpen) {
-      return null
-    }
-
-    return (
-      <ul className='command-child-container'>
-        {model.children.map((child) => (
-          <Command
-            key={child.id}
-            model={child}
-            aliasesWithDuplicates={null}
-            groupId={model.id}
-          />
-        ))}
-      </ul>
-    )
   }
 
   const _isPinned = () => {
@@ -503,7 +484,18 @@ const Command: React.FC<Props> = observer(({ model, aliasesWithDuplicates, group
           </FlashOnClick>
         </div>
         <Progress model={model} />
-        {_children()}
+        {model.hasChildren && model.isOpen && (
+          <ul className='command-child-container'>
+            {model.children.map((child) => (
+              <Command
+                key={child.id}
+                model={child}
+                aliasesWithDuplicates={null}
+                groupId={model.id}
+              />
+            ))}
+          </ul>
+        )}
       </li>
       {model.showError && (
         <li>
