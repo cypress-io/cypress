@@ -50,7 +50,7 @@ const Attempt: React.FC<AttemptProps> = observer(({ model, scrollIntoView, studi
     } else {
       setIsMounted(true)
     }
-  }, [model, studioActive])
+  })
 
   return (
     <li
@@ -63,6 +63,7 @@ const Attempt: React.FC<AttemptProps> = observer(({ model, scrollIntoView, studi
         headerClass='attempt-name'
         contentClass='attempt-content'
         isOpen={model.isOpen}
+        onOpenStateChangeRequested={(isOpen: boolean) => model.setIsOpen(isOpen)}
       >
         <div className={`attempt-${model.id + 1}`}>
           <Sessions model={model.sessions} />

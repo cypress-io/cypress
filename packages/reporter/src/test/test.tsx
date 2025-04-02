@@ -176,6 +176,7 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
       headerStyle={{ paddingLeft: indent(model.level) }}
       contentClass='runnable-instruments'
       isOpen={model.isOpen}
+      onOpenStateChangeRequested={(isOpen: boolean) => model.setIsOpen(isOpen)}
       hideExpander
     >
       <div style={{ paddingLeft: indent(model.level) }}>

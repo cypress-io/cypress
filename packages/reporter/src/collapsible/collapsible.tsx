@@ -1,5 +1,5 @@
 import cs from 'classnames'
-import React, { CSSProperties, MouseEvent, ReactNode, RefObject, useCallback, useEffect, useState } from 'react'
+import React, { CSSProperties, MouseEvent, ReactNode, RefObject, useCallback, useState } from 'react'
 import { onEnterOrSpace } from '../lib/util'
 import ChevronIcon from '@packages/frontend-shared/src/assets/icons/chevron-down-small_x8.svg'
 
@@ -13,23 +13,22 @@ interface CollapsibleProps {
   contentClass?: string
   hideExpander?: boolean
   children?: ReactNode
+  onOpenStateChangeRequested?: (isOpen: boolean) => void
 }
 
-const Collapsible: React.FC<CollapsibleProps> = ({ isOpen: isOpenAsProp = false, header, headerClass = '', headerStyle = {}, headerExtras, contentClass = '', hideExpander = false, containerRef = null, toggleOpen = () => undefined, children }) => {
-  const [isOpen, setIsOpen] = useState(isOpenAsProp)
+const Collapsible: React.FC<CollapsibleProps> = ({ isOpen: isOpenAsProp = false, header, headerClass = '', headerStyle = {}, headerExtras, contentClass = '', hideExpander = false, containerRef = null, onOpenStateChangeRequested, children }) => {
+  const [isOpenState, setIsOpenState] = useState(isOpenAsProp)
 
-  useEffect(() => {
-    setIsOpen(isOpenAsProp)
-  }, [isOpenAsProp])
+  const toggleOpenState = useCallback((e?: MouseEvent) => {
+    e?.stopPropagation()
+    if (onOpenStateChangeRequested) {
+      onOpenStateChangeRequested(!isOpen)
+    } else {
+      setIsOpenState(!isOpen)
+    }
+  }, [isOpenState, onOpenStateChangeRequested])
 
-  const _onClick = useCallback((e: MouseEvent) => {
-    e.stopPropagation()
-    setIsOpen(!isOpen)
-  }, [isOpen])
-
-  const _onKeyPress = useCallback(() => {
-    setIsOpen(!isOpen)
-  }, [isOpen])
+  const isOpen = onOpenStateChangeRequested ? isOpenAsProp : isOpenState
 
   return (
     <div className={cs('collapsible', { 'is-open': isOpen })} ref={containerRef}>
@@ -37,8 +36,8 @@ const Collapsible: React.FC<CollapsibleProps> = ({ isOpen: isOpenAsProp = false,
         <div
           aria-expanded={isOpen}
           className='collapsible-header'
-          onClick={_onClick}
-          onKeyUp={onEnterOrSpace(_onKeyPress)}
+          onClick={toggleOpenState}
+          onKeyUp={onEnterOrSpace(toggleOpenState)}
           role='button'
           tabIndex={0}
         >
