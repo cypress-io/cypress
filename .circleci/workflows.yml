@@ -705,6 +705,7 @@ commands:
               YARN_CMD="cypress:run"
               PARALLEL="--parallel --group 5x-driver-cdp-<<parameters.browser>>"
             else
+              DEBUG="cypress:server:automation"
               YARN_CMD="cypress:run"
               PARALLEL="--parallel --group 5x-driver-<<parameters.browser>>"
             fi

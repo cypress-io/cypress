@@ -86,9 +86,13 @@ export class Automation {
       const onReq = this.get('onRequest')
 
       if (onReq) {
+        debug('Middleware `onRequest` fn found, attempting middleware exec for message: %s', message)
+
         return Bluebird.try(() => {
           return onReq(resolvedMessage, resolvedData)
         }).catch((e) => {
+          debug('Error from middleware for message %s: %o', message, e)
+
           if (AutomationNotImplemented.isAutomationNotImplementedErr(e)) {
             debug(`${e.message}. Falling back to emit via socket.`)
 
