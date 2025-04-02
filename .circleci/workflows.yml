@@ -705,7 +705,6 @@ commands:
               YARN_CMD="cypress:run"
               PARALLEL="--parallel --group 5x-driver-cdp-<<parameters.browser>>"
             else
-              DEBUG="cypress:server:automation"
               YARN_CMD="cypress:run"
               PARALLEL="--parallel --group 5x-driver-<<parameters.browser>>"
             fi
@@ -714,6 +713,7 @@ commands:
               # internal PR
               CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
               CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
+              DEBUG="cypress:server:automation" \
               yarn $YARN_CMD --record $PARALLEL --browser <<parameters.browser>> --runner-ui
             else
               # external PR
