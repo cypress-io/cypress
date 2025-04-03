@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.0.0
+
+_Released 7/1/2025 (PENDING)_
+
+**Breaking Changes:**
+
+- Removed support for Angular 17. Only Angular 18 and 19 are now supported. This change affects the `@cypress/angular` package. Addresses [#31303](https://github.com/cypress-io/cypress/issues/31303).
+
 ## 14.1.1
 
 _Released 3/11/2025 (PENDING)_
