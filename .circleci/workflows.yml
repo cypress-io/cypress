@@ -1,8 +1,8 @@
 version: 2.1
 
-chrome-stable-version: &chrome-stable-version "133.0.6943.141"
-chrome-beta-version: &chrome-beta-version "134.0.6998.35"
-firefox-stable-version: &firefox-stable-version "135.0"
+chrome-stable-version: &chrome-stable-version "134.0.6998.165"
+chrome-beta-version: &chrome-beta-version "135.0.7049.41"
+firefox-stable-version: &firefox-stable-version "136.0.3"
 
 orbs:
   browser-tools: circleci/browser-tools@1.5.2
@@ -36,10 +36,9 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - /^release\/\d+\.\d+\.\d+$/
-        - feat/implement_bidi
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'update-v8-snapshot-cache-on-develop'
-        - 'ryanm/chore/add_internal_studio'
+        - 'renovate/webdriverio-monorepo'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -50,7 +49,7 @@ macWorkflowFilters: &darwin-workflow-filters
       - equal: [ develop, << pipeline.git.branch >> ]
       # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-      - equal: [ 'feat/implement_bidi', << pipeline.git.branch >> ]
+      - equal: [ 'renovate/webdriverio-monorepo', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
@@ -61,7 +60,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
       - equal: [ develop, << pipeline.git.branch >> ]
       # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-      - equal: [ 'feat/implement_bidi', << pipeline.git.branch >> ]
+      - equal: [ 'renovate/webdriverio-monorepo', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
@@ -84,7 +83,7 @@ windowsWorkflowFilters: &windows-workflow-filters
       - equal: [ develop, << pipeline.git.branch >> ]
       # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-      - equal: [ 'feat/implement_bidi', << pipeline.git.branch >> ]
+      - equal: [ 'renovate/webdriverio-monorepo', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
@@ -98,7 +97,6 @@ executors:
     resource_class: medium
     environment:
       PLATFORM: linux
-      CI_DOCKER: "true"
 
   kitchensink-executor:
     docker:
@@ -107,7 +105,6 @@ executors:
     resource_class: medium
     environment:
       PLATFORM: linux
-      CI_DOCKER: "true"
 
   # Docker image with non-root "node" user
   non-root-docker-user:
@@ -160,7 +157,7 @@ commands:
           name: Set environment variable to determine whether or not to persist artifacts
           command: |
             echo "Setting SHOULD_PERSIST_ARTIFACTS variable"
-            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "feat/implement_bidi" ]]; then
+            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "bump-win-version-info" ]]; then
                 export SHOULD_PERSIST_ARTIFACTS=true
             fi' >> "$BASH_ENV"
   # You must run `setup_should_persist_artifacts` command and be using bash before running this command
@@ -251,7 +248,7 @@ commands:
           command: |
             source ./scripts/ensure-node.sh
             # Minification takes some time. We only really need to do that for the binary (and we regenerate snapshots separately there)
-            V8_SNAPSHOT_DISABLE_MINIFY=1 yarn build-v8-snapshot-prod
+            V8_UPDATE_METAFILE=1 V8_SNAPSHOT_DISABLE_MINIFY=1 yarn build-v8-snapshot-prod
       - prepare-modules-cache # So we don't throw these in the workspace cache
       - persist_to_workspace:
           root: ~/
@@ -659,11 +656,6 @@ commands:
         description: run subset of tests with injectDocumentDomain config enabled
         type: boolean
         default: false
-      is-firefox-cdp:
-        description: whether or not the group should be associated to the firefox CDP
-          run or not. This is determined by the browser version.
-        type: boolean
-        default: false
 
     steps:
       - restore_cached_workspace
@@ -701,13 +693,9 @@ commands:
             echo Current working directory is $PWD
             echo Total containers $CIRCLE_NODE_TOTAL
 
-
             if << parameters.inject-document-domain >> ; then
               YARN_CMD="cypress:run:inject-document-domain"
               PARALLEL="--parallel --group 5x-driver-inject-document-domain-<<parameters.browser>>"
-            elif << parameters.is-firefox-cdp >> ; then
-              YARN_CMD="cypress:run"
-              PARALLEL="--parallel --group 5x-driver-cdp-<<parameters.browser>>"
             else
               YARN_CMD="cypress:run"
               PARALLEL="--parallel --group 5x-driver-<<parameters.browser>>"
@@ -729,12 +717,7 @@ commands:
               yarn $YARN_CMD --browser <<parameters.browser>> --spec $TESTFILES --runner-ui
             fi
           working_directory: packages/driver
-      - verify-mocha-results
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
+      - sanitize-verify-and-store-mocha-results
 
   windows-install-chrome:
     parameters:
@@ -846,9 +829,7 @@ commands:
             else
               echo "skipping percy screenshots uploading"
             fi
-      - store_test_results:
-          path: /tmp/cypress
-      - store-npm-logs
+      - sanitize-verify-and-store-mocha-results
 
   run-system-tests:
     parameters:
@@ -884,12 +865,7 @@ commands:
             SPECS=`echo $SPECS | xargs -n 1 | circleci tests split --split-by=timings`
             echo SPECS=$SPECS
             yarn workspace @tooling/system-tests test:ci $SPECS --browser <<parameters.browser>>
-      - verify-mocha-results
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
+      - sanitize-verify-and-store-mocha-results
 
   run-binary-system-tests:
     steps:
@@ -904,18 +880,7 @@ commands:
             SPECS=`echo $ALL_SPECS | xargs -n 1 | circleci tests split --split-by=timings`
             echo SPECS=$SPECS
             yarn workspace @tooling/system-tests test:ci $SPECS
-      - verify-mocha-results
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
-
-  store-npm-logs:
-    description: Saves any NPM debug logs as artifacts in case there is a problem
-    steps:
-      - store_artifacts:
-          path: ~/.npm/_logs
+      - sanitize-verify-and-store-mocha-results
 
   post-install-comment:
     parameters:
@@ -934,21 +899,33 @@ commands:
               --npm << parameters.package_url_path >> \
               --binary << parameters.binary_url_path >>
 
-  verify-mocha-results:
+  sanitize-verify-and-store-mocha-results:
     description: Double-check that Mocha tests ran as expected.
     parameters:
       expectedResultCount:
         description: The number of result files to expect, ie, the number of Mocha test
           suites that ran.
         type: integer
-        ## by default, assert that at least 1 test ran
+        ## pass a default magic number of 0 to assert that at least 1 test ran
         default: 0
+      testResultsPath:
+        description: The path to the test results
+        type: string
+        default: /tmp/cypress
     steps:
+      - run:
+          name: 'Sanitize Mocha Results'
+          when: always
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn sanitize:mocha:results
       - run:
           name: 'Verify Mocha Results'
           command: |
             source ./scripts/ensure-node.sh
             yarn verify:mocha:results <<parameters.expectedResultCount>>
+      - store_test_results:
+          path: <<parameters.testResultsPath>>
 
   clone-repo-and-checkout-branch:
     description: |
@@ -1096,7 +1073,6 @@ commands:
                       name: Run tests using command
                       working_directory: /tmp/<<parameters.repo>>
                       command: <<parameters.command>>
-      - store-npm-logs
 
   test-binary-against-repo:
     description: |
@@ -1282,7 +1258,6 @@ commands:
                       command: |
                         source ./ci-ensure-node.sh
                         <<parameters.command>>
-      - store-npm-logs
 
   check-if-binary-exists:
     steps:
@@ -1399,7 +1374,6 @@ commands:
             fi
             source ./scripts/ensure-node.sh
             yarn binary-zip
-      - store-npm-logs
       - persist_to_workspace:
           root: ~/
           paths:
@@ -1456,7 +1430,6 @@ commands:
       - run:
           name: list created NPM package
           command: ls -l
-      - store-npm-logs
       - persist_to_workspace:
           root: ~/
           paths:
@@ -1479,7 +1452,6 @@ commands:
               --type npm-package \
               --file cypress.tgz \
               --version $(node -p "require('./package.json').version")
-      - store-npm-logs
       - run: ls -l
       - run: cat binary-url.json
       - run: cat npm-package-url.json
@@ -1529,7 +1501,6 @@ jobs:
       - caching-dependency-installer:
           only-cache-for-root-user: <<parameters.only-cache-for-root-user>>
           build-better-sqlite3: <<parameters.build-better-sqlite3>>
-      - store-npm-logs
 
   ## restores node_modules from previous step & builds if first step skipped
   build:
@@ -1539,6 +1510,9 @@ jobs:
       resource_class:
         type: string
         default: large
+      is_contributor_pr:
+        type: boolean
+        default: false
     resource_class: << parameters.resource_class >>
     steps:
       - restore_cached_workspace
@@ -1556,14 +1530,10 @@ jobs:
           name: Top level packages
           command: yarn list --depth=0 || true
       - run:
-          name: Check env canaries on Linux
-          command: |
-            # only Docker has the required env data for this
-            if [[ $CI_DOCKER == 'true' ]]; then
-              node ./scripts/circle-env.js --check-canaries
-            fi
+          name: Check env canaries
+          command: node ./scripts/circle-env.js --check-canaries --is-contributor-pr <<
+            parameters.is_contributor_pr >>
       - build-and-persist
-      - store-npm-logs
 
   lint:
     <<: *defaults
@@ -1578,7 +1548,6 @@ jobs:
       - run:
           name: cypress info (dev)
           command: node cli/bin/cypress info --dev
-      - store-npm-logs
 
   check-ts:
     <<: *defaults
@@ -1670,8 +1639,6 @@ jobs:
             cli/visual-snapshots/cypress-help.html
           environment:
             FORCE_COLOR: 2
-      - store_artifacts:
-          path: cli/visual-snapshots
       - run:
           name: Upload CLI snapshots for diffing
           command: |
@@ -1718,7 +1685,7 @@ jobs:
                 command: |
                   source ./scripts/ensure-node.sh
                   yarn test-integration --scope=@tooling/{packherd,v8-snapshot,electron-mksnapshot}
-            - verify-mocha-results:
+            - sanitize-verify-and-store-mocha-results:
                 expectedResultCount: 3
       - when:
           condition:
@@ -1730,11 +1697,8 @@ jobs:
                 command: |
                   source ./scripts/ensure-node.sh
                   yarn test-integration --scope=@tooling/packherd
-            - verify-mocha-results:
+            - sanitize-verify-and-store-mocha-results:
                 expectedResultCount: 1
-      - store_test_results:
-          path: /tmp/cypress
-      - store-npm-logs
 
   driver-integration-memory-tests:
     <<: *defaults
@@ -1774,11 +1738,7 @@ jobs:
             DEBUG=cypress*memory \
             yarn cypress:run --browser electron --spec "cypress/e2e/memory/*.cy.*"
           working_directory: packages/driver
-      - store_test_results:
-          path: /tmp/cypress
-      - store-npm-logs
-      - store_artifacts:
-          path: packages/driver/cypress/logs/memory
+      - sanitize-verify-and-store-mocha-results
 
   unit-tests:
     <<: *defaults
@@ -1801,6 +1761,7 @@ jobs:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
             - run: yarn test-scripts scripts/**/*spec.js
+            - sanitize-verify-and-store-mocha-results
       - unless:
           condition:
             equal: [ *windows-executor, << parameters.executor >> ]
@@ -1810,16 +1771,8 @@ jobs:
             - run: yarn test
             # run type checking for each individual package
             - run: yarn lerna run types
-            - verify-mocha-results:
+            - sanitize-verify-and-store-mocha-results:
                 expectedResultCount: 20
-      - store_test_results:
-          path: /tmp/cypress
-      # CLI tests generate HTML files with sample CLI command output
-      - store_artifacts:
-          path: cli/test/html
-      - store_artifacts:
-          path: packages/errors/__snapshot-images__
-      - store-npm-logs
 
   verify-release-readiness:
     <<: *defaults
@@ -1849,7 +1802,6 @@ jobs:
       - run:
           name: "Lint types 🧹"
           command: yarn workspace cypress dtslint
-      - store-npm-logs
 
   server-unit-tests:
     <<: *defaults
@@ -1857,11 +1809,8 @@ jobs:
     steps:
       - restore_cached_workspace
       - run: yarn test-unit --scope=@packages/server
-      - verify-mocha-results:
+      - sanitize-verify-and-store-mocha-results:
           expectedResultCount: 1
-      - store_test_results:
-          path: /tmp/cypress
-      - store-npm-logs
 
   server-unit-tests-cloud-environment:
     <<: *defaults
@@ -1891,11 +1840,8 @@ jobs:
                 name: reinstall dependencies to work around cache issue (Windows only)
                 command: rm -rf node_modules && yarn
       - run: yarn workspace @packages/server test-unit cloud/environment_spec.ts
-      - verify-mocha-results:
+      - sanitize-verify-and-store-mocha-results:
           expectedResultCount: 1
-      - store_test_results:
-          path: /tmp/cypress
-      - store-npm-logs
 
   server-integration-tests:
     <<: *defaults
@@ -1905,11 +1851,8 @@ jobs:
       - install-browsers:
           install-chrome: true
       - run: yarn test-integration --scope=@packages/server
-      - verify-mocha-results:
+      - sanitize-verify-and-store-mocha-results:
           expectedResultCount: 1
-      - store_test_results:
-          path: /tmp/cypress
-      - store-npm-logs
 
   server-performance-tests:
     <<: *defaults
@@ -1920,13 +1863,8 @@ jobs:
           install-firefox: true
       - run:
           command: yarn workspace @packages/server test-performance
-      - verify-mocha-results:
+      - sanitize-verify-and-store-mocha-results:
           expectedResultCount: 1
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
 
   system-tests-node-modules-install:
     <<: *defaults
@@ -2050,12 +1988,7 @@ jobs:
             CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
           command: yarn workspace @tooling/system-tests test:ci "test/non_root*spec*"
             --browser electron
-      - verify-mocha-results
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
+      - sanitize-verify-and-store-mocha-results
 
   run-frontend-shared-component-tests-chrome:
     <<: *defaults
@@ -2195,18 +2128,6 @@ jobs:
       - run-driver-integration-tests:
           browser: firefox
 
-  # Runs the driver tests using firefox 134, which does NOT use WebDriver BiDi
-  # This is to test and make sure there aren't regressions with the old CDP driver
-  driver-integration-tests-firefox-cdp:
-    <<: *defaults
-    resource_class: medium+
-    parallelism: 5
-    steps:
-      - run-driver-integration-tests:
-          browser: firefox
-          firefox-version: "134.0.2"
-          is-firefox-cdp: true
-
   driver-integration-tests-electron:
     <<: *defaults
     parallelism: 5
@@ -2259,12 +2180,7 @@ jobs:
             yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group reporter --runner-ui
           working_directory: packages/reporter
-      - verify-mocha-results
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
+      - sanitize-verify-and-store-mocha-results
 
   run-webpack-dev-server-integration-tests:
     <<: *defaults
@@ -2285,11 +2201,7 @@ jobs:
             yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group webpack-dev-server
           working_directory: npm/webpack-dev-server
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
+      - sanitize-verify-and-store-mocha-results
 
   run-vite-dev-server-integration-tests:
     <<: *defaults
@@ -2309,11 +2221,7 @@ jobs:
             yarn percy exec --parallel -- -- \
             yarn cypress:run --record --parallel --group vite-dev-server
           working_directory: npm/vite-dev-server
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
+      - sanitize-verify-and-store-mocha-results
 
   npm-webpack-preprocessor:
     <<: *defaults
@@ -2325,7 +2233,6 @@ jobs:
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-preprocessor test
-      - store-npm-logs
 
   npm-webpack-dev-server:
     <<: *defaults
@@ -2347,9 +2254,8 @@ jobs:
           name: Run tests
           command: yarn test
           working_directory: npm/vite-dev-server
-      - store_test_results:
-          path: npm/vite-dev-server/test_results
-      - store-npm-logs
+      - sanitize-verify-and-store-mocha-results:
+          testResultsPath: npm/vite-dev-server/test_results
 
   npm-webpack-batteries-included-preprocessor:
     <<: *defaults
@@ -2371,11 +2277,8 @@ jobs:
           name: Run tests
           command: yarn test
           working_directory: npm/vue
-      - store_test_results:
-          path: npm/vue/test_results
-      - store_artifacts:
-          path: npm/vue/test_results
-      - store-npm-logs
+      - sanitize-verify-and-store-mocha-results:
+          testResultsPath: npm/vue/test_results
 
   npm-angular:
     <<: *defaults
@@ -2384,7 +2287,6 @@ jobs:
       - run:
           name: Build
           command: yarn lerna run build --scope=@cypress/angular
-      - store-npm-logs
 
   npm-puppeteer-unit-tests:
     <<: *defaults
@@ -2397,11 +2299,8 @@ jobs:
           name: Run tests
           command: yarn test
           working_directory: npm/puppeteer
-      - store_test_results:
-          path: npm/puppeteer/test_results
-      - store_artifacts:
-          path: npm/puppeteer/test_results
-      - store-npm-logs
+      - sanitize-verify-and-store-mocha-results:
+          testResultsPath: npm/puppeteer/test_results
 
   npm-puppeteer-cypress-tests:
     <<: *defaults
@@ -2414,11 +2313,7 @@ jobs:
       - run:
           command: yarn cypress:run
           working_directory: npm/puppeteer
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
+      - sanitize-verify-and-store-mocha-results
 
   npm-react:
     <<: *defaults
@@ -2431,11 +2326,8 @@ jobs:
           name: Run tests
           command: yarn test
           working_directory: npm/react
-      - store_test_results:
-          path: npm/react/test_results
-      - store_artifacts:
-          path: npm/react/test_results
-      - store-npm-logs
+      - sanitize-verify-and-store-mocha-results:
+          testResultsPath: npm/react/test_results
 
   npm-vite-plugin-cypress-esm:
     <<: *defaults
@@ -2448,11 +2340,8 @@ jobs:
           name: Run tests
           command: yarn test
           working_directory: npm/vite-plugin-cypress-esm
-      - store_test_results:
-          path: npm/vite-plugin-cypress-esm/test_results
-      - store_artifacts:
-          path: npm/vite-plugin-cypress-esm/test_results
-      - store-npm-logs
+      - sanitize-verify-and-store-mocha-results:
+          testResultsPath: npm/vite-plugin-cypress-esm/test_results
 
   npm-mount-utils:
     <<: *defaults
@@ -2461,7 +2350,6 @@ jobs:
       - run:
           name: Build
           command: yarn lerna run build --scope=@cypress/mount-utils
-      - store-npm-logs
 
   npm-grep:
     <<: *defaults
@@ -2471,11 +2359,8 @@ jobs:
       - run:
           name: Run tests
           command: yarn workspace @cypress/grep cy:run
-      - store_test_results:
-          path: npm/grep/test_results
-      - store_artifacts:
-          path: npm/grep/test_results
-      - store-npm-logs
+      - sanitize-verify-and-store-mocha-results:
+          testResultsPath: npm/grep/test_results
 
   npm-eslint-plugin-dev:
     <<: *defaults
@@ -2498,7 +2383,6 @@ jobs:
           command: |
             yarn test
           working_directory: npm/cypress-schematic
-      - store-npm-logs
 
   npm-release:
     <<: *defaults
@@ -2614,7 +2498,6 @@ jobs:
           name: Run Kitchensink example project
           command: |
             yarn cypress:run --project /tmp/cypress-example-kitchensink
-      - store-npm-logs
 
   test-kitchensink-against-staging:
     <<: *defaults
@@ -2640,7 +2523,6 @@ jobs:
             CYPRESS_RECORD_KEY=$TEST_KITCHENSINK_RECORD_KEY \
             CYPRESS_INTERNAL_ENV=staging \
             yarn cypress:run --project /tmp/cypress-example-kitchensink --record
-      - store-npm-logs
 
   test-against-staging:
     <<: *defaults
@@ -2655,7 +2537,6 @@ jobs:
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             CYPRESS_INTERNAL_ENV=staging \
             yarn cypress:run --project /tmp/cypress-test-tiny --record
-      - store-npm-logs
 
   test-npm-module-and-verify-binary:
     <<: *defaults
@@ -2693,7 +2574,6 @@ jobs:
           name: Cypress info
           working_directory: test-binary
           command: $(yarn bin cypress) info
-      - store-npm-logs
 
   test-npm-module-on-minimum-node-version:
     <<: *defaults
@@ -2817,7 +2697,6 @@ jobs:
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             CYPRESS_INTERNAL_ENV=staging \
             $(yarn bin cypress) run --record
-      - store-npm-logs
 
   test-binary-against-recipes-firefox:
     <<: *defaults
@@ -2897,31 +2776,6 @@ jobs:
           repo: cypress-example-todomvc
           browser: firefox
 
-  test-binary-against-conduit-chrome:
-    <<: *defaults
-    steps:
-      - test-binary-against-repo:
-          repo: cypress-example-conduit-app
-          browser: chrome
-          command: "npm run cypress:run"
-          wait-on: http://localhost:3000
-
-  test-binary-against-api-testing-firefox:
-    <<: *defaults
-    steps:
-      - test-binary-against-repo:
-          repo: cypress-example-api-testing
-          browser: firefox
-          command: "npm run cy:run"
-
-  test-binary-against-piechopper-firefox:
-    <<: *defaults
-    steps:
-      - test-binary-against-repo:
-          repo: cypress-example-piechopper
-          browser: firefox
-          command: "npm run cypress:run"
-
   test-binary-against-cypress-realworld-app:
     <<: *defaults
     resource_class: medium+
@@ -2970,7 +2824,6 @@ jobs:
           name: Run Cypress binary
           working_directory: /tmp/cypress-test-tiny
           command: DEBUG=cypress:cli $(yarn bin cypress) run
-      - store-npm-logs
 
 linux-x64-workflow: &linux-x64-workflow
   jobs:
@@ -3015,7 +2868,6 @@ linux-x64-workflow: &linux-x64-workflow
           - run-webpack-dev-server-integration-tests
           - run-vite-dev-server-integration-tests
           - driver-integration-tests-firefox
-          - driver-integration-tests-firefox-cdp
           - driver-integration-tests-chrome
           - driver-integration-tests-chrome-inject-document-domain
           - driver-integration-tests-chrome-beta-inject-document-domain
@@ -3088,10 +2940,6 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
     - driver-integration-tests-firefox:
-        context: test-runner:cypress-record-key
-        requires:
-          - build
-    - driver-integration-tests-firefox-cdp:
         context: test-runner:cypress-record-key
         requires:
           - build
@@ -3237,7 +3085,6 @@ linux-x64-workflow: &linux-x64-workflow
           - linux-lint
           - percy-finalize
           - driver-integration-tests-firefox
-          - driver-integration-tests-firefox-cdp
           - driver-integration-tests-chrome
           - driver-integration-tests-chrome-beta
           - driver-integration-tests-chrome-inject-document-domain
@@ -3391,6 +3238,7 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
   jobs:
     - node_modules_install
     - build:
+        is_contributor_pr: true
         requires:
           - node_modules_install
     # In subsequent jobs, we use some contexts that are restricted to members of the Cypress organization.
@@ -3489,10 +3337,6 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
         requires:
           - contributor-pr
     - driver-integration-tests-firefox:
-        context: test-runner:cypress-record-key
-        requires:
-          - contributor-pr
-    - driver-integration-tests-firefox-cdp:
         context: test-runner:cypress-record-key
         requires:
           - contributor-pr
@@ -3637,7 +3481,6 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
           - linux-lint
           - percy-finalize
           - driver-integration-tests-firefox
-          - driver-integration-tests-firefox-cdp
           - driver-integration-tests-chrome
           - driver-integration-tests-chrome-beta
           - driver-integration-tests-electron
@@ -3773,6 +3616,7 @@ linux-arm64-workflow: &linux-arm64-workflow
 
     - build:
         name: linux-arm64-build
+        context: test-runner:env-canary
         executor: linux-arm64
         resource_class: arm.medium
         requires:
@@ -3881,6 +3725,7 @@ darwin-arm64-workflow: &darwin-arm64-workflow
 
     - build:
         name: darwin-arm64-build
+        context: test-runner:env-canary
         executor: darwin-arm64
         resource_class: cypress-io/m1-macstadium
         requires:

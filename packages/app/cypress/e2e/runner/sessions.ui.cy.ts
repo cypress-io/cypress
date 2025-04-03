@@ -7,6 +7,9 @@ const validateSessionsInstrumentPanel = (sessionIds: Array<string> = []) => {
   .first()
   .should('contain', `Sessions (${sessionIds.length})`)
   .as('instrument_panel')
+
+  cy.get('.sessions-container')
+  .first()
   .click()
 
   sessionIds.forEach((id) => {

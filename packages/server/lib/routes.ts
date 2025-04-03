@@ -103,10 +103,16 @@ export const createCommonRoutes = ({
     next()
   })
 
+  // If we are in cypress in cypress we need to pass along the studio routes
+  // to the child project.
+  if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
+    router.get('/__cypress-studio/*', async (req, res) => {
+      await networkProxy.handleHttpRequest(req, res)
+    })
   // We need to handle the case where the studio is not defined or loaded properly.
   // Module federation still tries to load the dynamic asset, but since we do not
   // have anything to load, we return a blank file.
-  if (!getCtx().coreData.studio || getCtx().coreData.studio?.status === 'IN_ERROR') {
+  } else if (!getCtx().coreData.studio || getCtx().coreData.studio?.status === 'IN_ERROR') {
     router.get('/__cypress-studio/app-studio.js', (req, res) => {
       res.setHeader('Content-Type', 'application/javascript')
       res.status(200).send('')
@@ -171,13 +177,7 @@ export const createCommonRoutes = ({
     res.sendFile(file, { etag: false })
   })
 
-  // TODO: The below route is not technically correct for cypress in cypress tests.
-  // We should be using 'config.namespace' to provide the namespace instead of hard coding __cypress, however,
-  // In the runner when we create the spec bridge we have no knowledge of the namespace used by the server so
-  // we create a spec bridge for the namespace of the server specified in the config, but that server hasn't been created.
-  // To fix this I think we need to find a way to listen in the cypress in cypress server for routes from the server the
-  // cypress instance thinks should exist, but that's outside the current scope.
-  router.get('/__cypress/spec-bridge-iframes', async (req, res) => {
+  router.get(`/${config.namespace}/spec-bridge-iframes`, async (req, res) => {
     debug('handling cross-origin iframe for domain: %s', req.hostname)
 
     // Chrome plans to make document.domain immutable in Chrome 109, with the default value

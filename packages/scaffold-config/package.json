@@ -22,7 +22,7 @@
     "fs-extra": "^9.1.0",
     "globby": "^11.0.1",
     "resolve-package-path": "^4.0.3",
-    "semver": "^7.5.3",
+    "semver": "^7.7.1",
     "zod": "^3.22.5"
   },
   "devDependencies": {

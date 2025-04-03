@@ -1,6 +1,8 @@
 import debugModule from 'debug'
 import type { Automation } from '../automation'
+import { AutomationNotImplemented } from '../automation/automation_not_implemented'
 import type { BrowserPreRequest, BrowserResponseReceived, ResourceType } from '@packages/proxy'
+import type { AutomationMiddleware, AutomationCommands } from '@packages/types'
 import type { Client as WebDriverClient } from 'webdriver'
 import type {
   NetworkBeforeRequestSentParameters,
@@ -9,6 +11,9 @@ import type {
   NetworkFetchErrorParameters,
   BrowsingContextInfo,
 } from 'webdriver/build/bidi/localTypes'
+
+import { bidiKeyPress } from '../automation/commands/key_press'
+
 const debug = debugModule('cypress:server:browsers:bidi_automation')
 const debugVerbose = debugModule('cypress-verbose:server:browsers:bidi_automation')
 
@@ -86,6 +91,9 @@ export class BidiAutomation {
     this.webDriverClient.on('network.fetchError', this.onFetchError)
     this.webDriverClient.on('browsingContext.contextCreated', this.onBrowsingContextCreated)
     this.webDriverClient.on('browsingContext.contextDestroyed', this.onBrowsingContextDestroyed)
+
+    debug('registering middleware')
+    automation.use(this.automationMiddleware)
   }
 
   setTopLevelContextId = (contextId?: string) => {
@@ -174,9 +182,10 @@ export class BidiAutomation {
       resourceType,
       originalResourceType: params.request.initiatorType || params.request.destination,
       initiator: params.initiator,
-      // Since we are NOT using CDP, we set the values to -1 to indicate that we do not have this information.
-      cdpRequestWillBeSentTimestamp: -1,
-      cdpRequestWillBeSentReceivedTimestamp: -1,
+      // Since we are NOT using CDP, we set the values to 0 to indicate that we do not have this information.
+      // This is important when determining pre-request timeout and removal behavior
+      cdpRequestWillBeSentTimestamp: 0,
+      cdpRequestWillBeSentReceivedTimestamp: 0,
     }
 
     debugVerbose(`prerequest received for request ID ${params.request.request}: %o`, browserPreRequest)
@@ -216,6 +225,10 @@ export class BidiAutomation {
           cookies: params.request.cookies,
         })
       } catch (err: unknown) {
+        debugVerbose(`error continuing request: %o`, err)
+        debugVerbose(`removing prerequest for request ID: ${params.request.request}`)
+        // if the continueRequest fails for any reason, we need to remove the prerequest from the automation client
+        this.automation.onRemoveBrowserPreRequest?.(params.request.request)
         // happens if you kill the Cypress app in the middle of request interception. This error can be ignored
         if (!(err as Error)?.message.includes('no such request')) {
           throw err
@@ -273,5 +286,25 @@ export class BidiAutomation {
 
   static create (webdriverClient: WebDriverClient, automation: Automation) {
     return new BidiAutomation(webdriverClient, automation)
+  }
+
+  public readonly automationMiddleware: AutomationMiddleware = {
+    onRequest: async <T extends keyof AutomationCommands> (message: T, data: AutomationCommands[T]['dataType']): Promise<AutomationCommands[T]['returnType']> => {
+      debugVerbose('automation command \'%s\' requested with data: %O', message, data)
+
+      switch (message) {
+        case 'key:press':
+          if (this.topLevelContextId) {
+            await bidiKeyPress(data, this.webDriverClient, this.topLevelContextId)
+          } else {
+            throw new Error('Cannot emit key press: no top level context initialized')
+          }
+
+          return
+        default:
+          debug('BiDi automation not implemented for message: %s', message)
+          throw new AutomationNotImplemented(message, 'BiDiAutomation')
+      }
+    },
   }
 }

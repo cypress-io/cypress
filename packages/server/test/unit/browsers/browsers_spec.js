@@ -118,6 +118,19 @@ describe('lib/browsers/index', () => {
     })
   })
 
+  context('.closeProtocolConnection', () => {
+    it('calls close on instance', async () => {
+      sinon.stub(chrome, 'closeProtocolConnection').resolves()
+      await browsers.closeProtocolConnection({
+        browser: {
+          family: 'chromium',
+        },
+      })
+
+      expect(chrome.closeProtocolConnection).to.be.called
+    })
+  })
+
   context('.connectToNewSpec', () => {
     it(`throws an error if browser family doesn't exist`, () => {
       return browsers.connectToNewSpec({

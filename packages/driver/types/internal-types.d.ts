@@ -47,7 +47,6 @@ declare namespace Cypress {
       [routeId: string]: any
     }
     sinon: sinon.SinonApi
-    stop: () => void
     utils: CypressUtils
     state: State
     events: Events
@@ -77,7 +76,8 @@ declare namespace Cypress {
   }
 
   interface TestConfigOverrides extends Cypress.TestConfigOverrides {
-    protocolEnabled?: boolean
+    isDefaultProtocolEnabled?: boolean
+    isStudioProtocolEnabled?: boolean
   }
 
   interface ResolvedConfigOptions {

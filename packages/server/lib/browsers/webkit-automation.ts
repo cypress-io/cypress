@@ -196,7 +196,7 @@ export class WebKitAutomation {
       const suggestedFilename = download.suggestedFilename()
       const filePath = path.join(downloadsFolder, suggestedFilename)
 
-      this.automation.push('create:download', {
+      await this.automation.push('create:download', {
         id,
         url: download.url(),
         filePath,
@@ -207,7 +207,7 @@ export class WebKitAutomation {
       // Cypress trashes before runs - so we have to use `.saveAs` to move it
       await download.saveAs(filePath)
 
-      this.automation.push('complete:download', { id })
+      await this.automation.push('complete:download', { id })
     })
   }
 

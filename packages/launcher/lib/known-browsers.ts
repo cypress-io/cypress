@@ -1,5 +1,24 @@
 import type { Browser, BrowserValidatorResult, FoundBrowser } from '@packages/types'
 
+const firefoxValidatorFn = (browser: FoundBrowser, platform: NodeJS.Platform): BrowserValidatorResult => {
+  try {
+    if (browser.majorVersion) {
+      const majorVersion = Number(browser.majorVersion)
+
+      if (majorVersion < 135) {
+        return {
+          isSupported: false,
+          warningMessage: `Cypress does not support running ${browser.displayName} version ${browser.majorVersion} due to lack of WebDriver BiDi support. To use ${browser.displayName} with Cypress, install version 135 or newer.`,
+        }
+      }
+    }
+  } catch (e) { /* empty */ }
+
+  return {
+    isSupported: true,
+  }
+}
+
 /** list of the browsers we can detect and use by default */
 export const knownBrowsers: Browser[] = [
   {
@@ -62,9 +81,10 @@ export const knownBrowsers: Browser[] = [
     family: 'firefox',
     channel: 'stable',
     displayName: 'Firefox',
-    // Mozilla Firefox 70.0.1
+    // Mozilla Firefox 135.0.1
     versionRegex: /^Mozilla Firefox ([^\sab]+)$/m,
     binary: 'firefox',
+    validator: firefoxValidatorFn,
   },
   {
     name: 'firefox',
@@ -75,6 +95,7 @@ export const knownBrowsers: Browser[] = [
     versionRegex: /^Mozilla Firefox (\S+b\S*)$/m,
     // ubuntu PPAs install it as firefox
     binary: ['firefox-developer-edition', 'firefox'],
+    validator: firefoxValidatorFn,
   },
   {
     name: 'firefox',
@@ -85,6 +106,7 @@ export const knownBrowsers: Browser[] = [
     versionRegex: /^Mozilla Firefox (\S+a\S*)$/m,
     // ubuntu PPAs install it as firefox-trunk
     binary: ['firefox-nightly', 'firefox-trunk'],
+    validator: firefoxValidatorFn,
   },
   {
     name: 'edge',

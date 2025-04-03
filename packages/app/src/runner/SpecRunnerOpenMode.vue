@@ -1,9 +1,11 @@
 <template>
   <StudioInstructionsModal
+    v-if="studioStore.instructionModalIsOpen"
     :open="studioStore.instructionModalIsOpen"
     @close="studioStore.closeInstructionModal"
   />
   <StudioSaveModal
+    v-if="studioStore.saveModalIsOpen"
     :open="studioStore.saveModalIsOpen"
     @close="studioStore.closeSaveModal"
   />
@@ -98,7 +100,11 @@
         <ScreenshotHelperPixels />
       </template>
       <template #panel4>
-        <StudioPanel v-show="shouldShowStudioPanel" />
+        <StudioPanel
+          v-if="shouldShowStudioPanel"
+          data-cy="studio-panel"
+          :can-access-studio-a-i="studioStore.canAccessStudioAI"
+        />
       </template>
     </ResizablePanels>
   </AdjustRunnerStyleDuringScreenshot>
@@ -239,7 +245,7 @@ const studioStatus = computed(() => {
 })
 
 const shouldShowStudioPanel = computed(() => {
-  return studioStatus.value === 'INITIALIZED' && studioStore.isActive
+  return studioStatus.value === 'INITIALIZED' && (studioStore.isLoading || studioStore.isActive)
 })
 
 const hideCommandLog = runnerUiStore.hideCommandLog

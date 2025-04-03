@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "14.1.0",
+  "version": "14.2.1",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -49,6 +49,7 @@
     "prepare": "husky install",
     "prepare-release-artifacts": "node ./scripts/prepare-release-artifacts.js",
     "pretest-e2e": "yarn ensure-deps",
+    "sanitize:mocha:results": "node ./scripts/sanitize-mocha-results.js",
     "prestart": "yarn ensure-deps",
     "start": "cypress open --dev --global",
     "stop-only": "npx stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,src,__snapshots__ --exclude cypress-tests.ts,*only.cy.js",
@@ -67,14 +68,14 @@
     "pretest-watch": "yarn ensure-deps",
     "test-watch": "lerna exec yarn test-watch --ignore=@packages/{driver,root,static,web-config}",
     "type-check": "yarn lerna exec yarn type-check --scope=@tooling/system-tests && node scripts/type_check",
-    "verify:mocha:results": "node ./scripts/verify-mocha-results",
+    "verify:mocha:results": "node ./scripts/verify-mocha-results.js",
     "watch": "yarn gulp watch"
   },
   "devDependencies": {
     "@aws-sdk/client-s3": "3.485.0",
     "@aws-sdk/credential-providers": "3.53.0",
     "@babel/eslint-parser": "7.25.1",
-    "@cypress/request": "^3.0.7",
+    "@cypress/request": "^3.0.8",
     "@cypress/request-promise": "^5.0.0",
     "@electron/fuses": "1.8.0",
     "@electron/notarize": "^2.5.0",
@@ -196,7 +197,7 @@
     "rimraf": "5.0.10",
     "semantic-release": "22.0.12",
     "semantic-release-monorepo": "8.0.2",
-    "semver": "7.5.3",
+    "semver": "^7.7.1",
     "shelljs": "0.8.5",
     "sinon": "7.3.2",
     "snap-shot-it": "7.9.10",
