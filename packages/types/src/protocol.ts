@@ -138,6 +138,7 @@ export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
   uploadCaptureArtifact(artifact: CaptureArtifact): Promise<UploadCaptureArtifactResult | undefined>
   connectToBrowser (cdpClient: CDPClient): Promise<void>
   close (): void
+  db?: Database
 }
 
 type Response = {

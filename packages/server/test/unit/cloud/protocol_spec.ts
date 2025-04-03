@@ -350,6 +350,20 @@ describe('lib/cloud/protocol', () => {
     })
   })
 
+  describe('.db', () => {
+    it('returns the database instance', () => {
+      const mockDb = { test: 'db' }
+
+      protocolManager['_db'] = mockDb
+
+      expect(protocolManager.db).to.equal(mockDb)
+    })
+
+    it('returns undefined when no database is set', () => {
+      expect(protocolManager.db).to.be.undefined
+    })
+  })
+
   describe('.uploadCaptureArtifact()', () => {
     let filePath: string
     let fileSize: number
