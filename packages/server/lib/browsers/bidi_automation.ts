@@ -81,7 +81,6 @@ export class BidiAutomation {
   private constructor (webDriverClient: WebDriverClient, automation: Automation) {
     this.automation = automation
     this.webDriverClient = webDriverClient
-
     // bind Bidi Events to update the standard automation client
     // Error here is expected until webdriver adds initiatorType and destination to the request object
     // @ts-expect-error
@@ -91,9 +90,6 @@ export class BidiAutomation {
     this.webDriverClient.on('network.fetchError', this.onFetchError)
     this.webDriverClient.on('browsingContext.contextCreated', this.onBrowsingContextCreated)
     this.webDriverClient.on('browsingContext.contextDestroyed', this.onBrowsingContextDestroyed)
-
-    debug('registering middleware')
-    automation.use(this.automationMiddleware)
   }
 
   setTopLevelContextId = (contextId?: string) => {

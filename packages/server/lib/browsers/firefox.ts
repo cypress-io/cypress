@@ -421,6 +421,9 @@ function shouldUseBiDi (browser: Browser): boolean {
 export async function connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
   if (shouldUseBiDi(browser)) {
     await firefoxUtil.connectToNewSpecBiDi(options, automation, browserBidiClient!)
+
+    debug('registering middleware')
+    automation.use(browserBidiClient!.automationMiddleware)
   } else {
     await firefoxUtil.connectToNewSpecCDP(options, automation, browserCriClient!)
   }
