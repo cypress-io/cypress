@@ -48,16 +48,16 @@ interface TestErrorProps {
 }
 
 const TestError: React.FC<TestErrorProps> = ({ err, groupLevel = 0, testId, commandId }) => {
+  const _onPrint = useCallback((e: MouseEvent) => {
+    e.stopPropagation()
+    events.emit('show:error', { err, groupLevel, testId, commandId })
+  }, [err, groupLevel, testId, commandId])
+
   if (!err || !err.displayMessage) return null
 
   const md = new Markdown('zero')
 
   md.enable(['backticks', 'emphasis', 'escape'])
-
-  const _onPrint = useCallback((e: MouseEvent) => {
-    e.stopPropagation()
-    events.emit('show:error', { err, groupLevel, testId, commandId })
-  }, [err, groupLevel, testId, commandId])
 
   const { codeFrame } = err
 
