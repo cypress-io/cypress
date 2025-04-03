@@ -91,11 +91,7 @@ export class Automation {
         return Bluebird.try(() => {
           return onReq(resolvedMessage, resolvedData)
         }).catch((e) => {
-          debug('Error from middleware for message %s: %o', message, e)
-
           if (AutomationNotImplemented.isAutomationNotImplementedErr(e)) {
-            debug(`${e.message}. Falling back to emit via socket.`)
-
             return this.requestAutomationResponse(resolvedMessage, resolvedData, fn)
           }
 
@@ -193,6 +189,8 @@ export class Automation {
   }
 
   use (middlewares: AutomationMiddleware) {
+    debug('installing middleware')
+
     return this.middleware = {
       ...this.middleware,
       ...middlewares,

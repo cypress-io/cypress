@@ -79,6 +79,7 @@ export class BidiAutomation {
   private interceptId: string | undefined = undefined
 
   private constructor (webDriverClient: WebDriverClient, automation: Automation) {
+    debug('initializing bidi automation')
     this.automation = automation
     this.webDriverClient = webDriverClient
     // bind Bidi Events to update the standard automation client
