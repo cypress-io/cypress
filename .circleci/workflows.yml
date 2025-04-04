@@ -784,6 +784,7 @@ commands:
       - windows-install-chrome:
           browser: <<parameters.browser>>
       - run:
+          name: Run <<parameters.package>> UI tests
           command: |
             echo Current working directory is $PWD
             echo Total containers $CIRCLE_NODE_TOTAL
