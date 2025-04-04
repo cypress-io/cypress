@@ -1376,7 +1376,7 @@ export const AllCypressErrors = {
   // TODO: link to docs on injectDocumentDomain
   INJECT_DOCUMENT_DOMAIN_DEPRECATION: () => {
     return errTemplate`\
-      The ${fmt.highlight('injectDocumentDomain')} option is deprecated. Interactions with intra-test navigations to differing hostnames must now be wrapped in ${fmt.highlight('cy.origin')} commands, even if the hostname is a subdomain. This configuration option will be removed in Cypress 15.
+      The ${fmt.highlight('injectDocumentDomain')} option is deprecated. Interactions with intra-test navigations to differing hostnames must now be wrapped in ${fmt.highlight('cy.origin')} commands, even if the hostname is a subdomain. This configuration option will be removed in a future version of Cypress.
     
       Read the documentation for the injectDocumentDomain configuration option: https://on.cypress.io/inject-document-domain-configuration
     `

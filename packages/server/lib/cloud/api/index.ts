@@ -448,7 +448,7 @@ export default {
       if (script) {
         const config = options.project.getConfig()
 
-        await options.project.protocolManager.setupProtocol(script, {
+        await options.project.protocolManager.prepareAndSetupProtocol(script, {
           runId: result.runId,
           projectId: options.projectId,
           testingType: options.testingType,
@@ -460,6 +460,7 @@ export default {
           projectConfig: _.pick(config, ['devServerPublicPathRoute', 'port', 'proxyUrl', 'namespace']),
           mountVersion: runnerCapabilities.protocolMountVersion,
           debugData: options.project.configDebugData,
+          mode: 'record',
         })
       }
 
@@ -691,4 +692,5 @@ export default {
   },
 
   retryWithBackoff,
+  runnerCapabilities,
 }

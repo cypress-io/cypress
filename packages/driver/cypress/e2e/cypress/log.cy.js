@@ -49,7 +49,7 @@ describe('src/cypress/log', function () {
     })
 
     it('does not create a log when protocol is disabled', function () {
-      this.config.returns(false)
+      this.state.withArgs('isProtocolEnabled').returns(false)
       const log = this.log({ name: 'mock', hidden: false })
       const hiddenLog = this.log({ name: 'mock', hidden: true })
 
@@ -58,7 +58,7 @@ describe('src/cypress/log', function () {
     })
 
     it('creates a hidden log when protocol is enabled', function () {
-      this.config.returns(true)
+      this.state.withArgs('isProtocolEnabled').returns(true)
       const log = this.log({ name: 'mock', hidden: false })
       const hiddenLog = this.log({ name: 'mock', hidden: true })
 
@@ -184,7 +184,7 @@ describe('src/cypress/log', function () {
 
     describe('when protocol is disabled', function () {
       it('does not truncate message value', function () {
-        this.config.withArgs('protocolEnabled').returns(false)
+        this.state.withArgs('isProtocolEnabled').returns(false)
         const log = new Log(this.createSnapshot, this.state, this.config, this.fireChangeEvent)
         const longMessage = 'x'.repeat(5000)
 
@@ -194,7 +194,7 @@ describe('src/cypress/log', function () {
       })
 
       it('does not truncates renderProps.message value', function () {
-        this.config.withArgs('protocolEnabled').returns(false)
+        this.state.withArgs('isProtocolEnabled').returns(false)
         const log = new Log(this.createSnapshot, this.state, this.config, this.fireChangeEvent)
 
         const longMessage = 'x'.repeat(5000)
@@ -215,7 +215,7 @@ describe('src/cypress/log', function () {
 
     describe('when protocol is enabled', function () {
       it('does not truncate message value', function () {
-        this.config.withArgs('protocolEnabled').returns(false)
+        this.state.withArgs('isProtocolEnabled').returns(false)
         const log = new Log(this.createSnapshot, this.state, this.config, this.fireChangeEvent)
         const longMessage = 'x'.repeat(5000)
 
@@ -225,7 +225,7 @@ describe('src/cypress/log', function () {
       })
 
       it('truncates message value of hidden log', function () {
-        this.config.withArgs('protocolEnabled').returns(true)
+        this.state.withArgs('isProtocolEnabled').returns(true)
         const log = new Log(this.createSnapshot, this.state, this.config, this.fireChangeEvent)
         const longMessage = 'x'.repeat(5000)
 
@@ -235,7 +235,7 @@ describe('src/cypress/log', function () {
       })
 
       it('does not truncates renderProps.message value', function () {
-        this.config.withArgs('protocolEnabled').returns(false)
+        this.state.withArgs('isProtocolEnabled').returns(false)
         const log = new Log(this.createSnapshot, this.state, this.config, this.fireChangeEvent)
 
         const longMessage = 'x'.repeat(5000)
@@ -254,7 +254,7 @@ describe('src/cypress/log', function () {
       })
 
       it('truncates renderProps.message value of hidden log', function () {
-        this.config.withArgs('protocolEnabled').returns(true)
+        this.state.withArgs('isProtocolEnabled').returns(true)
         const log = new Log(this.createSnapshot, this.state, this.config, this.fireChangeEvent)
 
         const longMessage = 'x'.repeat(5000)
@@ -406,7 +406,7 @@ describe('src/cypress/log', function () {
 
     it('is no-op if not interactive and protocol is disabled', function () {
       this.config.withArgs('isInteractive').returns(false)
-      this.config.withArgs('protocolEnabled').returns(false)
+      this.state.withArgs('isProtocolEnabled').returns(false)
 
       const log = this.log()
       const result = log.snapshot()
@@ -417,7 +417,7 @@ describe('src/cypress/log', function () {
 
     it('is no-op if numTestsKeptInMemory is 0 and protocol is disabled', function () {
       this.config.withArgs('numTestsKeptInMemory').returns(0)
-      this.config.withArgs('protocolEnabled').returns(false)
+      this.state.withArgs('isProtocolEnabled').returns(false)
 
       const log = this.log()
       const result = log.snapshot()
@@ -428,7 +428,7 @@ describe('src/cypress/log', function () {
 
     it('creates a snapshot and returns the log when not interactive and protocol is enabled', function () {
       this.config.withArgs('isInteractive').returns(false)
-      this.config.withArgs('protocolEnabled').returns(true)
+      this.state.withArgs('isProtocolEnabled').returns(true)
       this.config.withArgs('numTestsKeptInMemory').returns(0)
 
       const div = Cypress.$('<div />')
@@ -442,7 +442,7 @@ describe('src/cypress/log', function () {
 
     it('create a snapshot and returns the log when not interactive and protocol is enabled but numTestsKeptInMemory > 0', function () {
       this.config.withArgs('isInteractive').returns(false)
-      this.config.withArgs('protocolEnabled').returns(true)
+      this.state.withArgs('isProtocolEnabled').returns(true)
       this.config.withArgs('numTestsKeptInMemory').returns(50)
 
       const div = Cypress.$('<div />')
@@ -462,7 +462,7 @@ describe('src/cypress/log', function () {
     })
   })
 
-  context('protocolEnabled log change flush timing', function () {
+  context('isProtocolEnabled log change flush timing', function () {
     let dependency
     let resolveDep
     let changeEventsFlushed
@@ -476,7 +476,7 @@ describe('src/cypress/log', function () {
 
       this.state = cy.stub()
       this.config = cy.stub()
-      this.config.withArgs('protocolEnabled').returns(true)
+      this.state.withArgs('isProtocolEnabled').returns(true)
       this.log = create(Cypress, this.cy, this.state, this.config)
 
       dependency = new Promise((resolve, _) => {

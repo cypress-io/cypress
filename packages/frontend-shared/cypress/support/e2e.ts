@@ -13,7 +13,7 @@ import type pDefer from 'p-defer'
 import 'cypress-plugin-tab'
 import type { Response } from 'cross-fetch'
 
-import type { E2ETaskMap } from '../e2e/e2ePluginSetup'
+import type { E2ETaskMap, InternalOpenProjectCapabilities } from '../e2e/e2ePluginSetup'
 import { installCustomPercyCommand } from './customPercyCommand'
 import i18n from '../../src/locales/en-US.json'
 import { addNetworkCommands } from './onlineNetwork'
@@ -204,6 +204,10 @@ beforeEach(() => {
   taskInternal('__internal__beforeEach', undefined)
 })
 
+afterEach(() => {
+  taskInternal('__internal__afterEach', undefined)
+})
+
 after(() => {
   taskInternal('__internal__after', undefined)
 })
@@ -242,13 +246,13 @@ function openGlobalMode (options: OpenGlobalModeOptions = {}) {
 
 type WithPrefix<T extends string> = `${T}${string}`;
 
-function openProject (projectName: WithPrefix<ProjectFixtureDir>, argv: string[] = []) {
+function openProject (projectName: WithPrefix<ProjectFixtureDir>, argv: string[] = [], capabilities: InternalOpenProjectCapabilities = { cloudStudio: false }) {
   if (!fixtureDirs.some((dir) => projectName.startsWith(dir))) {
     throw new Error(`Unknown project ${projectName}`)
   }
 
   return logInternal({ name: 'openProject', message: argv.join(' ') }, () => {
-    return taskInternal('__internal_openProject', { projectName, argv })
+    return taskInternal('__internal_openProject', { projectName, argv, capabilities })
   }).then((obj) => {
     Cypress.env('e2e_serverPort', obj.e2eServerPort)
 

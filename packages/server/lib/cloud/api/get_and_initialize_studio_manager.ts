@@ -11,6 +11,8 @@ import { agent } from '@packages/network'
 import { asyncRetry, linearDelay } from '../../util/async_retry'
 import { isRetryableError } from '../network/is_retryable_error'
 import { PUBLIC_KEY_VERSION } from '../constants'
+import { CloudRequest } from './cloud_request'
+import type { CloudDataSource } from '@packages/data-context/src/sources'
 
 const pkg = require('@packages/root')
 const routes = require('../routes')
@@ -116,7 +118,7 @@ export const retrieveAndExtractStudioBundle = async ({ projectId }: { projectId?
   return { studioHash }
 }
 
-export const getAndInitializeStudioManager = async ({ projectId }: { projectId?: string } = {}): Promise<StudioManager> => {
+export const getAndInitializeStudioManager = async ({ projectId, cloudDataSource }: { projectId?: string, cloudDataSource: CloudDataSource }): Promise<StudioManager> => {
   let script: string
 
   try {
@@ -126,7 +128,23 @@ export const getAndInitializeStudioManager = async ({ projectId }: { projectId?:
 
     const studioManager = new StudioManager()
 
-    studioManager.setup({ script, studioPath, studioHash })
+    const cloudEnv = (process.env.CYPRESS_INTERNAL_ENV || 'production') as 'development' | 'staging' | 'production'
+    const cloudUrl = cloudDataSource.getCloudUrl(cloudEnv)
+    const cloudHeaders = await cloudDataSource.additionalHeaders()
+
+    await studioManager.setup({
+      script,
+      studioPath,
+      studioHash,
+      projectSlug: projectId,
+      cloudApi: {
+        cloudUrl,
+        cloudHeaders,
+        CloudRequest,
+        isRetryableError,
+        asyncRetry,
+      },
+    })
 
     return studioManager
   } catch (error: unknown) {

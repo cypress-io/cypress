@@ -6,6 +6,7 @@ import events from './events'
 interface Props {
   fileDetails: FileDetails
   className?: string
+  children?: React.ReactNode
 }
 
 // Catches click events that bubble from children and emits open file events to

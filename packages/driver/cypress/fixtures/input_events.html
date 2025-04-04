@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+
+<head>
+  <title>Input Event Monitor</title>
+  <script defer>
+    ['keydown', 'keyup'].forEach((ev) => {
+      document.addEventListener(ev, (data) => {
+        document.getElementById(ev).value = data.key
+      })
+    })
+  </script>
+</head>
+
+<body>
+  <input type="text" id="focus" />
+  <input type="text" id="keyup" />
+  <input type="text" id="keydown" />
+</body>

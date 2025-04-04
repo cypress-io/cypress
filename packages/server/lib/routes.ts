@@ -103,10 +103,16 @@ export const createCommonRoutes = ({
     next()
   })
 
+  // If we are in cypress in cypress we need to pass along the studio routes
+  // to the child project.
+  if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
+    router.get('/__cypress-studio/*', async (req, res) => {
+      await networkProxy.handleHttpRequest(req, res)
+    })
   // We need to handle the case where the studio is not defined or loaded properly.
   // Module federation still tries to load the dynamic asset, but since we do not
   // have anything to load, we return a blank file.
-  if (!getCtx().coreData.studio || getCtx().coreData.studio?.status === 'IN_ERROR') {
+  } else if (!getCtx().coreData.studio || getCtx().coreData.studio?.status === 'IN_ERROR') {
     router.get('/__cypress-studio/app-studio.js', (req, res) => {
       res.setHeader('Content-Type', 'application/javascript')
       res.status(200).send('')

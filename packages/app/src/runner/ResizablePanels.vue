@@ -57,7 +57,7 @@
 
     <div
       v-show="showPanel4"
-      data-cy="studio-panel"
+      data-cy="panel-4"
       class="h-full bg-gray-100 relative"
       :style="{width: `${panel4Width}px`}"
     >

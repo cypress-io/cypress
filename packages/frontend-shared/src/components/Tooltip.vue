@@ -155,11 +155,11 @@ const actualPopperClass = computed(() => {
 
 .cypress-v-tooltip-light {
   .v-popper__inner {
-    @apply bg-white text-black;
+    @apply border-0 py-2 px-4;
+    @apply bg-white text-gray-800;
     border-color: transparent;
     border-radius: 4px !important;
     box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.15);
-    padding: 0;
   }
 
   .v-popper__arrow-outer {

@@ -14,6 +14,7 @@ interface Props {
   containerRef?: RefObject<HTMLDivElement>
   contentClass?: string
   hideExpander: boolean
+  children?: ReactNode
 }
 
 interface State {
