@@ -66,6 +66,43 @@ const testStaticAssets = async (buildResourcePath) => {
         'return callback((data instanceof ArrayBuffer || isArrayBuffer(data)) ? data : data.buffer);',
       ],
     }),
+    testPackageStaticAssets({
+      assetGlob: `${buildResourcePath}/packages/server/node_modules/geckodriver/dist/install.js`,
+      badStrings: [
+        'await download()',
+      ],
+      goodStrings: [
+        'download()',
+      ],
+    }),
+    testPackageStaticAssets({
+      assetGlob: `${buildResourcePath}/packages/server/node_modules/edgedriver/dist/install.js`,
+      badStrings: [
+        'await download()',
+      ],
+      goodStrings: [
+        'download()',
+      ],
+    }),
+    testPackageStaticAssets({
+      assetGlob: `${buildResourcePath}/packages/server/node_modules/@wdio/protocols/build/index.js`,
+      badStrings: [
+        'name: "addon"',
+        'description: "base64 string of the add on file"',
+      ],
+      goodStrings: [
+        'name: "path"',
+        'description: "path to the extension"',
+      ],
+    }),
+    testPackageStaticAssets({
+      assetGlob: `${buildResourcePath}/packages/server/node_modules/@wdio/utils/build/node.js`,
+      badStrings: [],
+      goodStrings: [
+        `log.setLevel(debugModule.enabled('cypress-verbose:server:browsers:webdriver') ? 'info' : 'silent')`,
+        `log2.setLevel(debugModule.enabled('cypress-verbose:server:browsers:webdriver') ? 'info' : 'silent')`,
+      ],
+    }),
   ])
 }
 

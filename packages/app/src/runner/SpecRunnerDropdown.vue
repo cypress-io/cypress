@@ -5,19 +5,19 @@
     #="{ open, close }"
   >
     <PopoverButton
-      class="bg-white border rounded-[50px] self-center h-full grow px-[5px] group"
+      class="border rounded-[50px] self-center h-full grow px-[5px] group outline-none hover:bg-gray-800"
       :class="{
-        'hocus-default': !props.disabled,
         'opacity-50 cursor-auto': props.disabled,
         'rounded-[5px] border-[1px] border-indigo-100': !props.minimal,
         'border-transparent': props.minimal,
+        'bg-white': !props.minimal,
+        'bg-transparent': props.minimal,
       }"
       :disabled="props.disabled"
     >
       <div
         class="flex gap-[8px] items-center"
         :class="{
-          'group-hocus:text-indigo-600': !props.disabled,
           'text-indigo-600': open,
           'text-gray-600': !open,
         }"
@@ -64,6 +64,8 @@ import { Popover, PopoverButton, PopoverPanel } from '@headlessui/vue'
 const props = withDefaults(defineProps<{
   variant?: 'panel'
   align?: 'left' | 'right'
+  // The minimal prop is used to style the dropdown as a minimal button with
+  // no border, background, or chevron icon.
   minimal?: boolean
   // The disabled prop is used as the Popover key so that changes to the prop
   // cause the Popover component to mount again. This re-mounting ensures that

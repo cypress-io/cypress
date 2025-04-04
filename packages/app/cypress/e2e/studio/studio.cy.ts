@@ -1,4 +1,5 @@
 import { launchStudio } from './helper'
+import pDefer from 'p-defer'
 
 describe('Cypress Studio', () => {
   function incrementCounter (initialCount: number) {
@@ -20,6 +21,72 @@ describe('Cypress Studio', () => {
       cy.get('.command').should('have.length', num)
     })
   }
+
+  context('cloud studio', () => {
+    it('loads the studio page', () => {
+      launchStudio({ enableCloudStudio: true })
+
+      cy.window().then((win) => {
+        expect(win.Cypress.config('isDefaultProtocolEnabled')).to.be.false
+        expect(win.Cypress.config('isStudioProtocolEnabled')).to.be.true
+        expect(win.Cypress.state('isProtocolEnabled')).to.be.true
+      })
+    })
+
+    it('displays Studio header', () => {
+      launchStudio({ enableCloudStudio: true })
+
+      cy.viewport(1500, 1000)
+      cy.get('[data-cy="studio-toolbar"]').should('be.visible')
+      cy.percySnapshot()
+    })
+
+    it('immediately loads the studio panel', () => {
+      const deferred = pDefer()
+
+      cy.scaffoldProject('experimental-studio')
+      cy.openProject('experimental-studio', [], {
+        cloudStudio: true,
+      })
+
+      cy.startAppServer('e2e')
+      cy.visitApp()
+      cy.specsPageIsVisible()
+      cy.get('[data-cy-row="spec.cy.js"]').click()
+
+      cy.waitForSpecToFinish()
+
+      cy.findByTestId('studio-panel').should('not.exist')
+
+      cy.intercept('/cypress/e2e/index.html', () => {
+        // wait for the promise to resolve before responding
+        // this will ensure the studio panel is loaded before the test finishes
+        return deferred.promise
+      }).as('indexHtml')
+
+      cy.contains('visits a basic html page')
+      .closest('.runnable-wrapper')
+      .findByTestId('launch-studio')
+      .click()
+
+      // regular studio is not loaded until after the test finishes
+      cy.get('[data-cy="hook-name-studio commands"]').should('not.exist')
+      // cloud studio is loaded immediately
+      cy.findByTestId('studio-panel').then(() => {
+        // we've verified the studio panel is loaded, now resolve the promise so the test can finish
+        deferred.resolve()
+      })
+
+      cy.wait('@indexHtml')
+
+      // Studio re-executes spec before waiting for commands - wait for the spec to finish executing.
+      cy.waitForSpecToFinish()
+
+      // Verify the studio panel is still open
+      cy.findByTestId('studio-panel')
+      cy.get('[data-cy="hook-name-studio commands"]')
+    })
+  })
 
   it('updates an existing test with an action', () => {
     launchStudio()
@@ -623,7 +690,8 @@ describe('studio functionality', () => {
     cy.startAppServer('e2e')
     cy.visitApp()
     cy.specsPageIsVisible()
-    cy.get(`[title="empty.cy.js"]`).should('be.visible').click()
+    cy.get(`[title="empty.cy.js"]`).should('be.visible')
+    cy.get(`[title="empty.cy.js"]`).click()
 
     cy.waitForSpecToFinish()
 
@@ -645,7 +713,7 @@ describe('studio functionality', () => {
       cy.get('#increment').realClick()
     })
 
-    cy.get('button').contains('Save Commands').click()
+    cy.contains('button', 'Save Commands').click()
 
     cy.get('#testName').type('new-test')
 
@@ -695,10 +763,11 @@ describe('studio functionality', () => {
 
     cy.get('button.studio-copy').click()
 
-    cy.get('@writeText').should('have.been.calledOnceWith',
-`/* ==== Generated with Cypress Studio ==== */
-cy.get('#increment').click();
-/* ==== End Cypress Studio ==== */`)
+    if (Cypress.platform === 'win32') {
+      cy.get('@writeText').should('have.been.calledOnceWith', '/* ==== Generated with Cypress Studio ==== */\r\ncy.get(\'#increment\').click();\r\n/* ==== End Cypress Studio ==== */')
+    } else {
+      cy.get('@writeText').should('have.been.calledOnceWith', '/* ==== Generated with Cypress Studio ==== */\ncy.get(\'#increment\').click();\n/* ==== End Cypress Studio ==== */')
+    }
   })
 
   it('copies the studio commands to the clipboard using studio toolbar', () => {
@@ -713,10 +782,11 @@ cy.get('#increment').click();
 
     cy.findByTestId('studio-toolbar-controls').findByTestId('copy-commands').click()
 
-    cy.get('@writeText').should('have.been.calledOnceWith',
-`/* ==== Generated with Cypress Studio ==== */
-cy.get('#increment').click();
-/* ==== End Cypress Studio ==== */`)
+    if (Cypress.platform === 'win32') {
+      cy.get('@writeText').should('have.been.calledOnceWith', '/* ==== Generated with Cypress Studio ==== */\r\ncy.get(\'#increment\').click();\r\n/* ==== End Cypress Studio ==== */')
+    } else {
+      cy.get('@writeText').should('have.been.calledOnceWith', '/* ==== Generated with Cypress Studio ==== */\ncy.get(\'#increment\').click();\n/* ==== End Cypress Studio ==== */')
+    }
   })
 
   it('removes pending commands if the page is reloaded', () => {
@@ -867,7 +937,12 @@ describe('studio functionality', () => {
 
     cy.location().its('hash').should('equal', '#/specs').and('not.contain', 'testId=').and('not.contain', 'studio=')
     cy.findByTestId('alert').should('contain.text', 'Spec not found')
-    cy.findByTestId('alert-body').should('contain.text', 'There is no spec matching the following location: cypress/e2e/spec.cy.js')
+
+    if (Cypress.platform === 'win32') {
+      cy.findByTestId('alert-body').should('contain.text', 'There is no spec matching the following location: cypress\\e2e\\spec.cy.js')
+    } else {
+      cy.findByTestId('alert-body').should('contain.text', 'There is no spec matching the following location: cypress/e2e/spec.cy.js')
+    }
   })
 
   it('appends the studio commands to the commands added to the test on the file system when file watching is disabled', () => {
@@ -958,11 +1033,11 @@ describe('studio functionality', () => {
 })`)
     })
 
-    cy.findByTestId('studio-toolbar-controls').should('exist')
+    cy.findByTestId('studio-toolbar-controls')
 
     cy.get('button').contains('Save Commands').click()
 
-    cy.findByTestId('studio-toolbar-controls').should('exist')
+    cy.findByTestId('studio-toolbar-controls')
     cy.get('button').contains('Save Commands')
 
     cy.findByTestId('hook-name-studio commands').closest('.hook-studio').within(() => {

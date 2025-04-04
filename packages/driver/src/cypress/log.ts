@@ -255,7 +255,7 @@ export class Log {
     // only fire the log:state:changed event as fast as every 4ms
     this.fireChangeEvent = _.debounce(fireChangeEvent, 4)
 
-    if (config('protocolEnabled')) {
+    if (state('isProtocolEnabled')) {
       Cypress.once('test:after:run', () => {
         this.fireChangeEvent.flush()
       })
@@ -337,7 +337,7 @@ export class Log {
 
     // truncate message when log is hidden to prevent bloating memory
     // and the protocol database
-    if (obj.message && this.config('protocolEnabled') && isHiddenLog) {
+    if (obj.message && this.state('isProtocolEnabled') && isHiddenLog) {
       obj.message = $utils
       .stringify(obj.message)
       .substring(0, PROTOCOL_MESSAGE_TRUNCATION_LENGTH)
@@ -357,7 +357,7 @@ export class Log {
       this.wrapConsoleProps()
     }
 
-    if (obj.renderProps && _.isFunction(obj.renderProps) && isHiddenLog && this.config('protocolEnabled')) {
+    if (obj.renderProps && _.isFunction(obj.renderProps) && isHiddenLog && this.state('isProtocolEnabled')) {
       this.wrapRenderProps()
     }
 
@@ -402,7 +402,7 @@ export class Log {
     if (
       (!Cypress.isCrossOriginSpecBridge && this.get('isCrossOriginLog'))
       || (!this.config('isInteractive')
-      || (this.config('numTestsKeptInMemory') === 0)) && !this.config('protocolEnabled')) {
+      || (this.config('numTestsKeptInMemory') === 0)) && !this.state('isProtocolEnabled')) {
       return this
     }
 
@@ -663,7 +663,7 @@ class LogManager {
         $errUtils.throwErrByPath('log.invalid_argument', { args: { arg: options } })
       }
 
-      if (!config('protocolEnabled') && options.hidden !== undefined && options.hidden) {
+      if (!state('isProtocolEnabled') && options.hidden !== undefined && options.hidden) {
         return
       }
 

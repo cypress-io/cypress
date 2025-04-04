@@ -58,7 +58,42 @@ export interface LaunchArgs {
 
 type NullableMiddlewareHook = ((message: unknown, data: unknown) => void) | null
 
-export type OnRequestEvent = (eventName: string, data: any) => void
+export type KeyPressSupportedKeys = 'Tab'
+
+interface CommandSignature<P = any, R = any> {
+  dataType: P
+  returnType: R
+}
+
+export interface KeyPressParams {
+  key: KeyPressSupportedKeys
+}
+
+export interface AutomationCommands {
+  'take:screenshot': CommandSignature
+  'get:cookies': CommandSignature
+  'get:cookie': CommandSignature
+  'set:cookie': CommandSignature
+  'set:cookies': CommandSignature
+  'add:cookies': CommandSignature
+  'clear:cookies': CommandSignature
+  'clear:cookie': CommandSignature
+  'change:cookie': CommandSignature
+  'create:download': CommandSignature
+  'canceled:download': CommandSignature
+  'complete:download': CommandSignature
+  'get:heap:size:limit': CommandSignature
+  'collect:garbage': CommandSignature
+  'reset:browser:tabs:for:next:spec': CommandSignature
+  'reset:browser:state': CommandSignature
+  'focus:browser:window': CommandSignature
+  'is:automation:client:connected': CommandSignature
+  'remote:debugger:protocol': CommandSignature
+  'response:received': CommandSignature
+  'key:press': CommandSignature<KeyPressParams, void>
+}
+
+export type OnRequestEvent = <T extends keyof AutomationCommands>(message: T, data: AutomationCommands[T]['dataType']) => Promise<AutomationCommands[T]['returnType']>
 
 export type OnServiceWorkerRegistrationUpdated = (data: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) => void
 

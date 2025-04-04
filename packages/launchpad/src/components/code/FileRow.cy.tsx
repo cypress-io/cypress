@@ -1,6 +1,5 @@
 /* eslint-disable no-irregular-whitespace */
 import FileRow from './FileRow.vue'
-import { faker } from '@faker-js/faker'
 // tslint:disable-next-line: no-implicit-dependencies - need to handle this
 import { defaultMessages } from '@cy/i18n'
 
@@ -16,9 +15,7 @@ export default defineConfig({
   },
 })`
 
-faker.seed(1)
-
-const description = faker.hacker.phrase()
+const description = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod.'
 const messages = defaultMessages.setupPage.configFile
 
 const changesRequiredDescription = messages.changesRequiredDescription.replace('{0}', '')
@@ -125,7 +122,7 @@ describe('FileRow', () => {
   })
 
   it('responds nice to small screens', { viewportWidth: 500 }, () => {
-    const lorem = faker.lorem.paragraphs(3)
+    const lorem = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
 
     cy.mount(() => (
       <div class="w-full p-5">

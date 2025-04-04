@@ -44,6 +44,8 @@ async function connectToNewSpecCDP (options, automation: Automation, browserCriC
 
   if (browserCriClient) {
     await browserCriClient.currentlyAttachedTarget?.close().catch(() => {})
+    // Strictly speaking this shouldn't ever happen in firefox, but to future proof adding it in case.
+    await browserCriClient.currentlyAttachedProtocolTarget?.close().catch(() => {})
     const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
     await CdpAutomation.create(pageCriClient.send, pageCriClient.on, pageCriClient.off, browserCriClient.resetBrowserTargets, automation)

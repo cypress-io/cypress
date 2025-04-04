@@ -4,38 +4,57 @@
   </div>
   <div
     v-else
-    ref="root"
+    ref="container"
   >
     Loading the panel...
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { init, loadRemote } from '@module-federation/runtime'
 import type { StudioAppDefaultShape, StudioPanelShape } from './studio-app-types'
 
-interface StudioApp { default: StudioAppDefaultShape }
-
-const root = ref<HTMLElement | null>(null)
-const error = ref<string | null>(null)
-const Panel = ref<StudioPanelShape | null>(null)
-
-const maybeRenderReactComponent = () => {
-  if (!Panel.value || !!error.value) {
-    return
-  }
-
-  const panel = window.UnifiedRunner.React.createElement(Panel.value)
-
-  window.UnifiedRunner.ReactDOM.createRoot(root.value).render(panel)
+// Mirrors the ReactDOM.Root type since incorporating those types
+// messes up vue typing elsewhere
+interface Root {
+  render: (element: JSX.Element) => void
+  unmount: () => void
 }
 
-const unmountReactComponent = () => {
-  if (!Panel.value || !root.value) {
+const props = defineProps<{
+  canAccessStudioAI: boolean
+}>()
+
+interface StudioApp { default: StudioAppDefaultShape }
+
+const container = ref<HTMLElement | null>(null)
+const error = ref<string | null>(null)
+const ReactStudioPanel = ref<StudioPanelShape | null>(null)
+const reactRoot = ref<Root | null>(null)
+
+const maybeRenderReactComponent = () => {
+  // don't render the react component if the react studio panel has not loaded or if there is an error
+  if (!ReactStudioPanel.value || !!error.value) {
     return
   }
 
-  window.UnifiedRunner.ReactDOM.unmountComponentAtNode(root.value)
+  const panel = window.UnifiedRunner.React.createElement(ReactStudioPanel.value, { canAccessStudioAI: props.canAccessStudioAI })
+
+  if (!reactRoot.value) {
+    reactRoot.value = window.UnifiedRunner.ReactDOM.createRoot(container.value)
+  }
+
+  reactRoot.value?.render(panel)
+}
+
+watch(() => props.canAccessStudioAI, maybeRenderReactComponent)
+
+const unmountReactComponent = () => {
+  if (!ReactStudioPanel.value || !container.value) {
+    return
+  }
+
+  reactRoot.value?.unmount()
 }
 
 init({
@@ -71,7 +90,7 @@ loadRemote<StudioApp>('app-studio').then((module) => {
     return
   }
 
-  Panel.value = module.default.StudioPanel
+  ReactStudioPanel.value = module.default.StudioPanel
   maybeRenderReactComponent()
 }).catch((e) => {
   error.value = e.message
