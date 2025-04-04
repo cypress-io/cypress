@@ -198,6 +198,7 @@ export class Automation {
   }
 
   async push<T extends keyof AutomationCommands> (message: T, data: AutomationCommands[T]['dataType']) {
+    debug('push `%s`: %o', message, data)
     const result = await this.normalize(message, data)
 
     if (result) {
@@ -208,6 +209,7 @@ export class Automation {
   async request<T extends keyof AutomationCommands> (message: T, data: AutomationCommands[T]['dataType'], fn) {
     // curry in the message + callback function
     // for obtaining the external automation data
+    debug('request: `%s`', message)
     const automate = this.automationValve(message, fn)
 
     await this.invokeAsync('onBeforeRequest', message, data)
