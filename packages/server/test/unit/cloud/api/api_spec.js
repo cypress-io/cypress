@@ -330,7 +330,7 @@ describe('lib/cloud/api', () => {
 
       return api.sendPreflight({})
       .then(() => {
-        expect(api.rp.post).to.be.calledWithMatch({ timeout: 60000 })
+        expect(api.rp.post).to.be.calledWithMatch({ timeout: 5000 })
       })
     })
 
