@@ -49,7 +49,7 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
     'node_modules/webpack-dev-server/lib/Server.js',
     'node_modules/html-webpack-plugin-4/index.js',
     'node_modules/html-webpack-plugin-5/index.js',
-    'node_modules/mocha-7.0.1/index.js',
+    'node_modules/mocha-7.2.0/index.js',
     'packages/server/node_modules/webdriver/build/index.js',
     // dependencies needed for geckodriver when running firefox in the binary
     'node_modules/pump/index.js',
