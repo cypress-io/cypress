@@ -55,6 +55,20 @@ export interface SingleReporterProps extends BaseReporterProps{
 const Reporter: React.FC<SingleReporterProps> = observer(({ appState = appStateDefault, runner, className, error, runMode = 'single', studioEnabled, autoScrollingEnabled, isSpecsListOpen, resetStatsOnSpecChange, renderReporterHeader = (props: ReporterHeaderProps) => <Header {...props}/>, runnerStore }) => {
   const previousSpecRunId = usePrevious(runnerStore.specRunId)
   const [isMounted, setIsMounted] = useState(false)
+  const [isInitialized, setIsInitialized] = useState(false)
+
+  // this registration needs to happen synchronously and not async inside useEffect or else the events will not be registered and the reporter might hang inside cy-in-cy tests
+  if (!isInitialized) {
+    events.init({
+      appState,
+      runnablesStore,
+      scroller,
+      statsStore,
+    })
+
+    events.listen(runner)
+    setIsInitialized(true)
+  }
 
   useEffect(() => {
     if (!runnerStore.spec) {
@@ -69,15 +83,6 @@ const Reporter: React.FC<SingleReporterProps> = observer(({ appState = appStateD
     action('set:specs:list', () => {
       appState.setSpecsList(isSpecsListOpen ?? false)
     })()
-
-    events.init({
-      appState,
-      runnablesStore,
-      scroller,
-      statsStore,
-    })
-
-    events.listen(runner)
 
     shortcuts.start()
     EQ.init()
