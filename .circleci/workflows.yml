@@ -713,7 +713,6 @@ commands:
               # internal PR
               CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
               CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
-              DEBUG="cypress:server:automation,cypress:server:browsers:firefox,cypress:server:browsers:bidi_automation,cypress:server:socket-base" \
               yarn $YARN_CMD --record $PARALLEL --browser <<parameters.browser>> --runner-ui
             else
               # external PR
