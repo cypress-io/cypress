@@ -234,8 +234,9 @@ const isRetriableError = (err) => {
 
 function noproxyPreflightTimeout (): number {
   try {
-    return !_.isUndefined(process.env.CYPRESS_INTERNAL_INITIAL_PREFLIGHT_TIMEOUT) ?
-      Number(process.env.CYPRESS_INTERNAL_PREFLIGHT_TIMEOUT) : 5000
+    const timeoutFromEnv = Number(process.env.CYPRESS_INTERNAL_INITIAL_PREFLIGHT_TIMEOUT)
+
+    return isNaN(timeoutFromEnv) ? 5000 : timeoutFromEnv
   } catch (e: unknown) {
     return 5000
   }
@@ -636,7 +637,7 @@ export default {
 
         if (initialPreflightTimeout >= 0) {
           try {
-            return await makeReq(preflightBaseProxy, null, noproxyPreflightTimeout())
+            return await makeReq(preflightBaseProxy, null, initialPreflightTimeout)
           } catch (err) {
             if (err.statusCode === 412) {
               throw err
