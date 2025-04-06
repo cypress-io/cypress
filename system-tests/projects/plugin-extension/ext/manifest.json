@@ -3,8 +3,11 @@
   "version": "0",
   "description": "tests adding user extension into Cypress",
   "permissions": [
-    "tabs",
-    "webNavigation",
+    "tabs"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*",
     "<all_urls>"
   ],
   "content_scripts": [
@@ -17,11 +20,11 @@
         "*://*/__/*"
       ],
       "js": [
-        "background.js"
+        "content.js"
       ],
       "run_at": "document_end",
       "all_frames": true
     }
   ],
-  "manifest_version": 2
+  "manifest_version": 3
 }

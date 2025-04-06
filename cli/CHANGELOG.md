@@ -7,6 +7,7 @@ _Released 4/8/2025 (PENDING)_
 
 - Allows for `babel-loader` version 10 to be a peer dependency of `@cypress/webpack-preprocessor`. Fixed in [#31218](https://github.com/cypress-io/cypress/pull/31218).
 - Fixed an issue where Firefox BiDi was prematurely removing prerequests on pending requests. Fixes [#31376](https://github.com/cypress-io/cypress/issues/31376).
+- Fixed an [issue](https://github.com/electron/electron/issues/45398) with Electron causing slow animations and increased test times by starting a CDP screencast with a noop configuration. Fixes [#30980](https://github.com/cypress-io/cypress/issues/30980).
 
 **Misc:**
 
@@ -15,7 +16,7 @@ _Released 4/8/2025 (PENDING)_
 
 **Dependency Updates:**
 
-- Upgraded `mocha` from `7.0.1` to `7.1.1`. Addressed in [#31401](https://github.com/cypress-io/cypress/pull/31401).
+- Upgraded `mocha` from `7.0.1` to `7.2.0`. Addressed in [#31423](https://github.com/cypress-io/cypress/pull/31423) and [#31432](https://github.com/cypress-io/cypress/pull/31432).
 - Upgraded `webdriver` from `9.7.3` to `9.11.0`. Addressed in [#31315](https://github.com/cypress-io/cypress/pull/31315).
 - Upgraded `win-version-info` from `5.0.1` to `6.0.1`. Addressed in [#31358](https://github.com/cypress-io/cypress/pull/31358).
 

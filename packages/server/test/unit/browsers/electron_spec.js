@@ -14,6 +14,7 @@ const { Automation } = require(`../../../lib/automation`)
 const { BrowserCriClient } = require('../../../lib/browsers/browser-cri-client')
 const electronApp = require('../../../lib/util/electron-app')
 const utils = require('../../../lib/browsers/utils')
+const { screencastOpts } = require('../../../lib/browsers/cdp_automation')
 
 const ELECTRON_PID = 10001
 
@@ -474,6 +475,41 @@ describe('lib/browsers/electron', () => {
         expect(this.pageCriClient.send).to.be.calledWith('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' })
         expect(this.pageCriClient.send).to.be.calledWith('Network.clearBrowserCache')
       })
+    })
+
+    it('expects the video to be fully enabled if specified in the config', async function () {
+      const mockWriteVideoFrame = sinon.stub()
+      const mockVideoApi = {
+        useFfmpegVideoController: sinon.stub().resolves({
+          writeVideoFrame: mockWriteVideoFrame,
+        }),
+      }
+
+      await electron._launch(this.win, this.url, this.automation, this.options, mockVideoApi, undefined, { attachCDPClient: sinon.stub() })
+
+      expect(mockVideoApi.useFfmpegVideoController).to.be.called
+      expect(this.pageCriClient.on).to.be.calledWith('Page.screencastFrame', sinon.match.func)
+      expect(this.pageCriClient.send).to.be.calledWith('Page.startScreencast', screencastOpts())
+    })
+
+    it('starts the screencast but does not capture the frames if video is not enabled but the app is in run mode', async function () {
+      this.options.isTextTerminal = true
+
+      await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+
+      expect(this.pageCriClient.on).not.to.be.calledWith('Page.screencastFrame', sinon.match.func)
+      expect(this.pageCriClient.send).to.be.calledWith('Page.startScreencast', {
+        format: 'jpeg',
+        everyNthFrame: 2 ** 31 - 1,
+        quality: 0,
+      })
+    })
+
+    it('does not start the screencast if video is not enabled and the app is not in run mode', async function () {
+      await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+
+      expect(this.pageCriClient.on).not.to.be.calledWith('Page.screencastFrame', sinon.match.func)
+      expect(this.pageCriClient.send).not.to.be.calledWith('Page.startScreencast', sinon.match.any)
     })
 
     it('registers onRequest automation middleware and calls show when requesting to be focused', function () {
