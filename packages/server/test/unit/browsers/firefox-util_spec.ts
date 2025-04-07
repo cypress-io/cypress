@@ -51,7 +51,7 @@ describe('Firefox-Util', () => {
     describe('when using bidi', () => {
       it('registers the automation middleware with the automation system', async () => {
         await FirefoxUtil.setup({ automation, onError, url, remotePort, webdriverClient, useWebDriverBiDi })
-        expect(automation.use).to.have.been.calledWith()
+        expect(automation.use).to.have.been.calledWith(stubbedBiDiAutomation.automationMiddleware)
       })
     })
   })
