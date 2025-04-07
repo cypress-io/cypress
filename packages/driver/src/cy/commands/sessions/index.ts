@@ -57,7 +57,7 @@ export default function (Commands, Cypress, cy) {
       }
 
       // stringify deterministically if we were given an object
-      id = _.isString(id) ? id : stringifyStable(id)
+      id = _.isString(id) ? id : stringifyStable(id) as string
 
       if (!setup || !_.isFunction(setup)) {
         $errUtils.throwErrByPath('sessions.session.wrongArgSetup')
@@ -92,7 +92,7 @@ export default function (Commands, Cypress, cy) {
         })
       }
 
-      let session: Cypress.SessionData = sessionsManager.getActiveSession(id)
+      let session: Cypress.SessionData = sessionsManager.getActiveSession(id as string)
       const isRegisteredSessionForSpec = sessionsManager.registeredSessions.has(id)
 
       if (session) {

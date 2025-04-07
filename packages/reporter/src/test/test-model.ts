@@ -187,6 +187,10 @@ export default class Test extends Runnable {
     cb()
   }
 
+  @action setIsOpen (isOpen: boolean) {
+    this._isOpen = isOpen
+  }
+
   // this is called to sync up the command log UI for the sake of
   // screenshots, so we only ever need to open the last attempt
   setIsOpenWhenActive (isOpen: boolean) {
