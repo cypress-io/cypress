@@ -175,6 +175,7 @@ _Released 4/8/2025_
 - Allows for `babel-loader` version 10 to be a peer dependency of `@cypress/webpack-preprocessor`. Fixed in [#31218](https://github.com/cypress-io/cypress/pull/31218).
 - Fixed an issue where Firefox BiDi was prematurely removing prerequests on pending requests. Fixes [#31376](https://github.com/cypress-io/cypress/issues/31376).
 - Fixed an [issue](https://github.com/electron/electron/issues/45398) with Electron causing slow animations and increased test times by starting a CDP screencast with a noop configuration. Fixes [#30980](https://github.com/cypress-io/cypress/issues/30980).
+- Fixed an issue where Create from Component feature might not be able to parse React components from project files. Fixed in [#31457](https://github.com/cypress-io/cypress/pull/31457).
 
 **Misc:**
 
