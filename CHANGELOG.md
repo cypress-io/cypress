@@ -1,6 +1,5 @@
 # Changelogs
 
-make a change to this file to test contributor flow
 - [Cypress App](https://on.cypress.io/changelog)
 - [`@cypress/angular`](https://github.com/cypress-io/cypress/blob/develop/npm/angular/CHANGELOG.md)
 - [`@cypress/eslint-plugin-dev`](https://github.com/cypress-io/cypress/blob/develop/npm/eslint-plugin-dev/CHANGELOG.md)
