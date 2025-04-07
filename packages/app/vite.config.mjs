@@ -33,6 +33,13 @@ const config = makeConfig({
       '@toycode/markdown-it-class',
       '@cypress-design/vue-tabs',
       'gravatar',
+      '@opentelemetry/sdk-trace-web',
+      '@opentelemetry/resources',
+      '@opentelemetry/sdk-trace-base',
+      '@opentelemetry/api',
+      '@opentelemetry/semantic-conventions',
+      '@opentelemetry/exporter-trace-otlp-http',
+      '@opentelemetry/core',
     ],
     esbuildOptions: {
       target: 'ES2022',
