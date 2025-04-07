@@ -498,8 +498,10 @@ commands:
     steps:
       - run: pwd
       - run:
-          name: print global yarn cache path
-          command: echo $(yarn global bin)
+          name: print global yarn cache path and size
+          command: |
+            echo $(yarn global bin)
+            du -sh $(yarn global bin)
       - run:
           name: print yarn version
           command: yarn versions
