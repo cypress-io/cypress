@@ -27,7 +27,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
       })
     })
 
-    cy.get('.reporter').then(() => {
+    cy.get('.reporter.mounted').then(() => {
       runner.emit('runnables:ready', runnables)
       runner.emit('reporter:start', {})
       addCommand(runner, {

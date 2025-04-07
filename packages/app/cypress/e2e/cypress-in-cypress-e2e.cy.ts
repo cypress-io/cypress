@@ -72,7 +72,9 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
 
     cy.get('.hook-open-in-ide').should('exist')
 
-    cy.get('#unified-runner').should('have.attr', 'style', 'width: 1000px; height: 660px; transform: scale(0.769697); position: absolute; margin-left: -25px;')
+    cy.get('#unified-runner').then((el) => {
+      expect(el[0].getAttribute('style')).to.match(/width: 1000px; height: 660px; transform: scale\(0.769\d+\); position: absolute; margin-left: -25px;/)
+    })
   })
 
   it('navigation between specs and other parts of the app works', () => {
@@ -168,7 +170,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.contains('SyntaxError')
     .should('be.visible')
     .invoke('outerHeight')
-    .should('eq', expectedAutHeight)
+    .should('be.closeTo', expectedAutHeight, 1)
 
     // Checking the height here might seem excessive
     // but we really want some warning if this changes
@@ -199,8 +201,12 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
 
     cy.get('.toggle-specs-wrapper').click()
 
-    cy.get('#unified-runner').should('have.css', 'width', '333px')
-    cy.get('#unified-runner').should('have.css', 'height', '333px')
+    cy.get('#unified-runner').then((el) => {
+      // CSS properties are calculated over inline styles, which means we get a close representation
+      // of the actual values, but not the exact values (+/- 1 pixel), hence the use of matching the style
+      // attribute.
+      expect(el[0].getAttribute('style')).to.match(/width: 333px; height: 333px/)
+    })
   })
 
   it('stops correctly running spec while switching specs', () => {
@@ -208,6 +214,9 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.specsPageIsVisible()
     cy.contains('withFailure.spec').click()
     cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
+    // A bit of a hack, but our cy-in-cy test needs to wait for the reporter to fully render before pressing the "f" key to expand the "Search specs" menu.
+    // Otherwise, the "f" keypress happens before the event is registered, which causes the "Search Specs" menu to not expand.
+    cy.get('[data-cy="runnable-header"]').should('be.visible')
     cy.get('body').type('f')
     cy.contains('Search specs')
     cy.contains('withWait.spec').click()
