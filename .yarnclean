@@ -47,3 +47,4 @@ wercker.yml
 .travis.yml
 
 # misc
+*.md
