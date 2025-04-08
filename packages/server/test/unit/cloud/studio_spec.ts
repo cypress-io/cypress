@@ -160,9 +160,40 @@ describe('lib/cloud/studio', () => {
         name: 'chrome',
         family: 'chromium',
         channel: 'stable',
-      })
+        displayName: 'Chrome',
+        version: '100.0.0',
+        majorVersion: '100',
+        path: '/path/to/chrome',
+        isHeaded: true,
+        isHeadless: false,
+      } as Cypress.Browser)
 
       expect(result).to.be.true
+    })
+  })
+
+  describe('addSocketListeners', () => {
+    it('calls addSocketListeners on the studio server', () => {
+      sinon.stub(studio, 'addSocketListeners')
+      const mockSocket = { id: 'test-socket' } as any
+
+      studioManager.addSocketListeners(mockSocket)
+
+      expect(studio.addSocketListeners).to.be.calledWith(mockSocket)
+    })
+
+    it('does not call addSocketListeners when studio server is not defined', () => {
+      // Set _studioServer to undefined
+      (studioManager as any)._studioServer = undefined
+
+      // Create a spy on invokeSync to verify it's not called
+      const invokeSyncSpy = sinon.spy(studioManager, 'invokeSync')
+
+      const mockSocket = { id: 'test-socket' } as any
+
+      studioManager.addSocketListeners(mockSocket)
+
+      expect(invokeSyncSpy).to.not.be.called
     })
   })
 })
