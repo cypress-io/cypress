@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import React, { MouseEvent } from 'react'
+import React, { MouseEvent, useCallback } from 'react'
 import cs from 'classnames'
 import { observer } from 'mobx-react'
 import Markdown from 'markdown-it'
@@ -44,11 +44,14 @@ interface TestErrorProps {
   testId?: string
   commandId?: number
   // the command group level to nest the recovered in-test error
-  groupLevel: number
+  groupLevel?: number
 }
 
-const TestError = (props: TestErrorProps) => {
-  const { err } = props
+const TestError: React.FC<TestErrorProps> = ({ err, groupLevel = 0, testId, commandId }) => {
+  const _onPrint = useCallback((e: MouseEvent) => {
+    e.stopPropagation()
+    events.emit('show:error', { err, groupLevel, testId, commandId })
+  }, [err, groupLevel, testId, commandId])
 
   if (!err || !err.displayMessage) return null
 
@@ -56,23 +59,13 @@ const TestError = (props: TestErrorProps) => {
 
   md.enable(['backticks', 'emphasis', 'escape'])
 
-  const onPrint = () => {
-    events.emit('show:error', props)
-  }
-
-  const _onPrintClick = (e: MouseEvent) => {
-    e.stopPropagation()
-
-    onPrint()
-  }
-
   const { codeFrame } = err
 
   const groupPlaceholder: Array<JSX.Element> = []
 
   if (err.isRecovered) {
     // cap the group nesting to 5 levels to keep the log text legible
-    for (let i = 0; i < props.groupLevel; i++) {
+    for (let i = 0; i < groupLevel; i++) {
       groupPlaceholder.push(<span key={`${err.name}-err-${i}`} className='err-group-block' />)
     }
   }
@@ -99,10 +92,10 @@ const TestError = (props: TestErrorProps) => {
             header='View stack trace'
             headerClass='runnable-err-stack-expander'
             headerExtras={
-              <FlashOnClick onClick={_onPrintClick} message="Printed output to your console">
+              <FlashOnClick onClick={_onPrint} message="Printed output to your console">
                 <div
                   className="runnable-err-print"
-                  onKeyPress={onEnterOrSpace(onPrint)}
+                  onKeyDown={onEnterOrSpace(() => events.emit('show:error', { err, groupLevel, testId, commandId }))}
                   role='button'
                   tabIndex={0}
                 >
@@ -119,10 +112,6 @@ const TestError = (props: TestErrorProps) => {
       </div>
     </div>
   )
-}
-
-TestError.defaultProps = {
-  groupLevel: 0,
 }
 
 export default observer(TestError)

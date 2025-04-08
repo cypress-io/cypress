@@ -185,6 +185,8 @@ export class SocketBase {
       message: T,
       data: AutomationCommands[T]['dataType'],
     ) => {
+      debug('request: %s', message)
+
       return automation.request(message, data, onAutomationClientRequestCallback)
     }
 

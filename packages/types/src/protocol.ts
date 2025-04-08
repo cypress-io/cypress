@@ -1,4 +1,4 @@
-import type { Database } from 'better-sqlite3'
+import type Database from 'better-sqlite3'
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import type { IncomingHttpHeaders } from 'http'
 import type { Readable } from 'stream'
@@ -38,7 +38,7 @@ export interface AppCaptureProtocolCommon {
 
 export interface AppCaptureProtocolInterface extends AppCaptureProtocolCommon {
   getDbMetadata (): { offset: number, size: number } | undefined
-  beforeSpec ({ spec, workingDirectory, archivePath, dbPath, db }: { spec: FoundSpec & { instanceId: string }, workingDirectory: string, archivePath: string, dbPath: string, db: Database }): void
+  beforeSpec ({ spec, workingDirectory, archivePath, dbPath, db }: { spec: FoundSpec & { instanceId: string }, workingDirectory: string, archivePath: string, dbPath: string, db: Database.Database }): void
   uploadStallSamplingInterval: () => number
   connectToBrowser (cdpClient: CDPClient): Promise<void>
 }
@@ -138,6 +138,7 @@ export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
   uploadCaptureArtifact(artifact: CaptureArtifact): Promise<UploadCaptureArtifactResult | undefined>
   connectToBrowser (cdpClient: CDPClient): Promise<void>
   close (): void
+  db?: Database.Database
 }
 
 type Response = {

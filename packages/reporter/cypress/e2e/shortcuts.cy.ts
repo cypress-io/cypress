@@ -36,7 +36,7 @@ describe('shortcuts', function () {
       })
     })
 
-    cy.get('.reporter').then(() => {
+    cy.get('.reporter.mounted').then(() => {
       runner.emit('runnables:ready', this.runnables)
       runner.emit('reporter:start', {})
     })

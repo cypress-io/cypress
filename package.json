@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "14.2.1",
+  "version": "14.3.0",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -52,7 +52,7 @@
     "sanitize:mocha:results": "node ./scripts/sanitize-mocha-results.js",
     "prestart": "yarn ensure-deps",
     "start": "cypress open --dev --global",
-    "stop-only": "npx stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,src,__snapshots__ --exclude cypress-tests.ts,*only.cy.js",
+    "stop-only": "npx stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,src,__snapshots__,patches --exclude cypress-tests.ts,*only.cy.js",
     "stop-only-all": "yarn stop-only --folder packages",
     "pretest": "yarn ensure-deps",
     "test": "yarn lerna exec yarn test --scope=cypress --scope=@packages/{config,data-context,driver,electron,errors,extension,https-proxy,launcher,net-stubbing,network,packherd-require,proxy,rewriter,scaffold-config,socket,v8-snapshot-require,telemetry} --scope=@tooling/{electron-mksnapshot,v8-snapshot}",
@@ -187,7 +187,7 @@
     "mock-fs": "5.4.0",
     "npm-packlist": "9.0.0",
     "p-defer": "^3.0.0",
-    "patch-package": "6.4.7",
+    "patch-package": "8.0.0",
     "playwright-webkit": "1.24.2",
     "pluralize": "8.0.0",
     "print-arch": "1.0.0",
