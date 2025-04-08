@@ -498,17 +498,9 @@ commands:
         default: cy-doc
     steps:
       - run: pwd
-      - run:
-          name: print global yarn cache path and size
-          command: |
-            if ! command -v ver 2>&1 >/dev/null
-            then
-              # ver does not exist; this is linux or darwin
-              du -sh $(yarn global bin)
-            else
-              # ver exists; this is windows
-              du $(yarn global bin)
-            fi
+      ##- run:
+      ##  name: print global yarn cache path and size
+      ##  command: du -sh $(yarn global bin)
       - run:
           name: print yarn version
           command: yarn versions
