@@ -84,6 +84,7 @@ windowsWorkflowFilters: &windows-workflow-filters
       # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
       - equal: [ 'chore/fix_react_18_deprecation_warnings', << pipeline.git.branch >> ]
+      - equal: [ 'cacie/fix-du', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
@@ -500,7 +501,14 @@ commands:
       - run:
           name: print global yarn cache path and size
           command: |
-            du -sh $(yarn global bin)
+            if ! command -v ver 2>&1 >/dev/null
+            then
+              # ver does not exist; this is linux or darwin
+              du -sh $(yarn global bin)
+            else
+              # ver exists; this is windows
+              du $(yarn global bin)
+            fi
       - run:
           name: print yarn version
           command: yarn versions
