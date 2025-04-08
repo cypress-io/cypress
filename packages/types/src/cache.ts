@@ -3,6 +3,7 @@ export interface Cache {
   PROJECT_PREFERENCES: Record<string, Preferences>
   USER: CachedUser
   COHORTS: Record<string, Cohort>
+  PROJECTS_CONFIG: Record<string, any>
 }
 
 import type { AllowedState } from './preferences'
@@ -13,6 +14,11 @@ export interface CachedUser {
   authToken: string
   name: string
   email: string
+}
+
+export interface LegacyCachedUser extends CachedUser {
+  session_token?: string
+  sessionToken?: string
 }
 
 export interface Cohort {
