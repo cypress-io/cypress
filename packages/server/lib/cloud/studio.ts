@@ -7,6 +7,7 @@ import os from 'os'
 import { agent } from '@packages/network'
 import Debug from 'debug'
 import { requireScript } from './require_script'
+import type Database from 'better-sqlite3'
 
 interface StudioServer { default: StudioServerDefaultShape }
 
@@ -36,6 +37,10 @@ export class StudioManager implements StudioManagerShape {
     manager.reportError(error).catch(() => { })
 
     return manager
+  }
+
+  setProtocolDb (db: Database.Database): void {
+    this.invokeSync('setProtocolDb', { isEssential: true }, db)
   }
 
   async setup ({ script, studioPath, studioHash, projectSlug, cloudApi }: SetupOptions): Promise<void> {
@@ -107,9 +112,8 @@ export class StudioManager implements StudioManagerShape {
     }
 
     try {
-      const fn = this._studioServer[method] as Function
-
-      return fn.apply(this._studioServer, args)
+      // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
+      return this._studioServer[method].apply(this._studioServer, args)
     } catch (error: unknown) {
       let actualError: Error
 

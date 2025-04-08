@@ -2,6 +2,7 @@
 
 import type { Router } from 'express'
 import type { AxiosInstance } from 'axios'
+import type Database from 'better-sqlite3'
 import type { Socket } from 'socket.io'
 
 interface RetryOptions {
@@ -33,6 +34,7 @@ export interface StudioServerOptions {
 export interface StudioServerShape {
   initializeRoutes(router: Router): void
   canAccessStudioAI(browser: Cypress.Browser): Promise<boolean>
+  setProtocolDb(database: Database.Database): void
   addSocketListeners(socket: Socket): void
 }
 

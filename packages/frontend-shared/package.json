@@ -90,7 +90,7 @@
     "markdown-it": "13.0.1",
     "modern-normalize": "1.1.0",
     "p-defer": "^3.0.0",
-    "patch-package": "6.4.7",
+    "patch-package": "8.0.0",
     "postcss": "^8.4.22",
     "shiki": "^0.9.12",
     "sinon": "13.0.2",

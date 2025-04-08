@@ -14,6 +14,7 @@ import $utils from '../cypress/utils'
 import $window from '../dom/window'
 import type { Log } from '../cypress/log'
 import type { StateFunc } from '../cypress/state'
+import type { KeyPressSupportedKeys } from '@packages/types'
 
 const debug = Debug('cypress:driver:keyboard')
 
@@ -1397,6 +1398,10 @@ const defaults = (props: Partial<Cypress.KeyboardDefaultsOptions>) => {
   return getConfig()
 }
 
+const Keys: Record<string, KeyPressSupportedKeys> = {
+  TAB: 'Tab',
+}
+
 export default {
   defaults,
   getConfig,
@@ -1405,4 +1410,5 @@ export default {
   reset,
   toModifiersEventOptions,
   fromModifierEventOptions,
+  Keys,
 }

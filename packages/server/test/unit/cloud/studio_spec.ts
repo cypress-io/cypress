@@ -161,12 +161,12 @@ describe('lib/cloud/studio', () => {
         family: 'chromium',
         channel: 'stable',
         displayName: 'Chrome',
-        version: '100.0.0',
-        majorVersion: '100',
+        version: '120.0.0',
+        majorVersion: '120',
         path: '/path/to/chrome',
         isHeaded: true,
         isHeadless: false,
-      } as Cypress.Browser)
+      })
 
       expect(result).to.be.true
     })
@@ -194,6 +194,18 @@ describe('lib/cloud/studio', () => {
       studioManager.addSocketListeners(mockSocket)
 
       expect(invokeSyncSpy).to.not.be.called
+    })
+  })
+
+  describe('setProtocolDb', () => {
+    it('sets the protocol database on the studio server', () => {
+      const mockDb = { test: 'db' }
+
+      sinon.stub(studio, 'setProtocolDb')
+
+      studioManager.setProtocolDb(mockDb as any)
+
+      expect(studio.setProtocolDb).to.be.calledWith(mockDb)
     })
   })
 })

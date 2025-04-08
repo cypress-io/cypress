@@ -200,6 +200,10 @@ export default class Attempt {
     }
   }
 
+  @action setIsOpen (isOpen: boolean) {
+    this._isOpen = isOpen
+  }
+
   @action finish (props: UpdatableTestProps, isInteractive: boolean) {
     this.update(props)
     this.isActive = false

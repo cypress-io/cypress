@@ -20,7 +20,7 @@ describe('test errors', () => {
         // @ts-ignore
         runnablesWithErr.suites[0].tests[0].err = err
 
-        cy.get('.reporter').then(() => {
+        cy.get('.reporter.mounted').then(() => {
           runner.emit('runnables:ready', runnablesWithErr)
           runner.emit('reporter:start', {})
         })

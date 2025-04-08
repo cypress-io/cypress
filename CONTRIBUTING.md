@@ -201,7 +201,7 @@ We try to tag all issues with a `pkg/` or `npm/` tag describing the appropriate 
 You must have the following installed on your system to contribute locally:
 
 - [`Node.js`](https://nodejs.org/en/) (See the root [.node-version](.node-version) file for the required version. You can find a list of tools on [node-version-usage](https://github.com/shadowspawn/node-version-usage) to switch the version of [`Node.js`](https://nodejs.org/en/) based on [.node-version](.node-version).)
-- [`Yarn v1 Classic`](https://yarnpkg.com/en/docs/install). If you have [`Node.js`](https://nodejs.org/en/) experimental [corepack](https://nodejs.org/docs/latest/api/corepack.html) enabled, installation of the Yarn package manager will be handled automatically. Attempting to install Yarn globally with npm will fail if [corepack](https://nodejs.org/docs/latest/api/corepack.html) is enabled.
+- [`Yarn v1 Classic`](https://yarnpkg.com/en/docs/install) (See also [Corepack](#corepack) below.)
 - [`python`](https://www.python.org/downloads/) (since we use `node-gyp`. See their [repo](https://github.com/nodejs/node-gyp) for Python version requirements.)
 
 #### Debian/Ubuntu
@@ -215,6 +215,10 @@ For Ubuntu `24.04` and above, refer also to the [Ubuntu 24.04 Release notes](htt
 #### Windows
 
 Currently no additional instructions for installation requirements.
+
+#### Corepack
+
+The Cypress repo is compatible with Corepack and contains a `packageManager` field in the root [package.json](./package.json) file to automatically install Yarn. Cypress does not however require you to enable Corepack. It is classed as experimental and not suitable for production by the Node.js organization. Refer to the repo [corepack](https://github.com/nodejs/corepack#readme) for instructions, known issues and workarounds.
 
 ### Getting Started
 

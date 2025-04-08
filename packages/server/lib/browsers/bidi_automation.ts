@@ -79,9 +79,9 @@ export class BidiAutomation {
   private interceptId: string | undefined = undefined
 
   private constructor (webDriverClient: WebDriverClient, automation: Automation) {
+    debug('initializing bidi automation')
     this.automation = automation
     this.webDriverClient = webDriverClient
-
     // bind Bidi Events to update the standard automation client
     // Error here is expected until webdriver adds initiatorType and destination to the request object
     // @ts-expect-error
@@ -91,9 +91,6 @@ export class BidiAutomation {
     this.webDriverClient.on('network.fetchError', this.onFetchError)
     this.webDriverClient.on('browsingContext.contextCreated', this.onBrowsingContextCreated)
     this.webDriverClient.on('browsingContext.contextDestroyed', this.onBrowsingContextDestroyed)
-
-    debug('registering middleware')
-    automation.use(this.automationMiddleware)
   }
 
   setTopLevelContextId = (contextId?: string) => {
@@ -294,10 +291,10 @@ export class BidiAutomation {
 
       switch (message) {
         case 'key:press':
-          if (this.topLevelContextId) {
-            await bidiKeyPress(data, this.webDriverClient, this.topLevelContextId)
+          if (this.autContextId) {
+            await bidiKeyPress(data, this.webDriverClient, this.autContextId, this.topLevelContextId)
           } else {
-            throw new Error('Cannot emit key press: no top level context initialized')
+            throw new Error('Cannot emit key press: no AUT context initialized')
           }
 
           return
