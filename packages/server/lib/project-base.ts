@@ -27,7 +27,6 @@ import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/service-worker-manager'
 import { getAndInitializeStudioManager } from './cloud/api/get_and_initialize_studio_manager'
 import api from './cloud/api'
-import type { StudioManager } from './cloud/studio'
 import { v4 } from 'uuid'
 
 const routes = require('./cloud/routes')
@@ -73,6 +72,7 @@ export class ProjectBase extends EE {
   private _protocolManager?: ProtocolManagerShape
   private _recordTests?: any = null
   private _isServerOpen: boolean = false
+  private studioManagerPromise: Promise<void> | null = null
 
   public videoRecording?: VideoRecording
   public browser: any
@@ -160,19 +160,16 @@ export class ProjectBase extends EE {
 
     this._server = new ServerBase(cfg)
 
-    let studioManager: StudioManager | null
-
-    if (process.env.CYPRESS_ENABLE_CLOUD_STUDIO || process.env.CYPRESS_LOCAL_STUDIO_PATH) {
-      studioManager = await getAndInitializeStudioManager({
-        projectId: cfg.projectId,
-        cloudDataSource: this.ctx.cloud,
-      })
-
+    // Start studio manager initialization but don't block
+    this.studioManagerPromise = getAndInitializeStudioManager({
+      projectId: cfg.projectId,
+      cloudDataSource: this.ctx.cloud,
+    }).then(async (studioManager) => {
       this.ctx.update((data) => {
         data.studio = studioManager
       })
 
-      if (studioManager.status === 'INITIALIZED') {
+      if (studioManager.status === 'ENABLED') {
         const protocolManager = new ProtocolManager()
         const protocolUrl = routes.apiRoutes.captureProtocolCurrent()
         const script = await api.getCaptureProtocolScript(protocolUrl)
@@ -195,7 +192,13 @@ export class ProjectBase extends EE {
         studioManager.protocolManager = protocolManager
         studioManager.isProtocolEnabled = true
       }
-    }
+    }).catch((err) => {
+      debug('Error during studio manager setup: %o', err)
+
+      this.ctx.update((data) => {
+        data.studio = null
+      })
+    })
 
     const [port, warning] = await this._server.open(cfg, {
       getCurrentBrowser: () => this.browser,
@@ -431,6 +434,15 @@ export class ProjectBase extends EE {
       closeExtraTargets: this.closeExtraTargets,
 
       onStudioInit: async () => {
+        await this.studioManagerPromise
+
+        this.ctx.coreData.studio?.captureStudioEvent({
+          type: 'studio:init',
+          machineId: await this.ctx.coreData.machineId,
+          projectId: this.cfg.projectId,
+          user: this.ctx.coreData.user?.email,
+        })
+
         if (this.spec && this.ctx.coreData.studio?.protocolManager) {
           const canAccessStudioAI = await this.ctx.coreData.studio?.canAccessStudioAI(this.browser) ?? false
 
@@ -460,6 +472,8 @@ export class ProjectBase extends EE {
       },
 
       onStudioDestroy: async () => {
+        await this.studioManagerPromise
+
         if (this.ctx.coreData.studio?.protocolManager) {
           await browsers.closeProtocolConnection({ browser: this.browser, foundBrowsers: this.options.browsers })
           this.protocolManager?.close()

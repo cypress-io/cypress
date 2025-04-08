@@ -1,4 +1,4 @@
-import type { StudioErrorReport, StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape, StudioCloudApi } from '@packages/types'
+import type { StudioErrorReport, StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape, StudioCloudApi, StudioEvent } from '@packages/types'
 import type { Router } from 'express'
 import fetch from 'cross-fetch'
 import pkg from '@packages/root'
@@ -16,6 +16,7 @@ interface SetupOptions {
   studioHash?: string
   projectSlug?: string
   cloudApi: StudioCloudApi
+  shouldEnableStudio: boolean
 }
 
 const debug = Debug('cypress:server:studio')
@@ -42,7 +43,7 @@ export class StudioManager implements StudioManagerShape {
     this.invokeSync('setProtocolDb', { isEssential: true }, db)
   }
 
-  async setup ({ script, studioPath, studioHash, projectSlug, cloudApi }: SetupOptions): Promise<void> {
+  async setup ({ script, studioPath, studioHash, projectSlug, cloudApi, shouldEnableStudio }: SetupOptions): Promise<void> {
     const { createStudioServer } = requireScript<StudioServer>(script).default
 
     this._studioServer = await createStudioServer({
@@ -52,13 +53,22 @@ export class StudioManager implements StudioManagerShape {
     })
 
     this._studioHash = studioHash
-    this.status = 'INITIALIZED'
+    this.status = shouldEnableStudio ? 'ENABLED' : 'INITIALIZED'
   }
 
   initializeRoutes (router: Router): void {
     if (this._studioServer) {
       this.invokeSync('initializeRoutes', { isEssential: true }, router)
     }
+  }
+
+  async captureStudioEvent (event: StudioEvent): Promise<void> {
+    if (this._studioServer) {
+      // this request is not essential - we don't want studio to error out if a telemetry request fails
+      return (await this.invokeAsync('captureStudioEvent', { isEssential: false }, event))
+    }
+
+    return Promise.resolve()
   }
 
   async canAccessStudioAI (browser: Cypress.Browser): Promise<boolean> {
@@ -123,7 +133,7 @@ export class StudioManager implements StudioManagerShape {
   }
 
   /**
-   * Abstracts invoking a synchronous method on the StudioServer instance, so we can handle
+   * Abstracts invoking an asynchronous method on the StudioServer instance, so we can handle
    * errors in a uniform way
    */
   private async invokeAsync <K extends StudioServerAsyncMethods> (method: K, { isEssential }: { isEssential: boolean }, ...args: Parameters<StudioServerShape[K]>): Promise<ReturnType<StudioServerShape[K]> | undefined> {
@@ -143,7 +153,11 @@ export class StudioManager implements StudioManagerShape {
         actualError = error
       }
 
-      this.status = 'IN_ERROR'
+      // only set error state if this request is essential
+      if (isEssential) {
+        this.status = 'IN_ERROR'
+      }
+
       // Call and forget this, we don't want to block the main thread
       this.reportError(actualError).catch(() => { })
 

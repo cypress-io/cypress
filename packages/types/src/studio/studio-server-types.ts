@@ -30,10 +30,18 @@ export interface StudioServerOptions {
   cloudApi: StudioCloudApi
 }
 
+export interface StudioEvent {
+  type: string
+  machineId: string | null
+  user?: string
+  projectId?: string
+}
+
 export interface StudioServerShape {
   initializeRoutes(router: Router): void
   canAccessStudioAI(browser: Cypress.Browser): Promise<boolean>
   setProtocolDb(database: Database.Database): void
+  captureStudioEvent(event: StudioEvent): Promise<void>
 }
 
 export interface StudioServerDefaultShape {
