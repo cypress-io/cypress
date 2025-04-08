@@ -1,23 +1,21 @@
-describe('__placeholder__/commands/actions/press', () => {
+describe('src/cy/commands/actions/press', () => {
   it('dispatches the tab keypress to the AUT', () => {
+    // Non-BiDi firefox is not supported
+    if (Cypress.browser.family === 'firefox' && Cypress.browserMajorVersion() < 135) {
+      return
+    }
+
+    // TODO: Webkit is not supported. https://github.com/cypress-io/cypress/issues/31054
+    if (Cypress.isBrowser('webkit')) {
+      return
+    }
+
     cy.visit('/fixtures/input_events.html')
 
-    cy.get('#focus').focus().then(async () => {
-      try {
-        await Cypress.automation('key:press', { key: 'Tab' })
-      } catch (e) {
-        if (e.message && (e.message as string).includes('key:press')) {
-          cy.log(e.message)
+    cy.press(Cypress.Keyboard.Keys.TAB)
 
-          return
-        }
+    cy.get('#keydown').should('have.value', 'Tab')
 
-        throw e
-      }
-
-      cy.get('#keyup').should('have.value', 'Tab')
-
-      cy.get('#keydown').should('have.value', 'Tab')
-    })
+    cy.get('#keyup').should('have.value', 'Tab')
   })
 })
