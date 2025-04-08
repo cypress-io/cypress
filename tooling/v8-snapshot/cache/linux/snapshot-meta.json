@@ -2230,7 +2230,6 @@
     "./node_modules/is-regexp/index.js",
     "./node_modules/is-stream/index.js",
     "./node_modules/is-typedarray/index.js",
-    "./node_modules/isarray/index.js",
     "./node_modules/isbinaryfile/lib/index.js",
     "./node_modules/isexe/mode.js",
     "./node_modules/isexe/windows.js",
@@ -3181,6 +3180,7 @@
     "./node_modules/react-docgen/node_modules/doctrine/package.json",
     "./node_modules/react-docgen/node_modules/strip-indent/index.js",
     "./node_modules/readable-stream/lib/internal/streams/destroy.js",
+    "./node_modules/readable-stream/node_modules/isarray/index.js",
     "./node_modules/recast/node_modules/ast-types/def/babel-core.js",
     "./node_modules/recast/node_modules/ast-types/def/babel.js",
     "./node_modules/recast/node_modules/ast-types/def/core-operators.js",
@@ -4233,5 +4233,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "aa95c9584e65317d0d447a8e274859e7728102e53274742f95a9cd3dc08fe9fd"
+  "deferredHash": "712617e51b2b166bd89f4eeb0c7840516ff71d7c469fb06777924ee845bd6fb4"
 }
