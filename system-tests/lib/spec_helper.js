@@ -96,7 +96,7 @@ before(function () {
 
 // appData.ensure()
 
-beforeEach(function () {
+beforeEach(async function () {
   this.originalEnv = originalEnv
 
   nock.disableNetConnect()
@@ -104,7 +104,7 @@ beforeEach(function () {
 
   // always clean up the cache
   // before each test
-  return cache.remove()
+  await cache.remove()
 })
 
 afterEach(() => {

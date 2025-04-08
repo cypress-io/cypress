@@ -96,28 +96,26 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
           }))
         })
       },
-      clearLatestProjectsCache () {
-        return cache.removeLatestProjects()
+      async clearLatestProjectsCache () {
+        await cache.removeLatestProjects()
       },
-      getProjectPreferencesFromCache () {
+      async getProjectPreferencesFromCache () {
         return cache.getProjectPreferences()
       },
-      clearProjectPreferences (projectTitle: string) {
-        return cache.removeProjectPreferences(projectTitle)
+      async clearProjectPreferences (projectTitle: string) {
+        await cache.removeProjectPreferences(projectTitle)
       },
-      clearAllProjectPreferences () {
-        return cache.removeAllProjectPreferences()
+      async clearAllProjectPreferences () {
+        await cache.removeAllProjectPreferences()
       },
-      insertProjectPreferencesToCache (projectTitle: string, preferences: Preferences) {
-        // FIXME: this should be awaited (since it writes to disk asynchronously) but is not
-        // https://cypress-io.atlassian.net/browse/UNIFY-1705
-        cache.insertProjectPreferences(projectTitle, preferences)
+      async insertProjectPreferencesToCache (projectTitle: string, preferences: Preferences) {
+        await cache.insertProjectPreferences(projectTitle, preferences)
       },
-      removeProjectFromCache (path: string) {
-        return cache.removeProject(path)
+      async removeProjectFromCache (path: string) {
+        await cache.removeProject(path)
       },
-      closeActiveProject () {
-        return openProject.closeActiveProject()
+      async closeActiveProject () {
+        await openProject.closeActiveProject()
       },
       getCurrentBrowser () {
         return (openProject?.getProject()?.browser) ?? undefined
