@@ -19,6 +19,7 @@
     "better-sqlite3": "11.5.0",
     "devtools-protocol": "0.0.1413303",
     "express": "4.21.0",
+    "socket.io": "4.0.1",
     "typescript": "~5.4.5"
   },
   "files": [

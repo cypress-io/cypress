@@ -1,5 +1,6 @@
 import type { StudioErrorReport, StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape, StudioCloudApi } from '@packages/types'
 import type { Router } from 'express'
+import type { Socket } from 'socket.io'
 import fetch from 'cross-fetch'
 import pkg from '@packages/root'
 import os from 'os'
@@ -56,6 +57,12 @@ export class StudioManager implements StudioManagerShape {
     }
   }
 
+  addSocketListeners (socket: Socket): void {
+    if (this._studioServer) {
+      this.invokeSync('addSocketListeners', { isEssential: true }, socket)
+    }
+  }
+
   async canAccessStudioAI (browser: Cypress.Browser): Promise<boolean> {
     return (await this.invokeAsync('canAccessStudioAI', { isEssential: true }, browser)) ?? false
   }
@@ -100,7 +107,9 @@ export class StudioManager implements StudioManagerShape {
     }
 
     try {
-      return this._studioServer[method].apply(this._studioServer, args)
+      const fn = this._studioServer[method] as Function
+
+      return fn.apply(this._studioServer, args)
     } catch (error: unknown) {
       let actualError: Error
 
