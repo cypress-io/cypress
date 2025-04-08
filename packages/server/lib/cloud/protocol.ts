@@ -62,6 +62,10 @@ export class ProtocolManager implements ProtocolManagerShape {
     } : undefined
   }
 
+  get db () {
+    return this._db
+  }
+
   async prepareProtocol (script: string, options: ProtocolManagerOptions) {
     this._captureHash = base64url.fromBase64(crypto.createHash('SHA256').update(script).digest('base64'))
 

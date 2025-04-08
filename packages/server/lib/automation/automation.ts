@@ -86,12 +86,12 @@ export class Automation {
       const onReq = this.get('onRequest')
 
       if (onReq) {
+        debug('Middleware `onRequest` fn found, attempting middleware exec for message: %s', message)
+
         return Bluebird.try(() => {
           return onReq(resolvedMessage, resolvedData)
         }).catch((e) => {
           if (AutomationNotImplemented.isAutomationNotImplementedErr(e)) {
-            debug(`${e.message}. Falling back to emit via socket.`)
-
             return this.requestAutomationResponse(resolvedMessage, resolvedData, fn)
           }
 
@@ -189,6 +189,8 @@ export class Automation {
   }
 
   use (middlewares: AutomationMiddleware) {
+    debug('installing middleware')
+
     return this.middleware = {
       ...this.middleware,
       ...middlewares,
@@ -196,6 +198,7 @@ export class Automation {
   }
 
   async push<T extends keyof AutomationCommands> (message: T, data: AutomationCommands[T]['dataType']) {
+    debug('push `%s`: %o', message, data)
     const result = await this.normalize(message, data)
 
     if (result) {
@@ -206,6 +209,7 @@ export class Automation {
   async request<T extends keyof AutomationCommands> (message: T, data: AutomationCommands[T]['dataType'], fn) {
     // curry in the message + callback function
     // for obtaining the external automation data
+    debug('request: `%s`', message)
     const automate = this.automationValve(message, fn)
 
     await this.invokeAsync('onBeforeRequest', message, data)

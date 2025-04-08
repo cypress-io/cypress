@@ -1,7 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 14.2.2
+## 14.3.0
 
-_Released 4/8/2025 (PENDING)_
+_Released 4/8/2025_
+
+**Features:**
+
+- The [`cy.press()`](https://on.cypress.io/api/press) command is now available. It supports dispatching native Tab keyboard events to the browser. Addresses [#31050](https://github.com/cypress-io/cypress/issues/31050). Addresses [#299](https://github.com/cypress-io/cypress/issues/299). Addressed in [#31398](https://github.com/cypress-io/cypress/pull/31398).
 
 **Bugfixes:**
 
@@ -16,7 +20,7 @@ _Released 4/8/2025 (PENDING)_
 
 **Dependency Updates:**
 
-- Upgraded `mocha` from `7.0.1` to `7.1.1`. Addressed in [#31401](https://github.com/cypress-io/cypress/pull/31401).
+- Upgraded `mocha` from `7.0.1` to `7.2.0`. Addressed in [#31423](https://github.com/cypress-io/cypress/pull/31423) and [#31432](https://github.com/cypress-io/cypress/pull/31432).
 - Upgraded `webdriver` from `9.7.3` to `9.11.0`. Addressed in [#31315](https://github.com/cypress-io/cypress/pull/31315).
 - Upgraded `win-version-info` from `5.0.1` to `6.0.1`. Addressed in [#31358](https://github.com/cypress-io/cypress/pull/31358).
 

@@ -4,7 +4,7 @@
   </div>
   <div
     v-else
-    ref="root"
+    ref="container"
   >
     Loading the panel...
   </div>
@@ -27,26 +27,30 @@ const props = defineProps<{
 
 interface StudioApp { default: StudioAppDefaultShape }
 
-const root = ref<HTMLElement | null>(null)
+const container = ref<HTMLElement | null>(null)
 const error = ref<string | null>(null)
-const Panel = ref<StudioPanelShape | null>(null)
+const ReactStudioPanel = ref<StudioPanelShape | null>(null)
 const reactRoot = ref<Root | null>(null)
 
 const maybeRenderReactComponent = () => {
-  if (!Panel.value || !!error.value) {
+  // don't render the react component if the react studio panel has not loaded or if there is an error
+  if (!ReactStudioPanel.value || !!error.value) {
     return
   }
 
-  const panel = window.UnifiedRunner.React.createElement(Panel.value, { canAccessStudioAI: props.canAccessStudioAI })
+  const panel = window.UnifiedRunner.React.createElement(ReactStudioPanel.value, { canAccessStudioAI: props.canAccessStudioAI })
 
-  reactRoot.value = window.UnifiedRunner.ReactDOM.createRoot(root.value)
+  if (!reactRoot.value) {
+    reactRoot.value = window.UnifiedRunner.ReactDOM.createRoot(container.value)
+  }
+
   reactRoot.value?.render(panel)
 }
 
 watch(() => props.canAccessStudioAI, maybeRenderReactComponent)
 
 const unmountReactComponent = () => {
-  if (!Panel.value || !root.value) {
+  if (!ReactStudioPanel.value || !container.value) {
     return
   }
 
@@ -86,7 +90,7 @@ loadRemote<StudioApp>('app-studio').then((module) => {
     return
   }
 
-  Panel.value = module.default.StudioPanel
+  ReactStudioPanel.value = module.default.StudioPanel
   maybeRenderReactComponent()
 }).catch((e) => {
   error.value = e.message

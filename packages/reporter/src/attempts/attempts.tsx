@@ -1,6 +1,6 @@
 import cs from 'classnames'
 import { observer } from 'mobx-react'
-import React, { Component } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import type { TestState } from '@packages/types'
 import Agents from '../agents/agents'
@@ -35,73 +35,62 @@ const AttemptHeader = ({ index, state }: {index: number, state: TestState }) => 
   </span>
 )
 
-const StudioError = () => (
-  <div className='runnable-err-wrapper studio-err-wrapper'>
-    <div className='runnable-err'>
-      <div className='runnable-err-message'>
-        Studio cannot add commands to a failing test.
-      </div>
-    </div>
-  </div>
-)
-
-function renderAttemptContent (model: AttemptModel, studioActive: boolean) {
-  // performance optimization - don't render contents if not open
-  return (
-    <div className={`attempt-${model.id + 1}`}>
-      <Sessions model={model.sessions} />
-      <Agents model={model} />
-      <Routes model={model} />
-      <div ref='commands' className='runnable-commands-region'>
-        {model.hasCommands ? <Hooks model={model} /> : <NoCommands />}
-      </div>
-      {model.state === 'failed' && (
-        <div className='attempt-error-region'>
-          <TestError {...model.error} />
-          {studioActive && <StudioError />}
-        </div>
-      )}
-    </div>
-  )
-}
-
 interface AttemptProps {
   model: AttemptModel
   scrollIntoView: Function
   studioActive: boolean
 }
 
-@observer
-class Attempt extends Component<AttemptProps> {
-  componentDidUpdate () {
-    this.props.scrollIntoView()
-  }
+const Attempt: React.FC<AttemptProps> = observer(({ model, scrollIntoView, studioActive }) => {
+  const [isMounted, setIsMounted] = useState(false)
 
-  render () {
-    const { model, studioActive } = this.props
+  useEffect(() => {
+    if (isMounted) {
+      scrollIntoView()
+    } else {
+      setIsMounted(true)
+    }
+  })
 
-    // HACK: causes component update when command log is added
-    model.commands.length
-
-    return (
-      <li
-        key={model.id}
-        className={cs('attempt-item', `attempt-state-${model.state}`)}
-        ref="container"
+  return (
+    <li
+      key={model.id}
+      className={cs('attempt-item', `attempt-state-${model.state}`)}
+    >
+      <Collapsible
+        header={<AttemptHeader index={model.id} state={model.state} />}
+        hideExpander
+        headerClass='attempt-name'
+        contentClass='attempt-content'
+        isOpen={model.isOpen}
+        onOpenStateChangeRequested={(isOpen: boolean) => model.setIsOpen(isOpen)}
       >
-        <Collapsible
-          header={<AttemptHeader index={model.id} state={model.state} />}
-          hideExpander
-          headerClass='attempt-name'
-          contentClass='attempt-content'
-          isOpen={model.isOpen}
-        >
-          {renderAttemptContent(model, studioActive)}
-        </Collapsible>
-      </li>
-    )
-  }
-}
+        <div className={`attempt-${model.id + 1}`}>
+          <Sessions model={model.sessions} />
+          <Agents model={model} />
+          <Routes model={model} />
+          <div className='runnable-commands-region'>
+            {model.hasCommands ? <Hooks model={model} /> : <NoCommands />}
+          </div>
+          {model.state === 'failed' && (
+            <div className='attempt-error-region'>
+              <TestError {...model.error} />
+              {studioActive && (
+                <div className='runnable-err-wrapper studio-err-wrapper'>
+                  <div className='runnable-err'>
+                    <div className='runnable-err-message'>
+                      Studio cannot add commands to a failing test.
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </Collapsible>
+    </li>
+  )
+})
 
 const Attempts = observer(({ test, scrollIntoView, studioActive }: {test: TestModel, scrollIntoView: Function, studioActive: boolean}) => {
   return (<ul className={cs('attempts', {
