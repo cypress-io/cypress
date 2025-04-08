@@ -10,14 +10,9 @@
   ],
   "compilerOptions": {
     "lib": ["esnext"],
-    "strict": true,
     "allowJs": false,
     "noImplicitAny": true,
-    "noUnusedLocals": false,
-    "resolveJsonModule": true,
-    "experimentalDecorators": true,
     "noUncheckedIndexedAccess": true,
-    "importsNotUsedAsValues": "error",
     "types": []
   },
 }

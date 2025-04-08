@@ -5,13 +5,11 @@ import $errUtils from '../cypress/error_utils'
 export default (Cypress, userOptions: Cypress.LogGroup.Config, fn: Cypress.LogGroup.ApiCallback) => {
   const cy = Cypress.cy
 
-  const shouldEmitLog = userOptions.log === undefined ? true : userOptions.log
-
   const options: Cypress.InternalLogConfig = {
     ...userOptions,
     instrument: 'command',
     groupStart: true,
-    emitOnly: !shouldEmitLog,
+    hidden: userOptions.log === false,
   }
 
   const log = Cypress.log(options)

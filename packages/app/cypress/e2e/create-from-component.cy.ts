@@ -28,7 +28,7 @@ function validateCreateFromVueComponentCard (beforeEachFn: () => void, expectedS
   it('Lists Vue components in the project', () => {
     cy.get('@ComponentCard').click()
 
-    cy.findByText('2 matches').should('be.visible')
+    cy.findByText('9 matches').should('be.visible')
 
     cy.findByText('App').should('be.visible')
     cy.findByText('HelloWorld').should('be.visible')
@@ -38,11 +38,11 @@ function validateCreateFromVueComponentCard (beforeEachFn: () => void, expectedS
     cy.get('@ComponentCard').click()
 
     cy.findByText('*.vue').should('be.visible')
-    cy.findByText('2 matches').should('be.visible')
-    cy.findByLabelText('file-name-input').type('HelloWorld')
+    cy.findByText('9 matches').should('be.visible')
+    cy.findByLabelText('Search by filename').type('HelloWorld')
 
     cy.findByText('HelloWorld').should('be.visible')
-    cy.findByText('1 of 2 matches').should('be.visible')
+    cy.findByText('1 of 9 matches').should('be.visible')
     cy.findByText('App').should('not.exist')
   })
 
@@ -124,7 +124,7 @@ function validateCreateFromReactComponentCard (beforeEachFn: () => void, expecte
 
     cy.findByText('*.{js,jsx,tsx}').should('be.visible')
     cy.findByText('5 matches').should('be.visible')
-    cy.findByLabelText('file-name-input').type('App')
+    cy.findByLabelText('Search by filename').type('App')
 
     cy.findByText('App').should('be.visible')
     cy.findByText('1 of 5 matches').should('be.visible')
@@ -207,25 +207,27 @@ describe('Create from component card', () => {
   context('Vue', () => {
     context('project with default spec pattern', () => {
       validateCreateFromVueComponentCard(() => {
-        cy.scaffoldProject('no-specs-vue-2')
-        cy.openProject('no-specs-vue-2', ['--component'])
+        cy.scaffoldProject('no-specs-vue')
+        cy.openProject('no-specs-vue', ['--component'])
         cy.startAppServer('component')
         cy.visitApp()
+        cy.specsPageIsVisible('new-project')
 
         cy.findAllByTestId('card').eq(0).as('ComponentCard')
-      }, 'src/components/HelloWorld.cy.js')
+      }, 'src/components/HelloWorld.cy.ts')
     })
 
     context('project with custom spec pattern', () => {
       validateCreateFromVueComponentCard(() => {
-        cy.scaffoldProject('no-specs-vue-2')
-        cy.openProject('no-specs-vue-2', ['--config-file', 'cypress-custom-spec-pattern.config.js', '--component'])
+        cy.scaffoldProject('no-specs-vue')
+        cy.openProject('no-specs-vue', ['--config-file', 'cypress-custom-spec-pattern.config.ts', '--component'])
         cy.startAppServer('component')
         cy.visitApp()
+        cy.specsPageIsVisible('no-specs')
 
         cy.findByText('New spec').click()
         cy.findAllByTestId('card').eq(0).as('ComponentCard')
-      }, 'src/specs-folder/HelloWorld.cy.js')
+      }, 'src/specs-folder/HelloWorld.cy.ts')
     })
   })
 
@@ -236,6 +238,7 @@ describe('Create from component card', () => {
         cy.openProject('no-specs', ['--component'])
         cy.startAppServer('component')
         cy.visitApp()
+        cy.specsPageIsVisible('new-project')
 
         cy.findAllByTestId('card').eq(0).as('ComponentCard')
       }, 'src/App.cy.jsx')
@@ -247,6 +250,7 @@ describe('Create from component card', () => {
         cy.openProject('no-specs', ['--config-file', 'cypress-custom-spec-pattern.config.ts', '--component'])
         cy.startAppServer('component')
         cy.visitApp()
+        cy.specsPageIsVisible('no-specs')
 
         cy.findByText('New spec').click()
         cy.findAllByTestId('card').eq(0).as('ComponentCard')

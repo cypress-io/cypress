@@ -1,5 +1,6 @@
 import RunResults from './RunResults.vue'
 import { RunResultsFragmentDoc } from '../generated/graphql-test'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 import { CloudRunStubs } from '@packages/graphql/test/stubCloudTypes'
 

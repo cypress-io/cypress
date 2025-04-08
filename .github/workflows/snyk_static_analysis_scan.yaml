@@ -8,18 +8,20 @@ on:
     branches:
       - develop
 jobs:
-  Snyk_SAST_Scan :
+  Snyk_SAST_Scan:
+    # Skip this job on PRs from forks
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.BOT_GITHUB_ACTION_TOKEN }}
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           cache: 'yarn'
       - name: Run yarn
         run: yarn

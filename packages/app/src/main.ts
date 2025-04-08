@@ -4,13 +4,15 @@ import 'tailwindcss/tailwind.css'
 import urql from '@urql/vue'
 import App from './App.vue'
 import { makeUrqlClient } from '@packages/frontend-shared/src/graphql/urqlClient'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { createI18n } from '@cy/i18n'
 import { createRouter } from './router/router'
 import { injectBundle } from './runner/injectBundle'
 import { createPinia } from './store'
 import Toast, { POSITION } from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
-import { createWebsocket, getRunnerConfigFromWindow } from './runner'
+import { createWebsocket } from './runner'
+import { getRunnerConfigFromWindow } from './runner/get-runner-config-from-window'
 import { telemetry } from '@packages/telemetry/src/browser'
 
 // Grab the time just before loading config to include that in the cypress:app span
@@ -39,7 +41,7 @@ app.use(Toast, {
   closeOnClick: false,
 })
 
-makeUrqlClient({ target: 'app', namespace: config.namespace, socketIoRoute: config.socketIoRoute }).then((client) => {
+await makeUrqlClient({ target: 'app', namespace: config.namespace, socketIoRoute: config.socketIoRoute }).then((client) => {
   app.use(urql, client)
   app.use(createRouter())
   app.use(createI18n())

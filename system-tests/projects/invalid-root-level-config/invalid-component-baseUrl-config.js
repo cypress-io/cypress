@@ -2,7 +2,7 @@ module.exports = {
   component: {
     baseUrl: 'https://foo.com',
     devServer: {
-      framework: 'create-react-app',
+      framework: 'react',
       bundler: 'webpack',
     },
   },

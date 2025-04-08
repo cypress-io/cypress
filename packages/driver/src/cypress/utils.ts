@@ -241,6 +241,7 @@ export default {
     return _
     .chain(values)
     .map(_.bind(this.stringifyActual, this))
+    // @ts-expect-error
     .without(undefined)
     .join(', ')
     .value()

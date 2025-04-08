@@ -48,7 +48,7 @@ describe('useTestingType', () => {
   })
 
   it('supplies expected query data', () => {
-    mountComposable(useTestingType).then((value) => {
+    mountComposable(useTestingType).then(async (value) => {
       const result = value as unknown as ReturnType<typeof useTestingType>
 
       expect(result.activeTestingType.value).to.eql('e2e')
@@ -69,12 +69,12 @@ describe('useTestingType', () => {
       })
 
       it('should toggle viewed mode', () => {
-        mountComposable(useTestingType).then((value) => {
+        mountComposable(useTestingType).then(async (value) => {
           const result = value as unknown as ReturnType<typeof useTestingType>
 
           expect(result.viewedTestingType.value).to.eql('e2e')
 
-          result.viewTestingType('component')
+          await result.viewTestingType('component')
 
           expect(result.viewedTestingType.value).to.eql('component')
         })
@@ -92,24 +92,24 @@ describe('useTestingType', () => {
       })
 
       it('should toggle active mode if not active mode', () => {
-        mountComposable(useTestingType).then((value) => {
+        mountComposable(useTestingType).then(async (value) => {
           const result = value as unknown as ReturnType<typeof useTestingType>
 
           expect(result.viewedTestingType.value).to.eql('e2e')
 
-          result.viewTestingType('component')
+          await result.viewTestingType('component')
         })
 
         cy.get('@activateTestingType').should('have.been.calledOnce')
       })
 
       it('should toggle viewed mode if active mode', () => {
-        mountComposable(useTestingType).then((value) => {
+        mountComposable(useTestingType).then(async (value) => {
           const result = value as unknown as ReturnType<typeof useTestingType>
 
           expect(result.viewedTestingType.value).to.eql('e2e')
 
-          result.viewTestingType('e2e')
+          await result.viewTestingType('e2e')
         })
 
         cy.get('@activateTestingType').should('not.have.been.called')

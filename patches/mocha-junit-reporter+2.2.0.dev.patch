@@ -1,0 +1,13 @@
+diff --git a/node_modules/mocha-junit-reporter/index.js b/node_modules/mocha-junit-reporter/index.js
+index fbbed2e..de27092 100644
+--- a/node_modules/mocha-junit-reporter/index.js
++++ b/node_modules/mocha-junit-reporter/index.js
+@@ -366,7 +366,7 @@ MochaJUnitReporter.prototype.getTestcaseData = function(test, err) {
+       message = '';
+     }
+     var failureMessage = err.stack || message;
+-    if (!Base.hideDiff && err.expected !== undefined) {
++    if (!Base.hideDiff && err.expected !== undefined && mocha6plus) {
+         var oldUseColors = Base.useColors;
+         Base.useColors = false;
+         failureMessage += "\n" + Base.generateDiff(err.actual, err.expected);

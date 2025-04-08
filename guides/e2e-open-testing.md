@@ -34,6 +34,7 @@ it('should onboard a todos project', () => {
 it('should open todos in the app', () => {
   cy.startAppServer() // starts the express server used to run the "app"
   cy.visitApp() // visits the app page, without launching the browser
+  cy.specsPageIsVisible()
   cy.get('[href=#/runs]').click()
   cy.get('[href=#/settings]').click()
 })

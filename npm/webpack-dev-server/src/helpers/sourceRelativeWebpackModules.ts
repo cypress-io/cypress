@@ -5,6 +5,13 @@ import debugFn from 'debug'
 
 const debug = debugFn('cypress:webpack-dev-server:sourceRelativeWebpackModules')
 
+class CypressWebpackDevServerError extends Error {
+  constructor (message: string) {
+    super(message)
+    this.name = 'CypressWebpackDevServerError'
+  }
+}
+
 export type ModuleClass = typeof Module & {
   _load(id: string, parent: Module, isMain: boolean): any
   _resolveFilename(request: string, parent: Module, isMain: boolean, options?: { paths: string[] }): string
@@ -30,7 +37,7 @@ export interface SourcedWebpackDevServer extends SourcedDependency {
   module: {
     new (...args: unknown[]): unknown
   }
-  majorVersion: 3 | 4
+  majorVersion: 4 | 5
 }
 
 export interface SourcedHtmlWebpackPlugin extends SourcedDependency {
@@ -59,9 +66,6 @@ export const cypressWebpackPath = (config: WebpackDevServerConfig) => {
 type FrameworkWebpackMapper = { [Property in Frameworks]: string | undefined }
 
 const frameworkWebpackMapper: FrameworkWebpackMapper = {
-  'create-react-app': 'react-scripts',
-  'vue-cli': '@vue/cli-service',
-  'nuxt': '@nuxt/webpack',
   react: undefined,
   vue: undefined,
   next: 'next',
@@ -180,11 +184,10 @@ export function sourceWebpack (config: WebpackDevServerConfig, framework: Source
 
 // Source the webpack-dev-server module from the provided framework or projectRoot.
 // If none is found, we fallback to the version bundled with this package.
-export function sourceWebpackDevServer (config: WebpackDevServerConfig, framework?: SourcedDependency | null): SourcedWebpackDevServer {
+export function sourceWebpackDevServer (config: WebpackDevServerConfig, webpackMajorVersion: 4 | 5, framework?: SourcedDependency | null): SourcedWebpackDevServer {
   const searchRoot = framework?.importPath ?? config.cypressConfig.projectRoot
 
   debug('WebpackDevServer: Attempting to source webpack-dev-server from %s', searchRoot)
-
   const webpackDevServer = { } as SourcedWebpackDevServer
   let webpackDevServerJsonPath: string
 
@@ -208,9 +211,18 @@ export function sourceWebpackDevServer (config: WebpackDevServerConfig, framewor
   webpackDevServer.importPath = path.dirname(webpackDevServerJsonPath)
   webpackDevServer.packageJson = require(webpackDevServerJsonPath)
   webpackDevServer.module = require(webpackDevServer.importPath)
-  webpackDevServer.majorVersion = getMajorVersion(webpackDevServer.packageJson, [3, 4])
+  webpackDevServer.majorVersion = getMajorVersion(webpackDevServer.packageJson, [4, 5])
 
   debug('WebpackDevServer: Successfully sourced webpack-dev-server - %o', webpackDevServer)
+  if (webpackMajorVersion < 5 && webpackDevServer.majorVersion === 5) {
+    const json = webpackDevServer.packageJson
+
+    throw new CypressWebpackDevServerError(
+      `Incompatible major versions of webpack and webpack-dev-server!
+      webpack-dev-server major version ${webpackDevServer.majorVersion} only works with major versions of webpack 5 - saw webpack-dev-server version ${json.version}.
+      If using webpack major version 4, please install webpack-dev-server version 4 to be used with @cypress/webpack-dev-server or upgrade to webpack 5.`,
+    )
+  }
 
   return webpackDevServer
 }
@@ -268,7 +280,7 @@ export function sourceHtmlWebpackPlugin (config: WebpackDevServerConfig, framewo
 export function sourceDefaultWebpackDependencies (config: WebpackDevServerConfig): SourceRelativeWebpackResult {
   const framework = sourceFramework(config)
   const webpack = sourceWebpack(config, framework)
-  const webpackDevServer = sourceWebpackDevServer(config, framework)
+  const webpackDevServer = sourceWebpackDevServer(config, webpack.majorVersion, framework)
   const htmlWebpackPlugin = sourceHtmlWebpackPlugin(config, framework, webpack)
 
   return {

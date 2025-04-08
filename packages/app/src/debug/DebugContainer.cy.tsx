@@ -1,5 +1,6 @@
 import { DebugSpecListGroupsFragment, DebugSpecListSpecFragment, DebugSpecListTestsFragment, DebugSpecsFragment, DebugSpecsFragmentDoc, UseCohorts_DetermineCohortDocument } from '../generated/graphql-test'
 import DebugContainer from './DebugContainer.vue'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import { specsList } from './utils/DebugMapping'
@@ -170,7 +171,7 @@ describe('<DebugContainer />', () => {
         mountTestRun('allSkipped')
 
         cy.findByTestId('collapsible').should('be.visible')
-        cy.contains('h3', 'Incomplete')
+        cy.contains('h2', 'Incomplete')
         cy.contains('The browser server never connected.').should('be.visible')
         cy.contains('2 of 3 specs skipped').should('be.visible')
       })
@@ -181,7 +182,7 @@ describe('<DebugContainer />', () => {
         mountTestRun('noTests')
 
         cy.findByTestId('collapsible').should('be.visible')
-        cy.contains('h3', 'Incomplete')
+        cy.contains('h2', 'Incomplete')
         cy.contains('Run has no tests').should('be.visible')
       })
     })
@@ -191,7 +192,7 @@ describe('<DebugContainer />', () => {
         mountTestRun('timedOutWithCi')
 
         cy.findByTestId('collapsible').should('be.visible')
-        cy.contains('h3', 'Incomplete')
+        cy.contains('h2', 'Incomplete')
         cy.contains('Circle CI #1234').should('have.attr', 'href', 'https://circleci.com').should('be.visible')
         cy.contains('Archive this run to remove it').should('be.visible')
       })
@@ -200,7 +201,7 @@ describe('<DebugContainer />', () => {
         mountTestRun('timedOutWithoutCi')
 
         cy.findByTestId('collapsible').should('be.visible')
-        cy.contains('h3', 'Incomplete')
+        cy.contains('h2', 'Incomplete')
         cy.contains('Circle CI #1234').should('not.exist')
         cy.contains('Archive this run to remove it').should('be.visible')
       })

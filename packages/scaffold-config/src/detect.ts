@@ -25,7 +25,7 @@ export async function areAllDepsSatisfied (projectPath: string, framework: Cypre
   return true
 }
 
-// Detect the framework, which can either be a tool like Create React App,
+// Detect the framework, which can either be a tool like Next.js,
 // in which case we just return the framework. The user cannot change the
 // bundler.
 
@@ -38,7 +38,6 @@ export async function detectFramework (projectPath: string, frameworks: Cypress.
     const hasAllDeps = await areAllDepsSatisfied(projectPath, framework)
 
     // so far all the templates we support only have 1 bundler,
-    // for example CRA only works with webpack,
     // but we want to consider in the future, tools like Nuxt ship
     // both a webpack and vite dev-env.
     // if we support this, we will also need to attempt to infer the dev server of choice.

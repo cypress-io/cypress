@@ -101,26 +101,23 @@ export default (Commands, Cypress, cy, state) => {
         $errUtils.throwErrByPath('scrollIntoView.invalid_easing', { args: { easing: options.easing } })
       }
 
-      if (options.log) {
-        deltaOptions = $utils.filterOutOptions(options, { duration: 0, easing: 'swing', offset: { left: 0, top: 0 } })
+      deltaOptions = $utils.filterOutOptions(options, { duration: 0, easing: 'swing', offset: { left: 0, top: 0 } })
 
-        const log = {
-          $el: options.$el,
-          message: deltaOptions,
-          timeout: options.timeout,
-          consoleProps () {
-            const obj = {
-              // merge into consoleProps without mutating it
-              'Applied To': $dom.getElements(options.$el),
-              'Scrolled Element': $dom.getElements(options.$el),
-            }
+      options._log = Cypress.log({
+        $el: options.$el,
+        message: deltaOptions,
+        hidden: options.log === false,
+        timeout: options.timeout,
+        consoleProps () {
+          const obj = {
+            // merge into consoleProps without mutating it
+            'Applied To': $dom.getElements(options.$el),
+            'Scrolled Element': $dom.getElements(options.$el),
+          }
 
-            return obj
-          },
-        }
-
-        options._log = Cypress.log(log)
-      }
+          return obj
+        },
+      })
 
       if (!parentIsWin) {
         // scroll the parent into view first
@@ -131,6 +128,7 @@ export default (Commands, Cypress, cy, state) => {
       const scrollIntoView = () => {
         return new Promise((resolve, reject) => {
           // scroll our axes
+          // @ts-ignore - scrollTo does not define a 'done()' key on its config object.
           return $(options.$parent).scrollTo(options.$el, {
             axis: options.axis,
             easing: options.easing,
@@ -283,54 +281,54 @@ export default (Commands, Cypress, cy, state) => {
         $errUtils.throwErrByPath('scrollTo.invalid_target', { args: { x, y } })
       }
 
-      if (options.log) {
-        const deltaOptions = $utils.stringify(
-          $utils.filterOutOptions(options, { duration: 0, easing: 'swing' }),
-        )
+      const deltaOptions = $utils.stringify(
+        $utils.filterOutOptions(options, { duration: 0, easing: 'swing' }),
+      )
 
-        const messageArgs: string[] = []
+      const messageArgs: string[] = []
 
-        if (position) {
-          messageArgs.push(position)
-        } else {
-          messageArgs.push(x)
-          messageArgs.push(y)
-        }
-
-        if (deltaOptions) {
-          messageArgs.push(deltaOptions)
-        }
-
-        const log: Record<string, any> = {
-          message: messageArgs.join(', '),
-          timeout: options.timeout,
-          consoleProps () {
-            // merge into consoleProps without mutating it
-            const obj: Record<string, any> = {}
-
-            if (position) {
-              obj.Position = position
-            } else {
-              obj.X = x
-              obj.Y = y
-            }
-
-            if (deltaOptions) {
-              obj.Options = deltaOptions
-            }
-
-            obj['Scrolled Element'] = $dom.getElements(options.$el)
-
-            return obj
-          },
-        }
-
-        options._log = Cypress.log(log)
+      if (position) {
+        messageArgs.push(position)
+      } else {
+        messageArgs.push(x)
+        messageArgs.push(y)
       }
+
+      if (deltaOptions) {
+        messageArgs.push(deltaOptions)
+      }
+
+      options._log = Cypress.log({
+        message: messageArgs.join(', '),
+        hidden: options.log === false,
+        timeout: options.timeout,
+        consoleProps () {
+          // merge into consoleProps without mutating it
+          const obj: Record<string, any> = {}
+
+          if (position) {
+            obj.Position = position
+          } else {
+            obj.X = x
+            obj.Y = y
+          }
+
+          if (deltaOptions) {
+            obj.Options = deltaOptions
+          }
+
+          obj['Scrolled Element'] = $dom.getElements(options.$el)
+
+          return obj
+        },
+      })
 
       const subjectChain = cy.subjectChain()
 
       const ensureScrollability = () => {
+        // Make sure the scroll command can communicate with the AUT
+        Cypress.ensure.commandCanCommunicateWithAUT(cy)
+
         try {
           subject = cy.getSubjectFromChain(subjectChain)
 
@@ -382,14 +380,11 @@ export default (Commands, Cypress, cy, state) => {
       const scrollTo = () => {
         return new Promise((resolve, reject) => {
           // scroll our axis
+          // @ts-ignore
           $(options.$el).scrollTo({ left: x, top: y }, {
             axis: options.axis,
             easing: options.easing,
             duration: options.duration,
-            // TODO: ensureScrollable option does not exist on jQuery or config/jquery.scrollto.ts.
-            // It can be removed.
-            // @ts-ignore
-            ensureScrollable: options.ensureScrollable,
             done () {
               return resolve(options.$el)
             },

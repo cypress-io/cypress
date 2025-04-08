@@ -1,7 +1,7 @@
 /* eslint-disable no-dupe-class-members */
 import Bluebird from 'bluebird'
 import { EventEmitter } from 'events'
-import type { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
+import type { MobxRunnerStore } from '../store/mobx-runner-store'
 import type MobX from 'mobx'
 import type { LocalBusEmitsMap, LocalBusEventMap, DriverToLocalBus, SocketToDriverMap } from './event-manager-types'
 import type { RunState, CachedTestState, AutomationElementId, FileDetails, ReporterStartInfo, ReporterRunState } from '@packages/types'
@@ -16,6 +16,7 @@ import { handlePausing } from './events/pausing'
 import { addTelemetryListeners } from './events/telemetry'
 import { telemetry } from '@packages/telemetry/src/browser'
 import { addCaptureProtocolListeners } from './events/capture-protocol'
+import { getRunnerConfigFromWindow } from './get-runner-config-from-window'
 
 export type CypressInCypressMochaEvent = Array<Array<string | Record<string, any>>>
 
@@ -40,10 +41,10 @@ interface AddGlobalListenerOptions {
 }
 
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
-const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame'.split(' ')
+const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame dev-server:on-spec-update'.split(' ')
 const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed visit:blank cypress:in:cypress:runner:event'.split(' ')
 const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
-const socketToDriverEvents = 'net:stubbing:event request:event script:error cross:origin:cookies'.split(' ')
+const socketToDriverEvents = 'net:stubbing:event request:event script:error cross:origin:cookies dev-server:on-spec-updated'.split(' ')
 const localToReporterEvents = 'reporter:log:add reporter:log:state:changed reporter:log:remove'.split(' ')
 
 /**
@@ -280,18 +281,42 @@ export class EventManager {
     this.reporterBus.on('studio:init:test', (testId) => {
       this.studioStore.setTestId(testId)
 
-      studioInit()
+      this.ws.emit('studio:init', ({ canAccessStudioAI, error }) => {
+        if (error) {
+          // eslint-disable-next-line no-console
+          console.error(error)
+        }
+
+        this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
+        studioInit()
+      })
     })
 
     this.reporterBus.on('studio:init:suite', (suiteId) => {
       this.studioStore.setSuiteId(suiteId)
 
-      studioInit()
+      this.ws.emit('studio:init', ({ canAccessStudioAI, error }) => {
+        if (error) {
+          // eslint-disable-next-line no-console
+          console.error(error)
+        }
+
+        this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
+        studioInit()
+      })
     })
 
     this.reporterBus.on('studio:cancel', () => {
-      this.studioStore.cancel()
-      rerun()
+      this.ws.emit('studio:destroy', ({ error }) => {
+        if (error) {
+          // eslint-disable-next-line no-console
+          console.error(error)
+        }
+
+        this.studioStore.cancel()
+        // Reloading for now. This is the easiest way to clear out the protocol code from the front end
+        window.location.reload()
+      })
     })
 
     this.reporterBus.on('studio:remove:command', (commandId) => {
@@ -306,10 +331,6 @@ export class EventManager {
       this._studioCopyToClipboard(cb)
     })
 
-    this.localBus.on('studio:start', () => {
-      rerun()
-    })
-
     this.localBus.on('studio:copy:to:clipboard', (cb) => {
       this._studioCopyToClipboard(cb)
     })
@@ -318,13 +339,32 @@ export class EventManager {
       this.ws.emit('studio:save', saveInfo, (err) => {
         if (err) {
           this.reporterBus.emit('test:set:state', this.studioStore.saveError(err), noop)
+        } else {
+          this.ws.emit('studio:destroy', ({ error }) => {
+            if (error) {
+              // eslint-disable-next-line no-console
+              console.error(error)
+            }
+
+            this.studioStore.saveSuccess()
+            // Reloading for now. This is the easiest way to clear out the protocol code from the front end
+            window.location.reload()
+          })
         }
       })
     })
 
     this.localBus.on('studio:cancel', () => {
-      this.studioStore.cancel()
-      rerun()
+      this.ws.emit('studio:destroy', ({ error }) => {
+        if (error) {
+          // eslint-disable-next-line no-console
+          console.error(error)
+        }
+
+        this.studioStore.cancel()
+        // Reloading for now. This is the easiest way to clear out the protocol code from the front end
+        window.location.reload()
+      })
     })
 
     this.ws.on('aut:destroy:init', () => {
@@ -344,7 +384,12 @@ export class EventManager {
     // when we actually unload then
     // nuke all of the cookies again
     // so we clear out unload
-    $window.on('unload', () => {
+    // While we must move to pagehide for Chromium, it does not work for our
+    // needs in Firefox. Until that is addressed, only Chromium uses the pagehide
+    // event as a proxy for AUT unloads.
+    const unloadEvent = this.isBrowserFamily('chromium') ? 'pagehide' : 'unload'
+
+    $window.on(unloadEvent, (e) => {
       this._clearAllCookies()
     })
 
@@ -387,18 +432,24 @@ export class EventManager {
     }
 
     Cypress = this.Cypress = this.$CypressDriver.create(config)
+    this.localBus.emit('cypress:created', Cypress)
 
     // expose Cypress globally
-    // @ts-ignore
     window.Cypress = Cypress
+
+    this.studioStore.setup(config)
+
+    const isDefaultProtocolEnabled = Cypress.config('isDefaultProtocolEnabled')
+    const isStudioProtocolEnabled = Cypress.config('isStudioProtocolEnabled')
+    const isStudioInScope = this.studioStore.isActive || this.studioStore.isLoading
+
+    Cypress.state('isProtocolEnabled', isDefaultProtocolEnabled || (isStudioProtocolEnabled && isStudioInScope))
 
     this._addListeners()
   }
 
-  isBrowser (browserName) {
-    if (!this.Cypress) return false
-
-    return this.Cypress.isBrowser(browserName)
+  isBrowserFamily (family: string) {
+    return getRunnerConfigFromWindow()?.browser?.family === family
   }
 
   initialize ($autIframe: JQuery<HTMLIFrameElement>, config: Record<string, any>) {
@@ -419,7 +470,7 @@ export class EventManager {
 
           const hideCommandLog = Cypress.config('hideCommandLog')
 
-          this.studioStore.initialize(config, runState)
+          this.studioStore.initialize()
 
           const runnables = Cypress.runner.normalizeAll(runState.tests, hideCommandLog, testFilter)
 
@@ -464,7 +515,7 @@ export class EventManager {
   _addListeners () {
     addTelemetryListeners(Cypress)
 
-    if (Cypress.config('protocolEnabled')) {
+    if (Cypress.state('isProtocolEnabled')) {
       addCaptureProtocolListeners(Cypress)
     }
 
@@ -485,14 +536,7 @@ export class EventManager {
 
       return new Bluebird((resolve) => {
         this.reporterBus.emit('reporter:collect:run:state', (reporterState: ReporterRunState) => {
-          resolve({
-            ...reporterState,
-            studio: {
-              testId: this.studioStore.testId,
-              suiteId: this.studioStore.suiteId,
-              url: this.studioStore.url,
-            },
-          })
+          resolve({ reporterState })
         })
       })
     })
@@ -617,6 +661,7 @@ export class EventManager {
     })
 
     Cypress.on('test:before:run:async', async (...args) => {
+      crossOriginLogs = {}
       const [attributes, test] = args
 
       this.reporterBus.emit('test:before:run:async', attributes)
@@ -660,35 +705,6 @@ export class EventManager {
     // Reflect back to the requesting origin the status of the 'duringUserTestExecution' state
     Cypress.primaryOriginCommunicator.on('sync:during:user:test:execution', (_data, { origin, responseEvent }) => {
       Cypress.primaryOriginCommunicator.toSpecBridge(origin, responseEvent, cy.state('duringUserTestExecution'))
-    })
-
-    Cypress.on('request:snapshot:from:spec:bridge', ({ log, name, options, specBridge, addSnapshot }: {
-      log: Cypress.Log
-      name?: string
-      options?: any
-      specBridge: string
-      addSnapshot: (snapshot: any, options: any, shouldRebindSnapshotFn: boolean) => Cypress.Log
-    }) => {
-      const eventID = log.get('id')
-
-      const requestSnapshot = () => {
-        return Cypress.primaryOriginCommunicator.toSpecBridgePromise({
-          origin: specBridge,
-          event: 'snapshot:generate:for:log',
-          data: {
-            name,
-            id: eventID,
-          },
-        }).then((crossOriginSnapshot) => {
-          const snapshot = crossOriginSnapshot.body ? crossOriginSnapshot : null
-
-          addSnapshot.apply(log, [snapshot, options, false])
-        })
-      }
-
-      requestSnapshot().catch(() => {
-        // If a spec bridge isn't present to respond this isn't an error and there is nothing to do.
-      })
     })
 
     Cypress.primaryOriginCommunicator.on('before:unload', (origin) => {
@@ -801,14 +817,22 @@ export class EventManager {
      * This is also applicable when a user changes their spec file and hot reloads their spec, in which case we need to rebind onMessage
      * with the newly creates Cypress.primaryOriginCommunicator
      */
-    window?.top?.removeEventListener('message', crossOriginOnMessageRef, false)
-    crossOriginOnMessageRef = ({ data, source }) => {
-      Cypress?.primaryOriginCommunicator.onMessage({ data, source })
+    try {
+      window.top.removeEventListener('message', crossOriginOnMessageRef, false)
+      crossOriginOnMessageRef = ({ data, source }) => {
+        Cypress?.primaryOriginCommunicator.onMessage({ data, source })
 
-      return undefined
+        return undefined
+      }
+
+      window.top.addEventListener('message', crossOriginOnMessageRef, false)
+    } catch (error) {
+      // in cy-in-cy tests, window.top may not be accessible due to cross-origin restrictions
+      if (error.name !== 'SecurityError') {
+        // re-throw any error that's not a cross-origin error
+        throw error
+      }
     }
-
-    window.top.addEventListener('message', crossOriginOnMessageRef, false)
   }
 
   _runDriver (runState: RunState, testState: CachedTestState) {
@@ -860,7 +884,6 @@ export class EventManager {
     Cypress.primaryOriginCommunicator.removeAllListeners()
     // clean up the cross origin logs in memory to prevent dangling references as the log objects themselves at this point will no longer be needed.
     crossOriginLogs = {}
-
     this.studioStore.setInactive()
   }
 
@@ -900,9 +923,9 @@ export class EventManager {
   }
 
   _studioCopyToClipboard (cb) {
-    this.ws.emit('studio:get:commands:text', this.studioStore.logs, (commandsText) => {
-      this.studioStore.copyToClipboard(commandsText)
-      .then(cb)
+    this.ws.emit('studio:get:commands:text', this.studioStore.logs, async (commandsText) => {
+      await this.studioStore.copyToClipboard(commandsText)
+      cb()
     })
   }
 

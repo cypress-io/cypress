@@ -5,7 +5,7 @@ const { Automation } = require(`../../lib/automation`)
 
 describe('lib/automation', () => {
   beforeEach(function () {
-    this.automation = new Automation()
+    this.automation = new Automation({})
   })
 
   context('.reset', () => {

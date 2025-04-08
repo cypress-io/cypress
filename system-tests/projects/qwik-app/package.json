@@ -1,14 +1,14 @@
 {
-  "name": "my-qwik-app",
-  "private": true,
+  "name": "qwik-app",
+  "version": "0.0.0-test",
   "scripts": {
     "qwik": "qwik"
   },
   "devDependencies": {
     "@builder.io/qwik": "0.17.5",
-    "vite": "4.1.1"
+    "vite": "5.4.10"
   },
   "engines": {
-    "node": ">=15.0.0"
+    "node": ">=20.0.0"
   }
 }

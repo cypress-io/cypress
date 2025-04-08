@@ -1,28 +1,23 @@
 <template>
-  <div class="border-t rounded-b flex bg-gray-50 border-t border-t-gray-100 py-[16px] px-[24px] gap-3">
+  <div class="rounded-b flex bg-gray-50 border-t border-t-gray-100 py-[16px] px-[24px] gap-3">
     <slot>
       <Button
         v-if="nextFn"
-        size="lg"
+        size="40"
         :disabled="!canNavigateForward"
-        :variant="mainVariant"
+        :variant="mainVariant === 'pending' ? 'disabled' : mainVariant"
         @click="nextFn"
       >
-        <template
+        <i-cy-loading_x16
           v-if="mainVariant === 'pending'"
-          #prefix
-        >
-          <i-cy-loading_x16
-            v-if="mainVariant === 'pending'"
-            class="animate-spin icon-dark-white icon-light-gray-400"
-          />
-        </template>
+          class="animate-spin icon-dark-white icon-light-gray-400 mr-[8px]"
+        />
         {{ next }}
       </Button>
       <Button
         v-if="backFn"
-        size="lg"
-        variant="outline"
+        size="40"
+        variant="outline-light"
         @click="backFn"
       >
         {{ back }}
@@ -33,7 +28,7 @@
         class="flex px-3 items-center"
       >
         <label
-          for="altFn"
+          id="altFn"
           class="px-3 text-gray-500"
           @click="handleAlt"
         >
@@ -41,15 +36,15 @@
         </label>
         <Switch
           size="lg"
-          name="altFn"
+          label-id="altFn"
           :value="altValue"
           @update="handleAlt"
         />
       </div>
       <Button
         v-if="skipFn"
-        size="lg"
-        variant="text"
+        size="40"
+        variant="link"
         class="text-gray-500"
         @click="skipFn"
       >
@@ -62,8 +57,7 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import type { ButtonVariants } from '@cy/components/Button.vue'
-import Button from '@cy/components/Button.vue'
+import Button, { type ButtonVariants } from '@cypress-design/vue-button'
 import Switch from '@cy/components/Switch.vue'
 
 const props = withDefaults(defineProps<{
@@ -76,7 +70,7 @@ const props = withDefaults(defineProps<{
   alt?: string
   altFn?: (value: boolean) => void
   canNavigateForward?: boolean
-  mainVariant?: ButtonVariants
+  mainVariant?: ButtonVariants | 'pending'
 }>(), {
   alt: undefined,
   altFn: undefined,
@@ -86,7 +80,7 @@ const props = withDefaults(defineProps<{
   backFn: undefined,
   nextFn: undefined,
   skipFn: undefined,
-  mainVariant: 'primary',
+  mainVariant: 'indigo-dark',
 })
 
 const altValue = ref(false)

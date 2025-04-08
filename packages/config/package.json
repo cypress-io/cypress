@@ -7,32 +7,38 @@
   "browser": "src/browser.ts",
   "scripts": {
     "build-prod": "tsc || echo 'built, with errors'",
-    "check-ts": "tsc --noEmit",
-    "clean-deps": "rimraf node_modules",
+    "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean": "rimraf --glob ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/!**__fixtures__**/**/*.js || echo 'cleaned'",
+    "clean-deps": "rimraf node_modules",
+    "lint": "eslint --ext .js,.ts,.json, .",
     "test": "yarn test-unit",
-    "test:clean": "find ./test/__fixtures__ -depth -name 'output.*' -type f -exec rm {} \\;",
     "test-debug": "yarn test-unit --inspect-brk=5566",
     "test-unit": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json -r @packages/ts/register 'test/**/*.spec.ts' --exit --timeout 5000",
-    "lint": "eslint --ext .js,.ts,.json, ."
+    "test:clean": "find ./test/__fixtures__ -depth -name 'output.*' -type f -exec rm {} \\;",
+    "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "dependencies": {
-    "@babel/core": "^7.22.9",
-    "@babel/parser": "^7.22.7",
-    "@babel/plugin-syntax-typescript": "^7.22.5",
-    "@babel/plugin-transform-typescript": "^7.22.9",
-    "@babel/traverse": "^7.22.8",
-    "@babel/types": "^7.22.5",
+    "@babel/core": "^7.25.2",
+    "@babel/parser": "^7.25.3",
+    "@babel/plugin-syntax-typescript": "^7.24.7",
+    "@babel/plugin-transform-typescript": "^7.25.2",
+    "@babel/traverse": "^7.25.3",
+    "@babel/types": "^7.25.2",
+    "bluebird": "^3.7.2",
     "check-more-types": "2.24.0",
     "common-tags": "1.8.0",
     "debug": "^4.3.4",
+    "dedent": "^0.7.0",
     "fs-extra": "^9.1.0",
     "lodash": "^4.17.21",
+    "prettier": "^2.8.8",
     "recast": "0.20.4",
-    "return-deep-diff": "0.4.0"
+    "return-deep-diff": "0.4.0",
+    "underscore.string": "^3.3.6"
   },
   "devDependencies": {
     "@packages/errors": "0.0.0-development",
+    "@packages/network": "0.0.0-development",
     "@packages/root": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
     "@packages/types": "0.0.0-development",
@@ -44,5 +50,6 @@
   "files": [
     "src"
   ],
-  "types": "src/index.ts"
+  "types": "src/index.ts",
+  "nx": {}
 }

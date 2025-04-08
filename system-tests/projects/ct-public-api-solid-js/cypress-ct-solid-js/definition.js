@@ -17,7 +17,7 @@ const dep = {
   // Human readable description.
   description: 'A required dependency for this project',
   // Minimum supported version.
-  minVersion: '1.6.11',
+  minVersion: '1.9.3',
 }
 
 /**

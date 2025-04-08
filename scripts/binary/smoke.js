@@ -299,7 +299,7 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
     console.error(`extra keys in electron process: ${extraKeys}`)
   }
 
-  const allowList = ['regeneratorRuntime', '__core-js_shared__', 'getSnapshotResult', 'supportTypeScript']
+  const allowList = ['__core-js_shared__', 'getSnapshotResult', 'supportTypeScript', 'Iterator']
 
   await testAlteringEntryPoint(`(${compareGlobals.toString()})()`, `extra keys in electron process: ${allowList}\nIntegrity check failed with expected stack length 9 but got 10`)
 

@@ -1,3 +1,4 @@
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 import ComponentTestingAvailableBanner from './ComponentTestingAvailableBanner.vue'
 import { TrackedBanner_RecordBannerSeenDocument, TrackedBanner_SetProjectStateDocument } from '../../generated/graphql'
@@ -5,8 +6,6 @@ import type Sinon from 'sinon'
 
 const frameworks = [
   { name: 'React', type: 'react' },
-  { name: 'Create React App', type: 'reactscripts' },
-  { name: 'Nuxt.js (v2)', type: 'nuxtjs' },
   { name: 'Vue', type: 'vue3' },
   { name: 'Angular', type: 'angular' },
   { name: 'Next.js', type: 'nextjs' },
@@ -25,7 +24,7 @@ describe('<ComponentTestingBanner />', { viewportWidth: 1200 }, () => {
       )
 
       cy.findByTestId('alert-prefix-icon').should('be.visible')
-      cy.contains(defaultMessages.specPage.banners.ct.title.replace('{0}', framework.name)).should('be.visible')
+      cy.contains(defaultMessages.specPage.banners.componentTesting.title.replace('{0}', framework.name)).should('be.visible')
     })
   })
 

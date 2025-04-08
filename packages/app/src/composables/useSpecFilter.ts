@@ -2,7 +2,7 @@ import { useSpecStore } from '../store'
 import { useMutation, gql } from '@urql/vue'
 import { ref, watch } from 'vue'
 import { useDebounce } from '@vueuse/core'
-import { SpecFilter_SetPreferencesDocument } from '@packages/app/src/generated/graphql'
+import { SpecFilter_SetPreferencesDocument } from '../generated/graphql'
 
 gql`
 mutation SpecFilter_SetPreferences ($value: String!) {
@@ -23,18 +23,19 @@ export function useSpecFilter (savedFilter?: string) {
 
   const debouncedSpecFilterModel = useDebounce(specFilterModel, 200)
 
-  function setSpecFilter (specFilter: string) {
+  async function setSpecFilter (specFilter: string) {
     if (specStore.specFilter !== specFilter) {
       specStore.setSpecFilter(specFilter)
-      saveSpecFilter.executeMutation({ value: JSON.stringify({ specFilter }) })
+      await saveSpecFilter.executeMutation({ value: JSON.stringify({ specFilter }) })
     }
   }
 
-  watch(() => debouncedSpecFilterModel?.value, (newVal) => {
-    setSpecFilter(newVal ?? '')
+  watch(() => debouncedSpecFilterModel?.value, async (newVal) => {
+    await setSpecFilter(newVal ?? '')
   })
 
   // initialize spec filter in store
+  // tslint:disable:no-floating-promises
   setSpecFilter(specFilterModel.value)
 
   return {

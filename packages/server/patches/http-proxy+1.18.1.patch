@@ -1,0 +1,61 @@
+diff --git a/node_modules/http-proxy/.auto-changelog b/node_modules/http-proxy/.auto-changelog
+old mode 100644
+new mode 100755
+diff --git a/node_modules/http-proxy/.gitattributes b/node_modules/http-proxy/.gitattributes
+deleted file mode 100644
+index 1a6bd45..0000000
+--- a/node_modules/http-proxy/.gitattributes
++++ /dev/null
+@@ -1 +0,0 @@
+-package-lock.json binary
+diff --git a/node_modules/http-proxy/CHANGELOG.md b/node_modules/http-proxy/CHANGELOG.md
+old mode 100644
+new mode 100755
+diff --git a/node_modules/http-proxy/CODE_OF_CONDUCT.md b/node_modules/http-proxy/CODE_OF_CONDUCT.md
+old mode 100644
+new mode 100755
+diff --git a/node_modules/http-proxy/LICENSE b/node_modules/http-proxy/LICENSE
+old mode 100644
+new mode 100755
+diff --git a/node_modules/http-proxy/README.md b/node_modules/http-proxy/README.md
+old mode 100644
+new mode 100755
+diff --git a/node_modules/http-proxy/codecov.yml b/node_modules/http-proxy/codecov.yml
+old mode 100644
+new mode 100755
+diff --git a/node_modules/http-proxy/index.js b/node_modules/http-proxy/index.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/http-proxy/lib/http-proxy.js b/node_modules/http-proxy/lib/http-proxy.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/http-proxy/lib/http-proxy/common.js b/node_modules/http-proxy/lib/http-proxy/common.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/http-proxy/lib/http-proxy/index.js b/node_modules/http-proxy/lib/http-proxy/index.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/http-proxy/lib/http-proxy/passes/web-incoming.js b/node_modules/http-proxy/lib/http-proxy/passes/web-incoming.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/http-proxy/lib/http-proxy/passes/web-outgoing.js b/node_modules/http-proxy/lib/http-proxy/passes/web-outgoing.js
+old mode 100644
+new mode 100755
+diff --git a/node_modules/http-proxy/lib/http-proxy/passes/ws-incoming.js b/node_modules/http-proxy/lib/http-proxy/passes/ws-incoming.js
+old mode 100644
+new mode 100755
+index 270f23f..feac117
+--- a/node_modules/http-proxy/lib/http-proxy/passes/ws-incoming.js
++++ b/node_modules/http-proxy/lib/http-proxy/passes/ws-incoming.js
+@@ -111,7 +111,7 @@ module.exports = {
+     proxyReq.on('error', onOutgoingError);
+     proxyReq.on('response', function (res) {
+       // if upgrade event isn't going to happen, close the socket
+-      if (!res.upgrade) {
++      if (!res.upgrade && socket.readyState === "open" && !socket.destroyed) {
+         socket.write(createHttpHeader('HTTP/' + res.httpVersion + ' ' + res.statusCode + ' ' + res.statusMessage, res.headers));
+         res.pipe(socket);
+       }
+diff --git a/node_modules/http-proxy/renovate.json b/node_modules/http-proxy/renovate.json
+old mode 100644
+new mode 100755

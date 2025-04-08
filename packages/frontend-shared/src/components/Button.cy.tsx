@@ -1,4 +1,5 @@
 import Button, { ButtonVariants } from './Button.vue'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these module imports
 import IconCoffee from '~icons/mdi/coffee'
 import { createRouter, createWebHistory } from 'vue-router'
 
@@ -105,7 +106,7 @@ describe('<Button />', { viewportWidth: 300, viewportHeight: 400 }, () => {
     ))
 
     cy.contains('a', 'test').should('not.have.attr', 'href')
-    cy.contains('a', 'test').should('have.attr', 'aria-disabled', 'disabled')
+    cy.contains('a', 'test').should('have.attr', 'aria-disabled', 'true')
     cy.contains('a', 'test').should('have.attr', 'role', 'link')
   })
 

@@ -3,7 +3,7 @@ import React from 'react'
 import { observer } from 'mobx-react'
 import GlobeIcon from '@packages/frontend-shared/src/assets/icons/globe_x12.svg'
 
-import SessionsModel from './sessions-model'
+import type SessionsModel from './sessions-model'
 import events from '../lib/events'
 import Collapsible from '../collapsible/collapsible'
 import Tag from '../lib/tag'

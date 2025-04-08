@@ -5,7 +5,6 @@ describe('baseUrl', () => {
     cy.scaffoldProject('config-with-base-url-warning')
     cy.openProject('config-with-base-url-warning')
     cy.visitLaunchpad()
-    cy.skipWelcome()
 
     cy.get('[data-cy-testingtype="e2e"]').click()
     cy.get('[data-cy="alert"]').contains('Warning: Cannot Connect Base Url Warning')
@@ -22,7 +21,6 @@ describe('baseUrl', () => {
     cy.scaffoldProject('config-with-base-url-warning')
     cy.openProject('config-with-base-url-warning')
     cy.visitLaunchpad()
-    cy.skipWelcome()
 
     cy.get('[data-cy-testingtype="e2e"]').click()
     cy.get('[data-cy="alert"]').contains('Warning: Cannot Connect Base Url Warning')
@@ -46,7 +44,6 @@ describe('baseUrl', () => {
     cy.scaffoldProject('config-with-js')
     cy.openProject('config-with-js')
     cy.visitLaunchpad()
-    cy.skipWelcome()
 
     cy.get('[data-cy-testingtype="e2e"]').click()
     cy.get('h1').should('contain', 'Choose a browser')
@@ -78,7 +75,6 @@ describe('experimentalSingleTabRunMode', () => {
     cy.openProject('experimentalSingleTabRunMode', ['--component', '--config-file', 'cypress-component-only.config.js'])
 
     cy.visitLaunchpad()
-    cy.skipWelcome()
 
     cy.findByTestId('launchpad-Choose a browser')
     cy.get('h1').contains('Choose a browser')
@@ -88,7 +84,6 @@ describe('experimentalSingleTabRunMode', () => {
     cy.scaffoldProject('experimentalSingleTabRunMode')
     cy.openProject('experimentalSingleTabRunMode')
     cy.visitLaunchpad()
-    cy.skipWelcome()
     cy.get('[data-cy-testingtype="e2e"]').click()
     cy.findByTestId('error-header').contains('Cypress configuration error')
     cy.findByTestId('alert-body').contains('The experimentalSingleTabRunMode experiment is currently only supported for Component Testing.')
@@ -101,7 +96,6 @@ describe('experimentalStudio', () => {
     cy.openProject('experimentalSingleTabRunMode', ['--config-file', 'cypress-invalid-studio-experiment.config.js'])
 
     cy.visitLaunchpad()
-    cy.skipWelcome()
     cy.get('[data-cy-testingtype="component"]').click()
     cy.findByTestId('error-header')
     cy.contains('The experimentalStudio experiment is currently only supported for End to End Testing.')
@@ -124,7 +118,6 @@ describe('experimentalStudio', () => {
     })
 
     cy.visitLaunchpad()
-    cy.skipWelcome()
     cy.get('[data-cy-testingtype="e2e"]').click()
     cy.findByTestId('launchpad-Choose a browser')
     cy.get('h1').contains('Choose a browser')
@@ -137,7 +130,6 @@ describe('experimentalRunAllSpecs', () => {
     cy.openProject('run-all-specs')
 
     cy.visitLaunchpad()
-    cy.skipWelcome()
     cy.get('[data-cy-testingtype="e2e"]').click()
     cy.findByTestId('launchpad-Choose a browser')
     cy.get('h1').contains('Choose a browser')
@@ -148,7 +140,6 @@ describe('experimentalRunAllSpecs', () => {
     cy.openProject('run-all-specs', ['--config-file', 'cypress-invalid-component.config.js'])
 
     cy.visitLaunchpad()
-    cy.skipWelcome()
     cy.get('[data-cy-testingtype="component"]').click()
     cy.findByTestId('error-header')
     cy.contains('The experimentalRunAllSpecs experiment is currently only supported for End to End Testing')
@@ -159,7 +150,6 @@ describe('experimentalRunAllSpecs', () => {
     cy.openProject('run-all-specs', ['--config-file', 'cypress-invalid-root.config.js'])
 
     cy.visitLaunchpad()
-    cy.skipWelcome()
     cy.get('[data-cy-testingtype="e2e"]').click()
     cy.findByTestId('error-header')
     cy.contains('The experimentalRunAllSpecs experiment is currently only supported for End to End Testing')
@@ -172,7 +162,6 @@ describe('experimentalOriginDependencies', () => {
     cy.openProject('session-and-origin-e2e-specs')
 
     cy.visitLaunchpad()
-    cy.skipWelcome()
     cy.get('[data-cy-testingtype="e2e"]').click()
     cy.findByTestId('launchpad-Choose a browser')
     cy.get('h1').contains('Choose a browser')
@@ -184,7 +173,6 @@ describe('experimentalOriginDependencies', () => {
     cy.openProject('session-and-origin-e2e-specs', ['--config-file', 'cypress-invalid-component.config.js'])
 
     cy.visitLaunchpad()
-    cy.skipWelcome()
     cy.get('[data-cy-testingtype="component"]').click()
     cy.findByTestId('error-header')
     cy.contains('The experimentalOriginDependencies experiment is currently only supported for End to End Testing')
@@ -196,7 +184,6 @@ describe('experimentalOriginDependencies', () => {
     cy.openProject('session-and-origin-e2e-specs', ['--config-file', 'cypress-invalid-root.config.js'])
 
     cy.visitLaunchpad()
-    cy.skipWelcome()
     cy.get('[data-cy-testingtype="e2e"]').click()
     cy.findByTestId('error-header')
     cy.contains('The experimentalOriginDependencies experiment is currently only supported for End to End Testing')
@@ -209,45 +196,42 @@ describe('component testing dependency warnings', () => {
     cy.addProject('component-testing-outdated-dependencies')
     cy.openGlobalMode()
     cy.visitLaunchpad()
-    cy.skipWelcome()
     cy.contains('component-testing-outdated-dependencies').click()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
     cy.contains('a', 'Projects').click()
     cy.get('[data-cy-testingtype="component"]').click()
     cy.get('[data-cy="warning-alert"]', { timeout: 12000 }).should('exist')
     .should('contain.text', 'Warning: Component Testing Mismatched Dependencies')
-    .should('contain.text', 'vite. Expected ^2.0.0 || ^3.0.0 || ^4.0.0, found 2.0.0-beta.70')
-    .should('contain.text', 'react. Expected ^16.0.0 || ^17.0.0 || ^18.0.0, found 15.6.2.')
-    .should('contain.text', 'react-dom. Expected ^16.0.0 || ^17.0.0 || ^18.0.0 but dependency was not found.')
+    .should('contain.text', 'vite. Expected ^4.0.0 || ^5.0.0 || ^6.0.0, found 3.2.11')
+    .should('contain.text', 'react. Expected ^18.0.0 || ^19.0.0, found 15.6.2.')
+    .should('contain.text', 'react-dom. Expected ^18.0.0 || ^19.0.0 but dependency was not found.')
 
     cy.get('.warning-markdown').find('li').should('have.length', 3)
   })
 
-  it('warns against outdated @vue/cli dependency', () => {
-    cy.scaffoldProject('outdated-deps-vuecli3')
-    cy.addProject('outdated-deps-vuecli3')
+  it('warns against outdated vue/vite dependency', () => {
+    cy.scaffoldProject('outdated-deps-vue-vite')
+    cy.addProject('outdated-deps-vue-vite')
     cy.openGlobalMode()
     cy.visitLaunchpad()
-    cy.skipWelcome()
-    cy.contains('outdated-deps-vuecli3').click()
+    cy.contains('outdated-deps-vue-vite').click()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
     cy.contains('a', 'Projects').click()
     cy.get('[data-cy-testingtype="component"]', { timeout: 12000 }).click()
     cy.get('[data-cy="warning-alert"]', { timeout: 12000 }).should('exist')
     .should('contain.text', 'Warning: Component Testing Mismatched Dependencies')
-    .should('contain.text', '@vue/cli-service. Expected ^4.0.0 || ^5.0.0, found 3.12.1.')
+    .should('contain.text', 'vite. Expected ^4.0.0 || ^5.0.0 || ^6.0.0, found 3.2.11.')
     .should('contain.text', 'vue. Expected ^3.0.0, found 2.7.8.')
 
     cy.get('.warning-markdown').find('li').should('have.length', 2)
   })
 
   it('does not show warning for project with supported dependencies', () => {
-    cy.scaffoldProject('vueclivue3-configured')
-    cy.addProject('vueclivue3-configured')
+    cy.scaffoldProject('vue3-webpack-ts-configured')
+    cy.addProject('vue3-webpack-ts-configured')
     cy.openGlobalMode()
     cy.visitLaunchpad()
-    cy.skipWelcome()
-    cy.contains('vueclivue3-configured').click()
+    cy.contains('vue3-webpack-ts-configured').click()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
     cy.get('a').contains('Projects').click()
     cy.get('[data-cy-testingtype="component"]', { timeout: 10000 }).click()
@@ -258,10 +242,9 @@ describe('component testing dependency warnings', () => {
   })
 
   it('does not show warning for project that does not require bundler to be installed', () => {
-    cy.scaffoldProject('next-12')
-    cy.openProject('next-12', ['--component'])
+    cy.scaffoldProject('next-14')
+    cy.openProject('next-14', ['--component'])
     cy.visitLaunchpad()
-    cy.skipWelcome()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
     cy.contains('Choose a browser', { timeout: 12000 })
     cy.get('[data-cy="warning-alert"]').should('not.exist')

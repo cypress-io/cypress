@@ -5,7 +5,7 @@ import { fixtureDirs, ProjectFixtureDir } from '@tooling/system-tests'
 import type { DataContext } from '@packages/data-context'
 import type { AuthenticatedUserShape } from '@packages/data-context/src/data'
 import type { DocumentNode, ExecutionResult } from 'graphql'
-import type { Browser, FoundBrowser, OpenModeOptions } from '@packages/types'
+import { GET_MAJOR_VERSION_FOR_CONTENT, type Browser, type FoundBrowser, type OpenModeOptions } from '@packages/types'
 
 import type { SinonStub } from 'sinon'
 import type sinon from 'sinon'
@@ -13,12 +13,13 @@ import type pDefer from 'p-defer'
 import 'cypress-plugin-tab'
 import type { Response } from 'cross-fetch'
 
-import type { E2ETaskMap } from '../e2e/e2ePluginSetup'
+import type { E2ETaskMap, InternalOpenProjectCapabilities } from '../e2e/e2ePluginSetup'
 import { installCustomPercyCommand } from './customPercyCommand'
 import i18n from '../../src/locales/en-US.json'
 import { addNetworkCommands } from './onlineNetwork'
 import { logInternal } from './utils'
 import { tabUntil } from './tab-until'
+import './browserIconCommands'
 
 configure({ testIdAttribute: 'data-cy' })
 
@@ -159,9 +160,13 @@ declare global {
        */
       visitApp(href?: string, opts?: Partial<Cypress.VisitOptions>): Chainable<AUTWindow>
       /**
+       * Verifies the specs page is visible (list, no specs, or create spec page)
+       */
+      specsPageIsVisible(specsSetup?: 'new-project' | 'no-specs'): Chainable<any>
+      /**
        * Visits the Cypress launchpad
        */
-      visitLaunchpad(href?: string): Chainable<AUTWindow>
+      visitLaunchpad: typeof visitLaunchpad
       /**
        * Skips the welcome screen of the launchpad
        */
@@ -197,6 +202,10 @@ beforeEach(() => {
   // Reset the ports so we know we need to call "openProject" before each test
   Cypress.env('e2e_serverPort', undefined)
   taskInternal('__internal__beforeEach', undefined)
+})
+
+afterEach(() => {
+  taskInternal('__internal__afterEach', undefined)
 })
 
 after(() => {
@@ -237,13 +246,13 @@ function openGlobalMode (options: OpenGlobalModeOptions = {}) {
 
 type WithPrefix<T extends string> = `${T}${string}`;
 
-function openProject (projectName: WithPrefix<ProjectFixtureDir>, argv: string[] = []) {
+function openProject (projectName: WithPrefix<ProjectFixtureDir>, argv: string[] = [], capabilities: InternalOpenProjectCapabilities = { cloudStudio: false }) {
   if (!fixtureDirs.some((dir) => projectName.startsWith(dir))) {
     throw new Error(`Unknown project ${projectName}`)
   }
 
   return logInternal({ name: 'openProject', message: argv.join(' ') }, () => {
-    return taskInternal('__internal_openProject', { projectName, argv })
+    return taskInternal('__internal_openProject', { projectName, argv, capabilities })
   }).then((obj) => {
     Cypress.env('e2e_serverPort', obj.e2eServerPort)
 
@@ -365,13 +374,49 @@ function visitApp (href?: string, opts?: Partial<Cypress.VisitOptions>) {
   })
 }
 
-function visitLaunchpad () {
-  return logInternal(`visitLaunchpad ${Cypress.env('e2e_launchpadPort')}`, () => {
+function specsPageIsVisible (specsSetup) {
+  if (specsSetup === 'new-project') {
+    // if this is a new project, we'll be on the create spec page
+    return cy.get('[data-cy=create-spec-page-cards]').should('be.visible')
+  }
+
+  if (specsSetup === 'no-specs') {
+    // if this is an existing project with no specs, we'll be on the no specs found page
+    return cy.get('[data-cy=create-spec-page-description]').should('be.visible')
+  }
+
+  // if our tests seeded specs, we'll be on the specs list page
+  return cy.get('[data-cy=spec-list-container]').should('be.visible')
+}
+
+function visitLaunchpad (options: { showWelcome?: boolean } = { showWelcome: false }) {
+  function launchpadVisit () {
     return cy.visit(`/__launchpad/index.html`, { log: false }).then((val) => {
       return cy.get('[data-e2e]', { timeout: 10000, log: false }).then(() => {
-        return val
+        return cy.get('.spinner', { timeout: 10000, log: false }).should('not.exist').then(() => {
+          return val
+        })
       })
     })
+  }
+
+  return logInternal(`visitLaunchpad ${Cypress.env('e2e_launchpadPort')}`, () => {
+    if (!options.showWelcome) {
+      return cy.withCtx(async (ctx, o) => {
+        // avoid re-stubbing already stubbed prompts in case we call getPreferences multiple times
+        if ((ctx._apis.localSettingsApi.getPreferences as any).wrappedMethod === undefined) {
+          o.sinon.stub(ctx._apis.localSettingsApi, 'getPreferences').resolves({ majorVersionWelcomeDismissed: {
+            [o.MAJOR_VERSION_FOR_CONTENT]: Date.now(),
+          } })
+        }
+      }, {
+        MAJOR_VERSION_FOR_CONTENT: GET_MAJOR_VERSION_FOR_CONTENT(),
+      }).then(() => {
+        return launchpadVisit()
+      })
+    }
+
+    return launchpadVisit()
   })
 }
 
@@ -536,7 +581,7 @@ function getAutIframe () {
   return cy.get('iframe.aut-iframe').its('0.contentDocument.documentElement').then(cy.wrap) as Cypress.Chainable<JQuery<HTMLIFrameElement>>
 }
 
-Cypress.on('uncaught:exception', (err) => !err.message.includes('ResizeObserver loop limit exceeded'))
+Cypress.on('uncaught:exception', (err) => !err.message.includes('ResizeObserver loop completed with undelivered notifications.'))
 
 Cypress.Commands.add('scaffoldProject', scaffoldProject)
 
@@ -544,6 +589,7 @@ Cypress.Commands.add('getAutIframe', getAutIframe)
 Cypress.Commands.add('addProject', addProject)
 Cypress.Commands.add('openGlobalMode', openGlobalMode)
 Cypress.Commands.add('visitApp', visitApp)
+Cypress.Commands.add('specsPageIsVisible', specsPageIsVisible)
 Cypress.Commands.add('loginUser', loginUser)
 Cypress.Commands.add('visitLaunchpad', visitLaunchpad)
 Cypress.Commands.add('skipWelcome', skipWelcome)

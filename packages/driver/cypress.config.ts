@@ -1,7 +1,8 @@
+// tslint:disable-next-line: no-implicit-dependencies - cypress
 import { defineConfig } from 'cypress'
 import { devServer as cypressWebpackDevServer } from '@cypress/webpack-dev-server'
 
-export default defineConfig({
+export const baseConfig: Cypress.ConfigOptions = {
   projectId: 'ypt4pf',
   experimentalStudio: true,
   experimentalMemoryManagement: true,
@@ -22,6 +23,15 @@ export default defineConfig({
     experimentalOriginDependencies: true,
     experimentalModifyObstructiveThirdPartyCode: true,
     setupNodeEvents: (on, config) => {
+      on('task', {
+        log (message) {
+          // eslint-disable-next-line no-console
+          console.log(message)
+
+          return null
+        },
+      })
+
       return require('./cypress/plugins')(on, config)
     },
     baseUrl: 'http://localhost:3500',
@@ -37,4 +47,6 @@ export default defineConfig({
       })
     },
   },
-})
+}
+
+export default defineConfig(baseConfig)

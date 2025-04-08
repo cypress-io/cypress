@@ -6,7 +6,7 @@ import React from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
 import defaultEvents, { Events } from '../lib/events'
-import { AppState } from '../lib/app-state'
+import type { AppState } from '../lib/app-state'
 
 import ChevronDownIcon from '@packages/frontend-shared/src/assets/icons/chevron-down-small_x16.svg'
 import ChevronUpIcon from '@packages/frontend-shared/src/assets/icons/chevron-up-small_x16.svg'

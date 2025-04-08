@@ -1,10 +1,7 @@
-let astUtils
-
-try {
-  astUtils = require('eslint/lib/util/ast-utils')
-} catch (e) {
-  astUtils = require('eslint/lib/shared/ast-utils')
-}
+// @see https://github.com/eslint/eslint/blob/v8.57.0/lib/shared/ast-utils.js#L12
+// This value is not exported anywhere, but hasn't changed in almost a decade.
+// we can directly reference the pattern here
+const lineBreakPattern = /\r\n|[\r\n\u2028\u2029]/u
 
 module.exports = {
   meta: {
@@ -25,7 +22,7 @@ module.exports = {
     const sourceCode = context.getSourceCode()
 
     function getPropertyText (node) {
-      const lines = sourceCode.getText(node).split(astUtils.LINEBREAK_MATCHER)
+      const lines = sourceCode.getText(node).split(lineBreakPattern)
 
       return lines[0]
     }

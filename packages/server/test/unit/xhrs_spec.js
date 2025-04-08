@@ -3,34 +3,6 @@ require('../spec_helper')
 const xhrs = require(`../../lib/controllers/xhrs`)
 
 describe('lib/controllers/xhr', () => {
-  describe('#parseContentType', () => {
-    it('returns application/json', () => {
-      const str = JSON.stringify({ foo: 'bar' })
-
-      expect(xhrs.parseContentType(str)).to.eq('application/json')
-    })
-
-    it('returns text/html', () => {
-      const str = `\
-<html>
-  <body>foobarbaz</body>
-</html>\
-`
-
-      expect(xhrs.parseContentType(str)).to.eq('text/html')
-    })
-
-    it('returns text/plain', () => {
-      const str = 'foobar<p>baz'
-
-      expect(xhrs.parseContentType(str)).to.eq('text/plain')
-    })
-
-    it('returns text/plain by default', () => {
-      expect(xhrs.parseContentType()).to.eq('text/plain')
-    })
-  })
-
   describe('#parseHeaders', () => {
     it('returns object literal on undefined', () => {
       const obj = xhrs.parseHeaders(undefined)

@@ -1,20 +1,17 @@
 {
-  "name": "vue-vite-ts-unconfigured",
-  "private": true,
-  "version": "0.0.0",
+  "name": "vue-vite-ts-configured",
+  "version": "0.0.0-test",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.2.25"
+    "vue": "^3.5.12"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^2.2.0",
     "@cypress/vite-dev-server": "file:../../../npm/vite-dev-server",
-    "typescript": "^4.5.4",
-    "vite": "^2.8.0",
-    "vue-tsc": "^0.29.8"
+    "@vitejs/plugin-vue": "^5.1.4",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10"
   }
 }

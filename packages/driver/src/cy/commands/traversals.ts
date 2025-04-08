@@ -91,7 +91,8 @@ export default (Commands, Cypress, cy) => {
       // Omit any null or undefined arguments
       const selector = _.filter([arg1, arg2], (a) => (a != null && !_.isFunction(a) && !_.isObject(a))).join(', ')
 
-      const log = userOptions.log !== false && Cypress.log({
+      const log = Cypress.log({
+        hidden: userOptions.log === false,
         message: selector,
         timeout: userOptions.timeout,
         consoleProps: () => ({}),

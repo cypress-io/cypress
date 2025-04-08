@@ -154,9 +154,33 @@ describe('src/cy/commands/location', () => {
         })
       })
 
-      it('does not emit when {log: false}', () => {
+      it('can turn off logging when protocol is disabled', function () {
+        cy.state('isProtocolEnabled', false)
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
         cy.url({ log: false }).then(function () {
-          expect(this.log).to.be.undefined
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', function () {
+        cy.state('isProtocolEnabled', true)
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.url({ log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name'), 'log name').to.eq('url')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
       })
 
@@ -307,9 +331,33 @@ describe('src/cy/commands/location', () => {
         })
       })
 
-      it('does not emit when {log: false}', () => {
+      it('can turn off logging when protocol is disabled', function () {
+        cy.state('isProtocolEnabled', false)
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
         cy.hash({ log: false }).then(function () {
-          expect(this.log).to.be.undefined
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', function () {
+        cy.state('isProtocolEnabled', true)
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.hash({ log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name'), 'log name').to.eq('hash')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
       })
 
@@ -487,15 +535,47 @@ describe('src/cy/commands/location', () => {
         })
       })
 
-      it('does not emit when {log: false} as options', () => {
+      it('can turn off logging with {log: false} as options', function () {
+        cy.state('isProtocolEnabled', false)
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
         cy.location('href', { log: false }).then(function () {
-          expect(this.log).to.be.undefined
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
         })
       })
 
-      it('does not emit when {log: false} as key', () => {
+      it('can turn off logging with {log: false} as key', function () {
+        cy.state('isProtocolEnabled', false)
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
         cy.location({ log: false }).then(function () {
-          expect(this.log).to.be.undefined
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', function () {
+        cy.state('isProtocolEnabled', true)
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        cy.location('href', { log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name'), 'log name').to.eq('location')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
       })
 

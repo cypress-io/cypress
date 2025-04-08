@@ -9,8 +9,8 @@ const moduleSources: ModulesDef = {
     5: 'webpack',
   },
   webpackDevServer: {
-    3: 'webpack-dev-server-3',
-    4: 'webpack-dev-server',
+    4: 'webpack-dev-server-4',
+    5: 'webpack-dev-server',
   },
   htmlWebpackPlugin: {
     4: 'html-webpack-plugin-4',
@@ -20,7 +20,7 @@ const moduleSources: ModulesDef = {
 
 export interface ModuleMatrixResultOptions {
   webpack: 4 | 5
-  webpackDevServer: 3 | 4
+  webpackDevServer: 4 | 5
   htmlWebpackPlugin?: 4 | 5
 }
 

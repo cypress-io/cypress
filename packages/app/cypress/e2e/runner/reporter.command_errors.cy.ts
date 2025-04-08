@@ -296,7 +296,7 @@ describe('errors ui', {
 
     verify('assertion failure in response callback', {
       column: 24,
-      codeFrameText: '.reply(()=>{',
+      codeFrameText: '.reply(()=>',
       message: [
         `expected 'b' to equal 'c'`,
       ],

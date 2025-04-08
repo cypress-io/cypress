@@ -1,4 +1,4 @@
-import { getDisplayUrlMatcher } from '@packages/driver/src/cy/net-stubbing/route-matcher-log'
+import { getDisplayUrlMatcher } from '../../../src/cy/net-stubbing/route-matcher-log'
 import type { RouteMatcherOptions } from '@packages/net-stubbing/lib/external-types'
 
 const testFail = (cb, expectedDocsUrl = 'https://on.cypress.io/intercept') => {
@@ -26,6 +26,9 @@ describe('network stubbing', { retries: 15 }, function () {
 
   beforeEach(function () {
     cy.spy(Cypress.utils, 'warning')
+    // Starting in Electron 28, we cannot use fetch or XHR from within about:blank. This is a workaround
+    // to ensure that we have a valid origin for our tests.
+    cy.visit('/fixtures/empty.html')
   })
 
   context('cy.intercept()', function () {
@@ -936,13 +939,24 @@ describe('network stubbing', { retries: 15 }, function () {
     // @see https://github.com/cypress-io/cypress/issues/8497
     it('can load transfer-encoding: chunked redirects', function () {
       cy.intercept('*')
-      const url4 = 'http://localhost:3501/fixtures/generic.html'
-      const url3 = `http://localhost:3501/redirect?href=${encodeURIComponent(url4)}`
-      const url2 = `http://foobar.com:3500/redirect?chunked=1&href=${encodeURIComponent(url3)}`
-      const url1 = `http://foobar.com:3500/redirect?chunked=1&href=${encodeURIComponent(url2)}`
+      const originOne = 'http://foobar.com:3500'
+      const originTwo = Cypress.config('injectDocumentDomain') ? 'http://localhost:3501' : 'http://foobar.com:3501'
 
-      cy.visit(url1)
-      .location('href').should('eq', url4)
+      const url4 = `${originTwo}/fixtures/generic.html`
+      const url3 = `${originTwo}/redirect?href=${encodeURIComponent(url4)}`
+      const url2 = `${originOne}/redirect?chunked=1&href=${encodeURIComponent(url3)}`
+      const url1 = `${originOne}/redirect?chunked=1&href=${encodeURIComponent(url2)}`
+
+      cy.visit(`${originOne}/fixtures/empty.html`)
+
+      cy.visit(url1).as('redirect')
+      if (Cypress.config('injectDocumentDomain')) {
+        cy.location('href').should('eq', url4)
+      } else {
+        cy.origin('http://foobar.com:3501', { args: [url4] }, ([url4]) => {
+          cy.location('href').should('eq', url4)
+        })
+      }
     })
 
     context('can intercept against any domain', function () {
@@ -1619,7 +1633,7 @@ describe('network stubbing', { retries: 15 }, function () {
       })
     })
 
-    it('can modify the request body', function () {
+    it('can modify the request body', function (done) {
       const body = '{"foo":"bar"}'
 
       cy.intercept('/post-only', function (req) {
@@ -1630,15 +1644,17 @@ describe('network stubbing', { retries: 15 }, function () {
       }).then(function () {
         $.post('/post-only', 'quuz').done((responseText) => {
           expect(responseText).to.contain(body)
+
+          done()
         })
       })
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23422
-    it('can add a body to a request that does not have one', { retries: 15 }, function () {
+    it('can add a body to a request that does not have one', { retries: 15 }, function (done) {
       const body = '{"foo":"bar"}'
 
-      cy.intercept('/post-only', function (req) {
+      cy.intercept('/post-only*', function (req) {
         expect(req.body).to.eq('')
         expect(req.method).to.eq('GET')
         req.method = 'POST'
@@ -1646,8 +1662,9 @@ describe('network stubbing', { retries: 15 }, function () {
 
         req.body = body
       }).then(function () {
-        $.get('/post-only').done((responseText) => {
+        $.get('/post-only').then((responseText) => {
           expect(responseText).to.contain(body)
+          done()
         })
       })
     })
@@ -1691,23 +1708,6 @@ describe('network stubbing', { retries: 15 }, function () {
       })
     })
 
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23404
-    it('can delay with deprecated delayMs param', { retries: 15 }, function () {
-      const delayMs = 250
-
-      cy.intercept('/timeout*', (req) => {
-        this.start = Date.now()
-
-        req.reply({
-          delayMs,
-        })
-      }).then(() => {
-        return $.get('/timeout').then((responseText) => {
-          expect(Date.now() - this.start).to.be.closeTo(delayMs + 100, 100)
-        })
-      })
-    })
-
     // @see https://github.com/cypress-io/cypress/issues/14446
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23406
     it('should delay the same amount on every response', { retries: 15 }, () => {
@@ -1746,6 +1746,7 @@ describe('network stubbing', { retries: 15 }, function () {
       }).as('create')
 
       cy.then(() => {
+        // tslint:disable:no-floating-promises
         fetch('/post-only', {
           method: 'POST', // *GET, POST, PUT, DELETE, etc.
         })
@@ -2199,7 +2200,7 @@ describe('network stubbing', { retries: 15 }, function () {
 
       context('with `times`', function () {
         // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23434
-        it('only uses each handler N times', { retries: 15 }, function () {
+        it('only uses each handler N times', { browser: '!webkit', retries: 15 }, function () {
           const url = uniqueRoute('/foo')
           const third = sinon.stub()
 
@@ -3732,6 +3733,25 @@ describe('network stubbing', { retries: 15 }, function () {
         })
       })
 
+      // @see https://github.com/cypress-io/cypress/issues/25448
+      it('gets all aliased Interceptions by alias.all when assigning an alias using req.alias', function () {
+        const url = uniqueRoute('/foo')
+
+        cy.intercept(`${url}*`, (req) => {
+          req.alias = 'alias'
+          req.reply({ bar: 'baz' })
+        })
+        .then(() => {
+          $.get(url)
+          $.get(url)
+        })
+        .wait('@alias').wait('@alias')
+
+        cy.get('@alias.all').then((interceptions) => {
+          expect(interceptions).to.have.length(2)
+        })
+      })
+
       // TODO: fix+document this behavior
       // @see https://github.com/cypress-io/cypress/issues/7663
       it.skip('gets indexed Interception by alias.number', function () {
@@ -3790,6 +3810,31 @@ describe('network stubbing', { retries: 15 }, function () {
           $.get(url)
         })
         .wait('@fromInterceptor')
+        .then(() => {
+          const log = cy.queue.logs({
+            displayName: 'xhr',
+          })[0]
+
+          const renderProps = log.get('renderProps')()
+
+          expect(renderProps.interceptions).to.have.length(1)
+          expect(renderProps.interceptions[0]).to.have.property('alias')
+          expect(renderProps.interceptions[0].alias).to.eq('fromInterceptor')
+        })
+      })
+
+      it('can dynamically alias the request and get with @alias.all', function () {
+        const url = uniqueRoute('/foo')
+
+        cy.intercept(`${url}*`, (req) => {
+          req.alias = 'fromInterceptor'
+        })
+        .then(() => {
+          $.get(url)
+          $.get(url)
+        })
+        .wait('@fromInterceptor').wait('@fromInterceptor')
+        .get('@fromInterceptor.all').should('have.length', 2)
       })
 
       it('can time out on a dynamic alias', function (done) {

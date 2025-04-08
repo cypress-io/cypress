@@ -3,6 +3,7 @@ import { SnapshotGenerator } from '../generator/snapshot-generator'
 import { prettyPrintError } from '../utils'
 import fs from 'fs-extra'
 import forceNoRewrite from './force-no-rewrite'
+import type { SnapshotConfig } from './config'
 
 const debug = require('debug')
 const logInfo = debug('cypress:snapgen:info')
@@ -16,6 +17,8 @@ function getSnapshotGenerator ({
   resolverMap,
   minify,
   integrityCheckSource,
+  useExistingSnapshotScript,
+  updateSnapshotScriptContents,
 }: {
   nodeModulesOnly: boolean
   projectBaseDir: string
@@ -24,6 +27,8 @@ function getSnapshotGenerator ({
   resolverMap: Record<string, string>
   minify: boolean
   integrityCheckSource: string | undefined
+  useExistingSnapshotScript?: boolean
+  updateSnapshotScriptContents?: (contents: string) => string
 }) {
   return new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
     cacheDir: snapshotCacheDir,
@@ -32,6 +37,8 @@ function getSnapshotGenerator ({
     forceNoRewrite,
     minify,
     integrityCheckSource,
+    useExistingSnapshotScript,
+    updateSnapshotScriptContents,
   })
 }
 
@@ -44,7 +51,10 @@ function getSnapshotGenerator ({
  * @param {Partial<import('../snapconfig').SnapshotConfig>} opts
  */
 export async function installSnapshot (
-  {
+  config: SnapshotConfig,
+  resolverMap,
+) {
+  const {
     cypressAppSnapshotDir,
     nodeModulesOnly,
     projectBaseDir,
@@ -52,9 +62,10 @@ export async function installSnapshot (
     snapshotEntryFile,
     minify,
     integrityCheckSource,
-  },
-  resolverMap,
-) {
+    useExistingSnapshotScript,
+    updateSnapshotScriptContents,
+  } = config
+
   try {
     logInfo('Generating snapshot %o', {
       nodeModulesOnly,
@@ -68,6 +79,8 @@ export async function installSnapshot (
       resolverMap,
       minify,
       integrityCheckSource,
+      useExistingSnapshotScript,
+      updateSnapshotScriptContents,
     })
 
     await snapshotGenerator.createScript()

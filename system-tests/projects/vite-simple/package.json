@@ -1,19 +1,18 @@
 {
   "name": "vite-simple",
-  "version": "0.0.0",
-  "private": true,
+  "version": "0.0.0-test",
   "scripts": {
-    "dev": "vite",
     "build": "vite build",
+    "dev": "vite",
     "preview": "vite preview"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^3.0.1",
-    "vite": "^4.0.4"
+    "@vitejs/plugin-react": "^4.3.3",
+    "vite": "^5.4.10"
   },
   "type": "module"
 }

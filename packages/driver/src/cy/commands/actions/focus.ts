@@ -41,15 +41,14 @@ export default (Commands, Cypress, cy) => {
         options.$el = $dom.wrap(options.$el)
       }
 
-      if (options.log) {
-        options._log = Cypress.log({
-          $el: options.$el,
-          timeout: options.timeout,
-          consoleProps () {
-            return { 'Applied To': $dom.getElements(options.$el) }
-          },
-        })
-      }
+      options._log = Cypress.log({
+        $el: options.$el,
+        timeout: options.timeout,
+        hidden: options.log === false,
+        consoleProps () {
+          return { 'Applied To': $dom.getElements(options.$el) }
+        },
+      })
 
       const el = options.$el.get(0)
 
@@ -61,7 +60,7 @@ export default (Commands, Cypress, cy) => {
       $elements.isElement(options.$el.get(0)) &&
       $elements.isBody(options.$el.get(0))
 
-      // http://www.w3.org/$R/html5/editing.html#specially-focusable
+      // https://dev.w3.org/html5/spec-LC/editing.html#specially-focusable
       // ensure there is only 1 dom element in the subject
       // make sure its allowed to be focusable
       if (!(isWin || isBody || $dom.isFocusable(options.$el))) {
@@ -134,19 +133,18 @@ export default (Commands, Cypress, cy) => {
 
       const isBody = options.$el.is('body')
 
-      if (options.log) {
-        // figure out the options which actually change the behavior of clicks
-        const deltaOptions = $utils.filterOutOptions(options)
+      // figure out the options which actually change the behavior of clicks
+      const deltaOptions = $utils.filterOutOptions(options)
 
-        options._log = Cypress.log({
-          $el: options.$el,
-          message: deltaOptions,
-          timeout: options.timeout,
-          consoleProps () {
-            return { 'Applied To': $dom.getElements(options.$el) }
-          },
-        })
-      }
+      options._log = Cypress.log({
+        $el: options.$el,
+        hidden: !options.log,
+        message: deltaOptions,
+        timeout: options.timeout,
+        consoleProps () {
+          return { 'Applied To': $dom.getElements(options.$el) }
+        },
+      })
 
       if (options.$el.length && options.$el.length > 1) {
         if (options.error === false) {

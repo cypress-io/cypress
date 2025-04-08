@@ -2,14 +2,14 @@ import $dom from '../../../dom'
 
 export default (Commands, Cypress, cy, state) => {
   Commands.addQuery('focused', function focused (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
-    const log = options.log !== false && Cypress.log({ timeout: options.timeout })
+    const log = Cypress.log({ timeout: options.timeout, hidden: options.log === false })
 
     this.set('timeout', options.timeout)
 
     return () => {
       let $el = cy.getFocused()
 
-      log && cy.state('current') === this && log.set({
+      cy.state('current') === this && log?.set({
         $el,
         consoleProps: () => {
           return {

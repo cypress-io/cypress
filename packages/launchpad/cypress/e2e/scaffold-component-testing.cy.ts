@@ -4,7 +4,6 @@ function startSetupFor (project: ProjectFixtureDir) {
   cy.scaffoldProject(project)
   cy.openProject(project)
   cy.visitLaunchpad()
-  cy.skipWelcome()
 
   cy.contains('Component Testing').click()
   cy.get(`[data-testid="select-framework"]`)
@@ -25,51 +24,17 @@ const ONE_MINUTE = 1000 * 60
 describe('scaffolding component testing', {
   taskTimeout: ONE_MINUTE,
 }, () => {
-  context('vuecli4vue2', () => {
-    it('scaffolds component testing for Vue CLI 4 w/ Vue 2 project', () => {
-      startSetupFor('vueclivue2-unconfigured')
+  context('webpack5vue3', () => {
+    it('scaffolds component testing for Webpack 5 w/ Vue 3 project', () => {
+      startSetupFor('vue3-webpack-ts-unconfigured')
 
       // should detect correctly
-      cy.get('button').should('be.visible').contains('Vue CLI (Vue 2)(detected)')
+      cy.get('button').should('be.visible').contains('Vue.js 3(detected)')
+      cy.get('button').should('be.visible').contains('Webpack(detected)')
       cy.get('button').contains('Next step').click()
       cy.findByRole('button', { name: 'Continue' }).click()
-      verifyConfigFile(`cypress.config.js`)
-    })
-  })
-
-  context('vuecli4vue3', () => {
-    it('scaffolds component testing for Vue CLI 4 w/ Vue 3 project', () => {
-      startSetupFor('vueclivue3-unconfigured')
-
-      // should detect correctly
-      cy.get('button').should('be.visible').contains('Vue CLI (Vue 3)(detected)')
-      cy.get('button').contains('Next step').click()
-      cy.findByRole('button', { name: 'Continue' }).click()
-      verifyConfigFile(`cypress.config.js`)
-    })
-  })
-
-  context('vuecli5vue3', () => {
-    it('scaffolds component testing for Vue CLI 5 w/ Vue 3 project', () => {
-      startSetupFor('vuecli5vue3-unconfigured')
-
-      // should detect correctly
-      cy.get('button').should('be.visible').contains('Vue CLI (Vue 3)(detected)')
-      cy.get('button').contains('Next step').click()
-      cy.findByRole('button', { name: 'Continue' }).click()
-      verifyConfigFile(`cypress.config.js`)
-    })
-  })
-
-  context('create-react-app', () => {
-    it('scaffolds component testing for Create React App v5 project', () => {
-      startSetupFor('create-react-app-unconfigured')
-
-      // should detect correctly
-      cy.get('button').should('be.visible').contains('Create React App(detected)')
-      cy.get('button').contains('Next step').click()
-      cy.findByRole('button', { name: 'Continue' }).click()
-      verifyConfigFile(`cypress.config.js`)
+      cy.get('[data-cy="launchpad-Configuration files"]').should('be.visible')
+      verifyConfigFile(`cypress.config.ts`)
     })
   })
 
@@ -93,6 +58,7 @@ describe('scaffolding component testing', {
       })
 
       cy.get('button').contains('Skip').click()
+      cy.get('[data-cy="launchpad-Configuration files"]').should('be.visible')
 
       verifyConfigFile(`cypress.config.ts`)
     })
@@ -101,7 +67,6 @@ describe('scaffolding component testing', {
       cy.scaffoldProject('react-vite-ts-unconfigured')
       cy.openProject('react-vite-ts-unconfigured')
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.withCtx(async (ctx) => {
         const reactPackageFilePath = 'node_modules/react/package.json'
@@ -112,15 +77,12 @@ describe('scaffolding component testing', {
       })
 
       cy.contains('Component Testing').click()
-      cy.get(`[data-testid="select-framework"]`)
-
-      cy.get('button').should('be.visible').contains('React.js(detected)')
-
-      cy.get('button').contains('Next step').click()
+      cy.contains('button', 'React.js(detected)').should('be.visible')
+      cy.contains('button', 'Next step').click()
 
       // react-dom dependency is missing
       cy.findByTestId('dependency-react-dom').within(() => {
-        cy.get('[aria-label="pending installation"]').should('exist')
+        cy.get('[aria-label="pending installation"]')
       })
 
       // fake install
@@ -129,7 +91,7 @@ describe('scaffolding component testing', {
         await ctx.actions.file.writeFileInProject(
           ctx.path.join('node_modules', 'react-dom', 'package.json'),
           JSON.stringify({
-            'version': '17.0.0',
+            'version': '18.3.1',
           }),
         )
       })
@@ -137,6 +99,11 @@ describe('scaffolding component testing', {
       // now it is installed, launchpad should detect it and update the UI
       cy.findByTestId('dependency-react-dom').within(() => {
         cy.get('[aria-label="installed"]').should('exist')
+      })
+
+      // now clean up the state that we mutated
+      cy.withCtx(async (ctx) => {
+        await ctx.fs.rmSync(ctx.path.join(ctx.currentProject!, 'node_modules', 'react-dom', 'package.json'))
       })
     })
   })
@@ -149,20 +116,8 @@ describe('scaffolding component testing', {
       cy.get('button').should('be.visible').contains('Vue.js 3(detected)')
       cy.get('button').contains('Next step').click()
       cy.findByRole('button', { name: 'Continue' }).click()
+      cy.get('[data-cy="launchpad-Configuration files"]').should('be.visible')
       verifyConfigFile(`cypress.config.ts`)
-    })
-  })
-
-  context('nuxtjs-vue2-unconfigured', () => {
-    it('scaffolds component testing for Nuxt 2', () => {
-      startSetupFor('nuxtjs-vue2-unconfigured')
-
-      // should detect correctly
-      // Screen reader text is "Support is in", but don't want to rely on DOM introduced whitespace so using regex
-      cy.contains('button', /Nuxt\.js \(v2\)\s+Support is in\s+Alpha\(detected\)/).should('be.visible')
-      cy.contains('button', 'Next step').click()
-      cy.findByRole('button', { name: 'Continue' }).click()
-      verifyConfigFile(`cypress.config.js`)
     })
   })
 
@@ -176,6 +131,7 @@ describe('scaffolding component testing', {
       cy.contains('button', 'Angular(detected)').should('be.visible')
       cy.contains('button', 'Next step').click()
       cy.findByRole('button', { name: 'Continue' }).click()
+      cy.get('[data-cy="launchpad-Configuration files"]').should('be.visible')
       verifyConfigFile(`cypress.config.ts`)
     })
   })
@@ -189,7 +145,8 @@ describe('scaffolding component testing', {
       cy.contains('button', /Svelte\.js\s+Support is in\s+Alpha\(detected\)/).should('be.visible')
       cy.contains('button', 'Next step').click()
       cy.findByRole('button', { name: 'Continue' }).click()
-      verifyConfigFile(`cypress.config.js`)
+      cy.get('[data-cy="launchpad-Configuration files"]').should('be.visible')
+      verifyConfigFile(`cypress.config.ts`)
     })
   })
 
@@ -202,7 +159,8 @@ describe('scaffolding component testing', {
       cy.contains('button', /Svelte\.js\s+Support is in\s+Alpha\(detected\)/).should('be.visible')
       cy.contains('button', 'Next step').click()
       cy.findByRole('button', { name: 'Continue' }).click()
-      verifyConfigFile(`cypress.config.js`)
+      cy.get('[data-cy="launchpad-Configuration files"]').should('be.visible')
+      verifyConfigFile(`cypress.config.ts`)
     })
   })
 
@@ -217,7 +175,6 @@ describe('scaffolding component testing', {
       })
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.contains('Component Testing').click()
       cy.contains('button', 'Qwik').should('be.visible')
@@ -234,6 +191,7 @@ describe('scaffolding component testing', {
       })
 
       cy.contains('button', 'Continue').click()
+      cy.get('[data-cy="launchpad-Configuration files"]').should('be.visible')
 
       verifyConfigFile('cypress.config.js')
     })
@@ -248,7 +206,6 @@ describe('scaffolding component testing', {
       })
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.contains('Component Testing').click()
       cy.contains('button', 'Solid').should('be.visible')
@@ -265,6 +222,7 @@ describe('scaffolding component testing', {
       })
 
       cy.contains('button', 'Continue').click()
+      cy.get('[data-cy="launchpad-Configuration files"]').should('be.visible')
 
       verifyConfigFile('cypress.config.js')
     })
@@ -282,7 +240,6 @@ describe('scaffolding component testing', {
       })
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.contains('Component Testing').click()
       cy.get(`[data-testid="select-framework"]`).click()
@@ -302,7 +259,6 @@ describe('scaffolding component testing', {
       })
 
       cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.contains('Component Testing').click()
 

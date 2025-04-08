@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/cy",
+    "allowSyntheticDefaultImports": true,
+    "types": [
+      "cypress"
+    ]
+  },
+  "include": [
+    "src/**/*.cy.ts",
+    "cypress/support/component.ts"
+  ]
+}

@@ -12,14 +12,14 @@
         :class="prefixIconClass"
       />
     </slot>
-    <h3
+    <h2
       class="grow font-medium text-left leading-normal decoration-current"
       :class="headerClass"
     >
       <slot name="title">
         {{ title }}
       </slot>
-    </h3>
+    </h2>
     <div class="relative shrink">
       <slot
         name="suffixIcon"

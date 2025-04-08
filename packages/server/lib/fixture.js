@@ -3,7 +3,7 @@ const check = require('syntax-error')
 const debug = require('debug')('cypress:server:fixture')
 const coffee = require('coffeescript')
 const Promise = require('bluebird')
-const jsonlint = require('jsonlint')
+const jsonParseBetterErrors = require('json-parse-even-better-errors')
 const stripAnsi = require('strip-ansi')
 
 const errors = require('./errors')
@@ -29,7 +29,7 @@ const extensions = [
 const queue = {}
 
 const friendlyJsonParse = function (s) {
-  jsonlint.parse(s) // might throw good error
+  jsonParseBetterErrors(s) // should throw an error with better formatting
 
   return JSON.parse(s) // actually parses correctly all the edge cases
 }

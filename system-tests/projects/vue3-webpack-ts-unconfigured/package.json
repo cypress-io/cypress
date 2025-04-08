@@ -1,0 +1,30 @@
+{
+  "name": "vue3-webpack-ts-unconfigured",
+  "version": "0.0.0-test",
+  "scripts": {
+    "build": "webpack --mode production",
+    "start": "webpack-dev-server --mode development",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
+    "autoprefixer": "^10.4.20",
+    "babel-loader": "^9.2.1",
+    "core-js": "^3.39.0",
+    "css-loader": "^7.1.2",
+    "html-webpack-plugin": "^5.6.3",
+    "postcss": "^8.4.47",
+    "postcss-loader": "^8.1.1",
+    "style-loader": "^3.3.1",
+    "tailwindcss": "^3.0.24",
+    "template-compiler": "^1.2.1",
+    "ts-loader": "^9.5.1",
+    "typescript": "~5.4.5",
+    "vue": "^3.5.12",
+    "vue-loader": "^17.4.2",
+    "webpack": "^5.96.1",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.1.0"
+  }
+}

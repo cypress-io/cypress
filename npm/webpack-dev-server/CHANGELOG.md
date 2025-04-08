@@ -1,3 +1,81 @@
+# [@cypress/webpack-dev-server-v4.0.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v4.0.1...@cypress/webpack-dev-server-v4.0.2) (2025-03-25)
+
+# [@cypress/webpack-dev-server-v4.0.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v4.0.0...@cypress/webpack-dev-server-v4.0.1) (2025-01-15)
+
+
+### Bug Fixes
+
+* add cypress 14 as a peer dependency for webpack-dev-server ([#30862](https://github.com/cypress-io/cypress/issues/30862)) ([a46c2dd](https://github.com/cypress-io/cypress/commit/a46c2dde8dc9778f2048fb5f67a74de2a9377b4b))
+
+# [@cypress/webpack-dev-server-v4.0.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.11.0...@cypress/webpack-dev-server-v4.0.0) (2025-01-08)
+
+
+### breaking
+
+* release version 4.0.0 of @cypress/webpack-dev-server. ([85da287](https://github.com/cypress-io/cypress/commit/85da2870fd722ea7f08c7cfc5708780415bddf2e))
+
+### BREAKING CHANGES
+
+* Cypress 14 drops support for webpack-dev-server 3. webpack/webpack-dev-server 4 and 5 are supported. @cypress/webpack-dev-server now ships with webpack-dev-server v5 by default.
+
+# [@cypress/webpack-dev-server-v3.11.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.10.1...@cypress/webpack-dev-server-v3.11.0) (2024-08-27)
+
+
+### Features
+
+* implement JIT component experiment ([#30049](https://github.com/cypress-io/cypress/issues/30049)) ([57f6110](https://github.com/cypress-io/cypress/commit/57f6110d29f0b234c969abc747f0fae29c0f4ead))
+
+# [@cypress/webpack-dev-server-v3.10.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.10.0...@cypress/webpack-dev-server-v3.10.1) (2024-08-01)
+
+
+### Bug Fixes
+
+* **deps:** update dependency webpack-dev-server to ^4.15.2 ([#29936](https://github.com/cypress-io/cypress/issues/29936)) ([f2b41b0](https://github.com/cypress-io/cypress/commit/f2b41b0103f0f9f9d50ea1d07d45ee8f8a677f48))
+
+# [@cypress/webpack-dev-server-v3.10.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.9.0...@cypress/webpack-dev-server-v3.10.0) (2024-06-07)
+
+
+### Bug Fixes
+
+* update cypress to Typescript 5 ([#29568](https://github.com/cypress-io/cypress/issues/29568)) ([f3b6766](https://github.com/cypress-io/cypress/commit/f3b67666a5db0438594339c379cf27e1fd1e4abc))
+
+
+### Features
+
+* add CT support for angular 18 ([#29584](https://github.com/cypress-io/cypress/issues/29584)) ([cceea03](https://github.com/cypress-io/cypress/commit/cceea0386447bbf8ada7dab22e7159a78060bcca))
+
+# [@cypress/webpack-dev-server-v3.9.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.8.0...@cypress/webpack-dev-server-v3.9.0) (2024-05-30)
+
+
+### Features
+
+* support Next.JS version 14 ([#29558](https://github.com/cypress-io/cypress/issues/29558)) ([cf6b29d](https://github.com/cypress-io/cypress/commit/cf6b29db229cc825f27fd78e7baeafaa16576f9a))
+
+# [@cypress/webpack-dev-server-v3.8.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.7.4...@cypress/webpack-dev-server-v3.8.0) (2024-04-18)
+
+
+### Features
+
+* support webpack-dev-server v5 in @cypress/webpack-dev-server ([#29306](https://github.com/cypress-io/cypress/issues/29306)) ([d7e9d60](https://github.com/cypress-io/cypress/commit/d7e9d6068c6ab01ab58f9959ea7ad6a361087764))
+
+# [@cypress/webpack-dev-server-v3.7.4](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.7.3...@cypress/webpack-dev-server-v3.7.4) (2024-01-30)
+
+
+### Bug Fixes
+
+* optimize reduce addCypressToWebpackEslintRulesInPlace ([#27819](https://github.com/cypress-io/cypress/issues/27819)) ([43792e7](https://github.com/cypress-io/cypress/commit/43792e7583651318ea4653fce914a16b9fd5ae48))
+
+# [@cypress/webpack-dev-server-v3.7.3](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.7.2...@cypress/webpack-dev-server-v3.7.3) (2024-01-12)
+
+# [@cypress/webpack-dev-server-v3.7.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.7.1...@cypress/webpack-dev-server-v3.7.2) (2023-12-26)
+
+# [@cypress/webpack-dev-server-v3.7.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.7.0...@cypress/webpack-dev-server-v3.7.1) (2023-11-22)
+
+
+### Bug Fixes
+
+* Allow absolute paths in indexHtmlFile ([#28324](https://github.com/cypress-io/cypress/issues/28324)) ([dcd6a18](https://github.com/cypress-io/cypress/commit/dcd6a18d9b43707a240101696e7b718f97380149))
+
 # [@cypress/webpack-dev-server-v3.7.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.6.1...@cypress/webpack-dev-server-v3.7.0) (2023-11-07)
 
 

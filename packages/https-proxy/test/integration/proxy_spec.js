@@ -90,29 +90,31 @@ describe('Proxy', () => {
     })
   })
 
-  it('closes outgoing connections when client disconnects', function () {
+  it('closes outgoing connections when client disconnects', async function () {
     this.sandbox.spy(net, 'connect')
 
-    return request({
+    await request({
       strictSSL: false,
       url: 'https://localhost:8444/replace',
       proxy: 'http://localhost:3333',
       resolveWithFullResponse: true,
     })
-    .then(() => {
-      // ensure the outgoing socket created for this connection was destroyed
-      expect(net.connect).calledOnce
 
-      const socket = net.connect.getCalls()[0].returnValue
+    // ensure the outgoing socket created for this connection was destroyed
+    expect(net.connect).calledOnce
 
-      return new Promise((resolve) => {
+    const socket = net.connect.getCalls()[0].returnValue
+
+    // sometimes the close event happens before we can attach the listener, causing this test to flake
+    if (!socket.destroyed || !socket.readyState === 'closed') {
+      await new Promise((resolve) => {
         socket.on('close', () => {
           expect(socket.destroyed).to.be.true
 
           resolve()
         })
       })
-    })
+    }
   })
 
   it('can boot the httpServer', () => {
@@ -127,7 +129,9 @@ describe('Proxy', () => {
     })
   })
 
-  context('generating certificates', () => {
+  context('generating certificates', function () {
+    this.retries(4)
+
     it('reuses existing certificates', function () {
       return request({
         strictSSL: false,
@@ -188,6 +192,8 @@ describe('Proxy', () => {
 
     // https://github.com/cypress-io/cypress/issues/771
     it('generates certs and can proxy requests for HTTPS requests to IPs', function () {
+      this.timeout(5000)
+
       this.sandbox.spy(this.proxy, '_generateMissingCertificates')
       this.sandbox.spy(this.proxy, '_getServerPortForIp')
 
@@ -268,13 +274,13 @@ describe('Proxy', () => {
       process.env.npm_config_noproxy = 'just,some,nonsense'
 
       process.env.NO_PROXY = ''
-      process.env.HTTP_PROXY = process.env.HTTPS_PROXY = 'http://localhost:9001'
+      process.env.HTTP_PROXY = process.env.HTTPS_PROXY = 'http://localhost:2222'
 
       this.upstream = new DebugProxy({
         keepRequests: true,
       })
 
-      return this.upstream.start(9001)
+      return this.upstream.start(2222)
     })
 
     it('passes a request to an https server through the upstream', function () {
@@ -307,7 +313,7 @@ describe('Proxy', () => {
         return true
       }
 
-      process.env.HTTP_PROXY = (process.env.HTTPS_PROXY = 'http://foo:bar@localhost:9001')
+      process.env.HTTP_PROXY = process.env.HTTPS_PROXY = 'http://foo:bar@localhost:2222'
 
       return request({
         strictSSL: false,
@@ -318,29 +324,31 @@ describe('Proxy', () => {
       })
     })
 
-    it('closes outgoing connections when client disconnects', function () {
+    it('closes outgoing connections when client disconnects', async function () {
       this.sandbox.spy(net, 'connect')
 
-      return request({
+      await request({
         strictSSL: false,
         url: 'https://localhost:8444/replace',
         proxy: 'http://localhost:3333',
         resolveWithFullResponse: true,
         forever: false,
       })
-      .then(() => {
-        // ensure the outgoing socket created for this connection was destroyed
-        expect(net.connect).calledOnce
-        const socket = net.connect.getCalls()[0].returnValue
 
-        return new Promise((resolve) => {
-          return socket.on('close', () => {
+      // ensure the outgoing socket created for this connection was destroyed
+      expect(net.connect).calledOnce
+      const socket = net.connect.getCalls()[0].returnValue
+
+      // sometimes the close event happens before we can attach the listener, causing this test to flake
+      if (!socket.destroyed || !socket.readyState === 'closed') {
+        await new Promise((resolve) => {
+          socket.on('close', () => {
             expect(socket.destroyed).to.be.true
 
             resolve()
           })
         })
-      })
+      }
     })
 
     // https://github.com/cypress-io/cypress/issues/4257

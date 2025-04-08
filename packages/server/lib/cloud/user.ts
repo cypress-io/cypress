@@ -1,4 +1,4 @@
-const api = require('./api')
+const api = require('./api').default
 const cache = require('../cache')
 
 import type { CachedUser } from '@packages/types'
@@ -25,6 +25,8 @@ export = {
         if (authToken) {
           return api.postLogout(authToken)
         }
+
+        return undefined
       })
     })
   },

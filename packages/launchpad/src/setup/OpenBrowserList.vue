@@ -14,7 +14,7 @@
         :key="browser.id"
         :data-cy-browser="browser.name"
         :value="browser.id"
-        :disabled="browser.disabled || !browser.isVersionSupported || browserStatus.chosen"
+        :disabled="browser.disabled || !browser.isVersionSupported ||browserStatus.chosen"
       >
         <RadioGroupLabel
           :for="browser.id"
@@ -31,9 +31,9 @@
             popper-class="max-w-lg"
           >
             <i-cy-circle-bg-question-mark_x16
-              data-cy="unsupported-browser-tooltip-trigger"
+              data-cy="browser-warning-tooltip-trigger"
               class="mt-[8px] mr-[8px] top-0 right-0 inline-block absolute icon-dark-gray-700 icon-light-gray-200"
-              alt="unsupported browser"
+              alt="browser warning"
             />
             <template #popper>
               <div class="text-center p-2 text-gray-300 text-[14px] leading-[20px]">
@@ -48,16 +48,16 @@
             </template>
           </Tooltip>
           <div class="text-center">
-            <img
-              :src="allBrowsersIcons[browser.displayName] || allBrowsersIcons.generic"
+            <component
+              :is="allBrowsersIcons[browser.displayName?.toLowerCase()] || allBrowsersIcons.generic"
               alt=""
               class="h-[40px] w-[40px] inline"
               :class="{ 'filter grayscale': browser.disabled || !browser.isVersionSupported }"
-            >
+            />
           </div>
           <div
             class="font-medium pt-2 px-2 text-[18px] leading-[28px] truncate"
-            :class="checked ? 'text-jade-600' : ( browser.disabled || !browser.isVersionSupported ) ? 'text-gray-500' : 'text-indigo-600'"
+            :class="checked ? 'text-jade-600' : (browser.disabled || !browser.isVersionSupported ) ? 'text-gray-500' : 'text-indigo-600'"
           >
             {{ browser.displayName }}
           </div>
@@ -76,62 +76,62 @@
           <template v-if="browserStatus.closed || browserStatus.opening">
             <Button
               v-if="browserStatus.closed"
-              size="lg"
+              size="40"
               type="submit"
-              :prefix-icon="testingTypeIcon"
-              prefix-icon-class="icon-dark-white"
-              variant="secondary"
+              variant="jade-dark"
               data-cy="launch-button"
-              class="font-medium"
             >
+              <component
+                :is="testingTypeIcon"
+                class="mr-[8px] icon-dark-white"
+              />
               {{ browserText[props.gql.currentTestingType].start }}
             </Button>
             <Button
               v-else
-              size="lg"
+              size="40"
               type="button"
               disabled
-              variant="pending"
+              variant="disabled"
               class="font-medium disabled:cursor-default"
-              :prefix-icon="StatusRunningIcon"
-              prefix-icon-class="icon-light-gray-300 icon-dark-white animate-spin"
             >
+              <StatusRunningIcon class="mr-[8px] icon-dark-white icon-light-gray-300 animate-spin" />
               {{ browserText[props.gql.currentTestingType].opening }}
             </Button>
           </template>
           <template v-else>
             <Button
-              size="lg"
+              size="40"
               type="button"
               disabled
-              variant="pending"
-              :prefix-icon="testingTypeIcon"
-              prefix-icon-class="icon-dark-white"
+              variant="disabled"
               class="font-medium disabled:cursor-default"
             >
+              <component
+                :is="testingTypeIcon"
+                class="mr-[8px] icon-dark-gray-500 icon-light-transparent"
+              />
               {{ browserText.running }}
             </Button>
             <Button
               v-if="props.gql.activeBrowser?.isFocusSupported"
-              size="lg"
+              size="40"
               type="button"
-              variant="outline"
-              :prefix-icon="ExportIcon"
-              prefix-icon-class="icon-dark-gray-500"
+              variant="outline-light"
               class="font-medium"
               @click="emit('focusBrowser')"
             >
+              <ExportIcon class="mr-[8px] icon-dark-gray-500" />
               {{ browserText.focus }}
             </Button>
             <Button
-              size="lg"
+              size="40"
               type="button"
-              variant="outline"
-              :prefix-icon="PowerStandbyIcon"
-              prefix-icon-class="icon-dark-gray-500"
+              variant="outline-light"
               class="font-medium"
               @click="emit('closeBrowser')"
             >
+              <PowerStandbyIcon class="mr-[8px] icon-dark-gray-500" />
               {{ browserText.close }}
             </Button>
           </template>
@@ -139,13 +139,14 @@
       </div>
 
       <Button
-        size="sm"
-        variant="text"
-        :prefix-icon="ArrowRightIcon"
-        prefix-icon-class="icon-dark-gray-500 transform transition-transform ease-in duration-200 inline-block group-hocus:icon-dark-indigo-500 rotate-180 group-hocus:translate-x-[-2px]"
+        size="24"
+        variant="link"
         class="font-medium mx-auto text-gray-600 hocus-link-default group hocus:text-indigo-500"
         @click="emit('navigatedBack')"
       >
+        <ArrowRightIcon
+          class="mr-[8px] icon-dark-gray-500 transform transition-transform ease-in duration-200 inline-block group-hocus:icon-dark-indigo-500 rotate-180 group-hocus:translate-x-[-2px]"
+        />
         {{ browserText.switchTestingType }}
       </Button>
     </div>
@@ -154,7 +155,7 @@
 
 <script lang="ts" setup>
 import { useI18n } from '@cy/i18n'
-import Button from '@packages/frontend-shared/src/components/Button.vue'
+import Button from '@cypress-design/vue-button'
 import { computed } from 'vue'
 import { useMutation, gql, useSubscription } from '@urql/vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
@@ -189,9 +190,9 @@ fragment OpenBrowserList on CurrentProject {
   browsers {
     id
     disabled
-    isVersionSupported
     name
     displayName
+    isVersionSupported
     warning
     majorVersion
   }

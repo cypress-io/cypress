@@ -1,6 +1,9 @@
 const path = require('path')
 const webpack = require('webpack')
+const Debug = require('debug')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
+
+const debug = Debug('cypress:webpack-batteries-included-preprocessor')
 
 const hasTsLoader = (rules) => {
   return rules.some((rule) => {
@@ -23,12 +26,21 @@ const addTypeScriptConfig = (file, options) => {
   if (!rules || !Array.isArray(rules)) return options
 
   // if we find ts-loader configured, don't add it again
-  if (hasTsLoader(rules)) return options
+  if (hasTsLoader(rules)) {
+    debug('ts-loader already configured, not adding again')
+
+    return options
+  }
 
   const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
   // node will try to load a projects tsconfig.json instead of the node
-  // package using require('tsconfig'), so we alias it as 'tsconfig-aliased-for-wbip'
-  const configFile = require('tsconfig-aliased-for-wbip').findSync(path.dirname(file.filePath))
+
+  const getTsConfig = require('get-tsconfig')
+
+  // returns null if tsconfig cannot be found in the path/parent hierarchy
+  const configFile = getTsConfig.getTsconfig(file.filePath)
+
+  configFile ? debug(`found user tsconfig.json at ${configFile?.path} with compilerOptions: ${JSON.stringify(configFile?.config?.compilerOptions)}`) : debug('no user tsconfig.json found')
 
   webpackOptions.module.rules.push({
     test: /\.tsx?$/,
@@ -38,11 +50,6 @@ const addTypeScriptConfig = (file, options) => {
         loader: require.resolve('ts-loader'),
         options: {
           compiler: options.typescript,
-          compilerOptions: {
-            inlineSourceMap: true,
-            inlineSources: true,
-            downlevelIteration: true,
-          },
           logLevel: 'error',
           silent: true,
           transpileOnly: true,
@@ -53,35 +60,13 @@ const addTypeScriptConfig = (file, options) => {
 
   webpackOptions.resolve.extensions = webpackOptions.resolve.extensions.concat(['.ts', '.tsx'])
   webpackOptions.resolve.plugins = [new TsconfigPathsPlugin({
-    configFile,
+    configFile: configFile?.path,
     silent: true,
   })]
 
   options.__typescriptSupportAdded = true
 
   return options
-}
-
-/**
- * Config yarn pnp plugin for webpack 4
- * @param {*} file file to be processed
- * @param {*} options
- */
-const addYarnPnpConfig = (file, options) => {
-  const { makeResolver } = require('pnp-webpack-plugin/resolver')
-  const findPnpApi = require('module').findPnpApi
-
-  if (findPnpApi && file.filePath) {
-    const pnpapi = findPnpApi(file.filePath)
-
-    if (pnpapi) {
-      const PnpPlugin = {
-        apply: makeResolver({ pnpapi }),
-      }
-
-      options.webpackOptions.resolve.plugins.push(PnpPlugin)
-    }
-  }
 }
 
 const getDefaultWebpackOptions = () => {
@@ -143,7 +128,13 @@ const getDefaultWebpackOptions = () => {
         // resolve to include the full file extension if a file resolution is provided.
         // @see https://github.com/cypress-io/cypress/issues/27599
         // @see https://webpack.js.org/configuration/module/#resolvefullyspecified
-        process: 'process/browser.js',
+
+        // Due to Pnp compatibility issues, we want to make sure that we resolve to the 'process' library installed with the binary,
+        // which should resolve on leaf app/packages/server/node_modules/@cypress/webpack-batteries-included-preprocessor and up the tree.
+        // In other words, we want to resolve 'process' that is installed with cypress (or the package itself, i.e. @cypress/webpack-batteries-included-preprocessor)
+        // and not in the user's node_modules directory as it may not exist.
+        // @see https://github.com/cypress-io/cypress/issues/27947.
+        process: require.resolve('process/browser.js'),
       }),
     ],
     resolve: {
@@ -203,11 +194,6 @@ const preprocessor = (options = {}) => {
 
     if (options.typescript) {
       options = addTypeScriptConfig(file, options)
-    }
-
-    if (process.versions.pnp) {
-      // pnp path
-      addYarnPnpConfig(file, options)
     }
 
     return webpackPreprocessor(options)(file)

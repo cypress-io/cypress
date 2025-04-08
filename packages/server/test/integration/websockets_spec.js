@@ -38,7 +38,7 @@ describe('Web Sockets', () => {
       this.cfg = cfg
       this.ws = new ws.Server({ port: wsPort })
 
-      this.server = new ServerBase()
+      this.server = new ServerBase(cfg)
 
       return this.server.open(this.cfg, {
         SocketCtor: SocketE2E,
@@ -219,7 +219,11 @@ describe('Web Sockets', () => {
 
   context('socket.io handling', () => {
     beforeEach(function () {
-      this.automation = new Automation(this.cfg.namespace, this.cfg.socketIoCookie, this.cfg.screenshotsFolder)
+      this.automation = new Automation({
+        cyNamespace: this.cfg.namespace,
+        cookieNamespace: this.cfg.socketIoCookie,
+        screenshotsFolder: this.cfg.screenshotsFolder,
+      })
 
       return this.server.startWebsockets(this.automation, this.cfg, {})
     })

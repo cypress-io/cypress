@@ -17,21 +17,23 @@
     "shelljs": "0.8.5"
   },
   "devDependencies": {
-    "eslint": "^7.22.0",
+    "eslint": "^8.56.0",
+    "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-json-format": "^2.0.0",
-    "eslint-plugin-mocha": "^8.1.0",
+    "eslint-plugin-mocha": "^8.2.0",
     "eslint-plugin-promise": "^4.2.1",
     "sinon": "^7.3.2",
     "sinon-chai": "^3.3.0"
   },
   "peerDependencies": {
-    "@typescript-eslint/eslint-plugin": ">= 1.11.0",
-    "@typescript-eslint/parser": ">= 1.11.0",
-    "babel-eslint": "^7.2.3",
-    "eslint": ">= 3.2.1",
+    "@babel/eslint-parser": "^7.25.1",
+    "@typescript-eslint/eslint-plugin": ">= 7.0.0",
+    "@typescript-eslint/parser": ">= 7.0.0",
+    "eslint": "^= 8.0.0",
+    "eslint-plugin-import": ">= 2.0.0",
     "eslint-plugin-json-format": ">= 2.0.0",
-    "eslint-plugin-mocha": "^4.11.0",
-    "eslint-plugin-react": "^7.22.0"
+    "eslint-plugin-mocha": " >= 8.0.0",
+    "eslint-plugin-react": ">= 7.22.0"
   },
   "bin": {
     "lint-changed": "./lib/scripts/lint-changed.js",
@@ -50,5 +52,6 @@
     "cypress",
     "eslint",
     "eslintplugin"
-  ]
+  ],
+  "nx": {}
 }

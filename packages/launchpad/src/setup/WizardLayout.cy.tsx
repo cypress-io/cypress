@@ -1,4 +1,5 @@
 import WizardLayout from './WizardLayout.vue'
+// tslint:disable-next-line: no-implicit-dependencies - need to handle this
 import { defaultMessages } from '@cy/i18n'
 
 describe('<WizardLayout />', () => {

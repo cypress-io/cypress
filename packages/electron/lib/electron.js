@@ -56,7 +56,7 @@ module.exports = {
 
     const options = {
       preferLocal: true, // finds the "node_modules/.bin/electron"
-      timeout: 5000, // prevents hanging Electron if there is an error for some reason
+      timeout: 10000, // prevents hanging Electron if there is an error for some reason
     }
 
     debug('Running Electron with %o %o', args, options)
@@ -94,6 +94,7 @@ module.exports = {
     const dest = paths.getPathToResources('app')
 
     debug('appPath %s', appPath)
+
     debug('dest path %s', dest)
 
     // make sure this path exists!

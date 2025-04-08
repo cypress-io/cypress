@@ -35,6 +35,7 @@
     </ButtonInternals>
   </button>
 
+  <!-- @vue-expect-error -->
   <component
     :is="linkVersion"
     v-else
@@ -167,7 +168,7 @@ const linkProps = computed(() => {
   if (props.disabled) {
     return {
       role: 'link',
-      ariaDisabled: 'disabled',
+      ariaDisabled: 'true',
       href: null,
     }
   }

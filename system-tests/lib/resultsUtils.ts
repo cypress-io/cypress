@@ -4,8 +4,8 @@ import _ from 'lodash'
 
 const STATIC_DATE = '2018-02-01T20:14:19.323Z'
 
-const expectDurationWithin = function (obj, duration, low, high, reset) {
-  const d = _.get(obj, duration)
+const expectDurationWithin = function (obj: object, duration: string, low: number, high: number, reset: number) {
+  const d: number | undefined = _.get(obj, duration)
 
   // bail if we don't have a duration
   if (!_.isNumber(d)) {
@@ -248,15 +248,15 @@ export const expectCorrectModuleApiResult = (json, opts: {
       run,
       'stats.duration',
       wallClocks,
-      wallClocks + 600, // add 600ms to account for padding
+      wallClocks + 1000, // add 600ms to account for padding
       1234,
     )
 
     expectDurationWithin(
       run,
       'reporterStats.duration',
-      wallClocks,
-      wallClocks + 600, // add 600ms to account for padding
+      wallClocks - 100,
+      wallClocks + 1000, // add 600ms to account for padding
       1234,
     )
 

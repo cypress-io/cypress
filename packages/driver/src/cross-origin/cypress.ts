@@ -31,9 +31,9 @@ const createCypress = () => {
   // @ts-ignore
   const Cypress = window.Cypress = new $Cypress() as Cypress.Cypress
 
-  Cypress.specBridgeCommunicator.once('initialize:cypress', ({ config, env }) => {
+  Cypress.specBridgeCommunicator.once('initialize:cypress', ({ config, env, isProtocolEnabled }) => {
     // eventually, setup will get called again on rerun and cy will get re-created
-    setup(config, env)
+    setup({ cypressConfig: config, env, isProtocolEnabled })
   })
 
   Cypress.specBridgeCommunicator.on('attach:to:window', () => {
@@ -82,23 +82,10 @@ const createCypress = () => {
     }
   })
 
-  Cypress.specBridgeCommunicator.on('snapshot:generate:for:log', ({ name }, { responseEvent }) => {
-    // if the snapshot cannot be taken (in a transitory space), set to an empty object in order to not fail serialization
-    let requestedCrossOriginSnapshot = {}
-
-    // don't attempt to take snapshots after the spec bridge has been unloaded. Instead, send an empty snapshot back to the primary
-    // to display current state of dom
-    if (cy.state('document') !== undefined) {
-      requestedCrossOriginSnapshot = cy.createSnapshot(name) || {}
-    }
-
-    Cypress.specBridgeCommunicator.toPrimary(responseEvent, requestedCrossOriginSnapshot)
-  })
-
   Cypress.specBridgeCommunicator.toPrimary('bridge:ready')
 }
 
-const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
+const setup = ({ cypressConfig, env, isProtocolEnabled }: { cypressConfig: Cypress.Config, env: Cypress.ObjectLike, isProtocolEnabled: boolean }) => {
   const Cypress = window.Cypress
 
   Cypress.configure({
@@ -111,6 +98,8 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
     // This value is not synced with the config because it is omitted on big Cypress creation, as well as a few other key properties
     testingType: 'e2e',
   })
+
+  Cypress.state('isProtocolEnabled', isProtocolEnabled)
 
   // @ts-ignore
   const cy = window.cy = new $Cy(window, Cypress, Cypress.Cookies, Cypress.state, Cypress.config, false)
@@ -231,10 +220,13 @@ const attachToWindow = (autWindow: Window) => {
       Cypress.specBridgeCommunicator.toPrimary('window:load', { url: remoteLocation.href })
       cy.isStable(true, 'load')
     },
-    onUnload (e) {
+    onPageHide (e) {
       cy.state('window', undefined)
       cy.state('document', undefined)
 
+      // unload is being actively deprecated/removed by chrome, so for
+      // compatibility, we are using `window`'s `pagehide` event as a proxy
+      // for the `window:unload` event that we emit. See: https://github.com/cypress-io/cypress/pull/29525
       return Cypress.action('app:window:unload', e)
     },
     onNavigation (...args) {

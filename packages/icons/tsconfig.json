@@ -1,15 +1,9 @@
 {
   "extends": "../ts/tsconfig.json",
   "compilerOptions": {
-    "strict": true,
     "allowJs": false,
     "noImplicitAny": true,
-    "noUnusedLocals": false,
-    "resolveJsonModule": true,
-    "experimentalDecorators": true,
     "noUncheckedIndexedAccess": true,
-    "importsNotUsedAsValues": "error",
     "outDir": "dist",
-    "declaration": true
   },
 }

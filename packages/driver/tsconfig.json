@@ -1,29 +1,20 @@
 {
   "extends": "./../ts/tsconfig.json",
   "compilerOptions": {
-    "target": "ES2016",
-    "lib": ["ES2018", "DOM", "DOM.Iterable",  "ES2020.Promise", "ES2021.String"],
-    "module": "commonjs",
-    "allowJs": true,
-    "noImplicitAny": false,
+    "target": "ES2017",
+    "lib": ["ES2021", "DOM", "DOM.Iterable"],
     "noImplicitThis": false,
-    "strictFunctionTypes": true,
     "preserveWatchOutput": true,
     "sourceMap": true,
-    "importHelpers": true,
     "strictNullChecks": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true,
     "noEmit": true,
-    "noImplicitReturns": true,
-    "allowSyntheticDefaultImports": true,
     "outDir": "dist",
-    "esModuleInterop": true,
     "noErrorTruncation": true,
-    "types": []
+    "types": [],
+    "resolveJsonModule": true
   },
   "exclude": [
-    "dist"
+    "dist",
+    "test"
   ]
 }

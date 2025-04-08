@@ -1,58 +1,19 @@
-exports['e2e experimentalSkipDomainInjection=true / passes'] = `
+exports['e2e experimentalSkipDomainInjection=true / fails with an error message about experimentalSkipDomainInjection being removed'] = `
+The following configuration option is invalid:
 
-====================================================================================================
+ - experimentalSkipDomainInjection
 
-  (Run Starting)
+https://on.cypress.io/configuration
 
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:      1.2.3                                                                            │
-  │ Browser:      FooBrowser 88                                                                    │
-  │ Specs:        1 found (experimental_skip_domain_injection.cy.ts)                               │
-  │ Searched:     cypress/e2e/experimental_skip_domain_injection.cy.ts                             │
-  │ Experiments:  experimentalSkipDomainInjection=*.foobar.com                                     │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+The following configuration option is invalid:
 
+ - experimentalSkipDomainInjection
 
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  experimental_skip_domain_injection.cy.ts                                        (1 of 1)
+https://on.cypress.io/configuration
 
+The experimentalSkipDomainInjection experiment is over. document.domain injection is now off by default.
 
-  expected behavior when experimentalSkipDomainInjection=true
-    ✓ Handles cross-site/cross-origin navigation the same way without the experimental flag enabled
-    ✓ errors appropriately when doing a sub domain navigation w/o cy.origin()
-    ✓ allows sub-domain navigations with the use of cy.origin()
-
-
-  3 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        3                                                                                │
-  │ Passing:      3                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     experimental_skip_domain_injection.cy.ts                                         │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  experimental_skip_domain_injection.      XX:XX        3        3        -        -        - │
-  │    cy.ts                                                                                       │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        3        3        -        -        -  
+Read the migration guide for Cypress v14.0.0: https://on.cypress.io/migration-guide
 
 
 `

@@ -36,6 +36,9 @@ describe('privileged channel', () => {
       Function: { prototype: {
         toString: Function.prototype.toString,
       } },
+      location: {
+        origin: 'http://localhost:1234',
+      },
       Math: {
         imul: Math.imul,
       },

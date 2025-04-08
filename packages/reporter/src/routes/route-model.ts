@@ -1,4 +1,4 @@
-import { observable } from 'mobx'
+import { observable, makeObservable } from 'mobx'
 import Instrument, { InstrumentProps } from '../instruments/instrument-model'
 
 export interface RouteProps extends InstrumentProps {
@@ -16,6 +16,8 @@ export default class Route extends Instrument {
 
   constructor (props: RouteProps) {
     super(props)
+
+    makeObservable(this)
 
     this.isStubbed = props.isStubbed
     this.method = props.method

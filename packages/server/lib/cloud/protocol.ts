@@ -4,16 +4,16 @@ import fetch from 'cross-fetch'
 import crypto from 'crypto'
 import Debug from 'debug'
 import fs from 'fs-extra'
-import Module from 'module'
 import os from 'os'
 import path from 'path'
-
 import { agent } from '@packages/network'
 import pkg from '@packages/root'
-
 import env from '../util/env'
+import { putProtocolArtifact } from './api/put_protocol_artifact'
+import { requireScript } from './require_script'
+
 import type { Readable } from 'stream'
-import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions, ResponseEndedWithEmptyBodyOptions, ResponseStreamTimedOutOptions } from '@packages/types'
+import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions, ResponseEndedWithEmptyBodyOptions, ResponseStreamTimedOutOptions, AfterSpecDurations, FoundSpec } from '@packages/types'
 
 const routes = require('./routes')
 
@@ -23,67 +23,53 @@ const debugVerbose = Debug('cypress-verbose:server:protocol')
 const CAPTURE_ERRORS = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 const DELETE_DB = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 
-// Timeout for upload
-const TWO_MINUTES = 120000
-const RETRY_DELAYS = [500, 1000, 2000, 4000, 8000, 16000, 32000]
-const DB_SIZE_LIMIT = 5000000000
+export const DB_SIZE_LIMIT = 5000000000
+
+export const DEFAULT_STREAM_SAMPLING_INTERVAL = 10000
 
 const dbSizeLimit = () => {
   return env.get('CYPRESS_INTERNAL_SYSTEM_TESTS') === '1' ?
     200 : DB_SIZE_LIMIT
 }
 
-/**
- * requireScript, does just that, requires the passed in script as if it was a module.
- * @param script - string
- * @returns exports
- */
-const requireScript = (script: string) => {
-  const mod = new Module('id', module)
-
-  mod.filename = ''
-  // _compile is a private method
-  // @ts-expect-error
-  mod._compile(script, mod.filename)
-
-  module.children.splice(module.children.indexOf(mod), 1)
-
-  return mod.exports
-}
-
-class CypressRetryableError extends Error {
-  constructor (message: string) {
-    super(message)
-    this.name = 'CypressRetryableError'
-  }
-}
+type AppCaptureProtocolConstructor = new (options: ProtocolManagerOptions) => AppCaptureProtocolInterface
 
 export class ProtocolManager implements ProtocolManagerShape {
   private _runId?: string
   private _instanceId?: string
   private _db?: Database.Database
+  private _dbPath?: string
   private _archivePath?: string
   private _errors: ProtocolError[] = []
   private _protocol: AppCaptureProtocolInterface | undefined
   private _runnableId: string | undefined
   private _captureHash: string | undefined
+  private _afterSpecDurations: AfterSpecDurations & {
+    afterSpecTotal: number
+  } | undefined
+  private AppCaptureProtocol: AppCaptureProtocolConstructor | undefined
+  private options: ProtocolManagerOptions | undefined
 
-  get protocolEnabled (): boolean {
+  get isProtocolEnabled (): boolean {
     return !!this._protocol
   }
 
   get networkEnableOptions () {
-    return this.protocolEnabled ? {
+    return this.isProtocolEnabled ? {
       maxTotalBufferSize: 0,
       maxResourceBufferSize: 0,
       maxPostDataSize: 64 * 1024,
     } : undefined
   }
 
-  async setupProtocol (script: string, options: ProtocolManagerOptions) {
+  get db () {
+    return this._db
+  }
+
+  async prepareProtocol (script: string, options: ProtocolManagerOptions) {
     this._captureHash = base64url.fromBase64(crypto.createHash('SHA256').update(script).digest('base64'))
 
-    debug('setting up protocol via script')
+    debug('preparing protocol via script')
 
     try {
       this._runId = options.runId
@@ -92,15 +78,38 @@ export class ProtocolManager implements ProtocolManagerShape {
 
         await fs.ensureDir(cypressProtocolDirectory)
 
-        const { AppCaptureProtocol } = requireScript(script)
+        const { AppCaptureProtocol } = requireScript<{ AppCaptureProtocol: AppCaptureProtocolConstructor }>(script)
 
-        this._protocol = new AppCaptureProtocol(options)
+        this.AppCaptureProtocol = AppCaptureProtocol
+        this.options = options
       }
     } catch (error) {
       if (CAPTURE_ERRORS) {
         this._errors.push({
           error,
           args: [script],
+          captureMethod: 'prepareProtocol',
+          fatal: true,
+        })
+      } else {
+        throw error
+      }
+    }
+  }
+
+  setupProtocol () {
+    debug('setting up protocol')
+
+    try {
+      if (!this.AppCaptureProtocol || !this.options) {
+        throw new Error('Cannot setup protocol without a prepared protocol')
+      }
+
+      this._protocol = new this.AppCaptureProtocol(this.options)
+    } catch (error) {
+      if (CAPTURE_ERRORS) {
+        this._errors.push({
+          error,
           captureMethod: 'setupProtocol',
           fatal: true,
         })
@@ -108,6 +117,11 @@ export class ProtocolManager implements ProtocolManagerShape {
         throw error
       }
     }
+  }
+
+  async prepareAndSetupProtocol (script: string, options: ProtocolManagerOptions) {
+    await this.prepareProtocol(script, options)
+    this.setupProtocol()
   }
 
   async connectToBrowser (cdpClient: CDPClient) {
@@ -137,7 +151,9 @@ export class ProtocolManager implements ProtocolManagerShape {
     this.invokeSync('addRunnables', { isEssential: true }, runnables)
   }
 
-  beforeSpec (spec: { instanceId: string }) {
+  beforeSpec (spec: FoundSpec & { instanceId: string }) {
+    this._afterSpecDurations = undefined
+
     if (!this._protocol) {
       return
     }
@@ -159,7 +175,7 @@ export class ProtocolManager implements ProtocolManagerShape {
     }
   }
 
-  private _beforeSpec (spec: { instanceId: string }) {
+  private _beforeSpec (spec: FoundSpec & { instanceId: string }) {
     this._instanceId = spec.instanceId
     const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
     const archivePath = path.join(cypressProtocolDirectory, `${spec.instanceId}.tar`)
@@ -173,12 +189,36 @@ export class ProtocolManager implements ProtocolManagerShape {
     })
 
     this._db = db
+    this._dbPath = dbPath
     this._archivePath = archivePath
-    this.invokeSync('beforeSpec', { isEssential: true }, { workingDirectory: cypressProtocolDirectory, archivePath, dbPath, db })
+    this.invokeSync('beforeSpec', { isEssential: true }, { workingDirectory: cypressProtocolDirectory, archivePath, dbPath, db, spec })
   }
 
   async afterSpec () {
-    await this.invokeAsync('afterSpec', { isEssential: true })
+    const startTime = performance.now() + performance.timeOrigin
+
+    try {
+      const ret = await this.invokeAsync('afterSpec', { isEssential: true })
+      const durations = ret?.durations
+
+      const afterSpecTotal = (performance.now() + performance.timeOrigin) - startTime
+
+      this._afterSpecDurations = {
+        afterSpecTotal,
+        ...(durations ? durations : {}),
+      }
+
+      debug('Persisting after spec durations in state: %O', this._afterSpecDurations)
+
+      return undefined
+    } catch (e) {
+      // rethrow; this is try/catch so we can 'finally' ascertain duration
+      this._afterSpecDurations = {
+        afterSpecTotal: (performance.now() + performance.timeOrigin - startTime),
+      }
+
+      throw e
+    }
   }
 
   async beforeTest (test: { id: string } & Record<string, any>) {
@@ -243,7 +283,7 @@ export class ProtocolManager implements ProtocolManagerShape {
     return !!this._errors.length
   }
 
-  addFatalError (captureMethod: ProtocolCaptureMethod, error: Error, args: any) {
+  addFatalError (captureMethod: ProtocolCaptureMethod, error: Error, args?: any) {
     this._errors.push({
       fatal: true,
       error,
@@ -267,7 +307,11 @@ export class ProtocolManager implements ProtocolManagerShape {
     return this._errors.filter((e) => !e.fatal)
   }
 
-  async getArchiveInfo (): Promise<{ stream: Readable, fileSize: number } | void> {
+  getArchivePath (): string | undefined {
+    return this._archivePath
+  }
+
+  async getArchiveInfo (): Promise<{ filePath: string, fileSize: number } | void> {
     const archivePath = this._archivePath
 
     debug('reading archive from', archivePath)
@@ -276,98 +320,66 @@ export class ProtocolManager implements ProtocolManagerShape {
     }
 
     return {
-      stream: fs.createReadStream(archivePath),
+      filePath: archivePath,
       fileSize: (await fs.stat(archivePath)).size,
     }
   }
 
-  async uploadCaptureArtifact ({ uploadUrl, payload, fileSize }: CaptureArtifact, timeout) {
-    const archivePath = this._archivePath
+  async uploadCaptureArtifact ({ uploadUrl, fileSize, filePath }: CaptureArtifact) {
+    if (!this._protocol || !filePath || !this._db) {
+      debug('not uploading due to one of the following being falsy: %O', {
+        _protocol: !!this._protocol,
+        archivePath: !!filePath,
+        _db: !!this._db,
+      })
 
-    if (!this._protocol || !archivePath || !this._db) {
       return
     }
 
-    debug(`uploading %s to %s with a file size of %s`, archivePath, uploadUrl, fileSize)
+    const captureErrors = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 
-    const retryRequest = async (retryCount: number, errors: Error[]) => {
-      try {
-        if (fileSize > dbSizeLimit()) {
-          throw new Error(`Spec recording too large: db is ${fileSize} bytes, limit is ${dbSizeLimit()} bytes`)
-        }
-
-        const controller = new AbortController()
-
-        setTimeout(() => {
-          controller.abort()
-        }, timeout ?? TWO_MINUTES)
-
-        const res = await fetch(uploadUrl, {
-          agent,
-          method: 'PUT',
-          // @ts-expect-error - this is supported
-          body: payload,
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/x-tar',
-            'Content-Length': `${fileSize}`,
-          },
-          signal: controller.signal,
-        })
-
-        if (res.ok) {
-          return {
-            fileSize,
-            success: true,
-            specAccess: this._protocol?.getDbMetadata(),
-          }
-        }
-
-        const errorMessage = await res.json().catch(() => res.statusText)
-
-        debug(`error response: %O`, errorMessage)
-
-        if (res.status >= 500 && res.status < 600) {
-          throw new CypressRetryableError(errorMessage)
-        }
-
-        throw new Error(errorMessage)
-      } catch (e) {
-        // Only retry errors that are network related (e.g. connection reset or timeouts)
-        if (['FetchError', 'AbortError', 'CypressRetryableError'].includes(e.name)) {
-          if (retryCount < RETRY_DELAYS.length) {
-            debug(`retrying upload %o`, { retryCount })
-            await new Promise((resolve) => setTimeout(resolve, RETRY_DELAYS[retryCount]))
-
-            return await retryRequest(retryCount + 1, [...errors, e])
-          }
-        }
-
-        const totalErrors = [...errors, e]
-
-        throw new AggregateError(totalErrors, e.message)
-      }
-    }
+    debug(`uploading %s to %s with a file size of %s`, filePath, uploadUrl, fileSize)
 
     try {
-      return await retryRequest(0, [])
+      const environmentSuppliedInterval = parseInt(process.env.CYPRESS_TEST_REPLAY_UPLOAD_SAMPLING_INTERVAL || '', 10)
+      const samplingInterval = !Number.isNaN(environmentSuppliedInterval) ?
+        environmentSuppliedInterval :
+        this._protocol.uploadStallSamplingInterval ? this._protocol.uploadStallSamplingInterval() : DEFAULT_STREAM_SAMPLING_INTERVAL
+
+      await putProtocolArtifact(filePath, dbSizeLimit(), uploadUrl, samplingInterval)
+
+      return {
+        fileSize,
+        success: true,
+        specAccess: this._protocol.getDbMetadata(),
+        ...(this._afterSpecDurations ? {
+          afterSpecDurations: this._afterSpecDurations,
+        } : {}),
+      }
     } catch (e) {
-      if (CAPTURE_ERRORS) {
+      if (captureErrors) {
         this._errors.push({
           error: e,
           captureMethod: 'uploadCaptureArtifact',
           fatal: true,
+          isUploadError: true,
         })
+
+        throw e
       }
 
-      throw e
+      return
     } finally {
-      await (
-        DELETE_DB ? fs.unlink(archivePath).catch((e) => {
-          debug(`Error unlinking db %o`, e)
-        }) : Promise.resolve()
-      )
+      if (DELETE_DB) {
+        await fs.unlink(filePath).catch((e) => {
+          debug('Error unlinking db %o', e)
+        })
+      }
     }
+  }
+
+  async cdpReconnect () {
+    await this.invokeAsync('cdpReconnect', { isEssential: true })
   }
 
   async reportNonFatalErrors (context?: {
@@ -420,6 +432,27 @@ export class ProtocolManager implements ProtocolManagerShape {
     this._errors = []
   }
 
+  close (): void {
+    this._db?.close()
+    this._db = undefined
+
+    if (this._dbPath) {
+      fs.unlink(this._dbPath).catch(() => {})
+    }
+
+    this._dbPath = undefined
+
+    if (this._archivePath) {
+      fs.unlink(this._archivePath).catch(() => {})
+    }
+
+    this._archivePath = undefined
+    this._instanceId = undefined
+    this._runId = undefined
+    this._errors = []
+    this._protocol = undefined
+  }
+
   /**
    * Abstracts invoking a synchronous method on the AppCaptureProtocol instance, so we can handle
    * errors in a uniform way
@@ -445,9 +478,9 @@ export class ProtocolManager implements ProtocolManagerShape {
    * Abstracts invoking a synchronous method on the AppCaptureProtocol instance, so we can handle
    * errors in a uniform way
    */
-  private async invokeAsync <K extends ProtocolAsyncMethods> (method: K, { isEssential }: { isEssential: boolean }, ...args: Parameters<AppCaptureProtocolInterface[K]>) {
+  private async invokeAsync <K extends ProtocolAsyncMethods> (method: K, { isEssential }: { isEssential: boolean }, ...args: Parameters<AppCaptureProtocolInterface[K]>): Promise<ReturnType<AppCaptureProtocolInterface[K]> | undefined> {
     if (!this._protocol) {
-      return
+      return undefined
     }
 
     try {
@@ -459,6 +492,8 @@ export class ProtocolManager implements ProtocolManagerShape {
       } else {
         throw error
       }
+
+      return undefined
     }
   }
 

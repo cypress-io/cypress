@@ -1,0 +1,55 @@
+{
+  "name": "@cypress/puppeteer",
+  "version": "0.0.0-development",
+  "description": "Plugin for enhancing Cypress tests with Puppeteer",
+  "private": false,
+  "main": "dist/plugin/index.js",
+  "scripts": {
+    "build": "rimraf dist && tsc || echo 'built, with errors'",
+    "build-prod": "yarn build",
+    "check-ts": "tsc --noEmit",
+    "cypress:open": "node ../../scripts/cypress.js open",
+    "cypress:run": "node ../../scripts/cypress.js run --browser chrome",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
+    "semantic-release": "semantic-release",
+    "test": "mocha test/unit/*.spec.ts",
+    "test-watch": "yarn test & chokidar '**/*.ts' 'test/unit/*.ts' -c 'yarn test'",
+    "watch": "rimraf dist && tsc --watch"
+  },
+  "dependencies": {
+    "lodash": "^4.17.21",
+    "puppeteer-core": "^21.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.16.0",
+    "chai-as-promised": "^7.1.1",
+    "chokidar": "^3.5.3",
+    "express": "4.21.0",
+    "mocha": "^9.2.2",
+    "rimraf": "^5.0.10",
+    "semantic-release": "22.0.12",
+    "sinon": "^13.0.1",
+    "sinon-chai": "^3.7.0",
+    "ts-node": "^10.9.2",
+    "typescript": "5.4.5"
+  },
+  "peerDependencies": {
+    "cypress": ">=13.6.0"
+  },
+  "files": [
+    "dist",
+    "support"
+  ],
+  "types": "dist/plugin/index.d.ts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cypress-io/cypress.git"
+  },
+  "homepage": "https://github.com/cypress-io/cypress/blob/develop/npm/puppeteer/#readme",
+  "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fpuppeteer&template=1-bug-report.md&title=",
+  "publishConfig": {
+    "access": "public"
+  },
+  "nx": {}
+}

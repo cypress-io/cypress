@@ -17,6 +17,40 @@ describe('src/cy/commands/cookies - no stub', () => {
     cy.setCookie('key8', 'value8', { domain: 'www2.foobar.com', log: false })
   }
 
+  it('sets the cookie on the specified domain as hostOnly and validates hostOnly property persists through related commands that fetch cookies', () => {
+    const isWebkit = Cypress.browser.name.includes('webkit')
+
+    cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
+    cy.setCookie('foo', 'bar', { hostOnly: true })
+
+    cy.getCookie('foo').its('domain').should('eq', 'www.barbaz.com')
+    if (!isWebkit) {
+      cy.getCookie('foo').its('hostOnly').should('eq', true)
+    }
+
+    cy.getCookies().then((cookies) => {
+      expect(cookies).to.have.lengthOf(1)
+
+      const cookie = cookies[0]
+
+      expect(cookie).to.have.property('domain', 'www.barbaz.com')
+      if (!isWebkit) {
+        expect(cookie).to.have.property('hostOnly', true)
+      }
+    })
+
+    cy.getAllCookies().then((cookies) => {
+      expect(cookies).to.have.lengthOf(1)
+
+      const cookie = cookies[0]
+
+      expect(cookie).to.have.property('domain', 'www.barbaz.com')
+      if (!isWebkit) {
+        expect(cookie).to.have.property('hostOnly', true)
+      }
+    })
+  })
+
   context('#getCookies', () => {
     it('returns cookies from only the bare domain matching the AUT by default when AUT is an apex domain', () => {
       cy.visit('http://barbaz.com:3500/fixtures/generic.html')
@@ -562,40 +596,6 @@ describe('src/cy/commands/cookies - no stub', () => {
       })
     })
   })
-
-  it('sets the cookie on the specified domain as hostOnly and validates hostOnly property persists through related commands that fetch cookies', () => {
-    const isWebkit = Cypress.browser.name.includes('webkit')
-
-    cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
-    cy.setCookie('foo', 'bar', { hostOnly: true })
-
-    cy.getCookie('foo').its('domain').should('eq', 'www.barbaz.com')
-    if (!isWebkit) {
-      cy.getCookie('foo').its('hostOnly').should('eq', true)
-    }
-
-    cy.getCookies().then((cookies) => {
-      expect(cookies).to.have.lengthOf(1)
-
-      const cookie = cookies[0]
-
-      expect(cookie).to.have.property('domain', 'www.barbaz.com')
-      if (!isWebkit) {
-        expect(cookie).to.have.property('hostOnly', true)
-      }
-    })
-
-    cy.getAllCookies().then((cookies) => {
-      expect(cookies).to.have.lengthOf(1)
-
-      const cookie = cookies[0]
-
-      expect(cookie).to.have.property('domain', 'www.barbaz.com')
-      if (!isWebkit) {
-        expect(cookie).to.have.property('hostOnly', true)
-      }
-    })
-  })
 })
 
 describe('src/cy/commands/cookies', () => {
@@ -802,9 +802,38 @@ describe('src/cy/commands/cookies', () => {
         ])
       })
 
-      it('can turn off logging', () => {
+      it('can turn off logging when protocol is disabled', function () {
+        cy.state('isProtocolEnabled', false)
+        cy.on('_log:added', (attrs, log) => {
+          if (attrs.name === 'getCookies') {
+            this.hiddenLog = log
+          }
+        })
+
         cy.getCookies({ log: false }).then(function () {
-          expect(this.lastLog).to.be.undefined
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', function () {
+        cy.state('isProtocolEnabled', true)
+        cy.on('_log:added', (attrs, log) => {
+          if (attrs.name === 'getCookies') {
+            this.hiddenLog = log
+          }
+        })
+
+        cy.getCookies({ log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.ok
+          expect(hiddenLog.get('name'), 'log name').to.eq('getCookies')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
       })
 
@@ -943,26 +972,55 @@ describe('src/cy/commands/cookies', () => {
     describe('.log', () => {
       beforeEach(function () {
         cy.on('log:added', (attrs, log) => {
-          if (attrs.name === 'getCookies') {
+          if (attrs.name === 'getAllCookies') {
             this.lastLog = log
           }
         })
 
         Cypress.automation
-        .withArgs('get:cookies', { domain: 'localhost' })
+        .withArgs('get:cookies')
         .resolves([
           { name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false, hostOnly: false },
         ])
       })
 
-      it('can turn off logging', () => {
-        cy.getCookies({ log: false }).then(function () {
-          expect(this.lastLog).to.be.undefined
+      it('can turn off logging when protocol is disabled', function () {
+        cy.state('isProtocolEnabled', false)
+        cy.on('_log:added', (attrs, log) => {
+          if (attrs.name === 'getAllCookies') {
+            this.hiddenLog = log
+          }
+        })
+
+        cy.getAllCookies({ log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', function () {
+        cy.state('isProtocolEnabled', true)
+        cy.on('_log:added', (attrs, log) => {
+          if (attrs.name === 'getAllCookies') {
+            this.hiddenLog = log
+          }
+        })
+
+        cy.getAllCookies({ log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.ok
+          expect(hiddenLog.get('name'), 'log name').to.eq('getAllCookies')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
       })
 
       it('ends immediately', () => {
-        cy.getCookies().then(function () {
+        cy.getAllCookies().then(function () {
           const { lastLog } = this
 
           expect(lastLog.get('ended')).to.be.true
@@ -971,7 +1029,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('snapshots immediately', () => {
-        cy.getCookies().then(function () {
+        cy.getAllCookies().then(function () {
           const { lastLog } = this
 
           expect(lastLog.get('snapshots').length).to.eq(1)
@@ -980,7 +1038,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       it('#consoleProps', () => {
-        cy.getCookies().then(function (cookies) {
+        cy.getAllCookies().then(function (cookies) {
           expect(cookies).to.deep.eq([{ name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false, hostOnly: false }])
           const c = this.lastLog.invoke('consoleProps')
 
@@ -1164,9 +1222,38 @@ describe('src/cy/commands/cookies', () => {
         .resolves(null)
       })
 
-      it('can turn off logging', () => {
+      it('can turn off logging when protocol is disabled', function () {
+        cy.state('isProtocolEnabled', false)
+        cy.on('_log:added', (attrs, log) => {
+          if (attrs.name === 'getCookie') {
+            this.hiddenLog = log
+          }
+        })
+
         cy.getCookie('foo', { log: false }).then(function () {
-          expect(this.log).to.be.undefined
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', function () {
+        cy.state('isProtocolEnabled', true)
+        cy.on('_log:added', (attrs, log) => {
+          if (attrs.name === 'getCookie') {
+            this.hiddenLog = log
+          }
+        })
+
+        cy.getCookie('foo', { log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.ok
+          expect(hiddenLog.get('name'), 'log name').to.eq('getCookie')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
       })
 
@@ -1511,9 +1598,38 @@ describe('src/cy/commands/cookies', () => {
         })
       })
 
-      it('can turn off logging', () => {
+      it('can turn off logging when protocol is disabled', function () {
+        cy.state('isProtocolEnabled', false)
+        cy.on('_log:added', (attrs, log) => {
+          if (attrs.name === 'setCookie') {
+            this.hiddenLog = log
+          }
+        })
+
         cy.setCookie('foo', 'bar', { log: false }).then(function () {
-          expect(this.log).to.be.undefined
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', function () {
+        cy.state('isProtocolEnabled', true)
+        cy.on('_log:added', (attrs, log) => {
+          if (attrs.name === 'setCookie') {
+            this.hiddenLog = log
+          }
+        })
+
+        cy.setCookie('foo', 'bar', { log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.ok
+          expect(hiddenLog.get('name'), 'log name').to.eq('setCookie')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
       })
 
@@ -1701,9 +1817,38 @@ describe('src/cy/commands/cookies', () => {
         .resolves(null)
       })
 
-      it('can turn off logging', () => {
+      it('can turn off logging when protocol is disabled', function () {
+        cy.state('isProtocolEnabled', false)
+        cy.on('_log:added', (attrs, log) => {
+          if (attrs.name === 'clearCookie') {
+            this.hiddenLog = log
+          }
+        })
+
         cy.clearCookie('foo', { log: false }).then(function () {
-          expect(this.log).to.be.undefined
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', function () {
+        cy.state('isProtocolEnabled', true)
+        cy.on('_log:added', (attrs, log) => {
+          if (attrs.name === 'clearCookie') {
+            this.hiddenLog = log
+          }
+        })
+
+        cy.clearCookie('foo', { log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.ok
+          expect(hiddenLog.get('name'), 'log name').to.eq('clearCookie')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
       })
 
@@ -1957,9 +2102,38 @@ describe('src/cy/commands/cookies', () => {
         ])
       })
 
-      it('can turn off logging', () => {
+      it('can turn off logging when protocol is disabled', function () {
+        cy.state('isProtocolEnabled', false)
+        cy.on('_log:added', (attrs, log) => {
+          if (attrs.name === 'clearCookies') {
+            this.hiddenLog = log
+          }
+        })
+
         cy.clearCookies({ log: false }).then(function () {
-          expect(this.log).to.be.undefined
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', function () {
+        cy.state('isProtocolEnabled', true)
+        cy.on('_log:added', (attrs, log) => {
+          if (attrs.name === 'clearCookies') {
+            this.hiddenLog = log
+          }
+        })
+
+        cy.clearCookies({ log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.ok
+          expect(hiddenLog.get('name'), 'log name').to.eq('clearCookies')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
       })
 
@@ -2241,9 +2415,38 @@ describe('src/cy/commands/cookies', () => {
         ])
       })
 
-      it('can turn off logging', () => {
+      it('can turn off logging when protocol is disabled', function () {
+        cy.state('isProtocolEnabled', false)
+        cy.on('_log:added', (attrs, log) => {
+          if (attrs.name === 'clearAllCookies') {
+            this.hiddenLog = log
+          }
+        })
+
         cy.clearAllCookies({ log: false }).then(function () {
-          expect(this.log).to.be.undefined
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', function () {
+        cy.state('isProtocolEnabled', true)
+        cy.on('_log:added', (attrs, log) => {
+          if (attrs.name === 'clearAllCookies') {
+            this.hiddenLog = log
+          }
+        })
+
+        cy.clearAllCookies({ log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.ok
+          expect(hiddenLog.get('name'), 'log name').to.eq('clearAllCookies')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
       })
 

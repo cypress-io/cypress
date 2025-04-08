@@ -1,0 +1,21 @@
+{
+  "name": "svelte-webpack-configured",
+  "version": "0.0.0-test",
+  "scripts": {
+    "build": "cross-env NODE_ENV=production webpack",
+    "dev": "webpack serve"
+  },
+  "devDependencies": {
+    "css-loader": "^7.1.2",
+    "html-webpack-plugin": "^5.6.3",
+    "mini-css-extract-plugin": "^2.9.2",
+    "svelte": "^5.4.0",
+    "svelte-loader": "^3.2.4",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.7.2",
+    "webpack": "^5.96.1",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.1.0"
+  },
+  "projectFixtureDirectory": "svelte"
+}

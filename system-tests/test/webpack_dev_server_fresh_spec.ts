@@ -4,7 +4,7 @@ import type { fixtureDirs } from '@tooling/system-tests'
 
 type ProjectDirs = typeof fixtureDirs
 
-const WEBPACK_REACT: ProjectDirs[number][] = ['webpack4_wds3-react', 'webpack4_wds4-react', 'webpack5_wds3-react', 'webpack5_wds4-react']
+const WEBPACK_REACT: ProjectDirs[number][] = ['webpack4_wds4-react', 'webpack5_wds4-react', 'webpack5_wds5-react']
 
 describe('@cypress/webpack-dev-server', function () {
   systemTests.setup()
@@ -36,5 +36,16 @@ describe('@cypress/webpack-dev-server', function () {
         },
       })
     }
+    systemTests.it('throws graceful error when user tries to run wds5 with webpack 4', {
+      project: 'webpack4_wds5-react',
+      configFile: 'cypress-webpack.config.ts',
+      testingType: 'component',
+      browser: 'chrome',
+      snapshot: true,
+      expectedExitCode: 1,
+      onStdout: (stdout) => {
+        return systemTests.normalizeWebpackErrors(stdout)
+      },
+    })
   })
 })

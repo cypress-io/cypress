@@ -213,7 +213,7 @@ class SourcemapSupport {
       frame = cloneCallSite(frame)
 
       frame.getFileName = function getFileName () {
-        return pos.source || pos.name || null
+        return pos.source || pos.name || undefined
       }
 
       frame.getLineNumber = function getLineNumber () {
@@ -225,7 +225,7 @@ class SourcemapSupport {
       }
 
       frame.getScriptNameOrSourceURL = function getScriptNameOrSourceURL () {
-        return pos.source || pos.name
+        return pos.source || pos.name || ''
       }
 
       frame.codeFrames = pos.codeFrames

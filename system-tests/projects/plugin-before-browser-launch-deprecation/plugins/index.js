@@ -26,13 +26,22 @@ const getHandlersByType = (type) => {
       return {
         onBeforeBrowserLaunch (browser, launchOptions) {
           // this will emit a warning but only once
-          launchOptions = launchOptions.concat(['--foo'])
-          launchOptions.push('--foo=bar')
-          launchOptions.unshift('--load-extension=/foo/bar/baz.js')
+          // with firefox & geckodriver, you cannot pipe extraneous arguments to the browser or else the browser will fail to launch
+          if (browser.name === 'firefox') {
+            launchOptions = launchOptions.concat(['-height', `768`, '-width', '1366'])
+          } else {
+            launchOptions = launchOptions.concat(['--foo'])
+            launchOptions.push('--foo=bar')
+            launchOptions.unshift('--load-extension=/foo/bar/baz.js')
+          }
 
           return launchOptions
         },
-        onTask: { assertPsOutput: assertPsOutput(['--foo', '--foo=bar']) },
+        onTask: {
+          assertPsOutput (args) {
+            return args === 'firefox' ? assertPsOutput(['-height', '-width']) : assertPsOutput(['--foo', '--foo=bar'])
+          },
+        },
       }
 
     case 'return-new-array-without-mutation':
@@ -50,12 +59,22 @@ const getHandlersByType = (type) => {
       return {
         onBeforeBrowserLaunch (browser, launchOptions) {
           // this will NOT emit a warning
-          launchOptions.args.push('--foo')
-          launchOptions.args.unshift('--bar')
+          // with firefox & geckodriver, you cannot pipe extraneous arguments to the browser or else the browser will fail to launch
+          if (browser.name === 'firefox') {
+            launchOptions.args.push('-height', '768')
+            launchOptions.args.push('-width', '1366')
+          } else {
+            launchOptions.args.push('--foo')
+            launchOptions.args.unshift('--bar')
+          }
 
           return launchOptions
         },
-        onTask: { assertPsOutput: assertPsOutput(['--foo', '--bar']) },
+        onTask: {
+          assertPsOutput (args) {
+            return args === 'firefox' ? assertPsOutput(['-height', '-width']) : assertPsOutput(['--foo', '--bar'])
+          },
+        },
       }
 
     case 'return-undefined-mutate-array':

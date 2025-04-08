@@ -7,7 +7,7 @@ const _isBrowser = (browser, matcher, errPrefix) => {
   let exclusive = false
 
   const matchWithExclusion = (objValue, srcValue) => {
-    if (srcValue.startsWith('!')) {
+    if (_.isString(srcValue) && srcValue.startsWith('!')) {
       exclusive = true
 
       return objValue !== srcValue.slice(1)

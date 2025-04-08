@@ -1,22 +1,20 @@
 import React from 'react'
 import './Button.css'
 
-export class Button extends React.Component {
-  handleClick () {
-    this.props.clickHandler(this.props.name)
+export function Button ({ name, orange, wide, clickHandler }) {
+  const className = [
+    'component-button',
+    orange ? 'orange' : '',
+    wide ? 'wide' : '',
+  ]
+
+  function handleClick () {
+    clickHandler(name)
   }
 
-  render () {
-    const className = [
-      'component-button',
-      this.props.orange ? 'orange' : '',
-      this.props.wide ? 'wide' : '',
-    ]
-
-    return (
-      <div className={className.join(' ').trim()}>
-        <button onClick={this.handleClick.bind(this)}>{this.props.name}</button>
-      </div>
-    )
-  }
+  return (
+    <div className={className.join(' ').trim()}>
+      <button onClick={handleClick.bind(this)}>{name}</button>
+    </div>
+  )
 }

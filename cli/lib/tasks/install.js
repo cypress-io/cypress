@@ -55,12 +55,16 @@ const displayCompletionMsg = () => {
 
   logger.log()
   logger.log(
-    'You can now open Cypress by running:',
-    chalk.cyan(path.join('node_modules', '.bin', 'cypress'), 'open'),
+    'You can now open Cypress by running one of the following, depending on your package manager:',
   )
 
   logger.log()
-  logger.log(chalk.grey('https://on.cypress.io/installing-cypress'))
+  logger.log(chalk.cyan('- npx cypress open'))
+  logger.log(chalk.cyan('- yarn cypress open'))
+  logger.log(chalk.cyan('- pnpm cypress open'))
+
+  logger.log()
+  logger.log(chalk.grey('https://on.cypress.io/opening-the-app'))
   logger.log()
 }
 

@@ -12,7 +12,7 @@ import {
 import $errUtils from '../../cypress/error_utils'
 
 // user-facing StaticResponse only
-export const STATIC_RESPONSE_KEYS: (keyof StaticResponse)[] = ['body', 'fixture', 'statusCode', 'headers', 'forceNetworkError', 'throttleKbps', 'delay', 'delayMs']
+export const STATIC_RESPONSE_KEYS: (keyof StaticResponse)[] = ['body', 'fixture', 'statusCode', 'headers', 'forceNetworkError', 'throttleKbps', 'delay']
 
 export const STATIC_RESPONSE_WITH_OPTIONS_KEYS: (keyof StaticResponseWithOptions)[] = [...STATIC_RESPONSE_KEYS, 'log']
 
@@ -21,7 +21,7 @@ export function validateStaticResponse (cmd: string, staticResponse: StaticRespo
     $errUtils.throwErrByPath('net_stubbing.invalid_static_response', { args: { cmd, message, staticResponse } })
   }
 
-  const { body, fixture, statusCode, headers, forceNetworkError, throttleKbps, delay, delayMs } = staticResponse
+  const { body, fixture, statusCode, headers, forceNetworkError, throttleKbps, delay } = staticResponse
 
   if (forceNetworkError && (body || statusCode || headers)) {
     err('`forceNetworkError`, if passed, must be the only option in the StaticResponse.')
@@ -51,14 +51,6 @@ export function validateStaticResponse (cmd: string, staticResponse: StaticRespo
 
   if (!_.isUndefined(throttleKbps) && (!_.isNumber(throttleKbps) || (throttleKbps < 0 || !_.isFinite(throttleKbps)))) {
     err('`throttleKbps` must be a finite, positive number.')
-  }
-
-  if (delayMs && delay) {
-    err('`delayMs` and `delay` cannot both be set.')
-  }
-
-  if (delayMs && (!_.isFinite(delayMs) || delayMs < 0)) {
-    err('`delayMs` must be a finite, positive number.')
   }
 
   if (delay && (!_.isFinite(delay) || delay < 0)) {
@@ -106,12 +98,7 @@ function getFixtureOpts (fixture: string): FixtureOpts {
 }
 
 export function getBackendStaticResponse (staticResponse: Readonly<StaticResponseWithOptions>): BackendStaticResponseWithArrayBuffer {
-  const backendStaticResponse: BackendStaticResponseWithArrayBuffer = _.omit(staticResponse, 'body', 'fixture', 'delayMs', 'log')
-
-  if (staticResponse.delayMs) {
-    // support deprecated `delayMs` usage
-    backendStaticResponse.delay = staticResponse.delayMs
-  }
+  const backendStaticResponse: BackendStaticResponseWithArrayBuffer = _.omit(staticResponse, 'body', 'fixture', 'log')
 
   if (staticResponse.fixture) {
     backendStaticResponse.fixture = getFixtureOpts(staticResponse.fixture)

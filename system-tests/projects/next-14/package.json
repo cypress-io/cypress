@@ -1,0 +1,16 @@
+{
+  "name": "next-14",
+  "version": "0.0.0-test",
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "lint": "next lint",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "14.2.17",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "projectFixtureDirectory": "next"
+}

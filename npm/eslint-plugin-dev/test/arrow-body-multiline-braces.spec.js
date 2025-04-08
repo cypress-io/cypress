@@ -1,47 +1,44 @@
 const path = require('path')
-const CLIEngine = require('eslint').CLIEngine
-const plugin = require('..')
+const eslint = require('eslint')
+const plugin = require('../lib')
 const _ = require('lodash')
 const { expect } = require('chai')
 
 const pluginName = '__plugin__'
+const ESLint = eslint.ESLint
 
-function execute (file, options = {}) {
-  const opts = _.defaultsDeep(options, {
+async function execute (file, options = {}) {
+  const defaultConfig = {
     fix: true,
-    config: {
+    ignore: false,
+    useEslintrc: false,
+    baseConfig: {
       parserOptions: {
         ecmaVersion: 2018,
         sourceType: 'module',
       },
+      rules: {
+        [`${pluginName}/arrow-body-multiline-braces`]: ['error', 'always'],
+      },
+      plugins: [pluginName],
     },
-
-  })
-
-  const cli = new CLIEngine({
-    parserOptions: {
-      ecmaVersion: 2018,
-      sourceType: 'module',
+    plugins: {
+      [pluginName]: plugin,
     },
-    rules: {
-      [`${pluginName}/arrow-body-multiline-braces`]: ['error', 'always'],
-    },
-    ...opts,
-    ignore: false,
-    useEslintrc: false,
-    plugins: [pluginName],
-  })
+  }
+  const opts = _.defaultsDeep(options, defaultConfig)
 
-  cli.addPlugin(pluginName, plugin)
-  const results = cli.executeOnFiles([path.join(__dirname, file)]).results[0]
+  const cli = new ESLint(opts)
 
-  return results
+  const results = await cli.lintFiles([path.join(__dirname, file)])
+
+  return results[0]
 }
 
 describe('arrow-body-multiline-braces', () => {
   it('lint multiline js', async () => {
     const filename = './fixtures/multiline.js'
-    const result = execute(filename, {
+    const result = await execute(filename, {
       fix: true,
     })
 
@@ -50,7 +47,7 @@ describe('arrow-body-multiline-braces', () => {
 
   it('lint oneline js', async () => {
     const filename = './fixtures/oneline.js'
-    const result = execute(filename, { fix: false })
+    const result = await execute(filename, { fix: false })
 
     expect(result.output).not.ok
     expect(result.errorCount).eq(0)

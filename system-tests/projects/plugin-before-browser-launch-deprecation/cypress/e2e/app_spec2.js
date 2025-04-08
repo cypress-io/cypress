@@ -8,5 +8,5 @@ it('2 - asserts on browser args', () => {
     return
   }
 
-  cy.task('assertPsOutput')
+  cy.task('assertPsOutput', Cypress.browser.name)
 })

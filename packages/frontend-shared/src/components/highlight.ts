@@ -2,7 +2,7 @@ import type { Highlighter, ILanguageRegistration } from 'shiki'
 import { getHighlighter, setOnigasmWASM } from 'shiki'
 import onigasm from 'onigasm/lib/onigasm.wasm?url'
 import shikiCyTheme from '../public/shiki/themes/cypress.theme.json'
-const langJSONFilesArray = import.meta.globEager('../public/shiki/languages/*.tmLanguage.json')
+const langJSONFilesArray = import.meta.glob('../public/shiki/languages/*.tmLanguage.json', { eager: true })
 
 // Convert to the format shiki needs for language customization.
 // @see https://github.com/shikijs/shiki/blob/main/docs/languages.md

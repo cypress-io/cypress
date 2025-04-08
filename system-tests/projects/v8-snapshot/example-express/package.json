@@ -4,18 +4,17 @@
   "description": "Example app demonstrating how to use v8-snapshot.",
   "private": false,
   "scripts": {
-    "start-nohook": "electron app",
-    "start": "DEBUG='(packherd|snapgen):*' PROJECT_BASE_DIR=`pwd` electron -r ./app/hook-require.js app",
-    "start-quiet": "DEBUG='_' PROJECT_BASE_DIR=`pwd` electron -r ./app/hook-require.js app",
-    "start-no-snap": "DEBUG='_' electron app",
-    "start-as-node": "ELECTRON_RUN_AS_NODE=1 DEBUG='(packherd|snapgen):*' PROJECT_BASE_DIR=`pwd` electron -r ./app/hook-require.js app",
     "debug": "DEBUG='(packherd|snapgen):*' PROJECT_BASE_DIR=`pwd` electron --inspect-brk -r ./app/hook-require.js app",
     "install-snapshot": "DEBUG='(packherd|snapgen):(info|debug|error)*' node ./snapshot/install-snapshot.js",
+    "start": "DEBUG='(packherd|snapgen):*' PROJECT_BASE_DIR=`pwd` electron -r ./app/hook-require.js app",
+    "start-as-node": "ELECTRON_RUN_AS_NODE=1 DEBUG='(packherd|snapgen):*' PROJECT_BASE_DIR=`pwd` electron -r ./app/hook-require.js app",
+    "start-no-snap": "DEBUG='_' electron app",
+    "start-nohook": "electron app",
+    "start-quiet": "DEBUG='_' PROJECT_BASE_DIR=`pwd` electron -r ./app/hook-require.js app",
     "uninstall-snapshot": "DEBUG='(packherd|snapgen):*' node ./snapshot/uninstall-snapshot.js"
   },
   "dependencies": {
     "express": "^4.17.1"
   },
-  "license": "MIT",
-  "author": "Thorsten Lorenz <thlorenz@gmx.de>"
+  "license": "MIT"
 }

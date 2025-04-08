@@ -25,12 +25,12 @@ describe('e2e binary CI environments', () => {
   )
 
   smokeTestDockerImage(
-    'ubuntu 20 passes',
-    'cypress/base-internal:ubuntu20-node18', 0,
+    'ubuntu 22 passes',
+    'cypress/base-internal:ubuntu22-node18', 0,
   )
 
   smokeTestDockerImage(
-    'ubuntu 22 passes',
-    'cypress/base-internal:ubuntu22-node18', 0,
+    'ubuntu 24 passes',
+    'cypress/base-internal:ubuntu24-node18', 0,
   )
 })

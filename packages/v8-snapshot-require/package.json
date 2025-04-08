@@ -7,8 +7,8 @@
   "scripts": {
     "build": "tsc",
     "check-ts": "tsc --noEmit && yarn -s tslint",
-    "clean-deps": "rimraf node_modules",
     "clean": "rimraf dist",
+    "clean-deps": "rimraf node_modules",
     "test": "yarn test-unit",
     "test-unit": "mocha --config ./test/.mocharc.js",
     "tslint": "tslint --config ../ts/tslint.json --project .",
@@ -20,11 +20,13 @@
     "source-map-js": "^0.6.2"
   },
   "devDependencies": {
+    "@tooling/packherd": "0.0.0-development",
     "mocha": "7.0.1"
   },
   "files": [
     "dist",
     "src/snapshot-require.ts"
   ],
-  "types": "src/snapshot-require.ts"
+  "types": "src/snapshot-require.ts",
+  "nx": {}
 }

@@ -11,12 +11,12 @@ import MiniCSSExtractWebpackPlugin = require('mini-css-extract-plugin')
 
 const env = process.env.NODE_ENV === 'production' ? 'production' : 'development'
 const args = process.argv.slice(2)
-const liveReloadEnabled = !(args.includes('--no-livereload') || process.env.NO_LIVERELOAD)
+const liveReloadEnabled = process.env.ENABLE_LIVE_RELOAD === '1'
 const watchModeEnabled = args.includes('--watch') || args.includes('-w')
 
-// opt out of livereload with arg --no-livereload
+// opt in to livereload with ENABLE_LIVE_RELOAD set to '1'
 // eslint-disable-next-line no-console
-if (liveReloadEnabled && watchModeEnabled) console.log(chalk.gray(`\nLive Reloading is enabled. use ${chalk.bold('--no-livereload')} to disable`))
+if (liveReloadEnabled && watchModeEnabled) console.log(chalk.gray(`\nLive Reloading is enabled. Unset ${chalk.bold('ENABLE_LIVE_RELOAD')} to disable`))
 
 process.env.NODE_ENV = env
 

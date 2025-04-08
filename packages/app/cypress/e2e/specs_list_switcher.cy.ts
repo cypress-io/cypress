@@ -14,6 +14,7 @@ describe('App: Spec List Testing Type Switcher', () => {
       })
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.verifyCtSelected()
     })
 
@@ -43,6 +44,7 @@ describe('App: Spec List Testing Type Switcher', () => {
       })
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.verifyE2ESelected()
     })
 
@@ -68,6 +70,7 @@ describe('App: Spec List Testing Type Switcher', () => {
       cy.startAppServer('component')
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.verifyCtSelected()
     })
 

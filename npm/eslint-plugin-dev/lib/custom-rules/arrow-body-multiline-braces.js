@@ -1,5 +1,6 @@
 const ruleComposer = require('eslint-rule-composer')
-const arrowBodyStyle = require('eslint/lib/rules/arrow-body-style')
+const eslint = require('eslint')
+const arrowBodyStyle = new eslint.Linter().getRules().get('arrow-body-style')
 
 module.exports = ruleComposer.filterReports(
   arrowBodyStyle,

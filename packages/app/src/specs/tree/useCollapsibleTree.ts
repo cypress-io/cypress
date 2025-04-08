@@ -2,7 +2,7 @@ import type { ComputedRef, Ref } from 'vue'
 import { computed } from 'vue'
 import { useToggle } from '@vueuse/core'
 import type { FoundSpec } from '@packages/types/src'
-import { getRunnerConfigFromWindow } from '../../runner'
+import { getRunnerConfigFromWindow } from '../../runner/get-runner-config-from-window'
 
 export type RawNode <T> = {
   id: string

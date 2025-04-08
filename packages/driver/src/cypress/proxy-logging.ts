@@ -67,6 +67,7 @@ function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.I
     url: req.preRequest.url,
     method: req.preRequest.method,
     timeout: 0,
+    message: '', // set to empty string so that we don't inherit the default message
     consoleProps: () => req.consoleProps,
     renderProps: () => {
       function getIndicator (): 'aborted' | 'pending' | 'successful' | 'bad' {

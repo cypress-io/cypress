@@ -5,8 +5,13 @@
     @update:modelValue="handleUpdate"
   >
     <template #default="{ open }">
-      <ListboxLabel class="font-medium text-sm text-gray-800 block">
-        <template v-if="label">
+      <ListboxLabel
+        :id="label ? labelId : ''"
+        class="font-medium text-sm text-gray-800 block"
+      >
+        <template
+          v-if="label"
+        >
           {{ label }}
         </template>
         <slot
@@ -71,16 +76,19 @@
           leave-from-class="opacity-100"
           leave-to-class="opacity-0"
         >
-          <ListboxOptions class="bg-white rounded shadow-lg ring-black mt-1 text-base w-full max-h-60 ring-1 ring-opacity-5 z-10 absolute overflow-auto sm:text-sm focus:outline-none">
+          <ListboxOptions
+            :aria-labelledby="labelId"
+            class="bg-white rounded shadow-lg ring-black mt-1 text-base w-full max-h-60 ring-1 ring-opacity-5 z-10 absolute overflow-auto sm:text-sm focus:outline-none"
+          >
             <ListboxOption
               v-for="option in props.options"
               :key="get(option, itemKey)"
               v-slot="{ active, selected }"
-              as="ul"
+              as="li"
               :value="option"
               :disabled="option.disabled || false"
             >
-              <li
+              <div
                 class="border-transparent cursor-pointer border py-2 pr-8 pl-4 block truncate select-none relative "
                 :class="[{
                   'font-medium bg-jade-50': isSelectedOption(option),
@@ -114,7 +122,6 @@
                     {{ get(option, itemValue || '') }}
                   </slot>
                 </span>
-
                 <span class="flex text-sm pr-3 inset-y-0 right-0 absolute items-center">
                   <slot
                     name="item-suffix"
@@ -134,9 +141,14 @@
                     </span>
                   </slot>
                 </span>
-              </li>
+              </div>
             </ListboxOption>
-            <slot name="footer" />
+            <li
+              v-if="$slots.footer"
+              role="option"
+            >
+              <slot name="footer" />
+            </li>
           </ListboxOptions>
         </transition>
       </div>
@@ -167,6 +179,7 @@ const props = withDefaults(defineProps<{
   modelValue?: Option // Current object being selected
   placeholder?: string
   label?: string
+  labelId: string
   /**
    * The value of the modelValue to render. `value` by default
    */
@@ -179,6 +192,7 @@ const props = withDefaults(defineProps<{
 }>(), {
   placeholder: '',
   label: '',
+  labelId: undefined,
   itemValue: 'value',
   modelValue: undefined,
   itemKey: 'key',

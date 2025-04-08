@@ -1,7 +1,7 @@
 import _ from 'lodash'
-import { action, computed, observable } from 'mobx'
+import { action, computed, observable, makeObservable } from 'mobx'
 import { TestState } from '../test/test-model'
-import { IntervalID } from '../lib/types'
+import type { IntervalID } from '../lib/types'
 
 import type { StatsStoreStartInfo } from '@packages/types'
 
@@ -23,7 +23,11 @@ class StatsStore {
   @observable _currentTime: number | null = defaults._startTime;
   [key: string]: any
 
-  private _interval?: IntervalID;
+  private _interval?: IntervalID
+
+  constructor () {
+    makeObservable(this)
+  }
 
   @computed get duration () {
     if (!this._startTime) return 0

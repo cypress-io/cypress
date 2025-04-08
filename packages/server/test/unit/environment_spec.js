@@ -86,6 +86,20 @@ describe('lib/environment', () => {
       expect(app.commandLine.appendSwitch).to.have.been.calledWith('--quux', 'false')
     })
 
+    it('sets launch args with multiple values inside quotes', () => {
+      restore = mockedEnv({
+        ELECTRON_EXTRA_LAUNCH_ARGS: `--foo --ipsum=0 --bar=--baz=quux --lorem='--ipsum=dolor --sit=amet'`,
+      })
+
+      sinon.stub(app.commandLine, 'appendSwitch')
+      require(`../../lib/environment`)
+
+      expect(app.commandLine.appendSwitch).to.have.been.calledWith('--foo')
+      expect(app.commandLine.appendSwitch).to.have.been.calledWith('--ipsum', '0')
+      expect(app.commandLine.appendSwitch).to.have.been.calledWith('--bar', '--baz=quux')
+      expect(app.commandLine.appendSwitch).to.have.been.calledWith('--lorem', '--ipsum=dolor --sit=amet')
+    })
+
     return afterEach(() => {
       if (restore) {
         return restore()

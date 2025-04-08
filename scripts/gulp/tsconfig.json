@@ -5,6 +5,11 @@
     "noEmit": true,
     "strict": true,
     "esModuleInterop": true,
+    "ignoreDeprecations": "5.0",
+    /* 
+     * TODO: remove importsNotUsedAsValues after typescript 5.5 and up as it will no longer work. If we want the same behavior
+     * as importsNotUsedAsValues, we need to use "verbatimModuleSyntax", which will require this package to be an ES Module.
+     */
     "importsNotUsedAsValues": "error",
     "types": []
   },

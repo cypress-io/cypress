@@ -30,7 +30,7 @@ export class ErrorBoundary extends React.Component {
         <React.Fragment>
           <header>
             <h1>Something went wrong.</h1>
-            <h3>{`${name} failed to load`}</h3>
+            <h2>{`${name} failed to load`}</h2>
           </header>
           <section>
             <pre>

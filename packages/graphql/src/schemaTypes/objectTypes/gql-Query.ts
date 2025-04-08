@@ -11,6 +11,7 @@ import { Wizard } from './gql-Wizard'
 import { ErrorWrapper } from './gql-ErrorWrapper'
 import { CachedUser } from './gql-CachedUser'
 import { Cohort } from './gql-Cohorts'
+import { Studio } from './gql-Studio'
 
 export const Query = objectType({
   name: 'Query',
@@ -101,6 +102,12 @@ export const Query = objectType({
       resolve: (source, args, ctx) => ctx.coreData.authState,
     })
 
+    t.field('studio', {
+      type: Studio,
+      description: 'Data pertaining to studio and the studio manager that is loaded from the cloud',
+      resolve: (source, args, ctx) => ctx.coreData.studio,
+    })
+
     t.nonNull.field('localSettings', {
       type: LocalSettings,
       description: 'local settings on a device-by-device basis',
@@ -145,17 +152,6 @@ export const Query = objectType({
     t.string('machineId', {
       description: 'Unique node machine identifier for this instance - may be nil if unable to resolve',
       resolve: async (source, args, ctx) => await ctx.coreData.machineId,
-    })
-
-    t.string('videoEmbedHtml', {
-      description: 'Markup for the migration landing page video embed',
-      resolve: (source, args, ctx) => {
-        // NOTE: embedded video is not always a part of the v9 - v10 migration experience
-        // in the case of v1x - v13, we want to show an embedded video to users installing the major
-        // version for the first time without going through the steps of the migration resolver, hence
-        // why this lives in the root resolver but the migration context
-        return ctx.migration.getVideoEmbedHtml()
-      },
     })
   },
   sourceType: {

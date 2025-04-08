@@ -4,6 +4,7 @@ import { take } from 'rxjs/operators'
 
 @Component({
   selector: 'app-child-providers',
+  standalone: false,
   template: `<button (click)="handleClick()">{{ message }}</button>`,
 })
 export class ChildProvidersComponent {

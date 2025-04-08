@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>All Tests</title>
+  </head>
+  <body>
+    <script type="text/javascript">
+      document.domain = 'localhost';
+
+      (function(parent) {
+        var Cypress = window.Cypress = parent.Cypress;
+        if (!Cypress) {
+          throw new Error("Tests cannot run without a reference to Cypress!");
+        }
+        return Cypress.onSpecWindow(window, [{"absolute":"/<path-to-project>/todos/tests/_support/spec_helper.js","relative":"tests/_support/spec_helper.js","relativeUrl":"/__cypress/tests?p=tests/_support/spec_helper.js"},{"absolute":"/<path-to-project>/todos/tests/sub/sub_test.coffee","relative":"tests/sub/sub_test.coffee","relativeUrl":"/__cypress/tests?p=tests/sub/sub_test.coffee"}]);
+      })(window.opener || window.parent);
+    </script>
+  </body>
+</html>

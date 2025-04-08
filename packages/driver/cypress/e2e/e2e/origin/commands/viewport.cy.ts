@@ -154,10 +154,10 @@ context('cy.origin viewport', { browser: '!webkit' }, () => {
 
           cy.window().its('innerHeight').should('eq', 480)
           cy.window().its('innerWidth').should('eq', 320)
-        })
 
-        cy.window().then((win) => {
-          win.location.href = 'http://www.idp.com:3500/fixtures/primary-origin.html'
+          cy.window().then((win) => {
+            win.location.href = 'http://www.idp.com:3500/fixtures/primary-origin.html'
+          })
         })
 
         cy.origin('http://www.idp.com:3500', () => {

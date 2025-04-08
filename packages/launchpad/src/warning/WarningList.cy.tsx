@@ -1,6 +1,7 @@
 import { WarningListFragmentDoc } from '../generated/graphql-test'
 import WarningList from './WarningList.vue'
-import faker from 'faker'
+import { faker } from '@faker-js/faker'
+// tslint:disable-next-line: no-implicit-dependencies - need to handle this
 import { defaultMessages } from '@cy/i18n'
 import { WarningList_RemoveWarningDocument } from '../generated/graphql'
 

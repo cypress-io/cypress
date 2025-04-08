@@ -1,20 +1,9 @@
+import { describe, it, beforeEach, afterEach } from 'vitest'
 import Fixtures, { ProjectFixtureDir } from '@tooling/system-tests'
 import * as FixturesScaffold from '@tooling/system-tests/lib/dep-installer'
 import execa from 'execa'
 import path from 'path'
 import * as fs from 'fs-extra'
-
-const scaffoldAngularProject = async (project: string) => {
-  const projectPath = Fixtures.projectPath(project)
-
-  Fixtures.removeProject(project)
-  await Fixtures.scaffoldProject(project)
-  await FixturesScaffold.scaffoldProjectNodeModules({ project })
-  await fs.remove(path.join(projectPath, 'cypress.config.ts'))
-  await fs.remove(path.join(projectPath, 'cypress'))
-
-  return projectPath
-}
 
 const runCommandInProject = (command: string, projectPath: string) => {
   const [ex, ...args] = command.split(' ')
@@ -35,29 +24,40 @@ const copyAngularMount = async (projectPath: string) => {
 
 const cypressSchematicPackagePath = path.join(__dirname, '..')
 
-const ANGULAR_PROJECTS: ProjectFixtureDir[] = ['angular-14', 'angular-15']
+const ANGULAR_PROJECTS: ProjectFixtureDir[] = ['angular-18', 'angular-19']
+
+const timeout = 1000 * 60 * 5
 
 describe('ng add @cypress/schematic / e2e and ct', function () {
-  this.timeout(1000 * 60 * 5)
-
   for (const project of ANGULAR_PROJECTS) {
-    it('should install ct files with option and no component specs', async () => {
-      const projectPath = await scaffoldAngularProject(project)
+    describe(project, () => {
+      const projectPath: string = Fixtures.projectPath(project)
 
-      await runCommandInProject(`yarn add @cypress/schematic@file:${cypressSchematicPackagePath}`, projectPath)
-      await runCommandInProject('yarn ng add @cypress/schematic --e2e --component', projectPath)
-      await copyAngularMount(projectPath)
-      await runCommandInProject('yarn ng run angular:ct --watch false --spec src/app/app.component.cy.ts', projectPath)
-    })
+      beforeEach(async () => {
+        await Fixtures.scaffoldProject(project)
+        await FixturesScaffold.scaffoldProjectNodeModules({ project })
+        await fs.remove(path.join(projectPath, 'cypress.config.ts'))
+        await fs.remove(path.join(projectPath, 'cypress'))
 
-    it('should generate component alongside component spec', async () => {
-      const projectPath = await scaffoldAngularProject(project)
+        await runCommandInProject(`yarn add @cypress/schematic@file:${cypressSchematicPackagePath}`, projectPath)
+      }, timeout)
 
-      await runCommandInProject(`yarn add @cypress/schematic@file:${cypressSchematicPackagePath}`, projectPath)
-      await runCommandInProject('yarn ng add @cypress/schematic --e2e --component', projectPath)
-      await copyAngularMount(projectPath)
-      await runCommandInProject('yarn ng generate c foo', projectPath)
-      await runCommandInProject('yarn ng run angular:ct --watch false --spec src/app/foo/foo.component.cy.ts', projectPath)
+      afterEach(() => {
+        Fixtures.removeProject(project)
+      }, timeout)
+
+      it('should install ct files with option and no component specs', async () => {
+        await runCommandInProject('yarn ng add @cypress/schematic --e2e --component', projectPath)
+        await copyAngularMount(projectPath)
+        await runCommandInProject('yarn ng run angular:ct --watch false --spec src/app/app.component.cy.ts', projectPath)
+      }, timeout)
+
+      it('should generate component alongside component spec', async () => {
+        await runCommandInProject('yarn ng add @cypress/schematic --e2e --component', projectPath)
+        await copyAngularMount(projectPath)
+        await runCommandInProject('yarn ng generate c foo', projectPath)
+        await runCommandInProject('yarn ng run angular:ct --watch false --spec src/app/foo/foo.component.cy.ts', projectPath)
+      }, timeout)
     })
   }
 })

@@ -10,6 +10,7 @@
         this._shadow = this.attachShadow({mode: "open"});
 
         const input = document.createElement("input");
+        input.id = 'shadow-dom-input'
         this._shadow.appendChild(input);
       }
     }

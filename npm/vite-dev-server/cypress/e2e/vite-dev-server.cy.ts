@@ -9,6 +9,7 @@ describe('Config options', () => {
     cy.startAppServer('component')
 
     cy.visitApp()
+    cy.specsPageIsVisible()
     cy.contains('App.cy.jsx').click()
     cy.waitForSpecToFinish()
     cy.get('.passed > .num').should('contain', 1)
@@ -18,7 +19,7 @@ describe('Config options', () => {
       await ctx.actions.file.writeFileInProject(
         'src/App.cy.jsx', `
         import React from 'react'
-        import { mount } from 'cypress/react18'
+        import { mount } from 'cypress/react'
 
         export const App = () => {
           return (
@@ -43,21 +44,23 @@ describe('Config options', () => {
   })
 
   it('supports supportFile = false', () => {
-    cy.scaffoldProject('vite2.9.1-react')
-    cy.openProject('vite2.9.1-react', ['--config-file', 'cypress-vite-no-support.config.ts', '--component'])
+    cy.scaffoldProject('vite6.0.0-react')
+    cy.openProject('vite6.0.0-react', ['--config-file', 'cypress-vite-no-support.config.ts', '--component'])
     cy.startAppServer('component')
 
     cy.visitApp()
+    cy.specsPageIsVisible()
     cy.contains('App.cy.jsx').click()
     cy.waitForSpecToFinish()
-    cy.get('.passed > .num').should('contain', 1)
+    // no support file means there is no mount function registered, so all tests should fail
+    cy.get('.failed > .num').should('contain', 2)
   })
 
   it('supports serving files with whitespace', () => {
     const specWithWhitespace = 'spec with whitespace.cy.jsx'
 
-    cy.scaffoldProject('vite2.9.1-react')
-    cy.openProject('vite2.9.1-react', ['--config-file', 'cypress-vite.config.ts', '--component'])
+    cy.scaffoldProject('vite6.0.0-react')
+    cy.openProject('vite6.0.0-react', ['--config-file', 'cypress-vite.config.ts', '--component'])
     cy.startAppServer('component')
 
     cy.withCtx(async (ctx, { specWithWhitespace }) => {
@@ -68,27 +71,30 @@ describe('Config options', () => {
     }, { specWithWhitespace })
 
     cy.visitApp()
+    cy.specsPageIsVisible()
     cy.contains(specWithWhitespace).click()
     cy.get('.passed > .num').should('contain', 2)
   })
 
   it('supports @cypress/vite-dev-server', () => {
-    cy.scaffoldProject('vite2.9.1-react')
-    cy.openProject('vite2.9.1-react', ['--config-file', 'cypress-vite-dev-server-function.config.ts', '--component'])
+    cy.scaffoldProject('vite6.0.0-react')
+    cy.openProject('vite6.0.0-react', ['--config-file', 'cypress-vite-dev-server-function.config.ts', '--component'])
     cy.startAppServer('component')
 
     cy.visitApp()
+    cy.specsPageIsVisible()
     cy.contains('App.cy.jsx').click()
     cy.waitForSpecToFinish()
     cy.get('.passed > .num').should('contain', 2)
   })
 
   it('supports viteConfig as an async function', () => {
-    cy.scaffoldProject('vite2.9.1-react')
-    cy.openProject('vite2.9.1-react', ['--config-file', 'cypress-vite-async-function-config.config.ts', '--component'])
+    cy.scaffoldProject('vite6.0.0-react')
+    cy.openProject('vite6.0.0-react', ['--config-file', 'cypress-vite-async-function-config.config.ts', '--component'])
     cy.startAppServer('component')
 
     cy.visitApp()
+    cy.specsPageIsVisible()
     cy.contains('App.cy.jsx').click()
     cy.waitForSpecToFinish()
     cy.get('.passed > .num').should('contain', 2)
@@ -114,8 +120,8 @@ describe('sourcemaps', () => {
       })
     `
 
-    cy.scaffoldProject('vite3.0.2-react')
-    cy.openProject('vite3.0.2-react', ['--config-file', 'cypress-vite.config.ts', '--component'])
+    cy.scaffoldProject('vite6.0.0-react')
+    cy.openProject('vite6.0.0-react', ['--config-file', 'cypress-vite.config.ts', '--component'])
     cy.startAppServer('component')
 
     cy.withCtx(async (ctx, o) => {
@@ -147,15 +153,16 @@ describe('sourcemaps', () => {
 
     const verifySourcemap = (specName: string, line: number, column: number) => {
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.contains(specName).click()
       cy.waitForSpecToFinish()
       cy.get('.failed > .num').should('contain', 2)
       cy.get('.runnable-err-file-path', { timeout: 250 }).should('contain', `${specName}:${line}:${column}`)
     }
 
-    verifySourcemap('JsErrorSpec.cy.js', 7, 9)
+    verifySourcemap('JsErrorSpec.cy.js', 7, 8)
 
-    verifySourcemap('JsWithImportErrorSpec.cy.js', 9, 9)
+    verifySourcemap('JsWithImportErrorSpec.cy.js', 9, 8)
 
     verifySourcemap('JsxErrorSpec.cy.jsx', 7, 8)
 

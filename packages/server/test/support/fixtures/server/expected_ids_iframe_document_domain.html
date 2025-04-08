@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>integration/foo.coffee</title>
+  </head>
+  <body>
+    <script type="text/javascript">
+      document.domain = 'localhost';
+
+      (function(parent) {
+        var Cypress = window.Cypress = parent.Cypress;
+        if (!Cypress) {
+          throw new Error("Tests cannot run without a reference to Cypress!");
+        }
+        return Cypress.onSpecWindow(window, [{"absolute":"/<path-to-project>/ids/cypress/support/e2e.js","relative":"cypress/support/e2e.js","relativeUrl":"/__cypress/tests?p=cypress/support/e2e.js"},{"absolute":"/<path-to-project>/ids/cypress/integration/foo.coffee","relative":"cypress/integration/foo.coffee","relativeUrl":"/__cypress/tests?p=cypress/integration/foo.coffee"}]);
+      })(window.opener || window.parent);
+    </script>
+  </body>
+</html>

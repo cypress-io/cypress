@@ -1,0 +1,1 @@
+NOTE: This project should NOT work as webpack 4 and webpack-dev-server 5 are NOT compatible. We use this project to make sure @cypress/webpack-dev-server throws a descriptive error if a user is using webpack 4 and webpack-dev-server 5 together.

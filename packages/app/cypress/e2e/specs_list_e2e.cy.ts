@@ -41,6 +41,7 @@ describe('App: Spec List (E2E)', () => {
     })
 
     cy.visitApp()
+    cy.specsPageIsVisible()
     cy.verifyE2ESelected()
   }
 
@@ -126,6 +127,30 @@ describe('App: Spec List (E2E)', () => {
       cy.findByTestId('runnable-header').should('be.visible')
     })
 
+    it('updates the spec filename when a new spec is selected', () => {
+      // load the first spec
+      cy.findAllByTestId('spec-item-link').contains('accounts_list.spec.js').click()
+
+      // ensure the tests are loaded
+      cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
+      cy.findByText('Your tests are loading...').should('not.be.visible')
+
+      cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
+      // A bit of a hack, but our cy-in-cy test needs to wait for the reporter to fully render before pressing the "f" key to expand the "Search specs" menu.
+      // Otherwise, the "f" keypress happens before the event is registered, which causes the "Search Specs" menu to not expand.
+      cy.get('[data-cy="runnable-header"]').should('be.visible')
+      // open the inline spec list
+      cy.get('body').type('f')
+
+      // verify the first spec filename
+      cy.findByTestId('runnable-header').contains('accounts_list.spec.js')
+
+      // select the second spec from the inline spec list
+      cy.findAllByTestId('spec-file-item').contains('accounts_new.spec.js').click()
+      // verify the spec filename was updated
+      cy.findByTestId('runnable-header').contains('accounts_new.spec.js')
+    })
+
     it('cannot open the Spec File Row link in a new tab with "cmd + click"', (done) => {
       let numTargets
       let newNumTargets
@@ -152,7 +177,7 @@ describe('App: Spec List (E2E)', () => {
 
       it('displays only matching spec', function () {
         cy.get('button')
-        .contains('26 matches')
+        .contains('28 matches')
         .should('not.contain.text', 'of')
 
         clearSearchAndType('content')
@@ -160,13 +185,13 @@ describe('App: Spec List (E2E)', () => {
         .should('have.length', 3)
         .and('contain', 'dom-content.spec.js')
 
-        cy.get('button').contains('3 of 26 matches')
+        cy.get('button').contains('3 of 28 matches')
 
         cy.findByLabelText('Search specs').clear().type('asdf')
         cy.findAllByTestId('spec-item')
         .should('have.length', 0)
 
-        cy.get('button').contains('0 of 26 matches')
+        cy.get('button').contains('0 of 28 matches')
       })
 
       it('only shows matching folders', () => {
@@ -185,6 +210,20 @@ describe('App: Spec List (E2E)', () => {
         cy.findByTestId('spec-item')
         .should('have.length', 1)
         .and('contain', 'app.spec.js')
+      })
+
+      it('search by digits inside long strings', function () {
+        clearSearchAndType('4276')
+
+        cy.findByTestId('spec-item')
+        .should('have.length', 1)
+        .and('contain', 'dummyTest4276_test.spec.js')
+
+        clearSearchAndType('7890')
+
+        cy.findByTestId('spec-item')
+        .should('have.length', 1)
+        .and('contain', 'dummy7890Test_test.spec.js')
       })
 
       it('ignores non-number characters', function () {
@@ -217,7 +256,7 @@ describe('App: Spec List (E2E)', () => {
         cy.findByLabelText('Search specs')
         .should('have.value', '')
 
-        cy.get('button').contains('26 matches')
+        cy.get('button').contains('28 matches')
       })
 
       it('clears the filter if the user presses ESC key', function () {
@@ -226,7 +265,7 @@ describe('App: Spec List (E2E)', () => {
 
         cy.get('@searchField').should('have.value', '')
 
-        cy.get('button').contains('26 matches')
+        cy.get('button').contains('28 matches')
       })
 
       it('shows empty message if no results', function () {
@@ -242,7 +281,7 @@ describe('App: Spec List (E2E)', () => {
         cy.findByText('Clear search').click()
         cy.focused().should('have.id', 'spec-filter')
 
-        cy.get('button').contains('26 matches')
+        cy.get('button').contains('28 matches')
       })
 
       it('normalizes directory path separators for Windows', function () {
@@ -317,13 +356,26 @@ describe('App: Spec List (E2E)', () => {
         const targetSpecFile = 'accounts_list.spec.js'
 
         clearSearchAndType(targetSpecFile)
+
+        // wait for filter
+        cy.findAllByTestId('spec-item').should('have.length', 1)
+
         cy.contains('a', targetSpecFile).click()
+
+        // make sure we are on the spec view before clicking back to the specs list
+        cy.findByTestId('runnable-header').contains(targetSpecFile)
 
         cy.contains('input', targetSpecFile).should('not.exist')
 
-        cy.get('button[aria-controls="reporter-inline-specs-list"]').click({ force: true })
+        // A bit of a hack, but our cy-in-cy test needs to wait for the reporter to fully render before expanding the "Search specs" menu.
+        // Otherwise, the click happens before the event is registered, which causes the "Search Specs" menu to not expand.
+        cy.get('[data-cy="runnable-header"]').should('be.visible')
+        cy.contains('button', 'Specs').click({ force: true })
 
-        cy.get('input').should('be.visible').and('have.value', targetSpecFile)
+        // wait until specs list is visible
+        cy.findByTestId('specs-list-container').should('be.visible')
+
+        cy.get('@searchField').should('have.value', targetSpecFile)
 
         cy.findByTestId('sidebar-link-specs-page').click()
 

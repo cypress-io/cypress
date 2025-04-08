@@ -1,11 +1,31 @@
 import { cors, uri } from '@packages/network'
 import Debug from 'debug'
 import _ from 'lodash'
+import type { ParsedHostWithProtocolAndHost } from '@packages/network/lib/types'
+import type { DocumentDomainInjection } from '@packages/network'
 
-const DEFAULT_DOMAIN_NAME = 'localhost'
+export const DEFAULT_DOMAIN_NAME = 'localhost'
+
 const fullyQualifiedRe = /^https?:\/\//
 
 const debug = Debug('cypress:server:remote-states')
+
+export interface RemoteState {
+  auth?: {
+    username: string
+    password: string
+  }
+  domainName: string
+  strategy: 'file' | 'http'
+  origin: string
+  fileServer: string | null
+  props: ParsedHostWithProtocolAndHost | null
+}
+
+interface RemoteStatesServerPorts {
+  server: number
+  fileServer?: number
+}
 
 /**
  * Class to maintain and manage the remote states of the server.
@@ -42,22 +62,30 @@ const debug = Debug('cypress:server:remote-states')
  * }
  */
 export class RemoteStates {
-  private remoteStates: Map<string, Cypress.RemoteState> = new Map()
+  private remoteStates: Map<string, RemoteState> = new Map()
   private primaryOriginKey: string = ''
   private currentOriginKey: string = ''
-  private configure: () => { serverPort: number, fileServerPort: number }
-  private _config: { serverPort: number, fileServerPort: number } | undefined
+  private serverPorts?: RemoteStatesServerPorts
 
-  constructor (configure) {
-    this.configure = configure
+  constructor (
+    private configure: () => RemoteStatesServerPorts,
+    private documentDomainInjection: DocumentDomainInjection,
+  ) {
   }
 
   get (url: string) {
-    const state = this.remoteStates.get(cors.getSuperDomainOrigin(url))
+    debug('get (origin key)', this.documentDomainInjection.getOrigin(url), this.remoteStates)
+    const state = this.remoteStates.get(this.documentDomainInjection.getOrigin(url))
 
     debug('getting remote state: %o for: %s', state, url)
 
     return _.cloneDeep(state)
+  }
+
+  hasPrimary () {
+    const remoteStates = Array.from(this.remoteStates.entries())
+
+    return !!(remoteStates.length && remoteStates[0] && remoteStates[0][1])
   }
 
   getPrimary () {
@@ -69,7 +97,7 @@ export class RemoteStates {
   }
 
   isPrimarySuperDomainOrigin (url: string): boolean {
-    return this.primaryOriginKey === cors.getSuperDomainOrigin(url)
+    return this.primaryOriginKey === this.documentDomainInjection.getOrigin(url)
   }
 
   reset () {
@@ -82,67 +110,66 @@ export class RemoteStates {
     this.currentOriginKey = this.primaryOriginKey
   }
 
-  current (): Cypress.RemoteState {
-    return this.get(this.currentOriginKey) as Cypress.RemoteState
+  current (): RemoteState {
+    return this.get(this.currentOriginKey) as RemoteState
   }
 
-  set (urlOrState: string | Cypress.RemoteState, options: { auth?: {} } = {}, isPrimarySuperDomainOrigin: boolean = true): Cypress.RemoteState {
-    let state
+  private _stateFromUrl (url: string): RemoteState {
+    const remoteOrigin = uri.origin(url)
+    const remoteProps = cors.parseUrlIntoHostProtocolDomainTldPort(remoteOrigin)
 
-    if (_.isString(urlOrState)) {
-      const remoteOrigin = uri.origin(urlOrState)
-      const remoteProps = cors.parseUrlIntoHostProtocolDomainTldPort(remoteOrigin)
-
-      if ((urlOrState === '<root>') || !fullyQualifiedRe.test(urlOrState)) {
-        state = {
-          auth: options.auth,
-          origin: `http://${DEFAULT_DOMAIN_NAME}:${this.config.serverPort}`,
-          strategy: 'file',
-          fileServer: _.compact([`http://${DEFAULT_DOMAIN_NAME}`, this.config.fileServerPort]).join(':'),
-          domainName: DEFAULT_DOMAIN_NAME,
-          props: null,
-        }
-      } else {
-        state = {
-          auth: options.auth,
-          origin: remoteOrigin,
-          strategy: 'http',
-          fileServer: null,
-          domainName: cors.getDomainNameFromParsedHost(remoteProps),
-          props: remoteProps,
-        }
+    if ((url === '<root>') || !fullyQualifiedRe.test(url)) {
+      return {
+        origin: `http://${DEFAULT_DOMAIN_NAME}:${this.ports.server}`,
+        strategy: 'file',
+        fileServer: _.compact([`http://${DEFAULT_DOMAIN_NAME}`, this.ports.fileServer]).join(':'),
+        domainName: DEFAULT_DOMAIN_NAME,
+        props: null,
       }
-    } else {
-      state = urlOrState
     }
 
-    const remoteOrigin = cors.getSuperDomainOrigin(state.origin)
+    return {
+      origin: remoteOrigin,
+      strategy: 'http',
+      fileServer: null,
+      domainName: cors.getDomainNameFromParsedHost(remoteProps),
+      props: remoteProps,
+    }
+  }
 
-    this.currentOriginKey = remoteOrigin
+  set (urlOrState: string | RemoteState, options: Pick<RemoteState, 'auth'> = { }, isPrimaryOrigin: boolean = true): RemoteState | undefined {
+    const state: RemoteState = _.isString(urlOrState) ?
+      {
+        ...this._stateFromUrl(urlOrState),
+        auth: options.auth,
+      } :
+      urlOrState
 
-    if (isPrimarySuperDomainOrigin) {
+    this.currentOriginKey = this.documentDomainInjection.getOrigin(state.origin)
+
+    if (isPrimaryOrigin) {
       // convert map to array
       const stateArray = Array.from(this.remoteStates.entries())
 
       // set the primary remote state and convert back to map
-      stateArray[0] = [remoteOrigin, state]
+      stateArray[0] = [this.currentOriginKey, state]
       this.remoteStates = new Map(stateArray)
 
-      this.primaryOriginKey = remoteOrigin
+      this.primaryOriginKey = this.currentOriginKey
     } else {
-      this.remoteStates.set(remoteOrigin, state)
+      this.remoteStates.set(this.currentOriginKey, state)
     }
 
-    debug('setting remote state %o for %s', state, remoteOrigin)
+    debug('setting remote state %o for %s', state, this.currentOriginKey)
 
-    return this.get(remoteOrigin) as Cypress.RemoteState
+    return this.get(this.currentOriginKey)
   }
 
-  private get config () {
-    if (!this._config) {
-      this._config = this.configure()
+  private get ports () {
+    if (!this.serverPorts) {
+      this.serverPorts = this.configure()
     }
 
-    return this._config
+    return this.serverPorts
   }
 }

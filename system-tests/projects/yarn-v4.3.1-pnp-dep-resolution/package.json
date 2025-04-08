@@ -1,0 +1,9 @@
+{
+  "name": "yarn-v4.3.1-pnp-dep-resolution",
+  "version": "0.0.0-test",
+  "devDependencies": {
+    "axe-core": "^4.10.3",
+    "cypress-axe": "^1.6.0"
+  },
+  "packageManager": "yarn@4.3.1"
+}

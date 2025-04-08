@@ -7,14 +7,10 @@
     "test"
   ],
   "compilerOptions": {
-    "strict": true,
     "allowJs": false,
     "rootDir": "src",
     "noImplicitAny": true,
-    "resolveJsonModule": true,
-    "experimentalDecorators": true,
     "noUncheckedIndexedAccess": true,
-    "importsNotUsedAsValues": "error",
     "types": ["node"],
     "typeRoots": [
       "../../node_modules/@types"

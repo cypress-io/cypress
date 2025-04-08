@@ -1,9 +1,6 @@
-/// <reference path="../../../../../../cli/types/mocha/index.d.ts" />
-
+import { describe, it, beforeEach, expect } from 'vitest'
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing'
 import { join } from 'path'
-import { expect } from 'chai'
-import { take } from 'rxjs/operators'
 
 describe('ng-generate @cypress/schematic:specs-ct', () => {
   const schematicRunner = new SchematicTestRunner(
@@ -15,10 +12,10 @@ describe('ng-generate @cypress/schematic:specs-ct', () => {
   const workspaceOptions = {
     name: 'workspace',
     newProjectRoot: 'projects',
-    version: '12.0.0',
+    version: '18.0.0',
   }
 
-  const appOptions: Parameters<typeof schematicRunner['runExternalSchematicAsync']>[2] = {
+  const appOptions: Parameters<typeof schematicRunner['runExternalSchematic']>[2] = {
     name: 'sandbox',
     inlineTemplate: false,
     routing: false,
@@ -27,11 +24,13 @@ describe('ng-generate @cypress/schematic:specs-ct', () => {
   }
 
   beforeEach(async () => {
-    appTree = await schematicRunner.runExternalSchematicAsync('@schematics/angular', 'workspace', workspaceOptions).toPromise()
-    appTree = await schematicRunner.runExternalSchematicAsync('@schematics/angular', 'application', appOptions, appTree).toPromise()
+    appTree = await schematicRunner.runExternalSchematic('@schematics/angular', 'workspace', workspaceOptions)
+    appTree = await schematicRunner.runExternalSchematic('@schematics/angular', 'application', appOptions, appTree)
   })
 
   it('should create cypress component tests alongside components', async () => {
-    return schematicRunner.runSchematicAsync('specs-ct', { project: 'sandbox' }, appTree).pipe(take(1)).subscribe((tree: UnitTestTree) => expect(tree.files).to.contain('/projects/sandbox/app/src/app.component.cy.ts'))
+    const tree = await schematicRunner.runSchematic('specs-ct', { project: 'sandbox' }, appTree)
+
+    expect(tree.files).to.contain('/projects/sandbox/src/fake-component.component.cy.ts')
   })
 })

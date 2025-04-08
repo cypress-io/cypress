@@ -113,7 +113,7 @@ function maybeScrollToAnchor () {
   }
 
   // Get the root HTML element, then query for the desired anchor element.
-  // Finally, if we found it, scroll into into view!
+  // Finally, if we found it, scroll into view!
   const $el = root.value.$el as HTMLDivElement
   const $anchor = $el.querySelector(`#${route.query.anchor}`)
 

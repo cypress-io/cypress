@@ -13,13 +13,14 @@
       <div
         v-else
         class="flex font-medium text-gray-700 items-center children:leading-[24px]"
+        role="banner"
       >
         <img
           class="h-[32px] mr-[18px] w-[32px]"
           src="../assets/logos/cypress-dark.png"
           alt="cypress"
         >
-        <nav>
+        <div>
           <ol>
             <li
               v-if="props.gql.isGlobalMode"
@@ -84,9 +85,12 @@
               </template>
             </template>
           </ol>
-        </nav>
+        </div>
       </div>
-      <div class="flex gap-6">
+      <nav
+        class="flex gap-6"
+        role="navigation"
+      >
         <TopNav
           :gql="props.gql"
           :show-browsers="props.showBrowsers"
@@ -152,7 +156,7 @@
             <span class="font-medium whitespace-nowrap group-hocus:text-indigo-500">{{ t('topNav.login.actionLogin') }}</span>
           </button>
         </div>
-      </div>
+      </nav>
     </div>
   </div>
 </template>

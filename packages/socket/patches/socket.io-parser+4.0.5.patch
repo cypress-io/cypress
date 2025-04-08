@@ -105,7 +105,7 @@ index b0c8727..3b2dcc3 100644
  const binary_1 = require("./binary");
  const is_binary_1 = require("./is-binary");
  const debug = require("debug")("socket.io-parser");
-+const CircularJSON = require('circular-json')
++const flatted = require("flatted");
  /**
   * Protocol version.
   *
@@ -114,7 +114,7 @@ index b0c8727..3b2dcc3 100644
          // json data
          if (null != obj.data) {
 -            str += JSON.stringify(obj.data);
-+            str += CircularJSON.stringify(obj.data);
++            str += flatted.stringify(obj.data);
          }
          debug("encoded %j as %s", obj, str);
          return str;
@@ -123,7 +123,7 @@ index b0c8727..3b2dcc3 100644
  function tryParse(str) {
      try {
 -        return JSON.parse(str);
-+        return CircularJSON.parse(str);
++        return flatted.parse(str);
      }
      catch (e) {
          return false;

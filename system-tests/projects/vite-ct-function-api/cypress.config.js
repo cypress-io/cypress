@@ -4,7 +4,7 @@ module.exports = {
   retries: null,
   component: {
     experimentalSingleTabRunMode: true,
-    supportFile: 'cypress/component/support/component.js',
+    supportFile: 'cypress/component/support/component.ts',
     devServer (cypressConfig) {
       return devServer(cypressConfig)
     },

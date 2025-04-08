@@ -44,7 +44,7 @@ module.exports = (on) => {
 }
 ```
 
-Other than the `typescript` option, this preprocessor supports the same options as [@cypress/webpack-preprocessor](https://github.com/cypress-io/cypress/tree/develop/npm/webpack-preprocessor#readme), so see its README for more information.
+Other than the `typescript` option, this preprocessor supports the same options as [@cypress/webpack-preprocessor](https://github.com/cypress-io/cypress/tree/develop/npm/webpack-preprocessor#readme), so see its [README](https://github.com/cypress-io/cypress/tree/develop/npm/webpack-preprocessor#readme) for more information.
 
 ## Contributing
 

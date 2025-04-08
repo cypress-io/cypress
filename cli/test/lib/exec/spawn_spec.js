@@ -7,6 +7,9 @@ const tty = require('tty')
 const path = require('path')
 const EE = require('events')
 const mockedEnv = require('mocked-env')
+const readline = require('readline')
+const proxyquire = require('proxyquire')
+
 const debug = require('debug')('test')
 
 const state = require(`${lib}/tasks/state`)
@@ -22,6 +25,7 @@ const execPath = process.execPath
 const nodeVersion = process.versions.node
 
 const defaultBinaryDir = '/default/binary/dir'
+let mockReadlineEE
 
 describe('lib/exec/spawn', function () {
   beforeEach(function () {
@@ -49,8 +53,11 @@ describe('lib/exec/spawn', function () {
 
     // process.stdin is both an event emitter and a readable stream
     this.processStdin = new EE()
+    mockReadlineEE = new EE()
+
     this.processStdin.pipe = sinon.stub().returns(undefined)
     sinon.stub(process, 'stdin').value(this.processStdin)
+    sinon.stub(readline, 'createInterface').returns(mockReadlineEE)
     sinon.stub(cp, 'spawn').returns(this.spawnedProcess)
     sinon.stub(xvfb, 'start').resolves()
     sinon.stub(xvfb, 'stop').resolves()
@@ -76,7 +83,22 @@ describe('lib/exec/spawn', function () {
         ----- Certificate i=0 (OU=Cypress Proxy Server Certificate,O=Cypress Proxy CA,L=Internet,ST=Internet,C=Internet,CN=www.googletagmanager.com) -----
         ERROR: No matching issuer found
 
-        objc[60540]: Class WebSwapCGLLayer is implemented in both /System/Library/Frameworks/WebKit.framework/Versions/A/Frameworks/WebCore.framework/Versions/A/Frameworks/libANGLE-shared.dylib (0x7ffa5a006318) and /{path/to/app}/node_modules/electron/dist/Electron.app/Contents/Frameworks/Electron Framework.framework/Versions/A/Libraries/libGLESv2.dylib (0x10f8a89c8). One of the two will be used. Which one is undefined.
+        Warning: loader_scanned_icd_add: Driver /usr/lib/x86_64-linux-gnu/libvulkan_intel.so supports Vulkan 1.2, but only supports loader interface version 4. Interface version 5 or newer required to support this version of Vulkan (Policy #LDP_DRIVER_7)
+        Warning: loader_scanned_icd_add: Driver /usr/lib/x86_64-linux-gnu/libvulkan_lvp.so supports Vulkan 1.1, but only supports loader interface version 4. Interface version 5 or newer required to support this version of Vulkan (Policy #LDP_DRIVER_7)
+        Warning: loader_scanned_icd_add: Driver /usr/lib/x86_64-linux-gnu/libvulkan_radeon.so supports Vulkan 1.2, but only supports loader interface version 4. Interface version 5 or newer required to support this verison of Vulkan (Policy #LDP_DRIVER_7)
+        Warning: Layer VK_LAYER_MESA_device_select uses API version 1.2 which is older than the application specified API version of 1.3. May cause issues.
+
+        Warning: vkCreateInstance: Found no drivers!
+        Warning: vkCreateInstance failed with VK_ERROR_INCOMPATIBLE_DRIVER
+            at CheckVkSuccessImpl (../../third_party/dawn/src/dawn/native/vulkan/VulkanError.cpp:88)
+            at CreateVkInstance (../../third_party/dawn/src/dawn/native/vulkan/BackendVk.cpp:458)
+            at Initialize (../../third_party/dawn/src/dawn/native/vulkan/BackendVk.cpp:344)
+            at Create (../../third_party/dawn/src/dawn/native/vulkan/BackendVk.cpp:266)
+            at operator() (../../third_party/dawn/src/dawn/native/vulkan/BackendVk.cpp:521)
+
+        [78887:1023/114920.074882:ERROR:debug_utils.cc(14)] Hit debug scenario: 4
+
+        [18489:0822/130231.159571:ERROR:gl_display.cc(497)] EGL Driver message (Error) eglQueryDeviceAttribEXT: Bad attribute.
       `
 
       const lines = _
@@ -89,6 +111,18 @@ describe('lib/exec/spawn', function () {
       _.each(lines, (line) => {
         expect(spawn.isGarbageLineWarning(line), `expected line to be garbage: ${line}`).to.be.true
       })
+    })
+
+    it('returns true for XDG runtime dir warnings', () => {
+      expect(spawn.isGarbageLineWarning('error: XDG_RUNTIME_DIR is invalid or not set')).to.be.true
+    })
+
+    it('returns true for MESA ZINK errors', () => {
+      expect(spawn.isGarbageLineWarning('MESA: error: ZINK: failed to choose pdev')).to.be.true
+    })
+
+    it('returns true for GLX driver errors', () => {
+      expect(spawn.isGarbageLineWarning('glx: failed to create drisw screen')).to.be.true
     })
   })
 
@@ -372,6 +406,22 @@ describe('lib/exec/spawn', function () {
       .then(() => {
         expect(cp.spawn.firstCall.args[2].windowsHide).to.be.false
       })
+    })
+
+    it('propagates treeKill if SIGINT is detected in windows console', async function () {
+      this.spawnedProcess.pid = 7
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+
+      os.platform.returns('win32')
+
+      const treeKillMock = sinon.stub().returns(0)
+
+      const spawn = proxyquire(`${lib}/exec/spawn`, { 'tree-kill': treeKillMock })
+
+      await spawn.start([], { env: {} })
+
+      mockReadlineEE.emit('SIGINT')
+      expect(treeKillMock).to.have.been.calledWith(7, 'SIGINT')
     })
 
     it('does not set windowsHide property when in darwin', function () {

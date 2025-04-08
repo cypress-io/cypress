@@ -223,6 +223,9 @@ export class CommandQueue extends Queue<$Command> {
     // end in case we have after / afterEach hooks
     // which need to run
     this.index = this.length
+
+    // Mark the state as stable, so that any cypress commands can be re-queued during the after / afterEach hooks
+    this.state('isStable', true)
   }
 
   private runCommand (command: $Command) {
@@ -468,7 +471,8 @@ export class CommandQueue extends Queue<$Command> {
 
       Cypress.action('cy:command:start', command)
 
-      return this.runCommand(command)!
+      return Cypress.action<Promise<void>>('cy:command:start:async', command)
+      .then(() => this.runCommand(command)!)
       .then(() => {
         // each successful command invocation should
         // always reset the timeout for the current runnable

@@ -1,5 +1,7 @@
 import { cors } from '../../lib'
+import { Policy } from '../../lib/cors'
 import { expect } from 'chai'
+import type { ParsedHostWithProtocolAndHost } from '../../lib/types'
 
 describe('lib/cors', () => {
   context('.parseUrlIntoHostProtocolDomainTldPort', () => {
@@ -321,264 +323,159 @@ describe('lib/cors', () => {
     })
   })
 
-  context('.urlMatchesPolicyBasedOnDomain', () => {
-    const assertsUrlsAreNotAPolicyMatch = (url1, url2) => {
-      expect(cors.urlMatchesPolicyBasedOnDomain(url1, url2)).to.be.false
-    }
+  context('.urlMatchesPolicyProps', () => {
+    let policy: Policy
+    let frameUrl: string
+    let topProps: ParsedHostWithProtocolAndHost
 
-    const assertsUrlsAreAPolicyOriginMatch = (url1, url2) => {
-      expect(cors.urlMatchesPolicyBasedOnDomain(url1, url2)).to.be.true
-    }
-
-    describe('domain + subdomain', () => {
-      const url = 'https://staging.gurgle.com'
-
-      it('does not match', function () {
-        assertsUrlsAreNotAPolicyMatch('https://foo.bar:443', url)
-        assertsUrlsAreNotAPolicyMatch('http://foo.bar:80', url)
-        assertsUrlsAreNotAPolicyMatch('http://foo.bar', url)
-        assertsUrlsAreNotAPolicyMatch('http://staging.gurgle.com', url)
-        assertsUrlsAreNotAPolicyMatch('http://staging.gurgle.com:80', url)
-        assertsUrlsAreNotAPolicyMatch('https://staging.gurgle2.com:443', url)
-        assertsUrlsAreNotAPolicyMatch('https://staging.gurgle.net:443', url)
-        assertsUrlsAreNotAPolicyMatch('https://gurgle.net:443', url)
-        assertsUrlsAreNotAPolicyMatch('http://gurgle.com', url)
+    describe('with a same-origin policy', () => {
+      beforeEach(() => {
+        policy = 'same-origin'
       })
 
-      it('matches', function () {
-        assertsUrlsAreAPolicyOriginMatch('https://staging.gurgle.com:443', url)
-        assertsUrlsAreAPolicyOriginMatch('https://gurgle.com:443', url)
-        assertsUrlsAreAPolicyOriginMatch('https://foo.gurgle.com:443', url)
-        assertsUrlsAreAPolicyOriginMatch('https://foo.bar.gurgle.com:443', url)
-      })
-    })
+      describe('and origin matches', () => {
+        beforeEach(() => {
+          frameUrl = 'http://www.foo.com'
+          topProps = cors.parseUrlIntoHostProtocolDomainTldPort(frameUrl)
+        })
 
-    describe('google (strict same-origin policy)', () => {
-      const url = 'https://staging.google.com'
-
-      it('does not match', function () {
-        assertsUrlsAreNotAPolicyMatch('https://foo.bar:443', url)
-        assertsUrlsAreNotAPolicyMatch('http://foo.bar:80', url)
-        assertsUrlsAreNotAPolicyMatch('http://foo.bar', url)
-        assertsUrlsAreNotAPolicyMatch('http://staging.google.com', url)
-        assertsUrlsAreNotAPolicyMatch('http://staging.google.com:80', url)
-        assertsUrlsAreNotAPolicyMatch('https://staging.google2.com:443', url)
-        assertsUrlsAreNotAPolicyMatch('https://staging.google.net:443', url)
-        assertsUrlsAreNotAPolicyMatch('https://google.net:443', url)
-        assertsUrlsAreNotAPolicyMatch('http://google.com', url)
-        assertsUrlsAreNotAPolicyMatch('https://google.com:443', url)
-        assertsUrlsAreNotAPolicyMatch('https://foo.google.com:443', url)
-        assertsUrlsAreNotAPolicyMatch('https://foo.bar.google.com:443', url)
+        it('matches', () => {
+          expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).to.be.true
+        })
       })
 
-      it('matches', function () {
-        assertsUrlsAreAPolicyOriginMatch('https://staging.google.com:443', url)
+      describe('and origin does not match', () => {
+        beforeEach(() => {
+          frameUrl = 'http://www.foo.com'
+          topProps = cors.parseUrlIntoHostProtocolDomainTldPort('http://www.bar.com')
+        })
+
+        it('does not match', () => {
+          expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).to.be.false
+        })
       })
     })
 
-    describe('public suffix', () => {
-      const url = 'https://example.gitlab.io'
-
-      it('does not match', function () {
-        assertsUrlsAreNotAPolicyMatch('http://example.gitlab.io', url)
-        assertsUrlsAreNotAPolicyMatch('https://foo.gitlab.io:443', url)
+    describe('with a same-super-domain-origin policy', () => {
+      beforeEach(() => {
+        policy = 'same-super-domain-origin'
       })
 
-      it('matches', function () {
-        assertsUrlsAreAPolicyOriginMatch('https://example.gitlab.io:443', url)
-        assertsUrlsAreAPolicyOriginMatch('https://foo.example.gitlab.io:443', url)
-      })
-    })
+      describe('and origin matches', () => {
+        beforeEach(() => {
+          frameUrl = 'http://www.foo.com'
+          topProps = cors.parseUrlIntoHostProtocolDomainTldPort(frameUrl)
+        })
 
-    describe('localhost', () => {
-      const url = 'http://localhost:4200'
-
-      it('does not match', function () {
-        assertsUrlsAreNotAPolicyMatch('http://localhoss:4200', url)
-        assertsUrlsAreNotAPolicyMatch('http://localhost:4201', url)
+        it('matches', () => {
+          expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).to.be.true
+        })
       })
 
-      it('matches', function () {
-        assertsUrlsAreAPolicyOriginMatch('http://localhost:4200', url)
-      })
-    })
+      describe('and superdomains match', () => {
+        const superdomain = 'foo.com'
+        const port = '8080'
 
-    describe('app.localhost', () => {
-      const url = 'http://app.localhost:4200'
+        beforeEach(() => {
+          frameUrl = `http://www.${superdomain}`
+          topProps = cors.parseUrlIntoHostProtocolDomainTldPort(`http://docs.${superdomain}:${port}`)
+        })
 
-      it('does not match', function () {
-        assertsUrlsAreNotAPolicyMatch('http://app.localhoss:4200', url)
-        assertsUrlsAreNotAPolicyMatch('http://app.localhost:4201', url)
-      })
+        describe('and the ports are not strictly equal', () => {
+          it('does not match', () => {
+            expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).to.be.false
+          })
+        })
 
-      it('matches', function () {
-        assertsUrlsAreAPolicyOriginMatch('http://app.localhost:4200', url)
-        assertsUrlsAreAPolicyOriginMatch('http://name.app.localhost:4200', url)
-      })
-    })
+        describe('and the ports are strictly equal', () => {
+          beforeEach(() => {
+            frameUrl = `${frameUrl}:${port}`
+            topProps.port = port
+          })
 
-    describe('local', () => {
-      const url = 'http://brian.dev.local'
-
-      it('does not match', function () {
-        assertsUrlsAreNotAPolicyMatch('https://brian.dev.local:443', url)
-        assertsUrlsAreNotAPolicyMatch('https://brian.dev.local', url)
-        assertsUrlsAreNotAPolicyMatch('http://brian.dev2.local:81', url)
-        assertsUrlsAreNotAPolicyMatch('http://brian.dev.local:8081', url)
+          it('does match', () => {
+            expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).to.be.true
+          })
+        })
       })
 
-      it('matches', function () {
-        assertsUrlsAreAPolicyOriginMatch('http://jennifer.dev.local', url)
-        assertsUrlsAreAPolicyOriginMatch('http://jennifer.dev.local:80', url)
-        assertsUrlsAreAPolicyOriginMatch('http://jennifer.dev.local', url)
+      describe('and superdomains do not match', () => {
+        beforeEach(() => {
+          frameUrl = 'http://www.foo.com'
+          topProps = cors.parseUrlIntoHostProtocolDomainTldPort('http://www.bar.com')
+        })
+
+        it('does not match', () => {
+          expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).to.be.false
+        })
       })
     })
 
-    describe('ip address', () => {
-      const url = 'http://192.168.5.10'
-
-      it('does not match', function () {
-        assertsUrlsAreNotAPolicyMatch('http://192.168.5.10:443', url)
-        assertsUrlsAreNotAPolicyMatch('https://192.168.5.10', url)
-        assertsUrlsAreNotAPolicyMatch('http://193.168.5.10', url)
-        assertsUrlsAreNotAPolicyMatch('http://193.168.5.10:80', url)
-        assertsUrlsAreNotAPolicyMatch('http://192.168.5.10:12345', url)
+    describe('with a schemeful-same-site policy', () => {
+      beforeEach(() => {
+        policy = 'schemeful-same-site'
       })
 
-      it('matches', function () {
-        assertsUrlsAreAPolicyOriginMatch('http://192.168.5.10', url)
-        assertsUrlsAreAPolicyOriginMatch('http://192.168.5.10:80', url)
-      })
-    })
-  })
+      describe('and origin matches', () => {
+        beforeEach(() => {
+          frameUrl = 'http://www.foo.com'
+          topProps = cors.parseUrlIntoHostProtocolDomainTldPort('http://www.foo.com')
+        })
 
-  context('.urlMatchesPolicyBasedOnDomainProps', () => {
-    const assertsUrlsAreNotAPolicyMatch = (url1, props) => {
-      expect(cors.urlMatchesPolicyBasedOnDomainProps(url1, props)).to.be.false
-    }
-
-    const assertsUrlsAreAPolicyOriginMatch = (url1, props) => {
-      expect(cors.urlMatchesPolicyBasedOnDomainProps(url1, props)).to.be.true
-    }
-
-    describe('domain + subdomain', () => {
-      const props = cors.parseUrlIntoHostProtocolDomainTldPort('https://staging.gurgle.com')
-
-      it('does not match', function () {
-        assertsUrlsAreNotAPolicyMatch('https://foo.bar:443', props)
-        assertsUrlsAreNotAPolicyMatch('http://foo.bar:80', props)
-        assertsUrlsAreNotAPolicyMatch('http://foo.bar', props)
-        assertsUrlsAreNotAPolicyMatch('http://staging.gurgle.com', props)
-        assertsUrlsAreNotAPolicyMatch('http://staging.gurgle.com:80', props)
-        assertsUrlsAreNotAPolicyMatch('https://staging.gurgle2.com:443', props)
-        assertsUrlsAreNotAPolicyMatch('https://staging.gurgle.net:443', props)
-        assertsUrlsAreNotAPolicyMatch('https://gurgle.net:443', props)
-        assertsUrlsAreNotAPolicyMatch('http://gurgle.com', props)
+        it('matches', () => {
+          expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).to.be.true
+        })
       })
 
-      it('matches', function () {
-        assertsUrlsAreAPolicyOriginMatch('https://staging.gurgle.com:443', props)
-        assertsUrlsAreAPolicyOriginMatch('https://gurgle.com:443', props)
-        assertsUrlsAreAPolicyOriginMatch('https://foo.gurgle.com:443', props)
-        assertsUrlsAreAPolicyOriginMatch('https://foo.bar.gurgle.com:443', props)
-      })
-    })
+      describe('and superdomains match', () => {
+        beforeEach(() => {
+          frameUrl = 'http://www.foo.com'
+          topProps = cors.parseUrlIntoHostProtocolDomainTldPort('http://docs.foo.com')
+        })
 
-    describe('google (strict same-origin policy)', () => {
-      const props = cors.parseUrlIntoHostProtocolDomainTldPort('https://staging.google.com')
+        describe('and neither ports match with neither being 443', () => {
+          beforeEach(() => {
+            frameUrl = `${frameUrl}:8080`
+            topProps.port = '8081'
+          })
 
-      it('does not match', function () {
-        assertsUrlsAreNotAPolicyMatch('https://foo.bar:443', props)
-        assertsUrlsAreNotAPolicyMatch('http://foo.bar:80', props)
-        assertsUrlsAreNotAPolicyMatch('http://foo.bar', props)
-        assertsUrlsAreNotAPolicyMatch('http://staging.google.com', props)
-        assertsUrlsAreNotAPolicyMatch('http://staging.google.com:80', props)
-        assertsUrlsAreNotAPolicyMatch('https://staging.google2.com:443', props)
-        assertsUrlsAreNotAPolicyMatch('https://staging.google.net:443', props)
-        assertsUrlsAreNotAPolicyMatch('https://google.net:443', props)
-        assertsUrlsAreNotAPolicyMatch('http://google.com', props)
-        assertsUrlsAreNotAPolicyMatch('https://google.com:443', props)
-        assertsUrlsAreNotAPolicyMatch('https://foo.google.com:443', props)
-        assertsUrlsAreNotAPolicyMatch('https://foo.bar.google.com:443', props)
-      })
+          it('matches', () => {
+            expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).to.be.true
+          })
+        })
 
-      it('matches', function () {
-        assertsUrlsAreAPolicyOriginMatch('https://staging.google.com:443', props)
-      })
-    })
+        describe('and neither ports match but frameUrl is 443 / https', () => {
+          beforeEach(() => {
+            frameUrl = 'https://www.foo.com'
+            topProps.port = '8081'
+          })
 
-    describe('public suffix', () => {
-      const props = cors.parseUrlIntoHostProtocolDomainTldPort('https://example.gitlab.io')
+          it('does not match', () => {
+            expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).to.be.false
+          })
+        })
 
-      it('does not match', function () {
-        assertsUrlsAreNotAPolicyMatch('http://example.gitlab.io', props)
-        assertsUrlsAreNotAPolicyMatch('https://foo.gitlab.io:443', props)
-      })
+        describe('and neither ports match but topProps is 443 / https', () => {
+          beforeEach(() => {
+            frameUrl = `${frameUrl}:8080`
+            topProps = cors.parseUrlIntoHostProtocolDomainTldPort('https://www.foo.com')
+          })
 
-      it('matches', function () {
-        assertsUrlsAreAPolicyOriginMatch('https://example.gitlab.io:443', props)
-        assertsUrlsAreAPolicyOriginMatch('https://foo.example.gitlab.io:443', props)
-      })
-    })
+          it('does not match', () => {
+            expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).to.be.false
+          })
+        })
 
-    describe('localhost', () => {
-      const props = cors.parseUrlIntoHostProtocolDomainTldPort('http://localhost:4200')
+        describe('and the ports match', () => {
+          beforeEach(() => {
+            frameUrl = `${frameUrl}:8080`
+            topProps.port = `8080`
+          })
 
-      it('does not match', function () {
-        assertsUrlsAreNotAPolicyMatch('http://localhoss:4200', props)
-        assertsUrlsAreNotAPolicyMatch('http://localhost:4201', props)
-      })
-
-      it('matches', function () {
-        assertsUrlsAreAPolicyOriginMatch('http://localhost:4200', props)
-      })
-    })
-
-    describe('app.localhost', () => {
-      const props = cors.parseUrlIntoHostProtocolDomainTldPort('http://app.localhost:4200')
-
-      it('does not match', function () {
-        assertsUrlsAreNotAPolicyMatch('http://app.localhoss:4200', props)
-        assertsUrlsAreNotAPolicyMatch('http://app.localhost:4201', props)
-      })
-
-      it('matches', function () {
-        assertsUrlsAreAPolicyOriginMatch('http://app.localhost:4200', props)
-        assertsUrlsAreAPolicyOriginMatch('http://name.app.localhost:4200', props)
-      })
-    })
-
-    describe('local', () => {
-      const props = cors.parseUrlIntoHostProtocolDomainTldPort('http://brian.dev.local')
-
-      it('does not match', function () {
-        assertsUrlsAreNotAPolicyMatch('https://brian.dev.local:443', props)
-        assertsUrlsAreNotAPolicyMatch('https://brian.dev.local', props)
-        assertsUrlsAreNotAPolicyMatch('http://brian.dev2.local:81', props)
-        assertsUrlsAreNotAPolicyMatch('http://brian.dev.local:8081', props)
-      })
-
-      it('matches', function () {
-        assertsUrlsAreAPolicyOriginMatch('http://jennifer.dev.local', props)
-        assertsUrlsAreAPolicyOriginMatch('http://jennifer.dev.local:80', props)
-        assertsUrlsAreAPolicyOriginMatch('http://jennifer.dev.local', props)
-      })
-    })
-
-    describe('ip address', () => {
-      const props = cors.parseUrlIntoHostProtocolDomainTldPort('http://192.168.5.10')
-
-      it('does not match', function () {
-        assertsUrlsAreNotAPolicyMatch('http://192.168.5.10:443', props)
-        assertsUrlsAreNotAPolicyMatch('https://192.168.5.10', props)
-        assertsUrlsAreNotAPolicyMatch('http://193.168.5.10', props)
-        assertsUrlsAreNotAPolicyMatch('http://193.168.5.10:80', props)
-        assertsUrlsAreNotAPolicyMatch('http://192.168.5.10:12345', props)
-      })
-
-      it('matches', function () {
-        assertsUrlsAreAPolicyOriginMatch('http://192.168.5.10', props)
-        assertsUrlsAreAPolicyOriginMatch('http://192.168.5.10:80', props)
+          it('matches', () => {
+            expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).to.be.true
+          })
+        })
       })
     })
   })
@@ -646,97 +543,13 @@ describe('lib/cors', () => {
     })
   })
 
-  context('.getOrigin', () => {
-    it('ports', () => {
-      expect(cors.getOrigin('https://example.com')).to.equal('https://example.com')
-      expect(cors.getOrigin('http://example.com:8080')).to.equal('http://example.com:8080')
+  context('.policyFromConfig', () => {
+    it('returns \'same-origin\' when injectDocumentDomain is false', () => {
+      expect(cors.policyFromConfig({ injectDocumentDomain: false })).to.equal('same-origin')
     })
 
-    it('subdomain', () => {
-      expect(cors.getOrigin('http://www.example.com')).to.equal('http://www.example.com')
-      expect(cors.getOrigin('http://www.app.herokuapp.com:8080')).to.equal('http://www.app.herokuapp.com:8080')
-    })
-  })
-
-  context('.policyForDomain', () => {
-    const recommendedSameOriginPolicyUrlGlobs = ['*.salesforce.com', '*.force.com', '*.google.com', 'google.com']
-
-    context('returns "same-origin" for google domains', () => {
-      it('accounts.google.com', () => {
-        expect(cors.policyForDomain('https://accounts.google.com', {
-          skipDomainInjectionForDomains: recommendedSameOriginPolicyUrlGlobs,
-        })).to.equal('same-origin')
-      })
-
-      it('www.google.com', () => {
-        expect(cors.policyForDomain('https://www.google.com', {
-          skipDomainInjectionForDomains: recommendedSameOriginPolicyUrlGlobs,
-        })).to.equal('same-origin')
-      })
-    })
-
-    context('returns "same-origin" for salesforce domains', () => {
-      it('https://the-host.develop.lightning.force.com', () => {
-        expect(cors.policyForDomain('https://the-host.develop.lightning.force.com', {
-          skipDomainInjectionForDomains: recommendedSameOriginPolicyUrlGlobs,
-        })).to.equal('same-origin')
-      })
-
-      it('https://the-host.develop.my.salesforce.com', () => {
-        expect(cors.policyForDomain('https://the-host.develop.my.salesforce.com', {
-          skipDomainInjectionForDomains: recommendedSameOriginPolicyUrlGlobs,
-        })).to.equal('same-origin')
-      })
-
-      it('https://the-host.develop.file.force.com', () => {
-        expect(cors.policyForDomain('https://the-host.develop.file.force.com', {
-          skipDomainInjectionForDomains: recommendedSameOriginPolicyUrlGlobs,
-        })).to.equal('same-origin')
-      })
-
-      it('https://the-host.develop.my.salesforce.com', () => {
-        expect(cors.policyForDomain('https://the-host.develop.my.salesforce.com', {
-          skipDomainInjectionForDomains: recommendedSameOriginPolicyUrlGlobs,
-        })).to.equal('same-origin')
-      })
-    })
-
-    describe('returns "same-super-domain-origin" for non exception urls', () => {
-      it('www.cypress.io', () => {
-        expect(cors.policyForDomain('http://www.cypress.io', {
-          skipDomainInjectionForDomains: recommendedSameOriginPolicyUrlGlobs,
-        })).to.equal('same-super-domain-origin')
-      })
-
-      it('docs.cypress.io', () => {
-        expect(cors.policyForDomain('http://docs.cypress.io', {
-          skipDomainInjectionForDomains: recommendedSameOriginPolicyUrlGlobs,
-        })).to.equal('same-super-domain-origin')
-      })
-
-      it('stackoverflow.com', () => {
-        expect(cors.policyForDomain('https://stackoverflow.com', {
-          skipDomainInjectionForDomains: recommendedSameOriginPolicyUrlGlobs,
-        })).to.equal('same-super-domain-origin')
-      })
-    })
-  })
-
-  context('.shouldInjectDocumentDomain', () => {
-    it('returns false when "skipDomainInjectionForDomains" is configured and contains a matching blob pattern ', () => {
-      expect(cors.shouldInjectDocumentDomain('http://www.cypress.io', {
-        skipDomainInjectionForDomains: ['*.cypress.io'],
-      })).to.be.false
-    })
-
-    it('returns true when "skipDomainInjectionForDomains" exists, but doesn\'t contain a matching glob pattern', () => {
-      expect(cors.shouldInjectDocumentDomain('http://www.cypress.io', {
-        skipDomainInjectionForDomains: ['*.foobar.com'],
-      })).to.be.true
-    })
-
-    it('returns true otherwise', () => {
-      expect(cors.shouldInjectDocumentDomain('http://www.cypress.io')).to.be.true
+    it('returns \'same-super-domain-origin\' when injectDocumentDomain is true', () => {
+      expect(cors.policyFromConfig({ injectDocumentDomain: true })).to.equal('same-super-domain-origin')
     })
   })
 })

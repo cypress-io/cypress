@@ -7,13 +7,13 @@ import { WebpackDevServerConfig } from '../../src/devServer'
 import '../support'
 
 const expectWatchOverrides = (webpackConfig: Configuration) => {
-  expect(webpackConfig.watchOptions?.ignored).to.contain('**/node_modules/!(@cypress/webpack-dev-server/dist/browser.js)**')
+  expect((webpackConfig.watchOptions?.ignored as RegExp)?.test('**/node_modules/!(@cypress/webpack-dev-server/dist/browser.js)**')).to.be.true
 }
 
 const expectPagesDir = (webpackConfig: Configuration, projectRoot: string) => {
   const ReactLoadablePlugin: any = webpackConfig.plugins?.find((plugin) => plugin.constructor.name === 'ReactLoadablePlugin')
 
-  expect(ReactLoadablePlugin.pagesDir).eq(path.join(projectRoot, 'pages'))
+  expect(ReactLoadablePlugin.pagesOrAppDir).eq(path.join(projectRoot, 'pages'))
 }
 
 const expectWebpackSpan = (webpackConfig: Configuration) => {
@@ -54,8 +54,8 @@ describe('nextHandler', function () {
   // can take a while since we install node_modules
   this.timeout(1000 * 60)
 
-  it('sources from a next-12 project', async () => {
-    const projectRoot = await scaffoldMigrationProject('next-12')
+  it('sources from a next-14 project', async () => {
+    const projectRoot = await scaffoldMigrationProject('next-14')
 
     process.chdir(projectRoot)
 
@@ -75,7 +75,7 @@ describe('nextHandler', function () {
   })
 
   it('throws if nodeVersion is set to bundled', async () => {
-    const projectRoot = await scaffoldMigrationProject('next-12')
+    const projectRoot = await scaffoldMigrationProject('next-14')
 
     process.chdir(projectRoot)
 

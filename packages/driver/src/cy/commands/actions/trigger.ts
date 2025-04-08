@@ -78,20 +78,19 @@ export default (Commands, Cypress, cy, state, config) => {
       // else through so user can specify what the event object needs
       let eventOptions = _.omit(options, 'log', '$el', 'position', 'x', 'y', 'waitForAnimations', 'animationDistanceThreshold')
 
-      if (options.log) {
-        options._log = Cypress.log({
-          $el: subject,
-          timeout: options.timeout,
-          consoleProps () {
-            return {
-              'Yielded': subject,
-              'Event options': eventOptions,
-            }
-          },
-        })
+      options._log = Cypress.log({
+        $el: subject,
+        hidden: options.log === false,
+        timeout: options.timeout,
+        consoleProps () {
+          return {
+            'Yielded': subject,
+            'Event options': eventOptions,
+          }
+        },
+      })
 
-        options._log.snapshot('before', { next: 'after' })
-      }
+      options._log?.snapshot('before', { next: 'after' })
 
       if (!_.isString(eventName)) {
         $errUtils.throwErrByPath('trigger.invalid_argument', {

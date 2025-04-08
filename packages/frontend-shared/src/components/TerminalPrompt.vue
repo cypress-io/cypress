@@ -10,6 +10,7 @@
       :value="command"
       data-cy="terminal-prompt-input"
       class="border-none flex-1"
+      aria-label="Terminal command"
     >
     <div class="font-sans">
       <CopyButton

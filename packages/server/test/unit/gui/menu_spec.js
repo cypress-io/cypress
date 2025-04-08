@@ -4,7 +4,6 @@ const _ = require('lodash')
 const os = require('os')
 const electron = require('electron')
 const appData = require(`../../../lib/util/app_data`)
-const open = require(`../../../lib/util/open`)
 const menu = require(`../../../lib/gui/menu`)
 
 const getMenuItem = function (label) {
@@ -25,6 +24,7 @@ describe('gui/menu', function () {
     sinon.stub(electron.Menu, 'buildFromTemplate')
     sinon.stub(electron.Menu, 'setApplicationMenu')
     electron.shell.openExternal = sinon.stub()
+    electron.shell.openPath = sinon.stub()
   })
 
   it('builds menu from template and sets it', () => {
@@ -77,10 +77,9 @@ describe('gui/menu', function () {
     })
 
     it('opens app data directory when View App Data is clicked', () => {
-      sinon.stub(open, 'opn')
       menu.set()
       getSubMenuItem(getMenuItem('File'), 'View App Data').click()
-      expect(open.opn).to.be.calledWith(appData.path())
+      expect(electron.shell.openPath).to.be.calledWith(appData.path())
     })
 
     it('calls logout callback when Log Out is clicked', () => {

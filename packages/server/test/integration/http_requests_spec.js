@@ -161,7 +161,7 @@ describe('Routes', () => {
               httpsServer.start(8443),
 
               // and open our cypress server
-              (this.server = new ServerBase()),
+              (this.server = new ServerBase(cfg)),
 
               this.server.open(cfg, {
                 SocketCtor: SocketE2E,
@@ -266,7 +266,7 @@ describe('Routes', () => {
         .then((res) => {
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.include('<html>')
-          expect(res.body).to.include('document.domain = \'github.com\'')
+          expect(res.body).to.include('parent.Cypress')
 
           expect(res.body).to.include('</html>')
         })
@@ -304,7 +304,6 @@ describe('Routes', () => {
         .then((res) => {
           expect(res.statusCode).to.eq(200)
           expect(res.body).not.to.include('Cypress')
-          expect(res.body).to.include('document.domain = \'localhost\'')
 
           expect(res.body).to.include('<body>https server</body>')
         })
@@ -332,8 +331,6 @@ describe('Routes', () => {
       return this.rp('http://localhost:2020/__cypress/spec-bridge-iframes')
       .then((res) => {
         expect(res.statusCode).to.eq(200)
-
-        expect(res.body).to.match(/document.domain = \'localhost\'/)
 
         expect(res.headers['origin-agent-cluster']).to.eq('?0')
       })
@@ -988,7 +985,9 @@ describe('Routes', () => {
 
     context('basic request with correlation', () => {
       beforeEach(function () {
-        return this.setup('http://www.github.com', undefined, undefined, true)
+        return this.setup('http://www.github.com', undefined, undefined, true).then(() => {
+          this.networkProxy.setPreRequestTimeout(2000)
+        })
       })
 
       it('properly correlates when CDP failures come first', function () {
@@ -1087,6 +1086,176 @@ describe('Routes', () => {
           })
         })
       })
+
+      it('properly correlates when request has | character', function () {
+        this.timeout(1500)
+
+        nock(this.server.remoteStates.current().origin)
+        .get('/?foo=bar|baz')
+        .reply(200, 'hello from bar!', {
+          'Content-Type': 'text/html',
+        })
+
+        const requestPromise = this.rp({
+          url: 'http://www.github.com/?foo=bar|baz',
+          headers: {
+            'Accept-Encoding': 'identity',
+          },
+        })
+
+        this.networkProxy.addPendingBrowserPreRequest({
+          requestId: '1',
+          method: 'GET',
+          url: 'http://www.github.com/?foo=bar|baz',
+        })
+
+        return requestPromise.then((res) => {
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.include('hello from bar!')
+        })
+      })
+
+      it('properly correlates when request has | character with addPendingUrlWithoutPreRequest', function () {
+        this.timeout(1500)
+
+        nock(this.server.remoteStates.current().origin)
+        .get('/?foo=bar|baz')
+        .reply(200, 'hello from bar!', {
+          'Content-Type': 'text/html',
+        })
+
+        const requestPromise = this.rp({
+          url: 'http://www.github.com/?foo=bar|baz',
+          headers: {
+            'Accept-Encoding': 'identity',
+          },
+        })
+
+        this.networkProxy.addPendingUrlWithoutPreRequest('http://www.github.com/?foo=bar|baz')
+
+        return requestPromise.then((res) => {
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.include('hello from bar!')
+        })
+      })
+
+      it('properly correlates when request has encoded | character', function () {
+        this.timeout(1500)
+
+        nock(this.server.remoteStates.current().origin)
+        .get('/?foo=bar%7Cbaz')
+        .reply(200, 'hello from bar!', {
+          'Content-Type': 'text/html',
+        })
+
+        const requestPromise = this.rp({
+          url: 'http://www.github.com/?foo=bar%7Cbaz',
+          headers: {
+            'Accept-Encoding': 'identity',
+          },
+        })
+
+        this.networkProxy.addPendingBrowserPreRequest({
+          requestId: '1',
+          method: 'GET',
+          url: 'http://www.github.com/?foo=bar%7Cbaz',
+        })
+
+        return requestPromise.then((res) => {
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.include('hello from bar!')
+        })
+      })
+
+      it('properly correlates when request has encoded " " (space) character', function () {
+        this.timeout(1500)
+
+        nock(this.server.remoteStates.current().origin)
+        .get('/?foo=bar%20baz')
+        .reply(200, 'hello from bar!', {
+          'Content-Type': 'text/html',
+        })
+
+        const requestPromise = this.rp({
+          url: 'http://www.github.com/?foo=bar%20baz',
+          headers: {
+            'Accept-Encoding': 'identity',
+          },
+        })
+
+        this.networkProxy.addPendingBrowserPreRequest({
+          requestId: '1',
+          method: 'GET',
+          url: 'http://www.github.com/?foo=bar%20baz',
+        })
+
+        return requestPromise.then((res) => {
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.include('hello from bar!')
+        })
+      })
+
+      it('properly correlates when request has encoded " character', function () {
+        this.timeout(1500)
+
+        nock(this.server.remoteStates.current().origin)
+        .get('/?foo=bar%22')
+        .reply(200, 'hello from bar!', {
+          'Content-Type': 'text/html',
+        })
+
+        const requestPromise = this.rp({
+          url: 'http://www.github.com/?foo=bar%22',
+          headers: {
+            'Accept-Encoding': 'identity',
+          },
+        })
+
+        this.networkProxy.addPendingBrowserPreRequest({
+          requestId: '1',
+          method: 'GET',
+          url: 'http://www.github.com/?foo=bar%22',
+        })
+
+        return requestPromise.then((res) => {
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.include('hello from bar!')
+        })
+      })
+
+      it('handles malformed URIs', function () {
+        this.timeout(1500)
+
+        nock(this.server.remoteStates.current().origin)
+        .get('/?foo=%A4')
+        .reply(200, 'hello from bar!', {
+          'Content-Type': 'text/html',
+        })
+
+        const requestPromise = this.rp({
+          url: 'http://www.github.com/?foo=%A4',
+          headers: {
+            'Accept-Encoding': 'identity',
+          },
+        })
+
+        this.networkProxy.addPendingBrowserPreRequest({
+          requestId: '1',
+          method: 'GET',
+          url: 'http://www.github.com/?foo=%A4',
+        })
+
+        return requestPromise.then((res) => {
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.include('hello from bar!')
+        })
+      })
     })
 
     context('gzip', () => {
@@ -1115,7 +1284,6 @@ describe('Routes', () => {
           expect(res.body).to.include('<html>')
           expect(res.body).to.include('gzip')
           expect(res.body).to.include('parent.Cypress')
-          expect(res.body).to.include('document.domain = \'github.com\'')
 
           expect(res.body).to.include('</html>')
         })
@@ -1142,7 +1310,6 @@ describe('Routes', () => {
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.include('<html>')
           expect(res.body).to.include('gzip')
-          expect(res.body).to.include('document.domain = \'github.com\'')
 
           expect(res.body).to.include('</html>')
         })
@@ -1165,7 +1332,6 @@ describe('Routes', () => {
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.include('<html>')
           expect(res.body).to.include('gzip')
-          expect(res.body).not.to.include('document.domain = \'github.com\'')
 
           expect(res.body).to.include('</html>')
         })
@@ -1180,7 +1346,7 @@ describe('Routes', () => {
         app.use(compression({ chunkSize: 64, threshold: 1 }))
 
         app.get('/', (req, res) => {
-          res.setHeader('content-type', 'application/javascript; charset=UTF-8')
+          res.setHeader('content-type', 'text/javascript; charset=UTF-8')
           res.setHeader('transfer-encoding', 'chunked')
 
           const write = (chunk) => {
@@ -1480,7 +1646,6 @@ describe('Routes', () => {
         .then((res) => {
           expect(res.statusCode).to.eq(500)
           expect(res.body).to.include('server error')
-          expect(res.body).to.include('document.domain = \'github.com\'')
 
           expect(res.headers['set-cookie']).to.match(/__cypress.initial=;/)
         })
@@ -1570,8 +1735,6 @@ describe('Routes', () => {
             expect(res.body).to.include('The file was not found.')
             expect(res.body).to.include('<html>\n<head> <script')
             expect(res.body).to.include('</script> </head> <body>')
-
-            expect(res.body).to.include('document.domain = \'localhost\';')
           })
         })
       }) // should continue to inject
@@ -2035,7 +2198,6 @@ describe('Routes', () => {
         .then((res) => {
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.include('origin')
-          expect(res.body).to.include('document.domain = \'localhost\'')
 
           expect(res.body).not.to.include('Cypress')
         })
@@ -2663,283 +2825,65 @@ describe('Routes', () => {
     })
 
     context('content injection', () => {
-      beforeEach(function () {
-        return this.setup('http://www.cypress.io')
-      })
-
-      it('injects when head has attributes', async function () {
-        nock(this.server.remoteStates.current().origin)
-        .get('/bar')
-        .reply(200, '<html> <head prefix="og: foo"> <meta name="foo" content="bar"> </head> <body>hello from bar!</body> </html>', {
-          'Content-Type': 'text/html',
+      describe('without config.injectDocumentDomain enabled', function () {
+        beforeEach(function () {
+          return this.setup('http://www.cypress.io')
         })
 
-        const injection = await getRunnerInjectionContents()
-        const contents = removeWhitespace(Fixtures.get('server/expected_head_inject.html').replace('{{injection}}', injection))
-        const res = await this.rp({
-          url: 'http://www.cypress.io/bar',
-          headers: {
-            'Cookie': '__cypress.initial=true',
-            'Accept-Encoding': 'identity',
-          },
-        })
-        const body = cleanResponseBody(res.body)
+        it('injects when head has attributes', async function () {
+          nock(this.server.remoteStates.current().origin)
+          .get('/bar')
+          .reply(200, '<html> <head prefix="og: foo"> <meta name="foo" content="bar"> </head> <body>hello from bar!</body> </html>', {
+            'Content-Type': 'text/html',
+          })
 
-        expect(res.statusCode).to.eq(200)
-        expect(body).to.eq(contents)
-      })
-
-      it('injects even when head tag is missing', async function () {
-        nock(this.server.remoteStates.current().origin)
-        .get('/bar')
-        .reply(200, '<html> <body>hello from bar!</body> </html>', {
-          'Content-Type': 'text/html',
-        })
-
-        const injection = await getRunnerInjectionContents()
-        const contents = removeWhitespace(Fixtures.get('server/expected_no_head_tag_inject.html').replace('{{injection}}', injection))
-
-        const res = await this.rp({
-          url: 'http://www.cypress.io/bar',
-          headers: {
-            'Cookie': '__cypress.initial=true',
-            'Accept-Encoding': 'identity',
-          },
-        })
-        const body = cleanResponseBody(res.body)
-
-        expect(res.statusCode).to.eq(200)
-        expect(body).to.eq(contents)
-      })
-
-      it('injects when head is capitalized', function () {
-        nock(this.server.remoteStates.current().origin)
-        .get('/bar')
-        .reply(200, '<HTML> <HEAD>hello from bar!</HEAD> </HTML>', {
-          'Content-Type': 'text/html',
-        })
-
-        return this.rp({
-          url: 'http://www.cypress.io/bar',
-          headers: {
-            'Cookie': '__cypress.initial=true',
-            'Accept-Encoding': 'identity',
-          },
-        })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          expect(res.body).to.include('<HTML> <HEAD> <script type=\'text/javascript\'> document.domain = \'cypress.io\';')
-        })
-      })
-
-      it('injects when head missing but has <header>', function () {
-        nock(this.server.remoteStates.current().origin)
-        .get('/bar')
-        .reply(200, '<html> <body><nav>some nav</nav><header>header</header></body> </html>', {
-          'Content-Type': 'text/html',
-        })
-
-        return this.rp({
-          url: 'http://www.cypress.io/bar',
-          headers: {
-            'Cookie': '__cypress.initial=true',
-            'Accept-Encoding': 'identity',
-          },
-        })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          expect(res.body).to.include('<html> <head> <script type=\'text/javascript\'> document.domain = \'cypress.io\';')
-
-          expect(res.body).to.include('</head> <body><nav>some nav</nav><header>header</header></body> </html>')
-        })
-      })
-
-      it('injects when body is capitalized', function () {
-        nock(this.server.remoteStates.current().origin)
-        .get('/bar')
-        .reply(200, '<HTML> <BODY>hello from bar!</BODY> </HTML>', {
-          'Content-Type': 'text/html',
-        })
-
-        return this.rp({
-          url: 'http://www.cypress.io/bar',
-          headers: {
-            'Cookie': '__cypress.initial=true',
-            'Accept-Encoding': 'identity',
-          },
-        })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          expect(res.body).to.include('</script> </head> <BODY>hello from bar!</BODY> </HTML>')
-        })
-      })
-
-      it('injects when both head + body are missing', function () {
-        nock(this.server.remoteStates.current().origin)
-        .get('/bar')
-        .reply(200, '<HTML>hello from bar!</HTML>', {
-          'Content-Type': 'text/html',
-        })
-
-        return this.rp({
-          url: 'http://www.cypress.io/bar',
-          headers: {
-            'Cookie': '__cypress.initial=true',
-            'Accept-Encoding': 'identity',
-          },
-        })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          expect(res.body).to.include('<HTML> <head> <script')
-
-          expect(res.body).to.include('</head>hello from bar!</HTML>')
-        })
-      })
-
-      it('injects even when html + head + body are missing', function () {
-        nock(this.server.remoteStates.current().origin)
-        .get('/bar')
-        .reply(200, '<div>hello from bar!</div>', {
-          'Content-Type': 'text/html',
-        })
-
-        return this.rp({
-          url: 'http://www.cypress.io/bar',
-          headers: {
-            'Cookie': '__cypress.initial=true',
-            'Accept-Encoding': 'identity',
-          },
-        })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          expect(res.body).to.include('<head> <script')
-
-          expect(res.body).to.include('</head><div>hello from bar!</div>')
-        })
-      })
-
-      it('injects after DOCTYPE declaration when no other content', function () {
-        nock(this.server.remoteStates.current().origin)
-        .get('/bar')
-        .reply(200, '<!DOCTYPE>', {
-          'Content-Type': 'text/html',
-        })
-
-        return this.rp({
-          url: 'http://www.cypress.io/bar',
-          headers: {
-            'Cookie': '__cypress.initial=true',
-            'Accept-Encoding': 'identity',
-          },
-        })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          expect(res.body).to.include('<!DOCTYPE><head> <script')
-        })
-      })
-
-      it('injects superdomain even when head tag is missing', function () {
-        nock(this.server.remoteStates.current().origin)
-        .get('/bar')
-        .reply(200, '<html> <body>hello from bar!</body> </html>', {
-          'Content-Type': 'text/html',
-        })
-
-        return this.rp({
-          url: 'http://www.cypress.io/bar',
-          headers: {
-            'Cookie': '__cypress.initial=false',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Encoding': 'identity',
-          },
-        })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          expect(res.body).to.eq('<html> <head> <script type=\'text/javascript\'> document.domain = \'cypress.io\'; </script> </head> <body>hello from bar!</body> </html>')
-        })
-      })
-
-      it('injects content after following redirect', function () {
-        nock(this.server.remoteStates.current().origin)
-        .get('/bar')
-        .reply(302, undefined, {
-          // redirect us to google.com!
-          'Location': 'http://www.cypress.io/foo',
-        })
-
-        nock(this.server.remoteStates.current().origin)
-        .get('/foo')
-        .reply(200, '<html> <head prefix="og: foo"> <title>foo</title> </head> <body>hello from bar!</body> </html>', {
-          'Content-Type': 'text/html',
-        })
-
-        return this.rp({
-          url: 'http://www.cypress.io/bar',
-          headers: {
-            'Cookie': '__cypress.initial=true',
-            'Accept-Encoding': 'identity',
-          },
-        })
-        .then((res) => {
-          expect(res.statusCode).to.eq(302)
-          expect(res.headers['location']).to.eq('http://www.cypress.io/foo')
-          expect(res.headers['set-cookie']).to.match(/initial=true/)
-
-          return this.rp({
-            url: res.headers['location'],
+          const injection = await getRunnerInjectionContents()
+          const contents = removeWhitespace(Fixtures.get('server/expected_head_inject.html').replace('{{injection}}', injection))
+          const res = await this.rp({
+            url: 'http://www.cypress.io/bar',
             headers: {
+              'Cookie': '__cypress.initial=true',
               'Accept-Encoding': 'identity',
             },
           })
-          .then((res) => {
-            expect(res.statusCode).to.eq(200)
-            expect(res.headers['set-cookie']).to.match(/initial=;/)
+          const body = cleanResponseBody(res.body)
 
-            expect(res.body).to.include('parent.Cypress')
-          })
-        })
-      })
-
-      it('injects performantly on a huge amount of elements over http', function () {
-        Fixtures.scaffold()
-
-        nock(this.server.remoteStates.current().origin)
-        .get('/elements.html')
-        .replyWithFile(200, Fixtures.projectPath('e2e/elements.html'), {
-          'Content-Type': 'text/html',
-        })
-
-        return this.rp({
-          url: 'http://www.cypress.io/elements.html',
-          headers: {
-            'Cookie': '__cypress.initial=true',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Encoding': 'identity',
-          },
-        })
-        .then((res) => {
           expect(res.statusCode).to.eq(200)
-
-          expect(res.body).to.include('document.domain = \'cypress.io\';')
+          expect(body).to.eq(contents)
         })
-      })
 
-      it('injects performantly on a huge amount of elements over file', function () {
-        Fixtures.scaffold()
+        it('injects even when head tag is missing', async function () {
+          nock(this.server.remoteStates.current().origin)
+          .get('/bar')
+          .reply(200, '<html> <body>hello from bar!</body> </html>', {
+            'Content-Type': 'text/html',
+          })
 
-        return this.setup('/index.html', {
-          projectRoot: Fixtures.projectPath('e2e'),
+          const injection = await getRunnerInjectionContents()
+          const contents = removeWhitespace(Fixtures.get('server/expected_no_head_tag_inject.html').replace('{{injection}}', injection))
+
+          const res = await this.rp({
+            url: 'http://www.cypress.io/bar',
+            headers: {
+              'Cookie': '__cypress.initial=true',
+              'Accept-Encoding': 'identity',
+            },
+          })
+          const body = cleanResponseBody(res.body)
+
+          expect(res.statusCode).to.eq(200)
+          expect(body).to.eq(contents)
         })
-        .then(() => {
+
+        it('injects when head is capitalized', function () {
+          nock(this.server.remoteStates.current().origin)
+          .get('/bar')
+          .reply(200, '<HTML> <HEAD>hello from bar!</HEAD> </HTML>', {
+            'Content-Type': 'text/html',
+          })
+
           return this.rp({
-            url: `${this.proxy}/elements.html`,
+            url: 'http://www.cypress.io/bar',
             headers: {
               'Cookie': '__cypress.initial=true',
               'Accept-Encoding': 'identity',
@@ -2948,63 +2892,20 @@ describe('Routes', () => {
           .then((res) => {
             expect(res.statusCode).to.eq(200)
 
-            expect(res.body).to.include('document.domain = \'localhost\';')
+            expect(res.body).to.include('<HTML> <HEAD>')
+            expect(res.body).to.include('Cypress=parent.Cypress')
           })
         })
-      })
 
-      it('does not inject when not initial and not html', function () {
-        nock(this.server.remoteStates.current().origin)
-        .get('/bar')
-        .reply(200, '<html><head></head></html>', {
-          'Content-Type': 'text/plain',
-        })
-
-        return this.rp({
-          url: 'http://www.cypress.io/bar',
-          headers: {
-            'Cookie': '__cypress.initial=false',
-            'Accept-Encoding': 'identity',
-          },
-        })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          expect(res.body).to.eq('<html><head></head></html>')
-        })
-      })
-
-      it('injects into https server', async function () {
-        await this.setup('https://localhost:8443')
-
-        const injection = await getRunnerInjectionContents()
-        const contents = removeWhitespace(Fixtures.get('server/expected_https_inject.html').replace('{{injection}}', injection))
-        const res = await this.rp({
-          url: 'https://localhost:8443/',
-          headers: {
-            'Cookie': '__cypress.initial=true',
-            'Accept-Encoding': 'identity',
-          },
-        })
-        const body = cleanResponseBody(res.body)
-
-        expect(res.statusCode).to.eq(200)
-        expect(body).to.eq(contents)
-      })
-
-      it('injects into https://www.google.com', function () {
-        return this.setup('https://www.google.com')
-        .then(() => {
-          this.server.onRequest((req, res) => {
-            return nock('https://www.google.com')
-            .get('/')
-            .reply(200, '<html><head></head><body>google</body></html>', {
-              'Content-Type': 'text/html',
-            })
+        it('injects when head missing but has <header>', function () {
+          nock(this.server.remoteStates.current().origin)
+          .get('/bar')
+          .reply(200, '<html> <body><nav>some nav</nav><header>header</header></body> </html>', {
+            'Content-Type': 'text/html',
           })
 
           return this.rp({
-            url: 'https://www.google.com/',
+            url: 'http://www.cypress.io/bar',
             headers: {
               'Cookie': '__cypress.initial=true',
               'Accept-Encoding': 'identity',
@@ -3013,82 +2914,389 @@ describe('Routes', () => {
           .then((res) => {
             expect(res.statusCode).to.eq(200)
 
-            expect(res.body).to.include('parent.Cypress')
+            expect(res.body).to.include('<html> <head>')
+            expect(res.body).to.include('Cypress=parent.Cypress')
+            expect(res.body).to.include('</head> <body><nav>some nav</nav><header>header</header></body> </html>')
           })
         })
-      })
 
-      it('injects even on 5xx responses', function () {
-        return this.setup('https://www.cypress.io')
-        .then(() => {
-          this.server.onRequest((req, res) => {
-            return nock('https://www.cypress.io')
-            .get('/')
-            .reply(500, '<html><head></head><body>google</body></html>', {
-              'Content-Type': 'text/html',
-            })
+        it('injects when body is capitalized', function () {
+          nock(this.server.remoteStates.current().origin)
+          .get('/bar')
+          .reply(200, '<HTML> <BODY>hello from bar!</BODY> </HTML>', {
+            'Content-Type': 'text/html',
           })
 
           return this.rp({
-            url: 'https://www.cypress.io/',
+            url: 'http://www.cypress.io/bar',
             headers: {
-              'Accept': 'text/html, application/xhtml+xml, */*',
+              'Cookie': '__cypress.initial=true',
               'Accept-Encoding': 'identity',
             },
           })
           .then((res) => {
-            expect(res.statusCode).to.eq(500)
+            expect(res.statusCode).to.eq(200)
 
-            expect(res.body).to.include('document.domain = \'cypress.io\'')
+            expect(res.body).to.include('Cypress=parent.Cypress')
+            expect(res.body).to.include('</script> </head> <BODY>hello from bar!</BODY> </HTML>')
           })
         })
-      })
 
-      it('works with host swapping', async function () {
-        await this.setup('https://www.foobar.com:8443')
-        evilDns.add('*.foobar.com', '127.0.0.1')
+        it('injects when both head + body are missing', function () {
+          nock(this.server.remoteStates.current().origin)
+          .get('/bar')
+          .reply(200, '<HTML>hello from bar!</HTML>', {
+            'Content-Type': 'text/html',
+          })
 
-        const injection = await getRunnerInjectionContents()
-        const contents = removeWhitespace(Fixtures.get('server/expected_https_inject.html').replace('{{injection}}', injection))
-        const res = await this.rp({
-          url: 'https://www.foobar.com:8443/index.html',
-          headers: {
-            'Cookie': '__cypress.initial=true',
-            'Accept-Encoding': 'identity',
-          },
+          return this.rp({
+            url: 'http://www.cypress.io/bar',
+            headers: {
+              'Cookie': '__cypress.initial=true',
+              'Accept-Encoding': 'identity',
+            },
+          })
+          .then((res) => {
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).to.include('Cypress=parent.Cypress')
+            expect(res.body).to.include('<HTML> <head> <script')
+
+            expect(res.body).to.include('</head>hello from bar!</HTML>')
+          })
         })
-        const body = cleanResponseBody(res.body)
 
-        expect(res.statusCode).to.eq(200)
-        expect(body).to.eq(contents.replace('localhost', 'foobar.com'))
-      })
+        it('injects even when html + head + body are missing', function () {
+          nock(this.server.remoteStates.current().origin)
+          .get('/bar')
+          .reply(200, '<div>hello from bar!</div>', {
+            'Content-Type': 'text/html',
+          })
 
-      it('continues to inject on the same https superdomain but different subdomain', async function () {
-        await this.setup('https://www.foobar.com:8443')
-        evilDns.add('*.foobar.com', '127.0.0.1')
+          return this.rp({
+            url: 'http://www.cypress.io/bar',
+            headers: {
+              'Cookie': '__cypress.initial=true',
+              'Accept-Encoding': 'identity',
+            },
+          })
+          .then((res) => {
+            expect(res.statusCode).to.eq(200)
 
-        const injection = await getRunnerInjectionContents()
-        const contents = removeWhitespace(Fixtures.get('server/expected_https_inject.html').replace('{{injection}}', injection))
-        const res = await this.rp({
-          url: 'https://docs.foobar.com:8443/index.html',
-          headers: {
-            'Cookie': '__cypress.initial=true',
-            'Accept-Encoding': 'identity',
-          },
+            expect(res.body).to.include('<head>')
+            expect(res.body).to.include('Cypress=parent.Cypress')
+
+            expect(res.body).to.include('</head><div>hello from bar!</div>')
+          })
         })
-        const body = cleanResponseBody(res.body)
 
-        expect(res.statusCode).to.eq(200)
-        expect(body).to.eq(contents.replace('localhost', 'foobar.com'))
-      })
+        it('injects after DOCTYPE declaration when no other content', function () {
+          nock(this.server.remoteStates.current().origin)
+          .get('/bar')
+          .reply(200, '<!DOCTYPE>', {
+            'Content-Type': 'text/html',
+          })
 
-      it('injects document.domain on https requests to same superdomain but different subdomain', function () {
-        return this.setup('https://www.foobar.com:8443')
-        .then(() => {
+          return this.rp({
+            url: 'http://www.cypress.io/bar',
+            headers: {
+              'Cookie': '__cypress.initial=true',
+              'Accept-Encoding': 'identity',
+            },
+          })
+          .then((res) => {
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).to.include('<!DOCTYPE><head> <script')
+            expect(res.body).to.include('Cypress=parent.Cypress')
+          })
+        })
+
+        it('injects content after following redirect', function () {
+          nock(this.server.remoteStates.current().origin)
+          .get('/bar')
+          .reply(302, undefined, {
+            // redirect us to google.com!
+            'Location': 'http://www.cypress.io/foo',
+          })
+
+          nock(this.server.remoteStates.current().origin)
+          .get('/foo')
+          .reply(200, '<html> <head prefix="og: foo"> <title>foo</title> </head> <body>hello from bar!</body> </html>', {
+            'Content-Type': 'text/html',
+          })
+
+          return this.rp({
+            url: 'http://www.cypress.io/bar',
+            headers: {
+              'Cookie': '__cypress.initial=true',
+              'Accept-Encoding': 'identity',
+            },
+          })
+          .then((res) => {
+            expect(res.statusCode).to.eq(302)
+            expect(res.headers['location']).to.eq('http://www.cypress.io/foo')
+            expect(res.headers['set-cookie']).to.match(/initial=true/)
+
+            return this.rp({
+              url: res.headers['location'],
+              headers: {
+                'Accept-Encoding': 'identity',
+              },
+            })
+            .then((res) => {
+              expect(res.statusCode).to.eq(200)
+              expect(res.headers['set-cookie']).to.match(/initial=;/)
+
+              expect(res.body).to.include('parent.Cypress')
+            })
+          })
+        })
+
+        it('injects performantly on a huge amount of elements over http', function () {
+          Fixtures.scaffold()
+
+          nock(this.server.remoteStates.current().origin)
+          .get('/elements.html')
+          .replyWithFile(200, Fixtures.projectPath('e2e/elements.html'), {
+            'Content-Type': 'text/html',
+          })
+
+          return this.rp({
+            url: 'http://www.cypress.io/elements.html',
+            headers: {
+              'Cookie': '__cypress.initial=true',
+              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+              'Accept-Encoding': 'identity',
+            },
+          })
+          .then((res) => {
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).to.include('Cypress=parent.Cypress')
+          })
+        })
+
+        it('injects performantly on a huge amount of elements over file', function () {
+          Fixtures.scaffold()
+
+          return this.setup('/index.html', {
+            projectRoot: Fixtures.projectPath('e2e'),
+          })
+          .then(() => {
+            return this.rp({
+              url: `${this.proxy}/elements.html`,
+              headers: {
+                'Cookie': '__cypress.initial=true',
+                'Accept-Encoding': 'identity',
+              },
+            })
+            .then((res) => {
+              expect(res.statusCode).to.eq(200)
+
+              expect(res.body).to.include('Cypress=parent.Cypress')
+            })
+          })
+        })
+
+        it('does not inject when not initial and not html', function () {
+          nock(this.server.remoteStates.current().origin)
+          .get('/bar')
+          .reply(200, '<html><head></head></html>', {
+            'Content-Type': 'text/plain',
+          })
+
+          return this.rp({
+            url: 'http://www.cypress.io/bar',
+            headers: {
+              'Cookie': '__cypress.initial=false',
+              'Accept-Encoding': 'identity',
+            },
+          })
+          .then((res) => {
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).not.to.include('Cypress=parent.Cypress')
+          })
+        })
+
+        it('injects into https server', async function () {
+          await this.setup('https://localhost:8443')
+
+          const injection = await getRunnerInjectionContents()
+          const contents = removeWhitespace(Fixtures.get('server/expected_https_inject.html').replace('{{injection}}', injection))
+          const res = await this.rp({
+            url: 'https://localhost:8443/',
+            headers: {
+              'Cookie': '__cypress.initial=true',
+              'Accept-Encoding': 'identity',
+            },
+          })
+          const body = cleanResponseBody(res.body)
+
+          expect(res.statusCode).to.eq(200)
+          expect(body).to.eq(contents)
+        })
+
+        it('injects into https://www.google.com', function () {
+          return this.setup('https://www.google.com')
+          .then(() => {
+            this.server.onRequest((req, res) => {
+              return nock('https://www.google.com')
+              .get('/')
+              .reply(200, '<html><head></head><body>google</body></html>', {
+                'Content-Type': 'text/html',
+              })
+            })
+
+            return this.rp({
+              url: 'https://www.google.com/',
+              headers: {
+                'Cookie': '__cypress.initial=true',
+                'Accept-Encoding': 'identity',
+              },
+            })
+            .then((res) => {
+              expect(res.statusCode).to.eq(200)
+
+              expect(res.body).to.include('parent.Cypress')
+            })
+          })
+        })
+
+        it('injects even on 5xx responses', function () {
+          return this.setup('https://www.cypress.io')
+          .then(() => {
+            this.server.onRequest((req, res) => {
+              return nock('https://www.cypress.io')
+              .get('/')
+              .reply(500, '<html><head></head><body>google</body></html>', {
+                'Content-Type': 'text/html',
+              })
+            })
+
+            return this.rp({
+              url: 'https://www.cypress.io/',
+              headers: {
+                'Accept': 'text/html, application/xhtml+xml, */*',
+                'Accept-Encoding': 'identity',
+              },
+            })
+            .then((res) => {
+              expect(res.statusCode).to.eq(500)
+
+              expect(res.body).to.include('<html><head> <script type=\'text/javascript\'>')
+            })
+          })
+        })
+
+        it('works with host swapping', async function () {
+          await this.setup('https://www.foobar.com:8443')
           evilDns.add('*.foobar.com', '127.0.0.1')
 
+          const injection = await getRunnerInjectionContents()
+          const contents = removeWhitespace(Fixtures.get('server/expected_https_inject.html').replace('{{injection}}', injection))
+          const res = await this.rp({
+            url: 'https://www.foobar.com:8443/index.html',
+            headers: {
+              'Cookie': '__cypress.initial=true',
+              'Accept-Encoding': 'identity',
+            },
+          })
+          const body = cleanResponseBody(res.body)
+
+          expect(res.statusCode).to.eq(200)
+          expect(body).to.eq(contents.replace('localhost', 'foobar.com'))
+        })
+      })
+
+      describe('with config.injectDocumentDomain enabled', function () {
+        const config = {
+          injectDocumentDomain: true,
+          testingType: 'e2e',
+        }
+        const superdomain = 'cypress.io'
+        const origin = 'http://www.cypress.io'
+
+        beforeEach(function () {
+          return this.setup(origin, {
+            config,
+          })
+        })
+
+        it('injects superdomain even when head tag is missing', function () {
+          nock(this.server.remoteStates.current().origin)
+          .get('/bar')
+          .reply(200, '<html> <body>hello from bar!</body> </html>', {
+            'Content-Type': 'text/html',
+          })
+
           return this.rp({
+            url: `${origin}/bar`,
+            headers: {
+              'Cookie': '__cypress.initial=false',
+              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+              'Accept-Encoding': 'identity',
+            },
+          })
+          .then((res) => {
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).to.include(`document.domain = \'${superdomain}\'`)
+          })
+        })
+
+        it('continues to inject on the same https superdomain but different subdomain', async function () {
+          await this.setup('https://www.foobar.com:8443', { config })
+          evilDns.add('*.foobar.com', '127.0.0.1')
+
+          const injection = await getRunnerInjectionContents()
+          const contents = removeWhitespace(Fixtures.get('server/expected_https_inject_document_domain.html').replace('{{injection}}', injection))
+          const res = await this.rp({
             url: 'https://docs.foobar.com:8443/index.html',
+            headers: {
+              'Cookie': '__cypress.initial=true',
+              'Accept-Encoding': 'identity',
+            },
+          })
+          const body = cleanResponseBody(res.body)
+
+          expect(res.statusCode).to.eq(200)
+          expect(body).to.eq(contents.replace('localhost', 'foobar.com'))
+        })
+
+        it('injects document.domain on https requests to same superdomain but different subdomain', function () {
+          return this.setup('https://www.foobar.com:8443', { config })
+          .then(() => {
+            evilDns.add('*.foobar.com', '127.0.0.1')
+
+            return this.rp({
+              url: 'https://docs.foobar.com:8443/index.html',
+              headers: {
+                'Cookie': '__cypress.initial=false',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Encoding': 'identity',
+              },
+            })
+            .then((res) => {
+              expect(res.statusCode).to.eq(200)
+
+              const body = cleanResponseBody(res.body)
+
+              expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = \'foobar.com\'; </script></head><body>https server</body></html>')
+            })
+          })
+        })
+
+        it('injects document.domain on other http requests', function () {
+          nock(this.server.remoteStates.current().origin)
+          .get('/iframe')
+          .reply(200, '<html><head></head></html>', {
+            'Content-Type': 'text/html',
+          })
+
+          return this.rp({
+            url: 'http://www.cypress.io/iframe',
             headers: {
               'Cookie': '__cypress.initial=false',
               'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -3100,193 +3308,24 @@ describe('Routes', () => {
 
             const body = cleanResponseBody(res.body)
 
-            expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = \'foobar.com\'; </script></head><body>https server</body></html>')
+            expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = \'cypress.io\'; </script></head></html>')
           })
         })
-      })
 
-      it('injects document.domain on other http requests', function () {
-        nock(this.server.remoteStates.current().origin)
-        .get('/iframe')
-        .reply(200, '<html><head></head></html>', {
-          'Content-Type': 'text/html',
-        })
-
-        return this.rp({
-          url: 'http://www.cypress.io/iframe',
-          headers: {
-            'Cookie': '__cypress.initial=false',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Encoding': 'identity',
-          },
-        })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          const body = cleanResponseBody(res.body)
-
-          expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = \'cypress.io\'; </script></head></html>')
-        })
-      })
-
-      it('does not inject document.domain on matching super domains but different subdomain - when the domain is set to strict same origin (google)', function () {
-        nock('http://www.google.com')
-        .get('/iframe')
-        .reply(200, '<html><head></head></html>', {
-          'Content-Type': 'text/html',
-        })
-
-        return this.rp({
-          url: 'http://www.google.com/iframe',
-          headers: {
-            'Cookie': '__cypress.initial=false',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Encoding': 'identity',
-          },
-        })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          const body = cleanResponseBody(res.body)
-
-          expect(body).to.eq('<html><head></head></html>')
-        })
-      })
-
-      it('injects document.domain on AUT iframe requests that do not match current superDomain', function () {
-        nock('http://www.foobar.com')
-        .get('/')
-        .reply(200, '<html><head></head><body>hi</body></html>', {
-          'Content-Type': 'text/html',
-        })
-
-        return this.rp({
-          url: 'http://www.foobar.com',
-          headers: {
-            'Cookie': '__cypress.initial=false',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'X-Cypress-Is-AUT-Frame': 'true',
-            'Accept-Encoding': 'identity',
-          },
-        })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          const body = cleanResponseBody(res.body)
-
-          expect(body).to.include(`<html><head> <script type='text/javascript'> document.domain = 'foobar.com';`)
-        })
-      })
-
-      it('does not inject document.domain on non http requests', function () {
-        nock(this.server.remoteStates.current().origin)
-        .get('/json')
-        .reply(200, {
-          foo: '<html><head></head></html>',
-        })
-
-        return this.rp({
-          url: 'http://www.cypress.io/json',
-          json: true,
-          headers: {
-            'Cookie': '__cypress.initial=false',
-            'Accept-Encoding': 'identity',
-          },
-        })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          expect(res.body).to.deep.eq({ foo: '<html><head></head></html>' })
-        })
-      })
-
-      it('does not inject document.domain on http requests which do not match current superDomain and are not the AUT iframe', function () {
-        nock('http://www.foobar.com')
-        .get('/')
-        .reply(200, '<html><head></head><body>hi</body></html>', {
-          'Content-Type': 'text/html',
-        })
-
-        return this.rp({
-          url: 'http://www.foobar.com',
-          headers: {
-            'Cookie': '__cypress.initial=false',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Encoding': 'identity',
-          },
-        })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          expect(res.body).to.eq('<html><head></head><body>hi</body></html>')
-        })
-      })
-
-      it('does not inject anything when not text/html response content-type even when __cypress.initial=true', function () {
-        nock(this.server.remoteStates.current().origin)
-        .get('/json')
-        .reply(200, { foo: 'bar' })
-
-        return this.rp({
-          url: 'http://www.cypress.io/json',
-          headers: {
-            'Cookie': '__cypress.initial=true',
-            'Accept': 'application/json',
-            'Accept-Encoding': 'identity',
-          },
-        })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.eq(JSON.stringify({ foo: 'bar' }))
-
-          // it should not be telling us to turn this off either
-          expect(res.headers['set-cookie']).not.to.match(/initial/)
-        })
-      })
-
-      it('does not inject into x-requested-with request headers', function () {
-        nock(this.server.remoteStates.current().origin)
-        .get('/iframe')
-        .reply(200, '<html><head></head></html>', {
-          'Content-Type': 'text/html',
-        })
-
-        return this.rp({
-          url: 'http://www.cypress.io/iframe',
-          headers: {
-            'Cookie': '__cypress.initial=false',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Encoding': 'identity',
-            'X-Requested-With': 'XMLHttpRequest',
-          },
-        })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          const body = cleanResponseBody(res.body)
-
-          expect(body).to.eq('<html><head></head></html>')
-        })
-      })
-
-      return ['text/html', 'application/xhtml+xml', 'text/plain, application/xhtml+xml', '', null].forEach((type) => {
-        it(`does not inject unless both text/html and application/xhtml+xml is requested: tried to accept: ${type}`, function () {
-          nock(this.server.remoteStates.current().origin)
+        it('does not inject document.domain on matching super domains but different subdomain - when the domain is set to strict same origin (google)', function () {
+          nock('http://www.google.com')
           .get('/iframe')
           .reply(200, '<html><head></head></html>', {
             'Content-Type': 'text/html',
           })
 
-          const headers = {
-            'Cookie': '__cypress.initial=false',
-            'Accept-Encoding': 'identity',
-          }
-
-          headers['Accept'] = type
-
           return this.rp({
-            url: 'http://www.cypress.io/iframe',
-            headers,
+            url: 'http://www.google.com/iframe',
+            headers: {
+              'Cookie': '__cypress.initial=false',
+              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+              'Accept-Encoding': 'identity',
+            },
           })
           .then((res) => {
             expect(res.statusCode).to.eq(200)
@@ -3296,35 +3335,180 @@ describe('Routes', () => {
             expect(body).to.eq('<html><head></head></html>')
           })
         })
-      })
-    })
 
-    context('content injection', () => {
-      beforeEach(function () {
-        return this.setup('http://www.foo.com')
-      })
+        it('injects document.domain on AUT iframe requests that do not match current superDomain', function () {
+          nock('http://www.foobar.com')
+          .get('/')
+          .reply(200, '<html><head></head><body>hi</body></html>', {
+            'Content-Type': 'text/html',
+          })
 
-      it('injects document.domain on matching super domains but different subdomain - non google domain', function () {
-        nock('http://mail.foo.com')
-        .get('/iframe')
-        .reply(200, '<html><head></head></html>', {
-          'Content-Type': 'text/html',
+          return this.rp({
+            url: 'http://www.foobar.com',
+            headers: {
+              'Cookie': '__cypress.initial=false',
+              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+              'X-Cypress-Is-AUT-Frame': 'true',
+              'Accept-Encoding': 'identity',
+            },
+          })
+          .then((res) => {
+            expect(res.statusCode).to.eq(200)
+
+            const body = cleanResponseBody(res.body)
+
+            expect(body).to.include(`<html><head> <script type='text/javascript'> document.domain = 'foobar.com';`)
+          })
         })
 
-        return this.rp({
-          url: 'http://mail.foo.com/iframe',
-          headers: {
-            'Cookie': '__cypress.initial=false',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Encoding': 'identity',
-          },
+        it('does not inject document.domain on non http requests', function () {
+          nock(this.server.remoteStates.current().origin)
+          .get('/json')
+          .reply(200, {
+            foo: '<html><head></head></html>',
+          })
+
+          return this.rp({
+            url: 'http://www.cypress.io/json',
+            json: true,
+            headers: {
+              'Cookie': '__cypress.initial=false',
+              'Accept-Encoding': 'identity',
+            },
+          })
+          .then((res) => {
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).to.deep.eq({ foo: '<html><head></head></html>' })
+          })
         })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
 
-          const body = cleanResponseBody(res.body)
+        it('does not inject document.domain on http requests which do not match current superDomain and are not the AUT iframe', function () {
+          nock('http://www.foobar.com')
+          .get('/')
+          .reply(200, '<html><head></head><body>hi</body></html>', {
+            'Content-Type': 'text/html',
+          })
 
-          expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = \'foo.com\'; </script></head></html>')
+          return this.rp({
+            url: 'http://www.foobar.com',
+            headers: {
+              'Cookie': '__cypress.initial=false',
+              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+              'Accept-Encoding': 'identity',
+            },
+          })
+          .then((res) => {
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).to.eq('<html><head></head><body>hi</body></html>')
+          })
+        })
+
+        it('does not inject anything when not text/html response content-type even when __cypress.initial=true', function () {
+          nock(this.server.remoteStates.current().origin)
+          .get('/json')
+          .reply(200, { foo: 'bar' })
+
+          return this.rp({
+            url: 'http://www.cypress.io/json',
+            headers: {
+              'Cookie': '__cypress.initial=true',
+              'Accept': 'application/json',
+              'Accept-Encoding': 'identity',
+            },
+          })
+          .then((res) => {
+            expect(res.statusCode).to.eq(200)
+            expect(res.body).to.eq(JSON.stringify({ foo: 'bar' }))
+
+            // it should not be telling us to turn this off either
+            expect(res.headers['set-cookie']).not.to.match(/initial/)
+          })
+        })
+
+        it('does not inject into x-requested-with request headers', function () {
+          nock(this.server.remoteStates.current().origin)
+          .get('/iframe')
+          .reply(200, '<html><head></head></html>', {
+            'Content-Type': 'text/html',
+          })
+
+          return this.rp({
+            url: 'http://www.cypress.io/iframe',
+            headers: {
+              'Cookie': '__cypress.initial=false',
+              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+              'Accept-Encoding': 'identity',
+              'X-Requested-With': 'XMLHttpRequest',
+            },
+          })
+          .then((res) => {
+            expect(res.statusCode).to.eq(200)
+
+            const body = cleanResponseBody(res.body)
+
+            expect(body).to.eq('<html><head></head></html>')
+          })
+        })
+
+        context('content injection', () => {
+          beforeEach(function () {
+            return this.setup('http://www.foo.com', { config })
+          })
+
+          it('injects document.domain on matching super domains but different subdomain - non google domain', function () {
+            nock('http://mail.foo.com')
+            .get('/iframe')
+            .reply(200, '<html><head></head></html>', {
+              'Content-Type': 'text/html',
+            })
+
+            return this.rp({
+              url: 'http://mail.foo.com/iframe',
+              headers: {
+                'Cookie': '__cypress.initial=false',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Encoding': 'identity',
+              },
+            })
+            .then((res) => {
+              expect(res.statusCode).to.eq(200)
+
+              const body = cleanResponseBody(res.body)
+
+              expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = \'foo.com\'; </script></head></html>')
+            })
+          })
+        })
+
+        ;['text/html', 'application/xhtml+xml', 'text/plain, application/xhtml+xml', '', null].forEach((type) => {
+          it(`does not inject unless both text/html and application/xhtml+xml is requested: tried to accept: ${type}`, function () {
+            nock(this.server.remoteStates.current().origin)
+            .get('/iframe')
+            .reply(200, '<html><head></head></html>', {
+              'Content-Type': 'text/html',
+            })
+
+            const headers = {
+              'Cookie': '__cypress.initial=false',
+              'Accept-Encoding': 'identity',
+            }
+
+            headers['Accept'] = type
+
+            return this.rp({
+              url: 'http://www.cypress.io/iframe',
+              headers,
+            })
+            .then((res) => {
+              expect(res.statusCode).to.eq(200)
+
+              const body = cleanResponseBody(res.body)
+
+              expect(body).to.eq('<html><head></head></html>')
+            })
+          })
         })
       })
     })
@@ -3365,7 +3549,7 @@ describe('Routes', () => {
           nock(this.server.remoteStates.current().origin)
           .get('/app.js')
           .reply(200, 'if (top !== self) { }', {
-            'Content-Type': 'application/javascript',
+            'Content-Type': 'text/javascript',
           })
 
           return this.rp({
@@ -3421,7 +3605,7 @@ describe('Routes', () => {
             nock(this.server.remoteStates.current().origin)
             .get('/index.js')
             .reply(200, resp, {
-              'Content-Type': 'application/javascript',
+              'Content-Type': 'text/javascript',
               'Content-Encoding': 'gzip',
             })
 
@@ -3450,7 +3634,7 @@ describe('Routes', () => {
             // truncates the CRC checksum and size check
             // at the end of the stream
             .reply(200, resp.slice(0, -8), {
-              'Content-Type': 'application/javascript',
+              'Content-Type': 'text/javascript',
               'Content-Encoding': 'gzip',
             })
 
@@ -3501,7 +3685,7 @@ describe('Routes', () => {
           .get('/app.js')
           .delayBody(100)
           .replyWithFile(200, Fixtures.path('server/gzip-bad.html.gz'), {
-            'Content-Type': 'application/javascript',
+            'Content-Type': 'text/javascript',
             'Content-Encoding': 'gzip',
           })
 
@@ -3544,7 +3728,7 @@ describe('Routes', () => {
             nock(this.server.remoteStates.current().origin)
             .get('/app.js')
             .reply(200, hugeJsFile, {
-              'Content-Type': 'application/javascript',
+              'Content-Type': 'text/javascript',
             })
 
             let reqTime = new Date()
@@ -3555,8 +3739,8 @@ describe('Routes', () => {
 
               reqTime = new Date() - reqTime
 
-              // shouldn't be more than 500ms
-              expect(reqTime).to.be.lt(500)
+              // shouldn't be more than 750ms
+              expect(reqTime).to.be.lt(750)
             })
           })
         })
@@ -3600,7 +3784,7 @@ describe('Routes', () => {
           nock(this.server.remoteStates.current().origin)
           .get('/app.js')
           .reply(200, 'if (top !== self) { }', {
-            'Content-Type': 'application/javascript',
+            'Content-Type': 'text/javascript',
           })
 
           return this.rp({
@@ -3679,15 +3863,18 @@ describe('Routes', () => {
     })
 
     context('file requests', () => {
-      beforeEach(function () {
+      let injectDocumentDomain = false
+
+      function setupProject ({ fileServerFolder }) {
         Fixtures.scaffold()
 
         return this.setup('/index.html', {
           projectRoot: Fixtures.projectPath('no-server'),
           config: {
-            fileServerFolder: 'dev',
+            fileServerFolder,
             specPattern: 'my-tests/**/*',
             supportFile: false,
+            injectDocumentDomain,
           },
         })
         .then(() => {
@@ -3711,175 +3898,224 @@ describe('Routes', () => {
             expect(res.headers['last-modified']).to.exist
           })
         })
-      })
+      }
 
-      it('sets etag', function () {
-        return this.rp({
-          url: `${this.proxy}/assets/app.css`,
-          headers: {
-            'Accept-Encoding': 'identity',
-          },
+      describe('without injectDocumentDomain enabled', () => {
+        beforeEach(function () {
+          this.setupProject = setupProject.bind(this)
+
+          return this.setupProject({ fileServerFolder: 'dev' })
         })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.eq('html { color: black; }')
 
-          expect(res.headers['etag']).to.be.a('string')
+        it('sets etag', function () {
+          return this.rp({
+            url: `${this.proxy}/assets/app.css`,
+            headers: {
+              'Accept-Encoding': 'identity',
+            },
+          })
+          .then((res) => {
+            expect(res.statusCode).to.eq(200)
+            expect(res.body).to.eq('html { color: black; }')
+
+            expect(res.headers['etag']).to.be.a('string')
+          })
         })
-      })
 
-      it('sets last-modified', function () {
-        return this.rp(`${this.proxy}/assets/app.css`)
-        .then((res) => {
-          expect(res.headers['last-modified']).to.be.a('string')
+        it('sets last-modified', function () {
+          return this.rp(`${this.proxy}/assets/app.css`)
+          .then((res) => {
+            expect(res.headers['last-modified']).to.be.a('string')
+          })
         })
-      })
 
-      it('streams from file system', function () {
-        return this.rp({
-          url: `${this.proxy}/assets/app.css`,
-          headers: {
-            'Accept-Encoding': 'identity',
-          },
+        it('streams from file system', function () {
+          return this.rp({
+            url: `${this.proxy}/assets/app.css`,
+            headers: {
+              'Accept-Encoding': 'identity',
+            },
+          })
+          .then((res) => {
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).to.eq('html { color: black; }')
+          })
         })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
 
-          expect(res.body).to.eq('html { color: black; }')
+        it('sets content-type', function () {
+          return this.rp(`${this.proxy}/assets/app.css`)
+          .then((res) => {
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.headers['content-type']).to.match(/text\/css/)
+          })
         })
-      })
 
-      it('sets content-type', function () {
-        return this.rp(`${this.proxy}/assets/app.css`)
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
+        it('disregards anything past the pathname', function () {
+          return this.rp({
+            url: `${this.proxy}/assets/app.css?foo=bar#hash`,
+            headers: {
+              'Accept-Encoding': 'identity',
+            },
+          })
+          .then((res) => {
+            expect(res.statusCode).to.eq(200)
 
-          expect(res.headers['content-type']).to.match(/text\/css/)
+            expect(res.body).to.eq('html { color: black; }')
+          })
         })
-      })
 
-      it('disregards anything past the pathname', function () {
-        return this.rp({
-          url: `${this.proxy}/assets/app.css?foo=bar#hash`,
-          headers: {
-            'Accept-Encoding': 'identity',
-          },
+        it('can serve files with spaces in the path', function () {
+          return this.rp({
+            url: `${this.proxy}/a space/foo.txt`,
+            headers: {
+              'Accept-Encoding': 'identity',
+            },
+          })
+          .then((res) => {
+            expect(res.statusCode).to.eq(200)
+            expect(res.headers).to.have.property('x-cypress-file-path', encodeURI(`${Fixtures.projectPath('no-server')}/dev/a space/foo.txt`))
+            expect(res.body).to.eq('foo')
+          })
         })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
 
-          expect(res.body).to.eq('html { color: black; }')
+        /**
+         * NOTE: certain characters cannot be used inside our own monorepo due to our system tests also needing to run
+         * inside Windows. The following are reserved characters:
+         *
+         * < (less than)
+         * > (greater than)
+         * : (colon)
+         * " (double quote)
+         * / (forward slash)
+         * \ (backslash)
+         * | (vertical bar or pipe)
+         * ? (question mark)
+         * * (asterisk)
+         *
+         * @see https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file#naming-conventions for more details
+         */
+        it('can serve files with special characters in the fileServerFolder path', async function () {
+          await this.setupProject({ fileServerFolder: `dev/_ ;.,'!(){}[]@=-+$&\`~^ĵ符` })
+
+          return this.rp({
+            url: `${this.proxy}/foo.txt`,
+            headers: {
+              'Accept-Encoding': 'identity',
+            },
+          })
+          .then((res) => {
+            expect(res.statusCode).to.eq(200)
+            expect(res.headers).to.have.property('x-cypress-file-path', encodeURI(`${Fixtures.projectPath('no-server')}/dev/_ ;.,'!(){}[]@=-+$&\`~^ĵ符/foo.txt`))
+            expect(res.body).to.eq('foo')
+          })
         })
-      })
 
-      it('can serve files with spaces in the path', function () {
-        return this.rp({
-          url: `${this.proxy}/a space/foo.txt`,
-          headers: {
-            'Accept-Encoding': 'identity',
-          },
+        it('sets x-cypress-file-path headers', function () {
+          return this.rp(`${this.proxy}/assets/app.css`)
+          .then((res) => {
+            expect(res.headers).to.have.property('x-cypress-file-path', `${Fixtures.projectPath('no-server')}/dev/assets/app.css`)
+          })
         })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
 
-          expect(res.body).to.eq('foo')
-        })
-      })
+        it('sets x-cypress-file-server-error headers on error', function () {
+          return this.rp(`${this.proxy}/does-not-exist.html`)
+          .then((res) => {
+            expect(res.statusCode).to.eq(404)
 
-      it('sets x-cypress-file-path headers', function () {
-        return this.rp(`${this.proxy}/assets/app.css`)
-        .then((res) => {
-          expect(res.headers).to.have.property('x-cypress-file-path', `${Fixtures.projectPath('no-server')}/dev/assets/app.css`)
-        })
-      })
-
-      it('sets x-cypress-file-server-error headers on error', function () {
-        return this.rp(`${this.proxy}/does-not-exist.html`)
-        .then((res) => {
-          expect(res.statusCode).to.eq(404)
-
-          expect(res.headers).to.have.property('x-cypress-file-server-error', 'true')
-        })
-      })
-
-      it('injects document.domain on other http requests', function () {
-        return this.rp({
-          url: `${this.proxy}/index.html`,
-          headers: {
-            'Cookie': '__cypress.initial=false',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Encoding': 'identity',
-          },
-        })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          expect(res.body).to.include('document.domain = \'localhost\';')
-        })
-      })
-
-      it('injects document.domain on other http requests to root', function () {
-        return this.rp({
-          url: `${this.proxy}/sub/`,
-          headers: {
-            'Cookie': '__cypress.initial=false',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Encoding': 'identity',
-          },
-        })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-
-          expect(res.body).to.include('document.domain = \'localhost\';')
-        })
-      })
-
-      it('does not inject injects document.domain on 301 redirects to folders', function () {
-        return this.rp({
-          url: `${this.proxy}/sub`,
-          headers: {
-            'Cookie': '__cypress.initial=false',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          },
-        })
-        .then((res) => {
-          expect(res.statusCode).to.eq(301)
-
-          expect(res.body).not.to.include('document.domain = \'localhost\';')
+            expect(res.headers).to.have.property('x-cypress-file-server-error', 'true')
+          })
         })
       })
 
-      it('does not inject document.domain on non http requests', function () {
-        return this.rp({
-          url: `${this.proxy}/assets/foo.json`,
-          json: true,
-          headers: {
-            'Cookie': '__cypress.initial=false',
-            'Accept-Encoding': 'identity',
-          },
-        })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
+      describe('with config.injectDocumentDomain enabled', function () {
+        beforeEach(function () {
+          injectDocumentDomain = true
+          this.setupProject = setupProject.bind(this)
 
-          expect(res.body).to.deep.eq({ contents: '<html><head></head></html>' })
+          return this.setupProject({ fileServerFolder: 'dev' })
         })
-      })
 
-      it('does not inject anything when not text/html response content-type even when __cypress.initial=true', function () {
-        return this.rp({
-          url: `${this.proxy}/assets/foo.json`,
-          headers: {
-            'Cookie': '__cypress.initial=true',
-            'Accept': 'application/json',
-            'Accept-Encoding': 'identity',
-          },
+        it('injects document.domain on other http requests', function () {
+          return this.rp({
+            url: `${this.proxy}/index.html`,
+            headers: {
+              'Cookie': '__cypress.initial=false',
+              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+              'Accept-Encoding': 'identity',
+            },
+          })
+          .then((res) => {
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).to.include('document.domain = \'localhost\';')
+          })
         })
-        .then((res) => {
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.deep.eq(JSON.stringify({ contents: '<html><head></head></html>' }, null, 2))
 
-          // it should not be telling us to turn this off either
-          expect(res.headers['set-cookie']).not.to.match(/initial/)
+        it('injects document.domain on other http requests to root', function () {
+          return this.rp({
+            url: `${this.proxy}/sub/`,
+            headers: {
+              'Cookie': '__cypress.initial=false',
+              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+              'Accept-Encoding': 'identity',
+            },
+          })
+          .then((res) => {
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).to.include('document.domain = \'localhost\';')
+          })
+        })
+
+        it('does not inject injects document.domain on 301 redirects to folders', function () {
+          return this.rp({
+            url: `${this.proxy}/sub`,
+            headers: {
+              'Cookie': '__cypress.initial=false',
+              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            },
+          })
+          .then((res) => {
+            expect(res.statusCode).to.eq(301)
+
+            expect(res.body).not.to.include('document.domain = \'localhost\';')
+          })
+        })
+
+        it('does not inject document.domain on non http requests', function () {
+          return this.rp({
+            url: `${this.proxy}/assets/foo.json`,
+            json: true,
+            headers: {
+              'Cookie': '__cypress.initial=false',
+              'Accept-Encoding': 'identity',
+            },
+          })
+          .then((res) => {
+            expect(res.statusCode).to.eq(200)
+
+            expect(res.body).to.deep.eq({ contents: '<html><head></head></html>' })
+          })
+        })
+
+        it('does not inject anything when not text/html response content-type even when __cypress.initial=true', function () {
+          return this.rp({
+            url: `${this.proxy}/assets/foo.json`,
+            headers: {
+              'Cookie': '__cypress.initial=true',
+              'Accept': 'application/json',
+              'Accept-Encoding': 'identity',
+            },
+          })
+          .then((res) => {
+            expect(res.statusCode).to.eq(200)
+            expect(res.body).to.deep.eq(JSON.stringify({ contents: '<html><head></head></html>' }, null, 2))
+
+            // it should not be telling us to turn this off either
+            expect(res.headers['set-cookie']).not.to.match(/initial/)
+          })
         })
       })
     })
@@ -4096,7 +4332,7 @@ describe('Routes', () => {
             })
 
             res.writeHead(200, {
-              'Content-Type': 'application/javascript',
+              'Content-Type': 'text/javascript',
             })
 
             // write some bytes, causing

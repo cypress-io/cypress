@@ -6,7 +6,7 @@ const commitInfo = require('@cypress/commit-info')
 const mockedEnv = require('mocked-env')
 
 const errors = require(`../../../lib/errors`)
-const api = require(`../../../lib/cloud/api`)
+const api = require(`../../../lib/cloud/api`).default
 const exception = require(`../../../lib/cloud/exception`)
 const recordMode = require(`../../../lib/modes/record`)
 const ciProvider = require(`../../../lib/util/ci_provider`)
@@ -416,8 +416,7 @@ describe('lib/modes/record', () => {
 
       return recordMode.createInstance(this.options)
       .then(() => {
-        expect(api.createInstance).to.be.calledWith({
-          runId: 'run-123',
+        expect(api.createInstance).to.be.calledWith('run-123', {
           groupId: 'group-123',
           machineId: 'machine-123',
           platform: {},

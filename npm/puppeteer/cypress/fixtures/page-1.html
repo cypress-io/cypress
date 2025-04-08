@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Page 1</title>
+    <link rel="stylesheet" href="/cypress/fixtures/styles.css"></link>
+  </head>
+  <body>
+    <main>
+      <h1>Page 1</h1>
+
+      <input />
+
+      <button>Open new tab</button>
+    </main>
+
+    <script>
+      document.querySelector('button').addEventListener('click', () => {
+        const text = document.querySelector('input').value
+
+        window.open(`/cypress/fixtures/page-2.html?text=${encodeURIComponent(text)}`)
+      })
+    </script>
+  </body>
+</html>

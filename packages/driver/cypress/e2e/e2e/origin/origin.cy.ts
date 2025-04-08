@@ -10,43 +10,45 @@ describe('cy.origin', { browser: '!webkit' }, () => {
     })
   })
 
-  it('creates and injects into google subdomains', () => {
+  if (!Cypress.config('injectDocumentDomain')) {
+    it('creates and does not inject into google subdomains', () => {
     // Intercept google to keep our tests independent from google.
-    cy.intercept('https://www.google.com', {
-      body: '<html><head><title></title></head><body><p>google.com</p></body></html>',
-    })
-
-    cy.intercept('https://accounts.google.com', {
-      body: '<html><head><title></title></head><body><p>accounts.google.com</p></body></html>',
-    })
-
-    cy.visit('https://www.google.com')
-    cy.visit('https://accounts.google.com')
-    cy.origin('https://accounts.google.com', () => {
-      cy.window().then((win) => {
-        expect(win.Cypress).to.exist
+      cy.intercept('https://www.google.com', {
+        body: '<html><head><title></title></head><body><p>google.com</p></body></html>',
       })
-    })
-  })
 
-  it('creates and injects into google subdomains when visiting in an origin block', () => {
-    // Intercept google to keep our tests independent from google.
-    cy.intercept('https://www.google.com', {
-      body: '<html><head><title></title></head><body><p>google.com</p></body></html>',
-    })
+      cy.intercept('https://accounts.google.com', {
+        body: '<html><head><title></title></head><body><p>accounts.google.com</p></body></html>',
+      })
 
-    cy.intercept('https://accounts.google.com', {
-      body: '<html><head><title></title></head><body><p>accounts.google.com</p></body></html>',
-    })
-
-    cy.visit('https://www.google.com')
-    cy.origin('https://accounts.google.com', () => {
+      cy.visit('https://www.google.com')
       cy.visit('https://accounts.google.com')
-      cy.window().then((win) => {
-        expect(win.Cypress).to.exist
+      cy.origin('https://accounts.google.com', () => {
+        cy.window().then((win) => {
+          expect(win.Cypress).to.exist
+        })
       })
     })
-  })
+
+    it('creates and does not inject into google subdomains when visiting in an origin block', () => {
+    // Intercept google to keep our tests independent from google.
+      cy.intercept('https://www.google.com', {
+        body: '<html><head><title></title></head><body><p>google.com</p></body></html>',
+      })
+
+      cy.intercept('https://accounts.google.com', {
+        body: '<html><head><title></title></head><body><p>accounts.google.com</p></body></html>',
+      })
+
+      cy.visit('https://www.google.com')
+      cy.origin('https://accounts.google.com', () => {
+        cy.visit('https://accounts.google.com')
+        cy.window().then((win) => {
+          expect(win.Cypress).to.exist
+        })
+      })
+    })
+  }
 
   it('passes viewportWidth/Height state to the secondary origin', () => {
     const expectedViewport = [320, 480]
@@ -152,60 +154,6 @@ describe('cy.origin', { browser: '!webkit' }, () => {
       })
 
       cy.log('after cy.origin')
-    })
-
-    it('passes runnable state to the secondary origin', () => {
-      const runnable = cy.state('runnable')
-      const expectedRunnable = {
-        clearTimeout: null,
-        isPending: null,
-        resetTimeout: null,
-        timeout: null,
-        id: runnable.id,
-        _currentRetry: runnable._currentRetry,
-        _timeout: 4000,
-        type: 'test',
-        title: 'passes runnable state to the secondary origin',
-        titlePath: [
-          'cy.origin',
-          'withBeforeEach',
-          'passes runnable state to the secondary origin',
-        ],
-        parent: {
-          id: runnable.parent.id,
-          type: 'suite',
-          title: 'withBeforeEach',
-          titlePath: [
-            'withBeforeEach',
-          ],
-          parent: {
-            id: runnable.parent.parent.id,
-            type: 'suite',
-            title: '',
-            titlePath: undefined,
-            ctx: {},
-          },
-          ctx: {},
-        },
-        ctx: {},
-      }
-
-      cy.origin('http://www.foobar.com:3500', { args: expectedRunnable }, (expectedRunnable) => {
-        const actualRunnable = cy.state('runnable')
-
-        expect(actualRunnable.titlePath()).to.deep.equal(expectedRunnable.titlePath)
-        expectedRunnable.titlePath = actualRunnable.titlePath
-
-        expect(actualRunnable.title).to.equal(expectedRunnable.title)
-        expect(actualRunnable.id).to.equal(expectedRunnable.id)
-        expect(actualRunnable.ctx).to.deep.equal(expectedRunnable.ctx)
-        expect(actualRunnable._timeout).to.equal(expectedRunnable._timeout)
-        expect(actualRunnable.type).to.equal(expectedRunnable.type)
-        expect(actualRunnable.callback).to.exist
-        expect(actualRunnable.timeout).to.exist
-        expect(actualRunnable.parent.title).to.equal(expectedRunnable.parent.title)
-        expect(actualRunnable.parent.type).to.equal(expectedRunnable.parent.type)
-      })
     })
 
     it('handles querying nested elements', () => {

@@ -11,6 +11,7 @@ import { autoBindDebug, hasTypeScriptInstalled, toPosix } from '../util'
 import _ from 'lodash'
 import { pathToFileURL } from 'url'
 import os from 'os'
+import semver from 'semver'
 import type { OTLPTraceExporterCloud } from '@packages/telemetry'
 import { telemetry, encodeTelemetryContext } from '@packages/telemetry'
 
@@ -48,6 +49,10 @@ export interface SerializedLoadConfigReply {
   requires: string[]
 }
 
+export interface DebugData {
+  filePreprocessorHandlerText?: string
+}
+
 /**
  * The ProjectConfigIpc is an EventEmitter wrapping the childProcess,
  * adding a "send" method for sending events from the parent process into the childProcess,
@@ -58,11 +63,13 @@ export class ProjectConfigIpc extends EventEmitter {
 
   constructor (
     readonly nodePath: string | undefined | null,
+    readonly nodeVersion: string | undefined | null,
     readonly projectRoot: string,
     readonly configFilePath: string,
     readonly configFile: string | false,
     readonly onError: (cypressError: CypressError, title?: string | undefined) => void,
     readonly onWarning: (cypressError: CypressError) => void,
+    readonly onDebugData: (debugData: DebugData) => void,
   ) {
     super()
     this._childProcess = this.forkConfigProcess()
@@ -129,6 +136,7 @@ export class ProjectConfigIpc extends EventEmitter {
    */
   once(evt: 'setupTestingType:reply', listener: (payload: SetupNodeEventsReply) => void): this
   once(evt: 'setupTestingType:error', listener: (error: CypressError) => void): this
+  once(evt: 'file:preprocessor:overridden', listener: (payload: { handlerText: string }) => void): this
   once (evt: string, listener: (...args: any[]) => void) {
     return super.once(evt, listener)
   }
@@ -236,6 +244,12 @@ export class ProjectConfigIpc extends EventEmitter {
         reject(err)
       })
 
+      this.once('file:preprocessor:overridden', ({ handlerText }) => {
+        this.onDebugData({
+          filePreprocessorHandlerText: handlerText,
+        })
+      })
+
       const handleWarning = (warningErr: CypressError) => {
         debug('plugins process warning:', warningErr.stack)
 
@@ -301,7 +315,23 @@ export class ProjectConfigIpc extends EventEmitter {
         // best option that leverages the existing modules we bundle in the binary.
         // @see ts-node esm loader https://typestrong.org/ts-node/docs/usage/#node-flags-and-other-tools
         // @see Node.js Loader API https://nodejs.org/api/esm.html#customizing-esm-specifier-resolution-algorithm
-        const tsNodeEsmLoader = `--experimental-specifier-resolution=node --loader ${tsNodeEsm}`
+        let tsNodeEsmLoader = `--experimental-specifier-resolution=node --loader ${tsNodeEsm}`
+
+        // starting in nodejs 20.19.0 and 22.7.0, the --experimental-detect-module option is now enabled by default.
+        // We need to disable it with the --no-experimental-detect-module flag.
+        // @see https://github.com/cypress-io/cypress/issues/30084
+        if (this.nodeVersion && (semver.gte(this.nodeVersion, '22.7.0') || semver.satisfies(this.nodeVersion, '>= 20.19.0 < 21.0.0'))) {
+          debug(`detected node version ${this.nodeVersion}, adding --no-experimental-detect-module option to child_process NODE_OPTIONS.`)
+          tsNodeEsmLoader = `${tsNodeEsmLoader} --no-experimental-detect-module`
+        }
+
+        // starting in nodejs 20.19.0 and 22.12.0, the --experimental-require-module option is now enabled by default.
+        // We need to disable it with the --no-experimental-require-module flag.
+        // @see https://github.com/cypress-io/cypress/issues/30715
+        if (this.nodeVersion && (semver.gte(this.nodeVersion, '22.12.0') || semver.satisfies(this.nodeVersion, '>= 20.19.0 < 21.0.0'))) {
+          debug(`detected node version ${this.nodeVersion}, adding --no-experimental-require-module option to child_process NODE_OPTIONS.`)
+          tsNodeEsmLoader = `${tsNodeEsmLoader} --no-experimental-require-module`
+        }
 
         if (childOptions.env.NODE_OPTIONS) {
           childOptions.env.NODE_OPTIONS += ` ${tsNodeEsmLoader}`

@@ -1,5 +1,6 @@
 {
-  "name": "cypress-ct-bad-missing-value",
+  "name": "cypress-ct-bad-syntax",
+  "version": "0.0.0-test",
   "exports": {
     "node": "./definition.js",
     "default": "./index.js"

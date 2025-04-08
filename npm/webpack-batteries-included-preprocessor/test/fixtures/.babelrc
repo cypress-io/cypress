@@ -1,6 +1,0 @@
-{
-  "__description__": "This is here to prove that .babelrc does not get used by babel-loader. It's not used for the compilation of this project.",
-  "plugins": [
-    "doesnt-exist"
-  ]
-}

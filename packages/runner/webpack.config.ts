@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { waitUntilIconsBuilt } from '../../scripts/ensure-icons'
 import { getCommonConfig, getSimpleConfig, getCopyWebpackPlugin } from '@packages/web-config/webpack.config.base'
 import path from 'path'
-import webpack from 'webpack'
+import type webpack from 'webpack'
 
 const commonConfig = getCommonConfig()
 const CopyWebpackPlugin = getCopyWebpackPlugin()
@@ -38,10 +38,6 @@ mainConfig.resolve = {
   alias: {
     'bluebird': require.resolve('bluebird'),
     'lodash': require.resolve('lodash'),
-    'mobx': require.resolve('mobx'),
-    'mobx-react': require.resolve('mobx-react'),
-    'react': require.resolve('react'),
-    'react-dom': require.resolve('react-dom'),
   },
 }
 

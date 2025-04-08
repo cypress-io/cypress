@@ -1,12 +1,12 @@
 # Building Release Artifacts
 
-The `cypress` NPM package consists of two main parts:
+The `cypress` npm package consists of two main parts:
 
-1. The `cypress` NPM package `.tgz` (built from [`cli`](../cli))
+1. The `cypress` npm package `.tgz` (built from [`cli`](../cli))
     * Contains the command line tool `cypress`, type definitions, and the [Module API](https://on.cypress.io/module-api).
-    * End users install this via NPM to the project's `node_modules`.
-2. The "binary" `.zip` (built from [`packages/server`](../packages/server))
-    * Contains the Electron app, `ffmpeg`, and built versions of the [`server`](../packages/server), [`desktop-gui`](../packages/desktop-gui), [`runner`](../packages/runner), [`example` project](../packages/example), and [`extension`](../packages/extension)
+    * End users install this via npm to the project's `node_modules` directory or via Yarn or pnpm similarly.
+2. The "binary" `.zip` (built from the [`packages`](../packages) directory)
+    * Contains the Electron app, `ffmpeg`, and built versions of the packages from the [`packages`](../packages) sub-directories (`frontend-shared`, `reporter` and `web-config` are not separately included).
         * Also contains all the production dependencies of the above.
     * This is installed when the `cli` is installed or when `cypress install` is run, to a system cache.
 
@@ -38,3 +38,9 @@ You can build the Cypress binary locally by running `yarn binary-build`, then pa
 If you're on macOS and building locally, you'll need a code-signing certificate in your keychain, which you can get by following the [instructions on Apple's website](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Procedures/Procedures.html#//apple_ref/doc/uid/TP40005929-CH4-SW30). Also, you'll also most likely want to skip notarization since it requires an Apple Developer Program account - set `SKIP_NOTARIZATION=1` when building locally to do this. [More info about code signing in CI](./code-signing.md).
 
 `yarn binary-zip` can be used to zip the built binary together.
+
+### Tips
+
+If you want to speed up the time it takes to package the binary, set `V8_SNAPSHOT_DISABLE_MINIFY=1`
+
+If you are on an M1, you need to set `RESET_ADHOC_SIGNATURE=1` in order to be able to actually run the binary after packaging it.

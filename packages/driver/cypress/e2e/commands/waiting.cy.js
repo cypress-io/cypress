@@ -943,15 +943,149 @@ describe('src/cy/commands/waiting', () => {
 
           this.logs.push(log)
         })
-
-        return null
       })
 
-      it('can turn off logging', () => {
-        cy.wait(10, { log: false }).then(function () {
-          const { lastLog } = this
+      describe('explicit wait time', function () {
+        it('can turn off logging when protocol is disabled', function () {
+          cy.state('isProtocolEnabled', false)
+          // Starting in Electron 28, we cannot use fetch or XHR from within about:blank. This is a workaround
+          // to ensure that we have a valid origin for our tests.
+          cy.visit('/fixtures/empty.html')
 
-          expect(lastLog).to.be.undefined
+          cy.on('_log:added', (attrs, log) => {
+            this.hiddenLog = log
+          })
+
+          cy.wait(10, { log: false }).then(function () {
+            const { lastWaitLog, hiddenLog } = this
+
+            expect(lastWaitLog).to.be.undefined
+            expect(hiddenLog).to.be.undefined
+          })
+        })
+
+        it('can send hidden log when protocol is enabled', function () {
+          cy.state('isProtocolEnabled', true)
+          // Starting in Electron 28, we cannot use fetch or XHR from within about:blank. This is a workaround
+          // to ensure that we have a valid origin for our tests.
+          cy.visit('/fixtures/empty.html')
+
+          cy.on('_log:added', (attrs, log) => {
+            this.hiddenLog = log
+          })
+
+          cy.wait(10, { log: false }).then(function () {
+            const { lastWaitLog, hiddenLog } = this
+
+            expect(lastWaitLog).to.be.undefined
+            expect(hiddenLog.get('name')).to.eq('wait')
+            expect(hiddenLog.get('hidden')).to.be.true
+            expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+          })
+        })
+      })
+
+      describe('wait for xhr', function () {
+        it('can turn off logging when protocol is disabled', function () {
+          cy.state('isProtocolEnabled', false)
+          // Starting in Electron 28, we cannot use fetch or XHR from within about:blank. This is a workaround
+          // to ensure that we have a valid origin for our tests.
+          cy.visit('/fixtures/empty.html')
+
+          cy.on('_log:added', (attrs, log) => {
+            if (attrs.name === 'wait') {
+              this.hiddenWaitLog = log
+            }
+          })
+
+          const response = { foo: 'foo' }
+
+          cy
+          .intercept('GET', /.*/, response).as('fetch')
+          .window().then((win) => {
+            xhrGet(win, '/foo')
+
+            return null
+          })
+          .wait('@fetch.response', { log: false })
+          .then(function (xhr) {
+            const { lastWaitLog, hiddenWaitLog } = this
+
+            expect(xhr.response.body).to.deep.eq(response)
+
+            expect(lastWaitLog).to.be.undefined
+            expect(hiddenWaitLog).to.be.undefined
+          })
+        })
+
+        it('can send hidden log when protocol is enabled', function () {
+          cy.state('isProtocolEnabled', true)
+          // Starting in Electron 28, we cannot use fetch or XHR from within about:blank. This is a workaround
+          // to ensure that we have a valid origin for our tests.
+          cy.visit('/fixtures/empty.html')
+
+          cy.on('_log:added', (attrs, log) => {
+            if (attrs.name === 'wait') {
+              this.hiddenWaitLog = log
+            }
+          })
+
+          const response = { foo: 'foo' }
+
+          cy
+          .intercept('GET', /.*/, response).as('fetch')
+          .window().then((win) => {
+            xhrGet(win, '/foo')
+
+            return null
+          })
+          .wait('@fetch.response', { log: false })
+          .then(function (xhr) {
+            const { lastWaitLog, hiddenWaitLog } = this
+
+            expect(xhr.response.body).to.deep.eq(response)
+
+            expect(lastWaitLog).to.be.undefined
+            expect(hiddenWaitLog).to.be.ok
+            expect(hiddenWaitLog.get('name')).to.eq('wait')
+            expect(hiddenWaitLog.get('hidden')).to.be.true
+            expect(hiddenWaitLog.get('snapshots').length, 'log snapshot length').to.eq(1)
+          })
+        })
+      })
+
+      it('can turn off logging for wait for xhr', function () {
+        cy.state('isProtocolEnabled', true)
+        // Starting in Electron 28, we cannot use fetch or XHR from within about:blank. This is a workaround
+        // to ensure that we have a valid origin for our tests.
+        cy.visit('/fixtures/empty.html')
+
+        cy.on('_log:added', (attrs, log) => {
+          if (attrs.name === 'wait') {
+            this.hiddenWaitLog = log
+          }
+        })
+
+        const response = { foo: 'foo' }
+
+        cy
+        .intercept('GET', /.*/, response).as('fetch')
+        .window().then((win) => {
+          xhrGet(win, '/foo')
+
+          return null
+        })
+        .wait('@fetch.response', { log: false })
+        .then(function (xhr) {
+          const { lastWaitLog, hiddenWaitLog } = this
+
+          expect(xhr.response.body).to.deep.eq(response)
+
+          expect(lastWaitLog).to.be.undefined
+          expect(hiddenWaitLog).to.be.ok
+          expect(hiddenWaitLog.get('name')).to.eq('wait')
+          expect(hiddenWaitLog.get('hidden')).to.be.true
+          expect(hiddenWaitLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
       })
 
@@ -1099,12 +1233,6 @@ describe('src/cy/commands/waiting', () => {
           })
           .wait(['@getFoo', '@getBar'])
         })
-      })
-
-      describe('function argument errors', () => {
-        it('.log')
-
-        it('#consoleProps')
       })
 
       describe('alias argument', () => {

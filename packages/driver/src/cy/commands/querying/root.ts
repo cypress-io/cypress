@@ -1,7 +1,9 @@
 export default (Commands, Cypress, cy, state) => {
-  Commands.addQuery('root', function root (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
-    const log = options.log !== false && Cypress.log({
+  Commands.addQuery('root', function root (options: Cypress.LogTimeoutOptions) {
+    options = options || {}
+    const log = Cypress.log({
       timeout: options.timeout,
+      hidden: options.log === false,
     })
 
     this.set('timeout', options.timeout)

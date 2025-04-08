@@ -3,7 +3,7 @@ import type { ViteDevServerConfig } from './devServer'
 
 const debug = debugFn('cypress:vite-dev-server:getVite')
 
-export type Vite = typeof import('vite')
+export type Vite = typeof import('vite-6')
 
 // "vite-dev-server" is bundled in the binary, so we need to require.resolve "vite"
 // from root of the active project since we don't bundle vite internally but rather

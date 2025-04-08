@@ -19,3 +19,5 @@ export {
 export { allowDestroy } from './allow-destroy'
 
 export { concatStream } from './concat-stream'
+
+export { DocumentDomainInjection } from './document-domain-injection'

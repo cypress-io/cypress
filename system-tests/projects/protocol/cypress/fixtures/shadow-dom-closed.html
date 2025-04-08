@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Shadow DOM Closed Fixture</title>
+</head>
+<body>
+  <h1>Shadow DOM Closed Fixture</h1>
+  <div id="shadow-root"></div>
+  <script>
+    const rootEl = document.getElementById('shadow-root')
+    const root = rootEl.attachShadow({ mode: 'closed' })
+
+    root.innerHTML = `<div id="in-shadow">
+      <p>Shadow DOM content</p>
+    </div>`
+  </script>
+</body>
+</html>

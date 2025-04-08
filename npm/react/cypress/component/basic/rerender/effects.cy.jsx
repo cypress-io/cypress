@@ -1,7 +1,6 @@
 /// <reference types="cypress" />
 import React, { useLayoutEffect, useEffect } from 'react'
-import ReactDom from 'react-dom'
-import { mount, getContainerEl } from '@cypress/react'
+import { mount } from '@cypress/react'
 
 it('should not run unmount effect cleanup when rerendering', () => {
   const layoutEffectCleanup = cy.stub()
@@ -60,9 +59,14 @@ it('should run unmount effect cleanup when unmounting', () => {
       expect(effectCleanup).to.have.been.callCount(0)
     })
 
-    cy
-    .then(() => ReactDom.unmountComponentAtNode(getContainerEl()))
-    .then(() => {
+    // mount something else to trigger an unmount event
+    cy.mount(<div>Hello </div>)
+    .then(async () => {
+      // does not call useEffect in react 17 unmount synchronously.
+      // @see https://github.com/facebook/react/issues/20263
+      // to keep this test working, we need to flush the microtask queue.
+      await new Promise((r) => setTimeout(r))
+
       expect(layoutEffectCleanup).to.have.been.callCount(1)
       expect(effectCleanup).to.have.been.callCount(1)
     })

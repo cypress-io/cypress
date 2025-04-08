@@ -14,6 +14,8 @@ import systemTests from './system-tests'
 
 let CAPTURE_PROTOCOL_ENABLED = false
 let CAPTURE_PROTOCOL_MESSAGE: string | undefined
+let CAPTURE_PROTOCOL_UPLOAD_ENABLED = true
+let CAPTURE_PROTOCOL_INVALID_SIG = false
 
 import {
   TEST_PRIVATE,
@@ -32,7 +34,7 @@ postInstanceTestsResponse.actions = []
 export const postRunResponse = _.assign({}, postRunResponseWithWarnings, { warnings: [] })
 
 // mocked here rather than attempting to intercept and mock an s3 req
-export const CAPTURE_PROTOCOL_UPLOAD_URL = '/capture-protocol/upload/'
+export const CAPTURE_PROTOCOL_UPLOAD_URL = '/capture-protocol/upload/?x-amz-credential=1234abcd&x-amz-signature=1a2b3c-4d5e6f'
 
 let protocolStub: {
   value: string
@@ -94,7 +96,11 @@ const sendUploadUrls = function (req, res) {
   json.screenshotUploadUrls = screenshotUploadUrls
 
   if (CAPTURE_PROTOCOL_ENABLED) {
-    json.captureUploadUrl = `http://localhost:1234${CAPTURE_PROTOCOL_UPLOAD_URL}`
+    if (CAPTURE_PROTOCOL_UPLOAD_ENABLED) {
+      json.captureUploadUrl = `http://localhost:1234${CAPTURE_PROTOCOL_UPLOAD_URL}`
+    } else {
+      json.captureUploadUrl = `http://fake.test/url`
+    }
   }
 
   return res.json(json)
@@ -231,11 +237,18 @@ export const routeHandlers: Record<string, RouteHandler> = {
     res: async (req, res) => {
       if (protocolStub) {
         res.header('Content-Encoding', 'gzip')
-        res.header('x-cypress-signature', protocolStub.sign)
+        res.header('x-cypress-signature', CAPTURE_PROTOCOL_INVALID_SIG ? 'some-invalid-sig' : protocolStub.sign)
         res.status(200).send(protocolStub.compressed)
       } else {
         res.status(404).send('')
       }
+    },
+  },
+  putCaptureScript: {
+    method: 'put',
+    url: '/capture-protocol/script/*',
+    res: async (_, res) => {
+      res.status(413).send('')
     },
   },
   putCaptureProtocolUpload: {
@@ -256,7 +269,7 @@ export const routeHandlers: Record<string, RouteHandler> = {
   },
 }
 
-export const createRoutes = (props: DeepPartial<typeof routeHandlers>) => {
+export const createRoutes = (props: DeepPartial<typeof routeHandlers> = {}) => {
   return _.values(_.merge(_.cloneDeep(routeHandlers), props))
 }
 
@@ -452,6 +465,26 @@ export const disableCaptureProtocolWithMessage = (message: string) => {
 
   afterEach(() => {
     CAPTURE_PROTOCOL_MESSAGE = undefined
+  })
+}
+
+export const enableInvalidProtocolSignature = () => {
+  beforeEach(() => {
+    CAPTURE_PROTOCOL_INVALID_SIG = true
+  })
+
+  afterEach(() => {
+    CAPTURE_PROTOCOL_INVALID_SIG = false
+  })
+}
+
+export const disableCaptureProtocolUploadUrl = () => {
+  beforeEach(() => {
+    CAPTURE_PROTOCOL_UPLOAD_ENABLED = false
+  })
+
+  afterEach(() => {
+    CAPTURE_PROTOCOL_ENABLED = true
   })
 }
 

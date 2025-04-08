@@ -1,22 +1,22 @@
 import _ from 'lodash'
 import cs from 'classnames'
 import Markdown from 'markdown-it'
-import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
-import React, { Component } from 'react'
+import React, { useCallback, useState } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
-import appState, { AppState } from '../lib/app-state'
-import events, { Events } from '../lib/events'
+import appState from '../lib/app-state'
+import events from '../lib/events'
 import FlashOnClick from '../lib/flash-on-click'
 import StateIcon from '../lib/state-icon'
 import Tag from '../lib/tag'
-import { TimeoutID } from '../lib/types'
-import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
-import { Alias, AliasObject } from '../instruments/instrument-model'
+import type { TimeoutID } from '../lib/types'
+import runnablesStore from '../runnables/runnables-store'
+import type { Alias, AliasObject } from '../instruments/instrument-model'
 import { determineTagType } from '../sessions/utils'
 
-import CommandModel, { RenderProps } from './command-model'
+import type CommandModel from './command-model'
+import type { RenderProps } from './command-model'
 import TestError from '../errors/test-error'
 
 import ChevronIcon from '@packages/frontend-shared/src/assets/icons/chevron-down-small_x8.svg'
@@ -24,24 +24,58 @@ import HiddenIcon from '@packages/frontend-shared/src/assets/icons/general-eye-c
 import PinIcon from '@packages/frontend-shared/src/assets/icons/object-pin_x16.svg'
 import RunningIcon from '@packages/frontend-shared/src/assets/icons/status-running_x16.svg'
 
-const md = new Markdown({ breaks: true })
-
 const displayName = (model: CommandModel) => model.displayName || model.name
 const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
 
-export const formattedMessage = (message: string) => {
+const md = new Markdown()
+const mdOnlyHTML = new Markdown('zero').enable(['html_inline', 'html_block'])
+
+const asterisksRegex = /^\*\*(.+?)\*\*$/gs
+// regex to match everything outside of expected/actual values like:
+// 'expected **<span>** to exist in the DOM'
+// `expected **glob*glob** to contain *****`
+// `expected **<span>** to have CSS property **background-color** with the value **rgb(0, 0, 0)**, but the value was **rgba(0, 0, 0, 0)**`
+// `expected **foo** to have length above **1** but got **0**`
+// `Custom message expected **<span>** to exist in the DOM`
+const assertionRegex = /^.*?expected | to[^\*]+| not[^\*]+| with[^\*]+|,? but[^\*]+/g
+
+// used to format the display of command messages and error messages
+// we use markdown syntax within our error messages (code ticks, urls, etc)
+// and cy.log and Cypress.log supports markdown formatting
+export const formattedMessage = (message: string, name?: string) => {
   if (!message) return ''
 
-  const searchText = ['to match', 'to equal']
-  const regex = new RegExp(searchText.join('|'))
-  const split = message.split(regex)
-  const matchingText = searchText.find((text) => message.includes(text))
-  const textToConvert = [split[0].trim(), ...(matchingText ? [matchingText] : [])].join(' ')
-  const spaceEscapedText = textToConvert.replace(/^ +/gm, (initialSpaces) => '&#32;'.repeat(initialSpaces.length)) // &#32 is the HTML entity for a space
-  const converted = md.renderInline(spaceEscapedText)
-  const assertion = (split[1] && [`<strong>${split[1].trim()}</strong>`]) || []
+  // if the command has url args, don't format those chars like __ and ~~
+  if (name === 'visit' || name === 'request' || name === 'origin') {
+    return message
+  }
 
-  return [converted, ...assertion].join(' ')
+  // the command message is formatted as '(Optional Custom Msg:) expected <actual> to {assertion} <expected>'
+  const assertionArray = message.match(assertionRegex)
+
+  if (name === 'assert' && assertionArray) {
+    const expectedActualArray = () => {
+    // get the expected and actual values of assertions
+      const splitTrim = message.split(assertionRegex).filter(Boolean).map((s) => s.trim())
+
+      // replace outside double asterisks with strong tags
+      return splitTrim.map((s) => {
+      // we want to escape HTML chars so that they display
+      // correctly in the command log: <p> -> &lt;p&gt;
+        const HTMLEscapedString = mdOnlyHTML.renderInline(s)
+
+        return HTMLEscapedString.replace(asterisksRegex, `<strong>$1</strong>`)
+      })
+    }
+    // for assertions print the exact text so that characters like _ and *
+    // are not escaped in the assertion display when comparing values
+    const result = assertionArray.flatMap((s, index) => [s, expectedActualArray()[index]])
+
+    return result.join('')
+  }
+
+  // format markdown for everything else
+  return md.renderInline(message)
 }
 
 const invisibleMessage = (model: CommandModel) => {
@@ -226,7 +260,7 @@ const Message = observer(({ model }: MessageProps) => (
     )}
     {!!model.displayMessage && <span
       className='command-message-text'
-      dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage) }}
+      dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage, model.name) }}
     />}
   </span>
 ))
@@ -255,9 +289,6 @@ const Progress = observer(({ model }: ProgressProps) => {
 interface Props {
   model: CommandModel
   aliasesWithDuplicates: Array<Alias> | null
-  appState: AppState
-  events: Events
-  runnablesStore: RunnablesStore
   groupId?: number
 }
 
@@ -282,12 +313,12 @@ const CommandControls = observer(({ model, commandName, events }) => {
   const isSessionCommand = commandName === 'session'
   const displayNumOfChildren = !isSystemEvent && !isSessionCommand && model.hasChildren && !model.isOpen
 
-  const _removeStudioCommand = (e: React.MouseEvent<HTMLElement, globalThis.MouseEvent>) => {
+  const _removeStudioCommand = useCallback((e: React.MouseEvent<HTMLElement, globalThis.MouseEvent>) => {
     e.preventDefault()
     e.stopPropagation()
 
     events.emit('studio:remove:command', model.number)
-  }
+  }, [events, model.number])
 
   return (
     <span className='command-controls'>
@@ -334,134 +365,48 @@ const CommandControls = observer(({ model, commandName, events }) => {
   )
 })
 
-@observer
-class Command extends Component<Props> {
-  @observable isOpen: boolean|null = null
-  private _showTimeout?: TimeoutID
+const Command: React.FC<Props> = observer(({ model, aliasesWithDuplicates, groupId }) => {
+  const [showTimeout, setShowTimeout] = useState<TimeoutID | undefined>(undefined)
 
-  static defaultProps = {
-    appState,
-    events,
-    runnablesStore,
+  if (model.group && groupId !== model.group) {
+    return null
   }
 
-  render () {
-    const { model, aliasesWithDuplicates } = this.props
+  const commandName = model.name ? nameClassName(model.name) : ''
+  const groupPlaceholder: Array<JSX.Element> = []
 
-    if (model.group && this.props.groupId !== model.group) {
-      return null
+  let groupLevel = 0
+
+  if (model.groupLevel !== undefined) {
+    // cap the group nesting to 5 levels to keep the log text legible
+    groupLevel = model.groupLevel < 6 ? model.groupLevel : 5
+
+    for (let i = 1; i < groupLevel; i++) {
+      groupPlaceholder.push(<span key={`${groupId}-${i}`} className='command-group-block' />)
     }
-
-    const commandName = model.name ? nameClassName(model.name) : ''
-    const groupPlaceholder: Array<JSX.Element> = []
-
-    let groupLevel = 0
-
-    if (model.groupLevel !== undefined) {
-      // cap the group nesting to 5 levels to keep the log text legible
-      groupLevel = model.groupLevel < 6 ? model.groupLevel : 5
-
-      for (let i = 1; i < groupLevel; i++) {
-        groupPlaceholder.push(<span key={`${this.props.groupId}-${i}`} className='command-group-block' />)
-      }
-    }
-
-    return (
-      <>
-        <li className={cs('command', `command-name-${commandName}`, { 'command-is-studio': model.isStudio })}>
-          <div
-            className={cs(
-              'command-wrapper',
-                `command-state-${model.state}`,
-                `command-type-${model.type}`,
-                {
-                  'command-is-event': !!model.event,
-                  'command-is-pinned': this._isPinned(),
-                  'command-is-interactive': (model.hasConsoleProps || model.hasSnapshot),
-                },
-            )}
-          >
-            <NavColumns model={model} isPinned={this._isPinned()} toggleColumnPin={this._toggleColumnPin} />
-            <FlashOnClick
-              message='Printed output to your console'
-              onClick={this._toggleColumnPin}
-              shouldShowMessage={this._shouldShowClickMessage}
-              wrapperClassName={cs('command-pin-target', { 'command-group': !!this.props.groupId })}
-            >
-              <div
-                className='command-wrapper-text'
-                onMouseEnter={() => this._snapshot(true)}
-                onMouseLeave={() => this._snapshot(false)}
-              >
-                {groupPlaceholder}
-                <CommandDetails model={model} groupId={this.props.groupId} aliasesWithDuplicates={aliasesWithDuplicates} />
-                <CommandControls model={model} commandName={commandName} events={this.props.events} />
-              </div>
-            </FlashOnClick>
-          </div>
-          <Progress model={model} />
-          {this._children()}
-        </li>
-        {model.showError && (
-          <li>
-            <TestError
-              err={model.err}
-              testId={model.testId}
-              commandId={model.id}
-              // if the err is recovered and the current command is a log group, nest the test error within the group
-              groupLevel={model.group && model.hasChildren ? ++groupLevel : groupLevel}
-            />
-          </li>
-        )}
-      </>
-    )
   }
 
-  _children () {
-    const { appState, events, model, runnablesStore } = this.props
-
-    if (!model.hasChildren || !model.isOpen) {
-      return null
-    }
-
-    return (
-      <ul className='command-child-container'>
-        {model.children.map((child) => (
-          <Command
-            key={child.id}
-            model={child}
-            appState={appState}
-            events={events}
-            runnablesStore={runnablesStore}
-            aliasesWithDuplicates={null}
-            groupId={model.id}
-          />
-        ))}
-      </ul>
-    )
+  const _isPinned = () => {
+    return appState.pinnedSnapshotId === model.id
   }
 
-  _isPinned () {
-    return this.props.appState.pinnedSnapshotId === this.props.model.id
+  const _shouldShowClickMessage = () => {
+    return !appState.isRunning && !!model.hasConsoleProps
   }
 
-  _shouldShowClickMessage = () => {
-    return !this.props.appState.isRunning && !!this.props.model.hasConsoleProps
-  }
+  const _toggleColumnPin = () => {
+    if (appState.isRunning) return
 
-  @action _toggleColumnPin = () => {
-    if (this.props.appState.isRunning) return
+    const { testId, id } = model
 
-    const { testId, id } = this.props.model
-
-    if (this._isPinned()) {
-      this.props.appState.pinnedSnapshotId = null
-      this.props.events.emit('unpin:snapshot', testId, id)
-      this._snapshot(true)
+    if (_isPinned()) {
+      appState.pinnedSnapshotId = null
+      events.emit('unpin:snapshot', testId, id)
+      _snapshot(true)
     } else {
-      this.props.appState.pinnedSnapshotId = id as number
-      this.props.events.emit('pin:snapshot', testId, id)
-      this.props.events.emit('show:command', testId, id)
+      appState.pinnedSnapshotId = id as number
+      events.emit('pin:snapshot', testId, id)
+      events.emit('show:command', testId, id)
     }
   }
 
@@ -482,31 +427,90 @@ class Command extends Component<Props> {
   // over many commands, unless you're hovered for
   // 50ms, it won't show the snapshot at all. so we
   // optimize for both snapshot showing + restoring
-  _snapshot (show: boolean) {
-    const { model, runnablesStore } = this.props
-
+  const _snapshot = (show: boolean) => {
     if (show) {
       runnablesStore.attemptingShowSnapshot = true
 
-      this._showTimeout = setTimeout(() => {
+      setShowTimeout(setTimeout(() => {
         runnablesStore.showingSnapshot = true
-        this.props.events.emit('show:snapshot', model.testId, model.id)
-      }, 50)
+        events.emit('show:snapshot', model.testId, model.id)
+      }, 50))
     } else {
       runnablesStore.attemptingShowSnapshot = false
-      clearTimeout(this._showTimeout as TimeoutID)
+      clearTimeout(showTimeout as TimeoutID)
 
       setTimeout(() => {
         // if we are currently showing a snapshot but
         // we aren't trying to show a different snapshot
         if (runnablesStore.showingSnapshot && !runnablesStore.attemptingShowSnapshot) {
           runnablesStore.showingSnapshot = false
-          this.props.events.emit('hide:snapshot', model.testId, model.id)
+          events.emit('hide:snapshot', model.testId, model.id)
         }
       }, 50)
     }
   }
-}
+
+  return (
+    <>
+      <li className={cs('command', `command-name-${commandName}`, { 'command-is-studio': model.isStudio })}>
+        <div
+          className={cs(
+            'command-wrapper',
+              `command-state-${model.state}`,
+              `command-type-${model.type}`,
+              {
+                'command-is-event': !!model.event,
+                'command-is-pinned': _isPinned(),
+                'command-is-interactive': (model.hasConsoleProps || model.hasSnapshot),
+              },
+          )}
+        >
+          <NavColumns model={model} isPinned={_isPinned()} toggleColumnPin={_toggleColumnPin} />
+          <FlashOnClick
+            message='Printed output to your console'
+            onClick={_toggleColumnPin}
+            shouldShowMessage={_shouldShowClickMessage}
+            wrapperClassName={cs('command-pin-target', { 'command-group': !!groupId })}
+          >
+            <div
+              className='command-wrapper-text'
+              onMouseEnter={() => _snapshot(true)}
+              onMouseLeave={() => _snapshot(false)}
+            >
+              {groupPlaceholder}
+              <CommandDetails model={model} groupId={groupId} aliasesWithDuplicates={aliasesWithDuplicates} />
+              <CommandControls model={model} commandName={commandName} events={events} />
+            </div>
+          </FlashOnClick>
+        </div>
+        <Progress model={model} />
+        {model.hasChildren && model.isOpen && (
+          <ul className='command-child-container'>
+            {model.children.map((child) => (
+              <Command
+                key={child.id}
+                model={child}
+                aliasesWithDuplicates={null}
+                groupId={model.id}
+              />
+            ))}
+          </ul>
+        )}
+      </li>
+      {model.showError && (
+        <li>
+          <TestError
+            err={model.err}
+            testId={model.testId}
+            commandId={model.id}
+            // if the err is recovered and the current command is a log group, nest the test error within the group
+            groupLevel={model.group && model.hasChildren ? ++groupLevel : groupLevel}
+          />
+        </li>
+      )}
+    </>
+  )
+})
 
 export { Aliases, AliasesReferences, Message, Progress }
 

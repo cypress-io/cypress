@@ -106,7 +106,7 @@ describe('cloud debug test filtering', () => {
 
     cy.get('.debug-dismiss').contains('2 / 4 tests').click().waitForSpecToFinish()
 
-    // suite.only is respected
+    // suite only is respected
     cy.withCtx((ctx) => {
       ctx.coreData.cloudProject.testsForRunResults = {
         'cypress/e2e/skip-and-only.cy.js': ['t3', 's1 t4'],

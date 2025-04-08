@@ -61,15 +61,37 @@ describe('src/cy/commands/exec', () => {
         return null
       })
 
-      it('can turn off logging', () => {
+      it('can turn off logging when protocol is disabled', function () {
+        cy.state('isProtocolEnabled', false)
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
         Cypress.backend.resolves(okResponse)
 
         cy.exec('ls', { log: false }).then(function () {
-          const logs = _.filter(this.logs, (log) => {
-            return log.get('name') === 'exec'
-          })
+          const { lastLog, hiddenLog } = this
 
-          expect(logs.length).to.eq(0)
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', function () {
+        cy.state('isProtocolEnabled', true)
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        Cypress.backend.resolves(okResponse)
+
+        cy.exec('ls', { log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name'), 'log name').to.eq('exec')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
       })
 

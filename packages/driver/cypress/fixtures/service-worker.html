@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <script>
+    const makeRequest = () => {
+      fetch(`/fixtures/1mb?j=${Math.random()}#hash`).then((response) => {
+        document.getElementById('output').innerText = 'done'
+      }).catch(() => {})
+    }
+
+    navigator.serviceWorker.register('/fixtures/service-worker.js')
+    .then((registration) => {
+      const serviceWorker = registration.installing || registration.waiting
+      if (serviceWorker) {
+        let controllerChangeCalled = false
+        // called when clients.claim() is called in the service worker
+        navigator.serviceWorker.addEventListener('controllerchange', (e) => {
+          controllerChangeCalled = true
+          makeRequest()
+        })
+
+        serviceWorker.addEventListener('statechange', (e) => {
+          if (e.target.state === 'activated' && !controllerChangeCalled) {
+            // service worker activated, either skip reloading the page
+            // so we can test when an activated service worker is not intercepting requests
+            // or reload the page so it can intercept requests
+            if (location.search.includes('skipReload')) {
+              makeRequest()
+            } else {
+              location.reload()
+            }
+          }
+        })
+      } else {
+        makeRequest()
+      }
+    })
+  </script>
+</head>
+<body>
+  <h1>hi</h1>
+  <div id="output"></div>
+</body>
+</html>

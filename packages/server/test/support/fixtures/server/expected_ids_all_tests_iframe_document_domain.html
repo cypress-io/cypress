@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>All Tests</title>
+  </head>
+  <body>
+    <script type="text/javascript">
+      document.domain = 'localhost';
+
+      (function(parent) {
+        var Cypress = window.Cypress = parent.Cypress;
+        if (!Cypress) {
+          throw new Error("Tests cannot run without a reference to Cypress!");
+        }
+        return Cypress.onSpecWindow(window, [{"absolute":"/<path-to-project>/ids/cypress/support/e2e.js","relative":"cypress/support/e2e.js","relativeUrl":"/__cypress/tests?p=cypress/support/e2e.js"},{"absolute":"/<path-to-project>/ids/cypress/integration/bar.js","relative":"cypress/integration/bar.js","relativeUrl":"/__cypress/tests?p=cypress/integration/bar.js"},{"absolute":"/<path-to-project>/ids/cypress/integration/baz.js","relative":"cypress/integration/baz.js","relativeUrl":"/__cypress/tests?p=cypress/integration/baz.js"},{"absolute":"/<path-to-project>/ids/cypress/integration/dom.jsx","relative":"cypress/integration/dom.jsx","relativeUrl":"/__cypress/tests?p=cypress/integration/dom.jsx"},{"absolute":"/<path-to-project>/ids/cypress/integration/es6.js","relative":"cypress/integration/es6.js","relativeUrl":"/__cypress/tests?p=cypress/integration/es6.js"},{"absolute":"/<path-to-project>/ids/cypress/integration/foo.coffee","relative":"cypress/integration/foo.coffee","relativeUrl":"/__cypress/tests?p=cypress/integration/foo.coffee"},{"absolute":"/<path-to-project>/ids/cypress/integration/nested/tmp.js","relative":"cypress/integration/nested/tmp.js","relativeUrl":"/__cypress/tests?p=cypress/integration/nested/tmp.js"},{"absolute":"/<path-to-project>/ids/cypress/integration/noop.coffee","relative":"cypress/integration/noop.coffee","relativeUrl":"/__cypress/tests?p=cypress/integration/noop.coffee"}]);
+      })(window.opener || window.parent);
+    </script>
+  </body>
+</html>

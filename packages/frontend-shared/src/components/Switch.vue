@@ -1,6 +1,6 @@
 <template>
   <button
-    :id="name"
+    :aria-labelledby="labelId"
     class="border-transparent border rounded-[50px] relative hocus-default disabled:ring-0 disabled:outline-0 disabled:bg-gray-100"
     :class="[value ? 'bg-jade-400' : 'bg-gray-300', sizeClasses[size].container, {
       '!hocus:ring-0': size === 'sm'
@@ -22,7 +22,7 @@
 withDefaults(defineProps<{
   value: boolean
   size?: 'sm' | 'md' | 'lg' | 'xl'
-  name: string // required for an id so that an external <label> can be associated with the switch
+  labelId: string // required for an id so that an external <label> can be associated with the switch
   disabled?: boolean
 }>(), {
   value: false,

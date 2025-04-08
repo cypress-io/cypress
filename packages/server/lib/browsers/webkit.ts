@@ -40,6 +40,10 @@ export function connectProtocolToBrowser (): Promise<void> {
   throw new Error('Protocol is not yet supported in WebKit.')
 }
 
+export function closeProtocolConnection (): Promise<void> {
+  throw new Error('Protocol is not yet supported in WebKit.')
+}
+
 /**
  * Playwright adds an `exit` event listener to run a cleanup process. It tries to use the current binary to run a Node script by passing it as argv[1].
  * However, the Electron binary does not support an entrypoint, leading Cypress to think it's being opened in global mode (no args) when this fn is called.
@@ -153,4 +157,11 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   })
 
   return new WkInstance()
+}
+
+export async function closeExtraTargets () {
+  // we're currently holding off on implementing Webkit support in order
+  // to release Chromium support as soon as possible and may add Webkit
+  // support in the future
+  debug('Closing extra targets is not currently supported in Webkit')
 }

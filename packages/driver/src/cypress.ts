@@ -44,7 +44,7 @@ import { PrimaryOriginCommunicator, SpecBridgeCommunicator } from './cross-origi
 import { setupAutEventHandlers } from './cypress/aut_event_handlers'
 
 import type { CachedTestState } from '@packages/types'
-import * as cors from '@packages/network/lib/cors'
+import { DocumentDomainInjection } from '@packages/network/lib/document-domain-injection'
 import { setSpecContentSecurityPolicy } from './util/privileged_channel'
 
 import { telemetry } from '@packages/telemetry/src/browser'
@@ -117,6 +117,8 @@ class $Cypress {
   log: any
   isBrowser: any
   browserMajorVersion: any
+  // This is NodeEventEmitter['emit'], but typescript cannot determine that it is
+  // definitively initialized due to being initialized with $Events.extend(this)
   emit: any
   emitThen: any
   emitMap: any
@@ -186,13 +188,7 @@ class $Cypress {
   configure (config: Record<string, any> = {}) {
     const domainName = config.remote ? config.remote.domainName : undefined
 
-    // set domainName but allow us to turn
-    // off this feature in testing
-    const shouldInjectDocumentDomain = cors.shouldInjectDocumentDomain(window.location.origin, {
-      skipDomainInjectionForDomains: config.experimentalSkipDomainInjection,
-    })
-
-    if (domainName && config.testingType === 'e2e' && shouldInjectDocumentDomain) {
+    if (DocumentDomainInjection.InjectionBehavior(config).shouldInjectDocumentDomain(domainName)) {
       document.domain = domainName
     }
 
@@ -352,6 +348,7 @@ class $Cypress {
     this.downloads = $Downloads.create(this)
 
     // wire up command create to cy
+    // @ts-expect-error
     this.Commands = $Commands.create(this, this.cy, this.state, this.config)
 
     this.events.proxyTo(this.cy)
@@ -372,8 +369,10 @@ class $Cypress {
     })
     .then(() => {
       return (new Promise((resolve) => {
-        if (this.$autIframe) {
+        if (this.$autIframe.prop('contentWindow')) {
           resolve()
+        } else if (this.$autIframe) {
+          this.$autIframe.on('load', resolve)
         } else {
           // block initialization if the iframe has not been created yet
           // Used in CT when async chunks for plugins take their time to download/parse
@@ -611,11 +610,23 @@ class $Cypress {
         return this.emit('after:all:screenshots', ...args)
 
       case 'command:log:added':
+        if (args[0].hidden) {
+          this.emit('_log:added', ...args)
+
+          return // do not emit hidden logs to public apis
+        }
+
         this.runner?.addLog(args[0], this.config('isInteractive'))
 
         return this.emit('log:added', ...args)
 
       case 'command:log:changed':
+        if (args[0].hidden) {
+          this.emit('_log:changed', ...args)
+
+          return // do not emit hidden logs to public apis
+        }
+
         // Cypress logs will only trigger an update every 4 ms so there is a
         // chance the runner has been torn down when the update is triggered.
         this.runner?.addLog(args[0], this.config('isInteractive'))
@@ -646,6 +657,9 @@ class $Cypress {
 
       case 'cy:command:start':
         return this.emit('command:start', ...args)
+
+      case 'cy:command:start:async':
+        return this.emitThen('command:start:async', ...args)
 
       case 'cy:command:end':
         return this.emit('command:end', ...args)

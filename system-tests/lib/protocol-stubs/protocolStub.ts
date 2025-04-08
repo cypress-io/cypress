@@ -1,6 +1,6 @@
 import path from 'path'
 import fs from 'fs-extra'
-import type { AppCaptureProtocolInterface, ResponseEndedWithEmptyBodyOptions, ResponseStreamOptions, ResponseStreamTimedOutOptions } from '@packages/types'
+import type { AppCaptureProtocolInterface, ProtocolManagerOptions, ResponseEndedWithEmptyBodyOptions, ResponseStreamOptions, ResponseStreamTimedOutOptions } from '@packages/types'
 import type { Readable } from 'stream'
 
 const getFilePath = (filename) => {
@@ -12,9 +12,28 @@ const getFilePath = (filename) => {
   )
 }
 
+const CDP_EVENT_DRAIN_DURATION = 1
+
+const AUT_EVENT_DRAIN_DURATION = 5
+
+const BODY_PROMISES_DURATION = 7
+
+const CLOSE_DB_DURATION = 11
+
+const TEARDOWN_BINDINGS_DURATION = 13
+
+const DURATIONS = {
+  drainCDPEvents: CDP_EVENT_DRAIN_DURATION,
+  drainAUTEvents: AUT_EVENT_DRAIN_DURATION,
+  resolveBodyPromises: BODY_PROMISES_DURATION,
+  closeDb: CLOSE_DB_DURATION,
+  teardownBindings: TEARDOWN_BINDINGS_DURATION,
+}
+
 export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   private filename: string
   private events = {
+    debugData: {},
     beforeSpec: [],
     afterSpec: [],
     beforeTest: [],
@@ -33,6 +52,10 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   }
   private cdpClient: any
   private scriptToEvaluateId: any
+
+  constructor (options: ProtocolManagerOptions) {
+    this.events.debugData = options.debugData
+  }
 
   getDbMetadata (): { offset: number, size: number } {
     return {
@@ -90,7 +113,7 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     }
   }
 
-  async afterSpec (): Promise<void> {
+  async afterSpec () {
     this.events.afterSpec.push(true)
 
     // since the order of the logs can vary per run, we sort them by id to ensure the snapshot can be compared
@@ -109,6 +132,8 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     })
     .catch(() => {
     })
+
+    return { durations: DURATIONS }
   }
 
   beforeTest = (test) => {
@@ -169,5 +194,9 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     this.resetEvents()
 
     this.events.resetTest.push(testId)
+  }
+
+  async cdpReconnect (): Promise<void> {
+
   }
 }

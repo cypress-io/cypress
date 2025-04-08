@@ -72,15 +72,14 @@ export class $Command {
       } else {
         log.set('snapshot', false)
         log.finish()
+        if (Cypress.isCrossOriginSpecBridge) {
+          log.fireChangeEvent.flush()
+        }
       }
     })
   }
 
   log (log) {
-    // always set the chainerId of the log to ourselves
-    // so it can be queried on later
-    log.set('chainerId', this.get('chainerId'))
-
     this.get('logs').push(log)
 
     return this

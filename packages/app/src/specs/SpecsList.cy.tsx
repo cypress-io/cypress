@@ -1,5 +1,6 @@
 import SpecsList from './SpecsList.vue'
 import { Specs_SpecsListFragmentDoc, SpecsListFragment, TestingTypeEnum, SpecFilter_SetPreferencesDocument } from '../generated/graphql-test'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 
 describe('<SpecsList />', { keystrokeDelay: 0 }, () => {

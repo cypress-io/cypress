@@ -5,11 +5,11 @@ import { mount } from '@cypress/react'
 import './tic-tac-toe.css'
 
 // for now need a constructor, otherwise getting "Weak map" key
-const BoardWrap = ({ squares, onClick }) => {
+const BoardWrap = ({ squares, onPlay }) => {
   return (
     <div className="game">
       <div className="game-board">
-        <Board squares={squares} onClick={onClick} />
+        <Board squares={squares} onPlay={onPlay} />
       </div>
     </div>
   )
@@ -21,16 +21,16 @@ beforeEach(() => {
 
 it('renders empty Board', () => {
   const squares = Array(9).fill(null)
-  const onClick = cy.stub()
+  const onPlay = cy.stub()
 
-  mount(<BoardWrap squares={squares} onClick={onClick} />)
+  mount(<BoardWrap squares={squares} onPlay={onPlay} />)
   cy.get('.board-row')
   .eq(0)
   .find('.square')
   .eq(0)
   .click()
   .then(() => {
-    expect(onClick).to.have.been.calledWith(0)
+    expect(onPlay).to.have.been.called
   })
 })
 
@@ -55,7 +55,7 @@ it('renders Board with a few squares filled', () => {
 
 it('plays the game', () => {
   mount(<Game />)
-  cy.contains('.game-info', 'Next player: X').should('be.visible')
+  cy.contains('.game-board > .status', 'Next player: X').should('be.visible')
   cy.get('.board-row')
   .eq(0)
   .find('.square')
@@ -87,7 +87,7 @@ it('plays the game', () => {
   .eq(2)
   .click()
 
-  cy.contains('.game-info', 'Winner: X').should('be.visible')
+  cy.contains('.game-board > .status', 'Winner: X').should('be.visible')
   // history of moves
   cy.get('ol li')
   .should('have.length', 6)

@@ -488,10 +488,6 @@ describe('lib/tasks/download', function () {
   })
 
   context('architecture detection', () => {
-    beforeEach(() => {
-      sinon.stub(os, 'arch')
-    })
-
     context('Apple Silicon/M1', () => {
       function nockDarwinArm64 () {
         return nock('https://download.cypress.io')

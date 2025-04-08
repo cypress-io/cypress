@@ -1,4 +1,4 @@
-import type { ReporterRunState, StudioRecorderState } from './reporter'
+import type { ReporterRunState } from './reporter'
 
 interface MochaRunnerState {
   startTime?: number
@@ -12,7 +12,6 @@ interface MochaRunnerState {
 }
 
 export type RunState = MochaRunnerState & ReporterRunState & {
-  studio?: StudioRecorderState
   isSpecsListOpen?: boolean
 }
 

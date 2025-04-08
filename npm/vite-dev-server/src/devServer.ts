@@ -1,5 +1,6 @@
 import debugFn from 'debug'
-import type { UserConfig } from 'vite'
+import semverMajor from 'semver/functions/major'
+import type { UserConfig } from 'vite-6'
 import { getVite, Vite } from './getVite'
 import { createViteDevServerConfig } from './resolveConfig'
 
@@ -8,7 +9,6 @@ const debug = debugFn('cypress:vite-dev-server:devServer')
 const ALL_FRAMEWORKS = ['react', 'vue'] as const
 
 type ConfigHandler = UserConfig | (() => UserConfig | Promise<UserConfig>)
-
 export type ViteDevServerConfig = {
   specs: Cypress.Spec[]
   cypressConfig: Cypress.PluginConfigOptions
@@ -22,6 +22,15 @@ export type ViteDevServerConfig = {
 export async function devServer (config: ViteDevServerConfig): Promise<Cypress.ResolvedDevServerConfig> {
   // This has to be the first thing we do as we need to source vite from their project's dependencies
   const vite = getVite(config)
+
+  let majorVersion: number | undefined = undefined
+
+  if (vite.version) {
+    majorVersion = semverMajor(vite.version)
+    debug(`Found vite version v${majorVersion}`)
+  } else {
+    debug(`vite version not found`)
+  }
 
   debug('Creating Vite Server')
   const server = await devServer.create(config, vite)
@@ -41,7 +50,12 @@ export async function devServer (config: ViteDevServerConfig): Promise<Cypress.R
     port,
     // Close is for unit testing only. We kill this child process which will handle the closing of the server
     close (cb) {
-      return server.close().then(() => cb?.()).catch(cb)
+      debug('closing dev server')
+
+      return server.close().then(() => {
+        debug('closed dev server')
+        cb?.()
+      }).catch(cb)
     },
   }
 }

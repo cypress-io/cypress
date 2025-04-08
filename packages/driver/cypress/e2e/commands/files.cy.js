@@ -1,6 +1,5 @@
 const { assertLogLength } = require('../../support/utils')
 const { stripIndent } = require('common-tags')
-const { _ } = Cypress
 
 const okResponse = {
   contents: 'contents',
@@ -142,19 +141,39 @@ describe('src/cy/commands/files', () => {
           this.lastLog = log
           this.logs.push(log)
         })
-
-        return null
       })
 
-      it('can turn off logging', () => {
+      it('can turn off logging when protocol is disabled', function () {
+        cy.state('isProtocolEnabled', false)
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
         Cypress.backend.resolves(okResponse)
 
         cy.readFile('foo.json', { log: false }).then(function () {
-          const logs = _.filter(this.logs, (log) => {
-            return log.get('name') === 'readFile'
-          })
+          const { lastLog, hiddenLog } = this
 
-          expect(logs.length).to.eq(0)
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', function () {
+        cy.state('isProtocolEnabled', true)
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        Cypress.backend.resolves(okResponse)
+
+        cy.readFile('foo.json', { log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name'), 'log name').to.eq('readFile')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
       })
 
@@ -597,19 +616,39 @@ describe('src/cy/commands/files', () => {
           this.lastLog = log
           this.logs.push(log)
         })
-
-        return null
       })
 
-      it('can turn off logging', () => {
+      it('can turn off logging when protocol is disabled', function () {
+        cy.state('isProtocolEnabled', false)
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
         Cypress.backend.resolves(okResponse)
 
         cy.writeFile('foo.txt', 'contents', { log: false }).then(function () {
-          const logs = _.filter(this.logs, (log) => {
-            return log.get('name') === 'writeFile'
-          })
+          const { lastLog, hiddenLog } = this
 
-          expect(logs.length).to.eq(0)
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', function () {
+        cy.state('isProtocolEnabled', true)
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
+
+        Cypress.backend.resolves(okResponse)
+
+        cy.writeFile('foo.txt', 'contents', { log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+          expect(hiddenLog.get('name'), 'log name').to.eq('writeFile')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
       })
 

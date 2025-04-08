@@ -3,6 +3,7 @@ import type { Request, Response } from 'express'
 import type { ProxyTimings } from '@packages/types'
 import type { ResourceType } from '@packages/net-stubbing'
 import type { BackendRoute } from '@packages/net-stubbing/lib/server/types'
+import type { Protocol } from 'devtools-protocol'
 
 /**
  * An incoming request to the Cypress web server.
@@ -63,8 +64,11 @@ export type BrowserPreRequest = {
   resourceType: ResourceType
   originalResourceType: string | undefined
   errorHandled?: boolean
-  cdpRequestWillBeSentTimestamp: number
-  cdpRequestWillBeSentReceivedTimestamp: number
+  initiator?: Protocol.Network.Initiator
+  documentURL?: string
+  hasRedirectResponse?: boolean
+  cdpRequestWillBeSentTimestamp?: number
+  cdpRequestWillBeSentReceivedTimestamp?: number
 }
 
 export type BrowserPreRequestWithTimings = BrowserPreRequest & ProxyTimings

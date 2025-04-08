@@ -1,12 +1,12 @@
 import { assertLogLength } from '../../support/utils'
 
 describe('src/cy/commands/storage', () => {
-  let logs: Cypress.Log[]
+  let logs
 
   beforeEach(() => {
     logs = []
 
-    cy.on('log:added', (attrs, log: Cypress.Log) => {
+    cy.on('log:added', (attrs, log) => {
       logs.push(log)
     })
   })
@@ -42,13 +42,41 @@ describe('src/cy/commands/storage', () => {
         assertLogLength(logs, 2)
         expect(logs[0].get('name')).to.eq('visit')
         expect(logs[1].get('name')).to.eq('getAllLocalStorage')
+        expect(logs[1].get('hidden')).to.be.false
       })
     })
 
-    it('does not log when log: false', () => {
+    it('can turn off logging when protocol is disabled', function () {
+      cy.state('isProtocolEnabled', false)
+      cy.on('_log:added', (attrs, log) => {
+        this.hiddenLog = log
+      })
+
       cy.getAllLocalStorage({ log: false }).then(() => {
+        const { hiddenLog } = this
+
         assertLogLength(logs, 1)
         expect(logs[0].get('name')).to.eq('visit')
+
+        expect(hiddenLog).to.be.undefined
+      })
+    })
+
+    it('can send hidden log when protocol is enabled', function () {
+      cy.state('isProtocolEnabled', true)
+      cy.on('_log:added', (attrs, log) => {
+        this.hiddenLog = log
+      })
+
+      cy.getAllLocalStorage({ log: false }).then(() => {
+        const { hiddenLog } = this
+
+        assertLogLength(logs, 1)
+        expect(logs[0].get('name')).to.eq('visit')
+
+        expect(hiddenLog.get('name')).to.eq('getAllLocalStorage')
+        expect(hiddenLog.get('hidden')).to.be.true
+        expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
       })
     })
 
@@ -99,13 +127,41 @@ describe('src/cy/commands/storage', () => {
         assertLogLength(logs, 2)
         expect(logs[0].get('name')).to.eq('visit')
         expect(logs[1].get('name')).to.eq('clearAllLocalStorage')
+        expect(logs[1].get('hidden')).to.be.false
       })
     })
 
-    it('does not log when log: false', () => {
+    it('can turn off logging when protocol is disabled', function () {
+      cy.state('isProtocolEnabled', false)
+      cy.on('_log:added', (attrs, log) => {
+        this.hiddenLog = log
+      })
+
       cy.clearAllLocalStorage({ log: false }).then(() => {
+        const { hiddenLog } = this
+
         assertLogLength(logs, 1)
         expect(logs[0].get('name')).to.eq('visit')
+
+        expect(hiddenLog).to.be.undefined
+      })
+    })
+
+    it('can send hidden log when protocol is enabled', function () {
+      cy.state('isProtocolEnabled', true)
+      cy.on('_log:added', (attrs, log) => {
+        this.hiddenLog = log
+      })
+
+      cy.clearAllLocalStorage({ log: false }).then(() => {
+        const { hiddenLog } = this
+
+        assertLogLength(logs, 1)
+        expect(logs[0].get('name')).to.eq('visit')
+
+        expect(hiddenLog.get('name')).to.eq('clearAllLocalStorage')
+        expect(hiddenLog.get('hidden')).to.be.true
+        expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
       })
     })
   })
@@ -141,13 +197,41 @@ describe('src/cy/commands/storage', () => {
         assertLogLength(logs, 2)
         expect(logs[0].get('name')).to.eq('visit')
         expect(logs[1].get('name')).to.eq('getAllSessionStorage')
+        expect(logs[1].get('hidden')).to.be.false
       })
     })
 
-    it('does not log when log: false', () => {
+    it('can turn off logging when protocol is disabled', function () {
+      cy.state('isProtocolEnabled', false)
+      cy.on('_log:added', (attrs, log) => {
+        this.hiddenLog = log
+      })
+
       cy.getAllSessionStorage({ log: false }).then(() => {
+        const { hiddenLog } = this
+
         assertLogLength(logs, 1)
         expect(logs[0].get('name')).to.eq('visit')
+
+        expect(hiddenLog).to.be.undefined
+      })
+    })
+
+    it('can send hidden log when protocol is enabled', function () {
+      cy.state('isProtocolEnabled', true)
+      cy.on('_log:added', (attrs, log) => {
+        this.hiddenLog = log
+      })
+
+      cy.getAllSessionStorage({ log: false }).then(() => {
+        const { hiddenLog } = this
+
+        assertLogLength(logs, 1)
+        expect(logs[0].get('name')).to.eq('visit')
+
+        expect(hiddenLog.get('name')).to.eq('getAllSessionStorage')
+        expect(hiddenLog.get('hidden')).to.be.true
+        expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
       })
     })
 
@@ -198,13 +282,41 @@ describe('src/cy/commands/storage', () => {
         assertLogLength(logs, 2)
         expect(logs[0].get('name')).to.eq('visit')
         expect(logs[1].get('name')).to.eq('clearAllSessionStorage')
+        expect(logs[1].get('hidden')).to.be.false
       })
     })
 
-    it('does not log when log: false', () => {
-      cy.clearAllSessionStorage({ log: false }).then(() => {
+    it('can turn off logging when protocol is disabled', function () {
+      cy.state('isProtocolEnabled', false)
+      cy.on('_log:added', (attrs, log) => {
+        this.hiddenLog = log
+      })
+
+      cy.clearLocalStorage('foo', { log: false }).then(() => {
+        const { hiddenLog } = this
+
         assertLogLength(logs, 1)
         expect(logs[0].get('name')).to.eq('visit')
+
+        expect(hiddenLog).to.be.undefined
+      })
+    })
+
+    it('can send hidden log when protocol is enabled', function () {
+      cy.state('isProtocolEnabled', true)
+      cy.on('_log:added', (attrs, log) => {
+        this.hiddenLog = log
+      })
+
+      cy.clearLocalStorage('foo', { log: false }).then(() => {
+        const { hiddenLog } = this
+
+        assertLogLength(logs, 1)
+        expect(logs[0].get('name')).to.eq('visit')
+
+        expect(hiddenLog.get('name')).to.eq('clearLocalStorage')
+        expect(hiddenLog.get('hidden')).to.be.true
+        expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
       })
     })
   })
@@ -275,8 +387,6 @@ describe('src/cy/commands/storage', () => {
         cy.on('log:added', (attrs, log) => {
           this.lastLog = log
         })
-
-        return null
       })
 
       it('ends immediately', () => {
@@ -304,22 +414,41 @@ describe('src/cy/commands/storage', () => {
           this.lastLog = log
         })
 
-        return null
+        cy.on('_log:added', (attrs, log) => {
+          this.hiddenLog = log
+        })
       })
 
-      it('log is disabled', () => {
+      it('can turn off logging when protocol is disabled', function () {
+        cy.state('isProtocolEnabled', false)
         cy.clearLocalStorage('foo', { log: false }).then(function () {
-          const { lastLog } = this
+          const { lastLog, hiddenLog } = this
 
           expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
+        })
+      })
+
+      it('can send hidden log when protocol is enabled', function () {
+        cy.state('isProtocolEnabled', true)
+        cy.clearLocalStorage('foo', { log: false }).then(function () {
+          const { lastLog, hiddenLog } = this
+
+          expect(lastLog).to.be.undefined
+
+          expect(hiddenLog.get('name'), 'log name').to.eq('clearLocalStorage')
+          expect(hiddenLog.get('hidden'), 'log hidden').to.be.true
+          expect(hiddenLog.get('snapshots').length, 'log snapshot length').to.eq(1)
         })
       })
 
       it('log is disabled without key', () => {
+        cy.state('isProtocolEnabled', false)
         cy.clearLocalStorage({ log: false }).then(function () {
-          const { lastLog } = this
+          const { lastLog, hiddenLog } = this
 
           expect(lastLog).to.be.undefined
+          expect(hiddenLog).to.be.undefined
         })
       })
     })

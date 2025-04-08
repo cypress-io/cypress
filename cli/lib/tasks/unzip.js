@@ -84,11 +84,11 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
             return resolve()
           })
           .catch((err) => {
-            if (err) {
-              debug('error %s', err.message)
+            const error = err || new Error('Unknown error with Node extract tool')
 
-              return reject(err)
-            }
+            debug('error %s', error.message)
+
+            return reject(error)
           })
         }
 

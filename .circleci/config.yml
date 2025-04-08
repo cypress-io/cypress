@@ -2,10 +2,11 @@ version: 2.1
 setup: true
 
 orbs:
-  continuation: circleci/continuation@0.3.1
+  continuation: circleci/continuation@1.0.0
 
 jobs:
   verify-ci-should-run:
+    resource_class: small
     docker:
       - image: cimg/node:current
     steps:
@@ -51,17 +52,9 @@ jobs:
 
             echo "Skipping CI; branch in progress - $TRIGGER_INSTRUCTIONS"
             cancel_build
-
-      - run:
-          name: Download .circleci/workflows.yaml
-          command: |
-            if [[ "$CIRCLE_BRANCH" == "pull/"* ]]; then
-              curl -o workflows.yml https://raw.githubusercontent.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/develop/.circleci/workflows.yml
-            else 
-              curl -o workflows.yml https://raw.githubusercontent.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}/.circleci/workflows.yml
-            fi
+      - checkout
       - continuation/continue:
-          configuration_path: workflows.yml
+          configuration_path: .circleci/workflows.yml
 
 workflows:
   # the setup-workflow workflow is always triggered.

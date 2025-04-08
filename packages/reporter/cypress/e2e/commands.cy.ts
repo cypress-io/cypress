@@ -27,7 +27,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
       })
     })
 
-    cy.get('.reporter').then(() => {
+    cy.get('.reporter.mounted').then(() => {
       runner.emit('runnables:ready', runnables)
       runner.emit('reporter:start', {})
       addCommand(runner, {
@@ -181,6 +181,56 @@ describe('commands', { viewportHeight: 1000 }, () => {
     })
 
     cy.get('.command').should('have.length', 27)
+
+    cy.percySnapshot()
+  })
+
+  it('displays assertions formatted', () => {
+    addCommand(runner, {
+      id: 1291,
+      name: 'assert',
+      type: 'child',
+      message: 'expected **value** to equal **value**',
+      state: 'passed',
+      timeout: 4000,
+      group: 1229,
+      groupLevel: 2,
+      wallClockStartedAt: inProgressStartedAt,
+    })
+
+    addCommand(runner, {
+      id: 1292,
+      name: 'assert',
+      type: 'child',
+      message: 'expected **value** to match **value**',
+      state: 'passed',
+      timeout: 4000,
+      group: 1229,
+      groupLevel: 2,
+      wallClockStartedAt: inProgressStartedAt,
+    })
+
+    addCommand(runner, {
+      id: 1293,
+      name: 'assert',
+      type: 'child',
+      message: 'expected **_value_** to contain **_value_**',
+      state: 'passed',
+      timeout: 4000,
+      group: 1229,
+      groupLevel: 2,
+      wallClockStartedAt: inProgressStartedAt,
+    })
+
+    cy.contains('.command-message-text', 'to equal')
+    .find('strong').should('have.length', 2)
+    .and('contain', 'value')
+    .and('not.contain', '*')
+
+    cy.contains('.command-message-text', 'to match')
+    .find('strong').should('have.length', 2)
+    .and('contain', 'value')
+    .and('not.contain', '*')
 
     cy.percySnapshot()
   })

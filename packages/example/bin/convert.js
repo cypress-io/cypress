@@ -24,11 +24,6 @@ function replaceStringsIn (file) {
     replace(eslintRe, "")
     replace("imgSrcToDataURL('/assets", "imgSrcToDataURL('https://example.cypress.io/assets")
 
-    // temporary for 5.0.0
-    // TODO: remove this
-    replace("whitelist: 'session_id'", "preserve: 'session_id'")
-    replace("server.whitelist", "server.ignore")
-
     fs.writeFile(file, str, function (err) {
       if (err) throw err
 

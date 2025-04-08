@@ -1,3 +1,4 @@
+import { authCreds } from '../../../../fixtures/auth_creds'
 import { findCrossOriginLogs } from '../../../../support/utils'
 
 context('cy.origin navigation', { browser: '!webkit' }, () => {
@@ -309,13 +310,8 @@ context('cy.origin navigation', { browser: '!webkit' }, () => {
     })
 
     it('supports auth options and adding auth to subsequent requests', () => {
-      cy.origin('http://www.foobar.com:3500', () => {
-        cy.visit('http://www.foobar.com:3500/basic_auth', {
-          auth: {
-            username: 'cypress',
-            password: 'password123',
-          },
-        })
+      cy.origin('http://www.foobar.com:3500', { args: authCreds }, (auth) => {
+        cy.visit('http://www.foobar.com:3500/basic_auth', { auth })
 
         cy.get('body').should('have.text', 'basic auth worked')
 

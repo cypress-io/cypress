@@ -16,7 +16,7 @@ import {
   browserNameVersionRe,
 } from './normalizeStdout'
 
-const isCi = require('is-ci')
+const isCi = require('ci-info').isCI
 
 require('mocha-banner').register()
 const chalk = require('chalk').default
@@ -80,16 +80,6 @@ type ExecOptions = {
    */
   withBinary?: boolean
   /**
-   * Deprecated. Use `--cypress-inspect-brk` from command line instead.
-   * @deprecated
-   */
-  inspectBrk?: null
-  /**
-   * Deprecated. Use `--no-exit` from command line instead.
-   * @deprecated
-   */
-  exit?: null
-  /**
    * Don't exit when tests are finished. You can also pass `--no-exit` via the command line.
    */
   noExit?: boolean
@@ -143,13 +133,17 @@ type ExecOptions = {
    */
   snapshot?: boolean
   /**
-   * By default strip ansi codes from stdout. Pass false to turn off.
+   * By default strip ansi codes from stdout/stderr. Pass false to turn off.
    */
   stripAnsi?: boolean
   /**
    * Pass a function to assert on and/or modify the stdout before snapshotting.
    */
   onStdout?: (stdout: string) => string | void
+  /**
+   * Pass a function to assert on and/or modify the stderr.
+   */
+  onStderr?: (stderr: string) => string | void
   /**
    * Pass a function to receive the spawned process as an argument.
    */
@@ -625,14 +619,6 @@ const systemTests = {
   },
 
   options (ctx, options: ExecOptions) {
-    if (options.inspectBrk != null) {
-      throw new Error(`
-      passing { inspectBrk: true } to system test options is no longer supported
-      Please pass the --cypress-inspect-brk flag to the test command instead
-      e.g. "yarn test async_timeouts_spec.js --cypress-inspect-brk"
-      `)
-    }
-
     _.defaults(options, {
       browser: process.env.SNAPSHOT_BROWSER || 'electron',
       headed: process.env.HEADED || false,
@@ -644,18 +630,9 @@ const systemTests = {
       sanitizeScreenshotDimensions: false,
       normalizeStdoutAvailableBrowsers: true,
       noExit: process.env.NO_EXIT,
-      inspectBrk: process.env.CYPRESS_INSPECT_BRK,
     })
 
     const projectPath = Fixtures.projectPath(options.project)
-
-    if (options.exit != null) {
-      throw new Error(`
-      passing { exit: false } to system test options is no longer supported
-      Please pass the --no-exit flag to the test command instead
-      e.g. "yarn test async_timeouts_spec.js --no-exit"
-      `)
-    }
 
     if (options.noExit && options.timeout < 3000000) {
       options.timeout = 3000000
@@ -766,10 +743,6 @@ const systemTests = {
       args.push('--no-exit')
     }
 
-    if (options.inspectBrk) {
-      args.push('--inspect-brk')
-    }
-
     if (options.tag) {
       args.push(`--tag=${options.tag}`)
     }
@@ -857,24 +830,30 @@ const systemTests = {
       })
 
       if (options.stripAnsi) {
-        // always strip ansi from stdout before yielding
+        // always strip ansi from stdout/stderr before yielding
         // it to any callback functions
         stdout = stripAnsi(stdout)
+        stderr = stripAnsi(stderr)
+      }
+
+      if (options.onStdout) {
+        const newStdout = options.onStdout(stdout)
+
+        if (newStdout && _.isString(newStdout)) {
+          stdout = newStdout
+        }
+      }
+
+      if (options.onStderr) {
+        const newStderr = options.onStderr(stderr)
+
+        if (newStderr && _.isString(newStderr)) {
+          stderr = newStderr
+        }
       }
 
       // snapshot the stdout!
       if (options.snapshot) {
-        // enable callback to modify stdout
-        const ostd = options.onStdout
-
-        if (ostd) {
-          const newStdout = ostd(stdout)
-
-          if (newStdout && _.isString(newStdout)) {
-            stdout = newStdout
-          }
-        }
-
         // if we have browser in the stdout make
         // sure its legit
         const matches = browserNameVersionRe.exec(stdout)

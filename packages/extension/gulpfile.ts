@@ -1,5 +1,5 @@
 import gulp from 'gulp'
-import rimraf from 'rimraf'
+import { rimraf } from 'rimraf'
 import { waitUntilIconsBuilt } from '../../scripts/ensure-icons'
 import cp from 'child_process'
 import * as path from 'path'
@@ -12,8 +12,8 @@ async function cypressIcons () {
   return require('@packages/icons')
 }
 
-const clean = (done) => {
-  rimraf('dist', done)
+function clean (): Promise<boolean> {
+  return rimraf('dist')
 }
 
 const manifest = (v: 'v2' | 'v3') => {
@@ -27,6 +27,11 @@ const background = (cb) => {
   cp.fork(nodeWebpack, { stdio: 'inherit' }).on('exit', (code) => {
     cb(code === 0 ? null : new Error(`Webpack process exited with code ${code}`))
   })
+}
+
+const copyScriptsForV3 = () => {
+  return gulp.src('app/v3/*.js')
+  .pipe(gulp.dest('dist/v3'))
 }
 
 const html = () => {
@@ -74,6 +79,7 @@ const build = gulp.series(
     manifest('v2'),
     manifest('v3'),
     background,
+    copyScriptsForV3,
     html,
     css,
   ),

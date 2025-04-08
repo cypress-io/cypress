@@ -1,6 +1,7 @@
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 import Warning from './Warning.vue'
-import faker from 'faker'
+import { faker } from '@faker-js/faker'
 import { ref } from 'vue'
 
 faker.seed(1)

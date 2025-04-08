@@ -2,7 +2,8 @@ import SpecRunnerHeaderOpenMode from './SpecRunnerHeaderOpenMode.vue'
 import { useAutStore } from '../store'
 import { SpecRunnerHeaderFragment, SpecRunnerHeaderFragmentDoc } from '../generated/graphql-test'
 import { createEventManager, createTestAutIframe } from '../../cypress/component/support/ctSupport'
-import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
+import { ExternalLink_OpenExternalDocument } from '@packages/frontend-shared/src/generated/graphql'
+import { cyGeneralGlobeX16 } from '@cypress-design/icon-registry'
 
 function renderWithGql (gqlVal: SpecRunnerHeaderFragment) {
   const eventManager = createEventManager()
@@ -30,8 +31,8 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     })
 
     cy.findByTestId('aut-url-input').should('be.visible').should('have.value', autUrl)
-    cy.findByTestId('select-browser').should('be.visible').contains('Electron 73')
-    cy.findByTestId('viewport').should('be.visible').contains('500x500')
+    cy.findByTestId('select-browser').should('be.visible').contains('title', 'Electron 73')
+    cy.findByTestId('viewport-size').should('be.visible').contains('500x500')
   })
 
   it('disabled selector playground button when isRunning is true', () => {
@@ -46,9 +47,6 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     })
 
     cy.get('[data-cy="playground-activator"]').should('be.disabled')
-    cy.findByTestId('aut-url-input').should('be.visible')
-    cy.findByTestId('select-browser').should('be.visible').contains('Electron 73')
-    cy.findByTestId('viewport').should('be.visible').contains('500x500')
   })
 
   it('disabled selector playground button when isLoading is true', () => {
@@ -63,9 +61,6 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     })
 
     cy.get('[data-cy="playground-activator"]').should('be.disabled')
-    cy.findByTestId('aut-url-input').should('be.visible')
-    cy.findByTestId('select-browser').should('be.visible').contains('Electron 73')
-    cy.findByTestId('viewport').should('be.visible').contains('500x500')
   })
 
   it('enables selector playground button by default', () => {
@@ -76,9 +71,6 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     })
 
     cy.get('[data-cy="playground-activator"]').should('not.be.disabled')
-    cy.findByTestId('aut-url-input').should('be.visible')
-    cy.findByTestId('select-browser').should('be.visible').contains('Electron 73')
-    cy.findByTestId('viewport').should('be.visible').contains('500x500')
   })
 
   it('shows url section if currentTestingType is e2e', () => {
@@ -98,8 +90,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
 
     cy.get('[data-cy="aut-url"]').should('exist')
     cy.findByTestId('aut-url-input').should('be.visible').should('have.value', autUrl)
-    cy.findByTestId('select-browser').should('be.visible').contains('Electron 73')
-    cy.findByTestId('viewport').should('be.visible').contains('500x500')
+    cy.findByTestId('viewport-size').should('be.visible').contains('500x500')
   })
 
   it('url section handles long url/small viewport', {
@@ -122,7 +113,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     cy.get('[data-cy="aut-url"]').should('exist')
     cy.findByTestId('aut-url-input').should('be.visible').should('have.value', autUrl)
     cy.findByTestId('select-browser').should('be.visible').contains('Electron 73')
-    cy.findByTestId('viewport').should('be.visible').contains('500x500')
+    cy.findByTestId('viewport-size').should('be.visible').contains('500x500')
     cy.percySnapshot()
   })
 
@@ -142,11 +133,38 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     })
 
     cy.findByTestId('aut-url-input').invoke('val').should('contain', autUrl)
-    cy.findByTestId('select-browser').should('be.visible').contains('Electron 73')
-    cy.findByTestId('viewport').should('be.visible').contains('500x500')
   })
 
-  it('does not show url section if currentTestingType is component', () => {
+  it('opens aut url externally', () => {
+    const autStore = useAutStore()
+    const autUrl = 'http://localhost:3000/todo'
+
+    autStore.updateUrl(autUrl)
+
+    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+      onResult: (gql) => {
+        gql.currentTestingType = 'e2e'
+      },
+      render: (gqlVal) => {
+        return renderWithGql(gqlVal)
+      },
+    })
+
+    const openExternalStub = cy.stub()
+
+    cy.stubMutationResolver(ExternalLink_OpenExternalDocument, (defineResult, { url }) => {
+      openExternalStub(url)
+
+      return defineResult({
+        openExternal: true,
+      })
+    })
+
+    cy.findByTestId('aut-url-input').click()
+    cy.wrap(openExternalStub).should('have.been.calledWith', 'http://localhost:3000/todo')
+  })
+
+  it('disables url section if currentTestingType is component', () => {
     const autStore = useAutStore()
 
     autStore.updateUrl('http://localhost:3000')
@@ -161,9 +179,9 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     })
 
     cy.findByTestId('playground-activator').should('be.visible')
-    cy.findByTestId('aut-url').should('not.exist')
-    cy.findByTestId('select-browser').should('be.visible').contains('Electron 73')
-    cy.findByTestId('viewport').should('be.visible').contains('500x500')
+    cy.findByTestId('aut-url-input').should('be.disabled')
+    cy.findByTestId('aut-url-input').should('have.prop', 'placeholder', 'URL navigation disabled in component testing')
+    cy.findByTestId('viewport-size').should('be.visible').contains('500x500')
   })
 
   it('shows current browser and possible browsers', () => {
@@ -197,9 +215,19 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
 
     cy.findByTestId('select-browser').contains('Fake Browser')
 
-    cy.get('[data-cy="select-browser"] > button img').should('have.attr', 'src', allBrowsersIcons.generic)
+    cy.get('[data-cy="select-browser"] > button svg').eq(0).children().verifyBrowserIconSvg(cyGeneralGlobeX16.data)
+  })
 
-    cy.findByTestId('viewport').contains('500x500')
+  it('shows selected browser as first browser in dropdown', () => {
+    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+      render: (gqlVal) => {
+        return renderWithGql(gqlVal)
+      },
+    })
+
+    cy.get('[data-cy="select-browser"] > button').should('be.enabled').click()
+    cy.get('[data-browser-id="1"]').should('contain', 'Electron').and('contain', 'Version 73')
+    cy.get('[data-browser-id="1"]').find('[data-cy="top-nav-browser-list-selected-item"]')
   })
 
   it('shows current viewport info', () => {
@@ -212,39 +240,25 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
       },
     })
 
-    cy.get('[data-cy="viewport"]').click()
-    cy.contains('The viewport determines').should('be.visible')
-    cy.contains('Additionally, you can override this value in your cypress.config.js or via the cy.viewport() command.')
-    .should('be.visible')
-
-    cy.get('[data-cy="viewport"]').click()
-    cy.contains('The viewport determines').should('be.hidden')
-    cy.get('[data-cy="viewport"] button').focus().type(' ')
-    cy.contains('The viewport determines').should('be.visible')
-    cy.get('[data-cy="viewport"] button').focus().type('{enter}')
-    cy.contains('The viewport determines').should('be.hidden')
+    cy.get('[data-cy="viewport-size"]').contains('500x500')
   })
 
-  it('links to the viewport docs', () => {
+  it('shows scale % in viewport info', () => {
+    const autStore = useAutStore()
+
+    autStore.setScale(0.4)
+    autStore.updateUrl('http://localhost:3000/todo')
     cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
       render: (gqlVal) => {
         return renderWithGql({
           ...gqlVal,
-          currentTestingType: 'e2e',
+          configFile: 'cypress.config.js',
         })
       },
     })
 
-    cy.findByTestId('viewport').click()
-    cy.findByTestId('viewport-docs')
-    .should('be.visible')
-    .should('have.attr', 'href', 'https://on.cypress.io/viewport')
-
-    cy.contains('The viewport determines the width and height of your application under test. By default the viewport will be 500px by 500px for end-to-end testing.')
-    cy.contains('Additionally, you can override this value in your cypress.config.ts or via the cy.viewport() command.')
-    .should('be.visible')
-
-    cy.findByTestId('viewport-docs').should('have.attr', 'href', 'https://on.cypress.io/viewport')
+    cy.get('[data-cy="viewport-scale"]').contains('40%')
+    cy.percySnapshot()
   })
 
   it('disables browser dropdown button when isRunning is true', () => {
@@ -263,8 +277,6 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
 
     cy.findByTestId('select-browser').should('be.visible').contains('Chrome 78')
     cy.get('[data-cy="select-browser"] > button').should('be.disabled')
-    cy.findByTestId('aut-url').should('be.visible')
-    cy.findByTestId('viewport').should('be.visible').contains('500x500')
   })
 
   it('opens and closes selector playground', () => {

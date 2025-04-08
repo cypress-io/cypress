@@ -372,7 +372,7 @@ export class ProjectDataSource {
     // When file system changes are detected, we retrieve any spec files matching
     // the determined specPattern. This function is debounced to limit execution
     // during sequential file operations.
-    const onProjectFileSystemChange = _.debounce(async () => {
+    const onProjectFileSystemChange = _.debounce(async (_type, _filePath) => {
       const specs = await this.findSpecs({
         projectRoot,
         testingType,
@@ -382,6 +382,9 @@ export class ProjectDataSource {
         additionalIgnorePattern,
       })
 
+      // with JIT, since we are unable to deterministically determine the dev-server in use, the test will recompile
+      // any time the spec directory has contents added/removed. This means a recompile when it is not needed, but this should
+      // only be applicable in open mode and seldomly experienced.
       if (_.isEqual(this.specs, specs)) {
         this.ctx.actions.project.refreshSpecs(specs)
 

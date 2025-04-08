@@ -15,6 +15,7 @@ describe('App: Settings', () => {
   it('visits settings page', () => {
     cy.startAppServer('e2e')
     cy.visitApp()
+    cy.specsPageIsVisible()
     cy.get(SidebarSettingsLinkSelector).click()
 
     cy.contains('[data-cy="app-header-bar"]', 'Settings')
@@ -33,6 +34,7 @@ describe('App: Settings', () => {
 
       cy.startAppServer('e2e')
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.get(SidebarSettingsLinkSelector).click()
       cy.findByText('Cypress Cloud settings').click()
       cy.findByText('Project ID').should('be.visible')
@@ -49,6 +51,7 @@ describe('App: Settings', () => {
       cy.loginUser()
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.get(SidebarSettingsLinkSelector).click()
       cy.findByText('Cypress Cloud settings').click()
       cy.findByText('Record key').should('be.visible')
@@ -59,6 +62,7 @@ describe('App: Settings', () => {
       cy.loginUser()
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.get(SidebarSettingsLinkSelector).click()
       cy.findByText('Cypress Cloud settings').click()
       cy.get('[data-cy="code-box"]').should('contain', '***')
@@ -91,6 +95,7 @@ describe('App: Settings', () => {
       cy.startAppServer('e2e')
       cy.loginUser()
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.findByTestId('spec-list-container').scrollTo('bottom')
       // Visit the test to trigger the ws.off() for the TR websockets
       cy.contains('test1.js').click()
@@ -108,6 +113,7 @@ describe('App: Settings', () => {
       cy.startAppServer('e2e')
       cy.loginUser()
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.withCtx((ctx, o) => {
         o.sinon.spy(ctx.actions.auth, 'logout')
       })
@@ -137,6 +143,7 @@ describe('App: Settings', () => {
       cy.loginUser()
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.findByTestId('sidebar-link-settings-page').click()
       cy.findByText('Project settings').click()
       cy.get('[data-cy="file-match-indicator"]').contains('2 matches')
@@ -155,6 +162,7 @@ describe('App: Settings', () => {
       cy.loginUser()
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.get(SidebarSettingsLinkSelector).click()
       cy.findByText('Project settings').click()
       cy.get('[data-cy="file-match-indicator"]').contains('19 matches')
@@ -166,19 +174,13 @@ describe('App: Settings', () => {
       cy.loginUser()
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.get(SidebarSettingsLinkSelector).click()
       cy.findByText('Project settings').click()
       cy.get('[data-cy="settings-experiments"]').within(() => {
         cy.validateExternalLink({
           name: 'Learn more.',
           href: 'https://on.cypress.io/experiments',
-        })
-
-        cy.get('[data-cy="experiment-experimentalFetchPolyfill"]').within(() => {
-          cy.validateExternalLink({
-            name: 'cy.intercept()',
-            href: 'https://on.cypress.io/intercept',
-          })
         })
 
         cy.get('[data-cy="experiment-experimentalInteractiveRunEvents"]').within(() => {
@@ -210,6 +212,13 @@ describe('App: Settings', () => {
           })
         })
       })
+
+      // makes sure all experiments have an i18n header and description available.
+      // @see https://github.com/cypress-io/cypress/issues/30126.
+      cy.get('[data-cy="settings-experiments"] [role="row"][data-cy^="experiment-"]').each((experimentRow) => {
+        cy.wrap(experimentRow[0]).get('[data-cy="experimentName"]').should('not.contain.text', 'settingsPage.')
+        cy.wrap(experimentRow[0]).get('[data-cy="experimentDescription"]').should('not.contain.text', 'settingsPage.')
+      })
     })
 
     it('shows the Resolved Configuration section', () => {
@@ -217,6 +226,7 @@ describe('App: Settings', () => {
       cy.loginUser()
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.get(SidebarSettingsLinkSelector).click()
       cy.findByText('Project settings').click()
       cy.get('[data-cy="config-code"]').contains('{')
@@ -227,6 +237,7 @@ describe('App: Settings', () => {
       cy.loginUser()
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.get(SidebarSettingsLinkSelector).click()
       cy.findByText('Project settings').click()
       cy.get('[data-cy="config-legend"]').within(() => {
@@ -270,6 +281,7 @@ describe('App: Settings', () => {
       cy.loginUser()
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.get(SidebarSettingsLinkSelector).click()
       cy.findByText('Project settings').click()
       cy.get('[data-cy="config-legend"]').within(() => {
@@ -331,6 +343,7 @@ describe('App: Settings', () => {
       // navigate away and come back
       // preferred editor selected from dropdown should have been persisted
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.findByTestId('sidebar-link-settings-page').click()
       cy.wait(200)
       cy.get('[data-cy="Device settings"]').click()
@@ -380,6 +393,7 @@ describe('App: Settings', () => {
       // navigate away and come back
       // preferred editor selected from dropdown should have been persisted
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.findByTestId('sidebar-link-settings-page').click()
       cy.wait(200)
       cy.get('[data-cy="Device settings"]').click()
@@ -410,6 +424,7 @@ describe('App: Settings', () => {
         cy.startAppServer('e2e')
         cy.loginUser()
         cy.visitApp()
+        cy.specsPageIsVisible()
         cy.get('button').contains('Enable desktop notifications').click()
         // We specifically scroll this anchor into view when clicking the "Enable desktop notifications" button.
         cy.get('section#notifications').should('be.visible')
@@ -540,6 +555,7 @@ describe('App: Settings without cloud', () => {
     cy.startAppServer('component')
 
     cy.visitApp()
+    cy.specsPageIsVisible()
     cy.get(SidebarSettingsLinkSelector).click()
     cy.findByText('Cypress Cloud settings').click()
     cy.findByText('Project ID').should('not.exist')
@@ -566,6 +582,7 @@ describe('App: Settings without cloud', () => {
     cy.startAppServer('component')
 
     cy.visitApp()
+    cy.specsPageIsVisible()
     cy.get(SidebarSettingsLinkSelector).click()
     cy.findByText('Project settings').click()
 

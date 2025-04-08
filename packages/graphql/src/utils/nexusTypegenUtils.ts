@@ -61,6 +61,7 @@ export async function nexusTypegen (cfg: NexusTypegenCfg) {
       CYPRESS_INTERNAL_NEXUS_CODEGEN: 'true',
       TS_NODE_CACHE: 'false',
     },
+    ...process.platform === 'win32' ? { shell: true } : {},
   })
 
   out.stderr.on('data', (data) => {
@@ -91,8 +92,7 @@ const nexusTypegenDebounced = (cfg: NexusTypegenCfg) => {
   debounced[cfg.filePath] =
     debounced[cfg.filePath] ?? _.debounce(nexusTypegen, 500)
 
-  // @ts-expect-error
-  debounced[cfg.filePath](cfg)
+  debounced[cfg.filePath]?.(cfg)
 }
 
 interface NexusTypegenWatchCfg extends NexusTypegenCfg {

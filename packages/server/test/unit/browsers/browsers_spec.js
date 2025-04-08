@@ -118,6 +118,19 @@ describe('lib/browsers/index', () => {
     })
   })
 
+  context('.closeProtocolConnection', () => {
+    it('calls close on instance', async () => {
+      sinon.stub(chrome, 'closeProtocolConnection').resolves()
+      await browsers.closeProtocolConnection({
+        browser: {
+          family: 'chromium',
+        },
+      })
+
+      expect(chrome.closeProtocolConnection).to.be.called
+    })
+  })
+
   context('.connectToNewSpec', () => {
     it(`throws an error if browser family doesn't exist`, () => {
       return browsers.connectToNewSpec({
@@ -209,6 +222,7 @@ describe('lib/browsers/index', () => {
       browsers._setInstance(null)
 
       expect(browserInstance1.kill).to.be.calledOnce
+      expect(browserInstance1.isOrphanedBrowserProcess).to.be.true
       expect(currentInstance).to.equal(browserInstance2)
     })
 
@@ -262,6 +276,7 @@ describe('lib/browsers/index', () => {
       browsers._setInstance(null)
 
       expect(browserInstance1.kill).to.be.calledOnce
+      expect(browserInstance1.isOrphanedBrowserProcess).to.be.true
       expect(currentInstance).to.equal(browserInstance2)
     })
   })
@@ -274,21 +289,6 @@ describe('lib/browsers/index', () => {
 
       // this error is snapshotted in an e2e test, no need to do it here
       expect(fn).to.throw({ type: 'UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES' })
-    })
-
-    it('warns if array passed and changes it to args', () => {
-      const onWarning = sinon.stub()
-
-      const result = utils.extendLaunchOptionsFromPlugins({ args: [] }, ['foo'], { onWarning })
-
-      expect(result).to.deep.eq({
-        args: ['foo'],
-      })
-
-      // this error is snapshotted in e2e tests, no need to do it here
-      expect(onWarning).to.be.calledOnce
-
-      expect(onWarning).to.be.calledWithMatch({ type: 'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS' })
     })
   })
 
@@ -394,6 +394,31 @@ describe('lib/browsers/index', () => {
         ['opening', 'open', 'closed'].forEach((status, i) => {
           expect(ctx.actions.app.setBrowserStatus.getCall(i).args[0]).eq(status)
         })
+      })
+    })
+  })
+
+  context('didBrowserPreviouslyHaveUnexpectedExit', () => {
+    it('sets didBrowserPreviouslyHaveUnexpectedExit when the browser unexpectedly closes', () => {
+      const url = 'http://localhost:3000'
+      const ee = new EventEmitter()
+
+      ee.kill = () => {
+        ee.emit('exit')
+      }
+
+      const instance = ee
+
+      browsers._setInstance(instance)
+
+      sinon.stub(electron, 'open').resolves(instance)
+      sinon.spy(ctx.actions.app, 'setBrowserStatus')
+
+      // Stub to speed up test, we don't care about the delay
+      sinon.stub(Promise, 'delay').resolves()
+
+      return browsers.open({ name: 'electron', family: 'chromium' }, { url }, null, ctx).then(browsers.close).then(() => {
+        expect(ctx.coreData.didBrowserPreviouslyHaveUnexpectedExit).eq(true)
       })
     })
   })

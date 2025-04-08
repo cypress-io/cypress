@@ -7,6 +7,7 @@ describe('Config options', () => {
     cy.startAppServer('component')
 
     cy.visitApp()
+    cy.specsPageIsVisible()
     cy.contains('App.cy.jsx').click()
     cy.waitForSpecToFinish()
     cy.get('.passed > .num').should('contain', 1)
@@ -18,6 +19,7 @@ describe('Config options', () => {
     cy.startAppServer('component')
 
     cy.visitApp()
+    cy.specsPageIsVisible()
     cy.contains('foo.cy.js').click()
     cy.waitForSpecToFinish()
     cy.get('.passed > .num').should('contain', 1)
@@ -29,6 +31,7 @@ describe('Config options', () => {
     cy.startAppServer('component')
 
     cy.visitApp()
+    cy.specsPageIsVisible()
     cy.contains('App.cy.jsx').click()
     cy.waitForSpecToFinish()
     cy.get('.passed > .num').should('contain', 1)
@@ -40,6 +43,7 @@ describe('Config options', () => {
     cy.startAppServer('component')
 
     cy.visitApp()
+    cy.specsPageIsVisible()
     cy.contains('App.cy.jsx').click()
     cy.waitForSpecToFinish()
     cy.get('.passed > .num').should('contain', 2)
@@ -57,6 +61,7 @@ describe('Config options', () => {
     cy.startAppServer('component')
 
     cy.visitApp()
+    cy.specsPageIsVisible()
 
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject(
@@ -75,6 +80,7 @@ describe('Config options', () => {
     cy.startAppServer('component')
 
     cy.visitApp()
+    cy.specsPageIsVisible()
     cy.contains('relative-url.cy.jsx').click()
     cy.waitForSpecToFinish()
     cy.get('.passed > .num').should('contain', 1)

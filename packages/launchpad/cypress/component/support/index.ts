@@ -15,7 +15,6 @@
 
 // Import commands.js using ES2015 syntax:
 
-import '@iconify/iconify'
 import '@purge-icons/generated'
 
 import 'cypress-real-events/support'

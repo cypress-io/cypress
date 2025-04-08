@@ -3,8 +3,8 @@ const debug = require('debug')('cypress:server:chrome_policy_check')
 const errors = require('../errors')
 const os = require('os')
 
-// https://www.chromium.org/administrators/policy-list-3#Proxy
-// https://www.chromium.org/administrators/policy-list-3#ProxySettings
+// https://chromeenterprise.google/policies/#Proxy
+// https://chromeenterprise.google/policies/#ProxySettings
 const BAD_PROXY_POLICY_NAMES = [
   'ProxySettings',
   'ProxyMode',
@@ -14,7 +14,7 @@ const BAD_PROXY_POLICY_NAMES = [
   'ProxyBypassList',
 ]
 
-// https://www.chromium.org/administrators/policy-list-3#Extensions
+// https://chromeenterprise.google/policies/#Extensions
 const BAD_EXTENSION_POLICY_NAMES = [
   'ExtensionInstallBlacklist',
   'ExtensionInstallWhitelist',

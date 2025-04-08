@@ -19,7 +19,11 @@ export const VueI18n = createI18n()
 export function createI18n (opts = {}) {
   return _createI18n<MessageSchema, 'en-US'>({
     locale: 'en-US',
-    messages: compiledMessages,
+    /**
+    * precompiled messages from unplugin-vue-i18n do not include explicit keys derived from
+    * the filenames of the raw message sources, so it must be coerced.
+    */
+    messages: compiledMessages as { 'en-US': MessageSchema },
     ...opts,
   })
 }

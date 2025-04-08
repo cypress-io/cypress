@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import Bluebird from 'bluebird'
+// tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
 import { BrowserWindow } from 'electron'
 import Debug from 'debug'
 import * as savedState from '../saved_state'
@@ -185,7 +186,7 @@ export function create (projectRoot, _options: WindowOptions, newBrowserWindow =
     })
   }
 
-  win.webContents.on('crashed', function (...args) {
+  win.webContents.on('render-process-gone', function (...args) {
     return options.onCrashed.apply(win, args)
   })
 

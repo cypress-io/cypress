@@ -1,0 +1,8 @@
+<p data-cy="signals-optional-component-title-display">
+  {{ title() }}
+</p>
+<p data-cy="signals-optional-component-count-display"> {{ count() }}</p>
+<!-- make sure this signal is preserved! -->
+<p data-cy="signals-optional-component-set-signal"> {{ $setSignal() }}</p>
+<button data-cy="signals-optional-component-count-incr" (click)="count.set(count() + 1)">Increase</button>
+<button data-cy="signals-optional-component-count-decr" (click)="count.set(count() - 1)">Decrease</button>

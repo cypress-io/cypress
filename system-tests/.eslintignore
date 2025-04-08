@@ -10,20 +10,20 @@ system-tests/projects/no-specs/src/Invalid.jsx
 system-tests/projects/todos/tests/_fixtures/bad_js.js
 system-tests/projects/todos/tests/_fixtures/bar.js
 system-tests/projects/todos/tests/_fixtures/foo.js
+system-tests/projects/todos/tests/_fixtures/user.js
 system-tests/projects/todos/tests/_fixtures/nested/fixture.js
 system-tests/projects/todos/tests/_fixtures/no_format.js
 system-tests/projects/todos/tests/_fixtures/trailing_new_line.js
-system-tests/projects/todos/tests/_fixtures/user.js
 system-tests/projects/qwik-app/cypress-ct-bad-missing-value/*
 system-tests/projects/qwik-app/cypress-ct-bad-syntax/*
 system-tests/project-fixtures/react/src/AppCompilationError.cy.jsx
 system-tests/projects/qwik-app/cypress-ct-bad-missing-value/definition.js
+system-tests/projects/outdated-deps-vuecli3
 
 # 3rd party
 system-tests/projects/e2e/static/jquery.js
 
 # snapshots
-system-tests/projects/pristine/expected-cypress-js-component-create-react-app-v5/cypress.config.js
 system-tests/projects/pristine/expected-cypress-js-e2e/cypress.config.js
 system-tests/projects/pristine/expected-cypress-js-e2e-without-fixtures/cypress.config.js
 system-tests/projects/pristine-module/expected-cypress-js-e2e/cypress.config.js

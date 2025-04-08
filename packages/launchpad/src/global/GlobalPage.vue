@@ -6,12 +6,12 @@
       :project-count="filteredProjects?.length"
       @add-project="handleAddProject"
     />
-    <h2
+    <h1
       v-if="filteredProjects.length"
       class="mb-[16px] text-gray-800"
     >
       {{ t('globalPage.recentProjectsHeader') }}
-    </h2>
+    </h1>
     <div
       :class="{ 'md:grid md:grid-cols-2 md:gap-[24px] mb-0': filteredProjects?.length > 1 }"
     >

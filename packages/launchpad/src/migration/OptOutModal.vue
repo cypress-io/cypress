@@ -100,7 +100,7 @@
           {{ t('migration.renameAuto.modal.buttonSave') }}
         </Button>
         <Button
-          variant="outline"
+          variant="outline-light"
           @click="emit('cancel')"
         >
           {{ t('migration.renameAuto.modal.buttonCancel') }}
@@ -113,7 +113,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import Alert from '@cy/components/Alert.vue'
-import Button from '@cy/components/Button.vue'
+import Button from '@cypress-design/vue-button'
 import CodeTag from '@cy/components/CodeTag.vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import Radio from '@cy/components/Radio.vue'

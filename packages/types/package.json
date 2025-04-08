@@ -10,13 +10,25 @@
     "clean": "rimraf src/*.js src/**/*.js",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
-  "dependencies": {},
+  "dependencies": {
+    "semver": "^7.7.1"
+  },
   "devDependencies": {
-    "@types/node": "18.17.5",
-    "typescript": "^4.7.4"
+    "@types/node": "20.16.0",
+    "axios": "^1.8.3",
+    "better-sqlite3": "11.5.0",
+    "devtools-protocol": "0.0.1413303",
+    "express": "4.21.0",
+    "typescript": "~5.4.5"
   },
   "files": [
     "src/*"
   ],
-  "types": "src/index.ts"
+  "types": "src/index.ts",
+  "workspaces": {
+    "nohoist": [
+      "devtools-protocol"
+    ]
+  },
+  "nx": {}
 }

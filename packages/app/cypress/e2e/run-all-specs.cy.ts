@@ -30,6 +30,7 @@ describe('run-all-specs', () => {
     cy.openProject('run-all-specs')
     cy.startAppServer()
     cy.visitApp()
+    cy.specsPageIsVisible()
 
     // Spawns new browser so we need to stub this
     cy.withCtx((ctx, { sinon }) => {

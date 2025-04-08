@@ -1,6 +1,8 @@
 {
+  "name": "pristine-yarn",
+  "version": "0.0.0-test",
   "devDependencies": {
-    "typescript": "4.6.3"
+    "typescript": "5.6.3"
   },
   "_cySkipDepInstall": true
 }

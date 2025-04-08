@@ -1,10 +1,10 @@
 {
-  "name": "@test-project/webpack-preprocessor",
+  "name": "webpack-preprocessor",
   "version": "0.0.0-test",
   "devDependencies": {
-    "@babel/core": "7.9.0",
-    "@babel/preset-env": "7.9.0",
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
     "@cypress/webpack-preprocessor": "file:../../../npm/webpack-preprocessor",
-    "babel-loader": "8.3.0"
+    "babel-loader": "^9.2.1"
   }
 }

@@ -107,7 +107,9 @@ export function parseCspHeaders (headers: OutgoingHttpHeaders, headerName: strin
       policy = cspRegExp.exec(cspHeader)
     }
 
-    return [...acc, policies]
+    acc.push(policies)
+
+    return acc
   }, [])
 }
 

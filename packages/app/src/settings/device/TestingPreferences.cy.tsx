@@ -1,3 +1,4 @@
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 import { TestingPreferencesFragmentDoc } from '../../generated/graphql-test'
 import TestingPreferences from './TestingPreferences.vue'
@@ -28,7 +29,7 @@ describe('<TestingPreferences />', () => {
       </div>),
     })
 
-    cy.get(`#autoScrollingEnabled[role="switch"]`)
+    cy.get(`#autoScrollingToggle[role="switch"]`)
     .should('have.attr', 'aria-checked', 'false')
   })
 })

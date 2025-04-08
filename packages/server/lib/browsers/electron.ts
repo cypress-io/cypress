@@ -9,6 +9,7 @@ import * as savedState from '../saved_state'
 import utils from './utils'
 import * as errors from '../errors'
 import type { Browser, BrowserInstance, GracefulShutdownOptions } from './types'
+// tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
 import type { BrowserWindow } from 'electron'
 import type { Automation } from '../automation'
 import type { BrowserLaunchOpts, Preferences, ProtocolManagerShape, RunModeVideoApi } from '@packages/types'
@@ -16,6 +17,7 @@ import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
 import memory from './memory'
 import { BrowserCriClient } from './browser-cri-client'
 import { getRemoteDebuggingPort } from '../util/electron-app'
+import type { CriClient } from './cri-client'
 
 // TODO: unmix these two types
 type ElectronOpts = Windows.WindowOptions & BrowserLaunchOpts
@@ -54,12 +56,22 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
   const port = getRemoteDebuggingPort()
 
   if (!browserCriClient) {
-    browserCriClient = await BrowserCriClient.create({ hosts: ['127.0.0.1'], port, browserName: 'electron', onAsynchronousError: options.onError, onReconnect: () => {}, fullyManageTabs: true })
+    debug(`browser CRI is not set. Creating...`)
+    browserCriClient = await BrowserCriClient.create({
+      hosts: ['127.0.0.1'],
+      port,
+      browserName: 'electron',
+      onAsynchronousError: options.onError,
+      onReconnect: () => {},
+      fullyManageTabs: true,
+      onServiceWorkerClientEvent: parent.onServiceWorkerClientEvent,
+    })
   }
 
   const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
   const sendClose = async () => {
+    debug(`sendClose called, browserCriClient is set? ${!!browserCriClient}`)
     if (browserCriClient) {
       const gracefulShutdown = true
 
@@ -118,6 +130,25 @@ async function recordVideo (cdpAutomation: CdpAutomation, videoApi: RunModeVideo
   const { writeVideoFrame } = await videoApi.useFfmpegVideoController()
 
   await cdpAutomation.startVideoRecording(writeVideoFrame, screencastOpts())
+}
+
+// Start video legitimately if we have a video api. Otherwise, if we're in run mode, start a dummy screencast to prevent:
+// https://github.com/electron/electron/issues/45398
+async function handleVideo (handleVideoOptions: { pageCriClient: CriClient, cdpAutomation: CdpAutomation, videoApi?: RunModeVideoApi, options: BrowserLaunchOpts }) {
+  const { pageCriClient, cdpAutomation, videoApi, options } = handleVideoOptions
+
+  if (videoApi) {
+    await recordVideo(cdpAutomation, videoApi)
+  } else if (options.isTextTerminal) {
+    // To prevent https://github.com/electron/electron/issues/45398, we start a dummy screen cast with a quality of 0
+    // and only capture every 2^32 - 1 frames without listening to any frames. This is effectively a no-op, but it
+    // prevents the issue from occurring.
+    await pageCriClient.send('Page.startScreencast', {
+      format: 'jpeg',
+      everyNthFrame: 2 ** 31 - 1,
+      quality: 0,
+    })
+  }
 }
 
 export = {
@@ -303,11 +334,12 @@ export = {
 
       await Promise.all([
         pageCriClient.send('Page.enable'),
+        pageCriClient.send('ServiceWorker.enable'),
         this.connectProtocolToBrowser({ protocolManager }),
         cdpSocketServer?.attachCDPClient(cdpAutomation),
-        videoApi && recordVideo(cdpAutomation, videoApi),
+        handleVideo({ pageCriClient, cdpAutomation, videoApi, options }),
         this._handleDownloads(win, options.downloadsFolder, automation),
-        utils.handleDownloadLinksViaCDP(pageCriClient, automation),
+        utils.initializeCDP(pageCriClient, automation),
         // Ensure to clear browser state in between runs. This is handled differently in browsers when we launch new tabs, but we don't have that concept in electron
         pageCriClient.send('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' }),
         pageCriClient.send('Network.clearBrowserCache'),
@@ -434,10 +466,15 @@ export = {
    * Clear instance state for the electron instance, this is normally called on kill or on exit, for electron there isn't any state to clear.
    */
   clearInstanceState (options: GracefulShutdownOptions = {}) {
-    debug('closing remote interface client', { options })
-    // Do nothing on failure here since we're shutting down anyway
-    browserCriClient?.close(options.gracefulShutdown).catch(() => {})
-    browserCriClient = null
+    // in the case of orphaned browser clients, we should preserve the CRI client as it is connected
+    // to the same host regardless of window
+    debug('clearInstanceState called with options', { options })
+    if (!options.shouldPreserveCriClient) {
+      debug('closing remote interface client')
+      // Do nothing on failure here since we're shutting down anyway
+      browserCriClient?.close(options.gracefulShutdown).catch(() => {})
+      browserCriClient = null
+    }
   },
 
   connectToNewSpec (browser: Browser, options: ElectronOpts, automation: Automation) {
@@ -453,7 +490,23 @@ export = {
 
     if (!browserCriClient?.currentlyAttachedTarget) throw new Error('Missing pageCriClient in connectProtocolToBrowser')
 
-    await options.protocolManager?.connectToBrowser(browserCriClient.currentlyAttachedTarget)
+    // Clone the target here so that we separate the protocol client and the main client.
+    // This allows us to close the protocol client independently of the main client
+    // which we do when we exit out of studio in open mode.
+    if (!browserCriClient.currentlyAttachedProtocolTarget) {
+      browserCriClient.currentlyAttachedProtocolTarget = await browserCriClient.currentlyAttachedTarget.clone()
+    }
+
+    await options.protocolManager?.connectToBrowser(browserCriClient.currentlyAttachedProtocolTarget)
+  },
+
+  async closeProtocolConnection () {
+    const browserCriClient = this._getBrowserCriClient()
+
+    if (browserCriClient?.currentlyAttachedProtocolTarget) {
+      await browserCriClient.currentlyAttachedProtocolTarget.close()
+      browserCriClient.currentlyAttachedProtocolTarget = undefined
+    }
   },
 
   validateLaunchOptions (launchOptions: typeof utils.defaultLaunchOptions) {
@@ -525,7 +578,7 @@ export = {
       allPids: [mainPid],
       browserWindow: win,
       kill (this: BrowserInstance) {
-        clearInstanceState({ gracefulShutdown: true })
+        clearInstanceState({ gracefulShutdown: true, shouldPreserveCriClient: this.isOrphanedBrowserProcess })
 
         if (this.isProcessExit) {
           // if the process is exiting, all BrowserWindows will be destroyed anyways
@@ -544,5 +597,9 @@ export = {
     })
 
     return instance
+  },
+
+  async closeExtraTargets () {
+    return browserCriClient?.closeExtraTargets()
   },
 }

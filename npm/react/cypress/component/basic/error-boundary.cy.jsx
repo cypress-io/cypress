@@ -45,6 +45,6 @@ describe('Error Boundary', () => {
     )
 
     cy.get('header h1').should('contain', 'Something went wrong.')
-    cy.get('header h3').should('contain', 'ChildWithError failed to load')
+    cy.get('header h2').should('contain', 'ChildWithError failed to load')
   })
 })

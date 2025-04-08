@@ -50,6 +50,7 @@ describe('Proxy Logging', () => {
       // TODO(webkit): fix+unskip for webkit release
       browser: '!webkit',
     }, (done) => {
+      // tslint:disable:no-floating-promises
       fetch('/some-url')
 
       // trigger: Cypress.Log() called
@@ -126,6 +127,28 @@ describe('Proxy Logging', () => {
       img.src = `/fixtures/media/cypress.png?${Date.now()}`
     })
 
+    it('does not inherit the message of the currently running command', () => {
+      const logs: any[] = []
+
+      cy.on('log:added', (log) => {
+        if (log.name !== 'request') return
+
+        logs.push(log)
+      })
+
+      // delay the fetch call by 100ms to ensure it gets
+      // triggered during the cy.wait() below
+      // tslint:disable:no-floating-promises
+      setTimeout(() => {
+        fetch('/some-url')
+      }, 100)
+
+      cy.wait(200).then(() => {
+        expect(logs).to.have.length(1)
+        expect(logs[0].message).to.eq('')
+      })
+    })
+
     context('with cy.intercept()', () => {
       it('shows non-xhr/fetch log if intercepted', (done) => {
         const src = `/fixtures/media/cypress.png?${Date.now()}`
@@ -166,6 +189,7 @@ describe('Proxy Logging', () => {
       it('intercept log has consoleProps with intercept info', (done) => {
         cy.intercept('/some-url', 'stubbed response').as('alias')
         .then(() => {
+          // tslint:disable:no-floating-promises
           fetch('/some-url')
         })
 

@@ -1,4 +1,5 @@
 import { DataContext, getCtx, clearCtx, setCtx } from '@packages/data-context'
+// tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
 import electron, { OpenDialogOptions, SaveDialogOptions, BrowserWindow } from 'electron'
 
 import { isListening } from './util/ensure-url'
@@ -155,8 +156,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return devServer
       },
       isListening,
-      resetBrowserTabsForNextTest (shouldKeepTabOpen: boolean) {
-        return openProject.resetBrowserTabsForNextTest(shouldKeepTabOpen)
+      resetBrowserTabsForNextSpec (shouldKeepTabOpen: boolean) {
+        return openProject.resetBrowserTabsForNextSpec(shouldKeepTabOpen)
       },
       resetServer () {
         return openProject.getProject()?.server.reset()

@@ -4,7 +4,7 @@ import fse from 'fs-extra'
 import path from 'path'
 import { PNG } from 'pngjs'
 
-const isCi = require('is-ci')
+const isCi = require('ci-info').isCI
 
 if (app) {
   app.on('window-all-closed', () => {

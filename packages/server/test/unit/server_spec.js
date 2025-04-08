@@ -20,11 +20,10 @@ mockery.registerMock('morgan', () => {
 
 describe('lib/server', () => {
   beforeEach(function () {
-    this.server = new ServerBase()
-
     return setupFullConfigWithDefaults({ projectRoot: '/foo/bar/', config: { supportFile: false } }, getCtx().file.getFilesByGlob)
     .then((cfg) => {
       this.config = cfg
+      this.server = new ServerBase(cfg)
     })
   })
 
@@ -54,7 +53,7 @@ describe.skip('lib/server', () => {
     return setupFullConfigWithDefaults({ projectRoot: '/foo/bar/' }, getCtx().file.getFilesByGlob)
     .then((cfg) => {
       this.config = cfg
-      this.server = new ServerBase()
+      this.server = new ServerBase(cfg)
 
       this.oldFileServer = this.server._fileServer
       this.server._fileServer = this.fileServer

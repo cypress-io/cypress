@@ -3,3 +3,4 @@
 **/package-lock.json
 **/tsconfig.json
 **/cypress/fixtures
+**/generated

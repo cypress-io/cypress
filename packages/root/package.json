@@ -2,5 +2,6 @@
   "name": "@packages/root",
   "version": "0.0.0-development",
   "description": "dummy package pointing at the root package",
-  "main": "index.js"
+  "main": "index.js",
+  "nx": {}
 }

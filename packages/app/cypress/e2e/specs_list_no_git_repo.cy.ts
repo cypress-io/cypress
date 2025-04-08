@@ -4,6 +4,7 @@ describe('Spec List - Last updated with no git info', () => {
     cy.openProject('cypress-in-cypress')
     cy.startAppServer('e2e')
     cy.visitApp()
+    cy.specsPageIsVisible()
   })
 
   // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23474

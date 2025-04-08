@@ -36,12 +36,20 @@ declare namespace Cypress {
     (task: 'protocol:page:loading', input: any): Promise<void>
   }
 
+  interface Devices {
+    keyboard: Keyboard
+    mouse: Mouse
+  }
+
   interface cy {
+    devices: Devices
+    getAll: (tag: string, events: string) => Events
     /**
      * If `as` is chained to the current command, return the alias name used.
      */
+    getAlias: IAliases['getAlias']
     getNextAlias: IAliases['getNextAlias']
-    noop: <T>(v: T) => Cypress.Chainable<T>
+    noop: <T>(v?: T) => Cypress.Chainable<T>
     now: <T>(string, v: T) => Cypress.Chainable<T>
     queue: CommandQueue
     retry: IRetries['retry']
@@ -58,5 +66,6 @@ declare namespace Cypress {
 
     createSnapshot: ISnapshots['createSnapshot']
     getStyles: ISnapshots['getStyles']
+    timeout: ITimeouts['timeout']
   }
 }

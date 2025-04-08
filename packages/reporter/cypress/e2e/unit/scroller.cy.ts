@@ -156,6 +156,9 @@ describe('scroller', () => {
 
       scroller.setContainer(container, onUserScroll)
       scroller.scrollIntoView(getElement({ offsetTop: 600 }))
+      scroller.scrollIntoView(getElement({ offsetTop: 600 }))
+      clock.tick(16)
+      container.addEventListener.callArg(1)
       clock.tick(16)
       container.addEventListener.callArg(1)
       clock.tick(16)

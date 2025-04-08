@@ -1,35 +1,26 @@
 import {
   getContainerEl,
   setupHooks,
-  checkForRemovedStyleOptions,
 } from '@cypress/mount-utils'
-import type { ComponentConstructorOptions, ComponentProps, SvelteComponent } from 'svelte'
+import { mount as svelteMount, unmount as svelteUnmount } from 'svelte'
+import type { MountOptions, Component } from 'svelte'
 
 const DEFAULT_COMP_NAME = 'unknown'
 
-type SvelteConstructor<T> = new (...args: any[]) => T;
-type SvelteComponentOptions<T extends SvelteComponent> = Omit<
-  ComponentConstructorOptions<ComponentProps<T>>,
-  'hydrate' | 'target' | '$$inline'
->;
-
-export interface MountOptions<T extends SvelteComponent>
-  extends SvelteComponentOptions<T> {
-  log?: boolean
+export interface MountReturn{
+  component: Record<string, any>
 }
 
-export interface MountReturn<T extends SvelteComponent> {
-  component: T
-}
-
-let componentInstance: SvelteComponent | undefined
+let componentInstance: Record<string, any> | undefined
 
 const cleanup = () => {
-  componentInstance?.$destroy()
+  if (componentInstance) {
+    svelteUnmount(componentInstance)
+  }
 }
 
 // Extract the component name from the object passed to mount
-const getComponentDisplayName = <T extends SvelteComponent>(Component: SvelteConstructor<T>): string => {
+const getComponentDisplayName = (Component: Component<Record<string, any>, Record<string, any>, any>): string => {
   if (Component.name) {
     const [, match] = /Proxy\<(\w+)\>/.exec(Component.name) || []
 
@@ -42,7 +33,7 @@ const getComponentDisplayName = <T extends SvelteComponent>(Component: SvelteCon
 /**
  * Mounts a Svelte component inside the Cypress browser
  *
- * @param {SvelteConstructor<T>} Component Svelte component being mounted
+ * @param {Record<string, any>} Component Svelte component being mounted
  * @param {MountReturn<T extends SvelteComponent>} options options to customize the component being mounted
  * @returns Cypress.Chainable<MountReturn>
  *
@@ -57,11 +48,13 @@ const getComponentDisplayName = <T extends SvelteComponent>(Component: SvelteCon
  *
  * @see {@link https://on.cypress.io/mounting-svelte} for more details.
  */
-export function mount<T extends SvelteComponent> (
-  Component: SvelteConstructor<T>,
-  options: MountOptions<T> = {},
-): Cypress.Chainable<MountReturn<T>> {
-  checkForRemovedStyleOptions(options)
+export function mount (
+  Component: Component<Record<string, any>, Record<string, any>, any>,
+  options: Omit<MountOptions, 'target'> & {log?: boolean} = {},
+): Cypress.Chainable<MountReturn> {
+  // In Svelte 5, the component name is no longer easily discoverable and logs as "wrapper"
+  // so we default the logging of it to false as it doesn't provide a lot of value
+  options.log = options.log || false
 
   return cy.then(() => {
     // Remove last mounted component if cy.mount is called more than once in a test
@@ -69,9 +62,10 @@ export function mount<T extends SvelteComponent> (
 
     const target = getContainerEl()
 
-    const ComponentConstructor = ((Component as any).default || Component) as SvelteConstructor<T>
+    const ComponentConstructor = ((Component as any).default || Component) as Component<Record<string, any>, Record<string, any>, any>
 
-    componentInstance = new ComponentConstructor({
+    // @see https://svelte.dev/docs/svelte/v5-migration-guide#Components-are-no-longer-classes
+    componentInstance = svelteMount(ComponentConstructor, {
       target,
       ...options,
     })
@@ -88,7 +82,7 @@ export function mount<T extends SvelteComponent> (
         })
       }
     })
-    .wrap({ component: componentInstance as T }, { log: false })
+    .wrap({ component: componentInstance as Record<string, any> }, { log: false })
   })
 }
 

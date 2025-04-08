@@ -1,6 +1,7 @@
-import { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, MIGRATION_STEPS, MigrationStep, BannerState } from '@packages/types'
+import { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, MIGRATION_STEPS, MigrationStep, BannerState, StudioManagerShape } from '@packages/types'
 import { WizardBundler, CT_FRAMEWORKS, resolveComponentFrameworkDefinition, ErroredFramework } from '@packages/scaffold-config'
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
+// tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
 import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
 import type { SocketIONamespace, SocketIOServer } from '@packages/socket'
@@ -75,6 +76,7 @@ export interface AppDataShape {
   browsers: ReadonlyArray<FoundBrowser> | null
   projects: ProjectShape[]
   nodePath: Maybe<string>
+  nodeVersion: Maybe<string>
   browserStatus: BrowserStatus
   browserUserAgent: string | null
   relaunchBrowser: boolean
@@ -93,7 +95,6 @@ export interface WizardDataShape {
 export interface MigrationDataShape {
   // TODO: have the model of migration here
   step: MigrationStep
-  videoEmbedHtml: string | null
   legacyConfigForMigration?: LegacyCypressConfigJson | null
   filteredSteps: MigrationStep[]
   flags: {
@@ -171,6 +172,8 @@ export interface CoreDataShape {
   } | null
   cloudProject: CloudDataShape
   eventCollectorSource: EventCollectorSource | null
+  didBrowserPreviouslyHaveUnexpectedExit: boolean
+  studio: StudioManagerShape | null
 }
 
 /**
@@ -194,6 +197,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       browsers: null,
       projects: [],
       nodePath: modeOptions.userNodePath,
+      nodeVersion: modeOptions.userNodeVersion,
       browserStatus: 'closed',
       browserUserAgent: null,
       relaunchBrowser: false,
@@ -222,7 +226,6 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     },
     migration: {
       step: 'renameAuto',
-      videoEmbedHtml: null,
       legacyConfigForMigration: null,
       filteredSteps: [...MIGRATION_STEPS],
       flags: {
@@ -251,6 +254,8 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       testsForRunResults: {},
     },
     eventCollectorSource: null,
+    didBrowserPreviouslyHaveUnexpectedExit: false,
+    studio: null,
   }
 
   async function machineId (): Promise<string | null> {

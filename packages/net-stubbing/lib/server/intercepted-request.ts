@@ -51,8 +51,6 @@ export class InterceptedRequest {
     this._onResponse = opts.onResponse
     this.state = opts.state
     this.socket = opts.socket
-
-    this.addDefaultSubscriptions()
   }
 
   onResponse = (incomingRes: IncomingMessage, resStream: Readable) => {
@@ -65,7 +63,7 @@ export class InterceptedRequest {
     this._onResponse(incomingRes, resStream)
   }
 
-  private addDefaultSubscriptions () {
+  addDefaultSubscriptions () {
     if (this.subscriptionsByRoute.length) {
       throw new Error('cannot add default subscriptions to non-empty array')
     }
@@ -75,6 +73,10 @@ export class InterceptedRequest {
     }
 
     for (const route of this.req.matchingRoutes) {
+      if (route.disabled) {
+        continue
+      }
+
       const subscriptionsByRoute = {
         routeId: route.id,
         immediateStaticResponse: route.staticResponse,

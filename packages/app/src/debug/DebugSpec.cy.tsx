@@ -1,4 +1,5 @@
 import DebugSpec, { Spec, TestResults } from './DebugSpec.vue'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 
 const resultCounts = (min: number, max: number) => {
@@ -493,7 +494,7 @@ describe('Run Failures button', () => {
     ))
 
     cy.findByTestId('run-failures')
-    .should('have.attr', 'aria-disabled', 'disabled')
+    .should('have.attr', 'aria-disabled', 'true')
     .should('not.have.attr', 'href')
 
     cy.findByTestId('run-failures').realHover()
@@ -517,7 +518,7 @@ describe('Run Failures button', () => {
     ))
 
     cy.findByTestId('run-failures')
-    .should('have.attr', 'aria-disabled', 'disabled')
+    .should('have.attr', 'aria-disabled', 'true')
     .should('not.have.attr', 'href')
 
     cy.findByTestId('run-failures').realHover()

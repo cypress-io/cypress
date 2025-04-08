@@ -78,7 +78,7 @@ describe('exec info', function () {
       stable: false,
       commitSha: 'abc123',
       commitBranch: 'someBranchName',
-      commitDate: new Date('02-02-2022').toISOString(),
+      commitDate: new Date('2022-02-02').toISOString(),
     })
 
     await startInfoAndSnapshot('logs additional info about pre-releases')

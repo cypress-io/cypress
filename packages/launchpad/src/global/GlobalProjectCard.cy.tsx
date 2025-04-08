@@ -1,5 +1,6 @@
 import GlobalProjectCard from './GlobalProjectCard.vue'
 import { GlobalProjectCardFragmentDoc } from '../generated/graphql-test'
+// tslint:disable-next-line: no-implicit-dependencies - need to handle this
 import { defaultMessages } from '@cy/i18n'
 
 const defaultPath = '/usr/local/dev/projects/some-test-title'

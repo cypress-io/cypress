@@ -6,7 +6,7 @@
 // - https://nodejs.org/api/url.html#url_url_format_urlobject
 
 import _ from 'lodash'
-import url, { URL } from 'url'
+import url from 'url'
 
 // yup, protocol contains a: ':' colon
 // at the end of it (-______________-)
@@ -87,7 +87,11 @@ export function addDefaultPort (urlToCheck: any) {
 }
 
 export function getPath (urlToCheck: string) {
-  return url.parse(urlToCheck).path
+  // since we are only concerned with the pathname and search properties,
+  // we can set the base to a fake base to handle relative urls
+  const url = new URL(urlToCheck, 'http://fake-base.com')
+
+  return `${url.pathname}${url.search}`
 }
 
 const localhostIPRegex = /^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/

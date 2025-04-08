@@ -61,7 +61,7 @@ export const findParent = (el, condition) => {
   return collectParent(el)
 }
 
-export const getFirstParentWithTagName = ($el, tagName) => {
+export const getFirstParentWithTagName = ($el: JQuery, tagName: string) => {
   if (isUndefinedOrHTMLBodyDoc($el) || !tagName) {
     return null
   }
@@ -171,11 +171,11 @@ export const elementFromPoint = (doc, x, y): HTMLElement => {
  * By DOM Hierarchy
  * Compares two elements to see what their relationship is
  */
-export const isAncestor = ($el, $maybeAncestor) => {
+export const isAncestor = ($el: JQuery<HTMLElement>, $maybeAncestor: JQuery<HTMLElement>) => {
   return $jquery.wrap(getAllParents($el[0])).index($maybeAncestor) >= 0
 }
 
-export const isChild = ($el, $maybeChild) => {
+export const isChild = ($el: JQuery<HTMLElement>, $maybeChild: JQuery<HTMLElement>) => {
   let children = $el.children()
 
   if (children.length && children[0].nodeName === 'SHADOW-ROOT') {
@@ -185,7 +185,7 @@ export const isChild = ($el, $maybeChild) => {
   return children.index($maybeChild) >= 0
 }
 
-export const isDescendent = ($el1, $el2) => {
+export const isDescendent = ($el1: JQuery<HTMLElement>, $el2?: JQuery<HTMLElement>) => {
   if (!$el2) {
     return false
   }
@@ -328,7 +328,7 @@ export const getContainsSelector = (text, filter = '', options: {
   return selectors.join()
 }
 
-export const getInputFromLabel = ($el) => {
+export const getInputFromLabel = ($el: JQuery<HTMLElement>) => {
   if (!$el.is('label')) {
     return $([])
   }

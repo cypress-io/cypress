@@ -33,5 +33,6 @@
     "dist",
     "src"
   ],
-  "types": "src/node.ts"
+  "types": "src/node.ts",
+  "nx": {}
 }

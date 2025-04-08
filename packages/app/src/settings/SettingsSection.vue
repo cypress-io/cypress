@@ -1,6 +1,7 @@
 <template>
   <section :id="anchor">
     <h2
+      :id="labelId"
       class="font-medium text-[16px] text-gray-900 leading-[24px] inline-flex items-baseline align-middle"
     >
       <slot name="title" />
@@ -22,5 +23,6 @@
 defineProps<{
   code?: string
   anchor?: string
+  labelId?: string
 }>()
 </script>

@@ -31,7 +31,7 @@
 
 ## Requirements
 
-- Angular 14+
+- Angular 17.2.0+ (Cypress 13 and under supports Angular 13 - 16)
 
 ## Usage ⏯
 

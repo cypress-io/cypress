@@ -1,4 +1,5 @@
 import ButtonBar from './ButtonBar.vue'
+// tslint:disable-next-line: no-implicit-dependencies - need to handle this
 import { defaultMessages } from '@cy/i18n'
 
 const { next: nextLabel, back: backLabel } = defaultMessages.setupPage.step

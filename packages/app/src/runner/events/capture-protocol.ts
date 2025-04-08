@@ -1,4 +1,9 @@
-const attachCypressProtocolInfo = (info) => {
+type ProtocolInfo = {
+  type: 'cy:protocol-snapshot' | 'log:added' | 'log:changed' | 'page:loading'| 'test:before:run:async' | 'test:before:after:run:async' | 'test:after:run:async' | 'url:changed' | 'viewport:changed'
+  timestamp: DOMHighResTimeStamp
+}
+
+const attachCypressProtocolInfo = (info: ProtocolInfo) => {
   let cypressProtocolElement: HTMLElement | null = document.getElementById('__cypress-protocol')
 
   // If element does not exist, create it
@@ -20,7 +25,7 @@ export const addCaptureProtocolListeners = (Cypress: Cypress.Cypress) => {
     })
   })
 
-  Cypress.on('log:added', (attributes) => {
+  Cypress.on('log:added', async (attributes) => {
     // TODO: UNIFY-1318 - Race condition in unified runner - we should not need this null check
     if (!Cypress.runner) {
       return
@@ -33,10 +38,10 @@ export const addCaptureProtocolListeners = (Cypress: Cypress.Cypress) => {
       timestamp: performance.now() + performance.timeOrigin,
     })
 
-    Cypress.backend('protocol:command:log:added', protocolProps)
+    await Cypress.backend('protocol:command:log:added', protocolProps)
   })
 
-  Cypress.on('log:changed', (attributes) => {
+  Cypress.on('log:changed', async (attributes) => {
     // TODO: UNIFY-1318 - Race condition in unified runner - we should not need this null check
     if (!Cypress.runner) {
       return
@@ -49,10 +54,10 @@ export const addCaptureProtocolListeners = (Cypress: Cypress.Cypress) => {
       timestamp: performance.now() + performance.timeOrigin,
     })
 
-    Cypress.backend('protocol:command:log:changed', protocolProps)
+    await Cypress.backend('protocol:command:log:changed', protocolProps)
   })
 
-  const viewportChangedHandler = (viewport) => {
+  const viewportChangedHandler = async (viewport) => {
     const timestamp = performance.timeOrigin + performance.now()
 
     attachCypressProtocolInfo({
@@ -60,7 +65,7 @@ export const addCaptureProtocolListeners = (Cypress: Cypress.Cypress) => {
       timestamp,
     })
 
-    Cypress.backend('protocol:viewport:changed', {
+    await Cypress.backend('protocol:viewport:changed', {
       viewport: {
         width: viewport.viewportWidth,
         height: viewport.viewportHeight,
@@ -74,15 +79,20 @@ export const addCaptureProtocolListeners = (Cypress: Cypress.Cypress) => {
   Cypress.primaryOriginCommunicator.on('viewport:changed', viewportChangedHandler)
 
   Cypress.on('test:before:run:async', async (attributes) => {
+    const timestamp = performance.now() + performance.timeOrigin
+
     attachCypressProtocolInfo({
       type: 'test:before:run:async',
-      timestamp: performance.now() + performance.timeOrigin,
+      timestamp,
     })
 
-    await Cypress.backend('protocol:test:before:run:async', attributes)
+    await Cypress.backend('protocol:test:before:run:async', {
+      ...attributes,
+      timestamp,
+    })
   })
 
-  Cypress.on('url:changed', (url) => {
+  Cypress.on('url:changed', async (url) => {
     const timestamp = performance.timeOrigin + performance.now()
 
     attachCypressProtocolInfo({
@@ -90,10 +100,10 @@ export const addCaptureProtocolListeners = (Cypress: Cypress.Cypress) => {
       timestamp,
     })
 
-    Cypress.backend('protocol:url:changed', { url, timestamp })
+    await Cypress.backend('protocol:url:changed', { url, timestamp })
   })
 
-  Cypress.on('page:loading', (loading) => {
+  Cypress.on('page:loading', async (loading) => {
     const timestamp = performance.timeOrigin + performance.now()
 
     attachCypressProtocolInfo({
@@ -101,7 +111,7 @@ export const addCaptureProtocolListeners = (Cypress: Cypress.Cypress) => {
       timestamp,
     })
 
-    Cypress.backend('protocol:page:loading', { loading, timestamp })
+    await Cypress.backend('protocol:page:loading', { loading, timestamp })
   })
 
   Cypress.on('test:before:after:run:async', async (attributes, _test, options) => {

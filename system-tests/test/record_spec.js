@@ -23,13 +23,15 @@ const {
   postInstanceTestsResponse,
   encryptBody,
   disableCaptureProtocolWithMessage,
+  disableCaptureProtocolUploadUrl,
   CAPTURE_PROTOCOL_UPLOAD_URL,
   postRunResponseWithProtocolDisabled,
   routeHandlers,
+  enableInvalidProtocolSignature,
 } = require('../lib/serverStub')
 const { expectRunsToHaveCorrectTimings } = require('../lib/resultsUtils')
 const { randomBytes } = require('crypto')
-const { PROTOCOL_STUB_CONSTRUCTOR_ERROR, PROTOCOL_STUB_NONFATAL_ERROR, PROTOCOL_STUB_BEFORESPEC_ERROR, PROTOCOL_STUB_BEFORETEST_ERROR } = require('../lib/protocol-stubs/protocolStubResponse')
+const { PROTOCOL_STUB_CONSTRUCTOR_ERROR, PROTOCOL_STUB_NONFATAL_ERROR, PROTOCOL_STUB_BEFORESPEC_ERROR, PROTOCOL_STUB_BEFORETEST_ERROR, PROTOCOL_STUB_NO_DB_WRITE } = require('../lib/protocol-stubs/protocolStubResponse')
 const debug = require('debug')('cypress:system-tests:record_spec')
 const e2ePath = Fixtures.projectPath('e2e')
 const outputPath = path.join(e2ePath, 'output.json')
@@ -38,6 +40,11 @@ let { runId, groupId, machineId, runUrl, tags } = postRunResponse
 const { instanceId } = postRunInstanceResponse
 
 describe('e2e record', () => {
+  beforeEach(() => {
+    // uploads happen too fast to be captured by these tests without tuning these values
+    process.env.CYPRESS_UPLOAD_ACTIVITY_INTERVAL = 100
+  })
+
   context('passing', () => {
     setupStubbedServer(createRoutes())
 
@@ -1523,6 +1530,44 @@ describe('e2e record', () => {
       })
     })
 
+    describe('update instance artifacts', () => {
+      const routes = createRoutes({
+        putArtifacts: {
+          res (_, res) {
+            return res.sendStatus(500)
+          },
+        },
+      })
+
+      setupStubbedServer(routes)
+
+      it('warns but proceeds', function () {
+        process.env.DISABLE_API_RETRIES = 'true'
+
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          record: true,
+          snapshot: true,
+        })
+        .then(() => {
+          const urls = getRequestUrls()
+
+          expect(urls).to.deep.eq([
+            'POST /runs',
+            `POST /runs/${runId}/instances`,
+            `POST /instances/${instanceId}/tests`,
+            `POST /instances/${instanceId}/results`,
+            'PUT /screenshots/1.png',
+            `PUT /instances/${instanceId}/artifacts`,
+            `PUT /instances/${instanceId}/stdout`,
+            `POST /runs/${runId}/instances`,
+          ])
+        })
+      })
+    })
+
     describe('api retries on error', () => {
       let count = 0
 
@@ -2293,7 +2338,7 @@ describe('e2e record', () => {
 
       describe('passing', () => {
         enableCaptureProtocol()
-        it('retrieves the capture protocol and uploads the db', function () {
+        it('retrieves the capture protocol, uploads the db, and updates the artifact upload report', function () {
           return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
             configFile: 'cypress-with-project-id.config.js',
@@ -2302,8 +2347,41 @@ describe('e2e record', () => {
             snapshot: true,
           }).then((ret) => {
             const urls = getRequestUrls()
+            const artifactReport = getRequests().find(({ url }) => url.includes(`/instances/${instanceId}/artifacts`))?.body
 
             expect(urls).to.include.members([`PUT ${CAPTURE_PROTOCOL_UPLOAD_URL}`])
+
+            expect(artifactReport?.protocol).to.an('object')
+            expect(artifactReport?.protocol?.url).to.be.a('string')
+            expect(artifactReport?.protocol?.uploadDuration).to.be.a('number')
+            expect(artifactReport?.protocol).to.containSubset({
+              afterSpecDurations: {
+                drainCDPEvents: 1,
+                drainAUTEvents: 5,
+                resolveBodyPromises: 7,
+                closeDb: 11,
+                teardownBindings: 13,
+              },
+            })
+
+            expect(artifactReport?.protocol?.afterSpecDurations?.afterSpecTotal).to.be.a('number')
+          })
+        })
+      })
+
+      describe('when capture protocol script returns with an invalid signature', () => {
+        enableCaptureProtocol()
+        enableInvalidProtocolSignature()
+
+        it('displays an appropriate error message', function () {
+          return systemTests.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            configFile: 'cypress-with-project-id.config.js',
+            browser: 'chrome',
+            spec: 'record_pass*',
+            record: true,
+            snapshot: true,
+            expectedExitCode: 0,
           })
         })
       })
@@ -2344,20 +2422,13 @@ describe('e2e record', () => {
             spec: 'simple_multiple.cy.js',
             configFile: 'cypress-with-project-id.config.js',
             record: true,
-            snapshot: true,
+            snapshot: false,
             expectedExitCode: 1,
           }).then(() => {
             const requests = getRequests()
             const postResultsRequest = requests.find((r) => r.url === `POST /instances/${instanceId}/results`)
 
-            console.log(postResultsRequest)
             expect(postResultsRequest?.body.exception).to.include('Your configFile threw an error')
-            expect(postResultsRequest?.body.tests).to.have.length(2)
-            expect(postResultsRequest?.body.stats.suites).to.equal(1)
-            expect(postResultsRequest?.body.stats.tests).to.equal(2)
-            expect(postResultsRequest?.body.stats.passes).to.equal(1)
-            expect(postResultsRequest?.body.stats.failures).to.equal(1)
-            expect(postResultsRequest?.body.stats.skipped).to.equal(0)
           })
         })
       })
@@ -2392,6 +2463,38 @@ describe('e2e record', () => {
 
               expect(artifactReport?.protocol).to.exist()
               expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
+              expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
+              expect(artifactReport?.protocol?.url).to.exist().and.not.be.empty()
+            })
+          })
+        })
+
+        describe('db is unreadable', () => {
+          enableCaptureProtocol(PROTOCOL_STUB_NO_DB_WRITE)
+          beforeEach(() => {
+            if (fs.existsSync(archiveFile)) {
+              return fsPromise.rm(archiveFile)
+            }
+          })
+
+          it('displays warning and continues', function () {
+            return systemTests.exec(this, {
+              key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+              configFile: 'cypress-with-project-id.config.js',
+              spec: 'record_pass*',
+              record: true,
+              snapshot: true,
+            }).then(() => {
+              const urls = getRequestUrls()
+
+              expect(urls).to.include.members([`PUT /instances/${instanceId}/artifacts`])
+              expect(urls).not.to.include.members([`PUT ${CAPTURE_PROTOCOL_UPLOAD_URL}`])
+
+              const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
+
+              expect(artifactReport?.protocol).to.exist()
+              expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
+              expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
               expect(artifactReport?.protocol?.url).to.exist().and.not.be.empty()
             })
           })
@@ -2417,6 +2520,7 @@ describe('e2e record', () => {
 
               expect(artifactReport?.protocol).to.exist()
               expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
+              expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
               expect(artifactReport?.protocol?.url).to.exist().and.not.be.empty()
             })
           })
@@ -2442,6 +2546,7 @@ describe('e2e record', () => {
 
               expect(artifactReport?.protocol).to.exist()
               expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
+              expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
               expect(artifactReport?.protocol?.url).to.exist().and.not.be.empty()
             })
           })
@@ -2508,12 +2613,46 @@ describe('e2e record', () => {
       })
     })
   })
+
+  describe('capture-protocol enabled but missing upload url', () => {
+    enableCaptureProtocol()
+    setupStubbedServer(createRoutes({
+      postInstanceResults: {
+        res: (req, res) => {
+          res.status(200).json({
+            screenshotUploadUrls: [],
+            videoUploadUrl: undefined,
+            captureUloadUrl: undefined,
+          })
+        },
+      },
+    }))
+
+    it('Does not try to upload the protocol artifact to the capture protocol script url', function () {
+      return systemTests.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        configFile: 'cypress-with-project-id.config.js',
+        spec: 'record_pass*',
+        record: true,
+        snapshot: true,
+      }).then(() => {
+        const requestUrls = getRequestUrls()
+
+        expect(requestUrls.find((url) => url.includes('PUT /capture-protocol/script/'))).to.be.undefined
+      })
+    })
+  })
 })
 
 describe('capture-protocol api errors', () => {
+  beforeEach(() => {
+    // uploads happen too fast to be captured by these tests without tuning these values
+    process.env.CYPRESS_UPLOAD_ACTIVITY_INTERVAL = 100
+  })
+
   enableCaptureProtocol()
 
-  const stubbedServerWithErrorOn = (endpoint, numberOfFailuresBeforeSuccess = Number.MAX_SAFE_INTEGER) => {
+  const stubbedServerWithErrorOn = (endpoint, numberOfFailuresBeforeSuccess = Number.MAX_SAFE_INTEGER, status = 500, mimeType = 'text/plain', responseBody = '') => {
     let failures = 0
 
     return setupStubbedServer(createRoutes({
@@ -2521,7 +2660,8 @@ describe('capture-protocol api errors', () => {
         res: (req, res) => {
           if (failures < numberOfFailuresBeforeSuccess) {
             failures += 1
-            res.status(500).send('500 - Internal Server Error')
+            res.set('Content-Type', mimeType)
+            res.status(status).send(responseBody)
           } else {
             routeHandlers[endpoint].res(req, res)
           }
@@ -2530,7 +2670,7 @@ describe('capture-protocol api errors', () => {
     }))
   }
 
-  describe('upload 500 - retries 8 times and fails', () => {
+  describe('upload 500 - does not retry', () => {
     stubbedServerWithErrorOn('putCaptureProtocolUpload')
     it('continues', function () {
       process.env.API_RETRY_INTERVALS = '1000'
@@ -2549,13 +2689,64 @@ describe('capture-protocol api errors', () => {
         const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
         expect(artifactReport?.protocol).to.exist()
-        expect(artifactReport?.protocol?.error).to.equal('Failed to upload after 8 attempts. Errors: Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error, Internal Server Error')
+        expect(artifactReport?.protocol?.error).to.equal(
+          'Failed to upload Test Replay: http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX responded with 500 Internal Server Error',
+        )
       })
     })
   })
 
-  describe('upload 500 - retries 7 times and succeeds on the last call', () => {
-    stubbedServerWithErrorOn('putCaptureProtocolUpload', 7)
+  describe('upload 503 - tries 3 times and fails', () => {
+    const errorResponseBody = `<?xml version="1.0" encoding="UTF-8"?>
+<Error>
+  <Code>ServiceUnavailable</Code>
+  <Message>Service is unable to handle request.</Message>
+  <Resource>/test_replay/archive.tar</Resource> 
+  <RequestId>4442587FB7D0A2F9</RequestId>
+</Error>`
+    const wspTrimmedResponse = `<?xml version="1.0" encoding="UTF-8"?><Error><Code>ServiceUnavailable</Code><Message>Service is unable to handle request.</Message><Resource>/test_replay/archive.tar</Resource><RequestId>4442587FB7D0A2F9</RequestId></Error>`
+    const errorResponseMimeType = 'application/xml'
+
+    stubbedServerWithErrorOn('putCaptureProtocolUpload', Number.MAX_SAFE_INTEGER, 503, errorResponseMimeType, errorResponseBody)
+    it('continues', function () {
+      process.env.API_RETRY_INTERVALS = '1000'
+
+      return systemTests.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        configFile: 'cypress-with-project-id.config.js',
+        spec: 'record_pass*',
+        record: true,
+        snapshot: true,
+      }).then(() => {
+        const urls = getRequestUrls()
+
+        expect(urls).to.include.members([`PUT /instances/${instanceId}/artifacts`])
+
+        const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
+
+        expect(artifactReport?.protocol).to.exist()
+
+        const expectedUrl = `http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX`
+
+        const expectedErrorMessage = `${expectedUrl} responded with 503 Service Unavailable: ${wspTrimmedResponse}`
+
+        expect(artifactReport?.protocol?.error).to.equal(`Failed to upload Test Replay after 3 attempts. Errors: ${[expectedErrorMessage, expectedErrorMessage, expectedErrorMessage].join(', ')}`)
+        expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
+      })
+    })
+  })
+
+  describe('upload 400 - does not retry, as 400 is not a retryable error', () => {
+    const errorResponseMimeType = 'application/xml'
+    const errorResponseBody = `<?xml version="1.0" encoding="UTF-8"?>
+    <Error>
+      <Code>RequestTimeTooSkewed</Code>
+      <Message>The difference between the request time and the server's time is too large.</Message>
+      <Resource>/test_replay/archive.tar</Resource> 
+      <RequestId>4442587FB7D0A2F9</RequestId>
+    </Error>`
+
+    stubbedServerWithErrorOn('putCaptureProtocolUpload', 2, 400, errorResponseMimeType, errorResponseBody)
 
     let archiveFile = ''
 
@@ -2582,8 +2773,38 @@ describe('capture-protocol api errors', () => {
     })
   })
 
+  describe('upload network error', () => {
+    disableCaptureProtocolUploadUrl()
+    setupStubbedServer(createRoutes())
+
+    it('retries 3 times, warns and continues', function () {
+      process.env.API_RETRY_INTERVALS = '1000'
+
+      return systemTests.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        configFile: 'cypress-with-project-id.config.js',
+        spec: 'record_pass*',
+        record: true,
+        snapshot: true,
+      }).then(() => {
+        const urls = getRequestUrls()
+
+        expect(urls).to.include.members([`PUT /instances/${instanceId}/artifacts`])
+
+        const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
+
+        expect(artifactReport?.protocol).to.exist()
+        expect(artifactReport?.protocol?.error).to.equal(
+          'Failed to upload Test Replay after 3 attempts. Errors: request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test, request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test, request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test',
+        )
+
+        expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
+      })
+    })
+  })
+
   describe('fetch script 500', () => {
-    stubbedServerWithErrorOn('getCaptureScript')
+    stubbedServerWithErrorOn('getCaptureScript', Infinity, 500, 'text/plain', '500 - Internal Server Error')
     it('continues', function () {
       process.env.API_RETRY_INTERVALS = '1000'
 

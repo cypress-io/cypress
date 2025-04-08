@@ -39,4 +39,4 @@ localStorage.DEBUG = 'cypress:driver,cypress:driver:*'
 
 For more info, see the [public documentation for printing debug logs](https://docs.cypress.io/guides/references/troubleshooting#Print-DEBUG-logs) and the [`debug` module docs][debug]
 
-[debug]: https://github.com/visionmedia/debug#readme
+[debug]: https://github.com/debug-js/debug#readme

@@ -567,6 +567,21 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
           return { skipClickEventReason: 'element was detached' }
         }
 
+        // Only send click event if element is not disabled.
+        // First find an parent element that can actually be disabled
+        const findParentThatCanBeDisabled = (el: HTMLElement): HTMLElement | null => {
+          const elementsThatCanBeDisabled = ['button', 'input', 'select', 'textarea', 'optgroup', 'option', 'fieldset']
+
+          return elementsThatCanBeDisabled.includes($elements.getTagName(el)) ? el : null
+        }
+
+        const parentThatCanBeDisabled = $elements.findParent(mouseUpPhase.targetEl, findParentThatCanBeDisabled) || $elements.findParent(mouseDownPhase.targetEl, findParentThatCanBeDisabled)
+
+        // Then check if parent is indeed disabled
+        if (parentThatCanBeDisabled !== null && $elements.isDisabled($(parentThatCanBeDisabled))) {
+          return { skipClickEventReason: 'element was disabled' }
+        }
+
         const commonAncestor = mouseUpPhase.targetEl &&
         mouseDownPhase.targetEl &&
         $elements.getFirstCommonAncestor(mouseUpPhase.targetEl, mouseDownPhase.targetEl)

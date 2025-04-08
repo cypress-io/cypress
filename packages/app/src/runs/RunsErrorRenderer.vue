@@ -30,7 +30,7 @@
     >
       <CodeTag
         bg
-        class="bg-purple-50 text-purple-500"
+        class="text-purple-500 bg-purple-50"
       >
         projectId: "{{ currentProject?.projectId }}"
       </CodeTag>
@@ -69,7 +69,7 @@ import type { RunsErrorRendererFragment } from '../generated/graphql'
 import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import SendIcon from '~icons/cy/paper-airplane_x16.svg'
 import { useI18n } from '@cy/i18n'
-import CodeTag from '../../../frontend-shared/src/components/CodeTag.vue'
+import CodeTag from '@packages/frontend-shared/src/components/CodeTag.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 

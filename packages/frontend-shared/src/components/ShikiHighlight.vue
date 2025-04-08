@@ -21,6 +21,7 @@ shikiWrapperClasses computed property.
     <div
       v-if="highlighterInitialized"
       ref="codeEl"
+      tabindex="0"
       :class="[
         'shiki-wrapper',
 

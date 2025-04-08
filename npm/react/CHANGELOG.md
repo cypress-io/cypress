@@ -1,3 +1,31 @@
+# [@cypress/react-v9.0.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v9.0.0...@cypress/react-v9.0.1) (2025-03-25)
+
+# [@cypress/react-v9.0.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v8.0.2...@cypress/react-v9.0.0) (2025-01-08)
+
+
+### breaking
+
+* release version 9.0.0 of @cypress/react. ([b383b4f](https://github.com/cypress-io/cypress/commit/b383b4fb9adf676d96c6658230d68425fe9023cb))
+
+
+### Features
+
+* support react 19 for component testing with cypress/react [run ci] ([#30651](https://github.com/cypress-io/cypress/issues/30651)) ([94d360e](https://github.com/cypress-io/cypress/commit/94d360e8ae4dbffee03121c1d74c8c577ebaa1e2))
+
+
+### BREAKING CHANGES
+
+* Cypress 14 drops support for React 16-17. React 18 and up is supported.
+
+# [@cypress/react-v8.0.2](https://github.com/cypress-io/cypress/compare/@cypress/react-v8.0.1...@cypress/react-v8.0.2) (2024-06-07)
+
+
+### Bug Fixes
+
+* update cypress to Typescript 5 ([#29568](https://github.com/cypress-io/cypress/issues/29568)) ([f3b6766](https://github.com/cypress-io/cypress/commit/f3b67666a5db0438594339c379cf27e1fd1e4abc))
+
+# [@cypress/react-v8.0.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v8.0.0...@cypress/react-v8.0.1) (2024-05-06)
+
 # [@cypress/react-v8.0.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v7.0.3...@cypress/react-v8.0.0) (2023-08-29)
 
 

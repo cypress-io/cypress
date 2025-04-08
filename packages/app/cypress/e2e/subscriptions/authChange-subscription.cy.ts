@@ -28,6 +28,7 @@ describe('authChange subscription', () => {
 
       cy.startAppServer()
       cy.visitApp()
+      cy.specsPageIsVisible()
     })
 
     it('responds to authChange subscription for login', () => {
@@ -65,6 +66,7 @@ describe('authChange subscription', () => {
 
       cy.startAppServer('component')
       cy.visitApp()
+      cy.specsPageIsVisible()
     })
 
     it('responds to authChange subscription for login', () => {

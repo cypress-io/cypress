@@ -12,14 +12,18 @@ export interface AsyncServer {
   listenAsync: (port) => Promise<void>
 }
 
-function createExpressApp () {
+function createExpressApp (requestCallback: (req) => void) {
   const app: express.Application = express()
 
   app.get('/get', (req, res) => {
+    if (requestCallback) requestCallback(req)
+
     res.send('It worked!')
   })
 
   app.get('/empty-response', (req, res) => {
+    if (requestCallback) requestCallback(req)
+
     // ERR_EMPTY_RESPONSE in Chrome
     setTimeout(() => res.connection.destroy(), 100)
   })
@@ -45,10 +49,11 @@ export class Servers {
   wsServer: any
   wssServer: any
   caCertificatePath: string
+  lastRequestHeaders: any
 
   start (httpPort: number, httpsPort: number) {
     return Promise.join(
-      createExpressApp(),
+      createExpressApp((req) => this.lastRequestHeaders = req.headers),
       getCAInformation(),
     )
     .spread((app: Express.Application, [serverCertificateKeys, caCertificatePath]: [serverCertificateKeys: string[], caCertificatePath: string]) => {

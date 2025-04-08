@@ -89,19 +89,23 @@ export default (Commands, Cypress, cy, state) => {
   }
 
   Commands.addQuery('title', function title (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+    // Make sure the window command can communicate with the AUT.
+    // otherwise, it yields an empty string
+    Cypress.ensure.commandCanCommunicateWithAUT(cy)
     this.set('timeout', options.timeout)
-    if (options.log !== false) {
-      Cypress.log({ timeout: options.timeout })
-    }
+    Cypress.log({ timeout: options.timeout, hidden: options.log === false })
 
     return () => (state('document')?.title || '')
   })
 
   Commands.addQuery('window', function windowFn (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+    // Make sure the window command can communicate with the AUT.
+    Cypress.ensure.commandCanCommunicateWithAUT(cy)
     this.set('timeout', options.timeout)
-    if (options.log !== false) {
-      Cypress.log({ timeout: options.timeout })
-    }
+    Cypress.log({
+      hidden: options.log === false,
+      timeout: options.timeout,
+    })
 
     return () => {
       const win = state('window')
@@ -115,10 +119,13 @@ export default (Commands, Cypress, cy, state) => {
   })
 
   Commands.addQuery('document', function documentFn (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+    // Make sure the document command can communicate with the AUT.
+    Cypress.ensure.commandCanCommunicateWithAUT(cy)
     this.set('timeout', options.timeout)
-    if (options.log !== false) {
-      Cypress.log({ timeout: options.timeout })
-    }
+    Cypress.log({
+      hidden: options.log === false,
+      timeout: options.timeout,
+    })
 
     return () => {
       const win = state('window')
@@ -142,27 +149,26 @@ export default (Commands, Cypress, cy, state) => {
       let height
       let width
 
-      if (options.log) {
-        // The type of presetOrWidth is either string or number
-        // When preset => string
-        // When width => number
-        const isPreset = typeof presetOrWidth === 'string'
+      // The type of presetOrWidth is either string or number
+      // When preset => string
+      // When width => number
+      const isPreset = typeof presetOrWidth === 'string'
 
-        options._log = Cypress.log({
-          consoleProps () {
-            const obj: Record<string, string | number> = {}
+      options._log = Cypress.log({
+        hidden: options.log === false,
+        consoleProps () {
+          const obj: Record<string, string | number> = {}
 
-            if (isPreset) {
-              obj.Preset = presetOrWidth
-            }
+          if (isPreset) {
+            obj.Preset = presetOrWidth
+          }
 
-            obj.Width = width
-            obj.Height = height
+          obj.Width = width
+          obj.Height = height
 
-            return obj
-          },
-        })
-      }
+          return obj
+        },
+      })
 
       const throwErrBadArgs = () => {
         return $errUtils.throwErrByPath('viewport.bad_args', { onFail: options._log })
@@ -237,9 +243,7 @@ export default (Commands, Cypress, cy, state) => {
 
       return setViewportAndSynchronize(width, height)
       .then((viewport) => {
-        if (options._log) {
-          options._log.set(viewport)
-        }
+        options._log?.set(viewport)
 
         return null
       })

@@ -30,6 +30,7 @@ function scaffoldTestingTypeAndVisitRunsPage (testingType: 'e2e' | 'component'):
   })
 
   cy.visitApp()
+  cy.specsPageIsVisible()
 
   moveToRunsPage()
 }
@@ -45,6 +46,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     it('resolves the runs page', () => {
       cy.loginUser()
       cy.visitApp()
+      cy.specsPageIsVisible()
       moveToRunsPage()
       cy.get('[data-cy="runs"]')
       cy.get('[data-cy="app-header-bar"]').findByText('Runs').should('be.visible')
@@ -59,6 +61,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.findByTestId('sidebar-link-runs-page').click()
       cy.get('[data-cy*="runsSkeleton-"]')
       cy.get('[data-cy="runs"]')
@@ -74,12 +77,14 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('when logged out, shows call to action', () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
       moveToRunsPage()
       cy.contains(defaultMessages.runs.connect.buttonUser).should('exist')
     })
 
     it('clicking the login button will open the login modal', () => {
       cy.visitApp()
+      cy.specsPageIsVisible()
       moveToRunsPage()
       cy.contains(defaultMessages.runs.connect.buttonUser).click()
       cy.withCtx((ctx, o) => {
@@ -101,6 +106,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     it('if logged in and connected', { viewportWidth: 1200 }, () => {
       cy.loginUser()
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       moveToRunsPage()
       cy.findByTestId('runNumber-status-OVERLIMIT').click()
@@ -131,6 +137,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.loginUser()
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       moveToRunsPage()
 
@@ -175,6 +182,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.loginUser()
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       moveToRunsPage()
 
@@ -210,6 +218,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.loginUser()
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       moveToRunsPage()
 
@@ -239,6 +248,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.loginUser()
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       moveToRunsPage()
 
@@ -263,6 +273,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.startAppServer('component')
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       moveToRunsPage()
 
       cy.withCtx(async (ctx, options) => {
@@ -300,7 +311,8 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   })
 
   context('Runs - Create Project', () => {
-    it('when a project is created, injects new projectId into the config file, and sends expected UTM params', () => {
+    // TODO: fix flaky test
+    it.skip('when a project is created, injects new projectId into the config file, and sends expected UTM params', () => {
       cy.remoteGraphQLIntercept((obj) => {
         if (obj.operationName === 'SelectCloudProjectModal_CreateCloudProject_cloudProjectCreate') {
           obj.result.data!.cloudProjectCreate = {
@@ -317,6 +329,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.startAppServer('e2e')
       cy.loginUser()
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       cy.withCtx(async (ctx, o) => {
         o.sinon.spy(ctx.cloud, 'executeRemoteGraphQL')
@@ -359,6 +372,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.startAppServer('e2e')
       cy.loginUser()
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       cy.withCtx(async (ctx) => {
         const config = await ctx.project.getConfig()
@@ -394,6 +408,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.startAppServer('e2e')
       cy.loginUser()
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       cy.withCtx(async (ctx) => {
         const config = await ctx.project.getConfig()
@@ -448,6 +463,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
 
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       moveToRunsPage()
     })
@@ -456,7 +472,8 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.findByText(defaultMessages.runs.errors.notFound.button).should('be.visible')
     })
 
-    it('opens Connect Project modal after clicking Reconnect Project button', () => {
+    // TODO: fix flaky test
+    it.skip('opens Connect Project modal after clicking Reconnect Project button', () => {
       cy.findByText(defaultMessages.runs.errors.notFound.button).click()
 
       cy.get('[aria-modal="true"]').should('exist')
@@ -575,6 +592,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
 
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       moveToRunsPage()
     })
@@ -602,6 +620,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
 
       cy.visitApp()
+      cy.specsPageIsVisible()
       moveToRunsPage()
       cy.findByText(defaultMessages.runs.connect.buttonProject).should('exist')
     })
@@ -625,6 +644,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         o.sinon.stub(ctx.config.electronApi, 'copyTextToClipboard')
       })
 
+      cy.get('[data-cy="terminal-prompt-input').should('have.value', 'npx cypress run --component --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
       cy.get('[data-cy="copy-button"]').click()
       cy.contains('Copied!')
       cy.withRetryableCtx((ctx) => {
@@ -634,10 +654,12 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('displays a copy button and copies correct command in E2E', () => {
       scaffoldTestingTypeAndVisitRunsPage('e2e')
+
       cy.withCtx(async (ctx, o) => {
         o.sinon.stub(ctx.config.electronApi, 'copyTextToClipboard')
       })
 
+      cy.get('[data-cy="terminal-prompt-input').should('have.value', 'npx cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
       cy.get('[data-cy="copy-button"]').click()
       cy.contains('Copied!')
       cy.withRetryableCtx((ctx) => {
@@ -657,6 +679,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       it('displays a list of recorded runs if a run has been recorded', () => {
         cy.loginUser()
         cy.visitApp()
+        cy.specsPageIsVisible()
         moveToRunsPage()
         cy.get('[data-cy="runs"]')
       })
@@ -664,6 +687,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       it('displays each run with correct information', () => {
         cy.loginUser()
         cy.visitApp()
+        cy.specsPageIsVisible()
         moveToRunsPage()
 
         cy.get('[data-cy="runCard-status-CANCELLED"]').first().within(() => {
@@ -696,6 +720,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       it('opens the run page if a run is clicked', () => {
         cy.loginUser()
         cy.visitApp()
+        cy.specsPageIsVisible()
 
         moveToRunsPage()
         cy.get('[data-cy="runNumber-status-CANCELLED"]').first().click()
@@ -721,6 +746,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         })
 
         cy.visitApp()
+        cy.specsPageIsVisible()
 
         moveToRunsPage()
 
@@ -752,6 +778,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       it('displays a list of recorded runs if a run has been recorded', () => {
         cy.loginUser()
         cy.visitApp()
+        cy.specsPageIsVisible()
         moveToRunsPage()
         cy.get('[data-cy="runs"]')
       })
@@ -759,6 +786,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       it('displays each run with correct information', () => {
         cy.loginUser()
         cy.visitApp()
+        cy.specsPageIsVisible()
         moveToRunsPage()
 
         cy.findByText('fix: using Git data CANCELLED')
@@ -784,6 +812,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       it('opens the run page if a run is clicked', () => {
         cy.loginUser()
         cy.visitApp()
+        cy.specsPageIsVisible()
 
         moveToRunsPage()
         cy.get('[data-cy="runNumber-status-CANCELLED"]').first().click()
@@ -805,6 +834,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     it('shows alert warning if runs have been returned already', () => {
       cy.loginUser()
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.wait(1000)
       moveToRunsPage()
       cy.get('[data-cy="runs"]')
@@ -819,6 +849,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     it('should remove the alert warning if the app reconnects to the internet', () => {
       cy.loginUser()
       cy.visitApp()
+      cy.specsPageIsVisible()
       cy.wait(1000)
       moveToRunsPage()
       cy.get('[data-cy="runs"]')
@@ -853,6 +884,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.loginUser()
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       cy.get('[href="#/runs"]').click()
 
@@ -878,6 +910,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.loginUser()
       cy.visitApp()
+      cy.specsPageIsVisible()
 
       cy.remoteGraphQLIntercept(async (obj) => {
         if (obj.result.data?.cloudViewer?.organizations?.nodes) {

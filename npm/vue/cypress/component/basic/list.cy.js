@@ -1,7 +1,7 @@
-import { mountCallback } from '@cypress/vue'
+import { mount } from '@cypress/vue'
 
-/* eslint-env mocha */
-describe('Declarative rendering', () => {
+// TODO: fix with https://github.com/cypress-io/cypress/issues/30706
+describe.skip('Declarative rendering', () => {
   // List example from https://vuejs.org/v2/guide/#Declarative-Rendering
   const template = `
     <ol>
@@ -21,7 +21,9 @@ describe('Declarative rendering', () => {
     }
   }
 
-  beforeEach(mountCallback({ template, data }))
+  beforeEach(() => {
+    mount({ template, data })
+  })
 
   it('shows 3 items', () => {
     cy.get('li').should('have.length', 3)

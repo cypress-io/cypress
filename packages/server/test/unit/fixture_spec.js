@@ -6,12 +6,6 @@ const fixture = require(`../../lib/fixture`)
 const { fs } = require(`../../lib/util/fs`)
 const FixturesHelper = require('@tooling/system-tests')
 const { getCtx } = require(`../../lib/makeDataContext`)
-const os = require('os')
-const eol = require('eol')
-
-const isWindows = () => {
-  return os.platform() === 'win32'
-}
 
 let ctx
 
@@ -75,29 +69,13 @@ describe('lib/fixture', () => {
   context('json files', () => {
     it('throws when json is invalid', function () {
       const e =
-        `\
-'bad_json.json' is not valid JSON.
-Parse error on line 2:
-{  "bad": "json"  "should": "not parse
-------------------^
-Expecting 'EOF', '}', ':', ',', ']', got 'STRING'\
-`
+        `\'bad_json.json\' is not valid JSON.\nExpected ',' or '}' after property value in JSON at position 20 while parsing near "{\\n  \\"bad\\": \\"json\\"\\n  \\"should\\": \\"not parse..."`
 
       return fixture.get(this.fixturesFolder, 'bad_json.json')
       .then(() => {
         throw new Error('should have failed but did not')
       }).catch((err) => {
-        if (isWindows()) {
-          // there is weird trailing whitespace in the lines
-          // of the error message on Windows
-          expect(err.message).to.include('\'bad_json.json\' is not valid JSON.')
-          expect(err.message).to.include('Parse error on line 2:')
-
-          expect(err.message).to.include('Expecting \'EOF\', \'}\', \':\', \',\', \']\', got \'STRING\'')
-        } else {
-          // on other platforms can match the error directly
-          expect(eol.auto(err.message)).to.eq(eol.auto(e))
-        }
+        expect(err.message).to.eq(e)
       })
     })
 

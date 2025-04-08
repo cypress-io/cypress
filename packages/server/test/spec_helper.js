@@ -1,6 +1,8 @@
 /* eslint-disable no-console */
 require('../lib/environment')
 
+const { enable, mockElectron } = require('./mockery_helper')
+
 const chai = require('chai')
 
 chai.use(require('chai-subset'))
@@ -14,7 +16,6 @@ global.proxyquire = require('proxyquire')
 global.sinon = require('sinon')
 const _ = require('lodash')
 const Promise = require('bluebird')
-const path = require('path')
 const cache = require('../lib/cache')
 
 require('chai')
@@ -60,7 +61,11 @@ const {
 } = sinon
 
 sinon.useFakeTimers = function (...args) {
-  sinon._clock = useFakeTimers.apply(sinon, args)
+  const clock = useFakeTimers.apply(sinon, args)
+
+  sinon._clock = clock
+
+  return clock
 }
 
 sinon.restore = function (...args) {
@@ -75,21 +80,9 @@ sinon.restore = function (...args) {
   return restore.apply(sinon, args)
 }
 
-mockery.enable({
-  warnOnUnregistered: false,
-})
+enable(mockery)
 
-// stub out the entire electron object for our stub
-// we must use an absolute path here because of the way mockery internally loads this
-// module - meaning the first time electron is required it'll use this path string
-// so because its required from a separate module we must use an absolute reference to it
-mockery.registerSubstitute(
-  'electron',
-  path.join(__dirname, './support/helpers/electron_stub'),
-)
-
-// stub out electron's original-fs module which is available when running in electron
-mockery.registerMock('original-fs', {})
+mockElectron(mockery)
 
 before(function () {
   if (hasOnly) {

@@ -10,6 +10,7 @@ describe('App: Specs', () => {
         cy.openProject('no-specs')
         cy.startAppServer('e2e')
         cy.visitApp()
+        cy.specsPageIsVisible('new-project')
 
         // With no specs present, the page renders two cards, one for scaffolding example specs,
         // another for creating a new blank spec.
@@ -192,7 +193,9 @@ describe('App: Specs', () => {
 
           cy.get('[aria-label="Close"]').click()
 
-          cy.visitApp().get('[data-cy="spec-list-file"]').contains('MyTest.cy.js')
+          cy.visitApp()
+          cy.specsPageIsVisible()
+          cy.get('[data-cy="spec-list-file"]').contains('MyTest.cy.js')
         })
 
         it('should not show trouble rendering alert', () => {
@@ -230,6 +233,7 @@ describe('App: Specs', () => {
 
         cy.startAppServer('e2e')
         cy.visitApp()
+        cy.specsPageIsVisible('new-project')
 
         // With no specs present, the page renders two cards, one for scaffolding example specs,
         // another for creating a new blank spec.
@@ -301,7 +305,9 @@ describe('App: Specs', () => {
 
           cy.get('[aria-label="Close"]').click()
 
-          cy.visitApp().get('[data-cy="spec-list-file"]').contains('MyTest.cy.ts')
+          cy.visitApp()
+          cy.specsPageIsVisible()
+          cy.get('[data-cy="spec-list-file"]').contains('MyTest.cy.ts')
         })
       })
     })
@@ -327,6 +333,7 @@ describe('App: Specs', () => {
 
         cy.startAppServer('e2e')
         cy.visitApp()
+        cy.specsPageIsVisible('no-specs')
       })
 
       it('shows No Specs page with specPattern from config', () => {
@@ -340,11 +347,11 @@ describe('App: Specs', () => {
         .and('contain', defaultMessages.createSpec.page.customPatternNoSpecs.description.split('{0}')[0])
 
         cy.findByTestId('file-match-indicator').should('contain', 'No matches')
-        cy.findByRole('button', { name: 'cypress.config.js' })
+        cy.findByRole('button', { name: 'open in IDE' })
         cy.findByTestId('spec-pattern').should('contain', 'src/**/*.{cy,spec}.{js,jsx}')
 
         cy.contains('button', defaultMessages.createSpec.updateSpecPattern)
-        cy.findByRole('button', { name: 'New spec', exact: false })
+        cy.findByRole('button', { name: 'New spec' })
       })
 
       it('opens config file in ide from SpecPattern', () => {
@@ -352,7 +359,7 @@ describe('App: Specs', () => {
           o.sinon.stub(ctx.actions.file, 'openFile')
         })
 
-        cy.findByRole('button', { name: 'cypress.config.js' }).click()
+        cy.findByRole('button', { name: 'open in IDE' }).click()
 
         cy.withCtx((ctx, o) => {
           expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`cypress\.config\.js$`)), 1, 1)
@@ -384,7 +391,7 @@ describe('App: Specs', () => {
       })
 
       it('shows new spec button to start creation workflow', () => {
-        cy.findByRole('button', { name: 'New spec', exact: false }).click()
+        cy.findByRole('button', { name: 'New spec' }).click()
 
         cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
           cy.findAllByTestId('card').eq(0)
@@ -397,7 +404,7 @@ describe('App: Specs', () => {
 
       context('scaffold starter spec', () => {
         it('should generate template spec', () => {
-          cy.findByRole('button', { name: 'New spec', exact: false }).click()
+          cy.findByRole('button', { name: 'New spec' }).click()
 
           cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
             cy.findAllByTestId('card').eq(0)
@@ -436,7 +443,9 @@ describe('App: Specs', () => {
 
           cy.get('[aria-label="Close"]').click()
 
-          cy.visitApp().get('[data-cy-row]').contains('MyTest.cy.js')
+          cy.visitApp()
+          cy.specsPageIsVisible()
+          cy.get('[data-cy-row]').contains('MyTest.cy.js')
         })
 
         it('generates spec with file name that does not contain a known spec extension', () => {
@@ -475,7 +484,7 @@ describe('App: Specs', () => {
       })
 
       it('shows extension warning', () => {
-        cy.findByRole('button', { name: 'New spec', exact: false }).click()
+        cy.findByRole('button', { name: 'New spec' }).click()
 
         cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
           cy.findAllByTestId('card').eq(0)
@@ -504,6 +513,7 @@ describe('App: Specs', () => {
         cy.openProject('pristine-with-e2e-testing')
         cy.startAppServer('e2e')
         cy.visitApp()
+        cy.specsPageIsVisible('new-project')
       })
 
       context('scaffold example files', () => {
@@ -540,6 +550,7 @@ describe('App: Specs', () => {
         cy.openProject('no-specs', ['--component'])
         cy.startAppServer('component')
         cy.visitApp()
+        cy.specsPageIsVisible('new-project')
 
         cy.findAllByTestId('card').eq(1).as('TemplateSpecCard')
       })
@@ -670,6 +681,7 @@ describe('App: Specs', () => {
 
         cy.startAppServer('component')
         cy.visitApp()
+        cy.specsPageIsVisible('no-specs')
       })
 
       it('shows No Specs page with specPattern from config', () => {
@@ -683,11 +695,11 @@ describe('App: Specs', () => {
         .and('contain', defaultMessages.createSpec.page.customPatternNoSpecs.description.split('{0}')[0])
 
         cy.findByTestId('file-match-indicator').should('contain', 'No matches')
-        cy.findByRole('button', { name: 'cypress.config.js' })
+        cy.findByRole('button', { name: 'open in IDE' })
         cy.findByTestId('spec-pattern').should('contain', 'src/specs-folder/*.cy.{js,jsx}')
 
         cy.contains('button', defaultMessages.createSpec.updateSpecPattern)
-        cy.findByRole('button', { name: 'New spec', exact: false })
+        cy.findByRole('button', { name: 'New spec' })
       })
 
       it('opens config file in ide from SpecPattern', () => {
@@ -695,7 +707,7 @@ describe('App: Specs', () => {
           o.sinon.stub(ctx.actions.file, 'openFile')
         })
 
-        cy.findByRole('button', { name: 'cypress.config.js' }).click()
+        cy.findByRole('button', { name: 'open in IDE' }).click()
 
         cy.withCtx((ctx, o) => {
           expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`cypress\.config\.js$`)), 1, 1)
@@ -715,7 +727,7 @@ describe('App: Specs', () => {
       })
 
       it('shows new spec button to start creation workflow', () => {
-        cy.findByRole('button', { name: 'New spec', exact: false }).click()
+        cy.findByRole('button', { name: 'New spec' }).click()
 
         selectTemplateSpecCard()
 
@@ -723,7 +735,7 @@ describe('App: Specs', () => {
       })
 
       it('shows create first spec page with create template spec option and goes back if it is cancel', () => {
-        cy.findByRole('button', { name: 'New spec', exact: false }).click()
+        cy.findByRole('button', { name: 'New spec' }).click()
 
         selectTemplateSpecCard()
 
@@ -775,6 +787,7 @@ describe('App: Specs', () => {
       cy.openProject('no-specs')
       cy.startAppServer('e2e')
       cy.visitApp()
+      cy.specsPageIsVisible('new-project')
 
       cy.findByRole('heading', {
         level: 1,

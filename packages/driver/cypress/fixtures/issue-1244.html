@@ -47,7 +47,7 @@
   <form target="_top" method="GET" action="/fixtures/dom.html">
     <button class="inline_top" type="submit">Submit inline top</button>
   </form>
-  <form target="_parent" method="GET" action="/fixtures/dom.html">
+  <form target="_parent" method="GET" action="/fixtures/empty.html">
     <button class="inline_parent" type="submit">Submit inline parent</button>
   </form>
   <form target="_self" method="GET" action="/fixtures/dom.html">
@@ -63,7 +63,7 @@
     <a class="setTarget" href="/fixtures/dom.html" onclick="handleEventTarget(event)">Link setTarget</a>
     <a class="setAttr" href="/fixtures/dom.html" onclick="handleEventAttribute(event)">Link setAttribute</a>
     <a class="inline_top" href="/fixtures/dom.html" target="_top">Link top</a>
-    <a class="inline_parent" href="/fixtures/dom.html" target="_parent">Link parent</a>
+    <a class="inline_parent" href="/fixtures/empty.html" target="_parent">Link parent</a>
     <a class="inline_self" href="/fixtures/dom.html" target="_self">Link self</a>
     <a class="inline_blank" href="/fixtures/dom.html" target="_blank">Link _blank</a>
     <a class="inline_invalid" href="/fixtures/dom.html" target="invalid">Link invalid</a>

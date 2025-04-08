@@ -12,7 +12,7 @@ const requestXhrRe = /\.request$/
 
 const reserved = ['test', 'runnable', 'timeout', 'slow', 'skip', 'inspect']
 
-const aliasDisplayName = (name) => {
+export const aliasDisplayName = (name) => {
   return name.replace(aliasDisplayRe, '')
 }
 
@@ -29,7 +29,7 @@ export const create = (cy: $Cy) => ({
     ctx[alias] = cy.getSubjectFromChain(aliasObj.subjectChain)
   },
 
-  getAlias (name, cmd, log) {
+  getAlias (name: string, cmd?: string, log?: any) {
     const aliases = cy.state('aliases') || {}
 
     // bail if the name doesn't reference an alias

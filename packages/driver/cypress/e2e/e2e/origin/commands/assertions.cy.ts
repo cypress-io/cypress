@@ -26,13 +26,12 @@ context('cy.origin assertions', { browser: '!webkit' }, () => {
     beforeEach(() => {
       logs = new Map()
 
-      cy.on('log:changed', (attrs, log) => {
+      cy.on('log:added', (attrs, log) => {
         logs.set(attrs.id, log)
       })
     })
 
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23148
-    it('.should() and .and()', { retries: 15 }, () => {
+    it('.should() and .and()', () => {
       cy.origin('http://www.foobar.com:3500', () => {
         cy.get(':checkbox[name="colors"][value="blue"]')
         .should('not.be.checked').and('not.be.disabled')

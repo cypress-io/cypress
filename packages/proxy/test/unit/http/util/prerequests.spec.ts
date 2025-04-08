@@ -9,10 +9,11 @@ describe('http/util/prerequests', () => {
   let preRequests: PreRequests
   let protocolManager: ProtocolManagerShape
 
-  function expectPendingCounts (pendingRequests: number, pendingPreRequests: number, pendingWithoutPreRequests = 0) {
+  function expectPendingCounts (pendingRequests: number, pendingPreRequests: number, pendingWithoutPreRequests = 0, pendingPreRequestsToRemove = 0) {
     expect(preRequests.pendingRequests.length).to.eq(pendingRequests, 'wrong number of pending requests')
     expect(preRequests.pendingPreRequests.length).to.eq(pendingPreRequests, 'wrong number of pending prerequests')
     expect(preRequests.pendingUrlsWithoutPreRequests.length).to.eq(pendingWithoutPreRequests, 'wrong number of pending without prerequests')
+    expect(preRequests.pendingPreRequestsToRemove.size).to.eq(pendingPreRequestsToRemove, 'wrong number of pending prerequests to remove')
   }
 
   beforeEach(() => {
@@ -37,6 +38,7 @@ describe('http/util/prerequests', () => {
       headers: {},
       resourceType: 'xhr',
       originalResourceType: undefined,
+      documentURL: 'foo',
       cdpRequestWillBeSentTimestamp: 1,
       cdpRequestWillBeSentReceivedTimestamp: 2,
     })
@@ -48,6 +50,7 @@ describe('http/util/prerequests', () => {
       headers: {},
       resourceType: 'xhr',
       originalResourceType: undefined,
+      documentURL: 'foo',
       cdpRequestWillBeSentTimestamp: 1,
       cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin + 10000,
     }
@@ -60,6 +63,7 @@ describe('http/util/prerequests', () => {
       headers: {},
       resourceType: 'xhr',
       originalResourceType: undefined,
+      documentURL: 'foo',
       cdpRequestWillBeSentTimestamp: 1,
       cdpRequestWillBeSentReceivedTimestamp: 2,
     })
@@ -161,6 +165,7 @@ describe('http/util/prerequests', () => {
       headers: {},
       resourceType: 'xhr',
       originalResourceType: undefined,
+      documentURL: 'foo',
       cdpRequestWillBeSentTimestamp: 1,
       cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin + 10000,
     }
@@ -184,6 +189,9 @@ describe('http/util/prerequests', () => {
     preRequests = new PreRequests(10, 200)
     preRequests.addPending({ requestId: '1234', url: 'foo', method: 'GET', cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin } as BrowserPreRequest)
     preRequests.addPendingUrlWithoutPreRequest('bar')
+    preRequests.removePendingPreRequest('12345')
+
+    expectPendingCounts(0, 1, 1, 1)
 
     // preRequests garbage collects pre-requests that never matched up with an incoming request after around
     // 2 * requestTimeout. We verify that it's gone (and therefore not leaking memory) by sending in a request
@@ -227,13 +235,18 @@ describe('http/util/prerequests', () => {
     expectPendingCounts(0, 2)
   })
 
-  it('immediately handles a request from a service worker loading', () => {
-    const cbServiceWorker = sinon.stub()
+  it('adds to pending pre-requests to remove if the pre-request is not found', () => {
+    expectPendingCounts(0, 0)
 
-    preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: { 'sec-fetch-dest': 'serviceworker' } } as any, () => {}, cbServiceWorker)
+    // remove a pre-request that doesn't exist yet
+    preRequests.removePendingPreRequest('1235')
 
-    expect(cbServiceWorker).to.be.calledOnce
-    expect(cbServiceWorker).to.be.calledWith()
+    expectPendingCounts(0, 0, 0, 1)
+
+    // add a pre-request that matches the pending removal
+    preRequests.addPending({ requestId: '1235', url: 'foo', method: 'GET' } as BrowserPreRequest)
+
+    expectPendingCounts(0, 0)
   })
 
   it('removes a pending request', () => {
@@ -257,7 +270,7 @@ describe('http/util/prerequests', () => {
     expectPendingCounts(0, 0)
   })
 
-  it('resets the queues', () => {
+  it('resets the queues and service worker manager', () => {
     let callbackCalled = false
 
     preRequests.addPending({ requestId: '1234', url: 'bar', method: 'GET' } as BrowserPreRequest)
@@ -274,5 +287,26 @@ describe('http/util/prerequests', () => {
     expectPendingCounts(0, 0, 0)
 
     expect(callbackCalled).to.be.true
+  })
+
+  it('decodes the proxied url', () => {
+    preRequests.get({ proxiedUrl: 'foo%7Cbar', method: 'GET', headers: {} } as CypressIncomingRequest, () => {}, () => {})
+
+    expect(preRequests.pendingRequests.length).to.eq(1)
+    expect(preRequests.pendingRequests.shift('GET-foo|bar')).not.to.be.undefined
+  })
+
+  it('decodes the pending url without pre-request', () => {
+    preRequests.addPendingUrlWithoutPreRequest('foo%7Cbar')
+
+    expect(preRequests.pendingUrlsWithoutPreRequests.length).to.eq(1)
+    expect(preRequests.pendingUrlsWithoutPreRequests.shift('GET-foo|bar')).not.to.be.undefined
+  })
+
+  it('decodes pending url', () => {
+    preRequests.addPending({ requestId: '1234', url: 'foo%7Cbar', method: 'GET' } as BrowserPreRequest)
+
+    expect(preRequests.pendingPreRequests.length).to.eq(1)
+    expect(preRequests.pendingPreRequests.shift('GET-foo|bar')).not.to.be.undefined
   })
 })

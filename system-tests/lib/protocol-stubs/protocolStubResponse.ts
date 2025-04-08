@@ -50,3 +50,7 @@ export const PROTOCOL_STUB_NONFATAL_ERROR = stub('protocolStubWithNonFatalError.
 export const PROTOCOL_STUB_BEFORETEST_ERROR = stub('protocolStubWithBeforeTestError.ts')
 
 export const PROTOCOL_STUB_FONT_FLOODING = stub('protocolStubFontFlooding.ts')
+
+export const PROTOCOL_STUB_SERVICE_WORKER = stub('protocolStubServiceWorker.ts')
+
+export const PROTOCOL_STUB_NO_DB_WRITE = stub('protocolStubWithMissingArchive.ts')

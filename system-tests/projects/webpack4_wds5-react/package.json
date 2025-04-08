@@ -1,0 +1,19 @@
+{
+  "name": "webpack4_wds5-react",
+  "version": "0.0.0-test",
+  "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
+    "@babel/preset-react": "^7.25.9",
+    "@cypress/webpack-dev-server": "file:../../../npm/webpack-dev-server",
+    "babel-loader": "^8.4.1",
+    "css-loader": "^5.2.7",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "style-loader": "^2.0.0",
+    "webpack": "^4.47.0",
+    "webpack-dev-server": "^5.1.0"
+  },
+  "sideEffects": false,
+  "projectFixtureDirectory": "react"
+}

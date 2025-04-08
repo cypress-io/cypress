@@ -34,7 +34,8 @@ export class CDPSocketServer extends EventEmitter {
     super.emit('connection', this._cdpSocket)
   }
 
-  emit = (event: string, ...args: any[]) => {
+  // @ts-expect-error TODO: fix emit type
+  emit = async (event: string, ...args: any[]) => {
     this._cdpSocket?.emit(event, ...args)
 
     return true
@@ -100,7 +101,8 @@ export class CDPSocket extends EventEmitter {
     return
   }
 
-  emit = (event: string, ...args: any[]) => {
+  // @ts-expect-error TODO: fix emit type
+  emit = async (event: string, ...args: any[]) => {
     // Generate a unique callback event name
     const uuid = randomUUID()
     let callback: ((...args: any[]) => void) | undefined
@@ -113,7 +115,7 @@ export class CDPSocket extends EventEmitter {
       this.once(uuid, callback)
     }
 
-    encode([event, uuid, args], this._namespace).then((encoded: any) => {
+    await encode([event, uuid, args], this._namespace).then((encoded: any) => {
       const expression = `
         if (window['cypressSocket-${this._namespace}'] && window['cypressSocket-${this._namespace}'].send) {
           window['cypressSocket-${this._namespace}'].send('${JSON.stringify(encoded).replaceAll('\\', '\\\\').replaceAll('\'', '\\\'')}')
@@ -158,12 +160,12 @@ export class CDPSocket extends EventEmitter {
 
     const data = JSON.parse(payload)
 
-    decode(data).then((decoded: any) => {
+    await decode(data).then((decoded: any) => {
       const [event, callbackEvent, args] = decoded
 
-      const callback = (...callbackArgs: any[]) => {
+      const callback = async (...callbackArgs: any[]) => {
         debugVerbose('emitting callback from browser %o', { callbackEvent, callbackArgs })
-        this.emit(callbackEvent, ...callbackArgs)
+        await this.emit(callbackEvent, ...callbackArgs)
       }
 
       debugVerbose('emitting message from browser %o', { event, callbackEvent, args })

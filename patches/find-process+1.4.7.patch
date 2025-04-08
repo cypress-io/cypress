@@ -1,0 +1,13 @@
+diff --git a/node_modules/find-process/lib/utils.js b/node_modules/find-process/lib/utils.js
+index fb7592b..a192426 100644
+--- a/node_modules/find-process/lib/utils.js
++++ b/node_modules/find-process/lib/utils.js
+@@ -134,7 +134,7 @@ const utils = {
+    * @return {Array}
+    */
+   parseTable (data) {
+-    const lines = data.split(/(\r\n\r\n|\r\n\n|\n\r\n)|\n\n/).filter(line => {
++    const lines = data.split(/(\r\n\r\n|\r\n\n|\n\r\n|\n\n)/).filter(line => {
+       return line.trim().length > 0
+     }).map((e) => e.split(/(\r\n|\n|\r)/).filter(line => line.trim().length > 0))
+ 

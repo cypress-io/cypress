@@ -23,7 +23,6 @@ import type { MountingOptions as VTUMountingOptions, VueWrapper } from '@vue/tes
 import {
   getContainerEl,
   setupHooks,
-  checkForRemovedStyleOptions,
 } from '@cypress/mount-utils'
 
 import * as _VueTestUtils from '@vue/test-utils'
@@ -393,7 +392,6 @@ export function mount<
  * })
  */
 export function mount (componentOptions: any, options: any = {}) {
-  checkForRemovedStyleOptions(options)
   // Remove last mounted component if cy.mount is called more than once in a test
   cleanup()
 
@@ -441,17 +439,7 @@ export function mount (componentOptions: any, options: any = {}) {
         component: wrapper.vm,
       }
 
-      return new Proxy(Object.create(returnVal), {
-        get (obj, prop) {
-        // throw an error if it looks like the caller is trying to call a method on the VueWrapper that was originally returned
-          if (Reflect.get(wrapper, prop)) {
-            // @ts-expect-error - internal API
-            Cypress.utils.throwErrByPath('mount.vue_yielded_value')
-          }
-
-          return Reflect.get(obj, prop)
-        },
-      })
+      return returnVal
     })
   })
 }
@@ -478,25 +466,6 @@ function getComponentDisplayName (componentOptions: any): string {
   }
 
   return DEFAULT_COMP_NAME
-}
-
-/**
- * Helper function for mounting a component quickly in test hooks.
- * @example
- *  import {mountCallback} from '@cypress/vue'
- *  beforeEach(mountVue(component, options))
- *
- * Removed as of Cypress 11.0.0.
- * @see https://on.cypress.io/migration-11-0-0-component-testing-updates
- */
-export function mountCallback (
-  component: any,
-  options: any = {},
-) {
-  return () => {
-    // @ts-expect-error - undocumented API
-    Cypress.utils.throwErrByPath('mount.mount_callback')
-  }
 }
 
 // Side effects from "import { mount } from '@cypress/<my-framework>'" are annoying, we should avoid doing this

@@ -1,0 +1,13 @@
+diff --git a/node_modules/@types/sinon/index.d.ts b/node_modules/@types/sinon/index.d.ts
+index 07ba706..fd32cbe 100644
+--- a/node_modules/@types/sinon/index.d.ts
++++ b/node_modules/@types/sinon/index.d.ts
+@@ -45,7 +45,7 @@ declare namespace Sinon {
+          * so a call that received the provided arguments (in the same spots) and possibly others as well will return true.
+          * @param args
+          */
+-        calledWith(...args: Partial<MatchArguments<TArgs>>): boolean;
++        calledWith(...args: Partial<MatchArguments<TArgs>>[]): boolean;
+         /**
+          * Returns true if spy was called at least once with the provided arguments and no others.
+          */

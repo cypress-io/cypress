@@ -3,7 +3,7 @@ import {
   useQueryClient,
   QueryClient,
   QueryClientProvider,
-} from 'react-query'
+} from '@tanstack/react-query'
 import React from 'react'
 
 // Create a client
@@ -27,7 +27,7 @@ function Todos () {
   const mutation = useMutation(postTodo, {
     onSuccess: () => {
       // Invalidate and refetch
-      queryClient.invalidateQueries('todos')
+      queryClient.invalidateQueries({ queryKey: ['todos'] })
     },
   })
 

@@ -8,7 +8,7 @@ export function fuzzySortSpecs <T extends FuzzyFoundSpec> (specs: T[], searchVal
   const normalizedSearchValue = normalizeSpecValue(searchValue)
 
   const fuzzySortResult = fuzzySort
-  .go(normalizedSearchValue, specs, { keys: ['normalizedRelative', 'normalizedBaseName'], allowTypo: false, threshold: -3000 })
+  .go(normalizedSearchValue, specs, { keys: ['normalizedRelative', 'normalizedBaseName'], allowTypo: false, threshold: -10000 })
   .map((result) => {
     const [relative, baseName] = result
 

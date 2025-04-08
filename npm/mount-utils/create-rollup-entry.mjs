@@ -14,6 +14,7 @@ export function createEntries (options) {
     formats,
     input,
     config = {},
+    dtsOptions = {},
   } = options
 
   const banner = `
@@ -72,7 +73,7 @@ export function createEntries (options) {
     input,
     output: [{ file: 'dist/index.d.ts', format: 'es' }],
     plugins: [
-      dts({ respectExternal: true }),
+      dts({ respectExternal: true, ...dtsOptions }),
       {
         name: 'cypress-types-reference',
         // rollup-plugin-dts does not add '// <reference types="cypress" />' like rollup-plugin-typescript2 did so we add it here.

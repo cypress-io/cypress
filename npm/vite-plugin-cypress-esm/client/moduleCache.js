@@ -176,7 +176,7 @@ function log (msg) {
     return
   }
 
-  console.log(`[cypress:vite-plugin-mock-esm]: ${msg}`)
+  console.log(`[cypress:vite-plugin-cypress-esm]: ${msg}`)
 }
 
 function cacheAndProxifyModule (id, module) {

@@ -53,21 +53,20 @@ module.exports = {
         'tooling/**',
         'packages/{app,driver,frontend-shared,launchpad}/cypress/**',
         '*.test.ts',
-        // ignore in packages that don't run in the Cypress process
-        'npm/create-cypress-tests/**',
       ],
       rules: {
         'no-restricted-properties': 'off',
         'no-restricted-syntax': 'off',
       },
     },
+    {
+      files: ['*.json'],
+      extends: 'plugin:@cypress/dev/general',
+    },
   ],
   rules: {
     'no-duplicate-imports': 'off',
-    'import/no-duplicates': 'off',
-    '@typescript-eslint/no-duplicate-imports': [
-      'error',
-    ],
+    'import/no-duplicates': 'error',
     'prefer-spread': 'off',
     'prefer-rest-params': 'off',
     'no-useless-constructor': 'off',

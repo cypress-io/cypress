@@ -1,6 +1,7 @@
 import FileChooser from './FileChooser.vue'
 
 import { ref } from 'vue'
+// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 import data from '../../../cypress/fixtures/FileChooser.json'
 import type { FileParts } from '@packages/data-context/src/gen/graphcache-config.gen'

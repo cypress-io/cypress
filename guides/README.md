@@ -24,3 +24,4 @@ For general contributor information, check out [`CONTRIBUTING.md`](../CONTRIBUTI
 * [Testing strategy and style guide (draft)](./testing-strategy-and-styleguide.md)
 * [Writing cross-platform JavaScript](./writing-cross-platform-javascript.md)
 * [Writing the Cypress Changelog](./writing-the-cypress-changelog.md)
+* [Writing and Migrating To TypeScript](./typescript.md)

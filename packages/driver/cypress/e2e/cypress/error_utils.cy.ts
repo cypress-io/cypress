@@ -2,9 +2,9 @@ import { allowTsModuleStubbing } from '../../support/helpers'
 
 allowTsModuleStubbing()
 
-import $stackUtils from '@packages/driver/src/cypress/stack_utils'
-import $errUtils, { CypressError } from '@packages/driver/src/cypress/error_utils'
-import $errorMessages from '@packages/driver/src/cypress/error_messages'
+import $stackUtils from '../../../src/cypress/stack_utils'
+import $errUtils, { CypressError } from '../../../src/cypress/error_utils'
+import $errorMessages from '../../../src/cypress/error_messages'
 
 const { sinon } = Cypress
 
@@ -369,17 +369,6 @@ describe('driver/src/cypress/error_utils', () => {
 
         return true
       })
-    })
-  })
-
-  context('.throwErrByPath', () => {
-    it('looks up error and throws it', () => {
-      // @ts-ignore
-      $errorMessages.__test_error = 'simple error message'
-
-      const fn = () => $errUtils.throwErrByPath('__test_error')
-
-      expect(fn).to.throw('simple error message')
     })
   })
 

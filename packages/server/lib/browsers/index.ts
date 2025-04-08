@@ -24,12 +24,14 @@ interface KillOptions {
   isProcessExit?: boolean
   nullOut?: boolean
   unbind?: boolean
+  isOrphanedBrowserProcess?: boolean
 }
 
 const kill = (options: KillOptions = {}) => {
   options = _.defaults({}, options, {
     instance,
     isProcessExit: false,
+    isOrphanedBrowserProcess: false,
     unbind: true,
     nullOut: true,
   })
@@ -60,7 +62,7 @@ const kill = (options: KillOptions = {}) => {
     debug('killing browser process')
 
     instanceToKill.isProcessExit = options.isProcessExit
-
+    instanceToKill.isOrphanedBrowserProcess = options.isOrphanedBrowserProcess
     instanceToKill.kill()
   })
 }
@@ -145,6 +147,12 @@ export = {
     await browserLauncher.connectProtocolToBrowser(options)
   },
 
+  async closeProtocolConnection (options: { browser: Browser, foundBrowsers?: FoundBrowser[] }) {
+    const browserLauncher = await getBrowserLauncher(options.browser, options.foundBrowsers || [])
+
+    await browserLauncher.closeProtocolConnection()
+  },
+
   async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation, cdpSocketServer?: CDPSocketServer): Promise<BrowserInstance | null> {
     const browserLauncher = await getBrowserLauncher(browser, options.browsers)
 
@@ -180,7 +188,7 @@ export = {
 
     const _instance = await browserLauncher.open(browser, options.url, options, automation, ctx.coreData.servers.cdpSocketServer)
 
-    debug('browser opened')
+    debug(`browser opened for launch ${thisLaunchAttempt}`)
 
     // in most cases, we'll kill any running browser instance before launching
     // a new one when we call `await kill()` early in this function.
@@ -204,8 +212,11 @@ export = {
     // this browser, it means it has been orphaned and should be terminated.
     //
     // https://github.com/cypress-io/cypress/issues/24377
-    if (thisLaunchAttempt !== launchAttempt) {
-      await kill({ instance: _instance, nullOut: false })
+    const isOrphanedBrowserProcess = thisLaunchAttempt !== launchAttempt
+
+    if (isOrphanedBrowserProcess) {
+      debug(`killing process because launch attempt: ${thisLaunchAttempt} does not match current launch attempt: ${launchAttempt}`)
+      await kill({ instance: _instance, isOrphanedBrowserProcess, nullOut: false })
 
       return null
     }
@@ -217,6 +228,11 @@ export = {
     // so that there is a default for each browser but
     // enable the browser to configure the interface
     instance.once('exit', async (code, signal) => {
+      // When the browser has unexpectedly exited, we need to send a signal to the attempt launcher to recreate the browser CRI clients.
+      // We do NOT want to attempt to use existing CRI clients as the previous instance of the browser was terminated.
+      // @see https://github.com/cypress-io/cypress/issues/27657
+      ctx.coreData.didBrowserPreviouslyHaveUnexpectedExit = true
+
       debug('browser instance exit event received %o', { code, signal })
 
       ctx.actions.app.setBrowserStatus('closed')
@@ -272,5 +288,16 @@ export = {
     ctx.actions.app.setBrowserStatus('open')
 
     return instance
+  },
+
+  /**
+   * Closes extra targets that are not the Cypress tab
+   */
+  async closeExtraTargets () {
+    if (!instance?.browser) return
+
+    const browserLauncher = await getBrowserLauncher(instance.browser, [])
+
+    await browserLauncher.closeExtraTargets()
   },
 } as const

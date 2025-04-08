@@ -110,13 +110,14 @@ const keysToEliminate = ['codeFrame', '_testConfig'] as const
 function removeUnusedKeysForTestSnapshot<T> (obj: T): T {
   // with experimental retries, mocha can fire a 'retry' event with an undefined error
   // this is expected
-  if (obj === undefined) return obj
+  if (obj === undefined || obj === null) return obj
 
   for (const key of keysToEliminate) {
     delete obj[key]
   }
 
   for (const [key, value] of Object.entries(obj)) {
+    // @ts-expect-error
     if (key in obj) {
       const transform = eventCleanseMap[key]?.(value)
 

@@ -1,6 +1,9 @@
 import { oneLine } from 'common-tags'
 import { getRunnerInjectionContents, getRunnerCrossOriginInjectionContents } from '@packages/resolve-dist'
 import type { SerializableAutomationCookie } from '@packages/server/lib/util/cookies'
+import Debug from 'debug'
+
+const debug = Debug('cypress:proxy:http:inject')
 
 interface InjectionOpts {
   cspNonce?: string
@@ -19,6 +22,7 @@ function injectCspNonce (options: InjectionOpts) {
 }
 
 export function partial (domain, options: InjectionOpts) {
+  debug('partial injection', domain, options)
   let documentDomainInjection = `document.domain = '${domain}';`
 
   if (!options.shouldInjectDocumentDomain) {
@@ -35,6 +39,8 @@ export function partial (domain, options: InjectionOpts) {
 }
 
 export function full (domain, options: InjectionOpts) {
+  debug('full injection', domain, options)
+
   return getRunnerInjectionContents().then((contents) => {
     let documentDomainInjection = `document.domain = '${domain}';`
 
@@ -53,6 +59,7 @@ export function full (domain, options: InjectionOpts) {
 }
 
 export async function fullCrossOrigin (domain, options: InjectionOpts & FullCrossOriginOpts) {
+  debug('cross origin injection', domain, options)
   const contents = await getRunnerCrossOriginInjectionContents()
   const { cspNonce, ...crossOriginOptions } = options
 

@@ -1,6 +1,6 @@
 import { basename } from 'path'
 import _ from 'lodash'
-import mime from 'mime-types'
+import mime from 'mime'
 
 import $dom from '../../../dom'
 import $errUtils from '../../../cypress/error_utils'
@@ -44,7 +44,7 @@ const createDataTransfer = (files: Cypress.FileReferenceObject[], eventTarget: J
   files.forEach(({
     contents,
     fileName = '',
-    mimeType = mime.lookup(fileName) || '',
+    mimeType = mime.getType(fileName) || '',
     lastModified = Date.now(),
   }) => {
     const file = new targetWindow.File([contents], fileName, { lastModified, type: mimeType })
@@ -290,20 +290,19 @@ export default (Commands, Cypress, cy, state, config) => {
         eventTarget: subject,
       })
 
-      if (options.log) {
-        options._log = Cypress.log({
-          $el: options.$el,
-          timeout: options.timeout,
-          consoleProps () {
-            return {
-              'Target': $dom.getElements(options.$el),
-              Elements: options.$el?.length,
-            }
-          },
-        })
+      options._log = Cypress.log({
+        $el: options.$el,
+        hidden: options.log === false,
+        timeout: options.timeout,
+        consoleProps () {
+          return {
+            'Target': $dom.getElements(options.$el),
+            Elements: options.$el?.length,
+          }
+        },
+      })
 
-        options._log.snapshot('before', { next: 'after' })
-      }
+      options._log?.snapshot('before', { next: 'after' })
 
       if (!options.action || !ACTIONS[options.action]) {
         $errUtils.throwErrByPath('selectFile.invalid_action', {

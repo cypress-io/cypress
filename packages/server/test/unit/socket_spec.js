@@ -15,7 +15,6 @@ const preprocessor = require('../../lib/plugins/preprocessor')
 const { fs } = require('../../lib/util/fs')
 const session = require('../../lib/session')
 
-const firefoxUtil = require('../../lib/browsers/firefox-util').default
 const { createRoutes } = require('../../lib/routes')
 const { getCtx } = require('../../lib/makeDataContext')
 const { sinon } = require('../spec_helper')
@@ -37,13 +36,12 @@ describe('lib/socket', () => {
 
     this.todosPath = Fixtures.projectPath('todos')
 
-    this.server = new ServerBase()
-
     await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
     return ctx.lifecycleManager.getFullInitialConfig()
     .then((cfg) => {
       this.cfg = cfg
+      this.server = new ServerBase(cfg)
     })
   })
 
@@ -66,9 +64,15 @@ describe('lib/socket', () => {
       .then(() => {
         this.options = {
           onSavedStateChanged: sinon.spy(),
+          onStudioInit: sinon.stub(),
+          onStudioDestroy: sinon.stub(),
         }
 
-        this.automation = new Automation(this.cfg.namespace, this.cfg.socketIoCookie, this.cfg.screenshotsFolder)
+        this.automation = new Automation({
+          cyNamespace: this.cfg.namespace,
+          cookieNamespace: this.cfg.socketIoCookie,
+          screenshotsFolder: this.cfg.screenshotsFolder,
+        })
 
         this.server.startWebsockets(this.automation, this.cfg, this.options)
         this.socket = this.server._socket
@@ -511,38 +515,67 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(backend:request, firefox:force:gc)', () => {
-      it('calls firefoxUtil#collectGarbage', function (done) {
-        sinon.stub(firefoxUtil, 'collectGarbage').resolves()
-
-        return this.client.emit('backend:request', 'firefox:force:gc', (resp) => {
-          expect(firefoxUtil.collectGarbage).to.be.calledOnce
-          expect(resp.error).to.be.undefined
-
-          return done()
-        })
-      })
-
-      it('errors when collectGarbage throws', function (done) {
-        const err = new Error('foo')
-
-        sinon.stub(firefoxUtil, 'collectGarbage').throws(err)
-
-        return this.client.emit('backend:request', 'firefox:force:gc', (resp) => {
-          expect(firefoxUtil.collectGarbage).to.be.calledOnce
-          expect(resp.error.message).to.eq(err.message)
-
-          return done()
-        })
-      })
-    })
-
     context('on(save:app:state)', () => {
       it('calls onSavedStateChanged with the state', function (done) {
         return this.client.emit('save:app:state', { reporterWidth: 500 }, () => {
           expect(this.options.onSavedStateChanged).to.be.calledWith({ reporterWidth: 500 })
 
           return done()
+        })
+      })
+    })
+
+    context('on(studio:init)', () => {
+      it('calls onStudioInit', async function () {
+        this.options.onStudioInit.resolves({ canAccessStudioAI: true })
+
+        await new Promise((resolve) => {
+          this.client.emit('studio:init', ({ canAccessStudioAI }) => {
+            expect(this.options.onStudioInit).to.be.called
+            expect(canAccessStudioAI).to.be.true
+
+            resolve()
+          })
+        })
+      })
+
+      it('handles errors thrown by onStudioInit', async function () {
+        this.options.onStudioInit.rejects(new Error('foo'))
+
+        await new Promise((resolve) => {
+          this.client.emit('studio:init', ({ error }) => {
+            expect(this.options.onStudioInit).to.be.called
+            expect(error.message).to.eq('foo')
+
+            resolve()
+          })
+        })
+      })
+    })
+
+    context('on(studio:destroy)', () => {
+      it('calls onStudioDestroy', async function () {
+        this.options.onStudioDestroy.resolves()
+
+        await new Promise((resolve) => {
+          this.client.emit('studio:destroy', () => {
+            expect(this.options.onStudioDestroy).to.be.called
+
+            resolve()
+          })
+        })
+      })
+
+      it('handles errors thrown by onStudioDestroy', async function () {
+        this.options.onStudioDestroy.rejects(new Error('foo'))
+
+        await new Promise((resolve) => {
+          this.client.emit('studio:destroy', ({ error }) => {
+            expect(this.options.onStudioDestroy).to.be.called
+            expect(error.message).to.eq('foo')
+
+            resolve()
+          })
         })
       })
     })
@@ -775,7 +808,11 @@ describe('lib/socket', () => {
         getCurrentBrowser: () => null,
       })
       .then(() => {
-        this.automation = new Automation(this.cfg.namespace, this.cfg.socketIoCookie, this.cfg.screenshotsFolder)
+        this.automation = new Automation({
+          cyNamespace: this.cfg.namespace,
+          cookieNamespace: this.cfg.socketIoCookie,
+          screenshotsFolder: this.cfg.screenshotsFolder,
+        })
 
         this.server.startWebsockets(this.automation, this.cfg, {})
 

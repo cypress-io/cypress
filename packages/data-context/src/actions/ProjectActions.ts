@@ -52,7 +52,7 @@ export interface ProjectApiShape {
     emitter: EventEmitter
   }
   isListening: (url: string) => Promise<void>
-  resetBrowserTabsForNextTest(shouldKeepTabOpen: boolean): Promise<void>
+  resetBrowserTabsForNextSpec(shouldKeepTabOpen: boolean): Promise<void>
   resetServer(): void
   runSpec(spec: Cypress.Spec): Promise<void>
   routeToDebug(runNumber: number): void
@@ -89,6 +89,13 @@ type SetForceReconfigureProjectByTestingType = {
 const debug = debugLib('cypress:data-context:ProjectActions')
 
 export class ProjectActions {
+  /**
+   * @var globalLaunchCount
+   * Used as a read-only in the launchpad to ensure
+   * that launchProject is only called once if
+   * the --browser flag is passed alone.
+   */
+  private globalLaunchCount = 0
   constructor (private ctx: DataContext) {}
 
   private get api () {
@@ -125,6 +132,14 @@ export class ProjectActions {
     this.ctx.update((d) => {
       d.app.projects = projects
     })
+  }
+
+  get launchCount () {
+    return this.globalLaunchCount
+  }
+
+  set launchCount (count) {
+    this.globalLaunchCount = count
   }
 
   openDirectoryInIDE (projectPath: string) {
@@ -279,11 +294,12 @@ export class ProjectActions {
 
     // Used for run-all-specs feature
     if (options?.shouldLaunchNewTab) {
-      await this.api.resetBrowserTabsForNextTest(true)
+      await this.api.resetBrowserTabsForNextSpec(true)
       this.api.resetServer()
     }
 
     await this.api.launchProject(browser, activeSpec ?? emptySpec, options)
+    this.globalLaunchCount++
 
     return
   }

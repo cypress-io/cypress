@@ -9,6 +9,9 @@ describe('test/test.tsx', () => {
       state: 'passed',
       title: 'foobar',
       attempts: [],
+      setIsOpen: (isOpen) => model.isOpen = isOpen,
+      onOpenStateChangeRequested: (isOpen) => model.setIsOpen(isOpen),
+      callbackAfterUpdate: () => undefined,
     }
 
     const appState = {
@@ -37,6 +40,9 @@ describe('test/test.tsx', () => {
       state: 'passed',
       title: 'foobar',
       attempts: [],
+      setIsOpen: (isOpen) => model.isOpen = isOpen,
+      onOpenStateChangeRequested: (isOpen) => model.setIsOpen(isOpen),
+      callbackAfterUpdate: () => undefined,
     }
 
     const appState = {

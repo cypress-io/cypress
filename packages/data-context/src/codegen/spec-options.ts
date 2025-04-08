@@ -31,7 +31,7 @@ export const expectedSpecExtensions = ['.cy', '.spec', '.test', '-spec', '-test'
 type ComponentExtension = `.cy.${'js' | 'ts' | 'jsx' | 'tsx'}`
 type TemplateKey = 'e2e' | 'componentEmpty' | 'vueComponent' | 'reactComponent'
 export class SpecOptions {
-  private parsedPath: ParsedPath;
+  private parsedPath: ParsedPath
 
   constructor (private options: CodeGenOptions) {
     this.parsedPath = path.parse(options.codeGenPath)

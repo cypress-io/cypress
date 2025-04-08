@@ -140,7 +140,7 @@ export const replaceLocalNpmVersions = async function (basePath: string) {
       let shouldWriteFile = false
 
       for (const [depName, version] of Object.entries(dependencies)) {
-        const matchedPkg = Boolean(depName.startsWith('@cypress/') || depName === 'create-cypress-tests')
+        const matchedPkg = Boolean(depName.startsWith('@cypress/'))
 
         if (!matchedPkg || version !== '0.0.0-development') {
           continue

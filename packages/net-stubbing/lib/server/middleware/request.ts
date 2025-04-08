@@ -96,7 +96,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
   }) as CyHttpMessages.IncomingRequest
 
   request.res.once('finish', async () => {
-    request.handleSubscriptions<CyHttpMessages.ResponseComplete>({
+    await request.handleSubscriptions<CyHttpMessages.ResponseComplete>({
       eventName: 'after:response',
       data: request.includeBodyInAfterResponse ? {
         finalResBody: request.res.body!,
@@ -137,6 +137,11 @@ export const InterceptRequest: RequestMiddleware = async function () {
   }
 
   await ensureBody()
+
+  // Note that this needs to happen after the `ensureBody` call to ensure that we proceed synchronously to
+  // where we update the state of the routes:
+  // https://github.com/cypress-io/cypress/blob/aafac6a6104b689a118f4c4f29f948d7d8a35aef/packages/net-stubbing/lib/server/intercepted-request.ts#L167-L169
+  request.addDefaultSubscriptions()
 
   if (!_.isString(req.body) && !_.isBuffer(req.body)) {
     throw new Error('req.body must be a string or a Buffer')

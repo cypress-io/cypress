@@ -15,45 +15,23 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
     })
 
     cy.findByRole('button', {
-      name: 'Front-end framework Pick a framework',
+      name: 'Pick a framework',
       expanded: false,
     })
     .should('have.attr', 'aria-haspopup', 'true')
     .click()
     .should('have.attr', 'aria-expanded', 'true')
 
-    cy.get('li')
-    .then(($items) => {
-      return $items.map((_idx, html) => Cypress.$(html).text()).get()
-    })
-    // alphabetical order
-    // we should "support is in alpha" for a11y (not shown visually)
-    .should('deep.eq', ['Create React App (v5) Support is in  Alpha', 'Vue.js (v3)'])
+    cy.get('li').spread(($firstLi, $secondLi) => {
+      cy.wrap($firstLi).should('contain', 'React.js')
+      cy.wrap($firstLi).find('svg').should('have.attr', 'data-cy', 'react-logo')
 
-    const frameworkIconName = (frameworkName: string) => {
-      if (frameworkName.includes('React')) {
-        return 'react-logo'
-      }
-
-      if (frameworkName.includes('Nuxt')) {
-        return 'nuxtjs-logo'
-      }
-
-      if (frameworkName.includes('Vue')) {
-        return 'vue-logo'
-      }
-
-      return `${Cypress._.lowerCase(frameworkName).replace(' ', '')}-logo`
-    }
-
-    ;['Create React App (v5) Support is in Alpha', 'Vue.js (v3)'].forEach((name) => {
-      cy.findByRole('option', { name })
-      .find('svg')
-      .should('have.attr', 'data-cy', frameworkIconName(name))
+      cy.wrap($secondLi).should('contain', 'Vue.js (v3)')
+      cy.wrap($secondLi).find('svg').should('have.attr', 'data-cy', 'vue-logo')
     })
 
     cy.findByRole('button', { name: 'Next step' })
-    .should('have.disabled')
+    .should('be.disabled')
 
     cy.findByRole('link', { name: 'Browse our list of third-party framework integrations' })
     .should('have.attr', 'href', 'https://on.cypress.io/component-integrations?utm_medium=Select+Framework+Dropdown&utm_source=Binary%3A+Launchpad&utm_campaign=Browse+third-party+frameworks')
@@ -77,11 +55,11 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
     })
 
     cy.findByRole('button', {
-      name: 'Front-end framework Pick a framework',
+      name: 'Pick a framework',
       expanded: false,
     }).click()
 
-    cy.findByRole('option', { name: 'Create React App (v5) Support is in Alpha (detected)' }).should('be.visible').click()
+    cy.findByRole('option', { name: 'React.js (detected)' }).should('be.visible').click()
   })
 
   it('shows the description of bundler', () => {
@@ -102,7 +80,6 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
       ),
     })
 
-    cy.findByLabelText('Bundler').should('be.visible')
     cy.findByLabelText('Pick a bundler').should('be.visible')
   })
 
@@ -146,7 +123,7 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
       ),
     })
 
-    cy.contains('h3', 'Community framework definition problem')
+    cy.contains('h2', 'Community framework definition problem')
     cy.contains('p', PLURAL_MESSAGE).should('be.visible')
     cy.contains('p', SINGULAR_MESSAGE).should('not.exist')
     cy.contains('li', PATH_1).should('be.visible')

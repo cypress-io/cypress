@@ -1,6 +1,6 @@
 require('../../spec_helper')
 
-const api = require('../../../lib/cloud/api')
+const api = require('../../../lib/cloud/api').default
 const cache = require('../../../lib/cache')
 const user = require('../../../lib/cloud/user')
 
