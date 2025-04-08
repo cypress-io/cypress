@@ -498,8 +498,9 @@ commands:
     steps:
       - run: pwd
       - run:
-          name: print global yarn cache path
-          command: echo $(yarn global bin)
+          name: print global yarn cache path and size
+          command: |
+            du -sh $(yarn global bin)
       - run:
           name: print yarn version
           command: yarn versions
@@ -784,6 +785,7 @@ commands:
       - windows-install-chrome:
           browser: <<parameters.browser>>
       - run:
+          name: Run <<parameters.package>> UI tests
           command: |
             echo Current working directory is $PWD
             echo Total containers $CIRCLE_NODE_TOTAL
