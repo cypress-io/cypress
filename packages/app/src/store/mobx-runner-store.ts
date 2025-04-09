@@ -15,31 +15,47 @@ const defaults = {
 } as const
 
 export class MobxRunnerStore {
-  @observable spec?: Cypress.Spec
-  @observable specs: Cypress.Spec[] = []
-  @observable specRunId?: string
-  @observable isLoading = true
-  @observable width: number
-  @observable height: number
-  @observable automation?: AutomationStatus
-  @observable canSaveStudioLogs = false
+  spec?: Cypress.Spec
+  specs: Cypress.Spec[] = []
+  specRunId?: string
+  isLoading = true
+  width: number
+  height: number
+  automation?: AutomationStatus
+  canSaveStudioLogs = false
 
   constructor (testingType: Cypress.TestingType) {
-    makeObservable(this)
+    makeObservable(this, {
+      spec: observable,
+      specs: observable,
+      specRunId: observable,
+      isLoading: observable,
+      width: observable,
+      height: observable,
+      automation: observable,
+      canSaveStudioLogs: observable,
+      setCanSaveStudioLogs: action,
+      setSpec: action,
+      checkCurrentSpecStillExists: action,
+      setSpecs: action,
+      setIsLoading: action,
+      updateDimensions: action,
+    })
+
     this.width = defaults[testingType].width
     this.height = defaults[testingType].height
   }
 
-  @action setCanSaveStudioLogs (canSave: boolean) {
+  setCanSaveStudioLogs (canSave: boolean) {
     this.canSaveStudioLogs = canSave
   }
 
-  @action setSpec (spec: Cypress.Spec | undefined) {
+  setSpec (spec: Cypress.Spec | undefined) {
     this.spec = spec
     this.specRunId = nanoid()
   }
 
-  @action checkCurrentSpecStillExists (specs: Cypress.Spec[]) {
+  checkCurrentSpecStillExists (specs: Cypress.Spec[]) {
     const newSpecsAbsolutes = new Set(specs.map((spec) => spec.absolute))
 
     this.specs.forEach((oldSpec) => {
@@ -49,16 +65,16 @@ export class MobxRunnerStore {
     })
   }
 
-  @action setSpecs (specs: Cypress.Spec[]) {
+  setSpecs (specs: Cypress.Spec[]) {
     this.checkCurrentSpecStillExists(specs)
     this.specs = specs
   }
 
-  @action setIsLoading (isLoading: boolean) {
+  setIsLoading (isLoading: boolean) {
     this.isLoading = isLoading
   }
 
-  @action updateDimensions (width: number, height: number) {
+  updateDimensions (width: number, height: number) {
     this.height = height
     this.width = width
   }

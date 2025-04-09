@@ -14,20 +14,20 @@ import type Log from '../instruments/instrument-model'
 import Session, { SessionProps } from '../sessions/sessions-model'
 
 export default class Attempt {
-  @observable agents: Agent[] = []
-  @observable sessions: Record<string, Session> = {}
-  @observable commands: Command[] = []
-  @observable err?: Err = undefined
-  @observable hooks: Hook[] = []
+  agents: Agent[] = []
+  sessions: Record<string, Session> = {}
+  commands: Command[] = []
+  err?: Err = undefined
+  hooks: Hook[] = []
   // TODO: make this an enum with states: 'QUEUED, ACTIVE, INACTIVE'
-  @observable isActive: boolean | null = null
-  @observable routes: Route[] = []
-  @observable _state?: TestState | null = null
-  @observable _testOuterStatus?: TestState = undefined
-  @observable _invocationCount: number = 0
-  @observable invocationDetails?: FileDetails
+  isActive: boolean | null = null
+  routes: Route[] = []
+  _state?: TestState | null = null
+  _testOuterStatus?: TestState = undefined
+  _invocationCount: number = 0
+  invocationDetails?: FileDetails
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  @observable hookCount: { [name in HookName]: number } = {
+  hookCount: { [name in HookName]: number } = {
     'before all': 0,
     'before each': 0,
     'after all': 0,
@@ -35,19 +35,47 @@ export default class Attempt {
     'test body': 0,
     'studio commands': 0,
   }
-  @observable _isOpen: boolean|null = null
+  _isOpen: boolean|null = null
 
-  @observable isOpenWhenLast: boolean | null = null
+  isOpenWhenLast: boolean | null = null
   _callbackAfterUpdate: Function | null = null
   testId: string
 
-  @observable id: number
+  id: number
   test: Test
 
   _logs: {[key: string]: Log} = {}
 
   constructor (props: TestProps, test: Test) {
-    makeObservable(this)
+    makeObservable(this, {
+      agents: observable,
+      sessions: observable,
+      commands: observable,
+      err: observable,
+      hooks: observable,
+      isActive: observable,
+      routes: observable,
+      _state: observable,
+      _testOuterStatus: observable,
+      _invocationCount: observable,
+      invocationDetails: observable,
+      hookCount: observable,
+      _isOpen: observable,
+      isOpenWhenLast: observable,
+      id: observable,
+      hasCommands: computed,
+      isLongRunning: computed,
+      _hasLongRunningCommand: computed,
+      state: computed,
+      error: computed,
+      isLast: computed,
+      isOpen: computed,
+      start: action,
+      update: action,
+      setIsOpen: action,
+      finish: action,
+    })
+
     this.testId = props.id
     this.id = props.currentRetry || 0
     this.test = test
@@ -66,25 +94,25 @@ export default class Attempt {
     _.each(props.routes, this.addLog)
   }
 
-  @computed get hasCommands () {
+  get hasCommands () {
     return !!this.commands.length
   }
 
-  @computed get isLongRunning () {
+  get isLongRunning () {
     return this.isActive && this._hasLongRunningCommand
   }
 
-  @computed get _hasLongRunningCommand () {
+  get _hasLongRunningCommand () {
     return _.some(this.commands, (command) => {
       return command.isLongRunning
     })
   }
 
-  @computed get state () {
+  get state () {
     return this._state || (this.isActive ? 'active' : 'processing')
   }
 
-  @computed get error () {
+  get error () {
     const command = this.err?.isCommandErr ? this.commandMatchingErr() : undefined
 
     return {
@@ -94,11 +122,11 @@ export default class Attempt {
     }
   }
 
-  @computed get isLast () {
+  get isLast () {
     return this.id === this.test.lastAttempt.id
   }
 
-  @computed get isOpen () {
+  get isOpen () {
     if (this._isOpen !== null) {
       return this._isOpen
     }
@@ -166,11 +194,11 @@ export default class Attempt {
     .last()
   }
 
-  @action start () {
+  start () {
     this.isActive = true
   }
 
-  @action update (props: UpdatableTestProps) {
+  update (props: UpdatableTestProps) {
     if (props.state) {
       this._state = props.state
     }
@@ -200,11 +228,11 @@ export default class Attempt {
     }
   }
 
-  @action setIsOpen (isOpen: boolean) {
+  setIsOpen (isOpen: boolean) {
     this._isOpen = isOpen
   }
 
-  @action finish (props: UpdatableTestProps, isInteractive: boolean) {
+  finish (props: UpdatableTestProps, isInteractive: boolean) {
     this.update(props)
     this.isActive = false
 
