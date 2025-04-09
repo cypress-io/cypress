@@ -1,4 +1,4 @@
-import React from 'react'
+import type { RefObject } from 'react'
 
 export interface StudioPanelProps {
   canAccessStudioAI: boolean
@@ -22,12 +22,12 @@ export type RunnerStatus = 'running' | 'finished'
 
 export type StudioEventManagerShape = (props: StudioEventManagerProps) => {
   runnerStatus: RunnerStatus
-  testBody: string | null
+  testBlock: string | null
 }
 
 export interface StudioAIStreamProps {
   canAccessStudioAI: boolean
-  AIOutputRef: React.RefObject<HTMLTextAreaElement>
+  AIOutputRef: RefObject<HTMLTextAreaElement>
   runnerStatus: RunnerStatus
 }
 
