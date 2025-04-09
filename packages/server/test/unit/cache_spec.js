@@ -4,68 +4,10 @@ require(`../../lib/cwd`)
 const Promise = require('bluebird')
 const cache = require(`../../lib/cache`).cache
 const { fs } = require(`../../lib/util/fs`)
-const Fixtures = require('@tooling/system-tests')
 
 describe('lib/cache', () => {
   beforeEach(async () => {
     await cache.remove()
-  })
-
-  context('#_applyRewriteRules', () => {
-    beforeEach(function () {
-      return fs.readJsonAsync(Fixtures.path('server/old_cache.json')).then((oldCache) => {
-        this.oldCache = oldCache
-      })
-    })
-
-    it('converts object to array of paths', function () {
-      const obj = cache._applyRewriteRules(this.oldCache)
-
-      expect(obj).to.deep.eq({
-        COHORTS: {},
-        PROJECTS: [
-          '/Users/bmann/Dev/examples-angular-circle-ci',
-          '/Users/bmann/Dev/cypress-core-gui',
-          '/Users/bmann/Dev/cypress-app/spec/fixtures/projects/todos',
-        ],
-        PROJECTS_CONFIG: {},
-        PROJECT_PREFERENCES: {},
-        USER: { name: 'brian', sessionToken: 'abc123' },
-      })
-    })
-
-    it('compacts non PATH values', () => {
-      const obj = cache._applyRewriteRules({
-        USER: {},
-        PROJECTS: {
-          one: { PATH: 'foo/bar' },
-          two: { FOO: 'baz' },
-        },
-      })
-
-      expect(obj).to.deep.eq({
-        COHORTS: {},
-        PROJECTS: ['foo/bar'],
-        PROJECTS_CONFIG: {},
-        PROJECT_PREFERENCES: {},
-        USER: {},
-      })
-    })
-
-    it('converts session_token to session_token', () => {
-      const obj = cache._applyRewriteRules({
-        USER: { id: 1, session_token: 'abc123' },
-        PROJECTS: [],
-      })
-
-      expect(obj).to.deep.eq({
-        COHORTS: {},
-        PROJECTS: [],
-        PROJECTS_CONFIG: {},
-        PROJECT_PREFERENCES: {},
-        USER: { id: 1, sessionToken: 'abc123' },
-      })
-    })
   })
 
   context('projects', () => {
@@ -227,7 +169,7 @@ context('queues public methods', () => {
       cache.insertProject('foo'),
     ])
 
-    const json = await cache.read()
+    const json = await cache._read()
 
     expect(json).to.deep.eq({
       USER: {

@@ -16,11 +16,6 @@ export interface CachedUser {
   email: string
 }
 
-export interface LegacyCachedUser extends CachedUser {
-  session_token?: string
-  sessionToken?: string
-}
-
 export interface Cohort {
   name: string
   cohort: string

@@ -4,7 +4,7 @@ import { globalPubSub } from '@packages/data-context'
 import { fs } from './util/fs'
 import appData from './util/app_data'
 import FileUtil from './util/file'
-import type { Cache, CachedUser, LegacyCachedUser, Preferences, Cohort } from '@packages/types'
+import type { Cache, CachedUser, Preferences, Cohort } from '@packages/types'
 
 interface Transaction {
   get: <T = Cache>(key?: string, defaultValue?: T) => Promise<T>
@@ -18,32 +18,6 @@ const fileUtil = new FileUtil({
 globalPubSub.on('test:cleanup', () => {
   fileUtil.__resetForTest()
 })
-
-const convertProjectsToArray = function (obj: Cache): Cache | undefined {
-  // if our project structure is not
-  // an array then its legacy and we
-  // need to convert it
-  if (!_.isArray(obj.PROJECTS)) {
-    obj.PROJECTS = _.chain(obj.PROJECTS).values().map('PATH').compact().value()
-
-    return obj
-  }
-
-  return undefined
-}
-
-const renameSessionToken = function (obj: Cache): Cache | undefined {
-  const user = obj.USER as LegacyCachedUser
-
-  if (user && user.session_token) {
-    user.sessionToken = user.session_token
-    delete user.session_token
-
-    return obj
-  }
-
-  return undefined
-}
 
 export const cache = {
   path: fileUtil.path,
@@ -62,22 +36,10 @@ export const cache = {
     }
   },
 
-  _applyRewriteRules (obj: Partial<Cache> = {}): Cache {
-    return _.reduce([convertProjectsToArray, renameSessionToken], (memo, fn) => {
-      const ret = fn(memo as Cache)
-
-      return ret || memo
-    }, { ...this.defaults(), ...obj } as Cache)
-  },
-
-  read (): Promise<Cache> {
+  _read (): Promise<Cache> {
     return fileUtil.get().then((contents) => {
       return _.defaults(contents, this.defaults())
     })
-  },
-
-  write (obj: Partial<Cache> = {}): Promise<Cache> {
-    return fileUtil.set(obj).return(obj)
   },
 
   _getProjects (tx: Transaction): Promise<string[]> {
