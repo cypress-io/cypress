@@ -60,7 +60,9 @@ export const cache = {
         const pathsToRemove = Promise.reduce(projects, (memo: string[], path) => {
           return fs.statAsync(path)
           .catch(() => {
-            return memo.push(path)
+            memo.push(path)
+
+            return memo
           }).return(memo)
         }, [])
 
