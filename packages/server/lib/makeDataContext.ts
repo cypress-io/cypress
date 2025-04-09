@@ -83,39 +83,39 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       openProjectCreate (args: InitializeProjectOptions, options: OpenProjectLaunchOptions) {
         return openProject.create(args.projectRoot, args, options)
       },
-      async insertProjectToCache (projectRoot: string) {
-        await cache.insertProject(projectRoot)
+      insertProjectToCache (projectRoot: string) {
+        return cache.insertProject(projectRoot)
       },
       async getProjectRootsFromCache () {
-        const roots = await cache.getProjectRoots()
-
-        return Promise.all(roots.map(async (projectRoot: string) => {
-          return {
-            projectRoot,
-            savedState: () => savedState.create(projectRoot).then((s) => s.get()),
-          }
-        }))
+        return cache.getProjectRoots().then((roots) => {
+          return Promise.all(roots.map(async (projectRoot: string) => {
+            return {
+              projectRoot,
+              savedState: () => savedState.create(projectRoot).then((s) => s.get()),
+            }
+          }))
+        })
       },
-      async clearLatestProjectsCache () {
-        await cache.removeLatestProjects()
+      clearLatestProjectsCache () {
+        return cache.removeLatestProjects()
       },
-      async getProjectPreferencesFromCache () {
+      getProjectPreferencesFromCache () {
         return cache.getProjectPreferences()
       },
-      async clearProjectPreferences (projectTitle: string) {
-        await cache.removeProjectPreferences(projectTitle)
+      clearProjectPreferences (projectTitle: string) {
+        return cache.removeProjectPreferences(projectTitle)
       },
-      async clearAllProjectPreferences () {
-        await cache.removeAllProjectPreferences()
+      clearAllProjectPreferences () {
+        return cache.removeAllProjectPreferences()
       },
-      async insertProjectPreferencesToCache (projectTitle: string, preferences: Preferences) {
-        await cache.insertProjectPreferences(projectTitle, preferences)
+      insertProjectPreferencesToCache (projectTitle: string, preferences: Preferences) {
+        return cache.insertProjectPreferences(projectTitle, preferences)
       },
-      async removeProjectFromCache (path: string) {
-        await cache.removeProject(path)
+      removeProjectFromCache (path: string) {
+        return cache.removeProject(path)
       },
-      async closeActiveProject () {
-        await openProject.closeActiveProject()
+      closeActiveProject () {
+        return openProject.closeActiveProject()
       },
       getCurrentBrowser () {
         return (openProject?.getProject()?.browser) ?? undefined
