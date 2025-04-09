@@ -1,4 +1,4 @@
-const cache = require('./cache')
+import { cache } from './cache'
 import type { Cohort } from '@packages/types'
 const debug = require('debug')('cypress:server:cohorts')
 

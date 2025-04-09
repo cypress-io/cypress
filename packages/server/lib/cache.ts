@@ -6,6 +6,11 @@ import appData from './util/app_data'
 import FileUtil from './util/file'
 import type { Cache, CachedUser, LegacyCachedUser, Preferences, Cohort } from '@packages/types'
 
+interface Transaction {
+  get: <T = Cache>(key?: string, defaultValue?: T) => Promise<T>
+  set: (key: string | Partial<Cache>, value?: any) => Promise<void>
+}
+
 const fileUtil = new FileUtil({
   path: appData.path('cache'),
 })
@@ -75,11 +80,11 @@ export const cache = {
     return fileUtil.set(obj).return(obj)
   },
 
-  _getProjects (tx: any): Promise<string[]> {
+  _getProjects (tx: Transaction): Promise<string[]> {
     return tx.get('PROJECTS', [])
   },
 
-  _removeProjects (tx: any, projects: string[], paths: string | string[]): Promise<void> {
+  _removeProjects (tx: Transaction, projects: string[], paths: string | string[]): Promise<void> {
     const pathsArray = Array.isArray(paths) ? paths : [paths]
 
     projects = _.without(projects, ...pathsArray)
@@ -88,7 +93,7 @@ export const cache = {
   },
 
   getProjectRoots (): Promise<string[]> {
-    return fileUtil.transaction((tx) => {
+    return fileUtil.transaction((tx: Transaction) => {
       return this._getProjects(tx).then((projects) => {
         const pathsToRemove = Promise.reduce(projects, (memo: string[], path) => {
           return fs.statAsync(path)
@@ -107,7 +112,7 @@ export const cache = {
   },
 
   removeProject (path: string): Promise<void> {
-    return fileUtil.transaction((tx) => {
+    return fileUtil.transaction((tx: Transaction) => {
       return this._getProjects(tx).then((projects) => {
         return this._removeProjects(tx, projects, path)
       })
@@ -115,7 +120,7 @@ export const cache = {
   },
 
   insertProject (path: string): Promise<void> {
-    return fileUtil.transaction((tx) => {
+    return fileUtil.transaction((tx: Transaction) => {
       return this._getProjects(tx).then((projects) => {
         // projects are sorted by most recently used, so add a project to
         // the start or move it to the start if it already exists
@@ -155,7 +160,7 @@ export const cache = {
   },
 
   insertProjectPreferences (projectTitle: string, projectPreferences: Preferences): Promise<void> {
-    return fileUtil.transaction((tx) => {
+    return fileUtil.transaction((tx: Transaction) => {
       return tx.get('PROJECT_PREFERENCES', {}).then((preferences) => {
         return tx.set('PROJECT_PREFERENCES', {
           ...preferences,
@@ -194,7 +199,7 @@ export const cache = {
   },
 
   insertCohort (cohort: Cohort): Promise<void> {
-    return fileUtil.transaction((tx) => {
+    return fileUtil.transaction((tx: Transaction) => {
       return tx.get('COHORTS', {}).then((cohorts) => {
         return tx.set('COHORTS', {
           ...cohorts,
@@ -211,5 +216,5 @@ export const cache = {
   },
 
   // for testing purposes
-  __get: fileUtil.get.bind(fileUtil),
+  __get: fileUtil.get.bind(fileUtil) as <T = Cache>(key?: string, defaultValue?: T) => Promise<T>,
 }

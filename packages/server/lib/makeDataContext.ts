@@ -83,18 +83,18 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       openProjectCreate (args: InitializeProjectOptions, options: OpenProjectLaunchOptions) {
         return openProject.create(args.projectRoot, args, options)
       },
-      insertProjectToCache (projectRoot: string) {
-        return cache.insertProject(projectRoot)
+      async insertProjectToCache (projectRoot: string) {
+        await cache.insertProject(projectRoot)
       },
       async getProjectRootsFromCache () {
-        return cache.getProjectRoots().then((roots) => {
-          return Promise.all(roots.map(async (projectRoot: string) => {
-            return {
-              projectRoot,
-              savedState: () => savedState.create(projectRoot).then((s) => s.get()),
-            }
-          }))
-        })
+        const roots = await cache.getProjectRoots()
+
+        return Promise.all(roots.map(async (projectRoot: string) => {
+          return {
+            projectRoot,
+            savedState: () => savedState.create(projectRoot).then((s) => s.get()),
+          }
+        }))
       },
       async clearLatestProjectsCache () {
         await cache.removeLatestProjects()

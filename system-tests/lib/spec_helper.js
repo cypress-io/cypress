@@ -12,7 +12,7 @@ global.sinon = require('sinon')
 const _ = require('lodash')
 const Promise = require('bluebird')
 const path = require('path')
-const cache = require(`@packages/server/lib/cache`)
+const cache = require('@packages/server/lib/cache').cache
 
 require('chai')
 .use(require('@cypress/sinon-chai'))

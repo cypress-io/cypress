@@ -2,8 +2,7 @@ require('../spec_helper')
 require(`../../lib/cwd`)
 
 const Promise = require('bluebird')
-const { __get } = require('../../lib/cache')
-const { cache } = require(`../../lib/cache`)
+const cache = require(`../../lib/cache`).cache
 const { fs } = require(`../../lib/util/fs`)
 const Fixtures = require('@tooling/system-tests')
 
@@ -23,12 +22,15 @@ describe('lib/cache', () => {
       const obj = cache._applyRewriteRules(this.oldCache)
 
       expect(obj).to.deep.eq({
-        USER: { name: 'brian', sessionToken: 'abc123' },
+        COHORTS: {},
         PROJECTS: [
           '/Users/bmann/Dev/examples-angular-circle-ci',
           '/Users/bmann/Dev/cypress-core-gui',
           '/Users/bmann/Dev/cypress-app/spec/fixtures/projects/todos',
         ],
+        PROJECTS_CONFIG: {},
+        PROJECT_PREFERENCES: {},
+        USER: { name: 'brian', sessionToken: 'abc123' },
       })
     })
 
@@ -42,8 +44,11 @@ describe('lib/cache', () => {
       })
 
       expect(obj).to.deep.eq({
-        USER: {},
+        COHORTS: {},
         PROJECTS: ['foo/bar'],
+        PROJECTS_CONFIG: {},
+        PROJECT_PREFERENCES: {},
+        USER: {},
       })
     })
 
@@ -54,60 +59,49 @@ describe('lib/cache', () => {
       })
 
       expect(obj).to.deep.eq({
-        USER: { id: 1, sessionToken: 'abc123' },
+        COHORTS: {},
         PROJECTS: [],
+        PROJECTS_CONFIG: {},
+        PROJECT_PREFERENCES: {},
+        USER: { id: 1, sessionToken: 'abc123' },
       })
     })
   })
 
   context('projects', () => {
     describe('#insertProject', () => {
-      it('inserts project by path', () => {
-        return cache.insertProject('foo/bar')
-        .then(() => {
-          return cache.__get('PROJECTS')
-        }).then((projects) => {
-          expect(projects).to.deep.eq(['foo/bar'])
-        })
+      it('inserts project by path', async () => {
+        await cache.insertProject('foo/bar')
+        const projects = await cache.__get('PROJECTS')
+
+        expect(projects).to.deep.eq(['foo/bar'])
       })
 
-      it('inserts project at the start', () => {
-        return cache.insertProject('foo')
-        .then(() => {
-          return cache.insertProject('bar')
-        }).then(() => {
-          return cache.__get('PROJECTS')
-        }).then((projects) => {
-          expect(projects).to.deep.eq(['bar', 'foo'])
-        })
+      it('inserts project at the start', async () => {
+        await cache.insertProject('foo')
+        await cache.insertProject('bar')
+        const projects = await cache.__get('PROJECTS')
+
+        expect(projects).to.deep.eq(['bar', 'foo'])
       })
 
-      it('can insert multiple projects in a row', () => {
-        return Promise.all([
-          cache.insertProject('baz'),
-          cache.insertProject('bar'),
-          cache.insertProject('foo'),
-        ])
-        .then(() => {
-          return cache.__get('PROJECTS')
-        }).then((projects) => {
-          expect(projects).to.deep.eq(['foo', 'bar', 'baz'])
-        })
+      it('can insert multiple projects in a row', async () => {
+        await cache.insertProject('baz')
+        await cache.insertProject('bar')
+        await cache.insertProject('foo')
+        const projects = await cache.__get('PROJECTS')
+
+        expect(projects).to.deep.eq(['foo', 'bar', 'baz'])
       })
 
-      it('moves project to start if it already exists', () => {
-        return Promise.all([
-          cache.insertProject('foo'),
-          cache.insertProject('bar'),
-          cache.insertProject('baz'),
-        ])
-        .then(() => {
-          return cache.insertProject('bar')
-        }).then(() => {
-          return cache.__get('PROJECTS')
-        }).then((projects) => {
-          expect(projects).to.deep.eq(['bar', 'baz', 'foo'])
-        })
+      it('moves project to start if it already exists', async () => {
+        await cache.insertProject('foo')
+        await cache.insertProject('bar')
+        await cache.insertProject('baz')
+        await cache.insertProject('bar')
+        const projects = await cache.__get('PROJECTS')
+
+        expect(projects).to.deep.eq(['bar', 'baz', 'foo'])
       })
     })
 
@@ -115,10 +109,9 @@ describe('lib/cache', () => {
       it('removes project by path', async () => {
         await cache.insertProject('/Users/brian/app')
         await cache.removeProject('/Users/brian/app')
-      }).then(() => {
-        return cache.__get('PROJECTS').then((projects) => {
-          expect(projects).to.deep.eq([])
-        })
+        const projects = await cache.__get('PROJECTS')
+
+        expect(projects).to.deep.eq([])
       })
     })
   })
@@ -128,70 +121,63 @@ describe('lib/cache', () => {
       this.statAsync = sinon.stub(fs, 'statAsync')
     })
 
-    it('returns an array of paths', function () {
+    afterEach(function () {
+      this.statAsync.restore()
+    })
+
+    it('returns an array of paths', async function () {
       this.statAsync.withArgs('/Users/brian/app').resolves()
       this.statAsync.withArgs('/Users/sam/app2').resolves()
 
-      return cache.insertProject('/Users/brian/app')
-      .then(() => {
-        return cache.insertProject('/Users/sam/app2')
-      }).then(() => {
-        return cache.getProjectRoots().then((paths) => {
-          expect(paths).to.deep.eq(['/Users/sam/app2', '/Users/brian/app'])
-        })
-      })
+      await cache.insertProject('/Users/brian/app')
+      await cache.insertProject('/Users/sam/app2')
+      const paths = await cache.getProjectRoots()
+
+      expect(paths).to.deep.eq(['/Users/sam/app2', '/Users/brian/app'])
     })
 
-    it('removes any paths which no longer exist on the filesystem', function () {
+    it('removes any paths which no longer exist on the filesystem', async function () {
       this.statAsync.withArgs('/Users/brian/app').resolves()
       this.statAsync.withArgs('/Users/sam/app2').rejects(new Error())
 
-      return cache.insertProject('/Users/brian/app')
-      .then(() => {
-        return cache.insertProject('/Users/sam/app2')
-      }).then(() => {
-        return cache.getProjectRoots().then((paths) => {
-          expect(paths).to.deep.eq(['/Users/brian/app'])
-        })
-      })
-      .then(() => {
-        // we have to wait on the write event because
-        // of process.nextTick
-        return Promise.delay(100).then(() => {
-          return cache.__get('PROJECTS').then((projects) => {
-            expect(projects).to.deep.eq(['/Users/brian/app'])
-          })
-        })
-      })
+      await cache.insertProject('/Users/brian/app')
+      await cache.insertProject('/Users/sam/app2')
+      const paths = await cache.getProjectRoots()
+
+      expect(paths).to.deep.eq(['/Users/brian/app'])
+      // we have to wait on the write event because
+      // of process.nextTick
+      await Promise.delay(100)
+      const projects = await cache.__get('PROJECTS')
+
+      expect(projects).to.deep.eq(['/Users/brian/app'])
     })
   })
 })
 
 context('project preferences', () => {
-  it('should insert a projects preferences into the cache', () => {
+  it('should insert a projects preferences into the cache', async () => {
     const testProjectTitle = 'launchpad'
     const testPreferences = { testingType: 'e2e', browserPath: '/some/test/path' }
 
-    return cache.insertProjectPreferences(testProjectTitle, testPreferences)
-    .then(() => cache.__get('PROJECT_PREFERENCES'))
-    .then((preferences) => {
-      expect(preferences[testProjectTitle]).to.deep.equal(testPreferences)
-    })
+    await cache.insertProjectPreferences(testProjectTitle, testPreferences)
+    const preferences = await cache.__get('PROJECT_PREFERENCES')
+
+    expect(preferences[testProjectTitle]).to.deep.equal(testPreferences)
   })
 
-  it('should insert multiple projects preferences into the cache', () => {
+  it('should insert multiple projects preferences into the cache', async () => {
     const testProjectTitle = 'launchpad'
     const testPreferences = { testingType: 'e2e', browserPath: '/some/test/path' }
     const anotherTestProjectTitle = 'launchpad'
     const anotherTestPreferene = { testingType: 'e2e', browserPath: '/some/test/path' }
 
-    return cache.insertProjectPreferences(testProjectTitle, testPreferences)
-    .then(() => cache.insertProjectPreferences(anotherTestProjectTitle, anotherTestPreferene))
-    .then(() => cache.__get('PROJECT_PREFERENCES'))
-    .then((preferences) => {
-      expect(preferences).to.have.property(testProjectTitle)
-      expect(preferences).to.have.property(anotherTestProjectTitle)
-    })
+    await cache.insertProjectPreferences(testProjectTitle, testPreferences)
+    await cache.insertProjectPreferences(anotherTestProjectTitle, anotherTestPreferene)
+    const preferences = await cache.__get('PROJECT_PREFERENCES')
+
+    expect(preferences).to.have.property(testProjectTitle)
+    expect(preferences).to.have.property(anotherTestProjectTitle)
   })
 
   it('should clear the projects preferred preferences', async () => {
@@ -200,10 +186,9 @@ context('project preferences', () => {
 
     await cache.insertProjectPreferences(testProjectTitle, testPreferences)
     await cache.removeProjectPreferences(testProjectTitle)
-    .then(() => __get('PROJECT_PREFERENCES'))
-    .then((preferences) => {
-      expect(preferences[testProjectTitle]).to.equal(null)
-    })
+    const preferences = await cache.__get('PROJECT_PREFERENCES')
+
+    expect(preferences[testProjectTitle]).to.equal(null)
   })
 })
 
@@ -217,12 +202,11 @@ context('#setUser / #getUser', () => {
     }
   })
 
-  it('sets and gets user', function () {
-    return cache.setUser(this.user).then(() => {
-      return cache.getUser().then((user) => {
-        expect(user).to.deep.eq(this.user)
-      })
-    })
+  it('sets and gets user', async function () {
+    await cache.setUser(this.user)
+    const user = await cache.getUser()
+
+    expect(user).to.deep.eq(this.user)
   })
 })
 
@@ -237,45 +221,43 @@ context('#removeUser', () => {
 })
 
 context('queues public methods', () => {
-  it('is able to write both values', () => {
-    return Promise.all([
+  it('is able to write both values', async function () {
+    await Promise.all([
       cache.setUser({ name: 'brian', authToken: 'auth-token-123' }),
       cache.insertProject('foo'),
     ])
-    .then(() => {
-      return cache.read()
-    }).then((json) => {
-      expect(json).to.deep.eq({
-        USER: {
-          name: 'brian',
-          authToken: 'auth-token-123',
-        },
-        PROJECTS: ['foo'],
-        PROJECT_PREFERENCES: {},
-        PROJECTS_CONFIG: {},
-        COHORTS: {},
-      })
+
+    const json = await cache.read()
+
+    expect(json).to.deep.eq({
+      USER: {
+        name: 'brian',
+        authToken: 'auth-token-123',
+      },
+      PROJECTS: ['foo'],
+      PROJECT_PREFERENCES: {},
+      PROJECTS_CONFIG: {},
+      COHORTS: {},
     })
   })
 })
 
 context('cohorts', () => {
-  it('should get no cohorts when empty', () => {
-    return cache.getCohorts().then((cohorts) => {
-      expect(cohorts).to.deep.eq({})
-    })
+  it('should get no cohorts when empty', async function () {
+    const cohorts = await cache.getCohorts()
+
+    expect(cohorts).to.deep.eq({})
   })
 
-  it('should insert a cohort', () => {
+  it('should insert a cohort', async function () {
     const cohort = {
       name: 'cohort_id',
       cohort: 'A',
     }
 
-    return cache.insertCohort(cohort).then(() => {
-      return cache.getCohorts().then((cohorts) => {
-        expect(cohorts).to.deep.eq({ [cohort.name]: cohort })
-      })
-    })
+    await cache.insertCohort(cohort)
+    const cohorts = await cache.getCohorts()
+
+    expect(cohorts).to.deep.eq({ [cohort.name]: cohort })
   })
 })
