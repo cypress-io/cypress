@@ -22,7 +22,7 @@ export interface AuthenticatedUserShape {
 
 export interface ProjectShape {
   projectRoot: string
-  savedState?: () => Promise<Partial<AllowedState>>
+  savedState?: () => Promise<AllowedState>
 }
 
 export interface ServersDataShape {
