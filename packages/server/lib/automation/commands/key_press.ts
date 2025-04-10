@@ -113,9 +113,7 @@ async function hasActiveWindow (client: Client) {
 }
 
 async function activateTopWindow (client: Client, autContext: string): Promise<void> {
-  const { contexts: [{ context: topLevelContext }] } = await client.browsingContextGetTree({
-    maxDepth: Infinity,
-  })
+  const { contexts: [{ context: topLevelContext }] } = await client.browsingContextGetTree({})
 
   await client.switchToWindow(topLevelContext)
 }
