@@ -2665,10 +2665,10 @@
   dependencies:
     "@cypress-design/icon-registry" "^1.5.1"
 
-"@cypress-design/css@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/css/-/css-1.0.0.tgz#65c48ee7c7f62446e239f3590016e8817d09b816"
-  integrity sha512-FtKERQybOTBd+2USvTKQVZYnXE9EF2y8hLCslm2iNyb1TbcKU4fLc3aeSTEFKupDsZxCCYDDQJHSYxjWjgYiTg==
+"@cypress-design/css@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/css/-/css-1.1.0.tgz#707d6d51fb7a43be304a501fccdc08d2c134825c"
+  integrity sha512-xHLkTQNKIpKqcK0bVQBOTCISDBV+Z+HD8MyfQyNKuYRy408bwzICi+LsrSf0attsqEoE57Jp2n6VoNbNbPXHqg==
   dependencies:
     "@tailwindcss/container-queries" "^0.1.1"
     lodash "^4.17.21"

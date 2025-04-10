@@ -34,26 +34,38 @@ export interface ErrProps {
 }
 
 export default class Err {
-  @observable name = ''
-  @observable message = ''
-  @observable stack = ''
-  @observable.ref parsedStack: ParsedStackLine[] | null = null
-  @observable docsUrl = '' as string | string[]
-  @observable templateType = ''
+  name = ''
+  message = ''
+  stack = ''
+  parsedStack: ParsedStackLine[] | null = null
+  docsUrl = '' as string | string[]
+  templateType = ''
   // @ts-ignore
-  @observable.ref codeFrame: CodeFrame
-  @observable isRecovered: boolean = false
+  codeFrame: CodeFrame
+  isRecovered: boolean = false
 
   constructor (props?: Partial<ErrProps>) {
-    makeObservable(this)
+    makeObservable(this, {
+      name: observable,
+      message: observable,
+      stack: observable,
+      parsedStack: observable.ref,
+      docsUrl: observable,
+      templateType: observable,
+      codeFrame: observable.ref,
+      isRecovered: observable,
+      displayMessage: computed,
+      isCommandErr: computed,
+    })
+
     this.update(props)
   }
 
-  @computed get displayMessage () {
+  get displayMessage () {
     return _.compact([this.name, this.message]).join(': ')
   }
 
-  @computed get isCommandErr () {
+  get isCommandErr () {
     return /(AssertionError|CypressError)/.test(this.name)
   }
 
