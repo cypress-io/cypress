@@ -16,13 +16,19 @@ export interface SessionProps extends InstrumentProps {
 
 export default class Session extends Instrument {
   name: string
-  @observable status: string
-  @observable isGlobalSession: boolean = false
-  @observable tagType: string
+  status: string
+  isGlobalSession: boolean = false
+  tagType: string
 
   constructor (props: SessionProps) {
     super(props)
-    makeObservable(this)
+
+    makeObservable(this, {
+      status: observable,
+      isGlobalSession: observable,
+      tagType: observable,
+    })
+
     const { state, sessionInfo: { isGlobalSession, id, status } } = props
 
     this.isGlobalSession = isGlobalSession
