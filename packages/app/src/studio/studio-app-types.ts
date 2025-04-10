@@ -1,3 +1,5 @@
+import React from 'react'
+
 export interface StudioPanelProps {
   canAccessStudioAI: boolean
   useStudioEventManager?: StudioEventManagerShape
