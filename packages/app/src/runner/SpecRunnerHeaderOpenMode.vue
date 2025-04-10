@@ -8,9 +8,9 @@
       <button
         data-cy="playground-activator"
         :disabled="isDisabled"
-        class="bg-gray-900 border rounded-md flex h-full border-gray-800 outline-solid outline-indigo-500 transition w-[40px] duration-150 items-center justify-center hover:bg-gray-800"
+        class="bg-gray-1100 border rounded-md flex h-full border-gray-800 outline-solid outline-indigo-500 transition w-[40px] duration-150 items-center justify-center hover:bg-gray-800"
         :aria-label="t('runner.selectorPlayground.toggle')"
-        :class="[selectorPlaygroundStore.show ? 'bg-gray-800 border-gray-700' : 'bg-gray-900']"
+        :class="[selectorPlaygroundStore.show ? 'bg-gray-800 border-gray-700' : 'bg-gray-1100']"
         @click="togglePlayground"
       >
         <i-cy-crosshairs_x16 class="icon-dark-gray-300" />
