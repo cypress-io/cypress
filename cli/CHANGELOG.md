@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 14.3.1
+
+_Released 4/15/2025_
+
+**Bugfixes:**
+
+- The [`cy.press()](http://on.cypress.io/api/press) command no longer errors when used in specs subsequent to the first spec in run mode. Addresses [#31481](https://github.com/cypress-io/cypress/pull/31481).
+
 ## 14.3.0
 
 _Released 4/8/2025_
