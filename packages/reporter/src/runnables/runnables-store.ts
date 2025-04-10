@@ -47,8 +47,8 @@ type RunnableType = 'test' | 'suite'
 type TestOrSuite<T> = T extends TestProps ? TestProps : SuiteProps
 
 export class RunnablesStore {
-  @observable isReady = defaults.isReady
-  @observable runnables: RunnableArray = []
+  isReady = defaults.isReady
+  runnables: RunnableArray = []
   /**
    * Stores a list of all the runnables files where the reporter
    * has passed without any specific order.
@@ -56,10 +56,10 @@ export class RunnablesStore {
    * key: spec FilePath
    * content: RunnableArray
    */
-  @observable runnablesHistory: Record<string, RunnableArray> = {}
-  @observable totalTests: number = 0
-  @observable totalUnfilteredTests: number = 0
-  @observable testFilter: TestFilter
+  runnablesHistory: Record<string, RunnableArray> = {}
+  totalTests: number = 0
+  totalUnfilteredTests: number = 0
+  testFilter: TestFilter
 
   runningSpec: string | null = null
 
@@ -77,7 +77,16 @@ export class RunnablesStore {
   showingSnapshot = defaults.showingSnapshot
 
   constructor ({ appState, scroller }: Props) {
-    makeObservable(this)
+    makeObservable(this, {
+      isReady: observable,
+      runnables: observable,
+      runnablesHistory: observable,
+      totalTests: observable,
+      totalUnfilteredTests: observable,
+      testFilter: observable,
+      setRunningSpec: action,
+    })
+
     this.appState = appState
     this.scroller = scroller
   }
@@ -213,7 +222,6 @@ export class RunnablesStore {
     this.totalTests = 0
   }
 
-  @action
   setRunningSpec (specPath: string) {
     const previousSpec = this.runningSpec
 

@@ -1,11 +1,15 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 14.3.1
 
-_Released 4/15/2025_
+_Released 4/22/2025 (PENDING)_
 
 **Bugfixes:**
 
-- The [`cy.press()](http://on.cypress.io/api/press) command no longer errors when used in specs subsequent to the first spec in run mode. Addresses [#31481](https://github.com/cypress-io/cypress/pull/31481).
+- The [`cy.press()`](http://on.cypress.io/api/press) command no longer errors when used in specs subsequent to the first spec in run mode. Addresses [#31481](https://github.com/cypress-io/cypress/pull/31481).
+
+**Misc:**
+
+- The UI of the reporter and URL were updated to a darker gray background for better color contrast. Addressed in [#31475](https://github.com/cypress-io/cypress/pull/31475).
 
 ## 14.3.0
 
