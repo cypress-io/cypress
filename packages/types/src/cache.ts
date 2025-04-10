@@ -3,6 +3,7 @@ export interface Cache {
   PROJECT_PREFERENCES: Record<string, Preferences>
   USER: CachedUser
   COHORTS: Record<string, Cohort>
+  PROJECTS_CONFIG: Record<string, any>
 }
 
 import type { AllowedState } from './preferences'

@@ -1,5 +1,5 @@
 const api = require('./api').default
-const cache = require('../cache')
+const { cache } = require('../cache')
 
 import type { CachedUser } from '@packages/types'
 import type Bluebird from 'bluebird'
