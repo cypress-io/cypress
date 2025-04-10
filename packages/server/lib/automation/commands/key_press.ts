@@ -129,6 +129,7 @@ export async function bidiKeyPress ({ key }: KeyPressParams, client: Client, aut
 
   const needsWindowActivation = !(await hasActiveWindow(client))
 
+  // TODO: refactor for Cy15 https://github.com/cypress-io/cypress/issues/31480
   if (needsWindowActivation) {
     debug('Primary window is not currently active; attempting to activate')
     try {
