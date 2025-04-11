@@ -104,6 +104,7 @@
           v-if="shouldShowStudioPanel"
           data-cy="studio-panel"
           :can-access-studio-a-i="studioStore.canAccessStudioAI"
+          :on-studio-panel-close="handleStudioPanelClose"
         />
       </template>
     </ResizablePanels>
@@ -223,6 +224,10 @@ const {
 } = useEventManager()
 
 const studioStore = useStudioStore()
+
+const handleStudioPanelClose = () => {
+  eventManager.emit('studio:cancel', undefined)
+}
 
 const specsListWidthPreferences = computed(() => {
   return props.gql.localSettings.preferences.specListWidth ?? runnerUiStore.specListWidth
