@@ -14,7 +14,7 @@ const {
 } = require('@packages/network')
 const pkg = require('@packages/root')
 const api = require('../../../../lib/cloud/api').default
-const cache = require('../../../../lib/cache')
+const cache = require('../../../../lib/cache').cache
 const errors = require('../../../../lib/errors')
 const machineId = require('../../../../lib/cloud/machine_id')
 const Promise = require('bluebird')

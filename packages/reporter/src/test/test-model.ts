@@ -54,15 +54,33 @@ export default class Test extends Runnable {
   hooks: HookProps[]
   invocationDetails?: FileDetails
 
-  @observable attempts: Attempt[] = []
-  @observable _isOpen: boolean | null = null
-  @observable isOpenWhenActive: Boolean | null = null
-  @observable _isFinished = false
+  attempts: Attempt[] = []
+  _isOpen: boolean | null = null
+  isOpenWhenActive: Boolean | null = null
+  _isFinished = false
 
   constructor (props: TestProps, level: number, private store: RunnablesStore) {
     super(props, level)
 
-    makeObservable(this)
+    makeObservable(this, {
+      attempts: observable,
+      _isOpen: observable,
+      isOpenWhenActive: observable,
+      _isFinished: observable,
+      isLongRunning: computed,
+      isOpen: computed,
+      state: computed,
+      err: computed,
+      lastAttempt: computed,
+      hasMultipleAttempts: computed,
+      hasRetried: computed,
+      isActive: computed,
+      currentRetry: computed,
+      start: action,
+      update: action,
+      setIsOpen: action,
+      finish: action,
+    })
 
     this.invocationDetails = props.invocationDetails
 
@@ -81,13 +99,13 @@ export default class Test extends Runnable {
     this._addAttempt(props)
   }
 
-  @computed get isLongRunning () {
+  get isLongRunning () {
     return _.some(this.attempts, (attempt: Attempt) => {
       return attempt.isLongRunning
     })
   }
 
-  @computed get isOpen () {
+  get isOpen () {
     if (this._isOpen === null) {
       return Boolean(this.state === 'failed'
       || this.isLongRunning
@@ -98,34 +116,34 @@ export default class Test extends Runnable {
     return this._isOpen
   }
 
-  @computed get state () {
+  get state () {
     // Use the outerStatus of the last attempt to determine overall test status, if present,
     // as the last attempt may have 'passed', but the outerStatus may be marked as failed.
     return this.lastAttempt ? (this.lastAttempt._testOuterStatus || this.lastAttempt.state) : 'active'
   }
 
-  @computed get err () {
+  get err () {
     return this.lastAttempt ? this.lastAttempt.err : new Err({})
   }
 
-  @computed get lastAttempt () {
+  get lastAttempt () {
     return _.last(this.attempts) as Attempt
   }
 
-  @computed get hasMultipleAttempts () {
+  get hasMultipleAttempts () {
     return this.attempts.length > 1
   }
 
-  @computed get hasRetried () {
+  get hasRetried () {
     return this.state === 'passed' && this.hasMultipleAttempts
   }
 
   // TODO: make this an enum with states: 'QUEUED, ACTIVE, INACTIVE'
-  @computed get isActive (): boolean {
+  get isActive (): boolean {
     return _.some(this.attempts, { isActive: true })
   }
 
-  @computed get currentRetry () {
+  get currentRetry () {
     return this.attempts.length - 1
   }
 
@@ -153,7 +171,7 @@ export default class Test extends Runnable {
     })
   }
 
-  @action start (props: TestProps) {
+  start (props: TestProps) {
     let attempt = this.getAttemptByIndex(props.currentRetry)
 
     if (!attempt) {
@@ -163,7 +181,7 @@ export default class Test extends Runnable {
     attempt.start()
   }
 
-  @action update (props: UpdatableTestProps, cb: UpdateTestCallback) {
+  update (props: UpdatableTestProps, cb: UpdateTestCallback) {
     if (this.state === 'processing' && !props.state) {
       cb()
     }
@@ -187,7 +205,7 @@ export default class Test extends Runnable {
     cb()
   }
 
-  @action setIsOpen (isOpen: boolean) {
+  setIsOpen (isOpen: boolean) {
     this._isOpen = isOpen
   }
 
@@ -204,7 +222,7 @@ export default class Test extends Runnable {
     }
   }
 
-  @action finish (props: UpdatableTestProps, isInteractive: boolean) {
+  finish (props: UpdatableTestProps, isInteractive: boolean) {
     this._isFinished = !(props.retries && props.currentRetry) || props.currentRetry >= props.retries
 
     this._withAttempt(props.currentRetry ?? 0, (attempt: Attempt) => {

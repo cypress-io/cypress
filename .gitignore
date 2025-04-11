@@ -399,3 +399,6 @@ system-tests/lib/validations
 
 .nx/cache
 .nx/workspace-data
+
+# IDE files
+.cursor

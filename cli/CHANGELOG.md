@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 14.3.1
+
+_Released 4/22/2025 (PENDING)_
+
+**Misc:**
+
+- The UI of the reporter and URL were updated to a darker gray background for better color contrast. Addressed in [#31475](https://github.com/cypress-io/cypress/pull/31475).
+
 ## 14.3.0
 
 _Released 4/8/2025_
