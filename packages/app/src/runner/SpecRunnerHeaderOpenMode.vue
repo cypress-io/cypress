@@ -88,6 +88,7 @@
           </span>
         </Tag>
       </div>
+      <StudioButton v-if="!studioStore.isActive" />
     </div>
 
     <SelectorPlayground
@@ -136,6 +137,7 @@ import SpecRunnerDropdown from './SpecRunnerDropdown.vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import { useStudioStore } from '../store/studio-store'
 import { useExternalLink } from '@cy/gql-components/useExternalLink'
+import StudioButton from '../studio/StudioButton.vue'
 
 gql`
 fragment SpecRunnerHeader on CurrentProject {
