@@ -19,6 +19,7 @@ exports['e2e record passing passes 1'] = `
                                                                                                     
   Running:  record_error.cy.js                                                              (1 of 4)
   Estimated: X second(s)
+Still waiting to connect to Chrome, retrying in X second(s)(attempt 18/62)
 
 Oops...we found an error preparing this test file:
 
@@ -1169,7 +1170,7 @@ exports['e2e record api interaction errors create instance 500 does not proceed 
 
 We encountered an unexpected error communicating with our servers.
 
-Request failed with status code 500
+StatusCodeError: 500 - "Internal Server Error"
 
 Because you passed the --parallel flag, this run cannot proceed since it requires a valid response from our servers.
 
@@ -1195,7 +1196,7 @@ exports['e2e record api interaction errors create instance 500 without paralleli
 
 We encountered an unexpected error communicating with our servers.
 
-Request failed with status code 500
+StatusCodeError: 500 - "Internal Server Error"
 
 Because you passed the --record flag, this run cannot proceed since it requires a valid response from our servers.
 
@@ -1413,7 +1414,7 @@ exports['e2e record api interaction errors create instance errors and exits on c
 
 We encountered an unexpected error communicating with our servers.
 
-Request failed with status code 500
+StatusCodeError: 500 - "Internal Server Error"
 
 Because you passed the --record flag, this run cannot proceed since it requires a valid response from our servers.
 
@@ -4420,9 +4421,9 @@ We will retry 1 more time in X second(s)...
 
 We encountered an unexpected error communicating with our servers.
 
-Request failed with status code 500
+StatusCodeError: 500 - "Internal Server Error"
 
-We will retry 2 more times in ...
+We will retry 3 more times in X second(s)...
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
