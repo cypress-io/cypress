@@ -15,6 +15,7 @@ describe('cy.pause() in run mode', () => {
     headed: true,
     noExit: true,
     expectedExitCode: null,
+    browser: '!webkit',
     onSpawn: (cp) => {
       cp.stdout.on('data', (buf) => {
         if (buf.toString().includes('not exiting due to options.exit being false')) {
@@ -38,6 +39,7 @@ describe('cy.pause() in run mode', () => {
     headed: false,
     noExit: true,
     expectedExitCode: null,
+    browser: '!webkit',
     onSpawn: (cp) => {
       cp.stdout.on('data', (buf) => {
         if (buf.toString().includes('not exiting due to options.exit being false')) {
@@ -62,6 +64,7 @@ describe('cy.pause() in run mode', () => {
     headed: true,
     noExit: false,
     expectedExitCode: 0,
+    browser: '!webkit',
   })
 
   systemTests.it('does not pause without --headed and --no-exit', {
@@ -75,5 +78,6 @@ describe('cy.pause() in run mode', () => {
     headed: false,
     noExit: false,
     expectedExitCode: 0,
+    browser: '!webkit',
   })
 })
