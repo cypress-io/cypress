@@ -26,6 +26,7 @@ import type { AfterSpecDurations } from '@packages/types'
 import { PUBLIC_KEY_VERSION } from '../constants'
 
 // axios implementation disabled until proxy issues can be diagnosed/fixed
+// TODO: https://github.com/cypress-io/cypress/issues/31490
 //import { createInstance } from './create_instance'
 import type { CreateInstanceRequestBody, CreateInstanceResponse } from './create_instance'
 
