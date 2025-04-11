@@ -25,7 +25,8 @@ import type { ProjectBase } from '../../project-base'
 import type { AfterSpecDurations } from '@packages/types'
 import { PUBLIC_KEY_VERSION } from '../constants'
 
-import { createInstance } from './create_instance'
+// axios implementation disabled until proxy issues can be diagnosed/fixed
+//import { createInstance } from './create_instance'
 import { transformError } from './axios_middleware/transform_error'
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
@@ -443,7 +444,33 @@ export default {
     .catch(tagError)
   },
 
-  createInstance,
+  createInstance (options) {
+    const { runId, timeout } = options
+
+    const body = _.pick(options, [
+      'spec',
+      'groupId',
+      'machineId',
+      'platform',
+    ])
+
+    return retryWithBackoff((attemptIndex) => {
+      return rp.post({
+        body,
+        url: recordRoutes.instances(runId),
+        json: true,
+        encrypt: preflightResult.encrypt,
+        timeout: timeout ?? SIXTY_SECONDS,
+        headers: {
+          'x-route-version': '5',
+          'x-cypress-run-id': runId,
+          'x-cypress-request-attempt': attemptIndex,
+        },
+      })
+      .catch(RequestErrors.StatusCodeError, transformError)
+      .catch(tagError)
+    })
+  },
 
   postInstanceTests (options) {
     const { instanceId, runId, timeout, ...body } = options
