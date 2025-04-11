@@ -112,12 +112,6 @@ async function hasActiveWindow (client: Client) {
   }
 }
 
-async function activateTopWindow (client: Client, autContext: string): Promise<void> {
-  const { contexts: [{ context: topLevelContext }] } = await client.browsingContextGetTree({})
-
-  await client.switchToWindow(topLevelContext)
-}
-
 export async function bidiKeyPress ({ key }: KeyPressParams, client: Client, autContext: string, idSuffix?: string): Promise<void> {
   const value = BIDI_VALUE[key]
 
@@ -131,7 +125,9 @@ export async function bidiKeyPress ({ key }: KeyPressParams, client: Client, aut
   if (needsWindowActivation) {
     debug('Primary window is not currently active; attempting to activate')
     try {
-      await activateTopWindow(client, autContext)
+      const { contexts: [{ context: topLevelContext }] } = await client.browsingContextGetTree({})
+
+      await client.switchToWindow(topLevelContext)
     } catch (e) {
       debug('Error while attempting to activate main browser tab:', e)
       const err = new Error(`Unable to activate main browser tab: ${e?.message || 'Unknown Error Occurred'}. DEBUG namespace cypress:server:automation:command:keypress for more information.`)
