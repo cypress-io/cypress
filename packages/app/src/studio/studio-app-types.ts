@@ -1,5 +1,6 @@
 export interface StudioPanelProps {
   canAccessStudioAI: boolean
+  onStudioPanelClose: () => void
 }
 
 export type StudioPanelShape = (props: StudioPanelProps) => JSX.Element
