@@ -5,7 +5,7 @@ import { isAxiosError } from 'axios'
 
 const MAX_RETRIES = 3
 
-interface CreateInstanceResponse {
+export interface CreateInstanceResponse {
   spec: string | null
   instanceId: string | null
   claimedInstances: number
@@ -13,7 +13,7 @@ interface CreateInstanceResponse {
   totalInstances: number
 }
 
-interface CreateInstanceRequestBody {
+export interface CreateInstanceRequestBody {
   spec: string | null
   groupId: string
   machineId: string

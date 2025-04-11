@@ -27,15 +27,19 @@ import { PUBLIC_KEY_VERSION } from '../constants'
 
 // axios implementation disabled until proxy issues can be diagnosed/fixed
 //import { createInstance } from './create_instance'
+import type { CreateInstanceRequestBody, CreateInstanceResponse } from './create_instance'
+
 import { transformError } from './axios_middleware/transform_error'
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
 const TWO_MINUTES = humanInterval('2 minutes')
 
-const DELAYS: number[] = process.env.API_RETRY_INTERVALS
-  ? process.env.API_RETRY_INTERVALS.split(',').map(_.toNumber)
-  : [THIRTY_SECONDS, SIXTY_SECONDS, TWO_MINUTES]
+function retryDelays (): number[] {
+  return process.env.API_RETRY_INTERVALS
+    ? process.env.API_RETRY_INTERVALS.split(',').map(_.toNumber)
+    : [THIRTY_SECONDS, SIXTY_SECONDS, TWO_MINUTES]
+}
 
 const runnerCapabilities = {
   'dynamicSpecsInSerialMode': true,
@@ -182,16 +186,18 @@ const retryWithBackoff = (fn) => {
       throw err.cause
     })
     .catch(isRetriableError, (err) => {
-      if (retryIndex >= DELAYS.length) {
+      const delays = retryDelays()
+
+      if (retryIndex >= delays.length) {
         throw err
       }
 
-      const delayMs = DELAYS[retryIndex]
+      const delayMs = delays[retryIndex]
 
       errors.warning(
         'CLOUD_API_RESPONSE_FAILED_RETRYING', {
           delayMs,
-          tries: DELAYS.length - retryIndex,
+          tries: delays.length - retryIndex,
           response: err,
         },
       )
@@ -444,16 +450,7 @@ export default {
     .catch(tagError)
   },
 
-  createInstance (options) {
-    const { runId, timeout } = options
-
-    const body = _.pick(options, [
-      'spec',
-      'groupId',
-      'machineId',
-      'platform',
-    ])
-
+  createInstance (runId: string, body: CreateInstanceRequestBody, timeout: number = 0): Bluebird<CreateInstanceResponse> {
     return retryWithBackoff((attemptIndex) => {
       return rp.post({
         body,
@@ -469,7 +466,7 @@ export default {
       })
       .catch(RequestErrors.StatusCodeError, transformError)
       .catch(tagError)
-    })
+    }) as Bluebird<CreateInstanceResponse>
   },
 
   postInstanceTests (options) {
