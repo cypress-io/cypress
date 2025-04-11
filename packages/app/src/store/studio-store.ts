@@ -282,6 +282,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       this._hasStarted = false
       this._currentId = 1
       this.isFailed = false
+      this.newTestMode = false
 
       this._maybeResetRunnables()
     },
