@@ -31,11 +31,10 @@ const studioStore = useStudioStore()
 const eventManager = getEventManager()
 
 function toggleStudioPanel () {
-  if (studioStore.isActive) {
+  if (studioStore.isOpen) {
     eventManager.emit('studio:cancel')
   } else {
-    // TODO mabel handle not opening the studio url prompt
-    eventManager.emit('studio:init:suite', 'r1')
+    eventManager.emit('studio:init:new:test', 'r1')
   }
 }
 </script>

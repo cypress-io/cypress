@@ -121,6 +121,7 @@ interface StudioRecorderState {
   _currentId: number
 
   canAccessStudioAI: boolean
+  newTestMode: boolean
 }
 
 export const useStudioStore = defineStore('studioRecorder', {
@@ -136,10 +137,15 @@ export const useStudioStore = defineStore('studioRecorder', {
       _hasStarted: false,
       _currentId: 1,
       canAccessStudioAI: false,
+      newTestMode: false,
     }
   },
 
   actions: {
+    setNewTestMode (newTestMode: boolean) {
+      this.newTestMode = newTestMode
+    },
+
     setTestId (testId: string) {
       this.testId = testId
       this._updateUrlParams(['testId', 'suiteId'])

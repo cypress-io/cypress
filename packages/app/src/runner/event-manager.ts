@@ -354,6 +354,21 @@ export class EventManager {
       })
     })
 
+    this.localBus.on('studio:init:new:test', (suiteId) => {
+      this.studioStore.setSuiteId(suiteId)
+      this.studioStore.setNewTestMode(true)
+
+      this.ws.emit('studio:init', ({ canAccessStudioAI, error }) => {
+        if (error) {
+          // eslint-disable-next-line no-console
+          console.error(error)
+        }
+
+        this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
+        studioInit()
+      })
+    })
+
     this.localBus.on('studio:cancel', () => {
       this.ws.emit('studio:destroy', ({ error }) => {
         if (error) {
