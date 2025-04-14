@@ -12,7 +12,7 @@ global.sinon = require('sinon')
 const _ = require('lodash')
 const Promise = require('bluebird')
 const path = require('path')
-const cache = require(`@packages/server/lib/cache`)
+const cache = require('@packages/server/lib/cache').cache
 
 require('chai')
 .use(require('@cypress/sinon-chai'))
@@ -96,7 +96,7 @@ before(function () {
 
 // appData.ensure()
 
-beforeEach(function () {
+beforeEach(async function () {
   this.originalEnv = originalEnv
 
   nock.disableNetConnect()
@@ -104,7 +104,7 @@ beforeEach(function () {
 
   // always clean up the cache
   // before each test
-  return cache.remove()
+  await cache.remove()
 })
 
 afterEach(() => {
