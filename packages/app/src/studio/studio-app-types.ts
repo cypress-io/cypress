@@ -1,5 +1,3 @@
-import type { RefObject } from 'react'
-
 export interface StudioPanelProps {
   canAccessStudioAI: boolean
   useStudioEventManager?: StudioEventManagerShape
@@ -27,7 +25,7 @@ export type StudioEventManagerShape = (props: StudioEventManagerProps) => {
 
 export interface StudioAIStreamProps {
   canAccessStudioAI: boolean
-  AIOutputRef: RefObject<HTMLTextAreaElement>
+  AIOutputRef: { current: HTMLTextAreaElement | null }
   runnerStatus: RunnerStatus
 }
 
