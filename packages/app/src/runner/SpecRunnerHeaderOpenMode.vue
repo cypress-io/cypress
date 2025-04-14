@@ -2,15 +2,15 @@
   <div
     id="spec-runner-header"
     ref="autHeaderEl"
-    class="h-full bg-gray-1000 border-l-[1px] border-gray-900 min-h-[64px] text-[14px]"
+    class="h-full bg-gray-1100 border-l-[1px] border-gray-900 min-h-[64px] text-[14px]"
   >
     <div class="flex flex-wrap grow p-[16px] gap-[12px] justify-end h-[64px]">
       <button
         data-cy="playground-activator"
         :disabled="isDisabled"
-        class="bg-gray-900 border rounded-md flex h-full border-gray-800 outline-solid outline-indigo-500 transition w-[40px] duration-150 items-center justify-center hover:bg-gray-800"
+        class="bg-gray-1100 border rounded-md flex h-full border-gray-800 outline-solid outline-indigo-500 transition w-[40px] duration-150 items-center justify-center hover:bg-gray-800"
         :aria-label="t('runner.selectorPlayground.toggle')"
-        :class="[selectorPlaygroundStore.show ? 'bg-gray-800 border-gray-700' : 'bg-gray-900']"
+        :class="[selectorPlaygroundStore.show ? 'bg-gray-800 border-gray-700' : 'bg-gray-1100']"
         @click="togglePlayground"
       >
         <i-cy-crosshairs_x16 class="icon-dark-gray-300" />

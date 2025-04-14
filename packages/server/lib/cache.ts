@@ -1,10 +1,15 @@
-const _ = require('lodash')
-const Promise = require('bluebird')
-const { globalPubSub } = require('@packages/data-context')
+import _ from 'lodash'
+import Promise from 'bluebird'
+import { globalPubSub } from '@packages/data-context'
+import { fs } from './util/fs'
+import appData from './util/app_data'
+import FileUtil from './util/file'
+import type { Cache, CachedUser, Preferences, Cohort } from '@packages/types'
 
-const { fs } = require('./util/fs')
-const appData = require('./util/app_data')
-const FileUtil = require('./util/file')
+interface Transaction {
+  get: <T = Cache>(key?: string, defaultValue?: T) => Promise<T>
+  set: (key: string | Partial<Cache>, value?: any) => Promise<void>
+}
 
 const fileUtil = new FileUtil({
   path: appData.path('cache'),
@@ -14,34 +19,16 @@ globalPubSub.on('test:cleanup', () => {
   fileUtil.__resetForTest()
 })
 
-const convertProjectsToArray = function (obj) {
-  // if our project structure is not
-  // an array then its legacy and we
-  // need to convert it
-  if (!_.isArray(obj.PROJECTS)) {
-    obj.PROJECTS = _.chain(obj.PROJECTS).values().map('PATH').compact().value()
-
-    return obj
-  }
-}
-
-const renameSessionToken = function (obj) {
-  let st
-
-  if (obj.USER && (st = obj.USER.session_token)) {
-    delete obj.USER.session_token
-    obj.USER.sessionToken = st
-
-    return obj
-  }
-}
-
-module.exports = {
+export const cache = {
   path: fileUtil.path,
 
-  defaults () {
+  defaults (): Cache {
     return {
-      USER: {},
+      USER: {
+        authToken: '',
+        name: '',
+        email: '',
+      },
       PROJECTS: [],
       PROJECT_PREFERENCES: {},
       PROJECTS_CONFIG: {},
@@ -49,55 +36,35 @@ module.exports = {
     }
   },
 
-  _applyRewriteRules (obj = {}) {
-    return _.reduce([convertProjectsToArray, renameSessionToken], (memo, fn) => {
-      let ret
-
-      ret = fn(memo)
-
-      if (ret) {
-        return ret
-      }
-
-      return memo
-    }
-    , _.cloneDeep(obj))
-  },
-
-  read () {
+  _read (): Promise<Cache> {
     return fileUtil.get().then((contents) => {
       return _.defaults(contents, this.defaults())
     })
   },
 
-  write (obj = {}) {
-    return fileUtil.set(obj).return(obj)
-  },
-
-  _getProjects (tx) {
+  _getProjects (tx: Transaction): Promise<string[]> {
     return tx.get('PROJECTS', [])
   },
 
-  _removeProjects (tx, projects, paths) {
-    // normalize paths in array
-    projects = _.without(projects, ...[].concat(paths))
+  _removeProjects (tx: Transaction, projects: string[], paths: string | string[]): Promise<void> {
+    const pathsArray = Array.isArray(paths) ? paths : [paths]
+
+    projects = _.without(projects, ...pathsArray)
 
     return tx.set({ PROJECTS: projects })
   },
 
-  /**
-   * @return {Promise<string[]>}
-   */
-  getProjectRoots () {
-    return fileUtil.transaction((tx) => {
+  getProjectRoots (): Promise<string[]> {
+    return fileUtil.transaction((tx: Transaction) => {
       return this._getProjects(tx).then((projects) => {
-        const pathsToRemove = Promise.reduce(projects, (memo, path) => {
+        const pathsToRemove = Promise.reduce(projects, (memo: string[], path) => {
           return fs.statAsync(path)
           .catch(() => {
-            return memo.push(path)
+            memo.push(path)
+
+            return memo
           }).return(memo)
-        }
-        , [])
+        }, [])
 
         return pathsToRemove.then((removedPaths) => {
           return this._removeProjects(tx, projects, removedPaths)
@@ -108,16 +75,16 @@ module.exports = {
     })
   },
 
-  removeProject (path) {
-    return fileUtil.transaction((tx) => {
+  removeProject (path: string): Promise<void> {
+    return fileUtil.transaction((tx: Transaction) => {
       return this._getProjects(tx).then((projects) => {
         return this._removeProjects(tx, projects, path)
       })
     })
   },
 
-  insertProject (path) {
-    return fileUtil.transaction((tx) => {
+  insertProject (path: string): Promise<void> {
+    return fileUtil.transaction((tx: Transaction) => {
       return this._getProjects(tx).then((projects) => {
         // projects are sorted by most recently used, so add a project to
         // the start or move it to the start if it already exists
@@ -136,28 +103,28 @@ module.exports = {
     })
   },
 
-  getUser () {
+  getUser (): Promise<CachedUser> {
     return fileUtil.get('USER', {})
   },
 
-  setUser (user) {
+  setUser (user: CachedUser): Promise<void> {
     return fileUtil.set({ USER: user })
   },
 
-  removeUser () {
+  removeUser (): Promise<void> {
     return fileUtil.set({ USER: {} })
   },
 
-  removeLatestProjects () {
+  removeLatestProjects (): Promise<void> {
     return fileUtil.set({ PROJECTS: [] })
   },
 
-  getProjectPreferences () {
+  getProjectPreferences (): Promise<Record<string, Preferences>> {
     return fileUtil.get('PROJECT_PREFERENCES', {})
   },
 
-  insertProjectPreferences (projectTitle, projectPreferences) {
-    return fileUtil.transaction((tx) => {
+  insertProjectPreferences (projectTitle: string, projectPreferences: Preferences): Promise<void> {
+    return fileUtil.transaction((tx: Transaction) => {
       return tx.get('PROJECT_PREFERENCES', {}).then((preferences) => {
         return tx.set('PROJECT_PREFERENCES', {
           ...preferences,
@@ -170,11 +137,11 @@ module.exports = {
     })
   },
 
-  removeAllProjectPreferences () {
+  removeAllProjectPreferences (): Promise<void> {
     return fileUtil.set({ PROJECT_PREFERENCES: {} })
   },
 
-  removeProjectPreferences (projectTitle) {
+  removeProjectPreferences (projectTitle: string): Promise<void> {
     const preferences = fileUtil.get('PROJECT_PREFERENCES', {})
 
     const updatedPreferences = {
@@ -185,7 +152,7 @@ module.exports = {
     return fileUtil.set({ PROJECT_PREFERENCES: updatedPreferences })
   },
 
-  getCohorts () {
+  getCohorts (): Promise<Record<string, Cohort>> {
     return fileUtil.get('COHORTS', {}).then((cohorts) => {
       Object.keys(cohorts).forEach((key) => {
         cohorts[key].name = key
@@ -195,8 +162,8 @@ module.exports = {
     })
   },
 
-  insertCohort (cohort) {
-    return fileUtil.transaction((tx) => {
+  insertCohort (cohort: Cohort): Promise<void> {
+    return fileUtil.transaction((tx: Transaction) => {
       return tx.get('COHORTS', {}).then((cohorts) => {
         return tx.set('COHORTS', {
           ...cohorts,
@@ -208,11 +175,10 @@ module.exports = {
     })
   },
 
-  remove () {
+  remove (): Promise<void> {
     return fileUtil.remove()
   },
 
   // for testing purposes
-
-  __get: fileUtil.get.bind(fileUtil),
+  __get: fileUtil.get.bind(fileUtil) as <T = Cache>(key?: string, defaultValue?: T) => Promise<T>,
 }
