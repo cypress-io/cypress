@@ -21,10 +21,6 @@ class StudioServer implements StudioServerShape {
   setProtocolDb (db: Database.Database): void {
     // This is a test implementation that does nothing
   }
-
-  getProtocolDb (): Database.Database {
-    return {} as Database.Database
-  }
 }
 
 const studioServerDefault: StudioServerDefaultShape = {

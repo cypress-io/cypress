@@ -35,7 +35,6 @@ export interface StudioServerShape {
   initializeRoutes(router: Router): void
   canAccessStudioAI(browser: Cypress.Browser): Promise<boolean>
   setProtocolDb(database: Database.Database): void
-  getProtocolDb(): Database.Database | undefined
   addSocketListeners(socket: Socket): void
 }
 
