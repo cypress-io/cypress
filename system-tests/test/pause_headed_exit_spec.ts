@@ -1,6 +1,9 @@
 import systemTests from '../lib/system-tests'
 import childProcess from 'child_process'
 
+// these system tests are skipped in webkit due to flake.
+// TODO: https://github.com/cypress-io/cypress/issues/31503
+
 describe('cy.pause() in run mode', () => {
   systemTests.setup()
 
