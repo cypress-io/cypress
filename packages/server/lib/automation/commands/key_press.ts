@@ -104,6 +104,14 @@ export const BIDI_VALUE: KeyCodeLookup = {
   'Tab': '\uE004',
 }
 
+async function getActiveWindow (client: Client) {
+  try {
+    return await client.getWindowHandle()
+  } catch (e) {
+    return undefined
+  }
+}
+
 export async function bidiKeyPress ({ key }: KeyPressParams, client: Client, autContext: string, idSuffix?: string): Promise<void> {
   const value = BIDI_VALUE[key]
 
@@ -111,17 +119,41 @@ export async function bidiKeyPress ({ key }: KeyPressParams, client: Client, aut
     throw new InvalidKeyError(key)
   }
 
-  const autFrameElement = await client.findElement('css selector', 'iframe.aut-iframe')
-  const activeElement = await client.getActiveElement()
+  const activeWindow = await getActiveWindow(client)
+  const { contexts: [{ context: topLevelContext }] } = await client.browsingContextGetTree({})
 
-  if (!isEqual(autFrameElement, activeElement)) {
-    await client.scriptEvaluate(
-      {
-        expression: `window.focus()`,
-        target: { context: autContext },
-        awaitPromise: false,
-      },
-    )
+  // TODO: refactor for Cy15 https://github.com/cypress-io/cypress/issues/31480
+  if (activeWindow !== topLevelContext) {
+    debug('Primary window is not currently active; attempting to activate')
+    try {
+      await client.switchToWindow(topLevelContext)
+    } catch (e) {
+      debug('Error while attempting to activate main browser tab:', e)
+      const err = new Error(`Unable to activate main browser tab: ${e?.message || 'Unknown Error Occurred'}. DEBUG namespace cypress:server:automation:command:keypress for more information.`)
+
+      throw err
+    }
+  }
+
+  try {
+    const autFrameElement = await client.findElement('css selector', 'iframe.aut-iframe')
+    const activeElement = await client.getActiveElement()
+
+    if (!isEqual(autFrameElement, activeElement)) {
+      debug('aut iframe is not currently focused; focusing aut iframe: ', autContext)
+      await client.scriptEvaluate(
+        {
+          expression: `window.focus()`,
+          target: { context: autContext },
+          awaitPromise: false,
+        },
+      )
+    }
+  } catch (e) {
+    debug('Error occurred during aut frame focus detection:', e)
+    const err = new Error(`Unable to focus the AUT iframe: ${e?.message || 'Unknown Error Occurred'}. DEBUG namespace cypress:server:automation:command:keypress for more information.`)
+
+    throw err
   }
 
   try {
@@ -138,6 +170,8 @@ export async function bidiKeyPress ({ key }: KeyPressParams, client: Client, aut
     })
   } catch (e) {
     debug(e)
-    throw e
+    const err = new Error(`Unable to perform key press command for '${key}' key: ${e?.message || 'Unknown Error Occurred'}. DEBUG namespace cypress:server:automation:command:keypress for more information.`)
+
+    throw err
   }
 }
