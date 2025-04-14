@@ -261,6 +261,28 @@ describe('key:press automation command', () => {
       })
     })
 
+    describe('when webdriver classic has the top level context as the active window', () => {
+      beforeEach(() => {
+        client.getWindowHandle.resolves(topLevelContext)
+      })
+
+      it('does not activate the top level context window', async () => {
+        await bidiKeyPress({ key }, client as WebdriverClient, autContext, 'idSuffix')
+        expect(client.switchToWindow).not.to.have.been.called
+      })
+    })
+
+    describe('when webdriver classic has a different window than the top level context as the active window', () => {
+      beforeEach(() => {
+        client.getWindowHandle.resolves('fa54442b-bc42-45fa-9996-88b7fd066211')
+      })
+
+      it('activates the top level context window', async () => {
+        await bidiKeyPress({ key }, client as WebdriverClient, autContext, 'idSuffix')
+        expect(client.switchToWindow).to.have.been.calledWith(topLevelContext)
+      })
+    })
+
     it('calls client.inputPerformActions with a keydown and keyup action', async () => {
       client.getWindowHandle.resolves(topLevelContext)
       client.findElement.withArgs('css selector ', 'iframe.aut-iframe').resolves(iframeElement)

@@ -104,11 +104,11 @@ export const BIDI_VALUE: KeyCodeLookup = {
   'Tab': '\uE004',
 }
 
-async function hasActiveWindow (client: Client) {
+async function getActiveWindow (client: Client) {
   try {
-    return !!(await client.getWindowHandle())
+    return await client.getWindowHandle()
   } catch (e) {
-    return false
+    return undefined
   }
 }
 
@@ -119,14 +119,13 @@ export async function bidiKeyPress ({ key }: KeyPressParams, client: Client, aut
     throw new InvalidKeyError(key)
   }
 
-  const needsWindowActivation = !(await hasActiveWindow(client))
+  const activeWindow = await getActiveWindow(client)
+  const { contexts: [{ context: topLevelContext }] } = await client.browsingContextGetTree({})
 
   // TODO: refactor for Cy15 https://github.com/cypress-io/cypress/issues/31480
-  if (needsWindowActivation) {
+  if (activeWindow !== topLevelContext) {
     debug('Primary window is not currently active; attempting to activate')
     try {
-      const { contexts: [{ context: topLevelContext }] } = await client.browsingContextGetTree({})
-
       await client.switchToWindow(topLevelContext)
     } catch (e) {
       debug('Error while attempting to activate main browser tab:', e)
