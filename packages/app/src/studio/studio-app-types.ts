@@ -24,7 +24,7 @@ export type StudioEventManagerShape = (
 
 export interface StudioAIStreamProps {
   canAccessStudioAI: boolean
-  AIOutputRef: React.RefObject<HTMLTextAreaElement>
+  AIOutputRef: { current: HTMLTextAreaElement | null }
   runnerStatus: RunnerStatus
 }
 
