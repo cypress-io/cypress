@@ -1,6 +1,5 @@
 import debugLib from 'debug'
 import type { Configuration as WebpackDevServer5Configuration } from 'webpack-dev-server'
-import type { Configuration as WebpackDevServer4Configuration } from 'webpack-dev-server-4'
 import type { WebpackDevServerConfig } from './devServer'
 import type { SourceRelativeWebpackResult } from './helpers/sourceRelativeWebpackModules'
 import { makeWebpackConfig } from './makeWebpackConfig'
@@ -51,12 +50,6 @@ export async function createWebpackDevServer (
     return webpackDevServer5(config, webpackCompiler, finalWebpackConfig)
   }
 
-  if (webpackDevServerMajorVersion === 4) {
-    debug('using webpack-dev-server v4')
-
-    return webpackDevServer4(config, webpackCompiler, finalWebpackConfig)
-  }
-
   throw new Error(`Unsupported webpackDevServer version ${webpackDevServerMajorVersion}`)
 }
 
@@ -88,36 +81,6 @@ function webpackDevServer5 (
   const server = new WebpackDevServer(webpackDevServerConfig, compiler)
 
   debug(server)
-
-  return {
-    server,
-    compiler,
-  }
-}
-
-function webpackDevServer4 (
-  config: CreateFinalWebpackConfig,
-  compiler: object,
-  finalWebpackConfig: Record<string, any>,
-) {
-  const { devServerConfig: { cypressConfig: { devServerPublicPathRoute } } } = config
-  const isOpenMode = !config.devServerConfig.cypressConfig.isTextTerminal
-  const WebpackDevServer = config.sourceWebpackModulesResult.webpackDevServer.module
-  const webpackDevServerConfig: WebpackDevServer4Configuration = {
-    host: '127.0.0.1',
-    port: 'auto',
-    // @ts-ignore
-    ...finalWebpackConfig?.devServer,
-    devMiddleware: {
-      publicPath: devServerPublicPathRoute,
-      stats: finalWebpackConfig.stats ?? 'minimal',
-    },
-    hot: false,
-    // Only enable file watching & reload when executing tests in `open` mode
-    liveReload: isOpenMode,
-  }
-
-  const server = new WebpackDevServer(webpackDevServerConfig, compiler)
 
   return {
     server,

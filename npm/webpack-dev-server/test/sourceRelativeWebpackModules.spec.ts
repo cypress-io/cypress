@@ -18,16 +18,6 @@ const WEBPACK_REACT: Partial<Record<ProjectDirs[number], {
   webpackDevServer: number
   htmlWebpackPlugin: number
 }>> = {
-  'webpack4_wds4-react': {
-    webpack: 4,
-    webpackDevServer: 4,
-    htmlWebpackPlugin: 4,
-  },
-  'webpack5_wds4-react': {
-    webpack: 5,
-    webpackDevServer: 4,
-    htmlWebpackPlugin: 5,
-  },
   'webpack5_wds5-react': {
     webpack: 5,
     webpackDevServer: 5,

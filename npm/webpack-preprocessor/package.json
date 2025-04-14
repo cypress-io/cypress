@@ -47,8 +47,8 @@
   "peerDependencies": {
     "@babel/core": "^7.25.2",
     "@babel/preset-env": "^7.25.3",
-    "babel-loader": "^8.3 || ^9 || ^10",
-    "webpack": "^4 || ^5"
+    "babel-loader": "^9 || ^10",
+    "webpack": "^5"
   },
   "files": [
     "dist"

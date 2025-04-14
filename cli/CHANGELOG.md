@@ -9,6 +9,8 @@ _Released 07/01/2025 (PENDING)_
 - Removed support for Node.js 18 and Node.js 23. Addresses [#31302](https://github.com/cypress-io/cypress/issues/31302).
 - Removed support for [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol) with the [firefox](https://www.mozilla.org/) browser. Addresses [#31189](https://github.com/cypress-io/cypress/issues/31189).
 - The Cypress configuration wizard for Component Testing supports TypeScript 5.0 or greater. Addresses [#31187](https://github.com/cypress-io/cypress/issues/31187).
+- `@cypress/webpack-dev-server` and `@cypress/webpack-preprocessor` no longer support `webpack` version 4. Addresses [#31344](https://github.com/cypress-io/cypress/issues/31344). If you still need to use `webpack` version 4, please see our [migration guide](https://docs.cypress.io/app/references/migration-guide#Migrating-to-Cypress-150).
+- `@cypress/webpack-dev-server` no longer supports `webpack-dev-server` version 4. Addresses [#31605](https://github.com/cypress-io/cypress/issues/31605). If you still need to use `webpack-dev-server` version 4, please see our [migration guide](https://docs.cypress.io/app/references/migration-guide#Migrating-to-Cypress-150).
 
 **Features:**
 

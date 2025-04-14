@@ -59,7 +59,7 @@
     "typescript": "~5.4.5"
   },
   "peerDependencies": {
-    "@cypress/webpack-preprocessor": "^5.4.4"
+    "@cypress/webpack-preprocessor": "^6.0.4"
   },
   "files": [
     "index.js",

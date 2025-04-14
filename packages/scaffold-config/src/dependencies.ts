@@ -4,7 +4,7 @@ export const WIZARD_DEPENDENCY_WEBPACK = {
   package: 'webpack',
   installer: 'webpack',
   description: 'Webpack is a module bundler',
-  minVersion: '^4.0.0 || ^5.0.0',
+  minVersion: '^5.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_VUE_3 = {

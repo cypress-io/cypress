@@ -418,7 +418,7 @@ describe('resolveComponentFrameworkDefinition', () => {
 
     fakeDepsInNodeModules(projectRoot, [
       { dependency: 'solid-js', version: '1.0.0' },
-      { dependency: 'webpack', version: '4.0.0' },
+      { dependency: 'webpack', version: '5.0.0' },
     ])
 
     const result = resolveComponentFrameworkDefinition(solidJs)
@@ -431,7 +431,7 @@ describe('resolveComponentFrameworkDefinition', () => {
       },
       {
         dependency: WIZARD_DEPENDENCY_WEBPACK,
-        detectedVersion: '4.0.0',
+        detectedVersion: '5.0.0',
         satisfied: true,
       },
     ])

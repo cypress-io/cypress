@@ -51,7 +51,6 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
     'node_modules/find-up/index.js',
     'node_modules/webpack/lib/webpack.js',
     'node_modules/webpack-dev-server/lib/Server.js',
-    'node_modules/html-webpack-plugin-4/index.js',
     'node_modules/html-webpack-plugin-5/index.js',
     'node_modules/mocha-7.2.0/index.js',
     'packages/server/node_modules/webdriver/build/index.js',

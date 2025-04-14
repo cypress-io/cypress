@@ -1,0 +1,1 @@
+NOTE: This project should NOT work as @cypress/webpack-dev-server v5 (Cypress v15) no longer works with webpack-dev-server version 4
