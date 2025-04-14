@@ -1,5 +1,8 @@
 <template>
-  <div class="loading-studio-panel border-l border-gray-900 h-screen flex flex-col">
+  <div
+    class="loading-studio-panel border-l border-gray-900 h-screen flex flex-col"
+    data-cy="loading-studio-panel"
+  >
     <header class="border-b border-gray-800 p-4">
       <div class="flex items-center justify-between">
         <div class="flex items-center">

@@ -1,7 +1,10 @@
 <template>
-  <div className="flex items-center">
+  <div
+    className="flex items-center"
+  >
     <button
       className="flex items-center gap-2 px-4 py-2 bg-transparent border border-gray-700 rounded text-gray-500 hover:bg-gray-800"
+      data-cy="studio-button"
       @click="toggleStudioPanel"
     >
       <IconMenuExpandRight
