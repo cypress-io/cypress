@@ -1,5 +1,4 @@
-import type { StudioServerShape, StudioServerDefaultShape, StudioBrowser } from '@packages/types'
-import type Database from 'better-sqlite3'
+import type { StudioServerShape, StudioServerDefaultShape } from '@packages/types'
 import type { Router } from 'express'
 
 class StudioServer implements StudioServerShape {
@@ -7,11 +6,19 @@ class StudioServer implements StudioServerShape {
 
   }
 
-  canAccessStudioAI (browser: StudioBrowser): Promise<boolean> {
+  canAccessStudioAI (browser: Cypress.Browser): Promise<boolean> {
     return Promise.resolve(true)
   }
 
-  setProtocolDb (db: Database.Database): void {
+  setProtocolDbPath (dbPath: string): void {
+  }
+
+  initializeStudioAI (): Promise<void> {
+    return Promise.resolve()
+  }
+
+  destroy (): Promise<void> {
+    return Promise.resolve()
   }
 }
 

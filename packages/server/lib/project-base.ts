@@ -432,11 +432,13 @@ export class ProjectBase extends EE {
 
       onStudioInit: async () => {
         if (this.spec && this.ctx.coreData.studio?.protocolManager) {
-          const canAccessStudioAI = await this.ctx.coreData.studio?.canAccessStudioAI(this.browser) ?? false
+          const canAccessStudioAI = await this.ctx.coreData.studio.canAccessStudioAI(this.browser) ?? false
 
           if (!canAccessStudioAI) {
             return { canAccessStudioAI }
           }
+
+          await this.ctx.coreData.studio.initializeStudioAI()
 
           this.protocolManager = this.ctx.coreData.studio?.protocolManager
           this.protocolManager?.setupProtocol()
@@ -447,8 +449,8 @@ export class ProjectBase extends EE {
 
           await browsers.connectProtocolToBrowser({ browser: this.browser, foundBrowsers: this.options.browsers, protocolManager: this.protocolManager })
 
-          if (this.protocolManager.db) {
-            this.ctx.coreData.studio?.setProtocolDb(this.protocolManager.db)
+          if (this.protocolManager.dbPath) {
+            this.ctx.coreData.studio?.setProtocolDbPath(this.protocolManager.dbPath)
           }
 
           return { canAccessStudioAI: true }
@@ -464,6 +466,7 @@ export class ProjectBase extends EE {
           await browsers.closeProtocolConnection({ browser: this.browser, foundBrowsers: this.options.browsers })
           this.protocolManager?.close()
           this.protocolManager = undefined
+          await this.ctx.coreData.studio.destroy()
         }
       },
 

@@ -172,15 +172,35 @@ describe('lib/cloud/studio', () => {
     })
   })
 
-  describe('setProtocolDb', () => {
-    it('sets the protocol database on the studio server', () => {
-      const mockDb = { test: 'db' }
+  describe('setProtocolDbPath', () => {
+    it('sets the protocol database path on the studio server', () => {
+      const mockPath = '/path/to/db'
 
-      sinon.stub(studio, 'setProtocolDb')
+      sinon.stub(studio, 'setProtocolDbPath')
 
-      studioManager.setProtocolDb(mockDb as any)
+      studioManager.setProtocolDbPath(mockPath)
 
-      expect(studio.setProtocolDb).to.be.calledWith(mockDb)
+      expect(studio.setProtocolDbPath).to.be.calledWith(mockPath)
+    })
+  })
+
+  describe('initializeStudioAI', () => {
+    it('initializes Studio AI on the studio server', async () => {
+      sinon.stub(studio, 'initializeStudioAI').resolves()
+
+      await studioManager.initializeStudioAI()
+
+      expect(studio.initializeStudioAI).to.be.called
+    })
+  })
+
+  describe('destroy', () => {
+    it('destroys the studio server', async () => {
+      sinon.stub(studio, 'destroy').resolves()
+
+      await studioManager.destroy()
+
+      expect(studio.destroy).to.be.called
     })
   })
 })

@@ -6,7 +6,7 @@ import os from 'os'
 import { agent } from '@packages/network'
 import Debug from 'debug'
 import { requireScript } from './require_script'
-import type Database from 'better-sqlite3'
+import path from 'path'
 
 interface StudioServer { default: StudioServerDefaultShape }
 
@@ -38,8 +38,8 @@ export class StudioManager implements StudioManagerShape {
     return manager
   }
 
-  setProtocolDb (db: Database.Database): void {
-    this.invokeSync('setProtocolDb', { isEssential: true }, db)
+  setProtocolDbPath (protocolDbPath: string): void {
+    this.invokeSync('setProtocolDbPath', { isEssential: true }, protocolDbPath)
   }
 
   async setup ({ script, studioPath, studioHash, projectSlug, cloudApi }: SetupOptions): Promise<void> {
@@ -49,6 +49,7 @@ export class StudioManager implements StudioManagerShape {
       studioPath,
       projectSlug,
       cloudApi,
+      betterSqlite3Path: path.dirname(require.resolve('better-sqlite3/package.json')),
     })
 
     this._studioHash = studioHash
@@ -63,6 +64,14 @@ export class StudioManager implements StudioManagerShape {
 
   async canAccessStudioAI (browser: Cypress.Browser): Promise<boolean> {
     return (await this.invokeAsync('canAccessStudioAI', { isEssential: true }, browser)) ?? false
+  }
+
+  async initializeStudioAI (): Promise<void> {
+    await this.invokeAsync('initializeStudioAI', { isEssential: true })
+  }
+
+  async destroy (): Promise<void> {
+    await this.invokeAsync('destroy', { isEssential: true })
   }
 
   private async reportError (error: Error): Promise<void> {

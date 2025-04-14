@@ -43,6 +43,7 @@ describe('lib/project-base', () => {
     this.testStudioManager = {
       initializeRoutes: () => {},
       status: 'INITIALIZED',
+      destroy: () => Promise.resolve(),
     }
 
     sinon.stub(studio, 'getAndInitializeStudioManager').resolves(this.testStudioManager)
@@ -736,18 +737,20 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     it('passes onStudioInit callback with AI enabled and a protocol manager', async function () {
       const mockSetupProtocol = sinon.stub()
       const mockBeforeSpec = sinon.stub()
-      const mockAccessStudioLLM = sinon.stub().resolves(true)
-      const mockSetProtocolDb = sinon.stub()
+      const mockAccessStudioAI = sinon.stub().resolves(true)
+      const mockSetProtocolDbPath = sinon.stub()
+      const mockInitializeStudioAI = sinon.stub().resolves()
 
       this.project.spec = {}
       this.project.ctx.coreData.studio = {
-        canAccessStudioAI: mockAccessStudioLLM,
+        canAccessStudioAI: mockAccessStudioAI,
         protocolManager: {
           setupProtocol: mockSetupProtocol,
           beforeSpec: mockBeforeSpec,
-          db: { test: 'db' },
+          dbPath: 'test-db-path',
         },
-        setProtocolDb: mockSetProtocolDb,
+        setProtocolDbPath: mockSetProtocolDbPath,
+        initializeStudioAI: mockInitializeStudioAI,
       }
 
       sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
@@ -783,7 +786,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       expect(mockSetupProtocol).to.be.calledOnce
       expect(mockBeforeSpec).to.be.calledOnce
-      expect(mockAccessStudioLLM).to.be.calledWith({
+      expect(mockAccessStudioAI).to.be.calledWith({
         family: 'chromium',
         name: 'chrome',
         channel: 'stable',
@@ -796,17 +799,18 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
 
       expect(this.project['_protocolManager']).to.eq(this.project.ctx.coreData.studio.protocolManager)
-      expect(mockSetProtocolDb).to.be.calledWith({ test: 'db' })
+      expect(mockSetProtocolDbPath).to.be.calledWith('test-db-path')
+      expect(mockInitializeStudioAI).to.be.called
     })
 
     it('passes onStudioInit callback with AI enabled but no protocol manager', async function () {
       const mockSetupProtocol = sinon.stub()
       const mockBeforeSpec = sinon.stub()
-      const mockAccessStudioLLM = sinon.stub().resolves(true)
+      const mockAccessStudioAI = sinon.stub().resolves(true)
 
       this.project.spec = {}
       this.project.ctx.coreData.studio = {
-        canAccessStudioAI: mockAccessStudioLLM,
+        canAccessStudioAI: mockAccessStudioAI,
       }
 
       this.project.browser = {
@@ -836,20 +840,20 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       expect(mockSetupProtocol).not.to.be.called
       expect(mockBeforeSpec).not.to.be.called
-      expect(mockAccessStudioLLM).not.to.be.called
+      expect(mockAccessStudioAI).not.to.be.called
 
       expect(browsers.connectProtocolToBrowser).not.to.be.called
       expect(this.project['_protocolManager']).to.be.undefined
     })
 
-    it('passes onStudioInit callback with llm disabled', async function () {
+    it('passes onStudioInit callback with AI disabled', async function () {
       const mockSetupProtocol = sinon.stub()
       const mockBeforeSpec = sinon.stub()
-      const mockAccessStudioLLM = sinon.stub().resolves(false)
+      const mockAccessStudioAI = sinon.stub().resolves(false)
 
       this.project.spec = {}
       this.project.ctx.coreData.studio = {
-        canAccessStudioAI: mockAccessStudioLLM,
+        canAccessStudioAI: mockAccessStudioAI,
         protocolManager: {
           setupProtocol: mockSetupProtocol,
           beforeSpec: mockBeforeSpec,
@@ -887,9 +891,11 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
     it('passes onStudioDestroy callback', async function () {
       const mockClose = sinon.stub()
+      const mockDestroy = sinon.stub().resolves()
 
       this.project.ctx.coreData.studio = {
         protocolManager: {},
+        destroy: mockDestroy,
       }
 
       sinon.stub(browsers, 'closeProtocolConnection').resolves()
@@ -928,7 +934,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
 
       expect(mockClose).to.be.calledOnce
-
+      expect(mockDestroy).to.be.calledOnce
       expect(this.project['_protocolManager']).to.be.undefined
     })
   })
