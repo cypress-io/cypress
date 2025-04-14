@@ -1,6 +1,6 @@
 <template>
-  <div class="bg-gray-1100 border-l border-gray-900 h-screen flex flex-col">
-    <header class="bg-gray-1100 border-b border-gray-800 p-4">
+  <div class="loading-studio-panel border-l border-gray-900 h-screen flex flex-col">
+    <header class="border-b border-gray-800 p-4">
       <div class="flex items-center justify-between">
         <div class="flex items-center">
           <StudioButton />
@@ -20,3 +20,13 @@ import Spinner from '@cypress-design/vue-spinner/sfc'
 import StudioButton from './StudioButton.vue'
 
 </script>
+
+<style scoped>
+.loading-studio-panel {
+  background-color: #161827;
+
+  header {
+    background-color: #161827;
+  }
+}
+</style>
