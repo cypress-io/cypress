@@ -6,7 +6,7 @@
     v-else
     ref="container"
   >
-    <LoadingStudioPanel />
+    <LoadingStudioPanel :event-manager="props.eventManager" />
   </div>
 </template>
 <script lang="ts" setup>
@@ -14,6 +14,7 @@ import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { init, loadRemote } from '@module-federation/runtime'
 import type { StudioAppDefaultShape, StudioPanelShape } from './studio-app-types'
 import LoadingStudioPanel from './LoadingStudioPanel.vue'
+import type { EventManager } from '../runner/event-manager'
 
 // Mirrors the ReactDOM.Root type since incorporating those types
 // messes up vue typing elsewhere
@@ -25,6 +26,7 @@ interface Root {
 const props = defineProps<{
   canAccessStudioAI: boolean
   onStudioPanelClose: () => void
+  eventManager: EventManager
 }>()
 
 interface StudioApp { default: StudioAppDefaultShape }

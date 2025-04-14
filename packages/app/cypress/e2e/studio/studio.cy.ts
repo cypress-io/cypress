@@ -93,7 +93,6 @@ describe('studio functionality', () => {
       cy.findByTestId('studio-panel').then(() => {
         // check for the loading panel from the app first
         cy.get('[data-cy="loading-studio-panel"]').should('be.visible')
-        cy.percySnapshot('Studio Panel Loading State')
         // we've verified the studio panel is loaded, now resolve the promise so the test can finish
         deferred.resolve()
       })

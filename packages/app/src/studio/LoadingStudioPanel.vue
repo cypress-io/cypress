@@ -6,7 +6,7 @@
     <header class="border-b border-gray-800 p-4">
       <div class="flex items-center justify-between">
         <div class="flex items-center">
-          <StudioButton />
+          <StudioButton :event-manager="props.eventManager" />
         </div>
       </div>
     </header>
@@ -18,9 +18,14 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import Spinner from '@cypress-design/vue-spinner/sfc'
 import StudioButton from './StudioButton.vue'
+import { EventManager } from '../runner/event-manager'
+
+const props = defineProps<{
+  eventManager: EventManager
+}>()
 
 </script>
 

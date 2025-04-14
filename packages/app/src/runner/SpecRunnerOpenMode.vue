@@ -100,6 +100,7 @@
             data-cy="studio-panel"
             :can-access-studio-a-i="studioStore.canAccessStudioAI"
             :on-studio-panel-close="handleStudioPanelClose"
+            :event-manager="eventManager"
           />
         </HideDuringScreenshot>
       </template>

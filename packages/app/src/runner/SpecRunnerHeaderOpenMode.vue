@@ -88,7 +88,10 @@
           </span>
         </Tag>
       </div>
-      <StudioButton v-if="!studioStore.isActive" />
+      <StudioButton
+        v-if="!studioStore.isActive"
+        :event-manager="eventManager"
+      />
     </div>
 
     <SelectorPlayground
