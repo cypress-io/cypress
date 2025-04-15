@@ -201,6 +201,7 @@
     "request-promise": "4.2.6",
     "sinon": "17.0.1",
     "snap-shot-it": "7.9.10",
+    "socket.io": "4.0.1",
     "ssestream": "1.0.1",
     "supertest": "4.0.2",
     "supertest-session": "4.0.0",

@@ -2,6 +2,7 @@
 
 import type { Router } from 'express'
 import type { AxiosInstance } from 'axios'
+import type { Socket } from 'socket.io'
 
 interface RetryOptions {
   maxAttempts: number
@@ -37,6 +38,7 @@ export interface StudioAIInitializeOptions {
 export interface StudioServerShape {
   initializeRoutes(router: Router): void
   canAccessStudioAI(browser: Cypress.Browser): Promise<boolean>
+  addSocketListeners(socket: Socket): void
   initializeStudioAI(options: StudioAIInitializeOptions): Promise<void>
   destroy(): Promise<void>
 }
