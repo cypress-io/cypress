@@ -799,8 +799,56 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
 
       expect(this.project['_protocolManager']).to.eq(this.project.ctx.coreData.studio.protocolManager)
-      expect(mockSetProtocolDbPath).to.be.calledWith('test-db-path')
-      expect(mockInitializeStudioAI).to.be.called
+      expect(mockInitializeStudioAI).to.be.calledWith({
+        protocolDbPath: 'test-db-path',
+      })
+    })
+
+    it('handles case where protocol manager db path is not set', async function () {
+      const mockSetupProtocol = sinon.stub()
+      const mockBeforeSpec = sinon.stub()
+      const mockAccessStudioAI = sinon.stub().resolves(true)
+      const mockSetProtocolDbPath = sinon.stub()
+      const mockInitializeStudioAI = sinon.stub().resolves()
+
+      this.project.spec = {}
+      this.project.ctx.coreData.studio = {
+        canAccessStudioAI: mockAccessStudioAI,
+        protocolManager: {
+          setupProtocol: mockSetupProtocol,
+          beforeSpec: mockBeforeSpec,
+          dbPath: null,
+        },
+        setProtocolDbPath: mockSetProtocolDbPath,
+        initializeStudioAI: mockInitializeStudioAI,
+      }
+
+      sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
+
+      this.project.browser = {
+        name: 'chrome',
+        family: 'chromium',
+        channel: 'stable',
+      }
+
+      this.project.options.browsers = [{
+        name: 'chrome',
+        family: 'chromium',
+        channel: 'stable',
+      }]
+
+      let studioInitPromise
+
+      this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
+        studioInitPromise = callbacks.onStudioInit()
+      })
+
+      this.project.startWebsockets({}, {})
+
+      const { canAccessStudioAI } = await studioInitPromise
+
+      expect(canAccessStudioAI).to.be.false
+      expect(this.project['_protocolManager']).to.be.undefined
     })
 
     it('passes onStudioInit callback with AI enabled but no protocol manager', async function () {

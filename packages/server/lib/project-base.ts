@@ -438,20 +438,25 @@ export class ProjectBase extends EE {
             return { canAccessStudioAI }
           }
 
-          await this.ctx.coreData.studio.initializeStudioAI()
-
-          this.protocolManager = this.ctx.coreData.studio?.protocolManager
-          this.protocolManager?.setupProtocol()
-          this.protocolManager?.beforeSpec({
+          this.ctx.coreData.studio.protocolManager.setupProtocol()
+          this.ctx.coreData.studio.protocolManager.beforeSpec({
             ...this.spec,
             instanceId: v4(),
           })
 
-          await browsers.connectProtocolToBrowser({ browser: this.browser, foundBrowsers: this.options.browsers, protocolManager: this.protocolManager })
+          await browsers.connectProtocolToBrowser({ browser: this.browser, foundBrowsers: this.options.browsers, protocolManager: this.ctx.coreData.studio.protocolManager })
 
-          if (this.protocolManager.dbPath) {
-            this.ctx.coreData.studio?.setProtocolDbPath(this.protocolManager.dbPath)
+          if (!this.ctx.coreData.studio.protocolManager.dbPath) {
+            debug('Protocol database path is not set after initializing protocol manager')
+
+            return { canAccessStudioAI: false }
           }
+
+          this.protocolManager = this.ctx.coreData.studio.protocolManager
+
+          await this.ctx.coreData.studio.initializeStudioAI({
+            protocolDbPath: this.ctx.coreData.studio.protocolManager.dbPath,
+          })
 
           return { canAccessStudioAI: true }
         }

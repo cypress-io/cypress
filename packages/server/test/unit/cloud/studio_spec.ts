@@ -172,25 +172,17 @@ describe('lib/cloud/studio', () => {
     })
   })
 
-  describe('setProtocolDbPath', () => {
-    it('sets the protocol database path on the studio server', () => {
-      const mockPath = '/path/to/db'
-
-      sinon.stub(studio, 'setProtocolDbPath')
-
-      studioManager.setProtocolDbPath(mockPath)
-
-      expect(studio.setProtocolDbPath).to.be.calledWith(mockPath)
-    })
-  })
-
   describe('initializeStudioAI', () => {
     it('initializes Studio AI on the studio server', async () => {
       sinon.stub(studio, 'initializeStudioAI').resolves()
 
-      await studioManager.initializeStudioAI()
+      await studioManager.initializeStudioAI({
+        protocolDbPath: 'test-db-path',
+      })
 
-      expect(studio.initializeStudioAI).to.be.called
+      expect(studio.initializeStudioAI).to.be.calledWith({
+        protocolDbPath: 'test-db-path',
+      })
     })
   })
 

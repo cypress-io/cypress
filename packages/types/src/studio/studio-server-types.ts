@@ -30,11 +30,14 @@ export interface StudioServerOptions {
   betterSqlite3Path: string
 }
 
+export interface StudioAIInitializeOptions {
+  protocolDbPath: string
+}
+
 export interface StudioServerShape {
   initializeRoutes(router: Router): void
   canAccessStudioAI(browser: Cypress.Browser): Promise<boolean>
-  setProtocolDbPath(path: string): void
-  initializeStudioAI(): Promise<void>
+  initializeStudioAI(options: StudioAIInitializeOptions): Promise<void>
   destroy(): Promise<void>
 }
 

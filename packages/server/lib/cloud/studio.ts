@@ -1,4 +1,4 @@
-import type { StudioErrorReport, StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape, StudioCloudApi } from '@packages/types'
+import type { StudioErrorReport, StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape, StudioCloudApi, StudioAIInitializeOptions } from '@packages/types'
 import type { Router } from 'express'
 import fetch from 'cross-fetch'
 import pkg from '@packages/root'
@@ -38,10 +38,6 @@ export class StudioManager implements StudioManagerShape {
     return manager
   }
 
-  setProtocolDbPath (protocolDbPath: string): void {
-    this.invokeSync('setProtocolDbPath', { isEssential: true }, protocolDbPath)
-  }
-
   async setup ({ script, studioPath, studioHash, projectSlug, cloudApi }: SetupOptions): Promise<void> {
     const { createStudioServer } = requireScript<StudioServer>(script).default
 
@@ -66,8 +62,8 @@ export class StudioManager implements StudioManagerShape {
     return (await this.invokeAsync('canAccessStudioAI', { isEssential: true }, browser)) ?? false
   }
 
-  async initializeStudioAI (): Promise<void> {
-    await this.invokeAsync('initializeStudioAI', { isEssential: true })
+  async initializeStudioAI (options: StudioAIInitializeOptions): Promise<void> {
+    await this.invokeAsync('initializeStudioAI', { isEssential: true }, options)
   }
 
   async destroy (): Promise<void> {
@@ -114,7 +110,6 @@ export class StudioManager implements StudioManagerShape {
     }
 
     try {
-      // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
       return this._studioServer[method].apply(this._studioServer, args)
     } catch (error: unknown) {
       let actualError: Error
