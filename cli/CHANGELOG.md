@@ -5,6 +5,7 @@ _Released 4/22/2025 (PENDING)_
 
 **Bugfixes:**
 
+- The [`cy.press()`](http://on.cypress.io/api/press) command no longer errors when used in specs subsequent to the first spec in run mode. Fixes [#31466](https://github.com/cypress-io/cypress/issues/31466).
 - Fixed an issue where certain proxy conditions prevented test runs from being recorded. Fixes [#31485](https://github.com/cypress-io/cypress/issues/31485).
 
 **Misc:**

@@ -288,7 +288,7 @@ export class BidiAutomation {
   public readonly automationMiddleware: AutomationMiddleware = {
     onRequest: async <T extends keyof AutomationCommands> (message: T, data: AutomationCommands[T]['dataType']): Promise<AutomationCommands[T]['returnType']> => {
       debugVerbose('automation command \'%s\' requested with data: %O', message, data)
-
+      debug('BiDi middleware handling msg `%s` for top context %s', message, this.topLevelContextId)
       switch (message) {
         case 'key:press':
           if (this.autContextId) {
