@@ -1,11 +1,14 @@
 <template>
   <div className="flex items-center">
-    <button
-      className="flex items-center gap-2 px-4 py-2 bg-transparent border border-gray-700 rounded text-gray-500 hover:bg-gray-800"
+    <Button
+      class="gap-[8px]"
+      variant="outline-dark"
       data-cy="studio-button"
+      size="32"
       @click="toggleStudioPanel"
     >
       <IconMenuExpandRight
+        v-if="studioStore.isOpen"
         size="16"
         stroke-color="gray-500"
       />
@@ -17,12 +20,18 @@
       >
         Beta
       </Tag>
-    </button>
+      <IconMenuExpandLeft
+        v-if="!studioStore.isOpen"
+        size="16"
+        stroke-color="gray-500"
+      />
+    </Button>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { IconMenuExpandRight } from '@cypress-design/vue-icon'
+import { IconMenuExpandLeft, IconMenuExpandRight } from '@cypress-design/vue-icon'
+import Button from '@cypress-design/vue-button'
 import Tag from '@cypress-design/vue-tag'
 import { useStudioStore } from '../store/studio-store'
 import { EventManager } from '../runner/event-manager'
