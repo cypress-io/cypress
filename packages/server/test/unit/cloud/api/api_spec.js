@@ -325,7 +325,7 @@ describe('lib/cloud/api', () => {
       })
     })
 
-    it('sets timeout to 60 seconds when no CYPRESS_INTERNAL_INITIAL_PREFLIGHT_TIMEOUT env is set', () => {
+    it('sets timeout to 60 seconds when no CYPRESS_INITIAL_PREFLIGHT_TIMEOUT env is set', () => {
       sinon.stub(api.rp, 'post').resolves({})
 
       return api.sendPreflight({})
@@ -334,17 +334,17 @@ describe('lib/cloud/api', () => {
       })
     })
 
-    describe('when CYPRESS_INTERNAL_INITIAL_PREFLIGHT_TIMEOUT env is set to a negative number', () => {
+    describe('when CYPRESS_INITIAL_PREFLIGHT_TIMEOUT env is set to a negative number', () => {
       const configuredTimeout = -1
       let prevEnv
 
       beforeEach(() => {
-        prevEnv = process.env.CYPRESS_INTERNAL_INITIAL_PREFLIGHT_TIMEOUT
-        process.env.CYPRESS_INTERNAL_INITIAL_PREFLIGHT_TIMEOUT = configuredTimeout
+        prevEnv = process.env.CYPRESS_INITIAL_PREFLIGHT_TIMEOUT
+        process.env.CYPRESS_INITIAL_PREFLIGHT_TIMEOUT = configuredTimeout
       })
 
       afterEach(() => {
-        process.env.CYPRESS_INTERNAL_INITIAL_PREFLIGHT_TIMEOUT = prevEnv
+        process.env.CYPRESS_INITIAL_PREFLIGHT_TIMEOUT = prevEnv
       })
 
       it('skips the no-agent preflight request', () => {
@@ -373,17 +373,17 @@ describe('lib/cloud/api', () => {
       })
     })
 
-    describe('when CYPRESS_INTERNAL_INITIAL_PREFLIGHT_TIMEOUT env is set to a positive number', () => {
+    describe('when CYPRESS_INITIAL_PREFLIGHT_TIMEOUT env is set to a positive number', () => {
       const configuredTimeout = 10000
       let prevEnv
 
       beforeEach(() => {
-        prevEnv = process.env.CYPRESS_INTERNAL_INITIAL_PREFLIGHT_TIMEOUT
-        process.env.CYPRESS_INTERNAL_INITIAL_PREFLIGHT_TIMEOUT = configuredTimeout
+        prevEnv = process.env.CYPRESS_INITIAL_PREFLIGHT_TIMEOUT
+        process.env.CYPRESS_INITIAL_PREFLIGHT_TIMEOUT = configuredTimeout
       })
 
       afterEach(() => {
-        process.env.CYPRESS_INTERNAL_INITIAL_PREFLIGHT_TIMEOUT = prevEnv
+        process.env.CYPRESS_INITIAL_PREFLIGHT_TIMEOUT = prevEnv
         api.rp.post.restore()
       })
 

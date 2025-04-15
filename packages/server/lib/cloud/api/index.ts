@@ -234,7 +234,7 @@ const isRetriableError = (err) => {
 
 function noproxyPreflightTimeout (): number {
   try {
-    const timeoutFromEnv = Number(process.env.CYPRESS_INTERNAL_INITIAL_PREFLIGHT_TIMEOUT)
+    const timeoutFromEnv = Number(process.env.CYPRESS_INITIAL_PREFLIGHT_TIMEOUT)
 
     return isNaN(timeoutFromEnv) ? 5000 : timeoutFromEnv
   } catch (e: unknown) {
