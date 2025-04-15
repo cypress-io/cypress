@@ -1,0 +1,11 @@
+module.exports = {
+  spec: 'test/unit',
+  require: '@packages/ts/register',
+  recursive: true,
+  extension: ['js', 'ts'],
+  reporter: 'mocha-multi-reporters',
+  reporterOptions: {
+    configFile: '../../mocha-reporter-config.json'
+  },
+  exit: true
+} 
