@@ -24,7 +24,9 @@
     "jsdoc-format": false,
     // for now keep the Cypress NPM module API
     // in its own file for simplicity
-    "no-single-declare-module": false
+    "no-single-declare-module": false,
+    // This is detecting necessary qualifiers as unnecessary
+    "no-unnecessary-qualifier": false
   },
   "linterOptions": {
     "exclude": [

@@ -1,7 +1,10 @@
 {
   "extends": "../ts/tsconfig.json",
   "compilerOptions": {
+    // needed for mobx
     "useDefineForClassFields": true,
+    // explicitly turn this off as it defaults to true in the base tsconfig.json
+    "experimentalDecorators": false,
     "types": [
       "node",
       "cypress",

@@ -1,9 +1,40 @@
 diff --git a/node_modules/mocha/CHANGELOG.md b/node_modules/mocha/CHANGELOG.md
 deleted file mode 100644
-index c3b33f1..0000000
+index 71ef0fc..0000000
 --- a/node_modules/mocha/CHANGELOG.md
 +++ /dev/null
-@@ -1,634 +0,0 @@
+@@ -1,665 +0,0 @@
+-# 7.2.0 / 2020-05-22
+-
+-## :tada: Enhancements
+-
+-- [#4234](https://github.com/mochajs/mocha/issues/4234): Add ability to run tests in a mocha instance multiple times ([**@nicojs**](https://github.com/nicojs))
+-- [#4219](https://github.com/mochajs/mocha/issues/4219): Exposing filename in JSON, doc, and json-stream reporters ([**@Daniel0113**](https://github.com/Daniel0113))
+-- [#4244](https://github.com/mochajs/mocha/issues/4244): Add Root Hook Plugins ([**@boneskull**](https://github.com/boneskull))
+-
+-## :bug: Fixes
+-
+-- [#4258](https://github.com/mochajs/mocha/issues/4258): Fix missing dot in name of configuration file ([**@sonicdoe**](https://github.com/sonicdoe))
+-- [#4194](https://github.com/mochajs/mocha/issues/4194): Check if module.paths really exists ([**@ematipico**](https://github.com/ematipico))
+-- [#4256](https://github.com/mochajs/mocha/issues/4256): `--forbid-only` does not recognize `it.only` when `before` crashes ([**@arvidOtt**](https://github.com/arvidOtt))
+-- [#4152](https://github.com/mochajs/mocha/issues/4152): Bug with multiple async done() calls ([**@boneskull**](https://github.com/boneskull))
+-- [#4275](https://github.com/mochajs/mocha/issues/4275): Improper warnings for invalid reporters ([**@boneskull**](https://github.com/boneskull))
+-- [#4288](https://github.com/mochajs/mocha/issues/4288): Broken hook.spec.js test for IE11 ([**@boneskull**](https://github.com/boneskull))
+-
+-## :book: Documentation
+-
+-- [#4081](https://github.com/mochajs/mocha/issues/4081): Insufficient white space for API docs in view on mobile ([**@HyunSangHan**](https://github.com/HyunSangHan))
+-- [#4255](https://github.com/mochajs/mocha/issues/4255): Update mocha-docdash for UI fixes on API docs ([**@craigtaub**](https://github.com/craigtaub))
+-- [#4235](https://github.com/mochajs/mocha/issues/4235): Enable emoji on website; enable normal ul elements ([**@boneskull**](https://github.com/boneskull))
+-- [#4272](https://github.com/mochajs/mocha/issues/4272): Fetch sponsors at build time, show ALL non-skeevy sponsors ([**@boneskull**](https://github.com/boneskull))
+-
+-## :nut_and_bolt: Other
+-
+-- [#4249](https://github.com/mochajs/mocha/issues/4249): Refactoring improving encapsulation ([**@arvidOtt**](https://github.com/arvidOtt))
+-- [#4242](https://github.com/mochajs/mocha/issues/4242): CI add job names, add Node.js v14 to matrix ([**@boneskull**](https://github.com/boneskull))
+-- [#4237](https://github.com/mochajs/mocha/issues/4237): Refactor validatePlugins to throw coded errors ([**@boneskull**](https://github.com/boneskull))
+-- [#4236](https://github.com/mochajs/mocha/issues/4236): Better debug output ([**@boneskull**](https://github.com/boneskull))
+-
 -# 7.1.2 / 2020-04-26
 -
 -## :nut_and_bolt: Other
@@ -552,7 +583,7 @@ index c3b33f1..0000000
 -
 -- [#3226](https://github.com/mochajs/mocha/issues/3226): Do not swallow errors that are thrown asynchronously from passing tests ([@boneskull](https://github.com/boneskull)). Example:
 -
--  \```js
+-  \`\`\`js
 -  it('should actually fail, sorry!', function (done) {
 -  // passing assertion
 -  assert(true === true);
@@ -565,7 +596,7 @@ index c3b33f1..0000000
 -  throw new Error('chaos!');
 -  }, 100);
 -  });
--  \```
+-  \`\`\`
 -
 -  Previously to this version, Mocha would have _silently swallowed_ the `chaos!` exception, and you wouldn't know. Well, _now you know_. Mocha cannot recover from this gracefully, so it will exit with a nonzero code.
 -
@@ -758,12 +789,12 @@ deleted file mode 100644
 index b3623a5..0000000
 Binary files a/node_modules/mocha/assets/growl/ok.png and /dev/null differ
 diff --git a/node_modules/mocha/lib/mocha.js b/node_modules/mocha/lib/mocha.js
-index 740e1fd..0cd2769 100644
+index 1983690..ee096a3 100644
 --- a/node_modules/mocha/lib/mocha.js
 +++ b/node_modules/mocha/lib/mocha.js
-@@ -904,7 +904,7 @@ Mocha.prototype.run = function(fn) {
-   options.files = this.files;
-   var runner = new exports.Runner(suite, options.delay);
+@@ -1014,7 +1014,7 @@ Mocha.prototype.run = function(fn) {
+     cleanReferencesAfterRun: this._cleanReferencesAfterRun
+   });
    createStatsCollector(runner);
 -  var reporter = new this._reporter(runner, options);
 +  var reporter = this._reporter(runner, options);
@@ -771,10 +802,10 @@ index 740e1fd..0cd2769 100644
    runner.fullStackTrace = options.fullTrace;
    runner.asyncOnly = options.asyncOnly;
 diff --git a/node_modules/mocha/lib/runner.js b/node_modules/mocha/lib/runner.js
-index 25c03b9..f71c992 100644
+index 20a6af2..2123646 100644
 --- a/node_modules/mocha/lib/runner.js
 +++ b/node_modules/mocha/lib/runner.js
-@@ -677,9 +677,43 @@ Runner.prototype.runTests = function(suite, fn) {
+@@ -755,9 +755,42 @@ Runner.prototype.runTests = function(suite, fn) {
            }
            self.emit(constants.EVENT_TEST_END, test);
            return self.hookUp(HOOK_TYPE_AFTER_EACH, next);
@@ -814,13 +845,12 @@ index 25c03b9..f71c992 100644
 +
            var retry = test.currentRetry();
 -          if (retry < test.retries()) {
-+
 +          // requeue the test if we have retries and haven't satisfied our retry configuration.
 +          if (retry < test.retries() && testStatusInfo.shouldAttemptsContinue) {
              var clonedTest = test.clone();
              clonedTest.currentRetry(retry + 1);
              tests.unshift(clonedTest);
-@@ -689,8 +723,25 @@ Runner.prototype.runTests = function(suite, fn) {
+@@ -767,8 +800,25 @@ Runner.prototype.runTests = function(suite, fn) {
              // Early return + hook trigger so that it doesn't
              // increment the count wrong
              return self.hookUp(HOOK_TYPE_AFTER_EACH, next);

@@ -68,6 +68,8 @@ describe('SelectorPlayground', () => {
     selectorPlaygroundStore.setNumElements(0)
 
     mountSelectorPlayground()
+    cy.then(() => selectorPlaygroundStore.setValidity(true))
+
     cy.get('[data-cy="playground-num-elements"]').contains('No matches')
 
     cy.then(() => selectorPlaygroundStore.setNumElements(1))

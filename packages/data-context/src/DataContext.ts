@@ -33,7 +33,6 @@ import {
   GraphQLDataSource,
   RemoteRequestDataSource,
 } from './sources'
-import { cached } from './util/cached'
 import type { GraphQLSchema, OperationTypeNode, DocumentNode } from 'graphql'
 import type { IncomingHttpHeaders } from 'http'
 // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
@@ -86,6 +85,24 @@ export class DataContext {
   private _config: Omit<DataContextConfig, 'modeOptions'>
   private _modeOptions: Partial<AllModeOptions>
   private _coreData: CoreDataShape
+  private _graphql: GraphQLDataSource
+  private _remoteRequest: RemoteRequestDataSource
+  private _file: FileDataSource
+  private _versions: VersionsDataSource
+  private _browser: BrowserDataSource
+  private _actions: DataActions
+  private _wizard: WizardDataSource
+  private _project: ProjectDataSource
+  private _relevantRuns: RelevantRunsDataSource
+  private _relevantRunSpecs: RelevantRunSpecsDataSource
+  private _cloud: CloudDataSource
+  private _env: EnvDataSource
+  private _emitter: DataEmitterActions
+  private _html: HtmlDataSource
+  private _error: ErrorDataSource
+  private _util: UtilDataSource
+  private _migration: MigrationDataSource
+
   readonly lifecycleManager: ProjectLifecycleManager
 
   constructor (_config: DataContextConfig) {
@@ -94,6 +111,33 @@ export class DataContext {
     this._config = rest
     this._modeOptions = modeOptions ?? {} // {} For legacy tests
     this._coreData = _config.coreData ?? makeCoreData(this._modeOptions)
+    this._graphql = new GraphQLDataSource()
+    this._remoteRequest = new RemoteRequestDataSource()
+    this._file = new FileDataSource(this)
+    this._versions = new VersionsDataSource(this)
+    this._browser = new BrowserDataSource(this)
+    this._actions = new DataActions(this)
+    this._wizard = new WizardDataSource(this)
+    this._project = new ProjectDataSource(this)
+    this._relevantRuns = new RelevantRunsDataSource(this)
+    this._relevantRunSpecs = new RelevantRunSpecsDataSource(this)
+    this._cloud = new CloudDataSource({
+      fetch: (input: RequestInfo | URL, init?: RequestInit) => this.util.fetch(input, init),
+      getUser: () => this.coreData.user,
+      logout: () => this.actions.auth.logout().catch(this.logTraceError),
+      invalidateClientUrqlCache: () => this.graphql.invalidateClientUrqlCache(this),
+      headers: {
+        getMachineId: this.coreData.machineId,
+      },
+    })
+
+    this._env = new EnvDataSource(this)
+    this._emitter = new DataEmitterActions(this)
+    this._html = new HtmlDataSource(this)
+    this._error = new ErrorDataSource(this)
+    this._util = new UtilDataSource(this)
+    this._migration = new MigrationDataSource(this)
+    // the lifecycle manager needs to be initialized last as it needs properties instantiated on the DataContext object
     this.lifecycleManager = new ProjectLifecycleManager(this)
   }
 
@@ -113,14 +157,12 @@ export class DataContext {
     return !this.isRunMode
   }
 
-  @cached
   get graphql () {
-    return new GraphQLDataSource()
+    return this._graphql
   }
 
-  @cached
   get remoteRequest () {
-    return new RemoteRequestDataSource()
+    return this._remoteRequest
   }
 
   get modeOptions (): Readonly<Partial<AllModeOptions>> {
@@ -131,95 +173,71 @@ export class DataContext {
     return this._coreData
   }
 
-  @cached
   get file () {
-    return new FileDataSource(this)
+    return this._file
   }
 
-  @cached
   get versions () {
-    return new VersionsDataSource(this)
+    return this._versions
   }
 
-  @cached
   get browser () {
-    return new BrowserDataSource(this)
+    return this._browser
   }
 
   /**
    * All mutations (update / delete / create), fs writes, etc.
    * should run through this namespace. Everything else should be a "getter"
    */
-  @cached
   get actions () {
-    return new DataActions(this)
+    return this._actions
   }
 
-  @cached
   get wizard () {
-    return new WizardDataSource(this)
+    return this._wizard
   }
 
   get currentProject () {
     return this.coreData.currentProject
   }
 
-  @cached
   get project () {
-    return new ProjectDataSource(this)
+    return this._project
   }
 
-  @cached
   get relevantRuns () {
-    return new RelevantRunsDataSource(this)
+    return this._relevantRuns
   }
 
-  @cached
   get relevantRunSpecs () {
-    return new RelevantRunSpecsDataSource(this)
+    return this._relevantRunSpecs
   }
 
-  @cached
   get cloud () {
-    return new CloudDataSource({
-      fetch: (input: RequestInfo | URL, init?: RequestInit) => this.util.fetch(input, init),
-      getUser: () => this.coreData.user,
-      logout: () => this.actions.auth.logout().catch(this.logTraceError),
-      invalidateClientUrqlCache: () => this.graphql.invalidateClientUrqlCache(this),
-      headers: {
-        getMachineId: this.coreData.machineId,
-      },
-    })
+    return this._cloud
   }
-
-  @cached
   get env () {
-    return new EnvDataSource(this)
+    return this._env
   }
 
-  @cached
   get emitter () {
-    return new DataEmitterActions(this)
+    return this._emitter
   }
 
-  @cached
   get html () {
-    return new HtmlDataSource(this)
+    return this._html
   }
 
-  @cached
   get error () {
-    return new ErrorDataSource(this)
+    return this._error
   }
 
-  @cached
   get util () {
-    return new UtilDataSource(this)
+    return this._util
   }
 
-  @cached
   get migration () {
-    return new MigrationDataSource(this)
+    return this._migration
   }
 
   /**
@@ -231,12 +249,10 @@ export class DataContext {
 
   // Utilities
 
-  @cached
   get fs () {
     return fsExtra
   }
 
-  @cached
   get path () {
     return path
   }

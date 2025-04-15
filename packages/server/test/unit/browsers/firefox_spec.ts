@@ -162,6 +162,8 @@ describe('lib/browsers/firefox', () => {
           context: mockContextId,
           url: 'next-spec-url',
         })
+
+        expect(this.automation.use).to.have.been.calledWith(bidiAutomationClient.automationMiddleware)
       })
     })
 

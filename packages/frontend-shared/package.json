@@ -31,7 +31,7 @@
   "devDependencies": {
     "@antfu/utils": "^0.7.8",
     "@babel/code-frame": "7.26.2",
-    "@cypress-design/css": "^1.0.0",
+    "@cypress-design/css": "^1.1.0",
     "@faker-js/faker": "9.6.0",
     "@graphql-codegen/plugin-helpers": "2.3.2",
     "@graphql-typed-document-node/core": "^3.1.0",
@@ -90,7 +90,7 @@
     "markdown-it": "13.0.1",
     "modern-normalize": "1.1.0",
     "p-defer": "^3.0.0",
-    "patch-package": "6.4.7",
+    "patch-package": "8.0.0",
     "postcss": "^8.4.22",
     "shiki": "^0.9.12",
     "sinon": "13.0.2",
