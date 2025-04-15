@@ -9,6 +9,10 @@ _Released 07/01/2025 (PENDING)_
 - Removed support for [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol) with the [firefox](https://www.mozilla.org/) browser. Addresses [#31189](https://github.com/cypress-io/cypress/issues/31189).
 - The Cypress configuration wizard for Component Testing supports TypeScript 5.0 or greater. Addresses [#31187](https://github.com/cypress-io/cypress/issues/31187).
 
+**Features:**
+
+- [`tsx`](https://tsx.is/) is now used in all cases to run the Cypress config, replacing [ts-node](https://github.com/TypeStrong/ts-node) for TypeScript and Node for commonjs/ESM. This should allow for more interoperability for users who are using any variant of ES Modules. Addresses [#30954](https://github.com/cypress-io/cypress/issues/30954), [#30925](https://github.com/cypress-io/cypress/issues/30925), and [#31185](https://github.com/cypress-io/cypress/issues/31185).
+
 ## 14.3.1
 
 _Released 4/17/2025_

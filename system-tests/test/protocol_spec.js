@@ -71,7 +71,7 @@ describe('capture-protocol', () => {
 
       const protocolEvents = await fs.promises.readFile(getFilePath('e9e81b5e-cc58-4026-b2ff-8ae3161435a6.db'), 'utf8')
 
-      expect(JSON.parse(protocolEvents).debugData.filePreprocessorHandlerText).to.equal('(file) => {\n                return file.filePath;\n            }')
+      expect(JSON.parse(protocolEvents).debugData.filePreprocessorHandlerText).to.equal('file=>{return file.filePath}')
     })
   })
 

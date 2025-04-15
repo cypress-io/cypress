@@ -39,11 +39,15 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
   const unixBuildAppDir = buildAppDir.split(path.sep).join(path.posix.sep)
   const startingEntryPoints = [
     'packages/server/lib/plugins/child/require_async_child.js',
-    'packages/server/lib/plugins/child/register_ts_node.js',
     'packages/server/node_modules/@cypress/webpack-batteries-included-preprocessor/index.js',
     'packages/server/node_modules/ts-loader/index.js',
     'packages/rewriter/lib/threads/worker.js',
     'npm/webpack-batteries-included-preprocessor/index.js',
+    // needed in the server entry point
+    'node_modules/tsx/dist/cjs/index.cjs',
+    'node_modules/tsx/dist/loader.mjs',
+    // esbuild is also a runtime dependency with tsx
+    'node_modules/esbuild/lib/main.js',
     'node_modules/find-up/index.js',
     'node_modules/webpack/lib/webpack.js',
     'node_modules/webpack-dev-server/lib/Server.js',

@@ -1,5 +1,5 @@
 require('graceful-fs').gracefulify(require('fs'))
-const stripAnsi = require('strip-ansi')
+const path = require('path')
 const debugLib = require('debug')
 const { pathToFileURL } = require('url')
 const util = require('../util')
@@ -194,21 +194,21 @@ function run (ipc, file, projectRoot) {
       debug('loaded config from %s %o', file, result)
     } catch (err) {
       // Starting in Node 20, error objects that are thrown while using `node --load` are not properly serialized
-      // so we need to check both the name and the stack. We also have patched ts-node to ensure that the error is
-      // of the right form to be serialized.
-      if (err.name === 'TSError' || err.stack.includes('TSError')) {
-        err.name = 'TSError'
-        // because of this https://github.com/TypeStrong/ts-node/issues/1418
-        // we have to do this https://stackoverflow.com/questions/25245716/remove-all-ansi-colors-styles-from-strings/29497680
-        const cleanMessage = stripAnsi(err.message)
+      // so we need to check both the name and the stack.
+
+      // With tsx, errors now come in as TransformErrors instead of TSErrors.
+      if (err.name === 'TransformError' || err.stack.includes('TransformError')) {
+        err.name = 'TransformError'
+
+        const cleanMessage = err.message
         // replace the first line with better text (remove potentially misleading word TypeScript for example)
         .replace(/^.*\n/g, 'Error compiling file\n')
 
-        // Regex to pull out the error from the message body of a TSError. It displays the relative path to a file
-        const tsErrorRegex = /\n(.*?)\((\d+),(\d+)\):/g
-        const failurePath = tsErrorRegex.exec(cleanMessage)
+        // Regex to pull out the error from the message body of a tsx TransformError. It displays the relative path to a file
+        const transformErrorRegex = /\n(.*?):(\d+):(\d+):/g
+        const failurePath = transformErrorRegex.exec(cleanMessage)
 
-        err.compilerErrorLocation = failurePath ? { filePath: failurePath[1], line: Number(failurePath[2]), column: Number(failurePath[3]) } : null
+        err.compilerErrorLocation = failurePath ? { filePath: path.relative(projectRoot, failurePath[1]), line: Number(failurePath[2]), column: Number(failurePath[3]) } : null
         err.originalMessage = err.message
         err.message = cleanMessage
       } else if (Array.isArray(err.errors)) {

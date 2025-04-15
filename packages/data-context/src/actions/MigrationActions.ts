@@ -38,7 +38,7 @@ import { hasTypeScriptInstalled, toPosix } from '../util'
 
 const debug = debugLib('cypress:data-context:MigrationActions')
 
-const tsNode = toPosix(require.resolve('@packages/server/lib/plugins/child/register_ts_node'))
+const tsxCjs = toPosix(require.resolve('tsx/cjs'))
 
 export function getConfigWithDefaults (legacyConfig: any) {
   const newConfig = _.cloneDeep(legacyConfig)
@@ -99,20 +99,20 @@ export async function processConfigViaLegacyPlugins (projectRoot: string, legacy
     const configProcessArgs = ['--projectRoot', projectRoot, '--file', cwd]
     const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
 
-    // use ts-node if they've got typescript installed
+    // use tsx if they've got typescript installed
     // this matches the 9.x behavior, which is what we want for
     // processing legacy pluginsFile (we never supported `"type": "module") in 9.x.
     if (hasTypeScriptInstalled(projectRoot)) {
-      const tsNodeLoader = `--require "${tsNode}"`
+      const tsxLoader = `--require "${tsxCjs}"`
 
       if (!childOptions.env) {
         childOptions.env = {}
       }
 
       if (childOptions.env.NODE_OPTIONS) {
-        childOptions.env.NODE_OPTIONS += ` ${tsNodeLoader}`
+        childOptions.env.NODE_OPTIONS += ` ${tsxLoader}`
       } else {
-        childOptions.env.NODE_OPTIONS = tsNodeLoader
+        childOptions.env.NODE_OPTIONS = tsxLoader
       }
     }
 

@@ -24,7 +24,7 @@ export class ErrorDataSource {
       return null
     }
 
-    // If we saw a TSError,  or a esbuild error we will extract the error location from the message
+    // If we saw a TransformError, or a esbuild error we will extract the error location from the message
     const compilerErrorLocation = source.cypressError.originalError?.compilerErrorLocation
 
     let line: number | null | undefined
@@ -38,7 +38,8 @@ export class ErrorDataSource {
     } else {
       // Skip any stack trace lines which come from node:internal code
       const stackLines = stackUtils.getStackLines(source.cypressError.stack ?? '')
-      const filteredStackLines = stackLines.filter((stackLine) => !stackLine.includes('node:electron') && !stackLine.includes('node:internal') && !stackLine.includes('source-map-support'))
+      // we want to filter out any tsx transformation code in the stack to help identify the error
+      const filteredStackLines = stackLines.filter((stackLine) => !stackLine.includes('node:electron') && !stackLine.includes('node:internal') && !stackLine.includes('source-map-support') && !stackLine.includes('/node_modules/tsx/dist/register'))
       const parsedLine = stackUtils.parseStackLine(filteredStackLines[0] ?? '')
 
       if (parsedLine) {
