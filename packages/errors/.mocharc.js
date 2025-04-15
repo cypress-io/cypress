@@ -1,5 +1,5 @@
 module.exports = {
-  spec: 'test/unit',
+  spec: 'test/unit/*.ts',
   require: '@packages/ts/register',
   recursive: true,
   extension: ['js', 'ts'],
