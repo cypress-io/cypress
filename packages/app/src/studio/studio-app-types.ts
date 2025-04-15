@@ -12,8 +12,13 @@ export interface StudioAppDefaultShape {
   StudioPanel: StudioPanelShape
 }
 
+export type CypressInternal = Cypress.Cypress &
+CyEventEmitter & {
+  state: (key: string) => any
+}
+
 export interface StudioEventManagerProps {
-  Cypress: Cypress.Cypress & CyEventEmitter
+  Cypress: CypressInternal
 }
 
 export type RunnerStatus = 'running' | 'finished'
