@@ -105,6 +105,8 @@ export default {
       // we need to set this to bind our AUT intercepts correctly. Hopefully we can move this in the future on a more sure implementation
       client.setTopLevelContextId(contexts[0].context)
 
+      automation.use(client.automationMiddleware)
+
       await webdriverClient.browsingContextNavigate({
         context: contexts[0].context,
         url,

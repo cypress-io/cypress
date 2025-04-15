@@ -447,6 +447,10 @@ export class ProjectBase extends EE {
 
           await browsers.connectProtocolToBrowser({ browser: this.browser, foundBrowsers: this.options.browsers, protocolManager: this.protocolManager })
 
+          if (this.protocolManager.db) {
+            this.ctx.coreData.studio?.setProtocolDb(this.protocolManager.db)
+          }
+
           return { canAccessStudioAI: true }
         }
 

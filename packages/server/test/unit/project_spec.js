@@ -737,6 +737,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       const mockSetupProtocol = sinon.stub()
       const mockBeforeSpec = sinon.stub()
       const mockAccessStudioLLM = sinon.stub().resolves(true)
+      const mockSetProtocolDb = sinon.stub()
 
       this.project.spec = {}
       this.project.ctx.coreData.studio = {
@@ -744,7 +745,9 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         protocolManager: {
           setupProtocol: mockSetupProtocol,
           beforeSpec: mockBeforeSpec,
+          db: { test: 'db' },
         },
+        setProtocolDb: mockSetProtocolDb,
       }
 
       sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
@@ -793,6 +796,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
 
       expect(this.project['_protocolManager']).to.eq(this.project.ctx.coreData.studio.protocolManager)
+      expect(mockSetProtocolDb).to.be.calledWith({ test: 'db' })
     })
 
     it('passes onStudioInit callback with AI enabled but no protocol manager', async function () {

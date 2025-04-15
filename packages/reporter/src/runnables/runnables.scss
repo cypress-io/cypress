@@ -4,7 +4,7 @@
   min-height: 0; // needed for firefox or else scrolling gets funky
 
   .container {
-    background-color: $gray-1000;
+    background-color: $gray-1100;
     flex-grow: 2;
     overflow-y: auto;
   }
@@ -21,7 +21,7 @@
   }
 
   .no-tests {
-    background-color: $gray-1000;
+    background-color: $gray-1100;
     min-height: 20px;
     padding: 24px;
 
@@ -86,7 +86,7 @@
   .runnable {
     width: 100%;
     color: $gray-400;
-    background-color: $gray-1000;
+    background-color: $gray-1100;
     overflow: auto;
     line-height: 18px;
     padding-left: 0;
@@ -98,7 +98,7 @@
       .collapsible-header {
         &:focus {
           .collapsible-header-inner {
-            background-color: $gray-1000;
+            background-color: $gray-1100;
             cursor: pointer;
           }
         }

@@ -45,7 +45,7 @@ describe('runnables', () => {
     start = (renderProps?: Partial<BaseReporterProps>) => {
       render(renderProps)
 
-      return cy.get('.reporter').then(() => {
+      return cy.get('.reporter.mounted').then(() => {
         runner.emit('runnables:ready', runnables)
         runner.emit('reporter:start', {})
       })

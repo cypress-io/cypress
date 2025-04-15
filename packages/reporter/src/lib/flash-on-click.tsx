@@ -1,7 +1,6 @@
-import { action, observable, makeObservable } from 'mobx'
+import { action } from 'mobx'
 import { observer } from 'mobx-react'
-import PropTypes from 'prop-types'
-import React, { Children, cloneElement, Component, MouseEvent, ReactElement, ReactNode } from 'react'
+import React, { Children, cloneElement, MouseEvent, ReactElement, ReactNode, useCallback, useState } from 'react'
 // @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
 
@@ -10,55 +9,35 @@ interface Props {
   onClick: ((e: MouseEvent) => void)
   shouldShowMessage?: (() => boolean)
   wrapperClassName?: string
+  children: React.ReactNode
 }
 
-@observer
-class FlashOnClick extends Component<Props> {
-  static propTypes = {
-    message: PropTypes.string.isRequired,
-    onClick: PropTypes.func.isRequired,
-    shouldShowMessage: PropTypes.func,
-    wrapperClassName: PropTypes.string,
-  }
+const FlashOnClick: React.FC<Props> = observer(({ message, onClick, wrapperClassName, children, shouldShowMessage = () => true }) => {
+  const [show, setShow] = useState(false)
 
-  static defaultProps = {
-    shouldShowMessage: () => true,
-  }
-
-  @observable _show = false
-
-  constructor (props: Props) {
-    super(props)
-    makeObservable(this)
-  }
-
-  render () {
-    const child = Children.only<ReactNode>(this.props.children)
-
-    return (
-      <Tooltip
-        placement='top'
-        title={this.props.message}
-        visible={this._show}
-        className='cy-tooltip'
-        wrapperClassName={this.props.wrapperClassName}
-      >
-        {cloneElement(child as ReactElement, { onClick: this._onClick })}
-      </Tooltip>
-    )
-  }
-
-  @action _onClick = (e: MouseEvent) => {
-    const { onClick, shouldShowMessage } = this.props
-
+  const _onClick = useCallback((e: MouseEvent) => {
     onClick(e)
     if (shouldShowMessage && !shouldShowMessage()) return
 
-    this._show = true
+    setShow(true)
     setTimeout(action('hide:console:message', () => {
-      this._show = false
+      setShow(false)
     }), 1500)
-  }
-}
+  }, [onClick, shouldShowMessage])
+
+  const child = Children.only<ReactNode>(children)
+
+  return (
+    <Tooltip
+      placement='top'
+      title={message}
+      visible={show}
+      className='cy-tooltip'
+      wrapperClassName={wrapperClassName}
+    >
+      {cloneElement(child as ReactElement, { onClick: _onClick })}
+    </Tooltip>
+  )
+})
 
 export default FlashOnClick

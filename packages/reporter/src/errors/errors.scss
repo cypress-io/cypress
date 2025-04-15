@@ -2,7 +2,7 @@ $code-border-radius: 4px;
 
 .reporter {
   .error {
-    background-color: $gray-1000;
+    background-color: $gray-1100;
     min-height: 20px;
     padding: 24px;
 
@@ -262,7 +262,7 @@ $code-border-radius: 4px;
   }
 
   .test-err-code-frame {
-    background-color: $gray-1000;
+    background-color: $gray-1100;
     border: 1px dashed rgba(245, 154, 169, 0.1);
     border-radius: $code-border-radius;
     margin: 0 0 10px;

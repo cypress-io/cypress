@@ -9,6 +9,7 @@ import * as Submit from './submit'
 import * as Type from './type'
 import * as Trigger from './trigger'
 import * as Mount from './mount'
+import Press from './press'
 
 export {
   Check,
@@ -22,4 +23,5 @@ export {
   Type,
   Trigger,
   Mount,
+  Press,
 }
