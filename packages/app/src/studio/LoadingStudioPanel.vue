@@ -21,7 +21,7 @@
 <script lang="ts" setup>
 import Spinner from '@cypress-design/vue-spinner/sfc'
 import StudioButton from './StudioButton.vue'
-import { EventManager } from '../runner/event-manager'
+import type { EventManager } from '../runner/event-manager'
 
 const props = defineProps<{
   eventManager: EventManager

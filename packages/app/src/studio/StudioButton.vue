@@ -34,7 +34,7 @@ import { IconMenuExpandLeft, IconMenuExpandRight } from '@cypress-design/vue-ico
 import Button from '@cypress-design/vue-button'
 import Tag from '@cypress-design/vue-tag'
 import { useStudioStore } from '../store/studio-store'
-import { EventManager } from '../runner/event-manager'
+import type { EventManager } from '../runner/event-manager'
 
 const props = defineProps<{ eventManager: EventManager }>()
 
