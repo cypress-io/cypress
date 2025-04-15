@@ -2,7 +2,7 @@
   <div
     id="spec-runner-header"
     ref="autHeaderEl"
-    class="bg-gray-1000 border-l-[1px] border-gray-900 min-h-[64px] px-[16px] text-[14px]"
+    class="bg-gray-1100 border-l-[1px] border-gray-900 min-h-[64px] px-[16px] text-[14px]"
   >
     <!-- this is similar to the Open Mode header but it's not interactive, so can be a lot smaller-->
     <div class="flex grow flex-wrap py-[16px] gap-[12px] justify-end">

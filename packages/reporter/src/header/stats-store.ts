@@ -15,21 +15,29 @@ const defaults = {
 }
 
 class StatsStore {
-  @observable numPassed: number = defaults.numPassed
-  @observable numFailed: number = defaults.numFailed
-  @observable numPending: number = defaults.numPending
+  numPassed: number = defaults.numPassed
+  numFailed: number = defaults.numFailed
+  numPending: number = defaults.numPending
 
-  @observable _startTime: number | null = defaults._startTime
-  @observable _currentTime: number | null = defaults._startTime;
+  _startTime: number | null = defaults._startTime
+  _currentTime: number | null = defaults._startTime;
   [key: string]: any
 
   private _interval?: IntervalID
 
   constructor () {
-    makeObservable(this)
+    makeObservable(this, {
+      numPassed: observable,
+      numFailed: observable,
+      numPending: observable,
+      _startTime: observable,
+      _currentTime: observable,
+      duration: computed,
+      incrementCount: action,
+    })
   }
 
-  @computed get duration () {
+  get duration () {
     if (!this._startTime) return 0
 
     if (!this._currentTime) {
@@ -64,7 +72,6 @@ class StatsStore {
     this._currentTime = Date.now()
   }
 
-  @action
   incrementCount (type: TestState) {
     const countKey = `num${_.capitalize(type)}`
 

@@ -8,6 +8,18 @@ _Released 07/01/2025 (PENDING)_
 - Removed support for Node.js 18 and Node.js 23. Addresses [#31302](https://github.com/cypress-io/cypress/issues/31302).
 - Removed support for [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol) with the [firefox](https://www.mozilla.org/) browser. Addresses [#31189](https://github.com/cypress-io/cypress/issues/31189).
 
+## 14.3.1
+
+_Released 4/22/2025 (PENDING)_
+
+**Bugfixes:**
+
+- The [`cy.press()`](http://on.cypress.io/api/press) command no longer errors when used in specs subsequent to the first spec in run mode. Fixes [#31466](https://github.com/cypress-io/cypress/issues/31466).
+
+**Misc:**
+
+- The UI of the reporter and URL were updated to a darker gray background for better color contrast. Addressed in [#31475](https://github.com/cypress-io/cypress/pull/31475).
+
 ## 14.3.0
 
 _Released 4/8/2025_

@@ -20,7 +20,7 @@ import auth from './cloud/auth'
 import user from './cloud/user'
 import cohorts from './cohorts'
 import { openProject } from './open_project'
-import cache from './cache'
+import { cache } from './cache'
 import { graphqlSchema } from '@packages/graphql/src/schema'
 import { openExternal } from './gui/links'
 import { getUserEditor } from './util/editors'
@@ -109,9 +109,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return cache.removeAllProjectPreferences()
       },
       insertProjectPreferencesToCache (projectTitle: string, preferences: Preferences) {
-        // FIXME: this should be awaited (since it writes to disk asynchronously) but is not
-        // https://cypress-io.atlassian.net/browse/UNIFY-1705
-        cache.insertProjectPreferences(projectTitle, preferences)
+        return cache.insertProjectPreferences(projectTitle, preferences)
       },
       removeProjectFromCache (path: string) {
         return cache.removeProject(path)
