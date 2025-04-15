@@ -10,7 +10,7 @@ pre[class*="language-"] {
 
 :not(pre) > code[class*="language-"],
 pre[class*="language-"] {
-	background: $gray-1000;
+	background: $gray-1100;
 }
 
 // .token.comment,
@@ -52,7 +52,7 @@ pre[class*="language-"] {
 .token.important,
 .token.variable {
 	color: $orange-400;
-  background: $gray-1000;
+  background: $gray-1100;
 }
 
 .token.atrule,
