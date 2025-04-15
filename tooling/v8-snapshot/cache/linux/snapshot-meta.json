@@ -3735,7 +3735,6 @@
     "./packages/data-context/src/sources/migration/utils.ts",
     "./packages/data-context/src/util/DocumentNodeBuilder.ts",
     "./packages/data-context/src/util/autoBindDebug.ts",
-    "./packages/data-context/src/util/cached.ts",
     "./packages/data-context/src/util/config-file-updater.ts",
     "./packages/data-context/src/util/file.ts",
     "./packages/data-context/src/util/hasTypescript.ts",
