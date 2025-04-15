@@ -19,7 +19,6 @@ exports['e2e record passing passes 1'] = `
                                                                                                     
   Running:  record_error.cy.js                                                              (1 of 4)
   Estimated: X second(s)
-Still waiting to connect to Chrome, retrying in X second(s)(attempt 18/62)
 
 Oops...we found an error preparing this test file:
 
