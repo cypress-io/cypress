@@ -2,9 +2,6 @@ import { createEventManager } from '../../cypress/component/support/ctSupport'
 import LoadingStudioPanel from './LoadingStudioPanel.vue'
 
 describe('LoadingStudioPanel', () => {
-  beforeEach(() => {
-  })
-
   it('renders loading studio panel', () => {
     const eventManager = createEventManager()
 
