@@ -29,12 +29,13 @@ const props = defineProps<{
 
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+
 .loading-studio-panel {
-  background-color: #161827;
+  background-color: $gray-1100;
 
   header {
-    background-color: #161827;
+    background-color: $gray-1100;
   }
 }
 </style>

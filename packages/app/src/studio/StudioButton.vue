@@ -1,5 +1,5 @@
 <template>
-  <div className="flex items-center">
+  <div className="flex items-center bg-gray-900">
     <Button
       class="gap-[8px]"
       variant="outline-dark"
