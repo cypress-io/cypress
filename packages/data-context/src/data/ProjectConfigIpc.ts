@@ -20,7 +20,8 @@ const debugVerbose = debugLib(`cypress-verbose:lifecycle:ProjectConfigIpc`)
 
 const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
 
-const tsx = toPosix(require.resolve('tsx'))
+// NOTE: need the file:// prefix to avoid https://nodejs.org/api/errors.html#err_unsupported_esm_url_scheme on windows
+const tsx = os.platform() === 'win32' ? `file://${toPosix(require.resolve('tsx'))}` : toPosix(require.resolve('tsx'))
 
 export type IpcHandler = (ipc: ProjectConfigIpc) => void
 
