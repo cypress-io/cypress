@@ -407,6 +407,8 @@ export class SocketBase {
           return socket.emit('dev-server:on-spec-updated')
         })
 
+        getCtx().coreData.studio?.addSocketListeners(socket)
+
         socket.on('studio:init', async (cb) => {
           try {
             const { canAccessStudioAI } = await options.onStudioInit()
