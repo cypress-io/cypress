@@ -325,7 +325,7 @@ describe('lib/cloud/api', () => {
       })
     })
 
-    it('sets timeout to 60 seconds when no CYPRESS_INITIAL_PREFLIGHT_TIMEOUT env is set', () => {
+    it('sets timeout to 5 seconds when no CYPRESS_INITIAL_PREFLIGHT_TIMEOUT env is set', () => {
       sinon.stub(api.rp, 'post').resolves({})
 
       return api.sendPreflight({})
