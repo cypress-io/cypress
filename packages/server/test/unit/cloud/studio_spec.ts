@@ -172,6 +172,31 @@ describe('lib/cloud/studio', () => {
     })
   })
 
+  describe('addSocketListeners', () => {
+    it('calls addSocketListeners on the studio server', () => {
+      sinon.stub(studio, 'addSocketListeners')
+      const mockSocket = { id: 'test-socket' } as any
+
+      studioManager.addSocketListeners(mockSocket)
+
+      expect(studio.addSocketListeners).to.be.calledWith(mockSocket)
+    })
+
+    it('does not call addSocketListeners when studio server is not defined', () => {
+      // Set _studioServer to undefined
+      (studioManager as any)._studioServer = undefined
+
+      // Create a spy on invokeSync to verify it's not called
+      const invokeSyncSpy = sinon.spy(studioManager, 'invokeSync')
+
+      const mockSocket = { id: 'test-socket' } as any
+
+      studioManager.addSocketListeners(mockSocket)
+
+      expect(invokeSyncSpy).to.not.be.called
+    })
+  })
+
   describe('setProtocolDb', () => {
     it('sets the protocol database on the studio server', () => {
       const mockDb = { test: 'db' }

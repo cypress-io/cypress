@@ -1,5 +1,6 @@
 import type { StudioErrorReport, StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape, StudioCloudApi } from '@packages/types'
 import type { Router } from 'express'
+import type { Socket } from 'socket.io'
 import fetch from 'cross-fetch'
 import pkg from '@packages/root'
 import os from 'os'
@@ -58,6 +59,12 @@ export class StudioManager implements StudioManagerShape {
   initializeRoutes (router: Router): void {
     if (this._studioServer) {
       this.invokeSync('initializeRoutes', { isEssential: true }, router)
+    }
+  }
+
+  addSocketListeners (socket: Socket): void {
+    if (this._studioServer) {
+      this.invokeSync('addSocketListeners', { isEssential: true }, socket)
     }
   }
 
