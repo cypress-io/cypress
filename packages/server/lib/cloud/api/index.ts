@@ -658,7 +658,7 @@ export default {
       }
 
       const postReqs = async () => {
-        const initialPreflightTimeout = noproxyPreflightTimeout()
+        const initialPreflightTimeout = noProxyPreflightTimeout()
 
         if (initialPreflightTimeout >= 0) {
           try {
