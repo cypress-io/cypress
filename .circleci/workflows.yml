@@ -1782,6 +1782,8 @@ jobs:
             - run: yarn lerna run types
             - sanitize-verify-and-store-mocha-results:
                 expectedResultCount: 20
+            - store_artifacts:
+                path: /tmp/cypress/junit
 
   verify-release-readiness:
     <<: *defaults
