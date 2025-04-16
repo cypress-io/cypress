@@ -42,29 +42,29 @@ export interface CommandProps extends InstrumentProps {
 }
 
 export default class Command extends Instrument {
-  @observable.struct renderProps: RenderProps = {}
-  @observable.struct sessionInfo?: SessionProps['sessionInfo']
-  @observable err?: Err
-  @observable event?: boolean = false
-  @observable isLongRunning = false
-  @observable number?: number
-  @observable numElements: number
-  @observable timeout?: number
-  @observable visible?: boolean
-  @observable wallClockStartedAt?: string
-  @observable children: Array<Command> = []
-  @observable hookId: string
-  @observable isStudio: boolean
-  @observable group?: number
-  @observable groupLevel?: number
-  @observable hasSnapshot?: boolean
-  @observable hasConsoleProps?: boolean
-  @observable _isOpen: boolean|null = null
+  renderProps: RenderProps = {}
+  sessionInfo?: SessionProps['sessionInfo']
+  err?: Err
+  event?: boolean = false
+  isLongRunning = false
+  number?: number
+  numElements: number
+  timeout?: number
+  visible?: boolean
+  wallClockStartedAt?: string
+  children: Array<Command> = []
+  hookId: string
+  isStudio: boolean
+  group?: number
+  groupLevel?: number
+  hasSnapshot?: boolean
+  hasConsoleProps?: boolean
+  _isOpen: boolean|null = null
 
   private _prevState: string | null | undefined = null
   private _pendingTimeout?: TimeoutID = undefined
 
-  @computed get displayMessage () {
+  get displayMessage () {
     return this.renderProps.message || this.message
   }
 
@@ -76,7 +76,7 @@ export default class Command extends Instrument {
     return children.length + children.reduce((previousValue, child) => previousValue + this.countNestedCommands(child.children), 0)
   }
 
-  @computed get numChildren () {
+  get numChildren () {
     if (this.event) {
       // add one to include self so it's the total number of same events
       return this.children.length + 1
@@ -85,7 +85,7 @@ export default class Command extends Instrument {
     return this.countNestedCommands(this.children)
   }
 
-  @computed get isOpen () {
+  get isOpen () {
     if (!this.hasChildren) return null
 
     return this._isOpen || (this._isOpen === null
@@ -106,11 +106,11 @@ export default class Command extends Instrument {
     )
   }
 
-  @action toggleOpen () {
+  toggleOpen () {
     this._isOpen = !this.isOpen
   }
 
-  @computed get hasChildren () {
+  get hasChildren () {
     if (this.event) {
       // if the command is an event log, we add one to the number of children count to include
       // itself in the total number of same events that render when the group is closed
@@ -120,7 +120,7 @@ export default class Command extends Instrument {
     return this.numChildren > 0
   }
 
-  @computed get showError () {
+  get showError () {
     if (this.hasChildren) {
       return (this.err?.isRecovered && this.isOpen)
     }
@@ -131,7 +131,33 @@ export default class Command extends Instrument {
   constructor (props: CommandProps) {
     super(props)
 
-    makeObservable(this)
+    makeObservable(this, {
+      renderProps: observable.struct,
+      sessionInfo: observable.struct,
+      err: observable,
+      event: observable,
+      isLongRunning: observable,
+      number: observable,
+      numElements: observable,
+      timeout: observable,
+      visible: observable,
+      wallClockStartedAt: observable,
+      children: observable,
+      hookId: observable,
+      isStudio: observable,
+      group: observable,
+      groupLevel: observable,
+      hasSnapshot: observable,
+      hasConsoleProps: observable,
+      _isOpen: observable,
+      displayMessage: computed,
+      numChildren: computed,
+      isOpen: computed,
+      toggleOpen: action,
+      hasChildren: computed,
+      showError: computed,
+      setGroup: action,
+    })
 
     if (props.err) {
       this.err = new Err(props.err)
@@ -190,7 +216,6 @@ export default class Command extends Instrument {
     return command.event && this.matches(command)
   }
 
-  @action
   setGroup (id) {
     this.group = id
   }

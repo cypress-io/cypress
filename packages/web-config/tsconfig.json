@@ -56,7 +56,8 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "noErrorTruncation": true,
-    "experimentalDecorators": true,
+    // explicitly turn this off as it defaults to true in the base tsconfig.json and it's not needed here
+    "experimentalDecorators": false,
     "skipLibCheck": true
     // "noResolve": true
   },
