@@ -240,7 +240,7 @@ const isRetriableError = (err) => {
     (err.statusCode == null)
 }
 
-function noproxyPreflightTimeout (): number {
+function noProxyPreflightTimeout (): number {
   try {
     const timeoutFromEnv = Number(process.env.CYPRESS_INITIAL_PREFLIGHT_TIMEOUT)
 
