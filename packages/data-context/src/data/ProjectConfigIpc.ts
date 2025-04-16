@@ -308,8 +308,10 @@ export class ProjectConfigIpc extends EventEmitter {
     }
 
     /**
-     * use --import for node 20.6.0 and above as --import is supported
-     * use --loader for node under 20.6.0
+     * use --import for node versions
+     * 18.19.0 and above for 18.x.x as --import is supported (Cypress 15 does not support node 18.x.x)
+     * 20.6.0 and above for 20.x.x as --import is supported
+     * use --loader for node under 18.19.0 and 20.6.0
      * @see https://tsx.is/dev-api/node-cli#node-js-cli
      */
     let tsxLoader = this.nodeVersion && semver.lt(this.nodeVersion, '20.6.0') ? `--loader ${tsx}` : `--import ${tsx}`
