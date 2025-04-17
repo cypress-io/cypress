@@ -1878,9 +1878,9 @@ Warning from Cypress Cloud:
 This feature will not be supported soon, please check with Cypress to learn more: https://on.cypress.io/
 ----------------------------------------------------------------------
 
-You've exceeded the limit of private test results under your free plan this month. The limit is 500 private test results.
+You've exceeded the limit of test results under your current billing plan this month. The limit is 500 test results.
 
-Your plan is now in a grace period, which means your tests will still be recorded until 2999-12-31. Please upgrade your plan to continue recording tests on Cypress Cloud in the future.
+To continue getting the full benefits of your current plan, please visit your billing to upgrade.
 
 https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
