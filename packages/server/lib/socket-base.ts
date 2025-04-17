@@ -407,13 +407,26 @@ export class SocketBase {
           return socket.emit('dev-server:on-spec-updated')
         })
 
-        getCtx().coreData.studio?.addSocketListeners(socket)
+        getCtx().coreData.studioLifecycleManager?.onStudioReady((studio) => {
+          studio.addSocketListeners(socket)
+        })
 
         socket.on('studio:init', async (cb) => {
           try {
             const { canAccessStudioAI } = await options.onStudioInit()
 
             cb({ canAccessStudioAI })
+          } catch (error) {
+            cb({ error: errors.cloneErr(error) })
+          }
+        })
+
+        socket.on('studio:protocol:enabled', async (cb) => {
+          try {
+            const ctx = await getCtx()
+            const studio = await ctx.coreData.studioLifecycleManager?.getStudio()
+
+            cb({ studioProtocolEnabled: studio?.isProtocolEnabled })
           } catch (error) {
             cb({ error: errors.cloneErr(error) })
           }

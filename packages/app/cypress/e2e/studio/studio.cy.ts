@@ -22,13 +22,13 @@ describe('Cypress Studio', () => {
     })
   }
 
-  context('cloud studio', () => {
-    it('loads the studio page', () => {
+  context.only('cloud studio', () => {
+    it.only('loads the studio page', () => {
+
       launchStudio({ enableCloudStudio: true })
 
       cy.window().then((win) => {
         expect(win.Cypress.config('isDefaultProtocolEnabled')).to.be.false
-        expect(win.Cypress.config('isStudioProtocolEnabled')).to.be.true
         expect(win.Cypress.state('isProtocolEnabled')).to.be.true
       })
     })

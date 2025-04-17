@@ -164,7 +164,10 @@ export interface CoreDataShape {
   cloudProject: CloudDataShape
   eventCollectorSource: EventCollectorSource | null
   didBrowserPreviouslyHaveUnexpectedExit: boolean
-  studio: StudioManagerShape | null
+  studioLifecycleManager?: {
+    getStudio: () => Promise<StudioManagerShape | null>
+    onStudioReady: (listener: (studioManager: StudioManagerShape) => void) => () => void
+  }
 }
 
 /**
@@ -246,7 +249,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     },
     eventCollectorSource: null,
     didBrowserPreviouslyHaveUnexpectedExit: false,
-    studio: null,
+    studioLifecycleManager: undefined,
   }
 
   async function machineId (): Promise<string | null> {

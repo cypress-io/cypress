@@ -105,7 +105,10 @@ export const Query = objectType({
     t.field('studio', {
       type: Studio,
       description: 'Data pertaining to studio and the studio manager that is loaded from the cloud',
-      resolve: (source, args, ctx) => ctx.coreData.studio,
+      resolve: async (source, args, ctx) => {
+        const studio = await ctx.coreData.studioLifecycleManager?.getStudio()
+        return studio ? { status: studio.status } : null
+      },
     })
 
     t.nonNull.field('localSettings', {
