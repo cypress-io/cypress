@@ -13,9 +13,9 @@ export interface StudioAppDefaultShape {
 }
 
 export type CypressInternal = Cypress.Cypress &
-  CyEventEmitter & {
-    state: (key: string) => any
-  }
+CyEventEmitter & {
+  state: (key: string) => any
+}
 
 export interface StudioEventManagerProps {
   Cypress: CypressInternal
