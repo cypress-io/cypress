@@ -1,3 +1,6 @@
+/**
+ * The axios Cloud instance should not be used.
+ */
 import os from 'os'
 
 import axios, { AxiosInstance } from 'axios'

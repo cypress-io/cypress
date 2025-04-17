@@ -1,11 +1,10 @@
 import chai from 'chai'
 import nock from 'nock'
-import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
-import os from 'os'
 import pkg from '@packages/root'
 
-import { createInstance } from '../../../../lib/cloud/api/create_instance'
+import { createInstance as axiosCreateInstance, CreateInstanceRequestBody, CreateInstanceResponse } from '../../../../lib/cloud/api/create_instance'
+import api from '../../../../lib/cloud/api'
 
 chai.use(sinonChai)
 
@@ -14,11 +13,14 @@ const { expect } = chai
 const API_BASEURL = 'http://localhost:1234'
 const OS_PLATFORM = 'linux'
 
+const AXIOS_LABEL = 'axios createInstance'
+const REQUEST_LABEL = 'request createInstance'
+
 context('API createInstance', () => {
   let nocked
   const runId = 'run-id-123'
 
-  const instanceRequestData: Parameters<typeof createInstance>[1] = {
+  const instanceRequestData: CreateInstanceRequestBody = {
     spec: null,
     groupId: 'groupId123',
     machineId: 'machineId123',
@@ -32,7 +34,7 @@ context('API createInstance', () => {
     },
   }
 
-  const instanceResponseData: Awaited<ReturnType<typeof createInstance>> = {
+  const instanceResponseData: CreateInstanceResponse = {
     instanceId: 'instance-id-123',
     claimedInstances: 0,
     estimatedWallClockDuration: null,
@@ -43,65 +45,96 @@ context('API createInstance', () => {
   beforeEach(() => {
     nocked = nock(API_BASEURL)
     .matchHeader('x-cypress-run-id', runId)
-    // sinon stubbing on the `os` package doesn't work for `createInstance`
-    //.matchHeader('x-os-name', OS_PLATFORM)
     .matchHeader('x-cypress-version', pkg.version)
     .post(`/runs/${runId}/instances`)
 
-    sinon.stub(os, 'platform').returns(OS_PLATFORM)
+    api.setPreflightResult({ encrypt: false })
   })
 
-  afterEach(() => {
-    (os.platform as sinon.SinonStub).restore()
-  })
+  ;[
+    {
+      label: AXIOS_LABEL,
+      fn: axiosCreateInstance,
+    },
+    {
+      label: REQUEST_LABEL,
+      fn: api.createInstance,
+    },
+  ].forEach(function ({ label, fn: createInstance }) {
+    describe(label, function () {
+      describe('when the request succeeds', () => {
+        beforeEach(() => {
+          nocked.reply(200, instanceResponseData)
+        })
 
-  describe('when the request succeeds', () => {
-    beforeEach(() => {
-      nocked.reply(200, instanceResponseData)
-    })
+        it('returns the created instance', async () => {
+          const response = await createInstance(runId, instanceRequestData)
 
-    it('returns the created instance', async () => {
-      const response = await createInstance(runId, instanceRequestData)
+          for (let k in instanceResponseData) {
+            expect(instanceResponseData[k]).to.eq(response[k])
+          }
+        })
+      })
 
-      for (let k in instanceResponseData) {
-        expect(instanceResponseData[k]).to.eq(response[k])
-      }
-    })
-  })
+      describe('when the request times out 4 times', () => {
+        const timeout = 10
+        let oldIntervals
 
-  describe('when the request times out 3 times', () => {
-    const timeout = 100
+        beforeEach(() => {
+          oldIntervals = process.env.API_RETRY_INTERVALS
+          process.env.API_RETRY_INTERVALS = '0,0,0'
+          nocked
+          .times(4)
+          .delayConnection(5000)
+          .reply(200, instanceResponseData)
+        })
 
-    beforeEach(() => {
-      nocked
-      .times(3)
-      .delayConnection(5000)
-      .reply(200, instanceResponseData)
-    })
+        afterEach(() => {
+          process.env.API_RETRY_INTERVALS = oldIntervals
+        })
 
-    it('throws an aggregate error', () => {
-      return createInstance(runId, instanceRequestData, timeout)
-      .then(() => {
-        throw new Error('should have thrown here')
-      }).catch((err) => {
-        for (const error of err.errors) {
-          expect(error.message).to.eq(`timeout of ${timeout}ms exceeded`)
-          expect(error.isApiError).to.be.true
+        // axios throws an AggregateError
+        if (AXIOS_LABEL === label) {
+          it('throws an aggregate error', () => {
+            return createInstance(runId, instanceRequestData, timeout)
+            .then(() => {
+              throw new Error('should have thrown here')
+            }).catch((err) => {
+              for (const error of err.errors) {
+                expect(error.message).to.eq(`timeout of ${timeout}ms exceeded`)
+                expect(error.isApiError).to.be.true
+              }
+            })
+          })
+        // request/promise throws the most recent error
+        } else {
+          it('throws a tagged error', async () => {
+            let thrown: Error | undefined = undefined
+
+            try {
+              await createInstance(runId, instanceRequestData, timeout)
+            } catch (e) {
+              thrown = e
+            }
+
+            expect(thrown).not.to.be.undefined
+            expect((thrown as Error & { isApiError?: boolean }).isApiError).to.be.true
+          })
         }
       })
-    })
-  })
 
-  describe('when the request times out once and then succeeds', () => {
-    beforeEach(() => {
-      nocked.delayConnection(5000).reply(200, instanceResponseData)
-      nocked.delayConnection(0).reply(200, instanceResponseData)
-    })
+      describe('when the request times out once and then succeeds', () => {
+        beforeEach(() => {
+          nocked.delayConnection(5000).reply(200, instanceResponseData)
+          nocked.delayConnection(0).reply(200, instanceResponseData)
+        })
 
-    it('returns the instance response data', async () => {
-      const data = await createInstance(runId, instanceRequestData, 100)
+        it('returns the instance response data', async () => {
+          const data = await createInstance(runId, instanceRequestData, 100)
 
-      expect(data).to.deep.eq(instanceResponseData)
+          expect(data).to.deep.eq(instanceResponseData)
+        })
+      })
     })
   })
 })
