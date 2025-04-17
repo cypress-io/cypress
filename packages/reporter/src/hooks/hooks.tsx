@@ -62,7 +62,7 @@ export interface HookProps {
   showNumber: boolean
 }
 
-const Hook = observer(({ model, showNumber }: HookProps) => (
+const Hook: React.FC<HookProps> = observer(({ model, showNumber }: HookProps) => (
   <li className={cs('hook-item', { 'hook-failed': model.failed, 'hook-studio': model.isStudio })}>
     <Collapsible
       header={<HookHeader model={model} number={showNumber ? model.hookNumber : undefined} />}
@@ -78,6 +78,8 @@ const Hook = observer(({ model, showNumber }: HookProps) => (
   </li>
 ))
 
+Hook.displayName = 'Hook'
+
 export interface HooksModel {
   hooks: HookModel[]
   hookCount: { [name in HookName]: number }
@@ -89,7 +91,7 @@ export interface HooksProps {
   model: HooksModel
 }
 
-const Hooks = observer(({ state = appState, model }: HooksProps) => (
+const Hooks: React.FC<HooksProps> = observer(({ state = appState, model }: HooksProps) => (
   <ul className='hooks-container'>
     {_.map(model.hooks, (hook) => {
       if (hook.commands.length || (hook.isStudio && state.studioActive && model.state === 'passed')) {
@@ -100,6 +102,8 @@ const Hooks = observer(({ state = appState, model }: HooksProps) => (
     })}
   </ul>
 ))
+
+Hooks.displayName = 'Hooks'
 
 export { Hook, HookHeader }
 

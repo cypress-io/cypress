@@ -56,4 +56,6 @@ const RunnableHeader: React.FC<RunnableHeaderProps> = observer(({ spec, statsSto
   )
 })
 
+RunnableHeader.displayName = 'RunnableHeader'
+
 export default RunnableHeader

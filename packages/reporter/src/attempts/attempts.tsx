@@ -92,7 +92,15 @@ const Attempt: React.FC<AttemptProps> = observer(({ model, scrollIntoView, studi
   )
 })
 
-const Attempts = observer(({ test, scrollIntoView, studioActive }: {test: TestModel, scrollIntoView: Function, studioActive: boolean}) => {
+Attempt.displayName = 'Attempt'
+
+interface AttemptsProps {
+  test: TestModel
+  scrollIntoView: Function
+  studioActive: boolean
+}
+
+const Attempts: React.FC<AttemptsProps> = observer(({ test, scrollIntoView, studioActive }: AttemptsProps) => {
   return (<ul className={cs('attempts', {
     'has-multiple-attempts': test.hasMultipleAttempts,
   })}>
@@ -108,6 +116,8 @@ const Attempts = observer(({ test, scrollIntoView, studioActive }: {test: TestMo
     })}
   </ul>)
 })
+
+Attempts.displayName = 'Attempts'
 
 export { Attempt, AttemptHeader, NoCommands }
 
