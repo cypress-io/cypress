@@ -15,17 +15,7 @@ export function loadProjectAndRunSpec ({ projectName = 'experimental-studio' as 
 }
 
 export function launchStudio ({ specName = 'spec.cy.js', createNewTest = false, cliArgs = [''], enableCloudStudio = false } = {}) {
-  cy.scaffoldProject('experimental-studio')
-  cy.openProject('experimental-studio', cliArgs, {
-    cloudStudio: enableCloudStudio,
-  })
-
-  cy.startAppServer('e2e')
-  cy.visitApp()
-  cy.specsPageIsVisible()
-  cy.get(`[data-cy-row="${specName}"]`).click()
-
-  cy.waitForSpecToFinish()
+  loadProjectAndRunSpec({ specName, cliArgs, enableCloudStudio })
 
   // Should not show "Studio Commands" until we've started a new Studio session.
   cy.get('[data-cy="hook-name-studio commands"]').should('not.exist')
