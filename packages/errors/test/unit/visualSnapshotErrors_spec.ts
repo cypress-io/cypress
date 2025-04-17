@@ -966,34 +966,6 @@ describe('visual error templates', () => {
         default: [],
       }
     },
-    FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS: () => {
-      return {
-        default: [{
-          link: 'https://cloud.cypress.io/project/abcd',
-          limit: 500,
-          usedTestsMessage: 'test',
-        }],
-      }
-    },
-    FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS: () => {
-      return {
-        default: [{
-          link: 'https://cloud.cypress.io/project/abcd',
-          limit: 500,
-          usedTestsMessage: 'test',
-          gracePeriodMessage: 'the grace period ends',
-        }],
-      }
-    },
-    PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS: () => {
-      return {
-        default: [{
-          link: 'https://on.cypress.io/set-up-billing',
-          limit: 25000,
-          usedTestsMessage: 'private test',
-        }],
-      }
-    },
     FREE_PLAN_EXCEEDS_MONTHLY_TESTS: () => {
       return {
         default: [{

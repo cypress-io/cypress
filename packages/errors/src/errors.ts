@@ -1026,30 +1026,6 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/installing-cypress`
   },
-  FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS: (arg1: {link: string, usedTestsMessage: string, limit: number}) => {
-    return errTemplate`\
-        You've exceeded the limit of private test results under your free plan this month. ${getUsedTestsMessage(arg1.limit, arg1.usedTestsMessage)}
-
-        To continue recording tests this month you must upgrade your account. Please visit your billing to upgrade to another billing plan.
-
-        ${fmt.off(arg1.link)}`
-  },
-  FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS: (arg1: {link: string, usedTestsMessage: string, gracePeriodMessage: string, limit: number}) => {
-    return errTemplate`\
-        You've exceeded the limit of private test results under your free plan this month. ${getUsedTestsMessage(arg1.limit, arg1.usedTestsMessage)}
-
-        Your plan is now in a grace period, which means your tests will still be recorded until ${fmt.off(arg1.gracePeriodMessage)}. Please upgrade your plan to continue recording tests on Cypress Cloud in the future.
-
-        ${fmt.off(arg1.link)}`
-  },
-  PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS: (arg1: {link: string, usedTestsMessage: string, limit: number}) => {
-    return errTemplate`\
-        You've exceeded the limit of private test results under your current billing plan this month. ${getUsedTestsMessage(arg1.limit, arg1.usedTestsMessage)}
-
-        To upgrade your account, please visit your billing to upgrade to another billing plan.
-
-        ${fmt.off(arg1.link)}`
-  },
   FREE_PLAN_EXCEEDS_MONTHLY_TESTS: (arg1: {link: string, usedTestsMessage: string, limit: number}) => {
     return errTemplate`\
         You've exceeded the limit of test results under your free plan this month. ${getUsedTestsMessage(arg1.limit, arg1.usedTestsMessage)}
