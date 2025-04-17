@@ -19,98 +19,117 @@ import { ErrorActions } from './actions/ErrorActions'
 import { EventCollectorActions } from './actions/EventCollectorActions'
 import { NotificationActions } from './actions/NotificationActions'
 import { VersionsActions } from './actions/VersionsActions'
-import { cached } from './util'
 
 export class DataActions {
-  constructor (private ctx: DataContext) {}
+  private _error: ErrorActions
+  private _file: FileActions
+  private _dev: DevActions
+  private _app: AppActions
+  private _auth: AuthActions
+  private _localSettings: LocalSettingsActions
+  private _wizard: WizardActions
+  private _project: ProjectActions
+  private _electron: ElectronActions
+  private _migration: MigrationActions
+  private _browser: BrowserActions
+  private _servers: ServersActions
+  private _versions: VersionsActions
+  private _eventCollector: EventCollectorActions
+  private _cohorts: CohortsActions
+  private _codegen: CodegenActions
+  private _notification: NotificationActions
+  private _cloudProject: CloudProjectActions
 
-  @cached
+  constructor (private ctx: DataContext) {
+    this._error = new ErrorActions(this.ctx)
+    this._file = new FileActions(this.ctx)
+    this._dev = new DevActions(this.ctx)
+    this._app = new AppActions(this.ctx)
+    this._auth = new AuthActions(this.ctx)
+    this._localSettings = new LocalSettingsActions(this.ctx)
+    this._wizard = new WizardActions(this.ctx)
+    this._project = new ProjectActions(this.ctx)
+    this._electron = new ElectronActions(this.ctx)
+    this._migration = new MigrationActions(this.ctx)
+    this._browser = new BrowserActions(this.ctx)
+    this._servers = new ServersActions(this.ctx)
+    this._versions = new VersionsActions(this.ctx)
+    this._eventCollector = new EventCollectorActions(this.ctx)
+    this._cohorts = new CohortsActions(this.ctx)
+    this._codegen = new CodegenActions(this.ctx)
+    this._notification = new NotificationActions(this.ctx)
+    this._cloudProject = new CloudProjectActions(this.ctx)
+  }
+
   get error () {
-    return new ErrorActions(this.ctx)
+    return this._error
   }
 
-  @cached
   get file () {
-    return new FileActions(this.ctx)
+    return this._file
   }
 
-  @cached
   get dev () {
-    return new DevActions(this.ctx)
+    return this._dev
   }
 
-  @cached
   get app () {
-    return new AppActions(this.ctx)
+    return this._app
   }
 
-  @cached
   get auth () {
-    return new AuthActions(this.ctx)
+    return this._auth
   }
 
-  @cached
   get localSettings () {
-    return new LocalSettingsActions(this.ctx)
+    return this._localSettings
   }
 
-  @cached
   get wizard () {
-    return new WizardActions(this.ctx)
+    return this._wizard
   }
 
-  @cached
   get project () {
-    return new ProjectActions(this.ctx)
+    return this._project
   }
 
-  @cached
   get electron () {
-    return new ElectronActions(this.ctx)
+    return this._electron
   }
 
-  @cached
   get migration () {
-    return new MigrationActions(this.ctx)
+    return this._migration
   }
 
-  @cached
   get browser () {
-    return new BrowserActions(this.ctx)
+    return this._browser
   }
 
-  @cached
   get servers () {
-    return new ServersActions(this.ctx)
+    return this._servers
   }
 
-  @cached
   get versions () {
-    return new VersionsActions(this.ctx)
+    return this._versions
   }
 
-  @cached
   get eventCollector () {
-    return new EventCollectorActions(this.ctx)
+    return this._eventCollector
   }
 
-  @cached
   get cohorts () {
-    return new CohortsActions(this.ctx)
+    return this._cohorts
   }
 
-  @cached
   get codegen () {
-    return new CodegenActions(this.ctx)
+    return this._codegen
   }
 
-  @cached
   get notification () {
-    return new NotificationActions(this.ctx)
+    return this._notification
   }
 
-  @cached
   get cloudProject () {
-    return new CloudProjectActions(this.ctx)
+    return this._cloudProject
   }
 }

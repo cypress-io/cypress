@@ -16,6 +16,11 @@ const readline = require('readline')
 const isXlibOrLibudevRe = /^(?:Xlib|libudev)/
 const isHighSierraWarningRe = /\*\*\* WARNING/
 const isRenderWorkerRe = /\.RenderWorker-/
+// This is a warning that occurs when running in a container on Linux.
+// https://github.com/cypress-io/cypress/issues/29563
+// Example:
+// [437:1212/125803.148706:ERROR:zygote_host_impl_linux.cc(273)] Failed to adjust OOM score of renderer with pid 610: Permission denied (13)
+const isOOMScoreWarningRe = /Failed to adjust OOM score of renderer with pid/
 
 // Chromium (which Electron uses) always makes several attempts to connect to the system dbus.
 // This works fine in most desktop environments, but in a docker container, there is no dbus service
@@ -100,6 +105,7 @@ const GARBAGE_WARNINGS = [
   isXlibOrLibudevRe,
   isHighSierraWarningRe,
   isRenderWorkerRe,
+  isOOMScoreWarningRe,
   isDbusWarning,
   isCertVerifyProcBuiltin,
   isHostVulkanDriverWarning,

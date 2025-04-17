@@ -3,9 +3,16 @@
 
 _Released 4/22/2025 (PENDING)_
 
+**Bugfixes:**
+
+- The [`cy.press()`](http://on.cypress.io/api/press) command no longer errors when used in specs subsequent to the first spec in run mode. Fixes [#31466](https://github.com/cypress-io/cypress/issues/31466).
+- Fixed an issue where certain proxy conditions prevented test runs from being recorded. Fixes [#31485](https://github.com/cypress-io/cypress/issues/31485).
+
 **Misc:**
 
+- Suppress benign warnings that reference OOM score of renderer. Addresses [#29563](https://github.com/cypress-io/cypress/issues/29563). Addressed in [#31521](https://github.com/cypress-io/cypress/pull/31521).
 - The UI of the reporter and URL were updated to a darker gray background for better color contrast. Addressed in [#31475](https://github.com/cypress-io/cypress/pull/31475).
+- Fixed an issue where the error message output when attempting to install Cypress on an unsupported architecture included an outdated documentation link to Cypress system requirements. Fixes [#31512](https://github.com/cypress-io/cypress/issues/31512).
 
 ## 14.3.0
 
