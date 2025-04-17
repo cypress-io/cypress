@@ -1,6 +1,8 @@
-export function loadExperimentalStudio ({ specName = 'spec.cy.js', cliArgs = [''], enableCloudStudio = false, specSelector = 'data-cy-row' } = {}) {
-  cy.scaffoldProject('experimental-studio')
-  cy.openProject('experimental-studio', cliArgs, {
+import type { ProjectFixtureDir } from '@tooling/system-tests'
+
+export function loadProjectAndRunSpec ({ projectName = 'experimental-studio' as ProjectFixtureDir, specName = 'spec.cy.js', cliArgs = [''], enableCloudStudio = false, specSelector = 'data-cy-row' } = {}) {
+  cy.scaffoldProject(projectName)
+  cy.openProject(projectName, cliArgs, {
     cloudStudio: enableCloudStudio,
   })
 

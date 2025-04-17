@@ -72,6 +72,7 @@
             :gql="props.gql.currentProject"
             :event-manager="eventManager"
             :get-aut-iframe="getAutIframeModel"
+            :should-show-studio-button="shouldShowStudioButton"
           />
         </HideDuringScreenshot>
 
@@ -244,6 +245,10 @@ const isSpecsListOpenPreferences = computed(() => {
 
 const studioStatus = computed(() => {
   return props.gql.studio?.status
+})
+
+const shouldShowStudioButton = computed(() => {
+  return !!props.gql.studio && !studioStore.isActive
 })
 
 const shouldShowStudioPanel = computed(() => {

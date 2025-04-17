@@ -1,4 +1,4 @@
-import { launchStudio, loadExperimentalStudio } from './helper'
+import { launchStudio, loadProjectAndRunSpec } from './helper'
 import pDefer from 'p-defer'
 
 describe('Cypress Studio', () => {
@@ -61,18 +61,16 @@ describe('studio functionality', () => {
       })
     })
 
-    it('displays Studio header', () => {
-      launchStudio({ enableCloudStudio: true })
+    it('does not display Studio button when not using cloud studio', () => {
+      loadProjectAndRunSpec({ })
 
-      cy.viewport(1500, 1000)
-      cy.get('[data-cy="studio-toolbar"]').should('be.visible')
-      cy.percySnapshot()
+      cy.get('[data-cy="studio-button"]').should('not.exist')
     })
 
     it('immediately loads the studio panel', () => {
       const deferred = pDefer()
 
-      loadExperimentalStudio({ enableCloudStudio: true })
+      loadProjectAndRunSpec({ enableCloudStudio: true })
 
       cy.findByTestId('studio-panel').should('not.exist')
 
@@ -117,8 +115,9 @@ describe('studio functionality', () => {
 
     it('opens studio panel to new test when clicking on studio button (from the app) next to url', () => {
       cy.viewport(1500, 1000)
-      loadExperimentalStudio({ enableCloudStudio: true })
-      cy.get('[data-cy="studio-button"]').click()
+      loadProjectAndRunSpec({ enableCloudStudio: true })
+      // studio button should be visible when using cloud studio
+      cy.get('[data-cy="studio-button"]').should('be.visible').click()
       cy.get('[data-cy="studio-panel"]').should('be.visible')
 
       cy.contains('New Test')
@@ -451,7 +450,7 @@ describe('studio functionality', () => {
   })
 
   it('creates a new test from an empty spec', () => {
-    loadExperimentalStudio({ specName: 'empty.cy.js', specSelector: 'title' })
+    loadProjectAndRunSpec({ specName: 'empty.cy.js', specSelector: 'title' })
 
     cy.contains('Create test with Cypress Studio').click()
     cy.findByTestId('aut-url').as('urlPrompt')
@@ -695,7 +694,7 @@ describe('studio functionality', () => {
   })
 
   it('does not create a new test if the Save test modal is closed', () => {
-    loadExperimentalStudio({ specName: 'empty.cy.js', specSelector: 'title' })
+    loadProjectAndRunSpec({ specName: 'empty.cy.js', specSelector: 'title' })
 
     cy.waitForSpecToFinish()
 

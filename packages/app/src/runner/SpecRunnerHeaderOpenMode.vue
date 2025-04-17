@@ -89,7 +89,7 @@
         </Tag>
       </div>
       <StudioButton
-        v-if="!studioStore.isActive"
+        v-if="shouldShowStudioButton"
         :event-manager="eventManager"
       />
     </div>
@@ -175,6 +175,7 @@ const props = defineProps<{
   gql: SpecRunnerHeaderFragment
   eventManager: EventManager
   getAutIframe: () => AutIframe
+  shouldShowStudioButton: boolean
 }>()
 
 const showAlert = ref(false)
