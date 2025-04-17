@@ -1895,12 +1895,6 @@ export type AllCypressErrorObj = typeof AllCypressErrors
 
 export type AllCypressErrorNames = keyof typeof AllCypressErrors
 
-export function getMsgByType<Type extends keyof AllCypressErrorObj> (type: Type, ...args: Parameters<AllCypressErrorObj[Type]>): string {
-  const err = getError(type, ...args)
-
-  return err.message
-}
-
 /**
  * Given an error name & params for the error, returns a "CypressError",
  * with a forBrowser property, used when we want to format the value for sending to
