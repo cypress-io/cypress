@@ -111,9 +111,11 @@ export const createCommonRoutes = ({
     })
   } else {
     console.log('SETTING LIFECYCLE LISTENER FOR ROUTES')
+    const studioRouter = Router()
+    router.use('/', studioRouter)
     getCtx().coreData.studioLifecycleManager?.onStudioReady((studio) => {
       console.log('STUDIO READY, INITIALIZING ROUTES')
-      studio.initializeRoutes(router)
+      studio.initializeRoutes(studioRouter)
     })
   }
 
