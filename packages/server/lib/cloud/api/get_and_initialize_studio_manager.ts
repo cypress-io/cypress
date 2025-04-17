@@ -156,7 +156,7 @@ export const getAndInitializeStudioManager = async ({ projectId, cloudDataSource
       actualError = error
     }
 
-    return StudioManager.createInErrorManager(actualError)
+    return StudioManager.createInErrorManager(actualError, 'getAndInitializeStudioManager', { projectId, cloudDataSource })
   } finally {
     await fs.promises.rm(bundlePath, { force: true })
   }
