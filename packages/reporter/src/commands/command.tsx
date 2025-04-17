@@ -2,7 +2,7 @@ import _ from 'lodash'
 import cs from 'classnames'
 import Markdown from 'markdown-it'
 import { observer } from 'mobx-react'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useState, useEffect } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
 import appState from '../lib/app-state'
@@ -321,6 +321,7 @@ interface CommandProps {
   model: CommandModel
   aliasesWithDuplicates: Array<Alias> | null
   groupId?: number
+  scrollIntoView: Function
 }
 
 const CommandDetails: React.FC<CommandDetailsProps> = observer(({ model, groupId, aliasesWithDuplicates }) => (
@@ -400,8 +401,22 @@ const CommandControls: React.FC<CommandControlsProps> = observer(({ model, comma
 
 CommandControls.displayName = 'CommandControls'
 
-const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates, groupId }) => {
+const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates, groupId, scrollIntoView }) => {
   const [showTimeout, setShowTimeout] = useState<TimeoutID | undefined>(undefined)
+
+  useEffect(() => {
+    /**
+    * When moving class components into functional components (@see https://github.com/cypress-io/cypress/pull/31284),
+    * we introduced a bug where the command log was not scrolling into view when a command
+    * was added. This has to do with more efficient DOM rendering in React where the
+    * <Attempt> component does not call useEffect when it's children update.
+    *
+    * To fix this, we need to call the scroll handler when a <Command> is added to the test
+    *
+    * @see https://github.com/cypress-io/cypress/issues/31530 for more details
+    */
+    scrollIntoView()
+  }, [])
 
   if (model.group && groupId !== model.group) {
     return null
@@ -527,6 +542,7 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
                 model={child}
                 aliasesWithDuplicates={null}
                 groupId={model.id}
+                scrollIntoView={scrollIntoView}
               />
             ))}
           </ul>

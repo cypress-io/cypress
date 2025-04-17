@@ -70,7 +70,7 @@ const Attempt: React.FC<AttemptProps> = observer(({ model, scrollIntoView, studi
           <Agents model={model} />
           <Routes model={model} />
           <div className='runnable-commands-region'>
-            {model.hasCommands ? <Hooks model={model} /> : <NoCommands />}
+            {model.hasCommands ? <Hooks model={model} scrollIntoView={scrollIntoView} /> : <NoCommands />}
           </div>
           {model.state === 'failed' && (
             <div className='attempt-error-region'>
