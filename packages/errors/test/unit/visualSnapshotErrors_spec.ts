@@ -364,11 +364,6 @@ describe('visual error templates', () => {
         default: ['/path/does/not/exist', err.message],
       }
     },
-    NOT_LOGGED_IN: () => {
-      return {
-        default: [],
-      }
-    },
     TESTS_DID_NOT_START_RETRYING: () => {
       return {
         default: ['Retrying...'],

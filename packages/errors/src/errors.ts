@@ -138,12 +138,6 @@ export const AllCypressErrors = {
 
         ${fmt.highlightSecondary(arg2)}`
   },
-  NOT_LOGGED_IN: () => {
-    return errTemplate`\
-        You're not logged in.
-
-        Run ${fmt.highlight(`cypress open`)} to open Cypress and log in.`
-  },
   TESTS_DID_NOT_START_RETRYING: (arg1: string) => {
     return errTemplate`Timed out waiting for the browser to connect. ${fmt.off(arg1)}`
   },
