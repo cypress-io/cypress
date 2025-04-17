@@ -117,6 +117,7 @@ export class StudioManager implements StudioManagerShape {
     }
 
     try {
+      // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
       return this._studioServer[method].apply(this._studioServer, args)
     } catch (error: unknown) {
       let actualError: Error
