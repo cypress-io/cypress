@@ -6,14 +6,19 @@ const request = require('@cypress/request-promise')
 const humanInterval = require('human-interval')
 
 const RequestErrors = require('@cypress/request-promise/errors')
-const { agent } = require('@packages/network')
+
 const pkg = require('@packages/root')
 
 const machineId = require('../machine_id')
 const errors = require('../../errors')
-const { apiUrl, apiRoutes, makeRoutes } = require('../routes')
 
 import Bluebird from 'bluebird'
+
+import type { AfterSpecDurations } from '@packages/types'
+import { agent } from '@packages/network'
+import type { CombinedAgent } from '@packages/network/lib/agent'
+
+import { apiUrl, apiRoutes, makeRoutes } from '../routes'
 import { getText } from '../../util/status_code'
 import * as enc from '../encryption'
 import getEnvInformationForProjectRoot from '../environment'
@@ -22,7 +27,7 @@ import type { OptionsWithUrl } from 'request-promise'
 import { fs } from '../../util/fs'
 import ProtocolManager from '../protocol'
 import type { ProjectBase } from '../../project-base'
-import type { AfterSpecDurations } from '@packages/types'
+
 import { PUBLIC_KEY_VERSION } from '../constants'
 
 // axios implementation disabled until proxy issues can be diagnosed/fixed
@@ -235,6 +240,16 @@ const isRetriableError = (err) => {
     (err.statusCode == null)
 }
 
+function noProxyPreflightTimeout (): number {
+  try {
+    const timeoutFromEnv = Number(process.env.CYPRESS_INITIAL_PREFLIGHT_TIMEOUT)
+
+    return isNaN(timeoutFromEnv) ? 5000 : timeoutFromEnv
+  } catch (e: unknown) {
+    return 5000
+  }
+}
+
 export type CreateRunOptions = {
   projectRoot: string
   ci: {
@@ -307,8 +322,21 @@ type UpdateInstanceArtifactsOptions = {
   instanceId: string
   timeout?: number
 }
+interface DefaultPreflightResult {
+  encrypt: true
+}
 
-let preflightResult = {
+interface PreflightWarning {
+  message: string
+}
+
+interface CachedPreflightResult {
+  encrypt: boolean
+  apiUrl: string
+  warnings?: PreflightWarning[]
+}
+
+let preflightResult: DefaultPreflightResult | CachedPreflightResult = {
   encrypt: true,
 }
 
@@ -598,14 +626,13 @@ export default {
 
   sendPreflight (preflightInfo) {
     return retryWithBackoff(async (attemptIndex) => {
-      const { timeout, projectRoot } = preflightInfo
-
-      preflightInfo = _.omit(preflightInfo, 'timeout', 'projectRoot')
+      const { projectRoot, timeout, ...preflightRequestBody } = preflightInfo
 
       const preflightBaseProxy = apiUrl.replace('api', 'api-proxy')
 
       const envInformation = await getEnvInformationForProjectRoot(projectRoot, process.pid.toString())
-      const makeReq = ({ baseUrl, agent }) => {
+
+      const makeReq = (baseUrl: string, agent: CombinedAgent | null, timeout: number) => {
         return rp.post({
           url: `${baseUrl}preflight`,
           body: {
@@ -613,13 +640,13 @@ export default {
             envUrl: envInformation.envUrl,
             dependencies: envInformation.dependencies,
             errors: envInformation.errors,
-            ...preflightInfo,
+            ...preflightRequestBody,
           },
           headers: {
             'x-route-version': '1',
             'x-cypress-request-attempt': attemptIndex,
           },
-          timeout: timeout ?? SIXTY_SECONDS,
+          timeout,
           json: true,
           encrypt: 'always',
           agent,
@@ -631,14 +658,19 @@ export default {
       }
 
       const postReqs = async () => {
-        return makeReq({ baseUrl: preflightBaseProxy, agent: null })
-        .catch((err) => {
-          if (err.statusCode === 412) {
-            throw err
-          }
+        const initialPreflightTimeout = noProxyPreflightTimeout()
 
-          return makeReq({ baseUrl: apiUrl, agent })
-        })
+        if (initialPreflightTimeout >= 0) {
+          try {
+            return await makeReq(preflightBaseProxy, null, initialPreflightTimeout)
+          } catch (err) {
+            if (err.statusCode === 412) {
+              throw err
+            }
+          }
+        }
+
+        return makeReq(apiUrl, agent, timeout)
       }
 
       const result = await postReqs()
