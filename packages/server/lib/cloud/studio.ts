@@ -1,5 +1,6 @@
 import type { StudioErrorReport, StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape, StudioCloudApi, StudioEvent } from '@packages/types'
 import type { Router } from 'express'
+import type { Socket } from 'socket.io'
 import fetch from 'cross-fetch'
 import pkg from '@packages/root'
 import os from 'os'
@@ -69,6 +70,12 @@ export class StudioManager implements StudioManagerShape {
     }
 
     return Promise.resolve()
+  }
+
+  addSocketListeners (socket: Socket): void {
+    if (this._studioServer) {
+      this.invokeSync('addSocketListeners', { isEssential: true }, socket)
+    }
   }
 
   async canAccessStudioAI (browser: Cypress.Browser): Promise<boolean> {
