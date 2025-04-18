@@ -350,17 +350,17 @@ describe('lib/cloud/protocol', () => {
     })
   })
 
-  describe('.db', () => {
-    it('returns the database instance', () => {
-      const mockDb = { test: 'db' }
+  describe('.dbPath', () => {
+    it('returns the database path', () => {
+      const mockDbPath = '/path/to/db'
 
-      protocolManager['_db'] = mockDb
+      protocolManager['_dbPath'] = mockDbPath
 
-      expect(protocolManager.db).to.equal(mockDb)
+      expect(protocolManager.dbPath).to.equal(mockDbPath)
     })
 
-    it('returns undefined when no database is set', () => {
-      expect(protocolManager.db).to.be.undefined
+    it('returns undefined when no database path is set', () => {
+      expect(protocolManager.dbPath).to.be.undefined
     })
   })
 

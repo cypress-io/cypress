@@ -62,8 +62,8 @@ export class ProtocolManager implements ProtocolManagerShape {
     } : undefined
   }
 
-  get db () {
-    return this._db
+  get dbPath () {
+    return this._dbPath
   }
 
   async prepareProtocol (script: string, options: ProtocolManagerOptions) {

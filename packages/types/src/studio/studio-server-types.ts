@@ -2,7 +2,7 @@
 
 import type { Router } from 'express'
 import type { AxiosInstance } from 'axios'
-import type Database from 'better-sqlite3'
+import type { Socket } from 'socket.io'
 
 interface RetryOptions {
   maxAttempts: number
@@ -28,12 +28,19 @@ export interface StudioServerOptions {
   studioPath: string
   projectSlug?: string
   cloudApi: StudioCloudApi
+  betterSqlite3Path: string
+}
+
+export interface StudioAIInitializeOptions {
+  protocolDbPath: string
 }
 
 export interface StudioServerShape {
   initializeRoutes(router: Router): void
   canAccessStudioAI(browser: Cypress.Browser): Promise<boolean>
-  setProtocolDb(database: Database.Database): void
+  addSocketListeners(socket: Socket): void
+  initializeStudioAI(options: StudioAIInitializeOptions): Promise<void>
+  destroy(): Promise<void>
 }
 
 export interface StudioServerDefaultShape {

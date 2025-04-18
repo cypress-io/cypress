@@ -172,15 +172,52 @@ describe('lib/cloud/studio', () => {
     })
   })
 
-  describe('setProtocolDb', () => {
-    it('sets the protocol database on the studio server', () => {
-      const mockDb = { test: 'db' }
+  describe('addSocketListeners', () => {
+    it('calls addSocketListeners on the studio server', () => {
+      sinon.stub(studio, 'addSocketListeners')
+      const mockSocket = { id: 'test-socket' } as any
 
-      sinon.stub(studio, 'setProtocolDb')
+      studioManager.addSocketListeners(mockSocket)
 
-      studioManager.setProtocolDb(mockDb as any)
+      expect(studio.addSocketListeners).to.be.calledWith(mockSocket)
+    })
 
-      expect(studio.setProtocolDb).to.be.calledWith(mockDb)
+    it('does not call addSocketListeners when studio server is not defined', () => {
+      // Set _studioServer to undefined
+      (studioManager as any)._studioServer = undefined
+
+      // Create a spy on invokeSync to verify it's not called
+      const invokeSyncSpy = sinon.spy(studioManager, 'invokeSync')
+
+      const mockSocket = { id: 'test-socket' } as any
+
+      studioManager.addSocketListeners(mockSocket)
+
+      expect(invokeSyncSpy).to.not.be.called
+    })
+  })
+
+  describe('initializeStudioAI', () => {
+    it('initializes Studio AI on the studio server', async () => {
+      sinon.stub(studio, 'initializeStudioAI').resolves()
+
+      await studioManager.initializeStudioAI({
+        protocolDbPath: 'test-db-path',
+      })
+
+      expect(studio.initializeStudioAI).to.be.calledWith({
+        protocolDbPath: 'test-db-path',
+      })
+    })
+  })
+
+  describe('destroy', () => {
+    it('destroys the studio server', async () => {
+      sinon.stub(studio, 'destroy').resolves()
+
+      await studioManager.destroy()
+
+      expect(studio.destroy).to.be.called
     })
   })
 })

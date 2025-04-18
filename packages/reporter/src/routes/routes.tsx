@@ -38,17 +38,19 @@ export interface RouteListProps {
   model: RouteListModel
 }
 
-const RoutesList = observer(({ model }: RouteListProps) => (
+const RoutesList: React.FC<RouteListProps> = observer(({ model }: RouteListProps) => (
   <tbody>
     {_.map(model.routes, (route) => <Route key={route.id} model={route} />)}
   </tbody>
 ))
 
+RoutesList.displayName = 'RoutesList'
+
 export interface RoutesProps {
   model: RouteListModel
 }
 
-const Routes = observer(({ model }: RoutesProps) => {
+const Routes: React.FC<RoutesProps> = observer(({ model }: RoutesProps) => {
   if (!model.routes.length) {
     return null
   }
@@ -90,6 +92,8 @@ const Routes = observer(({ model }: RoutesProps) => {
     </div>
   )
 })
+
+Routes.displayName = 'Routes'
 
 export { Route, RoutesList }
 

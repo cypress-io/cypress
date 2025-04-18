@@ -1,13 +1,22 @@
 import type Sinon from 'sinon'
+import type { expect as Expect } from 'chai'
 import type { KeyPressSupportedKeys } from '@packages/types'
 import type { SendDebuggerCommand } from '../../../../lib/browsers/cdp_automation'
 import { cdpKeyPress, bidiKeyPress, BIDI_VALUE, CDP_KEYCODE } from '../../../../lib/automation/commands/key_press'
 import { Client as WebdriverClient } from 'webdriver'
 import type { Protocol } from 'devtools-protocol'
-const { expect, sinon } = require('../../../spec_helper')
+const { expect, sinon }: { expect: typeof Expect, sinon: Sinon.SinonSandbox } = require('../../../spec_helper')
+
+type ClientParams<T extends keyof WebdriverClient> = WebdriverClient[T] extends (...args: any[]) => any ?
+  Parameters<WebdriverClient[T]> :
+  never
+
+type ClientReturn<T extends keyof WebdriverClient> = WebdriverClient[T] extends (...args: any[]) => any ?
+  ReturnType<WebdriverClient[T]> :
+  never
 
 describe('key:press automation command', () => {
-  describe('cdp()', () => {
+  describe('cdp', () => {
     let sendFn: Sinon.SinonStub<Parameters<SendDebuggerCommand>, ReturnType<SendDebuggerCommand>>
     const topFrameId = 'abc'
     const autFrameId = 'def'
@@ -178,16 +187,20 @@ describe('key:press automation command', () => {
     const otherElement = {
       'element-6066-11e4-a52e-4f735466cecf': 'uuid-2',
     }
+    const topLevelContext = 'b7173d71-c76c-41ec-beff-25a72f7cae13'
 
     beforeEach(() => {
       // can't create a sinon stubbed instance because webdriver doesn't export the constructor. Because it's known that
       // bidiKeypress only invokes inputPerformActions, and inputPerformActions is properly typed, this is okay.
       // @ts-expect-error
       client = {
-        inputPerformActions: (sinon as Sinon.SinonSandbox).stub<Parameters<WebdriverClient['inputPerformActions']>, ReturnType<WebdriverClient['inputPerformActions']>>(),
-        getActiveElement: (sinon as Sinon.SinonSandbox).stub<Parameters<WebdriverClient['getActiveElement']>, ReturnType<WebdriverClient['getActiveElement']>>(),
-        findElement: (sinon as Sinon.SinonSandbox).stub<Parameters<WebdriverClient['findElement']>, ReturnType<WebdriverClient['findElement']>>(),
-        scriptEvaluate: (sinon as Sinon.SinonSandbox).stub<Parameters<WebdriverClient['scriptEvaluate']>, ReturnType<WebdriverClient['scriptEvaluate']>>(),
+        inputPerformActions: sinon.stub<ClientParams<'inputPerformActions'>, ClientReturn<'inputPerformActions'>>(),
+        getActiveElement: sinon.stub<ClientParams<'getActiveElement'>, ClientReturn<'getActiveElement'>>(),
+        findElement: sinon.stub<ClientParams<'findElement'>, ClientReturn<'findElement'>>(),
+        scriptEvaluate: sinon.stub<ClientParams<'scriptEvaluate'>, ClientReturn<'scriptEvaluate'>>(),
+        getWindowHandle: sinon.stub<ClientParams<'getWindowHandle'>, ClientReturn<'getWindowHandle'>>(),
+        switchToWindow: sinon.stub<ClientParams<'switchToWindow'>, ClientReturn<'switchToWindow'>>().resolves(),
+        browsingContextGetTree: sinon.stub<ClientParams<'browsingContextGetTree'>, ClientReturn<'browsingContextGetTree'>>(),
       }
 
       autContext = 'someContextId'
@@ -195,10 +208,21 @@ describe('key:press automation command', () => {
       key = 'Tab'
 
       client.inputPerformActions.resolves()
+      client.browsingContextGetTree.resolves({
+        contexts: [
+          {
+            context: topLevelContext,
+            children: [],
+            url: 'someUrl',
+            userContext: 'userContext',
+          },
+        ],
+      })
     })
 
     describe('when the aut iframe is not in focus', () => {
       beforeEach(() => {
+        client.getWindowHandle.resolves(topLevelContext)
         client.findElement.withArgs('css selector ', 'iframe.aut-iframe').resolves(iframeElement)
         // @ts-expect-error - webdriver types show this returning a string, but it actually returns an ElementReference, same as findElement
         client.getActiveElement.resolves(otherElement)
@@ -226,7 +250,41 @@ describe('key:press automation command', () => {
       })
     })
 
+    describe('when webdriver classic has no active window', () => {
+      beforeEach(() => {
+        client.getWindowHandle.rejects(new Error())
+      })
+
+      it('activates the top level context window', async () => {
+        await bidiKeyPress({ key }, client as WebdriverClient, autContext, 'idSuffix')
+        expect(client.switchToWindow).to.have.been.calledWith(topLevelContext)
+      })
+    })
+
+    describe('when webdriver classic has the top level context as the active window', () => {
+      beforeEach(() => {
+        client.getWindowHandle.resolves(topLevelContext)
+      })
+
+      it('does not activate the top level context window', async () => {
+        await bidiKeyPress({ key }, client as WebdriverClient, autContext, 'idSuffix')
+        expect(client.switchToWindow).not.to.have.been.called
+      })
+    })
+
+    describe('when webdriver classic has a different window than the top level context as the active window', () => {
+      beforeEach(() => {
+        client.getWindowHandle.resolves('fa54442b-bc42-45fa-9996-88b7fd066211')
+      })
+
+      it('activates the top level context window', async () => {
+        await bidiKeyPress({ key }, client as WebdriverClient, autContext, 'idSuffix')
+        expect(client.switchToWindow).to.have.been.calledWith(topLevelContext)
+      })
+    })
+
     it('calls client.inputPerformActions with a keydown and keyup action', async () => {
+      client.getWindowHandle.resolves(topLevelContext)
       client.findElement.withArgs('css selector ', 'iframe.aut-iframe').resolves(iframeElement)
       // @ts-expect-error - webdriver types show this returning a string, but it actually returns an ElementReference, same as findElement
       client.getActiveElement.resolves(iframeElement)

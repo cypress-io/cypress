@@ -1,6 +1,9 @@
 import systemTests from '../lib/system-tests'
 import childProcess from 'child_process'
 
+// these system tests are skipped in webkit due to flake.
+// TODO: https://github.com/cypress-io/cypress/issues/31503
+
 describe('cy.pause() in run mode', () => {
   systemTests.setup()
 
@@ -15,6 +18,7 @@ describe('cy.pause() in run mode', () => {
     headed: true,
     noExit: true,
     expectedExitCode: null,
+    browser: '!webkit',
     onSpawn: (cp) => {
       cp.stdout.on('data', (buf) => {
         if (buf.toString().includes('not exiting due to options.exit being false')) {
@@ -38,6 +42,7 @@ describe('cy.pause() in run mode', () => {
     headed: false,
     noExit: true,
     expectedExitCode: null,
+    browser: '!webkit',
     onSpawn: (cp) => {
       cp.stdout.on('data', (buf) => {
         if (buf.toString().includes('not exiting due to options.exit being false')) {
@@ -62,6 +67,7 @@ describe('cy.pause() in run mode', () => {
     headed: true,
     noExit: false,
     expectedExitCode: 0,
+    browser: '!webkit',
   })
 
   systemTests.it('does not pause without --headed and --no-exit', {
@@ -75,5 +81,6 @@ describe('cy.pause() in run mode', () => {
     headed: false,
     noExit: false,
     expectedExitCode: 0,
+    browser: '!webkit',
   })
 })

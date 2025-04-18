@@ -1,4 +1,31 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 14.3.2
+
+_Released 4/22/2025 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where auto scroll in the Cypress Command Log was not scrolling correctly. Fixes [#31530](https://github.com/cypress-io/cypress/issues/31530).
+
+## 14.3.1
+
+_Released 4/17/2025_
+
+**Performance:**
+
+- Reduced the initial timeout for the preflight API request to determine proxy conditions from sixty seconds to five, and made this timeout duration configurable with the `CYPRESS_INITIAL_PREFLIGHT_TIMEOUT` environment variable. Addresses [#28423](https://github.com/cypress-io/cypress/issues/28423). Addressed in [#31283](https://github.com/cypress-io/cypress/pull/31283).
+
+**Bugfixes:**
+
+- The [`cy.press()`](http://on.cypress.io/api/press) command no longer errors when used in specs subsequent to the first spec in run mode. Fixes [#31466](https://github.com/cypress-io/cypress/issues/31466).
+- Fixed an issue where certain proxy conditions prevented test runs from being recorded. Fixes [#31485](https://github.com/cypress-io/cypress/issues/31485).
+
+**Misc:**
+
+- Suppress benign warnings that reference OOM score of renderer. Addresses [#29563](https://github.com/cypress-io/cypress/issues/29563). Addressed in [#31521](https://github.com/cypress-io/cypress/pull/31521).
+- The UI of the reporter and URL were updated to a darker gray background for better color contrast. Addressed in [#31475](https://github.com/cypress-io/cypress/pull/31475).
+- Fixed an issue where the error message output when attempting to install Cypress on an unsupported architecture included an outdated documentation link to Cypress system requirements. Fixes [#31512](https://github.com/cypress-io/cypress/issues/31512).
+
 ## 14.3.0
 
 _Released 4/8/2025_

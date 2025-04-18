@@ -74,6 +74,14 @@ describe('lib/socket', () => {
           screenshotsFolder: this.cfg.screenshotsFolder,
         })
 
+        // Create a mock studio object with addSocketListeners method
+        const mockStudio = {
+          addSocketListeners: sinon.stub(),
+        }
+
+        // Set the studio in the context
+        ctx.coreData.studio = mockStudio
+
         this.server.startWebsockets(this.automation, this.cfg, this.options)
         this.socket = this.server._socket
 
@@ -577,6 +585,14 @@ describe('lib/socket', () => {
             resolve()
           })
         })
+      })
+    })
+
+    context('studio.addSocketListeners', () => {
+      it('calls addSocketListeners on studio when socket connects', function () {
+        // The socket connection was already established in the beforeEach so
+        // we can just verify that addSocketListeners was called
+        expect(ctx.coreData.studio.addSocketListeners).to.be.called
       })
     })
 
