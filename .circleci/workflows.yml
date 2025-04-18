@@ -1,11 +1,11 @@
 version: 2.1
 
 chrome-stable-version: &chrome-stable-version "135.0.7049.95"
-chrome-beta-version: &chrome-beta-version "136.0.7103.25"
+chrome-beta-version: &chrome-beta-version "136.0.7103.33"
 firefox-stable-version: &firefox-stable-version "137.0"
 
 orbs:
-  browser-tools: circleci/browser-tools@1.5.2
+  browser-tools: circleci/browser-tools@1.5.3
 
 defaults: &defaults
   parallelism: 1
