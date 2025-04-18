@@ -5,7 +5,7 @@ _Released 4/22/2025 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed and issue where auto scroll in the Cypress Reporter was not happening correctly. Fixes [#31530](https://github.com/cypress-io/cypress/issues/31530).
+- Fixed an issue where auto scroll in the Cypress Command Log was not scrolling correctly. Fixes [#31530](https://github.com/cypress-io/cypress/issues/31530).
 
 ## 14.3.1
 
