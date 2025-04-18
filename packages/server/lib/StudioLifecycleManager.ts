@@ -1,5 +1,5 @@
 import { EventEmitter } from 'stream'
-import { StudioManager } from './cloud/studio'
+import type { StudioManager } from './cloud/studio'
 
 export class StudioLifecycleManager extends EventEmitter {
   studioManagerPromise: Promise<StudioManager | null> | null = null
