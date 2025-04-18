@@ -432,24 +432,31 @@ export class ProjectBase extends EE {
 
       onStudioInit: async () => {
         if (this.spec && this.ctx.coreData.studio?.protocolManager) {
-          const canAccessStudioAI = await this.ctx.coreData.studio?.canAccessStudioAI(this.browser) ?? false
+          const canAccessStudioAI = await this.ctx.coreData.studio.canAccessStudioAI(this.browser) ?? false
 
           if (!canAccessStudioAI) {
             return { canAccessStudioAI }
           }
 
-          this.protocolManager = this.ctx.coreData.studio?.protocolManager
-          this.protocolManager?.setupProtocol()
-          this.protocolManager?.beforeSpec({
+          this.ctx.coreData.studio.protocolManager.setupProtocol()
+          this.ctx.coreData.studio.protocolManager.beforeSpec({
             ...this.spec,
             instanceId: v4(),
           })
 
-          await browsers.connectProtocolToBrowser({ browser: this.browser, foundBrowsers: this.options.browsers, protocolManager: this.protocolManager })
+          await browsers.connectProtocolToBrowser({ browser: this.browser, foundBrowsers: this.options.browsers, protocolManager: this.ctx.coreData.studio.protocolManager })
 
-          if (this.protocolManager.db) {
-            this.ctx.coreData.studio?.setProtocolDb(this.protocolManager.db)
+          if (!this.ctx.coreData.studio.protocolManager.dbPath) {
+            debug('Protocol database path is not set after initializing protocol manager')
+
+            return { canAccessStudioAI: false }
           }
+
+          this.protocolManager = this.ctx.coreData.studio.protocolManager
+
+          await this.ctx.coreData.studio.initializeStudioAI({
+            protocolDbPath: this.ctx.coreData.studio.protocolManager.dbPath,
+          })
 
           return { canAccessStudioAI: true }
         }
@@ -464,6 +471,7 @@ export class ProjectBase extends EE {
           await browsers.closeProtocolConnection({ browser: this.browser, foundBrowsers: this.options.browsers })
           this.protocolManager?.close()
           this.protocolManager = undefined
+          await this.ctx.coreData.studio.destroy()
         }
       },
 

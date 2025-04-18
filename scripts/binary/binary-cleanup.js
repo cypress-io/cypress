@@ -59,6 +59,8 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
     'node_modules/string-width/index.js',
     'node_modules/proxy-from-env/index.js',
     // end needed deps for geckodriver
+    // better-sqlite3 is needed to be loaded in dynamically in studio
+    'node_modules/better-sqlite3/lib/index.js',
   ]
 
   let entryPoints = new Set([
