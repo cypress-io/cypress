@@ -59,7 +59,9 @@ describe('cy.session', { retries: 0 }, () => {
         .then(async () => {
           cy.spy(Cypress, 'action').log(false)
 
-          await Cypress.action('runner:test:before:after:run:async', {}, Cypress.state('runnable'), { nextTestHasTestIsolationOn: true })
+          await Cypress.action('runner:test:before:after:run:async', {}, Cypress.state('runnable'), {
+            nextTestHasTestIsolationOn: true,
+          })
 
           expect(Cypress.action).to.be.calledWith('cy:url:changed', '')
           expect(Cypress.action).to.be.calledWith('cy:visit:blank', { testIsolation: true })
@@ -73,7 +75,9 @@ describe('cy.session', { retries: 0 }, () => {
         .then(async () => {
           cy.spy(Cypress, 'action').log(false)
 
-          await Cypress.action('runner:test:before:after:run:async', {}, Cypress.state('runnable'), { nextTestHasTestIsolationOn: undefined })
+          await Cypress.action('runner:test:before:after:run:async', {}, Cypress.state('runnable'), {
+            nextTestHasTestIsolationOn: undefined,
+          })
 
           expect(Cypress.action).to.be.calledWith('cy:url:changed', '')
           expect(Cypress.action).to.be.calledWith('cy:visit:blank', { testIsolation: true })
@@ -87,7 +91,9 @@ describe('cy.session', { retries: 0 }, () => {
         .then(async () => {
           cy.spy(Cypress, 'action').log(false)
 
-          await Cypress.action('runner:test:before:after:run:async', {}, Cypress.state('runnable'), { nextTestHasTestIsolationOn: false })
+          await Cypress.action('runner:test:before:after:run:async', {}, Cypress.state('runnable'), {
+            nextTestHasTestIsolationOn: false,
+          })
 
           expect(Cypress.action).not.to.be.calledWith('cy:url:changed', '')
           expect(Cypress.action).not.to.be.calledWith('cy:visit:blank', { testIsolation: true })
@@ -99,31 +105,52 @@ describe('cy.session', { retries: 0 }, () => {
       it('clears the browser cookie after each run', () => {
         cy.window()
         .then((win) => {
-          // @ts-expect-error TODO: cookie doesn't exist on win, usually cookie is set on document
-          win.cookie = 'key=value; SameSite=Strict; Secure; Path=/fixtures'
+          // Check that the only cookie present is the Cypress initial cookie
+          expect(win.document.cookie).to.satisfy((cookie) => {
+            return !cookie || cookie === '__cypress.initial=true'
+          })
+
+          win.document.cookie = 'key=value; SameSite=Strict; Secure; Path=/fixtures'
         })
         .then(async () => {
           cy.spy(Cypress, 'action').log(false)
 
-          await Cypress.action('runner:test:before:after:run:async', {}, Cypress.state('runnable'), { nextTestHasTestIsolationOn: true })
+          await Cypress.action('runner:test:before:after:run:async', {}, Cypress.state('runnable'), {
+            nextTestHasTestIsolationOn: true,
+          })
         })
 
-        cy.window().its('cookie').should('be.undefined')
+        cy.window().then((win) => {
+          // Check that the only cookie present is the Cypress initial cookie
+          expect(win.document.cookie).to.satisfy((cookie) => {
+            return !cookie || cookie === '__cypress.initial=true'
+          })
+        })
       })
 
       it('does not clear the browser cookie after each run if the next test has test isolation off', () => {
         cy.window()
         .then((win) => {
-          // @ts-expect-error TODO: cookie doesn't exist on win, usually cookie is set on document
-          win.cookie = 'key=value; SameSite=Strict; Secure; Path=/fixtures'
+          // Check that the only cookie present is the Cypress initial cookie
+          expect(win.document.cookie).to.satisfy((cookie) => {
+            return !cookie || cookie === '__cypress.initial=true'
+          })
+
+          win.document.cookie = 'key=value'
+          expect(win.document.cookie).to.include('key=value')
         })
         .then(async () => {
           cy.spy(Cypress, 'action').log(false)
 
-          await Cypress.action('runner:test:before:after:run:async', {}, Cypress.state('runnable'), { nextTestHasTestIsolationOn: false })
+          await Cypress.action('runner:test:before:after:run:async', {}, Cypress.state('runnable'), {
+            nextTestHasTestIsolationOn: false,
+          })
         })
 
-        cy.window().its('cookie').should('eq', 'key=value; SameSite=Strict; Secure; Path=/fixtures')
+        cy.window()
+        .then((win) => {
+          expect(win.document.cookie).to.include('key=value')
+        })
       })
     })
 
@@ -896,8 +923,7 @@ describe('cy.session', { retries: 0 }, () => {
       it('does not clear the browser context before each run', () => {
         cy.window()
         .then((win) => {
-          // @ts-expect-error TODO: cookie doesn't exist on win, usually cookie is set on document
-          win.cookie = 'key=value; SameSite=Strict; Secure; Path=/fixtures'
+          win.document.cookie = 'key=value; SameSite=Strict; Secure; Path=/fixtures'
           win.localStorage.setItem('animal', 'bear')
           win.sessionStorage.setItem('food', 'burgers')
         })
@@ -913,9 +939,11 @@ describe('cy.session', { retries: 0 }, () => {
           expect(Cypress.action).not.to.be.calledWith('cy:visit:blank')
         })
 
-        cy.window().its('cookie').should('equal', 'key=value; SameSite=Strict; Secure; Path=/fixtures')
-        cy.window().its('localStorage').should('have.length', 1).should('deep.contain', { animal: 'bear' })
-        cy.window().its('sessionStorage').should('have.length', 1).should('deep.contain', { food: 'burgers' })
+        cy.window().then((win) => {
+          expect(win.document.cookie).to.contain('key=value')
+          expect(win.localStorage).to.have.length(1).and.to.deep.contain({ animal: 'bear' })
+          expect(win.sessionStorage).to.have.length(1).and.to.deep.contain({ food: 'burgers' })
+        })
       })
     })
 
