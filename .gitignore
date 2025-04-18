@@ -20,6 +20,7 @@ Cached Theme Material Design.pak
 packages/data-context/src/**/*.js
 packages/errors/src/**/*.js
 packages/errors/test/**/*.js
+!packages/errors/test/.mocharc.js
 
 # from driver
 packages/driver/cypress/videos
