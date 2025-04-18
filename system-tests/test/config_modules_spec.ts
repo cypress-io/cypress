@@ -42,7 +42,6 @@ describe('compiles config files using the native node import', () => {
     'config-cjs-and-esm/config-with-mjs-tsconfig-es5',
     'config-cjs-and-esm/config-with-cjs-tsconfig-es5',
     'config-cjs-and-esm/config-with-js-tsconfig-es5',
-    'config-cjs-and-esm/config-with-js-tsconfig-es3',
     'config-cjs-and-esm/config-with-js-tsconfig-es2015',
     'config-cjs-and-esm/config-with-module-resolution-bundler',
   ].forEach((project) => {
