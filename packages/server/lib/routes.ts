@@ -110,11 +110,10 @@ export const createCommonRoutes = ({
       await networkProxy.handleHttpRequest(req, res)
     })
   } else {
-    console.log('SETTING LIFECYCLE LISTENER FOR ROUTES')
     const studioRouter = Router()
+
     router.use('/', studioRouter)
     getCtx().coreData.studioLifecycleManager?.onStudioReady((studio) => {
-      console.log('STUDIO READY, INITIALIZING ROUTES')
       studio.initializeRoutes(studioRouter)
     })
   }

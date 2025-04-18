@@ -37,7 +37,7 @@ export class StudioLifecycleManager extends EventEmitter {
     this.studioManagerPromise = studioManagerPromise
 
     // When the promise resolves, emit the studio:ready event with the studio manager
-    studioManagerPromise.then((studioManager) => {
+    void studioManagerPromise.then((studioManager) => {
       this.emit(StudioLifecycleManager.STUDIO_READY_EVENT, studioManager)
     })
   }
@@ -53,7 +53,7 @@ export class StudioLifecycleManager extends EventEmitter {
 
     // If studio is already ready, call the listener immediately and only once
     if (this.studioManagerPromise) {
-      this.studioManagerPromise.then((studioManager) => {
+      void this.studioManagerPromise.then((studioManager) => {
         // Remove the listener first to prevent it from being called twice
         this.off(StudioLifecycleManager.STUDIO_READY_EVENT, listener)
         // Only call listener if studioManager is not null

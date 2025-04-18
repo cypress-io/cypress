@@ -200,6 +200,9 @@ export class ProjectBase extends EE {
     const studioLifecycleManager = new StudioLifecycleManager()
 
     studioLifecycleManager.setStudioPromise(studioManagerPromise)
+    .catch((err) => {
+      debug('Error setting studio manager promise: %o', err)
+    })
 
     // Register a listener to update config when studio is ready
     studioLifecycleManager.onStudioReady((studioManager) => {
@@ -614,7 +617,7 @@ export class ProjectBase extends EE {
     return !!this.browser
   }
 
-  async setCurrentSpecAndBrowser (spec, browser: FoundBrowser) {
+  setCurrentSpecAndBrowser (spec, browser: FoundBrowser) {
     this.spec = spec
     this.browser = browser
 
