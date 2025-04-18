@@ -1,4 +1,4 @@
-import { StudioCloudApi } from '@packages/types/src/studio/studio-server-types'
+import type { StudioCloudApi } from '@packages/types/src/studio/studio-server-types'
 import Debug from 'debug'
 
 const debug = Debug('cypress:server:cloud:api:studio:report_studio_errors')
