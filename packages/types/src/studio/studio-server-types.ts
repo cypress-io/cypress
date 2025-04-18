@@ -55,6 +55,7 @@ export interface StudioServerShape {
   addSocketListeners(socket: Socket): void
   initializeStudioAI(options: StudioAIInitializeOptions): Promise<void>
   destroy(): Promise<void>
+  captureStudioEvent(event: StudioEvent): Promise<void>
 }
 
 export interface StudioServerDefaultShape {
