@@ -1,4 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+
+## 14.3.2
+
+**Bugfixes**
+
+- Fixed an issue where the configuration setting `trashAssetsBeforeRuns=false` was ignored for assets in the `videosfolder` and these assets were incorrectly deleted before running tests with `cypress run`. Addresses [#8280](https://github.com/cypress-io/cypress/issues/8280).
+
 ## 14.3.1
 
 _Released 4/17/2025_
@@ -31,9 +38,6 @@ _Released 4/8/2025_
 - Allows for `babel-loader` version 10 to be a peer dependency of `@cypress/webpack-preprocessor`. Fixed in [#31218](https://github.com/cypress-io/cypress/pull/31218).
 - Fixed an issue where Firefox BiDi was prematurely removing prerequests on pending requests. Fixes [#31376](https://github.com/cypress-io/cypress/issues/31376).
 - Fixed an [issue](https://github.com/electron/electron/issues/45398) with Electron causing slow animations and increased test times by starting a CDP screencast with a noop configuration. Fixes [#30980](https://github.com/cypress-io/cypress/issues/30980).
-
-**Bugfixes**
-- Fixed an issue where the configuration setting `trashAssetsBeforeRuns=false` was ignored for assets in the `videosfolder` and these assets were incorrectly deleted before running tests with `cypress run`. Addresses [#8280](https://github.com/cypress-io/cypress/issues/8280).
 
 **Misc:**
 
