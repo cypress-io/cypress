@@ -4,6 +4,7 @@ import type { Socket } from 'socket.io'
 import Debug from 'debug'
 import { requireScript } from './require_script'
 import path from 'path'
+import { reportStudioError, ReportStudioErrorOptions } from './api/studio/report_studio_error'
 
 interface StudioServer { default: StudioServerDefaultShape }
 
@@ -23,12 +24,19 @@ export class StudioManager implements StudioManagerShape {
   protocolManager: ProtocolManagerShape | undefined
   private _studioServer: StudioServerShape | undefined
 
-  static createInErrorManager (error: Error, studioMethod: string, ...studioMethodArgs: unknown[]): StudioManager {
+  static createInErrorManager ({ cloudApi, studioHash, projectSlug, error, studioMethod, studioMethodArgs }: ReportStudioErrorOptions): StudioManager {
     const manager = new StudioManager()
 
     manager.status = 'IN_ERROR'
 
-    manager.reportError(error, studioMethod, ...studioMethodArgs)
+    reportStudioError({
+      cloudApi,
+      studioHash,
+      projectSlug,
+      error,
+      studioMethod,
+      studioMethodArgs,
+    })
 
     return manager
   }
@@ -37,6 +45,7 @@ export class StudioManager implements StudioManagerShape {
     const { createStudioServer } = requireScript<StudioServer>(script).default
 
     this._studioServer = await createStudioServer({
+      studioHash,
       studioPath,
       projectSlug,
       cloudApi,

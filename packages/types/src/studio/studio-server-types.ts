@@ -25,7 +25,7 @@ type AsyncRetry = <TArgs extends any[], TResult>(
 ) => (...args: TArgs) => Promise<TResult>
 
 export interface StudioServerOptions {
-  studioHash: string
+  studioHash?: string
   studioPath: string
   projectSlug?: string
   cloudApi: StudioCloudApi
