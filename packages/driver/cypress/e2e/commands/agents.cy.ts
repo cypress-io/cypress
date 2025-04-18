@@ -72,11 +72,10 @@ describe('src/cy/commands/agents', () => {
           },
         }
 
-        // @ts-expect-error TODO: deprecated: Figure out how to handle types here
-        cy.stub(this.obj, 'bar', 'baz')
+        cy.stub(this.obj, 'bar').returns('baz')
 
         this.replacementCalled = false
-        this.stub = cy.stub(this.obj, 'foo', () => {
+        this.stub = cy.stub(this.obj, 'foo').callsFake(() => {
           this.replacementCalled = true
         })
       })
