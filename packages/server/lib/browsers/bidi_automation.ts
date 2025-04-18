@@ -1,6 +1,12 @@
 import debugModule from 'debug'
-import type { Automation } from '../automation'
+import toInteger from 'lodash/toInteger'
+import isNumber from 'lodash/isNumber'
+import { isHostOnlyCookie } from './cdp_automation'
+import { cookieMatches } from '../automation/util'
+import { bidiKeyPress } from '../automation/commands/key_press'
 import { AutomationNotImplemented } from '../automation/automation_not_implemented'
+
+import type { Automation } from '../automation'
 import type { BrowserPreRequest, BrowserResponseReceived, ResourceType } from '@packages/proxy'
 import type { AutomationMiddleware, AutomationCommands } from '@packages/types'
 import type { Client as WebDriverClient } from 'webdriver'
@@ -9,12 +15,38 @@ import type {
   NetworkResponseStartedParameters,
   NetworkResponseCompletedParameters,
   NetworkFetchErrorParameters,
+  NetworkCookie,
   BrowsingContextInfo,
+  NetworkSameSite,
 } from 'webdriver/build/bidi/localTypes'
+import type { CyCookie } from './webkit-automation'
 
-import { bidiKeyPress } from '../automation/commands/key_press'
+const BIDI_DEBUG_NAMESPACE = 'cypress:server:browsers:bidi_automation'
+const BIDI_COOKIE_DEBUG_NAMESPACE = `${BIDI_DEBUG_NAMESPACE}:cookies`
+const BIDI_SCREENSHOT_DEBUG_NAMESPACE = `${BIDI_DEBUG_NAMESPACE}:screenshot`
 
-const debug = debugModule('cypress:server:browsers:bidi_automation')
+const debug = debugModule(BIDI_DEBUG_NAMESPACE)
+const debugCookies = debugModule(BIDI_COOKIE_DEBUG_NAMESPACE)
+const debugScreenshot = debugModule(BIDI_SCREENSHOT_DEBUG_NAMESPACE)
+
+// if the filter is not an exact match OR, if looselyMatchCookiePath is enabled, doesn't include the path.
+// ex: /foo/bar/baz path should include cookies for /foo/bar/baz, /foo/bar, /foo, and /
+// this is shipped in remoteTypes within webdriver but it isn't exported, so we need to redefine the type
+interface StoragePartialCookie extends Record<string, unknown> {
+  name: string
+  value: {
+    type: 'string'
+    value: string
+  }
+  domain: string
+  path: string
+  httpOnly: boolean
+  hostOnly?: boolean
+  secure: boolean
+  sameSite: NetworkSameSite
+  expiry?: number
+}
+
 const debugVerbose = debugModule('cypress-verbose:server:browsers:bidi_automation')
 
 // NOTE: these types will eventually be generated automatically via the 'webdriver' package
@@ -59,6 +91,100 @@ const normalizeResourceType = (type: RequestInitiatorType): ResourceType => {
     default:
       return type
   }
+}
+
+function convertSameSiteBiDiToExtension (str: NetworkSameSite) {
+  if (str === 'none') {
+    return 'no_restriction'
+  }
+
+  return str
+}
+
+function convertSameSiteExtensionToBiDi (str: CyCookie['sameSite']) {
+  if (str === 'no_restriction') {
+    return 'none'
+  }
+
+  // if no value, default to 'none' as this is the browser default in firefox specifically.
+  // Every other browser defaults to 'lax'
+  return str === undefined ? 'none' : str
+}
+
+// used to normalize cookies to CyCookie before returning them through the automation client
+const convertBiDiCookieToCyCookie = (cookie: NetworkCookie): CyCookie => {
+  const cyCookie: CyCookie = {
+    name: cookie.name,
+    value: cookie.value.value,
+    domain: cookie.domain,
+    path: cookie.path,
+    httpOnly: cookie.httpOnly,
+    hostOnly: !!isHostOnlyCookie(cookie),
+    expirationDate: cookie.expiry ?? undefined,
+    secure: cookie.secure,
+    sameSite: convertSameSiteBiDiToExtension(cookie.sameSite),
+  }
+
+  debugCookies(`parsed BiDi cookie %o to cy cookie %o`, cookie, cyCookie)
+
+  return cyCookie
+}
+
+const convertCyCookieToBiDiCookie = (cookie: CyCookie): StoragePartialCookie => {
+  const cookieToSet: StoragePartialCookie = {
+    name: cookie.name,
+    value: {
+      type: 'string',
+      value: cookie.value,
+    },
+    domain: cookie.domain,
+    path: cookie.path,
+    httpOnly: cookie.httpOnly,
+    secure: cookie.secure,
+    sameSite: convertSameSiteExtensionToBiDi(cookie.sameSite),
+    // BiDi cookie expiry is in seconds from EPOCH, but sometimes the automation client feeds in a float and BiDi does not know how to handle it.
+    // If trying to set a float on the expiry time in BiDi, the setting silently fails.
+    expiry: (cookie.expirationDate === -Infinity ? 0 : (isNumber(cookie.expirationDate) ? toInteger(cookie.expirationDate) : null)) ?? undefined,
+  }
+
+  if (!cookie.hostOnly && isHostOnlyCookie(cookie)) {
+    cookieToSet.domain = `.${cookie.domain}`
+  }
+
+  if (cookie.hostOnly && !isHostOnlyCookie(cookie)) {
+    cookieToSet.hostOnly = false
+  }
+
+  debugCookies(`parsed cy cookie %o to BiDi cookie %o`, cookie, cookieToSet)
+
+  return cookieToSet
+}
+
+const buildBiDiClearCookieFilterFromCyCookie = (cookie: CyCookie): StoragePartialCookie => {
+  const cookieToClearFilter: StoragePartialCookie = {
+    name: cookie.name,
+    value: {
+      type: 'string',
+      value: cookie.value,
+    },
+    domain: cookie.domain,
+    path: cookie.path,
+    httpOnly: cookie.httpOnly,
+    secure: cookie.secure,
+    sameSite: convertSameSiteExtensionToBiDi(cookie.sameSite),
+  }
+
+  if (!cookie.hostOnly && isHostOnlyCookie(cookie)) {
+    cookieToClearFilter.domain = `.${cookie.domain}`
+  }
+
+  if (cookie.hostOnly && !isHostOnlyCookie(cookie)) {
+    cookieToClearFilter.hostOnly = false
+  }
+
+  debugCookies(`built filter to clear cookies from cy cookie %o: %o`, cookie, cookieToClearFilter)
+
+  return cookieToClearFilter
 }
 
 export class BidiAutomation {
@@ -272,6 +398,101 @@ export class BidiAutomation {
     this.automation.onRemoveBrowserPreRequest?.(params.request.request)
   }
 
+  private async getAllCookiesMatchingFilter (filter?: {
+    name?: string
+    domain?: string
+    path?: string
+    url?: string
+  }) {
+    let secure: boolean | undefined = undefined
+
+    if (filter?.url) {
+      const url = new URL(filter.url)
+
+      filter.domain = url.hostname
+      // if we are in a non-secure context, we do NOT want to get secure cookies and apply them,
+      // but non-secure cookies can be applied in a secure context.
+      if (url.protocol === 'http:') {
+        secure = false
+      }
+
+      if (url.pathname) {
+        filter.path = url.pathname
+      }
+    }
+
+    /**
+     *
+     * filter for BiDI storageGetCookies gets the EXACT domain / path of the cookie.
+     * Cypress expects all cookies that apply to that domain / path hierarchy to be returned.
+     *
+     * Domain example:
+     * For instance, domain www.foobar.com would have cookies with .foobar.com applied,
+     * but sending domain=www.foobar.com to storageGetCookies would not return cookies with .foobar.com domain.
+     *
+     * Path example
+     * For instance, given everything equal except path, given 3 cookies paths:
+     * /
+     * /cookies
+     * /cookies/foo
+     *
+     *  passing path=/cookies/foo will ONLY return cookies matching the exact path of cookies/foo and not its parent hierarchy
+     */
+    const BiDiCookieFilter = {
+      ...(filter?.name !== undefined ? {
+        name: filter.name,
+      } : {}),
+      ...(secure !== undefined ? {
+        secure,
+      } : {}),
+    }
+
+    const { cookies } = await this.webDriverClient.storageGetCookies({ filter: BiDiCookieFilter })
+
+    debugCookies(`found cookies: %o matching filter: %o`, cookies, BiDiCookieFilter)
+    // convert the BiDi Cookies to CyCookies
+    const normalizedCookies: CyCookie[] = cookies.map((cookie) => convertBiDiCookieToCyCookie(cookie))
+
+    // because of the above comment on the BiDi API, we get ALL cookies not filtering by domain
+    // (name filter is safe to reduce the payload coming back)
+    // and filter out all cookies that apply to the given domain, path, and name (which should already be done)
+    const filteredCookies = normalizedCookies.filter((cookie) => cookieMatches(cookie, filter))
+
+    debugCookies(`filtered additional cookies based on domain, path, or name: %o`, filteredCookies)
+
+    // print additional information if additional filtering was performed and differs from that returned from BiDi
+    if (debugModule.enabled(BIDI_COOKIE_DEBUG_NAMESPACE) && filteredCookies.length !== normalizedCookies.length) {
+      debugCookies(`filtered additional cookies based on domain, path, or name: %o`, filteredCookies)
+    }
+
+    return filteredCookies
+  }
+
+  private async clearCookies (cookie: CyCookie) {
+    const {
+      domain,
+      path,
+      name,
+    } = cookie
+    // get the cookie we are clearing from the BiDi API to make sure it exists
+    const cookieToBeCleared = (await this.getAllCookiesMatchingFilter({
+      domain,
+      path,
+      name,
+    }))[0]
+
+    debugCookies(`found cookie matching %o filter: %o`, { domain, name, path }, cookieToBeCleared)
+
+    if (!cookieToBeCleared) return
+
+    // if it does, convert it to a BiDi cookie filter and delete the cookie
+    await this.webDriverClient.storageDeleteCookies({
+      filter: buildBiDiClearCookieFilterFromCyCookie(cookieToBeCleared),
+    })
+
+    return cookieToBeCleared
+  }
+
   close () {
     this.webDriverClient.off('network.beforeRequestSent', this.onBeforeRequestSent)
     this.webDriverClient.off('network.responseStarted', this.onResponseStarted)
@@ -290,6 +511,145 @@ export class BidiAutomation {
       debugVerbose('automation command \'%s\' requested with data: %O', message, data)
       debug('BiDi middleware handling msg `%s` for top context %s', message, this.topLevelContextId)
       switch (message) {
+        case 'get:cookies':
+        {
+          debugCookies(`get:cookies %o`, data)
+          const cookies = await this.getAllCookiesMatchingFilter(data)
+
+          return cookies
+        }
+
+        case 'get:cookie':
+        {
+          const cookies = await this.getAllCookiesMatchingFilter(data)
+
+          return cookies[0] || null
+        }
+        case 'set:cookie':
+        {
+          debugCookies(`set:cookie %o`, data)
+          await this.webDriverClient.storageSetCookie({
+            cookie: convertCyCookieToBiDiCookie(data),
+          })
+
+          const cookies = await this.getAllCookiesMatchingFilter(data)
+
+          return cookies[0] || null
+        }
+
+        case 'add:cookies':
+          debugCookies(`add:cookies %o`, data)
+          await Promise.all(data.map((cookie) => {
+            return this.webDriverClient.storageSetCookie({
+              cookie: convertCyCookieToBiDiCookie(cookie),
+            })
+          }))
+
+          return
+
+        case 'set:cookies':
+
+          await this.webDriverClient.storageDeleteCookies({})
+          debugCookies(`set:cookies %o`, data)
+
+          await Promise.all(data.map((cookie) => {
+            return this.webDriverClient.storageSetCookie({
+              cookie: convertCyCookieToBiDiCookie(cookie),
+            })
+          }))
+
+          return
+        case 'clear:cookie':
+        {
+          debugCookies(`clear:cookie %o`, data)
+
+          const clearedCookie = await this.clearCookies(data)
+
+          return clearedCookie
+        }
+        case 'clear:cookies':
+        {
+          debugCookies(`clear:cookies %o`, data)
+
+          const cookiesToBeCleared: CyCookie[] = await Promise.all(data.map(async (cookie: CyCookie) => this.clearCookies(cookie)))
+
+          // clearCookies can return undefined so we filter those values out
+          return cookiesToBeCleared.filter(Boolean)
+        }
+        case 'is:automation:client:connected':
+          return true
+        case 'take:screenshot':
+        {
+          const { contexts } = await this.webDriverClient.browsingContextGetTree({})
+
+          const cypressContext = contexts[0].context
+
+          // make sure the main cypress context is focused before taking a screenshot
+          await this.webDriverClient.browsingContextActivate({
+            context: cypressContext,
+          })
+
+          const { data: base64EncodedScreenshot } = await this.webDriverClient.browsingContextCaptureScreenshot({
+            context: contexts[0].context,
+            format: {
+              type: 'png',
+            },
+          })
+
+          debugScreenshot(`take:screenshot base64 encoded value of context %s: %s`, contexts[0].context, base64EncodedScreenshot)
+
+          return `data:image/png;base64,${base64EncodedScreenshot}`
+        }
+
+        case 'reset:browser:state':
+          // FIXME: patch this for now just to get clean cookies between tests
+          // we really need something similar to the Storage.clearDataForOrigin and Network.clearBrowserCache methods here.
+
+          // For now we can forward to the web extension or the web extension https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/browsingData/remove API
+          debug('reset:browser:state')
+          // await this.webDriverClient.storageDeleteCookies({})
+          // to accomplish this, we will throw an AutomationNotImplemented error to let the web extension handle it.
+          throw new AutomationNotImplemented(message, 'BiDiAutomation')
+        case 'reset:browser:tabs:for:next:spec':
+          {
+            const { contexts } = await this.webDriverClient.browsingContextGetTree({})
+
+            if (data.shouldKeepTabOpen) {
+              // create a new context for the next spec to run
+              const { context } = await this.webDriverClient.browsingContextCreate({
+                type: 'tab',
+              })
+
+              debug(`reset:browser:tabs:for:next:spec shouldKeepTabOpen=true. Created new context: %s`, context)
+            }
+
+            // CLOSE ALL BUT THE NEW CONTEXT, which makes it active
+            // also do not need to navigate to about:blank as this happens by default
+            for (const context of contexts) {
+              debug(`reset:browser:tabs:for:next:spec closing context: %s`, context.context)
+
+              await this.webDriverClient.browsingContextClose({
+                context: context.context,
+              })
+            }
+          }
+
+          return
+        case 'focus:browser:window':
+          {
+            const { contexts } = await this.webDriverClient.browsingContextGetTree({})
+
+            // TODO: just focus the AUT context window that we already have as opposed to the zero-ith frame
+            const cypressContext = contexts[0].context
+
+            await this.webDriverClient.browsingContextActivate({
+              context: cypressContext,
+            })
+
+            debug(`focus:browser:window focused context: %s`, cypressContext)
+          }
+
+          return
         case 'key:press':
           if (this.autContextId) {
             await bidiKeyPress(data, this.webDriverClient, this.autContextId, this.topLevelContextId)

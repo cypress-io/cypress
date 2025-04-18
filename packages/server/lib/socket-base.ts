@@ -228,9 +228,7 @@ export class SocketBase {
           debug('automation:client connected')
 
           // only send the necessary config
-          automationClient.emit('automation:config', {
-            IS_CDP_FORCED_FOR_FIREFOX: !!process.env.FORCE_FIREFOX_CDP,
-          })
+          automationClient.emit('automation:config', {})
 
           // if our automation disconnects then we're
           // in trouble and should probably bomb everything

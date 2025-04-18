@@ -1,4 +1,13 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.0.0
+
+_Released 07/01/2025 (PENDING)_
+
+**Breaking Changes:**
+
+- Removed support for Node.js 18 and Node.js 23. Addresses [#31302](https://github.com/cypress-io/cypress/issues/31302).
+- Removed support for [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol) with the [firefox](https://www.mozilla.org/) browser. Addresses [#31189](https://github.com/cypress-io/cypress/issues/31189).
+
 ## 14.3.1
 
 _Released 4/17/2025_

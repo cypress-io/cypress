@@ -1079,11 +1079,6 @@ describe('visual error templates', () => {
         default: [1, 'chrome', 62],
       }
     },
-    CDP_FIREFOX_DEPRECATED: () => {
-      return {
-        default: [],
-      }
-    },
     BROWSER_PROCESS_CLOSED_UNEXPECTEDLY: () => {
       return {
         default: ['chrome'],

@@ -85,15 +85,15 @@ describe('linux browser detection', () => {
       name: 'firefox',
       family: 'firefox',
       displayName: 'Firefox',
-      majorVersion: '99',
+      majorVersion: '135',
       path: 'firefox',
       profilePath: '/home/foo/snap/firefox/current',
-      version: '99.2.3',
+      version: '135.0.1',
     }
 
     beforeEach(() => {
       execa.withArgs('firefox', ['--version'])
-      .resolves({ stdout: 'Mozilla Firefox 99.2.3' })
+      .resolves({ stdout: 'Mozilla Firefox 135.0.1' })
 
       sinon.stub(os, 'homedir').returns('/home/foo')
     })
