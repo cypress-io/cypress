@@ -1144,34 +1144,6 @@ describe('e2e record', () => {
       })
     })
 
-    describe('create run 402 - free plan exceeds monthly private tests', () => {
-      setupStubbedServer(createRoutes({
-        postRun: {
-          res (req, res) {
-            return res.status(402).json({
-              code: 'FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS',
-              payload: {
-                used: 600,
-                limit: 500,
-                orgId: 'org-id-1234',
-              },
-            })
-          },
-        },
-      }))
-
-      it('errors and exits when on free plan and over recorded runs limit', function () {
-        return systemTests.exec(this, {
-          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          configFile: 'cypress-with-project-id.config.js',
-          spec: 'record_pass*',
-          record: true,
-          snapshot: true,
-          expectedExitCode: 1,
-        })
-      })
-    })
-
     describe('create run 402 - free plan exceeds monthly tests', () => {
       setupStubbedServer(createRoutes({
         postRun: {
@@ -1993,9 +1965,8 @@ describe('e2e record', () => {
                 warnings: [{
                   name: 'foo',
                   message: 'foo',
-                  code: 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS',
+                  code: 'PAID_PLAN_EXCEEDS_MONTHLY_TESTS',
                   limit: 500,
-                  gracePeriodEnds: '2999-12-31',
                   orgId: 'org-id-1234',
                 }],
               })
@@ -2022,43 +1993,6 @@ describe('e2e record', () => {
 
   describe('api interaction warnings', () => {
     describe('create run warnings', () => {
-      describe('grace period - over private tests limit', () => {
-        const mockServer = setupStubbedServer(createRoutes({
-          postRun: {
-            res (req, res) {
-              mockServer.setSpecs(req)
-
-              return res.status(200).json({
-                runId,
-                groupId,
-                machineId,
-                runUrl,
-                tags,
-                warnings: [{
-                  name: 'foo',
-                  message: 'foo',
-                  code: 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS',
-                  limit: 500,
-                  gracePeriodEnds: '2999-12-31',
-                  orgId: 'org-id-1234',
-                }],
-              })
-            },
-          },
-
-        }))
-
-        it('warns when over private test results', function () {
-          return systemTests.exec(this, {
-            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-            configFile: 'cypress-with-project-id.config.js',
-            spec: 'record_pass*',
-            record: true,
-            snapshot: true,
-          })
-        })
-      })
-
       describe('grace period - over tests limit', () => {
         const mockServer = setupStubbedServer(createRoutes({
           postRun: {
@@ -2155,42 +2089,6 @@ describe('e2e record', () => {
         }))
 
         it('warns when using parallel feature', function () {
-          return systemTests.exec(this, {
-            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-            configFile: 'cypress-with-project-id.config.js',
-            spec: 'record_pass*',
-            record: true,
-            snapshot: true,
-          })
-        })
-      })
-
-      describe('paid plan - over private tests limit', () => {
-        const mockServer = setupStubbedServer(createRoutes({
-          postRun: {
-            res (req, res) {
-              mockServer.setSpecs(req)
-
-              return res.status(200).json({
-                runId,
-                groupId,
-                machineId,
-                runUrl,
-                tags,
-                warnings: [{
-                  name: 'foo',
-                  message: 'foo',
-                  code: 'PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS',
-                  used: 700,
-                  limit: 500,
-                  orgId: 'org-id-1234',
-                }],
-              })
-            },
-          },
-        }))
-
-        it('warns when over private test results', function () {
           return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
             configFile: 'cypress-with-project-id.config.js',

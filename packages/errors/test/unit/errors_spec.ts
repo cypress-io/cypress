@@ -17,7 +17,7 @@ describe('lib/errors', () => {
 
   context('.log', () => {
     it('uses red by default', () => {
-      const err = errors.get('NOT_LOGGED_IN')
+      const err = errors.get('TESTS_DID_NOT_START_FAILED')
 
       const ret = errors.log(err)
 
@@ -33,7 +33,7 @@ describe('lib/errors', () => {
     })
 
     it('can change the color', () => {
-      const err = errors.get('NOT_LOGGED_IN')
+      const err = errors.get('TESTS_DID_NOT_START_FAILED')
 
       const ret = errors.log(err, 'yellow')
 
