@@ -6,6 +6,14 @@ import { canAccess, createHashForFile, matchFileHash } from '../utils'
 
 const logInfo = debug('cypress:snapgen:info')
 
+function cleanupDependencySet (dependencySet: string[], inputs: Record<string, { fileInfo: { fullPath: string } }>) {
+  const inputsKeys = Object.keys(inputs)
+
+  return dependencySet.filter((dependency) => {
+    return inputsKeys.includes(dependency.slice(2))
+  })
+}
+
 export async function determineDeferred (
   bundlerPath: string,
   projectBaseDir: string,
@@ -98,11 +106,14 @@ export async function determineDeferred (
     deferred: updatedDeferred,
     norewrite: updatedNorewrite,
     healthy: updatedHealthy,
+    meta: esbuildMeta,
   } = await doctor.heal()
   const deferredHashFile = path.relative(projectBaseDir, hashFilePath)
 
+  const cleanedUpNorewrite = cleanupDependencySet(updatedNorewrite, esbuildMeta.inputs)
+
   const updatedMeta = {
-    norewrite: opts.nodeModulesOnly ? [...updatedNorewrite, ...projectNoRewrite] : updatedNorewrite,
+    norewrite: opts.nodeModulesOnly ? [...cleanedUpNorewrite, ...projectNoRewrite] : cleanedUpNorewrite,
     deferred: opts.nodeModulesOnly ? [...updatedDeferred, ...projectDeferred] : updatedDeferred,
     healthy: opts.nodeModulesOnly ? [...updatedHealthy, ...projectHealthy] : updatedHealthy,
     deferredHashFile,
@@ -122,7 +133,7 @@ export async function determineDeferred (
   }
 
   return {
-    norewrite: updatedNorewrite,
+    norewrite: cleanedUpNorewrite,
     deferred: updatedDeferred,
     healthy: updatedHealthy,
   }
