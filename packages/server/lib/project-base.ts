@@ -490,11 +490,19 @@ export class ProjectBase extends EE {
             instanceId: v4(),
           })
 
-          await browsers.connectProtocolToBrowser({ browser: this.browser, foundBrowsers: this.options.browsers, protocolManager: this.protocolManager })
+          await browsers.connectProtocolToBrowser({ browser: this.browser, foundBrowsers: this.options.browsers, protocolManager: studio.protocolManager })
 
-          if (this.protocolManager.db) {
-            studio?.setProtocolDb(this.protocolManager.db)
+          if (!studio.protocolManager.dbPath) {
+            debug('Protocol database path is not set after initializing protocol manager')
+
+            return { canAccessStudioAI: false }
           }
+
+          this.protocolManager = studio.protocolManager
+
+          await studio.initializeStudioAI({
+            protocolDbPath: studio.protocolManager.dbPath,
+          })
 
           return { canAccessStudioAI: true }
         }
@@ -511,6 +519,7 @@ export class ProjectBase extends EE {
           await browsers.closeProtocolConnection({ browser: this.browser, foundBrowsers: this.options.browsers })
           this.protocolManager?.close()
           this.protocolManager = undefined
+          await studio.destroy()
         }
       },
 
@@ -613,22 +622,6 @@ export class ProjectBase extends EE {
       // If we're not in chromium, our strategy for correlating service worker prerequests doesn't work in non-chromium browsers (https://github.com/cypress-io/cypress/issues/28079)
       // in order to not hang for 2 seconds, we override the prerequest timeout to be 500 ms (which is what it has been historically)
       this._server?.setPreRequestTimeout(500)
-    }
-
-    if (this.spec) {
-      // Set protocol manager on protocolManager
-      const studio = await this.ctx.coreData.studioLifecycleManager?.getStudio()
-
-      if (this.spec && studio?.protocolManager) {
-        const canAccessStudioAI = await studio?.canAccessStudioAI(this.browser) ?? false
-
-        if (canAccessStudioAI) {
-          this.protocolManager = studio?.protocolManager
-          if (this.protocolManager && studio && this.protocolManager.db) {
-            studio.setProtocolDb(this.protocolManager.db)
-          }
-        }
-      }
     }
   }
 

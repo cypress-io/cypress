@@ -306,13 +306,6 @@ const createRun = Promise.method((options: any = {}) => {
 
     return _.each(response.warnings, (warning: any) => {
       switch (warning.code) {
-        case 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS':
-          return errorsWarning('FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS', {
-            limit: warning.limit,
-            usedTestsMessage: 'private test',
-            gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds),
-            link: billingLink(warning.orgId),
-          })
         case 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS':
           return errorsWarning('FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS', {
             limit: warning.limit,
@@ -330,13 +323,6 @@ const createRun = Promise.method((options: any = {}) => {
             planType: 'free',
             limit: warning.limit,
             usedTestsMessage: 'test',
-            link: billingLink(warning.orgId),
-          })
-        case 'PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS':
-          return errorsWarning('PLAN_EXCEEDS_MONTHLY_TESTS', {
-            planType: 'current',
-            limit: warning.limit,
-            usedTestsMessage: 'private test',
             link: billingLink(warning.orgId),
           })
         case 'PAID_PLAN_EXCEEDS_MONTHLY_TESTS':
@@ -380,12 +366,6 @@ const createRun = Promise.method((options: any = {}) => {
         const orgId = _.get(payload, 'orgId')
 
         switch (code) {
-          case 'FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS':
-            return throwErr('FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS', {
-              limit,
-              usedTestsMessage: 'private test',
-              link: billingLink(orgId),
-            })
           case 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS':
             return throwErr('FREE_PLAN_EXCEEDS_MONTHLY_TESTS', {
               limit,

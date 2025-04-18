@@ -46,6 +46,7 @@ describe('lib/project-base', () => {
     this.testStudioManager = {
       initializeRoutes: () => {},
       status: 'INITIALIZED',
+      destroy: () => Promise.resolve(),
     }
 
     sinon.stub(studio, 'getAndInitializeStudioManager').resolves(this.testStudioManager)
@@ -728,8 +729,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     it('passes onStudioInit callback with AI enabled and a protocol manager', async function () {
       const mockSetupProtocol = sinon.stub()
       const mockBeforeSpec = sinon.stub()
-      const mockAccessStudioLLM = sinon.stub().resolves(true)
-      const mockSetProtocolDb = sinon.stub()
+      const mockAccessStudioAI = sinon.stub().resolves(true)
       const mockCaptureStudioEvent = sinon.stub().resolves()
 
       this.project.spec = {}
@@ -741,15 +741,14 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       const studioManager = new StudioManager()
 
-      studioManager.canAccessStudioAI = mockAccessStudioLLM
+      studioManager.canAccessStudioAI = mockAccessStudioAI
       studioManager.captureStudioEvent = mockCaptureStudioEvent
       studioManager.protocolManager = {
         setupProtocol: mockSetupProtocol,
         beforeSpec: mockBeforeSpec,
         db: { test: 'db' },
+        dbPath: 'test-db-path',
       }
-
-      studioManager.setProtocolDb = mockSetProtocolDb
 
       const studioLifecycleManager = new StudioLifecycleManager()
 
@@ -803,7 +802,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       expect(mockSetupProtocol).to.be.calledOnce
       expect(mockBeforeSpec).to.be.calledOnce
-      expect(mockAccessStudioLLM).to.be.calledWith({
+      expect(mockAccessStudioAI).to.be.calledWith({
         family: 'chromium',
         name: 'chrome',
         channel: 'stable',
@@ -816,13 +815,12 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
 
       expect(this.project['_protocolManager']).to.eq(studioManager.protocolManager)
-      expect(mockSetProtocolDb).to.be.calledWith({ test: 'db' })
     })
 
     it('passes onStudioInit callback with AI enabled but no protocol manager', async function () {
       const mockSetupProtocol = sinon.stub()
       const mockBeforeSpec = sinon.stub()
-      const mockAccessStudioLLM = sinon.stub().resolves(true)
+      const mockAccessStudioAI = sinon.stub().resolves(true)
       const mockCaptureStudioEvent = sinon.stub().resolves()
 
       this.project.spec = {}
@@ -834,7 +832,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       const studioManager = new StudioManager()
 
-      studioManager.canAccessStudioAI = mockAccessStudioLLM
+      studioManager.canAccessStudioAI = mockAccessStudioAI
       studioManager.captureStudioEvent = mockCaptureStudioEvent
 
       const studioLifecycleManager = new StudioLifecycleManager()
@@ -882,16 +880,16 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       expect(mockSetupProtocol).not.to.be.called
       expect(mockBeforeSpec).not.to.be.called
-      expect(mockAccessStudioLLM).not.to.be.called
+      expect(mockAccessStudioAI).not.to.be.called
 
       expect(browsers.connectProtocolToBrowser).not.to.be.called
       expect(this.project['_protocolManager']).to.be.undefined
     })
 
-    it('passes onStudioInit callback with llm disabled', async function () {
+    it('passes onStudioInit callback with AI disabled', async function () {
       const mockSetupProtocol = sinon.stub()
       const mockBeforeSpec = sinon.stub()
-      const mockAccessStudioLLM = sinon.stub().resolves(false)
+      const mockAccessStudioAI = sinon.stub().resolves(false)
       const mockCaptureStudioEvent = sinon.stub().resolves()
 
       this.project.spec = {}
@@ -903,7 +901,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       const studioManager = new StudioManager()
 
-      studioManager.canAccessStudioAI = mockAccessStudioLLM
+      studioManager.canAccessStudioAI = mockAccessStudioAI
       studioManager.captureStudioEvent = mockCaptureStudioEvent
       studioManager.protocolManager = {
         setupProtocol: mockSetupProtocol,

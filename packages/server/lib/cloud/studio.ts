@@ -1,4 +1,4 @@
-import type { StudioErrorReport, StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape, StudioCloudApi, StudioEvent } from '@packages/types'
+import type { StudioErrorReport, StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape, StudioCloudApi, StudioAIInitializeOptions, StudioEvent } from '@packages/types'
 import type { Router } from 'express'
 import type { Socket } from 'socket.io'
 import fetch from 'cross-fetch'
@@ -7,7 +7,7 @@ import os from 'os'
 import { agent } from '@packages/network'
 import Debug from 'debug'
 import { requireScript } from './require_script'
-import type Database from 'better-sqlite3'
+import path from 'path'
 
 interface StudioServer { default: StudioServerDefaultShape }
 
@@ -40,10 +40,6 @@ export class StudioManager implements StudioManagerShape {
     return manager
   }
 
-  setProtocolDb (db: Database.Database): void {
-    this.invokeSync('setProtocolDb', { isEssential: true }, db)
-  }
-
   async setup ({ script, studioPath, studioHash, projectSlug, cloudApi, shouldEnableStudio }: SetupOptions): Promise<void> {
     const { createStudioServer } = requireScript<StudioServer>(script).default
 
@@ -51,6 +47,7 @@ export class StudioManager implements StudioManagerShape {
       studioPath,
       projectSlug,
       cloudApi,
+      betterSqlite3Path: path.dirname(require.resolve('better-sqlite3/package.json')),
     })
 
     this._studioHash = studioHash
@@ -80,6 +77,14 @@ export class StudioManager implements StudioManagerShape {
 
   async canAccessStudioAI (browser: Cypress.Browser): Promise<boolean> {
     return (await this.invokeAsync('canAccessStudioAI', { isEssential: true }, browser)) ?? false
+  }
+
+  async initializeStudioAI (options: StudioAIInitializeOptions): Promise<void> {
+    await this.invokeAsync('initializeStudioAI', { isEssential: true }, options)
+  }
+
+  async destroy (): Promise<void> {
+    await this.invokeAsync('destroy', { isEssential: true })
   }
 
   private async reportError (error: Error): Promise<void> {
