@@ -49,9 +49,9 @@ describe('lib/routes', () => {
     function setupCommonRoutes () {
       const router = {
         get: sinon.stub(),
-        post: () => {},
-        all: () => {},
-        use: sinon.stub(),
+        post: sinon.stub(),
+        all: sinon.stub(),
+        use: sinon.spy(),
       }
 
       const Router = sinon.stub().returns(router)
@@ -70,6 +70,8 @@ describe('lib/routes', () => {
     it('sends 301 if a chrome https upgrade is detected for /', () => {
       const { router } = setupCommonRoutes()
 
+      const middleware = router.use.args.find((args) => args[0] === '/')?.[1]
+
       const req = {
         hostname: 'foobar.com',
         path: '/',
@@ -84,7 +86,7 @@ describe('lib/routes', () => {
 
       res.status.returns(res)
 
-      router.use.withArgs('/').yield(req, res, next)
+      middleware(req, res, next)
 
       expect(res.status).to.be.calledWith(301)
       expect(res.redirect).to.be.calledWith('http://foobar.com/')
@@ -93,6 +95,8 @@ describe('lib/routes', () => {
     it('sends 301 if a chrome https upgrade is detected for /__/', () => {
       const { router } = setupCommonRoutes()
 
+      const middleware = router.use.args.find((args) => args[0] === '/')?.[1]
+
       const req = {
         hostname: 'foobar.com',
         path: '/__/',
@@ -107,50 +111,52 @@ describe('lib/routes', () => {
 
       res.status.returns(res)
 
-      router.use.withArgs('/').yield(req, res, next)
+      middleware(req, res, next)
 
       expect(res.status).to.be.calledWith(301)
       expect(res.redirect).to.be.calledWith('http://foobar.com/__/')
     })
 
-    it('is a noop if a chrome https upgrade is detected for /', () => {
+    it('is a noop if path is neither / nor /__/', () => {
       const { router } = setupCommonRoutes()
+
+      const middleware = router.use.args.find((args) => args[0] === '/')?.[1]
 
       const req = {
         hostname: 'foobar.com',
-        path: '/',
-        proxiedUrl: 'https://foobar.com/',
+        path: '/something-else',
+        proxiedUrl: 'https://foobar.com/something-else',
         protocol: 'https',
       }
       const res = {
         status: sinon.stub().throws('res.status() should not be called'),
+        redirect: sinon.stub(),
       }
       const next = sinon.stub()
 
-      res.status.returns(res)
-
-      router.use.withArgs('/').yield(req, res, next)
+      middleware(req, res, next)
 
       expect(next).to.be.called
     })
 
-    it('is a noop if a chrome https upgrade is detected for /__/', () => {
+    it('is a noop if protocol is not https', () => {
       const { router } = setupCommonRoutes()
+
+      const middleware = router.use.args.find((args) => args[0] === '/')?.[1]
 
       const req = {
         hostname: 'foobar.com',
-        path: '/__/',
-        proxiedUrl: 'https://foobar.com/__/',
-        protocol: 'https',
+        path: '/',
+        proxiedUrl: 'http://foobar.com/',
+        protocol: 'http',
       }
       const res = {
         status: sinon.stub().throws('res.status() should not be called'),
+        redirect: sinon.stub(),
       }
       const next = sinon.stub()
 
-      res.status.returns(res)
-
-      router.use.withArgs('/').yield(req, res, next)
+      middleware(req, res, next)
 
       expect(next).to.be.called
     })
@@ -160,6 +166,8 @@ describe('lib/routes', () => {
 
       const { router } = setupCommonRoutes()
 
+      const middleware = router.use.args.find((args) => args[0] === '/')?.[1]
+
       const req = {
         hostname: 'foobar.com',
         path: '/',
@@ -168,18 +176,19 @@ describe('lib/routes', () => {
       }
       const res = {
         status: sinon.stub().throws('res.status() should not be called'),
+        redirect: sinon.stub(),
       }
       const next = sinon.stub()
 
-      res.status.returns(res)
-
-      router.use.withArgs('/').yield(req, res, next)
+      middleware(req, res, next)
 
       expect(next).to.be.called
     })
 
     it('is a noop if primary hostname and request hostname do not match', () => {
       const { router } = setupCommonRoutes()
+
+      const middleware = router.use.args.find((args) => args[0] === '/')?.[1]
 
       const req = {
         hostname: 'other.com',
@@ -189,12 +198,11 @@ describe('lib/routes', () => {
       }
       const res = {
         status: sinon.stub().throws('res.status() should not be called'),
+        redirect: sinon.stub(),
       }
       const next = sinon.stub()
 
-      res.status.returns(res)
-
-      router.use.withArgs('/').yield(req, res, next)
+      middleware(req, res, next)
 
       expect(next).to.be.called
     })
@@ -210,6 +218,8 @@ describe('lib/routes', () => {
 
       const { router } = setupCommonRoutes()
 
+      const middleware = router.use.args.find((args) => args[0] === '/')?.[1]
+
       const req = {
         hostname: 'foobar.com',
         path: '/',
@@ -218,12 +228,11 @@ describe('lib/routes', () => {
       }
       const res = {
         status: sinon.stub().throws('res.status() should not be called'),
+        redirect: sinon.stub(),
       }
       const next = sinon.stub()
 
-      res.status.returns(res)
-
-      router.use.withArgs('/').yield(req, res, next)
+      middleware(req, res, next)
 
       expect(next).to.be.called
     })
