@@ -444,7 +444,7 @@ export class EventManager {
     let isStudioProtocolEnabled = false
     const isStudioInScope = this.studioStore.isActive || this.studioStore.isLoading
 
-    if(isStudioInScope) {
+    if (isStudioInScope) {
       await new Promise<void>((resolve) => {
         this.ws.emit('studio:protocol:enabled', ({ studioProtocolEnabled }) => {
           isStudioProtocolEnabled = studioProtocolEnabled
@@ -459,7 +459,6 @@ export class EventManager {
     }
 
     this._addListeners()
-
   }
 
   isBrowserFamily (family: string) {
