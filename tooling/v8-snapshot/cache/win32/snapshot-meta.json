@@ -2452,6 +2452,7 @@
     "./node_modules/lodash/isArrayLike.js",
     "./node_modules/lodash/isFunction.js",
     "./node_modules/lodash/isLength.js",
+    "./node_modules/lodash/isNumber.js",
     "./node_modules/lodash/isObject.js",
     "./node_modules/lodash/isObjectLike.js",
     "./node_modules/lodash/isString.js",
