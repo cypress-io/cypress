@@ -16,7 +16,6 @@ import * as savedState from './saved_state'
 import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
-
 import system from './util/system'
 import type { BannersState, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ProtocolManagerShape, ReceivedCypressOptions, ResolvedConfigurationOptions, TestingType, VideoRecording, AutomationCommands } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
@@ -193,13 +192,35 @@ export class ProjectBase extends EE {
       return studioManager
     }).catch((err) => {
       debug('Error during studio manager setup: %o', err)
-      console.log('ERROR DURING STUDIO MANAGER SETUP', err)
+
       return null
     })
 
     // Create a StudioLifecycleManager and set the studio manager promise
     const studioLifecycleManager = new StudioLifecycleManager()
+
     studioLifecycleManager.setStudioPromise(studioManagerPromise)
+
+    // Register a listener to update config when studio is ready
+    studioLifecycleManager.onStudioReady((studioManager) => {
+      debug('Studio is ready, updating config with isStudioProtocolEnabled:', studioManager.isProtocolEnabled)
+
+      // Update our cached config with the studio protocol enabled state
+      if (this._cfg) {
+        this._cfg.isStudioProtocolEnabled = studioManager.isProtocolEnabled
+
+        // Also update hideRunnerUi based on the studio state
+        const isDefaultProtocolEnabled = this._protocolManager?.isProtocolEnabled ?? false
+
+        const studio = this.ctx.coreData.studioLifecycleManager?.getStudioIfReady()
+        const hideRunnerUi = this.options?.args?.runnerUi === false ||
+          (isDefaultProtocolEnabled && !studio && !this.options?.args?.runnerUi)
+
+        this._cfg.hideRunnerUi = hideRunnerUi
+
+        debug('Updated config with hideRunnerUi:', hideRunnerUi)
+      }
+    })
 
     this.ctx.update((data) => {
       data.studioLifecycleManager = studioLifecycleManager
@@ -446,6 +467,13 @@ export class ProjectBase extends EE {
           machineId: await this.ctx.coreData.machineId,
           projectId: this.cfg.projectId,
           user: this.ctx.coreData.user?.email,
+          browser: this.browser ? {
+            name: this.browser.name,
+            family: this.browser.family,
+            channel: this.browser.channel,
+            version: this.browser.version,
+          } : undefined,
+          cypressVersion: pkg.version,
         })
 
         if (this.spec && studio?.protocolManager) {
@@ -590,6 +618,7 @@ export class ProjectBase extends EE {
     if (this.spec) {
       // Set protocol manager on protocolManager
       const studio = await this.ctx.coreData.studioLifecycleManager?.getStudio()
+
       if (this.spec && studio?.protocolManager) {
         const canAccessStudioAI = await studio?.canAccessStudioAI(this.browser) ?? false
 
@@ -649,18 +678,16 @@ export class ProjectBase extends EE {
 
     const isDefaultProtocolEnabled = this._protocolManager?.isProtocolEnabled ?? false
 
-    // We need to use a synchronous approach in this method since it returns a non-Promise value
-    // The caller will need to handle the Promise values when needed
-    
     // hide the runner if explicitly requested or if the protocol is enabled outside of studio and the runner is not explicitly enabled
-    const hideRunnerUi = this.options?.args?.runnerUi === false || 
-      (isDefaultProtocolEnabled && !this.ctx.coreData.studioLifecycleManager?.getStudio() && !this.options?.args?.runnerUi)
+    const studio = this.ctx.coreData.studioLifecycleManager?.getStudioIfReady()
+    const hideRunnerUi = (
+      this.options?.args?.runnerUi === false ||
+      (isDefaultProtocolEnabled && !studio && !this.options?.args?.runnerUi)
+    )
 
     // hide the command log if explicitly requested or if we are hiding the runner
     const hideCommandLog = this._cfg.env?.NO_COMMAND_LOG === 1 || hideRunnerUi
 
-    // NOTE: For backward compatibility, we continue using the synchronous version that uses
-    // ctx.coreData.studio. The new pattern will use getStudio() where async is possible.
     return {
       ...this._cfg,
       remote: this.remoteStates?.current() ?? {} as Cypress.RemoteState,
@@ -668,7 +695,7 @@ export class ProjectBase extends EE {
       testingType: this.ctx.coreData.currentTestingType ?? 'e2e',
       specs: [],
       isDefaultProtocolEnabled,
-      isStudioProtocolEnabled: this.ctx.coreData.studioLifecycleManager?.getStudio()?.isProtocolEnabled ?? false,
+      isStudioProtocolEnabled: this._cfg?.isStudioProtocolEnabled ?? false,
       hideCommandLog,
       hideRunnerUi,
     }

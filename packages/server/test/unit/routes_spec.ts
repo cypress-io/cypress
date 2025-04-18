@@ -113,13 +113,34 @@ describe('lib/routes', () => {
       expect(res.redirect).to.be.calledWith('http://foobar.com/__/')
     })
 
-    it('is a noop if not a matching route', () => {
+    it('is a noop if a chrome https upgrade is detected for /', () => {
       const { router } = setupCommonRoutes()
 
       const req = {
         hostname: 'foobar.com',
-        path: '/other-route',
-        proxiedUrl: 'https://foobar.com/other-route',
+        path: '/',
+        proxiedUrl: 'https://foobar.com/',
+        protocol: 'https',
+      }
+      const res = {
+        status: sinon.stub().throws('res.status() should not be called'),
+      }
+      const next = sinon.stub()
+
+      res.status.returns(res)
+
+      router.use.withArgs('/').yield(req, res, next)
+
+      expect(next).to.be.called
+    })
+
+    it('is a noop if a chrome https upgrade is detected for /__/', () => {
+      const { router } = setupCommonRoutes()
+
+      const req = {
+        hostname: 'foobar.com',
+        path: '/__/',
+        proxiedUrl: 'https://foobar.com/__/',
         protocol: 'https',
       }
       const res = {
@@ -208,48 +229,81 @@ describe('lib/routes', () => {
     })
 
     it('initializes routes on studio if present', () => {
-      getCtx().coreData.studio = {
+      const studioManager = {
         status: 'INITIALIZED',
         initializeRoutes: sinon.stub(),
+        isProtocolEnabled: false,
+        captureStudioEvent: sinon.stub(),
+        canAccessStudioAI: sinon.stub(),
+        setProtocolDb: sinon.stub(),
+        addSocketListeners: sinon.stub(),
       }
+
+      const studioLifecycleManager = {
+        onStudioReady: sinon.stub().callsFake((callback) => {
+          callback(studioManager)
+
+          return () => {}
+        }),
+      }
+
+      getCtx().coreData.studioLifecycleManager = studioLifecycleManager as any
 
       const { router } = setupCommonRoutes()
 
-      expect(getCtx().coreData.studio.initializeRoutes).to.be.calledWith(router)
+      expect(studioManager.initializeRoutes).to.be.calledWith(router)
     })
 
     it('initializes a dummy route for studio if studio is not present', () => {
-      const { router } = setupCommonRoutes()
+      delete getCtx().coreData.studioLifecycleManager
 
-      const req = {
-        path: '/__cypress-studio/app-studio.js',
-        protocol: 'https',
+      const studioRouter = {
+        get: sinon.stub(),
+        post: sinon.stub(),
+        all: sinon.stub(),
+        use: sinon.stub(),
       }
-      const res = {
-        setHeader: sinon.stub(),
-        status: sinon.stub(),
-        send: sinon.stub(),
+
+      const router = {
+        get: sinon.stub(),
+        post: sinon.stub(),
+        all: sinon.stub(),
+        use: sinon.stub().withArgs('/').returns(studioRouter),
       }
-      const next = sinon.stub().throws('next() should not be called')
 
-      res.status.returns(res)
+      const Router = sinon.stub()
 
-      router.get.withArgs('/__cypress-studio/app-studio.js').yield(req, res, next)
+      Router.onFirstCall().returns(router)
+      Router.onSecondCall().returns(studioRouter)
 
-      expect(res.setHeader).to.be.calledWith('Content-Type', 'application/javascript')
-      expect(res.status).to.be.calledWith(200)
-      expect(res.send).to.be.calledWith('')
+      const { createCommonRoutes } = proxyquire('../../lib/routes', {
+        'express': { Router },
+      })
+
+      createCommonRoutes(routeOptions)
+
+      expect(router.use).to.have.been.calledWith('/')
+
+      expect(Router).to.have.been.calledTwice
+
+      expect(getCtx().coreData.studioLifecycleManager).to.be.undefined
     })
 
     it('does not initialize routes on studio if status is in error', () => {
-      getCtx().coreData.studio = {
+      const studioManager = {
         status: 'IN_ERROR',
         initializeRoutes: sinon.stub(),
       }
 
+      const studioLifecycleManager = {
+        onStudioReady: sinon.stub().returns(() => {}),
+      }
+
+      getCtx().coreData.studioLifecycleManager = studioLifecycleManager as any
+
       setupCommonRoutes()
 
-      expect(getCtx().coreData.studio.initializeRoutes).not.to.be.called
+      expect(studioManager.initializeRoutes).not.to.be.called
     })
   })
 })

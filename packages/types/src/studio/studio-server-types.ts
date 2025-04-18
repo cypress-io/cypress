@@ -36,6 +36,13 @@ export interface StudioEvent {
   machineId: string | null
   user?: string
   projectId?: string
+  browser?: {
+    name: string
+    family: string
+    channel?: string
+    version?: string
+  }
+  cypressVersion?: string
 }
 
 export interface StudioServerShape {

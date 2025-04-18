@@ -20,8 +20,10 @@ describe('getAndInitializeStudioManager', () => {
   let createInErrorManagerStub: sinon.SinonStub = sinon.stub()
   let tmpdir: string = '/tmp'
   let studioManagerSetupStub: sinon.SinonStub = sinon.stub()
+  let originalEnv: NodeJS.ProcessEnv
 
   beforeEach(() => {
+    originalEnv = { ...process.env }
     rmStub = sinon.stub()
     ensureStub = sinon.stub()
     copyStub = sinon.stub()
@@ -71,7 +73,99 @@ describe('getAndInitializeStudioManager', () => {
   })
 
   afterEach(() => {
+    process.env = originalEnv
     sinon.restore()
+  })
+
+  describe('Studio status based on environment variables', () => {
+    let mockGetCloudUrl: sinon.SinonStub
+    let mockAdditionalHeaders: sinon.SinonStub
+    let cloud: CloudDataSource
+    let writeStream: Writable
+    let readStream: Readable
+
+    beforeEach(() => {
+      readStream = Readable.from('console.log("studio script")')
+
+      writeStream = new Writable({
+        write: (chunk, encoding, callback) => {
+          callback()
+        },
+      })
+
+      createWriteStreamStub.returns(writeStream)
+      createReadStreamStub.returns(Readable.from('tar contents'))
+
+      mockGetCloudUrl = sinon.stub()
+      mockAdditionalHeaders = sinon.stub()
+      cloud = {
+        getCloudUrl: mockGetCloudUrl,
+        additionalHeaders: mockAdditionalHeaders,
+      } as unknown as CloudDataSource
+
+      mockGetCloudUrl.returns('http://localhost:1234')
+      mockAdditionalHeaders.resolves({
+        a: 'b',
+        c: 'd',
+      })
+
+      crossFetchStub.resolves({
+        body: readStream,
+        headers: {
+          get: (header) => {
+            if (header === 'x-cypress-signature') {
+              return '159'
+            }
+          },
+        },
+      })
+
+      verifySignatureFromFileStub.resolves(true)
+    })
+
+    it('sets status to ENABLED when CYPRESS_ENABLE_CLOUD_STUDIO is set', async () => {
+      process.env.CYPRESS_ENABLE_CLOUD_STUDIO = '1'
+      delete process.env.CYPRESS_LOCAL_STUDIO_PATH
+
+      await getAndInitializeStudioManager({ projectId: '12345', cloudDataSource: cloud })
+
+      expect(studioManagerSetupStub).to.be.calledWith(sinon.match({
+        shouldEnableStudio: true,
+      }))
+    })
+
+    it('sets status to ENABLED when CYPRESS_LOCAL_STUDIO_PATH is set', async () => {
+      delete process.env.CYPRESS_ENABLE_CLOUD_STUDIO
+      process.env.CYPRESS_LOCAL_STUDIO_PATH = '/path/to/studio'
+
+      await getAndInitializeStudioManager({ projectId: '12345', cloudDataSource: cloud })
+
+      expect(studioManagerSetupStub).to.be.calledWith(sinon.match({
+        shouldEnableStudio: true,
+      }))
+    })
+
+    it('sets status to INITIALIZED when neither env variable is set', async () => {
+      delete process.env.CYPRESS_ENABLE_CLOUD_STUDIO
+      delete process.env.CYPRESS_LOCAL_STUDIO_PATH
+
+      await getAndInitializeStudioManager({ projectId: '12345', cloudDataSource: cloud })
+
+      expect(studioManagerSetupStub).to.be.calledWith(sinon.match({
+        shouldEnableStudio: false,
+      }))
+    })
+
+    it('sets status to ENABLED when both env variables are set', async () => {
+      process.env.CYPRESS_ENABLE_CLOUD_STUDIO = '1'
+      process.env.CYPRESS_LOCAL_STUDIO_PATH = '/path/to/studio'
+
+      await getAndInitializeStudioManager({ projectId: '12345', cloudDataSource: cloud })
+
+      expect(studioManagerSetupStub).to.be.calledWith(sinon.match({
+        shouldEnableStudio: true,
+      }))
+    })
   })
 
   describe('CYPRESS_LOCAL_STUDIO_PATH is set', () => {

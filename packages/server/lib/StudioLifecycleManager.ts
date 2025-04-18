@@ -5,11 +5,27 @@ export class StudioLifecycleManager extends EventEmitter {
   studioManagerPromise: Promise<StudioManager | null> | null = null
   private static readonly STUDIO_READY_EVENT = 'studio:ready'
 
-  async initialize() {
+  async initialize () {
     this.emit('initialize')
   }
 
-  async getStudio() {
+  /**
+   * Check if studio manager is ready to be used
+   * @returns boolean indicating if studio manager promise exists
+   */
+  isStudioReady (): boolean {
+    return this.studioManagerPromise !== null
+  }
+
+  /**
+   * Get the studio manager if ready
+   * @returns The studio manager promise if ready, or null if not
+   */
+  getStudioIfReady (): Promise<StudioManager | null> | null {
+    return this.studioManagerPromise
+  }
+
+  async getStudio () {
     if (!this.studioManagerPromise) {
       throw new Error('Studio manager has not been initialized')
     }
@@ -17,9 +33,9 @@ export class StudioLifecycleManager extends EventEmitter {
     return this.studioManagerPromise
   }
 
-  async setStudioPromise(studioManagerPromise: Promise<StudioManager | null>) {
+  async setStudioPromise (studioManagerPromise: Promise<StudioManager | null>) {
     this.studioManagerPromise = studioManagerPromise
-    
+
     // When the promise resolves, emit the studio:ready event with the studio manager
     studioManagerPromise.then((studioManager) => {
       this.emit(StudioLifecycleManager.STUDIO_READY_EVENT, studioManager)
@@ -31,10 +47,10 @@ export class StudioLifecycleManager extends EventEmitter {
    * @param listener Function to call when studio is ready
    * @returns Function to remove the listener
    */
-  onStudioReady(listener: (studioManager: StudioManager) => void): () => void {
+  onStudioReady (listener: (studioManager: StudioManager) => void): () => void {
     // Use once instead of on to ensure the listener only fires once
     this.once(StudioLifecycleManager.STUDIO_READY_EVENT, listener)
-    
+
     // If studio is already ready, call the listener immediately and only once
     if (this.studioManagerPromise) {
       this.studioManagerPromise.then((studioManager) => {
@@ -46,11 +62,10 @@ export class StudioLifecycleManager extends EventEmitter {
         }
       })
     }
-    
+
     // Return a function to remove the listener
     return () => {
       this.off(StudioLifecycleManager.STUDIO_READY_EVENT, listener)
     }
   }
 }
-

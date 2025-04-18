@@ -36,6 +36,7 @@ describe('lib/cloud/studio', () => {
       studioHash: 'abcdefg',
       projectSlug: '1234',
       cloudApi: {} as any,
+      shouldEnableStudio: true,
     })
 
     studio = (studioManager as any)._studioServer
@@ -89,6 +90,36 @@ describe('lib/cloud/studio', () => {
       await studioManager.canAccessStudioAI({} as any)
 
       expect(studioManager.status).to.eq('IN_ERROR')
+      expect(stubbedCrossFetch).to.be.calledWithMatch(sinon.match((url: string) => url.endsWith('/studio/errors')), {
+        agent: sinon.match.any,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-cypress-version': pkg.version,
+          'x-os-name': 'darwin',
+          'x-arch': 'x64',
+        },
+        body: sinon.match((body) => {
+          const parsedBody = JSON.parse(body)
+
+          expect(parsedBody.studioHash).to.eq('abcdefg')
+          expect(parsedBody.errors[0].name).to.eq(error.name)
+          expect(parsedBody.errors[0].stack).to.eq(error.stack)
+          expect(parsedBody.errors[0].message).to.eq(error.message)
+
+          return true
+        }),
+      })
+    })
+
+    it('does not set state IN_ERROR when a non-essential async method fails', async () => {
+      const error = new Error('foo')
+
+      sinon.stub(studio, 'captureStudioEvent').throws(error)
+
+      await studioManager.captureStudioEvent({} as any)
+
+      expect(studioManager.status).to.eq('NOT_INITIALIZED')
       expect(stubbedCrossFetch).to.be.calledWithMatch(sinon.match((url: string) => url.endsWith('/studio/errors')), {
         agent: sinon.match.any,
         method: 'POST',

@@ -22,9 +22,8 @@ describe('Cypress Studio', () => {
     })
   }
 
-  context.only('cloud studio', () => {
-    it.only('loads the studio page', () => {
-
+  context('cloud studio', () => {
+    it('loads the studio page', () => {
       launchStudio({ enableCloudStudio: true })
 
       cy.window().then((win) => {

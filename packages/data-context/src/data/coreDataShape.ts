@@ -167,6 +167,8 @@ export interface CoreDataShape {
   studioLifecycleManager?: {
     getStudio: () => Promise<StudioManagerShape | null>
     onStudioReady: (listener: (studioManager: StudioManagerShape) => void) => () => void
+    isStudioReady: () => boolean
+    getStudioIfReady: () => Promise<StudioManagerShape | null> | null
   }
 }
 
