@@ -3,10 +3,13 @@ import { readBundleResult, readSnapshotResult } from '../utils/bundle'
 import { SnapshotGenerator } from '../../src/generator/snapshot-generator'
 import { Flag } from '../../src/generator/snapshot-generator-flags'
 import { electronExecutable } from '../utils/consts'
-import { expect, assert } from 'chai'
+import { expect, assert, use } from 'chai'
 import { promisify } from 'util'
 import { exec as execOrig } from 'child_process'
 import fs from 'fs-extra'
+import chaiAsPromised from 'chai-as-promised'
+
+use(chaiAsPromised)
 
 const exec = promisify(execOrig)
 
@@ -287,6 +290,7 @@ describe('doctor', () => {
     let generator = new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
       cacheDir,
       nodeModulesOnly: false,
+      forceNoRewrite: ['force-no-rewrite.js'],
     })
 
     // Set up project to use an intermediate healthy dependency and snapshot
@@ -296,6 +300,7 @@ describe('doctor', () => {
     const intermediateHealthy = await fs.readFile(path.join(templateDir, 'intermediate-healthy.js'))
     const intermediateDeferred = await fs.readFile(path.join(templateDir, 'intermediate-deferred.js'))
     const norewrite = await fs.readFile(path.join(templateDir, 'leaf-norewrite.js'))
+    const forceNoRewrite = await fs.readFile(path.join(templateDir, 'force-no-rewrite.js'))
 
     await fs.writeFile(path.join(projectBaseDir, 'entry.js'), initialEntry)
     await fs.writeFile(path.join(projectBaseDir, 'healthy.js'), healthy)
@@ -303,6 +308,7 @@ describe('doctor', () => {
     await fs.writeFile(path.join(projectBaseDir, 'intermediate-healthy.js'), intermediateHealthy)
     await fs.writeFile(path.join(projectBaseDir, 'intermediate-deferred.js'), intermediateDeferred)
     await fs.writeFile(path.join(projectBaseDir, 'norewrite.js'), norewrite)
+    await fs.writeFile(path.join(projectBaseDir, 'node_modules', 'force-no-rewrite.js'), forceNoRewrite)
 
     await generator.createScript()
     await generator.makeAndInstallSnapshot()
@@ -310,6 +316,7 @@ describe('doctor', () => {
 
     expect(metadata).to.deep.equal({
       norewrite: [
+        './node_modules/force-no-rewrite.js',
         './norewrite.js',
       ],
       deferred: [
@@ -353,6 +360,21 @@ describe('doctor', () => {
         './healthy.js',
       ],
     })
+  })
+
+  it('throws an error if a force no rewrite module is not found in the project', async () => {
+    const projectBaseDir = path.join(__dirname, '..', 'fixtures', 'iterative', 'project')
+    const cacheDir = path.join(projectBaseDir, 'cache')
+    const snapshotEntryFile = path.join(projectBaseDir, 'entry.js')
+
+    await fs.remove(cacheDir)
+    let generator = new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
+      cacheDir,
+      nodeModulesOnly: false,
+      forceNoRewrite: ['force-no-rewrite.js'],
+    })
+
+    await expect(generator.createScript()).to.be.rejectedWith('Force no rewrite dependencies not found in project: force-no-rewrite.js')
   })
 
   // TODO: We still have a hole where a file moves from healthy to deferred or norewrite. This doesn't happen very frequently and can be solved later:

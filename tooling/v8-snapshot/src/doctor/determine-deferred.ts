@@ -6,12 +6,43 @@ import { canAccess, createHashForFile, matchFileHash } from '../utils'
 
 const logInfo = debug('cypress:snapgen:info')
 
-function cleanupDependencySet (dependencySet: string[], inputs: Record<string, { fileInfo: { fullPath: string } }>) {
+/**
+ * Filters out force no rewrite modules that are not in the project
+ * @param norewrite - The set of calculated no rewrite modules in the project
+ * @param forceNoRewrite - The set of force no rewrite modules
+ */
+function filterForceNoRewrite (norewrite: string[], forceNoRewrite: Set<string>) {
+  return norewrite.filter((dependency) => {
+    // Remove the leading './' from the dependency
+    const trimmedDependency = dependency.slice(2)
+
+    // Keep the files that start with packages as their paths are explicit
+    // Otherwise, the files are assumed to be in node_modules and we filter out
+    // the ones that are in the force no rewrite set (e.g. force no rewrite of 'force-no-rewrite.js'
+    // will be 'node_modules/force-no-rewrite.js')
+    return trimmedDependency.startsWith('packages') || !forceNoRewrite.has(trimmedDependency)
+  })
+}
+
+/**
+ * Throws an error if a force no rewrite module is not found in the project
+ * @param norewrite - The set of force no rewrite modules
+ * @param inputs - The inputs from the esbuild bundle which are actually in the project
+ */
+function errorOnInvalidForceNoRewrite (norewrite: Set<string>, inputs: Record<string, { fileInfo: { fullPath: string } }>) {
   const inputsKeys = Object.keys(inputs)
 
-  return dependencySet.filter((dependency) => {
-    return inputsKeys.includes(dependency.slice(2))
+  const invalidForceNoRewrites: string[] = []
+
+  Array.from(norewrite).forEach((dependency) => {
+    if (!inputsKeys.some((key) => key.endsWith(dependency))) {
+      invalidForceNoRewrites.push(dependency)
+    }
   })
+
+  if (invalidForceNoRewrites.length > 0) {
+    throw new Error(`Force no rewrite dependencies not found in project: ${invalidForceNoRewrites.join(', ')}`)
+  }
 }
 
 export async function determineDeferred (
@@ -108,12 +139,14 @@ export async function determineDeferred (
     healthy: updatedHealthy,
     meta: esbuildMeta,
   } = await doctor.heal()
-  const deferredHashFile = path.relative(projectBaseDir, hashFilePath)
 
-  const cleanedUpNorewrite = cleanupDependencySet(updatedNorewrite, esbuildMeta.inputs)
+  errorOnInvalidForceNoRewrite(opts.forceNoRewrite, esbuildMeta.inputs)
+
+  const deferredHashFile = path.relative(projectBaseDir, hashFilePath)
+  const filteredNoRewrite = filterForceNoRewrite(updatedNorewrite, opts.forceNoRewrite)
 
   const updatedMeta = {
-    norewrite: opts.nodeModulesOnly ? [...cleanedUpNorewrite, ...projectNoRewrite] : cleanedUpNorewrite,
+    norewrite: opts.nodeModulesOnly ? [...filteredNoRewrite, ...projectNoRewrite] : filteredNoRewrite,
     deferred: opts.nodeModulesOnly ? [...updatedDeferred, ...projectDeferred] : updatedDeferred,
     healthy: opts.nodeModulesOnly ? [...updatedHealthy, ...projectHealthy] : updatedHealthy,
     deferredHashFile,
@@ -133,7 +166,7 @@ export async function determineDeferred (
   }
 
   return {
-    norewrite: cleanedUpNorewrite,
+    norewrite: updatedNorewrite,
     deferred: updatedDeferred,
     healthy: updatedHealthy,
   }

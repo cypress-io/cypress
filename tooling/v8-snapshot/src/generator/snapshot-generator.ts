@@ -1,7 +1,7 @@
 import { strict as assert } from 'assert'
 import debug from 'debug'
 import fs from 'fs'
-import { dirname, join, basename, relative } from 'path'
+import { dirname, join, basename } from 'path'
 import { minify } from 'terser'
 import { createSnapshotScript, SnapshotScript } from './create-snapshot-script'
 import { SnapshotVerifier } from './snapshot-verifier'
@@ -19,7 +19,6 @@ import { createExportScript, ExportScript } from './create-snapshot-bundle'
 import { Flag, GeneratorFlags } from './snapshot-generator-flags'
 import { syncAndRun } from '@tooling/electron-mksnapshot'
 import tempDir from 'temp-dir'
-import glob from 'glob'
 
 const logInfo = debug('cypress:snapgen:info')
 const logDebug = debug('cypress:snapgen:debug')
@@ -109,30 +108,6 @@ function getDefaultGenerationOpts (projectBaseDir: string): GenerationOpts {
     useExistingSnapshotScript: false,
     updateSnapshotScriptContents: undefined,
   }
-}
-
-function resolveAndValidateDependencySet ({ dependencySet, projectBaseDir }: { dependencySet: Set<string>, projectBaseDir: string }) {
-  // find all dependencies that match using glob and add them to the set
-  const unresolvedDependencies: Set<string> = new Set()
-  const resolvedDependencies: Set<string> = new Set()
-
-  for (const dependency of dependencySet) {
-    const files = glob.sync(join(projectBaseDir, dependency))
-
-    if (files.length === 0) {
-      unresolvedDependencies.add(dependency)
-    } else {
-      for (const file of files) {
-        resolvedDependencies.add(relative(projectBaseDir, file))
-      }
-    }
-  }
-
-  if (unresolvedDependencies.size > 0) {
-    throw new Error(`Dependencies not found in project: ${Array.from(unresolvedDependencies).join(',\n')}`)
-  }
-
-  return resolvedDependencies
 }
 
 /**
@@ -251,15 +226,7 @@ export class SnapshotGenerator {
     this.electronVersion = resolveElectronVersion(projectBaseDir)
 
     this.nodeModulesOnly = nodeModulesOnly
-
-    const forceNoRewriteSet = new Set(forceNoRewrite)
-
-    const resolvedForceNoRewrite = resolveAndValidateDependencySet({
-      dependencySet: forceNoRewriteSet,
-      projectBaseDir,
-    })
-
-    this.forceNoRewrite = resolvedForceNoRewrite
+    this.forceNoRewrite = new Set(forceNoRewrite)
     this.nodeEnv = nodeEnv
     this.cypressInternalEnv = cypressInternalEnv
     this._flags = new GeneratorFlags(mode)

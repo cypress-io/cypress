@@ -513,8 +513,15 @@ export class SnapshotDoctor {
           //      modules as healthy, deferred or non-rewritable
           switch (result.outcome) {
             case 'completed': {
-              healState.healthy.add(key)
-              logDebug('Verified as healthy "%s"', key)
+              if ([...this.forceNoRewrite].find((y) => key.endsWith(y))) {
+                healState.needNorewrite.add(key)
+                logDebug('Not rewriting "%s" as it is a force no rewrite module', key)
+                break
+              } else {
+                healState.healthy.add(key)
+                logDebug('Verified as healthy "%s"', key)
+              }
+
               break
             }
             case 'failed:assembleScript':
@@ -531,8 +538,15 @@ export class SnapshotDoctor {
               if (warning != null) {
                 switch (warning.consequence) {
                   case WarningConsequence.Defer: {
-                    logInfo('Deferring "%s"', key)
-                    healState.needDefer.add(key)
+                    if ([...this.forceNoRewrite].find((y) => key.endsWith(y))) {
+                      healState.needNorewrite.add(key)
+                      logDebug('Not rewriting "%s" as it is a force no rewrite module', key)
+                      break
+                    } else {
+                      logInfo('Deferring "%s"', key)
+                      healState.needDefer.add(key)
+                    }
+
                     break
                   }
                   case WarningConsequence.NoRewrite: {
