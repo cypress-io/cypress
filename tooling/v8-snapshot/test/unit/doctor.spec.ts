@@ -308,6 +308,7 @@ describe('doctor', () => {
     await fs.writeFile(path.join(projectBaseDir, 'intermediate-healthy.js'), intermediateHealthy)
     await fs.writeFile(path.join(projectBaseDir, 'intermediate-deferred.js'), intermediateDeferred)
     await fs.writeFile(path.join(projectBaseDir, 'norewrite.js'), norewrite)
+    await fs.ensureDir(path.join(projectBaseDir, 'node_modules'))
     await fs.writeFile(path.join(projectBaseDir, 'node_modules', 'force-no-rewrite.js'), forceNoRewrite)
 
     await generator.createScript()

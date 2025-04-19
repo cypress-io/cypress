@@ -33,6 +33,7 @@ export default [
   'packages/server/lib/modes/run.ts',
   'debug/src/node.js',
   'minimatch/minimatch.js',
+  'js-yaml/lib/js-yaml/type/js/function.js',
   'packages/server/lib/open_project.ts',
   'packages/server/lib/project-base.ts',
   'packages/server/lib/socket-ct.ts',
