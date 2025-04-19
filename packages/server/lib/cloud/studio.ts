@@ -137,6 +137,8 @@ export class StudioManager implements StudioManagerShape {
 
       this.status = 'IN_ERROR'
       this.reportError(actualError, method, ...args)
+
+      return undefined
     }
   }
 }
