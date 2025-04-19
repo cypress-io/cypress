@@ -492,6 +492,13 @@ export class SnapshotDoctor {
       ) {
         // 5. Process the module verification in parallel
         const promises = nextStage.map(async (key): Promise<void> => {
+          if ([...this.forceNoRewrite].find((y) => key.endsWith(y))) {
+            healState.needNorewrite.add(key)
+            logDebug('Not rewriting "%s" as it is a force no rewrite module', key)
+
+            return
+          }
+
           logDebug('Testing entry in isolation "%s"', key)
           // 5.1. The script processor distributes processing modules across
           // multiple worker threads
@@ -513,14 +520,8 @@ export class SnapshotDoctor {
           //      modules as healthy, deferred or non-rewritable
           switch (result.outcome) {
             case 'completed': {
-              if ([...this.forceNoRewrite].find((y) => key.endsWith(y))) {
-                healState.needNorewrite.add(key)
-                logDebug('Not rewriting "%s" as it is a force no rewrite module', key)
-                break
-              } else {
-                healState.healthy.add(key)
-                logDebug('Verified as healthy "%s"', key)
-              }
+              healState.healthy.add(key)
+              logDebug('Verified as healthy "%s"', key)
 
               break
             }
@@ -538,14 +539,8 @@ export class SnapshotDoctor {
               if (warning != null) {
                 switch (warning.consequence) {
                   case WarningConsequence.Defer: {
-                    if ([...this.forceNoRewrite].find((y) => key.endsWith(y))) {
-                      healState.needNorewrite.add(key)
-                      logDebug('Not rewriting "%s" as it is a force no rewrite module', key)
-                      break
-                    } else {
-                      logInfo('Deferring "%s"', key)
-                      healState.needDefer.add(key)
-                    }
+                    logInfo('Deferring "%s"', key)
+                    healState.needDefer.add(key)
 
                     break
                   }
