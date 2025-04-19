@@ -1,10 +1,12 @@
 /**
  * These modules are force no rewritten because they are rewritten in a way that
- * breaks the snapshot. For files in the project, we should include the start
- * of the path (e.g. packages/https-proxy/lib/ca.js). For files in node_modules,
- * we should include the start of the path (e.g. force-no-rewrite/index.js) so
- * that dependencies that are hoisted in other node_modules directories are also
- * not rewritten.
+ * breaks the snapshot. When run through the snapshot generator, these strings
+ * will be compared to the end of each file's path and if they match, the given
+ * file will be marked as force no rewritten. For files in the project, we should
+ * include the start of the path (e.g. packages/https-proxy/lib/ca.js). For files
+ * in node_modules, we should exclude the start of the path (e.g.
+ * force-no-rewrite/index.js) so that dependencies that are hoisted in other
+ * node_modules directories are also not rewritten.
  */
 export default [
   // recursion due to process.emit overwrites which is incorrectly rewritten
