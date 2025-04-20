@@ -31,7 +31,6 @@ export default [
   'packages/https-proxy/lib/ca.js',
   // TODO: Figure out why these don't properly get flagged as norewrite: https://github.com/cypress-io/cypress/issues/23986
   '@cspotcode/source-map-support/source-map-support.js',
-  'packages/server/lib/modes/record.ts',
   'packages/server/lib/modes/run.ts',
   'debug/src/node.js',
   'minimatch/minimatch.js',
