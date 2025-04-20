@@ -752,6 +752,7 @@
     "./packages/server/lib/cypress.ts",
     "./packages/server/lib/environment.js",
     "./packages/server/lib/log.js",
+    "./packages/server/lib/modes/record.ts",
     "./packages/server/lib/plugins/dev-server.js",
     "./packages/server/lib/plugins/preprocessor.js",
     "./packages/server/lib/plugins/run_events.js",
