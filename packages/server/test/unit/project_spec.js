@@ -730,6 +730,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       const mockSetupProtocol = sinon.stub()
       const mockBeforeSpec = sinon.stub()
       const mockAccessStudioAI = sinon.stub().resolves(true)
+      const mockCaptureStudioEvent = sinon.stub().resolves()
 
       this.project.spec = {}
 
@@ -741,6 +742,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       const studioManager = new StudioManager()
 
       studioManager.canAccessStudioAI = mockAccessStudioAI
+      studioManager.captureStudioEvent = mockCaptureStudioEvent
       studioManager.protocolManager = {
         setupProtocol: mockSetupProtocol,
         beforeSpec: mockBeforeSpec,
@@ -784,6 +786,19 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       const { canAccessStudioAI } = await studioInitPromise
 
       expect(canAccessStudioAI).to.be.true
+      expect(mockCaptureStudioEvent).to.be.calledWith({
+        type: 'studio:init',
+        machineId: 'test-machine-id',
+        projectId: 'test-project-id',
+        user: 'test@example.com',
+        browser: {
+          name: 'chrome',
+          family: 'chromium',
+          channel: 'stable',
+          version: undefined,
+        },
+        cypressVersion: pkg.version,
+      })
 
       expect(mockSetupProtocol).to.be.calledOnce
       expect(mockBeforeSpec).to.be.calledOnce
@@ -806,6 +821,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       const mockSetupProtocol = sinon.stub()
       const mockBeforeSpec = sinon.stub()
       const mockAccessStudioAI = sinon.stub().resolves(true)
+      const mockCaptureStudioEvent = sinon.stub().resolves()
 
       this.project.spec = {}
 
@@ -817,7 +833,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       const studioManager = new StudioManager()
 
       studioManager.canAccessStudioAI = mockAccessStudioAI
-
+      studioManager.captureStudioEvent = mockCaptureStudioEvent
       const studioLifecycleManager = new StudioLifecycleManager()
 
       this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
@@ -847,6 +863,19 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       const { canAccessStudioAI } = await studioInitPromise
 
       expect(canAccessStudioAI).to.be.false
+      expect(mockCaptureStudioEvent).to.be.calledWith({
+        type: 'studio:init',
+        machineId: 'test-machine-id',
+        projectId: 'test-project-id',
+        user: 'test@example.com',
+        browser: {
+          name: 'chrome',
+          family: 'chromium',
+          channel: undefined,
+          version: undefined,
+        },
+        cypressVersion: pkg.version,
+      })
 
       expect(mockSetupProtocol).not.to.be.called
       expect(mockBeforeSpec).not.to.be.called
@@ -860,6 +889,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       const mockSetupProtocol = sinon.stub()
       const mockBeforeSpec = sinon.stub()
       const mockAccessStudioAI = sinon.stub().resolves(false)
+      const mockCaptureStudioEvent = sinon.stub().resolves()
 
       this.project.spec = {}
 
@@ -871,6 +901,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       const studioManager = new StudioManager()
 
       studioManager.canAccessStudioAI = mockAccessStudioAI
+      studioManager.captureStudioEvent = mockCaptureStudioEvent
       studioManager.protocolManager = {
         setupProtocol: mockSetupProtocol,
         beforeSpec: mockBeforeSpec,
@@ -905,6 +936,19 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       const { canAccessStudioAI } = await studioInitPromise
 
       expect(canAccessStudioAI).to.be.false
+      expect(mockCaptureStudioEvent).to.be.calledWith({
+        type: 'studio:init',
+        machineId: 'test-machine-id',
+        projectId: 'test-project-id',
+        user: 'test@example.com',
+        browser: {
+          name: 'chrome',
+          family: 'chromium',
+          channel: undefined,
+          version: undefined,
+        },
+        cypressVersion: pkg.version,
+      })
 
       expect(mockSetupProtocol).not.to.be.called
       expect(mockBeforeSpec).not.to.be.called

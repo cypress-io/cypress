@@ -115,6 +115,10 @@ describe('lib/cloud/studio', () => {
     it('does not set state IN_ERROR when a non-essential async method fails', async () => {
       const error = new Error('foo')
 
+      sinon.stub(studio, 'captureStudioEvent').throws(error)
+
+      await studioManager.captureStudioEvent({} as any)
+
       expect(studioManager.status).to.eq('NOT_INITIALIZED')
       expect(stubbedCrossFetch).to.be.calledWithMatch(sinon.match((url: string) => url.endsWith('/studio/errors')), {
         agent: sinon.match.any,

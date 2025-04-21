@@ -35,12 +35,27 @@ export interface StudioAIInitializeOptions {
   protocolDbPath: string
 }
 
+export interface StudioEvent {
+  type: string
+  machineId: string | null
+  user?: string
+  projectId?: string
+  browser?: {
+    name: string
+    family: string
+    channel?: string
+    version?: string
+  }
+  cypressVersion?: string
+}
+
 export interface StudioServerShape {
   initializeRoutes(router: Router): void
   canAccessStudioAI(browser: Cypress.Browser): Promise<boolean>
   addSocketListeners(socket: Socket): void
   initializeStudioAI(options: StudioAIInitializeOptions): Promise<void>
   destroy(): Promise<void>
+  captureStudioEvent(event: StudioEvent): Promise<void>
 }
 
 export interface StudioServerDefaultShape {
