@@ -15,7 +15,7 @@ describe('StudioButton', () => {
     cy.spy(eventManager, 'emit').as('eventManagerSpy')
 
     mountStudioButton(eventManager)
-    eventManager.on('studio:init:new:test', () => {
+    eventManager.on('studio:init:suite', () => {
       studioInitNewTestSpy()
     })
 
