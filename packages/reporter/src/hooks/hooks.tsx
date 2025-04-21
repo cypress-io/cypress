@@ -60,9 +60,10 @@ const StudioNoCommands = () => (
 export interface HookProps {
   model: HookModel
   showNumber: boolean
+  scrollIntoView: Function
 }
 
-const Hook = observer(({ model, showNumber }: HookProps) => (
+const Hook: React.FC<HookProps> = observer(({ model, showNumber, scrollIntoView }: HookProps) => (
   <li className={cs('hook-item', { 'hook-failed': model.failed, 'hook-studio': model.isStudio })}>
     <Collapsible
       header={<HookHeader model={model} number={showNumber ? model.hookNumber : undefined} />}
@@ -71,12 +72,14 @@ const Hook = observer(({ model, showNumber }: HookProps) => (
       isOpen
     >
       <ul className='commands-container'>
-        {_.map(model.commands, (command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} />)}
+        {_.map(model.commands, (command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} scrollIntoView={scrollIntoView} />)}
         {model.showStudioPrompt && <StudioNoCommands />}
       </ul>
     </Collapsible>
   </li>
 ))
+
+Hook.displayName = 'Hook'
 
 export interface HooksModel {
   hooks: HookModel[]
@@ -87,19 +90,22 @@ export interface HooksModel {
 export interface HooksProps {
   state?: AppState
   model: HooksModel
+  scrollIntoView: Function
 }
 
-const Hooks = observer(({ state = appState, model }: HooksProps) => (
+const Hooks: React.FC<HooksProps> = observer(({ state = appState, model, scrollIntoView }: HooksProps) => (
   <ul className='hooks-container'>
     {_.map(model.hooks, (hook) => {
       if (hook.commands.length || (hook.isStudio && state.studioActive && model.state === 'passed')) {
-        return <Hook key={hook.hookId} model={hook} showNumber={model.hookCount[hook.hookName] > 1} />
+        return <Hook key={hook.hookId} model={hook} scrollIntoView={scrollIntoView} showNumber={model.hookCount[hook.hookName] > 1} />
       }
 
       return null
     })}
   </ul>
 ))
+
+Hooks.displayName = 'Hooks'
 
 export { Hook, HookHeader }
 

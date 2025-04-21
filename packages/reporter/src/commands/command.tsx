@@ -2,11 +2,11 @@ import _ from 'lodash'
 import cs from 'classnames'
 import Markdown from 'markdown-it'
 import { observer } from 'mobx-react'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useState, useEffect } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
 import appState from '../lib/app-state'
-import events from '../lib/events'
+import events, { Events } from '../lib/events'
 import FlashOnClick from '../lib/flash-on-click'
 import StateIcon from '../lib/state-icon'
 import Tag from '../lib/tag'
@@ -100,6 +100,12 @@ const shouldShowCount = (aliasesWithDuplicates: Array<Alias> | null, aliasName: 
   return _.includes(aliasesWithDuplicates, aliasName)
 }
 
+interface NavColumnsProps {
+  model: CommandModel
+  isPinned: boolean
+  toggleColumnPin: () => void
+}
+
 /**
  * NavColumns Rules:
  *   > Command Number Column
@@ -111,7 +117,7 @@ const shouldShowCount = (aliasesWithDuplicates: Array<Alias> | null, aliasName: 
  *   > Expander Column
  *      - When the log is a group log and it has children logs, it will display the chevron icon
  */
-const NavColumns = observer(({ model, isPinned, toggleColumnPin }) => (
+const NavColumns: React.FC<NavColumnsProps> = observer(({ model, isPinned, toggleColumnPin }) => (
   <>
     <div className='command-number-column' onClick={toggleColumnPin}>
       {model._isPending() && <RunningIcon data-cy="reporter-running-icon" className='fa-spin' />}
@@ -126,13 +132,15 @@ const NavColumns = observer(({ model, isPinned, toggleColumnPin }) => (
   </>
 ))
 
+NavColumns.displayName = 'NavColumns'
+
 interface AliasReferenceProps {
   aliasObj: AliasObject
   model: CommandModel
   aliasesWithDuplicates: Array<Alias> | null
 }
 
-const AliasReference = observer(({ aliasObj, model, aliasesWithDuplicates }: AliasReferenceProps) => {
+const AliasReference: React.FC<AliasReferenceProps> = observer(({ aliasObj, model, aliasesWithDuplicates }: AliasReferenceProps) => {
   const showCount = shouldShowCount(aliasesWithDuplicates, aliasObj.name, model)
   const toolTipMessage = showCount ? `Found ${aliasObj.ordinal} alias for: '${aliasObj.name}'` : `Found an alias for: '${aliasObj.name}'`
 
@@ -147,12 +155,14 @@ const AliasReference = observer(({ aliasObj, model, aliasesWithDuplicates }: Ali
   )
 })
 
+AliasReference.displayName = 'AliasReference'
+
 interface AliasesReferencesProps {
   model: CommandModel
   aliasesWithDuplicates: Array<Alias> | null
 }
 
-const AliasesReferences = observer(({ model, aliasesWithDuplicates }: AliasesReferencesProps) => {
+const AliasesReferences: React.FC<AliasesReferencesProps> = observer(({ model, aliasesWithDuplicates }: AliasesReferencesProps) => {
   const aliases = ([] as Array<AliasObject>).concat((model.referencesAlias as AliasObject))
 
   if (!aliases.length) {
@@ -173,7 +183,9 @@ const AliasesReferences = observer(({ model, aliasesWithDuplicates }: AliasesRef
   )
 })
 
-const Interceptions = observer(({ interceptions, wentToOrigin, status }: RenderProps) => {
+AliasesReferences.displayName = 'AliasesReferences'
+
+const Interceptions: React.FC<RenderProps> = observer(({ interceptions, wentToOrigin, status }: RenderProps) => {
   if (!interceptions?.length) {
     return null
   }
@@ -209,11 +221,12 @@ const Interceptions = observer(({ interceptions, wentToOrigin, status }: RenderP
   )
 })
 
+Interceptions.displayName = 'Interceptions'
 interface AliasesProps {
   model: CommandModel
 }
 
-const Aliases = observer(({ model }: AliasesProps) => {
+const Aliases: React.FC<AliasesProps> = observer(({ model }: AliasesProps) => {
   if (!model.alias || model.aliasType === 'route') return null
 
   const aliases = ([] as Array<Alias>).concat(model.alias)
@@ -241,11 +254,13 @@ const Aliases = observer(({ model }: AliasesProps) => {
   )
 })
 
+Aliases.displayName = 'Aliases'
+
 interface MessageProps {
   model: CommandModel
 }
 
-const Message = observer(({ model }: MessageProps) => (
+const Message: React.FC<MessageProps> = observer(({ model }: MessageProps) => (
   <span className='command-message'>
     {!!model.renderProps.indicator && (
       <i
@@ -265,11 +280,13 @@ const Message = observer(({ model }: MessageProps) => (
   </span>
 ))
 
+Message.displayName = 'Message'
+
 interface ProgressProps {
   model: CommandModel
 }
 
-const Progress = observer(({ model }: ProgressProps) => {
+const Progress: React.FC<ProgressProps> = observer(({ model }: ProgressProps) => {
   if (model.state !== 'pending' || !model.timeout || !model.wallClockStartedAt) {
     return null
   }
@@ -286,13 +303,28 @@ const Progress = observer(({ model }: ProgressProps) => {
   )
 })
 
-interface Props {
+Progress.displayName = 'Progress'
+
+interface CommandDetailsProps {
+  model: CommandModel
+  groupId: number | undefined
+  aliasesWithDuplicates: Array<Alias> | null
+}
+
+interface CommandControlsProps {
+  model: CommandModel
+  commandName: string
+  events: Events
+}
+
+interface CommandProps {
   model: CommandModel
   aliasesWithDuplicates: Array<Alias> | null
   groupId?: number
+  scrollIntoView: Function
 }
 
-const CommandDetails = observer(({ model, groupId, aliasesWithDuplicates }) => (
+const CommandDetails: React.FC<CommandDetailsProps> = observer(({ model, groupId, aliasesWithDuplicates }) => (
   <span className={cs('command-info')}>
     <span className='command-method'>
       <span>
@@ -307,7 +339,9 @@ const CommandDetails = observer(({ model, groupId, aliasesWithDuplicates }) => (
   </span>
 ))
 
-const CommandControls = observer(({ model, commandName, events }) => {
+CommandDetails.displayName = 'CommandDetails'
+
+const CommandControls: React.FC<CommandControlsProps> = observer(({ model, commandName, events }) => {
   const displayNumOfElements = model.state !== 'pending' && model.numElements != null && model.numElements !== 1
   const isSystemEvent = model.type === 'system' && model.event
   const isSessionCommand = commandName === 'session'
@@ -365,8 +399,24 @@ const CommandControls = observer(({ model, commandName, events }) => {
   )
 })
 
-const Command: React.FC<Props> = observer(({ model, aliasesWithDuplicates, groupId }) => {
+CommandControls.displayName = 'CommandControls'
+
+const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates, groupId, scrollIntoView }) => {
   const [showTimeout, setShowTimeout] = useState<TimeoutID | undefined>(undefined)
+
+  useEffect(() => {
+    /**
+    * When moving class components into functional components (@see https://github.com/cypress-io/cypress/pull/31284),
+    * we introduced a bug where the command log was not scrolling into view when a command
+    * was added. This has to do with more efficient DOM rendering in React where the
+    * <Attempt> component does not call useEffect when it's children update.
+    *
+    * To fix this, we need to call the scroll handler when a <Command> is added to the test
+    *
+    * @see https://github.com/cypress-io/cypress/issues/31530 for more details
+    */
+    scrollIntoView()
+  }, [])
 
   if (model.group && groupId !== model.group) {
     return null
@@ -492,6 +542,7 @@ const Command: React.FC<Props> = observer(({ model, aliasesWithDuplicates, group
                 model={child}
                 aliasesWithDuplicates={null}
                 groupId={model.id}
+                scrollIntoView={scrollIntoView}
               />
             ))}
           </ul>
@@ -511,6 +562,8 @@ const Command: React.FC<Props> = observer(({ model, aliasesWithDuplicates, group
     </>
   )
 })
+
+Command.displayName = 'Command'
 
 export { Aliases, AliasesReferences, Message, Progress }
 
