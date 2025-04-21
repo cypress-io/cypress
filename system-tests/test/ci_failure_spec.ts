@@ -8,7 +8,8 @@ describe('CI failure', () => {
       browser: 'electron',
       spec: 'simple_failing.cy.js',
       processEnv: {
-        BUILD_ID: 1,
+        CI: '1',
+        CYPRESS_COMMERCIAL_RECOMMENDATIONS: '1',
       },
       expectedExitCode: 2,
       snapshot: true,
