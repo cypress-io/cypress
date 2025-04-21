@@ -17,10 +17,7 @@
       </button>
       <div
         data-cy="aut-url"
-        class="border rounded bg-gray-950 flex grow border-gray-800 h-[32px] align-middle"
-        :class="{
-          'bg-gray-50': autStore.isLoadingUrl
-        }"
+        class="border rounded flex bg-gray-950 grow border-gray-800 h-[32px] align-middle"
       >
         <SpecRunnerDropdown
           v-if="selectedBrowser?.displayName"
