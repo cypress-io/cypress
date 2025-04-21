@@ -43,6 +43,7 @@ export const clickCommandLog = (sel, type?) => {
       assert(false, 'failed to get command log React instance')
     }
 
+    // forces the runner off (NOTE: this will break auto scrolling in open mode for tests that use this helper specifically)
     appStateInstance.isRunning = false
     const inner = $(commandLogEl).find('.command-wrapper-text')
 

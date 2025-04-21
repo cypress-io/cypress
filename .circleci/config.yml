@@ -2,7 +2,7 @@ version: 2.1
 setup: true
 
 orbs:
-  continuation: circleci/continuation@1.0.0
+  continuation: circleci/continuation@1.1.0
 
 jobs:
   verify-ci-should-run:

@@ -27,4 +27,6 @@ const Switch: React.FC<Props> = observer(({ value, 'data-cy': dataCy, size = 'lg
   )
 })
 
+Switch.displayName = 'Switch'
+
 export default Switch

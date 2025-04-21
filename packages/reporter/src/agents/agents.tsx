@@ -28,13 +28,15 @@ export interface AgentsProps {
   model: AgentsModel
 }
 
-const AgentsList = observer(({ model }: AgentsProps) => (
+const AgentsList: React.FC<AgentsProps> = observer(({ model }: AgentsProps) => (
   <tbody>
     {_.map(model.agents, (agent) => <Agent key={agent.id} model={agent} />)}
   </tbody>
 ))
 
-const Agents = observer(({ model }: AgentsProps) => {
+AgentsList.displayName = 'AgentsList'
+
+const Agents: React.FC<AgentsProps> = observer(({ model }: AgentsProps) => {
   if (!model.agents.length) {
     return null
   }
@@ -66,6 +68,8 @@ const Agents = observer(({ model }: AgentsProps) => {
       </div>
     </div>)
 })
+
+Agents.displayName = 'Agents'
 
 export { Agent, AgentsList }
 
