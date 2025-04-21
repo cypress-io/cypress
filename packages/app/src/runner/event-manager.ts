@@ -278,7 +278,7 @@ export class EventManager {
       rerun()
     }
 
-    const studioInitSuite = ({ suiteId, showUrlPrompt = true }) => {
+    const studioInitSuite = ({ suiteId, showUrlPrompt = true }: { suiteId: string, showUrlPrompt?: boolean }) => {
       this.studioStore.setSuiteId(suiteId)
       this.studioStore.setShowUrlPrompt(showUrlPrompt)
 
