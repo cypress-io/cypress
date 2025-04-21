@@ -354,9 +354,9 @@ export class EventManager {
       })
     })
 
-    this.localBus.on('studio:init:new:test', (suiteId) => {
+    this.localBus.on('studio:init:suite', ({ suiteId, showUrlPrompt = true }) => {
       this.studioStore.setSuiteId(suiteId)
-      this.studioStore.setNewTestMode(true)
+      this.studioStore.setShowUrlPrompt(showUrlPrompt)
 
       this.ws.emit('studio:init', ({ canAccessStudioAI, error }) => {
         if (error) {

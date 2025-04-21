@@ -121,7 +121,7 @@ interface StudioRecorderState {
   _currentId: number
 
   canAccessStudioAI: boolean
-  newTestMode: boolean
+  showUrlPrompt: boolean
 }
 
 export const useStudioStore = defineStore('studioRecorder', {
@@ -137,13 +137,13 @@ export const useStudioStore = defineStore('studioRecorder', {
       _hasStarted: false,
       _currentId: 1,
       canAccessStudioAI: false,
-      newTestMode: false,
+      showUrlPrompt: true,
     }
   },
 
   actions: {
-    setNewTestMode (newTestMode: boolean) {
-      this.newTestMode = newTestMode
+    setShowUrlPrompt (shouldShowUrlPrompt: boolean) {
+      this.showUrlPrompt = shouldShowUrlPrompt
     },
 
     setTestId (testId: string) {
@@ -282,7 +282,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       this._hasStarted = false
       this._currentId = 1
       this.isFailed = false
-      this.newTestMode = false
+      this.showUrlPrompt = true
 
       this._maybeResetRunnables()
     },

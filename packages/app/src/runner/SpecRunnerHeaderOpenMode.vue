@@ -57,7 +57,7 @@
           @keyup.enter="visitUrl"
         >
         <StudioUrlPrompt
-          v-if="studioStore.needsUrl && !urlDisabled && !studioStore.newTestMode"
+          v-if="studioStore.needsUrl && !urlDisabled && studioStore.showUrlPrompt"
           :aut-url-input-ref="autUrlInputRef"
           :url-in-progress="urlInProgress"
           :overlay-z-index="studioOverlayZIndex"
