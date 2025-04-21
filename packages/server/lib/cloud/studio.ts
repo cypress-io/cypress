@@ -39,7 +39,7 @@ export class StudioManager implements StudioManagerShape {
     return manager
   }
 
-  async setup ({ script, studioPath, studioHash, projectSlug, cloudApi }: SetupOptions): Promise<void> {
+  async setup ({ script, studioPath, studioHash, projectSlug, cloudApi, shouldEnableStudio }: SetupOptions): Promise<void> {
     const { createStudioServer } = requireScript<StudioServer>(script).default
 
     this._studioServer = await createStudioServer({
@@ -50,7 +50,7 @@ export class StudioManager implements StudioManagerShape {
     })
 
     this._studioHash = studioHash
-    this.status = 'INITIALIZED'
+    this.status = shouldEnableStudio ? 'ENABLED' : 'INITIALIZED'
   }
 
   initializeRoutes (router: Router): void {
