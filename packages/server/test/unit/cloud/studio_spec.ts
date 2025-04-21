@@ -119,7 +119,7 @@ describe('lib/cloud/studio', () => {
 
       await studioManager.captureStudioEvent({} as any)
 
-      expect(studioManager.status).to.eq('NOT_INITIALIZED')
+      expect(studioManager.status).to.eq('ENABLED')
       expect(stubbedCrossFetch).to.be.calledWithMatch(sinon.match((url: string) => url.endsWith('/studio/errors')), {
         agent: sinon.match.any,
         method: 'POST',
