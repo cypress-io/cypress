@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 14.3.2
+
+_Released 4/22/2025 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where auto scroll in the Cypress Command Log was not scrolling correctly. Fixes [#31530](https://github.com/cypress-io/cypress/issues/31530).
+
 ## 14.3.1
 
 _Released 4/17/2025_
