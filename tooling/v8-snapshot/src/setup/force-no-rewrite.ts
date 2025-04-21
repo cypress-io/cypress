@@ -11,8 +11,6 @@
 export default [
   // recursion due to process.emit overwrites which is incorrectly rewritten
   'signal-exit/index.js',
-  // recursion due to process.{chdir,cwd} overwrites which are incorrectly rewritten
-  'graceful-fs/polyfills.js',
   // wx is rewritten to __get_wx__ but not available for Node.js > 0.6
   'lockfile/lockfile.js',
   // rewrites dns.lookup which conflicts with our rewrite
