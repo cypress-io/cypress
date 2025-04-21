@@ -9,6 +9,7 @@ describe('CI failure', () => {
       spec: 'simple_failing.cy.js',
       processEnv: {
         CI: 1,
+        CIRCLECI: 'true',
       },
       expectedExitCode: 2,
       snapshot: true,
