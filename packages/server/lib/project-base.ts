@@ -465,24 +465,6 @@ export class ProjectBase extends EE {
       onStudioInit: async () => {
         const studio = await this.ctx.coreData.studioLifecycleManager?.getStudio()
 
-        try {
-          studio?.captureStudioEvent({
-            type: 'studio:init',
-            machineId: await this.ctx.coreData.machineId,
-            projectId: this.cfg.projectId,
-            user: this.ctx.coreData.user?.email,
-            browser: this.browser ? {
-              name: this.browser.name,
-              family: this.browser.family,
-              channel: this.browser.channel,
-              version: this.browser.version,
-            } : undefined,
-            cypressVersion: pkg.version,
-          })
-        } catch (error) {
-          debug('Error capturing studio event:', error)
-        }
-
         if (this.spec && studio?.protocolManager) {
           const canAccessStudioAI = await studio?.canAccessStudioAI(this.browser) ?? false
 

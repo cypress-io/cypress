@@ -242,7 +242,6 @@ describe('lib/routes', () => {
         status: 'INITIALIZED',
         initializeRoutes: sinon.stub(),
         isProtocolEnabled: false,
-        captureStudioEvent: sinon.stub(),
         canAccessStudioAI: sinon.stub(),
         setProtocolDb: sinon.stub(),
         addSocketListeners: sinon.stub(),
