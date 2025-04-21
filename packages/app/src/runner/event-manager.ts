@@ -278,6 +278,21 @@ export class EventManager {
       rerun()
     }
 
+    const studioInitSuite = ({ suiteId, showUrlPrompt = true }) => {
+      this.studioStore.setSuiteId(suiteId)
+      this.studioStore.setShowUrlPrompt(showUrlPrompt)
+
+      this.ws.emit('studio:init', ({ canAccessStudioAI, error }) => {
+        if (error) {
+          // eslint-disable-next-line no-console
+          console.error(error)
+        }
+
+        this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
+        studioInit()
+      })
+    }
+
     this.reporterBus.on('studio:init:test', (testId) => {
       this.studioStore.setTestId(testId)
 
@@ -293,17 +308,7 @@ export class EventManager {
     })
 
     this.reporterBus.on('studio:init:suite', (suiteId) => {
-      this.studioStore.setSuiteId(suiteId)
-
-      this.ws.emit('studio:init', ({ canAccessStudioAI, error }) => {
-        if (error) {
-          // eslint-disable-next-line no-console
-          console.error(error)
-        }
-
-        this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
-        studioInit()
-      })
+      studioInitSuite({ suiteId })
     })
 
     this.reporterBus.on('studio:cancel', () => {
@@ -355,18 +360,7 @@ export class EventManager {
     })
 
     this.localBus.on('studio:init:suite', ({ suiteId, showUrlPrompt = true }) => {
-      this.studioStore.setSuiteId(suiteId)
-      this.studioStore.setShowUrlPrompt(showUrlPrompt)
-
-      this.ws.emit('studio:init', ({ canAccessStudioAI, error }) => {
-        if (error) {
-          // eslint-disable-next-line no-console
-          console.error(error)
-        }
-
-        this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
-        studioInit()
-      })
+      studioInitSuite({ suiteId, showUrlPrompt })
     })
 
     this.localBus.on('studio:cancel', () => {
