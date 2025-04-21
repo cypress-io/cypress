@@ -107,6 +107,7 @@ export const Query = objectType({
       description: 'Data pertaining to studio and the studio manager that is loaded from the cloud',
       resolve: async (source, args, ctx) => {
         const studio = await ctx.coreData.studioLifecycleManager?.getStudio()
+
         return studio ? { status: studio.status } : null
       },
     })
