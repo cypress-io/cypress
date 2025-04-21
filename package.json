@@ -102,7 +102,6 @@
     "@types/bluebird": "3.5.29",
     "@types/chai-enzyme": "0.6.7",
     "@types/debug": "4.1.7",
-    "@types/detect-port": "^2.0.0",
     "@types/enzyme-adapter-react-16": "1.0.5",
     "@types/fluent-ffmpeg": "^2.1.18",
     "@types/fs-extra": "^9.0.13",
