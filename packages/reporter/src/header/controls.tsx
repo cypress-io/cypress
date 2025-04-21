@@ -24,7 +24,7 @@ interface Props {
   appState: AppState
 }
 
-const Controls = observer(({ events = defaultEvents, appState }: Props) => {
+const Controls: React.FC<Props> = observer(({ events = defaultEvents, appState }: Props) => {
   const emit = (event: string) => () => events.emit(event)
   const togglePreferencesMenu = () => {
     appState.togglePreferencesMenu()
@@ -81,5 +81,7 @@ const Controls = observer(({ events = defaultEvents, appState }: Props) => {
     </div>
   )
 })
+
+Controls.displayName = 'Controls'
 
 export default Controls

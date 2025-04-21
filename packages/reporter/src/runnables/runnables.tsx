@@ -91,7 +91,7 @@ interface RunnablesListProps {
   canSaveStudioLogs: boolean
 }
 
-const RunnablesList = observer(({ runnables, studioEnabled, canSaveStudioLogs }: RunnablesListProps) => (
+const RunnablesList: React.FC<RunnablesListProps> = observer(({ runnables, studioEnabled, canSaveStudioLogs }: RunnablesListProps) => (
   <div className='wrap'>
     <ul className='runnables'>
       {_.map(runnables, (runnable) =>
@@ -105,6 +105,8 @@ const RunnablesList = observer(({ runnables, studioEnabled, canSaveStudioLogs }:
   </div>
 ))
 
+RunnablesList.displayName = 'RunnablesList'
+
 export interface RunnablesContentProps {
   runnablesStore: RunnablesStore
   spec: Cypress.Cypress['spec']
@@ -113,7 +115,7 @@ export interface RunnablesContentProps {
   canSaveStudioLogs: boolean
 }
 
-const RunnablesContent = observer(({ runnablesStore, spec, error, studioEnabled, canSaveStudioLogs }: RunnablesContentProps) => {
+const RunnablesContent: React.FC<RunnablesContentProps> = observer(({ runnablesStore, spec, error, studioEnabled, canSaveStudioLogs }: RunnablesContentProps) => {
   const { isReady, runnables, runnablesHistory } = runnablesStore
 
   if (!isReady) {
@@ -142,6 +144,8 @@ const RunnablesContent = observer(({ runnablesStore, spec, error, studioEnabled,
     />
   )
 })
+
+RunnablesContent.displayName = 'RunnablesContent'
 
 export interface RunnablesProps {
   error?: RunnablesErrorModel
@@ -189,6 +193,8 @@ const Runnables: React.FC<RunnablesProps> = observer(({ appState, scroller, erro
     </div>
   )
 })
+
+Runnables.displayName = 'Runnables'
 
 export { RunnablesList }
 

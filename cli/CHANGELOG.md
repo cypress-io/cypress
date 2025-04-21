@@ -1,9 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-
 ## 14.3.2
 
-**Bugfixes**
+_Released 4/22/2025 (PENDING)_
 
+**Bugfixes:**
+
+- Fixed an issue where auto scroll in the Cypress Command Log was not scrolling correctly. Fixes [#31530](https://github.com/cypress-io/cypress/issues/31530).
 - Fixed an issue where the configuration setting `trashAssetsBeforeRuns=false` was ignored for assets in the `videosfolder` and these assets were incorrectly deleted before running tests with `cypress run`. Addresses [#8280](https://github.com/cypress-io/cypress/issues/8280).
 
 ## 14.3.1
