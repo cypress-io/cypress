@@ -359,8 +359,8 @@ export class EventManager {
       })
     })
 
-    this.localBus.on('studio:init:suite', ({ suiteId, showUrlPrompt = true }) => {
-      studioInitSuite({ suiteId, showUrlPrompt })
+    this.localBus.on('studio:init:suite', (options: { suiteId: string, showUrlPrompt?: boolean }) => {
+      studioInitSuite(options)
     })
 
     this.localBus.on('studio:cancel', () => {
