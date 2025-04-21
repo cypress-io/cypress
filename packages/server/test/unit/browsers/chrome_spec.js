@@ -515,12 +515,15 @@ describe('lib/browsers/chrome', () => {
         targetId: '1234',
       }
 
+      const mockCurrentlyAttachedProtocolTarget = {}
+
       const cdpSocketServer = {
         attachCDPClient: sinon.stub(),
       }
 
       const browserCriClient = {
         currentlyAttachedTarget: pageCriClient,
+        currentlyAttachedProtocolTarget: mockCurrentlyAttachedProtocolTarget,
         host: 'http://localhost',
         port: 1234,
       }
@@ -556,7 +559,7 @@ describe('lib/browsers/chrome', () => {
       expect(chrome._handleDownloads).to.be.called
       expect(onInitializeNewBrowserTabCalled).to.be.true
       expect(cdpSocketServer.attachCDPClient).to.be.calledWith(pageCriClient)
-      expect(protocolManager.connectToBrowser).to.be.calledWith(pageCriClient)
+      expect(protocolManager.connectToBrowser).to.be.calledWith(mockCurrentlyAttachedProtocolTarget)
     })
   })
 
@@ -566,7 +569,35 @@ describe('lib/browsers/chrome', () => {
         connectToBrowser: sinon.stub().resolves(),
       }
 
-      const pageCriClient = sinon.stub()
+      const mockCurrentlyAttachedProtocolTarget = {}
+
+      const pageCriClient = {
+        clone: sinon.stub().returns(mockCurrentlyAttachedProtocolTarget),
+      }
+
+      const browserCriClient = {
+        currentlyAttachedTarget: pageCriClient,
+        currentlyAttachedProtocolTarget: mockCurrentlyAttachedProtocolTarget,
+      }
+
+      sinon.stub(chrome, '_getBrowserCriClient').returns(browserCriClient)
+
+      await chrome.connectProtocolToBrowser({ protocolManager })
+
+      expect(pageCriClient.clone).not.to.be.called
+      expect(protocolManager.connectToBrowser).to.be.calledWith(mockCurrentlyAttachedProtocolTarget)
+    })
+
+    it('connects to the browser cri client when the protocol target has not been created', async function () {
+      const protocolManager = {
+        connectToBrowser: sinon.stub().resolves(),
+      }
+
+      const mockCurrentlyAttachedProtocolTarget = {}
+
+      const pageCriClient = {
+        clone: sinon.stub().resolves(mockCurrentlyAttachedProtocolTarget),
+      }
 
       const browserCriClient = {
         currentlyAttachedTarget: pageCriClient,
@@ -576,7 +607,9 @@ describe('lib/browsers/chrome', () => {
 
       await chrome.connectProtocolToBrowser({ protocolManager })
 
-      expect(protocolManager.connectToBrowser).to.be.calledWith(pageCriClient)
+      expect(pageCriClient.clone).to.be.called
+      expect(protocolManager.connectToBrowser).to.be.calledWith(mockCurrentlyAttachedProtocolTarget)
+      expect(browserCriClient.currentlyAttachedProtocolTarget).to.eq(mockCurrentlyAttachedProtocolTarget)
     })
 
     it('throws error if there is no browser cri client', function () {
@@ -603,6 +636,25 @@ describe('lib/browsers/chrome', () => {
 
       expect(chrome.connectProtocolToBrowser({ protocolManager })).to.be.rejectedWith('Missing pageCriClient in connectProtocolToBrowser')
       expect(protocolManager.connectToBrowser).not.to.be.called
+    })
+  })
+
+  context('#closeProtocolConnection', () => {
+    it('closes the protocol connection', async function () {
+      const mockCurrentlyAttachedProtocolTarget = {
+        close: sinon.stub().resolves(),
+      }
+
+      const browserCriClient = {
+        currentlyAttachedProtocolTarget: mockCurrentlyAttachedProtocolTarget,
+      }
+
+      sinon.stub(chrome, '_getBrowserCriClient').returns(browserCriClient)
+
+      await chrome.closeProtocolConnection()
+
+      expect(mockCurrentlyAttachedProtocolTarget.close).to.be.called
+      expect(browserCriClient.currentlyAttachedProtocolTarget).to.be.undefined
     })
   })
 

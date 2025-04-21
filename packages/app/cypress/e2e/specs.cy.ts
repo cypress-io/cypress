@@ -351,7 +351,7 @@ describe('App: Specs', () => {
         cy.findByTestId('spec-pattern').should('contain', 'src/**/*.{cy,spec}.{js,jsx}')
 
         cy.contains('button', defaultMessages.createSpec.updateSpecPattern)
-        cy.findByRole('button', { name: 'New spec', exact: false })
+        cy.findByRole('button', { name: 'New spec' })
       })
 
       it('opens config file in ide from SpecPattern', () => {
@@ -391,7 +391,7 @@ describe('App: Specs', () => {
       })
 
       it('shows new spec button to start creation workflow', () => {
-        cy.findByRole('button', { name: 'New spec', exact: false }).click()
+        cy.findByRole('button', { name: 'New spec' }).click()
 
         cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
           cy.findAllByTestId('card').eq(0)
@@ -404,7 +404,7 @@ describe('App: Specs', () => {
 
       context('scaffold starter spec', () => {
         it('should generate template spec', () => {
-          cy.findByRole('button', { name: 'New spec', exact: false }).click()
+          cy.findByRole('button', { name: 'New spec' }).click()
 
           cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
             cy.findAllByTestId('card').eq(0)
@@ -484,7 +484,7 @@ describe('App: Specs', () => {
       })
 
       it('shows extension warning', () => {
-        cy.findByRole('button', { name: 'New spec', exact: false }).click()
+        cy.findByRole('button', { name: 'New spec' }).click()
 
         cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
           cy.findAllByTestId('card').eq(0)
@@ -647,7 +647,8 @@ describe('App: Specs', () => {
           })
 
           cy.contains('Review the docs')
-          .should('have.attr', 'href', 'https://on.cypress.io/styling-components')
+          .should('be.visible')
+          .and('have.attr', 'href', 'https://on.cypress.io/styling-components')
 
           cy.log('should not contain the link if you navigate away and back')
           cy.get('body').type('f')
@@ -699,7 +700,7 @@ describe('App: Specs', () => {
         cy.findByTestId('spec-pattern').should('contain', 'src/specs-folder/*.cy.{js,jsx}')
 
         cy.contains('button', defaultMessages.createSpec.updateSpecPattern)
-        cy.findByRole('button', { name: 'New spec', exact: false })
+        cy.findByRole('button', { name: 'New spec' })
       })
 
       it('opens config file in ide from SpecPattern', () => {
@@ -727,7 +728,7 @@ describe('App: Specs', () => {
       })
 
       it('shows new spec button to start creation workflow', () => {
-        cy.findByRole('button', { name: 'New spec', exact: false }).click()
+        cy.findByRole('button', { name: 'New spec' }).click()
 
         selectTemplateSpecCard()
 
@@ -735,7 +736,7 @@ describe('App: Specs', () => {
       })
 
       it('shows create first spec page with create template spec option and goes back if it is cancel', () => {
-        cy.findByRole('button', { name: 'New spec', exact: false }).click()
+        cy.findByRole('button', { name: 'New spec' }).click()
 
         selectTemplateSpecCard()
 

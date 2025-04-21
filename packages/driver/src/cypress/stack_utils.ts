@@ -15,7 +15,7 @@ import { codeFrameColumns } from '@babel/code-frame'
 
 import $utils from './utils'
 import $sourceMapUtils from './source_map_utils'
-
+import { toPosix } from './util/to_posix'
 // Intentionally deep-importing from @packages/errors so as to not bundle the entire @packages/errors in the client unnecessarily
 import { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitStack, stackLineRegex } from '@packages/errors/src/stackUtils'
 
@@ -182,12 +182,6 @@ const getCodeFrameFromSource = (sourceCode, { line, column: originalColumn, rela
     frame,
     language: getLanguageFromExtension(relativeFile),
   }
-}
-
-export const toPosix = (file: string) => {
-  return Cypress.config('platform') === 'win32'
-    ? file.replaceAll('\\', '/')
-    : file
 }
 
 const getRelativePathFromRoot = (relativeFile: string, absoluteFile?: string) => {
@@ -549,5 +543,4 @@ export default {
   stackWithUserInvocationStackSpliced,
   captureUserInvocationStack,
   getInvocationDetails,
-  toPosix,
 }

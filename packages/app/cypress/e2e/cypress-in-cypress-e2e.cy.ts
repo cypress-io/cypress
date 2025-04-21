@@ -23,7 +23,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
 
     cy.contains('Canary').should('be.visible')
     cy.findByTestId('select-browser').click()
-    cy.get('[data-cy="viewport"]').click()
+    cy.get('[data-cy="viewport-size"]').should('be.visible')
 
     cy.contains('Chrome 1')
     .focus()
@@ -33,14 +33,6 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     // snapshotAUTPanel('browsers open')
 
     cy.contains('Canary').should('be.hidden')
-
-    cy.get('[data-cy="viewport"]').click()
-    cy.contains('The viewport determines the width and height of your application under test. By default the viewport will be 1000px by 660px for end-to-end testing.')
-    .should('be.visible')
-
-    // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
-    // snapshotAUTPanel('viewport info open')
-
     cy.get('body').click()
 
     cy.findByTestId('playground-activator').click()
@@ -79,6 +71,10 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     })
 
     cy.get('.hook-open-in-ide').should('exist')
+
+    cy.get('#unified-runner').then((el) => {
+      expect(el[0].getAttribute('style')).to.match(/width: 1000px; height: 660px; transform: scale\(0.769\d+\); position: absolute; margin-left: -25px;/)
+    })
   })
 
   it('navigation between specs and other parts of the app works', () => {
@@ -157,7 +153,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
   })
 
   it('shows a compilation error with a malformed spec', { viewportHeight: 596, viewportWidth: 1000 }, () => {
-    const expectedAutHeight = 456 // based on explicitly setting viewport in this test to 596
+    const expectedAutHeight = 500 // based on explicitly setting viewport in this test to 596
 
     cy.visitApp()
     cy.specsPageIsVisible()
@@ -174,7 +170,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.contains('SyntaxError')
     .should('be.visible')
     .invoke('outerHeight')
-    .should('eq', expectedAutHeight)
+    .should('be.closeTo', expectedAutHeight, 1)
 
     // Checking the height here might seem excessive
     // but we really want some warning if this changes
@@ -205,8 +201,12 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
 
     cy.get('.toggle-specs-wrapper').click()
 
-    cy.get('#unified-runner').should('have.css', 'width', '333px')
-    cy.get('#unified-runner').should('have.css', 'height', '333px')
+    cy.get('#unified-runner').then((el) => {
+      // CSS properties are calculated over inline styles, which means we get a close representation
+      // of the actual values, but not the exact values (+/- 1 pixel), hence the use of matching the style
+      // attribute.
+      expect(el[0].getAttribute('style')).to.match(/width: 333px; height: 333px/)
+    })
   })
 
   it('stops correctly running spec while switching specs', () => {
@@ -214,6 +214,9 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.specsPageIsVisible()
     cy.contains('withFailure.spec').click()
     cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
+    // A bit of a hack, but our cy-in-cy test needs to wait for the reporter to fully render before pressing the "f" key to expand the "Search specs" menu.
+    // Otherwise, the "f" keypress happens before the event is registered, which causes the "Search Specs" menu to not expand.
+    cy.get('[data-cy="runnable-header"]').should('be.visible')
     cy.get('body').type('f')
     cy.contains('Search specs')
     cy.contains('withWait.spec').click()

@@ -64,6 +64,8 @@ describe('lib/socket', () => {
       .then(() => {
         this.options = {
           onSavedStateChanged: sinon.spy(),
+          onStudioInit: sinon.stub(),
+          onStudioDestroy: sinon.stub(),
         }
 
         this.automation = new Automation({
@@ -71,6 +73,14 @@ describe('lib/socket', () => {
           cookieNamespace: this.cfg.socketIoCookie,
           screenshotsFolder: this.cfg.screenshotsFolder,
         })
+
+        // Create a mock studio object with addSocketListeners method
+        const mockStudio = {
+          addSocketListeners: sinon.stub(),
+        }
+
+        // Set the studio in the context
+        ctx.coreData.studio = mockStudio
 
         this.server.startWebsockets(this.automation, this.cfg, this.options)
         this.socket = this.server._socket
@@ -520,6 +530,69 @@ describe('lib/socket', () => {
 
           return done()
         })
+      })
+    })
+
+    context('on(studio:init)', () => {
+      it('calls onStudioInit', async function () {
+        this.options.onStudioInit.resolves({ canAccessStudioAI: true })
+
+        await new Promise((resolve) => {
+          this.client.emit('studio:init', ({ canAccessStudioAI }) => {
+            expect(this.options.onStudioInit).to.be.called
+            expect(canAccessStudioAI).to.be.true
+
+            resolve()
+          })
+        })
+      })
+
+      it('handles errors thrown by onStudioInit', async function () {
+        this.options.onStudioInit.rejects(new Error('foo'))
+
+        await new Promise((resolve) => {
+          this.client.emit('studio:init', ({ error }) => {
+            expect(this.options.onStudioInit).to.be.called
+            expect(error.message).to.eq('foo')
+
+            resolve()
+          })
+        })
+      })
+    })
+
+    context('on(studio:destroy)', () => {
+      it('calls onStudioDestroy', async function () {
+        this.options.onStudioDestroy.resolves()
+
+        await new Promise((resolve) => {
+          this.client.emit('studio:destroy', () => {
+            expect(this.options.onStudioDestroy).to.be.called
+
+            resolve()
+          })
+        })
+      })
+
+      it('handles errors thrown by onStudioDestroy', async function () {
+        this.options.onStudioDestroy.rejects(new Error('foo'))
+
+        await new Promise((resolve) => {
+          this.client.emit('studio:destroy', ({ error }) => {
+            expect(this.options.onStudioDestroy).to.be.called
+            expect(error.message).to.eq('foo')
+
+            resolve()
+          })
+        })
+      })
+    })
+
+    context('studio.addSocketListeners', () => {
+      it('calls addSocketListeners on studio when socket connects', function () {
+        // The socket connection was already established in the beforeEach so
+        // we can just verify that addSocketListeners was called
+        expect(ctx.coreData.studio.addSocketListeners).to.be.called
       })
     })
 

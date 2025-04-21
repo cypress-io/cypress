@@ -4,6 +4,7 @@ import { addCrossOriginIframe, getAutIframeModel, getEventManager, UnifiedRunner
 import { useAutStore, useSpecStore } from '../store'
 import { useStudioStore } from '../store/studio-store'
 import { empty, getReporterElement, getRunnerElement } from './utils'
+import { unmountReporter } from './reporter'
 
 export function useEventManager () {
   const eventManager = getEventManager()
@@ -85,13 +86,14 @@ export function useEventManager () {
 
     // TODO: UNIFY-1318 - this should be handled by whoever starts it, reporter?
     window.UnifiedRunner.shortcuts.stop()
-
     const reporterElement = getReporterElement()
 
     if (reporterElement) {
       // reporter can be disabled by the user,
       // so sometimes will not exist to be cleaned up
-      empty(reporterElement)
+      // NOTE: we do not use empty() on the reporter as it is written in react.
+      // As of React 18, its better to call unmount on the root, which effectively does the same thing as empty().
+      unmountReporter()
     }
   }
 

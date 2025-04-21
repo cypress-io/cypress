@@ -1,9 +1,11 @@
 <template>
   <StudioInstructionsModal
+    v-if="studioStore.instructionModalIsOpen"
     :open="studioStore.instructionModalIsOpen"
     @close="studioStore.closeInstructionModal"
   />
   <StudioSaveModal
+    v-if="studioStore.saveModalIsOpen"
     :open="studioStore.saveModalIsOpen"
     @close="studioStore.closeSaveModal"
   />
@@ -12,16 +14,14 @@
     class="flex"
   >
     <AutomationElement />
-    <AutomationDisconnected
-      v-if="runnerUiStore.automationStatus === 'DISCONNECTED'"
-    />
+    <AutomationDisconnected v-if="runnerUiStore.automationStatus === 'DISCONNECTED'" />
     <AutomationMissing
       v-else-if="runnerUiStore.automationStatus === 'MISSING'"
       :gql="props.gql.currentProject"
     />
     <ResizablePanels
       v-else
-      :style="{width: `calc(100vw - ${screenshotStore.isScreenshotting ? 0 : collapsedNavBarWidth}px)`}"
+      :style="{ width: `calc(100vw - ${screenshotStore.isScreenshotting ? 0 : collapsedNavBarWidth}px)` }"
       :offset-left="collapsedNavBarWidth"
       :max-total-width="windowWidth - collapsedNavBarWidth"
       :initial-panel1-width="specsListWidthPreferences"
@@ -31,16 +31,17 @@
       :min-panel3-width="minWidths.aut"
       :show-panel1="runnerUiStore.isSpecsListOpen && !screenshotStore.isScreenshotting"
       :show-panel2="!screenshotStore.isScreenshotting && !hideCommandLog"
+      :show-panel4="shouldShowStudioPanel"
       @resize-end="handleResizeEnd"
       @panel-width-updated="handlePanelWidthUpdated"
     >
-      <template #panel1="{isDragging}">
+      <template #panel1="{ isDragging }">
         <HideDuringScreenshot
           v-if="props.gql.currentProject"
           v-show="runnerUiStore.isSpecsListOpen"
           id="inline-spec-list"
           class="h-full bg-gray-1000 border-gray-900 border-r force-dark"
-          :class="{'pointer-events-none': isDragging}"
+          :class="{ 'pointer-events-none': isDragging }"
         >
           <InlineSpecList
             id="reporter-inline-specs-list"
@@ -55,9 +56,7 @@
         </HideDuringScreenshot>
       </template>
       <template #panel2>
-        <HideDuringScreenshot
-          class="h-full"
-        >
+        <HideDuringScreenshot class="h-full">
           <div
             v-if="!hideCommandLog"
             v-once
@@ -73,12 +72,11 @@
             :gql="props.gql.currentProject"
             :event-manager="eventManager"
             :get-aut-iframe="getAutIframeModel"
+            :should-show-studio-button="shouldShowStudioButton"
           />
         </HideDuringScreenshot>
 
-        <RemoveClassesDuringScreenshotting
-          class="h-0 p-[16px]"
-        >
+        <RemoveClassesDuringScreenshotting class="h-0 p-[16px]">
           <ScriptError
             v-if="autStore.scriptError"
             :error="autStore.scriptError.error"
@@ -95,6 +93,17 @@
           :get-aut-iframe="getAutIframeModel"
         />
         <ScreenshotHelperPixels />
+      </template>
+      <template #panel4>
+        <HideDuringScreenshot>
+          <StudioPanel
+            v-if="shouldShowStudioPanel"
+            data-cy="studio-panel"
+            :can-access-studio-a-i="studioStore.canAccessStudioAI"
+            :on-studio-panel-close="handleStudioPanelClose"
+            :event-manager="eventManager"
+          />
+        </HideDuringScreenshot>
       </template>
     </ResizablePanels>
   </AdjustRunnerStyleDuringScreenshot>
@@ -130,6 +139,7 @@ import { runnerConstants } from './runner-constants'
 import StudioInstructionsModal from './studio/StudioInstructionsModal.vue'
 import StudioSaveModal from './studio/StudioSaveModal.vue'
 import { useStudioStore } from '../store/studio-store'
+import StudioPanel from '../studio/StudioPanel.vue'
 
 const {
   preferredMinimumPanelWidth,
@@ -148,7 +158,16 @@ fragment SpecRunner_Preferences on Query {
       autoScrollingEnabled
       reporterWidth
       specListWidth
+      studioWidth
     }
+  }
+}
+`
+
+gql`
+fragment SpecRunner_Studio on Query {
+  studio {
+    status
   }
 }
 `
@@ -171,6 +190,7 @@ fragment SpecRunner on Query {
   }
   ...ChooseExternalEditor
   ...SpecRunner_Preferences
+  ...SpecRunner_Studio
 }
 `
 
@@ -203,6 +223,10 @@ const {
 
 const studioStore = useStudioStore()
 
+const handleStudioPanelClose = () => {
+  eventManager.emit('studio:cancel', undefined)
+}
+
 const specsListWidthPreferences = computed(() => {
   return props.gql.localSettings.preferences.specListWidth ?? runnerUiStore.specListWidth
 })
@@ -211,8 +235,24 @@ const reporterWidthPreferences = computed(() => {
   return props.gql.localSettings.preferences.reporterWidth ?? runnerUiStore.reporterWidth
 })
 
+const studioWidthPreferences = computed(() => {
+  return props.gql.localSettings.preferences.studioWidth ?? runnerUiStore.studioWidth
+})
+
 const isSpecsListOpenPreferences = computed(() => {
   return props.gql.localSettings.preferences.isSpecsListOpen ?? false
+})
+
+const studioStatus = computed(() => {
+  return props.gql.studio?.status
+})
+
+const shouldShowStudioButton = computed(() => {
+  return !!props.gql.studio && !studioStore.isActive
+})
+
+const shouldShowStudioPanel = computed(() => {
+  return studioStatus.value === 'INITIALIZED' && (studioStore.isLoading || studioStore.isActive)
 })
 
 const hideCommandLog = runnerUiStore.hideCommandLog
@@ -232,6 +272,7 @@ if (!hideCommandLog) {
   preferences.update('isSpecsListOpen', isSpecsListOpenPreferences.value)
   preferences.update('reporterWidth', reporterWidthPreferences.value)
   preferences.update('specListWidth', specsListWidthPreferences.value)
+  preferences.update('studioWidth', studioWidthPreferences.value)
   // 👆 we must update these preferences before calling useRunnerStyle, to make sure that values from GQL
   // will be available during the initial calculation that useRunnerStyle does
 }
@@ -286,6 +327,7 @@ function openFile () {
     },
   })
 }
+
 onMounted(() => {
   const eventManager = getEventManager()
 

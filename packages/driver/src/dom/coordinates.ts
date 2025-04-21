@@ -310,7 +310,7 @@ const getElementCoordinatesByPositionRelativeToXY = ($el, x, y) => {
   return positionProps
 }
 
-const getElementCoordinatesByPosition = ($el, position) => {
+const getElementCoordinatesByPosition = ($el, position?) => {
   position = position || 'center'
 
   const positionProps = getElementPositioning($el)

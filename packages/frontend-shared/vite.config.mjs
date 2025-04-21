@@ -116,7 +116,6 @@ export const makeConfig = (config = {}, plugins = {}) => {
     css: {
       preprocessorOptions: {
         scss: {
-          // @ts-expect-error
           additionalData: `@use "file:///${path.resolve(__dirname, '../reporter/src/lib/variables.scss').replaceAll('\\', '/')}" as *;\n`,
         },
       },

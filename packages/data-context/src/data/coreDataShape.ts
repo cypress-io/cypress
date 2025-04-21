@@ -1,4 +1,4 @@
-import { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, MIGRATION_STEPS, MigrationStep, BannerState } from '@packages/types'
+import { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, MIGRATION_STEPS, MigrationStep, StudioManagerShape } from '@packages/types'
 import { WizardBundler, CT_FRAMEWORKS, resolveComponentFrameworkDefinition, ErroredFramework } from '@packages/scaffold-config'
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
@@ -22,7 +22,7 @@ export interface AuthenticatedUserShape {
 
 export interface ProjectShape {
   projectRoot: string
-  savedState?: () => Promise<Maybe<SavedStateShape>>
+  savedState?: () => Promise<AllowedState>
 }
 
 export interface ServersDataShape {
@@ -45,15 +45,6 @@ export interface LocalSettingsDataShape {
   refreshing: Promise<Editor[]> | null
   availableEditors: Editor[]
   preferences: AllowedState
-}
-
-export interface SavedStateShape {
-  firstOpened?: number | null
-  lastOpened?: number | null
-  promptsShown?: object | null
-  banners?: BannerState | null
-  lastProjectId?: string | null
-  specFilter?: string | null
 }
 
 export interface ConfigChildProcessShape {
@@ -173,6 +164,7 @@ export interface CoreDataShape {
   cloudProject: CloudDataShape
   eventCollectorSource: EventCollectorSource | null
   didBrowserPreviouslyHaveUnexpectedExit: boolean
+  studio: StudioManagerShape | null
 }
 
 /**
@@ -254,6 +246,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     },
     eventCollectorSource: null,
     didBrowserPreviouslyHaveUnexpectedExit: false,
+    studio: null,
   }
 
   async function machineId (): Promise<string | null> {

@@ -4,6 +4,7 @@ import { generalDecrypt, GeneralJWE } from 'jose'
 import base64Url from 'base64url'
 import type { CypressRequestOptions } from './api'
 import { deflateRaw as deflateRawCb } from 'zlib'
+import fs from 'fs'
 
 const deflateRaw = promisify(deflateRawCb)
 
@@ -41,7 +42,26 @@ export function verifySignature (body: string, signature: string, publicKey?: cr
 
   verify.update(body)
 
-  return verify.verify(publicKey || getPublicKey(), Buffer.from(signature, 'base64'))
+  return verify.verify(publicKey || getPublicKey(), signature, 'base64')
+}
+
+export function verifySignatureFromFile (file: string, signature: string, publicKey?: crypto.KeyObject): Promise<boolean> {
+  const verify = crypto.createVerify('SHA256')
+
+  const stream = fs.createReadStream(file)
+
+  stream.on('data', (chunk: crypto.BinaryLike) => {
+    verify.update(chunk)
+  })
+
+  return new Promise<boolean>((resolve, reject) => {
+    stream.on('end', () => {
+      verify.end()
+      resolve(verify.verify(publicKey || getPublicKey(), signature, 'base64'))
+    })
+
+    stream.on('error', reject)
+  })
 }
 
 // Implements the https://www.rfc-editor.org/rfc/rfc7516 spec

@@ -6,14 +6,19 @@ const request = require('@cypress/request-promise')
 const humanInterval = require('human-interval')
 
 const RequestErrors = require('@cypress/request-promise/errors')
-const { agent } = require('@packages/network')
+
 const pkg = require('@packages/root')
 
 const machineId = require('../machine_id')
 const errors = require('../../errors')
-const { apiUrl, apiRoutes, makeRoutes } = require('../routes')
 
 import Bluebird from 'bluebird'
+
+import type { AfterSpecDurations } from '@packages/types'
+import { agent } from '@packages/network'
+import type { CombinedAgent } from '@packages/network/lib/agent'
+
+import { apiUrl, apiRoutes, makeRoutes } from '../routes'
 import { getText } from '../../util/status_code'
 import * as enc from '../encryption'
 import getEnvInformationForProjectRoot from '../environment'
@@ -22,17 +27,25 @@ import type { OptionsWithUrl } from 'request-promise'
 import { fs } from '../../util/fs'
 import ProtocolManager from '../protocol'
 import type { ProjectBase } from '../../project-base'
-import type { AfterSpecDurations } from '@packages/types'
+
+import { PUBLIC_KEY_VERSION } from '../constants'
+
+// axios implementation disabled until proxy issues can be diagnosed/fixed
+// TODO: https://github.com/cypress-io/cypress/issues/31490
+//import { createInstance } from './create_instance'
+import type { CreateInstanceRequestBody, CreateInstanceResponse } from './create_instance'
+
+import { transformError } from './axios_middleware/transform_error'
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
 const TWO_MINUTES = humanInterval('2 minutes')
 
-const PUBLIC_KEY_VERSION = '1'
-
-const DELAYS: number[] = process.env.API_RETRY_INTERVALS
-  ? process.env.API_RETRY_INTERVALS.split(',').map(_.toNumber)
-  : [THIRTY_SECONDS, SIXTY_SECONDS, TWO_MINUTES]
+function retryDelays (): number[] {
+  return process.env.API_RETRY_INTERVALS
+    ? process.env.API_RETRY_INTERVALS.split(',').map(_.toNumber)
+    : [THIRTY_SECONDS, SIXTY_SECONDS, TWO_MINUTES]
+}
 
 const runnerCapabilities = {
   'dynamicSpecsInSerialMode': true,
@@ -179,16 +192,18 @@ const retryWithBackoff = (fn) => {
       throw err.cause
     })
     .catch(isRetriableError, (err) => {
-      if (retryIndex >= DELAYS.length) {
+      const delays = retryDelays()
+
+      if (retryIndex >= delays.length) {
         throw err
       }
 
-      const delayMs = DELAYS[retryIndex]
+      const delayMs = delays[retryIndex]
 
       errors.warning(
         'CLOUD_API_RESPONSE_FAILED_RETRYING', {
           delayMs,
-          tries: DELAYS.length - retryIndex,
+          tries: delays.length - retryIndex,
           response: err,
         },
       )
@@ -208,19 +223,6 @@ const retryWithBackoff = (fn) => {
   return attempt(0)
 }
 
-const formatResponseBody = function (err) {
-  // if the body is JSON object
-  if (_.isObject(err.error)) {
-    // transform the error message to include the
-    // stringified body (represented as the 'error' property)
-    const body = JSON.stringify(err.error, null, 2)
-
-    err.message = [err.statusCode, body].join('\n\n')
-  }
-
-  throw err
-}
-
 const tagError = function (err) {
   err.isApiError = true
   throw err
@@ -238,9 +240,22 @@ const isRetriableError = (err) => {
     (err.statusCode == null)
 }
 
+function noProxyPreflightTimeout (): number {
+  try {
+    const timeoutFromEnv = Number(process.env.CYPRESS_INITIAL_PREFLIGHT_TIMEOUT)
+
+    return isNaN(timeoutFromEnv) ? 5000 : timeoutFromEnv
+  } catch (e: unknown) {
+    return 5000
+  }
+}
+
 export type CreateRunOptions = {
   projectRoot: string
-  ci: string
+  ci: {
+    params: string
+    provider: string
+  }
   ciBuildId: string
   projectId: string
   recordKey: string
@@ -254,6 +269,7 @@ export type CreateRunOptions = {
   testingType: 'e2e' | 'component'
   timeout?: number
   project: ProjectBase
+  autoCancelAfterFailures?: number | undefined
 }
 
 type CreateRunResponse = {
@@ -306,8 +322,21 @@ type UpdateInstanceArtifactsOptions = {
   instanceId: string
   timeout?: number
 }
+interface DefaultPreflightResult {
+  encrypt: true
+}
 
-let preflightResult = {
+interface PreflightWarning {
+  message: string
+}
+
+interface CachedPreflightResult {
+  encrypt: boolean
+  apiUrl: string
+  warnings?: PreflightWarning[]
+}
+
+let preflightResult: DefaultPreflightResult | CachedPreflightResult = {
   encrypt: true,
 }
 
@@ -351,7 +380,7 @@ export default {
     .catch(tagError)
   },
 
-  createRun (options: CreateRunOptions) {
+  createRun (options: CreateRunOptions): Bluebird<CreateRunResponse> {
     const preflightOptions = _.pick(options, ['projectId', 'projectRoot', 'ciBuildId', 'browser', 'testingType', 'parallel', 'timeout'])
 
     return this.sendPreflight(preflightOptions)
@@ -428,7 +457,7 @@ export default {
       if (script) {
         const config = options.project.getConfig()
 
-        await options.project.protocolManager.setupProtocol(script, {
+        await options.project.protocolManager.prepareAndSetupProtocol(script, {
           runId: result.runId,
           projectId: options.projectId,
           testingType: options.testingType,
@@ -439,25 +468,18 @@ export default {
           },
           projectConfig: _.pick(config, ['devServerPublicPathRoute', 'port', 'proxyUrl', 'namespace']),
           mountVersion: runnerCapabilities.protocolMountVersion,
+          debugData: options.project.configDebugData,
+          mode: 'record',
         })
       }
 
       return result
     })
-    .catch(RequestErrors.StatusCodeError, formatResponseBody)
+    .catch(RequestErrors.StatusCodeError, transformError)
     .catch(tagError)
   },
 
-  createInstance (options) {
-    const { runId, timeout } = options
-
-    const body = _.pick(options, [
-      'spec',
-      'groupId',
-      'machineId',
-      'platform',
-    ])
-
+  createInstance (runId: string, body: CreateInstanceRequestBody, timeout: number = 0): Bluebird<CreateInstanceResponse> {
     return retryWithBackoff((attemptIndex) => {
       return rp.post({
         body,
@@ -471,9 +493,9 @@ export default {
           'x-cypress-request-attempt': attemptIndex,
         },
       })
-    })
-    .catch(RequestErrors.StatusCodeError, formatResponseBody)
-    .catch(tagError)
+      .catch(RequestErrors.StatusCodeError, transformError)
+      .catch(tagError)
+    }) as Bluebird<CreateInstanceResponse>
   },
 
   postInstanceTests (options) {
@@ -492,7 +514,7 @@ export default {
         },
         body,
       })
-      .catch(RequestErrors.StatusCodeError, formatResponseBody)
+      .catch(RequestErrors.StatusCodeError, transformError)
       .catch(tagError)
     })
   },
@@ -512,7 +534,7 @@ export default {
 
         },
       })
-      .catch(RequestErrors.StatusCodeError, formatResponseBody)
+      .catch(RequestErrors.StatusCodeError, transformError)
       .catch(tagError)
     })
   },
@@ -532,7 +554,7 @@ export default {
           'x-cypress-request-attempt': attemptIndex,
         },
       })
-      .catch(RequestErrors.StatusCodeError, formatResponseBody)
+      .catch(RequestErrors.StatusCodeError, transformError)
       .catch(tagError)
     })
   },
@@ -559,7 +581,7 @@ export default {
           'metadata',
         ]),
       })
-      .catch(RequestErrors.StatusCodeError, formatResponseBody)
+      .catch(RequestErrors.StatusCodeError, transformError)
       .catch(tagError)
     })
   },
@@ -604,14 +626,13 @@ export default {
 
   sendPreflight (preflightInfo) {
     return retryWithBackoff(async (attemptIndex) => {
-      const { timeout, projectRoot } = preflightInfo
-
-      preflightInfo = _.omit(preflightInfo, 'timeout', 'projectRoot')
+      const { projectRoot, timeout, ...preflightRequestBody } = preflightInfo
 
       const preflightBaseProxy = apiUrl.replace('api', 'api-proxy')
 
       const envInformation = await getEnvInformationForProjectRoot(projectRoot, process.pid.toString())
-      const makeReq = ({ baseUrl, agent }) => {
+
+      const makeReq = (baseUrl: string, agent: CombinedAgent | null, timeout: number) => {
         return rp.post({
           url: `${baseUrl}preflight`,
           body: {
@@ -619,13 +640,13 @@ export default {
             envUrl: envInformation.envUrl,
             dependencies: envInformation.dependencies,
             errors: envInformation.errors,
-            ...preflightInfo,
+            ...preflightRequestBody,
           },
           headers: {
             'x-route-version': '1',
             'x-cypress-request-attempt': attemptIndex,
           },
-          timeout: timeout ?? SIXTY_SECONDS,
+          timeout,
           json: true,
           encrypt: 'always',
           agent,
@@ -637,14 +658,19 @@ export default {
       }
 
       const postReqs = async () => {
-        return makeReq({ baseUrl: preflightBaseProxy, agent: null })
-        .catch((err) => {
-          if (err.statusCode === 412) {
-            throw err
-          }
+        const initialPreflightTimeout = noProxyPreflightTimeout()
 
-          return makeReq({ baseUrl: apiUrl, agent })
-        })
+        if (initialPreflightTimeout >= 0) {
+          try {
+            return await makeReq(preflightBaseProxy, null, initialPreflightTimeout)
+          } catch (err) {
+            if (err.statusCode === 412) {
+              throw err
+            }
+          }
+        }
+
+        return makeReq(apiUrl, agent, timeout)
       }
 
       const result = await postReqs()
@@ -692,4 +718,5 @@ export default {
   },
 
   retryWithBackoff,
+  runnerCapabilities,
 }

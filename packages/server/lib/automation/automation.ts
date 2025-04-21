@@ -3,9 +3,13 @@ import { v4 as uuidv4 } from 'uuid'
 import { Cookies } from './cookies'
 import { Screenshot } from './screenshot'
 import type { BrowserPreRequest } from '@packages/proxy'
-import type { AutomationMiddleware, OnRequestEvent, OnServiceWorkerClientSideRegistrationUpdated, OnServiceWorkerRegistrationUpdated, OnServiceWorkerVersionUpdated } from '@packages/types'
+import type { AutomationCommands, AutomationMiddleware, OnRequestEvent, OnServiceWorkerClientSideRegistrationUpdated, OnServiceWorkerRegistrationUpdated, OnServiceWorkerVersionUpdated } from '@packages/types'
 import { cookieJar } from '../util/cookies'
 import type { ServiceWorkerEventHandler } from '@packages/proxy/lib/http/util/service-worker-manager'
+import Debug from 'debug'
+import { AutomationNotImplemented } from './automation_not_implemented'
+
+const debug = Debug('cypress:server:automation')
 
 export type OnBrowserPreRequest = (browserPreRequest: BrowserPreRequest) => Promise<void>
 
@@ -26,6 +30,7 @@ export type AutomationOptions = {
 export class Automation {
   private requests: Record<number, (any) => void>
   private middleware: AutomationMiddleware
+  private preferredMiddleware?: AutomationMiddleware
   private cookies: Cookies
   private screenshot: { capture: (data: any, automate: any) => any }
   public onBrowserPreRequest: OnBrowserPreRequest | undefined
@@ -70,25 +75,31 @@ export class Automation {
     this.middleware = this.initializeMiddleware()
   }
 
-  automationValve (message: string, fn: (...args: any) => any) {
-    return (msg: string, data: any) => {
-      // enable us to omit message
-      // argument
-      if (!data) {
-        data = msg
-        msg = message
-      }
+  automationValve<T extends keyof AutomationCommands> (message: T, fn: (...args: any) => any) {
+    return (
+      msg: T | AutomationCommands[T]['dataType'],
+      data: T extends keyof AutomationCommands ? AutomationCommands[T]['dataType'] : never,
+    ): Bluebird<AutomationCommands[T]['returnType']> => {
+      const resolvedData = data ?? msg as AutomationCommands[T]['dataType']
+      const resolvedMessage = data ? msg : message
 
       const onReq = this.get('onRequest')
 
-      // if we have an onRequest function
-      // then just invoke that
       if (onReq) {
-        return Bluebird.resolve(onReq(msg, data))
+        debug('Middleware `onRequest` fn found, attempting middleware exec for message: %s', message)
+
+        return Bluebird.try(() => {
+          return onReq(resolvedMessage, resolvedData)
+        }).catch((e) => {
+          if (AutomationNotImplemented.isAutomationNotImplementedErr(e)) {
+            return this.requestAutomationResponse(resolvedMessage, resolvedData, fn)
+          }
+
+          throw e
+        })
       }
 
-      // do the default
-      return Bluebird.resolve(this.requestAutomationResponse(msg, data, fn))
+      return this.requestAutomationResponse(resolvedMessage, resolvedData, fn)
     }
   }
 
@@ -118,18 +129,19 @@ export class Automation {
     })
   }
 
-  invokeAsync (fn, ...args) {
-    return Bluebird
-    .try(() => {
-      fn = this.get(fn)
+  async invokeAsync (fn, ...args) {
+    const invocationTarget = this.get(fn) as (...args: any[]) => Promise<any>
 
-      if (fn) {
-        return fn(...args)
+    if (invocationTarget) {
+      try {
+        return await invocationTarget(...args)
+      } catch (err: unknown) {
+        debug('invokeAsync on %s failed: %s', fn, err)
       }
-    })
+    }
   }
 
-  normalize (message: string, data: any, automate?) {
+  normalize<T extends keyof AutomationCommands> (message: T, data: AutomationCommands[T]['dataType'], automate?): Promise<AutomationCommands[T]['returnType']> {
     return Bluebird.try(() => {
       switch (message) {
         case 'take:screenshot':
@@ -177,34 +189,36 @@ export class Automation {
   }
 
   use (middlewares: AutomationMiddleware) {
+    debug('installing middleware')
+
     return this.middleware = {
       ...this.middleware,
       ...middlewares,
     }
   }
 
-  push (message: string, data: unknown) {
-    return this.normalize(message, data)
-    .then((data) => {
-      if (data) {
-        this.invokeAsync('onPush', message, data)
-      }
-    })
+  async push<T extends keyof AutomationCommands> (message: T, data: AutomationCommands[T]['dataType']) {
+    debug('push `%s`: %o', message, data)
+    const result = await this.normalize(message, data)
+
+    if (result) {
+      await this.invokeAsync('onPush', message, result)
+    }
   }
 
-  request (message, data, fn) {
+  async request<T extends keyof AutomationCommands> (message: T, data: AutomationCommands[T]['dataType'], fn) {
     // curry in the message + callback function
     // for obtaining the external automation data
+    debug('request: `%s`', message)
     const automate = this.automationValve(message, fn)
 
-    // enable us to tap into before making the request
-    return this.invokeAsync('onBeforeRequest', message, data)
-    .then(() => {
-      return this.normalize(message, data, automate)
-    })
-    .tap((resp) => {
-      return this.invokeAsync('onAfterResponse', message, data, resp)
-    })
+    await this.invokeAsync('onBeforeRequest', message, data)
+
+    const resp = await this.normalize(message, data, automate)
+
+    await this.invokeAsync('onAfterResponse', message, data, resp)
+
+    return resp
   }
 
   response = (id, resp) => {

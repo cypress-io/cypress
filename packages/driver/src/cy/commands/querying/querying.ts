@@ -14,7 +14,6 @@ type GetOptions = Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Withi
 }>
 
 type ContainsOptions = Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.CaseMatchable & Cypress.Shadow>
-type ShadowOptions = Partial<Cypress.Loggable & Cypress.Timeoutable>
 
 type QueryCommandOptions = 'get' | 'contains' | 'shadow' | ''
 
@@ -143,7 +142,7 @@ function getAlias (selector, log, cy) {
   }
 }
 
-function validateTimeoutFromOpts (options: GetOptions | ContainsOptions | ShadowOptions = {}, queryCommand: QueryCommandOptions = '') {
+function validateTimeoutFromOpts (options: GetOptions | ContainsOptions | Cypress.LogTimeoutOptions = {}, queryCommand: QueryCommandOptions = '') {
   if (!isEmpty(queryCommand) && _.isPlainObject(options) && options.hasOwnProperty('timeout') && !_.isFinite(options.timeout)) {
     $errUtils.throwErrByPath(`${queryCommand}.invalid_option_timeout`, {
       args: { timeout: options.timeout },
@@ -368,7 +367,8 @@ export default (Commands, Cypress, cy, state) => {
     }
   })
 
-  Commands.addQuery('shadow', function contains (userOptions: ShadowOptions = {}) {
+  Commands.addQuery('shadow', function contains (userOptions: Cypress.LogTimeoutOptions) {
+    userOptions = userOptions || {}
     const log = Cypress.log({
       hidden: userOptions.log === false,
       timeout: userOptions.timeout,

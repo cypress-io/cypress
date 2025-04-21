@@ -294,86 +294,116 @@ describe('app/background', () => {
   })
 
   context('add header to aut iframe requests', () => {
-    it('does not add header if it is the top frame', async function () {
-      const details = {
-        parentFrameId: -1,
-      }
-
-      sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
-
-      await this.connect()
-
-      const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
-
-      expect(result).to.be.undefined
+    beforeEach(() => {
+      browser.runtime.getBrowserInfo = sinon.stub().resolves({ name: 'Firefox', version: '135.0.1' })
     })
 
-    it('does not add header if it is a nested frame', async function () {
-      const details = {
-        parentFrameId: 12345,
-      }
-
+    it('allows for CDP to be used as an escape hatch if BiDi would otherwise be enabled', async function () {
       sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      await this.connect()
+      await this.connect({
+        IS_CDP_FORCED_FOR_FIREFOX: true,
+      })
 
-      const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
-
-      expect(result).to.be.undefined
+      expect(browser.webRequest.onBeforeSendHeaders.addListener).to.be.called
     })
 
-    it('does not add header if it is a spec frame request', async function () {
-      const details = {
-        parentFrameId: 0,
-        type: 'sub_frame',
-        url: '/__cypress/integration/spec.js',
-      }
+    context('BiDi enabled', () => {
+      it('does not attach onBeforeSendHeaders listener if BiDi is enabled', async function () {
+        sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
+        await this.connect()
 
-      await this.connect()
-      const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
-
-      expect(result).to.be.undefined
-    })
-
-    it('appends X-Cypress-Is-AUT-Frame header to AUT iframe request', async function () {
-      const details = {
-        parentFrameId: 0,
-        type: 'sub_frame',
-        url: 'http://localhost:3000/index.html',
-        requestHeaders: [
-          { name: 'X-Foo', value: 'Bar' },
-        ],
-      }
-
-      sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
-
-      await this.connect()
-      const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
-
-      expect(result).to.deep.equal({
-        requestHeaders: [
-          {
-            name: 'X-Foo',
-            value: 'Bar',
-          },
-          {
-            name: 'X-Cypress-Is-AUT-Frame',
-            value: 'true',
-          },
-        ],
+        expect(browser.webRequest.onBeforeSendHeaders.addListener).not.to.be.called
       })
     })
 
-    it('does not add before-headers listener if in non-Firefox browser', async function () {
-      browser.runtime.getBrowserInfo = undefined
+    context('CDP enabled', () => {
+      beforeEach(() => {
+        browser.runtime.getBrowserInfo = sinon.stub().resolves({ name: 'Firefox', version: '134' })
+      })
 
-      const onBeforeSendHeaders = sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
+      it('does not add header if it is the top frame', async function () {
+        const details = {
+          parentFrameId: -1,
+        }
 
-      await this.connect()
+        sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      expect(onBeforeSendHeaders).not.to.be.called
+        await this.connect()
+
+        const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
+
+        expect(result).to.be.undefined
+      })
+
+      it('does not add header if it is a nested frame', async function () {
+        const details = {
+          parentFrameId: 12345,
+        }
+
+        sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
+
+        await this.connect()
+
+        const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
+
+        expect(result).to.be.undefined
+      })
+
+      it('does not add header if it is a spec frame request', async function () {
+        const details = {
+          parentFrameId: 0,
+          type: 'sub_frame',
+          url: '/__cypress/integration/spec.js',
+        }
+
+        sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
+
+        await this.connect()
+        const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
+
+        expect(result).to.be.undefined
+      })
+
+      it('appends X-Cypress-Is-AUT-Frame header to AUT iframe request', async function () {
+        const details = {
+          parentFrameId: 0,
+          type: 'sub_frame',
+          url: 'http://localhost:3000/index.html',
+          requestHeaders: [
+            { name: 'X-Foo', value: 'Bar' },
+          ],
+        }
+
+        sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
+
+        await this.connect()
+        const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
+
+        expect(result).to.deep.equal({
+          requestHeaders: [
+            {
+              name: 'X-Foo',
+              value: 'Bar',
+            },
+            {
+              name: 'X-Cypress-Is-AUT-Frame',
+              value: 'true',
+            },
+          ],
+        })
+      })
+
+      it('does not add before-headers listener if in non-Firefox browser', async function () {
+        browser.runtime.getBrowserInfo = undefined
+
+        const onBeforeSendHeaders = sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
+
+        await this.connect()
+
+        expect(onBeforeSendHeaders).not.to.be.called
+      })
     })
   })
 

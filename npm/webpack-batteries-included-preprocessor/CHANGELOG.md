@@ -1,3 +1,17 @@
+# [@cypress/webpack-batteries-included-preprocessor-v3.0.7](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v3.0.6...@cypress/webpack-batteries-included-preprocessor-v3.0.7) (2025-03-26)
+
+
+### Bug Fixes
+
+* allow version 10 of the babel-loader peer dependency ([#31218](https://github.com/cypress-io/cypress/issues/31218)) ([33cf18e](https://github.com/cypress-io/cypress/commit/33cf18e409a25573566b033f50b03d824e32cef1))
+
+# [@cypress/webpack-batteries-included-preprocessor-v3.0.6](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v3.0.5...@cypress/webpack-batteries-included-preprocessor-v3.0.6) (2025-03-25)
+
+
+### Bug Fixes
+
+* change default options for sourceMaps inside WBIP ([#31270](https://github.com/cypress-io/cypress/issues/31270)) ([7bdf1e9](https://github.com/cypress-io/cypress/commit/7bdf1e98707329157c7149b5b26fcb5bf799b8bc))
+
 # [@cypress/webpack-batteries-included-preprocessor-v3.0.5](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v3.0.4...@cypress/webpack-batteries-included-preprocessor-v3.0.5) (2024-08-14)
 
 

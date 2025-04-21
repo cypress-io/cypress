@@ -135,6 +135,10 @@ describe('App: Spec List (E2E)', () => {
       cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
       cy.findByText('Your tests are loading...').should('not.be.visible')
 
+      cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
+      // A bit of a hack, but our cy-in-cy test needs to wait for the reporter to fully render before pressing the "f" key to expand the "Search specs" menu.
+      // Otherwise, the "f" keypress happens before the event is registered, which causes the "Search Specs" menu to not expand.
+      cy.get('[data-cy="runnable-header"]').should('be.visible')
       // open the inline spec list
       cy.get('body').type('f')
 
@@ -363,6 +367,9 @@ describe('App: Spec List (E2E)', () => {
 
         cy.contains('input', targetSpecFile).should('not.exist')
 
+        // A bit of a hack, but our cy-in-cy test needs to wait for the reporter to fully render before expanding the "Search specs" menu.
+        // Otherwise, the click happens before the event is registered, which causes the "Search Specs" menu to not expand.
+        cy.get('[data-cy="runnable-header"]').should('be.visible')
         cy.contains('button', 'Specs').click({ force: true })
 
         // wait until specs list is visible

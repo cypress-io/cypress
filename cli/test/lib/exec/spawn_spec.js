@@ -99,6 +99,8 @@ describe('lib/exec/spawn', function () {
         [78887:1023/114920.074882:ERROR:debug_utils.cc(14)] Hit debug scenario: 4
 
         [18489:0822/130231.159571:ERROR:gl_display.cc(497)] EGL Driver message (Error) eglQueryDeviceAttribEXT: Bad attribute.
+
+        [437:1212/125803.148706:ERROR:zygote_host_impl_linux.cc(273)] Failed to adjust OOM score of renderer with pid 610: Permission denied (13)
       `
 
       const lines = _
@@ -123,6 +125,10 @@ describe('lib/exec/spawn', function () {
 
     it('returns true for GLX driver errors', () => {
       expect(spawn.isGarbageLineWarning('glx: failed to create drisw screen')).to.be.true
+    })
+
+    it('returns true for OOM score adjustment warnings', () => {
+      expect(spawn.isGarbageLineWarning('[437:1212/125803.148706:ERROR:zygote_host_impl_linux.cc(273)] Failed to adjust OOM score of renderer with pid 610: Permission denied (13)')).to.be.true
     })
   })
 

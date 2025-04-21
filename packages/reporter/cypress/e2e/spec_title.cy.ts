@@ -13,7 +13,7 @@ describe('spec title', () => {
         win.render({ runner, runnerStore: { spec } })
       })
 
-      cy.get('.reporter').then(() => {
+      cy.get('.reporter.mounted').then(() => {
         runner.emit('runnables:ready', {})
         runner.emit('reporter:start', {})
       })

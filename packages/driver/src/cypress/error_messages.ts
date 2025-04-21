@@ -1310,6 +1310,18 @@ export default {
     },
   },
 
+  press: {
+    invalid_key: stripIndent`\
+      \`{{key}}\` is not supported by ${cmd('press')}. See \`Cypress.Keyboard.Keys\` for keys that are supported.
+    `,
+    unsupported_browser_version: stripIndent`\
+      ${cmd('press')} is not supported in {{browser}} version {{version}}. Upgrade to version {{minimumVersion}} to use \`cy.press()\`.
+    `,
+    unsupported_browser: stripIndent`\
+      ${cmd('press')} is not supported in {{family}} browsers.
+    `,
+  },
+
   proxy: {
     js_rewriting_failed: stripIndent`\
       An error occurred in the Cypress proxy layer while rewriting your source code. This is a bug in Cypress. Open an issue if you see this message.

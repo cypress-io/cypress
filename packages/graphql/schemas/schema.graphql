@@ -1129,6 +1129,7 @@ enum ErrorTypeEnum {
   CANNOT_TRASH_ASSETS
   CDP_COULD_NOT_CONNECT
   CDP_COULD_NOT_RECONNECT
+  CDP_FIREFOX_DEPRECATED
   CDP_RETRYING_CONNECTION
   CDP_VERSION_TOO_OLD
   CHROME_WEB_SECURITY_NOT_SUPPORTED
@@ -1206,9 +1207,7 @@ enum ErrorTypeEnum {
   FIREFOX_GECKODRIVER_FAILURE
   FIXTURE_NOT_FOUND
   FOLDER_NOT_WRITABLE
-  FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS
   FREE_PLAN_EXCEEDS_MONTHLY_TESTS
-  FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS
   FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS
   FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE
   INCOMPATIBLE_PLUGIN_RETRIES
@@ -1228,12 +1227,10 @@ enum ErrorTypeEnum {
   MIGRATION_CYPRESS_NOT_FOUND
   MIGRATION_MISMATCHED_CYPRESS_VERSIONS
   MULTIPLE_SUPPORT_FILES_FOUND
-  NOT_LOGGED_IN
   NO_DEFAULT_CONFIG_FILE_FOUND
   NO_PROJECT_FOUND_AT_PROJECT_ROOT
   NO_PROJECT_ID
   NO_SPECS_FOUND
-  PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS
   PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN
   PLAN_EXCEEDS_MONTHLY_TESTS
   PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED
@@ -1455,6 +1452,7 @@ type LocalSettingsPreferences {
   """
   shouldLaunchBrowserFromOpenBrowser: Boolean
   specListWidth: Int
+  studioWidth: Int
   wasBrowserSetInCLI: Boolean
 }
 
@@ -2071,6 +2069,11 @@ type Query {
   """The files that have just been scaffolded"""
   scaffoldedFiles: [ScaffoldedFile!]
 
+  """
+  Data pertaining to studio and the studio manager that is loaded from the cloud
+  """
+  studio: Studio
+
   """Previous versions of cypress and their release date"""
   versions: VersionData
 
@@ -2368,6 +2371,18 @@ type SpecDataAggregate {
 enum SpecType {
   component
   integration
+}
+
+"""The studio manager for the app"""
+type Studio {
+  """The current status of the studio"""
+  status: StudioStatusType
+}
+
+enum StudioStatusType {
+  INITIALIZED
+  IN_ERROR
+  NOT_INITIALIZED
 }
 
 type Subscription {

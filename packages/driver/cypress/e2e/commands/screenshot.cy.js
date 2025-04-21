@@ -1097,7 +1097,8 @@ describe('src/cy/commands/screenshot', () => {
         return null
       })
 
-      it('can turn off logging when protocol is disabled', { protocolEnabled: false }, function () {
+      it('can turn off logging when protocol is disabled', function () {
+        cy.state('isProtocolEnabled', false)
         cy.on('_log:added', (attrs, log) => {
           if (attrs.name === 'screenshot') {
             this.hiddenLog = log
@@ -1112,7 +1113,8 @@ describe('src/cy/commands/screenshot', () => {
         })
       })
 
-      it('can send hidden log when protocol is enabled', { protocolEnabled: true }, function () {
+      it('can send hidden log when protocol is enabled', function () {
+        cy.state('isProtocolEnabled', true)
         cy.on('_log:added', (attrs, log) => {
           if (attrs.name === 'screenshot') {
             this.hiddenLog = log

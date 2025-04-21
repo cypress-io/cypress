@@ -27,7 +27,7 @@ const interactiveMode = require(`../../lib/modes/interactive`)
 const api = require(`../../lib/cloud/api`).default
 const cwd = require(`../../lib/cwd`)
 const user = require(`../../lib/cloud/user`)
-const cache = require(`../../lib/cache`)
+const cache = require(`../../lib/cache`).cache
 const errors = require(`../../lib/errors`)
 const cypress = require(`../../lib/cypress`)
 const ProjectBase = require(`../../lib/project-base`).ProjectBase
@@ -1079,6 +1079,7 @@ describe('lib/cypress', () => {
             ensureMinimumProtocolVersion: sinon.stub().resolves(),
             attachToTargetUrl: sinon.stub().resolves(criClient),
             currentlyAttachedTarget: criClient,
+            currentlyAttachedProtocolTarget: criClient,
             close: sinon.stub().resolves(),
             getWebSocketDebuggerUrl: sinon.stub().returns('ws://debugger'),
           }

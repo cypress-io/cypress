@@ -348,6 +348,7 @@ class $Cypress {
     this.downloads = $Downloads.create(this)
 
     // wire up command create to cy
+    // @ts-expect-error
     this.Commands = $Commands.create(this, this.cy, this.state, this.config)
 
     this.events.proxyTo(this.cy)

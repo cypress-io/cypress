@@ -278,21 +278,50 @@ export class EventManager {
       rerun()
     }
 
+    const studioInitSuite = ({ suiteId, showUrlPrompt = true }: { suiteId: string, showUrlPrompt?: boolean }) => {
+      this.studioStore.setSuiteId(suiteId)
+      this.studioStore.setShowUrlPrompt(showUrlPrompt)
+
+      this.ws.emit('studio:init', ({ canAccessStudioAI, error }) => {
+        if (error) {
+          // eslint-disable-next-line no-console
+          console.error(error)
+        }
+
+        this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
+        studioInit()
+      })
+    }
+
     this.reporterBus.on('studio:init:test', (testId) => {
       this.studioStore.setTestId(testId)
 
-      studioInit()
+      this.ws.emit('studio:init', ({ canAccessStudioAI, error }) => {
+        if (error) {
+          // eslint-disable-next-line no-console
+          console.error(error)
+        }
+
+        this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
+        studioInit()
+      })
     })
 
     this.reporterBus.on('studio:init:suite', (suiteId) => {
-      this.studioStore.setSuiteId(suiteId)
-
-      studioInit()
+      studioInitSuite({ suiteId })
     })
 
     this.reporterBus.on('studio:cancel', () => {
-      this.studioStore.cancel()
-      rerun()
+      this.ws.emit('studio:destroy', ({ error }) => {
+        if (error) {
+          // eslint-disable-next-line no-console
+          console.error(error)
+        }
+
+        this.studioStore.cancel()
+        // Reloading for now. This is the easiest way to clear out the protocol code from the front end
+        window.location.reload()
+      })
     })
 
     this.reporterBus.on('studio:remove:command', (commandId) => {
@@ -315,13 +344,36 @@ export class EventManager {
       this.ws.emit('studio:save', saveInfo, (err) => {
         if (err) {
           this.reporterBus.emit('test:set:state', this.studioStore.saveError(err), noop)
+        } else {
+          this.ws.emit('studio:destroy', ({ error }) => {
+            if (error) {
+              // eslint-disable-next-line no-console
+              console.error(error)
+            }
+
+            this.studioStore.saveSuccess()
+            // Reloading for now. This is the easiest way to clear out the protocol code from the front end
+            window.location.reload()
+          })
         }
       })
     })
 
+    this.localBus.on('studio:init:suite', (options: { suiteId: string, showUrlPrompt?: boolean }) => {
+      studioInitSuite(options)
+    })
+
     this.localBus.on('studio:cancel', () => {
-      this.studioStore.cancel()
-      rerun()
+      this.ws.emit('studio:destroy', ({ error }) => {
+        if (error) {
+          // eslint-disable-next-line no-console
+          console.error(error)
+        }
+
+        this.studioStore.cancel()
+        // Reloading for now. This is the easiest way to clear out the protocol code from the front end
+        window.location.reload()
+      })
     })
 
     this.ws.on('aut:destroy:init', () => {
@@ -389,10 +441,18 @@ export class EventManager {
     }
 
     Cypress = this.Cypress = this.$CypressDriver.create(config)
+    this.localBus.emit('cypress:created', Cypress)
 
     // expose Cypress globally
-    // @ts-ignore
     window.Cypress = Cypress
+
+    this.studioStore.setup(config)
+
+    const isDefaultProtocolEnabled = Cypress.config('isDefaultProtocolEnabled')
+    const isStudioProtocolEnabled = Cypress.config('isStudioProtocolEnabled')
+    const isStudioInScope = this.studioStore.isActive || this.studioStore.isLoading
+
+    Cypress.state('isProtocolEnabled', isDefaultProtocolEnabled || (isStudioProtocolEnabled && isStudioInScope))
 
     this._addListeners()
   }
@@ -419,7 +479,7 @@ export class EventManager {
 
           const hideCommandLog = Cypress.config('hideCommandLog')
 
-          this.studioStore.initialize(config, runState)
+          this.studioStore.initialize()
 
           const runnables = Cypress.runner.normalizeAll(runState.tests, hideCommandLog, testFilter)
 
@@ -464,7 +524,7 @@ export class EventManager {
   _addListeners () {
     addTelemetryListeners(Cypress)
 
-    if (Cypress.config('protocolEnabled')) {
+    if (Cypress.state('isProtocolEnabled')) {
       addCaptureProtocolListeners(Cypress)
     }
 
@@ -485,14 +545,7 @@ export class EventManager {
 
       return new Bluebird((resolve) => {
         this.reporterBus.emit('reporter:collect:run:state', (reporterState: ReporterRunState) => {
-          resolve({
-            ...reporterState,
-            studio: {
-              testId: this.studioStore.testId,
-              suiteId: this.studioStore.suiteId,
-              url: this.studioStore.url,
-            },
-          })
+          resolve({ reporterState })
         })
       })
     })
@@ -773,14 +826,22 @@ export class EventManager {
      * This is also applicable when a user changes their spec file and hot reloads their spec, in which case we need to rebind onMessage
      * with the newly creates Cypress.primaryOriginCommunicator
      */
-    window?.top?.removeEventListener('message', crossOriginOnMessageRef, false)
-    crossOriginOnMessageRef = ({ data, source }) => {
-      Cypress?.primaryOriginCommunicator.onMessage({ data, source })
+    try {
+      window.top.removeEventListener('message', crossOriginOnMessageRef, false)
+      crossOriginOnMessageRef = ({ data, source }) => {
+        Cypress?.primaryOriginCommunicator.onMessage({ data, source })
 
-      return undefined
+        return undefined
+      }
+
+      window.top.addEventListener('message', crossOriginOnMessageRef, false)
+    } catch (error) {
+      // in cy-in-cy tests, window.top may not be accessible due to cross-origin restrictions
+      if (error.name !== 'SecurityError') {
+        // re-throw any error that's not a cross-origin error
+        throw error
+      }
     }
-
-    window.top.addEventListener('message', crossOriginOnMessageRef, false)
   }
 
   _runDriver (runState: RunState, testState: CachedTestState) {

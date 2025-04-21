@@ -6,7 +6,7 @@ import { useAutStore, useRunnerUiStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
 import { runnerConstants } from './runner-constants'
 
-export type ResizablePanelName = 'panel1' | 'panel2' | 'panel3'
+export type ResizablePanelName = 'panel1' | 'panel2' | 'panel3' | 'panel4'
 
 export type DraggablePanel = Exclude<ResizablePanelName, 'panel3'>
 
@@ -17,6 +17,7 @@ const autMargin = 16
 // so that we only save to GQL when the resizing has ended
 const reporterWidth = ref<number>(0)
 const specListWidth = ref<number>(0)
+const studioWidth = ref<number>(0)
 
 export const useRunnerStyle = () => {
   const { width: windowWidth, height: windowHeight } = useWindowSize()
@@ -26,10 +27,11 @@ export const useRunnerStyle = () => {
   const screenshotStore = useScreenshotStore()
   const autStore = useAutStore()
 
-  const { reporterWidth: initialReporterWidth, specListWidth: initialSpecsListWidth } = runnerUIStore
+  const { reporterWidth: initialReporterWidth, specListWidth: initialSpecsListWidth, studioWidth: initialStudioWidth } = runnerUIStore
 
   reporterWidth.value = initialReporterWidth
   specListWidth.value = initialSpecsListWidth
+  studioWidth.value = initialStudioWidth
 
   const containerWidth = computed(() => {
     const miscBorders = 4
@@ -47,7 +49,7 @@ export const useRunnerStyle = () => {
         nonAutWidth += (autMargin * 2)
       }
 
-      nonAutWidth += reporterWidth.value + specListWidth.value + miscBorders
+      nonAutWidth += reporterWidth.value + specListWidth.value + studioWidth.value + miscBorders
     }
 
     const containerWidth = windowWidth.value - nonAutWidth
@@ -117,6 +119,8 @@ export function useResizablePanels () {
   const handleResizeEnd = async (panel: DraggablePanel) => {
     if (panel === 'panel1') {
       await preferences.update('specListWidth', specListWidth.value)
+    } else if (panel === 'panel4') {
+      await preferences.update('studioWidth', studioWidth.value)
     } else {
       await preferences.update('reporterWidth', reporterWidth.value)
     }
@@ -125,6 +129,8 @@ export function useResizablePanels () {
   const handlePanelWidthUpdated = ({ panel, width }: { panel: DraggablePanel, width: number }) => {
     if (panel === 'panel1') {
       specListWidth.value = width
+    } else if (panel === 'panel4') {
+      studioWidth.value = width
     } else {
       reporterWidth.value = width
     }

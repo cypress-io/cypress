@@ -37,7 +37,19 @@ describe('lib/cloud/protocol', () => {
   beforeEach(async () => {
     protocolManager = new ProtocolManager()
 
-    await protocolManager.setupProtocol(stubProtocol, { runId: '1', testingType: 'e2e', projectId: '1', cloudApi: { url: 'http://localhost:1234', retryWithBackoff: async () => {}, requestPromise: { get: async () => {} } } })
+    await protocolManager.prepareAndSetupProtocol(stubProtocol, {
+      runId: '1',
+      testingType: 'e2e',
+      projectId: '1',
+      cloudApi: { url: 'http://localhost:1234', retryWithBackoff: async () => {}, requestPromise: { get: async () => {} } },
+      projectConfig: {
+        devServerPublicPathRoute: '/__cypress-app/src',
+        namespace: '__cypress-app',
+        port: 1234,
+        proxyUrl: 'http://localhost:1234',
+      },
+      mode: 'record',
+    })
 
     protocol = (protocolManager as any)._protocol
     expect((protocol as any)).not.to.be.undefined
@@ -308,6 +320,50 @@ describe('lib/cloud/protocol', () => {
     expect(protocol.resetTest).to.be.calledWith(testId)
   })
 
+  describe('.reset', () => {
+    it('closes the protocol manager', () => {
+      const mockClose = sinon.stub()
+
+      protocolManager['_db'] = {
+        close: mockClose,
+      }
+
+      protocolManager['_dbPath'] = '/path/to/db'
+      sinon.stub(fs, 'unlink').resolves()
+      protocolManager['_archivePath'] = '/path/to/archive'
+      protocolManager['_instanceId'] = 'abc123'
+      protocolManager['_runId'] = '1'
+      protocolManager['_errors'] = [{ captureMethod: 'cdpClient.on' }]
+
+      protocolManager.close()
+
+      expect(mockClose).to.be.called
+      expect(protocolManager['_db']).to.be.undefined
+      expect(protocolManager['_dbPath']).to.be.undefined
+      expect(fs.unlink).to.be.calledWith('/path/to/db')
+      expect(protocolManager['_archivePath']).to.be.undefined
+      expect(fs.unlink).to.be.calledWith('/path/to/archive')
+      expect(protocolManager['_instanceId']).to.be.undefined
+      expect(protocolManager['_runId']).to.be.undefined
+      expect(protocolManager['_errors']).to.be.empty
+      expect(protocolManager['_protocol']).to.be.undefined
+    })
+  })
+
+  describe('.dbPath', () => {
+    it('returns the database path', () => {
+      const mockDbPath = '/path/to/db'
+
+      protocolManager['_dbPath'] = mockDbPath
+
+      expect(protocolManager.dbPath).to.equal(mockDbPath)
+    })
+
+    it('returns undefined when no database path is set', () => {
+      expect(protocolManager.dbPath).to.be.undefined
+    })
+  })
+
   describe('.uploadCaptureArtifact()', () => {
     let filePath: string
     let fileSize: number
@@ -339,7 +395,7 @@ describe('lib/cloud/protocol', () => {
 
         sinon.stub(protocol, 'getDbMetadata').returns({ offset, size })
         sinon.stub(fs, 'unlink').withArgs(filePath).resolves()
-        protocolManager.beforeSpec({ instanceId, absolute: '/path/to/spec', relative: 'spec', relativeToCommonRoot: 'common/root', specFileExtension: '.ts', fileExtension: '.ts', specType: 'integration', baseName: 'spec', name: 'spec', fileName: 'spec.ts' })
+        protocolManager.beforeSpec({ instanceId, absolute: '/path/to/spec', relative: 'spec', specFileExtension: '.ts', fileExtension: '.ts', specType: 'integration', baseName: 'spec', name: 'spec', fileName: 'spec.ts' })
 
         expectedAfterSpecTotal = 225
 

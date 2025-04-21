@@ -15,7 +15,8 @@ describe('lib/plugins/child/ts_node', () => {
   describe('typescript registration', () => {
     it('registers ts-node with preserveValueImports if typescript 4.5.0 and above is installed', () => {
       // Since Cypress server is now bundled with Typescript 5, we can no longer stub the typescript object due to
-      // API changes (@see https://github.com/microsoft/TypeScript/wiki/API-Breaking-Changes#typescript-50)
+      // TypeScript 5 being shipped as an ESM package build with ESBuild, which means the exports are unmodifiable
+      // (@see https://github.com/microsoft/TypeScript/wiki/API-Breaking-Changes#typescript-50)
       // Cypress no longer supports Typescript 3 and below as of Cypress 13, so this singular test to verify
       // preserveValueImports is present on the compilerOptions above 4.5.0 should be valid enough.
       tsNodeUtil.register('proj-root', '/path/to/plugins/file.js')

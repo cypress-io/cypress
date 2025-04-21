@@ -7,6 +7,72 @@ import webpack from 'webpack'
 import utils from './lib/utils'
 import { overrideSourceMaps } from './lib/typescript-overrides'
 
+const getTsLoaderIfExists = (rules) => {
+  let tsLoaderRule
+
+  rules.some((rule) => {
+    if (!rule.use && !rule.loader) return false
+
+    if (Array.isArray(rule.use)) {
+      const foundRule = rule.use.find((use) => {
+        return use.loader && use.loader.includes('ts-loader')
+      })
+
+      /**
+       * If the rule is found, it will look like this:
+       * rules: [
+       *  {
+       *    test: /\.tsx?$/,
+       *    exclude: [/node_modules/],
+       *    use: [{
+       *      loader: 'ts-loader'
+       *    }]
+       *  }
+       * ]
+       */
+      tsLoaderRule = foundRule
+
+      return tsLoaderRule
+    }
+
+    if (_.isObject(rule.use) && rule.use.loader && rule.use.loader.includes('ts-loader')) {
+      /**
+       * If the rule is found, it will look like this:
+       * rules: [
+       *  {
+       *    test: /\.tsx?$/,
+       *    exclude: [/node_modules/],
+       *    use: {
+       *      loader: 'ts-loader'
+       *    }
+       *  }
+       * ]
+       */
+      tsLoaderRule = rule.use
+
+      return tsLoaderRule
+    }
+
+    tsLoaderRule = rules.find((rule) => {
+      /**
+       * If the rule is found, it will look like this:
+       * rules: [
+       *  {
+       *    test: /\.tsx?$/,
+       *    exclude: [/node_modules/],
+       *    loader: 'ts-loader'
+       *  }
+       * ]
+       */
+      return rule.loader && rule.loader.includes('ts-loader')
+    })
+
+    return tsLoaderRule
+  })
+
+  return tsLoaderRule
+}
+
 const debug = Debug('cypress:webpack')
 const debugStats = Debug('cypress:webpack:stats')
 
@@ -207,6 +273,37 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
         path: path.dirname(outputPath),
         filename: path.basename(outputPath),
       },
+    })
+    .tap((opts) => {
+      try {
+        const tsLoaderRule = getTsLoaderIfExists(opts?.module?.rules)
+
+        if (!tsLoaderRule) {
+          debug('ts-loader not detected')
+
+          return
+        }
+
+        // FIXME: To prevent disruption, we are only passing in these 4 options to the ts-loader.
+        // We will be passing in the entire compilerOptions object from the tsconfig.json in Cypress 15.
+        // @see https://github.com/cypress-io/cypress/issues/29614#issuecomment-2722071332
+        // @see https://github.com/cypress-io/cypress/issues/31282
+        // Cypress ALWAYS wants sourceMap set to true, regardless of the user configuration.
+        // This is because we want to display a correct code frame in the test runner.
+        debug(`ts-loader detected: overriding tsconfig to use sourceMap:true, inlineSourceMap:false, inlineSources:false, downlevelIteration:true`)
+
+        tsLoaderRule.options = tsLoaderRule?.options || {}
+        tsLoaderRule.options.compilerOptions = tsLoaderRule.options?.compilerOptions || {}
+
+        tsLoaderRule.options.compilerOptions.sourceMap = true
+        tsLoaderRule.options.compilerOptions.inlineSourceMap = false
+        tsLoaderRule.options.compilerOptions.inlineSources = false
+        tsLoaderRule.options.compilerOptions.downlevelIteration = true
+      } catch (e) {
+        debug('ts-loader not detected', e)
+
+        return
+      }
     })
     .tap((opts) => {
       if (opts.devtool === false) {

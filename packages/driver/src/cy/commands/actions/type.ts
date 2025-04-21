@@ -8,28 +8,14 @@ import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
 import $Keyboard from '../../../cy/keyboard'
-import type { Log } from '../../../cypress/log'
 
 import debugFn from 'debug'
 const debug = debugFn('cypress:driver:command:type')
 
-interface InternalTypeOptions extends Partial<Cypress.TypeOptions> {
-  _log?: Log
-  $el: JQuery
-  ensure?: object
-  verify: boolean
-  interval?: number
-}
-
-interface InternalClearOptions extends Partial<Cypress.ClearOptions> {
-  _log?: Log
-  ensure?: object
-}
-
 export default function (Commands, Cypress, cy, state, config) {
   const { keyboard } = cy.devices
 
-  function type (subject, chars, userOptions: Partial<Cypress.TypeOptions> = {}) {
+  function type (subject: any, chars: any, userOptions: Partial<InternalTypeOptions> = {}) {
     let updateTable
 
     // allow the el we're typing into to be
@@ -605,7 +591,7 @@ export default function (Commands, Cypress, cy, state, config) {
     })
   }
 
-  function clear (subject, userOptions: Partial<Cypress.ClearOptions> = {}) {
+  function clear (subject, userOptions: Partial<InternalClearOptions> = {}) {
     const options: InternalClearOptions = _.defaults({}, userOptions, {
       log: true,
       force: false,

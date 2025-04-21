@@ -364,11 +364,6 @@ describe('visual error templates', () => {
         default: ['/path/does/not/exist', err.message],
       }
     },
-    NOT_LOGGED_IN: () => {
-      return {
-        default: [],
-      }
-    },
     TESTS_DID_NOT_START_RETRYING: () => {
       return {
         default: ['Retrying...'],
@@ -697,10 +692,10 @@ describe('visual error templates', () => {
     },
     CLOUD_PROTOCOL_UPLOAD_STREAM_STALL_FAILURE: () => {
       // @ts-expect-error
-      const err: Error & { chunkSizeKB: number, maxActivityDwellTime: number } = new Error('stream stall')
+      const err: Error & { chunkSizeBytes: number, maxActivityDwellTime: number } = new Error('stream stall')
 
-      err.chunkSizeKB = 64
-      err.maxActivityDwellTime = 5000
+      err.chunkSizeBytes = 65536
+      err.maxActivityDwellTime = 10000
 
       return {
         default: [err],
@@ -971,34 +966,6 @@ describe('visual error templates', () => {
         default: [],
       }
     },
-    FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS: () => {
-      return {
-        default: [{
-          link: 'https://cloud.cypress.io/project/abcd',
-          limit: 500,
-          usedTestsMessage: 'test',
-        }],
-      }
-    },
-    FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS: () => {
-      return {
-        default: [{
-          link: 'https://cloud.cypress.io/project/abcd',
-          limit: 500,
-          usedTestsMessage: 'test',
-          gracePeriodMessage: 'the grace period ends',
-        }],
-      }
-    },
-    PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS: () => {
-      return {
-        default: [{
-          link: 'https://on.cypress.io/set-up-billing',
-          limit: 25000,
-          usedTestsMessage: 'private test',
-        }],
-      }
-    },
     FREE_PLAN_EXCEEDS_MONTHLY_TESTS: () => {
       return {
         default: [{
@@ -1110,6 +1077,11 @@ describe('visual error templates', () => {
     CDP_RETRYING_CONNECTION: () => {
       return {
         default: [1, 'chrome', 62],
+      }
+    },
+    CDP_FIREFOX_DEPRECATED: () => {
+      return {
+        default: [],
       }
     },
     BROWSER_PROCESS_CLOSED_UNEXPECTEDLY: () => {

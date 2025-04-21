@@ -170,7 +170,7 @@ export const randomComponents = <T extends 'Spec' | 'FileParts'>(n = 200, baseTy
         __typename: 'GitInfo' as const,
         statusType: 'unmodified' as const,
         id: faker.string.uuid(),
-        author: faker.internet.userName(),
+        author: faker.internet.username(),
         lastModifiedHumanReadable: dayjs(lastModifiedTimestamp).fromNow(),
         lastModifiedTimestamp: lastModifiedTimestamp.toUTCString(),
       },

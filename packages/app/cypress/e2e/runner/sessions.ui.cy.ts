@@ -3,8 +3,13 @@ import { snapshotReporter } from './support/snapshot-reporter'
 
 const validateSessionsInstrumentPanel = (sessionIds: Array<string> = []) => {
   cy.get('.sessions-container')
+  // there could be multiple retries where multiple session containers are rendered
+  .first()
   .should('contain', `Sessions (${sessionIds.length})`)
   .as('instrument_panel')
+
+  cy.get('.sessions-container')
+  .first()
   .click()
 
   sessionIds.forEach((id) => {

@@ -4,7 +4,7 @@ import type { Automation } from '../automation'
 import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
 
 export type Browser = FoundBrowser & {
-  majorVersion: number
+  majorVersion: number | string
   isHeadless: boolean
   isHeaded: boolean
 }
@@ -45,6 +45,10 @@ export type BrowserLauncher = {
    * Used to connect the protocol to an existing browser.
    */
   connectProtocolToBrowser: (options: { protocolManager?: ProtocolManagerShape }) => Promise<void>
+  /**
+   * Closes the protocol connection to the browser.
+   */
+  closeProtocolConnection: () => Promise<void>
   /**
    * Closes any targets that are not the currently-attached Cypress target
    */

@@ -5,7 +5,7 @@ import Copy from 'rollup-plugin-copy'
 import Legacy from '@vitejs/plugin-legacy'
 import { resolve } from 'path'
 
-export default makeConfig({
+const config = makeConfig({
   optimizeDeps: {
     include: [
       'javascript-time-ago',
@@ -19,14 +19,35 @@ export default makeConfig({
       'events',
       '@popperjs/core',
       '@opentelemetry/*',
+      '@headlessui/vue',
+      '@cypress-design/vue-icon',
+      '@cypress-design/vue-statusicon',
+      'human-interval',
+      'floating-vue',
+      'dayjs',
+      'dayjs/plugin/relativeTime',
+      'dayjs/plugin/duration',
+      'dayjs/plugin/customParseFormat',
+      'dayjs/plugin/utc',
+      'markdown-it',
+      '@toycode/markdown-it-class',
+      '@cypress-design/vue-tabs',
+      'gravatar',
+      '@opentelemetry/sdk-trace-web',
+      '@opentelemetry/resources',
+      '@opentelemetry/sdk-trace-base',
+      '@opentelemetry/api',
+      '@opentelemetry/semantic-conventions',
+      '@opentelemetry/exporter-trace-otlp-http',
+      '@opentelemetry/core',
     ],
-    esbuildOptions: { 
-      target: "ES2022" 
-    }
+    esbuildOptions: {
+      target: 'ES2022',
+    },
   },
   build: {
-    target: "ES2022"
-  }
+    target: 'ES2022',
+  },
 }, {
   plugins: [
     Layouts(),
@@ -44,3 +65,5 @@ export default makeConfig({
     }),
   ],
 })
+
+export default config

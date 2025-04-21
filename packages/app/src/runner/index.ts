@@ -318,13 +318,6 @@ async function runSpecE2E (config, spec: SpecFile) {
     specSrc: encodeURIComponent(spec.relative),
   })
 
-  // FIXME: BILL Determine where to call client with to force browser repaint
-  /**
-   * call the clientWidth to force the browser to repaint for viewport changes
-   * otherwise firefox may fail when changing the viewport in between origins
-   * this.refs.container.clientWidth
-   */
-
   // append to document, so the iframe will execute the spec
   addIframe({
     $container,
@@ -356,7 +349,7 @@ async function initialize () {
 
   const studioStore = useStudioStore()
 
-  studioStore.cancel()
+  studioStore.reset()
 
   // TODO(lachlan): UNIFY-1318 - use GraphQL to get the viewport dimensions
   // once it is more practical to do so
@@ -427,6 +420,13 @@ async function executeSpec (spec: SpecFile, isRerun: boolean = false) {
   // creates a new instance of the Cypress driver for this spec,
   // initializes a bunch of listeners watches spec file for changes.
   await getEventManager().setup(config)
+
+  if (!_eventManager) {
+    // with functional react components and bridging the unified runner between Vue and React,
+    // we sometimes get into a state where the runner has torn down the reporter, which in turn tears down the event manager,
+    // while we are in the process of executing the next spec. In this case, we have a no-op execute spec and need to exit early without error.
+    return
+  }
 
   if (window.__CYPRESS_TESTING_TYPE__ === 'e2e') {
     return runSpecE2E(config, spec)
