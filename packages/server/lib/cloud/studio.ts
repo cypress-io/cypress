@@ -17,6 +17,7 @@ interface SetupOptions {
   studioHash?: string
   projectSlug?: string
   cloudApi: StudioCloudApi
+  shouldEnableStudio: boolean
 }
 
 const debug = Debug('cypress:server:studio')
