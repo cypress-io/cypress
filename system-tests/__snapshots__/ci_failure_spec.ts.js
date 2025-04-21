@@ -55,9 +55,9 @@ exports['CI failure fails and displays the message that points users to the clou
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing.cy.js/simple failing spec -- fai    (2560x1440)
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing.cy.js/simple failing spec -- fai    (1280x720)
      ls1 (failed).png                                                                               
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing.cy.js/simple failing spec -- fai    (2560x1440)
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing.cy.js/simple failing spec -- fai    (1280x720)
      ls2 (failed).png                                                                               
 
 
