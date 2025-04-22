@@ -24,7 +24,7 @@ interface StudioError {
 interface StudioErrorPayload {
   studioHash: string | undefined
   projectSlug: string | undefined
-  error: StudioError
+  errors: StudioError[]
 }
 
 export function reportStudioError ({
@@ -66,13 +66,13 @@ export function reportStudioError ({
     const payload: StudioErrorPayload = {
       studioHash,
       projectSlug,
-      error: {
+      errors: [{
         name: stripPath(errorObject.name ?? `Unknown name`),
         stack: stripPath(errorObject.stack ?? `Unknown stack`),
         message: stripPath(errorObject.message ?? `Unknown message`),
         studioMethod,
         studioMethodArgs: studioMethodArgsString,
-      },
+      }],
     }
 
     cloudApi.CloudRequest.post(

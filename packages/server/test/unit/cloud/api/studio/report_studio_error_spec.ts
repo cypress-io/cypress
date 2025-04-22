@@ -53,13 +53,13 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
         {
           studioHash: 'abc123',
           projectSlug: 'test-project',
-          error: {
+          errors: [{
             name: 'Error',
             message: 'string error',
             stack: sinon.match((stack) => stack.includes('<stripped-path>report_studio_error_spec.ts')),
             studioMethod: 'testMethod',
             studioMethodArgs: undefined,
-          },
+          }],
         },
         {
           headers: {
@@ -88,13 +88,13 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
         {
           studioHash: 'abc123',
           projectSlug: 'test-project',
-          error: {
+          errors: [{
             name: 'Error',
             message: 'test error',
             stack: 'test stack',
             studioMethod: 'testMethod',
             studioMethodArgs: undefined,
-          },
+          }],
         },
         {
           headers: {
@@ -123,12 +123,13 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
         {
           studioHash: 'abc123',
           projectSlug: 'test-project',
-          error: {
+          errors: [{
             name: 'Error',
             message: 'test error',
+            stack: sinon.match((stack) => stack.includes('<stripped-path>report_studio_error_spec.ts')),
             studioMethod: 'testMethod',
             studioMethodArgs: JSON.stringify({ args }),
-          },
+          }],
         },
         {
           headers: {
@@ -159,12 +160,13 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
         {
           studioHash: 'abc123',
           projectSlug: 'test-project',
-          error: {
+          errors: [{
             name: 'Error',
             message: 'test error',
+            stack: sinon.match((stack) => stack.includes('<stripped-path>report_studio_error_spec.ts')),
             studioMethod: 'testMethod',
             studioMethodArgs: sinon.match(/Unknown args/),
-          },
+          }],
         },
         {
           headers: {
