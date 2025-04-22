@@ -53,14 +53,6 @@ exports['CI failure fails and displays the message that points users to the clou
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing.cy.js/simple failing spec -- fai   (1280x720)
-     ls1 (failed).png                                                                               
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing.cy.js/simple failing spec -- fai   (1280x720)
-     ls2 (failed).png                                                                               
-
-
 ====================================================================================================
 
   (Run Finished)
@@ -74,10 +66,10 @@ exports['CI failure fails and displays the message that points users to the clou
 
 ----------------------------------------------------------------------------------------------------
 
-  Having trouble debugging your CI failures?
+  Debug faster with full visibility.
 
-  Record your runs to Cypress Cloud to watch video recordings for each test,
-  debug failing and flaky tests, and integrate with your favorite tools.
+  Record to Cypress Cloud and get instant access to full test details and replays.
+  Inspect the DOM, network events, and console logs exactly as they ran in CI.
 
   >> https://on.cypress.io/cloud-get-started
 

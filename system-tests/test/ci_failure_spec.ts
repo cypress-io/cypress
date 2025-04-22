@@ -13,6 +13,9 @@ describe('CI failure', () => {
       },
       expectedExitCode: 2,
       snapshot: true,
+      config: {
+        screenshotOnRunFailure: false,
+      },
     })
   })
 })
