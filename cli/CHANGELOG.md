@@ -7,6 +7,10 @@ _Released 4/22/2025 (PENDING)_
 
 - Fixed an issue where auto scroll in the Cypress Command Log was not scrolling correctly. Fixes [#31530](https://github.com/cypress-io/cypress/issues/31530).
 
+**Misc:**
+
+- The URL in the Cypress App no longer displays a white background when the URL is loading. Fixes [#31556](https://github.com/cypress-io/cypress/issues/31556).
+
 ## 14.3.1
 
 _Released 4/17/2025_
