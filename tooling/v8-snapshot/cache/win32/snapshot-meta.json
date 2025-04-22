@@ -1,5 +1,6 @@
 {
   "norewrite": [
+    "./ci-info/index.js",
     "./evil-dns/evil-dns.js",
     "./get-stream/buffer-stream.js",
     "./graceful-fs/polyfills.js",
@@ -70,10 +71,8 @@
     "./packages/server/lib/util/process_profiler.ts",
     "./packages/server/lib/util/suppress_warnings.js",
     "./packages/server/node_modules/axios/lib/adapters/http.js",
-    "./packages/server/node_modules/ci-info/index.js",
     "./packages/server/node_modules/glob/node_modules/minimatch/minimatch.js",
     "./packages/server/node_modules/graceful-fs/polyfills.js",
-    "./packages/server/node_modules/is-ci/index.js",
     "./packages/server/node_modules/mocha/node_modules/debug/src/node.js",
     "./process-nextick-args/index.js",
     "./signal-exit/index.js",
