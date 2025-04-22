@@ -1,11 +1,11 @@
 version: 2.1
 
-chrome-stable-version: &chrome-stable-version "134.0.6998.165"
-chrome-beta-version: &chrome-beta-version "135.0.7049.41"
-firefox-stable-version: &firefox-stable-version "136.0.3"
+chrome-stable-version: &chrome-stable-version "135.0.7049.95"
+chrome-beta-version: &chrome-beta-version "136.0.7103.33"
+firefox-stable-version: &firefox-stable-version "137.0"
 
 orbs:
-  browser-tools: circleci/browser-tools@1.5.2
+  browser-tools: circleci/browser-tools@1.5.3
 
 defaults: &defaults
   parallelism: 1
@@ -497,9 +497,9 @@ commands:
         default: cy-doc
     steps:
       - run: pwd
-      - run:
-          name: print global yarn cache path
-          command: echo $(yarn global bin)
+      ##- run:
+      ##  name: print global yarn cache path and size
+      ##  command: du -sh $(yarn global bin)
       - run:
           name: print yarn version
           command: yarn versions
@@ -776,6 +776,7 @@ commands:
       - windows-install-chrome:
           browser: <<parameters.browser>>
       - run:
+          name: Run <<parameters.package>> UI tests
           command: |
             echo Current working directory is $PWD
             echo Total containers $CIRCLE_NODE_TOTAL
@@ -801,7 +802,7 @@ commands:
               if [[ <<parameters.type>> == 'ct' ]]; then
                 # component tests are located side by side with the source codes.
                 # for the app component tests, ignore specs that are known to cause failures on contributor PRs (see https://discuss.circleci.com/t/how-to-exclude-certain-files-from-circleci-test-globbing/41028)
-                TESTFILES=$(find src -regextype posix-extended -name '*.cy.*' -not -regex '.*(FileMatch|PromoAction|SelectorPlayground|useDurationFormat|useTestingType|SpecPatterns).cy.*' | circleci tests split --total=$CIRCLE_NODE_TOTAL)
+                TESTFILES=$(find src -regextype posix-extended -name '*.cy.*' | circleci tests split --total=$CIRCLE_NODE_TOTAL)
               else
                 GLOB="cypress/e2e/**/*cy.*"
                 TESTFILES=$(circleci tests glob "$GLOB" | circleci tests split --total=$CIRCLE_NODE_TOTAL)

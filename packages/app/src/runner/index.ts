@@ -421,6 +421,13 @@ async function executeSpec (spec: SpecFile, isRerun: boolean = false) {
   // initializes a bunch of listeners watches spec file for changes.
   await getEventManager().setup(config)
 
+  if (!_eventManager) {
+    // with functional react components and bridging the unified runner between Vue and React,
+    // we sometimes get into a state where the runner has torn down the reporter, which in turn tears down the event manager,
+    // while we are in the process of executing the next spec. In this case, we have a no-op execute spec and need to exit early without error.
+    return
+  }
+
   if (window.__CYPRESS_TESTING_TYPE__ === 'e2e') {
     return runSpecE2E(config, spec)
   }

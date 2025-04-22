@@ -12,8 +12,9 @@
     "../frontend-shared/cypress/**/*.ts"
   ],
   "compilerOptions": {
-    "noImplicitThis": true,
+    // needed for mobx
     "useDefineForClassFields": true,
+    "noImplicitThis": true,
     "paths": {
       "@cy/i18n": ["../frontend-shared/src/locales/i18n"],
       "@cy/components/*": ["../frontend-shared/src/components/*"],

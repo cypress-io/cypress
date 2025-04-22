@@ -350,6 +350,20 @@ describe('lib/cloud/protocol', () => {
     })
   })
 
+  describe('.dbPath', () => {
+    it('returns the database path', () => {
+      const mockDbPath = '/path/to/db'
+
+      protocolManager['_dbPath'] = mockDbPath
+
+      expect(protocolManager.dbPath).to.equal(mockDbPath)
+    })
+
+    it('returns undefined when no database path is set', () => {
+      expect(protocolManager.dbPath).to.be.undefined
+    })
+  })
+
   describe('.uploadCaptureArtifact()', () => {
     let filePath: string
     let fileSize: number

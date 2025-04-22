@@ -185,6 +185,8 @@ export class SocketBase {
       message: T,
       data: AutomationCommands[T]['dataType'],
     ) => {
+      debug('request: %s', message)
+
       return automation.request(message, data, onAutomationClientRequestCallback)
     }
 
@@ -402,6 +404,8 @@ export class SocketBase {
 
           return socket.emit('dev-server:on-spec-updated')
         })
+
+        getCtx().coreData.studio?.addSocketListeners(socket)
 
         socket.on('studio:init', async (cb) => {
           try {

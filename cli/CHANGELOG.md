@@ -8,10 +8,34 @@ _Released 07/01/2025 (PENDING)_
 - Removed support for Angular 17. The minimum supported version is now `18.0.0`. Addresses [#31303](https://github.com/cypress-io/cypress/issues/31303).
 - Removed support for Node.js 18 and Node.js 23. Addresses [#31302](https://github.com/cypress-io/cypress/issues/31302).
 - Removed support for [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol) with the [firefox](https://www.mozilla.org/) browser. Addresses [#31189](https://github.com/cypress-io/cypress/issues/31189).
+- The Cypress configuration wizard for Component Testing supports TypeScript 5.0 or greater. Addresses [#31187](https://github.com/cypress-io/cypress/issues/31187).
 
-## 14.2.2
+## 14.3.1
 
-_Released 4/8/2025 (PENDING)_
+_Released 4/17/2025_
+
+**Performance:**
+
+- Reduced the initial timeout for the preflight API request to determine proxy conditions from sixty seconds to five, and made this timeout duration configurable with the `CYPRESS_INITIAL_PREFLIGHT_TIMEOUT` environment variable. Addresses [#28423](https://github.com/cypress-io/cypress/issues/28423). Addressed in [#31283](https://github.com/cypress-io/cypress/pull/31283).
+
+**Bugfixes:**
+
+- The [`cy.press()`](http://on.cypress.io/api/press) command no longer errors when used in specs subsequent to the first spec in run mode. Fixes [#31466](https://github.com/cypress-io/cypress/issues/31466).
+- Fixed an issue where certain proxy conditions prevented test runs from being recorded. Fixes [#31485](https://github.com/cypress-io/cypress/issues/31485).
+
+**Misc:**
+
+- Suppress benign warnings that reference OOM score of renderer. Addresses [#29563](https://github.com/cypress-io/cypress/issues/29563). Addressed in [#31521](https://github.com/cypress-io/cypress/pull/31521).
+- The UI of the reporter and URL were updated to a darker gray background for better color contrast. Addressed in [#31475](https://github.com/cypress-io/cypress/pull/31475).
+- Fixed an issue where the error message output when attempting to install Cypress on an unsupported architecture included an outdated documentation link to Cypress system requirements. Fixes [#31512](https://github.com/cypress-io/cypress/issues/31512).
+
+## 14.3.0
+
+_Released 4/8/2025_
+
+**Features:**
+
+- The [`cy.press()`](https://on.cypress.io/api/press) command is now available. It supports dispatching native Tab keyboard events to the browser. Addresses [#31050](https://github.com/cypress-io/cypress/issues/31050). Addresses [#299](https://github.com/cypress-io/cypress/issues/299). Addressed in [#31398](https://github.com/cypress-io/cypress/pull/31398).
 
 **Bugfixes:**
 
@@ -26,7 +50,7 @@ _Released 4/8/2025 (PENDING)_
 
 **Dependency Updates:**
 
-- Upgraded `mocha` from `7.0.1` to `7.1.2`. Addressed in [#31416](https://github.com/cypress-io/cypress/pull/31416).
+- Upgraded `mocha` from `7.0.1` to `7.2.0`. Addressed in [#31423](https://github.com/cypress-io/cypress/pull/31423) and [#31432](https://github.com/cypress-io/cypress/pull/31432).
 - Upgraded `webdriver` from `9.7.3` to `9.11.0`. Addressed in [#31315](https://github.com/cypress-io/cypress/pull/31315).
 - Upgraded `win-version-info` from `5.0.1` to `6.0.1`. Addressed in [#31358](https://github.com/cypress-io/cypress/pull/31358).
 

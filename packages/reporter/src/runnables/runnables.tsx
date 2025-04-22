@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
-import React, { Component, MouseEvent } from 'react'
+import React, { MouseEvent, useCallback, useEffect, useRef } from 'react'
 
 import events, { Events } from '../lib/events'
 import { RunnablesError, RunnablesErrorModel } from './runnable-error'
@@ -33,12 +33,12 @@ interface RunnablesEmptyStateProps {
 }
 
 const RunnablesEmptyState = ({ spec, studioEnabled, eventManager = events }: RunnablesEmptyStateProps) => {
-  const _launchStudio = (e: MouseEvent) => {
+  const _launchStudio = useCallback((e: MouseEvent) => {
     e.preventDefault()
 
     // root runnable always has r1 as id
     eventManager.emit('studio:init:suite', 'r1')
-  }
+  }, [eventManager])
 
   const isAllSpecs = spec.absolute === '__all' || spec.relative === '__all'
 
@@ -154,28 +154,10 @@ export interface RunnablesProps {
   canSaveStudioLogs: boolean
 }
 
-@observer
-class Runnables extends Component<RunnablesProps> {
-  render () {
-    const { error, runnablesStore, spec, studioEnabled, canSaveStudioLogs } = this.props
+const Runnables: React.FC<RunnablesProps> = observer(({ appState, scroller, error, runnablesStore, spec, studioEnabled, canSaveStudioLogs }) => {
+  const containerRef = useRef<HTMLDivElement>(null)
 
-    return (
-      <div ref='container' className='container'>
-        <RunnableHeader spec={spec} statsStore={statsStore} />
-        <RunnablesContent
-          runnablesStore={runnablesStore}
-          studioEnabled={studioEnabled}
-          canSaveStudioLogs={canSaveStudioLogs}
-          spec={spec}
-          error={error}
-        />
-      </div>
-    )
-  }
-
-  componentDidMount () {
-    const { scroller, appState } = this.props
-
+  useEffect(() => {
     let maybeHandleScroll: UserScrollCallback | undefined = undefined
 
     if (window.__CYPRESS_MODE__ === 'open') {
@@ -191,9 +173,22 @@ class Runnables extends Component<RunnablesProps> {
     // we need to always call scroller.setContainer, but the callback can be undefined
     // so we pass maybeHandleScroll. If we don't, Cypress blows up with an error like
     // `A container must be set on the scroller with scroller.setContainer(container)`
-    scroller.setContainer(this.refs.container as Element, maybeHandleScroll)
-  }
-}
+    scroller.setContainer(containerRef.current as Element, maybeHandleScroll)
+  }, [])
+
+  return (
+    <div ref={containerRef} className='container'>
+      <RunnableHeader spec={spec} statsStore={statsStore} />
+      <RunnablesContent
+        runnablesStore={runnablesStore}
+        studioEnabled={studioEnabled}
+        canSaveStudioLogs={canSaveStudioLogs}
+        spec={spec}
+        error={error}
+      />
+    </div>
+  )
+})
 
 export { RunnablesList }
 

@@ -1,11 +1,13 @@
-import type { StudioErrorReport, StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape, StudioCloudApi } from '@packages/types'
+import type { StudioErrorReport, StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape, StudioCloudApi, StudioAIInitializeOptions } from '@packages/types'
 import type { Router } from 'express'
+import type { Socket } from 'socket.io'
 import fetch from 'cross-fetch'
 import pkg from '@packages/root'
 import os from 'os'
 import { agent } from '@packages/network'
 import Debug from 'debug'
 import { requireScript } from './require_script'
+import path from 'path'
 
 interface StudioServer { default: StudioServerDefaultShape }
 
@@ -44,6 +46,7 @@ export class StudioManager implements StudioManagerShape {
       studioPath,
       projectSlug,
       cloudApi,
+      betterSqlite3Path: path.dirname(require.resolve('better-sqlite3/package.json')),
     })
 
     this._studioHash = studioHash
@@ -56,8 +59,22 @@ export class StudioManager implements StudioManagerShape {
     }
   }
 
+  addSocketListeners (socket: Socket): void {
+    if (this._studioServer) {
+      this.invokeSync('addSocketListeners', { isEssential: true }, socket)
+    }
+  }
+
   async canAccessStudioAI (browser: Cypress.Browser): Promise<boolean> {
     return (await this.invokeAsync('canAccessStudioAI', { isEssential: true }, browser)) ?? false
+  }
+
+  async initializeStudioAI (options: StudioAIInitializeOptions): Promise<void> {
+    await this.invokeAsync('initializeStudioAI', { isEssential: true }, options)
+  }
+
+  async destroy (): Promise<void> {
+    await this.invokeAsync('destroy', { isEssential: true })
   }
 
   private async reportError (error: Error): Promise<void> {
@@ -100,6 +117,7 @@ export class StudioManager implements StudioManagerShape {
     }
 
     try {
+      // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
       return this._studioServer[method].apply(this._studioServer, args)
     } catch (error: unknown) {
       let actualError: Error

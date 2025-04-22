@@ -3,7 +3,7 @@ import { allCommands } from '../cy/commands'
 import { addCommand as addNetstubbingCommand } from '../cy/net-stubbing'
 import $errUtils from './error_utils'
 import $stackUtils from './stack_utils'
-
+import type { $Cy } from './cy'
 import type { QueryFunction } from './state'
 
 const PLACEHOLDER_COMMANDS = ['mount', 'hover']
@@ -40,7 +40,7 @@ const internalError = (path, args) => {
 }
 
 export default {
-  create: (Cypress, cy, state, config) => {
+  create: (Cypress: Cypress.Cypress, cy: $Cy, state, config) => {
     const reservedCommandNames = new Set(Object.keys(cy))
     const commands = {}
     const queries = {}
@@ -63,11 +63,11 @@ export default {
         return null
       },
 
-      addSync (name, fn) {
+      addSync (name: string, fn: (...args: any[]) => any) {
         return cy.addCommandSync(name, fn)
       },
 
-      addAll (options = {}, obj) {
+      addAll (options, obj) {
         if (!obj) {
           obj = options
           options = {}

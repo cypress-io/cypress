@@ -16,7 +16,7 @@ global.proxyquire = require('proxyquire')
 global.sinon = require('sinon')
 const _ = require('lodash')
 const Promise = require('bluebird')
-const cache = require('../lib/cache')
+const cache = require('../lib/cache').cache
 
 require('chai')
 .use(require('@cypress/sinon-chai'))

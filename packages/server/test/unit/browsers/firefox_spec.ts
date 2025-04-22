@@ -119,6 +119,8 @@ describe('lib/browsers/firefox', () => {
           context: mockContextId,
           url: 'next-spec-url',
         })
+
+        expect(this.automation.use).to.have.been.calledWith(bidiAutomationClient.automationMiddleware)
       })
     })
 
@@ -283,6 +285,7 @@ describe('lib/browsers/firefox', () => {
 
         // make sure Bidi gets created
         expect(BidiAutomation.create).to.be.calledWith(wdInstance, this.automation)
+        expect(this.automation.use).to.have.been.calledWith(bidiAutomationClient.automationMiddleware)
         expect(bidiAutomationClient.setTopLevelContextId).to.be.calledWith(mockContextId)
       })
 

@@ -6,9 +6,17 @@ import type { EventManager } from './event-manager'
 import { useRunnerUiStore } from '../store/runner-ui-store'
 
 let hasInitializeReporter = false
+let reactDomRoot: any = null
 
 export function setInitializedReporter (val: boolean) {
   hasInitializeReporter = val
+}
+
+export function unmountReporter () {
+  if (reactDomRoot) {
+    reactDomRoot.unmount()
+    reactDomRoot = null
+  }
 }
 
 async function resetReporter () {
@@ -50,7 +58,7 @@ function renderReporter (
     testFilter: specsStore.testFilter,
   })
 
-  const reactDomRoot = window.UnifiedRunner.ReactDOM.createRoot(root)
+  reactDomRoot = window.UnifiedRunner.ReactDOM.createRoot(root)
 
   reactDomRoot.render(reporter)
 }

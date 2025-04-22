@@ -1,6 +1,5 @@
-import { action, makeObservable } from 'mobx'
 import { observer } from 'mobx-react'
-import React, { Component } from 'react'
+import React, { useCallback } from 'react'
 
 interface Props {
   value: boolean
@@ -9,34 +8,23 @@ interface Props {
   onUpdate: (e: MouseEvent) => void
 }
 
-@observer
-class Switch extends Component<Props> {
-  @action _onClick = (e: MouseEvent) => {
-    const { onUpdate } = this.props
-
+const Switch: React.FC<Props> = observer(({ value, 'data-cy': dataCy, size = 'lg', onUpdate }) => {
+  const _onClick = useCallback((e: MouseEvent) => {
     onUpdate(e)
-  }
+  }, [onUpdate])
 
-  constructor (props: Props) {
-    super(props)
-    makeObservable(this)
-  }
-
-  render () {
-    const { 'data-cy': dataCy, size = 'lg', value } = this.props
-
-    return (
-      <button
-        data-cy={dataCy}
-        className={`switch switch-${size}`}
-        role="switch"
-        aria-checked={value}
-        onClick={this._onClick}
-      >
-        <span className="indicator" />
-      </button>
-    )
-  }
-}
+  return (
+    <button
+      data-cy={dataCy}
+      className={`switch switch-${size}`}
+      role="switch"
+      aria-checked={value}
+      // @ts-expect-error
+      onClick={_onClick}
+    >
+      <span className="indicator" />
+    </button>
+  )
+})
 
 export default Switch

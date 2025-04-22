@@ -28,7 +28,7 @@ context('.logException', () => {
     sinon.stub(exception, 'create').resolves()
     sinon.stub(process.env, 'CYPRESS_INTERNAL_ENV').value('production')
 
-    const err = errors.get('NOT_LOGGED_IN')
+    const err = errors.get('TESTS_DID_NOT_START_FAILED')
 
     return errors.logException(err)
     .then(() => {
@@ -56,7 +56,7 @@ context('.logException', () => {
     sinon.stub(exception, 'create').rejects(new Error('foo'))
     sinon.stub(process.env, 'CYPRESS_INTERNAL_ENV').value('production')
 
-    const err = errors.get('NOT_LOGGED_IN')
+    const err = errors.get('TESTS_DID_NOT_START_FAILED')
 
     return errors.logException(err)
     .then((ret) => {
