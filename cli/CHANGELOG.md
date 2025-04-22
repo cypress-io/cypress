@@ -5,7 +5,7 @@ _Released 07/01/2025 (PENDING)_
 
 **Breaking Changes:**
 
-- Removed support for Angular 17. Only Angular 18 and 19 are now supported. This change affects the `@cypress/angular` package. Addresses [#31303](https://github.com/cypress-io/cypress/issues/31303).
+- Removed support for Angular 17. The minimum supported version is now `18.0.0`. Addresses [#31303](https://github.com/cypress-io/cypress/issues/31303).
 - Removed support for Node.js 18 and Node.js 23. Addresses [#31302](https://github.com/cypress-io/cypress/issues/31302).
 - Removed support for [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol) with the [firefox](https://www.mozilla.org/) browser. Addresses [#31189](https://github.com/cypress-io/cypress/issues/31189).
 
