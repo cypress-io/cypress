@@ -290,7 +290,7 @@ describe('doctor', () => {
     let generator = new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
       cacheDir,
       nodeModulesOnly: false,
-      forceNoRewrite: ['force-no-rewrite.js'],
+      forceNorewrite: ['*/node_modules/force-no-rewrite.js', 'absolute-path/force-no-rewrite.js'],
     })
 
     // Set up project to use an intermediate healthy dependency and snapshot
@@ -300,7 +300,7 @@ describe('doctor', () => {
     const intermediateHealthy = await fs.readFile(path.join(templateDir, 'intermediate-healthy.js'))
     const intermediateDeferred = await fs.readFile(path.join(templateDir, 'intermediate-deferred.js'))
     const norewrite = await fs.readFile(path.join(templateDir, 'leaf-norewrite.js'))
-    const forceNoRewrite = await fs.readFile(path.join(templateDir, 'force-no-rewrite.js'))
+    const forceNorewrite = await fs.readFile(path.join(templateDir, 'force-no-rewrite.js'))
 
     await fs.writeFile(path.join(projectBaseDir, 'entry.js'), initialEntry)
     await fs.writeFile(path.join(projectBaseDir, 'healthy.js'), healthy)
@@ -308,8 +308,12 @@ describe('doctor', () => {
     await fs.writeFile(path.join(projectBaseDir, 'intermediate-healthy.js'), intermediateHealthy)
     await fs.writeFile(path.join(projectBaseDir, 'intermediate-deferred.js'), intermediateDeferred)
     await fs.writeFile(path.join(projectBaseDir, 'norewrite.js'), norewrite)
-    await fs.ensureDir(path.join(projectBaseDir, 'node_modules'))
-    await fs.writeFile(path.join(projectBaseDir, 'node_modules', 'force-no-rewrite.js'), forceNoRewrite)
+    await fs.ensureDir(path.join(projectBaseDir, 'packages', 'server', 'node_modules'))
+    await fs.writeFile(path.join(projectBaseDir, 'packages', 'server', 'node_modules', 'force-no-rewrite.js'), forceNorewrite)
+    await fs.ensureDir(path.join(projectBaseDir, 'absolute-path'))
+    await fs.writeFile(path.join(projectBaseDir, 'absolute-path', 'force-no-rewrite.js'), forceNorewrite)
+    await fs.ensureDir(path.join(projectBaseDir, 'node_modules', 'absolute-path'))
+    await fs.writeFile(path.join(projectBaseDir, 'node_modules', 'absolute-path', 'force-no-rewrite.js'), forceNorewrite)
 
     await generator.createScript()
     await generator.makeAndInstallSnapshot()
@@ -317,8 +321,9 @@ describe('doctor', () => {
 
     expect(metadata).to.deep.equal({
       norewrite: [
-        './node_modules/force-no-rewrite.js',
+        './absolute-path/force-no-rewrite.js',
         './norewrite.js',
+        './packages/server/node_modules/force-no-rewrite.js',
       ],
       deferred: [
         './deferred.js',
@@ -327,6 +332,7 @@ describe('doctor', () => {
         './entry.js',
         './healthy.js',
         './intermediate-healthy.js',
+        './node_modules/absolute-path/force-no-rewrite.js',
       ],
     })
 
@@ -335,7 +341,7 @@ describe('doctor', () => {
       nodeModulesOnly: false,
       previousDeferred: metadata.deferred,
       previousHealthy: metadata.healthy,
-      previousNoRewrite: metadata.norewrite,
+      previousNorewrite: metadata.norewrite,
     })
 
     // Switch project to use an intermediate deferred dependency and re-snapshot
@@ -372,7 +378,7 @@ describe('doctor', () => {
     let generator = new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
       cacheDir,
       nodeModulesOnly: false,
-      forceNoRewrite: ['force-no-rewrite.js'],
+      forceNorewrite: ['force-no-rewrite.js'],
     })
 
     await expect(generator.createScript()).to.be.rejectedWith('Force no rewrite dependencies not found in project: force-no-rewrite.js')
@@ -427,7 +433,7 @@ describe('doctor', () => {
       nodeModulesOnly: false,
       previousDeferred: metadata.deferred,
       previousHealthy: metadata.healthy,
-      previousNoRewrite: metadata.norewrite,
+      previousNorewrite: metadata.norewrite,
     })
 
     // Then create the snapshot with a intermediate deferred file

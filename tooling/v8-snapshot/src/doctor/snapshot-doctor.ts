@@ -30,8 +30,8 @@ const logError = debug('cypress:snapgen:error')
  *
  * @property previousDeferred See {@link GenerationOpts} previousDeferred
  * @property previousHealthy See {@link GenerationOpts} previousHealthy
- * @property previousNoRewrite See {@link GenerationOpts} previousNoRewrite
- * @property forceNoRewrite See {@link GenerationOpts} forceNoRewrite
+ * @property previousNorewrite See {@link GenerationOpts} previousNorewrite
+ * @property forceNorewrite See {@link GenerationOpts} forceNorewrite
  */
 export type SnapshotDoctorOpts = Omit<
   CreateSnapshotScriptOpts,
@@ -44,8 +44,30 @@ export type SnapshotDoctorOpts = Omit<
 > & {
   previousDeferred: Set<string>
   previousHealthy: Set<string>
-  previousNoRewrite: Set<string>
-  forceNoRewrite: Set<string>
+  previousNorewrite: Set<string>
+  forceNorewrite: Set<string>
+}
+
+/**
+ * Checks if a dependency matches a force no rewrite entry
+ * @param dependency - The dependency to check
+ * @param forceNorewrite - The force no rewrite entry
+ * @returns true if the dependency matches the force no rewrite entry, false otherwise
+ */
+export const doesDependencyMatchForceNorewriteEntry = (dependency: string, forceNorewrite: string) => {
+  // The force no rewrite file follows a convention where we try
+  // and match all possible node_modules paths if the force no
+  // rewrite entry starts with "*". If it does not
+  // start with "*" then it is an exact match.
+  if (forceNorewrite.startsWith('*')) {
+    if (dependency.endsWith(forceNorewrite.slice(2))) {
+      return true
+    }
+  } else if (dependency === forceNorewrite) {
+    return true
+  }
+
+  return false
 }
 
 /**
@@ -241,7 +263,7 @@ function unpathify (keys: Set<string>) {
  * ```ts
  * previousDeferred: Set<string>
  * previousHealthy: Set<string>
- * previousNoRewrite: Set<string>
+ * previousNorewrite: Set<string>
  * ```
  *
  * ## Snapshot Doctor Steps
@@ -261,8 +283,8 @@ export class SnapshotDoctor {
   private readonly nodeModulesOnly: boolean
   private readonly previousDeferred: Set<string>
   private readonly previousHealthy: Set<string>
-  private readonly previousNoRewrite: Set<string>
-  private readonly forceNoRewrite: Set<string>
+  private readonly previousNorewrite: Set<string>
+  private readonly forceNorewrite: Set<string>
   private readonly nodeEnv: string
   private readonly cypressInternalEnv: string
   private readonly _scriptProcessor: AsyncScriptProcessor
@@ -283,8 +305,8 @@ export class SnapshotDoctor {
     this.nodeModulesOnly = opts.nodeModulesOnly
     this.previousDeferred = unpathify(opts.previousDeferred)
     this.previousHealthy = unpathify(opts.previousHealthy)
-    this.previousNoRewrite = unpathify(opts.previousNoRewrite)
-    this.forceNoRewrite = unpathify(opts.forceNoRewrite)
+    this.previousNorewrite = unpathify(opts.previousNorewrite)
+    this.forceNorewrite = unpathify(opts.forceNorewrite)
     this.nodeEnv = opts.nodeEnv
     this.cypressInternalEnv = opts.cypressInternalEnv
     this.integrityCheckSource = opts.integrityCheckSource
@@ -328,21 +350,21 @@ export class SnapshotDoctor {
 
     const filteredPreviousHealthy = filterStaleImports(this.previousHealthy)
     const filteredPreviousDeferred = filterStaleImports(this.previousDeferred)
-    const filteredPreviousNoRewrite = filterStaleImports(this.previousNoRewrite)
+    const filteredPreviousNorewrite = filterStaleImports(this.previousNorewrite)
 
     // 3. Initialize the heal state with data from previous runs that was
     //    provided to us
-    //    forceNoRewrite is provided for modules which we manually determined
+    //    forceNorewrite is provided for modules which we manually determined
     //    to result in invalid/problematic code when rewritten
     const healState = new HealState(
       meta,
       filteredPreviousHealthy,
       filteredPreviousDeferred,
-      new Set([...filteredPreviousNoRewrite, ...this.forceNoRewrite]),
+      new Set([...filteredPreviousNorewrite, ...this.forceNorewrite]),
     )
 
     // 4. Generate the initial bundle and warnings using what was done previously
-    const { warnings, bundle } = await this._createScript(new Set(filteredPreviousDeferred), new Set([...filteredPreviousNoRewrite, ...this.forceNoRewrite]))
+    const { warnings, bundle } = await this._createScript(new Set(filteredPreviousDeferred), new Set([...filteredPreviousNorewrite, ...this.forceNorewrite]))
 
     // 5. Process the initial bundle in order to detect issues during
     //    verification
@@ -456,7 +478,7 @@ export class SnapshotDoctor {
           logError('Encountered warning triggering defer: %s', s)
           healState.needDefer.add(warning.location.file)
           break
-        case WarningConsequence.NoRewrite:
+        case WarningConsequence.Norewrite:
           logError('Encountered warning triggering no-rewrite: %s', s)
           healState.needNorewrite.add(warning.location.file)
           break
@@ -492,7 +514,11 @@ export class SnapshotDoctor {
       ) {
         // 5. Process the module verification in parallel
         const promises = nextStage.map(async (key): Promise<void> => {
-          if ([...this.forceNoRewrite].find((y) => key.endsWith(y))) {
+          const includedInForceNorewrite = [...this.forceNorewrite].find((forceNorewrite) => {
+            return doesDependencyMatchForceNorewriteEntry(key, forceNorewrite)
+          })
+
+          if (includedInForceNorewrite) {
             healState.needNorewrite.add(key)
             logDebug('Not rewriting "%s" as it is a force no rewrite module', key)
 
@@ -544,7 +570,7 @@ export class SnapshotDoctor {
 
                     break
                   }
-                  case WarningConsequence.NoRewrite: {
+                  case WarningConsequence.Norewrite: {
                     logInfo(
                       'Not rewriting "%s" as it results in incorrect code',
                       key,

@@ -1,27 +1,23 @@
 import debug from 'debug'
 import fs from 'fs'
 import path from 'path'
-import { SnapshotDoctor } from './snapshot-doctor'
+import { doesDependencyMatchForceNorewriteEntry, SnapshotDoctor } from './snapshot-doctor'
 import { canAccess, createHashForFile, matchFileHash } from '../utils'
 
 const logInfo = debug('cypress:snapgen:info')
 
-/**
- * Filters out force no rewrite modules that are not in the project
- * @param norewrite - The set of calculated no rewrite modules in the project
- * @param forceNoRewrite - The set of force no rewrite modules
- */
-function filterForceNoRewrite (norewrite: string[], forceNoRewrite: Set<string>) {
-  return norewrite.filter((dependency) => {
-    // Remove the leading './' from the dependency
-    const trimmedDependency = dependency.slice(2)
+interface ErrorOnInvalidForceNorewriteOpts {
+  forceNorewrite: Set<string>
+  inputs: Record<string, { fileInfo: { fullPath: string } }>
+  nodeModulesOnly: boolean
+}
 
-    // Keep the files that start with packages as their paths are explicit
-    // Otherwise, the files are assumed to be in node_modules and we filter out
-    // the ones that are in the force no rewrite set (e.g. force no rewrite of 'force-no-rewrite.js'
-    // will be 'node_modules/force-no-rewrite.js')
-    return trimmedDependency.startsWith('packages') || !forceNoRewrite.has(trimmedDependency)
-  })
+/**
+ * Filters out the wildcard force no rewrite modules
+ * @param norewrite - The set of calculated no rewrite modules in the project
+ */
+function filterForceNorewrite (norewrite: string[]) {
+  return norewrite.filter((dependency) => !dependency.startsWith('./*'))
 }
 
 /**
@@ -29,19 +25,27 @@ function filterForceNoRewrite (norewrite: string[], forceNoRewrite: Set<string>)
  * @param norewrite - The set of force no rewrite modules
  * @param inputs - The inputs from the esbuild bundle which are actually in the project
  */
-function errorOnInvalidForceNoRewrite (norewrite: Set<string>, inputs: Record<string, { fileInfo: { fullPath: string } }>) {
-  const inputsKeys = Object.keys(inputs)
+function errorOnInvalidForceNorewrite (opts: ErrorOnInvalidForceNorewriteOpts) {
+  const inputsKeys = Object.keys(opts.inputs)
 
-  const invalidForceNoRewrites: string[] = []
+  const invalidForceNorewrites: string[] = []
 
-  Array.from(norewrite).forEach((dependency) => {
-    if (!inputsKeys.some((key) => key.endsWith(dependency))) {
-      invalidForceNoRewrites.push(dependency)
+  Array.from(opts.forceNorewrite).forEach((dependency) => {
+    if (opts.nodeModulesOnly && !dependency.startsWith('node_modules') && !dependency.startsWith('*')) {
+      return
+    }
+
+    const includedInInputs = inputsKeys.some((key) => {
+      return doesDependencyMatchForceNorewriteEntry(key, dependency)
+    })
+
+    if (!includedInInputs) {
+      invalidForceNorewrites.push(dependency)
     }
   })
 
-  if (invalidForceNoRewrites.length > 0) {
-    throw new Error(`Force no rewrite dependencies not found in project: ${invalidForceNoRewrites.join(', ')}`)
+  if (invalidForceNorewrites.length > 0) {
+    throw new Error(`Force no rewrite dependencies not found in project: ${invalidForceNorewrites.join(', ')}`)
   }
 }
 
@@ -52,7 +56,7 @@ export async function determineDeferred (
   cacheDir: string,
   opts: {
     nodeModulesOnly: boolean
-    forceNoRewrite: Set<string>
+    forceNorewrite: Set<string>
     nodeEnv: string
     cypressInternalEnv: string
     integrityCheckSource: string | undefined
@@ -89,22 +93,22 @@ export async function determineDeferred (
     }
   })
 
-  let nodeModulesNoRewrite: string[] = []
-  let projectNoRewrite: string[] = []
-  let currentNoRewrite = opts.nodeModulesOnly ? nodeModulesNoRewrite : norewrite
+  let nodeModulesNorewrite: string[] = []
+  let projectNorewrite: string[] = []
+  let currentNorewrite = opts.nodeModulesOnly ? nodeModulesNorewrite : norewrite
 
   norewrite.forEach((dependency) => {
     if (dependency.includes('node_modules')) {
-      nodeModulesNoRewrite.push(dependency)
+      nodeModulesNorewrite.push(dependency)
     } else {
-      projectNoRewrite.push(dependency)
+      projectNorewrite.push(dependency)
     }
   })
 
   if (res.match && opts.nodeModulesOnly) {
     const combined: Set<string> = new Set([
-      ...currentNoRewrite,
-      ...opts.forceNoRewrite,
+      ...currentNorewrite,
+      ...opts.forceNorewrite,
     ])
 
     return {
@@ -125,8 +129,8 @@ export async function determineDeferred (
     nodeModulesOnly: opts.nodeModulesOnly,
     previousDeferred: currentDeferred,
     previousHealthy: currentHealthy,
-    previousNoRewrite: currentNoRewrite,
-    forceNoRewrite: opts.forceNoRewrite,
+    previousNorewrite: currentNorewrite,
+    forceNorewrite: opts.forceNorewrite,
     nodeEnv: opts.nodeEnv,
     cypressInternalEnv: opts.cypressInternalEnv,
     supportTypeScript: opts.nodeModulesOnly,
@@ -140,13 +144,17 @@ export async function determineDeferred (
     meta: esbuildMeta,
   } = await doctor.heal()
 
-  errorOnInvalidForceNoRewrite(opts.forceNoRewrite, esbuildMeta.inputs)
+  errorOnInvalidForceNorewrite({
+    forceNorewrite: opts.forceNorewrite,
+    inputs: esbuildMeta.inputs,
+    nodeModulesOnly: opts.nodeModulesOnly,
+  })
 
   const deferredHashFile = path.relative(projectBaseDir, hashFilePath)
-  const filteredNoRewrite = filterForceNoRewrite(updatedNorewrite, opts.forceNoRewrite)
+  const filteredNorewrite = filterForceNorewrite(updatedNorewrite)
 
   const updatedMeta = {
-    norewrite: opts.nodeModulesOnly ? [...filteredNoRewrite, ...projectNoRewrite] : filteredNoRewrite,
+    norewrite: opts.nodeModulesOnly ? [...filteredNorewrite, ...projectNorewrite] : filteredNorewrite,
     deferred: opts.nodeModulesOnly ? [...updatedDeferred, ...projectDeferred] : updatedDeferred,
     healthy: opts.nodeModulesOnly ? [...updatedHealthy, ...projectHealthy] : updatedHealthy,
     deferredHashFile,
@@ -166,7 +174,7 @@ export async function determineDeferred (
   }
 
   return {
-    norewrite: updatedNorewrite,
+    norewrite: filteredNorewrite,
     deferred: updatedDeferred,
     healthy: updatedHealthy,
   }
