@@ -56,7 +56,7 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
           error: {
             name: 'Error',
             message: 'string error',
-            stack: sinon.match.string,
+            stack: sinon.match((stack) => stack.includes('<stripped-path>report_studio_error_spec.ts')),
             studioMethod: 'testMethod',
             studioMethodArgs: undefined,
           },
