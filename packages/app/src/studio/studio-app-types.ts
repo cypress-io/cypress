@@ -1,5 +1,6 @@
 export interface StudioPanelProps {
   canAccessStudioAI: boolean
+  onStudioPanelClose: () => void
   useStudioEventManager?: StudioEventManagerShape
   useStudioAIStream?: StudioAIStreamShape
 }

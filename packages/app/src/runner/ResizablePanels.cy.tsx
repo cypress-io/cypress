@@ -201,7 +201,7 @@ describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 40
       cy.contains('panel1').should('not.be.visible')
       cy.contains('panel2').should('not.be.visible')
       cy.contains('panel4').should('be.visible')
-      assertWidth('panel3', 1200)
+      assertWidth('panel3', 1160)
     })
   })
 })

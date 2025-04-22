@@ -14,16 +14,14 @@
     class="flex"
   >
     <AutomationElement />
-    <AutomationDisconnected
-      v-if="runnerUiStore.automationStatus === 'DISCONNECTED'"
-    />
+    <AutomationDisconnected v-if="runnerUiStore.automationStatus === 'DISCONNECTED'" />
     <AutomationMissing
       v-else-if="runnerUiStore.automationStatus === 'MISSING'"
       :gql="props.gql.currentProject"
     />
     <ResizablePanels
       v-else
-      :style="{width: `calc(100vw - ${screenshotStore.isScreenshotting ? 0 : collapsedNavBarWidth}px)`}"
+      :style="{ width: `calc(100vw - ${screenshotStore.isScreenshotting ? 0 : collapsedNavBarWidth}px)` }"
       :offset-left="collapsedNavBarWidth"
       :max-total-width="windowWidth - collapsedNavBarWidth"
       :initial-panel1-width="specsListWidthPreferences"
@@ -37,13 +35,13 @@
       @resize-end="handleResizeEnd"
       @panel-width-updated="handlePanelWidthUpdated"
     >
-      <template #panel1="{isDragging}">
+      <template #panel1="{ isDragging }">
         <HideDuringScreenshot
           v-if="props.gql.currentProject"
           v-show="runnerUiStore.isSpecsListOpen"
           id="inline-spec-list"
           class="h-full bg-gray-1000 border-gray-900 border-r force-dark"
-          :class="{'pointer-events-none': isDragging}"
+          :class="{ 'pointer-events-none': isDragging }"
         >
           <InlineSpecList
             id="reporter-inline-specs-list"
@@ -58,9 +56,7 @@
         </HideDuringScreenshot>
       </template>
       <template #panel2>
-        <HideDuringScreenshot
-          class="h-full"
-        >
+        <HideDuringScreenshot class="h-full">
           <div
             v-if="!hideCommandLog"
             v-once
@@ -76,12 +72,11 @@
             :gql="props.gql.currentProject"
             :event-manager="eventManager"
             :get-aut-iframe="getAutIframeModel"
+            :should-show-studio-button="shouldShowStudioButton"
           />
         </HideDuringScreenshot>
 
-        <RemoveClassesDuringScreenshotting
-          class="h-0 p-[16px]"
-        >
+        <RemoveClassesDuringScreenshotting class="h-0 p-[16px]">
           <ScriptError
             v-if="autStore.scriptError"
             :error="autStore.scriptError.error"
@@ -100,11 +95,15 @@
         <ScreenshotHelperPixels />
       </template>
       <template #panel4>
-        <StudioPanel
-          v-if="shouldShowStudioPanel"
-          data-cy="studio-panel"
-          :can-access-studio-a-i="studioStore.canAccessStudioAI"
-        />
+        <HideDuringScreenshot>
+          <StudioPanel
+            v-if="shouldShowStudioPanel"
+            data-cy="studio-panel"
+            :can-access-studio-a-i="studioStore.canAccessStudioAI"
+            :on-studio-panel-close="handleStudioPanelClose"
+            :event-manager="eventManager"
+          />
+        </HideDuringScreenshot>
       </template>
     </ResizablePanels>
   </AdjustRunnerStyleDuringScreenshot>
@@ -224,6 +223,10 @@ const {
 
 const studioStore = useStudioStore()
 
+const handleStudioPanelClose = () => {
+  eventManager.emit('studio:cancel', undefined)
+}
+
 const specsListWidthPreferences = computed(() => {
   return props.gql.localSettings.preferences.specListWidth ?? runnerUiStore.specListWidth
 })
@@ -242,6 +245,10 @@ const isSpecsListOpenPreferences = computed(() => {
 
 const studioStatus = computed(() => {
   return props.gql.studio?.status
+})
+
+const shouldShowStudioButton = computed(() => {
+  return !!props.gql.studio && !studioStore.isActive
 })
 
 const shouldShowStudioPanel = computed(() => {
