@@ -2653,6 +2653,11 @@
     tailwindcss "^3.4.3"
     tailwindcss-hocus "^0.0.7"
 
+"@cypress-design/constants-spinner@^1.0.0":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@cypress-design/constants-spinner/-/constants-spinner-1.0.1.tgz#33904995ea95c34867905aa09391d5364ffcc129"
+  integrity sha512-qXZ0KwxxV+jN74TCWJhW6NtIEnGhIcu5tdIYVgiSIIyyEr9NAIw8qumc3IHaYSjSvolDJ1xsNY5QbVfZiHgFTQ==
+
 "@cypress-design/constants-statusicon@^1.0.0":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@cypress-design/constants-statusicon/-/constants-statusicon-1.0.1.tgz#d7398d2cdb4d9a640876f631eb2cc0d851d5f385"
@@ -2683,10 +2688,10 @@
   dependencies:
     "@cypress-design/color-constants" "^1.0.0"
 
-"@cypress-design/vue-button@^1.1.0", "@cypress-design/vue-button@^1.3.0":
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/vue-button/-/vue-button-1.3.0.tgz#402230743d35daf99af8bde728a5b4c93d61f74e"
-  integrity sha512-zBxgzYL6+i8qz6KfbJRyq4oVBh+JSCT8OQ9NA2t0TL2frTvY2mutjZZjXoSkiACvw6sA/W9QcWh5SXyvHUWrqA==
+"@cypress-design/vue-button@^1.1.0", "@cypress-design/vue-button@^1.6.0":
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-button/-/vue-button-1.6.0.tgz#e7266dfe11c31628ef3a979fffcf041b141e39c3"
+  integrity sha512-RnV2suh3BJg3fb7hc1gdh58p13yxBHHm9fmmE6AkHR3OBRAbbd5oqQmZWwuBuWteyj2gVFRgTRYHPzOZBm9wEg==
 
 "@cypress-design/vue-icon@^1.0.0", "@cypress-design/vue-icon@^1.6.0":
   version "1.6.0"
@@ -2694,6 +2699,13 @@
   integrity sha512-XQjGWTw31ENMh0npWynR71F56zzqgPrryjUFi2b7lremzHzwHV8KaonKNVVSzbJnDOyI50VCns70Rhd8yS6VNw==
   dependencies:
     "@cypress-design/icon-registry" "^1.6.0"
+
+"@cypress-design/vue-spinner@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-spinner/-/vue-spinner-1.0.0.tgz#41dce62273980abe8d8bb5f723db3455160cbc48"
+  integrity sha512-5p8sfbRzUAhbncbqc8oXY0SMeKJ37FNw1JGzfVxwqcHqZbHjvxIsIynaCsvPo/wwWFaaysz4vD89FQ3ynHCPSQ==
+  dependencies:
+    "@cypress-design/constants-spinner" "^1.0.0"
 
 "@cypress-design/vue-statusicon@^1.0.0":
   version "1.0.0"
