@@ -156,34 +156,36 @@ export class ProjectBase extends EE {
 
     const studioLifecycleManager = new StudioLifecycleManager()
 
-    void studioLifecycleManager.initializeStudioManager({
-      projectId: cfg.projectId,
-      cloudDataSource: this.ctx.cloud,
-      cfg,
-      debugData: this.configDebugData,
-      ctx: this.ctx,
-    })
+    if (!cfg.isTextTerminal) {
+      studioLifecycleManager.initializeStudioManager({
+        projectId: cfg.projectId,
+        cloudDataSource: this.ctx.cloud,
+        cfg,
+        debugData: this.configDebugData,
+        ctx: this.ctx,
+      })
 
-    // Register a listener to update config when studio is ready
-    studioLifecycleManager.onStudioReady((studioManager) => {
-      debug('Studio is ready, updating config with isStudioProtocolEnabled:', studioManager.isProtocolEnabled)
+      // Register a listener to update config when studio is ready
+      studioLifecycleManager.onStudioReady((studioManager) => {
+        debug('Studio is ready, updating config with isStudioProtocolEnabled:', studioManager.isProtocolEnabled)
 
-      // Update our cached config with the studio protocol enabled state
-      if (this._cfg) {
-        this._cfg.isStudioProtocolEnabled = studioManager.isProtocolEnabled
+        // Update our cached config with the studio protocol enabled state
+        if (this._cfg) {
+          this._cfg.isStudioProtocolEnabled = studioManager.isProtocolEnabled
 
-        // Also update hideRunnerUi based on the studio state
-        const isDefaultProtocolEnabled = this._protocolManager?.isProtocolEnabled ?? false
+          // Also update hideRunnerUi based on the studio state
+          const isDefaultProtocolEnabled = this._protocolManager?.isProtocolEnabled ?? false
 
-        const studio = this.ctx.coreData.studioLifecycleManager?.getStudioIfReady()
-        const hideRunnerUi = this.options?.args?.runnerUi === false ||
+          const studio = this.ctx.coreData.studioLifecycleManager?.getStudioIfReady()
+          const hideRunnerUi = this.options?.args?.runnerUi === false ||
           (isDefaultProtocolEnabled && !studio && !this.options?.args?.runnerUi)
 
-        this._cfg.hideRunnerUi = hideRunnerUi
+          this._cfg.hideRunnerUi = hideRunnerUi
 
-        debug('Updated config with hideRunnerUi:', hideRunnerUi)
-      }
-    })
+          debug('Updated config with hideRunnerUi:', hideRunnerUi)
+        }
+      })
+    }
 
     const [port, warning] = await this._server.open(cfg, {
       getCurrentBrowser: () => this.browser,

@@ -39,7 +39,7 @@ export class StudioLifecycleManager extends EventEmitter {
    * @param debugData Debug data for the configuration
    * @param ctx Data context to register this instance with
    */
-  async initializeStudioManager ({
+  initializeStudioManager ({
     projectId,
     cloudDataSource,
     cfg,
@@ -51,7 +51,7 @@ export class StudioLifecycleManager extends EventEmitter {
     cfg: Cfg
     debugData: any
     ctx: DataContext
-  }): Promise<void> {
+  }): void {
     debug('Initializing studio manager')
 
     const studioManagerPromise = getAndInitializeStudioManager({
