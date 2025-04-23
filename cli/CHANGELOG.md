@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 14.3.3
+
+_Released 5/6/2025 (PENDING)_
+
+**Misc:**
+
+- The URL in the Cypress App no longer displays a white background when the URL is loading. Fixes [#31556](https://github.com/cypress-io/cypress/issues/31556).
+
 ## 14.3.2
 
 _Released 4/22/2025_
