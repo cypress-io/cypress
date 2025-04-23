@@ -25,6 +25,7 @@ type AsyncRetry = <TArgs extends any[], TResult>(
 ) => (...args: TArgs) => Promise<TResult>
 
 export interface StudioServerOptions {
+  studioHash?: string
   studioPath: string
   projectSlug?: string
   cloudApi: StudioCloudApi
@@ -40,6 +41,11 @@ export interface StudioServerShape {
   canAccessStudioAI(browser: Cypress.Browser): Promise<boolean>
   addSocketListeners(socket: Socket): void
   initializeStudioAI(options: StudioAIInitializeOptions): Promise<void>
+  reportError(
+    error: unknown,
+    studioMethod: string,
+    ...studioMethodArgs: unknown[]
+  ): void
   destroy(): Promise<void>
 }
 

@@ -1,7 +1,7 @@
 import { EventEmitter } from 'stream'
 import type { StudioManager } from './cloud/studio'
 import { ProtocolManager } from './cloud/protocol'
-import { getAndInitializeStudioManager } from './cloud/api/get_and_initialize_studio_manager'
+import { getAndInitializeStudioManager } from './cloud/api/studio/get_and_initialize_studio_manager'
 import Debug from 'debug'
 import type { CloudDataSource } from '@packages/data-context/src/sources'
 import type { Cfg } from './project-base'
