@@ -9,9 +9,6 @@
       <div
         data-cy="aut-url"
         class="border rounded flex grow border-[1px] bg-gray-950 border-gray-800 h-[32px] align-middle overflow-hidden"
-        :class="{
-          'bg-gray-800': autStore.isLoadingUrl
-        }"
       >
         <SpecRunnerDropdown data-cy="select-browser">
           <template #heading>

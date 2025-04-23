@@ -6,13 +6,15 @@
     v-else
     ref="container"
   >
-    Loading the panel...
+    <LoadingStudioPanel :event-manager="props.eventManager" />
   </div>
 </template>
 <script lang="ts" setup>
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { init, loadRemote } from '@module-federation/runtime'
 import type { StudioAppDefaultShape, StudioPanelShape } from './studio-app-types'
+import LoadingStudioPanel from './LoadingStudioPanel.vue'
+import type { EventManager } from '../runner/event-manager'
 
 // Mirrors the ReactDOM.Root type since incorporating those types
 // messes up vue typing elsewhere
@@ -23,6 +25,8 @@ interface Root {
 
 const props = defineProps<{
   canAccessStudioAI: boolean
+  onStudioPanelClose: () => void
+  eventManager: EventManager
 }>()
 
 interface StudioApp { default: StudioAppDefaultShape }
@@ -38,7 +42,7 @@ const maybeRenderReactComponent = () => {
     return
   }
 
-  const panel = window.UnifiedRunner.React.createElement(ReactStudioPanel.value, { canAccessStudioAI: props.canAccessStudioAI })
+  const panel = window.UnifiedRunner.React.createElement(ReactStudioPanel.value, { canAccessStudioAI: props.canAccessStudioAI, onStudioPanelClose: props.onStudioPanelClose })
 
   if (!reactRoot.value) {
     reactRoot.value = window.UnifiedRunner.ReactDOM.createRoot(container.value)

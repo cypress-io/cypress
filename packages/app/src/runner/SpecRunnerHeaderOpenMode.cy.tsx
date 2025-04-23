@@ -5,7 +5,7 @@ import { createEventManager, createTestAutIframe } from '../../cypress/component
 import { ExternalLink_OpenExternalDocument } from '@packages/frontend-shared/src/generated/graphql'
 import { cyGeneralGlobeX16 } from '@cypress-design/icon-registry'
 
-function renderWithGql (gqlVal: SpecRunnerHeaderFragment) {
+function renderWithGql (gqlVal: SpecRunnerHeaderFragment, shouldShowStudioButton = false) {
   const eventManager = createEventManager()
   const autIframe = createTestAutIframe()
 
@@ -15,7 +15,9 @@ function renderWithGql (gqlVal: SpecRunnerHeaderFragment) {
       configFile: gqlVal.configFile || 'cypress.config.ts',
     }}
     eventManager={eventManager}
-    getAutIframe={() => autIframe}/>)
+    getAutIframe={() => autIframe}
+    shouldShowStudioButton={shouldShowStudioButton}
+  />)
 }
 
 describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
@@ -291,5 +293,31 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
 
     cy.findByTestId('playground-activator').click()
     cy.get('#selector-playground').should('not.exist')
+  })
+
+  it('does not display', () => {
+    const autStore = useAutStore()
+    const autUrl = 'http://localhost:4000'
+
+    autStore.updateUrl(autUrl)
+    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+      render: (gqlVal) => {
+        return renderWithGql(gqlVal)
+      },
+    })
+
+    cy.findByTestId('aut-url-input').should('be.visible').should('have.value', autUrl)
+    cy.findByTestId('select-browser').should('be.visible').contains('title', 'Electron 73')
+    cy.findByTestId('viewport-size').should('be.visible').contains('500x500')
+  })
+
+  it('shows studio button', () => {
+    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+      render: (gqlVal) => {
+        return renderWithGql(gqlVal, true)
+      },
+    })
+
+    cy.findByTestId('studio-button').should('be.visible')
   })
 })

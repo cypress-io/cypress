@@ -16,7 +16,7 @@ interface Props {
  * Renders a link-style element that presents a tooltip on hover
  * and opens the file in an external editor when selected.
  */
-const FileNameOpener = observer((props: Props) => {
+const FileNameOpener: React.FC<Props> = observer((props: Props) => {
   const { displayFile, originalFile, line, column } = props.fileDetails
 
   return (
@@ -34,5 +34,7 @@ const FileNameOpener = observer((props: Props) => {
     </Tooltip>
   )
 })
+
+FileNameOpener.displayName = 'FileNameOpener'
 
 export default FileNameOpener
