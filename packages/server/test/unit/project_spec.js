@@ -15,8 +15,6 @@ const runEvents = require(`../../lib/plugins/run_events`)
 const system = require(`../../lib/util/system`)
 const { getCtx } = require(`../../lib/makeDataContext`)
 const studio = require('../../lib/cloud/api/get_and_initialize_studio_manager')
-const api = require('../../lib/cloud/api').default
-const { ProtocolManager } = require('../../lib/cloud/protocol')
 const browsers = require('../../lib/browsers')
 const { StudioLifecycleManager } = require('../../lib/StudioLifecycleManager')
 const { StudioManager } = require('../../lib/cloud/studio')
@@ -483,52 +481,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
     })
 
-    it('creates the protocol manager if studio is enabled', async function () {
-      this.testStudioManager.status = 'ENABLED'
-
-      sinon.stub(api, 'getCaptureProtocolScript').resolves('console.log("hello")')
-      sinon.stub(ProtocolManager.prototype, 'prepareProtocol').resolves()
-
-      this.config.testingType = 'e2e'
-
-      await this.project.open()
-
-      expect(studio.getAndInitializeStudioManager).to.be.calledWith({
-        projectId: 'abc123',
-        cloudDataSource: ctx.cloud,
-      })
-
-      const studioReadyPromise = new Promise((resolve) => {
-        ctx.coreData.studioLifecycleManager?.onStudioReady((studioManager) => {
-          resolve(studioManager)
-        })
-      })
-
-      const studioManager = await studioReadyPromise
-
-      expect(studioManager).to.eq(this.testStudioManager)
-      expect(api.getCaptureProtocolScript).to.be.calledWith('http://localhost:1234/capture-protocol/script/current.js')
-      expect(ProtocolManager.prototype.prepareProtocol).to.be.calledWith('console.log("hello")', {
-        runId: 'studio',
-        projectId: 'abc123',
-        testingType: 'e2e',
-        cloudApi: {
-          url: 'http://localhost:1234/',
-          retryWithBackoff: api.retryWithBackoff,
-          requestPromise: api.rp,
-        },
-        projectConfig: {
-          devServerPublicPathRoute: '/__cypress/src',
-          namespace: '__cypress',
-          port: 8888,
-          proxyUrl: 'http://localhost:8888',
-        },
-        mountVersion: 2,
-        debugData: {},
-        mode: 'studio',
-      })
-    })
-
     describe('saved state', function () {
       beforeEach(function () {
         this._time = 1609459200000
@@ -752,7 +704,18 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
 
-      await studioLifecycleManager.setStudioPromise(Promise.resolve(studioManager))
+      // Set up the studio manager promise directly
+      studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
+
+      // Create a browser object
+      this.project.browser = {
+        name: 'chrome',
+        family: 'chromium',
+      }
+
+      this.project.options = { browsers: [this.project.browser] }
+
+      sinon.stub(browsers, 'closeProtocolConnection').resolves()
 
       sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
       sinon.stub(this.project, 'protocolManager').get(() => {
@@ -760,18 +723,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       }).set((protocolManager) => {
         this.project['_protocolManager'] = protocolManager
       })
-
-      this.project.browser = {
-        name: 'chrome',
-        family: 'chromium',
-        channel: 'stable',
-      }
-
-      this.project.options.browsers = [{
-        name: 'chrome',
-        family: 'chromium',
-        channel: 'stable',
-      }]
 
       let studioInitPromise
 
@@ -790,7 +741,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       expect(mockAccessStudioAI).to.be.calledWith({
         family: 'chromium',
         name: 'chrome',
-        channel: 'stable',
       })
 
       expect(browsers.connectProtocolToBrowser).to.be.calledWith({
@@ -822,12 +772,18 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
 
-      await studioLifecycleManager.setStudioPromise(Promise.resolve(studioManager))
+      // Set up the studio manager promise directly
+      studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
 
+      // Create a browser object
       this.project.browser = {
         name: 'chrome',
         family: 'chromium',
       }
+
+      this.project.options = { browsers: [this.project.browser] }
+
+      sinon.stub(browsers, 'closeProtocolConnection').resolves()
 
       sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
       sinon.stub(this.project, 'protocolManager').get(() => {
@@ -880,12 +836,18 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
 
-      await studioLifecycleManager.setStudioPromise(Promise.resolve(studioManager))
+      // Set up the studio manager promise directly
+      studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
 
+      // Create a browser object
       this.project.browser = {
         name: 'chrome',
         family: 'chromium',
       }
+
+      this.project.options = { browsers: [this.project.browser] }
+
+      sinon.stub(browsers, 'closeProtocolConnection').resolves()
 
       sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
       sinon.stub(this.project, 'protocolManager').get(() => {
@@ -925,8 +887,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
 
-      // Set the studio manager promise to immediately resolve with our test studio manager
-      await studioLifecycleManager.setStudioPromise(Promise.resolve(studioManager))
+      // Set up the studio manager promise directly
+      studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
 
       // Create a browser object
       this.project.browser = {
@@ -936,10 +898,10 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       this.project.options = { browsers: [this.project.browser] }
 
+      sinon.stub(browsers, 'closeProtocolConnection').resolves()
+
       // Track the callbacks passed to startWebsockets
       let callbacks
-
-      sinon.stub(browsers, 'closeProtocolConnection').resolves()
 
       // Modify the startWebsockets stub to track the callbacks
       this.project.server.startWebsockets.callsFake((automation, config, cbObject) => {

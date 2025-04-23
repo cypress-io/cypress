@@ -20,16 +20,11 @@ import system from './util/system'
 import type { BannersState, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ProtocolManagerShape, ReceivedCypressOptions, ResolvedConfigurationOptions, TestingType, VideoRecording, AutomationCommands } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { createHmac } from 'crypto'
-import ProtocolManager from './cloud/protocol'
 import { ServerBase } from './server-base'
 import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/service-worker-manager'
-import { getAndInitializeStudioManager } from './cloud/api/get_and_initialize_studio_manager'
-import api from './cloud/api'
 import { v4 } from 'uuid'
 import { StudioLifecycleManager } from './StudioLifecycleManager'
-
-const routes = require('./cloud/routes')
 
 export interface Cfg extends ReceivedCypressOptions {
   projectId?: string
@@ -72,7 +67,6 @@ export class ProjectBase extends EE {
   private _protocolManager?: ProtocolManagerShape
   private _recordTests?: any = null
   private _isServerOpen: boolean = false
-  private studioManagerPromise: Promise<void> | null = null
 
   public videoRecording?: VideoRecording
   public browser: any
@@ -160,48 +154,14 @@ export class ProjectBase extends EE {
 
     this._server = new ServerBase(cfg)
 
-    // Start studio manager initialization but don't block
-    const studioManagerPromise = getAndInitializeStudioManager({
-      projectId: cfg.projectId,
-      cloudDataSource: this.ctx.cloud,
-    }).then(async (studioManager) => {
-      if (studioManager.status === 'ENABLED') {
-        const protocolManager = new ProtocolManager()
-        const protocolUrl = routes.apiRoutes.captureProtocolCurrent()
-        const script = await api.getCaptureProtocolScript(protocolUrl)
-
-        await protocolManager.prepareProtocol(script, {
-          runId: 'studio',
-          projectId: cfg.projectId,
-          testingType: cfg.testingType,
-          cloudApi: {
-            url: routes.apiUrl,
-            retryWithBackoff: api.retryWithBackoff,
-            requestPromise: api.rp,
-          },
-          projectConfig: _.pick(cfg, ['devServerPublicPathRoute', 'port', 'proxyUrl', 'namespace']),
-          mountVersion: api.runnerCapabilities.protocolMountVersion,
-          debugData: this.configDebugData,
-          mode: 'studio',
-        })
-
-        studioManager.protocolManager = protocolManager
-        studioManager.isProtocolEnabled = true
-      }
-
-      return studioManager
-    }).catch((err) => {
-      debug('Error during studio manager setup: %o', err)
-
-      return null
-    })
-
-    // Create a StudioLifecycleManager and set the studio manager promise
     const studioLifecycleManager = new StudioLifecycleManager()
 
-    studioLifecycleManager.setStudioPromise(studioManagerPromise)
-    .catch((err) => {
-      debug('Error setting studio manager promise: %o', err)
+    void studioLifecycleManager.initializeStudioManager({
+      projectId: cfg.projectId,
+      cloudDataSource: this.ctx.cloud,
+      cfg,
+      debugData: this.configDebugData,
+      ctx: this.ctx,
     })
 
     // Register a listener to update config when studio is ready
@@ -223,10 +183,6 @@ export class ProjectBase extends EE {
 
         debug('Updated config with hideRunnerUi:', hideRunnerUi)
       }
-    })
-
-    this.ctx.update((data) => {
-      data.studioLifecycleManager = studioLifecycleManager
     })
 
     const [port, warning] = await this._server.open(cfg, {

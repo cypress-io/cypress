@@ -1,12 +1,101 @@
 import { EventEmitter } from 'stream'
 import type { StudioManager } from './cloud/studio'
+import { ProtocolManager } from './cloud/protocol'
+import { getAndInitializeStudioManager } from './cloud/api/get_and_initialize_studio_manager'
+import Debug from 'debug'
+import type { CloudDataSource } from '@packages/data-context/src/sources'
+import type { Cfg } from './project-base'
+import _ from 'lodash'
+import type { DataContext } from '@packages/data-context'
+import api from './cloud/api'
+
+const debug = Debug('cypress:server:studio-lifecycle-manager')
+const routes = require('./cloud/routes')
 
 export class StudioLifecycleManager extends EventEmitter {
   studioManagerPromise: Promise<StudioManager | null> | null = null
   private static readonly STUDIO_READY_EVENT = 'studio:ready'
+  private ctx: DataContext | null = null
 
-  async initialize () {
-    this.emit('initialize')
+  /**
+   * Set the studio manager promise and register listeners
+   * @param studioManagerPromise Promise that resolves to a StudioManager
+   */
+  private setStudioManagerPromise (studioManagerPromise: Promise<StudioManager | null>): void {
+    this.studioManagerPromise = studioManagerPromise
+
+    // When the promise resolves, emit the studio:ready event with the studio manager
+    void studioManagerPromise.then((studioManager) => {
+      this.emit(StudioLifecycleManager.STUDIO_READY_EVENT, studioManager)
+    })
+  }
+
+  /**
+   * Initialize the studio manager and possibly set up protocol.
+   * Also registers this instance in the data context.
+   * @param projectId The project ID
+   * @param cloudDataSource The cloud data source
+   * @param cfg The project configuration
+   * @param debugData Debug data for the configuration
+   * @param ctx Data context to register this instance with
+   */
+  async initializeStudioManager ({
+    projectId,
+    cloudDataSource,
+    cfg,
+    debugData,
+    ctx,
+  }: {
+    projectId?: string
+    cloudDataSource: CloudDataSource
+    cfg: Cfg
+    debugData: any
+    ctx: DataContext
+  }): Promise<void> {
+    debug('Initializing studio manager')
+
+    const studioManagerPromise = getAndInitializeStudioManager({
+      projectId,
+      cloudDataSource,
+    }).then(async (studioManager) => {
+      if (studioManager.status === 'ENABLED') {
+        debug('Studio manager enabled, setting up protocol')
+        const protocolManager = new ProtocolManager()
+        const protocolUrl = routes.apiRoutes.captureProtocolCurrent()
+        const script = await api.getCaptureProtocolScript(protocolUrl)
+
+        await protocolManager.prepareProtocol(script, {
+          runId: 'studio',
+          projectId: cfg.projectId,
+          testingType: cfg.testingType,
+          cloudApi: {
+            url: routes.apiUrl,
+            retryWithBackoff: api.retryWithBackoff,
+            requestPromise: api.rp,
+          },
+          projectConfig: _.pick(cfg, ['devServerPublicPathRoute', 'port', 'proxyUrl', 'namespace']),
+          mountVersion: api.runnerCapabilities.protocolMountVersion,
+          debugData,
+          mode: 'studio',
+        })
+
+        studioManager.protocolManager = protocolManager
+        studioManager.isProtocolEnabled = true
+      }
+
+      return studioManager
+    }).catch((err) => {
+      debug('Error during studio manager setup: %o', err)
+
+      return null
+    })
+
+    this.setStudioManagerPromise(studioManagerPromise)
+
+    // Register this instance in the data context
+    ctx.update((data) => {
+      data.studioLifecycleManager = this
+    })
   }
 
   /**
@@ -31,15 +120,6 @@ export class StudioLifecycleManager extends EventEmitter {
     }
 
     return this.studioManagerPromise
-  }
-
-  async setStudioPromise (studioManagerPromise: Promise<StudioManager | null>) {
-    this.studioManagerPromise = studioManagerPromise
-
-    // When the promise resolves, emit the studio:ready event with the studio manager
-    void studioManagerPromise.then((studioManager) => {
-      this.emit(StudioLifecycleManager.STUDIO_READY_EVENT, studioManager)
-    })
   }
 
   /**

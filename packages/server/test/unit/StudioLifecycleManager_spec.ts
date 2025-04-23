@@ -2,6 +2,12 @@ import { expect } from 'chai'
 import { StudioManager } from '../../lib/cloud/studio'
 import { StudioLifecycleManager } from '../../lib/StudioLifecycleManager'
 import { sinon } from '../spec_helper'
+import type { DataContext } from '@packages/data-context'
+import type { Cfg } from '../../lib/project-base'
+import type { CloudDataSource } from '@packages/data-context/src/sources'
+import * as getAndInitializeStudioManagerModule from '../../lib/cloud/api/get_and_initialize_studio_manager'
+import ProtocolManager from '../../lib/cloud/protocol'
+const api = require('../../lib/cloud/api').default
 
 // Helper to wait for next tick in event loop
 const nextTick = () => new Promise((resolve) => process.nextTick(resolve))
@@ -9,26 +15,138 @@ const nextTick = () => new Promise((resolve) => process.nextTick(resolve))
 describe('StudioLifecycleManager', () => {
   let studioLifecycleManager: StudioLifecycleManager
   let mockStudioManager: StudioManager
+  let mockCtx: DataContext
+  let mockCloudDataSource: CloudDataSource
+  let mockCfg: Cfg
+  let getAndInitializeStudioManagerStub: sinon.SinonStub
+  let emitSpy: sinon.SinonSpy
+  let getCaptureProtocolScriptStub: sinon.SinonStub
+  let prepareProtocolStub: sinon.SinonStub
 
   beforeEach(() => {
     studioLifecycleManager = new StudioLifecycleManager()
     mockStudioManager = {
       addSocketListeners: sinon.stub(),
       canAccessStudioAI: sinon.stub().resolves(true),
+      status: 'INITIALIZED',
     } as unknown as StudioManager
+
+    mockCtx = {
+      update: sinon.stub(),
+      coreData: {},
+    } as unknown as DataContext
+
+    mockCloudDataSource = {} as CloudDataSource
+
+    mockCfg = {
+      projectId: 'abc123',
+      testingType: 'e2e',
+      projectRoot: '/test/project',
+      port: 8888,
+      proxyUrl: 'http://localhost:8888',
+      devServerPublicPathRoute: '/__cypress/src',
+      namespace: '__cypress',
+    } as unknown as Cfg
+
+    // Use spy instead of stub for emit to allow the actual emit functionality to work
+    emitSpy = sinon.spy(studioLifecycleManager, 'emit')
+
+    // Stub the getAndInitializeStudioManager function
+    getAndInitializeStudioManagerStub = sinon.stub(getAndInitializeStudioManagerModule, 'getAndInitializeStudioManager')
+    getAndInitializeStudioManagerStub.resolves(mockStudioManager)
+
+    // Stub protocol data
+    getCaptureProtocolScriptStub = sinon.stub(api, 'getCaptureProtocolScript').resolves('console.log("hello")')
+    prepareProtocolStub = sinon.stub(ProtocolManager.prototype, 'prepareProtocol').resolves()
   })
 
   afterEach(() => {
     sinon.restore()
   })
 
-  describe('initialize', () => {
-    it('emits the initialize event', async () => {
-      const emitSpy = sinon.spy(studioLifecycleManager, 'emit')
+  describe('initializeStudioManager', () => {
+    it('initializes the studio manager and registers it in the data context', async () => {
+      studioLifecycleManager.initializeStudioManager({
+        projectId: 'test-project-id',
+        cloudDataSource: mockCloudDataSource,
+        cfg: mockCfg,
+        debugData: {},
+        ctx: mockCtx,
+      })
 
-      await studioLifecycleManager.initialize()
+      const studioReadyPromise = new Promise((resolve) => {
+        studioLifecycleManager?.onStudioReady((studioManager) => {
+          resolve(studioManager)
+        })
+      })
 
-      expect(emitSpy).to.be.calledWith('initialize')
+      await studioReadyPromise
+
+      expect(mockCtx.update).to.be.calledOnce
+      expect(studioLifecycleManager.studioManagerPromise).to.not.be.null
+      expect(emitSpy).to.be.calledWith('studio:ready', mockStudioManager)
+    })
+
+    it('sets up protocol if studio is enabled', async () => {
+      mockStudioManager.status = 'ENABLED'
+
+      studioLifecycleManager.initializeStudioManager({
+        projectId: 'abc123',
+        cloudDataSource: mockCloudDataSource,
+        cfg: mockCfg,
+        debugData: {},
+        ctx: mockCtx,
+      })
+
+      const studioReadyPromise = new Promise((resolve) => {
+        studioLifecycleManager?.onStudioReady((studioManager) => {
+          resolve(studioManager)
+        })
+      })
+
+      await studioReadyPromise
+
+      expect(getCaptureProtocolScriptStub).to.be.calledWith('http://localhost:1234/capture-protocol/script/current.js')
+      expect(prepareProtocolStub).to.be.calledWith('console.log("hello")', {
+        runId: 'studio',
+        projectId: 'abc123',
+        testingType: 'e2e',
+        cloudApi: {
+          url: 'http://localhost:1234/',
+          retryWithBackoff: api.retryWithBackoff,
+          requestPromise: api.rp,
+        },
+        projectConfig: {
+          devServerPublicPathRoute: '/__cypress/src',
+          namespace: '__cypress',
+          port: 8888,
+          proxyUrl: 'http://localhost:8888',
+        },
+        mountVersion: 2,
+        debugData: {},
+        mode: 'studio',
+      })
+    })
+
+    it('handles errors during initialization', async () => {
+      const error = new Error('Test error')
+
+      getAndInitializeStudioManagerStub.rejects(error)
+
+      // Should not throw
+      await studioLifecycleManager.initializeStudioManager({
+        projectId: 'test-project-id',
+        cloudDataSource: mockCloudDataSource,
+        cfg: mockCfg,
+        debugData: {},
+        ctx: mockCtx,
+      })
+
+      // Should still update the context
+      expect(mockCtx.update).to.be.calledOnce
+      const result = await studioLifecycleManager.studioManagerPromise
+
+      expect(result).to.be.null
     })
   })
 
@@ -38,7 +156,7 @@ describe('StudioLifecycleManager', () => {
     })
 
     it('returns true when studioManagerPromise is set', async () => {
-      await studioLifecycleManager.setStudioPromise(Promise.resolve(mockStudioManager))
+      studioLifecycleManager.studioManagerPromise = Promise.resolve(mockStudioManager)
 
       expect(studioLifecycleManager.isStudioReady()).to.be.true
     })
@@ -52,7 +170,7 @@ describe('StudioLifecycleManager', () => {
     it('returns the promise when studioManagerPromise is set', async () => {
       const promise = Promise.resolve(mockStudioManager)
 
-      await studioLifecycleManager.setStudioPromise(promise)
+      studioLifecycleManager.studioManagerPromise = promise
 
       expect(studioLifecycleManager.getStudioIfReady()).to.equal(promise)
     })
@@ -69,43 +187,11 @@ describe('StudioLifecycleManager', () => {
     })
 
     it('returns the resolved promise when studioManagerPromise is set', async () => {
-      await studioLifecycleManager.setStudioPromise(Promise.resolve(mockStudioManager))
+      studioLifecycleManager.studioManagerPromise = Promise.resolve(mockStudioManager)
 
       const result = await studioLifecycleManager.getStudio()
 
       expect(result).to.equal(mockStudioManager)
-    })
-  })
-
-  describe('setStudioPromise', () => {
-    it('sets the studioManagerPromise', async () => {
-      const promise = Promise.resolve(mockStudioManager)
-
-      await studioLifecycleManager.setStudioPromise(promise)
-
-      expect(studioLifecycleManager.studioManagerPromise).to.equal(promise)
-    })
-
-    it('emits studio:ready event when promise resolves with a studio manager', async () => {
-      const emitSpy = sinon.spy(studioLifecycleManager, 'emit')
-      const promise = Promise.resolve(mockStudioManager)
-
-      await studioLifecycleManager.setStudioPromise(promise)
-      // Wait for promise to resolve and event to be emitted
-      await nextTick()
-
-      expect(emitSpy).to.be.calledWith('studio:ready', mockStudioManager)
-    })
-
-    it('emits studio:ready event with null when promise resolves to null', async () => {
-      const emitSpy = sinon.spy(studioLifecycleManager, 'emit')
-      const promise = Promise.resolve(null)
-
-      await studioLifecycleManager.setStudioPromise(promise)
-      // Wait for promise to resolve
-      await nextTick()
-
-      expect(emitSpy).to.be.calledWith('studio:ready', null)
     })
   })
 
@@ -133,7 +219,7 @@ describe('StudioLifecycleManager', () => {
     it('calls listener immediately if studioManagerPromise is already resolved', async () => {
       const listener = sinon.stub()
 
-      await studioLifecycleManager.setStudioPromise(Promise.resolve(mockStudioManager))
+      studioLifecycleManager.studioManagerPromise = Promise.resolve(mockStudioManager)
       // Ensure promise is resolved
       await nextTick()
 
@@ -148,7 +234,7 @@ describe('StudioLifecycleManager', () => {
       const listener = sinon.stub()
       const offSpy = sinon.spy(studioLifecycleManager, 'off')
 
-      await studioLifecycleManager.setStudioPromise(Promise.resolve(null))
+      studioLifecycleManager.studioManagerPromise = Promise.resolve(null)
       // Ensure promise is resolved
       await nextTick()
 
@@ -165,7 +251,7 @@ describe('StudioLifecycleManager', () => {
       const offSpy = sinon.spy(studioLifecycleManager, 'off')
       const listener = sinon.stub()
 
-      await studioLifecycleManager.setStudioPromise(Promise.resolve(mockStudioManager))
+      studioLifecycleManager.studioManagerPromise = Promise.resolve(mockStudioManager)
       // Ensure promise is resolved
       await nextTick()
 
