@@ -6,7 +6,7 @@
   },
   "devDependencies": {
     "@builder.io/qwik": "0.17.5",
-    "vite": "5.4.10"
+    "vite": "^5.4.18"
   },
   "engines": {
     "node": ">=20.0.0"
