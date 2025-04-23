@@ -1,13 +1,13 @@
 /**
  * These modules are force no rewritten because they are rewritten in a way that
- * breaks the snapshot but is not detected automatically by the snapshot builder. 
+ * breaks the snapshot but is not detected automatically by the snapshot builder.
  * When run through the snapshot generator, these strings
  * will be compared to the file's path and if they match, the given
  * file will be marked as force no rewritten. If we want to match the full path, we
- * should include the full relative path with respect to the project base (e.g. 
+ * should include the full relative path with respect to the project base (e.g.
  * packages/https-proxy/lib/ca.js). For files where we want to match multiple hoisted
- * locations, we should specify the dependency starting with `*/` (e.g.
- * */node_modules/signal-exit/index.js)
+ * locations, we should specify the dependency starting with `* /` (e.g.
+ * `* /node_modules/signal-exit/index.js`)
  */
 export default [
   // recursion due to process.emit overwrites which is incorrectly rewritten
