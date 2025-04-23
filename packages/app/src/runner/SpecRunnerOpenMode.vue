@@ -248,7 +248,7 @@ const studioStatus = computed(() => {
 })
 
 const shouldShowStudioButton = computed(() => {
-  return !!props.gql.studio && !studioStore.isActive
+  return !!props.gql.studio && !studioStore.isOpen
 })
 
 const shouldShowStudioPanel = computed(() => {
