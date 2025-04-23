@@ -1,11 +1,24 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 14.3.3
+
+_Released 5/6/2025 (PENDING)_
+
+**Misc:**
+
+- The URL in the Cypress App no longer displays a white background when the URL is loading. Fixes [#31556](https://github.com/cypress-io/cypress/issues/31556).
+
 ## 14.3.2
 
-_Released 4/22/2025 (PENDING)_
+_Released 4/22/2025_
 
 **Bugfixes:**
 
 - Fixed an issue where auto scroll in the Cypress Command Log was not scrolling correctly. Fixes [#31530](https://github.com/cypress-io/cypress/issues/31530).
+- Fixed an issue where a message pointing users to the Cypress Cloud was not displaying on runs with failures in CI. Fixes [#31550](https://github.com/cypress-io/cypress/issues/31550).
+
+**Misc:**
+
+- The URL in the Cypress App no longer displays a white background when the URL is loading. Fixes [#31556](https://github.com/cypress-io/cypress/issues/31556).
 
 ## 14.3.1
 
