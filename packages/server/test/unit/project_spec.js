@@ -296,13 +296,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       it('returns true if runnerUi arg is not set and protocol is enabled', function () {
         this.project.protocolManager = { isProtocolEnabled: true }
-
-        // Create StudioLifecycleManager and set it up to return null (indicating studio is not ready)
-        const studioLifecycleManager = new StudioLifecycleManager()
-
-        this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
-
-        sinon.stub(studioLifecycleManager, 'isStudioReady').returns(false)
+        this.project.cfg.isTextTerminal = true
 
         const config = this.project.getConfig()
 
@@ -311,13 +305,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       it('returns false if runnerUi arg is not set and protocol is not enabled', function () {
         this.project.protocolManager = { isProtocolEnabled: false }
-
-        // Create StudioLifecycleManager and set it up to return null (indicating studio is not ready)
-        const studioLifecycleManager = new StudioLifecycleManager()
-
-        this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
-
-        sinon.stub(studioLifecycleManager, 'isStudioReady').returns(false)
+        this.project.cfg.isTextTerminal = true
 
         const config = this.project.getConfig()
 
@@ -327,13 +315,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       it('returns false if runnerUi arg is set to true and protocol is enabled', function () {
         this.project.protocolManager = { isProtocolEnabled: true }
         this.project.options.args.runnerUi = true
-
-        // Create StudioLifecycleManager and set it up to return null (indicating studio is not ready)
-        const studioLifecycleManager = new StudioLifecycleManager()
-
-        this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
-
-        sinon.stub(studioLifecycleManager, 'isStudioReady').returns(false)
+        this.project.cfg.isTextTerminal = true
 
         const config = this.project.getConfig()
 
@@ -350,22 +332,13 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         expect(config.hideCommandLog).to.be.true
       })
 
-      it('returns false if in run mode and protocol is enabled', function () {
-        const cfg = { isTextTerminal: true }
-
-        this.project.cfg = cfg
-
-        const studioLifecycleManager = new StudioLifecycleManager()
-
-        this.project.ctx = this.project.ctx || {}
-        this.project.ctx.coreData = this.project.ctx.coreData || {}
-        this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
-
-        sinon.stub(studioLifecycleManager, 'isStudioReady').returns(true)
+      it('returns true if in run mode and protocol is enabled', function () {
+        this.project.protocolManager = { isProtocolEnabled: true }
+        this.project.cfg.isTextTerminal = true
 
         const config = this.project.getConfig()
 
-        expect(config.hideRunnerUi).to.be.false
+        expect(config.hideRunnerUi).to.be.true
       })
     })
   })
