@@ -1,7 +1,7 @@
+import { sinon } from '../spec_helper'
 import { expect } from 'chai'
 import { StudioManager } from '../../lib/cloud/studio'
 import { StudioLifecycleManager } from '../../lib/StudioLifecycleManager'
-import { sinon } from '../spec_helper'
 import type { DataContext } from '@packages/data-context'
 import type { Cfg } from '../../lib/project-base'
 import type { CloudDataSource } from '@packages/data-context/src/sources'
