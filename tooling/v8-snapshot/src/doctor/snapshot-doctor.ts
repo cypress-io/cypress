@@ -59,7 +59,7 @@ export const doesDependencyMatchForceNorewriteEntry = (dependency: string, force
   // and match all possible node_modules paths if the force no
   // rewrite entry starts with "*/". If it does not
   // start with "*" then it is an exact match.
-  return (forceNorewrite.startsWith('*') && dependency.endsWith(forceNorewrite.slice(2))) || dependency === forceNorewrite
+  return (forceNorewrite.startsWith('*/') && dependency.endsWith(forceNorewrite.slice(2))) || dependency === forceNorewrite
 }
 
 /**
