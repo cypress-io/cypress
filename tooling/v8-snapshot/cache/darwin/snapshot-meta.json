@@ -4174,6 +4174,8 @@
     "./packages/socket/node_modules/socket.io/node_modules/ws/lib/validation.js",
     "./packages/socket/node_modules/socket.io/package.json",
     "./packages/telemetry/dist/detectors/circleCiDetectorSync.js",
+    "./packages/telemetry/dist/index.js",
+    "./packages/telemetry/dist/node.js",
     "./packages/telemetry/dist/processors/on-start-span-processor.js",
     "./packages/telemetry/dist/span-exporters/cloud-span-exporter.js",
     "./packages/telemetry/dist/span-exporters/console-trace-link-exporter.js",
