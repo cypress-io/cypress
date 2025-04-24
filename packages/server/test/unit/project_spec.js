@@ -302,8 +302,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
         this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
 
-        // Mock getStudioIfReady to return null (indicating studio is not ready)
-        sinon.stub(studioLifecycleManager, 'getStudioIfReady').returns(null)
+        sinon.stub(studioLifecycleManager, 'isStudioReady').returns(false)
 
         const config = this.project.getConfig()
 
@@ -318,8 +317,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
         this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
 
-        // Mock getStudioIfReady to return null (studio readiness doesn't matter when protocol is disabled)
-        sinon.stub(studioLifecycleManager, 'getStudioIfReady').returns(null)
+        sinon.stub(studioLifecycleManager, 'isStudioReady').returns(false)
 
         const config = this.project.getConfig()
 
@@ -335,8 +333,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
         this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
 
-        // Mock getStudioIfReady to return null (studio readiness doesn't matter when runnerUi is explicitly set)
-        sinon.stub(studioLifecycleManager, 'getStudioIfReady').returns(null)
+        sinon.stub(studioLifecycleManager, 'isStudioReady').returns(false)
 
         const config = this.project.getConfig()
 
@@ -353,18 +350,18 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         expect(config.hideCommandLog).to.be.true
       })
 
-      it('returns false if cloud studio is enabled', function () {
-        this.project.protocolManager = { isProtocolEnabled: true }
+      it('returns false if in run mode and protocol is enabled', function () {
+        const cfg = { isTextTerminal: true }
 
-        // Create StudioLifecycleManager and set it up to return a ready studio
+        this.project.cfg = cfg
+
         const studioLifecycleManager = new StudioLifecycleManager()
 
+        this.project.ctx = this.project.ctx || {}
+        this.project.ctx.coreData = this.project.ctx.coreData || {}
         this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
 
-        // Mock getStudioIfReady to return an object (indicating studio is ready)
-        sinon.stub(studioLifecycleManager, 'getStudioIfReady').returns({
-          isProtocolEnabled: true,
-        })
+        sinon.stub(studioLifecycleManager, 'isStudioReady').returns(true)
 
         const config = this.project.getConfig()
 
@@ -609,14 +606,20 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       this.project.ctx = this.project.ctx || {}
       this.project.ctx.coreData = this.project.ctx.coreData || {}
       this.project.ctx.coreData.studioLifecycleManager = {
-        getStudioIfReady: sinon.stub().returns({
+        isStudioReady: sinon.stub().returns(true),
+        getStudio: sinon.stub().resolves({
           isProtocolEnabled: false,
         }),
       }
 
+      let protocolManagerValue
+
+      sinon.stub(this.project, 'protocolManager').get(() => protocolManagerValue).set((val) => {
+        protocolManagerValue = val
+      })
+
       this.project.reset()
       expect(this.project._automation.reset).to.be.calledOnce
-
       expect(this.project.server.reset).to.be.calledOnce
     })
 
@@ -625,15 +628,22 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       this.project._cfg = {}
       this.project._protocolManager = { close: sinon.stub() }
 
-      // Create StudioLifecycleManager and set it up to return a ready studio
       const studioLifecycleManager = new StudioLifecycleManager()
 
+      this.project.ctx = this.project.ctx || {}
+      this.project.ctx.coreData = this.project.ctx.coreData || {}
       this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
 
-      // Create a studio object and setup the stub to return it
       const studio = { isProtocolEnabled: true }
 
-      sinon.stub(studioLifecycleManager, 'getStudioIfReady').returns(studio)
+      sinon.stub(studioLifecycleManager, 'isStudioReady').returns(true)
+      sinon.stub(studioLifecycleManager, 'getStudio').resolves(studio)
+
+      let protocolManagerValue = this.project._protocolManager
+
+      sinon.stub(this.project, 'protocolManager').get(() => protocolManagerValue).set((val) => {
+        protocolManagerValue = val
+      })
 
       // Call reset
       this.project.reset()
@@ -641,10 +651,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       // Verify expected behaviors
       expect(this.project._automation.reset).to.be.calledOnce
       expect(this.project.server.reset).to.be.calledOnce
-
-      // In a real implementation, the protocol manager would be closed and reset
-      // but we can't easily test that in isolation, so we're just verifying the
-      // method was called
     })
   })
 

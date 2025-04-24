@@ -83,7 +83,7 @@ describe('StudioLifecycleManager', () => {
       await studioReadyPromise
 
       expect(mockCtx.update).to.be.calledOnce
-      expect(studioLifecycleManager.studioManagerPromise).to.not.be.null
+      expect(studioLifecycleManager.isStudioReady()).to.be.true
       expect(emitSpy).to.be.calledWith('studio:ready', mockStudioManager)
     })
 
@@ -144,40 +144,38 @@ describe('StudioLifecycleManager', () => {
 
       // Should still update the context
       expect(mockCtx.update).to.be.calledOnce
-      const result = await studioLifecycleManager.studioManagerPromise
 
-      expect(result).to.be.null
+      // @ts-ignore - accessing private property for testing
+      const studioPromise = studioLifecycleManager.studioManagerPromise
+
+      expect(studioPromise).to.not.be.null
+
+      if (studioPromise) {
+        const result = await studioPromise
+
+        expect(result).to.be.null
+      }
     })
   })
 
   describe('isStudioReady', () => {
-    it('returns false when studioManagerPromise is null', () => {
+    it('returns false when studio manager has not been initialized', () => {
       expect(studioLifecycleManager.isStudioReady()).to.be.false
     })
 
-    it('returns true when studioManagerPromise is set', async () => {
+    it('returns true when studio has been initialized', async () => {
+      // @ts-ignore - accessing private property for testing
       studioLifecycleManager.studioManagerPromise = Promise.resolve(mockStudioManager)
+
+      // @ts-ignore - accessing private property for testing
+      studioLifecycleManager['studioReady'] = true
 
       expect(studioLifecycleManager.isStudioReady()).to.be.true
     })
   })
 
-  describe('getStudioIfReady', () => {
-    it('returns null when studioManagerPromise is null', () => {
-      expect(studioLifecycleManager.getStudioIfReady()).to.be.null
-    })
-
-    it('returns the promise when studioManagerPromise is set', async () => {
-      const promise = Promise.resolve(mockStudioManager)
-
-      studioLifecycleManager.studioManagerPromise = promise
-
-      expect(studioLifecycleManager.getStudioIfReady()).to.equal(promise)
-    })
-  })
-
   describe('getStudio', () => {
-    it('throws an error when studioManagerPromise is null', async () => {
+    it('throws an error when studio manager is not initialized', async () => {
       try {
         await studioLifecycleManager.getStudio()
         expect.fail('Expected method to throw')
@@ -186,7 +184,8 @@ describe('StudioLifecycleManager', () => {
       }
     })
 
-    it('returns the resolved promise when studioManagerPromise is set', async () => {
+    it('returns the studio manager when initialized', async () => {
+      // @ts-ignore - accessing private property for testing
       studioLifecycleManager.studioManagerPromise = Promise.resolve(mockStudioManager)
 
       const result = await studioLifecycleManager.getStudio()
@@ -216,47 +215,63 @@ describe('StudioLifecycleManager', () => {
       expect(offSpy).to.be.calledWith('studio:ready', listener)
     })
 
-    it('calls listener immediately if studioManagerPromise is already resolved', async () => {
+    it('calls listener immediately if studio is already ready', async () => {
       const listener = sinon.stub()
 
+      // @ts-ignore - accessing private property for testing
       studioLifecycleManager.studioManagerPromise = Promise.resolve(mockStudioManager)
-      // Ensure promise is resolved
-      await nextTick()
+
+      // @ts-ignore - accessing private property for testing
+      studioLifecycleManager['studioReady'] = true
+
+      await Promise.resolve()
 
       studioLifecycleManager.onStudioReady(listener)
-      // Need another tick to let the promise in onStudioReady resolve
+
+      await Promise.resolve()
+      await Promise.resolve()
       await nextTick()
 
       expect(listener).to.be.calledWith(mockStudioManager)
     })
 
-    it('does not call listener if studioManagerPromise resolves to null', async () => {
+    it('does not call listener if studio manager is null', async () => {
       const listener = sinon.stub()
-      const offSpy = sinon.spy(studioLifecycleManager, 'off')
 
+      // @ts-ignore - accessing private property for testing
       studioLifecycleManager.studioManagerPromise = Promise.resolve(null)
-      // Ensure promise is resolved
-      await nextTick()
+
+      // @ts-ignore - accessing private property for testing
+      studioLifecycleManager['studioReady'] = true
+
+      await Promise.resolve()
 
       studioLifecycleManager.onStudioReady(listener)
-      // Need another tick to let the promise in onStudioReady resolve
+
+      await Promise.resolve()
+      await Promise.resolve()
       await nextTick()
 
       expect(listener).not.to.be.called
-      // The listener should still be removed to prevent it from being called if another studioManager is set
-      expect(offSpy).to.be.calledWith('studio:ready', listener)
     })
 
     it('removes the listener after immediate call to prevent double execution', async () => {
-      const offSpy = sinon.spy(studioLifecycleManager, 'off')
       const listener = sinon.stub()
 
+      // @ts-ignore - accessing private property for testing
       studioLifecycleManager.studioManagerPromise = Promise.resolve(mockStudioManager)
-      // Ensure promise is resolved
-      await nextTick()
+
+      // @ts-ignore - accessing private property for testing
+      studioLifecycleManager['studioReady'] = true
+
+      await Promise.resolve()
+
+      const offSpy = sinon.spy(studioLifecycleManager, 'off')
 
       studioLifecycleManager.onStudioReady(listener)
-      // Need another tick to let the promise in onStudioReady resolve
+
+      await Promise.resolve()
+      await Promise.resolve()
       await nextTick()
 
       expect(offSpy).to.be.calledWith('studio:ready', listener)

@@ -154,36 +154,15 @@ export class ProjectBase extends EE {
 
     this._server = new ServerBase(cfg)
 
-    const studioLifecycleManager = new StudioLifecycleManager()
-
     if (!cfg.isTextTerminal) {
+      const studioLifecycleManager = new StudioLifecycleManager()
+
       studioLifecycleManager.initializeStudioManager({
         projectId: cfg.projectId,
         cloudDataSource: this.ctx.cloud,
         cfg,
         debugData: this.configDebugData,
         ctx: this.ctx,
-      })
-
-      // Register a listener to update config when studio is ready
-      studioLifecycleManager.onStudioReady((studioManager) => {
-        debug('Studio is ready, updating config with isStudioProtocolEnabled:', studioManager.isProtocolEnabled)
-
-        // Update our cached config with the studio protocol enabled state
-        if (this._cfg) {
-          this._cfg.isStudioProtocolEnabled = studioManager.isProtocolEnabled
-
-          // Also update hideRunnerUi based on the studio state
-          const isDefaultProtocolEnabled = this._protocolManager?.isProtocolEnabled ?? false
-
-          const studio = this.ctx.coreData.studioLifecycleManager?.getStudioIfReady()
-          const hideRunnerUi = this.options?.args?.runnerUi === false ||
-          (isDefaultProtocolEnabled && !studio && !this.options?.args?.runnerUi)
-
-          this._cfg.hideRunnerUi = hideRunnerUi
-
-          debug('Updated config with hideRunnerUi:', hideRunnerUi)
-        }
       })
     }
 
@@ -276,7 +255,7 @@ export class ProjectBase extends EE {
 
     // if we're in studio mode, we need to close the protocol manager
     // to ensure the config is initialized properly on browser relaunch
-    if (this.getConfig().isStudioProtocolEnabled) {
+    if (this.ctx.coreData.studioLifecycleManager) {
       this.protocolManager?.close()
       this.protocolManager = undefined
     }
@@ -430,9 +409,9 @@ export class ProjectBase extends EE {
             return { canAccessStudioAI }
           }
 
-          this.protocolManager = studio?.protocolManager
-          this.protocolManager?.setupProtocol()
-          this.protocolManager?.beforeSpec({
+          this.protocolManager = studio.protocolManager
+          this.protocolManager.setupProtocol()
+          this.protocolManager.beforeSpec({
             ...this.spec,
             instanceId: v4(),
           })
@@ -444,8 +423,6 @@ export class ProjectBase extends EE {
 
             return { canAccessStudioAI: false }
           }
-
-          this.protocolManager = studio.protocolManager
 
           await studio.initializeStudioAI({
             protocolDbPath: studio.protocolManager.dbPath,
@@ -618,11 +595,9 @@ export class ProjectBase extends EE {
 
     const isDefaultProtocolEnabled = this._protocolManager?.isProtocolEnabled ?? false
 
-    // hide the runner if explicitly requested or if the protocol is enabled outside of studio and the runner is not explicitly enabled
-    const studio = this.ctx.coreData.studioLifecycleManager?.getStudioIfReady()
     const hideRunnerUi = (
       this.options?.args?.runnerUi === false ||
-      (isDefaultProtocolEnabled && !studio && !this.options?.args?.runnerUi)
+      (isDefaultProtocolEnabled && !this._cfg.isTextTerminal && !this.options?.args?.runnerUi)
     )
 
     // hide the command log if explicitly requested or if we are hiding the runner

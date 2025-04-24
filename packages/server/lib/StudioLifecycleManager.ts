@@ -13,22 +13,9 @@ const debug = Debug('cypress:server:studio-lifecycle-manager')
 const routes = require('./cloud/routes')
 
 export class StudioLifecycleManager extends EventEmitter {
-  studioManagerPromise: Promise<StudioManager | null> | null = null
+  private studioManagerPromise: Promise<StudioManager | null> | null = null
+  private studioReady = false
   private static readonly STUDIO_READY_EVENT = 'studio:ready'
-  private ctx: DataContext | null = null
-
-  /**
-   * Set the studio manager promise and register listeners
-   * @param studioManagerPromise Promise that resolves to a StudioManager
-   */
-  private setStudioManagerPromise (studioManagerPromise: Promise<StudioManager | null>): void {
-    this.studioManagerPromise = studioManagerPromise
-
-    // When the promise resolves, emit the studio:ready event with the studio manager
-    void studioManagerPromise.then((studioManager) => {
-      this.emit(StudioLifecycleManager.STUDIO_READY_EVENT, studioManager)
-    })
-  }
 
   /**
    * Initialize the studio manager and possibly set up protocol.
@@ -90,7 +77,13 @@ export class StudioLifecycleManager extends EventEmitter {
       return null
     })
 
-    this.setStudioManagerPromise(studioManagerPromise)
+    this.studioManagerPromise = studioManagerPromise
+
+    // When the promise resolves, emit the studio:ready event with the studio manager
+    void studioManagerPromise.then((studioManager) => {
+      this.studioReady = true
+      this.emit(StudioLifecycleManager.STUDIO_READY_EVENT, studioManager)
+    })
 
     // Register this instance in the data context
     ctx.update((data) => {
@@ -98,20 +91,8 @@ export class StudioLifecycleManager extends EventEmitter {
     })
   }
 
-  /**
-   * Check if studio manager is ready to be used
-   * @returns boolean indicating if studio manager promise exists
-   */
   isStudioReady (): boolean {
-    return this.studioManagerPromise !== null
-  }
-
-  /**
-   * Get the studio manager if ready
-   * @returns The studio manager promise if ready, or null if not
-   */
-  getStudioIfReady (): Promise<StudioManager | null> | null {
-    return this.studioManagerPromise
+    return this.studioReady
   }
 
   async getStudio () {
@@ -119,7 +100,7 @@ export class StudioLifecycleManager extends EventEmitter {
       throw new Error('Studio manager has not been initialized')
     }
 
-    return this.studioManagerPromise
+    return await this.studioManagerPromise
   }
 
   /**

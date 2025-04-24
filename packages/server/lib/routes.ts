@@ -110,6 +110,9 @@ export const createCommonRoutes = ({
       await networkProxy.handleHttpRequest(req, res)
     })
   } else {
+    // express matches routes in order. since this callback executes after the
+    // router has already been defined, we need to create a new router to use
+    // for the studio routes
     const studioRouter = Router()
 
     router.use('/', studioRouter)
