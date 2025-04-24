@@ -131,6 +131,7 @@ const Reporter: React.FC<SingleReporterProps> = observer(({ appState = appStateD
   )
 })
 
+Reporter.displayName = 'Reporter'
 declare global {
   interface Window {
     Cypress: any

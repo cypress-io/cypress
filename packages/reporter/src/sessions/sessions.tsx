@@ -13,7 +13,7 @@ export interface SessionPanelProps {
   model: Record<string, SessionsModel>
 }
 
-const SessionRow = (model: SessionsModel) => {
+const SessionRow: React.FC<SessionsModel> = (model) => {
   const { name, isGlobalSession, id, status, testId } = model
 
   const printToConsole = (id) => {
@@ -43,7 +43,7 @@ const SessionRow = (model: SessionsModel) => {
   )
 }
 
-const Sessions = ({ model }: SessionPanelProps) => {
+const Sessions: React.FC<SessionPanelProps> = ({ model }) => {
   const sessions = Object.values(model)
 
   if (sessions.length === 0) {
