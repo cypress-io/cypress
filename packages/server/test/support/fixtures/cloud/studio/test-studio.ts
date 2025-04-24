@@ -1,7 +1,6 @@
 /// <reference types="cypress" />
 
 import type { StudioServerShape, StudioServerDefaultShape } from '@packages/types'
-import type Database from 'better-sqlite3'
 import type { Router } from 'express'
 import type { Socket } from '@packages/socket'
 
@@ -14,11 +13,19 @@ class StudioServer implements StudioServerShape {
     return Promise.resolve(true)
   }
 
-  addSocketListeners (socket: Socket): void {
+  initializeStudioAI (): Promise<void> {
+    return Promise.resolve()
+  }
+
+  reportError (error: Error, method: string, ...args: any[]): void {
     // This is a test implementation that does nothing
   }
 
-  setProtocolDb (db: Database.Database): void {
+  destroy (): Promise<void> {
+    return Promise.resolve()
+  }
+
+  addSocketListeners (socket: Socket): void {
     // This is a test implementation that does nothing
   }
 }

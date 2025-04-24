@@ -14,7 +14,7 @@ interface Props {
   stats: StatsStore
 }
 
-const Stats = observer(({ stats }: Props) => (
+const Stats: React.FC<Props> = observer(({ stats }: Props) => (
   <ul aria-label='Stats' className='stats'>
     <li className='passed'>
       <PassedIcon aria-hidden="true" />
@@ -33,5 +33,7 @@ const Stats = observer(({ stats }: Props) => (
     </li>
   </ul>
 ))
+
+Stats.displayName = 'Stats'
 
 export default Stats

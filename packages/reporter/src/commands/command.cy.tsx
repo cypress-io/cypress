@@ -29,6 +29,7 @@ describe('commands', () => {
                 numElements: 1,
               })
             }
+            scrollIntoView={() => {}}
           />
         </div>,
       )
@@ -96,6 +97,7 @@ describe('commands', () => {
                   numElements: 1,
                 })
               }
+              scrollIntoView={() => {}}
             />
           ))}
         </div>,

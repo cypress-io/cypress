@@ -114,4 +114,6 @@ const TestError: React.FC<TestErrorProps> = ({ err, groupLevel = 0, testId, comm
   )
 }
 
+TestError.displayName = 'TestError'
+
 export default observer(TestError)

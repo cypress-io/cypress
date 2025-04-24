@@ -4,18 +4,7 @@ const pkg = require('@packages/root')
 const api = require('./api').default
 const user = require('./user')
 const system = require('../util/system')
-
-// strip everything but the file name to remove any sensitive
-// data in the path
-const pathRe = /'?((\/|\\+|[a-z]:\\)[^\s']+)+'?/ig
-const pathSepRe = /[\/\\]+/
-const stripPath = (text) => {
-  return (text || '').replace(pathRe, (path) => {
-    const fileName = _.last(path.split(pathSepRe)) || ''
-
-    return `<stripped-path>${fileName}`
-  })
-}
+const { stripPath } = require('./strip_path')
 
 export = {
   getErr (err: Error) {
