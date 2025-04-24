@@ -57,17 +57,9 @@ export type SnapshotDoctorOpts = Omit<
 export const doesDependencyMatchForceNorewriteEntry = (dependency: string, forceNorewrite: string) => {
   // The force no rewrite file follows a convention where we try
   // and match all possible node_modules paths if the force no
-  // rewrite entry starts with "*". If it does not
+  // rewrite entry starts with "*/". If it does not
   // start with "*" then it is an exact match.
-  if (forceNorewrite.startsWith('*')) {
-    if (dependency.endsWith(forceNorewrite.slice(2))) {
-      return true
-    }
-  } else if (dependency === forceNorewrite) {
-    return true
-  }
-
-  return false
+  return (forceNorewrite.startsWith('*') && dependency.endsWith(forceNorewrite.slice(2))) || dependency === forceNorewrite
 }
 
 /**

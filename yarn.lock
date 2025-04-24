@@ -2813,70 +2813,70 @@
   resolved "https://registry.yarnpkg.com/@cypress/sinon-chai/-/sinon-chai-2.9.1.tgz#1705c0341bc286740979b1b1cac89b7f5d34d6bc"
   integrity sha512-qwFQ1urghF3mv7CFSDw/LEqIQP12qqKLuW7p6mXR92HP5fPNlgNiZVITWVsupDg7JpOEKfeRTVearo9mkk/5eg==
 
-"@cypress/snapbuild-android-arm64@1.0.4-beta-002":
-  version "1.0.4-beta-002"
-  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-android-arm64/-/snapbuild-android-arm64-1.0.4-beta-002.tgz#ed2ef96f563933da3b670fdefac3670b8cf88257"
-  integrity sha512-PXkayTn/QYapyo9QUk7y5yqHZMnk2ESU792uEa8M0/4l0LvD+L1ZtlCQw25VGi4Yr6gexjx+uTzdUlnTCKTG2g==
+"@cypress/snapbuild-android-arm64@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-android-arm64/-/snapbuild-android-arm64-1.0.4.tgz#b55b4c7040eefd270d15a7259bf7a1141c5b8c8b"
+  integrity sha512-op8n069RDxn5Y8DEAlcryp331z7xvpIiCNHjlLj7nLW5llxEN7sqXuLEu4sxHGE+1iNPyiKMUsTIrlYfZ8oTxg==
 
-"@cypress/snapbuild-darwin-64@1.0.4-beta-002":
-  version "1.0.4-beta-002"
-  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-darwin-64/-/snapbuild-darwin-64-1.0.4-beta-002.tgz#1d6f4c7f0e058d0cfe8758c2738bb2a085803496"
-  integrity sha512-Mjp4GOd3eflfVvdt9vYJ603TU/bVy38/w0/tH24+5j5JrzvpVXuVzpaioEx/d2lusQypEo4PSRVwrvL0HXckNA==
+"@cypress/snapbuild-darwin-64@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-darwin-64/-/snapbuild-darwin-64-1.0.4.tgz#b9da7a93da60b7bb2a5080d83ec2866da44ec7a8"
+  integrity sha512-Bv2NJL7AI13reotJqHazPTCQG/p/07JS4sshX+1qN6aR4syeYZXGGt5/BWb3FKdu95ttPTV7n31u50gJ1oPGQA==
 
-"@cypress/snapbuild-darwin-arm64@1.0.4-beta-002":
-  version "1.0.4-beta-002"
-  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-darwin-arm64/-/snapbuild-darwin-arm64-1.0.4-beta-002.tgz#31b3a2aeb53fcf3e1736d6bde5f9c1f7421d433c"
-  integrity sha512-5f4KfsFSoSpjgJspOBHXN8lO9hRRLt2vdL9YwwWDkYKMcS8sOIJuKkG0nYS+hwvYNSsBnm1knRnMxAx5BsD8wQ==
+"@cypress/snapbuild-darwin-arm64@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-darwin-arm64/-/snapbuild-darwin-arm64-1.0.4.tgz#cbd6cd8392c5001e7653fdd6f0a1b4c32ac2f187"
+  integrity sha512-FOL2MSzVVmblBmxy2ix7jLlDMNvkc/6CFAxeMaQs5k3yS/ISJVLF8+hxDeJ5okTAQmktm2hxCuvqNtIfXOBrig==
 
-"@cypress/snapbuild-freebsd-64@1.0.4-beta-002":
-  version "1.0.4-beta-002"
-  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-freebsd-64/-/snapbuild-freebsd-64-1.0.4-beta-002.tgz#69c34b365a1bb96790073b7f3c00e0591eb2682f"
-  integrity sha512-UxXNyXlNxyejNMo55gdbfdHIM4Oy0HxvhRnP2Mu6RmO6PyMfjfDmX+BuJVYHZ5Y9zT7ZQtSbe0TvkEgMAcph+g==
+"@cypress/snapbuild-freebsd-64@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-freebsd-64/-/snapbuild-freebsd-64-1.0.4.tgz#df651fd8d1f5752f26aa67ffd8bbab89b23a6ca6"
+  integrity sha512-r7duu+fdCnXematAOkkNn5eiH9pe1kYZhT9+hX1/EV5svyrKYYzudpOSqsANSM8mefECvw1CNXf2pkdr1eQwUQ==
 
-"@cypress/snapbuild-freebsd-arm64@1.0.4-beta-002":
-  version "1.0.4-beta-002"
-  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-freebsd-arm64/-/snapbuild-freebsd-arm64-1.0.4-beta-002.tgz#88a36bb39d876bdfcbdd76b12e00a6105ddee4da"
-  integrity sha512-oqqjDuiD/2tUqLVhV/IJORDmjgLUwZKe9Fj6yv6VzfUWA/HqLrUxVauTtY0XF9PXigs0TN4SqMpYA9fQy+a8kQ==
+"@cypress/snapbuild-freebsd-arm64@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-freebsd-arm64/-/snapbuild-freebsd-arm64-1.0.4.tgz#513405fe56b5e6f4ece42efa65cf3312e9a2b7d7"
+  integrity sha512-sIqLvNypokGS/Hkod0/O48PHoMI5ozr1Wbkdo+Y+gC3/B1mO8tzfXY921cthXDFmvOijRrx/G/zyYIDK0uKZbQ==
 
-"@cypress/snapbuild-linux-32@1.0.4-beta-002":
-  version "1.0.4-beta-002"
-  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-linux-32/-/snapbuild-linux-32-1.0.4-beta-002.tgz#d1ffb53fd0309f774d7bc7a6e13d06c73c7d1a63"
-  integrity sha512-2u/RI2EWiF17rZc/fJjLShFxNSwoORQwW+rLgPQ1Pnk6jA7JHOvyOjZz86WtiDtu2X3gA9GXOn6phfIxFxfM1Q==
+"@cypress/snapbuild-linux-32@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-linux-32/-/snapbuild-linux-32-1.0.4.tgz#1bc5927089c5ebb081a2ae7771401ca5c057e2f7"
+  integrity sha512-1wlEexRcQUJokvOvJ5eob5dqc09LaDas7pYAIO6Ry7npVCR+IkK6fFxSUhlS2wnLH0aYzODWPYxvpYid5t2UzQ==
 
-"@cypress/snapbuild-linux-64@1.0.4-beta-002":
-  version "1.0.4-beta-002"
-  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-linux-64/-/snapbuild-linux-64-1.0.4-beta-002.tgz#820b2acd4aea52e75d0d97f0d9a4504a74591efe"
-  integrity sha512-DjLf5QrS6ua0hyfnSdb8530B7tMELeOiXeD3mN3472a2oN5EzXr6MnHfhIZZUys8R4DJMJip6Q2DJD5JhzuqUQ==
+"@cypress/snapbuild-linux-64@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-linux-64/-/snapbuild-linux-64-1.0.4.tgz#1ee178d43a27b9f7f48ce6c5cbf225f905df0762"
+  integrity sha512-T1eYg1AXq2ene6StFqoU+6C+oKGmq0ivf2imOs6b+oFEn5i50fs48lVsRH0H79Ny12AFEXoBU+jtBkeKyUPKsw==
 
-"@cypress/snapbuild-linux-arm64@1.0.4-beta-002":
-  version "1.0.4-beta-002"
-  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-linux-arm64/-/snapbuild-linux-arm64-1.0.4-beta-002.tgz#cfd2abca4a42fee913ff8d887efdb7f6a9983a04"
-  integrity sha512-nmuxolg6vrqKo4c4kaqem+tT3muHhAMK1YG7Vm9jxWdL6BqTBFo02aGvgLRU59bZo6EMbHeHOFNW5zRz0ffXPA==
+"@cypress/snapbuild-linux-arm64@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-linux-arm64/-/snapbuild-linux-arm64-1.0.4.tgz#118cd5da1dbad714ca64e95cf35cf7e6404b4fe5"
+  integrity sha512-c04PE2GAWt4tey4ixGY4YIiMj++PrPid9geVijpjk1vZgeKtAC20TTMZ+8BDT9+n3aZuk5tqGHh+woH8ZqEutQ==
 
-"@cypress/snapbuild-linux-arm@1.0.4-beta-002":
-  version "1.0.4-beta-002"
-  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-linux-arm/-/snapbuild-linux-arm-1.0.4-beta-002.tgz#fd3c32a923303d759c5310bf461c49e92c5e4f4a"
-  integrity sha512-2bAezBHaXT3k4QoObvsquxMHviaSV/2EbrXBsaEKT1KrbYqRO/FmRGUly5r65+sFGiwtJ+XqolSnwNB/LCBQCA==
+"@cypress/snapbuild-linux-arm@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-linux-arm/-/snapbuild-linux-arm-1.0.4.tgz#79ce571e618a9052b19dc8d202f15a5277e1b360"
+  integrity sha512-R9hjOdd4km0hpY0mVaG7sA9wR2O32cGAUVNRsK14Wq2SwDA4HBLwmTmOZu01t78Gm/4WGvr7PAQWY4Lx3Yb7FA==
 
-"@cypress/snapbuild-linux-mips64le@1.0.4-beta-002":
-  version "1.0.4-beta-002"
-  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-linux-mips64le/-/snapbuild-linux-mips64le-1.0.4-beta-002.tgz#400c085292000b3da128e36c1424a66362814a69"
-  integrity sha512-+HhFqDksrZDuBHl8ybM2+px2sr8YJ72S+bwRSyRiCua74ngmpikQoWv2IRfVIBn85gYGsIHt7teBj3MxzR3ScQ==
+"@cypress/snapbuild-linux-mips64le@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-linux-mips64le/-/snapbuild-linux-mips64le-1.0.4.tgz#038f60623ea3d4032682c77e7cd143ad2d5f7b3f"
+  integrity sha512-d58+E+DkV9MT4EtYEgBvxWwg1sPwMLXg3qjJykxc7Q6udEBLm8CJSBP9o3KSYqQ2WCAaJBiMBn4cJFWRUR37Ww==
 
-"@cypress/snapbuild-linux-ppc64le@1.0.4-beta-002":
-  version "1.0.4-beta-002"
-  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-linux-ppc64le/-/snapbuild-linux-ppc64le-1.0.4-beta-002.tgz#c20e85a6ccaa885aa04139ff6c712e5a3e1522d7"
-  integrity sha512-1HLsaRioNuz0YmipliKQwlcqC4/PSAnZwhk97nDddZWItV1tRZMLKunQTpZG5AlLkuIPvUKNL9DEoKct1w4DaQ==
+"@cypress/snapbuild-linux-ppc64le@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-linux-ppc64le/-/snapbuild-linux-ppc64le-1.0.4.tgz#fd4f0a844f384f5bd3153209b0ed16be86ce2587"
+  integrity sha512-J9RWsf884YwE8NVruVN5lDuZZscRCc0+1ZwkUQIafz+/68KCfn6/YxBgCXC0kwUfTffQsVlq0m7/yaInE/1ReA==
 
-"@cypress/snapbuild-windows-32@1.0.4-beta-002":
-  version "1.0.4-beta-002"
-  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-windows-32/-/snapbuild-windows-32-1.0.4-beta-002.tgz#60536cc8e109f01f9930351fdda3489dd2ff6875"
-  integrity sha512-fU1GJNnt/y6w3ivmDhz7Aq8JBs3WXeCaOFiVwIxbkD49PYQ13Kl12W1s83BmeXRCOuVVKCAMH+Sdm1CsLcuOBQ==
+"@cypress/snapbuild-windows-32@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-windows-32/-/snapbuild-windows-32-1.0.4.tgz#ab148a83f6e31a738d65a6f321139fb6e69cea0c"
+  integrity sha512-kVA3jOY53EiJsBIT2E2hdNneRJhUPE6YP5PopTuVQ+xh9ms0rD3mmK/XEyDwF/AzPhQht6GxKPyIPSJwmaRJ0Q==
 
-"@cypress/snapbuild-windows-64@1.0.4-beta-002":
-  version "1.0.4-beta-002"
-  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-windows-64/-/snapbuild-windows-64-1.0.4-beta-002.tgz#01a28a7aa957dea017bcf31a42ece81c387defd8"
-  integrity sha512-za5t6x/qoIfHjH9awgYB6odrxxc9tk6q333Tz8M8IzNYJYBYVL4g8SVEQtOYbUh/MZVPLtT+3TOTOJF85RbZhA==
+"@cypress/snapbuild-windows-64@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-windows-64/-/snapbuild-windows-64-1.0.4.tgz#37854c0d1262b98913d3b6aa99f5343724e80d2b"
+  integrity sha512-sXqQ2+6xTVZVvKnK0WTNkczDUFRXeE9Cmv0nhfVYXpFNVhhLcUJm748haTMzeBtLh40o9BzvN/sFqkQwoCsI9w==
 
 "@cypress/unique-selector@0.0.5":
   version "0.0.5"
