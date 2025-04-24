@@ -22,7 +22,7 @@ export interface ReporterHeaderProps {
   runnablesStore: RunnablesStore
 }
 
-const Header = observer(({ appState, events = defaultEvents, statsStore, runnablesStore }: ReporterHeaderProps) => (
+const Header: React.FC<ReporterHeaderProps> = observer(({ appState, events = defaultEvents, statsStore, runnablesStore }: ReporterHeaderProps) => (
   <header>
     <Tooltip placement='bottom' title={<p>{appState.isSpecsListOpen ? 'Collapse' : 'Expand'} Specs List <span className='kbd'>F</span></p>} wrapperClassName='toggle-specs-wrapper' className='cy-tooltip'>
       <button
@@ -46,5 +46,7 @@ const Header = observer(({ appState, events = defaultEvents, statsStore, runnabl
     <Controls appState={appState} />
   </header>
 ))
+
+Header.displayName = 'Header'
 
 export default Header

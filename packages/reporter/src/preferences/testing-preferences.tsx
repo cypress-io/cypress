@@ -11,7 +11,7 @@ interface Props {
   appState: AppState
 }
 
-const TestingPreferences = observer(({
+const TestingPreferences: React.FC<Props> = observer(({
   events = defaultEvents,
   appState,
 }: Props) => {
@@ -42,5 +42,7 @@ const TestingPreferences = observer(({
     </div>
   )
 })
+
+TestingPreferences.displayName = 'TestingPreferences'
 
 export default TestingPreferences

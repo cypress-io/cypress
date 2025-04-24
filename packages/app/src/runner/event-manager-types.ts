@@ -42,6 +42,7 @@ export type LocalBusEmitsMap = {
   'studio:save': StudioSavePayload
   'studio:cancel': undefined
   'studio:copy:to:clipboard': () => void
+  'studio:init:suite': { suiteId: string, showUrlPrompt?: boolean }
 
   // Reporter Events
   'reporter:log:add': CommandLog

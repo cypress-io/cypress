@@ -40,4 +40,5 @@ const FlashOnClick: React.FC<Props> = observer(({ message, onClick, wrapperClass
   )
 })
 
+FlashOnClick.displayName = 'FlashOnClick'
 export default FlashOnClick

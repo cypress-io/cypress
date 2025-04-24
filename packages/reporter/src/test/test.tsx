@@ -187,4 +187,5 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
   )
 })
 
+Test.displayName = 'Test'
 export default Test

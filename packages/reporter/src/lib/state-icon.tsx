@@ -15,7 +15,7 @@ interface Props extends React.HTMLProps<HTMLDivElement> {
   isStudio?: boolean
 }
 
-const StateIcon = observer((props: Props) => {
+const StateIcon: React.FC<Props> = observer((props: Props) => {
   const { state, isStudio, ...rest } = props
 
   if (state === 'active') {
@@ -58,5 +58,7 @@ const StateIcon = observer((props: Props) => {
     <PendingIcon />
   )
 })
+
+StateIcon.displayName = 'StateIcon'
 
 export default StateIcon

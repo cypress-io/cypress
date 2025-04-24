@@ -1,4 +1,4 @@
-import { launchStudio } from './helper'
+import { launchStudio, loadProjectAndRunSpec } from './helper'
 import pDefer from 'p-defer'
 
 describe('Cypress Studio', () => {
@@ -22,6 +22,34 @@ describe('Cypress Studio', () => {
     })
   }
 
+  function assertClosingPanelWithoutChanges () {
+    // Cypress re-runs after you cancel Studio.
+    // Original spec should pass
+    cy.waitForSpecToFinish({ passCount: 1 })
+
+    cy.get('.command').should('have.length', 1)
+
+    // Assert the spec was executed without any new commands.
+    cy.get('.command-name-visit').within(() => {
+      cy.contains('visit')
+      cy.contains('cypress/e2e/index.html')
+    })
+
+    cy.findByTestId('hook-name-studio commands').should('not.exist')
+
+    cy.withCtx(async (ctx) => {
+      const spec = await ctx.actions.file.readFileInProject('cypress/e2e/spec.cy.js')
+
+      // No change, since we closed studio
+      expect(spec.trim().replace(/\r/g, '')).to.eq(`
+describe('studio functionality', () => {
+  it('visits a basic html page', () => {
+    cy.visit('cypress/e2e/index.html')
+  })
+})`.trim())
+    })
+  }
+
   context('cloud studio', () => {
     it('loads the studio page', () => {
       launchStudio({ enableCloudStudio: true })
@@ -33,28 +61,16 @@ describe('Cypress Studio', () => {
       })
     })
 
-    it('displays Studio header', () => {
-      launchStudio({ enableCloudStudio: true })
+    it('does not display Studio button when not using cloud studio', () => {
+      loadProjectAndRunSpec({ })
 
-      cy.viewport(1500, 1000)
-      cy.get('[data-cy="studio-toolbar"]').should('be.visible')
-      cy.percySnapshot()
+      cy.get('[data-cy="studio-button"]').should('not.exist')
     })
 
     it('immediately loads the studio panel', () => {
       const deferred = pDefer()
 
-      cy.scaffoldProject('experimental-studio')
-      cy.openProject('experimental-studio', [], {
-        cloudStudio: true,
-      })
-
-      cy.startAppServer('e2e')
-      cy.visitApp()
-      cy.specsPageIsVisible()
-      cy.get('[data-cy-row="spec.cy.js"]').click()
-
-      cy.waitForSpecToFinish()
+      loadProjectAndRunSpec({ enableCloudStudio: true })
 
       cy.findByTestId('studio-panel').should('not.exist')
 
@@ -73,6 +89,8 @@ describe('Cypress Studio', () => {
       cy.get('[data-cy="hook-name-studio commands"]').should('not.exist')
       // cloud studio is loaded immediately
       cy.findByTestId('studio-panel').then(() => {
+        // check for the loading panel from the app first
+        cy.get('[data-cy="loading-studio-panel"]').should('be.visible')
         // we've verified the studio panel is loaded, now resolve the promise so the test can finish
         deferred.resolve()
       })
@@ -85,6 +103,28 @@ describe('Cypress Studio', () => {
       // Verify the studio panel is still open
       cy.findByTestId('studio-panel')
       cy.get('[data-cy="hook-name-studio commands"]')
+    })
+
+    it('closes studio panel when clicking studio button (from the cloud)', () => {
+      launchStudio({ enableCloudStudio: true })
+
+      cy.get('[data-cy="studio-header-studio-button"]').click()
+
+      assertClosingPanelWithoutChanges()
+    })
+
+    it('opens studio panel to new test when clicking on studio button (from the app) next to url', () => {
+      cy.viewport(1500, 1000)
+      loadProjectAndRunSpec({ enableCloudStudio: true })
+      // studio button should be visible when using cloud studio
+      cy.get('[data-cy="studio-button"]').should('be.visible').click()
+      cy.get('[data-cy="studio-panel"]').should('be.visible')
+
+      cy.contains('New Test')
+
+      cy.get('[data-cy="studio-url-prompt"]').should('not.exist')
+
+      cy.percySnapshot()
     })
   })
 
@@ -364,31 +404,7 @@ describe('studio functionality', () => {
 
     cy.findByTestId('studio-toolbar-controls').findByTestId('close-studio').click()
 
-    // Cypress re-runs after you cancel Studio.
-    // Original spec should pass
-    cy.waitForSpecToFinish({ passCount: 1 })
-
-    cy.get('.command').should('have.length', 1)
-
-    // Assert the spec was executed without any new commands.
-    cy.get('.command-name-visit').within(() => {
-      cy.contains('visit')
-      cy.contains('cypress/e2e/index.html')
-    })
-
-    cy.findByTestId('hook-name-studio commands').should('not.exist')
-
-    cy.withCtx(async (ctx) => {
-      const spec = await ctx.actions.file.readFileInProject('cypress/e2e/spec.cy.js')
-
-      // No change, since we closed studio
-      expect(spec.trim().replace(/\r/g, '')).to.eq(`
-describe('studio functionality', () => {
-  it('visits a basic html page', () => {
-    cy.visit('cypress/e2e/index.html')
-  })
-})`.trim())
-    })
+    assertClosingPanelWithoutChanges()
   })
 
   it('removes pending commands when restarting studio', () => {
@@ -434,14 +450,7 @@ describe('studio functionality', () => {
   })
 
   it('creates a new test from an empty spec', () => {
-    cy.scaffoldProject('experimental-studio')
-    cy.openProject('experimental-studio')
-    cy.startAppServer('e2e')
-    cy.visitApp()
-    cy.specsPageIsVisible()
-    cy.get(`[title="empty.cy.js"]`).should('be.visible').click()
-
-    cy.waitForSpecToFinish()
+    loadProjectAndRunSpec({ specName: 'empty.cy.js', specSelector: 'title' })
 
     cy.contains('Create test with Cypress Studio').click()
     cy.findByTestId('aut-url').as('urlPrompt')
@@ -685,13 +694,7 @@ describe('studio functionality', () => {
   })
 
   it('does not create a new test if the Save test modal is closed', () => {
-    cy.scaffoldProject('experimental-studio')
-    cy.openProject('experimental-studio')
-    cy.startAppServer('e2e')
-    cy.visitApp()
-    cy.specsPageIsVisible()
-    cy.get(`[title="empty.cy.js"]`).should('be.visible')
-    cy.get(`[title="empty.cy.js"]`).click()
+    loadProjectAndRunSpec({ specName: 'empty.cy.js', specSelector: 'title' })
 
     cy.waitForSpecToFinish()
 
