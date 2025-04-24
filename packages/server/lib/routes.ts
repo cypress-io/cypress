@@ -116,7 +116,7 @@ export const createCommonRoutes = ({
     const studioRouter = Router()
 
     router.use('/', studioRouter)
-    getCtx().coreData.studioLifecycleManager?.onStudioReady((studio) => {
+    getCtx().coreData.studioLifecycleManager?.registerStudioReadyListener((studio) => {
       studio.initializeRoutes(studioRouter)
     })
   }

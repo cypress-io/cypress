@@ -248,7 +248,7 @@ describe('lib/routes', () => {
       }
 
       const studioLifecycleManager = {
-        onStudioReady: sinon.stub().callsFake((callback) => {
+        registerStudioReadyListener: sinon.stub().callsFake((callback) => {
           callback(studioManager)
 
           return () => {}
@@ -304,7 +304,7 @@ describe('lib/routes', () => {
       }
 
       const studioLifecycleManager = {
-        onStudioReady: sinon.stub().returns(() => {}),
+        registerStudioReadyListener: sinon.stub().returns(() => {}),
       }
 
       getCtx().coreData.studioLifecycleManager = studioLifecycleManager as any

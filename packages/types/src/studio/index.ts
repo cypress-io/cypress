@@ -15,8 +15,8 @@ export interface StudioManagerShape extends StudioServerShape {
 
 export interface StudioLifecycleManagerShape {
   getStudio: () => Promise<StudioManagerShape | null>
-  onStudioReady: (listener: (studioManager: StudioManagerShape) => void) => () => void
   isStudioReady: () => boolean
+  registerStudioReadyListener: (listener: (studioManager: StudioManagerShape) => void) => void
 }
 
 export type StudioErrorReport = {

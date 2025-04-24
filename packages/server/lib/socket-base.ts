@@ -407,7 +407,7 @@ export class SocketBase {
           return socket.emit('dev-server:on-spec-updated')
         })
 
-        getCtx().coreData.studioLifecycleManager?.onStudioReady((studio) => {
+        getCtx().coreData.studioLifecycleManager?.registerStudioReadyListener((studio) => {
           studio.addSocketListeners(socket)
         })
 

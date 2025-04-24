@@ -1,4 +1,3 @@
-import { EventEmitter } from 'stream'
 import type { StudioManager } from './cloud/studio'
 import { ProtocolManager } from './cloud/protocol'
 import { getAndInitializeStudioManager } from './cloud/api/studio/get_and_initialize_studio_manager'
@@ -12,11 +11,11 @@ import api from './cloud/api'
 const debug = Debug('cypress:server:studio-lifecycle-manager')
 const routes = require('./cloud/routes')
 
-export class StudioLifecycleManager extends EventEmitter {
+export class StudioLifecycleManager {
   private studioManagerPromise: Promise<StudioManager | null> | null = null
   private studioReady = false
   private static readonly STUDIO_READY_EVENT = 'studio:ready'
-
+  private listeners: ((studioManager: StudioManager) => void)[] = []
   /**
    * Initialize the studio manager and possibly set up protocol.
    * Also registers this instance in the data context.
@@ -79,10 +78,10 @@ export class StudioLifecycleManager extends EventEmitter {
 
     this.studioManagerPromise = studioManagerPromise
 
-    // When the promise resolves, emit the studio:ready event with the studio manager
+    // When the promise resolves, call all the listeners
     void studioManagerPromise.then((studioManager) => {
       this.studioReady = true
-      this.emit(StudioLifecycleManager.STUDIO_READY_EVENT, studioManager)
+      this.callRegisteredListeners()
     })
 
     // Register this instance in the data context
@@ -103,30 +102,39 @@ export class StudioLifecycleManager extends EventEmitter {
     return await this.studioManagerPromise
   }
 
+  private callRegisteredListeners (listener?: ((studioManager: StudioManager) => void)) {
+    if (!this.studioManagerPromise || !this.studioReady) {
+      throw new Error('Studio manager has not been initialized')
+    }
+
+    void this.studioManagerPromise.then((studioManager) => {
+      if (studioManager) {
+        // if we were passed a listener, just call that one
+        if (listener) {
+          listener(studioManager)
+        } else {
+          // otherwise, call all the listeners
+          this.listeners.forEach((listener) => {
+            listener(studioManager)
+          })
+
+          this.listeners = []
+        }
+      }
+    })
+  }
+
   /**
    * Register a listener that will be called when the studio is ready
    * @param listener Function to call when studio is ready
-   * @returns Function to remove the listener
    */
-  onStudioReady (listener: (studioManager: StudioManager) => void): () => void {
-    // Use once instead of on to ensure the listener only fires once
-    this.once(StudioLifecycleManager.STUDIO_READY_EVENT, listener)
-
-    // If studio is already ready, call the listener immediately and only once
-    if (this.studioManagerPromise) {
-      void this.studioManagerPromise.then((studioManager) => {
-        // Remove the listener first to prevent it from being called twice
-        this.off(StudioLifecycleManager.STUDIO_READY_EVENT, listener)
-        // Only call listener if studioManager is not null
-        if (studioManager) {
-          listener(studioManager)
-        }
-      })
+  registerStudioReadyListener (listener: (studioManager: StudioManager) => void): void {
+    // if studio is already ready and there is a studio manager, call the listener immediately and only once
+    if (this.studioReady && this.studioManagerPromise) {
+      this.callRegisteredListeners(listener)
     }
 
-    // Return a function to remove the listener
-    return () => {
-      this.off(StudioLifecycleManager.STUDIO_READY_EVENT, listener)
-    }
+    // otherwise, keep track of the listener and call it when the studio is ready
+    this.listeners.push(listener)
   }
 }
