@@ -597,7 +597,7 @@ export class ProjectBase extends EE {
 
     const hideRunnerUi = (
       this.options?.args?.runnerUi === false ||
-      (isDefaultProtocolEnabled && !this._cfg.isTextTerminal && !this.options?.args?.runnerUi)
+      (isDefaultProtocolEnabled && this._cfg.isTextTerminal && !this.options?.args?.runnerUi)
     )
 
     // hide the command log if explicitly requested or if we are hiding the runner
