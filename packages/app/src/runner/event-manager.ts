@@ -456,9 +456,7 @@ export class EventManager {
     if (isStudioInScope && !isDefaultProtocolEnabled) {
       await new Promise<void>((resolve) => {
         this.ws.emit('studio:protocol:enabled', ({ studioProtocolEnabled }) => {
-          isStudioProtocolEnabled = studioProtocolEnabled
-
-          Cypress.state('isProtocolEnabled', isStudioProtocolEnabled)
+          Cypress.state('isProtocolEnabled', studioProtocolEnabled)
 
           resolve()
         })
