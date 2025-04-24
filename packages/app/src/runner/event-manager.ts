@@ -450,7 +450,6 @@ export class EventManager {
 
     const isDefaultProtocolEnabled = Cypress.config('isDefaultProtocolEnabled')
 
-    let isStudioProtocolEnabled = false
     const isStudioInScope = this.studioStore.isActive || this.studioStore.isLoading
 
     if (isStudioInScope && !isDefaultProtocolEnabled) {
