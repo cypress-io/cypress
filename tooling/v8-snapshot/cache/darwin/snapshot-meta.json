@@ -4174,6 +4174,8 @@
     "./packages/socket/node_modules/socket.io/node_modules/ws/lib/validation.js",
     "./packages/socket/node_modules/socket.io/package.json",
     "./packages/telemetry/dist/detectors/circleCiDetectorSync.js",
+    "./packages/telemetry/dist/index.js",
+    "./packages/telemetry/dist/node.js",
     "./packages/telemetry/dist/processors/on-start-span-processor.js",
     "./packages/telemetry/dist/span-exporters/cloud-span-exporter.js",
     "./packages/telemetry/dist/span-exporters/console-trace-link-exporter.js",
@@ -4205,5 +4207,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "9694c1118fc9d06f1c89a2aaa38d62e3f170a7a6108ef5e84cc997ce429573ee"
+  "deferredHash": "b395a5f4898f4a942db12ee9ccc57494d5ed9eae488aa7c9316fee5ebbb5fb4b"
 }
