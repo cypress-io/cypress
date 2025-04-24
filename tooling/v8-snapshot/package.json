@@ -29,6 +29,7 @@
   },
   "devDependencies": {
     "@tooling/system-tests": "0.0.0-development",
+    "chai-as-promised": "7.1.1",
     "cpr": "^3.0.1",
     "mocha": "7.0.1",
     "snap-shot-it": "7.9.10",
@@ -40,19 +41,19 @@
   ],
   "types": "src/v8-snapshot.ts",
   "optionalDependencies": {
-    "@cypress/snapbuild-android-arm64": "1.0.3",
-    "@cypress/snapbuild-darwin-64": "1.0.3",
-    "@cypress/snapbuild-darwin-arm64": "1.0.3",
-    "@cypress/snapbuild-freebsd-64": "1.0.3",
-    "@cypress/snapbuild-freebsd-arm64": "1.0.3",
-    "@cypress/snapbuild-linux-32": "1.0.3",
-    "@cypress/snapbuild-linux-64": "1.0.3",
-    "@cypress/snapbuild-linux-arm": "1.0.3",
-    "@cypress/snapbuild-linux-arm64": "1.0.3",
-    "@cypress/snapbuild-linux-mips64le": "1.0.3",
-    "@cypress/snapbuild-linux-ppc64le": "1.0.3",
-    "@cypress/snapbuild-windows-32": "1.0.3",
-    "@cypress/snapbuild-windows-64": "1.0.3"
+    "@cypress/snapbuild-android-arm64": "1.0.4",
+    "@cypress/snapbuild-darwin-64": "1.0.4",
+    "@cypress/snapbuild-darwin-arm64": "1.0.4",
+    "@cypress/snapbuild-freebsd-64": "1.0.4",
+    "@cypress/snapbuild-freebsd-arm64": "1.0.4",
+    "@cypress/snapbuild-linux-32": "1.0.4",
+    "@cypress/snapbuild-linux-64": "1.0.4",
+    "@cypress/snapbuild-linux-arm": "1.0.4",
+    "@cypress/snapbuild-linux-arm64": "1.0.4",
+    "@cypress/snapbuild-linux-mips64le": "1.0.4",
+    "@cypress/snapbuild-linux-ppc64le": "1.0.4",
+    "@cypress/snapbuild-windows-32": "1.0.4",
+    "@cypress/snapbuild-windows-64": "1.0.4"
   },
   "nx": {
     "implicitDependencies": [
