@@ -4197,6 +4197,8 @@
     "./packages/types/src/index.ts",
     "./packages/types/src/modeOptions.ts",
     "./packages/types/src/preferences.ts",
+    "./packages/types/src/protocol.ts",
+    "./packages/types/src/proxy.ts",
     "./packages/types/src/reporter.ts",
     "./packages/types/src/server.ts",
     "./packages/types/src/spec.ts",
@@ -4208,5 +4210,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "9694c1118fc9d06f1c89a2aaa38d62e3f170a7a6108ef5e84cc997ce429573ee"
+  "deferredHash": "b395a5f4898f4a942db12ee9ccc57494d5ed9eae488aa7c9316fee5ebbb5fb4b"
 }
