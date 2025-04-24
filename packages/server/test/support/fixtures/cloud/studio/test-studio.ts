@@ -20,7 +20,7 @@ class StudioServer implements StudioServerShape {
   destroy (): Promise<void> {
     return Promise.resolve()
   }
-  
+
   addSocketListeners (socket: Socket): void {
     // This is a test implementation that does nothing
   }

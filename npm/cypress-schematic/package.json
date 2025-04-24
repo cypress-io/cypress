@@ -27,8 +27,8 @@
     "vitest": "2.1.4"
   },
   "peerDependencies": {
-    "@angular/cli": ">=17.2",
-    "@angular/core": ">=17.2"
+    "@angular/cli": ">=18.0.0",
+    "@angular/core": ">=18.0.0"
   },
   "license": "MIT",
   "repository": {
