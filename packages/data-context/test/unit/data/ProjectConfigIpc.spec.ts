@@ -66,7 +66,7 @@ describe('ProjectConfigIpc', () => {
 
           PROJECTS.forEach((project) => {
             it(`${project}: tsx generic loader (esm/commonjs/typescript)`, async () => {
-              // @ts-expect-error
+              // @ts-expect-error ignoring due to nested directories in the system-test project directory not being included in the type.
               const projectPath = await scaffoldProject(project)
 
               projectConfigIpc = new ProjectConfigIpc(

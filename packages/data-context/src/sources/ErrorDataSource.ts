@@ -6,6 +6,7 @@ import os from 'os'
 import type { DataContext } from '..'
 
 const tsxCodeFrameFilter = '/node_modules/tsx/dist/register'
+const windowsTsxCodeFrameFilter = tsxCodeFrameFilter.replaceAll('/', '\\')
 const isWindows = os.platform() === 'win32'
 
 export interface CodeFrameShape {
@@ -43,7 +44,7 @@ export class ErrorDataSource {
       const stackLines = stackUtils.getStackLines(source.cypressError.stack ?? '')
 
       // we want to filter out any tsx transformation code in the stack to help identify the error. Windows stack can have both posix paths and dos paths so we need to filter both (last line is a no-op on posix as its the same thing)
-      const filteredStackLines = stackLines.filter((stackLine) => !stackLine.includes('node:electron') && !stackLine.includes('node:internal') && !stackLine.includes('source-map-support') && !stackLine.includes(tsxCodeFrameFilter) && !(isWindows && stackLine.includes(tsxCodeFrameFilter.replaceAll('/', '\\'))))
+      const filteredStackLines = stackLines.filter((stackLine) => !stackLine.includes('node:electron') && !stackLine.includes('node:internal') && !stackLine.includes('source-map-support') && !stackLine.includes(tsxCodeFrameFilter) && !(isWindows && stackLine.includes(windowsTsxCodeFrameFilter)))
       const parsedLine = stackUtils.parseStackLine(filteredStackLines[0] ?? '')
 
       if (parsedLine) {

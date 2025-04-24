@@ -310,9 +310,8 @@ export class ProjectConfigIpc extends EventEmitter {
 
     /**
      * use --import for node versions
-     * 18.19.0 and above for 18.x.x as --import is supported (Cypress 15 does not support node 18.x.x)
      * 20.6.0 and above for 20.x.x as --import is supported
-     * use --loader for node under 18.19.0 and 20.6.0
+     * use --loader for node under 20.6.0 for 20.x.x
      * @see https://tsx.is/dev-api/node-cli#node-js-cli
      */
     let tsxLoader = this.nodeVersion && semver.lt(this.nodeVersion, '20.6.0') ? `--loader ${tsx}` : `--import ${tsx}`
@@ -326,13 +325,13 @@ export class ProjectConfigIpc extends EventEmitter {
 
       // TODO: get the tsconfig.json that applies to the users cypress.config.ts file
       // right now, we are just using the tsconfig.json we find in the project root
-      const tsConfigIfExists = getTsconfig(this.projectRoot)
+      const tsConfig = getTsconfig(this.projectRoot)
 
-      if (tsConfigIfExists) {
-        debug(`tsconfig.json found at ${tsConfigIfExists.path}`)
-        childOptions.env.TSX_TSCONFIG_PATH = tsConfigIfExists.path
+      if (tsConfig) {
+        debug(`tsconfig.json found at ${tsConfig.path}`)
+        childOptions.env.TSX_TSCONFIG_PATH = tsConfig.path
 
-        debugVerbose(`tsconfig.json parsed as follows: %o`, tsConfigIfExists.config)
+        debugVerbose(`tsconfig.json parsed as follows: %o`, tsConfig.config)
       } else {
         debug(`No tsconfig.json found! Attempting to parse file without tsconfig.json.`)
       }
