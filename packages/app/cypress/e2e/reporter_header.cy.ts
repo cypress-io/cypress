@@ -11,6 +11,7 @@ describe('Reporter Header', () => {
     })
 
     it('selects the correct spec in the Specs List', () => {
+      cy.get('[data-cy="runnable-header"]').should('be.visible')
       cy.get('body').type('f')
 
       cy.get('[data-selected-spec="true"]').should('contain', 'dom-content').should('have.length', '1')
@@ -19,6 +20,7 @@ describe('Reporter Header', () => {
 
     // TODO: Reenable as part of https://github.com/cypress-io/cypress/issues/23902
     it.skip('filters the list of specs when searching for specs', () => {
+      cy.get('[data-cy="runnable-header"]').should('be.visible')
       cy.get('body').type('f')
 
       cy.findByTestId('specs-list-panel').within(() => {
