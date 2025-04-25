@@ -70,6 +70,10 @@ export class StudioLifecycleManager {
         debug('Cloud studio is not enabled - skipping protocol setup')
       }
 
+      debug('Studio is ready')
+      this.studioReady = true
+      this.callRegisteredListeners()
+
       return studioManager
     }).catch((err) => {
       debug('Error during studio manager setup: %o', err)
@@ -78,13 +82,6 @@ export class StudioLifecycleManager {
     })
 
     this.studioManagerPromise = studioManagerPromise
-
-    // When the promise resolves, call all the listeners
-    void studioManagerPromise.then(() => {
-      debug('Studio is ready')
-      this.studioReady = true
-      this.callRegisteredListeners()
-    })
 
     // Register this instance in the data context
     ctx.update((data) => {
