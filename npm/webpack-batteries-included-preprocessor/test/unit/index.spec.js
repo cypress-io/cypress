@@ -82,8 +82,16 @@ describe('webpack-batteries-included-preprocessor', () => {
       mock.stop('@cypress/webpack-preprocessor')
     })
 
-    it('always returns loader options even if there is an error discovering the user\'s tsconfig.json', () => {
-      getTsConfigMock.returns(null)
+    it('correctly passes the options in the user\'s tsconfig.json options into ts-loader', () => {
+      getTsConfigMock.returns({
+        config: {
+          compilerOptions: {
+            module: 'ESNext',
+            moduleResolution: 'Bundler',
+          },
+          path: '/foo/tsconfig.json',
+        },
+      })
 
       const preprocessorCB = preprocessor({
         typescript: true,
@@ -104,8 +112,28 @@ describe('webpack-batteries-included-preprocessor', () => {
       expect(tsLoader.options.silent).to.be.true
       expect(tsLoader.options.transpileOnly).to.be.true
 
-      // compilerOptions are set by `@cypress/webpack-preprocessor` if ts-loader is present
-      expect(tsLoader.options.compilerOptions).to.be.undefined
+      // compilerOptions are overridden (sourceMap=true) by `@cypress/webpack-preprocessor` if ts-loader is present
+      expect(tsLoader.options.compilerOptions).to.deep.equal({
+        module: 'ESNext',
+        moduleResolution: 'Bundler',
+      })
+    })
+
+    // @see https://github.com/cypress-io/cypress/issues/18938. ts-loader needs a tsconfig.json file to work.
+    it('throws an error if the user\'s tsconfig.json is not found', () => {
+      getTsConfigMock.returns(null)
+
+      const preprocessorCB = preprocessor({
+        typescript: true,
+        webpackOptions,
+      })
+
+      expect(() => {
+        return preprocessorCB({
+          filePath: 'foo.ts',
+          outputPath: '.js',
+        })
+      }).to.throw('No tsconfig.json found, but typescript is installed. ts-loader needs a tsconfig.json file to work. Please add one to your project in either the root or the cypress directory.')
     })
   })
 })

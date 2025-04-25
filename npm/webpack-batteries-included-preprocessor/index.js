@@ -1,10 +1,18 @@
 const path = require('path')
 const Debug = require('debug')
+const getTsConfig = require('get-tsconfig')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 
 const debug = Debug('cypress:webpack-batteries-included-preprocessor')
 const WBADebugNamespace = 'cypress-verbose:webpack-batteries-included-preprocessor:bundle-analyzer'
+
+class TsConfigNotFoundError extends Error {
+  constructor () {
+    super('No tsconfig.json found, but typescript is installed. ts-loader needs a tsconfig.json file to work. Please add one to your project in either the root or the cypress directory.')
+    this.name = 'TsConfigNotFoundError'
+  }
+}
 
 const hasTsLoader = (rules) => {
   return rules.some((rule) => {
@@ -17,6 +25,17 @@ const hasTsLoader = (rules) => {
 }
 
 const addTypeScriptConfig = (file, options) => {
+  // returns null if tsconfig cannot be found in the path/parent hierarchy
+  const configFile = getTsConfig.getTsconfig(file.filePath)
+
+  if (!configFile && typescriptExtensionRegex.test(file.filePath)) {
+    debug('no user tsconfig.json found. Throwing TsConfigNotFoundError')
+    // @see https://github.com/cypress-io/cypress/issues/18938
+    throw new TsConfigNotFoundError()
+  }
+
+  debug(`found user tsconfig.json at ${configFile?.path} with compilerOptions: ${JSON.stringify(configFile?.config?.compilerOptions)}`)
+
   // shortcut if we know we've already added typescript support
   if (options.__typescriptSupportAdded) return options
 
@@ -36,13 +55,6 @@ const addTypeScriptConfig = (file, options) => {
   const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
   // node will try to load a projects tsconfig.json instead of the node
 
-  const getTsConfig = require('get-tsconfig')
-
-  // returns null if tsconfig cannot be found in the path/parent hierarchy
-  const configFile = getTsConfig.getTsconfig(file.filePath)
-
-  configFile ? debug(`found user tsconfig.json at ${configFile?.path} with compilerOptions: ${JSON.stringify(configFile?.config?.compilerOptions)}`) : debug('no user tsconfig.json found')
-
   webpackOptions.module.rules.push({
     test: /\.tsx?$/,
     exclude: [/node_modules/],
@@ -51,6 +63,10 @@ const addTypeScriptConfig = (file, options) => {
         loader: require.resolve('ts-loader'),
         options: {
           compiler: options.typescript,
+          // pass in the resolved compiler options from the tsconfig file into ts-loader to most accurately transpile the code
+          ...(configFile ? {
+            compilerOptions: configFile.config.compilerOptions,
+          } : {}),
           logLevel: 'error',
           silent: true,
           transpileOnly: true,
