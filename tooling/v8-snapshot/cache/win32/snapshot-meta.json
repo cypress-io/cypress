@@ -744,9 +744,9 @@
     "./packages/server/lib/browsers/memory/index.ts",
     "./packages/server/lib/cache.ts",
     "./packages/server/lib/cloud/api/cloud_request.ts",
-    "./packages/server/lib/cloud/api/get_and_initialize_studio_manager.ts",
     "./packages/server/lib/cloud/api/index.ts",
     "./packages/server/lib/cloud/api/put_protocol_artifact.ts",
+    "./packages/server/lib/cloud/api/studio/get_and_initialize_studio_manager.ts",
     "./packages/server/lib/cloud/artifacts/protocol_artifact.ts",
     "./packages/server/lib/cloud/artifacts/screenshot_artifact.ts",
     "./packages/server/lib/cloud/artifacts/video_artifact.ts",
@@ -3886,6 +3886,7 @@
     "./packages/server/lib/cloud/api/axios_middleware/logging.ts",
     "./packages/server/lib/cloud/api/axios_middleware/transform_error.ts",
     "./packages/server/lib/cloud/api/scrub_url.ts",
+    "./packages/server/lib/cloud/api/studio/report_studio_error.ts",
     "./packages/server/lib/cloud/artifacts/artifact.ts",
     "./packages/server/lib/cloud/artifacts/file_upload_strategy.ts",
     "./packages/server/lib/cloud/artifacts/print_protocol_upload_error.ts",
@@ -3901,6 +3902,7 @@
     "./packages/server/lib/cloud/network/system_error.ts",
     "./packages/server/lib/cloud/protocol.ts",
     "./packages/server/lib/cloud/require_script.ts",
+    "./packages/server/lib/cloud/strip_path.ts",
     "./packages/server/lib/cloud/studio.ts",
     "./packages/server/lib/cloud/upload/send_file.ts",
     "./packages/server/lib/cloud/upload/stream_activity_monitor.ts",
@@ -4210,5 +4212,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "259d8d7d6ba3eb300d997387cfddc46c6cd8804e5b3d4443106836dbc7263b44"
+  "deferredHash": "f0796b776b8ece35b5b1a1fc7889f01a13294e86771b7ecc3dec9abd781de7af"
 }

@@ -214,8 +214,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.specsPageIsVisible()
     cy.contains('withFailure.spec').click()
     cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
-    // A bit of a hack, but our cy-in-cy test needs to wait for the reporter to fully render before pressing the "f" key to expand the "Search specs" menu.
-    // Otherwise, the "f" keypress happens before the event is registered, which causes the "Search Specs" menu to not expand.
+
     cy.get('[data-cy="runnable-header"]').should('be.visible')
     cy.get('body').type('f')
     cy.contains('Search specs')
