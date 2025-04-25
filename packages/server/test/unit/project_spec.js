@@ -685,6 +685,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       // Set up the studio manager promise directly
       studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
+      studioLifecycleManager.isStudioReady = sinon.stub().returns(true)
 
       // Create a browser object
       this.project.browser = {

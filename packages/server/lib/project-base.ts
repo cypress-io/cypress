@@ -25,6 +25,10 @@ import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/service-worker-manager'
 import { v4 } from 'uuid'
 import { StudioLifecycleManager } from './StudioLifecycleManager'
+import { reportStudioError } from './cloud/api/studio/report_studio_error'
+import { CloudRequest } from './cloud/api/cloud_request'
+import { isRetryableError } from './cloud/network/is_retryable_error'
+import { asyncRetry } from './util/async_retry'
 
 export interface Cfg extends ReceivedCypressOptions {
   projectId?: string
@@ -400,6 +404,32 @@ export class ProjectBase extends EE {
       closeExtraTargets: this.closeExtraTargets,
 
       onStudioInit: async () => {
+        const isStudioReady = this.ctx.coreData.studioLifecycleManager?.isStudioReady()
+
+        if (!isStudioReady) {
+          debug('User entered studio mode before cloud studio was initialized')
+          const cloudEnv = (process.env.CYPRESS_INTERNAL_ENV || 'production') as 'development' | 'staging' | 'production'
+          const cloudUrl = this.ctx.cloud.getCloudUrl(cloudEnv)
+          const cloudHeaders = await this.ctx.cloud.additionalHeaders()
+
+          reportStudioError({
+            cloudApi: {
+              cloudUrl,
+              cloudHeaders,
+              CloudRequest,
+              isRetryableError,
+              asyncRetry,
+            },
+            studioHash: this.id,
+            projectSlug: this.cfg.projectId,
+            error: new Error('User entered studio before cloud studio was initialized'),
+            studioMethod: 'onStudioInit',
+            studioMethodArgs: [],
+          })
+
+          return { canAccessStudioAI: false }
+        }
+
         const studio = await this.ctx.coreData.studioLifecycleManager?.getStudio()
 
         if (this.spec && studio?.protocolManager) {
@@ -437,6 +467,14 @@ export class ProjectBase extends EE {
       },
 
       onStudioDestroy: async () => {
+        const isStudioReady = await this.ctx.coreData.studioLifecycleManager?.isStudioReady()
+
+        if (!isStudioReady) {
+          debug('Studio is not ready - skipping destroy')
+
+          return
+        }
+
         const studio = await this.ctx.coreData.studioLifecycleManager?.getStudio()
 
         if (studio?.protocolManager) {
