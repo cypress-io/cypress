@@ -14,6 +14,7 @@ const routes = require('./cloud/routes')
 export class StudioLifecycleManager {
   private studioManagerPromise: Promise<StudioManager | null> | null = null
   private studioReady = false
+  private studioManager: StudioManager | null = null
   private listeners: ((studioManager: StudioManager) => void)[] = []
   /**
    * Initialize the studio manager and possibly set up protocol.
@@ -72,6 +73,7 @@ export class StudioLifecycleManager {
 
       debug('Studio is ready')
       this.studioReady = true
+      this.studioManager = studioManager
       this.callRegisteredListeners()
 
       return studioManager
@@ -101,27 +103,17 @@ export class StudioLifecycleManager {
     return await this.studioManagerPromise
   }
 
-  private callRegisteredListeners (listener?: ((studioManager: StudioManager) => void)) {
-    if (!this.studioManagerPromise || !this.studioReady) {
+  private callRegisteredListeners () {
+    if (!this.studioManager) {
       throw new Error('Studio manager has not been initialized')
     }
 
-    void this.studioManagerPromise.then((studioManager) => {
-      if (studioManager) {
-        // if we were passed a listener, just call that one
-        if (listener) {
-          listener(studioManager)
-        } else {
-          // otherwise, call all the listeners
-          debug('Calling all studio ready listeners')
-          this.listeners.forEach((listener) => {
-            listener(studioManager)
-          })
-
-          this.listeners = []
-        }
-      }
+    debug('Calling all studio ready listeners')
+    this.listeners.forEach((listener) => {
+      listener(this.studioManager as StudioManager)
     })
+
+    this.listeners = []
   }
 
   /**
@@ -130,8 +122,8 @@ export class StudioLifecycleManager {
    */
   registerStudioReadyListener (listener: (studioManager: StudioManager) => void): void {
     // if studio is already ready and there is a studio manager, call the listener immediately and only once
-    if (this.studioReady && this.studioManagerPromise) {
-      this.callRegisteredListeners(listener)
+    if (this.studioReady && this.studioManager) {
+      listener(this.studioManager)
     } else {
       // otherwise, keep track of the listener and call it when the studio is ready
       this.listeners.push(listener)

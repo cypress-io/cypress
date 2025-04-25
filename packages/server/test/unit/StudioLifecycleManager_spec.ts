@@ -200,7 +200,7 @@ describe('StudioLifecycleManager', () => {
       const listener = sinon.stub()
 
       // @ts-ignore - accessing private property for testing
-      studioLifecycleManager.studioManagerPromise = Promise.resolve(mockStudioManager)
+      studioLifecycleManager.studioManager = mockStudioManager
 
       // @ts-ignore - accessing private property for testing
       studioLifecycleManager['studioReady'] = true
@@ -220,7 +220,7 @@ describe('StudioLifecycleManager', () => {
       const listener = sinon.stub()
 
       // @ts-ignore - accessing private property for testing
-      studioLifecycleManager.studioManagerPromise = Promise.resolve(null)
+      studioLifecycleManager.studioManager = null
 
       // @ts-ignore - accessing private property for testing
       studioLifecycleManager['studioReady'] = true
