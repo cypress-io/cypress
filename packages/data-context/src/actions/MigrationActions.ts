@@ -105,7 +105,6 @@ export async function processConfigViaLegacyPlugins (projectRoot: string, legacy
     // this matches the 9.x behavior, which is what we want for
     // processing legacy pluginsFile (we never supported `"type": "module") in 9.x.
     if (hasTypeScriptInstalled(projectRoot)) {
-      // TODO: we need to test a cypress.json v9 legacy migration here with typescript
       let tsxLoader = nodeVersion && semver.lt(nodeVersion, '20.6.0') ? `--loader ${tsxCjs}` : `--import ${tsxCjs}`
 
       debug(`using generic ${tsxLoader} for esm and cjs with TypeScript for legacy migration.`)
