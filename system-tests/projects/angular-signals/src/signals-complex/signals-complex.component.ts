@@ -1,7 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  effect,
   input,
   model,
 } from '@angular/core'
@@ -24,12 +23,4 @@ export type User = {
 export class SignalsComplexComponent {
   user = input.required<User>()
   acquaintances = model.required<User[]>()
-  constructor () {
-    effect(() => {
-      // there is a bug in Angular 17 that doesn't rerender the signal when set outside the component context
-      // this is resolved in Angular 18. adding an effect() causes the template to be update when the signal is updated
-      console.log(`The user is: ${JSON.stringify(this.user())}`)
-      console.log(`The acquaintances are: ${JSON.stringify(this.acquaintances())}`)
-    })
-  }
 }

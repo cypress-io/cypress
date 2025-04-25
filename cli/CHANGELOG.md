@@ -5,6 +5,7 @@ _Released 07/01/2025 (PENDING)_
 
 **Breaking Changes:**
 
+- Removed support for Angular 17. The minimum supported version is now `18.0.0`. Addresses [#31303](https://github.com/cypress-io/cypress/issues/31303).
 - Removed support for Node.js 18 and Node.js 23. Addresses [#31302](https://github.com/cypress-io/cypress/issues/31302).
 - Removed support for [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol) with the [firefox](https://www.mozilla.org/) browser. Addresses [#31189](https://github.com/cypress-io/cypress/issues/31189).
 - The Cypress configuration wizard for Component Testing supports TypeScript 5.0 or greater. Addresses [#31187](https://github.com/cypress-io/cypress/issues/31187).

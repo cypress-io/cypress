@@ -147,7 +147,7 @@ describe('detectFramework', () => {
     })
   })
 
-  ;['17.2.0', '18.2.0'].forEach((v) => {
+  ;['18.2.0', '19.2.9'].forEach((v) => {
     it(`Angular CLI v${v}`, async () => {
       const projectPath = await scaffoldMigrationProject('angular-cli-unconfigured')
 
