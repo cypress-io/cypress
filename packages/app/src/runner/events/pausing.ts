@@ -1,12 +1,24 @@
-export const handlePausing = (getCypress, reporterBus) => {
-  const Cypress = getCypress()
-  // tracks whether the cy.pause() was called from the primary driver
-  // (value === null) or from a cross-origin spec bridge (value is the origin
-  // matching that spec bridge)
-  let sendEventsToOrigin = null
+// tracks whether the cy.pause() was called from the primary driver
+// (value === null) or from a cross-origin spec bridge (value is the origin
 
-  reporterBus.on('runner:next', () => {
-    const Cypress = getCypress()
+import EventEmitter from 'events'
+
+// matching that spec bridge)
+let sendEventsToOrigin: string | null = null
+
+type GetCypressFunction = () => any
+
+class PauseHandlers {
+  private getCypress: GetCypressFunction
+  private reporterBus: EventEmitter
+
+  constructor (getCypress: GetCypressFunction, reporterBus: EventEmitter) {
+    this.getCypress = getCypress
+    this.reporterBus = reporterBus
+  }
+
+  nextHandler = () => {
+    const Cypress = this.getCypress()
 
     if (!Cypress) return
 
@@ -17,10 +29,10 @@ export const handlePausing = (getCypress, reporterBus) => {
     } else {
       Cypress.emit('resume:next')
     }
-  })
+  }
 
-  reporterBus.on('runner:resume', () => {
-    const Cypress = getCypress()
+  resumeHandler = () => {
+    const Cypress = this.getCypress()
 
     if (!Cypress) return
 
@@ -34,17 +46,45 @@ export const handlePausing = (getCypress, reporterBus) => {
 
     // pause sequence is over - reset this for subsequent pauses
     sendEventsToOrigin = null
-  })
+  }
 
-  // from the primary driver
-  Cypress.on('paused', (nextCommandName) => {
-    reporterBus.emit('paused', nextCommandName)
-  })
+  pausedHandler = (nextCommandName: string) => {
+    this.reporterBus.emit('paused', nextCommandName)
+  }
 
-  // from a cross-origin spec bridge
-  Cypress.primaryOriginCommunicator.on('paused', ({ nextCommandName, origin }) => {
+  crossOriginPausedHandler = ({ nextCommandName, origin }: { nextCommandName: string, origin: string }) => {
     sendEventsToOrigin = origin
+    this.reporterBus.emit('paused', nextCommandName)
+  }
 
-    reporterBus.emit('paused', nextCommandName)
-  })
+  removeListeners = () => {
+    const Cypress = this.getCypress()
+
+    this.reporterBus.removeListener('runner:next', this.nextHandler)
+    this.reporterBus.removeListener('runner:resume', this.resumeHandler)
+    Cypress.removeListener('paused', this.pausedHandler)
+    Cypress.primaryOriginCommunicator.removeListener('paused', this.crossOriginPausedHandler)
+  }
+
+  addListeners = () => {
+    const Cypress = this.getCypress()
+
+    this.reporterBus.on('runner:next', this.nextHandler)
+    this.reporterBus.on('runner:resume', this.resumeHandler)
+    Cypress.on('paused', this.pausedHandler)
+    Cypress.primaryOriginCommunicator.on('paused', this.crossOriginPausedHandler)
+  }
+}
+
+let currentHandlers: PauseHandlers | null = null
+
+export const handlePausing = (getCypress: GetCypressFunction, reporterBus: EventEmitter) => {
+  // Remove existing handlers if they exist
+  if (currentHandlers) {
+    currentHandlers.removeListeners()
+  }
+
+  // Create new handlers
+  currentHandlers = new PauseHandlers(getCypress, reporterBus)
+  currentHandlers.addListeners()
 }
