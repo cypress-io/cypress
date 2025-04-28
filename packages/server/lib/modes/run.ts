@@ -244,8 +244,7 @@ async function startVideoRecording (options: { previous?: VideoRecording, projec
       titles: [],
     }
 
-    // getPath returns a Promise!!!
-    return await getPath(data, ext, options.videosFolder, options.overwrite)
+    return getPath(data, ext, options.videosFolder, options.overwrite)
   }
 
   const videoName = await videoPath('', 'mp4')
