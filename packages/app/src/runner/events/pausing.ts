@@ -1,12 +1,12 @@
 // tracks whether the cy.pause() was called from the primary driver
 // (value === null) or from a cross-origin spec bridge (value is the origin
 
-import EventEmitter from 'events'
+import type EventEmitter from 'events'
 
 // matching that spec bridge)
 let sendEventsToOrigin: string | null = null
 
-type GetCypressFunction = () => any
+type GetCypressFunction = () => Cypress.Cypress
 
 class PauseHandlers {
   constructor (private getCypress: GetCypressFunction, private reporterBus: EventEmitter) {}
