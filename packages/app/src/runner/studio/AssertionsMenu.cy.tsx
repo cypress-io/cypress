@@ -14,7 +14,7 @@ describe('AssertionsMenu', () => {
     {
       type: 'have.text',
       options: [
-        { name: 'text', value: 'Test Element' },
+        { value: 'Test Element' },
       ],
     },
     {

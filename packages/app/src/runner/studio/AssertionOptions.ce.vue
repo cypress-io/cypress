@@ -68,18 +68,10 @@ const getOptionKey = (option: AssertionOption): string => {
 }
 
 const handleOptionClick = (option: AssertionOption): void => {
-  if (!option.name || !option.value) {
-    return
-  }
-
-  const stringValue = Array.isArray(option.value)
-    ? option.value.join(', ')
-    : String(option.value)
-
   emit('addAssertion', {
     type: props.type,
-    name: option.name,
-    value: stringValue,
+    name: option.name || '',
+    value: String(option.value || ''),
   })
 }
 

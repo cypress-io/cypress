@@ -148,10 +148,13 @@ onMounted(() => {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 14px;
-      font-weight: 500;
-      color: $gray-100;
       padding: 0.4rem 0.6rem;
+
+      span {
+        font-size: 14px;
+        font-weight: 500;
+        color: $gray-100;
+      }
     }
 
     .close-wrapper {

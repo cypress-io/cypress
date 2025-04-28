@@ -27,7 +27,7 @@
     <AssertionOptions
       v-if="hasOptions && isOpen"
       :type="type"
-      :options="options"
+      :options="options || []"
       @set-popper-element="setPopperElement"
       @add-assertion="addAssertion"
     />
@@ -38,10 +38,11 @@
 import { Ref, ref } from 'vue'
 import AssertionOptions from './AssertionOptions.ce.vue'
 import { IconChevronRightMedium } from '@cypress-design/vue-icon'
+import type { AssertionType } from './types'
 
 const props = defineProps<{
-  type: string
-  options: any
+  type: AssertionType['type']
+  options: AssertionType['options']
 }>()
 
 const emit = defineEmits<{
