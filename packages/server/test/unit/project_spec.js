@@ -687,7 +687,9 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       // Set up the studio manager promise directly
       studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
-      studioLifecycleManager.isStudioReady = sinon.stub().returns(true)
+      // Set studioReady flag to true to simulate completion of initialization
+      studioLifecycleManager.studioReady = true
+      studioLifecycleManager.studioManager = studioManager
 
       // Create a browser object
       this.project.browser = {
@@ -718,14 +720,13 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       expect(canAccessStudioAI).to.be.true
       expect(mockCaptureStudioEvent).to.be.calledWith({
-        type: 'studio:init',
+        type: 'studio:started',
         machineId: 'test-machine-id',
         projectId: 'test-project-id',
-        user: 'test@example.com',
         browser: {
           name: 'chrome',
           family: 'chromium',
-          channel: 'stable',
+          channel: undefined,
           version: undefined,
         },
         cypressVersion: pkg.version,
@@ -768,8 +769,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
 
-      // Set up the studio manager promise directly
       studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
+      studioLifecycleManager.studioReady = true
 
       // Create a browser object
       this.project.browser = {
@@ -800,10 +801,9 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       expect(canAccessStudioAI).to.be.false
       expect(mockCaptureStudioEvent).to.be.calledWith({
-        type: 'studio:init',
+        type: 'studio:started',
         machineId: 'test-machine-id',
         projectId: 'test-project-id',
-        user: 'test@example.com',
         browser: {
           name: 'chrome',
           family: 'chromium',
@@ -847,8 +847,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
 
-      // Set up the studio manager promise directly
       studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
+      studioLifecycleManager.studioReady = true
 
       // Create a browser object
       this.project.browser = {
@@ -879,10 +879,9 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       expect(canAccessStudioAI).to.be.false
       expect(mockCaptureStudioEvent).to.be.calledWith({
-        type: 'studio:init',
+        type: 'studio:started',
         machineId: 'test-machine-id',
         projectId: 'test-project-id',
-        user: 'test@example.com',
         browser: {
           name: 'chrome',
           family: 'chromium',
@@ -913,6 +912,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       // Set up the studio manager promise directly
       studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
+      studioLifecycleManager.studioReady = true
+      studioLifecycleManager.studioManager = studioManager
 
       // Create a browser object
       this.project.browser = {
