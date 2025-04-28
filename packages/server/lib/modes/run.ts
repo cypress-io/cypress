@@ -228,7 +228,7 @@ async function trashAssets (config: Cfg) {
 async function startVideoRecording (options: { previous?: VideoRecording, project: Project, spec: SpecWithRelativeRoot, videosFolder: string, overwrite: boolean }): Promise<VideoRecording> {
   if (!options.videosFolder) throw new Error('Missing videoFolder for recording')
 
-  async function videoPath (suffix: string, ext: string) {
+  async function videoPath (ext: string, suffix: string = '') {
     const specPath = options.spec.relativeToCommonRoot + suffix
     // tslint:disable-next-line
     const data: Data = {
@@ -247,8 +247,8 @@ async function startVideoRecording (options: { previous?: VideoRecording, projec
     return getPath(data, ext, options.videosFolder, options.overwrite)
   }
 
-  const videoName = await videoPath('', 'mp4')
-  const compressedVideoName = await videoPath('-compressed', 'mp4')
+  const videoName = await videoPath('mp4')
+  const compressedVideoName = await videoPath('mp4', '-compressed')
 
   const outputDir = path.dirname(videoName)
 
