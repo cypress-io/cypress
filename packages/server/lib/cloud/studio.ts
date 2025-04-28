@@ -21,7 +21,6 @@ const debug = Debug('cypress:server:studio')
 
 export class StudioManager implements StudioManagerShape {
   status: StudioStatus = 'NOT_INITIALIZED'
-  isProtocolEnabled: boolean = false
   protocolManager: ProtocolManagerShape | undefined
   private _studioServer: StudioServerShape | undefined
 
@@ -113,6 +112,10 @@ export class StudioManager implements StudioManagerShape {
       this.status = 'IN_ERROR'
       this.reportError(actualError, method, ...args)
     }
+  }
+
+  get isProtocolEnabled () {
+    return !!this.protocolManager
   }
 
   /**

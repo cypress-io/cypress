@@ -37,7 +37,6 @@ export interface Cfg extends ReceivedCypressOptions {
   fileServerFolder?: Cypress.ResolvedConfigOptions['fileServerFolder']
   testingType: TestingType
   isDefaultProtocolEnabled?: boolean
-  isStudioProtocolEnabled?: boolean
   hideCommandLog?: boolean
   hideRunnerUi?: boolean
   exit?: boolean
@@ -648,7 +647,6 @@ export class ProjectBase extends EE {
       testingType: this.ctx.coreData.currentTestingType ?? 'e2e',
       specs: [],
       isDefaultProtocolEnabled,
-      isStudioProtocolEnabled: this._cfg?.isStudioProtocolEnabled ?? false,
       hideCommandLog,
       hideRunnerUi,
     }

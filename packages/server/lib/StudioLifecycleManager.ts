@@ -7,7 +7,10 @@ import type { Cfg } from './project-base'
 import _ from 'lodash'
 import type { DataContext } from '@packages/data-context'
 import api from './cloud/api'
-
+import { reportStudioError } from './cloud/api/studio/report_studio_error'
+import { CloudRequest } from './cloud/api/cloud_request'
+import { isRetryableError } from './cloud/network/is_retryable_error'
+import { asyncRetry } from './util/async_retry'
 const debug = Debug('cypress:server:studio-lifecycle-manager')
 const routes = require('./cloud/routes')
 
@@ -66,7 +69,6 @@ export class StudioLifecycleManager {
         })
 
         studioManager.protocolManager = protocolManager
-        studioManager.isProtocolEnabled = true
       } else {
         debug('Cloud studio is not enabled - skipping protocol setup')
       }
@@ -77,8 +79,27 @@ export class StudioLifecycleManager {
       this.callRegisteredListeners()
 
       return studioManager
-    }).catch((err) => {
-      debug('Error during studio manager setup: %o', err)
+    }).catch(async (error) => {
+      debug('Error during studio manager setup: %o', error)
+
+      const cloudEnv = (process.env.CYPRESS_INTERNAL_ENV || 'production') as 'development' | 'staging' | 'production'
+      const cloudUrl = ctx.cloud.getCloudUrl(cloudEnv)
+      const cloudHeaders = await ctx.cloud.additionalHeaders()
+
+      reportStudioError({
+        cloudApi: {
+          cloudUrl,
+          cloudHeaders,
+          CloudRequest,
+          isRetryableError,
+          asyncRetry,
+        },
+        studioHash: projectId,
+        projectSlug: cfg.projectId,
+        error,
+        studioMethod: 'initializeStudioManager',
+        studioMethodArgs: [],
+      })
 
       return null
     })
