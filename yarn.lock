@@ -2642,7 +2642,7 @@
   resolved "https://registry.yarnpkg.com/@csstools/css-tokenizer/-/css-tokenizer-3.0.3.tgz#a5502c8539265fecbd873c1e395a890339f119c2"
   integrity sha512-UJnjoFsmxfKUdNYdWgOB0mWUypuLvAfQPH1+pyvRJs6euowbFkFC6P13w1l8mJyi3vxYMxc9kld5jZEGRQs6bw==
 
-"@cypress-design/color-constants@^1.0.0", "@cypress-design/color-constants@^1.1.0":
+"@cypress-design/color-constants@^1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@cypress-design/color-constants/-/color-constants-1.1.0.tgz#f09370d802d6eaddda03a22d0307da1327c37f6f"
   integrity sha512-a6M416WSQ3Yh5u3O2tw3h7DnHcus/hrMTWI8yFwp6Wl1KlyJlHSDcKZmotFqLfjFPgkzu9u7hFSnRA4y7WqZJA==
@@ -2681,7 +2681,7 @@
     tailwindcss "^3.4.3"
     tailwindcss-hocus "^0.0.7"
 
-"@cypress-design/icon-registry@^1.0.0", "@cypress-design/icon-registry@^1.18.0", "@cypress-design/icon-registry@^1.5.1", "@cypress-design/icon-registry@^1.6.0":
+"@cypress-design/icon-registry@^1.0.0", "@cypress-design/icon-registry@^1.18.0", "@cypress-design/icon-registry@^1.5.1":
   version "1.18.0"
   resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-1.18.0.tgz#799c5ac8f8362aebdcf2181119c3205136ca5ab9"
   integrity sha512-4goChP9rWVq7F/+c36JyJ4quvHSyI6gkjJ/IKFqncNwkC3gvVeJ4GQX2mqQJCQ+z0Er+2Mmzcw7JiVo1GpbJlg==
@@ -2693,7 +2693,7 @@
   resolved "https://registry.yarnpkg.com/@cypress-design/vue-button/-/vue-button-1.6.0.tgz#e7266dfe11c31628ef3a979fffcf041b141e39c3"
   integrity sha512-RnV2suh3BJg3fb7hc1gdh58p13yxBHHm9fmmE6AkHR3OBRAbbd5oqQmZWwuBuWteyj2gVFRgTRYHPzOZBm9wEg==
 
-"@cypress-design/vue-icon@^1.0.0", "@cypress-design/vue-icon@^1.18.0", "@cypress-design/vue-icon@^1.6.0":
+"@cypress-design/vue-icon@^1.0.0", "@cypress-design/vue-icon@^1.18.0":
   version "1.18.0"
   resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-1.18.0.tgz#deecb084252271903de8e22cac3e29ad9f108e72"
   integrity sha512-EPMCzy2d5t+wB2sayKdjHJsTeCJe94B9ulX+USYUw/fOhxIKfOBFR48KkfZHBMIYtIDV5iNHxSKvnLFPDYiuAg==

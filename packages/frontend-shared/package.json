@@ -19,7 +19,7 @@
     "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "dependencies": {
-    "@cypress-design/vue-icon": "^1.6.0",
+    "@cypress-design/vue-icon": "^1.18.0",
     "@intlify/unplugin-vue-i18n": "4.0.0",
     "@packages/data-context": "0.0.0-development",
     "@urql/devtools": "2.0.3",
