@@ -192,10 +192,7 @@ function run (ipc, file, projectRoot) {
 
       debug('loaded config from %s %o', file, result)
     } catch (err) {
-      // Starting in Node 20, error objects that are thrown while using `node --load` are not properly serialized
-      // so we need to check both the name and the stack.
-
-      // With tsx, errors now come in as TransformErrors instead of TSErrors.
+      // With tsx, errors now come in as TransformErrors instead of TSErrors (as they also include JavaScript errors).
       if (err.name === 'TransformError' || err.stack.includes('TransformError')) {
         const { compilerErrorLocation, originalMessage, message } = util.buildErrorLocationFromTransformError(err, projectRoot)
 
