@@ -1,9 +1,17 @@
 <template>
   <div
     :class="['assertion-type', { 'single-assertion': !hasOptions }]"
+    tabindex="0"
+    role="button"
+    :aria-expanded="isOpen"
+    :aria-haspopup="hasOptions"
     @click.stop="onClick"
     @mouseover.stop="onOpen"
     @mouseout.stop="onClose"
+    @focus="onOpen"
+    @blur="onClose"
+    @keydown.enter="onClick"
+    @keydown.space="onClick"
   >
     <div class="assertion-type-text">
       <span>
@@ -58,7 +66,7 @@ const onOpen = () => {
   isOpen.value = true
 }
 
-const onClose = (e: MouseEvent) => {
+const onClose = (e: MouseEvent | FocusEvent) => {
   if (e.relatedTarget instanceof Element &&
     popperElement.value && popperElement.value.contains(e.relatedTarget)) {
     return
@@ -86,34 +94,46 @@ const addAssertion = ({ type, name, value }) => {
 @import './assertions-style.scss';
 
 .assertion-type {
-  color: #202020;
   cursor: default;
   font-size: 14px;
   padding: 0.4rem 0.4rem 0.4rem 0.7rem;
   position: static;
+  outline: none;
+  border-radius: 4px;
+  border: 1px solid transparent;
 
   &:first-of-type {
     padding-top: 0.5rem;
   }
 
   &:last-of-type {
-    border-bottom-left-radius: $border-radius;
-    border-bottom-right-radius: $border-radius;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
     padding-bottom: 0.5rem;
   }
 
   &:hover {
-    background-color: #e9ecef;
+    background-color: $gray-1000;
+    border: 1px solid $gray-950;
+  }
+
+  &:focus {
+    color: $indigo-300;
+    outline: none;
+    border: 1px solid #9aa2fc;
+    box-shadow: 0 0 3px 3px rgba(154, 162, 252, 0.35);
+    -webkit-box-shadow: 0 0 3px 3px rgba(154, 162, 252, 0.35);
+    -moz-box-shadow: 0 0 3px 3px rgba(154, 162, 252, 0.35);
   }
 
   &.single-assertion {
     cursor: pointer;
-    font-weight: 600;
   }
 
   .assertion-type-text {
     align-items: center;
     display: flex;
+    cursor: pointer;
 
     .dropdown-arrow {
       margin-left: auto;

@@ -17,19 +17,30 @@
       </div>
       <div class="close-wrapper">
         <a
+          data-cy="assertions-menu-close"
+          tabindex="0"
+          role="button"
           class="close"
+          @keydown.enter="onClose"
+          @keydown.space="onClose"
           @click.stop="onClose"
-        >&times;</a>
+        >
+          <IconActionDeleteSmall />
+        </a>
       </div>
     </div>
     <div
       class="subtitle"
+      data-cy="assertions-subtitle"
     >
-      expect
+      Expect
       {{ ' ' }}
-      <code>
+      <Tag
+        size="20"
+        color="gray"
+      >
         {{ tagName }}
-      </code>
+      </Tag>
       {{ ' ' }}
       to
     </div>
@@ -52,6 +63,8 @@ import { createPopper } from '@popperjs/core'
 import AssertionType from './AssertionType.ce.vue'
 import _ from 'lodash'
 import { nextTick, onMounted, Ref, ref, StyleValue } from 'vue'
+import { IconActionDeleteSmall } from '@cypress-design/vue-icon'
+import Tag from '@cypress-design/vue-tag'
 import type { PossibleAssertions, AddAssertion, AssertionArgs } from './types'
 
 const props = defineProps <{
@@ -113,19 +126,26 @@ onMounted(() => {
 .assertions-menu {
   @include menu-style;
 
-  font-family: 'Helvetica Neue', 'Arial', sans-serif;
+  font-weight: normal;
   z-index: 2147483647;
-  width: 175px;
+  width: 225px;
   position: absolute;
+  color: $gray-300;
+  border: 1px solid #9aa2fc;
+  box-shadow: 0 0 3px 3px rgba(154, 162, 252, 0.35);
+  -webkit-box-shadow: 0 0 3px 3px rgba(154, 162, 252, 0.35);
+  -moz-box-shadow: 0 0 3px 3px rgba(154, 162, 252, 0.35);
 
   .header {
     align-items: center;
-    background: #07b282;
-    border-top-left-radius: $border-radius;
-    border-top-right-radius: $border-radius;
-    color: #fff;
+    background: $gray-1100;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    color: $gray-300;
     display: flex;
-    padding: 0.5rem 0.7rem;
+    padding: 8px 17px;
+    border-bottom: 1px solid $gray-900;
+    font-weight: 500;
 
     .title {
       font-size: 14px;
@@ -137,28 +157,28 @@ onMounted(() => {
       margin-top: -2.5px;
 
       .close {
-        font-size: 18px;
-        font-weight: 500;
-
         &:hover, &:focus, &:active {
           cursor: pointer;
           color: #eee;
+
+        }
+
+        &:focus {
+          outline-color: #9aa2fc;
         }
       }
     }
   }
 
   .subtitle {
-    border-bottom: 1px solid #c4c4c4;
-    color: #6b6b6b;
-    font-size: 13px;
-    font-style: italic;
-    font-weight: 400;
-    padding: 0.5rem 0.7rem;
+    border-bottom: 1px solid $gray-900;
+    padding: 14px 17px;
+    color: $gray-500;
+    font-size: 14px;
+  }
 
-    code {
-      font-weight: 600;
-    }
+  .assertions-list {
+    padding: 8px;
   }
 }
 </style>
