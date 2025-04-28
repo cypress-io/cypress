@@ -131,6 +131,15 @@ describe('StudioLifecycleManager', () => {
 
     it('handles errors during initialization and reports them', async () => {
       const error = new Error('Test error')
+      const listener1 = sinon.stub()
+      const listener2 = sinon.stub()
+
+      // Register listeners that should be cleaned up
+      studioLifecycleManager.registerStudioReadyListener(listener1)
+      studioLifecycleManager.registerStudioReadyListener(listener2)
+
+      // @ts-ignore - accessing private property for testing
+      expect(studioLifecycleManager['listeners'].length).to.equal(2)
 
       getAndInitializeStudioManagerStub.rejects(error)
 
@@ -169,6 +178,12 @@ describe('StudioLifecycleManager', () => {
         studioMethod: 'initializeStudioManager',
         studioMethodArgs: [],
       })
+
+      // @ts-ignore - accessing private property for testing
+      expect(studioLifecycleManager['listeners'].length).to.equal(0)
+
+      expect(listener1).not.to.be.called
+      expect(listener2).not.to.be.called
 
       if (studioPromise) {
         const result = await studioPromise

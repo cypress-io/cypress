@@ -101,6 +101,9 @@ export class StudioLifecycleManager {
         studioMethodArgs: [],
       })
 
+      // Clean up any registered listeners
+      this.listeners = []
+
       return null
     })
 
