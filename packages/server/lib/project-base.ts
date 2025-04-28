@@ -17,7 +17,7 @@ import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
 import system from './util/system'
-import type { BannersState, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ProtocolManagerShape, ReceivedCypressOptions, ResolvedConfigurationOptions, TestingType, VideoRecording, AutomationCommands } from '@packages/types'
+import { BannersState, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ProtocolManagerShape, ReceivedCypressOptions, ResolvedConfigurationOptions, TestingType, VideoRecording, AutomationCommands, StudioMetricsTypes } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { createHmac } from 'crypto'
 import { ServerBase } from './server-base'
@@ -434,10 +434,9 @@ export class ProjectBase extends EE {
 
         try {
           studio?.captureStudioEvent({
-            type: 'studio:init',
+            type: StudioMetricsTypes.STUDIO_STARTED,
             machineId: await this.ctx.coreData.machineId,
             projectId: this.cfg.projectId,
-            user: this.ctx.coreData.user?.email,
             browser: this.browser ? {
               name: this.browser.name,
               family: this.browser.family,
