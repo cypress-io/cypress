@@ -6,6 +6,7 @@ import type { DataContext } from '@packages/data-context'
 import type { Cfg } from '../../lib/project-base'
 import type { CloudDataSource } from '@packages/data-context/src/sources'
 import * as getAndInitializeStudioManagerModule from '../../lib/cloud/api/studio/get_and_initialize_studio_manager'
+import * as reportStudioErrorPath from '../../lib/cloud/api/studio/report_studio_error'
 import ProtocolManager from '../../lib/cloud/protocol'
 const api = require('../../lib/cloud/api').default
 
@@ -21,6 +22,7 @@ describe('StudioLifecycleManager', () => {
   let getAndInitializeStudioManagerStub: sinon.SinonStub
   let getCaptureProtocolScriptStub: sinon.SinonStub
   let prepareProtocolStub: sinon.SinonStub
+  let reportStudioErrorStub: sinon.SinonStub
 
   beforeEach(() => {
     studioLifecycleManager = new StudioLifecycleManager()
@@ -33,6 +35,10 @@ describe('StudioLifecycleManager', () => {
     mockCtx = {
       update: sinon.stub(),
       coreData: {},
+      cloud: {
+        getCloudUrl: sinon.stub().returns('https://cloud.cypress.io'),
+        additionalHeaders: sinon.stub().resolves({ 'Authorization': 'Bearer test-token' }),
+      },
     } as unknown as DataContext
 
     mockCloudDataSource = {} as CloudDataSource
@@ -52,6 +58,8 @@ describe('StudioLifecycleManager', () => {
 
     getCaptureProtocolScriptStub = sinon.stub(api, 'getCaptureProtocolScript').resolves('console.log("hello")')
     prepareProtocolStub = sinon.stub(ProtocolManager.prototype, 'prepareProtocol').resolves()
+
+    reportStudioErrorStub = sinon.stub(reportStudioErrorPath, 'reportStudioError')
   })
 
   afterEach(() => {
@@ -121,13 +129,21 @@ describe('StudioLifecycleManager', () => {
       })
     })
 
-    it('handles errors during initialization', async () => {
+    it('handles errors during initialization and reports them', async () => {
       const error = new Error('Test error')
 
       getAndInitializeStudioManagerStub.rejects(error)
 
+      const reportErrorPromise = new Promise<void>((resolve) => {
+        reportStudioErrorStub.callsFake(() => {
+          resolve()
+
+          return undefined
+        })
+      })
+
       // Should not throw
-      await studioLifecycleManager.initializeStudioManager({
+      studioLifecycleManager.initializeStudioManager({
         projectId: 'test-project-id',
         cloudDataSource: mockCloudDataSource,
         cfg: mockCfg,
@@ -135,12 +151,24 @@ describe('StudioLifecycleManager', () => {
         ctx: mockCtx,
       })
 
+      await reportErrorPromise
+
       expect(mockCtx.update).to.be.calledOnce
 
       // @ts-ignore - accessing private property for testing
       const studioPromise = studioLifecycleManager.studioManagerPromise
 
       expect(studioPromise).to.not.be.null
+
+      expect(reportStudioErrorStub).to.be.calledOnce
+      expect(reportStudioErrorStub).to.be.calledWithMatch({
+        cloudApi: sinon.match.object,
+        studioHash: 'test-project-id',
+        projectSlug: 'abc123',
+        error: sinon.match.instanceOf(Error).and(sinon.match.has('message', 'Test error')),
+        studioMethod: 'initializeStudioManager',
+        studioMethodArgs: [],
+      })
 
       if (studioPromise) {
         const result = await studioPromise
