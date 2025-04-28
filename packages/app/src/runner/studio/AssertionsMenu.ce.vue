@@ -8,9 +8,12 @@
     ref="assertionsMenu"
     class="assertions-menu"
   >
-    <div class="header">
+    <div
+      class="header"
+      data-cy="assertions-menu-header"
+    >
       <div class="title">
-        <span>Add Assertion</span>
+        <span>Assert</span>
       </div>
       <div class="close-wrapper">
         <a
