@@ -2,7 +2,7 @@ process.env.CYPRESS_INTERNAL_ENV = process.env.CYPRESS_INTERNAL_ENV ?? 'producti
 
 import path from 'path'
 import fs from 'fs-extra'
-import { retrieveAndExtractStudioBundle, studioPath } from '@packages/server/lib/cloud/api/get_and_initialize_studio_manager'
+import { retrieveAndExtractStudioBundle, studioPath } from '@packages/server/lib/cloud/api/studio/get_and_initialize_studio_manager'
 
 export const downloadStudioTypes = async (): Promise<void> => {
   await retrieveAndExtractStudioBundle({ projectId: 'ypt4pf' })

@@ -4,7 +4,7 @@
     ref="autHeaderEl"
     class="h-full bg-gray-1100 border-l-[1px] border-gray-900 min-h-[64px] text-[14px]"
   >
-    <div class="flex flex-wrap grow p-[16px] gap-[12px] justify-end h-[64px]">
+    <div class="flex flex-wrap grow p-[16px] gap-[12px] h-[64px] flex-nowrap">
       <button
         data-cy="playground-activator"
         :disabled="isDisabled"
@@ -17,10 +17,7 @@
       </button>
       <div
         data-cy="aut-url"
-        class="border rounded bg-gray-950 flex grow border-gray-800 h-[32px] align-middle"
-        :class="{
-          'bg-gray-50': autStore.isLoadingUrl
-        }"
+        class="border rounded flex bg-gray-950 grow border-gray-800 h-[32px] align-middle"
       >
         <SpecRunnerDropdown
           v-if="selectedBrowser?.displayName"
@@ -50,14 +47,14 @@
           :value="inputValue"
           :placeholder="inputPlaceholder"
           aria-label="url of the application under test"
-          class="aut-url-input bg-gray-950 flex grow mr-[12px] leading-normal max-w-full text-gray-300 self-center hocus-link-default truncate"
+          class="aut-url-input bg-gray-950 flex grow mr-[12px] leading-normal max-w-full text-gray-300 self-center hocus-link-default truncate w-full"
           :style="{ zIndex: inputZIndex }"
           @input="setStudioUrl"
           @click="openExternally"
           @keyup.enter="visitUrl"
         >
         <StudioUrlPrompt
-          v-if="studioStore.needsUrl && !urlDisabled"
+          v-if="studioStore.needsUrl && !urlDisabled && studioStore.showUrlPrompt"
           :aut-url-input-ref="autUrlInputRef"
           :url-in-progress="urlInProgress"
           :overlay-z-index="studioOverlayZIndex"
@@ -88,6 +85,10 @@
           </span>
         </Tag>
       </div>
+      <StudioButton
+        v-if="shouldShowStudioButton"
+        :event-manager="eventManager"
+      />
     </div>
 
     <SelectorPlayground
@@ -136,6 +137,7 @@ import SpecRunnerDropdown from './SpecRunnerDropdown.vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import { useStudioStore } from '../store/studio-store'
 import { useExternalLink } from '@cy/gql-components/useExternalLink'
+import StudioButton from '../studio/StudioButton.vue'
 
 gql`
 fragment SpecRunnerHeader on CurrentProject {
@@ -170,6 +172,7 @@ const props = defineProps<{
   gql: SpecRunnerHeaderFragment
   eventManager: EventManager
   getAutIframe: () => AutIframe
+  shouldShowStudioButton: boolean
 }>()
 
 const showAlert = ref(false)

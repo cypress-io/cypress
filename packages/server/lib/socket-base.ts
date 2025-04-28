@@ -407,7 +407,7 @@ export class SocketBase {
           return socket.emit('dev-server:on-spec-updated')
         })
 
-        getCtx().coreData.studioLifecycleManager?.onStudioReady((studio) => {
+        getCtx().coreData.studioLifecycleManager?.registerStudioReadyListener((studio) => {
           studio.addSocketListeners(socket)
         })
 
@@ -424,6 +424,12 @@ export class SocketBase {
         socket.on('studio:protocol:enabled', async (cb) => {
           try {
             const ctx = await getCtx()
+            const isStudioReady = ctx.coreData.studioLifecycleManager?.isStudioReady()
+
+            if (!isStudioReady) {
+              return cb({ studioProtocolEnabled: false })
+            }
+
             const studio = await ctx.coreData.studioLifecycleManager?.getStudio()
 
             cb({ studioProtocolEnabled: studio?.isProtocolEnabled })

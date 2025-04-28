@@ -80,7 +80,7 @@ describe('lib/socket', () => {
         }
 
         const studioLifecycleManager = {
-          onStudioReady: sinon.stub().callsFake((callback) => {
+          registerStudioReadyListener: sinon.stub().callsFake((callback) => {
             callback(mockStudio)
 
             return () => {}
@@ -597,18 +597,18 @@ describe('lib/socket', () => {
 
     context('studio.addSocketListeners', () => {
       it('calls addSocketListeners on studio when socket connects', function () {
-        // Verify that onStudioReady was called
-        expect(ctx.coreData.studioLifecycleManager.onStudioReady).to.be.called
+        // Verify that registerStudioReadyListener was called
+        expect(ctx.coreData.studioLifecycleManager.registerStudioReadyListener).to.be.called
 
         // Check that the callback was called with the mock studio object
-        const onStudioReadyCallback = ctx.coreData.studioLifecycleManager.onStudioReady.firstCall.args[0]
+        const registerStudioReadyListenerCallback = ctx.coreData.studioLifecycleManager.registerStudioReadyListener.firstCall.args[0]
 
-        expect(onStudioReadyCallback).to.be.a('function')
+        expect(registerStudioReadyListenerCallback).to.be.a('function')
 
         // Verify the mock studio's addSocketListeners was called by the callback
         const mockStudio = { addSocketListeners: sinon.stub() }
 
-        onStudioReadyCallback(mockStudio)
+        registerStudioReadyListenerCallback(mockStudio)
         expect(mockStudio.addSocketListeners).to.be.called
       })
     })

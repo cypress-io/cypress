@@ -1,7 +1,13 @@
+import { sinon } from '../spec_helper'
 import { expect } from 'chai'
 import { StudioManager } from '../../lib/cloud/studio'
 import { StudioLifecycleManager } from '../../lib/StudioLifecycleManager'
-import { sinon } from '../spec_helper'
+import type { DataContext } from '@packages/data-context'
+import type { Cfg } from '../../lib/project-base'
+import type { CloudDataSource } from '@packages/data-context/src/sources'
+import * as getAndInitializeStudioManagerModule from '../../lib/cloud/api/studio/get_and_initialize_studio_manager'
+import ProtocolManager from '../../lib/cloud/protocol'
+const api = require('../../lib/cloud/api').default
 
 // Helper to wait for next tick in event loop
 const nextTick = () => new Promise((resolve) => process.nextTick(resolve))
@@ -9,57 +15,159 @@ const nextTick = () => new Promise((resolve) => process.nextTick(resolve))
 describe('StudioLifecycleManager', () => {
   let studioLifecycleManager: StudioLifecycleManager
   let mockStudioManager: StudioManager
+  let mockCtx: DataContext
+  let mockCloudDataSource: CloudDataSource
+  let mockCfg: Cfg
+  let getAndInitializeStudioManagerStub: sinon.SinonStub
+  let getCaptureProtocolScriptStub: sinon.SinonStub
+  let prepareProtocolStub: sinon.SinonStub
 
   beforeEach(() => {
     studioLifecycleManager = new StudioLifecycleManager()
     mockStudioManager = {
       addSocketListeners: sinon.stub(),
       canAccessStudioAI: sinon.stub().resolves(true),
+      status: 'INITIALIZED',
     } as unknown as StudioManager
+
+    mockCtx = {
+      update: sinon.stub(),
+      coreData: {},
+    } as unknown as DataContext
+
+    mockCloudDataSource = {} as CloudDataSource
+
+    mockCfg = {
+      projectId: 'abc123',
+      testingType: 'e2e',
+      projectRoot: '/test/project',
+      port: 8888,
+      proxyUrl: 'http://localhost:8888',
+      devServerPublicPathRoute: '/__cypress/src',
+      namespace: '__cypress',
+    } as unknown as Cfg
+
+    getAndInitializeStudioManagerStub = sinon.stub(getAndInitializeStudioManagerModule, 'getAndInitializeStudioManager')
+    getAndInitializeStudioManagerStub.resolves(mockStudioManager)
+
+    getCaptureProtocolScriptStub = sinon.stub(api, 'getCaptureProtocolScript').resolves('console.log("hello")')
+    prepareProtocolStub = sinon.stub(ProtocolManager.prototype, 'prepareProtocol').resolves()
   })
 
   afterEach(() => {
     sinon.restore()
   })
 
-  describe('initialize', () => {
-    it('emits the initialize event', async () => {
-      const emitSpy = sinon.spy(studioLifecycleManager, 'emit')
+  describe('initializeStudioManager', () => {
+    it('initializes the studio manager and registers it in the data context', async () => {
+      studioLifecycleManager.initializeStudioManager({
+        projectId: 'test-project-id',
+        cloudDataSource: mockCloudDataSource,
+        cfg: mockCfg,
+        debugData: {},
+        ctx: mockCtx,
+      })
 
-      await studioLifecycleManager.initialize()
+      const studioReadyPromise = new Promise((resolve) => {
+        studioLifecycleManager?.registerStudioReadyListener((studioManager) => {
+          resolve(studioManager)
+        })
+      })
 
-      expect(emitSpy).to.be.calledWith('initialize')
+      await studioReadyPromise
+
+      expect(mockCtx.update).to.be.calledOnce
+      expect(studioLifecycleManager.isStudioReady()).to.be.true
+    })
+
+    it('sets up protocol if studio is enabled', async () => {
+      mockStudioManager.status = 'ENABLED'
+
+      studioLifecycleManager.initializeStudioManager({
+        projectId: 'abc123',
+        cloudDataSource: mockCloudDataSource,
+        cfg: mockCfg,
+        debugData: {},
+        ctx: mockCtx,
+      })
+
+      const studioReadyPromise = new Promise((resolve) => {
+        studioLifecycleManager?.registerStudioReadyListener((studioManager) => {
+          resolve(studioManager)
+        })
+      })
+
+      await studioReadyPromise
+
+      expect(getCaptureProtocolScriptStub).to.be.calledWith('http://localhost:1234/capture-protocol/script/current.js')
+      expect(prepareProtocolStub).to.be.calledWith('console.log("hello")', {
+        runId: 'studio',
+        projectId: 'abc123',
+        testingType: 'e2e',
+        cloudApi: {
+          url: 'http://localhost:1234/',
+          retryWithBackoff: api.retryWithBackoff,
+          requestPromise: api.rp,
+        },
+        projectConfig: {
+          devServerPublicPathRoute: '/__cypress/src',
+          namespace: '__cypress',
+          port: 8888,
+          proxyUrl: 'http://localhost:8888',
+        },
+        mountVersion: 2,
+        debugData: {},
+        mode: 'studio',
+      })
+    })
+
+    it('handles errors during initialization', async () => {
+      const error = new Error('Test error')
+
+      getAndInitializeStudioManagerStub.rejects(error)
+
+      // Should not throw
+      await studioLifecycleManager.initializeStudioManager({
+        projectId: 'test-project-id',
+        cloudDataSource: mockCloudDataSource,
+        cfg: mockCfg,
+        debugData: {},
+        ctx: mockCtx,
+      })
+
+      expect(mockCtx.update).to.be.calledOnce
+
+      // @ts-ignore - accessing private property for testing
+      const studioPromise = studioLifecycleManager.studioManagerPromise
+
+      expect(studioPromise).to.not.be.null
+
+      if (studioPromise) {
+        const result = await studioPromise
+
+        expect(result).to.be.null
+      }
     })
   })
 
   describe('isStudioReady', () => {
-    it('returns false when studioManagerPromise is null', () => {
+    it('returns false when studio manager has not been initialized', () => {
       expect(studioLifecycleManager.isStudioReady()).to.be.false
     })
 
-    it('returns true when studioManagerPromise is set', async () => {
-      await studioLifecycleManager.setStudioPromise(Promise.resolve(mockStudioManager))
+    it('returns true when studio has been initialized', async () => {
+      // @ts-ignore - accessing private property for testing
+      studioLifecycleManager.studioManagerPromise = Promise.resolve(mockStudioManager)
+
+      // @ts-ignore - accessing private property for testing
+      studioLifecycleManager['studioReady'] = true
 
       expect(studioLifecycleManager.isStudioReady()).to.be.true
     })
   })
 
-  describe('getStudioIfReady', () => {
-    it('returns null when studioManagerPromise is null', () => {
-      expect(studioLifecycleManager.getStudioIfReady()).to.be.null
-    })
-
-    it('returns the promise when studioManagerPromise is set', async () => {
-      const promise = Promise.resolve(mockStudioManager)
-
-      await studioLifecycleManager.setStudioPromise(promise)
-
-      expect(studioLifecycleManager.getStudioIfReady()).to.equal(promise)
-    })
-  })
-
   describe('getStudio', () => {
-    it('throws an error when studioManagerPromise is null', async () => {
+    it('throws an error when studio manager is not initialized', async () => {
       try {
         await studioLifecycleManager.getStudio()
         expect.fail('Expected method to throw')
@@ -68,8 +176,9 @@ describe('StudioLifecycleManager', () => {
       }
     })
 
-    it('returns the resolved promise when studioManagerPromise is set', async () => {
-      await studioLifecycleManager.setStudioPromise(Promise.resolve(mockStudioManager))
+    it('returns the studio manager when initialized', async () => {
+      // @ts-ignore - accessing private property for testing
+      studioLifecycleManager.studioManagerPromise = Promise.resolve(mockStudioManager)
 
       const result = await studioLifecycleManager.getStudio()
 
@@ -77,103 +186,104 @@ describe('StudioLifecycleManager', () => {
     })
   })
 
-  describe('setStudioPromise', () => {
-    it('sets the studioManagerPromise', async () => {
-      const promise = Promise.resolve(mockStudioManager)
-
-      await studioLifecycleManager.setStudioPromise(promise)
-
-      expect(studioLifecycleManager.studioManagerPromise).to.equal(promise)
-    })
-
-    it('emits studio:ready event when promise resolves with a studio manager', async () => {
-      const emitSpy = sinon.spy(studioLifecycleManager, 'emit')
-      const promise = Promise.resolve(mockStudioManager)
-
-      await studioLifecycleManager.setStudioPromise(promise)
-      // Wait for promise to resolve and event to be emitted
-      await nextTick()
-
-      expect(emitSpy).to.be.calledWith('studio:ready', mockStudioManager)
-    })
-
-    it('emits studio:ready event with null when promise resolves to null', async () => {
-      const emitSpy = sinon.spy(studioLifecycleManager, 'emit')
-      const promise = Promise.resolve(null)
-
-      await studioLifecycleManager.setStudioPromise(promise)
-      // Wait for promise to resolve
-      await nextTick()
-
-      expect(emitSpy).to.be.calledWith('studio:ready', null)
-    })
-  })
-
-  describe('onStudioReady', () => {
-    it('registers a listener with once() for studio:ready event', () => {
-      const onceSpy = sinon.spy(studioLifecycleManager, 'once')
+  describe('registerStudioReadyListener', () => {
+    it('registers a listener that will be called when studio is ready', () => {
       const listener = sinon.stub()
 
-      studioLifecycleManager.onStudioReady(listener)
+      studioLifecycleManager.registerStudioReadyListener(listener)
 
-      expect(onceSpy).to.be.calledWith('studio:ready', listener)
+      // @ts-ignore - accessing private property for testing
+      expect(studioLifecycleManager['listeners']).to.include(listener)
     })
 
-    it('returns a function to remove the listener', () => {
-      const offSpy = sinon.spy(studioLifecycleManager, 'off')
+    it('calls listener immediately if studio is already ready', async () => {
       const listener = sinon.stub()
 
-      const removeListener = studioLifecycleManager.onStudioReady(listener)
+      // @ts-ignore - accessing private property for testing
+      studioLifecycleManager.studioManager = mockStudioManager
 
-      removeListener()
+      // @ts-ignore - accessing private property for testing
+      studioLifecycleManager['studioReady'] = true
 
-      expect(offSpy).to.be.calledWith('studio:ready', listener)
-    })
+      await Promise.resolve()
 
-    it('calls listener immediately if studioManagerPromise is already resolved', async () => {
-      const listener = sinon.stub()
+      studioLifecycleManager.registerStudioReadyListener(listener)
 
-      await studioLifecycleManager.setStudioPromise(Promise.resolve(mockStudioManager))
-      // Ensure promise is resolved
-      await nextTick()
-
-      studioLifecycleManager.onStudioReady(listener)
-      // Need another tick to let the promise in onStudioReady resolve
+      await Promise.resolve()
+      await Promise.resolve()
       await nextTick()
 
       expect(listener).to.be.calledWith(mockStudioManager)
     })
 
-    it('does not call listener if studioManagerPromise resolves to null', async () => {
+    it('does not call listener if studio manager is null', async () => {
       const listener = sinon.stub()
-      const offSpy = sinon.spy(studioLifecycleManager, 'off')
 
-      await studioLifecycleManager.setStudioPromise(Promise.resolve(null))
-      // Ensure promise is resolved
-      await nextTick()
+      // @ts-ignore - accessing private property for testing
+      studioLifecycleManager.studioManager = null
 
-      studioLifecycleManager.onStudioReady(listener)
-      // Need another tick to let the promise in onStudioReady resolve
+      // @ts-ignore - accessing private property for testing
+      studioLifecycleManager['studioReady'] = true
+
+      studioLifecycleManager.registerStudioReadyListener(listener)
+
+      // Give enough time for any promises to resolve
+      await Promise.resolve()
+      await Promise.resolve()
       await nextTick()
 
       expect(listener).not.to.be.called
-      // The listener should still be removed to prevent it from being called if another studioManager is set
-      expect(offSpy).to.be.calledWith('studio:ready', listener)
     })
 
-    it('removes the listener after immediate call to prevent double execution', async () => {
-      const offSpy = sinon.spy(studioLifecycleManager, 'off')
-      const listener = sinon.stub()
+    it('adds multiple listeners to the list', () => {
+      const listener1 = sinon.stub()
+      const listener2 = sinon.stub()
 
-      await studioLifecycleManager.setStudioPromise(Promise.resolve(mockStudioManager))
-      // Ensure promise is resolved
+      studioLifecycleManager.registerStudioReadyListener(listener1)
+      studioLifecycleManager.registerStudioReadyListener(listener2)
+
+      // @ts-ignore - accessing private property for testing
+      expect(studioLifecycleManager['listeners']).to.include(listener1)
+      // @ts-ignore - accessing private property for testing
+      expect(studioLifecycleManager['listeners']).to.include(listener2)
+    })
+
+    it('cleans up listeners after calling them when studio becomes ready', async () => {
+      const listener1 = sinon.stub()
+      const listener2 = sinon.stub()
+
+      studioLifecycleManager.registerStudioReadyListener(listener1)
+      studioLifecycleManager.registerStudioReadyListener(listener2)
+
+      // @ts-ignore - accessing private property for testing
+      expect(studioLifecycleManager['listeners'].length).to.equal(2)
+
+      const listenersCalledPromise = Promise.all([
+        new Promise<void>((resolve) => {
+          listener1.callsFake(() => resolve())
+        }),
+        new Promise<void>((resolve) => {
+          listener2.callsFake(() => resolve())
+        }),
+      ])
+
+      studioLifecycleManager.initializeStudioManager({
+        projectId: 'test-project-id',
+        cloudDataSource: mockCloudDataSource,
+        cfg: mockCfg,
+        debugData: {},
+        ctx: mockCtx,
+      })
+
+      await listenersCalledPromise
+
       await nextTick()
 
-      studioLifecycleManager.onStudioReady(listener)
-      // Need another tick to let the promise in onStudioReady resolve
-      await nextTick()
+      expect(listener1).to.be.calledWith(mockStudioManager)
+      expect(listener2).to.be.calledWith(mockStudioManager)
 
-      expect(offSpy).to.be.calledWith('studio:ready', listener)
+      // @ts-ignore - accessing private property for testing
+      expect(studioLifecycleManager['listeners'].length).to.equal(0)
     })
   })
 })

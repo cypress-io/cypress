@@ -93,7 +93,7 @@ necessary consequence taken.
 The possible consequences affect the module we verified in the following manner:
 
 - Defer: we need to _defer_ the module in order to prevent it from loading
-- NoRewrite: we should not _rewrite_ the module as it results in invalid code
+- Norewrite: we should not _rewrite_ the module as it results in invalid code
 - None: no consequence, i.e. a light weight warning for informative purposes only
 
 Once we have done this for all leaves, the doctor finds all modules that only depend on those and

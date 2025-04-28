@@ -95,7 +95,7 @@ module.exports = async function (params) {
       const cloudApiFileSource = await getProtocolFileSource(cloudApiFilePath)
       const cloudProtocolFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/protocol.ts')
       const cloudProtocolFileSource = await getProtocolFileSource(cloudProtocolFilePath)
-      const getAndInitializeStudioManagerFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/api/get_and_initialize_studio_manager.ts')
+      const getAndInitializeStudioManagerFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/api/studio/get_and_initialize_studio_manager.ts')
       const getAndInitializeStudioManagerFileSource = await getStudioFileSource(getAndInitializeStudioManagerFilePath)
 
       await Promise.all([

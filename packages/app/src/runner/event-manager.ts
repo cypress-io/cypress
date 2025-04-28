@@ -278,6 +278,21 @@ export class EventManager {
       rerun()
     }
 
+    const studioInitSuite = ({ suiteId, showUrlPrompt = true }: { suiteId: string, showUrlPrompt?: boolean }) => {
+      this.studioStore.setSuiteId(suiteId)
+      this.studioStore.setShowUrlPrompt(showUrlPrompt)
+
+      this.ws.emit('studio:init', ({ canAccessStudioAI, error }) => {
+        if (error) {
+          // eslint-disable-next-line no-console
+          console.error(error)
+        }
+
+        this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
+        studioInit()
+      })
+    }
+
     this.reporterBus.on('studio:init:test', (testId) => {
       this.studioStore.setTestId(testId)
 
@@ -293,17 +308,7 @@ export class EventManager {
     })
 
     this.reporterBus.on('studio:init:suite', (suiteId) => {
-      this.studioStore.setSuiteId(suiteId)
-
-      this.ws.emit('studio:init', ({ canAccessStudioAI, error }) => {
-        if (error) {
-          // eslint-disable-next-line no-console
-          console.error(error)
-        }
-
-        this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
-        studioInit()
-      })
+      studioInitSuite({ suiteId })
     })
 
     this.reporterBus.on('studio:cancel', () => {
@@ -352,6 +357,10 @@ export class EventManager {
           })
         }
       })
+    })
+
+    this.localBus.on('studio:init:suite', (options: { suiteId: string, showUrlPrompt?: boolean }) => {
+      studioInitSuite(options)
     })
 
     this.localBus.on('studio:cancel', () => {
@@ -441,15 +450,12 @@ export class EventManager {
 
     const isDefaultProtocolEnabled = Cypress.config('isDefaultProtocolEnabled')
 
-    let isStudioProtocolEnabled = false
     const isStudioInScope = this.studioStore.isActive || this.studioStore.isLoading
 
-    if (isStudioInScope) {
+    if (isStudioInScope && !isDefaultProtocolEnabled) {
       await new Promise<void>((resolve) => {
         this.ws.emit('studio:protocol:enabled', ({ studioProtocolEnabled }) => {
-          isStudioProtocolEnabled = studioProtocolEnabled
-
-          Cypress.state('isProtocolEnabled', isDefaultProtocolEnabled || (isStudioProtocolEnabled && isStudioInScope))
+          Cypress.state('isProtocolEnabled', studioProtocolEnabled)
 
           resolve()
         })
