@@ -13,6 +13,11 @@
       data-cy="assertions-menu-header"
     >
       <div class="title">
+        <IconActionTap
+          size="16"
+          stroke-color="gray-500"
+          fill-color="gray-900"
+        />
         <span>Assert</span>
       </div>
       <div class="close-wrapper">
@@ -35,12 +40,9 @@
     >
       Expect
       {{ ' ' }}
-      <Tag
-        size="20"
-        color="gray"
-      >
+      <code class="code">
         {{ tagName }}
-      </Tag>
+      </code>
       {{ ' ' }}
       to
     </div>
@@ -63,8 +65,7 @@ import { createPopper } from '@popperjs/core'
 import AssertionType from './AssertionType.ce.vue'
 import _ from 'lodash'
 import { nextTick, onMounted, Ref, ref, StyleValue } from 'vue'
-import { IconActionDeleteSmall } from '@cypress-design/vue-icon'
-import Tag from '@cypress-design/vue-tag'
+import { IconActionDeleteSmall, IconActionTap } from '@cypress-design/vue-icon'
 import type { PossibleAssertions, AddAssertion, AssertionArgs } from './types'
 
 const props = defineProps <{
@@ -131,10 +132,6 @@ onMounted(() => {
   width: 225px;
   position: absolute;
   color: $gray-300;
-  border: 1px solid #9aa2fc;
-  box-shadow: 0 0 3px 3px rgba(154, 162, 252, 0.35);
-  -webkit-box-shadow: 0 0 3px 3px rgba(154, 162, 252, 0.35);
-  -moz-box-shadow: 0 0 3px 3px rgba(154, 162, 252, 0.35);
 
   .header {
     align-items: center;
@@ -143,18 +140,24 @@ onMounted(() => {
     border-top-right-radius: 4px;
     color: $gray-300;
     display: flex;
-    padding: 8px 17px;
+    padding: 8px;
     border-bottom: 1px solid $gray-900;
     font-weight: 500;
 
     .title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 500;
+      color: $gray-100;
+      padding: 0.4rem 0.6rem;
     }
 
     .close-wrapper {
       margin-left: auto;
       margin-top: -2.5px;
+      margin-right: 8px;
 
       .close {
         &:hover, &:focus, &:active {
@@ -172,9 +175,20 @@ onMounted(() => {
 
   .subtitle {
     border-bottom: 1px solid $gray-900;
-    padding: 14px 17px;
+    padding: 14px 9px;
+    margin: 0 8px;
     color: $gray-500;
     font-size: 14px;
+  }
+
+  .code {
+    font-size: 12px;
+    font-weight: 500;
+    color: $white;
+    border-radius: 4px;
+    border: 1px solid $gray-900;
+    line-height: 20px;
+    padding: 4px;
   }
 
   .assertions-list {

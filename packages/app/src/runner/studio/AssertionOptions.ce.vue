@@ -5,29 +5,29 @@
     data-cy="assertion-options"
   >
     <div
-      v-for="{ name, value } in options"
-      :key="`${name}${value}`"
+      v-for="option in options"
+      :key="getOptionKey(option)"
       class="assertion-option"
       data-cy="assertion-option"
       tabindex="0"
       role="button"
-      @keydown.enter="() => onClick(name, value)"
-      @keydown.space="() => onClick(name, value)"
-      @click.stop="() => onClick(name, value)"
+      @keydown.enter="handleOptionClick(option)"
+      @keydown.space="handleOptionClick(option)"
+      @click.stop="handleOptionClick(option)"
     >
       <span
-        v-if="name"
+        v-if="option.name"
         class="assertion-option-name"
         data-cy="assertion-option-name"
       >
-        {{ truncate(name) }}:{{ ' ' }}
+        {{ truncate(option.name) }}:{{ ' ' }}
       </span>
       <span
         v-else
         class="assertion-option-value"
         data-cy="assertion-option-value"
       >
-        {{ typeof value === 'string' && truncate(value) }}
+        {{ typeof option.value === 'string' && truncate(option.value) }}
       </span>
     </div>
   </div>
@@ -38,46 +38,65 @@ import { createPopper } from '@popperjs/core'
 import { onMounted, ref, nextTick, Ref } from 'vue'
 import type { AssertionOption } from './types'
 
-const props = defineProps<{
+interface Props {
   type: string
   options: AssertionOption[]
-}>()
+}
+
+const props = defineProps<Props>()
 
 const emit = defineEmits<{
   (eventName: 'addAssertion', value: { type: string, name: string, value: string })
   (eventName: 'setPopperElement', value: HTMLElement)
 }>()
 
-const truncate = (str: string): string => {
-  if (str && str.length > 80) {
-    return `${str.substring(0, 77)}...`
-  }
-
-  return str
-}
-
 const popper: Ref<HTMLElement | null> = ref(null)
 
-onMounted(() => {
-  nextTick(() => {
-    const popperEl = popper.value as HTMLElement
-    const reference = popperEl.parentElement as HTMLElement
+const TRUNCATE_LENGTH = 80
+const TRUNCATE_SUFFIX = '...'
 
-    createPopper(reference, popperEl, {
-      placement: 'right-start',
-    })
-
-    emit('setPopperElement', popperEl)
-  })
-})
-
-const onClick = (name: string | undefined, value: string | number | string[] | undefined): void => {
-  if (name && value) {
-    const stringValue = Array.isArray(value) ? value.join(', ') : String(value)
-
-    emit('addAssertion', { type: props.type, name, value: stringValue })
+const truncate = (str: string): string => {
+  if (!str || str.length <= TRUNCATE_LENGTH) {
+    return str
   }
+
+  return `${str.substring(0, TRUNCATE_LENGTH - TRUNCATE_SUFFIX.length)}${TRUNCATE_SUFFIX}`
 }
+
+const getOptionKey = (option: AssertionOption): string => {
+  return `${option.name}${option.value}`
+}
+
+const handleOptionClick = (option: AssertionOption): void => {
+  if (!option.name || !option.value) {
+    return
+  }
+
+  const stringValue = Array.isArray(option.value)
+    ? option.value.join(', ')
+    : String(option.value)
+
+  emit('addAssertion', {
+    type: props.type,
+    name: option.name,
+    value: stringValue,
+  })
+}
+
+const initializePopper = (): void => {
+  const popperEl = popper.value as HTMLElement
+  const reference = popperEl.parentElement as HTMLElement
+
+  createPopper(reference, popperEl, {
+    placement: 'right-start',
+  })
+
+  emit('setPopperElement', popperEl)
+}
+
+onMounted(() => {
+  nextTick(initializePopper)
+})
 </script>
 
 <style lang="scss">
@@ -91,10 +110,7 @@ const onClick = (name: string | undefined, value: string | number | string[] | u
   overflow: hidden;
   overflow-wrap: break-word;
   position: absolute;
-  border: 1px solid #9aa2fc;
-  box-shadow: 0 0 3px 3px rgba(154, 162, 252, 0.35);
-  -webkit-box-shadow: 0 0 3px 3px rgba(154, 162, 252, 0.35);
-  -moz-box-shadow: 0 0 3px 3px rgba(154, 162, 252, 0.35);
+  right: 8px;
   border-radius: 4px;
 
   .assertion-option {
@@ -122,10 +138,7 @@ const onClick = (name: string | undefined, value: string | number | string[] | u
       background-color: $gray-950;
       color: $indigo-300;
       outline: none;
-      border: 1px solid #9aa2fc;
-      box-shadow: 0 0 3px 3px rgba(154, 162, 252, 0.35);
-      -webkit-box-shadow: 0 0 3px 3px rgba(154, 162, 252, 0.35);
-      -moz-box-shadow: 0 0 3px 3px rgba(154, 162, 252, 0.35);
+      @include box-shadow;
     }
   }
 }
