@@ -16,7 +16,7 @@ If you want to run against locally developed Studio code:
   - Run `yarn`
   - Run `yarn cypress:open`
  
-Note: When using the `CYPRESS_LOCAL_STUDIO_PATH` environment variable, we bypass our error reporting and instead decide to throw an exception immediately. The purpose of this is to try and weed out any issues by drawing attention to them immediately during local development.
+Note: When using the `CYPRESS_LOCAL_STUDIO_PATH` environment variable, we bypass our error reporting and instead throw the exception immediately. The purpose of this is to try and surface issues immediately during local development.
 
 ## Types
 
