@@ -57,6 +57,7 @@ describe('plugin events', () => {
         })
       })
 
+      cy.get('[data-cy="runnable-header"]').should('be.visible')
       cy.get('body').type('f')
       cy.get('div[title="run_events_spec_2.cy.js"]').click()
       cy.waitForSpecToFinish({
