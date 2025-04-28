@@ -3,6 +3,10 @@
 
 _Released 5/6/2025 (PENDING)_
 
+**Performance:**
+
+- Ensure the previous pausing event handlers are removed before new ones are added. Addressed in [#31596](https://github.com/cypress-io/cypress/pull/31596).
+
 **Misc:**
 
 - The URL in the Cypress App no longer displays a white background when the URL is loading. Fixes [#31556](https://github.com/cypress-io/cypress/issues/31556).
