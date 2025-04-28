@@ -9,13 +9,7 @@ let sendEventsToOrigin: string | null = null
 type GetCypressFunction = () => any
 
 class PauseHandlers {
-  private getCypress: GetCypressFunction
-  private reporterBus: EventEmitter
-
-  constructor (getCypress: GetCypressFunction, reporterBus: EventEmitter) {
-    this.getCypress = getCypress
-    this.reporterBus = reporterBus
-  }
+  constructor (private getCypress: GetCypressFunction, private reporterBus: EventEmitter) {}
 
   nextHandler = () => {
     const Cypress = this.getCypress()
