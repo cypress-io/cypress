@@ -6,8 +6,6 @@ import esbuild from 'esbuild'
 import type { StudioManager as StudioManagerShape } from '@packages/server/lib/cloud/studio'
 import os from 'os'
 
-const pkg = require('@packages/root')
-
 const { outputFiles: [{ contents: stubStudioRaw }] } = esbuild.buildSync({
   entryPoints: [path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'studio', 'test-studio.ts')],
   bundle: true,
@@ -18,15 +16,17 @@ const { outputFiles: [{ contents: stubStudioRaw }] } = esbuild.buildSync({
 const stubStudio = new TextDecoder('utf-8').decode(stubStudioRaw)
 
 describe('lib/cloud/studio', () => {
-  let stubbedCrossFetch: sinon.SinonStub
   let studioManager: StudioManagerShape
   let studio: StudioServerShape
   let StudioManager: typeof import('@packages/server/lib/cloud/studio').StudioManager
+  let reportStudioError: sinon.SinonStub
 
   beforeEach(async () => {
-    stubbedCrossFetch = sinon.stub()
+    reportStudioError = sinon.stub()
     StudioManager = (proxyquire('../lib/cloud/studio', {
-      'cross-fetch': stubbedCrossFetch,
+      './api/studio/report_studio_error': {
+        reportStudioError,
+      },
     }) as typeof import('@packages/server/lib/cloud/studio')).StudioManager
 
     studioManager = new StudioManager()
@@ -53,30 +53,12 @@ describe('lib/cloud/studio', () => {
       const error = new Error('foo')
 
       sinon.stub(studio, 'initializeRoutes').throws(error)
+      sinon.stub(studio, 'reportError')
 
       studioManager.initializeRoutes({} as any)
 
       expect(studioManager.status).to.eq('IN_ERROR')
-      expect(stubbedCrossFetch).to.be.calledWithMatch(sinon.match((url: string) => url.endsWith('/studio/errors')), {
-        agent: sinon.match.any,
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-cypress-version': pkg.version,
-          'x-os-name': 'darwin',
-          'x-arch': 'x64',
-        },
-        body: sinon.match((body) => {
-          const parsedBody = JSON.parse(body)
-
-          expect(parsedBody.studioHash).to.eq('abcdefg')
-          expect(parsedBody.errors[0].name).to.eq(error.name)
-          expect(parsedBody.errors[0].stack).to.eq(error.stack)
-          expect(parsedBody.errors[0].message).to.eq(error.message)
-
-          return true
-        }),
-      })
+      expect(studio.reportError).to.be.calledWithMatch(error, 'initializeRoutes', {})
     })
   })
 
@@ -85,58 +67,34 @@ describe('lib/cloud/studio', () => {
       const error = new Error('foo')
 
       sinon.stub(studio, 'canAccessStudioAI').throws(error)
+      sinon.stub(studio, 'reportError')
 
       await studioManager.canAccessStudioAI({} as any)
 
       expect(studioManager.status).to.eq('IN_ERROR')
-      expect(stubbedCrossFetch).to.be.calledWithMatch(sinon.match((url: string) => url.endsWith('/studio/errors')), {
-        agent: sinon.match.any,
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-cypress-version': pkg.version,
-          'x-os-name': 'darwin',
-          'x-arch': 'x64',
-        },
-        body: sinon.match((body) => {
-          const parsedBody = JSON.parse(body)
-
-          expect(parsedBody.studioHash).to.eq('abcdefg')
-          expect(parsedBody.errors[0].name).to.eq(error.name)
-          expect(parsedBody.errors[0].stack).to.eq(error.stack)
-          expect(parsedBody.errors[0].message).to.eq(error.message)
-
-          return true
-        }),
-      })
+      expect(studio.reportError).to.be.calledWithMatch(error, 'canAccessStudioAI', {})
     })
   })
 
   describe('createInErrorManager', () => {
     it('creates a studio manager in error state', () => {
-      const manager = StudioManager.createInErrorManager(new Error('foo'))
+      const error = new Error('foo')
+      const manager = StudioManager.createInErrorManager({
+        error,
+        cloudApi: {} as any,
+        studioHash: 'abcdefg',
+        projectSlug: '1234',
+        studioMethod: 'initializeRoutes',
+      })
 
       expect(manager.status).to.eq('IN_ERROR')
-
-      expect(stubbedCrossFetch).to.be.calledWithMatch(sinon.match((url: string) => url.endsWith('/studio/errors')), {
-        agent: sinon.match.any,
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-cypress-version': pkg.version,
-          'x-os-name': 'darwin',
-          'x-arch': 'x64',
-        },
-        body: sinon.match((body) => {
-          const parsedBody = JSON.parse(body)
-
-          expect(parsedBody.studioHash).to.be.undefined
-          expect(parsedBody.errors[0].name).to.eq('Error')
-          expect(parsedBody.errors[0].stack).to.be.a('string')
-          expect(parsedBody.errors[0].message).to.eq('foo')
-
-          return true
-        }),
+      expect(reportStudioError).to.be.calledWithMatch({
+        error,
+        cloudApi: {} as any,
+        studioHash: 'abcdefg',
+        projectSlug: '1234',
+        studioMethod: 'initializeRoutes',
+        studioMethodArgs: undefined,
       })
     })
   })

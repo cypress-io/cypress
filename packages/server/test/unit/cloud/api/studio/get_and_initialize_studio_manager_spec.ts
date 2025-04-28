@@ -1,13 +1,13 @@
 import { Readable, Writable } from 'stream'
-import { proxyquire, sinon } from '../../../spec_helper'
-import { HttpError } from '../../../../lib/cloud/network/http_error'
-import { CloudRequest } from '../../../../lib/cloud/api/cloud_request'
-import { isRetryableError } from '../../../../lib/cloud/network/is_retryable_error'
-import { asyncRetry } from '../../../../lib/util/async_retry'
+import { proxyquire, sinon } from '../../../../spec_helper'
+import { HttpError } from '../../../../../lib/cloud/network/http_error'
+import { CloudRequest } from '../../../../../lib/cloud/api/cloud_request'
+import { isRetryableError } from '../../../../../lib/cloud/network/is_retryable_error'
+import { asyncRetry } from '../../../../../lib/util/async_retry'
 import { CloudDataSource } from '@packages/data-context/src/sources'
 
 describe('getAndInitializeStudioManager', () => {
-  let getAndInitializeStudioManager: typeof import('@packages/server/lib/cloud/api/get_and_initialize_studio_manager').getAndInitializeStudioManager
+  let getAndInitializeStudioManager: typeof import('@packages/server/lib/cloud/api/studio/get_and_initialize_studio_manager').getAndInitializeStudioManager
   let rmStub: sinon.SinonStub = sinon.stub()
   let ensureStub: sinon.SinonStub = sinon.stub()
   let copyStub: sinon.SinonStub = sinon.stub()
@@ -34,7 +34,7 @@ describe('getAndInitializeStudioManager', () => {
     createInErrorManagerStub = sinon.stub()
     studioManagerSetupStub = sinon.stub()
 
-    getAndInitializeStudioManager = (proxyquire('../lib/cloud/api/get_and_initialize_studio_manager', {
+    getAndInitializeStudioManager = (proxyquire('../lib/cloud/api/studio/get_and_initialize_studio_manager', {
       fs: {
         promises: {
           rm: rmStub.resolves(),
@@ -54,10 +54,10 @@ describe('getAndInitializeStudioManager', () => {
       tar: {
         extract: extractStub.resolves(),
       },
-      '../encryption': {
+      '../../encryption': {
         verifySignatureFromFile: verifySignatureFromFileStub,
       },
-      '../studio': {
+      '../../studio': {
         StudioManager: class StudioManager {
           static createInErrorManager = createInErrorManagerStub
           setup = (...options) => studioManagerSetupStub(...options)
@@ -67,7 +67,7 @@ describe('getAndInitializeStudioManager', () => {
       '@packages/root': {
         version: '1.2.3',
       },
-    }) as typeof import('@packages/server/lib/cloud/api/get_and_initialize_studio_manager')).getAndInitializeStudioManager
+    }) as typeof import('@packages/server/lib/cloud/api/studio/get_and_initialize_studio_manager')).getAndInitializeStudioManager
   })
 
   afterEach(() => {
@@ -314,7 +314,19 @@ describe('getAndInitializeStudioManager', () => {
         encrypt: 'signed',
       })
 
-      expect(createInErrorManagerStub).to.be.calledWithMatch(sinon.match.instanceOf(AggregateError))
+      expect(createInErrorManagerStub).to.be.calledWithMatch({
+        error: sinon.match.instanceOf(AggregateError),
+        cloudApi: {
+          cloudUrl: 'http://localhost:1234',
+          cloudHeaders: {
+            a: 'b',
+            c: 'd',
+          },
+        },
+        studioHash: undefined,
+        projectSlug: '12345',
+        studioMethod: 'getAndInitializeStudioManager',
+      })
     })
 
     it('throws an error and returns a studio manager in error state if the signature verification fails', async () => {
@@ -367,7 +379,16 @@ describe('getAndInitializeStudioManager', () => {
       })
 
       expect(verifySignatureFromFileStub).to.be.calledWith('/tmp/cypress/studio/bundle.tar', '159')
-      expect(createInErrorManagerStub).to.be.calledWithMatch(sinon.match.instanceOf(Error).and(sinon.match.has('message', 'Unable to verify studio signature')))
+      expect(createInErrorManagerStub).to.be.calledWithMatch({
+        error: sinon.match.instanceOf(Error).and(sinon.match.has('message', 'Unable to verify studio signature')),
+        cloudApi: {
+          cloudUrl: 'http://localhost:1234',
+          cloudHeaders: { a: 'b', c: 'd' },
+        },
+        studioHash: undefined,
+        projectSlug: '12345',
+        studioMethod: 'getAndInitializeStudioManager',
+      })
     })
 
     it('throws an error if there is no signature in the response headers', async () => {
@@ -397,7 +418,16 @@ describe('getAndInitializeStudioManager', () => {
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
       expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')
-      expect(createInErrorManagerStub).to.be.calledWithMatch(sinon.match.instanceOf(Error).and(sinon.match.has('message', 'Unable to get studio signature')))
+      expect(createInErrorManagerStub).to.be.calledWithMatch({
+        error: sinon.match.instanceOf(Error).and(sinon.match.has('message', 'Unable to get studio signature')),
+        cloudApi: {
+          cloudUrl: 'http://localhost:1234',
+          cloudHeaders: { a: 'b', c: 'd' },
+        },
+        studioHash: undefined,
+        projectSlug: '12345',
+        studioMethod: 'getAndInitializeStudioManager',
+      })
     })
   })
 })

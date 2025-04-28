@@ -1,21 +1,21 @@
 import path from 'path'
 import os from 'os'
 import { ensureDir, copy, readFile } from 'fs-extra'
-import { StudioManager } from '../studio'
+import { StudioManager } from '../../studio'
 import tar from 'tar'
-import { verifySignatureFromFile } from '../encryption'
+import { verifySignatureFromFile } from '../../encryption'
 import crypto from 'crypto'
 import fs from 'fs'
 import fetch from 'cross-fetch'
 import { agent } from '@packages/network'
-import { asyncRetry, linearDelay } from '../../util/async_retry'
-import { isRetryableError } from '../network/is_retryable_error'
-import { PUBLIC_KEY_VERSION } from '../constants'
-import { CloudRequest } from './cloud_request'
+import { asyncRetry, linearDelay } from '../../../util/async_retry'
+import { isRetryableError } from '../../network/is_retryable_error'
+import { PUBLIC_KEY_VERSION } from '../../constants'
+import { CloudRequest } from '../cloud_request'
 import type { CloudDataSource } from '@packages/data-context/src/sources'
 
 const pkg = require('@packages/root')
-const routes = require('../routes')
+const routes = require('../../routes')
 
 const _delay = linearDelay(500)
 
@@ -121,16 +121,18 @@ export const retrieveAndExtractStudioBundle = async ({ projectId }: { projectId?
 export const getAndInitializeStudioManager = async ({ projectId, cloudDataSource }: { projectId?: string, cloudDataSource: CloudDataSource }): Promise<StudioManager> => {
   let script: string
 
+  const cloudEnv = (process.env.CYPRESS_INTERNAL_ENV || 'production') as 'development' | 'staging' | 'production'
+  const cloudUrl = cloudDataSource.getCloudUrl(cloudEnv)
+  const cloudHeaders = await cloudDataSource.additionalHeaders()
+
+  let studioHash: string | undefined
+
   try {
-    const { studioHash } = await retrieveAndExtractStudioBundle({ projectId })
+    ({ studioHash } = await retrieveAndExtractStudioBundle({ projectId }))
 
     script = await readFile(serverFilePath, 'utf8')
 
     const studioManager = new StudioManager()
-
-    const cloudEnv = (process.env.CYPRESS_INTERNAL_ENV || 'production') as 'development' | 'staging' | 'production'
-    const cloudUrl = cloudDataSource.getCloudUrl(cloudEnv)
-    const cloudHeaders = await cloudDataSource.additionalHeaders()
 
     await studioManager.setup({
       script,
@@ -156,7 +158,19 @@ export const getAndInitializeStudioManager = async ({ projectId, cloudDataSource
       actualError = error
     }
 
-    return StudioManager.createInErrorManager(actualError)
+    return StudioManager.createInErrorManager({
+      cloudApi: {
+        cloudUrl,
+        cloudHeaders,
+        CloudRequest,
+        isRetryableError,
+        asyncRetry,
+      },
+      studioHash,
+      projectSlug: projectId,
+      error: actualError,
+      studioMethod: 'getAndInitializeStudioManager',
+    })
   } finally {
     await fs.promises.rm(bundlePath, { force: true })
   }
