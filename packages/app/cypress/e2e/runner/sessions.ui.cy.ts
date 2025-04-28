@@ -772,6 +772,7 @@ describe('runner/cypress sessions.open_mode.spec', () => {
   })
 
   it('persists global session and does not persists spec session when selecting a different spec', () => {
+    cy.get('[data-cy="runnable-header"]').should('be.visible')
     cy.get('body').type('f')
     cy.get('div[title="blank_session.cy.js"]').click()
 

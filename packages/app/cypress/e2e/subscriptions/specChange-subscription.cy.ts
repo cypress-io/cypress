@@ -195,6 +195,7 @@ e2e: {
       cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
+      cy.get('[data-cy="runnable-header"]').should('be.visible')
       cy.get('body').type('f')
       cy.get('[data-cy="spec-file-item"]')
       .should('have.length', 28)
@@ -221,6 +222,7 @@ e2e: {
       cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
+      cy.get('[data-cy="runnable-header"]').should('be.visible')
       cy.get('body').type('f')
       cy.get('[data-cy="spec-file-item"]')
       .should('have.length', 28)
@@ -297,6 +299,7 @@ e2e: {
       cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
 
+      cy.get('[data-cy="runnable-header"]').should('be.visible')
       cy.get('body').type('f')
       cy.get('[data-cy="spec-file-item"]')
       .should('have.length', 28)
