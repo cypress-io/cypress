@@ -5,6 +5,7 @@ _Released 5/6/2025 (PENDING)_
 
 **Misc:**
 
+- The Assertions menu when you right click in `experimentalStudio` tests now displays in dark mode. Addresses [#10621](https://github.com/cypress-io/cypress-services/issues/10621).
 - The URL in the Cypress App no longer displays a white background when the URL is loading. Fixes [#31556](https://github.com/cypress-io/cypress/issues/31556).
 
 ## 14.3.2

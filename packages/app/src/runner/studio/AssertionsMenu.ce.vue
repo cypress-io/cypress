@@ -118,12 +118,12 @@ onMounted(() => {
 <style scoped lang="scss">
 @import "./assertions-style.scss";
 
-// NOTE: This is needed because the icon component css is not working here
+// NOTE: This is needed because the icon component css is not imported in this component
 .icon-dark-gray-500 {
   fill: $gray-500;
 }
 
-// NOTE: This is needed because the icon component css is not working here
+// NOTE: This is needed because the icon component css is not imported in this component
 .icon-light-gray-900 {
   fill: $gray-900;
 }
@@ -138,6 +138,7 @@ onMounted(() => {
   @include menu-style;
 
   font-weight: normal;
+  font-family: $font-system;
   z-index: 2147483647;
   width: 225px;
   position: absolute;
