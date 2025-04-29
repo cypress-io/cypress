@@ -85,7 +85,15 @@ describe('SelectorPlayground', () => {
     cy.get('[data-cy="playground-num-elements"]').contains('Invalid')
   })
 
-  it('focuses and copies selector text', () => {
+  it('focuses playground selector', () => {
+    mountSelectorPlayground()
+    cy.get('[data-cy="playground-selector"]').as('copy').clear().type('.foo-bar')
+
+    cy.get('@copy').click()
+    cy.get('@copy').should('be.focused')
+  })
+
+  it('copies selector text', () => {
     const copyStub = cy.stub()
 
     cy.stubMutationResolver(Clipboard_CopyToClipboardDocument, (defineResult, { text }) => {
@@ -100,18 +108,13 @@ describe('SelectorPlayground', () => {
 
     cy.spy(autIframe, 'toggleSelectorHighlight')
 
-    cy.get('[data-cy="playground-selector"]').as('copy').clear().type('.foo-bar')
-
-    cy.get('@copy').click()
-    cy.get('@copy').should('be.focused')
-
     cy.get('[data-cy="playground-copy"]').trigger('mouseenter')
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Copy to clipboard')
 
     cy.get('[data-cy="playground-copy"]').click()
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Copied!')
 
-    cy.wrap(copyStub).should('have.been.calledWith', 'cy.get(\'.foo-bar\')')
+    cy.wrap(copyStub).should('have.been.calledWith', 'cy.get(\'body\')')
   })
 
   it('prints elements when selected elements found', () => {
