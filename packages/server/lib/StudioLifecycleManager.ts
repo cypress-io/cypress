@@ -12,6 +12,7 @@ import { CloudRequest } from './cloud/api/cloud_request'
 import { isRetryableError } from './cloud/network/is_retryable_error'
 import { asyncRetry } from './util/async_retry'
 import { postStudioSession } from './cloud/api/studio/post_studio_session'
+
 const debug = Debug('cypress:server:studio-lifecycle-manager')
 const routes = require('./cloud/routes')
 
@@ -154,8 +155,8 @@ export class StudioLifecycleManager {
    * @param listener Function to call when studio is ready
    */
   registerStudioReadyListener (listener: (studioManager: StudioManager) => void): void {
-    // if studio is already ready and there is a studio manager, call the listener immediately and only once
-    if (this.isStudioReady() && this.studioManager) {
+    // if there is already a studio manager, call the listener immediately
+    if (this.studioManager) {
       debug('Studio ready - calling listener immediately')
       listener(this.studioManager)
     } else {

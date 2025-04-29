@@ -51,10 +51,7 @@ declare namespace Cypress {
     }
     sinon: sinon.SinonApi
     utils: CypressUtils
-    state: State
     events: Events
-    emit: (event: string, payload?: any) => void
-    primaryOriginCommunicator: import('../src/cross-origin/communicator').PrimaryOriginCommunicator
     specBridgeCommunicator: import('../src/cross-origin/communicator').SpecBridgeCommunicator
     mocha: $Mocha
     configure: (config: Cypress.ObjectLike) => void
@@ -96,7 +93,7 @@ declare namespace Cypress {
     (action: 'before:stability:release', fn: () => void)
     (action: '_log:added', fn: (attributes: ObjectLike, log: Cypress.Log) => void): Cypress
     (action: '_log:changed', fn: (attributes: ObjectLike, log: Cypress.Log) => void): Cypress
-    (action: 'paused', fn: (nextCommandName: string) => void)
+    (action: 'resume:all', fn: () => void)
   }
 
   interface Backend {
