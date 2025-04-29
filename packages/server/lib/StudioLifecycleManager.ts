@@ -145,8 +145,8 @@ export class StudioLifecycleManager {
    * @param listener Function to call when studio is ready
    */
   registerStudioReadyListener (listener: (studioManager: StudioManager) => void): void {
-    // if studio is already ready and there is a studio manager, call the listener immediately and only once
-    if (this.isStudioReady() && this.studioManager) {
+    // if there is already a studio manager, call the listener immediately
+    if (this.studioManager) {
       debug('Studio ready - calling listener immediately')
       listener(this.studioManager)
     } else {
