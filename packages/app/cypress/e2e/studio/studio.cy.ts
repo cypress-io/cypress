@@ -56,9 +56,50 @@ describe('studio functionality', () => {
 
       cy.window().then((win) => {
         expect(win.Cypress.config('isDefaultProtocolEnabled')).to.be.false
-        expect(win.Cypress.config('isStudioProtocolEnabled')).to.be.true
         expect(win.Cypress.state('isProtocolEnabled')).to.be.true
       })
+    })
+
+    it('loads the studio UI correctly when studio bundle is taking too long to load', () => {
+      loadProjectAndRunSpec({ enableCloudStudio: false })
+
+      cy.window().then(() => {
+        cy.withCtx((ctx) => {
+          // Mock the studioLifecycleManager.getStudio method to return a hanging promise
+          if (ctx.coreData.studioLifecycleManager) {
+            const neverResolvingPromise = new Promise<null>(() => {})
+
+            ctx.coreData.studioLifecycleManager.getStudio = () => neverResolvingPromise
+            ctx.coreData.studioLifecycleManager.isStudioReady = () => false
+          }
+        })
+      })
+
+      cy.contains('visits a basic html page')
+      .closest('.runnable-wrapper')
+      .findByTestId('launch-studio')
+      .click()
+
+      cy.waitForSpecToFinish()
+
+      // Verify the cloud studio panel is not present
+      cy.findByTestId('studio-panel').should('not.exist')
+
+      cy.get('[data-cy="loading-studio-panel"]').should('not.exist')
+
+      cy.get('[data-cy="hook-name-studio commands"]').should('exist')
+
+      cy.getAutIframe().within(() => {
+        cy.get('#increment').realClick()
+      })
+
+      cy.findByTestId('hook-name-studio commands').closest('.hook-studio').within(() => {
+        cy.get('.command').should('have.length', 2)
+        cy.get('.command-name-get').should('contain.text', '#increment')
+        cy.get('.command-name-click').should('contain.text', 'click')
+      })
+
+      cy.get('button').contains('Save Commands').should('not.be.disabled')
     })
 
     it('does not display Studio button when not using cloud studio', () => {

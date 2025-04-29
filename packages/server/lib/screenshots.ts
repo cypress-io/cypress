@@ -1,53 +1,19 @@
 import _ from 'lodash'
 import Debug from 'debug'
 import mime from 'mime'
-import path from 'path'
 import Promise from 'bluebird'
 import dataUriToBuffer from 'data-uri-to-buffer'
 import Jimp from 'jimp'
 import sizeOf from 'image-size'
 import colorString from 'color-string'
-import sanitize from 'sanitize-filename'
 import * as plugins from './plugins'
-import { fs } from './util/fs'
+import { fs, getPath } from './util/fs'
+import type { Data, ScreenshotsFolder } from './util/fs'
 
 let debug = Debug('cypress:server:screenshot')
-const RUNNABLE_SEPARATOR = ' -- '
-const pathSeparatorRe = /[\\\/]/g
 
 // internal id incrementor
 let __ID__: string | null = null
-
-type ScreenshotsFolder = string | false | undefined
-
-interface Clip {
-  x: number
-  y: number
-  width: number
-  height: number
-}
-
-// TODO: This is likely not representative of the entire Type and should be updated
-interface Data {
-  specName: string
-  name: string
-  startTime: Date
-  viewport: {
-    width: number
-    height: number
-  }
-  titles?: string[]
-  testFailure?: boolean
-  overwrite?: boolean
-  simple?: boolean
-  current?: number
-  total?: number
-  testAttemptIndex?: number
-  appOnly?: boolean
-  hideRunnerUi?: boolean
-  clip?: Clip
-  userClip?: Clip
-}
 
 // TODO: This is likely not representative of the entire Type and should be updated
 interface Details {
@@ -61,7 +27,10 @@ interface Details {
 interface SavedDetails {
   size?: string
   takenAt?: Date
-  dimensions?: string
+  dimensions?: {
+    width: number
+    height: number
+  }
   multipart?: any
   pixelRatio?: number
   name?: any
@@ -69,14 +38,6 @@ interface SavedDetails {
   testFailure?: boolean
   path?: string
 }
-
-// many filesystems limit filename length to 255 bytes/characters, so truncate the filename to
-// the smallest common denominator of safe filenames, which is 255 bytes. when ENAMETOOLONG
-// errors are encountered, `maxSafeBytes` will be decremented to at most `MIN_PREFIX_BYTES`, at
-// which point the latest ENAMETOOLONG error will be emitted.
-// @see https://en.wikipedia.org/wiki/Comparison_of_file_systems#Limits
-let maxSafeBytes = Number(process.env.CYPRESS_MAX_SAFE_FILENAME_BYTES) || 254
-const MIN_PREFIX_BYTES = 64
 
 // TODO: when we parallelize these builds we'll need
 // a semaphore to access the file system when we write
@@ -359,92 +320,6 @@ const getDimensions = function (details) {
   }
 
   return pick(details.image.bitmap)
-}
-
-const ensureSafePath = function (withoutExt: string, extension: string, overwrite: Data['overwrite'], num = 0) {
-  const suffix = `${(num && !overwrite) ? ` (${num})` : ''}.${extension}`
-
-  const maxSafePrefixBytes = maxSafeBytes - suffix.length
-  const filenameBuf = Buffer.from(path.basename(withoutExt))
-
-  if (filenameBuf.byteLength > maxSafePrefixBytes) {
-    const truncated = filenameBuf.slice(0, maxSafePrefixBytes).toString()
-
-    withoutExt = path.join(path.dirname(withoutExt), truncated)
-  }
-
-  const fullPath = [withoutExt, suffix].join('')
-
-  debug('ensureSafePath %o', { withoutExt, extension, num, maxSafeBytes, maxSafePrefixBytes })
-
-  return fs.pathExists(fullPath)
-  .then((found) => {
-    if (found && !overwrite) {
-      return ensureSafePath(withoutExt, extension, overwrite, num + 1)
-    }
-
-    // path does not exist, attempt to create it to check for an ENAMETOOLONG error
-    // @ts-expect-error
-    return fs.outputFileAsync(fullPath, '')
-    .then(() => fullPath)
-    .catch((err) => {
-      debug('received error when testing path %o', { err, fullPath, maxSafePrefixBytes, maxSafeBytes })
-
-      if (err.code === 'ENAMETOOLONG' && maxSafePrefixBytes >= MIN_PREFIX_BYTES) {
-        maxSafeBytes -= 1
-
-        return ensureSafePath(withoutExt, extension, overwrite, num)
-      }
-
-      throw err
-    })
-  })
-}
-
-const sanitizeToString = (title: string | null | undefined) => {
-  // test titles may be values which aren't strings like
-  // null or undefined - so convert before trying to sanitize
-  return sanitize(_.toString(title))
-}
-
-const getPath = function (data: Data, ext, screenshotsFolder: ScreenshotsFolder, overwrite: Data['overwrite']) {
-  let names
-  const specNames = (data.specName || '')
-  .split(pathSeparatorRe)
-
-  if (data.name) {
-    // @ts-expect-error
-    names = data.name.split(pathSeparatorRe).map(sanitize)
-  } else {
-    names = _
-    .chain(data.titles)
-    .map(sanitizeToString)
-    .join(RUNNABLE_SEPARATOR)
-    // @ts-expect-error - this shouldn't be necessary, but it breaks if you remove it
-    .concat([])
-    .value()
-  }
-
-  const index = names.length - 1
-
-  // append (failed) to the last name
-  if (data.testFailure) {
-    names[index] = `${names[index]} (failed)`
-  }
-
-  if (data.testAttemptIndex && data.testAttemptIndex > 0) {
-    names[index] = `${names[index]} (attempt ${data.testAttemptIndex + 1})`
-  }
-
-  let withoutExt
-
-  if (screenshotsFolder) {
-    withoutExt = path.join(screenshotsFolder, ...specNames, ...names)
-  } else {
-    withoutExt = path.join(...specNames, ...names)
-  }
-
-  return ensureSafePath(withoutExt, ext, overwrite)
 }
 
 const getPathToScreenshot = function (data: Data, details: Details, screenshotsFolder: ScreenshotsFolder) {

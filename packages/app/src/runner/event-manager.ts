@@ -449,10 +449,20 @@ export class EventManager {
     this.studioStore.setup(config)
 
     const isDefaultProtocolEnabled = Cypress.config('isDefaultProtocolEnabled')
-    const isStudioProtocolEnabled = Cypress.config('isStudioProtocolEnabled')
+
     const isStudioInScope = this.studioStore.isActive || this.studioStore.isLoading
 
-    Cypress.state('isProtocolEnabled', isDefaultProtocolEnabled || (isStudioProtocolEnabled && isStudioInScope))
+    if (isStudioInScope && !isDefaultProtocolEnabled) {
+      await new Promise<void>((resolve) => {
+        this.ws.emit('studio:protocol:enabled', ({ studioProtocolEnabled }) => {
+          Cypress.state('isProtocolEnabled', studioProtocolEnabled)
+
+          resolve()
+        })
+      })
+    } else {
+      Cypress.state('isProtocolEnabled', isDefaultProtocolEnabled)
+    }
 
     this._addListeners()
   }

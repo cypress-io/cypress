@@ -146,6 +146,7 @@ export const getAndInitializeStudioManager = async ({ projectId, cloudDataSource
         isRetryableError,
         asyncRetry,
       },
+      shouldEnableStudio: !!(process.env.CYPRESS_ENABLE_CLOUD_STUDIO || process.env.CYPRESS_LOCAL_STUDIO_PATH),
     })
 
     return studioManager

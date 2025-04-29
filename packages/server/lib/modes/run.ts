@@ -13,7 +13,7 @@ import Reporter from '../reporter'
 import browserUtils from '../browsers'
 import { openProject } from '../open_project'
 import * as videoCapture from '../video_capture'
-import { fs } from '../util/fs'
+import { fs, getPath } from '../util/fs'
 import runEvents from '../plugins/run_events'
 import env from '../util/env'
 import trash from '../util/trash'
@@ -23,6 +23,7 @@ import chromePolicyCheck from '../util/chrome_policy_check'
 import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser, BrowserVideoController, VideoRecording, ProcessOptions, ProtocolManagerShape, AutomationCommands } from '@packages/types'
 import type { Cfg, ProjectBase } from '../project-base'
 import type { Browser } from '../browsers/types'
+import type { Data } from '../util/fs'
 import * as printResults from '../util/print-run'
 import { telemetry } from '@packages/telemetry'
 import { CypressRunResult, createPublicBrowser, createPublicConfig, createPublicRunResults, createPublicSpec, createPublicSpecResults } from './results'
@@ -224,15 +225,30 @@ async function trashAssets (config: Cfg) {
   }
 }
 
-async function startVideoRecording (options: { previous?: VideoRecording, project: Project, spec: SpecWithRelativeRoot, videosFolder: string }): Promise<VideoRecording> {
+async function startVideoRecording (options: { previous?: VideoRecording, project: Project, spec: SpecWithRelativeRoot, videosFolder: string, overwrite: boolean }): Promise<VideoRecording> {
   if (!options.videosFolder) throw new Error('Missing videoFolder for recording')
 
-  function videoPath (suffix: string) {
-    return path.join(options.videosFolder, options.spec.relativeToCommonRoot + suffix)
+  async function videoPath (ext: string, suffix: string = '') {
+    const specPath = options.spec.relativeToCommonRoot + suffix
+    // tslint:disable-next-line
+    const data: Data = {
+      name: specPath,
+      startTime: new Date(), // needed for ts-lint
+      viewport: {
+        width: 0,
+        height: 0,
+      },
+      specName: '', // this is optional, the getPath will pick up from specPath
+      testFailure: false, //  this is only applicable for screenshot, not for video
+      testAttemptIndex: 0,
+      titles: [],
+    }
+
+    return getPath(data, ext, options.videosFolder, options.overwrite)
   }
 
-  const videoName = videoPath('.mp4')
-  const compressedVideoName = videoPath('-compressed.mp4')
+  const videoName = await videoPath('mp4')
+  const compressedVideoName = await videoPath('mp4', '-compressed')
 
   const outputDir = path.dirname(videoName)
 
@@ -332,6 +348,13 @@ async function compressRecording (options: { quiet: boolean, videoCompression: n
   // or we've been told not to upload the video
   if (options.videoCompression === false || options.videoCompression === 0) {
     debug('skipping compression')
+
+    // the getSafePath used to get the compressedVideoName creates the file
+    // in order to check if the path is safe or not. So here, if the compressed
+    // file exists, we remove it as compression is not enabled
+    if (fs.existsSync(options.processOptions.compressedVideoName)) {
+      await fs.remove(options.processOptions.compressedVideoName)
+    }
 
     return
   }
@@ -949,7 +972,7 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
   async function getVideoRecording () {
     if (!options.video) return undefined
 
-    const opts = { project, spec, videosFolder: options.videosFolder }
+    const opts = { project, spec, videosFolder: options.videosFolder, overwrite: options.config.trashAssetsBeforeRuns }
 
     telemetry.startSpan({ name: 'video:capture' })
 
