@@ -115,8 +115,18 @@ onMounted(() => {
 })
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
 @import "./assertions-style.scss";
+
+// NOTE: This is needed because the icon component css is not working here
+.icon-dark-gray-500 {
+  fill: $gray-500;
+}
+
+// NOTE: This is needed because the icon component css is not working here
+.icon-light-gray-900 {
+  fill: $gray-900;
+}
 
 .highlight {
   background: rgba(159, 196, 231, 0.6);
