@@ -15,9 +15,8 @@ const debug = Debug('cypress:server:studio-lifecycle-manager')
 const routes = require('./cloud/routes')
 
 export class StudioLifecycleManager {
-  private studioManagerPromise: Promise<StudioManager | null> | null = null
-  private studioReady = false
-  private studioManager: StudioManager | null = null
+  private studioManagerPromise?: Promise<StudioManager | null>
+  private studioManager?: StudioManager
   private listeners: ((studioManager: StudioManager) => void)[] = []
   /**
    * Initialize the studio manager and possibly set up protocol.
@@ -74,7 +73,6 @@ export class StudioLifecycleManager {
       }
 
       debug('Studio is ready')
-      this.studioReady = true
       this.studioManager = studioManager
       this.callRegisteredListeners()
 
@@ -116,7 +114,7 @@ export class StudioLifecycleManager {
   }
 
   isStudioReady (): boolean {
-    return this.studioReady
+    return !!this.studioManager
   }
 
   async getStudio () {
@@ -132,9 +130,11 @@ export class StudioLifecycleManager {
       throw new Error('Studio manager has not been initialized')
     }
 
+    const studioManager = this.studioManager
+
     debug('Calling all studio ready listeners')
     this.listeners.forEach((listener) => {
-      listener(this.studioManager as StudioManager)
+      listener(studioManager)
     })
 
     this.listeners = []
@@ -145,11 +145,12 @@ export class StudioLifecycleManager {
    * @param listener Function to call when studio is ready
    */
   registerStudioReadyListener (listener: (studioManager: StudioManager) => void): void {
-    // if studio is already ready and there is a studio manager, call the listener immediately and only once
-    if (this.studioReady && this.studioManager) {
+    // if there is already a studio manager, call the listener immediately
+    if (this.studioManager) {
+      debug('Studio ready - calling listener immediately')
       listener(this.studioManager)
     } else {
-      // otherwise, keep track of the listener and call it when the studio is ready
+      debug('Studio not ready - registering studio ready listener')
       this.listeners.push(listener)
     }
   }

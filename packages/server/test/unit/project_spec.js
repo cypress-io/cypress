@@ -687,9 +687,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       // Set up the studio manager promise directly
       studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
-      // Set studioReady flag to true to simulate completion of initialization
-      studioLifecycleManager.studioReady = true
-      studioLifecycleManager.studioManager = studioManager
+      studioLifecycleManager.isStudioReady = sinon.stub().returns(true)
 
       // Create a browser object
       this.project.browser = {
@@ -770,7 +768,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
 
       studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
-      studioLifecycleManager.studioReady = true
+
+      studioLifecycleManager.isStudioReady = sinon.stub().returns(true)
 
       // Create a browser object
       this.project.browser = {
@@ -848,9 +847,9 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
 
       studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
-      studioLifecycleManager.studioReady = true
 
-      // Create a browser object
+      studioLifecycleManager.isStudioReady = sinon.stub().returns(true)
+
       this.project.browser = {
         name: 'chrome',
         family: 'chromium',
@@ -912,8 +911,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       // Set up the studio manager promise directly
       studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
-      studioLifecycleManager.studioReady = true
-      studioLifecycleManager.studioManager = studioManager
 
       // Create a browser object
       this.project.browser = {
