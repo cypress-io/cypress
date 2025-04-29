@@ -501,10 +501,8 @@ describe('lib/cloud/api', () => {
           scopeApi.done()
 
           expect(err).not.to.have.property('statusCode')
-          expect(err).to.contain({
-            name: 'DecryptionError',
-            message: 'JWE Recipients missing or incorrect type',
-          })
+          expect(err).to.have.property('name', 'DecryptionError')
+          expect(err).to.have.property('message', 'JWE Recipients missing or incorrect type')
         })
       })
 
@@ -524,10 +522,8 @@ describe('lib/cloud/api', () => {
           scopeApi.done()
 
           expect(err).not.to.have.property('statusCode')
-          expect(err).to.contain({
-            name: 'DecryptionError',
-            message: 'General JWE must be an object',
-          })
+          expect(err).to.have.property('name', 'DecryptionError')
+          expect(err).to.have.property('message', 'General JWE must be an object')
         })
       })
 
@@ -547,10 +543,8 @@ describe('lib/cloud/api', () => {
           scopeApi.done()
 
           expect(err).not.to.have.property('statusCode')
-          expect(err).to.contain({
-            name: 'DecryptionError',
-            message: 'General JWE must be an object',
-          })
+          expect(err).to.have.property('name', 'DecryptionError')
+          expect(err).to.have.property('message', 'General JWE must be an object')
         })
       })
 
