@@ -38,20 +38,20 @@ describe('postStudioSession', () => {
       ok: false,
       json: () => {
         return Promise.resolve({
-          error: 'Failed to get studio session',
+          error: 'Failed to create studio session',
         })
       },
     })
 
     await expect(postStudioSession({
       projectId: '12345',
-    })).to.be.rejectedWith('Failed to get studio session')
+    })).to.be.rejectedWith('Failed to create studio session')
 
     expect(crossFetchStub).to.have.been.calledOnce
   })
 
   it('should throw an error if we receive a retryable error more than twice', async () => {
-    crossFetchStub.rejects(new SystemError(new Error('Failed to get studio session'), 'http://localhost:1234/studio/session'))
+    crossFetchStub.rejects(new SystemError(new Error('Failed to create studio session'), 'http://localhost:1234/studio/session'))
 
     await expect(postStudioSession({
       projectId: '12345',
