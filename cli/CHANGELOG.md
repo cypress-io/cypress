@@ -3,6 +3,14 @@
 
 _Released 5/6/2025 (PENDING)_
 
+**Performance:**
+
+- Ensure the previous pausing event handlers are removed before new ones are added. Addressed in [#31596](https://github.com/cypress-io/cypress/pull/31596).
+
+**Bugfixes:**
+
+- Fixed an issue where the configuration setting `trashAssetsBeforeRuns=false` was ignored for assets in the `videosFolder`. These assets were incorrectly deleted before running tests with `cypress run`. Addresses [#8280](https://github.com/cypress-io/cypress/issues/8280).
+
 **Misc:**
 
 - The Assertions menu when you right click in `experimentalStudio` tests now displays in dark mode. Addresses [#10621](https://github.com/cypress-io/cypress-services/issues/10621). Addressed in [#31598](https://github.com/cypress-io/cypress/pull/31598).

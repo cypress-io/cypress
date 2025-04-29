@@ -14,13 +14,13 @@ interface SetupOptions {
   studioHash?: string
   projectSlug?: string
   cloudApi: StudioCloudApi
+  shouldEnableStudio: boolean
 }
 
 const debug = Debug('cypress:server:studio')
 
 export class StudioManager implements StudioManagerShape {
   status: StudioStatus = 'NOT_INITIALIZED'
-  isProtocolEnabled: boolean = false
   protocolManager: ProtocolManagerShape | undefined
   private _studioServer: StudioServerShape | undefined
 
@@ -41,7 +41,7 @@ export class StudioManager implements StudioManagerShape {
     return manager
   }
 
-  async setup ({ script, studioPath, studioHash, projectSlug, cloudApi }: SetupOptions): Promise<void> {
+  async setup ({ script, studioPath, studioHash, projectSlug, cloudApi, shouldEnableStudio }: SetupOptions): Promise<void> {
     const { createStudioServer } = requireScript<StudioServer>(script).default
 
     this._studioServer = await createStudioServer({
@@ -52,7 +52,7 @@ export class StudioManager implements StudioManagerShape {
       betterSqlite3Path: path.dirname(require.resolve('better-sqlite3/package.json')),
     })
 
-    this.status = 'INITIALIZED'
+    this.status = shouldEnableStudio ? 'ENABLED' : 'INITIALIZED'
   }
 
   initializeRoutes (router: Router): void {
@@ -112,6 +112,10 @@ export class StudioManager implements StudioManagerShape {
       this.status = 'IN_ERROR'
       this.reportError(actualError, method, ...args)
     }
+  }
+
+  get isProtocolEnabled () {
+    return !!this.protocolManager
   }
 
   /**

@@ -16,21 +16,19 @@ import * as savedState from './saved_state'
 import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
-
 import system from './util/system'
 import type { BannersState, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ProtocolManagerShape, ReceivedCypressOptions, ResolvedConfigurationOptions, TestingType, VideoRecording, AutomationCommands } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { createHmac } from 'crypto'
-import ProtocolManager from './cloud/protocol'
 import { ServerBase } from './server-base'
 import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/service-worker-manager'
-import { getAndInitializeStudioManager } from './cloud/api/studio/get_and_initialize_studio_manager'
-import api from './cloud/api'
-import type { StudioManager } from './cloud/studio'
 import { v4 } from 'uuid'
-
-const routes = require('./cloud/routes')
+import { StudioLifecycleManager } from './StudioLifecycleManager'
+import { reportStudioError } from './cloud/api/studio/report_studio_error'
+import { CloudRequest } from './cloud/api/cloud_request'
+import { isRetryableError } from './cloud/network/is_retryable_error'
+import { asyncRetry } from './util/async_retry'
 
 export interface Cfg extends ReceivedCypressOptions {
   projectId?: string
@@ -39,7 +37,6 @@ export interface Cfg extends ReceivedCypressOptions {
   fileServerFolder?: Cypress.ResolvedConfigOptions['fileServerFolder']
   testingType: TestingType
   isDefaultProtocolEnabled?: boolean
-  isStudioProtocolEnabled?: boolean
   hideCommandLog?: boolean
   hideRunnerUi?: boolean
   exit?: boolean
@@ -160,41 +157,16 @@ export class ProjectBase extends EE {
 
     this._server = new ServerBase(cfg)
 
-    let studioManager: StudioManager | null
+    if (!cfg.isTextTerminal) {
+      const studioLifecycleManager = new StudioLifecycleManager()
 
-    if (process.env.CYPRESS_ENABLE_CLOUD_STUDIO || process.env.CYPRESS_LOCAL_STUDIO_PATH) {
-      studioManager = await getAndInitializeStudioManager({
+      studioLifecycleManager.initializeStudioManager({
         projectId: cfg.projectId,
         cloudDataSource: this.ctx.cloud,
+        cfg,
+        debugData: this.configDebugData,
+        ctx: this.ctx,
       })
-
-      this.ctx.update((data) => {
-        data.studio = studioManager
-      })
-
-      if (studioManager.status === 'INITIALIZED') {
-        const protocolManager = new ProtocolManager()
-        const protocolUrl = routes.apiRoutes.captureProtocolCurrent()
-        const script = await api.getCaptureProtocolScript(protocolUrl)
-
-        await protocolManager.prepareProtocol(script, {
-          runId: 'studio',
-          projectId: cfg.projectId,
-          testingType: cfg.testingType,
-          cloudApi: {
-            url: routes.apiUrl,
-            retryWithBackoff: api.retryWithBackoff,
-            requestPromise: api.rp,
-          },
-          projectConfig: _.pick(cfg, ['devServerPublicPathRoute', 'port', 'proxyUrl', 'namespace']),
-          mountVersion: api.runnerCapabilities.protocolMountVersion,
-          debugData: this.configDebugData,
-          mode: 'studio',
-        })
-
-        studioManager.protocolManager = protocolManager
-        studioManager.isProtocolEnabled = true
-      }
     }
 
     const [port, warning] = await this._server.open(cfg, {
@@ -286,7 +258,7 @@ export class ProjectBase extends EE {
 
     // if we're in studio mode, we need to close the protocol manager
     // to ensure the config is initialized properly on browser relaunch
-    if (this.getConfig().isStudioProtocolEnabled) {
+    if (this.ctx.coreData.studioLifecycleManager) {
       this.protocolManager?.close()
       this.protocolManager = undefined
     }
@@ -431,31 +403,58 @@ export class ProjectBase extends EE {
       closeExtraTargets: this.closeExtraTargets,
 
       onStudioInit: async () => {
-        if (this.spec && this.ctx.coreData.studio?.protocolManager) {
-          const canAccessStudioAI = await this.ctx.coreData.studio.canAccessStudioAI(this.browser) ?? false
+        const isStudioReady = this.ctx.coreData.studioLifecycleManager?.isStudioReady()
+
+        if (!isStudioReady) {
+          debug('User entered studio mode before cloud studio was initialized')
+          const cloudEnv = (process.env.CYPRESS_INTERNAL_ENV || 'production') as 'development' | 'staging' | 'production'
+          const cloudUrl = this.ctx.cloud.getCloudUrl(cloudEnv)
+          const cloudHeaders = await this.ctx.cloud.additionalHeaders()
+
+          reportStudioError({
+            cloudApi: {
+              cloudUrl,
+              cloudHeaders,
+              CloudRequest,
+              isRetryableError,
+              asyncRetry,
+            },
+            studioHash: this.id,
+            projectSlug: this.cfg.projectId,
+            error: new Error('User entered studio before cloud studio was initialized'),
+            studioMethod: 'onStudioInit',
+            studioMethodArgs: [],
+          })
+
+          return { canAccessStudioAI: false }
+        }
+
+        const studio = await this.ctx.coreData.studioLifecycleManager?.getStudio()
+
+        if (this.spec && studio?.protocolManager) {
+          const canAccessStudioAI = await studio?.canAccessStudioAI(this.browser) ?? false
 
           if (!canAccessStudioAI) {
             return { canAccessStudioAI }
           }
 
-          this.ctx.coreData.studio.protocolManager.setupProtocol()
-          this.ctx.coreData.studio.protocolManager.beforeSpec({
+          this.protocolManager = studio.protocolManager
+          this.protocolManager.setupProtocol()
+          this.protocolManager.beforeSpec({
             ...this.spec,
             instanceId: v4(),
           })
 
-          await browsers.connectProtocolToBrowser({ browser: this.browser, foundBrowsers: this.options.browsers, protocolManager: this.ctx.coreData.studio.protocolManager })
+          await browsers.connectProtocolToBrowser({ browser: this.browser, foundBrowsers: this.options.browsers, protocolManager: studio.protocolManager })
 
-          if (!this.ctx.coreData.studio.protocolManager.dbPath) {
+          if (!studio.protocolManager.dbPath) {
             debug('Protocol database path is not set after initializing protocol manager')
 
             return { canAccessStudioAI: false }
           }
 
-          this.protocolManager = this.ctx.coreData.studio.protocolManager
-
-          await this.ctx.coreData.studio.initializeStudioAI({
-            protocolDbPath: this.ctx.coreData.studio.protocolManager.dbPath,
+          await studio.initializeStudioAI({
+            protocolDbPath: studio.protocolManager.dbPath,
           })
 
           return { canAccessStudioAI: true }
@@ -467,11 +466,21 @@ export class ProjectBase extends EE {
       },
 
       onStudioDestroy: async () => {
-        if (this.ctx.coreData.studio?.protocolManager) {
+        const isStudioReady = await this.ctx.coreData.studioLifecycleManager?.isStudioReady()
+
+        if (!isStudioReady) {
+          debug('Studio is not ready - skipping destroy')
+
+          return
+        }
+
+        const studio = await this.ctx.coreData.studioLifecycleManager?.getStudio()
+
+        if (studio?.protocolManager) {
           await browsers.closeProtocolConnection({ browser: this.browser, foundBrowsers: this.options.browsers })
           this.protocolManager?.close()
           this.protocolManager = undefined
-          await this.ctx.coreData.studio.destroy()
+          await studio.destroy()
         }
       },
 
@@ -623,8 +632,10 @@ export class ProjectBase extends EE {
 
     const isDefaultProtocolEnabled = this._protocolManager?.isProtocolEnabled ?? false
 
-    // hide the runner if explicitly requested or if the protocol is enabled outside of studio and the runner is not explicitly enabled
-    const hideRunnerUi = this.options?.args?.runnerUi === false || (isDefaultProtocolEnabled && !this.ctx.coreData.studio && !this.options?.args?.runnerUi)
+    const hideRunnerUi = (
+      this.options?.args?.runnerUi === false ||
+      (isDefaultProtocolEnabled && this._cfg.isTextTerminal && !this.options?.args?.runnerUi)
+    )
 
     // hide the command log if explicitly requested or if we are hiding the runner
     const hideCommandLog = this._cfg.env?.NO_COMMAND_LOG === 1 || hideRunnerUi
@@ -636,7 +647,6 @@ export class ProjectBase extends EE {
       testingType: this.ctx.coreData.currentTestingType ?? 'e2e',
       specs: [],
       isDefaultProtocolEnabled,
-      isStudioProtocolEnabled: this.ctx.coreData.studio?.isProtocolEnabled ?? false,
       hideCommandLog,
       hideRunnerUi,
     }

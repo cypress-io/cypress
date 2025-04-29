@@ -36,6 +36,7 @@ describe('lib/cloud/studio', () => {
       studioHash: 'abcdefg',
       projectSlug: '1234',
       cloudApi: {} as any,
+      shouldEnableStudio: true,
     })
 
     studio = (studioManager as any)._studioServer
