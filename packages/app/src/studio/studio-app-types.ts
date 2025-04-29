@@ -1,6 +1,6 @@
 export interface StudioPanelProps {
   canAccessStudioAI: boolean
-  onStudioPanelClose: () => void
+  onStudioPanelClose?: () => void
   useStudioEventManager?: StudioEventManagerShape
   useStudioAIStream?: StudioAIStreamShape
 }
@@ -33,6 +33,7 @@ export interface StudioAIStreamProps {
   canAccessStudioAI: boolean
   AIOutputRef: { current: HTMLTextAreaElement | null }
   runnerStatus: RunnerStatus
+  testCode: string | null
 }
 
 export type StudioAIStreamShape = (props: StudioAIStreamProps) => void

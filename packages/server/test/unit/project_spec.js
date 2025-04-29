@@ -631,7 +631,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     beforeEach(function () {
       this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
       this.project.watchers = {}
-      this.project._server = { close () {}, startWebsockets: sinon.stub() }
+      this.project._server = { close () {}, startWebsockets: sinon.stub(), setProtocolManager: sinon.stub() }
       sinon.stub(ProjectBase.prototype, 'open').resolves()
     })
 
@@ -860,15 +860,18 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       this.project.ctx.coreData = this.project.ctx.coreData || {}
 
       // Create a studio manager with minimal properties
-      const studioManager = new StudioManager()
+      const protocolManager = { close: sinon.stub().resolves() }
+      const studioManager = {
+        destroy: sinon.stub().resolves(),
+        protocolManager,
+      }
 
-      // Create a StudioLifecycleManager and set it on coreData
-      const studioLifecycleManager = new StudioLifecycleManager()
+      this.project.ctx.coreData.studioLifecycleManager = {
+        isStudioReady: sinon.stub().resolves(true),
+        getStudio: sinon.stub().resolves(studioManager),
+      }
 
-      this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
-
-      // Set up the studio manager promise directly
-      studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
+      this.project['_protocolManager'] = protocolManager
 
       // Create a browser object
       this.project.browser = {
@@ -880,19 +883,22 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       sinon.stub(browsers, 'closeProtocolConnection').resolves()
 
-      // Track the callbacks passed to startWebsockets
-      let callbacks
-
       // Modify the startWebsockets stub to track the callbacks
-      this.project.server.startWebsockets.callsFake((automation, config, cbObject) => {
-        callbacks = cbObject
+      const callbackPromise = new Promise((resolve) => {
+        this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
+          await callbacks.onStudioDestroy()
+          resolve()
+        })
       })
 
       this.project.startWebsockets({}, {})
 
-      // Verify the callback exists and is a function
-      expect(callbacks).to.have.property('onStudioDestroy')
-      expect(typeof callbacks.onStudioDestroy).to.equal('function')
+      await callbackPromise
+
+      expect(studioManager.destroy).to.have.been.calledOnce
+      expect(browsers.closeProtocolConnection).to.have.been.calledOnce
+      expect(protocolManager.close).to.have.been.calledOnce
+      expect(this.project['_protocolManager']).to.be.undefined
     })
   })
 

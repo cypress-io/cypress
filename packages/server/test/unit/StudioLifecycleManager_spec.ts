@@ -9,6 +9,7 @@ import * as getAndInitializeStudioManagerModule from '../../lib/cloud/api/studio
 import * as reportStudioErrorPath from '../../lib/cloud/api/studio/report_studio_error'
 import ProtocolManager from '../../lib/cloud/protocol'
 const api = require('../../lib/cloud/api').default
+import * as postStudioSessionModule from '../../lib/cloud/api/studio/post_studio_session'
 
 // Helper to wait for next tick in event loop
 const nextTick = () => new Promise((resolve) => process.nextTick(resolve))
@@ -19,6 +20,7 @@ describe('StudioLifecycleManager', () => {
   let mockCtx: DataContext
   let mockCloudDataSource: CloudDataSource
   let mockCfg: Cfg
+  let postStudioSessionStub: sinon.SinonStub
   let getAndInitializeStudioManagerStub: sinon.SinonStub
   let getCaptureProtocolScriptStub: sinon.SinonStub
   let prepareProtocolStub: sinon.SinonStub
@@ -52,6 +54,12 @@ describe('StudioLifecycleManager', () => {
       devServerPublicPathRoute: '/__cypress/src',
       namespace: '__cypress',
     } as unknown as Cfg
+
+    postStudioSessionStub = sinon.stub(postStudioSessionModule, 'postStudioSession')
+    postStudioSessionStub.resolves({
+      studioUrl: 'https://cloud.cypress.io/studio/bundle/abc.tgz',
+      protocolUrl: 'https://cloud.cypress.io/capture-protocol/script/def.js',
+    })
 
     getAndInitializeStudioManagerStub = sinon.stub(getAndInitializeStudioManagerModule, 'getAndInitializeStudioManager')
     getAndInitializeStudioManagerStub.resolves(mockStudioManager)
@@ -107,7 +115,11 @@ describe('StudioLifecycleManager', () => {
 
       await studioReadyPromise
 
-      expect(getCaptureProtocolScriptStub).to.be.calledWith('http://localhost:1234/capture-protocol/script/current.js')
+      expect(postStudioSessionStub).to.be.calledWith({
+        projectId: 'abc123',
+      })
+
+      expect(getCaptureProtocolScriptStub).to.be.calledWith('https://cloud.cypress.io/capture-protocol/script/def.js')
       expect(prepareProtocolStub).to.be.calledWith('console.log("hello")', {
         runId: 'studio',
         projectId: 'abc123',
