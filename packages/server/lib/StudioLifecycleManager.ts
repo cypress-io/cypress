@@ -44,75 +44,37 @@ export class StudioLifecycleManager {
   }): void {
     debug('Initializing studio manager')
 
-    const studioManagerPromise = new Promise<StudioManager | null>(async (resolve) => {
-      try {
-        const studioSession = await postStudioSession({
-          projectId,
-        })
+    const studioManagerPromise = this.createStudioManager({
+      projectId,
+      cloudDataSource,
+      cfg,
+      debugData,
+    }).catch(async (error) => {
+      debug('Error during studio manager setup: %o', error)
 
-        const studioManager = await getAndInitializeStudioManager({
-          studioUrl: studioSession.studioUrl,
-          projectId,
-          cloudDataSource,
-        })
+      const cloudEnv = (process.env.CYPRESS_INTERNAL_ENV || 'production') as 'development' | 'staging' | 'production'
+      const cloudUrl = ctx.cloud.getCloudUrl(cloudEnv)
+      const cloudHeaders = await ctx.cloud.additionalHeaders()
 
-        if (studioManager.status === 'ENABLED') {
-          debug('Cloud studio is enabled - setting up protocol')
-          const protocolManager = new ProtocolManager()
-          const script = await api.getCaptureProtocolScript(studioSession.protocolUrl)
+      reportStudioError({
+        cloudApi: {
+          cloudUrl,
+          cloudHeaders,
+          CloudRequest,
+          isRetryableError,
+          asyncRetry,
+        },
+        studioHash: projectId,
+        projectSlug: cfg.projectId,
+        error,
+        studioMethod: 'initializeStudioManager',
+        studioMethodArgs: [],
+      })
 
-          await protocolManager.prepareProtocol(script, {
-            runId: 'studio',
-            projectId: cfg.projectId,
-            testingType: cfg.testingType,
-            cloudApi: {
-              url: routes.apiUrl,
-              retryWithBackoff: api.retryWithBackoff,
-              requestPromise: api.rp,
-            },
-            projectConfig: _.pick(cfg, ['devServerPublicPathRoute', 'port', 'proxyUrl', 'namespace']),
-            mountVersion: api.runnerCapabilities.protocolMountVersion,
-            debugData,
-            mode: 'studio',
-          })
+      // Clean up any registered listeners
+      this.listeners = []
 
-          studioManager.protocolManager = protocolManager
-        } else {
-          debug('Cloud studio is not enabled - skipping protocol setup')
-        }
-
-        debug('Studio is ready')
-        this.studioManager = studioManager
-        this.callRegisteredListeners()
-
-        resolve(studioManager)
-      } catch (error) {
-        debug('Error during studio manager setup: %o', error)
-
-        const cloudEnv = (process.env.CYPRESS_INTERNAL_ENV || 'production') as 'development' | 'staging' | 'production'
-        const cloudUrl = ctx.cloud.getCloudUrl(cloudEnv)
-        const cloudHeaders = await ctx.cloud.additionalHeaders()
-
-        reportStudioError({
-          cloudApi: {
-            cloudUrl,
-            cloudHeaders,
-            CloudRequest,
-            isRetryableError,
-            asyncRetry,
-          },
-          studioHash: projectId,
-          projectSlug: cfg.projectId,
-          error,
-          studioMethod: 'initializeStudioManager',
-          studioMethodArgs: [],
-        })
-
-        // Clean up any registered listeners
-        this.listeners = []
-
-        resolve(null)
-      }
+      return null
     })
 
     this.studioManagerPromise = studioManagerPromise
@@ -133,6 +95,59 @@ export class StudioLifecycleManager {
     }
 
     return await this.studioManagerPromise
+  }
+
+  private async createStudioManager ({
+    projectId,
+    cloudDataSource,
+    cfg,
+    debugData,
+  }: {
+    projectId?: string
+    cloudDataSource: CloudDataSource
+    cfg: Cfg
+    debugData: any
+  }): Promise<StudioManager> {
+    const studioSession = await postStudioSession({
+      projectId,
+    })
+
+    const studioManager = await getAndInitializeStudioManager({
+      studioUrl: studioSession.studioUrl,
+      projectId,
+      cloudDataSource,
+    })
+
+    if (studioManager.status === 'ENABLED') {
+      debug('Cloud studio is enabled - setting up protocol')
+      const protocolManager = new ProtocolManager()
+      const script = await api.getCaptureProtocolScript(studioSession.protocolUrl)
+
+      await protocolManager.prepareProtocol(script, {
+        runId: 'studio',
+        projectId: cfg.projectId,
+        testingType: cfg.testingType,
+        cloudApi: {
+          url: routes.apiUrl,
+          retryWithBackoff: api.retryWithBackoff,
+          requestPromise: api.rp,
+        },
+        projectConfig: _.pick(cfg, ['devServerPublicPathRoute', 'port', 'proxyUrl', 'namespace']),
+        mountVersion: api.runnerCapabilities.protocolMountVersion,
+        debugData,
+        mode: 'studio',
+      })
+
+      studioManager.protocolManager = protocolManager
+    } else {
+      debug('Cloud studio is not enabled - skipping protocol setup')
+    }
+
+    debug('Studio is ready')
+    this.studioManager = studioManager
+    this.callRegisteredListeners()
+
+    return studioManager
   }
 
   private callRegisteredListeners () {
