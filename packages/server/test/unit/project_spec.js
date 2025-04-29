@@ -609,6 +609,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       const studio = { isProtocolEnabled: true }
 
+      studioLifecycleManager.isStudioReady = sinon.stub().returns(true)
       sinon.stub(studioLifecycleManager, 'getStudio').resolves(studio)
 
       let protocolManagerValue = this.project._protocolManager
@@ -684,6 +685,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       // Set up the studio manager promise directly
       studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
+      studioLifecycleManager.isStudioReady = sinon.stub().returns(true)
 
       // Create a browser object
       this.project.browser = {
@@ -866,6 +868,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       this.project.ctx.coreData.studioLifecycleManager = {
         getStudio: sinon.stub().resolves(studioManager),
+        isStudioReady: sinon.stub().resolves(true),
       }
 
       this.project['_protocolManager'] = protocolManager
