@@ -219,8 +219,9 @@ describe('lib/cloud/api', () => {
       return api.ping()
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
-        expect(err.isApiError).to.be.true
+      })
+      .catch((err) => {
+        expect(err).to.have.property('isApiError', true)
       })
     })
   })
@@ -943,7 +944,7 @@ describe('lib/cloud/api', () => {
       .then(() => {
         throw new Error('should have thrown here')
       }).catch((err) => {
-        expect(err.isApiError).to.be.true
+        expect(err).to.have.property('isApiError', true)
         expect(this.protocolManager.prepareAndSetupProtocol).not.to.be.called
       })
     })
@@ -958,7 +959,7 @@ describe('lib/cloud/api', () => {
         throw new Error('should have thrown here')
       })
       .catch((err) => {
-        expect(err.isApiError).to.be.true
+        expect(err).to.have.property('isApiError', true)
       })
     })
   })
@@ -1059,8 +1060,9 @@ describe('lib/cloud/api', () => {
       return api.postInstanceTests(this.props)
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
-        expect(err.isApiError).to.be.true
+      })
+      .catch((err) => {
+        expect(err).to.have.property('isApiError', true)
       })
     })
   })
@@ -1163,8 +1165,9 @@ describe('lib/cloud/api', () => {
       return api.postInstanceResults(this.updateProps)
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
-        expect(err.isApiError).to.be.true
+      })
+      .catch((err) => {
+        expect(err).to.have.property('isApiError', true)
       })
     })
   })
@@ -1260,8 +1263,9 @@ describe('lib/cloud/api', () => {
       })
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
-        expect(err.isApiError).to.be.true
+      })
+      .catch((err) => {
+        expect(err).to.have.property('isApiError', true)
       })
     })
   })
@@ -1285,8 +1289,9 @@ describe('lib/cloud/api', () => {
       return api.getAuthUrls()
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
-        expect(err.isApiError).to.be.true
+      })
+      .catch((err) => {
+        expect(err).to.have.property('isApiError', true)
       })
     })
 
@@ -1332,8 +1337,9 @@ describe('lib/cloud/api', () => {
       return api.postLogout('auth-token-123')
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
-        expect(err.isApiError).to.be.true
+      })
+      .catch((err) => {
+        expect(err).to.have.property('isApiError', true)
       })
     })
   })
@@ -1395,8 +1401,9 @@ describe('lib/cloud/api', () => {
       return api.createCrashReport({ foo: 'bar' }, 'auth-token-123')
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
-        expect(err.isApiError).to.be.true
+      })
+      .catch((err) => {
+        expect(err).to.have.property('isApiError', true)
       })
     })
   })

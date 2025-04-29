@@ -2249,7 +2249,7 @@ describe('e2e record', () => {
 
             expect(urls).to.include.members([`PUT ${CAPTURE_PROTOCOL_UPLOAD_URL}`])
 
-            expect(artifactReport?.protocol).to.an('object')
+            expect(artifactReport?.protocol).to.be.an('object')
             expect(artifactReport?.protocol?.url).to.be.a('string')
             expect(artifactReport?.protocol?.uploadDuration).to.be.a('number')
             expect(artifactReport?.protocol).to.containSubset({
@@ -2359,10 +2359,10 @@ describe('e2e record', () => {
 
               const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
-              expect(artifactReport?.protocol).to.exist()
-              expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
-              expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
-              expect(artifactReport?.protocol?.url).to.exist().and.not.be.empty()
+              expect(artifactReport?.protocol).to.exist
+              expect(artifactReport?.protocol?.error).to.exist.and.not.to.be.empty()
+              expect(artifactReport?.protocol?.errorStack).to.exist.and.not.to.be.empty()
+              expect(artifactReport?.protocol?.url).to.exist.and.not.to.be.empty()
             })
           })
         })
@@ -2390,10 +2390,10 @@ describe('e2e record', () => {
 
               const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
-              expect(artifactReport?.protocol).to.exist()
-              expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
-              expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
-              expect(artifactReport?.protocol?.url).to.exist().and.not.be.empty()
+              expect(artifactReport?.protocol).to.exist
+              expect(artifactReport?.protocol?.error).to.exist.and.not.to.be.empty()
+              expect(artifactReport?.protocol?.errorStack).to.exist.and.not.to.be.empty()
+              expect(artifactReport?.protocol?.url).to.exist.and.not.to.be.empty()
             })
           })
         })
@@ -2416,10 +2416,10 @@ describe('e2e record', () => {
 
               const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
-              expect(artifactReport?.protocol).to.exist()
-              expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
-              expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
-              expect(artifactReport?.protocol?.url).to.exist().and.not.be.empty()
+              expect(artifactReport?.protocol).to.exist
+              expect(artifactReport?.protocol?.error).to.exist.and.not.to.be.empty()
+              expect(artifactReport?.protocol?.errorStack).to.exist.and.not.to.be.empty()
+              expect(artifactReport?.protocol?.url).to.exist.and.not.to.be.empty()
             })
           })
         })
@@ -2442,10 +2442,10 @@ describe('e2e record', () => {
 
               const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
-              expect(artifactReport?.protocol).to.exist()
-              expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
-              expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
-              expect(artifactReport?.protocol?.url).to.exist().and.not.be.empty()
+              expect(artifactReport?.protocol).to.exist
+              expect(artifactReport?.protocol?.error).to.exist.and.not.to.be.empty()
+              expect(artifactReport?.protocol?.errorStack).to.exist.and.not.to.be.empty()
+              expect(artifactReport?.protocol?.url).to.exist.and.not.to.be.empty()
             })
           })
         })
@@ -2468,9 +2468,9 @@ describe('e2e record', () => {
 
               const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
-              expect(artifactReport?.protocol).to.exist()
-              expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
-              expect(artifactReport?.protocol?.url).to.exist().and.not.be.empty()
+              expect(artifactReport?.protocol).to.exist
+              expect(artifactReport?.protocol?.error).to.exist.and.not.to.be.empty()
+              expect(artifactReport?.protocol?.url).to.exist.and.not.to.be.empty()
             })
           })
         })
@@ -2586,7 +2586,7 @@ describe('capture-protocol api errors', () => {
 
         const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
-        expect(artifactReport?.protocol).to.exist()
+        expect(artifactReport?.protocol).to.exist
         expect(artifactReport?.protocol?.error).to.equal(
           'Failed to upload Test Replay: http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX responded with 500 Internal Server Error',
         )
@@ -2622,7 +2622,7 @@ describe('capture-protocol api errors', () => {
 
         const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
-        expect(artifactReport?.protocol).to.exist()
+        expect(artifactReport?.protocol).to.exist
 
         const expectedUrl = `http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX`
 
@@ -2691,7 +2691,7 @@ describe('capture-protocol api errors', () => {
 
         const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
-        expect(artifactReport?.protocol).to.exist()
+        expect(artifactReport?.protocol).to.exist
         expect(artifactReport?.protocol?.error).to.equal(
           'Failed to upload Test Replay after 3 attempts. Errors: request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test, request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test, request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test',
         )
