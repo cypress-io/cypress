@@ -17,7 +17,7 @@ const routes = require('./cloud/routes')
 export class StudioLifecycleManager {
   private studioManagerPromise?: Promise<StudioManager | null>
   private studioReady = false
-  private studioManager: StudioManager | null = null
+  private studioManager?: StudioManager
   private listeners: ((studioManager: StudioManager) => void)[] = []
   /**
    * Initialize the studio manager and possibly set up protocol.
