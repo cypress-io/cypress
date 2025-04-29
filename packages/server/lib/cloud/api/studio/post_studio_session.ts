@@ -25,7 +25,7 @@ export const postStudioSession = async ({ projectId }: GetStudioSessionOptions) 
     })
 
     if (!response.ok) {
-      throw new Error('Failed to get studio session')
+      throw new Error('Failed to create studio session')
     }
 
     const data = await response.json()
