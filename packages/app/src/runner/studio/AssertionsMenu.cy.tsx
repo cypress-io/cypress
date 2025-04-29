@@ -69,10 +69,10 @@ describe('AssertionsMenu', () => {
 
   it('is tabbable', () => {
     cy.get('[data-cy="assertion-options"]').should('not.exist')
-    cy.press('Tab')
-    cy.press('Tab')
+    cy.press('Tab') // close
+    cy.press('Tab') // first assertion type
+    cy.press('Tab') // first assertion option
     cy.get('[data-cy="assertion-options"]').should('contain', 'text:')
-    cy.press('Tab')
   })
 
   it('calls addAssertion when clicking a single assertion', () => {
