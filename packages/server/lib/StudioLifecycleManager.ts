@@ -15,7 +15,7 @@ const debug = Debug('cypress:server:studio-lifecycle-manager')
 const routes = require('./cloud/routes')
 
 export class StudioLifecycleManager {
-  private studioManagerPromise: Promise<StudioManager | null> | null = null
+  private studioManagerPromise?: Promise<StudioManager | null>
   private studioReady = false
   private studioManager: StudioManager | null = null
   private listeners: ((studioManager: StudioManager) => void)[] = []
