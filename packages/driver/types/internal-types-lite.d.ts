@@ -9,10 +9,9 @@ declare namespace Cypress {
     state: State
     emit: import('eventemitter2').EventEmitter2['emit']
     removeListener: import('eventemitter2').EventEmitter2['removeListener']
-    primaryOriginCommunicator: {
+    primaryOriginCommunicator: import('eventemitter2').EventEmitter2 & {
       toSpecBridge: (origin: string, event: string, data?: any, responseEvent?: string) => void
-      on: import('eventemitter2').EventEmitter2['on']
-      removeListener: import('eventemitter2').EventEmitter2['removeListener']
+      userInvocationStack?: string
     }
   }
 

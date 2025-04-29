@@ -94,6 +94,7 @@ declare namespace Cypress {
     (action: 'before:stability:release', fn: () => void)
     (action: '_log:added', fn: (attributes: ObjectLike, log: Cypress.Log) => void): Cypress
     (action: '_log:changed', fn: (attributes: ObjectLike, log: Cypress.Log) => void): Cypress
+    (action: 'resume:all', fn: () => void)
   }
 
   interface Backend {
