@@ -200,10 +200,7 @@ describe('StudioLifecycleManager', () => {
 
     it('returns true when studio has been initialized', async () => {
       // @ts-ignore - accessing private property for testing
-      studioLifecycleManager.studioManagerPromise = Promise.resolve(mockStudioManager)
-
-      // @ts-ignore - accessing private property for testing
-      studioLifecycleManager['studioReady'] = true
+      studioLifecycleManager.studioManager = mockStudioManager
 
       expect(studioLifecycleManager.isStudioReady()).to.be.true
     })
