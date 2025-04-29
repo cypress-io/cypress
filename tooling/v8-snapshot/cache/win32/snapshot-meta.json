@@ -300,6 +300,7 @@
     "./node_modules/fs-extra/lib/json/jsonfile.js",
     "./node_modules/fs-extra/lib/path-exists/index.js",
     "./node_modules/get-stream/buffer-stream.js",
+    "./node_modules/get-tsconfig/dist/index.cjs",
     "./node_modules/getenv/index.js",
     "./node_modules/glob-parent/index.js",
     "./node_modules/globby/stream-utils.js",
@@ -3225,6 +3226,7 @@
     "./node_modules/resolve-package-path/lib/resolve-package-path.js",
     "./node_modules/resolve-package-path/lib/rethrow-unless-code.js",
     "./node_modules/resolve-package-path/lib/should-preserve-symlinks.js",
+    "./node_modules/resolve-pkg-maps/dist/index.cjs",
     "./node_modules/resolve/lib/caller.js",
     "./node_modules/resolve/lib/core.js",
     "./node_modules/resolve/lib/core.json",
@@ -4231,5 +4233,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "5288fc0882ad952980a43ded99e2c3030c9201b7c047f178a8f1001a363f6162"
+  "deferredHash": "14390fb2f42ef33d3c70c2f6ca40bc550ae9591fa41ca679ee4e3094630e7295"
 }
