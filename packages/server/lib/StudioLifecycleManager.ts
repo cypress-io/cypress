@@ -131,10 +131,11 @@ export class StudioLifecycleManager {
     if (!this.studioManager) {
       throw new Error('Studio manager has not been initialized')
     }
+    const studioManager = this.studioManager
 
     debug('Calling all studio ready listeners')
     this.listeners.forEach((listener) => {
-      listener(this.studioManager as StudioManager)
+      listener(studioManager)
     })
 
     this.listeners = []
