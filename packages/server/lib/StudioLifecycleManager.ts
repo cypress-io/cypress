@@ -81,7 +81,6 @@ export class StudioLifecycleManager {
         }
 
         debug('Studio is ready')
-        this.studioReady = true
         this.studioManager = studioManager
         this.callRegisteredListeners()
 
