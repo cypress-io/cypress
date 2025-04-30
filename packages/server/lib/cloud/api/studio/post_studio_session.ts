@@ -2,7 +2,7 @@ import { asyncRetry, linearDelay } from '../../../util/async_retry'
 import { isRetryableError } from '../../network/is_retryable_error'
 import fetch from 'cross-fetch'
 import os from 'os'
-
+import { agent } from '@packages/network'
 const pkg = require('@packages/root')
 const routes = require('../../routes') as typeof import('../../routes')
 
@@ -15,6 +15,8 @@ const _delay = linearDelay(500)
 export const postStudioSession = async ({ projectId }: GetStudioSessionOptions) => {
   return await (asyncRetry(async () => {
     const response = await fetch(routes.apiRoutes.studioSession(), {
+      // @ts-expect-error - this is supported
+      agent,
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

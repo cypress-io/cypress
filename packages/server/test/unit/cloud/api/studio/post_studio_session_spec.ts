@@ -1,5 +1,8 @@
 import { SystemError } from '../../../../../lib/cloud/network/system_error'
 import { proxyquire } from '../../../../spec_helper'
+import os from 'os'
+import { agent } from '@packages/network'
+import pkg from '@packages/root'
 
 describe('postStudioSession', () => {
   let postStudioSession: typeof import('@packages/server/lib/cloud/api/studio/post_studio_session').postStudioSession
@@ -31,6 +34,21 @@ describe('postStudioSession', () => {
       studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz',
       protocolUrl: 'http://localhost:1234/capture-protocol/script/def.js',
     })
+
+    expect(crossFetchStub).to.have.been.calledOnce
+    expect(crossFetchStub).to.have.been.calledWith(
+      'http://localhost:1234/studio/session',
+      {
+        method: 'POST',
+        agent,
+        headers: {
+          'Content-Type': 'application/json',
+          'x-os-name': os.platform(),
+          'x-cypress-version': pkg.version,
+        },
+        body: JSON.stringify({ projectSlug: '12345', studioMountVersion: 1, protocolMountVersion: 2 }),
+      },
+    )
   })
 
   it('should throw immediately if the response is not ok', async () => {
