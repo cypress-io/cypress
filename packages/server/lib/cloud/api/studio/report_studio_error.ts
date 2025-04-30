@@ -37,7 +37,7 @@ export function reportStudioError ({
 }: ReportStudioErrorOptions): void {
   debug('Error reported:', error)
 
-  // When developing locally, we want to throw the error so we can see it in the console
+  // When developing locally, do not send to Sentry, but instead log to console.
   if (
     process.env.CYPRESS_LOCAL_STUDIO_PATH ||
     process.env.NODE_ENV !== 'production'
