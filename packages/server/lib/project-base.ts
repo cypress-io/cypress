@@ -478,7 +478,7 @@ export class ProjectBase extends EE {
 
         await studio?.destroy()
 
-        if (studio?.protocolManager) {
+        if (this.protocolManager) {
           await browsers.closeProtocolConnection({ browser: this.browser, foundBrowsers: this.options.browsers })
           this.protocolManager?.close()
           this.protocolManager = undefined
