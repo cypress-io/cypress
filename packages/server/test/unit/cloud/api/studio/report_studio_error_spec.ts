@@ -54,6 +54,12 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
         error,
         studioMethod: 'testMethod',
       })
+
+      // eslint-disable-next-line no-console
+      expect(console.error).to.have.been.calledWith(
+        'Error in testMethod:',
+        error,
+      )
     })
 
     it('converts non-Error objects to Error', () => {
