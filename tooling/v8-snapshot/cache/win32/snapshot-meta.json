@@ -3860,6 +3860,7 @@
     "./packages/scaffold-config/src/index.ts",
     "./packages/scaffold-config/src/supportFile.ts",
     "./packages/server/config/app.json",
+    "./packages/server/lib/StudioLifecycleManager.ts",
     "./packages/server/lib/automation/automation.ts",
     "./packages/server/lib/automation/automation_not_implemented.ts",
     "./packages/server/lib/automation/commands/key_press.ts",
