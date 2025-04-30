@@ -38,8 +38,14 @@ export function reportStudioError ({
   debug('Error reported:', error)
 
   // When developing locally, we want to throw the error so we can see it in the console
-  if (process.env.CYPRESS_LOCAL_STUDIO_PATH) {
-    throw error
+  if (
+    process.env.CYPRESS_LOCAL_STUDIO_PATH ||
+    process.env.NODE_ENV !== 'production'
+  ) {
+    // eslint-disable-next-line no-console
+    console.error(`Error in ${studioMethod}:`, error)
+
+    return
   }
 
   let errorObject: Error
