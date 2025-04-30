@@ -40,7 +40,7 @@ export function reportStudioError ({
   // When developing locally, do not send to Sentry, but instead log to console.
   if (
     process.env.CYPRESS_LOCAL_STUDIO_PATH ||
-    process.env.NODE_ENV !== 'production'
+    process.env.NODE_ENV === 'development'
   ) {
     // eslint-disable-next-line no-console
     console.error(`Error in ${studioMethod}:`, error)
