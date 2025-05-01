@@ -1,8 +1,6 @@
 /// <reference types="cypress" />
 
 import type WebpackDevServer5 from 'webpack-dev-server'
-import type WebpackDevServer4 from 'webpack-dev-server-4'
-
 import type { Compiler, Configuration } from 'webpack'
 
 import { createWebpackDevServer } from './createWebpackDevServer'
@@ -40,10 +38,6 @@ export type WebpackDevServerConfig = {
  * @internal
  */
 type DevServerCreateResult = {
-  version: 4
-  server: WebpackDevServer4
-  compiler: Compiler
-} | {
   version: 5
   server: WebpackDevServer5
   compiler: Compiler

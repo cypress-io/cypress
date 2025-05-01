@@ -22,7 +22,7 @@ interface SuiteProps {
   canSaveStudioLogs: boolean
 }
 
-const Suite = observer(({ eventManager = events, model, studioEnabled, canSaveStudioLogs }: SuiteProps) => {
+const Suite: React.FC<SuiteProps> = observer(({ eventManager = events, model, studioEnabled, canSaveStudioLogs }: SuiteProps) => {
   const _launchStudio = useCallback((e: MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -65,6 +65,8 @@ const Suite = observer(({ eventManager = events, model, studioEnabled, canSaveSt
   )
 })
 
+Suite.displayName = 'Suite'
+
 export interface RunnableProps {
   model: TestModel | SuiteModel
   appState: AppState
@@ -91,6 +93,8 @@ const Runnable: React.FC<RunnableProps> = observer(({ appState: appStateProps = 
     </li>
   )
 })
+
+Runnable.displayName = 'Runnable'
 
 export { Suite }
 

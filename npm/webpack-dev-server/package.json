@@ -19,7 +19,6 @@
   "dependencies": {
     "find-up": "6.3.0",
     "fs-extra": "9.1.0",
-    "html-webpack-plugin-4": "npm:html-webpack-plugin@^4",
     "html-webpack-plugin-5": "npm:html-webpack-plugin@^5",
     "local-pkg": "0.4.1",
     "semver": "^7.7.1",
@@ -39,12 +38,10 @@
     "sinon": "^13.0.1",
     "snap-shot-it": "^7.9.10",
     "ts-node": "^10.9.2",
-    "webpack": "npm:webpack@^5",
-    "webpack-4": "npm:webpack@^4",
-    "webpack-dev-server-4": "npm:webpack-dev-server@^4"
+    "webpack": "npm:webpack@^5"
   },
   "peerDependencies": {
-    "cypress": ">=14.0.0"
+    "cypress": ">=15.0.0"
   },
   "files": [
     "dist"

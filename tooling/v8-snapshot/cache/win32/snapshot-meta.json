@@ -1,5 +1,6 @@
 {
   "norewrite": [
+    "./ci-info/index.js",
     "./evil-dns/evil-dns.js",
     "./get-stream/buffer-stream.js",
     "./graceful-fs/polyfills.js",
@@ -70,10 +71,8 @@
     "./packages/server/lib/util/process_profiler.ts",
     "./packages/server/lib/util/suppress_warnings.js",
     "./packages/server/node_modules/axios/lib/adapters/http.js",
-    "./packages/server/node_modules/ci-info/index.js",
     "./packages/server/node_modules/glob/node_modules/minimatch/minimatch.js",
     "./packages/server/node_modules/graceful-fs/polyfills.js",
-    "./packages/server/node_modules/is-ci/index.js",
     "./packages/server/node_modules/mocha/node_modules/debug/src/node.js",
     "./process-nextick-args/index.js",
     "./signal-exit/index.js",
@@ -301,6 +300,7 @@
     "./node_modules/fs-extra/lib/json/jsonfile.js",
     "./node_modules/fs-extra/lib/path-exists/index.js",
     "./node_modules/get-stream/buffer-stream.js",
+    "./node_modules/get-tsconfig/dist/index.cjs",
     "./node_modules/getenv/index.js",
     "./node_modules/glob-parent/index.js",
     "./node_modules/globby/stream-utils.js",
@@ -3226,6 +3226,7 @@
     "./node_modules/resolve-package-path/lib/resolve-package-path.js",
     "./node_modules/resolve-package-path/lib/rethrow-unless-code.js",
     "./node_modules/resolve-package-path/lib/should-preserve-symlinks.js",
+    "./node_modules/resolve-pkg-maps/dist/index.cjs",
     "./node_modules/resolve/lib/caller.js",
     "./node_modules/resolve/lib/core.js",
     "./node_modules/resolve/lib/core.json",
@@ -4232,5 +4233,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "e2db6d3b7bd3ee15f9d030060b722659630033245ed451f4d6af79a8bca00044"
+  "deferredHash": "14390fb2f42ef33d3c70c2f6ca40bc550ae9591fa41ca679ee4e3094630e7295"
 }

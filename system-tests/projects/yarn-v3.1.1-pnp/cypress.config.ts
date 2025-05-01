@@ -1,8 +1,9 @@
-import * as head from 'lodash/head'
+import head from 'lodash/head'
+import { defineConfig } from 'cypress'
 
-module.exports = {
-  'e2e': {
-    'supportFile': false,
+export default defineConfig({
+  e2e: {
+    supportFile: false,
     setupNodeEvents (on, config) {
       // make sure plugin can access dependencies
       head([1, 2, 3])
@@ -10,4 +11,4 @@ module.exports = {
       return config
     },
   },
-}
+})

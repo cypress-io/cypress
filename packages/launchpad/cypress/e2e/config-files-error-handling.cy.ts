@@ -149,7 +149,7 @@ describe('Launchpad: Error System Tests', () => {
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
 
     cy.findAllByTestId('collapsible').should('be.visible')
-    cy.contains('h2', 'TSError')
+    cy.contains('h2', 'TransformError')
     cy.contains('p', 'Your configFile is invalid:')
     cy.contains('p', getPathForPlatform('cy-projects/config-with-ts-syntax-error/cypress.config.ts'))
     cy.contains('p', 'It threw an error when required, check the stack trace below:')
@@ -207,11 +207,11 @@ describe('Launchpad: Error System Tests', () => {
     cy.visitLaunchpad()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
     cy.findAllByTestId('collapsible').should('be.visible')
-    cy.contains('h2', 'TSError')
+    cy.contains('h2', 'TransformError')
     cy.contains('p', 'Your configFile is invalid:')
     cy.contains('p', getPathForPlatform('cy-projects/config-with-ts-module-error/cypress.config.ts'))
     cy.contains('p', 'It threw an error when required, check the stack trace below:')
-    cy.get('[data-testid="error-code-frame"]').should('contain', 'cypress.config.ts:6:10')
+    cy.get('[data-testid="error-code-frame"]').should('contain', 'cypress.config.ts:6:9')
   })
 })
 

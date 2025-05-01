@@ -19,4 +19,5 @@ const OpenFileInIDE: React.FC<Props> = observer((props) => {
   )
 })
 
+OpenFileInIDE.displayName = 'OpenFileInIDE'
 export default OpenFileInIDE

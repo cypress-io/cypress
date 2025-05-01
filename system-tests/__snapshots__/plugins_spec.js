@@ -444,11 +444,8 @@ Your configFile is invalid: /foo/bar/.projects/plugins-root-syntax-error/cypress
 
 It threw an error when required, check the stack trace below:
 
-/foo/bar/.projects/plugins-root-syntax-error/cypress.config.js:3
-}
-^
-
-SyntaxError: Unexpected token '}'
+Error: Transform failed with 1 error:
+/foo/bar/.projects/plugins-root-syntax-error/cypress.config.js:3:0: ERROR: Unexpected "}"
       [stack trace lines]
 `
 

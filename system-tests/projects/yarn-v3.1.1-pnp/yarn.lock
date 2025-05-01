@@ -5,6 +5,13 @@ __metadata:
   version: 5
   cacheKey: 8
 
+"@types/lodash@npm:^4.14.225":
+  version: 4.17.16
+  resolution: "@types/lodash@npm:4.17.16"
+  checksum: 915618c5735b10007e0ed7d06fdce6b344f88fc721d492b189a69064bfd046d2382e1ba61d683eeb61cad60ca0286cd110e6fe0fa4ab2e99066a40478376831d
+  languageName: node
+  linkType: hard
+
 "lodash@npm:^4.17.21":
   version: 4.17.21
   resolution: "lodash@npm:4.17.21"
@@ -36,6 +43,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "yarn-v3.1.1-pnp@workspace:."
   dependencies:
+    "@types/lodash": ^4.14.225
     lodash: ^4.17.21
     typescript: ^5.6.3
   languageName: unknown

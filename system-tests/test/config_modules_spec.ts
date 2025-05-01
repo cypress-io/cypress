@@ -10,7 +10,9 @@ describe('cypress config with esm and cjs', function () {
     'config-cjs-and-esm/config-with-js-module',
     'config-cjs-and-esm/config-with-ts-module',
     'config-cjs-and-esm/config-node-next',
-
+    // covers use cases that now work with tsx
+    'config-cjs-and-esm/config-with-ts-extends',
+    'config-cjs-and-esm/config-with-ts-module-no-tsconfig',
     // This covers Vite and SvelteKit e2e projects
     'config-cjs-and-esm/config-with-ts-module-and-esbuild',
     'config-cjs-and-esm/config-with-ts-tsconfig-es5',

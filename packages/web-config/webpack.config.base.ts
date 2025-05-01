@@ -23,9 +23,11 @@ process.env.NODE_ENV = env
 // @ts-ignore
 const evalDevToolPlugin = new webpack.EvalDevToolModulePlugin({
   moduleFilenameTemplate: 'cypress://[namespace]/[resource-path]',
-  fallbackModuleFilenameTemplate: 'cypress://[namespace]/[resourcePath]?[contenthash]',
 })
 
+// We intentionally set the evalDevToolPlugin property to true on the plugin instance to be able to determine if the plugin is present in the driver.
+// If present, we strip it out. Otherwise, we do not get code frames in the driver tests. @see https://github.com/cypress-io/cypress/blob/v14.3.2/packages/driver/cypress/plugins/index.js#L24
+// @ts-expect-error
 evalDevToolPlugin.evalDevToolPlugin = true
 
 const optimization = {

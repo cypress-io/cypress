@@ -3,6 +3,7 @@ import path from 'path'
 import debugLib from 'debug'
 import { fork } from 'child_process'
 import fs from 'fs-extra'
+import os from 'os'
 import semver from 'semver'
 import type { ForkOptions } from 'child_process'
 import assert from 'assert'
@@ -38,7 +39,8 @@ import { hasTypeScriptInstalled, toPosix } from '../util'
 
 const debug = debugLib('cypress:data-context:MigrationActions')
 
-const tsNode = toPosix(require.resolve('@packages/server/lib/plugins/child/register_ts_node'))
+// NOTE: need the file:// prefix to avoid https://nodejs.org/api/errors.html#err_unsupported_esm_url_scheme on windows
+const tsxCjs = os.platform() === 'win32' ? `file://${toPosix(require.resolve('tsx/cjs'))}` : toPosix(require.resolve('tsx/cjs'))
 
 export function getConfigWithDefaults (legacyConfig: any) {
   const newConfig = _.cloneDeep(legacyConfig)
@@ -74,7 +76,7 @@ export function getDiff (oldConfig: any, newConfig: any) {
   }, result)
 }
 
-export async function processConfigViaLegacyPlugins (projectRoot: string, legacyConfig: LegacyCypressConfigJson): Promise<LegacyCypressConfigJson> {
+export async function processConfigViaLegacyPlugins (projectRoot: string, legacyConfig: LegacyCypressConfigJson, nodeVersion: string | undefined | null): Promise<LegacyCypressConfigJson> {
   const pluginFile = legacyConfig.pluginsFile
     ? await getLegacyPluginsCustomFilePath(projectRoot, legacyConfig.pluginsFile)
     : await tryGetDefaultLegacyPluginsFile(projectRoot)
@@ -99,20 +101,22 @@ export async function processConfigViaLegacyPlugins (projectRoot: string, legacy
     const configProcessArgs = ['--projectRoot', projectRoot, '--file', cwd]
     const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
 
-    // use ts-node if they've got typescript installed
+    // use tsx if they've got typescript installed
     // this matches the 9.x behavior, which is what we want for
     // processing legacy pluginsFile (we never supported `"type": "module") in 9.x.
     if (hasTypeScriptInstalled(projectRoot)) {
-      const tsNodeLoader = `--require "${tsNode}"`
+      let tsxLoader = nodeVersion && semver.lt(nodeVersion, '20.6.0') ? `--loader ${tsxCjs}` : `--import ${tsxCjs}`
+
+      debug(`using generic ${tsxLoader} for esm and cjs with TypeScript for legacy migration.`)
 
       if (!childOptions.env) {
         childOptions.env = {}
       }
 
       if (childOptions.env.NODE_OPTIONS) {
-        childOptions.env.NODE_OPTIONS += ` ${tsNodeLoader}`
+        childOptions.env.NODE_OPTIONS += ` ${tsxLoader}`
       } else {
-        childOptions.env.NODE_OPTIONS = tsNodeLoader
+        childOptions.env.NODE_OPTIONS = tsxLoader
       }
     }
 
@@ -319,7 +323,7 @@ export class MigrationActions {
 
   async setLegacyConfigForMigration (config: LegacyCypressConfigJson) {
     assert(this.ctx.currentProject)
-    const legacyConfigForMigration = await processConfigViaLegacyPlugins(this.ctx.currentProject, config)
+    const legacyConfigForMigration = await processConfigViaLegacyPlugins(this.ctx.currentProject, config, this.ctx.coreData.app.nodeVersion)
 
     this.ctx.update((coreData) => {
       coreData.migration.legacyConfigForMigration = legacyConfigForMigration

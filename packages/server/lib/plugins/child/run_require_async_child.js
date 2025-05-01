@@ -1,5 +1,4 @@
 require('graceful-fs').gracefulify(require('fs'))
-const stripAnsi = require('strip-ansi')
 const debugLib = require('debug')
 const { pathToFileURL } = require('url')
 const util = require('../util')
@@ -193,24 +192,13 @@ function run (ipc, file, projectRoot) {
 
       debug('loaded config from %s %o', file, result)
     } catch (err) {
-      // Starting in Node 20, error objects that are thrown while using `node --load` are not properly serialized
-      // so we need to check both the name and the stack. We also have patched ts-node to ensure that the error is
-      // of the right form to be serialized.
-      if (err.name === 'TSError' || err.stack.includes('TSError')) {
-        err.name = 'TSError'
-        // because of this https://github.com/TypeStrong/ts-node/issues/1418
-        // we have to do this https://stackoverflow.com/questions/25245716/remove-all-ansi-colors-styles-from-strings/29497680
-        const cleanMessage = stripAnsi(err.message)
-        // replace the first line with better text (remove potentially misleading word TypeScript for example)
-        .replace(/^.*\n/g, 'Error compiling file\n')
+      // With tsx, errors now come in as TransformErrors instead of TSErrors (as they also include JavaScript errors).
+      if (err.name === 'TransformError' || err.stack.includes('TransformError')) {
+        const { compilerErrorLocation, originalMessage, message } = util.buildErrorLocationFromTransformError(err, projectRoot)
 
-        // Regex to pull out the error from the message body of a TSError. It displays the relative path to a file
-        const tsErrorRegex = /\n(.*?)\((\d+),(\d+)\):/g
-        const failurePath = tsErrorRegex.exec(cleanMessage)
-
-        err.compilerErrorLocation = failurePath ? { filePath: failurePath[1], line: Number(failurePath[2]), column: Number(failurePath[3]) } : null
-        err.originalMessage = err.message
-        err.message = cleanMessage
+        err.compilerErrorLocation = compilerErrorLocation
+        err.originalMessage = originalMessage
+        err.message = message
       } else if (Array.isArray(err.errors)) {
         // The stack trace of the esbuild error, do not give to much information related with the user error,
         // we have the errors array which includes the users file and information related with the error

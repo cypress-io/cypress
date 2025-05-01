@@ -377,10 +377,10 @@ vite-plugin-inspect@0.8.7:
     picocolors "^1.0.1"
     sirv "^2.0.4"
 
-vite@4.5.5:
-  version "4.5.5"
-  resolved "https://registry.npmjs.org/vite/-/vite-4.5.5.tgz#639b9feca5c0a3bfe3c60cb630ef28bf219d742e"
-  integrity sha512-ifW3Lb2sMdX+WU91s3R0FyQlAyLxOzCSCP37ujw0+r5POeHPwe6udWVIElKQq8gk3t7b8rkmvqC6IHBpCff4GQ==
+vite@^4.5.12:
+  version "4.5.13"
+  resolved "https://registry.yarnpkg.com/vite/-/vite-4.5.13.tgz#778534a947112c6c455e89737730fae5d458a294"
+  integrity sha512-Hgp8IF/yZDzKsN1hQWOuQZbrKiaFsbQud+07jJ8h9m9PaHWkpvZ5u55Xw5yYjWRXwRQ4jwFlJvY7T7FUJG9MCA==
   dependencies:
     esbuild "^0.18.10"
     postcss "^8.4.27"
