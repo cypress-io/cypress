@@ -75,6 +75,16 @@ describe('lib/cloud/studio', () => {
       expect(studioManager.status).to.eq('IN_ERROR')
       expect(studio.reportError).to.be.calledWithMatch(error, 'canAccessStudioAI', {})
     })
+
+    it('does not set state IN_ERROR when a non-essential async method fails', async () => {
+      const error = new Error('foo')
+
+      sinon.stub(studio, 'captureStudioEvent').throws(error)
+
+      await studioManager.captureStudioEvent({} as any)
+
+      expect(studioManager.status).to.eq('ENABLED')
+    })
   })
 
   describe('createInErrorManager', () => {

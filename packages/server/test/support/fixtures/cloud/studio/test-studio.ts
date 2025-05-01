@@ -28,6 +28,10 @@ class StudioServer implements StudioServerShape {
   addSocketListeners (socket: Socket): void {
     // This is a test implementation that does nothing
   }
+
+  captureStudioEvent (event: StudioEvent): Promise<void> {
+    return Promise.resolve()
+  }
 }
 
 const studioServerDefault: StudioServerDefaultShape = {
