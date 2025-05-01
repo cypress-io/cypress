@@ -14,8 +14,12 @@ import { PUBLIC_KEY_VERSION } from '../../constants'
 import { CloudRequest } from '../cloud_request'
 import type { CloudDataSource } from '@packages/data-context/src/sources'
 
+interface Options {
+  studioUrl: string
+  projectId?: string
+}
+
 const pkg = require('@packages/root')
-const routes = require('../../routes')
 
 const _delay = linearDelay(500)
 
@@ -24,11 +28,11 @@ export const studioPath = path.join(os.tmpdir(), 'cypress', 'studio')
 const bundlePath = path.join(studioPath, 'bundle.tar')
 const serverFilePath = path.join(studioPath, 'server', 'index.js')
 
-const downloadStudioBundleToTempDirectory = async (projectId?: string): Promise<void> => {
+const downloadStudioBundleToTempDirectory = async ({ studioUrl, projectId }: Options): Promise<void> => {
   let responseSignature: string | null = null
 
   await (asyncRetry(async () => {
-    const response = await fetch(routes.apiRoutes.studio() as string, {
+    const response = await fetch(studioUrl, {
       // @ts-expect-error - this is supported
       agent,
       method: 'GET',
@@ -90,7 +94,7 @@ const getTarHash = (): Promise<string> => {
   })
 }
 
-export const retrieveAndExtractStudioBundle = async ({ projectId }: { projectId?: string } = {}): Promise<{ studioHash: string | undefined }> => {
+export const retrieveAndExtractStudioBundle = async ({ studioUrl, projectId }: Options): Promise<{ studioHash: string | undefined }> => {
   // First remove studioPath to ensure we have a clean slate
   await fs.promises.rm(studioPath, { recursive: true, force: true })
   await ensureDir(studioPath)
@@ -106,7 +110,7 @@ export const retrieveAndExtractStudioBundle = async ({ projectId }: { projectId?
     return { studioHash: undefined }
   }
 
-  await downloadStudioBundleToTempDirectory(projectId)
+  await downloadStudioBundleToTempDirectory({ studioUrl, projectId })
 
   const studioHash = await getTarHash()
 
@@ -118,7 +122,7 @@ export const retrieveAndExtractStudioBundle = async ({ projectId }: { projectId?
   return { studioHash }
 }
 
-export const getAndInitializeStudioManager = async ({ projectId, cloudDataSource }: { projectId?: string, cloudDataSource: CloudDataSource }): Promise<StudioManager> => {
+export const getAndInitializeStudioManager = async ({ studioUrl, projectId, cloudDataSource }: { studioUrl: string, projectId?: string, cloudDataSource: CloudDataSource }): Promise<StudioManager> => {
   let script: string
 
   const cloudEnv = (process.env.CYPRESS_INTERNAL_ENV || 'production') as 'development' | 'staging' | 'production'
@@ -128,7 +132,7 @@ export const getAndInitializeStudioManager = async ({ projectId, cloudDataSource
   let studioHash: string | undefined
 
   try {
-    ({ studioHash } = await retrieveAndExtractStudioBundle({ projectId }))
+    ({ studioHash } = await retrieveAndExtractStudioBundle({ studioUrl, projectId }))
 
     script = await readFile(serverFilePath, 'utf8')
 

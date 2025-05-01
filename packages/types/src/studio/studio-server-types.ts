@@ -4,6 +4,26 @@ import type { Router } from 'express'
 import type { AxiosInstance } from 'axios'
 import type { Socket } from 'socket.io'
 
+export const StudioMetricsTypes = {
+  STUDIO_STARTED: 'studio:started',
+} as const
+
+export type StudioMetricsType =
+  (typeof StudioMetricsTypes)[keyof typeof StudioMetricsTypes]
+
+export interface StudioEvent {
+  type: StudioMetricsType
+  machineId: string | null
+  projectId?: string
+  browser?: {
+    name: string
+    family: string
+    channel?: string
+    version?: string
+  }
+  cypressVersion?: string
+}
+
 interface RetryOptions {
   maxAttempts: number
   retryDelay?: (attempt: number) => number
@@ -47,6 +67,7 @@ export interface StudioServerShape {
     ...studioMethodArgs: unknown[]
   ): void
   destroy(): Promise<void>
+  captureStudioEvent(event: StudioEvent): Promise<void>
 }
 
 export interface StudioServerDefaultShape {

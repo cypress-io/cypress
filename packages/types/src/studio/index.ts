@@ -1,5 +1,5 @@
 import type { ProtocolManagerShape } from '../protocol'
-import type { StudioServerShape } from './studio-server-types'
+import type { StudioServerShape, StudioEvent } from './studio-server-types'
 
 export * from './studio-server-types'
 
@@ -11,6 +11,7 @@ export interface StudioManagerShape extends StudioServerShape {
   status: StudioStatus
   isProtocolEnabled: boolean
   protocolManager?: ProtocolManagerShape
+  captureStudioEvent: (event: StudioEvent) => Promise<void>
 }
 
 export interface StudioLifecycleManagerShape {
