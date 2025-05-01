@@ -1,5 +1,4 @@
 import { hookRequire } from '@packages/server/hook-require'
-import nock from 'nock'
 
 hookRequire({ forceTypeScript: false })
 
@@ -32,6 +31,7 @@ import * as inspector from 'inspector'
 import sinonChai from '@cypress/sinon-chai'
 import sinon from 'sinon'
 import fs from 'fs-extra'
+import nock from 'nock'
 import { CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types'
 
 import { CloudQuery } from '@packages/graphql/test/stubCloudTypes'

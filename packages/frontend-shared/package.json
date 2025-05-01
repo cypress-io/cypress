@@ -89,6 +89,7 @@
     "lodash": "4.17.21",
     "markdown-it": "13.0.1",
     "modern-normalize": "1.1.0",
+    "nock": "13.2.9",
     "p-defer": "^3.0.0",
     "patch-package": "8.0.0",
     "postcss": "^8.4.22",
