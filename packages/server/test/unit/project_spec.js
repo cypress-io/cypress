@@ -609,7 +609,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       const studio = { isProtocolEnabled: true }
 
-      sinon.stub(studioLifecycleManager, 'isStudioReady').returns(true)
+      studioLifecycleManager.isStudioReady = sinon.stub().returns(true)
       sinon.stub(studioLifecycleManager, 'getStudio').resolves(studio)
 
       let protocolManagerValue = this.project._protocolManager
@@ -631,7 +631,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     beforeEach(function () {
       this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
       this.project.watchers = {}
-      this.project._server = { close () {}, startWebsockets: sinon.stub() }
+      this.project._server = { close () {}, startWebsockets: sinon.stub(), setProtocolManager: sinon.stub() }
       sinon.stub(ProjectBase.prototype, 'open').resolves()
     })
 
@@ -661,6 +661,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       const mockSetupProtocol = sinon.stub()
       const mockBeforeSpec = sinon.stub()
       const mockAccessStudioAI = sinon.stub().resolves(true)
+      const mockCaptureStudioEvent = sinon.stub().resolves()
 
       this.project.spec = {}
 
@@ -672,6 +673,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       const studioManager = new StudioManager()
 
       studioManager.canAccessStudioAI = mockAccessStudioAI
+      studioManager.captureStudioEvent = mockCaptureStudioEvent
       studioManager.protocolManager = {
         setupProtocol: mockSetupProtocol,
         beforeSpec: mockBeforeSpec,
@@ -715,6 +717,18 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       const { canAccessStudioAI } = await studioInitPromise
 
       expect(canAccessStudioAI).to.be.true
+      expect(mockCaptureStudioEvent).to.be.calledWith({
+        type: 'studio:started',
+        machineId: 'test-machine-id',
+        projectId: 'test-project-id',
+        browser: {
+          name: 'chrome',
+          family: 'chromium',
+          channel: undefined,
+          version: undefined,
+        },
+        cypressVersion: pkg.version,
+      })
 
       expect(mockSetupProtocol).to.be.calledOnce
       expect(mockBeforeSpec).to.be.calledOnce
@@ -736,6 +750,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       const mockSetupProtocol = sinon.stub()
       const mockBeforeSpec = sinon.stub()
       const mockAccessStudioAI = sinon.stub().resolves(true)
+      const mockCaptureStudioEvent = sinon.stub().resolves()
 
       this.project.spec = {}
 
@@ -747,13 +762,14 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       const studioManager = new StudioManager()
 
       studioManager.canAccessStudioAI = mockAccessStudioAI
-
+      studioManager.captureStudioEvent = mockCaptureStudioEvent
       const studioLifecycleManager = new StudioLifecycleManager()
 
       this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
 
-      // Set up the studio manager promise directly
       studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
+
+      studioLifecycleManager.isStudioReady = sinon.stub().returns(true)
 
       // Create a browser object
       this.project.browser = {
@@ -783,6 +799,18 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       const { canAccessStudioAI } = await studioInitPromise
 
       expect(canAccessStudioAI).to.be.false
+      expect(mockCaptureStudioEvent).to.be.calledWith({
+        type: 'studio:started',
+        machineId: 'test-machine-id',
+        projectId: 'test-project-id',
+        browser: {
+          name: 'chrome',
+          family: 'chromium',
+          channel: undefined,
+          version: undefined,
+        },
+        cypressVersion: pkg.version,
+      })
 
       expect(mockSetupProtocol).not.to.be.called
       expect(mockBeforeSpec).not.to.be.called
@@ -796,6 +824,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       const mockSetupProtocol = sinon.stub()
       const mockBeforeSpec = sinon.stub()
       const mockAccessStudioAI = sinon.stub().resolves(false)
+      const mockCaptureStudioEvent = sinon.stub().resolves()
 
       this.project.spec = {}
 
@@ -807,6 +836,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       const studioManager = new StudioManager()
 
       studioManager.canAccessStudioAI = mockAccessStudioAI
+      studioManager.captureStudioEvent = mockCaptureStudioEvent
       studioManager.protocolManager = {
         setupProtocol: mockSetupProtocol,
         beforeSpec: mockBeforeSpec,
@@ -816,10 +846,10 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
 
-      // Set up the studio manager promise directly
       studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
 
-      // Create a browser object
+      studioLifecycleManager.isStudioReady = sinon.stub().returns(true)
+
       this.project.browser = {
         name: 'chrome',
         family: 'chromium',
@@ -847,6 +877,18 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       const { canAccessStudioAI } = await studioInitPromise
 
       expect(canAccessStudioAI).to.be.false
+      expect(mockCaptureStudioEvent).to.be.calledWith({
+        type: 'studio:started',
+        machineId: 'test-machine-id',
+        projectId: 'test-project-id',
+        browser: {
+          name: 'chrome',
+          family: 'chromium',
+          channel: undefined,
+          version: undefined,
+        },
+        cypressVersion: pkg.version,
+      })
 
       expect(mockSetupProtocol).not.to.be.called
       expect(mockBeforeSpec).not.to.be.called
@@ -860,15 +902,18 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       this.project.ctx.coreData = this.project.ctx.coreData || {}
 
       // Create a studio manager with minimal properties
-      const studioManager = new StudioManager()
+      const protocolManager = { close: sinon.stub().resolves() }
+      const studioManager = {
+        destroy: sinon.stub().resolves(),
+        protocolManager,
+      }
 
-      // Create a StudioLifecycleManager and set it on coreData
-      const studioLifecycleManager = new StudioLifecycleManager()
+      this.project.ctx.coreData.studioLifecycleManager = {
+        getStudio: sinon.stub().resolves(studioManager),
+        isStudioReady: sinon.stub().resolves(true),
+      }
 
-      this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
-
-      // Set up the studio manager promise directly
-      studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
+      this.project['_protocolManager'] = protocolManager
 
       // Create a browser object
       this.project.browser = {
@@ -880,19 +925,22 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       sinon.stub(browsers, 'closeProtocolConnection').resolves()
 
-      // Track the callbacks passed to startWebsockets
-      let callbacks
-
       // Modify the startWebsockets stub to track the callbacks
-      this.project.server.startWebsockets.callsFake((automation, config, cbObject) => {
-        callbacks = cbObject
+      const callbackPromise = new Promise((resolve) => {
+        this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
+          await callbacks.onStudioDestroy()
+          resolve()
+        })
       })
 
       this.project.startWebsockets({}, {})
 
-      // Verify the callback exists and is a function
-      expect(callbacks).to.have.property('onStudioDestroy')
-      expect(typeof callbacks.onStudioDestroy).to.equal('function')
+      await callbackPromise
+
+      expect(studioManager.destroy).to.have.been.calledOnce
+      expect(browsers.closeProtocolConnection).to.have.been.calledOnce
+      expect(protocolManager.close).to.have.been.calledOnce
+      expect(this.project['_protocolManager']).to.be.undefined
     })
   })
 
