@@ -127,7 +127,7 @@ describe('getAndInitializeStudioManager', () => {
       process.env.CYPRESS_ENABLE_CLOUD_STUDIO = '1'
       delete process.env.CYPRESS_LOCAL_STUDIO_PATH
 
-      await getAndInitializeStudioManager({ projectId: '12345', cloudDataSource: cloud })
+      await getAndInitializeStudioManager({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId: '12345', cloudDataSource: cloud })
 
       expect(studioManagerSetupStub).to.be.calledWith(sinon.match({
         shouldEnableStudio: true,
@@ -138,7 +138,7 @@ describe('getAndInitializeStudioManager', () => {
       delete process.env.CYPRESS_ENABLE_CLOUD_STUDIO
       process.env.CYPRESS_LOCAL_STUDIO_PATH = '/path/to/studio'
 
-      await getAndInitializeStudioManager({ projectId: '12345', cloudDataSource: cloud })
+      await getAndInitializeStudioManager({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId: '12345', cloudDataSource: cloud })
 
       expect(studioManagerSetupStub).to.be.calledWith(sinon.match({
         shouldEnableStudio: true,
@@ -149,7 +149,7 @@ describe('getAndInitializeStudioManager', () => {
       delete process.env.CYPRESS_ENABLE_CLOUD_STUDIO
       delete process.env.CYPRESS_LOCAL_STUDIO_PATH
 
-      await getAndInitializeStudioManager({ projectId: '12345', cloudDataSource: cloud })
+      await getAndInitializeStudioManager({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId: '12345', cloudDataSource: cloud })
 
       expect(studioManagerSetupStub).to.be.calledWith(sinon.match({
         shouldEnableStudio: false,
@@ -160,7 +160,7 @@ describe('getAndInitializeStudioManager', () => {
       process.env.CYPRESS_ENABLE_CLOUD_STUDIO = '1'
       process.env.CYPRESS_LOCAL_STUDIO_PATH = '/path/to/studio'
 
-      await getAndInitializeStudioManager({ projectId: '12345', cloudDataSource: cloud })
+      await getAndInitializeStudioManager({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId: '12345', cloudDataSource: cloud })
 
       expect(studioManagerSetupStub).to.be.calledWith(sinon.match({
         shouldEnableStudio: true,
@@ -188,6 +188,7 @@ describe('getAndInitializeStudioManager', () => {
       })
 
       await getAndInitializeStudioManager({
+        studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz',
         projectId: '12345',
         cloudDataSource: cloud,
       })
@@ -264,12 +265,12 @@ describe('getAndInitializeStudioManager', () => {
 
       const projectId = '12345'
 
-      await getAndInitializeStudioManager({ projectId, cloudDataSource: cloud })
+      await getAndInitializeStudioManager({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId, cloudDataSource: cloud })
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
       expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')
 
-      expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/current.tgz', {
+      expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
         agent: sinon.match.any,
         method: 'GET',
         headers: {
@@ -331,12 +332,12 @@ describe('getAndInitializeStudioManager', () => {
 
       const projectId = '12345'
 
-      await getAndInitializeStudioManager({ projectId, cloudDataSource: cloud })
+      await getAndInitializeStudioManager({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId, cloudDataSource: cloud })
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
       expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')
 
-      expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/current.tgz', {
+      expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
         agent: sinon.match.any,
         method: 'GET',
         headers: {
@@ -388,13 +389,13 @@ describe('getAndInitializeStudioManager', () => {
 
       const projectId = '12345'
 
-      await getAndInitializeStudioManager({ projectId, cloudDataSource: cloud })
+      await getAndInitializeStudioManager({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId, cloudDataSource: cloud })
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
       expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')
 
       expect(crossFetchStub).to.be.calledThrice
-      expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/current.tgz', {
+      expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
         agent: sinon.match.any,
         method: 'GET',
         headers: {
@@ -452,13 +453,13 @@ describe('getAndInitializeStudioManager', () => {
 
       const projectId = '12345'
 
-      await getAndInitializeStudioManager({ projectId, cloudDataSource: cloud })
+      await getAndInitializeStudioManager({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId, cloudDataSource: cloud })
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
       expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')
       expect(writeResult).to.eq('console.log("studio script")')
 
-      expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/current.tgz', {
+      expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
         agent: sinon.match.any,
         method: 'GET',
         headers: {
@@ -508,7 +509,7 @@ describe('getAndInitializeStudioManager', () => {
 
       const projectId = '12345'
 
-      await getAndInitializeStudioManager({ projectId, cloudDataSource: cloud })
+      await getAndInitializeStudioManager({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId, cloudDataSource: cloud })
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
       expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')

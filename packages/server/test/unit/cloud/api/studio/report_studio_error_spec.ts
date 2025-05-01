@@ -22,19 +22,44 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
   })
 
   describe('reportStudioError', () => {
-    it('throws error when CYPRESS_LOCAL_STUDIO_PATH is set', () => {
+    it('logs error when CYPRESS_LOCAL_STUDIO_PATH is set', () => {
+      sinon.stub(console, 'error')
       process.env.CYPRESS_LOCAL_STUDIO_PATH = '/path/to/studio'
       const error = new Error('test error')
 
-      expect(() => {
-        reportStudioError({
-          cloudApi,
-          studioHash: 'abc123',
-          projectSlug: 'test-project',
-          error,
-          studioMethod: 'testMethod',
-        })
-      }).to.throw('test error')
+      reportStudioError({
+        cloudApi,
+        studioHash: 'abc123',
+        projectSlug: 'test-project',
+        error,
+        studioMethod: 'testMethod',
+      })
+
+      // eslint-disable-next-line no-console
+      expect(console.error).to.have.been.calledWith(
+        'Error in testMethod:',
+        error,
+      )
+    })
+
+    it('logs error when NODE_ENV is development', () => {
+      sinon.stub(console, 'error')
+      process.env.NODE_ENV = 'development'
+      const error = new Error('test error')
+
+      reportStudioError({
+        cloudApi,
+        studioHash: 'abc123',
+        projectSlug: 'test-project',
+        error,
+        studioMethod: 'testMethod',
+      })
+
+      // eslint-disable-next-line no-console
+      expect(console.error).to.have.been.calledWith(
+        'Error in testMethod:',
+        error,
+      )
     })
 
     it('converts non-Error objects to Error', () => {
