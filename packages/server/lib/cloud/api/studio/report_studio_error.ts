@@ -37,9 +37,15 @@ export function reportStudioError ({
 }: ReportStudioErrorOptions): void {
   debug('Error reported:', error)
 
-  // When developing locally, we want to throw the error so we can see it in the console
-  if (process.env.CYPRESS_LOCAL_STUDIO_PATH) {
-    throw error
+  // When developing locally, do not send to Sentry, but instead log to console.
+  if (
+    process.env.CYPRESS_LOCAL_STUDIO_PATH ||
+    process.env.NODE_ENV === 'development'
+  ) {
+    // eslint-disable-next-line no-console
+    console.error(`Error in ${studioMethod}:`, error)
+
+    return
   }
 
   let errorObject: Error
