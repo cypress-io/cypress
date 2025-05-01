@@ -429,8 +429,6 @@ async function makeE2ETasks () {
     async __internal_openProject ({ argv, projectName, capabilities }: InternalOpenProjectArgs): Promise<ResetOptionsResult> {
       if (capabilities.cloudStudio) {
         process.env.CYPRESS_ENABLE_CLOUD_STUDIO = 'true'
-        // TODO: remove this once the cloud studio piece lands
-        process.env.CYPRESS_LOCAL_STUDIO_PATH = '/Users/ryanm/protocol/cypress-services-pristine/app/packages/studio/dist/development'
         // Cypress in Cypress testing breaks pretty heavily in terms of the inner Cypress's protocol. For now, we essentially
         // disable the protocol by using a dummy protocol that does nothing and allowing tests to mock studio full snapshots as needed.
         process.env.CYPRESS_LOCAL_PROTOCOL_PATH = dummyProtocolPath
