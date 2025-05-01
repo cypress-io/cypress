@@ -201,7 +201,6 @@ async function makeE2ETasks () {
     __internal__afterEach () {
       delete process.env.CYPRESS_ENABLE_CLOUD_STUDIO
       delete process.env.CYPRESS_IN_CYPRESS_MOCK_FULL_SNAPSHOT
-      delete process.env.CYPRESS_LOCAL_PROTOCOL_PATH
       nock.cleanAll()
 
       return null
