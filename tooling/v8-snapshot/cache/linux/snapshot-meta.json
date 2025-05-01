@@ -3886,6 +3886,7 @@
     "./packages/server/lib/cloud/api/axios_middleware/logging.ts",
     "./packages/server/lib/cloud/api/axios_middleware/transform_error.ts",
     "./packages/server/lib/cloud/api/scrub_url.ts",
+    "./packages/server/lib/cloud/api/studio/post_studio_session.ts",
     "./packages/server/lib/cloud/api/studio/report_studio_error.ts",
     "./packages/server/lib/cloud/artifacts/artifact.ts",
     "./packages/server/lib/cloud/artifacts/file_upload_strategy.ts",
