@@ -2360,9 +2360,12 @@ describe('e2e record', () => {
               const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
               expect(artifactReport?.protocol).to.exist
-              expect(artifactReport?.protocol?.error).to.exist.and.not.to.be.empty()
-              expect(artifactReport?.protocol?.errorStack).to.exist.and.not.to.be.empty()
-              expect(artifactReport?.protocol?.url).to.exist.and.not.to.be.empty()
+              expect(artifactReport?.protocol?.error).to.exist
+              expect(artifactReport?.protocol?.error).to.not.to.be.empty()
+              expect(artifactReport?.protocol?.errorStack).to.exist
+              expect(artifactReport?.protocol?.errorStack).to.not.to.be.empty()
+              expect(artifactReport?.protocol?.url).to.exist
+              expect(artifactReport?.protocol?.url).to.not.be.empty()
             })
           })
         })
@@ -2391,9 +2394,12 @@ describe('e2e record', () => {
               const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
               expect(artifactReport?.protocol).to.exist
-              expect(artifactReport?.protocol?.error).to.exist.and.not.to.be.empty()
-              expect(artifactReport?.protocol?.errorStack).to.exist.and.not.to.be.empty()
-              expect(artifactReport?.protocol?.url).to.exist.and.not.to.be.empty()
+              expect(artifactReport?.protocol?.error).to.exist
+              expect(artifactReport?.protocol?.error).to.not.to.be.empty()
+              expect(artifactReport?.protocol?.errorStack).to.exist
+              expect(artifactReport?.protocol?.errorStack).to.not.be.empty()
+              expect(artifactReport?.protocol?.url).to.exist
+              expect(artifactReport?.protocol?.url).to.not.to.be.empty()
             })
           })
         })
@@ -2417,9 +2423,12 @@ describe('e2e record', () => {
               const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
               expect(artifactReport?.protocol).to.exist
-              expect(artifactReport?.protocol?.error).to.exist.and.not.to.be.empty()
-              expect(artifactReport?.protocol?.errorStack).to.exist.and.not.to.be.empty()
-              expect(artifactReport?.protocol?.url).to.exist.and.not.to.be.empty()
+              expect(artifactReport?.protocol?.error).to.exist
+              expect(artifactReport?.protocol?.error).to.not.be.empty()
+              expect(artifactReport?.protocol?.errorStack).to.exist
+              expect(artifactReport?.protocol?.errorStack).to.not.be.empty()
+              expect(artifactReport?.protocol?.url).to.exist
+              expect(artifactReport?.protocol?.url).to.not.be.empty()
             })
           })
         })
@@ -2443,9 +2452,12 @@ describe('e2e record', () => {
               const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
               expect(artifactReport?.protocol).to.exist
-              expect(artifactReport?.protocol?.error).to.exist.and.not.to.be.empty()
-              expect(artifactReport?.protocol?.errorStack).to.exist.and.not.to.be.empty()
-              expect(artifactReport?.protocol?.url).to.exist.and.not.to.be.empty()
+              expect(artifactReport?.protocol?.error).to.exist
+              expect(artifactReport?.protocol?.error).to.not.be.empty()
+              expect(artifactReport?.protocol?.errorStack).to.exist
+              expect(artifactReport?.protocol?.errorStack).to.not.be.empty()
+              expect(artifactReport?.protocol?.url).to.exist
+              expect(artifactReport?.protocol?.url).to.not.be.empty()
             })
           })
         })
@@ -2469,8 +2481,12 @@ describe('e2e record', () => {
               const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
               expect(artifactReport?.protocol).to.exist
-              expect(artifactReport?.protocol?.error).to.exist.and.not.to.be.empty()
-              expect(artifactReport?.protocol?.url).to.exist.and.not.to.be.empty()
+              expect(artifactReport?.protocol?.error).to.exist
+              expect(artifactReport?.protocol?.error).to.not.be.empty()
+              expect(artifactReport?.protocol?.errorStack).to.exist
+              expect(artifactReport?.protocol?.errorStack).to.not.be.empty()
+              expect(artifactReport?.protocol?.url).to.exist
+              expect(artifactReport?.protocol?.url).to.not.be.empty()
             })
           })
         })
@@ -2629,7 +2645,8 @@ describe('capture-protocol api errors', () => {
         const expectedErrorMessage = `${expectedUrl} responded with 503 Service Unavailable: ${wspTrimmedResponse}`
 
         expect(artifactReport?.protocol?.error).to.equal(`Failed to upload Test Replay after 3 attempts. Errors: ${[expectedErrorMessage, expectedErrorMessage, expectedErrorMessage].join(', ')}`)
-        expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
+        expect(artifactReport?.protocol?.errorStack).to.exist
+        expect(artifactReport?.protocol?.errorStack).to.not.be.empty()
       })
     })
   })
@@ -2696,7 +2713,8 @@ describe('capture-protocol api errors', () => {
           'Failed to upload Test Replay after 3 attempts. Errors: request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test, request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test, request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test',
         )
 
-        expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
+        expect(artifactReport?.protocol?.errorStack).to.exist
+        expect(artifactReport?.protocol?.errorStack).to.not.be.empty()
       })
     })
   })
