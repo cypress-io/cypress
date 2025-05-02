@@ -31,7 +31,7 @@ const logError = debug('cypress:snapgen:error')
  *
  * @property nodeModulesOnly if `true` only node modules will be included in the snapshot and app modules are omitted
  *
- * @property forceNoRewrite relative paths to modules that we know will cause
+ * @property forceNorewrite relative paths to modules that we know will cause
  * problems when rewritten and we manually want to exclude them from snapshot
  * bundler rewrites
  *
@@ -82,7 +82,7 @@ export type GenerationOpts = {
   cacheDir: string
   snapshotBinDir: string
   nodeModulesOnly: boolean
-  forceNoRewrite?: string[]
+  forceNorewrite?: string[]
   resolverMap?: Record<string, string>
   flags: Flag
   nodeEnv: string
@@ -137,8 +137,8 @@ export class SnapshotGenerator {
   private readonly electronVersion: string
   /** See {@link GenerationOpts} nodeModulesOnly */
   private readonly nodeModulesOnly: boolean
-  /** See {@link GenerationOpts} forceNoRewrite */
-  private readonly forceNoRewrite: Set<string>
+  /** See {@link GenerationOpts} forceNorewrite */
+  private readonly forceNorewrite: Set<string>
   /** See {@link GenerationOpts} nodeEnv */
   private readonly nodeEnv: string
   /** See {@link GenerationOpts} cypressInternalEnv */
@@ -200,7 +200,7 @@ export class SnapshotGenerator {
     const {
       cacheDir,
       nodeModulesOnly,
-      forceNoRewrite,
+      forceNorewrite,
       flags: mode,
       nodeEnv,
       cypressInternalEnv,
@@ -226,7 +226,7 @@ export class SnapshotGenerator {
     this.electronVersion = resolveElectronVersion(projectBaseDir)
 
     this.nodeModulesOnly = nodeModulesOnly
-    this.forceNoRewrite = new Set(forceNoRewrite)
+    this.forceNorewrite = new Set(forceNorewrite)
     this.nodeEnv = nodeEnv
     this.cypressInternalEnv = cypressInternalEnv
     this._flags = new GeneratorFlags(mode)
@@ -243,7 +243,7 @@ export class SnapshotGenerator {
       cacheDir,
       snapshotScriptPath: this.snapshotScriptPath,
       nodeModulesOnly: this.nodeModulesOnly,
-      forceNoRewrite: this.forceNoRewrite.size,
+      forceNorewrite: this.forceNorewrite.size,
       auxiliaryData: auxiliaryDataKeys,
     })
   }
@@ -287,7 +287,7 @@ export class SnapshotGenerator {
         this.cacheDir,
         {
           nodeModulesOnly: this.nodeModulesOnly,
-          forceNoRewrite: this.forceNoRewrite,
+          forceNorewrite: this.forceNorewrite,
           nodeEnv: this.nodeEnv,
           cypressInternalEnv: this.cypressInternalEnv,
           integrityCheckSource: this.integrityCheckSource,
@@ -393,7 +393,7 @@ export class SnapshotGenerator {
         this.cacheDir,
         {
           nodeModulesOnly: this.nodeModulesOnly,
-          forceNoRewrite: this.forceNoRewrite,
+          forceNorewrite: this.forceNorewrite,
           nodeEnv: this.nodeEnv,
           cypressInternalEnv: this.cypressInternalEnv,
           integrityCheckSource: this.integrityCheckSource,

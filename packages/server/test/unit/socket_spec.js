@@ -79,8 +79,15 @@ describe('lib/socket', () => {
           addSocketListeners: sinon.stub(),
         }
 
-        // Set the studio in the context
-        ctx.coreData.studio = mockStudio
+        const studioLifecycleManager = {
+          registerStudioReadyListener: sinon.stub().callsFake((callback) => {
+            callback(mockStudio)
+
+            return () => {}
+          }),
+        }
+
+        ctx.coreData.studioLifecycleManager = studioLifecycleManager
 
         this.server.startWebsockets(this.automation, this.cfg, this.options)
         this.socket = this.server._socket
@@ -590,9 +597,19 @@ describe('lib/socket', () => {
 
     context('studio.addSocketListeners', () => {
       it('calls addSocketListeners on studio when socket connects', function () {
-        // The socket connection was already established in the beforeEach so
-        // we can just verify that addSocketListeners was called
-        expect(ctx.coreData.studio.addSocketListeners).to.be.called
+        // Verify that registerStudioReadyListener was called
+        expect(ctx.coreData.studioLifecycleManager.registerStudioReadyListener).to.be.called
+
+        // Check that the callback was called with the mock studio object
+        const registerStudioReadyListenerCallback = ctx.coreData.studioLifecycleManager.registerStudioReadyListener.firstCall.args[0]
+
+        expect(registerStudioReadyListenerCallback).to.be.a('function')
+
+        // Verify the mock studio's addSocketListeners was called by the callback
+        const mockStudio = { addSocketListeners: sinon.stub() }
+
+        registerStudioReadyListenerCallback(mockStudio)
+        expect(mockStudio.addSocketListeners).to.be.called
       })
     })
 
