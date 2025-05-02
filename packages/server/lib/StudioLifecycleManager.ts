@@ -12,7 +12,6 @@ import { CloudRequest } from './cloud/api/cloud_request'
 import { isRetryableError } from './cloud/network/is_retryable_error'
 import { asyncRetry } from './util/async_retry'
 import { postStudioSession } from './cloud/api/studio/post_studio_session'
-import { CLOUD_ENV } from './cloud/constants'
 
 const debug = Debug('cypress:server:studio-lifecycle-manager')
 const routes = require('./cloud/routes')
@@ -53,7 +52,8 @@ export class StudioLifecycleManager {
     }).catch(async (error) => {
       debug('Error during studio manager setup: %o', error)
 
-      const cloudUrl = ctx.cloud.getCloudUrl(CLOUD_ENV)
+      const cloudEnv = (process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'production') as 'development' | 'staging' | 'production'
+      const cloudUrl = ctx.cloud.getCloudUrl(cloudEnv)
       const cloudHeaders = await ctx.cloud.additionalHeaders()
 
       reportStudioError({
