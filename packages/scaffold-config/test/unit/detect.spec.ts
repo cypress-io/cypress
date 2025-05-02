@@ -355,7 +355,7 @@ describe('detectLanguage', () => {
 
       fakeDepsInNodeModules(projectRoot, [{ devDependency: 'typescript', version: '4.3.6' }])
 
-      const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson, isMigrating: true })
+      const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
       expect(actual).to.eq('js')
     })

@@ -304,13 +304,6 @@ describe('visual error templates', () => {
 
   // testVisualErrors('CANNOT_RECORD_NO_PROJECT_ID', {
   testVisualErrors(errorType, {
-    LEGACY_CONFIG_ERROR_DURING_MIGRATION: () => {
-      const err = makeErr()
-
-      return {
-        default: ['cypress/plugins/index.js', err],
-      }
-    },
     CANNOT_TRASH_ASSETS: () => {
       const err = makeErr()
 
@@ -1168,16 +1161,6 @@ describe('visual error templates', () => {
         default: ['./path/to/cypress-plugin-retries'],
       }
     },
-    CONFIG_FILE_MIGRATION_NEEDED: () => {
-      return {
-        default: ['/path/to/projectRoot'],
-      }
-    },
-    LEGACY_CONFIG_FILE: () => {
-      return {
-        default: ['cypress.json', '/path/to/projectRoot'],
-      }
-    },
     SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER: () => {
       return {
         default: ['/path/to/project/cypress.config.js'],
@@ -1274,11 +1257,6 @@ describe('visual error templates', () => {
         default: [makeErr()],
       }
     },
-    MIGRATION_ALREADY_OCURRED: () => {
-      return {
-        default: ['custom.config.js', 'custom.json'],
-      }
-    },
     TEST_FILES_RENAMED: () => {
       return {
         default: [{ name: 'testFiles', newName: 'specPattern', configFile: '/path/to/cypress.config.js.ts' }],
@@ -1292,16 +1270,6 @@ describe('visual error templates', () => {
     INTEGRATION_FOLDER_REMOVED: () => {
       return {
         default: [{ name: 'integrationFolder', configFile: '/path/to/cypress.config.js.ts' }],
-      }
-    },
-    MIGRATION_MISMATCHED_CYPRESS_VERSIONS: () => {
-      return {
-        default: ['9.6.0', '10.0.0'],
-      }
-    },
-    MIGRATION_CYPRESS_NOT_FOUND: () => {
-      return {
-        default: [],
       }
     },
     DEV_SERVER_CONFIG_FILE_NOT_FOUND: () => {

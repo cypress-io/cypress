@@ -215,61 +215,6 @@ function run (ipc, file, projectRoot) {
     }
   })
 
-  ipc.on('loadLegacyPlugins', async (legacyConfig) => {
-    try {
-      let legacyPlugins = await loadFile(file)
-
-      if (legacyPlugins && typeof legacyPlugins.default === 'function') {
-        legacyPlugins = legacyPlugins.default
-      }
-
-      // invalid or empty plugins file
-      if (typeof legacyPlugins !== 'function') {
-        ipc.send('loadLegacyPlugins:reply', legacyConfig)
-
-        return
-      }
-
-      // we do not want to execute any tasks - the purpose
-      // of this is to get any modified config returned
-      // by plugins.
-      const noop = () => {}
-      const legacyPluginsConfig = await legacyPlugins(noop, legacyConfig)
-
-      // pluginsFile did not return the config - this is allowed, although
-      // we recommend returning it in our docs.
-      if (!legacyPluginsConfig) {
-        ipc.send('loadLegacyPlugins:reply', legacyConfig)
-
-        return
-      }
-
-      // match merging strategy from 9.x
-      const mergedLegacyConfig = {
-        ...legacyConfig,
-        ...legacyPluginsConfig,
-      }
-
-      if (legacyConfig.e2e || legacyPluginsConfig.e2e) {
-        mergedLegacyConfig.e2e = {
-          ...(legacyConfig.e2e || {}),
-          ...(legacyPluginsConfig.e2e || {}),
-        }
-      }
-
-      if (legacyConfig.component || legacyPluginsConfig.component) {
-        mergedLegacyConfig.component = {
-          ...(legacyConfig.component || {}),
-          ...(legacyPluginsConfig.component || {}),
-        }
-      }
-
-      ipc.send('loadLegacyPlugins:reply', mergedLegacyConfig)
-    } catch (e) {
-      ipc.send('loadLegacyPlugins:error', util.serializeError(e))
-    }
-  })
-
   ipc.send('ready')
 }
 

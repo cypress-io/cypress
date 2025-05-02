@@ -23,9 +23,6 @@
         v-else-if="query.data.value.isGlobalMode && !query.data.value?.currentProject"
         :gql="query.data.value"
       />
-      <MigrationWizard
-        v-else-if="currentProject?.needsLegacyConfigMigration"
-      />
       <template v-else>
         <ScaffoldedFiles
           v-if="query.data.value.scaffoldedFiles"
@@ -93,9 +90,8 @@ import StandardModal from '@cy/components/StandardModal.vue'
 import HeaderBar from '@cy/gql-components/HeaderBar.vue'
 import Spinner from '@cy/components/Spinner.vue'
 import CompareTestingTypes from './setup/CompareTestingTypes.vue'
-import MigrationWizard from './migration/MigrationWizard.vue'
 import ScaffoldedFiles from './setup/ScaffoldedFiles.vue'
-import MajorVersionWelcome from './migration/MajorVersionWelcome.vue'
+import MajorVersionWelcome from './welcome/MajorVersionWelcome.vue'
 import { useI18n } from '@cy/i18n'
 import { computed, ref, watch } from 'vue'
 import LaunchpadHeader from './setup/LaunchpadHeader.vue'
@@ -131,7 +127,6 @@ fragment MainLaunchpadQueryData on Query {
     isLoadingConfigFile
     isLoadingNodeEvents
     isFullConfigReady
-    needsLegacyConfigMigration
     currentTestingType
     activeBrowser {
       id

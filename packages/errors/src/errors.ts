@@ -1433,36 +1433,6 @@ export const AllCypressErrors = {
       Please remove or combine the support files into a single file.`
   },
 
-  CONFIG_FILE_MIGRATION_NEEDED: (projectRoot: string) => {
-    return errTemplate`
-        There is a ${fmt.highlight(`cypress.json`)} file at the path: ${fmt.path(projectRoot)}
-
-        ${fmt.cypressVersion('10.0.0')} no longer supports ${fmt.highlight(`cypress.json`)}.
-
-        Please run ${fmt.highlightTertiary('cypress open')} to launch the migration tool to migrate to ${fmt.highlightSecondary('cypress.config.{js,ts,mjs,cjs}')}.
-
-        https://on.cypress.io/migration-guide
-      `
-  },
-
-  LEGACY_CONFIG_ERROR_DURING_MIGRATION: (file: string, error: Error) => {
-    return errTemplate`
-        Your ${fmt.highlight(file)} file threw an error. ${fmt.stackTrace(error)}
-
-        Please ensure your pluginsFile is valid and relaunch the migration tool to migrate to ${fmt.cypressVersion('10.0.0')}.
-      `
-  },
-
-  LEGACY_CONFIG_FILE: (baseFileName: string, projectRoot: string, legacyConfigFile: string = 'cypress.json') => {
-    return errTemplate`
-      There is both a ${fmt.highlight(baseFileName)} and a ${fmt.highlight(legacyConfigFile)} file at the location below:
-
-      ${fmt.path(projectRoot)}
-
-      Cypress no longer supports ${fmt.off(legacyConfigFile)}, please remove it from your project.
-    `
-  },
-
   SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER: (configFilePath: string) => {
     const code = errPartial`
       {
@@ -1681,18 +1651,6 @@ export const AllCypressErrors = {
     `
   },
 
-  MIGRATION_ALREADY_OCURRED: (configFile: string, legacyConfigFile: string) => {
-    return errTemplate`
-      You are attempting to use Cypress with an older config file: ${fmt.highlight(legacyConfigFile)}
-      When you upgraded to Cypress v10.0 the config file was updated and moved to a new location: ${fmt.highlight(configFile)}
-
-      You may need to update any CLI scripts to ensure that they are referring the new version. This would typically look something like:
-      "${fmt.highlight(`cypress open --config-file=${configFile}`)}"
-
-      https://on.cypress.io/migration-guide
-    `
-  },
-
   TEST_FILES_RENAMED: (errShape: BreakingErrResult, err?: Error) => {
     const stackTrace = err ? fmt.stackTrace(err) : null
 
@@ -1773,26 +1731,6 @@ export const AllCypressErrors = {
 
       ${stackTrace}
       `
-  },
-
-  MIGRATION_MISMATCHED_CYPRESS_VERSIONS: (version: string, currentVersion: string) => {
-    return errTemplate`
-      You are running ${fmt.cypressVersion(currentVersion)} in global mode, but you are attempting to migrate a project where ${fmt.cypressVersion(version)} is installed.
-
-      Ensure the project you are migrating has Cypress version ${fmt.cypressVersion(currentVersion)} installed.
-
-      https://on.cypress.io/migration-guide
-    `
-  },
-
-  MIGRATION_CYPRESS_NOT_FOUND: () => {
-    return errTemplate`
-      You are running Cypress 10+ in global mode and attempting to open or migrate a project where an install of ${fmt.code('cypress')} cannot be found.
-
-      Ensure that ${fmt.code('cypress@10')} or greater is installed in the project you are attempting to open or migrate.
-
-      https://on.cypress.io/migration-guide
-    `
   },
 
   DEV_SERVER_CONFIG_FILE_NOT_FOUND: (devServer: 'vite' | 'webpack', root: string, searchedFor: string[]) => {

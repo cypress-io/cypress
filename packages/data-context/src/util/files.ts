@@ -3,7 +3,7 @@ import type { TestingType, FoundSpec } from '@packages/types'
 import Debug from 'debug'
 import _ from 'lodash'
 import path from 'path'
-import { getPathFromSpecPattern, getLongestCommonPrefixFromPaths } from '../ProjectDataSource'
+import { getPathFromSpecPattern, getLongestCommonPrefixFromPaths } from '../sources/ProjectDataSource'
 
 export const isDefaultSupportFile = (supportFile: string) => {
   if (_.isNil(supportFile) || !_.isBoolean(supportFile) && supportFile.match(/(^|\.+\/)cypress\/support($|\/index($|\.(ts|js|coffee)$))/)) {
@@ -19,7 +19,7 @@ export async function getDefaultSpecFileName (
   { currentProject, testingType, fileExtensionToUse, specPattern, specs = [], name }:
   { currentProject: string | null, testingType: TestingType | null, fileExtensionToUse: FileExtension, specPattern: string[], specs?: FoundSpec[], name?: string },
 ): Promise<string> {
-  const debug = Debug('cypress:data-context:sources:migration:utils')
+  const debug = Debug('cypress:data-context:util:files')
 
   const defaultFilename = `${name ? name : testingType === 'e2e' ? 'spec' : 'ComponentName'}.cy.${fileExtensionToUse}`
   const defaultPathname = path.join('cypress', testingType ?? 'e2e', defaultFilename)
