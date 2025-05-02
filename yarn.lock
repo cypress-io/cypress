@@ -13550,10 +13550,10 @@ cross-spawn@^6.0.0, cross-spawn@^6.0.5:
     shebang-command "^1.2.0"
     which "^1.2.9"
 
-cross-spawn@^7.0.0, cross-spawn@^7.0.1, cross-spawn@^7.0.2, cross-spawn@^7.0.3:
-  version "7.0.3"
-  resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-7.0.3.tgz#f73a85b9d5d41d045551c177e2882d4ac85728a6"
-  integrity sha512-iRDPJKUPVEND7dHPO8rkbOnPpyDygcDFtWjpeWNCgy8WP2rXcxXL8TskReQl6OrB2G7+UJrags1q15Fudc7G6w==
+cross-spawn@^7.0.0, cross-spawn@^7.0.1, cross-spawn@^7.0.2, cross-spawn@^7.0.3, cross-spawn@^7.0.6:
+  version "7.0.6"
+  resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-7.0.6.tgz#8a58fe78f00dcd70c370451759dfbfaf03e8ee9f"
+  integrity sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==
   dependencies:
     path-key "^3.1.0"
     shebang-command "^2.0.0"
@@ -13748,12 +13748,12 @@ cypress-each@^1.11.0:
   resolved "https://registry.yarnpkg.com/cypress-each/-/cypress-each-1.11.0.tgz#013c9b43a950f157bcf082d4bd0bb424fb370441"
   integrity sha512-zeqeQkppPL6BKLIJdfR5IUoZRrxRudApJapnFzWCkkrmefQSqdlBma2fzhmniSJ3TRhxe5xpK3W3/l8aCrHvwQ==
 
-cypress-example-kitchensink@3.1.2:
-  version "3.1.2"
-  resolved "https://registry.yarnpkg.com/cypress-example-kitchensink/-/cypress-example-kitchensink-3.1.2.tgz#ddf8d6c21ccc8b6e0fe47c814299f02873e817fe"
-  integrity sha512-yKJeqNGGqZt313lwiFZxfLjpJWpaC3LO7+IpN/xocA15G6uqQ3etxEbCOg/NfmmskP9sm5NukXJ03MbeKvkTxA==
+cypress-example-kitchensink@4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/cypress-example-kitchensink/-/cypress-example-kitchensink-4.0.0.tgz#a47566a06ef9273c379649406698a5bfa8022311"
+  integrity sha512-Ot0MlAHrtcx3Snd0JHxQFIEOoCgP/MwKflPlTqqqX3JbQOhT0WtS24+iUF/hJplrkOz/2iM17d/rmd+U3f8A2A==
   dependencies:
-    npm-run-all2 "7.0.1"
+    npm-run-all2 "7.0.2"
     serve "14.2.4"
 
 cypress-expect@^2.5.3:
@@ -24037,13 +24037,13 @@ npm-registry-fetch@^18.0.0, npm-registry-fetch@^18.0.1:
     npm-package-arg "^12.0.0"
     proc-log "^5.0.0"
 
-npm-run-all2@7.0.1:
-  version "7.0.1"
-  resolved "https://registry.yarnpkg.com/npm-run-all2/-/npm-run-all2-7.0.1.tgz#7a20f65d072db4a880802d4ba5cd19566daef752"
-  integrity sha512-Adbv+bJQ8UTAM03rRODqrO5cx0YU5KCG2CvHtSURiadvdTjjgGJXdbc1oQ9CXBh9dnGfHSoSB1Web/0Dzp6kOQ==
+npm-run-all2@7.0.2:
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/npm-run-all2/-/npm-run-all2-7.0.2.tgz#26155c140b5e3f1155efd7f5d67212c8027b397c"
+  integrity sha512-7tXR+r9hzRNOPNTvXegM+QzCuMjzUIIq66VDunL6j60O4RrExx32XUhlrS7UK4VcdGw5/Wxzb3kfNcFix9JKDA==
   dependencies:
     ansi-styles "^6.2.1"
-    cross-spawn "^7.0.3"
+    cross-spawn "^7.0.6"
     memorystream "^0.3.1"
     minimatch "^9.0.0"
     pidtree "^0.6.0"
