@@ -8,7 +8,6 @@
  */
 import path from 'path'
 import _ from 'lodash'
-import resolve from 'resolve'
 import fs from 'fs'
 
 import { getError, CypressError, ConfigValidationFailureInfo } from '@packages/errors'
@@ -505,8 +504,6 @@ export class ProjectLifecycleManager {
    * @returns true if we can initialize and false if not
    */
   private readyToInitialize (projectRoot: string): boolean {
-    this.legacyPluginGuard()
-
     this.configFileWarningCheck()
 
     return this.metaState.hasValidConfigFile
@@ -623,19 +620,6 @@ export class ProjectLifecycleManager {
 
   executeNodeEvent (event: string, args: any[]) {
     return this._eventRegistrar.executeNodeEvent(event, args)
-  }
-
-  private legacyPluginGuard () {
-    // test and warn for incompatible plugin
-    try {
-      const retriesPluginPath = path.dirname(resolve.sync('cypress-plugin-retries/package.json', {
-        basedir: this.projectRoot,
-      }))
-
-      this.ctx.onWarning(getError('INCOMPATIBLE_PLUGIN_RETRIES', path.relative(this.projectRoot, retriesPluginPath)))
-    } catch (e) {
-      // noop, incompatible plugin not installed
-    }
   }
 
   /**
