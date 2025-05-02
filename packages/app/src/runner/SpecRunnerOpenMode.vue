@@ -102,6 +102,7 @@
             :can-access-studio-a-i="studioStore.canAccessStudioAI"
             :on-studio-panel-close="handleStudioPanelClose"
             :event-manager="eventManager"
+            :studio-status="studioStatus"
           />
         </HideDuringScreenshot>
       </template>
@@ -110,7 +111,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, onMounted } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { REPORTER_ID, RUNNER_ID } from './utils'
 import InlineSpecList from '../specs/InlineSpecList.vue'
 import { getAutIframeModel, getEventManager } from '.'
@@ -125,7 +126,7 @@ import ScreenshotHelperPixels from './screenshot/ScreenshotHelperPixels.vue'
 import { useScreenshotStore } from '../store/screenshot-store'
 import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
 import { useMutation, gql } from '@urql/vue'
-import { SpecRunnerOpenMode_OpenFileInIdeDocument } from '../generated/graphql'
+import { SpecRunnerOpenMode_OpenFileInIdeDocument, StudioStatus_ChangeDocument } from '../generated/graphql'
 import type { SpecRunnerFragment } from '../generated/graphql'
 import { usePreferences } from '../composables/usePreferences'
 import ScriptError from './ScriptError.vue'
@@ -140,6 +141,7 @@ import StudioInstructionsModal from './studio/StudioInstructionsModal.vue'
 import StudioSaveModal from './studio/StudioSaveModal.vue'
 import { useStudioStore } from '../store/studio-store'
 import StudioPanel from '../studio/StudioPanel.vue'
+import { useSubscription } from '../graphql'
 
 const {
   preferredMinimumPanelWidth,
@@ -166,9 +168,7 @@ fragment SpecRunner_Preferences on Query {
 
 gql`
 fragment SpecRunner_Studio on Query {
-  studio {
-    status
-  }
+  cloudStudioEnabled
 }
 `
 
@@ -197,6 +197,14 @@ fragment SpecRunner on Query {
 gql`
 mutation SpecRunnerOpenMode_OpenFileInIDE ($input: FileDetailsInput!) {
   openFileInIDE (input: $input)
+}
+`
+
+gql`
+subscription StudioStatus_Change {
+  studioStatusChange {
+    status
+  }
 }
 `
 
@@ -243,16 +251,27 @@ const isSpecsListOpenPreferences = computed(() => {
   return props.gql.localSettings.preferences.isSpecsListOpen ?? false
 })
 
-const studioStatus = computed(() => {
-  return props.gql.studio?.status
+// Initialize with null and wait for subscription to update
+const studioStatus = ref<string | null>(null)
+
+useSubscription({ query: StudioStatus_ChangeDocument }, (_, data) => {
+  if (data?.studioStatusChange?.status) {
+    studioStatus.value = data.studioStatusChange.status
+  }
+
+  return data
+})
+
+const cloudStudioEnabled = computed(() => {
+  return props.gql.cloudStudioEnabled
 })
 
 const shouldShowStudioButton = computed(() => {
-  return !!props.gql.studio && studioStatus.value === 'ENABLED' && !studioStore.isOpen
+  return cloudStudioEnabled.value && !studioStore.isOpen
 })
 
 const shouldShowStudioPanel = computed(() => {
-  return studioStatus.value === 'ENABLED' && (studioStore.isLoading || studioStore.isActive)
+  return cloudStudioEnabled.value && (studioStore.isLoading || studioStore.isActive)
 })
 
 const hideCommandLog = runnerUiStore.hideCommandLog

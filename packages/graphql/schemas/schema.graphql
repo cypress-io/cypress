@@ -2023,6 +2023,9 @@ type Query {
     specPath: String!
   ): CloudProjectSpecResult
 
+  """Whether cloud studio is enabled"""
+  cloudStudioEnabled: Boolean
+
   """A user within the Cypress Cloud"""
   cloudViewer: CloudUser
 
@@ -2068,11 +2071,6 @@ type Query {
 
   """The files that have just been scaffolded"""
   scaffoldedFiles: [ScaffoldedFile!]
-
-  """
-  Data pertaining to studio and the studio manager that is loaded from the cloud
-  """
-  studio: Studio
 
   """Previous versions of cypress and their release date"""
   versions: VersionData
@@ -2382,6 +2380,7 @@ type Studio {
 enum StudioStatusType {
   ENABLED
   INITIALIZED
+  INITIALIZING
   IN_ERROR
   NOT_INITIALIZED
 }
@@ -2437,6 +2436,9 @@ type Subscription {
 
   """Issued when the watched specs for the project changes"""
   specsChange: CurrentProject
+
+  """Status of the studio manager"""
+  studioStatusChange: Studio
 }
 
 enum SupportStatusEnum {

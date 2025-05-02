@@ -91,6 +91,13 @@ abstract class DataEmitterEvents {
   }
 
   /**
+   * Emitted when the studio manager's status changes
+   */
+  studioStatusChange () {
+    this._emit('studioStatusChange')
+  }
+
+  /**
    * Emitted when then relevant run numbers changed after querying for matching
    * runs based on local commit shas
   */

@@ -49,6 +49,23 @@ export const Subscription = subscriptionType({
       resolve: (source, args, ctx) => ctx.lifecycleManager,
     })
 
+    t.field('studioStatusChange', {
+      type: 'Studio',
+      description: 'Status of the studio manager',
+      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('studioStatusChange'),
+      resolve: async (source, args, ctx) => {
+        const isStudioReady = ctx.coreData.studioLifecycleManager?.isStudioReady()
+
+        if (!isStudioReady) {
+          return { status: 'INITIALIZING' as const }
+        }
+
+        const studio = await ctx.coreData.studioLifecycleManager?.getStudio()
+
+        return studio ? { status: studio.status } : null
+      },
+    })
+
     t.field('configChange', {
       type: CurrentProject,
       description: 'Issued when cypress.config.js is re-executed due to a change',
