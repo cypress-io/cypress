@@ -1041,7 +1041,6 @@ type CurrentProject implements Node & ProjectLike {
 
   """Whether the project has Typescript"""
   isUsingTypeScript: Boolean
-
   packageManager: PackageManagerEnum!
 
   """Cached preferences for this project"""
@@ -1872,7 +1871,6 @@ type Query {
   Unique node machine identifier for this instance - may be nil if unable to resolve
   """
   machineId: String
-
   node(id: ID!): Node
 
   """Defines the suggested polling intervals for various schema resources"""
