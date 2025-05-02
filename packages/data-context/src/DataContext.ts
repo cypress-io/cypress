@@ -233,10 +233,6 @@ export class DataContext {
     return this._util
   }
 
-  get migration () {
-    return this._migration
-  }
-
   /**
    * This will be replaced with Immer, for immutable state updates.
    */
