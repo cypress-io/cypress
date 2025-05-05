@@ -1206,27 +1206,11 @@ export const AllCypressErrors = {
 
         If you don't require screenshots or videos to be stored you can safely ignore this warning.`
   },
-  EXPERIMENTAL_SAMESITE_REMOVED: () => {
-    return errTemplate`\
-        The ${fmt.highlight(`experimentalGetCookiesSameSite`)} configuration option was removed in ${fmt.cypressVersion(`5.0.0`)}.
-
-        Returning the ${fmt.highlightSecondary(`sameSite`)} property is now the default behavior of the ${fmt.highlightSecondary(`cy.cookie`)} commands.
-
-        You can safely remove this option from your config.`
-  },
   EXPERIMENTAL_JIT_COMPILE_REMOVED: () => {
     return errTemplate`\
         The ${fmt.highlight(`experimentalJustInTimeCompile`)} configuration option was removed in ${fmt.cypressVersion(`14.0.0`)}.
         A new ${fmt.highlightSecondary(`justInTimeCompile`)} configuration option is available and is now ${fmt.highlightSecondary(`true`)} by default.
         You can safely remove this option from your config.`
-  },
-  EXPERIMENTAL_SESSION_SUPPORT_REMOVED: () => {
-    return errTemplate`\
-        The ${fmt.highlight(`experimentalSessionSupport`)} configuration option was removed in ${fmt.cypressVersion(`9.6.0`)}.
-
-        You can safely remove this option from your config.
-
-        https://on.cypress.io/session`
   },
   EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED: () => {
     return errTemplate`\
@@ -1236,24 +1220,6 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/session
         https://on.cypress.io/origin`
-  },
-  EXPERIMENTAL_SHADOW_DOM_REMOVED: () => {
-    return errTemplate`\
-        The ${fmt.highlight(`experimentalShadowDomSupport`)} configuration option was removed in ${fmt.cypressVersion(`5.2.0`)}. It is no longer necessary when utilizing the ${fmt.highlightSecondary(`includeShadowDom`)} option.
-
-        You can safely remove this option from your config.`
-  },
-  EXPERIMENTAL_NETWORK_STUBBING_REMOVED: () => {
-    return errTemplate`\
-        The ${fmt.highlight(`experimentalNetworkStubbing`)} configuration option was removed in ${fmt.cypressVersion(`6.0.0`)}.
-
-        It is no longer necessary for using ${fmt.highlightSecondary(`cy.intercept()`)}. You can safely remove this option from your config.`
-  },
-  EXPERIMENTAL_RUN_EVENTS_REMOVED: () => {
-    return errTemplate`\
-        The ${fmt.highlight(`experimentalRunEvents`)} configuration option was removed in ${fmt.cypressVersion(`6.7.0`)}. It is no longer necessary when listening to run events in the plugins file.
-
-        You can safely remove this option from your config.`
   },
   EXPERIMENTAL_SINGLE_TAB_RUN_MODE: () => {
     return errTemplate`\
@@ -1321,26 +1287,6 @@ export const AllCypressErrors = {
 
       Read the documentation for the injectDocumentDomain configuration option: https://on.cypress.io/inject-document-domain-configuration
     `
-  },
-  FIREFOX_GC_INTERVAL_REMOVED: () => {
-    return errTemplate`\
-        The ${fmt.highlight(`firefoxGcInterval`)} configuration option was removed in ${fmt.cypressVersion(`8.0.0`)}. It was introduced to work around a bug in Firefox 79 and below.
-
-        Since Cypress no longer supports Firefox 85 and below in Cypress ${fmt.cypressVersion(`8.0.0`)}, this option was removed.
-
-        You can safely remove this option from your config.`
-  },
-  // TODO: make this relative path, not absolute
-  INCOMPATIBLE_PLUGIN_RETRIES: (arg1: string) => {
-    return errTemplate`\
-      We've detected that the incompatible plugin ${fmt.highlight(`cypress-plugin-retries`)} is installed at: ${fmt.path(arg1)}
-
-      Test retries is now natively supported in ${fmt.cypressVersion(`5.0.0`)}.
-
-      Remove the plugin from your dependencies to silence this warning.
-
-      https://on.cypress.io/test-retries
-      `
   },
   INVALID_CONFIG_OPTION: (arg1: string[]) => {
     const phrase = arg1.length > 1 ? 'options are' : 'option is'

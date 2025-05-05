@@ -1106,17 +1106,7 @@ describe('visual error templates', () => {
         default: ['/path/to/folder'],
       }
     },
-    EXPERIMENTAL_SAMESITE_REMOVED: () => {
-      return {
-        default: [],
-      }
-    },
     EXPERIMENTAL_JIT_COMPILE_REMOVED: () => {
-      return {
-        default: [],
-      }
-    },
-    EXPERIMENTAL_SESSION_SUPPORT_REMOVED: () => {
       return {
         default: [],
       }
@@ -1124,31 +1114,6 @@ describe('visual error templates', () => {
     EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED: () => {
       return {
         default: [],
-      }
-    },
-    EXPERIMENTAL_SHADOW_DOM_REMOVED: () => {
-      return {
-        default: [],
-      }
-    },
-    EXPERIMENTAL_NETWORK_STUBBING_REMOVED: () => {
-      return {
-        default: [],
-      }
-    },
-    EXPERIMENTAL_RUN_EVENTS_REMOVED: () => {
-      return {
-        default: [],
-      }
-    },
-    FIREFOX_GC_INTERVAL_REMOVED: () => {
-      return {
-        default: [],
-      }
-    },
-    INCOMPATIBLE_PLUGIN_RETRIES: () => {
-      return {
-        default: ['./path/to/cypress-plugin-retries'],
       }
     },
     SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER: () => {

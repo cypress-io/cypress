@@ -154,12 +154,12 @@ describe('config/src/index', () => {
       const errorFn = sinon.spy()
 
       configUtil.validateNoBreakingConfig({
-        'experimentalNetworkStubbing': 'should break',
+        'experimentalSessionAndOrigin': 'should break',
         configFile: 'config.js',
       }, warningFn, errorFn, 'e2e')
 
-      expect(warningFn).to.have.been.calledOnceWith('EXPERIMENTAL_NETWORK_STUBBING_REMOVED', {
-        name: 'experimentalNetworkStubbing',
+      expect(warningFn).to.have.been.calledOnceWith('EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED', {
+        name: 'experimentalSessionAndOrigin',
         newName: undefined,
         value: undefined,
         testingType: 'e2e',

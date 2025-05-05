@@ -35,14 +35,14 @@ describe('Config files error handling', () => {
   it('handles deprecated config fields', () => {
     cy.openProject('pristine')
     cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { e2e: { supportFile: false, experimentalComponentTesting: true } }')
+      await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { e2e: { supportFile: false, videoUploadOnPasses: true } }')
     })
 
     cy.openProject('pristine')
 
     cy.visitLaunchpad()
     cy.get('[data-cy-testingType=e2e]').click()
-    cy.get('body', { timeout: 10000 }).should('contain.text', 'experimentalComponentTesting')
+    cy.get('body', { timeout: 10000 }).should('contain.text', 'videoUploadOnPasses')
     expectStackToBe('closed')
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { e2e: { supportFile: false } }')
