@@ -1,8 +1,15 @@
-$border-radius: 4px;
+
+@mixin box-shadow {
+  border: 1px solid #9aa2fc;
+  box-shadow: 0 0 0 3px rgba(154, 162, 252, 0.35);
+  -webkit-box-shadow: 0 0 0 3px rgba(154, 162, 252, 0.35);
+  -moz-box-shadow: 0 0 0 3px rgba(154, 162, 252, 0.35);
+}
 
 @mixin menu-style {
-  background: #fff;
+  background: $gray-1100;
   border: 1px solid #DDD;
   box-shadow: 2px 5px 12px rgba(0, 0, 0, 0.2);
-  border-radius: $border-radius;
+  border-radius: 4px;
+  @include box-shadow;
 }
