@@ -357,7 +357,7 @@ describe('detectLanguage', () => {
 
       const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
-      expect(actual).to.eq('js')
+      expect(actual).to.eq('ts')
     })
 
     it('with a TypeScript supportFile', async () => {

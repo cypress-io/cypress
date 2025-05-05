@@ -4,7 +4,7 @@ Clear, consistent, errors are one of the important parts of the Cypress experien
 
 ### @packages/errors
 
-All error related logic for the server should be added to `@packages/errors`. This logic has been separated out from the `@packages/server` to enable strict type checking & use in other packages we have added in the `10.0-release` branch.
+All error related logic for the server should be added to `@packages/errors`.
 
 ### Errors Development Workflow
 
