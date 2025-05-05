@@ -504,6 +504,8 @@ export class ProjectLifecycleManager {
    * @returns true if we can initialize and false if not
    */
   private readyToInitialize (projectRoot: string): boolean {
+    // This calls a lot of methods that are necessary to check config-wise upfront
+    this.refreshMetaState()
     this.configFileWarningCheck()
 
     return this.metaState.hasValidConfigFile
