@@ -24,7 +24,7 @@
   "devDependencies": {
     "@cypress-design/icon-registry": "^1.5.1",
     "@cypress-design/vue-button": "^1.6.0",
-    "@cypress-design/vue-icon": "^1.6.0",
+    "@cypress-design/vue-icon": "^1.18.0",
     "@cypress-design/vue-spinner": "^1.0.0",
     "@cypress-design/vue-statusicon": "^1.0.0",
     "@cypress-design/vue-tabs": "^1.2.2",

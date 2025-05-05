@@ -10,23 +10,23 @@ These tests run in CI in Electron, Chrome, Firefox, and WebKit under the `system
 ## Running System Tests
 
 ```bash
-yarn test # runs all tests
+yarn test-system # runs all tests
 ## or use globbing to find spec in folders as defined in "glob-in-dir" param in package.json
-yarn test screenshot*element # runs screenshot_element_capture_spec.js
-yarn test screenshot # runs screenshot_element_capture_spec.js, screenshot_fullpage_capture_spec.js, ..., etc.
+yarn test-system screenshot*element # runs screenshot_element_capture_spec.js
+yarn test-system screenshot # runs screenshot_element_capture_spec.js, screenshot_fullpage_capture_spec.js, ..., etc.
 
 ```
 
 To keep the browser open after a spec run (for easier debugging and iterating on specs), you can pass the `--no-exit` flag to the test command. Live reloading due to spec changes should also work:
 
 ```sh
-yarn test go_spec.js --browser chrome --no-exit
+yarn test-system go_spec.js --browser chrome --no-exit
 ```
 
 To debug the Cypress process under test, you can pass `--cypress-inspect-brk`:
 
 ```sh
-yarn test go_spec.js --browser chrome --no-exit --cypress-inspect-brk
+yarn test-system go_spec.js --browser chrome --no-exit --cypress-inspect-brk
 ```
 
 ## Developing Tests

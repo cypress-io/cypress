@@ -109,16 +109,16 @@ export const createCommonRoutes = ({
     router.get('/__cypress-studio/*', async (req, res) => {
       await networkProxy.handleHttpRequest(req, res)
     })
-  // We need to handle the case where the studio is not defined or loaded properly.
-  // Module federation still tries to load the dynamic asset, but since we do not
-  // have anything to load, we return a blank file.
-  } else if (!getCtx().coreData.studio || getCtx().coreData.studio?.status === 'IN_ERROR') {
-    router.get('/__cypress-studio/app-studio.js', (req, res) => {
-      res.setHeader('Content-Type', 'application/javascript')
-      res.status(200).send('')
-    })
   } else {
-    getCtx().coreData.studio?.initializeRoutes(router)
+    // express matches routes in order. since this callback executes after the
+    // router has already been defined, we need to create a new router to use
+    // for the studio routes
+    const studioRouter = Router()
+
+    router.use('/', studioRouter)
+    getCtx().coreData.studioLifecycleManager?.registerStudioReadyListener((studio) => {
+      studio.initializeRoutes(studioRouter)
+    })
   }
 
   router.get(`/${config.namespace}/tests`, (req, res, next) => {

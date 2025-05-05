@@ -129,8 +129,6 @@ export class AutIframe {
         return
       }
 
-      this.$iframe[0].src = 'about:blank'
-
       this.$iframe.one('load', () => {
         if (testIsolation) {
           this._showTestIsolationBlankPage()
@@ -140,6 +138,8 @@ export class AutIframe {
 
         resolve()
       })
+
+      this.$iframe[0].src = 'about:blank'
     })
   }
 

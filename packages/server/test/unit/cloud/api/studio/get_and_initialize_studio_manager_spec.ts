@@ -1,13 +1,13 @@
 import { Readable, Writable } from 'stream'
-import { proxyquire, sinon } from '../../../spec_helper'
-import { HttpError } from '../../../../lib/cloud/network/http_error'
-import { CloudRequest } from '../../../../lib/cloud/api/cloud_request'
-import { isRetryableError } from '../../../../lib/cloud/network/is_retryable_error'
-import { asyncRetry } from '../../../../lib/util/async_retry'
+import { proxyquire, sinon } from '../../../../spec_helper'
+import { HttpError } from '../../../../../lib/cloud/network/http_error'
+import { CloudRequest } from '../../../../../lib/cloud/api/cloud_request'
+import { isRetryableError } from '../../../../../lib/cloud/network/is_retryable_error'
+import { asyncRetry } from '../../../../../lib/util/async_retry'
 import { CloudDataSource } from '@packages/data-context/src/sources'
 
 describe('getAndInitializeStudioManager', () => {
-  let getAndInitializeStudioManager: typeof import('@packages/server/lib/cloud/api/get_and_initialize_studio_manager').getAndInitializeStudioManager
+  let getAndInitializeStudioManager: typeof import('@packages/server/lib/cloud/api/studio/get_and_initialize_studio_manager').getAndInitializeStudioManager
   let rmStub: sinon.SinonStub = sinon.stub()
   let ensureStub: sinon.SinonStub = sinon.stub()
   let copyStub: sinon.SinonStub = sinon.stub()
@@ -20,8 +20,10 @@ describe('getAndInitializeStudioManager', () => {
   let createInErrorManagerStub: sinon.SinonStub = sinon.stub()
   let tmpdir: string = '/tmp'
   let studioManagerSetupStub: sinon.SinonStub = sinon.stub()
+  let originalEnv: NodeJS.ProcessEnv
 
   beforeEach(() => {
+    originalEnv = { ...process.env }
     rmStub = sinon.stub()
     ensureStub = sinon.stub()
     copyStub = sinon.stub()
@@ -34,7 +36,7 @@ describe('getAndInitializeStudioManager', () => {
     createInErrorManagerStub = sinon.stub()
     studioManagerSetupStub = sinon.stub()
 
-    getAndInitializeStudioManager = (proxyquire('../lib/cloud/api/get_and_initialize_studio_manager', {
+    getAndInitializeStudioManager = (proxyquire('../lib/cloud/api/studio/get_and_initialize_studio_manager', {
       fs: {
         promises: {
           rm: rmStub.resolves(),
@@ -54,10 +56,10 @@ describe('getAndInitializeStudioManager', () => {
       tar: {
         extract: extractStub.resolves(),
       },
-      '../encryption': {
+      '../../encryption': {
         verifySignatureFromFile: verifySignatureFromFileStub,
       },
-      '../studio': {
+      '../../studio': {
         StudioManager: class StudioManager {
           static createInErrorManager = createInErrorManagerStub
           setup = (...options) => studioManagerSetupStub(...options)
@@ -67,11 +69,103 @@ describe('getAndInitializeStudioManager', () => {
       '@packages/root': {
         version: '1.2.3',
       },
-    }) as typeof import('@packages/server/lib/cloud/api/get_and_initialize_studio_manager')).getAndInitializeStudioManager
+    }) as typeof import('@packages/server/lib/cloud/api/studio/get_and_initialize_studio_manager')).getAndInitializeStudioManager
   })
 
   afterEach(() => {
+    process.env = originalEnv
     sinon.restore()
+  })
+
+  describe('Studio status based on environment variables', () => {
+    let mockGetCloudUrl: sinon.SinonStub
+    let mockAdditionalHeaders: sinon.SinonStub
+    let cloud: CloudDataSource
+    let writeStream: Writable
+    let readStream: Readable
+
+    beforeEach(() => {
+      readStream = Readable.from('console.log("studio script")')
+
+      writeStream = new Writable({
+        write: (chunk, encoding, callback) => {
+          callback()
+        },
+      })
+
+      createWriteStreamStub.returns(writeStream)
+      createReadStreamStub.returns(Readable.from('tar contents'))
+
+      mockGetCloudUrl = sinon.stub()
+      mockAdditionalHeaders = sinon.stub()
+      cloud = {
+        getCloudUrl: mockGetCloudUrl,
+        additionalHeaders: mockAdditionalHeaders,
+      } as unknown as CloudDataSource
+
+      mockGetCloudUrl.returns('http://localhost:1234')
+      mockAdditionalHeaders.resolves({
+        a: 'b',
+        c: 'd',
+      })
+
+      crossFetchStub.resolves({
+        body: readStream,
+        headers: {
+          get: (header) => {
+            if (header === 'x-cypress-signature') {
+              return '159'
+            }
+          },
+        },
+      })
+
+      verifySignatureFromFileStub.resolves(true)
+    })
+
+    it('sets status to ENABLED when CYPRESS_ENABLE_CLOUD_STUDIO is set', async () => {
+      process.env.CYPRESS_ENABLE_CLOUD_STUDIO = '1'
+      delete process.env.CYPRESS_LOCAL_STUDIO_PATH
+
+      await getAndInitializeStudioManager({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId: '12345', cloudDataSource: cloud })
+
+      expect(studioManagerSetupStub).to.be.calledWith(sinon.match({
+        shouldEnableStudio: true,
+      }))
+    })
+
+    it('sets status to ENABLED when CYPRESS_LOCAL_STUDIO_PATH is set', async () => {
+      delete process.env.CYPRESS_ENABLE_CLOUD_STUDIO
+      process.env.CYPRESS_LOCAL_STUDIO_PATH = '/path/to/studio'
+
+      await getAndInitializeStudioManager({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId: '12345', cloudDataSource: cloud })
+
+      expect(studioManagerSetupStub).to.be.calledWith(sinon.match({
+        shouldEnableStudio: true,
+      }))
+    })
+
+    it('sets status to INITIALIZED when neither env variable is set', async () => {
+      delete process.env.CYPRESS_ENABLE_CLOUD_STUDIO
+      delete process.env.CYPRESS_LOCAL_STUDIO_PATH
+
+      await getAndInitializeStudioManager({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId: '12345', cloudDataSource: cloud })
+
+      expect(studioManagerSetupStub).to.be.calledWith(sinon.match({
+        shouldEnableStudio: false,
+      }))
+    })
+
+    it('sets status to ENABLED when both env variables are set', async () => {
+      process.env.CYPRESS_ENABLE_CLOUD_STUDIO = '1'
+      process.env.CYPRESS_LOCAL_STUDIO_PATH = '/path/to/studio'
+
+      await getAndInitializeStudioManager({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId: '12345', cloudDataSource: cloud })
+
+      expect(studioManagerSetupStub).to.be.calledWith(sinon.match({
+        shouldEnableStudio: true,
+      }))
+    })
   })
 
   describe('CYPRESS_LOCAL_STUDIO_PATH is set', () => {
@@ -94,6 +188,7 @@ describe('getAndInitializeStudioManager', () => {
       })
 
       await getAndInitializeStudioManager({
+        studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz',
         projectId: '12345',
         cloudDataSource: cloud,
       })
@@ -170,12 +265,12 @@ describe('getAndInitializeStudioManager', () => {
 
       const projectId = '12345'
 
-      await getAndInitializeStudioManager({ projectId, cloudDataSource: cloud })
+      await getAndInitializeStudioManager({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId, cloudDataSource: cloud })
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
       expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')
 
-      expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/current.tgz', {
+      expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
         agent: sinon.match.any,
         method: 'GET',
         headers: {
@@ -237,12 +332,12 @@ describe('getAndInitializeStudioManager', () => {
 
       const projectId = '12345'
 
-      await getAndInitializeStudioManager({ projectId, cloudDataSource: cloud })
+      await getAndInitializeStudioManager({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId, cloudDataSource: cloud })
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
       expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')
 
-      expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/current.tgz', {
+      expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
         agent: sinon.match.any,
         method: 'GET',
         headers: {
@@ -294,13 +389,13 @@ describe('getAndInitializeStudioManager', () => {
 
       const projectId = '12345'
 
-      await getAndInitializeStudioManager({ projectId, cloudDataSource: cloud })
+      await getAndInitializeStudioManager({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId, cloudDataSource: cloud })
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
       expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')
 
       expect(crossFetchStub).to.be.calledThrice
-      expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/current.tgz', {
+      expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
         agent: sinon.match.any,
         method: 'GET',
         headers: {
@@ -314,7 +409,19 @@ describe('getAndInitializeStudioManager', () => {
         encrypt: 'signed',
       })
 
-      expect(createInErrorManagerStub).to.be.calledWithMatch(sinon.match.instanceOf(AggregateError))
+      expect(createInErrorManagerStub).to.be.calledWithMatch({
+        error: sinon.match.instanceOf(AggregateError),
+        cloudApi: {
+          cloudUrl: 'http://localhost:1234',
+          cloudHeaders: {
+            a: 'b',
+            c: 'd',
+          },
+        },
+        studioHash: undefined,
+        projectSlug: '12345',
+        studioMethod: 'getAndInitializeStudioManager',
+      })
     })
 
     it('throws an error and returns a studio manager in error state if the signature verification fails', async () => {
@@ -346,13 +453,13 @@ describe('getAndInitializeStudioManager', () => {
 
       const projectId = '12345'
 
-      await getAndInitializeStudioManager({ projectId, cloudDataSource: cloud })
+      await getAndInitializeStudioManager({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId, cloudDataSource: cloud })
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
       expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')
       expect(writeResult).to.eq('console.log("studio script")')
 
-      expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/current.tgz', {
+      expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
         agent: sinon.match.any,
         method: 'GET',
         headers: {
@@ -367,7 +474,16 @@ describe('getAndInitializeStudioManager', () => {
       })
 
       expect(verifySignatureFromFileStub).to.be.calledWith('/tmp/cypress/studio/bundle.tar', '159')
-      expect(createInErrorManagerStub).to.be.calledWithMatch(sinon.match.instanceOf(Error).and(sinon.match.has('message', 'Unable to verify studio signature')))
+      expect(createInErrorManagerStub).to.be.calledWithMatch({
+        error: sinon.match.instanceOf(Error).and(sinon.match.has('message', 'Unable to verify studio signature')),
+        cloudApi: {
+          cloudUrl: 'http://localhost:1234',
+          cloudHeaders: { a: 'b', c: 'd' },
+        },
+        studioHash: undefined,
+        projectSlug: '12345',
+        studioMethod: 'getAndInitializeStudioManager',
+      })
     })
 
     it('throws an error if there is no signature in the response headers', async () => {
@@ -393,11 +509,20 @@ describe('getAndInitializeStudioManager', () => {
 
       const projectId = '12345'
 
-      await getAndInitializeStudioManager({ projectId, cloudDataSource: cloud })
+      await getAndInitializeStudioManager({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId, cloudDataSource: cloud })
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
       expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')
-      expect(createInErrorManagerStub).to.be.calledWithMatch(sinon.match.instanceOf(Error).and(sinon.match.has('message', 'Unable to get studio signature')))
+      expect(createInErrorManagerStub).to.be.calledWithMatch({
+        error: sinon.match.instanceOf(Error).and(sinon.match.has('message', 'Unable to get studio signature')),
+        cloudApi: {
+          cloudUrl: 'http://localhost:1234',
+          cloudHeaders: { a: 'b', c: 'd' },
+        },
+        studioHash: undefined,
+        projectSlug: '12345',
+        studioMethod: 'getAndInitializeStudioManager',
+      })
     })
   })
 })

@@ -248,11 +248,11 @@ const studioStatus = computed(() => {
 })
 
 const shouldShowStudioButton = computed(() => {
-  return !!props.gql.studio && !studioStore.isOpen
+  return !!props.gql.studio && studioStatus.value === 'ENABLED' && !studioStore.isOpen
 })
 
 const shouldShowStudioPanel = computed(() => {
-  return studioStatus.value === 'INITIALIZED' && (studioStore.isLoading || studioStore.isActive)
+  return studioStatus.value === 'ENABLED' && (studioStore.isLoading || studioStore.isActive)
 })
 
 const hideCommandLog = runnerUiStore.hideCommandLog

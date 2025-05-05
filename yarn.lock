@@ -2642,10 +2642,10 @@
   resolved "https://registry.yarnpkg.com/@csstools/css-tokenizer/-/css-tokenizer-3.0.3.tgz#a5502c8539265fecbd873c1e395a890339f119c2"
   integrity sha512-UJnjoFsmxfKUdNYdWgOB0mWUypuLvAfQPH1+pyvRJs6euowbFkFC6P13w1l8mJyi3vxYMxc9kld5jZEGRQs6bw==
 
-"@cypress-design/color-constants@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/color-constants/-/color-constants-1.0.0.tgz#a8373c5eeeefc9b2040710b9159c96e6e2ac09b3"
-  integrity sha512-ZGSfWR5zSQQkc6+k0xiRiuCdxUzoPYOwdIOHIK6M0PqhPg3rmP455M752U082jbIsQvoea4k9CNE053oOna4Zw==
+"@cypress-design/color-constants@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/color-constants/-/color-constants-1.1.0.tgz#f09370d802d6eaddda03a22d0307da1327c37f6f"
+  integrity sha512-a6M416WSQ3Yh5u3O2tw3h7DnHcus/hrMTWI8yFwp6Wl1KlyJlHSDcKZmotFqLfjFPgkzu9u7hFSnRA4y7WqZJA==
   dependencies:
     "@tailwindcss/container-queries" "^0.1.1"
     lodash "^4.17.21"
@@ -2681,24 +2681,24 @@
     tailwindcss "^3.4.3"
     tailwindcss-hocus "^0.0.7"
 
-"@cypress-design/icon-registry@^1.0.0", "@cypress-design/icon-registry@^1.5.1", "@cypress-design/icon-registry@^1.6.0":
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-1.6.0.tgz#6367e40722cbf191a0086419ba06de18e7e79f46"
-  integrity sha512-erJVhL+0gk2oL+fCnBy3hhcs7xFM1abPLZzmIupOtoyb/PB5DtpHtGi3QEF2MBu1UcMjRhuihF6VO3rqZhkn2Q==
+"@cypress-design/icon-registry@^1.0.0", "@cypress-design/icon-registry@^1.18.0", "@cypress-design/icon-registry@^1.5.1":
+  version "1.18.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-1.18.0.tgz#799c5ac8f8362aebdcf2181119c3205136ca5ab9"
+  integrity sha512-4goChP9rWVq7F/+c36JyJ4quvHSyI6gkjJ/IKFqncNwkC3gvVeJ4GQX2mqQJCQ+z0Er+2Mmzcw7JiVo1GpbJlg==
   dependencies:
-    "@cypress-design/color-constants" "^1.0.0"
+    "@cypress-design/color-constants" "^1.1.0"
 
 "@cypress-design/vue-button@^1.1.0", "@cypress-design/vue-button@^1.6.0":
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/@cypress-design/vue-button/-/vue-button-1.6.0.tgz#e7266dfe11c31628ef3a979fffcf041b141e39c3"
   integrity sha512-RnV2suh3BJg3fb7hc1gdh58p13yxBHHm9fmmE6AkHR3OBRAbbd5oqQmZWwuBuWteyj2gVFRgTRYHPzOZBm9wEg==
 
-"@cypress-design/vue-icon@^1.0.0", "@cypress-design/vue-icon@^1.6.0":
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-1.6.0.tgz#d67e6cf241363f648896717efc456da28590cd0f"
-  integrity sha512-XQjGWTw31ENMh0npWynR71F56zzqgPrryjUFi2b7lremzHzwHV8KaonKNVVSzbJnDOyI50VCns70Rhd8yS6VNw==
+"@cypress-design/vue-icon@^1.0.0", "@cypress-design/vue-icon@^1.18.0":
+  version "1.18.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-1.18.0.tgz#deecb084252271903de8e22cac3e29ad9f108e72"
+  integrity sha512-EPMCzy2d5t+wB2sayKdjHJsTeCJe94B9ulX+USYUw/fOhxIKfOBFR48KkfZHBMIYtIDV5iNHxSKvnLFPDYiuAg==
   dependencies:
-    "@cypress-design/icon-registry" "^1.6.0"
+    "@cypress-design/icon-registry" "^1.18.0"
 
 "@cypress-design/vue-spinner@^1.0.0":
   version "1.0.0"
@@ -2813,70 +2813,70 @@
   resolved "https://registry.yarnpkg.com/@cypress/sinon-chai/-/sinon-chai-2.9.1.tgz#1705c0341bc286740979b1b1cac89b7f5d34d6bc"
   integrity sha512-qwFQ1urghF3mv7CFSDw/LEqIQP12qqKLuW7p6mXR92HP5fPNlgNiZVITWVsupDg7JpOEKfeRTVearo9mkk/5eg==
 
-"@cypress/snapbuild-android-arm64@1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-android-arm64/-/snapbuild-android-arm64-1.0.3.tgz#bc1da7ad2972107f6b527d3f2056b723d51e60f3"
-  integrity sha512-f5Ze/2RKW7WdBvZFL9EIz1hLHx+03hamvn+DFotbRDa4uCd3z5mWnWqRGRj2asVyE/HyZAsuVcQ6u4DkSkkpeQ==
+"@cypress/snapbuild-android-arm64@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-android-arm64/-/snapbuild-android-arm64-1.0.4.tgz#b55b4c7040eefd270d15a7259bf7a1141c5b8c8b"
+  integrity sha512-op8n069RDxn5Y8DEAlcryp331z7xvpIiCNHjlLj7nLW5llxEN7sqXuLEu4sxHGE+1iNPyiKMUsTIrlYfZ8oTxg==
 
-"@cypress/snapbuild-darwin-64@1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-darwin-64/-/snapbuild-darwin-64-1.0.3.tgz#ae49b42d10091a555e47f1946016e7c2015859f6"
-  integrity sha512-0UMy6Aua3ObLmF23lIligk2EokHsy+gAxMbumn8+N2blEo4VELVzopS44DoFngdXz/C5XjY+fcTZ8UzKQtQazg==
+"@cypress/snapbuild-darwin-64@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-darwin-64/-/snapbuild-darwin-64-1.0.4.tgz#b9da7a93da60b7bb2a5080d83ec2866da44ec7a8"
+  integrity sha512-Bv2NJL7AI13reotJqHazPTCQG/p/07JS4sshX+1qN6aR4syeYZXGGt5/BWb3FKdu95ttPTV7n31u50gJ1oPGQA==
 
-"@cypress/snapbuild-darwin-arm64@1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-darwin-arm64/-/snapbuild-darwin-arm64-1.0.3.tgz#c0e9349d4a9e4748d2f7ea69b59f0ddf2cf62a25"
-  integrity sha512-IndicX9hwIzxn8cuw4u731/FimmP0cNnEVnceXPkleeZr5B/RKKn+YUhUUio9E0FpFH9+GvYWZ0ggFPzigX6Gw==
+"@cypress/snapbuild-darwin-arm64@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-darwin-arm64/-/snapbuild-darwin-arm64-1.0.4.tgz#cbd6cd8392c5001e7653fdd6f0a1b4c32ac2f187"
+  integrity sha512-FOL2MSzVVmblBmxy2ix7jLlDMNvkc/6CFAxeMaQs5k3yS/ISJVLF8+hxDeJ5okTAQmktm2hxCuvqNtIfXOBrig==
 
-"@cypress/snapbuild-freebsd-64@1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-freebsd-64/-/snapbuild-freebsd-64-1.0.3.tgz#2e2812015409db54dc1cf8f350f53bebf0678f6d"
-  integrity sha512-hXTOK4NQdtJJfjz+rgYUlxpV423yOjk2AJ5f2Waa+b/fYZJLTfowMFIAb3K6AUBfhC2o4MP2fftlQJQGuw5+WQ==
+"@cypress/snapbuild-freebsd-64@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-freebsd-64/-/snapbuild-freebsd-64-1.0.4.tgz#df651fd8d1f5752f26aa67ffd8bbab89b23a6ca6"
+  integrity sha512-r7duu+fdCnXematAOkkNn5eiH9pe1kYZhT9+hX1/EV5svyrKYYzudpOSqsANSM8mefECvw1CNXf2pkdr1eQwUQ==
 
-"@cypress/snapbuild-freebsd-arm64@1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-freebsd-arm64/-/snapbuild-freebsd-arm64-1.0.3.tgz#1342cb6d86ce7b503ac24badab1b57e83505d7d2"
-  integrity sha512-b/LoH2LJuWD7DyCH3Mig0Q6DX4cmNp986LEKevm8s/kBVeeF3+rHPQy+XNRA8wdvEqGoS/OHaxY0dOIwtwmIrA==
+"@cypress/snapbuild-freebsd-arm64@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-freebsd-arm64/-/snapbuild-freebsd-arm64-1.0.4.tgz#513405fe56b5e6f4ece42efa65cf3312e9a2b7d7"
+  integrity sha512-sIqLvNypokGS/Hkod0/O48PHoMI5ozr1Wbkdo+Y+gC3/B1mO8tzfXY921cthXDFmvOijRrx/G/zyYIDK0uKZbQ==
 
-"@cypress/snapbuild-linux-32@1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-linux-32/-/snapbuild-linux-32-1.0.3.tgz#9231a8271e5c077428f76aef5bf627ede8efc52b"
-  integrity sha512-pEM2iE+6/omz24Tld5N+nWfIZ2BRxhO4PSQCtpEtIWPnRefHcixA0kxjHlRuDJZUfiQy9k5c1Syubri2RCcvCg==
+"@cypress/snapbuild-linux-32@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-linux-32/-/snapbuild-linux-32-1.0.4.tgz#1bc5927089c5ebb081a2ae7771401ca5c057e2f7"
+  integrity sha512-1wlEexRcQUJokvOvJ5eob5dqc09LaDas7pYAIO6Ry7npVCR+IkK6fFxSUhlS2wnLH0aYzODWPYxvpYid5t2UzQ==
 
-"@cypress/snapbuild-linux-64@1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-linux-64/-/snapbuild-linux-64-1.0.3.tgz#c3ce77734c62e2902a19a2b27abe5cce93941530"
-  integrity sha512-r8b7sUFSQcZx+8Nmgw69aZR/aFDfprdma23/JHddBna9rxjB22QMstEBrVffbkSOmblNWG4ZFuD0Xvv9NtH/5w==
+"@cypress/snapbuild-linux-64@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-linux-64/-/snapbuild-linux-64-1.0.4.tgz#1ee178d43a27b9f7f48ce6c5cbf225f905df0762"
+  integrity sha512-T1eYg1AXq2ene6StFqoU+6C+oKGmq0ivf2imOs6b+oFEn5i50fs48lVsRH0H79Ny12AFEXoBU+jtBkeKyUPKsw==
 
-"@cypress/snapbuild-linux-arm64@1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-linux-arm64/-/snapbuild-linux-arm64-1.0.3.tgz#3d22a8ba186aa639ee7c9a830ace2959fd93fc71"
-  integrity sha512-yaz37dQ0lAzuX9Yr9mNvl/jJMibotGQ6FrnQM9iyfTPGKQpnoeqB4UczLiWMk29MCbhmVIzxNKHJojyxixBEpQ==
+"@cypress/snapbuild-linux-arm64@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-linux-arm64/-/snapbuild-linux-arm64-1.0.4.tgz#118cd5da1dbad714ca64e95cf35cf7e6404b4fe5"
+  integrity sha512-c04PE2GAWt4tey4ixGY4YIiMj++PrPid9geVijpjk1vZgeKtAC20TTMZ+8BDT9+n3aZuk5tqGHh+woH8ZqEutQ==
 
-"@cypress/snapbuild-linux-arm@1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-linux-arm/-/snapbuild-linux-arm-1.0.3.tgz#7bf1c8f6fea7f224b7c594dbd79fb056876779b8"
-  integrity sha512-wMBaqwDABeTnByR0bYxeSCF//hFZKcVFkyRKugFbGAYMLAqD9FwHymbi9qe4qpe0OXYDTVOj9kHcrArb7HFqrw==
+"@cypress/snapbuild-linux-arm@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-linux-arm/-/snapbuild-linux-arm-1.0.4.tgz#79ce571e618a9052b19dc8d202f15a5277e1b360"
+  integrity sha512-R9hjOdd4km0hpY0mVaG7sA9wR2O32cGAUVNRsK14Wq2SwDA4HBLwmTmOZu01t78Gm/4WGvr7PAQWY4Lx3Yb7FA==
 
-"@cypress/snapbuild-linux-mips64le@1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-linux-mips64le/-/snapbuild-linux-mips64le-1.0.3.tgz#848f86c3a0477772d3097065294af70767b2e3c2"
-  integrity sha512-3sQR9tkLnpqFEWLgxVzngn1ZHmoj0UwBpvAN1QpMAMwTV0gWqYEhpR3V1GJDIj/OHR4z6g2/pjSmgUbtRhTWYg==
+"@cypress/snapbuild-linux-mips64le@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-linux-mips64le/-/snapbuild-linux-mips64le-1.0.4.tgz#038f60623ea3d4032682c77e7cd143ad2d5f7b3f"
+  integrity sha512-d58+E+DkV9MT4EtYEgBvxWwg1sPwMLXg3qjJykxc7Q6udEBLm8CJSBP9o3KSYqQ2WCAaJBiMBn4cJFWRUR37Ww==
 
-"@cypress/snapbuild-linux-ppc64le@1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-linux-ppc64le/-/snapbuild-linux-ppc64le-1.0.3.tgz#907e16b69bb4bced63d7e6f78b378ff31033f883"
-  integrity sha512-VdzAq0H1zGahueO3cOvzueKkBm2Gs4fHnz0gDykr2EIx21iBbpkGB0WHwyV0DbW1bXJbx12LNIjwrguUkkakag==
+"@cypress/snapbuild-linux-ppc64le@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-linux-ppc64le/-/snapbuild-linux-ppc64le-1.0.4.tgz#fd4f0a844f384f5bd3153209b0ed16be86ce2587"
+  integrity sha512-J9RWsf884YwE8NVruVN5lDuZZscRCc0+1ZwkUQIafz+/68KCfn6/YxBgCXC0kwUfTffQsVlq0m7/yaInE/1ReA==
 
-"@cypress/snapbuild-windows-32@1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-windows-32/-/snapbuild-windows-32-1.0.3.tgz#fd1159602d1f6d028e7e84046d3b6bbd07c69f54"
-  integrity sha512-14QbmvHyHl+2fUGs0sW0mRqhj34tc3MnrbUX+XV/SLFu3I09zg+mBn4kx7h881h9tf42o7aRj+Z6LuG7SZ2jRw==
+"@cypress/snapbuild-windows-32@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-windows-32/-/snapbuild-windows-32-1.0.4.tgz#ab148a83f6e31a738d65a6f321139fb6e69cea0c"
+  integrity sha512-kVA3jOY53EiJsBIT2E2hdNneRJhUPE6YP5PopTuVQ+xh9ms0rD3mmK/XEyDwF/AzPhQht6GxKPyIPSJwmaRJ0Q==
 
-"@cypress/snapbuild-windows-64@1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-windows-64/-/snapbuild-windows-64-1.0.3.tgz#92b9602a288c2cc961dc4f759049e9a3275cac9d"
-  integrity sha512-+7YH4+iex1BbqOKXKkJSvsr108wCAW4LsPZjMjpC+Ft0dIhJ8+MEpljpwCpUl3spjHp+e7qJXIOfgvFJ5fAJZw==
+"@cypress/snapbuild-windows-64@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@cypress/snapbuild-windows-64/-/snapbuild-windows-64-1.0.4.tgz#37854c0d1262b98913d3b6aa99f5343724e80d2b"
+  integrity sha512-sXqQ2+6xTVZVvKnK0WTNkczDUFRXeE9Cmv0nhfVYXpFNVhhLcUJm748haTMzeBtLh40o9BzvN/sFqkQwoCsI9w==
 
 "@cypress/unique-selector@0.0.5":
   version "0.0.5"
@@ -13324,10 +13324,10 @@ cross-spawn@^6.0.0, cross-spawn@^6.0.5:
     shebang-command "^1.2.0"
     which "^1.2.9"
 
-cross-spawn@^7.0.0, cross-spawn@^7.0.1, cross-spawn@^7.0.2, cross-spawn@^7.0.3:
-  version "7.0.3"
-  resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-7.0.3.tgz#f73a85b9d5d41d045551c177e2882d4ac85728a6"
-  integrity sha512-iRDPJKUPVEND7dHPO8rkbOnPpyDygcDFtWjpeWNCgy8WP2rXcxXL8TskReQl6OrB2G7+UJrags1q15Fudc7G6w==
+cross-spawn@^7.0.0, cross-spawn@^7.0.1, cross-spawn@^7.0.2, cross-spawn@^7.0.3, cross-spawn@^7.0.6:
+  version "7.0.6"
+  resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-7.0.6.tgz#8a58fe78f00dcd70c370451759dfbfaf03e8ee9f"
+  integrity sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==
   dependencies:
     path-key "^3.1.0"
     shebang-command "^2.0.0"
@@ -13502,12 +13502,12 @@ cypress-each@^1.11.0:
   resolved "https://registry.yarnpkg.com/cypress-each/-/cypress-each-1.11.0.tgz#013c9b43a950f157bcf082d4bd0bb424fb370441"
   integrity sha512-zeqeQkppPL6BKLIJdfR5IUoZRrxRudApJapnFzWCkkrmefQSqdlBma2fzhmniSJ3TRhxe5xpK3W3/l8aCrHvwQ==
 
-cypress-example-kitchensink@3.1.2:
-  version "3.1.2"
-  resolved "https://registry.yarnpkg.com/cypress-example-kitchensink/-/cypress-example-kitchensink-3.1.2.tgz#ddf8d6c21ccc8b6e0fe47c814299f02873e817fe"
-  integrity sha512-yKJeqNGGqZt313lwiFZxfLjpJWpaC3LO7+IpN/xocA15G6uqQ3etxEbCOg/NfmmskP9sm5NukXJ03MbeKvkTxA==
+cypress-example-kitchensink@4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/cypress-example-kitchensink/-/cypress-example-kitchensink-4.0.0.tgz#a47566a06ef9273c379649406698a5bfa8022311"
+  integrity sha512-Ot0MlAHrtcx3Snd0JHxQFIEOoCgP/MwKflPlTqqqX3JbQOhT0WtS24+iUF/hJplrkOz/2iM17d/rmd+U3f8A2A==
   dependencies:
-    npm-run-all2 "7.0.1"
+    npm-run-all2 "7.0.2"
     serve "14.2.4"
 
 cypress-expect@^2.5.3:
@@ -23579,13 +23579,13 @@ npm-registry-fetch@^18.0.0, npm-registry-fetch@^18.0.1:
     npm-package-arg "^12.0.0"
     proc-log "^5.0.0"
 
-npm-run-all2@7.0.1:
-  version "7.0.1"
-  resolved "https://registry.yarnpkg.com/npm-run-all2/-/npm-run-all2-7.0.1.tgz#7a20f65d072db4a880802d4ba5cd19566daef752"
-  integrity sha512-Adbv+bJQ8UTAM03rRODqrO5cx0YU5KCG2CvHtSURiadvdTjjgGJXdbc1oQ9CXBh9dnGfHSoSB1Web/0Dzp6kOQ==
+npm-run-all2@7.0.2:
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/npm-run-all2/-/npm-run-all2-7.0.2.tgz#26155c140b5e3f1155efd7f5d67212c8027b397c"
+  integrity sha512-7tXR+r9hzRNOPNTvXegM+QzCuMjzUIIq66VDunL6j60O4RrExx32XUhlrS7UK4VcdGw5/Wxzb3kfNcFix9JKDA==
   dependencies:
     ansi-styles "^6.2.1"
-    cross-spawn "^7.0.3"
+    cross-spawn "^7.0.6"
     memorystream "^0.3.1"
     minimatch "^9.0.0"
     pidtree "^0.6.0"
