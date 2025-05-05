@@ -32645,10 +32645,10 @@ zod@^3.22.5:
   resolved "https://registry.yarnpkg.com/zod/-/zod-3.22.5.tgz#b9b09db03f6700b0d0b75bf0dbf0c5fc46155220"
   integrity sha512-HqnGsCdVZ2xc0qWPLdO25WnseXThh0kEYKIdV5F/hTHO75hNZFp8thxSeHhiPrHZKrFTo1SOgkAj9po5bexZlw==
 
-zone.js@0.9.0:
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/zone.js/-/zone.js-0.9.0.tgz#f42319d657f7616724ed40c5907d4614b4c683fa"
-  integrity sha512-EfygvVnLxPSCMSgJ4h7SoY+XNr7ybdwvvwEQ70lvMFl9coNnciXSyWi8Kg6znK1ubyUSffkCKvleSQpLuUKw0Q==
+zone.js@0.15.0:
+  version "0.15.0"
+  resolved "https://registry.yarnpkg.com/zone.js/-/zone.js-0.15.0.tgz#4810624e58d6dcf7b8379c1631765589917a0d8f"
+  integrity sha512-9oxn0IIjbCZkJ67L+LkhYWRyAy7axphb3VgE2MBDlOqnmHMPWGYMxJxBYFueFq/JGY2GMwS0rU+UCLunEmy5UA==
 
 zone.js@~0.14.6:
   version "0.14.6"
