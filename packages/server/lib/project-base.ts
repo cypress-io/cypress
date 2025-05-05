@@ -407,7 +407,7 @@ export class ProjectBase extends EE {
 
         if (!isStudioReady) {
           debug('User entered studio mode before cloud studio was initialized')
-          const cloudEnv = (process.env.CYPRESS_INTERNAL_ENV || 'production') as 'development' | 'staging' | 'production'
+          const cloudEnv = (process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'production') as 'development' | 'staging' | 'production'
           const cloudUrl = this.ctx.cloud.getCloudUrl(cloudEnv)
           const cloudHeaders = await this.ctx.cloud.additionalHeaders()
 

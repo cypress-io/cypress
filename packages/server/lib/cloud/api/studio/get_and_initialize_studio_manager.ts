@@ -125,7 +125,7 @@ export const retrieveAndExtractStudioBundle = async ({ studioUrl, projectId }: O
 export const getAndInitializeStudioManager = async ({ studioUrl, projectId, cloudDataSource }: { studioUrl: string, projectId?: string, cloudDataSource: CloudDataSource }): Promise<StudioManager> => {
   let script: string
 
-  const cloudEnv = (process.env.CYPRESS_INTERNAL_ENV || 'production') as 'development' | 'staging' | 'production'
+  const cloudEnv = (process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'production') as 'development' | 'staging' | 'production'
   const cloudUrl = cloudDataSource.getCloudUrl(cloudEnv)
   const cloudHeaders = await cloudDataSource.additionalHeaders()
 

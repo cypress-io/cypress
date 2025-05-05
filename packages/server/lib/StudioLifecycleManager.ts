@@ -52,7 +52,7 @@ export class StudioLifecycleManager {
     }).catch(async (error) => {
       debug('Error during studio manager setup: %o', error)
 
-      const cloudEnv = (process.env.CYPRESS_INTERNAL_ENV || 'production') as 'development' | 'staging' | 'production'
+      const cloudEnv = (process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'production') as 'development' | 'staging' | 'production'
       const cloudUrl = ctx.cloud.getCloudUrl(cloudEnv)
       const cloudHeaders = await ctx.cloud.additionalHeaders()
 
