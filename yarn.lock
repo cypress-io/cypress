@@ -2642,10 +2642,10 @@
   resolved "https://registry.yarnpkg.com/@csstools/css-tokenizer/-/css-tokenizer-3.0.3.tgz#a5502c8539265fecbd873c1e395a890339f119c2"
   integrity sha512-UJnjoFsmxfKUdNYdWgOB0mWUypuLvAfQPH1+pyvRJs6euowbFkFC6P13w1l8mJyi3vxYMxc9kld5jZEGRQs6bw==
 
-"@cypress-design/color-constants@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/color-constants/-/color-constants-1.0.0.tgz#a8373c5eeeefc9b2040710b9159c96e6e2ac09b3"
-  integrity sha512-ZGSfWR5zSQQkc6+k0xiRiuCdxUzoPYOwdIOHIK6M0PqhPg3rmP455M752U082jbIsQvoea4k9CNE053oOna4Zw==
+"@cypress-design/color-constants@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/color-constants/-/color-constants-1.1.0.tgz#f09370d802d6eaddda03a22d0307da1327c37f6f"
+  integrity sha512-a6M416WSQ3Yh5u3O2tw3h7DnHcus/hrMTWI8yFwp6Wl1KlyJlHSDcKZmotFqLfjFPgkzu9u7hFSnRA4y7WqZJA==
   dependencies:
     "@tailwindcss/container-queries" "^0.1.1"
     lodash "^4.17.21"
@@ -2681,24 +2681,24 @@
     tailwindcss "^3.4.3"
     tailwindcss-hocus "^0.0.7"
 
-"@cypress-design/icon-registry@^1.0.0", "@cypress-design/icon-registry@^1.5.1", "@cypress-design/icon-registry@^1.6.0":
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-1.6.0.tgz#6367e40722cbf191a0086419ba06de18e7e79f46"
-  integrity sha512-erJVhL+0gk2oL+fCnBy3hhcs7xFM1abPLZzmIupOtoyb/PB5DtpHtGi3QEF2MBu1UcMjRhuihF6VO3rqZhkn2Q==
+"@cypress-design/icon-registry@^1.0.0", "@cypress-design/icon-registry@^1.18.0", "@cypress-design/icon-registry@^1.5.1":
+  version "1.18.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-1.18.0.tgz#799c5ac8f8362aebdcf2181119c3205136ca5ab9"
+  integrity sha512-4goChP9rWVq7F/+c36JyJ4quvHSyI6gkjJ/IKFqncNwkC3gvVeJ4GQX2mqQJCQ+z0Er+2Mmzcw7JiVo1GpbJlg==
   dependencies:
-    "@cypress-design/color-constants" "^1.0.0"
+    "@cypress-design/color-constants" "^1.1.0"
 
 "@cypress-design/vue-button@^1.1.0", "@cypress-design/vue-button@^1.6.0":
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/@cypress-design/vue-button/-/vue-button-1.6.0.tgz#e7266dfe11c31628ef3a979fffcf041b141e39c3"
   integrity sha512-RnV2suh3BJg3fb7hc1gdh58p13yxBHHm9fmmE6AkHR3OBRAbbd5oqQmZWwuBuWteyj2gVFRgTRYHPzOZBm9wEg==
 
-"@cypress-design/vue-icon@^1.0.0", "@cypress-design/vue-icon@^1.6.0":
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-1.6.0.tgz#d67e6cf241363f648896717efc456da28590cd0f"
-  integrity sha512-XQjGWTw31ENMh0npWynR71F56zzqgPrryjUFi2b7lremzHzwHV8KaonKNVVSzbJnDOyI50VCns70Rhd8yS6VNw==
+"@cypress-design/vue-icon@^1.0.0", "@cypress-design/vue-icon@^1.18.0":
+  version "1.18.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-1.18.0.tgz#deecb084252271903de8e22cac3e29ad9f108e72"
+  integrity sha512-EPMCzy2d5t+wB2sayKdjHJsTeCJe94B9ulX+USYUw/fOhxIKfOBFR48KkfZHBMIYtIDV5iNHxSKvnLFPDYiuAg==
   dependencies:
-    "@cypress-design/icon-registry" "^1.6.0"
+    "@cypress-design/icon-registry" "^1.18.0"
 
 "@cypress-design/vue-spinner@^1.0.0":
   version "1.0.0"

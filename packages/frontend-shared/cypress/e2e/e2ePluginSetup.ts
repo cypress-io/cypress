@@ -24,19 +24,23 @@ import path from 'path'
 import execa from 'execa'
 import _ from 'lodash'
 
-import type { CyTaskResult, OpenGlobalModeOptions, RemoteGraphQLBatchInterceptor, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from '../support/e2e'
+import type { CyTaskResult, OpenGlobalModeOptions, RemoteGraphQLBatchInterceptor, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions, MockNodeCloudRequestOptions, MockNodeCloudStreamingRequestOptions } from '../support/e2e'
 import { fixtureDirs } from '@tooling/system-tests'
 import * as inspector from 'inspector'
 // tslint:disable-next-line: no-implicit-dependencies - requires cypress
 import sinonChai from '@cypress/sinon-chai'
 import sinon from 'sinon'
 import fs from 'fs-extra'
+import nock from 'nock'
 import { CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types'
 
 import { CloudQuery } from '@packages/graphql/test/stubCloudTypes'
 import pDefer from 'p-defer'
+import { Readable } from 'stream'
 
 const pkg = require('@packages/root')
+
+const dummyProtocolPath = path.join(__dirname, '../fixtures/dummy-protocol.js')
 
 export interface InternalOpenProjectCapabilities {
   cloudStudio: boolean
@@ -196,6 +200,8 @@ async function makeE2ETasks () {
      */
     __internal__afterEach () {
       delete process.env.CYPRESS_ENABLE_CLOUD_STUDIO
+      delete process.env.CYPRESS_IN_CYPRESS_MOCK_FULL_SNAPSHOT
+      nock.cleanAll()
 
       return null
     },
@@ -422,6 +428,9 @@ async function makeE2ETasks () {
     async __internal_openProject ({ argv, projectName, capabilities }: InternalOpenProjectArgs): Promise<ResetOptionsResult> {
       if (capabilities.cloudStudio) {
         process.env.CYPRESS_ENABLE_CLOUD_STUDIO = 'true'
+        // Cypress in Cypress testing breaks pretty heavily in terms of the inner Cypress's protocol. For now, we essentially
+        // disable the protocol by using a dummy protocol that does nothing and allowing tests to mock studio full snapshots as needed.
+        process.env.CYPRESS_LOCAL_PROTOCOL_PATH = dummyProtocolPath
       }
 
       let projectMatched = false
@@ -462,6 +471,52 @@ async function makeE2ETasks () {
         modeOptions,
         e2eServerPort: ctx.coreData.servers.appServerPort,
       }
+    },
+    __internal_mockStudioFullSnapshot (fullSnapshot: Record<string, any>) {
+      // This is the outlet to provide a mock full snapshot for studio tests.
+      // This is necessary because protocol does not capture things properly in the inner Cypress
+      // when running in Cypress in Cypress.
+      process.env.CYPRESS_IN_CYPRESS_MOCK_FULL_SNAPSHOT = JSON.stringify(fullSnapshot)
+
+      return null
+    },
+    __internal_mockNodeCloudRequest ({ url, method, body }: MockNodeCloudRequestOptions) {
+      const nocked = nock('https://cloud.cypress.io', {
+        allowUnmocked: true,
+      })
+
+      nocked[method](url).reply(200, body)
+
+      return null
+    },
+    __internal_mockNodeCloudStreamingRequest ({ url, method, body }: MockNodeCloudStreamingRequestOptions) {
+      const nocked = nock('https://cloud.cypress.io', {
+        allowUnmocked: true,
+      })
+
+      // This format is exactly what is expected by our cloud streaming requests (currently just our
+      // interactions with studio AI). Note that this does not replicate how the event streaming
+      // works exactly, but it is good enough for these Cypress in Cypress purposes and we test
+      // the full functionality with all edge cases alongside the Studio cloud code.
+      nocked[method](url).reply(200, () => {
+        const stream = new Readable({
+          read () {
+            this.push('event: chunk\n')
+            this.push(`data: ${JSON.stringify(body)}\n\n`)
+            this.push('event: end\n')
+            this.push('data: \n\n')
+            this.push(null)
+          },
+        })
+
+        return stream
+      }, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive',
+      })
+
+      return null
     },
     async __internal_withCtx (obj: WithCtxObj): Promise<CyTaskResult<any>> {
       const options: WithCtxInjected = {

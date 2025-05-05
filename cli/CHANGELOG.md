@@ -11,9 +11,11 @@ _Released 5/6/2025 (PENDING)_
 
 - Fixed an issue where the configuration setting `trashAssetsBeforeRuns=false` was ignored for assets in the `videosFolder`. These assets were incorrectly deleted before running tests with `cypress run`. Addresses [#8280](https://github.com/cypress-io/cypress/issues/8280).
 - Fixed an issue where Cypress was hanging when piping stdout and stderr to a file, and using `@cypress/grep` results in many matched files. Fixes [#31625](https://github.com/cypress-io/cypress/issues/31625). Addressed in [31631](https://github.com/cypress-io/cypress/pull/31631).
+- Fixed a potential hang condition when navigating to `about:blank`. Addressed in [#31634](https://github.com/cypress-io/cypress/pull/31634).
 
 **Misc:**
 
+- The Assertions menu when you right click in `experimentalStudio` tests now displays in dark mode. Addresses [#10621](https://github.com/cypress-io/cypress-services/issues/10621). Addressed in [#31598](https://github.com/cypress-io/cypress/pull/31598).
 - The URL in the Cypress App no longer displays a white background when the URL is loading. Fixes [#31556](https://github.com/cypress-io/cypress/issues/31556).
 
 **Dependency Updates:**
