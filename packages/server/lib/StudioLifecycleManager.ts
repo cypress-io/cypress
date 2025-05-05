@@ -18,12 +18,15 @@ const debug = Debug('cypress:server:studio-lifecycle-manager')
 const routes = require('./cloud/routes')
 
 export class StudioLifecycleManager {
-  public static cloudStudioEnabled = !!(process.env.CYPRESS_ENABLE_CLOUD_STUDIO || process.env.CYPRESS_LOCAL_STUDIO_PATH)
   private studioManagerPromise?: Promise<StudioManager | null>
   private studioManager?: StudioManager
   private listeners: ((studioManager: StudioManager) => void)[] = []
   private ctx?: DataContext
   private lastStatus?: StudioStatus
+
+  public static get cloudStudioEnabled () {
+    return !!(process.env.CYPRESS_ENABLE_CLOUD_STUDIO || process.env.CYPRESS_LOCAL_STUDIO_PATH)
+  }
 
   /**
    * Initialize the studio manager and possibly set up protocol.
@@ -219,6 +222,7 @@ export class StudioLifecycleManager {
       get: () => currentStatus,
       set: (newStatus: StudioStatus) => {
         if (newStatus !== currentStatus) {
+          debug('Studio status change detected: %s → %s', currentStatus, newStatus)
           currentStatus = newStatus
           this.updateStatus(newStatus)
         }
