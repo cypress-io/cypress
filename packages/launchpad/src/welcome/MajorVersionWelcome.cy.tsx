@@ -24,7 +24,6 @@ describe('<MajorVersionWelcome />', { viewportWidth: 1280, viewportHeight: 1400 
       cy.contains('a[href="https://on.cypress.io/changelog#13-0-0"]', '13.0.0')
       cy.contains('a[href="https://on.cypress.io/changelog#12-0-0"]', '12.0.0')
       cy.contains('a[href="https://on.cypress.io/changelog#11-0-0"]', '11.0.0')
-      cy.contains('a[href="https://on.cypress.io/changelog#10-0-0"]', '10.0.0')
     })
 
     cy.get('[data-cy="major-version-welcome-footer"]').within(() => {
@@ -43,7 +42,6 @@ describe('<MajorVersionWelcome />', { viewportWidth: 1280, viewportHeight: 1400 
     cy.contains('13.0.0 Released last year')
     cy.contains('12.0.0 Released 2 years ago')
     cy.contains('11.0.0 Released 2 years ago')
-    cy.contains('10.0.0 Released 3 years ago')
     cy.tick(interval('1 minute'))
     cy.contains('14.0.0 Released 1 minute ago')
     cy.tick(interval('1 month'))
