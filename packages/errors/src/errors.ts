@@ -7,7 +7,7 @@ import path from 'path'
 import stripAnsi from 'strip-ansi'
 import type { BreakingErrResult, TestingType } from '@packages/types'
 import { humanTime, logError, parseResolvedPattern, pluralize } from './errorUtils'
-import { errPartial, errTemplate, fmt, theme, PartialErr } from './errTemplate'
+import { errPartial, errTemplate, fmt, theme } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
 import type { ClonedError, ConfigValidationFailureInfo, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
 import { normalizeNetworkErrorMessage } from './normalizeNetworkErrorMessage'
@@ -105,16 +105,6 @@ export const AllCypressErrors = {
         ${fmt.listItems(options)}`
   },
   BROWSER_NOT_FOUND_BY_NAME: (browser: string, foundBrowsersStr: string[]) => {
-    let canarySuffix: PartialErr | null = null
-
-    if (browser === 'canary') {
-      canarySuffix = errPartial`\
-          ${fmt.off('\n\n')}
-          Note: In ${fmt.cypressVersion(`4.0.0`)}, Canary must be launched as ${fmt.highlightSecondary(`chrome:canary`)}, not ${fmt.highlightSecondary(`canary`)}.
-
-          See https://on.cypress.io/migration-guide for more information on breaking changes in 4.0.0.`
-    }
-
     return errTemplate`\
         Can't run because you've entered an invalid browser name.
 
@@ -126,7 +116,7 @@ export const AllCypressErrors = {
         You can also use a custom browser: https://on.cypress.io/customize-browsers
 
         Available browsers found on your system are:
-        ${fmt.listItems(foundBrowsersStr)}${canarySuffix}`
+        ${fmt.listItems(foundBrowsersStr)}`
   },
   BROWSER_NOT_FOUND_BY_PATH: (arg1: string, arg2: string) => {
     return errTemplate`\
@@ -895,7 +885,7 @@ export const AllCypressErrors = {
 
       Fix the error in your code and re-run your tests.`
   },
-  // happens when there is an error in configuration file like "cypress.json"
+  // happens when there is an error in configuration file like "cypress.config.js"
   // TODO: make this relative path, not absolute
   CONFIG_VALIDATION_MSG_ERROR: (fileType: 'configFile' | null, fileName: string | null, validationMsg: string) => {
     if (!fileType) {
@@ -1230,20 +1220,6 @@ export const AllCypressErrors = {
         A new ${fmt.highlightSecondary(`justInTimeCompile`)} configuration option is available and is now ${fmt.highlightSecondary(`true`)} by default.
         You can safely remove this option from your config.`
   },
-  // TODO: verify configFile is absolute path
-  // TODO: make this relative path, not absolute
-  EXPERIMENTAL_COMPONENT_TESTING_REMOVED: (arg1: {configFile: string}) => {
-    return errTemplate`\
-        The ${fmt.highlight('experimentalComponentTesting')} configuration option was removed in ${fmt.cypressVersion(`7.0.0`)}.
-
-        Please remove this flag from: ${fmt.path(arg1.configFile)}
-
-        Component Testing is now a supported testing type. You can run your component tests with:
-
-          ${fmt.terminal(`cypress open --component`)}
-
-        https://on.cypress.io/migration-guide`
-  },
   EXPERIMENTAL_SESSION_SUPPORT_REMOVED: () => {
     return errTemplate`\
         The ${fmt.highlight(`experimentalSessionSupport`)} configuration option was removed in ${fmt.cypressVersion(`9.6.0`)}.
@@ -1278,16 +1254,6 @@ export const AllCypressErrors = {
         The ${fmt.highlight(`experimentalRunEvents`)} configuration option was removed in ${fmt.cypressVersion(`6.7.0`)}. It is no longer necessary when listening to run events in the plugins file.
 
         You can safely remove this option from your config.`
-  },
-  EXPERIMENTAL_STUDIO_REMOVED: () => {
-    return errTemplate`\
-        We're ending the experimental phase of Cypress Studio in ${fmt.cypressVersion(`10.0.0`)}.
-
-        If you don't think you can live without Studio or you'd like to learn about how to work around its removal, please join the discussion here: http://on.cypress.io/studio-removal
-
-        Your feedback will help us factor in product decisions that may see Studio return in a future release.
-
-        You can safely remove the ${fmt.highlight(`experimentalStudio`)} configuration option from your config.`
   },
   EXPERIMENTAL_SINGLE_TAB_RUN_MODE: () => {
     return errTemplate`\
@@ -1470,11 +1436,9 @@ export const AllCypressErrors = {
     return errTemplate`\
         The ${fmt.highlight('pluginsFile')} configuration option you have supplied has been replaced with ${fmt.highlightSecondary('setupNodeEvents')}.
 
-        This new option is not a one-to-one correlation and it must be configured separately as a testing type property: ${fmt.highlightSecondary('e2e.setupNodeEvents')} and ${fmt.highlightSecondary('component.setupNodeEvents')}
+        This option is not a one-to-one correlation and must be configured separately as a testing type property: ${fmt.highlightSecondary('e2e.setupNodeEvents')} and ${fmt.highlightSecondary('component.setupNodeEvents')}
 
-        ${fmt.code(code)}
-
-        https://on.cypress.io/migration-guide`
+        ${fmt.code(code)}`
   },
 
   VIDEO_UPLOAD_ON_PASSES_REMOVED: (_errShape: BreakingErrResult) => {
@@ -1498,13 +1462,11 @@ export const AllCypressErrors = {
       }`
 
     return errTemplate`\
-      The ${fmt.highlight(errShape.name)} configuration option is now invalid when set from the root of the config object in ${fmt.cypressVersion(`10.0.0`)}.
+      The ${fmt.highlight(errShape.name)} configuration option is invalid when set from the root of the config object.
 
-      It is now configured separately as a testing type property: ${fmt.highlightSecondary(`e2e.${errShape.name}`)} and ${fmt.highlightSecondary(`component.${errShape.name}`)}
+      Set it within a testing type property: ${fmt.highlightSecondary(`e2e.${errShape.name}`)} and ${fmt.highlightSecondary(`component.${errShape.name}`)}
 
-      ${fmt.code(code)}
-
-      https://on.cypress.io/migration-guide`
+      ${fmt.code(code)}`
   },
 
   CONFIG_FILE_INVALID_ROOT_CONFIG_E2E: (errShape: BreakingErrResult) => {
@@ -1516,13 +1478,11 @@ export const AllCypressErrors = {
       }`
 
     return errTemplate`\
-      The ${fmt.highlight(errShape.name)} configuration option is now invalid when set from the root of the config object in ${fmt.cypressVersion(`10.0.0`)}.
+      The ${fmt.highlight(errShape.name)} configuration option is invalid when set from the root of the config object.
 
-      It is now configured separately as a testing type property: ${fmt.highlightSecondary(`e2e.${errShape.name}`)}
+      Set it within a testing type property: ${fmt.highlightSecondary(`e2e.${errShape.name}`)}
 
-      ${fmt.code(code)}
-
-      https://on.cypress.io/migration-guide`
+      ${fmt.code(code)}`
   },
 
   CONFIG_FILE_INVALID_ROOT_CONFIG_COMPONENT: (errShape: BreakingErrResult) => {
@@ -1534,13 +1494,11 @@ export const AllCypressErrors = {
       }`
 
     return errTemplate`\
-      The ${fmt.highlight(errShape.name)} configuration option is now invalid when set from the root of the config object in ${fmt.cypressVersion(`10.0.0`)}.
+      The ${fmt.highlight(errShape.name)} configuration option is invalid when set from the root of the config object.
 
-      It is now configured separately as a testing type property: ${fmt.highlightSecondary(`component.${errShape.name}`)}
+      Set it within a testing type property: ${fmt.highlightSecondary(`component.${errShape.name}`)}
 
-      ${fmt.code(code)}
-
-      https://on.cypress.io/migration-guide`
+      ${fmt.code(code)}`
   },
 
   // TODO: add path to config file
@@ -1557,9 +1515,7 @@ export const AllCypressErrors = {
 
       Please remove this option or add this as an e2e testing type property: ${fmt.highlightSecondary(`e2e.${errShape.name}`)}
 
-      ${fmt.code(code)}
-
-      https://on.cypress.io/migration-guide`
+      ${fmt.code(code)}`
   },
 
   CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_E2E: (errShape: BreakingErrResult) => {
@@ -1575,9 +1531,7 @@ export const AllCypressErrors = {
 
       Please remove this option or add this as a component testing type property: ${fmt.highlightSecondary(`component.${errShape.name}`)}
 
-      ${fmt.code(code)}
-
-      https://on.cypress.io/migration-guide`
+      ${fmt.code(code)}`
   },
 
   CONFIG_FILE_DEV_SERVER_IS_NOT_VALID: (configFilePath: string, setupNodeEvents: any) => {
@@ -1649,88 +1603,6 @@ export const AllCypressErrors = {
 
       ${fmt.stackTrace(err)}
     `
-  },
-
-  TEST_FILES_RENAMED: (errShape: BreakingErrResult, err?: Error) => {
-    const stackTrace = err ? fmt.stackTrace(err) : null
-
-    const newName = errShape.newName || '<unknown>'
-
-    const testingTypedHelpMessage = errShape.testingType
-      ? errPartial`${fmt.highlightSecondary(`${errShape.testingType}.${newName}`)}`
-      : errPartial`${fmt.highlightSecondary(`e2e.${newName}`)} or ${fmt.highlightSecondary(`component.${newName}`)}`
-
-    const code = errShape.testingType
-      ? errPartial`
-        {
-          ${fmt.off(errShape.testingType)}: {
-            specPattern: '...',
-          },
-        }`
-      : errPartial`
-        {
-          e2e: {
-            specPattern: '...',
-          },
-          component: {
-            specPattern: '...',
-          },
-        }`
-
-    return errTemplate`\
-      The ${fmt.highlight(errShape.name)} configuration option is now invalid when set on the config object in ${fmt.cypressVersion(`10.0.0`)}.
-
-      It is now renamed to ${fmt.highlight(newName)} and configured separately as a testing type property: ${testingTypedHelpMessage}
-      ${fmt.code(code)}
-
-      https://on.cypress.io/migration-guide
-
-      ${stackTrace}
-      `
-  },
-
-  COMPONENT_FOLDER_REMOVED: (errShape: BreakingErrResult, err?: Error) => {
-    const stackTrace = err ? fmt.stackTrace(err) : null
-
-    const code = errPartial`
-    {
-      component: {
-        specPattern: '...',
-      },
-    }`
-
-    return errTemplate`\
-      The ${fmt.highlight(errShape.name)} configuration option is now invalid when set on the config object in ${fmt.cypressVersion(`10.0.0`)}.
-
-      It is now renamed to ${fmt.highlight('specPattern')} and configured separately as a component testing property: ${fmt.highlightSecondary('component.specPattern')}
-      ${fmt.code(code)}
-
-      https://on.cypress.io/migration-guide
-
-      ${stackTrace}
-      `
-  },
-
-  INTEGRATION_FOLDER_REMOVED: (errShape: BreakingErrResult, err?: Error) => {
-    const stackTrace = err ? fmt.stackTrace(err) : null
-
-    const code = errPartial`
-    {
-      e2e: {
-        specPattern: '...',
-      },
-    }`
-
-    return errTemplate`\
-      The ${fmt.highlight(errShape.name)} configuration option is now invalid when set on the config object in ${fmt.cypressVersion(`10.0.0`)}.
-
-      It is now renamed to ${fmt.highlight('specPattern')} and configured separately as a end to end testing property: ${fmt.highlightSecondary('e2e.specPattern')}
-      ${fmt.code(code)}
-
-      https://on.cypress.io/migration-guide
-
-      ${stackTrace}
-      `
   },
 
   DEV_SERVER_CONFIG_FILE_NOT_FOUND: (devServer: 'vite' | 'webpack', root: string, searchedFor: string[]) => {

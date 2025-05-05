@@ -591,7 +591,7 @@ describe('visual error templates', () => {
     },
     CANNOT_RECORD_NO_PROJECT_ID: () => {
       return {
-        default: ['/path/to/cypress.json'],
+        default: ['/path/to/cypress.config.js'],
       }
     },
     PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION: () => {
@@ -732,12 +732,12 @@ describe('visual error templates', () => {
     },
     CLOUD_PROJECT_NOT_FOUND: () => {
       return {
-        default: ['project-id-123', '/path/to/cypress.json'],
+        default: ['project-id-123', '/path/to/cypress.config.js'],
       }
     },
     NO_PROJECT_ID: () => {
       return {
-        default: ['/path/to/project/cypress.json'],
+        default: ['/path/to/project/cypress.config.js'],
       }
     },
     NO_PROJECT_FOUND_AT_PROJECT_ROOT: () => {
@@ -857,28 +857,28 @@ describe('visual error templates', () => {
     },
     CONFIG_VALIDATION_ERROR: () => {
       return {
-        default: ['configFile', 'cypress.json', {
+        default: ['configFile', 'cypress.config.js', {
           key: 'defaultCommandTimeout',
           type: 'a number',
           value: false,
         }],
-        list: ['configFile', 'cypress.json', {
+        list: ['configFile', 'cypress.config.js', {
           key: 'displayName',
           type: 'a non-empty string',
           value: { name: 'chrome', version: '1.2.3', displayName: null },
           list: 'browsers',
         }],
-        invalidString: ['configFile', 'cypress.json', {
+        invalidString: ['configFile', 'cypress.config.js', {
           key: 'defaultCommandTimeout',
           type: 'a number',
           value: '1234',
         }],
-        invalidObject: ['configFile', 'cypress.json', {
+        invalidObject: ['configFile', 'cypress.config.js', {
           key: 'defaultCommandTimeout',
           type: 'a number',
           value: { foo: 'bar' },
         }],
-        invalidArray: ['configFile', 'cypress.json', {
+        invalidArray: ['configFile', 'cypress.config.js', {
           key: 'defaultCommandTimeout',
           type: 'a number',
           value: [1, 2, 3],
@@ -892,7 +892,7 @@ describe('visual error templates', () => {
     },
     CONFIG_VALIDATION_MSG_ERROR: () => {
       return {
-        default: ['configFile', 'cypress.json', '`something` was not right'],
+        default: ['configFile', 'cypress.config.js', '`something` was not right'],
         noFileType: [null, null, '`something` was not right'],
       }
     },
@@ -951,7 +951,7 @@ describe('visual error templates', () => {
     },
     CONFIG_FILE_NOT_FOUND: () => {
       return {
-        default: ['cypress.json', '/path/to/project/root'],
+        default: ['cypress.config.js', '/path/to/project/root'],
       }
     },
     INVOKED_BINARY_OUTSIDE_NPM_MODULE: () => {
@@ -1116,11 +1116,6 @@ describe('visual error templates', () => {
         default: [],
       }
     },
-    EXPERIMENTAL_COMPONENT_TESTING_REMOVED: () => {
-      return {
-        default: [{ configFile: '/path/to/cypress.config.js' }],
-      }
-    },
     EXPERIMENTAL_SESSION_SUPPORT_REMOVED: () => {
       return {
         default: [],
@@ -1142,11 +1137,6 @@ describe('visual error templates', () => {
       }
     },
     EXPERIMENTAL_RUN_EVENTS_REMOVED: () => {
-      return {
-        default: [],
-      }
-    },
-    EXPERIMENTAL_STUDIO_REMOVED: () => {
       return {
         default: [],
       }
@@ -1255,21 +1245,6 @@ describe('visual error templates', () => {
     CLOUD_GRAPHQL_ERROR: () => {
       return {
         default: [makeErr()],
-      }
-    },
-    TEST_FILES_RENAMED: () => {
-      return {
-        default: [{ name: 'testFiles', newName: 'specPattern', configFile: '/path/to/cypress.config.js.ts' }],
-      }
-    },
-    COMPONENT_FOLDER_REMOVED: () => {
-      return {
-        default: [{ name: 'componentFolder', configFile: '/path/to/cypress.config.js.ts' }],
-      }
-    },
-    INTEGRATION_FOLDER_REMOVED: () => {
-      return {
-        default: [{ name: 'integrationFolder', configFile: '/path/to/cypress.config.js.ts' }],
       }
     },
     DEV_SERVER_CONFIG_FILE_NOT_FOUND: () => {

@@ -133,28 +133,6 @@
                 <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
                 blog post</ExternalLink>.
             </p>
-            <br>
-            <div class="pb-[8px]">
-              <ExternalLink
-                href="https://on.cypress.io/changelog#10-0-0"
-                class="font-bold text-indigo-500"
-              >
-                10.0.0
-              </ExternalLink>
-              <span class="font-light pl-[10px] text-gray-500 text-[14px]">
-                Released {{ versionReleaseDates['10'] }}
-              </span>
-            </div>
-            <p class="text-[14px] leading-[20px]">
-              We've reworked the Cypress app from the ground up to modernize the interface, streamline workflows and integrate better into your overall development experience.
-              <br>
-              <br>
-              Read about breaking changes in our
-
-              <ExternalLink href="https://on.cypress.io/cypress-10-release">
-                <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
-                blog post</ExternalLink>.
-            </p>
           </div>
         </div>
       </div>

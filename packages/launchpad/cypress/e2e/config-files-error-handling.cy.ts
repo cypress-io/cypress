@@ -1,5 +1,3 @@
-import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
-import pkg from '../../../../package.json'
 import { getPathForPlatform } from './support/getPathForPlatform'
 
 const expectStackToBe = (mode: 'open' | 'closed') => {
@@ -27,43 +25,6 @@ describe('Config files error handling', () => {
     expectStackToBe('closed')
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.removeFileInProject('cypress.config.js')
-    })
-
-    cy.findByRole('button', { name: 'Try again' }).click()
-
-    cy.contains('h1', 'Welcome to Cypress', { timeout: 10000 })
-  })
-
-  it('shows the upgrade screen if there is a legacy config file', () => {
-    cy.openProject('pristine-with-e2e-testing')
-    cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.json', '{}')
-      await ctx.actions.file.removeFileInProject('cypress.config.js')
-    })
-
-    cy.openProject('pristine-with-e2e-testing')
-
-    cy.visitLaunchpad()
-
-    cy.get('body').should('contain.text', defaultMessages.migration.wizard.title.replace('{version}', pkg.version.split('.')[0]))
-    cy.get('body').should('contain.text', defaultMessages.migration.wizard.description)
-  })
-
-  it('handles config files with legacy config file in same project', () => {
-    cy.openProject('pristine-with-e2e-testing')
-    cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.json', '{}')
-    })
-
-    cy.openProject('pristine-with-e2e-testing')
-    cy.visitLaunchpad()
-
-    cy.contains('p', 'There is both a cypress.config.js and a cypress.json file at the location below:')
-    cy.contains('body', 'Cypress no longer supports cypress.json')
-    expectStackToBe('closed')
-
-    cy.withCtx(async (ctx) => {
-      await ctx.actions.file.removeFileInProject('cypress.json')
     })
 
     cy.findByRole('button', { name: 'Try again' }).click()
@@ -216,7 +177,7 @@ describe('Launchpad: Error System Tests', () => {
 })
 
 describe('setupNodeEvents', () => {
-  it('throws an error when in setupNodeEvents updating a config value that was removed in 10.X', () => {
+  it('throws an error when in setupNodeEvents updating a config value in the root config', () => {
     cy.scaffoldProject('config-update-non-migrated-value')
     cy.openProject('config-update-non-migrated-value')
     cy.visitLaunchpad()
@@ -224,11 +185,11 @@ describe('setupNodeEvents', () => {
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
     cy.findAllByTestId('collapsible').should('be.visible')
     cy.get('h2').contains('Error running e2e.setupNodeEvents()')
-    cy.get('p').contains('The integrationFolder configuration option is now invalid when set on the config object in Cypress version 10.0.0.')
-    cy.get('p').contains('It is now renamed to specPattern and configured separately as a end to end testing property: e2e.specPattern')
+    cy.get('p').contains('The integrationFolder configuration option is invalid when set on the config object.')
+    cy.get('p').contains('Set it within a testing type property: e2e.specPattern')
   })
 
-  it('throws an error when in setupNodeEvents updating a config value on a clone of config that was removed in 10.X', () => {
+  it('throws an error when in setupNodeEvents updating a config value on a clone of config in the root config', () => {
     cy.scaffoldProject('config-update-non-migrated-value-clone')
     cy.openProject('config-update-non-migrated-value-clone')
     cy.visitLaunchpad()
@@ -239,7 +200,7 @@ describe('setupNodeEvents', () => {
     cy.get('[data-cy="alert-body"]').should('contain', 'integrationFolder')
   })
 
-  it('throws an error when in setupNodeEvents updating an e2e config value that was removed in 10.X', () => {
+  it('throws an error when in setupNodeEvents updating an e2e config value in the root config', () => {
     cy.scaffoldProject('config-update-non-migrated-value-e2e')
     cy.openProject('config-update-non-migrated-value-e2e')
     cy.visitLaunchpad()

@@ -9,14 +9,11 @@ import type { TestingType } from '@packages/types'
 import * as validate from './validation'
 
 const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
-  'COMPONENT_FOLDER_REMOVED',
-  'INTEGRATION_FOLDER_REMOVED',
   'CONFIG_FILE_INVALID_ROOT_CONFIG',
   'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E',
   'CONFIG_FILE_INVALID_ROOT_CONFIG_COMPONENT',
   'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT',
   'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_E2E',
-  'EXPERIMENTAL_COMPONENT_TESTING_REMOVED',
   'EXPERIMENTAL_SAMESITE_REMOVED',
   'EXPERIMENTAL_NETWORK_STUBBING_REMOVED',
   'EXPERIMENTAL_RUN_EVENTS_REMOVED',
@@ -28,7 +25,6 @@ const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
   'PLUGINS_FILE_CONFIG_OPTION_REMOVED',
   'VIDEO_UPLOAD_ON_PASSES_REMOVED',
   'RENAMED_CONFIG_OPTION',
-  'TEST_FILES_RENAMED',
 ] as const
 
 type ValidationOptions = {
@@ -627,14 +623,6 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
     newName: 'blockHosts',
     isWarning: false,
   }, {
-    name: 'componentFolder',
-    errorKey: 'COMPONENT_FOLDER_REMOVED',
-    isWarning: false,
-  }, {
-    name: 'experimentalComponentTesting',
-    errorKey: 'EXPERIMENTAL_COMPONENT_TESTING_REMOVED',
-    isWarning: false,
-  }, {
     name: 'experimentalGetCookiesSameSite',
     errorKey: 'EXPERIMENTAL_SAMESITE_REMOVED',
     isWarning: true,
@@ -672,23 +660,8 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
     errorKey: 'FIREFOX_GC_INTERVAL_REMOVED',
     isWarning: true,
   }, {
-    name: 'ignoreTestFiles',
-    errorKey: 'TEST_FILES_RENAMED',
-    newName: 'excludeSpecPattern',
-    isWarning: false,
-  }, {
-    name: 'integrationFolder',
-    errorKey: 'INTEGRATION_FOLDER_REMOVED',
-    isWarning: false,
-  }, {
     name: 'pluginsFile',
     errorKey: 'PLUGINS_FILE_CONFIG_OPTION_REMOVED',
-    isWarning: false,
-  },
-  {
-    name: 'testFiles',
-    errorKey: 'TEST_FILES_RENAMED',
-    newName: 'specPattern',
     isWarning: false,
   }, {
     name: 'videoUploadOnPasses',
