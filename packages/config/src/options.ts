@@ -607,11 +607,6 @@ export const options: Array<DriverConfigOption | RuntimeConfigOption> = [
  */
 export const breakingOptions: Readonly<BreakingOption[]> = [
   {
-    name: 'blacklistHosts',
-    errorKey: 'RENAMED_CONFIG_OPTION',
-    newName: 'blockHosts',
-    isWarning: false,
-  }, {
     name: 'experimentalJustInTimeCompile',
     errorKey: 'EXPERIMENTAL_JIT_COMPILE_REMOVED',
     isWarning: true,

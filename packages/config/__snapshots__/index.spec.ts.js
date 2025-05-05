@@ -1,15 +1,8 @@
 exports['config/src/index .getBreakingKeys returns list of breaking config keys 1'] = [
-  'blacklistHosts',
-  'componentFolder',
   'experimentalJustInTimeCompile',
-  'experimentalSessionSupport',
   'experimentalSessionAndOrigin',
-  'experimentalShadowDomSupport',
   'experimentalSkipDomainInjection',
-  'ignoreTestFiles',
-  'integrationFolder',
   'pluginsFile',
-  'testFiles',
   'videoUploadOnPasses',
 ]
 
