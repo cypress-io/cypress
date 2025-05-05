@@ -267,19 +267,9 @@ export default function (Commands, Cypress, cy, state) {
     return wrap(this, 'spy', theSpy, obj, method)
   }
 
-  const stub = function (obj, method: string, replacerFnOrValue) {
+  const stub = function (obj, method: string) {
     // TODO: make the code below work with `packages/runner` type check without casting to `never`.
     let theStub = sandbox.stub.call(sandbox, obj, method as never)
-
-    // sinon 2 changed the stub signature
-    // this maintains the 3-argument signature so it's not breaking
-    if (arguments.length === 3) {
-      if (_.isFunction(replacerFnOrValue)) {
-        theStub = theStub.callsFake(replacerFnOrValue)
-      } else {
-        theStub = theStub.value(replacerFnOrValue)
-      }
-    }
 
     return wrap(this, 'stub', theStub, obj, method)
   }

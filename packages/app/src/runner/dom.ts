@@ -30,6 +30,8 @@ export function getOrCreateHelperDom ({ body, className, css }) {
 
   container.classList.add(className)
 
+  // NOTE: This is needed to prevent the container from inheriting styles from the body of the AUT
+  container.style.all = 'initial'
   container.style.position = 'static'
 
   body.appendChild(container)

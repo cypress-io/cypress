@@ -2126,12 +2126,6 @@ declare namespace Cypress {
      *    expect(o.toString).to.have.been.calledOnce
      */
     stub<T>(obj: T, method: keyof T): Agent<sinon.SinonStub>
-    /**
-     * Stubs a method on an object
-     *
-     * @deprecated Use `cy.stub(object, name).callsFake(fn)` instead
-     */
-    stub<T>(obj: T, method: keyof T, func: (...args: any[]) => any): Agent<sinon.SinonStub>
 
     /**
      * Submit a form.
@@ -3330,7 +3324,6 @@ declare namespace Cypress {
     spec: Cypress['spec'] | null
     specs: Array<Cypress['spec']>
     isDefaultProtocolEnabled: boolean
-    isStudioProtocolEnabled: boolean
     hideCommandLog: boolean
     hideRunnerUi: boolean
   }

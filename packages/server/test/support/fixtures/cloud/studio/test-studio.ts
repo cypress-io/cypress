@@ -17,12 +17,20 @@ class StudioServer implements StudioServerShape {
     return Promise.resolve()
   }
 
+  reportError (error: Error, method: string, ...args: any[]): void {
+    // This is a test implementation that does nothing
+  }
+
   destroy (): Promise<void> {
     return Promise.resolve()
   }
 
   addSocketListeners (socket: Socket): void {
     // This is a test implementation that does nothing
+  }
+
+  captureStudioEvent (event: StudioEvent): Promise<void> {
+    return Promise.resolve()
   }
 }
 

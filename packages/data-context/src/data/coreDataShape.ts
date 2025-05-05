@@ -1,4 +1,4 @@
-import type { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, StudioManagerShape } from '@packages/types'
+import type { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, StudioLifecycleManagerShape } from '@packages/types'
 import { WizardBundler, CT_FRAMEWORKS, resolveComponentFrameworkDefinition, ErroredFramework } from '@packages/scaffold-config'
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
@@ -143,7 +143,7 @@ export interface CoreDataShape {
   cloudProject: CloudDataShape
   eventCollectorSource: EventCollectorSource | null
   didBrowserPreviouslyHaveUnexpectedExit: boolean
-  studio: StudioManagerShape | null
+  studioLifecycleManager?: StudioLifecycleManagerShape
 }
 
 /**
@@ -209,7 +209,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     },
     eventCollectorSource: null,
     didBrowserPreviouslyHaveUnexpectedExit: false,
-    studio: null,
+    studioLifecycleManager: undefined,
   }
 
   async function machineId (): Promise<string | null> {

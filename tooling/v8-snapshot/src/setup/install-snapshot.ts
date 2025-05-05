@@ -2,7 +2,7 @@ import path from 'path'
 import { SnapshotGenerator } from '../generator/snapshot-generator'
 import { prettyPrintError } from '../utils'
 import fs from 'fs-extra'
-import forceNoRewrite from './force-no-rewrite'
+import forceNorewrite from './force-no-rewrite'
 import type { SnapshotConfig } from './config'
 
 const debug = require('debug')
@@ -34,7 +34,7 @@ function getSnapshotGenerator ({
     cacheDir: snapshotCacheDir,
     nodeModulesOnly,
     resolverMap,
-    forceNoRewrite,
+    forceNorewrite,
     minify,
     integrityCheckSource,
     useExistingSnapshotScript,
