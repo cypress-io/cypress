@@ -48,11 +48,14 @@ describe('integration: express', () => {
     let stdout = ''
     let stderr = ''
 
+    let deferredHash, metadata
     try {
       ({ stdout, stderr } = await execa('node', ['./snapshot/install-snapshot.js'], { cwd: projectBaseDir, maxBuffer: 600 * _MB, env }))
 
-      const { deferredHash, ...metadata } = require(metadataFile)
-      
+      const output = require(metadataFile)
+
+      deferredHash = output.deferredHash
+      metadata = output.metadata
     } catch (err: any) {
       assert.fail(`error: ${err.toString()}\nstdout: ${stdout}\nstderr: ${stderr}`)
     }
