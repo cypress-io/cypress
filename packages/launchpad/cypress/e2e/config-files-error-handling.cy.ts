@@ -261,7 +261,7 @@ describe('setupNodeEvents', () => {
     cy.findByRole('button', { name: 'Try again' }).click()
     cy.get('[data-cy-testingType=e2e]').click()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
-    cy.get('[data-cy="alert-body"]').should('contain', 'The baseUrl configuration option is now invalid when set from the root of the config object')
+    cy.get('[data-cy="alert-body"]').should('contain', 'The baseUrl configuration option is invalid when set from the root of the config object')
 
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', `module.exports = { e2e: { baseUrl: 'http://localhost:3000', supportFile: false } }`)
