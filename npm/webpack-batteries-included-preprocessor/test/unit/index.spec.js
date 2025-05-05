@@ -40,8 +40,8 @@ describe('webpack-batteries-included-preprocessor', () => {
       preprocessor = require('../../index')
       const result = preprocessor.getFullWebpackOptions('file/path', 'typescript/path')
 
-      expect(result.plugins).to.have.length(2)
-      expect(result.plugins[1].constructor.name).to.equal('BundleAnalyzerPlugin')
+      expect(result.plugins).to.have.length(1)
+      expect(result.plugins[0].constructor.name).to.equal('BundleAnalyzerPlugin')
       Debug.disable()
     })
   })

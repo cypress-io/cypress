@@ -40,7 +40,7 @@ describe('devServer', function () {
   // Writing to disk includes the correct source map size, where the difference will be made up from stat size vs parsed size
   // This is critical if a user is trying to debug to determine if they have large source maps or other large files in their dev-server under test
   describe('writes to disk if DEBUG=cypress-verbose:webpack-dev-server:bundle-analyzer is set', async () => {
-    const WEBPACK_DEV_SERVER_VERSIONS: (4 | 5)[] = [4, 5]
+    const WEBPACK_DEV_SERVER_VERSIONS: (5)[] = [5]
 
     beforeEach(() => {
       debug.enable('cypress-verbose:webpack-dev-server:bundle-analyzer')

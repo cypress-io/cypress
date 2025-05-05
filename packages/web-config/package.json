@@ -16,6 +16,7 @@
     "@svgr/webpack": "8.0.1",
     "@types/webpack": "^5.28.1",
     "arraybuffer-loader": "1.0.8",
+    "assert": "2.0.0",
     "autoprefixer": "10.4.20",
     "babel-loader": "10.0.0",
     "browser-resolve": "2.0.0",

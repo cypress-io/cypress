@@ -22,7 +22,7 @@ npm install --save-dev @cypress/webpack-batteries-included-preprocessor @cypress
 
 ## Usage
 
-In your project's [plugins file](https://on.cypress.io/guides/tooling/plugins-guide.html):
+In your project's [cypress.config.js file](https://on.cypress.io/guides/tooling/plugins-guide.html):
 
 ```javascript
 const webpackPreprocessor = require('@cypress/webpack-batteries-included-preprocessor')
@@ -43,6 +43,29 @@ module.exports = (on) => {
   }))
 }
 ```
+
+As for version `4.x.x`, webpack built-ins are no longer shipped by default with `@cypress/webpack-batteries-included-preprocessor`. If you need to install built-ins, you can always get the default `@cypress/webpack-batteries-included-preprocessor` webpack options the preprocessor ships with and decorate them:
+
+```javascript
+const webpackPreprocessor = require('@cypress/webpack-batteries-included-preprocessor')
+
+function getWebpackOptions () {
+  const options = webpackPreprocessor.getFullWebpackOptions()
+
+  // add built-ins as needed
+  options.resolve.fallback.path = require.resolve('path-browserify')
+
+  return options
+}
+
+module.exports = (on) => {
+  on('file:preprocessor', webpackPreprocessor({
+    webpackOptions: getWebpackOptions()
+  }))
+}
+```
+
+Please see [resolve.fallback](see https://webpack.js.org/configuration/resolve/#resolvefallback) for more information on what built-ins can be shimmed.
 
 Other than the `typescript` option, this preprocessor supports the same options as [@cypress/webpack-preprocessor](https://github.com/cypress-io/cypress/tree/develop/npm/webpack-preprocessor#readme), so see its [README](https://github.com/cypress-io/cypress/tree/develop/npm/webpack-preprocessor#readme) for more information.
 

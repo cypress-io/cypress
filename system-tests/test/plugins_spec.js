@@ -206,6 +206,7 @@ describe('e2e plugins', function () {
 
     it('supports node builtins', function () {
       return systemTests.exec(this, {
+        project: 'node-builtins',
         spec: 'node_builtins.cy.js',
       })
     })

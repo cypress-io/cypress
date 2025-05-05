@@ -256,7 +256,7 @@ class RunPlugins {
       ...tsPath && { typescript: tsPath },
     }
 
-    debug('creating webpack preprocessor with options %o', options)
+    debug('creating webpack batteries included preprocessor with options %o', options)
 
     const webpackPreprocessor = require('@cypress/webpack-batteries-included-preprocessor')
 

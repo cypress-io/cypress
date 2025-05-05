@@ -341,7 +341,7 @@ describe('makeWebpackConfig', () => {
   // Gives users a diagnostic output with webpack-bundle-analyzer to get a visible representation of their webpack bundle, which they can send to us
   // to give us an idea what issues they may be experiencing
   describe('enables webpack-bundle-analyzer if DEBUG=cypress-verbose:webpack-dev-server:bundle-analyzer is set', async () => {
-    const WEBPACK_VERSIONS: (4 | 5)[] = [4, 5]
+    const WEBPACK_VERSIONS: (5)[] = [5]
 
     beforeEach(() => {
       debug.enable('cypress-verbose:webpack-dev-server:bundle-analyzer')

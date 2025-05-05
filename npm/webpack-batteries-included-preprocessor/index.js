@@ -1,5 +1,4 @@
 const path = require('path')
-const webpack = require('webpack')
 const Debug = require('debug')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
@@ -120,24 +119,6 @@ const getDefaultWebpackOptions = () => {
       }],
     },
     plugins: [
-      new webpack.ProvidePlugin({
-        Buffer: ['buffer', 'Buffer'],
-        // As of Webpack 5, a new option called resolve.fullySpecified, was added.
-        // This option means that a full path, in particular to .mjs / .js files
-        // in ESM packages must have the full path of an import specified.
-        // Otherwise, compilation fails as this option defaults to true.
-        // This means we need to adjust our global injections to always
-        // resolve to include the full file extension if a file resolution is provided.
-        // @see https://github.com/cypress-io/cypress/issues/27599
-        // @see https://webpack.js.org/configuration/module/#resolvefullyspecified
-
-        // Due to Pnp compatibility issues, we want to make sure that we resolve to the 'process' library installed with the binary,
-        // which should resolve on leaf app/packages/server/node_modules/@cypress/webpack-batteries-included-preprocessor and up the tree.
-        // In other words, we want to resolve 'process' that is installed with cypress (or the package itself, i.e. @cypress/webpack-batteries-included-preprocessor)
-        // and not in the user's node_modules directory as it may not exist.
-        // @see https://github.com/cypress-io/cypress/issues/27947.
-        process: require.resolve('process/browser.js'),
-      }),
       // If the user is trying to debug their bundle, we'll add the BundleAnalyzerPlugin
       // to see the size of the support file (first bundle when running `cypress open`)
       // and spec files (subsequent bundles when running `cypress open`)
@@ -146,42 +127,42 @@ const getDefaultWebpackOptions = () => {
     resolve: {
       extensions: ['.js', '.json', '.jsx', '.mjs', '.coffee'],
       fallback: {
-        assert: require.resolve('assert/'),
-        buffer: require.resolve('buffer/'),
+        assert: false,
+        buffer: false,
         child_process: false,
         cluster: false,
         console: false,
-        constants: require.resolve('constants-browserify'),
-        crypto: require.resolve('crypto-browserify'),
+        constants: false,
+        crypto: false,
         dgram: false,
         dns: false,
-        domain: require.resolve('domain-browser'),
-        events: require.resolve('events/'),
+        domain: false,
+        events: false,
         fs: false,
-        http: require.resolve('stream-http'),
-        https: require.resolve('https-browserify'),
+        http: false,
+        https: false,
         http2: false,
         inspector: false,
         module: false,
         net: false,
-        os: require.resolve('os-browserify/browser'),
-        path: require.resolve('path-browserify'),
+        os: false,
+        path: false,
         perf_hooks: false,
-        punycode: require.resolve('punycode/'),
-        process: require.resolve('process/browser.js'),
-        querystring: require.resolve('querystring-es3'),
+        punycode: false,
+        process: false,
+        querystring: false,
         readline: false,
         repl: false,
-        stream: require.resolve('stream-browserify'),
-        string_decoder: require.resolve('string_decoder/'),
-        sys: require.resolve('util/'),
-        timers: require.resolve('timers-browserify'),
+        stream: false,
+        string_decoder: false,
+        sys: false,
+        timers: false,
         tls: false,
-        tty: require.resolve('tty-browserify'),
-        url: require.resolve('url/'),
-        util: require.resolve('util/'),
-        vm: require.resolve('vm-browserify'),
-        zlib: require.resolve('browserify-zlib'),
+        tty: false,
+        url: false,
+        util: false,
+        vm: false,
+        zlib: false,
       },
       plugins: [],
     },
