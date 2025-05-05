@@ -11,7 +11,6 @@ import { Wizard } from './gql-Wizard'
 import { ErrorWrapper } from './gql-ErrorWrapper'
 import { CachedUser } from './gql-CachedUser'
 import { Cohort } from './gql-Cohorts'
-import { StudioLifecycleManager } from '@packages/server/lib/StudioLifecycleManager'
 
 export const Query = objectType({
   name: 'Query',
@@ -105,7 +104,7 @@ export const Query = objectType({
     t.field('cloudStudioEnabled', {
       type: 'Boolean',
       description: 'Whether cloud studio is enabled',
-      resolve: (source, args, ctx) => StudioLifecycleManager.cloudStudioEnabled,
+      resolve: (source, args, ctx) => ctx.coreData.studioLifecycleManager?.cloudStudioEnabled ?? false,
     })
 
     t.nonNull.field('localSettings', {
