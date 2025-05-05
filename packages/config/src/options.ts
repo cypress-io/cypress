@@ -594,11 +594,6 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     validation: validate.isBoolean,
     isInternal: true,
   }, {
-    name: 'isStudioProtocolEnabled',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isInternal: true,
-  }, {
     name: 'hideCommandLog',
     defaultValue: false,
     validation: validate.isBoolean,

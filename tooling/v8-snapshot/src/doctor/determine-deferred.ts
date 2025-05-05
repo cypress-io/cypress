@@ -1,10 +1,53 @@
 import debug from 'debug'
 import fs from 'fs'
 import path from 'path'
-import { SnapshotDoctor } from './snapshot-doctor'
+import { doesDependencyMatchForceNorewriteEntry, SnapshotDoctor } from './snapshot-doctor'
 import { canAccess, createHashForFile, matchFileHash } from '../utils'
 
 const logInfo = debug('cypress:snapgen:info')
+
+interface ErrorOnInvalidForceNorewriteOpts {
+  forceNorewrite: Set<string>
+  inputs: Record<string, { fileInfo: { fullPath: string } }>
+  nodeModulesOnly: boolean
+}
+
+/**
+ * Filters out the wildcard force no rewrite modules
+ * @param norewrite - The set of calculated no rewrite modules in the project
+ */
+function filterForceNorewrite (norewrite: string[]) {
+  return norewrite.filter((dependency) => !dependency.startsWith('./*'))
+}
+
+/**
+ * Throws an error if a force no rewrite module is not found in the project
+ * @param norewrite - The set of force no rewrite modules
+ * @param inputs - The inputs from the esbuild bundle which are actually in the project
+ */
+function errorOnInvalidForceNorewrite (opts: ErrorOnInvalidForceNorewriteOpts) {
+  const inputsKeys = Object.keys(opts.inputs)
+
+  const invalidForceNorewrites: string[] = []
+
+  Array.from(opts.forceNorewrite).forEach((dependency) => {
+    if (opts.nodeModulesOnly && !dependency.startsWith('node_modules') && !dependency.startsWith('*')) {
+      return
+    }
+
+    const includedInInputs = inputsKeys.some((key) => {
+      return doesDependencyMatchForceNorewriteEntry(key, dependency)
+    })
+
+    if (!includedInInputs) {
+      invalidForceNorewrites.push(dependency)
+    }
+  })
+
+  if (invalidForceNorewrites.length > 0) {
+    throw new Error(`Force no rewrite dependencies not found in project: ${invalidForceNorewrites.join(', ')}`)
+  }
+}
 
 export async function determineDeferred (
   bundlerPath: string,
@@ -13,7 +56,7 @@ export async function determineDeferred (
   cacheDir: string,
   opts: {
     nodeModulesOnly: boolean
-    forceNoRewrite: Set<string>
+    forceNorewrite: Set<string>
     nodeEnv: string
     cypressInternalEnv: string
     integrityCheckSource: string | undefined
@@ -50,22 +93,22 @@ export async function determineDeferred (
     }
   })
 
-  let nodeModulesNoRewrite: string[] = []
-  let projectNoRewrite: string[] = []
-  let currentNoRewrite = opts.nodeModulesOnly ? nodeModulesNoRewrite : norewrite
+  let nodeModulesNorewrite: string[] = []
+  let projectNorewrite: string[] = []
+  let currentNorewrite = opts.nodeModulesOnly ? nodeModulesNorewrite : norewrite
 
   norewrite.forEach((dependency) => {
     if (dependency.includes('node_modules')) {
-      nodeModulesNoRewrite.push(dependency)
+      nodeModulesNorewrite.push(dependency)
     } else {
-      projectNoRewrite.push(dependency)
+      projectNorewrite.push(dependency)
     }
   })
 
   if (res.match && opts.nodeModulesOnly) {
     const combined: Set<string> = new Set([
-      ...currentNoRewrite,
-      ...opts.forceNoRewrite,
+      ...currentNorewrite,
+      ...opts.forceNorewrite,
     ])
 
     return {
@@ -86,8 +129,8 @@ export async function determineDeferred (
     nodeModulesOnly: opts.nodeModulesOnly,
     previousDeferred: currentDeferred,
     previousHealthy: currentHealthy,
-    previousNoRewrite: currentNoRewrite,
-    forceNoRewrite: opts.forceNoRewrite,
+    previousNorewrite: currentNorewrite,
+    forceNorewrite: opts.forceNorewrite,
     nodeEnv: opts.nodeEnv,
     cypressInternalEnv: opts.cypressInternalEnv,
     supportTypeScript: opts.nodeModulesOnly,
@@ -98,11 +141,20 @@ export async function determineDeferred (
     deferred: updatedDeferred,
     norewrite: updatedNorewrite,
     healthy: updatedHealthy,
+    meta: esbuildMeta,
   } = await doctor.heal()
+
+  errorOnInvalidForceNorewrite({
+    forceNorewrite: opts.forceNorewrite,
+    inputs: esbuildMeta.inputs,
+    nodeModulesOnly: opts.nodeModulesOnly,
+  })
+
   const deferredHashFile = path.relative(projectBaseDir, hashFilePath)
+  const filteredNorewrite = filterForceNorewrite(updatedNorewrite)
 
   const updatedMeta = {
-    norewrite: opts.nodeModulesOnly ? [...updatedNorewrite, ...projectNoRewrite] : updatedNorewrite,
+    norewrite: opts.nodeModulesOnly ? [...filteredNorewrite, ...projectNorewrite] : filteredNorewrite,
     deferred: opts.nodeModulesOnly ? [...updatedDeferred, ...projectDeferred] : updatedDeferred,
     healthy: opts.nodeModulesOnly ? [...updatedHealthy, ...projectHealthy] : updatedHealthy,
     deferredHashFile,
@@ -122,7 +174,7 @@ export async function determineDeferred (
   }
 
   return {
-    norewrite: updatedNorewrite,
+    norewrite: filteredNorewrite,
     deferred: updatedDeferred,
     healthy: updatedHealthy,
   }

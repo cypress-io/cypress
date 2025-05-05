@@ -48,13 +48,13 @@ export type WarningsProcessHistory = {
  * The consequence of a specific type of warning.
  *
  * - Defer: we need to defer the module in order to prevent it from loading
- * - NoRewrite: we should not rewrite the module as it results in invalid code
+ * - Norewrite: we should not rewrite the module as it results in invalid code
  * - None: no consequence, i.e. a light weight warning for informative purposes only
  * @category snapshot
  */
 export enum WarningConsequence {
   Defer,
-  NoRewrite,
+  Norewrite,
   None,
 }
 
@@ -157,7 +157,7 @@ export class WarningsProcessor {
     // prettier-ignore
     const consequence =
            text.includes(SNAPSHOT_REWRITE_FAILURE)
-        || REFERENCE_ERROR_NOREWRITE.test(text) ? WarningConsequence.NoRewrite
+        || REFERENCE_ERROR_NOREWRITE.test(text) ? WarningConsequence.Norewrite
              : text.includes(SNAPSHOT_CACHE_FAILURE)
         || REFERENCE_ERROR_DEFER.test(text) ? WarningConsequence.Defer
                : WarningConsequence.None
@@ -185,7 +185,7 @@ export class WarningsProcessor {
 
         return x
       }
-      case WarningConsequence.NoRewrite: {
+      case WarningConsequence.Norewrite: {
         if (norewrite.has(x.location.file)) return null
 
         return x

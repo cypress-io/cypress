@@ -2380,6 +2380,7 @@ type Studio {
 }
 
 enum StudioStatusType {
+  ENABLED
   INITIALIZED
   IN_ERROR
   NOT_INITIALIZED

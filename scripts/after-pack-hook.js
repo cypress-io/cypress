@@ -95,8 +95,6 @@ module.exports = async function (params) {
       const cloudApiFileSource = await getProtocolFileSource(cloudApiFilePath)
       const cloudProtocolFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/protocol.ts')
       const cloudProtocolFileSource = await getProtocolFileSource(cloudProtocolFilePath)
-      const projectBaseFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/project-base.ts')
-      const projectBaseFileSource = await getStudioFileSource(projectBaseFilePath)
       const getAndInitializeStudioManagerFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/api/studio/get_and_initialize_studio_manager.ts')
       const getAndInitializeStudioManagerFileSource = await getStudioFileSource(getAndInitializeStudioManagerFilePath)
 
@@ -105,7 +103,6 @@ module.exports = async function (params) {
         fs.writeFile(cloudEnvironmentFilePath, cloudEnvironmentFileSource),
         fs.writeFile(cloudApiFilePath, cloudApiFileSource),
         fs.writeFile(cloudProtocolFilePath, cloudProtocolFileSource),
-        fs.writeFile(projectBaseFilePath, projectBaseFileSource),
         fs.writeFile(getAndInitializeStudioManagerFilePath, getAndInitializeStudioManagerFileSource),
         fs.writeFile(path.join(outputFolder, 'index.js'), binaryEntryPointSource),
       ])
@@ -119,7 +116,6 @@ module.exports = async function (params) {
         validateCloudEnvironmentFile(cloudEnvironmentFilePath),
         validateProtocolFile(cloudApiFilePath),
         validateProtocolFile(cloudProtocolFilePath),
-        validateStudioFile(projectBaseFilePath),
         validateStudioFile(getAndInitializeStudioManagerFilePath),
       ])
 
