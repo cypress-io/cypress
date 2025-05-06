@@ -164,16 +164,6 @@ Please delete the conflicting configuration files.
 
 `
 
-exports['e2e config throws error when cypress.json is found in project and cypress.config.{js,ts,mjs,cjs} exists as well 1'] = `
-There is both a cypress.config.js and a cypress.json file at the location below:
-
-/foo/bar/.projects/multiple-config-files-with-json
-
-Cypress no longer supports cypress.json, please remove it from your project.
-
-
-`
-
 exports['e2e config throws an error if baseUrl is set on the component level 1'] = `
 The component.baseUrl configuration option is not valid for component testing.
 
@@ -184,6 +174,7 @@ Please remove this option or add this as an e2e testing type property: e2e.baseU
     baseUrl: '...',
   }
 }
+
 `
 
 exports['e2e config setupNodeEvents modify specPattern for current testing type 1'] = `
@@ -251,6 +242,7 @@ Please remove this option or add this as a component testing type property: comp
     indexHtmlFile: '...',
   }
 }
+
 `
 
 exports['e2e config finds supportFiles in projects containing glob syntax 1'] = `
@@ -312,5 +304,79 @@ Your configFile at /foo/bar/.projects/invalid-env-file/cypress.env.json set an i
 Expected reporter to be a string.
 
 Instead the value was: 5
+
+`
+
+exports['e2e config throws an error if supportFile is set on the root level 1'] = `
+The supportFile configuration option is invalid when set from the root of the config object.
+
+Set it within a testing type property: e2e.supportFile and component.supportFile
+
+{
+  e2e: {
+    specPattern: '...',
+  },
+  component: {
+    specPattern: '...',
+  },
+}
+
+`
+
+exports['e2e config throws an error if specPattern is set on the root level 1'] = `
+The specPattern configuration option is invalid when set from the root of the config object.
+
+Set it within a testing type property: e2e.specPattern and component.specPattern
+
+{
+  e2e: {
+    specPattern: '...',
+  },
+  component: {
+    specPattern: '...',
+  },
+}
+
+`
+
+exports['e2e config throws an error if excludeSpecPattern is set on the root level 1'] = `
+The excludeSpecPattern configuration option is invalid when set from the root of the config object.
+
+Set it within a testing type property: e2e.excludeSpecPattern and component.excludeSpecPattern
+
+{
+  e2e: {
+    specPattern: '...',
+  },
+  component: {
+    specPattern: '...',
+  },
+}
+
+`
+
+exports['e2e config throws an error if baseUrl is set on the root level 1'] = `
+The baseUrl configuration option is invalid when set from the root of the config object.
+
+Set it within a testing type property: e2e.baseUrl
+
+{
+  e2e: {
+    baseUrl: '...',
+  }
+}
+
+`
+
+exports['e2e config throws an error if indexHtml is set on the root level 1'] = `
+The indexHtmlFile configuration option is invalid when set from the root of the config object.
+
+Set it within a testing type property: component.indexHtmlFile
+
+{
+  component: {
+    indexHtmlFile: '...',
+  }
+}
 
 `

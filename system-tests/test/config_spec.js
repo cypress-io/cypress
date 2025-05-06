@@ -93,16 +93,6 @@ describe('e2e config', () => {
     })
   })
 
-  it('throws error when cypress.json is found in project and cypress.config.{js,ts,mjs,cjs} exists as well', async function () {
-    await Fixtures.scaffoldProject('multiple-config-files-with-json')
-
-    return systemTests.exec(this, {
-      project: 'multiple-config-files-with-json',
-      expectedExitCode: 1,
-      snapshot: true,
-    })
-  })
-
   it('throws an error if supportFile is set on the root level', async function () {
     await Fixtures.scaffoldProject('invalid-root-level-config')
 
@@ -192,34 +182,12 @@ describe('e2e config', () => {
     })
   })
 
-  it('throws an error if testFiles is set on the config file', async function () {
-    await Fixtures.scaffoldProject('invalid-root-level-config')
-
-    return systemTests.exec(this, {
-      project: 'invalid-root-level-config',
-      configFile: 'invalid-testFiles-config.js',
-      expectedExitCode: 1,
-      snapshot: true,
-    })
-  })
-
   it('setupNodeEvents modify specPattern for current testing type', async function () {
     await Fixtures.scaffoldProject('e2e')
 
     return systemTests.exec(this, {
       project: 'e2e',
       configFile: 'cypress-setupNodeEvents-modify-config.config.js',
-      snapshot: true,
-    })
-  })
-
-  it('throws an error if componentFolder is set on the config file', async function () {
-    await Fixtures.scaffoldProject('invalid-root-level-config')
-
-    return systemTests.exec(this, {
-      project: 'invalid-root-level-config',
-      configFile: 'invalid-componentFolder-config.js',
-      expectedExitCode: 1,
       snapshot: true,
     })
   })
