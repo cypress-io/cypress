@@ -267,11 +267,11 @@ const cloudStudioEnabled = computed(() => {
 })
 
 const shouldShowStudioButton = computed(() => {
-  return cloudStudioEnabled.value && !studioStore.isOpen
+  return !!cloudStudioEnabled.value && !studioStore.isOpen
 })
 
 const shouldShowStudioPanel = computed(() => {
-  return cloudStudioEnabled.value && (studioStore.isLoading || studioStore.isActive)
+  return !!cloudStudioEnabled.value && (studioStore.isLoading || studioStore.isActive)
 })
 
 const hideCommandLog = runnerUiStore.hideCommandLog
