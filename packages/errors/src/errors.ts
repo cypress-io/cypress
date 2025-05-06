@@ -1368,25 +1368,6 @@ export const AllCypressErrors = {
     `
   },
 
-  PLUGINS_FILE_CONFIG_OPTION_REMOVED: (_errShape: BreakingErrResult) => {
-    const code = errPartial`
-    {
-      e2e: {
-        setupNodeEvents()
-      },
-      component: {
-        setupNodeEvents()
-      },
-    }`
-
-    return errTemplate`\
-        The ${fmt.highlight('pluginsFile')} configuration option you have supplied has been replaced with ${fmt.highlightSecondary('setupNodeEvents')}.
-
-        This option is not a one-to-one correlation and must be configured separately as a testing type property: ${fmt.highlightSecondary('e2e.setupNodeEvents')} and ${fmt.highlightSecondary('component.setupNodeEvents')}
-
-        ${fmt.code(code)}`
-  },
-
   VIDEO_UPLOAD_ON_PASSES_REMOVED: (_errShape: BreakingErrResult) => {
     return errTemplate`\
         The ${fmt.highlight(`videoUploadOnPasses`)} configuration option was removed in ${fmt.cypressVersion(`13.0.0`)}.

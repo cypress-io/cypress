@@ -2,7 +2,7 @@ module.exports = {
   e2e: {
     supportFile: false,
     setupNodeEvents (on, config) {
-      config.integrationFolder = 'path/to/integration/folder'
+      config.experimentalSkipDomainInjection = true
 
       return config
     },

@@ -174,13 +174,13 @@ describe('config/src/index', () => {
       const errorFn = sinon.spy()
 
       configUtil.validateNoBreakingConfig({
-        'pluginsFile': 'should break',
+        experimentalSkipDomainInjection: true,
         configFile: 'config.js',
       }, warningFn, errorFn, 'e2e')
 
       expect(warningFn).to.have.been.callCount(0)
-      expect(errorFn).to.have.been.calledOnceWith('PLUGINS_FILE_CONFIG_OPTION_REMOVED', {
-        name: 'pluginsFile',
+      expect(errorFn).to.have.been.calledOnceWith('EXPERIMENTAL_SKIP_DOMAIN_INJECTION_REMOVED', {
+        name: 'experimentalSkipDomainInjection',
         newName: undefined,
         value: undefined,
         testingType: 'e2e',

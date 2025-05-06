@@ -2,7 +2,6 @@ exports['config/src/index .getBreakingKeys returns list of breaking config keys 
   'experimentalJustInTimeCompile',
   'experimentalSessionAndOrigin',
   'experimentalSkipDomainInjection',
-  'pluginsFile',
   'videoUploadOnPasses',
 ]
 

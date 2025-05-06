@@ -1152,11 +1152,6 @@ describe('visual error templates', () => {
         default: ['spec.{ts,js}', ['support.ts', 'support.js']],
       }
     },
-    PLUGINS_FILE_CONFIG_OPTION_REMOVED: () => {
-      return {
-        default: [{ name: 'pluginsFile', configFile: '/path/to/cypress.config.js.ts' }],
-      }
-    },
     VIDEO_UPLOAD_ON_PASSES_REMOVED: () => {
       return {
         default: [{ name: 'videoUploadOnPasses', configFile: '/path/to/cypress.config.js.ts' }],

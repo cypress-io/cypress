@@ -16,7 +16,6 @@ const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
   'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_E2E',
   'EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED',
   'EXPERIMENTAL_SINGLE_TAB_RUN_MODE',
-  'PLUGINS_FILE_CONFIG_OPTION_REMOVED',
   'VIDEO_UPLOAD_ON_PASSES_REMOVED',
   'RENAMED_CONFIG_OPTION',
 ] as const
@@ -617,10 +616,6 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
   }, {
     name: 'experimentalSkipDomainInjection',
     errorKey: 'EXPERIMENTAL_SKIP_DOMAIN_INJECTION_REMOVED',
-    isWarning: false,
-  }, {
-    name: 'pluginsFile',
-    errorKey: 'PLUGINS_FILE_CONFIG_OPTION_REMOVED',
     isWarning: false,
   }, {
     name: 'videoUploadOnPasses',

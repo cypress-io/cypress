@@ -32,17 +32,19 @@ describe('Config files error handling', () => {
     cy.contains('h1', 'Welcome to Cypress', { timeout: 10000 })
   })
 
-  it('handles deprecated config fields', () => {
+  it('handles removed config fields', () => {
     cy.openProject('pristine')
     cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { e2e: { supportFile: false, videoUploadOnPasses: true } }')
+      // ensure the config set here has 'isWarning: false' to ensure it errors in UI
+      // supportFile is required so the config is valid
+      await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { e2e: { supportFile: false, experimentalSkipDomainInjection: true } }')
     })
 
     cy.openProject('pristine')
 
     cy.visitLaunchpad()
     cy.get('[data-cy-testingType=e2e]').click()
-    cy.get('body', { timeout: 10000 }).should('contain.text', 'videoUploadOnPasses')
+    cy.get('body', { timeout: 10000 }).should('contain.text', 'experimentalSkipDomainInjection')
     expectStackToBe('closed')
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { e2e: { supportFile: false } }')
@@ -177,39 +179,31 @@ describe('Launchpad: Error System Tests', () => {
 })
 
 describe('setupNodeEvents', () => {
-  it('throws an error when in setupNodeEvents updating a config value in the root config', () => {
-    cy.scaffoldProject('config-update-non-migrated-value')
-    cy.openProject('config-update-non-migrated-value')
+  it('throws an error when in setupNodeEvents updating a config value in the root config that was removed', () => {
+    cy.scaffoldProject('config-update-in-setup-node-events')
+    cy.openProject('config-update-in-setup-node-events')
     cy.visitLaunchpad()
     cy.findByText('E2E Testing').click()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
     cy.findAllByTestId('collapsible').should('be.visible')
     cy.get('h2').contains('Error running e2e.setupNodeEvents()')
-    cy.get('p').contains('The integrationFolder configuration option is invalid when set on the config object.')
-    cy.get('p').contains('Set it within a testing type property: e2e.specPattern')
+    cy.get('p').contains('The experimentalSkipDomainInjection experiment is over.')
+    cy.get('p').contains('Read the migration guide for Cypress v14.0.0')
   })
 
-  it('throws an error when in setupNodeEvents updating a config value on a clone of config in the root config', () => {
-    cy.scaffoldProject('config-update-non-migrated-value-clone')
-    cy.openProject('config-update-non-migrated-value-clone')
+  it('throws an error when in setupNodeEvents updating a config value on a clone of config in the root config that was removed', () => {
+    cy.scaffoldProject('config-update-in-setup-node-events-clone')
+    cy.openProject('config-update-in-setup-node-events-clone')
     cy.visitLaunchpad()
     cy.findByText('E2E Testing').click()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
     cy.percySnapshot()
 
-    cy.get('[data-cy="alert-body"]').should('contain', 'integrationFolder')
+    cy.get('p').contains('The experimentalSkipDomainInjection experiment is over.')
+    cy.get('p').contains('Read the migration guide for Cypress v14.0.0')
   })
 
-  it('throws an error when in setupNodeEvents updating an e2e config value in the root config', () => {
-    cy.scaffoldProject('config-update-non-migrated-value-e2e')
-    cy.openProject('config-update-non-migrated-value-e2e')
-    cy.visitLaunchpad()
-    cy.findByText('E2E Testing').click()
-    cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
-    cy.percySnapshot()
-  })
-
-  it('handles deprecated config fields in setupNodeEvents', () => {
+  it('handles removed config fields in setupNodeEvents', () => {
     cy.scaffoldProject('pristine')
     cy.openProject('pristine')
     cy.withCtx(async (ctx) => {
@@ -218,7 +212,7 @@ describe('setupNodeEvents', () => {
   e2e: { 
     supportFile: false, 
     setupNodeEvents(on, config){
-      config.testFiles = '**/*.spec.js'
+      config.experimentalSkipDomainInjection = true
       return config
     }
   }
@@ -229,7 +223,7 @@ describe('setupNodeEvents', () => {
 
     cy.visitLaunchpad()
     cy.get('[data-cy-testingType=e2e]').click()
-    cy.get('body', { timeout: 10000 }).should('contain.text', 'testFiles')
+    cy.get('body', { timeout: 10000 }).should('contain.text', 'experimentalSkipDomainInjection')
     cy.get('body', { timeout: 10000 }).should('contain.text', 'setupNodeEvents')
     expectStackToBe('closed')
     cy.withCtx(async (ctx) => {
