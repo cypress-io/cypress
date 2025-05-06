@@ -654,7 +654,7 @@ describe('lib/config', () => {
 
           return this.expectValidationFails('The supportFile configuration option is invalid when set from the root of the config object')
           .then(() => {
-            return this.expectValidationFails('It is now configured separately as a testing type property: e2e.supportFile and component.supportFile')
+            return this.expectValidationFails('Set it within a testing type property: e2e.supportFile and component.supportFile')
           })
         })
       })
