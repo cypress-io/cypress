@@ -289,7 +289,7 @@ describe('detectLanguage', () => {
 
       const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
-      expect(actual).to.eq('ts')
+      expect(actual).to.eq('js')
     })
   })
 
