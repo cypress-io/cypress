@@ -1307,30 +1307,10 @@ export const AllCypressErrors = {
 
         ${fmt.stackTrace(arg2)}`
   },
-  CONFIG_FILE_INVALID_DEV_START_EVENT: (pluginsFilePath: string) => {
-    const code = errPartial`
-      module.exports = (on, config) => {
-        on('dev-server:start', () => {
-          ${fmt.comment('// start dev server here')}
-          return startDevServer(...)
-        }
-      }`
-
-    return errTemplate`\
-        To run component tests, Cypress needs you to configure the ${fmt.highlight(`dev-server:start`)} event.
-
-        Please update this file: ${fmt.path(pluginsFilePath)}
-
-        ${fmt.code(code)}
-
-        https://on.cypress.io/component-testing`
-  },
 
   UNSUPPORTED_BROWSER_VERSION: (errorMsg: string) => {
     return errTemplate`${fmt.off(errorMsg)}`
   },
-
-  // V10 Added:
 
   MULTIPLE_SUPPORT_FILES_FOUND: (arg1: string, arg2: string[]) => {
     return errTemplate`\
@@ -1343,29 +1323,6 @@ export const AllCypressErrors = {
       ${fmt.listItems(arg2)}
 
       Please remove or combine the support files into a single file.`
-  },
-
-  SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER: (configFilePath: string) => {
-    const code = errPartial`
-      {
-        component: {
-          devServer (cypressDevServerConfig, devServerConfig) {
-            ${fmt.comment(`// start dev server here`)
-          }
-        }
-      }`
-
-    return errTemplate`\
-      Your ${fmt.highlightSecondary(`configFile`)} is invalid: ${fmt.path(configFilePath)}
-
-      Binding to the ${fmt.highlightSecondary(`on('dev-server:start')`)} event is no longer necessary.
-
-      Please update your code to use the ${fmt.highlight(`component.devServer()`)} function.
-
-      ${fmt.code(code)}
-
-      Learn more: https://on.cypress.io/dev-server
-    `
   },
 
   VIDEO_UPLOAD_ON_PASSES_REMOVED: (_errShape: BreakingErrResult) => {

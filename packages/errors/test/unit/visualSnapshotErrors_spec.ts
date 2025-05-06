@@ -1116,16 +1116,6 @@ describe('visual error templates', () => {
         default: [],
       }
     },
-    SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER: () => {
-      return {
-        default: ['/path/to/project/cypress.config.js'],
-      }
-    },
-    CONFIG_FILE_INVALID_DEV_START_EVENT: () => {
-      return {
-        default: ['/path/to/plugins/file.js'],
-      }
-    },
     CONFIG_FILE_DEV_SERVER_INVALID_RETURN: () => {
       return {
         default: [{}],
