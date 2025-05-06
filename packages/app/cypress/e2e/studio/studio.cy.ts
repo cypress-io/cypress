@@ -233,7 +233,7 @@ describe('studio functionality', () => {
       cy.get('[data-cy="ai-status-text"]').should('contain.text', 'Enabled')
 
       // Verify that the AI output is correct
-      cy.get('[data-cy="studio-ai-output-textarea"]').should('contain.text', aiOutput)
+      cy.get('[data-cy="recommendation-editor"]').should('contain', aiOutput)
     })
   })
 
