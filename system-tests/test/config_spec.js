@@ -23,6 +23,9 @@ describe('e2e config', () => {
       project: 'config-with-short-timeout',
       snapshot: true,
       expectedExitCode: 1,
+      config: {
+        screenshotOnRunFailure: false,
+      },
     })
   })
 
