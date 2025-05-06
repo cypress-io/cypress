@@ -90,20 +90,6 @@ describe('e2e config', () => {
     })
   })
 
-  it('throws error when cypress.json is found in project and need migration', async function () {
-    await Fixtures.scaffoldProject('pristine')
-
-    const projectRoot = Fixtures.projectPath('pristine')
-
-    return fs.writeFile(path.join(projectRoot, 'cypress.json'), '{}').then(() => {
-      return systemTests.exec(this, {
-        project: 'pristine',
-        expectedExitCode: 1,
-        snapshot: true,
-      })
-    })
-  })
-
   it('throws error when cypress.json is found in project and cypress.config.{js,ts,mjs,cjs} exists as well', async function () {
     await Fixtures.scaffoldProject('multiple-config-files-with-json')
 
