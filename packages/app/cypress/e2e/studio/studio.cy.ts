@@ -54,13 +54,15 @@ describe('studio functionality', () => {
     it('loads the studio page', () => {
       launchStudio({ enableCloudStudio: true })
 
+      cy.get('[data-cy="loading-studio-panel"]').should('not.exist')
+
       cy.window().then((win) => {
         expect(win.Cypress.config('isDefaultProtocolEnabled')).to.be.false
         expect(win.Cypress.state('isProtocolEnabled')).to.be.true
       })
     })
 
-    it('loads the studio UI correctly when studio bundle is taking too long to load', () => {
+    it('loads the legacy studio UI correctly when studio bundle is taking too long to load', () => {
       loadProjectAndRunSpec({ enableCloudStudio: false })
 
       cy.window().then(() => {
@@ -149,6 +151,8 @@ describe('studio functionality', () => {
     it('closes studio panel when clicking studio button (from the cloud)', () => {
       launchStudio({ enableCloudStudio: true })
 
+      cy.findByTestId('studio-panel').should('be.visible')
+      cy.get('[data-cy="loading-studio-panel"]').should('not.exist')
       cy.get('[data-cy="studio-header-studio-button"]').click()
 
       assertClosingPanelWithoutChanges()
@@ -228,6 +232,9 @@ describe('studio functionality', () => {
       // Verify the studio panel is still open
       cy.findByTestId('studio-panel')
       cy.get('[data-cy="hook-name-studio commands"]')
+
+      // make sure studio is not loading
+      cy.get('[data-cy="loading-studio-panel"]').should('not.exist')
 
       // Verify that AI is enabled
       cy.get('[data-cy="ai-status-text"]').should('contain.text', 'Enabled')

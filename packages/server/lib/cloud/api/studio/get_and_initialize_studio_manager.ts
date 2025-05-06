@@ -31,11 +31,11 @@ export const studioPath = path.join(os.tmpdir(), 'cypress', 'studio')
 const bundlePath = path.join(studioPath, 'bundle.tar')
 const serverFilePath = path.join(studioPath, 'server', 'index.js')
 
-async function downloadStudioBundleWithTimeout (args: Options) {
+async function downloadStudioBundleWithTimeout (args: Options & { downloadTimeoutMs?: number }) {
   const timeoutPromise = new Promise((_, reject) => {
     setTimeout(() => {
       reject(new Error('Cloud studio download timed out'))
-    }, DOWNLOAD_TIMEOUT_MS)
+    }, args.downloadTimeoutMs || DOWNLOAD_TIMEOUT_MS)
   })
 
   const funcPromise = downloadStudioBundleToTempDirectory(args)
@@ -48,6 +48,7 @@ const downloadStudioBundleToTempDirectory = async ({ studioUrl, projectId }: Opt
 
   await (asyncRetry(async () => {
     const response = await fetch(studioUrl, {
+      // @ts-expect-error - this is supported
       agent,
       method: 'GET',
       headers: {
@@ -108,7 +109,7 @@ const getTarHash = (): Promise<string> => {
   })
 }
 
-export const retrieveAndExtractStudioBundle = async ({ studioUrl, projectId }: Options): Promise<{ studioHash: string | undefined }> => {
+export const retrieveAndExtractStudioBundle = async ({ studioUrl, projectId, downloadTimeoutMs }: Options & { downloadTimeoutMs?: number }): Promise<{ studioHash: string | undefined }> => {
   // First remove studioPath to ensure we have a clean slate
   await fs.promises.rm(studioPath, { recursive: true, force: true })
   await ensureDir(studioPath)
@@ -124,7 +125,7 @@ export const retrieveAndExtractStudioBundle = async ({ studioUrl, projectId }: O
     return { studioHash: undefined }
   }
 
-  await downloadStudioBundleWithTimeout({ studioUrl, projectId })
+  await downloadStudioBundleWithTimeout({ studioUrl, projectId, downloadTimeoutMs })
 
   const studioHash = await getTarHash()
 
@@ -136,7 +137,7 @@ export const retrieveAndExtractStudioBundle = async ({ studioUrl, projectId }: O
   return { studioHash }
 }
 
-export const getAndInitializeStudioManager = async ({ studioUrl, projectId, cloudDataSource, shouldEnableStudio }: { studioUrl: string, projectId?: string, cloudDataSource: CloudDataSource, shouldEnableStudio: boolean }): Promise<StudioManager> => {
+export const getAndInitializeStudioManager = async ({ studioUrl, projectId, cloudDataSource, shouldEnableStudio, downloadTimeoutMs }: { studioUrl: string, projectId?: string, cloudDataSource: CloudDataSource, shouldEnableStudio: boolean, downloadTimeoutMs?: number }): Promise<StudioManager> => {
   let script: string
 
   const cloudEnv = (process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'production') as 'development' | 'staging' | 'production'
@@ -146,7 +147,7 @@ export const getAndInitializeStudioManager = async ({ studioUrl, projectId, clou
   let studioHash: string | undefined
 
   try {
-    ({ studioHash } = await retrieveAndExtractStudioBundle({ studioUrl, projectId }))
+    ({ studioHash } = await retrieveAndExtractStudioBundle({ studioUrl, projectId, downloadTimeoutMs }))
 
     script = await readFile(serverFilePath, 'utf8')
 
