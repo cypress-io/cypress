@@ -50,7 +50,11 @@ export class StudioLifecycleManager {
     debugData: any
     ctx: DataContext
   }): void {
-    debug('Initializing studio manager')
+    // Register this instance in the data context
+    ctx.update((data) => {
+      data.studioLifecycleManager = this
+    })
+
     this.ctx = ctx
 
     this.updateStatus('INITIALIZING')
@@ -91,11 +95,6 @@ export class StudioLifecycleManager {
     })
 
     this.studioManagerPromise = studioManagerPromise
-
-    // Register this instance in the data context
-    ctx.update((data) => {
-      data.studioLifecycleManager = this
-    })
   }
 
   isStudioReady (): boolean {
@@ -138,8 +137,6 @@ export class StudioLifecycleManager {
       shouldEnableStudio: this.cloudStudioEnabled,
     })
 
-    this.updateStatus(studioManager.status)
-
     this.setupStatusProxy(studioManager)
 
     if (studioManager.status === 'ENABLED') {
@@ -170,6 +167,7 @@ export class StudioLifecycleManager {
     debug('Studio is ready')
     this.studioManager = studioManager
     this.callRegisteredListeners()
+    this.updateStatus(studioManager.status)
 
     return studioManager
   }
@@ -211,7 +209,11 @@ export class StudioLifecycleManager {
     this.lastStatus = status
 
     if (this.ctx) {
-      process.nextTick(() => this.ctx?.emitter.studioStatusChange())
+      process.nextTick(() => {
+        this.ctx?.emitter.studioStatusChange()
+      })
+    } else {
+      debug('No ctx available, cannot emit studioStatusChange')
     }
   }
 
@@ -222,11 +224,9 @@ export class StudioLifecycleManager {
     Object.defineProperty(studioManager, 'status', {
       get: () => currentStatus,
       set: (newStatus: StudioStatus) => {
-        if (newStatus !== currentStatus) {
-          debug('Studio status change detected: %s → %s', currentStatus, newStatus)
-          currentStatus = newStatus
-          this.updateStatus(newStatus)
-        }
+        debug('Studio status change detected: %s → %s', currentStatus, newStatus)
+        currentStatus = newStatus
+        this.updateStatus(newStatus)
       },
       enumerable: true,
       configurable: true,

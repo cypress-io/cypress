@@ -23,79 +23,62 @@ const pkg = require('@packages/root')
 
 const _delay = linearDelay(500)
 
-// Default timeout of 15 seconds for the download
-const DOWNLOAD_TIMEOUT_MS = 15000
+// Default timeout of 30 seconds for the download
+const DOWNLOAD_TIMEOUT_MS = 30000
 
 export const studioPath = path.join(os.tmpdir(), 'cypress', 'studio')
 
 const bundlePath = path.join(studioPath, 'bundle.tar')
 const serverFilePath = path.join(studioPath, 'server', 'index.js')
 
+async function downloadStudioBundleWithTimeout (args: Options) {
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => {
+      reject(new Error('Cloud studio download timed out'))
+    }, DOWNLOAD_TIMEOUT_MS)
+  })
+
+  const funcPromise = downloadStudioBundleToTempDirectory(args)
+
+  return Promise.race([funcPromise, timeoutPromise])
+}
+
 const downloadStudioBundleToTempDirectory = async ({ studioUrl, projectId }: Options): Promise<void> => {
   let responseSignature: string | null = null
 
-  try {
-    await (asyncRetry(async () => {
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => {
-        controller.abort()
-      }, DOWNLOAD_TIMEOUT_MS)
+  await (asyncRetry(async () => {
+    const response = await fetch(studioUrl, {
+      agent,
+      method: 'GET',
+      headers: {
+        'x-route-version': '1',
+        'x-cypress-signature': PUBLIC_KEY_VERSION,
+        ...(projectId ? { 'x-cypress-project-slug': projectId } : {}),
+        'x-cypress-studio-mount-version': '1',
+        'x-os-name': os.platform(),
+        'x-cypress-version': pkg.version,
+      },
+      encrypt: 'signed',
+    })
 
-      try {
-        const response = await fetch(studioUrl, {
-          // @ts-expect-error - this is supported
-          agent,
-          method: 'GET',
-          signal: controller.signal,
-          headers: {
-            'x-route-version': '1',
-            'x-cypress-signature': PUBLIC_KEY_VERSION,
-            ...(projectId ? { 'x-cypress-project-slug': projectId } : {}),
-            'x-cypress-studio-mount-version': '1',
-            'x-os-name': os.platform(),
-            'x-cypress-version': pkg.version,
-          },
-          encrypt: 'signed',
-        })
+    responseSignature = response.headers.get('x-cypress-signature')
 
-        responseSignature = response.headers.get('x-cypress-signature')
+    await new Promise<void>((resolve, reject) => {
+      const writeStream = fs.createWriteStream(bundlePath)
 
-        await new Promise<void>((resolve, reject) => {
-          const writeStream = fs.createWriteStream(bundlePath)
+      writeStream.on('error', reject)
+      writeStream.on('finish', () => {
+        resolve()
+      })
 
-          const downloadTimeout = setTimeout(() => {
-            writeStream.destroy()
-            reject(new Error(`Studio bundle download timed out after ${DOWNLOAD_TIMEOUT_MS}ms`))
-          }, DOWNLOAD_TIMEOUT_MS)
-
-          writeStream.on('error', (err) => {
-            clearTimeout(downloadTimeout)
-            reject(err)
-          })
-
-          writeStream.on('finish', () => {
-            clearTimeout(downloadTimeout)
-            resolve()
-          })
-
-          // @ts-expect-error - this is supported
-          response.body?.pipe(writeStream)
-        })
-      } finally {
-        clearTimeout(timeoutId)
-      }
-    }, {
-      maxAttempts: 3,
-      retryDelay: _delay,
-      shouldRetry: isRetryableError,
-    }))()
-  } catch (error) {
-    if (error instanceof Error && error.message.includes('timed out')) {
-      throw new Error(`Studio initialization failed: Download timed out after ${DOWNLOAD_TIMEOUT_MS}ms. Please check your network connection and try again.`)
-    }
-
-    throw error
-  }
+      // @ts-expect-error - this is supported
+      response.body?.pipe(writeStream)
+    })
+  }, {
+    maxAttempts: 3,
+    retryDelay: _delay,
+    shouldRetry: isRetryableError,
+  }))()
 
   if (!responseSignature) {
     throw new Error('Unable to get studio signature')
@@ -141,7 +124,7 @@ export const retrieveAndExtractStudioBundle = async ({ studioUrl, projectId }: O
     return { studioHash: undefined }
   }
 
-  await downloadStudioBundleToTempDirectory({ studioUrl, projectId })
+  await downloadStudioBundleWithTimeout({ studioUrl, projectId })
 
   const studioHash = await getTarHash()
 
