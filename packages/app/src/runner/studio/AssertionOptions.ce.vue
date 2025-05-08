@@ -2,24 +2,32 @@
   <div
     ref="popper"
     class="assertion-options"
+    data-cy="assertion-options"
   >
     <div
-      v-for="{ name, value } in options"
-      :key="`${name}${value}`"
+      v-for="option in options"
+      :key="getOptionKey(option)"
       class="assertion-option"
-      @click.stop="() => onClick(name, value)"
+      data-cy="assertion-option"
+      tabindex="0"
+      role="button"
+      @keydown.enter="handleOptionClick(option)"
+      @keydown.space="handleOptionClick(option)"
+      @click.stop="handleOptionClick(option)"
     >
       <span
-        v-if="name"
+        v-if="option.name"
         class="assertion-option-name"
+        data-cy="assertion-option-name"
       >
-        {{ truncate(name) }}:{{ ' ' }}
+        {{ truncate(option.name) }}:{{ ' ' }}
       </span>
       <span
         v-else
         class="assertion-option-value"
+        data-cy="assertion-option-value"
       >
-        {{ typeof value === 'string' && truncate(value) }}
+        {{ typeof option.value === 'string' && truncate(option.value) }}
       </span>
     </div>
   </div>
@@ -30,45 +38,60 @@ import { createPopper } from '@popperjs/core'
 import { onMounted, ref, nextTick, Ref } from 'vue'
 import type { AssertionOption } from './types'
 
-const props = defineProps<{
+interface Props {
   type: string
   options: AssertionOption[]
-}>()
+}
+
+const props = defineProps<Props>()
 
 const emit = defineEmits<{
   (eventName: 'addAssertion', value: { type: string, name: string, value: string })
   (eventName: 'setPopperElement', value: HTMLElement)
 }>()
 
-const truncate = (str: string) => {
-  if (str && str.length > 80) {
-    return `${str.substr(0, 77)}...`
-  }
-
-  return str
-}
-
 const popper: Ref<HTMLElement | null> = ref(null)
 
-onMounted(() => {
-  nextTick(() => {
-    const popperEl = popper.value as HTMLElement
-    const reference = popperEl.parentElement as HTMLElement
+const TRUNCATE_LENGTH = 80
+const TRUNCATE_SUFFIX = '...'
 
-    createPopper(reference, popperEl, {
-      placement: 'right-start',
-    })
+const truncate = (str: string): string => {
+  if (!str || str.length <= TRUNCATE_LENGTH) {
+    return str
+  }
 
-    emit('setPopperElement', popperEl)
-  })
-})
-
-const onClick = (name, value) => {
-  emit('addAssertion', { type: props.type, name, value })
+  return `${str.substring(0, TRUNCATE_LENGTH - TRUNCATE_SUFFIX.length)}${TRUNCATE_SUFFIX}`
 }
+
+const getOptionKey = (option: AssertionOption): string => {
+  return `${option.name}${option.value}`
+}
+
+const handleOptionClick = (option: AssertionOption): void => {
+  emit('addAssertion', {
+    type: props.type,
+    name: option.name || '',
+    value: String(option.value || ''),
+  })
+}
+
+const initializePopper = (): void => {
+  const popperEl = popper.value as HTMLElement
+  const reference = popperEl.parentElement as HTMLElement
+
+  createPopper(reference, popperEl, {
+    placement: 'right-start',
+  })
+
+  emit('setPopperElement', popperEl)
+}
+
+onMounted(() => {
+  nextTick(initializePopper)
+})
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
 @import './assertions-style.scss';
 
 .assertion-options {
@@ -79,17 +102,35 @@ const onClick = (name, value) => {
   overflow: hidden;
   overflow-wrap: break-word;
   position: absolute;
+  right: 8px;
+  border-radius: 4px;
 
   .assertion-option {
+    font-size: 14px;
     cursor: pointer;
     padding: 0.4rem 0.6rem;
+    border: 1px solid transparent;
 
-    &:hover {
-      background-color: #e9ecef;
+    &:first-of-type {
+      border-top-left-radius: 4px;
+      border-top-right-radius: 4px;
     }
 
-    .assertion-option-value {
-      font-weight: 600;
+    &:last-of-type {
+      border-bottom-left-radius: 4px;
+      border-bottom-right-radius: 4px;
+    }
+
+    &:hover {
+      background-color: $gray-1000;
+      border: 1px solid $gray-950;
+    }
+
+    &:focus {
+      background-color: $gray-950;
+      color: $indigo-300;
+      outline: none;
+      @include box-shadow;
     }
   }
 }

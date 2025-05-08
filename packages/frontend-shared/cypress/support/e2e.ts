@@ -12,6 +12,7 @@ import type sinon from 'sinon'
 import type pDefer from 'p-defer'
 import 'cypress-plugin-tab'
 import type { Response } from 'cross-fetch'
+import type nock from 'nock'
 
 import type { E2ETaskMap, InternalOpenProjectCapabilities } from '../e2e/e2ePluginSetup'
 import { installCustomPercyCommand } from './customPercyCommand'
@@ -78,6 +79,18 @@ export interface FindBrowsersOptions {
    * })
    */
   filter?(browser: Browser): boolean
+}
+
+export interface MockNodeCloudRequestOptions {
+  url: string
+  method: string
+  body: nock.Body
+}
+
+export interface MockNodeCloudStreamingRequestOptions {
+  url: string
+  method: string
+  body: nock.Body
 }
 
 export interface ValidateExternalLinkOptions {
@@ -184,6 +197,20 @@ declare global {
        * Get the AUT <iframe>. Useful for Cypress in Cypress tests.
        */
       getAutIframe(): Chainable<JQuery<HTMLIFrameElement>>
+      /**
+       * Mocks a studio full snapshot as if it were captured in the inner Cypress's protocol.
+       * This is necessary because protocol does not capture things properly in the inner Cypress
+       * when running in Cypress in Cypress.
+       */
+      mockStudioFullSnapshot(fullSnapshot: Record<string, any>): void
+      /**
+       * Mocks a node cloud request
+       */
+      mockNodeCloudRequest(options: { url: string, method: string, body: nock.Body }): void
+      /**
+       * Mocks a node cloud streaming request
+       */
+      mockNodeCloudStreamingRequest(options: { url: string, method: string, body: nock.Body }): void
     }
 
   }
@@ -257,6 +284,24 @@ function openProject (projectName: WithPrefix<ProjectFixtureDir>, argv: string[]
     Cypress.env('e2e_serverPort', obj.e2eServerPort)
 
     return obj.modeOptions
+  })
+}
+
+function mockStudioFullSnapshot (fullSnapshot: Record<string, any>) {
+  return logInternal({ name: 'mockStudioFullSnapshot' }, () => {
+    return taskInternal('__internal_mockStudioFullSnapshot', fullSnapshot)
+  })
+}
+
+function mockNodeCloudRequest (options: MockNodeCloudRequestOptions) {
+  return logInternal({ name: 'mockNodeCloudRequest' }, () => {
+    return taskInternal('__internal_mockNodeCloudRequest', options)
+  })
+}
+
+function mockNodeCloudStreamingRequest (options: MockNodeCloudStreamingRequestOptions) {
+  return logInternal({ name: 'mockNodeCloudStreamingRequest' }, () => {
+    return taskInternal('__internal_mockNodeCloudStreamingRequest', options)
   })
 }
 
@@ -602,6 +647,9 @@ Cypress.Commands.add('remoteGraphQLInterceptBatched', remoteGraphQLInterceptBatc
 Cypress.Commands.add('findBrowsers', findBrowsers)
 Cypress.Commands.add('tabUntil', tabUntil)
 Cypress.Commands.add('validateExternalLink', { prevSubject: ['optional', 'element'] }, validateExternalLink)
+Cypress.Commands.add('mockStudioFullSnapshot', mockStudioFullSnapshot)
+Cypress.Commands.add('mockNodeCloudRequest', mockNodeCloudRequest)
+Cypress.Commands.add('mockNodeCloudStreamingRequest', mockNodeCloudStreamingRequest)
 
 installCustomPercyCommand({
   elementOverrides: {
