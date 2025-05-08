@@ -896,6 +896,63 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       expect(this.project['_protocolManager']).to.be.undefined
     })
 
+    it('does not capture studio started event if the user is accessing cloud studio', async function () {
+      process.env.CYPRESS_ENABLE_CLOUD_STUDIO = 'true'
+      process.env.CYPRESS_LOCAL_STUDIO_PATH = 'false'
+
+      const mockAccessStudioAI = sinon.stub().resolves(true)
+      const mockCaptureStudioEvent = sinon.stub().resolves()
+
+      this.project.spec = {}
+
+      this.project._cfg = this.project._cfg || {}
+      this.project._cfg.projectId = 'test-project-id'
+      this.project.ctx.coreData.user = { email: 'test@example.com' }
+      this.project.ctx.coreData.machineId = Promise.resolve('test-machine-id')
+
+      const studioManager = new StudioManager()
+
+      studioManager.canAccessStudioAI = mockAccessStudioAI
+      studioManager.captureStudioEvent = mockCaptureStudioEvent
+      const studioLifecycleManager = new StudioLifecycleManager()
+
+      this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
+
+      studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
+
+      studioLifecycleManager.isStudioReady = sinon.stub().returns(true)
+
+      // Create a browser object
+      this.project.browser = {
+        name: 'chrome',
+        family: 'chromium',
+      }
+
+      this.project.options = { browsers: [this.project.browser] }
+
+      sinon.stub(browsers, 'closeProtocolConnection').resolves()
+
+      sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
+      sinon.stub(this.project, 'protocolManager').get(() => {
+        return this.project['_protocolManager']
+      }).set((protocolManager) => {
+        this.project['_protocolManager'] = protocolManager
+      })
+
+      let studioInitPromise
+
+      this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
+        studioInitPromise = callbacks.onStudioInit()
+      })
+
+      this.project.startWebsockets({}, {})
+
+      const { canAccessStudioAI } = await studioInitPromise
+
+      expect(canAccessStudioAI).to.be.false
+      expect(mockCaptureStudioEvent).not.to.be.called
+    })
+
     it('passes onStudioDestroy callback', async function () {
       // Set up minimal required properties
       this.project.ctx = this.project.ctx || {}
