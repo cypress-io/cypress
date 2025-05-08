@@ -115,7 +115,7 @@ init({
 onMounted(maybeRenderReactComponent)
 onBeforeUnmount(unmountReactComponent)
 
-watch(() => props.studioStatus, (newStatus, oldStatus) => {
+watch(() => props.studioStatus, (newStatus) => {
   if (newStatus === 'ENABLED') {
     loadStudioComponent()
   }
