@@ -216,7 +216,7 @@ async function trashAssets (config: Cfg) {
   try {
     await Promise.all([
       trash.folder(config.videosFolder),
-      trash.folder(config.screenshotsFolder),
+      typeof config.screenshotsFolder === 'string' ? trash.folder(config.screenshotsFolder) : Promise.resolve(),
       trash.folder(config.downloadsFolder),
     ])
   } catch (err) {
