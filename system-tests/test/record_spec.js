@@ -2365,7 +2365,7 @@ describe('e2e record', () => {
               expect(artifactReport?.protocol?.errorStack).to.exist
               expect(artifactReport?.protocol?.errorStack).to.not.be.empty
               expect(artifactReport?.protocol?.url).to.exist
-              expect(artifactReport?.protocol?.url).to.not.be.empty()
+              expect(artifactReport?.protocol?.url).to.not.be.empty
             })
           })
         })
@@ -2399,7 +2399,7 @@ describe('e2e record', () => {
               expect(artifactReport?.protocol?.errorStack).to.exist
               expect(artifactReport?.protocol?.errorStack).to.not.be.empty
               expect(artifactReport?.protocol?.url).to.exist
-              expect(artifactReport?.protocol?.url).to.not.be.empty()
+              expect(artifactReport?.protocol?.url).to.not.be.empty
             })
           })
         })
@@ -2428,7 +2428,7 @@ describe('e2e record', () => {
               expect(artifactReport?.protocol?.errorStack).to.exist
               expect(artifactReport?.protocol?.errorStack).to.not.be.empty
               expect(artifactReport?.protocol?.url).to.exist
-              expect(artifactReport?.protocol?.url).to.not.be.empty()
+              expect(artifactReport?.protocol?.url).to.not.be.empty
             })
           })
         })
@@ -2457,7 +2457,7 @@ describe('e2e record', () => {
               expect(artifactReport?.protocol?.errorStack).to.exist
               expect(artifactReport?.protocol?.errorStack).to.not.be.empty
               expect(artifactReport?.protocol?.url).to.exist
-              expect(artifactReport?.protocol?.url).to.not.be.empty()
+              expect(artifactReport?.protocol?.url).to.not.be.empty
             })
           })
         })
@@ -2484,7 +2484,7 @@ describe('e2e record', () => {
               expect(artifactReport?.protocol?.error).to.exist
               expect(artifactReport?.protocol?.error).to.not.be.empty
               expect(artifactReport?.protocol?.url).to.exist
-              expect(artifactReport?.protocol?.url).to.not.be.empty()
+              expect(artifactReport?.protocol?.url).to.not.be.empty
             })
           })
         })
@@ -2644,7 +2644,7 @@ describe('capture-protocol api errors', () => {
 
         expect(artifactReport?.protocol?.error).to.equal(`Failed to upload Test Replay after 3 attempts. Errors: ${[expectedErrorMessage, expectedErrorMessage, expectedErrorMessage].join(', ')}`)
         expect(artifactReport?.protocol?.errorStack).to.exist
-        expect(artifactReport?.protocol?.errorStack).to.not.be.empty()
+        expect(artifactReport?.protocol?.errorStack).to.not.be.empty
       })
     })
   })
@@ -2712,7 +2712,7 @@ describe('capture-protocol api errors', () => {
         )
 
         expect(artifactReport?.protocol?.errorStack).to.exist
-        expect(artifactReport?.protocol?.errorStack).to.not.be.empty()
+        expect(artifactReport?.protocol?.errorStack).to.not.be.empty
       })
     })
   })
