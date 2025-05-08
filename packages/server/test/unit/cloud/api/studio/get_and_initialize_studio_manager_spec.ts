@@ -28,7 +28,11 @@ describe('getAndInitializeStudioManager', () => {
     ensureStub = sinon.stub()
     copyStub = sinon.stub()
     readFileStub = sinon.stub()
-    crossFetchStub = sinon.stub()
+    crossFetchStub = sinon.stub().resolves({
+      ok: true,
+      statusText: 'OK',
+    })
+
     createReadStreamStub = sinon.stub()
     createWriteStreamStub = sinon.stub()
     verifySignatureFromFileStub = sinon.stub()
@@ -38,9 +42,6 @@ describe('getAndInitializeStudioManager', () => {
 
     getAndInitializeStudioManager = (proxyquire('../lib/cloud/api/studio/get_and_initialize_studio_manager', {
       fs: {
-        promises: {
-          rm: rmStub.resolves(),
-        },
         createReadStream: createReadStreamStub,
         createWriteStream: createWriteStreamStub,
       },
@@ -49,6 +50,7 @@ describe('getAndInitializeStudioManager', () => {
         platform: () => 'linux',
       },
       'fs-extra': {
+        remove: rmStub.resolves(),
         ensureDir: ensureStub.resolves(),
         copy: copyStub.resolves(),
         readFile: readFileStub.resolves('console.log("studio script")'),
@@ -110,6 +112,8 @@ describe('getAndInitializeStudioManager', () => {
       })
 
       crossFetchStub.resolves({
+        ok: true,
+        statusText: 'OK',
         body: readStream,
         headers: {
           get: (header) => {
@@ -251,6 +255,8 @@ describe('getAndInitializeStudioManager', () => {
       })
 
       crossFetchStub.resolves({
+        ok: true,
+        statusText: 'OK',
         body: readStream,
         headers: {
           get: (header) => {
@@ -298,7 +304,7 @@ describe('getAndInitializeStudioManager', () => {
       expect(studioManagerSetupStub).to.be.calledWithMatch({
         script: 'console.log("studio script")',
         studioPath: '/tmp/cypress/studio',
-        studioHash: 'V8T1PKuSTK1h9gr-1Z2Wtx__bxTpCXWRZ57sKmPVTSs',
+        studioHash: 'abc',
       })
     })
 
@@ -318,6 +324,8 @@ describe('getAndInitializeStudioManager', () => {
 
       crossFetchStub.onFirstCall().rejects(new HttpError('Failed to fetch', 'url', 502, 'Bad Gateway', 'Bad Gateway', sinon.stub()))
       crossFetchStub.onSecondCall().resolves({
+        ok: true,
+        statusText: 'OK',
         body: readStream,
         headers: {
           get: (header) => {
@@ -365,7 +373,7 @@ describe('getAndInitializeStudioManager', () => {
       expect(studioManagerSetupStub).to.be.calledWithMatch({
         script: 'console.log("studio script")',
         studioPath: '/tmp/cypress/studio',
-        studioHash: 'V8T1PKuSTK1h9gr-1Z2Wtx__bxTpCXWRZ57sKmPVTSs',
+        studioHash: 'abc',
       })
     })
 
@@ -424,6 +432,43 @@ describe('getAndInitializeStudioManager', () => {
       })
     })
 
+    it('throws an error and returns a studio manager in error state if the response status is not ok', async () => {
+      const mockGetCloudUrl = sinon.stub()
+      const mockAdditionalHeaders = sinon.stub()
+      const cloud = {
+        getCloudUrl: mockGetCloudUrl,
+        additionalHeaders: mockAdditionalHeaders,
+      } as unknown as CloudDataSource
+
+      mockGetCloudUrl.returns('http://localhost:1234')
+      mockAdditionalHeaders.resolves({
+        a: 'b',
+        c: 'd',
+      })
+
+      crossFetchStub.resolves({
+        ok: false,
+        statusText: 'Some failure',
+      })
+
+      const projectId = '12345'
+
+      await getAndInitializeStudioManager({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId, cloudDataSource: cloud })
+
+      expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
+      expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')
+      expect(createInErrorManagerStub).to.be.calledWithMatch({
+        error: sinon.match.instanceOf(Error).and(sinon.match.has('message', 'Failed to download studio bundle: Some failure')),
+        cloudApi: {
+          cloudUrl: 'http://localhost:1234',
+          cloudHeaders: { a: 'b', c: 'd' },
+        },
+        studioHash: undefined,
+        projectSlug: '12345',
+        studioMethod: 'getAndInitializeStudioManager',
+      })
+    })
+
     it('throws an error and returns a studio manager in error state if the signature verification fails', async () => {
       const mockGetCloudUrl = sinon.stub()
       const mockAdditionalHeaders = sinon.stub()
@@ -439,6 +484,8 @@ describe('getAndInitializeStudioManager', () => {
       })
 
       crossFetchStub.resolves({
+        ok: true,
+        statusText: 'OK',
         body: readStream,
         headers: {
           get: (header) => {
@@ -501,6 +548,8 @@ describe('getAndInitializeStudioManager', () => {
       })
 
       crossFetchStub.resolves({
+        ok: true,
+        statusText: 'OK',
         body: readStream,
         headers: {
           get: () => null,
