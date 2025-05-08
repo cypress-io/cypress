@@ -65,9 +65,9 @@ export function assertClosingPanelWithoutChanges () {
     // No change, since we closed studio
     expect(spec.trim().replace(/\r/g, '')).to.eq(`
 describe('studio functionality', () => {
-it('visits a basic html page', () => {
-  cy.visit('cypress/e2e/index.html')
-})
+  it('visits a basic html page', () => {
+    cy.visit('cypress/e2e/index.html')
+  })
 })`.trim())
   })
 }
