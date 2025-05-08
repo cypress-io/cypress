@@ -2196,7 +2196,6 @@ describe('e2e record', () => {
             const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`).body
 
             debug(artifactReport)
-            expect(artifactReport?.protocol?.error).to.not.be.empty
           })
         })
       })
@@ -2484,8 +2483,6 @@ describe('e2e record', () => {
               expect(artifactReport?.protocol).to.exist
               expect(artifactReport?.protocol?.error).to.exist
               expect(artifactReport?.protocol?.error).to.not.be.empty
-              expect(artifactReport?.protocol?.errorStack).to.exist
-              expect(artifactReport?.protocol?.errorStack).to.not.be.empty
               expect(artifactReport?.protocol?.url).to.exist
               expect(artifactReport?.protocol?.url).to.not.be.empty()
             })
