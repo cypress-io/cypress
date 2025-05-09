@@ -1,4 +1,13 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 14.3.4
+
+_Released 5/20/2025 (PENDING)_
+
+**Dependency Updates:**
+
+- Upgraded `trash` from `5.2.0` to `7.2.0`. Addressed in [#31667](https://github.com/cypress-io/cypress/pull/31667).
+
+
 ## 14.3.3
 
 _Released 5/6/2025_
