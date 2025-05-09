@@ -276,7 +276,7 @@ describe('detectLanguage', () => {
     it('with tsconfig.json in cypress directory', async () => {
       const projectRoot = await scaffoldMigrationProject('ts-proj-tsconfig-in-cypress')
 
-      fakeDepsInNodeModules(projectRoot, [{ devDependency: 'typescript', version: '4.3.6' }])
+      fakeDepsInNodeModules(projectRoot, [{ devDependency: 'typescript', version: '5.8.3' }])
       const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
       expect(actual).to.eq('ts')
