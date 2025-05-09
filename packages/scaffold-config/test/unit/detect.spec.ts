@@ -285,7 +285,7 @@ describe('detectLanguage', () => {
     it('with only .d.ts files', async () => {
       const projectRoot = await scaffoldMigrationProject('dts-files-only')
 
-      fakeDepsInNodeModules(projectRoot, [{ devDependency: 'typescript', version: '4.3.6' }])
+      fakeDepsInNodeModules(projectRoot, [{ devDependency: 'typescript', version: '5.8.3' }])
 
       const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
