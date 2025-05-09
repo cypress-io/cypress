@@ -5,7 +5,7 @@ const verifyPassedAndFailedAreSame = (expectedFailures) => {
   return ({ stdout }) => {
     const passes = stdout.match(/✓ ✓ VERIFY/g)
 
-    expect(passes?.length || 0, 'number of passes should equal the number of failures').to.equal(expectedFailures)
+    expect(passes?.length || 0).to.equal(expectedFailures, 'number of passes should equal the number of failures')
   }
 }
 

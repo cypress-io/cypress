@@ -18,7 +18,7 @@ module.exports = {
         err = e
       }
 
-      expect(err).to.include({ code: 'EACCES' })
+      expect(err).to.have.property('code', 'EACCES')
 
       console.log(`✅ ${config.projectRoot} is not writable`)
 
