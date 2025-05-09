@@ -73,6 +73,7 @@
             :event-manager="eventManager"
             :get-aut-iframe="getAutIframeModel"
             :should-show-studio-button="shouldShowStudioButton"
+            :studio-beta-available="studioBetaAvailable"
           />
         </HideDuringScreenshot>
 
@@ -247,8 +248,12 @@ const studioStatus = computed(() => {
   return props.gql.studio?.status
 })
 
+const studioBetaAvailable = computed(() => {
+  return studioStatus.value === 'ENABLED' && !!props.gql.studio
+})
+
 const shouldShowStudioButton = computed(() => {
-  return !!props.gql.studio && studioStatus.value === 'ENABLED' && !studioStore.isOpen
+  return studioStatus.value === 'ENABLED' && !!props.gql.studio && !studioStore.isOpen
 })
 
 const shouldShowStudioPanel = computed(() => {
