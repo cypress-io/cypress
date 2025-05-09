@@ -33,6 +33,29 @@ This cache should be maintained and updated over time. Rather than having this m
 
 ## Troubleshooting
 
+### Missing Dependency
+
+#### Background on Snapshot Dependencies
+
+When we generate snapshots, we create a metadata file that contains information about all dependencies included in the snapshot. In theory, these dependencies could be removed from the binary to save space, since they're already included in the snapshot. This helps offset the size increase from the snapshot itself.
+
+However, not all dependencies can be safely removed. There are two main categories of dependencies that must be preserved:
+
+1. Dependencies (and their sub-dependencies) that are used in child processes
+2. Dependencies (and their sub-dependencies) that are dynamically loaded and cannot be determined by esbuild
+
+To handle this, we maintain a list of these dependencies and use esbuild to retrieve all their child dependencies. This list is defined in [binary-cleanup.js](https://github.com/cypress-io/cypress/blob/develop/scripts/binary/binary-cleanup.js#L40-L64). We then remove these dependencies from the list of v8 snapshot metadata dependencies, leaving only the ones that are safe to remove.
+
+#### Handling Missing Dependencies
+
+If you encounter a missing dependency error, follow these steps:
+
+1. Look through the stack trace of the missing dependency error
+2. Try to identify where the dependency is being dynamically required/imported
+3. Add the dependency to the list in [binary-cleanup.js](https://github.com/cypress-io/cypress/blob/develop/scripts/binary/binary-cleanup.js#L40-L64)
+
+This will ensure the dependency is preserved in the binary and available when needed.
+
 ### Local Development
 
 If you're running into problems locally, either with generating the snapshot or at runtime, a good first step is to clean everything and start from scratch. This command will accomplish that (note that it will delete any new unstaged files, so if you want to keep them, either stash them or stage them):
