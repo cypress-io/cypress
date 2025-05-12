@@ -3,6 +3,10 @@
 
 _Released 5/20/2025 (PENDING)_
 
+**Misc:**
+
+- Cursor is now available as an IDE option for opening files in Cypress, if it is installed on your system. Addressed in [#31691](https://github.com/cypress-io/cypress/pull/31691).
+
 **Dependency Updates:**
 
 - Upgraded `trash` from `5.2.0` to `7.2.0`. Addressed in [#31667](https://github.com/cypress-io/cypress/pull/31667).
