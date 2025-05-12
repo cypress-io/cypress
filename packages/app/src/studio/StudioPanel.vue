@@ -120,8 +120,6 @@ watch(() => props.studioStatus, (newStatus) => {
   if (newStatus === 'ENABLED') {
     loadStudioComponent()
   }
-
-  maybeRenderReactComponent()
 }, { immediate: true })
 
 function loadStudioComponent () {
