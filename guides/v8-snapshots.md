@@ -42,7 +42,7 @@ When we generate snapshots, we create a metadata file that contains information 
 However, not all dependencies can be safely removed. There are two main categories of dependencies that must be preserved:
 
 1. Dependencies (and their sub-dependencies) that are used in child processes
-2. Dependencies (and their sub-dependencies) that are dynamically loaded and cannot be determined by esbuild
+2. Dependencies (and their sub-dependencies) that are dynamically loaded and cannot be determined by `esbuild`
 
 To handle this, we maintain a list of these dependencies and use esbuild to retrieve all their child dependencies. This list is defined in [binary-cleanup.js](https://github.com/cypress-io/cypress/blob/develop/scripts/binary/binary-cleanup.js#L40-L64). We then remove these dependencies from the list of v8 snapshot metadata dependencies, leaving only the ones that are safe to remove.
 
