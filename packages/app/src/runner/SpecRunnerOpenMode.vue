@@ -268,7 +268,7 @@ const cloudStudioEnabled = computed(() => {
 })
 
 const studioBetaAvailable = computed(() => {
-  return studioStatus.value === 'ENABLED' && !!props.gql.studio
+  return !!cloudStudioEnabled.value
 })
 
 const shouldShowStudioButton = computed(() => {
