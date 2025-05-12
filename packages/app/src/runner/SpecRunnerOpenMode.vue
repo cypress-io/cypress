@@ -169,7 +169,7 @@ fragment SpecRunner_Preferences on Query {
 
 gql`
 fragment SpecRunner_Studio on Query {
-  cloudStudioEnabled
+  cloudStudioRequested
 }
 `
 
@@ -261,20 +261,20 @@ useSubscription({ query: StudioStatus_ChangeDocument }, (_, data) => {
   return data
 })
 
-const cloudStudioEnabled = computed(() => {
-  return props.gql.cloudStudioEnabled
+const cloudStudioRequested = computed(() => {
+  return props.gql.cloudStudioRequested
 })
 
 const studioBetaAvailable = computed(() => {
-  return !!cloudStudioEnabled.value
+  return !!cloudStudioRequested.value
 })
 
 const shouldShowStudioButton = computed(() => {
-  return !!cloudStudioEnabled.value && !studioStore.isOpen
+  return !!cloudStudioRequested.value && !studioStore.isOpen
 })
 
 const shouldShowStudioPanel = computed(() => {
-  return !!cloudStudioEnabled.value && (studioStore.isLoading || studioStore.isActive)
+  return !!cloudStudioRequested.value && (studioStore.isLoading || studioStore.isActive)
 })
 
 const hideCommandLog = runnerUiStore.hideCommandLog

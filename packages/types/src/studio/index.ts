@@ -19,6 +19,7 @@ export interface StudioLifecycleManagerShape {
   isStudioReady: () => boolean
   registerStudioReadyListener: (listener: (studioManager: StudioManagerShape) => void) => void
   cloudStudioEnabled: boolean
+  updateStatus: (status: StudioStatus) => void
 }
 
 export type StudioErrorReport = {

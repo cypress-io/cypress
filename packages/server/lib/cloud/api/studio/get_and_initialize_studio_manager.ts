@@ -12,6 +12,7 @@ import { isRetryableError } from '../../network/is_retryable_error'
 import { PUBLIC_KEY_VERSION } from '../../constants'
 import { CloudRequest } from '../cloud_request'
 import type { CloudDataSource } from '@packages/data-context/src/sources'
+import type { StudioLifecycleManagerShape } from '@packages/types'
 
 interface Options {
   studioUrl: string
@@ -124,7 +125,7 @@ export const retrieveAndExtractStudioBundle = async ({ studioUrl, projectId, dow
   return { studioHash }
 }
 
-export const getAndInitializeStudioManager = async ({ studioUrl, projectId, cloudDataSource, shouldEnableStudio, downloadTimeoutMs }: { studioUrl: string, projectId?: string, cloudDataSource: CloudDataSource, shouldEnableStudio: boolean, downloadTimeoutMs?: number }): Promise<StudioManager> => {
+export const getAndInitializeStudioManager = async ({ studioUrl, projectId, cloudDataSource, shouldEnableStudio, downloadTimeoutMs, lifecycleManager }: { studioUrl: string, projectId?: string, cloudDataSource: CloudDataSource, shouldEnableStudio: boolean, downloadTimeoutMs?: number, lifecycleManager?: StudioLifecycleManagerShape }): Promise<StudioManager> => {
   let script: string
 
   const cloudEnv = (process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'production') as 'development' | 'staging' | 'production'
@@ -153,6 +154,7 @@ export const getAndInitializeStudioManager = async ({ studioUrl, projectId, clou
         asyncRetry,
       },
       shouldEnableStudio,
+      lifecycleManager,
     })
 
     return studioManager
@@ -177,6 +179,7 @@ export const getAndInitializeStudioManager = async ({ studioUrl, projectId, clou
       projectSlug: projectId,
       error: actualError,
       studioMethod: 'getAndInitializeStudioManager',
+      lifecycleManager,
     })
   } finally {
     await remove(bundlePath)

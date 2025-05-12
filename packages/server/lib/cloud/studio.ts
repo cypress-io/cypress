@@ -1,4 +1,4 @@
-import type { StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape, StudioCloudApi, StudioAIInitializeOptions, StudioEvent } from '@packages/types'
+import type { StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape, StudioCloudApi, StudioAIInitializeOptions, StudioEvent, StudioLifecycleManagerShape } from '@packages/types'
 import type { Router } from 'express'
 import type { Socket } from 'socket.io'
 import Debug from 'debug'
@@ -15,6 +15,7 @@ interface SetupOptions {
   projectSlug?: string
   cloudApi: StudioCloudApi
   shouldEnableStudio: boolean
+  lifecycleManager?: StudioLifecycleManagerShape
 }
 
 const debug = Debug('cypress:server:studio')
@@ -23,11 +24,22 @@ export class StudioManager implements StudioManagerShape {
   status: StudioStatus = 'NOT_INITIALIZED'
   protocolManager: ProtocolManagerShape | undefined
   private _studioServer: StudioServerShape | undefined
+  private lifecycleManager?: StudioLifecycleManagerShape
 
-  static createInErrorManager ({ cloudApi, studioHash, projectSlug, error, studioMethod, studioMethodArgs }: ReportStudioErrorOptions): StudioManager {
+  setStatus (status: StudioStatus) {
+    this.status = status
+    if (this.lifecycleManager) {
+      this.lifecycleManager.updateStatus(status)
+    } else {
+      debug('StudioManager.setStatus: lifecycleManager does not exist - not updating status')
+    }
+  }
+
+  static createInErrorManager ({ cloudApi, studioHash, projectSlug, error, studioMethod, studioMethodArgs, lifecycleManager }: ReportStudioErrorOptions & { lifecycleManager?: StudioLifecycleManagerShape }): StudioManager {
     const manager = new StudioManager()
 
-    manager.status = 'IN_ERROR'
+    manager.lifecycleManager = lifecycleManager
+    manager.setStatus('IN_ERROR')
 
     reportStudioError({
       cloudApi,
@@ -41,7 +53,9 @@ export class StudioManager implements StudioManagerShape {
     return manager
   }
 
-  async setup ({ script, studioPath, studioHash, projectSlug, cloudApi, shouldEnableStudio }: SetupOptions): Promise<void> {
+  async setup ({ script, studioPath, studioHash, projectSlug, cloudApi, shouldEnableStudio, lifecycleManager }: SetupOptions): Promise<void> {
+    this.lifecycleManager = lifecycleManager
+
     const { createStudioServer } = requireScript<StudioServer>(script).default
 
     this._studioServer = await createStudioServer({
@@ -52,7 +66,7 @@ export class StudioManager implements StudioManagerShape {
       betterSqlite3Path: path.dirname(require.resolve('better-sqlite3/package.json')),
     })
 
-    this.status = shouldEnableStudio ? 'ENABLED' : 'INITIALIZED'
+    this.setStatus(shouldEnableStudio ? 'ENABLED' : 'INITIALIZED')
   }
 
   initializeRoutes (router: Router): void {
@@ -118,7 +132,7 @@ export class StudioManager implements StudioManagerShape {
         actualError = error
       }
 
-      this.status = 'IN_ERROR'
+      this.setStatus('IN_ERROR')
       this.reportError(actualError, method, ...args)
     }
   }
@@ -150,7 +164,7 @@ export class StudioManager implements StudioManagerShape {
 
       // only set error state if this request is essential
       if (isEssential) {
-        this.status = 'IN_ERROR'
+        this.setStatus('IN_ERROR')
       }
 
       this.reportError(actualError, method, ...args)

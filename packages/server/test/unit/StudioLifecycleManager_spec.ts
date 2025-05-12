@@ -10,7 +10,6 @@ import * as reportStudioErrorPath from '../../lib/cloud/api/studio/report_studio
 import ProtocolManager from '../../lib/cloud/protocol'
 const api = require('../../lib/cloud/api').default
 import * as postStudioSessionModule from '../../lib/cloud/api/studio/post_studio_session'
-import type { StudioStatus } from '@packages/types'
 
 // Helper to wait for next tick in event loop
 const nextTick = () => new Promise((resolve) => process.nextTick(resolve))
@@ -382,7 +381,6 @@ describe('StudioLifecycleManager', () => {
       // @ts-expect-error - accessing private property
       studioLifecycleManager.ctx = mockCtx
 
-      // @ts-expect-error - calling private method
       studioLifecycleManager.updateStatus('INITIALIZING')
 
       // Wait for nextTick to process
@@ -392,7 +390,6 @@ describe('StudioLifecycleManager', () => {
 
       // Same status should not trigger another event
       studioStatusChangeEmitterStub.reset()
-      // @ts-expect-error - calling private method
       studioLifecycleManager.updateStatus('INITIALIZING')
 
       await nextTick()
@@ -400,69 +397,7 @@ describe('StudioLifecycleManager', () => {
 
       // Different status should trigger another event
       studioStatusChangeEmitterStub.reset()
-      // @ts-expect-error - calling private method
       studioLifecycleManager.updateStatus('ENABLED')
-
-      await nextTick()
-      expect(studioStatusChangeEmitterStub).to.be.calledOnce
-    })
-
-    it('emits events via nextTick to ensure asynchronous delivery', async () => {
-      // Setup the context to test status updates
-      // @ts-expect-error - accessing private property
-      studioLifecycleManager.ctx = mockCtx
-
-      const statusUpdateOrder: string[] = []
-
-      // Capture the order of operations
-      studioStatusChangeEmitterStub.callsFake(() => {
-        statusUpdateOrder.push('event emitted')
-      })
-
-      // @ts-expect-error - calling private method
-      studioLifecycleManager.updateStatus('ENABLED')
-      statusUpdateOrder.push('updateStatus completed')
-
-      // Before nextTick, the event should not have been emitted yet
-      expect(studioStatusChangeEmitterStub).not.to.be.called
-      expect(statusUpdateOrder).to.deep.equal(['updateStatus completed'])
-
-      // After nextTick, the event should be emitted
-      await nextTick()
-      expect(statusUpdateOrder).to.deep.equal(['updateStatus completed', 'event emitted'])
-      expect(studioStatusChangeEmitterStub).to.be.calledOnce
-    })
-
-    it('proxies the status property to track changes', async () => {
-      // @ts-expect-error - accessing private property
-      studioLifecycleManager.ctx = mockCtx
-
-      const studioManager = {
-        status: 'INITIALIZED' as StudioStatus,
-      } as StudioManager
-
-      // @ts-expect-error - calling private method
-      studioLifecycleManager.setupStatusProxy(studioManager)
-
-      expect(studioManager.status).to.equal('INITIALIZED')
-      // Same status should not trigger another event
-      expect(studioStatusChangeEmitterStub).not.to.be.called
-
-      studioManager.status = 'ENABLED'
-      expect(studioManager.status).to.equal('ENABLED')
-
-      await nextTick()
-      expect(studioStatusChangeEmitterStub).to.be.calledOnce
-
-      studioStatusChangeEmitterStub.reset()
-      studioManager.status = 'ENABLED'
-
-      await nextTick()
-      // Same status should not trigger another event
-      expect(studioStatusChangeEmitterStub).not.to.be.called
-
-      studioStatusChangeEmitterStub.reset()
-      studioManager.status = 'IN_ERROR'
 
       await nextTick()
       expect(studioStatusChangeEmitterStub).to.be.calledOnce

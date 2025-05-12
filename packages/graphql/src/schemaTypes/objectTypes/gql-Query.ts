@@ -101,9 +101,9 @@ export const Query = objectType({
       resolve: (source, args, ctx) => ctx.coreData.authState,
     })
 
-    t.field('cloudStudioEnabled', {
+    t.field('cloudStudioRequested', {
       type: 'Boolean',
-      description: 'Whether cloud studio is enabled',
+      description: 'Whether cloud studio is requested by the environment',
       resolve: (source, args, ctx) => ctx.coreData.studioLifecycleManager?.cloudStudioEnabled ?? false,
     })
 

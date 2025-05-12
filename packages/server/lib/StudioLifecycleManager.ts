@@ -135,9 +135,8 @@ export class StudioLifecycleManager {
       projectId,
       cloudDataSource,
       shouldEnableStudio: this.cloudStudioEnabled,
+      lifecycleManager: this,
     })
-
-    this.setupStatusProxy(studioManager)
 
     if (studioManager.status === 'ENABLED') {
       debug('Cloud studio is enabled - setting up protocol')
@@ -202,34 +201,20 @@ export class StudioLifecycleManager {
     }
   }
 
-  private updateStatus (status: StudioStatus) {
-    if (status === this.lastStatus) return
+  public updateStatus (status: StudioStatus) {
+    if (status === this.lastStatus) {
+      debug('Studio status unchanged: %s', status)
+
+      return
+    }
 
     debug('Studio status changed: %s → %s', this.lastStatus, status)
     this.lastStatus = status
 
     if (this.ctx) {
-      process.nextTick(() => {
-        this.ctx?.emitter.studioStatusChange()
-      })
+      this.ctx?.emitter.studioStatusChange()
     } else {
       debug('No ctx available, cannot emit studioStatusChange')
     }
-  }
-
-  // Monitor status changes on the studioManager
-  private setupStatusProxy (studioManager: StudioManager) {
-    let currentStatus = studioManager.status
-
-    Object.defineProperty(studioManager, 'status', {
-      get: () => currentStatus,
-      set: (newStatus: StudioStatus) => {
-        debug('Studio status change detected: %s → %s', currentStatus, newStatus)
-        currentStatus = newStatus
-        this.updateStatus(newStatus)
-      },
-      enumerable: true,
-      configurable: true,
-    })
   }
 }

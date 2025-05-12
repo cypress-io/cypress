@@ -93,7 +93,8 @@ describe('Studio Cloud', () => {
 
   it('hides selector playground and studio controls when studio beta is available', () => {
     launchStudio({ enableCloudStudio: true })
-    cy.get('[data-cy="studio-header-studio-button"]').click()
+
+    cy.findByTestId('studio-panel').should('be.visible')
 
     cy.get('[data-cy="playground-activator"]').should('not.exist')
     cy.get('[data-cy="studio-toolbar"]').should('not.exist')
