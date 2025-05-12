@@ -154,7 +154,6 @@ export const getAndInitializeStudioManager = async ({ studioUrl, projectId, clou
         asyncRetry,
       },
       shouldEnableStudio,
-      lifecycleManager,
     })
 
     return studioManager
@@ -179,7 +178,6 @@ export const getAndInitializeStudioManager = async ({ studioUrl, projectId, clou
       projectSlug: projectId,
       error: actualError,
       studioMethod: 'getAndInitializeStudioManager',
-      lifecycleManager,
     })
   } finally {
     await remove(bundlePath)
