@@ -87,7 +87,8 @@ Follow these steps:
 
 1. Look through the stack trace of the missing dependency error
 2. Try to identify where the dependency is being dynamically required/imported
-3. Add the dependency to the list in [binary-cleanup.js](https://github.com/cypress-io/cypress/blob/develop/scripts/binary/binary-cleanup.js#L40-L64)
+3. Validate that the dynamically required/imported dependency is missing from the binary
+4. Add the dependency to the list in [binary-cleanup.js](https://github.com/cypress-io/cypress/blob/develop/scripts/binary/binary-cleanup.js#L40-L64)
 
 This will ensure the dependency is preserved in the binary and available when needed.
 
