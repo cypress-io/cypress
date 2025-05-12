@@ -24,7 +24,7 @@ export class StudioLifecycleManager {
   private ctx?: DataContext
   private lastStatus?: StudioStatus
 
-  public get cloudStudioEnabled () {
+  public get cloudStudioRequested () {
     return !!(process.env.CYPRESS_ENABLE_CLOUD_STUDIO || process.env.CYPRESS_LOCAL_STUDIO_PATH)
   }
 
@@ -134,7 +134,7 @@ export class StudioLifecycleManager {
       studioUrl: studioSession.studioUrl,
       projectId,
       cloudDataSource,
-      shouldEnableStudio: this.cloudStudioEnabled,
+      shouldEnableStudio: this.cloudStudioRequested,
       lifecycleManager: this,
     })
 

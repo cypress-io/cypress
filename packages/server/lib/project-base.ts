@@ -432,7 +432,7 @@ export class ProjectBase extends EE {
         const studio = await this.ctx.coreData.studioLifecycleManager?.getStudio()
 
         // only capture studio started event if the user is accessing legacy studio
-        if (!this.ctx.coreData.studioLifecycleManager?.cloudStudioEnabled) {
+        if (!this.ctx.coreData.studioLifecycleManager?.cloudStudioRequested) {
           try {
             studio?.captureStudioEvent({
               type: StudioMetricsTypes.STUDIO_STARTED,

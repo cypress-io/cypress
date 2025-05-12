@@ -18,7 +18,7 @@ export interface StudioLifecycleManagerShape {
   getStudio: () => Promise<StudioManagerShape | null>
   isStudioReady: () => boolean
   registerStudioReadyListener: (listener: (studioManager: StudioManagerShape) => void) => void
-  cloudStudioEnabled: boolean
+  cloudStudioRequested: boolean
   updateStatus: (status: StudioStatus) => void
 }
 

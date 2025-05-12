@@ -104,7 +104,7 @@ export const Query = objectType({
     t.field('cloudStudioRequested', {
       type: 'Boolean',
       description: 'Whether cloud studio is requested by the environment',
-      resolve: (source, args, ctx) => ctx.coreData.studioLifecycleManager?.cloudStudioEnabled ?? false,
+      resolve: (source, args, ctx) => ctx.coreData.studioLifecycleManager?.cloudStudioRequested ?? false,
     })
 
     t.nonNull.field('localSettings', {
