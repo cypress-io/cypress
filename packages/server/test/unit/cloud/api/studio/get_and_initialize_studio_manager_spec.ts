@@ -361,7 +361,7 @@ describe('getAndInitializeStudioManager', () => {
 
       const projectId = '12345'
 
-      await getAndInitializeStudioManager({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId, cloudDataSource: cloud })
+      await getAndInitializeStudioManager({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId, cloudDataSource: cloud, shouldEnableStudio: true })
 
       expect(rmStub).to.be.calledWith('/tmp/cypress/studio')
       expect(ensureStub).to.be.calledWith('/tmp/cypress/studio')
