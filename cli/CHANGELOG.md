@@ -10,6 +10,7 @@ _Released 5/20/2025 (PENDING)_
 **Bugfixes:**
 
 - Fixed an issue with the experimental usage of WebKit where Cypress incorrectly displayed `0` as the WebKit version. Addresses [#31684](https://github.com/cypress-io/cypress/issues/31684).
+- Fixed an issue where framebusting was occurring when `top.window.location` was being set explicitly. This fix does not require the `experimentalModifyObstructiveThirdPartyCode` configuration option. Addresses [#31687](https://github.com/cypress-io/cypress/issues/31687).
 
 **Misc:**
 
