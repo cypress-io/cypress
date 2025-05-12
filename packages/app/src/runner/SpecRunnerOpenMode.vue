@@ -203,9 +203,7 @@ mutation SpecRunnerOpenMode_OpenFileInIDE ($input: FileDetailsInput!) {
 
 gql`
 subscription StudioStatus_Change {
-  studioStatusChange {
-    status
-  }
+  studioStatusChange
 }
 `
 
@@ -256,8 +254,8 @@ const isSpecsListOpenPreferences = computed(() => {
 const studioStatus = ref<string | null>(null)
 
 useSubscription({ query: StudioStatus_ChangeDocument }, (_, data) => {
-  if (data?.studioStatusChange?.status) {
-    studioStatus.value = data.studioStatusChange.status
+  if (data?.studioStatusChange) {
+    studioStatus.value = data.studioStatusChange
   }
 
   return data

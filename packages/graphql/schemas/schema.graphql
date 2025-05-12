@@ -2371,12 +2371,6 @@ enum SpecType {
   integration
 }
 
-"""The studio manager for the app"""
-type Studio {
-  """The current status of the studio"""
-  status: StudioStatusType
-}
-
 enum StudioStatusType {
   ENABLED
   INITIALIZED
@@ -2438,7 +2432,7 @@ type Subscription {
   specsChange: CurrentProject
 
   """Status of the studio manager"""
-  studioStatusChange: Studio
+  studioStatusChange: StudioStatusType
 }
 
 enum SupportStatusEnum {

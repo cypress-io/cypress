@@ -1,6 +1,6 @@
 import type { PushFragmentData } from '@packages/data-context/src/actions'
 import { enumType, idArg, list, nonNull, objectType, subscriptionType } from 'nexus'
-import { CurrentProject, DevState, Query, Wizard } from '.'
+import { CurrentProject, DevState, Query, StudioStatusTypeEnum, Wizard } from '.'
 import { Spec } from './gql-Spec'
 import { RelevantRun } from './gql-RelevantRun'
 
@@ -50,19 +50,19 @@ export const Subscription = subscriptionType({
     })
 
     t.field('studioStatusChange', {
-      type: 'Studio',
+      type: StudioStatusTypeEnum,
       description: 'Status of the studio manager',
       subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('studioStatusChange'),
       resolve: async (source, args, ctx) => {
         const isStudioReady = ctx.coreData.studioLifecycleManager?.isStudioReady()
 
         if (!isStudioReady) {
-          return { status: 'INITIALIZING' as const }
+          return 'INITIALIZING'
         }
 
         const studio = await ctx.coreData.studioLifecycleManager?.getStudio()
 
-        return studio ? { status: studio.status } : null
+        return studio?.status ?? null
       },
     })
 

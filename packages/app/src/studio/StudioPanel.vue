@@ -5,8 +5,9 @@
   >
     <LoadingStudioPanel :event-manager="props.eventManager" />
   </div>
-  <!-- these are two distinct errors: if studio status is IN_ERROR, it means that the studio bundle failed to load from the cloud -->
-  <!-- if there is an error in the component state, it means module federation failed to load the component -->
+  <!-- these are two distinct errors: -->
+  <!--   * if studio status is IN_ERROR, it means that the studio bundle failed to load from the cloud -->
+  <!--   * if there is an error in the component state, it means module federation failed to load the component -->
   <div v-else-if="props.studioStatus === 'IN_ERROR'">
     <div class="p-4 text-red-500 font-medium">
       <div class="mb-2">
