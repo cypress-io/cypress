@@ -6,6 +6,7 @@
   >
     <div class="flex flex-wrap grow p-[16px] gap-[12px] h-[64px] flex-nowrap">
       <button
+        v-if="!studioBetaAvailable"
         data-cy="playground-activator"
         :disabled="isDisabled"
         class="bg-gray-1100 border rounded-md flex h-full border-gray-800 outline-solid outline-indigo-500 transition w-[40px] duration-150 items-center justify-center hover:bg-gray-800"
@@ -97,7 +98,7 @@
       :event-manager="eventManager"
     />
 
-    <StudioControls v-if="studioStore.isActive" />
+    <StudioControls v-if="!studioBetaAvailable && studioStore.isActive" />
 
     <Alert
       v-model="showAlert"
@@ -173,6 +174,7 @@ const props = defineProps<{
   eventManager: EventManager
   getAutIframe: () => AutIframe
   shouldShowStudioButton: boolean
+  studioBetaAvailable: boolean
 }>()
 
 const showAlert = ref(false)

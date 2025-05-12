@@ -1,10 +1,9 @@
 import path from 'path'
 import os from 'os'
-import { ensureDir, copy, readFile } from 'fs-extra'
+import { ensureDir, copy, readFile, remove } from 'fs-extra'
 import { StudioManager } from '../../studio'
 import tar from 'tar'
 import { verifySignatureFromFile } from '../../encryption'
-import crypto from 'crypto'
 import fs from 'fs'
 import fetch from 'cross-fetch'
 import { agent } from '@packages/network'
@@ -62,6 +61,10 @@ const downloadStudioBundleToTempDirectory = async ({ studioUrl, projectId }: Opt
       encrypt: 'signed',
     })
 
+    if (!response.ok) {
+      throw new Error(`Failed to download studio bundle: ${response.statusText}`)
+    }
+
     responseSignature = response.headers.get('x-cypress-signature')
 
     await new Promise<void>((resolve, reject) => {
@@ -92,26 +95,12 @@ const downloadStudioBundleToTempDirectory = async ({ studioUrl, projectId }: Opt
   }
 }
 
-const getTarHash = (): Promise<string> => {
-  let hash = ''
-
-  return new Promise<string>((resolve, reject) => {
-    fs.createReadStream(bundlePath)
-    .pipe(crypto.createHash('sha256'))
-    .setEncoding('base64url')
-    .on('data', (data) => {
-      hash += String(data)
-    })
-    .on('error', reject)
-    .on('close', () => {
-      resolve(hash)
-    })
-  })
-}
-
 export const retrieveAndExtractStudioBundle = async ({ studioUrl, projectId, downloadTimeoutMs }: Options & { downloadTimeoutMs?: number }): Promise<{ studioHash: string | undefined }> => {
+  // The studio hash is the last part of the studio URL, after the last slash and before the extension
+  const studioHash = studioUrl.split('/').pop()?.split('.')[0]
+
   // First remove studioPath to ensure we have a clean slate
-  await fs.promises.rm(studioPath, { recursive: true, force: true })
+  await remove(studioPath)
   await ensureDir(studioPath)
 
   // Note: CYPRESS_LOCAL_STUDIO_PATH is stripped from the binary, effectively removing this code path
@@ -126,8 +115,6 @@ export const retrieveAndExtractStudioBundle = async ({ studioUrl, projectId, dow
   }
 
   await downloadStudioBundleWithTimeout({ studioUrl, projectId, downloadTimeoutMs })
-
-  const studioHash = await getTarHash()
 
   await tar.extract({
     file: bundlePath,
@@ -192,6 +179,6 @@ export const getAndInitializeStudioManager = async ({ studioUrl, projectId, clou
       studioMethod: 'getAndInitializeStudioManager',
     })
   } finally {
-    await fs.promises.rm(bundlePath, { force: true })
+    await remove(bundlePath)
   }
 }

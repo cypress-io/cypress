@@ -5,7 +5,7 @@ import { createEventManager, createTestAutIframe } from '../../cypress/component
 import { ExternalLink_OpenExternalDocument } from '@packages/frontend-shared/src/generated/graphql'
 import { cyGeneralGlobeX16 } from '@cypress-design/icon-registry'
 
-function renderWithGql (gqlVal: SpecRunnerHeaderFragment, shouldShowStudioButton = false) {
+function renderWithGql (gqlVal: SpecRunnerHeaderFragment, shouldShowStudioButton = false, studioBetaAvailable = false) {
   const eventManager = createEventManager()
   const autIframe = createTestAutIframe()
 
@@ -17,6 +17,7 @@ function renderWithGql (gqlVal: SpecRunnerHeaderFragment, shouldShowStudioButton
     eventManager={eventManager}
     getAutIframe={() => autIframe}
     shouldShowStudioButton={shouldShowStudioButton}
+    studioBetaAvailable={studioBetaAvailable}
   />)
 }
 
@@ -37,42 +38,54 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     cy.findByTestId('viewport-size').should('be.visible').contains('500x500')
   })
 
-  it('disabled selector playground button when isRunning is true', () => {
-    const autStore = useAutStore()
+  describe('selector playground button', () => {
+    it('is enabled by default', () => {
+      cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+        render: (gqlVal) => {
+          return renderWithGql(gqlVal)
+        },
+      })
 
-    autStore.setIsRunning(true)
-
-    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
-      render: (gqlVal) => {
-        return renderWithGql(gqlVal)
-      },
+      cy.get('[data-cy="playground-activator"]').should('not.be.disabled')
     })
 
-    cy.get('[data-cy="playground-activator"]').should('be.disabled')
-  })
+    it('is disabled when isRunning is true', () => {
+      const autStore = useAutStore()
 
-  it('disabled selector playground button when isLoading is true', () => {
-    const autStore = useAutStore()
+      autStore.setIsRunning(true)
 
-    autStore.setIsLoading(true)
+      cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+        render: (gqlVal) => {
+          return renderWithGql(gqlVal)
+        },
+      })
 
-    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
-      render: (gqlVal) => {
-        return renderWithGql(gqlVal)
-      },
+      cy.get('[data-cy="playground-activator"]').should('be.disabled')
     })
 
-    cy.get('[data-cy="playground-activator"]').should('be.disabled')
-  })
+    it('is disabled when isLoading is true', () => {
+      const autStore = useAutStore()
 
-  it('enables selector playground button by default', () => {
-    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
-      render: (gqlVal) => {
-        return renderWithGql(gqlVal)
-      },
+      autStore.setIsLoading(true)
+
+      cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+        render: (gqlVal) => {
+          return renderWithGql(gqlVal)
+        },
+      })
+
+      cy.get('[data-cy="playground-activator"]').should('be.disabled')
     })
 
-    cy.get('[data-cy="playground-activator"]').should('not.be.disabled')
+    it('is hidden when studio beta is available', () => {
+      cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+        render: (gqlVal) => {
+          return renderWithGql(gqlVal, true, true)
+        },
+      })
+
+      cy.get('[data-cy="playground-activator"]').should('not.exist')
+    })
   })
 
   it('shows url section if currentTestingType is e2e', () => {

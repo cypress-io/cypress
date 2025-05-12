@@ -54,6 +54,7 @@ describe('postStudioSession', () => {
   it('should throw immediately if the response is not ok', async () => {
     crossFetchStub.resolves({
       ok: false,
+      statusText: 'Some failure',
       json: () => {
         return Promise.resolve({
           error: 'Failed to create studio session',
@@ -63,7 +64,7 @@ describe('postStudioSession', () => {
 
     await expect(postStudioSession({
       projectId: '12345',
-    })).to.be.rejectedWith('Failed to create studio session')
+    })).to.be.rejectedWith('Failed to create studio session: Some failure')
 
     expect(crossFetchStub).to.have.been.calledOnce
   })

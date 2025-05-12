@@ -43,3 +43,31 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTest = false, 
     cy.get('[data-cy="hook-name-studio commands"]').should('exist')
   }
 }
+
+export function assertClosingPanelWithoutChanges () {
+  // Cypress re-runs after you cancel Studio.
+  // Original spec should pass
+  cy.waitForSpecToFinish({ passCount: 1 })
+
+  cy.get('.command').should('have.length', 1)
+
+  // Assert the spec was executed without any new commands.
+  cy.get('.command-name-visit').within(() => {
+    cy.contains('visit')
+    cy.contains('cypress/e2e/index.html')
+  })
+
+  cy.findByTestId('hook-name-studio commands').should('not.exist')
+
+  cy.withCtx(async (ctx) => {
+    const spec = await ctx.actions.file.readFileInProject('cypress/e2e/spec.cy.js')
+
+    // No change, since we closed studio
+    expect(spec.trim().replace(/\r/g, '')).to.eq(`
+describe('studio functionality', () => {
+  it('visits a basic html page', () => {
+    cy.visit('cypress/e2e/index.html')
+  })
+})`.trim())
+  })
+}

@@ -62,6 +62,26 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
       )
     })
 
+    it('logs error when CYPRESS_INTERNAL_E2E_TESTING_SELF is set', () => {
+      sinon.stub(console, 'error')
+      process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
+      const error = new Error('test error')
+
+      reportStudioError({
+        cloudApi,
+        studioHash: 'abc123',
+        projectSlug: 'test-project',
+        error,
+        studioMethod: 'testMethod',
+      })
+
+      // eslint-disable-next-line no-console
+      expect(console.error).to.have.been.calledWith(
+        'Error in testMethod:',
+        error,
+      )
+    })
+
     it('converts non-Error objects to Error', () => {
       const error = 'string error'
 

@@ -73,6 +73,7 @@
             :event-manager="eventManager"
             :get-aut-iframe="getAutIframeModel"
             :should-show-studio-button="shouldShowStudioButton"
+            :studio-beta-available="studioBetaAvailable"
           />
         </HideDuringScreenshot>
 
@@ -264,6 +265,10 @@ useSubscription({ query: StudioStatus_ChangeDocument }, (_, data) => {
 
 const cloudStudioEnabled = computed(() => {
   return props.gql.cloudStudioEnabled
+})
+
+const studioBetaAvailable = computed(() => {
+  return studioStatus.value === 'ENABLED' && !!props.gql.studio
 })
 
 const shouldShowStudioButton = computed(() => {
