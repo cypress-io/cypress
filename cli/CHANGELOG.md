@@ -10,6 +10,7 @@ _Released 5/20/2025 (PENDING)_
 **Misc:**
 
 - Cursor is now available as an IDE option for opening files in Cypress, if it is installed on your system. Addressed in [#31691](https://github.com/cypress-io/cypress/pull/31691).
+- `cy.press()` types now have a return type of `Chainable<null>` instead of `void`. Addressed in [#31698](https://github.com/cypress-io/cypress/pull/31698).
 
 **Dependency Updates:**
 
