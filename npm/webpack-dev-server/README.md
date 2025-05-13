@@ -39,6 +39,10 @@ export default defineConfig({
 })
 ```
 
+## Debugging
+
+If having issues with chunk load errors or bundle size problems, specifically in your component tests, please try setting `DEBUG=cypress-verbose:webpack-dev-server:bundle-analyzer` before starting Cypress to get a `webpack-bundle-analyzer` report to help determine the cause of the issue. If filing an issue with Cypress, please include this report with your issue to better help us serve your issue.
+
 ## Testing
 
 Unit tests can be run with `yarn test`. Integration tests can be run with `yarn cypress:run`
