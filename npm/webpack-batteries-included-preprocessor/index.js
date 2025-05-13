@@ -2,8 +2,10 @@ const path = require('path')
 const webpack = require('webpack')
 const Debug = require('debug')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 
 const debug = Debug('cypress:webpack-batteries-included-preprocessor')
+const WBADebugNamespace = 'cypress-verbose:webpack-batteries-included-preprocessor:bundle-analyzer'
 
 const hasTsLoader = (rules) => {
   return rules.some((rule) => {
@@ -136,6 +138,10 @@ const getDefaultWebpackOptions = () => {
         // @see https://github.com/cypress-io/cypress/issues/27947.
         process: require.resolve('process/browser.js'),
       }),
+      // If the user is trying to debug their bundle, we'll add the BundleAnalyzerPlugin
+      // to see the size of the support file (first bundle when running `cypress open`)
+      // and spec files (subsequent bundles when running `cypress open`)
+      ...(Debug.enabled(WBADebugNamespace) ? [new BundleAnalyzerPlugin()] : []),
     ],
     resolve: {
       extensions: ['.js', '.json', '.jsx', '.mjs', '.coffee'],

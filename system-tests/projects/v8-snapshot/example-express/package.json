@@ -14,7 +14,7 @@
     "uninstall-snapshot": "DEBUG='(packherd|snapgen):*' node ./snapshot/uninstall-snapshot.js"
   },
   "dependencies": {
-    "express": "^4.17.1"
+    "express": "^4.21.0"
   },
   "license": "MIT"
 }

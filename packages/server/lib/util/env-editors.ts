@@ -2,6 +2,10 @@ import type { Editor } from '@packages/types'
 
 export const linuxEditors = [
   {
+    id: 'cursor',
+    binary: 'cursor',
+    name: 'Cursor',
+  }, {
     id: 'atom',
     binary: 'atom',
     name: 'Atom',
@@ -54,6 +58,10 @@ export const linuxEditors = [
 
 export const macOSEditors = [
   {
+    id: 'cursor',
+    binary: '/Applications/Cursor.app/Contents/MacOS/Cursor',
+    name: 'Cursor',
+  }, {
     id: 'atom',
     binary: 'atom',
     name: 'Atom',
@@ -130,6 +138,10 @@ export const macOSEditors = [
 
 export const windowsEditors = [
   {
+    id: 'cursor',
+    binary: 'Cursor.exe',
+    name: 'Cursor',
+  }, {
     id: 'brackets',
     binary: 'Brackets.exe',
     name: 'Brackets',
