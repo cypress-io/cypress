@@ -33,6 +33,65 @@ This cache should be maintained and updated over time. Rather than having this m
 
 ## Troubleshooting
 
+### Missing Dependency
+
+#### Background on Snapshot Dependencies
+
+When we generate snapshots, we create a metadata file that contains information about all dependencies included in the snapshot. In theory, these dependencies could be removed from the binary to save space, since they're already included in the snapshot. This helps offset the size increase from the snapshot itself.
+
+However, not all dependencies can be safely removed. There are two main categories of dependencies that must be preserved:
+
+1. Dependencies (and their sub-dependencies) that are used in child processes
+2. Dependencies (and their sub-dependencies) that are dynamically loaded and cannot be determined by `esbuild`
+
+To handle this, we maintain a list of these dependencies and use `esbuild` to retrieve all their child dependencies. This list is defined in [binary-cleanup.js](https://github.com/cypress-io/cypress/blob/develop/scripts/binary/binary-cleanup.js#L40-L64). We then remove these dependencies from the list of v8 snapshot metadata dependencies, leaving only the ones that are safe to remove.
+
+#### Handling Missing Dependencies
+
+If you encounter a missing dependency error that looks something like:
+
+```
+Error: Cannot find module 'get-stream'
+Require stack:
+- /root/.cache/Cypress/beta-14.3.4-update-trash-d37e059a/Cypress/resources/app/node_modules/extract-zip/index.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1232:15)
+    at s._resolveFilename (node:electron/js2c/browser_init:2:124107)
+    at PackherdModuleLoader._tryResolveFilename (/root/.cache/Cypress/beta-14.3.4-update-trash-d37e059a/Cypress/resources/app/packages/server/index.jsc:1:786120)
+    at PackherdModuleLoader._resolvePaths (/root/.cache/Cypress/beta-14.3.4-update-trash-d37e059a/Cypress/resources/app/packages/server/index.jsc:1:782910)
+    at PackherdModuleLoader.tryLoad (/root/.cache/Cypress/beta-14.3.4-update-trash-d37e059a/Cypress/resources/app/packages/server/index.jsc:1:780953)
+    at Function.<anonymous> (/root/.cache/Cypress/beta-14.3.4-update-trash-d37e059a/Cypress/resources/app/packages/server/index.jsc:1:791773)
+    at d._load (<embedded>:2752:176394)
+    at Module.require (node:internal/modules/cjs/loader:1318:19)
+    at require (node:internal/modules/helpers:179:18)
+    at Object.<anonymous> (/root/.cache/Cypress/beta-14.3.4-update-trash-d37e059a/Cypress/resources/app/node_modules/extract-zip/index.js:4:19)
+    at Module._compile (node:internal/modules/cjs/loader:1484:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1564:10)
+    at Module.load (node:internal/modules/cjs/loader:1295:32)
+    at Module._load (node:internal/modules/cjs/loader:1111:12)
+    at c._load [as origLoad] (node:electron/js2c/node_init:2:16955)
+    at PackherdModuleLoader.tryLoad (/root/.cache/Cypress/beta-14.3.4-update-trash-d37e059a/Cypress/resources/app/packages/server/index.jsc:1:781559)
+    at Function.<anonymous> (/root/.cache/Cypress/beta-14.3.4-update-trash-d37e059a/Cypress/resources/app/packages/server/index.jsc:1:791773)
+    at d._load (<embedded>:2752:176394)
+    at node:internal/modules/esm/translators:350:17
+    at ModuleWrap.<anonymous> (node:internal/modules/esm/translators:286:7)
+    at ModuleJob.run (node:internal/modules/esm/module_job:234:25)
+    at async ModuleLoader.import (node:internal/modules/esm/loader:473:24)
+    at async startWebDriver (file:///root/.cache/Cypress/beta-14.3.4-update-trash-d37e059a/Cypress/resources/app/packages/server/node_modules/@wdio/utils/build/index.js:503:49)
+    at async _WebDriver.newSession (file:///root/.cache/Cypress/beta-14.3.4-update-trash-d37e059a/Cypress/resources/app/packages/server/node_modules/webdriver/build/node.js:1327:27)
+    at async Object.Z (<embedded>:2752:13515)
+    at async Object.open (<embedded>:2752:30921)
+    at async v.relaunchBrowser (<embedded>:2861:42528)
+```
+
+Follow these steps:
+
+1. Look through the stack trace of the missing dependency error
+2. Try to identify where the dependency is being dynamically required/imported
+3. Validate that the dynamically required/imported dependency is missing from the binary
+4. Add the dependency to the list in [binary-cleanup.js](https://github.com/cypress-io/cypress/blob/develop/scripts/binary/binary-cleanup.js#L40-L64)
+
+This will ensure the dependency is preserved in the binary and available when needed.
+
 ### Local Development
 
 If you're running into problems locally, either with generating the snapshot or at runtime, a good first step is to clean everything and start from scratch. This command will accomplish that (note that it will delete any new unstaged files, so if you want to keep them, either stash them or stage them):
