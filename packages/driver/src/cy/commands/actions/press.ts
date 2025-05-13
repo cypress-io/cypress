@@ -36,7 +36,7 @@ export default function (Commands: Cypress.Commands, Cypress: Cypress.Cypress, c
 
       // throwErrByPath always throws, but there's no way to indicate that
       // code beyond this point is unreachable to typescript / linters
-      return
+      return null
     }
 
     if (Cypress.browser.family === 'webkit') {
@@ -47,7 +47,7 @@ export default function (Commands: Cypress.Commands, Cypress: Cypress.Cypress, c
         },
       })
 
-      return
+      return null
     }
 
     if (Cypress.browser.name === 'firefox' && Number(Cypress.browser.majorVersion) < 135) {
@@ -71,7 +71,11 @@ export default function (Commands: Cypress.Commands, Cypress: Cypress.Cypress, c
     } catch (err) {
       $errUtils.throwErr(err, { onFail: log })
     }
+
+    return null
   }
 
-  return Commands.add('press', pressCommand)
+  return Commands.addAll({
+    press: pressCommand,
+  })
 }
