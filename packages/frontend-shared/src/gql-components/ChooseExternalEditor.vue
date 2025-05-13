@@ -95,7 +95,7 @@ const icons: Record<string, FunctionalComponent<SVGAttributes, {}>> = {
 const customEditor = { id: 'custom', icon: Terminal, name: 'Custom', binary: 'custom' }
 
 const editorOptions = computed(() => {
-  const editors = props.gql.localSettings.availableEditors?.map((x) => ({ ...x, icon: icons[x.id] })) || []
+  const editors = props.gql.localSettings.availableEditors?.map((x) => ({ ...x, icon: icons[x.id] ?? icons['custom'] })) || []
 
   editors.push(customEditor)
 

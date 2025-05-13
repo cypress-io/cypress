@@ -1,3 +1,10 @@
+# [@cypress/webpack-batteries-included-preprocessor-v3.1.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v3.0.7...@cypress/webpack-batteries-included-preprocessor-v3.1.0) (2025-05-13)
+
+
+### Features
+
+* ship webpack-bundle-analyzer with`@cypress/webpack-dev-server` and `@cypress/webpack-batteries-included-preprocessor` ([#31588](https://github.com/cypress-io/cypress/issues/31588)) ([46f2867](https://github.com/cypress-io/cypress/commit/46f2867b9dafbf991bf7154cb181eb07d9c6ad20))
+
 # [@cypress/webpack-batteries-included-preprocessor-v3.0.7](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v3.0.6...@cypress/webpack-batteries-included-preprocessor-v3.0.7) (2025-03-26)
 
 
