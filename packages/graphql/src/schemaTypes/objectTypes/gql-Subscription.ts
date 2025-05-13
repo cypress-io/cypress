@@ -4,6 +4,17 @@ import { CurrentProject, DevState, Query, StudioStatusTypeEnum, Wizard } from '.
 import { Spec } from './gql-Spec'
 import { RelevantRun } from './gql-RelevantRun'
 
+export const StudioStatusPayload = objectType({
+  name: 'StudioStatusPayload',
+  definition (t) {
+    t.nonNull.field('status', {
+      type: StudioStatusTypeEnum,
+    })
+
+    t.nonNull.boolean('canAccessStudioAI')
+  },
+})
+
 export const Subscription = subscriptionType({
   definition (t) {
     t.field('authChange', {
@@ -49,20 +60,35 @@ export const Subscription = subscriptionType({
       resolve: (source, args, ctx) => ctx.lifecycleManager,
     })
 
-    t.field('studioStatusChange', {
-      type: StudioStatusTypeEnum,
-      description: 'Status of the studio manager',
+    t.nonNull.field('studioStatusChange', {
+      type: StudioStatusPayload,
+      description: 'Status of the studio manager and AI access',
       subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('studioStatusChange'),
       resolve: async (source, args, ctx) => {
         const isStudioReady = ctx.coreData.studioLifecycleManager?.isStudioReady()
 
         if (!isStudioReady) {
-          return 'INITIALIZING'
+          return {
+            status: 'INITIALIZING' as const,
+            canAccessStudioAI: false,
+          }
         }
 
         const studio = await ctx.coreData.studioLifecycleManager?.getStudio()
 
-        return studio?.status ?? null
+        if (!studio) {
+          return {
+            status: 'NOT_INITIALIZED' as const,
+            canAccessStudioAI: false,
+          }
+        }
+
+        const canAccessStudioAI = studio.status === 'ENABLED' && ctx.coreData.activeBrowser && (await studio.canAccessStudioAI(ctx.coreData.activeBrowser as Cypress.Browser)) || false
+
+        return {
+          status: studio.status,
+          canAccessStudioAI,
+        }
       },
     })
 

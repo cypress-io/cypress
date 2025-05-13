@@ -2371,6 +2371,11 @@ enum SpecType {
   integration
 }
 
+type StudioStatusPayload {
+  canAccessStudioAI: Boolean!
+  status: StudioStatusType!
+}
+
 enum StudioStatusType {
   ENABLED
   INITIALIZED
@@ -2431,8 +2436,8 @@ type Subscription {
   """Issued when the watched specs for the project changes"""
   specsChange: CurrentProject
 
-  """Status of the studio manager"""
-  studioStatusChange: StudioStatusType
+  """Status of the studio manager and AI access"""
+  studioStatusChange: StudioStatusPayload!
 }
 
 enum SupportStatusEnum {

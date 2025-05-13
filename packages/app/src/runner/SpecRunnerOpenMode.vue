@@ -203,7 +203,10 @@ mutation SpecRunnerOpenMode_OpenFileInIDE ($input: FileDetailsInput!) {
 
 gql`
 subscription StudioStatus_Change {
-  studioStatusChange
+  studioStatusChange {
+    status
+    canAccessStudioAI
+  }
 }
 `
 
@@ -255,7 +258,8 @@ const studioStatus = ref<string | null>(null)
 
 useSubscription({ query: StudioStatus_ChangeDocument }, (_, data) => {
   if (data?.studioStatusChange) {
-    studioStatus.value = data.studioStatusChange
+    studioStatus.value = data.studioStatusChange.status
+    studioStore.setCanAccessStudioAI(data.studioStatusChange.canAccessStudioAI)
   }
 
   return data
