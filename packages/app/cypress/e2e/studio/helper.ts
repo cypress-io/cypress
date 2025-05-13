@@ -34,6 +34,9 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTest = false, 
   .findByTestId('launch-studio')
   .click()
 
+  // Studio re-executes spec before waiting for commands - wait for the spec to finish executing.
+  cy.waitForSpecToFinish()
+
   if (createNewTest) {
     cy.get('span.runnable-title').contains('New Test').should('exist')
   } else {
