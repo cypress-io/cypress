@@ -7,11 +7,11 @@ import $errUtils from '../../../cypress/error_utils'
 import $utils from '../../../cypress/utils'
 
 export interface PressCommand {
-  (key: KeyPressSupportedKeys, userOptions?: Partial<Cypress.Loggable> & Partial<Cypress.Timeoutable>): void
+  (key: KeyPressSupportedKeys, userOptions?: Partial<Cypress.Loggable> & Partial<Cypress.Timeoutable>): Promise<void>
 }
 
 export default function (Commands: Cypress.Commands, Cypress: Cypress.Cypress, cy: $Cy, state: StateFunc, config: any) {
-  async function pressCommand (key: KeyPressSupportedKeys, userOptions?: Partial<Cypress.Loggable> & Partial<Cypress.Timeoutable>) {
+  const press: PressCommand = async function pressCommand (key: KeyPressSupportedKeys, userOptions?: Partial<Cypress.Loggable> & Partial<Cypress.Timeoutable>) {
     const options: Cypress.Loggable & Partial<Cypress.Timeoutable> = defaults({}, userOptions, {
       log: true,
     })
@@ -36,7 +36,7 @@ export default function (Commands: Cypress.Commands, Cypress: Cypress.Cypress, c
 
       // throwErrByPath always throws, but there's no way to indicate that
       // code beyond this point is unreachable to typescript / linters
-      return null
+      return
     }
 
     if (Cypress.browser.family === 'webkit') {
@@ -47,7 +47,7 @@ export default function (Commands: Cypress.Commands, Cypress: Cypress.Cypress, c
         },
       })
 
-      return null
+      return
     }
 
     if (Cypress.browser.name === 'firefox' && Number(Cypress.browser.majorVersion) < 135) {
@@ -72,10 +72,10 @@ export default function (Commands: Cypress.Commands, Cypress: Cypress.Cypress, c
       $errUtils.throwErr(err, { onFail: log })
     }
 
-    return null
+    return
   }
 
   return Commands.addAll({
-    press: pressCommand,
+    press,
   })
 }
