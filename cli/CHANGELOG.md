@@ -10,6 +10,7 @@ _Released 5/20/2025 (PENDING)_
 **Misc:**
 
 - Cursor is now available as an IDE option for opening files in Cypress, if it is installed on your system. Addressed in [#31691](https://github.com/cypress-io/cypress/pull/31691).
+- The error shown when the `--record` flag is missing has been updated to be shorter. Addressed in [#31676](https://github.com/cypress-io/cypress/pull/31676).
 
 **Dependency Updates:**
 
