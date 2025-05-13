@@ -63,6 +63,11 @@ export function setup (options: SetupOptions) {
 
   try {
     options.on('after:browser:launch', (browser: Cypress.Browser, options: Cypress.AfterBrowserLaunchDetails) => {
+      if (Number(browser.majorVersion) >= 137 && browser.name === 'chrome' && browser.isHeaded) {
+        // @see https://github.com/cypress-io/cypress/issues/31703
+        throw pluginError('@cypress/puppeteer does not work in Google Chrome v137 and higher in cypress open mode (or headed run mode). If you need to use @cypress/puppeteer in headed mode, please use Electron, Chrome for Testing, Chromium, or another Chrome variant that supports loading extensions.')
+      }
+
       cypressBrowser = browser
       debuggerUrl = options.webSocketDebuggerUrl
     })
