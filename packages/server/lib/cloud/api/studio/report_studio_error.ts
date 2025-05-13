@@ -1,7 +1,6 @@
 import type { StudioCloudApi } from '@packages/types/src/studio/studio-server-types'
 import Debug from 'debug'
 import { stripPath } from '../../strip_path'
-
 const debug = Debug('cypress:server:cloud:api:studio:report_studio_errors')
 
 export interface ReportStudioErrorOptions {

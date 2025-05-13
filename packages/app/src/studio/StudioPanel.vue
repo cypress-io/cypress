@@ -1,12 +1,36 @@
 <template>
-  <div v-if="error">
-    Error loading the panel
+  <div
+    v-if="props.studioStatus === 'INITIALIZING'"
+    ref="container"
+  >
+    <LoadingStudioPanel :event-manager="props.eventManager" />
+  </div>
+  <!-- these are two distinct errors: -->
+  <!--   * if studio status is IN_ERROR, it means that the studio bundle failed to load from the cloud -->
+  <!--   * if there is an error in the component state, it means module federation failed to load the component -->
+  <div v-else-if="props.studioStatus === 'IN_ERROR'">
+    <div class="p-4 text-red-500 font-medium">
+      <div class="mb-2">
+        Error fetching studio bundle from cloud
+      </div>
+    </div>
+  </div>
+  <div v-else-if="error">
+    <div class="p-4 text-red-500 font-medium">
+      <div class="mb-2">
+        Error loading the panel
+      </div>
+      <div>{{ error }}</div>
+    </div>
   </div>
   <div
     v-else
     ref="container"
   >
-    <LoadingStudioPanel :event-manager="props.eventManager" />
+    <LoadingStudioPanel
+      v-if="!ReactStudioPanel"
+      :event-manager="props.eventManager"
+    />
   </div>
 </template>
 <script lang="ts" setup>
@@ -27,6 +51,7 @@ const props = defineProps<{
   canAccessStudioAI: boolean
   onStudioPanelClose: () => void
   eventManager: EventManager
+  studioStatus: string | null
 }>()
 
 interface StudioApp { default: StudioAppDefaultShape }
@@ -37,7 +62,11 @@ const ReactStudioPanel = ref<StudioPanelShape | null>(null)
 const reactRoot = ref<Root | null>(null)
 
 const maybeRenderReactComponent = () => {
-  // don't render the react component if the react studio panel has not loaded or if there is an error
+  // Skip rendering if studio is initializing or errored out
+  if (props.studioStatus === 'INITIALIZING' || props.studioStatus === 'IN_ERROR') {
+    return
+  }
+
   if (!ReactStudioPanel.value || !!error.value) {
     return
   }
@@ -87,17 +116,29 @@ init({
 onMounted(maybeRenderReactComponent)
 onBeforeUnmount(unmountReactComponent)
 
-loadRemote<StudioApp>('app-studio').then((module) => {
-  if (!module?.default) {
-    error.value = 'The panel was not loaded successfully'
+watch(() => props.studioStatus, (newStatus) => {
+  if (newStatus === 'ENABLED') {
+    loadStudioComponent()
+  }
+}, { immediate: true })
 
+function loadStudioComponent () {
+  if (ReactStudioPanel.value) {
     return
   }
 
-  ReactStudioPanel.value = module.default.StudioPanel
-  maybeRenderReactComponent()
-}).catch((e) => {
-  error.value = e.message
-})
+  loadRemote<StudioApp>('app-studio').then((module) => {
+    if (!module?.default) {
+      error.value = 'The panel was not loaded successfully'
+
+      return
+    }
+
+    ReactStudioPanel.value = module.default.StudioPanel
+    maybeRenderReactComponent()
+  }).catch((e) => {
+    error.value = e.message
+  })
+}
 
 </script>

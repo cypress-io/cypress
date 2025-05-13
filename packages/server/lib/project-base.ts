@@ -431,10 +431,8 @@ export class ProjectBase extends EE {
 
         const studio = await this.ctx.coreData.studioLifecycleManager?.getStudio()
 
-        const isCloudStudio = !!(process.env.CYPRESS_ENABLE_CLOUD_STUDIO || process.env.CYPRESS_LOCAL_STUDIO_PATH)
-
         // only capture studio started event if the user is accessing legacy studio
-        if (!isCloudStudio) {
+        if (!this.ctx.coreData.studioLifecycleManager?.cloudStudioRequested) {
           try {
             studio?.captureStudioEvent({
               type: StudioMetricsTypes.STUDIO_STARTED,

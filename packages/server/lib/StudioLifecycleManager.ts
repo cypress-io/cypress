@@ -12,6 +12,7 @@ import { CloudRequest } from './cloud/api/cloud_request'
 import { isRetryableError } from './cloud/network/is_retryable_error'
 import { asyncRetry } from './util/async_retry'
 import { postStudioSession } from './cloud/api/studio/post_studio_session'
+import type { StudioStatus } from '@packages/types'
 
 const debug = Debug('cypress:server:studio-lifecycle-manager')
 const routes = require('./cloud/routes')
@@ -20,6 +21,13 @@ export class StudioLifecycleManager {
   private studioManagerPromise?: Promise<StudioManager | null>
   private studioManager?: StudioManager
   private listeners: ((studioManager: StudioManager) => void)[] = []
+  private ctx?: DataContext
+  private lastStatus?: StudioStatus
+
+  public get cloudStudioRequested () {
+    return !!(process.env.CYPRESS_ENABLE_CLOUD_STUDIO || process.env.CYPRESS_LOCAL_STUDIO_PATH)
+  }
+
   /**
    * Initialize the studio manager and possibly set up protocol.
    * Also registers this instance in the data context.
@@ -42,7 +50,14 @@ export class StudioLifecycleManager {
     debugData: any
     ctx: DataContext
   }): void {
-    debug('Initializing studio manager')
+    // Register this instance in the data context
+    ctx.update((data) => {
+      data.studioLifecycleManager = this
+    })
+
+    this.ctx = ctx
+
+    this.updateStatus('INITIALIZING')
 
     const studioManagerPromise = this.createStudioManager({
       projectId,
@@ -71,6 +86,8 @@ export class StudioLifecycleManager {
         studioMethodArgs: [],
       })
 
+      this.updateStatus('IN_ERROR')
+
       // Clean up any registered listeners
       this.listeners = []
 
@@ -78,11 +95,6 @@ export class StudioLifecycleManager {
     })
 
     this.studioManagerPromise = studioManagerPromise
-
-    // Register this instance in the data context
-    ctx.update((data) => {
-      data.studioLifecycleManager = this
-    })
   }
 
   isStudioReady (): boolean {
@@ -94,7 +106,13 @@ export class StudioLifecycleManager {
       throw new Error('Studio manager has not been initialized')
     }
 
-    return await this.studioManagerPromise
+    const studioManager = await this.studioManagerPromise
+
+    if (studioManager) {
+      this.updateStatus(studioManager.status)
+    }
+
+    return studioManager
   }
 
   private async createStudioManager ({
@@ -116,6 +134,8 @@ export class StudioLifecycleManager {
       studioUrl: studioSession.studioUrl,
       projectId,
       cloudDataSource,
+      shouldEnableStudio: this.cloudStudioRequested,
+      lifecycleManager: this,
     })
 
     if (studioManager.status === 'ENABLED') {
@@ -146,6 +166,7 @@ export class StudioLifecycleManager {
     debug('Studio is ready')
     this.studioManager = studioManager
     this.callRegisteredListeners()
+    this.updateStatus(studioManager.status)
 
     return studioManager
   }
@@ -177,6 +198,23 @@ export class StudioLifecycleManager {
     } else {
       debug('Studio not ready - registering studio ready listener')
       this.listeners.push(listener)
+    }
+  }
+
+  public updateStatus (status: StudioStatus) {
+    if (status === this.lastStatus) {
+      debug('Studio status unchanged: %s', status)
+
+      return
+    }
+
+    debug('Studio status changed: %s → %s', this.lastStatus, status)
+    this.lastStatus = status
+
+    if (this.ctx) {
+      this.ctx?.emitter.studioStatusChange()
+    } else {
+      debug('No ctx available, cannot emit studioStatusChange')
     }
   }
 }

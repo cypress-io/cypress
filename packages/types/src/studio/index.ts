@@ -3,7 +3,7 @@ import type { StudioServerShape, StudioEvent } from './studio-server-types'
 
 export * from './studio-server-types'
 
-export const STUDIO_STATUSES = ['NOT_INITIALIZED', 'INITIALIZED', 'ENABLED', 'IN_ERROR'] as const
+export const STUDIO_STATUSES = ['NOT_INITIALIZED', 'INITIALIZING', 'INITIALIZED', 'ENABLED', 'IN_ERROR'] as const
 
 export type StudioStatus = typeof STUDIO_STATUSES[number]
 
@@ -18,6 +18,8 @@ export interface StudioLifecycleManagerShape {
   getStudio: () => Promise<StudioManagerShape | null>
   isStudioReady: () => boolean
   registerStudioReadyListener: (listener: (studioManager: StudioManagerShape) => void) => void
+  cloudStudioRequested: boolean
+  updateStatus: (status: StudioStatus) => void
 }
 
 export type StudioErrorReport = {

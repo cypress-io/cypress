@@ -25,6 +25,7 @@ describe('StudioLifecycleManager', () => {
   let getCaptureProtocolScriptStub: sinon.SinonStub
   let prepareProtocolStub: sinon.SinonStub
   let reportStudioErrorStub: sinon.SinonStub
+  let studioStatusChangeEmitterStub: sinon.SinonStub
 
   beforeEach(() => {
     studioLifecycleManager = new StudioLifecycleManager()
@@ -34,12 +35,17 @@ describe('StudioLifecycleManager', () => {
       status: 'INITIALIZED',
     } as unknown as StudioManager
 
+    studioStatusChangeEmitterStub = sinon.stub()
+
     mockCtx = {
       update: sinon.stub(),
       coreData: {},
       cloud: {
         getCloudUrl: sinon.stub().returns('https://cloud.cypress.io'),
         additionalHeaders: sinon.stub().resolves({ 'Authorization': 'Bearer test-token' }),
+      },
+      emitter: {
+        studioStatusChange: studioStatusChangeEmitterStub,
       },
     } as unknown as DataContext
 
@@ -72,6 +78,36 @@ describe('StudioLifecycleManager', () => {
 
   afterEach(() => {
     sinon.restore()
+  })
+
+  describe('cloudStudioRequested', () => {
+    it('is true when CYPRESS_ENABLE_CLOUD_STUDIO is set', async () => {
+      process.env.CYPRESS_ENABLE_CLOUD_STUDIO = '1'
+      delete process.env.CYPRESS_LOCAL_STUDIO_PATH
+
+      expect(studioLifecycleManager.cloudStudioRequested).to.be.true
+    })
+
+    it('is true when CYPRESS_LOCAL_STUDIO_PATH is set', async () => {
+      delete process.env.CYPRESS_ENABLE_CLOUD_STUDIO
+      process.env.CYPRESS_LOCAL_STUDIO_PATH = '/path/to/studio'
+
+      expect(studioLifecycleManager.cloudStudioRequested).to.be.true
+    })
+
+    it('is false when neither env variable is set', async () => {
+      delete process.env.CYPRESS_ENABLE_CLOUD_STUDIO
+      delete process.env.CYPRESS_LOCAL_STUDIO_PATH
+
+      expect(studioLifecycleManager.cloudStudioRequested).to.be.false
+    })
+
+    it('is true when both env variables are set', async () => {
+      process.env.CYPRESS_ENABLE_CLOUD_STUDIO = '1'
+      process.env.CYPRESS_LOCAL_STUDIO_PATH = '/path/to/studio'
+
+      expect(studioLifecycleManager.cloudStudioRequested).to.be.true
+    })
   })
 
   describe('initializeStudioManager', () => {
@@ -150,8 +186,8 @@ describe('StudioLifecycleManager', () => {
       studioLifecycleManager.registerStudioReadyListener(listener1)
       studioLifecycleManager.registerStudioReadyListener(listener2)
 
-      // @ts-ignore - accessing private property for testing
-      expect(studioLifecycleManager['listeners'].length).to.equal(2)
+      // @ts-expect-error - accessing private property
+      expect(studioLifecycleManager.listeners.length).to.equal(2)
 
       getAndInitializeStudioManagerStub.rejects(error)
 
@@ -176,7 +212,7 @@ describe('StudioLifecycleManager', () => {
 
       expect(mockCtx.update).to.be.calledOnce
 
-      // @ts-ignore - accessing private property for testing
+      // @ts-expect-error - accessing private property
       const studioPromise = studioLifecycleManager.studioManagerPromise
 
       expect(studioPromise).to.not.be.null
@@ -191,8 +227,8 @@ describe('StudioLifecycleManager', () => {
         studioMethodArgs: [],
       })
 
-      // @ts-ignore - accessing private property for testing
-      expect(studioLifecycleManager['listeners'].length).to.equal(0)
+      // @ts-expect-error - accessing private property
+      expect(studioLifecycleManager.listeners.length).to.equal(0)
 
       expect(listener1).not.to.be.called
       expect(listener2).not.to.be.called
@@ -211,7 +247,7 @@ describe('StudioLifecycleManager', () => {
     })
 
     it('returns true when studio has been initialized', async () => {
-      // @ts-ignore - accessing private property for testing
+      // @ts-expect-error - accessing private property
       studioLifecycleManager.studioManager = mockStudioManager
 
       expect(studioLifecycleManager.isStudioReady()).to.be.true
@@ -229,7 +265,7 @@ describe('StudioLifecycleManager', () => {
     })
 
     it('returns the studio manager when initialized', async () => {
-      // @ts-ignore - accessing private property for testing
+      // @ts-expect-error - accessing private property
       studioLifecycleManager.studioManagerPromise = Promise.resolve(mockStudioManager)
 
       const result = await studioLifecycleManager.getStudio()
@@ -244,18 +280,18 @@ describe('StudioLifecycleManager', () => {
 
       studioLifecycleManager.registerStudioReadyListener(listener)
 
-      // @ts-ignore - accessing private property for testing
-      expect(studioLifecycleManager['listeners']).to.include(listener)
+      // @ts-expect-error - accessing private property
+      expect(studioLifecycleManager.listeners).to.include(listener)
     })
 
     it('calls listener immediately if studio is already ready', async () => {
       const listener = sinon.stub()
 
-      // @ts-ignore - accessing private property for testing
+      // @ts-expect-error - accessing private property
       studioLifecycleManager.studioManager = mockStudioManager
 
-      // @ts-ignore - accessing private property for testing
-      studioLifecycleManager['studioReady'] = true
+      // @ts-expect-error - accessing non-existent property
+      studioLifecycleManager.studioReady = true
 
       await Promise.resolve()
 
@@ -271,11 +307,11 @@ describe('StudioLifecycleManager', () => {
     it('does not call listener if studio manager is null', async () => {
       const listener = sinon.stub()
 
-      // @ts-ignore - accessing private property for testing
+      // @ts-expect-error - accessing private property
       studioLifecycleManager.studioManager = null
 
-      // @ts-ignore - accessing private property for testing
-      studioLifecycleManager['studioReady'] = true
+      // @ts-expect-error - accessing non-existent property
+      studioLifecycleManager.studioReady = true
 
       studioLifecycleManager.registerStudioReadyListener(listener)
 
@@ -294,10 +330,10 @@ describe('StudioLifecycleManager', () => {
       studioLifecycleManager.registerStudioReadyListener(listener1)
       studioLifecycleManager.registerStudioReadyListener(listener2)
 
-      // @ts-ignore - accessing private property for testing
-      expect(studioLifecycleManager['listeners']).to.include(listener1)
-      // @ts-ignore - accessing private property for testing
-      expect(studioLifecycleManager['listeners']).to.include(listener2)
+      // @ts-expect-error - accessing private property
+      expect(studioLifecycleManager.listeners).to.include(listener1)
+      // @ts-expect-error - accessing private property
+      expect(studioLifecycleManager.listeners).to.include(listener2)
     })
 
     it('cleans up listeners after calling them when studio becomes ready', async () => {
@@ -307,8 +343,8 @@ describe('StudioLifecycleManager', () => {
       studioLifecycleManager.registerStudioReadyListener(listener1)
       studioLifecycleManager.registerStudioReadyListener(listener2)
 
-      // @ts-ignore - accessing private property for testing
-      expect(studioLifecycleManager['listeners'].length).to.equal(2)
+      // @ts-expect-error - accessing private property
+      expect(studioLifecycleManager.listeners.length).to.equal(2)
 
       const listenersCalledPromise = Promise.all([
         new Promise<void>((resolve) => {
@@ -334,8 +370,96 @@ describe('StudioLifecycleManager', () => {
       expect(listener1).to.be.calledWith(mockStudioManager)
       expect(listener2).to.be.calledWith(mockStudioManager)
 
-      // @ts-ignore - accessing private property for testing
-      expect(studioLifecycleManager['listeners'].length).to.equal(0)
+      // @ts-expect-error - accessing private property
+      expect(studioLifecycleManager.listeners.length).to.equal(0)
+    })
+  })
+
+  describe('status tracking', () => {
+    it('updates status and emits events when status changes', async () => {
+      // Setup the context to test status updates
+      // @ts-expect-error - accessing private property
+      studioLifecycleManager.ctx = mockCtx
+
+      studioLifecycleManager.updateStatus('INITIALIZING')
+
+      // Wait for nextTick to process
+      await nextTick()
+
+      expect(studioStatusChangeEmitterStub).to.be.calledOnce
+
+      // Same status should not trigger another event
+      studioStatusChangeEmitterStub.reset()
+      studioLifecycleManager.updateStatus('INITIALIZING')
+
+      await nextTick()
+      expect(studioStatusChangeEmitterStub).not.to.be.called
+
+      // Different status should trigger another event
+      studioStatusChangeEmitterStub.reset()
+      studioLifecycleManager.updateStatus('ENABLED')
+
+      await nextTick()
+      expect(studioStatusChangeEmitterStub).to.be.calledOnce
+    })
+
+    it('updates status when getStudio is called', async () => {
+      // @ts-expect-error - accessing private property
+      studioLifecycleManager.ctx = mockCtx
+      // @ts-expect-error - accessing private property
+      studioLifecycleManager.studioManagerPromise = Promise.resolve(mockStudioManager)
+
+      const updateStatusSpy = sinon.spy(studioLifecycleManager as any, 'updateStatus')
+
+      const result = await studioLifecycleManager.getStudio()
+
+      expect(result).to.equal(mockStudioManager)
+      expect(updateStatusSpy).to.be.calledWith('INITIALIZED')
+    })
+
+    it('handles status updates properly during initialization', async () => {
+      const statusChangesSpy = sinon.spy(studioLifecycleManager as any, 'updateStatus')
+
+      studioLifecycleManager.initializeStudioManager({
+        projectId: 'test-project-id',
+        cloudDataSource: mockCloudDataSource,
+        cfg: mockCfg,
+        debugData: {},
+        ctx: mockCtx,
+      })
+
+      // Should set INITIALIZING status immediately
+      expect(statusChangesSpy).to.be.calledWith('INITIALIZING')
+
+      const studioReadyPromise = new Promise((resolve) => {
+        studioLifecycleManager?.registerStudioReadyListener(() => {
+          resolve(true)
+        })
+      })
+
+      await studioReadyPromise
+
+      expect(statusChangesSpy).to.be.calledWith('INITIALIZED')
+    })
+
+    it('updates status to IN_ERROR when initialization fails', async () => {
+      getAndInitializeStudioManagerStub.rejects(new Error('Test error'))
+
+      const statusChangesSpy = sinon.spy(studioLifecycleManager as any, 'updateStatus')
+
+      studioLifecycleManager.initializeStudioManager({
+        projectId: 'test-project-id',
+        cloudDataSource: mockCloudDataSource,
+        cfg: mockCfg,
+        debugData: {},
+        ctx: mockCtx,
+      })
+
+      expect(statusChangesSpy).to.be.calledWith('INITIALIZING')
+
+      await new Promise((resolve) => setTimeout(resolve, 10))
+
+      expect(statusChangesSpy).to.be.calledWith('IN_ERROR')
     })
   })
 })

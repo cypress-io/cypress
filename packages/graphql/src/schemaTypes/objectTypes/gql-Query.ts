@@ -11,8 +11,6 @@ import { Wizard } from './gql-Wizard'
 import { ErrorWrapper } from './gql-ErrorWrapper'
 import { CachedUser } from './gql-CachedUser'
 import { Cohort } from './gql-Cohorts'
-import { Studio } from './gql-Studio'
-import type { StudioStatusType } from '@packages/data-context/src/gen/graphcache-config.gen'
 
 export const Query = objectType({
   name: 'Query',
@@ -103,20 +101,10 @@ export const Query = objectType({
       resolve: (source, args, ctx) => ctx.coreData.authState,
     })
 
-    t.field('studio', {
-      type: Studio,
-      description: 'Data pertaining to studio and the studio manager that is loaded from the cloud',
-      resolve: async (source, args, ctx) => {
-        const isStudioReady = ctx.coreData.studioLifecycleManager?.isStudioReady()
-
-        if (!isStudioReady) {
-          return { status: 'INITIALIZED' as StudioStatusType }
-        }
-
-        const studio = await ctx.coreData.studioLifecycleManager?.getStudio()
-
-        return studio ? { status: studio.status } : null
-      },
+    t.field('cloudStudioRequested', {
+      type: 'Boolean',
+      description: 'Whether cloud studio is requested by the environment',
+      resolve: (source, args, ctx) => ctx.coreData.studioLifecycleManager?.cloudStudioRequested ?? false,
     })
 
     t.nonNull.field('localSettings', {

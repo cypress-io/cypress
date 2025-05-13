@@ -42,9 +42,11 @@ Add the following in `tsconfig.json`:
 
 ## Compatibility
 
-`@cypress/puppeteer` requires Cypress version 13.6.0 or greater.
+Before using `@cypress/puppeteer`, ensure the following requirements are met:
 
-Only Chromium-based browsers (e.g. Chrome, Chromium, Electron) are supported.
+- Cypress 13.6.0+ is required.
+- Only Chromium-based browsers are supported, such as Chrome for Testing, Chromium, and Electron.
+- Chrome-branded browsers (e.g., standard Chrome) are not supported in version 137+ due to Chrome's removal of the `--load-extension` flag. We recommend using Chrome for Testing or Chromium instead. [See download instructions](https://www.chromium.org/getting-involved/download-chromium/).
 
 ## Usage
 
@@ -339,6 +341,7 @@ export default defineConfig({
 
 If you receive this error in your command log, the Puppeteer plugin was unable to communicate with the Cypress extension. This extension is necessary in order to re-activate the main Cypress tab after a Puppeteer command, when running in open mode.
 
+* If you're using a Chrome-branded browser (e.g., standard Chrome) in version 137+, you'll need to use Chrome for Testing or Chromium instead. [See download instructions](https://www.chromium.org/getting-involved/download-chromium/).
 * Ensure this extension is enabled in the instance of Chrome that Cypress launches by visiting chrome://extensions/
 * Ensure the Cypress extension is allowed by your company's security policy by its extension id, `caljajdfkjjjdehjdoimjkkakekklcck`
 

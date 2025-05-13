@@ -491,10 +491,6 @@ export const AllCypressErrors = {
 
           ${fmt.terminal('cypress run --record')}
 
-        If you don't want to record these runs, you can silence this warning:
-
-          ${fmt.terminal('cypress run --record false')}
-
         https://on.cypress.io/recording-project-runs`
   },
   CLOUD_INVALID_RUN_REQUEST: (arg1: {message: string, errors: string[], object: object}) => {

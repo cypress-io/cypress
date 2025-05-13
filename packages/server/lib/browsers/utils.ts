@@ -210,7 +210,7 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
   return launchOptions
 }
 
-const wkBrowserVersionRe = /BROWSER_VERSION = \'(?<version>[^']+)\'/gm
+const wkBrowserVersionRe = /BROWSER_VERSION\s*=\s*(['"])(?<version>[\d.]+)\1/gm
 
 const getWebKitBrowserVersion = async () => {
   try {
