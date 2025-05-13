@@ -132,6 +132,13 @@ describe('Studio Cloud', () => {
       body: { enabled: true },
     })
 
+    // this endpoint gets called twice, so we need to mock it twice
+    cy.mockNodeCloudRequest({
+      url: '/studio/testgen/n69px6/enabled',
+      method: 'get',
+      body: { enabled: true },
+    })
+
     const aiOutput = 'cy.get(\'button\').should(\'have.text\', \'Increment\')'
 
     cy.mockNodeCloudStreamingRequest({
