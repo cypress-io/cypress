@@ -82,6 +82,7 @@ const original = `\
       if (fooparent===selfVar) return
       if (loadStop===windowFile) return
       if (fooparent===windowFile) return
+      top.window.location='https://www.foobar.com'
     </script>
   </body>
 </html>\
@@ -163,6 +164,7 @@ const expected = `\
       if (fooparent===selfVar) return
       if (loadStop===windowFile) return
       if (fooparent===windowFile) return
+      self.window.location='https://www.foobar.com'
     </script>
   </body>
 </html>\
