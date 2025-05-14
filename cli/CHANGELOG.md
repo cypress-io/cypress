@@ -3,6 +3,10 @@
 
 _Released 6/3/2025 (PENDING)_
 
+**Misc:**
+
+- Added timeout field to EnqueuedCommandAttributes type. Addresses [#30198](https://github.com/cypress-io/cypress/issues/30198).
+
 **Dependency Updates:**
 
 - Updated `@sinonjs/fake-timers` from `10.3.0` to `11.3.1`. Addressed in [#31746](https://github.com/cypress-io/cypress/pull/31746).
