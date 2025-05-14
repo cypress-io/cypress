@@ -6426,6 +6426,7 @@ declare namespace Cypress {
     injected: boolean
     userInvocationStack?: string
     query?: boolean
+    timeout?: number
     fn(...args: any[]): any
   }
 
