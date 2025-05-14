@@ -83,7 +83,7 @@
     "@types/minimatch": "3.0.5",
     "@types/mocha": "8.0.3",
     "@types/sinon": "9.0.9",
-    "@types/sinon-chai": "3.2.5",
+    "@types/sinon-chai": "3.2.12",
     "chai": "3.5.0",
     "chai-as-promised": "7.1.1",
     "chai-string": "1.5.0",
