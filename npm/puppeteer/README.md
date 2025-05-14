@@ -46,7 +46,7 @@ Before using `@cypress/puppeteer`, ensure the following requirements are met:
 
 - Cypress 13.6.0+ is required.
 - Only Chromium-based browsers are supported, such as Chrome for Testing, Chromium, and Electron.
-- Chrome-branded browsers (e.g., standard Chrome) are not supported in version 137+ due to Chrome's removal of the `--load-extension` flag. We recommend using Chrome for Testing or Chromium instead. [See download instructions](https://www.chromium.org/getting-involved/download-chromium/).
+- Chrome-branded browsers (e.g., standard Chrome) are not supported in version 137+ due to Chrome's removal of the `--load-extension` flag. We recommend using Chrome for Testing or Chromium instead. See Cypress Docker image examples for [Chrome for Testing](https://github.com/cypress-io/cypress-docker-images/tree/master/examples/chrome-for-testing) and [Chromium](https://github.com/cypress-io/cypress-docker-images/tree/master/examples/chromium).
 
 ## Usage
 
