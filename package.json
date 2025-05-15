@@ -199,6 +199,7 @@
     "semver": "^7.7.1",
     "shelljs": "0.8.5",
     "sinon": "7.3.2",
+    "sinon-chai": "3.7.0",
     "snap-shot-it": "7.9.10",
     "stop-only": "3.4.1",
     "strip-ansi": "6.0.1",
