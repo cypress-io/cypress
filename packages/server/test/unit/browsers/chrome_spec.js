@@ -270,6 +270,32 @@ describe('lib/browsers/chrome', () => {
       })
     })
 
+    it('warns the user if `--load-extension` is passed into branded chrome 137 and up', async function () {
+      sinon.stub(console, 'log')
+
+      plugins.registerEvent('before:browser:launch', (browser, config) => {
+        return Promise.resolve({ args: ['--foo=bar', '--load-extension=/foo/bar/baz.js,/quux.js'] })
+      })
+
+      await chrome.open({ isHeaded: true, majorVersion: '137', name: 'chrome' }, 'http://', { onWarning: () => {}, onError: () => {} }, this.automation)
+
+      // eslint-disable-next-line no-console
+      expect(console.log).to.have.been.calledWith(sinon.match('Google Chrome v137 and higher does not allow loading extensions via --load-extension. If you need to load an extension to test with Cypress, please use Chrome for Testing, Chromium, or another Chrome variant that supports loading extensions.'))
+    })
+
+    it('warns the user if launchOptions.extensions is passed into branded chrome 137 and up', async function () {
+      sinon.stub(console, 'log')
+
+      plugins.registerEvent('before:browser:launch', (browser, config) => {
+        return Promise.resolve({ args: ['--foo=bar'], extensions: ['/foo/bar/baz.js', '/quux.js'] })
+      })
+
+      await chrome.open({ isHeaded: true, majorVersion: '139', name: 'chrome' }, 'http://', { onWarning: () => {}, onError: () => {} }, this.automation)
+
+      // eslint-disable-next-line no-console
+      expect(console.log).to.have.been.calledWith(sinon.match('Google Chrome v137 and higher does not allow loading extensions via --load-extension. If you need to load an extension to test with Cypress, please use Chrome for Testing, Chromium, or another Chrome variant that supports loading extensions.'))
+    })
+
     it('cleans up an unclean browser profile exit status', function () {
       this.readJson.withArgs('/profile/dir/Default/Preferences').resolves({
         profile: {
