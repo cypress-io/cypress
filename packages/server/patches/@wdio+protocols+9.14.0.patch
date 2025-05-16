@@ -8,7 +8,7 @@ index 374e3dd..9c820d0 100644
          {
 -          name: "addon",
 +          // cypress uses 'path' over 'addon' to avoid zipping the extension,
-+          // which is easier for cypress to encorporate and doesn't break users
++          // which is easier for cypress to incorporate and doesn't break users
 +          name: "path",
            type: "string",
 -          description: "base64 string of the add on file",
