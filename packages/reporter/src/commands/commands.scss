@@ -1,8 +1,11 @@
 @mixin nested-command-dashes($color) {
   border-left: 1px dotted $color;
   border-image-slice: 0 0 0 1;
-  border-image-source: repeating-linear-gradient(0deg, transparent, $color, $color 4px);
+  border-image-source: repeating-linear-gradient(0deg, transparent, $color, $color 2px);
 }
+
+/** Group indentation width for chevron and vertical lines */
+$group-indent-width: 18px;
 
 .reporter {
   // rendered within ../hooks/hooks.tsx
@@ -47,17 +50,6 @@
     .command-method,
     .command-message {
       color: $gray-500;
-    }
-  }
-
-  // Child Styles
-  .command-type-child {
-    .command-method {
-      &:before {
-        float: left;
-        content: "-";
-        margin-right: 2px;
-      }
     }
   }
 
@@ -121,19 +113,39 @@
   // when no children, add padding to act as the .command-expander-column's width
   // to prevent adding another element to the page
   .command-number-column + span.command-pin-target {
-    margin-left: 25px;
+    margin-left: 14px;
   }
 
   .command-pin-target.command-group {
-    @include nested-command-dashes($gray-600);
-    padding-left: 12px;
+    @include nested-command-dashes($gray-700);
     min-height: 28px;
 
     .command-group-block {
-      @include nested-command-dashes($gray-600);
-      width: 12px;
+      @include nested-command-dashes($gray-700);
+      width: $group-indent-width;
+      min-width: $group-indent-width;
       min-height: 28px;
-      min-width: 12px;
+    }
+  }
+
+  .command-group-no-children {
+    padding-left: 15px; 
+  }
+
+  .command-wrapper-text-group {
+    padding-left: 15px;
+    width: 100%;
+
+  }
+
+  .command-wrapper-text-group-parent {
+    padding-left: 5px;
+  }
+
+  .nested-group-expander {   
+    .command-expander {
+      position: relative;
+      margin-left: -16px !important; // Adjust this value to center the caret on the border
     }
   }
 
@@ -454,7 +466,7 @@
     font-size: 12px;
     line-height: 1;
     margin-top: -1px;
-    margin-left: 10px;
+    margin-left: 12px;
     outline: none;
     text-align: right;
     width: 15px;
@@ -465,20 +477,14 @@
     }
   }
 
-  .command-expander-column {
+  %command-expander-base {
     flex-shrink: 0;
-    padding-left: 10px;
-    padding-right: 5px;
-    padding-top: 4px;
-    padding-bottom: 4px;
-    width: 25px;
     display: flex;
 
     .command-expander {
       color: $gray-500;
       transform: rotate(-90deg);
       transition: transform 150ms ease-out;
-      margin-top: 5px;
 
       path {
         stroke: $gray-700;
@@ -487,6 +493,30 @@
 
     .command-expander-is-open {
       transform: rotate(0deg);
+    }
+  }
+
+  .command-expander-column {
+    @extend %command-expander-base;
+    padding: 4px 5px 4px 11px;
+    width: 25px;
+
+    .command-expander {
+      margin-top: 5px;
+    }
+  }
+
+  .command-expander-column-group {
+    @extend %command-expander-base;
+    padding: 0;
+    width: $group-indent-width;
+    min-width: $group-indent-width;
+    max-width: $group-indent-width;
+    align-items: center;
+    justify-content: center;
+
+    .command-expander {
+      margin: 0;
     }
   }
 
