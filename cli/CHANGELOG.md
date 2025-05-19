@@ -21,7 +21,7 @@ _Released 5/20/2025 (PENDING)_
 
 **Dependency Updates:**
 
-- Upgraded `@sinonjs/fake-timers` from `8.1.0` to `9.1.2`. Addressed in [#31725](https://github.com/cypress-io/cypress/pull/31725).
+- Upgraded `@sinonjs/fake-timers` from `8.1.0` to `10.3.0`. Addressed in [#31725](https://github.com/cypress-io/cypress/pull/31725) and [#31737](https://github.com/cypress-io/cypress/pull/31737).
 - Upgraded `trash` from `5.2.0` to `7.2.0`. Addressed in [#31667](https://github.com/cypress-io/cypress/pull/31667).
 - Upgraded `webdriver` from `9.11.0` to `9.14.0`. Addressed in [#31689](https://github.com/cypress-io/cypress/pull/31689).
 
