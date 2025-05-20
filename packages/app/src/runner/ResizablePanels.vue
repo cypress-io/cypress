@@ -253,6 +253,10 @@ function isNewWidthAllowed (mouseClientX: number, panel: DraggablePanel) {
     const rightEdge = props.maxTotalWidth + props.offsetLeft
     const newWidth = rightEdge - mouseClientX
 
+    if (isMaxWidthSmall && newWidth >= props.minPanel4Width) {
+      return true
+    }
+
     return panel4IsDragging.value && newWidth >= props.minPanel4Width && newWidth <= maxPanel4Width.value
   }
 
