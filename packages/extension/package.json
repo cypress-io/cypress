@@ -34,7 +34,7 @@
     "mock-require": "3.0.3",
     "rimraf": "5.0.10",
     "sinon": "7.3.2",
-    "sinon-chai": "3.3.0",
+    "sinon-chai": "3.7.0",
     "ts-loader": "9.5.2",
     "webextension-polyfill": "0.4.0",
     "webpack": "^5.88.2"

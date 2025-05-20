@@ -13,6 +13,7 @@ import type {
 } from 'webdriver/build/bidi/localTypes'
 
 import { bidiKeyPress } from '../automation/commands/key_press'
+import type Protocol from 'devtools-protocol'
 
 const debug = debugModule('cypress:server:browsers:bidi_automation')
 const debugVerbose = debugModule('cypress-verbose:server:browsers:bidi_automation')
@@ -178,7 +179,7 @@ export class BidiAutomation {
       headers: parsedHeaders,
       resourceType,
       originalResourceType: params.request.initiatorType || params.request.destination,
-      initiator: params.initiator,
+      initiator: params.initiator as Protocol.Network.Initiator,
       // Since we are NOT using CDP, we set the values to 0 to indicate that we do not have this information.
       // This is important when determining pre-request timeout and removal behavior
       cdpRequestWillBeSentTimestamp: 0,
