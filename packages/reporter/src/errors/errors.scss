@@ -1,4 +1,5 @@
 $code-border-radius: 4px;
+$group-indent-width: 18px;
 
 .reporter {
   .error {
@@ -54,19 +55,19 @@ $code-border-radius: 4px;
   .recovered-test-err {
     .runnable-err-header,
     .runnable-err-body {
-      padding-left: 49px;
+      padding-left: 38px;
       display: flex;
 
       .err-group-block {
         border-left: 1px dotted $err-header-text;
         border-image-slice: 0 0 0 1;
-        border-image-source: repeating-linear-gradient(0deg, transparent, $err-header-text, $err-header-text 4px);
-        width: 12px;
-        min-width: 12px;
+        border-image-source: repeating-linear-gradient(0deg, transparent, $err-header-text, $err-header-text 2px);
+        width: $group-indent-width;
+        min-width: $group-indent-width;
 
         &:first-of-type {
-          width: 13px;
-          min-width: 13px;
+          width: 16px;
+          min-width: 16px;
         }
     } 
   }
