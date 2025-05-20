@@ -26,9 +26,11 @@
       :max-total-width="windowWidth - collapsedNavBarWidth"
       :initial-panel1-width="specsListWidthPreferences"
       :initial-panel2-width="reporterWidthPreferences"
+      :initial-panel4-width="studioWidthPreferences"
       :min-panel1-width="minWidths.specsList"
       :min-panel2-width="minWidths.reporter"
       :min-panel3-width="minWidths.aut"
+      :min-panel4-width="minWidths.studio"
       :show-panel1="runnerUiStore.isSpecsListOpen && !screenshotStore.isScreenshotting"
       :show-panel2="!screenshotStore.isScreenshotting && !hideCommandLog"
       :show-panel4="shouldShowStudioPanel"
@@ -149,6 +151,7 @@ const {
   absoluteAutMinimum,
   absoluteSpecListMinimum,
   absoluteReporterMinimum,
+  absoluteStudioMinimum,
   collapsedNavBarWidth,
 } = runnerConstants
 
@@ -278,7 +281,7 @@ const shouldShowStudioButton = computed(() => {
 })
 
 const shouldShowStudioPanel = computed(() => {
-  return !!cloudStudioRequested.value && (studioStore.isLoading || studioStore.isActive)
+  return !!cloudStudioRequested.value && (studioStore.isLoading || studioStore.isActive) && !screenshotStore.isScreenshotting
 })
 
 const hideCommandLog = runnerUiStore.hideCommandLog
@@ -330,6 +333,7 @@ const minWidths = computed(() => {
     aut: getMinimum(absoluteAutMinimum, doesContentFit),
     specsList: getMinimum(absoluteSpecListMinimum, doesContentFit),
     reporter: getMinimum(absoluteReporterMinimum, doesContentFit),
+    studio: absoluteStudioMinimum,
   }
 })
 
