@@ -16,7 +16,7 @@ To run against locally developed `cy.prompt`:
   - Log In to the Cloud via the App
   - Open a project that has `experimentalPromptCommand: true` set in the `e2e` config of the `cypress.config.js|ts` file.
  
-To run against a deployed version of studio:
+To run against a deployed version of `cy.prompt`:
 
 - Set:
   - `CYPRESS_INTERNAL_ENV=<environment>` (e.g. `staging` or `production` if you want to hit those deployments of `cypress-services` or `development` if you want to hit a locally running version of `cypress-services`)
