@@ -111,8 +111,6 @@ describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 40
   })
 
   describe('when panel 4 is shown', () => {
-    const minPanel3Width = 500
-
     beforeEach(() => {
       cy.mount(() => (
         <div class="flex">
