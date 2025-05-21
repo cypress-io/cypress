@@ -123,8 +123,8 @@ const panel1IsDragging = ref(false)
 const panel2IsDragging = ref(false)
 const panel4IsDragging = ref(false)
 const cachedPanel1Width = ref<number>(props.initialPanel1Width) // because panel 1 (the inline specs list) can be opened and closed in the UI, we cache the width
+const cachedPanel4Width = ref(props.initialPanel4Width)
 const panel2Width = ref(props.initialPanel2Width)
-const panel4Width = ref(props.initialPanel4Width)
 
 const handleMousedown = (panel: DraggablePanel, event: MouseEvent) => {
   if (panel === 'panel1') {
@@ -159,7 +159,7 @@ const handleMousemove = (event: MouseEvent) => {
     // and when we drag it to the right, it shrinks
     const rightEdge = props.maxTotalWidth + props.offsetLeft
 
-    panel4Width.value = rightEdge - event.clientX
+    cachedPanel4Width.value = rightEdge - event.clientX
     emit('panelWidthUpdated', { panel: 'panel4', width: panel4Width.value })
   }
 }
@@ -183,7 +183,7 @@ const handleMouseup = () => {
 }
 
 const maxPanel1Width = computed(() => {
-  const unavailableWidth = panel2Width.value + props.minPanel3Width
+  const unavailableWidth = panel2Width.value + props.minPanel3Width + panel4Width.value
 
   return props.maxTotalWidth - unavailableWidth
 })
@@ -194,6 +194,14 @@ const panel1Width = computed(() => {
   }
 
   return cachedPanel1Width.value
+})
+
+const panel4Width = computed(() => {
+  if (!props.showPanel4) {
+    return 0
+  }
+
+  return cachedPanel4Width.value
 })
 
 const maxPanel2Width = computed(() => {
@@ -272,7 +280,7 @@ watchEffect(() => {
   if (!props.showPanel4) {
     emit('panelWidthUpdated', { panel: 'panel4', width: 0 })
   } else if (props.showPanel4) {
-    emit('panelWidthUpdated', { panel: 'panel4', width: panel4Width.value })
+    emit('panelWidthUpdated', { panel: 'panel4', width: cachedPanel4Width.value })
   }
 })
 
