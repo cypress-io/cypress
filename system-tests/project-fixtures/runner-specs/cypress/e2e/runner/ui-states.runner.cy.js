@@ -1,0 +1,351 @@
+describe('Hooks', () => {
+  before(() => {
+    cy.log('command in "before" hook')
+  })
+
+  beforeEach(() => {
+    cy.log('command in "beforeEach" hook')
+  })
+
+  it('test hooks', () => {
+    cy.log('command in "it" test')
+  })
+
+  afterEach(() => {
+    cy.log('command in "afterEach" hook')
+  })
+
+  after(() => {
+    cy.log('command in "after" hook')
+  })
+})
+
+describe('Commands', () => {
+  it('commands that dont display in UI', () => {
+    cy.visit('cypress/fixtures/commandsActions.html')
+
+    cy.wrap({ foo: { bar: 'baz' } })
+    .then((obj) => obj)
+    .should('have.property', 'foo')
+    .and('have.property', 'bar')
+
+    cy.wrap({ foo: { bar: 'baz' } })
+    .as('myObject')
+
+    cy.get('@myObject').then((obj) => {
+      cy.log(obj)
+    })
+
+    cy.get('div').each(($div) => { }).end()
+
+    cy.fixture('uiStates')
+
+    cy.intercept('GET', 'comments/*').as('getComment')
+
+    cy.wrap(['foo', 'bar']).spread(() => {})
+
+    const obj = {
+      foo () { },
+      bar () { },
+    }
+
+    cy.spy(obj, 'foo')
+    cy.stub(obj, 'bar')
+  })
+
+  it('commands that display in UI', () => {
+    cy.visit('cypress/fixtures/commandsActions.html')
+
+    cy.get('.action-blur')
+    .type('foo')
+    .clear()
+
+    cy.focused()
+    .blur()
+
+    cy.get('.action-check [type="checkbox"]').first()
+    .check()
+    .uncheck()
+
+    cy.get('div')
+    .children()
+
+    cy.setCookie('fakeCookie', '123ABC')
+    cy.getCookie('fakeCookie')
+    cy.getCookies()
+    cy.clearCookie('fakeCookie')
+    cy.clearCookies()
+
+    cy.clearLocalStorage()
+
+    cy.get('.action-btn')
+    .click()
+    .dblclick()
+    .rightclick()
+
+    const now = new Date(Date.UTC(2017, 2, 14)).getTime()
+
+    cy.clock(now)
+    cy.tick(10000)
+
+    cy.get('li').closest('.nav')
+
+    cy.contains('Commands')
+    cy.get('li').contains('Commands')
+
+    cy.document()
+
+    cy.get('div').eq(0)
+
+    cy.exec('echo Jane Lane')
+
+    cy.get('div')
+    .filter('.container')
+    .find('#navbar')
+    .first()
+
+    cy.go('forward')
+
+    cy.hash()
+
+    cy.get('div').invoke('text')
+
+    cy.get('div').its('length')
+
+    cy.get('div').last()
+
+    cy.location()
+
+    cy.log('message')
+
+    cy.get('div')
+    .next()
+    .nextAll()
+    .not('.container')
+    .parent()
+    .parents()
+    .parentsUntil()
+    .prev()
+    .prevAll()
+    .prevUntil()
+
+    cy.get('div').first()
+    .scrollIntoView()
+    .screenshot()
+
+    cy.scrollTo('bottom')
+
+    cy.get('.action-select')
+    .select('apples')
+    .siblings()
+
+    cy.get('form').first()
+
+    cy.title()
+
+    cy.get('div').first().trigger('click')
+
+    cy.url()
+
+    cy.viewport('ipad-2')
+
+    cy.wait(2)
+
+    cy.window()
+
+    cy.get('div').first().within(() => {
+
+    })
+
+    cy.wrap({ foo: 'bar' })
+
+    cy.session('session', () => {
+      cy.visit('cypress/fixtures/uiStates.html')
+    })
+  })
+
+  it('command options', () => {
+    cy.visit('cypress/fixtures/uiStates.html')
+
+    cy.get('#a').focus().blur({ force: false })
+    cy.get('#checkbox').check({ force: false })
+    cy.get('form').children({ timeout: 2000 })
+    cy.get('#a').clear({ force: false })
+    cy.clearCookie('authId', { timeout: 2001 })
+    cy.clearCookies({ timeout: 2002 })
+
+    cy.contains('button').click({ force: false })
+    cy.contains('button').click(1, 2, { force: false })
+    cy.contains('button').click('bottom', { force: false })
+
+    cy.get('#a').closest('form', { timeout: 2003 })
+    cy.contains('.test', 'Hello', { timeout: 2004 })
+    cy.get('button').dblclick({ force: false })
+
+    cy.document({ timeout: 2005 })
+
+    cy.get('input').eq(0, { timeout: 2006 })
+    cy.exec('ls', { env: { 'a': true } })
+    cy.get('input').filter('#a', { timeout: 2007 })
+    cy.get('form').find('#a', { timeout: 2008 })
+    cy.get('input').first({ timeout: 2009 })
+
+    cy.get('#a').focus({ timeout: 2010 })
+    cy.get('#a').focus()
+    cy.focused({ timeout: 2011 })
+    cy.get('#a', { withinSubject: document.forms[0] })
+    cy.getCookie('auth_key', { timeout: 2012 })
+    cy.getCookies({ timeout: 2013 })
+    cy.go('forward', { timeout: 2014 })
+    cy.hash({ timeout: 2015 })
+    cy.get('input').last({ timeout: 2016 })
+    cy.location('port', { timeout: 2017 })
+    cy.get('#a').next('input', { timeout: 2018 })
+    cy.get('#a').nextAll('input', { timeout: 2019 })
+    cy.get('#a').nextUntil('#b', { timeout: 2020 })
+    cy.get('input').not('#a', { timeout: 2021 })
+    cy.get('#a').parent('form', { timeout: 2022 })
+    cy.get('#a').parents('form', { timeout: 2023 })
+    cy.get('#a').parentsUntil('body', { timeout: 2024 })
+
+    cy.get('#b').prev('input', { timeout: 2025 })
+    cy.get('#b').prevAll('input', { timeout: 2026 })
+    cy.get('#b').prevUntil('#a', { timeout: 2027 })
+    cy.readFile('./cypress/fixtures/uiStates.json', { timeout: 2028 })
+    cy.reload(true, { timeout: 2028 })
+
+    cy.get('button').rightclick({ timeout: 2028 })
+    cy.root({ timeout: 2028 })
+
+    cy.screenshot({ capture: 'viewport' })
+    cy.get('form').scrollIntoView({
+      offset: { top: 20, left: 30, right: 20, bottom: 40 },
+      log: true,
+      timeout: 3000,
+      duration: 0,
+    })
+
+    cy.scrollTo(0, 500, { duration: 100 })
+    cy.get('#fruits').select('apples', { force: false })
+
+    cy.setCookie('auth_key', '123key', { httpOnly: true })
+
+    cy.get('#a').siblings('input', { timeout: 2029 })
+
+    cy.get('form').submit({ timeout: 2030 })
+
+    cy.title({ timeout: 2032 })
+    cy.get('#a').trigger('mouseenter', 'top', { cancelable: true })
+    cy.get('#a').type('hi?', {
+      delay: 10,
+      force: true,
+    })
+
+    cy.get('#checkbox').uncheck('good', { force: false })
+    cy.url({ timeout: 2033 })
+    cy.visit('cypress/fixtures/uiStates.html', {
+      timeout: 20000,
+    })
+
+    cy.wait(100, { requestTimeout: 2000 })
+    cy.window({ timeout: 2034 })
+    cy.wrap({ name: 'John Doe' }, { timeout: 2035 })
+    cy.writeFile('./cypress/_test-output/test.txt', 'test', { timeout: 2036 })
+  })
+
+  it('Element Visibility', () => {
+    cy.visit('cypress/fixtures/commandsActions.html')
+
+    cy.get('#scroll-horizontal button')
+    .should('not.be.visible')
+  })
+})
+
+describe('Status Codes', () => {
+  it('Request Statuses', () => {
+    cy.request('https://httpstat.us/200')
+    cy.request('https://httpstat.us/304')
+
+    cy.request({
+      url: 'https://httpstat.us/400',
+      failOnStatusCode: false,
+    })
+
+    cy.request({
+      url: 'https://httpstat.us/502',
+      failOnStatusCode: false,
+    })
+
+    cy.request({
+      url: 'https://httpstat.us/103',
+      timeout: 2000,
+    })
+  })
+})
+
+describe('Page Events', () => {
+  it('events - page events', () => {
+    cy.visit('cypress/fixtures/commandsActions.html')
+
+    cy.get('form').first().submit()
+
+    cy.visit('cypress/fixtures/aliasing.html')
+    cy.get('.network-btn').click()
+  })
+})
+
+describe('Errors', () => {
+  it('simple error with docs link', () => {
+    cy.visit('cypress/fixtures/commandsActions.html')
+    cy.get('div')
+    .click()
+  })
+
+  it('long error', () => {
+    cy.request('http://httpstat.us/500')
+  })
+})
+
+describe('Nested Tests', () => {
+  context('level 2', () => {
+    context('level 3', () => {
+      context('level 4', () => {
+        context('level 5', () => {
+          context('level 6', () => {
+            context('level 7', () => {
+              context('level 8', () => {
+                context('level 9', () => {
+                  context('level 10', () => {
+                    context('level 11', () => {
+                      context('level 12', () => {
+                        context('level 13', () => {
+                          context('level 14', () => {
+                            context('level 15', () => {
+                              context('level 16', () => {
+                                context('level 17', () => {
+                                  context('level 18', () => {
+                                    context('level 19', () => {
+                                      context('level 20', () => {
+                                        it('passing test', () => {
+                                          expect(true).to.be.true
+                                        })
+                                      })
+                                    })
+                                  })
+                                })
+                              })
+                            })
+                          })
+                        })
+                      })
+                    })
+                  })
+                })
+              })
+            })
+          })
+        })
+      })
+    })
+  })
+})
