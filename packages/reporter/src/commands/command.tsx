@@ -326,7 +326,7 @@ interface CommandProps {
 
 const CommandDetails: React.FC<CommandDetailsProps> = observer(({ model, groupId, aliasesWithDuplicates }) => (
   <span className={cs('command-info')}>
-    <span className='command-method'>
+    <span className={cs('command-method', { 'command-method-child': !model.hasChildren })}>
       <span>
         {model.event && model.type !== 'system' ? `(${displayName(model)})` : displayName(model)}
       </span>

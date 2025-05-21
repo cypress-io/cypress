@@ -53,6 +53,17 @@ $group-indent-width: 18px;
     }
   }
 
+  //  Child Styles
+   .command-type-child {
+    .command-method-child {
+      &:before {
+        float: left;
+        content: "-";
+        margin-right: 2px;
+      }
+    }
+  }
+
   .command-wrapper {
     border-left: 2px solid $reporter-section-background;
     background-color: $reporter-section-background;
