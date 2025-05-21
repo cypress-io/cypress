@@ -211,7 +211,7 @@
     "tree-kill": "1.2.2",
     "ts-node": "^10.9.2",
     "typescript": "5.3.3",
-    "yaml": "2.7.0",
+    "yaml": "2.8.0",
     "yarn-deduplicate": "3.1.0"
   },
   "engines": {
