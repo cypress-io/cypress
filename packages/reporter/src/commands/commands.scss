@@ -124,7 +124,7 @@ $group-indent-width: 18px;
   // when no children, add padding to act as the .command-expander-column's width
   // to prevent adding another element to the page
   .command-number-column + span.command-pin-target {
-    margin-left: 14px;
+    margin-left: 25px;
   }
 
   .command-pin-target.command-group {
@@ -515,6 +515,10 @@ $group-indent-width: 18px;
     .command-expander {
       margin-top: 5px;
     }
+  }
+
+  .command-expander-column-parent {
+    margin-left: 11px;
   }
 
   .command-expander-column-group {

@@ -125,7 +125,7 @@ const NavColumns: React.FC<NavColumnsProps> = observer(({ model, isPinned, toggl
       {(!model._isPending() && !isPinned) && model.number}
     </div>
     {model.hasChildren && !model.group && (
-      <div className='command-expander-column' onClick={() => model.toggleOpen()}>
+      <div className='command-expander-column command-expander-column-parent' onClick={() => model.toggleOpen()}>
         <ChevronIcon className={cs('command-expander', { 'command-expander-is-open': model.hasChildren && !!model.isOpen })} />
       </div>
     )}
