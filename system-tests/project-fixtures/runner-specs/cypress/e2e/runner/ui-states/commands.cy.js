@@ -31,7 +31,7 @@ describe('Commands', () => {
     cy.stub(obj, 'bar')
   })
 
-  it('commands that display in UI', () => {
+  it('commands that display in UI - part 1', () => {
     cy.visit('cypress/fixtures/commandsActions.html')
 
     cy.get('.action-blur')
@@ -65,6 +65,10 @@ describe('Commands', () => {
 
     cy.clock(now)
     cy.tick(10000)
+  })
+
+  it('commands that display in UI - part 2', () => {
+    cy.visit('cypress/fixtures/commandsActions.html')
 
     cy.get('li').closest('.nav')
 
@@ -106,6 +110,10 @@ describe('Commands', () => {
     .prev()
     .prevAll()
     .prevUntil()
+  })
+
+  it('commands that display in UI - part 3', () => {
+    cy.visit('cypress/fixtures/commandsActions.html')
 
     cy.get('div').first()
     .scrollIntoView()
@@ -142,7 +150,7 @@ describe('Commands', () => {
     })
   })
 
-  it('command options', () => {
+  it('command options - part 1', () => {
     cy.visit('cypress/fixtures/uiStates.html')
 
     cy.get('#a').focus().blur({ force: false })
@@ -167,6 +175,10 @@ describe('Commands', () => {
     cy.get('input').filter('#a', { timeout: 2007 })
     cy.get('form').find('#a', { timeout: 2008 })
     cy.get('input').first({ timeout: 2009 })
+  })
+
+  it('command options - part 2', () => {
+    cy.visit('cypress/fixtures/uiStates.html')
 
     cy.get('#a').focus({ timeout: 2010 })
     cy.get('#a').focus()
@@ -194,6 +206,10 @@ describe('Commands', () => {
 
     cy.get('button').rightclick({ timeout: 2028 })
     cy.root({ timeout: 2028 })
+  })
+
+  it('command options - part 3', () => {
+    cy.visit('cypress/fixtures/uiStates.html')
 
     cy.screenshot({ capture: 'viewport' })
     cy.get('form').scrollIntoView({

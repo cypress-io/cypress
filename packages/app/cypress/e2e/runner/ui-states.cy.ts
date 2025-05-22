@@ -54,9 +54,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
       })
     })
 
-    it('commands that display in UI', () => {
-      cy.viewport(1000, 2800)
-
+    it('commands that display in UI - part 1', () => {
       runSpec({
         fileName: 'ui-states/commands.cy.js',
       })
@@ -66,7 +64,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
             resolve()
           })
         }).then(() => {
-          cy.contains('commands that display in UI').should('be.visible')
+          cy.contains('commands that display in UI - part 1').should('be.visible')
           .click()
 
           cy.percySnapshot()
@@ -74,9 +72,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
       })
     })
 
-    it('command options', () => {
-      cy.viewport(1000, 3200)
-
+    it('commands that display in UI - part 2', () => {
       runSpec({
         fileName: 'ui-states/commands.cy.js',
       })
@@ -86,7 +82,75 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
             resolve()
           })
         }).then(() => {
-          cy.contains('command options').as('commandOptions').should('be.visible').click()
+          cy.contains('commands that display in UI - part 2').should('be.visible')
+          .click()
+
+          cy.percySnapshot()
+        })
+      })
+    })
+
+    it('commands that display in UI - part 3', () => {
+      runSpec({
+        fileName: 'ui-states/commands.cy.js',
+      })
+      .then((win) => {
+        return new Promise<void>((resolve) => {
+          win.getEventManager().on('cypress:in:cypress:run:complete', () => {
+            resolve()
+          })
+        }).then(() => {
+          cy.contains('commands that display in UI - part 3').should('be.visible')
+          .click()
+
+          cy.percySnapshot()
+        })
+      })
+    })
+
+    it('command options - part 1', () => {
+      runSpec({
+        fileName: 'ui-states/commands.cy.js',
+      })
+      .then((win) => {
+        return new Promise<void>((resolve) => {
+          win.getEventManager().on('cypress:in:cypress:run:complete', () => {
+            resolve()
+          })
+        }).then(() => {
+          cy.contains('command options - part 1').should('be.visible').click()
+          cy.percySnapshot()
+        })
+      })
+    })
+
+    it('command options - part 2', () => {
+      runSpec({
+        fileName: 'ui-states/commands.cy.js',
+      })
+      .then((win) => {
+        return new Promise<void>((resolve) => {
+          win.getEventManager().on('cypress:in:cypress:run:complete', () => {
+            resolve()
+          })
+        }).then(() => {
+          cy.contains('command options - part 2').should('be.visible').click()
+          cy.percySnapshot()
+        })
+      })
+    })
+
+    it('command options - part 3', () => {
+      runSpec({
+        fileName: 'ui-states/commands.cy.js',
+      })
+      .then((win) => {
+        return new Promise<void>((resolve) => {
+          win.getEventManager().on('cypress:in:cypress:run:complete', () => {
+            resolve()
+          })
+        }).then(() => {
+          cy.contains('command options - part 3').should('be.visible').click()
           cy.percySnapshot()
         })
       })
@@ -142,10 +206,6 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
   })
 
   describe('errors', () => {
-    beforeEach(() => {
-      cy.viewport(1000, 3000)
-    })
-
     it('simple error with docs link', () => {
       runSpec({
         fileName: 'ui-states/errors.cy.js',
