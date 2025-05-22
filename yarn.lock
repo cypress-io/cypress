@@ -15207,10 +15207,10 @@ enzyme-adapter-utils@^1.11.0:
     prop-types "^15.7.2"
     semver "^5.7.1"
 
-eol@0.9.1:
-  version "0.9.1"
-  resolved "https://registry.yarnpkg.com/eol/-/eol-0.9.1.tgz#f701912f504074be35c6117a5c4ade49cd547acd"
-  integrity sha512-Ds/TEoZjwggRoz/Q2O7SE3i4Jm66mqTDfmdHdq/7DKVk3bro9Q8h6WdXKdPqFLMoqxrDK5SVRzHVPOS6uuGtrg==
+eol@0.10.0:
+  version "0.10.0"
+  resolved "https://registry.yarnpkg.com/eol/-/eol-0.10.0.tgz#51b35c6b9aa0329a26d102b6ddc454be8654739b"
+  integrity sha512-+w3ktYrOphcIqC1XKmhQYvM+o2uxgQFiimL7B6JPZJlWVxf7Lno9e/JWLPIgbHo7DoZ+b7jsf/NzrUcNe6ZTZQ==
 
 err-code@^2.0.2:
   version "2.0.3"
