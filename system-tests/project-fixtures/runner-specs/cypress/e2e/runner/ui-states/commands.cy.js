@@ -67,7 +67,7 @@ describe('Commands', () => {
     cy.tick(10000)
   })
 
-  it('commands that display in UI - part 2', () => {
+  it('commands that display in UI - part 2a', () => {
     cy.visit('cypress/fixtures/commandsActions.html')
 
     cy.get('li').closest('.nav')
@@ -89,6 +89,10 @@ describe('Commands', () => {
     cy.go('forward')
 
     cy.hash()
+  })
+
+  it('commands that display in UI - part 2b', () => {
+    cy.visit('cypress/fixtures/commandsActions.html')
 
     cy.get('div').invoke('text')
 

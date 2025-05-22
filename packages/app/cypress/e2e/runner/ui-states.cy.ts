@@ -56,7 +56,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
 
     it('commands that display in UI - part 1', () => {
       runSpec({
-        fileName: 'ui-states/commands.cy.js',
+        fileName: 'ui-states/commandsToDisplay.cy.js',
       })
       .then((win) => {
         return new Promise<void>((resolve) => {
@@ -74,7 +74,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
 
     it('commands that display in UI - part 2', () => {
       runSpec({
-        fileName: 'ui-states/commands.cy.js',
+        fileName: 'ui-states/commandsToDisplay.cy.js',
       })
       .then((win) => {
         return new Promise<void>((resolve) => {
@@ -92,7 +92,25 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
 
     it('commands that display in UI - part 3', () => {
       runSpec({
-        fileName: 'ui-states/commands.cy.js',
+        fileName: 'ui-states/commandsToDisplay.cy.js',
+      })
+      .then((win) => {
+        return new Promise<void>((resolve) => {
+          win.getEventManager().on('cypress:in:cypress:run:complete', () => {
+            resolve()
+          })
+        }).then(() => {
+          cy.contains('commands that display in UI - part 3').should('be.visible')
+          .click()
+
+          cy.percySnapshot()
+        })
+      })
+    })
+
+    it('commands that display in UI - part 4', () => {
+      runSpec({
+        fileName: 'ui-states/commandsToDisplay.cy.js',
       })
       .then((win) => {
         return new Promise<void>((resolve) => {
@@ -232,6 +250,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
             resolve()
           })
         }).then(() => {
+          cy.contains('simple error with docs link').click()
           cy.contains('long error').should('be.visible')
           cy.percySnapshot()
         })
