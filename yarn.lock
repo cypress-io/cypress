@@ -12274,13 +12274,13 @@ chownr@^3.0.0:
   resolved "https://registry.yarnpkg.com/chownr/-/chownr-3.0.0.tgz#9855e64ecd240a9cc4267ce8a4aa5d24a1da15e4"
   integrity sha512-+IxzY9BZOQd/XuYPRmrvEVjF/nqj5kgT4kEq7VofrDoM1MxoRjEWkrCC3EtLi59TVawxTAn+orJwFQcrqEN1+g==
 
-chrome-har-capturer@0.13.4:
-  version "0.13.4"
-  resolved "https://registry.yarnpkg.com/chrome-har-capturer/-/chrome-har-capturer-0.13.4.tgz#9a9c25509cc3e854b7163b7d99a96a44bda286d0"
-  integrity sha512-7KfO7L3iIsgtTIHeQrrFfYLlDcKHxgtjBZbEjKfeECBhoy6Y/Q3lF2gW1iD2yyrqz/iW0/aTjecL/ls0TDdlpg==
+chrome-har-capturer@0.14.2:
+  version "0.14.2"
+  resolved "https://registry.yarnpkg.com/chrome-har-capturer/-/chrome-har-capturer-0.14.2.tgz#b52c832becf8c1f6efb8e4b247d231318d2b9f41"
+  integrity sha512-0Qja9JLmG14hr/+8SvS/TZLcEdE2YmLHfrWas/g73aRnP/ulBeZW+YPfCQRHEU+bjXv1WBuGVcAK9qFOVJAt5A==
   dependencies:
     chalk "1.x.x"
-    chrome-remote-interface "^0.25.7"
+    chrome-remote-interface "^0.31.2"
     commander "2.x.x"
 
 chrome-remote-interface@0.33.3:
@@ -12291,13 +12291,13 @@ chrome-remote-interface@0.33.3:
     commander "2.11.x"
     ws "^7.2.0"
 
-chrome-remote-interface@^0.25.7:
-  version "0.25.7"
-  resolved "https://registry.yarnpkg.com/chrome-remote-interface/-/chrome-remote-interface-0.25.7.tgz#827e85fbef3cc561a9ef2404eb7eee355968c5bc"
-  integrity sha512-6zI6LbR2IiGmduFZededaerEr9hHXabxT/L+fRrdq65a0CfyLMzpq0BKuZiqN0Upqcacsb6q2POj7fmobwBsEA==
+chrome-remote-interface@^0.31.2:
+  version "0.31.3"
+  resolved "https://registry.yarnpkg.com/chrome-remote-interface/-/chrome-remote-interface-0.31.3.tgz#bd01b89f5f0e968f7eeb37b8b7c5ac20e6e1f4d0"
+  integrity sha512-NTwb1YNPHXLTus1RjqsLxJmdViKwKJg/lrFEcM6pbyQy04Ow2QKWHXyPpxzwE+dFsJghWuvSAdTy4W0trluz1g==
   dependencies:
     commander "2.11.x"
-    ws "3.3.x"
+    ws "^7.2.0"
 
 chrome-trace-event@^1.0.2:
   version "1.0.2"
@@ -31109,11 +31109,6 @@ uid-safe@~2.1.5:
   dependencies:
     random-bytes "~1.0.0"
 
-ultron@~1.1.0:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/ultron/-/ultron-1.1.1.tgz#9fe1536a10a664a65266a1e3ccf85fd36302bc9c"
-  integrity sha512-UIEXBNeYmKptWH6z8ZnqTeS8fV74zG0/eRU9VGkpzz+LIJNs8W/zM/L+7ctCkRrgbNnnR0xxw4bKOr0cW0N0Og==
-
 unbox-primitive@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/unbox-primitive/-/unbox-primitive-1.0.2.tgz#29032021057d5e6cdbd08c5129c226dff8ed6f9e"
@@ -32821,15 +32816,6 @@ write-pkg@4.0.0:
     sort-keys "^2.0.0"
     type-fest "^0.4.1"
     write-json-file "^3.2.0"
-
-ws@3.3.x:
-  version "3.3.3"
-  resolved "https://registry.yarnpkg.com/ws/-/ws-3.3.3.tgz#f1cf84fe2d5e901ebce94efaece785f187a228f2"
-  integrity sha512-nnWLa/NwZSt4KQJu51MYlCcSQ5g7INpOrOMt4XV8j4dqTXdmlUmSHQ8/oLC069ckre0fRsgfvsKwbTdtKLCDkA==
-  dependencies:
-    async-limiter "~1.0.0"
-    safe-buffer "~5.1.0"
-    ultron "~1.1.0"
 
 ws@5.2.4:
   version "5.2.4"
