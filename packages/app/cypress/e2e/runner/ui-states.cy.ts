@@ -174,6 +174,54 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
       })
     })
 
+    it('command options - part 4', () => {
+      runSpec({
+        fileName: 'ui-states/commands.cy.js',
+      })
+      .then((win) => {
+        return new Promise<void>((resolve) => {
+          win.getEventManager().on('cypress:in:cypress:run:complete', () => {
+            resolve()
+          })
+        }).then(() => {
+          cy.contains('command options - part 4').should('be.visible').click()
+          cy.percySnapshot()
+        })
+      })
+    })
+
+    it('command options - part 5', () => {
+      runSpec({
+        fileName: 'ui-states/commands.cy.js',
+      })
+      .then((win) => {
+        return new Promise<void>((resolve) => {
+          win.getEventManager().on('cypress:in:cypress:run:complete', () => {
+            resolve()
+          })
+        }).then(() => {
+          cy.contains('command options - part 5').should('be.visible').click()
+          cy.percySnapshot()
+        })
+      })
+    })
+
+    it('command options - part 6', () => {
+      runSpec({
+        fileName: 'ui-states/commands.cy.js',
+      })
+      .then((win) => {
+        return new Promise<void>((resolve) => {
+          win.getEventManager().on('cypress:in:cypress:run:complete', () => {
+            resolve()
+          })
+        }).then(() => {
+          cy.contains('command options - part 6').should('be.visible').click()
+          cy.percySnapshot()
+        })
+      })
+    })
+
     it('Element Visibility', () => {
       runSpec({
         fileName: 'ui-states/commands.cy.js',

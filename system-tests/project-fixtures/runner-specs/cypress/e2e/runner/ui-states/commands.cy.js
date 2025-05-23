@@ -44,6 +44,10 @@ describe('Commands', () => {
     cy.contains('button').click({ force: false })
     cy.contains('button').click(1, 2, { force: false })
     cy.contains('button').click('bottom', { force: false })
+  })
+
+  it('command options - part 2', () => {
+    cy.visit('cypress/fixtures/uiStates.html')
 
     cy.get('#a').closest('form', { timeout: 2003 })
     cy.contains('.test', 'Hello', { timeout: 2004 })
@@ -58,7 +62,7 @@ describe('Commands', () => {
     cy.get('input').first({ timeout: 2009 })
   })
 
-  it('command options - part 2', () => {
+  it('command options - part 3', () => {
     cy.visit('cypress/fixtures/uiStates.html')
 
     cy.get('#a').focus({ timeout: 2010 })
@@ -73,23 +77,26 @@ describe('Commands', () => {
     cy.location('port', { timeout: 2017 })
     cy.get('#a').next('input', { timeout: 2018 })
     cy.get('#a').nextAll('input', { timeout: 2019 })
+  })
+
+  it('command options - part 4', () => {
+    cy.visit('cypress/fixtures/uiStates.html')
+
     cy.get('#a').nextUntil('#b', { timeout: 2020 })
     cy.get('input').not('#a', { timeout: 2021 })
     cy.get('#a').parent('form', { timeout: 2022 })
     cy.get('#a').parents('form', { timeout: 2023 })
     cy.get('#a').parentsUntil('body', { timeout: 2024 })
-
     cy.get('#b').prev('input', { timeout: 2025 })
     cy.get('#b').prevAll('input', { timeout: 2026 })
     cy.get('#b').prevUntil('#a', { timeout: 2027 })
     cy.readFile('./cypress/fixtures/uiStates.json', { timeout: 2028 })
     cy.reload(true, { timeout: 2028 })
-
     cy.get('button').rightclick({ timeout: 2028 })
     cy.root({ timeout: 2028 })
   })
 
-  it('command options - part 3', () => {
+  it('command options - part 5', () => {
     cy.visit('cypress/fixtures/uiStates.html')
 
     cy.screenshot({ capture: 'viewport' })
@@ -102,14 +109,15 @@ describe('Commands', () => {
 
     cy.scrollTo(0, 500, { duration: 100 })
     cy.get('#fruits').select('apples', { force: false })
-
     cy.setCookie('auth_key', '123key', { httpOnly: true })
-
     cy.get('#a').siblings('input', { timeout: 2029 })
-
     cy.get('form').submit({ timeout: 2030 })
-
     cy.title({ timeout: 2032 })
+  })
+
+  it('command options - part 6', () => {
+    cy.visit('cypress/fixtures/uiStates.html')
+
     cy.get('#a').trigger('mouseenter', 'top', { cancelable: true })
     cy.get('#a').type('hi?', {
       delay: 10,
