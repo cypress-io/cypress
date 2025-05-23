@@ -1931,6 +1931,23 @@ export default {
         }
 
         _runner.stopped = true
+
+        // if the current runnable is a test, then we need to abort the run
+        // immediately. Otherwise, we will wait for our hook logic to finish
+        if (_runner.currentRunnable.type === 'test') {
+          // abort the run
+          _runner.abort()
+
+          // emit the final 'end' event
+          // since our reporter depends on this event
+          // and mocha may never fire this because our
+          // runnable may never finish
+          _runner.emit('end')
+
+          // remove all the listeners
+          // so no more events fire
+          _runner.removeAllListeners()
+        }
       },
 
       getDisplayPropsForLog: LogUtils.getDisplayProps,
