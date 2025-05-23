@@ -23,7 +23,7 @@
     "eslint-plugin-mocha": "^8.2.0",
     "eslint-plugin-promise": "^4.2.1",
     "sinon": "^7.3.2",
-    "sinon-chai": "^3.3.0"
+    "sinon-chai": "^3.7.0"
   },
   "peerDependencies": {
     "@babel/eslint-parser": "^7.25.1",

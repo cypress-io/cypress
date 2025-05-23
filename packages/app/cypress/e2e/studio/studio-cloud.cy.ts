@@ -148,13 +148,16 @@ describe('Studio Cloud', () => {
     })
 
     cy.mockStudioFullSnapshot({
-      id: 1,
-      nodeType: 1,
-      nodeName: 'div',
-      localName: 'div',
-      nodeValue: 'div',
-      children: [],
-      shadowRoots: [],
+      fullSnapshot: {
+        id: 1,
+        nodeType: 1,
+        nodeName: 'div',
+        localName: 'div',
+        nodeValue: 'div',
+        children: [],
+        shadowRoots: [],
+      },
+      url: 'http://localhost:3000/cypress/e2e/index.html',
     })
 
     const deferred = pDefer()

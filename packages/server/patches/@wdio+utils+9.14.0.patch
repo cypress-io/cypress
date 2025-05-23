@@ -1,15 +1,5 @@
-diff --git a/node_modules/@wdio/utils/README.md b/node_modules/@wdio/utils/README.md
-deleted file mode 100644
-index 3e8048a..0000000
---- a/node_modules/@wdio/utils/README.md
-+++ /dev/null
-@@ -1,4 +0,0 @@
--WDIO Repl
--=========
--
--> A WDIO helper utility to provide a repl interface WebdriverIO
 diff --git a/node_modules/@wdio/utils/build/node.js b/node_modules/@wdio/utils/build/node.js
-index c499226..92050be 100644
+index 6f664e3..4bb80b5 100644
 --- a/node_modules/@wdio/utils/build/node.js
 +++ b/node_modules/@wdio/utils/build/node.js
 @@ -5,6 +5,7 @@ import cp2 from "node:child_process";
@@ -36,5 +26,5 @@ index c499226..92050be 100644
 +// wrap in cypress debugger statement to avoid extraneous messages to the console
 +log2.setLevel(debugModule.enabled('cypress-verbose:server:browsers:webdriver') ? 'info' : 'silent')
  var DRIVER_WAIT_TIMEOUT = 10 * 1e3;
+ var DRIVER_RETRY_INTERVAL = 100;
  async function startWebDriver(options) {
-   if (process.env.WDIO_SKIP_DRIVER_SETUP) {

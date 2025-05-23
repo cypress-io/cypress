@@ -346,6 +346,11 @@ describe('visual error templates', () => {
         default: [err],
       }
     },
+    CHROME_137_LOAD_EXTENSION_NOT_SUPPORTED: () => {
+      return {
+        default: [],
+      }
+    },
     CHROME_WEB_SECURITY_NOT_SUPPORTED: () => {
       return {
         default: ['firefox'],
