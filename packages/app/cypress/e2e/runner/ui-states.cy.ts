@@ -1,4 +1,4 @@
-import { runSpec } from './support/spec-loader'
+import { loadSpec } from './support/spec-loader'
 
 describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 600000 }, () => {
   beforeEach(() => {
@@ -6,303 +6,193 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
   })
 
   it('hooks', () => {
-    runSpec({
-      fileName: 'ui-states/hooks.cy.js',
+    loadSpec({
+      filePath: 'runner/ui-states/hooks.cy.js',
+      passCount: 1,
     })
-    .then((win) => {
-      return new Promise<void>((resolve) => {
-        win.getEventManager().on('cypress:in:cypress:run:complete', () => {
-          resolve()
-        })
-      }).then(() => {
-        cy.contains('test hooks').should('be.visible')
-        cy.percySnapshot()
-      })
-    })
+
+    cy.contains('test hooks').should('be.visible')
+    cy.percySnapshot()
   })
 
   it('nested tests', () => {
-    runSpec({
-      fileName: 'ui-states/nested-tests.cy.js',
+    loadSpec({
+      filePath: 'runner/ui-states/nested-tests.cy.js',
+      passCount: 1,
     })
-    .then((win) => {
-      return new Promise<void>((resolve) => {
-        win.getEventManager().on('cypress:in:cypress:run:complete', () => {
-          resolve()
-        })
-      }).then(() => {
-        cy.contains('Nested Tests').should('be.visible')
-        cy.percySnapshot()
-      })
-    })
+
+    cy.contains('Nested Tests').should('be.visible')
+    cy.percySnapshot()
   })
 
   describe('commands', () => {
-    it('commands that dont display in UI', () => {
-      runSpec({
-        fileName: 'ui-states/commands.cy.js',
+    it('part 1 - basic commands', () => {
+      loadSpec({
+        filePath: 'runner/ui-states/commandsToDisplay.cy.js',
+        passCount: 1,
       })
-      .then((win) => {
-        return new Promise<void>((resolve) => {
-          win.getEventManager().on('cypress:in:cypress:run:complete', () => {
-            resolve()
-          })
-        }).then(() => {
-          cy.contains('commands that dont display in UI').should('be.visible').click()
-          cy.percySnapshot()
-        })
-      })
+
+      cy.contains('part 1 - basic commands').should('be.visible').click()
+      cy.percySnapshot()
     })
 
-    it('commands that display in UI - part 1', () => {
-      runSpec({
-        fileName: 'ui-states/commandsToDisplay.cy.js',
+    it('part 2 - traversal and navigation', () => {
+      loadSpec({
+        filePath: 'runner/ui-states/commandsToDisplay.cy.js',
+        passCount: 2,
       })
-      .then((win) => {
-        return new Promise<void>((resolve) => {
-          win.getEventManager().on('cypress:in:cypress:run:complete', () => {
-            resolve()
-          })
-        }).then(() => {
-          cy.contains('commands that display in UI - part 1').should('be.visible')
-          .click()
 
-          cy.percySnapshot()
-        })
-      })
+      cy.contains('part 2 - traversal and navigation').should('be.visible')
+      .click()
+
+      cy.percySnapshot()
     })
 
-    it('commands that display in UI - part 2', () => {
-      runSpec({
-        fileName: 'ui-states/commandsToDisplay.cy.js',
+    it('part 3 - element manipulation', () => {
+      loadSpec({
+        filePath: 'runner/ui-states/commandsToDisplay.cy.js',
+        passCount: 3,
       })
-      .then((win) => {
-        return new Promise<void>((resolve) => {
-          win.getEventManager().on('cypress:in:cypress:run:complete', () => {
-            resolve()
-          })
-        }).then(() => {
-          cy.contains('commands that display in UI - part 2').should('be.visible')
-          .click()
 
-          cy.percySnapshot()
-        })
-      })
+      cy.contains('part 3 - element manipulation').should('be.visible')
+      .click()
+
+      cy.percySnapshot()
     })
 
-    it('commands that display in UI - part 3', () => {
-      runSpec({
-        fileName: 'ui-states/commandsToDisplay.cy.js',
+    it('part 4 - advanced interactions', () => {
+      loadSpec({
+        filePath: 'runner/ui-states/commandsToDisplay.cy.js',
+        passCount: 4,
       })
-      .then((win) => {
-        return new Promise<void>((resolve) => {
-          win.getEventManager().on('cypress:in:cypress:run:complete', () => {
-            resolve()
-          })
-        }).then(() => {
-          cy.contains('commands that display in UI - part 3').should('be.visible')
-          .click()
 
-          cy.percySnapshot()
-        })
-      })
+      cy.contains('part 4 - advanced interactions').should('be.visible')
+      .click()
+
+      cy.percySnapshot()
     })
 
-    it('commands that display in UI - part 4', () => {
-      runSpec({
-        fileName: 'ui-states/commandsToDisplay.cy.js',
+    it('commands that do not appear in command log', () => {
+      loadSpec({
+        filePath: 'runner/ui-states/commands.cy.js',
+        passCount: 1,
       })
-      .then((win) => {
-        return new Promise<void>((resolve) => {
-          win.getEventManager().on('cypress:in:cypress:run:complete', () => {
-            resolve()
-          })
-        }).then(() => {
-          cy.contains('commands that display in UI - part 3').should('be.visible')
-          .click()
 
-          cy.percySnapshot()
-        })
-      })
+      cy.contains('commands that do not appear in command log').should('be.visible').click()
+      cy.percySnapshot()
     })
 
-    it('command options - part 1', () => {
-      runSpec({
-        fileName: 'ui-states/commands.cy.js',
+    it('form interaction command options', () => {
+      loadSpec({
+        filePath: 'runner/ui-states/commands.cy.js',
+        passCount: 2,
       })
-      .then((win) => {
-        return new Promise<void>((resolve) => {
-          win.getEventManager().on('cypress:in:cypress:run:complete', () => {
-            resolve()
-          })
-        }).then(() => {
-          cy.contains('command options - part 1').should('be.visible').click()
-          cy.percySnapshot()
-        })
-      })
+
+      cy.contains('form interaction command options').should('be.visible').click()
+      cy.percySnapshot()
     })
 
-    it('command options - part 2', () => {
-      runSpec({
-        fileName: 'ui-states/commands.cy.js',
+    it('DOM traversal command options', () => {
+      loadSpec({
+        filePath: 'runner/ui-states/commands.cy.js',
+        passCount: 3,
       })
-      .then((win) => {
-        return new Promise<void>((resolve) => {
-          win.getEventManager().on('cypress:in:cypress:run:complete', () => {
-            resolve()
-          })
-        }).then(() => {
-          cy.contains('command options - part 2').should('be.visible').click()
-          cy.percySnapshot()
-        })
-      })
+
+      cy.contains('DOM traversal command options').should('be.visible').click()
+      cy.percySnapshot()
     })
 
-    it('command options - part 3', () => {
-      runSpec({
-        fileName: 'ui-states/commands.cy.js',
+    it('element state and navigation command options', () => {
+      loadSpec({
+        filePath: 'runner/ui-states/commands.cy.js',
+        passCount: 4,
       })
-      .then((win) => {
-        return new Promise<void>((resolve) => {
-          win.getEventManager().on('cypress:in:cypress:run:complete', () => {
-            resolve()
-          })
-        }).then(() => {
-          cy.contains('command options - part 3').should('be.visible').click()
-          cy.percySnapshot()
-        })
-      })
+
+      cy.contains('element state and navigation command options').should('be.visible').click()
+      cy.percySnapshot()
     })
 
-    it('command options - part 4', () => {
-      runSpec({
-        fileName: 'ui-states/commands.cy.js',
+    it('element traversal and file operations command options', () => {
+      loadSpec({
+        filePath: 'runner/ui-states/commands.cy.js',
+        passCount: 5,
       })
-      .then((win) => {
-        return new Promise<void>((resolve) => {
-          win.getEventManager().on('cypress:in:cypress:run:complete', () => {
-            resolve()
-          })
-        }).then(() => {
-          cy.contains('command options - part 4').should('be.visible').click()
-          cy.percySnapshot()
-        })
-      })
+
+      cy.contains('element traversal and file operations command options').should('be.visible').click()
+      cy.percySnapshot()
     })
 
-    it('command options - part 5', () => {
-      runSpec({
-        fileName: 'ui-states/commands.cy.js',
+    it('scrolling and form interaction command options', () => {
+      loadSpec({
+        filePath: 'runner/ui-states/commands.cy.js',
+        passCount: 6,
       })
-      .then((win) => {
-        return new Promise<void>((resolve) => {
-          win.getEventManager().on('cypress:in:cypress:run:complete', () => {
-            resolve()
-          })
-        }).then(() => {
-          cy.contains('command options - part 5').should('be.visible').click()
-          cy.percySnapshot()
-        })
-      })
+
+      cy.contains('scrolling and form interaction command options').should('be.visible').click()
+      cy.percySnapshot()
     })
 
-    it('command options - part 6', () => {
-      runSpec({
-        fileName: 'ui-states/commands.cy.js',
+    it('user interaction and window command options', () => {
+      loadSpec({
+        filePath: 'runner/ui-states/commands.cy.js',
+        passCount: 7,
       })
-      .then((win) => {
-        return new Promise<void>((resolve) => {
-          win.getEventManager().on('cypress:in:cypress:run:complete', () => {
-            resolve()
-          })
-        }).then(() => {
-          cy.contains('command options - part 6').should('be.visible').click()
-          cy.percySnapshot()
-        })
-      })
+
+      cy.contains('user interaction and window command options').should('be.visible').click()
+      cy.percySnapshot()
     })
 
-    it('Element Visibility', () => {
-      runSpec({
-        fileName: 'ui-states/commands.cy.js',
+    it('verify element visibility state', () => {
+      loadSpec({
+        filePath: 'runner/ui-states/commands.cy.js',
+        passCount: 8,
       })
-      .then((win) => {
-        return new Promise<void>((resolve) => {
-          win.getEventManager().on('cypress:in:cypress:run:complete', () => {
-            resolve()
-          })
-        }).then(() => {
-          cy.contains('Element Visibility').should('be.visible').click()
-          cy.percySnapshot()
-        })
-      })
+
+      cy.contains('verify element visibility state').should('be.visible').click()
+      cy.percySnapshot()
     })
   })
 
   it('status codes', () => {
-    runSpec({
-      fileName: 'ui-states/status-codes.cy.js',
+    loadSpec({
+      filePath: 'runner/ui-states/status-codes.cy.js',
+      failCount: 1,
     })
-    .then((win) => {
-      return new Promise<void>((resolve) => {
-        win.getEventManager().on('cypress:in:cypress:run:complete', () => {
-          resolve()
-        })
-      }).then(() => {
-        cy.contains('Request Statuses').should('be.visible')
-        cy.percySnapshot()
-      })
-    })
+
+    cy.contains('Request Statuses').should('be.visible')
+    cy.percySnapshot()
   })
 
   it('page events', () => {
-    runSpec({
-      fileName: 'ui-states/page-events.cy.js',
+    loadSpec({
+      filePath: 'runner/ui-states/page-events.cy.js',
+      failCount: 1,
     })
-    .then((win) => {
-      return new Promise<void>((resolve) => {
-        win.getEventManager().on('cypress:in:cypress:run:complete', () => {
-          resolve()
-        })
-      }).then(() => {
-        cy.contains('events - page events').should('be.visible')
-        cy.percySnapshot()
-      })
-    })
+
+    cy.contains('events - page events').should('be.visible')
+    cy.percySnapshot()
   })
 
   describe('errors', () => {
     it('simple error with docs link', () => {
-      runSpec({
-        fileName: 'ui-states/errors.cy.js',
+      loadSpec({
+        filePath: 'runner/ui-states/errors.cy.js',
+        failCount: 1,
       })
-      .then((win) => {
-        return new Promise<void>((resolve) => {
-          win.getEventManager().on('cypress:in:cypress:run:complete', () => {
-            resolve()
-          })
-        }).then(() => {
-          cy.contains('simple error with docs link').should('be.visible')
-          cy.percySnapshot()
-        })
-      })
+
+      cy.contains('simple error with docs link').should('be.visible')
+      cy.percySnapshot()
     })
 
     it('long error', () => {
-      runSpec({
-        fileName: 'ui-states/errors.cy.js',
+      loadSpec({
+        filePath: 'runner/ui-states/errors.cy.js',
+        failCount: 2,
       })
-      .then((win) => {
-        return new Promise<void>((resolve) => {
-          win.getEventManager().on('cypress:in:cypress:run:complete', () => {
-            resolve()
-          })
-        }).then(() => {
-          cy.contains('simple error with docs link').click()
-          cy.contains('long error').should('be.visible')
-          cy.percySnapshot()
-        })
-      })
+
+      cy.contains('simple error with docs link').click()
+      cy.contains('long error').should('be.visible')
+      cy.percySnapshot()
     })
   })
 })

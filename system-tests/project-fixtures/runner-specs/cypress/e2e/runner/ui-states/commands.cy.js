@@ -1,5 +1,5 @@
-describe('Commands', () => {
-  it('commands that dont display in UI', () => {
+describe('Command Options and UI Display Tests', () => {
+  it('commands that do not appear in command log', () => {
     cy.visit('cypress/fixtures/commandsActions.html')
 
     cy.wrap({ foo: { bar: 'baz' } })
@@ -31,7 +31,7 @@ describe('Commands', () => {
     cy.stub(obj, 'bar')
   })
 
-  it('command options - part 1', () => {
+  it('form interaction command options', () => {
     cy.visit('cypress/fixtures/uiStates.html')
 
     cy.get('#a').focus().blur({ force: false })
@@ -46,7 +46,7 @@ describe('Commands', () => {
     cy.contains('button').click('bottom', { force: false })
   })
 
-  it('command options - part 2', () => {
+  it('DOM traversal command options', () => {
     cy.visit('cypress/fixtures/uiStates.html')
 
     cy.get('#a').closest('form', { timeout: 2003 })
@@ -62,7 +62,7 @@ describe('Commands', () => {
     cy.get('input').first({ timeout: 2009 })
   })
 
-  it('command options - part 3', () => {
+  it('element state and navigation command options', () => {
     cy.visit('cypress/fixtures/uiStates.html')
 
     cy.get('#a').focus({ timeout: 2010 })
@@ -79,7 +79,7 @@ describe('Commands', () => {
     cy.get('#a').nextAll('input', { timeout: 2019 })
   })
 
-  it('command options - part 4', () => {
+  it('element traversal and file operations command options', () => {
     cy.visit('cypress/fixtures/uiStates.html')
 
     cy.get('#a').nextUntil('#b', { timeout: 2020 })
@@ -96,7 +96,7 @@ describe('Commands', () => {
     cy.root({ timeout: 2028 })
   })
 
-  it('command options - part 5', () => {
+  it('scrolling and form interaction command options', () => {
     cy.visit('cypress/fixtures/uiStates.html')
 
     cy.screenshot({ capture: 'viewport' })
@@ -115,7 +115,7 @@ describe('Commands', () => {
     cy.title({ timeout: 2032 })
   })
 
-  it('command options - part 6', () => {
+  it('user interaction and window command options', () => {
     cy.visit('cypress/fixtures/uiStates.html')
 
     cy.get('#a').trigger('mouseenter', 'top', { cancelable: true })
@@ -136,7 +136,7 @@ describe('Commands', () => {
     cy.writeFile('./cypress/_test-output/test.txt', 'test', { timeout: 2036 })
   })
 
-  it('Element Visibility', () => {
+  it('verify element visibility state', () => {
     cy.visit('cypress/fixtures/commandsActions.html')
 
     cy.get('#scroll-horizontal button')

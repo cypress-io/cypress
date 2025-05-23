@@ -1,5 +1,5 @@
 describe('Commands to display in UI', () => {
-  it('commands that display in UI - part 1', () => {
+  it('part 1 - basic commands', () => {
     cy.visit('cypress/fixtures/commandsActions.html')
 
     cy.get('.action-blur')
@@ -35,7 +35,7 @@ describe('Commands to display in UI', () => {
     cy.tick(10000)
   })
 
-  it('commands that display in UI - part 2', () => {
+  it('part 2 - traversal and navigation', () => {
     cy.visit('cypress/fixtures/commandsActions.html')
 
     cy.get('li').closest('.nav')
@@ -59,7 +59,7 @@ describe('Commands to display in UI', () => {
     cy.hash()
   })
 
-  it('commands that display in UI - part 3', () => {
+  it('part 3 - element manipulation', () => {
     cy.visit('cypress/fixtures/commandsActions.html')
 
     cy.get('div').invoke('text')
@@ -84,7 +84,7 @@ describe('Commands to display in UI', () => {
     .prevUntil()
   })
 
-  it('commands that display in UI - part 4', () => {
+  it('part 4 - advanced interactions', () => {
     cy.visit('cypress/fixtures/commandsActions.html')
 
     cy.get('div').first()
