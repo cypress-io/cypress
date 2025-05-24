@@ -6,5 +6,6 @@ export const runnerConstants = {
   absoluteAutMinimum: 100,
   absoluteSpecListMinimum: 50,
   absoluteReporterMinimum: 50,
+  absoluteStudioMinimum: 340,
   collapsedNavBarWidth: 64,
 }
