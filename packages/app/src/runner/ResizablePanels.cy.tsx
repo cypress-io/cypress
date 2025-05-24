@@ -5,9 +5,11 @@ import { runnerConstants } from './runner-constants'
 // default values
 const defaultPanel1Width = runnerConstants.defaultSpecListWidth
 const defaultPanel2Width = runnerConstants.defaultReporterWidth
+const defaultPanel4Width = runnerConstants.defaultStudioWidth
 const minPanel1Width = 100
 const minPanel2Width = 100
 const minPanel3Width = 500
+const minPanel4Width = runnerConstants.absoluteStudioMinimum
 
 // helpers
 const assertWidth = (panel: ResizablePanelName, width: number) => {
@@ -38,9 +40,11 @@ describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 40
             v-slots={slotContents}
             initialPanel1Width={defaultPanel1Width}
             initialPanel2Width={defaultPanel2Width}
+            initialPanel4Width={defaultPanel4Width}
             minPanel1Width={minPanel1Width}
             minPanel2Width={minPanel2Width}
             minPanel3Width={minPanel3Width}
+            minPanel4Width={minPanel4Width}
           />
         </div>))
     })
@@ -102,6 +106,128 @@ describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 40
       assertWidth('panel1', defaultPanel1Width)
 
       // panel 3 reached its minimum allowed size
+      assertWidth('panel3', minPanel3Width)
+    })
+  })
+
+  describe('when panel 4 is shown', () => {
+    beforeEach(() => {
+      cy.mount(() => (
+        <div class="flex">
+          <div class="h-screen">
+            <ResizablePanels
+              maxTotalWidth={2000}
+              v-slots={slotContents}
+              initialPanel1Width={defaultPanel1Width}
+              initialPanel2Width={defaultPanel2Width}
+              initialPanel4Width={defaultPanel4Width}
+              minPanel1Width={minPanel1Width}
+              minPanel2Width={minPanel2Width}
+              minPanel3Width={minPanel3Width}
+              minPanel4Width={minPanel4Width}
+              showPanel4={true}
+            />
+          </div></div>))
+    })
+
+    it('the panels can be resized', () => {
+      assertWidth('panel1', defaultPanel1Width)
+      dragHandleToClientX('panel1', 500)
+      assertWidth('panel1', 500)
+      dragHandleToClientX('panel1', 400)
+      assertWidth('panel1', 400)
+
+      assertWidth('panel2', defaultPanel2Width)
+      dragHandleToClientX('panel2', 800)
+      assertWidth('panel2', 400)
+      dragHandleToClientX('panel2', 700)
+      assertWidth('panel2', 300)
+
+      assertWidth('panel4', defaultPanel4Width)
+      dragHandleToClientX('panel4', 1300)
+      assertWidth('panel4', 700)
+      dragHandleToClientX('panel4', 1500)
+      assertWidth('panel4', 500)
+    })
+
+    it('panel 1 can be resized between its minimum allowed width and maximum available space', () => {
+      // drag panel 1 to its minimum width and attempt to go below it
+      assertWidth('panel1', defaultPanel1Width)
+      dragHandleToClientX('panel1', 100)
+      dragHandleToClientX('panel1', 99)
+      assertWidth('panel1', minPanel1Width)
+      dragHandleToClientX('panel1', 50)
+      assertWidth('panel1', minPanel1Width)
+
+      // drag panel 1 to the maximum space available and attempt to go above it
+      dragHandleToClientX('panel1', 710)
+      dragHandleToClientX('panel1', 800)
+      assertWidth('panel1', 710)
+      dragHandleToClientX('panel1', 900)
+      assertWidth('panel1', 710)
+
+      // panel 2 was not reduced
+      assertWidth('panel2', defaultPanel2Width)
+
+      // panel 3 reached its minimum allowed size
+      assertWidth('panel3', 500)
+
+      // panel 4 was not reduced
+      assertWidth('panel4', defaultPanel4Width)
+    })
+
+    it('panel 2 can be resized between its minimum allowed width and maximum available space', () => {
+      // drag panel 2 to its minimum width and attempt to go below it
+      assertWidth('panel2', defaultPanel2Width)
+      dragHandleToClientX('panel2', 380)
+      dragHandleToClientX('panel2', 200)
+      assertWidth('panel2', minPanel2Width)
+      dragHandleToClientX('panel2', 180)
+      assertWidth('panel2', minPanel2Width)
+
+      // drag panel 2 to the maximum space available and attempt to go above it
+      dragHandleToClientX('panel2', 1160)
+      dragHandleToClientX('panel2', 1200)
+      assertWidth('panel2', 880)
+      dragHandleToClientX('panel2', 1300)
+      assertWidth('panel2', 880)
+
+      // panel 1 was not reduced
+      assertWidth('panel1', defaultPanel1Width)
+
+      // panel 3 reached its minimum allowed size
+      assertWidth('panel3', minPanel3Width)
+
+      // panel 4 was not reduced
+      assertWidth('panel4', defaultPanel4Width)
+    })
+
+    it('panel 4 can be resized between its minimum allowed width and maximum available space', () => {
+      // since its starting width is the same as its minimum width,
+      // drag panel 4 to a different width, then drag it to its minimum width and attempt to go below it
+      assertWidth('panel4', defaultPanel4Width)
+      dragHandleToClientX('panel4', 1400)
+      assertWidth('panel4', 600)
+      dragHandleToClientX('panel4', 1660)
+      dragHandleToClientX('panel4', 1800)
+      assertWidth('panel4', minPanel4Width)
+      dragHandleToClientX('panel4', 1900)
+      assertWidth('panel4', minPanel4Width)
+
+      // drag panel 4 to the maximum space available and attempt to go above it
+      dragHandleToClientX('panel4', 1230)
+      dragHandleToClientX('panel4', 1100)
+      assertWidth('panel4', 770)
+      dragHandleToClientX('panel4', 900)
+      assertWidth('panel4', 770)
+
+      // panel 1 was not reduced
+      assertWidth('panel1', defaultPanel1Width)
+
+      // panel 2 was not reduced
+      assertWidth('panel2', defaultPanel2Width)
+
+      // panel 3 reached its absolute minimum allowed size
       assertWidth('panel3', minPanel3Width)
     })
   })
