@@ -44,3 +44,9 @@
   padding-top: 4px;
   padding-bottom: 4px;
 }
+
+@mixin group-indent-width {
+  width: 18px;
+  min-width: 18px;
+  max-width: 18px;
+}

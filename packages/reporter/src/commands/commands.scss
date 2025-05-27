@@ -4,9 +4,6 @@
   border-image-source: repeating-linear-gradient(0deg, transparent, $color, $color 2px);
 }
 
-/** Group indentation width for chevron and vertical lines */
-$group-indent-width: 18px;
-
 .reporter {
   // rendered within ../hooks/hooks.tsx
   .commands-container {
@@ -128,8 +125,7 @@ $group-indent-width: 18px;
 
     .command-group-block {
       @include nested-command-dashes($gray-700);
-      width: $group-indent-width;
-      min-width: $group-indent-width;
+      @include group-indent-width;
       min-height: 28px;
     }
   }
@@ -512,16 +508,13 @@ $group-indent-width: 18px;
     }
   }
 
-  .command-expander-column-parent {
-    margin-left: 11px;
-  }
+ 
 
   .command-expander-column-group {
     @extend %command-expander-base;
+    @include group-indent-width;
+
     padding: 0;
-    width: $group-indent-width;
-    min-width: $group-indent-width;
-    max-width: $group-indent-width;
     align-items: center;
     justify-content: center;
 

@@ -1,5 +1,4 @@
 $code-border-radius: 4px;
-$group-indent-width: 18px;
 
 .reporter {
   .error {
@@ -59,11 +58,11 @@ $group-indent-width: 18px;
       display: flex;
 
       .err-group-block {
+        @include group-indent-width;
+        
         border-left: 1px dotted $err-header-text;
         border-image-slice: 0 0 0 1;
         border-image-source: repeating-linear-gradient(0deg, transparent, $err-header-text, $err-header-text 2px);
-        width: $group-indent-width;
-        min-width: $group-indent-width;
 
         &:first-of-type {
           width: 16px;
