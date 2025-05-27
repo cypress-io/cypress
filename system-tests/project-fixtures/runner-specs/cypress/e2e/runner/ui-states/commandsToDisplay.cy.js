@@ -112,7 +112,8 @@ describe('Commands to display in UI', () => {
     cy.window()
 
     cy.get('div').first().within(() => {
-
+      cy.log('message')
+      cy.expect(1).to.equal(1)
     })
 
     cy.wrap({ foo: 'bar' })
