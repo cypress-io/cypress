@@ -53,12 +53,12 @@ export const getCyPromptBundle = async ({ cyPromptUrl, projectId, bundlePath }: 
   }))()
 
   if (!responseSignature) {
-    throw new Error('Unable to get studio signature')
+    throw new Error('Unable to get cy-prompt signature')
   }
 
   const verified = await verifySignatureFromFile(bundlePath, responseSignature)
 
   if (!verified) {
-    throw new Error('Unable to verify studio signature')
+    throw new Error('Unable to verify cy-prompt signature')
   }
 }
