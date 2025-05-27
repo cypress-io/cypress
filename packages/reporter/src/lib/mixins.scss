@@ -38,11 +38,13 @@
   padding-bottom: 4px;
   text-align: right;
   width: 24px;
+  align-self: center;
 }
 
 @mixin command-info-padding {
   padding-top: 4px;
   padding-bottom: 4px;
+  align-self: center;
 }
 
 @mixin group-indent-width {
