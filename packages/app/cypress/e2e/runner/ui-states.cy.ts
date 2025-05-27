@@ -1,3 +1,4 @@
+import { snapshotReporter } from './support/snapshot-reporter'
 import { loadSpec } from './support/spec-loader'
 
 describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 600000 }, () => {
@@ -12,7 +13,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
     })
 
     cy.contains('test hooks').should('be.visible')
-    cy.percySnapshot()
+    snapshotReporter()
   })
 
   it('nested tests', () => {
@@ -22,7 +23,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
     })
 
     cy.contains('Nested Tests').should('be.visible')
-    cy.percySnapshot()
+    snapshotReporter()
   })
 
   describe('commands', () => {
@@ -33,7 +34,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
       })
 
       cy.contains('part 1 - basic commands').should('be.visible').click()
-      cy.percySnapshot()
+      snapshotReporter()
     })
 
     it('part 2 - traversal and navigation', () => {
@@ -45,7 +46,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
       cy.contains('part 2 - traversal and navigation').should('be.visible')
       .click()
 
-      cy.percySnapshot()
+      snapshotReporter()
     })
 
     it('part 3 - element manipulation', () => {
@@ -57,7 +58,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
       cy.contains('part 3 - element manipulation').should('be.visible')
       .click()
 
-      cy.percySnapshot()
+      snapshotReporter()
     })
 
     it('part 4 - advanced interactions', () => {
@@ -69,7 +70,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
       cy.contains('part 4 - advanced interactions').should('be.visible')
       .click()
 
-      cy.percySnapshot()
+      snapshotReporter()
     })
 
     it('commands that do not appear in command log', () => {
@@ -79,7 +80,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
       })
 
       cy.contains('commands that do not appear in command log').should('be.visible').click()
-      cy.percySnapshot()
+      snapshotReporter()
     })
 
     it('form interaction command options', () => {
@@ -89,7 +90,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
       })
 
       cy.contains('form interaction command options').should('be.visible').click()
-      cy.percySnapshot()
+      snapshotReporter()
     })
 
     it('DOM traversal command options', () => {
@@ -99,7 +100,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
       })
 
       cy.contains('DOM traversal command options').should('be.visible').click()
-      cy.percySnapshot()
+      snapshotReporter()
     })
 
     it('element state and navigation command options', () => {
@@ -109,7 +110,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
       })
 
       cy.contains('element state and navigation command options').should('be.visible').click()
-      cy.percySnapshot()
+      snapshotReporter()
     })
 
     it('element traversal and file operations command options', () => {
@@ -119,7 +120,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
       })
 
       cy.contains('element traversal and file operations command options').should('be.visible').click()
-      cy.percySnapshot()
+      snapshotReporter()
     })
 
     it('scrolling and form interaction command options', () => {
@@ -129,7 +130,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
       })
 
       cy.contains('scrolling and form interaction command options').should('be.visible').click()
-      cy.percySnapshot()
+      snapshotReporter()
     })
 
     it('user interaction and window command options', () => {
@@ -139,7 +140,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
       })
 
       cy.contains('user interaction and window command options').should('be.visible').click()
-      cy.percySnapshot()
+      snapshotReporter()
     })
 
     it('verify element visibility state', () => {
@@ -149,7 +150,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
       })
 
       cy.contains('verify element visibility state').should('be.visible').click()
-      cy.percySnapshot()
+      snapshotReporter()
     })
   })
 
@@ -160,7 +161,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
     })
 
     cy.contains('Request Statuses').should('be.visible')
-    cy.percySnapshot()
+    snapshotReporter()
   })
 
   it('page events', () => {
@@ -170,7 +171,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
     })
 
     cy.contains('events - page events').should('be.visible')
-    cy.percySnapshot()
+    snapshotReporter()
   })
 
   describe('errors', () => {
@@ -181,7 +182,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
       })
 
       cy.contains('simple error with docs link').should('be.visible')
-      cy.percySnapshot()
+      snapshotReporter()
     })
 
     it('long error', () => {
@@ -192,7 +193,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
 
       cy.contains('simple error with docs link').click()
       cy.contains('long error').should('be.visible')
-      cy.percySnapshot()
+      snapshotReporter()
     })
   })
 })
