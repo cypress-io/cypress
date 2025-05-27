@@ -21,7 +21,8 @@ import {
  *  - session data SHOULD be cleared between specs in run mode
  */
 export default function (Commands, Cypress, cy) {
-  const COMMAND_TIMEOUT = 20000
+  // 20s timeout used for internal cy commands within the session command
+  const COMMAND_TIMEOUT = 20_000
 
   const sessionsManager = new SessionsManager(Cypress, cy)
   const sessions = sessionsManager.sessions
