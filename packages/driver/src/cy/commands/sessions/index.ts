@@ -151,7 +151,7 @@ export default function (Commands, Cypress, cy) {
           message: '',
           type: 'system',
         }, (setupLogGroup) => {
-          return cy.then(async () => {
+          return cy.then({ timeout: COMMAND_TIMEOUT }, async () => {
             // Catch when a cypress command fails in the setup function to correctly update log status
             // before failing command and ending command queue.
             cy.state('onQueueFailed', (err, _queue) => {
@@ -181,8 +181,8 @@ export default function (Commands, Cypress, cy) {
             } finally {
               cy.breakSubjectLinksToCurrentChainer()
             }
-          }, { timeout: COMMAND_TIMEOUT })
-          .then(async () => {
+          })
+          .then({ timeout: COMMAND_TIMEOUT }, async () => {
             cy.state('onQueueFailed', null)
             const data = await sessions.getCurrentSessionData()
 
@@ -202,7 +202,7 @@ export default function (Commands, Cypress, cy) {
             })
 
             return
-          }, { timeout: COMMAND_TIMEOUT })
+          })
         })
       }
 
@@ -243,7 +243,7 @@ export default function (Commands, Cypress, cy) {
             }
           },
         }, (validateLog) => {
-          return cy.then(async () => {
+          return cy.then({ timeout: COMMAND_TIMEOUT }, async () => {
             const isValidSession = true
             let caughtCommandErr = false
             let _commandToRunAfterValidation
@@ -352,7 +352,7 @@ export default function (Commands, Cypress, cy) {
               throw err
             }
 
-            _commandToRunAfterValidation = cy.then(async () => {
+            _commandToRunAfterValidation = cy.then({ timeout: COMMAND_TIMEOUT }, async () => {
               Cypress.state('onQueueFailed', null)
 
               if (caughtCommandErr) {
@@ -424,10 +424,10 @@ export default function (Commands, Cypress, cy) {
               })
 
               return isValidSession
-            }, { timeout: COMMAND_TIMEOUT })
+            })
 
             return _commandToRunAfterValidation
-          }, { timeout: COMMAND_TIMEOUT })
+          })
         })
       }
       /**
@@ -436,16 +436,16 @@ export default function (Commands, Cypress, cy) {
        *   2. validate session
        */
       const createSessionWorkflow = (existingSession, step: 'create' | 'recreate') => {
-        return cy.then(async () => {
+        return cy.then({ timeout: COMMAND_TIMEOUT }, async () => {
           setSessionLogStatus(statusMap.inProgress(step))
 
           await navigateAboutBlank()
           await sessions.clearCurrentSessionData()
 
           return cy.whenStable(() => createSession(existingSession, step))
-        }, { timeout: COMMAND_TIMEOUT })
-        .then(() => validateSession(existingSession, step), { timeout: COMMAND_TIMEOUT })
-        .then(async (isValidSession: boolean) => {
+        })
+        .then({ timeout: COMMAND_TIMEOUT }, () => validateSession(existingSession, step))
+        .then({ timeout: COMMAND_TIMEOUT }, async (isValidSession: boolean) => {
           if (!isValidSession) {
             return 'failed'
           }
@@ -454,7 +454,7 @@ export default function (Commands, Cypress, cy) {
           await sessionsManager.saveSessionData(existingSession)
 
           return statusMap.complete(step)
-        }, { timeout: COMMAND_TIMEOUT })
+        })
       }
 
       /**
@@ -464,21 +464,21 @@ export default function (Commands, Cypress, cy) {
        *   3. if validation fails, catch error and recreate session
        */
       const restoreSessionWorkflow = (existingSession: Cypress.SessionData) => {
-        return cy.then(async () => {
+        return cy.then({ timeout: COMMAND_TIMEOUT }, async () => {
           setSessionLogStatus(statusMap.inProgress(SESSION_STEPS.restore))
           await navigateAboutBlank()
           await sessions.clearCurrentSessionData()
 
           return restoreSession(existingSession)
-        }, { timeout: COMMAND_TIMEOUT })
-        .then(() => validateSession(existingSession, SESSION_STEPS.restore), { timeout: COMMAND_TIMEOUT })
-        .then((isValidSession: boolean) => {
+        })
+        .then({ timeout: COMMAND_TIMEOUT }, () => validateSession(existingSession, SESSION_STEPS.restore))
+        .then({ timeout: COMMAND_TIMEOUT }, (isValidSession: boolean) => {
           if (!isValidSession) {
             return createSessionWorkflow(existingSession, SESSION_STEPS.recreate)
           }
 
           return statusMap.complete(SESSION_STEPS.restore)
-        }, { timeout: COMMAND_TIMEOUT })
+        })
       }
 
       /**
@@ -497,7 +497,7 @@ export default function (Commands, Cypress, cy) {
       }
 
       return logGroup(Cypress, groupDetails, (log) => {
-        return cy.then(async () => {
+        return cy.then({ timeout: COMMAND_TIMEOUT }, async () => {
           _log = log
 
           if (!session.hydrated) {
@@ -513,12 +513,12 @@ export default function (Commands, Cypress, cy) {
           }
 
           return restoreSessionWorkflow(session)
-        }, { timeout: COMMAND_TIMEOUT }).then((status: 'created' | 'restored' | 'recreated' | 'failed') => {
+        }).then({ timeout: COMMAND_TIMEOUT }, (status: 'created' | 'restored' | 'recreated' | 'failed') => {
           return navigateAboutBlank()
           .then(() => {
             setSessionLogStatus(status)
           })
-        }, { timeout: COMMAND_TIMEOUT })
+        })
       })
     },
   })
