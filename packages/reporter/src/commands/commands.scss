@@ -111,20 +111,15 @@ $group-indent-width: 18px;
   }
 
   .command-number-column {
+    @include gutter-alignment;
+
     color: #5a5f7a;
-    flex-shrink: 0;
-    min-height: 1px; // because some numbers are empty
-    max-height: 28px; // because some numbers are empty
-    padding-top: 4px;
-    padding-bottom: 4px;
-    text-align: right;
-    width: 24px;
   }
 
   // when no children, add padding to act as the .command-expander-column's width
   // to prevent adding another element to the page
   .command-number-column + span.command-pin-target {
-    margin-left: 25px;
+    margin-left: $gutter-margin;
   }
 
   .command-pin-target.command-group {
@@ -161,12 +156,12 @@ $group-indent-width: 18px;
   }
 
   .command-info {
+    @include command-info-padding;
+
     display: -webkit-box;
     font-weight: 600;
     margin-left: 0;
     overflow: hidden;
-    padding-top: 4px;
-    padding-bottom: 4px;
     width: 100%;
     -webkit-line-clamp: 100;
     -webkit-box-orient: vertical;
