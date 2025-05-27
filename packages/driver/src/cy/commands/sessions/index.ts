@@ -21,6 +21,8 @@ import {
  *  - session data SHOULD be cleared between specs in run mode
  */
 export default function (Commands, Cypress, cy) {
+  const COMMAND_TIMEOUT = 20000
+
   const sessionsManager = new SessionsManager(Cypress, cy)
   const sessions = sessionsManager.sessions
 
@@ -179,7 +181,7 @@ export default function (Commands, Cypress, cy) {
             } finally {
               cy.breakSubjectLinksToCurrentChainer()
             }
-          })
+          }, { timeout: COMMAND_TIMEOUT })
           .then(async () => {
             cy.state('onQueueFailed', null)
             const data = await sessions.getCurrentSessionData()
@@ -200,7 +202,7 @@ export default function (Commands, Cypress, cy) {
             })
 
             return
-          })
+          }, { timeout: COMMAND_TIMEOUT })
         })
       }
 
@@ -422,10 +424,10 @@ export default function (Commands, Cypress, cy) {
               })
 
               return isValidSession
-            })
+            }, { timeout: COMMAND_TIMEOUT })
 
             return _commandToRunAfterValidation
-          })
+          }, { timeout: COMMAND_TIMEOUT })
         })
       }
       /**
@@ -441,8 +443,8 @@ export default function (Commands, Cypress, cy) {
           await sessions.clearCurrentSessionData()
 
           return cy.whenStable(() => createSession(existingSession, step))
-        })
-        .then(() => validateSession(existingSession, step))
+        }, { timeout: COMMAND_TIMEOUT })
+        .then(() => validateSession(existingSession, step), { timeout: COMMAND_TIMEOUT })
         .then(async (isValidSession: boolean) => {
           if (!isValidSession) {
             return 'failed'
@@ -452,7 +454,7 @@ export default function (Commands, Cypress, cy) {
           await sessionsManager.saveSessionData(existingSession)
 
           return statusMap.complete(step)
-        })
+        }, { timeout: COMMAND_TIMEOUT })
       }
 
       /**
@@ -468,15 +470,15 @@ export default function (Commands, Cypress, cy) {
           await sessions.clearCurrentSessionData()
 
           return restoreSession(existingSession)
-        })
-        .then(() => validateSession(existingSession, SESSION_STEPS.restore))
+        }, { timeout: COMMAND_TIMEOUT })
+        .then(() => validateSession(existingSession, SESSION_STEPS.restore), { timeout: COMMAND_TIMEOUT })
         .then((isValidSession: boolean) => {
           if (!isValidSession) {
             return createSessionWorkflow(existingSession, SESSION_STEPS.recreate)
           }
 
           return statusMap.complete(SESSION_STEPS.restore)
-        })
+        }, { timeout: COMMAND_TIMEOUT })
       }
 
       /**
@@ -511,12 +513,12 @@ export default function (Commands, Cypress, cy) {
           }
 
           return restoreSessionWorkflow(session)
-        }).then((status: 'created' | 'restored' | 'recreated' | 'failed') => {
+        }, { timeout: COMMAND_TIMEOUT }).then((status: 'created' | 'restored' | 'recreated' | 'failed') => {
           return navigateAboutBlank()
           .then(() => {
             setSessionLogStatus(status)
           })
-        })
+        }, { timeout: COMMAND_TIMEOUT })
       })
     },
   })
