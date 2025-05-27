@@ -56,7 +56,7 @@ export default (Commands, Cypress, cy) => {
           return await cloud.cyPrompt(Cypress, message)
         } catch (error) {
           // TODO: handle this better
-          throw new Error('CyPromptDriver not found')
+          throw new Error(`CyPromptDriver not found: ${error}`)
         }
       },
     })
