@@ -26,7 +26,7 @@ describe('e2e before:browser:launch', () => {
 
   systemTests.it('can add extensions', {
     // as of Chrome 137, --load-extension does not work in chrome branded. In order to test this, we need to use the chrome-for-testing browser or chromium.
-    browser: ['electron', 'chrome-for-testing', 'firefox'], // TODO(webkit): fix+unskip, or skip and add a test that this fails with WebKit
+    browser: ['!webkit', '!chrome'], // TODO(webkit): fix+unskip, or skip and add a test that this fails with WebKit
     spec: 'spec.cy.js',
     headed: true,
     project: 'browser-extensions',

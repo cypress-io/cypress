@@ -24,6 +24,7 @@ context('cy.visit performance tests', function () {
   }
 
   systemTests.it('passes', {
+    // chrome-for-testing is being skipped here because it isn't available in CI and we are performance testing in chrome. This can always be un-skipped if needed to performance test chrome for testing.
     browser: ['!webkit', '!chrome-for-testing'], // TODO(webkit): does this really need to run in all browsers? currently it's broken in webkit because we are missing deps
     configFile: 'cypress-performance.config.js',
     onStdout,
