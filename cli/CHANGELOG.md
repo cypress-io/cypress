@@ -5,7 +5,7 @@ _Released 6/3/2025 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed an issue where `cy.session` may fail internally if navigating to `about:blank` takes longer than the `defaultCommandTimeout`. Addresses [#29496](https://github.com/cypress-io/cypress/issues/29496).
+- Fixed an issue where `cy.session()` may fail internally if navigating to `about:blank` takes longer than the `defaultCommandTimeout`. Addresses [#29496](https://github.com/cypress-io/cypress/issues/29496).
 
 **Dependency Updates:**
 
