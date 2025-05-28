@@ -108,7 +108,8 @@ export class StudioLifecycleManager {
     if (process.env.CYPRESS_LOCAL_STUDIO_PATH) {
       // Close the watcher if it already exists
       if (StudioLifecycleManager.watcher) {
-        StudioLifecycleManager.watcher.close()
+        // Nothing really to do if this fails and it's only in development
+        StudioLifecycleManager.watcher.close().catch(() => {})
       }
 
       // Watch for changes to the cy prompt
