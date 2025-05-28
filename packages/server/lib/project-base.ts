@@ -29,6 +29,7 @@ import { reportStudioError } from './cloud/api/studio/report_studio_error'
 import { CloudRequest } from './cloud/api/cloud_request'
 import { isRetryableError } from './cloud/network/is_retryable_error'
 import { asyncRetry } from './util/async_retry'
+import { getCloudMetadata } from './cloud/get_cloud_metadata'
 
 export interface Cfg extends ReceivedCypressOptions {
   projectId?: string
@@ -407,9 +408,7 @@ export class ProjectBase extends EE {
 
         if (!isStudioReady) {
           debug('User entered studio mode before cloud studio was initialized')
-          const cloudEnv = (process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'production') as 'development' | 'staging' | 'production'
-          const cloudUrl = this.ctx.cloud.getCloudUrl(cloudEnv)
-          const cloudHeaders = await this.ctx.cloud.additionalHeaders()
+          const { cloudUrl, cloudHeaders } = await getCloudMetadata(this.ctx.cloud)
 
           reportStudioError({
             cloudApi: {
