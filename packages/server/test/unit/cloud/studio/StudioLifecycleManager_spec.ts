@@ -10,9 +10,10 @@ import { CloudRequest } from '../../../../lib/cloud/api/cloud_request'
 import { isRetryableError } from '../../../../lib/cloud/network/is_retryable_error'
 import { asyncRetry } from '../../../../lib/util/async_retry'
 import { Cfg } from '../../../../lib/project-base'
-import api from '../../../../lib/cloud/api'
 import ProtocolManager from '../../../../lib/cloud/protocol'
 import * as reportStudioErrorPath from '../../../../lib/cloud/api/studio/report_studio_error'
+
+const api = require('../../../../lib/cloud/api').default
 
 // Helper to wait for next tick in event loop
 const nextTick = () => new Promise((resolve) => process.nextTick(resolve))
