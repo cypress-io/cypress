@@ -4,7 +4,6 @@ import path from 'path'
 import fs from 'fs-extra'
 import { postStudioSession } from '@packages/server/lib/cloud/api/studio/post_studio_session'
 import os from 'os'
-import chokidar from 'chokidar'
 import { ensureStudioBundle } from '@packages/server/lib/cloud/studio/ensure_studio_bundle'
 
 export const downloadStudioTypes = async (): Promise<void> => {
@@ -26,31 +25,14 @@ export const downloadStudioTypes = async (): Promise<void> => {
       path.join(__dirname, '..', '..', '..', 'packages', 'types', 'src', 'studio', 'studio-server-types.ts'),
     )
   } else {
-    const copyAppTypes = async () => {
-      await fs.copyFile(
-        path.join(process.env.CYPRESS_LOCAL_STUDIO_PATH!, 'app', 'types.ts'),
-        path.join(__dirname, '..', '..', '..', 'packages', 'app', 'src', 'studio', 'studio-app-types.ts'),
-      )
-    }
-    const copyServerTypes = async () => {
-      await fs.copyFile(
-        path.join(process.env.CYPRESS_LOCAL_STUDIO_PATH!, 'server', 'types.ts'),
-        path.join(__dirname, '..', '..', '..', 'packages', 'types', 'src', 'studio', 'studio-server-types.ts'),
-      )
-    }
+    await fs.copyFile(
+      path.join(process.env.CYPRESS_LOCAL_STUDIO_PATH!, 'app', 'types.ts'),
+      path.join(__dirname, '..', '..', '..', 'packages', 'app', 'src', 'studio', 'studio-app-types.ts'),
+    )
 
-    const appWatcher = chokidar.watch(path.join(process.env.CYPRESS_LOCAL_STUDIO_PATH, 'app', 'types.ts'), {
-      awaitWriteFinish: true,
-    })
-
-    appWatcher.on('ready', copyAppTypes)
-    appWatcher.on('change', copyAppTypes)
-
-    const serverWatcher = chokidar.watch(path.join(process.env.CYPRESS_LOCAL_STUDIO_PATH, 'server', 'types.ts'), {
-      awaitWriteFinish: true,
-    })
-
-    serverWatcher.on('ready', copyServerTypes)
-    serverWatcher.on('change', copyServerTypes)
+    await fs.copyFile(
+      path.join(process.env.CYPRESS_LOCAL_STUDIO_PATH!, 'server', 'types.ts'),
+      path.join(__dirname, '..', '..', '..', 'packages', 'types', 'src', 'studio', 'studio-server-types.ts'),
+    )
   }
 }
