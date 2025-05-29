@@ -13,7 +13,20 @@ interface EnsureStudioBundleOptions {
 
 const DOWNLOAD_TIMEOUT = 30000
 
-export const ensureStudioBundle = async ({ studioUrl, projectId, studioPath, downloadTimeoutMs = DOWNLOAD_TIMEOUT }: EnsureStudioBundleOptions) => {
+/**
+ * Ensures that the studio bundle is downloaded and extracted into the given path
+ * @param options - The options for the ensure studio bundle operation
+ * @param options.studioUrl - The URL of the studio bundle
+ * @param options.projectId - The project ID of the studio bundle
+ * @param options.studioPath - The path to extract the studio bundle to
+ * @param options.downloadTimeoutMs - The timeout for the download operation
+ */
+export const ensureStudioBundle = async ({
+  studioUrl,
+  projectId,
+  studioPath,
+  downloadTimeoutMs = DOWNLOAD_TIMEOUT,
+}: EnsureStudioBundleOptions) => {
   const bundlePath = path.join(studioPath, 'bundle.tar')
 
   // First remove cyPromptPath to ensure we have a clean slate

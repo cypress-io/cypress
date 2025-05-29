@@ -407,7 +407,7 @@ describe('StudioLifecycleManager', () => {
       const listener1 = sinon.stub()
       const listener2 = sinon.stub()
 
-      // Register listerns that should be cleaned up
+      // Register listeners that should be cleaned up
       studioLifecycleManager.registerStudioReadyListener(listener1)
       studioLifecycleManager.registerStudioReadyListener(listener2)
 

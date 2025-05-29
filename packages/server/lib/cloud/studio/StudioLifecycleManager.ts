@@ -103,33 +103,12 @@ export class StudioLifecycleManager {
 
     this.studioManagerPromise = studioManagerPromise
 
-    // If the studio bundle is local, we need to watch for changes to the bundle
-    // and reload the manager on file changes
-    if (process.env.CYPRESS_LOCAL_STUDIO_PATH) {
-      // Close the watcher if it already exists
-      if (StudioLifecycleManager.watcher) {
-        // Nothing really to do if this fails and it's only in development
-        StudioLifecycleManager.watcher.close().catch(() => {})
-      }
-
-      // Watch for changes to the cy prompt
-      StudioLifecycleManager.watcher = chokidar.watch(path.join(process.env.CYPRESS_LOCAL_STUDIO_PATH, 'server', 'index.js'), {
-        awaitWriteFinish: true,
-      }).on('change', async () => {
-        await this.studioManager?.destroy()
-        this.studioManager = undefined
-        this.studioManagerPromise = this.createStudioManager({
-          projectId,
-          cloudDataSource,
-          cfg,
-          debugData,
-        }).catch((error) => {
-          debug('Error during reload of studio manager: %o', error)
-
-          return null
-        })
-      })
-    }
+    this.setupWatcher({
+      projectId,
+      cloudDataSource,
+      cfg,
+      debugData,
+    })
   }
 
   isStudioReady (): boolean {
@@ -261,6 +240,46 @@ export class StudioLifecycleManager {
     if (!process.env.CYPRESS_LOCAL_STUDIO_PATH) {
       this.listeners = []
     }
+  }
+
+  private setupWatcher ({
+    projectId,
+    cloudDataSource,
+    cfg,
+    debugData,
+  }: {
+    projectId?: string
+    cloudDataSource: CloudDataSource
+    cfg: Cfg
+    debugData: any
+  }) {
+    // Don't setup a watcher if the studio bundle is local
+    if (!process.env.CYPRESS_LOCAL_STUDIO_PATH) {
+      return
+    }
+
+    // Close the watcher if a previous watcher exists
+    if (StudioLifecycleManager.watcher) {
+      StudioLifecycleManager.watcher.close().catch(() => {})
+    }
+
+    // Watch for changes to the cy prompt
+    StudioLifecycleManager.watcher = chokidar.watch(path.join(process.env.CYPRESS_LOCAL_STUDIO_PATH, 'server', 'index.js'), {
+      awaitWriteFinish: true,
+    }).on('change', async () => {
+      await this.studioManager?.destroy()
+      this.studioManager = undefined
+      this.studioManagerPromise = this.createStudioManager({
+        projectId,
+        cloudDataSource,
+        cfg,
+        debugData,
+      }).catch((error) => {
+        debug('Error during reload of studio manager: %o', error)
+
+        return null
+      })
+    })
   }
 
   /**
