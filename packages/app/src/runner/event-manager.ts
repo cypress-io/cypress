@@ -41,7 +41,7 @@ interface AddGlobalListenerOptions {
 }
 
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
-const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame dev-server:on-spec-update'.split(' ')
+const driverToSocketEvents = 'backend:request prompt:backend:request automation:request mocha recorder:frame dev-server:on-spec-update'.split(' ')
 const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed visit:blank cypress:in:cypress:runner:event'.split(' ')
 const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
 const socketToDriverEvents = 'net:stubbing:event request:event script:error cross:origin:cookies dev-server:on-spec-updated'.split(' ')
@@ -797,11 +797,7 @@ export class EventManager {
       },
     )
 
-    /**
-     * Call a backend request for the requesting spec bridge since we cannot have websockets in the spec bridges.
-     * Return it's response.
-     */
-    Cypress.primaryOriginCommunicator.on('backend:request', async ({ args }, { source, responseEvent }) => {
+    const baseBackendRequestHandler = async ({ args }, { source, responseEvent }) => {
       let response
 
       try {
@@ -811,7 +807,19 @@ export class EventManager {
       }
 
       Cypress.primaryOriginCommunicator.toSource(source, responseEvent, response)
-    })
+    }
+
+    /**
+     * Call a backend request for the requesting spec bridge since we cannot have websockets in the spec bridges.
+     * Return it's response.
+     */
+    Cypress.primaryOriginCommunicator.on('backend:request', baseBackendRequestHandler)
+
+    /**
+     * Call a backend request for the requesting spec bridge since we cannot have websockets in the spec bridges.
+     * Return it's response.
+     */
+    Cypress.primaryOriginCommunicator.on('prompt:backend:request', baseBackendRequestHandler)
 
     /**
      * Call an automation request for the requesting spec bridge since we cannot have websockets in the spec bridges.

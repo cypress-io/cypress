@@ -454,6 +454,34 @@ export class SocketBase {
           cyPrompt = cp
         })
 
+        socket.on('prompt:backend:request', (eventName: string, ...args) => {
+          // cb is always the last argument
+          const cb = args.pop()
+
+          debug('prompt:backend:request %o', { eventName, args })
+
+          const promptBackendRequest = () => {
+            switch (eventName) {
+              case 'wait:for:cy:prompt:ready':
+                return getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt().then((cyPrompt) => {
+                  return {
+                    success: cyPrompt && cyPrompt.status === 'INITIALIZED',
+                  }
+                })
+              default: {
+                return cyPrompt?.handleBackendRequest(eventName, ...args)
+              }
+            }
+          }
+
+          return Bluebird.try(promptBackendRequest)
+          .then((resp) => {
+            return cb({ response: resp })
+          }).catch((err) => {
+            return cb({ error: errors.cloneErr(err) })
+          })
+        })
+
         socket.on('backend:request', (eventName: string, ...args) => {
           const userAgent = socket.request?.headers['user-agent'] || getCtx().coreData.app.browserUserAgent
 
@@ -463,10 +491,6 @@ export class SocketBase {
           debug('backend:request %o', { eventName, args })
 
           const backendRequest = () => {
-            if (eventName.startsWith('cy:prompt:')) {
-              return cyPrompt?.handleBackendRequest(eventName, ...args)
-            }
-
             switch (eventName) {
               case 'preserve:run:state':
                 runState = args[0]
@@ -544,12 +568,6 @@ export class SocketBase {
                 })
               case 'close:extra:targets':
                 return options.closeExtraTargets()
-              case 'wait:for:cy:prompt:ready':
-                return getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt().then((cyPrompt) => {
-                  return {
-                    success: cyPrompt && cyPrompt.status === 'INITIALIZED',
-                  }
-                })
               default:
                 throw new Error(`You requested a backend event we cannot handle: ${eventName}`)
             }

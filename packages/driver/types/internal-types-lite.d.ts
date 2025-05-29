@@ -19,6 +19,7 @@ declare namespace Cypress {
     (action: 'net:stubbing:event', frame: any)
     (action: 'request:event', data: any)
     (action: 'backend:request', fn: (...any) => void)
+    (action: 'prompt:backend:request', fn: (...any) => void)
     (action: 'automation:request', fn: (...any) => void)
     (action: 'viewport:changed', fn?: (viewport: { viewportWidth: string, viewportHeight: string }, callback: () => void) => void)
     (action: 'before:screenshot', fn: (config: {}, fn: () => void) => void)

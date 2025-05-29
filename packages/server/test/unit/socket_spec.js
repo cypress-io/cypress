@@ -547,7 +547,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(backend:request, wait:for:cy:prompt:ready)', () => {
+    context('on(prompt:backend:request, wait:for:cy:prompt:ready)', () => {
       it('awaits cy prompt ready and returns true if cy prompt is ready', function (done) {
         const mockCyPrompt = {
           status: 'INITIALIZED',
@@ -555,7 +555,7 @@ describe('lib/socket', () => {
 
         ctx.coreData.cyPromptLifecycleManager.getCyPrompt.resolves(mockCyPrompt)
 
-        return this.client.emit('backend:request', 'wait:for:cy:prompt:ready', (resp) => {
+        return this.client.emit('prompt:backend:request', 'wait:for:cy:prompt:ready', (resp) => {
           expect(resp.response).to.deep.eq({ success: true })
 
           return done()
@@ -569,7 +569,7 @@ describe('lib/socket', () => {
 
         ctx.coreData.cyPromptLifecycleManager.getCyPrompt.resolves(mockCyPrompt)
 
-        return this.client.emit('backend:request', 'wait:for:cy:prompt:ready', (resp) => {
+        return this.client.emit('prompt:backend:request', 'wait:for:cy:prompt:ready', (resp) => {
           expect(resp.response).to.deep.eq({ success: false })
 
           return done()
@@ -577,7 +577,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(backend:request, cy:prompt)', () => {
+    context('on(prompt:backend:request, default)', () => {
       it('calls handleBackendRequest with the correct arguments', function (done) {
         // Verify that registerCyPromptReadyListener was called
         expect(ctx.coreData.cyPromptLifecycleManager.registerCyPromptReadyListener).to.be.called
@@ -592,9 +592,9 @@ describe('lib/socket', () => {
 
         registerCyPromptReadyListenerCallback(mockCyPrompt)
 
-        return this.client.emit('backend:request', 'cy:prompt:init', 'foo', (resp) => {
+        return this.client.emit('prompt:backend:request', 'prompt:init', 'foo', (resp) => {
           expect(resp.response).to.deep.eq({ foo: 'bar' })
-          expect(mockCyPrompt.handleBackendRequest).to.be.calledWith('cy:prompt:init', 'foo')
+          expect(mockCyPrompt.handleBackendRequest).to.be.calledWith('prompt:init', 'foo')
 
           return done()
         })

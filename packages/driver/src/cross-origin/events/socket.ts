@@ -16,5 +16,6 @@ export const handleSocketEvents = (Cypress) => {
   }
 
   Cypress.on('backend:request', (...args) => onRequest('backend:request', args))
+  Cypress.on('prompt:backend:request', (...args) => onRequest('prompt:backend:request', args))
   Cypress.on('automation:request', (...args) => onRequest('automation:request', args))
 }
