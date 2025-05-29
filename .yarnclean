@@ -46,4 +46,4 @@ wercker.yml
 .yarn-metadata.json
 .travis.yml
 
-!node_modules/**/*
+!node_modules/istanbul-reports/lib/html/assets
