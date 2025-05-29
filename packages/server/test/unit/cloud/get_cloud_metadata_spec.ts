@@ -4,13 +4,10 @@ import { getCloudMetadata } from '../../../lib/cloud/get_cloud_metadata'
 
 describe('getCloudMetadata', () => {
   let mockCloudDataSource: CloudDataSource
-  let originalCypressConfigEnv: string | undefined
-  let originalCypressInternalEnv: string | undefined
+  let originalCypressConfigEnv: string | undefined = process.env.CYPRESS_CONFIG_ENV
+  let originalCypressInternalEnv: string | undefined = process.env.CYPRESS_INTERNAL_ENV
 
   beforeEach(() => {
-    originalCypressConfigEnv = process.env.CYPRESS_CONFIG_ENV
-    originalCypressInternalEnv = process.env.CYPRESS_INTERNAL_ENV
-
     mockCloudDataSource = {
       getCloudUrl: sinon.stub().returns('https://cloud.cypress.io'),
       additionalHeaders: sinon.stub().resolves({ 'x-cypress-cloud-header': 'test' }),
@@ -59,6 +56,9 @@ describe('getCloudMetadata', () => {
   })
 
   it('should return the cloud metadata based on the default environment', async () => {
+    delete process.env.CYPRESS_CONFIG_ENV
+    delete process.env.CYPRESS_INTERNAL_ENV
+
     const cloudMetadata = await getCloudMetadata(mockCloudDataSource)
 
     expect(mockCloudDataSource.getCloudUrl).to.have.been.calledWith('production')

@@ -89,6 +89,9 @@ describe('StudioLifecycleManager', () => {
           close: watcherCloseStub,
         }),
       },
+      '../routes': {
+        apiUrl: 'http://localhost:1234/',
+      },
     }).StudioLifecycleManager
 
     studioLifecycleManager = new StudioLifecycleManager()
