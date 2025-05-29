@@ -206,7 +206,7 @@ describe('Studio Cloud', () => {
     cy.get('[data-cy="recommendation-editor"]').should('contain', aiOutput)
   })
 
-  it('exits studio mode if the spec is changed on the file system', () => {
+  it('does not exit studio mode if the spec is changed on the file system', () => {
     launchStudio({ enableCloudStudio: true })
 
     cy.findByTestId('studio-panel').should('be.visible')
