@@ -45,8 +45,6 @@ describe('getCloudMetadata', () => {
   })
 
   it('should return the cloud metadata based on the default environment', async () => {
-    process.env.CYPRESS_CONFIG_ENV = 'production'
-    process.env.CYPRESS_INTERNAL_ENV = 'production'
 
     const cloudMetadata = await getCloudMetadata(mockCloudDataSource)
 
