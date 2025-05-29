@@ -46,5 +46,4 @@ wercker.yml
 .yarn-metadata.json
 .travis.yml
 
-# do not remove istanbul report assets
-!node_modules/istanbul-reports/
+!node_modules/**/*
