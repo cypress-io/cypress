@@ -1,5 +1,5 @@
 import { init, loadRemote } from '@module-federation/runtime'
-import type{ CyPromptDriverDefaultShape } from './prompt-driver-types'
+import type { CyPromptDriverDefaultShape } from './prompt-driver-types'
 
 interface CyPromptDriver { default: CyPromptDriverDefaultShape }
 
