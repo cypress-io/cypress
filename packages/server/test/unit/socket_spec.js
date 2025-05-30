@@ -66,6 +66,7 @@ describe('lib/socket', () => {
           onSavedStateChanged: sinon.spy(),
           onStudioInit: sinon.stub(),
           onStudioDestroy: sinon.stub(),
+          onCyPromptReady: sinon.stub(),
         }
 
         this.automation = new Automation({
@@ -681,6 +682,26 @@ describe('lib/socket', () => {
 
         registerStudioReadyListenerCallback(mockStudio)
         expect(mockStudio.addSocketListeners).to.be.called
+      })
+    })
+
+    context('cy.prompt.addSocketListeners', () => {
+      it('calls onCyPromptReady with the cy prompt manager', function () {
+        const mockCyPromptManager = {
+          foo: 'bar',
+        }
+
+        // Verify that registerCyPromptReadyListener was called
+        expect(ctx.coreData.cyPromptLifecycleManager.registerCyPromptReadyListener).to.be.called
+
+        // Check that the callback was called with the mock cy prompt manager object
+        const registerCyPromptReadyListenerCallback = ctx.coreData.cyPromptLifecycleManager.registerCyPromptReadyListener.firstCall.args[0]
+
+        expect(registerCyPromptReadyListenerCallback).to.be.a('function')
+
+        registerCyPromptReadyListenerCallback(mockCyPromptManager)
+
+        expect(this.options.onCyPromptReady).to.be.calledWith(mockCyPromptManager)
       })
     })
 

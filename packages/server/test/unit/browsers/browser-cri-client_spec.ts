@@ -4,7 +4,7 @@ import { expect, proxyquire, sinon } from '../../spec_helper'
 import * as protocol from '../../../lib/browsers/protocol'
 import { stripAnsi } from '@packages/errors'
 import net from 'net'
-import { ProtocolManagerShape } from '@packages/types'
+import { ProtocolManagerShape, CyPromptManagerShape } from '@packages/types'
 import type { Protocol } from 'devtools-protocol'
 import { serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker-manager'
 
@@ -14,6 +14,7 @@ const THROWS_PORT = 65535
 
 type GetClientParams = {
   protocolManager?: ProtocolManagerShape
+  cyPromptManager?: CyPromptManagerShape
   fullyManageTabs?: boolean
 }
 
@@ -59,14 +60,14 @@ describe('lib/browsers/browser-cri-client', function () {
       'chrome-remote-interface': criImport,
     })
 
-    getClient = ({ protocolManager, fullyManageTabs } = {}) => {
+    getClient = ({ protocolManager, cyPromptManager, fullyManageTabs } = {}) => {
       criClientCreateStub = criClientCreateStub.withArgs({ target: 'http://web/socket/url', onAsynchronousError: onError, onReconnect: undefined, protocolManager, fullyManageTabs }).resolves({
         send,
         on,
         close,
       })
 
-      return browserCriClient.BrowserCriClient.create({ hosts: ['127.0.0.1'], port: PORT, browserName: 'Chrome', onAsynchronousError: onError, protocolManager, fullyManageTabs, onServiceWorkerClientEvent })
+      return browserCriClient.BrowserCriClient.create({ hosts: ['127.0.0.1'], port: PORT, browserName: 'Chrome', onAsynchronousError: onError, protocolManager, cyPromptManager, fullyManageTabs, onServiceWorkerClientEvent })
     }
   })
 
@@ -450,8 +451,9 @@ describe('lib/browsers/browser-cri-client', function () {
   context('#attachToTargetUrl', function () {
     it('creates a page client when the passed in url is found', async function () {
       const mockProtocolClient = {}
+      const mockCyPromptClient = {}
       const mockPageClient = {
-        clone: sinon.stub().returns(mockProtocolClient),
+        clone: sinon.stub().onFirstCall().returns(mockProtocolClient).onSecondCall().returns(mockCyPromptClient),
       }
 
       send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
@@ -463,14 +465,19 @@ describe('lib/browsers/browser-cri-client', function () {
 
       expect(client).to.be.equal(mockPageClient)
       expect(browserClient.currentlyAttachedProtocolTarget).to.be.equal(mockProtocolClient)
+      expect(browserClient.currentlyAttachedCyPromptTarget).to.be.equal(mockCyPromptClient)
     })
 
     it('creates a page client when the passed in url is found and notifies the protocol manager and fully managed tabs', async function () {
       const mockProtocolClient = {}
+      const mockCyPromptClient = {}
       const mockPageClient = {
-        clone: sinon.stub().returns(mockProtocolClient),
+        clone: sinon.stub().onFirstCall().returns(mockProtocolClient).onSecondCall().returns(mockCyPromptClient),
       }
       const protocolManager: any = {
+        connectToBrowser: sinon.stub().resolves(),
+      }
+      const cyPromptManager: any = {
         connectToBrowser: sinon.stub().resolves(),
       }
 
@@ -479,21 +486,27 @@ describe('lib/browsers/browser-cri-client', function () {
       on.withArgs('Target.targetDestroyed', sinon.match.func)
       criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager, fullyManageTabs: true, browserClient: { on, send, close } }).resolves(mockPageClient)
 
-      const browserClient = await getClient({ protocolManager, fullyManageTabs: true })
+      const browserClient = await getClient({ protocolManager, cyPromptManager, fullyManageTabs: true })
 
       const client = await browserClient.attachToTargetUrl('http://foo.com')
 
       expect(client).to.be.equal(mockPageClient)
       expect(browserClient.currentlyAttachedProtocolTarget).to.be.equal(mockProtocolClient)
+      expect(browserClient.currentlyAttachedCyPromptTarget).to.be.equal(mockCyPromptClient)
       expect(protocolManager.connectToBrowser).to.be.calledWith(browserClient.currentlyAttachedProtocolTarget)
+      expect(cyPromptManager.connectToBrowser).to.be.calledWith(browserClient.currentlyAttachedCyPromptTarget)
     })
 
     it('creates a page client when the passed in url is found and notifies the protocol manager and fully managed tabs and attaching to target throws', async function () {
       const mockProtocolClient = {}
+      const mockCyPromptClient = {}
       const mockPageClient = {
-        clone: sinon.stub().returns(mockProtocolClient),
+        clone: sinon.stub().onFirstCall().returns(mockProtocolClient).onSecondCall().returns(mockCyPromptClient),
       }
       const protocolManager: any = {
+        connectToBrowser: sinon.stub().resolves(),
+      }
+      const cyPromptManager: any = {
         connectToBrowser: sinon.stub().resolves(),
       }
 
@@ -505,13 +518,15 @@ describe('lib/browsers/browser-cri-client', function () {
 
       criClientCreateStub.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager, fullyManageTabs: true, browserClient: { on, send, close } }).resolves(mockPageClient)
 
-      const browserClient = await getClient({ protocolManager, fullyManageTabs: true })
+      const browserClient = await getClient({ protocolManager, cyPromptManager, fullyManageTabs: true })
 
       const client = await browserClient.attachToTargetUrl('http://foo.com')
 
       expect(client).to.be.equal(mockPageClient)
       expect(browserClient.currentlyAttachedProtocolTarget).to.be.equal(mockProtocolClient)
+      expect(browserClient.currentlyAttachedCyPromptTarget).to.be.equal(mockCyPromptClient)
       expect(protocolManager.connectToBrowser).to.be.calledWith(browserClient.currentlyAttachedProtocolTarget)
+      expect(cyPromptManager.connectToBrowser).to.be.calledWith(browserClient.currentlyAttachedCyPromptTarget)
 
       // This would throw if the error was not caught
       await on.withArgs('Target.attachedToTarget').args[0][1]({ targetInfo: { type: 'worker' } })

@@ -8,7 +8,7 @@ import * as errors from '../errors'
 import type { CypressError } from '@packages/errors'
 import { CriClient, DEFAULT_NETWORK_ENABLE_OPTIONS } from './cri-client'
 import { serviceWorkerClientEventHandler, serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker-manager'
-import type { ProtocolManagerShape } from '@packages/types'
+import type { CyPromptManagerShape, ProtocolManagerShape } from '@packages/types'
 import type { ServiceWorkerEventHandler } from '@packages/proxy/lib/http/util/service-worker-manager'
 
 const debug = Debug('cypress:server:browsers:browser-cri-client')
@@ -26,6 +26,7 @@ type BrowserCriClientOptions = {
   browserName: string
   onAsynchronousError: (err: CypressError) => void
   protocolManager?: ProtocolManagerShape
+  cyPromptManager?: CyPromptManagerShape
   fullyManageTabs?: boolean
   onServiceWorkerClientEvent: ServiceWorkerEventHandler
 }
@@ -38,6 +39,7 @@ type BrowserCriClientCreateOptions = {
   onReconnect?: (client: CriClient) => void
   port: number
   protocolManager?: ProtocolManagerShape
+  cyPromptManager?: CyPromptManagerShape
   onServiceWorkerClientEvent: ServiceWorkerEventHandler
 }
 
@@ -184,10 +186,12 @@ export class BrowserCriClient {
   private browserName: string
   private onAsynchronousError: (err: CypressError) => void
   private protocolManager?: ProtocolManagerShape
+  private cyPromptManager?: CyPromptManagerShape
   private fullyManageTabs?: boolean
   onServiceWorkerClientEvent: ServiceWorkerEventHandler
   currentlyAttachedTarget: CriClient | undefined
   currentlyAttachedProtocolTarget: CriClient | undefined
+  currentlyAttachedCyPromptTarget: CriClient | undefined
   // whenever we instantiate the instance we're already connected bc
   // we receive an underlying CRI connection
   // TODO: remove "connected" in favor of closing/closed or disconnected
@@ -207,6 +211,7 @@ export class BrowserCriClient {
     this.browserName = options.browserName
     this.onAsynchronousError = options.onAsynchronousError
     this.protocolManager = options.protocolManager
+    this.cyPromptManager = options.cyPromptManager
     this.fullyManageTabs = options.fullyManageTabs
     this.onServiceWorkerClientEvent = options.onServiceWorkerClientEvent
   }
@@ -223,6 +228,7 @@ export class BrowserCriClient {
    * @param options.onReconnect callback for when the browser cri client reconnects to the browser
    * @param options.port the port to which to connect
    * @param options.protocolManager the protocol manager to use with the browser cri client
+   * @param options.cyPromptManager the cy prompt manager to use with the browser cri client
    * @param options.onServiceWorkerClientEvent callback for when a service worker fetch event is received
    * @returns a wrapper around the chrome remote interface that is connected to the browser target
    */
@@ -235,6 +241,7 @@ export class BrowserCriClient {
       onReconnect,
       port,
       protocolManager,
+      cyPromptManager,
       onServiceWorkerClientEvent,
     } = options
 
@@ -259,6 +266,7 @@ export class BrowserCriClient {
         browserName,
         onAsynchronousError,
         protocolManager,
+        cyPromptManager,
         fullyManageTabs,
         onServiceWorkerClientEvent,
       })
@@ -566,6 +574,12 @@ export class BrowserCriClient {
       if (!this.currentlyAttachedProtocolTarget) {
         this.currentlyAttachedProtocolTarget = await this.currentlyAttachedTarget.clone()
         await this.protocolManager?.connectToBrowser(this.currentlyAttachedProtocolTarget)
+      }
+
+      // Clone the cy prompt target here so that we separate the cy propt client and the main client.
+      if (!this.currentlyAttachedCyPromptTarget) {
+        this.currentlyAttachedCyPromptTarget = await this.currentlyAttachedTarget.clone()
+        await this.cyPromptManager?.connectToBrowser(this.currentlyAttachedCyPromptTarget)
       }
 
       return this.currentlyAttachedTarget

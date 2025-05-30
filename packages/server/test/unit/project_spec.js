@@ -1038,6 +1038,40 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       expect(protocolManager.close).to.have.been.calledOnce
       expect(this.project['_protocolManager']).to.be.undefined
     })
+
+    it('passes onCyPromptReady callback', async function () {
+      const mockCyPromptManager = {
+        foo: 'bar',
+      }
+
+      // Create a browser object
+      this.project.browser = {
+        name: 'chrome',
+        family: 'chromium',
+      }
+
+      this.project.options = { browsers: [this.project.browser] }
+
+      sinon.stub(browsers, 'connectCyPromptToBrowser')
+
+      // Modify the startWebsockets stub to track the callbacks
+      const callbackPromise = new Promise((resolve) => {
+        this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
+          await callbacks.onCyPromptReady(mockCyPromptManager)
+          resolve()
+        })
+      })
+
+      this.project.startWebsockets({}, {})
+
+      await callbackPromise
+
+      expect(browsers.connectCyPromptToBrowser).to.have.been.calledWith({
+        browser: this.project.browser,
+        foundBrowsers: this.project.options.browsers,
+        cyPromptManager: mockCyPromptManager,
+      })
+    })
   })
 
   context('#getProjectId', () => {

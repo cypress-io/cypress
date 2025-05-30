@@ -266,4 +266,13 @@ describe('lib/open_project', () => {
       expect(browsers.connectProtocolToBrowser).to.be.calledWith(options)
     })
   })
+
+  context('#connectCyPromptToBrowser', () => {
+    it('connects cy prompt to browser', async () => {
+      sinon.stub(browsers, 'connectCyPromptToBrowser').resolves()
+      const options = sinon.stub()
+
+      await openProject.connectCyPromptToBrowser(options)
+    })
+  })
 })

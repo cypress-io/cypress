@@ -24,6 +24,10 @@ describe('lib/browsers/electron', () => {
       connectToBrowser: sinon.stub().resolves(),
     }
 
+    this.cyPromptManager = {
+      connectToBrowser: sinon.stub().resolves(),
+    }
+
     this.url = 'https://foo.com'
     this.state = {}
     this.options = {
@@ -280,6 +284,47 @@ describe('lib/browsers/electron', () => {
     })
   })
 
+  context('.connectCyPromptToBrowser', () => {
+    it('connects to the browser cri client', async function () {
+      const mockCurrentlyAttachedCyPromptTarget = {}
+
+      this.browserCriClient.currentlyAttachedCyPromptTarget = mockCurrentlyAttachedCyPromptTarget
+      sinon.stub(electron, '_getBrowserCriClient').returns(this.browserCriClient)
+
+      await electron.connectCyPromptToBrowser({ cyPromptManager: this.cyPromptManager })
+      expect(this.pageCriClient.clone).not.to.be.called
+      expect(this.cyPromptManager.connectToBrowser).to.be.calledWith(mockCurrentlyAttachedCyPromptTarget)
+    })
+
+    it('connects to the browser cri client when the cy prompt target has not been created', async function () {
+      const mockCurrentlyAttachedCyPromptTarget = {}
+
+      this.pageCriClient.clone.resolves(mockCurrentlyAttachedCyPromptTarget)
+      sinon.stub(electron, '_getBrowserCriClient').returns(this.browserCriClient)
+
+      await electron.connectCyPromptToBrowser({ cyPromptManager: this.cyPromptManager })
+      expect(this.pageCriClient.clone).to.be.called
+      expect(this.cyPromptManager.connectToBrowser).to.be.calledWith(mockCurrentlyAttachedCyPromptTarget)
+      expect(this.browserCriClient.currentlyAttachedCyPromptTarget).to.eq(mockCurrentlyAttachedCyPromptTarget)
+    })
+
+    it('throws error if there is no browser cri client', function () {
+      sinon.stub(electron, '_getBrowserCriClient').returns(null)
+
+      expect(electron.connectCyPromptToBrowser({ cyPromptManager: this.cyPromptManager })).to.be.rejectedWith('Missing pageCriClient in connectCyPromptToBrowser')
+      expect(this.cyPromptManager.connectToBrowser).not.to.be.called
+    })
+
+    it('throws error if there is no page cri client', async function () {
+      this.browserCriClient.currentlyAttachedTarget = null
+
+      sinon.stub(electron, '_getBrowserCriClient').returns(this.browserCriClient)
+
+      expect(electron.connectCyPromptToBrowser({ cyPromptManager: this.cyPromptManager })).to.be.rejectedWith('Missing pageCriClient in connectCyPromptToBrowser')
+      expect(this.cyPromptManager.connectToBrowser).not.to.be.called
+    })
+  })
+
   context('#closeProtocolConnection', () => {
     it('closes the protocol connection', async function () {
       const mockCurrentlyAttachedProtocolTarget = {
@@ -336,7 +381,7 @@ describe('lib/browsers/electron', () => {
     })
 
     it('sets menu.set whether or not its in headless mode', function () {
-      return electron._launch(this.win, this.url, this.automation, { show: true, onError: () => {} }, undefined, undefined, { attachCDPClient: sinon.stub() })
+      return electron._launch(this.win, this.url, this.automation, { show: true, onError: () => {} }, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
       .then(() => {
         expect(menu.set).to.be.calledWith({ withInternalDevTools: true })
       }).then(() => {
@@ -349,36 +394,36 @@ describe('lib/browsers/electron', () => {
     })
 
     it('sets user agent if options.userAgent', function () {
-      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
       .then(() => {
         expect(electron._setUserAgent).not.to.be.called
       }).then(() => {
-        return electron._launch(this.win, this.url, this.automation, { userAgent: 'foo', onError: () => {} }, undefined, undefined, { attachCDPClient: sinon.stub() })
+        return electron._launch(this.win, this.url, this.automation, { userAgent: 'foo', onError: () => {} }, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
       }).then(() => {
         expect(electron._setUserAgent).to.be.calledWith(this.win.webContents, 'foo')
       })
     })
 
     it('sets proxy if options.proxyServer', function () {
-      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
       .then(() => {
         expect(electron._setProxy).not.to.be.called
       }).then(() => {
-        return electron._launch(this.win, this.url, this.automation, { proxyServer: 'foo', onError: () => {} }, undefined, undefined, { attachCDPClient: sinon.stub() })
+        return electron._launch(this.win, this.url, this.automation, { proxyServer: 'foo', onError: () => {} }, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
       }).then(() => {
         expect(electron._setProxy).to.be.calledWith(this.win.webContents, 'foo')
       })
     })
 
     it('calls win.loadURL with url', function () {
-      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
       .then(() => {
         expect(this.win.loadURL).to.be.calledWith(this.url)
       })
     })
 
     it('resolves with win', function () {
-      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
       .then((win) => {
         expect(win).to.eq(this.win)
       })
@@ -397,7 +442,7 @@ describe('lib/browsers/electron', () => {
       this.options.downloadsFolder = 'downloads'
       sinon.stub(this.automation, 'push')
 
-      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
       .then(() => {
         expect(this.automation.push).to.be.calledWith('create:download', {
           id: '1',
@@ -421,7 +466,7 @@ describe('lib/browsers/electron', () => {
       this.options.downloadsFolder = 'downloads'
       sinon.stub(this.automation, 'push')
 
-      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
       .then(() => {
         expect(this.automation.push).to.be.calledWith('complete:download', {
           id: '1',
@@ -442,7 +487,7 @@ describe('lib/browsers/electron', () => {
       this.options.downloadsFolder = 'downloads'
       sinon.stub(this.automation, 'push')
 
-      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
       .then(() => {
         expect(this.automation.push).to.be.calledWith('canceled:download', {
           id: '1',
@@ -453,7 +498,7 @@ describe('lib/browsers/electron', () => {
     it('sets download behavior', function () {
       this.options.downloadsFolder = 'downloads'
 
-      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
       .then(() => {
         expect(this.pageCriClient.send).to.be.calledWith('Page.setDownloadBehavior', {
           behavior: 'allow',
@@ -463,14 +508,14 @@ describe('lib/browsers/electron', () => {
     })
 
     it('handles download links via cdp', function () {
-      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
       .then(() => {
         expect(utils.initializeCDP).to.be.calledWith(this.pageCriClient, this.automation)
       })
     })
 
     it('expects the browser to be reset', function () {
-      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
       .then(() => {
         expect(this.pageCriClient.send).to.be.calledWith('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' })
         expect(this.pageCriClient.send).to.be.calledWith('Network.clearBrowserCache')
@@ -485,7 +530,7 @@ describe('lib/browsers/electron', () => {
         }),
       }
 
-      await electron._launch(this.win, this.url, this.automation, this.options, mockVideoApi, undefined, { attachCDPClient: sinon.stub() })
+      await electron._launch(this.win, this.url, this.automation, this.options, mockVideoApi, undefined, undefined, { attachCDPClient: sinon.stub() })
 
       expect(mockVideoApi.useFfmpegVideoController).to.be.called
       expect(this.pageCriClient.on).to.be.calledWith('Page.screencastFrame', sinon.match.func)
@@ -495,7 +540,7 @@ describe('lib/browsers/electron', () => {
     it('starts the screencast but does not capture the frames if video is not enabled but the app is in run mode', async function () {
       this.options.isTextTerminal = true
 
-      await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
 
       expect(this.pageCriClient.on).not.to.be.calledWith('Page.screencastFrame', sinon.match.func)
       expect(this.pageCriClient.send).to.be.calledWith('Page.startScreencast', {
@@ -506,7 +551,7 @@ describe('lib/browsers/electron', () => {
     })
 
     it('does not start the screencast if video is not enabled and the app is not in run mode', async function () {
-      await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
 
       expect(this.pageCriClient.on).not.to.be.calledWith('Page.screencastFrame', sinon.match.func)
       expect(this.pageCriClient.send).not.to.be.calledWith('Page.startScreencast', sinon.match.any)
@@ -515,7 +560,7 @@ describe('lib/browsers/electron', () => {
     it('registers onRequest automation middleware and calls show when requesting to be focused', function () {
       sinon.spy(this.automation, 'use')
 
-      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() }, undefined, undefined, { attachCDPClient: sinon.stub() })
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
       .then(() => {
         expect(this.automation.use).to.be.called
         expect(this.automation.use.lastCall.args[0].onRequest).to.be.a('function')
@@ -529,7 +574,7 @@ describe('lib/browsers/electron', () => {
     it('registers onRequest automation middleware and calls destroy when requesting to close the browser tabs', function () {
       sinon.spy(this.automation, 'use')
 
-      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
       .then(async () => {
         expect(this.automation.use).to.be.called
         expect(this.automation.use.lastCall.args[0].onRequest).to.be.a('function')
@@ -565,7 +610,7 @@ describe('lib/browsers/electron', () => {
       })
 
       it('sends Fetch.enable only for Document ResourceType', async function () {
-        await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+        await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
 
         expect(this.pageCriClient.send).to.have.been.calledWith('Fetch.enable', {
           patterns: [{
@@ -575,7 +620,7 @@ describe('lib/browsers/electron', () => {
       })
 
       it('does not add header when not a document', async function () {
-        await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+        await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
 
         this.pageCriClient.on.withArgs('Fetch.requestPaused').yield({
           requestId: '1234',
@@ -586,7 +631,7 @@ describe('lib/browsers/electron', () => {
       })
 
       it('does not add header when it is a spec frame request', async function () {
-        await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+        await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
 
         this.pageCriClient.on.withArgs('Page.frameAttached').yield()
 
@@ -605,7 +650,7 @@ describe('lib/browsers/electron', () => {
       })
 
       it('appends X-Cypress-Is-AUT-Frame header to AUT iframe request', async function () {
-        await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+        await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
 
         this.pageCriClient.on.withArgs('Page.frameAttached').yield()
 
@@ -637,7 +682,7 @@ describe('lib/browsers/electron', () => {
       })
 
       it('gets frame tree on Page.frameAttached', async function () {
-        await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+        await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
 
         this.pageCriClient.on.withArgs('Page.frameAttached').yield()
 
@@ -645,7 +690,7 @@ describe('lib/browsers/electron', () => {
       })
 
       it('gets frame tree on Page.frameDetached', async function () {
-        await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+        await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
 
         this.pageCriClient.on.withArgs('Page.frameDetached').yield()
 
@@ -657,7 +702,7 @@ describe('lib/browsers/electron', () => {
 
         this.pageCriClient.clone.resolves(mockCurrentlyAttachedProtocolTarget)
 
-        await electron._launch(this.win, this.url, this.automation, this.options, undefined, this.protocolManager, { attachCDPClient: sinon.stub() })
+        await electron._launch(this.win, this.url, this.automation, this.options, undefined, this.protocolManager, undefined, { attachCDPClient: sinon.stub() })
 
         expect(this.protocolManager.connectToBrowser).to.be.calledWith(mockCurrentlyAttachedProtocolTarget)
       })
@@ -676,7 +721,7 @@ describe('lib/browsers/electron', () => {
       it('does not attempt to replace the user agent', function () {
         this.options.experimentalModifyObstructiveThirdPartyCode = false
 
-        return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+        return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
         .then(() => {
           expect(this.win.webContents.session.setUserAgent).not.to.be.called
           expect(this.pageCriClient.send).not.to.be.calledWith('Network.setUserAgentOverride', {
@@ -696,7 +741,7 @@ describe('lib/browsers/electron', () => {
         this.options.experimentalModifyObstructiveThirdPartyCode = false
         this.options.userAgent = 'foobar'
 
-        return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+        return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
         .then(() => {
           expect(this.win.webContents.session.setUserAgent).to.be.calledWith('foobar')
           expect(this.win.webContents.session.setUserAgent).not.to.be.calledWith('barbaz')
@@ -709,7 +754,7 @@ describe('lib/browsers/electron', () => {
       it('versioned cypress', function () {
         userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/10.0.3 Chrome/100.0.4896.75 Electron/18.0.4 Safari/537.36'
 
-        return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+        return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
         .then(() => {
           const expectedUA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36'
 
@@ -723,7 +768,7 @@ describe('lib/browsers/electron', () => {
       it('development cypress', function () {
         userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/0.0.0-development Chrome/100.0.4896.75 Electron/18.0.4 Safari/537.36'
 
-        return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+        return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
         .then(() => {
           const expectedUA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36'
 
@@ -737,7 +782,7 @@ describe('lib/browsers/electron', () => {
       it('older Windows user agent', function () {
         userAgent = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) electron/1.0.0 Chrome/53.0.2785.113 Electron/1.4.3 Safari/537.36'
 
-        return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+        return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
         .then(() => {
           const expectedUA = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.113 Safari/537.36'
 
@@ -751,7 +796,7 @@ describe('lib/browsers/electron', () => {
       it('newer Windows user agent', function () {
         userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Teams/1.5.00.4689 Chrome/85.0.4183.121 Electron/10.4.7 Safari/537.36'
 
-        return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+        return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
         .then(() => {
           const expectedUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Teams/1.5.00.4689 Chrome/85.0.4183.121 Safari/537.36'
 
@@ -765,7 +810,7 @@ describe('lib/browsers/electron', () => {
       it('Linux user agent', function () {
         userAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Typora/0.9.93 Chrome/83.0.4103.119 Electron/9.0.5 Safari/E7FBAF'
 
-        return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+        return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
         .then(() => {
           const expectedUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Typora/0.9.93 Chrome/83.0.4103.119 Safari/E7FBAF'
 
@@ -780,7 +825,7 @@ describe('lib/browsers/electron', () => {
         // this user agent containing Cypress was actually a common UA found on a website for Electron purposes...
         userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/8.3.0 Chrome/91.0.4472.124 Electron/13.1.7 Safari/537.36'
 
-        return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+        return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
         .then(() => {
           const expectedUA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
 
@@ -794,7 +839,7 @@ describe('lib/browsers/electron', () => {
       it('newer MacOS user agent', function () {
         userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36'
 
-        return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+        return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, undefined, { attachCDPClient: sinon.stub() })
         .then(() => {
           const expectedUA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36'
 
