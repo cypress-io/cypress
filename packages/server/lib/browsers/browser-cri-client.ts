@@ -576,7 +576,7 @@ export class BrowserCriClient {
         await this.protocolManager?.connectToBrowser(this.currentlyAttachedProtocolTarget)
       }
 
-      // Clone the cy prompt target here so that we separate the cy propt client and the main client.
+      // Clone the cy.prompt() target here so that we separate the cy.prompt() client and the main client.
       if (!this.currentlyAttachedCyPromptTarget) {
         this.currentlyAttachedCyPromptTarget = await this.currentlyAttachedTarget.clone()
         await this.cyPromptManager?.connectToBrowser(this.currentlyAttachedCyPromptTarget)
