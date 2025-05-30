@@ -816,7 +816,7 @@ export class EventManager {
     Cypress.primaryOriginCommunicator.on('backend:request', baseBackendRequestHandler)
 
     /**
-     * Call a backend request for the requesting spec bridge since we cannot have websockets in the spec bridges.
+     * Call a prompt backend request for the requesting spec bridge since we cannot have websockets in the spec bridges.
      * Return it's response.
      */
     Cypress.primaryOriginCommunicator.on('prompt:backend:request', baseBackendRequestHandler)
