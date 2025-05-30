@@ -126,6 +126,8 @@ export class AutIframe {
   visitBlankPage = (testIsolation?: boolean) => {
     return new Promise<void>((resolve) => {
       if (!this.$iframe) {
+        resolve()
+
         return
       }
 
