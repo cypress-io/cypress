@@ -764,7 +764,7 @@ class $Cypress {
     }
   }
 
-  private baseBackendRequestHandler (emitEventName: string, eventName, ...args) {
+  backendRequestHandler (backendRequestNamespace: string, emitter, eventName, ...args) {
     return new Promise((resolve, reject) => {
       const fn = function (reply) {
         const e = reply.error
@@ -787,16 +787,12 @@ class $Cypress {
         return resolve(reply.response)
       }
 
-      return this.emit(emitEventName, eventName, ...args, fn)
+      return emitter.emit(backendRequestNamespace, eventName, ...args, fn)
     })
   }
 
   backend (eventName, ...args) {
-    return this.baseBackendRequestHandler('backend:request', eventName, ...args)
-  }
-
-  promptBackend (eventName, ...args) {
-    return this.baseBackendRequestHandler('prompt:backend:request', eventName, ...args)
+    return this.backendRequestHandler('backend:request', this, eventName, ...args)
   }
 
   automation (eventName, ...args) {

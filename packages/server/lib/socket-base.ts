@@ -23,7 +23,7 @@ import type { Automation } from './automation'
 // eslint-disable-next-line no-duplicate-imports
 import type { Socket } from '@packages/socket'
 
-import type { RunState, CachedTestState, ProtocolManagerShape, AutomationCommands, CyPromptManagerShape } from '@packages/types'
+import type { RunState, CachedTestState, ProtocolManagerShape, AutomationCommands } from '@packages/types'
 import memory from './browsers/memory'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
 
@@ -411,6 +411,10 @@ export class SocketBase {
           studio.addSocketListeners(socket)
         })
 
+        getCtx().coreData.cyPromptLifecycleManager?.registerCyPromptReadyListener((cyPrompt) => {
+          cyPrompt.addSocketListeners(socket)
+        })
+
         socket.on('studio:init', async (cb) => {
           try {
             const { canAccessStudioAI } = await options.onStudioInit()
@@ -446,40 +450,6 @@ export class SocketBase {
           } catch (error) {
             cb({ error: errors.cloneErr(error) })
           }
-        })
-
-        let cyPrompt: CyPromptManagerShape | undefined
-
-        getCtx().coreData.cyPromptLifecycleManager?.registerCyPromptReadyListener((cp) => {
-          cyPrompt = cp
-        })
-
-        socket.on('prompt:backend:request', (eventName: string, ...args) => {
-          // cb is always the last argument
-          const cb = args.pop()
-
-          debug('prompt:backend:request %o', { eventName, args })
-
-          const promptBackendRequest = () => {
-            switch (eventName) {
-              case 'wait:for:cy:prompt:ready':
-                return getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt().then((cyPrompt) => {
-                  return {
-                    success: cyPrompt && cyPrompt.status === 'INITIALIZED',
-                  }
-                })
-              default: {
-                return cyPrompt?.handleBackendRequest(eventName, ...args)
-              }
-            }
-          }
-
-          return Bluebird.try(promptBackendRequest)
-          .then((resp) => {
-            return cb({ response: resp })
-          }).catch((err) => {
-            return cb({ error: errors.cloneErr(err) })
-          })
         })
 
         socket.on('backend:request', (eventName: string, ...args) => {
@@ -568,6 +538,12 @@ export class SocketBase {
                 })
               case 'close:extra:targets':
                 return options.closeExtraTargets()
+              case 'wait:for:cy:prompt:ready':
+                return getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt().then((cyPrompt) => {
+                  return {
+                    success: cyPrompt && cyPrompt.status === 'INITIALIZED',
+                  }
+                })
               default:
                 throw new Error(`You requested a backend event we cannot handle: ${eventName}`)
             }

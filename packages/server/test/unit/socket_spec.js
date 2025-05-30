@@ -89,7 +89,7 @@ describe('lib/socket', () => {
 
         // Create a mock cy prompt object with handleBackendRequest method
         const mockCyPrompt = {
-          handleBackendRequest: sinon.stub().resolves({ foo: 'bar' }),
+          addSocketListeners: sinon.stub(),
           status: 'INITIALIZED',
         }
 
@@ -547,7 +547,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(prompt:backend:request, wait:for:cy:prompt:ready)', () => {
+    context('on(backend:request, wait:for:cy:prompt:ready)', () => {
       it('awaits cy prompt ready and returns true if cy prompt is ready', function (done) {
         const mockCyPrompt = {
           status: 'INITIALIZED',
@@ -555,7 +555,7 @@ describe('lib/socket', () => {
 
         ctx.coreData.cyPromptLifecycleManager.getCyPrompt.resolves(mockCyPrompt)
 
-        return this.client.emit('prompt:backend:request', 'wait:for:cy:prompt:ready', (resp) => {
+        return this.client.emit('backend:request', 'wait:for:cy:prompt:ready', (resp) => {
           expect(resp.response).to.deep.eq({ success: true })
 
           return done()
@@ -569,32 +569,8 @@ describe('lib/socket', () => {
 
         ctx.coreData.cyPromptLifecycleManager.getCyPrompt.resolves(mockCyPrompt)
 
-        return this.client.emit('prompt:backend:request', 'wait:for:cy:prompt:ready', (resp) => {
+        return this.client.emit('backend:request', 'wait:for:cy:prompt:ready', (resp) => {
           expect(resp.response).to.deep.eq({ success: false })
-
-          return done()
-        })
-      })
-    })
-
-    context('on(prompt:backend:request, default)', () => {
-      it('calls handleBackendRequest with the correct arguments', function (done) {
-        // Verify that registerCyPromptReadyListener was called
-        expect(ctx.coreData.cyPromptLifecycleManager.registerCyPromptReadyListener).to.be.called
-
-        // Check that the callback was called with the mock cy prompt object
-        const registerCyPromptReadyListenerCallback = ctx.coreData.cyPromptLifecycleManager.registerCyPromptReadyListener.firstCall.args[0]
-
-        expect(registerCyPromptReadyListenerCallback).to.be.a('function')
-
-        // Verify the mock cy prompt's handleBackendRequest was called by the callback
-        const mockCyPrompt = { handleBackendRequest: sinon.stub().resolves({ foo: 'bar' }) }
-
-        registerCyPromptReadyListenerCallback(mockCyPrompt)
-
-        return this.client.emit('prompt:backend:request', 'prompt:init', 'foo', (resp) => {
-          expect(resp.response).to.deep.eq({ foo: 'bar' })
-          expect(mockCyPrompt.handleBackendRequest).to.be.calledWith('prompt:init', 'foo')
 
           return done()
         })
@@ -681,6 +657,22 @@ describe('lib/socket', () => {
 
         registerStudioReadyListenerCallback(mockStudio)
         expect(mockStudio.addSocketListeners).to.be.called
+      })
+    })
+
+    context('cy.prompt.addSocketListeners', () => {
+      it('calls addSocketListeners on cy prompt when socket connects', function () {
+        // Verify that registerCyPromptReadyListener was called
+        expect(ctx.coreData.cyPromptLifecycleManager.registerCyPromptReadyListener).to.be.called
+
+        const registerCyPromptReadyListenerCallback = ctx.coreData.cyPromptLifecycleManager.registerCyPromptReadyListener.firstCall.args[0]
+
+        expect(registerCyPromptReadyListenerCallback).to.be.a('function')
+
+        const mockCyPrompt = { addSocketListeners: sinon.stub() }
+
+        registerCyPromptReadyListenerCallback(mockCyPrompt)
+        expect(mockCyPrompt.addSocketListeners).to.be.called
       })
     })
 

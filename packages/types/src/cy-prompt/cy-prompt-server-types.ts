@@ -1,11 +1,8 @@
-// Note: This file is owned by the cloud delivered
-// cy prompt bundle. It is downloaded and copied here.
-// It should not be modified directly here.
-
 /// <reference types="cypress" />
 
 import type { Router } from 'express'
 import type { AxiosInstance } from 'axios'
+import type { Socket } from 'socket.io'
 
 interface RetryOptions {
   maxAttempts: number
@@ -36,7 +33,7 @@ export interface CyPromptServerOptions {
 
 export interface CyPromptServerShape {
   initializeRoutes(router: Router): void
-  handleBackendRequest: (eventName: string, ...args: any[]) => Promise<any>
+  addSocketListeners(socket: Socket): void
 }
 
 export interface CyPromptServerDefaultShape {
