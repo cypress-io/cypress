@@ -29,7 +29,7 @@ export const ensureStudioBundle = async ({
 }: EnsureStudioBundleOptions) => {
   const bundlePath = path.join(studioPath, 'bundle.tar')
 
-  // First remove cyPromptPath to ensure we have a clean slate
+  // First remove studioPath to ensure we have a clean slate
   await remove(studioPath)
   await ensureDir(studioPath)
 

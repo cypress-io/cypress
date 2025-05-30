@@ -253,17 +253,18 @@ export class StudioLifecycleManager {
     cfg: Cfg
     debugData: any
   }) {
-    // Don't setup a watcher if the studio bundle is local
+    // Don't setup a watcher if the studio bundle is NOT local
     if (!process.env.CYPRESS_LOCAL_STUDIO_PATH) {
       return
     }
 
     // Close the watcher if a previous watcher exists
     if (StudioLifecycleManager.watcher) {
+      StudioLifecycleManager.watcher.removeAllListeners()
       StudioLifecycleManager.watcher.close().catch(() => {})
     }
 
-    // Watch for changes to the cy prompt
+    // Watch for changes to the studio bundle
     StudioLifecycleManager.watcher = chokidar.watch(path.join(process.env.CYPRESS_LOCAL_STUDIO_PATH, 'server', 'index.js'), {
       awaitWriteFinish: true,
     }).on('change', async () => {
@@ -292,6 +293,8 @@ export class StudioLifecycleManager {
       debug('Studio ready - calling listener immediately')
       listener(this.studioManager)
 
+      // If the studio bundle is local, we need to register the listener
+      // so that we can reload the studio when the bundle changes
       if (process.env.CYPRESS_LOCAL_STUDIO_PATH) {
         this.listeners.push(listener)
       }
