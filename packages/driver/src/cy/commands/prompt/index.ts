@@ -1,5 +1,5 @@
 import { init, loadRemote } from '@module-federation/runtime'
-import type { CyPromptDriverDefaultShape } from './prompt-driver-types'
+import type { CypressInternal, CyPromptDriverDefaultShape } from './prompt-driver-types'
 import type Emitter from 'component-emitter'
 
 interface CyPromptDriver { default: CyPromptDriverDefaultShape }
@@ -56,7 +56,7 @@ const initializeCloudCyPrompt = async (Cypress: Cypress.Cypress, cy: Cypress.Cyp
   }
 
   return cloudModule.createCyPrompt({
-    Cypress,
+    Cypress: Cypress as CypressInternal,
     cy,
     eventManager: window.getEventManager(),
   })
