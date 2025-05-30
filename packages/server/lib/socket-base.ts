@@ -451,8 +451,8 @@ export class SocketBase {
 
         let cyPrompt: CyPromptManagerShape | undefined
 
-        getCtx().coreData.cyPromptLifecycleManager?.registerCyPromptReadyListener((cp) => {
-          options.onCyPromptReady(cp)
+        getCtx().coreData.cyPromptLifecycleManager?.registerCyPromptReadyListener(async (cp) => {
+          await options.onCyPromptReady(cp)
           cyPrompt = cp
         })
 

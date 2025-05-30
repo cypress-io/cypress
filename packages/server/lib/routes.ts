@@ -127,7 +127,7 @@ export const createCommonRoutes = ({
     const cyPromptRouter = Router()
 
     router.use('/', cyPromptRouter)
-    getCtx().coreData.cyPromptLifecycleManager?.registerCyPromptReadyListener((cyPrompt) => {
+    getCtx().coreData.cyPromptLifecycleManager?.registerCyPromptReadyListener(async (cyPrompt) => {
       cyPrompt.initializeRoutes(cyPromptRouter)
     })
   }

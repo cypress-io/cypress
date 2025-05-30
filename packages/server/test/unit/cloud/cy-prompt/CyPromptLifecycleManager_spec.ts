@@ -91,7 +91,7 @@ describe('CyPromptLifecycleManager', () => {
       })
 
       const cyPromptReadyPromise = new Promise((resolve) => {
-        cyPromptLifecycleManager?.registerCyPromptReadyListener((cyPromptManager) => {
+        cyPromptLifecycleManager?.registerCyPromptReadyListener(async (cyPromptManager) => {
           resolve(cyPromptManager)
         })
       })

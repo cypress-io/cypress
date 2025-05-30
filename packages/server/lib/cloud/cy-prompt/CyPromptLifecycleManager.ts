@@ -16,7 +16,8 @@ const debug = Debug('cypress:server:cy-prompt-lifecycle-manager')
 export class CyPromptLifecycleManager {
   private cyPromptManagerPromise?: Promise<CyPromptManager | null>
   private cyPromptManager?: CyPromptManager
-  private listeners: ((cyPromptManager: CyPromptManager) => void)[] = []
+  private listeners: ((cyPromptManager: CyPromptManager) => Promise<void>)[] = []
+  private listenerPromises: Promise<void>[] = []
 
   /**
    * Initialize the cy prompt manager.
@@ -133,6 +134,9 @@ export class CyPromptLifecycleManager {
     this.cyPromptManager = cyPromptManager
     this.callRegisteredListeners()
 
+    await Promise.all(this.listenerPromises)
+    this.listenerPromises = []
+
     return cyPromptManager
   }
 
@@ -145,7 +149,7 @@ export class CyPromptLifecycleManager {
 
     debug('Calling all cy prompt ready listeners')
     this.listeners.forEach((listener) => {
-      listener(cyPromptManager)
+      this.listenerPromises.push(listener(cyPromptManager))
     })
 
     this.listeners = []
@@ -155,11 +159,11 @@ export class CyPromptLifecycleManager {
    * Register a listener that will be called when the cy prompt manager is ready
    * @param listener Function to call when cy prompt manager is ready
    */
-  registerCyPromptReadyListener (listener: (cyPromptManager: CyPromptManager) => void): void {
+  registerCyPromptReadyListener (listener: (cyPromptManager: CyPromptManager) => Promise<void>): void {
     // if there is already a cy prompt manager, call the listener immediately
     if (this.cyPromptManager) {
       debug('cy prompt ready - calling listener immediately')
-      listener(this.cyPromptManager)
+      this.listenerPromises.push(listener(this.cyPromptManager))
     } else {
       debug('cy prompt not ready - registering cy prompt ready listener')
       this.listeners.push(listener)
