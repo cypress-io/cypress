@@ -515,8 +515,8 @@ export class ProjectBase extends EE {
         }
       },
 
-      onCyPromptReady: (cyPromptManager: CyPromptManagerShape) => {
-        browsers.connectCyPromptToBrowser({ browser: this.browser, foundBrowsers: this.options.browsers, cyPromptManager })
+      onCyPromptReady: async (cyPromptManager: CyPromptManagerShape) => {
+        await browsers.connectCyPromptToBrowser({ browser: this.browser, foundBrowsers: this.options.browsers, cyPromptManager })
       },
 
       onCaptureVideoFrames: (data: any) => {
