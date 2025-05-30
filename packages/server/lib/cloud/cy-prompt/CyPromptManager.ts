@@ -2,7 +2,7 @@ import type { CyPromptManagerShape, CyPromptStatus, CyPromptServerDefaultShape, 
 import type { Router } from 'express'
 import Debug from 'debug'
 import { requireScript } from '../require_script'
-import { Socket } from 'socket.io'
+import type { Socket } from 'socket.io'
 
 interface CyPromptServer { default: CyPromptServerDefaultShape }
 
@@ -84,6 +84,7 @@ export class CyPromptManager implements CyPromptManagerShape {
     }
 
     try {
+      // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
       return await this._cyPromptServer[method].apply(this._cyPromptServer, args)
     } catch (error: unknown) {
       let actualError: Error
