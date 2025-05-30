@@ -276,7 +276,7 @@ export = {
     return this._launch(win, url, automation, electronOptions)
   },
 
-  async _launch (win: BrowserWindow, url: string, automation: Automation, options: ElectronOpts, videoApi?: RunModeVideoApi, protocolManager?: ProtocolManagerShape, cyPromptManager?: CyPromptManagerShape, cdpSocketServer?: CDPSocketServer) {
+  async _launch (win: BrowserWindow, url: string, automation: Automation, options: ElectronOpts, videoApi?: RunModeVideoApi, protocolManager?: ProtocolManagerShape, cdpSocketServer?: CDPSocketServer) {
     if (options.show) {
       menu.set({ withInternalDevTools: true })
     }
