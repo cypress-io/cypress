@@ -228,7 +228,7 @@ export class BrowserCriClient {
    * @param options.onReconnect callback for when the browser cri client reconnects to the browser
    * @param options.port the port to which to connect
    * @param options.protocolManager the protocol manager to use with the browser cri client
-   * @param options.cyPromptManager the cy prompt manager to use with the browser cri client
+   * @param options.cyPromptManager the cy.prompt() manager to use with the browser cri client
    * @param options.onServiceWorkerClientEvent callback for when a service worker fetch event is received
    * @returns a wrapper around the chrome remote interface that is connected to the browser target
    */
