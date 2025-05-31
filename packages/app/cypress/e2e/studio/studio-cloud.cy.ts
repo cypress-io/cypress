@@ -205,4 +205,26 @@ describe('Studio Cloud', () => {
     // Verify that the AI output is correct
     cy.get('[data-cy="recommendation-editor"]').should('contain', aiOutput)
   })
+
+  it('does not exit studio mode if the spec is changed on the file system', () => {
+    launchStudio({ enableCloudStudio: true })
+
+    cy.findByTestId('studio-panel').should('be.visible')
+
+    // update the spec on the file system to force a rerun through watched:file:changed
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.writeFileInProject('cypress/e2e/spec.cy.js', `
+describe('studio functionality', () => {
+  it('visits a basic html page', () => {
+    // new comment
+    cy.visit('cypress/e2e/index.html')
+  })
+})`)
+    })
+
+    cy.waitForSpecToFinish()
+
+    // verify studio is still open
+    cy.findByTestId('studio-panel').should('be.visible')
+  })
 })

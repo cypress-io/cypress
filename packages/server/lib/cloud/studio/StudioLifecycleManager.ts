@@ -1,23 +1,30 @@
-import type { StudioManager } from './cloud/studio'
-import { ProtocolManager } from './cloud/protocol'
-import { getAndInitializeStudioManager } from './cloud/api/studio/get_and_initialize_studio_manager'
+import { StudioManager } from './studio'
+import { ProtocolManager } from '../protocol'
 import Debug from 'debug'
 import type { CloudDataSource } from '@packages/data-context/src/sources'
-import type { Cfg } from './project-base'
+import type { Cfg } from '../../project-base'
 import _ from 'lodash'
 import type { DataContext } from '@packages/data-context'
-import api from './cloud/api'
-import { reportStudioError } from './cloud/api/studio/report_studio_error'
-import { CloudRequest } from './cloud/api/cloud_request'
-import { isRetryableError } from './cloud/network/is_retryable_error'
-import { asyncRetry } from './util/async_retry'
-import { postStudioSession } from './cloud/api/studio/post_studio_session'
+import api from '../api'
+import { reportStudioError } from '../api/studio/report_studio_error'
+import { CloudRequest } from '../api/cloud_request'
+import { isRetryableError } from '../network/is_retryable_error'
+import { asyncRetry } from '../../util/async_retry'
+import { postStudioSession } from '../api/studio/post_studio_session'
 import type { StudioStatus } from '@packages/types'
+import path from 'path'
+import os from 'os'
+import { ensureStudioBundle } from './ensure_studio_bundle'
+import chokidar from 'chokidar'
+import { readFile } from 'fs/promises'
+import { getCloudMetadata } from '../get_cloud_metadata'
 
 const debug = Debug('cypress:server:studio-lifecycle-manager')
-const routes = require('./cloud/routes')
+const routes = require('../routes')
 
 export class StudioLifecycleManager {
+  private static hashLoadingMap: Map<string, Promise<void>> = new Map()
+  private static watcher: chokidar.FSWatcher | null = null
   private studioManagerPromise?: Promise<StudioManager | null>
   private studioManager?: StudioManager
   private listeners: ((studioManager: StudioManager) => void)[] = []
@@ -50,6 +57,8 @@ export class StudioLifecycleManager {
     debugData: any
     ctx: DataContext
   }): void {
+    debug('Initializing studio manager')
+
     // Register this instance in the data context
     ctx.update((data) => {
       data.studioLifecycleManager = this
@@ -67,9 +76,7 @@ export class StudioLifecycleManager {
     }).catch(async (error) => {
       debug('Error during studio manager setup: %o', error)
 
-      const cloudEnv = (process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'production') as 'development' | 'staging' | 'production'
-      const cloudUrl = ctx.cloud.getCloudUrl(cloudEnv)
-      const cloudHeaders = await ctx.cloud.additionalHeaders()
+      const { cloudUrl, cloudHeaders } = await getCloudMetadata(cloudDataSource)
 
       reportStudioError({
         cloudApi: {
@@ -95,6 +102,13 @@ export class StudioLifecycleManager {
     })
 
     this.studioManagerPromise = studioManagerPromise
+
+    this.setupWatcher({
+      projectId,
+      cloudDataSource,
+      cfg,
+      debugData,
+    })
   }
 
   isStudioReady (): boolean {
@@ -126,16 +140,56 @@ export class StudioLifecycleManager {
     cfg: Cfg
     debugData: any
   }): Promise<StudioManager> {
+    let studioPath: string
+    let studioHash: string
+
     const studioSession = await postStudioSession({
       projectId,
     })
 
-    const studioManager = await getAndInitializeStudioManager({
-      studioUrl: studioSession.studioUrl,
-      projectId,
-      cloudDataSource,
+    if (!process.env.CYPRESS_LOCAL_STUDIO_PATH) {
+      // The studio hash is the last part of the studio URL, after the last slash and before the extension
+      studioHash = studioSession.studioUrl.split('/').pop()?.split('.')[0]
+      studioPath = path.join(os.tmpdir(), 'cypress', 'studio', studioHash)
+
+      let hashLoadingPromise = StudioLifecycleManager.hashLoadingMap.get(studioHash)
+
+      if (!hashLoadingPromise) {
+        hashLoadingPromise = ensureStudioBundle({
+          studioUrl: studioSession.studioUrl,
+          studioPath,
+          projectId,
+        })
+
+        StudioLifecycleManager.hashLoadingMap.set(studioHash, hashLoadingPromise)
+      }
+
+      await hashLoadingPromise
+    } else {
+      studioPath = process.env.CYPRESS_LOCAL_STUDIO_PATH
+      studioHash = 'local'
+    }
+
+    const serverFilePath = path.join(studioPath, 'server', 'index.js')
+
+    const script = await readFile(serverFilePath, 'utf8')
+    const studioManager = new StudioManager()
+
+    const { cloudUrl, cloudHeaders } = await getCloudMetadata(cloudDataSource)
+
+    await studioManager.setup({
+      script,
+      studioPath,
+      studioHash,
+      projectSlug: projectId,
+      cloudApi: {
+        cloudUrl,
+        cloudHeaders,
+        CloudRequest,
+        isRetryableError,
+        asyncRetry,
+      },
       shouldEnableStudio: this.cloudStudioRequested,
-      lifecycleManager: this,
     })
 
     if (studioManager.status === 'ENABLED') {
@@ -183,7 +237,50 @@ export class StudioLifecycleManager {
       listener(studioManager)
     })
 
-    this.listeners = []
+    if (!process.env.CYPRESS_LOCAL_STUDIO_PATH) {
+      this.listeners = []
+    }
+  }
+
+  private setupWatcher ({
+    projectId,
+    cloudDataSource,
+    cfg,
+    debugData,
+  }: {
+    projectId?: string
+    cloudDataSource: CloudDataSource
+    cfg: Cfg
+    debugData: any
+  }) {
+    // Don't setup a watcher if the studio bundle is NOT local
+    if (!process.env.CYPRESS_LOCAL_STUDIO_PATH) {
+      return
+    }
+
+    // Close the watcher if a previous watcher exists
+    if (StudioLifecycleManager.watcher) {
+      StudioLifecycleManager.watcher.removeAllListeners()
+      StudioLifecycleManager.watcher.close().catch(() => {})
+    }
+
+    // Watch for changes to the studio bundle
+    StudioLifecycleManager.watcher = chokidar.watch(path.join(process.env.CYPRESS_LOCAL_STUDIO_PATH, 'server', 'index.js'), {
+      awaitWriteFinish: true,
+    }).on('change', async () => {
+      await this.studioManager?.destroy()
+      this.studioManager = undefined
+      this.studioManagerPromise = this.createStudioManager({
+        projectId,
+        cloudDataSource,
+        cfg,
+        debugData,
+      }).catch((error) => {
+        debug('Error during reload of studio manager: %o', error)
+
+        return null
+      })
+    })
   }
 
   /**
@@ -195,6 +292,12 @@ export class StudioLifecycleManager {
     if (this.studioManager) {
       debug('Studio ready - calling listener immediately')
       listener(this.studioManager)
+
+      // If the studio bundle is local, we need to register the listener
+      // so that we can reload the studio when the bundle changes
+      if (process.env.CYPRESS_LOCAL_STUDIO_PATH) {
+        this.listeners.push(listener)
+      }
     } else {
       debug('Studio not ready - registering studio ready listener')
       this.listeners.push(listener)
