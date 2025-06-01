@@ -157,7 +157,7 @@ export class ProjectBase extends EE {
     process.chdir(this.projectRoot)
 
     this._server = new ServerBase(cfg)
-    if (cfg.projectId && cfg.experimentalPromptCommand) {
+    if (cfg.experimentalPromptCommand) {
       const cyPromptLifecycleManager = new CyPromptLifecycleManager()
 
       cyPromptLifecycleManager.initializeCyPromptManager({
