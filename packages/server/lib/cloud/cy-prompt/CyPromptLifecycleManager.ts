@@ -43,9 +43,7 @@ export class CyPromptLifecycleManager {
       projectId,
       cloudDataSource,
     }).catch(async (error) => {
-      // TODO: remove this once we have a proper error reporting mechanism
-      // eslint-disable-next-line no-console
-      console.log('Error during cy prompt manager setup: %o', error)
+      debug('Error during cy prompt manager setup: %o', error)
 
       // const cloudEnv = (process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'production') as 'development' | 'staging' | 'production'
       // const cloudUrl = ctx.cloud.getCloudUrl(cloudEnv)
