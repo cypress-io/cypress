@@ -540,10 +540,18 @@ export class SocketBase {
                 return options.closeExtraTargets()
               case 'wait:for:cy:prompt:ready':
                 return getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt().then((cyPrompt) => {
+                  // TODO: remove this once we have a proper error reporting mechanism
+                  // eslint-disable-next-line no-console
+                  console.log('cy prompt', cyPrompt)
+
                   return {
                     success: cyPrompt && cyPrompt.status === 'INITIALIZED',
                   }
                 }).catch((err) => {
+                  // TODO: remove this once we have a proper error reporting mechanism
+                  // eslint-disable-next-line no-console
+                  console.log('error getting cy prompt', err)
+
                   return {
                     success: false,
                     error: err,
