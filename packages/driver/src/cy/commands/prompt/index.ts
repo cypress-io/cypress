@@ -18,7 +18,7 @@ const initializeModule = async (Cypress: Cypress.Cypress, cy: Cypress.Cypress['c
   const { success } = await Cypress.backend('wait:for:cy:prompt:ready')
 
   if (!success) {
-    throw new Error('CyPromptDriver not found')
+    throw new Error('error waiting for cy prompt bundle to be downloaded and ready')
   }
 
   // Once the cy prompt bundle is downloaded and ready,
@@ -40,7 +40,7 @@ const initializeModule = async (Cypress: Cypress.Cypress, cy: Cypress.Cypress['c
   const module = await loadRemote<CyPromptDriver>('cy-prompt')
 
   if (!module?.default) {
-    throw new Error('CyPromptDriver not found')
+    throw new Error('error loading cy prompt driver')
   }
 
   initializedModule = module.default
