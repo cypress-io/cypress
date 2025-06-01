@@ -41,7 +41,7 @@ const initializeCloudCyPrompt = async (Cypress: Cypress.Cypress): Promise<CyProm
 
 export default (Commands, Cypress, cy) => {
   if (Cypress.config('experimentalPromptCommand') &&
-  (Cypress.browser.family === 'chrome' || Cypress.browser.name === 'electron')) {
+  (Cypress.browser.family === 'chromium' || Cypress.browser.name === 'electron')) {
     Commands.addAll({
       async prompt (message: string) {
         try {

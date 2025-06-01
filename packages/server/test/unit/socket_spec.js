@@ -559,6 +559,8 @@ describe('lib/socket', () => {
         return this.client.emit('backend:request', 'wait:for:cy:prompt:ready', (resp) => {
           expect(resp.response).to.deep.eq({ success: true })
 
+          expect(this.options.onCyPromptReady).to.be.calledWith(mockCyPrompt)
+
           return done()
         })
       })
@@ -682,24 +684,6 @@ describe('lib/socket', () => {
 
         registerStudioReadyListenerCallback(mockStudio)
         expect(mockStudio.addSocketListeners).to.be.called
-      })
-    })
-
-    context('cy.prompt.addSocketListeners', () => {
-      it('calls onCyPromptReady with the cy prompt manager', async function () {
-        const mockCyPromptManager = {
-          foo: 'bar',
-        }
-
-        // Verify that registerCyPromptReadyListener was called
-        expect(ctx.coreData.cyPromptLifecycleManager.registerCyPromptReadyListener).to.be.called
-
-        // Check that the callback was called with the mock cy prompt manager object
-        const registerCyPromptReadyListenerCallback = ctx.coreData.cyPromptLifecycleManager.registerCyPromptReadyListener.firstCall.args[0]
-
-        await registerCyPromptReadyListenerCallback(mockCyPromptManager)
-
-        expect(this.options.onCyPromptReady).to.be.calledWith(mockCyPromptManager)
       })
     })
 

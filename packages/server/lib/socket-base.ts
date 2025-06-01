@@ -452,7 +452,6 @@ export class SocketBase {
         let cyPrompt: CyPromptManagerShape | undefined
 
         getCtx().coreData.cyPromptLifecycleManager?.registerCyPromptReadyListener(async (cp) => {
-          await options.onCyPromptReady(cp)
           cyPrompt = cp
         })
 
@@ -547,7 +546,9 @@ export class SocketBase {
               case 'close:extra:targets':
                 return options.closeExtraTargets()
               case 'wait:for:cy:prompt:ready':
-                return getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt().then((cyPrompt) => {
+                return getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt().then(async (cyPrompt) => {
+                  await options.onCyPromptReady(cyPrompt)
+
                   return {
                     success: cyPrompt && cyPrompt.status === 'INITIALIZED',
                   }
