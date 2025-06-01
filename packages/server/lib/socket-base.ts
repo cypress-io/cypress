@@ -543,6 +543,11 @@ export class SocketBase {
                   return {
                     success: cyPrompt && cyPrompt.status === 'INITIALIZED',
                   }
+                }).catch((err) => {
+                  return {
+                    success: false,
+                    error: err,
+                  }
                 })
               default:
                 throw new Error(`You requested a backend event we cannot handle: ${eventName}`)
