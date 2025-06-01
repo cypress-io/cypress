@@ -88,6 +88,30 @@ interface AutomationError extends Error {
 // Are we running Cypress in Cypress? (Used for E2E Testing for Cypress in Cypress only)
 const isCypressInCypress = document.defaultView !== top
 
+const handlePrimaryOriginSocketEvent = (Cypress, eventName: string) => {
+  Cypress.primaryOriginCommunicator.on(
+    eventName,
+    async ({ args }: { args: [string, any[]] }, { source, responseEvent }) => {
+      let response
+
+      try {
+        response = await Cypress.backendRequestHandler(
+          eventName,
+          ...args,
+        )
+      } catch (error) {
+        response = { error }
+      }
+
+      Cypress.primaryOriginCommunicator.toSource(
+        source,
+        responseEvent,
+        response,
+      )
+    },
+  )
+}
+
 class $Cypress {
   cy: any
   chai: any
@@ -160,6 +184,8 @@ class $Cypress {
   minimatch = minimatch
   sinon = sinon
   lolex = fakeTimers
+
+  handlePrimaryOriginSocketEvent = handlePrimaryOriginSocketEvent
 
   static $: any
   static utils: any
@@ -764,7 +790,7 @@ class $Cypress {
     }
   }
 
-  backendRequestHandler (backendRequestNamespace: string, emitter, eventName, ...args) {
+  backendRequestHandler (backendRequestNamespace: string, eventName, ...args) {
     return new Promise((resolve, reject) => {
       const fn = function (reply) {
         const e = reply.error
@@ -787,12 +813,12 @@ class $Cypress {
         return resolve(reply.response)
       }
 
-      return emitter.emit(backendRequestNamespace, eventName, ...args, fn)
+      return Cypress.emit(backendRequestNamespace, eventName, ...args, fn)
     })
   }
 
   backend (eventName, ...args) {
-    return this.backendRequestHandler('backend:request', this, eventName, ...args)
+    return this.backendRequestHandler('backend:request', eventName, ...args)
   }
 
   automation (eventName, ...args) {

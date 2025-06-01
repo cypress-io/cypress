@@ -6,7 +6,7 @@ interface CyPromptDriver { default: CyPromptDriverDefaultShape }
 
 declare global {
   interface Window {
-    getEventManager: () => {
+    getEventManager?: () => {
       ws: Emitter
     }
   }
@@ -58,7 +58,7 @@ const initializeCloudCyPrompt = async (Cypress: Cypress.Cypress, cy: Cypress.Cyp
   return cloudModule.createCyPrompt({
     Cypress: Cypress as CypressInternal,
     cy,
-    eventManager: window.getEventManager(),
+    eventManager: window.getEventManager ? window.getEventManager() : undefined,
   })
 }
 

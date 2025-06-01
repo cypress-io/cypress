@@ -7,19 +7,34 @@ interface InternalActions extends Cypress.Actions {
   ): Cypress.Cypress
 }
 
-export interface CypressInternal extends Cypress.Cypress {
+export interface CypressInternalBase extends Cypress.Cypress {
   backendRequestHandler: (
     backendRequestNamespace: string,
     eventName: string,
     ...args: any[]
   ) => Promise<any>
-  primaryOriginCommunicator: import('eventemitter2').EventEmitter2 & {
-    toSpecBridge: (origin: string, event: string, data?: any, responseEvent?: string) => void
-    userInvocationStack?: string
-    toSource: (source: string, responseEvent: string, response: any) => void
-  }
   on: InternalActions
 }
+
+interface CrossOriginCypressInternal extends CypressInternalBase {
+  isCrossOriginSpecBridge: true
+  handleCrossOriginSocketEvent: (
+    Cypress: CypressInternal,
+    eventName: string
+  ) => void
+}
+
+interface SameOriginCypressInternal extends CypressInternalBase {
+  isCrossOriginSpecBridge: false
+  handlePrimaryOriginSocketEvent: (
+    Cypress: CypressInternal,
+    eventName: string
+  ) => void
+}
+
+export type CypressInternal =
+  | CrossOriginCypressInternal
+  | SameOriginCypressInternal
 
 export interface CyPromptEventManager {
   ws: Emitter
@@ -28,7 +43,9 @@ export interface CyPromptEventManager {
 export interface CyPromptOptions {
   Cypress: CypressInternal
   cy: Cypress.cy
-  eventManager: CyPromptEventManager
+  // Note that the eventManager is present in same origin AUTs, but not cross origin
+  // so we need to check for it's presence before using it
+  eventManager?: CyPromptEventManager
 }
 
 export interface CyPromptDriverDefaultShape {
