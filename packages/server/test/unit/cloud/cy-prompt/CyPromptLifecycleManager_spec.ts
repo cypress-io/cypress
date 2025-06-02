@@ -139,6 +139,68 @@ describe('CyPromptLifecycleManager', () => {
       expect(readFileStub).to.be.calledWith(path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc', 'server', 'index.js'), 'utf8')
     })
 
+    it('only calls ensureCyPromptBundle once per cy prompt hash', async () => {
+      cyPromptLifecycleManager.initializeCyPromptManager({
+        projectId: 'test-project-id',
+        cloudDataSource: mockCloudDataSource,
+        ctx: mockCtx,
+      })
+
+      const cyPromptReadyPromise1 = new Promise((resolve) => {
+        cyPromptLifecycleManager?.registerCyPromptReadyListener((cyPromptManager) => {
+          resolve(cyPromptManager)
+        })
+      })
+
+      const cyPromptManager1 = await cyPromptReadyPromise1
+
+      cyPromptLifecycleManager.initializeCyPromptManager({
+        projectId: 'test-project-id',
+        cloudDataSource: mockCloudDataSource,
+        ctx: mockCtx,
+      })
+
+      const cyPromptReadyPromise2 = new Promise((resolve) => {
+        cyPromptLifecycleManager?.registerCyPromptReadyListener((cyPromptManager) => {
+          resolve(cyPromptManager)
+        })
+      })
+
+      const cyPromptManager2 = await cyPromptReadyPromise2
+
+      expect(cyPromptManager1).to.equal(cyPromptManager2)
+
+      expect(ensureCyPromptBundleStub).to.be.calledOnce
+      expect(ensureCyPromptBundleStub).to.be.calledWith({
+        cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc'),
+        cyPromptUrl: 'https://cloud.cypress.io/cy-prompt/bundle/abc.tgz',
+        projectId: 'test-project-id',
+      })
+
+      expect(cyPromptManagerSetupStub).to.be.calledOnce
+      expect(cyPromptManagerSetupStub).to.be.calledWith({
+        script: 'console.log("cy-prompt script")',
+        cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc'),
+        cyPromptHash: 'abc',
+        projectSlug: 'test-project-id',
+        cloudApi: {
+          cloudUrl: 'https://cloud.cypress.io',
+          cloudHeaders: { 'Authorization': 'Bearer test-token' },
+          CloudRequest,
+          isRetryableError,
+          asyncRetry,
+        },
+      })
+
+      expect(postCyPromptSessionStub).to.be.calledWith({
+        projectId: 'test-project-id',
+      })
+
+      expect(mockCloudDataSource.getCloudUrl).to.be.calledWith('test')
+      expect(mockCloudDataSource.additionalHeaders).to.be.called
+      expect(readFileStub).to.be.calledWith(path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc', 'server', 'index.js'), 'utf8')
+    })
+
     it('initializes the cy-prompt manager in watch mode if CYPRESS_LOCAL_CY_PROMPT_PATH is set', async () => {
       process.env.CYPRESS_LOCAL_CY_PROMPT_PATH = '/path/to/cy-prompt'
 
