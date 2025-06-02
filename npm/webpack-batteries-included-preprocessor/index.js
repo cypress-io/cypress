@@ -1,6 +1,7 @@
 const path = require('path')
 const Debug = require('debug')
 const getTsConfig = require('get-tsconfig')
+const webpack = require('webpack')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 
@@ -135,6 +136,24 @@ const getDefaultWebpackOptions = () => {
       }],
     },
     plugins: [
+      new webpack.ProvidePlugin({
+        Buffer: ['buffer', 'Buffer'],
+        // As of Webpack 5, a new option called resolve.fullySpecified, was added.
+        // This option means that a full path, in particular to .mjs / .js files
+        // in ESM packages must have the full path of an import specified.
+        // Otherwise, compilation fails as this option defaults to true.
+        // This means we need to adjust our global injections to always
+        // resolve to include the full file extension if a file resolution is provided.
+        // @see https://github.com/cypress-io/cypress/issues/27599
+        // @see https://webpack.js.org/configuration/module/#resolvefullyspecified
+
+        // Due to Pnp compatibility issues, we want to make sure that we resolve to the 'process' library installed with the binary,
+        // which should resolve on leaf app/packages/server/node_modules/@cypress/webpack-batteries-included-preprocessor and up the tree.
+        // In other words, we want to resolve 'process' that is installed with cypress (or the package itself, i.e. @cypress/webpack-batteries-included-preprocessor)
+        // and not in the user's node_modules directory as it may not exist.
+        // @see https://github.com/cypress-io/cypress/issues/27947.
+        process: require.resolve('process/browser.js'),
+      }),
       // If the user is trying to debug their bundle, we'll add the BundleAnalyzerPlugin
       // to see the size of the support file (first bundle when running `cypress open`)
       // and spec files (subsequent bundles when running `cypress open`)
@@ -144,7 +163,7 @@ const getDefaultWebpackOptions = () => {
       extensions: ['.js', '.json', '.jsx', '.mjs', '.coffee'],
       fallback: {
         assert: false,
-        buffer: false,
+        buffer: require.resolve('buffer/'),
         child_process: false,
         cluster: false,
         console: false,
@@ -161,15 +180,15 @@ const getDefaultWebpackOptions = () => {
         inspector: false,
         module: false,
         net: false,
-        os: false,
-        path: false,
+        os: require.resolve('os-browserify/browser'),
+        path: require.resolve('path-browserify'),
         perf_hooks: false,
         punycode: false,
-        process: false,
+        process: require.resolve('process/browser.js'),
         querystring: false,
         readline: false,
         repl: false,
-        stream: false,
+        stream: require.resolve('stream-browserify'),
         string_decoder: false,
         sys: false,
         timers: false,
