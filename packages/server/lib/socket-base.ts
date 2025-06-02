@@ -465,20 +465,20 @@ export class SocketBase {
 
           const backendRequest = () => {
             if (eventName.startsWith('cy:prompt:')) {
-              try {
+              // eslint-disable-next-line no-console
+              console.log('cyPrompt', eventName, ...args)
+
+              return cyPrompt?.handleBackendRequest(eventName, ...args).then((result) => {
                 // eslint-disable-next-line no-console
-                console.log('cyPrompt', eventName, ...args)
+                console.log('result', result)
 
-                return cyPrompt?.handleBackendRequest(eventName, ...args).then((result) => {
-                  // eslint-disable-next-line no-console
-                  console.log('result', result)
-
-                  return result
-                })
-              } catch (error) {
+                return result
+              }).catch((error) => {
                 // eslint-disable-next-line no-console
                 console.error('error', error)
-              }
+
+                return error
+              })
             }
 
             switch (eventName) {
