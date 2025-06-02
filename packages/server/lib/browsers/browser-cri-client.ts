@@ -475,7 +475,8 @@ export class BrowserCriClient {
 
     // always close the connection to the page target because it was destroyed
     browserCriClient.currentlyAttachedTarget.close().catch(() => { }),
-    browserCriClient.currentlyAttachedProtocolTarget?.close().catch(() => {})
+    browserCriClient.currentlyAttachedProtocolTarget?.close().catch(() => {}),
+    browserCriClient.currentlyAttachedCyPromptTarget?.close().catch(() => {})
 
     new Bluebird((resolve) => {
       // this event could fire either expectedly or unexpectedly
@@ -622,6 +623,7 @@ export class BrowserCriClient {
 
       await this.currentlyAttachedTarget.close().catch(() => {})
       await this.currentlyAttachedProtocolTarget?.close().catch(() => {})
+      await this.currentlyAttachedCyPromptTarget?.close().catch(() => {})
 
       debug('target client closed', this.currentlyAttachedTarget.targetId)
     }
@@ -631,6 +633,10 @@ export class BrowserCriClient {
     })
 
     this.currentlyAttachedProtocolTarget?.queue.subscriptions.forEach((subscription) => {
+      this.browserClient.off(subscription.eventName, subscription.cb as any)
+    })
+
+    this.currentlyAttachedCyPromptTarget?.queue.subscriptions.forEach((subscription) => {
       this.browserClient.off(subscription.eventName, subscription.cb as any)
     })
 
@@ -645,13 +651,15 @@ export class BrowserCriClient {
         browserClient: this.browserClient,
       })
 
-      // Clone the target here so that we separate the protocol client and the main client.
-      // This allows us to close the protocol client independently of the main client
+      // Clone the targets here so that we separate these clients from the main client.
+      // This allows us to close these clients independently of the main client
       // which we do when we exit out of studio in open mode.
       this.currentlyAttachedProtocolTarget = await this.currentlyAttachedTarget.clone()
+      this.currentlyAttachedCyPromptTarget = await this.currentlyAttachedTarget.clone()
     } else {
       this.currentlyAttachedTarget = undefined
       this.currentlyAttachedProtocolTarget = undefined
+      this.currentlyAttachedCyPromptTarget = undefined
     }
 
     this.resettingBrowserTargets = false
@@ -712,6 +720,7 @@ export class BrowserCriClient {
     if (this.currentlyAttachedTarget) {
       await this.currentlyAttachedTarget.close()
       await this.currentlyAttachedProtocolTarget?.close()
+      await this.currentlyAttachedCyPromptTarget?.close()
     }
 
     await this.browserClient.close()

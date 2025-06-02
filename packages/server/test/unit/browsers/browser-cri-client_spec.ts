@@ -371,6 +371,9 @@ describe('lib/browsers/browser-cri-client', function () {
             currentlyAttachedProtocolTarget: {
               close: sinon.stub().resolves(),
             },
+            currentlyAttachedCyPromptTarget: {
+              close: sinon.stub().resolves(),
+            },
             resettingBrowserTargets: false,
           },
           event: {
@@ -387,6 +390,7 @@ describe('lib/browsers/browser-cri-client', function () {
         expect(options.browserCriClient.getExtraTargetClient).not.to.be.called
         expect(options.browserCriClient.currentlyAttachedTarget.close).not.to.be.called
         expect(options.browserCriClient.currentlyAttachedProtocolTarget.close).not.to.be.called
+        expect(options.browserCriClient.currentlyAttachedCyPromptTarget.close).not.to.be.called
       })
 
       it('closes the extra target client', () => {
@@ -597,13 +601,28 @@ describe('lib/browsers/browser-cri-client', function () {
         },
       }
 
+      const mockCurrentlyAttachedCyPromptTarget = {
+        targetId: '100',
+        close: sinon.stub().resolves(sinon.stub().resolves()),
+        queue: {
+          subscriptions: [{
+            eventName: 'Network.requestWillBeSent',
+            cb: sinon.stub(),
+          }],
+        },
+      }
+
       const mockUpdatedCurrentlyAttachedProtocolTarget = {
+        targetId: '101',
+      }
+
+      const mockUpdatedCurrentlyAttachedCyPromptTarget = {
         targetId: '101',
       }
 
       const mockUpdatedCurrentlyAttachedTarget = {
         targetId: '101',
-        clone: sinon.stub().returns(mockUpdatedCurrentlyAttachedProtocolTarget),
+        clone: sinon.stub().onFirstCall().returns(mockUpdatedCurrentlyAttachedProtocolTarget).onSecondCall().returns(mockUpdatedCurrentlyAttachedCyPromptTarget),
       }
 
       send.withArgs('Target.createTarget', { url: 'about:blank' }).resolves(mockUpdatedCurrentlyAttachedTarget)
@@ -615,6 +634,7 @@ describe('lib/browsers/browser-cri-client', function () {
 
       browserClient.currentlyAttachedTarget = mockCurrentlyAttachedTarget
       browserClient.currentlyAttachedProtocolTarget = mockCurrentlyAttachedProtocolTarget
+      browserClient.currentlyAttachedCyPromptTarget = mockCurrentlyAttachedCyPromptTarget
       browserClient.browserClient.off = sinon.stub()
 
       await browserClient.resetBrowserTargets(true)
@@ -622,8 +642,10 @@ describe('lib/browsers/browser-cri-client', function () {
       expect(mockCurrentlyAttachedTarget.close).to.be.called
       expect(browserClient.currentlyAttachedTarget).to.eql(mockUpdatedCurrentlyAttachedTarget)
       expect(browserClient.currentlyAttachedProtocolTarget).to.eql(mockUpdatedCurrentlyAttachedProtocolTarget)
+      expect(browserClient.currentlyAttachedCyPromptTarget).to.eql(mockUpdatedCurrentlyAttachedCyPromptTarget)
       expect(browserClient.browserClient.off).to.be.calledWith('Network.requestWillBeSent', mockCurrentlyAttachedTarget.queue.subscriptions[0].cb)
       expect(browserClient.browserClient.off).to.be.calledWith('Network.requestWillBeSent', mockCurrentlyAttachedProtocolTarget.queue.subscriptions[0].cb)
+      expect(browserClient.browserClient.off).to.be.calledWith('Network.requestWillBeSent', mockCurrentlyAttachedCyPromptTarget.queue.subscriptions[0].cb)
     })
 
     it('closes the currently attached target without keeping a tab open', async function () {
@@ -643,19 +665,30 @@ describe('lib/browsers/browser-cri-client', function () {
         },
       }
 
+      const mockCurrentlyAttachedCyPromptTarget = {
+        targetId: '100',
+        close: sinon.stub().resolves(sinon.stub().resolves()),
+        queue: {
+          subscriptions: [],
+        },
+      }
+
       send.withArgs('Target.closeTarget', { targetId: '100' }).resolves()
 
       const browserClient = await getClient() as any
 
       browserClient.currentlyAttachedTarget = mockCurrentlyAttachedTarget
       browserClient.currentlyAttachedProtocolTarget = mockCurrentlyAttachedProtocolTarget
+      browserClient.currentlyAttachedCyPromptTarget = mockCurrentlyAttachedCyPromptTarget
 
       await browserClient.resetBrowserTargets(false)
 
       expect(mockCurrentlyAttachedTarget.close).to.be.called
       expect(mockCurrentlyAttachedProtocolTarget.close).to.be.called
+      expect(mockCurrentlyAttachedCyPromptTarget.close).to.be.called
       expect(browserClient.currentlyAttachedTarget).to.be.undefined
       expect(browserClient.currentlyAttachedProtocolTarget).to.be.undefined
+      expect(browserClient.currentlyAttachedCyPromptTarget).to.be.undefined
     })
 
     it('throws when there is no currently attached target', async function () {
@@ -703,14 +736,25 @@ describe('lib/browsers/browser-cri-client', function () {
         close: sinon.stub().resolves(),
       }
 
+      const mockCurrentlyAttachedProtocolTarget = {
+        close: sinon.stub().resolves(),
+      }
+
+      const mockCurrentlyAttachedCyPromptTarget = {
+        close: sinon.stub().resolves(),
+      }
+
       const browserClient = await getClient() as any
 
       browserClient.currentlyAttachedTarget = mockCurrentlyAttachedTarget
+      browserClient.currentlyAttachedProtocolTarget = mockCurrentlyAttachedProtocolTarget
+      browserClient.currentlyAttachedCyPromptTarget = mockCurrentlyAttachedCyPromptTarget
 
       await browserClient.close()
 
       expect(mockCurrentlyAttachedTarget.close).to.be.called
-      expect(close).to.be.called
+      expect(mockCurrentlyAttachedProtocolTarget.close).to.be.called
+      expect(mockCurrentlyAttachedCyPromptTarget.close).to.be.called
     })
 
     it('just the browser client with no currently attached target', async function () {
