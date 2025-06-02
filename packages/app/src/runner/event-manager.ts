@@ -43,7 +43,6 @@ interface AddGlobalListenerOptions {
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
 const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame dev-server:on-spec-update'.split(' ')
 const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed visit:blank cypress:in:cypress:runner:event'.split(' ')
-const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
 const socketToDriverEvents = 'net:stubbing:event request:event script:error cross:origin:cookies dev-server:on-spec-updated'.split(' ')
 const localToReporterEvents = 'reporter:log:add reporter:log:state:changed reporter:log:remove'.split(' ')
 
@@ -158,7 +157,11 @@ export class EventManager {
     })
 
     this.ws.on('watched:file:changed', () => {
-      this.studioStore.cancel()
+      // only cancel studio if cloud studio was not requested
+      if (!Cypress.env('LOCAL_STUDIO_PATH') && !Cypress.env('ENABLE_CLOUD_STUDIO')) {
+        this.studioStore.cancel()
+      }
+
       rerun()
     })
 
@@ -168,9 +171,7 @@ export class EventManager {
       }
     })
 
-    socketRerunEvents.forEach((event) => {
-      this.ws.on(event, rerun)
-    })
+    this.ws.on('runner:restart', rerun)
 
     socketToDriverEvents.forEach((event) => {
       this.ws.on(event, (...args) => {

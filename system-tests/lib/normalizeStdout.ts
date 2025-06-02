@@ -4,11 +4,11 @@ import os from 'os'
 
 export const e2ePath = Fixtures.projectPath('e2e')
 
-export const DEFAULT_BROWSERS = ['electron', 'chrome', 'firefox', 'webkit']
+export const DEFAULT_BROWSERS = ['electron', 'chrome', 'chrome-for-testing', 'firefox', 'webkit']
 
 export const pathUpToProjectName = Fixtures.projectPath('')
 
-export const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox|WebKit)(\s\d+)(\s\(\w+\))?(\s+)/
+export const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Chrome for Testing|Canary|Chromium|Firefox|WebKit)(\s\d+)(\s\(\w+\))?(\s+)/
 
 const availableBrowsersRe = /(Available browsers found on your system are:)([\s\S]+)/g
 const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
