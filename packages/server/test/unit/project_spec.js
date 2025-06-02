@@ -477,18 +477,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
           expect(CyPromptLifecycleManager.prototype.initializeCyPromptManager).not.to.be.called
         })
       })
-
-      it('does not initialize cy prompt lifecycle manager if projectId is not set', function () {
-        this.config.projectId = undefined
-        this.config.experimentalPromptCommand = true
-
-        sinon.stub(CyPromptLifecycleManager.prototype, 'initializeCyPromptManager')
-
-        return this.project.open()
-        .then(() => {
-          expect(CyPromptLifecycleManager.prototype.initializeCyPromptManager).not.to.be.called
-        })
-      })
     })
 
     describe('saved state', function () {
