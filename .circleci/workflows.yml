@@ -5,7 +5,7 @@ chrome-beta-version: &chrome-beta-version "138.0.7204.4"
 firefox-stable-version: &firefox-stable-version "137.0"
 
 orbs:
-  browser-tools: circleci/browser-tools@1.5.3
+  browser-tools: circleci/browser-tools@2.0.0
 
 defaults: &defaults
   parallelism: 1
@@ -608,17 +608,17 @@ commands:
                 condition:
                   equal: [ true, << parameters.install-firefox >> ]
                 steps:
-                  - browser-tools/install-firefox:
+                  - browser-tools/install_firefox:
                       # https://download-installer.cdn.mozilla.net/pub/firefox/releases/
                       version: << parameters.firefox-version >>
             - when:
                 condition:
                   equal: [ true, << parameters.install-chrome >> ]
                 steps:
-                  - browser-tools/install-chrome:
+                  - browser-tools/install_chrome:
                       # https://www.ubuntuupdates.org/package/google_chrome/stable/main/base/google-chrome-stable
                       channel: << parameters.google-chrome-channel >>
-                      chrome-version: << parameters.google-chrome-version >>
+                      chrome_version: << parameters.google-chrome-version >>
                   - when:
                       condition:
                         equal: [ 'beta', << parameters.google-chrome-channel>> ]
