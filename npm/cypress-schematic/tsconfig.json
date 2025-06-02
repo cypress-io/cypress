@@ -6,7 +6,7 @@
       "dom"
     ],
     "declaration": true,
-    "module": "esnext",
+    "module": "commonjs",
     "moduleResolution": "node",
     "noEmitOnError": true,
     "noFallthroughCasesInSwitch": true,
