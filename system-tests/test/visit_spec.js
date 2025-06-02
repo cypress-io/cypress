@@ -145,7 +145,7 @@ describe('e2e visit', () => {
       },
     })
 
-    systemTests.it.only('passes with experimentalSourceRewriting', {
+    systemTests.it('passes with experimentalSourceRewriting', {
       browser: '!webkit', // TODO(webkit): fix+unskip
       spec: 'source_rewriting.cy.js',
       config: {
