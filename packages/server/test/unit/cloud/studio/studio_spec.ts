@@ -1,13 +1,13 @@
-import { proxyquire, sinon } from '../../spec_helper'
+import { proxyquire, sinon } from '../../../spec_helper'
 import path from 'path'
 import type { StudioServerShape } from '@packages/types'
 import { expect } from 'chai'
 import esbuild from 'esbuild'
-import type { StudioManager as StudioManagerShape } from '@packages/server/lib/cloud/studio'
+import type { StudioManager as StudioManagerShape } from '@packages/server/lib/cloud/studio/studio'
 import os from 'os'
 
 const { outputFiles: [{ contents: stubStudioRaw }] } = esbuild.buildSync({
-  entryPoints: [path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'studio', 'test-studio.ts')],
+  entryPoints: [path.join(__dirname, '..', '..', '..', 'support', 'fixtures', 'cloud', 'studio', 'test-studio.ts')],
   bundle: true,
   format: 'cjs',
   write: false,
@@ -18,16 +18,16 @@ const stubStudio = new TextDecoder('utf-8').decode(stubStudioRaw)
 describe('lib/cloud/studio', () => {
   let studioManager: StudioManagerShape
   let studio: StudioServerShape
-  let StudioManager: typeof import('@packages/server/lib/cloud/studio').StudioManager
+  let StudioManager: typeof import('@packages/server/lib/cloud/studio/studio').StudioManager
   let reportStudioError: sinon.SinonStub
 
   beforeEach(async () => {
     reportStudioError = sinon.stub()
-    StudioManager = (proxyquire('../lib/cloud/studio', {
-      './api/studio/report_studio_error': {
+    StudioManager = (proxyquire('../lib/cloud/studio/studio', {
+      '../api/studio/report_studio_error': {
         reportStudioError,
       },
-    }) as typeof import('@packages/server/lib/cloud/studio')).StudioManager
+    }) as typeof import('@packages/server/lib/cloud/studio/studio')).StudioManager
 
     studioManager = new StudioManager()
     await studioManager.setup({
