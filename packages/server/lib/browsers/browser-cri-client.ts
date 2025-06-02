@@ -477,10 +477,10 @@ export class BrowserCriClient {
     browserCriClient.currentlyAttachedTarget.close().catch(() => { })
     browserCriClient.currentlyAttachedProtocolTarget?.close().catch(() => { })
     // eslint-disable-next-line no-console
-    console.log('closing cy prompt target', browserCriClient.currentlyAttachedCyPromptTarget)
+    console.log('closing cy prompt target', browserCriClient.currentlyAttachedCyPromptTarget?.targetId)
     browserCriClient.currentlyAttachedCyPromptTarget?.close().catch(() => { })
     // eslint-disable-next-line no-console
-    console.log('closed cy prompt target', browserCriClient.currentlyAttachedCyPromptTarget)
+    console.log('closed cy prompt target', browserCriClient.currentlyAttachedCyPromptTarget?.targetId)
 
     new Bluebird((resolve) => {
       // this event could fire either expectedly or unexpectedly
@@ -628,10 +628,10 @@ export class BrowserCriClient {
       await this.currentlyAttachedTarget.close().catch(() => {})
       await this.currentlyAttachedProtocolTarget?.close().catch(() => {})
       // eslint-disable-next-line no-console
-      console.log('closing cy prompt target', this.currentlyAttachedCyPromptTarget)
+      console.log('closing cy prompt target', this.currentlyAttachedCyPromptTarget?.targetId)
       await this.currentlyAttachedCyPromptTarget?.close().catch(() => {})
       // eslint-disable-next-line no-console
-      console.log('closed cy prompt target', this.currentlyAttachedCyPromptTarget)
+      console.log('closed cy prompt target', this.currentlyAttachedCyPromptTarget?.targetId)
 
       debug('target client closed', this.currentlyAttachedTarget.targetId)
     }
@@ -645,13 +645,13 @@ export class BrowserCriClient {
     })
 
     // eslint-disable-next-line no-console
-    console.log('turning off cy prompt target subscriptions', this.currentlyAttachedCyPromptTarget)
+    console.log('turning off cy prompt target subscriptions', this.currentlyAttachedCyPromptTarget?.targetId)
     this.currentlyAttachedCyPromptTarget?.queue.subscriptions.forEach((subscription) => {
       this.browserClient.off(subscription.eventName, subscription.cb as any)
     })
 
     // eslint-disable-next-line no-console
-    console.log('turned off cy prompt target subscriptions', this.currentlyAttachedCyPromptTarget)
+    console.log('turned off cy prompt target subscriptions', this.currentlyAttachedCyPromptTarget?.targetId)
 
     if (target) {
       this.currentlyAttachedTarget = await CriClient.create({
@@ -671,7 +671,7 @@ export class BrowserCriClient {
       console.log('cloned protocol target')
       this.currentlyAttachedCyPromptTarget = await this.currentlyAttachedTarget.clone()
       // eslint-disable-next-line no-console
-      console.log('cloned cy prompt target', this.currentlyAttachedCyPromptTarget)
+      console.log('cloned cy prompt target', this.currentlyAttachedCyPromptTarget?.targetId)
     } else {
       this.currentlyAttachedTarget = undefined
       this.currentlyAttachedProtocolTarget = undefined
@@ -737,10 +737,10 @@ export class BrowserCriClient {
       await this.currentlyAttachedTarget.close()
       await this.currentlyAttachedProtocolTarget?.close()
       // eslint-disable-next-line no-console
-      console.log('closing cy prompt target', this.currentlyAttachedCyPromptTarget)
+      console.log('closing cy prompt target', this.currentlyAttachedCyPromptTarget?.targetId)
       await this.currentlyAttachedCyPromptTarget?.close()
       // eslint-disable-next-line no-console
-      console.log('closed cy prompt target', this.currentlyAttachedCyPromptTarget)
+      console.log('closed cy prompt target', this.currentlyAttachedCyPromptTarget?.targetId)
     }
 
     await this.browserClient.close()
