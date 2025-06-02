@@ -10,10 +10,14 @@ import path from 'path'
 import os from 'os'
 import { readFile } from 'fs-extra'
 import { ensureCyPromptBundle } from './ensure_cy_prompt_bundle'
+import chokidar from 'chokidar'
+import { getCloudMetadata } from '../get_cloud_metadata'
 
 const debug = Debug('cypress:server:cy-prompt-lifecycle-manager')
 
 export class CyPromptLifecycleManager {
+  private static hashLoadingMap: Map<string, Promise<void>> = new Map()
+  private static watcher: chokidar.FSWatcher | null = null
   private cyPromptManagerPromise?: Promise<CyPromptManager | null>
   private cyPromptManager?: CyPromptManager
   private listeners: ((cyPromptManager: CyPromptManager) => void)[] = []
@@ -72,6 +76,11 @@ export class CyPromptLifecycleManager {
     })
 
     this.cyPromptManagerPromise = cyPromptManagerPromise
+
+    this.setupWatcher({
+      projectId,
+      cloudDataSource,
+    })
   }
 
   async getCyPrompt () {
@@ -91,29 +100,42 @@ export class CyPromptLifecycleManager {
     projectId: string
     cloudDataSource: CloudDataSource
   }): Promise<CyPromptManager> {
+    let cyPromptHash: string
+    let cyPromptPath: string
+
     const cyPromptSession = await postCyPromptSession({
       projectId,
     })
 
-    // The cy prompt hash is the last part of the cy prompt URL, after the last slash and before the extension
-    const cyPromptHash = cyPromptSession.cyPromptUrl.split('/').pop()?.split('.')[0]
-    const cyPromptPath = path.join(os.tmpdir(), 'cypress', 'cy-prompt', cyPromptHash)
-    const bundlePath = path.join(cyPromptPath, 'bundle.tar')
-    const serverFilePath = path.join(cyPromptPath, 'server', 'index.js')
+    if (!process.env.CYPRESS_LOCAL_CY_PROMPT_PATH) {
+      // The cy prompt hash is the last part of the cy prompt URL, after the last slash and before the extension
+      cyPromptHash = cyPromptSession.cyPromptUrl.split('/').pop()?.split('.')[0]
+      cyPromptPath = path.join(os.tmpdir(), 'cypress', 'cy-prompt', cyPromptHash)
 
-    await ensureCyPromptBundle({
-      cyPromptUrl: cyPromptSession.cyPromptUrl,
-      projectId,
-      cyPromptPath,
-      bundlePath,
-    })
+      let hashLoadingPromise = CyPromptLifecycleManager.hashLoadingMap.get(cyPromptHash)
+
+      if (!hashLoadingPromise) {
+        hashLoadingPromise = ensureCyPromptBundle({
+          cyPromptUrl: cyPromptSession.cyPromptUrl,
+          projectId,
+          cyPromptPath,
+        })
+
+        CyPromptLifecycleManager.hashLoadingMap.set(cyPromptHash, hashLoadingPromise)
+      }
+
+      await hashLoadingPromise
+    } else {
+      cyPromptPath = process.env.CYPRESS_LOCAL_CY_PROMPT_PATH
+      cyPromptHash = 'local'
+    }
+
+    const serverFilePath = path.join(cyPromptPath, 'server', 'index.js')
 
     const script = await readFile(serverFilePath, 'utf8')
     const cyPromptManager = new CyPromptManager()
 
-    const cloudEnv = (process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'production') as 'development' | 'staging' | 'production'
-    const cloudUrl = cloudDataSource.getCloudUrl(cloudEnv)
-    const cloudHeaders = await cloudDataSource.additionalHeaders()
+    const { cloudUrl, cloudHeaders } = await getCloudMetadata(cloudDataSource)
 
     await cyPromptManager.setup({
       script,
@@ -148,7 +170,43 @@ export class CyPromptLifecycleManager {
       listener(cyPromptManager)
     })
 
-    this.listeners = []
+    if (!process.env.CYPRESS_LOCAL_CY_PROMPT_PATH) {
+      this.listeners = []
+    }
+  }
+
+  private setupWatcher ({
+    projectId,
+    cloudDataSource,
+  }: {
+    projectId: string
+    cloudDataSource: CloudDataSource
+  }) {
+    // Don't setup a watcher if the cy prompt bundle is NOT local
+    if (!process.env.CYPRESS_LOCAL_CY_PROMPT_PATH) {
+      return
+    }
+
+    // Close the watcher if a previous watcher exists
+    if (CyPromptLifecycleManager.watcher) {
+      CyPromptLifecycleManager.watcher.removeAllListeners()
+      CyPromptLifecycleManager.watcher.close().catch(() => {})
+    }
+
+    // Watch for changes to the cy prompt bundle
+    CyPromptLifecycleManager.watcher = chokidar.watch(path.join(process.env.CYPRESS_LOCAL_CY_PROMPT_PATH, 'server', 'index.js'), {
+      awaitWriteFinish: true,
+    }).on('change', async () => {
+      this.cyPromptManager = undefined
+      this.cyPromptManagerPromise = this.createCyPromptManager({
+        projectId,
+        cloudDataSource,
+      }).catch((error) => {
+        debug('Error during reload of cy prompt manager: %o', error)
+
+        return null
+      })
+    })
   }
 
   /**
@@ -160,6 +218,12 @@ export class CyPromptLifecycleManager {
     if (this.cyPromptManager) {
       debug('cy prompt ready - calling listener immediately')
       listener(this.cyPromptManager)
+
+      // If the cy prompt bundle is local, we need to register the listener
+      // so that we can reload the cy prompt when the bundle changes
+      if (process.env.CYPRESS_LOCAL_CY_PROMPT_PATH) {
+        this.listeners.push(listener)
+      }
     } else {
       debug('cy prompt not ready - registering cy prompt ready listener')
       this.listeners.push(listener)

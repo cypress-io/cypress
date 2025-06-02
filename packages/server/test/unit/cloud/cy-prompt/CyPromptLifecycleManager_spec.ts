@@ -21,6 +21,9 @@ describe('CyPromptLifecycleManager', () => {
   let ensureCyPromptBundleStub: sinon.SinonStub
   let cyPromptManagerSetupStub: sinon.SinonStub = sinon.stub()
   let readFileStub: sinon.SinonStub = sinon.stub()
+  let watcherStub: sinon.SinonStub = sinon.stub()
+  let watcherOnStub: sinon.SinonStub = sinon.stub()
+  let watcherCloseStub: sinon.SinonStub = sinon.stub()
 
   beforeEach(() => {
     postCyPromptSessionStub = sinon.stub()
@@ -49,6 +52,12 @@ describe('CyPromptLifecycleManager', () => {
       },
       'fs-extra': {
         readFile: readFileStub.resolves('console.log("cy-prompt script")'),
+      },
+      'chokidar': {
+        watch: watcherStub.returns({
+          on: watcherOnStub,
+          close: watcherCloseStub,
+        }),
       },
     }).CyPromptLifecycleManager
 
@@ -80,6 +89,8 @@ describe('CyPromptLifecycleManager', () => {
 
   afterEach(() => {
     sinon.restore()
+
+    delete process.env.CYPRESS_LOCAL_CY_PROMPT_PATH
   })
 
   describe('initializeCyPromptManager', () => {
@@ -103,7 +114,6 @@ describe('CyPromptLifecycleManager', () => {
         cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc'),
         cyPromptUrl: 'https://cloud.cypress.io/cy-prompt/bundle/abc.tgz',
         projectId: 'test-project-id',
-        bundlePath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc', 'bundle.tar'),
       })
 
       expect(cyPromptManagerSetupStub).to.be.calledWith({
@@ -127,6 +137,72 @@ describe('CyPromptLifecycleManager', () => {
       expect(mockCloudDataSource.getCloudUrl).to.be.calledWith('test')
       expect(mockCloudDataSource.additionalHeaders).to.be.called
       expect(readFileStub).to.be.calledWith(path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc', 'server', 'index.js'), 'utf8')
+    })
+
+    it('initializes the cy-prompt manager in watch mode if CYPRESS_LOCAL_CY_PROMPT_PATH is set', async () => {
+      process.env.CYPRESS_LOCAL_CY_PROMPT_PATH = '/path/to/cy-prompt'
+
+      cyPromptLifecycleManager.initializeCyPromptManager({
+        projectId: 'test-project-id',
+        cloudDataSource: mockCloudDataSource,
+        ctx: mockCtx,
+      })
+
+      const cyPromptReadyPromise = new Promise((resolve) => {
+        cyPromptLifecycleManager?.registerCyPromptReadyListener((cyPromptManager) => {
+          resolve(cyPromptManager)
+        })
+      })
+
+      await cyPromptReadyPromise
+
+      expect(mockCtx.update).to.be.calledOnce
+      expect(ensureCyPromptBundleStub).to.not.be.called
+
+      expect(cyPromptManagerSetupStub).to.be.calledWith({
+        script: 'console.log("cy-prompt script")',
+        cyPromptPath: '/path/to/cy-prompt',
+        cyPromptHash: 'local',
+        projectSlug: 'test-project-id',
+        cloudApi: {
+          cloudUrl: 'https://cloud.cypress.io',
+          cloudHeaders: { 'Authorization': 'Bearer test-token' },
+          CloudRequest,
+          isRetryableError,
+          asyncRetry,
+        },
+      })
+
+      expect(postCyPromptSessionStub).to.be.calledWith({
+        projectId: 'test-project-id',
+      })
+
+      expect(readFileStub).to.be.calledWith(path.join('/path', 'to', 'cy-prompt', 'server', 'index.js'), 'utf8')
+
+      expect(CyPromptLifecycleManager['watcher']).to.be.present
+      expect(watcherStub).to.be.calledWith(path.join('/path', 'to', 'cy-prompt', 'server', 'index.js'), {
+        awaitWriteFinish: true,
+      })
+
+      expect(watcherOnStub).to.be.calledWith('change')
+
+      const onCallback = watcherOnStub.args[0][1]
+
+      let mockCyPromptManagerPromise: Promise<CyPromptManager | null>
+      const updatedCyPromptManager = {} as unknown as CyPromptManager
+
+      cyPromptLifecycleManager['createCyPromptManager'] = sinon.stub().callsFake(() => {
+        mockCyPromptManagerPromise = new Promise((resolve) => {
+          resolve(updatedCyPromptManager)
+        })
+
+        return mockCyPromptManagerPromise
+      })
+
+      onCallback()
+
+      expect(mockCyPromptManagerPromise).to.be.present
+      expect(await mockCyPromptManagerPromise).to.equal(updatedCyPromptManager)
     })
   })
 
@@ -172,6 +248,25 @@ describe('CyPromptLifecycleManager', () => {
       cyPromptLifecycleManager.registerCyPromptReadyListener(listener)
 
       expect(listener).to.be.calledWith(mockCyPromptManager)
+    })
+
+    it('calls listener immediately and adds to the list of listeners when CYPRESS_LOCAL_CY_PROMPT_PATH is set', async () => {
+      process.env.CYPRESS_LOCAL_CY_PROMPT_PATH = '/path/to/cy-prompt'
+
+      const listener = sinon.stub()
+
+      // @ts-expect-error - accessing private property
+      cyPromptLifecycleManager.cyPromptManager = mockCyPromptManager
+
+      // @ts-expect-error - accessing non-existent property
+      cyPromptLifecycleManager.cyPromptReady = true
+
+      cyPromptLifecycleManager.registerCyPromptReadyListener(listener)
+
+      expect(listener).to.be.calledWith(mockCyPromptManager)
+
+      // @ts-expect-error - accessing private property
+      expect(cyPromptLifecycleManager.listeners).to.include(listener)
     })
 
     it('does not call listener if cy-prompt manager is null', async () => {
@@ -233,6 +328,42 @@ describe('CyPromptLifecycleManager', () => {
 
       // @ts-expect-error - accessing private property
       expect(cyPromptLifecycleManager.listeners.length).to.equal(0)
+    })
+
+    it('does not clean up listeners when CYPRESS_LOCAL_CY_PROMPT_PATH is set', async () => {
+      process.env.CYPRESS_LOCAL_CY_PROMPT_PATH = '/path/to/cy-prompt'
+
+      const listener1 = sinon.stub()
+      const listener2 = sinon.stub()
+
+      cyPromptLifecycleManager.registerCyPromptReadyListener(listener1)
+      cyPromptLifecycleManager.registerCyPromptReadyListener(listener2)
+
+      // @ts-expect-error - accessing private property
+      expect(cyPromptLifecycleManager.listeners.length).to.equal(2)
+
+      const listenersCalledPromise = Promise.all([
+        new Promise<void>((resolve) => {
+          listener1.callsFake(() => resolve())
+        }),
+        new Promise<void>((resolve) => {
+          listener2.callsFake(() => resolve())
+        }),
+      ])
+
+      cyPromptLifecycleManager.initializeCyPromptManager({
+        projectId: 'test-project-id',
+        cloudDataSource: mockCloudDataSource,
+        ctx: mockCtx,
+      })
+
+      await listenersCalledPromise
+
+      expect(listener1).to.be.calledWith(mockCyPromptManager)
+      expect(listener2).to.be.calledWith(mockCyPromptManager)
+
+      // @ts-expect-error - accessing private property
+      expect(cyPromptLifecycleManager.listeners.length).to.equal(2)
     })
   })
 })
