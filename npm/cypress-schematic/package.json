@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "jsonc-parser": "^3.3.1",
-    "rxjs": "~7.8.1"
+    "rxjs": "^7.8.1"
   },
   "devDependencies": {
     "@angular-devkit/architect": "^0.1802.11",
@@ -45,6 +45,9 @@
     "angular",
     "automation"
   ],
+  "resolutions": {
+    "rxjs": "^7.8.1"
+  },
   "publishConfig": {
     "access": "public"
   },
