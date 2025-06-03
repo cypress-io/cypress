@@ -571,23 +571,29 @@ export class BrowserCriClient {
 
       const currentTarget = this.currentlyAttachedTarget
 
+      const createProtocolTarget = async () => {
+        // Clone the target here so that we separate the protocol client and the main client.
+        // This allows us to close the protocol client independently of the main client
+        // which we do when we exit out of studio in open mode.
+        if (!this.currentlyAttachedProtocolTarget) {
+          this.currentlyAttachedProtocolTarget = await currentTarget.clone()
+        }
+
+        await this.protocolManager?.connectToBrowser(this.currentlyAttachedProtocolTarget)
+      }
+
+      const createCyPromptTarget = async () => {
+        // Clone the cy.prompt() target here so that we separate the cy.prompt() client and the main client.
+        if (!this.currentlyAttachedCyPromptTarget) {
+          this.currentlyAttachedCyPromptTarget = await currentTarget.clone()
+        }
+
+        await this.cyPromptManager?.connectToBrowser(this.currentlyAttachedCyPromptTarget)
+      }
+
       await Promise.all([
-        async () => {
-          // Clone the target here so that we separate the protocol client and the main client.
-          // This allows us to close the protocol client independently of the main client
-          // which we do when we exit out of studio in open mode.
-          if (!this.currentlyAttachedProtocolTarget) {
-            this.currentlyAttachedProtocolTarget = await currentTarget.clone()
-            await this.protocolManager?.connectToBrowser(this.currentlyAttachedProtocolTarget)
-          }
-        },
-        async () => {
-          // Clone the cy.prompt() target here so that we separate the cy.prompt() client and the main client.
-          if (!this.currentlyAttachedCyPromptTarget) {
-            this.currentlyAttachedCyPromptTarget = await currentTarget.clone()
-            await this.cyPromptManager?.connectToBrowser(this.currentlyAttachedCyPromptTarget)
-          }
-        },
+        createProtocolTarget(),
+        createCyPromptTarget(),
       ])
 
       return this.currentlyAttachedTarget
@@ -662,15 +668,17 @@ export class BrowserCriClient {
 
       const currentTarget = this.currentlyAttachedTarget
 
-      // Clone the targets here so that we separate these clients from the main client.
-      // This allows us to operate these clients independently of the main client
+      const createProtocolTarget = async () => {
+        this.currentlyAttachedProtocolTarget = await currentTarget.clone()
+      }
+
+      const createCyPromptTarget = async () => {
+        this.currentlyAttachedCyPromptTarget = await currentTarget.clone()
+      }
+
       await Promise.all([
-        async () => {
-          this.currentlyAttachedProtocolTarget = await currentTarget.clone()
-        },
-        async () => {
-          this.currentlyAttachedCyPromptTarget = await currentTarget.clone()
-        },
+        createProtocolTarget(),
+        createCyPromptTarget(),
       ])
     } else {
       this.currentlyAttachedTarget = undefined
