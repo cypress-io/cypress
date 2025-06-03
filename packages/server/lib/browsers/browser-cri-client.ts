@@ -26,7 +26,6 @@ type BrowserCriClientOptions = {
   browserName: string
   onAsynchronousError: (err: CypressError) => void
   protocolManager?: ProtocolManagerShape
-  cyPromptManager?: CyPromptManagerShape
   fullyManageTabs?: boolean
   onServiceWorkerClientEvent: ServiceWorkerEventHandler
 }
@@ -211,7 +210,6 @@ export class BrowserCriClient {
     this.browserName = options.browserName
     this.onAsynchronousError = options.onAsynchronousError
     this.protocolManager = options.protocolManager
-    this.cyPromptManager = options.cyPromptManager
     this.fullyManageTabs = options.fullyManageTabs
     this.onServiceWorkerClientEvent = options.onServiceWorkerClientEvent
   }
@@ -228,7 +226,6 @@ export class BrowserCriClient {
    * @param options.onReconnect callback for when the browser cri client reconnects to the browser
    * @param options.port the port to which to connect
    * @param options.protocolManager the protocol manager to use with the browser cri client
-   * @param options.cyPromptManager the cy.prompt() manager to use with the browser cri client
    * @param options.onServiceWorkerClientEvent callback for when a service worker fetch event is received
    * @returns a wrapper around the chrome remote interface that is connected to the browser target
    */
@@ -241,7 +238,6 @@ export class BrowserCriClient {
       onReconnect,
       port,
       protocolManager,
-      cyPromptManager,
       onServiceWorkerClientEvent,
     } = options
 
@@ -266,7 +262,6 @@ export class BrowserCriClient {
         browserName,
         onAsynchronousError,
         protocolManager,
-        cyPromptManager,
         fullyManageTabs,
         onServiceWorkerClientEvent,
       })
@@ -569,32 +564,14 @@ export class BrowserCriClient {
         browserClient: this.browserClient,
       })
 
-      const currentTarget = this.currentlyAttachedTarget
-
-      const createProtocolTarget = async () => {
-        // Clone the target here so that we separate the protocol client and the main client.
-        // This allows us to close the protocol client independently of the main client
-        // which we do when we exit out of studio in open mode.
-        if (!this.currentlyAttachedProtocolTarget) {
-          this.currentlyAttachedProtocolTarget = await currentTarget.clone()
-        }
-
-        await this.protocolManager?.connectToBrowser(this.currentlyAttachedProtocolTarget)
+      // Clone the target here so that we separate the protocol client and the main client.
+      // This allows us to close the protocol client independently of the main client
+      // which we do when we exit out of studio in open mode.
+      if (!this.currentlyAttachedProtocolTarget) {
+        this.currentlyAttachedProtocolTarget = await this.currentlyAttachedTarget.clone()
       }
 
-      const createCyPromptTarget = async () => {
-        // Clone the cy.prompt() target here so that we separate the cy.prompt() client and the main client.
-        if (!this.currentlyAttachedCyPromptTarget) {
-          this.currentlyAttachedCyPromptTarget = await currentTarget.clone()
-        }
-
-        await this.cyPromptManager?.connectToBrowser(this.currentlyAttachedCyPromptTarget)
-      }
-
-      await Promise.all([
-        createProtocolTarget(),
-        createCyPromptTarget(),
-      ])
+      await this.protocolManager?.connectToBrowser(this.currentlyAttachedProtocolTarget)
 
       return this.currentlyAttachedTarget
     }, this.browserName, this.port)
