@@ -44,7 +44,8 @@ export default (Commands, Cypress, cy) => {
     Commands.addAll({
       async prompt (message: string) {
         if (Cypress.browser.family !== 'chromium' && Cypress.browser.name !== 'electron') {
-          // TODO: handle this better
+          // TODO: (cy.prompt) We will look into supporting other browsers (and testing them)
+          // as this is rolled out
           throw new Error('`cy.prompt()` is not supported in this browser.')
         }
 

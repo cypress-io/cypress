@@ -53,7 +53,7 @@ describe('lib/cloud/cy-prompt', () => {
 
       expect(cyPromptManager.status).to.eq('IN_ERROR')
 
-      // TODO: test that the error is reported
+      // TODO: (cy.prompt) test that the error is reported
     })
   })
 
@@ -65,7 +65,7 @@ describe('lib/cloud/cy-prompt', () => {
 
       await cyPromptManager.handleBackendRequest('cy:prompt:start', {} as any)
 
-      // TODO: test that the error is reported
+      // TODO: (cy.prompt) test that the error is reported
     })
   })
 

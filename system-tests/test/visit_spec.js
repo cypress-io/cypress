@@ -151,9 +151,6 @@ describe('e2e visit', () => {
       config: {
         experimentalSourceRewriting: true,
       },
-      processEnv: {
-        DEBUG: 'cypress:server:browsers:cri-client',
-      },
       snapshot: true,
       onRun (exec) {
         return startTlsV1Server(6776)

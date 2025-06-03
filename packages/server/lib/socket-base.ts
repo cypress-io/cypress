@@ -465,20 +465,7 @@ export class SocketBase {
 
           const backendRequest = () => {
             if (eventName.startsWith('cy:prompt:')) {
-              // eslint-disable-next-line no-console
-              console.log('cyPrompt', eventName, ...args)
-
-              return cyPrompt?.handleBackendRequest(eventName, ...args).then((result) => {
-                // eslint-disable-next-line no-console
-                console.log('result', result)
-
-                return result
-              }).catch((error) => {
-                // eslint-disable-next-line no-console
-                console.error('error', error)
-
-                return error
-              })
+              return cyPrompt?.handleBackendRequest(eventName, ...args)
             }
 
             switch (eventName) {
@@ -694,6 +681,12 @@ export class SocketBase {
 
   end () {
     this.ended = true
+
+    // TODO: we need an 'ack' from this end
+    // event from the other side
+    this.getIos().forEach((io) => {
+      io?.emit('tests:finished')
+    })
   }
 
   async resetBrowserTabsForNextSpec (shouldKeepTabOpen: boolean) {

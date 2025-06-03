@@ -1,6 +1,8 @@
 describe('src/cy/commands/prompt', () => {
   it('executes the prompt command', () => {
-    // TODO: test the error messages
+    // TODO: (cy.prompt) We will look into supporting other browsers
+    // as this is rolled out. We will add error messages for other browsers
+    // and add tests if necessary
     if (Cypress.isBrowser('webkit') || Cypress.isBrowser('firefox')) {
       return
     }
