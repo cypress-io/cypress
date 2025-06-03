@@ -66,6 +66,7 @@ describe('lib/socket', () => {
           onSavedStateChanged: sinon.spy(),
           onStudioInit: sinon.stub(),
           onStudioDestroy: sinon.stub(),
+          onCyPromptReady: sinon.stub(),
         }
 
         this.automation = new Automation({
@@ -558,6 +559,8 @@ describe('lib/socket', () => {
         return this.client.emit('backend:request', 'wait:for:cy:prompt:ready', (resp) => {
           expect(resp.response).to.deep.eq({ success: true })
 
+          expect(this.options.onCyPromptReady).to.be.calledWith(mockCyPrompt)
+
           return done()
         })
       })
@@ -578,25 +581,25 @@ describe('lib/socket', () => {
     })
 
     context('on(backend:request, cy:prompt)', () => {
-      it('calls handleBackendRequest with the correct arguments', function (done) {
+      it('calls handleBackendRequest with the correct arguments', async function () {
         // Verify that registerCyPromptReadyListener was called
         expect(ctx.coreData.cyPromptLifecycleManager.registerCyPromptReadyListener).to.be.called
 
         // Check that the callback was called with the mock cy prompt object
         const registerCyPromptReadyListenerCallback = ctx.coreData.cyPromptLifecycleManager.registerCyPromptReadyListener.firstCall.args[0]
 
-        expect(registerCyPromptReadyListenerCallback).to.be.a('function')
-
         // Verify the mock cy prompt's handleBackendRequest was called by the callback
         const mockCyPrompt = { handleBackendRequest: sinon.stub().resolves({ foo: 'bar' }) }
 
-        registerCyPromptReadyListenerCallback(mockCyPrompt)
+        await registerCyPromptReadyListenerCallback(mockCyPrompt)
 
-        return this.client.emit('backend:request', 'cy:prompt:init', 'foo', (resp) => {
-          expect(resp.response).to.deep.eq({ foo: 'bar' })
-          expect(mockCyPrompt.handleBackendRequest).to.be.calledWith('cy:prompt:init', 'foo')
+        await new Promise((resolve) => {
+          this.client.emit('backend:request', 'cy:prompt:init', 'foo', (resp) => {
+            expect(resp.response).to.deep.eq({ foo: 'bar' })
+            expect(mockCyPrompt.handleBackendRequest).to.be.calledWith('cy:prompt:init', 'foo')
 
-          return done()
+            resolve()
+          })
         })
       })
     })

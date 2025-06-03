@@ -7,7 +7,7 @@ import path from 'path'
 interface EnsureCyPromptBundleOptions {
   cyPromptPath: string
   cyPromptUrl: string
-  projectId: string
+  projectId?: string
 }
 
 export const ensureCyPromptBundle = async ({ cyPromptPath, cyPromptUrl, projectId }: EnsureCyPromptBundleOptions) => {

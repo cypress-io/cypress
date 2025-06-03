@@ -118,6 +118,19 @@ describe('lib/browsers/index', () => {
     })
   })
 
+  context('.connectCyPromptToBrowser', () => {
+    it('connects browser to cy prompt', async () => {
+      sinon.stub(chrome, 'connectCyPromptToBrowser').resolves()
+      await browsers.connectCyPromptToBrowser({
+        browser: {
+          family: 'chromium',
+        },
+      })
+
+      expect(chrome.connectCyPromptToBrowser).to.be.called
+    })
+  })
+
   context('.closeProtocolConnection', () => {
     it('calls close on instance', async () => {
       sinon.stub(chrome, 'closeProtocolConnection').resolves()

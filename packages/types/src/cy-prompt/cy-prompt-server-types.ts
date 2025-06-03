@@ -4,8 +4,17 @@
 
 /// <reference types="cypress" />
 
+import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping.d'
 import type { Router } from 'express'
 import type { AxiosInstance } from 'axios'
+
+export type CyPromptCommands = ProtocolMapping.Commands
+
+export type CyPromptCommand<T extends keyof CyPromptCommands> = CyPromptCommands[T]
+
+export type CyPromptEvents = ProtocolMapping.Events
+
+export type CyPromptEvent<T extends keyof CyPromptEvents> = CyPromptEvents[T]
 
 interface RetryOptions {
   maxAttempts: number
@@ -34,9 +43,21 @@ export interface CyPromptServerOptions {
   cloudApi: CyPromptCloudApi
 }
 
+export interface CyPromptCDPClient {
+  send<T extends Extract<keyof CyPromptCommands, string>>(
+    command: T,
+    params?: CyPromptCommand<T>['paramsType'][0]
+  ): Promise<CyPromptCommand<T>['returnType']>
+  on<T extends Extract<keyof CyPromptEvents, string>>(
+    eventName: T,
+    cb: (event: CyPromptEvent<T>[0]) => void | Promise<unknown>
+  ): void
+}
+
 export interface CyPromptServerShape {
   initializeRoutes(router: Router): void
   handleBackendRequest: (eventName: string, ...args: any[]) => Promise<any>
+  connectToBrowser: (cdpClient: CyPromptCDPClient) => void
 }
 
 export interface CyPromptServerDefaultShape {

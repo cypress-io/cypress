@@ -154,6 +154,7 @@ export class SocketBase {
       onCaptureVideoFrames () {},
       onStudioInit () {},
       onStudioDestroy () {},
+      onCyPromptReady () {},
     })
 
     let automationClient
@@ -545,7 +546,9 @@ export class SocketBase {
               case 'close:extra:targets':
                 return options.closeExtraTargets()
               case 'wait:for:cy:prompt:ready':
-                return getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt().then((cyPrompt) => {
+                return getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt().then(async (cyPrompt) => {
+                  await options.onCyPromptReady(cyPrompt)
+
                   return {
                     success: cyPrompt && cyPrompt.status === 'INITIALIZED',
                   }

@@ -8,7 +8,7 @@ import * as errors from '../errors'
 import type { CypressError } from '@packages/errors'
 import { CriClient, DEFAULT_NETWORK_ENABLE_OPTIONS } from './cri-client'
 import { serviceWorkerClientEventHandler, serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker-manager'
-import type { ProtocolManagerShape } from '@packages/types'
+import type { CyPromptManagerShape, ProtocolManagerShape } from '@packages/types'
 import type { ServiceWorkerEventHandler } from '@packages/proxy/lib/http/util/service-worker-manager'
 
 const debug = Debug('cypress:server:browsers:browser-cri-client')
@@ -38,6 +38,7 @@ type BrowserCriClientCreateOptions = {
   onReconnect?: (client: CriClient) => void
   port: number
   protocolManager?: ProtocolManagerShape
+  cyPromptManager?: CyPromptManagerShape
   onServiceWorkerClientEvent: ServiceWorkerEventHandler
 }
 
@@ -184,10 +185,12 @@ export class BrowserCriClient {
   private browserName: string
   private onAsynchronousError: (err: CypressError) => void
   private protocolManager?: ProtocolManagerShape
+  private cyPromptManager?: CyPromptManagerShape
   private fullyManageTabs?: boolean
   onServiceWorkerClientEvent: ServiceWorkerEventHandler
   currentlyAttachedTarget: CriClient | undefined
   currentlyAttachedProtocolTarget: CriClient | undefined
+  currentlyAttachedCyPromptTarget: CriClient | undefined
   // whenever we instantiate the instance we're already connected bc
   // we receive an underlying CRI connection
   // TODO: remove "connected" in favor of closing/closed or disconnected
@@ -466,8 +469,9 @@ export class BrowserCriClient {
     // otherwise it means the the browser itself was closed
 
     // always close the connection to the page target because it was destroyed
-    browserCriClient.currentlyAttachedTarget.close().catch(() => { }),
-    browserCriClient.currentlyAttachedProtocolTarget?.close().catch(() => {})
+    browserCriClient.currentlyAttachedTarget.close().catch(() => { })
+    browserCriClient.currentlyAttachedProtocolTarget?.close().catch(() => { })
+    browserCriClient.currentlyAttachedCyPromptTarget?.close().catch(() => { })
 
     new Bluebird((resolve) => {
       // this event could fire either expectedly or unexpectedly
@@ -565,8 +569,9 @@ export class BrowserCriClient {
       // which we do when we exit out of studio in open mode.
       if (!this.currentlyAttachedProtocolTarget) {
         this.currentlyAttachedProtocolTarget = await this.currentlyAttachedTarget.clone()
-        await this.protocolManager?.connectToBrowser(this.currentlyAttachedProtocolTarget)
       }
+
+      await this.protocolManager?.connectToBrowser(this.currentlyAttachedProtocolTarget)
 
       return this.currentlyAttachedTarget
     }, this.browserName, this.port)
@@ -606,8 +611,11 @@ export class BrowserCriClient {
 
       debug('target closed', this.currentlyAttachedTarget.targetId)
 
-      await this.currentlyAttachedTarget.close().catch(() => {})
-      await this.currentlyAttachedProtocolTarget?.close().catch(() => {})
+      await Promise.all([
+        this.currentlyAttachedTarget.close().catch(() => {}),
+        this.currentlyAttachedProtocolTarget?.close().catch(() => {}),
+        this.currentlyAttachedCyPromptTarget?.close().catch(() => {}),
+      ])
 
       debug('target client closed', this.currentlyAttachedTarget.targetId)
     }
@@ -617,6 +625,10 @@ export class BrowserCriClient {
     })
 
     this.currentlyAttachedProtocolTarget?.queue.subscriptions.forEach((subscription) => {
+      this.browserClient.off(subscription.eventName, subscription.cb as any)
+    })
+
+    this.currentlyAttachedCyPromptTarget?.queue.subscriptions.forEach((subscription) => {
       this.browserClient.off(subscription.eventName, subscription.cb as any)
     })
 
@@ -631,13 +643,24 @@ export class BrowserCriClient {
         browserClient: this.browserClient,
       })
 
-      // Clone the target here so that we separate the protocol client and the main client.
-      // This allows us to close the protocol client independently of the main client
-      // which we do when we exit out of studio in open mode.
-      this.currentlyAttachedProtocolTarget = await this.currentlyAttachedTarget.clone()
+      const currentTarget = this.currentlyAttachedTarget
+
+      const createProtocolTarget = async () => {
+        this.currentlyAttachedProtocolTarget = await currentTarget.clone()
+      }
+
+      const createCyPromptTarget = async () => {
+        this.currentlyAttachedCyPromptTarget = await currentTarget.clone()
+      }
+
+      await Promise.all([
+        createProtocolTarget(),
+        createCyPromptTarget(),
+      ])
     } else {
       this.currentlyAttachedTarget = undefined
       this.currentlyAttachedProtocolTarget = undefined
+      this.currentlyAttachedCyPromptTarget = undefined
     }
 
     this.resettingBrowserTargets = false
@@ -696,8 +719,11 @@ export class BrowserCriClient {
     this.connected = false
 
     if (this.currentlyAttachedTarget) {
-      await this.currentlyAttachedTarget.close()
-      await this.currentlyAttachedProtocolTarget?.close()
+      await Promise.all([
+        this.currentlyAttachedTarget.close(),
+        this.currentlyAttachedProtocolTarget?.close(),
+        this.currentlyAttachedCyPromptTarget?.close(),
+      ])
     }
 
     await this.browserClient.close()

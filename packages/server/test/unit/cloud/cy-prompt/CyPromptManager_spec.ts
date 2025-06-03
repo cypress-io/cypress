@@ -52,6 +52,8 @@ describe('lib/cloud/cy-prompt', () => {
       cyPromptManager.initializeRoutes({} as any)
 
       expect(cyPromptManager.status).to.eq('IN_ERROR')
+
+      // TODO: (cy.prompt) test that the error is reported
     })
   })
 
@@ -63,7 +65,7 @@ describe('lib/cloud/cy-prompt', () => {
 
       await cyPromptManager.handleBackendRequest('cy:prompt:start', {} as any)
 
-      expect(cyPromptManager.status).to.eq('IN_ERROR')
+      // TODO: (cy.prompt) test that the error is reported
     })
   })
 
@@ -95,6 +97,32 @@ describe('lib/cloud/cy-prompt', () => {
       const invokeSyncSpy = sinon.spy(cyPromptManager, 'invokeSync')
 
       cyPromptManager.handleBackendRequest('cy:prompt:start', {} as any)
+
+      expect(invokeSyncSpy).to.not.be.called
+    })
+  })
+
+  describe('connectToBrowser', () => {
+    it('connects to the browser', () => {
+      const mockCriClient = {
+        send: sinon.stub().resolves(),
+        on: sinon.stub().resolves(),
+      }
+
+      sinon.stub(cyPrompt, 'connectToBrowser')
+
+      cyPromptManager.connectToBrowser(mockCriClient)
+
+      expect(cyPrompt.connectToBrowser).to.be.calledWith(mockCriClient)
+    })
+
+    it('does not call connectToBrowser when cy prompt server is not defined', () => {
+      // Set _cyPromptServer to undefined
+      (cyPromptManager as any)._cyPromptServer = undefined
+
+      const invokeSyncSpy = sinon.spy(cyPromptManager, 'invokeSync')
+
+      cyPromptManager.connectToBrowser({} as any)
 
       expect(invokeSyncSpy).to.not.be.called
     })

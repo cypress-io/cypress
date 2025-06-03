@@ -1,4 +1,4 @@
-import type { CyPromptManagerShape, CyPromptStatus, CyPromptServerDefaultShape, CyPromptServerShape, CyPromptCloudApi } from '@packages/types'
+import type { CyPromptManagerShape, CyPromptStatus, CyPromptServerDefaultShape, CyPromptServerShape, CyPromptCloudApi, CyPromptCDPClient } from '@packages/types'
 import type { Router } from 'express'
 import Debug from 'debug'
 import { requireScript } from '../require_script'
@@ -40,7 +40,13 @@ export class CyPromptManager implements CyPromptManagerShape {
 
   async handleBackendRequest (eventName: string, ...args: any[]): Promise<any> {
     if (this._cyPromptServer) {
-      return this.invokeAsync('handleBackendRequest', { isEssential: true }, eventName, ...args)
+      return this.invokeAsync('handleBackendRequest', { isEssential: false }, eventName, ...args)
+    }
+  }
+
+  connectToBrowser (target: CyPromptCDPClient): void {
+    if (this._cyPromptServer) {
+      return this.invokeSync('connectToBrowser', { isEssential: true }, target)
     }
   }
 
@@ -54,6 +60,7 @@ export class CyPromptManager implements CyPromptManagerShape {
     }
 
     try {
+      // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
       return this._cyPromptServer[method].apply(this._cyPromptServer, args)
     } catch (error: unknown) {
       let actualError: Error

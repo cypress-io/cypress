@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 
-import type { CyPromptServerShape, CyPromptServerDefaultShape } from '@packages/types'
+import type { CyPromptServerShape, CyPromptServerDefaultShape, CyPromptCDPClient } from '@packages/types'
 import type { Router } from 'express'
 
 class CyPromptServer implements CyPromptServerShape {
@@ -10,6 +10,10 @@ class CyPromptServer implements CyPromptServerShape {
 
   handleBackendRequest (eventName: string, ...args: any[]): Promise<any> {
     return Promise.resolve()
+  }
+
+  connectToBrowser (criClient: CyPromptCDPClient): void {
+    // This is a test implementation that does nothing
   }
 }
 
