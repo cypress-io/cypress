@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 14.4.1
 
-_Released 6/3/2025 (PENDING)_
+_Released 6/3/2025_
 
 **Bugfixes:**
 
