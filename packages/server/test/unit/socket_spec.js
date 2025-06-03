@@ -66,6 +66,7 @@ describe('lib/socket', () => {
           onSavedStateChanged: sinon.spy(),
           onStudioInit: sinon.stub(),
           onStudioDestroy: sinon.stub(),
+          onCyPromptReady: sinon.stub(),
         }
 
         this.automation = new Automation({
@@ -557,6 +558,8 @@ describe('lib/socket', () => {
 
         return this.client.emit('backend:request', 'wait:for:cy:prompt:ready', (resp) => {
           expect(resp.response).to.deep.eq({ success: true })
+
+          expect(this.options.onCyPromptReady).to.be.calledWith(mockCyPrompt)
 
           return done()
         })

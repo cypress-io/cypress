@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 
-import type { CyPromptServerShape, CyPromptServerDefaultShape } from '@packages/types'
+import type { CyPromptServerShape, CyPromptServerDefaultShape, CyPromptCDPClient } from '@packages/types'
 import type { Router } from 'express'
 import type { Socket } from 'socket.io'
 
@@ -10,6 +10,10 @@ class CyPromptServer implements CyPromptServerShape {
   }
 
   addSocketListeners (socket: Socket): void {
+    // This is a test implementation that does nothing
+  }
+
+  connectToBrowser (criClient: CyPromptCDPClient): void {
     // This is a test implementation that does nothing
   }
 }

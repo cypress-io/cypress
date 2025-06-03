@@ -1,4 +1,4 @@
-import type { CyPromptManagerShape, CyPromptStatus, CyPromptServerDefaultShape, CyPromptServerShape, CyPromptCloudApi } from '@packages/types'
+import type { CyPromptManagerShape, CyPromptStatus, CyPromptServerDefaultShape, CyPromptServerShape, CyPromptCloudApi, CyPromptCDPClient } from '@packages/types'
 import type { Router } from 'express'
 import Debug from 'debug'
 import { requireScript } from '../require_script'
@@ -42,6 +42,12 @@ export class CyPromptManager implements CyPromptManagerShape {
   addSocketListeners (socket: Socket): void {
     if (this._cyPromptServer) {
       this.invokeSync('addSocketListeners', { isEssential: true }, socket)
+    }
+  }
+
+  connectToBrowser (target: CyPromptCDPClient): void {
+    if (this._cyPromptServer) {
+      return this.invokeSync('connectToBrowser', { isEssential: true }, target)
     }
   }
 

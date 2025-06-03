@@ -439,6 +439,10 @@ export function connectProtocolToBrowser (): Promise<void> {
   throw new Error('Protocol is not yet supported in firefox.')
 }
 
+export function connectCyPromptToBrowser (): Promise<void> {
+  throw new Error('CyPrompt is not yet supported in firefox.')
+}
+
 export function closeProtocolConnection (): Promise<void> {
   throw new Error('Protocol is not yet supported in firefox.')
 }

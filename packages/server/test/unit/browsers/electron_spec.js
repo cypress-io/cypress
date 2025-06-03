@@ -24,6 +24,10 @@ describe('lib/browsers/electron', () => {
       connectToBrowser: sinon.stub().resolves(),
     }
 
+    this.cyPromptManager = {
+      connectToBrowser: sinon.stub().resolves(),
+    }
+
     this.url = 'https://foo.com'
     this.state = {}
     this.options = {
@@ -280,6 +284,47 @@ describe('lib/browsers/electron', () => {
     })
   })
 
+  context('.connectCyPromptToBrowser', () => {
+    it('connects to the browser cri client', async function () {
+      const mockCurrentlyAttachedCyPromptTarget = {}
+
+      this.browserCriClient.currentlyAttachedCyPromptTarget = mockCurrentlyAttachedCyPromptTarget
+      sinon.stub(electron, '_getBrowserCriClient').returns(this.browserCriClient)
+
+      await electron.connectCyPromptToBrowser({ cyPromptManager: this.cyPromptManager })
+      expect(this.pageCriClient.clone).not.to.be.called
+      expect(this.cyPromptManager.connectToBrowser).to.be.calledWith(mockCurrentlyAttachedCyPromptTarget)
+    })
+
+    it('connects to the browser cri client when the cy prompt target has not been created', async function () {
+      const mockCurrentlyAttachedCyPromptTarget = {}
+
+      this.pageCriClient.clone.resolves(mockCurrentlyAttachedCyPromptTarget)
+      sinon.stub(electron, '_getBrowserCriClient').returns(this.browserCriClient)
+
+      await electron.connectCyPromptToBrowser({ cyPromptManager: this.cyPromptManager })
+      expect(this.pageCriClient.clone).to.be.called
+      expect(this.cyPromptManager.connectToBrowser).to.be.calledWith(mockCurrentlyAttachedCyPromptTarget)
+      expect(this.browserCriClient.currentlyAttachedCyPromptTarget).to.eq(mockCurrentlyAttachedCyPromptTarget)
+    })
+
+    it('throws error if there is no browser cri client', function () {
+      sinon.stub(electron, '_getBrowserCriClient').returns(null)
+
+      expect(electron.connectCyPromptToBrowser({ cyPromptManager: this.cyPromptManager })).to.be.rejectedWith('Missing pageCriClient in connectCyPromptToBrowser')
+      expect(this.cyPromptManager.connectToBrowser).not.to.be.called
+    })
+
+    it('throws error if there is no page cri client', async function () {
+      this.browserCriClient.currentlyAttachedTarget = null
+
+      sinon.stub(electron, '_getBrowserCriClient').returns(this.browserCriClient)
+
+      expect(electron.connectCyPromptToBrowser({ cyPromptManager: this.cyPromptManager })).to.be.rejectedWith('Missing pageCriClient in connectCyPromptToBrowser')
+      expect(this.cyPromptManager.connectToBrowser).not.to.be.called
+    })
+  })
+
   context('#closeProtocolConnection', () => {
     it('closes the protocol connection', async function () {
       const mockCurrentlyAttachedProtocolTarget = {
@@ -515,7 +560,7 @@ describe('lib/browsers/electron', () => {
     it('registers onRequest automation middleware and calls show when requesting to be focused', function () {
       sinon.spy(this.automation, 'use')
 
-      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() }, undefined, undefined, { attachCDPClient: sinon.stub() })
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
       .then(() => {
         expect(this.automation.use).to.be.called
         expect(this.automation.use.lastCall.args[0].onRequest).to.be.a('function')

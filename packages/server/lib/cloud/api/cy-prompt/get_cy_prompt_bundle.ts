@@ -10,7 +10,7 @@ import { verifySignatureFromFile } from '../../encryption'
 const pkg = require('@packages/root')
 const _delay = linearDelay(500)
 
-export const getCyPromptBundle = async ({ cyPromptUrl, projectId, bundlePath }: { cyPromptUrl: string, projectId: string, bundlePath: string }) => {
+export const getCyPromptBundle = async ({ cyPromptUrl, projectId, bundlePath }: { cyPromptUrl: string, projectId?: string, bundlePath: string }) => {
   let responseSignature: string | null = null
 
   await (asyncRetry(async () => {

@@ -17,7 +17,7 @@ import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
 import system from './util/system'
-import { BannersState, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ProtocolManagerShape, ReceivedCypressOptions, ResolvedConfigurationOptions, TestingType, VideoRecording, AutomationCommands, StudioMetricsTypes } from '@packages/types'
+import { BannersState, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ProtocolManagerShape, CyPromptManagerShape, ReceivedCypressOptions, ResolvedConfigurationOptions, TestingType, VideoRecording, AutomationCommands, StudioMetricsTypes } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { createHmac } from 'crypto'
 import { ServerBase } from './server-base'
@@ -159,7 +159,7 @@ export class ProjectBase extends EE {
 
     this._server = new ServerBase(cfg)
     // @ts-expect-error - this will not error when we actually release the experimentalPromptCommand flag
-    if (cfg.projectId && cfg.experimentalPromptCommand) {
+    if (cfg.experimentalPromptCommand) {
       const cyPromptLifecycleManager = new CyPromptLifecycleManager()
 
       cyPromptLifecycleManager.initializeCyPromptManager({
@@ -513,6 +513,10 @@ export class ProjectBase extends EE {
           this.protocolManager?.close()
           this.protocolManager = undefined
         }
+      },
+
+      onCyPromptReady: async (cyPromptManager: CyPromptManagerShape) => {
+        await browsers.connectCyPromptToBrowser({ browser: this.browser, foundBrowsers: this.options.browsers, cyPromptManager })
       },
 
       onCaptureVideoFrames: (data: any) => {

@@ -30,7 +30,7 @@ export class CyPromptLifecycleManager {
     cloudDataSource,
     ctx,
   }: {
-    projectId: string
+    projectId?: string
     cloudDataSource: CloudDataSource
     ctx: DataContext
   }): void {
@@ -88,7 +88,7 @@ export class CyPromptLifecycleManager {
     projectId,
     cloudDataSource,
   }: {
-    projectId: string
+    projectId?: string
     cloudDataSource: CloudDataSource
   }): Promise<CyPromptManager> {
     const cyPromptSession = await postCyPromptSession({
