@@ -88,15 +88,15 @@ interface AutomationError extends Error {
 // Are we running Cypress in Cypress? (Used for E2E Testing for Cypress in Cypress only)
 const isCypressInCypress = document.defaultView !== top
 
-const handlePrimaryOriginSocketEvent = (Cypress, eventName: string) => {
+const handlePrimaryOriginSocketEvent = (Cypress, backendRequestNamespace: string) => {
   Cypress.primaryOriginCommunicator.on(
-    eventName,
+    backendRequestNamespace,
     async ({ args }: { args: [string, any[]] }, { source, responseEvent }) => {
       let response
 
       try {
         response = await Cypress.backendRequestHandler(
-          eventName,
+          backendRequestNamespace,
           ...args,
         )
       } catch (error) {
