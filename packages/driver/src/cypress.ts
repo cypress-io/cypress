@@ -814,7 +814,7 @@ class $Cypress {
         return resolve(reply.response)
       }
 
-      return Cypress.emit(backendRequestNamespace, eventName, ...args, fn)
+      return this.emit(backendRequestNamespace, eventName, ...args, fn)
     })
   }
 
