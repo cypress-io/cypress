@@ -23,7 +23,7 @@ import type { Automation } from './automation'
 // eslint-disable-next-line no-duplicate-imports
 import type { Socket } from '@packages/socket'
 
-import type { RunState, CachedTestState, ProtocolManagerShape, AutomationCommands, CyPromptManagerShape } from '@packages/types'
+import type { RunState, CachedTestState, ProtocolManagerShape, AutomationCommands } from '@packages/types'
 import memory from './browsers/memory'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
 
@@ -412,6 +412,10 @@ export class SocketBase {
           studio.addSocketListeners(socket)
         })
 
+        getCtx().coreData.cyPromptLifecycleManager?.registerCyPromptReadyListener((cyPrompt) => {
+          cyPrompt.addSocketListeners(socket)
+        })
+
         socket.on('studio:init', async (cb) => {
           try {
             const { canAccessStudioAI } = await options.onStudioInit()
@@ -449,12 +453,6 @@ export class SocketBase {
           }
         })
 
-        let cyPrompt: CyPromptManagerShape | undefined
-
-        getCtx().coreData.cyPromptLifecycleManager?.registerCyPromptReadyListener((cp) => {
-          cyPrompt = cp
-        })
-
         socket.on('backend:request', (eventName: string, ...args) => {
           const userAgent = socket.request?.headers['user-agent'] || getCtx().coreData.app.browserUserAgent
 
@@ -464,10 +462,6 @@ export class SocketBase {
           debug('backend:request %o', { eventName, args })
 
           const backendRequest = () => {
-            if (eventName.startsWith('cy:prompt:')) {
-              return cyPrompt?.handleBackendRequest(eventName, ...args)
-            }
-
             switch (eventName) {
               case 'preserve:run:state':
                 runState = args[0]

@@ -11,7 +11,9 @@ declare namespace Cypress {
     primaryOriginCommunicator: import('eventemitter2').EventEmitter2 & {
       toSpecBridge: (origin: string, event: string, data?: any, responseEvent?: string) => void
       userInvocationStack?: string
+      toSource: (source: string, responseEvent: string, response: any) => void
     }
+    backendRequestHandler: (backendRequestNamespace: string, emitter: Emitter, eventName: string, ...args: any[]) => Promise<any>
   }
 
   interface Actions {

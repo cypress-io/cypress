@@ -1,12 +1,9 @@
-// Note: This file is owned by the cloud delivered
-// cy prompt bundle. It is downloaded and copied here.
-// It should not be modified directly here.
-
 /// <reference types="cypress" />
 
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping.d'
 import type { Router } from 'express'
 import type { AxiosInstance } from 'axios'
+import type { Socket } from 'socket.io'
 
 export type CyPromptCommands = ProtocolMapping.Commands
 
@@ -56,7 +53,7 @@ export interface CyPromptCDPClient {
 
 export interface CyPromptServerShape {
   initializeRoutes(router: Router): void
-  handleBackendRequest: (eventName: string, ...args: any[]) => Promise<any>
+  addSocketListeners(socket: Socket): void
   connectToBrowser: (cdpClient: CyPromptCDPClient) => void
 }
 

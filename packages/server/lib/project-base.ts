@@ -158,6 +158,7 @@ export class ProjectBase extends EE {
     process.chdir(this.projectRoot)
 
     this._server = new ServerBase(cfg)
+    // @ts-expect-error - this will not error when we actually release the experimentalPromptCommand flag
     if (cfg.experimentalPromptCommand) {
       const cyPromptLifecycleManager = new CyPromptLifecycleManager()
 

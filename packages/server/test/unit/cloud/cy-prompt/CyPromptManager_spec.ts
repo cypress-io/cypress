@@ -57,18 +57,6 @@ describe('lib/cloud/cy-prompt', () => {
     })
   })
 
-  describe('asynchronous method invocation', () => {
-    it('reports an error when a asynchronous method fails', async () => {
-      const error = new Error('foo')
-
-      sinon.stub(cyPrompt, 'handleBackendRequest').throws(error)
-
-      await cyPromptManager.handleBackendRequest('cy:prompt:start', {} as any)
-
-      // TODO: (cy.prompt) test that the error is reported
-    })
-  })
-
   describe('initializeRoutes', () => {
     it('initializes routes', () => {
       sinon.stub(cyPrompt, 'initializeRoutes')
@@ -80,25 +68,14 @@ describe('lib/cloud/cy-prompt', () => {
     })
   })
 
-  describe('handleBackendRequest', () => {
-    it('calls handleBackendRequest on the cy prompt server', () => {
-      sinon.stub(cyPrompt, 'handleBackendRequest')
+  describe('addSocketListeners', () => {
+    it('adds socket listeners', () => {
+      sinon.stub(cyPrompt, 'addSocketListeners')
+      const mockSocket = sinon.stub()
 
-      cyPromptManager.handleBackendRequest('cy:prompt:start', {} as any)
+      cyPromptManager.addSocketListeners(mockSocket)
 
-      expect(cyPrompt.handleBackendRequest).to.be.calledWith('cy:prompt:start', {} as any)
-    })
-
-    it('does not call handleBackendRequest when cy prompt server is not defined', () => {
-      // Set _cyPromptServer to undefined
-      (cyPromptManager as any)._cyPromptServer = undefined
-
-      // Create a spy on invokeSync to verify it's not called
-      const invokeSyncSpy = sinon.spy(cyPromptManager, 'invokeSync')
-
-      cyPromptManager.handleBackendRequest('cy:prompt:start', {} as any)
-
-      expect(invokeSyncSpy).to.not.be.called
+      expect(cyPrompt.addSocketListeners).to.be.calledWith(mockSocket)
     })
   })
 

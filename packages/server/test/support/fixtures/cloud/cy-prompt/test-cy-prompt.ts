@@ -2,14 +2,15 @@
 
 import type { CyPromptServerShape, CyPromptServerDefaultShape, CyPromptCDPClient } from '@packages/types'
 import type { Router } from 'express'
+import type { Socket } from 'socket.io'
 
 class CyPromptServer implements CyPromptServerShape {
   initializeRoutes (router: Router): void {
     // This is a test implementation that does nothing
   }
 
-  handleBackendRequest (eventName: string, ...args: any[]): Promise<any> {
-    return Promise.resolve()
+  addSocketListeners (socket: Socket): void {
+    // This is a test implementation that does nothing
   }
 
   connectToBrowser (criClient: CyPromptCDPClient): void {
