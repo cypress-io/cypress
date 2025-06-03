@@ -719,7 +719,7 @@ export class BrowserCriClient {
     if (this.currentlyAttachedTarget) {
       await this.currentlyAttachedTarget.close()
       await this.currentlyAttachedProtocolTarget?.close()
-      // await this.currentlyAttachedCyPromptTarget?.close()
+      await this.currentlyAttachedCyPromptTarget?.close()
     }
 
     await this.browserClient.close()
