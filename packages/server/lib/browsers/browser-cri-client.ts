@@ -476,7 +476,7 @@ export class BrowserCriClient {
     // always close the connection to the page target because it was destroyed
     browserCriClient.currentlyAttachedTarget.close().catch(() => { })
     browserCriClient.currentlyAttachedProtocolTarget?.close().catch(() => { })
-    // browserCriClient.currentlyAttachedCyPromptTarget?.close().catch(() => { })
+    browserCriClient.currentlyAttachedCyPromptTarget?.close().catch(() => { })
 
     new Bluebird((resolve) => {
       // this event could fire either expectedly or unexpectedly
@@ -621,9 +621,11 @@ export class BrowserCriClient {
 
       debug('target closed', this.currentlyAttachedTarget.targetId)
 
-      await this.currentlyAttachedTarget.close().catch(() => {})
-      await this.currentlyAttachedProtocolTarget?.close().catch(() => {})
-      // await this.currentlyAttachedCyPromptTarget?.close().catch(() => {})
+      await Promise.all([
+        this.currentlyAttachedTarget.close().catch(() => {}),
+        this.currentlyAttachedProtocolTarget?.close().catch(() => {}),
+        this.currentlyAttachedCyPromptTarget?.close().catch(() => {}),
+      ])
 
       debug('target client closed', this.currentlyAttachedTarget.targetId)
     }
@@ -636,9 +638,9 @@ export class BrowserCriClient {
       this.browserClient.off(subscription.eventName, subscription.cb as any)
     })
 
-    // this.currentlyAttachedCyPromptTarget?.queue.subscriptions.forEach((subscription) => {
-    //   this.browserClient.off(subscription.eventName, subscription.cb as any)
-    // })
+    this.currentlyAttachedCyPromptTarget?.queue.subscriptions.forEach((subscription) => {
+      this.browserClient.off(subscription.eventName, subscription.cb as any)
+    })
 
     if (target) {
       this.currentlyAttachedTarget = await CriClient.create({
@@ -654,7 +656,7 @@ export class BrowserCriClient {
       // Clone the targets here so that we separate these clients from the main client.
       // This allows us to operate these clients independently of the main client
       this.currentlyAttachedProtocolTarget = await this.currentlyAttachedTarget.clone()
-      // this.currentlyAttachedCyPromptTarget = await this.currentlyAttachedTarget.clone()
+      this.currentlyAttachedCyPromptTarget = await this.currentlyAttachedTarget.clone()
     } else {
       this.currentlyAttachedTarget = undefined
       this.currentlyAttachedProtocolTarget = undefined
@@ -717,9 +719,11 @@ export class BrowserCriClient {
     this.connected = false
 
     if (this.currentlyAttachedTarget) {
-      await this.currentlyAttachedTarget.close()
-      await this.currentlyAttachedProtocolTarget?.close()
-      await this.currentlyAttachedCyPromptTarget?.close()
+      await Promise.all([
+        this.currentlyAttachedTarget.close(),
+        this.currentlyAttachedProtocolTarget?.close(),
+        this.currentlyAttachedCyPromptTarget?.close(),
+      ])
     }
 
     await this.browserClient.close()
