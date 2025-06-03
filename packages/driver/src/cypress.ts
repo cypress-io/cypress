@@ -91,12 +91,13 @@ const isCypressInCypress = document.defaultView !== top
 const handlePrimaryOriginSocketEvent = (Cypress, backendRequestNamespace: string) => {
   Cypress.primaryOriginCommunicator.on(
     backendRequestNamespace,
-    async ({ args }: { args: [string, any[]] }, { source, responseEvent }) => {
+    async ({ args: [eventName, ...args] }: { args: [string, any[]] }, { source, responseEvent }) => {
       let response
 
       try {
         response = await Cypress.backendRequestHandler(
           backendRequestNamespace,
+          eventName,
           ...args,
         )
       } catch (error) {

@@ -66,7 +66,7 @@ export default (Commands, Cypress, cy) => {
   if (Cypress.config('experimentalPromptCommand')) {
     let initializeCloudCyPromptPromise: Promise<ReturnType<CyPromptDriverDefaultShape['createCyPrompt']>> | undefined
 
-    if (Cypress.browser.family === 'chromium' && Cypress.browser.name === 'electron') {
+    if (Cypress.browser.family === 'chromium' || Cypress.browser.name === 'electron') {
       initializeCloudCyPromptPromise = initializeCloudCyPrompt(Cypress, cy)
     }
 
