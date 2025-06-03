@@ -179,7 +179,7 @@ export class CyPromptLifecycleManager {
     projectId,
     cloudDataSource,
   }: {
-    projectId: string
+    projectId?: string
     cloudDataSource: CloudDataSource
   }) {
     // Don't setup a watcher if the cy prompt bundle is NOT local
