@@ -64,11 +64,15 @@ const initializeCloudCyPrompt = async (Cypress: Cypress.Cypress, cy: Cypress.Cyp
 
 export default (Commands, Cypress, cy) => {
   if (Cypress.config('experimentalPromptCommand')) {
-    const initializeCloudCyPromptPromise = initializeCloudCyPrompt(Cypress, cy)
+    let initializeCloudCyPromptPromise: Promise<ReturnType<CyPromptDriverDefaultShape['createCyPrompt']>> | undefined
+
+    if (Cypress.browser.family === 'chromium' && Cypress.browser.name === 'electron') {
+      initializeCloudCyPromptPromise = initializeCloudCyPrompt(Cypress, cy)
+    }
 
     Commands.addAll({
       async prompt (message: string, options: object = {}) {
-        if (Cypress.browser.family !== 'chromium' && Cypress.browser.name !== 'electron') {
+        if (!initializeCloudCyPromptPromise) {
           // TODO: (cy.prompt) We will look into supporting other browsers (and testing them)
           // as this is rolled out
           throw new Error('`cy.prompt()` is not supported in this browser.')
