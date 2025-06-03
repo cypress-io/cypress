@@ -151,7 +151,7 @@ describe('e2e visit', () => {
       config: {
         experimentalSourceRewriting: true,
       },
-      env: {
+      processEnv: {
         DEBUG: 'cypress:server:browsers:cri-client',
       },
       snapshot: true,
