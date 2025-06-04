@@ -4,11 +4,12 @@ import { determineDeferred, SnapshotMetadata } from '../../src/doctor/determine-
 
 import fs from 'fs'
 import path from 'path'
-import { doesDependencyMatchForceNorewriteEntry, SnapshotDoctor } from '../../src/doctor/snapshot-doctor'
+import * as doctor from '../../src/doctor/snapshot-doctor'
 import * as utils from '../../src/utils'
 import type { Metadata } from '../../src/types'
 
 const { canAccess, createHashForFile, matchFileHash } = utils
+const { doesDependencyMatchForceNorewriteEntry, SnapshotDoctor } = doctor
 
 vi.mock('fs', async () => {
   const actual = await vi.importActual<typeof fs>('fs')
@@ -52,6 +53,8 @@ describe('determineDeferred', () => {
   let currentHash: string
   let matchFileHashResult: Awaited<ReturnType<typeof matchFileHash>>
 
+  let meta: Metadata
+
   beforeEach(() => {
     bundlerPath = 'bundlerPath'
     projectBaseDir = 'projectBaseDir'
@@ -66,6 +69,12 @@ describe('determineDeferred', () => {
       integrityCheckSource: 'integrityCheckSource',
     }
 
+    meta = {
+      inputs: {},
+      resolverMap: {},
+      outputs: {},
+    }
+
     hashFilePath = path.join(projectBaseDir, 'yarn.lock')
 
     matchFileHashResult = {
@@ -73,7 +82,7 @@ describe('determineDeferred', () => {
       match: true,
     }
 
-    ;(matchFileHash as Mock<typeof matchFileHash>).mockResolvedValue(matchFileHashResult)
+    ;(matchFileHash as Mock<typeof matchFileHash>).mockImplementation(() => Promise.resolve(matchFileHashResult))
 
     vi.spyOn(fs.promises, 'writeFile').mockResolvedValue(void 0)
   })
@@ -126,6 +135,106 @@ describe('determineDeferred', () => {
           healthy: expect.arrayContaining([moduleHealthy]),
         })
       })
+
+      describe('and hash does not match', () => {
+        beforeEach(() => {
+          (matchFileHash as Mock<typeof matchFileHash>).mockImplementation(() => {
+            return Promise.resolve({
+              hash: 'differentHash',
+              match: false,
+            })
+          })
+        })
+
+        describe('and there are invalid forcenoRewrite dependencies', () => {
+          beforeEach(() => {
+            opts.forceNorewrite.add('node_modules/missing-deferred')
+
+            ;(doesDependencyMatchForceNorewriteEntry as Mock<typeof doesDependencyMatchForceNorewriteEntry>).mockReturnValue(false)
+          })
+
+          it('throws an error', async () => {
+            await expect(
+              determineDeferred(bundlerPath, projectBaseDir, snapshotEntryFile, cacheDir, opts),
+            ).rejects.toThrow()
+          })
+        })
+
+        describe('and there are not invalid forcenoRewrite dependencies', () => {
+          beforeEach(() => {
+            opts.forceNorewrite.add('node_modules/healthy')
+
+            ;(doesDependencyMatchForceNorewriteEntry as Mock<typeof doesDependencyMatchForceNorewriteEntry>).mockReturnValue(true)
+          })
+
+          describe('and doctor.heal() returns no changes', () => {
+            beforeEach(() => {
+              vi.mocked(SnapshotDoctor.prototype.heal).mockResolvedValue({
+                healthy: previousSnapshotMetadata.healthy,
+                deferred: previousSnapshotMetadata.deferred,
+                norewrite: previousSnapshotMetadata.norewrite,
+                bundle: Buffer.from(''),
+                meta,
+              })
+
+              meta.inputs = {
+                'node_modules/healthy': {
+                  fileInfo: { fullPath: 'node_modules/healthy' },
+                },
+              }
+            })
+
+            it('returns the previous snapshot metadata, without the hash', async () => {
+              const { deferredHash, ...previousMetadata } = previousSnapshotMetadata
+
+              await expect(
+                determineDeferred(bundlerPath, projectBaseDir, snapshotEntryFile, cacheDir, opts),
+              ).resolves.toEqual(previousMetadata)
+            })
+          })
+        })
+
+        describe('and there are non-node_modules entries in forceNorewrite', () => {
+          beforeEach(() => {
+            opts.forceNorewrite.add('/non-npm')
+
+            ;(doesDependencyMatchForceNorewriteEntry as Mock<typeof doesDependencyMatchForceNorewriteEntry>).mockReturnValue(true)
+          })
+
+          it('throws an error', async () => {
+            await expect(
+              determineDeferred(bundlerPath, projectBaseDir, snapshotEntryFile, cacheDir, opts),
+            ).resolves.not.toThrow()
+          })
+        })
+      })
+
+      describe('when doctor.heal() returns no changes', () => {
+        beforeEach(() => {
+          vi.mocked(SnapshotDoctor.prototype.heal).mockResolvedValue({
+            healthy: previousSnapshotMetadata.healthy,
+            deferred: previousSnapshotMetadata.deferred,
+            norewrite: previousSnapshotMetadata.norewrite,
+            bundle: Buffer.from(''),
+            meta,
+          })
+        })
+
+        describe('and there are forceNorewrite dependencies that are not in inputs', () => {
+          beforeEach(() => {
+            opts.forceNorewrite.add('non-npm')
+            meta.inputs = {
+              'some-other-key': { fileInfo: { fullPath: 'some-other-path' } },
+            }
+          })
+
+          it('throws an error listing the missing dependencies', async () => {
+            await expect(
+              determineDeferred(bundlerPath, projectBaseDir, snapshotEntryFile, cacheDir, opts),
+            ).rejects.toThrow('Force no rewrite dependencies not found in project: non-npm')
+          })
+        }
+      })
     })
 
     describe('when not using nodeModulesOnly', () => {
@@ -135,13 +244,7 @@ describe('determineDeferred', () => {
 
       describe('when doctor.heal() returns no changes', () => {
         beforeEach(() => {
-          const meta: Metadata = {
-            inputs: {},
-            resolverMap: {},
-            outputs: {},
-          }
-
-          vi.mocked(SnapshotDoctor.prototype.heal).mockResolvedValue({
+          (SnapshotDoctor.prototype.heal as Mock<typeof SnapshotDoctor.prototype.heal>).mockResolvedValue({
             healthy: previousSnapshotMetadata.healthy,
             deferred: previousSnapshotMetadata.deferred,
             norewrite: previousSnapshotMetadata.norewrite,
@@ -156,6 +259,34 @@ describe('determineDeferred', () => {
           await expect(
             determineDeferred(bundlerPath, projectBaseDir, snapshotEntryFile, cacheDir, opts),
           ).resolves.toEqual(previousMetadata)
+        })
+      })
+
+      describe('when doctor.heal() returns invalid forceNorewrite', () => {
+        const meta: Metadata = {
+          inputs: {},
+          resolverMap: {},
+          outputs: {},
+        }
+
+        beforeEach(() => {
+          vi.mocked(SnapshotDoctor.prototype.heal).mockResolvedValue({
+            healthy: previousSnapshotMetadata.healthy,
+            deferred: previousSnapshotMetadata.deferred,
+            norewrite: previousSnapshotMetadata.norewrite,
+            bundle: Buffer.from(''),
+            meta,
+          })
+
+          vi.spyOn(doctor, 'doesDependencyMatchForceNorewriteEntry').mockReturnValue(false)
+
+          opts.forceNorewrite.add('node_modules/missing-deferred')
+        })
+
+        it('throws an error', async () => {
+          await expect(
+            determineDeferred(bundlerPath, projectBaseDir, snapshotEntryFile, cacheDir, opts),
+          ).rejects.toThrow()
         })
       })
     })

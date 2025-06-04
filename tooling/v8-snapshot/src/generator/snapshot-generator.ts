@@ -263,10 +263,12 @@ export class SnapshotGenerator {
     if (this.useExistingSnapshotScript) {
       let contents = await fs.promises.readFile(this.snapshotScriptPath, 'utf8')
 
+      console.log('??', contents, this.updateSnapshotScriptContents)
       if (this.updateSnapshotScriptContents) {
         contents = this.updateSnapshotScriptContents(contents)
       }
 
+      console.log('??', contents)
       this.snapshotScript = Buffer.from(contents)
       await fs.promises.writeFile(this.snapshotScriptPath, this.snapshotScript)
 
@@ -339,7 +341,8 @@ export class SnapshotGenerator {
     //    errors we verify that the generated script is snapshot-able.
     logInfo('Verifying snapshot script')
     try {
-      this._verifyScript()
+      assert(this.snapshotScript != null, 'need snapshotScript to be set')
+      this._snapshotVerifier.verify(this.snapshotScript, this.snapshotScriptPath)
     } catch (err) {
       logInfo(`Script failed verification, writing to ${this.snapshotScriptPath}`)
 
@@ -603,10 +606,5 @@ export class SnapshotGenerator {
     }
 
     throw new Error('make snapshot failed')
-  }
-
-  private _verifyScript () {
-    assert(this.snapshotScript != null, 'need snapshotScript to be set')
-    this._snapshotVerifier.verify(this.snapshotScript, this.snapshotScriptPath)
   }
 }

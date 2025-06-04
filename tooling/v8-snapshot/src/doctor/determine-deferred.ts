@@ -30,6 +30,7 @@ function errorOnInvalidForceNorewrite (opts: ErrorOnInvalidForceNorewriteOpts) {
 
   const invalidForceNorewrites: string[] = []
 
+  console.log('errrr', Array.from(opts.forceNorewrite), opts.inputs)
   Array.from(opts.forceNorewrite).forEach((dependency) => {
     if (opts.nodeModulesOnly && !dependency.startsWith('node_modules') && !dependency.startsWith('*')) {
       return
@@ -39,6 +40,8 @@ function errorOnInvalidForceNorewrite (opts: ErrorOnInvalidForceNorewriteOpts) {
       return doesDependencyMatchForceNorewriteEntry(key, dependency)
     })
 
+    console.log('included', inputsKeys, includedInInputs)
+
     if (!includedInInputs) {
       invalidForceNorewrites.push(dependency)
     }
@@ -47,6 +50,20 @@ function errorOnInvalidForceNorewrite (opts: ErrorOnInvalidForceNorewriteOpts) {
   if (invalidForceNorewrites.length > 0) {
     throw new Error(`Force no rewrite dependencies not found in project: ${invalidForceNorewrites.join(', ')}`)
   }
+}
+
+interface SnapshotMetadata {
+  deferredHash: string
+  norewrite: string[]
+  deferred: string[]
+  healthy: string[]
+}
+
+async function importCachedSnapshotMetadata (cacheDir: string): Promise<SnapshotMetadata> {
+  const jsonPath = path.join(cacheDir, 'snapshot-meta.json')
+  const contents = await fs.promises.readFile(jsonPath, 'utf8')
+
+  return JSON.parse(contents) satisfies SnapshotMetadata
 }
 
 export async function determineDeferred (
@@ -63,8 +80,10 @@ export async function determineDeferred (
   },
 ) {
   const jsonPath = path.join(cacheDir, 'snapshot-meta.json')
+
   const usePreviousSnapshotMetadata = (!process.env.V8_SNAPSHOT_FROM_SCRATCH || !['1', 'true'].includes(process.env.V8_SNAPSHOT_FROM_SCRATCH)) && await canAccess(jsonPath)
-  const { deferredHash, norewrite, deferred, healthy } = usePreviousSnapshotMetadata ? require(jsonPath) : { deferredHash: '', norewrite: [], deferred: [], healthy: [] }
+  const { deferredHash, norewrite, deferred, healthy } = usePreviousSnapshotMetadata ? await importCachedSnapshotMetadata(cacheDir) : await Promise.resolve({ deferredHash: '', norewrite: [], deferred: [], healthy: [] })
+
   const hashFilePath = await findHashFile(projectBaseDir)
   const currentHash = await createHashForFile(hashFilePath)
   const res = await matchFileHash(hashFilePath, deferredHash)
@@ -127,9 +146,9 @@ export async function determineDeferred (
     entryFilePath: snapshotEntryFile,
     baseDirPath: projectBaseDir,
     nodeModulesOnly: opts.nodeModulesOnly,
-    previousDeferred: currentDeferred,
-    previousHealthy: currentHealthy,
-    previousNorewrite: currentNorewrite,
+    previousDeferred: new Set(currentDeferred),
+    previousHealthy: new Set(currentHealthy),
+    previousNorewrite: new Set(currentNorewrite),
     forceNorewrite: opts.forceNorewrite,
     nodeEnv: opts.nodeEnv,
     cypressInternalEnv: opts.cypressInternalEnv,

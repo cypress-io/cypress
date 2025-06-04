@@ -12,7 +12,9 @@
     "test": "yarn test-unit",
     "test-integration": "mocha test/integration/**/*.spec.ts --config ./test/.mocharc.js",
     "test-unit": "mocha test/unit/**/*.spec.ts --config ./test/.mocharc.js",
-    "watch": "tsc --watch"
+    "test-vspec": "vitest run",
+    "watch": "tsc --watch",
+    "watch-vspec": "vitest watch"
   },
   "dependencies": {
     "@tooling/electron-mksnapshot": "0.0.0-development",
@@ -29,11 +31,13 @@
   },
   "devDependencies": {
     "@tooling/system-tests": "0.0.0-development",
+    "@vitest/coverage-v8": "2.1.8",
     "chai-as-promised": "7.1.1",
     "cpr": "^3.0.1",
     "mocha": "7.0.1",
     "snap-shot-it": "7.9.10",
-    "stealthy-require": "^1.1.1"
+    "stealthy-require": "^1.1.1",
+    "vitest": "2.1.8"
   },
   "files": [
     "dist",

@@ -34,6 +34,7 @@ export async function insertValueInJSString (fileContents: string, obj: Record<s
         && nodePath.node.callee.type === 'Identifier') {
       const functionName = nodePath.node.callee.name
 
+      // @ts-expect-error - ast is the wrong type
       if (isDefineConfigFunction(ast, functionName)) {
         return handleExport(nodePath.get('arguments', 0))
       }

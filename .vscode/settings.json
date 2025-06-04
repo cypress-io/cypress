@@ -38,4 +38,13 @@
   "volar.takeOverMode.enabled": "auto",
 
   "editor.tabSize": 2,
+  "coverage-gutters.coverageFileNames": [
+    "coverage-final.json",
+    "lcov.info",
+    "cov.xml",
+    "coverage.xml",
+    "cobertura.xml",
+    "jacoco.xml",
+    "coverage.cobertura.xml"
+  ],
 }
