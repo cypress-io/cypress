@@ -123,7 +123,8 @@ cy.log(`Platform ${Cypress.platform} architecture ${Cypress.arch}`)
 if (Cypress.platform === 'win32') {
   cy.exec('print cypress.config.js')
     .its('stderr').should('be.empty')
-} else {
+}
+else {
   cy.exec('cat cypress.config.js')
     .its('stderr').should('be.empty')
 

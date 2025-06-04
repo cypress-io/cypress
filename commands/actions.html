@@ -82,9 +82,9 @@ cy.get('.action-email').type('{leftarrow}{rightarrow}{uparrow}{downarrow}')
 cy.get('.action-email').type('{del}{selectall}{backspace}')
 
 // .type() with key modifiers
-cy.get('.action-email').type('{alt}{option}') //these are equivalent
-cy.get('.action-email').type('{ctrl}{control}') //these are equivalent
-cy.get('.action-email').type('{meta}{command}{cmd}') //these are equivalent
+cy.get('.action-email').type('{alt}{option}') // these are equivalent
+cy.get('.action-email').type('{ctrl}{control}') // these are equivalent
+cy.get('.action-email').type('{meta}{command}{cmd}') // these are equivalent
 cy.get('.action-email').type('{shift}')
 
 // Delay each keypress by 0.1 sec
@@ -182,7 +182,7 @@ cy.get('.action-clear').should('have.value', '')</code></pre>
           <p>To submit a form, use the <a href="https://on.cypress.io/submit"><code>cy.submit()</code></a> command.</p>
           <pre><code class="javascript">cy.get('.action-form')
   .find('[type="text"]').type('HALFOFF')
-      
+
 cy.get('.action-form').submit()
 cy.get('.action-form').next().should('contain', 'Your form has been submitted!')</code></pre>
         </div>
