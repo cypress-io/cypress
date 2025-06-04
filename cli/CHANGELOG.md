@@ -1,11 +1,15 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 14.5.0
 
-_Released 6/3/2025_
+_Released 6/17/2025 (PENDING)_
 
 **Features:**
 
 - Install Cypress `win32-x64` binary on Windows `win32-arm64` systems. Cypress runs in emulation. Addresses [#30252](https://github.com/cypress-io/cypress/issues/30252).
+
+## 14.4.1
+
+_Released 6/3/2025_
 
 **Bugfixes:**
 
