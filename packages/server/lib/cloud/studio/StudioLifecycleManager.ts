@@ -280,6 +280,11 @@ export class StudioLifecycleManager {
 
         return null
       })
+
+      await this.studioManagerPromise
+
+      // eslint-disable-next-line no-console
+      console.log('Studio manager reloaded')
     })
   }
 
