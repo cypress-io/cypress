@@ -1,4 +1,5 @@
-Cypress.on('test:before:run:async', () => {
+Cypress.on('test:before:run:async', async () => {
+  await new Promise((resolve) => setTimeout(resolve, 1000))
   console.log('test:before:run:async')
 })
 

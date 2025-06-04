@@ -178,18 +178,19 @@ exports['e2e Cypress.stop() / stops execution when called in afterEach'] = `
 
 
   Cypress.stop() in afterEach
+    ✓ should run this test
 
-  0 passing
+  1 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Tests:        2                                                                                │
-  │ Passing:      0                                                                                │
+  │ Passing:      1                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
-  │ Skipped:      2                                                                                │
+  │ Skipped:      1                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -204,9 +205,9 @@ exports['e2e Cypress.stop() / stops execution when called in afterEach'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  cypress-stop-afterEach.cy.js             XX:XX        2        -        -        -        2 │
+  │ ✔  cypress-stop-afterEach.cy.js             XX:XX        2        1        -        -        1 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        2        -        -        -        2  
+    ✔  All specs passed!                        XX:XX        2        1        -        -        1  
 
 
 `
@@ -231,18 +232,20 @@ exports['e2e Cypress.stop() / stops execution when called in after'] = `
 
 
   Cypress.stop() in after
+    ✓ should run this test
 
-  0 passing
+
+  1 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Tests:        1                                                                                │
-  │ Passing:      0                                                                                │
+  │ Passing:      1                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
-  │ Skipped:      1                                                                                │
+  │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -257,9 +260,9 @@ exports['e2e Cypress.stop() / stops execution when called in after'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  cypress-stop-after.cy.js                 XX:XX        1        -        -        -        1 │
+  │ ✔  cypress-stop-after.cy.js                 XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        -        -        -        1  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `

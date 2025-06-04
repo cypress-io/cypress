@@ -1932,9 +1932,15 @@ export default {
 
         _runner.stopped = true
 
-        // if the current runnable is a test, then we need to abort the run
-        // immediately. Otherwise, we will wait for our hook logic to finish
-        if (_runner.currentRunnable.type === 'test') {
+        // if the current runnable is a test or a before or beforeEach hook,
+        // then we need to abort the run immediately. Otherwise, we will wait
+        // for the after/afterEach hook logic to finish
+        const isTest = _runner.currentRunnable.type === 'test'
+        const isHook = _runner.currentRunnable.type === 'hook'
+        const hookName = isHook && getHookName(_runner.currentRunnable)
+        const shouldAbortImmediately = isTest || (isHook && (hookName === 'before all' || hookName === 'before each'))
+
+        if (shouldAbortImmediately) {
           // abort the run
           _runner.abort()
 
