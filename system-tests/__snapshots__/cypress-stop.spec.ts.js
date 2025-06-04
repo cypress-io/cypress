@@ -7,14 +7,14 @@ exports['e2e Cypress.stop() / stops execution when called in before'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (cypress-stop-before.cy.js)                                                │
-  │ Searched:   cypress/e2e/cypress-stop-before.cy.js                                              │
+  │ Specs:      1 found (before.cy.js)                                                             │
+  │ Searched:   cypress/e2e/before.cy.js                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  cypress-stop-before.cy.js                                                       (1 of 1)
+  Running:  before.cy.js                                                                    (1 of 1)
 
 
   Cypress.stop() in before
@@ -33,7 +33,7 @@ exports['e2e Cypress.stop() / stops execution when called in before'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     cypress-stop-before.cy.js                                                        │
+  │ Spec Ran:     before.cy.js                                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -44,7 +44,7 @@ exports['e2e Cypress.stop() / stops execution when called in before'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  cypress-stop-before.cy.js                XX:XX        2        -        -        -        2 │
+  │ ✔  before.cy.js                             XX:XX        2        -        -        -        2 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        2        -        -        -        2  
 
@@ -60,14 +60,14 @@ exports['e2e Cypress.stop() / stops execution when called in beforeEach'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (cypress-stop-beforeEach.cy.js)                                            │
-  │ Searched:   cypress/e2e/cypress-stop-beforeEach.cy.js                                          │
+  │ Specs:      1 found (beforeEach.cy.js)                                                         │
+  │ Searched:   cypress/e2e/beforeEach.cy.js                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  cypress-stop-beforeEach.cy.js                                                   (1 of 1)
+  Running:  beforeEach.cy.js                                                                (1 of 1)
 
 
   Cypress.stop() in beforeEach
@@ -86,7 +86,7 @@ exports['e2e Cypress.stop() / stops execution when called in beforeEach'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     cypress-stop-beforeEach.cy.js                                                    │
+  │ Spec Ran:     beforeEach.cy.js                                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -97,7 +97,7 @@ exports['e2e Cypress.stop() / stops execution when called in beforeEach'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  cypress-stop-beforeEach.cy.js            XX:XX        2        -        -        -        2 │
+  │ ✔  beforeEach.cy.js                         XX:XX        2        -        -        -        2 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        2        -        -        -        2  
 
@@ -113,14 +113,14 @@ exports['e2e Cypress.stop() / stops execution when called in test'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (cypress-stop-test.cy.js)                                                  │
-  │ Searched:   cypress/e2e/cypress-stop-test.cy.js                                                │
+  │ Specs:      1 found (test.cy.js)                                                               │
+  │ Searched:   cypress/e2e/test.cy.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  cypress-stop-test.cy.js                                                         (1 of 1)
+  Running:  test.cy.js                                                                      (1 of 1)
 
 
   Cypress.stop() in test
@@ -140,7 +140,7 @@ exports['e2e Cypress.stop() / stops execution when called in test'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     cypress-stop-test.cy.js                                                          │
+  │ Spec Ran:     test.cy.js                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -151,7 +151,7 @@ exports['e2e Cypress.stop() / stops execution when called in test'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  cypress-stop-test.cy.js                  XX:XX        3        1        -        -        2 │
+  │ ✔  test.cy.js                               XX:XX        3        1        -        -        2 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        3        1        -        -        2  
 
@@ -167,14 +167,14 @@ exports['e2e Cypress.stop() / stops execution when called in afterEach'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (cypress-stop-afterEach.cy.js)                                             │
-  │ Searched:   cypress/e2e/cypress-stop-afterEach.cy.js                                           │
+  │ Specs:      1 found (afterEach.cy.js)                                                          │
+  │ Searched:   cypress/e2e/afterEach.cy.js                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  cypress-stop-afterEach.cy.js                                                    (1 of 1)
+  Running:  afterEach.cy.js                                                                 (1 of 1)
 
 
   Cypress.stop() in afterEach
@@ -194,7 +194,7 @@ exports['e2e Cypress.stop() / stops execution when called in afterEach'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     cypress-stop-afterEach.cy.js                                                     │
+  │ Spec Ran:     afterEach.cy.js                                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -205,7 +205,7 @@ exports['e2e Cypress.stop() / stops execution when called in afterEach'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  cypress-stop-afterEach.cy.js             XX:XX        2        1        -        -        1 │
+  │ ✔  afterEach.cy.js                          XX:XX        2        1        -        -        1 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        2        1        -        -        1  
 
@@ -221,14 +221,14 @@ exports['e2e Cypress.stop() / stops execution when called in after'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (cypress-stop-after.cy.js)                                                 │
-  │ Searched:   cypress/e2e/cypress-stop-after.cy.js                                               │
+  │ Specs:      1 found (after.cy.js)                                                              │
+  │ Searched:   cypress/e2e/after.cy.js                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  cypress-stop-after.cy.js                                                        (1 of 1)
+  Running:  after.cy.js                                                                     (1 of 1)
 
 
   Cypress.stop() in after
@@ -249,7 +249,7 @@ exports['e2e Cypress.stop() / stops execution when called in after'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     cypress-stop-after.cy.js                                                         │
+  │ Spec Ran:     after.cy.js                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -260,7 +260,7 @@ exports['e2e Cypress.stop() / stops execution when called in after'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  cypress-stop-after.cy.js                 XX:XX        1        1        -        -        - │
+  │ ✔  after.cy.js                              XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 

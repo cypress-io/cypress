@@ -5,7 +5,7 @@ describe('e2e Cypress.stop()', () => {
 
   systemTests.it('stops execution when called in before', {
     project: 'cypres-stop',
-    spec: 'cypress-stop-before.cy.js',
+    spec: 'before.cy.js',
     snapshot: true,
     expectedExitCode: 0,
     browser: 'electron',
@@ -35,7 +35,7 @@ describe('e2e Cypress.stop()', () => {
 
   systemTests.it('stops execution when called in beforeEach', {
     project: 'cypres-stop',
-    spec: 'cypress-stop-beforeEach.cy.js',
+    spec: 'beforeEach.cy.js',
     snapshot: true,
     expectedExitCode: 0,
     browser: 'electron',
@@ -65,7 +65,7 @@ describe('e2e Cypress.stop()', () => {
 
   systemTests.it('stops execution when called in test', {
     project: 'cypres-stop',
-    spec: 'cypress-stop-test.cy.js',
+    spec: 'test.cy.js',
     snapshot: true,
     expectedExitCode: 0,
     browser: 'electron',
@@ -95,7 +95,7 @@ describe('e2e Cypress.stop()', () => {
 
   systemTests.it('stops execution when called in afterEach', {
     project: 'cypres-stop',
-    spec: 'cypress-stop-afterEach.cy.js',
+    spec: 'afterEach.cy.js',
     snapshot: true,
     expectedExitCode: 0,
     browser: 'electron',
@@ -125,7 +125,7 @@ describe('e2e Cypress.stop()', () => {
 
   systemTests.it('stops execution when called in after', {
     project: 'cypres-stop',
-    spec: 'cypress-stop-after.cy.js',
+    spec: 'after.cy.js',
     snapshot: true,
     expectedExitCode: 0,
     browser: 'electron',
