@@ -1,6 +1,6 @@
 import systemTests from '../lib/system-tests'
 
-describe('e2e Cypress.stop()', () => {
+describe('Cypress.stop()', () => {
   const getRunnableEventCounts = (stderr: string) => {
     const beforeRunCount = (stderr.match(/test:before:run(?!:async)/g) || []).length
     const beforeRunAsyncCount = (stderr.match(/test:before:run:async/g) || []).length
@@ -34,7 +34,7 @@ describe('e2e Cypress.stop()', () => {
   systemTests.setup()
 
   systemTests.it('stops execution when called in before', {
-    project: 'cypres-stop',
+    project: 'cypress-stop',
     spec: 'before.cy.js',
     snapshot: true,
     expectedExitCode: 0,
@@ -67,7 +67,7 @@ describe('e2e Cypress.stop()', () => {
   })
 
   systemTests.it('stops execution when called in beforeEach', {
-    project: 'cypres-stop',
+    project: 'cypress-stop',
     spec: 'beforeEach.cy.js',
     snapshot: true,
     expectedExitCode: 0,
@@ -100,7 +100,7 @@ describe('e2e Cypress.stop()', () => {
   })
 
   systemTests.it('stops execution when called in test', {
-    project: 'cypres-stop',
+    project: 'cypress-stop',
     spec: 'test.cy.js',
     snapshot: true,
     expectedExitCode: 0,
@@ -133,7 +133,7 @@ describe('e2e Cypress.stop()', () => {
   })
 
   systemTests.it('stops execution when called in afterEach', {
-    project: 'cypres-stop',
+    project: 'cypress-stop',
     spec: 'afterEach.cy.js',
     snapshot: true,
     expectedExitCode: 0,
@@ -166,7 +166,7 @@ describe('e2e Cypress.stop()', () => {
   })
 
   systemTests.it('stops execution when called in after', {
-    project: 'cypres-stop',
+    project: 'cypress-stop',
     spec: 'after.cy.js',
     snapshot: true,
     expectedExitCode: 0,

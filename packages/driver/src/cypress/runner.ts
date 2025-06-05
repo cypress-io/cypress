@@ -557,6 +557,9 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
         testAfterRun(test, Cypress)
         await testAfterRunAsync(test, Cypress)
 
+        // if the user has stopped the run, we need to abort,
+        // this needs to happen after the test:after:run events have fired
+        // to ensure protocol can properly handle the abort
         if (_runner.stopped) {
           // abort the run
           _runner.abort()

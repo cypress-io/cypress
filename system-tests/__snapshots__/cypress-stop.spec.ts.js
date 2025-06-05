@@ -1,4 +1,4 @@
-exports['e2e Cypress.stop() / stops execution when called in before'] = `
+exports['Cypress.stop() / stops execution when called in before'] = `
 
 ====================================================================================================
 
@@ -52,7 +52,7 @@ exports['e2e Cypress.stop() / stops execution when called in before'] = `
 
 `
 
-exports['e2e Cypress.stop() / stops execution when called in beforeEach'] = `
+exports['Cypress.stop() / stops execution when called in beforeEach'] = `
 
 ====================================================================================================
 
@@ -106,7 +106,7 @@ exports['e2e Cypress.stop() / stops execution when called in beforeEach'] = `
 
 `
 
-exports['e2e Cypress.stop() / stops execution when called in test'] = `
+exports['Cypress.stop() / stops execution when called in test'] = `
 
 ====================================================================================================
 
@@ -161,7 +161,7 @@ exports['e2e Cypress.stop() / stops execution when called in test'] = `
 
 `
 
-exports['e2e Cypress.stop() / stops execution when called in afterEach'] = `
+exports['Cypress.stop() / stops execution when called in afterEach'] = `
 
 ====================================================================================================
 
@@ -215,7 +215,7 @@ exports['e2e Cypress.stop() / stops execution when called in afterEach'] = `
 
 `
 
-exports['e2e Cypress.stop() / stops execution when called in after'] = `
+exports['Cypress.stop() / stops execution when called in after'] = `
 
 ====================================================================================================
 
