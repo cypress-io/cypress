@@ -281,7 +281,8 @@ export class StudioLifecycleManager {
 
         return studioManager
       }).catch((error) => {
-        debug('Error during reload of studio manager: %o', error)
+        // eslint-disable-next-line no-console
+        console.error('Error during reload of studio manager: %o', error)
 
         return null
       })
