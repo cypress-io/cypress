@@ -405,6 +405,7 @@ export class ProjectBase extends EE {
 
       onStudioInit: async () => {
         const isStudioReady = this.ctx.coreData.studioLifecycleManager?.isStudioReady()
+        const cloudStudioSessionId = v4()
 
         if (!isStudioReady) {
           debug('User entered studio mode before cloud studio was initialized')
@@ -425,10 +426,15 @@ export class ProjectBase extends EE {
             studioMethodArgs: [],
           })
 
-          return { canAccessStudioAI: false }
+          return { canAccessStudioAI: false, cloudStudioSessionId }
         }
 
         const studio = await this.ctx.coreData.studioLifecycleManager?.getStudio()
+
+        // Update the studio session ID for telemetry
+        if (studio) {
+          studio.updateSessionId(cloudStudioSessionId)
+        }
 
         // only capture studio started event if the user is accessing legacy studio
         if (!this.ctx.coreData.studioLifecycleManager?.cloudStudioRequested) {
@@ -454,7 +460,7 @@ export class ProjectBase extends EE {
           const canAccessStudioAI = await studio?.canAccessStudioAI(this.browser) ?? false
 
           if (!canAccessStudioAI) {
-            return { canAccessStudioAI }
+            return { canAccessStudioAI, cloudStudioSessionId }
           }
 
           this.protocolManager = studio.protocolManager
@@ -469,19 +475,19 @@ export class ProjectBase extends EE {
           if (!studio.protocolManager.dbPath) {
             debug('Protocol database path is not set after initializing protocol manager')
 
-            return { canAccessStudioAI: false }
+            return { canAccessStudioAI: false, cloudStudioSessionId }
           }
 
           await studio.initializeStudioAI({
             protocolDbPath: studio.protocolManager.dbPath,
           })
 
-          return { canAccessStudioAI: true }
+          return { canAccessStudioAI: true, cloudStudioSessionId }
         }
 
         this.protocolManager = undefined
 
-        return { canAccessStudioAI: false }
+        return { canAccessStudioAI: false, cloudStudioSessionId }
       },
 
       onStudioDestroy: async () => {

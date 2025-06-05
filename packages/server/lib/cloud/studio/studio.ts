@@ -84,6 +84,10 @@ export class StudioManager implements StudioManagerShape {
     await this.invokeAsync('initializeStudioAI', { isEssential: true }, options)
   }
 
+  updateSessionId (sessionId: string): void {
+    this.invokeSync('updateSessionId', { isEssential: true }, sessionId)
+  }
+
   async destroy (): Promise<void> {
     await this.invokeAsync('destroy', { isEssential: true })
   }

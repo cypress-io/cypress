@@ -542,12 +542,27 @@ describe('lib/socket', () => {
 
     context('on(studio:init)', () => {
       it('calls onStudioInit', async function () {
-        this.options.onStudioInit.resolves({ canAccessStudioAI: true })
+        this.options.onStudioInit.resolves({ canAccessStudioAI: true, cloudStudioSessionId: 'test-session-id' })
 
         await new Promise((resolve) => {
-          this.client.emit('studio:init', ({ canAccessStudioAI }) => {
+          this.client.emit('studio:init', ({ canAccessStudioAI, cloudStudioSessionId }) => {
             expect(this.options.onStudioInit).to.be.called
             expect(canAccessStudioAI).to.be.true
+            expect(cloudStudioSessionId).to.eq('test-session-id')
+
+            resolve()
+          })
+        })
+      })
+
+      it('calls onStudioInit and handles undefined cloudStudioSessionId', async function () {
+        this.options.onStudioInit.resolves({ canAccessStudioAI: false, cloudStudioSessionId: undefined })
+
+        await new Promise((resolve) => {
+          this.client.emit('studio:init', ({ canAccessStudioAI, cloudStudioSessionId }) => {
+            expect(this.options.onStudioInit).to.be.called
+            expect(canAccessStudioAI).to.be.false
+            expect(cloudStudioSessionId).to.be.undefined
 
             resolve()
           })

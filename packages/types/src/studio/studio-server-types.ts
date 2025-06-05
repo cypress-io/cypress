@@ -61,6 +61,7 @@ export interface StudioServerShape {
   canAccessStudioAI(browser: Cypress.Browser): Promise<boolean>
   addSocketListeners(socket: Socket): void
   initializeStudioAI(options: StudioAIInitializeOptions): Promise<void>
+  updateSessionId(sessionId: string): void
   reportError(
     error: unknown,
     studioMethod: string,
