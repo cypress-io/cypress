@@ -30,6 +30,9 @@ import { CloudRequest } from './cloud/api/cloud_request'
 import { isRetryableError } from './cloud/network/is_retryable_error'
 import { asyncRetry } from './util/async_retry'
 import { getCloudMetadata } from './cloud/get_cloud_metadata'
+import { telemetryManager } from './cloud/studio/telemetry/TelemetryManager'
+import { INITIALIZATION_MARK_NAMES, INITIALIZATION_TELEMETRY_GROUP_NAMES } from './cloud/studio/telemetry/constants/initialization'
+import { TelemetryReporter } from './cloud/studio/telemetry/TelemetryReporter'
 
 export interface Cfg extends ReceivedCypressOptions {
   projectId?: string
@@ -404,84 +407,119 @@ export class ProjectBase extends EE {
       closeExtraTargets: this.closeExtraTargets,
 
       onStudioInit: async () => {
-        const isStudioReady = this.ctx.coreData.studioLifecycleManager?.isStudioReady()
+        telemetryManager.mark(INITIALIZATION_MARK_NAMES.INITIALIZATION_START)
 
-        if (!isStudioReady) {
-          debug('User entered studio mode before cloud studio was initialized')
-          const { cloudUrl, cloudHeaders } = await getCloudMetadata(this.ctx.cloud)
+        const endTelemetry = ({ status, canAccessStudioAI }: { status: string, canAccessStudioAI: boolean }) => {
+          telemetryManager.mark(INITIALIZATION_MARK_NAMES.INITIALIZATION_END)
 
-          reportStudioError({
-            cloudApi: {
-              cloudUrl,
-              cloudHeaders,
-              CloudRequest,
-              isRetryableError,
-              asyncRetry,
-            },
-            studioHash: this.id,
-            projectSlug: this.cfg.projectId,
-            error: new Error('User entered studio before cloud studio was initialized'),
-            studioMethod: 'onStudioInit',
-            studioMethodArgs: [],
+          TelemetryReporter.getInstance().reportTelemetry(INITIALIZATION_TELEMETRY_GROUP_NAMES.INITIALIZE_STUDIO, {
+            status,
+            canAccessStudioAI,
           })
-
-          return { canAccessStudioAI: false }
         }
 
-        const studio = await this.ctx.coreData.studioLifecycleManager?.getStudio()
+        try {
+          const isStudioReady = this.ctx.coreData.studioLifecycleManager?.isStudioReady()
 
-        // only capture studio started event if the user is accessing legacy studio
-        if (!this.ctx.coreData.studioLifecycleManager?.cloudStudioRequested) {
-          try {
-            studio?.captureStudioEvent({
-              type: StudioMetricsTypes.STUDIO_STARTED,
-              machineId: await this.ctx.coreData.machineId,
-              projectId: this.cfg.projectId,
-              browser: this.browser ? {
-                name: this.browser.name,
-                family: this.browser.family,
-                channel: this.browser.channel,
-                version: this.browser.version,
-              } : undefined,
-              cypressVersion: pkg.version,
+          if (!isStudioReady) {
+            debug('User entered studio mode before cloud studio was initialized')
+            const { cloudUrl, cloudHeaders } = await getCloudMetadata(this.ctx.cloud)
+
+            reportStudioError({
+              cloudApi: {
+                cloudUrl,
+                cloudHeaders,
+                CloudRequest,
+                isRetryableError,
+                asyncRetry,
+              },
+              studioHash: this.id,
+              projectSlug: this.cfg.projectId,
+              error: new Error('User entered studio before cloud studio was initialized'),
+              studioMethod: 'onStudioInit',
+              studioMethodArgs: [],
             })
-          } catch (error) {
-            debug('Error capturing studio event:', error)
-          }
-        }
 
-        if (this.spec && studio?.protocolManager) {
-          const canAccessStudioAI = await studio?.canAccessStudioAI(this.browser) ?? false
-
-          if (!canAccessStudioAI) {
-            return { canAccessStudioAI }
-          }
-
-          this.protocolManager = studio.protocolManager
-          this.protocolManager.setupProtocol()
-          this.protocolManager.beforeSpec({
-            ...this.spec,
-            instanceId: v4(),
-          })
-
-          await browsers.connectProtocolToBrowser({ browser: this.browser, foundBrowsers: this.options.browsers, protocolManager: studio.protocolManager })
-
-          if (!studio.protocolManager.dbPath) {
-            debug('Protocol database path is not set after initializing protocol manager')
+            endTelemetry({ status: 'studio-not-ready', canAccessStudioAI: false })
 
             return { canAccessStudioAI: false }
           }
 
-          await studio.initializeStudioAI({
-            protocolDbPath: studio.protocolManager.dbPath,
-          })
+          const studio = await this.ctx.coreData.studioLifecycleManager?.getStudio()
 
-          return { canAccessStudioAI: true }
+          // only capture studio started event if the user is accessing legacy studio
+          if (!this.ctx.coreData.studioLifecycleManager?.cloudStudioRequested) {
+            try {
+              studio?.captureStudioEvent({
+                type: StudioMetricsTypes.STUDIO_STARTED,
+                machineId: await this.ctx.coreData.machineId,
+                projectId: this.cfg.projectId,
+                browser: this.browser ? {
+                  name: this.browser.name,
+                  family: this.browser.family,
+                  channel: this.browser.channel,
+                  version: this.browser.version,
+                } : undefined,
+                cypressVersion: pkg.version,
+              })
+            } catch (error) {
+              debug('Error capturing studio event:', error)
+            }
+          }
+
+          if (this.spec && studio?.protocolManager) {
+            telemetryManager.mark(INITIALIZATION_MARK_NAMES.CAN_ACCESS_STUDIO_AI_START)
+            const canAccessStudioAI = await studio?.canAccessStudioAI(this.browser) ?? false
+
+            telemetryManager.mark(INITIALIZATION_MARK_NAMES.CAN_ACCESS_STUDIO_AI_END)
+
+            if (!canAccessStudioAI) {
+              endTelemetry({ status: 'success', canAccessStudioAI })
+
+              return { canAccessStudioAI }
+            }
+
+            this.protocolManager = studio.protocolManager
+            this.protocolManager.setupProtocol()
+            this.protocolManager.beforeSpec({
+              ...this.spec,
+              instanceId: v4(),
+            })
+
+            telemetryManager.mark(INITIALIZATION_MARK_NAMES.CONNECT_PROTOCOL_TO_BROWSER_START)
+            await browsers.connectProtocolToBrowser({ browser: this.browser, foundBrowsers: this.options.browsers, protocolManager: studio.protocolManager })
+            telemetryManager.mark(INITIALIZATION_MARK_NAMES.CONNECT_PROTOCOL_TO_BROWSER_END)
+
+            if (!studio.protocolManager.dbPath) {
+              debug('Protocol database path is not set after initializing protocol manager')
+
+              endTelemetry({ status: 'protocol-db-path-not-set', canAccessStudioAI: false })
+
+              return { canAccessStudioAI: false }
+            }
+
+            telemetryManager.mark(INITIALIZATION_MARK_NAMES.INITIALIZE_STUDIO_AI_START)
+            await studio.initializeStudioAI({
+              protocolDbPath: studio.protocolManager.dbPath,
+            })
+
+            telemetryManager.mark(INITIALIZATION_MARK_NAMES.INITIALIZE_STUDIO_AI_END)
+
+            endTelemetry({ status: 'success', canAccessStudioAI: true })
+
+            return { canAccessStudioAI: true }
+          }
+
+          this.protocolManager = undefined
+
+          endTelemetry({ status: 'success', canAccessStudioAI: false })
+
+          return { canAccessStudioAI: false }
+        } catch (error) {
+          endTelemetry({ status: 'exception', canAccessStudioAI: false })
+
+          return { canAccessStudioAI: false }
         }
-
-        this.protocolManager = undefined
-
-        return { canAccessStudioAI: false }
       },
 
       onStudioDestroy: async () => {

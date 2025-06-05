@@ -18,6 +18,10 @@ import { ensureStudioBundle } from './ensure_studio_bundle'
 import chokidar from 'chokidar'
 import { readFile } from 'fs/promises'
 import { getCloudMetadata } from '../get_cloud_metadata'
+import { initializeTelemetryReporter, reportTelemetry } from './telemetry/TelemetryReporter'
+import { telemetryManager } from './telemetry/TelemetryManager'
+import { BUNDLE_LIFECYCLE_MARK_NAMES, BUNDLE_LIFECYCLE_TELEMETRY_GROUP_NAMES } from './telemetry/constants/bundle-lifecycle'
+import { INITIALIZATION_TELEMETRY_GROUP_NAMES } from './telemetry/constants/initialization'
 
 const debug = Debug('cypress:server:studio-lifecycle-manager')
 const routes = require('../routes')
@@ -98,6 +102,11 @@ export class StudioLifecycleManager {
       // Clean up any registered listeners
       this.listeners = []
 
+      telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.BUNDLE_LIFECYCLE_END)
+      reportTelemetry(BUNDLE_LIFECYCLE_TELEMETRY_GROUP_NAMES.COMPLETE_BUNDLE_LIFECYCLE, {
+        success: false,
+      })
+
       return null
     })
 
@@ -112,6 +121,12 @@ export class StudioLifecycleManager {
   }
 
   isStudioReady (): boolean {
+    if (!this.studioManager) {
+      telemetryManager.addGroupMetadata(INITIALIZATION_TELEMETRY_GROUP_NAMES.INITIALIZE_STUDIO, {
+        studioRequestedBeforeReady: true,
+      })
+    }
+
     return !!this.studioManager
   }
 
@@ -143,10 +158,21 @@ export class StudioLifecycleManager {
     let studioPath: string
     let studioHash: string
 
+    initializeTelemetryReporter({
+      projectSlug: projectId,
+      cloudDataSource,
+    })
+
+    telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.BUNDLE_LIFECYCLE_START)
+
+    telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.POST_STUDIO_SESSION_START)
     const studioSession = await postStudioSession({
       projectId,
     })
 
+    telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.POST_STUDIO_SESSION_END)
+
+    telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.ENSURE_STUDIO_BUNDLE_START)
     if (!process.env.CYPRESS_LOCAL_STUDIO_PATH) {
       // The studio hash is the last part of the studio URL, after the last slash and before the extension
       studioHash = studioSession.studioUrl.split('/').pop()?.split('.')[0]
@@ -170,10 +196,14 @@ export class StudioLifecycleManager {
       studioHash = 'local'
     }
 
+    telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.ENSURE_STUDIO_BUNDLE_END)
+
     const serverFilePath = path.join(studioPath, 'server', 'index.js')
 
     const script = await readFile(serverFilePath, 'utf8')
     const studioManager = new StudioManager()
+
+    telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_MANAGER_SETUP_START)
 
     const { cloudUrl, cloudHeaders } = await getCloudMetadata(cloudDataSource)
 
@@ -192,11 +222,18 @@ export class StudioLifecycleManager {
       shouldEnableStudio: this.cloudStudioRequested,
     })
 
+    telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_MANAGER_SETUP_END)
+
     if (studioManager.status === 'ENABLED') {
       debug('Cloud studio is enabled - setting up protocol')
       const protocolManager = new ProtocolManager()
+
+      telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_PROTOCOL_GET_START)
       const script = await api.getCaptureProtocolScript(studioSession.protocolUrl)
 
+      telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_PROTOCOL_GET_END)
+
+      telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_PROTOCOL_PREPARE_START)
       await protocolManager.prepareProtocol(script, {
         runId: 'studio',
         projectId: cfg.projectId,
@@ -212,6 +249,8 @@ export class StudioLifecycleManager {
         mode: 'studio',
       })
 
+      telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_PROTOCOL_PREPARE_END)
+
       studioManager.protocolManager = protocolManager
     } else {
       debug('Cloud studio is not enabled - skipping protocol setup')
@@ -221,6 +260,11 @@ export class StudioLifecycleManager {
     this.studioManager = studioManager
     this.callRegisteredListeners()
     this.updateStatus(studioManager.status)
+
+    telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.BUNDLE_LIFECYCLE_END)
+    reportTelemetry(BUNDLE_LIFECYCLE_TELEMETRY_GROUP_NAMES.COMPLETE_BUNDLE_LIFECYCLE, {
+      success: true,
+    })
 
     return studioManager
   }
