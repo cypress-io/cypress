@@ -7,13 +7,13 @@ import { agent } from '@packages/network'
 const pkg = require('@packages/root')
 const routes = require('../../routes') as typeof import('../../routes')
 
-interface GetStudioSessionOptions {
+interface PostStudioSessionOptions {
   projectId?: string
 }
 
 const _delay = linearDelay(500)
 
-export const postStudioSession = async ({ projectId }: GetStudioSessionOptions) => {
+export const postStudioSession = async ({ projectId }: PostStudioSessionOptions) => {
   return await (asyncRetry(async () => {
     const response = await fetch(routes.apiRoutes.studioSession(), {
       // @ts-expect-error - this is supported
