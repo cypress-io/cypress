@@ -1,3 +1,19 @@
+before(() => {
+  console.log('global before')
+})
+
+beforeEach(() => {
+  console.log('global beforeEach')
+})
+
+afterEach(() => {
+  console.log('global afterEach')
+})
+
+after(() => {
+  console.log('global after')
+})
+
 Cypress.on('test:before:run:async', async () => {
   await new Promise((resolve) => setTimeout(resolve, 1000))
   console.log('test:before:run:async')

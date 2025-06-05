@@ -4,8 +4,11 @@ describe('Cypress.stop() in test', () => {
   })
 
   it('should stop during test execution', () => {
-    Cypress.stop()
+    return Cypress.stop()
+
+    // eslint-disable-next-line no-unreachable
     console.log('test 2')
+    throw new Error('This code should not run')
   })
 
   it('should not run this test', () => {

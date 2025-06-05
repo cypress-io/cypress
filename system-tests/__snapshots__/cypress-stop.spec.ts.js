@@ -18,18 +18,19 @@ exports['e2e Cypress.stop() / stops execution when called in before'] = `
 
 
   Cypress.stop() in before
+    ✓ should not run this test (NaNms)
 
-  0 passing
+  1 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Tests:        2                                                                                │
-  │ Passing:      0                                                                                │
+  │ Passing:      1                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
-  │ Skipped:      2                                                                                │
+  │ Skipped:      1                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -44,9 +45,9 @@ exports['e2e Cypress.stop() / stops execution when called in before'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  before.cy.js                             XX:XX        2        -        -        -        2 │
+  │ ✔  before.cy.js                             XX:XX        2        1        -        -        1 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        2        -        -        -        2  
+    ✔  All specs passed!                        XX:XX        2        1        -        -        1  
 
 
 `
@@ -71,18 +72,19 @@ exports['e2e Cypress.stop() / stops execution when called in beforeEach'] = `
 
 
   Cypress.stop() in beforeEach
+    ✓ should not run this test (NaNms)
 
-  0 passing
+  1 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Tests:        2                                                                                │
-  │ Passing:      0                                                                                │
+  │ Passing:      1                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
-  │ Skipped:      2                                                                                │
+  │ Skipped:      1                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -97,9 +99,9 @@ exports['e2e Cypress.stop() / stops execution when called in beforeEach'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  beforeEach.cy.js                         XX:XX        2        -        -        -        2 │
+  │ ✔  beforeEach.cy.js                         XX:XX        2        1        -        -        1 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        2        -        -        -        2  
+    ✔  All specs passed!                        XX:XX        2        1        -        -        1  
 
 
 `
@@ -125,18 +127,19 @@ exports['e2e Cypress.stop() / stops execution when called in test'] = `
 
   Cypress.stop() in test
     ✓ should run this test
+    ✓ should stop during test execution
 
-  1 passing
+  2 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Tests:        3                                                                                │
-  │ Passing:      1                                                                                │
+  │ Passing:      2                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
-  │ Skipped:      2                                                                                │
+  │ Skipped:      1                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
@@ -151,9 +154,9 @@ exports['e2e Cypress.stop() / stops execution when called in test'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  test.cy.js                               XX:XX        3        1        -        -        2 │
+  │ ✔  test.cy.js                               XX:XX        3        2        -        -        1 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        3        1        -        -        2  
+    ✔  All specs passed!                        XX:XX        3        2        -        -        1  
 
 
 `
