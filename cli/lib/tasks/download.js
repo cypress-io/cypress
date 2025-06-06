@@ -61,6 +61,12 @@ const prepend = (arch, urlPath, version) => {
   const platform = os.platform()
   const pathTemplate = util.getEnv('CYPRESS_DOWNLOAD_PATH_TEMPLATE', true)
 
+  if ((platform === 'win32') && (arch === 'arm64')) {
+    debug(`detected platform ${platform} architecture ${arch} combination`)
+    arch = 'x64'
+    debug(`overriding to download ${platform}-${arch} instead`)
+  }
+
   return pathTemplate
     ? (
       pathTemplate
