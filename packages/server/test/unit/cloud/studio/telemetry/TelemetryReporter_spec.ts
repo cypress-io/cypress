@@ -108,7 +108,7 @@ describe('TelemetryReporter', () => {
       )
 
       // Await the post promise to resolve
-      await new Promise((resolve) => setTimeout(resolve, 0))
+      await new Promise((resolve) => setTimeout(resolve, 5))
 
       expect(mockPost).to.have.been.calledWith(
         'https://cloud.cypress.io/studio/telemetry',
@@ -140,7 +140,7 @@ describe('TelemetryReporter', () => {
       )
 
       // Wait for the promise to resolve
-      await new Promise((resolve) => setTimeout(resolve, 0))
+      await new Promise((resolve) => setTimeout(resolve, 5))
 
       // Verify the error was handled gracefully (no uncaught exceptions)
       expect(mockPost).to.have.been.called
@@ -171,7 +171,7 @@ describe('TelemetryReporter', () => {
         test: 'test',
       })
 
-      await new Promise((resolve) => setTimeout(resolve, 0))
+      await new Promise((resolve) => setTimeout(resolve, 5))
 
       expect(mockPost).to.have.been.calledWith(
         'https://cloud.cypress.io/studio/telemetry',

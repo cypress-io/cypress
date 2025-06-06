@@ -4,7 +4,7 @@ import {
   TelemetryGroupName,
   telemetryManager,
 } from './TelemetryManager'
-import { CloudDataSource } from '@packages/data-context/src/sources/CloudDataSource'
+import type { CloudDataSource } from '@packages/data-context/src/sources/CloudDataSource'
 import { CloudRequest } from '../../api/cloud_request'
 import { getCloudMetadata } from '../../get_cloud_metadata'
 
