@@ -56,7 +56,7 @@ const initializeCloudCyPrompt = async (Cypress: Cypress.Cypress, cy: Cypress.Cyp
       cloudModule = await initializeModule(Cypress)
     }
 
-    return cloudModule.createCyPrompt({
+    return await cloudModule.createCyPrompt({
       Cypress: Cypress as CypressInternal,
       cy,
       eventManager: window.getEventManager ? window.getEventManager() : undefined,
@@ -74,29 +74,38 @@ export default (Commands, Cypress, cy) => {
       initializeCloudCyPromptPromise = initializeCloudCyPrompt(Cypress, cy)
     }
 
+    const prompt = async (message: string, options: object = {}) => {
+      if (!initializeCloudCyPromptPromise) {
+        // TODO: (cy.prompt) We will look into supporting other browsers (and testing them)
+        // as this is rolled out
+        throw new Error('`cy.prompt()` is not supported in this browser.')
+      }
+
+      try {
+        const bundleResult = await initializeCloudCyPromptPromise
+
+        if (bundleResult instanceof Error) {
+          throw bundleResult
+        }
+
+        const cyPrompt = bundleResult
+
+        return await cyPrompt(message, options)
+      } catch (error) {
+        // TODO: handle this better
+        throw new Error(`CyPromptDriver not found: ${error}`)
+      }
+    }
+
+    // For testing purposes, we can reset the prompt command initialization
+    // by calling the __reset method.
+    prompt.__reset = () => {
+      initializedModule = null
+      initializeCloudCyPromptPromise = initializeCloudCyPrompt(Cypress, cy)
+    }
+
     Commands.addAll({
-      async prompt (message: string, options: object = {}) {
-        if (!initializeCloudCyPromptPromise) {
-          // TODO: (cy.prompt) We will look into supporting other browsers (and testing them)
-          // as this is rolled out
-          throw new Error('`cy.prompt()` is not supported in this browser.')
-        }
-
-        try {
-          const bundleResult = await initializeCloudCyPromptPromise
-
-          if (bundleResult instanceof Error) {
-            throw bundleResult
-          }
-
-          const cyPrompt = bundleResult
-
-          return await cyPrompt(message, options)
-        } catch (error) {
-          // TODO: handle this better
-          throw new Error(`CyPromptDriver not found: ${error}`)
-        }
-      },
+      prompt,
     })
   }
 }

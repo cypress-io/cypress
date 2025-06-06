@@ -21,18 +21,4 @@ describe('src/cy/commands/prompt', () => {
       cy.prompt('Hello, world!')
     })
   })
-
-  it('errors if wait for ready does not return success', () => {
-    // @ts-expect-error - this is internal to Cypress
-    cy.stub(Cypress.backend, 'wait:for:cy:prompt:ready').resolves({ success: false })
-
-    cy.on('fail', (err) => {
-      expect(err.message).to.include('error waiting for cy prompt bundle to be downloaded and ready')
-    })
-
-    cy.visit('http://www.foobar.com:3500/fixtures/dom.html')
-
-    // @ts-expect-error - this will not error when we actually release the experimentalPromptCommand flag
-    cy.prompt('Hello, world!')
-  })
 })

@@ -57,4 +57,23 @@ describe('ensureCyPromptBundle', () => {
       cwd: cyPromptPath,
     })
   })
+
+  it('should throw an error if the cy prompt bundle download times out', async () => {
+    getCyPromptBundleStub.callsFake(() => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(new Error('Cy prompt bundle download timed out'))
+        }, 3000)
+      })
+    })
+
+    const ensureCyPromptBundlePromise = ensureCyPromptBundle({
+      cyPromptPath: '/tmp/cypress/cy-prompt/123',
+      cyPromptUrl: 'https://cypress.io/cy-prompt',
+      projectId: '123',
+      downloadTimeoutMs: 500,
+    })
+
+    await expect(ensureCyPromptBundlePromise).to.be.rejectedWith('Cy prompt bundle download timed out')
+  })
 })
