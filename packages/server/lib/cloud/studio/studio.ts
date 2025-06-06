@@ -85,7 +85,11 @@ export class StudioManager implements StudioManagerShape {
   }
 
   updateSessionId (sessionId: string): void {
-    this.invokeSync('updateSessionId', { isEssential: true }, sessionId)
+    if (this._studioServer && typeof this._studioServer.updateSessionId === 'function') {
+      this.invokeSync('updateSessionId', { isEssential: false }, sessionId)
+    } else {
+      debug('updateSessionId method not available on studio server')
+    }
   }
 
   async destroy (): Promise<void> {
