@@ -11,6 +11,10 @@ _Released 6/17/2025 (PENDING)_
 
 - Fixed an issue when using `Cypress.stop()` where a run may be aborted prior to receiving the required runner events causing Test Replay to not be available. Addresses [#31781](https://github.com/cypress-io/cypress/issues/31781).
 
+**Misc:**
+
+- Added timeout field to EnqueuedCommandAttributes type. Addresses [#30198](https://github.com/cypress-io/cypress/issues/30198).
+
 ## 14.4.1
 
 _Released 6/3/2025_
@@ -22,10 +26,6 @@ _Released 6/3/2025_
 **Misc:**
 
 - The design of commands that display as grouped (such as `.within()` and `cy.session()`) has been updated to provide better clarity when collapsing groups. Addressed in [#31739](https://github.com/cypress-io/cypress/pull/31739).
-
-**Misc:**
-
-- Added timeout field to EnqueuedCommandAttributes type. Addresses [#30198](https://github.com/cypress-io/cypress/issues/30198).
 
 **Dependency Updates:**
 
