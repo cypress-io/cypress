@@ -1,15 +1,19 @@
-import { sinon } from '../spec_helper'
+import { sinon, proxyquire } from '../../../spec_helper'
 import { expect } from 'chai'
-import { StudioManager } from '../../lib/cloud/studio'
-import { StudioLifecycleManager } from '../../lib/StudioLifecycleManager'
+import { StudioManager } from '../../../../lib/cloud/studio/studio'
+import { StudioLifecycleManager } from '../../../../lib/cloud/studio/StudioLifecycleManager'
 import type { DataContext } from '@packages/data-context'
-import type { Cfg } from '../../lib/project-base'
 import type { CloudDataSource } from '@packages/data-context/src/sources'
-import * as getAndInitializeStudioManagerModule from '../../lib/cloud/api/studio/get_and_initialize_studio_manager'
-import * as reportStudioErrorPath from '../../lib/cloud/api/studio/report_studio_error'
-import ProtocolManager from '../../lib/cloud/protocol'
-const api = require('../../lib/cloud/api').default
-import * as postStudioSessionModule from '../../lib/cloud/api/studio/post_studio_session'
+import path from 'path'
+import os from 'os'
+import { CloudRequest } from '../../../../lib/cloud/api/cloud_request'
+import { isRetryableError } from '../../../../lib/cloud/network/is_retryable_error'
+import { asyncRetry } from '../../../../lib/util/async_retry'
+import { Cfg } from '../../../../lib/project-base'
+import ProtocolManager from '../../../../lib/cloud/protocol'
+import * as reportStudioErrorPath from '../../../../lib/cloud/api/studio/report_studio_error'
+
+const api = require('../../../../lib/cloud/api').default
 
 // Helper to wait for next tick in event loop
 const nextTick = () => new Promise((resolve) => process.nextTick(resolve))
@@ -19,21 +23,78 @@ describe('StudioLifecycleManager', () => {
   let mockStudioManager: StudioManager
   let mockCtx: DataContext
   let mockCloudDataSource: CloudDataSource
-  let mockCfg: Cfg
+  let StudioLifecycleManager: typeof import('../../../../lib/cloud/studio/StudioLifecycleManager').StudioLifecycleManager
   let postStudioSessionStub: sinon.SinonStub
-  let getAndInitializeStudioManagerStub: sinon.SinonStub
-  let getCaptureProtocolScriptStub: sinon.SinonStub
+  let studioStatusChangeEmitterStub: sinon.SinonStub
+  let ensureStudioBundleStub: sinon.SinonStub
+  let studioManagerSetupStub: sinon.SinonStub = sinon.stub()
+  let readFileStub: sinon.SinonStub = sinon.stub()
+  let mockCfg: Cfg
   let prepareProtocolStub: sinon.SinonStub
   let reportStudioErrorStub: sinon.SinonStub
-  let studioStatusChangeEmitterStub: sinon.SinonStub
+  let getCaptureProtocolScriptStub: sinon.SinonStub
+  let watcherStub: sinon.SinonStub
+  let watcherOnStub: sinon.SinonStub
+  let watcherCloseStub: sinon.SinonStub
+  let studioManagerDestroyStub: sinon.SinonStub
 
   beforeEach(() => {
-    studioLifecycleManager = new StudioLifecycleManager()
+    postStudioSessionStub = sinon.stub()
+    studioManagerSetupStub = sinon.stub()
+    ensureStudioBundleStub = sinon.stub()
+    studioStatusChangeEmitterStub = sinon.stub()
+    prepareProtocolStub = sinon.stub()
+    reportStudioErrorStub = sinon.stub()
+    getCaptureProtocolScriptStub = sinon.stub()
+    watcherStub = sinon.stub()
+    watcherOnStub = sinon.stub()
+    watcherCloseStub = sinon.stub()
+    studioManagerDestroyStub = sinon.stub()
     mockStudioManager = {
-      addSocketListeners: sinon.stub(),
-      canAccessStudioAI: sinon.stub().resolves(true),
       status: 'INITIALIZED',
+      setup: studioManagerSetupStub.resolves(),
+      destroy: studioManagerDestroyStub.resolves(),
     } as unknown as StudioManager
+
+    readFileStub = sinon.stub()
+    StudioLifecycleManager = proxyquire('../lib/cloud/studio/StudioLifecycleManager', {
+      './ensure_studio_bundle': {
+        ensureStudioBundle: ensureStudioBundleStub,
+      },
+      '../api/studio/post_studio_session': {
+        postStudioSession: postStudioSessionStub,
+      },
+      './studio': {
+        StudioManager: class StudioManager {
+          constructor () {
+            return mockStudioManager
+          }
+        },
+      },
+      'fs-extra': {
+        readFile: readFileStub.resolves('console.log("studio script")'),
+      },
+      '../get_cloud_metadata': {
+        getCloudMetadata: sinon.stub().resolves({
+          cloudUrl: 'https://cloud.cypress.io',
+          cloudHeaders: { 'Authorization': 'Bearer test-token' },
+        }),
+      },
+      'fs/promises': {
+        readFile: readFileStub.resolves('console.log("studio script")'),
+      },
+      'chokidar': {
+        watch: watcherStub.returns({
+          on: watcherOnStub,
+          close: watcherCloseStub,
+        }),
+      },
+      '../routes': {
+        apiUrl: 'http://localhost:1234/',
+      },
+    }).StudioLifecycleManager
+
+    studioLifecycleManager = new StudioLifecycleManager()
 
     studioStatusChangeEmitterStub = sinon.stub()
 
@@ -49,7 +110,10 @@ describe('StudioLifecycleManager', () => {
       },
     } as unknown as DataContext
 
-    mockCloudDataSource = {} as CloudDataSource
+    mockCloudDataSource = {
+      getCloudUrl: sinon.stub().returns('https://cloud.cypress.io'),
+      additionalHeaders: sinon.stub().resolves({ 'Authorization': 'Bearer test-token' }),
+    } as CloudDataSource
 
     mockCfg = {
       projectId: 'abc123',
@@ -61,23 +125,21 @@ describe('StudioLifecycleManager', () => {
       namespace: '__cypress',
     } as unknown as Cfg
 
-    postStudioSessionStub = sinon.stub(postStudioSessionModule, 'postStudioSession')
     postStudioSessionStub.resolves({
       studioUrl: 'https://cloud.cypress.io/studio/bundle/abc.tgz',
       protocolUrl: 'https://cloud.cypress.io/capture-protocol/script/def.js',
     })
 
-    getAndInitializeStudioManagerStub = sinon.stub(getAndInitializeStudioManagerModule, 'getAndInitializeStudioManager')
-    getAndInitializeStudioManagerStub.resolves(mockStudioManager)
-
     getCaptureProtocolScriptStub = sinon.stub(api, 'getCaptureProtocolScript').resolves('console.log("hello")')
     prepareProtocolStub = sinon.stub(ProtocolManager.prototype, 'prepareProtocol').resolves()
 
-    reportStudioErrorStub = sinon.stub(reportStudioErrorPath, 'reportStudioError')
+    reportStudioErrorStub = sinon.stub(reportStudioErrorPath, 'reportStudioError').resolves()
   })
 
   afterEach(() => {
     sinon.restore()
+
+    delete process.env.CYPRESS_LOCAL_STUDIO_PATH
   })
 
   describe('cloudStudioRequested', () => {
@@ -111,13 +173,19 @@ describe('StudioLifecycleManager', () => {
   })
 
   describe('initializeStudioManager', () => {
-    it('initializes the studio manager and registers it in the data context', async () => {
+    it('initializes the studio manager and registers it in the data context and does not set up protocol when studio is initialized', async () => {
+      studioManagerSetupStub.callsFake((args) => {
+        mockStudioManager.status = 'INITIALIZED'
+
+        return Promise.resolve()
+      })
+
       studioLifecycleManager.initializeStudioManager({
         projectId: 'test-project-id',
         cloudDataSource: mockCloudDataSource,
+        ctx: mockCtx,
         cfg: mockCfg,
         debugData: {},
-        ctx: mockCtx,
       })
 
       const studioReadyPromise = new Promise((resolve) => {
@@ -129,18 +197,50 @@ describe('StudioLifecycleManager', () => {
       await studioReadyPromise
 
       expect(mockCtx.update).to.be.calledOnce
-      expect(studioLifecycleManager.isStudioReady()).to.be.true
+      expect(ensureStudioBundleStub).to.be.calledWith({
+        studioPath: path.join(os.tmpdir(), 'cypress', 'studio', 'abc'),
+        studioUrl: 'https://cloud.cypress.io/studio/bundle/abc.tgz',
+        projectId: 'test-project-id',
+      })
+
+      expect(studioManagerSetupStub).to.be.calledWith({
+        script: 'console.log("studio script")',
+        studioPath: path.join(os.tmpdir(), 'cypress', 'studio', 'abc'),
+        studioHash: 'abc',
+        projectSlug: 'test-project-id',
+        cloudApi: {
+          cloudUrl: 'https://cloud.cypress.io',
+          cloudHeaders: { 'Authorization': 'Bearer test-token' },
+          CloudRequest,
+          isRetryableError,
+          asyncRetry,
+        },
+        shouldEnableStudio: false,
+      })
+
+      expect(postStudioSessionStub).to.be.calledWith({
+        projectId: 'test-project-id',
+      })
+
+      expect(readFileStub).to.be.calledWith(path.join(os.tmpdir(), 'cypress', 'studio', 'abc', 'server', 'index.js'), 'utf8')
+
+      expect(getCaptureProtocolScriptStub).not.to.be.called
+      expect(prepareProtocolStub).not.to.be.called
     })
 
-    it('sets up protocol if studio is enabled', async () => {
-      mockStudioManager.status = 'ENABLED'
+    it('initializes the studio manager and registers it in the data context and sets up protocol when studio is enabled', async () => {
+      studioManagerSetupStub.callsFake((args) => {
+        mockStudioManager.status = 'ENABLED'
+
+        return Promise.resolve()
+      })
 
       studioLifecycleManager.initializeStudioManager({
-        projectId: 'abc123',
+        projectId: 'test-project-id',
         cloudDataSource: mockCloudDataSource,
+        ctx: mockCtx,
         cfg: mockCfg,
         debugData: {},
-        ctx: mockCtx,
       })
 
       const studioReadyPromise = new Promise((resolve) => {
@@ -151,9 +251,33 @@ describe('StudioLifecycleManager', () => {
 
       await studioReadyPromise
 
-      expect(postStudioSessionStub).to.be.calledWith({
-        projectId: 'abc123',
+      expect(mockCtx.update).to.be.calledOnce
+      expect(ensureStudioBundleStub).to.be.calledWith({
+        studioPath: path.join(os.tmpdir(), 'cypress', 'studio', 'abc'),
+        studioUrl: 'https://cloud.cypress.io/studio/bundle/abc.tgz',
+        projectId: 'test-project-id',
       })
+
+      expect(studioManagerSetupStub).to.be.calledWith({
+        script: 'console.log("studio script")',
+        studioPath: path.join(os.tmpdir(), 'cypress', 'studio', 'abc'),
+        studioHash: 'abc',
+        projectSlug: 'test-project-id',
+        cloudApi: {
+          cloudUrl: 'https://cloud.cypress.io',
+          cloudHeaders: { 'Authorization': 'Bearer test-token' },
+          CloudRequest,
+          isRetryableError,
+          asyncRetry,
+        },
+        shouldEnableStudio: false,
+      })
+
+      expect(postStudioSessionStub).to.be.calledWith({
+        projectId: 'test-project-id',
+      })
+
+      expect(readFileStub).to.be.calledWith(path.join(os.tmpdir(), 'cypress', 'studio', 'abc', 'server', 'index.js'), 'utf8')
 
       expect(getCaptureProtocolScriptStub).to.be.calledWith('https://cloud.cypress.io/capture-protocol/script/def.js')
       expect(prepareProtocolStub).to.be.calledWith('console.log("hello")', {
@@ -177,7 +301,108 @@ describe('StudioLifecycleManager', () => {
       })
     })
 
-    it('handles errors during initialization and reports them', async () => {
+    it('initializes the studio manager in watch mode when CYPRESS_LOCAL_STUDIO_PATH is set', async () => {
+      process.env.CYPRESS_LOCAL_STUDIO_PATH = '/path/to/studio'
+
+      studioManagerSetupStub.callsFake((args) => {
+        mockStudioManager.status = 'ENABLED'
+
+        return Promise.resolve()
+      })
+
+      studioLifecycleManager.initializeStudioManager({
+        projectId: 'test-project-id',
+        cloudDataSource: mockCloudDataSource,
+        ctx: mockCtx,
+        cfg: mockCfg,
+        debugData: {},
+      })
+
+      const studioReadyPromise = new Promise((resolve) => {
+        studioLifecycleManager?.registerStudioReadyListener((studioManager) => {
+          resolve(studioManager)
+        })
+      })
+
+      await studioReadyPromise
+
+      expect(mockCtx.update).to.be.calledOnce
+      expect(ensureStudioBundleStub).not.to.be.called
+
+      expect(studioManagerSetupStub).to.be.calledWith({
+        script: 'console.log("studio script")',
+        studioPath: '/path/to/studio',
+        studioHash: 'local',
+        projectSlug: 'test-project-id',
+        cloudApi: {
+          cloudUrl: 'https://cloud.cypress.io',
+          cloudHeaders: { 'Authorization': 'Bearer test-token' },
+          CloudRequest,
+          isRetryableError,
+          asyncRetry,
+        },
+        shouldEnableStudio: true,
+      })
+
+      expect(postStudioSessionStub).to.be.calledWith({
+        projectId: 'test-project-id',
+      })
+
+      expect(readFileStub).to.be.calledWith(path.join('/path', 'to', 'studio', 'server', 'index.js'), 'utf8')
+
+      expect(getCaptureProtocolScriptStub).to.be.calledWith('https://cloud.cypress.io/capture-protocol/script/def.js')
+      expect(prepareProtocolStub).to.be.calledWith('console.log("hello")', {
+        runId: 'studio',
+        projectId: 'abc123',
+        testingType: 'e2e',
+        cloudApi: {
+          url: 'http://localhost:1234/',
+          retryWithBackoff: api.retryWithBackoff,
+          requestPromise: api.rp,
+        },
+        projectConfig: {
+          devServerPublicPathRoute: '/__cypress/src',
+          namespace: '__cypress',
+          port: 8888,
+          proxyUrl: 'http://localhost:8888',
+        },
+        mountVersion: 2,
+        debugData: {},
+        mode: 'studio',
+      })
+
+      expect(StudioLifecycleManager['watcher']).to.be.present
+      expect(watcherStub).to.be.calledWith(path.join('/path', 'to', 'studio', 'server', 'index.js'), {
+        awaitWriteFinish: true,
+      })
+
+      expect(watcherOnStub).to.be.calledWith('change')
+
+      const onCallback = watcherOnStub.args[0][1]
+
+      let mockStudioManagerPromise: Promise<StudioManager>
+      const updatedStudioManager = {
+        status: 'ENABLED',
+        destroy: studioManagerDestroyStub,
+      } as unknown as StudioManager
+
+      studioLifecycleManager['createStudioManager'] = sinon.stub().callsFake(() => {
+        mockStudioManagerPromise = new Promise((resolve) => {
+          resolve(updatedStudioManager)
+        })
+
+        return mockStudioManagerPromise
+      })
+
+      await onCallback()
+
+      expect(studioManagerDestroyStub).to.be.called
+
+      expect(mockStudioManagerPromise).to.be.present
+      expect(await mockStudioManagerPromise).to.equal(updatedStudioManager)
+    })
+
+    it('handles errors when initializing the studio manager and reports them', async () => {
       const error = new Error('Test error')
       const listener1 = sinon.stub()
       const listener2 = sinon.stub()
@@ -189,23 +414,22 @@ describe('StudioLifecycleManager', () => {
       // @ts-expect-error - accessing private property
       expect(studioLifecycleManager.listeners.length).to.equal(2)
 
-      getAndInitializeStudioManagerStub.rejects(error)
+      ensureStudioBundleStub.rejects(error)
 
       const reportErrorPromise = new Promise<void>((resolve) => {
-        reportStudioErrorStub.callsFake(() => {
+        reportStudioErrorStub.callsFake((err) => {
           resolve()
 
           return undefined
         })
       })
 
-      // Should not throw
-      studioLifecycleManager.initializeStudioManager({
+      await studioLifecycleManager.initializeStudioManager({
         projectId: 'test-project-id',
         cloudDataSource: mockCloudDataSource,
+        ctx: mockCtx,
         cfg: mockCfg,
         debugData: {},
-        ctx: mockCtx,
       })
 
       await reportErrorPromise
@@ -293,15 +517,28 @@ describe('StudioLifecycleManager', () => {
       // @ts-expect-error - accessing non-existent property
       studioLifecycleManager.studioReady = true
 
-      await Promise.resolve()
+      studioLifecycleManager.registerStudioReadyListener(listener)
+
+      expect(listener).to.be.calledWith(mockStudioManager)
+    })
+
+    it('calls listener immediately and adds to the list of listeners when CYPRESS_LOCAL_STUDIO_PATH is set', async () => {
+      process.env.CYPRESS_LOCAL_STUDIO_PATH = '/path/to/studio'
+
+      const listener = sinon.stub()
+
+      // @ts-expect-error - accessing private property
+      studioLifecycleManager.studioManager = mockStudioManager
+
+      // @ts-expect-error - accessing non-existent property
+      studioLifecycleManager.studioReady = true
 
       studioLifecycleManager.registerStudioReadyListener(listener)
 
-      await Promise.resolve()
-      await Promise.resolve()
-      await nextTick()
-
       expect(listener).to.be.calledWith(mockStudioManager)
+
+      // @ts-expect-error - accessing private property
+      expect(studioLifecycleManager.listeners).to.include(listener)
     })
 
     it('does not call listener if studio manager is null', async () => {
@@ -314,11 +551,6 @@ describe('StudioLifecycleManager', () => {
       studioLifecycleManager.studioReady = true
 
       studioLifecycleManager.registerStudioReadyListener(listener)
-
-      // Give enough time for any promises to resolve
-      await Promise.resolve()
-      await Promise.resolve()
-      await nextTick()
 
       expect(listener).not.to.be.called
     })
@@ -358,20 +590,56 @@ describe('StudioLifecycleManager', () => {
       studioLifecycleManager.initializeStudioManager({
         projectId: 'test-project-id',
         cloudDataSource: mockCloudDataSource,
+        ctx: mockCtx,
         cfg: mockCfg,
         debugData: {},
-        ctx: mockCtx,
       })
 
       await listenersCalledPromise
-
-      await nextTick()
 
       expect(listener1).to.be.calledWith(mockStudioManager)
       expect(listener2).to.be.calledWith(mockStudioManager)
 
       // @ts-expect-error - accessing private property
       expect(studioLifecycleManager.listeners.length).to.equal(0)
+    })
+
+    it('does not clean up listeners when CYPRESS_LOCAL_STUDIO_PATH is set', async () => {
+      process.env.CYPRESS_LOCAL_STUDIO_PATH = '/path/to/studio'
+
+      const listener1 = sinon.stub()
+      const listener2 = sinon.stub()
+
+      studioLifecycleManager.registerStudioReadyListener(listener1)
+      studioLifecycleManager.registerStudioReadyListener(listener2)
+
+      // @ts-expect-error - accessing private property
+      expect(studioLifecycleManager.listeners.length).to.equal(2)
+
+      const listenersCalledPromise = Promise.all([
+        new Promise<void>((resolve) => {
+          listener1.callsFake(() => resolve())
+        }),
+        new Promise<void>((resolve) => {
+          listener2.callsFake(() => resolve())
+        }),
+      ])
+
+      studioLifecycleManager.initializeStudioManager({
+        projectId: 'test-project-id',
+        cloudDataSource: mockCloudDataSource,
+        ctx: mockCtx,
+        cfg: mockCfg,
+        debugData: {},
+      })
+
+      await listenersCalledPromise
+
+      expect(listener1).to.be.calledWith(mockStudioManager)
+      expect(listener2).to.be.calledWith(mockStudioManager)
+
+      // @ts-expect-error - accessing private property
+      expect(studioLifecycleManager.listeners.length).to.equal(2)
     })
   })
 
@@ -443,7 +711,7 @@ describe('StudioLifecycleManager', () => {
     })
 
     it('updates status to IN_ERROR when initialization fails', async () => {
-      getAndInitializeStudioManagerStub.rejects(new Error('Test error'))
+      ensureStudioBundleStub.rejects(new Error('Test error'))
 
       const statusChangesSpy = sinon.spy(studioLifecycleManager as any, 'updateStatus')
 

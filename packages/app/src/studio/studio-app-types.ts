@@ -49,13 +49,18 @@ export type RunnerStatusShape = (props: RunnerStatusProps) => {
 
 export interface StudioAIStreamProps {
   canAccessStudioAI: boolean
-  AIOutputRef: { current: HTMLTextAreaElement | null }
   runnerStatus: RunnerStatus
   testCode?: string
   isCreatingNewTest: boolean
 }
 
-export type StudioAIStreamShape = (props: StudioAIStreamProps) => void
+export interface StudioAIStream {
+  recommendation: string
+  isStreaming: boolean
+  generationId: string | null
+}
+
+export type StudioAIStreamShape = (props: StudioAIStreamProps) => StudioAIStream
 
 export interface TestContentRetrieverProps {
   Cypress: CypressInternal
@@ -65,4 +70,18 @@ export type TestContentRetrieverShape = (props: TestContentRetrieverProps) => {
   isLoading: boolean
   testBlock: TestBlock | null
   isCreatingNewTest: boolean
+}
+
+export interface Command {
+  selector?: string
+  name: string
+  message?: string | string[]
+  isAssertion?: boolean
+}
+
+export interface SaveDetails {
+  absoluteFile: string
+  runnableTitle: string
+  contents: string
+  testName?: string
 }

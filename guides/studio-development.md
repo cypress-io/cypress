@@ -29,6 +29,8 @@ Regardless of running against local or deployed studio:
 
 Note: When using the `CYPRESS_LOCAL_STUDIO_PATH` environment variable or when running the Cypress app via the locally cloned repository, we bypass our error reporting and instead log errors to the browser or node console.
 
+Note: When using the `CYPRESS_LOCAL_STUDIO_PATH` the cloud studio code will be watched for changes so that you do not have to stop the app to incoprorate any new changes.
+
 ## Types
 
 The studio bundle provides the types for the `app` and `server` interfaces that are used within the Cypress code. To incorporate the types into the code base, run:

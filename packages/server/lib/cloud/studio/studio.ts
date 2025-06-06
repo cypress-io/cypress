@@ -2,9 +2,9 @@ import type { StudioManagerShape, StudioStatus, StudioServerDefaultShape, Studio
 import type { Router } from 'express'
 import type { Socket } from 'socket.io'
 import Debug from 'debug'
-import { requireScript } from './require_script'
+import { requireScript } from '../require_script'
 import path from 'path'
-import { reportStudioError, ReportStudioErrorOptions } from './api/studio/report_studio_error'
+import { reportStudioError, ReportStudioErrorOptions } from '../api/studio/report_studio_error'
 
 interface StudioServer { default: StudioServerDefaultShape }
 

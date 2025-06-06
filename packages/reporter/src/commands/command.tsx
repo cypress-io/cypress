@@ -124,7 +124,7 @@ const NavColumns: React.FC<NavColumnsProps> = observer(({ model, isPinned, toggl
       {(!model._isPending() && isPinned) && <PinIcon className='command-pin' />}
       {(!model._isPending() && !isPinned) && model.number}
     </div>
-    {model.hasChildren && (
+    {model.hasChildren && !model.group && (
       <div className='command-expander-column' onClick={() => model.toggleOpen()}>
         <ChevronIcon className={cs('command-expander', { 'command-expander-is-open': model.hasChildren && !!model.isOpen })} />
       </div>
@@ -326,7 +326,7 @@ interface CommandProps {
 
 const CommandDetails: React.FC<CommandDetailsProps> = observer(({ model, groupId, aliasesWithDuplicates }) => (
   <span className={cs('command-info')}>
-    <span className='command-method'>
+    <span className={cs('command-method', { 'command-method-child': !model.hasChildren })}>
       <span>
         {model.event && model.type !== 'system' ? `(${displayName(model)})` : displayName(model)}
       </span>
@@ -432,7 +432,10 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
     groupLevel = model.groupLevel < 6 ? model.groupLevel : 5
 
     for (let i = 1; i < groupLevel; i++) {
-      groupPlaceholder.push(<span key={`${groupId}-${i}`} className='command-group-block' />)
+      groupPlaceholder.push(<span key={`${groupId}-${i}`} className='command-group-block' onClick={(e) => {
+        e.stopPropagation()
+        model.toggleOpen()
+      }} />)
     }
   }
 
@@ -520,14 +523,26 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
             message='Printed output to your console'
             onClick={_toggleColumnPin}
             shouldShowMessage={_shouldShowClickMessage}
-            wrapperClassName={cs('command-pin-target', { 'command-group': !!groupId })}
+            wrapperClassName={cs('command-pin-target', { 'command-group': !!groupId, 'command-group-no-children': !model.hasChildren && model.group })}
           >
             <div
-              className='command-wrapper-text'
+              className={cs('command-wrapper-text', {
+                'command-wrapper-text-group': model.hasChildren && groupId,
+                'command-wrapper-text-group-parent': model.hasChildren && !groupId,
+              })}
               onMouseEnter={() => _snapshot(true)}
               onMouseLeave={() => _snapshot(false)}
             >
               {groupPlaceholder}
+
+              {model.hasChildren && groupId && (
+                <div className={cs('command-expander-column-group', { 'nested-group-expander': model.groupLevel })} onClick={(e) => {
+                  e.stopPropagation()
+                  model.toggleOpen()
+                }}>
+                  <ChevronIcon className={cs('command-expander', { 'command-expander-is-open': model.hasChildren && !!model.isOpen })} />
+                </div>
+              )}
               <CommandDetails model={model} groupId={groupId} aliasesWithDuplicates={aliasesWithDuplicates} />
               <CommandControls model={model} commandName={commandName} events={events} />
             </div>

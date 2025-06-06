@@ -74,7 +74,9 @@ const TestError: React.FC<TestErrorProps> = ({ err, groupLevel = 0, testId, comm
     <div className={cs('runnable-err', { 'recovered-test-err': err.isRecovered })}>
       <div className='runnable-err-header'>
         {groupPlaceholder}
-        <WarningIcon />
+        <div className={cs('runnable-err-icon', { 'runnable-err-icon-group': groupPlaceholder.length > 0 })}>
+          <WarningIcon />
+        </div>
         <div className='runnable-err-name'>
           {err.name}
         </div>
