@@ -450,19 +450,22 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     describe('CyPromptLifecycleManager', function () {
+      let initializeCyPromptManagerStub
+
       afterEach(function () {
         delete process.env.CYPRESS_ENABLE_CY_PROMPT
+        initializeCyPromptManagerStub.restore()
       })
 
       it('initializes cy prompt lifecycle manager if experimentalPromptCommand is enabled', function () {
         this.config.projectId = 'abc123'
         this.config.experimentalPromptCommand = true
 
-        sinon.stub(CyPromptLifecycleManager.prototype, 'initializeCyPromptManager')
+        initializeCyPromptManagerStub = sinon.stub(CyPromptLifecycleManager.prototype, 'initializeCyPromptManager')
 
         return this.project.open()
         .then(() => {
-          expect(CyPromptLifecycleManager.prototype.initializeCyPromptManager).to.be.calledWith({
+          expect(initializeCyPromptManagerStub).to.be.calledWith({
             projectId: 'abc123',
             cloudDataSource: ctx.cloud,
             ctx,
@@ -473,11 +476,11 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       it('initializes cy prompt lifecycle manager if process.env.CYPRESS_ENABLE_CY_PROMPT is enabled', function () {
         process.env.CYPRESS_ENABLE_CY_PROMPT = 'true'
 
-        sinon.stub(CyPromptLifecycleManager.prototype, 'initializeCyPromptManager')
+        initializeCyPromptManagerStub = sinon.stub(CyPromptLifecycleManager.prototype, 'initializeCyPromptManager')
 
         return this.project.open()
         .then(() => {
-          expect(CyPromptLifecycleManager.prototype.initializeCyPromptManager).to.be.calledWith({
+          expect(initializeCyPromptManagerStub).to.be.calledWith({
             projectId: 'abc123',
             cloudDataSource: ctx.cloud,
             ctx,
@@ -489,11 +492,11 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         this.config.projectId = 'abc123'
         this.config.experimentalPromptCommand = false
 
-        sinon.stub(CyPromptLifecycleManager.prototype, 'initializeCyPromptManager')
+        initializeCyPromptManagerStub = sinon.stub(CyPromptLifecycleManager.prototype, 'initializeCyPromptManager')
 
         return this.project.open()
         .then(() => {
-          expect(CyPromptLifecycleManager.prototype.initializeCyPromptManager).not.to.be.called
+          expect(initializeCyPromptManagerStub).not.to.be.called
         })
       })
     })
