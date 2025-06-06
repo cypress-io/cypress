@@ -450,9 +450,28 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     describe('CyPromptLifecycleManager', function () {
-      it('initializes cy prompt lifecycle manager', function () {
+      afterEach(function () {
+        delete process.env.CYPRESS_ENABLE_CY_PROMPT
+      })
+
+      it('initializes cy prompt lifecycle manager if experimentalPromptCommand is enabled', function () {
         this.config.projectId = 'abc123'
         this.config.experimentalPromptCommand = true
+
+        sinon.stub(CyPromptLifecycleManager.prototype, 'initializeCyPromptManager')
+
+        return this.project.open()
+        .then(() => {
+          expect(CyPromptLifecycleManager.prototype.initializeCyPromptManager).to.be.calledWith({
+            projectId: 'abc123',
+            cloudDataSource: ctx.cloud,
+            ctx,
+          })
+        })
+      })
+
+      it('initializes cy prompt lifecycle manager if process.env.CYPRESS_ENABLE_CY_PROMPT is enabled', function () {
+        process.env.CYPRESS_ENABLE_CY_PROMPT = 'true'
 
         sinon.stub(CyPromptLifecycleManager.prototype, 'initializeCyPromptManager')
 
