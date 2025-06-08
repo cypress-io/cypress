@@ -319,8 +319,14 @@ export class StudioLifecycleManager {
         cloudDataSource,
         cfg,
         debugData,
+      }).then((studioManager) => {
+        // eslint-disable-next-line no-console
+        console.log('Studio manager reloaded')
+
+        return studioManager
       }).catch((error) => {
-        debug('Error during reload of studio manager: %o', error)
+        // eslint-disable-next-line no-console
+        console.error('Error during reload of studio manager: %o', error)
 
         return null
       })
