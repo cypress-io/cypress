@@ -415,10 +415,8 @@ describe('src/cy/commands/navigation', () => {
         const rel = cy.stub(win, 'removeEventListener')
 
         cy.go('back').then(() => {
-          const unloadEvent = cy.browser.family === 'chromium' ? 'pagehide' : 'unload'
-
           expect(rel).to.be.calledWith('beforeunload')
-          expect(rel).to.be.calledWith(unloadEvent)
+          expect(rel).to.be.calledWith('unload')
         })
       })
     })
