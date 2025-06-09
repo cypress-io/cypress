@@ -1322,6 +1322,41 @@ export default {
     `,
   },
 
+  prompt: {
+    promptDownloadError (obj) {
+      return {
+        message: stripIndent`\
+        Failed to download cy.prompt Cloud code:
+
+        - ${obj.error.code}: ${obj.error.message}
+
+         Check your network connection and file settings to ensure download is not interrupted.
+      `,
+        docsUrl: 'https://on.cypress.io/prompt-download-error',
+      }
+    },
+    promptDownloadTimedOut (obj) {
+      return {
+        message: stripIndent`\
+        Timed out waiting for cy.prompt Cloud code:
+
+        - ${obj.error.code}: ${obj.error.message}
+
+         Check your network connection and system configuration.
+      `,
+        docsUrl: 'https://on.cypress.io/prompt-download-error',
+      }
+    },
+    promptSupportedBrowser: stripIndent`\
+        \`cy.prompt\` is only supported in Chromium-based browsers.
+
+        Use Chrome, Electron, Chromium, or Chrome for Testing.
+      `,
+    promptTestingTypeError: stripIndent`\
+      \`cy.prompt\` is currently only supported in end-to-end tests.
+    `,
+  },
+
   proxy: {
     js_rewriting_failed: stripIndent`\
       An error occurred in the Cypress proxy layer while rewriting your source code. This is a bug in Cypress. Open an issue if you see this message.

@@ -54,4 +54,16 @@ describe('component testing', () => {
       expect(Cypress.log).to.be.calledWithMatch(sinon.match({ 'message': `Error: "Promise rejected with a string!"`, name: 'uncaught exception' }))
     })
   })
+
+  it('fails when trying to use cy.prompt in component tests', (done) => {
+    cy.spy(Cypress, 'log').log(false)
+
+    cy.on('fail', (err) => {
+      expect(err.message).to.include('`cy.prompt` is currently only supported in end-to-end tests.')
+
+      done()
+    })
+
+    cy.prompt('Hello, world!')
+  })
 })

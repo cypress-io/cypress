@@ -18,7 +18,10 @@ const debug = Debug('cypress:server:cy-prompt-lifecycle-manager')
 export class CyPromptLifecycleManager {
   private static hashLoadingMap: Map<string, Promise<void>> = new Map()
   private static watcher: chokidar.FSWatcher | null = null
-  private cyPromptManagerPromise?: Promise<CyPromptManager | null>
+  private cyPromptManagerPromise?: Promise<{
+    cyPromptManager?: CyPromptManager
+    error?: Error
+  }>
   private cyPromptManager?: CyPromptManager
   private listeners: ((cyPromptManager: CyPromptManager) => void)[] = []
 
@@ -72,7 +75,7 @@ export class CyPromptLifecycleManager {
       // Clean up any registered listeners
       this.listeners = []
 
-      return null
+      return { error }
     })
 
     this.cyPromptManagerPromise = cyPromptManagerPromise
@@ -99,7 +102,7 @@ export class CyPromptLifecycleManager {
   }: {
     projectId?: string
     cloudDataSource: CloudDataSource
-  }): Promise<CyPromptManager> {
+  }): Promise<{ cyPromptManager?: CyPromptManager, error?: Error }> {
     let cyPromptHash: string
     let cyPromptPath: string
 
@@ -155,7 +158,7 @@ export class CyPromptLifecycleManager {
     this.cyPromptManager = cyPromptManager
     this.callRegisteredListeners()
 
-    return cyPromptManager
+    return { cyPromptManager }
   }
 
   private callRegisteredListeners () {
