@@ -19,7 +19,15 @@ const verbose = require('../VerboseRenderer')
 const { buildInfo, version } = require('../../package.json')
 
 function _getBinaryUrlFromBuildInfo (arch, { commitSha, commitBranch }) {
-  return `https://cdn.cypress.io/beta/binary/${version}/${os.platform()}-${arch}/${commitBranch}-${commitSha}/cypress.zip`
+  const platform = os.platform()
+
+  if ((platform === 'win32') && (arch === 'arm64')) {
+    debug(`detected platform ${platform} architecture ${arch} combination`)
+    arch = 'x64'
+    debug(`overriding to download ${platform}-${arch} pre-release binary instead`)
+  }
+
+  return `https://cdn.cypress.io/beta/binary/${version}/${platform}-${arch}/${commitBranch}-${commitSha}/cypress.zip`
 }
 
 const alreadyInstalledMsg = () => {
