@@ -64,6 +64,7 @@ describe('component testing', () => {
       done()
     })
 
+    // @ts-expect-error - this will not error when we actually release the experimentalPromptCommand flag
     cy.prompt('Hello, world!')
   })
 })
