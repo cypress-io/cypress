@@ -19,7 +19,15 @@ const verbose = require('../VerboseRenderer')
 const { buildInfo, version } = require('../../package.json')
 
 function _getBinaryUrlFromBuildInfo (arch, { commitSha, commitBranch }) {
-  return `https://cdn.cypress.io/beta/binary/${version}/${os.platform()}-${arch}/${commitBranch}-${commitSha}/cypress.zip`
+  const platform = os.platform()
+
+  if ((platform === 'win32') && (arch === 'arm64')) {
+    debug(`detected platform ${platform} architecture ${arch} combination`)
+    arch = 'x64'
+    debug(`overriding to download ${platform}-${arch} pre-release binary instead`)
+  }
+
+  return `https://cdn.cypress.io/beta/binary/${version}/${platform}-${arch}/${commitBranch}-${commitSha}/cypress.zip`
 }
 
 const alreadyInstalledMsg = () => {
@@ -138,7 +146,7 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
 
 const validateOS = () => {
   return util.getPlatformInfo().then((platformInfo) => {
-    return platformInfo.match(/(win32-x64|linux-x64|linux-arm64|darwin-x64|darwin-arm64)/)
+    return platformInfo.match(/(win32-x64|win32-arm64|linux-x64|linux-arm64|darwin-x64|darwin-arm64)/)
   })
 }
 
