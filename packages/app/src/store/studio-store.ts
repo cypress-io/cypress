@@ -122,6 +122,7 @@ interface StudioRecorderState {
 
   canAccessStudioAI: boolean
   showUrlPrompt: boolean
+  cloudStudioRequested: boolean
 }
 
 export const useStudioStore = defineStore('studioRecorder', {
@@ -138,10 +139,15 @@ export const useStudioStore = defineStore('studioRecorder', {
       _currentId: 1,
       canAccessStudioAI: false,
       showUrlPrompt: true,
+      cloudStudioRequested: false,
     }
   },
 
   actions: {
+    setCloudStudioRequested (cloudStudioRequested: boolean) {
+      this.cloudStudioRequested = cloudStudioRequested
+    },
+
     setShowUrlPrompt (shouldShowUrlPrompt: boolean) {
       this.showUrlPrompt = shouldShowUrlPrompt
     },
@@ -498,6 +504,11 @@ export const useStudioStore = defineStore('studioRecorder', {
 
       this._body = body
 
+      // if we're in cloud studio, we shouldn't attach our own listeners - cloud studio will handle it
+      if (this.cloudStudioRequested) {
+        return
+      }
+
       for (const event of eventTypes) {
         this._body.addEventListener(event, this._recordEvent, {
           capture: true,
@@ -853,7 +864,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       return $el.hasClass('__cypress-studio-assertions-menu')
     },
 
-    _openAssertionsMenu (event) {
+    _openAssertionsMenu (event, addAssertion?: ($el: HTMLElement | JQuery<HTMLElement>, ...args: AssertionArgs) => void) {
       if (!this._body) {
         throw Error('this._body was not defined')
       }
@@ -874,7 +885,7 @@ export const useStudioStore = defineStore('studioRecorder', {
         $body: window.UnifiedRunner.CypressJQuery(this._body),
         props: {
           possibleAssertions: this._generatePossibleAssertions($el),
-          addAssertion: this._addAssertion,
+          addAssertion: addAssertion || this._addAssertion,
           closeMenu: this._closeAssertionsMenu,
         },
       })
