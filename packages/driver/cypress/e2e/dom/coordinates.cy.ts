@@ -280,7 +280,7 @@ this is some long text with a single <span id="multiple" style="color:darkblue">
       const $el = cy.$$('#multiple')
       const el = $el[0]
 
-      cy.stub(el, 'getClientRects', () => {
+      cy.stub(el, 'getClientRects').callsFake(() => {
         return [
           {
             top: 100,

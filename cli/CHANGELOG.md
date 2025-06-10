@@ -1,4 +1,28 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.0.0
+
+_Released 07/01/2025 (PENDING)_
+
+**Breaking Changes:**
+
+- Removed support for Angular 17. The minimum supported version is now `18.0.0`. Addresses [#31303](https://github.com/cypress-io/cypress/issues/31303).
+- `@cypress/angular` now requires a minimum of `zone.js` `0.14.0`. Addresses [#31582](https://github.com/cypress-io/cypress/issues/31582).
+- Removed support for Node.js 18 and Node.js 23. Addresses [#31302](https://github.com/cypress-io/cypress/issues/31302).
+- Removed support for [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol) with the [firefox](https://www.mozilla.org/) browser. Addresses [#31189](https://github.com/cypress-io/cypress/issues/31189).
+- Removed support of the deprecated 3 argument signature of `cy.stub`. Use `cy.stub(object, name).callsFake(fn)` instead. Addresses [#31346](https://github.com/cypress-io/cypress/issues/31346).
+- The Cypress configuration wizard for Component Testing supports TypeScript 5.0 or greater. Addresses [#31187](https://github.com/cypress-io/cypress/issues/31187).
+- `@cypress/webpack-dev-server` and `@cypress/webpack-preprocessor` no longer support `webpack` version 4. Addresses [#31344](https://github.com/cypress-io/cypress/issues/31344). If you still need to use `webpack` version 4, please see our [migration guide](https://docs.cypress.io/app/references/migration-guide#Migrating-to-Cypress-150).
+- `@cypress/webpack-dev-server` no longer supports `webpack-dev-server` version 4. Addresses [#31605](https://github.com/cypress-io/cypress/issues/31605). If you still need to use `webpack-dev-server` version 4, please see our [migration guide](https://docs.cypress.io/app/references/migration-guide#Migrating-to-Cypress-150).
+- The `@cypress/webpack-batteries-included-preprocessor` no longer includes browser built-ins that were automatically provided by Webpack 4. To add built-ins manually, refer to the Webpack [resolve.fallback](https://webpack.js.org/configuration/resolve/#resolvefallback) documentation and the [`@cypress/webpack-batteries-included-preprocessor` README](../npm/webpack-batteries-included-preprocessor/README.md). Addresses [#31039](https://github.com/cypress-io/cypress/issues/31039).
+
+**Features:**
+
+- [`tsx`](https://tsx.is/) is now used in all cases to run the Cypress config, replacing [ts-node](https://github.com/TypeStrong/ts-node) for TypeScript and Node for commonjs/ESM. This should allow for more interoperability for users who are using any variant of ES Modules. Addresses [#8090](https://github.com/cypress-io/cypress/issues/8090), [#15724](https://github.com/cypress-io/cypress/issues/15724), [#21805](https://github.com/cypress-io/cypress/issues/21805), [#22273](https://github.com/cypress-io/cypress/issues/22273), [#22747](https://github.com/cypress-io/cypress/issues/22747), [#23141](https://github.com/cypress-io/cypress/issues/23141), [#25958](https://github.com/cypress-io/cypress/issues/25958), [#25959](https://github.com/cypress-io/cypress/issues/25959), [#26606](https://github.com/cypress-io/cypress/issues/26606), [#27359](https://github.com/cypress-io/cypress/issues/27359), [#27450](https://github.com/cypress-io/cypress/issues/27450), [#28442](https://github.com/cypress-io/cypress/issues/28442), [#30318](https://github.com/cypress-io/cypress/issues/30318), [#30718](https://github.com/cypress-io/cypress/issues/30718), [#30907](https://github.com/cypress-io/cypress/issues/30907), [#30915](https://github.com/cypress-io/cypress/issues/30915), [#30925](https://github.com/cypress-io/cypress/issues/30925), [#30954](https://github.com/cypress-io/cypress/issues/30954) and [#31185](https://github.com/cypress-io/cypress/issues/31185).
+
+**Misc:**
+
+- Migration helpers and related errors are no longer shown when upgrading from Cypress versions earlier than 10.0.0. To migrate from a pre-10.0.0 version, upgrade one major version at a time to receive the appropriate guidance. Addresses [#31345](https://github.com/cypress-io/cypress/issues/31345). Addressed in [https://github.com/cypress-io/cypress/pull/31629/](https://github.com/cypress-io/cypress/pull/31629/).
+
 ## 14.5.0
 
 _Released 6/17/2025 (PENDING)_

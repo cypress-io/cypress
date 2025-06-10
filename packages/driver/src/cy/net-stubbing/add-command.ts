@@ -158,11 +158,6 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
     }
   }
 
-  // @ts-ignore
-  if (routeMatcher.matchUrlAgainstPath) {
-    return err(`\`matchUrlAgainstPath\` was removed in Cypress 7.0.0 and should be removed from your tests. Your tests will run the same. For more information, visit https://on.cypress.io/migration-guide`)
-  }
-
   for (const prop in routeMatcher) {
     if (!allRouteMatcherFields.includes(prop)) {
       return err(`An unknown \`RouteMatcher\` property was passed: \`${String(prop)}\`\n\nValid \`RouteMatcher\` properties are: ${allRouteMatcherFields.join(', ')}`)

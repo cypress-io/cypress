@@ -62,42 +62,6 @@ describe('src/cy/commands/agents', () => {
       })
     })
 
-    describe('.stub(obj, \'method\', replacerFn)', () => {
-      beforeEach(function () {
-        this.originalCalled = false
-        this.obj = {
-          bar: 'bar',
-          foo: () => {
-            this.originalCalled = true
-          },
-        }
-
-        // @ts-expect-error TODO: deprecated: Figure out how to handle types here
-        cy.stub(this.obj, 'bar', 'baz')
-
-        this.replacementCalled = false
-        this.stub = cy.stub(this.obj, 'foo', () => {
-          this.replacementCalled = true
-        })
-      })
-
-      it('proxies sinon stub', function () {
-        this.obj.foo()
-
-        expect(this.stub.callCount).to.eq(1)
-      })
-
-      it('replaces method with replacement', function () {
-        this.obj.foo()
-        expect(this.originalCalled).to.be.false
-        expect(this.replacementCalled).to.be.true
-      })
-
-      it('replaces values', function () {
-        expect(this.obj.bar).to.eq('baz')
-      })
-    })
-
     describe('.resolves', () => {
       beforeEach(function () {
         this.obj = { foo () {} }

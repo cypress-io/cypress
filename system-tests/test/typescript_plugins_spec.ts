@@ -16,13 +16,7 @@ describe('e2e typescript in plugins file', function () {
     })
   })
 
-  it('can use a tsconfig.json with preserveValueImports: true to run config', function () {
-    return systemTests.exec(this, {
-      project: 'ts-proj-4',
-    })
-  })
-
-  it('works with typescript 5', function () {
+  it('works with typescript 5 with preserveValueImports: true to run config', function () {
     return systemTests.exec(this, {
       project: 'ts-proj-5',
       testingType: 'component',

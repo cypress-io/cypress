@@ -31,7 +31,6 @@ export interface ClientTestContext {
     allBundlers: WizardBundler[]
     warnings: []
   }
-  migration: {}
   user: AuthenticatedUserShape | null
   cloudTypes: typeof cloudTypes
   __mockPartial: any
@@ -104,7 +103,6 @@ export function makeClientTestContext (): ClientTestContext {
         },
       ],
     },
-    migration: {},
     __mockPartial: {},
   }
 }

@@ -221,10 +221,6 @@ mutation GlobalPageHeader_clearCurrentProject {
     currentProject {
       id
     }
-    # This ensures the cache is updated with null after clearing project
-    migration {
-      configFileNameBefore
-    }
   }
 }
 `

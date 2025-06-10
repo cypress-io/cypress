@@ -693,11 +693,6 @@ commands:
         description: run subset of tests with injectDocumentDomain config enabled
         type: boolean
         default: false
-      is-firefox-cdp:
-        description: whether or not the group should be associated to the firefox CDP
-          run or not. This is determined by the browser version.
-        type: boolean
-        default: false
 
     steps:
       - restore_cached_workspace
@@ -738,9 +733,6 @@ commands:
             if << parameters.inject-document-domain >> ; then
               YARN_CMD="cypress:run:inject-document-domain"
               PARALLEL="--parallel --group 5x-driver-inject-document-domain-<<parameters.browser>>"
-            elif << parameters.is-firefox-cdp >> ; then
-              YARN_CMD="cypress:run"
-              PARALLEL="--parallel --group 5x-driver-cdp-<<parameters.browser>>"
             else
               YARN_CMD="cypress:run"
               PARALLEL="--parallel --group 5x-driver-<<parameters.browser>>"
@@ -1206,23 +1198,6 @@ commands:
               CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm install --legacy-peer-deps ~/cypress/cypress.tgz
             fi
           working_directory: /tmp/<<parameters.repo>>
-      - run:
-          name: Scaffold new config file
-          working_directory: /tmp/<<parameters.repo>>
-          environment:
-            CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
-          command: |
-            if [[ -f cypress.json ]]; then
-              rm -rf cypress.json
-              echo 'module.exports = { e2e: {} }' > cypress.config.js
-            fi
-      - run:
-          name: Rename support file
-          working_directory: /tmp/<<parameters.repo>>
-          command: |
-            if [[ -f cypress/support/index.js ]]; then
-              mv cypress/support/index.js cypress/support/e2e.js
-            fi
       - run:
           name: Print Cypress version
           working_directory: /tmp/<<parameters.repo>>
@@ -2175,18 +2150,6 @@ jobs:
       - run-driver-integration-tests:
           browser: firefox
 
-  # Runs the driver tests using firefox 134, which does NOT use WebDriver BiDi
-  # This is to test and make sure there aren't regressions with the old CDP driver
-  driver-integration-tests-firefox-cdp:
-    <<: *defaults
-    resource_class: medium+
-    parallelism: 5
-    steps:
-      - run-driver-integration-tests:
-          browser: firefox
-          firefox-version: "134.0.2"
-          is-firefox-cdp: true
-
   driver-integration-tests-electron:
     <<: *defaults
     parallelism: 5
@@ -2927,7 +2890,6 @@ linux-x64-workflow: &linux-x64-workflow
           - run-webpack-dev-server-integration-tests
           - run-vite-dev-server-integration-tests
           - driver-integration-tests-firefox
-          - driver-integration-tests-firefox-cdp
           - driver-integration-tests-chrome
           - driver-integration-tests-chrome-inject-document-domain
           - driver-integration-tests-chrome-beta-inject-document-domain
@@ -3000,10 +2962,6 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
     - driver-integration-tests-firefox:
-        context: test-runner:cypress-record-key
-        requires:
-          - build
-    - driver-integration-tests-firefox-cdp:
         context: test-runner:cypress-record-key
         requires:
           - build
@@ -3149,7 +3107,6 @@ linux-x64-workflow: &linux-x64-workflow
           - linux-lint
           - percy-finalize
           - driver-integration-tests-firefox
-          - driver-integration-tests-firefox-cdp
           - driver-integration-tests-chrome
           - driver-integration-tests-chrome-beta
           - driver-integration-tests-chrome-inject-document-domain
@@ -3405,10 +3362,6 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
         context: test-runner:cypress-record-key
         requires:
           - contributor-pr
-    - driver-integration-tests-firefox-cdp:
-        context: test-runner:cypress-record-key
-        requires:
-          - contributor-pr
     - driver-integration-tests-electron:
         context: test-runner:cypress-record-key
         requires:
@@ -3550,7 +3503,6 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
           - linux-lint
           - percy-finalize
           - driver-integration-tests-firefox
-          - driver-integration-tests-firefox-cdp
           - driver-integration-tests-chrome
           - driver-integration-tests-chrome-beta
           - driver-integration-tests-electron

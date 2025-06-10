@@ -151,4 +151,25 @@ describe('lib/plugins/util', () => {
       })
     })
   })
+
+  context('#buildErrorLocationFromTransformError', () => {
+    it('correctly calculates the compiler error location to correctly display the code frame in the Cypress app', () => {
+      const err = {
+        name: 'TransformError',
+        message: 'Transform failed with 1 error:\n/my/project/root/cypress.config.ts:12:15: ERROR: Unexpected ","',
+      }
+
+      const result = util.buildErrorLocationFromTransformError(err, '/my/project/root')
+
+      expect(result).to.eql({
+        compilerErrorLocation: {
+          filePath: 'cypress.config.ts',
+          line: 12,
+          column: 15,
+        },
+        message: 'Error compiling file\n/my/project/root/cypress.config.ts:12:15: ERROR: Unexpected ","',
+        originalMessage: 'Transform failed with 1 error:\n/my/project/root/cypress.config.ts:12:15: ERROR: Unexpected ","',
+      })
+    })
+  })
 })

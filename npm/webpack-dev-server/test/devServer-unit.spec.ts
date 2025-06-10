@@ -15,50 +15,6 @@ const cypressConfig = {
 describe('devServer', function () {
   this.timeout(10 * 1000)
 
-  it('creates a new devServer webpack4, webpackDevServer4', async () => {
-    const { devServer } = proxyquire('../src/devServer', {
-      './helpers/sourceRelativeWebpackModules': {
-        sourceDefaultWebpackDependencies: () => {
-          return createModuleMatrixResult({
-            webpack: 4,
-            webpackDevServer: 4,
-          })
-        } },
-    }) as typeof import('../src/devServer')
-
-    const result = await devServer.create({
-      specs: [],
-      cypressConfig,
-      webpackConfig: {},
-      devServerEvents: new EventEmitter(),
-    })
-
-    expect(result.server).to.be.instanceOf(require('webpack-dev-server-4'))
-    expect(result.version).to.eq(4)
-  })
-
-  it('creates a new devServer webpack5, webpackDevServer4', async () => {
-    const { devServer } = proxyquire('../src/devServer', {
-      './helpers/sourceRelativeWebpackModules': {
-        sourceDefaultWebpackDependencies: () => {
-          return createModuleMatrixResult({
-            webpack: 5,
-            webpackDevServer: 4,
-          })
-        } },
-    }) as typeof import('../src/devServer')
-
-    const result = await devServer.create({
-      specs: [],
-      cypressConfig,
-      webpackConfig: {},
-      devServerEvents: new EventEmitter(),
-    })
-
-    expect(result.server).to.be.instanceOf(require('webpack-dev-server-4'))
-    expect(result.version).to.eq(4)
-  })
-
   it('creates a new devServer webpack5, webpackDevServer5', async () => {
     const { devServer } = proxyquire('../src/devServer', {
       './helpers/sourceRelativeWebpackModules': {
@@ -84,7 +40,7 @@ describe('devServer', function () {
   // Writing to disk includes the correct source map size, where the difference will be made up from stat size vs parsed size
   // This is critical if a user is trying to debug to determine if they have large source maps or other large files in their dev-server under test
   describe('writes to disk if DEBUG=cypress-verbose:webpack-dev-server:bundle-analyzer is set', async () => {
-    const WEBPACK_DEV_SERVER_VERSIONS: (4 | 5)[] = [4, 5]
+    const WEBPACK_DEV_SERVER_VERSIONS: (5)[] = [5]
 
     beforeEach(() => {
       debug.enable('cypress-verbose:webpack-dev-server:bundle-analyzer')

@@ -18,7 +18,7 @@ describe('Mocking ES6 import', () => {
 
     // stub property on the loaded ES6 module using cy.stub
     // which will be restored after the test automatically
-    cy.stub(GreetingModule, 'greeting', 'test greeting')
+    cy.stub(GreetingModule, 'greeting').returns('test greeting')
     mount(<Component />)
     cy.contains('h1', 'test greeting').should('be.visible')
   })

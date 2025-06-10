@@ -13,20 +13,20 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@angular/common": "^17.2.0",
-    "@angular/core": "^17.2.0",
-    "@angular/platform-browser-dynamic": "^17.2.0",
+    "@angular/common": "^18.0.0",
+    "@angular/core": "^18.0.0",
+    "@angular/platform-browser-dynamic": "^18.0.0",
     "@cypress/mount-utils": "0.0.0-development",
     "rollup": "^4.24.4",
     "typescript": "~5.4.5",
     "zone.js": "~0.14.6"
   },
   "peerDependencies": {
-    "@angular/common": ">=17.2",
-    "@angular/core": ">=17.2",
-    "@angular/platform-browser-dynamic": ">=17.2",
+    "@angular/common": ">=18.0.0",
+    "@angular/core": ">=18.0.0",
+    "@angular/platform-browser-dynamic": ">=18.0.0",
     "rxjs": ">=7.5.0",
-    "zone.js": ">=0.13.0"
+    "zone.js": ">=0.14.0"
   },
   "files": [
     "dist"

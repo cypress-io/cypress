@@ -4,7 +4,6 @@ import { stubMutation } from './stubgql-Mutation'
 import { stubQuery } from './stubgql-Query'
 import { stubGlobalProject, stubProject } from './stubgql-Project'
 import { CloudOrganizationStubs, CloudProjectStubs, CloudRecordKeyStubs, CloudRunStubs, CloudUserStubs } from '@packages/graphql/test/stubCloudTypes'
-import { stubMigration } from './stubgql-Migration'
 import type { CodegenTypeMap } from '../generated/test-graphql-types.gen'
 import { StubErrorWrapper } from './stubgql-ErrorWrapper'
 
@@ -15,7 +14,6 @@ export const GQLStubRegistry = {
   ProjectLike: stubProject,
   GlobalProject: stubGlobalProject,
   CurrentProject: stubProject,
-  Migration: stubMigration,
   Mutation: stubMutation,
   Query: stubQuery,
   CloudOrganization: CloudOrganizationStubs.cyOrg,

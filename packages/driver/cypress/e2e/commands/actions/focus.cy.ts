@@ -457,7 +457,7 @@ describe('src/cy/commands/actions/focus', () => {
         //
         //   now.apply(@, arguments)
         //
-        // cy.stub(cy, "now", nowFn)
+        // cy.stub(cy, "now").callsFake(nowFn)
 
         const $first = cy.$$('input:first')
         // Preserved for later use.
