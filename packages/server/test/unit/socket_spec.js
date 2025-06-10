@@ -585,7 +585,7 @@ describe('lib/socket', () => {
         })
       })
 
-      it('awaits cy prompt ready and returns error if cy prompt is not ready', function (done) {
+      it('awaits cy prompt ready and returns error if cy prompt error is thrown', function (done) {
         const mockCyPrompt = {
           cyPromptManager: undefined,
           error: new Error('not loaded'),
