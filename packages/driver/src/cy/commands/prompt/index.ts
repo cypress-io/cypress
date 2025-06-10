@@ -1,6 +1,7 @@
 import { init, loadRemote } from '@module-federation/runtime'
 import type { CypressInternal, CyPromptDriverDefaultShape } from './prompt-driver-types'
 import type Emitter from 'component-emitter'
+import errorUtils from '../../../cypress/error_utils'
 
 interface CyPromptDriver { default: CyPromptDriverDefaultShape }
 
@@ -60,13 +61,18 @@ const initializeCloudCyPrompt = async (Cypress: Cypress.Cypress, cy: Cypress.Cyp
       Cypress: Cypress as CypressInternal,
       cy,
       eventManager: window.getEventManager ? window.getEventManager() : undefined,
+      errorUtils: {
+        extendErrorMessages: errorUtils.extendErrorMessages,
+        throwErrByPath: errorUtils.throwErrByPath,
+      },
     })
   } catch (error) {
     return error
   }
 }
 
-export default (Commands, Cypress, cy) => {
+export default (Commands: Cypress.Cypress['Commands'], Cypress: Cypress.Cypress, cy: Cypress.Cypress['cy']) => {
+  // @ts-expect-error - these types are not yet implemented until the prompt command is rolled out
   if (Cypress.config('experimentalPromptCommand')) {
     let initializeCloudCyPromptPromise: Promise<ReturnType<CyPromptDriverDefaultShape['createCyPrompt']> | Error> | undefined
 
@@ -74,27 +80,23 @@ export default (Commands, Cypress, cy) => {
       initializeCloudCyPromptPromise = initializeCloudCyPrompt(Cypress, cy)
     }
 
-    const prompt = async (message: string, options: object = {}) => {
+    const prompt = (message: string, options: object = {}): Cypress.Chainable<null> => {
       if (!initializeCloudCyPromptPromise) {
         // TODO: (cy.prompt) We will look into supporting other browsers (and testing them)
         // as this is rolled out
         throw new Error('`cy.prompt()` is not supported in this browser.')
       }
 
-      try {
-        const bundleResult = await initializeCloudCyPromptPromise
-
+      // TODO: figure out how to handle timeout more generally
+      return cy.wrap(initializeCloudCyPromptPromise, { log: false, timeout: 45000 }).then((bundleResult: ReturnType<CyPromptDriverDefaultShape['createCyPrompt']> | Error) => {
         if (bundleResult instanceof Error) {
           throw bundleResult
         }
 
         const cyPrompt = bundleResult
 
-        return await cyPrompt(message, options)
-      } catch (error) {
-        // TODO: handle this better
-        throw new Error(`CyPromptDriver not found: ${error}`)
-      }
+        return cyPrompt(message, options)
+      })
     }
 
     // For testing purposes, we can reset the prompt command initialization

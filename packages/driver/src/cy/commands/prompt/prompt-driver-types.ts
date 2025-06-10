@@ -46,6 +46,10 @@ export interface CyPromptOptions {
   // Note that the eventManager is present in same origin AUTs, but not cross origin
   // so we need to check for it's presence before using it
   eventManager?: CyPromptEventManager
+  errorUtils: {
+    extendErrorMessages: (errorMessages: any) => void
+    throwErrByPath: (err: any, path: string) => void
+  }
 }
 
 export interface CyPromptDriverDefaultShape {
