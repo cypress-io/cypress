@@ -852,7 +852,8 @@
     "./packages/socket/node_modules/socket.io/node_modules/ws/lib/websocket-server.js",
     "./packages/ts/register.js",
     "./packages/types/index.js",
-    "./tooling/v8-snapshot/dist/setup/v8-snapshot-entry-cy-in-cy.js"
+    "./tooling/v8-snapshot/dist/setup/v8-snapshot-entry-cy-in-cy.js",
+    "./node_modules/http-proxy/lib/http-proxy/common.js"
   ],
   "healthy": [
     "./node_modules/@babel/code-frame/lib/index.js",

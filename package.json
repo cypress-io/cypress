@@ -214,7 +214,7 @@
     "yarn-deduplicate": "3.1.0"
   },
   "engines": {
-    "node": ">=22.14.0",
+    "node": ">=22.15.1",
     "yarn": ">=1.22.22"
   },
   "productName": "Cypress",
@@ -279,7 +279,7 @@
     "@types/react": "18.3.12",
     "browserify-sign": "4.2.2",
     "devtools-protocol": "0.0.1413303",
-    "node-abi": "3.74.0",
+    "node-abi": "4.9.0",
     "sharp": "0.29.3",
     "vue-template-compiler": "2.6.12"
   },
