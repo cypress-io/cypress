@@ -96,12 +96,16 @@ export default (Commands, Cypress, cy) => {
     const prompt = async (message: string, options: object = {}) => {
       if (Cypress.testingType === 'component') {
         $errUtils.throwErrByPath('prompt.promptTestingTypeError')
+
+        return
       }
 
       if (!initializeCloudCyPromptPromise) {
         // TODO: (cy.prompt) We will look into supporting other browsers (and testing them)
         // as this is rolled out
         $errUtils.throwErrByPath('prompt.promptSupportedBrowser')
+
+        return
       }
 
       try {
