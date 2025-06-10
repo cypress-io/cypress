@@ -207,7 +207,10 @@ export class CyPromptLifecycleManager {
       }).catch((error) => {
         debug('Error during reload of cy prompt manager: %o', error)
 
-        return null
+        return {
+          cyPromptManager: undefined,
+          error: new Error('Error during reload of cy prompt manager'),
+        }
       })
     })
   }
