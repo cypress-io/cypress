@@ -606,6 +606,21 @@ context('lib/browsers/cdp_automation', () => {
 
     describe('get:aut:url', function () {
       it('gets the application url via CDP', async function () {
+        this.sendDebuggerCommand.withArgs('Page.getFrameTree').resolves({
+          frameTree:
+            {
+              childFrames: [
+                {
+                  frame: {
+                    id: '1',
+                    name: 'Your project: foobar',
+                    url: 'http://localhost:3500/fixtures/dom.html',
+                  },
+                },
+              ],
+            },
+        })
+
         this.sendDebuggerCommand.withArgs('Runtime.evaluate').resolves({
           result: {
             type: 'string',
@@ -620,20 +635,6 @@ context('lib/browsers/cdp_automation', () => {
           },
         })
 
-        // @ts-expect-error
-        cdpAutomation.frameTree = {
-          childFrames: [
-            {
-              // @ts-expect-error
-              frame: {
-                id: '1',
-                name: 'Your project: foobar',
-                url: 'http://localhost:3500/fixtures/dom.html',
-              },
-            },
-          ],
-        }
-
         const resp = await this.onRequest('get:aut:url')
 
         expect(resp).to.equal('http://localhost:3500/fixtures/dom.html')
@@ -645,32 +646,33 @@ context('lib/browsers/cdp_automation', () => {
       })
 
       it('fails silently if the frame cannot be found', async function () {
-        expect(this.onRequest('get:aut:url')).to.be.rejectedWith('Unable to find valid context for frame')
+        expect(this.onRequest('get:aut:url')).to.be.rejectedWith('Could not find AUT frame')
       })
     })
 
     describe('reload:aut:frame', function () {
       it('reloads the application', async function () {
+        this.sendDebuggerCommand.withArgs('Page.getFrameTree').resolves({
+          frameTree:
+            {
+              childFrames: [
+                {
+                  frame: {
+                    id: '1',
+                    name: 'Your project: foobar',
+                    url: 'http://localhost:3500/fixtures/dom.html',
+                  },
+                },
+              ],
+            },
+        })
+
         // @ts-expect-error
         cdpAutomation.executionContexts.set(123, {
           auxData: {
             frameId: '1',
           },
         })
-
-        // @ts-expect-error
-        cdpAutomation.frameTree = {
-          childFrames: [
-            {
-              // @ts-expect-error
-              frame: {
-                id: '1',
-                name: 'Your project: foobar',
-                url: 'http://localhost:3500/fixtures/dom.html',
-              },
-            },
-          ],
-        }
 
         const resp = await this.onRequest('reload:aut:frame', { forceReload: false })
 
@@ -683,26 +685,27 @@ context('lib/browsers/cdp_automation', () => {
       })
 
       it('reloads the application via the force option', async function () {
+        this.sendDebuggerCommand.withArgs('Page.getFrameTree').resolves({
+          frameTree:
+            {
+              childFrames: [
+                {
+                  frame: {
+                    id: '1',
+                    name: 'Your project: foobar',
+                    url: 'http://localhost:3500/fixtures/dom.html',
+                  },
+                },
+              ],
+            },
+        })
+
         // @ts-expect-error
         cdpAutomation.executionContexts.set(123, {
           auxData: {
             frameId: '1',
           },
         })
-
-        // @ts-expect-error
-        cdpAutomation.frameTree = {
-          childFrames: [
-            {
-              // @ts-expect-error
-              frame: {
-                id: '1',
-                name: 'Your project: foobar',
-                url: 'http://localhost:3500/fixtures/dom.html',
-              },
-            },
-          ],
-        }
 
         const resp = await this.onRequest('reload:aut:frame', { forceReload: true })
 
@@ -715,32 +718,33 @@ context('lib/browsers/cdp_automation', () => {
       })
 
       it('fails if the frame cannot be found', async function () {
-        expect(this.onRequest('reload:aut:frame', { forceReload: false })).to.be.rejectedWith('Unable to find valid context for frame')
+        expect(this.onRequest('reload:aut:frame', { forceReload: false })).to.be.rejectedWith('Could not find AUT frame')
       })
     })
 
     describe('navigate:aut:history', function () {
       it('navigates the AUT history', async function () {
+        this.sendDebuggerCommand.withArgs('Page.getFrameTree').resolves({
+          frameTree:
+            {
+              childFrames: [
+                {
+                  frame: {
+                    id: '1',
+                    name: 'Your project: foobar',
+                    url: 'http://localhost:3500/fixtures/dom.html',
+                  },
+                },
+              ],
+            },
+        })
+
         // @ts-expect-error
         cdpAutomation.executionContexts.set(123, {
           auxData: {
             frameId: '1',
           },
         })
-
-        // @ts-expect-error
-        cdpAutomation.frameTree = {
-          childFrames: [
-            {
-              // @ts-expect-error
-              frame: {
-                id: '1',
-                name: 'Your project: foobar',
-                url: 'http://localhost:3500/fixtures/dom.html',
-              },
-            },
-          ],
-        }
 
         const resp = await this.onRequest('navigate:aut:history', { historyNumber: 1 })
 
@@ -753,12 +757,27 @@ context('lib/browsers/cdp_automation', () => {
       })
 
       it('fails if the frame cannot be found', async function () {
-        expect(this.onRequest('navigate:aut:history', { historyNumber: 1 })).to.be.rejectedWith('Unable to find valid context for frame')
+        expect(this.onRequest('navigate:aut:history', { historyNumber: 1 })).to.be.rejectedWith('Could not find AUT frame')
       })
     })
 
     describe('get:aut:title', function () {
       it('is able to get the AUT title', async function () {
+        this.sendDebuggerCommand.withArgs('Page.getFrameTree').resolves({
+          frameTree:
+            {
+              childFrames: [
+                {
+                  frame: {
+                    id: '1',
+                    name: 'Your project: foobar',
+                    url: 'http://localhost:3500/fixtures/dom.html',
+                  },
+                },
+              ],
+            },
+        })
+
         this.sendDebuggerCommand.withArgs('Runtime.evaluate').resolves({
           result: {
             type: 'string',
@@ -773,20 +792,6 @@ context('lib/browsers/cdp_automation', () => {
           },
         })
 
-        // @ts-expect-error
-        cdpAutomation.frameTree = {
-          childFrames: [
-            {
-              // @ts-expect-error
-              frame: {
-                id: '1',
-                name: 'Your project: foobar',
-                url: 'http://localhost:3500/fixtures/dom.html',
-              },
-            },
-          ],
-        }
-
         const resp = await this.onRequest('get:aut:title')
 
         expect(resp).to.equal('mock title')
@@ -798,7 +803,7 @@ context('lib/browsers/cdp_automation', () => {
       })
 
       it('fails if the frame cannot be found', async function () {
-        expect(this.onRequest('get:aut:title')).to.be.rejectedWith('Unable to find valid context for frame')
+        expect(this.onRequest('get:aut:title')).to.be.rejectedWith('Could not find AUT frame')
       })
     })
   })

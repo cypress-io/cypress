@@ -5,6 +5,7 @@ import type { Client } from 'webdriver'
 import Debug from 'debug'
 import { isEqual } from 'lodash'
 import { evaluateInFrameContext } from '../helpers/evaluate_in_frame_context'
+import { AUT_FRAME_NAME_IDENTIFIER } from '../helpers/aut_identifier'
 
 const debug = Debug('cypress:server:automation:command:keypress')
 
@@ -43,7 +44,7 @@ export async function cdpKeyPress (
   const keyIdentifier = CDP_KEYCODE[key]
 
   const autFrame = frameTree.childFrames?.find(({ frame }) => {
-    return frame.name?.includes('Your project')
+    return frame.name?.includes(AUT_FRAME_NAME_IDENTIFIER)
   })
 
   if (!autFrame) {
