@@ -6,7 +6,7 @@ export default defineConfig({
     exclude: ['**/__snapshots__/**/*', '**/dist/**/*', '**/node_modules/**/*'],
     reporters: [
       'default',
-      ['junit', { suiteName: 'v8-snapshot tooling Unit Tests', outputFile: '/tmp/cypress/junit/driver-test-results.xml' }],
+      ['junit', { suiteName: 'v8-snapshot tooling Unit Tests', outputFile: '/tmp/cypress/junit/v8-snapshot-test-results.xml' }],
     ],
     coverage: {
       provider: 'v8',
