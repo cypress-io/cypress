@@ -1,8 +1,9 @@
 import debug from 'debug'
 import fs from 'fs'
 import path from 'path'
-import { doesDependencyMatchForceNorewriteEntry, SnapshotDoctor } from './snapshot-doctor'
+import { SnapshotDoctor } from './snapshot-doctor'
 import { canAccess, createHashForFile, matchFileHash } from '../utils'
+import { doesDependencyMatchForceNorewriteEntry } from './dependency-match'
 
 const logInfo = debug('cypress:snapgen:info')
 
@@ -30,7 +31,6 @@ function errorOnInvalidForceNorewrite (opts: ErrorOnInvalidForceNorewriteOpts) {
 
   const invalidForceNorewrites: string[] = []
 
-  console.log('errrr', Array.from(opts.forceNorewrite), opts.inputs)
   Array.from(opts.forceNorewrite).forEach((dependency) => {
     if (opts.nodeModulesOnly && !dependency.startsWith('node_modules') && !dependency.startsWith('*')) {
       return
@@ -39,8 +39,6 @@ function errorOnInvalidForceNorewrite (opts: ErrorOnInvalidForceNorewriteOpts) {
     const includedInInputs = inputsKeys.some((key) => {
       return doesDependencyMatchForceNorewriteEntry(key, dependency)
     })
-
-    console.log('included', inputsKeys, includedInInputs)
 
     if (!includedInInputs) {
       invalidForceNorewrites.push(dependency)
@@ -52,7 +50,7 @@ function errorOnInvalidForceNorewrite (opts: ErrorOnInvalidForceNorewriteOpts) {
   }
 }
 
-interface SnapshotMetadata {
+export interface SnapshotMetadata {
   deferredHash: string
   norewrite: string[]
   deferred: string[]
@@ -86,7 +84,6 @@ export async function determineDeferred (
 
   const hashFilePath = await findHashFile(projectBaseDir)
   const currentHash = await createHashForFile(hashFilePath)
-  const res = await matchFileHash(hashFilePath, deferredHash)
 
   let nodeModulesHealthy: string[] = []
   let projectHealthy: string[] = []
@@ -124,7 +121,10 @@ export async function determineDeferred (
     }
   })
 
-  if (res.match && opts.nodeModulesOnly) {
+  const res = await matchFileHash(hashFilePath, deferredHash)
+  const fileHashMatchesDeferredHash = res.match
+
+  if (fileHashMatchesDeferredHash && opts.nodeModulesOnly) {
     const combined: Set<string> = new Set([
       ...currentNorewrite,
       ...opts.forceNorewrite,

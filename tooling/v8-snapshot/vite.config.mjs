@@ -10,7 +10,7 @@ export default defineConfig({
     ],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json'],
+      reporter: ['lcovonly'],
       exclude: ['**/__snapshots__/**/*', '**/dist/**/*', '**/node_modules/**/*', 'test/**/*', 'vite.config.mjs', 'cache/**/*'],
     },
   },
