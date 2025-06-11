@@ -166,9 +166,10 @@ export class ProjectBase extends EE {
       const cyPromptLifecycleManager = new CyPromptLifecycleManager()
 
       cyPromptLifecycleManager.initializeCyPromptManager({
-        projectId: cfg.projectId,
         cloudDataSource: this.ctx.cloud,
         ctx: this.ctx,
+        record: this.options.record,
+        key: this.options.key,
       })
     }
 
