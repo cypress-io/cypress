@@ -6,6 +6,7 @@
     "dev": "webpack serve"
   },
   "devDependencies": {
+    "cross-env": "7.0.3",
     "css-loader": "^7.1.2",
     "html-webpack-plugin": "^5.6.3",
     "mini-css-extract-plugin": "^2.9.2",
