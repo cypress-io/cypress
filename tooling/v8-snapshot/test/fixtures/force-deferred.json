@@ -1,0 +1,6 @@
+{
+  "empty": [],
+  "withValues": [
+    "node_modules/some-package/src/index.js"
+  ]
+}

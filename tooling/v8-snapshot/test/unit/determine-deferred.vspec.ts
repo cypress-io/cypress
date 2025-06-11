@@ -6,9 +6,49 @@ import fs from 'fs'
 import * as doctor from '../../src/doctor/snapshot-doctor'
 import * as utils from '../../src/utils'
 import type { Metadata } from '../../src/types'
-
+import forceDeferredFixtures from '../../test/fixtures/force-deferred.json'
+import { forceDeferred } from '../../src/setup/force-deferred'
 const { createHashForFile, matchFileHash } = utils
 const { SnapshotDoctor } = doctor
+
+expect.extend({
+  setContaining<T extends Set<U> | Array<U> | U, U> (received: Set<U>, expected: T) {
+    if (!(received instanceof Set)) {
+      return { message: () => `expected ${received} to be a Set`, pass: false }
+    }
+
+    const notFound: U[] = []
+    const coercedExpected: U[] = expected instanceof Set ? Array.from(expected) : expected instanceof Array ? expected : [expected]
+
+    for (const val of coercedExpected) {
+      if (!received.has(val)) {
+        notFound.push(val)
+      }
+    }
+
+    return { message: () => `expected ${received} to contain ${expected}`, pass: notFound.length === 0 }
+  },
+})
+
+declare module 'vitest' {
+  interface Assertion {
+    setContaining<U> (expected: Set<U> | Array<U> | U): void
+  }
+
+  interface AsymmetricMatchers {
+    setContaining<U> (expected: Set<U> | Array<U> | U): void
+  }
+
+  interface ExpectStatic {
+    setContaining<U> (expected: Set<U> | Array<U> | U): void
+  }
+}
+
+vi.mock('../../src/setup/force-deferred', () => {
+  return {
+    forceDeferred: vi.fn(),
+  }
+})
 
 vi.mock('fs', async () => {
   const actual = await vi.importActual<typeof fs>('fs')
@@ -84,6 +124,12 @@ describe('determineDeferred', () => {
     })
 
     vi.spyOn(fs.promises, 'writeFile').mockResolvedValue(void 0)
+
+    vi.mocked(forceDeferred).mockReturnValue(forceDeferredFixtures.empty)
+  })
+
+  afterEach(() => {
+    vi.resetAllMocks()
   })
 
   describe('when using previous snapshot metadata', () => {
@@ -385,6 +431,47 @@ describe('determineDeferred', () => {
             determineDeferred(bundlerPath, projectBaseDir, snapshotEntryFile, cacheDir, opts),
           ).rejects.toThrow()
         })
+      })
+    })
+  })
+
+  describe('when not using previous snapshot metadata', () => {
+    let prevEnv
+
+    beforeEach(() => {
+      prevEnv = process.env.V8_SNAPSHOT_FROM_SCRATCH
+
+      process.env.V8_SNAPSHOT_FROM_SCRATCH = '1'
+
+      vi.spyOn(utils, 'canAccess').mockResolvedValue(false)
+
+      matchFileHashResult.match = false
+      opts.nodeModulesOnly = false
+
+      vi.mocked(SnapshotDoctor.prototype.heal).mockResolvedValue({
+        healthy: [],
+        deferred: [],
+        norewrite: [],
+        bundle: Buffer.from(''),
+        meta,
+      })
+    })
+
+    afterEach(() => {
+      process.env.V8_SNAPSHOT_FROM_SCRATCH = prevEnv
+    })
+
+    describe('when there are files that are force-deferred', () => {
+      beforeEach(() => {
+        vi.mocked(forceDeferred).mockReturnValue(forceDeferredFixtures.withValues)
+      })
+
+      it('initializes the doctor with the force-deferred entries in the previousDeferred param', async () => {
+        await determineDeferred(bundlerPath, projectBaseDir, snapshotEntryFile, cacheDir, opts)
+
+        expect(SnapshotDoctor).toHaveBeenCalledWith(expect.objectContaining({
+          previousDeferred: expect.setContaining(forceDeferredFixtures.withValues),
+        }))
       })
     })
   })

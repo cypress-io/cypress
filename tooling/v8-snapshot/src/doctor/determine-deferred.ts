@@ -4,7 +4,7 @@ import path from 'path'
 import { SnapshotDoctor } from './snapshot-doctor'
 import { canAccess, createHashForFile, matchFileHash } from '../utils'
 import { doesDependencyMatchForceNorewriteEntry } from './dependency-match'
-
+import { forceDeferred } from '../setup/force-deferred'
 const logInfo = debug('cypress:snapgen:info')
 
 interface ErrorOnInvalidForceNorewriteOpts {
@@ -146,7 +146,7 @@ export async function determineDeferred (
     entryFilePath: snapshotEntryFile,
     baseDirPath: projectBaseDir,
     nodeModulesOnly: opts.nodeModulesOnly,
-    previousDeferred: new Set(currentDeferred),
+    previousDeferred: new Set([...currentDeferred, ...forceDeferred()]),
     previousHealthy: new Set(currentHealthy),
     previousNorewrite: new Set(currentNorewrite),
     forceNorewrite: opts.forceNorewrite,
