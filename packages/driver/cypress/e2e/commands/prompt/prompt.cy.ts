@@ -21,4 +21,22 @@ describe('src/cy/commands/prompt', () => {
       cy.prompt('Hello, world!')
     })
   })
+
+  it('fails when trying to use cy.prompt in a browser that is not supported', (done) => {
+    if (Cypress.isBrowser({ family: 'chromium' })) {
+      done()
+
+      return
+    }
+
+    cy.on('fail', (err) => {
+      expect(err.message).to.include('`cy.prompt` is only supported in Chromium-based browsers.')
+
+      done()
+    })
+
+    cy.visit('http://www.foobar.com:3500/fixtures/dom.html')
+    // @ts-expect-error - this will not error when we actually release the experimentalPromptCommand flag
+    cy.prompt('Hello, world!')
+  })
 })

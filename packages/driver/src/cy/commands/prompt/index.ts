@@ -1,7 +1,7 @@
 import { init, loadRemote } from '@module-federation/runtime'
 import type { CypressInternal, CyPromptDriverDefaultShape } from './prompt-driver-types'
 import type Emitter from 'component-emitter'
-import errorUtils from '../../../cypress/error_utils'
+import $errUtils from '../../../cypress/error_utils'
 
 interface CyPromptDriver { default: CyPromptDriverDefaultShape }
 
@@ -16,9 +16,26 @@ declare global {
 let initializedModule: CyPromptDriverDefaultShape | null = null
 const initializeModule = async (Cypress: Cypress.Cypress): Promise<CyPromptDriverDefaultShape> => {
   // Wait for the cy prompt bundle to be downloaded and ready
-  const { success } = await Cypress.backend('wait:for:cy:prompt:ready')
+  const { success, error } = await Cypress.backend('wait:for:cy:prompt:ready')
 
-  if (!success) {
+  if (error) {
+    if (error.name === 'ENOSPC') {
+      $errUtils.throwErrByPath('prompt.promptDownloadError', {
+        args: {
+          error,
+        },
+      })
+    } else {
+      $errUtils.throwErrByPath('prompt.promptDownloadTimedOut', {
+        args: {
+          error,
+        },
+      })
+    }
+  }
+
+  if (!success && !error) {
+    // TODO: Generic error message
     throw new Error('error waiting for cy prompt bundle to be downloaded and ready')
   }
 
@@ -41,6 +58,7 @@ const initializeModule = async (Cypress: Cypress.Cypress): Promise<CyPromptDrive
   const module = await loadRemote<CyPromptDriver>('cy-prompt')
 
   if (!module?.default) {
+    // TODO: Generic error message
     throw new Error('error loading cy prompt driver')
   }
 
@@ -62,8 +80,8 @@ const initializeCloudCyPrompt = async (Cypress: Cypress.Cypress, cy: Cypress.Cyp
       cy,
       eventManager: window.getEventManager ? window.getEventManager() : undefined,
       errorUtils: {
-        extendErrorMessages: errorUtils.extendErrorMessages,
-        throwErrByPath: errorUtils.throwErrByPath,
+        extendErrorMessages: $errUtils.extendErrorMessages,
+        throwErrByPath: $errUtils.throwErrByPath,
       },
     })
   } catch (error) {
@@ -80,11 +98,19 @@ export default (Commands: Cypress.Cypress['Commands'], Cypress: Cypress.Cypress,
       initializeCloudCyPromptPromise = initializeCloudCyPrompt(Cypress, cy)
     }
 
-    const prompt = (message: string, options: object = {}): Cypress.Chainable<null> => {
+    const prompt = async (message: string, options: object = {}) => {
+      if (Cypress.testingType === 'component') {
+        $errUtils.throwErrByPath('prompt.promptTestingTypeError')
+
+        return
+      }
+
       if (!initializeCloudCyPromptPromise) {
         // TODO: (cy.prompt) We will look into supporting other browsers (and testing them)
         // as this is rolled out
-        throw new Error('`cy.prompt()` is not supported in this browser.')
+        $errUtils.throwErrByPath('prompt.promptSupportedBrowser')
+
+        return
       }
 
       // TODO: figure out how to handle timeout more generally

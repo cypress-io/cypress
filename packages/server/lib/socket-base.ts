@@ -541,10 +541,13 @@ export class SocketBase {
                 return options.closeExtraTargets()
               case 'wait:for:cy:prompt:ready':
                 return getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt().then(async (cyPrompt) => {
-                  await options.onCyPromptReady(cyPrompt)
+                  if (cyPrompt.cyPromptManager) {
+                    await options.onCyPromptReady(cyPrompt.cyPromptManager)
+                  }
 
                   return {
-                    success: cyPrompt && cyPrompt.status === 'INITIALIZED',
+                    success: cyPrompt.cyPromptManager && cyPrompt.cyPromptManager.status === 'INITIALIZED',
+                    error: cyPrompt.error ? errors.cloneErr(cyPrompt.error) : undefined,
                   }
                 })
               default:

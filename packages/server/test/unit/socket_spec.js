@@ -551,7 +551,10 @@ describe('lib/socket', () => {
     context('on(backend:request, wait:for:cy:prompt:ready)', () => {
       it('awaits cy prompt ready and returns true if cy prompt is ready', function (done) {
         const mockCyPrompt = {
-          status: 'INITIALIZED',
+          cyPromptManager: {
+            status: 'INITIALIZED',
+          },
+          error: undefined,
         }
 
         ctx.coreData.cyPromptLifecycleManager.getCyPrompt.resolves(mockCyPrompt)
@@ -559,7 +562,7 @@ describe('lib/socket', () => {
         return this.client.emit('backend:request', 'wait:for:cy:prompt:ready', (resp) => {
           expect(resp.response).to.deep.eq({ success: true })
 
-          expect(this.options.onCyPromptReady).to.be.calledWith(mockCyPrompt)
+          expect(this.options.onCyPromptReady).to.be.calledWith(mockCyPrompt.cyPromptManager)
 
           return done()
         })
@@ -567,13 +570,33 @@ describe('lib/socket', () => {
 
       it('awaits cy prompt ready and returns false if cy prompt is not ready', function (done) {
         const mockCyPrompt = {
-          status: 'NOT_INITIALIZED',
+          cyPromptManager: {
+            status: 'NOT_INITIALIZED',
+          },
+          error: undefined,
         }
 
         ctx.coreData.cyPromptLifecycleManager.getCyPrompt.resolves(mockCyPrompt)
 
         return this.client.emit('backend:request', 'wait:for:cy:prompt:ready', (resp) => {
           expect(resp.response).to.deep.eq({ success: false })
+
+          return done()
+        })
+      })
+
+      it('awaits cy prompt ready and returns error if cy prompt error is thrown', function (done) {
+        const mockCyPrompt = {
+          cyPromptManager: undefined,
+          error: new Error('not loaded'),
+        }
+
+        ctx.coreData.cyPromptLifecycleManager.getCyPrompt.resolves(mockCyPrompt)
+
+        return this.client.emit('backend:request', 'wait:for:cy:prompt:ready', (resp) => {
+          expect(resp.response).to.deep.eq({
+            error: errors.cloneErr(mockCyPrompt.error),
+          })
 
           return done()
         })

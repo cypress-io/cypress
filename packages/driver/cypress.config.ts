@@ -40,7 +40,7 @@ export const baseConfig: Cypress.ConfigOptions = {
   },
   component: {
     experimentalSingleTabRunMode: true,
-    specPattern: 'cypress/component/**/*.cy.js',
+    specPattern: 'cypress/component/**/*.cy.{js,ts}',
     supportFile: false,
     devServer: (devServerOptions) => {
       return cypressWebpackDevServer({

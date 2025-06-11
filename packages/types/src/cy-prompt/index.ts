@@ -11,6 +11,9 @@ export interface CyPromptManagerShape extends CyPromptServerShape {
 }
 
 export interface CyPromptLifecycleManagerShape {
-  getCyPrompt: () => Promise<CyPromptManagerShape | null>
+  getCyPrompt: () => Promise<{
+    cyPromptManager?: CyPromptManagerShape
+    error?: Error
+  }>
   registerCyPromptReadyListener: (listener: (cyPromptManager: CyPromptManagerShape) => void) => void
 }
