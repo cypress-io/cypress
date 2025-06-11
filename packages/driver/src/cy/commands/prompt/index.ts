@@ -98,7 +98,7 @@ export default (Commands: Cypress.Cypress['Commands'], Cypress: Cypress.Cypress,
       initializeCloudCyPromptPromise = initializeCloudCyPrompt(Cypress, cy)
     }
 
-    const prompt = async (message: string, options: object = {}) => {
+    const prompt = (message: string, options: object = {}) => {
       if (Cypress.testingType === 'component') {
         $errUtils.throwErrByPath('prompt.promptTestingTypeError')
 

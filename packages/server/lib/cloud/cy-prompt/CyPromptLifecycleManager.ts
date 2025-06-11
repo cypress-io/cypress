@@ -55,6 +55,7 @@ export class CyPromptLifecycleManager {
         projectSlug: (await ctx.project.getConfig()).projectId || undefined,
         record,
         key,
+        isOpenMode: ctx.isOpenMode,
       }
     }
 
