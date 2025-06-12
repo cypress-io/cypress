@@ -1,6 +1,7 @@
 export interface StudioPanelProps {
   canAccessStudioAI: boolean
   onStudioPanelClose?: () => void
+  studioSessionId?: string
   useRunnerStatus?: RunnerStatusShape
   useTestContentRetriever?: TestContentRetrieverShape
   useStudioAIStream?: StudioAIStreamShape
