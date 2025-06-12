@@ -418,6 +418,8 @@ export class ProjectBase extends EE {
           })
         }
 
+        const cloudStudioSessionId = v4()
+
         try {
           const isStudioReady = this.ctx.coreData.studioLifecycleManager?.isStudioReady()
 
@@ -442,7 +444,7 @@ export class ProjectBase extends EE {
 
             endTelemetry({ status: 'studio-not-ready', canAccessStudioAI: false })
 
-            return { canAccessStudioAI: false }
+            return { canAccessStudioAI: false, cloudStudioSessionId }
           }
 
           const studio = await this.ctx.coreData.studioLifecycleManager?.getStudio()
@@ -476,7 +478,7 @@ export class ProjectBase extends EE {
             if (!canAccessStudioAI) {
               endTelemetry({ status: 'success', canAccessStudioAI })
 
-              return { canAccessStudioAI }
+              return { canAccessStudioAI, cloudStudioSessionId }
             }
 
             this.protocolManager = studio.protocolManager
@@ -495,7 +497,7 @@ export class ProjectBase extends EE {
 
               endTelemetry({ status: 'protocol-db-path-not-set', canAccessStudioAI: false })
 
-              return { canAccessStudioAI: false }
+              return { canAccessStudioAI: false, cloudStudioSessionId }
             }
 
             telemetryManager.mark(INITIALIZATION_MARK_NAMES.INITIALIZE_STUDIO_AI_START)
@@ -507,18 +509,18 @@ export class ProjectBase extends EE {
 
             endTelemetry({ status: 'success', canAccessStudioAI: true })
 
-            return { canAccessStudioAI: true }
+            return { canAccessStudioAI: true, cloudStudioSessionId }
           }
 
           this.protocolManager = undefined
 
           endTelemetry({ status: 'success', canAccessStudioAI: false })
 
-          return { canAccessStudioAI: false }
+          return { canAccessStudioAI: false, cloudStudioSessionId }
         } catch (error) {
           endTelemetry({ status: 'exception', canAccessStudioAI: false })
 
-          return { canAccessStudioAI: false }
+          return { canAccessStudioAI: false, cloudStudioSessionId }
         }
       },
 

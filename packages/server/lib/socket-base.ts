@@ -413,9 +413,9 @@ export class SocketBase {
 
         socket.on('studio:init', async (cb) => {
           try {
-            const { canAccessStudioAI } = await options.onStudioInit()
+            const { canAccessStudioAI, cloudStudioSessionId } = await options.onStudioInit()
 
-            cb({ canAccessStudioAI })
+            cb({ canAccessStudioAI, cloudStudioSessionId })
           } catch (error) {
             cb({ error: errors.cloneErr(error) })
           }

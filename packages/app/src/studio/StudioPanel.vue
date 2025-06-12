@@ -52,6 +52,7 @@ const props = defineProps<{
   onStudioPanelClose: () => void
   eventManager: EventManager
   studioStatus: string | null
+  cloudStudioSessionId?: string
 }>()
 
 interface StudioApp { default: StudioAppDefaultShape }
@@ -71,7 +72,11 @@ const maybeRenderReactComponent = () => {
     return
   }
 
-  const panel = window.UnifiedRunner.React.createElement(ReactStudioPanel.value, { canAccessStudioAI: props.canAccessStudioAI, onStudioPanelClose: props.onStudioPanelClose })
+  const panel = window.UnifiedRunner.React.createElement(ReactStudioPanel.value, {
+    canAccessStudioAI: props.canAccessStudioAI,
+    onStudioPanelClose: props.onStudioPanelClose,
+    studioSessionId: props.cloudStudioSessionId,
+  })
 
   if (!reactRoot.value) {
     reactRoot.value = window.UnifiedRunner.ReactDOM.createRoot(container.value)
@@ -81,6 +86,7 @@ const maybeRenderReactComponent = () => {
 }
 
 watch(() => props.canAccessStudioAI, maybeRenderReactComponent)
+watch(() => props.cloudStudioSessionId, maybeRenderReactComponent)
 
 const unmountReactComponent = () => {
   if (!ReactStudioPanel.value || !container.value) {
