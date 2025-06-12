@@ -3877,6 +3877,10 @@
     "./packages/server/lib/cloud/strip_path.ts",
     "./packages/server/lib/cloud/studio/ensure_studio_bundle.ts",
     "./packages/server/lib/cloud/studio/studio.ts",
+    "./packages/server/lib/cloud/studio/telemetry/TelemetryManager.ts",
+    "./packages/server/lib/cloud/studio/telemetry/TelemetryReporter.ts",
+    "./packages/server/lib/cloud/studio/telemetry/constants/bundle-lifecycle.ts",
+    "./packages/server/lib/cloud/studio/telemetry/constants/initialization.ts",
     "./packages/server/lib/cloud/upload/send_file.ts",
     "./packages/server/lib/cloud/upload/stream_activity_monitor.ts",
     "./packages/server/lib/cloud/upload/stream_stalled_error.ts",
@@ -4186,5 +4190,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "47cff3164c002cd4fa982fb8fa7c987b3a3e27c84113d642e80c0e743471b917"
+  "deferredHash": "79fe5ed644343541c25503b45862f78da16b6bdd776b9bf5182a0b92d55c8004"
 }

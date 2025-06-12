@@ -17,6 +17,8 @@ const { getCtx } = require(`../../lib/makeDataContext`)
 const browsers = require('../../lib/browsers')
 const { StudioLifecycleManager } = require('../../lib/cloud/studio/StudioLifecycleManager')
 const { StudioManager } = require('../../lib/cloud/studio/studio')
+const { telemetryManager, MARK_NAMES, TELEMETRY_GROUP_NAMES } = require('../../lib/cloud/studio/telemetry/TelemetryManager')
+const { TelemetryReporter } = require('../../lib/cloud/studio/telemetry/TelemetryReporter')
 
 let ctx
 
@@ -654,347 +656,401 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       expect(fn).to.be.calledOnce
     })
 
-    it('passes onStudioInit callback with AI enabled and a protocol manager', async function () {
-      const mockSetupProtocol = sinon.stub()
-      const mockBeforeSpec = sinon.stub()
-      const mockAccessStudioAI = sinon.stub().resolves(true)
-      const mockCaptureStudioEvent = sinon.stub().resolves()
-
-      this.project.spec = {}
-
-      this.project._cfg = this.project._cfg || {}
-      this.project._cfg.projectId = 'test-project-id'
-      this.project.ctx.coreData.user = { email: 'test@example.com' }
-      this.project.ctx.coreData.machineId = Promise.resolve('test-machine-id')
-
-      const studioManager = new StudioManager()
-
-      studioManager.canAccessStudioAI = mockAccessStudioAI
-      studioManager.captureStudioEvent = mockCaptureStudioEvent
-      studioManager.protocolManager = {
-        setupProtocol: mockSetupProtocol,
-        beforeSpec: mockBeforeSpec,
-        db: { test: 'db' },
-        dbPath: 'test-db-path',
-      }
-
-      const studioLifecycleManager = new StudioLifecycleManager()
-
-      this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
-
-      // Set up the studio manager promise directly
-      studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
-      studioLifecycleManager.isStudioReady = sinon.stub().returns(true)
-
-      // Create a browser object
-      this.project.browser = {
-        name: 'chrome',
-        family: 'chromium',
-      }
-
-      this.project.options = { browsers: [this.project.browser] }
-
-      sinon.stub(browsers, 'closeProtocolConnection').resolves()
-
-      sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
-      sinon.stub(this.project, 'protocolManager').get(() => {
-        return this.project['_protocolManager']
-      }).set((protocolManager) => {
-        this.project['_protocolManager'] = protocolManager
-      })
-
-      let studioInitPromise
-
-      this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
-        studioInitPromise = callbacks.onStudioInit()
-      })
-
-      this.project.startWebsockets({}, {})
-
-      const { canAccessStudioAI } = await studioInitPromise
-
-      expect(canAccessStudioAI).to.be.true
-      expect(mockCaptureStudioEvent).to.be.calledWith({
-        type: 'studio:started',
-        machineId: 'test-machine-id',
-        projectId: 'test-project-id',
-        browser: {
-          name: 'chrome',
-          family: 'chromium',
-          channel: undefined,
-          version: undefined,
-        },
-        cypressVersion: pkg.version,
-      })
-
-      expect(mockSetupProtocol).to.be.calledOnce
-      expect(mockBeforeSpec).to.be.calledOnce
-      expect(mockAccessStudioAI).to.be.calledWith({
-        family: 'chromium',
-        name: 'chrome',
-      })
-
-      expect(browsers.connectProtocolToBrowser).to.be.calledWith({
-        browser: this.project.browser,
-        foundBrowsers: this.project.options.browsers,
-        protocolManager: studioManager.protocolManager,
-      })
-
-      expect(this.project['_protocolManager']).to.eq(studioManager.protocolManager)
-    })
-
-    it('passes onStudioInit callback with AI enabled but no protocol manager', async function () {
-      const mockSetupProtocol = sinon.stub()
-      const mockBeforeSpec = sinon.stub()
-      const mockAccessStudioAI = sinon.stub().resolves(true)
-      const mockCaptureStudioEvent = sinon.stub().resolves()
-
-      this.project.spec = {}
-
-      this.project._cfg = this.project._cfg || {}
-      this.project._cfg.projectId = 'test-project-id'
-      this.project.ctx.coreData.user = { email: 'test@example.com' }
-      this.project.ctx.coreData.machineId = Promise.resolve('test-machine-id')
-
-      const studioManager = new StudioManager()
-
-      studioManager.canAccessStudioAI = mockAccessStudioAI
-      studioManager.captureStudioEvent = mockCaptureStudioEvent
-      const studioLifecycleManager = new StudioLifecycleManager()
-
-      this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
-
-      studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
-
-      studioLifecycleManager.isStudioReady = sinon.stub().returns(true)
-
-      // Create a browser object
-      this.project.browser = {
-        name: 'chrome',
-        family: 'chromium',
-      }
-
-      this.project.options = { browsers: [this.project.browser] }
-
-      sinon.stub(browsers, 'closeProtocolConnection').resolves()
-
-      sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
-      sinon.stub(this.project, 'protocolManager').get(() => {
-        return this.project['_protocolManager']
-      }).set((protocolManager) => {
-        this.project['_protocolManager'] = protocolManager
-      })
-
-      let studioInitPromise
-
-      this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
-        studioInitPromise = callbacks.onStudioInit()
-      })
-
-      this.project.startWebsockets({}, {})
-
-      const { canAccessStudioAI } = await studioInitPromise
-
-      expect(canAccessStudioAI).to.be.false
-      expect(mockCaptureStudioEvent).to.be.calledWith({
-        type: 'studio:started',
-        machineId: 'test-machine-id',
-        projectId: 'test-project-id',
-        browser: {
-          name: 'chrome',
-          family: 'chromium',
-          channel: undefined,
-          version: undefined,
-        },
-        cypressVersion: pkg.version,
-      })
-
-      expect(mockSetupProtocol).not.to.be.called
-      expect(mockBeforeSpec).not.to.be.called
-      expect(mockAccessStudioAI).not.to.be.called
-
-      expect(browsers.connectProtocolToBrowser).not.to.be.called
-      expect(this.project['_protocolManager']).to.be.undefined
-    })
-
-    it('passes onStudioInit callback with AI disabled', async function () {
-      const mockSetupProtocol = sinon.stub()
-      const mockBeforeSpec = sinon.stub()
-      const mockAccessStudioAI = sinon.stub().resolves(false)
-      const mockCaptureStudioEvent = sinon.stub().resolves()
-
-      this.project.spec = {}
-
-      this.project._cfg = this.project._cfg || {}
-      this.project._cfg.projectId = 'test-project-id'
-      this.project.ctx.coreData.user = { email: 'test@example.com' }
-      this.project.ctx.coreData.machineId = Promise.resolve('test-machine-id')
-
-      const studioManager = new StudioManager()
-
-      studioManager.canAccessStudioAI = mockAccessStudioAI
-      studioManager.captureStudioEvent = mockCaptureStudioEvent
-      studioManager.protocolManager = {
-        setupProtocol: mockSetupProtocol,
-        beforeSpec: mockBeforeSpec,
-      }
-
-      const studioLifecycleManager = new StudioLifecycleManager()
-
-      this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
-
-      studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
-
-      studioLifecycleManager.isStudioReady = sinon.stub().returns(true)
-
-      this.project.browser = {
-        name: 'chrome',
-        family: 'chromium',
-      }
-
-      this.project.options = { browsers: [this.project.browser] }
-
-      sinon.stub(browsers, 'closeProtocolConnection').resolves()
-
-      sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
-      sinon.stub(this.project, 'protocolManager').get(() => {
-        return this.project['_protocolManager']
-      }).set((protocolManager) => {
-        this.project['_protocolManager'] = protocolManager
-      })
-
-      let studioInitPromise
-
-      this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
-        studioInitPromise = callbacks.onStudioInit()
-      })
-
-      this.project.startWebsockets({}, {})
-
-      const { canAccessStudioAI } = await studioInitPromise
-
-      expect(canAccessStudioAI).to.be.false
-      expect(mockCaptureStudioEvent).to.be.calledWith({
-        type: 'studio:started',
-        machineId: 'test-machine-id',
-        projectId: 'test-project-id',
-        browser: {
-          name: 'chrome',
-          family: 'chromium',
-          channel: undefined,
-          version: undefined,
-        },
-        cypressVersion: pkg.version,
-      })
-
-      expect(mockSetupProtocol).not.to.be.called
-      expect(mockBeforeSpec).not.to.be.called
-      expect(browsers.connectProtocolToBrowser).not.to.be.called
-      expect(this.project['_protocolManager']).to.be.undefined
-    })
-
-    it('does not capture studio started event if the user is accessing cloud studio', async function () {
-      process.env.CYPRESS_ENABLE_CLOUD_STUDIO = 'true'
-      process.env.CYPRESS_LOCAL_STUDIO_PATH = 'false'
-
-      const mockAccessStudioAI = sinon.stub().resolves(true)
-      const mockCaptureStudioEvent = sinon.stub().resolves()
-
-      this.project.spec = {}
-
-      this.project._cfg = this.project._cfg || {}
-      this.project._cfg.projectId = 'test-project-id'
-      this.project.ctx.coreData.user = { email: 'test@example.com' }
-      this.project.ctx.coreData.machineId = Promise.resolve('test-machine-id')
-
-      const studioManager = new StudioManager()
-
-      studioManager.canAccessStudioAI = mockAccessStudioAI
-      studioManager.captureStudioEvent = mockCaptureStudioEvent
-      const studioLifecycleManager = new StudioLifecycleManager()
-
-      this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
-
-      studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
-
-      studioLifecycleManager.isStudioReady = sinon.stub().returns(true)
-
-      // Create a browser object
-      this.project.browser = {
-        name: 'chrome',
-        family: 'chromium',
-      }
-
-      this.project.options = { browsers: [this.project.browser] }
-
-      sinon.stub(browsers, 'closeProtocolConnection').resolves()
-
-      sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
-      sinon.stub(this.project, 'protocolManager').get(() => {
-        return this.project['_protocolManager']
-      }).set((protocolManager) => {
-        this.project['_protocolManager'] = protocolManager
-      })
-
-      let studioInitPromise
-
-      this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
-        studioInitPromise = callbacks.onStudioInit()
-      })
-
-      this.project.startWebsockets({}, {})
-
-      const { canAccessStudioAI } = await studioInitPromise
-
-      expect(canAccessStudioAI).to.be.false
-      expect(mockCaptureStudioEvent).not.to.be.called
-    })
-
-    it('passes onStudioDestroy callback', async function () {
-      // Set up minimal required properties
-      this.project.ctx = this.project.ctx || {}
-      this.project.ctx.coreData = this.project.ctx.coreData || {}
-
-      // Create a studio manager with minimal properties
-      const protocolManager = { close: sinon.stub().resolves() }
-      const studioManager = {
-        destroy: sinon.stub().resolves(),
-        protocolManager,
-      }
-
-      this.project.ctx.coreData.studioLifecycleManager = {
-        getStudio: sinon.stub().resolves(studioManager),
-        isStudioReady: sinon.stub().resolves(true),
-      }
-
-      this.project['_protocolManager'] = protocolManager
-
-      // Create a browser object
-      this.project.browser = {
-        name: 'chrome',
-        family: 'chromium',
-      }
-
-      this.project.options = { browsers: [this.project.browser] }
-
-      sinon.stub(browsers, 'closeProtocolConnection').resolves()
-
-      // Modify the startWebsockets stub to track the callbacks
-      const callbackPromise = new Promise((resolve) => {
-        this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
-          await callbacks.onStudioDestroy()
-          resolve()
+    describe('studio', () => {
+      let markStub
+      let reportTelemetryStub
+
+      beforeEach(function () {
+        markStub = sinon.stub()
+        reportTelemetryStub = sinon.stub()
+
+        telemetryManager.mark = markStub
+        TelemetryReporter.getInstance = sinon.stub().returns({
+          reportTelemetry: reportTelemetryStub,
         })
       })
 
-      this.project.startWebsockets({}, {})
+      it('passes onStudioInit callback with AI enabled and a protocol manager', async function () {
+        const mockSetupProtocol = sinon.stub()
+        const mockBeforeSpec = sinon.stub()
+        const mockAccessStudioAI = sinon.stub().resolves(true)
+        const mockCaptureStudioEvent = sinon.stub().resolves()
 
-      await callbackPromise
+        this.project.spec = {}
 
-      expect(studioManager.destroy).to.have.been.calledOnce
-      expect(browsers.closeProtocolConnection).to.have.been.calledOnce
-      expect(protocolManager.close).to.have.been.calledOnce
-      expect(this.project['_protocolManager']).to.be.undefined
+        this.project._cfg = this.project._cfg || {}
+        this.project._cfg.projectId = 'test-project-id'
+        this.project.ctx.coreData.user = { email: 'test@example.com' }
+        this.project.ctx.coreData.machineId = Promise.resolve('test-machine-id')
+
+        const studioManager = new StudioManager()
+
+        studioManager.canAccessStudioAI = mockAccessStudioAI
+        studioManager.captureStudioEvent = mockCaptureStudioEvent
+        studioManager.protocolManager = {
+          setupProtocol: mockSetupProtocol,
+          beforeSpec: mockBeforeSpec,
+          db: { test: 'db' },
+          dbPath: 'test-db-path',
+        }
+
+        const studioLifecycleManager = new StudioLifecycleManager()
+
+        this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
+
+        // Set up the studio manager promise directly
+        studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
+        studioLifecycleManager.isStudioReady = sinon.stub().returns(true)
+
+        // Create a browser object
+        this.project.browser = {
+          name: 'chrome',
+          family: 'chromium',
+        }
+
+        this.project.options = { browsers: [this.project.browser] }
+
+        sinon.stub(browsers, 'closeProtocolConnection').resolves()
+
+        sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
+        sinon.stub(this.project, 'protocolManager').get(() => {
+          return this.project['_protocolManager']
+        }).set((protocolManager) => {
+          this.project['_protocolManager'] = protocolManager
+        })
+
+        let studioInitPromise
+
+        this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
+          studioInitPromise = callbacks.onStudioInit()
+        })
+
+        this.project.startWebsockets({}, {})
+
+        const { canAccessStudioAI } = await studioInitPromise
+
+        expect(canAccessStudioAI).to.be.true
+        expect(mockCaptureStudioEvent).to.be.calledWith({
+          type: 'studio:started',
+          machineId: 'test-machine-id',
+          projectId: 'test-project-id',
+          browser: {
+            name: 'chrome',
+            family: 'chromium',
+            channel: undefined,
+            version: undefined,
+          },
+          cypressVersion: pkg.version,
+        })
+
+        expect(mockSetupProtocol).to.be.calledOnce
+        expect(mockBeforeSpec).to.be.calledOnce
+        expect(mockAccessStudioAI).to.be.calledWith({
+          family: 'chromium',
+          name: 'chrome',
+        })
+
+        expect(browsers.connectProtocolToBrowser).to.be.calledWith({
+          browser: this.project.browser,
+          foundBrowsers: this.project.options.browsers,
+          protocolManager: studioManager.protocolManager,
+        })
+
+        expect(this.project['_protocolManager']).to.eq(studioManager.protocolManager)
+
+        expect(markStub).to.be.calledWith(MARK_NAMES.INITIALIZATION_START)
+        expect(markStub).to.be.calledWith(MARK_NAMES.INITIALIZATION_END)
+        expect(markStub).to.be.calledWith(MARK_NAMES.CAN_ACCESS_STUDIO_AI_START)
+        expect(markStub).to.be.calledWith(MARK_NAMES.CAN_ACCESS_STUDIO_AI_END)
+        expect(markStub).to.be.calledWith(MARK_NAMES.CONNECT_PROTOCOL_TO_BROWSER_START)
+        expect(markStub).to.be.calledWith(MARK_NAMES.CONNECT_PROTOCOL_TO_BROWSER_END)
+        expect(markStub).to.be.calledWith(MARK_NAMES.INITIALIZE_STUDIO_AI_START)
+        expect(markStub).to.be.calledWith(MARK_NAMES.INITIALIZE_STUDIO_AI_END)
+        expect(reportTelemetryStub).to.be.calledWith(TELEMETRY_GROUP_NAMES.INITIALIZE_STUDIO, {
+          status: 'success',
+          canAccessStudioAI: true,
+        })
+      })
+
+      it('passes onStudioInit callback with AI enabled but no protocol manager', async function () {
+        const mockSetupProtocol = sinon.stub()
+        const mockBeforeSpec = sinon.stub()
+        const mockAccessStudioAI = sinon.stub().resolves(true)
+        const mockCaptureStudioEvent = sinon.stub().resolves()
+
+        this.project.spec = {}
+
+        this.project._cfg = this.project._cfg || {}
+        this.project._cfg.projectId = 'test-project-id'
+        this.project.ctx.coreData.user = { email: 'test@example.com' }
+        this.project.ctx.coreData.machineId = Promise.resolve('test-machine-id')
+
+        const studioManager = new StudioManager()
+
+        studioManager.canAccessStudioAI = mockAccessStudioAI
+        studioManager.captureStudioEvent = mockCaptureStudioEvent
+        const studioLifecycleManager = new StudioLifecycleManager()
+
+        this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
+
+        studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
+
+        studioLifecycleManager.isStudioReady = sinon.stub().returns(true)
+
+        // Create a browser object
+        this.project.browser = {
+          name: 'chrome',
+          family: 'chromium',
+        }
+
+        this.project.options = { browsers: [this.project.browser] }
+
+        sinon.stub(browsers, 'closeProtocolConnection').resolves()
+
+        sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
+        sinon.stub(this.project, 'protocolManager').get(() => {
+          return this.project['_protocolManager']
+        }).set((protocolManager) => {
+          this.project['_protocolManager'] = protocolManager
+        })
+
+        let studioInitPromise
+
+        this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
+          studioInitPromise = callbacks.onStudioInit()
+        })
+
+        this.project.startWebsockets({}, {})
+
+        const { canAccessStudioAI } = await studioInitPromise
+
+        expect(canAccessStudioAI).to.be.false
+        expect(mockCaptureStudioEvent).to.be.calledWith({
+          type: 'studio:started',
+          machineId: 'test-machine-id',
+          projectId: 'test-project-id',
+          browser: {
+            name: 'chrome',
+            family: 'chromium',
+            channel: undefined,
+            version: undefined,
+          },
+          cypressVersion: pkg.version,
+        })
+
+        expect(mockSetupProtocol).not.to.be.called
+        expect(mockBeforeSpec).not.to.be.called
+        expect(mockAccessStudioAI).not.to.be.called
+
+        expect(browsers.connectProtocolToBrowser).not.to.be.called
+        expect(this.project['_protocolManager']).to.be.undefined
+
+        expect(markStub).to.be.calledWith(MARK_NAMES.INITIALIZATION_START)
+        expect(markStub).to.be.calledWith(MARK_NAMES.INITIALIZATION_END)
+        expect(markStub).not.to.be.calledWith(MARK_NAMES.CAN_ACCESS_STUDIO_AI_START)
+        expect(markStub).not.to.be.calledWith(MARK_NAMES.CAN_ACCESS_STUDIO_AI_END)
+        expect(markStub).not.to.be.calledWith(MARK_NAMES.CONNECT_PROTOCOL_TO_BROWSER_START)
+        expect(markStub).not.to.be.calledWith(MARK_NAMES.CONNECT_PROTOCOL_TO_BROWSER_END)
+        expect(markStub).not.to.be.calledWith(MARK_NAMES.INITIALIZE_STUDIO_AI_START)
+        expect(markStub).not.to.be.calledWith(MARK_NAMES.INITIALIZE_STUDIO_AI_END)
+        expect(reportTelemetryStub).to.be.calledWith(TELEMETRY_GROUP_NAMES.INITIALIZE_STUDIO, {
+          status: 'success',
+          canAccessStudioAI: false,
+        })
+      })
+
+      it('passes onStudioInit callback with AI disabled', async function () {
+        const mockSetupProtocol = sinon.stub()
+        const mockBeforeSpec = sinon.stub()
+        const mockAccessStudioAI = sinon.stub().resolves(false)
+        const mockCaptureStudioEvent = sinon.stub().resolves()
+
+        this.project.spec = {}
+
+        this.project._cfg = this.project._cfg || {}
+        this.project._cfg.projectId = 'test-project-id'
+        this.project.ctx.coreData.user = { email: 'test@example.com' }
+        this.project.ctx.coreData.machineId = Promise.resolve('test-machine-id')
+
+        const studioManager = new StudioManager()
+
+        studioManager.canAccessStudioAI = mockAccessStudioAI
+        studioManager.captureStudioEvent = mockCaptureStudioEvent
+        studioManager.protocolManager = {
+          setupProtocol: mockSetupProtocol,
+          beforeSpec: mockBeforeSpec,
+        }
+
+        const studioLifecycleManager = new StudioLifecycleManager()
+
+        this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
+
+        studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
+
+        studioLifecycleManager.isStudioReady = sinon.stub().returns(true)
+
+        this.project.browser = {
+          name: 'chrome',
+          family: 'chromium',
+        }
+
+        this.project.options = { browsers: [this.project.browser] }
+
+        sinon.stub(browsers, 'closeProtocolConnection').resolves()
+
+        sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
+        sinon.stub(this.project, 'protocolManager').get(() => {
+          return this.project['_protocolManager']
+        }).set((protocolManager) => {
+          this.project['_protocolManager'] = protocolManager
+        })
+
+        let studioInitPromise
+
+        this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
+          studioInitPromise = callbacks.onStudioInit()
+        })
+
+        this.project.startWebsockets({}, {})
+
+        const { canAccessStudioAI } = await studioInitPromise
+
+        expect(canAccessStudioAI).to.be.false
+        expect(mockCaptureStudioEvent).to.be.calledWith({
+          type: 'studio:started',
+          machineId: 'test-machine-id',
+          projectId: 'test-project-id',
+          browser: {
+            name: 'chrome',
+            family: 'chromium',
+            channel: undefined,
+            version: undefined,
+          },
+          cypressVersion: pkg.version,
+        })
+
+        expect(mockSetupProtocol).not.to.be.called
+        expect(mockBeforeSpec).not.to.be.called
+        expect(browsers.connectProtocolToBrowser).not.to.be.called
+        expect(this.project['_protocolManager']).to.be.undefined
+
+        expect(markStub).to.be.calledWith(MARK_NAMES.INITIALIZATION_START)
+        expect(markStub).to.be.calledWith(MARK_NAMES.INITIALIZATION_END)
+        expect(markStub).to.be.calledWith(MARK_NAMES.CAN_ACCESS_STUDIO_AI_START)
+        expect(markStub).to.be.calledWith(MARK_NAMES.CAN_ACCESS_STUDIO_AI_END)
+        expect(markStub).not.to.be.calledWith(MARK_NAMES.CONNECT_PROTOCOL_TO_BROWSER_START)
+        expect(markStub).not.to.be.calledWith(MARK_NAMES.CONNECT_PROTOCOL_TO_BROWSER_END)
+        expect(markStub).not.to.be.calledWith(MARK_NAMES.INITIALIZE_STUDIO_AI_START)
+        expect(markStub).not.to.be.calledWith(MARK_NAMES.INITIALIZE_STUDIO_AI_END)
+        expect(reportTelemetryStub).to.be.calledWith(TELEMETRY_GROUP_NAMES.INITIALIZE_STUDIO, {
+          status: 'success',
+          canAccessStudioAI: false,
+        })
+      })
+
+      it('does not capture studio started event if the user is accessing cloud studio', async function () {
+        process.env.CYPRESS_ENABLE_CLOUD_STUDIO = 'true'
+        process.env.CYPRESS_LOCAL_STUDIO_PATH = 'false'
+
+        const mockAccessStudioAI = sinon.stub().resolves(true)
+        const mockCaptureStudioEvent = sinon.stub().resolves()
+
+        this.project.spec = {}
+
+        this.project._cfg = this.project._cfg || {}
+        this.project._cfg.projectId = 'test-project-id'
+        this.project.ctx.coreData.user = { email: 'test@example.com' }
+        this.project.ctx.coreData.machineId = Promise.resolve('test-machine-id')
+
+        const studioManager = new StudioManager()
+
+        studioManager.canAccessStudioAI = mockAccessStudioAI
+        studioManager.captureStudioEvent = mockCaptureStudioEvent
+        const studioLifecycleManager = new StudioLifecycleManager()
+
+        this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
+
+        studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
+
+        studioLifecycleManager.isStudioReady = sinon.stub().returns(true)
+
+        // Create a browser object
+        this.project.browser = {
+          name: 'chrome',
+          family: 'chromium',
+        }
+
+        this.project.options = { browsers: [this.project.browser] }
+
+        sinon.stub(browsers, 'closeProtocolConnection').resolves()
+
+        sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
+        sinon.stub(this.project, 'protocolManager').get(() => {
+          return this.project['_protocolManager']
+        }).set((protocolManager) => {
+          this.project['_protocolManager'] = protocolManager
+        })
+
+        let studioInitPromise
+
+        this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
+          studioInitPromise = callbacks.onStudioInit()
+        })
+
+        this.project.startWebsockets({}, {})
+
+        const { canAccessStudioAI } = await studioInitPromise
+
+        expect(canAccessStudioAI).to.be.false
+        expect(mockCaptureStudioEvent).not.to.be.called
+      })
+
+      it('passes onStudioDestroy callback', async function () {
+        // Set up minimal required properties
+        this.project.ctx = this.project.ctx || {}
+        this.project.ctx.coreData = this.project.ctx.coreData || {}
+
+        // Create a studio manager with minimal properties
+        const protocolManager = { close: sinon.stub().resolves() }
+        const studioManager = {
+          destroy: sinon.stub().resolves(),
+          protocolManager,
+        }
+
+        this.project.ctx.coreData.studioLifecycleManager = {
+          getStudio: sinon.stub().resolves(studioManager),
+          isStudioReady: sinon.stub().resolves(true),
+        }
+
+        this.project['_protocolManager'] = protocolManager
+
+        // Create a browser object
+        this.project.browser = {
+          name: 'chrome',
+          family: 'chromium',
+        }
+
+        this.project.options = { browsers: [this.project.browser] }
+
+        sinon.stub(browsers, 'closeProtocolConnection').resolves()
+
+        // Modify the startWebsockets stub to track the callbacks
+        const callbackPromise = new Promise((resolve) => {
+          this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
+            await callbacks.onStudioDestroy()
+            resolve()
+          })
+        })
+
+        this.project.startWebsockets({}, {})
+
+        await callbackPromise
+
+        expect(studioManager.destroy).to.have.been.calledOnce
+        expect(browsers.closeProtocolConnection).to.have.been.calledOnce
+        expect(protocolManager.close).to.have.been.calledOnce
+        expect(this.project['_protocolManager']).to.be.undefined
+      })
     })
   })
 

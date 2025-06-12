@@ -556,6 +556,24 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
 
         testAfterRun(test, Cypress)
         await testAfterRunAsync(test, Cypress)
+
+        // if the user has stopped the run, we need to abort,
+        // this needs to happen after the test:after:run events have fired
+        // to ensure protocol can properly handle the abort
+        if (_runner.stopped) {
+          // abort the run
+          _runner.abort()
+
+          // emit the final 'end' event
+          // since our reporter depends on this event
+          // and mocha may never fire this because our
+          // runnable may never finish
+          _runner.emit('end')
+
+          // remove all the listeners
+          // so no more events fire
+          _runner.removeAllListeners()
+        }
       })]
 
     return newArgs
@@ -1916,19 +1934,6 @@ export default {
         }
 
         _runner.stopped = true
-
-        // abort the run
-        _runner.abort()
-
-        // emit the final 'end' event
-        // since our reporter depends on this event
-        // and mocha may never fire this because our
-        // runnable may never finish
-        _runner.emit('end')
-
-        // remove all the listeners
-        // so no more events fire
-        _runner.removeAllListeners()
       },
 
       getDisplayPropsForLog: LogUtils.getDisplayProps,
