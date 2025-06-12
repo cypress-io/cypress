@@ -42,11 +42,7 @@ export function getUrlFromAutomation (Cypress: Cypress.Cypress, options: Partial
         searchParams: fullUrlObject.searchParams,
       }
     })
-    .catch((err) => {
-      mostRecentError.name = err.name
-      mostRecentError.message = err.message
-    })
-    .catch((err) => mostRecentError = err)
+    .catch<void>((err) => mostRecentError = err)
     // Pass or fail, we always clear the automationPromise, so future retries know there's no live request to the server.
     .finally(() => automationPromise = null)
 

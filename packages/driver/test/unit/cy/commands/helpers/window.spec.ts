@@ -7,9 +7,7 @@ import Bluebird from 'bluebird'
 
 const flushPromises = () => {
   return new Promise<void>((resolve) => {
-    setTimeout(() => {
-      resolve()
-    }, 10)
+    setTimeout(resolve)
   })
 }
 

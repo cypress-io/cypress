@@ -255,7 +255,7 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
 
   context('cross-origin AUT errors', () => {
     // We only need to check .get here because the other commands are chained off of it.
-    // the exceptions are window(), document(), title(), url(), hash(), location(), go(), reload(), and scrollTo()
+    // the exceptions are document() and scrollTo()
     const assertOriginFailure = (err: Error, done: () => void) => {
       expect(err.message).to.include(`The command was expected to run against origin \`http://localhost:3500\` but the application is at origin \`http://www.foobar.com:3500\`.`)
       expect(err.message).to.include(`This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.`)
