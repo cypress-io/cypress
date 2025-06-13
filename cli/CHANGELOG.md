@@ -10,6 +10,7 @@ _Released 6/17/2025 (PENDING)_
 **Bugfixes:**
 
 - Fixed an issue when using `Cypress.stop()` where a run may be aborted prior to receiving the required runner events causing Test Replay to not be available. Addresses [#31781](https://github.com/cypress-io/cypress/issues/31781).
+- Fixed missing support for setting an absolute path for `component.indexHtmlFile` in `@cypress/webpack-dev-server`. Fixes [#31819](https://github.com/cypress-io/cypress/issues/31819).
 
 ## 14.4.1
 
