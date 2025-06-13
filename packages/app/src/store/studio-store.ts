@@ -371,7 +371,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       if (name === 'click' && this._matchPreviousMouseEvent($el)) {
         selector = this._previousMouseEvent?.selector
       } else {
-        selector = getCypress().SelectorPlayground.getSelector($el)
+        selector = getCypress().ElementSelector.getSelector($el)
       }
 
       this._clearPreviousMouseEvent()
@@ -428,7 +428,7 @@ export const useStudioStore = defineStore('studioRecorder', {
 
     _addAssertion ($el: HTMLElement | JQuery<HTMLElement>, ...args: AssertionArgs) {
       const id = this._getId()
-      const selector = getCypress().SelectorPlayground.getSelector($el)
+      const selector = getCypress().ElementSelector.getSelector($el)
 
       const log: StudioLog = {
         id,
@@ -649,7 +649,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       if (!this._matchPreviousMouseEvent(target)) {
         this._previousMouseEvent = {
           element: target,
-          selector: getCypress().SelectorPlayground.getSelector(window.UnifiedRunner.CypressJQuery(target)),
+          selector: getCypress().ElementSelector.getSelector(window.UnifiedRunner.CypressJQuery(target)),
         }
       }
     },

@@ -696,10 +696,10 @@ declare namespace Cypress {
     }
 
     /**
-     * @see https://on.cypress.io/selector-playground-api
+     * @see https://on.cypress.io/element-selector-api
      */
-    SelectorPlayground: {
-      defaults(options: Partial<SelectorPlaygroundDefaultsOptions>): void
+    ElementSelector: {
+      defaults(options: Partial<ElementSelectorDefaultsOptions>): void
       getSelector($el: JQuery): JQuery.Selector
     }
 
@@ -2971,7 +2971,7 @@ declare namespace Cypress {
      */
     requestTimeout: number
     /**
-     * Time, in milliseconds, to wait until a response in a [cy.request()](https://on.cypress.io/request), [cy.wait()](https://on.cypress.io/wait), [cy.fixture()](https://on.cypress.io/fixture), [cy.getCookie()](https://on.cypress.io/getcookie), [cy.getCookies()](https://on.cypress.io/getcookies), [cy.setCookie()](https://on.cypress.io/setcookie), [cy.clearCookie()](https://on.cypress.io/clearcookie), [cy.clearCookies()](https://on.cypress.io/clearcookies), and [cy.screenshot()](https://on.cypress.io/screenshot) commands
+     * Time, in milliseconds, to wait for a response in a [cy.request()](https://on.cypress.io/request), [cy.wait()](https://on.cypress.io/wait), [cy.fixture()](https://on.cypress.io/fixture), [cy.getCookie()](https://on.cypress.io/getcookie), [cy.getCookies()](https://on.cypress.io/getcookies), [cy.setCookie()](https://on.cypress.io/setcookie), [cy.clearCookie()](https://on.cypress.io/clearcookie), [cy.clearCookies()](https://on.cypress.io/clearcookies), and [cy.screenshot()](https://on.cypress.io/screenshot) commands
      * @default 30000
      */
     responseTimeout: number
@@ -3714,9 +3714,8 @@ declare namespace Cypress {
     screenshotOnRunFailure: boolean
   }
 
-  interface SelectorPlaygroundDefaultsOptions {
+  interface ElementSelectorDefaultsOptions {
     selectorPriority: string[]
-    onElement: ($el: JQuery) => string | null | undefined
   }
 
   interface ScrollToOptions extends Loggable, Timeoutable {

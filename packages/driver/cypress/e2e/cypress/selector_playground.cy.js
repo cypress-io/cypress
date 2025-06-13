@@ -1,5 +1,5 @@
 const { $ } = window.Cypress.$Cypress
-const SelectorPlayground = Cypress.SelectorPlayground
+const ElementSelector = Cypress.ElementSelector
 
 const SELECTOR_DEFAULTS = [
   'data-cy', 'data-test', 'data-testid', 'data-qa', 'id', 'class', 'tag', 'attributes', 'nth-child',
@@ -7,19 +7,17 @@ const SELECTOR_DEFAULTS = [
 
 describe('src/cypress/selector_playground', () => {
   beforeEach(() => {
-    SelectorPlayground.reset()
+    ElementSelector.reset()
   })
 
   it('has defaults', () => {
-    expect(SelectorPlayground.getSelectorPriority()).to.deep.eq(SELECTOR_DEFAULTS)
-    expect(SelectorPlayground.getOnElement()).to.be.null
+    expect(ElementSelector.getSelectorPriority()).to.deep.eq(SELECTOR_DEFAULTS)
   })
 
   context('.defaults', () => {
-    it('is noop if not called with selectorPriority or onElement', () => {
-      SelectorPlayground.defaults({})
-      expect(SelectorPlayground.getSelectorPriority()).to.deep.eq(SELECTOR_DEFAULTS)
-      expect(SelectorPlayground.getOnElement()).to.be.null
+    it('is noop if not called with selectorPriority', () => {
+      ElementSelector.defaults({})
+      expect(ElementSelector.getSelectorPriority()).to.deep.eq(SELECTOR_DEFAULTS)
     })
 
     it('sets selector:playground:priority if selectorPriority specified', () => {
@@ -33,16 +31,16 @@ describe('src/cypress/selector_playground', () => {
         'nth-child',
       ]
 
-      SelectorPlayground.defaults({
+      ElementSelector.defaults({
         selectorPriority,
       })
 
-      expect(SelectorPlayground.getSelectorPriority()).to.eql(selectorPriority)
+      expect(ElementSelector.getSelectorPriority()).to.eql(selectorPriority)
     })
 
     it('throws if selectorPriority contains an unsupported priority', () => {
       const fn = () => {
-        SelectorPlayground.defaults({
+        ElementSelector.defaults({
           selectorPriority: [
             'id',
             'name',
@@ -52,12 +50,12 @@ describe('src/cypress/selector_playground', () => {
 
       expect(fn).to.throw()
       .with.property('message')
-      .and.include('`Cypress.SelectorPlayground.defaults()` called with invalid `selectorPriority` property. It must be one of: `data-*`, `id`, `class`, `tag`, `attributes`, `nth-child`. You passed: `name`')
+      .and.include('`Cypress.ElementSelector.defaults()` called with invalid `selectorPriority` property. It must be one of: `data-*`, `id`, `class`, `tag`, `attributes`, `nth-child`. You passed: `name`')
     })
 
     it('throws if selectorPriority has an unsupported priority that contains a substring of a valid priority', () => {
       const fn = () => {
-        SelectorPlayground.defaults({
+        ElementSelector.defaults({
           selectorPriority: [
             'idIsNotValid',
           ],
@@ -66,25 +64,17 @@ describe('src/cypress/selector_playground', () => {
 
       expect(fn).to.throw()
       .with.property('message')
-      .and.include('`Cypress.SelectorPlayground.defaults()` called with invalid `selectorPriority` property. It must be one of: `data-*`, `id`, `class`, `tag`, `attributes`, `nth-child`. You passed: `idIsNotValid`')
-    })
-
-    it('sets selector:playground:on:element if onElement specified', () => {
-      const onElement = () => {}
-
-      SelectorPlayground.defaults({ onElement })
-
-      expect(SelectorPlayground.getOnElement()).to.equal(onElement)
+      .and.include('`Cypress.ElementSelector.defaults()` called with invalid `selectorPriority` property. It must be one of: `data-*`, `id`, `class`, `tag`, `attributes`, `nth-child`. You passed: `idIsNotValid`')
     })
 
     it('throws if not passed an object', () => {
       const fn = () => {
-        SelectorPlayground.defaults()
+        ElementSelector.defaults()
       }
 
       expect(fn).to.throw()
       .with.property('message')
-      .and.include('`Cypress.SelectorPlayground.defaults()` must be called with an object. You passed: ')
+      .and.include('`Cypress.ElementSelector.defaults()` must be called with an object. You passed: ')
 
       expect(fn).to.throw()
       .with.property('docsUrl')
@@ -93,26 +83,12 @@ describe('src/cypress/selector_playground', () => {
 
     it('throws if selectorPriority is not an array', () => {
       const fn = () => {
-        SelectorPlayground.defaults({ selectorPriority: 'foo' })
+        ElementSelector.defaults({ selectorPriority: 'foo' })
       }
 
       expect(fn).to.throw()
       .with.property('message')
-      .and.include('`Cypress.SelectorPlayground.defaults()` called with invalid `selectorPriority` property. It must be an array. You passed: `foo`')
-
-      expect(fn).to.throw()
-      .with.property('docsUrl')
-      .and.include('https://on.cypress.io/selector-playground-api')
-    })
-
-    it('throws if onElement is not a function', () => {
-      const fn = () => {
-        SelectorPlayground.defaults({ onElement: 'foo' })
-      }
-
-      expect(fn).to.throw()
-      .with.property('message')
-      .and.include('`Cypress.SelectorPlayground.defaults()` called with invalid `onElement` property. It must be a function. You passed: `foo`')
+      .and.include('`Cypress.ElementSelector.defaults()` called with invalid `selectorPriority` property. It must be an array. You passed: `foo`')
 
       expect(fn).to.throw()
       .with.property('docsUrl')
@@ -126,29 +102,13 @@ describe('src/cypress/selector_playground', () => {
 
       Cypress.$('body').append($div)
 
-      expect(SelectorPlayground.getSelector($div)).to.eq('[data-cy="main button 123"]')
+      expect(ElementSelector.getSelector($div)).to.eq('[data-cy="main button 123"]')
 
-      SelectorPlayground.defaults({
+      ElementSelector.defaults({
         selectorPriority: ['data-foo'],
       })
 
-      expect(SelectorPlayground.getSelector($div)).to.eq('[data-foo="bar"]')
-
-      SelectorPlayground.defaults({
-        onElement ($el) {
-          return 'quux'
-        },
-      })
-
-      expect(SelectorPlayground.getSelector($div)).to.eq('quux')
-
-      SelectorPlayground.defaults({
-        onElement ($el) {
-          return null
-        },
-      })
-
-      expect(SelectorPlayground.getSelector($div)).to.eq('[data-foo="bar"]')
+      expect(ElementSelector.getSelector($div)).to.eq('[data-foo="bar"]')
     })
   })
 })
