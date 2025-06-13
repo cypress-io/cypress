@@ -624,6 +624,27 @@ describe('driver/src/cypress/error_utils', () => {
     })
   })
 
+  context('.extendErrorMessages', () => {
+    it('extends error messages', () => {
+      $errUtils.extendErrorMessages({
+        testErrors: {
+          test: 'test error message',
+        },
+      })
+
+      const fn = () => {
+        $errUtils.throwErrByPath('testErrors.test')
+      }
+
+      expect(fn).to.throw().and.satisfy((err) => {
+        expect(err.message).to.equal('test error message')
+        expect(err.name).to.eq('CypressError')
+
+        return true
+      })
+    })
+  })
+
   context('.getUnsupportedPlugin', () => {
     it('returns unsupported plugin if the error msg is the expected one', () => {
       const unsupportedPlugin = $errUtils.getUnsupportedPlugin({
