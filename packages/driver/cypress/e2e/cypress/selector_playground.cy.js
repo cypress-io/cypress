@@ -53,20 +53,6 @@ describe('src/cypress/selector_playground', () => {
       .and.include('`Cypress.ElementSelector.defaults()` called with invalid `selectorPriority` property. It must be one of: `data-*`, `id`, `class`, `tag`, `attributes`, `nth-child`. You passed: `name`')
     })
 
-    it('throws if selectorPriority has an unsupported priority that contains a substring of a valid priority', () => {
-      const fn = () => {
-        ElementSelector.defaults({
-          selectorPriority: [
-            'idIsNotValid',
-          ],
-        })
-      }
-
-      expect(fn).to.throw()
-      .with.property('message')
-      .and.include('`Cypress.ElementSelector.defaults()` called with invalid `selectorPriority` property. It must be one of: `data-*`, `id`, `class`, `tag`, `attributes`, `nth-child`. You passed: `idIsNotValid`')
-    })
-
     it('throws if not passed an object', () => {
       const fn = () => {
         ElementSelector.defaults()
@@ -78,7 +64,7 @@ describe('src/cypress/selector_playground', () => {
 
       expect(fn).to.throw()
       .with.property('docsUrl')
-      .and.include('https://on.cypress.io/selector-playground-api')
+      .and.include('https://on.cypress.io/element-selector-api')
     })
 
     it('throws if selectorPriority is not an array', () => {
@@ -92,7 +78,7 @@ describe('src/cypress/selector_playground', () => {
 
       expect(fn).to.throw()
       .with.property('docsUrl')
-      .and.include('https://on.cypress.io/selector-playground-api')
+      .and.include('https://on.cypress.io/element-selector-api')
     })
   })
 

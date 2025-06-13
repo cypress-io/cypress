@@ -28,7 +28,6 @@ export default {
   },
 
   getSelector ($el) {
-    // use uniqueSelector with the priorities
     return uniqueSelector($el.get(0), {
       selectorTypes: defaults.selectorPriority,
     })
@@ -49,15 +48,6 @@ export default {
           args: { arg: $utils.stringify(selectorPriority) },
         })
       }
-      // Validate that the priority is one of: "data-*", "id", "class", "tag", "attributes", "nth-child"
-
-      selectorPriority.forEach((priority) => {
-        if (!/^(data\-.*|id|class|tag|attributes|nth\-child)$/.test(priority)) {
-          $errUtils.throwErrByPath('element_selector.defaults_invalid_priority', {
-            args: { arg: priority },
-          })
-        }
-      })
 
       defaults.selectorPriority = selectorPriority
     }

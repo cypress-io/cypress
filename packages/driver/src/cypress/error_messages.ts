@@ -1727,10 +1727,6 @@ export default {
       message: '`Cypress.ElementSelector.defaults()` called with invalid `selectorPriority` property. It must be an array. You passed: `{{arg}}`',
       docsUrl: 'https://on.cypress.io/element-selector-api',
     },
-    defaults_invalid_priority: {
-      message: '`Cypress.ElementSelector.defaults()` called with invalid `selectorPriority` property. It must be one of: `data-*`, `id`, `class`, `tag`, `attributes`, `nth-child`. You passed: `{{arg}}`. Consider using the `onElement` property if a specific selector is desired.',
-      docsUrl: 'https://on.cypress.io/element-selector-api',
-    },
   },
 
   server: {

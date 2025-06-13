@@ -2878,10 +2878,10 @@
   resolved "https://registry.yarnpkg.com/@cypress/snapbuild-windows-64/-/snapbuild-windows-64-1.0.4.tgz#37854c0d1262b98913d3b6aa99f5343724e80d2b"
   integrity sha512-sXqQ2+6xTVZVvKnK0WTNkczDUFRXeE9Cmv0nhfVYXpFNVhhLcUJm748haTMzeBtLh40o9BzvN/sFqkQwoCsI9w==
 
-"@cypress/unique-selector@0.0.5":
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/@cypress/unique-selector/-/unique-selector-0.0.5.tgz#1ce7889dd9ffe47e8b39d31da3a6b7e9a0c9c93d"
-  integrity sha512-WS1M1arFAcl2v+A4OHT4ZPAXQgoQuVwM4quyZZQUmJsshXZqbTFyT918WQujC6yikOddZgiVGk46CIBGoCMnow==
+"@cypress/unique-selector@2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@cypress/unique-selector/-/unique-selector-2.1.1.tgz#e5afa80705eb48735f0ecbb5d148cded071d27bf"
+  integrity sha512-uMUiPfwWv/eG/ubSzvIdc/7C+RKG+r0QH7/qot61oEdYvBEabaZEQuugxXGzU5t2tbjpepU+FNWXBreTRo5MBQ==
   dependencies:
     css.escape "^1.5.1"
 
