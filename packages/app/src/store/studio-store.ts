@@ -123,6 +123,7 @@ interface StudioRecorderState {
   canAccessStudioAI: boolean
   showUrlPrompt: boolean
   cloudStudioRequested: boolean
+  cloudStudioSessionId?: string
 }
 
 export const useStudioStore = defineStore('studioRecorder', {
@@ -140,6 +141,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       canAccessStudioAI: false,
       showUrlPrompt: true,
       cloudStudioRequested: false,
+      cloudStudioSessionId: undefined,
     }
   },
 
@@ -165,6 +167,10 @@ export const useStudioStore = defineStore('studioRecorder', {
 
     setCanAccessStudioAI (canAccessStudioAI: boolean) {
       this.canAccessStudioAI = canAccessStudioAI
+    },
+
+    setCloudStudioSessionId (cloudStudioSessionId: string) {
+      this.cloudStudioSessionId = cloudStudioSessionId
     },
 
     clearRunnableIds () {
