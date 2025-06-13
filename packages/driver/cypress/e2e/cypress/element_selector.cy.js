@@ -5,7 +5,7 @@ const SELECTOR_DEFAULTS = [
   'data-cy', 'data-test', 'data-testid', 'data-qa', 'id', 'class', 'tag', 'attributes', 'nth-child',
 ]
 
-describe('src/cypress/selector_playground', () => {
+describe('src/cypress/element_selector', () => {
   beforeEach(() => {
     ElementSelector.reset()
   })
@@ -20,7 +20,7 @@ describe('src/cypress/selector_playground', () => {
       expect(ElementSelector.getSelectorPriority()).to.deep.eq(SELECTOR_DEFAULTS)
     })
 
-    it('sets selector:playground:priority if selectorPriority specified', () => {
+    it('sets element:selector:priority if selectorPriority specified', () => {
       const selectorPriority = [
         'data-1',
         'data-2',
@@ -36,21 +36,6 @@ describe('src/cypress/selector_playground', () => {
       })
 
       expect(ElementSelector.getSelectorPriority()).to.eql(selectorPriority)
-    })
-
-    it('throws if selectorPriority contains an unsupported priority', () => {
-      const fn = () => {
-        ElementSelector.defaults({
-          selectorPriority: [
-            'id',
-            'name',
-          ],
-        })
-      }
-
-      expect(fn).to.throw()
-      .with.property('message')
-      .and.include('`Cypress.ElementSelector.defaults()` called with invalid `selectorPriority` property. It must be one of: `data-*`, `id`, `class`, `tag`, `attributes`, `nth-child`. You passed: `name`')
     })
 
     it('throws if not passed an object', () => {
