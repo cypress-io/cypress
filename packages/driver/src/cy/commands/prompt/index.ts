@@ -47,7 +47,7 @@ const initializeModule = async (Cypress: Cypress.Cypress): Promise<CyPromptDrive
       type: 'module',
       name: 'cy-prompt',
       entryGlobalName: 'cy-prompt',
-      entry: '/__cypress-cy-prompt/cy-prompt.js',
+      entry: '/__cypress-cy-prompt/driver/cy-prompt.js',
       shareScope: 'default',
     }],
     name: 'driver',

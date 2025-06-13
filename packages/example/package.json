@@ -14,7 +14,6 @@
     "test-unit": "echo 'no unit tests'"
   },
   "devDependencies": {
-    "cross-env": "6.0.3",
     "cypress-example-kitchensink": "5.0.0",
     "gh-pages": "5.0.0",
     "gulp": "4.0.2",

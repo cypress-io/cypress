@@ -102,6 +102,7 @@
           <StudioPanel
             v-if="shouldShowStudioPanel"
             data-cy="studio-panel"
+            :cloud-studio-session-id="studioStore.cloudStudioSessionId"
             :can-access-studio-a-i="studioStore.canAccessStudioAI"
             :on-studio-panel-close="handleStudioPanelClose"
             :event-manager="eventManager"
@@ -269,6 +270,8 @@ useSubscription({ query: StudioStatus_ChangeDocument }, (_, data) => {
 })
 
 const cloudStudioRequested = computed(() => {
+  studioStore.setCloudStudioRequested(props.gql.cloudStudioRequested || false)
+
   return props.gql.cloudStudioRequested
 })
 
