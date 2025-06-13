@@ -26,7 +26,7 @@
     "@packages/socket": "0.0.0-development",
     "chai": "3.5.0",
     "chokidar-cli": "2.1.0",
-    "cross-env": "6.0.3",
+    "cross-env": "7.0.3",
     "eol": "0.10.0",
     "fs-extra": "9.1.0",
     "gulp": "4.0.2",
