@@ -1,9 +1,11 @@
-const { $ } = window.Cypress.$Cypress
-const ElementSelector = Cypress.ElementSelector
+/// <reference types="cypress" />
+import type { ElementSelectorAPI, SelectorType } from '../../../src/cypress/element_selector'
+import { DEFAULT_SELECTOR_PRIORITIES } from '../../../src/cypress/element_selector'
 
-const SELECTOR_DEFAULTS = [
-  'data-cy', 'data-test', 'data-testid', 'data-qa', 'id', 'class', 'tag', 'attributes', 'nth-child',
-]
+const { $: $cypress } = window.Cypress.$Cypress as any
+const ElementSelector = Cypress.ElementSelector as ElementSelectorAPI
+
+const SELECTOR_DEFAULTS: SelectorType[] = [...DEFAULT_SELECTOR_PRIORITIES]
 
 describe('src/cypress/element_selector', () => {
   beforeEach(() => {
@@ -21,7 +23,7 @@ describe('src/cypress/element_selector', () => {
     })
 
     it('sets element:selector:priority if selectorPriority specified', () => {
-      const selectorPriority = [
+      const selectorPriority: SelectorType[] = [
         'data-1',
         'data-2',
         'id',
@@ -40,7 +42,7 @@ describe('src/cypress/element_selector', () => {
 
     it('throws if not passed an object', () => {
       const fn = () => {
-        ElementSelector.defaults()
+        ElementSelector.defaults(undefined as any)
       }
 
       expect(fn).to.throw()
@@ -54,7 +56,7 @@ describe('src/cypress/element_selector', () => {
 
     it('throws if selectorPriority is not an array', () => {
       const fn = () => {
-        ElementSelector.defaults({ selectorPriority: 'foo' })
+        ElementSelector.defaults({ selectorPriority: 'foo' as any })
       }
 
       expect(fn).to.throw()
@@ -69,7 +71,7 @@ describe('src/cypress/element_selector', () => {
 
   context('.getSelector', () => {
     it('uses defaults.selectorPriority', () => {
-      const $div = $('<div data-cy=\'main button 123\' data-foo-bar-baz=\'quux\' data-test=\'qwerty\' data-foo=\'bar\' />')
+      const $div = $cypress('<div data-cy=\'main button 123\' data-foo-bar-baz=\'quux\' data-test=\'qwerty\' data-foo=\'bar\' />')
 
       Cypress.$('body').append($div)
 
