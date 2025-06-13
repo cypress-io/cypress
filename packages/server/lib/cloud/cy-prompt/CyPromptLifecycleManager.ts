@@ -12,7 +12,7 @@ import { readFile } from 'fs-extra'
 import { ensureCyPromptBundle } from './ensure_cy_prompt_bundle'
 import chokidar from 'chokidar'
 import { getCloudMetadata } from '../get_cloud_metadata'
-import { CyPromptAuthenticatedUserShape } from '@packages/types'
+import type { CyPromptAuthenticatedUserShape } from '@packages/types'
 
 const debug = Debug('cypress:server:cy-prompt-lifecycle-manager')
 
