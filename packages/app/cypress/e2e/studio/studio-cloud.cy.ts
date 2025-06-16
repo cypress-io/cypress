@@ -227,4 +227,35 @@ describe('studio functionality', () => {
     // verify studio is still open
     cy.findByTestId('studio-panel').should('be.visible')
   })
+
+  it('does not record studio commands when cloud studio is enabled', () => {
+    launchStudio({ enableCloudStudio: true })
+
+    cy.findByTestId('studio-panel').should('be.visible')
+
+    // Attempt to perform actions that would normally be recorded in regular studio
+    // but should NOT be recorded in when cloud studio is enabled because event listeners are not attached
+    cy.getAutIframe().within(() => {
+      cy.get('p').contains('Count is 0')
+
+      // Try to click the increment button - this should NOT be recorded
+      // because cloud studio event listeners should not be attached
+      cy.get('#increment').realClick().then(() => {
+        cy.get('p').contains('Count is 1')
+      })
+    })
+
+    // Verify that no legacy studio commands were recorded
+    cy.get('.command-is-studio').should('not.exist')
+
+    // Verify that the actual DOM interactions still work (button was clicked, counter incremented)
+    // but they just weren't recorded by the legacy studio event listeners
+    cy.getAutIframe().within(() => {
+      cy.get('p').should('contain', 'Count is 1')
+    })
+
+    cy.findByTestId('studio-panel').should('be.visible')
+
+    cy.get('[data-cy="studio-toolbar"]').should('not.exist')
+  })
 })

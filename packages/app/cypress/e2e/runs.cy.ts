@@ -564,8 +564,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
 
       cy.visitApp('/runs')
+      cy.findByText(defaultMessages.runs.errors.unauthorized.button).should('be.visible')
       cy.findByText(defaultMessages.runs.errors.unauthorized.button).click()
-      cy.findByText(defaultMessages.runs.errors.unauthorizedRequested.button).should('exist')
+      cy.findByText(defaultMessages.runs.errors.unauthorizedRequested.button).should('be.visible')
     })
   })
 
