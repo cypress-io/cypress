@@ -22,7 +22,6 @@ interface RetryOptions {
 
 export interface CyPromptCloudApi {
   cloudUrl: string
-  cloudHeaders: Record<string, string>
   CloudRequest: AxiosInstance
   isRetryableError: (err: unknown) => boolean
   asyncRetry: AsyncRetry
@@ -33,10 +32,22 @@ type AsyncRetry = <TArgs extends any[], TResult>(
   options: RetryOptions
 ) => (...args: TArgs) => Promise<TResult>
 
+export interface CyPromptAuthenticatedUserShape {
+  id?: string //Cloud user id
+  name?: string
+  email?: string
+  authToken?: string
+}
+
 export interface CyPromptServerOptions {
   cyPromptHash?: string
+  getProjectOptions: () => Promise<{
+    user?: CyPromptAuthenticatedUserShape
+    projectSlug?: string
+    record?: boolean
+    key?: string
+  }>
   cyPromptPath: string
-  projectSlug?: string
   cloudApi: CyPromptCloudApi
 }
 

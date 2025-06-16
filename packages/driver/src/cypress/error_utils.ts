@@ -22,6 +22,8 @@ const ERR_PREPARED_FOR_SERIALIZATION = Symbol('ERR_PREPARED_FOR_SERIALIZATION')
 
 const crossOriginScriptRe = /^script error/i
 
+let allErrorMessages = $errorMessages
+
 if (!Error.captureStackTrace) {
   Error.captureStackTrace = (err, fn) => {
     const stack = (new Error()).stack
@@ -396,7 +398,7 @@ const docsUrlByParents = (msgPath) => {
     return // reached root
   }
 
-  const obj = _.get($errorMessages, msgPath)
+  const obj = _.get(allErrorMessages, msgPath)
 
   if (obj.hasOwnProperty('docsUrl')) {
     return obj.docsUrl
@@ -406,7 +408,7 @@ const docsUrlByParents = (msgPath) => {
 }
 
 const errByPath = (msgPath, args?) => {
-  let msgValue = _.get($errorMessages, msgPath)
+  let msgValue = _.get(allErrorMessages, msgPath)
 
   if (!msgValue) {
     return internalErr({ message: `Error message path '${msgPath}' does not exist` })
@@ -655,6 +657,13 @@ const getUnsupportedPlugin = (runnable) => {
   return null
 }
 
+const extendErrorMessages = (errorMessages: any) => {
+  allErrorMessages = {
+    ...allErrorMessages,
+    ...errorMessages,
+  }
+}
+
 export default {
   stackWithReplacedProps,
   appendErrMsg,
@@ -679,4 +688,5 @@ export default {
   throwErrByPath,
   warnByPath,
   wrapErr,
+  extendErrorMessages,
 }

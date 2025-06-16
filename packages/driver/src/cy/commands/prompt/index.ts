@@ -47,7 +47,7 @@ const initializeModule = async (Cypress: Cypress.Cypress): Promise<CyPromptDrive
       type: 'module',
       name: 'cy-prompt',
       entryGlobalName: 'cy-prompt',
-      entry: '/__cypress-cy-prompt/cy-prompt.js',
+      entry: '/__cypress-cy-prompt/driver/cy-prompt.js',
       shareScope: 'default',
     }],
     name: 'driver',
@@ -79,13 +79,18 @@ const initializeCloudCyPrompt = async (Cypress: Cypress.Cypress, cy: Cypress.Cyp
       Cypress: Cypress as CypressInternal,
       cy,
       eventManager: window.getEventManager ? window.getEventManager() : undefined,
+      errorUtils: {
+        extendErrorMessages: $errUtils.extendErrorMessages,
+        throwErrByPath: $errUtils.throwErrByPath,
+      },
     })
   } catch (error) {
     return error
   }
 }
 
-export default (Commands, Cypress, cy) => {
+export default (Commands: Cypress.Cypress['Commands'], Cypress: Cypress.Cypress, cy: Cypress.Cypress['cy']) => {
+  // @ts-expect-error - these types are not yet implemented until the prompt command is rolled out
   if (Cypress.config('experimentalPromptCommand')) {
     let initializeCloudCyPromptPromise: Promise<ReturnType<CyPromptDriverDefaultShape['createCyPrompt']> | Error> | undefined
 
@@ -93,7 +98,7 @@ export default (Commands, Cypress, cy) => {
       initializeCloudCyPromptPromise = initializeCloudCyPrompt(Cypress, cy)
     }
 
-    const prompt = async (message: string, options: object = {}) => {
+    const prompt = (message: string, options: object = {}) => {
       if (Cypress.testingType === 'component') {
         $errUtils.throwErrByPath('prompt.promptTestingTypeError')
 
@@ -108,22 +113,16 @@ export default (Commands, Cypress, cy) => {
         return
       }
 
-      try {
-        const bundleResult = await initializeCloudCyPromptPromise
-
+      // TODO: figure out how to handle timeout more generally
+      return cy.wrap(initializeCloudCyPromptPromise, { log: false, timeout: 45000 }).then((bundleResult: ReturnType<CyPromptDriverDefaultShape['createCyPrompt']> | Error) => {
         if (bundleResult instanceof Error) {
           throw bundleResult
         }
 
         const cyPrompt = bundleResult
 
-        return await cyPrompt(message, options)
-      } catch (error) {
-        // TODO: Check error that the user is logged in / record key
-
-        // TODO: handle this better
-        throw new Error(`CyPromptDriver not found: ${error}`)
-      }
+        return cyPrompt(message, options)
+      })
     }
 
     // For testing purposes, we can reset the prompt command initialization

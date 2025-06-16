@@ -12,6 +12,7 @@ import { readFile } from 'fs-extra'
 import { ensureCyPromptBundle } from './ensure_cy_prompt_bundle'
 import chokidar from 'chokidar'
 import { getCloudMetadata } from '../get_cloud_metadata'
+import type { CyPromptAuthenticatedUserShape } from '@packages/types'
 
 const debug = Debug('cypress:server:cy-prompt-lifecycle-manager')
 
@@ -33,22 +34,34 @@ export class CyPromptLifecycleManager {
    * @param ctx Data context to register this instance with
    */
   initializeCyPromptManager ({
-    projectId,
     cloudDataSource,
     ctx,
+    record,
+    key,
   }: {
-    projectId?: string
     cloudDataSource: CloudDataSource
     ctx: DataContext
+    record?: boolean
+    key?: string
   }): void {
     // Register this instance in the data context
     ctx.update((data) => {
       data.cyPromptLifecycleManager = this
     })
 
+    const getProjectOptions = async () => {
+      return {
+        user: await ctx.actions.auth.authApi.getUser(),
+        projectSlug: (await ctx.project.getConfig()).projectId || undefined,
+        record,
+        key,
+        isOpenMode: ctx.isOpenMode,
+      }
+    }
+
     const cyPromptManagerPromise = this.createCyPromptManager({
-      projectId,
       cloudDataSource,
+      getProjectOptions,
     }).catch(async (error) => {
       debug('Error during cy prompt manager setup: %o', error)
 
@@ -81,8 +94,8 @@ export class CyPromptLifecycleManager {
     this.cyPromptManagerPromise = cyPromptManagerPromise
 
     this.setupWatcher({
-      projectId,
       cloudDataSource,
+      getProjectOptions,
     })
   }
 
@@ -97,17 +110,25 @@ export class CyPromptLifecycleManager {
   }
 
   private async createCyPromptManager ({
-    projectId,
     cloudDataSource,
+    getProjectOptions,
   }: {
     projectId?: string
     cloudDataSource: CloudDataSource
+    getProjectOptions: () => Promise<{
+      user?: CyPromptAuthenticatedUserShape
+      projectSlug?: string
+      record?: boolean
+      key?: string
+    }>
   }): Promise<{ cyPromptManager?: CyPromptManager, error?: Error }> {
     let cyPromptHash: string
     let cyPromptPath: string
 
+    const currentProjectOptions = await getProjectOptions()
+    const projectId = currentProjectOptions.projectSlug
     const cyPromptSession = await postCyPromptSession({
-      projectId,
+      projectId: currentProjectOptions.projectSlug,
     })
 
     if (!process.env.CYPRESS_LOCAL_CY_PROMPT_PATH) {
@@ -138,20 +159,19 @@ export class CyPromptLifecycleManager {
     const script = await readFile(serverFilePath, 'utf8')
     const cyPromptManager = new CyPromptManager()
 
-    const { cloudUrl, cloudHeaders } = await getCloudMetadata(cloudDataSource)
+    const { cloudUrl } = await getCloudMetadata(cloudDataSource)
 
     await cyPromptManager.setup({
       script,
       cyPromptPath,
       cyPromptHash,
-      projectSlug: projectId,
       cloudApi: {
         cloudUrl,
-        cloudHeaders,
         CloudRequest,
         isRetryableError,
         asyncRetry,
       },
+      getProjectOptions,
     })
 
     debug('cy prompt is ready')
@@ -181,9 +201,16 @@ export class CyPromptLifecycleManager {
   private setupWatcher ({
     projectId,
     cloudDataSource,
+    getProjectOptions,
   }: {
     projectId?: string
     cloudDataSource: CloudDataSource
+    getProjectOptions: () => Promise<{
+      user?: CyPromptAuthenticatedUserShape
+      projectSlug?: string
+      record?: boolean
+      key?: string
+    }>
   }) {
     // Don't setup a watcher if the cy prompt bundle is NOT local
     if (!process.env.CYPRESS_LOCAL_CY_PROMPT_PATH) {
@@ -204,6 +231,7 @@ export class CyPromptLifecycleManager {
       this.cyPromptManagerPromise = this.createCyPromptManager({
         projectId,
         cloudDataSource,
+        getProjectOptions,
       }).catch((error) => {
         debug('Error during reload of cy prompt manager: %o', error)
 

@@ -75,6 +75,20 @@ describe('CyPromptLifecycleManager', () => {
       emitter: {
         cyPromptStatusChange: cyPromptStatusChangeEmitterStub,
       },
+      actions: {
+        auth: {
+          authApi: {
+            getUser: sinon.stub().resolves({
+              authToken: 'test-token',
+            }),
+          },
+        },
+      },
+      project: {
+        getConfig: sinon.stub().resolves({
+          projectId: 'test-project-id',
+        }),
+      },
     } as unknown as DataContext
 
     mockCloudDataSource = {
@@ -96,9 +110,10 @@ describe('CyPromptLifecycleManager', () => {
   describe('initializeCyPromptManager', () => {
     it('initializes the cy-prompt manager and registers it in the data context', async () => {
       cyPromptLifecycleManager.initializeCyPromptManager({
-        projectId: 'test-project-id',
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
+        record: false,
+        key: '123e4567-e89b-12d3-a456-426614174000',
       })
 
       const cyPromptReadyPromise = new Promise((resolve) => {
@@ -120,14 +135,13 @@ describe('CyPromptLifecycleManager', () => {
         script: 'console.log("cy-prompt script")',
         cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc'),
         cyPromptHash: 'abc',
-        projectSlug: 'test-project-id',
         cloudApi: {
           cloudUrl: 'https://cloud.cypress.io',
-          cloudHeaders: { 'Authorization': 'Bearer test-token' },
           CloudRequest,
           isRetryableError,
           asyncRetry,
         },
+        getProjectOptions: sinon.match.func,
       })
 
       expect(postCyPromptSessionStub).to.be.calledWith({
@@ -141,9 +155,10 @@ describe('CyPromptLifecycleManager', () => {
 
     it('only calls ensureCyPromptBundle once per cy prompt hash', async () => {
       cyPromptLifecycleManager.initializeCyPromptManager({
-        projectId: 'test-project-id',
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
+        record: false,
+        key: '123e4567-e89b-12d3-a456-426614174000',
       })
 
       const cyPromptReadyPromise1 = new Promise((resolve) => {
@@ -155,9 +170,10 @@ describe('CyPromptLifecycleManager', () => {
       const cyPromptManager1 = await cyPromptReadyPromise1
 
       cyPromptLifecycleManager.initializeCyPromptManager({
-        projectId: 'test-project-id',
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
+        record: false,
+        key: '123e4567-e89b-12d3-a456-426614174000',
       })
 
       const cyPromptReadyPromise2 = new Promise((resolve) => {
@@ -182,14 +198,13 @@ describe('CyPromptLifecycleManager', () => {
         script: 'console.log("cy-prompt script")',
         cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc'),
         cyPromptHash: 'abc',
-        projectSlug: 'test-project-id',
         cloudApi: {
           cloudUrl: 'https://cloud.cypress.io',
-          cloudHeaders: { 'Authorization': 'Bearer test-token' },
           CloudRequest,
           isRetryableError,
           asyncRetry,
         },
+        getProjectOptions: sinon.match.func,
       })
 
       expect(postCyPromptSessionStub).to.be.calledWith({
@@ -205,9 +220,10 @@ describe('CyPromptLifecycleManager', () => {
       process.env.CYPRESS_LOCAL_CY_PROMPT_PATH = '/path/to/cy-prompt'
 
       cyPromptLifecycleManager.initializeCyPromptManager({
-        projectId: 'test-project-id',
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
+        record: false,
+        key: '123e4567-e89b-12d3-a456-426614174000',
       })
 
       const cyPromptReadyPromise = new Promise((resolve) => {
@@ -225,14 +241,13 @@ describe('CyPromptLifecycleManager', () => {
         script: 'console.log("cy-prompt script")',
         cyPromptPath: '/path/to/cy-prompt',
         cyPromptHash: 'local',
-        projectSlug: 'test-project-id',
         cloudApi: {
           cloudUrl: 'https://cloud.cypress.io',
-          cloudHeaders: { 'Authorization': 'Bearer test-token' },
           CloudRequest,
           isRetryableError,
           asyncRetry,
         },
+        getProjectOptions: sinon.match.func,
       })
 
       expect(postCyPromptSessionStub).to.be.calledWith({
@@ -378,9 +393,10 @@ describe('CyPromptLifecycleManager', () => {
       ])
 
       cyPromptLifecycleManager.initializeCyPromptManager({
-        projectId: 'test-project-id',
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
+        record: false,
+        key: '123e4567-e89b-12d3-a456-426614174000',
       })
 
       await listenersCalledPromise
@@ -414,9 +430,10 @@ describe('CyPromptLifecycleManager', () => {
       ])
 
       cyPromptLifecycleManager.initializeCyPromptManager({
-        projectId: 'test-project-id',
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
+        record: false,
+        key: '123e4567-e89b-12d3-a456-426614174000',
       })
 
       await listenersCalledPromise

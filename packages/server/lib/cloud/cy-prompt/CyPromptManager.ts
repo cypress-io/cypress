@@ -1,4 +1,4 @@
-import type { CyPromptManagerShape, CyPromptStatus, CyPromptServerDefaultShape, CyPromptServerShape, CyPromptCloudApi, CyPromptCDPClient } from '@packages/types'
+import type { CyPromptManagerShape, CyPromptStatus, CyPromptServerDefaultShape, CyPromptServerShape, CyPromptCloudApi, CyPromptCDPClient, CyPromptAuthenticatedUserShape } from '@packages/types'
 import type { Router } from 'express'
 import Debug from 'debug'
 import { requireScript } from '../require_script'
@@ -12,6 +12,12 @@ interface SetupOptions {
   cyPromptHash?: string
   projectSlug?: string
   cloudApi: CyPromptCloudApi
+  getProjectOptions: () => Promise<{
+    user?: CyPromptAuthenticatedUserShape
+    projectSlug?: string
+    record?: boolean
+    key?: string
+  }>
 }
 
 const debug = Debug('cypress:server:cy-prompt')
@@ -20,14 +26,14 @@ export class CyPromptManager implements CyPromptManagerShape {
   status: CyPromptStatus = 'NOT_INITIALIZED'
   private _cyPromptServer: CyPromptServerShape | undefined
 
-  async setup ({ script, cyPromptPath, cyPromptHash, projectSlug, cloudApi }: SetupOptions): Promise<void> {
+  async setup ({ script, cyPromptPath, cyPromptHash, getProjectOptions, cloudApi }: SetupOptions): Promise<void> {
     const { createCyPromptServer } = requireScript<CyPromptServer>(script).default
 
     this._cyPromptServer = await createCyPromptServer({
       cyPromptHash,
       cyPromptPath,
-      projectSlug,
       cloudApi,
+      getProjectOptions,
     })
 
     this.status = 'INITIALIZED'

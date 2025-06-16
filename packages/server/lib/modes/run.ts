@@ -160,6 +160,8 @@ const openProjectCreate = (projectRoot, socketId, args) => {
     onWarning,
     spec: args.spec,
     onError: args.onError,
+    record: args.record,
+    key: args.key,
   }
 
   return openProject.create(projectRoot, args, options)
