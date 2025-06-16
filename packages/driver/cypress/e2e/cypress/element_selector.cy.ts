@@ -1,8 +1,7 @@
 /// <reference types="cypress" />
 import type { ElementSelectorAPI, SelectorType } from '../../../src/cypress/element_selector'
 import { DEFAULT_SELECTOR_PRIORITIES } from '../../../src/cypress/element_selector'
-
-const { $: $cypress } = window.Cypress.$Cypress as any
+const { $: $cypress } = Cypress.$Cypress
 const ElementSelector = Cypress.ElementSelector as ElementSelectorAPI
 
 const SELECTOR_DEFAULTS: SelectorType[] = [...DEFAULT_SELECTOR_PRIORITIES]

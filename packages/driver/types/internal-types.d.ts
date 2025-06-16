@@ -61,6 +61,9 @@ declare namespace Cypress {
     Location: {
       create: (url: string) => ({ domain: string, superDomain: string })
     }
+    $Cypress: {
+      $: JQueryStatic
+    }
   }
 
   interface CypressUtils {
