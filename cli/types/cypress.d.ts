@@ -704,6 +704,15 @@ declare namespace Cypress {
     }
 
     /**
+     * @deprecated Use ElementSelector instead
+     * @see https://on.cypress.io/element-selector-api
+     */
+    SelectorPlayground: {
+      defaults(options: Partial<ElementSelectorDefaultsOptions>): void
+      getSelector($el: JQuery): JQuery.Selector
+    }
+
+    /**
      * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */

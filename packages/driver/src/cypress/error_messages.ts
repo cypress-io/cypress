@@ -1729,6 +1729,15 @@ export default {
     },
   },
 
+  selector_playground: {
+    renamed: ({ method }: { method: string }) => {
+      return {
+        message: `\`Cypress.SelectorPlayground.${method}()\` has been renamed to \`Cypress.ElementSelector.${method}()\`. Please update your code to use \`Cypress.ElementSelector\` instead.`,
+        docsUrl: 'https://on.cypress.io/element-selector-api',
+      }
+    },
+  },
+
   server: {
     removed (obj) {
       return {

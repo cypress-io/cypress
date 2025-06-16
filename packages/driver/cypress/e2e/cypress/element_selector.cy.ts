@@ -83,4 +83,34 @@ describe('src/cypress/element_selector', () => {
       expect(ElementSelector.getSelector($div)).to.eq('[data-foo="bar"]')
     })
   })
+
+  describe('Cypress.SelectorPlayground (renamed)', () => {
+    it('throws error when calling defaults()', () => {
+      const fn = () => {
+        Cypress.SelectorPlayground.defaults({})
+      }
+
+      expect(fn).to.throw()
+      .with.property('message')
+      .and.include('`Cypress.SelectorPlayground.defaults()` has been renamed to `Cypress.ElementSelector.defaults()`')
+
+      expect(fn).to.throw()
+      .with.property('message')
+      .and.include('Please update your code to use `Cypress.ElementSelector` instead')
+    })
+
+    it('throws error when calling getSelector()', () => {
+      const fn = () => {
+        Cypress.SelectorPlayground.getSelector($cypress('body'))
+      }
+
+      expect(fn).to.throw()
+      .with.property('message')
+      .and.include('`Cypress.SelectorPlayground.getSelector()` has been renamed to `Cypress.ElementSelector.getSelector()`')
+
+      expect(fn).to.throw()
+      .with.property('message')
+      .and.include('Please update your code to use `Cypress.ElementSelector` instead')
+    })
+  })
 })

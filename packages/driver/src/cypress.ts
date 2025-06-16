@@ -152,6 +152,18 @@ class $Cypress {
   Server = $Server
   Screenshot = $Screenshot
   ElementSelector = $ElementSelector
+  SelectorPlayground = {
+    defaults (options: any) {
+      $errUtils.throwErrByPath('selector_playground.renamed', {
+        args: { method: 'defaults' },
+      })
+    },
+    getSelector ($el: any) {
+      $errUtils.throwErrByPath('selector_playground.renamed', {
+        args: { method: 'getSelector' },
+      })
+    },
+  }
   utils = $utils
   _ = _
   Blob = blobUtil
