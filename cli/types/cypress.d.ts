@@ -696,6 +696,8 @@ declare namespace Cypress {
     }
 
     /**
+     * Element selector logic used for generating selectors for elements
+     * in the Selector Playground and Cypress Studio.
      * @see https://on.cypress.io/element-selector-api
      */
     ElementSelector: {
