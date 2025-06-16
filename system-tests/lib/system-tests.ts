@@ -40,8 +40,8 @@ require(`@packages/server/lib/project-base`)
 
 type CypressConfig = { [key: string]: any }
 
-export type BrowserName = 'electron' | 'firefox' | 'chrome' | 'webkit'
-| '!electron' | '!chrome' | '!firefox' | '!webkit'
+export type BrowserName = 'electron' | 'firefox' | 'chrome' | 'chrome-for-testing' | 'webkit'
+| '!electron' | '!chrome' | '!chrome-for-testing' | '!firefox' | '!webkit'
 
 type ExecResult = {
   code: number
@@ -865,7 +865,11 @@ const systemTests = {
           const { browser } = options
 
           if (browser && !customBrowserPath) {
-            expect(String(browser).toLowerCase()).to.eq(browserName.toLowerCase())
+            if (browser === 'chrome-for-testing') {
+              expect(String(browser).toLowerCase()).to.eq(browserName.toLowerCase().replaceAll(' ', '-'))
+            } else {
+              expect(String(browser).toLowerCase()).to.eq(browserName.toLowerCase())
+            }
           }
 
           expect(parseFloat(version)).to.be.a.number

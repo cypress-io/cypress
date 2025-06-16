@@ -54,26 +54,23 @@ $code-border-radius: 4px;
   .recovered-test-err {
     .runnable-err-header,
     .runnable-err-body {
-      padding-left: 49px;
+      padding-left: 38px;
       display: flex;
 
       .err-group-block {
+        @include group-indent-width;
+        
         border-left: 1px dotted $err-header-text;
         border-image-slice: 0 0 0 1;
-        border-image-source: repeating-linear-gradient(0deg, transparent, $err-header-text, $err-header-text 4px);
-        width: 12px;
-        min-width: 12px;
+        border-image-source: repeating-linear-gradient(0deg, transparent, $err-header-text, $err-header-text 2px);
 
         &:first-of-type {
-          width: 13px;
-          min-width: 13px;
+          width: 16px;
+          min-width: 16px;
         }
     } 
   }
 
-    .runnable-err-header > .runnable-err-name {
-      padding: 5px 4px 5px 15px;
-    }
 
     .runnable-err-content {
       padding: 0 12px 0 0;
@@ -110,20 +107,31 @@ $code-border-radius: 4px;
     display: flex;
     font-weight: bold;
     justify-content: space-between;
-    padding-left: 18px;
 
-    svg {
-      color: $red-400;
-      align-self: center
+    .runnable-err-icon {
+      @include gutter-alignment;
+
+      &.runnable-err-icon-group {
+        width: auto;
+      }
+      
+      svg {
+        color: $red-400;
+        align-self: center
+      }
     }
 
+ 
     .runnable-err-name {
+      @include command-info-padding;
+
       color: $err-header-text;
       flex: auto;
       font-size: 12px;
       font-weight: 600;
       line-height: 20px;
-      padding: 5px 4px 5px 24px;
+
+      margin-left: $gutter-margin;
     }
   }
 
