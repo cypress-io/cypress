@@ -220,13 +220,10 @@ const attachToWindow = (autWindow: Window) => {
       Cypress.specBridgeCommunicator.toPrimary('window:load', { url: remoteLocation.href })
       cy.isStable(true, 'load')
     },
-    onPageHide (e) {
+    onUnload (e) {
       cy.state('window', undefined)
       cy.state('document', undefined)
 
-      // unload is being actively deprecated/removed by chrome, so for
-      // compatibility, we are using `window`'s `pagehide` event as a proxy
-      // for the `window:unload` event that we emit. See: https://github.com/cypress-io/cypress/pull/29525
       return Cypress.action('app:window:unload', e)
     },
     onNavigation (...args) {
