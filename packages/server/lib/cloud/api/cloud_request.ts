@@ -6,20 +6,20 @@ import os from 'os'
 import axios, { AxiosInstance } from 'axios'
 
 import pkg from '@packages/root'
-import { httpAgent, httpsAgent } from '@packages/network/lib/agent'
+import agent from '@packages/network/lib/agent'
 
 import app_config from '../../../config/app.json'
 import { installErrorTransform } from './axios_middleware/transform_error'
 import { installLogging } from './axios_middleware/logging'
 
 // initialized with an export for testing purposes
-export const _create = (): AxiosInstance => {
+export const _create = (options: { baseURL?: string } = {}): AxiosInstance => {
   const cfgKey = process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'development'
 
   const instance = axios.create({
-    baseURL: app_config[cfgKey].api_url,
-    httpAgent,
-    httpsAgent,
+    baseURL: options.baseURL ?? app_config[cfgKey].api_url,
+    httpAgent: agent,
+    httpsAgent: agent,
     headers: {
       'x-os-name': os.platform(),
       'x-cypress-version': pkg.version,

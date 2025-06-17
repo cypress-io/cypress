@@ -15,7 +15,7 @@ const errors = require('../../errors')
 import Bluebird from 'bluebird'
 
 import type { AfterSpecDurations } from '@packages/types'
-import { agent } from '@packages/network'
+import agent from '@packages/network/lib/agent'
 import type { CombinedAgent } from '@packages/network/lib/agent'
 
 import { apiUrl, apiRoutes, makeRoutes } from '../routes'
@@ -479,7 +479,7 @@ export default {
     .catch(tagError)
   },
 
-  createInstance (runId: string, body: CreateInstanceRequestBody, timeout: number = 0): Bluebird<CreateInstanceResponse> {
+  createInstance (runId: string, body: CreateInstanceRequestBody, timeout?: number): Bluebird<CreateInstanceResponse> {
     return retryWithBackoff((attemptIndex) => {
       return rp.post({
         body,
