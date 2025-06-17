@@ -4,6 +4,8 @@ import WP from '../../npm/webpack-preprocessor'
 
 export default defineConfig({
   projectId: 'ypt4pf',
+  // @ts-expect-error - experimental prompt command is not officially typed until released
+  experimentalPromptCommand: true,
   reporter: '../../node_modules/cypress-multi-reporters/index.js',
 
   reporterOptions: {

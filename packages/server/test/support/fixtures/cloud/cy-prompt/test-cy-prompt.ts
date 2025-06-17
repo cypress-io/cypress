@@ -16,6 +16,10 @@ class CyPromptServer implements CyPromptServerShape {
   connectToBrowser (criClient: CyPromptCDPClient): void {
     // This is a test implementation that does nothing
   }
+
+  reset (testId?: string): void {
+    // This is a test implementation that does nothing
+  }
 }
 
 const cyPromptServerDefault: CyPromptServerDefaultShape = {

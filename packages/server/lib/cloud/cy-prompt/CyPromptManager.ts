@@ -57,6 +57,12 @@ export class CyPromptManager implements CyPromptManagerShape {
     }
   }
 
+  reset (testId?: string): void {
+    if (this._cyPromptServer) {
+      return this.invokeSync('reset', { isEssential: true }, testId)
+    }
+  }
+
   /**
    * Abstracts invoking a synchronous method on the CyPromptServer instance, so we can handle
    * errors in a uniform way

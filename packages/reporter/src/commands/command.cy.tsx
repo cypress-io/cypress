@@ -30,6 +30,7 @@ describe('commands', () => {
               })
             }
             scrollIntoView={() => {}}
+            aliasesWithDuplicates={[]}
           />
         </div>,
       )
@@ -98,12 +99,65 @@ describe('commands', () => {
                 })
               }
               scrollIntoView={() => {}}
+              aliasesWithDuplicates={[]}
             />
           ))}
         </div>,
       )
 
       cy.percySnapshot()
+    })
+  })
+
+  describe('prompt', () => {
+    it('should render prompt get code button when state is passed', () => {
+      cy.mount(
+        <div>
+          <Command
+            model={
+              new CommandModel({
+                name: 'prompt',
+                state: 'passed',
+                numElements: 1,
+                hookId: '1',
+                id: 1,
+                testId: '1',
+              })
+            }
+            scrollIntoView={() => {}}
+            aliasesWithDuplicates={[]}
+          />
+        </div>,
+      )
+
+      cy.get('.command-prompt-get-code').should('be.visible').should('have.text', 'Get code')
+      cy.get('.command-prompt-get-code-indicator').should('be.visible')
+
+      cy.percySnapshot()
+    })
+
+    it('should not render prompt get code button when state is not passed', () => {
+      cy.mount(
+        <div>
+          <Command
+            model={
+              new CommandModel({
+                name: 'prompt',
+                state: 'pending',
+                numElements: 1,
+                hookId: '1',
+                id: 1,
+                testId: '1',
+              })
+            }
+            scrollIntoView={() => {}}
+            aliasesWithDuplicates={[]}
+          />
+        </div>,
+      )
+
+      cy.get('.command-prompt-get-code').should('not.exist')
+      cy.get('.command-prompt-get-code-indicator').should('not.exist')
     })
   })
 })

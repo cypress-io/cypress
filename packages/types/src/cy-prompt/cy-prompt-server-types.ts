@@ -1,3 +1,7 @@
+// Note: This file is owned by the cloud delivered
+// cy prompt bundle. It is downloaded and copied here.
+// It should not be modified directly here.
+
 /// <reference types="cypress" />
 
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping.d'
@@ -7,7 +11,8 @@ import type { Socket } from 'socket.io'
 
 export type CyPromptCommands = ProtocolMapping.Commands
 
-export type CyPromptCommand<T extends keyof CyPromptCommands> = CyPromptCommands[T]
+export type CyPromptCommand<T extends keyof CyPromptCommands> =
+  CyPromptCommands[T]
 
 export type CyPromptEvents = ProtocolMapping.Events
 
@@ -39,16 +44,20 @@ export interface CyPromptAuthenticatedUserShape {
   authToken?: string
 }
 
+export interface CyPromptProjectOptions {
+  user?: CyPromptAuthenticatedUserShape
+  projectSlug?: string
+  record?: boolean
+  key?: string
+  isOpenMode?: boolean
+}
+
 export interface CyPromptServerOptions {
   cyPromptHash?: string
-  getProjectOptions: () => Promise<{
-    user?: CyPromptAuthenticatedUserShape
-    projectSlug?: string
-    record?: boolean
-    key?: string
-  }>
   cyPromptPath: string
+  projectSlug?: string
   cloudApi: CyPromptCloudApi
+  getProjectOptions: () => Promise<CyPromptProjectOptions>
 }
 
 export interface CyPromptCDPClient {
@@ -66,6 +75,7 @@ export interface CyPromptServerShape {
   initializeRoutes(router: Router): void
   addSocketListeners(socket: Socket): void
   connectToBrowser: (cdpClient: CyPromptCDPClient) => void
+  reset: (testId?: string) => void
 }
 
 export interface CyPromptServerDefaultShape {

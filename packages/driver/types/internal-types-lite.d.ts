@@ -42,7 +42,7 @@ declare namespace Cypress {
     (task: 'protocol:test:before:after:run:async', attributes: any, options: any): Promise<void>
     (task: 'protocol:url:changed', input: any): Promise<void>
     (task: 'protocol:page:loading', input: any): Promise<void>
-    (task: 'wait:for:cy:prompt:ready'): Promise<{ success: boolean, error?: Error }>
+    (task: 'wait:for:prompt:ready'): Promise<{ success: boolean, error?: Error }>
   }
 
   interface Devices {

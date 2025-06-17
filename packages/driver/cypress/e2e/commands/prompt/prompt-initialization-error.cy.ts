@@ -7,7 +7,7 @@ describe('src/cy/commands/prompt', () => {
     error.name = 'ENOSPC'
 
     backendStub.callThrough()
-    backendStub.withArgs('wait:for:cy:prompt:ready').resolves({ success: false, error })
+    backendStub.withArgs('wait:for:prompt:ready').resolves({ success: false, error })
 
     cy.on('fail', (err) => {
       expect(err.message).to.include('Failed to download cy.prompt Cloud code')
@@ -31,7 +31,7 @@ describe('src/cy/commands/prompt', () => {
     error.name = 'ECONNREFUSED'
 
     backendStub.callThrough()
-    backendStub.withArgs('wait:for:cy:prompt:ready').resolves({ success: false, error })
+    backendStub.withArgs('wait:for:prompt:ready').resolves({ success: false, error })
 
     cy.on('fail', (err) => {
       expect(err.message).to.include('Timed out waiting for cy.prompt Cloud code:')

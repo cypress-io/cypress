@@ -453,6 +453,16 @@ export class SocketBase {
           }
         })
 
+        socket.on('prompt:reset', (cb) => {
+          getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt().then(async (cyPrompt) => {
+            if (cyPrompt.cyPromptManager && !runState) {
+              cyPrompt.cyPromptManager.reset()
+            }
+
+            cb()
+          })
+        })
+
         socket.on('backend:request', (eventName: string, ...args) => {
           const userAgent = socket.request?.headers['user-agent'] || getCtx().coreData.app.browserUserAgent
 
@@ -539,7 +549,7 @@ export class SocketBase {
                 })
               case 'close:extra:targets':
                 return options.closeExtraTargets()
-              case 'wait:for:cy:prompt:ready':
+              case 'wait:for:prompt:ready':
                 return getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt().then(async (cyPrompt) => {
                   if (cyPrompt.cyPromptManager) {
                     await options.onCyPromptReady(cyPrompt.cyPromptManager)
@@ -574,9 +584,18 @@ export class SocketBase {
             runState = undefined
 
             // if we have cached test state, then we need to reset
-            // the test state on the protocol manager
+            // the test state on the protocol manager and prompt manager
             if (s.currentId) {
-              this._protocolManager?.resetTest(s.currentId)
+              const testId = s.currentId
+
+              this._protocolManager?.resetTest(testId)
+              getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt().then(async (cyPrompt) => {
+                if (cyPrompt.cyPromptManager) {
+                  // reset the prompt manager for the current test to clear any
+                  // cached state when top changes for the current test
+                  cyPrompt.cyPromptManager.reset(testId)
+                }
+              })
             }
           }
 

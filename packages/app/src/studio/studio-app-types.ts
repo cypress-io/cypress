@@ -1,10 +1,11 @@
+export type RecordingState = 'recording' | 'paused' | 'disabled'
+
 export interface StudioPanelProps {
   canAccessStudioAI: boolean
   onStudioPanelClose?: () => void
   studioSessionId?: string
   useRunnerStatus?: RunnerStatusShape
   useTestContentRetriever?: TestContentRetrieverShape
-  useStudioAIStream?: StudioAIStreamShape
   useCypress?: CypressShape
 }
 
@@ -53,6 +54,7 @@ export interface StudioAIStreamProps {
   runnerStatus: RunnerStatus
   testCode?: string
   isCreatingNewTest: boolean
+  Cypress: CypressInternal
 }
 
 export interface StudioAIStream {
@@ -71,18 +73,4 @@ export type TestContentRetrieverShape = (props: TestContentRetrieverProps) => {
   isLoading: boolean
   testBlock: TestBlock | null
   isCreatingNewTest: boolean
-}
-
-export interface Command {
-  selector?: string
-  name: string
-  message?: string | string[]
-  isAssertion?: boolean
-}
-
-export interface SaveDetails {
-  absoluteFile: string
-  runnableTitle: string
-  contents: string
-  testName?: string
 }
