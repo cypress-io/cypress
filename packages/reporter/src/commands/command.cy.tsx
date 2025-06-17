@@ -110,7 +110,15 @@ describe('commands', () => {
   })
 
   describe('prompt', () => {
+    let config
+
+    beforeEach(() => {
+      config = cy.stub(Cypress, 'config').log(false).callThrough()
+    })
+
     it('should render prompt get code button when state is passed', () => {
+      config.withArgs('experimentalPromptCommand').returns(true)
+      config.withArgs('isTextTerminal').returns(false)
       cy.mount(
         <div>
           <Command
@@ -137,6 +145,8 @@ describe('commands', () => {
     })
 
     it('should not render prompt get code button when state is not passed', () => {
+      config.withArgs('experimentalPromptCommand').returns(true)
+      config.withArgs('isTextTerminal').returns(false)
       cy.mount(
         <div>
           <Command
@@ -153,6 +163,34 @@ describe('commands', () => {
             scrollIntoView={() => {}}
             aliasesWithDuplicates={[]}
           />
+        </div>,
+      )
+
+      cy.get('.command-prompt-get-code').should('not.exist')
+      cy.get('.command-prompt-get-code-indicator').should('not.exist')
+    })
+
+    it('should not render prompt if experimentalPromptCommand is false', () => {
+      config.withArgs('experimentalPromptCommand').returns(false)
+      config.withArgs('isTextTerminal').returns(false)
+
+      cy.mount(
+        <div>
+          <Command model={new CommandModel({ name: 'prompt', state: 'passed', numElements: 1, hookId: '1', id: 1, testId: '1' })} scrollIntoView={() => {}} aliasesWithDuplicates={[]} />
+        </div>,
+      )
+
+      cy.get('.command-prompt-get-code').should('not.exist')
+      cy.get('.command-prompt-get-code-indicator').should('not.exist')
+    })
+
+    it('should not render prompt if isTextTerminal is true', () => {
+      config.withArgs('experimentalPromptCommand').returns(true)
+      config.withArgs('isTextTerminal').returns(true)
+
+      cy.mount(
+        <div>
+          <Command model={new CommandModel({ name: 'prompt', state: 'passed', numElements: 1, hookId: '1', id: 1, testId: '1' })} scrollIntoView={() => {}} aliasesWithDuplicates={[]} />
         </div>,
       )
 
