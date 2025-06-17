@@ -20,6 +20,7 @@ it('only supports a handful of built-ins that are popular amongst cypress projec
   expect(require('os')).to.be.an('object').and.have.property('platform')
   expect(require('path')).to.be.an('object').and.have.property('join')
   expect(require('perf_hooks')).to.eql({})
+  expect(require('process')).to.be.an('object').and.have.property('env')
   expect(require('punycode')).to.be.eql({})
   expect(require('querystring')).to.be.eql({})
   expect(require('readline')).to.be.eql({})
