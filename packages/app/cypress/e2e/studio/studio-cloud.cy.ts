@@ -148,13 +148,16 @@ describe('Studio Cloud', () => {
     })
 
     cy.mockStudioFullSnapshot({
-      id: 1,
-      nodeType: 1,
-      nodeName: 'div',
-      localName: 'div',
-      nodeValue: 'div',
-      children: [],
-      shadowRoots: [],
+      fullSnapshot: {
+        id: 1,
+        nodeType: 1,
+        nodeName: 'div',
+        localName: 'div',
+        nodeValue: 'div',
+        children: [],
+        shadowRoots: [],
+      },
+      url: 'http://localhost:3000/cypress/e2e/index.html',
     })
 
     const deferred = pDefer()
@@ -201,5 +204,58 @@ describe('Studio Cloud', () => {
 
     // Verify that the AI output is correct
     cy.get('[data-cy="recommendation-editor"]').should('contain', aiOutput)
+  })
+
+  it('does not exit studio mode if the spec is changed on the file system', () => {
+    launchStudio({ enableCloudStudio: true })
+
+    cy.findByTestId('studio-panel').should('be.visible')
+
+    // update the spec on the file system to force a rerun through watched:file:changed
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.writeFileInProject('cypress/e2e/spec.cy.js', `
+describe('studio functionality', () => {
+  it('visits a basic html page', () => {
+    // new comment
+    cy.visit('cypress/e2e/index.html')
+  })
+})`)
+    })
+
+    cy.waitForSpecToFinish()
+
+    // verify studio is still open
+    cy.findByTestId('studio-panel').should('be.visible')
+  })
+
+  it('does not record studio commands when cloud studio is enabled', () => {
+    launchStudio({ enableCloudStudio: true })
+
+    cy.findByTestId('studio-panel').should('be.visible')
+
+    // Attempt to perform actions that would normally be recorded in regular studio
+    // but should NOT be recorded in when cloud studio is enabled because event listeners are not attached
+    cy.getAutIframe().within(() => {
+      cy.get('p').contains('Count is 0')
+
+      // Try to click the increment button - this should NOT be recorded
+      // because cloud studio event listeners should not be attached
+      cy.get('#increment').realClick().then(() => {
+        cy.get('p').contains('Count is 1')
+      })
+    })
+
+    // Verify that no legacy studio commands were recorded
+    cy.get('.command-is-studio').should('not.exist')
+
+    // Verify that the actual DOM interactions still work (button was clicked, counter incremented)
+    // but they just weren't recorded by the legacy studio event listeners
+    cy.getAutIframe().within(() => {
+      cy.get('p').should('contain', 'Count is 1')
+    })
+
+    cy.findByTestId('studio-panel').should('be.visible')
+
+    cy.get('[data-cy="studio-toolbar"]').should('not.exist')
   })
 })

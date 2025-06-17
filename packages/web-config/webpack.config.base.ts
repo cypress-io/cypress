@@ -121,6 +121,7 @@ export const getCommonConfig = () => {
       extensions: ['.ts', '.js', '.jsx', '.tsx', '.scss', '.json'],
       // see https://gist.github.com/ef4/d2cf5672a93cf241fd47c020b9b3066a for polyfill migration details
       fallback: {
+        assert: require.resolve('assert/'),
         buffer: require.resolve('buffer/'),
         child_process: false,
         fs: false,

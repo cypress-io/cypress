@@ -1,6 +1,16 @@
 import { defineConfig } from 'cypress'
 import { snapshotCypressDirectory } from './cypress/tasks/snapshotsScaffold'
 import { uninstallDependenciesInScaffoldedProject } from './cypress/tasks/uninstallDependenciesInScaffoldedProject'
+import wbip from '@cypress/webpack-batteries-included-preprocessor'
+
+function getWebpackOptions () {
+  const options = wbip.getFullWebpackOptions()
+
+  // our tests need the path built-in for testing, so we need to shim it here into the webpack config
+  options.resolve.fallback.path = require.resolve('path-browserify')
+
+  return options
+}
 
 export default defineConfig({
   projectId: 'ypt4pf',
@@ -36,6 +46,8 @@ export default defineConfig({
         snapshotCypressDirectory,
         uninstallDependenciesInScaffoldedProject,
       })
+
+      on('file:preprocessor', wbip({ webpackOptions: getWebpackOptions(), typescript: require.resolve('typescript') }))
 
       return await e2ePluginSetup(on, config)
     },

@@ -502,5 +502,12 @@ describe('/lib/tasks/install', function () {
       expect(install._getBinaryUrlFromBuildInfo('x64', buildInfo))
       .to.eq(`https://cdn.cypress.io/beta/binary/0.0.0-development/linux-x64/aBranchName-abc123/cypress.zip`)
     })
+
+    it('overrides win32-arm64 to win32-x64 for pre-release', () => {
+      os.platform.returns('win32')
+
+      expect(install._getBinaryUrlFromBuildInfo('arm64', buildInfo))
+      .to.eq(`https://cdn.cypress.io/beta/binary/0.0.0-development/win32-x64/aBranchName-abc123/cypress.zip`)
+    })
   })
 })

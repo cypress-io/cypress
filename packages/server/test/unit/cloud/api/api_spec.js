@@ -228,6 +228,8 @@ describe('lib/cloud/api', () => {
 
   context('.sendPreflight', () => {
     let prodApi
+    let originalCypressConfigEnv = process.env.CYPRESS_CONFIG_ENV
+    let originalCypressAPIUrl = process.env.CYPRESS_API_URL
 
     beforeEach(function () {
       this.timeout(30000)
@@ -248,6 +250,20 @@ describe('lib/cloud/api', () => {
       }
 
       prodApi.resetPreflightResult()
+    })
+
+    afterEach(() => {
+      if (originalCypressConfigEnv) {
+        process.env.CYPRESS_CONFIG_ENV = originalCypressConfigEnv
+      } else {
+        delete process.env.CYPRESS_CONFIG_ENV
+      }
+
+      if (originalCypressAPIUrl) {
+        process.env.CYPRESS_API_URL = originalCypressAPIUrl
+      } else {
+        delete process.env.CYPRESS_API_URL
+      }
     })
 
     it('POST /preflight to proxy. returns encryption', () => {

@@ -95,15 +95,18 @@ module.exports = async function (params) {
       const cloudApiFileSource = await getProtocolFileSource(cloudApiFilePath)
       const cloudProtocolFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/protocol.ts')
       const cloudProtocolFileSource = await getProtocolFileSource(cloudProtocolFilePath)
-      const getAndInitializeStudioManagerFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/api/studio/get_and_initialize_studio_manager.ts')
-      const getAndInitializeStudioManagerFileSource = await getStudioFileSource(getAndInitializeStudioManagerFilePath)
+      const reportStudioErrorPath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/api/studio/report_studio_error.ts')
+      const reportStudioErrorFileSource = await getStudioFileSource(reportStudioErrorPath)
+      const StudioLifecycleManagerPath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/studio/StudioLifecycleManager.ts')
+      const StudioLifecycleManagerFileSource = await getStudioFileSource(StudioLifecycleManagerPath)
 
       await Promise.all([
         fs.writeFile(encryptionFilePath, encryptionFileSource),
         fs.writeFile(cloudEnvironmentFilePath, cloudEnvironmentFileSource),
         fs.writeFile(cloudApiFilePath, cloudApiFileSource),
         fs.writeFile(cloudProtocolFilePath, cloudProtocolFileSource),
-        fs.writeFile(getAndInitializeStudioManagerFilePath, getAndInitializeStudioManagerFileSource),
+        fs.writeFile(reportStudioErrorPath, reportStudioErrorFileSource),
+        fs.writeFile(StudioLifecycleManagerPath, StudioLifecycleManagerFileSource),
         fs.writeFile(path.join(outputFolder, 'index.js'), binaryEntryPointSource),
       ])
 
@@ -116,7 +119,8 @@ module.exports = async function (params) {
         validateCloudEnvironmentFile(cloudEnvironmentFilePath),
         validateProtocolFile(cloudApiFilePath),
         validateProtocolFile(cloudProtocolFilePath),
-        validateStudioFile(getAndInitializeStudioManagerFilePath),
+        validateStudioFile(reportStudioErrorPath),
+        validateStudioFile(StudioLifecycleManagerPath),
       ])
 
       await flipFuses(

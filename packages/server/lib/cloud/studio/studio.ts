@@ -2,9 +2,9 @@ import type { StudioManagerShape, StudioStatus, StudioServerDefaultShape, Studio
 import type { Router } from 'express'
 import type { Socket } from 'socket.io'
 import Debug from 'debug'
-import { requireScript } from './require_script'
+import { requireScript } from '../require_script'
 import path from 'path'
-import { reportStudioError, ReportStudioErrorOptions } from './api/studio/report_studio_error'
+import { reportStudioError, ReportStudioErrorOptions } from '../api/studio/report_studio_error'
 
 interface StudioServer { default: StudioServerDefaultShape }
 
@@ -82,6 +82,14 @@ export class StudioManager implements StudioManagerShape {
 
   async initializeStudioAI (options: StudioAIInitializeOptions): Promise<void> {
     await this.invokeAsync('initializeStudioAI', { isEssential: true }, options)
+  }
+
+  updateSessionId (sessionId: string): void {
+    if (this._studioServer && typeof this._studioServer.updateSessionId === 'function') {
+      this.invokeSync('updateSessionId', { isEssential: false }, sessionId)
+    } else {
+      debug('updateSessionId method not available on studio server')
+    }
   }
 
   async destroy (): Promise<void> {

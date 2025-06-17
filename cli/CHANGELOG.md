@@ -13,6 +13,8 @@ _Released 07/01/2025 (PENDING)_
 - The Cypress configuration wizard for Component Testing supports TypeScript 5.0 or greater. Addresses [#31187](https://github.com/cypress-io/cypress/issues/31187).
 - `@cypress/webpack-dev-server` and `@cypress/webpack-preprocessor` no longer support `webpack` version 4. Addresses [#31344](https://github.com/cypress-io/cypress/issues/31344). If you still need to use `webpack` version 4, please see our [migration guide](https://docs.cypress.io/app/references/migration-guide#Migrating-to-Cypress-150).
 - `@cypress/webpack-dev-server` no longer supports `webpack-dev-server` version 4. Addresses [#31605](https://github.com/cypress-io/cypress/issues/31605). If you still need to use `webpack-dev-server` version 4, please see our [migration guide](https://docs.cypress.io/app/references/migration-guide#Migrating-to-Cypress-150).
+- The `@cypress/webpack-batteries-included-preprocessor` no longer includes browser built-ins that were automatically provided by Webpack 4. To add built-ins manually, refer to the Webpack [resolve.fallback](https://webpack.js.org/configuration/resolve/#resolvefallback) documentation and the [`@cypress/webpack-batteries-included-preprocessor` README](../npm/webpack-batteries-included-preprocessor/README.md). Addresses [#31039](https://github.com/cypress-io/cypress/issues/31039).
+- The application under test's `pagehide` event in Chromium browsers will no longer trigger Cypress's `window:unload` event. Addressed in [#31853](https://github.com/cypress-io/cypress/pull/31853).
 
 **Features:**
 
@@ -27,9 +29,37 @@ _Released 07/01/2025 (PENDING)_
 - Upgraded bundled Node.js version from `20.18.1` to `22.14.0`.
 - Upgraded bundled Chromium version from `130.0.6723.137` to `134.0.6998.165`.
 
+## 14.5.0
+
+_Released 6/17/2025_
+
+**Features:**
+
+- Install Cypress `win32-x64` binary on Windows `win32-arm64` systems. Cypress runs in emulation. Addresses [#30252](https://github.com/cypress-io/cypress/issues/30252).
+
+**Bugfixes:**
+
+- Fixed an issue when using `Cypress.stop()` where a run may be aborted prior to receiving the required runner events causing Test Replay to not be available. Addresses [#31781](https://github.com/cypress-io/cypress/issues/31781).
+
+## 14.4.1
+
+_Released 6/3/2025_
+
+**Bugfixes:**
+
+- Fixed an issue where `cy.session()` may fail internally if navigating to `about:blank` takes longer than the `defaultCommandTimeout`. Addresses [#29496](https://github.com/cypress-io/cypress/issues/29496).
+
+**Misc:**
+
+- The design of commands that display as grouped (such as `.within()` and `cy.session()`) has been updated to provide better clarity when collapsing groups. Addressed in [#31739](https://github.com/cypress-io/cypress/pull/31739).
+
+**Dependency Updates:**
+
+- Updated `@sinonjs/fake-timers` from `10.3.0` to `11.3.1`. Addressed in [#31746](https://github.com/cypress-io/cypress/pull/31746).
+
 ## 14.4.0
 
-_Released 5/20/2025 (PENDING)_
+_Released 5/20/2025_
 
 **Features:**
 
@@ -43,12 +73,15 @@ _Released 5/20/2025 (PENDING)_
 
 **Misc:**
 
+- Chrome 137+ no longer supports `--load-extension` in branded Chrome, breaking the `@cypress/puppeteer` plugin in `open` mode and headed `run` mode and [`launchOptions.extensions`](https://docs.cypress.io/api/node-events/browser-launch-api#Add-browser-extensions). We recommend using Electron, Chrome for Testing or Chromium to continue using these features. See Cypress Docker image examples for [Chrome for Testing](https://github.com/cypress-io/cypress-docker-images/tree/master/examples/chrome-for-testing) and [Chromium](https://github.com/cypress-io/cypress-docker-images/tree/master/examples/chromium). Addresses [#31702](https://github.com/cypress-io/cypress/issues/31702) and [#31703](https://github.com/cypress-io/cypress/issues/31703).
 - Cursor is now available as an IDE option for opening files in Cypress, if it is installed on your system. Addressed in [#31691](https://github.com/cypress-io/cypress/pull/31691).
 - The error shown when the `--record` flag is missing has been updated to be shorter. Addressed in [#31676](https://github.com/cypress-io/cypress/pull/31676).
 
 **Dependency Updates:**
 
+- Upgraded `@sinonjs/fake-timers` from `8.1.0` to `10.3.0`. Addressed in [#31725](https://github.com/cypress-io/cypress/pull/31725) and [#31737](https://github.com/cypress-io/cypress/pull/31737).
 - Upgraded `trash` from `5.2.0` to `7.2.0`. Addressed in [#31667](https://github.com/cypress-io/cypress/pull/31667).
+- Upgraded `webdriver` from `9.11.0` to `9.14.0`. Addressed in [#31689](https://github.com/cypress-io/cypress/pull/31689).
 
 ## 14.3.3
 

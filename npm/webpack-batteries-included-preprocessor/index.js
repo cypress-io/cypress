@@ -1,11 +1,18 @@
 const path = require('path')
-const webpack = require('webpack')
 const Debug = require('debug')
+const getTsConfig = require('get-tsconfig')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 
 const debug = Debug('cypress:webpack-batteries-included-preprocessor')
 const WBADebugNamespace = 'cypress-verbose:webpack-batteries-included-preprocessor:bundle-analyzer'
+
+class TsConfigNotFoundError extends Error {
+  constructor () {
+    super('No tsconfig.json found, but typescript is installed. ts-loader needs a tsconfig.json file to work. Please add one to your project in either the root or the cypress directory.')
+    this.name = 'TsConfigNotFoundError'
+  }
+}
 
 const hasTsLoader = (rules) => {
   return rules.some((rule) => {
@@ -18,6 +25,17 @@ const hasTsLoader = (rules) => {
 }
 
 const addTypeScriptConfig = (file, options) => {
+  // returns null if tsconfig cannot be found in the path/parent hierarchy
+  const configFile = getTsConfig.getTsconfig(file.filePath)
+
+  if (!configFile && typescriptExtensionRegex.test(file.filePath)) {
+    debug('no user tsconfig.json found. Throwing TsConfigNotFoundError')
+    // @see https://github.com/cypress-io/cypress/issues/18938
+    throw new TsConfigNotFoundError()
+  }
+
+  debug(`found user tsconfig.json at ${configFile?.path} with compilerOptions: ${JSON.stringify(configFile?.config?.compilerOptions)}`)
+
   // shortcut if we know we've already added typescript support
   if (options.__typescriptSupportAdded) return options
 
@@ -37,13 +55,6 @@ const addTypeScriptConfig = (file, options) => {
   const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
   // node will try to load a projects tsconfig.json instead of the node
 
-  const getTsConfig = require('get-tsconfig')
-
-  // returns null if tsconfig cannot be found in the path/parent hierarchy
-  const configFile = getTsConfig.getTsconfig(file.filePath)
-
-  configFile ? debug(`found user tsconfig.json at ${configFile?.path} with compilerOptions: ${JSON.stringify(configFile?.config?.compilerOptions)}`) : debug('no user tsconfig.json found')
-
   webpackOptions.module.rules.push({
     test: /\.tsx?$/,
     exclude: [/node_modules/],
@@ -52,6 +63,10 @@ const addTypeScriptConfig = (file, options) => {
         loader: require.resolve('ts-loader'),
         options: {
           compiler: options.typescript,
+          // pass in the resolved compiler options from the tsconfig file into ts-loader to most accurately transpile the code
+          ...(configFile ? {
+            compilerOptions: configFile.config.compilerOptions,
+          } : {}),
           logLevel: 'error',
           silent: true,
           transpileOnly: true,
@@ -120,24 +135,6 @@ const getDefaultWebpackOptions = () => {
       }],
     },
     plugins: [
-      new webpack.ProvidePlugin({
-        Buffer: ['buffer', 'Buffer'],
-        // As of Webpack 5, a new option called resolve.fullySpecified, was added.
-        // This option means that a full path, in particular to .mjs / .js files
-        // in ESM packages must have the full path of an import specified.
-        // Otherwise, compilation fails as this option defaults to true.
-        // This means we need to adjust our global injections to always
-        // resolve to include the full file extension if a file resolution is provided.
-        // @see https://github.com/cypress-io/cypress/issues/27599
-        // @see https://webpack.js.org/configuration/module/#resolvefullyspecified
-
-        // Due to Pnp compatibility issues, we want to make sure that we resolve to the 'process' library installed with the binary,
-        // which should resolve on leaf app/packages/server/node_modules/@cypress/webpack-batteries-included-preprocessor and up the tree.
-        // In other words, we want to resolve 'process' that is installed with cypress (or the package itself, i.e. @cypress/webpack-batteries-included-preprocessor)
-        // and not in the user's node_modules directory as it may not exist.
-        // @see https://github.com/cypress-io/cypress/issues/27947.
-        process: require.resolve('process/browser.js'),
-      }),
       // If the user is trying to debug their bundle, we'll add the BundleAnalyzerPlugin
       // to see the size of the support file (first bundle when running `cypress open`)
       // and spec files (subsequent bundles when running `cypress open`)
@@ -146,42 +143,42 @@ const getDefaultWebpackOptions = () => {
     resolve: {
       extensions: ['.js', '.json', '.jsx', '.mjs', '.coffee'],
       fallback: {
-        assert: require.resolve('assert/'),
-        buffer: require.resolve('buffer/'),
+        assert: false,
+        buffer: false,
         child_process: false,
         cluster: false,
         console: false,
-        constants: require.resolve('constants-browserify'),
-        crypto: require.resolve('crypto-browserify'),
+        constants: false,
+        crypto: false,
         dgram: false,
         dns: false,
-        domain: require.resolve('domain-browser'),
-        events: require.resolve('events/'),
+        domain: false,
+        events: false,
         fs: false,
-        http: require.resolve('stream-http'),
-        https: require.resolve('https-browserify'),
+        http: false,
+        https: false,
         http2: false,
         inspector: false,
         module: false,
         net: false,
-        os: require.resolve('os-browserify/browser'),
-        path: require.resolve('path-browserify'),
+        os: false,
+        path: false,
         perf_hooks: false,
-        punycode: require.resolve('punycode/'),
-        process: require.resolve('process/browser.js'),
-        querystring: require.resolve('querystring-es3'),
+        punycode: false,
+        process: false,
+        querystring: false,
         readline: false,
         repl: false,
-        stream: require.resolve('stream-browserify'),
-        string_decoder: require.resolve('string_decoder/'),
-        sys: require.resolve('util/'),
-        timers: require.resolve('timers-browserify'),
+        stream: false,
+        string_decoder: false,
+        sys: false,
+        timers: false,
         tls: false,
-        tty: require.resolve('tty-browserify'),
-        url: require.resolve('url/'),
-        util: require.resolve('util/'),
-        vm: require.resolve('vm-browserify'),
-        zlib: require.resolve('browserify-zlib'),
+        tty: false,
+        url: false,
+        util: false,
+        vm: false,
+        zlib: false,
       },
       plugins: [],
     },

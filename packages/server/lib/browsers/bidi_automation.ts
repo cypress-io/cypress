@@ -6,6 +6,7 @@ import { cookieMatches } from '../automation/util'
 import { bidiKeyPress } from '../automation/commands/key_press'
 import { AutomationNotImplemented } from '../automation/automation_not_implemented'
 
+import type Protocol from 'devtools-protocol'
 import type { Automation } from '../automation'
 import type { BrowserPreRequest, BrowserResponseReceived, ResourceType } from '@packages/proxy'
 import type { AutomationMiddleware, AutomationCommands } from '@packages/types'
@@ -304,7 +305,7 @@ export class BidiAutomation {
       headers: parsedHeaders,
       resourceType,
       originalResourceType: params.request.initiatorType || params.request.destination,
-      initiator: params.initiator,
+      initiator: params.initiator as Protocol.Network.Initiator,
       // Since we are NOT using CDP, we set the values to 0 to indicate that we do not have this information.
       // This is important when determining pre-request timeout and removal behavior
       cdpRequestWillBeSentTimestamp: 0,

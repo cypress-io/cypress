@@ -1,11 +1,11 @@
 version: 2.1
 
-chrome-stable-version: &chrome-stable-version "136.0.7103.92"
-chrome-beta-version: &chrome-beta-version "137.0.7151.15"
+chrome-stable-version: &chrome-stable-version "137.0.7151.103"
+chrome-beta-version: &chrome-beta-version "138.0.7204.23"
 firefox-stable-version: &firefox-stable-version "137.0"
 
 orbs:
-  browser-tools: circleci/browser-tools@1.5.3
+  browser-tools: circleci/browser-tools@2.1.1
 
 defaults: &defaults
   parallelism: 1
@@ -562,6 +562,15 @@ commands:
         type: string
         # latest can also be used here
         default: *chrome-stable-version
+      install-chrome-for-testing:
+        description: whether or not to install google chrome for testing
+        type: boolean
+        default: false
+      google-chrome-for-testing-version:
+        description: Google Chrome for Testing version to install
+        type: string
+        # latest can also be used here
+        default: *chrome-stable-version
       install-firefox:
         description: whether or not to install firefox
         type: boolean
@@ -582,17 +591,17 @@ commands:
                 condition:
                   equal: [ true, << parameters.install-firefox >> ]
                 steps:
-                  - browser-tools/install-firefox:
+                  - browser-tools/install_firefox:
                       # https://download-installer.cdn.mozilla.net/pub/firefox/releases/
                       version: << parameters.firefox-version >>
             - when:
                 condition:
                   equal: [ true, << parameters.install-chrome >> ]
                 steps:
-                  - browser-tools/install-chrome:
+                  - browser-tools/install_chrome:
                       # https://www.ubuntuupdates.org/package/google_chrome/stable/main/base/google-chrome-stable
                       channel: << parameters.google-chrome-channel >>
-                      chrome-version: << parameters.google-chrome-version >>
+                      chrome_version: << parameters.google-chrome-version >>
                   - when:
                       condition:
                         equal: [ 'beta', << parameters.google-chrome-channel>> ]
@@ -603,7 +612,18 @@ commands:
                             # which we do not expect and errors out when running Cypress
                             name: remove linked google-chrome binary
                             command: |
-                              rm /usr/bin/google-chrome           
+                              rm /usr/bin/google-chrome
+            - when:
+                condition:
+                  equal: [ true, << parameters.install-chrome-for-testing >> ]
+                steps:
+                  - run:
+                      name: Install unzip
+                      command: |
+                        apt-get update && apt-get install -y unzip
+                  - browser-tools/install_chrome_for_testing:
+                      version: << parameters.google-chrome-for-testing-version >>
+                      install_chromedriver: false
 
   # This code builds better-sqlite3 on Debian 11 (Bullseye). This is necessary because Debian 10 has the oldest glibc version (2.31) that we support.
   #
@@ -847,6 +867,7 @@ commands:
             - install-webkit-deps
       - install-browsers:
           install-chrome: true
+          install-chrome-for-testing: true
           install-firefox: true
       - run:
           name: Run system tests

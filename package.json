@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "14.3.3",
+  "version": "14.5.0",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -117,7 +117,7 @@
     "@types/react-dom": "18.3.1",
     "@types/request-promise": "4.1.45",
     "@types/send": "^0.17.1",
-    "@types/sinon-chai": "3.2.3",
+    "@types/sinon-chai": "3.2.12",
     "@types/through2": "^2.0.36",
     "@types/underscore.string": "0.0.38",
     "@typescript-eslint/eslint-plugin": "7.2.0",
@@ -165,8 +165,7 @@
     "gulp-awspublish": "8.0.0",
     "gulp-debug": "4.0.0",
     "gulp-rename": "1.4.0",
-    "hasha": "5.0.0",
-    "http-server": "0.12.3",
+    "hasha": "5.2.2",
     "human-interval": "1.0.0",
     "husky": "7.0.2",
     "inquirer": "8.2.4",
@@ -199,6 +198,7 @@
     "semver": "^7.7.1",
     "shelljs": "0.8.5",
     "sinon": "7.3.2",
+    "sinon-chai": "3.7.0",
     "snap-shot-it": "7.9.10",
     "stop-only": "3.4.1",
     "strip-ansi": "6.0.1",
@@ -210,7 +210,7 @@
     "tree-kill": "1.2.2",
     "ts-node": "^10.9.2",
     "typescript": "5.3.3",
-    "yaml": "2.7.0",
+    "yaml": "2.8.0",
     "yarn-deduplicate": "3.1.0"
   },
   "engines": {
@@ -278,7 +278,7 @@
     "**/ua-parser-js": "0.7.33",
     "@types/react": "18.3.12",
     "browserify-sign": "4.2.2",
-    "devtools-protocol": "0.0.1413303",
+    "devtools-protocol": "0.0.1459876",
     "node-abi": "4.9.0",
     "sharp": "0.29.3",
     "vue-template-compiler": "2.6.12"

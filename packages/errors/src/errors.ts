@@ -98,6 +98,10 @@ export const AllCypressErrors = {
 
         This option will not have an effect in ${fmt.off(_.capitalize(browser))}. Tests that rely on web security being disabled will not run as expected.`
   },
+  CHROME_137_LOAD_EXTENSION_NOT_SUPPORTED: () => {
+    return errTemplate`\
+        Google Chrome v137 and higher does not allow loading extensions via --load-extension. If you need to load an extension to test with Cypress, please use Chrome for Testing, Chromium, or another Chrome variant that supports loading extensions.`
+  },
   BROWSER_UNSUPPORTED_LAUNCH_OPTION: (browser: string, options: string[]) => {
     return errTemplate`\
         Warning: The following browser launch options were provided but are not supported by ${fmt.highlightSecondary(browser)}
