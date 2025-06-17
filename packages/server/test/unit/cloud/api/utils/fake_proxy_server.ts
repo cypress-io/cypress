@@ -3,13 +3,10 @@ import http from 'http'
 import _ from 'lodash'
 import net, { AddressInfo } from 'net'
 import express from 'express'
-import pDefer from 'p-defer'
 import Promise from 'bluebird'
 import debugLib from 'debug'
 
 const debug = debugLib('cypress:test:fake_proxy_server')
-
-export const HTTP_FAKE_PROXY_SERVER_PORT = 4030
 
 export async function fakeClientServer () {
   const app = express()
@@ -18,13 +15,11 @@ export async function fakeClientServer () {
     res.json({ ok: true })
   })
 
-  const dfd = pDefer()
-
-  const srv = app.listen(() => {
-    dfd.resolve()
+  const srv = await new Promise<http.Server>((resolve) => {
+    const _srv = app.listen(() => {
+      resolve(_srv)
+    })
   })
-
-  await dfd.promise
 
   return {
     port: (srv.address() as AddressInfo).port,
@@ -87,17 +82,18 @@ export async function fakeProxyServer (onRequest: (msg: http.IncomingMessage) =>
     })
   })
 
-  const dfd = pDefer()
-
-  proxy.listen(HTTP_FAKE_PROXY_SERVER_PORT, () => {
-    debug(`HTTPS CONNECT proxy running at http://localhost:${HTTP_FAKE_PROXY_SERVER_PORT}`)
-    dfd.resolve()
+  await new Promise((resolve) => {
+    proxy.listen(() => {
+      resolve()
+    })
   })
 
-  await dfd.promise
+  const port = (proxy.address() as AddressInfo).port
+
+  debug(`HTTPS CONNECT proxy running at http://localhost:${port}`)
 
   return {
-    port: HTTP_FAKE_PROXY_SERVER_PORT,
+    port,
     teardown: () => {
       _requests = []
 
