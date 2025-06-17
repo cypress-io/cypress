@@ -30,6 +30,9 @@ describe('src/cypress/element_selector', () => {
         'tag',
         'attributes',
         'nth-child',
+        'name',
+        'attribute:aria-label',
+        'attribute:aria-labelledby',
       ]
 
       ElementSelector.defaults({
@@ -65,6 +68,35 @@ describe('src/cypress/element_selector', () => {
       expect(fn).to.throw()
       .with.property('docsUrl')
       .and.include('https://on.cypress.io/element-selector-api')
+    })
+
+    it('throws if selectorPriority contains an unsupported priority', () => {
+      const fn = () => {
+        ElementSelector.defaults({
+          selectorPriority: [
+            'id',
+            'attr', // invalid priority
+          ],
+        })
+      }
+
+      expect(fn).to.throw()
+      .with.property('message')
+      .and.include('`Cypress.ElementSelector.defaults()` called with invalid `selectorPriority` property. It must be one of: `data-*`, `attribute:*`, `id`, `class`, `tag`, `name`,`attributes`, or `nth-child`. You passed: `attr`')
+    })
+
+    it('throws if selectorPriority has an unsupported priority that contains a substring of a valid priority', () => {
+      const fn = () => {
+        ElementSelector.defaults({
+          selectorPriority: [
+            'idIsNotValid', // invalid priority
+          ],
+        })
+      }
+
+      expect(fn).to.throw()
+      .with.property('message')
+      .and.include('`Cypress.ElementSelector.defaults()` called with invalid `selectorPriority` property. It must be one of: `data-*`, `attribute:*`, `id`, `class`, `tag`, `name`,`attributes`, or `nth-child`. You passed: `idIsNotValid`')
     })
   })
 

@@ -5,6 +5,8 @@ import uniqueSelector from '@cypress/unique-selector'
 import $utils from './utils'
 import $errUtils from './error_utils'
 
+const VALID_SELECTOR_PRIORITY_REGEX = /^(data\-.+|id|class|tag|attributes|nth\-child|attribute:(.+)|name)$/
+
 export const DEFAULT_SELECTOR_PRIORITIES = [
   'data-cy',
   'data-test',
@@ -72,6 +74,16 @@ const ElementSelector: ElementSelectorAPI = {
           args: { arg: $utils.stringify(selectorPriority) },
         })
       }
+
+      // Validate that the priority is one of:
+      // "data-*", "id", "class", "tag", "attributes", "nth-child" , "attribute:*", "name"
+      selectorPriority.forEach((priority) => {
+        if (!VALID_SELECTOR_PRIORITY_REGEX.test(priority)) {
+          $errUtils.throwErrByPath('element_selector.defaults_invalid_selector_priority', {
+            args: { arg: priority },
+          })
+        }
+      })
 
       defaults.selectorPriority = selectorPriority
     }
