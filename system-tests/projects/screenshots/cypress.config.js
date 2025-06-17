@@ -1,17 +1,7 @@
 const path = require('path')
 const Jimp = require('jimp')
 const _ = require('lodash')
-const wbip = require('@cypress/webpack-batteries-included-preprocessor')
 const { useFixedBrowserLaunchSize } = require('@tooling/system-tests/lib/pluginUtils')
-
-function getWebpackOptions () {
-  const options = wbip.getFullWebpackOptions()
-
-  // our tests need the path built-in for testing, so we need to shim it here into the webpack config
-  options.resolve.fallback.path = require.resolve('path-browserify')
-
-  return options
-}
 
 module.exports = {
   'e2e': {
@@ -21,8 +11,6 @@ module.exports = {
 
         return options
       })
-
-      on('file:preprocessor', wbip({ webpackOptions: getWebpackOptions() }))
 
       on('task', {
         'ensure:pixel:color' ({ name, colors, devicePixelRatio }) {
