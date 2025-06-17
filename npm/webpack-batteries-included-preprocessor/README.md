@@ -44,7 +44,7 @@ module.exports = (on) => {
 }
 ```
 
-As of version `4.x.x`, `@cypress/webpack-batteries-included-preprocessor` only includes the `buffer`, `path`, `process`, `os`, and the `stream` built-ins. If your project requires built-ins not provided, you can retrieve the preprocessor's default Webpack options and decorate them as needed.
+As of version `4.x.x`, `@cypress/webpack-batteries-included-preprocessor` only includes the `buffer`, `path`, `process`, `os`, and `stream` built-ins. If your project requires built-ins not provided, you can retrieve the preprocessor's default Webpack options and decorate them as needed.
 
 ```javascript
 const webpackPreprocessor = require('@cypress/webpack-batteries-included-preprocessor')
