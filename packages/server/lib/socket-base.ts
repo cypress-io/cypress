@@ -453,14 +453,17 @@ export class SocketBase {
           }
         })
 
-        socket.on('prompt:reset', (cb) => {
-          getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt().then(async (cyPrompt) => {
-            if (cyPrompt.cyPromptManager && !runState) {
-              cyPrompt.cyPromptManager.reset()
-            }
+        socket.on('prompt:reset', async (cb) => {
+          const cyPrompt = await getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt()
 
-            cb()
-          })
+          // If we have runState, then we shouldn't reset the rull prompt manager because
+          // we are just changing top. We will clear the prompt manager for a specific test
+          // later.
+          if (!runState) {
+            cyPrompt?.cyPromptManager?.reset()
+          }
+
+          cb()
         })
 
         socket.on('backend:request', (eventName: string, ...args) => {
@@ -573,7 +576,7 @@ export class SocketBase {
           })
         })
 
-        socket.on('get:cached:test:state', (cb: (runState: RunState | null, testState: CachedTestState) => void) => {
+        socket.on('get:cached:test:state', async (cb: (runState: RunState | null, testState: CachedTestState) => void) => {
           const s = runState
 
           const cachedTestState: CachedTestState = {
@@ -589,13 +592,11 @@ export class SocketBase {
               const testId = s.currentId
 
               this._protocolManager?.resetTest(testId)
-              getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt().then(async (cyPrompt) => {
-                if (cyPrompt.cyPromptManager) {
-                  // reset the prompt manager for the current test to clear any
-                  // cached state when top changes for the current test
-                  cyPrompt.cyPromptManager.reset(testId)
-                }
-              })
+              const cyPrompt = await getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt()
+
+              // reset the prompt manager for the current test to clear any
+              // cached state when top changes for the current test
+              cyPrompt?.cyPromptManager?.reset(testId)
             }
           }
 
