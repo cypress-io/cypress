@@ -1,24 +1,54 @@
 /* eslint-disable no-console */
 import http from 'http'
-import _ from 'lodash'
-import net, { AddressInfo } from 'net'
+import { AddressInfo } from 'net'
 import express from 'express'
 import Promise from 'bluebird'
 import debugLib from 'debug'
+import DebuggingProxy from '@cypress/debugging-proxy'
+import getPort from 'get-port'
+import { CA } from '@packages/https-proxy'
 import { allowDestroy } from '@packages/network'
 
 const debug = debugLib('cypress:test:fake_proxy_server')
 
-debug.enabled = true
+const app = express()
 
-export async function fakeClientServer () {
-  const app = express()
+app.get('/ping', (req, res) => {
+  debug(`GET /ping request to ${req.url}`)
+  res.send('OK')
+})
 
-  app.post('/ping', (req, res) => {
-    debug(`/ping request to ${req.url}`)
-    res.json({ ok: true })
-  })
+app.post('/ping', (req, res) => {
+  debug(`POST /ping request to ${req.url}`)
+  res.json({ ok: true })
+})
 
+interface DestroyableProxyOptions {
+  keepRequests?: boolean
+  auth?: {
+    username?: string
+    password?: string
+  }
+  https?: {
+    cert: string | Buffer
+    key: string | Buffer
+  }
+  onRequest?: (url: string, req: http.IncomingMessage, res: http.ServerResponse) => void
+}
+
+class DestroyableProxy extends DebuggingProxy {
+  constructor (readonly options: DestroyableProxyOptions) {
+    super(options)
+    allowDestroy(this.server)
+  }
+  destroy () {
+    return Promise.fromCallback((cb) => {
+      this.server.destroy(cb)
+    })
+  }
+}
+
+export async function fakeHttpServer () {
   const srv = await new Promise<http.Server>((resolve) => {
     const _srv = app.listen(() => {
       resolve(_srv)
@@ -30,95 +60,45 @@ export async function fakeClientServer () {
   return {
     port: (srv.address() as AddressInfo).port,
     teardown: () => {
-      debug(`teardown fakeClientServer`)
+      debug(`teardown fakeHttpServer`)
 
       return Promise.fromCallback((cb) => srv.destroy(cb))
     },
   }
 }
 
-export async function fakeProxyServer (onRequest: (msg: http.IncomingMessage) => http.IncomingMessage = _.identity) {
-  let _requests: http.IncomingMessage[] = []
+export async function fakeHttpsServer (opts: DestroyableProxyOptions = {}) {
+  const ca = await CA.create()
+  const [cert, key] = await ca.generateServerCertificateKeys('localhost')
 
-  // Fake HTTP Proxy Server
-  const proxy = http.createServer((req, res) => {
-    debug(`HTTP request to ${req.url}`)
+  return fakeProxyServer({
+    ...opts,
+    https: {
+      cert,
+      key,
+    },
+    onRequest (url, req, res) {
+      app(req, res)
+    },
+  })
+}
 
-    _requests.push(req)
-    const target = new URL(req.url)
-    const options = {
-      hostname: target.hostname,
-      port: target.port || 80,
-      path: target.pathname,
-      method: req.method,
-      headers: req.headers,
-    } as http.RequestOptions
-
-    const proxyReq = http.request(options, (proxyRes) => {
-      res.writeHead(proxyRes.statusCode, proxyRes.headers)
-      proxyRes.pipe(res)
-    })
-
-    req.pipe(proxyReq)
-
-    proxyReq.on('error', (err) => {
-      console.error('Proxy request error:', err)
-      res.writeHead(502)
-      res.end('Bad Gateway')
-    })
+export async function fakeProxyServer (opts: DestroyableProxyOptions = {}) {
+  const port = await getPort()
+  const proxy = new DestroyableProxy({
+    keepRequests: true,
+    ...opts,
   })
 
-  // Handle HTTPS tunneling via CONNECT
-  proxy.on('connect', (req, clientSocket, head) => {
-    _requests.push(req)
-    req = onRequest(req)
-
-    const { port, hostname } = new URL(`http://${req.url}`)
-
-    debug(`CONNECT to ${hostname}:${port}`)
-
-    // Connect to the target server
-    const serverSocket = net.connect(Number(port ?? 443), hostname, () => {
-    // Send 200 OK to client
-      clientSocket.write('HTTP/1.1 200 Connection Established\r\n\r\n')
-
-      // Pipe data between client and target
-      serverSocket.write(head)
-      serverSocket.pipe(clientSocket)
-      clientSocket.pipe(serverSocket)
-    })
-
-    serverSocket.on('error', (err) => {
-      console.error(`Error connecting to ${hostname}:${port} -`, err.message)
-      clientSocket.end()
-    })
-  })
-
-  await new Promise((resolve) => {
-    proxy.listen(() => {
-      resolve()
-    })
-  })
-
-  allowDestroy(proxy)
-
-  const port = (proxy.address() as AddressInfo).port
-
-  debug(`HTTPS CONNECT proxy running at http://localhost:${port}`)
+  await proxy.start(port)
 
   return {
     port,
-    teardown: () => {
-      debug(`teardown fakeProxyServer`)
-
-      _requests = []
-
-      return Promise.fromCallback((cb) => {
-        proxy.destroy(cb)
-      })
-    },
     get requests () {
-      return _requests
+      return proxy.requests
+    },
+    teardown () {
+      return proxy.destroy()
     },
   }
 }

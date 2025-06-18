@@ -4,15 +4,13 @@ import sinonChai from 'sinon-chai'
 import chai, { expect } from 'chai'
 import agent from '@packages/network/lib/agent'
 import axios, { CreateAxiosDefaults, AxiosInstance } from 'axios'
-import nock from 'nock'
-
 import { _create } from '../../../../lib/cloud/api/cloud_request'
 import cloudApi from '../../../../lib/cloud/api'
 import app_config from '../../../../config/app.json'
 import os from 'os'
 import pkg from '@packages/root'
 import { transformError } from '../../../../lib/cloud/api/axios_middleware/transform_error'
-import { fakeClientServer, fakeProxyServer } from './utils/fake_proxy_server'
+import { fakeHttpServer, fakeHttpsServer, fakeProxyServer } from './utils/fake_proxy_server'
 
 chai.use(sinonChai)
 
@@ -45,10 +43,14 @@ describe('CloudRequest', () => {
       HTTPS_PROXY: undefined,
       CYPRESS_INTERNAL_ENV: undefined,
       NO_PROXY: undefined,
+      NODE_TLS_REJECT_UNAUTHORIZED: undefined,
     }
 
-    let fakeClientServerResult: Awaited<ReturnType<typeof fakeClientServer>>
+    let fakeHttpServerResult: Awaited<ReturnType<typeof fakeHttpServer>>
+    let fakeHttpsServerResult: Awaited<ReturnType<typeof fakeHttpsServer>>
+    let fakeHttpsConnectServerResult: Awaited<ReturnType<typeof fakeHttpsServer>>
     let fakeProxyServerResult: Awaited<ReturnType<typeof fakeProxyServer>>
+    let fakeProxyServerAuthResult: Awaited<ReturnType<typeof fakeProxyServer>>
     let addRequestSpy: sinon.SinonSpy<Parameters<typeof agent['addRequest']>, ReturnType<typeof agent['addRequest']>>
     let addHttpRequestSpy: sinon.SinonSpy<Parameters<typeof agent.httpAgent['addRequest']>, ReturnType<typeof agent.httpAgent['addRequest']>>
     let addHttpsRequestSpy: sinon.SinonSpy<Parameters<typeof agent.httpsAgent['addRequest']>, ReturnType<typeof agent.httpsAgent['addRequest']>>
@@ -58,6 +60,7 @@ describe('CloudRequest', () => {
       prevEnv.HTTP_PROXY = process.env.HTTP_PROXY
       prevEnv.HTTPS_PROXY = process.env.HTTPS_PROXY
       prevEnv.NO_PROXY = process.env.NO_PROXY
+      prevEnv.NODE_TLS_REJECT_UNAUTHORIZED = process.env.NODE_TLS_REJECT_UNAUTHORIZED
 
       // Delete NO_PROXY env so we can test HTTP -> HTTP proxy
       delete process.env.NO_PROXY
@@ -66,8 +69,11 @@ describe('CloudRequest', () => {
       addHttpRequestSpy = sinon.spy(agent.httpAgent, 'addRequest')
       addHttpsRequestSpy = sinon.spy(agent.httpsAgent, 'addRequest')
 
-      fakeClientServerResult = await fakeClientServer()
+      fakeHttpServerResult = await fakeHttpServer()
+      fakeHttpsServerResult = await fakeHttpsServer()
+      fakeHttpsConnectServerResult = await fakeHttpsServer()
       fakeProxyServerResult = await fakeProxyServer()
+      fakeProxyServerAuthResult = await fakeProxyServer({ auth: { username: 'foo', password: 'bar' } })
     })
 
     afterEach(async () => {
@@ -80,60 +86,74 @@ describe('CloudRequest', () => {
       }
 
       await Promise.all([
-        fakeClientServerResult.teardown(),
+        fakeHttpServerResult.teardown(),
+        fakeHttpsServerResult.teardown(),
+        fakeHttpsConnectServerResult.teardown(),
         fakeProxyServerResult.teardown(),
+        fakeProxyServerAuthResult.teardown(),
       ])
     })
 
-    it('issues requests to the correct location when using RP via Proxy', async () => {
-      nock.restore() // Allow this request to hit the Cypress Cloud's /ping route
-      process.env.CYPRESS_INTERNAL_ENV = 'production'
-      process.env.HTTP_PROXY = `http://localhost:${fakeProxyServerResult.port}`
-      process.env.HTTPS_PROXY = `http://localhost:${fakeProxyServerResult.port}`
+    function pingHttps (adapter: 'Axios' | 'Request') {
+      if (adapter === 'Axios') {
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
-      const result = await cloudApi.rp.get({
-        url: 'https://api.cypress.io/ping',
+        const CloudReq = _create({ baseURL: `https://localhost:${fakeHttpsServerResult.port}` })
+
+        return CloudReq.get(`/ping`, {}).then((r) => r.data)
+      }
+
+      return cloudApi.rp.get({
+        url: `https://localhost:${fakeHttpsServerResult.port}/ping`,
+        rejectUnauthorized: false,
+      })
+    }
+
+    for (const adapter of ['Axios', 'Request'] as const) {
+      it(`${adapter}: issues requests to the correct location when HTTP -> HTTPS via Proxy`, async () => {
+        process.env.HTTP_PROXY = `http://localhost:${fakeProxyServerResult.port}`
+        process.env.HTTPS_PROXY = `http://localhost:${fakeProxyServerResult.port}`
+
+        const result = await pingHttps(adapter)
+
+        expect(result).to.eql('OK')
+
+        expect(fakeProxyServerResult.requests.length).to.eq(1)
+        expect(fakeProxyServerResult.requests[0].url).to.eq(`localhost:${fakeHttpsServerResult.port}`)
+        expect(fakeProxyServerResult.requests[0].rawHeaders).to.eql(['Host', `localhost:${fakeHttpsServerResult.port}`])
+        expect(fakeProxyServerResult.requests[0].method).to.eql('CONNECT')
+
+        expect(addRequestSpy.getCalls().length).to.eq(1)
+        expect(addHttpRequestSpy.getCalls().length).to.eql(0)
+        expect(addHttpsRequestSpy.getCalls().length).to.eql(1)
       })
 
-      expect(result).to.eql('OK')
+      it(`${adapter}: issues requests to the correct location when using HTTPS -> HTTPS via Proxy`, async () => {
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+        process.env.HTTP_PROXY = `https://localhost:${fakeHttpsConnectServerResult.port}`
+        process.env.HTTPS_PROXY = `https://localhost:${fakeHttpsConnectServerResult.port}`
 
-      expect(fakeProxyServerResult.requests.length).to.eq(1)
-      expect(fakeProxyServerResult.requests[0].url).to.eq('api.cypress.io:443')
-      expect(fakeProxyServerResult.requests[0].rawHeaders).to.eql(['Host', 'api.cypress.io:443'])
-      expect(fakeProxyServerResult.requests[0].method).to.eql('CONNECT')
+        const result = await pingHttps(adapter)
 
-      expect(addRequestSpy.getCalls().length).to.eq(1)
-      expect(addHttpRequestSpy.getCalls().length).to.eql(0)
-      expect(addHttpsRequestSpy.getCalls().length).to.eql(1)
-    })
+        expect(result).to.eql('OK')
 
-    it('issues requests to the correct location when using HTTP -> HTTPS proxy', async () => {
-      process.env.CYPRESS_INTERNAL_ENV = 'production'
-      process.env.HTTP_PROXY = `http://localhost:${fakeProxyServerResult.port}`
-      process.env.HTTPS_PROXY = `http://localhost:${fakeProxyServerResult.port}`
+        expect(fakeHttpsConnectServerResult.requests.length).to.eq(1)
+        expect(fakeHttpsConnectServerResult.requests[0].url).to.eq(`localhost:${fakeHttpsServerResult.port}`)
+        expect(fakeHttpsConnectServerResult.requests[0].rawHeaders).to.eql(['Host', `localhost:${fakeHttpsServerResult.port}`])
+        expect(fakeHttpsConnectServerResult.requests[0].method).to.eql('CONNECT')
 
-      const CloudReq = _create()
-
-      const result = await CloudReq.get('/ping')
-
-      expect(result.data).to.eql('OK')
-
-      expect(fakeProxyServerResult.requests.length).to.eq(1)
-      expect(fakeProxyServerResult.requests[0].url).to.eq('api.cypress.io:443')
-      expect(fakeProxyServerResult.requests[0].rawHeaders).to.eql(['Host', 'api.cypress.io:443'])
-      expect(fakeProxyServerResult.requests[0].method).to.eql('CONNECT')
-      expect(addRequestSpy.getCalls().length).to.eq(1)
-      expect(addHttpRequestSpy.getCalls().length).to.eql(0)
-      expect(addHttpsRequestSpy.getCalls().length).to.eql(1)
-    })
+        expect(addRequestSpy.getCalls().length).to.eq(1)
+        expect(addHttpRequestSpy.getCalls().length).to.eql(0)
+        expect(addHttpsRequestSpy.getCalls().length).to.eql(1)
+      })
+    }
 
     it('RP: issues requests to the correct location when doing HTTP -> HTTP proxy', async () => {
-      process.env.CYPRESS_INTERNAL_ENV = 'production'
-      process.env.HTTP_PROXY = `http://localhost:${fakeProxyServerResult.port}`
-      process.env.HTTPS_PROXY = `http://localhost:${fakeProxyServerResult.port}`
+      process.env.HTTP_PROXY = `http://foo:bar@localhost:${fakeProxyServerAuthResult.port}`
+      process.env.HTTPS_PROXY = `http://foo:bar@localhost:${fakeProxyServerAuthResult.port}`
 
       const result = await cloudApi.rp.post({
-        url: `http://localhost:${fakeClientServerResult.port}/ping`,
+        url: `http://localhost:${fakeHttpServerResult.port}/ping`,
         json: true,
         body: {
         },
@@ -141,39 +161,39 @@ describe('CloudRequest', () => {
 
       expect(result).to.eql({ ok: true })
 
-      expect(fakeProxyServerResult.requests.length).to.eq(1)
-      expect(fakeProxyServerResult.requests[0].url).to.eq(`http://localhost:${fakeClientServerResult.port}/ping`)
-      expect(fakeProxyServerResult.requests[0].rawHeaders).to.eql([
+      expect(fakeProxyServerAuthResult.requests.length).to.eq(1)
+      expect(fakeProxyServerAuthResult.requests[0].url).to.eq(`http://localhost:${fakeHttpServerResult.port}/ping`)
+      expect(fakeProxyServerAuthResult.requests[0].rawHeaders).to.eql([
         'x-os-name', os.platform(),
         'x-cypress-version', pkg.version,
-        'host', `localhost:${fakeClientServerResult.port}`,
+        'host', `localhost:${fakeHttpServerResult.port}`,
         'accept-encoding', 'gzip, deflate',
         'accept', 'application/json',
         'content-type', 'application/json',
         'content-length', '2',
+        'proxy-authorization', 'basic Zm9vOmJhcg==',
         'Connection', 'close',
       ])
 
-      expect(fakeProxyServerResult.requests[0].method).to.eql('POST')
+      expect(fakeProxyServerAuthResult.requests[0].method).to.eql('POST')
       expect(addRequestSpy.getCalls().length).to.eq(1)
       expect(addHttpRequestSpy.getCalls().length).to.eql(1)
       expect(addHttpsRequestSpy.getCalls().length).to.eql(0)
     })
 
     it('Axios: issues requests to the correct location when using HTTP -> HTTP proxy', async () => {
-      process.env.CYPRESS_INTERNAL_ENV = 'production'
-      process.env.HTTP_PROXY = `http://localhost:${fakeProxyServerResult.port}`
-      process.env.HTTPS_PROXY = `http://localhost:${fakeProxyServerResult.port}`
+      process.env.HTTP_PROXY = `http://foo:bar@localhost:${fakeProxyServerAuthResult.port}`
+      process.env.HTTPS_PROXY = `http://foo:bar@localhost:${fakeProxyServerAuthResult.port}`
 
-      const CloudReq = _create({ baseURL: `http://localhost:${fakeClientServerResult.port}` })
+      const CloudReq = _create({ baseURL: `http://localhost:${fakeHttpServerResult.port}` })
 
       const result = await CloudReq.post('/ping', {})
 
       expect(result.data).to.eql({ ok: true })
 
-      expect(fakeProxyServerResult.requests.length).to.eq(1)
-      expect(fakeProxyServerResult.requests[0].url).to.eq(`http://localhost:${fakeClientServerResult.port}/ping`)
-      expect(fakeProxyServerResult.requests[0].rawHeaders).to.eql([
+      expect(fakeProxyServerAuthResult.requests.length).to.eq(1)
+      expect(fakeProxyServerAuthResult.requests[0].url).to.eq(`http://localhost:${fakeHttpServerResult.port}/ping`)
+      expect(fakeProxyServerAuthResult.requests[0].rawHeaders).to.eql([
         // different from Request Promise (changed):
         'Accept', 'application/json, text/plain, */*',
         'Content-Type', 'application/json',
@@ -185,11 +205,12 @@ describe('CloudRequest', () => {
         // different from Request Promise (changed):
         // 'Accept-Encoding', 'gzip, deflate',
         'Accept-Encoding', 'gzip, compress, deflate, br',
-        'host', `localhost:${fakeClientServerResult.port}`,
+        'proxy-authorization', 'basic Zm9vOmJhcg==',
+        'host', `localhost:${fakeHttpServerResult.port}`,
         'Connection', 'close',
       ])
 
-      expect(fakeProxyServerResult.requests[0].method).to.eql('POST')
+      expect(fakeProxyServerAuthResult.requests[0].method).to.eql('POST')
       expect(addRequestSpy.getCalls().length).to.eq(1)
       expect(addHttpRequestSpy.getCalls().length).to.eql(1)
       expect(addHttpsRequestSpy.getCalls().length).to.eql(0)
