@@ -21,6 +21,10 @@ import type {
   NetworkSameSite,
 } from 'webdriver/build/bidi/localTypes'
 import type { CyCookie } from './webkit-automation'
+import { bidiGetUrl } from '../automation/commands/get_url'
+import { bidiReloadFrame } from '../automation/commands/reload_frame'
+import { bidiNavigateHistory } from '../automation/commands/navigate_history'
+import { bidiGetFrameTitle } from '../automation/commands/get_frame_title'
 
 const BIDI_DEBUG_NAMESPACE = 'cypress:server:browsers:bidi_automation'
 const BIDI_COOKIE_DEBUG_NAMESPACE = `${BIDI_DEBUG_NAMESPACE}:cookies`
@@ -659,6 +663,43 @@ export class BidiAutomation {
           }
 
           return
+        case 'get:aut:url':
+        {
+          if (this.autContextId) {
+            return bidiGetUrl(this.webDriverClient, this.autContextId)
+          }
+
+          throw new Error('Cannot get AUT url: no AUT context initialized')
+        }
+
+        case 'reload:aut:frame':
+        {
+          if (this.autContextId) {
+            await bidiReloadFrame(this.webDriverClient, this.autContextId, data.forceReload)
+
+            return
+          }
+
+          throw new Error('Cannot reload AUT frame: no AUT context initialized')
+        }
+        case 'navigate:aut:history':
+        {
+          if (this.autContextId) {
+            await bidiNavigateHistory(this.webDriverClient, this.autContextId, data.historyNumber)
+
+            return
+          }
+
+          throw new Error('Cannot navigate AUT frame history: no AUT context initialized')
+        }
+        case 'get:aut:title':
+        {
+          if (this.autContextId) {
+            return bidiGetFrameTitle(this.webDriverClient, this.autContextId)
+          }
+
+          throw new Error('Cannot get AUT title no AUT context initialized')
+        }
         default:
           debug('BiDi automation not implemented for message: %s', message)
           throw new AutomationNotImplemented(message, 'BiDiAutomation')

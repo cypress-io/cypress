@@ -11,9 +11,7 @@ import type { NetworkFetchErrorParameters, NetworkResponseCompletedParameters, N
 // make sure testing promises resolve before asserting on async function conditions
 const flushPromises = () => {
   return new Promise<void>((resolve) => {
-    setTimeout(() => {
-      resolve()
-    }, 10)
+    setTimeout(resolve)
   })
 }
 
@@ -2164,6 +2162,133 @@ describe('lib/browsers/bidi_automation', () => {
           expect(mockWebdriverClient.browsingContextActivate).to.have.been.calledWith({
             context: '123',
           })
+        })
+      })
+
+      describe('get:aut:url', () => {
+        it('gets the application url', async () => {
+          mockWebdriverClient.browsingContextGetTree = sinon.stub().resolves({
+            contexts: [{ context: '123', url: 'http://localhost:3500/fixtures/dom.html' }],
+          })
+
+          //@ts-expect-error
+          bidiAutomationInstance.autContextId = '123'
+
+          const url = await bidiAutomationInstance.automationMiddleware.onRequest('get:aut:url', undefined)
+
+          expect(mockWebdriverClient.browsingContextGetTree).to.have.been.calledWith({
+            root: '123',
+          })
+
+          expect(url).to.equal('http://localhost:3500/fixtures/dom.html')
+        })
+
+        it('fails gracefully if no AUT context is initialized', async () => {
+          //@ts-expect-error
+          bidiAutomationInstance.autContextId = undefined
+
+          expect(bidiAutomationInstance.automationMiddleware.onRequest('get:aut:url', undefined)).to.be.rejectedWith('Cannot get AUT url: no AUT context initialized')
+        })
+      })
+
+      describe('reload:aut:frame', () => {
+        it('uses scriptEvaluate to reload the AUT window', async () => {
+          mockWebdriverClient.scriptEvaluate = sinon.stub().resolves()
+
+          //@ts-expect-error
+          bidiAutomationInstance.autContextId = '123'
+
+          await bidiAutomationInstance.automationMiddleware.onRequest('reload:aut:frame', { forceReload: false })
+
+          expect(mockWebdriverClient.scriptEvaluate).to.have.been.calledWith({
+            expression: `window.location.reload(false)`,
+            target: {
+              context: '123',
+            },
+            awaitPromise: false,
+          })
+        })
+
+        it('uses scriptEvaluate to reload the AUT window with the force option', async () => {
+          mockWebdriverClient.scriptEvaluate = sinon.stub().resolves()
+
+          //@ts-expect-error
+          bidiAutomationInstance.autContextId = '123'
+
+          await bidiAutomationInstance.automationMiddleware.onRequest('reload:aut:frame', { forceReload: true })
+
+          expect(mockWebdriverClient.scriptEvaluate).to.have.been.calledWith({
+            expression: `window.location.reload(true)`,
+            target: {
+              context: '123',
+            },
+            awaitPromise: false,
+          })
+        })
+
+        it('fails gracefully if no AUT context is initialized', async () => {
+          //@ts-expect-error
+          bidiAutomationInstance.autContextId = undefined
+
+          expect(bidiAutomationInstance.automationMiddleware.onRequest('reload:aut:frame', undefined)).to.be.rejectedWith('Cannot reload AUT frame: no AUT context initialized')
+        })
+      })
+
+      describe('navigate:aut:history', () => {
+        it('uses scriptEvaluate to navigate the AUT window history', async () => {
+          mockWebdriverClient.scriptEvaluate = sinon.stub().resolves()
+
+          //@ts-expect-error
+          bidiAutomationInstance.autContextId = '123'
+
+          await bidiAutomationInstance.automationMiddleware.onRequest('navigate:aut:history', { historyNumber: -1 })
+
+          expect(mockWebdriverClient.scriptEvaluate).to.have.been.calledWith({
+            expression: `window.history.go(-1)`,
+            target: {
+              context: '123',
+            },
+            awaitPromise: false,
+          })
+        })
+
+        it('fails gracefully if no AUT context is initialized', async () => {
+          //@ts-expect-error
+          bidiAutomationInstance.autContextId = undefined
+
+          expect(bidiAutomationInstance.automationMiddleware.onRequest('navigate:aut:history', undefined)).to.be.rejectedWith('Cannot navigate AUT frame history: no AUT context initialized')
+        })
+      })
+
+      describe('get:aut:title', () => {
+        it('uses scriptEvaluate to get the AUT title', async () => {
+          mockWebdriverClient.scriptEvaluate = sinon.stub().resolves({
+            result: {
+              value: 'test title',
+            },
+          })
+
+          //@ts-expect-error
+          bidiAutomationInstance.autContextId = '123'
+
+          const title = await bidiAutomationInstance.automationMiddleware.onRequest('get:aut:title', undefined)
+
+          expect(mockWebdriverClient.scriptEvaluate).to.have.been.calledWith({
+            expression: `window.document.title`,
+            target: {
+              context: '123',
+            },
+            awaitPromise: false,
+          })
+
+          expect(title).to.equal('test title')
+        })
+
+        it('fails gracefully if no AUT context is initialized', async () => {
+          //@ts-expect-error
+          bidiAutomationInstance.autContextId = undefined
+
+          expect(bidiAutomationInstance.automationMiddleware.onRequest('get:aut:title', undefined)).to.be.rejectedWith('Cannot get AUT title no AUT context initialized')
         })
       })
 
