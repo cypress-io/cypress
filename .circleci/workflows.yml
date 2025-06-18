@@ -255,12 +255,12 @@ commands:
           command: |
             source ./scripts/ensure-node.sh
             yarn build
-      # - run:
-      #     name: Generate v8 snapshot
-      #     command: |
-      #       source ./scripts/ensure-node.sh
-      #       # Minification takes some time. We only really need to do that for the binary (and we regenerate snapshots separately there)
-      #       V8_UPDATE_METAFILE=1 V8_SNAPSHOT_DISABLE_MINIFY=1 yarn build-v8-snapshot-prod
+      - run:
+          name: Generate v8 snapshot
+          command: |
+            source ./scripts/ensure-node.sh
+            # Minification takes some time. We only really need to do that for the binary (and we regenerate snapshots separately there)
+            V8_UPDATE_METAFILE=1 V8_SNAPSHOT_DISABLE_MINIFY=1 yarn build-v8-snapshot-prod
       - prepare-modules-cache # So we don't throw these in the workspace cache
       - persist_to_workspace:
           root: ~/
@@ -1850,8 +1850,7 @@ jobs:
     parallelism: 1
     steps:
       - restore_cached_workspace
-      - run: DEBUG=cypress:network:*,cypress:server:cloud:* yarn test-unit
-          **/cloud_request_spec.ts --scope=@packages/server
+      - run: yarn test-unit --scope=@packages/server
       - sanitize-verify-and-store-mocha-results:
           expectedResultCount: 1
 
@@ -3906,30 +3905,19 @@ windows-workflow: &windows-workflow
           - windows-build
 
 workflows:
-  tg-debug:
-    jobs:
-      - node_modules_install:
-          build-better-sqlite3: true
-      - build:
-          context: test-runner:env-canary
-          requires:
-            - node_modules_install
-      - server-unit-tests:
-          requires:
-            - build
-  # linux-x64:
-  #   <<: [ *linux-x64-workflow, *linux-x64-workflow-exclude-filters ]
-  # linux-x64-contributor:
-  #   <<: *linux-x64-contributor-workflow
-  #   when:
-  #     matches:
-  #       pattern: /^pull\/[0-9]+/
-  #       value: << pipeline.git.branch >>
-  # linux-arm64:
-  #   <<: [ *linux-arm64-workflow, *linux-arm64-workflow-filters ]
-  # darwin-x64:
-  #   <<: [ *darwin-x64-workflow, *darwin-workflow-filters ]
-  # darwin-arm64:
-  #   <<: [ *darwin-arm64-workflow, *darwin-workflow-filters ]
-  # windows:
-  #   <<: [ *windows-workflow, *windows-workflow-filters ]
+  linux-x64:
+    <<: [ *linux-x64-workflow, *linux-x64-workflow-exclude-filters ]
+  linux-x64-contributor:
+    <<: *linux-x64-contributor-workflow
+    when:
+      matches:
+        pattern: /^pull\/[0-9]+/
+        value: << pipeline.git.branch >>
+  linux-arm64:
+    <<: [ *linux-arm64-workflow, *linux-arm64-workflow-filters ]
+  darwin-x64:
+    <<: [ *darwin-x64-workflow, *darwin-workflow-filters ]
+  darwin-arm64:
+    <<: [ *darwin-arm64-workflow, *darwin-workflow-filters ]
+  windows:
+    <<: [ *windows-workflow, *windows-workflow-filters ]
