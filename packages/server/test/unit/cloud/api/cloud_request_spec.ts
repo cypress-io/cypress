@@ -44,6 +44,7 @@ describe('CloudRequest', () => {
       HTTP_PROXY: undefined,
       HTTPS_PROXY: undefined,
       CYPRESS_INTERNAL_ENV: undefined,
+      NO_PROXY: undefined,
     }
 
     let fakeClientServerResult: Awaited<ReturnType<typeof fakeClientServer>>
@@ -56,6 +57,10 @@ describe('CloudRequest', () => {
       prevEnv.CYPRESS_INTERNAL_ENV = process.env.CYPRESS_INTERNAL_ENV
       prevEnv.HTTP_PROXY = process.env.HTTP_PROXY
       prevEnv.HTTPS_PROXY = process.env.HTTPS_PROXY
+      prevEnv.NO_PROXY = process.env.NO_PROXY
+
+      // Delete NO_PROXY env so we can test HTTP -> HTTP proxy
+      delete process.env.NO_PROXY
 
       addRequestSpy = sinon.spy(agent, 'addRequest')
       addHttpRequestSpy = sinon.spy(agent.httpAgent, 'addRequest')
