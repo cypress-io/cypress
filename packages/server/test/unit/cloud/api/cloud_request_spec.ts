@@ -65,7 +65,7 @@ describe('CloudRequest', () => {
       fakeProxyServerResult = await fakeProxyServer()
     })
 
-    afterEach(() => {
+    afterEach(async () => {
       for (const key of Object.keys(prevEnv)) {
         if (prevEnv[key]) {
           process.env[key] = prevEnv[key]
@@ -74,8 +74,10 @@ describe('CloudRequest', () => {
         }
       }
 
-      fakeClientServerResult.teardown()
-      fakeProxyServerResult.teardown()
+      await Promise.all([
+        fakeClientServerResult.teardown(),
+        fakeProxyServerResult.teardown(),
+      ])
     })
 
     it('issues requests to the correct location when using RP via Proxy', async () => {

@@ -5,6 +5,7 @@ import net, { AddressInfo } from 'net'
 import express from 'express'
 import Promise from 'bluebird'
 import debugLib from 'debug'
+import { allowDestroy } from '@packages/network'
 
 const debug = debugLib('cypress:test:fake_proxy_server')
 
@@ -21,13 +22,17 @@ export async function fakeClientServer () {
     })
   })
 
+  allowDestroy(srv)
+
   return {
     port: (srv.address() as AddressInfo).port,
-    teardown: () => Promise.fromCallback((cb) => srv.close(cb)),
+    teardown: () => Promise.fromCallback((cb) => srv.destroy(cb)),
   }
 }
 
 export async function fakeProxyServer (onRequest: (msg: http.IncomingMessage) => http.IncomingMessage = _.identity) {
+  let _requests: http.IncomingMessage[] = []
+
   // Fake HTTP Proxy Server
   const proxy = http.createServer((req, res) => {
     _requests.push(req)
@@ -53,8 +58,6 @@ export async function fakeProxyServer (onRequest: (msg: http.IncomingMessage) =>
       res.end('Bad Gateway')
     })
   })
-
-  let _requests: http.IncomingMessage[] = []
 
   // Handle HTTPS tunneling via CONNECT
   proxy.on('connect', (req, clientSocket, head) => {
@@ -88,6 +91,8 @@ export async function fakeProxyServer (onRequest: (msg: http.IncomingMessage) =>
     })
   })
 
+  allowDestroy(proxy)
+
   const port = (proxy.address() as AddressInfo).port
 
   debug(`HTTPS CONNECT proxy running at http://localhost:${port}`)
@@ -98,7 +103,7 @@ export async function fakeProxyServer (onRequest: (msg: http.IncomingMessage) =>
       _requests = []
 
       return Promise.fromCallback((cb) => {
-        proxy.close(cb)
+        proxy.destroy(cb)
       })
     },
     get requests () {
