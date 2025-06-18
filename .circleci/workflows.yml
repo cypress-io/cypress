@@ -3910,13 +3910,13 @@ workflows:
     jobs:
       - node_modules_install:
           build-better-sqlite3: true
-      # - build:
-      #     context: test-runner:env-canary
-      #     requires:
-      #       - node_modules_install
-      - server-unit-tests:
+      - build:
+          context: test-runner:env-canary
           requires:
             - node_modules_install
+      - server-unit-tests:
+          requires:
+            - build
   # linux-x64:
   #   <<: [ *linux-x64-workflow, *linux-x64-workflow-exclude-filters ]
   # linux-x64-contributor:
