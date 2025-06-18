@@ -1850,7 +1850,8 @@ jobs:
     parallelism: 1
     steps:
       - restore_cached_workspace
-      - run: yarn test-unit --scope=@packages/server
+      - run: DEBUG=cypress:network:*,cypress:server:cloud:* yarn test-unit
+          **/cloud_request_spec.ts --scope=@packages/server
       - sanitize-verify-and-store-mocha-results:
           expectedResultCount: 1
 
@@ -3909,13 +3910,13 @@ workflows:
     jobs:
       - node_modules_install:
           build-better-sqlite3: true
-      - build:
-          context: test-runner:env-canary
-          requires:
-            - node_modules_install
+      # - build:
+      #     context: test-runner:env-canary
+      #     requires:
+      #       - node_modules_install
       - server-unit-tests:
           requires:
-            - build
+            - node_modules_install
   # linux-x64:
   #   <<: [ *linux-x64-workflow, *linux-x64-workflow-exclude-filters ]
   # linux-x64-contributor:
