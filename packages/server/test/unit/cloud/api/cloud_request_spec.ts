@@ -139,7 +139,7 @@ describe('CloudRequest', () => {
       expect(fakeProxyServerResult.requests.length).to.eq(1)
       expect(fakeProxyServerResult.requests[0].url).to.eq(`http://localhost:${fakeClientServerResult.port}/ping`)
       expect(fakeProxyServerResult.requests[0].rawHeaders).to.eql([
-        'x-os-name', 'darwin',
+        'x-os-name', os.platform(),
         'x-cypress-version', pkg.version,
         'host', `localhost:${fakeClientServerResult.port}`,
         'accept-encoding', 'gzip, deflate',
@@ -172,10 +172,10 @@ describe('CloudRequest', () => {
         // different from Request Promise (changed):
         'Accept', 'application/json, text/plain, */*',
         'Content-Type', 'application/json',
-        'x-os-name', 'darwin',
+        'x-os-name', os.platform(),
         'x-cypress-version', pkg.version,
         // different from Request Promise (added):
-        'User-Agent', 'cypress/14.4.1',
+        'User-Agent', `cypress/${pkg.version}`,
         'Content-Length', '2',
         // different from Request Promise (changed):
         // 'Accept-Encoding', 'gzip, deflate',

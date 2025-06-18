@@ -9,10 +9,13 @@ import { allowDestroy } from '@packages/network'
 
 const debug = debugLib('cypress:test:fake_proxy_server')
 
+debug.enabled = true
+
 export async function fakeClientServer () {
   const app = express()
 
   app.post('/ping', (req, res) => {
+    debug(`/ping request to ${req.url}`)
     res.json({ ok: true })
   })
 
@@ -26,7 +29,11 @@ export async function fakeClientServer () {
 
   return {
     port: (srv.address() as AddressInfo).port,
-    teardown: () => Promise.fromCallback((cb) => srv.destroy(cb)),
+    teardown: () => {
+      debug(`teardown fakeClientServer`)
+
+      return Promise.fromCallback((cb) => srv.destroy(cb))
+    },
   }
 }
 
@@ -35,6 +42,8 @@ export async function fakeProxyServer (onRequest: (msg: http.IncomingMessage) =>
 
   // Fake HTTP Proxy Server
   const proxy = http.createServer((req, res) => {
+    debug(`HTTP request to ${req.url}`)
+
     _requests.push(req)
     const target = new URL(req.url)
     const options = {
@@ -100,6 +109,8 @@ export async function fakeProxyServer (onRequest: (msg: http.IncomingMessage) =>
   return {
     port,
     teardown: () => {
+      debug(`teardown fakeProxyServer`)
+
       _requests = []
 
       return Promise.fromCallback((cb) => {
