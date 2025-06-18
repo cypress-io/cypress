@@ -454,16 +454,18 @@ export class SocketBase {
         })
 
         socket.on('prompt:reset', async (cb) => {
-          const cyPrompt = await getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt()
+          try {
+            const cyPrompt = await getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt()
 
-          // If we have runState, then we shouldn't reset the rull prompt manager because
-          // we are just changing top. We will clear the prompt manager for a specific test
-          // later.
-          if (!runState) {
-            cyPrompt?.cyPromptManager?.reset()
+            // If we have runState, then we shouldn't reset the rull prompt manager because
+            // we are just changing top. We will clear the prompt manager for a specific test
+            // later.
+            if (!runState) {
+              cyPrompt?.cyPromptManager?.reset()
+            }
+          } finally {
+            cb()
           }
-
-          cb()
         })
 
         socket.on('backend:request', (eventName: string, ...args) => {
@@ -592,11 +594,16 @@ export class SocketBase {
               const testId = s.currentId
 
               this._protocolManager?.resetTest(testId)
-              const cyPrompt = await getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt()
 
-              // reset the prompt manager for the current test to clear any
-              // cached state when top changes for the current test
-              cyPrompt?.cyPromptManager?.reset(testId)
+              try {
+                const cyPrompt = await getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt()
+
+                // reset the prompt manager for the current test to clear any
+                // cached state when top changes for the current test
+                cyPrompt?.cyPromptManager?.reset(testId)
+              } catch (error) {
+                debug('error resetting prompt manager', error)
+              }
             }
           }
 
