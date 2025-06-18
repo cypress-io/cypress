@@ -20,7 +20,7 @@ app.get('/ping', (req, res) => {
 
 app.post('/ping', (req, res) => {
   debug(`POST /ping request to ${req.url}`)
-  res.json({ ok: true })
+  res.json({ ok: true, auth: req.headers['authorization'] })
 })
 
 interface DestroyableProxyOptions {
@@ -36,51 +36,31 @@ interface DestroyableProxyOptions {
   onRequest?: (url: string, req: http.IncomingMessage, res: http.ServerResponse) => void
 }
 
-class DestroyableProxy extends DebuggingProxy {
+export class DestroyableProxy extends DebuggingProxy {
   constructor (readonly options: DestroyableProxyOptions) {
     super(options)
     allowDestroy(this.server)
   }
-  destroy () {
+
+  get baseUrl () {
+    const maybeAuth = this.options.auth ? `${this.options.auth.username}:${this.options.auth.password}@` : ''
+
+    return `http${this.options.https ? 's' : ''}://${maybeAuth}localhost:${this.port}`
+  }
+
+  get isHttps () {
+    return Boolean(this.options.https)
+  }
+
+  teardown () {
     return Promise.fromCallback((cb) => {
       this.server.destroy(cb)
     })
   }
-}
 
-export async function fakeHttpServer () {
-  const srv = await new Promise<http.Server>((resolve) => {
-    const _srv = app.listen(() => {
-      resolve(_srv)
-    })
-  })
-
-  allowDestroy(srv)
-
-  return {
-    port: (srv.address() as AddressInfo).port,
-    teardown: () => {
-      debug(`teardown fakeHttpServer`)
-
-      return Promise.fromCallback((cb) => srv.destroy(cb))
-    },
+  get port () {
+    return (this.server.address() as AddressInfo).port
   }
-}
-
-export async function fakeHttpsServer (opts: DestroyableProxyOptions = {}) {
-  const ca = await CA.create()
-  const [cert, key] = await ca.generateServerCertificateKeys('localhost')
-
-  return fakeProxyServer({
-    ...opts,
-    https: {
-      cert,
-      key,
-    },
-    onRequest (url, req, res) {
-      app(req, res)
-    },
-  })
 }
 
 export async function fakeProxyServer (opts: DestroyableProxyOptions = {}) {
@@ -92,13 +72,70 @@ export async function fakeProxyServer (opts: DestroyableProxyOptions = {}) {
 
   await proxy.start(port)
 
-  return {
-    port,
-    get requests () {
-      return proxy.requests
-    },
-    teardown () {
-      return proxy.destroy()
-    },
+  return proxy
+}
+
+interface FakeServerOptions {
+  https?: true
+  auth?: {
+    username?: string
+    password?: string
   }
+}
+
+interface FakeProxyOptions {
+  https?: true
+  auth?: {
+    username?: string
+    password?: string
+  }
+}
+
+export async function fakeServer (opts: FakeServerOptions) {
+  const port = await getPort()
+  const server = new DestroyableProxy({
+    auth: opts.auth,
+    https: opts.https ? await getHttpsOptions() : undefined,
+    keepRequests: true,
+    onRequest (url, req, res) {
+      server.requests.push(req)
+
+      if (opts.auth) {
+        const serverAuth = req.headers['authorization']
+
+        if (serverAuth.split(' ', 2)[1] !== server.correctAuth) {
+          res.writeHead(401, 'Unauthorized')
+          res.end()
+
+          return
+        }
+      }
+
+      app(req, res)
+    },
+  })
+
+  await server.start(port)
+
+  return server
+}
+
+export async function fakeProxy (opts: FakeProxyOptions) {
+  const port = await getPort()
+  const server = new DestroyableProxy({
+    keepRequests: true,
+    auth: opts.auth,
+    https: opts.https ? await getHttpsOptions() : undefined,
+  })
+
+  await server.start(port)
+
+  return server
+}
+
+async function getHttpsOptions () {
+  const ca = await CA.create()
+  const [cert, key] = await ca.generateServerCertificateKeys('localhost')
+
+  return { cert, key }
 }

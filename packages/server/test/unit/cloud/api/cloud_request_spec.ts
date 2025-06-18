@@ -10,7 +10,7 @@ import app_config from '../../../../config/app.json'
 import os from 'os'
 import pkg from '@packages/root'
 import { transformError } from '../../../../lib/cloud/api/axios_middleware/transform_error'
-import { fakeHttpServer, fakeHttpsServer, fakeProxyServer } from './utils/fake_proxy_server'
+import { DestroyableProxy, fakeServer, fakeProxy } from './utils/fake_proxy_server'
 
 chai.use(sinonChai)
 
@@ -46,14 +46,22 @@ describe('CloudRequest', () => {
       NODE_TLS_REJECT_UNAUTHORIZED: undefined,
     }
 
-    let fakeHttpServerResult: Awaited<ReturnType<typeof fakeHttpServer>>
-    let fakeHttpsServerResult: Awaited<ReturnType<typeof fakeHttpsServer>>
-    let fakeHttpsConnectServerResult: Awaited<ReturnType<typeof fakeHttpsServer>>
-    let fakeProxyServerResult: Awaited<ReturnType<typeof fakeProxyServer>>
-    let fakeProxyServerAuthResult: Awaited<ReturnType<typeof fakeProxyServer>>
+    let fakeHttpUpstream: DestroyableProxy
+    let fakeHttpUpstreamAuth: DestroyableProxy
+    let fakeHttpsUpstream: DestroyableProxy
+    let fakeHttpsUpstreamAuth: DestroyableProxy
+
+    let fakeHttpProxy: DestroyableProxy
+    let fakeHttpProxyAuth: DestroyableProxy
+    let fakeHttpsProxy: DestroyableProxy
+    let fakeHttpsProxyAuth: DestroyableProxy
+
     let addRequestSpy: sinon.SinonSpy<Parameters<typeof agent['addRequest']>, ReturnType<typeof agent['addRequest']>>
     let addHttpRequestSpy: sinon.SinonSpy<Parameters<typeof agent.httpAgent['addRequest']>, ReturnType<typeof agent.httpAgent['addRequest']>>
     let addHttpsRequestSpy: sinon.SinonSpy<Parameters<typeof agent.httpsAgent['addRequest']>, ReturnType<typeof agent.httpsAgent['addRequest']>>
+
+    const PROXY_AUTH = `Basic ${Buffer.from('Proxy:test2').toString('base64')}`
+    const UPSTREAM_AUTH = `Basic ${Buffer.from('upstream:test').toString('base64')}`
 
     beforeEach(async () => {
       prevEnv.CYPRESS_INTERNAL_ENV = process.env.CYPRESS_INTERNAL_ENV
@@ -64,16 +72,21 @@ describe('CloudRequest', () => {
 
       // Delete NO_PROXY env so we can test HTTP -> HTTP proxy
       delete process.env.NO_PROXY
+      delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
 
       addRequestSpy = sinon.spy(agent, 'addRequest')
       addHttpRequestSpy = sinon.spy(agent.httpAgent, 'addRequest')
       addHttpsRequestSpy = sinon.spy(agent.httpsAgent, 'addRequest')
 
-      fakeHttpServerResult = await fakeHttpServer()
-      fakeHttpsServerResult = await fakeHttpsServer()
-      fakeHttpsConnectServerResult = await fakeHttpsServer()
-      fakeProxyServerResult = await fakeProxyServer()
-      fakeProxyServerAuthResult = await fakeProxyServer({ auth: { username: 'foo', password: 'bar' } })
+      fakeHttpUpstream = await fakeServer({})
+      fakeHttpUpstreamAuth = await fakeServer({ auth: { username: 'upstream', password: 'test' } })
+      fakeHttpsUpstream = await fakeServer({ https: true })
+      fakeHttpsUpstreamAuth = await fakeServer({ https: true, auth: { username: 'upstream', password: 'test' } })
+
+      fakeHttpProxy = await fakeProxy({})
+      fakeHttpProxyAuth = await fakeProxy({ auth: { username: 'Proxy', password: 'test2' } })
+      fakeHttpsProxy = await fakeProxy({ https: true })
+      fakeHttpsProxyAuth = await fakeProxy({ https: true, auth: { username: 'Proxy', password: 'test2' } })
     })
 
     afterEach(async () => {
@@ -86,42 +99,88 @@ describe('CloudRequest', () => {
       }
 
       await Promise.all([
-        fakeHttpServerResult.teardown(),
-        fakeHttpsServerResult.teardown(),
-        fakeHttpsConnectServerResult.teardown(),
-        fakeProxyServerResult.teardown(),
-        fakeProxyServerAuthResult.teardown(),
+        fakeHttpUpstream.teardown(),
+        fakeHttpUpstreamAuth.teardown(),
+        fakeHttpsUpstream.teardown(),
+        fakeHttpsUpstreamAuth.teardown(),
+        fakeHttpProxy.teardown(),
+        fakeHttpProxyAuth.teardown(),
+        fakeHttpsProxy.teardown(),
+        fakeHttpsProxyAuth.teardown(),
       ])
     })
 
-    function pingHttps (adapter: 'Axios' | 'Request') {
-      if (adapter === 'Axios') {
+    function lowerHeaders (arr: string[]) {
+      return arr.map((v, i) => i % 2 ? v : v.toLowerCase())
+    }
+
+    function executeProxyRequest (
+      opts: {
+        adapter: 'Axios' | 'Request'
+        method?: 'get' | 'post'
+        proxyServer: DestroyableProxy
+        targetServer: DestroyableProxy
+      },
+    ) {
+      const { proxyServer, targetServer, adapter, method = 'get' } = opts
+
+      process.env.HTTP_PROXY = proxyServer.baseUrl
+      process.env.HTTPS_PROXY = proxyServer.baseUrl
+
+      if ((adapter === 'Axios' && proxyServer.isHttps) || targetServer.isHttps) {
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
-
-        const CloudReq = _create({ baseURL: `https://localhost:${fakeHttpsServerResult.port}` })
-
-        return CloudReq.get(`/ping`, {}).then((r) => r.data)
       }
 
-      return cloudApi.rp.get({
-        url: `https://localhost:${fakeHttpsServerResult.port}/ping`,
-        rejectUnauthorized: false,
+      if (adapter === 'Axios') {
+        const CloudReq = _create({ baseURL: targetServer.baseUrl })
+
+        return CloudReq[method](`/ping`, {}).then((r) => r.data)
+      }
+
+      const additional = method === 'post' ? {
+        body: {},
+        json: true,
+      } : {}
+
+      return cloudApi.rp[method]({
+        url: `${targetServer.baseUrl}/ping`,
+        rejectUnauthorized: !targetServer.isHttps && !targetServer.isHttps,
+        ...additional,
       })
     }
 
+    it('does a basic request', async () => {
+      const CloudReq = _create({ baseURL: fakeHttpUpstream.baseUrl })
+
+      expect(await CloudReq.get('/ping').then((r) => r.data)).to.eql('OK')
+      expect(fakeHttpUpstream.requests[0].rawHeaders).to.not.contain('Proxy-Authorization')
+    })
+
+    it('retains Proxy-Authorization for non-proxied requests', async () => {
+      const CloudReq = _create({ baseURL: fakeHttpUpstream.baseUrl })
+
+      expect(await CloudReq.get('/ping', {
+        headers: {
+          'Proxy-Authorization': 'foo',
+        },
+      }).then((r) => r.data)).to.eql('OK')
+
+      const headers = fakeHttpUpstream.requests[0].rawHeaders
+
+      expect(headers[headers.indexOf('Proxy-Authorization') + 1]).to.eql('foo')
+    })
+
+    //
     for (const adapter of ['Axios', 'Request'] as const) {
       it(`${adapter}: issues requests to the correct location when HTTP -> HTTPS via Proxy`, async () => {
-        process.env.HTTP_PROXY = `http://localhost:${fakeProxyServerResult.port}`
-        process.env.HTTPS_PROXY = `http://localhost:${fakeProxyServerResult.port}`
-
-        const result = await pingHttps(adapter)
+        const result = await executeProxyRequest({ adapter, proxyServer: fakeHttpProxy, targetServer: fakeHttpsUpstream })
 
         expect(result).to.eql('OK')
 
-        expect(fakeProxyServerResult.requests.length).to.eq(1)
-        expect(fakeProxyServerResult.requests[0].url).to.eq(`localhost:${fakeHttpsServerResult.port}`)
-        expect(fakeProxyServerResult.requests[0].rawHeaders).to.eql(['Host', `localhost:${fakeHttpsServerResult.port}`])
-        expect(fakeProxyServerResult.requests[0].method).to.eql('CONNECT')
+        expect(fakeHttpProxy.requests.length).to.eq(1)
+        expect(fakeHttpProxy.requests[0].url).to.eq(`localhost:${fakeHttpsUpstream.port}`)
+        expect(fakeHttpProxy.requests[0].rawHeaders).to.eql(['Host', `localhost:${fakeHttpsUpstream.port}`])
+        expect(fakeHttpProxy.requests[0].method).to.eql('CONNECT')
 
         expect(addRequestSpy.getCalls().length).to.eq(1)
         expect(addHttpRequestSpy.getCalls().length).to.eql(0)
@@ -129,92 +188,126 @@ describe('CloudRequest', () => {
       })
 
       it(`${adapter}: issues requests to the correct location when using HTTPS -> HTTPS via Proxy`, async () => {
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
-        process.env.HTTP_PROXY = `https://localhost:${fakeHttpsConnectServerResult.port}`
-        process.env.HTTPS_PROXY = `https://localhost:${fakeHttpsConnectServerResult.port}`
-
-        const result = await pingHttps(adapter)
+        const result = await await executeProxyRequest({ adapter, proxyServer: fakeHttpsProxy, targetServer: fakeHttpsUpstream })
 
         expect(result).to.eql('OK')
 
-        expect(fakeHttpsConnectServerResult.requests.length).to.eq(1)
-        expect(fakeHttpsConnectServerResult.requests[0].url).to.eq(`localhost:${fakeHttpsServerResult.port}`)
-        expect(fakeHttpsConnectServerResult.requests[0].rawHeaders).to.eql(['Host', `localhost:${fakeHttpsServerResult.port}`])
-        expect(fakeHttpsConnectServerResult.requests[0].method).to.eql('CONNECT')
+        expect(fakeHttpsProxy.requests.length).to.eq(1)
+        expect(fakeHttpsProxy.requests[0].url).to.eq(`localhost:${fakeHttpsUpstream.port}`)
+        expect(fakeHttpsProxy.requests[0].rawHeaders).to.eql(['Host', `localhost:${fakeHttpsUpstream.port}`])
+        expect(fakeHttpsProxy.requests[0].method).to.eql('CONNECT')
 
         expect(addRequestSpy.getCalls().length).to.eq(1)
         expect(addHttpRequestSpy.getCalls().length).to.eql(0)
         expect(addHttpsRequestSpy.getCalls().length).to.eql(1)
       })
-    }
 
-    it('RP: issues requests to the correct location when doing HTTP -> HTTP proxy', async () => {
-      process.env.HTTP_PROXY = `http://foo:bar@localhost:${fakeProxyServerAuthResult.port}`
-      process.env.HTTPS_PROXY = `http://foo:bar@localhost:${fakeProxyServerAuthResult.port}`
+      it(`${adapter}: issues requests to the correct location when doing HTTP -> HTTP proxy`, async () => {
+        const result = await executeProxyRequest({
+          method: 'post',
+          targetServer: fakeHttpUpstream,
+          proxyServer: fakeHttpProxy,
+          adapter,
+        })
 
-      const result = await cloudApi.rp.post({
-        url: `http://localhost:${fakeHttpServerResult.port}/ping`,
-        json: true,
-        body: {
-        },
+        expect(result).to.eql({ ok: true })
+
+        expect(fakeHttpProxy.requests.length).to.eq(1)
+        expect(fakeHttpProxy.requests[0].url).to.eq(`http://localhost:${fakeHttpUpstream.port}/ping`)
+        if (adapter === 'Request') {
+          expect(fakeHttpProxy.requests[0].rawHeaders).to.eql([
+            'x-os-name', os.platform(),
+            'x-cypress-version', pkg.version,
+            'host', `localhost:${fakeHttpUpstream.port}`,
+            'accept-encoding', 'gzip, deflate',
+            'accept', 'application/json',
+            'content-type', 'application/json',
+            'content-length', '2',
+            'Connection', 'close',
+          ])
+        } else {
+          expect(fakeHttpProxy.requests[0].rawHeaders).to.eql([
+            // different from Request Promise (changed):
+            'Accept', 'application/json, text/plain, */*',
+            'Content-Type', 'application/json',
+            'x-os-name', os.platform(),
+            'x-cypress-version', pkg.version,
+            // different from Request Promise (added):
+            'User-Agent', `cypress/${pkg.version}`,
+            'Content-Length', '2',
+            // different from Request Promise (changed):
+            // 'Accept-Encoding', 'gzip, deflate',
+            'Accept-Encoding', 'gzip, compress, deflate, br',
+            'host', `localhost:${fakeHttpUpstream.port}`,
+            'Connection', 'close',
+          ])
+        }
+
+        expect(fakeHttpProxy.requests[0].method).to.eql('POST')
+        expect(addRequestSpy.getCalls().length).to.eq(1)
+        expect(addHttpRequestSpy.getCalls().length).to.eql(1)
+        expect(addHttpsRequestSpy.getCalls().length).to.eql(0)
       })
 
-      expect(result).to.eql({ ok: true })
+      it(`${adapter}: issues requests to the correct location when doing HTTP (auth) -> HTTPS (auth) proxy`, async () => {
+        const result = await executeProxyRequest({
+          method: 'post',
+          proxyServer: fakeHttpProxyAuth,
+          targetServer: fakeHttpsUpstreamAuth,
+          adapter,
+        })
 
-      expect(fakeProxyServerAuthResult.requests.length).to.eq(1)
-      expect(fakeProxyServerAuthResult.requests[0].url).to.eq(`http://localhost:${fakeHttpServerResult.port}/ping`)
-      expect(fakeProxyServerAuthResult.requests[0].rawHeaders).to.eql([
-        'x-os-name', os.platform(),
-        'x-cypress-version', pkg.version,
-        'host', `localhost:${fakeHttpServerResult.port}`,
-        'accept-encoding', 'gzip, deflate',
-        'accept', 'application/json',
-        'content-type', 'application/json',
-        'content-length', '2',
-        'proxy-authorization', 'basic Zm9vOmJhcg==',
-        'Connection', 'close',
-      ])
+        expect(result).to.eql({
+          ok: true,
+          auth: UPSTREAM_AUTH,
+        })
 
-      expect(fakeProxyServerAuthResult.requests[0].method).to.eql('POST')
-      expect(addRequestSpy.getCalls().length).to.eq(1)
-      expect(addHttpRequestSpy.getCalls().length).to.eql(1)
-      expect(addHttpsRequestSpy.getCalls().length).to.eql(0)
-    })
+        expect(fakeHttpProxyAuth.requests.length).to.eq(1)
+        expect(fakeHttpProxyAuth.requests[0].url).to.eq(`localhost:${fakeHttpsUpstreamAuth.port}`)
 
-    it('Axios: issues requests to the correct location when using HTTP -> HTTP proxy', async () => {
-      process.env.HTTP_PROXY = `http://foo:bar@localhost:${fakeProxyServerAuthResult.port}`
-      process.env.HTTPS_PROXY = `http://foo:bar@localhost:${fakeProxyServerAuthResult.port}`
+        expect(lowerHeaders(fakeHttpProxyAuth.requests[0].rawHeaders)).to.eql([
+          'host', `localhost:${fakeHttpsUpstreamAuth.port}`,
+          'proxy-authorization', PROXY_AUTH,
+        ])
 
-      const CloudReq = _create({ baseURL: `http://localhost:${fakeHttpServerResult.port}` })
+        if (adapter === 'Request') {
+          expect(fakeHttpsUpstreamAuth.requests[0].rawHeaders).to.eql([
+            'x-os-name', os.platform(),
+            'x-cypress-version', pkg.version,
+            'host', `localhost:${fakeHttpsUpstreamAuth.port}`,
+            'accept-encoding', 'gzip, deflate',
+            'authorization', UPSTREAM_AUTH,
+            'accept', 'application/json',
+            'content-type', 'application/json',
+            'content-length', '2',
+            'Connection', 'close',
+          ])
+        } else {
+          expect(fakeHttpsUpstreamAuth.requests[0].rawHeaders).to.eql([
+            // different from Request Promise (changed):
+            'Accept', 'application/json, text/plain, */*',
+            'Content-Type', 'application/json',
+            'x-os-name', os.platform(),
+            'x-cypress-version', pkg.version,
+            // different from Request Promise (added):
+            'User-Agent', `cypress/${pkg.version}`,
+            'Content-Length', '2',
+            // different from Request Promise (changed):
+            // 'Accept-Encoding', 'gzip, deflate',
+            'Accept-Encoding', 'gzip, compress, deflate, br',
+            'host', `localhost:${fakeHttpsUpstreamAuth.port}`,
+            'Authorization', UPSTREAM_AUTH,
+            'Connection', 'close',
+          ])
+        }
 
-      const result = await CloudReq.post('/ping', {})
-
-      expect(result.data).to.eql({ ok: true })
-
-      expect(fakeProxyServerAuthResult.requests.length).to.eq(1)
-      expect(fakeProxyServerAuthResult.requests[0].url).to.eq(`http://localhost:${fakeHttpServerResult.port}/ping`)
-      expect(fakeProxyServerAuthResult.requests[0].rawHeaders).to.eql([
-        // different from Request Promise (changed):
-        'Accept', 'application/json, text/plain, */*',
-        'Content-Type', 'application/json',
-        'x-os-name', os.platform(),
-        'x-cypress-version', pkg.version,
-        // different from Request Promise (added):
-        'User-Agent', `cypress/${pkg.version}`,
-        'Content-Length', '2',
-        // different from Request Promise (changed):
-        // 'Accept-Encoding', 'gzip, deflate',
-        'Accept-Encoding', 'gzip, compress, deflate, br',
-        'proxy-authorization', 'basic Zm9vOmJhcg==',
-        'host', `localhost:${fakeHttpServerResult.port}`,
-        'Connection', 'close',
-      ])
-
-      expect(fakeProxyServerAuthResult.requests[0].method).to.eql('POST')
-      expect(addRequestSpy.getCalls().length).to.eq(1)
-      expect(addHttpRequestSpy.getCalls().length).to.eql(1)
-      expect(addHttpsRequestSpy.getCalls().length).to.eql(0)
-    })
+        expect(fakeHttpProxyAuth.requests[0].method).to.eql('CONNECT')
+        expect(fakeHttpsUpstreamAuth.requests[0].method).to.eql('POST')
+        expect(addRequestSpy.getCalls().length).to.eq(1)
+        expect(addHttpRequestSpy.getCalls().length).to.eql(0)
+        expect(addHttpsRequestSpy.getCalls().length).to.eql(1)
+      })
+    }
   })
 
   describe('headers', () => {
