@@ -14,7 +14,12 @@ import type { CDPClient, ProtocolManagerShape, WriteVideoFrame, AutomationMiddle
 import type { Automation } from '../automation'
 import { cookieMatches, CyCookie, CyCookieFilter } from '../automation/util'
 import { DEFAULT_NETWORK_ENABLE_OPTIONS, CriClient } from './cri-client'
+import { AUT_FRAME_NAME_IDENTIFIER } from '../automation/helpers/aut_identifier'
 import { cdpKeyPress } from '../automation/commands/key_press'
+import { cdpGetUrl } from '../automation/commands/get_url'
+import { cdpReloadFrame } from '../automation/commands/reload_frame'
+import { cdpNavigateHistory } from '../automation/commands/navigate_history'
+import { cdpGetFrameTitle } from '../automation/commands/get_frame_title'
 
 export type CdpCommand = keyof ProtocolMapping.Commands
 
@@ -454,7 +459,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     }
 
     const frame = _.find(this.frameTree?.childFrames || [], ({ frame }) => {
-      return frame?.name?.startsWith('Your project:')
+      return frame?.name?.startsWith(AUT_FRAME_NAME_IDENTIFIER)
     }) as HasFrame | undefined
 
     if (frame) {
@@ -462,6 +467,40 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     }
 
     return false
+  }
+
+  private _getAutFrame = async () => {
+    try {
+      if (this.gettingFrameTree) {
+        debugVerbose('awaiting frame tree')
+
+        await this.gettingFrameTree
+      }
+
+      const frameTree = (await this.send('Page.getFrameTree')).frameTree
+
+      let frame = _.find(frameTree?.childFrames || [], (item: HasFrame) => {
+        return item.frame?.name?.startsWith(AUT_FRAME_NAME_IDENTIFIER)
+      }) as HasFrame | undefined
+
+      // If we are in E2E Cypress in Cypress testing, we need to get the frame from the child frames of the AUT frame. Else we are reloading what would be the "top" frame under test (with the AUT and reporter_)
+      if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF && frame) {
+        // @ts-expect-error
+        frame = _.find(frame?.childFrames || [], (item: HasFrame) => {
+          return item.frame?.name?.startsWith(AUT_FRAME_NAME_IDENTIFIER)
+        }) as HasFrame | undefined
+      }
+
+      if (!frame) {
+        throw new Error('Could not find AUT frame')
+      }
+
+      return frame.frame
+    } catch (err) {
+      debugVerbose('failed to get aut frame:', err.stack)
+
+      throw new Error('Could not find AUT frame')
+    }
   }
 
   _handlePausedRequests = async (client: CriClient) => {
@@ -604,13 +643,15 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       case 'collect:garbage':
         return this.sendDebuggerCommandFn('HeapProfiler.collectGarbage')
       case 'key:press':
-        if (this.gettingFrameTree) {
-          debugVerbose('awaiting frame tree')
-
-          await this.gettingFrameTree
-        }
-
         return cdpKeyPress(data, this.sendDebuggerCommandFn, this.executionContexts, (await this.send('Page.getFrameTree')).frameTree)
+      case 'get:aut:url':
+        return cdpGetUrl(this.sendDebuggerCommandFn, this.executionContexts, await this._getAutFrame())
+      case 'reload:aut:frame':
+        return cdpReloadFrame(this.sendDebuggerCommandFn, this.executionContexts, await this._getAutFrame(), data.forceReload)
+      case 'navigate:aut:history':
+        return cdpNavigateHistory(this.sendDebuggerCommandFn, this.executionContexts, await this._getAutFrame(), data.historyNumber)
+      case 'get:aut:title':
+        return cdpGetFrameTitle(this.sendDebuggerCommandFn, this.executionContexts, await this._getAutFrame())
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }

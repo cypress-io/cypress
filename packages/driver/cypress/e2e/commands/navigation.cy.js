@@ -11,35 +11,23 @@ describe('src/cy/commands/navigation', () => {
     })
 
     it('calls into window.location.reload', () => {
-      const locReload = cy.spy(Cypress.utils, 'locReload')
-
-      cy.reload().then(() => {
-        expect(locReload).to.be.calledWith(false)
+      cy.on('fail', () => {
+        expect(Cypress.automation).to.be.calledWith('reload:aut:frame', { forceReload: false })
       })
-    })
 
-    it('can pass forceReload', () => {
-      const locReload = cy.spy(Cypress.utils, 'locReload')
+      cy.stub(Cypress, 'automation').withArgs('reload:aut:frame', { forceReload: false }).resolves()
 
-      cy.reload(true).then(() => {
-        expect(locReload).to.be.calledWith(true)
-      })
+      cy.reload({ timeout: 1000 })
     })
 
     it('can pass forceReload + options', () => {
-      const locReload = cy.spy(Cypress.utils, 'locReload')
-
-      cy.reload(true, {}).then(() => {
-        expect(locReload).to.be.calledWith(true)
+      cy.on('fail', () => {
+        expect(Cypress.automation).to.be.calledWith('reload:aut:frame', { forceReload: true })
       })
-    })
 
-    it('can pass just options', () => {
-      const locReload = cy.spy(Cypress.utils, 'locReload')
+      cy.stub(Cypress, 'automation').withArgs('reload:aut:frame', { forceReload: true }).resolves()
 
-      cy.reload({}).then(() => {
-        expect(locReload).to.be.calledWith(false)
-      })
+      cy.reload(true, { timeout: 1000 })
     })
 
     it('returns the window object', () => {
@@ -596,14 +584,15 @@ describe('src/cy/commands/navigation', () => {
             const { lastLog } = this
 
             beforeunload = true
-            expect(lastLog.get('snapshots').length).to.eq(1)
+            expect(lastLog.get('snapshots').length).to.eq(2)
             expect(lastLog.get('snapshots')[0].name).to.eq('before')
             expect(lastLog.get('snapshots')[0].body).to.be.an('object')
 
             return undefined
           })
 
-          cy.go('back').then(function () {
+          // wait for the beforeunload event to be fired after the history navigation
+          cy.go('back').wait(100).then(function () {
             const { lastLog } = this
 
             expect(beforeunload).to.be.true

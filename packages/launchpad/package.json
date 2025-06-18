@@ -66,7 +66,6 @@
     "human-interval": "1.0.0",
     "javascript-time-ago": "2.3.8",
     "markdown-it": "13.0.1",
-    "path-browserify": "1.0.1",
     "rollup-plugin-polyfill-node": "^0.7.0",
     "sinon": "13.0.2",
     "type-fest": "^2.3.4",

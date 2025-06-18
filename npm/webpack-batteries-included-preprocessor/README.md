@@ -44,7 +44,7 @@ module.exports = (on) => {
 }
 ```
 
-As of version `4.x.x`, `@cypress/webpack-batteries-included-preprocessor` no longer includes Webpack built-ins by default. If your project requires them, you can retrieve the preprocessor's default Webpack options and decorate them as needed.
+As of version `4.x.x`, `@cypress/webpack-batteries-included-preprocessor` only includes the `buffer`, `path`, `process`, `os`, and `stream` built-ins. If your project requires built-ins not provided, you can retrieve the preprocessor's default Webpack options and decorate them as needed.
 
 ```javascript
 const webpackPreprocessor = require('@cypress/webpack-batteries-included-preprocessor')
@@ -53,7 +53,7 @@ function getWebpackOptions () {
   const options = webpackPreprocessor.getFullWebpackOptions()
 
   // add built-ins as needed
-  options.resolve.fallback.path = require.resolve('path-browserify')
+  options.resolve.fallback.zlib = require.resolve('browserify-zlib')
 
   return options
 }

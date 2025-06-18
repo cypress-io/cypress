@@ -1,9 +1,4 @@
 {
   "name": "screenshots",
-  "version": "0.0.0",
-  "dependencies": {
-    "@cypress/webpack-batteries-included-preprocessor": "file:../../../npm/webpack-batteries-included-preprocessor",
-    "@cypress/webpack-preprocessor": "file:../../../npm/webpack-preprocessor",
-    "path-browserify": "1.0.1"
-  }
+  "version": "0.0.0"
 }
