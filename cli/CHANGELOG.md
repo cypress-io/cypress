@@ -26,9 +26,10 @@ _Released 07/01/2025 (PENDING)_
 - Migration helpers and related errors are no longer shown when upgrading from Cypress versions earlier than 10.0.0. To migrate from a pre-10.0.0 version, upgrade one major version at a time to receive the appropriate guidance. Addresses [#31345](https://github.com/cypress-io/cypress/issues/31345). Addressed in [https://github.com/cypress-io/cypress/pull/31629/](https://github.com/cypress-io/cypress/pull/31629/).
 
 **Dependency Updates:**
-- Upgraded `electron` from `33.2.1` to `35.3.0`.
-- Upgraded bundled Node.js version from `20.18.1` to `22.14.0`.
-- Upgraded bundled Chromium version from `130.0.6723.137` to `134.0.6998.165`.
+
+- Upgraded `electron` from `33.2.1` to `36.4.0`. Addressed in [#31912](https://github.com/cypress-io/cypress/pull/31912).
+- Upgraded bundled Node.js version from `20.18.1` to `22.14.0` Addressed in [#31912](https://github.com/cypress-io/cypress/pull/31912).
+- Upgraded bundled Chromium version from `130.0.6723.137` to `134.0.6998.165` Addressed in [#31912](https://github.com/cypress-io/cypress/pull/31912).
 
 ## 14.5.0
 
