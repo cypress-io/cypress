@@ -526,36 +526,39 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
             shouldShowMessage={_shouldShowClickMessage}
             wrapperClassName={cs('command-pin-target', { 'command-group': !!groupId, 'command-group-no-children': !model.hasChildren && model.group })}
           >
-            <div
-              className={cs('command-wrapper-text', {
-                'command-wrapper-text-group': model.hasChildren && groupId,
-                'command-wrapper-text-group-parent': model.hasChildren && !groupId,
-              })}
-              onMouseEnter={() => _snapshot(true)}
-              onMouseLeave={() => _snapshot(false)}
-            >
-              {groupPlaceholder}
+            <div className='command-wrapper-container'>
+              <div
+                className={cs('command-wrapper-text', {
+                  'command-wrapper-text-group': model.hasChildren && groupId,
+                  'command-wrapper-text-group-parent': model.hasChildren && !groupId,
+                })}
+                onMouseEnter={() => _snapshot(true)}
+                onMouseLeave={() => _snapshot(false)}
+              >
+                {groupPlaceholder}
 
-              {model.hasChildren && groupId && (
-                <div className={cs('command-expander-column-group', { 'nested-group-expander': model.groupLevel })} onClick={(e) => {
+                {model.hasChildren && groupId && (
+                  <div className={cs('command-expander-column-group', { 'nested-group-expander': model.groupLevel })} onClick={(e) => {
+                    e.stopPropagation()
+                    model.toggleOpen()
+                  }}>
+                    <ChevronIcon className={cs('command-expander', { 'command-expander-is-open': model.hasChildren && !!model.isOpen })} />
+                  </div>
+                )}
+                <CommandDetails model={model} groupId={groupId} aliasesWithDuplicates={aliasesWithDuplicates} />
+                <CommandControls model={model} commandName={commandName} events={events} />
+              </div>
+              {model.isCyPrompt && model.state === 'passed' && (
+                <div className='command-prompt-get-code' onClick={(e) => {
                   e.stopPropagation()
-                  model.toggleOpen()
+                  events.emit('prompt:get-code', { testId: model.testId, logId: model.id })
                 }}>
-                  <ChevronIcon className={cs('command-expander', { 'command-expander-is-open': model.hasChildren && !!model.isOpen })} />
+                  <AngleBracketsIcon className='command-prompt-get-code-indicator' width={12} height={12} />
+                  <span>Get code</span>
                 </div>
               )}
-              <CommandDetails model={model} groupId={groupId} aliasesWithDuplicates={aliasesWithDuplicates} />
-              <CommandControls model={model} commandName={commandName} events={events} />
             </div>
           </FlashOnClick>
-          {model.isCyPrompt && model.state === 'passed' && (
-            <div className='command-prompt-get-code' onClick={() => {
-              events.emit('prompt:get-code', { testId: model.testId, logId: model.id })
-            }}>
-              <AngleBracketsIcon className='command-prompt-get-code-indicator' />
-              <span>Get code</span>
-            </div>
-          )}
         </div>
         <Progress model={model} />
         {model.hasChildren && model.isOpen && (
