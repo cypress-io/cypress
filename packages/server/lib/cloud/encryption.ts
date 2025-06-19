@@ -69,7 +69,7 @@ export function verifySignatureFromFile (file: string, signature: string, public
 // in the jose library (https://github.com/panva/jose/blob/main/src/jwe/general/encrypt.ts),
 // but allows us to keep track of the encrypting key locally, to optionally use it for decryption
 // of encrypted payloads coming back in the response body.
-export async function encryptRequest (params: CypressRequestOptions, publicKey?: crypto.KeyObject): Promise<EncryptRequestData> {
+export async function encryptRequest (params: Pick<CypressRequestOptions, 'body'>, publicKey?: crypto.KeyObject): Promise<EncryptRequestData> {
   const key = publicKey || getPublicKey()
   const header = base64Url(JSON.stringify({ alg: 'RSA-OAEP', enc: 'A256GCM', zip: 'DEF' }))
   const deflated = await deflateRaw(JSON.stringify(params.body))

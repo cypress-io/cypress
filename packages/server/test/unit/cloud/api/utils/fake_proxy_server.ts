@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import http from 'http'
 import { AddressInfo } from 'net'
-import express from 'express'
+import express, { Application } from 'express'
 import Promise from 'bluebird'
 import debugLib from 'debug'
 import DebuggingProxy from '@cypress/debugging-proxy'
@@ -91,7 +91,7 @@ interface FakeProxyOptions {
   }
 }
 
-export async function fakeServer (opts: FakeServerOptions) {
+export async function fakeServer (opts: FakeServerOptions, serverApp: Application = app) {
   const port = await getPort()
   const server = new DestroyableProxy({
     auth: opts.auth,
@@ -111,7 +111,7 @@ export async function fakeServer (opts: FakeServerOptions) {
         }
       }
 
-      app(req, res)
+      serverApp(req, res)
     },
   })
 

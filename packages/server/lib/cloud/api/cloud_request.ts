@@ -11,9 +11,10 @@ import agent from '@packages/network/lib/agent'
 import app_config from '../../../config/app.json'
 import { installErrorTransform } from './axios_middleware/transform_error'
 import { installLogging } from './axios_middleware/logging'
+import { installEncryption } from './axios_middleware/encryption'
 
-// initialized with an export for testing purposes
-export const _create = (options: { baseURL?: string } = {}): AxiosInstance => {
+// Allows us to create customized Cloud Request instances w/ different baseURL & encryption configuration
+export const createCloudRequest = (options: { baseURL?: string, encrypt?: 'always' | 'signed' | true } = {}): AxiosInstance => {
   const cfgKey = process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'development'
 
   const instance = axios.create({
@@ -43,13 +44,17 @@ export const _create = (options: { baseURL?: string } = {}): AxiosInstance => {
     },
   })
 
+  if (options.encrypt) {
+    installEncryption(instance, options.encrypt)
+  }
+
   installLogging(instance)
   installErrorTransform(instance)
 
   return instance
 }
 
-export const CloudRequest = _create()
+export const CloudRequest = createCloudRequest()
 
 export const isRetryableCloudError = (error: unknown) => {
   // setting this env via mocha's beforeEach coerces this to a string, even if it's a boolean

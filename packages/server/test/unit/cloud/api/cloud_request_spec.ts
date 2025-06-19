@@ -4,7 +4,7 @@ import sinonChai from 'sinon-chai'
 import chai, { expect } from 'chai'
 import agent from '@packages/network/lib/agent'
 import axios, { CreateAxiosDefaults, AxiosInstance } from 'axios'
-import { _create } from '../../../../lib/cloud/api/cloud_request'
+import { createCloudRequest } from '../../../../lib/cloud/api/cloud_request'
 import cloudApi from '../../../../lib/cloud/api'
 import app_config from '../../../../config/app.json'
 import os from 'os'
@@ -30,7 +30,7 @@ describe('CloudRequest', () => {
   }
 
   it('instantiates with network combined agent', () => {
-    _create()
+    createCloudRequest()
     const cfg = getCreatedConfig()
 
     expect(cfg.httpAgent).to.eq(agent)
@@ -132,7 +132,7 @@ describe('CloudRequest', () => {
       }
 
       if (adapter === 'Axios') {
-        const CloudReq = _create({ baseURL: targetServer.baseUrl })
+        const CloudReq = createCloudRequest({ baseURL: targetServer.baseUrl })
 
         return CloudReq[method](`/ping`, {}).then((r) => r.data)
       }
@@ -150,14 +150,14 @@ describe('CloudRequest', () => {
     }
 
     it('does a basic request', async () => {
-      const CloudReq = _create({ baseURL: fakeHttpUpstream.baseUrl })
+      const CloudReq = createCloudRequest({ baseURL: fakeHttpUpstream.baseUrl })
 
       expect(await CloudReq.get('/ping').then((r) => r.data)).to.eql('OK')
       expect(fakeHttpUpstream.requests[0].rawHeaders).to.not.contain('Proxy-Authorization')
     })
 
     it('retains Proxy-Authorization for non-proxied requests', async () => {
-      const CloudReq = _create({ baseURL: fakeHttpUpstream.baseUrl })
+      const CloudReq = createCloudRequest({ baseURL: fakeHttpUpstream.baseUrl })
 
       expect(await CloudReq.get('/ping', {
         headers: {
@@ -328,7 +328,7 @@ describe('CloudRequest', () => {
     })
 
     it('sets exepcted platform, version, and user-agent headers', () => {
-      _create()
+      createCloudRequest()
       const cfg = getCreatedConfig()
 
       expect(cfg.headers).to.have.property('x-os-name', platform)
@@ -358,7 +358,7 @@ describe('CloudRequest', () => {
 
       ;(axios.create as sinon.SinonStub).returns(stubbedAxiosInstance)
 
-      _create()
+      createCloudRequest()
     })
 
     it('registers error transformation interceptor', () => {
@@ -388,7 +388,7 @@ describe('CloudRequest', () => {
       })
 
       it('sets to the value defined in app config', () => {
-        _create()
+        createCloudRequest()
         const cfg = getCreatedConfig()
 
         expect(cfg.baseURL).to.eq(app_config[env ?? 'development']?.api_url)
@@ -416,7 +416,7 @@ describe('CloudRequest', () => {
       })
 
       it('sets to the value defined in app config', () => {
-        _create()
+        createCloudRequest()
         const cfg = getCreatedConfig()
 
         expect(cfg.baseURL).to.eq(app_config[env ?? 'development']?.api_url)
