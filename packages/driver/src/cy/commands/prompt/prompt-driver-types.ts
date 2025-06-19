@@ -66,11 +66,18 @@ export interface CyPromptOptions {
   // so we need to check for it's presence before using it
   eventManager?: CyPromptEventManager
   errorUtils: CyPromptErrorUtils
-  getSourceDetailsForFirstLine: (stack: string, projectRoot?: string) => CyPromptStackLineDetail | undefined
+  getSourceDetailsForFirstLine: (
+    stack: string,
+    projectRoot?: string
+  ) => CyPromptStackLineDetail | undefined
 }
 
 export interface CyPromptDriverDefaultShape {
   createCyPrompt: (
     options: CyPromptOptions
-  ) => (args: { steps: string | string[], commandOptions?: object, promptCmd: any }) => Promise<void>
+  ) => (args: {
+    steps: string | string[]
+    commandOptions?: object
+    promptCmd: any
+  }) => Promise<void>
 }
