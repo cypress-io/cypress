@@ -457,7 +457,7 @@ export class SocketBase {
           try {
             const cyPrompt = await getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt()
 
-            // If we have runState, then we shouldn't reset the rull prompt manager because
+            // If we have runState, then we shouldn't reset the full prompt manager because
             // we are just changing top. We will clear the prompt manager for a specific test
             // later.
             if (!runState) {
