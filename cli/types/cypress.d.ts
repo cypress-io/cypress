@@ -3733,7 +3733,7 @@ declare namespace Cypress {
     | 'tag'
     | 'attributes'
     | 'nth-child'
-    | 'name';
+    | 'name'
 
   interface ElementSelectorDefaultsOptions {
     selectorPriority?: SelectorPriority[];
