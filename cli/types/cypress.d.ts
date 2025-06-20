@@ -3736,7 +3736,7 @@ declare namespace Cypress {
     | 'name'
 
   interface ElementSelectorDefaultsOptions {
-    selectorPriority?: SelectorPriority[];
+    selectorPriority?: SelectorPriority[]
   }
 
   interface ScrollToOptions extends Loggable, Timeoutable {
