@@ -3725,8 +3725,18 @@ declare namespace Cypress {
     screenshotOnRunFailure: boolean
   }
 
+  type SelectorPriority =
+    | `data-${string}`
+    | `attribute:${string}`
+    | 'id'
+    | 'class'
+    | 'tag'
+    | 'attributes'
+    | 'nth-child'
+    | 'name';
+
   interface ElementSelectorDefaultsOptions {
-    selectorPriority: string[]
+    selectorPriority?: SelectorPriority[];
   }
 
   interface ScrollToOptions extends Loggable, Timeoutable {
