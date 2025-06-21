@@ -76,11 +76,22 @@
       .command-expander > path {
         stroke: $gray-700;
       }
+
+      .command-prompt-get-code {
+        background: $gray-900;
+        border: 1px solid $gray-700;
+        color: $gray-200;
+
+        svg {
+          color: $gray-200;
+        }
+      }
     }
 
     .command-wrapper-text {
       display: flex;
       flex-wrap: nowrap;
+      width: 100%;
     }
 
     .command-interceptions {
@@ -103,6 +114,31 @@
     
       > *:first-child {
         margin-left: 0;
+      }
+    }
+
+    .command-wrapper-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+
+      .command-prompt-get-code {
+        min-width: 85px;
+        margin-top: 1px;
+        align-self: flex-start;
+        display: flex;
+        padding: 2px 4px;
+        gap: 4px;
+        align-items: center;
+        cursor: pointer;
+        border-radius: 4px;
+        border: 1px solid $gray-900;
+        color: $gray-300;
+      
+        svg {
+          color: $gray-500;
+        }       
       }
     }
   }

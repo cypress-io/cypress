@@ -17,6 +17,7 @@ import { addTelemetryListeners } from './events/telemetry'
 import { telemetry } from '@packages/telemetry/src/browser'
 import { addCaptureProtocolListeners } from './events/capture-protocol'
 import { getRunnerConfigFromWindow } from './get-runner-config-from-window'
+import { usePromptStore } from '../store/prompt-store'
 
 export type CypressInCypressMochaEvent = Array<Array<string | Record<string, any>>>
 
@@ -61,6 +62,7 @@ export class EventManager {
   ws: SocketShape
   specStore: ReturnType<typeof useSpecStore>
   studioStore: ReturnType<typeof useStudioStore>
+  promptStore: ReturnType<typeof usePromptStore>
 
   constructor (
     // import '@packages/driver'
@@ -75,6 +77,7 @@ export class EventManager {
     this.ws = ws
     this.specStore = useSpecStore()
     this.studioStore = useStudioStore()
+    this.promptStore = usePromptStore()
   }
 
   getCypress () {
@@ -418,6 +421,8 @@ export class EventManager {
       this._clearAllCookies()
       this._setUnload()
     })
+
+    this.addPromptListeners()
   }
 
   start (config) {
@@ -465,6 +470,12 @@ export class EventManager {
       })
     } else {
       Cypress.state('isProtocolEnabled', isDefaultProtocolEnabled)
+    }
+
+    if (Cypress.config('experimentalPromptCommand')) {
+      await new Promise((resolve) => {
+        this.ws.emit('prompt:reset', resolve)
+      })
     }
 
     this._addListeners()
@@ -956,6 +967,10 @@ export class EventManager {
     this.localBus.off(event, listener)
   }
 
+  removeAllListeners (event: string) {
+    this.localBus.removeAllListeners(event)
+  }
+
   notifyRunningSpec (specFile) {
     this.ws.emit('spec:changed', specFile)
   }
@@ -1005,5 +1020,14 @@ export class EventManager {
   // useful for testing
   _testingOnlySetCypress (cypress: any) {
     Cypress = cypress
+  }
+
+  private addPromptListeners () {
+    this.reporterBus.on('prompt:get-code', ({ testId, logId }) => {
+      this.promptStore.openGetCodeModal({
+        testId,
+        logId,
+      })
+    })
   }
 }

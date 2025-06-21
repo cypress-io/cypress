@@ -34,7 +34,17 @@ describe('lib/cloud/cy-prompt', () => {
       manifest: {
         'server/index.js': 'abcdefg',
       },
-      getProjectOptions: {} as any,
+      getProjectOptions: () => {
+        return Promise.resolve({
+          user: {
+            id: '1234',
+            email: 'test@test.com',
+            name: 'test',
+          },
+          projectSlug: '1234',
+          record: false,
+        })
+      },
     })
 
     cyPrompt = (cyPromptManager as any)._cyPromptServer
@@ -106,6 +116,24 @@ describe('lib/cloud/cy-prompt', () => {
       cyPromptManager.connectToBrowser({} as any)
 
       expect(invokeSyncSpy).to.not.be.called
+    })
+  })
+
+  describe('reset', () => {
+    it('calls reset', () => {
+      sinon.stub(cyPrompt, 'reset')
+
+      cyPromptManager.reset()
+
+      expect(cyPrompt.reset).to.be.called
+    })
+
+    it('calls resert with an id', () => {
+      sinon.stub(cyPrompt, 'reset')
+
+      cyPromptManager.reset('r1')
+
+      expect(cyPrompt.reset).to.be.calledWith('r1')
     })
   })
 })

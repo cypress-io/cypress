@@ -1,6 +1,6 @@
 # `cy.prompt` Development
 
-In production, the code used to facilitate the prompt command will be retrieved from the Cloud. While `cy.prompt` is still in its early stages it is hidden behind an environment variable: `CYPRESS_ENABLE_CY_PROMPT` but can also be run against local cloud Studio code via the environment variable: `CYPRESS_LOCAL_CY_PROMPT_PATH`.
+In production, the code used to facilitate the prompt command will be retrieved from the Cloud. While `cy.prompt` is still in its early stages it is hidden behind an environment variable: `CYPRESS_ENABLE_CY_PROMPT` but can also be run against local cloud prompt code via the environment variable: `CYPRESS_LOCAL_CY_PROMPT_PATH`.
 
 To run against locally developed `cy.prompt`:
 
@@ -29,6 +29,20 @@ To run against a deployed version of `cy.prompt`:
 
 - Set:
   - `CYPRESS_INTERNAL_ENV=<environment>` (e.g. `staging` or `production` if you want to hit those deployments of `cypress-services` or `development` if you want to hit a locally running version of `cypress-services`)
+
+## Types
+
+The prompt bundle provides the types for the `app`, `driver`, and `server` interfaces that are used within the Cypress code. To incorporate the types into the code base, run:
+
+```sh
+yarn gulp downloadPromptTypes
+```
+
+or to reference a local `cypress_services` repo:
+
+```sh
+CYPRESS_LOCAL_CY_PROMPT_PATH=<path-to-cypress-services/app/cy-prompt/dist/development-directory> yarn gulp downloadPromptTypes
+```
 
 ## Testing
 

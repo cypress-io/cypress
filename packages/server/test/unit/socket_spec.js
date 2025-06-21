@@ -52,6 +52,8 @@ describe('lib/socket', () => {
   })
 
   context('integration', () => {
+    let mockCyPrompt
+
     beforeEach(function (done) {
       // create a for realz socket.io connection
       // so we can test server emit / client emit events
@@ -89,15 +91,18 @@ describe('lib/socket', () => {
         }
 
         // Create a mock cy prompt object with handleBackendRequest method
-        const mockCyPrompt = {
+        mockCyPrompt = {
           addSocketListeners: sinon.stub(),
           status: 'INITIALIZED',
+          reset: sinon.stub(),
         }
 
         ctx.coreData.studioLifecycleManager = studioLifecycleManager
 
         const cyPromptLifecycleManager = {
-          getCyPrompt: sinon.stub().resolves(mockCyPrompt),
+          getCyPrompt: sinon.stub().resolves({
+            cyPromptManager: mockCyPrompt,
+          }),
           registerCyPromptReadyListener: sinon.stub().callsFake((callback) => {
             callback(mockCyPrompt)
 
@@ -548,7 +553,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(backend:request, wait:for:cy:prompt:ready)', () => {
+    context('on(backend:request, wait:for:prompt:ready)', () => {
       it('awaits cy prompt ready and returns true if cy prompt is ready', function (done) {
         const mockCyPrompt = {
           cyPromptManager: {
@@ -559,7 +564,7 @@ describe('lib/socket', () => {
 
         ctx.coreData.cyPromptLifecycleManager.getCyPrompt.resolves(mockCyPrompt)
 
-        return this.client.emit('backend:request', 'wait:for:cy:prompt:ready', (resp) => {
+        return this.client.emit('backend:request', 'wait:for:prompt:ready', (resp) => {
           expect(resp.response).to.deep.eq({ success: true })
 
           expect(this.options.onCyPromptReady).to.be.calledWith(mockCyPrompt.cyPromptManager)
@@ -578,7 +583,7 @@ describe('lib/socket', () => {
 
         ctx.coreData.cyPromptLifecycleManager.getCyPrompt.resolves(mockCyPrompt)
 
-        return this.client.emit('backend:request', 'wait:for:cy:prompt:ready', (resp) => {
+        return this.client.emit('backend:request', 'wait:for:prompt:ready', (resp) => {
           expect(resp.response).to.deep.eq({ success: false })
 
           return done()
@@ -593,7 +598,7 @@ describe('lib/socket', () => {
 
         ctx.coreData.cyPromptLifecycleManager.getCyPrompt.resolves(mockCyPrompt)
 
-        return this.client.emit('backend:request', 'wait:for:cy:prompt:ready', (resp) => {
+        return this.client.emit('backend:request', 'wait:for:prompt:ready', (resp) => {
           expect(resp.response).to.deep.eq({
             error: errors.cloneErr(mockCyPrompt.error),
           })
@@ -676,6 +681,34 @@ describe('lib/socket', () => {
           this.client.emit('studio:destroy', ({ error }) => {
             expect(this.options.onStudioDestroy).to.be.called
             expect(error.message).to.eq('foo')
+
+            resolve()
+          })
+        })
+      })
+    })
+
+    context('on(prompt:reset)', () => {
+      it('calls reset', async function () {
+        await new Promise((resolve) => {
+          this.client.emit('prompt:reset', () => {
+            expect(mockCyPrompt.reset).to.be.called
+
+            resolve()
+          })
+        })
+      })
+
+      it('does not call reset if there is runState', async function () {
+        await new Promise((resolve) => {
+          this.client.emit('backend:request', 'preserve:run:state', {}, () => {
+            resolve()
+          })
+        })
+
+        await new Promise((resolve) => {
+          this.client.emit('prompt:reset', () => {
+            expect(mockCyPrompt.reset).not.to.be.called
 
             resolve()
           })

@@ -2,6 +2,7 @@ import { init, loadRemote } from '@module-federation/runtime'
 import type { CypressInternal, CyPromptDriverDefaultShape } from './prompt-driver-types'
 import type Emitter from 'component-emitter'
 import $errUtils from '../../../cypress/error_utils'
+import $stackUtils from '../../../cypress/stack_utils'
 
 interface CyPromptDriver { default: CyPromptDriverDefaultShape }
 
@@ -16,7 +17,7 @@ declare global {
 let initializedModule: CyPromptDriverDefaultShape | null = null
 const initializeModule = async (Cypress: Cypress.Cypress): Promise<CyPromptDriverDefaultShape> => {
   // Wait for the cy prompt bundle to be downloaded and ready
-  const { success, error } = await Cypress.backend('wait:for:cy:prompt:ready')
+  const { success, error } = await Cypress.backend('wait:for:prompt:ready')
 
   if (error) {
     if (error.name === 'ENOSPC') {
@@ -83,6 +84,7 @@ const initializeCloudCyPrompt = async (Cypress: Cypress.Cypress, cy: Cypress.Cyp
         extendErrorMessages: $errUtils.extendErrorMessages,
         throwErrByPath: $errUtils.throwErrByPath,
       },
+      getSourceDetailsForFirstLine: $stackUtils.getSourceDetailsForFirstLine,
     })
   } catch (error) {
     return error
@@ -98,7 +100,9 @@ export default (Commands: Cypress.Cypress['Commands'], Cypress: Cypress.Cypress,
       initializeCloudCyPromptPromise = initializeCloudCyPrompt(Cypress, cy)
     }
 
-    const prompt = (message: string, options: object = {}) => {
+    const prompt = (steps: string | string[], commandOptions: object = {}) => {
+      const promptCmd = cy.state('current')
+
       if (Cypress.testingType === 'component') {
         $errUtils.throwErrByPath('prompt.promptTestingTypeError')
 
@@ -121,7 +125,11 @@ export default (Commands: Cypress.Cypress['Commands'], Cypress: Cypress.Cypress,
 
         const cyPrompt = bundleResult
 
-        return cyPrompt(message, options)
+        return cyPrompt({
+          steps,
+          commandOptions,
+          promptCmd,
+        })
       })
     }
 

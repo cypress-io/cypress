@@ -23,6 +23,7 @@ import ChevronIcon from '@packages/frontend-shared/src/assets/icons/chevron-down
 import HiddenIcon from '@packages/frontend-shared/src/assets/icons/general-eye-closed_x16.svg'
 import PinIcon from '@packages/frontend-shared/src/assets/icons/object-pin_x16.svg'
 import RunningIcon from '@packages/frontend-shared/src/assets/icons/status-running_x16.svg'
+import AngleBracketsIcon from '@packages/frontend-shared/src/assets/icons/technology-angle-brackets_x16.svg'
 
 const displayName = (model: CommandModel) => model.displayName || model.name
 const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
@@ -525,26 +526,37 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
             shouldShowMessage={_shouldShowClickMessage}
             wrapperClassName={cs('command-pin-target', { 'command-group': !!groupId, 'command-group-no-children': !model.hasChildren && model.group })}
           >
-            <div
-              className={cs('command-wrapper-text', {
-                'command-wrapper-text-group': model.hasChildren && groupId,
-                'command-wrapper-text-group-parent': model.hasChildren && !groupId,
-              })}
-              onMouseEnter={() => _snapshot(true)}
-              onMouseLeave={() => _snapshot(false)}
-            >
-              {groupPlaceholder}
+            <div className='command-wrapper-container'>
+              <div
+                className={cs('command-wrapper-text', {
+                  'command-wrapper-text-group': model.hasChildren && groupId,
+                  'command-wrapper-text-group-parent': model.hasChildren && !groupId,
+                })}
+                onMouseEnter={() => _snapshot(true)}
+                onMouseLeave={() => _snapshot(false)}
+              >
+                {groupPlaceholder}
 
-              {model.hasChildren && groupId && (
-                <div className={cs('command-expander-column-group', { 'nested-group-expander': model.groupLevel })} onClick={(e) => {
+                {model.hasChildren && groupId && (
+                  <div className={cs('command-expander-column-group', { 'nested-group-expander': model.groupLevel })} onClick={(e) => {
+                    e.stopPropagation()
+                    model.toggleOpen()
+                  }}>
+                    <ChevronIcon className={cs('command-expander', { 'command-expander-is-open': model.hasChildren && !!model.isOpen })} />
+                  </div>
+                )}
+                <CommandDetails model={model} groupId={groupId} aliasesWithDuplicates={aliasesWithDuplicates} />
+                <CommandControls model={model} commandName={commandName} events={events} />
+              </div>
+              {model.isCyPrompt && model.state === 'passed' && (
+                <div className='command-prompt-get-code' onClick={(e) => {
                   e.stopPropagation()
-                  model.toggleOpen()
+                  events.emit('prompt:get-code', { testId: model.testId, logId: model.id })
                 }}>
-                  <ChevronIcon className={cs('command-expander', { 'command-expander-is-open': model.hasChildren && !!model.isOpen })} />
+                  <AngleBracketsIcon className='command-prompt-get-code-indicator' width={12} height={12} />
+                  <span>Get code</span>
                 </div>
               )}
-              <CommandDetails model={model} groupId={groupId} aliasesWithDuplicates={aliasesWithDuplicates} />
-              <CommandControls model={model} commandName={commandName} events={events} />
             </div>
           </FlashOnClick>
         </div>

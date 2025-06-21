@@ -50,6 +50,7 @@ export interface StudioServerOptions {
   projectSlug?: string
   cloudApi: StudioCloudApi
   betterSqlite3Path: string
+  sessionId?: string
 }
 
 export interface StudioAIInitializeOptions {

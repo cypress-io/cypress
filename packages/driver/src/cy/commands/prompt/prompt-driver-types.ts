@@ -1,3 +1,7 @@
+// Note: This file is owned by the cloud delivered
+// cy prompt bundle. It is downloaded and copied here.
+// It should not be modified directly here.
+
 import type Emitter from 'component-emitter'
 
 interface InternalActions extends Cypress.Actions {
@@ -40,20 +44,40 @@ export interface CyPromptEventManager {
   ws: Emitter
 }
 
+export interface CyPromptErrorUtils {
+  extendErrorMessages: (errorMessages: any) => void
+  throwErrByPath: (errPath: any, options?: any) => never
+}
+
+export interface CyPromptStackLineDetail {
+  function: string
+  fileUrl: string
+  originalFile: string
+  relativeFile: string
+  absoluteFile: string
+  line: number
+  column: number
+}
+
 export interface CyPromptOptions {
   Cypress: CypressInternal
-  cy: Cypress.cy
+  cy: Cypress.cy & { state: (key: string) => any }
   // Note that the eventManager is present in same origin AUTs, but not cross origin
   // so we need to check for it's presence before using it
   eventManager?: CyPromptEventManager
-  errorUtils: {
-    extendErrorMessages: (errorMessages: any) => void
-    throwErrByPath: (err: any, path: string) => void
-  }
+  errorUtils: CyPromptErrorUtils
+  getSourceDetailsForFirstLine: (
+    stack: string,
+    projectRoot?: string
+  ) => CyPromptStackLineDetail | undefined
 }
 
 export interface CyPromptDriverDefaultShape {
   createCyPrompt: (
     options: CyPromptOptions
-  ) => (text: string, commandOptions?: object) => Promise<void>
+  ) => (args: {
+    steps: string | string[]
+    commandOptions?: object
+    promptCmd: any
+  }) => Promise<void>
 }
