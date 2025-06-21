@@ -13,11 +13,12 @@ import { ensureCyPromptBundle } from './ensure_cy_prompt_bundle'
 import chokidar from 'chokidar'
 import { getCloudMetadata } from '../get_cloud_metadata'
 import type { CyPromptAuthenticatedUserShape } from '@packages/types'
+import { verifySignature } from '../encryption'
 
 const debug = Debug('cypress:server:cy-prompt-lifecycle-manager')
 
 export class CyPromptLifecycleManager {
-  private static hashLoadingMap: Map<string, Promise<void>> = new Map()
+  private static hashLoadingMap: Map<string, Promise<Record<string, string>>> = new Map()
   private static watcher: chokidar.FSWatcher | null = null
   private cyPromptManagerPromise?: Promise<{
     cyPromptManager?: CyPromptManager
@@ -124,6 +125,7 @@ export class CyPromptLifecycleManager {
   }): Promise<{ cyPromptManager?: CyPromptManager, error?: Error }> {
     let cyPromptHash: string
     let cyPromptPath: string
+    let manifest: Record<string, string>
 
     const currentProjectOptions = await getProjectOptions()
     const projectId = currentProjectOptions.projectSlug
@@ -148,15 +150,21 @@ export class CyPromptLifecycleManager {
         CyPromptLifecycleManager.hashLoadingMap.set(cyPromptHash, hashLoadingPromise)
       }
 
-      await hashLoadingPromise
+      manifest = await hashLoadingPromise
     } else {
       cyPromptPath = process.env.CYPRESS_LOCAL_CY_PROMPT_PATH
       cyPromptHash = 'local'
+      manifest = {}
     }
 
     const serverFilePath = path.join(cyPromptPath, 'server', 'index.js')
 
     const script = await readFile(serverFilePath, 'utf8')
+
+    if (!process.env.CYPRESS_LOCAL_CY_PROMPT_PATH && !verifySignature(script, manifest[path.join('server', 'index.js')])) {
+      throw new Error('Invalid signature for cy prompt server script')
+    }
+
     const cyPromptManager = new CyPromptManager()
 
     const { cloudUrl } = await getCloudMetadata(cloudDataSource)
@@ -172,6 +180,7 @@ export class CyPromptLifecycleManager {
         asyncRetry,
       },
       getProjectOptions,
+      manifest,
     })
 
     debug('cy prompt is ready')

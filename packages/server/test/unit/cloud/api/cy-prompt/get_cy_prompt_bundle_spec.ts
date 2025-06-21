@@ -44,6 +44,8 @@ describe('getCyPromptBundle', () => {
   })
 
   it('downloads the cy-prompt bundle and extracts it', async () => {
+    const mockManifest = { 'app/cy-prompt.js': 'abcdefg' }
+
     crossFetchStub.resolves({
       ok: true,
       statusText: 'OK',
@@ -53,6 +55,10 @@ describe('getCyPromptBundle', () => {
           if (header === 'x-cypress-signature') {
             return '159'
           }
+
+          if (header === 'x-cypress-manifest') {
+            return JSON.stringify(mockManifest)
+          }
         },
       },
     })
@@ -61,7 +67,7 @@ describe('getCyPromptBundle', () => {
 
     const projectId = '12345'
 
-    await getCyPromptBundle({ cyPromptUrl: 'http://localhost:1234/cy-prompt/bundle/abc.tgz', projectId, bundlePath: '/tmp/cypress/cy-prompt/abc/bundle.tar' })
+    const manifest = await getCyPromptBundle({ cyPromptUrl: 'http://localhost:1234/cy-prompt/bundle/abc.tgz', projectId, bundlePath: '/tmp/cypress/cy-prompt/abc/bundle.tar' })
 
     expect(crossFetchStub).to.be.calledWith('http://localhost:1234/cy-prompt/bundle/abc.tgz', {
       agent: sinon.match.any,
@@ -80,9 +86,13 @@ describe('getCyPromptBundle', () => {
     expect(writeResult).to.eq('console.log("cy-prompt script")')
 
     expect(verifySignatureFromFileStub).to.be.calledWith('/tmp/cypress/cy-prompt/abc/bundle.tar', '159')
+
+    expect(manifest).to.deep.eq(mockManifest)
   })
 
   it('downloads the cy-prompt bundle and extracts it after 1 fetch failure', async () => {
+    const mockManifest = { 'app/cy-prompt.js': 'abcdefg' }
+
     crossFetchStub.onFirstCall().rejects(new HttpError('Failed to fetch', 'url', 502, 'Bad Gateway', 'Bad Gateway', sinon.stub()))
     crossFetchStub.onSecondCall().resolves({
       ok: true,
@@ -93,6 +103,10 @@ describe('getCyPromptBundle', () => {
           if (header === 'x-cypress-signature') {
             return '159'
           }
+
+          if (header === 'x-cypress-manifest') {
+            return JSON.stringify(mockManifest)
+          }
         },
       },
     })
@@ -101,7 +115,7 @@ describe('getCyPromptBundle', () => {
 
     const projectId = '12345'
 
-    await getCyPromptBundle({ cyPromptUrl: 'http://localhost:1234/cy-prompt/bundle/abc.tgz', projectId, bundlePath: '/tmp/cypress/cy-prompt/abc/bundle.tar' })
+    const manifest = await getCyPromptBundle({ cyPromptUrl: 'http://localhost:1234/cy-prompt/bundle/abc.tgz', projectId, bundlePath: '/tmp/cypress/cy-prompt/abc/bundle.tar' })
 
     expect(crossFetchStub).to.be.calledWith('http://localhost:1234/cy-prompt/bundle/abc.tgz', {
       agent: sinon.match.any,
@@ -120,6 +134,8 @@ describe('getCyPromptBundle', () => {
     expect(writeResult).to.eq('console.log("cy-prompt script")')
 
     expect(verifySignatureFromFileStub).to.be.calledWith('/tmp/cypress/cy-prompt/abc/bundle.tar', '159')
+
+    expect(manifest).to.deep.eq(mockManifest)
   })
 
   it('throws an error and returns a cy-prompt manager in error state if the fetch fails more than twice', async () => {

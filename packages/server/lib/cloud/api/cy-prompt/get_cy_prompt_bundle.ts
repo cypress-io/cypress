@@ -10,10 +10,10 @@ import { verifySignatureFromFile } from '../../encryption'
 const pkg = require('@packages/root')
 const _delay = linearDelay(500)
 
-export const getCyPromptBundle = async ({ cyPromptUrl, projectId, bundlePath }: { cyPromptUrl: string, projectId?: string, bundlePath: string }) => {
+export const getCyPromptBundle = async ({ cyPromptUrl, projectId, bundlePath }: { cyPromptUrl: string, projectId?: string, bundlePath: string }): Promise<Record<string, string>> => {
   let responseSignature: string | null = null
 
-  await (asyncRetry(async () => {
+  const manifest = await (asyncRetry(async () => {
     const response = await fetch(cyPromptUrl, {
       // @ts-expect-error - this is supported
       agent,
@@ -46,6 +46,8 @@ export const getCyPromptBundle = async ({ cyPromptUrl, projectId, bundlePath }: 
       // @ts-expect-error - this is supported
       response.body?.pipe(writeStream)
     })
+
+    return JSON.parse(response.headers.get('x-cypress-manifest') || '{}')
   }, {
     maxAttempts: 3,
     retryDelay: _delay,
@@ -61,4 +63,6 @@ export const getCyPromptBundle = async ({ cyPromptUrl, projectId, bundlePath }: 
   if (!verified) {
     throw new Error('Unable to verify cy-prompt signature')
   }
+
+  return manifest
 }

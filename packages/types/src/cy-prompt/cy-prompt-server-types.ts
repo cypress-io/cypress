@@ -4,6 +4,7 @@ import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping.d'
 import type { Router } from 'express'
 import type { AxiosInstance } from 'axios'
 import type { Socket } from 'socket.io'
+import type { BinaryLike } from 'crypto'
 
 export type CyPromptCommands = ProtocolMapping.Commands
 
@@ -49,6 +50,8 @@ export interface CyPromptServerOptions {
   }>
   cyPromptPath: string
   cloudApi: CyPromptCloudApi
+  manifest: Record<string, string>
+  verifySignature: (script: BinaryLike, signature: string) => boolean
 }
 
 export interface CyPromptCDPClient {

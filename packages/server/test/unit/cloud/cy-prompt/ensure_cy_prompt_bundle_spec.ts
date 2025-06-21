@@ -9,6 +9,9 @@ describe('ensureCyPromptBundle', () => {
   let ensureStub: sinon.SinonStub = sinon.stub()
   let extractStub: sinon.SinonStub = sinon.stub()
   let getCyPromptBundleStub: sinon.SinonStub = sinon.stub()
+  const mockManifest = {
+    'server/index.js': 'abcdefg',
+  }
 
   beforeEach(() => {
     rmStub = sinon.stub()
@@ -29,7 +32,7 @@ describe('ensureCyPromptBundle', () => {
         extract: extractStub.resolves(),
       },
       '../api/cy-prompt/get_cy_prompt_bundle': {
-        getCyPromptBundle: getCyPromptBundleStub.resolves(),
+        getCyPromptBundle: getCyPromptBundleStub.resolves(mockManifest),
       },
     })).ensureCyPromptBundle
   })
@@ -38,7 +41,7 @@ describe('ensureCyPromptBundle', () => {
     const cyPromptPath = path.join(os.tmpdir(), 'cypress', 'cy-prompt', '123')
     const bundlePath = path.join(cyPromptPath, 'bundle.tar')
 
-    await ensureCyPromptBundle({
+    const manifest = await ensureCyPromptBundle({
       cyPromptPath,
       cyPromptUrl: 'https://cypress.io/cy-prompt',
       projectId: '123',
@@ -56,6 +59,8 @@ describe('ensureCyPromptBundle', () => {
       file: bundlePath,
       cwd: cyPromptPath,
     })
+
+    expect(manifest).to.deep.eq(mockManifest)
   })
 
   it('should throw an error if the cy prompt bundle download times out', async () => {

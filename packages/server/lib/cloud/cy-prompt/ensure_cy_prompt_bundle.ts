@@ -21,7 +21,7 @@ interface EnsureCyPromptBundleOptions {
  * @param options.projectId - The project ID of the cy prompt bundle
  * @param options.downloadTimeoutMs - The timeout for the cy prompt bundle download
  */
-export const ensureCyPromptBundle = async ({ cyPromptPath, cyPromptUrl, projectId, downloadTimeoutMs = DOWNLOAD_TIMEOUT }: EnsureCyPromptBundleOptions) => {
+export const ensureCyPromptBundle = async ({ cyPromptPath, cyPromptUrl, projectId, downloadTimeoutMs = DOWNLOAD_TIMEOUT }: EnsureCyPromptBundleOptions): Promise<Record<string, string>> => {
   const bundlePath = path.join(cyPromptPath, 'bundle.tar')
 
   // First remove cyPromptPath to ensure we have a clean slate
@@ -30,7 +30,7 @@ export const ensureCyPromptBundle = async ({ cyPromptPath, cyPromptUrl, projectI
 
   let timeoutId: NodeJS.Timeout
 
-  await Promise.race([
+  const manifest = await Promise.race([
     getCyPromptBundle({
       cyPromptUrl,
       projectId,
@@ -43,10 +43,12 @@ export const ensureCyPromptBundle = async ({ cyPromptPath, cyPromptUrl, projectI
     }),
   ]).finally(() => {
     clearTimeout(timeoutId)
-  })
+  }) as Promise<Record<string, string>>
 
   await tar.extract({
     file: bundlePath,
     cwd: cyPromptPath,
   })
+
+  return manifest
 }

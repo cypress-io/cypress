@@ -31,6 +31,10 @@ describe('lib/cloud/cy-prompt', () => {
       cyPromptHash: 'abcdefg',
       projectSlug: '1234',
       cloudApi: {} as any,
+      manifest: {
+        'server/index.js': 'abcdefg',
+      },
+      getProjectOptions: {} as any,
     })
 
     cyPrompt = (cyPromptManager as any)._cyPromptServer
