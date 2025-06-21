@@ -26,7 +26,7 @@ export const ensureStudioBundle = async ({
   projectId,
   studioPath,
   downloadTimeoutMs = DOWNLOAD_TIMEOUT,
-}: EnsureStudioBundleOptions) => {
+}: EnsureStudioBundleOptions): Promise<Record<string, string>> => {
   const bundlePath = path.join(studioPath, 'bundle.tar')
 
   // First remove studioPath to ensure we have a clean slate
@@ -35,10 +35,9 @@ export const ensureStudioBundle = async ({
 
   let timeoutId: NodeJS.Timeout
 
-  await Promise.race([
+  const manifest = await Promise.race([
     getStudioBundle({
       studioUrl,
-      projectId,
       bundlePath,
     }),
     new Promise((_, reject) => {
@@ -48,10 +47,12 @@ export const ensureStudioBundle = async ({
     }),
   ]).finally(() => {
     clearTimeout(timeoutId)
-  })
+  }) as Promise<Record<string, string>>
 
   await tar.extract({
     file: bundlePath,
     cwd: studioPath,
   })
+
+  return manifest
 }

@@ -11,6 +11,9 @@ describe('ensureStudioBundle', () => {
   let readFileStub: sinon.SinonStub = sinon.stub()
   let extractStub: sinon.SinonStub = sinon.stub()
   let getStudioBundleStub: sinon.SinonStub = sinon.stub()
+  const mockManifest = {
+    'server/index.js': 'abcdefg',
+  }
 
   beforeEach(() => {
     rmStub = sinon.stub()
@@ -35,7 +38,7 @@ describe('ensureStudioBundle', () => {
         extract: extractStub.resolves(),
       },
       '../api/studio/get_studio_bundle': {
-        getStudioBundle: getStudioBundleStub.resolves(),
+        getStudioBundle: getStudioBundleStub.resolves(mockManifest),
       },
     })).ensureStudioBundle
   })
@@ -44,7 +47,7 @@ describe('ensureStudioBundle', () => {
     const studioPath = path.join(os.tmpdir(), 'cypress', 'studio', '123')
     const bundlePath = path.join(studioPath, 'bundle.tar')
 
-    await ensureStudioBundle({
+    const manifest = await ensureStudioBundle({
       studioPath,
       studioUrl: 'https://cypress.io/studio',
       projectId: '123',
@@ -54,7 +57,6 @@ describe('ensureStudioBundle', () => {
     expect(ensureStub).to.be.calledWith(studioPath)
     expect(getStudioBundleStub).to.be.calledWith({
       studioUrl: 'https://cypress.io/studio',
-      projectId: '123',
       bundlePath,
     })
 
@@ -62,6 +64,8 @@ describe('ensureStudioBundle', () => {
       file: bundlePath,
       cwd: studioPath,
     })
+
+    expect(manifest).to.deep.eq(mockManifest)
   })
 
   it('should throw an error if the studio bundle download times out', async () => {

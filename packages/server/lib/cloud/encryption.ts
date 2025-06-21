@@ -1,4 +1,4 @@
-import crypto from 'crypto'
+import crypto, { BinaryLike } from 'crypto'
 import { TextEncoder, promisify } from 'util'
 import { generalDecrypt, GeneralJWE } from 'jose'
 import base64Url from 'base64url'
@@ -37,7 +37,7 @@ export interface EncryptRequestData {
   secretKey: crypto.KeyObject
 }
 
-export function verifySignature (body: string, signature: string, publicKey?: crypto.KeyObject) {
+export function verifySignature (body: BinaryLike, signature: string, publicKey?: crypto.KeyObject) {
   const verify = crypto.createVerify('SHA256')
 
   verify.update(body)

@@ -5,6 +5,7 @@ import Debug from 'debug'
 import { requireScript } from '../require_script'
 import path from 'path'
 import { reportStudioError, ReportStudioErrorOptions } from '../api/studio/report_studio_error'
+import { verifySignature } from '../encryption'
 
 interface StudioServer { default: StudioServerDefaultShape }
 
@@ -15,6 +16,7 @@ interface SetupOptions {
   projectSlug?: string
   cloudApi: StudioCloudApi
   shouldEnableStudio: boolean
+  manifest: Record<string, string>
 }
 
 const debug = Debug('cypress:server:studio')
@@ -41,7 +43,7 @@ export class StudioManager implements StudioManagerShape {
     return manager
   }
 
-  async setup ({ script, studioPath, studioHash, projectSlug, cloudApi, shouldEnableStudio }: SetupOptions): Promise<void> {
+  async setup ({ script, studioPath, studioHash, projectSlug, cloudApi, shouldEnableStudio, manifest }: SetupOptions): Promise<void> {
     const { createStudioServer } = requireScript<StudioServer>(script).default
 
     this._studioServer = await createStudioServer({
@@ -50,6 +52,16 @@ export class StudioManager implements StudioManagerShape {
       projectSlug,
       cloudApi,
       betterSqlite3Path: path.dirname(require.resolve('better-sqlite3/package.json')),
+      manifest,
+      verifySignature: (script, signature) => {
+        // If we are running locally, we don't need to verify the signature. This
+        // environment variable will get stripped in the binary.
+        if (process.env.CYPRESS_LOCAL_STUDIO_PATH) {
+          return true
+        }
+
+        return verifySignature(script, signature)
+      },
     })
 
     this.status = shouldEnableStudio ? 'ENABLED' : 'INITIALIZED'

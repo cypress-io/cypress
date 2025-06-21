@@ -10,10 +10,9 @@ import { verifySignatureFromFile } from '../../encryption'
 const pkg = require('@packages/root')
 const _delay = linearDelay(500)
 
-export const getStudioBundle = async ({ studioUrl, projectId, bundlePath }: { studioUrl: string, projectId?: string, bundlePath: string }) => {
+export const getStudioBundle = async ({ studioUrl, bundlePath }: { studioUrl: string, bundlePath: string }): Promise<Record<string, string>> => {
   let responseSignature: string | null = null
-
-  await (asyncRetry(async () => {
+  const manifest = await (asyncRetry(async () => {
     const response = await fetch(studioUrl, {
       // @ts-expect-error - this is supported
       agent,
@@ -44,6 +43,8 @@ export const getStudioBundle = async ({ studioUrl, projectId, bundlePath }: { st
       // @ts-expect-error - this is supported
       response.body?.pipe(writeStream)
     })
+
+    return JSON.parse(response.headers.get('x-cypress-manifest') || '{}')
   }, {
     maxAttempts: 3,
     retryDelay: _delay,
@@ -59,4 +60,6 @@ export const getStudioBundle = async ({ studioUrl, projectId, bundlePath }: { st
   if (!verified) {
     throw new Error('Unable to verify studio signature')
   }
+
+  return manifest
 }

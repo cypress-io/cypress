@@ -9,6 +9,9 @@ describe('getStudioBundle', () => {
   let crossFetchStub: sinon.SinonStub
   let verifySignatureFromFileStub: sinon.SinonStub
   let getStudioBundle: typeof import('../../../../../lib/cloud/api/studio/get_studio_bundle').getStudioBundle
+  const mockManifest = {
+    'server/index.js': 'abcdefg',
+  }
 
   beforeEach(() => {
     createWriteStreamStub = sinon.stub()
@@ -53,15 +56,17 @@ describe('getStudioBundle', () => {
           if (header === 'x-cypress-signature') {
             return '159'
           }
+
+          if (header === 'x-cypress-manifest') {
+            return JSON.stringify(mockManifest)
+          }
         },
       },
     })
 
     verifySignatureFromFileStub.resolves(true)
 
-    const projectId = '12345'
-
-    await getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId, bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })
+    const manifest = await getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })
 
     expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
       agent: sinon.match.any,
@@ -78,6 +83,8 @@ describe('getStudioBundle', () => {
     expect(writeResult).to.eq('console.log("studio bundle")')
 
     expect(verifySignatureFromFileStub).to.be.calledWith('/tmp/cypress/studio/abc/bundle.tar', '159')
+
+    expect(manifest).to.deep.eq(mockManifest)
   })
 
   it('downloads the studio bundle and extracts it after 1 fetch failure', async () => {
@@ -91,15 +98,17 @@ describe('getStudioBundle', () => {
           if (header === 'x-cypress-signature') {
             return '159'
           }
+
+          if (header === 'x-cypress-manifest') {
+            return JSON.stringify(mockManifest)
+          }
         },
       },
     })
 
     verifySignatureFromFileStub.resolves(true)
 
-    const projectId = '12345'
-
-    await getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId, bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })
+    const manifest = await getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })
 
     expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
       agent: sinon.match.any,
@@ -116,6 +125,8 @@ describe('getStudioBundle', () => {
     expect(writeResult).to.eq('console.log("studio bundle")')
 
     expect(verifySignatureFromFileStub).to.be.calledWith('/tmp/cypress/studio/abc/bundle.tar', '159')
+
+    expect(manifest).to.deep.eq(mockManifest)
   })
 
   it('throws an error and returns a studio manager in error state if the fetch fails more than twice', async () => {
@@ -123,9 +134,7 @@ describe('getStudioBundle', () => {
 
     crossFetchStub.rejects(error)
 
-    const projectId = '12345'
-
-    await expect(getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId, bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })).to.be.rejected
+    await expect(getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })).to.be.rejected
 
     expect(crossFetchStub).to.be.calledThrice
     expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
@@ -147,9 +156,7 @@ describe('getStudioBundle', () => {
       statusText: 'Some failure',
     })
 
-    const projectId = '12345'
-
-    await expect(getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId, bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })).to.be.rejected
+    await expect(getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })).to.be.rejected
 
     expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
       agent: sinon.match.any,
@@ -182,9 +189,7 @@ describe('getStudioBundle', () => {
 
     verifySignatureFromFileStub.resolves(false)
 
-    const projectId = '12345'
-
-    await expect(getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId, bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })).to.be.rejected
+    await expect(getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })).to.be.rejected
 
     expect(writeResult).to.eq('console.log("studio bundle")')
 
@@ -213,9 +218,7 @@ describe('getStudioBundle', () => {
       },
     })
 
-    const projectId = '12345'
-
-    await expect(getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId, bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })).to.be.rejected
+    await expect(getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })).to.be.rejected
 
     expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
       agent: sinon.match.any,

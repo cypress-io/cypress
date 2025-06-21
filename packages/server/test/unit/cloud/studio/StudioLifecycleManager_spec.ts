@@ -43,6 +43,8 @@ describe('StudioLifecycleManager', () => {
   let markStub: sinon.SinonStub
   let initializeTelemetryReporterStub: sinon.SinonStub
   let reportTelemetryStub: sinon.SinonStub
+  let verifySignatureStub: sinon.SinonStub
+  const mockContents = 'console.log("studio script")'
 
   beforeEach(() => {
     postStudioSessionStub = sinon.stub()
@@ -65,6 +67,8 @@ describe('StudioLifecycleManager', () => {
       destroy: studioManagerDestroyStub.resolves(),
     } as unknown as StudioManager
 
+    verifySignatureStub = sinon.stub()
+
     readFileStub = sinon.stub()
     reportTelemetryStub = sinon.stub()
 
@@ -83,7 +87,7 @@ describe('StudioLifecycleManager', () => {
         },
       },
       'fs-extra': {
-        readFile: readFileStub.resolves('console.log("studio script")'),
+        readFile: readFileStub.resolves(mockContents),
       },
       '../get_cloud_metadata': {
         getCloudMetadata: sinon.stub().resolves({
@@ -112,6 +116,9 @@ describe('StudioLifecycleManager', () => {
       './telemetry/TelemetryReporter': {
         initializeTelemetryReporter: initializeTelemetryReporterStub,
         reportTelemetry: reportTelemetryStub,
+      },
+      '../encryption': {
+        verifySignature: verifySignatureStub.resolves(),
       },
     }).StudioLifecycleManager
 
@@ -215,6 +222,13 @@ describe('StudioLifecycleManager', () => {
         })
       })
 
+      const mockManifest = {
+        'server/index.js': 'abcdefg',
+      }
+
+      ensureStudioBundleStub.resolves(mockManifest)
+      verifySignatureStub.returns(true)
+
       await studioReadyPromise
 
       expect(mockCtx.update).to.be.calledOnce
@@ -237,11 +251,14 @@ describe('StudioLifecycleManager', () => {
           asyncRetry,
         },
         shouldEnableStudio: false,
+        manifest: mockManifest,
       })
 
       expect(postStudioSessionStub).to.be.calledWith({
         projectId: 'test-project-id',
       })
+
+      expect(verifySignatureStub).to.be.calledWith(mockContents, 'abcdefg')
 
       expect(readFileStub).to.be.calledWith(path.join(os.tmpdir(), 'cypress', 'studio', 'abc', 'server', 'index.js'), 'utf8')
 
@@ -292,6 +309,13 @@ describe('StudioLifecycleManager', () => {
         })
       })
 
+      const mockManifest = {
+        'server/index.js': 'abcdefg',
+      }
+
+      ensureStudioBundleStub.resolves(mockManifest)
+      verifySignatureStub.returns(true)
+
       await studioReadyPromise
 
       expect(mockCtx.update).to.be.calledOnce
@@ -314,11 +338,14 @@ describe('StudioLifecycleManager', () => {
           asyncRetry,
         },
         shouldEnableStudio: false,
+        manifest: mockManifest,
       })
 
       expect(postStudioSessionStub).to.be.calledWith({
         projectId: 'test-project-id',
       })
+
+      expect(verifySignatureStub).to.be.calledWith(mockContents, 'abcdefg')
 
       expect(readFileStub).to.be.calledWith(path.join(os.tmpdir(), 'cypress', 'studio', 'abc', 'server', 'index.js'), 'utf8')
 
@@ -389,6 +416,13 @@ describe('StudioLifecycleManager', () => {
         })
       })
 
+      const mockManifest = {
+        'server/index.js': 'abcdefg',
+      }
+
+      ensureStudioBundleStub.resolves(mockManifest)
+      verifySignatureStub.returns(true)
+
       await studioReadyPromise
 
       expect(mockCtx.update).to.be.calledOnce
@@ -407,11 +441,14 @@ describe('StudioLifecycleManager', () => {
           asyncRetry,
         },
         shouldEnableStudio: true,
+        manifest: {},
       })
 
       expect(postStudioSessionStub).to.be.calledWith({
         projectId: 'test-project-id',
       })
+
+      expect(verifySignatureStub).not.to.be.called
 
       expect(readFileStub).to.be.calledWith(path.join('/path', 'to', 'studio', 'server', 'index.js'), 'utf8')
 
@@ -590,6 +627,15 @@ describe('StudioLifecycleManager', () => {
   })
 
   describe('registerStudioReadyListener', () => {
+    beforeEach(() => {
+      const mockManifest = {
+        'server/index.js': 'abcdefg',
+      }
+
+      ensureStudioBundleStub.resolves(mockManifest)
+      verifySignatureStub.returns(true)
+    })
+
     it('registers a listener that will be called when studio is ready', () => {
       const listener = sinon.stub()
 
@@ -735,6 +781,15 @@ describe('StudioLifecycleManager', () => {
   })
 
   describe('status tracking', () => {
+    beforeEach(() => {
+      const mockManifest = {
+        'server/index.js': 'abcdefg',
+      }
+
+      ensureStudioBundleStub.resolves(mockManifest)
+      verifySignatureStub.returns(true)
+    })
+
     it('updates status and emits events when status changes', async () => {
       // Setup the context to test status updates
       // @ts-expect-error - accessing private property
