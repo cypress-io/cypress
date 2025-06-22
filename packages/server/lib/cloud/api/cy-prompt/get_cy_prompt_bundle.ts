@@ -5,15 +5,14 @@ import os from 'os'
 import { agent } from '@packages/network'
 import { PUBLIC_KEY_VERSION } from '../../constants'
 import { createWriteStream } from 'fs'
-import { verifySignatureFromFile } from '../../encryption'
 
 const pkg = require('@packages/root')
 const _delay = linearDelay(500)
 
-export const getCyPromptBundle = async ({ cyPromptUrl, projectId, bundlePath }: { cyPromptUrl: string, projectId?: string, bundlePath: string }): Promise<Record<string, string>> => {
+export const getCyPromptBundle = async ({ cyPromptUrl, projectId, bundlePath }: { cyPromptUrl: string, projectId?: string, bundlePath: string }): Promise<string> => {
   let responseSignature: string | null = null
 
-  const manifest = await (asyncRetry(async () => {
+  await (asyncRetry(async () => {
     const response = await fetch(cyPromptUrl, {
       // @ts-expect-error - this is supported
       agent,
@@ -46,8 +45,6 @@ export const getCyPromptBundle = async ({ cyPromptUrl, projectId, bundlePath }: 
       // @ts-expect-error - this is supported
       response.body?.pipe(writeStream)
     })
-
-    return JSON.parse(response.headers.get('x-cypress-manifest') || '{}')
   }, {
     maxAttempts: 3,
     retryDelay: _delay,
@@ -58,11 +55,5 @@ export const getCyPromptBundle = async ({ cyPromptUrl, projectId, bundlePath }: 
     throw new Error('Unable to get cy-prompt signature')
   }
 
-  const verified = await verifySignatureFromFile(bundlePath, responseSignature)
-
-  if (!verified) {
-    throw new Error('Unable to verify cy-prompt signature')
-  }
-
-  return manifest
+  return responseSignature
 }

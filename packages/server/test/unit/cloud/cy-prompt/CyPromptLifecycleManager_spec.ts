@@ -24,7 +24,6 @@ describe('CyPromptLifecycleManager', () => {
   let watcherStub: sinon.SinonStub = sinon.stub()
   let watcherOnStub: sinon.SinonStub = sinon.stub()
   let watcherCloseStub: sinon.SinonStub = sinon.stub()
-  let verifySignatureStub: sinon.SinonStub = sinon.stub()
   const mockContents: string = 'console.log("cy-prompt script")'
 
   beforeEach(() => {
@@ -32,7 +31,6 @@ describe('CyPromptLifecycleManager', () => {
     cyPromptManagerSetupStub = sinon.stub()
     ensureCyPromptBundleStub = sinon.stub()
     cyPromptStatusChangeEmitterStub = sinon.stub()
-    verifySignatureStub = sinon.stub()
     mockCyPromptManager = {
       status: 'INITIALIZED',
       setup: cyPromptManagerSetupStub.resolves(),
@@ -61,9 +59,6 @@ describe('CyPromptLifecycleManager', () => {
           on: watcherOnStub,
           close: watcherCloseStub,
         }),
-      },
-      '../encryption': {
-        verifySignature: verifySignatureStub,
       },
     }).CyPromptLifecycleManager
 
@@ -129,11 +124,10 @@ describe('CyPromptLifecycleManager', () => {
       })
 
       const mockManifest = {
-        'server/index.js': 'abcdefg',
+        'server/index.js': 'c3c4ab913ca059819549f105e756a4c4471df19abef884ce85eafc7b7970e7b4',
       }
 
       ensureCyPromptBundleStub.resolves(mockManifest)
-      verifySignatureStub.returns(true)
 
       await cyPromptReadyPromise
 
@@ -162,8 +156,6 @@ describe('CyPromptLifecycleManager', () => {
         projectId: 'test-project-id',
       })
 
-      expect(verifySignatureStub).to.be.calledWith(mockContents, 'abcdefg')
-
       expect(mockCloudDataSource.getCloudUrl).to.be.calledWith('test')
       expect(mockCloudDataSource.additionalHeaders).to.be.called
       expect(readFileStub).to.be.calledWith(path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc', 'server', 'index.js'), 'utf8')
@@ -184,11 +176,10 @@ describe('CyPromptLifecycleManager', () => {
       })
 
       const mockManifest = {
-        'server/index.js': 'abcdefg',
+        'server/index.js': 'c3c4ab913ca059819549f105e756a4c4471df19abef884ce85eafc7b7970e7b4',
       }
 
       ensureCyPromptBundleStub.resolves(mockManifest)
-      verifySignatureStub.returns(true)
 
       const cyPromptManager1 = await cyPromptReadyPromise1
 
@@ -234,8 +225,6 @@ describe('CyPromptLifecycleManager', () => {
       expect(postCyPromptSessionStub).to.be.calledWith({
         projectId: 'test-project-id',
       })
-
-      expect(verifySignatureStub).to.be.calledWith(mockContents, 'abcdefg')
 
       expect(mockCloudDataSource.getCloudUrl).to.be.calledWith('test')
       expect(mockCloudDataSource.additionalHeaders).to.be.called
@@ -333,11 +322,10 @@ describe('CyPromptLifecycleManager', () => {
   describe('registerCyPromptReadyListener', () => {
     beforeEach(() => {
       const mockManifest = {
-        'server/index.js': 'abcdefg',
+        'server/index.js': 'c3c4ab913ca059819549f105e756a4c4471df19abef884ce85eafc7b7970e7b4',
       }
 
       ensureCyPromptBundleStub.resolves(mockManifest)
-      verifySignatureStub.returns(true)
     })
 
     it('registers a listener that will be called when cy-prompt is ready', () => {

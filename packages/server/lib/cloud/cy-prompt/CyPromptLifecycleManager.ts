@@ -13,8 +13,7 @@ import { ensureCyPromptBundle } from './ensure_cy_prompt_bundle'
 import chokidar from 'chokidar'
 import { getCloudMetadata } from '../get_cloud_metadata'
 import type { CyPromptAuthenticatedUserShape } from '@packages/types'
-import { verifySignature } from '../encryption'
-
+import crypto from 'crypto'
 const debug = Debug('cypress:server:cy-prompt-lifecycle-manager')
 
 export class CyPromptLifecycleManager {
@@ -160,13 +159,14 @@ export class CyPromptLifecycleManager {
     const serverFilePath = path.join(cyPromptPath, 'server', 'index.js')
 
     const script = await readFile(serverFilePath, 'utf8')
-
-    const signature = manifest[path.join('server', 'index.js')]
+    const expectedHash = manifest[path.join('server', 'index.js')]
 
     // TODO: once the services have deployed, we should remove this check
-    if (signature) {
-      if (!process.env.CYPRESS_LOCAL_CY_PROMPT_PATH && !verifySignature(script, signature)) {
-        throw new Error('Invalid signature for cy prompt server script')
+    if (expectedHash) {
+      const actualHash = crypto.createHash('sha256').update(script).digest('hex')
+
+      if (!process.env.CYPRESS_LOCAL_CY_PROMPT_PATH && actualHash !== expectedHash) {
+        throw new Error('Invalid hash for cy prompt server script')
       }
     }
 

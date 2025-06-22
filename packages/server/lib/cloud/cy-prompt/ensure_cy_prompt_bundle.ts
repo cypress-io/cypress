@@ -1,8 +1,9 @@
-import { remove, ensureDir } from 'fs-extra'
+import { remove, ensureDir, readFile } from 'fs-extra'
 
 import tar from 'tar'
 import { getCyPromptBundle } from '../api/cy-prompt/get_cy_prompt_bundle'
 import path from 'path'
+import { verifySignature } from '../encryption'
 
 const DOWNLOAD_TIMEOUT = 30000
 
@@ -30,7 +31,7 @@ export const ensureCyPromptBundle = async ({ cyPromptPath, cyPromptUrl, projectI
 
   let timeoutId: NodeJS.Timeout
 
-  const manifest = await Promise.race([
+  const responseSignature = await Promise.race([
     getCyPromptBundle({
       cyPromptUrl,
       projectId,
@@ -43,12 +44,21 @@ export const ensureCyPromptBundle = async ({ cyPromptPath, cyPromptUrl, projectI
     }),
   ]).finally(() => {
     clearTimeout(timeoutId)
-  }) as Promise<Record<string, string>>
+  }) as string
 
   await tar.extract({
     file: bundlePath,
     cwd: cyPromptPath,
   })
 
-  return manifest
+  const manifestPath = path.join(cyPromptPath, 'manifest.json')
+  const manifestContents = await readFile(manifestPath, 'utf8')
+
+  const verified = await verifySignature(manifestContents, responseSignature)
+
+  if (!verified) {
+    throw new Error('Unable to verify cy-prompt signature')
+  }
+
+  return JSON.parse(manifestContents)
 }

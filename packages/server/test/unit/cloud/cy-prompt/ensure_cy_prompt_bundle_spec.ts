@@ -9,6 +9,9 @@ describe('ensureCyPromptBundle', () => {
   let ensureStub: sinon.SinonStub = sinon.stub()
   let extractStub: sinon.SinonStub = sinon.stub()
   let getCyPromptBundleStub: sinon.SinonStub = sinon.stub()
+  let readFileStub: sinon.SinonStub = sinon.stub()
+  let verifySignatureStub: sinon.SinonStub = sinon.stub()
+  const mockResponseSignature = '159'
   const mockManifest = {
     'server/index.js': 'abcdefg',
   }
@@ -18,6 +21,8 @@ describe('ensureCyPromptBundle', () => {
     ensureStub = sinon.stub()
     extractStub = sinon.stub()
     getCyPromptBundleStub = sinon.stub()
+    readFileStub = sinon.stub()
+    verifySignatureStub = sinon.stub()
 
     ensureCyPromptBundle = (proxyquire('../lib/cloud/cy-prompt/ensure_cy_prompt_bundle', {
       os: {
@@ -27,12 +32,16 @@ describe('ensureCyPromptBundle', () => {
       'fs-extra': {
         remove: rmStub.resolves(),
         ensureDir: ensureStub.resolves(),
+        readFile: readFileStub.resolves(JSON.stringify(mockManifest)),
       },
       tar: {
         extract: extractStub.resolves(),
       },
       '../api/cy-prompt/get_cy_prompt_bundle': {
-        getCyPromptBundle: getCyPromptBundleStub.resolves(mockManifest),
+        getCyPromptBundle: getCyPromptBundleStub.resolves(mockResponseSignature),
+      },
+      '../encryption': {
+        verifySignature: verifySignatureStub.resolves(true),
       },
     })).ensureCyPromptBundle
   })
@@ -49,6 +58,7 @@ describe('ensureCyPromptBundle', () => {
 
     expect(rmStub).to.be.calledWith(cyPromptPath)
     expect(ensureStub).to.be.calledWith(cyPromptPath)
+    expect(readFileStub).to.be.calledWith(path.join(cyPromptPath, 'manifest.json'), 'utf8')
     expect(getCyPromptBundleStub).to.be.calledWith({
       cyPromptUrl: 'https://cypress.io/cy-prompt',
       projectId: '123',
@@ -60,7 +70,21 @@ describe('ensureCyPromptBundle', () => {
       cwd: cyPromptPath,
     })
 
+    expect(verifySignatureStub).to.be.calledWith(JSON.stringify(mockManifest), mockResponseSignature)
+
     expect(manifest).to.deep.eq(mockManifest)
+  })
+
+  it('should throw an error if the cy prompt bundle signature is invalid', async () => {
+    verifySignatureStub.resolves(false)
+
+    const ensureCyPromptBundlePromise = ensureCyPromptBundle({
+      cyPromptPath: '/tmp/cypress/cy-prompt/123',
+      cyPromptUrl: 'https://cypress.io/cy-prompt',
+      projectId: '123',
+    })
+
+    await expect(ensureCyPromptBundlePromise).to.be.rejectedWith('Unable to verify cy-prompt signature')
   })
 
   it('should throw an error if the cy prompt bundle download times out', async () => {

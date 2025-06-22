@@ -59,7 +59,7 @@ export interface CyPromptServerOptions {
   projectSlug?: string
   cloudApi: CyPromptCloudApi
   manifest: Record<string, string>
-  verifySignature: (script: BinaryLike, signature: string) => boolean
+  verifyHash: (contents: BinaryLike, expectedHash: string) => boolean
   getProjectOptions: () => Promise<CyPromptProjectOptions>
 }
 
