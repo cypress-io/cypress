@@ -1,4 +1,4 @@
-import { remove, ensureDir, readFile } from 'fs-extra'
+import { remove, ensureDir, readFile, pathExists } from 'fs-extra'
 
 import tar from 'tar'
 import { getStudioBundle } from '../api/studio/get_studio_bundle'
@@ -56,6 +56,12 @@ export const ensureStudioBundle = async ({
   })
 
   const manifestPath = path.join(studioPath, 'manifest.json')
+
+  if (!(await pathExists(manifestPath))) {
+    // TODO: Eventually throw an error here once everything lands in production
+    return {}
+  }
+
   const manifestContents = await readFile(manifestPath, 'utf8')
 
   const verified = await verifySignature(manifestContents, responseSignature)

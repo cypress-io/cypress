@@ -12,6 +12,7 @@ describe('ensureStudioBundle', () => {
   let getStudioBundleStub: sinon.SinonStub = sinon.stub()
   let readFileStub: sinon.SinonStub = sinon.stub()
   let verifySignatureStub: sinon.SinonStub = sinon.stub()
+  let pathExistsStub: sinon.SinonStub = sinon.stub()
   const mockResponseSignature = '159'
   const mockManifest = {
     'server/index.js': 'abcdefg',
@@ -25,6 +26,7 @@ describe('ensureStudioBundle', () => {
     extractStub = sinon.stub()
     getStudioBundleStub = sinon.stub()
     verifySignatureStub = sinon.stub()
+    pathExistsStub = sinon.stub()
 
     ensureStudioBundle = (proxyquire('../lib/cloud/studio/ensure_studio_bundle', {
       os: {
@@ -36,6 +38,7 @@ describe('ensureStudioBundle', () => {
         ensureDir: ensureStub.resolves(),
         copy: copyStub.resolves(),
         readFile: readFileStub.resolves(JSON.stringify(mockManifest)),
+        pathExists: pathExistsStub.resolves(true),
       },
       tar: {
         extract: extractStub.resolves(),
