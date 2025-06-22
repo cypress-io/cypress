@@ -205,8 +205,13 @@ export class StudioLifecycleManager {
 
     const script = await readFile(serverFilePath, 'utf8')
 
-    if (!process.env.CYPRESS_LOCAL_STUDIO_PATH && !verifySignature(script, manifest[path.join('server', 'index.js')])) {
-      throw new Error('Invalid signature for studio server script')
+    const signature = manifest[path.join('server', 'index.js')]
+
+    // TODO: once the services have deployed, we should remove this check
+    if (signature) {
+      if (!process.env.CYPRESS_LOCAL_STUDIO_PATH && !verifySignature(script, signature)) {
+        throw new Error('Invalid signature for studio server script')
+      }
     }
 
     const studioManager = new StudioManager()
