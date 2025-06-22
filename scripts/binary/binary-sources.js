@@ -119,6 +119,14 @@ const getStudioFileSource = async (studioFilePath) => {
   return fileContents.replaceAll('process.env.CYPRESS_LOCAL_STUDIO_PATH', 'undefined')
 }
 
+const getCyPromptFileSource = async (cyPromptFilePath) => {
+  const fileContents = await fs.readFile(cyPromptFilePath, 'utf8')
+
+  if (!fileContents.includes('process.env.CYPRESS_LOCAL_CY_PROMPT_PATH')) {
+    throw new Error(`Expected to find CYPRESS_LOCAL_CY_PROMPT_PATH in cy prompt file`)
+  }
+}
+
 const validateProtocolFile = async (protocolFilePath) => {
   const afterReplaceProtocol = await fs.readFile(protocolFilePath, 'utf8')
 
@@ -135,6 +143,14 @@ const validateStudioFile = async (studioFilePath) => {
   }
 }
 
+const validateCyPromptFile = async (cyPromptFilePath) => {
+  const afterReplaceCyPrompt = await fs.readFile(cyPromptFilePath, 'utf8')
+
+  if (afterReplaceCyPrompt.includes('process.env.CYPRESS_LOCAL_CY_PROMPT_PATH')) {
+    throw new Error(`Expected process.env.CYPRESS_LOCAL_CY_PROMPT_PATH to be stripped from cy prompt file`)
+  }
+}
+
 module.exports = {
   getBinaryEntryPointSource,
   getBinaryByteNodeEntryPointSource,
@@ -147,6 +163,8 @@ module.exports = {
   validateProtocolFile,
   getStudioFileSource,
   validateStudioFile,
+  getCyPromptFileSource,
+  validateCyPromptFile,
   getIndexJscHash,
   DUMMY_INDEX_JSC_HASH,
 }

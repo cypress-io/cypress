@@ -161,8 +161,13 @@ export class CyPromptLifecycleManager {
 
     const script = await readFile(serverFilePath, 'utf8')
 
-    if (!process.env.CYPRESS_LOCAL_CY_PROMPT_PATH && !verifySignature(script, manifest[path.join('server', 'index.js')])) {
-      throw new Error('Invalid signature for cy prompt server script')
+    const signature = manifest[path.join('server', 'index.js')]
+
+    // TODO: once the services have deployed, we should remove this check
+    if (signature) {
+      if (!process.env.CYPRESS_LOCAL_CY_PROMPT_PATH && !verifySignature(script, signature)) {
+        throw new Error('Invalid signature for cy prompt server script')
+      }
     }
 
     const cyPromptManager = new CyPromptManager()
