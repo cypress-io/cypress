@@ -125,6 +125,8 @@ const getCyPromptFileSource = async (cyPromptFilePath) => {
   if (!fileContents.includes('process.env.CYPRESS_LOCAL_CY_PROMPT_PATH')) {
     throw new Error(`Expected to find CYPRESS_LOCAL_CY_PROMPT_PATH in cy prompt file`)
   }
+
+  return fileContents.replaceAll('process.env.CYPRESS_LOCAL_CY_PROMPT_PATH', 'undefined')
 }
 
 const validateProtocolFile = async (protocolFilePath) => {

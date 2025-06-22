@@ -1,4 +1,4 @@
-import { remove, ensureDir, readFile } from 'fs-extra'
+import { remove, ensureDir, readFile, pathExists } from 'fs-extra'
 
 import tar from 'tar'
 import { getCyPromptBundle } from '../api/cy-prompt/get_cy_prompt_bundle'
@@ -52,6 +52,12 @@ export const ensureCyPromptBundle = async ({ cyPromptPath, cyPromptUrl, projectI
   })
 
   const manifestPath = path.join(cyPromptPath, 'manifest.json')
+
+  if (!(await pathExists(manifestPath))) {
+    // TODO: Eventually throw an error here once everything lands in production
+    return {}
+  }
+
   const manifestContents = await readFile(manifestPath, 'utf8')
 
   const verified = await verifySignature(manifestContents, responseSignature)

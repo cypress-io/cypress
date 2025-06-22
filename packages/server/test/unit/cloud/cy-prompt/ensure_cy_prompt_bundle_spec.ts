@@ -11,6 +11,7 @@ describe('ensureCyPromptBundle', () => {
   let getCyPromptBundleStub: sinon.SinonStub = sinon.stub()
   let readFileStub: sinon.SinonStub = sinon.stub()
   let verifySignatureStub: sinon.SinonStub = sinon.stub()
+  let pathExistsStub: sinon.SinonStub = sinon.stub()
   const mockResponseSignature = '159'
   const mockManifest = {
     'server/index.js': 'abcdefg',
@@ -23,6 +24,7 @@ describe('ensureCyPromptBundle', () => {
     getCyPromptBundleStub = sinon.stub()
     readFileStub = sinon.stub()
     verifySignatureStub = sinon.stub()
+    pathExistsStub = sinon.stub()
 
     ensureCyPromptBundle = (proxyquire('../lib/cloud/cy-prompt/ensure_cy_prompt_bundle', {
       os: {
@@ -33,6 +35,7 @@ describe('ensureCyPromptBundle', () => {
         remove: rmStub.resolves(),
         ensureDir: ensureStub.resolves(),
         readFile: readFileStub.resolves(JSON.stringify(mockManifest)),
+        pathExists: pathExistsStub.resolves(true),
       },
       tar: {
         extract: extractStub.resolves(),
