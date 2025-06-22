@@ -1,8 +1,9 @@
-import { remove, ensureDir } from 'fs-extra'
+import { remove, ensureDir, readFile } from 'fs-extra'
 
 import tar from 'tar'
 import { getStudioBundle } from '../api/studio/get_studio_bundle'
 import path from 'path'
+import { verifySignature } from '../encryption'
 
 interface EnsureStudioBundleOptions {
   studioUrl: string
@@ -35,7 +36,7 @@ export const ensureStudioBundle = async ({
 
   let timeoutId: NodeJS.Timeout
 
-  const manifest = await Promise.race([
+  const responseSignature = await Promise.race([
     getStudioBundle({
       studioUrl,
       bundlePath,
@@ -47,12 +48,21 @@ export const ensureStudioBundle = async ({
     }),
   ]).finally(() => {
     clearTimeout(timeoutId)
-  }) as Promise<Record<string, string>>
+  }) as string
 
   await tar.extract({
     file: bundlePath,
     cwd: studioPath,
   })
 
-  return manifest
+  const manifestPath = path.join(studioPath, 'manifest.json')
+  const manifestContents = await readFile(manifestPath, 'utf8')
+
+  const verified = await verifySignature(manifestContents, responseSignature)
+
+  if (!verified) {
+    throw new Error('Unable to verify studio signature')
+  }
+
+  return JSON.parse(manifestContents)
 }

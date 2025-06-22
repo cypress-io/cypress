@@ -22,7 +22,7 @@ import { initializeTelemetryReporter, reportTelemetry } from './telemetry/Teleme
 import { telemetryManager } from './telemetry/TelemetryManager'
 import { BUNDLE_LIFECYCLE_MARK_NAMES, BUNDLE_LIFECYCLE_TELEMETRY_GROUP_NAMES } from './telemetry/constants/bundle-lifecycle'
 import { INITIALIZATION_TELEMETRY_GROUP_NAMES } from './telemetry/constants/initialization'
-import { verifySignature } from '../encryption'
+import crypto from 'crypto'
 
 const debug = Debug('cypress:server:studio-lifecycle-manager')
 const routes = require('../routes')
@@ -205,12 +205,14 @@ export class StudioLifecycleManager {
 
     const script = await readFile(serverFilePath, 'utf8')
 
-    const signature = manifest[path.join('server', 'index.js')]
+    const expectedHash = manifest[path.join('server', 'index.js')]
 
     // TODO: once the services have deployed, we should remove this check
-    if (signature) {
-      if (!process.env.CYPRESS_LOCAL_STUDIO_PATH && !verifySignature(script, signature)) {
-        throw new Error('Invalid signature for studio server script')
+    if (expectedHash) {
+      const actualHash = crypto.createHash('sha256').update(script).digest('hex')
+
+      if (!process.env.CYPRESS_LOCAL_STUDIO_PATH && actualHash !== expectedHash) {
+        throw new Error('Invalid hash for studio server script')
       }
     }
 

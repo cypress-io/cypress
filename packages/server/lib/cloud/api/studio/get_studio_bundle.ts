@@ -5,14 +5,14 @@ import os from 'os'
 import { agent } from '@packages/network'
 import { PUBLIC_KEY_VERSION } from '../../constants'
 import { createWriteStream } from 'fs'
-import { verifySignatureFromFile } from '../../encryption'
 
 const pkg = require('@packages/root')
 const _delay = linearDelay(500)
 
-export const getStudioBundle = async ({ studioUrl, bundlePath }: { studioUrl: string, bundlePath: string }): Promise<Record<string, string>> => {
+export const getStudioBundle = async ({ studioUrl, bundlePath }: { studioUrl: string, bundlePath: string }): Promise<string> => {
   let responseSignature: string | null = null
-  const manifest = await (asyncRetry(async () => {
+
+  await (asyncRetry(async () => {
     const response = await fetch(studioUrl, {
       // @ts-expect-error - this is supported
       agent,
@@ -43,8 +43,6 @@ export const getStudioBundle = async ({ studioUrl, bundlePath }: { studioUrl: st
       // @ts-expect-error - this is supported
       response.body?.pipe(writeStream)
     })
-
-    return JSON.parse(response.headers.get('x-cypress-manifest') || '{}')
   }, {
     maxAttempts: 3,
     retryDelay: _delay,
@@ -55,11 +53,5 @@ export const getStudioBundle = async ({ studioUrl, bundlePath }: { studioUrl: st
     throw new Error('Unable to get studio signature')
   }
 
-  const verified = await verifySignatureFromFile(bundlePath, responseSignature)
-
-  if (!verified) {
-    throw new Error('Unable to verify studio signature')
-  }
-
-  return manifest
+  return responseSignature
 }

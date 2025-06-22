@@ -52,7 +52,7 @@ export interface StudioServerOptions {
   cloudApi: StudioCloudApi
   betterSqlite3Path: string
   manifest: Record<string, string>
-  verifySignature: (script: BinaryLike, signature: string) => boolean
+  verifyHash: (contents: BinaryLike, expectedHash: string) => boolean
 }
 
 export interface StudioAIInitializeOptions {

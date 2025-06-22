@@ -5,7 +5,7 @@ import Debug from 'debug'
 import { requireScript } from '../require_script'
 import path from 'path'
 import { reportStudioError, ReportStudioErrorOptions } from '../api/studio/report_studio_error'
-import { verifySignature } from '../encryption'
+import crypto, { BinaryLike } from 'crypto'
 
 interface StudioServer { default: StudioServerDefaultShape }
 
@@ -53,14 +53,16 @@ export class StudioManager implements StudioManagerShape {
       cloudApi,
       betterSqlite3Path: path.dirname(require.resolve('better-sqlite3/package.json')),
       manifest,
-      verifySignature: (script, signature) => {
+      verifyHash: (contents: BinaryLike, expectedHash: string) => {
         // If we are running locally, we don't need to verify the signature. This
         // environment variable will get stripped in the binary.
         if (process.env.CYPRESS_LOCAL_STUDIO_PATH) {
           return true
         }
 
-        return verifySignature(script, signature)
+        const actualHash = crypto.createHash('sha256').update(contents).digest('hex')
+
+        return actualHash === expectedHash
       },
     })
 

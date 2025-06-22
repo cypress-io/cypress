@@ -43,7 +43,6 @@ describe('StudioLifecycleManager', () => {
   let markStub: sinon.SinonStub
   let initializeTelemetryReporterStub: sinon.SinonStub
   let reportTelemetryStub: sinon.SinonStub
-  let verifySignatureStub: sinon.SinonStub
   const mockContents = 'console.log("studio script")'
 
   beforeEach(() => {
@@ -66,8 +65,6 @@ describe('StudioLifecycleManager', () => {
       setup: studioManagerSetupStub.resolves(),
       destroy: studioManagerDestroyStub.resolves(),
     } as unknown as StudioManager
-
-    verifySignatureStub = sinon.stub()
 
     readFileStub = sinon.stub()
     reportTelemetryStub = sinon.stub()
@@ -116,9 +113,6 @@ describe('StudioLifecycleManager', () => {
       './telemetry/TelemetryReporter': {
         initializeTelemetryReporter: initializeTelemetryReporterStub,
         reportTelemetry: reportTelemetryStub,
-      },
-      '../encryption': {
-        verifySignature: verifySignatureStub.resolves(),
       },
     }).StudioLifecycleManager
 
@@ -223,11 +217,10 @@ describe('StudioLifecycleManager', () => {
       })
 
       const mockManifest = {
-        'server/index.js': 'abcdefg',
+        'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
       }
 
       ensureStudioBundleStub.resolves(mockManifest)
-      verifySignatureStub.returns(true)
 
       await studioReadyPromise
 
@@ -257,8 +250,6 @@ describe('StudioLifecycleManager', () => {
       expect(postStudioSessionStub).to.be.calledWith({
         projectId: 'test-project-id',
       })
-
-      expect(verifySignatureStub).to.be.calledWith(mockContents, 'abcdefg')
 
       expect(readFileStub).to.be.calledWith(path.join(os.tmpdir(), 'cypress', 'studio', 'abc', 'server', 'index.js'), 'utf8')
 
@@ -310,11 +301,10 @@ describe('StudioLifecycleManager', () => {
       })
 
       const mockManifest = {
-        'server/index.js': 'abcdefg',
+        'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
       }
 
       ensureStudioBundleStub.resolves(mockManifest)
-      verifySignatureStub.returns(true)
 
       await studioReadyPromise
 
@@ -344,8 +334,6 @@ describe('StudioLifecycleManager', () => {
       expect(postStudioSessionStub).to.be.calledWith({
         projectId: 'test-project-id',
       })
-
-      expect(verifySignatureStub).to.be.calledWith(mockContents, 'abcdefg')
 
       expect(readFileStub).to.be.calledWith(path.join(os.tmpdir(), 'cypress', 'studio', 'abc', 'server', 'index.js'), 'utf8')
 
@@ -417,11 +405,10 @@ describe('StudioLifecycleManager', () => {
       })
 
       const mockManifest = {
-        'server/index.js': 'abcdefg',
+        'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
       }
 
       ensureStudioBundleStub.resolves(mockManifest)
-      verifySignatureStub.returns(true)
 
       await studioReadyPromise
 
@@ -447,8 +434,6 @@ describe('StudioLifecycleManager', () => {
       expect(postStudioSessionStub).to.be.calledWith({
         projectId: 'test-project-id',
       })
-
-      expect(verifySignatureStub).not.to.be.called
 
       expect(readFileStub).to.be.calledWith(path.join('/path', 'to', 'studio', 'server', 'index.js'), 'utf8')
 
@@ -629,11 +614,10 @@ describe('StudioLifecycleManager', () => {
   describe('registerStudioReadyListener', () => {
     beforeEach(() => {
       const mockManifest = {
-        'server/index.js': 'abcdefg',
+        'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
       }
 
       ensureStudioBundleStub.resolves(mockManifest)
-      verifySignatureStub.returns(true)
     })
 
     it('registers a listener that will be called when studio is ready', () => {
@@ -783,11 +767,10 @@ describe('StudioLifecycleManager', () => {
   describe('status tracking', () => {
     beforeEach(() => {
       const mockManifest = {
-        'server/index.js': 'abcdefg',
+        'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
       }
 
       ensureStudioBundleStub.resolves(mockManifest)
-      verifySignatureStub.returns(true)
     })
 
     it('updates status and emits events when status changes', async () => {
