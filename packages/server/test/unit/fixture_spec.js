@@ -6,6 +6,7 @@ const fixture = require(`../../lib/fixture`)
 const { fs } = require(`../../lib/util/fs`)
 const FixturesHelper = require('@tooling/system-tests')
 const { getCtx } = require(`../../lib/makeDataContext`)
+const snapshot = require('snap-shot-it')
 
 let ctx
 
@@ -68,14 +69,11 @@ describe('lib/fixture', () => {
 
   context('json files', () => {
     it('throws when json is invalid', function () {
-      const e =
-        `\'bad_json.json\' is not valid JSON.\nExpected ',' or '}' after property value in JSON at position 20 while parsing near "{\\n  \\"bad\\": \\"json\\"\\n  \\"should\\": \\"not parse..."`
-
       return fixture.get(this.fixturesFolder, 'bad_json.json')
       .then(() => {
         throw new Error('should have failed but did not')
       }).catch((err) => {
-        expect(err.message).to.eq(e)
+        snapshot('invalid json error message', err.message)
       })
     })
 
