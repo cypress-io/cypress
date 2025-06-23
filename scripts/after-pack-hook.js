@@ -93,7 +93,7 @@ module.exports = async function (params) {
       const cloudEnvironmentFileSource = await getCloudEnvironmentFileSource(cloudEnvironmentFilePath)
 
       await Promise.all([
-        fs.writeFile(path.join(outputFolder, 'index.js'), binaryByteNodeEntryPointSource),
+        fs.writeFile(path.join(outputFolder, 'index.js'), binaryEntryPointSource),
         fs.writeFile(encryptionFilePath, encryptionFileSource),
         fs.writeFile(cloudEnvironmentFilePath, cloudEnvironmentFileSource),
       ])
