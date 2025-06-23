@@ -31,7 +31,7 @@ export const ensureCyPromptBundle = async ({ cyPromptPath, cyPromptUrl, projectI
 
   let timeoutId: NodeJS.Timeout
 
-  const responseSignature = await Promise.race([
+  const responseManifestSignature = await Promise.race([
     getCyPromptBundle({
       cyPromptUrl,
       projectId,
@@ -44,7 +44,7 @@ export const ensureCyPromptBundle = async ({ cyPromptPath, cyPromptUrl, projectI
     }),
   ]).finally(() => {
     clearTimeout(timeoutId)
-  }) as string
+  }) as string | null
 
   await tar.extract({
     file: bundlePath,
@@ -53,14 +53,14 @@ export const ensureCyPromptBundle = async ({ cyPromptPath, cyPromptUrl, projectI
 
   const manifestPath = path.join(cyPromptPath, 'manifest.json')
 
-  if (!(await pathExists(manifestPath))) {
+  if (!responseManifestSignature || !(await pathExists(manifestPath))) {
     // TODO: Eventually throw an error here once everything lands in production
     return {}
   }
 
   const manifestContents = await readFile(manifestPath, 'utf8')
 
-  const verified = await verifySignature(manifestContents, responseSignature)
+  const verified = await verifySignature(manifestContents, responseManifestSignature)
 
   if (!verified) {
     throw new Error('Unable to verify cy-prompt signature')
