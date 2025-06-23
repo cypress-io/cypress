@@ -149,10 +149,6 @@ function integrityCheck (options) {
   stackIntegrityCheck({ stackToMatch:
     [
       {
-        functionName: 'stackIntegrityCheck',
-        fileName: '<embedded>',
-      },
-      {
         functionName: 'integrityCheck',
         fileName: '<embedded>',
       },
@@ -195,6 +191,9 @@ function integrityCheck (options) {
         fileName: [appPath, 'index.js'].join(PATH_SEP),
         line: 1,
         column: 2764,
+      },
+      {
+        functionName: 'makeError',
       },
     ],
   })
