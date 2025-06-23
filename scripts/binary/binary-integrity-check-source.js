@@ -30,6 +30,8 @@ const stackIntegrityCheck = function stackIntegrityCheck (options) {
   OrigError.stackTraceLimit = originalStackTraceLimit
 
   if (stack.length !== options.stackToMatch.length) {
+    console.log('stack to match:', options.stackToMatch)
+    console.log('actual stack:', stack)
     console.error(`Integrity check failed with expected stack length ${options.stackToMatch.length} but got ${stack.length}`)
     throw new Error(integrityErrorMessage)
   }
@@ -146,6 +148,10 @@ function integrityCheck (options) {
   // 2. Validate that the stack trace is what we expect
   stackIntegrityCheck({ stackToMatch:
     [
+      {
+        functionName: 'stackIntegrityCheck',
+        fileName: '<embedded>',
+      },
       {
         functionName: 'integrityCheck',
         fileName: '<embedded>',
