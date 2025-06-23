@@ -59,8 +59,28 @@ export function getUrlFromAutomation (Cypress: Cypress.Cypress, options: Partial
     }
   })
 
-  return () => {
+  return (options: {
+    retryAfterResolve?: boolean
+  } = {
+    retryAfterResolve: false,
+  }) => {
     if (fullUrlObj) {
+      // In some cases, Cypress will want to retry fetching the url object after it is resolved.
+      // For instance, in the case of the command yielding an object, like cy.location().
+
+      // If cy.location().its('url').should('equal', 'https://www.foobar.com') initially fails the 'should' assertion,
+      // Cypress will want to retry fetching the url object as the onFail handler is NOT called when the subject is chained after 'its'.
+
+      // This does NOT apply if the assertion is chained directly after the command, like cy.location().should('equal', 'https://www.foobar.com').
+      // This examples DOES call the onFail handler and fetching the url will be retried from the context of the onFail handler.
+      if (options?.retryAfterResolve) {
+        const resolvedFullUrlObj = fullUrlObj
+
+        fullUrlObj = null
+
+        return resolvedFullUrlObj
+      }
+
       return fullUrlObj
     }
 
