@@ -36,7 +36,7 @@ export const ensureStudioBundle = async ({
 
   let timeoutId: NodeJS.Timeout
 
-  const responseSignature = await Promise.race([
+  const responseManifestSignature = await Promise.race([
     getStudioBundle({
       studioUrl,
       bundlePath,
@@ -57,14 +57,14 @@ export const ensureStudioBundle = async ({
 
   const manifestPath = path.join(studioPath, 'manifest.json')
 
-  if (!(await pathExists(manifestPath))) {
+  if (!responseManifestSignature || !(await pathExists(manifestPath))) {
     // TODO: Eventually throw an error here once everything lands in production
     return {}
   }
 
   const manifestContents = await readFile(manifestPath, 'utf8')
 
-  const verified = await verifySignature(manifestContents, responseSignature)
+  const verified = await verifySignature(manifestContents, responseManifestSignature)
 
   if (!verified) {
     throw new Error('Unable to verify studio signature')

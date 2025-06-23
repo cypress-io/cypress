@@ -5,12 +5,14 @@ import os from 'os'
 import { agent } from '@packages/network'
 import { PUBLIC_KEY_VERSION } from '../../constants'
 import { createWriteStream } from 'fs'
+import { verifySignatureFromFile } from '../../encryption'
 
 const pkg = require('@packages/root')
 const _delay = linearDelay(500)
 
-export const getStudioBundle = async ({ studioUrl, bundlePath }: { studioUrl: string, bundlePath: string }): Promise<string> => {
+export const getStudioBundle = async ({ studioUrl, bundlePath }: { studioUrl: string, bundlePath: string }): Promise<string | null> => {
   let responseSignature: string | null = null
+  let responseManifestSignature: string | null = null
 
   await (asyncRetry(async () => {
     const response = await fetch(studioUrl, {
@@ -31,6 +33,7 @@ export const getStudioBundle = async ({ studioUrl, bundlePath }: { studioUrl: st
     }
 
     responseSignature = response.headers.get('x-cypress-signature')
+    responseManifestSignature = response.headers.get('x-cypress-manifest-signature')
 
     await new Promise<void>((resolve, reject) => {
       const writeStream = createWriteStream(bundlePath)
@@ -53,5 +56,11 @@ export const getStudioBundle = async ({ studioUrl, bundlePath }: { studioUrl: st
     throw new Error('Unable to get studio signature')
   }
 
-  return responseSignature
+  const verified = await verifySignatureFromFile(bundlePath, responseSignature)
+
+  if (!verified) {
+    throw new Error('Unable to verify studio signature')
+  }
+
+  return responseManifestSignature
 }

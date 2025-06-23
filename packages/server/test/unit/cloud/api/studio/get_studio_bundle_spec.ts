@@ -7,11 +7,13 @@ describe('getStudioBundle', () => {
   let readStream: Readable
   let createWriteStreamStub: sinon.SinonStub
   let crossFetchStub: sinon.SinonStub
+  let verifySignatureFromFileStub: sinon.SinonStub
   let getStudioBundle: typeof import('../../../../../lib/cloud/api/studio/get_studio_bundle').getStudioBundle
 
   beforeEach(() => {
     createWriteStreamStub = sinon.stub()
     crossFetchStub = sinon.stub()
+    verifySignatureFromFileStub = sinon.stub()
     readStream = Readable.from('console.log("studio bundle")')
 
     writeResult = ''
@@ -35,6 +37,9 @@ describe('getStudioBundle', () => {
       '@packages/root': {
         version: '1.2.3',
       },
+      '../../encryption': {
+        verifySignatureFromFile: verifySignatureFromFileStub,
+      },
     }).getStudioBundle
   })
 
@@ -48,9 +53,15 @@ describe('getStudioBundle', () => {
           if (header === 'x-cypress-signature') {
             return '159'
           }
+
+          if (header === 'x-cypress-manifest-signature') {
+            return '160'
+          }
         },
       },
     })
+
+    verifySignatureFromFileStub.resolves(true)
 
     const responseSignature = await getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })
 
@@ -68,7 +79,9 @@ describe('getStudioBundle', () => {
 
     expect(writeResult).to.eq('console.log("studio bundle")')
 
-    expect(responseSignature).to.eq('159')
+    expect(verifySignatureFromFileStub).to.be.calledWith('/tmp/cypress/studio/abc/bundle.tar', '159')
+
+    expect(responseSignature).to.eq('160')
   })
 
   it('downloads the studio bundle and extracts it after 1 fetch failure', async () => {
@@ -82,9 +95,15 @@ describe('getStudioBundle', () => {
           if (header === 'x-cypress-signature') {
             return '159'
           }
+
+          if (header === 'x-cypress-manifest-signature') {
+            return '160'
+          }
         },
       },
     })
+
+    verifySignatureFromFileStub.resolves(true)
 
     const responseSignature = await getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })
 
@@ -102,7 +121,9 @@ describe('getStudioBundle', () => {
 
     expect(writeResult).to.eq('console.log("studio bundle")')
 
-    expect(responseSignature).to.eq('159')
+    expect(verifySignatureFromFileStub).to.be.calledWith('/tmp/cypress/studio/abc/bundle.tar', '159')
+
+    expect(responseSignature).to.eq('160')
   })
 
   it('throws an error and returns a studio manager in error state if the fetch fails more than twice', async () => {
@@ -145,6 +166,47 @@ describe('getStudioBundle', () => {
       },
       encrypt: 'signed',
     })
+  })
+
+  it('throws an error and returns a cy-prompt manager in error state if the signature verification fails', async () => {
+    verifySignatureFromFileStub.resolves(false)
+
+    crossFetchStub.resolves({
+      ok: true,
+      statusText: 'OK',
+      body: readStream,
+      headers: {
+        get: (header) => {
+          if (header === 'x-cypress-signature') {
+            return '159'
+          }
+
+          if (header === 'x-cypress-manifest-signature') {
+            return '160'
+          }
+        },
+      },
+    })
+
+    verifySignatureFromFileStub.resolves(false)
+
+    await expect(getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })).to.be.rejected
+
+    expect(writeResult).to.eq('console.log("studio bundle")')
+
+    expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
+      agent: sinon.match.any,
+      method: 'GET',
+      headers: {
+        'x-route-version': '1',
+        'x-cypress-signature': '1',
+        'x-os-name': 'linux',
+        'x-cypress-version': '1.2.3',
+      },
+      encrypt: 'signed',
+    })
+
+    expect(verifySignatureFromFileStub).to.be.calledWith('/tmp/cypress/studio/abc/bundle.tar', '159')
   })
 
   it('throws an error if there is no signature in the response headers', async () => {
