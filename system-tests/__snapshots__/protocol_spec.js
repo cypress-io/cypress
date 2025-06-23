@@ -6695,7 +6695,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
             "line": 4,
             "column": 0,
             "whitespace": "    ",
-            "stack": "Error\\n    at ./src/components/HelloEarth.cy.jsx (http://localhost:2121/__cypress/src/spec-0.js:16:1)\\n    at Function.__webpack_require__ (http://localhost:2121/__cypress/src/main.js:108:42)"
+            "stack": "Error\\n    at ./src/components/HelloEarth.cy.jsx (http://localhost:2121/__cypress/src/spec-0.js:16:1)\\n    at __webpack_require__ (http://localhost:2121/__cypress/src/main.js:108:42)"
           },
           "retries": -1,
           "_slow": 250,
@@ -6798,7 +6798,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
             "line": 4,
             "column": 0,
             "whitespace": "    ",
-            "stack": "Error\\n    at ./src/components/HelloMars.cy.jsx (http://localhost:2121/__cypress/src/spec-0.js:16:1)\\n    at Function.__webpack_require__ (http://localhost:2121/__cypress/src/main.js:108:42)"
+            "stack": "Error\\n    at ./src/components/HelloMars.cy.jsx (http://localhost:2121/__cypress/src/spec-0.js:16:1)\\n    at __webpack_require__ (http://localhost:2121/__cypress/src/main.js:108:42)"
           },
           "retries": -1,
           "_slow": 250,
@@ -8514,7 +8514,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
             "line": 4,
             "column": 0,
             "whitespace": "    ",
-            "stack": "Error\\n    at ./src/components/HelloEarth.cy.jsx (http://localhost:2121/__cypress/src/spec-0.js:16:1)\\n    at Function.__webpack_require__ (http://localhost:2121/__cypress/src/main.js:108:42)"
+            "stack": "Error\\n    at ./src/components/HelloEarth.cy.jsx (http://localhost:2121/__cypress/src/spec-0.js:16:1)\\n    at __webpack_require__ (http://localhost:2121/__cypress/src/main.js:108:42)"
           },
           "retries": -1,
           "_slow": 250,
@@ -8617,7 +8617,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
             "line": 4,
             "column": 0,
             "whitespace": "    ",
-            "stack": "Error\\n    at ./src/components/HelloMars.cy.jsx (http://localhost:2121/__cypress/src/spec-0.js:16:1)\\n    at Function.__webpack_require__ (http://localhost:2121/__cypress/src/main.js:108:42)"
+            "stack": "Error\\n    at ./src/components/HelloMars.cy.jsx (http://localhost:2121/__cypress/src/spec-0.js:16:1)\\n    at __webpack_require__ (http://localhost:2121/__cypress/src/main.js:108:42)"
           },
           "retries": -1,
           "_slow": 250,
