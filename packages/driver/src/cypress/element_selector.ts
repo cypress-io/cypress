@@ -19,19 +19,17 @@ export const DEFAULT_SELECTOR_PRIORITIES = [
   'nth-child',
 ] as const
 
-export type SelectorType = string
-
 export type Defaults = {
-  selectorPriority: SelectorType[]
+  selectorPriority: Cypress.SelectorPriority[]
 }
 
 export type ElementSelectorDefaultsOptions = {
-  selectorPriority?: SelectorType[]
+  selectorPriority?: Cypress.SelectorPriority[]
 }
 
 export interface ElementSelectorAPI {
   reset(): void
-  getSelectorPriority(): SelectorType[]
+  getSelectorPriority(): Cypress.SelectorPriority[]
   getSelector($el: any): string
   defaults(options: ElementSelectorDefaultsOptions): void
 }

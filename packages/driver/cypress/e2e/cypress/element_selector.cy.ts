@@ -1,10 +1,10 @@
 /// <reference types="cypress" />
-import type { ElementSelectorAPI, SelectorType } from '../../../src/cypress/element_selector'
+import type { ElementSelectorAPI } from '../../../src/cypress/element_selector'
 import { DEFAULT_SELECTOR_PRIORITIES } from '../../../src/cypress/element_selector'
 const { $: $cypress } = Cypress.$Cypress
 const ElementSelector = Cypress.ElementSelector as ElementSelectorAPI
 
-const SELECTOR_DEFAULTS: SelectorType[] = [...DEFAULT_SELECTOR_PRIORITIES]
+const SELECTOR_DEFAULTS: Cypress.SelectorPriority[] = [...DEFAULT_SELECTOR_PRIORITIES]
 
 describe('src/cypress/element_selector', () => {
   beforeEach(() => {
@@ -22,7 +22,7 @@ describe('src/cypress/element_selector', () => {
     })
 
     it('sets element:selector:priority if selectorPriority specified', () => {
-      const selectorPriority: SelectorType[] = [
+      const selectorPriority: Cypress.SelectorPriority[] = [
         'data-1',
         'data-2',
         'id',
@@ -75,7 +75,8 @@ describe('src/cypress/element_selector', () => {
         ElementSelector.defaults({
           selectorPriority: [
             'id',
-            'attr', // invalid priority
+            // @ts-expect-error - invalid priority
+            'attr',
           ],
         })
       }
@@ -89,7 +90,8 @@ describe('src/cypress/element_selector', () => {
       const fn = () => {
         ElementSelector.defaults({
           selectorPriority: [
-            'idIsNotValid', // invalid priority
+            // @ts-expect-error - invalid priority
+            'idIsNotValid',
           ],
         })
       }
