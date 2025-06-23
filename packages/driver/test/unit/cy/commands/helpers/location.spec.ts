@@ -140,7 +140,7 @@ describe('cy/commands/helpers/location', () => {
         })
 
         // @ts-expect-error
-        mockCypress.automation.mockImplementationOnce(() => {
+        mockCypress.automation.mockImplementation(() => {
           // no-op promise to simulate the waiting for the automation client
           return new Bluebird.Promise((resolve) => resolve('https://www.foobar.com#foobar'))
         })
@@ -170,8 +170,9 @@ describe('cy/commands/helpers/location', () => {
         })
 
         expect(() => {
+          // in this case the fn will returned the cached url object until the new one is available
           fn({ retryAfterResolve: true })
-        }).toThrow()
+        }).not.toThrow()
 
         // flush the microtask queue so we have a url value next time we call fn()
         await flushPromises()

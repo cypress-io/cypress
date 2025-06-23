@@ -13,6 +13,7 @@ export function getUrlFromAutomation (Cypress: Cypress.Cypress, options: Partial
   this.set('timeout', timeout)
 
   let fullUrlObj: any = null
+  let hasBeenInitiallyResolved = false
   let automationPromise: Promise<void> | null = null
   // need to set a valid type on this
   let mostRecentError = new UrlNotYetAvailableError()
@@ -21,8 +22,6 @@ export function getUrlFromAutomation (Cypress: Cypress.Cypress, options: Partial
     if (automationPromise) {
       return automationPromise
     }
-
-    fullUrlObj = null
 
     automationPromise = Cypress.automation('get:aut:url', {})
     .timeout(timeout)
@@ -73,13 +72,14 @@ export function getUrlFromAutomation (Cypress: Cypress.Cypress, options: Partial
 
       // This does NOT apply if the assertion is chained directly after the command, like cy.location().should('equal', 'https://www.foobar.com').
       // This examples DOES call the onFail handler and fetching the url will be retried from the context of the onFail handler.
-      if (options?.retryAfterResolve) {
-        const resolvedFullUrlObj = fullUrlObj
-
-        fullUrlObj = null
-
-        return resolvedFullUrlObj
+      if (options?.retryAfterResolve && hasBeenInitiallyResolved) {
+        // tslint:disable-next-line no-floating-promises
+        getUrlFromAutomation()
       }
+
+      // We only want to retry if the url object has been resolved at least once.
+      // Otherwise, this will always fetch n + 1 times which is usually unnecessary.
+      hasBeenInitiallyResolved = true
 
       return fullUrlObj
     }

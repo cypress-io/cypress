@@ -416,11 +416,15 @@ describe('src/cy/commands/location', () => {
     it('eventually returns a given key', function () {
       cy.stub(Cypress, 'automation').withArgs('get:aut:url')
       .onFirstCall().resolves('http://localhost:3500')
-      .onSecondCall().resolves('http://localhost:3500/my/path')
+      .resolves('http://localhost:3500/my/path')
 
       cy.location('pathname').should('equal', '/my/path')
       .then(() => {
-        expect(Cypress.automation).to.have.been.calledTwice
+        // should be called 3 times:
+        // 1. initial call cy.location('pathname')
+        // 2. the should() assertion
+        // 3. the then() callback
+        expect(Cypress.automation).to.have.been.calledThrice
       })
     })
 
