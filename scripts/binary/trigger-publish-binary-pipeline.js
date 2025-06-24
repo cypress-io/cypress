@@ -10,6 +10,7 @@ const { getNextVersionForBinary } = require('../get-next-version')
   const { nextVersion } = await getNextVersionForBinary()
 
   const body = JSON.stringify({
+    branch: 'electron-36',
     parameters: {
       temp_dir: os.tmpdir(),
       sha: process.env.CIRCLE_SHA1,
@@ -19,12 +20,6 @@ const { getNextVersionForBinary } = require('../get-next-version')
       branch: 'electron-36',
       should_persist_artifacts: Boolean(process.env.SHOULD_PERSIST_ARTIFACTS),
       binary_version: nextVersion,
-    },
-    config: {
-      branch: 'electron-36',
-    },
-    checkout: {
-      branch: 'electron-36',
     },
   })
 
