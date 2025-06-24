@@ -28,10 +28,9 @@ const stackIntegrityCheck = function stackIntegrityCheck (options) {
 
   OrigError.prepareStackTrace = originalPrepareStackTrace
   OrigError.stackTraceLimit = originalStackTraceLimit
-
+  console.log('stack to match:', options.stackToMatch)
+  console.log('actual stack:', stack)
   if (stack.length !== options.stackToMatch.length) {
-    console.log('stack to match:', options.stackToMatch)
-    console.log('actual stack:', stack)
     console.error(`Integrity check failed with expected stack length ${options.stackToMatch.length} but got ${stack.length}`)
     throw new Error(integrityErrorMessage)
   }
@@ -193,7 +192,7 @@ function integrityCheck (options) {
         column: 2764,
       },
       {
-        functionName: 'makeError',
+        functionName: 'traceSync',
       },
     ],
   })
