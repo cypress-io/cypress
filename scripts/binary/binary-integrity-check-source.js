@@ -28,8 +28,7 @@ const stackIntegrityCheck = function stackIntegrityCheck (options) {
 
   OrigError.prepareStackTrace = originalPrepareStackTrace
   OrigError.stackTraceLimit = originalStackTraceLimit
-  console.log('stack to match:', options.stackToMatch)
-  console.log('actual stack:', stack)
+
   if (stack.length !== options.stackToMatch.length) {
     console.error(`Integrity check failed with expected stack length ${options.stackToMatch.length} but got ${stack.length}`)
     throw new Error(integrityErrorMessage)
@@ -41,12 +40,6 @@ const stackIntegrityCheck = function stackIntegrityCheck (options) {
     const actualFileName = stack[index].getFileName()
     const actualColumnNumber = stack[index].getColumnNumber()
     const actualLineNumber = stack[index].getLineNumber()
-
-    console.log(`checking:
-      ${JSON.stringify({ expectedFunctionName, expectedFileName, expectedLineNumber, expectedColumnNumber }, null, 2)}
-       vs
-      ${JSON.stringify({ actualFunctionName, actualFileName, actualLineNumber, actualColumnNumber }, null, 2)}
-    `)
 
     if (expectedFunctionName && actualFunctionName !== expectedFunctionName) {
       console.error(`Integrity check failed with expected function name ${expectedFunctionName} but got ${actualFunctionName}`)
@@ -72,21 +65,21 @@ const stackIntegrityCheck = function stackIntegrityCheck (options) {
 
 function validateStartsWith () {
   if (originalStartsWith.call !== originalCallFn) {
-    console.error(`Integrity check failed for startsWith.call ${originalStartsWith.call} vs ${originalCallFn}`)
+    console.error(`Integrity check failed for startsWith.call ${originalStartsWith.call}`)
     throw new Error(integrityErrorMessage)
   }
 }
 
 function validateFilter () {
   if (originalFilter.call !== originalCallFn) {
-    console.error(`Integrity check failed for filter.call ${originalFilter.call} vs ${originalCallFn}`)
+    console.error(`Integrity check failed for filter.call ${originalFilter.call}`)
     throw new Error(integrityErrorMessage)
   }
 }
 
 function validateToString () {
   if (originalToString.call !== originalCallFn) {
-    console.error(`Integrity check failed for toString.call ${originalToString.call} vs ${originalCallFn}`)
+    console.error(`Integrity check failed for toString.call ${originalToString.call}`)
     throw new Error(integrityErrorMessage)
   }
 }
@@ -199,6 +192,7 @@ function integrityCheck (options) {
       },
       {
         functionName: 'traceSync',
+        fileName: 'node:diagnostics_channel',
       },
     ],
   })
