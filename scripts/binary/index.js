@@ -78,8 +78,10 @@ async function testExecutableVersion (buildAppExecutable, version) {
   la(result.stdout, 'missing output when getting built version', result)
 
   console.log('built app version', result.stdout)
-  la(result.stdout.trim() === version.trim(), 'different version reported',
-    result.stdout, 'from input version to build', version)
+  la(
+    result.stdout.trim() === version.trim(),
+    `different version reported: '${result.stdout.trim()}' from input version to build '${version.trim()}'`,
+  )
 
   console.log('✅ using --version on the Cypress binary works')
 }

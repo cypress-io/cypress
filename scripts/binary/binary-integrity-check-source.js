@@ -42,7 +42,11 @@ const stackIntegrityCheck = function stackIntegrityCheck (options) {
     const actualColumnNumber = stack[index].getColumnNumber()
     const actualLineNumber = stack[index].getLineNumber()
 
-    console.log(`checking: ${{ expectedFunctionName, expectedFileName, expectedLineNumber, expectedColumnNumber }} vs ${{ actualFunctionName, actualFileName, actualLineNumber, actualColumnNumber }}`)
+    console.log(`checking:
+      ${JSON.stringify({ expectedFunctionName, expectedFileName, expectedLineNumber, expectedColumnNumber }, null, 2)}
+       vs
+      ${JSON.stringify({ actualFunctionName, actualFileName, actualLineNumber, actualColumnNumber }, null, 2)}
+    `)
 
     if (expectedFunctionName && actualFunctionName !== expectedFunctionName) {
       console.error(`Integrity check failed with expected function name ${expectedFunctionName} but got ${actualFunctionName}`)
