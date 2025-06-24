@@ -2,7 +2,6 @@
  * The axios Cloud instance should not be used.
  */
 import os from 'os'
-
 import followRedirects from 'follow-redirects'
 import axios, { AxiosInstance } from 'axios'
 import pkg from '@packages/root'
@@ -13,18 +12,52 @@ import { installErrorTransform } from './axios_middleware/transform_error'
 import { installLogging } from './axios_middleware/logging'
 import { installEncryption } from './axios_middleware/encryption'
 
+export interface CreateCloudRequestOptions {
+  /**
+   * The baseURL for all requests for this Cloud Request instance
+   */
+  baseURL?: string
+  /**
+   * Additional headers for the Cloud Request
+   */
+  addditionalHeaders?: Record<string, string>
+  /**
+   * Whether to include e2e encryption for requests:
+   * true   = encrypt request, decrypt response if x-cypress-encrypted signature is set
+   * always = encrypt request, always decrypt response
+   * signed = send version in x-cypress-signature, check response's x-cypress-signature
+   * false  = no encryption
+   *
+   * @default false
+   */
+  enableEncryption?: 'always' | 'signed' | true | false
+  /**
+   * Whether to include the default logging middleware
+   * @default true
+   */
+  enableLogging?: boolean
+  /**
+   * Whether to include the default error transformation
+   * @default true
+   */
+  enableErrorTransform?: boolean
+}
+
 // Allows us to create customized Cloud Request instances w/ different baseURL & encryption configuration
-export const createCloudRequest = (options: { baseURL?: string, encrypt?: 'always' | 'signed' | true } = {}): AxiosInstance => {
+export const createCloudRequest = (options: CreateCloudRequestOptions = {}): AxiosInstance => {
   const cfgKey = process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'development'
+  const { baseURL = app_config[cfgKey].api_url, enableEncryption = false, enableLogging = true, enableErrorTransform = true } = options
 
   const instance = axios.create({
-    baseURL: options.baseURL ?? app_config[cfgKey].api_url,
+    baseURL,
     httpAgent: agent,
     httpsAgent: agent,
+    allowAbsoluteUrls: false,
     headers: {
       'x-os-name': os.platform(),
       'x-cypress-version': pkg.version,
       'User-Agent': `cypress/${pkg.version}`,
+      ...options.addditionalHeaders,
     },
     transport: {
       // https://github.com/axios/axios/issues/6313#issue-2198831362
@@ -44,12 +77,17 @@ export const createCloudRequest = (options: { baseURL?: string, encrypt?: 'alway
     },
   })
 
-  if (options.encrypt) {
-    installEncryption(instance, options.encrypt)
+  if (enableEncryption) {
+    installEncryption(instance, enableEncryption)
   }
 
-  installLogging(instance)
-  installErrorTransform(instance)
+  if (enableLogging) {
+    installLogging(instance)
+  }
+
+  if (enableErrorTransform) {
+    installErrorTransform(instance)
+  }
 
   return instance
 }
