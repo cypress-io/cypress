@@ -20,6 +20,12 @@ const { getNextVersionForBinary } = require('../get-next-version')
       should_persist_artifacts: Boolean(process.env.SHOULD_PERSIST_ARTIFACTS),
       binary_version: nextVersion,
     },
+    config: {
+      branch: 'electron-36',
+    },
+    checkout: {
+      branch: 'electron-36',
+    },
   })
 
   try {
