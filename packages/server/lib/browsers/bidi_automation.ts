@@ -172,7 +172,7 @@ export class BidiAutomation {
 
     const resourceType = normalizeResourceType(params.request.initiatorType)
 
-    const urlWithoutHash = url.substring(0, url.indexOf('#')) || url
+    const urlWithoutHash = url.includes('#') ? url.substring(0, url.indexOf('#')) : url
 
     const browserPreRequest: BrowserPreRequest = {
       requestId: params.request.request,
