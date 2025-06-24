@@ -12,6 +12,7 @@ export const DEFAULT_SELECTOR_PRIORITIES = [
   'data-test',
   'data-testid',
   'data-qa',
+  'name',
   'id',
   'class',
   'tag',
