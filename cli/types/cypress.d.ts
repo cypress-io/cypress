@@ -3726,14 +3726,14 @@ declare namespace Cypress {
   }
 
   type SelectorPriority =
-    | `data-${string}`
     | `attribute:${string}`
-    | 'id'
-    | 'class'
-    | 'tag'
     | 'attributes'
-    | 'nth-child'
+    | 'class'
+    | `data-${string}`
+    | 'id'
     | 'name'
+    | 'nth-child'
+    | 'tag'
 
   interface ElementSelectorDefaultsOptions {
     selectorPriority?: SelectorPriority[]
