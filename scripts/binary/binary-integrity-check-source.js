@@ -42,6 +42,8 @@ const stackIntegrityCheck = function stackIntegrityCheck (options) {
     const actualColumnNumber = stack[index].getColumnNumber()
     const actualLineNumber = stack[index].getLineNumber()
 
+    console.log(`checking: ${{ expectedFunctionName, expectedFileName, expectedLineNumber, expectedColumnNumber }} vs ${{ actualFunctionName, actualFileName, actualLineNumber, actualColumnNumber }}`)
+
     if (expectedFunctionName && actualFunctionName !== expectedFunctionName) {
       console.error(`Integrity check failed with expected function name ${expectedFunctionName} but got ${actualFunctionName}`)
       throw new Error(integrityErrorMessage)
@@ -66,21 +68,21 @@ const stackIntegrityCheck = function stackIntegrityCheck (options) {
 
 function validateStartsWith () {
   if (originalStartsWith.call !== originalCallFn) {
-    console.error(`Integrity check failed for startsWith.call`)
+    console.error(`Integrity check failed for startsWith.call ${originalStartsWith.call} vs ${originalCallFn}`)
     throw new Error(integrityErrorMessage)
   }
 }
 
 function validateFilter () {
   if (originalFilter.call !== originalCallFn) {
-    console.error(`Integrity check failed for filter.call`)
+    console.error(`Integrity check failed for filter.call ${originalFilter.call} vs ${originalCallFn}`)
     throw new Error(integrityErrorMessage)
   }
 }
 
 function validateToString () {
   if (originalToString.call !== originalCallFn) {
-    console.error(`Integrity check failed for toString.call`)
+    console.error(`Integrity check failed for toString.call ${originalToString.call} vs ${originalCallFn}`)
     throw new Error(integrityErrorMessage)
   }
 }
