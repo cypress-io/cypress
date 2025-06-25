@@ -132,6 +132,67 @@ describe('cy/commands/helpers/location', () => {
         })
       })
 
+      it('retries returning the url object after the automation promise is resolved and { retryAfterResolve: true } is passed', async () => {
+        // @ts-expect-error
+        mockCypress.automation.mockImplementationOnce(() => {
+          // no-op promise to simulate the waiting for the automation client
+          return new Bluebird.Promise((resolve) => resolve('https://www.example.com#foobar'))
+        })
+
+        // @ts-expect-error
+        mockCypress.automation.mockImplementation(() => {
+          // no-op promise to simulate the waiting for the automation client
+          return new Bluebird.Promise((resolve) => resolve('https://www.foobar.com#foobar'))
+        })
+
+        const fn = getUrlFromAutomation.call(mockContext, mockCypress, mockOptions)
+
+        expect(() => {
+          fn({ retryAfterResolve: true })
+        }).toThrow()
+
+        // flush the microtask queue so we have a url value next time we call fn()
+        await flushPromises()
+
+        const url = fn({ retryAfterResolve: true })
+
+        expect(url).toEqual({
+          protocol: 'https:',
+          host: 'www.example.com',
+          hostname: 'www.example.com',
+          hash: '#foobar',
+          search: '',
+          pathname: '/',
+          port: '',
+          origin: 'https://www.example.com',
+          href: 'https://www.example.com/#foobar',
+          searchParams: expect.any(Object),
+        })
+
+        expect(() => {
+          // in this case the fn will returned the cached url object until the new one is available
+          fn({ retryAfterResolve: true })
+        }).not.toThrow()
+
+        // flush the microtask queue so we have a url value next time we call fn()
+        await flushPromises()
+
+        const url2 = fn({ retryAfterResolve: true })
+
+        expect(url2).toEqual({
+          protocol: 'https:',
+          host: 'www.foobar.com',
+          hostname: 'www.foobar.com',
+          hash: '#foobar',
+          search: '',
+          pathname: '/',
+          port: '',
+          origin: 'https://www.foobar.com',
+          href: 'https://www.foobar.com/#foobar',
+          searchParams: expect.any(Object),
+        })
+      })
+
       it('throws an error when the automation promise is rejected and propagates the error', async () => {
         // @ts-expect-error
         mockCypress.automation.mockImplementation(() => {

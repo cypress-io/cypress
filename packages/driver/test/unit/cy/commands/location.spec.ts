@@ -303,6 +303,76 @@ describe('cy/commands/location', () => {
           locationQueryCommand.call(mockContext, mockCypress, mockCy, 'doesnotexist', {})()
         }).toThrow('Location object does not have key: `doesnotexist`')
       })
+
+      it('retries the command even after the location has resolved', () => {
+        // @ts-expect-error
+        getUrlFromAutomation.mockReturnValueOnce((opts) => {
+          expect(opts).toEqual({ retryAfterResolve: true })
+
+          return {
+            protocol: 'https:',
+            host: 'www.example.com',
+            hostname: 'www.example.com',
+            hash: '#foobar',
+            search: '',
+            pathname: '/',
+            port: '',
+            origin: 'https://www.example.com',
+            href: 'https://www.example.com/#foobar',
+            searchParams: expect.any(Object),
+          }
+        })
+
+        // @ts-expect-error
+        getUrlFromAutomation.mockReturnValueOnce((opts) => {
+          expect(opts).toEqual({ retryAfterResolve: true })
+
+          return {
+            protocol: 'https:',
+            host: 'www.foobar.com',
+            hostname: 'www.foobar.com',
+            hash: '#foobar',
+            search: '',
+            pathname: '/',
+            port: '',
+            origin: 'https://www.foobar.com',
+            href: 'https://www.foobar.com/#foobar',
+            searchParams: expect.any(Object),
+          }
+        })
+
+        const urlObj = locationQueryCommand.call(mockContext, mockCypress, mockCy, undefined, {})()
+
+        expect(urlObj).toEqual({
+          protocol: 'https:',
+          host: 'www.example.com',
+          hostname: 'www.example.com',
+          hash: '#foobar',
+          search: '',
+          pathname: '/',
+          port: '',
+          origin: 'https://www.example.com',
+          href: 'https://www.example.com/#foobar',
+          searchParams: expect.any(Object),
+        })
+
+        const urlObj2 = locationQueryCommand.call(mockContext, mockCypress, mockCy, undefined, {})()
+
+        expect(urlObj2).toEqual({
+          protocol: 'https:',
+          host: 'www.foobar.com',
+          hostname: 'www.foobar.com',
+          hash: '#foobar',
+          search: '',
+          pathname: '/',
+          port: '',
+          origin: 'https://www.foobar.com',
+          href: 'https://www.foobar.com/#foobar',
+          searchParams: expect.any(Object),
+        })
+
+        expect(getUrlFromAutomation).toHaveBeenCalledTimes(2)
+      })
     })
 
     describe('webkit', () => {
