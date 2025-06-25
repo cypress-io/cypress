@@ -31,7 +31,17 @@ const stackIntegrityCheck = function stackIntegrityCheck (options) {
 
   if (stack.length !== options.stackToMatch.length) {
     console.error(`Integrity check failed with expected stack length ${options.stackToMatch.length} but got ${stack.length}`)
+
     throw new Error(integrityErrorMessage)
+  }
+
+  for (const expectedStackFrame of options.stackToMatch) {
+    console.log('expected stack frames:')
+    console.log(JSON.stringify(expectedStackFrame, null, 2))
+  }
+  for (const actualStackFrame of stack) {
+    console.log('actual stack frames:')
+    console.log(JSON.stringify(actualStackFrame, null, 2))
   }
 
   for (let index = 0; index < options.stackToMatch.length; index++) {
