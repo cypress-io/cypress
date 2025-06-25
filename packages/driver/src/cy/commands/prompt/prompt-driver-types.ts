@@ -59,6 +59,13 @@ export interface CyPromptStackLineDetail {
   column: number
 }
 
+export interface CyPromptMoreInfoNeededOptions {
+  testId: string
+  logId: string
+  onSave: () => void
+  onCancel: () => void
+}
+
 export interface CyPromptOptions {
   Cypress: CypressInternal
   cy: Cypress.cy & { state: (key: string) => any }
@@ -70,6 +77,7 @@ export interface CyPromptOptions {
     stack: string,
     projectRoot?: string
   ) => CyPromptStackLineDetail | undefined
+  onMoreInfoNeeded: (options: CyPromptMoreInfoNeededOptions) => void
 }
 
 export interface CyPromptDriverDefaultShape {

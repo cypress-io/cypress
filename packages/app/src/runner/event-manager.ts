@@ -1029,5 +1029,14 @@ export class EventManager {
         logId,
       })
     })
+
+    this.localBus.on('prompt:more-info-needed', ({ testId, logId, onSave, onCancel }) => {
+      this.promptStore.openMoreInfoNeededModal({
+        testId,
+        logId,
+        onSave,
+        onCancel,
+      })
+    })
   }
 }

@@ -4,6 +4,11 @@
     :open="promptStore.getCodeModalIsOpen"
     @close="promptStore.closeGetCodeModal"
   />
+  <PromptMoreInfoNeededModal
+    v-if="promptStore.moreInfoNeededModalIsOpen"
+    :open="promptStore.moreInfoNeededModalIsOpen"
+    @close="promptStore.closeMoreInfoNeededModal"
+  />
   <StudioInstructionsModal
     v-if="studioStore.instructionModalIsOpen"
     :open="studioStore.instructionModalIsOpen"
@@ -152,6 +157,7 @@ import { useStudioStore } from '../store/studio-store'
 import StudioPanel from '../studio/StudioPanel.vue'
 import { useSubscription } from '../graphql'
 import PromptGetCodeModal from '../prompt/PromptGetCodeModal.vue'
+import PromptMoreInfoNeededModal from '../prompt/PromptMoreInfoNeededModal.vue'
 import { usePromptStore } from '../store/prompt-store'
 
 const {

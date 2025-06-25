@@ -21,8 +21,21 @@ export type GetCodeModalContentsShape = (
   props: GetCodeModalContentsProps
 ) => JSX.Element
 
+export interface MoreInfoNeededModalContentsProps {
+  Cypress: CypressInternal
+  testId: string
+  logId: string
+  onClose: () => void
+  onSave: () => void
+}
+
+export type MoreInfoNeededModalContentsShape = (
+  props: MoreInfoNeededModalContentsProps
+) => JSX.Element
+
 export interface CyPromptAppDefaultShape {
   // Purposefully do not use React in this signature to avoid conflicts when this type gets
   // transferred to the Cypress app
   GetCodeModalContents: GetCodeModalContentsShape
+  MoreInfoNeededModalContents: MoreInfoNeededModalContentsShape
 }
