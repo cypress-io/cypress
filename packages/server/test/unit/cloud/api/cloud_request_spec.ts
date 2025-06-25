@@ -4,6 +4,8 @@ import sinonChai from 'sinon-chai'
 import chai, { expect } from 'chai'
 import agent from '@packages/network/lib/agent'
 import axios, { CreateAxiosDefaults, AxiosInstance } from 'axios'
+import debugLib from 'debug'
+import stripAnsi from 'strip-ansi'
 import { createCloudRequest } from '../../../../lib/cloud/api/cloud_request'
 import cloudApi from '../../../../lib/cloud/api'
 import app_config from '../../../../config/app.json'
@@ -11,6 +13,7 @@ import os from 'os'
 import pkg from '@packages/root'
 import { transformError } from '../../../../lib/cloud/api/axios_middleware/transform_error'
 import { DestroyableProxy, fakeServer, fakeProxy } from './utils/fake_proxy_server'
+import dedent from 'dedent'
 
 chai.use(sinonChai)
 
@@ -308,6 +311,81 @@ describe('CloudRequest', () => {
         expect(addHttpsRequestSpy.getCalls().length).to.eql(1)
       })
     }
+  })
+
+  describe('createCloudRequest', () => {
+    let fakeApp: DestroyableProxy
+
+    before(async () => {
+      fakeApp = await fakeServer({})
+    })
+
+    after(() => fakeApp.teardown())
+
+    let wasEnabled: string
+
+    beforeEach(() => {
+      wasEnabled = debugLib.disable()
+    })
+
+    afterEach(() => {
+      debugLib.enable(wasEnabled)
+
+      sinon.restore()
+    })
+
+    it('can skip installing logging', async () => {
+      debugLib.enable('cypress:server:cloud:api')
+
+      const CloudRequest = createCloudRequest({ baseURL: fakeApp.baseUrl })
+
+      const logSpy = sinon.stub(process.stderr, 'write')
+
+      await CloudRequest.get('/ping')
+      const debugCalls = logSpy.getCalls().flatMap((c) => stripAnsi(String(c.args[0])).trim().replace(/\+(\d+)ms$/, '+?ms'))
+
+      expect(debugCalls).to.eql([
+        'cypress:server:cloud:api get /ping +?ms',
+        'cypress:server:cloud:api get /ping Success: 200 OK -> \n  cypress:server:cloud:api   Response: \'OK\' +?ms',
+      ])
+
+      logSpy.reset()
+
+      const CloudRequestNoLogs = createCloudRequest({ baseURL: fakeApp.baseUrl, enableLogging: false })
+
+      await CloudRequestNoLogs.get('/ping')
+      expect(logSpy.getCalls()).to.eql([])
+    })
+
+    it('can skip installing the error transform', async () => {
+      const CloudRequest = createCloudRequest({ baseURL: fakeApp.baseUrl })
+
+      // Installed
+      try {
+        await CloudRequest.get('/error')
+        throw new Error('Unreachable')
+      } catch (e) {
+        expect(e.isApiError).to.eql(true)
+        expect(e.message).to.equal(dedent`
+        404
+        
+        {
+          "ok": false
+        }
+        `)
+      }
+
+      const CloudRequestNoError = createCloudRequest({ baseURL: fakeApp.baseUrl, enableErrorTransform: false })
+
+      // Not Installed
+      try {
+        await CloudRequestNoError.get('/error')
+        throw new Error('Unreachable')
+      } catch (e) {
+        expect(e.isApiError).to.eql(undefined)
+        expect(e.response.data).to.eql({ ok: false })
+      }
+    })
   })
 
   describe('headers', () => {

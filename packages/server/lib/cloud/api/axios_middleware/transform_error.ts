@@ -7,7 +7,7 @@ declare module 'axios' {
   }
 }
 
-export const transformError = (err: AxiosError | Error & { error?: any, statusCode: number, isApiError?: boolean }): never => {
+export const transformError = (err: AxiosError | Error & { error?: any, statusCode: number, isApiError?: boolean }): never | Promise<never> => {
   const { data, status } = axios.isAxiosError(err) ?
     { data: err.response?.data, status: err.status } :
     { data: err.error, status: err.statusCode }

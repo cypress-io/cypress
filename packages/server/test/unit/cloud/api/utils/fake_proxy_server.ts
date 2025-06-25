@@ -23,6 +23,10 @@ app.post('/ping', (req, res) => {
   res.json({ ok: true, auth: req.headers['authorization'] })
 })
 
+app.get('/error', (req, res) => {
+  res.status(404).json({ ok: false })
+})
+
 interface DestroyableProxyOptions {
   keepRequests?: boolean
   auth?: {
