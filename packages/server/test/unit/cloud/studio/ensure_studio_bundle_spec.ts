@@ -92,6 +92,18 @@ describe('ensureStudioBundle', () => {
     await expect(ensureStudioBundlePromise).to.be.rejectedWith('Unable to verify studio signature')
   })
 
+  it('should throw an error if the studio bundle manifest is not found', async () => {
+    pathExistsStub.resolves(false)
+
+    const ensureStudioBundlePromise = ensureStudioBundle({
+      studioPath: '/tmp/cypress/studio/123',
+      studioUrl: 'https://cypress.io/studio',
+      projectId: '123',
+    })
+
+    await expect(ensureStudioBundlePromise).to.be.rejectedWith('Unable to find studio manifest')
+  })
+
   it('should throw an error if the studio bundle download times out', async () => {
     getStudioBundleStub.callsFake(() => {
       return new Promise((resolve) => {

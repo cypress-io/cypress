@@ -57,9 +57,8 @@ export const ensureStudioBundle = async ({
 
   const manifestPath = path.join(studioPath, 'manifest.json')
 
-  if (!responseManifestSignature || !(await pathExists(manifestPath))) {
-    // TODO: Eventually throw an error here once everything lands in production
-    return {}
+  if (!(await pathExists(manifestPath))) {
+    throw new Error('Unable to find studio manifest')
   }
 
   const manifestContents = await readFile(manifestPath, 'utf8')
