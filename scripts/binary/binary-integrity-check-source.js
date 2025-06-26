@@ -35,20 +35,20 @@ const stackIntegrityCheck = function stackIntegrityCheck (options) {
     throw new Error(integrityErrorMessage)
   }
 
-  console.log('expected stack frames:', JSON.stringify(options.stackToMatch, null, 2))
-  for (const expectedStackFrame of options.stackToMatch) {
-    console.log('    ', JSON.stringify(expectedStackFrame, null, 2))
-  }
+  // console.log('expected stack frames:', JSON.stringify(options.stackToMatch, null, 2))
+  // for (const expectedStackFrame of options.stackToMatch) {
+  //   console.log('    ', JSON.stringify(expectedStackFrame, null, 2))
+  // }
 
-  console.log('actual stack frames:')
-  for (const actualStackFrame of stack) {
-    console.log('    ', JSON.stringify({
-      functionName: actualStackFrame.getFunctionName(),
-      fileName: actualStackFrame.getFileName(),
-      line: actualStackFrame.getLineNumber(),
-      column: actualStackFrame.getColumnNumber(),
-    }, null, 2))
-  }
+  // console.log('actual stack frames:')
+  // for (const actualStackFrame of stack) {
+  //   console.log('    ', JSON.stringify({
+  //     functionName: actualStackFrame.getFunctionName(),
+  //     fileName: actualStackFrame.getFileName(),
+  //     line: actualStackFrame.getLineNumber(),
+  //     column: actualStackFrame.getColumnNumber(),
+  //   }, null, 2))
+  // }
 
   for (let index = 0; index < options.stackToMatch.length; index++) {
     const { functionName: expectedFunctionName, fileName: expectedFileName, line: expectedLineNumber, column: expectedColumnNumber } = options.stackToMatch[index]
