@@ -309,4 +309,20 @@ describe('http/util/prerequests', () => {
     expect(preRequests.pendingPreRequests.length).to.eq(1)
     expect(preRequests.pendingPreRequests.shift('GET-foo|bar')).not.to.be.undefined
   })
+
+  it('does not remove pre-requests when sweeping if cdpRequestWillBeSentReceivedTimestamp is 0', async () => {
+    // set the current time to 1000 ms
+    sinon.stub(Date, 'now').returns(1000)
+
+    // set a sweeper timer of 10 ms
+    preRequests = new PreRequests(10, 10)
+    preRequests.setProtocolManager(protocolManager)
+
+    preRequests.addPending({ requestId: '1234', url: 'foo', method: 'GET', cdpRequestWillBeSentReceivedTimestamp: 0 } as BrowserPreRequest)
+
+    // give the sweeper plenty of time to run. Iur request should still not be removed
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
+    expect(preRequests.pendingPreRequests.length).to.eq(1)
+  })
 })
