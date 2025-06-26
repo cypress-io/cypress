@@ -44,7 +44,7 @@ export class ErrorDataSource {
       const stackLines = stackUtils.getStackLines(source.cypressError.stack ?? '')
 
       // we want to filter out any tsx transformation code in the stack to help identify the error. Windows stack can have both posix paths and dos paths so we need to filter both (last line is a no-op on posix as its the same thing)
-      const filteredStackLines = stackLines.filter((stackLine) => !stackLine.includes('node:electron') && !stackLine.includes('node:internal') && !stackLine.includes('source-map-support') && !stackLine.includes(tsxCodeFrameFilter) && !(isWindows && stackLine.includes(windowsTsxCodeFrameFilter)))
+      const filteredStackLines = stackLines.filter((stackLine) => !stackLine.includes('node:') && !stackLine.includes('source-map-support') && !stackLine.includes(tsxCodeFrameFilter) && !(isWindows && stackLine.includes(windowsTsxCodeFrameFilter)))
       const parsedLine = stackUtils.parseStackLine(filteredStackLines[0] ?? '')
 
       if (parsedLine) {
