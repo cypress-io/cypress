@@ -8,20 +8,11 @@
   <!-- these are two distinct errors: -->
   <!--   * if studio status is IN_ERROR, it means that the studio bundle failed to load from the cloud -->
   <!--   * if there is an error in the component state, it means module federation failed to load the component -->
-  <div v-else-if="props.studioStatus === 'IN_ERROR'">
-    <div class="p-4 text-red-500 font-medium">
-      <div class="mb-2">
-        Error fetching studio bundle from cloud
-      </div>
-    </div>
-  </div>
-  <div v-else-if="error">
-    <div class="p-4 text-red-500 font-medium">
-      <div class="mb-2">
-        Error loading the panel
-      </div>
-      <div>{{ error }}</div>
-    </div>
+  <div v-else-if="props.studioStatus === 'IN_ERROR' || error">
+    <StudioErrorPanel 
+      :event-manager="props.eventManager" 
+      :on-retry="handleRetry"
+    />
   </div>
   <div
     v-else
@@ -38,6 +29,7 @@ import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { init, loadRemote } from '@module-federation/runtime'
 import type { StudioAppDefaultShape, StudioPanelShape } from './studio-app-types'
 import LoadingStudioPanel from './LoadingStudioPanel.vue'
+import StudioErrorPanel from './StudioErrorPanel.vue'
 import type { EventManager } from '../runner/event-manager'
 
 // Mirrors the ReactDOM.Root type since incorporating those types
@@ -61,6 +53,10 @@ const container = ref<HTMLElement | null>(null)
 const error = ref<string | null>(null)
 const ReactStudioPanel = ref<StudioPanelShape | null>(null)
 const reactRoot = ref<Root | null>(null)
+
+watch(() => error.value, (newError) => {
+  console.log('error', newError)
+})
 
 const maybeRenderReactComponent = () => {
   // Skip rendering if studio is initializing or errored out
@@ -123,6 +119,7 @@ onMounted(maybeRenderReactComponent)
 onBeforeUnmount(unmountReactComponent)
 
 watch(() => props.studioStatus, (newStatus) => {
+  console.log('props.studioStatus', newStatus)
   if (newStatus === 'ENABLED') {
     loadStudioComponent()
   }
@@ -145,6 +142,22 @@ function loadStudioComponent () {
   }).catch((e) => {
     error.value = e.message
   })
+}
+
+function handleRetry () {
+  // Clear any existing error
+  error.value = null
+  
+  // Reset the React panel component so it can be reloaded
+  ReactStudioPanel.value = null
+  
+  // If status was IN_ERROR, we need to emit a studio init event to retry
+  if (props.studioStatus === 'IN_ERROR') {
+    props.eventManager.emit('studio:init:suite', { suiteId: 'r1', showUrlPrompt: false })
+  } else {
+    // Otherwise, try to reload the studio component
+    loadStudioComponent()
+  }
 }
 
 </script>
