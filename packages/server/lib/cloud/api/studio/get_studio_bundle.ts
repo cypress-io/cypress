@@ -10,7 +10,7 @@ import { verifySignatureFromFile } from '../../encryption'
 const pkg = require('@packages/root')
 const _delay = linearDelay(500)
 
-export const getStudioBundle = async ({ studioUrl, bundlePath }: { studioUrl: string, bundlePath: string }): Promise<string | null> => {
+export const getStudioBundle = async ({ studioUrl, bundlePath }: { studioUrl: string, bundlePath: string }): Promise<string> => {
   let responseSignature: string | null = null
   let responseManifestSignature: string | null = null
 
@@ -54,6 +54,10 @@ export const getStudioBundle = async ({ studioUrl, bundlePath }: { studioUrl: st
 
   if (!responseSignature) {
     throw new Error('Unable to get studio signature')
+  }
+
+  if (!responseManifestSignature) {
+    throw new Error('Unable to get studio manifest signature')
   }
 
   const verified = await verifySignatureFromFile(bundlePath, responseSignature)

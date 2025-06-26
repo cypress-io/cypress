@@ -215,11 +215,44 @@ describe('getStudioBundle', () => {
       statusText: 'OK',
       body: readStream,
       headers: {
-        get: () => null,
+        get: (header) => {
+          if (header === 'x-cypress-manifest-signature') {
+            return '160'
+          }
+        },
       },
     })
 
-    await expect(getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })).to.be.rejected
+    await expect(getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })).to.be.rejectedWith('Unable to get studio signature')
+
+    expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
+      agent: sinon.match.any,
+      method: 'GET',
+      headers: {
+        'x-route-version': '1',
+        'x-cypress-signature': '1',
+        'x-os-name': 'linux',
+        'x-cypress-version': '1.2.3',
+      },
+      encrypt: 'signed',
+    })
+  })
+
+  it('throws an error if there is no manifest signature in the response headers', async () => {
+    crossFetchStub.resolves({
+      ok: true,
+      statusText: 'OK',
+      body: readStream,
+      headers: {
+        get: (header) => {
+          if (header === 'x-cypress-signature') {
+            return '159'
+          }
+        },
+      },
+    })
+
+    await expect(getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })).to.be.rejectedWith('Unable to get studio manifest signature')
 
     expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
       agent: sinon.match.any,
