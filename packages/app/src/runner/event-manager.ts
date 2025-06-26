@@ -919,6 +919,8 @@ export class EventManager {
       return
     }
 
+    this.promptStore.resetState()
+
     await this.resetReporter()
 
     // this probably isn't 100% necessary since Cypress will fall out of scope

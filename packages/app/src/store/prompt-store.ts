@@ -49,5 +49,12 @@ export const usePromptStore = defineStore('prompt', {
       this.moreInfoNeededModalIsOpen = false
       this.currentMoreInfoNeededModalInfo = null
     },
+
+    resetState () {
+      this.getCodeModalIsOpen = false
+      this.moreInfoNeededModalIsOpen = false
+      this.currentGetCodeModalInfo = null
+      this.currentMoreInfoNeededModalInfo = null
+    },
   },
 })
