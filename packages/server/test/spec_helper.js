@@ -104,6 +104,10 @@ beforeEach(async function () {
   setCtx(makeDataContext({}))
   this.originalEnv = originalEnv
 
+  if (!nock.isActive()) {
+    nock.activate()
+  }
+
   nock.disableNetConnect()
   nock.enableNetConnect(/localhost/)
 

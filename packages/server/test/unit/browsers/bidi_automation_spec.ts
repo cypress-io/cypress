@@ -382,6 +382,32 @@ describe('lib/browsers/bidi_automation', () => {
 
           expect(mockAutomationClient.onRemoveBrowserPreRequest).to.have.been.calledWith('request1')
         })
+
+        it('strips hashes out of the url when adding the prerequest', async () => {
+          BidiAutomation.create(mockWebdriverClient, mockAutomationClient)
+
+          mockRequest.request.url = 'https://www.foobar.com?foo=bar#hash'
+
+          mockWebdriverClient.emit('network.beforeRequestSent', mockRequest)
+
+          await flushPromises()
+
+          expect(mockAutomationClient.onBrowserPreRequest).to.have.been.calledWith({
+            requestId: 'request1',
+            method: 'GET',
+            url: 'https://www.foobar.com?foo=bar',
+            resourceType: 'xhr',
+            originalResourceType: 'xmlhttprequest',
+            initiator: {
+              type: 'preflight',
+            },
+            headers: {
+              foo: 'bar',
+            },
+            cdpRequestWillBeSentTimestamp: 0,
+            cdpRequestWillBeSentReceivedTimestamp: 0,
+          })
+        })
       })
 
       describe('responseStarted / responseCompleted', () => {

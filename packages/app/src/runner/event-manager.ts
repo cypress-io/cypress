@@ -283,13 +283,14 @@ export class EventManager {
       this.studioStore.setSuiteId(suiteId)
       this.studioStore.setShowUrlPrompt(showUrlPrompt)
 
-      this.ws.emit('studio:init', ({ canAccessStudioAI, error }) => {
+      this.ws.emit('studio:init', ({ canAccessStudioAI, cloudStudioSessionId, error }) => {
         if (error) {
           // eslint-disable-next-line no-console
           console.error(error)
         }
 
         this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
+        this.studioStore.setCloudStudioSessionId(cloudStudioSessionId)
         studioInit()
       })
     }
@@ -297,13 +298,14 @@ export class EventManager {
     this.reporterBus.on('studio:init:test', (testId) => {
       this.studioStore.setTestId(testId)
 
-      this.ws.emit('studio:init', ({ canAccessStudioAI, error }) => {
+      this.ws.emit('studio:init', ({ canAccessStudioAI, cloudStudioSessionId, error }) => {
         if (error) {
           // eslint-disable-next-line no-console
           console.error(error)
         }
 
         this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
+        this.studioStore.setCloudStudioSessionId(cloudStudioSessionId)
         studioInit()
       })
     })

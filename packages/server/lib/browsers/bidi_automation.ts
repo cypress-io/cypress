@@ -172,10 +172,13 @@ export class BidiAutomation {
 
     const resourceType = normalizeResourceType(params.request.initiatorType)
 
+    const urlWithoutHash = url.includes('#') ? url.substring(0, url.indexOf('#')) : url
+
     const browserPreRequest: BrowserPreRequest = {
       requestId: params.request.request,
       method: params.request.method,
-      url,
+      // urls coming into the http middleware contain query params, but lack the hash. To get an accurate key to match on the prerequest, we need to remove the hash.
+      url: urlWithoutHash,
       headers: parsedHeaders,
       resourceType,
       originalResourceType: params.request.initiatorType || params.request.destination,
