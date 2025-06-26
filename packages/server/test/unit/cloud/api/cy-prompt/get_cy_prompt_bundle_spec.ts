@@ -235,13 +235,50 @@ describe('getCyPromptBundle', () => {
       statusText: 'OK',
       body: readStream,
       headers: {
-        get: () => null,
+        get: (header) => {
+          if (header === 'x-cypress-manifest-signature') {
+            return '160'
+          }
+        },
       },
     })
 
     const projectId = '12345'
 
-    await expect(getCyPromptBundle({ cyPromptUrl: 'http://localhost:1234/cy-prompt/bundle/abc.tgz', projectId, bundlePath: '/tmp/cypress/cy-prompt/abc/bundle.tar' })).to.be.rejected
+    await expect(getCyPromptBundle({ cyPromptUrl: 'http://localhost:1234/cy-prompt/bundle/abc.tgz', projectId, bundlePath: '/tmp/cypress/cy-prompt/abc/bundle.tar' })).to.be.rejectedWith('Unable to get cy-prompt signature')
+
+    expect(crossFetchStub).to.be.calledWith('http://localhost:1234/cy-prompt/bundle/abc.tgz', {
+      agent: sinon.match.any,
+      method: 'GET',
+      headers: {
+        'x-route-version': '1',
+        'x-cypress-signature': '1',
+        'x-cypress-project-slug': '12345',
+        'x-cypress-cy-prompt-mount-version': '1',
+        'x-os-name': 'linux',
+        'x-cypress-version': '1.2.3',
+      },
+      encrypt: 'signed',
+    })
+  })
+
+  it('throws an error if there is no manifest signature in the response headers', async () => {
+    crossFetchStub.resolves({
+      ok: true,
+      statusText: 'OK',
+      body: readStream,
+      headers: {
+        get: (header) => {
+          if (header === 'x-cypress-signature') {
+            return '159'
+          }
+        },
+      },
+    })
+
+    const projectId = '12345'
+
+    await expect(getCyPromptBundle({ cyPromptUrl: 'http://localhost:1234/cy-prompt/bundle/abc.tgz', projectId, bundlePath: '/tmp/cypress/cy-prompt/abc/bundle.tar' })).to.be.rejectedWith('Unable to get cy-prompt manifest signature')
 
     expect(crossFetchStub).to.be.calledWith('http://localhost:1234/cy-prompt/bundle/abc.tgz', {
       agent: sinon.match.any,

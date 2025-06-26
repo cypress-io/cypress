@@ -10,7 +10,7 @@ import { verifySignatureFromFile } from '../../encryption'
 const pkg = require('@packages/root')
 const _delay = linearDelay(500)
 
-export const getCyPromptBundle = async ({ cyPromptUrl, projectId, bundlePath }: { cyPromptUrl: string, projectId?: string, bundlePath: string }): Promise<string | null> => {
+export const getCyPromptBundle = async ({ cyPromptUrl, projectId, bundlePath }: { cyPromptUrl: string, projectId?: string, bundlePath: string }): Promise<string> => {
   let responseSignature: string | null = null
   let responseManifestSignature: string | null = null
 
@@ -56,6 +56,10 @@ export const getCyPromptBundle = async ({ cyPromptUrl, projectId, bundlePath }: 
 
   if (!responseSignature) {
     throw new Error('Unable to get cy-prompt signature')
+  }
+
+  if (!responseManifestSignature) {
+    throw new Error('Unable to get cy-prompt manifest signature')
   }
 
   const verified = await verifySignatureFromFile(bundlePath, responseSignature)

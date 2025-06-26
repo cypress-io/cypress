@@ -90,6 +90,18 @@ describe('ensureCyPromptBundle', () => {
     await expect(ensureCyPromptBundlePromise).to.be.rejectedWith('Unable to verify cy-prompt signature')
   })
 
+  it('should throw an error if the cy prompt bundle manifest is not found', async () => {
+    pathExistsStub.resolves(false)
+
+    const ensureCyPromptBundlePromise = ensureCyPromptBundle({
+      cyPromptPath: '/tmp/cypress/cy-prompt/123',
+      cyPromptUrl: 'https://cypress.io/cy-prompt',
+      projectId: '123',
+    })
+
+    await expect(ensureCyPromptBundlePromise).to.be.rejectedWith('Unable to find cy-prompt manifest')
+  })
+
   it('should throw an error if the cy prompt bundle download times out', async () => {
     getCyPromptBundleStub.callsFake(() => {
       return new Promise((resolve) => {
