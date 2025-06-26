@@ -35,6 +35,14 @@ export class StudioLifecycleManager {
   private ctx?: DataContext
   private lastStatus?: StudioStatus
 
+  private initializationParams?: {
+    projectId?: string
+    cloudDataSource: CloudDataSource
+    cfg: Cfg
+    debugData: any
+    ctx: DataContext
+  }
+
   public get cloudStudioRequested () {
     return !!(process.env.CYPRESS_ENABLE_CLOUD_STUDIO || process.env.CYPRESS_LOCAL_STUDIO_PATH)
   }
@@ -62,6 +70,9 @@ export class StudioLifecycleManager {
     ctx: DataContext
   }): void {
     debug('Initializing studio manager')
+
+    // Store initialization parameters for retry
+    this.initializationParams = { projectId, cloudDataSource, cfg, debugData, ctx }
 
     // Register this instance in the data context
     ctx.update((data) => {
@@ -98,9 +109,6 @@ export class StudioLifecycleManager {
       })
 
       this.updateStatus('IN_ERROR')
-
-      // Clean up any registered listeners
-      this.listeners = []
 
       telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.BUNDLE_LIFECYCLE_END)
       reportTelemetry(BUNDLE_LIFECYCLE_TELEMETRY_GROUP_NAMES.COMPLETE_BUNDLE_LIFECYCLE, {
@@ -280,10 +288,6 @@ export class StudioLifecycleManager {
     this.listeners.forEach((listener) => {
       listener(studioManager)
     })
-
-    if (!process.env.CYPRESS_LOCAL_STUDIO_PATH) {
-      this.listeners = []
-    }
   }
 
   private setupWatcher ({
@@ -342,15 +346,42 @@ export class StudioLifecycleManager {
     if (this.studioManager) {
       debug('Studio ready - calling listener immediately')
       listener(this.studioManager)
-
-      // If the studio bundle is local, we need to register the listener
-      // so that we can reload the studio when the bundle changes
-      if (process.env.CYPRESS_LOCAL_STUDIO_PATH) {
-        this.listeners.push(listener)
-      }
+      this.listeners.push(listener)
     } else {
       debug('Studio not ready - registering studio ready listener')
       this.listeners.push(listener)
+    }
+  }
+
+  public getCurrentStatus (): StudioStatus | undefined {
+    return this.lastStatus
+  }
+
+  public retry (): void {
+    if (!this.ctx) {
+      debug('No ctx available, cannot retry studio initialization')
+
+      return
+    }
+
+    debug('Retrying studio initialization')
+
+    this.studioManager = undefined
+    this.studioManagerPromise = undefined
+    this.lastStatus = undefined
+
+    // Clear any cached failed bundle downloads to allow for retrying
+    const cacheSize = StudioLifecycleManager.hashLoadingMap.size
+
+    StudioLifecycleManager.hashLoadingMap.clear()
+    debug('Cleared %d cached studio bundle promises for retry', cacheSize)
+
+    // Re-initialize with the same parameters we stored
+    if (this.initializationParams) {
+      this.initializeStudioManager(this.initializationParams)
+    } else {
+      debug('No initialization parameters available for retry')
+      this.updateStatus('IN_ERROR')
     }
   }
 

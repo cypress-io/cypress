@@ -9,8 +9,8 @@
   <!--   * if studio status is IN_ERROR, it means that the studio bundle failed to load from the cloud -->
   <!--   * if there is an error in the component state, it means module federation failed to load the component -->
   <div v-else-if="props.studioStatus === 'IN_ERROR' || error">
-    <StudioErrorPanel 
-      :event-manager="props.eventManager" 
+    <StudioErrorPanel
+      :event-manager="props.eventManager"
       :on-retry="handleRetry"
     />
   </div>
@@ -31,6 +31,7 @@ import type { StudioAppDefaultShape, StudioPanelShape } from './studio-app-types
 import LoadingStudioPanel from './LoadingStudioPanel.vue'
 import StudioErrorPanel from './StudioErrorPanel.vue'
 import type { EventManager } from '../runner/event-manager'
+import { useMutation, gql } from '@urql/vue'
 
 // Mirrors the ReactDOM.Root type since incorporating those types
 // messes up vue typing elsewhere
@@ -38,6 +39,12 @@ interface Root {
   render: (element: JSX.Element) => void
   unmount: () => void
 }
+
+const retryStudioMutationGql = gql`
+  mutation RetryStudio {
+    retryStudio
+  }
+`
 
 const props = defineProps<{
   canAccessStudioAI: boolean
@@ -54,9 +61,7 @@ const error = ref<string | null>(null)
 const ReactStudioPanel = ref<StudioPanelShape | null>(null)
 const reactRoot = ref<Root | null>(null)
 
-watch(() => error.value, (newError) => {
-  console.log('error', newError)
-})
+const retryStudioMutation = useMutation(retryStudioMutationGql)
 
 const maybeRenderReactComponent = () => {
   // Skip rendering if studio is initializing or errored out
@@ -119,7 +124,6 @@ onMounted(maybeRenderReactComponent)
 onBeforeUnmount(unmountReactComponent)
 
 watch(() => props.studioStatus, (newStatus) => {
-  console.log('props.studioStatus', newStatus)
   if (newStatus === 'ENABLED') {
     loadStudioComponent()
   }
@@ -145,15 +149,13 @@ function loadStudioComponent () {
 }
 
 function handleRetry () {
-  // Clear any existing error
   error.value = null
-  
-  // Reset the React panel component so it can be reloaded
+
   ReactStudioPanel.value = null
-  
-  // If status was IN_ERROR, we need to emit a studio init event to retry
+
+  // If status was IN_ERROR, we need to retry the studio initialization
   if (props.studioStatus === 'IN_ERROR') {
-    props.eventManager.emit('studio:init:suite', { suiteId: 'r1', showUrlPrompt: false })
+    retryStudioMutation.executeMutation({})
   } else {
     // Otherwise, try to reload the studio component
     loadStudioComponent()

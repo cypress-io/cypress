@@ -196,6 +196,16 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('retryStudio', {
+      type: 'Boolean',
+      description: 'Retry studio initialization after an error',
+      resolve: (_, args, ctx) => {
+        ctx.coreData.studioLifecycleManager?.retry()
+
+        return true
+      },
+    })
+
     t.field('wizardUpdate', {
       type: Wizard,
       description: 'Updates the different fields of the wizard data store',
