@@ -995,9 +995,9 @@ describe('src/cy/commands/navigation', () => {
         .withArgs('preserve:run:state')
         .callsFake(fn)
 
-        cy.visit('http://localhost:4200')
-
-        expect(mockGetTestsState).to.be.calledWith('r2')
+        cy.visit('http://localhost:4200').then(() => {
+          expect(mockGetTestsState).to.be.calledWith('r2')
+        })
       })
 
       it('replaces window.location when origins don\'t match', (done) => {
@@ -1028,9 +1028,9 @@ describe('src/cy/commands/navigation', () => {
         .withArgs('preserve:run:state')
         .resolves()
 
-        cy.visit('http://localhost:4200')
-
-        expect(mockGetTestsState).to.be.calledWith('r2')
+        cy.visit('http://localhost:4200').then(() => {
+          expect(mockGetTestsState).to.be.calledWith('r2')
+        })
       })
     })
 
