@@ -115,7 +115,7 @@ export default (Commands: Cypress.Cypress['Commands'], Cypress: Cypress.Cypress,
       initializeCloudCyPromptPromise = initializeCloudCyPrompt(Cypress, cy)
     }
 
-    const prompt = (steps: string | string[], commandOptions: object = {}) => {
+    const prompt = (steps: string[], commandOptions: object = {}) => {
       const promptCmd = cy.state('current')
 
       if (Cypress.testingType === 'component') {
