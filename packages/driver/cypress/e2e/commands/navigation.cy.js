@@ -950,11 +950,13 @@ describe('src/cy/commands/navigation', () => {
     })
 
     describe('when origins don\'t match', () => {
+      let mockGetTestsState
+
       beforeEach(() => {
         Cypress.emit('test:before:run', { id: 'r2' })
 
         cy.stub(Cypress.runner, 'getEmissions').returns([])
-        cy.stub(Cypress.runner, 'getTestsState').returns([])
+        mockGetTestsState = cy.stub(Cypress.runner, 'getTestsState').returns([])
         cy.stub(Cypress.runner, 'getStartTime').returns('12345')
         cy.stub(Cypress.Log, 'countLogsByTests').withArgs([]).returns(1)
         cy.stub(Cypress.runner, 'countByTestState')
@@ -994,6 +996,8 @@ describe('src/cy/commands/navigation', () => {
         .callsFake(fn)
 
         cy.visit('http://localhost:4200')
+
+        expect(mockGetTestsState).to.be.calledWith('r2')
       })
 
       it('replaces window.location when origins don\'t match', (done) => {
@@ -1025,6 +1029,8 @@ describe('src/cy/commands/navigation', () => {
         .resolves()
 
         cy.visit('http://localhost:4200')
+
+        expect(mockGetTestsState).to.be.calledWith('r2')
       })
     })
 
