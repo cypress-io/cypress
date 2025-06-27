@@ -1,6 +1,6 @@
 // Note: This file is owned by the cloud delivered
-// cy prompt bundle. It is downloaded and copied here.
-// It should not be modified directly here.
+// cy-prompt bundle. It is downloaded and copied to the app.
+// It should not be modified directly in the app.
 
 /// <reference types="cypress" />
 
@@ -8,6 +8,7 @@ import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping.d'
 import type { Router } from 'express'
 import type { AxiosInstance } from 'axios'
 import type { Socket } from 'socket.io'
+import type { BinaryLike } from 'crypto'
 
 export type CyPromptCommands = ProtocolMapping.Commands
 
@@ -58,6 +59,8 @@ export interface CyPromptServerOptions {
   projectSlug?: string
   cloudApi: CyPromptCloudApi
   getProjectOptions: () => Promise<CyPromptProjectOptions>
+  manifest?: Record<string, string>
+  verifyHash: (contents: BinaryLike, expectedHash: string) => boolean
 }
 
 export interface CyPromptCDPClient {

@@ -133,7 +133,7 @@ export default (Commands: Cypress.Cypress['Commands'], Cypress: Cypress.Cypress,
       }
 
       // TODO: figure out how to handle timeout more generally
-      return cy.wrap(initializeCloudCyPromptPromise, { log: false, timeout: 45000 }).then({ timeout: 45000 }, (bundleResult: ReturnType<CyPromptDriverDefaultShape['createCyPrompt']> | Error) => {
+      return cy.wrap(initializeCloudCyPromptPromise, { log: false, timeout: 45000 }).then((bundleResult: ReturnType<CyPromptDriverDefaultShape['createCyPrompt']> | Error) => {
         if (bundleResult instanceof Error) {
           throw bundleResult
         }

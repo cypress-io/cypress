@@ -1,6 +1,8 @@
 // Note: This file is owned by the cloud delivered
-// cy prompt bundle. It is downloaded and copied here.
-// It should not be modified directly here.
+// cy-prompt bundle. It is downloaded and copied to the app.
+// It should not be modified directly in the app.
+
+import Emitter from 'component-emitter'
 
 export interface CypressInternal extends Cypress.Cypress {
   backendRequestHandler: (
@@ -8,6 +10,7 @@ export interface CypressInternal extends Cypress.Cypress {
     eventName: string,
     ...args: any[]
   ) => Promise<any>
+  preserveRunState: (testId: string) => Promise<void>
 }
 
 export interface GetCodeModalContentsProps {
@@ -21,8 +24,15 @@ export type GetCodeModalContentsShape = (
   props: GetCodeModalContentsProps
 ) => JSX.Element
 
+export interface CyPromptEventManager {
+  ws: Emitter
+  localBus: Emitter
+  rerunSpec: () => void
+}
+
 export interface MoreInfoNeededModalContentsProps {
   Cypress: CypressInternal
+  eventManager: CyPromptEventManager
   testId: string
   logId: string
   onClose: () => void

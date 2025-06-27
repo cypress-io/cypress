@@ -1,6 +1,6 @@
 // Note: This file is owned by the cloud delivered
-// cy prompt bundle. It is downloaded and copied here.
-// It should not be modified directly here.
+// cy-prompt bundle. It is downloaded and copied to the app.
+// It should not be modified directly in the app.
 
 import type Emitter from 'component-emitter'
 
@@ -8,6 +8,10 @@ interface InternalActions extends Cypress.Actions {
   (
     eventName: 'prompt:backend:request',
     listener: (...args: any[]) => void
+  ): Cypress.Cypress
+  (
+    eventName: 'test:after:run:async',
+    listener: (test: { id: string, err: Error }) => void
   ): Cypress.Cypress
 }
 

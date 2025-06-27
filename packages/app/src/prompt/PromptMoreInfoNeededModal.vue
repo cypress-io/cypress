@@ -58,6 +58,7 @@ const maybeRenderReactComponent = () => {
     Cypress,
     testId: promptStore.currentMoreInfoNeededModalInfo?.testId,
     logId: promptStore.currentMoreInfoNeededModalInfo?.logId,
+    eventManager: window.getEventManager(),
     onClose: () => {
       promptStore.currentMoreInfoNeededModalInfo?.onCancel()
       closeModal()

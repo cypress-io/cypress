@@ -43,7 +43,7 @@ import * as resolvers from './cypress/resolvers'
 import { PrimaryOriginCommunicator, SpecBridgeCommunicator } from './cross-origin/communicator'
 import { setupAutEventHandlers } from './cypress/aut_event_handlers'
 
-import type { CachedTestState } from '@packages/types'
+import type { CachedTestState, ReporterRunState } from '@packages/types'
 import { DocumentDomainInjection } from '@packages/network/lib/document-domain-injection'
 import { setSpecContentSecurityPolicy } from './util/privileged_channel'
 
@@ -820,6 +820,29 @@ class $Cypress {
 
   backend (eventName, ...args) {
     return this.backendRequestHandler('backend:request', eventName, ...args)
+  }
+
+  async preserveRunState (testId: string) {
+    const tests = Cypress.runner.getTestsState(testId)
+    let runState = {
+      currentId: testId,
+      tests: Cypress.runner.getTestsState(testId),
+      startTime: Cypress.runner.getStartTime(),
+      emissions: Cypress.runner.getEmissions(),
+      passed: Cypress.runner.countByTestState(tests, 'passed'),
+      failed: Cypress.runner.countByTestState(tests, 'failed'),
+      pending: Cypress.runner.countByTestState(tests, 'pending'),
+      numLogs: LogUtils.countLogsByTests(tests),
+    }
+
+    const otherRunStates: ReporterRunState = await Cypress.action('cy:collect:run:state')
+
+    // merge all the states together
+    runState = _.reduce(otherRunStates, (memo, obj) => {
+      return _.extend(memo, obj)
+    }, runState)
+
+    await Cypress.backend('preserve:run:state', runState)
   }
 
   automation (eventName, ...args) {
