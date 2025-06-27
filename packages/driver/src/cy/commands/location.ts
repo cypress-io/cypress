@@ -93,7 +93,7 @@ export function locationQueryCommand (Cypress: Cypress.Cypress, cy: Cypress.Cypr
   const fn = Cypress.isBrowser('webkit') ? cy.getRemoteLocation : getUrlFromAutomation.bind(this)(Cypress, options)
 
   return () => {
-    const location = fn()
+    const location = Cypress.isBrowser('webkit') ? fn() : fn({ retryAfterResolve: true })
 
     if (location === '') {
       // maybe the page's domain is "invisible" to us

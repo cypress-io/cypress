@@ -1,6 +1,6 @@
 # Cypress Webpack Preprocessor (Batteries Included)
 
-Cypress preprocessor for bundling JavaScript via webpack, with dependencies included and support for:
+Cypress preprocessor for bundling JavaScript via Webpack, with dependencies included and support for:
 
 - Various proposal-stage ES features
 - TypeScript

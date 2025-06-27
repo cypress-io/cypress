@@ -75,6 +75,7 @@
     "find-process": "1.4.7",
     "firefox-profile": "4.7.0",
     "fluent-ffmpeg": "2.1.2",
+    "follow-redirects": "^1.15.9",
     "fs-extra": "9.1.0",
     "geckodriver": "5.0.0",
     "get-port": "5.1.1",

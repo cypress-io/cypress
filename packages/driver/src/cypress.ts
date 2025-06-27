@@ -24,7 +24,7 @@ import $Mocha from './cypress/mocha'
 import { create as createMouse } from './cy/mouse'
 import $Runner from './cypress/runner'
 import $Screenshot from './cypress/screenshot'
-import $SelectorPlayground from './cypress/selector_playground'
+import $ElementSelector from './cypress/element_selector'
 import $Server from './cypress/server'
 import $SetterGetter from './cypress/setter_getter'
 import { validateConfig } from './util/config'
@@ -151,7 +151,19 @@ class $Cypress {
   Runner = $Runner
   Server = $Server
   Screenshot = $Screenshot
-  SelectorPlayground = $SelectorPlayground
+  ElementSelector = $ElementSelector
+  SelectorPlayground = {
+    defaults (options: any) {
+      $errUtils.throwErrByPath('selector_playground.renamed', {
+        args: { method: 'defaults' },
+      })
+    },
+    getSelector ($el: any) {
+      $errUtils.throwErrByPath('selector_playground.renamed', {
+        args: { method: 'getSelector' },
+      })
+    },
+  }
   utils = $utils
   _ = _
   Blob = blobUtil

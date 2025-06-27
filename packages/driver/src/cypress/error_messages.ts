@@ -1718,22 +1718,27 @@ export default {
     },
   },
 
-  selector_playground: {
+  element_selector: {
     defaults_invalid_arg: {
-      message: '`Cypress.SelectorPlayground.defaults()` must be called with an object. You passed: `{{arg}}`',
-      docsUrl: 'https://on.cypress.io/selector-playground-api',
+      message: '`Cypress.ElementSelector.defaults()` must be called with an object. You passed: `{{arg}}`',
+      docsUrl: 'https://on.cypress.io/element-selector-api',
     },
     defaults_invalid_priority_type: {
-      message: '`Cypress.SelectorPlayground.defaults()` called with invalid `selectorPriority` property. It must be an array. You passed: `{{arg}}`',
-      docsUrl: 'https://on.cypress.io/selector-playground-api',
+      message: '`Cypress.ElementSelector.defaults()` called with invalid `selectorPriority` property. It must be an array. You passed: `{{arg}}`',
+      docsUrl: 'https://on.cypress.io/element-selector-api',
     },
-    defaults_invalid_priority: {
-      message: '`Cypress.SelectorPlayground.defaults()` called with invalid `selectorPriority` property. It must be one of: `data-*`, `id`, `class`, `tag`, `attributes`, `nth-child`. You passed: `{{arg}}`. Consider using the `onElement` property if a specific selector is desired.',
-      docsUrl: 'https://on.cypress.io/selector-playground-api',
+    defaults_invalid_selector_priority: {
+      message: '`Cypress.ElementSelector.defaults()` called with invalid `selectorPriority` property. It must be one of: `data-*`, `attribute:*`, `id`, `class`, `tag`, `name`,`attributes`, or `nth-child`. You passed: `{{arg}}`.',
+      docsUrl: 'https://on.cypress.io/element-selector-api',
     },
-    defaults_invalid_on_element: {
-      message: '`Cypress.SelectorPlayground.defaults()` called with invalid `onElement` property. It must be a function. You passed: `{{arg}}`',
-      docsUrl: 'https://on.cypress.io/selector-playground-api',
+  },
+
+  selector_playground: {
+    renamed: ({ method }: { method: string }) => {
+      return {
+        message: `\`Cypress.SelectorPlayground.${method}()\` has been renamed to \`Cypress.ElementSelector.${method}()\`. Please update your code to use \`Cypress.ElementSelector\` instead.`,
+        docsUrl: 'https://on.cypress.io/element-selector-api',
+      }
     },
   },
 

@@ -18,7 +18,7 @@ function isAllowlistedEnv (key, value) {
     ['true', 'false', 'TRUE', 'FALSE', 'True', 'False'].includes(value)
     || value.length < 4
     // allow some envs that are not sensitive
-    || ['nodejs_version', 'CF_DOMAIN', 'SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES', 'CIRCLE_PROJECT_REPONAME', 'CIRCLE_PR_REPONAME', 'CIRCLE_BRANCH',
+    || ['nodejs_version', 'CF_DOMAIN', 'SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES', 'CIRCLE_PROJECT_REPONAME', 'CIRCLE_PR_REPONAME', 'CIRCLE_BRANCH', 'CIRCLE_PROJECT_USERNAME',
       'HOME', 'HOMEPATH', 'PLATFORM', 'HOSTNAME', 'PWD', 'INIT_CWD', 'USER', 'SUDO_USER', 'USERNAME', 'USERPROFILE', 'LOGNAME', 'npm_config_loglevel'].includes(key)
     // ignore npm_package_ envs https://docs.npmjs.com/cli/v11/using-npm/scripts#packagejson-vars
     || key.startsWith('npm_package_')

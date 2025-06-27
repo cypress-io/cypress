@@ -2878,10 +2878,10 @@
   resolved "https://registry.yarnpkg.com/@cypress/snapbuild-windows-64/-/snapbuild-windows-64-1.0.4.tgz#37854c0d1262b98913d3b6aa99f5343724e80d2b"
   integrity sha512-sXqQ2+6xTVZVvKnK0WTNkczDUFRXeE9Cmv0nhfVYXpFNVhhLcUJm748haTMzeBtLh40o9BzvN/sFqkQwoCsI9w==
 
-"@cypress/unique-selector@0.0.5":
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/@cypress/unique-selector/-/unique-selector-0.0.5.tgz#1ce7889dd9ffe47e8b39d31da3a6b7e9a0c9c93d"
-  integrity sha512-WS1M1arFAcl2v+A4OHT4ZPAXQgoQuVwM4quyZZQUmJsshXZqbTFyT918WQujC6yikOddZgiVGk46CIBGoCMnow==
+"@cypress/unique-selector@2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@cypress/unique-selector/-/unique-selector-2.1.1.tgz#e5afa80705eb48735f0ecbb5d148cded071d27bf"
+  integrity sha512-uMUiPfwWv/eG/ubSzvIdc/7C+RKG+r0QH7/qot61oEdYvBEabaZEQuugxXGzU5t2tbjpepU+FNWXBreTRo5MBQ==
   dependencies:
     css.escape "^1.5.1"
 
@@ -16725,10 +16725,10 @@ folktale@2.3.2:
   resolved "https://registry.yarnpkg.com/folktale/-/folktale-2.3.2.tgz#38231b039e5ef36989920cbf805bf6b227bf4fd4"
   integrity sha512-+8GbtQBwEqutP0v3uajDDoN64K2ehmHd0cjlghhxh0WpcfPzAIjPA03e1VvHlxL02FVGR0A6lwXsNQKn3H1RNQ==
 
-follow-redirects@^1.0.0, follow-redirects@^1.14.0, follow-redirects@^1.15.6:
-  version "1.15.6"
-  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.6.tgz#7f815c0cda4249c74ff09e95ef97c23b5fd0399b"
-  integrity sha512-wWN62YITEaOpSK584EZXJafH1AGpO8RVgElfkuXbTOrPX4fIfOyEpW/CsiNd8JdYrAoOvafRTOEnvsO++qCqFA==
+follow-redirects@^1.0.0, follow-redirects@^1.14.0, follow-redirects@^1.15.6, follow-redirects@^1.15.9:
+  version "1.15.9"
+  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.9.tgz#a604fa10e443bf98ca94228d9eebcc2e8a2c8ee1"
+  integrity sha512-gew4GsXizNgdoRyqmyfMHyAmXsZDk6mHkSxZFCzW9gwlbtOW44CDtYavM+y+72qD/Vq2l550kMF52DT8fOLJqQ==
 
 for-each@^0.3.3:
   version "0.3.3"
