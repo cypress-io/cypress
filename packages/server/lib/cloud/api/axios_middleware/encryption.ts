@@ -1,15 +1,89 @@
-import type { AxiosInstance, AxiosResponse } from 'axios'
+import type { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import * as enc from '../../encryption'
 import { PUBLIC_KEY_VERSION } from '../../constants'
-import { verifySignature } from '../../encryption'
-import _ from 'lodash'
-import { transformError } from './transform_error'
+import crypto, { KeyObject } from 'crypto'
+import { DecryptionError } from '../cloud_request_errors'
+import axios from 'axios'
 
-const verifySignatureHandler = async (res: AxiosResponse) => {
-  const isVerified = verifySignature(res.data, res.headers['x-cypress-signature'])
+let encryptionKey: KeyObject
 
-  if (!isVerified) {
-    throw new Error(`Unable to verify the request signature for ${res.request?.path ?? 'request'}`)
+declare module 'axios' {
+  interface AxiosRequestConfig {
+    encrypt?: 'always' | 'signed' | boolean
+  }
+}
+
+const maybeEncryptRequest = async (req: InternalAxiosRequestConfig) => {
+  if (!req.data) {
+    throw new Error(`Cannot issue encrypted request to ${req.url} without request body`)
+  }
+
+  encryptionKey ??= crypto.createSecretKey(Uint8Array.from(crypto.randomBytes(32)))
+
+  const { jwe } = await enc.encryptRequest({ body: req.data }, { secretKey: encryptionKey })
+
+  req.headers.set('x-cypress-encrypted', PUBLIC_KEY_VERSION)
+  req.data = jwe
+
+  return req
+}
+
+const maybeSignRequest = (req: InternalAxiosRequestConfig) => {
+  if (req.encrypt === 'signed') {
+    req.headers.set('x-cypress-signature', PUBLIC_KEY_VERSION)
+  }
+
+  return req
+}
+
+const maybeDecryptResponse = async (res: AxiosResponse) => {
+  if (!res.config.encrypt) {
+    return res
+  }
+
+  if (res.config.encrypt === 'always' || res.headers['x-cypress-encrypted']) {
+    try {
+      res.data = await enc.decryptResponse(res.data, encryptionKey)
+    } catch (e) {
+      throw new DecryptionError(e.message)
+    }
+  }
+
+  return res
+}
+
+const maybeDecryptErrorResponse = async (err: AxiosError<any> | Error & { error?: any, statusCode: number, isApiError?: boolean }) => {
+  if (axios.isAxiosError(err) && err.response?.data) {
+    if (err.config?.encrypt === 'always' || err.response?.headers['x-cypress-encrypted']) {
+      try {
+        if (err.response.data) {
+          err.response.data = await enc.decryptResponse(err.response.data, encryptionKey)
+        }
+      } catch (e) {
+        if (err.status && err.status >= 500 || err.status === 404) {
+          throw err
+        }
+
+        throw new DecryptionError(e.message)
+      }
+    }
+  }
+
+  throw err
+}
+
+const maybeVerifyResponseSignature = (res: AxiosResponse) => {
+  if (res.config.encrypt === 'signed' && !res.headers['x-cypress-signature']) {
+    throw new Error(`Expected signed response for ${res.config.url }`)
+  }
+
+  if (res.headers['x-cypress-signature']) {
+    const dataString = typeof res.data === 'string' ? res.data : JSON.stringify(res.data)
+    const verified = enc.verifySignature(dataString, res.headers['x-cypress-signature'])
+
+    if (!verified) {
+      throw new Error(`Unable to verify response signature for ${res.config.url}`)
+    }
   }
 
   return res
@@ -18,61 +92,19 @@ const verifySignatureHandler = async (res: AxiosResponse) => {
 // Always = req & res MUST be encrypted
 // true = req MUST be encrypted, res MAY be encrypted, signified by header
 // signed = verify signature of the response body
-export const installEncryption = (axios: AxiosInstance, encrypt: 'always' | 'signed' | true) => {
-  if (encrypt === 'always' || encrypt === true) {
-    axios.interceptors.request.use(async (req) => {
-      const transformResponse = _.castArray(req.transformResponse)
+export const installEncryption = (axios: AxiosInstance) => {
+  axios.interceptors.request.use(maybeEncryptRequest, undefined, {
+    runWhen (config) {
+      return config.encrypt === true || config.encrypt === 'always'
+    },
+  })
 
-      const { jwe, secretKey } = await enc.encryptRequest({ body: req.data })
+  axios.interceptors.request.use(maybeSignRequest, undefined, {
+    runWhen (config) {
+      return config.encrypt === 'signed'
+    },
+  })
 
-      req.headers.set('x-cypress-encrypted', PUBLIC_KEY_VERSION)
-      req.data = jwe
-      transformResponse.unshift(async (res, headers) => {
-        if (encrypt === 'always' || headers['x-cypress-encrypted'] === 'true') {
-          const result = await enc.decryptResponse(JSON.parse(res), secretKey)
-
-          return result
-        }
-
-        return res
-      })
-
-      req.transformResponse = transformResponse
-
-      return req
-    })
-
-    axios.interceptors.response.use(async (res) => {
-      res.data = await res.data
-
-      // If we've sent the data back with a signature, ensure we also validate it
-      if (res.headers['x-cypress-signature']) {
-        await verifySignatureHandler(res)
-      }
-
-      return res
-    }, async (err) => {
-      err.response.data = await err.response.data
-
-      if (err.response.headers['x-cypress-signature']) {
-        await verifySignatureHandler(err.response)
-      }
-
-      return transformError(err)
-    })
-
-    axios.get = function () {
-      throw new Error(`Cannot issue GET requests with encryption`)
-    }
-  }
-
-  if (encrypt === 'signed') {
-    axios.interceptors.request.use((req) => {
-      req.headers.set('x-cypress-signature', PUBLIC_KEY_VERSION)
-
-      return req
-    })
-
-    axios.interceptors.response.use(verifySignatureHandler)
-  }
+  axios.interceptors.response.use(maybeDecryptResponse, maybeDecryptErrorResponse)
+  axios.interceptors.response.use(maybeVerifyResponseSignature)
 }

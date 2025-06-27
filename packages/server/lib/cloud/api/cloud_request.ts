@@ -22,16 +22,6 @@ export interface CreateCloudRequestOptions {
    */
   addditionalHeaders?: Record<string, string>
   /**
-   * Whether to include e2e encryption for requests:
-   * true   = encrypt request, decrypt response if x-cypress-encrypted signature is set
-   * always = encrypt request, always decrypt response
-   * signed = send version in x-cypress-signature, check response's x-cypress-signature
-   * false  = no encryption
-   *
-   * @default false
-   */
-  enableEncryption?: 'always' | 'signed' | true | false
-  /**
    * Whether to include the default logging middleware
    * @default true
    */
@@ -46,7 +36,7 @@ export interface CreateCloudRequestOptions {
 // Allows us to create customized Cloud Request instances w/ different baseURL & encryption configuration
 export const createCloudRequest = (options: CreateCloudRequestOptions = {}): AxiosInstance => {
   const cfgKey = process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'development'
-  const { baseURL = app_config[cfgKey].api_url, enableEncryption = false, enableLogging = true, enableErrorTransform = true } = options
+  const { baseURL = app_config[cfgKey].api_url, enableLogging = true, enableErrorTransform = true } = options
 
   const instance = axios.create({
     baseURL,
@@ -77,9 +67,7 @@ export const createCloudRequest = (options: CreateCloudRequestOptions = {}): Axi
     },
   })
 
-  if (enableEncryption) {
-    installEncryption(instance, enableEncryption)
-  }
+  installEncryption(instance)
 
   if (enableLogging) {
     installLogging(instance)
@@ -93,6 +81,8 @@ export const createCloudRequest = (options: CreateCloudRequestOptions = {}): Axi
 }
 
 export const CloudRequest = createCloudRequest()
+
+export type TCloudReqest = ReturnType<typeof createCloudRequest>
 
 export const isRetryableCloudError = (error: unknown) => {
   // setting this env via mocha's beforeEach coerces this to a string, even if it's a boolean

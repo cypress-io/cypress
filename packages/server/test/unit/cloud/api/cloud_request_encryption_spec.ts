@@ -6,7 +6,7 @@ import fs from 'fs'
 import { DestroyableProxy, fakeServer } from './utils/fake_proxy_server'
 import bodyParser from 'body-parser'
 import { TEST_PRIVATE } from '@tooling/system-tests/lib/protocol-stubs/protocolStubResponse'
-import { createCloudRequest } from '../../../../lib/cloud/api/cloud_request'
+import { createCloudRequest, TCloudReqest } from '../../../../lib/cloud/api/cloud_request'
 import * as jose from 'jose'
 import dedent from 'dedent'
 
@@ -87,6 +87,8 @@ describe('CloudRequest Encryption', () => {
     res.end()
   }
 
+  app.get('/ping', (req, res) => res.json({ pong: 'true' }))
+
   app.get('/signed', async (req, res) => {
     const buffer = fs.readFileSync(__filename)
 
@@ -117,140 +119,112 @@ describe('CloudRequest Encryption', () => {
     }))
   })
 
-  app.post('/error-signed', async (req, res) => {
-    res.status(400)
+  let TestReq: TCloudReqest
 
-    return signResponse(req, res, JSON.stringify(req.body))
-  })
-
-  app.post('/invalid-error-signed', async (req, res) => {
-    res.status(400)
-
-    return invalidSignResponse(req, res, JSON.stringify(req.body))
+  before(async () => {
+    fakeEncryptionServer = await fakeServer({}, app)
+    TestReq = createCloudRequest({ baseURL: fakeEncryptionServer.baseUrl })
   })
 
   beforeEach(async () => {
     requests = []
-    fakeEncryptionServer = await fakeServer({}, app)
   })
 
-  afterEach(() => fakeEncryptionServer.teardown())
+  after(() => fakeEncryptionServer.teardown())
 
-  describe('.get', () => {
-    it('cannot issue .get requests with encryption', async () => {
-      const EncryptReq = createCloudRequest({ baseURL: fakeEncryptionServer.baseUrl, enableEncryption: true })
+  it('cannot issue encryption request without body', async () => {
+    try {
+      await TestReq.get('/foo', {
+        encrypt: true,
+      })
 
-      try {
-        await EncryptReq.get('/foo')
-        throw new Error('Unreachable')
-      } catch (e) {
-        expect(e.message).to.eq('Cannot issue GET requests with encryption')
-      }
-    })
-
-    it('verifies the signed response', async () => {
-      const SignedRes = createCloudRequest({ baseURL: fakeEncryptionServer.baseUrl, enableEncryption: 'signed' })
-
-      // Good
-      const data = await SignedRes.get('/signed').then((d) => d.data)
-
-      expect(data).to.equal(fs.readFileSync(__filename, 'utf8'))
-
-      // Bad
-      try {
-        await SignedRes.get('/invalid-signing')
-        throw new Error('Unreachable')
-      } catch (e) {
-        expect(e.message).to.equal('Unable to verify the request signature for /invalid-signing')
-      }
-    })
+      throw new Error('Unreachable')
+    } catch (e) {
+      expect(e.message).to.eq('Cannot issue encrypted request to /foo without request body')
+    }
   })
 
-  describe('.post', () => {
-    it('encrypts requests', async () => {
-      const EncryptReq = createCloudRequest({ baseURL: fakeEncryptionServer.baseUrl, enableEncryption: 'always' })
+  it('verifies the signed response', async () => {
+    // Good
+    const data = await TestReq.get('/signed', { encrypt: 'signed' }).then((d) => d.data)
 
-      const dataObj = (v: number) => {
-        return {
-          foo: {
-            bar: v,
-          },
-        }
+    expect(data).to.equal(fs.readFileSync(__filename, 'utf8'))
+
+    // Bad
+    try {
+      await TestReq.get('/invalid-signing', { encrypt: 'signed' })
+      throw new Error('Unreachable')
+    } catch (e) {
+      expect(e.message).to.equal('Unable to verify response signature for /invalid-signing')
+    }
+  })
+
+  it('enforces a response signature on signed requests', async () => {
+    try {
+      await TestReq.get('/ping', { encrypt: 'signed' })
+      throw new Error('Unreachable')
+    } catch (e) {
+      expect(e.message).to.equal('Expected signed response for /ping')
+    }
+  })
+
+  it('encrypts requests', async () => {
+    const dataObj = (v: number) => {
+      return {
+        foo: {
+          bar: v,
+        },
       }
+    }
 
-      const [res, res2, res3] = await Promise.all([
-        EncryptReq.post('/', dataObj(1)),
-        EncryptReq.post('/', dataObj(2)),
-        EncryptReq.post('/', dataObj(3)),
-      ])
+    const [res, res2, res3] = await Promise.all([
+      TestReq.post('/', dataObj(1), { encrypt: 'always' }),
+      TestReq.post('/', dataObj(2), { encrypt: 'always' }),
+      TestReq.post('/', dataObj(3), { encrypt: 'always' }),
+    ])
 
-      expect(res.data).to.eql(dataObj(1))
-      expect(res2.data).to.eql(dataObj(2))
-      expect(res3.data).to.eql(dataObj(3))
-    })
+    expect(res.data).to.eql(dataObj(1))
+    expect(res2.data).to.eql(dataObj(2))
+    expect(res3.data).to.eql(dataObj(3))
+  })
 
-    it('decrypts errors', async () => {
-      const EncryptReq = createCloudRequest({ baseURL: fakeEncryptionServer.baseUrl, enableEncryption: 'always' })
+  it('decrypts errors', async () => {
+    try {
+      await TestReq.post('/error', {
+        foo: true,
+      }, { encrypt: 'always' })
 
-      try {
-        await EncryptReq.post('/error', {
-          foo: true,
-        })
+      throw new Error('Unreachable')
+    } catch (e) {
+      expect(e.isApiError).to.be.true
 
-        throw new Error('Unreachable')
-      } catch (e) {
-        expect(e.isApiError).to.be.true
-
-        expect(e.message).to.equal(dedent`
+      expect(e.message).to.equal(dedent`
         400
 
         {
           "error": "Some Error"
         }
         `)
-      }
-    })
+    }
+  })
 
-    it('supports a signed response on encrypted requests', async () => {
-      const SignedRes = createCloudRequest({ baseURL: fakeEncryptionServer.baseUrl, enableEncryption: true })
+  it('supports a signed response on encrypted requests', async () => {
+    // Good
+    const data = await TestReq.post('/signed-post', {
+      foo: 'bar',
+    }, { encrypt: 'signed' }).then((d) => d.data)
 
-      // Good
-      const data = await SignedRes.post('/signed-post', {
-        foo: 'bar',
-      }).then((d) => d.data)
+    expect(data).to.eql({ foo: 'bar' })
 
-      expect(data).to.equal(JSON.stringify({ foo: 'bar' }))
+    // Bad
+    try {
+      await TestReq.post('/invalid-signed-post', {}, {
+        encrypt: 'signed',
+      })
 
-      // Bad
-      try {
-        await SignedRes.post('/invalid-signed-post', {})
-        throw new Error('Unreachable')
-      } catch (e) {
-        expect(e.message).to.equal('Unable to verify the request signature for /invalid-signed-post')
-      }
-    })
-
-    it('supports a signed response on encrypted error responses', async () => {
-      const SignedRes = createCloudRequest({ baseURL: fakeEncryptionServer.baseUrl, enableEncryption: true })
-
-      // Good
-      try {
-        await SignedRes.post('/error-signed', {
-          foo: 'bar',
-        })
-
-        throw new Error('Unreachable')
-      } catch (e) {
-        expect(e.response.data).to.equal(JSON.stringify({ foo: 'bar' }))
-      }
-
-      // Bad
-      try {
-        await SignedRes.post('/invalid-error-signed', {})
-        throw new Error('Unreachable')
-      } catch (e) {
-        expect(e.message).to.equal('Unable to verify the request signature for /invalid-error-signed')
-      }
-    })
+      throw new Error('Unreachable')
+    } catch (e) {
+      expect(e.message).to.equal('Unable to verify response signature for /invalid-signed-post')
+    }
   })
 })
