@@ -73,6 +73,7 @@ describe('getStudioBundle', () => {
         'x-cypress-version': '1.2.3',
       },
       encrypt: 'signed',
+      signal: sinon.match.any,
     })
 
     expect(writeResult).to.eq('console.log("studio bundle")')
@@ -111,6 +112,7 @@ describe('getStudioBundle', () => {
         'x-cypress-version': '1.2.3',
       },
       encrypt: 'signed',
+      signal: sinon.match.any,
     })
 
     expect(writeResult).to.eq('console.log("studio bundle")')
@@ -138,6 +140,7 @@ describe('getStudioBundle', () => {
         'x-cypress-version': '1.2.3',
       },
       encrypt: 'signed',
+      signal: sinon.match.any,
     })
   })
 
@@ -161,6 +164,7 @@ describe('getStudioBundle', () => {
         'x-cypress-version': '1.2.3',
       },
       encrypt: 'signed',
+      signal: sinon.match.any,
     })
   })
 
@@ -198,6 +202,7 @@ describe('getStudioBundle', () => {
         'x-cypress-version': '1.2.3',
       },
       encrypt: 'signed',
+      signal: sinon.match.any,
     })
 
     expect(verifySignatureFromFileStub).to.be.calledWith('/tmp/cypress/studio/abc/bundle.tar', '159')
@@ -227,6 +232,7 @@ describe('getStudioBundle', () => {
         'x-cypress-version': '1.2.3',
       },
       encrypt: 'signed',
+      signal: sinon.match.any,
     })
   })
 })
