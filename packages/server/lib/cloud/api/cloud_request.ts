@@ -42,7 +42,6 @@ export const createCloudRequest = (options: CreateCloudRequestOptions = {}): Axi
     baseURL,
     httpAgent: agent,
     httpsAgent: agent,
-    allowAbsoluteUrls: false,
     headers: {
       'x-os-name': os.platform(),
       'x-cypress-version': pkg.version,
