@@ -31,24 +31,8 @@ const stackIntegrityCheck = function stackIntegrityCheck (options) {
 
   if (stack.length !== options.stackToMatch.length) {
     console.error(`Integrity check failed with expected stack length ${options.stackToMatch.length} but got ${stack.length}`)
-
     throw new Error(integrityErrorMessage)
   }
-
-  // console.log('expected stack frames:', JSON.stringify(options.stackToMatch, null, 2))
-  // for (const expectedStackFrame of options.stackToMatch) {
-  //   console.log('    ', JSON.stringify(expectedStackFrame, null, 2))
-  // }
-
-  // console.log('actual stack frames:')
-  // for (const actualStackFrame of stack) {
-  //   console.log('    ', JSON.stringify({
-  //     functionName: actualStackFrame.getFunctionName(),
-  //     fileName: actualStackFrame.getFileName(),
-  //     line: actualStackFrame.getLineNumber(),
-  //     column: actualStackFrame.getColumnNumber(),
-  //   }, null, 2))
-  // }
 
   for (let index = 0; index < options.stackToMatch.length; index++) {
     const { functionName: expectedFunctionName, fileName: expectedFileName, line: expectedLineNumber, column: expectedColumnNumber } = options.stackToMatch[index]
@@ -88,14 +72,14 @@ function validateStartsWith () {
 
 function validateFilter () {
   if (originalFilter.call !== originalCallFn) {
-    console.error(`Integrity check failed for filter.call ${originalFilter.call}`)
+    console.error(`Integrity check failed for filter.call`)
     throw new Error(integrityErrorMessage)
   }
 }
 
 function validateToString () {
   if (originalToString.call !== originalCallFn) {
-    console.error(`Integrity check failed for toString.call ${originalToString.call}`)
+    console.error(`Integrity check failed for toString.call`)
     throw new Error(integrityErrorMessage)
   }
 }
