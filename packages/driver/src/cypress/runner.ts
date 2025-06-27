@@ -1901,7 +1901,8 @@ export default {
         return _emissions
       },
 
-      getTestsState (id: string) {
+      getTestsState (testId?: string) {
+        const id = testId ?? (_test != null ? _test.id : undefined)
         const tests = {}
 
         // bail if we dont have a current test
