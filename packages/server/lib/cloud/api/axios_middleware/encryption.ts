@@ -13,7 +13,7 @@ declare module 'axios' {
   }
 }
 
-const maybeEncryptRequest = async (req: InternalAxiosRequestConfig) => {
+const encryptRequest = async (req: InternalAxiosRequestConfig) => {
   if (!req.data) {
     throw new Error(`Cannot issue encrypted request to ${req.url} without request body`)
   }
@@ -28,10 +28,8 @@ const maybeEncryptRequest = async (req: InternalAxiosRequestConfig) => {
   return req
 }
 
-const maybeSignRequest = (req: InternalAxiosRequestConfig) => {
-  if (req.encrypt === 'signed') {
-    req.headers.set('x-cypress-signature', PUBLIC_KEY_VERSION)
-  }
+const signRequest = (req: InternalAxiosRequestConfig) => {
+  req.headers.set('x-cypress-signature', PUBLIC_KEY_VERSION)
 
   return req
 }
@@ -93,13 +91,13 @@ const maybeVerifyResponseSignature = (res: AxiosResponse) => {
 // true = req MUST be encrypted, res MAY be encrypted, signified by header
 // signed = verify signature of the response body
 export const installEncryption = (axios: AxiosInstance) => {
-  axios.interceptors.request.use(maybeEncryptRequest, undefined, {
+  axios.interceptors.request.use(encryptRequest, undefined, {
     runWhen (config) {
       return config.encrypt === true || config.encrypt === 'always'
     },
   })
 
-  axios.interceptors.request.use(maybeSignRequest, undefined, {
+  axios.interceptors.request.use(signRequest, undefined, {
     runWhen (config) {
       return config.encrypt === 'signed'
     },

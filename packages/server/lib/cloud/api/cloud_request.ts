@@ -20,7 +20,7 @@ export interface CreateCloudRequestOptions {
   /**
    * Additional headers for the Cloud Request
    */
-  addditionalHeaders?: Record<string, string>
+  additionalHeaders?: Record<string, string>
   /**
    * Whether to include the default logging middleware
    * @default true
@@ -46,7 +46,7 @@ export const createCloudRequest = (options: CreateCloudRequestOptions = {}): Axi
       'x-os-name': os.platform(),
       'x-cypress-version': pkg.version,
       'User-Agent': `cypress/${pkg.version}`,
-      ...options.addditionalHeaders,
+      ...options.additionalHeaders,
     },
     transport: {
       // https://github.com/axios/axios/issues/6313#issue-2198831362
