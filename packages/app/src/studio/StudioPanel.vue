@@ -26,7 +26,7 @@
 </template>
 <script lang="ts" setup>
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
-import { init, loadRemote } from '@module-federation/runtime'
+import { init, loadRemote, registerRemotes } from '@module-federation/runtime'
 import type { StudioAppDefaultShape, StudioPanelShape } from './studio-app-types'
 import LoadingStudioPanel from './LoadingStudioPanel.vue'
 import StudioErrorPanel from './StudioErrorPanel.vue'
@@ -150,14 +150,22 @@ function loadStudioComponent () {
 
 function handleRetry () {
   error.value = null
-
   ReactStudioPanel.value = null
 
   // If status was IN_ERROR, we need to retry the studio initialization
   if (props.studioStatus === 'IN_ERROR') {
     retryStudioMutation.executeMutation({})
   } else {
-    // Otherwise, try to reload the studio component
+    // Otherwise, try to reload the studio component with a cache-busting parameter
+    registerRemotes([{
+      alias: 'app-studio',
+      type: 'module',
+      name: 'app-studio',
+      entryGlobalName: 'app-studio',
+      entry: `/__cypress-studio/app-studio.js?retry=${Date.now()}`,
+      shareScope: 'default',
+    }], { force: true })
+
     loadStudioComponent()
   }
 }

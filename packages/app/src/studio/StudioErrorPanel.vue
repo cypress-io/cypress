@@ -12,40 +12,37 @@
     </header>
 
     <div class="flex flex-col items-center justify-center w-full h-full gap-[16px] p-[48px_16px_0_16px] text-center">
-      <!-- Browser Icon with Error Indicator -->
       <div class="relative">
-        <IconTechnologyDashboardFail 
+        <IconTechnologyDashboardFail
           size="48"
           stroke-color="gray-500"
-          fill-color="gray-100"
-          secondary-fill-color="red-400"
+          fill-color="gray-900"
+          secondary-fill-color="red-200"
+          secondary-stroke-color="red-500"
         />
       </div>
-      
-      <!-- Error Message -->
+
       <div class="flex flex-col items-center gap-[4px] max-w-[448px]">
         <h2 class="text-white text-[16px] leading-[24px] font-medium">
           Something went wrong
         </h2>
         <p class="text-gray-400 text-[16px] leading-[24px]">
-          There was a problem with data loading. Our team has been notified.
+          There was a problem with Cypress Studio. Our team has been notified.
           If the problem persists, please try again later.
         </p>
       </div>
-      
-      <!-- Retry Button -->
+
       <Button
         variant="outline-dark"
         size="32"
         data-cy="studio-error-retry-button"
         @click="handleRetry"
       >
-        <template #prefix>
-          <IconActionRefresh
-            size="16"
-            stroke-color="gray-500"
-          />
-        </template>
+        <IconActionRefresh
+          size="16"
+          class="mr-2 pt-[1px]"
+          stroke-color="gray-500"
+        />
         Retry
       </Button>
     </div>
@@ -78,4 +75,4 @@ const handleRetry = () => {
     background-color: $gray-1100;
   }
 }
-</style> 
+</style>
