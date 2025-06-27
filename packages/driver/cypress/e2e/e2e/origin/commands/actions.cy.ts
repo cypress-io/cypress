@@ -250,6 +250,7 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
     it('.go()', () => {
       cy.get('a[data-cy="dom-link"]').click()
       cy.go('back')
+      cy.url().should('contain', '/fixtures/primary-origin.html')
     })
   })
 

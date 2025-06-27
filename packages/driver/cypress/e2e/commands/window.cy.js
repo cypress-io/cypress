@@ -494,7 +494,9 @@ describe('src/cy/commands/window', () => {
         return null
       })
 
-      it('throws after timing out', (done) => {
+      it('throws after timing out', {
+        defaultCommandTimeout: 100,
+      }, (done) => {
         cy.$$('title').remove()
 
         cy.on('fail', (err) => {
