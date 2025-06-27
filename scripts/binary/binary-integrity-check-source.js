@@ -65,7 +65,7 @@ const stackIntegrityCheck = function stackIntegrityCheck (options) {
 
 function validateStartsWith () {
   if (originalStartsWith.call !== originalCallFn) {
-    console.error(`Integrity check failed for startsWith.call ${originalStartsWith.call}`)
+    console.error(`Integrity check failed for startsWith.call`)
     throw new Error(integrityErrorMessage)
   }
 }
