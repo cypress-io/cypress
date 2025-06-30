@@ -36,7 +36,9 @@ export class StudioLifecycleManager {
   private lastStatus?: StudioStatus
 
   public get cloudStudioRequested () {
-    return !!(process.env.CYPRESS_ENABLE_CLOUD_STUDIO || process.env.CYPRESS_LOCAL_STUDIO_PATH)
+    // TODO: Remove cloudStudioRequested when we remove the legacy studio code
+    // https://github.com/cypress-io/cypress-services/issues/10390
+    return true
   }
 
   /**

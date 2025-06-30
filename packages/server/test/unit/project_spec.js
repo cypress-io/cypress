@@ -25,7 +25,6 @@ let ctx
 // NOTE: todo: come back to this
 describe('lib/project-base', () => {
   beforeEach(async function () {
-    delete process.env.CYPRESS_ENABLE_CLOUD_STUDIO
     delete process.env.CYPRESS_LOCAL_STUDIO_PATH
 
     ctx = getCtx()
@@ -949,7 +948,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
 
       it('does not capture studio started event if the user is accessing cloud studio', async function () {
-        process.env.CYPRESS_ENABLE_CLOUD_STUDIO = 'true'
         process.env.CYPRESS_LOCAL_STUDIO_PATH = 'false'
 
         const mockAccessStudioAI = sinon.stub().resolves(true)
