@@ -6,7 +6,7 @@ _Released 07/15/2025 (PENDING)_
 **Breaking Changes:**
 
 - Removed support for Node.js 18 and Node.js 23. Addresses [#31302](https://github.com/cypress-io/cypress/issues/31302).
-- Removed support for [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol) with the [firefox](https://www.mozilla.org/) browser. Addresses [#31189](https://github.com/cypress-io/cypress/issues/31189).
+- Removed support for [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol) with the [Firefox](https://www.mozilla.org/firefox/) browser. Addresses [#31189](https://github.com/cypress-io/cypress/issues/31189).
 - Removed support of the deprecated 3 argument signature of `cy.stub`. Use `cy.stub(object, name).callsFake(fn)` instead. Addresses [#31346](https://github.com/cypress-io/cypress/issues/31346).
 - `@cypress/webpack-dev-server` and `@cypress/webpack-preprocessor` no longer support `webpack` version 4. Addresses [#31344](https://github.com/cypress-io/cypress/issues/31344). If you still need to use `webpack` version 4, please see our [migration guide](https://docs.cypress.io/app/references/migration-guide#Migrating-to-Cypress-150).
 - `@cypress/webpack-dev-server` no longer supports `webpack-dev-server` version 4. Addresses [#31605](https://github.com/cypress-io/cypress/issues/31605). If you still need to use `webpack-dev-server` version 4, please see our [migration guide](https://docs.cypress.io/app/references/migration-guide#Migrating-to-Cypress-150).
@@ -33,6 +33,14 @@ _Released 07/15/2025 (PENDING)_
 - Upgraded `electron` from `33.2.1` to `36.4.0`. Addresses [#31257](https://github.com/cypress-io/cypress/issues/31257). Addressed in [#31912](https://github.com/cypress-io/cypress/pull/31912).
 - Upgraded bundled Node.js version from `20.18.1` to `22.14.0`. Addresses [#31257](https://github.com/cypress-io/cypress/issues/31257). Addressed in [#31912](https://github.com/cypress-io/cypress/pull/31912).
 - Upgraded bundled Chromium version from `130.0.6723.137` to `134.0.6998.165`. Addresses [#31257](https://github.com/cypress-io/cypress/issues/31257). Addressed in [#31912](https://github.com/cypress-io/cypress/pull/31912).
+
+## 14.5.1
+
+_Released 7/01/2025 (PENDING)_
+
+**Dependency Updates:**
+
+- Updated `pbkdf2` from `3.1.2` to `3.1.3`. This removes the [SNYK-JS-PBKDF2-10495498](https://security.snyk.io/vuln/SNYK-JS-PBKDF2-10495498) vulnerability being reported in security scans. Addressed in [#31941](https://github.com/cypress-io/cypress/pull/31941).
 
 ## 14.5.0
 
