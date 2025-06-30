@@ -31,7 +31,7 @@ export const ensureCyPromptBundle = async ({ cyPromptPath, cyPromptUrl, projectI
 
   let timeoutId: NodeJS.Timeout
 
-  const responseManifestSignature = await Promise.race([
+  const responseManifestSignature: string = await Promise.race([
     getCyPromptBundle({
       cyPromptUrl,
       projectId,

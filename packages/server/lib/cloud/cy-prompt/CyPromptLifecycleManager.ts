@@ -159,11 +159,18 @@ export class CyPromptLifecycleManager {
     const serverFilePath = path.join(cyPromptPath, 'server', 'index.js')
 
     const script = await readFile(serverFilePath, 'utf8')
-    const expectedHash = manifest[path.join('server', 'index.js')]
-    const actualHash = crypto.createHash('sha256').update(script).digest('hex')
 
-    if (!process.env.CYPRESS_LOCAL_CY_PROMPT_PATH && actualHash !== expectedHash) {
-      throw new Error('Invalid hash for cy prompt server script')
+    if (!process.env.CYPRESS_LOCAL_CY_PROMPT_PATH) {
+      const expectedHash = manifest[path.join('server', 'index.js')]
+      const actualHash = crypto.createHash('sha256').update(script).digest('hex')
+
+      if (!expectedHash) {
+        throw new Error('cy prompt server script not found in manifest')
+      }
+
+      if (actualHash !== expectedHash) {
+        throw new Error('Invalid hash for cy prompt server script')
+      }
     }
 
     const cyPromptManager = new CyPromptManager()

@@ -297,6 +297,32 @@ describe('CyPromptLifecycleManager', () => {
       expect(mockCyPromptManagerPromise).to.be.present
       expect(await mockCyPromptManagerPromise).to.equal(updatedCyPromptManager)
     })
+
+    it('throws an error when the cy-prompt server script is not found in the manifest', async () => {
+      cyPromptManagerSetupStub.callsFake((args) => {
+        return Promise.resolve()
+      })
+
+      const mockManifest = {}
+
+      ensureCyPromptBundleStub.resolves(mockManifest)
+
+      cyPromptLifecycleManager.initializeCyPromptManager({
+        cloudDataSource: mockCloudDataSource,
+        ctx: mockCtx,
+        record: false,
+        key: '123e4567-e89b-12d3-a456-426614174000',
+      })
+
+      // @ts-expect-error - accessing private property
+      const cyPromptPromise = cyPromptLifecycleManager.cyPromptManagerPromise
+
+      expect(cyPromptPromise).to.not.be.null
+
+      const { error } = await cyPromptPromise
+
+      expect(error.message).to.equal('cy prompt server script not found in manifest')
+    })
   })
 
   describe('getCyPrompt', () => {
