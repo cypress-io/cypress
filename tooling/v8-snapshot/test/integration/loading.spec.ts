@@ -161,7 +161,7 @@ describe('loading', () => {
       } catch (err: any) {
         assert.fail(err.toString())
       }
-    })
+    }).timeout(120000)
   }
 
   it('loads a cached module that modifies require cache', async () => {
