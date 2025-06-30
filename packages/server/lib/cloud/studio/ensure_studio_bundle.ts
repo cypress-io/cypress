@@ -36,7 +36,7 @@ export const ensureStudioBundle = async ({
 
   let timeoutId: NodeJS.Timeout
 
-  const responseManifestSignature = await Promise.race([
+  const responseManifestSignature: string = await Promise.race([
     getStudioBundle({
       studioUrl,
       bundlePath,

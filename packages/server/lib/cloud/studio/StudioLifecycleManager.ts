@@ -204,11 +204,18 @@ export class StudioLifecycleManager {
     const serverFilePath = path.join(studioPath, 'server', 'index.js')
 
     const script = await readFile(serverFilePath, 'utf8')
-    const expectedHash = manifest[path.join('server', 'index.js')]
-    const actualHash = crypto.createHash('sha256').update(script).digest('hex')
 
-    if (!process.env.CYPRESS_LOCAL_STUDIO_PATH && actualHash !== expectedHash) {
-      throw new Error('Invalid hash for studio server script')
+    if (!process.env.CYPRESS_LOCAL_STUDIO_PATH) {
+      const expectedHash = manifest[path.join('server', 'index.js')]
+      const actualHash = crypto.createHash('sha256').update(script).digest('hex')
+
+      if (!actualHash) {
+        throw new Error('Studio server script not found in manifest')
+      }
+
+      if (actualHash !== expectedHash) {
+        throw new Error('Invalid hash for studio server script')
+      }
     }
 
     const studioManager = new StudioManager()
