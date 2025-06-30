@@ -209,8 +209,8 @@ export class StudioLifecycleManager {
       const expectedHash = manifest[path.join('server', 'index.js')]
       const actualHash = crypto.createHash('sha256').update(script).digest('hex')
 
-      if (!actualHash) {
-        throw new Error('Studio server script not found in manifest')
+      if (!expectedHash) {
+        throw new Error('Expected hash for studio server script not found in manifest')
       }
 
       if (actualHash !== expectedHash) {
