@@ -69,12 +69,14 @@ export function verifySignatureFromFile (file: string, signature: string, public
 // in the jose library (https://github.com/panva/jose/blob/main/src/jwe/general/encrypt.ts),
 // but allows us to keep track of the encrypting key locally, to optionally use it for decryption
 // of encrypted payloads coming back in the response body.
-export async function encryptRequest (params: CypressRequestOptions, publicKey?: crypto.KeyObject): Promise<EncryptRequestData> {
-  const key = publicKey || getPublicKey()
+export async function encryptRequest (params: Pick<CypressRequestOptions, 'body'>, options: {
+  publicKey?: crypto.KeyObject
+  secretKey?: crypto.KeyObject
+} = {}): Promise<EncryptRequestData> {
+  const { publicKey = getPublicKey(), secretKey = crypto.createSecretKey(crypto.randomBytes(32)) } = options
   const header = base64Url(JSON.stringify({ alg: 'RSA-OAEP', enc: 'A256GCM', zip: 'DEF' }))
   const deflated = await deflateRaw(JSON.stringify(params.body))
   const iv = crypto.randomBytes(12)
-  const secretKey = crypto.createSecretKey(crypto.randomBytes(32))
   const cipher = crypto.createCipheriv('aes-256-gcm', secretKey, iv, { authTagLength: 16 })
   const aad = new TextEncoder().encode(header)
 
@@ -95,7 +97,7 @@ export async function encryptRequest (params: CypressRequestOptions, publicKey?:
       ciphertext: base64Url(encrypted),
       recipients: [
         {
-          encrypted_key: base64Url(crypto.publicEncrypt(key, secretKey.export())),
+          encrypted_key: base64Url(crypto.publicEncrypt(publicKey, secretKey.export())),
         },
       ],
       tag: base64Url(cipher.getAuthTag()),

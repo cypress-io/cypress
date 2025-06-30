@@ -36,6 +36,7 @@ import { PUBLIC_KEY_VERSION } from '../constants'
 import type { CreateInstanceRequestBody, CreateInstanceResponse } from './create_instance'
 
 import { transformError } from './axios_middleware/transform_error'
+import { DecryptionError } from './cloud_request_errors'
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
@@ -56,15 +57,6 @@ const runnerCapabilities = {
 let responseCache = {}
 
 const CAPTURE_ERRORS = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
-
-class DecryptionError extends Error {
-  isDecryptionError = true
-
-  constructor (message: string) {
-    super(message)
-    this.name = 'DecryptionError'
-  }
-}
 
 export interface CypressRequestOptions extends OptionsWithUrl {
   encrypt?: boolean | 'always' | 'signed'
