@@ -1074,7 +1074,7 @@ export default (Commands, Cypress, cy, state, config) => {
           // state for like scrollTop
           let runState: RunState = {
             currentId: id,
-            tests: Cypress.runner.getTestsState(),
+            tests: Cypress.runner.getTestsState(id),
             startTime: Cypress.runner.getStartTime(),
             emissions: Cypress.runner.getEmissions(),
           }

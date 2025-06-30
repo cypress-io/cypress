@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 14.5.1
+
+_Released 7/01/2025 (PENDING)_
+
+**Dependency Updates:**
+
+- Updated `pbkdf2` from `3.1.2` to `3.1.3`. This removes the [SNYK-JS-PBKDF2-10495498](https://security.snyk.io/vuln/SNYK-JS-PBKDF2-10495498) vulnerability being reported in security scans. Addressed in [#31941](https://github.com/cypress-io/cypress/pull/31941).
+
 ## 14.5.0
 
 _Released 6/17/2025_
@@ -10,6 +18,7 @@ _Released 6/17/2025_
 **Bugfixes:**
 
 - Fixed an issue when using `Cypress.stop()` where a run may be aborted prior to receiving the required runner events causing Test Replay to not be available. Addresses [#31781](https://github.com/cypress-io/cypress/issues/31781).
+- Fixed an issue where prerequests with Firefox BiDi were prematurely being removed or matched incorrectly. Addresses [#31482](https://github.com/cypress-io/cypress/issues/31482).
 
 ## 14.4.1
 
