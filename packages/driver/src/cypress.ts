@@ -43,7 +43,7 @@ import * as resolvers from './cypress/resolvers'
 import { PrimaryOriginCommunicator, SpecBridgeCommunicator } from './cross-origin/communicator'
 import { setupAutEventHandlers } from './cypress/aut_event_handlers'
 
-import type { CachedTestState, ReporterRunState } from '@packages/types'
+import type { CachedTestState, ReporterRunState, RunState } from '@packages/types'
 import { DocumentDomainInjection } from '@packages/network/lib/document-domain-injection'
 import { setSpecContentSecurityPolicy } from './util/privileged_channel'
 
@@ -822,27 +822,27 @@ class $Cypress {
     return this.backendRequestHandler('backend:request', eventName, ...args)
   }
 
-  async preserveRunState (testId: string) {
-    const tests = Cypress.runner.getTestsState(testId)
-    let runState = {
+  preserveRunState (testId: string) {
+    const tests = this.runner.getTestsState(testId)
+    let runState: RunState = {
       currentId: testId,
-      tests: Cypress.runner.getTestsState(testId),
-      startTime: Cypress.runner.getStartTime(),
-      emissions: Cypress.runner.getEmissions(),
-      passed: Cypress.runner.countByTestState(tests, 'passed'),
-      failed: Cypress.runner.countByTestState(tests, 'failed'),
-      pending: Cypress.runner.countByTestState(tests, 'pending'),
+      tests: this.runner.getTestsState(testId),
+      startTime: this.runner.getStartTime(),
+      emissions: this.runner.getEmissions(),
+      passed: this.runner.countByTestState(tests, 'passed'),
+      failed: this.runner.countByTestState(tests, 'failed'),
+      pending: this.runner.countByTestState(tests, 'pending'),
       numLogs: LogUtils.countLogsByTests(tests),
     }
 
-    const otherRunStates: ReporterRunState = await Cypress.action('cy:collect:run:state')
+    return this.action('cy:collect:run:state').then((otherRunStates: ReporterRunState) => {
+      // merge all the states together
+      runState = _.reduce(otherRunStates, (memo, obj) => {
+        return _.extend(memo, obj)
+      }, runState)
 
-    // merge all the states together
-    runState = _.reduce(otherRunStates, (memo, obj) => {
-      return _.extend(memo, obj)
-    }, runState)
-
-    await Cypress.backend('preserve:run:state', runState)
+      return this.backend('preserve:run:state', runState)
+    })
   }
 
   automation (eventName, ...args) {
