@@ -44,7 +44,7 @@
             </div>
             <div class="children:mb-[16px]">
               <p>
-                This release prepares Cypress Studio for the next era of AI-assisted test creation. You can record interactions, add assertions by right-clicking, and now edit tests inline without leaving Cypress. Turn on <InlineCodeFragment>experimentalStudio</InlineCodeFragment>. in your config to try it out and share your feedback.
+                This release prepares Cypress Studio for the next era of AI-assisted test creation. You can record interactions, add assertions by right-clicking, and now edit tests inline without leaving Cypress. Turn on <InlineCodeFragment>experimentalStudio</InlineCodeFragment> in your config to try it out and share your feedback.
               </p>
               <p>
                 We’ve also made important changes to improve reliability, future compatibility, and cross-origin support. Several older versions of Node.js, browser protocols, and Webpack integrations are no longer supported.
