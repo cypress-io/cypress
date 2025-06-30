@@ -161,7 +161,7 @@ export class CyPromptLifecycleManager {
     const script = await readFile(serverFilePath, 'utf8')
 
     if (!process.env.CYPRESS_LOCAL_CY_PROMPT_PATH) {
-      const expectedHash = manifest[path.join('server', 'index.js')]
+      const expectedHash = manifest[path.posix.join('server', 'index.js')]
       const actualHash = crypto.createHash('sha256').update(script).digest('hex')
 
       if (!expectedHash) {
