@@ -27,6 +27,18 @@ describe('Cypress Studio', () => {
     cy.findByTestId('studio-button').should('be.visible')
   })
 
+  it('does not display the launch studio button when test is pending', () => {
+    loadProjectAndRunSpec({ specName: 'skipped.cy.js' })
+
+    cy.contains('skipped test')
+    .closest('.runnable-wrapper').as('runnable-wrapper')
+    .realHover()
+
+    cy.get('@runnable-wrapper')
+    .findByTestId('launch-studio')
+    .should('not.exist')
+  })
+
   it('updates an existing test with an action', () => {
     launchStudio()
 
