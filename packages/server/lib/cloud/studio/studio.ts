@@ -70,7 +70,7 @@ export class StudioManager implements StudioManagerShape {
     return Promise.resolve()
   }
 
-  addSocketListeners (socket: Socket, onTestFileChange?: (filePath: string) => void): void {
+  addSocketListeners (socket: Socket, onTestFileChange: (filePath: string) => void): void {
     if (this._studioServer) {
       this.invokeSync('addSocketListeners', { isEssential: true }, socket, onTestFileChange)
     }
