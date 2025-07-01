@@ -77,7 +77,9 @@ export class StudioManager implements StudioManagerShape {
   }
 
   async canAccessStudioAI (browser: Cypress.Browser): Promise<boolean> {
-    return (await this.invokeAsync('canAccessStudioAI', { isEssential: true }, browser)) ?? false
+    const envEnabled = !!(process.env.CYPRESS_ENABLE_CLOUD_STUDIO_AI === 'true' || process.env.CYPRESS_LOCAL_STUDIO_PATH)
+
+    return envEnabled && ((await this.invokeAsync('canAccessStudioAI', { isEssential: true }, browser)) ?? false)
   }
 
   async initializeStudioAI (options: StudioAIInitializeOptions): Promise<void> {

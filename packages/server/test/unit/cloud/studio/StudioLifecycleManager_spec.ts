@@ -164,31 +164,7 @@ describe('StudioLifecycleManager', () => {
   })
 
   describe('cloudStudioRequested', () => {
-    it('is true when CYPRESS_ENABLE_CLOUD_STUDIO is set', async () => {
-      process.env.CYPRESS_ENABLE_CLOUD_STUDIO = '1'
-      delete process.env.CYPRESS_LOCAL_STUDIO_PATH
-
-      expect(studioLifecycleManager.cloudStudioRequested).to.be.true
-    })
-
-    it('is true when CYPRESS_LOCAL_STUDIO_PATH is set', async () => {
-      delete process.env.CYPRESS_ENABLE_CLOUD_STUDIO
-      process.env.CYPRESS_LOCAL_STUDIO_PATH = '/path/to/studio'
-
-      expect(studioLifecycleManager.cloudStudioRequested).to.be.true
-    })
-
-    it('is false when neither env variable is set', async () => {
-      delete process.env.CYPRESS_ENABLE_CLOUD_STUDIO
-      delete process.env.CYPRESS_LOCAL_STUDIO_PATH
-
-      expect(studioLifecycleManager.cloudStudioRequested).to.be.false
-    })
-
-    it('is true when both env variables are set', async () => {
-      process.env.CYPRESS_ENABLE_CLOUD_STUDIO = '1'
-      process.env.CYPRESS_LOCAL_STUDIO_PATH = '/path/to/studio'
-
+    it('is always true', () => {
       expect(studioLifecycleManager.cloudStudioRequested).to.be.true
     })
   })
@@ -236,7 +212,7 @@ describe('StudioLifecycleManager', () => {
           isRetryableError,
           asyncRetry,
         },
-        shouldEnableStudio: false,
+        shouldEnableStudio: true,
       })
 
       expect(postStudioSessionStub).to.be.calledWith({
@@ -313,7 +289,7 @@ describe('StudioLifecycleManager', () => {
           isRetryableError,
           asyncRetry,
         },
-        shouldEnableStudio: false,
+        shouldEnableStudio: true,
       })
 
       expect(postStudioSessionStub).to.be.calledWith({

@@ -1,6 +1,6 @@
 # Studio Development
 
-In production, the code used to facilitate Studio functionality will be retrieved from the Cloud. While Studio is still in its early stages it is hidden behind an environment variable: `CYPRESS_ENABLE_CLOUD_STUDIO` but can also be run against local cloud Studio code via the environment variable: `CYPRESS_LOCAL_STUDIO_PATH`.
+In production, the code used to facilitate Studio functionality will be retrieved from the Cloud. During development, the environment variable `CYPRESS_LOCAL_STUDIO_PATH` can be used to run against a local version.
 
 To run against locally developed Studio:
 
@@ -15,7 +15,7 @@ To run against a deployed version of studio:
 
 - Set:
   - `CYPRESS_INTERNAL_ENV=<environment>` (e.g. `staging` or `production` if you want to hit those deployments of `cypress-services` or `development` if you want to hit a locally running version of `cypress-services`)
-  - `CYPRESS_ENABLE_CLOUD_STUDIO=true`
+  - `CYPRESS_ENABLE_CLOUD_STUDIO_AI` to `true` if AI functionality is needed (note, the feature flag will also need to be set in the appropriate environment).
 
 Regardless of running against local or deployed studio:
 

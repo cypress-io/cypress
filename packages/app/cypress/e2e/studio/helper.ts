@@ -1,10 +1,10 @@
 import type { ProjectFixtureDir } from '@tooling/system-tests'
 
-export function loadProjectAndRunSpec ({ projectName = 'experimental-studio' as ProjectFixtureDir, specName = 'spec.cy.js', cliArgs = [''], enableCloudStudio = false, specSelector = 'data-cy-row' } = {}) {
+export function loadProjectAndRunSpec ({ projectName = 'experimental-studio' as ProjectFixtureDir, specName = 'spec.cy.js', cliArgs = [''], specSelector = 'data-cy-row' } = {}) {
+  cy.viewport(1500, 1000)
+
   cy.scaffoldProject(projectName)
-  cy.openProject(projectName, cliArgs, {
-    cloudStudio: enableCloudStudio,
-  })
+  cy.openProject(projectName, cliArgs)
 
   cy.startAppServer('e2e')
   cy.visitApp()
@@ -14,8 +14,8 @@ export function loadProjectAndRunSpec ({ projectName = 'experimental-studio' as 
   cy.waitForSpecToFinish()
 }
 
-export function launchStudio ({ specName = 'spec.cy.js', createNewTest = false, cliArgs = [''], enableCloudStudio = false } = {}) {
-  loadProjectAndRunSpec({ specName, cliArgs, enableCloudStudio })
+export function launchStudio ({ specName = 'spec.cy.js', createNewTest = false, cliArgs = [''] } = {}) {
+  loadProjectAndRunSpec({ specName, cliArgs })
 
   // Should not show "Studio Commands" until we've started a new Studio session.
   cy.get('[data-cy="hook-name-studio commands"]').should('not.exist')
