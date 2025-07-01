@@ -15,6 +15,7 @@ To run against a deployed version of studio:
 
 - Set:
   - `CYPRESS_INTERNAL_ENV=<environment>` (e.g. `staging` or `production` if you want to hit those deployments of `cypress-services` or `development` if you want to hit a locally running version of `cypress-services`)
+  - `CYPRESS_ENABLE_CLOUD_STUDIO_AI` to `true` if AI functionality is needed (note, the feature flag will also need to be set in the appropriate environment).
 
 Regardless of running against local or deployed studio:
 
