@@ -7,6 +7,7 @@ import { handleGraphQLSocketRequest } from '@packages/graphql/src/makeGraphQLSer
 import { onNetStubbingEvent } from '@packages/net-stubbing'
 import * as socketIo from '@packages/socket'
 import { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
+import { fs } from './util/fs'
 
 import * as errors from './errors'
 import fixture from './fixture'
@@ -62,6 +63,18 @@ export class SocketBase {
     this.supportsRunEvents = config.isTextTerminal || config.experimentalInteractiveRunEvents
     this.ended = false
     this.localBus = new EventEmitter()
+  }
+
+  protected onTestFileChange = (filePath: string) => {
+    debug('test file changed %o', filePath)
+
+    return fs.statAsync(filePath)
+    .then(() => {
+      this._cdpIo?.emit('watched:file:changed')
+      this._socketIo?.emit('watched:file:changed')
+    }).catch(() => {
+      return debug('could not find test file that changed %o', filePath)
+    })
   }
 
   protected ensureProp = ensureProp
@@ -406,7 +419,7 @@ export class SocketBase {
         })
 
         getCtx().coreData.studioLifecycleManager?.registerStudioReadyListener((studio) => {
-          studio.addSocketListeners(socket)
+          studio.addSocketListeners(socket, this.onTestFileChange)
         })
 
         socket.on('studio:init', async (cb) => {

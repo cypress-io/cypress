@@ -1,7 +1,6 @@
 import Debug from 'debug'
 import preprocessor from './plugins/preprocessor'
 import { SocketBase } from './socket-base'
-import { fs } from './util/fs'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import * as studio from './studio'
 import type { FoundSpec } from '@packages/types'
@@ -20,7 +19,6 @@ export class SocketE2E extends SocketBase {
 
     this.testFilePath = null
 
-    this.onTestFileChange = this.onTestFileChange.bind(this)
     this.onStudioTestFileChange = this.onStudioTestFileChange.bind(this)
     this.removeOnStudioTestFileChange = this.removeOnStudioTestFileChange.bind(this)
 
@@ -39,18 +37,6 @@ export class SocketE2E extends SocketBase {
 
   removeOnStudioTestFileChange () {
     return preprocessor.emitter.off('file:updated', this.onStudioTestFileChange)
-  }
-
-  onTestFileChange = (filePath) => {
-    debug('test file changed %o', filePath)
-
-    return fs.statAsync(filePath)
-    .then(() => {
-      this._cdpIo?.emit('watched:file:changed')
-      this._socketIo?.emit('watched:file:changed')
-    }).catch(() => {
-      return debug('could not find test file that changed %o', filePath)
-    })
   }
 
   watchTestFileByPath (config, specConfig: FoundSpec) {
