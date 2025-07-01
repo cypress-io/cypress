@@ -15,6 +15,18 @@ describe('Cypress Studio', () => {
     })
   }
 
+  it('does not show the studio button if experimentalStudio is not enabled', () => {
+    loadProjectAndRunSpec({ cliArgs: ['--config', 'experimentalStudio=false'] })
+
+    cy.findByTestId('studio-button').should('not.exist')
+  })
+
+  it('shows the studio button if experimentalStudio is enabled', () => {
+    loadProjectAndRunSpec({ cliArgs: ['--config', 'experimentalStudio=true'] })
+
+    cy.findByTestId('studio-button').should('be.visible')
+  })
+
   it('updates an existing test with an action', () => {
     launchStudio()
 
