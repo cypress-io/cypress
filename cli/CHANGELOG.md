@@ -1521,3 +1521,9 @@ _Released 1/24/2023_
 - Video output link in `cypress run` mode has been added to it's own line to
   make the video output link more easily clickable in the terminal. Addresses
   [#23913](https://github.com/cypress-io/cypress/issues/23913).
+## Unreleased
+
+
+
+### Features
+- Added `.containIgnoreCase()` command to support case-insensitive text assertions. [#31979](https://github.com/cypress-io/cypress/issues/31979)
