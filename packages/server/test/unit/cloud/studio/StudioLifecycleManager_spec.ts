@@ -212,7 +212,7 @@ describe('StudioLifecycleManager', () => {
           isRetryableError,
           asyncRetry,
         },
-        shouldEnableStudio: false,
+        shouldEnableStudio: true,
       })
 
       expect(postStudioSessionStub).to.be.calledWith({
@@ -289,7 +289,7 @@ describe('StudioLifecycleManager', () => {
           isRetryableError,
           asyncRetry,
         },
-        shouldEnableStudio: false,
+        shouldEnableStudio: true,
       })
 
       expect(postStudioSessionStub).to.be.calledWith({

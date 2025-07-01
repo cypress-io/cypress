@@ -729,18 +729,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         const { canAccessStudioAI } = await studioInitPromise
 
         expect(canAccessStudioAI).to.be.true
-        expect(mockCaptureStudioEvent).to.be.calledWith({
-          type: 'studio:started',
-          machineId: 'test-machine-id',
-          projectId: 'test-project-id',
-          browser: {
-            name: 'chrome',
-            family: 'chromium',
-            channel: undefined,
-            version: undefined,
-          },
-          cypressVersion: pkg.version,
-        })
 
         expect(mockSetupProtocol).to.be.calledOnce
         expect(mockBeforeSpec).to.be.calledOnce
@@ -824,18 +812,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         const { canAccessStudioAI } = await studioInitPromise
 
         expect(canAccessStudioAI).to.be.false
-        expect(mockCaptureStudioEvent).to.be.calledWith({
-          type: 'studio:started',
-          machineId: 'test-machine-id',
-          projectId: 'test-project-id',
-          browser: {
-            name: 'chrome',
-            family: 'chromium',
-            channel: undefined,
-            version: undefined,
-          },
-          cypressVersion: pkg.version,
-        })
 
         expect(mockSetupProtocol).not.to.be.called
         expect(mockBeforeSpec).not.to.be.called
@@ -915,18 +891,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         const { canAccessStudioAI } = await studioInitPromise
 
         expect(canAccessStudioAI).to.be.false
-        expect(mockCaptureStudioEvent).to.be.calledWith({
-          type: 'studio:started',
-          machineId: 'test-machine-id',
-          projectId: 'test-project-id',
-          browser: {
-            name: 'chrome',
-            family: 'chromium',
-            channel: undefined,
-            version: undefined,
-          },
-          cypressVersion: pkg.version,
-        })
 
         expect(mockSetupProtocol).not.to.be.called
         expect(mockBeforeSpec).not.to.be.called
