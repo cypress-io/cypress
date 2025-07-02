@@ -1032,6 +1032,7 @@ export class EventManager {
       })
     })
 
+    this.localBus.removeAllListeners('prompt:more-info-needed')
     this.localBus.on('prompt:more-info-needed', ({ testId, logId, onSave, onCancel }) => {
       this.promptStore.openMoreInfoNeededModal({
         testId,
