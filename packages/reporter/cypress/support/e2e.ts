@@ -4,7 +4,7 @@ import { installCustomPercyCommand } from '@packages/frontend-shared/cypress/sup
 
 installCustomPercyCommand({
   before () {
-    cy.get('.toggle-specs-text').should('be.visible')
+    cy.get('.toggle-specs-button').should('be.visible')
   },
   elementOverrides: {
     '.command-progress': true,

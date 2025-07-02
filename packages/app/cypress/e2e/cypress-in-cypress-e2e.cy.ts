@@ -18,7 +18,6 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
 
     cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
     cy.findByTestId('aut-url').should('be.visible')
-    cy.findByTestId('playground-activator').should('be.visible')
     cy.findByTestId('select-browser').click()
 
     cy.contains('Canary').should('be.visible')
@@ -35,45 +34,10 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.contains('Canary').should('be.hidden')
     cy.get('body').click()
 
-    cy.findByTestId('playground-activator').click()
-    cy.findByTestId('playground-selector').clear().type('li')
-
-    // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
-    // snapshotAUTPanel('cy.get selector')
-
-    cy.findByTestId('playground-num-elements').contains('3 matches')
-
-    // This validates that each matching element is covered by the playground highlighting
-    cy.get('iframe.aut-iframe').its('0.contentDocument.body').then(cy.wrap).within(() => {
-      cy.get('li').each(($highlightedItem) => {
-        const el = $highlightedItem[0]
-        const rect = el.getBoundingClientRect()
-
-        const elAtPoint = el.ownerDocument.elementFromPoint(rect.left, rect.top)
-
-        expect(el).not.eq(elAtPoint)
-      })
-    })
-
-    cy.findByLabelText('Selector methods').click()
-    cy.findByRole('menuitem', { name: 'cy.contains' }).click()
-
-    cy.findByTestId('playground-selector').clear().type('Item 1')
-
-    // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
-    // snapshotAUTPanel('cy.contains selector')
-
-    cy.findByTestId('playground-num-elements').contains('1 match')
-
-    cy.window().then((win) => cy.spy(win.console, 'log'))
-    cy.findByTestId('playground-print').click().window().then((win) => {
-      expect(win.console.log).to.have.been.calledWith('%cCommand:  ', 'font-weight: bold', 'cy.contains(\'Item 1\')')
-    })
-
     cy.get('.hook-open-in-ide').should('exist')
 
     cy.get('#unified-runner').then((el) => {
-      expect(el[0].getAttribute('style')).to.match(/width: 1000px; height: 660px; transform: scale\(0.769\d+\); position: absolute; margin-left: -25px;/)
+      expect(el[0].getAttribute('style')).to.match(/width: 1000px; height: 660px; transform: scale\(0.854\d+\); position: absolute; margin-left: -25px;/)
     })
   })
 
@@ -213,7 +177,6 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.visitApp()
     cy.specsPageIsVisible()
     cy.contains('withFailure.spec').click()
-    cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
 
     cy.get('[data-cy="runnable-header"]').should('be.visible')
     cy.get('body').type('f')

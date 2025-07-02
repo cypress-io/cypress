@@ -7,7 +7,6 @@ import cs from 'classnames'
 import events, { Events } from '../lib/events'
 import appState, { AppState } from '../lib/app-state'
 import Collapsible from '../collapsible/collapsible'
-import { indent } from '../lib/util'
 import TestModel from './test-model'
 
 import scroller, { Scroller } from '../lib/scroller'
@@ -17,7 +16,6 @@ import { LaunchStudioIcon } from '../components/LaunchStudioIcon'
 
 import CheckIcon from '@packages/frontend-shared/src/assets/icons/checkmark_x16.svg'
 import ClipboardIcon from '@packages/frontend-shared/src/assets/icons/general-clipboard_x16.svg'
-import WarningIcon from '@packages/frontend-shared/src/assets/icons/warning_x16.svg'
 
 interface StudioControlsProps {
   events?: Events
@@ -137,16 +135,6 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
   const _controls = () => {
     let controls: Array<JSX.Element> = []
 
-    if (model.state === 'failed') {
-      controls.push(
-        <Tooltip key={`test-failed-${model}`} placement='top' title='One or more commands failed' className='cy-tooltip'>
-          <span>
-            <WarningIcon className="runnable-controls-status" />
-          </span>
-        </Tooltip>,
-      )
-    }
-
     if (studioEnabled && !appStateProps.studioActive && model.state !== 'pending') {
       controls.push(
         <LaunchStudioIcon
@@ -173,15 +161,14 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
       containerRef={containerRef}
       header={_header()}
       headerClass='runnable-wrapper'
-      headerStyle={{ paddingLeft: indent(model.level) }}
       contentClass='runnable-instruments'
       isOpen={model.isOpen}
       onOpenStateChangeRequested={(isOpen: boolean) => model.setIsOpen(isOpen)}
       hideExpander
     >
-      <div style={{ paddingLeft: indent(model.level) }}>
+      <div>
         <Attempts studioActive={appStateProps.studioActive} test={model} scrollIntoView={() => _scrollIntoView()} />
-        {appStateProps.studioActive && <StudioControls canSaveStudioLogs={canSaveStudioLogs}/>}
+        {appStateProps.studioActive && <StudioControls canSaveStudioLogs={canSaveStudioLogs} />}
       </div>
     </Collapsible>
   )

@@ -4,6 +4,10 @@
     font-size: 16px;
     font-weight: 400;
     color: $gray-700;
+
+    &::before {
+      width: 0;
+    }
   }
 
   .testing-preference {

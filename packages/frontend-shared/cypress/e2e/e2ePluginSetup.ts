@@ -42,14 +42,9 @@ const pkg = require('@packages/root')
 
 const dummyProtocolPath = path.join(__dirname, '../fixtures/dummy-protocol.js')
 
-export interface InternalOpenProjectCapabilities {
-  cloudStudio: boolean
-}
-
 interface InternalOpenProjectArgs {
   argv: string[]
   projectName: string
-  capabilities: InternalOpenProjectCapabilities
 }
 
 interface InternalAddProjectOpts {
@@ -199,7 +194,6 @@ async function makeE2ETasks () {
      * Clear out any capability specific environment variables that were set during the test
      */
     __internal__afterEach () {
-      delete process.env.CYPRESS_ENABLE_CLOUD_STUDIO
       delete process.env.CYPRESS_IN_CYPRESS_MOCK_FULL_SNAPSHOT
       nock.cleanAll()
 
@@ -425,13 +419,11 @@ async function makeE2ETasks () {
         e2eServerPort: ctx.coreData.servers.appServerPort,
       }
     },
-    async __internal_openProject ({ argv, projectName, capabilities }: InternalOpenProjectArgs): Promise<ResetOptionsResult> {
-      if (capabilities.cloudStudio) {
-        process.env.CYPRESS_ENABLE_CLOUD_STUDIO = 'true'
-        // Cypress in Cypress testing breaks pretty heavily in terms of the inner Cypress's protocol. For now, we essentially
-        // disable the protocol by using a dummy protocol that does nothing and allowing tests to mock studio full snapshots as needed.
-        process.env.CYPRESS_LOCAL_PROTOCOL_PATH = dummyProtocolPath
-      }
+    async __internal_openProject ({ argv, projectName }: InternalOpenProjectArgs): Promise<ResetOptionsResult> {
+      // Cypress in Cypress testing breaks pretty heavily in terms of the inner Cypress's protocol. For now, we essentially
+      // disable the protocol by using a dummy protocol that does nothing and allowing tests to mock studio full snapshots as needed.
+      process.env.CYPRESS_LOCAL_PROTOCOL_PATH = dummyProtocolPath
+      process.env.CYPRESS_ENABLE_CLOUD_STUDIO_AI = 'true'
 
       let projectMatched = false
 

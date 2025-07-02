@@ -3,7 +3,7 @@ import pDefer from 'p-defer'
 
 describe('Studio Cloud', () => {
   it('enables protocol for cloud studio', () => {
-    launchStudio({ enableCloudStudio: true })
+    launchStudio()
 
     cy.window().then((win) => {
       expect(win.Cypress.config('isDefaultProtocolEnabled')).to.be.false
@@ -11,52 +11,10 @@ describe('Studio Cloud', () => {
     })
   })
 
-  it('loads the legacy studio UI correctly when studio bundle is taking too long to load', () => {
-    loadProjectAndRunSpec({ enableCloudStudio: false })
-
-    cy.window().then(() => {
-      cy.withCtx((ctx) => {
-        // Mock the studioLifecycleManager.getStudio method to return a hanging promise
-        if (ctx.coreData.studioLifecycleManager) {
-          const neverResolvingPromise = new Promise<null>(() => {})
-
-          ctx.coreData.studioLifecycleManager.getStudio = () => neverResolvingPromise
-          ctx.coreData.studioLifecycleManager.isStudioReady = () => false
-        }
-      })
-    })
-
-    cy.contains('visits a basic html page')
-    .closest('.runnable-wrapper')
-    .findByTestId('launch-studio')
-    .click()
-
-    cy.waitForSpecToFinish()
-
-    // Verify the cloud studio panel is not present
-    cy.findByTestId('studio-panel').should('not.exist')
-
-    cy.get('[data-cy="loading-studio-panel"]').should('not.exist')
-
-    cy.get('[data-cy="hook-name-studio commands"]').should('exist')
-
-    cy.getAutIframe().within(() => {
-      cy.get('#increment').realClick()
-    })
-
-    cy.findByTestId('hook-name-studio commands').closest('.hook-studio').within(() => {
-      cy.get('.command').should('have.length', 2)
-      cy.get('.command-name-get').should('contain.text', '#increment')
-      cy.get('.command-name-click').should('contain.text', 'click')
-    })
-
-    cy.get('button').contains('Save Commands').should('not.be.disabled')
-  })
-
   it('immediately loads the studio panel', () => {
     const deferred = pDefer()
 
-    loadProjectAndRunSpec({ enableCloudStudio: true })
+    loadProjectAndRunSpec()
 
     cy.findByTestId('studio-panel').should('not.exist')
 
@@ -92,7 +50,7 @@ describe('Studio Cloud', () => {
   })
 
   it('hides selector playground and studio controls when studio beta is available', () => {
-    launchStudio({ enableCloudStudio: true })
+    launchStudio()
 
     cy.findByTestId('studio-panel').should('be.visible')
 
@@ -101,7 +59,7 @@ describe('Studio Cloud', () => {
   })
 
   it('closes studio panel when clicking studio button (from the cloud)', () => {
-    launchStudio({ enableCloudStudio: true })
+    launchStudio()
 
     cy.findByTestId('studio-panel').should('be.visible')
     cy.get('[data-cy="loading-studio-panel"]').should('not.exist')
@@ -113,7 +71,7 @@ describe('Studio Cloud', () => {
 
   it('opens studio panel to new test when clicking on studio button (from the app) next to url', () => {
     cy.viewport(1500, 1000)
-    loadProjectAndRunSpec({ enableCloudStudio: true })
+    loadProjectAndRunSpec()
     // studio button should be visible when using cloud studio
     cy.get('[data-cy="studio-button"]').should('be.visible').click()
     cy.get('[data-cy="studio-panel"]').should('be.visible')
@@ -162,7 +120,7 @@ describe('Studio Cloud', () => {
 
     const deferred = pDefer()
 
-    loadProjectAndRunSpec({ enableCloudStudio: true })
+    loadProjectAndRunSpec()
 
     cy.findByTestId('studio-panel').should('not.exist')
 
@@ -207,7 +165,7 @@ describe('Studio Cloud', () => {
   })
 
   it('does not exit studio mode if the spec is changed on the file system', () => {
-    launchStudio({ enableCloudStudio: true })
+    launchStudio()
 
     cy.findByTestId('studio-panel').should('be.visible')
 
@@ -228,24 +186,24 @@ describe('studio functionality', () => {
     cy.findByTestId('studio-panel').should('be.visible')
   })
 
-  it('does not record studio commands when cloud studio is enabled', () => {
-    launchStudio({ enableCloudStudio: true })
+  it('does not add studio logs when cloud studio is enabled', () => {
+    launchStudio()
 
     cy.findByTestId('studio-panel').should('be.visible')
 
-    // Attempt to perform actions that would normally be recorded in regular studio
-    // but should NOT be recorded in when cloud studio is enabled because event listeners are not attached
+    // Attempt to perform actions that would normally add studio logs in regular studio
+    // but should NOT be add studio logs when cloud studio is enabled because event listeners are not attached
     cy.getAutIframe().within(() => {
       cy.get('p').contains('Count is 0')
 
-      // Try to click the increment button - this should NOT be recorded
+      // Try to click the increment button - this should NOT add studio logs
       // because cloud studio event listeners should not be attached
       cy.get('#increment').realClick().then(() => {
         cy.get('p').contains('Count is 1')
       })
     })
 
-    // Verify that no legacy studio commands were recorded
+    // Verify that no legacy studio commands were added
     cy.get('.command-is-studio').should('not.exist')
 
     // Verify that the actual DOM interactions still work (button was clicked, counter incremented)

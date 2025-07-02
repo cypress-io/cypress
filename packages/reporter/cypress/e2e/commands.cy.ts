@@ -898,7 +898,10 @@ describe('commands', { viewportHeight: 1000 }, () => {
       })
 
       it('shows a tooltip', () => {
-        cy.get('.command-name-within').click('top')
+        cy.get('.command-name-within').within(() => {
+          cy.contains('within').click()
+        })
+
         cy.get('.cy-tooltip').should('have.text', 'Printed output to your console')
       })
 
@@ -911,21 +914,32 @@ describe('commands', { viewportHeight: 1000 }, () => {
 
       it('prints to console', () => {
         cy.spy(runner, 'emit')
-        cy.get('.command-name-within').click('top')
+        cy.get('.command-name-within').within(() => {
+          cy.contains('within').click()
+        })
 
         cy.wrap(runner.emit).should('be.calledWith', 'runner:console:log', 'r3', fakeIdForTest)
       })
 
       it('shows the snapshot', () => {
         cy.spy(runner, 'emit')
-        cy.get('.command-name-within').click('top')
+        cy.get('.command-name-within').within(() => {
+          cy.contains('within').click()
+        })
+
         cy.wrap(runner.emit).should('be.calledWith', 'runner:show:snapshot', 'r3', fakeIdForTest)
       })
 
       it('unpins after clicking again, does not re-print to the console', () => {
         cy.spy(runner, 'emit')
-        cy.get('.command-name-within').click('top')
-        cy.get('.command-name-within').click('top')
+        cy.get('.command-name-within').within(() => {
+          cy.contains('within').click()
+        })
+
+        cy.get('.command-name-within').within(() => {
+          cy.contains('within').click()
+        })
+
         // @ts-ignore
         cy.wrap(runner.emit.withArgs('runner:console:log')).should('be.calledOnce')
       })

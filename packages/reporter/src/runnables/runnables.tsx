@@ -5,10 +5,9 @@ import React, { MouseEvent, useCallback, useEffect, useRef } from 'react'
 
 import events, { Events } from '../lib/events'
 import { RunnablesError, RunnablesErrorModel } from './runnable-error'
-import Runnable from './runnable-and-suite'
-import RunnableHeader from './runnable-header'
+import Runnable, { shouldShowConnectionDots } from './runnable-and-suite'
 import type { RunnablesStore, RunnableArray } from './runnables-store'
-import statsStore, { StatsStore } from '../header/stats-store'
+import type { StatsStore } from '../header/stats-store'
 import type { Scroller, UserScrollCallback } from '../lib/scroller'
 import type { AppState } from '../lib/app-state'
 import OpenFileInIDE from '../lib/open-file-in-ide'
@@ -48,7 +47,7 @@ const RunnablesEmptyState = ({ spec, studioEnabled, eventManager = events }: Run
         <WarningIcon className="warning-icon" />No tests found.
       </h2>
       <p>Cypress could not detect tests in this file.</p>
-      { !isAllSpecs && (
+      {!isAllSpecs && (
         <>
           <OpenFileInIDE fileDetails={{
             column: 0,
@@ -91,19 +90,22 @@ interface RunnablesListProps {
   canSaveStudioLogs: boolean
 }
 
-const RunnablesList: React.FC<RunnablesListProps> = observer(({ runnables, studioEnabled, canSaveStudioLogs }: RunnablesListProps) => (
-  <div className='wrap'>
-    <ul className='runnables'>
-      {_.map(runnables, (runnable) =>
-        (<Runnable
-          key={runnable.id}
-          model={runnable}
-          canSaveStudioLogs={canSaveStudioLogs}
-          studioEnabled={studioEnabled}
-        />))}
-    </ul>
-  </div>
-))
+const RunnablesList: React.FC<RunnablesListProps> = observer(({ runnables, studioEnabled, canSaveStudioLogs }: RunnablesListProps) => {
+  return (
+    <div className='wrap'>
+      <ul className='runnables'>
+        {_.map(runnables, (runnable, index) =>
+          (<Runnable
+            key={runnable.id}
+            model={runnable}
+            canSaveStudioLogs={canSaveStudioLogs}
+            studioEnabled={studioEnabled}
+            shouldShowConnectingDots={shouldShowConnectionDots(runnables, runnable, index)}
+          />))}
+      </ul>
+    </div>
+  )
+})
 
 RunnablesList.displayName = 'RunnablesList'
 
@@ -182,7 +184,6 @@ const Runnables: React.FC<RunnablesProps> = observer(({ appState, scroller, erro
 
   return (
     <div ref={containerRef} className='container'>
-      <RunnableHeader spec={spec} statsStore={statsStore} />
       <RunnablesContent
         runnablesStore={runnablesStore}
         studioEnabled={studioEnabled}

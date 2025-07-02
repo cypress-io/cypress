@@ -71,6 +71,10 @@ describe('commands', () => {
         state: 'failed',
         status: 'failed',
       },
+      {
+        state: 'passed',
+        status: 'created',
+      },
     ]
 
     it('session status in command', () => {
@@ -102,6 +106,8 @@ describe('commands', () => {
           ))}
         </div>,
       )
+
+      cy.get('.command-name-session').last().click()
 
       cy.percySnapshot()
     })

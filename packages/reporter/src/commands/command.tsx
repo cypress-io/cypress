@@ -55,13 +55,13 @@ export const formattedMessage = (message: string, name?: string) => {
 
   if (name === 'assert' && assertionArray) {
     const expectedActualArray = () => {
-    // get the expected and actual values of assertions
+      // get the expected and actual values of assertions
       const splitTrim = message.split(assertionRegex).filter(Boolean).map((s) => s.trim())
 
       // replace outside double asterisks with strong tags
       return splitTrim.map((s) => {
-      // we want to escape HTML chars so that they display
-      // correctly in the command log: <p> -> &lt;p&gt;
+        // we want to escape HTML chars so that they display
+        // correctly in the command log: <p> -> &lt;p&gt;
         const HTMLEscapedString = mdOnlyHTML.renderInline(s)
 
         return HTMLEscapedString.replace(asterisksRegex, `<strong>$1</strong>`)
@@ -192,8 +192,8 @@ const Interceptions: React.FC<RenderProps> = observer(({ interceptions, wentToOr
 
   const interceptsTitle = (
     <span>
-      {wentToOrigin ? '' : <>This request did not go to origin because the response was stubbed.<br/></>}
-        This request matched:
+      {wentToOrigin ? '' : <>This request did not go to origin because the response was stubbed.<br /></>}
+      This request matched:
       <ul>
         {interceptions?.map(({ command, alias, type }, i) => (
           <li key={i}>
@@ -331,7 +331,7 @@ const CommandDetails: React.FC<CommandDetailsProps> = observer(({ model, groupId
         {model.event && model.type !== 'system' ? `(${displayName(model)})` : displayName(model)}
       </span>
     </span>
-    {!!groupId && model.type === 'system' && model.state === 'failed' && <StateIcon aria-hidden className='failed-indicator' state={model.state}/>}
+    {!!groupId && model.type === 'system' && model.state === 'failed' && <StateIcon data-cy='failed-icon-indicator' aria-hidden state={model.state} iconSize='12' />}
     {model.referencesAlias ?
       <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
       : <Message model={model} />
@@ -509,13 +509,13 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
         <div
           className={cs(
             'command-wrapper',
-              `command-state-${model.state}`,
-              `command-type-${model.type}`,
-              {
-                'command-is-event': !!model.event,
-                'command-is-pinned': _isPinned(),
-                'command-is-interactive': (model.hasConsoleProps || model.hasSnapshot),
-              },
+            `command-state-${model.state}`,
+            `command-type-${model.type}`,
+            {
+              'command-is-event': !!model.event,
+              'command-is-pinned': _isPinned(),
+              'command-is-interactive': (model.hasConsoleProps || model.hasSnapshot),
+            },
           )}
         >
           <NavColumns model={model} isPinned={_isPinned()} toggleColumnPin={_toggleColumnPin} />

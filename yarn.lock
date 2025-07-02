@@ -2653,6 +2653,11 @@
     tailwindcss "^3.4.3"
     tailwindcss-hocus "^0.0.7"
 
+"@cypress-design/constants-button@^1.9.0":
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/constants-button/-/constants-button-1.9.0.tgz#56683bb760b7eaab9857c7f7384c5ac55eafef18"
+  integrity sha512-4mNYfEdrUJUfC4uPwr7P3u0MFsxrffvf5CefbL1HbjwxdHSLT94PhUL70kOukkN1CkM2TwPOTffNZWFLARyQeQ==
+
 "@cypress-design/constants-spinner@^1.0.0":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@cypress-design/constants-spinner/-/constants-spinner-1.0.1.tgz#33904995ea95c34867905aa09391d5364ffcc129"
@@ -2670,10 +2675,10 @@
   dependencies:
     "@cypress-design/icon-registry" "^1.5.1"
 
-"@cypress-design/css@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/css/-/css-1.1.0.tgz#707d6d51fb7a43be304a501fccdc08d2c134825c"
-  integrity sha512-xHLkTQNKIpKqcK0bVQBOTCISDBV+Z+HD8MyfQyNKuYRy408bwzICi+LsrSf0attsqEoE57Jp2n6VoNbNbPXHqg==
+"@cypress-design/css@1.2.0", "@cypress-design/css@^1.1.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/css/-/css-1.2.0.tgz#e70488ba87d87fa3389f1d96a74d777f2cba5dec"
+  integrity sha512-7UBmEEzJ8EerqZdC0pfVL2ZEAkmnArFVHJxztK2YmZ/rVOh9ZKBl1A5vcuGgB8jtTsQ+XMyO7JbSTJn3OgH/DA==
   dependencies:
     "@tailwindcss/container-queries" "^0.1.1"
     lodash "^4.17.21"
@@ -2681,12 +2686,27 @@
     tailwindcss "^3.4.3"
     tailwindcss-hocus "^0.0.7"
 
-"@cypress-design/icon-registry@^1.0.0", "@cypress-design/icon-registry@^1.18.0", "@cypress-design/icon-registry@^1.5.1":
-  version "1.18.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-1.18.0.tgz#799c5ac8f8362aebdcf2181119c3205136ca5ab9"
-  integrity sha512-4goChP9rWVq7F/+c36JyJ4quvHSyI6gkjJ/IKFqncNwkC3gvVeJ4GQX2mqQJCQ+z0Er+2Mmzcw7JiVo1GpbJlg==
+"@cypress-design/icon-registry@^1.0.0", "@cypress-design/icon-registry@^1.18.0", "@cypress-design/icon-registry@^1.27.0", "@cypress-design/icon-registry@^1.5.1":
+  version "1.27.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-1.27.0.tgz#a657acc40cc6b43e14ebf1a0e19eb65f43e08a76"
+  integrity sha512-2/jlv/0RsCwwZpovIk8sjXsbqnnNgmpYiaQUl9XUoZ45rurhr2PuOwYk1HMAkrBcv05adzWLfiEtfzb5TwUG1w==
   dependencies:
     "@cypress-design/color-constants" "^1.1.0"
+
+"@cypress-design/react-button@^1.10.1":
+  version "1.10.1"
+  resolved "https://registry.yarnpkg.com/@cypress-design/react-button/-/react-button-1.10.1.tgz#31328d00789cf8a59898afdce1b71eecadec9de1"
+  integrity sha512-NFRWZRmYREaElTZj8ioyNu1lzaf0WperEw98EqC+LOYpwZzHtLahR0Ot/1DGOiCZTacrvBrtjo65VQGieXqJfQ==
+  dependencies:
+    clsx "^2.1.1"
+
+"@cypress-design/react-icon@^1.27.0":
+  version "1.27.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/react-icon/-/react-icon-1.27.0.tgz#e34952329887deb614b78b66d0357b7a4049cbe8"
+  integrity sha512-r8tu7JFwJWwsKSRMJ83ocSb6zfM0Hjnf2DTH5CEhlVxo/QHMOVk85zQSqxVHlX9p11C7jomUeMkoalD6dpKXTg==
+  dependencies:
+    "@cypress-design/icon-registry" "^1.27.0"
+    clsx "^2.1.1"
 
 "@cypress-design/vue-button@^1.1.0", "@cypress-design/vue-button@^1.6.0":
   version "1.6.0"
@@ -10478,7 +10498,7 @@ autobarrel@^1.1.0:
     minimist "^1.2.5"
     tslib "^2.0.0"
 
-autoprefixer@10.4.20, autoprefixer@^10.4.20:
+autoprefixer@10.4.20:
   version "10.4.20"
   resolved "https://registry.yarnpkg.com/autoprefixer/-/autoprefixer-10.4.20.tgz#5caec14d43976ef42e32dcb4bd62878e96be5b3b"
   integrity sha512-XY25y5xSv/wEoqzDyXXME4AFfkZI0P23z6Fs3YgymDnKJkCGOnkL0iTxCa85UTqaSgfcqyf3UA6+c7wUvx/16g==
@@ -10488,6 +10508,18 @@ autoprefixer@10.4.20, autoprefixer@^10.4.20:
     fraction.js "^4.3.7"
     normalize-range "^0.1.2"
     picocolors "^1.0.1"
+    postcss-value-parser "^4.2.0"
+
+autoprefixer@10.4.21, autoprefixer@^10.4.20:
+  version "10.4.21"
+  resolved "https://registry.yarnpkg.com/autoprefixer/-/autoprefixer-10.4.21.tgz#77189468e7a8ad1d9a37fbc08efc9f480cf0a95d"
+  integrity sha512-O+A6LWV5LDHSJD3LjHYoNi4VLsj/Whi7k6zG12xTYaU4cQ8oxQGckXNX8cRHK5yOZ/ppVHe0ZBXGzSV9jXdVbQ==
+  dependencies:
+    browserslist "^4.24.4"
+    caniuse-lite "^1.0.30001702"
+    fraction.js "^4.3.7"
+    normalize-range "^0.1.2"
+    picocolors "^1.1.1"
     postcss-value-parser "^4.2.0"
 
 autoprefixer@^9.4.5:
@@ -11245,15 +11277,15 @@ browserslist-to-esbuild@^2.1.1:
   dependencies:
     meow "^13.0.0"
 
-browserslist@^4.12.0, browserslist@^4.14.5, browserslist@^4.23.0, browserslist@^4.23.1, browserslist@^4.23.3, browserslist@^4.24.0:
-  version "4.24.4"
-  resolved "https://registry.npmjs.org/browserslist/-/browserslist-4.24.4.tgz#c6b2865a3f08bcb860a0e827389003b9fe686e4b"
-  integrity sha512-KDi1Ny1gSePi1vm0q4oxSF8b4DR44GF4BbmS2YdhPLOEqd8pDviZOGH/GsmRwoWJ2+5Lr085X7naowMwKHDG1A==
+browserslist@^4.12.0, browserslist@^4.14.5, browserslist@^4.23.0, browserslist@^4.23.1, browserslist@^4.23.3, browserslist@^4.24.0, browserslist@^4.24.4:
+  version "4.25.1"
+  resolved "https://registry.yarnpkg.com/browserslist/-/browserslist-4.25.1.tgz#ba9e8e6f298a1d86f829c9b975e07948967bb111"
+  integrity sha512-KGj0KoOMXLpSNkkEI6Z6mShmQy0bc1I+T7K9N81k4WWMrfz+6fQ6es80B/YLAeRoKvjYE1YSHHOW1qe9xIVzHw==
   dependencies:
-    caniuse-lite "^1.0.30001688"
-    electron-to-chromium "^1.5.73"
+    caniuse-lite "^1.0.30001726"
+    electron-to-chromium "^1.5.173"
     node-releases "^2.0.19"
-    update-browserslist-db "^1.1.1"
+    update-browserslist-db "^1.1.3"
 
 bser@2.1.1:
   version "2.1.1"
@@ -11662,10 +11694,10 @@ camelcase@^7.0.0:
   resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-7.0.1.tgz#f02e50af9fd7782bc8b88a3558c32fd3a388f048"
   integrity sha512-xlx1yCK2Oc1APsPXDL2LdlNP6+uu8OCDdhOBSVT279M/S+y75O30C2VuD8T2ogdePBBl7PfPF4504tnLgX3zfw==
 
-caniuse-lite@^1.0.30001109, caniuse-lite@^1.0.30001646, caniuse-lite@^1.0.30001688:
-  version "1.0.30001704"
-  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001704.tgz#6644fe909d924ac3a7125e8a0ab6af95b1f32990"
-  integrity sha512-+L2IgBbV6gXB4ETf0keSvLr7JUrRVbIaB/lrQ1+z8mRcQiisG5k+lG6O4n6Y5q6f5EuNfaYXKgymucphlEXQew==
+caniuse-lite@^1.0.30001109, caniuse-lite@^1.0.30001646, caniuse-lite@^1.0.30001702, caniuse-lite@^1.0.30001726:
+  version "1.0.30001726"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001726.tgz#a15bd87d5a4bf01f6b6f70ae7c97fdfd28b5ae47"
+  integrity sha512-VQAUIUzBiZ/UnlM28fSp2CRF3ivUn1BWEvxMcVTNwpw91Py1pGbPIyIKtd+tzct9C3ouceCVdGAXxZOpZAsgdw==
 
 capital-case@^1.0.4:
   version "1.0.4"
@@ -12398,6 +12430,11 @@ cloneable-readable@^1.0.0:
     inherits "^2.0.1"
     process-nextick-args "^2.0.0"
     readable-stream "^2.3.5"
+
+clsx@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/clsx/-/clsx-2.1.1.tgz#eed397c9fd8bd882bfb18deab7102049a2f32999"
+  integrity sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==
 
 cmd-shim@6.0.3, cmd-shim@^6.0.0:
   version "6.0.3"
@@ -14583,10 +14620,10 @@ electron-publish@25.1.7:
     lazy-val "^1.0.5"
     mime "^2.5.2"
 
-electron-to-chromium@^1.5.73:
-  version "1.5.116"
-  resolved "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.5.116.tgz#b779d73cd0cc75305d12ae4f061d7f7bcee4c761"
-  integrity sha512-mufxTCJzLBQVvSdZzX1s5YAuXsN1M4tTyYxOOL1TcSKtIzQ9rjIrm7yFK80rN5dwGTePgdoABDSHpuVtRQh0Zw==
+electron-to-chromium@^1.5.173:
+  version "1.5.174"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.174.tgz#c7d273755d4dc9bc4f1d192f6f2092bee42771f3"
+  integrity sha512-HE43yYdUUiJVjewV2A9EP8o89Kb4AqMKplMQP2IxEPUws1Etu/ZkdsgUDabUZ/WmbP4ZbvJDOcunvbBUPPIfmw==
 
 electron@33.2.1:
   version "33.2.1"
@@ -22636,11 +22673,6 @@ mockery@2.1.0:
   resolved "https://registry.yarnpkg.com/mockery/-/mockery-2.1.0.tgz#5b0aef1ff564f0f8139445e165536c7909713470"
   integrity sha512-9VkOmxKlWXoDO/h1jDZaS4lH33aWfRiJiNT/tKj+8OGzrcFDLo8d0syGdbsc3Bc4GvRXPb+NMMvojotmuGJTvA==
 
-modern-normalize@1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/modern-normalize/-/modern-normalize-1.1.0.tgz#da8e80140d9221426bd4f725c6e11283d34f90b7"
-  integrity sha512-2lMlY1Yc1+CUy0gw4H95uNN7vjbpoED7NNRSBHE25nWfLBdmMzFCsPshlzbxHz+gYMcBEUN8V4pU16prcdPSgA==
-
 modify-filename@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/modify-filename/-/modify-filename-1.1.0.tgz#9a2dec83806fbb2d975f22beec859ca26b393aa1"
@@ -22799,7 +22831,7 @@ nanoid@3.3.1:
   resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.3.1.tgz#6347a18cac88af88f58af0b3594b723d5e99bb35"
   integrity sha512-n6Vs/3KGyxPQd6uO0eH4Bv0ojGSUvuLlIHtC3Y0kEO23YRge8H9x1GCzLn28YX0H66pMkxuaeESFq4tKISKwdw==
 
-nanoid@^3.3.8:
+nanoid@^3.3.11:
   version "3.3.11"
   resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.3.11.tgz#4f4f112cefbe303202f2199838128936266d185b"
   integrity sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w==
@@ -25326,6 +25358,15 @@ postcss-value-parser@^4.0.0, postcss-value-parser@^4.1.0, postcss-value-parser@^
   resolved "https://registry.yarnpkg.com/postcss-value-parser/-/postcss-value-parser-4.2.0.tgz#723c09920836ba6d3e5af019f92bc0971c02e514"
   integrity sha512-1NNCs6uurfkVbeXG4S8JFT9t19m45ICnif8zWLd5oPSZ50QnwMfK+H3jv408d4jw/7Bttv5axS5IiHoLaVNHeQ==
 
+postcss@8.5.6, postcss@^8.1.10, postcss@^8.2.14, postcss@^8.2.7, postcss@^8.4.21, postcss@^8.4.22, postcss@^8.4.27, postcss@^8.4.38, postcss@^8.4.43, postcss@^8.4.47, postcss@^8.5.3:
+  version "8.5.6"
+  resolved "https://registry.yarnpkg.com/postcss/-/postcss-8.5.6.tgz#2825006615a619b4f62a9e7426cc120b349a8f3c"
+  integrity sha512-3Ybi1tAuwAP9s0r1UQ2J4n5Y0G05bJkpUIO0/bI9MhwmD70S5aTWbXGBwxHrelT+XM1k6dM0pk+SwNkpTRN7Pg==
+  dependencies:
+    nanoid "^3.3.11"
+    picocolors "^1.1.1"
+    source-map-js "^1.2.1"
+
 postcss@^6.0.14, postcss@^6.0.9:
   version "6.0.23"
   resolved "https://registry.yarnpkg.com/postcss/-/postcss-6.0.23.tgz#61c82cc328ac60e677645f979054eb98bc0e3324"
@@ -25342,15 +25383,6 @@ postcss@^7.0.11, postcss@^7.0.18, postcss@^7.0.32:
   dependencies:
     picocolors "^0.2.1"
     source-map "^0.6.1"
-
-postcss@^8.1.10, postcss@^8.2.14, postcss@^8.2.7, postcss@^8.4.21, postcss@^8.4.22, postcss@^8.4.27, postcss@^8.4.38, postcss@^8.4.43, postcss@^8.4.47, postcss@^8.5.3:
-  version "8.5.3"
-  resolved "https://registry.yarnpkg.com/postcss/-/postcss-8.5.3.tgz#1463b6f1c7fb16fe258736cba29a2de35237eafb"
-  integrity sha512-dle9A3yYxlBSrt8Fu+IpjGT8SY8hN0mlaA6GY8t0P5PjIOZemULz/E2Bnm/2dcUOena75OTNkHI76uZBNUUq3A==
-  dependencies:
-    nanoid "^3.3.8"
-    picocolors "^1.1.1"
-    source-map-js "^1.2.1"
 
 postject@^1.0.0-alpha.6:
   version "1.0.0-alpha.6"
@@ -29309,6 +29341,11 @@ tailwindcss@1.1.4:
     pretty-hrtime "^1.0.3"
     reduce-css-calc "^2.1.6"
 
+tailwindcss@4.1.10:
+  version "4.1.10"
+  resolved "https://registry.yarnpkg.com/tailwindcss/-/tailwindcss-4.1.10.tgz#515741b0a79316d1971d182f7fbc435b68679373"
+  integrity sha512-P3nr6WkvKV/ONsTzj6Gb57sWPMX29EPNPopo7+FcpkQaNsrNpZ1pv8QmrYI2RqEKD7mlGqLnGovlcYnBK0IqUA==
+
 tailwindcss@^3.3.1, tailwindcss@^3.4.3:
   version "3.4.17"
   resolved "https://registry.yarnpkg.com/tailwindcss/-/tailwindcss-3.4.17.tgz#ae8406c0f96696a631c790768ff319d46d5e5a63"
@@ -30737,7 +30774,7 @@ upath@^1.1.1:
   resolved "https://registry.yarnpkg.com/upath/-/upath-1.2.0.tgz#8f66dbcd55a883acdae4408af8b035a5044c1894"
   integrity sha512-aZwGpamFO61g3OlfT7OQCHqhGnW43ieH9WZeP7QxN/G/jS4jfqUkZxoryvJgVPEcrl5NL/ggHsSmLMHuH64Lhg==
 
-update-browserslist-db@^1.1.1:
+update-browserslist-db@^1.1.3:
   version "1.1.3"
   resolved "https://registry.npmjs.org/update-browserslist-db/-/update-browserslist-db-1.1.3.tgz#348377dd245216f9e7060ff50b15a1b740b75420"
   integrity sha512-UxhIZQ+QInVdunkDAaiazvvT/+fXL5Osr0JZlJulepYu6Jd7qJtDZjlur0emRlT71EN3ScPoE7gvsuIKKNavKw==

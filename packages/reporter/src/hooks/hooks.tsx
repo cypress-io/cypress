@@ -2,17 +2,13 @@ import cs from 'classnames'
 import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React from 'react'
-import type { FileDetails } from '@packages/types'
-
 import appState, { AppState } from '../lib/app-state'
 import Command from '../commands/command'
 import Collapsible from '../collapsible/collapsible'
 import type HookModel from './hook-model'
 import type { HookName } from './hook-model'
-
 import ArrowRightIcon from '@packages/frontend-shared/src/assets/icons/arrow-right_x16.svg'
-import OpenIcon from '@packages/frontend-shared/src/assets/icons/technology-code-editor_x16.svg'
-import OpenFileInIDE from '../lib/open-file-in-ide'
+import { OpenFileInIDEButton } from '../OpenFileInIDEButton'
 
 export interface HookHeaderProps {
   model: HookModel
@@ -25,18 +21,6 @@ const HookHeader = ({ model, number }: HookHeaderProps) => (
     {model.failed && <span className='hook-failed-message'> (failed)</span>}
   </span>
 )
-
-export interface HookOpenInIDEProps {
-  invocationDetails: FileDetails
-}
-
-const HookOpenInIDE = ({ invocationDetails }: HookOpenInIDEProps) => {
-  return (
-    <OpenFileInIDE fileDetails={invocationDetails} className='hook-open-in-ide'>
-      <OpenIcon viewBox="0 0 16 16" width="12" height="12" /> <span>Open in IDE</span>
-    </OpenFileInIDE>
-  )
-}
 
 const StudioNoCommands = () => (
   <li className='command command-name-get command-state-pending command-type-parent studio-prompt'>
@@ -66,9 +50,13 @@ export interface HookProps {
 const Hook: React.FC<HookProps> = observer(({ model, showNumber, scrollIntoView }: HookProps) => (
   <li className={cs('hook-item', { 'hook-failed': model.failed, 'hook-studio': model.isStudio })}>
     <Collapsible
-      header={<HookHeader model={model} number={showNumber ? model.hookNumber : undefined} />}
+      header={
+        <>
+          <HookHeader model={model} number={showNumber ? model.hookNumber : undefined} />
+          {model.invocationDetails && Cypress.testingType !== 'component' && <OpenFileInIDEButton fileDetails={model.invocationDetails} className='hook-open-in-ide' />}
+        </>
+      }
       headerClass='hook-header'
-      headerExtras={model.invocationDetails && Cypress.testingType !== 'component' && <HookOpenInIDE invocationDetails={model.invocationDetails} />}
       isOpen
     >
       <ul className='commands-container'>

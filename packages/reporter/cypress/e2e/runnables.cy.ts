@@ -137,8 +137,8 @@ describe('runnables', () => {
 
   it('does not display time if no time taken', () => {
     start()
-    cy.get('.runnable-header span:first').should('have.text', 'foo.js')
-    cy.get('.runnable-header span:last').should('not.have.text', '--')
+    cy.get('.runnable-header .runnable-header-file-name').contains('foo.js')
+    cy.get('.runnable-header .duration').should('not.exist')
   })
 
   describe('when there are no tests', () => {
@@ -204,11 +204,12 @@ describe('runnables', () => {
     })
 
     it('contains name of spec and emits when clicked', () => {
-      const selector = '.runnable-header a'
+      const selector = '.runnable-header-file-name'
 
       cy.stub(runner, 'emit').callThrough()
 
-      cy.get(selector).as('spec-title').contains('foo.js')
+      cy.get(selector).as('spec-title').contains('foo.js').realHover()
+      cy.get('.open-in-ide-button').click()
       cy.get(selector).click().then(() => {
         expect(runner.emit).to.be.calledWith('open:file:unified')
       })
