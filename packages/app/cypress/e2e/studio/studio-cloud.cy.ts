@@ -225,7 +225,7 @@ describe('studio functionality', () => {
         body: 'Internal Server Error',
       }).as('studioBundleFail')
 
-      loadProjectAndRunSpec({ enableCloudStudio: true })
+      loadProjectAndRunSpec()
 
       cy.contains('visits a basic html page')
       .closest('.runnable-wrapper')
@@ -255,7 +255,7 @@ describe('studio functionality', () => {
         body: 'Not Found',
       }).as('studioBundleNotFound')
 
-      loadProjectAndRunSpec({ enableCloudStudio: true })
+      loadProjectAndRunSpec()
 
       cy.contains('visits a basic html page')
       .closest('.runnable-wrapper')
@@ -293,7 +293,7 @@ describe('studio functionality', () => {
         }
       }).as('studioBundleRequest')
 
-      loadProjectAndRunSpec({ enableCloudStudio: true })
+      loadProjectAndRunSpec()
 
       cy.contains('visits a basic html page')
       .closest('.runnable-wrapper')
@@ -332,7 +332,7 @@ describe('studio functionality', () => {
         body: 'Service Unavailable',
       }).as('studioBundleUnavailable')
 
-      loadProjectAndRunSpec({ enableCloudStudio: true })
+      loadProjectAndRunSpec()
 
       cy.contains('visits a basic html page')
       .closest('.runnable-wrapper')
@@ -376,7 +376,7 @@ describe('studio functionality', () => {
         }
       }).as('studioBundleRequest')
 
-      loadProjectAndRunSpec({ enableCloudStudio: true })
+      loadProjectAndRunSpec()
 
       cy.contains('visits a basic html page')
       .closest('.runnable-wrapper')

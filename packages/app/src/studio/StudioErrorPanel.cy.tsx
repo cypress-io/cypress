@@ -10,6 +10,7 @@ describe('<StudioErrorPanel />', () => {
     cy.mount(
       <StudioErrorPanel
         eventManager={mockEventManager}
+        onRetry={() => {}}
       />,
     )
 
@@ -58,6 +59,7 @@ describe('<StudioErrorPanel />', () => {
     cy.mount(
       <StudioErrorPanel
         eventManager={mockEventManager}
+        onRetry={() => {}}
       />,
     )
 
