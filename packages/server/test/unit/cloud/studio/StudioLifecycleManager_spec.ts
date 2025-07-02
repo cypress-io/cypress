@@ -43,6 +43,7 @@ describe('StudioLifecycleManager', () => {
   let markStub: sinon.SinonStub
   let initializeTelemetryReporterStub: sinon.SinonStub
   let reportTelemetryStub: sinon.SinonStub
+  const mockContents = 'console.log("studio script")'
 
   beforeEach(() => {
     postStudioSessionStub = sinon.stub()
@@ -83,7 +84,7 @@ describe('StudioLifecycleManager', () => {
         },
       },
       'fs-extra': {
-        readFile: readFileStub.resolves('console.log("studio script")'),
+        readFile: readFileStub.resolves(mockContents),
       },
       '../get_cloud_metadata': {
         getCloudMetadata: sinon.stub().resolves({
@@ -215,6 +216,12 @@ describe('StudioLifecycleManager', () => {
         })
       })
 
+      const mockManifest = {
+        'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
+      }
+
+      ensureStudioBundleStub.resolves(mockManifest)
+
       await studioReadyPromise
 
       expect(mockCtx.update).to.be.calledOnce
@@ -237,6 +244,7 @@ describe('StudioLifecycleManager', () => {
           asyncRetry,
         },
         shouldEnableStudio: false,
+        manifest: mockManifest,
       })
 
       expect(postStudioSessionStub).to.be.calledWith({
@@ -292,6 +300,12 @@ describe('StudioLifecycleManager', () => {
         })
       })
 
+      const mockManifest = {
+        'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
+      }
+
+      ensureStudioBundleStub.resolves(mockManifest)
+
       await studioReadyPromise
 
       expect(mockCtx.update).to.be.calledOnce
@@ -314,6 +328,7 @@ describe('StudioLifecycleManager', () => {
           asyncRetry,
         },
         shouldEnableStudio: false,
+        manifest: mockManifest,
       })
 
       expect(postStudioSessionStub).to.be.calledWith({
@@ -389,6 +404,12 @@ describe('StudioLifecycleManager', () => {
         })
       })
 
+      const mockManifest = {
+        'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
+      }
+
+      ensureStudioBundleStub.resolves(mockManifest)
+
       await studioReadyPromise
 
       expect(mockCtx.update).to.be.calledOnce
@@ -407,6 +428,7 @@ describe('StudioLifecycleManager', () => {
           asyncRetry,
         },
         shouldEnableStudio: true,
+        manifest: {},
       })
 
       expect(postStudioSessionStub).to.be.calledWith({
@@ -465,6 +487,98 @@ describe('StudioLifecycleManager', () => {
 
       expect(mockStudioManagerPromise).to.be.present
       expect(await mockStudioManagerPromise).to.equal(updatedStudioManager)
+    })
+
+    it('throws an error when the studio server script is not found in the manifest', async () => {
+      studioManagerSetupStub.callsFake((args) => {
+        mockStudioManager.status = 'ENABLED'
+
+        return Promise.resolve()
+      })
+
+      const reportErrorPromise = new Promise<void>((resolve) => {
+        reportStudioErrorStub.callsFake((err) => {
+          resolve()
+
+          return undefined
+        })
+      })
+
+      const mockManifest = {}
+
+      ensureStudioBundleStub.resolves(mockManifest)
+
+      studioLifecycleManager.initializeStudioManager({
+        projectId: 'test-project-id',
+        cloudDataSource: mockCloudDataSource,
+        ctx: mockCtx,
+        cfg: mockCfg,
+        debugData: {},
+      })
+
+      await reportErrorPromise
+
+      // @ts-expect-error - accessing private property
+      const studioPromise = studioLifecycleManager.studioManagerPromise
+
+      expect(studioPromise).to.not.be.null
+
+      expect(reportStudioErrorStub).to.be.calledOnce
+      expect(reportStudioErrorStub).to.be.calledWithMatch({
+        cloudApi: sinon.match.object,
+        studioHash: 'test-project-id',
+        projectSlug: 'abc123',
+        error: sinon.match.instanceOf(Error).and(sinon.match.has('message', 'Expected hash for studio server script not found in manifest')),
+        studioMethod: 'initializeStudioManager',
+        studioMethodArgs: [],
+      })
+    })
+
+    it('throws an error when the studio server script is wrong in the manifest', async () => {
+      studioManagerSetupStub.callsFake((args) => {
+        mockStudioManager.status = 'ENABLED'
+
+        return Promise.resolve()
+      })
+
+      const reportErrorPromise = new Promise<void>((resolve) => {
+        reportStudioErrorStub.callsFake((err) => {
+          resolve()
+
+          return undefined
+        })
+      })
+
+      const mockManifest = {
+        'server/index.js': 'a1',
+      }
+
+      ensureStudioBundleStub.resolves(mockManifest)
+
+      studioLifecycleManager.initializeStudioManager({
+        projectId: 'test-project-id',
+        cloudDataSource: mockCloudDataSource,
+        ctx: mockCtx,
+        cfg: mockCfg,
+        debugData: {},
+      })
+
+      await reportErrorPromise
+
+      // @ts-expect-error - accessing private property
+      const studioPromise = studioLifecycleManager.studioManagerPromise
+
+      expect(studioPromise).to.not.be.null
+
+      expect(reportStudioErrorStub).to.be.calledOnce
+      expect(reportStudioErrorStub).to.be.calledWithMatch({
+        cloudApi: sinon.match.object,
+        studioHash: 'test-project-id',
+        projectSlug: 'abc123',
+        error: sinon.match.instanceOf(Error).and(sinon.match.has('message', 'Invalid hash for studio server script')),
+        studioMethod: 'initializeStudioManager',
+        studioMethodArgs: [],
+      })
     })
 
     it('handles errors when initializing the studio manager and reports them', async () => {
@@ -590,6 +704,14 @@ describe('StudioLifecycleManager', () => {
   })
 
   describe('registerStudioReadyListener', () => {
+    beforeEach(() => {
+      const mockManifest = {
+        'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
+      }
+
+      ensureStudioBundleStub.resolves(mockManifest)
+    })
+
     it('registers a listener that will be called when studio is ready', () => {
       const listener = sinon.stub()
 
@@ -735,6 +857,14 @@ describe('StudioLifecycleManager', () => {
   })
 
   describe('status tracking', () => {
+    beforeEach(() => {
+      const mockManifest = {
+        'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
+      }
+
+      ensureStudioBundleStub.resolves(mockManifest)
+    })
+
     it('updates status and emits events when status changes', async () => {
       // Setup the context to test status updates
       // @ts-expect-error - accessing private property

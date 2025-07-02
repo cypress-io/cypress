@@ -22,12 +22,13 @@ import { initializeTelemetryReporter, reportTelemetry } from './telemetry/Teleme
 import { telemetryManager } from './telemetry/TelemetryManager'
 import { BUNDLE_LIFECYCLE_MARK_NAMES, BUNDLE_LIFECYCLE_TELEMETRY_GROUP_NAMES } from './telemetry/constants/bundle-lifecycle'
 import { INITIALIZATION_TELEMETRY_GROUP_NAMES } from './telemetry/constants/initialization'
+import crypto from 'crypto'
 
 const debug = Debug('cypress:server:studio-lifecycle-manager')
 const routes = require('../routes')
 
 export class StudioLifecycleManager {
-  private static hashLoadingMap: Map<string, Promise<void>> = new Map()
+  private static hashLoadingMap: Map<string, Promise<Record<string, string>>> = new Map()
   private static watcher: chokidar.FSWatcher | null = null
   private studioManagerPromise?: Promise<StudioManager | null>
   private studioManager?: StudioManager
@@ -157,6 +158,7 @@ export class StudioLifecycleManager {
   }): Promise<StudioManager> {
     let studioPath: string
     let studioHash: string
+    let manifest: Record<string, string>
 
     initializeTelemetryReporter({
       projectSlug: projectId,
@@ -190,10 +192,11 @@ export class StudioLifecycleManager {
         StudioLifecycleManager.hashLoadingMap.set(studioHash, hashLoadingPromise)
       }
 
-      await hashLoadingPromise
+      manifest = await hashLoadingPromise
     } else {
       studioPath = process.env.CYPRESS_LOCAL_STUDIO_PATH
       studioHash = 'local'
+      manifest = {}
     }
 
     telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.ENSURE_STUDIO_BUNDLE_END)
@@ -201,6 +204,20 @@ export class StudioLifecycleManager {
     const serverFilePath = path.join(studioPath, 'server', 'index.js')
 
     const script = await readFile(serverFilePath, 'utf8')
+
+    if (!process.env.CYPRESS_LOCAL_STUDIO_PATH) {
+      const expectedHash = manifest['server/index.js']
+      const actualHash = crypto.createHash('sha256').update(script).digest('hex')
+
+      if (!expectedHash) {
+        throw new Error('Expected hash for studio server script not found in manifest')
+      }
+
+      if (actualHash !== expectedHash) {
+        throw new Error('Invalid hash for studio server script')
+      }
+    }
+
     const studioManager = new StudioManager()
 
     telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_MANAGER_SETUP_START)
@@ -220,6 +237,7 @@ export class StudioLifecycleManager {
         asyncRetry,
       },
       shouldEnableStudio: this.cloudStudioRequested,
+      manifest,
     })
 
     telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_MANAGER_SETUP_END)

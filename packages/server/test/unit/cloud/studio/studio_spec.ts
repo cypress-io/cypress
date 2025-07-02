@@ -37,6 +37,9 @@ describe('lib/cloud/studio', () => {
       projectSlug: '1234',
       cloudApi: {} as any,
       shouldEnableStudio: true,
+      manifest: {
+        'server/index.js': 'abcdefg',
+      },
     })
 
     studio = (studioManager as any)._studioServer
