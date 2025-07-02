@@ -321,7 +321,35 @@ describe('CyPromptLifecycleManager', () => {
 
       const { error } = await cyPromptPromise
 
-      expect(error.message).to.equal('cy prompt server script not found in manifest')
+      expect(error.message).to.equal('Expected hash for cy prompt server script not found in manifest')
+    })
+
+    it('throws an error when the cy-prompt server script is wrong in the manifest', async () => {
+      cyPromptManagerSetupStub.callsFake((args) => {
+        return Promise.resolve()
+      })
+
+      const mockManifest = {
+        'server/index.js': 'a1',
+      }
+
+      ensureCyPromptBundleStub.resolves(mockManifest)
+
+      cyPromptLifecycleManager.initializeCyPromptManager({
+        cloudDataSource: mockCloudDataSource,
+        ctx: mockCtx,
+        record: false,
+        key: '123e4567-e89b-12d3-a456-426614174000',
+      })
+
+      // @ts-expect-error - accessing private property
+      const cyPromptPromise = cyPromptLifecycleManager.cyPromptManagerPromise
+
+      expect(cyPromptPromise).to.not.be.null
+
+      const { error } = await cyPromptPromise
+
+      expect(error.message).to.equal('Invalid hash for cy prompt server script')
     })
   })
 

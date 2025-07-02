@@ -166,7 +166,7 @@ export class CyPromptLifecycleManager {
       const actualHash = crypto.createHash('sha256').update(script).digest('hex')
 
       if (!expectedHash) {
-        throw new Error('cy prompt server script not found in manifest')
+        throw new Error('Expected hash for cy prompt server script not found in manifest')
       }
 
       if (actualHash !== expectedHash) {
