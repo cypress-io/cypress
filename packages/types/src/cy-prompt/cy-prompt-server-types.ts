@@ -74,9 +74,15 @@ export interface CyPromptCDPClient {
   ): void
 }
 
+export interface CyPromptAddSocketListenerOptions {
+  socket: Socket
+  onBeforeSave: () => void
+  onAfterSave: (options: { error?: Error }) => void
+}
+
 export interface CyPromptServerShape {
   initializeRoutes(router: Router): void
-  addSocketListeners(socket: Socket): void
+  addSocketListeners(addSocketListenerOptions: CyPromptAddSocketListenerOptions): void
   connectToBrowser: (cdpClient: CyPromptCDPClient) => void
   reset: (testId?: string) => void
 }

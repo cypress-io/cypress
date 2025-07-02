@@ -25,16 +25,44 @@ export class SocketE2E extends SocketBase {
     this.removeOnStudioTestFileChange = this.removeOnStudioTestFileChange.bind(this)
 
     if (config.watchForFileChanges) {
-      preprocessor.emitter.on('file:updated', this.onTestFileChange)
+      preprocessor.emitter.on('file:updated', this.onTestFileChange(config))
     }
   }
 
-  onStudioTestFileChange (filePath) {
+  onBeforeSave (config) {
+    // even if the user has turned off file watching
+    // we want to force a reload on save
+    if (!config.watchForFileChanges) {
+      preprocessor.emitter.on('file:updated', this.onCloudTestFileChange)
+    }
+  }
+
+  onAfterSave (config, error) {
+    // even if the user has turned off file watching
+    // we want to force a reload on save
+    if (error && !config.watchForFileChanges) {
+      preprocessor.emitter.off('file:updated', this.onCloudTestFileChange)
+    }
+  }
+
+  onStudioTestFileChange = (filePath) => {
     // wait for the studio test file to be written to disk, then reload the test
     // and remove the listener (since this handler is only invoked when watchForFileChanges is false)
     return this.onTestFileChange(filePath).then(() => {
       this.removeOnStudioTestFileChange()
     })
+  }
+
+  onCloudTestFileChange = (filePath) => {
+    // wait for the studio test file to be written to disk, then reload the test
+    // and remove the listener (since this handler is only invoked when watchForFileChanges is false)
+    return this.onTestFileChange(filePath).then(() => {
+      this.removeOnCloudTestFileChange()
+    })
+  }
+
+  removeOnCloudTestFileChange () {
+    return preprocessor.emitter.off('file:updated', this.onCloudTestFileChange)
   }
 
   removeOnStudioTestFileChange () {

@@ -1,8 +1,7 @@
-import type { CyPromptManagerShape, CyPromptStatus, CyPromptServerDefaultShape, CyPromptServerShape, CyPromptCloudApi, CyPromptCDPClient, CyPromptAuthenticatedUserShape } from '@packages/types'
+import type { CyPromptManagerShape, CyPromptStatus, CyPromptServerDefaultShape, CyPromptServerShape, CyPromptCloudApi, CyPromptCDPClient, CyPromptAuthenticatedUserShape, CyPromptAddSocketListenerOptions } from '@packages/types'
 import type { Router } from 'express'
 import Debug from 'debug'
 import { requireScript } from '../require_script'
-import type { Socket } from 'socket.io'
 import crypto, { BinaryLike } from 'crypto'
 
 interface CyPromptServer { default: CyPromptServerDefaultShape }
@@ -59,9 +58,9 @@ export class CyPromptManager implements CyPromptManagerShape {
     }
   }
 
-  addSocketListeners (socket: Socket): void {
+  addSocketListeners (addSocketListenerOptions: CyPromptAddSocketListenerOptions): void {
     if (this._cyPromptServer) {
-      this.invokeSync('addSocketListeners', { isEssential: true }, socket)
+      this.invokeSync('addSocketListeners', { isEssential: true }, addSocketListenerOptions)
     }
   }
 
