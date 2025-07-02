@@ -55,7 +55,7 @@ const decryptReqBodyAndRespond = ({ reqBody, resBody }, fn) => {
       expect(params.body).to.deep.eq(reqBody)
     }
 
-    const { secretKey, jwe } = await encryptRequest(params, publicKey)
+    const { secretKey, jwe } = await encryptRequest(params, { publicKey })
 
     if (fn) {
       encryption.encryptRequest.restore()

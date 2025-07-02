@@ -31,6 +31,9 @@ describe('lib/cloud/cy-prompt', () => {
       cyPromptHash: 'abcdefg',
       projectSlug: '1234',
       cloudApi: {} as any,
+      manifest: {
+        'server/index.js': 'abcdefg',
+      },
       getProjectOptions: () => {
         return Promise.resolve({
           user: {

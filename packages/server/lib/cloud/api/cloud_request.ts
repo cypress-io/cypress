@@ -2,7 +2,6 @@
  * The axios Cloud instance should not be used.
  */
 import os from 'os'
-
 import followRedirects from 'follow-redirects'
 import axios, { AxiosInstance } from 'axios'
 import pkg from '@packages/root'
@@ -11,19 +10,43 @@ import agent from '@packages/network/lib/agent'
 import app_config from '../../../config/app.json'
 import { installErrorTransform } from './axios_middleware/transform_error'
 import { installLogging } from './axios_middleware/logging'
+import { installEncryption } from './axios_middleware/encryption'
 
-// initialized with an export for testing purposes
-export const _create = (options: { baseURL?: string } = {}): AxiosInstance => {
+export interface CreateCloudRequestOptions {
+  /**
+   * The baseURL for all requests for this Cloud Request instance
+   */
+  baseURL?: string
+  /**
+   * Additional headers for the Cloud Request
+   */
+  additionalHeaders?: Record<string, string>
+  /**
+   * Whether to include the default logging middleware
+   * @default true
+   */
+  enableLogging?: boolean
+  /**
+   * Whether to include the default error transformation
+   * @default true
+   */
+  enableErrorTransform?: boolean
+}
+
+// Allows us to create customized Cloud Request instances w/ different baseURL & encryption configuration
+export const createCloudRequest = (options: CreateCloudRequestOptions = {}): AxiosInstance => {
   const cfgKey = process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'development'
+  const { baseURL = app_config[cfgKey].api_url, enableLogging = true, enableErrorTransform = true } = options
 
   const instance = axios.create({
-    baseURL: options.baseURL ?? app_config[cfgKey].api_url,
+    baseURL,
     httpAgent: agent,
     httpsAgent: agent,
     headers: {
       'x-os-name': os.platform(),
       'x-cypress-version': pkg.version,
       'User-Agent': `cypress/${pkg.version}`,
+      ...options.additionalHeaders,
     },
     transport: {
       // https://github.com/axios/axios/issues/6313#issue-2198831362
@@ -43,13 +66,22 @@ export const _create = (options: { baseURL?: string } = {}): AxiosInstance => {
     },
   })
 
-  installLogging(instance)
-  installErrorTransform(instance)
+  installEncryption(instance)
+
+  if (enableLogging) {
+    installLogging(instance)
+  }
+
+  if (enableErrorTransform) {
+    installErrorTransform(instance)
+  }
 
   return instance
 }
 
-export const CloudRequest = _create()
+export const CloudRequest = createCloudRequest()
+
+export type TCloudReqest = ReturnType<typeof createCloudRequest>
 
 export const isRetryableCloudError = (error: unknown) => {
   // setting this env via mocha's beforeEach coerces this to a string, even if it's a boolean

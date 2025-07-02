@@ -58,6 +58,8 @@ export interface CyPromptServerOptions {
   cyPromptPath: string
   projectSlug?: string
   cloudApi: CyPromptCloudApi
+  manifest: Record<string, string>
+  verifyHash: (contents: BinaryLike, expectedHash: string) => boolean
   getProjectOptions: () => Promise<CyPromptProjectOptions>
   manifest?: Record<string, string>
   verifyHash: (contents: BinaryLike, expectedHash: string) => boolean

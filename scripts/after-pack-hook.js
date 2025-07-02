@@ -19,6 +19,8 @@ const {
   getStudioFileSource,
   validateStudioFile,
   getIndexJscHash,
+  getCyPromptFileSource,
+  validateCyPromptFile,
   DUMMY_INDEX_JSC_HASH,
 } = require('./binary/binary-sources')
 const verify = require('../cli/lib/tasks/verify')
@@ -100,6 +102,12 @@ module.exports = async function (params) {
       const StudioLifecycleManagerPath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/studio/StudioLifecycleManager.ts')
       const StudioLifecycleManagerFileSource = await getStudioFileSource(StudioLifecycleManagerPath)
 
+      // Remove local cy prompt env
+      const cyPromptLifecycleManagerPath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/cy-prompt/CyPromptLifecycleManager.ts')
+      const cyPromptLifecycleManagerFileSource = await getCyPromptFileSource(cyPromptLifecycleManagerPath)
+      const cyPromptManagerPath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/cy-prompt/CyPromptManager.ts')
+      const cyPromptManagerFileSource = await getCyPromptFileSource(cyPromptManagerPath)
+
       await Promise.all([
         fs.writeFile(encryptionFilePath, encryptionFileSource),
         fs.writeFile(cloudEnvironmentFilePath, cloudEnvironmentFileSource),
@@ -107,6 +115,8 @@ module.exports = async function (params) {
         fs.writeFile(cloudProtocolFilePath, cloudProtocolFileSource),
         fs.writeFile(reportStudioErrorPath, reportStudioErrorFileSource),
         fs.writeFile(StudioLifecycleManagerPath, StudioLifecycleManagerFileSource),
+        fs.writeFile(cyPromptLifecycleManagerPath, cyPromptLifecycleManagerFileSource),
+        fs.writeFile(cyPromptManagerPath, cyPromptManagerFileSource),
         fs.writeFile(path.join(outputFolder, 'index.js'), binaryEntryPointSource),
       ])
 
@@ -121,6 +131,8 @@ module.exports = async function (params) {
         validateProtocolFile(cloudProtocolFilePath),
         validateStudioFile(reportStudioErrorPath),
         validateStudioFile(StudioLifecycleManagerPath),
+        validateCyPromptFile(cyPromptLifecycleManagerPath),
+        validateCyPromptFile(cyPromptManagerPath),
       ])
 
       await flipFuses(

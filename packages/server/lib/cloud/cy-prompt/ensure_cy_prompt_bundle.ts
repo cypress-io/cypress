@@ -1,8 +1,9 @@
-import { remove, ensureDir } from 'fs-extra'
+import { remove, ensureDir, readFile, pathExists } from 'fs-extra'
 
 import tar from 'tar'
 import { getCyPromptBundle } from '../api/cy-prompt/get_cy_prompt_bundle'
 import path from 'path'
+import { verifySignature } from '../encryption'
 
 const DOWNLOAD_TIMEOUT = 30000
 
@@ -21,7 +22,7 @@ interface EnsureCyPromptBundleOptions {
  * @param options.projectId - The project ID of the cy prompt bundle
  * @param options.downloadTimeoutMs - The timeout for the cy prompt bundle download
  */
-export const ensureCyPromptBundle = async ({ cyPromptPath, cyPromptUrl, projectId, downloadTimeoutMs = DOWNLOAD_TIMEOUT }: EnsureCyPromptBundleOptions) => {
+export const ensureCyPromptBundle = async ({ cyPromptPath, cyPromptUrl, projectId, downloadTimeoutMs = DOWNLOAD_TIMEOUT }: EnsureCyPromptBundleOptions): Promise<Record<string, string>> => {
   const bundlePath = path.join(cyPromptPath, 'bundle.tar')
 
   // First remove cyPromptPath to ensure we have a clean slate
@@ -30,7 +31,7 @@ export const ensureCyPromptBundle = async ({ cyPromptPath, cyPromptUrl, projectI
 
   let timeoutId: NodeJS.Timeout
 
-  await Promise.race([
+  const responseManifestSignature: string = await Promise.race([
     getCyPromptBundle({
       cyPromptUrl,
       projectId,
@@ -43,10 +44,26 @@ export const ensureCyPromptBundle = async ({ cyPromptPath, cyPromptUrl, projectI
     }),
   ]).finally(() => {
     clearTimeout(timeoutId)
-  })
+  }) as string
 
   await tar.extract({
     file: bundlePath,
     cwd: cyPromptPath,
   })
+
+  const manifestPath = path.join(cyPromptPath, 'manifest.json')
+
+  if (!(await pathExists(manifestPath))) {
+    throw new Error('Unable to find cy-prompt manifest')
+  }
+
+  const manifestContents = await readFile(manifestPath, 'utf8')
+
+  const verified = await verifySignature(manifestContents, responseManifestSignature)
+
+  if (!verified) {
+    throw new Error('Unable to verify cy-prompt signature')
+  }
+
+  return JSON.parse(manifestContents)
 }

@@ -6,6 +6,6 @@ describe('Errors', () => {
   })
 
   it('long error', () => {
-    cy.request('http://httpstat.us/500')
+    cy.request('/status-code-test/500')
   })
 })

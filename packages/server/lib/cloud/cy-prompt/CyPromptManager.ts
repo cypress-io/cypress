@@ -3,6 +3,7 @@ import type { Router } from 'express'
 import Debug from 'debug'
 import { requireScript } from '../require_script'
 import type { Socket } from 'socket.io'
+import crypto, { BinaryLike } from 'crypto'
 
 interface CyPromptServer { default: CyPromptServerDefaultShape }
 
@@ -18,6 +19,7 @@ interface SetupOptions {
     record?: boolean
     key?: string
   }>
+  manifest: Record<string, string>
 }
 
 const debug = Debug('cypress:server:cy-prompt')
@@ -26,7 +28,7 @@ export class CyPromptManager implements CyPromptManagerShape {
   status: CyPromptStatus = 'NOT_INITIALIZED'
   private _cyPromptServer: CyPromptServerShape | undefined
 
-  async setup ({ script, cyPromptPath, cyPromptHash, getProjectOptions, cloudApi }: SetupOptions): Promise<void> {
+  async setup ({ script, cyPromptPath, cyPromptHash, getProjectOptions, cloudApi, manifest }: SetupOptions): Promise<void> {
     const { createCyPromptServer } = requireScript<CyPromptServer>(script).default
 
     this._cyPromptServer = await createCyPromptServer({
@@ -34,6 +36,18 @@ export class CyPromptManager implements CyPromptManagerShape {
       cyPromptPath,
       cloudApi,
       getProjectOptions,
+      manifest,
+      verifyHash: (contents: BinaryLike, expectedHash: string) => {
+        // If we are running locally, we don't need to verify the signature. This
+        // environment variable will get stripped in the binary.
+        if (process.env.CYPRESS_LOCAL_CY_PROMPT_PATH) {
+          return true
+        }
+
+        const actualHash = crypto.createHash('sha256').update(contents).digest('hex')
+
+        return actualHash === expectedHash
+      },
     })
 
     this.status = 'INITIALIZED'

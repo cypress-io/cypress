@@ -24,6 +24,7 @@ describe('CyPromptLifecycleManager', () => {
   let watcherStub: sinon.SinonStub = sinon.stub()
   let watcherOnStub: sinon.SinonStub = sinon.stub()
   let watcherCloseStub: sinon.SinonStub = sinon.stub()
+  const mockContents: string = 'console.log("cy-prompt script")'
 
   beforeEach(() => {
     postCyPromptSessionStub = sinon.stub()
@@ -51,7 +52,7 @@ describe('CyPromptLifecycleManager', () => {
         },
       },
       'fs-extra': {
-        readFile: readFileStub.resolves('console.log("cy-prompt script")'),
+        readFile: readFileStub.resolves(mockContents),
       },
       'chokidar': {
         watch: watcherStub.returns({
@@ -122,6 +123,12 @@ describe('CyPromptLifecycleManager', () => {
         })
       })
 
+      const mockManifest = {
+        'server/index.js': 'c3c4ab913ca059819549f105e756a4c4471df19abef884ce85eafc7b7970e7b4',
+      }
+
+      ensureCyPromptBundleStub.resolves(mockManifest)
+
       await cyPromptReadyPromise
 
       expect(mockCtx.update).to.be.calledOnce
@@ -142,6 +149,7 @@ describe('CyPromptLifecycleManager', () => {
           asyncRetry,
         },
         getProjectOptions: sinon.match.func,
+        manifest: mockManifest,
       })
 
       expect(postCyPromptSessionStub).to.be.calledWith({
@@ -166,6 +174,12 @@ describe('CyPromptLifecycleManager', () => {
           resolve(cyPromptManager)
         })
       })
+
+      const mockManifest = {
+        'server/index.js': 'c3c4ab913ca059819549f105e756a4c4471df19abef884ce85eafc7b7970e7b4',
+      }
+
+      ensureCyPromptBundleStub.resolves(mockManifest)
 
       const cyPromptManager1 = await cyPromptReadyPromise1
 
@@ -205,6 +219,7 @@ describe('CyPromptLifecycleManager', () => {
           asyncRetry,
         },
         getProjectOptions: sinon.match.func,
+        manifest: mockManifest,
       })
 
       expect(postCyPromptSessionStub).to.be.calledWith({
@@ -248,6 +263,7 @@ describe('CyPromptLifecycleManager', () => {
           asyncRetry,
         },
         getProjectOptions: sinon.match.func,
+        manifest: {},
       })
 
       expect(postCyPromptSessionStub).to.be.calledWith({
@@ -281,6 +297,60 @@ describe('CyPromptLifecycleManager', () => {
       expect(mockCyPromptManagerPromise).to.be.present
       expect(await mockCyPromptManagerPromise).to.equal(updatedCyPromptManager)
     })
+
+    it('throws an error when the cy-prompt server script is not found in the manifest', async () => {
+      cyPromptManagerSetupStub.callsFake((args) => {
+        return Promise.resolve()
+      })
+
+      const mockManifest = {}
+
+      ensureCyPromptBundleStub.resolves(mockManifest)
+
+      cyPromptLifecycleManager.initializeCyPromptManager({
+        cloudDataSource: mockCloudDataSource,
+        ctx: mockCtx,
+        record: false,
+        key: '123e4567-e89b-12d3-a456-426614174000',
+      })
+
+      // @ts-expect-error - accessing private property
+      const cyPromptPromise = cyPromptLifecycleManager.cyPromptManagerPromise
+
+      expect(cyPromptPromise).to.not.be.null
+
+      const { error } = await cyPromptPromise
+
+      expect(error.message).to.equal('Expected hash for cy prompt server script not found in manifest')
+    })
+
+    it('throws an error when the cy-prompt server script is wrong in the manifest', async () => {
+      cyPromptManagerSetupStub.callsFake((args) => {
+        return Promise.resolve()
+      })
+
+      const mockManifest = {
+        'server/index.js': 'a1',
+      }
+
+      ensureCyPromptBundleStub.resolves(mockManifest)
+
+      cyPromptLifecycleManager.initializeCyPromptManager({
+        cloudDataSource: mockCloudDataSource,
+        ctx: mockCtx,
+        record: false,
+        key: '123e4567-e89b-12d3-a456-426614174000',
+      })
+
+      // @ts-expect-error - accessing private property
+      const cyPromptPromise = cyPromptLifecycleManager.cyPromptManagerPromise
+
+      expect(cyPromptPromise).to.not.be.null
+
+      const { error } = await cyPromptPromise
+
+      expect(error.message).to.equal('Invalid hash for cy prompt server script')
+    })
   })
 
   describe('getCyPrompt', () => {
@@ -304,6 +374,14 @@ describe('CyPromptLifecycleManager', () => {
   })
 
   describe('registerCyPromptReadyListener', () => {
+    beforeEach(() => {
+      const mockManifest = {
+        'server/index.js': 'c3c4ab913ca059819549f105e756a4c4471df19abef884ce85eafc7b7970e7b4',
+      }
+
+      ensureCyPromptBundleStub.resolves(mockManifest)
+    })
+
     it('registers a listener that will be called when cy-prompt is ready', () => {
       const listener = sinon.stub()
 
