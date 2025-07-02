@@ -30,9 +30,13 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTest = false, 
   .closest('.runnable-wrapper').as('runnable-wrapper')
   .realHover()
 
-  cy.get('@runnable-wrapper')
-  .findByTestId('launch-studio')
-  .click()
+  if (createNewTest) {
+    cy.get('@runnable-wrapper').realHover().findByTestId('create-new-test-button').click()
+  } else {
+    cy.get('@runnable-wrapper')
+    .findByTestId('launch-studio')
+    .click()
+  }
 
   // Studio re-executes spec before waiting for commands - wait for the spec to finish executing.
   cy.waitForSpecToFinish()

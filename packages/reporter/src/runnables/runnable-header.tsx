@@ -3,16 +3,19 @@ import React, { ReactElement } from 'react'
 
 import type { StatsStore } from '../header/stats-store'
 import { formatDuration, getFilenameParts } from '../lib/util'
-import FileNameOpener from '../lib/file-name-opener'
+import { RunnablesStore } from './runnables-store'
+import { DebugDismiss } from '../header/DebugDismiss'
+import { OpenFileInIDEButton } from '../OpenFileInIDEButton'
 
 const renderRunnableHeader = (children: ReactElement) => <div className="runnable-header" data-cy="runnable-header">{children}</div>
 
 interface RunnableHeaderProps {
   spec: Cypress.Cypress['spec']
   statsStore: StatsStore
+  runnablesStore: RunnablesStore
 }
 
-const RunnableHeader: React.FC<RunnableHeaderProps> = observer(({ spec, statsStore }) => {
+const RunnableHeader: React.FC<RunnableHeaderProps> = observer(({ spec, statsStore, runnablesStore }) => {
   const relativeSpecPath = spec.relative
 
   if (spec.relative === '__all') {
@@ -32,7 +35,7 @@ const RunnableHeader: React.FC<RunnableHeaderProps> = observer(({ spec, statsSto
 
     return (
       <>
-        <strong>{specParts[0]}</strong>{specParts[1]}
+        <span className='spec-name'>{specParts[0]}</span><span className='spec-file-extension'>{specParts[1]}</span>
       </>
     )
   }
@@ -48,7 +51,11 @@ const RunnableHeader: React.FC<RunnableHeaderProps> = observer(({ spec, statsSto
 
   return renderRunnableHeader(
     <>
-      <FileNameOpener fileDetails={fileDetails} hasIcon />
+      <div className='runnable-header-file-name'>
+        {fileDetails.displayFile || fileDetails.originalFile}{!!fileDetails.line && `:${fileDetails.line}`}{!!fileDetails.column && `:${fileDetails.column}`}
+        <OpenFileInIDEButton fileDetails={fileDetails} />
+      </div>
+      {runnablesStore.testFilter && runnablesStore.totalTests > 0 && <DebugDismiss matched={runnablesStore.totalTests} total={runnablesStore.totalUnfilteredTests} />}
       {Boolean(statsStore.duration) && (
         <span className='duration' data-cy="spec-duration">{formatDuration(statsStore.duration)}</span>
       )}

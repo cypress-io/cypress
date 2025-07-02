@@ -24,14 +24,16 @@ const NoCommands = () => (
   </ul>
 )
 
-const AttemptHeader = ({ index, state }: {index: number, state: TestState }) => (
+const AttemptHeader = ({ index, state }: { index: number, state: TestState }) => (
   <span className='attempt-tag'>
+    <StateIcon state={state} className="attempt-state" iconSize='8' />
+    <span className='attempt-tag-text'>
+      Attempt {index + 1}
+    </span>
     <span className='open-close-indicator'>
       <CollapseIcon className='collapse-icon' />
       <ExpandIcon className='expand-icon' />
     </span>
-    Attempt {index + 1}
-    <StateIcon state={state} className="attempt-state" />
   </span>
 )
 

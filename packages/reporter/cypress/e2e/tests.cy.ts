@@ -48,13 +48,25 @@ describe('tests', () => {
   })
 
   it('includes the state as a class', () => {
-    cy.contains('suite 1')
-    .closest('.runnable')
-    .should('have.class', 'runnable-failed')
+    cy.get('.suite').first().within((el) => {
+      cy.wrap(el).contains('suite 1')
+      cy.get('.test').eq(0).should('have.class', 'runnable-passed')
+      cy.get('.test').eq(1).should('have.class', 'runnable-failed')
+    })
 
-    cy.contains('suite 2')
-    .closest('.runnable')
-    .should('have.class', 'runnable-passed')
+    cy.get('.suite').eq(1).within((el) => {
+      cy.wrap(el).contains('suite 1 > nested suite 1')
+      cy.get('.test').eq(0).should('have.class', 'runnable-pending')
+      cy.get('.test').eq(1).should('have.class', 'runnable-active')
+    })
+
+    cy.get('.suite').eq(2).within((el) => {
+      cy.wrap(el).contains('suite 2')
+      cy.get('.test').eq(0).should('have.class', 'runnable-passed')
+      cy.get('.test').eq(1).should('have.class', 'runnable-passed')
+      cy.get('.test').eq(2).should('have.class', 'runnable-passed')
+      .should('have.class', 'runnable-retried')
+    })
   })
 
   describe('expand and collapse', () => {
@@ -284,7 +296,7 @@ describe('studio controls', () => {
         .realHover()
         .find('.runnable-controls-studio')
         .should('be.visible')
-        .should('have.css', 'opacity', '0.5')
+        .should('have.css', 'opacity', '1')
       })
 
       it('displays studio icon with no transparency and tooltip on hover', { scrollBehavior: false }, () => {
@@ -355,13 +367,9 @@ describe('studio controls', () => {
         it('is visible without save and copy button if test was skipped', () => {
           cy.contains('nested suite 1')
           .parents('.collapsible').first()
-          .contains('test 1').click()
-          .parents('.collapsible').first()
-          .find('.studio-controls').as('pendingControls')
-          .should('be.visible')
-
-          cy.get('@pendingControls').find('.studio-save').should('not.be.visible')
-          cy.get('@pendingControls').find('.studio-copy').should('not.be.visible')
+          .contains('test 1').should('have.css', 'pointer-events', 'none')
+          .parents('.collapsible').first().scrollIntoView()
+          .find('.studio-controls').should('not.exist')
         })
 
         it('is not visible while test is running', () => {

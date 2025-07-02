@@ -177,7 +177,6 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.visitApp()
     cy.specsPageIsVisible()
     cy.contains('withFailure.spec').click()
-    cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
 
     cy.get('[data-cy="runnable-header"]').should('be.visible')
     cy.get('body').type('f')

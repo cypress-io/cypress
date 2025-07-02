@@ -55,19 +55,24 @@ describe('spec title', () => {
     })
 
     it('displays name without path', () => {
-      cy.get('.runnable-header').find('a').should('have.text', 'foo.js')
+      cy.get('.runnable-header-file-name').contains('foo.js')
 
       cy.percySnapshot()
     })
 
-    it('displays tooltip on hover', () => {
-      cy.get('.runnable-header a').first().trigger('mouseover')
-      cy.get('.cy-tooltip').first().should('have.text', 'Open in IDE')
+    it('displays Open in IDE button on spec name hover', () => {
+      cy.get('.open-in-ide-button').should('have.css', 'opacity', '0')
+
+      cy.get('.runnable-header-file-name').realHover()
+      cy.get('.open-in-ide-button').should('have.css', 'opacity', '1')
+      cy.get('.open-in-ide-button').contains('Open in IDE')
+
+      cy.percySnapshot()
     })
 
     itHandlesFileOpening({
       getRunner: () => runner,
-      selector: '.runnable-header a',
+      selector: '.open-in-ide-button',
       file: {
         file: '/absolute/path/to/foo.js',
         line: 0,

@@ -131,8 +131,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       // validate that the width we set in `withCtx` above is the starting point
         cy.get(`[data-cy="reporter-panel"]`).invoke('outerWidth').should('eq', 800)
 
-        cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
-        .click({ force: true })
+        cy.findByTestId('toggle-specs-button').click({ force: true })
 
         // this tooltip text confirms specs list is open
         cy.contains('Collapse Specs List')

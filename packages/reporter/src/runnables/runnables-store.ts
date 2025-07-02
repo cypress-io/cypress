@@ -126,7 +126,32 @@ export class RunnablesStore {
   }
 
   _createSuite (props: SuiteProps, level: number) {
-    const suite = new SuiteModel(props, level)
+    // Get parent suite titles by traversing up the queue
+    const parentTitles: string[] = []
+
+    // Find the immediate parent suite by looking for the last suite at a lower level
+    let parentLevel = level - 1
+
+    for (let i = this._runnablesQueue.length - 1; i >= 0; i--) {
+      const runnable = this._runnablesQueue[i]
+
+      if ('type' in runnable && runnable.type === 'suite' && runnable.level === parentLevel && runnable.title) {
+        // Add this parent's title
+        parentTitles.unshift(runnable.title)
+        break
+      }
+    }
+
+    // Combine parent titles with current suite title
+    const hierarchicalTitle = [...parentTitles, props.title].join(' > ')
+
+    // Create new props with the hierarchical title
+    const suiteProps = {
+      ...props,
+      title: hierarchicalTitle,
+    }
+
+    const suite = new SuiteModel(suiteProps, level)
 
     this._runnablesQueue.push(suite)
     suite.children = this._createRunnableChildren(props, ++level)

@@ -26,6 +26,7 @@ _Released 07/15/2025 (PENDING)_
 
 **Misc:**
 
+- The Cypress Command log has a new design when viewing a list of tests. Addresses [#31677](https://github.com/cypress-io/cypress/issues/31677). Addressed in [#31914](https://github.com/cypress-io/cypress/pull/31914).
 - Migration helpers and related errors are no longer shown when upgrading from Cypress versions earlier than 10.0.0. To migrate from a pre-10.0.0 version, upgrade one major version at a time to receive the appropriate guidance. Addresses [#31345](https://github.com/cypress-io/cypress/issues/31345). Addressed in [https://github.com/cypress-io/cypress/pull/31629/](https://github.com/cypress-io/cypress/pull/31629/).
 
 ## 14.5.2

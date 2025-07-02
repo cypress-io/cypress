@@ -71,7 +71,7 @@ const verifyFailure = (options) => {
   cy.contains('.runnable-title', specTitle).closest('.runnable').as('Root')
 
   cy.get('@Root').within(() => {
-    cy.contains('View stack trace').click()
+    cy.contains('Stack trace').click()
 
     const messageLines = [].concat(message)
 
