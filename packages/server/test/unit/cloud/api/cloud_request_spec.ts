@@ -4,13 +4,16 @@ import sinonChai from 'sinon-chai'
 import chai, { expect } from 'chai'
 import agent from '@packages/network/lib/agent'
 import axios, { CreateAxiosDefaults, AxiosInstance } from 'axios'
-import { _create } from '../../../../lib/cloud/api/cloud_request'
+import debugLib from 'debug'
+import stripAnsi from 'strip-ansi'
+import { createCloudRequest } from '../../../../lib/cloud/api/cloud_request'
 import cloudApi from '../../../../lib/cloud/api'
 import app_config from '../../../../config/app.json'
 import os from 'os'
 import pkg from '@packages/root'
 import { transformError } from '../../../../lib/cloud/api/axios_middleware/transform_error'
 import { DestroyableProxy, fakeServer, fakeProxy } from './utils/fake_proxy_server'
+import dedent from 'dedent'
 
 chai.use(sinonChai)
 
@@ -30,7 +33,7 @@ describe('CloudRequest', () => {
   }
 
   it('instantiates with network combined agent', () => {
-    _create()
+    createCloudRequest()
     const cfg = getCreatedConfig()
 
     expect(cfg.httpAgent).to.eq(agent)
@@ -132,7 +135,7 @@ describe('CloudRequest', () => {
       }
 
       if (adapter === 'Axios') {
-        const CloudReq = _create({ baseURL: targetServer.baseUrl })
+        const CloudReq = createCloudRequest({ baseURL: targetServer.baseUrl })
 
         return CloudReq[method](`/ping`, {}).then((r) => r.data)
       }
@@ -150,14 +153,14 @@ describe('CloudRequest', () => {
     }
 
     it('does a basic request', async () => {
-      const CloudReq = _create({ baseURL: fakeHttpUpstream.baseUrl })
+      const CloudReq = createCloudRequest({ baseURL: fakeHttpUpstream.baseUrl })
 
       expect(await CloudReq.get('/ping').then((r) => r.data)).to.eql('OK')
       expect(fakeHttpUpstream.requests[0].rawHeaders).to.not.contain('Proxy-Authorization')
     })
 
     it('retains Proxy-Authorization for non-proxied requests', async () => {
-      const CloudReq = _create({ baseURL: fakeHttpUpstream.baseUrl })
+      const CloudReq = createCloudRequest({ baseURL: fakeHttpUpstream.baseUrl })
 
       expect(await CloudReq.get('/ping', {
         headers: {
@@ -310,6 +313,81 @@ describe('CloudRequest', () => {
     }
   })
 
+  describe('createCloudRequest', () => {
+    let fakeApp: DestroyableProxy
+
+    before(async () => {
+      fakeApp = await fakeServer({})
+    })
+
+    after(() => fakeApp.teardown())
+
+    let wasEnabled: string
+
+    beforeEach(() => {
+      wasEnabled = debugLib.disable()
+    })
+
+    afterEach(() => {
+      debugLib.enable(wasEnabled)
+
+      sinon.restore()
+    })
+
+    it('can skip installing logging', async () => {
+      debugLib.enable('cypress:server:cloud:api')
+
+      const CloudRequest = createCloudRequest({ baseURL: fakeApp.baseUrl })
+
+      const logSpy = sinon.stub(process.stderr, 'write')
+
+      await CloudRequest.get('/ping')
+      const debugCalls = logSpy.getCalls().flatMap((c) => stripAnsi(String(c.args[0])).trim().replace(/\+(\d+)ms$/, '+?ms'))
+
+      expect(debugCalls).to.eql([
+        'cypress:server:cloud:api get /ping +?ms',
+        'cypress:server:cloud:api get /ping Success: 200 OK -> \n  cypress:server:cloud:api   Response: \'OK\' +?ms',
+      ])
+
+      logSpy.reset()
+
+      const CloudRequestNoLogs = createCloudRequest({ baseURL: fakeApp.baseUrl, enableLogging: false })
+
+      await CloudRequestNoLogs.get('/ping')
+      expect(logSpy.getCalls()).to.eql([])
+    })
+
+    it('can skip installing the error transform', async () => {
+      const CloudRequest = createCloudRequest({ baseURL: fakeApp.baseUrl })
+
+      // Installed
+      try {
+        await CloudRequest.get('/error')
+        throw new Error('Unreachable')
+      } catch (e) {
+        expect(e.isApiError).to.eql(true)
+        expect(e.message).to.equal(dedent`
+        404
+        
+        {
+          "ok": false
+        }
+        `)
+      }
+
+      const CloudRequestNoError = createCloudRequest({ baseURL: fakeApp.baseUrl, enableErrorTransform: false })
+
+      // Not Installed
+      try {
+        await CloudRequestNoError.get('/error')
+        throw new Error('Unreachable')
+      } catch (e) {
+        expect(e.isApiError).to.eql(undefined)
+        expect(e.response.data).to.eql({ ok: false })
+      }
+    })
+  })
+
   describe('headers', () => {
     const platform = 'sunos'
     const version = '0.0.0'
@@ -328,7 +406,7 @@ describe('CloudRequest', () => {
     })
 
     it('sets exepcted platform, version, and user-agent headers', () => {
-      _create()
+      createCloudRequest()
       const cfg = getCreatedConfig()
 
       expect(cfg.headers).to.have.property('x-os-name', platform)
@@ -358,7 +436,7 @@ describe('CloudRequest', () => {
 
       ;(axios.create as sinon.SinonStub).returns(stubbedAxiosInstance)
 
-      _create()
+      createCloudRequest()
     })
 
     it('registers error transformation interceptor', () => {
@@ -388,7 +466,7 @@ describe('CloudRequest', () => {
       })
 
       it('sets to the value defined in app config', () => {
-        _create()
+        createCloudRequest()
         const cfg = getCreatedConfig()
 
         expect(cfg.baseURL).to.eq(app_config[env ?? 'development']?.api_url)
@@ -416,7 +494,7 @@ describe('CloudRequest', () => {
       })
 
       it('sets to the value defined in app config', () => {
-        _create()
+        createCloudRequest()
         const cfg = getCreatedConfig()
 
         expect(cfg.baseURL).to.eq(app_config[env ?? 'development']?.api_url)
