@@ -34,21 +34,11 @@ export const ensureStudioBundle = async ({
   await remove(studioPath)
   await ensureDir(studioPath)
 
-  let timeoutId: NodeJS.Timeout
-
-  const responseManifestSignature: string = await Promise.race([
-    getStudioBundle({
-      studioUrl,
-      bundlePath,
-    }),
-    new Promise((_, reject) => {
-      timeoutId = setTimeout(() => {
-        reject(new Error('Studio bundle download timed out'))
-      }, downloadTimeoutMs)
-    }),
-  ]).finally(() => {
-    clearTimeout(timeoutId)
-  }) as string
+  const responseManifestSignature: string = await
+  getStudioBundle({
+    studioUrl,
+    bundlePath,
+  })
 
   await tar.extract({
     file: bundlePath,
