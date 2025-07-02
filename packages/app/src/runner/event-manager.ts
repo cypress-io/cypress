@@ -472,13 +472,13 @@ export class EventManager {
       Cypress.state('isProtocolEnabled', isDefaultProtocolEnabled)
     }
 
+    this._addListeners()
+
     if (Cypress.config('experimentalPromptCommand')) {
       await new Promise((resolve) => {
         this.ws.emit('prompt:reset', resolve)
       })
     }
-
-    this._addListeners()
   }
 
   isBrowserFamily (family: string) {
