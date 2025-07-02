@@ -528,7 +528,7 @@ describe('StudioLifecycleManager', () => {
         cloudApi: sinon.match.object,
         studioHash: 'test-project-id',
         projectSlug: 'abc123',
-        error: sinon.match.instanceOf(Error).and(sinon.match.has('message', 'Invalid hash for studio server script')),
+        error: sinon.match.instanceOf(Error).and(sinon.match.has('message', 'Expected hash for studio server script not found in manifest')),
         studioMethod: 'initializeStudioManager',
         studioMethodArgs: [],
       })
