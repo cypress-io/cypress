@@ -17,6 +17,7 @@ interface SetupOptions {
   cloudApi: StudioCloudApi
   shouldEnableStudio: boolean
   manifest: Record<string, string>
+  onTestFileChange: (filePath: string) => void
 }
 
 const debug = Debug('cypress:server:studio')
@@ -84,9 +85,15 @@ export class StudioManager implements StudioManagerShape {
     return Promise.resolve()
   }
 
-  addSocketListeners (socket: Socket, onTestFileChange: (filePath: string) => void): void {
+  setOnTestFileChange (onTestFileChange: (filePath: string) => void): void {
     if (this._studioServer) {
-      this.invokeSync('addSocketListeners', { isEssential: true }, socket, onTestFileChange)
+      this.invokeSync('setOnTestFileChange', { isEssential: true }, onTestFileChange)
+    }
+  }
+
+  addSocketListeners (socket: Socket): void {
+    if (this._studioServer) {
+      this.invokeSync('addSocketListeners', { isEssential: true }, socket)
     }
   }
 

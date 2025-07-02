@@ -62,7 +62,8 @@ export interface StudioAIInitializeOptions {
 export interface StudioServerShape {
   initializeRoutes(router: Router): void
   canAccessStudioAI(browser: Cypress.Browser): Promise<boolean>
-  addSocketListeners(socket: Socket, onTestFileChange: (filePath: string) => void): void
+  addSocketListeners(socket: Socket): void
+  setOnTestFileChange(onTestFileChange: (filePath: string) => void): void
   initializeStudioAI(options: StudioAIInitializeOptions): Promise<void>
   updateSessionId(sessionId: string): void
   reportError(

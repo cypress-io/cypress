@@ -419,7 +419,8 @@ export class SocketBase {
         })
 
         getCtx().coreData.studioLifecycleManager?.registerStudioReadyListener((studio) => {
-          studio.addSocketListeners(socket, this.onTestFileChange)
+          studio.setOnTestFileChange(this.onTestFileChange)
+          studio.addSocketListeners(socket)
         })
 
         socket.on('studio:init', async (cb) => {
