@@ -34,6 +34,7 @@ export class StudioLifecycleManager {
   private listeners: ((studioManager: StudioManager) => void)[] = []
   private ctx?: DataContext
   private lastStatus?: StudioStatus
+  private currentStudioHash?: string
 
   private initializationParams?: {
     projectId?: string
@@ -186,6 +187,9 @@ export class StudioLifecycleManager {
       studioHash = studioSession.studioUrl.split('/').pop()?.split('.')[0]
       studioPath = path.join(os.tmpdir(), 'cypress', 'studio', studioHash)
 
+      // Store the current studio hash so that we can clear the cache entry when retrying
+      this.currentStudioHash = studioHash
+
       let hashLoadingPromise = StudioLifecycleManager.hashLoadingMap.get(studioHash)
 
       if (!hashLoadingPromise) {
@@ -202,6 +206,7 @@ export class StudioLifecycleManager {
     } else {
       studioPath = process.env.CYPRESS_LOCAL_STUDIO_PATH
       studioHash = 'local'
+      this.currentStudioHash = studioHash
     }
 
     telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.ENSURE_STUDIO_BUNDLE_END)
@@ -288,6 +293,9 @@ export class StudioLifecycleManager {
     this.listeners.forEach((listener) => {
       listener(studioManager)
     })
+
+    debug('Clearing %d studio ready listeners after successful initialization', this.listeners.length)
+    this.listeners = []
   }
 
   private setupWatcher ({
@@ -370,11 +378,16 @@ export class StudioLifecycleManager {
     this.studioManagerPromise = undefined
     this.lastStatus = undefined
 
-    // Clear any cached failed bundle downloads to allow for retrying
-    const cacheSize = StudioLifecycleManager.hashLoadingMap.size
+    // Clear the cache entry for the current studio hash
+    if (this.currentStudioHash) {
+      const hadCachedPromise = StudioLifecycleManager.hashLoadingMap.has(this.currentStudioHash)
 
-    StudioLifecycleManager.hashLoadingMap.clear()
-    debug('Cleared %d cached studio bundle promises for retry', cacheSize)
+      StudioLifecycleManager.hashLoadingMap.delete(this.currentStudioHash)
+      debug('Cleared cached studio bundle promise for hash: %s (was cached: %s)', this.currentStudioHash, hadCachedPromise)
+      this.currentStudioHash = undefined
+    } else {
+      debug('No current studio hash available to clear from cache')
+    }
 
     // Re-initialize with the same parameters we stored
     if (this.initializationParams) {

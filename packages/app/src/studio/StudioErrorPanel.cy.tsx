@@ -14,22 +14,19 @@ describe('<StudioErrorPanel />', () => {
     )
 
     // Check that the error panel is displayed
-    cy.get('[data-cy="studio-error-panel"]').should('be.visible')
+    cy.findByTestId('studio-error-panel').should('be.visible')
 
     // Check for the error icon
-    cy.get('[data-cy="studio-error-panel"]')
+    cy.findByTestId('studio-error-panel')
     .find('svg')
     .should('be.visible')
 
-    // Check for the error title
-    cy.contains('Something went wrong').should('be.visible')
-
     // Check for the error description
-    cy.contains('There was a problem with Cypress Studio').should('be.visible')
+    cy.findByTestId('studio-error-panel').should('contain.text', 'There was a problem with Cypress Studio. Our team has been notified. If the problem persists, please try again later.')
     cy.contains('Our team has been notified').should('be.visible')
 
     // Check for the retry button
-    cy.get('[data-cy="studio-error-retry-button"]')
+    cy.findByTestId('studio-error-retry-button')
     .should('be.visible')
     .should('contain', 'Retry')
   })
@@ -48,7 +45,7 @@ describe('<StudioErrorPanel />', () => {
       />,
     )
 
-    cy.get('[data-cy="studio-error-retry-button"]').click()
+    cy.findByTestId('studio-error-retry-button').click()
 
     cy.get('@onRetry').should('have.been.calledOnce')
   })
@@ -65,6 +62,6 @@ describe('<StudioErrorPanel />', () => {
     )
 
     // Check that the Studio button is present in the header
-    cy.get('[data-cy="studio-button"]').should('be.visible')
+    cy.findByTestId('studio-button').should('be.visible')
   })
 })
