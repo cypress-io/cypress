@@ -9,6 +9,7 @@ import { verifySignatureFromFile } from '../../encryption'
 
 const pkg = require('@packages/root')
 const _delay = linearDelay(500)
+const DEFAULT_TIMEOUT = 25000
 
 export const getStudioBundle = async ({ studioUrl, bundlePath }: { studioUrl: string, bundlePath: string }): Promise<string> => {
   let responseSignature: string | null = null
@@ -18,7 +19,7 @@ export const getStudioBundle = async ({ studioUrl, bundlePath }: { studioUrl: st
     const controller = new AbortController()
     const fetchTimeout = setTimeout(() => {
       controller.abort()
-    }, 25000)
+    }, DEFAULT_TIMEOUT)
 
     try {
       const response = await fetch(studioUrl, {
@@ -56,7 +57,7 @@ export const getStudioBundle = async ({ studioUrl, bundlePath }: { studioUrl: st
         pipeTimeout = setTimeout(() => {
           cleanup()
           reject(new Error('Studio bundle pipe operation timed out'))
-        }, 20000)
+        }, DEFAULT_TIMEOUT)
 
         writeStream.on('error', (err) => {
           cleanup()

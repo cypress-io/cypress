@@ -916,6 +916,12 @@ describe('StudioLifecycleManager', () => {
         return Promise.resolve()
       })
 
+      const mockManifest = {
+        'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
+      }
+
+      ensureStudioBundleStub.resolves(mockManifest)
+
       // First initialize with some state
       studioLifecycleManager.initializeStudioManager({
         projectId: 'test-project-id',
@@ -932,14 +938,12 @@ describe('StudioLifecycleManager', () => {
         })
       })
 
-      // Verify initial state
+      // Initial state
       expect(studioLifecycleManager.getCurrentStatus()).to.equal('ENABLED')
       expect(studioLifecycleManager.isStudioReady()).to.be.true
 
-      // Check initial call count
       const initialCallCount = postStudioSessionStub.callCount
 
-      // Call retry
       studioLifecycleManager.retry()
 
       // Verify state was cleared
@@ -1004,14 +1008,9 @@ describe('StudioLifecycleManager', () => {
         debugData: {},
       })
 
-      // Wait for initialization to complete to ensure currentStudioHash is set
-      await new Promise((resolve) => {
-        studioLifecycleManager.registerStudioReadyListener(() => {
-          resolve(true)
-        })
-      })
+      // @ts-expect-error - accessing private property
+      studioLifecycleManager.currentStudioHash = 'abc'
 
-      // Call retry
       studioLifecycleManager.retry()
 
       // Verify only the current studio hash was cleared (abc from the studioUrl)
@@ -1053,7 +1052,6 @@ describe('StudioLifecycleManager', () => {
         })
       })
 
-      // Call retry
       studioLifecycleManager.retry()
 
       // Verify only the 'local' hash was cleared

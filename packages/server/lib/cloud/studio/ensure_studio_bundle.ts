@@ -9,10 +9,7 @@ interface EnsureStudioBundleOptions {
   studioUrl: string
   projectId?: string
   studioPath: string
-  downloadTimeoutMs?: number
 }
-
-const DOWNLOAD_TIMEOUT = 30000
 
 /**
  * Ensures that the studio bundle is downloaded and extracted into the given path
@@ -20,13 +17,11 @@ const DOWNLOAD_TIMEOUT = 30000
  * @param options.studioUrl - The URL of the studio bundle
  * @param options.projectId - The project ID of the studio bundle
  * @param options.studioPath - The path to extract the studio bundle to
- * @param options.downloadTimeoutMs - The timeout for the download operation
  */
 export const ensureStudioBundle = async ({
   studioUrl,
   projectId,
   studioPath,
-  downloadTimeoutMs = DOWNLOAD_TIMEOUT,
 }: EnsureStudioBundleOptions): Promise<Record<string, string>> => {
   const bundlePath = path.join(studioPath, 'bundle.tar')
 
@@ -34,8 +29,7 @@ export const ensureStudioBundle = async ({
   await remove(studioPath)
   await ensureDir(studioPath)
 
-  const responseManifestSignature: string = await
-  getStudioBundle({
+  const responseManifestSignature = await getStudioBundle({
     studioUrl,
     bundlePath,
   })
