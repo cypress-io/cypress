@@ -63,10 +63,6 @@ const maybeRenderReactComponent = () => {
       promptStore.currentMoreInfoNeededModalInfo?.onCancel()
       closeModal()
     },
-    onSave: () => {
-      promptStore.currentMoreInfoNeededModalInfo?.onSave()
-      closeModal()
-    },
   })
 
   if (!reactRoot.value) {

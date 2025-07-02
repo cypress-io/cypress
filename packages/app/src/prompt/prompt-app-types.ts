@@ -36,7 +36,6 @@ export interface MoreInfoNeededModalContentsProps {
   testId: string
   logId: string
   onClose: () => void
-  onSave: () => void
 }
 
 export type MoreInfoNeededModalContentsShape = (
