@@ -36,8 +36,6 @@ export const getStudioBundle = async ({ studioUrl, bundlePath }: { studioUrl: st
         signal: controller.signal,
       })
 
-      clearTimeout(fetchTimeout)
-
       if (!response.ok) {
         throw new Error(`Failed to download studio bundle: ${response.statusText}`)
       }
@@ -47,31 +45,26 @@ export const getStudioBundle = async ({ studioUrl, bundlePath }: { studioUrl: st
 
       await new Promise<void>((resolve, reject) => {
         const writeStream = createWriteStream(bundlePath)
-        let pipeTimeout: NodeJS.Timeout
-
-        const cleanup = () => {
-          clearTimeout(pipeTimeout)
-          writeStream.destroy()
-        }
-
-        pipeTimeout = setTimeout(() => {
-          cleanup()
-          reject(new Error('Studio bundle pipe operation timed out'))
-        }, DEFAULT_TIMEOUT)
 
         writeStream.on('error', (err) => {
-          cleanup()
+          writeStream.destroy()
           reject(err)
         })
 
         writeStream.on('finish', () => {
-          clearTimeout(pipeTimeout)
           resolve()
         })
 
         // @ts-expect-error - this is supported
         response.body?.pipe(writeStream)
       })
+
+      // Check if the operation was aborted due to timeout
+      if (controller.signal.aborted) {
+        throw new Error('Studio bundle fetch timed out')
+      }
+
+      clearTimeout(fetchTimeout)
     } catch (error) {
       clearTimeout(fetchTimeout)
       if (error.name === 'AbortError') {
