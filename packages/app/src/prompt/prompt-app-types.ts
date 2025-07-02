@@ -2,7 +2,7 @@
 // cy-prompt bundle. It is downloaded and copied to the app.
 // It should not be modified directly in the app.
 
-import Emitter from 'component-emitter'
+import type Emitter from 'component-emitter'
 
 export interface CypressInternal extends Cypress.Cypress {
   backendRequestHandler: (
