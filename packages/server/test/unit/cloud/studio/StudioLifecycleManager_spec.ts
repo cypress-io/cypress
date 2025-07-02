@@ -534,6 +534,53 @@ describe('StudioLifecycleManager', () => {
       })
     })
 
+    it('throws an error when the studio server script is wrong in the manifest', async () => {
+      studioManagerSetupStub.callsFake((args) => {
+        mockStudioManager.status = 'ENABLED'
+
+        return Promise.resolve()
+      })
+
+      const reportErrorPromise = new Promise<void>((resolve) => {
+        reportStudioErrorStub.callsFake((err) => {
+          resolve()
+
+          return undefined
+        })
+      })
+
+      const mockManifest = {
+        'server/index.js': 'a1',
+      }
+
+      ensureStudioBundleStub.resolves(mockManifest)
+
+      studioLifecycleManager.initializeStudioManager({
+        projectId: 'test-project-id',
+        cloudDataSource: mockCloudDataSource,
+        ctx: mockCtx,
+        cfg: mockCfg,
+        debugData: {},
+      })
+
+      await reportErrorPromise
+
+      // @ts-expect-error - accessing private property
+      const studioPromise = studioLifecycleManager.studioManagerPromise
+
+      expect(studioPromise).to.not.be.null
+
+      expect(reportStudioErrorStub).to.be.calledOnce
+      expect(reportStudioErrorStub).to.be.calledWithMatch({
+        cloudApi: sinon.match.object,
+        studioHash: 'test-project-id',
+        projectSlug: 'abc123',
+        error: sinon.match.instanceOf(Error).and(sinon.match.has('message', 'Invalid hash for studio server script')),
+        studioMethod: 'initializeStudioManager',
+        studioMethodArgs: [],
+      })
+    })
+
     it('handles errors when initializing the studio manager and reports them', async () => {
       const error = new Error('Test error')
       const listener1 = sinon.stub()
