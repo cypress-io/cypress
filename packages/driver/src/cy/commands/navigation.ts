@@ -4,7 +4,7 @@ import Promise from 'bluebird'
 
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
-import { Log } from '../../cypress/log'
+import type { Log } from '../../cypress/log'
 import { bothUrlsMatchAndOneHasHash } from '../navigation'
 import { $Location, LocationObject } from '../../cypress/location'
 import { isRunnerAbleToCommunicateWithAut } from '../../util/commandAUTCommunication'
