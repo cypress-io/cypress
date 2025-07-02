@@ -61,8 +61,6 @@ export interface CyPromptServerOptions {
   manifest: Record<string, string>
   verifyHash: (contents: BinaryLike, expectedHash: string) => boolean
   getProjectOptions: () => Promise<CyPromptProjectOptions>
-  manifest?: Record<string, string>
-  verifyHash: (contents: BinaryLike, expectedHash: string) => boolean
 }
 
 export interface CyPromptCDPClient {
