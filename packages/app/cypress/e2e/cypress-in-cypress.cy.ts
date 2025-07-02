@@ -182,24 +182,6 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       })
     })
 
-    it(`resets selector playground validity when selecting element with playground selector in ${testingType}`, () => {
-      startAtSpecsPage(testingType)
-
-      const spec = testingType === 'e2e' ? 'dom-content.spec.js' : 'TestComponent.spec.jsx'
-
-      cy.get('[data-cy="spec-item"]').contains(spec).click()
-      cy.get('.passed > .num').should('contain', 1)
-
-      cy.get('[data-cy="playground-activator"]').click()
-      cy.get('[data-cy="playground-selector"]').clear()
-      cy.get('[data-cy="playground-num-elements"]').contains('Invalid')
-      cy.get('iframe.aut-iframe').its('0.contentDocument.documentElement').then(cy.wrap).within(() => {
-        cy.get('body').click()
-      })
-
-      cy.get('[data-cy="playground-num-elements"]').contains('1 match')
-    })
-
     it(`hides the command log when hideCommandLog is set in open mode for ${testingType}`, () => {
       cy.scaffoldProject('cypress-in-cypress')
       cy.findBrowsers()

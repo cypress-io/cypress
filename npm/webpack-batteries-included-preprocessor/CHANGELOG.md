@@ -1,3 +1,5 @@
+# [@cypress/webpack-batteries-included-preprocessor-v3.1.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v3.1.0...@cypress/webpack-batteries-included-preprocessor-v3.1.1) (2025-07-01)
+
 # [@cypress/webpack-batteries-included-preprocessor-v3.1.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v3.0.7...@cypress/webpack-batteries-included-preprocessor-v3.1.0) (2025-05-13)
 
 

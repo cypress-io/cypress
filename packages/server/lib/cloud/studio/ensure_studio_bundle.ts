@@ -1,8 +1,9 @@
-import { remove, ensureDir } from 'fs-extra'
+import { remove, ensureDir, readFile, pathExists } from 'fs-extra'
 
 import tar from 'tar'
 import { getStudioBundle } from '../api/studio/get_studio_bundle'
 import path from 'path'
+import { verifySignature } from '../encryption'
 
 interface EnsureStudioBundleOptions {
   studioUrl: string
@@ -26,7 +27,7 @@ export const ensureStudioBundle = async ({
   projectId,
   studioPath,
   downloadTimeoutMs = DOWNLOAD_TIMEOUT,
-}: EnsureStudioBundleOptions) => {
+}: EnsureStudioBundleOptions): Promise<Record<string, string>> => {
   const bundlePath = path.join(studioPath, 'bundle.tar')
 
   // First remove studioPath to ensure we have a clean slate
@@ -35,10 +36,9 @@ export const ensureStudioBundle = async ({
 
   let timeoutId: NodeJS.Timeout
 
-  await Promise.race([
+  const responseManifestSignature: string = await Promise.race([
     getStudioBundle({
       studioUrl,
-      projectId,
       bundlePath,
     }),
     new Promise((_, reject) => {
@@ -48,10 +48,26 @@ export const ensureStudioBundle = async ({
     }),
   ]).finally(() => {
     clearTimeout(timeoutId)
-  })
+  }) as string
 
   await tar.extract({
     file: bundlePath,
     cwd: studioPath,
   })
+
+  const manifestPath = path.join(studioPath, 'manifest.json')
+
+  if (!(await pathExists(manifestPath))) {
+    throw new Error('Unable to find studio manifest')
+  }
+
+  const manifestContents = await readFile(manifestPath, 'utf8')
+
+  const verified = await verifySignature(manifestContents, responseManifestSignature)
+
+  if (!verified) {
+    throw new Error('Unable to verify studio signature')
+  }
+
+  return JSON.parse(manifestContents)
 }

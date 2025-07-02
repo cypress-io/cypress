@@ -393,7 +393,7 @@ const isRootSuite = (suite) => {
   return suite && suite.root
 }
 
-const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, getTests, cy) => {
+const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, getTests, cy, abort) => {
   // bail if our _runner doesn't have a hook.
   // useful in tests
   if (!_runner.hook) {
@@ -557,22 +557,11 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
         testAfterRun(test, Cypress)
         await testAfterRunAsync(test, Cypress)
 
-        // if the user has stopped the run, we need to abort,
+        // if the user has stopped the run and we are in run mode, we need to abort,
         // this needs to happen after the test:after:run events have fired
         // to ensure protocol can properly handle the abort
-        if (_runner.stopped) {
-          // abort the run
-          _runner.abort()
-
-          // emit the final 'end' event
-          // since our reporter depends on this event
-          // and mocha may never fire this because our
-          // runnable may never finish
-          _runner.emit('end')
-
-          // remove all the listeners
-          // so no more events fire
-          _runner.removeAllListeners()
+        if (_runner.stopped && isRunMode) {
+          abort()
         }
       })]
 
@@ -1407,7 +1396,22 @@ export default {
 
     const getOnlySuiteId = () => _onlySuiteId
 
-    overrideRunnerHook(Cypress, _runner, getTestById, getTest, setTest, getTests, cy)
+    const abort = () => {
+      // abort the run
+      _runner.abort()
+
+      // emit the final 'end' event
+      // since our reporter depends on this event
+      // and mocha may never fire this because our
+      // runnable may never finish
+      _runner.emit('end')
+
+      // remove all the listeners
+      // so no more events fire
+      _runner.removeAllListeners()
+    }
+
+    overrideRunnerHook(Cypress, _runner, getTestById, getTest, setTest, getTests, cy, abort)
 
     // this forces mocha to enqueue a duplicate test in the case of test retries
     const replacePreviousAttemptWith = (test) => {
@@ -1934,6 +1938,12 @@ export default {
         }
 
         _runner.stopped = true
+
+        // if we are in open mode, abort the run immediately
+        // since we want the user feedback to be immediate
+        if (Cypress.config('isInteractive')) {
+          abort()
+        }
       },
 
       getDisplayPropsForLog: LogUtils.getDisplayProps,

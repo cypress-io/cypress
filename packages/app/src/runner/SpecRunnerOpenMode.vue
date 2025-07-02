@@ -280,7 +280,11 @@ const studioBetaAvailable = computed(() => {
 })
 
 const shouldShowStudioButton = computed(() => {
-  return !!cloudStudioRequested.value && !studioStore.isOpen
+  // Find the experimentalStudio config field
+  const experimentalStudioConfig = props.gql.currentProject?.config?.find((item) => item.field === 'experimentalStudio')
+  const experimentalStudioEnabled = experimentalStudioConfig?.value === true
+
+  return !!cloudStudioRequested.value && !studioStore.isOpen && experimentalStudioEnabled
 })
 
 const shouldShowStudioPanel = computed(() => {

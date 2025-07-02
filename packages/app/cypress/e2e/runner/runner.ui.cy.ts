@@ -289,9 +289,14 @@ describe('src/cypress/runner', () => {
     it('user can stop test execution', () => {
       loadSpec({
         filePath: 'runner/stop-execution.runner.cy.js',
-        passCount: 0,
-        failCount: 1,
       })
+
+      // Click the stop button to stop execution
+      cy.get('.stop').click()
+
+      // Verify the UI updates immediately - stop button disappears, restart appears
+      cy.get('.stop', { timeout: 100 }).should('not.exist')
+      cy.get('.restart', { timeout: 100 }).should('be.visible')
 
       cy.get('.runnable-err-message').should('not.contain', 'ran afterEach even though specs were stopped')
       cy.get('.runnable-err-message').should('contain', 'Cypress test was stopped while running this command.')
