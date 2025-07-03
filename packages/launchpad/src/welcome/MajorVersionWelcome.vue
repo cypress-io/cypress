@@ -33,25 +33,25 @@
 
             <div class="mb-[16px]">
               <ExternalLink
-                href="https://on.cypress.io/changelog?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v14#14-0-0"
+                href="https://on.cypress.io/changelog?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v15#15-0-0"
                 class="font-bold text-indigo-500"
               >
-                14.0.0
+                15.0.0
               </ExternalLink>
               <span class="font-light pl-[10px] text-gray-500 text-[14px]">
-                Released {{ versionReleaseDates['14'] }}
+                Released {{ versionReleaseDates['15'] }}
               </span>
             </div>
             <div class="children:mb-[16px]">
               <p>
-                We’ve improved performance of component testing and added support for new framework and dev server versions.
+                This release prepares Cypress Studio for the next era of AI-assisted test creation. You can record interactions, add assertions by right-clicking, and now edit tests inline without leaving Cypress. Turn on <InlineCodeFragment>experimentalStudio</InlineCodeFragment> in your config to try it out and share your feedback.
               </p>
               <p>
-                This release also includes breaking changes to <InlineCodeFragment>cy.origin</InlineCodeFragment> that are necessary to handle
-                Chrome’s deprecation of <InlineCodeFragment>document.domain</InlineCodeFragment>, which should fix issues for some users in recent Chrome versions. Support for older versions of Node.js, Linux distributions, browsers and component testing frameworks and dev servers is also removed.
+                We’ve also made important changes to improve reliability, future compatibility, and cross-origin support. Several older versions of Node.js, browser protocols, and Webpack integrations are no longer supported.
+                This version includes breaking changes that may require updates to your project.
               </p>
               <p>
-                For a complete list of updates, please review our <ExternalLink href="https://on.cypress.io/changelog?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v14#14-0-0">
+                For a complete list of updates, please review our <ExternalLink href="https://on.cypress.io/changelog?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v15#15-0-0">
                   <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
                   changelog</ExternalLink>.
               </p>
@@ -65,6 +65,27 @@
             <h2 class="font-bold mt-[24px] mb-[12px] text-[14px] text-gray-600">
               Previous release highlights
             </h2>
+            <div class="pb-[8px]">
+              <ExternalLink
+                href="https://on.cypress.io/changelog#14-0-0"
+                class="font-bold text-indigo-500"
+              >
+                14.0.0
+              </ExternalLink>
+              <span class="font-light pl-[10px] text-gray-500 text-[14px]">
+                Released {{ versionReleaseDates['14'] }}
+              </span>
+            </div>
+            <p class="text-[14px] leading-[20px]">
+              We’ve improved performance of component testing and added support for new framework and dev server versions.
+              <br>
+              <br>
+              Read about the v14.0.0 changes in our
+              <ExternalLink href="https://on.cypress.io/cypress-14-release">
+                <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
+                blog post</ExternalLink>.
+            </p>
+            <br>
             <div class="pb-[8px]">
               <ExternalLink
                 href="https://on.cypress.io/changelog#13-0-0"
@@ -113,26 +134,6 @@
                 blog post</ExternalLink>.
             </p>
             <br>
-            <div class="pb-[8px]">
-              <ExternalLink
-                href="https://on.cypress.io/changelog#11-0-0"
-                class="font-bold text-indigo-500"
-              >
-                11.0.0
-              </ExternalLink>
-              <span class="font-light pl-[10px] text-gray-500 text-[14px]">
-                Released {{ versionReleaseDates['11'] }}
-              </span>
-            </div>
-            <p class="text-[14px] leading-[20px]">
-              We made Component Testing generally available for projects using React, Next.js, Angular, and Vue which allows you to test your application's components without running your whole app! We also massively improved our startup performance with up to 84% faster startup times!
-              <br>
-              <br>
-              Read about the v11.0.0 changes in our
-              <ExternalLink href="https://on.cypress.io/cypress-11-release">
-                <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
-                blog post</ExternalLink>.
-            </p>
           </div>
         </div>
       </div>
@@ -191,6 +192,7 @@ const versionReleaseDates = computed(() => {
     '12': useTimeAgo(Date.UTC(2022, 11, 6)).value,
     '13': useTimeAgo(Date.UTC(2023, 7, 29)).value,
     '14': useTimeAgo(Date.UTC(2025, 0, 16)).value,
+    '15': useTimeAgo(Date.UTC(2025, 6, 16)).value,
   }
 })
 
