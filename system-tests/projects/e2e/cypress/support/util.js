@@ -37,7 +37,7 @@ export const verify = (title, ctx, options) => {
     .contains(`FAIL - ${getTitle(title, ctx)}`)
     .closest('.collapsible')
     .within(() => {
-      cy.contains('View stack trace').click()
+      cy.contains('Stack trace').click()
 
       _.each([].concat(message), (msg) => {
         cy.get('.runnable-err-message')

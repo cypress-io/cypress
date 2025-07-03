@@ -1,6 +1,6 @@
 version: 2.1
 
-chrome-stable-version: &chrome-stable-version "138.0.7204.49"
+chrome-stable-version: &chrome-stable-version "138.0.7204.92"
 chrome-beta-version: &chrome-beta-version "139.0.7258.5"
 firefox-stable-version: &firefox-stable-version "137.0"
 
@@ -40,6 +40,7 @@ mainBuildFilters: &mainBuildFilters
         - 'update-v8-snapshot-cache-on-develop'
         - 'electron-36'
         - 'chore/test_cypress_recipes_15'
+        - 'mabel/issue-31677-reporter-redesign'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -52,6 +53,7 @@ macWorkflowFilters: &darwin-workflow-filters
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
       - equal: [ 'electron-36', << pipeline.git.branch >> ]
       - equal: [ 'chore/test_cypress_recipes_15', << pipeline.git.branch >> ]
+      - equal: [ 'mabel/issue-31677-reporter-redesign', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
@@ -64,6 +66,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
       - equal: [ 'electron-36', << pipeline.git.branch >> ]
       - equal: [ 'chore/test_cypress_recipes_15', << pipeline.git.branch >> ]
+      - equal: [ 'mabel/issue-31677-reporter-redesign', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
@@ -88,6 +91,7 @@ windowsWorkflowFilters: &windows-workflow-filters
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
       - equal: [ 'electron-36', << pipeline.git.branch >> ]
       - equal: [ 'chore/test_cypress_recipes_15', << pipeline.git.branch >> ]
+      - equal: [ 'mabel/issue-31677-reporter-redesign', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>

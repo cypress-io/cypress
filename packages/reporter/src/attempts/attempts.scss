@@ -1,40 +1,64 @@
 .reporter {
+  // Mixin for dotted border line
+  @mixin dotted-border-line($position: "top") {
+    border-left: 1px dotted $gray-800;
+    content: "";
+    left: 16px;
+    position: absolute;
+    height: 8px;
+    z-index: 1;
+
+    @if $position == "top" {
+      top: 0;
+    } @else if $position == "bottom" {
+      bottom: 0;
+    }
+  }
+
   .attempts {
+    border-right: 1px solid $gray-800;
+    border-bottom: 1px solid $gray-800;
+    border-radius: 0 0 4px 4px;
+
     .attempt-item > .collapsible > .collapsible-header-wrapper {
       display: none;
     }
 
-    &.has-multiple-attempts .attempt-item > .collapsible > .collapsible-header-wrapper {
-      display: flex;
+    &.has-multiple-attempts .attempt-item {
+      > .collapsible > .collapsible-header-wrapper {
+        display: flex;
+      }
+
+      &:not(:first-child) {
+        > .collapsible .attempt-name:before {
+          @include dotted-border-line("top");
+        }
+      }
+      > .collapsible .attempt-name {
+        &:after {
+          @include dotted-border-line("bottom");
+        }
+      }
     }
   }
 
-  .attempt-item {
-    margin-bottom: 7px;
+  .attempt-error-region {
+    margin: 0 8.5px;
+  }
 
+  .attempt-item {
     > .collapsible {
       position: relative;
-      margin-right: 16px;
-      .collapsible-header-inner {
-        outline: none;
-      }
 
-      &:before {
-        border-left: 1px solid $gray-900;
-        content: '';
-        left: 9px;
-        position: absolute;
-        top: 22px;
-        height: 15px;
+      > .attempt-name > .collapsible-header {
+        .collapsible-header-inner {
+          outline: none;
+          display: flex;
+          align-items: center;
+          width: 100%;
+          padding: 0;
+        }
       }
-
-      &.is-open:before {
-        display: none;
-      }
-    }
-
-    &:last-child > .collapsible:before {
-      display: none;
     }
 
     > .is-open .open-close-indicator {
@@ -47,75 +71,59 @@
       }
     }
 
-  .open-close-indicator {
-    svg {
-      margin-right: 3px;
+    .open-close-indicator {
+      svg {
+        margin-right: 3px;
 
-      &.collapse-icon {
-        display: none;
+        &.collapse-icon {
+          display: none;
+        }
+
+        &.expand-icon {
+          display: block;
+        }
       }
+    }
 
-      &.expand-icon {
-        display: block;
+    .attempt-content {
+      display: flex;
+      margin-bottom: 6px;
+
+      > div {
+        width: 100%;
       }
     }
-  }
 
-  .attempt-content {
-    padding-left: 5px;
-  }
-}
-
-  .attempt-state-failed {
-    .attempt-name:after {
-      color: $fail;
+    &:not(:last-child) .attempt-name {
+      border-bottom: 1px solid $gray-900;
     }
   }
-  .attempt-state-passed {
-    .attempt-name:after {
-      color: $pass;
-    }
-  }
-
 
   .attempt-name {
     display: flex;
-    justify-content: flex-end;
     position: relative;
     width: 100%;
 
-    &:before {
-      border-top: 1px solid $gray-900;
-      content: '';
-      left: 15px;
-      position: absolute;
-      right: 0;
-      top: 13px;
-    }
-
-    &:after {
-      color: $gray-600;
-      content: '•';
-      left: 7px;
-      position: absolute;
-      top: 4px;
+    .collapsible-header {
+      width: 100%;
     }
 
     .attempt-tag {
+      display: inline-flex;
       align-items: center;
-      border: 1px solid $gray-900;
-      border-radius: 7px;
-      box-shadow: 0 1px 1px 0 rgba($white, 0.20);
-      display: flex;
-      font-size: 11px;
-      padding: 2px 5px;
+      font-size: 14px;
+      gap: 8px;
+      width: 100%;
+      padding: 8px;
       position: relative;
-      background-color: $black;
       user-select: none;
       cursor: pointer;
 
       &:hover {
         background-color: $gray-1100;
+      }
+      .attempt-tag-text {
+        flex-grow: 1;
       }
     }
 

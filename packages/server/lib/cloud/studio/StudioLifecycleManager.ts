@@ -22,21 +22,33 @@ import { initializeTelemetryReporter, reportTelemetry } from './telemetry/Teleme
 import { telemetryManager } from './telemetry/TelemetryManager'
 import { BUNDLE_LIFECYCLE_MARK_NAMES, BUNDLE_LIFECYCLE_TELEMETRY_GROUP_NAMES } from './telemetry/constants/bundle-lifecycle'
 import { INITIALIZATION_TELEMETRY_GROUP_NAMES } from './telemetry/constants/initialization'
+import crypto from 'crypto'
 
 const debug = Debug('cypress:server:studio-lifecycle-manager')
 const routes = require('../routes')
 
 export class StudioLifecycleManager {
-  private static hashLoadingMap: Map<string, Promise<void>> = new Map()
+  private static hashLoadingMap: Map<string, Promise<Record<string, string>>> = new Map()
   private static watcher: chokidar.FSWatcher | null = null
   private studioManagerPromise?: Promise<StudioManager | null>
   private studioManager?: StudioManager
   private listeners: ((studioManager: StudioManager) => void)[] = []
   private ctx?: DataContext
   private lastStatus?: StudioStatus
+  private currentStudioHash?: string
+
+  private initializationParams?: {
+    projectId?: string
+    cloudDataSource: CloudDataSource
+    cfg: Cfg
+    debugData: any
+    ctx: DataContext
+  }
 
   public get cloudStudioRequested () {
-    return !!(process.env.CYPRESS_ENABLE_CLOUD_STUDIO || process.env.CYPRESS_LOCAL_STUDIO_PATH)
+    // TODO: Remove cloudStudioRequested when we remove the legacy studio code
+    // https://github.com/cypress-io/cypress-services/issues/10390
+    return true
   }
 
   /**
@@ -62,6 +74,9 @@ export class StudioLifecycleManager {
     ctx: DataContext
   }): void {
     debug('Initializing studio manager')
+
+    // Store initialization parameters for retry
+    this.initializationParams = { projectId, cloudDataSource, cfg, debugData, ctx }
 
     // Register this instance in the data context
     ctx.update((data) => {
@@ -98,9 +113,6 @@ export class StudioLifecycleManager {
       })
 
       this.updateStatus('IN_ERROR')
-
-      // Clean up any registered listeners
-      this.listeners = []
 
       telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.BUNDLE_LIFECYCLE_END)
       reportTelemetry(BUNDLE_LIFECYCLE_TELEMETRY_GROUP_NAMES.COMPLETE_BUNDLE_LIFECYCLE, {
@@ -157,6 +169,7 @@ export class StudioLifecycleManager {
   }): Promise<StudioManager> {
     let studioPath: string
     let studioHash: string
+    let manifest: Record<string, string>
 
     initializeTelemetryReporter({
       projectSlug: projectId,
@@ -178,6 +191,9 @@ export class StudioLifecycleManager {
       studioHash = studioSession.studioUrl.split('/').pop()?.split('.')[0]
       studioPath = path.join(os.tmpdir(), 'cypress', 'studio', studioHash)
 
+      // Store the current studio hash so that we can clear the cache entry when retrying
+      this.currentStudioHash = studioHash
+
       let hashLoadingPromise = StudioLifecycleManager.hashLoadingMap.get(studioHash)
 
       if (!hashLoadingPromise) {
@@ -190,10 +206,12 @@ export class StudioLifecycleManager {
         StudioLifecycleManager.hashLoadingMap.set(studioHash, hashLoadingPromise)
       }
 
-      await hashLoadingPromise
+      manifest = await hashLoadingPromise
     } else {
       studioPath = process.env.CYPRESS_LOCAL_STUDIO_PATH
       studioHash = 'local'
+      this.currentStudioHash = studioHash
+      manifest = {}
     }
 
     telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.ENSURE_STUDIO_BUNDLE_END)
@@ -201,6 +219,20 @@ export class StudioLifecycleManager {
     const serverFilePath = path.join(studioPath, 'server', 'index.js')
 
     const script = await readFile(serverFilePath, 'utf8')
+
+    if (!process.env.CYPRESS_LOCAL_STUDIO_PATH) {
+      const expectedHash = manifest['server/index.js']
+      const actualHash = crypto.createHash('sha256').update(script).digest('hex')
+
+      if (!expectedHash) {
+        throw new Error('Expected hash for studio server script not found in manifest')
+      }
+
+      if (actualHash !== expectedHash) {
+        throw new Error('Invalid hash for studio server script')
+      }
+    }
+
     const studioManager = new StudioManager()
 
     telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_MANAGER_SETUP_START)
@@ -220,6 +252,7 @@ export class StudioLifecycleManager {
         asyncRetry,
       },
       shouldEnableStudio: this.cloudStudioRequested,
+      manifest,
     })
 
     telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_MANAGER_SETUP_END)
@@ -281,9 +314,8 @@ export class StudioLifecycleManager {
       listener(studioManager)
     })
 
-    if (!process.env.CYPRESS_LOCAL_STUDIO_PATH) {
-      this.listeners = []
-    }
+    debug('Clearing %d studio ready listeners after successful initialization', this.listeners.length)
+    this.listeners = []
   }
 
   private setupWatcher ({
@@ -342,15 +374,47 @@ export class StudioLifecycleManager {
     if (this.studioManager) {
       debug('Studio ready - calling listener immediately')
       listener(this.studioManager)
-
-      // If the studio bundle is local, we need to register the listener
-      // so that we can reload the studio when the bundle changes
-      if (process.env.CYPRESS_LOCAL_STUDIO_PATH) {
-        this.listeners.push(listener)
-      }
+      this.listeners.push(listener)
     } else {
       debug('Studio not ready - registering studio ready listener')
       this.listeners.push(listener)
+    }
+  }
+
+  public getCurrentStatus (): StudioStatus | undefined {
+    return this.lastStatus
+  }
+
+  public retry (): void {
+    if (!this.ctx) {
+      debug('No ctx available, cannot retry studio initialization')
+
+      return
+    }
+
+    debug('Retrying studio initialization')
+
+    this.studioManager = undefined
+    this.studioManagerPromise = undefined
+    this.lastStatus = undefined
+
+    // Clear the cache entry for the current studio hash
+    if (this.currentStudioHash) {
+      const hadCachedPromise = StudioLifecycleManager.hashLoadingMap.has(this.currentStudioHash)
+
+      StudioLifecycleManager.hashLoadingMap.delete(this.currentStudioHash)
+      debug('Cleared cached studio bundle promise for hash: %s (was cached: %s)', this.currentStudioHash, hadCachedPromise)
+      this.currentStudioHash = undefined
+    } else {
+      debug('No current studio hash available to clear from cache')
+    }
+
+    // Re-initialize with the same parameters we stored
+    if (this.initializationParams) {
+      this.initializeStudioManager(this.initializationParams)
+    } else {
+      debug('No initialization parameters available for retry')
+      this.updateStatus('IN_ERROR')
     }
   }
 

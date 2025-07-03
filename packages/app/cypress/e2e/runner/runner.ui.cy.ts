@@ -171,8 +171,9 @@ describe('src/cypress/runner', () => {
         o.sinon.stub(ctx.actions.file, 'openFile')
       })
 
-      cy.contains('a', 'simple-cy-assert.runner')
-      .click()
+      cy.get('.open-in-ide-button').should('have.css', 'opacity', '0')
+      cy.get('.runnable-header-file-name').realHover()
+      cy.get('.open-in-ide-button').first().should('have.css', 'opacity', '1').click()
 
       cy.withCtx((ctx, o) => {
         expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`simple-cy-assert\.runner\.cy\.js$`)), 1, 1)
@@ -289,9 +290,14 @@ describe('src/cypress/runner', () => {
     it('user can stop test execution', () => {
       loadSpec({
         filePath: 'runner/stop-execution.runner.cy.js',
-        passCount: 0,
-        failCount: 1,
       })
+
+      // Click the stop button to stop execution
+      cy.get('.stop').click()
+
+      // Verify the UI updates immediately - stop button disappears, restart appears
+      cy.get('.stop', { timeout: 100 }).should('not.exist')
+      cy.get('.restart', { timeout: 100 }).should('be.visible')
 
       cy.get('.runnable-err-message').should('not.contain', 'ran afterEach even though specs were stopped')
       cy.get('.runnable-err-message').should('contain', 'Cypress test was stopped while running this command.')

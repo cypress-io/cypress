@@ -3,10 +3,7 @@ import { observer } from 'mobx-react'
 import React from 'react'
 
 import type { StatsStore } from './stats-store'
-
-import FailedIcon from '@packages/frontend-shared/src/assets/icons/status-failed_x12.svg'
-import PassedIcon from '@packages/frontend-shared/src/assets/icons/status-passed_x12.svg'
-import PendingIcon from '@packages/frontend-shared/src/assets/icons/status-pending_x12.svg'
+import { IconStatusFailedSimple, IconStatusPassedSimple, IconStatusSkippedOutline } from '@cypress-design/react-icon'
 
 const count = (num: number) => num > 0 ? num : '--'
 
@@ -17,17 +14,17 @@ interface Props {
 const Stats: React.FC<Props> = observer(({ stats }: Props) => (
   <ul aria-label='Stats' className='stats'>
     <li className='passed'>
-      <PassedIcon aria-hidden="true" />
+      <IconStatusPassedSimple size='12' strokeColor='jade-400' aria-hidden />
       <span className='visually-hidden'>Passed:</span>
       <span className={cs('num', { 'empty': !stats.numPassed })}>{count(stats.numPassed)}</span>
     </li>
     <li className='failed'>
-      <FailedIcon aria-hidden="true" />
+      <IconStatusFailedSimple size='12' strokeColor='red-400' aria-hidden />
       <span className='visually-hidden'>Failed:</span>
       <span className={cs('num', { 'empty': !stats.numFailed })}>{count(stats.numFailed)}</span>
     </li>
     <li className='pending'>
-      <PendingIcon aria-hidden="true" />
+      <IconStatusSkippedOutline size='12' strokeColor='gray-400' aria-hidden />
       <span className='visually-hidden'>Pending:</span>
       <span className={cs('num', { 'empty': !stats.numPending })}>{count(stats.numPending)}</span>
     </li>

@@ -386,7 +386,7 @@ describe('runner/cypress sessions.ui.spec', {
           .within(() => {
             cy.contains('.command-wrapper', 'Create new session')
             .should('have.class', 'command-state-failed')
-            .find('.failed-indicator')
+            .find('[data-cy="failed-icon-indicator"]')
             .should('exist')
           })
         })
@@ -465,7 +465,7 @@ describe('runner/cypress sessions.ui.spec', {
 
                 cy.contains('.command-wrapper', 'Validate session').as('validateSessionGroup')
                 .should('have.class', 'command-state-failed')
-                .find('.failed-indicator')
+                .find('[data-cy="failed-icon-indicator"]')
                 .should('exist')
               })
             })
@@ -528,7 +528,7 @@ describe('runner/cypress sessions.ui.spec', {
 
             cy.contains('.command-wrapper', 'Validate session').as('validateSessionGroup')
             .should('have.class', 'command-state-failed')
-            .find('.failed-indicator')
+            .find('[data-cy="failed-icon-indicator"]')
             .should('exist')
 
             const restoredMessagePostfix = 'This error occurred while validating the restored session. Because validation failed, we will try to recreate the session.'
@@ -545,7 +545,7 @@ describe('runner/cypress sessions.ui.spec', {
 
             cy.contains('.command-wrapper', 'Recreate session')
             .should('have.class', successfullyRecreatedSession ? 'command-state-passed' : 'command-state-failed')
-            .find('.failed-indicator')
+            .find('[data-cy="failed-icon-indicator"]')
             .should(successfullyRecreatedSession ? 'not.exist' : 'exist', 'is-open')
           })
         })

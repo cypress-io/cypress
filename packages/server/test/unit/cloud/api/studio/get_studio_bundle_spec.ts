@@ -31,14 +31,14 @@ describe('getStudioBundle', () => {
         createWriteStream: createWriteStreamStub,
       },
       'cross-fetch': crossFetchStub,
-      '../../encryption': {
-        verifySignatureFromFile: verifySignatureFromFileStub,
-      },
       'os': {
         platform: () => 'linux',
       },
       '@packages/root': {
         version: '1.2.3',
+      },
+      '../../encryption': {
+        verifySignatureFromFile: verifySignatureFromFileStub,
       },
     }).getStudioBundle
   })
@@ -53,15 +53,17 @@ describe('getStudioBundle', () => {
           if (header === 'x-cypress-signature') {
             return '159'
           }
+
+          if (header === 'x-cypress-manifest-signature') {
+            return '160'
+          }
         },
       },
     })
 
     verifySignatureFromFileStub.resolves(true)
 
-    const projectId = '12345'
-
-    await getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId, bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })
+    const responseSignature = await getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })
 
     expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
       agent: sinon.match.any,
@@ -73,11 +75,14 @@ describe('getStudioBundle', () => {
         'x-cypress-version': '1.2.3',
       },
       encrypt: 'signed',
+      signal: sinon.match.any,
     })
 
     expect(writeResult).to.eq('console.log("studio bundle")')
 
     expect(verifySignatureFromFileStub).to.be.calledWith('/tmp/cypress/studio/abc/bundle.tar', '159')
+
+    expect(responseSignature).to.eq('160')
   })
 
   it('downloads the studio bundle and extracts it after 1 fetch failure', async () => {
@@ -91,15 +96,17 @@ describe('getStudioBundle', () => {
           if (header === 'x-cypress-signature') {
             return '159'
           }
+
+          if (header === 'x-cypress-manifest-signature') {
+            return '160'
+          }
         },
       },
     })
 
     verifySignatureFromFileStub.resolves(true)
 
-    const projectId = '12345'
-
-    await getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId, bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })
+    const responseSignature = await getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })
 
     expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
       agent: sinon.match.any,
@@ -111,11 +118,14 @@ describe('getStudioBundle', () => {
         'x-cypress-version': '1.2.3',
       },
       encrypt: 'signed',
+      signal: sinon.match.any,
     })
 
     expect(writeResult).to.eq('console.log("studio bundle")')
 
     expect(verifySignatureFromFileStub).to.be.calledWith('/tmp/cypress/studio/abc/bundle.tar', '159')
+
+    expect(responseSignature).to.eq('160')
   })
 
   it('throws an error and returns a studio manager in error state if the fetch fails more than twice', async () => {
@@ -123,9 +133,7 @@ describe('getStudioBundle', () => {
 
     crossFetchStub.rejects(error)
 
-    const projectId = '12345'
-
-    await expect(getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId, bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })).to.be.rejected
+    await expect(getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })).to.be.rejected
 
     expect(crossFetchStub).to.be.calledThrice
     expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
@@ -138,6 +146,7 @@ describe('getStudioBundle', () => {
         'x-cypress-version': '1.2.3',
       },
       encrypt: 'signed',
+      signal: sinon.match.any,
     })
   })
 
@@ -147,9 +156,7 @@ describe('getStudioBundle', () => {
       statusText: 'Some failure',
     })
 
-    const projectId = '12345'
-
-    await expect(getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId, bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })).to.be.rejected
+    await expect(getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })).to.be.rejected
 
     expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
       agent: sinon.match.any,
@@ -161,12 +168,83 @@ describe('getStudioBundle', () => {
         'x-cypress-version': '1.2.3',
       },
       encrypt: 'signed',
+      signal: sinon.match.any,
     })
   })
 
-  it('throws an error and returns a studio manager in error state if the signature verification fails', async () => {
+  it('throws an error and returns a cy-prompt manager in error state if the signature verification fails', async () => {
     verifySignatureFromFileStub.resolves(false)
 
+    crossFetchStub.resolves({
+      ok: true,
+      statusText: 'OK',
+      body: readStream,
+      headers: {
+        get: (header) => {
+          if (header === 'x-cypress-signature') {
+            return '159'
+          }
+
+          if (header === 'x-cypress-manifest-signature') {
+            return '160'
+          }
+        },
+      },
+    })
+
+    verifySignatureFromFileStub.resolves(false)
+
+    await expect(getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })).to.be.rejected
+
+    expect(writeResult).to.eq('console.log("studio bundle")')
+
+    expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
+      agent: sinon.match.any,
+      method: 'GET',
+      headers: {
+        'x-route-version': '1',
+        'x-cypress-signature': '1',
+        'x-os-name': 'linux',
+        'x-cypress-version': '1.2.3',
+      },
+      encrypt: 'signed',
+      signal: sinon.match.any,
+    })
+
+    expect(verifySignatureFromFileStub).to.be.calledWith('/tmp/cypress/studio/abc/bundle.tar', '159')
+  })
+
+  it('throws an error if there is no signature in the response headers', async () => {
+    crossFetchStub.resolves({
+      ok: true,
+      statusText: 'OK',
+      body: readStream,
+      headers: {
+        get: (header) => {
+          if (header === 'x-cypress-manifest-signature') {
+            return '160'
+          }
+        },
+      },
+    })
+
+    await expect(getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })).to.be.rejectedWith('Unable to get studio signature')
+
+    expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
+      agent: sinon.match.any,
+      method: 'GET',
+      headers: {
+        'x-route-version': '1',
+        'x-cypress-signature': '1',
+        'x-os-name': 'linux',
+        'x-cypress-version': '1.2.3',
+      },
+      encrypt: 'signed',
+      signal: sinon.match.any,
+    })
+  })
+
+  it('throws an error if there is no manifest signature in the response headers', async () => {
     crossFetchStub.resolves({
       ok: true,
       statusText: 'OK',
@@ -180,13 +258,7 @@ describe('getStudioBundle', () => {
       },
     })
 
-    verifySignatureFromFileStub.resolves(false)
-
-    const projectId = '12345'
-
-    await expect(getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId, bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })).to.be.rejected
-
-    expect(writeResult).to.eq('console.log("studio bundle")')
+    await expect(getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })).to.be.rejectedWith('Unable to get studio manifest signature')
 
     expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
       agent: sinon.match.any,
@@ -198,35 +270,52 @@ describe('getStudioBundle', () => {
         'x-cypress-version': '1.2.3',
       },
       encrypt: 'signed',
+      signal: sinon.match.any,
     })
-
-    expect(verifySignatureFromFileStub).to.be.calledWith('/tmp/cypress/studio/abc/bundle.tar', '159')
   })
 
-  it('throws an error if there is no signature in the response headers', async () => {
+  it('handles AbortError and converts to timeout message', async () => {
+    const abortError = new Error('AbortError')
+
+    abortError.name = 'AbortError'
+
+    crossFetchStub.rejects(abortError)
+
+    await expect(getStudioBundle({
+      studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz',
+      bundlePath: '/tmp/cypress/studio/abc/bundle.tar',
+    })).to.be.rejectedWith('Studio bundle fetch timed out')
+  })
+
+  it('calls cleanup function when pipe operation errors', async () => {
+    const errorStream = new Writable({
+      write: (chunk, encoding, callback) => {
+        callback(new Error('Write error'))
+      },
+    })
+
+    const destroySpy = sinon.spy(errorStream, 'destroy')
+
+    createWriteStreamStub.returns(errorStream)
+
     crossFetchStub.resolves({
       ok: true,
       statusText: 'OK',
       body: readStream,
       headers: {
-        get: () => null,
+        get: (header) => {
+          if (header === 'x-cypress-signature') return '159'
+
+          if (header === 'x-cypress-manifest-signature') return '160'
+        },
       },
     })
 
-    const projectId = '12345'
+    await expect(getStudioBundle({
+      studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz',
+      bundlePath: '/tmp/cypress/studio/abc/bundle.tar',
+    })).to.be.rejected
 
-    await expect(getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', projectId, bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })).to.be.rejected
-
-    expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
-      agent: sinon.match.any,
-      method: 'GET',
-      headers: {
-        'x-route-version': '1',
-        'x-cypress-signature': '1',
-        'x-os-name': 'linux',
-        'x-cypress-version': '1.2.3',
-      },
-      encrypt: 'signed',
-    })
+    expect(destroySpy).to.have.been.called
   })
 })

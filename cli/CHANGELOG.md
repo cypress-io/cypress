@@ -26,6 +26,7 @@ _Released 07/15/2025 (PENDING)_
 
 **Misc:**
 
+- The Cypress Command log has a new design when viewing a list of tests. Addresses [#31677](https://github.com/cypress-io/cypress/issues/31677). Addressed in [#31914](https://github.com/cypress-io/cypress/pull/31914).
 - Migration helpers and related errors are no longer shown when upgrading from Cypress versions earlier than 10.0.0. To migrate from a pre-10.0.0 version, upgrade one major version at a time to receive the appropriate guidance. Addresses [#31345](https://github.com/cypress-io/cypress/issues/31345). Addressed in [https://github.com/cypress-io/cypress/pull/31629/](https://github.com/cypress-io/cypress/pull/31629/).
 
 **Dependency Updates:**
@@ -34,9 +35,21 @@ _Released 07/15/2025 (PENDING)_
 - Upgraded bundled Node.js version from `20.18.1` to `22.14.0`. Addresses [#31257](https://github.com/cypress-io/cypress/issues/31257). Addressed in [#31912](https://github.com/cypress-io/cypress/pull/31912).
 - Upgraded bundled Chromium version from `130.0.6723.137` to `134.0.6998.165`. Addresses [#31257](https://github.com/cypress-io/cypress/issues/31257). Addressed in [#31912](https://github.com/cypress-io/cypress/pull/31912).
 
+## 14.5.2
+
+_Released 7/15/2025 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed a regression introduced in [`14.5.0`](https://docs.cypress.io/guides/references/changelog#14-5-0) where the Stop button would not immediately stop the spec timer. Addresses [#31920](https://github.com/cypress-io/cypress/issues/31920).
+
 ## 14.5.1
 
-_Released 7/01/2025 (PENDING)_
+_Released 7/01/2025_
+
+**Bugfixes:**
+
+- Fixed an issue where prerequests with Firefox BiDi were prematurely being removed or matched incorrectly. Addresses [#31482](https://github.com/cypress-io/cypress/issues/31482).
 
 **Dependency Updates:**
 
@@ -53,7 +66,6 @@ _Released 6/17/2025_
 **Bugfixes:**
 
 - Fixed an issue when using `Cypress.stop()` where a run may be aborted prior to receiving the required runner events causing Test Replay to not be available. Addresses [#31781](https://github.com/cypress-io/cypress/issues/31781).
-- Fixed an issue where prerequests with Firefox BiDi were prematurely being removed or matched incorrectly. Addresses [#31482](https://github.com/cypress-io/cypress/issues/31482).
 
 ## 14.4.1
 
