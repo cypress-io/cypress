@@ -65,11 +65,20 @@ export const Subscription = subscriptionType({
       description: 'Status of the studio manager and AI access',
       subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('studioStatusChange'),
       resolve: async (source, args, ctx) => {
+        const currentStatus = ctx.coreData.studioLifecycleManager?.getCurrentStatus()
+
+        if (currentStatus === 'IN_ERROR') {
+          return {
+            status: 'IN_ERROR' as const,
+            canAccessStudioAI: false,
+          }
+        }
+
         const isStudioReady = ctx.coreData.studioLifecycleManager?.isStudioReady()
 
         if (!isStudioReady) {
           return {
-            status: 'INITIALIZING' as const,
+            status: currentStatus || 'INITIALIZING' as const,
             canAccessStudioAI: false,
           }
         }
