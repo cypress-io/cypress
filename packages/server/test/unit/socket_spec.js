@@ -14,10 +14,11 @@ const { Automation } = require('../../lib/automation')
 const preprocessor = require('../../lib/plugins/preprocessor')
 const { fs } = require('../../lib/util/fs')
 const session = require('../../lib/session')
-
+const devServer = require('../../lib/plugins/dev-server')
 const { createRoutes } = require('../../lib/routes')
 const { getCtx } = require('../../lib/makeDataContext')
 const { sinon } = require('../spec_helper')
+const { SocketCt } = require('../../lib/socket-ct')
 
 let ctx
 
@@ -30,6 +31,8 @@ describe('lib/socket', () => {
 
     // Don't bother initializing the child process, etc for this
     sinon.stub(ctx.actions.project, 'initializeActiveProject')
+    sinon.stub(preprocessor.emitter, 'on')
+    sinon.stub(preprocessor.emitter, 'off')
 
     Fixtures.scaffold()
     session.clearSessions(true)
@@ -735,7 +738,9 @@ describe('lib/socket', () => {
     })
 
     context('cy.prompt.addSocketListeners', () => {
-      it('calls addSocketListeners on cy prompt when socket connects', function () {
+      it('calls addSocketListeners on cy prompt when socket connects', async function () {
+        preprocessor.emitter.on.reset()
+
         // Verify that registerCyPromptReadyListener was called
         expect(ctx.coreData.cyPromptLifecycleManager.registerCyPromptReadyListener).to.be.called
 
@@ -747,6 +752,32 @@ describe('lib/socket', () => {
 
         registerCyPromptReadyListenerCallback(mockCyPrompt)
         expect(mockCyPrompt.addSocketListeners).to.be.called
+
+        const addSocketListenersOptions = mockCyPrompt.addSocketListeners.firstCall.args[0]
+
+        expect(addSocketListenersOptions).to.be.an('object')
+        expect(addSocketListenersOptions).to.have.property('socket')
+        expect(addSocketListenersOptions).to.have.property('onAfterSave')
+        expect(addSocketListenersOptions).to.have.property('onBeforeSave')
+
+        const onBeforeSave = addSocketListenersOptions.onBeforeSave
+
+        this.cfg.watchForFileChanges = false
+
+        onBeforeSave()
+
+        expect(preprocessor.emitter.on).to.be.calledWith('file:updated')
+
+        const preprocessorCallback = preprocessor.emitter.on.firstCall.args[1]
+
+        sinon.stub(this.socket._socketIo, 'emit')
+        sinon.stub(fs, 'statAsync').resolves()
+
+        await preprocessorCallback()
+
+        expect(this.socket._socketIo.emit).to.be.calledWith('watched:file:changed')
+
+        this.socket._socketIo.emit.reset()
       })
     })
 
@@ -950,215 +981,381 @@ describe('lib/socket', () => {
   })
 
   context('unit', () => {
-    beforeEach(function () {
-      this.mockClient = sinon.stub({
-        on () {},
-        emit () {},
-        conn: {
-          transport: {
-            name: 'websocket',
-          },
-        },
-      })
-
-      this.io = {
-        of: sinon.stub().returns({ on () {} }),
-        on: sinon.stub().withArgs('connection').yields(this.mockClient),
-        emit: sinon.stub(),
-        close: sinon.stub(),
-      }
-
-      sinon.stub(SocketE2E.prototype, 'createSocketIo').returns(this.io)
-      sinon.stub(preprocessor.emitter, 'on')
-
-      return this.server.open(this.cfg, {
-        SocketCtor: SocketE2E,
-        createRoutes,
-        testingType: 'e2e',
-        getCurrentBrowser: () => null,
-      })
-      .then(() => {
-        this.automation = new Automation({
-          cyNamespace: this.cfg.namespace,
-          cookieNamespace: this.cfg.socketIoCookie,
-          screenshotsFolder: this.cfg.screenshotsFolder,
-        })
-
-        this.server.startWebsockets(this.automation, this.cfg, {})
-
-        this.socket = this.server._socket
-      })
-    })
-
-    context('constructor', () => {
-      it('listens for \'file:updated\' on preprocessor', function () {
-        this.cfg.watchForFileChanges = true
-        new SocketE2E(this.cfg)
-
-        expect(preprocessor.emitter.on).to.be.calledWith('file:updated')
-      })
-
-      it('does not listen for \'file:updated\' if config.watchForFileChanges is false', function () {
-        preprocessor.emitter.on.reset()
-        this.cfg.watchForFileChanges = false
-        new SocketE2E(this.cfg)
-
-        expect(preprocessor.emitter.on).not.to.be.called
-      })
-    })
-
-    context('#sendFocusBrowserMessage', function () {
-      it('sends an automation request of focus:browser:window', function () {
-        sinon.stub(this.automation, 'request')
-
-        this.socket.sendFocusBrowserMessage()
-
-        expect(this.automation.request).to.be.calledWith('focus:browser:window', {})
-      })
-    })
-
-    context('#close', () => {
-      it('calls close on #io', function () {
-        this.socket.close()
-
-        expect(this.socket.socketIo.close).to.be.called
-      })
-
-      it('does not error when io isnt defined', function () {
-        return this.socket.close()
-      })
-    })
-
-    context('#watchTestFileByPath', () => {
+    context('e2e', () => {
       beforeEach(function () {
-        this.socket.testsDir = Fixtures.project('todos/tests')
-        this.filePath = `${this.socket.testsDir}/test1.js`
-
-        return sinon.stub(preprocessor, 'getFile').resolves()
-      })
-
-      it('returns undefined if trying to watch special path __all', function () {
-        const result = this.socket.watchTestFileByPath(this.cfg, {
-          relative: 'integration/__all',
+        this.mockClient = sinon.stub({
+          on () {},
+          emit () {},
+          conn: {
+            transport: {
+              name: 'websocket',
+            },
+          },
         })
 
-        expect(result).to.be.undefined
-      })
-
-      it('returns undefined if #testFilePath matches arguments', function () {
-        this.socket.testFilePath = path.join('integration', 'test1.js')
-        const result = this.socket.watchTestFileByPath(this.cfg, {
-          relative: path.join('integration', 'test1.js'),
-        })
-
-        expect(result).to.be.undefined
-      })
-
-      it('closes existing watched test file', function () {
-        sinon.stub(preprocessor, 'removeFile')
-        this.socket.testFilePath = 'tests/test1.js'
-
-        return this.socket.watchTestFileByPath(this.cfg, {
-          relative: 'test2.js',
-        }).then(() => {
-          expect(preprocessor.removeFile).to.be.calledWithMatch('test1.js', this.cfg)
-        })
-      })
-
-      it('sets #testFilePath', function () {
-        return this.socket.watchTestFileByPath(this.cfg, {
-          relative: `${path.sep}test1.js`,
-        }).then(() => {
-          expect(this.socket.testFilePath).to.eq(`test1.js`)
-        })
-      })
-
-      it('can normalizes leading slash', function () {
-        return this.socket.watchTestFileByPath(this.cfg, {
-          relative: `${path.sep}integration${path.sep}test1.js`,
-        }).then(() => {
-          expect(this.socket.testFilePath).to.eq(`integration${path.sep}test1.js`)
-        })
-      })
-
-      it('watches file by path', function () {
-        this.socket.watchTestFileByPath(this.cfg, {
-          relative: `integration${path.sep}test2.coffee`,
-        })
-
-        expect(preprocessor.getFile).to.be.calledWith(`integration${path.sep}test2.coffee`, this.cfg)
-      })
-
-      it('watches file by relative path in spec object', function () {
-        // this is what happens now with component / integration specs
-        const spec = {
-          absolute: `${path.sep}foo${path.sep}bar`,
-          relative: `relative${path.sep}to${path.sep}root${path.sep}test2.coffee`,
+        this.io = {
+          of: sinon.stub().returns({ on () {} }),
+          on: sinon.stub().withArgs('connection').yields(this.mockClient),
+          emit: sinon.stub(),
+          close: sinon.stub(),
         }
 
-        this.socket.watchTestFileByPath(this.cfg, spec)
+        sinon.stub(SocketE2E.prototype, 'createSocketIo').returns(this.io)
 
-        expect(preprocessor.getFile).to.be.calledWith(spec.relative, this.cfg)
+        return this.server.open(this.cfg, {
+          SocketCtor: SocketE2E,
+          createRoutes,
+          testingType: 'e2e',
+          getCurrentBrowser: () => null,
+        })
+        .then(() => {
+          this.automation = new Automation({
+            cyNamespace: this.cfg.namespace,
+            cookieNamespace: this.cfg.socketIoCookie,
+            screenshotsFolder: this.cfg.screenshotsFolder,
+          })
+
+          this.server.startWebsockets(this.automation, this.cfg, {})
+
+          this.socket = this.server._socket
+        })
       })
 
-      it('triggers watched:file:changed event when preprocessor \'file:updated\' is received', function (done) {
-        sinon.stub(fs, 'statAsync').resolves()
-        this.cfg.watchForFileChanges = true
-        this.socket.watchTestFileByPath(this.cfg, {
-          relative: 'integration/test2.coffee',
+      context('constructor', () => {
+        it('listens for \'file:updated\' on preprocessor', function () {
+          this.cfg.watchForFileChanges = true
+          new SocketE2E(this.cfg)
+
+          expect(preprocessor.emitter.on).to.be.calledWith('file:updated')
         })
 
-        preprocessor.emitter.on.withArgs('file:updated').yield('integration/test2.coffee')
+        it('does not listen for \'file:updated\' if config.watchForFileChanges is false', function () {
+          preprocessor.emitter.on.reset()
+          this.cfg.watchForFileChanges = false
+          new SocketE2E(this.cfg)
 
-        return setTimeout(() => {
-          expect(this.io.emit).to.be.calledWith('watched:file:changed')
+          expect(preprocessor.emitter.on).not.to.be.called
+        })
+      })
 
-          return done()
-        }
-        , 200)
+      context('#sendFocusBrowserMessage', function () {
+        it('sends an automation request of focus:browser:window', function () {
+          sinon.stub(this.automation, 'request')
+
+          this.socket.sendFocusBrowserMessage()
+
+          expect(this.automation.request).to.be.calledWith('focus:browser:window', {})
+        })
+      })
+
+      context('#close', () => {
+        it('calls close on #io', function () {
+          this.socket.close()
+
+          expect(this.socket.socketIo.close).to.be.called
+        })
+
+        it('does not error when io isnt defined', function () {
+          return this.socket.close()
+        })
+      })
+
+      context('#watchTestFileByPath', () => {
+        beforeEach(function () {
+          this.socket.testsDir = Fixtures.project('todos/tests')
+          this.filePath = `${this.socket.testsDir}/test1.js`
+
+          return sinon.stub(preprocessor, 'getFile').resolves()
+        })
+
+        it('returns undefined if trying to watch special path __all', function () {
+          const result = this.socket.watchTestFileByPath(this.cfg, {
+            relative: 'integration/__all',
+          })
+
+          expect(result).to.be.undefined
+        })
+
+        it('returns undefined if #testFilePath matches arguments', function () {
+          this.socket.testFilePath = path.join('integration', 'test1.js')
+          const result = this.socket.watchTestFileByPath(this.cfg, {
+            relative: path.join('integration', 'test1.js'),
+          })
+
+          expect(result).to.be.undefined
+        })
+
+        it('closes existing watched test file', function () {
+          sinon.stub(preprocessor, 'removeFile')
+          this.socket.testFilePath = 'tests/test1.js'
+
+          return this.socket.watchTestFileByPath(this.cfg, {
+            relative: 'test2.js',
+          }).then(() => {
+            expect(preprocessor.removeFile).to.be.calledWithMatch('test1.js', this.cfg)
+          })
+        })
+
+        it('sets #testFilePath', function () {
+          return this.socket.watchTestFileByPath(this.cfg, {
+            relative: `${path.sep}test1.js`,
+          }).then(() => {
+            expect(this.socket.testFilePath).to.eq(`test1.js`)
+          })
+        })
+
+        it('can normalizes leading slash', function () {
+          return this.socket.watchTestFileByPath(this.cfg, {
+            relative: `${path.sep}integration${path.sep}test1.js`,
+          }).then(() => {
+            expect(this.socket.testFilePath).to.eq(`integration${path.sep}test1.js`)
+          })
+        })
+
+        it('watches file by path', function () {
+          this.socket.watchTestFileByPath(this.cfg, {
+            relative: `integration${path.sep}test2.coffee`,
+          })
+
+          expect(preprocessor.getFile).to.be.calledWith(`integration${path.sep}test2.coffee`, this.cfg)
+        })
+
+        it('watches file by relative path in spec object', function () {
+          // this is what happens now with component / integration specs
+          const spec = {
+            absolute: `${path.sep}foo${path.sep}bar`,
+            relative: `relative${path.sep}to${path.sep}root${path.sep}test2.coffee`,
+          }
+
+          this.socket.watchTestFileByPath(this.cfg, spec)
+
+          expect(preprocessor.getFile).to.be.calledWith(spec.relative, this.cfg)
+        })
+
+        it('triggers watched:file:changed event when preprocessor \'file:updated\' is received', function (done) {
+          sinon.stub(fs, 'statAsync').resolves()
+          this.cfg.watchForFileChanges = true
+          this.socket.watchTestFileByPath(this.cfg, {
+            relative: 'integration/test2.coffee',
+          })
+
+          preprocessor.emitter.on.withArgs('file:updated').yield('integration/test2.coffee')
+
+          return setTimeout(() => {
+            expect(this.io.emit).to.be.calledWith('watched:file:changed')
+
+            return done()
+          }
+          , 200)
+        })
+      })
+
+      context('#startListening', () => {
+        describe('watch:test:file', () => {
+          it('listens for watch:test:file event', function () {
+            this.socket.startListening(this.server.getHttpServer(), this.automation, this.cfg, {})
+
+            expect(this.mockClient.on).to.be.calledWith('watch:test:file')
+          })
+
+          it('passes filePath to #watchTestFileByPath', function () {
+            const watchTestFileByPath = sinon.stub(this.socket, 'watchTestFileByPath')
+
+            this.mockClient.on.withArgs('watch:test:file').yields({ relative: 'foo/bar/baz' })
+
+            this.socket.startListening(this.server.getHttpServer(), this.automation, this.cfg, {})
+
+            expect(watchTestFileByPath).to.be.calledWith(this.cfg, { relative: 'foo/bar/baz' })
+          })
+        })
+
+        describe('#onTestFileChange', () => {
+          beforeEach(() => {
+            return sinon.spy(fs, 'statAsync')
+          })
+
+          it('calls statAsync on .js file', function () {
+            return this.socket.onTestFileChange('foo/bar.js').catch(() => {}).then(() => {
+              expect(fs.statAsync).to.be.calledWith('foo/bar.js')
+            })
+          })
+
+          it('calls statAsync on .coffee file', function () {
+            return this.socket.onTestFileChange('foo/bar_coffee.coffee').then(() => {
+              expect(fs.statAsync).to.be.calledWith('foo/bar_coffee.coffee')
+            })
+          })
+
+          it('does not emit if stat throws', function () {
+            return this.socket.onTestFileChange('foo/bar.js').then(() => {
+              expect(this.io.emit).not.to.be.called
+            })
+          })
+        })
+
+        describe('#onCloudTestFileChange', () => {
+          it('calls #onTestFileChange', function () {
+            preprocessor.emitter.off.reset()
+            sinon.stub(this.socket, 'onTestFileChange').resolves()
+
+            return this.socket.onCloudTestFileChange('foo/bar.js').then(() => {
+              expect(this.socket.onTestFileChange).to.be.calledWith('foo/bar.js')
+              expect(preprocessor.emitter.off).to.be.calledWith('file:updated', this.socket.onCloudTestFileChange)
+            })
+          })
+        })
+
+        describe('#onBeforeSave', () => {
+          it('calls #onTestFileChange and listens for file:updated when config.watchForFileChanges is false', function () {
+            preprocessor.emitter.on.reset()
+
+            this.cfg.watchForFileChanges = false
+
+            this.socket.onBeforeSave(this.cfg)
+
+            expect(preprocessor.emitter.on).to.be.calledWith('file:updated', this.socket.onCloudTestFileChange)
+          })
+
+          it('calls #onTestFileChange and does not listen for file:updated when config.watchForFileChanges is true', function () {
+            preprocessor.emitter.on.reset()
+
+            this.cfg.watchForFileChanges = true
+
+            this.socket.onBeforeSave(this.cfg)
+
+            expect(preprocessor.emitter.on).not.to.be.called
+          })
+        })
+
+        describe('#onAfterSave', () => {
+          it('removes listener for file:updated when there is an error and config.watchForFileChanges is false', function () {
+            preprocessor.emitter.off.reset()
+
+            this.cfg.watchForFileChanges = false
+
+            this.socket.onAfterSave(this.cfg, new Error('test error'))
+
+            expect(preprocessor.emitter.off).to.be.calledWith('file:updated', this.socket.onCloudTestFileChange)
+          })
+
+          it('does not remove listener for file:updated when there is an error and config.watchForFileChanges is true', function () {
+            preprocessor.emitter.off.reset()
+
+            this.cfg.watchForFileChanges = true
+
+            this.socket.onAfterSave(this.cfg, new Error('test error'))
+
+            expect(preprocessor.emitter.off).not.to.be.called
+          })
+
+          it('does not remove listener for file:updated when there is no error', function () {
+            preprocessor.emitter.off.reset()
+
+            this.cfg.watchForFileChanges = false
+
+            this.socket.onAfterSave(this.cfg)
+
+            expect(preprocessor.emitter.off).not.to.be.called
+          })
+        })
       })
     })
 
-    context('#startListening', () => {
-      describe('watch:test:file', () => {
-        it('listens for watch:test:file event', function () {
-          this.socket.startListening(this.server.getHttpServer(), this.automation, this.cfg, {})
-
-          expect(this.mockClient.on).to.be.calledWith('watch:test:file')
+    context('ct', () => {
+      beforeEach(function () {
+        this.mockClient = sinon.stub({
+          on () {},
+          emit () {},
+          conn: {
+            transport: {
+              name: 'websocket',
+            },
+          },
         })
 
-        it('passes filePath to #watchTestFileByPath', function () {
-          const watchTestFileByPath = sinon.stub(this.socket, 'watchTestFileByPath')
+        this.io = {
+          of: sinon.stub().returns({ on () {} }),
+          on: sinon.stub().withArgs('connection').yields(this.mockClient),
+          emit: sinon.stub(),
+          close: sinon.stub(),
+        }
 
-          this.mockClient.on.withArgs('watch:test:file').yields({ relative: 'foo/bar/baz' })
+        sinon.stub(SocketE2E.prototype, 'createSocketIo').returns(this.io)
+        sinon.stub(devServer.emitter, 'on')
+        sinon.stub(devServer.emitter, 'off')
 
-          this.socket.startListening(this.server.getHttpServer(), this.automation, this.cfg, {})
+        return this.server.open(this.cfg, {
+          SocketCtor: SocketCt,
+          createRoutes,
+          testingType: 'ct',
+          getCurrentBrowser: () => null,
+        })
+        .then(() => {
+          this.automation = new Automation({
+            cyNamespace: this.cfg.namespace,
+            cookieNamespace: this.cfg.socketIoCookie,
+            screenshotsFolder: this.cfg.screenshotsFolder,
+          })
 
-          expect(watchTestFileByPath).to.be.calledWith(this.cfg, { relative: 'foo/bar/baz' })
+          this.server.startWebsockets(this.automation, this.cfg, {})
+
+          this.socket = this.server._socket
         })
       })
 
-      describe('#onTestFileChange', () => {
-        beforeEach(() => {
-          return sinon.spy(fs, 'statAsync')
+      describe('#onCloudTestFileChange', () => {
+        it('calls #onCloudTestFileChange', function () {
+          devServer.emitter.off.reset()
+          sinon.stub(this.socket, 'toRunner')
+
+          this.socket.onCloudTestFileChange({ specFile: 'foo/bar.js' })
+
+          expect(this.socket.toRunner).to.be.calledWith('dev-server:compile:success', { specFile: 'foo/bar.js' })
+          expect(devServer.emitter.off).to.be.calledWith('dev-server:compile:success', this.socket.onCloudTestFileChange)
+        })
+      })
+
+      describe('#onBeforeSave', () => {
+        it('calls #onTestFileChange and listens for dev-server:compile:success when config.watchForFileChanges is false', function () {
+          devServer.emitter.on.reset()
+
+          this.cfg.watchForFileChanges = false
+
+          this.socket.onBeforeSave(this.cfg)
+
+          expect(devServer.emitter.on).to.be.calledWith('dev-server:compile:success', this.socket.onCloudTestFileChange)
+        })
+      })
+
+      describe('#onAfterSave', () => {
+        it('removes listener for dev-server:compile:success when there is an error and config.watchForFileChanges is false', function () {
+          devServer.emitter.off.reset()
+
+          this.cfg.watchForFileChanges = false
+
+          this.socket.onAfterSave(this.cfg, new Error('test error'))
+
+          expect(devServer.emitter.off).to.be.calledWith('dev-server:compile:success', this.socket.onCloudTestFileChange)
         })
 
-        it('calls statAsync on .js file', function () {
-          return this.socket.onTestFileChange('foo/bar.js').catch(() => {}).then(() => {
-            expect(fs.statAsync).to.be.calledWith('foo/bar.js')
-          })
+        it('does not remove listener for dev-server:compile:success when there is an error and config.watchForFileChanges is true', function () {
+          devServer.emitter.off.reset()
+
+          this.cfg.watchForFileChanges = true
+
+          this.socket.onAfterSave(this.cfg, new Error('test error'))
+
+          expect(devServer.emitter.off).not.to.be.called
         })
 
-        it('calls statAsync on .coffee file', function () {
-          return this.socket.onTestFileChange('foo/bar_coffee.coffee').then(() => {
-            expect(fs.statAsync).to.be.calledWith('foo/bar_coffee.coffee')
-          })
-        })
+        it('does not remove listener for dev-server:compile:success when there is no error', function () {
+          devServer.emitter.off.reset()
 
-        it('does not emit if stat throws', function () {
-          return this.socket.onTestFileChange('foo/bar.js').then(() => {
-            expect(this.io.emit).not.to.be.called
-          })
+          this.cfg.watchForFileChanges = false
+
+          this.socket.onAfterSave(this.cfg)
+
+          expect(devServer.emitter.off).not.to.be.called
         })
       })
     })

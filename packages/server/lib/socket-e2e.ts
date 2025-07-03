@@ -25,7 +25,7 @@ export class SocketE2E extends SocketBase {
     this.removeOnStudioTestFileChange = this.removeOnStudioTestFileChange.bind(this)
 
     if (config.watchForFileChanges) {
-      preprocessor.emitter.on('file:updated', this.onTestFileChange(config))
+      preprocessor.emitter.on('file:updated', this.onTestFileChange)
     }
   }
 
