@@ -1,6 +1,7 @@
 import Debug from 'debug'
 import preprocessor from './plugins/preprocessor'
 import { SocketBase } from './socket-base'
+import { fs } from './util/fs'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import * as studio from './studio'
 import type { FoundSpec } from '@packages/types'
@@ -19,11 +20,28 @@ export class SocketE2E extends SocketBase {
 
     this.testFilePath = null
 
+    this.onTestFileChange = this.onTestFileChange.bind(this)
     this.onStudioTestFileChange = this.onStudioTestFileChange.bind(this)
     this.removeOnStudioTestFileChange = this.removeOnStudioTestFileChange.bind(this)
 
     if (config.watchForFileChanges) {
       preprocessor.emitter.on('file:updated', this.onTestFileChange)
+    }
+  }
+
+  onBeforeSave (config) {
+    // even if the user has turned off file watching
+    // we want to force a reload on save
+    if (!config.watchForFileChanges) {
+      preprocessor.emitter.on('file:updated', this.onCloudTestFileChange)
+    }
+  }
+
+  onAfterSave (config, error) {
+    // even if the user has turned off file watching
+    // we want to force a reload on save
+    if (error && !config.watchForFileChanges) {
+      preprocessor.emitter.off('file:updated', this.onCloudTestFileChange)
     }
   }
 
@@ -35,8 +53,32 @@ export class SocketE2E extends SocketBase {
     })
   }
 
+  onCloudTestFileChange = (filePath) => {
+    // wait for the studio test file to be written to disk, then reload the test
+    // and remove the listener (since this handler is only invoked when watchForFileChanges is false)
+    return this.onTestFileChange(filePath).then(() => {
+      this.removeOnCloudTestFileChange()
+    })
+  }
+
+  removeOnCloudTestFileChange () {
+    return preprocessor.emitter.off('file:updated', this.onCloudTestFileChange)
+  }
+
   removeOnStudioTestFileChange () {
     return preprocessor.emitter.off('file:updated', this.onStudioTestFileChange)
+  }
+
+  onTestFileChange = (filePath) => {
+    debug('test file changed %o', filePath)
+
+    return fs.statAsync(filePath)
+    .then(() => {
+      this._cdpIo?.emit('watched:file:changed')
+      this._socketIo?.emit('watched:file:changed')
+    }).catch(() => {
+      return debug('could not find test file that changed %o', filePath)
+    })
   }
 
   watchTestFileByPath (config, specConfig: FoundSpec) {

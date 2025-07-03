@@ -7,7 +7,6 @@ import { handleGraphQLSocketRequest } from '@packages/graphql/src/makeGraphQLSer
 import { onNetStubbingEvent } from '@packages/net-stubbing'
 import * as socketIo from '@packages/socket'
 import { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
-import { fs } from './util/fs'
 
 import * as errors from './errors'
 import fixture from './fixture'
@@ -65,18 +64,6 @@ export class SocketBase {
     this.localBus = new EventEmitter()
   }
 
-  protected onTestFileChange = (filePath: string) => {
-    debug('test file changed %o', filePath)
-
-    return fs.statAsync(filePath)
-    .then(() => {
-      this._cdpIo?.emit('watched:file:changed')
-      this._socketIo?.emit('watched:file:changed')
-    }).catch(() => {
-      return debug('could not find test file that changed %o', filePath)
-    })
-  }
-
   protected ensureProp = ensureProp
 
   get socketIo () {
@@ -85,6 +72,14 @@ export class SocketBase {
 
   get cdpIo () {
     return this._cdpIo
+  }
+
+  onBeforeSave (config) {
+
+  }
+
+  onAfterSave (config, error) {
+
   }
 
   getIos () {
@@ -241,7 +236,9 @@ export class SocketBase {
           debug('automation:client connected')
 
           // only send the necessary config
-          automationClient.emit('automation:config', {})
+          automationClient.emit('automation:config', {
+            IS_CDP_FORCED_FOR_FIREFOX: !!process.env.FORCE_FIREFOX_CDP,
+          })
 
           // if our automation disconnects then we're
           // in trouble and should probably bomb everything
@@ -419,8 +416,15 @@ export class SocketBase {
         })
 
         getCtx().coreData.studioLifecycleManager?.registerStudioReadyListener((studio) => {
-          studio.setOnTestFileChange(this.onTestFileChange)
-          studio.addSocketListeners(socket)
+          studio.addSocketListeners({
+            socket,
+            onBeforeSave: () => {
+              this.onBeforeSave(config)
+            },
+            onAfterSave: ({ error }) => {
+              this.onAfterSave(config, error)
+            },
+          })
         })
 
         socket.on('studio:init', async (cb) => {

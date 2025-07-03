@@ -1,6 +1,5 @@
-import type { StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape, StudioCloudApi, StudioAIInitializeOptions, StudioEvent } from '@packages/types'
+import type { StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape, StudioCloudApi, StudioAIInitializeOptions, StudioEvent, StudioAddSocketListenersOptions } from '@packages/types'
 import type { Router } from 'express'
-import type { Socket } from 'socket.io'
 import Debug from 'debug'
 import { requireScript } from '../require_script'
 import path from 'path'
@@ -17,7 +16,6 @@ interface SetupOptions {
   cloudApi: StudioCloudApi
   shouldEnableStudio: boolean
   manifest: Record<string, string>
-  onTestFileChange: (filePath: string) => void
 }
 
 const debug = Debug('cypress:server:studio')
@@ -85,15 +83,9 @@ export class StudioManager implements StudioManagerShape {
     return Promise.resolve()
   }
 
-  setOnTestFileChange (onTestFileChange: (filePath: string) => void): void {
+  addSocketListeners (options: StudioAddSocketListenersOptions): void {
     if (this._studioServer) {
-      this.invokeSync('setOnTestFileChange', { isEssential: true }, onTestFileChange)
-    }
-  }
-
-  addSocketListeners (socket: Socket): void {
-    if (this._studioServer) {
-      this.invokeSync('addSocketListeners', { isEssential: true }, socket)
+      this.invokeSync('addSocketListeners', { isEssential: true }, options)
     }
   }
 
