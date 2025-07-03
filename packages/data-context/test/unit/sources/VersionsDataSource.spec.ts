@@ -47,7 +47,7 @@ describe('VersionsDataSource', () => {
             modified: '2022-01-31T21:14:41.593Z',
             created: '2014-03-09T01:07:35.219Z',
             [currentCypressVersion]: '2014-03-09T01:07:37.369Z',
-            '15.0.0': '2015-05-07T00:09:41.109Z',
+            '18.0.0': '2015-05-07T00:09:41.109Z',
           },
         }),
       })
@@ -81,7 +81,7 @@ describe('VersionsDataSource', () => {
       }).resolves({
         json: sinon.stub().resolves({
           name: 'Cypress',
-          version: '15.0.0',
+          version: '18.0.0',
         }),
       })
 
@@ -96,8 +96,8 @@ describe('VersionsDataSource', () => {
           released: '2014-03-09T01:07:37.369Z',
         },
         latest: {
-          id: '15.0.0',
-          version: '15.0.0',
+          id: '18.0.0',
+          version: '18.0.0',
           released: '2015-05-07T00:09:41.109Z',
         },
       })
