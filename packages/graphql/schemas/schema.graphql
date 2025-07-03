@@ -1612,6 +1612,9 @@ type Mutation {
   """Reset the Wizard to the starting position"""
   resetWizard: Boolean!
 
+  """Retry studio initialization after an error"""
+  retryStudio: Boolean
+
   """
   Run a single spec file using a supplied path. This initiates but does not wait for completion of the requested spec run.
   """

@@ -8,20 +8,11 @@
   <!-- these are two distinct errors: -->
   <!--   * if studio status is IN_ERROR, it means that the studio bundle failed to load from the cloud -->
   <!--   * if there is an error in the component state, it means module federation failed to load the component -->
-  <div v-else-if="props.studioStatus === 'IN_ERROR'">
-    <div class="p-4 text-red-500 font-medium">
-      <div class="mb-2">
-        Error fetching studio bundle from cloud
-      </div>
-    </div>
-  </div>
-  <div v-else-if="error">
-    <div class="p-4 text-red-500 font-medium">
-      <div class="mb-2">
-        Error loading the panel
-      </div>
-      <div>{{ error }}</div>
-    </div>
+  <div v-else-if="props.studioStatus === 'IN_ERROR' || error">
+    <StudioErrorPanel
+      :event-manager="props.eventManager"
+      :on-retry="handleRetry"
+    />
   </div>
   <div
     v-else
@@ -35,10 +26,12 @@
 </template>
 <script lang="ts" setup>
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
-import { init, loadRemote } from '@module-federation/runtime'
+import { init, loadRemote, registerRemotes } from '@module-federation/runtime'
 import type { StudioAppDefaultShape, StudioPanelShape } from './studio-app-types'
 import LoadingStudioPanel from './LoadingStudioPanel.vue'
+import StudioErrorPanel from './StudioErrorPanel.vue'
 import type { EventManager } from '../runner/event-manager'
+import { useMutation, gql } from '@urql/vue'
 
 // Mirrors the ReactDOM.Root type since incorporating those types
 // messes up vue typing elsewhere
@@ -46,6 +39,12 @@ interface Root {
   render: (element: JSX.Element) => void
   unmount: () => void
 }
+
+const retryStudioMutationGql = gql`
+  mutation RetryStudio {
+    retryStudio
+  }
+`
 
 const props = defineProps<{
   canAccessStudioAI: boolean
@@ -61,6 +60,8 @@ const container = ref<HTMLElement | null>(null)
 const error = ref<string | null>(null)
 const ReactStudioPanel = ref<StudioPanelShape | null>(null)
 const reactRoot = ref<Root | null>(null)
+
+const retryStudioMutation = useMutation(retryStudioMutationGql)
 
 const maybeRenderReactComponent = () => {
   // Skip rendering if studio is initializing or errored out
@@ -145,6 +146,28 @@ function loadStudioComponent () {
   }).catch((e) => {
     error.value = e.message
   })
+}
+
+function handleRetry () {
+  error.value = null
+  ReactStudioPanel.value = null
+
+  // If status was IN_ERROR, we need to retry the studio initialization
+  if (props.studioStatus === 'IN_ERROR') {
+    retryStudioMutation.executeMutation({})
+  } else {
+    // Otherwise, try to reload the studio component with a cache-busting parameter
+    registerRemotes([{
+      alias: 'app-studio',
+      type: 'module',
+      name: 'app-studio',
+      entryGlobalName: 'app-studio',
+      entry: `/__cypress-studio/app-studio.js?retry=${Date.now()}`,
+      shareScope: 'default',
+    }], { force: true })
+
+    loadStudioComponent()
+  }
 }
 
 </script>
