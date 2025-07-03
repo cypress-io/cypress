@@ -30,11 +30,11 @@ describe('Studio Cloud', () => {
     .click()
 
     // regular studio is not loaded until after the test finishes
-    cy.get('[data-cy="hook-name-studio commands"]').should('not.exist')
+    cy.findByTestId('hook-name-studio commands').should('not.exist')
     // cloud studio is loaded immediately
     cy.findByTestId('studio-panel').then(() => {
       // check for the loading panel from the app first
-      cy.get('[data-cy="loading-studio-panel"]').should('be.visible')
+      cy.findByTestId('loading-studio-panel').should('be.visible')
       // we've verified the studio panel is loaded, now resolve the promise so the test can finish
       deferred.resolve()
     })
@@ -46,7 +46,7 @@ describe('Studio Cloud', () => {
 
     // Verify the studio panel is still open
     cy.findByTestId('studio-panel')
-    cy.get('[data-cy="hook-name-studio commands"]')
+    cy.findByTestId('hook-name-studio commands')
   })
 
   it('hides selector playground and studio controls when studio beta is available', () => {
@@ -54,17 +54,17 @@ describe('Studio Cloud', () => {
 
     cy.findByTestId('studio-panel').should('be.visible')
 
-    cy.get('[data-cy="playground-activator"]').should('not.exist')
-    cy.get('[data-cy="studio-toolbar"]').should('not.exist')
+    cy.findByTestId('playground-activator').should('not.exist')
+    cy.findByTestId('studio-toolbar').should('not.exist')
   })
 
   it('closes studio panel when clicking studio button (from the cloud)', () => {
     launchStudio()
 
     cy.findByTestId('studio-panel').should('be.visible')
-    cy.get('[data-cy="loading-studio-panel"]').should('not.exist')
+    cy.findByTestId('loading-studio-panel').should('not.exist')
 
-    cy.get('[data-cy="studio-header-studio-button"]').click()
+    cy.findByTestId('studio-header-studio-button').click()
 
     assertClosingPanelWithoutChanges()
   })
@@ -73,12 +73,12 @@ describe('Studio Cloud', () => {
     cy.viewport(1500, 1000)
     loadProjectAndRunSpec()
     // studio button should be visible when using cloud studio
-    cy.get('[data-cy="studio-button"]').should('be.visible').click()
-    cy.get('[data-cy="studio-panel"]').should('be.visible')
+    cy.findByTestId('studio-button').should('be.visible').click()
+    cy.findByTestId('studio-panel').should('be.visible')
 
     cy.contains('New Test')
 
-    cy.get('[data-cy="studio-url-prompt"]').should('not.exist')
+    cy.findByTestId('studio-url-prompt').should('not.exist')
 
     cy.percySnapshot()
   })
@@ -136,11 +136,11 @@ describe('Studio Cloud', () => {
     .click()
 
     // regular studio is not loaded until after the test finishes
-    cy.get('[data-cy="hook-name-studio commands"]').should('not.exist')
+    cy.findByTestId('hook-name-studio commands').should('not.exist')
     // cloud studio is loaded immediately
     cy.findByTestId('studio-panel').then(() => {
       // check for the loading panel from the app first
-      cy.get('[data-cy="loading-studio-panel"]').should('be.visible')
+      cy.findByTestId('loading-studio-panel').should('be.visible')
       // we've verified the studio panel is loaded, now resolve the promise so the test can finish
       deferred.resolve()
     })
@@ -152,16 +152,16 @@ describe('Studio Cloud', () => {
 
     // Verify the studio panel is still open
     cy.findByTestId('studio-panel')
-    cy.get('[data-cy="hook-name-studio commands"]')
+    cy.findByTestId('hook-name-studio commands')
 
     // make sure studio is not loading
-    cy.get('[data-cy="loading-studio-panel"]').should('not.exist')
+    cy.findByTestId('loading-studio-panel').should('not.exist')
 
     // Verify that AI is enabled
-    cy.get('[data-cy="ai-status-text"]').should('contain.text', 'Enabled')
+    cy.findByTestId('ai-status-text').should('contain.text', 'Enabled')
 
     // Verify that the AI output is correct
-    cy.get('[data-cy="recommendation-editor"]').should('contain', aiOutput)
+    cy.findByTestId('recommendation-editor').should('contain', aiOutput)
   })
 
   it('does not exit studio mode if the spec is changed on the file system', () => {
@@ -214,6 +214,194 @@ describe('studio functionality', () => {
 
     cy.findByTestId('studio-panel').should('be.visible')
 
-    cy.get('[data-cy="studio-toolbar"]').should('not.exist')
+    cy.findByTestId('studio-toolbar').should('not.exist')
+  })
+
+  describe('failing to load studio and retrying', () => {
+    it('displays error panel when studio bundle fails to load', () => {
+      // Intercept the studio bundle request and make it fail
+      cy.intercept('GET', '/__cypress-studio/app-studio.js', {
+        statusCode: 500,
+        body: 'Internal Server Error',
+      }).as('studioBundleFail')
+
+      loadProjectAndRunSpec()
+
+      cy.contains('visits a basic html page')
+      .closest('.runnable-wrapper')
+      .findByTestId('launch-studio')
+      .click()
+
+      cy.waitForSpecToFinish()
+
+      // Wait for the failed studio bundle request
+      cy.wait('@studioBundleFail')
+
+      // Verify the error panel is displayed
+      cy.findByTestId('studio-error-panel').should('be.visible')
+      cy.contains('Something went wrong')
+      cy.findByTestId('studio-error-panel').should('contain.text', 'There was a problem with Cypress Studio. Our team has been notified. If the problem persists, please try again later.')
+
+      // Verify retry button is present
+      cy.findByTestId('studio-error-retry-button').should('be.visible')
+
+      cy.percySnapshot('studio-error-panel')
+    })
+
+    it('shows retry button with refresh icon', () => {
+      // Intercept and fail the studio bundle request
+      cy.intercept('GET', '/__cypress-studio/app-studio.js', {
+        statusCode: 404,
+        body: 'Not Found',
+      }).as('studioBundleNotFound')
+
+      loadProjectAndRunSpec()
+
+      cy.contains('visits a basic html page')
+      .closest('.runnable-wrapper')
+      .findByTestId('launch-studio')
+      .click()
+
+      cy.waitForSpecToFinish()
+
+      // Wait for the failed request
+      cy.wait('@studioBundleNotFound')
+
+      // Verify error panel and retry button
+      cy.findByTestId('studio-error-panel').should('be.visible')
+      cy.findByTestId('studio-error-retry-button')
+      .should('be.visible')
+      .should('contain', 'Retry')
+      .find('svg') // Check for the refresh icon
+      .should('exist')
+    })
+
+    it('retries studio initialization when retry button is clicked', () => {
+      let firstCallMade = false
+
+      cy.intercept('GET', '/__cypress-studio/app-studio.js*', (req) => {
+        if (!firstCallMade) {
+          // First call fails
+          firstCallMade = true
+          req.reply({
+            statusCode: 500,
+            body: 'Server Error',
+          })
+        } else {
+          // Subsequent calls succeed
+          req.continue()
+        }
+      }).as('studioBundleRequest')
+
+      loadProjectAndRunSpec()
+
+      cy.contains('visits a basic html page')
+      .closest('.runnable-wrapper')
+      .findByTestId('launch-studio')
+      .click()
+
+      cy.waitForSpecToFinish()
+
+      // Wait for the first failed request
+      cy.wait('@studioBundleRequest')
+
+      // Verify error panel is shown
+      cy.findByTestId('studio-error-panel').should('be.visible')
+
+      // Click retry button
+      cy.findByTestId('studio-error-retry-button').click()
+
+      // Verify that the error panel disappears (indicating retry worked)
+      cy.findByTestId('studio-error-panel').should('not.exist')
+
+      // Verify loading panel appears
+      cy.findByTestId('loading-studio-panel').should('be.visible')
+
+      // Wait for studio to load successfully
+      cy.findByTestId('studio-panel', { timeout: 10000 }).should('be.visible')
+
+      cy.findByTestId('test-block-editor').within(() => {
+        cy.contains('cy.visit')
+      })
+    })
+
+    it('maintains studio button functionality during error state', () => {
+      // Intercept and fail the studio bundle request
+      cy.intercept('GET', '/__cypress-studio/app-studio.js', {
+        statusCode: 503,
+        body: 'Service Unavailable',
+      }).as('studioBundleUnavailable')
+
+      loadProjectAndRunSpec()
+
+      cy.contains('visits a basic html page')
+      .closest('.runnable-wrapper')
+      .findByTestId('launch-studio')
+      .click()
+
+      cy.waitForSpecToFinish()
+
+      // Wait for the failed request
+      cy.wait('@studioBundleUnavailable')
+
+      // Verify error panel is displayed
+      cy.findByTestId('studio-error-panel').should('be.visible')
+
+      // Verify studio button is still present in the error panel header
+      cy.findByTestId('studio-error-panel').within(() => {
+        cy.findByTestId('studio-button').should('be.visible')
+      })
+
+      // Click studio button to close error panel
+      cy.findByTestId('studio-button').click()
+
+      // Verify error panel is closed
+      cy.findByTestId('studio-error-panel').should('not.exist')
+    })
+
+    it('handles multiple retry attempts gracefully', () => {
+      let failedCallCount = 0
+
+      cy.intercept('GET', '/__cypress-studio/app-studio.js*', (req) => {
+        if (failedCallCount < 2) {
+          // First two calls fail
+          failedCallCount++
+          req.reply({
+            statusCode: 500,
+            body: 'Attempt failed',
+          })
+        } else {
+          // Third call succeeds
+          req.continue()
+        }
+      }).as('studioBundleRequest')
+
+      loadProjectAndRunSpec()
+
+      cy.contains('visits a basic html page')
+      .closest('.runnable-wrapper')
+      .findByTestId('launch-studio')
+      .click()
+
+      cy.waitForSpecToFinish()
+
+      // Wait for first failed request
+      cy.wait('@studioBundleRequest')
+
+      // First retry attempt
+      cy.findByTestId('studio-error-panel').should('be.visible')
+      cy.findByTestId('studio-error-retry-button').click()
+
+      // Second retry attempt
+      cy.findByTestId('studio-error-panel').should('be.visible')
+      cy.findByTestId('studio-error-retry-button').click()
+
+      // Third attempt should succeed
+      cy.findByTestId('studio-error-panel').should('not.exist')
+      cy.findByTestId('studio-panel', { timeout: 10000 }).should('be.visible')
+      cy.findByTestId('test-block-editor').within(() => {
+        cy.contains('cy.visit')
+      })
+    })
   })
 })
