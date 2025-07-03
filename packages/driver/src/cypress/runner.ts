@@ -1939,9 +1939,11 @@ export default {
 
         _runner.stopped = true
 
-        // if we are in open mode, abort the run immediately
+        const isHeadedNoExit = Cypress.config('browser').isHeaded && !Cypress.config('exit')
+
+        // if we are in open mode or headed no-exit mode, abort the run immediately
         // since we want the user feedback to be immediate
-        if (Cypress.config('isInteractive')) {
+        if (Cypress.config('isInteractive') || isHeadedNoExit) {
           abort()
         }
       },
