@@ -226,7 +226,7 @@ export class CombinedAgent {
 
     const isHttps = isRequestHttps(options)
 
-    // Ensure that an HTTPS requests are using 443
+    // Ensure that HTTPS requests are using 443
     if (isHttps && options.port === 80) {
       options.port = 443
     }
