@@ -6,7 +6,7 @@ import agent from '@packages/network/lib/agent'
 import axios, { CreateAxiosDefaults, AxiosInstance } from 'axios'
 import debugLib from 'debug'
 import stripAnsi from 'strip-ansi'
-import { createCloudRequest } from '../../../../lib/cloud/api/cloud_request'
+import { CloudRequest, createCloudRequest } from '../../../../lib/cloud/api/cloud_request'
 import cloudApi from '../../../../lib/cloud/api'
 import app_config from '../../../../config/app.json'
 import os from 'os'
@@ -14,6 +14,9 @@ import pkg from '@packages/root'
 import { transformError } from '../../../../lib/cloud/api/axios_middleware/transform_error'
 import { DestroyableProxy, fakeServer, fakeProxy } from './utils/fake_proxy_server'
 import dedent from 'dedent'
+import { PassThrough } from 'stream'
+import fetch from 'cross-fetch'
+import nock from 'nock'
 
 chai.use(sinonChai)
 
@@ -441,6 +444,48 @@ describe('CloudRequest', () => {
 
     it('registers error transformation interceptor', () => {
       expect(stubbedAxiosInstance.interceptors?.response.use).to.have.been.calledWith(undefined, transformError)
+    })
+  })
+
+  describe('https requests', () => {
+    it('handles https requests properly', async () => {
+      nock.restore()
+
+      // @ts-ignore
+      const addRequestSpy = sinon.stub(agent.httpsAgent, 'addRequest').callsFake((req, options) => {
+        // fake IncomingMessage
+        const res = new PassThrough() as any
+
+        res.statusCode = 200
+        res.headers = {
+          'content-type': 'application/json',
+        }
+
+        process.nextTick(() => {
+          req.emit('response', res)
+          res.write(JSON.stringify({ ok: options.port === 443 && options.protocol === 'https:' }))
+          res.end()
+        })
+      })
+
+      const result1 = await CloudRequest.post('https://cloud.cypress.io/ping', {})
+
+      expect(result1.data).to.eql({ ok: true })
+
+      const result2 = await createCloudRequest({ baseURL: 'https://api.cypress.io' }).post('/ping', {})
+
+      expect(result2.data).to.eql({ ok: true })
+
+      const result3 = await fetch('https://cloud.cypress.io/ping', {
+        method: 'POST',
+        body: '{}',
+        // @ts-expect-error - this is supported
+        agent,
+      })
+
+      expect(await result3.json()).to.eql({ ok: true })
+
+      expect(addRequestSpy).to.have.been.calledThrice
     })
   })
 
