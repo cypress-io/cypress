@@ -6,7 +6,7 @@ import majorVersion from 'semver/functions/major.js'
 
 const debug = debugFn('cypress:vite-dev-server:getVite')
 
-export type Vite = typeof import('vite-6')
+export type Vite = typeof import('vite-7')
 
 // "vite-dev-server" is bundled in the binary, so we need to require.resolve "vite"
 // from root of the active project since we don't bundle vite internally but rather

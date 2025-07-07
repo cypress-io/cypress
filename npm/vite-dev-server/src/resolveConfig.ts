@@ -4,7 +4,7 @@
  * You can find it here https://github.com/vitest-dev/vitest/blob/main/packages/vitest/src/node/create.ts
  */
 import debugFn from 'debug'
-import type { InlineConfig } from 'vite-6'
+import type { InlineConfig } from 'vite-7'
 import path from 'path'
 import module from 'module'
 import semverGte from 'semver/functions/gte.js'
