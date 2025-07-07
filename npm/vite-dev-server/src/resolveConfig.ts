@@ -6,12 +6,13 @@
 import debugFn from 'debug'
 import type { InlineConfig } from 'vite-6'
 import path from 'path'
-import semverGte from 'semver/functions/gte'
+import module from 'module'
+import semverGte from 'semver/functions/gte.js'
 
-import { configFiles } from './constants'
-import type { ViteDevServerConfig } from './devServer'
-import { Cypress, CypressSourcemap } from './plugins/index'
-import type { Vite } from './getVite'
+import { configFiles } from './constants.js'
+import type { ViteDevServerConfig } from './devServer.js'
+import { Cypress, CypressSourcemap } from './plugins/index.js'
+import type { Vite } from './getVite.js'
 
 const debug = debugFn('cypress:vite-dev-server:resolve-config')
 
@@ -75,6 +76,8 @@ function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): Inline
   } = config
 
   const vitePort = port ?? undefined
+
+  const require = module.createRequire(import.meta.url)
 
   // Vite caches its output in the .vite directory in the node_modules where vite lives.
   // So we want to find that node_modules path and ensure it's added to the "allow" list

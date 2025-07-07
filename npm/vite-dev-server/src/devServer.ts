@@ -1,8 +1,8 @@
 import debugFn from 'debug'
-import semverMajor from 'semver/functions/major'
+import semverMajor from 'semver/functions/major.js'
 import type { UserConfig } from 'vite-6'
-import { getVite, Vite } from './getVite'
-import { createViteDevServerConfig } from './resolveConfig'
+import { getVite, Vite } from './getVite.js'
+import { createViteDevServerConfig } from './resolveConfig.js'
 
 const debug = debugFn('cypress:vite-dev-server:devServer')
 
@@ -21,7 +21,7 @@ export type ViteDevServerConfig = {
 
 export async function devServer (config: ViteDevServerConfig): Promise<Cypress.ResolvedDevServerConfig> {
   // This has to be the first thing we do as we need to source vite from their project's dependencies
-  const vite = getVite(config)
+  const vite = await getVite(config)
 
   let majorVersion: number | undefined = undefined
 
