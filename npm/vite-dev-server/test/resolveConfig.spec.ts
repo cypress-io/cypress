@@ -1,15 +1,11 @@
-import Chai, { expect } from 'chai'
+import { vi, describe, it, beforeEach, expect } from 'vitest'
 import { EventEmitter } from 'events'
 import * as vite4 from 'vite-4'
 import * as vite5 from 'vite-5'
 import * as vite6 from 'vite-6'
 import { scaffoldSystemTestProject } from './test-helpers/scaffoldProject'
 import { createViteDevServerConfig } from '../src/resolveConfig'
-import sinon from 'sinon'
-import SinonChai from 'sinon-chai'
 import type { ViteDevServerConfig } from '../src/devServer'
-
-Chai.use(SinonChai)
 
 const getViteDevServerConfig = (projectRoot: string) => {
   return {
@@ -39,10 +35,8 @@ const MAJOR_VERSIONS: ({version: 4, vite: any } | {version: 5, vite: any } | {ve
 ]
 
 describe('resolveConfig', function () {
-  this.timeout(1000 * 60)
-
   MAJOR_VERSIONS.forEach(({ version, vite: discoveredVite }) => {
-    context(`config resolution: v${version}`, () => {
+    describe(`config resolution: v${version}`, () => {
       it('with <project-root>/vite.config.js', async () => {
         const projectRoot = await scaffoldSystemTestProject(`vite${version}-inspect`)
         const viteDevServerConfig = getViteDevServerConfig(projectRoot)
@@ -66,7 +60,7 @@ describe('resolveConfig', function () {
       })
 
       it('calls viteConfig if it is a function', async () => {
-        const viteConfigFn = sinon.spy(async () => {
+        const viteConfigFn = vi.fn().mockImplementation(async () => {
           return {
             server: {
               fs: {
@@ -84,12 +78,12 @@ describe('resolveConfig', function () {
 
         const viteConfig = await createViteDevServerConfig(viteDevServerConfig, discoveredVite)
 
-        expect(viteConfigFn).to.be.called
+        expect(viteConfigFn).toBeCalled
         expect(viteConfig.server?.fs?.allow).to.include('some/other/file')
       })
     })
 
-    context('file watching', () => {
+    describe('file watching', () => {
       let viteDevServerConfig: ViteDevServerConfig
 
       beforeEach(async () => {
@@ -115,4 +109,4 @@ describe('resolveConfig', function () {
       })
     })
   })
-})
+}, 1000 * 60)

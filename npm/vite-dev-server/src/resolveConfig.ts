@@ -12,7 +12,6 @@ import { configFiles } from './constants'
 import type { ViteDevServerConfig } from './devServer'
 import { Cypress, CypressSourcemap } from './plugins/index'
 import type { Vite } from './getVite'
-import { dynamicImport } from './dynamic-import'
 
 const debug = debugFn('cypress:vite-dev-server:resolve-config')
 
@@ -32,7 +31,7 @@ export const createViteDevServerConfig = async (config: ViteDevServerConfig, vit
     // Set "configFile: false" to disable auto resolution of <project-root>/vite.config.js
     resolvedOverrides = { configFile: false, ...resolvedOverrides }
   } else {
-    const { findUp } = await dynamicImport<typeof import('find-up')>('find-up')
+    const { findUp } = await import('find-up')
 
     const configFile = await findUp(configFiles, { cwd: projectRoot })
 
