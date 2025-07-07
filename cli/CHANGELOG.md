@@ -32,7 +32,7 @@ _Released 07/15/2025 (PENDING)_
 **Dependency Updates:**
 
 - Upgraded `electron` from `33.2.1` to `36.4.0`. Addresses [#31257](https://github.com/cypress-io/cypress/issues/31257). Addressed in [#31912](https://github.com/cypress-io/cypress/pull/31912).
-- Upgraded bundled Node.js version from `20.18.1` to `22.14.0`. Addresses [#31257](https://github.com/cypress-io/cypress/issues/31257). Addressed in [#31912](https://github.com/cypress-io/cypress/pull/31912).
+- Upgraded bundled Node.js version from `20.18.1` to `22.15.1`. Addresses [#31257](https://github.com/cypress-io/cypress/issues/31257). Addressed in [#31912](https://github.com/cypress-io/cypress/pull/31912).
 - Upgraded bundled Chromium version from `130.0.6723.137` to `134.0.6998.165`. Addresses [#31257](https://github.com/cypress-io/cypress/issues/31257). Addressed in [#31912](https://github.com/cypress-io/cypress/pull/31912).
 
 ## 14.5.2
