@@ -126,7 +126,7 @@ export const createProxySock = (opts: CreateProxySockOpts, cb: CreateProxySockCb
 
 export const isRequestHttps = (options: http.RequestOptions) => {
   // WSS connections will not have an href, but you can tell protocol from the defaultAgent
-  return _.get(options, '_defaultAgent.protocol') === 'https:' || (options.href || '').slice(0, 6) === 'https:'
+  return _.get(options, '_defaultAgent.protocol') === 'https:' || options.protocol === 'https:' || (options.href || '').slice(0, 6) === 'https:'
 }
 
 export const isResponseStatusCode200 = (head: string) => {
@@ -225,6 +225,11 @@ export class CombinedAgent {
     }
 
     const isHttps = isRequestHttps(options)
+
+    // Ensure that HTTPS requests are using 443
+    if (isHttps && options.port === 80) {
+      options.port = 443
+    }
 
     if (!options.href) {
       // options.path can contain query parameters, which url.format will not-so-kindly urlencode for us...
