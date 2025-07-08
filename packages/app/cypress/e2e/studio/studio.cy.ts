@@ -641,6 +641,8 @@ describe('studio functionality', () => {
 })`)
     })
 
+    cy.wait(200)
+
     cy.findByTestId('studio-save-button').click()
 
     cy.waitForSpecToFinish({ passCount: 1 })
