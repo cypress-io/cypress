@@ -59,7 +59,7 @@ export function removeAllExtensions (win: BrowserWindow) {
   let extensions
 
   try {
-    extensions = win.webContents.session.getAllExtensions()
+    extensions = win.webContents.session.extensions.getAllExtensions()
 
     extensions.forEach(({ id }) => {
       win.webContents.session.removeExtension(id)
