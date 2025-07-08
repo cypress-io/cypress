@@ -621,9 +621,7 @@ describe('studio functionality', () => {
     }
   })
 
-  // TODO: not currently supported in Cloud Studio
-  // https://github.com/cypress-io/cypress-services/issues/10898
-  it.skip('appends the studio commands to the commands added to the test on the file system when file watching is disabled', () => {
+  it('appends the studio commands to the commands added to the test on the file system when file watching is disabled', () => {
     launchStudio({ cliArgs: ['--config', 'watchForFileChanges=false'] })
 
     incrementCounter(0)
@@ -696,6 +694,8 @@ describe('studio functionality', () => {
   })
 })`)
     })
+
+    cy.wait(200)
 
     cy.findByTestId('studio-save-button').click()
 
@@ -813,6 +813,8 @@ describe('studio functionality', () => {
   })
 })`)
     })
+
+    cy.wait(200)
 
     cy.findByTestId('studio-save-button').click()
 
