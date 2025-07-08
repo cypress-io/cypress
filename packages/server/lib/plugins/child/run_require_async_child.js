@@ -68,6 +68,7 @@ function run (ipc, file, projectRoot) {
       }
 
       if (devServer.bundler === 'vite') {
+        // tsx magic allows this import to work even thought its a ESM module and we are in a CJS context
         return { devServer: require('@cypress/vite-dev-server').devServer, objApi: true }
       }
     }
