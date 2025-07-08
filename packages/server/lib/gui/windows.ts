@@ -62,7 +62,7 @@ export function removeAllExtensions (win: BrowserWindow) {
     extensions = win.webContents.session.extensions.getAllExtensions()
 
     extensions.forEach(({ id }) => {
-      win.webContents.session.removeExtension(id)
+      win.webContents.session.extensions.removeExtension(id)
     })
   } catch (err) {
     debug('error removing all extensions %o', { err, extensions })
