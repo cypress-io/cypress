@@ -1,6 +1,7 @@
 import debugFn from 'debug'
 import module from 'module'
 import path from 'path'
+import os from 'os'
 import type { ViteDevServerConfig } from './devServer.js'
 import majorVersion from 'semver/functions/major.js'
 
@@ -12,10 +13,12 @@ export type Vite = typeof import('vite-7')
 // from root of the active project since we don't bundle vite internally but rather
 // use the version the user has installed
 export async function getVite (config: ViteDevServerConfig): Promise<Vite> {
+  const filePrefix = os.platform() === 'win32' ? 'file://' : ''
+
   try {
     const require = module.createRequire(import.meta.url)
     const vitePackageJsonPath = require.resolve('vite/package.json', { paths: [config.cypressConfig.projectRoot] })
-    const vitePackageJson = (await import(vitePackageJsonPath, {
+    const vitePackageJson = (await import(`${filePrefix}${vitePackageJsonPath}`, {
       with: {
         type: 'json',
       },
@@ -52,7 +55,7 @@ export async function getVite (config: ViteDevServerConfig): Promise<Vite> {
 
       debug('resolved esmViteImportPath as %s', esmViteImportPath)
 
-      const viteImport = await import(esmViteImportPath)
+      const viteImport = await import(`${filePrefix}${esmViteImportPath}`)
 
       return viteImport
     } catch (err) {
@@ -64,7 +67,7 @@ export async function getVite (config: ViteDevServerConfig): Promise<Vite> {
 
       debug('resolved cjsViteImportPath as %s', cjsViteImportPath)
 
-      const viteImport = await import(cjsViteImportPath)
+      const viteImport = await import(`${filePrefix}${cjsViteImportPath}`)
 
       return viteImport.default
     }
