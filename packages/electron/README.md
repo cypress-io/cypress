@@ -24,7 +24,6 @@ yarn workspace @packages/electron test-watch
 
 The version of `electron` that is bundled with Cypress should be kept as up-to-date as possible with the [stable Electron releases](https://www.electronjs.org/releases/stable). Many users expect the bundled Chromium and Node.js to be relatively recent. Also, historically, it has been extremely difficult to upgrade over multiple major versions of Electron at once, because of all the breaking changes in Electron and Node.js that impact Cypress.
 
-
 Upgrading `electron` involves more than just bumping this package's `package.json`. Here are additional tasks to check off when upgrading Electron:
 
 - [ ] **Write accurate changelog items.** The "User-facing changelog" for an Electron upgrade should mention the new Node.js and Chromium versions bundled. If this is a patch version of `electron`, a changelog entry might not be needed.
@@ -36,17 +35,16 @@ Upgrading `electron` involves more than just bumping this package's `package.jso
     - the major version number of Node.js changes, since users rely on the bundled Node.js to load plugins and `.js` fixtures, or
     - there are changes to Electron that require new shared libraries to be installed on Linux, breaking existing CI setups, or
     - there is some other change that would break existing usage of Cypress (for example, a Web API feature being removed/added to the bundled Chromium)
-- [ ] **Create and publish Docker `base-internal` and `browsers-internal` family images matching the Node.js and Chromium versions in Electron.** These images live inside the [`cypress-docker-images`](https://github.com/cypress-io/cypress-docker-images/) repository. The `browsers-internal` image will be used inside our CI pipelines. The `base-internal` image will be used by the `browsers-internal` image and possibly other system images (described below). The Chromium version can be determined from the [DEPS](https://github.com/electron/electron/blob/main/DEPS) file in Electron's repository on the correct tag. The Node version can be determined from the [Electron Releases page](https://www.electronjs.org/docs/latest/tutorial/electron-timelines). For general use of Cypress in Docker, we encourage the use of the [Cypress Docker Factory](https://github.com/cypress-io/cypress-docker-images#cypressfactory). This works great for using Cypress as an end user, but doesn't fully suit the needs for developing Cypress, as we require: 
+- [ ] **Create and publish Docker `base-internal` family images matching the Node.js and Chromium versions in Electron.** These images live inside the [`cypress-docker-images`](https://github.com/cypress-io/cypress-docker-images/) repository. The `base-internal` images will be used inside our CI pipelines. For general use of Cypress in Docker, we encourage the use of the [Cypress Docker Factory](https://github.com/cypress-io/cypress-docker-images#cypressfactory). This works great for using Cypress as an end user, but doesn't fully suit the needs for developing Cypress, as we require: 
     - The installation of packages, such as `curl`, `xauth`, and `build-essential`/`make` needed for our [`circleci`](../../.circleci/config.yml) jobs/pipelines.
     - Specific images targeted to test Cypress on various node versions and distributions of linux, such as different versions of `ubuntu`.
 
     These images are currently created on an 'as-needed' basis and are published manually to the [cypress docker repository](https://hub.docker.com/u/cypress). When creating these images, make sure: 
-    - The [browsers-internal](https://github.com/cypress-io/cypress-docker-images/tree/master/browsers-internal) image contains the latest version of Firefox and Edge.
     - The Ubuntu images in [base-internal](https://github.com/cypress-io/cypress-docker-images/tree/master/base-internal) are updated to be used in the [system binary tests](../../system-tests/test-binary) if any of the following are true for the images used inside the system binary tests:
       - The last two major [Ubuntu LTS Releases](https://ubuntu.com/about/release-cycle) are out-of-date.
       - The [NodeJS](https://nodejs.org/en) version is not the active LTS.
 - [ ] **Update `workflows.yml`**
-    - [ ] Ensure it references the new `base-internal` and `browsers-internal` Docker images
+    - [ ] Ensure it references the new `base-internal` Docker images
 
 - [ ] **Ensure that a matching Node.js version is enforced in the monorepo for local development and CI.** When Electron is upgraded, oftentimes, the bundled Node.js version that comes with Electron is updated as well. Because all unit and integration tests run in normal Node.js (not Electron's Node.js), it's important for this Node.js version to be synced with the monorepo. There are a few places where this needs to be done:
     - [ ] [`/.node-version`](../../.node-version) - used by `nvm` and other Node version managers
@@ -63,7 +61,7 @@ Upgrading `electron` involves more than just bumping this package's `package.jso
   - [ ] Update the target `electron` version in the circle configuration
   - [ ] Update the docker image to the new browsers-internal image made in the previous step
   - [ ] Temporarily update the circle configuration to allow `cypress` to run against the branch
-  - [ ] Temporarily set target `cypress-publish-binary` branch as a `branch` property on the request body in [../../scripts/binary/trigger-publish-binary-pipeline.js](../../scripts/binary/trigger-publish-binary-pipeline.js) script, so that you can test against this branch from the electron upgrade branch
+  - [ ] Temporarily set target `cypress-publish-binary` branch as a `branch` property on the request body in [../../scripts/binary/trigger-publish-binary-pipeline.js](../../scripts/binary/trigger-publish-binary-pipeline.js) script, so that you can test against this branch from the electron upgrade branch. This property must be set both at the root of the body object, and on the `parameters` key. If it is not set at the root, the binary pipeline will continue to use the primary branch. 
 
 
 - [ ] **Manually smoke test `cypress open`.** Upgrading Electron can break the `desktop-gui` in unexpected ways. Since testing in this area is weak, double-check that things like launching `cypress open`, signing into Cypress Cloud, and launching Electron tests still work.
@@ -87,3 +85,12 @@ Upgrading `electron` involves more than just bumping this package's `package.jso
 
 *Solution*: This is often due to a mismatched prebuild of `better-sqlite3`. Ensure your repository is clear of untracked files with `git clean -xfd`, and run `yarn` again. If the issue persists, ensure you are running the latest version of your operating system. Electron prebuilds key to darwin/linux/windows, and do not differentiate between versions of the same.
 
+#### node-abi out of date
+
+If you run into an error like below, please try some of the strategies below.
+
+```shell
+Could not detect abi for version X.X.X and runtime electron.  Updating "node-abi" might help solve this issue if it is a new release of electron
+```
+
+*Solution*: See if there's a new version of `@electron/rebuild` with a newer version of `node-abi` within it. If there is not a newer version, find the [latest release](https://github.com/electron/node-abi/releases) of `node-abi` that has an updated ABI registry with an `abi` entry matching the major version of Electron that you're updating to. Set this `node-abi` version in the `resolutions` of our [package.json](./package.json) file and rerun `yarn`.

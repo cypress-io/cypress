@@ -1,0 +1,16 @@
+diff --git a/node_modules/http-proxy/lib/http-proxy/common.js b/node_modules/http-proxy/lib/http-proxy/common.js
+index 6513e81..5ee132c 100644
+--- a/node_modules/http-proxy/lib/http-proxy/common.js
++++ b/node_modules/http-proxy/lib/http-proxy/common.js
+@@ -6,6 +6,11 @@ var common   = exports,
+ var upgradeHeader = /(^|,)\s*upgrade\s*($|,)/i,
+     isSSL = /^https|wss/;
+ 
++/**
++ * This is a workaround to prevent the module from being included in the
++ * v8 snapshot due to serialization issues in v8 versions 13.4.102-13.8.91.
++ */
++common._reject_file_as_deferred = require('path').join('a','b')
+ /**
+  * Simple Regex for testing if protocol is https
+  */

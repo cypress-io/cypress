@@ -20,7 +20,7 @@ _Released 07/15/2025 (PENDING)_
 
 **Features:**
 
-- [`cy.url()`](https://docs.cypress.io/api/commands/url), [`cy.hash()`](https://docs.cypress.io/api/commands/hash), [`cy.go()`](https://docs.cypress.io/api/commands/go), [`cy.reload()`](https://docs.cypress.io/api/commands/reload), [`cy.title()`](https://docs.cypress.io/api/commands/title), and [`cy.location()`](https://docs.cypress.io/api/commands/location) now use the automation client (CDP for Chromium browsers and WebDriver BiDi for Firefox) to return the appropriate values from the commands to the user instead of the window object. This is to avoid cross origin issues with [`cy.origin()`](https://docs.cypress.io/api/commands/origin) so these commands can be invoked anywhere inside a Cypress test without having to worry about origin access issues. Experimental Webkit still will use the window object to retrieve these values. Also, [`cy.window()`](https://docs.cypress.io/api/commands/window) will always return the current window object, regardless of origin restrictions. Not every property from the window object will be accessible depending on the origin context. Addresses [#31196](https://github.com/cypress-io/cypress/issues/31196).
+- [`cy.url()`](https://docs.cypress.io/api/commands/url), [`cy.hash()`](https://docs.cypress.io/api/commands/hash), [`cy.go()`](https://docs.cypress.io/api/commands/go), [`cy.reload()`](https://docs.cypress.io/api/commands/reload), [`cy.title()`](https://docs.cypress.io/api/commands/title), and [`cy.location()`](https://docs.cypress.io/api/commands/location) now use the automation client (CDP for Chromium browsers and WebDriver BiDi for Firefox) to return the appropriate values from the commands to the user instead of the window object. This is to avoid cross origin issues with [`cy.origin()`](https://docs.cypress.io/api/commands/origin) so these commands can be invoked anywhere inside a Cypress test without having to worry about origin access issues. Experimental WebKit still will use the window object to retrieve these values. Also, [`cy.window()`](https://docs.cypress.io/api/commands/window) will always return the current window object, regardless of origin restrictions. Not every property from the window object will be accessible depending on the origin context. Addresses [#31196](https://github.com/cypress-io/cypress/issues/31196).
 - Selectors accepted in the `selectorPriority` of the `SelectorPlayground` (renamed to `ElementSelector`) API have been expanded to accept `name` and `attributes:*`. Additionally, the default selector priority used by Cypress now includes `name`. Addresses [#31801](https://github.com/cypress-io/cypress/issues/30309) and [#6876](https://github.com/cypress-io/cypress/issues/6876). Addressed in [#31889](https://github.com/cypress-io/cypress/pull/31889).
 - [`tsx`](https://tsx.is/) is now used in all cases to run the Cypress config, replacing [ts-node](https://github.com/TypeStrong/ts-node) for TypeScript and Node for commonjs/ESM. This should allow for more interoperability for users who are using any variant of ES Modules. Addresses [#8090](https://github.com/cypress-io/cypress/issues/8090), [#15724](https://github.com/cypress-io/cypress/issues/15724), [#21805](https://github.com/cypress-io/cypress/issues/21805), [#22273](https://github.com/cypress-io/cypress/issues/22273), [#22747](https://github.com/cypress-io/cypress/issues/22747), [#23141](https://github.com/cypress-io/cypress/issues/23141), [#25958](https://github.com/cypress-io/cypress/issues/25958), [#25959](https://github.com/cypress-io/cypress/issues/25959), [#26606](https://github.com/cypress-io/cypress/issues/26606), [#27359](https://github.com/cypress-io/cypress/issues/27359), [#27450](https://github.com/cypress-io/cypress/issues/27450), [#28442](https://github.com/cypress-io/cypress/issues/28442), [#30318](https://github.com/cypress-io/cypress/issues/30318), [#30718](https://github.com/cypress-io/cypress/issues/30718), [#30907](https://github.com/cypress-io/cypress/issues/30907), [#30915](https://github.com/cypress-io/cypress/issues/30915), [#30925](https://github.com/cypress-io/cypress/issues/30925), [#30954](https://github.com/cypress-io/cypress/issues/30954) and [#31185](https://github.com/cypress-io/cypress/issues/31185).
 
@@ -28,6 +28,12 @@ _Released 07/15/2025 (PENDING)_
 
 - The Cypress Command log has a new design when viewing a list of tests. Addresses [#31677](https://github.com/cypress-io/cypress/issues/31677). Addressed in [#31914](https://github.com/cypress-io/cypress/pull/31914).
 - Migration helpers and related errors are no longer shown when upgrading from Cypress versions earlier than 10.0.0. To migrate from a pre-10.0.0 version, upgrade one major version at a time to receive the appropriate guidance. Addresses [#31345](https://github.com/cypress-io/cypress/issues/31345). Addressed in [https://github.com/cypress-io/cypress/pull/31629/](https://github.com/cypress-io/cypress/pull/31629/).
+
+**Dependency Updates:**
+
+- Upgraded `electron` from `33.2.1` to `36.4.0`. Addresses [#31257](https://github.com/cypress-io/cypress/issues/31257). Addressed in [#31912](https://github.com/cypress-io/cypress/pull/31912).
+- Upgraded bundled Node.js version from `20.18.1` to `22.15.1`. Addresses [#31257](https://github.com/cypress-io/cypress/issues/31257). Addressed in [#31912](https://github.com/cypress-io/cypress/pull/31912).
+- Upgraded bundled Chromium version from `130.0.6723.137` to `136.0.7103.149`. Addresses [#31257](https://github.com/cypress-io/cypress/issues/31257). Addressed in [#31912](https://github.com/cypress-io/cypress/pull/31912).
 
 ## 14.5.2
 
@@ -126,6 +132,7 @@ _Released 5/6/2025_
 **Dependency Updates:**
 
 - Downgraded `cli-table3` to 0.6.1. Addressed in [31631](https://github.com/cypress-io/cypress/pull/31631).
+
 
 ## 14.3.2
 
