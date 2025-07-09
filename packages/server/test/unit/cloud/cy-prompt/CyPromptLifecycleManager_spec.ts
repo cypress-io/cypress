@@ -9,6 +9,7 @@ import os from 'os'
 import { CloudRequest } from '../../../../lib/cloud/api/cloud_request'
 import { isRetryableError } from '../../../../lib/cloud/network/is_retryable_error'
 import { asyncRetry } from '../../../../lib/util/async_retry'
+import * as reportCyPromptErrorPath from '../../../../lib/cloud/api/cy-prompt/report_cy-prompt_error'
 
 describe('CyPromptLifecycleManager', () => {
   let cyPromptLifecycleManager: CyPromptLifecycleManager
@@ -24,12 +25,14 @@ describe('CyPromptLifecycleManager', () => {
   let watcherStub: sinon.SinonStub = sinon.stub()
   let watcherOnStub: sinon.SinonStub = sinon.stub()
   let watcherCloseStub: sinon.SinonStub = sinon.stub()
+  let reportCyPromptErrorStub: sinon.SinonStub
   const mockContents: string = 'console.log("cy-prompt script")'
 
   beforeEach(() => {
     postCyPromptSessionStub = sinon.stub()
     cyPromptManagerSetupStub = sinon.stub()
     ensureCyPromptBundleStub = sinon.stub()
+    reportCyPromptErrorStub = sinon.stub()
     cyPromptStatusChangeEmitterStub = sinon.stub()
     mockCyPromptManager = {
       status: 'INITIALIZED',
@@ -100,6 +103,8 @@ describe('CyPromptLifecycleManager', () => {
     postCyPromptSessionStub.resolves({
       cyPromptUrl: 'https://cloud.cypress.io/cy-prompt/bundle/abc.tgz',
     })
+
+    reportCyPromptErrorStub = sinon.stub(reportCyPromptErrorPath, 'reportCyPromptError').resolves()
   })
 
   afterEach(() => {
@@ -322,6 +327,23 @@ describe('CyPromptLifecycleManager', () => {
       const { error } = await cyPromptPromise
 
       expect(error.message).to.equal('Expected hash for cy prompt server script not found in manifest')
+
+      expect(reportCyPromptErrorStub).to.be.calledWith({
+        cloudApi: {
+          cloudUrl: 'https://cloud.cypress.io',
+          CloudRequest,
+          isRetryableError,
+          asyncRetry,
+          cloudHeaders: {
+            'Authorization': 'Bearer test-token',
+          },
+        },
+        cyPromptHash: 'abc',
+        projectSlug: 'test-project-id',
+        error,
+        cyPromptMethod: 'initializeCyPromptManager',
+        cyPromptMethodArgs: [],
+      })
     })
 
     it('throws an error when the cy-prompt server script is wrong in the manifest', async () => {
@@ -350,6 +372,23 @@ describe('CyPromptLifecycleManager', () => {
       const { error } = await cyPromptPromise
 
       expect(error.message).to.equal('Invalid hash for cy prompt server script')
+
+      expect(reportCyPromptErrorStub).to.be.calledWith({
+        cloudApi: {
+          cloudUrl: 'https://cloud.cypress.io',
+          CloudRequest,
+          isRetryableError,
+          asyncRetry,
+          cloudHeaders: {
+            'Authorization': 'Bearer test-token',
+          },
+        },
+        cyPromptHash: 'abc',
+        projectSlug: 'test-project-id',
+        error,
+        cyPromptMethod: 'initializeCyPromptManager',
+        cyPromptMethodArgs: [],
+      })
     })
   })
 

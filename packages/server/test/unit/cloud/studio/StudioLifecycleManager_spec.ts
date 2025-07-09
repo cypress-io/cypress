@@ -526,7 +526,7 @@ describe('StudioLifecycleManager', () => {
       expect(reportStudioErrorStub).to.be.calledOnce
       expect(reportStudioErrorStub).to.be.calledWithMatch({
         cloudApi: sinon.match.object,
-        studioHash: 'test-project-id',
+        studioHash: 'abc',
         projectSlug: 'abc123',
         error: sinon.match.instanceOf(Error).and(sinon.match.has('message', 'Expected hash for studio server script not found in manifest')),
         studioMethod: 'initializeStudioManager',
@@ -573,7 +573,7 @@ describe('StudioLifecycleManager', () => {
       expect(reportStudioErrorStub).to.be.calledOnce
       expect(reportStudioErrorStub).to.be.calledWithMatch({
         cloudApi: sinon.match.object,
-        studioHash: 'test-project-id',
+        studioHash: 'abc',
         projectSlug: 'abc123',
         error: sinon.match.instanceOf(Error).and(sinon.match.has('message', 'Invalid hash for studio server script')),
         studioMethod: 'initializeStudioManager',
@@ -623,7 +623,7 @@ describe('StudioLifecycleManager', () => {
       expect(reportStudioErrorStub).to.be.calledOnce
       expect(reportStudioErrorStub).to.be.calledWithMatch({
         cloudApi: sinon.match.object,
-        studioHash: 'test-project-id',
+        studioHash: 'abc',
         projectSlug: 'abc123',
         error: sinon.match.instanceOf(Error).and(sinon.match.has('message', 'Test error')),
         studioMethod: 'initializeStudioManager',

@@ -30,6 +30,7 @@ export interface CyPromptCloudApi {
   cloudUrl: string
   CloudRequest: AxiosInstance
   isRetryableError: (err: unknown) => boolean
+  cloudHeaders?: Record<string, string>
   asyncRetry: AsyncRetry
 }
 

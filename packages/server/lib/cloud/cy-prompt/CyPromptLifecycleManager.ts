@@ -14,6 +14,7 @@ import chokidar from 'chokidar'
 import { getCloudMetadata } from '../get_cloud_metadata'
 import type { CyPromptAuthenticatedUserShape } from '@packages/types'
 import crypto from 'crypto'
+import { reportCyPromptError } from '../api/cy-prompt/report_cy-prompt_error'
 
 const debug = Debug('cypress:server:cy-prompt-lifecycle-manager')
 
@@ -26,6 +27,7 @@ export class CyPromptLifecycleManager {
   }>
   private cyPromptManager?: CyPromptManager
   private listeners: ((cyPromptManager: CyPromptManager) => void)[] = []
+  private cyPromptHash: string | undefined
 
   /**
    * Initialize the cy prompt manager.
@@ -66,25 +68,24 @@ export class CyPromptLifecycleManager {
     }).catch(async (error) => {
       debug('Error during cy prompt manager setup: %o', error)
 
-      // const cloudEnv = (process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'production') as 'development' | 'staging' | 'production'
-      // const cloudUrl = ctx.cloud.getCloudUrl(cloudEnv)
-      // const cloudHeaders = await ctx.cloud.additionalHeaders()
+      const cloudEnv = (process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'production') as 'development' | 'staging' | 'production'
+      const cloudUrl = ctx.cloud.getCloudUrl(cloudEnv)
+      const cloudHeaders = await ctx.cloud.additionalHeaders()
 
-      // TODO: reportCyPromptError
-      // reportCyPromptError({
-      //   cloudApi: {
-      //     cloudUrl,
-      //     cloudHeaders,
-      //     CloudRequest,
-      //     isRetryableError,
-      //     asyncRetry,
-      //   },
-      //   cyPromptHash: projectId,
-      //   projectSlug: cfg.projectId,
-      //   error,
-      //   cyPromptMethod: 'initializeCyPromptManager',
-      //   cyPromptMethodArgs: [],
-      // })
+      reportCyPromptError({
+        cloudApi: {
+          cloudUrl,
+          cloudHeaders,
+          CloudRequest,
+          isRetryableError,
+          asyncRetry,
+        },
+        cyPromptHash: this.cyPromptHash,
+        projectSlug: (await ctx.project.getConfig()).projectId || undefined,
+        error,
+        cyPromptMethod: 'initializeCyPromptManager',
+        cyPromptMethodArgs: [],
+      })
 
       // Clean up any registered listeners
       this.listeners = []
@@ -123,7 +124,6 @@ export class CyPromptLifecycleManager {
       key?: string
     }>
   }): Promise<{ cyPromptManager?: CyPromptManager, error?: Error }> {
-    let cyPromptHash: string
     let cyPromptPath: string
     let manifest: Record<string, string>
 
@@ -135,10 +135,10 @@ export class CyPromptLifecycleManager {
 
     if (!process.env.CYPRESS_LOCAL_CY_PROMPT_PATH) {
       // The cy prompt hash is the last part of the cy prompt URL, after the last slash and before the extension
-      cyPromptHash = cyPromptSession.cyPromptUrl.split('/').pop()?.split('.')[0]
-      cyPromptPath = path.join(os.tmpdir(), 'cypress', 'cy-prompt', cyPromptHash)
+      this.cyPromptHash = cyPromptSession.cyPromptUrl.split('/').pop()?.split('.')[0] as string
+      cyPromptPath = path.join(os.tmpdir(), 'cypress', 'cy-prompt', this.cyPromptHash)
 
-      let hashLoadingPromise = CyPromptLifecycleManager.hashLoadingMap.get(cyPromptHash)
+      let hashLoadingPromise = CyPromptLifecycleManager.hashLoadingMap.get(this.cyPromptHash)
 
       if (!hashLoadingPromise) {
         hashLoadingPromise = ensureCyPromptBundle({
@@ -147,13 +147,13 @@ export class CyPromptLifecycleManager {
           cyPromptPath,
         })
 
-        CyPromptLifecycleManager.hashLoadingMap.set(cyPromptHash, hashLoadingPromise)
+        CyPromptLifecycleManager.hashLoadingMap.set(this.cyPromptHash, hashLoadingPromise)
       }
 
       manifest = await hashLoadingPromise
     } else {
       cyPromptPath = process.env.CYPRESS_LOCAL_CY_PROMPT_PATH
-      cyPromptHash = 'local'
+      this.cyPromptHash = 'local'
       manifest = {}
     }
 
@@ -181,7 +181,7 @@ export class CyPromptLifecycleManager {
     await cyPromptManager.setup({
       script,
       cyPromptPath,
-      cyPromptHash,
+      cyPromptHash: this.cyPromptHash,
       cloudApi: {
         cloudUrl,
         CloudRequest,

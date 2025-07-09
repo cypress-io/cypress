@@ -35,6 +35,7 @@ export class StudioLifecycleManager {
   private listeners: ((studioManager: StudioManager) => void)[] = []
   private ctx?: DataContext
   private lastStatus?: StudioStatus
+  private studioHash: string | undefined
 
   public get cloudStudioRequested () {
     return !!(process.env.CYPRESS_ENABLE_CLOUD_STUDIO || process.env.CYPRESS_LOCAL_STUDIO_PATH)
@@ -91,7 +92,7 @@ export class StudioLifecycleManager {
           isRetryableError,
           asyncRetry,
         },
-        studioHash: projectId,
+        studioHash: this.studioHash,
         projectSlug: cfg.projectId,
         error,
         studioMethod: 'initializeStudioManager',
@@ -157,7 +158,6 @@ export class StudioLifecycleManager {
     debugData: any
   }): Promise<StudioManager> {
     let studioPath: string
-    let studioHash: string
     let manifest: Record<string, string>
 
     initializeTelemetryReporter({
@@ -177,10 +177,10 @@ export class StudioLifecycleManager {
     telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.ENSURE_STUDIO_BUNDLE_START)
     if (!process.env.CYPRESS_LOCAL_STUDIO_PATH) {
       // The studio hash is the last part of the studio URL, after the last slash and before the extension
-      studioHash = studioSession.studioUrl.split('/').pop()?.split('.')[0]
-      studioPath = path.join(os.tmpdir(), 'cypress', 'studio', studioHash)
+      this.studioHash = studioSession.studioUrl.split('/').pop()?.split('.')[0] as string
+      studioPath = path.join(os.tmpdir(), 'cypress', 'studio', this.studioHash)
 
-      let hashLoadingPromise = StudioLifecycleManager.hashLoadingMap.get(studioHash)
+      let hashLoadingPromise = StudioLifecycleManager.hashLoadingMap.get(this.studioHash)
 
       if (!hashLoadingPromise) {
         hashLoadingPromise = ensureStudioBundle({
@@ -189,13 +189,13 @@ export class StudioLifecycleManager {
           projectId,
         })
 
-        StudioLifecycleManager.hashLoadingMap.set(studioHash, hashLoadingPromise)
+        StudioLifecycleManager.hashLoadingMap.set(this.studioHash, hashLoadingPromise)
       }
 
       manifest = await hashLoadingPromise
     } else {
       studioPath = process.env.CYPRESS_LOCAL_STUDIO_PATH
-      studioHash = 'local'
+      this.studioHash = 'local'
       manifest = {}
     }
 
@@ -227,7 +227,7 @@ export class StudioLifecycleManager {
     await studioManager.setup({
       script,
       studioPath,
-      studioHash,
+      studioHash: this.studioHash,
       projectSlug: projectId,
       cloudApi: {
         cloudUrl,
