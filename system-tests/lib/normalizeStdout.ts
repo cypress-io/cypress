@@ -167,8 +167,8 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   // Replaces CDP connection error message in Firefox since Cypress will retry
   .replace(/\nFailed to spawn CDP with Firefox. Retrying.*\.\.\.\n/g, '')
   // Replaces "new dependencies optimized" message from vite as it does not respect the logLevel='silent' option
-  .replace(/^.*new dependencies optimized.*$/gm, '')
-  .replace(/^.*Re-optimizing dependencies.*$/gm, '')
+  .replace(/^.*Re-optimizing dependencies.*?\n$/gm, '')
+  .replace(/\).*new dependencies optimized.*?\n/gm, ')\n')
 
   if (options.browser === 'webkit') {
     // WebKit throws for lookups on undefined refs with "Can't find variable: <var>"
