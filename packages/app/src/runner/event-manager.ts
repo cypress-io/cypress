@@ -865,6 +865,7 @@ export class EventManager {
     })
 
     const hasRunnableId = !!this.studioStore.testId || !!this.studioStore.suiteId
+    const studioSingleTestActive = !!this.studioStore.testId && !this.studioStore.suiteId
 
     this.reporterBus.emit('reporter:start', {
       startTime: Cypress.runner.getStartTime(),
@@ -875,6 +876,7 @@ export class EventManager {
       isSpecsListOpen: runState.isSpecsListOpen,
       scrollTop: runState.scrollTop,
       studioActive: hasRunnableId,
+      studioSingleTestActive,
     } as ReporterStartInfo)
   }
 
