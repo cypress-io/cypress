@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events'
 import { RootRunnable } from '../../src/runnables/runnables-store'
+import { itHandlesFileOpening } from '../support/utils'
 
 describe('hooks', () => {
   let runner: EventEmitter
