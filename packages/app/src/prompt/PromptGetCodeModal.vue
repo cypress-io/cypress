@@ -46,11 +46,11 @@ const closeModal = () => {
 const container = ref<HTMLDivElement | null>(null)
 const error = ref<string | null>(null)
 const ReactGetCodeModalContents = ref<GetCodeModalContentsShape | null>(null)
-const reactRoot = ref<Root | null>(null)
+const containerReactRootMap = new WeakMap<HTMLElement, Root>()
 const promptStore = usePromptStore()
 
 const maybeRenderReactComponent = () => {
-  if (!ReactGetCodeModalContents.value || !!error.value) {
+  if (!ReactGetCodeModalContents.value || !!error.value || !container.value) {
     return
   }
 
@@ -63,11 +63,18 @@ const maybeRenderReactComponent = () => {
     },
   })
 
-  if (!reactRoot.value) {
-    reactRoot.value = window.UnifiedRunner.ReactDOM.createRoot(container.value)
+  // Store the react root in a weak map keyed by the container. We do this so that we have a reference
+  // to it that's tied to the container value but absolutely do not want to use vue to do the tracking.
+  // If vue tracks it (e.g. using a ref) it creates proxies that do not play nicely with React in
+  // production
+  let reactRoot = containerReactRootMap.get(container.value)
+
+  if (!reactRoot) {
+    reactRoot = window.UnifiedRunner.ReactDOM.createRoot(container.value) as Root
+    containerReactRootMap.set(container.value, reactRoot)
   }
 
-  reactRoot.value?.render(panel)
+  reactRoot.render(panel)
 }
 
 const unmountReactComponent = () => {
@@ -75,7 +82,13 @@ const unmountReactComponent = () => {
     return
   }
 
-  reactRoot.value?.unmount()
+  const reactRoot = containerReactRootMap.get(container.value)
+
+  if (!reactRoot) {
+    return
+  }
+
+  reactRoot.unmount()
 }
 
 onMounted(maybeRenderReactComponent)
