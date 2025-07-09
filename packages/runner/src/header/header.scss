@@ -62,31 +62,6 @@
     }
   }
 
-  .display-selector-playground {
-    padding-left: 0;
-
-    .selector-playground-toggle {
-      display: block;
-    }
-  }
-
-  .showing-selector-playground {
-    .selector-playground {
-      display: flex;
-    }
-
-    .selector-playground-toggle {
-      background-color: #e9e9e9;
-      box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
-    }
-  }
-
-  .showing-studio {
-    .studio {
-      display: flex;
-    }
-  }
-
   .header-popup {
     align-items: center;
     background-color: #f8f8f8;
@@ -394,26 +369,6 @@
       &:hover, &:focus {
         color: $link-text;
         text-decoration: none;
-      }
-    }
-
-    .studio-controls {
-      display: flex;
-      margin-left: auto;
-
-      .button-studio {
-        border-left: 1px solid #e3e3e3;
-        font-size: 1.25em;
-      }
-
-      .button-success {
-        color: $success;
-      }
-
-      .button-studio-copy {
-        i {
-          width: 15px;
-        }
       }
     }
   }

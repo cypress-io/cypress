@@ -4,11 +4,6 @@
     :open="studioStore.instructionModalIsOpen"
     @close="studioStore.closeInstructionModal"
   />
-  <StudioSaveModal
-    v-if="studioStore.saveModalIsOpen"
-    :open="studioStore.saveModalIsOpen"
-    @close="studioStore.closeSaveModal"
-  />
   <AdjustRunnerStyleDuringScreenshot
     id="main-pane"
     class="flex"
@@ -142,7 +137,6 @@ import AutomationDisconnected from './automation/AutomationDisconnected.vue'
 import AutomationMissing from './automation/AutomationMissing.vue'
 import { runnerConstants } from './runner-constants'
 import StudioInstructionsModal from './studio/StudioInstructionsModal.vue'
-import StudioSaveModal from './studio/StudioSaveModal.vue'
 import { useStudioStore } from '../store/studio-store'
 import StudioPanel from '../studio/StudioPanel.vue'
 import { useSubscription } from '../graphql'

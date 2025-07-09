@@ -2,11 +2,11 @@ import _ from 'lodash'
 import cs from 'classnames'
 import Markdown from 'markdown-it'
 import { observer } from 'mobx-react'
-import React, { useCallback, useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
 import appState from '../lib/app-state'
-import events, { Events } from '../lib/events'
+import events from '../lib/events'
 import FlashOnClick from '../lib/flash-on-click'
 import StateIcon from '../lib/state-icon'
 import Tag from '../lib/tag'
@@ -314,7 +314,6 @@ interface CommandDetailsProps {
 interface CommandControlsProps {
   model: CommandModel
   commandName: string
-  events: Events
 }
 
 interface CommandProps {
@@ -341,27 +340,14 @@ const CommandDetails: React.FC<CommandDetailsProps> = observer(({ model, groupId
 
 CommandDetails.displayName = 'CommandDetails'
 
-const CommandControls: React.FC<CommandControlsProps> = observer(({ model, commandName, events }) => {
+const CommandControls: React.FC<CommandControlsProps> = observer(({ model, commandName }) => {
   const displayNumOfElements = model.state !== 'pending' && model.numElements != null && model.numElements !== 1
   const isSystemEvent = model.type === 'system' && model.event
   const isSessionCommand = commandName === 'session'
   const displayNumOfChildren = !isSystemEvent && !isSessionCommand && model.hasChildren && !model.isOpen
 
-  const _removeStudioCommand = useCallback((e: React.MouseEvent<HTMLElement, globalThis.MouseEvent>) => {
-    e.preventDefault()
-    e.stopPropagation()
-
-    events.emit('studio:remove:command', model.number)
-  }, [events, model.number])
-
   return (
     <span className='command-controls'>
-      {model.type === 'parent' && model.isStudio && (
-        <i
-          className='far fa-times-circle studio-command-remove'
-          onClick={_removeStudioCommand}
-        />
-      )}
       {isSessionCommand && (
         <Tag
           content={model.sessionInfo?.status}
@@ -505,7 +491,7 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
 
   return (
     <>
-      <li className={cs('command', `command-name-${commandName}`, { 'command-is-studio': model.isStudio })}>
+      <li className={cs('command', `command-name-${commandName}`)}>
         <div
           className={cs(
             'command-wrapper',
@@ -544,7 +530,7 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
                 </div>
               )}
               <CommandDetails model={model} groupId={groupId} aliasesWithDuplicates={aliasesWithDuplicates} />
-              <CommandControls model={model} commandName={commandName} events={events} />
+              <CommandControls model={model} commandName={commandName}/>
             </div>
           </FlashOnClick>
         </div>
