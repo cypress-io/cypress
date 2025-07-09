@@ -1,5 +1,4 @@
 import { defineConfig } from 'cypress'
-
 import type * as vite from 'vite'
 
 declare global {
