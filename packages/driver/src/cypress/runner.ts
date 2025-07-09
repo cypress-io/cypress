@@ -1940,7 +1940,7 @@ export default {
         _runner.stopped = true
         abort()
 
-        // if we are in open mode or headed no-exit mode, abort the run immediately
+        // if we are in open mode, abort the run immediately
         // since we want the user feedback to be immediate
         if (Cypress.config('isInteractive')) {
           abort()
