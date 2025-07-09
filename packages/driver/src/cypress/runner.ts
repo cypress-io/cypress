@@ -562,6 +562,10 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
         // to ensure protocol can properly handle the abort
         if (_runner.stopped && isRunMode) {
           abort()
+
+          // remove all the listeners
+          // so no more events fire
+          _runner.removeAllListeners()
         }
       })]
 
@@ -1405,10 +1409,6 @@ export default {
       // and mocha may never fire this because our
       // runnable may never finish
       _runner.emit('end')
-
-      // remove all the listeners
-      // so no more events fire
-      _runner.removeAllListeners()
     }
 
     overrideRunnerHook(Cypress, _runner, getTestById, getTest, setTest, getTests, cy, abort)
@@ -1938,13 +1938,16 @@ export default {
         }
 
         _runner.stopped = true
-
-        const isHeadedNoExit = Cypress.config('browser').isHeaded && !Cypress.config('exit')
+        abort()
 
         // if we are in open mode or headed no-exit mode, abort the run immediately
         // since we want the user feedback to be immediate
-        if (Cypress.config('isInteractive') || isHeadedNoExit) {
+        if (Cypress.config('isInteractive')) {
           abort()
+
+          // remove all the listeners
+          // so no more events fire
+          _runner.removeAllListeners()
         }
       },
 
