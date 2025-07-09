@@ -30,7 +30,7 @@ describe('encryption', () => {
     const { jwe, secretKey } = await encryption.encryptRequest({
       encrypt: true,
       body: TEST_BODY,
-    }, publicKey)
+    }, { publicKey })
 
     const { plaintext } = await jose.generalDecrypt(jwe, privateKey)
 
@@ -47,7 +47,7 @@ describe('encryption', () => {
     const { jwe, secretKey } = await encryption.encryptRequest({
       encrypt: true,
       body: TEST_BODY,
-    }, publicKey)
+    }, { publicKey })
 
     const RESPONSE_BODY = { runId: 123 }
 

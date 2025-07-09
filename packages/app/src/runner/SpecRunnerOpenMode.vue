@@ -270,6 +270,8 @@ useSubscription({ query: StudioStatus_ChangeDocument }, (_, data) => {
 })
 
 const cloudStudioRequested = computed(() => {
+  studioStore.setCloudStudioRequested(props.gql.cloudStudioRequested || false)
+
   return props.gql.cloudStudioRequested
 })
 
