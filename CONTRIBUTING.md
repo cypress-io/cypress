@@ -206,7 +206,7 @@ You must have the following installed on your system to contribute locally:
 
 #### Debian/Ubuntu
 
-`sudo apt install g++ make` meets the additional requirements to run `node-gyp` in the context of building Cypress from source.
+`sudo apt install build-essential` meets the additional requirements to run `node-gyp` in the context of building Cypress from source.
 `python` is pre-installed on Debian-based systems including Ubuntu.
 The Python versions shipped with Ubuntu versions `20.04`, `22.04` and `24.*` are compatible with Cypress requirements.
 
@@ -214,7 +214,7 @@ For Ubuntu `24.04` and above, refer also to the [Ubuntu 24.04 Release notes](htt
 
 #### Windows
 
-Currently no additional instructions for installation requirements.
+Sometimes, when using [`nvm`](https://github.com/coreybutler/nvm-windows) and changing node versions, node install tools are not installed automatically. This is needed for `node-gyp` to rebuild `better-sqlite3`. If you are failing to build Cypress because of this, either with a Python install missing or a VSCode version not being detected by `node-gyp`, you likely need to run the `install_tools.bat` outlined in the [better-sqlite3 troubleshooting guide](https://github.com/WiseLibs/better-sqlite3/blob/master/docs/troubleshooting.md).
 
 #### Corepack
 
