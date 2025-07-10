@@ -3,6 +3,14 @@
 /// <reference path="./cypress-eventemitter.d.ts" />
 /// <reference path="./cypress-type-helpers.d.ts" />
 
+const CypressTasks = (await import('../../../cypress.config')).CypressTasks
+
+type AllTasks = typeof CypressTasks
+type TaskEventNames = keyof AllTasks
+
+type MyParameter<T extends TaskEventNames> = Parameters<AllTasks[T]>[0]
+type MyReturnType<T extends TaskEventNames> = Readonly<ReturnType<AllTasks[T]>>
+
 declare namespace Cypress {
   type FileContents = string | any[] | object
   type HistoryDirection = 'back' | 'forward'
@@ -2164,7 +2172,11 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/api/task
      */
-    task<S = unknown>(event: string, arg?: any, options?: Partial<Loggable & Timeoutable>): Chainable<S>
+    task<TEvent extends TaskEventNames>(
+      event: TEvent,
+      arg: MyParameter<TEvent>,
+      options?: Partial<Loggable & Timeoutable>
+    ): Chainable<MyReturnType<TEvent>>
 
     /**
      * Enables you to work with the subject yielded from the previous command.
