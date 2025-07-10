@@ -9,6 +9,13 @@ const debug = debugFn('cypress:vite-dev-server:getVite')
 
 export type Vite = typeof import('vite-7')
 
+class CJSNotSupportedError extends Error {
+  constructor (message: string) {
+    super(message)
+    this.name = 'CJSNotSupportedError'
+  }
+}
+
 // "vite-dev-server" is bundled in the binary, so we need to require.resolve "vite"
 // from root of the active project since we don't bundle vite internally but rather
 // use the version the user has installed
@@ -59,6 +66,10 @@ export async function getVite (config: ViteDevServerConfig): Promise<Vite> {
 
       return viteImport
     } catch (err) {
+      if (majorVersionNumber >= 7) {
+        throw new CJSNotSupportedError(`CJS builds of vite ${majorVersionNumber} are not supported`)
+      }
+
       // if the ESM build import fails, try to import the CJS build
       debug('importing vite as ESM failed:', err)
       debug('importing vite as CJS')
@@ -72,6 +83,10 @@ export async function getVite (config: ViteDevServerConfig): Promise<Vite> {
       return viteImport.default
     }
   } catch (err) {
+    if (err instanceof CJSNotSupportedError) {
+      throw err
+    }
+
     throw new Error(`Could not find "vite" in your project's dependencies. Please install "vite" to fix this error.\n\n${err}`)
   }
 }
