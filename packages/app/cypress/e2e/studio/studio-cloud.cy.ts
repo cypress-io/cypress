@@ -40,7 +40,7 @@ describe('Studio Cloud', () => {
     cy.wait('@indexHtml')
 
     // Studio re-executes spec before waiting for commands - wait for the spec to finish executing.
-    cy.waitForSpecToFinish(undefined, undefined, true)
+    cy.waitForSpecToFinish(undefined, undefined, false)
 
     // Verify the studio panel is still open
     cy.findByTestId('studio-panel')
@@ -145,7 +145,7 @@ describe('Studio Cloud', () => {
     cy.wait('@indexHtml')
 
     // Studio re-executes spec before waiting for commands - wait for the spec to finish executing.
-    cy.waitForSpecToFinish(undefined, undefined, true)
+    cy.waitForSpecToFinish(undefined, undefined, false)
 
     // Verify the studio panel is still open
     cy.findByTestId('studio-panel')
@@ -176,7 +176,7 @@ describe('studio functionality', () => {
 })`)
     })
 
-    cy.waitForSpecToFinish(undefined, undefined, true)
+    cy.waitForSpecToFinish(undefined, undefined, false)
 
     // verify studio is still open
     cy.findByTestId('studio-panel').should('be.visible')

@@ -24,9 +24,9 @@ declare global {
   }
 }
 
-export const waitForSpecToFinish = (expectedResults, timeout?: number, isStudioSingleTest = false) => {
+export const waitForSpecToFinish = (expectedResults, timeout?: number, checkForStats = true) => {
   // If we're not in a single studio test, we won't have the stats so we can skip this
-  if (!isStudioSingleTest) {
+  if (checkForStats) {
     // First ensure the test is loaded
     cy.get('.passed > .num').should('exist')
     cy.get('.failed > .num').should('exist')

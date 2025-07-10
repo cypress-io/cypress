@@ -11,7 +11,7 @@ export function loadProjectAndRunSpec ({ projectName = 'experimental-studio' as 
   cy.specsPageIsVisible()
   cy.get(`[${specSelector}="${specName}"]`).click()
 
-  cy.waitForSpecToFinish()
+  cy.waitForSpecToFinish(undefined, undefined, false)
 }
 
 export function launchStudio ({ specName = 'spec.cy.js', createNewTest = false, cliArgs = [''] } = {}) {
