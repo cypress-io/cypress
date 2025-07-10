@@ -29,6 +29,8 @@ describe('lib/socket', () => {
 
     // Don't bother initializing the child process, etc for this
     sinon.stub(ctx.actions.project, 'initializeActiveProject')
+    sinon.stub(preprocessor.emitter, 'on')
+    sinon.stub(preprocessor.emitter, 'off')
 
     Fixtures.scaffold()
     session.clearSessions(true)
@@ -329,7 +331,9 @@ describe('lib/socket', () => {
     })
 
     context('studio.addSocketListeners', () => {
-      it('calls addSocketListeners on studio when socket connects', function () {
+      it('calls addSocketListeners on studio when socket connects', async function () {
+        preprocessor.emitter.on.reset()
+
         // Verify that registerStudioReadyListener was called
         expect(ctx.coreData.studioLifecycleManager.registerStudioReadyListener).to.be.called
 
@@ -343,6 +347,32 @@ describe('lib/socket', () => {
 
         registerStudioReadyListenerCallback(mockStudio)
         expect(mockStudio.addSocketListeners).to.be.called
+
+        const addSocketListenersOptions = mockStudio.addSocketListeners.firstCall.args[0]
+
+        expect(addSocketListenersOptions).to.be.an('object')
+        expect(addSocketListenersOptions).to.have.property('socket')
+        expect(addSocketListenersOptions).to.have.property('onAfterSave')
+        expect(addSocketListenersOptions).to.have.property('onBeforeSave')
+
+        const onBeforeSave = addSocketListenersOptions.onBeforeSave
+
+        this.cfg.watchForFileChanges = false
+
+        onBeforeSave()
+
+        expect(preprocessor.emitter.on).to.be.calledWith('file:updated')
+
+        const preprocessorCallback = preprocessor.emitter.on.firstCall.args[1]
+
+        sinon.stub(this.socket._socketIo, 'emit')
+        sinon.stub(fs, 'statAsync').resolves()
+
+        await preprocessorCallback()
+
+        expect(this.socket._socketIo.emit).to.be.calledWith('watched:file:changed')
+
+        this.socket._socketIo.emit.reset()
       })
     })
 
@@ -565,7 +595,6 @@ describe('lib/socket', () => {
       }
 
       sinon.stub(SocketE2E.prototype, 'createSocketIo').returns(this.io)
-      sinon.stub(preprocessor.emitter, 'on')
 
       return this.server.open(this.cfg, {
         SocketCtor: SocketE2E,
@@ -755,6 +784,72 @@ describe('lib/socket', () => {
           return this.socket.onTestFileChange('foo/bar.js').then(() => {
             expect(this.io.emit).not.to.be.called
           })
+        })
+      })
+
+      describe('#onCloudTestFileChange', () => {
+        it('calls #onTestFileChange', function () {
+          preprocessor.emitter.off.reset()
+          sinon.stub(this.socket, 'onTestFileChange').resolves()
+
+          return this.socket.onCloudTestFileChange('foo/bar.js').then(() => {
+            expect(this.socket.onTestFileChange).to.be.calledWith('foo/bar.js')
+            expect(preprocessor.emitter.off).to.be.calledWith('file:updated', this.socket.onCloudTestFileChange)
+          })
+        })
+      })
+
+      describe('#onBeforeSave', () => {
+        it('calls #onTestFileChange and listens for file:updated when config.watchForFileChanges is false', function () {
+          preprocessor.emitter.on.reset()
+
+          this.cfg.watchForFileChanges = false
+
+          this.socket.onBeforeSave(this.cfg)
+
+          expect(preprocessor.emitter.on).to.be.calledWith('file:updated', this.socket.onCloudTestFileChange)
+        })
+
+        it('calls #onTestFileChange and does not listen for file:updated when config.watchForFileChanges is true', function () {
+          preprocessor.emitter.on.reset()
+
+          this.cfg.watchForFileChanges = true
+
+          this.socket.onBeforeSave(this.cfg)
+
+          expect(preprocessor.emitter.on).not.to.be.called
+        })
+      })
+
+      describe('#onAfterSave', () => {
+        it('removes listener for file:updated when there is an error and config.watchForFileChanges is false', function () {
+          preprocessor.emitter.off.reset()
+
+          this.cfg.watchForFileChanges = false
+
+          this.socket.onAfterSave(this.cfg, new Error('test error'))
+
+          expect(preprocessor.emitter.off).to.be.calledWith('file:updated', this.socket.onCloudTestFileChange)
+        })
+
+        it('does not remove listener for file:updated when there is an error and config.watchForFileChanges is true', function () {
+          preprocessor.emitter.off.reset()
+
+          this.cfg.watchForFileChanges = true
+
+          this.socket.onAfterSave(this.cfg, new Error('test error'))
+
+          expect(preprocessor.emitter.off).not.to.be.called
+        })
+
+        it('does not remove listener for file:updated when there is no error', function () {
+          preprocessor.emitter.off.reset()
+
+          this.cfg.watchForFileChanges = false
+
+          this.socket.onAfterSave(this.cfg)
+
+          expect(preprocessor.emitter.off).not.to.be.called
         })
       })
     })
