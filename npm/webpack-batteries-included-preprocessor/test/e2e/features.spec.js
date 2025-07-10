@@ -90,6 +90,10 @@ describe('webpack-batteries-included-preprocessor features', () => {
       await runAndEval('typescript_imports_spec.js', { ...options })
     })
 
+    it('handles importing ESM .ts and .mts', async () => {
+      await runAndEval('typescript_esm_imports_spec.js', { ...options })
+    })
+
     it('handles esModuleInterop: false (default)', async () => {
       await runAndEval('typescript_esmoduleinterop_false_spec.ts', { ...options })
     })
