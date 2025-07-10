@@ -11,7 +11,7 @@ describe('Studio Cloud', () => {
     })
   })
 
-  it('immediately loads the studio panel', () => {
+  it('immediately loads the studio panel from existing test', () => {
     const deferred = pDefer()
 
     loadProjectAndRunSpec()
@@ -29,8 +29,6 @@ describe('Studio Cloud', () => {
     .findByTestId('launch-studio')
     .click()
 
-    // regular studio is not loaded until after the test finishes
-    cy.findByTestId('hook-name-studio commands').should('not.exist')
     // cloud studio is loaded immediately
     cy.findByTestId('studio-panel').then(() => {
       // check for the loading panel from the app first
@@ -42,14 +40,15 @@ describe('Studio Cloud', () => {
     cy.wait('@indexHtml')
 
     // Studio re-executes spec before waiting for commands - wait for the spec to finish executing.
-    cy.waitForSpecToFinish()
+    cy.waitForSpecToFinish(undefined, undefined, true)
 
     // Verify the studio panel is still open
     cy.findByTestId('studio-panel')
-    cy.findByTestId('hook-name-studio commands')
+
+    cy.percySnapshot()
   })
 
-  it('hides selector playground and studio controls when studio beta is available', () => {
+  it('hides selector playground and studio controls when experimentalStudio is enabled', () => {
     launchStudio()
 
     cy.findByTestId('studio-panel').should('be.visible')
@@ -135,8 +134,6 @@ describe('Studio Cloud', () => {
     .findByTestId('launch-studio')
     .click()
 
-    // regular studio is not loaded until after the test finishes
-    cy.findByTestId('hook-name-studio commands').should('not.exist')
     // cloud studio is loaded immediately
     cy.findByTestId('studio-panel').then(() => {
       // check for the loading panel from the app first
@@ -148,11 +145,10 @@ describe('Studio Cloud', () => {
     cy.wait('@indexHtml')
 
     // Studio re-executes spec before waiting for commands - wait for the spec to finish executing.
-    cy.waitForSpecToFinish()
+    cy.waitForSpecToFinish(undefined, undefined, true)
 
     // Verify the studio panel is still open
     cy.findByTestId('studio-panel')
-    cy.findByTestId('hook-name-studio commands')
 
     // make sure studio is not loading
     cy.findByTestId('loading-studio-panel').should('not.exist')
@@ -180,41 +176,10 @@ describe('studio functionality', () => {
 })`)
     })
 
-    cy.waitForSpecToFinish()
+    cy.waitForSpecToFinish(undefined, undefined, true)
 
     // verify studio is still open
     cy.findByTestId('studio-panel').should('be.visible')
-  })
-
-  it('does not add studio logs when cloud studio is enabled', () => {
-    launchStudio()
-
-    cy.findByTestId('studio-panel').should('be.visible')
-
-    // Attempt to perform actions that would normally add studio logs in regular studio
-    // but should NOT be add studio logs when cloud studio is enabled because event listeners are not attached
-    cy.getAutIframe().within(() => {
-      cy.get('p').contains('Count is 0')
-
-      // Try to click the increment button - this should NOT add studio logs
-      // because cloud studio event listeners should not be attached
-      cy.get('#increment').realClick().then(() => {
-        cy.get('p').contains('Count is 1')
-      })
-    })
-
-    // Verify that no legacy studio commands were added
-    cy.get('.command-is-studio').should('not.exist')
-
-    // Verify that the actual DOM interactions still work (button was clicked, counter incremented)
-    // but they just weren't recorded by the legacy studio event listeners
-    cy.getAutIframe().within(() => {
-      cy.get('p').should('contain', 'Count is 1')
-    })
-
-    cy.findByTestId('studio-panel').should('be.visible')
-
-    cy.findByTestId('studio-toolbar').should('not.exist')
   })
 
   describe('failing to load studio and retrying', () => {

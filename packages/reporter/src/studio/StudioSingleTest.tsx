@@ -110,13 +110,13 @@ export const StudioSingleTest = observer(({ appState, spec, runnablesStore, stat
       <>
         <div className='studio-header__test-section'>
           <StatusIcon test={currentTest} />
-          <Tooltip title={<ul className='studio-tooltip__breadcrumb-list' ref={tooltipRef}>
+          <Tooltip data-cy='studio-single-test-tooltip' title={<ul className='studio-tooltip__breadcrumb-list' ref={tooltipRef}>
             {getParentTitlesListElements(parentTitles)}
           </ul>}
           wrapperClassName='studio-header__test-tooltip-wrapper' className={cx(
             'studio-tooltip cy-tooltip',
           )}>
-            <span className='studio-header__test-title'>{currentTest.title}</span>
+            <span data-cy='studio-single-test-title' className='studio-header__test-title'>{currentTest.title}</span>
           </Tooltip>
           <Duration duration={statsStore.duration} />
           <Controls appState={appState} displayPreferencesButton={false} />
