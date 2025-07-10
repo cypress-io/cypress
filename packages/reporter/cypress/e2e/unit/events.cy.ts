@@ -26,6 +26,7 @@ type AppStateStub = AppState & {
   end: SinonSpy
   temporarilySetAutoScrolling: SinonSpy
   setStudioActive: SinonSpy
+  setStudioSingleTestActive: SinonSpy
   stop: SinonSpy
 }
 
@@ -38,6 +39,7 @@ const appStateStub = () => {
     end: sinon.spy(),
     temporarilySetAutoScrolling: sinon.spy(),
     setStudioActive: sinon.spy(),
+    setStudioSingleTestActive: sinon.spy(),
     stop: sinon.spy(),
   } as AppStateStub
 }
@@ -369,19 +371,9 @@ describe('events', () => {
       expect(runner.emit).to.have.been.calledWith('studio:init:suite', 'suite id')
     })
 
-    it('emits studio:remove:command with command id on studio:remove:command', () => {
-      events.emit('studio:remove:command', 'command id')
-      expect(runner.emit).to.have.been.calledWith('studio:remove:command', 'command id')
-    })
-
     it('emits studio:cancel on studio:cancel', () => {
       events.emit('studio:cancel')
       expect(runner.emit).to.have.been.calledWith('studio:cancel')
-    })
-
-    it('emits studio:save on studio:save', () => {
-      events.emit('studio:save')
-      expect(runner.emit).to.have.been.calledWith('studio:save')
     })
   })
 })
