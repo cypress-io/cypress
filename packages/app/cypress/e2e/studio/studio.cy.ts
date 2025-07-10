@@ -198,7 +198,8 @@ describe('studio functionality', () => {
     assertClosingPanelWithoutChanges()
   })
 
-  it('creates a new test from an empty spec', () => {
+  // TODO: The URL prompt is in cloud studio now
+  it.skip('creates a new test from an empty spec', () => {
     loadProjectAndRunSpec({ specName: 'empty.cy.js', specSelector: 'title' })
 
     cy.contains('Create test with Cypress Studio').click()
@@ -248,7 +249,8 @@ it('new-test', function() {
     })
   })
 
-  it('creates a new test for an existing spec', () => {
+  // TODO: The URL prompt is in cloud studio now
+  it.skip('creates a new test for an existing spec', () => {
     launchStudio({ createNewTest: true })
 
     cy.findByTestId('aut-url').as('urlPrompt')
@@ -443,7 +445,8 @@ describe('studio functionality', () => {
     })
   })
 
-  it('does not create a new test if the Save test modal is closed', () => {
+  // TODO: The URL prompt is in cloud studio now
+  it.skip('does not create a new test if the Save test modal is closed', () => {
     loadProjectAndRunSpec({ specName: 'empty.cy.js', specSelector: 'title' })
 
     cy.contains('Create test with Cypress Studio').click()
