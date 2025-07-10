@@ -8,7 +8,14 @@
   >
     <div class="flex min-h-screen items-center justify-center">
       <DialogOverlay class="bg-gray-800 opacity-90 fixed sm:inset-0" />
-      <div ref="container" />
+      <PromptErrorMessage
+        v-if="hasError"
+        :on-close="closeModal"
+      />
+      <div
+        v-else
+        ref="container"
+      />
     </div>
   </Dialog>
 </template>
@@ -19,6 +26,7 @@ import { init, loadRemote } from '@module-federation/runtime'
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import type { CyPromptAppDefaultShape, GetCodeModalContentsShape } from './prompt-app-types'
 import { usePromptStore } from '../store/prompt-store'
+import PromptErrorMessage from './PromptErrorMessage.vue'
 
 interface CyPromptApp { default: CyPromptAppDefaultShape }
 
@@ -44,13 +52,13 @@ const closeModal = () => {
 }
 
 const container = ref<HTMLDivElement | null>(null)
-const error = ref<string | null>(null)
+const hasError = ref<boolean>(false)
 const ReactGetCodeModalContents = ref<GetCodeModalContentsShape | null>(null)
 const containerReactRootMap = new WeakMap<HTMLElement, Root>()
 const promptStore = usePromptStore()
 
 const maybeRenderReactComponent = () => {
-  if (!ReactGetCodeModalContents.value || !!error.value || !container.value) {
+  if (!ReactGetCodeModalContents.value || !!hasError.value || !container.value) {
     return
   }
 
@@ -122,7 +130,7 @@ init({
 // means that the bundle has been downloaded
 loadRemote<CyPromptApp>('cy-prompt').then((module) => {
   if (!module?.default) {
-    error.value = 'The panel was not loaded successfully'
+    hasError.value = true
 
     return
   }
@@ -130,7 +138,7 @@ loadRemote<CyPromptApp>('cy-prompt').then((module) => {
   ReactGetCodeModalContents.value = module.default.GetCodeModalContents
   maybeRenderReactComponent()
 }).catch((e) => {
-  error.value = e.message
+  hasError.value = true
 })
 
 </script>
