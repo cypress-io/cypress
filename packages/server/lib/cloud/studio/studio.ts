@@ -1,6 +1,5 @@
-import type { StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape, StudioCloudApi, StudioAIInitializeOptions, StudioEvent } from '@packages/types'
+import type { StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape, StudioCloudApi, StudioAIInitializeOptions, StudioEvent, StudioAddSocketListenersOptions } from '@packages/types'
 import type { Router } from 'express'
-import type { Socket } from 'socket.io'
 import Debug from 'debug'
 import { requireScript } from '../require_script'
 import path from 'path'
@@ -84,9 +83,9 @@ export class StudioManager implements StudioManagerShape {
     return Promise.resolve()
   }
 
-  addSocketListeners (socket: Socket): void {
+  addSocketListeners (options: StudioAddSocketListenersOptions): void {
     if (this._studioServer) {
-      this.invokeSync('addSocketListeners', { isEssential: true }, socket)
+      this.invokeSync('addSocketListeners', { isEssential: true }, options)
     }
   }
 

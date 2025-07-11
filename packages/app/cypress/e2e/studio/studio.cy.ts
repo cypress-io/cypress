@@ -581,10 +581,10 @@ describe('studio functionality', () => {
     }
   })
 
-  // TODO: not currently supported in Cloud Studio
-  // https://github.com/cypress-io/cypress-services/issues/10898
-  it.skip('appends the studio commands to the commands added to the test on the file system when file watching is disabled', () => {
+  it('writes the studio commands to the test block when the spec is updated on the file system and file watching is disabled', () => {
     launchStudio({ cliArgs: ['--config', 'watchForFileChanges=false'] })
+
+    cy.findByTestId('record-button-recording').should('be.visible')
 
     incrementCounter(0)
 
@@ -609,23 +609,14 @@ describe('studio functionality', () => {
 
     cy.findByTestId('hook-name-studio commands').should('not.exist')
 
-    // assert the commands we wrote directly to the spec are executed
+    // only the commands in the editor are written to the test block - ideally we should also pick up the changes from the file system
+    // TODO: https://github.com/cypress-io/cypress-services/issues/11085
     cy.get('.command-name-visit').within(() => {
       cy.contains('visit')
       cy.contains('cypress/e2e/index.html')
     })
 
     cy.get('.command-name-get').eq(0).within(() => {
-      cy.contains('get')
-      cy.contains('h1')
-    })
-
-    cy.get('.command-name-assert').within(() => {
-      cy.contains('assert')
-      cy.contains('expected <h1> to have text Hello, Studio!')
-    })
-
-    cy.get('.command-name-get').eq(1).within(() => {
       cy.contains('get')
       cy.contains('#increment')
     })
@@ -637,6 +628,8 @@ describe('studio functionality', () => {
 
   it('remains in studio mode when the test name is changed on the file system and file watching is disabled', () => {
     launchStudio({ cliArgs: ['--config', 'watchForFileChanges=false'] })
+
+    cy.findByTestId('record-button-recording').should('be.visible')
 
     incrementCounter(0)
 
@@ -656,6 +649,8 @@ describe('studio functionality', () => {
   })
 })`)
     })
+
+    cy.wait(200)
 
     cy.findByTestId('studio-save-button').click()
 
@@ -706,11 +701,13 @@ describe('studio functionality', () => {
 
     cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=')
 
+    cy.findByTestId('record-button-recording').should('be.visible')
+
     cy.getAutIframe().within(() => {
       cy.get('#increment').realClick()
     })
 
-    cy.get('[data-cy="studio-save-button"]').click()
+    cy.findByTestId('studio-save-button').click()
 
     cy.location().its('hash').and('not.contain', 'testId=').and('not.contain', 'studio=')
   })
@@ -755,6 +752,8 @@ describe('studio functionality', () => {
   it('does not remove the studio url parameters if saving fails', () => {
     launchStudio({ cliArgs: ['--config', 'watchForFileChanges=false'] })
 
+    cy.findByTestId('record-button-recording').should('be.visible')
+
     incrementCounter(0)
 
     cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=')
@@ -773,6 +772,8 @@ describe('studio functionality', () => {
   })
 })`)
     })
+
+    cy.wait(200)
 
     cy.findByTestId('studio-save-button').click()
 

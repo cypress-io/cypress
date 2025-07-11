@@ -1,6 +1,6 @@
 version: 2.1
 
-chrome-stable-version: &chrome-stable-version "138.0.7204.92"
+chrome-stable-version: &chrome-stable-version "138.0.7204.100"
 chrome-beta-version: &chrome-beta-version "139.0.7258.5"
 firefox-stable-version: &firefox-stable-version "137.0"
 
@@ -38,9 +38,6 @@ mainBuildFilters: &mainBuildFilters
         - /^release\/\d+\.\d+\.\d+$/
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'update-v8-snapshot-cache-on-develop'
-        - 'electron-36'
-        - 'chore/test_cypress_recipes_15'
-        - 'mabel/issue-31677-reporter-redesign'
         - 'mabel/issue-10425-studio-redesign'
 
 # usually we don't build Mac app - it takes a long time
@@ -52,9 +49,6 @@ macWorkflowFilters: &darwin-workflow-filters
       - equal: [ develop, << pipeline.git.branch >> ]
       # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-      - equal: [ 'electron-36', << pipeline.git.branch >> ]
-      - equal: [ 'chore/test_cypress_recipes_15', << pipeline.git.branch >> ]
-      - equal: [ 'mabel/issue-31677-reporter-redesign', << pipeline.git.branch >> ]
       - equal: [ 'mabel/issue-10425-studio-redesign', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
@@ -66,9 +60,11 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
       - equal: [ develop, << pipeline.git.branch >> ]
       # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-      - equal: [ 'electron-36', << pipeline.git.branch >> ]
-      - equal: [ 'chore/test_cypress_recipes_15', << pipeline.git.branch >> ]
-      - equal: [ 'mabel/issue-31677-reporter-redesign', << pipeline.git.branch >> ]
+      - equal:
+          [
+            'ryanm/fix/ensure-that-we-do-not-attach-a-ref-to-react-root',
+            << pipeline.git.branch >>
+          ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
@@ -91,9 +87,11 @@ windowsWorkflowFilters: &windows-workflow-filters
       - equal: [ develop, << pipeline.git.branch >> ]
       # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-      - equal: [ 'electron-36', << pipeline.git.branch >> ]
-      - equal: [ 'chore/test_cypress_recipes_15', << pipeline.git.branch >> ]
-      - equal: [ 'mabel/issue-31677-reporter-redesign', << pipeline.git.branch >> ]
+      - equal:
+          [
+            'ryanm/fix/ensure-that-we-do-not-attach-a-ref-to-react-root',
+            << pipeline.git.branch >>
+          ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>

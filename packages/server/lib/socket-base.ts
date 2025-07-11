@@ -74,6 +74,14 @@ export class SocketBase {
     return this._cdpIo
   }
 
+  onBeforeSave (config) {
+
+  }
+
+  onAfterSave (config, error) {
+
+  }
+
   getIos () {
     return [this._cdpIo, this._socketIo]
   }
@@ -406,7 +414,15 @@ export class SocketBase {
         })
 
         getCtx().coreData.studioLifecycleManager?.registerStudioReadyListener((studio) => {
-          studio.addSocketListeners(socket)
+          studio.addSocketListeners({
+            socket,
+            onBeforeSave: () => {
+              this.onBeforeSave(config)
+            },
+            onAfterSave: ({ error }) => {
+              this.onAfterSave(config, error)
+            },
+          })
         })
 
         socket.on('studio:init', async (cb) => {

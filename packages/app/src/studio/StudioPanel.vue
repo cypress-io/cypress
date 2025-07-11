@@ -59,7 +59,7 @@ interface StudioApp { default: StudioAppDefaultShape }
 const container = ref<HTMLElement | null>(null)
 const error = ref<string | null>(null)
 const ReactStudioPanel = ref<StudioPanelShape | null>(null)
-const reactRoot = ref<Root | null>(null)
+const containerReactRootMap = new WeakMap<HTMLElement, Root>()
 
 const retryStudioMutation = useMutation(retryStudioMutationGql)
 
@@ -69,7 +69,7 @@ const maybeRenderReactComponent = () => {
     return
   }
 
-  if (!ReactStudioPanel.value || !!error.value) {
+  if (!ReactStudioPanel.value || !!error.value || !container.value) {
     return
   }
 
@@ -79,11 +79,18 @@ const maybeRenderReactComponent = () => {
     studioSessionId: props.cloudStudioSessionId,
   })
 
-  if (!reactRoot.value) {
-    reactRoot.value = window.UnifiedRunner.ReactDOM.createRoot(container.value)
+  // Store the react root in a weak map keyed by the container. We do this so that we have a reference
+  // to it that's tied to the container value but absolutely do not want to use vue to do the tracking.
+  // If vue tracks it (e.g. using a ref) it creates proxies that do not play nicely with React in
+  // production
+  let reactRoot = containerReactRootMap.get(container.value)
+
+  if (!reactRoot) {
+    reactRoot = window.UnifiedRunner.ReactDOM.createRoot(container.value) as Root
+    containerReactRootMap.set(container.value, reactRoot)
   }
 
-  reactRoot.value?.render(panel)
+  reactRoot?.render(panel)
 }
 
 watch(() => props.canAccessStudioAI, maybeRenderReactComponent)
@@ -94,7 +101,13 @@ const unmountReactComponent = () => {
     return
   }
 
-  reactRoot.value?.unmount()
+  const reactRoot = containerReactRootMap.get(container.value)
+
+  if (!reactRoot) {
+    return
+  }
+
+  reactRoot.unmount()
 }
 
 init({
