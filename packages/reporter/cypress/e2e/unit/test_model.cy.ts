@@ -37,12 +37,14 @@ const createCommand = (props: Partial<CommandProps> = {}) => {
 
 describe('Test model', () => {
   context('constructor', () => {
-    it('creates test body hooks', () => {
+    it('creates test body and studio commands hooks', () => {
       const test = createTest()
 
       expect(test.hooks.length).to.equal(1)
       expect(test.hooks[0].hookId).to.equal('r3')
       expect(test.hooks[0].hookName).to.equal('test body')
+      expect(test.hooks[1].hookId).to.equal('r3-studio')
+      expect(test.hooks[1].hookName).to.equal('studio commands')
     })
   })
 
@@ -136,7 +138,7 @@ describe('Test model', () => {
       ] })
 
       test.addLog(createCommand({ instrument: 'command', hookId: 'h1' }))
-      expect(test.lastAttempt.hooks.length).to.equal(2)
+      expect(test.lastAttempt.hooks.length).to.equal(3)
       expect(test.lastAttempt.hooks[0].hookName).equal('before each')
       expect(test.lastAttempt.hooks[0].commands.length).to.equal(1)
     })
@@ -151,11 +153,11 @@ describe('Test model', () => {
 
       command.isMatchingEvent = () => false
 
-      expect(test.lastAttempt.hooks.length).to.equal(2)
+      expect(test.lastAttempt.hooks.length).to.equal(3)
       expect(test.lastAttempt.hooks[0].hookName).to.equal('before each')
       expect(test.lastAttempt.hooks[0].commands.length).to.equal(1)
       test.addLog(createCommand({ hookId: 'h1' }))
-      expect(test.lastAttempt.hooks.length).to.equal(2)
+      expect(test.lastAttempt.hooks.length).to.equal(3)
       expect(test.lastAttempt.hooks[0].commands.length).to.equal(2)
     })
 

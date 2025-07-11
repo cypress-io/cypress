@@ -6,7 +6,7 @@ import type { Alias } from '../instruments/instrument-model'
 import type Err from '../errors/err-model'
 import type CommandModel from '../commands/command-model'
 
-export type HookName = 'before all' | 'before each' | 'after all' | 'after each' | 'test body'
+export type HookName = 'before all' | 'before each' | 'after all' | 'after each' | 'test body' | 'studio commands'
 
 export interface HookProps {
   hookId: string

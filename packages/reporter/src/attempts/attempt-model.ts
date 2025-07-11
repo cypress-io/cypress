@@ -33,6 +33,7 @@ export default class Attempt {
     'after all': 0,
     'after each': 0,
     'test body': 0,
+    'studio commands': 0,
   }
   _isOpen: boolean|null = null
 
