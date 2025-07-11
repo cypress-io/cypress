@@ -97,7 +97,7 @@ export const StudioSingleTest = observer(({ appState, spec, runnablesStore, stat
   return <>
     <header className='studio-header'>
       <div className='studio-header__file-section'>
-        <Button size='32' variant='outline-dark' className='studio-header__back-button' onClick={handleBack}>
+        <Button data-cy='studio-back-button' size='32' variant='outline-dark' className='studio-header__back-button' onClick={handleBack}>
           <IconArrowLeft size='16' strokeColor='gray-500' />
         </Button>
         <div className='studio-header__file-content'>

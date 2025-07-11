@@ -623,17 +623,32 @@ describe('studio functionality', () => {
     cy.findByTestId('studio-error').should('contain.text', 'Failed to save test code')
   })
 
-  it('removes url parameters when selecting a different spec', () => {
+  it('handles clicking the open in IDE button', () => {
+    launchStudio()
+
+    cy.withCtx((ctx, o) => {
+      o.sinon.stub(ctx.actions.file, 'openFile')
+    })
+
+    cy.get('.open-in-ide-button').should('have.css', 'opacity', '0')
+    cy.get('.studio-header__file-name').realHover()
+    cy.get('.open-in-ide-button').first().should('have.css', 'opacity', '1').click()
+    cy.get('.open-in-ide-button').contains('Open in IDE')
+
+    cy.percySnapshot()
+  })
+
+  it('handles back button in single test view', () => {
     launchStudio()
 
     cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=')
 
-    // select a different spec
-    cy.get('[aria-controls=reporter-inline-specs-list]').click()
-    cy.get('a').contains('spec-w-visit.cy.js').click()
-    cy.get('[aria-controls=reporter-inline-specs-list]').click()
+    cy.get('[data-cy="studio-back-button"]').click()
 
     cy.location().its('hash').should('not.contain', 'testId=').and('not.contain', 'studio=')
+
+    cy.get('.runnable-title').eq(0).should('contain.text', 'studio functionality')
+    cy.get('.runnable-title').eq(1).should('contain.text', 'visits a basic html page')
   })
 
   it('removes url parameters when going to a different page', () => {
