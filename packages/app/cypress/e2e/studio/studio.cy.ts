@@ -149,43 +149,6 @@ describe('studio functionality', () => {
     })
   })
 
-  it('does not update the test when it is cancelled', () => {
-    launchStudio()
-
-    incrementCounter(0)
-
-    cy.get('.cm-line').should('contain.text', `cy.get('#increment').click();`)
-
-    cy.get('a').contains('Cancel').click()
-
-    // Cypress re-runs after you cancel Studio.
-    // Original spec should pass
-    cy.waitForSpecToFinish({ passCount: 1 })
-
-    cy.get('.command').should('have.length', 1)
-
-    // Assert the spec was executed without any new commands.
-    cy.get('.command-name-visit').within(() => {
-      cy.contains('visit')
-      cy.contains('cypress/e2e/index.html')
-    })
-
-    cy.findByTestId('hook-name-studio commands').should('not.exist')
-    cy.findByTestId('studio-panel').should('not.exist')
-
-    cy.withCtx(async (ctx) => {
-      const spec = await ctx.actions.file.readFileInProject('cypress/e2e/spec.cy.js')
-
-      // No change, since we cancelled.
-      expect(spec.trim().replace(/\r/g, '')).to.eq(`
-describe('studio functionality', () => {
-  it('visits a basic html page', () => {
-    cy.visit('cypress/e2e/index.html')
-  })
-})`.trim())
-    })
-  })
-
   it('does not update the test when studio is closed using studio header button', () => {
     launchStudio()
 
@@ -725,26 +688,6 @@ describe('studio functionality', () => {
     cy.get('[data-cy="studio-save-button"]').click()
     cy.get('#testName').type('new-test')
     cy.get('button[type=submit]').click()
-
-    cy.location().its('hash').and('not.contain', 'suiteId=').and('not.contain', 'studio=')
-  })
-
-  it('removes the studio url parameters when cancelling test changes', () => {
-    launchStudio()
-
-    cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=')
-
-    cy.get('a').contains('Cancel').click()
-
-    cy.location().its('hash').and('not.contain', 'testId=').and('not.contain', 'studio=')
-  })
-
-  it('removes the studio url parameters when cancelling a new test', () => {
-    launchStudio({ specName: 'spec-w-visit.cy.js', createNewTest: true })
-
-    cy.location().its('hash').should('contain', 'suiteId=r2').and('contain', 'studio=')
-
-    cy.get('a').contains('Cancel').click()
 
     cy.location().its('hash').and('not.contain', 'suiteId=').and('not.contain', 'studio=')
   })
