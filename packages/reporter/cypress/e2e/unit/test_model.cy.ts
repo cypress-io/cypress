@@ -40,7 +40,7 @@ describe('Test model', () => {
     it('creates test body and studio commands hooks', () => {
       const test = createTest()
 
-      expect(test.hooks.length).to.equal(1)
+      expect(test.hooks.length).to.equal(2)
       expect(test.hooks[0].hookId).to.equal('r3')
       expect(test.hooks[0].hookName).to.equal('test body')
       expect(test.hooks[1].hookId).to.equal('r3-studio')

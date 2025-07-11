@@ -122,10 +122,10 @@ describe('runnables store', () => {
       rootRunnable.suites![0].suites[0].hooks = [createHook('h3')]
       rootRunnable.suites![0].suites[0].tests[0].hooks = [createHook('h4')]
       instance.setRunnables(rootRunnable)
-      expect(instance.runnables[0].hooks.length).to.equal(1)
+      expect(instance.runnables[0].hooks.length).to.equal(2)
       expect(instance.runnables[1].hooks.length).to.equal(2)
       expect((instance.runnables[1] as SuiteModel).children[2].hooks.length).to.equal(3)
-      expect(((instance.runnables[1] as SuiteModel).children[2] as SuiteModel).children[0].hooks.length).to.equal(5)
+      expect(((instance.runnables[1] as SuiteModel).children[2] as SuiteModel).children[0].hooks.length).to.equal(6)
     })
 
     it('sets .isReady flag', () => {
