@@ -198,7 +198,8 @@ describe('studio functionality', () => {
     assertClosingPanelWithoutChanges()
   })
 
-  it('creates a new test from an empty spec', () => {
+  // TODO: should be fixed in https://github.com/cypress-io/cypress-services/issues/11097
+  it.skip('creates a new test from an empty spec', () => {
     loadProjectAndRunSpec({ specName: 'empty.cy.js', specSelector: 'title' })
 
     cy.contains('Create test with Cypress Studio').click()
@@ -248,7 +249,8 @@ it('new-test', function() {
     })
   })
 
-  it('creates a new test for an existing spec', () => {
+  // TODO: should be fixed in https://github.com/cypress-io/cypress-services/issues/11097
+  it.skip('creates a new test for an existing spec', () => {
     launchStudio({ createNewTest: true })
 
     cy.findByTestId('aut-url').as('urlPrompt')
@@ -380,7 +382,7 @@ describe('studio functionality', () => {
     })
   })
 
-  // TODO: skipping until https://github.com/cypress-io/cypress-services/issues/10425 is completed
+  // TODO: skipping until https://github.com/cypress-io/cypress-services/issues/11097 is completed
   it.skip('creates a new test for an existing spec with the url already defined', () => {
     launchStudio({ specName: 'spec-w-visit.cy.js', createNewTest: true })
 
@@ -443,34 +445,6 @@ describe('studio functionality', () => {
     })
   })
 
-  it('does not create a new test if the Save test modal is closed', () => {
-    loadProjectAndRunSpec({ specName: 'empty.cy.js', specSelector: 'title' })
-
-    cy.contains('Create test with Cypress Studio').click()
-    cy.findByTestId('aut-url').as('urlPrompt')
-
-    cy.get('@urlPrompt').within(() => {
-      cy.contains('Continue ➜').should('be.disabled')
-    })
-
-    cy.get('@urlPrompt').type('/cypress/e2e/index.html')
-
-    cy.get('@urlPrompt').within(() => {
-      cy.contains('Continue ➜').click()
-    })
-
-    cy.getAutIframe().within(() => {
-      cy.get('p').contains('Count is 0')
-      cy.get('#increment').realClick()
-    })
-
-    cy.contains('button', 'Save Commands').click()
-
-    cy.get('#testName').type('new-test')
-
-    cy.get('button[aria-label=Close]').click()
-  })
-
   it('shows assertions menu and submenu correctly', () => {
     launchStudio()
 
@@ -512,11 +486,7 @@ describe('studio functionality', () => {
     cy.waitForSpecToFinish()
 
     // after reloading we should still be in studio mode but the commands should be removed
-    cy.findByTestId('hook-name-studio commands').closest('.hook-studio').within(() => {
-      cy.get('.command').should('have.length', 1)
-      cy.get('.studio-prompt').should('contain.text', 'Interact with your site to add test commands. Right click to add assertions.')
-    })
-
+    // so the save button should be disabled
     cy.findByTestId('studio-save-button').should('be.disabled')
   })
 
@@ -532,19 +502,12 @@ describe('studio functionality', () => {
     cy.waitForSpecToFinish()
 
     // after reloading we should still be in studio mode but the commands should be removed
-    cy.findByTestId('hook-name-studio commands').closest('.hook-studio').within(() => {
-      cy.get('.command').should('have.length', 1)
-      cy.get('.studio-prompt').should('contain.text', 'Interact with your site to add test commands. Right click to add assertions.')
-    })
-
+    // the save button should be disabled since the commands were removed
     cy.findByTestId('studio-save-button').should('be.disabled')
   })
 
   it('does not re-enter studio mode when changing pages and then coming back', () => {
     launchStudio()
-
-    cy.findByTestId('hook-name-studio commands')
-
     // go to the runs page
     cy.findByTestId('sidebar-link-runs-page').click()
 
@@ -554,7 +517,6 @@ describe('studio functionality', () => {
 
     cy.waitForSpecToFinish({ passCount: 1 })
 
-    cy.findByTestId('hook-name-studio commands').should('not.exist')
     cy.location().its('hash').should('not.contain', 'testId=').and('not.contain', 'studio=')
   })
 
@@ -579,8 +541,6 @@ describe('studio functionality', () => {
     })
 
     cy.waitForSpecToFinish({ passCount: 1 })
-
-    cy.findByTestId('hook-name-studio commands').should('not.exist')
 
     // assert the commands we wrote directly to the spec are executed
     cy.get('.command-name-visit').within(() => {

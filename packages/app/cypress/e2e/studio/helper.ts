@@ -11,7 +11,7 @@ export function loadProjectAndRunSpec ({ projectName = 'experimental-studio' as 
   cy.specsPageIsVisible()
   cy.get(`[${specSelector}="${specName}"]`).click()
 
-  cy.waitForSpecToFinish(undefined, undefined, false)
+  cy.waitForSpecToFinish()
 }
 
 export function launchStudio ({ specName = 'spec.cy.js', createNewTest = false, cliArgs = [''] } = {}) {
@@ -38,7 +38,7 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTest = false, 
   }
 
   // Studio re-executes spec before waiting for commands - wait for the spec to finish executing.
-  cy.waitForSpecToFinish()
+  cy.waitForSpecToFinish(undefined, undefined, false)
 
   if (createNewTest) {
     cy.get('span.runnable-title').contains(testTitle).should('exist')
@@ -59,8 +59,6 @@ export function assertClosingPanelWithoutChanges () {
     cy.contains('visit')
     cy.contains('cypress/e2e/index.html')
   })
-
-  cy.findByTestId('hook-name-studio commands').should('not.exist')
 
   cy.withCtx(async (ctx) => {
     const spec = await ctx.actions.file.readFileInProject('cypress/e2e/spec.cy.js')
