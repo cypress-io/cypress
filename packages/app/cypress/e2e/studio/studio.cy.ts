@@ -631,7 +631,7 @@ describe('studio functionality', () => {
     })
 
     cy.get('.open-in-ide-button').should('have.css', 'opacity', '0')
-    cy.get('.studio-header__file-name').realHover()
+    cy.get('[data-cy="studio-single-test-file-name"]').realHover()
     cy.get('.open-in-ide-button').first().should('have.css', 'opacity', '1').click()
     cy.get('.open-in-ide-button').contains('Open in IDE')
 
