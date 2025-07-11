@@ -39,7 +39,9 @@ export type LocalBusEmitsMap = {
   'cypress:in:cypress:run:complete': CypressInCypressMochaEvent[]
 
   // Studio Events
+  'studio:save': StudioSavePayload
   'studio:cancel': undefined
+  'studio:copy:to:clipboard': () => void
   'studio:init:suite': { suiteId: string, showUrlPrompt?: boolean }
 
   // Reporter Events

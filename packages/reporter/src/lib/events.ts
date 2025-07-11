@@ -224,8 +224,20 @@ const events: Events = {
       runner.emit('studio:init:suite', suiteId)
     })
 
+    localBus.on('studio:remove:command', (commandId) => {
+      runner.emit('studio:remove:command', commandId)
+    })
+
     localBus.on('studio:cancel', () => {
       runner.emit('studio:cancel')
+    })
+
+    localBus.on('studio:save', () => {
+      runner.emit('studio:save')
+    })
+
+    localBus.on('studio:copy:to:clipboard', (cb) => {
+      runner.emit('studio:copy:to:clipboard', cb)
     })
   },
 

@@ -130,6 +130,26 @@ export class SocketE2E extends SocketBase {
           return cb()
         })
 
+        socket.on('studio:save', (saveInfo, cb) => {
+          // even if the user has turned off file watching
+          // we want to force a reload on save
+          if (!config.watchForFileChanges) {
+            preprocessor.emitter.on('file:updated', this.onStudioTestFileChange)
+          }
+
+          studio.save(saveInfo)
+          .then((err) => {
+            cb(err)
+
+            // onStudioTestFileChange will remove itself after being called
+            // but if there's an error, it never gets called so we manually remove it
+            if (err && !config.watchForFileChanges) {
+              this.removeOnStudioTestFileChange()
+            }
+          })
+          .catch(() => {})
+        })
+
         socket.on('studio:get:commands:text', (commands, cb) => {
           const commandsText = studio.getCommandsText(commands)
 

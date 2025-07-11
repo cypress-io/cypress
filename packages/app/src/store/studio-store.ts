@@ -2,6 +2,7 @@ import type { FileDetails, Instrument, TestState } from '@packages/types/src'
 import { defineStore } from 'pinia'
 
 import { getEventManager } from '../runner'
+import type { StudioSavePayload } from '../runner/event-manager-types'
 import { closeStudioAssertionsMenu, openStudioAssertionsMenu } from '../runner/studio/mounter'
 import { useAutStore } from './aut-store'
 import type { PossibleAssertions, AssertionArgs } from '../runner/studio/types'
@@ -26,6 +27,15 @@ You can use the copy button below to copy the commands to your clipboard. \
 Cypress Studio is still in beta and the team is working hard to \
 resolve issues like this. To help us fix this issue more quickly, \
 you can provide us with more information by clicking 'Learn more' below.`
+}
+
+function assertNonNullish<TValue> (
+  value: TValue,
+  message: string,
+): asserts value is NonNullable<TValue> {
+  if (value === null || value === undefined) {
+    throw Error(message)
+  }
 }
 
 export interface CommandLog {
@@ -87,6 +97,7 @@ export interface StudioLog {
 }
 
 interface StudioRecorderState {
+  saveModalIsOpen: boolean
   instructionModalIsOpen: boolean
   logs: StudioLog[]
   isLoading: boolean
@@ -118,6 +129,7 @@ interface StudioRecorderState {
 export const useStudioStore = defineStore('studioRecorder', {
   state: (): StudioRecorderState => {
     return {
+      saveModalIsOpen: false,
       instructionModalIsOpen: false,
       logs: [],
       url: '',
@@ -172,6 +184,14 @@ export const useStudioStore = defineStore('studioRecorder', {
 
     closeInstructionModal () {
       this.instructionModalIsOpen = false
+    },
+
+    showSaveModal () {
+      this.saveModalIsOpen = true
+    },
+
+    closeSaveModal () {
+      this.saveModalIsOpen = false
     },
 
     startLoading () {
@@ -284,6 +304,32 @@ export const useStudioStore = defineStore('studioRecorder', {
       this.clearRunnableIds()
       this._removeUrlParams()
       this._initialUrl = undefined
+    },
+
+    startSave () {
+      if (this.suiteId) {
+        this.showSaveModal()
+      } else {
+        this.save()
+      }
+    },
+
+    save (testName?: string) {
+      this.closeSaveModal()
+
+      assertNonNullish(this.absoluteFile, `absoluteFile should exist`)
+
+      const payload: StudioSavePayload = {
+        fileDetails: this.fileDetails,
+        absoluteFile: this.absoluteFile,
+        runnableTitle: this.runnableTitle,
+        commands: this.logs,
+        isSuite: !!this.suiteId,
+        isRoot: this.suiteId === 'r1',
+        testName,
+      }
+
+      getEventManager().emit('studio:save', payload)
     },
 
     visitUrl (url?: string) {
@@ -510,6 +556,29 @@ export const useStudioStore = defineStore('studioRecorder', {
       })
 
       this._clearPreviousMouseEvent()
+    },
+
+    copyToClipboard (commandsText) {
+      // clipboard API is not supported without secure context
+      if (window.isSecureContext && navigator.clipboard) {
+        return navigator.clipboard.writeText(commandsText)
+      }
+
+      // fallback to creating invisible textarea
+      // create the textarea in our document rather than this._body
+      // as to not interfere with the app in the aut
+      const textArea = document.createElement('textarea')
+
+      textArea.value = commandsText
+      textArea.style.position = 'fixed'
+      textArea.style.opacity = '0'
+
+      document.body.appendChild(textArea)
+      textArea.select()
+      document.execCommand('copy')
+      textArea.remove()
+
+      return Promise.resolve()
     },
 
     _maybeResetRunnables () {
