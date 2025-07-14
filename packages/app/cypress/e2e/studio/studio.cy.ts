@@ -2,6 +2,8 @@ import { launchStudio, loadProjectAndRunSpec, assertClosingPanelWithoutChanges }
 
 describe('Cypress Studio', () => {
   function incrementCounter (initialCount: number) {
+    cy.waitForSpecToFinish(undefined, undefined, false)
+
     cy.getAutIframe().within(() => {
       cy.get('p').contains(`Count is ${initialCount}`)
 
@@ -86,6 +88,8 @@ describe('studio functionality', () => {
 
   it('updates an existing test with assertions', () => {
     launchStudio()
+
+    cy.waitForSpecToFinish(undefined, undefined, false)
 
     cy.getAutIframe().within(() => {
       cy.get('#increment').rightclick().then(() => {
@@ -411,6 +415,8 @@ describe('studio functionality', () => {
   it('shows assertions menu and submenu correctly', () => {
     launchStudio()
 
+    cy.waitForSpecToFinish(undefined, undefined, false)
+
     cy.getAutIframe().within(() => {
       // Show menu
       cy.get('h1').realClick({
@@ -680,6 +686,8 @@ describe('studio functionality', () => {
     cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=')
 
     cy.findByTestId('record-button-recording').should('be.visible')
+
+    cy.waitForSpecToFinish(undefined, undefined, false)
 
     cy.getAutIframe().within(() => {
       cy.get('#increment').realClick()
