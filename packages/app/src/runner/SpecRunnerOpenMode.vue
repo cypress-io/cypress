@@ -1,9 +1,4 @@
 <template>
-  <StudioInstructionsModal
-    v-if="studioStore.instructionModalIsOpen"
-    :open="studioStore.instructionModalIsOpen"
-    @close="studioStore.closeInstructionModal"
-  />
   <AdjustRunnerStyleDuringScreenshot
     id="main-pane"
     class="flex"
@@ -136,7 +131,6 @@ import { useEventManager } from './useEventManager'
 import AutomationDisconnected from './automation/AutomationDisconnected.vue'
 import AutomationMissing from './automation/AutomationMissing.vue'
 import { runnerConstants } from './runner-constants'
-import StudioInstructionsModal from './studio/StudioInstructionsModal.vue'
 import { useStudioStore } from '../store/studio-store'
 import StudioPanel from '../studio/StudioPanel.vue'
 import { useSubscription } from '../graphql'
