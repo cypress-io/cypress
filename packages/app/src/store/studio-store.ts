@@ -260,6 +260,7 @@ export const useStudioStore = defineStore('studioRecorder', {
     },
 
     interceptTest (test) {
+      // if this test is the one we created, we can just set the test id
       if (test.invocationDetails?.line === this.newTestLineNumber) {
         this.setTestId(test.id)
       }
