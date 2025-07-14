@@ -5,7 +5,7 @@ import type { fixtureDirs } from '@tooling/system-tests'
 type ProjectDirs = typeof fixtureDirs
 
 // These versions should reflect the latest versions of each major version of Vite - update as needed
-const VITE_REACT: ProjectDirs[number][] = ['vite4.5.12-react', 'vite5.4.18-react', 'vite6.2.5-react']
+const VITE_REACT: ProjectDirs[number][] = ['vite4.5.12-react', 'vite5.4.18-react', 'vite6.2.5-react', 'vite7.0.0-react']
 
 describe('@cypress/vite-dev-server', function () {
   systemTests.setup()
