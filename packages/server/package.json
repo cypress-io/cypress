@@ -25,7 +25,7 @@
   "dependencies": {
     "@babel/parser": "7.25.3",
     "@cypress/commit-info": "2.2.0",
-    "@cypress/get-windows-proxy": "1.6.2",
+    "@cypress/get-windows-proxy": "1.6.3",
     "@cypress/request": "^3.0.8",
     "@cypress/request-promise": "^5.0.0",
     "@cypress/vite-dev-server": "0.0.0-development",
