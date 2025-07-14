@@ -91,6 +91,8 @@ describe('studio functionality', () => {
 
     cy.waitForSpecToFinish(undefined, undefined, false)
 
+    cy.contains('No commands were issued in this test.').should('not.exist')
+
     cy.getAutIframe().within(() => {
       cy.get('#increment').rightclick().then(() => {
         cy.get('.__cypress-studio-assertions-menu').shadow().contains('be enabled').realClick()
@@ -417,6 +419,8 @@ describe('studio functionality', () => {
 
     cy.waitForSpecToFinish(undefined, undefined, false)
 
+    cy.contains('No commands were issued in this test.').should('not.exist')
+
     cy.getAutIframe().within(() => {
       // Show menu
       cy.get('h1').realClick({
@@ -439,6 +443,10 @@ describe('studio functionality', () => {
 
   it('removes pending commands if the page is reloaded', () => {
     launchStudio()
+
+    cy.waitForSpecToFinish(undefined, undefined, false)
+
+    cy.contains('No commands were issued in this test.').should('not.exist')
 
     incrementCounter(0)
 
