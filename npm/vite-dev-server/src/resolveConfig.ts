@@ -6,7 +6,7 @@
 import debugFn from 'debug'
 import type { InlineConfig } from 'vite-7'
 import path from 'path'
-import module from 'module'
+import { createRequire } from 'module'
 import semverGte from 'semver/functions/gte.js'
 
 import { configFiles } from './constants.js'
@@ -77,7 +77,7 @@ function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): Inline
 
   const vitePort = port ?? undefined
 
-  const require = module.createRequire(import.meta.url)
+  const require = createRequire(import.meta.url)
 
   // Vite caches its output in the .vite directory in the node_modules where vite lives.
   // So we want to find that node_modules path and ensure it's added to the "allow" list

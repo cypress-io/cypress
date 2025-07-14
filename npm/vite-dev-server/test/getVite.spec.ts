@@ -24,19 +24,17 @@ describe('getVite', () => {
       const original = await vi.importActual('module')
 
       return {
-        default: {
-          ...original,
-          createRequire: vi.fn(() => {
-            return {
-              resolve: vi.fn((id: string, opts: any) => {
-                // a bit hacky, but pass in the version as the project path so we don't muck up the module cache
-                const version = opts.paths[0]
+        ...original,
+        createRequire: vi.fn(() => {
+          return {
+            resolve: vi.fn((id: string, opts: any) => {
+              // a bit hacky, but pass in the version as the project path so we don't muck up the module cache
+              const version = opts.paths[0]
 
-                return `vite-${version}/package.json`
-              }),
-            }
-          }),
-        },
+              return `vite-${version}/package.json`
+            }),
+          }
+        }),
       }
     })
 

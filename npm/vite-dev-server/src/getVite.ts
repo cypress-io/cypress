@@ -1,5 +1,5 @@
 import debugFn from 'debug'
-import module from 'module'
+import { createRequire } from 'module'
 import path from 'path'
 import os from 'os'
 import type { ViteDevServerConfig } from './devServer.js'
@@ -23,7 +23,7 @@ export async function getVite (config: ViteDevServerConfig): Promise<Vite> {
   const filePrefix = os.platform() === 'win32' ? 'file://' : ''
 
   try {
-    const require = module.createRequire(import.meta.url)
+    const require = createRequire(import.meta.url)
     const vitePackageJsonPath = require.resolve('vite/package.json', { paths: [config.cypressConfig.projectRoot] })
     const vitePackageJson = (await import(`${filePrefix}${vitePackageJsonPath}`, {
       with: {

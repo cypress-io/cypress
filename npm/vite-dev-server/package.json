@@ -30,7 +30,7 @@
     "vitest": "2.1.4"
   },
   "peerDependencies": {
-    "cypress": ">=14.0.0"
+    "cypress": ">=15.0.0"
   },
   "files": [
     "dist",
