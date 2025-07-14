@@ -3,6 +3,8 @@ import { launchStudio, loadProjectAndRunSpec, assertClosingPanelWithoutChanges }
 describe('Cypress Studio', () => {
   function incrementCounter (initialCount: number) {
     cy.waitForSpecToFinish(undefined, undefined, false)
+    cy.get('.runnable-active').should('not.exist')
+    cy.contains('No commands were issued in this test.').should('not.exist')
 
     cy.getAutIframe().within(() => {
       cy.get('p').contains(`Count is ${initialCount}`)
