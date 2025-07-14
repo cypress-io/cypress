@@ -9,7 +9,7 @@ type AllTasks = typeof CypressTasks
 type TaskEventNames = keyof AllTasks
 
 type MyParameter<T extends TaskEventNames> = Parameters<AllTasks[T]>[0]
-type MyReturnType<T extends TaskEventNames> = ReturnType<AllTasks[T]>
+type MyReturnType<T extends TaskEventNames> = Awaited<ReturnType<AllTasks[T]>>
 
 declare namespace Cypress {
   type FileContents = string | any[] | object
