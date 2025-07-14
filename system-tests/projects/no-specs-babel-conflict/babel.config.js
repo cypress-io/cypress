@@ -76,5 +76,5 @@ module.exports = merge(
   {
     plugins,
   },
-  rootConfig
+  rootConfig,
 )
