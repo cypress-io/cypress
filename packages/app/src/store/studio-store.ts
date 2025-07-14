@@ -124,6 +124,7 @@ interface StudioRecorderState {
   showUrlPrompt: boolean
   cloudStudioRequested: boolean
   cloudStudioSessionId?: string
+  newTestLineNumber?: number
 }
 
 export const useStudioStore = defineStore('studioRecorder', {
@@ -156,7 +157,9 @@ export const useStudioStore = defineStore('studioRecorder', {
 
     setTestId (testId: string) {
       this.testId = testId
-      this._updateUrlParams(['testId', 'suiteId'])
+      this.suiteId = undefined
+      this.newTestLineNumber = undefined
+      this._updateUrlParams(['testId', 'suiteId', 'newTestLineNumber'])
     },
 
     setSuiteId (suiteId: string) {
@@ -171,6 +174,11 @@ export const useStudioStore = defineStore('studioRecorder', {
 
     setCloudStudioSessionId (cloudStudioSessionId: string) {
       this.cloudStudioSessionId = cloudStudioSessionId
+    },
+
+    setNewTestLineNumber (newTestLineNumber: number) {
+      this.newTestLineNumber = newTestLineNumber
+      this._updateUrlParams(['newTestLineNumber'])
     },
 
     clearRunnableIds () {
@@ -225,6 +233,10 @@ export const useStudioStore = defineStore('studioRecorder', {
         this._initialUrl = studio.url
       }
 
+      if (studio.newTestLineNumber) {
+        this.setNewTestLineNumber(studio.newTestLineNumber)
+      }
+
       if (this.testId || this.suiteId) {
         this.setAbsoluteFile(config.spec.absolute)
         this.startLoading()
@@ -232,10 +244,14 @@ export const useStudioStore = defineStore('studioRecorder', {
     },
 
     initialize () {
-      if (this.suiteId) {
-        getCypress().runner.setOnlySuiteId(this.suiteId)
-      } else if (this.testId) {
-        getCypress().runner.setOnlyTestId(this.testId)
+      if (this.newTestLineNumber) {
+        getCypress().runner.setNewTestLineNumber(this.newTestLineNumber)
+      } else {
+        if (this.suiteId) {
+          getCypress().runner.setOnlySuiteId(this.suiteId)
+        } else if (this.testId) {
+          getCypress().runner.setOnlyTestId(this.testId)
+        }
       }
     },
 
@@ -599,19 +615,20 @@ export const useStudioStore = defineStore('studioRecorder', {
       const testId = hashParams.get('testId')
       const suiteId = hashParams.get('suiteId')
       const visitUrl = hashParams.get('url')
+      const newTestLineNumber = hashParams.get('newTestLineNumber') ? Number(hashParams.get('newTestLineNumber')) : undefined
 
-      return { testId, suiteId, url: visitUrl }
+      return { testId, suiteId, url: visitUrl, newTestLineNumber }
     },
 
-    _updateUrlParams (filter: string[] = ['testId', 'suiteId', 'url']) {
+    _updateUrlParams (filter: string[] = ['testId', 'suiteId', 'url', 'newTestLineNumber']) {
       // if we don't have studio params, we don't need to update them
-      if (!this.testId && !this.suiteId && !this.url) return
-
-      const url = new URL(window.location.href)
-      const hashParams = new URLSearchParams(url.hash)
+      if (!this.testId && !this.suiteId && !this.url && !this.newTestLineNumber) return
 
       // if we have studio params, we need to remove them before adding them back
       this._removeUrlParams(filter)
+
+      const url = new URL(window.location.href)
+      const hashParams = new URLSearchParams(url.hash)
 
       // set the studio params
       hashParams.set('studio', '')
@@ -624,7 +641,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       window.history.replaceState({}, '', url.toString())
     },
 
-    _removeUrlParams (filter: string[] = ['testId', 'suiteId', 'url']) {
+    _removeUrlParams (filter: string[] = ['testId', 'suiteId', 'url', 'newTestLineNumber']) {
       const url = new URL(window.location.href)
       const hashParams = new URLSearchParams(url.hash)
 
@@ -636,8 +653,8 @@ export const useStudioStore = defineStore('studioRecorder', {
         hashParams.delete(param)
       })
 
-      // if the filter includes all the items, we can also remove the studio param
-      if (filter.length === 3) {
+      // if there are no studio specific params left, we can also remove the studio param
+      if (!hashParams.has('testId') && !hashParams.has('suiteId') && !hashParams.has('url') && !hashParams.has('newTestLineNumber')) {
         hashParams.delete('studio')
       }
 
