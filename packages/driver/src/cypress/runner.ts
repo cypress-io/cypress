@@ -776,7 +776,7 @@ const normalize = (runnable, tests, initialTests, getRunnableId, getHookId, setO
   }
 
   const onlyIdMode = () => {
-    return !!getOnlyTestId() || !!getOnlySuiteId() || !!getNewTestLineNumber()
+    return !!getOnlyTestId() || !!getNewTestLineNumber()
   }
 
   const suiteHasOnlyId = (suite) => {

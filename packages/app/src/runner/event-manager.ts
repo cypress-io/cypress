@@ -275,10 +275,6 @@ export class EventManager {
       this.ws.emit('open:file', url)
     })
 
-    const studioInit = () => {
-      rerun()
-    }
-
     const studioInitSuite = ({ suiteId, showUrlPrompt = true }: { suiteId: string, showUrlPrompt?: boolean }) => {
       this.studioStore.setSuiteId(suiteId)
       this.studioStore.setShowUrlPrompt(showUrlPrompt)
@@ -291,7 +287,9 @@ export class EventManager {
 
         this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
         this.studioStore.setCloudStudioSessionId(cloudStudioSessionId)
-        studioInit()
+        // when we enter studio with a new test, we don't want to rerun until
+        // the the test has been created, so we just set the studio active
+        this.studioStore.setStudioActive(true)
       })
     }
 
@@ -306,7 +304,7 @@ export class EventManager {
 
         this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
         this.studioStore.setCloudStudioSessionId(cloudStudioSessionId)
-        studioInit()
+        rerun()
       })
     })
 

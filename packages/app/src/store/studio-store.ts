@@ -237,9 +237,13 @@ export const useStudioStore = defineStore('studioRecorder', {
         this.setNewTestLineNumber(studio.newTestLineNumber)
       }
 
-      if (this.testId || this.suiteId) {
+      // if we have an existing test or are creating a new test, we need to start loading
+      // otherwise if we have a suite, we can just set the studio active
+      if (this.testId || studio.newTestLineNumber) {
         this.setAbsoluteFile(config.spec.absolute)
         this.startLoading()
+      } else if (this.suiteId) {
+        this.setStudioActive(true)
       }
     },
 
@@ -256,22 +260,16 @@ export const useStudioStore = defineStore('studioRecorder', {
     },
 
     interceptTest (test) {
-      if (this.suiteId) {
+      if (test.invocationDetails?.line === this.newTestLineNumber) {
         this.setTestId(test.id)
       }
 
-      if (this.testId || this.suiteId) {
+      if (this.testId) {
         if (test.invocationDetails) {
           this.setFileDetails(test.invocationDetails)
         }
 
-        if (this.suiteId) {
-          if (test.parent && test.parent.id !== 'r1') {
-            this.setRunnableTitle(test.parent.title)
-          }
-        } else {
-          this.setRunnableTitle(test.title)
-        }
+        this.setRunnableTitle(test.title)
       }
     },
 
@@ -1020,10 +1018,6 @@ export const useStudioStore = defineStore('studioRecorder', {
   },
 
   getters: {
-    hasRunnableId (state) {
-      return !!state.testId || !!state.suiteId
-    },
-
     isOpen: (state) => {
       return state.isActive || state.isLoading || state._hasStarted
     },
@@ -1037,7 +1031,7 @@ export const useStudioStore = defineStore('studioRecorder', {
     },
 
     needsUrl: (state) => {
-      return state.isActive && !state.url && !state.isFailed
+      return state.isActive && !state.url && !state.isFailed && !!state.testId
     },
 
     testError: (state) => {
