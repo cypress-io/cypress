@@ -1,3 +1,3 @@
-export * from './cypress'
+export * from './cypress.js'
 
-export * from './sourcemap'
+export * from './sourcemap.js'
