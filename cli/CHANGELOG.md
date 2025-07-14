@@ -24,6 +24,10 @@ _Released 07/15/2025 (PENDING)_
 - Selectors accepted in the `selectorPriority` of the `SelectorPlayground` (renamed to `ElementSelector`) API have been expanded to accept `name` and `attributes:*`. Additionally, the default selector priority used by Cypress now includes `name`. Addresses [#31801](https://github.com/cypress-io/cypress/issues/30309) and [#6876](https://github.com/cypress-io/cypress/issues/6876). Addressed in [#31889](https://github.com/cypress-io/cypress/pull/31889).
 - [`tsx`](https://tsx.is/) is now used in all cases to run the Cypress config, replacing [ts-node](https://github.com/TypeStrong/ts-node) for TypeScript and Node for commonjs/ESM. This should allow for more interoperability for users who are using any variant of ES Modules. Addresses [#8090](https://github.com/cypress-io/cypress/issues/8090), [#15724](https://github.com/cypress-io/cypress/issues/15724), [#21805](https://github.com/cypress-io/cypress/issues/21805), [#22273](https://github.com/cypress-io/cypress/issues/22273), [#22747](https://github.com/cypress-io/cypress/issues/22747), [#23141](https://github.com/cypress-io/cypress/issues/23141), [#25958](https://github.com/cypress-io/cypress/issues/25958), [#25959](https://github.com/cypress-io/cypress/issues/25959), [#26606](https://github.com/cypress-io/cypress/issues/26606), [#27359](https://github.com/cypress-io/cypress/issues/27359), [#27450](https://github.com/cypress-io/cypress/issues/27450), [#28442](https://github.com/cypress-io/cypress/issues/28442), [#30318](https://github.com/cypress-io/cypress/issues/30318), [#30718](https://github.com/cypress-io/cypress/issues/30718), [#30907](https://github.com/cypress-io/cypress/issues/30907), [#30915](https://github.com/cypress-io/cypress/issues/30915), [#30925](https://github.com/cypress-io/cypress/issues/30925), [#30954](https://github.com/cypress-io/cypress/issues/30954) and [#31185](https://github.com/cypress-io/cypress/issues/31185).
 
+**Bugfixes:**
+
+- Fixed an issue where Create from Component feature might not be able to parse React components from project files. Fixed in [#31457](https://github.com/cypress-io/cypress/pull/31457).
+
 **Misc:**
 
 - The Cypress Command log has a new design when viewing a list of tests. Addresses [#31677](https://github.com/cypress-io/cypress/issues/31677). Addressed in [#31914](https://github.com/cypress-io/cypress/pull/31914).
@@ -175,7 +179,6 @@ _Released 4/8/2025_
 - Allows for `babel-loader` version 10 to be a peer dependency of `@cypress/webpack-preprocessor`. Fixed in [#31218](https://github.com/cypress-io/cypress/pull/31218).
 - Fixed an issue where Firefox BiDi was prematurely removing prerequests on pending requests. Fixes [#31376](https://github.com/cypress-io/cypress/issues/31376).
 - Fixed an [issue](https://github.com/electron/electron/issues/45398) with Electron causing slow animations and increased test times by starting a CDP screencast with a noop configuration. Fixes [#30980](https://github.com/cypress-io/cypress/issues/30980).
-- Fixed an issue where Create from Component feature might not be able to parse React components from project files. Fixed in [#31457](https://github.com/cypress-io/cypress/pull/31457).
 
 **Misc:**
 
