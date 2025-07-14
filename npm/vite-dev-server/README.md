@@ -56,6 +56,7 @@ We then merge the sourced config with the user's vite config, and layer on our o
 | <= v2                    | <= v9         |
 | >= v3 <= v5              | >= v10 <= v13 |
 | >= v6                    | >= v14        |
+| >= v7 (esm only)         | >= v15        |
 
 #### `devServerPublicPathRoute` for Vite v5
 

@@ -1,11 +1,15 @@
 import debugFn from 'debug'
-import type { ModuleNode, PluginOption, ViteDevServer } from 'vite-6'
-import type { Vite } from '../getVite'
+import type { ModuleNode, PluginOption, ViteDevServer } from 'vite-7'
+import type { Vite } from '../getVite.js'
 import { parse, HTMLElement } from 'node-html-parser'
 import fs from 'fs'
 
-import type { ViteDevServerConfig } from '../devServer'
+import type { ViteDevServerConfig } from '../devServer.js'
 import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 const debug = debugFn('cypress:vite-dev-server:plugins:cypress')
 

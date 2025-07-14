@@ -38,7 +38,7 @@ mainBuildFilters: &mainBuildFilters
         - /^release\/\d+\.\d+\.\d+$/
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'update-v8-snapshot-cache-on-develop'
-        - 'ryanm/fix/ensure-that-we-do-not-attach-a-ref-to-react-root'
+        - 'feat/support_vite_7'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -49,11 +49,9 @@ macWorkflowFilters: &darwin-workflow-filters
       - equal: [ develop, << pipeline.git.branch >> ]
       # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-      - equal:
-          [
-            'ryanm/fix/ensure-that-we-do-not-attach-a-ref-to-react-root',
-            << pipeline.git.branch >>
-          ]
+      - equal: [ 'feat/support_vite_7', << pipeline.git.branch >> ]
+      - equal: [ 'chore/test_cypress_recipes_15', << pipeline.git.branch >> ]
+      - equal: [ 'mabel/issue-31677-reporter-redesign', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
@@ -66,7 +64,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
       - equal:
           [
-            'ryanm/fix/ensure-that-we-do-not-attach-a-ref-to-react-root',
+            'feat/support_vite_7',
             << pipeline.git.branch >>
           ]
       - matches:
@@ -93,7 +91,7 @@ windowsWorkflowFilters: &windows-workflow-filters
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
       - equal:
           [
-            'ryanm/fix/ensure-that-we-do-not-attach-a-ref-to-react-root',
+            'feat/support_vite_7',
             << pipeline.git.branch >>
           ]
       - matches:
@@ -169,7 +167,7 @@ commands:
           name: Set environment variable to determine whether or not to persist artifacts
           command: |
             echo "Setting SHOULD_PERSIST_ARTIFACTS variable"
-            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "ryanm/fix/ensure-that-we-do-not-attach-a-ref-to-react-root" ]]; then
+            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "feat/support_vite_7" ]]; then
                 export SHOULD_PERSIST_ARTIFACTS=true
             fi' >> "$BASH_ENV"
   # You must run `setup_should_persist_artifacts` command and be using bash before running this command
