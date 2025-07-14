@@ -272,11 +272,11 @@ describe('Create from component card', () => {
         cy.findAllByTestId('card').eq(0).as('ComponentCard')
 
         cy.get('@ComponentCard').click()
-  
+
         // Expand the row
         cy.findByText('App').should('be.visible').click()
-    
-          // Click on 'app' component
+
+        // Click on 'app' component
         cy.get('[data-cy="react-component-row"]').should('have.length', 2)
         cy.get('[data-cy="react-component-row"]').eq(0).should('contain', 'App')
         cy.get('[data-cy="react-component-row"]').eq(1).should('contain', 'AppWithDefaults')
