@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { observer } from 'mobx-react'
 import { getFilenameParts } from '../lib/util'
 import Test from '../test/test-model'
@@ -81,6 +81,7 @@ interface StudioTestHeaderProps {
 
 export const StudioSingleTest = observer(({ appState, spec, runnablesStore, statsStore }: StudioTestHeaderProps) => {
   const tooltipRef = useRef<HTMLUListElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   const { isReady } = runnablesStore
 
@@ -88,11 +89,36 @@ export const StudioSingleTest = observer(({ appState, spec, runnablesStore, stat
     return <Loading />
   }
 
+  const [isMounted, setIsMounted] = useState(false)
+
   const specParts = getFilenameParts(spec.name)
   const relativeSpecPath = spec.relative
 
   // Single we're in single test mode, the current test is the first test in the runnablesStore._tests
   const currentTest = Object.values(runnablesStore._tests)[0]
+
+  useEffect(() => {
+    _scrollIntoView()
+    if (!isMounted) {
+      setIsMounted(true)
+    } else {
+      if (currentTest) {
+        currentTest.callbackAfterUpdate()
+      }
+    }
+  })
+
+  const _scrollIntoView = () => {
+    if (appState.autoScrollingEnabled && (appState.isRunning || appState.studioActive) && currentTest?.state !== 'processing') {
+      window.requestAnimationFrame(() => {
+        // since this executes async in a RAF the ref might be null
+        if (containerRef.current) {
+          // Scroll to the bottom of the attempts container to show the latest content
+          containerRef.current.scrollTop = containerRef.current.scrollHeight
+        }
+      })
+    }
+  }
 
   const fileDetails = {
     absoluteFile: spec.absolute,
@@ -106,39 +132,41 @@ export const StudioSingleTest = observer(({ appState, spec, runnablesStore, stat
 
   const testTitle = currentTest ? <span data-cy='studio-single-test-title' className='studio-header__test-title'>{currentTest.title}</span> : null
 
-  return <>
-    <header className='studio-header'>
-      <div className='studio-header__file-section'>
-        <Button data-cy='studio-back-button' size='32' variant='outline-dark' className='studio-header__back-button' onClick={SingleTestActions.handleBackButton}>
-          <IconArrowLeft size='16' strokeColor='gray-500' />
-        </Button>
-        <div className='studio-header__file-content'>
-          <span data-cy='studio-single-test-file-name' className='studio-header__file-name'>{specParts[0]}{specParts[1]}</span>
-          <OpenFileInIDEButton fileDetails={fileDetails} />
+  return (
+    <div className='studio-single-test-container'>
+      <header className='studio-header'>
+        <div className='studio-header__file-section'>
+          <Button data-cy='studio-back-button' size='32' variant='outline-dark' className='studio-header__back-button' onClick={SingleTestActions.handleBackButton}>
+            <IconArrowLeft size='16' strokeColor='gray-500' />
+          </Button>
+          <div className='studio-header__file-content'>
+            <span data-cy='studio-single-test-file-name' className='studio-header__file-name'>{specParts[0]}{specParts[1]}</span>
+            <OpenFileInIDEButton fileDetails={fileDetails} />
+          </div>
         </div>
-      </div>
-    </header>
-    {currentTest && (
-      <>
-        <div className='studio-header__test-section'>
-          <StatusIcon test={currentTest} />
-          {parentTitles.length > 0 ? (
-            <Tooltip title={<ul className='studio-tooltip__breadcrumb-list' ref={tooltipRef}>
-              {getParentTitlesListElements(parentTitles)}
-            </ul>}
-            wrapperClassName='studio-header__test-tooltip-wrapper' className={cx(
-              'studio-tooltip cy-tooltip',
-            )}>
-              {testTitle}
-            </Tooltip>
-          ) : testTitle}
-          <Duration duration={statsStore.duration} />
-          <Controls appState={appState} displayPreferencesButton={false} />
-        </div>
-        <div className='studio-single-test-attempts' >
-          <Attempts test={currentTest} scrollIntoView={() => {}} />
-        </div>
-      </>
-    )}
-  </>
+      </header>
+      {currentTest && (
+        <>
+          <div className='studio-header__test-section'>
+            <StatusIcon test={currentTest} />
+            {parentTitles.length > 0 ? (
+              <Tooltip title={<ul className='studio-tooltip__breadcrumb-list' ref={tooltipRef}>
+                {getParentTitlesListElements(parentTitles)}
+              </ul>}
+              wrapperClassName='studio-header__test-tooltip-wrapper' className={cx(
+                'studio-tooltip cy-tooltip',
+              )}>
+                {testTitle}
+              </Tooltip>
+            ) : testTitle}
+            <Duration duration={statsStore.duration} />
+            <Controls appState={appState} displayPreferencesButton={false} />
+          </div>
+          <div ref={containerRef} className='studio-single-test-attempts' >
+            <Attempts test={currentTest} scrollIntoView={() => _scrollIntoView()} />
+          </div>
+        </>
+      )}
+    </div>
+  )
 })
