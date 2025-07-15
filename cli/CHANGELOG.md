@@ -39,7 +39,7 @@ _Released 07/15/2025 (PENDING)_
 
 ## 14.5.2
 
-_Released 7/15/2025 (PENDING)_
+_Released 7/15/2025_
 
 **Bugfixes:**
 
