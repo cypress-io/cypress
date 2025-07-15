@@ -145,7 +145,7 @@ const Runnable: React.FC<RunnableProps> = observer(({ model, studioEnabled, canS
       data-model-state={model.state}
     >
       {model.type === 'test'
-        ? <Test model={model as TestModel} studioEnabled={studioEnabled} canSaveStudioLogs={canSaveStudioLogs} />
+        ? <Test model={model as TestModel} studioEnabled={studioEnabled} />
         : <Suite model={model as SuiteModel}
           studioEnabled={studioEnabled}
           canSaveStudioLogs={canSaveStudioLogs}

@@ -4,8 +4,6 @@ import events, { Events } from '../lib/events'
 import appState, { AppState } from '../lib/app-state'
 import Collapsible from '../collapsible/collapsible'
 import TestModel from './test-model'
-
-import { Scroller } from '../lib/scroller'
 import Attempts from '../attempts/attempts'
 import StateIcon from '../lib/state-icon'
 import { LaunchStudioIcon } from '../components/LaunchStudioIcon'
@@ -14,13 +12,11 @@ import { useScrollIntoView } from '../lib/useScrollIntoView'
 interface TestProps {
   events?: Events
   appState?: AppState
-  scroller?: Scroller // Keep for backward compatibility but not used internally
   model: TestModel
   studioEnabled: boolean
-  canSaveStudioLogs: boolean
 }
 
-const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = events, appState: appStateProps = appState, scroller: scrollerProps, studioEnabled, canSaveStudioLogs }) => {
+const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = events, appState: appStateProps = appState, studioEnabled }) => {
   const { containerRef, isMounted, scrollIntoView } = useScrollIntoView({
     appState: appStateProps,
     testState: model.state,
@@ -34,7 +30,6 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
     eventsProps.emit('studio:init:test', model.id)
   }, [eventsProps, model.id])
 
-  // Call callbackAfterUpdate when mounted and model changes
   React.useEffect(() => {
     if (isMounted) {
       model.callbackAfterUpdate()
