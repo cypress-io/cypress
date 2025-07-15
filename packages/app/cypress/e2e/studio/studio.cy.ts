@@ -3,6 +3,7 @@ import { launchStudio, loadProjectAndRunSpec, assertClosingPanelWithoutChanges }
 describe('Cypress Studio', () => {
   function incrementCounter (initialCount: number) {
     cy.waitForSpecToFinish(undefined, undefined, false)
+
     cy.findByTestId('queued-icon').should('not.exist')
     cy.get('.runnable-active').should('not.exist')
     cy.contains('No commands were issued in this test.').should('not.exist')
@@ -475,8 +476,7 @@ describe('studio functionality', () => {
 
     cy.get('button[aria-label="Rerun all tests"]').click()
 
-    cy.waitForSpecToFinish()
-
+    cy.waitForSpecToFinish(undefined, undefined, false)
     // after reloading we should still be in studio mode but the commands should be removed
     // the save button should be disabled since the commands were removed
     cy.findByTestId('studio-save-button').should('be.disabled')
