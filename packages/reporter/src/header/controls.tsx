@@ -59,8 +59,8 @@ const Controls: React.FC<Props> = observer(({ events = defaultEvents, appState, 
           </Tooltip>
         ))}
         {ifThen(appState.isRunning && !appState.isPaused, (
-          <Tooltip placement='bottom' title={<p>Stop Running <span className='kbd'>S</span></p>} className='cy-tooltip' visible={appState.studioActive ? false : null}>
-            <button aria-label='Stop' className='stop' onClick={emit('stop')} disabled={appState.studioActive}>
+          <Tooltip placement='bottom' title={<p>Stop Running <span className='kbd'>S</span></p>} className='cy-tooltip'>
+            <button aria-label='Stop' className='stop' onClick={emit('stop')}>
               <IconActionStopCircle size='16' strokeColor={iconStrokeColor} />
             </button>
           </Tooltip>
