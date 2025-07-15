@@ -11,6 +11,7 @@ describe('StudioSingleTest', () => {
   let statsStore: StatsStore
   let mockSpec: Cypress.Cypress['spec']
   let mockTest: Test
+  let defaultRunnablesStore: RunnablesStore
 
   beforeEach(() => {
     // Mock the spec
@@ -39,7 +40,12 @@ describe('StudioSingleTest', () => {
       preferences: {},
     } as unknown as AppState
 
+    defaultRunnablesStore = {
+      isReady: true,
+    } as unknown as RunnablesStore
+
     runnablesStore = {
+      ...defaultRunnablesStore,
       _tests: {
         'test-1': mockTest,
       },
@@ -73,7 +79,7 @@ describe('StudioSingleTest', () => {
 
   it('shows correct status icon for passed test', () => {
     const passedTest = { ...mockTest, state: 'passed' } as unknown as Test
-    const testRunnablesStore = { _tests: { 'test-1': passedTest } } as unknown as RunnablesStore
+    const testRunnablesStore = { ...defaultRunnablesStore, _tests: { 'test-1': passedTest } } as unknown as RunnablesStore
 
     cy.mount(
       <StudioSingleTest
@@ -90,7 +96,7 @@ describe('StudioSingleTest', () => {
 
   it('shows correct status icon for failed test', () => {
     const failedTest = { ...mockTest, state: 'failed' } as unknown as Test
-    const testRunnablesStore = { _tests: { 'test-1': failedTest } } as unknown as RunnablesStore
+    const testRunnablesStore = { ...defaultRunnablesStore, _tests: { 'test-1': failedTest } } as unknown as RunnablesStore
 
     cy.mount(
       <StudioSingleTest
@@ -107,7 +113,7 @@ describe('StudioSingleTest', () => {
 
   it('shows correct status icon for running test', () => {
     const runningTest = { ...mockTest, state: 'active' } as unknown as Test
-    const testRunnablesStore = { _tests: { 'test-1': runningTest } } as unknown as RunnablesStore
+    const testRunnablesStore = { ...defaultRunnablesStore, _tests: { 'test-1': runningTest } } as unknown as RunnablesStore
 
     cy.mount(
       <StudioSingleTest
@@ -124,7 +130,7 @@ describe('StudioSingleTest', () => {
 
   it('shows correct status icon for queued test', () => {
     const queuedTest = { ...mockTest, state: 'processing' } as unknown as Test
-    const testRunnablesStore = { _tests: { 'test-1': queuedTest } } as unknown as RunnablesStore
+    const testRunnablesStore = { ...defaultRunnablesStore, _tests: { 'test-1': queuedTest } } as unknown as RunnablesStore
 
     cy.mount(
       <StudioSingleTest
@@ -141,7 +147,7 @@ describe('StudioSingleTest', () => {
 
   it('shows tooltip with parent titles', () => {
     const testWithParents = { ...mockTest, parentTitle: 'Test Suite > Nested Suite' } as unknown as Test
-    const testRunnablesStore = { _tests: { 'test-1': testWithParents } } as unknown as RunnablesStore
+    const testRunnablesStore = { ...defaultRunnablesStore, _tests: { 'test-1': testWithParents } } as unknown as RunnablesStore
 
     cy.mount(
       <StudioSingleTest
@@ -164,7 +170,7 @@ describe('StudioSingleTest', () => {
       ...mockTest,
       parentTitle: 'Very Long Suite Name That Exceeds Normal Length > Another Extremely Long Suite Name That Goes On And On > Third Level With Ridiculously Long Name > Fourth Level With Even More Text > Fifth Level With Maximum Length > Sixth Level With Overflow > Seventh Level With Truncation > Eighth Level With Wrapping > Ninth Level With Scrolling > Tenth Level With Final Test',
     } as unknown as Test
-    const testRunnablesStore = { _tests: { 'test-1': testWithLongTitles } } as unknown as RunnablesStore
+    const testRunnablesStore = { ...defaultRunnablesStore, _tests: { 'test-1': testWithLongTitles } } as unknown as RunnablesStore
 
     cy.mount(
       <StudioSingleTest
@@ -197,7 +203,7 @@ describe('StudioSingleTest', () => {
 
   it('handles test without parent titles', () => {
     const testWithoutParents = { ...mockTest, parentTitle: undefined } as unknown as Test
-    const testRunnablesStore = { _tests: { 'test-1': testWithoutParents } } as unknown as RunnablesStore
+    const testRunnablesStore = { ...defaultRunnablesStore, _tests: { 'test-1': testWithoutParents } } as unknown as RunnablesStore
 
     cy.mount(
       <StudioSingleTest
@@ -214,7 +220,7 @@ describe('StudioSingleTest', () => {
 
   it('handles empty parent titles array', () => {
     const testWithEmptyParents = { ...mockTest, parentTitle: '' } as unknown as Test
-    const testRunnablesStore = { _tests: { 'test-1': testWithEmptyParents } } as unknown as RunnablesStore
+    const testRunnablesStore = { ...defaultRunnablesStore, _tests: { 'test-1': testWithEmptyParents } } as unknown as RunnablesStore
 
     cy.mount(
       <StudioSingleTest
@@ -230,7 +236,7 @@ describe('StudioSingleTest', () => {
   })
 
   it('handles missing test gracefully', () => {
-    const emptyRunnablesStore = { _tests: {} } as unknown as RunnablesStore
+    const emptyRunnablesStore = { ...defaultRunnablesStore, _tests: {} } as unknown as RunnablesStore
 
     cy.mount(
       <StudioSingleTest
@@ -243,6 +249,27 @@ describe('StudioSingleTest', () => {
 
     // Should still render header but not test section
     cy.get('.studio-header__file-section').should('be.visible')
+    cy.get('.studio-header__test-section').should('not.exist')
+  })
+
+  it('shows loading state when not ready', () => {
+    const notReadyRunnablesStore = {
+      ...runnablesStore,
+      isReady: false,
+    } as unknown as RunnablesStore
+
+    cy.mount(
+      <StudioSingleTest
+        appState={appState}
+        spec={mockSpec}
+        runnablesStore={notReadyRunnablesStore}
+        statsStore={statsStore}
+      />,
+    )
+
+    // Should show loading component and not render the main content
+    cy.contains('Your tests are loading...').should('be.visible')
+    cy.get('.studio-header__file-section').should('not.exist')
     cy.get('.studio-header__test-section').should('not.exist')
   })
 })
