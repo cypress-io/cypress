@@ -19,7 +19,7 @@ import Header, { ReporterHeaderProps } from './header/header'
 import Runnables from './runnables/runnables'
 import TestingPreferences from './preferences/testing-preferences'
 import type { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
-import { StudioSingleTest } from './studio/StudioSingleTest'
+import { StudioTestHeader } from './studio/StudioTestHeader'
 
 function usePrevious (value) {
   const ref = useRef()
@@ -108,13 +108,15 @@ const Reporter: React.FC<SingleReporterProps> = observer(({ appState = appStateD
     }
   }, [runnerStore.spec, runnerStore.specRunId, resetStatsOnSpecChange, previousSpecRunId])
 
-  let content
+  const isStudioSingleTest = appState?.studioActive && appState.studioSingleTestActive
 
-  if (appState.studioActive && runnerStore.spec && appState.studioSingleTestActive) {
-    content = <StudioSingleTest appState={appState} spec={runnerStore.spec} runnablesStore={runnablesStore} statsStore={statsStore} />
-  } else {
-    content = <>
-      {renderReporterHeader({ appState, statsStore, runnablesStore, spec: runnerStore.spec })}
+  return (
+    <div className={cs(className, 'reporter', {
+      'mounted': isMounted,
+    })}>
+      {isStudioSingleTest && runnerStore.spec ? <StudioTestHeader
+        spec={runnerStore.spec}
+      /> : renderReporterHeader({ appState, statsStore, runnablesStore, spec: runnerStore.spec })}
       {appState?.isPreferencesMenuOpen ? (
         <TestingPreferences appState={appState} />
       ) : (
@@ -129,14 +131,6 @@ const Reporter: React.FC<SingleReporterProps> = observer(({ appState = appStateD
           canSaveStudioLogs={runnerStore.canSaveStudioLogs}
         />
       )}
-    </>
-  }
-
-  return (
-    <div className={cs(className, 'reporter', {
-      'mounted': isMounted,
-    })}>
-      {content}
     </div>
   )
 })

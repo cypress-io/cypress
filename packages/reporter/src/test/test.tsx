@@ -1,35 +1,30 @@
 import { observer } from 'mobx-react'
-import React, { MouseEvent, useCallback, useEffect, useRef, useState } from 'react'
+import React, { MouseEvent, useCallback } from 'react'
 import events, { Events } from '../lib/events'
 import appState, { AppState } from '../lib/app-state'
 import Collapsible from '../collapsible/collapsible'
 import TestModel from './test-model'
 
-import scroller, { Scroller } from '../lib/scroller'
+import { Scroller } from '../lib/scroller'
 import Attempts from '../attempts/attempts'
 import StateIcon from '../lib/state-icon'
 import { LaunchStudioIcon } from '../components/LaunchStudioIcon'
+import { useScrollIntoView } from '../lib/useScrollIntoView'
 
 interface TestProps {
   events?: Events
   appState?: AppState
-  scroller?: Scroller
+  scroller?: Scroller // Keep for backward compatibility but not used internally
   model: TestModel
   studioEnabled: boolean
   canSaveStudioLogs: boolean
 }
 
-const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = events, appState: appStateProps = appState, scroller: scrollerProps = scroller, studioEnabled, canSaveStudioLogs }) => {
-  const containerRef = useRef(null)
-  const [isMounted, setIsMounted] = useState(false)
-
-  useEffect(() => {
-    _scrollIntoView()
-    if (!isMounted) {
-      setIsMounted(true)
-    } else {
-      model.callbackAfterUpdate()
-    }
+const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = events, appState: appStateProps = appState, scroller: scrollerProps, studioEnabled, canSaveStudioLogs }) => {
+  const { containerRef, isMounted, scrollIntoView } = useScrollIntoView({
+    appState: appStateProps,
+    testState: model.state,
+    isStudioActive: appStateProps.studioActive,
   })
 
   const _launchStudio = useCallback((e: MouseEvent) => {
@@ -39,16 +34,12 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
     eventsProps.emit('studio:init:test', model.id)
   }, [eventsProps, model.id])
 
-  const _scrollIntoView = () => {
-    if (appStateProps.autoScrollingEnabled && (appStateProps.isRunning || appStateProps.studioActive) && model.state !== 'processing') {
-      window.requestAnimationFrame(() => {
-        // since this executes async in a RAF the ref might be null
-        if (containerRef.current) {
-          scrollerProps.scrollIntoView(containerRef.current as HTMLElement)
-        }
-      })
+  // Call callbackAfterUpdate when mounted and model changes
+  React.useEffect(() => {
+    if (isMounted) {
+      model.callbackAfterUpdate()
     }
-  }
+  }, [isMounted, model])
 
   const _header = () => {
     return (<>
@@ -96,7 +87,7 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
       hideExpander
     >
       <div>
-        <Attempts test={model} scrollIntoView={() => _scrollIntoView()} />
+        <Attempts test={model} scrollIntoView={scrollIntoView} />
       </div>
     </Collapsible>
   )
