@@ -206,8 +206,8 @@ export const useStudioStore = defineStore('studioRecorder', {
       this.isLoading = true
     },
 
-    setInactive () {
-      this.isActive = false
+    setActive (isActive: boolean) {
+      this.isActive = isActive
     },
 
     setUrl (url?: string) {
@@ -243,7 +243,7 @@ export const useStudioStore = defineStore('studioRecorder', {
         this.setAbsoluteFile(config.spec.absolute)
         this.startLoading()
       } else if (this.suiteId) {
-        this.setStudioActive(true)
+        this.setActive(true)
       }
     },
 

@@ -289,7 +289,7 @@ export class EventManager {
         this.studioStore.setCloudStudioSessionId(cloudStudioSessionId)
         // when we enter studio with a new test, we don't want to rerun until
         // the the test has been created, so we just set the studio active
-        this.studioStore.setStudioActive(true)
+        this.studioStore.setActive(true)
       })
     }
 
@@ -904,7 +904,7 @@ export class EventManager {
     Cypress.primaryOriginCommunicator.removeAllListeners()
     // clean up the cross origin logs in memory to prevent dangling references as the log objects themselves at this point will no longer be needed.
     crossOriginLogs = {}
-    this.studioStore.setInactive()
+    this.studioStore.setActive(false)
   }
 
   resetReporter () {
