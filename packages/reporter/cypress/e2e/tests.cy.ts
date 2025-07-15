@@ -307,7 +307,7 @@ describe('studio controls', () => {
         .should('be.visible')
         .should('have.css', 'opacity', '1')
 
-        cy.get('.cy-tooltip').contains('Add Commands to Test')
+        cy.get('.cy-tooltip').contains('Edit in Studio')
       })
 
       it('emits studio:init:test with the suite id when studio button clicked', () => {
