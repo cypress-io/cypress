@@ -2686,10 +2686,10 @@
     tailwindcss "^3.4.3"
     tailwindcss-hocus "^0.0.7"
 
-"@cypress-design/icon-registry@^1.0.0", "@cypress-design/icon-registry@^1.18.0", "@cypress-design/icon-registry@^1.27.0", "@cypress-design/icon-registry@^1.5.1":
-  version "1.27.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-1.27.0.tgz#a657acc40cc6b43e14ebf1a0e19eb65f43e08a76"
-  integrity sha512-2/jlv/0RsCwwZpovIk8sjXsbqnnNgmpYiaQUl9XUoZ45rurhr2PuOwYk1HMAkrBcv05adzWLfiEtfzb5TwUG1w==
+"@cypress-design/icon-registry@^1.0.0", "@cypress-design/icon-registry@^1.18.0", "@cypress-design/icon-registry@^1.30.0", "@cypress-design/icon-registry@^1.5.1":
+  version "1.30.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-1.30.0.tgz#169f61fddb0baad1e7297487eab4eec68fc7537e"
+  integrity sha512-4DSHYeSo6gnsnKrufTxgAn3c/1ORGCoDeXOLypoatfNtmlbSyB6jdsQ4wIJmuM6lR9wDtkwziPHCsilNVPFy2Q==
   dependencies:
     "@cypress-design/color-constants" "^1.1.0"
 
@@ -2700,12 +2700,12 @@
   dependencies:
     clsx "^2.1.1"
 
-"@cypress-design/react-icon@^1.27.0":
-  version "1.27.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/react-icon/-/react-icon-1.27.0.tgz#e34952329887deb614b78b66d0357b7a4049cbe8"
-  integrity sha512-r8tu7JFwJWwsKSRMJ83ocSb6zfM0Hjnf2DTH5CEhlVxo/QHMOVk85zQSqxVHlX9p11C7jomUeMkoalD6dpKXTg==
+"@cypress-design/react-icon@1.30.0":
+  version "1.30.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/react-icon/-/react-icon-1.30.0.tgz#2ac51db1ce2941dc012481c883e053c3bc8223c1"
+  integrity sha512-ooF9WpHvnW4A4SEh3/1aXs1lBqmCfIB2Ioca1dg+/uL22ALYgyji7xcAStm/BzMo/nGTelqx2GcDWzMqOjFnGw==
   dependencies:
-    "@cypress-design/icon-registry" "^1.27.0"
+    "@cypress-design/icon-registry" "^1.30.0"
     clsx "^2.1.1"
 
 "@cypress-design/vue-button@^1.1.0", "@cypress-design/vue-button@^1.6.0":
