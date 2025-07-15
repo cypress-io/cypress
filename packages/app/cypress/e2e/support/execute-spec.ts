@@ -17,26 +17,30 @@ declare global {
        * 3. Waits (with a timeout of 30s) for the Rerun all tests button to be present. This ensures all tests have completed
        *
        */
-      waitForSpecToFinish(expectedResults?: ExpectedResults, timeout?: number, checkForStats?: boolean): void
+      waitForSpecToFinish(expectedResults?: ExpectedResults, timeout?: number): void
       verifyE2ESelected(): void
       verifyCtSelected(): void
     }
   }
 }
 
-export const waitForSpecToFinish = (expectedResults, timeout?: number, checkForStats = true) => {
-  // If we're not in a single studio test, we won't have the stats so we can skip this
-  if (checkForStats) {
-    // First ensure the test is loaded
-    cy.get('.passed > .num').should('exist')
-    cy.get('.failed > .num').should('exist')
-  }
-
-  // Then ensure the tests are running
-  cy.contains('Your tests are loading...', { timeout: timeout || 30000 }).should('not.exist')
+export const waitForSpecToFinish = (expectedResults, timeout?: number) => {
+  cy.get('body').then(($body) => {
+    // if we're in studio test mode, we don't have the stats so we can skip this
+    if ($body.find('.spec-container').length > 0) {
+      cy.get('.passed > .num').should('exist')
+      cy.get('.failed > .num').should('exist')
+    }
+  })
 
   // Then ensure the tests have finished
   cy.get('[aria-label="Rerun all tests"]', { timeout: timeout || 30000 })
+
+  // Then ensure the tests are not running
+  cy.contains('Your tests are loading...', { timeout: timeout || 30000 }).should('not.exist')
+  cy.get('.runnable-processing').should('not.exist')
+  cy.findByTestId('queued-icon').should('not.exist')
+  cy.get('.runnable-active').should('not.exist')
 
   if (expectedResults) {
     shouldHaveTestResults(expectedResults)
