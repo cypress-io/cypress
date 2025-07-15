@@ -17,7 +17,7 @@ declare global {
        * 3. Waits (with a timeout of 30s) for the Rerun all tests button to be present. This ensures all tests have completed
        *
        */
-      waitForSpecToFinish(expectedResults?: ExpectedResults, timeout?: number, isStudioSingleTest?: boolean): void
+      waitForSpecToFinish(expectedResults?: ExpectedResults, timeout?: number, checkForStats?: boolean): void
       verifyE2ESelected(): void
       verifyCtSelected(): void
     }
