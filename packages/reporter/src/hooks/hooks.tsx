@@ -63,7 +63,7 @@ export interface HooksProps {
 const Hooks: React.FC<HooksProps> = observer(({ state = appState, model, scrollIntoView }: HooksProps) => (
   <ul className='hooks-container'>
     {_.map(model.hooks, (hook) => {
-      if (hook.commands.length) {
+      if (hook.commands.length && hook.hookName !== 'studio commands') {
         return <Hook key={hook.hookId} model={hook} scrollIntoView={scrollIntoView} showNumber={model.hookCount[hook.hookName] > 1} />
       }
 
