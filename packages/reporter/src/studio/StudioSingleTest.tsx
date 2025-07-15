@@ -135,7 +135,9 @@ export const StudioSingleTest = observer(({ appState, spec, runnablesStore, stat
           <Duration duration={statsStore.duration} />
           <Controls appState={appState} displayPreferencesButton={false} />
         </div>
-        <Attempts test={currentTest} scrollIntoView={() => { }} />
+        <div className='studio-single-test-attempts' >
+          <Attempts test={currentTest} scrollIntoView={() => {}} />
+        </div>
       </>
     )}
   </>
