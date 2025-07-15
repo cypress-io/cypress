@@ -3,6 +3,7 @@ import { launchStudio, loadProjectAndRunSpec, assertClosingPanelWithoutChanges }
 describe('Cypress Studio', () => {
   function incrementCounter (initialCount: number) {
     cy.waitForSpecToFinish(undefined, undefined, false)
+    cy.findByTestId('queued-icon').should('not.exist')
     cy.get('.runnable-active').should('not.exist')
     cy.contains('No commands were issued in this test.').should('not.exist')
 
@@ -446,10 +447,6 @@ describe('studio functionality', () => {
   it('removes pending commands if the page is reloaded', () => {
     launchStudio()
 
-    cy.waitForSpecToFinish(undefined, undefined, false)
-
-    cy.contains('No commands were issued in this test.').should('not.exist')
-
     incrementCounter(0)
 
     cy.get('.cm-line').should('contain.text', `cy.get('#increment').click();`)
@@ -462,7 +459,7 @@ describe('studio functionality', () => {
       win.location.href = win.location.href
     })
 
-    cy.waitForSpecToFinish()
+    cy.waitForSpecToFinish(undefined, undefined, false)
 
     // after reloading we should still be in studio mode but the commands should be removed
     // so the save button should be disabled
