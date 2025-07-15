@@ -13,6 +13,7 @@ import { AppState } from '../lib/app-state'
 import Attempts from '../attempts/attempts'
 import Tooltip from '@cypress/react-tooltip'
 import cx from 'classnames'
+import { Loading } from '../runnables/runnables'
 
 // this is set up to be stubbed in tests
 export const SingleTestActions = {
@@ -80,6 +81,12 @@ interface StudioTestHeaderProps {
 
 export const StudioSingleTest = observer(({ appState, spec, runnablesStore, statsStore }: StudioTestHeaderProps) => {
   const tooltipRef = useRef<HTMLUListElement>(null)
+
+  const { isReady } = runnablesStore
+
+  if (!isReady) {
+    return <Loading />
+  }
 
   const specParts = getFilenameParts(spec.name)
   const relativeSpecPath = spec.relative

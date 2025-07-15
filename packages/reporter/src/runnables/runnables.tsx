@@ -16,7 +16,7 @@ import OpenIcon from '@packages/frontend-shared/src/assets/icons/technology-code
 import StudioIcon from '@packages/frontend-shared/src/assets/icons/object-magic-wand-dark-mode_x16.svg'
 import WarningIcon from '@packages/frontend-shared/src/assets/icons/warning_x16.svg'
 
-const Loading = () => (
+export const Loading = () => (
   <div className='runnable-loading'>
     <div className='runnable-loading-animation'>
       <div /><div /><div /><div /><div />
