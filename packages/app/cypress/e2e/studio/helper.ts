@@ -42,7 +42,7 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTest = false, 
   cy.waitForSpecToFinish()
 
   if (createNewTest) {
-    cy.get('span.runnable-title').contains('New Test').should('exist')
+    cy.get('span.runnable-title').contains('New test').should('exist')
   } else {
     cy.get('[data-cy="hook-name-studio commands"]').should('exist')
   }

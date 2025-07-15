@@ -76,7 +76,7 @@ describe('Studio Cloud', () => {
     cy.findByTestId('studio-button').should('be.visible').click()
     cy.findByTestId('studio-panel').should('be.visible')
 
-    cy.contains('New Test')
+    cy.contains('New test')
 
     cy.findByTestId('studio-url-prompt').should('not.exist')
 
