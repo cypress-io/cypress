@@ -52,6 +52,7 @@ const props = defineProps<{
   eventManager: EventManager
   studioStatus: string | null
   cloudStudioSessionId?: string
+  autHeaderInputClassName: string
 }>()
 
 interface StudioApp { default: StudioAppDefaultShape }
@@ -77,9 +78,10 @@ const maybeRenderReactComponent = () => {
     canAccessStudioAI: props.canAccessStudioAI,
     onStudioPanelClose: props.onStudioPanelClose,
     studioSessionId: props.cloudStudioSessionId,
+    autHeaderInputClassName: props.autHeaderInputClassName,
   })
 
-  // Store the react root in a weak map keyed by the container. We do this so that we have a reference 
+  // Store the react root in a weak map keyed by the container. We do this so that we have a reference
   // to it that's tied to the container value but absolutely do not want to use vue to do the tracking.
   // If vue tracks it (e.g. using a ref) it creates proxies that do not play nicely with React in
   // production
