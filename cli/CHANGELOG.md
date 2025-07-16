@@ -1,11 +1,21 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 14.5.3
+
+_Released 7/30/2025 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed missing support for setting an absolute path for `component.indexHtmlFile` in `@cypress/webpack-dev-server`. Fixes [#31819](https://github.com/cypress-io/cypress/issues/31819).
+- Fixed an issue where TypeScript ESM projects using `.js` and `.mjs` extensions where not resolving correctly within `@cypress/webpack-batteries-included-preprocessor`. Addressed in [#31994](https://github.com/cypress-io/cypress/pull/31994).
+
 ## 14.5.2
 
-_Released 7/15/2025 (PENDING)_
+_Released 7/15/2025_
 
 **Bugfixes:**
 
 - Fixed a regression introduced in [`14.5.0`](https://docs.cypress.io/guides/references/changelog#14-5-0) where the Stop button would not immediately stop the spec timer. Addresses [#31920](https://github.com/cypress-io/cypress/issues/31920).
+- Fixed an issue with the `CloudRequest` where it used the wrong port for `https` requests. Addressed in [#31992](https://github.com/cypress-io/cypress/pull/31992).
 
 ## 14.5.1
 
