@@ -7,7 +7,6 @@ import mocha from 'eslint-plugin-mocha'
 import globals from 'globals'
 import vue from 'eslint-plugin-vue'
 import stylistic from '@stylistic/eslint-plugin'
-import * as graphql from '@graphql-eslint/eslint-plugin'
 import react from 'eslint-plugin-react'
 import eslintPluginImportX from 'eslint-plugin-import-x'
 
@@ -46,12 +45,6 @@ export default <InfiniteDepthConfigWithExtends[]>[
         },
       },
     },
-  },
-
-  // graphql parser
-  {
-    files: ['*.graphql'],
-    ...graphql.flatConfigs['operations-recommended'],
   },
 
   // common node files

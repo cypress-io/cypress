@@ -95,6 +95,10 @@ For each package in the batch:
 3. **Ensure dependencies are up to date:**
    - Remove any package-local ESLint plugins now provided by the shared config.
    - Remove TSLint-related dependencies (the new config includes `@typescript-eslint`).
+   - **Add the shared ESLint config as a dev dependency:**
+     - In each migrated package, add `@packages/eslint-config` to `devDependencies` (use a relative file path if not published to npm).
+   - **Add ESLint as a dev dependency:**
+     - Since `@packages/eslint-config` has ESLint as a peer dependency, add `eslint: "^9.18.0"` to `devDependencies`.
 4. **Run lint and autofix:**
    - From the package root, run:
      ```
