@@ -1,5 +1,6 @@
 import React from 'react'
-import { StudioTestHeader, TestActions } from './StudioTestHeader'
+import { StudioTestHeader } from './StudioTestHeader'
+import events from '../lib/events'
 
 describe('StudioTestHeader', () => {
   let mockSpec: Cypress.Cypress['spec']
@@ -12,7 +13,7 @@ describe('StudioTestHeader', () => {
       absolute: '/Users/test/cypress/e2e/example.cy.ts',
     } as Cypress.Cypress['spec']
 
-    cy.stub(TestActions, 'handleBackButton').as('handleBackButton')
+    cy.spy(events, 'emit').as('emitSpy')
   })
 
   it('renders studio header with spec information', () => {
@@ -38,6 +39,6 @@ describe('StudioTestHeader', () => {
     )
 
     cy.get('[data-cy="studio-back-button"]').click()
-    cy.get('@handleBackButton').should('have.been.called')
+    cy.get('@emitSpy').should('have.been.calledWith', 'studio:cancel', undefined)
   })
 })

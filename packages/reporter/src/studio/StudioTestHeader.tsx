@@ -1,27 +1,10 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { observer } from 'mobx-react'
 import { getFilenameParts } from '../lib/util'
 import Button from '@cypress-design/react-button'
 import { IconArrowLeft } from '@cypress-design/react-icon'
 import { OpenFileInIDEButton } from '../header/OpenFileInIDEButton'
-
-// this is set up to be stubbed in tests
-export const TestActions = {
-  handleBackButton: () => {
-    const url = new URL(window.location.href)
-    const hashParams = new URLSearchParams(url.hash)
-
-    hashParams.delete('studio')
-
-    ;['testId', 'suiteId'].forEach((param) => {
-      hashParams.delete(param)
-    })
-
-    url.hash = decodeURIComponent(hashParams.toString())
-    window.history.replaceState({}, '', url.toString())
-    window.location.reload()
-  },
-}
+import events from '../lib/events'
 
 interface StudioHeaderProps {
   spec: Cypress.Cypress['spec']
@@ -39,11 +22,17 @@ export const StudioTestHeader = observer(({ spec }: StudioHeaderProps) => {
     relativeFile: relativeSpecPath,
   }
 
+  const handleBackButton = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault()
+
+    events.emit('studio:cancel', undefined)
+  }, [])
+
   return (
     <>
       <header className='studio-header'>
         <div className='studio-header__file-section'>
-          <Button data-cy='studio-back-button' size='32' variant='outline-dark' className='studio-header__back-button' onClick={TestActions.handleBackButton}>
+          <Button data-cy='studio-back-button' size='32' variant='outline-dark' className='studio-header__back-button' onClick={handleBackButton}>
             <IconArrowLeft size='16' strokeColor='gray-500' />
           </Button>
           <div className='studio-header__file-content'>
