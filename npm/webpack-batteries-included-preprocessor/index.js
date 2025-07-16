@@ -63,7 +63,7 @@ const addTypeScriptConfig = (file, options) => {
   })
 
   webpackOptions.resolve.extensions = webpackOptions.resolve.extensions.concat(['.ts', '.tsx'])
-  webpackOptions.resolve.extensionAlias = { '.js': ['.ts', '.js'], '.mjs': ['.mts', '.mjs'] }
+  webpackOptions.resolve.extensionAlias = webpackOptions.resolve.extensionAlias || { '.js': ['.ts', '.js'], '.mjs': ['.mts', '.mjs'] }
   webpackOptions.resolve.plugins = [new TsconfigPathsPlugin({
     configFile: configFile?.path,
     silent: true,
