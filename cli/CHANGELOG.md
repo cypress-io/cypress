@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.0.0
 
-_Released 07/15/2025 (PENDING)_
+_Released 07/22/2025 (PENDING)_
 
 **Breaking Changes:**
 
@@ -10,7 +10,7 @@ _Released 07/15/2025 (PENDING)_
 - Removed support of the deprecated 3 argument signature of `cy.stub`. Use `cy.stub(object, name).callsFake(fn)` instead. Addresses [#31346](https://github.com/cypress-io/cypress/issues/31346).
 - `@cypress/webpack-dev-server` and `@cypress/webpack-preprocessor` no longer support `webpack` version 4. Addresses [#31344](https://github.com/cypress-io/cypress/issues/31344). If you still need to use `webpack` version 4, please see our [migration guide](https://docs.cypress.io/app/references/migration-guide#Migrating-to-Cypress-150).
 - `@cypress/webpack-dev-server` no longer supports `webpack-dev-server` version 4. Addresses [#31605](https://github.com/cypress-io/cypress/issues/31605). If you still need to use `webpack-dev-server` version 4, please see our [migration guide](https://docs.cypress.io/app/references/migration-guide#Migrating-to-Cypress-150).
-- In order to better align with best practices, `@cypress/webpack-batteries-included-preprocessor` no longer includes certain browser built-ins that were automatically provided by Webpack 4. The removed built-ins are `assert`, `constants`, `crypto`, `domain`, `events`, `http`, `https`, `punycode`, `querystring`, `string_decoder`, `sys`, `timers`, `tty`, `url`, `util`, `vm`, and `zlib`. However, we know that certain built-ins are popular, given that many users have files that are shared between their Cypress tests and node context. Because of this, `@cypress/webpack-batteries-included-preprocessor` will ship with built-in support for `buffer`, `path`, `process`, `os`, and `stream`. If there is a built-in that isn't supported be default and you need to add support, please refer to the Webpack [resolve.fallback](https://webpack.js.org/configuration/resolve/#resolvefallback) documentation and the [`@cypress/webpack-batteries-included-preprocessor` README](../npm/webpack-batteries-included-preprocessor/README.md). Addresses [#31039](https://github.com/cypress-io/cypress/issues/31039).
+- In order to better align with best practices, `@cypress/webpack-batteries-included-preprocessor` no longer includes certain browser built-ins that were automatically provided by Webpack 4. The removed built-ins are `assert`, `constants`, `crypto`, `domain`, `events`, `http`, `https`, `punycode`, `querystring`, `string_decoder`, `sys`, `timers`, `tty`, `url`, `util`, `vm`, and `zlib`. However, we know that certain built-ins are popular, given that many users have files that are shared between their Cypress tests and node context. Because of this, `@cypress/webpack-batteries-included-preprocessor` will ship with built-in support for `buffer`, `path`, `process`, `os`, and `stream`. If there is a built-in that isn't supported by default and you need to add support, please refer to the Webpack [resolve.fallback](https://webpack.js.org/configuration/resolve/#resolvefallback) documentation and the [`@cypress/webpack-batteries-included-preprocessor` README](../npm/webpack-batteries-included-preprocessor/README.md). Addresses [#31039](https://github.com/cypress-io/cypress/issues/31039).
 - The application under test's `pagehide` event in Chromium browsers will no longer trigger Cypress's `window:unload` event. Addressed in [#31853](https://github.com/cypress-io/cypress/pull/31853).
 - The `Cypress.SelectorPlayground` API has been renamed to `Cypress.ElementSelector`. This API was renamed to accommodate its use for defining `selectorPriority` in Cypress Studio and our future [`cy.prompt` release](https://on.cypress.io/cy-prompt-early-access?utm_source=docs&utm_medium=app-changelog&utm_content=cy-prompt-release). Addresses [#31801](https://github.com/cypress-io/cypress/issues/31801). Addressed in [#31889](https://github.com/cypress-io/cypress/pull/31889).
 - **Component Testing breaking changes:**
@@ -18,6 +18,7 @@ _Released 07/15/2025 (PENDING)_
   - `@cypress/angular` now requires a minimum of `zone.js` `0.14.0`. Addresses [#31582](https://github.com/cypress-io/cypress/issues/31582).
   - The Cypress configuration wizard for Component Testing supports TypeScript 5.0 or greater. Addresses [#31187](https://github.com/cypress-io/cypress/issues/31187).
   - `@cypress/vite-dev-server` is now an ESM only package. You will no longer be able to use this package from a CommonJS context. Addresses [#28373](https://github.com/cypress-io/cypress/issues/28373), [#29557](https://github.com/cypress-io/cypress/issues/29557) and [#31882](https://github.com/cypress-io/cypress/issues/31882).
+    - Removed support for Vite 4 inside `@cypress/vite-dev-server`. The minimum Vite version is `5`. Addresses [#32038](https://github.com/cypress-io/cypress/issues/32038).
 
 **Features:**
 
@@ -25,6 +26,10 @@ _Released 07/15/2025 (PENDING)_
 - Selectors accepted in the `selectorPriority` of the `SelectorPlayground` (renamed to `ElementSelector`) API have been expanded to accept `name` and `attributes:*`. Additionally, the default selector priority used by Cypress now includes `name`. Addresses [#31801](https://github.com/cypress-io/cypress/issues/30309) and [#6876](https://github.com/cypress-io/cypress/issues/6876). Addressed in [#31889](https://github.com/cypress-io/cypress/pull/31889).
 - [`tsx`](https://tsx.is/) is now used in all cases to run the Cypress config, replacing [ts-node](https://github.com/TypeStrong/ts-node) for TypeScript and Node for commonjs/ESM. This should allow for more interoperability for users who are using any variant of ES Modules. Addresses [#8090](https://github.com/cypress-io/cypress/issues/8090), [#15724](https://github.com/cypress-io/cypress/issues/15724), [#21805](https://github.com/cypress-io/cypress/issues/21805), [#22273](https://github.com/cypress-io/cypress/issues/22273), [#22747](https://github.com/cypress-io/cypress/issues/22747), [#23141](https://github.com/cypress-io/cypress/issues/23141), [#25958](https://github.com/cypress-io/cypress/issues/25958), [#25959](https://github.com/cypress-io/cypress/issues/25959), [#26606](https://github.com/cypress-io/cypress/issues/26606), [#27359](https://github.com/cypress-io/cypress/issues/27359), [#27450](https://github.com/cypress-io/cypress/issues/27450), [#28442](https://github.com/cypress-io/cypress/issues/28442), [#30318](https://github.com/cypress-io/cypress/issues/30318), [#30718](https://github.com/cypress-io/cypress/issues/30718), [#30907](https://github.com/cypress-io/cypress/issues/30907), [#30915](https://github.com/cypress-io/cypress/issues/30915), [#30925](https://github.com/cypress-io/cypress/issues/30925), [#30954](https://github.com/cypress-io/cypress/issues/30954) and [#31185](https://github.com/cypress-io/cypress/issues/31185).
 - `@cypress/vite-dev-server` now supports [vite](https://vite.dev/) version 7. Addresses[#31882](https://github.com/cypress-io/cypress/issues/31882).
+
+**Bugfixes:**
+
+- Fixed an issue where Create from Component feature might not be able to parse React components from project files. Fixed in [#31457](https://github.com/cypress-io/cypress/pull/31457).
 
 **Misc:**
 
@@ -37,9 +42,19 @@ _Released 07/15/2025 (PENDING)_
 - Upgraded bundled Node.js version from `20.18.1` to `22.15.1`. Addresses [#31257](https://github.com/cypress-io/cypress/issues/31257). Addressed in [#31912](https://github.com/cypress-io/cypress/pull/31912).
 - Upgraded bundled Chromium version from `130.0.6723.137` to `136.0.7103.149`. Addresses [#31257](https://github.com/cypress-io/cypress/issues/31257). Addressed in [#31912](https://github.com/cypress-io/cypress/pull/31912).
 
+## 14.5.3
+
+_Released 7/30/2025 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed missing support for setting an absolute path for `component.indexHtmlFile` in `@cypress/webpack-dev-server`. Fixes [#31819](https://github.com/cypress-io/cypress/issues/31819).
+- Fixed an issue where TypeScript ESM projects using `.js` and `.mjs` extensions where not resolving correctly within `@cypress/webpack-batteries-included-preprocessor`. Addressed in [#31994](https://github.com/cypress-io/cypress/pull/31994).
+- Fixed an issue in `@cypress/angular` where component instance fields were not reference safe and were being overwritten. Addresses [#31238](https://github.com/cypress-io/cypress/issues/31238) and [#31983](https://github.com/cypress-io/cypress/issues/31983).
+
 ## 14.5.2
 
-_Released 7/15/2025 (PENDING)_
+_Released 7/15/2025_
 
 **Bugfixes:**
 
