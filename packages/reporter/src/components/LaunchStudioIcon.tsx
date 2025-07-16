@@ -20,7 +20,7 @@ export const LaunchStudioIcon: React.FC<LaunchStudioIconProps> = ({ content, onC
         className='runnable-controls-studio'
         data-cy='launch-studio'
       >
-        <IconChevronRightMedium />
+        <IconChevronRightMedium style={{ marginTop: '-1px' }} />
       </a>
     </Tooltip>
   )
