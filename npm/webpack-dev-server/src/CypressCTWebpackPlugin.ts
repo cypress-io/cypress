@@ -118,8 +118,9 @@ export class CypressCTWebpackPlugin {
     // TODO: don't use a sync fs method here
     // eslint-disable-next-line no-restricted-syntax
     const utimesSync: UtimesSync = inputFileSystem.fileSystem.utimesSync ?? fs.utimesSync
+    const indexHtmlFilePath = path.isAbsolute(this.indexHtmlFile) ? this.indexHtmlFile : path.join(this.projectRoot, this.indexHtmlFile)
 
-    utimesSync(path.join(this.projectRoot, this.indexHtmlFile), new Date(), new Date())
+    utimesSync(indexHtmlFilePath, new Date(), new Date())
   }
 
   /**
