@@ -3,7 +3,7 @@
 ## Migration Checklist
 
 ### Batch 1: Small npm utilities
-- [ ] npm/grep
+- [x] npm/grep
 - [ ] npm/puppeteer
 - [ ] npm/mount-utils
 - [ ] npm/cypress-schematic
@@ -150,10 +150,161 @@ For each package in the batch:
 
 ---
 
+## Troubleshooting Guide
+
+### Common Issues and Solutions
+
+#### 1. **Jiti Version Compatibility Error**
+**Error:** `Error: You are using an outdated version of the 'jiti' library. Please update to the latest version of 'jiti' to ensure compatibility and access to the latest features.`
+
+**Solution:**
+- Add `jiti: "^2.4.2"` to the package's `devDependencies`
+- ESLint 9.x requires jiti >= 2.2.0, but monorepo dependencies might provide older versions
+
+#### 2. **TypeScript Project Service Errors**
+**Error:** `was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject`
+
+**Solutions:**
+- **Create/update `tsconfig.json`** that extends the base config:
+  ```json
+  {
+    "extends": "../../packages/ts/tsconfig.json",
+    "compilerOptions": {
+      "esModuleInterop": true,
+      "allowJs": true,
+      "checkJs": false
+    },
+    "include": [
+      "src/**/*",
+      "cypress/**/*",
+      "*.js",
+      "*.ts",
+      "*.jsx",
+      "*.tsx"
+    ],
+    "exclude": ["node_modules", "dist"]
+  }
+  ```
+- **For Cypress packages**, ensure `cypress/tsconfig.json` includes all test files:
+  ```json
+  {
+    "compilerOptions": {
+      "types": ["cypress"]
+    },
+    "include": [
+      "**/*.ts",
+      "**/*.js"
+    ]
+  }
+  ```
+- **Add `allowDefaultProject: true`** to ESLint config for problematic files:
+  ```ts
+  {
+    files: ['**/*.js', '**/*.ts', '**/*.jsx', '**/*.tsx'],
+    languageOptions: {
+      parserOptions: {
+        allowDefaultProject: true,
+      },
+    },
+  }
+  ```
+
+#### 3. **Skip Comment Rule Violations**
+**Error:** `@cypress/dev/skip-comment` rule violations for `it.skip()` tests
+
+**Solution:**
+- Replace `eslint-disable-next-line @cypress/dev/skip-comment` with proper explanatory comments:
+  ```js
+  // NOTE: This test is skipped for demonstration purposes
+  it.skip('first test', () => {})
+  ```
+
+#### 4. **Rule Mismatches in Pre-commit Hook**
+**Error:** ESLint rule violations that don't match the package's ESLint configuration (e.g., `Unexpected console statement` when `no-console` is off in package config)
+
+**Root Cause:** Pre-commit hook runs ESLint from root directory using root-level config, not package-specific config
+
+**Solution:**
+- Add package-specific lint-staged rule in root `package.json`:
+  ```json
+  "lint-staged": {
+    "npm/grep/**/*.{js,jsx,ts,tsx}": "cd npm/grep && eslint --fix",
+    "*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix"
+  }
+  ```
+
+#### 5. **ESLint Script Changes**
+**Before ESLint 9.x:**
+```json
+"lint": "eslint . --ext .js,.ts"
+```
+
+**After ESLint 9.x:**
+```json
+"lint": "eslint ."
+```
+ESLint 9.x auto-detects file extensions, so `--ext` flag is no longer needed.
+
+#### 6. **Package Dependencies**
+**Required additions to `package.json`:**
+```json
+{
+  "devDependencies": {
+    "@packages/eslint-config": "0.0.0-development",
+    "eslint": "^9.18.0",
+    "jiti": "^2.4.2"
+  }
+}
+```
+
+#### 7. **Custom Package Rules**
+If a package needs custom rules, extend the base config:
+```ts
+import baseConfig from '@packages/eslint-config'
+
+export default [
+  ...baseConfig,
+  {
+    files: ['**/*.js', '**/*.ts', '**/*.jsx', '**/*.tsx'],
+    rules: {
+      'no-console': 'off',
+      'no-restricted-syntax': 'off',
+    },
+  },
+  {
+    files: ['cypress/**/*.js', 'cypress/**/*.ts'],
+    languageOptions: {
+      globals: {
+        Cypress: 'readonly',
+        cy: 'readonly',
+      },
+    },
+  },
+]
+```
+
+### Migration Checklist Template
+
+For each package, ensure you've completed:
+
+- [ ] Removed `.eslintrc*` files
+- [ ] Created `eslint.config.ts` with proper configuration
+- [ ] Added required dependencies (`eslint`, `@packages/eslint-config`, `jiti`)
+- [ ] Created/updated `tsconfig.json` that extends base config
+- [ ] Updated ESLint scripts (removed `--ext` flag)
+- [ ] Fixed skip comment violations
+- [ ] Resolved console statement issues
+- [ ] Added package-specific lint-staged rule (if needed)
+- [ ] Ran `yarn lint` successfully
+- [ ] Ran tests to ensure nothing broke
+
+---
+
 ## Tips
 - Use a tracking issue or project board to coordinate and document progress.
 - If a package is especially noisy, consider splitting it into its own PR.
 - Communicate with the team about the migration timeline and process.
+- **Test the pre-commit hook** before pushing to ensure lint-staged works correctly.
 
 ---
 
