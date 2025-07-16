@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { AppState } from './app-state'
 import scroller from './scroller'
 
@@ -12,7 +12,7 @@ export const useScrollIntoView = ({ appState, testState, isStudioActive = false 
   const containerRef = useRef<HTMLDivElement>(null)
   const [isMounted, setIsMounted] = useState(false)
 
-  const _scrollIntoView = () => {
+  const _scrollIntoView = useCallback(() => {
     if (appState.autoScrollingEnabled && (appState.isRunning || isStudioActive) && testState !== 'processing') {
       window.requestAnimationFrame(() => {
         // since this executes async in a RAF the ref might be null
@@ -21,14 +21,14 @@ export const useScrollIntoView = ({ appState, testState, isStudioActive = false 
         }
       })
     }
-  }
+  }, [appState.autoScrollingEnabled, appState.isRunning, isStudioActive, testState])
 
   useEffect(() => {
     _scrollIntoView()
     if (!isMounted) {
       setIsMounted(true)
     }
-  })
+  }, [_scrollIntoView])
 
   return {
     containerRef,
