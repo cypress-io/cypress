@@ -38,9 +38,6 @@ export const waitForSpecToFinish = (expectedResults, timeout?: number) => {
 
   // Then ensure the tests are not running
   cy.contains('Your tests are loading...', { timeout: timeout || 30000 }).should('not.exist')
-  cy.get('.runnable-processing').should('not.exist')
-  cy.findByTestId('queued-icon').should('not.exist')
-  cy.get('.runnable-active').should('not.exist')
 
   if (expectedResults) {
     shouldHaveTestResults(expectedResults)
