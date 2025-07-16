@@ -256,26 +256,8 @@ const findTestInSuite = (suite, fn: any = _.identity) => {
   }
 }
 
-const findSuiteInSuite = (suite, fn: any = _.identity) => {
-  if (fn(suite)) {
-    return suite
-  }
-
-  for (const childSuite of suite.suites) {
-    const foundSuite = findSuiteInSuite(childSuite, fn)
-
-    if (foundSuite) {
-      return foundSuite
-    }
-  }
-}
-
 const suiteHasTest = (suite, testId) => {
   return findTestInSuite(suite, (test) => test.id === testId)
-}
-
-const suiteHasSuite = (suite, suiteId) => {
-  return findSuiteInSuite(suite, (s) => s.id === suiteId)
 }
 
 // same as findTestInSuite but iterates backwards
@@ -654,7 +636,7 @@ const pruneEmptySuites = (rootSuite, testFilter: NonNullable<TestFilter>) => {
   return totalUnfilteredTests
 }
 
-const normalizeAll = (suite, initialTests = {}, testFilter, setTestsById, setTests, getRunnableId, getHookId, setOnlyTestId, getOnlyTestId, getOnlySuiteId, getNewTestLineNumber) => {
+const normalizeAll = (suite, initialTests = {}, testFilter, setTestsById, setTests, getRunnableId, getHookId, setOnlyTestId, getOnlyTestId, getNewTestLineNumber) => {
   let totalUnfilteredTests = 0
 
   // Empty suites don't have any impact in run mode so let's avoid this extra work.
@@ -670,8 +652,7 @@ const normalizeAll = (suite, initialTests = {}, testFilter, setTestsById, setTes
   })
 
   // if we dont have any tests then bail
-  // unless we're using studio to add to the root suite
-  if (!hasTests && getOnlySuiteId() !== 'r1') {
+  if (!hasTests) {
     return
   }
 
@@ -681,7 +662,7 @@ const normalizeAll = (suite, initialTests = {}, testFilter, setTestsById, setTes
   // traversing through it multiple times
   const tests: Record<string, any> = {}
 
-  const normalizedSuite = normalize(suite, tests, initialTests, getRunnableId, getHookId, setOnlyTestId, getOnlyTestId, getOnlySuiteId, getNewTestLineNumber)
+  const normalizedSuite = normalize(suite, tests, initialTests, getRunnableId, getHookId, setOnlyTestId, getOnlyTestId, getNewTestLineNumber)
 
   if (setTestsById) {
     // use callback here to hand back
@@ -721,7 +702,7 @@ const normalizeAll = (suite, initialTests = {}, testFilter, setTestsById, setTes
   return normalizedSuite
 }
 
-const normalize = (runnable, tests, initialTests, getRunnableId, getHookId, setOnlyTestId, getOnlyTestId, getOnlySuiteId, getNewTestLineNumber) => {
+const normalize = (runnable, tests, initialTests, getRunnableId, getHookId, setOnlyTestId, getOnlyTestId, getNewTestLineNumber) => {
   const normalizeRunnable = (runnable) => {
     if (!runnable.id) {
       runnable.id = getRunnableId()
@@ -780,7 +761,7 @@ const normalize = (runnable, tests, initialTests, getRunnableId, getHookId, setO
   }
 
   const suiteHasOnlyId = (suite) => {
-    return suiteHasTest(suite, getOnlyTestId()) || suiteHasSuite(suite, getOnlySuiteId())
+    return suiteHasTest(suite, getOnlyTestId())
   }
 
   const normalizedRunnable = normalizeRunnable(runnable)
@@ -811,7 +792,7 @@ const normalize = (runnable, tests, initialTests, getRunnableId, getHookId, setO
     _.each({ tests: runnableTests, suites: runnableSuites }, (_runnables, type) => {
       if (runnable[type]) {
         return normalizedRunnable[type] = _.compact(_.map(_runnables, (childRunnable) => {
-          const normalizedChild = normalize(childRunnable, tests, initialTests, getRunnableId, getHookId, setOnlyTestId, getOnlyTestId, getOnlySuiteId, getNewTestLineNumber)
+          const normalizedChild = normalize(childRunnable, tests, initialTests, getRunnableId, getHookId, setOnlyTestId, getOnlyTestId, getNewTestLineNumber)
 
           if (type === 'tests' && onlyIdMode()) {
             if (normalizedChild.id === getOnlyTestId()) {
@@ -900,7 +881,7 @@ const normalize = (runnable, tests, initialTests, getRunnableId, getHookId, setO
       suite.suites = []
 
       normalizedSuite.suites = _.compact(_.map(suiteSuites, (childSuite) => {
-        const normalizedChildSuite = normalize(childSuite, tests, initialTests, getRunnableId, getHookId, setOnlyTestId, getOnlyTestId, getOnlySuiteId, getNewTestLineNumber)
+        const normalizedChildSuite = normalize(childSuite, tests, initialTests, getRunnableId, getHookId, setOnlyTestId, getOnlyTestId, getNewTestLineNumber)
 
         if ((suite._onlySuites.indexOf(childSuite) !== -1) || filterOnly(normalizedChildSuite, childSuite)) {
           if (onlyIdMode()) {
@@ -1332,7 +1313,6 @@ export default {
     }
     let _startTime: string | null = null
     let _onlyTestId = null
-    let _onlySuiteId = null
     let _newTestLineNumber = null
 
     const getRunnableId = () => {
@@ -1391,12 +1371,6 @@ export default {
     }
 
     const getOnlyTestId = () => _onlyTestId
-
-    const setOnlySuiteId = (suiteId) => {
-      _onlySuiteId = suiteId
-    }
-
-    const getOnlySuiteId = () => _onlySuiteId
 
     const setNewTestLineNumber = (newTestLineNumber) => {
       _newTestLineNumber = newTestLineNumber
@@ -1586,7 +1560,6 @@ export default {
     return {
       onSpecError,
       setOnlyTestId,
-      setOnlySuiteId,
       setNewTestLineNumber,
       getNewTestLineNumber,
       normalizeAll (tests, skipCollectingLogs, testFilter) {
@@ -1616,7 +1589,6 @@ export default {
           getHookId,
           setOnlyTestId,
           getOnlyTestId,
-          getOnlySuiteId,
           getNewTestLineNumber,
         )
       },

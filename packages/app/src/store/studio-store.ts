@@ -222,20 +222,16 @@ export const useStudioStore = defineStore('studioRecorder', {
     setup (config) {
       const studio = this._getUrlParams()
 
-      if (studio.testId) {
+      if (studio.newTestLineNumber) {
+        this.setNewTestLineNumber(studio.newTestLineNumber)
+      } else if (studio.testId) {
         this.setTestId(studio.testId)
-      }
-
-      if (studio.suiteId) {
+      } else if (studio.suiteId) {
         this.setSuiteId(studio.suiteId)
       }
 
       if (studio.url) {
         this._initialUrl = studio.url
-      }
-
-      if (studio.newTestLineNumber) {
-        this.setNewTestLineNumber(studio.newTestLineNumber)
       }
 
       // if we have an existing test or are creating a new test, we need to start loading
@@ -251,12 +247,8 @@ export const useStudioStore = defineStore('studioRecorder', {
     initialize () {
       if (this.newTestLineNumber) {
         getCypress().runner.setNewTestLineNumber(this.newTestLineNumber)
-      } else {
-        if (this.suiteId) {
-          getCypress().runner.setOnlySuiteId(this.suiteId)
-        } else if (this.testId) {
-          getCypress().runner.setOnlyTestId(this.testId)
-        }
+      } else if (this.testId) {
+        getCypress().runner.setOnlyTestId(this.testId)
       }
     },
 
