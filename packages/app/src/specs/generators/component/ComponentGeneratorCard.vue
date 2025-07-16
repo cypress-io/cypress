@@ -4,7 +4,6 @@
     :header="t('createSpec.component.importFromComponent.header')"
     :description="t('createSpec.component.importFromComponent.description')"
     :icon="DocumentCodeIcon"
-    :badge-text="t('versions.new')"
   />
 </template>
 
