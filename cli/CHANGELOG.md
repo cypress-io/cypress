@@ -18,6 +18,7 @@ _Released 07/22/2025 (PENDING)_
   - `@cypress/angular` now requires a minimum of `zone.js` `0.14.0`. Addresses [#31582](https://github.com/cypress-io/cypress/issues/31582).
   - The Cypress configuration wizard for Component Testing supports TypeScript 5.0 or greater. Addresses [#31187](https://github.com/cypress-io/cypress/issues/31187).
   - `@cypress/vite-dev-server` is now an ESM only package. You will no longer be able to use this package from a CommonJS context. Addresses [#28373](https://github.com/cypress-io/cypress/issues/28373), [#29557](https://github.com/cypress-io/cypress/issues/29557) and [#31882](https://github.com/cypress-io/cypress/issues/31882).
+    - Removed support for Vite 4 inside `@cypress/vite-dev-server`. The minimum Vite version is `5`. Addresses [#32038](https://github.com/cypress-io/cypress/issues/32038).
 
 **Features:**
 
@@ -25,6 +26,10 @@ _Released 07/22/2025 (PENDING)_
 - Selectors accepted in the `selectorPriority` of the `SelectorPlayground` (renamed to `ElementSelector`) API have been expanded to accept `name` and `attributes:*`. Additionally, the default selector priority used by Cypress now includes `name`. Addresses [#31801](https://github.com/cypress-io/cypress/issues/30309) and [#6876](https://github.com/cypress-io/cypress/issues/6876). Addressed in [#31889](https://github.com/cypress-io/cypress/pull/31889).
 - [`tsx`](https://tsx.is/) is now used in all cases to run the Cypress config, replacing [ts-node](https://github.com/TypeStrong/ts-node) for TypeScript and Node for commonjs/ESM. This should allow for more interoperability for users who are using any variant of ES Modules. Addresses [#8090](https://github.com/cypress-io/cypress/issues/8090), [#15724](https://github.com/cypress-io/cypress/issues/15724), [#21805](https://github.com/cypress-io/cypress/issues/21805), [#22273](https://github.com/cypress-io/cypress/issues/22273), [#22747](https://github.com/cypress-io/cypress/issues/22747), [#23141](https://github.com/cypress-io/cypress/issues/23141), [#25958](https://github.com/cypress-io/cypress/issues/25958), [#25959](https://github.com/cypress-io/cypress/issues/25959), [#26606](https://github.com/cypress-io/cypress/issues/26606), [#27359](https://github.com/cypress-io/cypress/issues/27359), [#27450](https://github.com/cypress-io/cypress/issues/27450), [#28442](https://github.com/cypress-io/cypress/issues/28442), [#30318](https://github.com/cypress-io/cypress/issues/30318), [#30718](https://github.com/cypress-io/cypress/issues/30718), [#30907](https://github.com/cypress-io/cypress/issues/30907), [#30915](https://github.com/cypress-io/cypress/issues/30915), [#30925](https://github.com/cypress-io/cypress/issues/30925), [#30954](https://github.com/cypress-io/cypress/issues/30954) and [#31185](https://github.com/cypress-io/cypress/issues/31185).
 - `@cypress/vite-dev-server` now supports [vite](https://vite.dev/) version 7. Addresses[#31882](https://github.com/cypress-io/cypress/issues/31882).
+
+**Bugfixes:**
+
+- Fixed an issue where Create from Component feature might not be able to parse React components from project files. Fixed in [#31457](https://github.com/cypress-io/cypress/pull/31457).
 
 **Misc:**
 
@@ -44,6 +49,8 @@ _Released 7/30/2025 (PENDING)_
 **Bugfixes:**
 
 - Fixed missing support for setting an absolute path for `component.indexHtmlFile` in `@cypress/webpack-dev-server`. Fixes [#31819](https://github.com/cypress-io/cypress/issues/31819).
+- Fixed an issue where TypeScript ESM projects using `.js` and `.mjs` extensions where not resolving correctly within `@cypress/webpack-batteries-included-preprocessor`. Addressed in [#31994](https://github.com/cypress-io/cypress/pull/31994).
+- Fixed an issue in `@cypress/angular` where component instance fields were not reference safe and were being overwritten. Addresses [#31238](https://github.com/cypress-io/cypress/issues/31238) and [#31983](https://github.com/cypress-io/cypress/issues/31983).
 
 ## 14.5.2
 

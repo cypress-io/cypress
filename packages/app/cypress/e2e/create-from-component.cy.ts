@@ -256,5 +256,31 @@ describe('Create from component card', () => {
         cy.findAllByTestId('card').eq(0).as('ComponentCard')
       }, 'src/specs-folder/App.cy.jsx')
     })
+
+    // This test verifies that the Create from Component functionality works correctly
+    // even when a project has a conflicting babel configuration file.
+    // The babel config in this test project includes TypeScript preset and transform plugins
+    // that interfere with react-docgen parsing without passing `configFile: false` to the babel parser.
+    context('project with conflicting babel config', () => {
+      it('parses components out of a file', () => {
+        cy.scaffoldProject('no-specs-babel-conflict')
+        cy.openProject('no-specs-babel-conflict', ['--component'])
+        cy.startAppServer('component')
+        cy.visitApp()
+        cy.specsPageIsVisible('new-project')
+
+        cy.findAllByTestId('card').eq(0).as('ComponentCard')
+
+        cy.get('@ComponentCard').click()
+
+        // Expand the row
+        cy.findByText('App').should('be.visible').click()
+
+        // Click on 'app' component
+        cy.get('[data-cy="react-component-row"]').should('have.length', 2)
+        cy.get('[data-cy="react-component-row"]').eq(0).should('contain', 'App')
+        cy.get('[data-cy="react-component-row"]').eq(1).should('contain', 'AppWithDefaults')
+      })
+    })
   })
 })

@@ -134,5 +134,29 @@ describe('CodegenActions', () => {
 
       expect(components).to.have.length(0)
     })
+
+    it('ensure that Babel is instructed to not use a config file', async () => {
+      let capturedOptions = null
+      const mockReactDocgen = {
+        parse: (src, options) => {
+          capturedOptions = options
+
+          return [{ displayName: 'TestComponent' }]
+        },
+        builtinResolvers: {
+          FindExportedDefinitionsResolver: class {
+            resolve () {
+              return []
+            }
+          },
+        },
+      }
+
+      const filePath = path.join(process.cwd(), 'test/unit/actions/project/counter-class.jsx')
+
+      await actions.getReactComponentsFromFile(filePath, mockReactDocgen)
+
+      expect(capturedOptions.babelOptions.configFile).to.equal(false)
+    })
   })
 })

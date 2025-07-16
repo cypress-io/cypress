@@ -1,6 +1,5 @@
 import { vi, describe, it, beforeEach, expect } from 'vitest'
 import { EventEmitter } from 'events'
-import * as vite4 from 'vite-4'
 import * as vite5 from 'vite-5'
 import * as vite6 from 'vite-6'
 import * as vite7 from 'vite-7'
@@ -20,11 +19,8 @@ const getViteDevServerConfig = (projectRoot: string) => {
     framework: 'react',
   } as unknown as ViteDevServerConfig
 }
-const MAJOR_VERSIONS: ({version: 4, vite: any } | {version: 5, vite: any } | {version: 6, vite: any } | {version: 7, vite: any })[] = [
-  {
-    version: 4,
-    vite: vite4,
-  },
+const MAJOR_VERSIONS: ({version: 5, vite: any } | {version: 6, vite: any } | {version: 7, vite: any })[] = [
+
   {
     version: 5,
     vite: vite5,

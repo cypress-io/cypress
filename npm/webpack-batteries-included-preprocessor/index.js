@@ -15,6 +15,8 @@ class TsConfigNotFoundError extends Error {
   }
 }
 
+const typescriptExtensionRegex = /\.m?tsx?$/
+
 const hasTsLoader = (rules) => {
   return rules.some((rule) => {
     if (!rule.use || !Array.isArray(rule.use)) return false
@@ -57,7 +59,7 @@ const addTypeScriptConfig = (file, options) => {
   // node will try to load a projects tsconfig.json instead of the node
 
   webpackOptions.module.rules.push({
-    test: /\.tsx?$/,
+    test: typescriptExtensionRegex,
     exclude: [/node_modules/],
     use: [
       {
@@ -77,6 +79,7 @@ const addTypeScriptConfig = (file, options) => {
   })
 
   webpackOptions.resolve.extensions = webpackOptions.resolve.extensions.concat(['.ts', '.tsx'])
+  webpackOptions.resolve.extensionAlias = webpackOptions.resolve.extensionAlias || { '.js': ['.ts', '.js'], '.mjs': ['.mts', '.mjs'] }
   webpackOptions.resolve.plugins = [new TsconfigPathsPlugin({
     configFile: configFile?.path,
     silent: true,
@@ -203,8 +206,6 @@ const getDefaultWebpackOptions = () => {
     },
   }
 }
-
-const typescriptExtensionRegex = /\.tsx?$/
 
 const preprocessor = (options = {}) => {
   return (file) => {
