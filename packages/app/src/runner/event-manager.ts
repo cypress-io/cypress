@@ -157,11 +157,6 @@ export class EventManager {
     })
 
     this.ws.on('watched:file:changed', () => {
-      // only cancel studio if cloud studio was not requested
-      if (!Cypress.env('LOCAL_STUDIO_PATH') && !Cypress.env('ENABLE_CLOUD_STUDIO')) {
-        this.studioStore.cancel()
-      }
-
       rerun()
     })
 
