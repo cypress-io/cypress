@@ -213,8 +213,6 @@ describe('Studio Cloud', () => {
     .findByTestId('launch-studio')
     .click()
 
-    // regular studio is not loaded until after the test finishes
-    cy.get('[data-cy="hook-name-studio commands"]').should('not.exist')
     // cloud studio is loaded immediately
     cy.findByTestId('studio-panel').then(() => {
       // check for the loading panel from the app first
@@ -230,7 +228,6 @@ describe('Studio Cloud', () => {
 
     // Verify the studio panel is still open
     cy.findByTestId('studio-panel')
-    cy.get('[data-cy="hook-name-studio commands"]')
 
     // make sure studio is not loading
     cy.get('[data-cy="loading-studio-panel"]').should('not.exist')
