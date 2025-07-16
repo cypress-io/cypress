@@ -184,6 +184,7 @@ export const useStudioStore = defineStore('studioRecorder', {
     clearRunnableIds () {
       this.testId = undefined
       this.suiteId = undefined
+      this.newTestLineNumber = undefined
     },
 
     openInstructionModal () {
@@ -1032,7 +1033,7 @@ export const useStudioStore = defineStore('studioRecorder', {
     },
 
     needsUrl: (state) => {
-      return state.isActive && !state.url && !state.isFailed && !!state.testId
+      return state.isActive && !state.url && !state.isFailed
     },
 
     testError: (state) => {
