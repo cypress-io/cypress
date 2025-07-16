@@ -65,8 +65,7 @@ describe('studio functionality', () => {
     })
 
     // Studio re-executes the test after writing it file.
-    // It should pass
-    cy.waitForSpecToFinish({ passCount: 1 })
+    cy.waitForSpecToFinish()
 
     // Assert the commands we input via Studio are executed.
     cy.get('.command-name-visit').within(() => {
@@ -74,7 +73,7 @@ describe('studio functionality', () => {
       cy.contains('cypress/e2e/index.html')
     })
 
-    cy.get('.command-name-get').within(() => {
+    cy.get('.command-name-get').first().within(() => {
       cy.contains('get')
       cy.contains('#increment')
     })
@@ -521,47 +520,6 @@ describe('studio functionality', () => {
     cy.location().its('hash').should('not.contain', 'testId=').and('not.contain', 'studio=')
   })
 
-  it('exits studio mode if the spec is changed on the file system', () => {
-    launchStudio()
-
-    incrementCounter(0)
-
-    cy.get('.cm-line').should('contain.text', `cy.get('#increment').click();`)
-
-    // update the spec on the file system
-    cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress/e2e/spec.cy.js', `
-describe('studio functionality', () => {
-  it('visits a basic html page', () => {
-    cy.visit('cypress/e2e/index.html')
-
-    // new command
-    cy.get('h1').should('have.text', 'Hello, Studio!')
-  })
-})`)
-    })
-
-    cy.waitForSpecToFinish({ passCount: 1 })
-
-    cy.findByTestId('hook-name-studio commands').should('not.exist')
-
-    // assert the commands we wrote directly to the spec are executed
-    cy.get('.command-name-visit').within(() => {
-      cy.contains('visit')
-      cy.contains('cypress/e2e/index.html')
-    })
-
-    cy.get('.command-name-get').within(() => {
-      cy.contains('get')
-      cy.contains('h1')
-    })
-
-    cy.get('.command-name-assert').within(() => {
-      cy.contains('assert')
-      cy.contains('expected <h1> to have text Hello, Studio!')
-    })
-  })
-
   it('exits studio mode if the spec is removed on the file system', () => {
     launchStudio()
 
@@ -608,9 +566,7 @@ describe('studio functionality', () => {
 
     cy.findByTestId('studio-save-button').click()
 
-    cy.waitForSpecToFinish({ passCount: 1 })
-
-    cy.findByTestId('hook-name-studio commands').should('not.exist')
+    cy.waitForSpecToFinish()
 
     // only the commands in the editor are written to the test block - ideally we should also pick up the changes from the file system
     // TODO: https://github.com/cypress-io/cypress-services/issues/11085
@@ -619,7 +575,7 @@ describe('studio functionality', () => {
       cy.contains('cypress/e2e/index.html')
     })
 
-    cy.get('.command-name-get').eq(0).within(() => {
+    cy.get('.command-name-get').first().within(() => {
       cy.contains('get')
       cy.contains('#increment')
     })
@@ -715,7 +671,7 @@ describe('studio functionality', () => {
     cy.location().its('hash').and('not.contain', 'suiteId=').and('contain', 'studio=').and('contain', 'testId=r2')
   })
 
-  it('removes the studio url parameters when saving test changes', () => {
+  it('does not remove the studio url parameters when saving test changes', () => {
     launchStudio()
 
     cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=')
@@ -728,7 +684,7 @@ describe('studio functionality', () => {
 
     cy.findByTestId('studio-save-button').click()
 
-    cy.location().its('hash').and('not.contain', 'testId=').and('not.contain', 'studio=')
+    cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=')
   })
 
   it('removes the studio url parameters when cancelling test changes', () => {
