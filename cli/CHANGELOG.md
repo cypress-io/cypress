@@ -18,6 +18,7 @@ _Released 07/22/2025 (PENDING)_
   - `@cypress/angular` now requires a minimum of `zone.js` `0.14.0`. Addresses [#31582](https://github.com/cypress-io/cypress/issues/31582).
   - The Cypress configuration wizard for Component Testing supports TypeScript 5.0 or greater. Addresses [#31187](https://github.com/cypress-io/cypress/issues/31187).
   - `@cypress/vite-dev-server` is now an ESM only package. You will no longer be able to use this package from a CommonJS context. Addresses [#28373](https://github.com/cypress-io/cypress/issues/28373), [#29557](https://github.com/cypress-io/cypress/issues/29557) and [#31882](https://github.com/cypress-io/cypress/issues/31882).
+    - Removed support for Vite 4 inside `@cypress/vite-dev-server`. The minimum Vite version is `5`. Addresses [#32038](https://github.com/cypress-io/cypress/issues/32038).
 
 **Features:**
 
