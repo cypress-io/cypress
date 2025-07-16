@@ -73,6 +73,24 @@ it('can assert on the signal itself', () => {
   })
 })
 
+it('ensure mount is reference safe - test for https://github.com/cypress-io/cypress/issues/31983', () => {
+  const titleSignal = signal('Signals Required Component')
+  const countSignal = signal(0)
+
+  cy.mount(SignalsRequiredComponent, {
+    componentProperties: {
+      title: titleSignal,
+      count: countSignal,
+    },
+  }).then(({ component }) => {
+    expect(component.title).to.not.equal(titleSignal)
+    expect(component.title()).to.equal('Signals Required Component')
+
+    expect(component.count).to.not.equal(countSignal)
+    expect(component.count()).to.equal(0)
+  })
+})
+
 // @see https://angular.dev/guide/signals#computed-signals
 it('allows use of computed signals', () => {
   const countSignal = signal(0)

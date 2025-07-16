@@ -58,35 +58,6 @@ describe('getVite', () => {
   })
 
   describe('esm', () => {
-    describe('version 4', () => {
-      it('should return the correct ESM vite instance', async () => {
-        vi.mock('vite-4/package.json', () => {
-          return {
-            default: {
-              version: '4.0.0',
-              exports: {
-                '.': {
-                  import: '/mock/vite/dist/node/index.js',
-                  require: '/mock/vite/index.cjs',
-                },
-              },
-            },
-          }
-        })
-
-        const vite = await getVite({
-          // @ts-expect-error - mock config
-          cypressConfig: {
-            projectRoot: '4',
-          },
-        })
-
-        expect(vite).toEqual({
-          moduleFormat: 'esm',
-        })
-      })
-    })
-
     describe('version 5', () => {
       it('should return the correct ESM vite instance', async () => {
         vi.mock('vite-5/package.json', () => {
@@ -177,34 +148,6 @@ describe('getVite', () => {
   })
 
   describe('cjs', () => {
-    describe('version 4', () => {
-      it('should return the correct CJS vite instance', async () => {
-        vi.mock('vite-4-cjs/package.json', () => {
-          return {
-            default: {
-              version: '4.0.0',
-              exports: {
-                '.': {
-                  require: '/mock/vite/index.cjs',
-                },
-              },
-            },
-          }
-        })
-
-        const vite = await getVite({
-          // @ts-expect-error - mock config
-          cypressConfig: {
-            projectRoot: '4-cjs',
-          },
-        })
-
-        expect(vite).toEqual({
-          moduleFormat: 'cjs',
-        })
-      })
-    })
-
     describe('version 5', () => {
       it('should return the correct CJS vite instance', async () => {
         vi.mock('vite-5-cjs/package.json', () => {
