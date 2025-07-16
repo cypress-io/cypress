@@ -48,8 +48,7 @@
           :value="inputValue"
           :placeholder="inputPlaceholder"
           aria-label="url of the application under test"
-          class="bg-gray-950 flex grow mr-[12px] leading-normal max-w-full text-gray-300 self-center hocus-link-default truncate w-full"
-          :class="autHeaderInputClassName"
+          class="aut-url-input bg-gray-950 flex grow mr-[12px] leading-normal max-w-full text-gray-300 self-center hocus-link-default truncate w-full"
           :style="{ zIndex: inputZIndex }"
           @input="setStudioUrl"
           @click="openExternally"
@@ -176,7 +175,6 @@ const props = defineProps<{
   getAutIframe: () => AutIframe
   shouldShowStudioButton: boolean
   studioBetaAvailable: boolean
-  autHeaderInputClassName: string
 }>()
 
 const showAlert = ref(false)

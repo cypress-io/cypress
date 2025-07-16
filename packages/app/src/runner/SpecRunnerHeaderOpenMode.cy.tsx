@@ -18,7 +18,6 @@ function renderWithGql (gqlVal: SpecRunnerHeaderFragment, shouldShowStudioButton
     getAutIframe={() => autIframe}
     shouldShowStudioButton={shouldShowStudioButton}
     studioBetaAvailable={studioBetaAvailable}
-    autHeaderInputClassName="test-aut-input"
   />)
 }
 

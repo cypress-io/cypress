@@ -76,7 +76,6 @@
             :get-aut-iframe="getAutIframeModel"
             :should-show-studio-button="shouldShowStudioButton"
             :studio-beta-available="studioBetaAvailable"
-            :aut-header-input-class-name="autHeaderInputClassName"
           />
         </HideDuringScreenshot>
 
@@ -108,7 +107,7 @@
             :on-studio-panel-close="handleStudioPanelClose"
             :event-manager="eventManager"
             :studio-status="studioStatus"
-            :aut-header-input-class-name="autHeaderInputClassName"
+            :aut-url-selector="autUrlSelector"
           />
         </HideDuringScreenshot>
       </template>
@@ -149,7 +148,8 @@ import { useStudioStore } from '../store/studio-store'
 import StudioPanel from '../studio/StudioPanel.vue'
 import { useSubscription } from '../graphql'
 
-const autHeaderInputClassName = 'aut-url-input'
+// this is used by the StudioPanel to access the AUT URL input
+const autUrlSelector = '.aut-url-input'
 
 const {
   preferredMinimumPanelWidth,
