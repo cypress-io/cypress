@@ -125,7 +125,8 @@ describe('Studio Cloud', () => {
     cy.percySnapshot()
   })
 
-  it('opens a cloud studio session with AI enabled', () => {
+  // TODO: un-skip this test when we enable Studio AI
+  it.skip('opens a cloud studio session with AI enabled', () => {
     cy.mockNodeCloudRequest({
       url: '/studio/testgen/n69px6/enabled',
       method: 'get',
@@ -204,6 +205,84 @@ describe('Studio Cloud', () => {
 
     // Verify that the AI output is correct
     cy.get('[data-cy="recommendation-editor"]').should('contain', aiOutput)
+  })
+
+  it('opens a cloud studio session with AI marked as coming soon', () => {
+    cy.mockNodeCloudRequest({
+      url: '/studio/testgen/n69px6/enabled',
+      method: 'get',
+      body: { enabled: true },
+    })
+
+    // this endpoint gets called twice, so we need to mock it twice
+    cy.mockNodeCloudRequest({
+      url: '/studio/testgen/n69px6/enabled',
+      method: 'get',
+      body: { enabled: true },
+    })
+
+    const aiOutput = 'cy.get(\'button\').should(\'have.text\', \'Increment\')'
+
+    cy.mockNodeCloudStreamingRequest({
+      url: '/studio/testgen/n69px6/generate',
+      method: 'post',
+      body: { recommendations: [{ content: aiOutput }] },
+    })
+
+    cy.mockStudioFullSnapshot({
+      fullSnapshot: {
+        id: 1,
+        nodeType: 1,
+        nodeName: 'div',
+        localName: 'div',
+        nodeValue: 'div',
+        children: [],
+        shadowRoots: [],
+      },
+      url: 'http://localhost:3000/cypress/e2e/index.html',
+    })
+
+    const deferred = pDefer()
+
+    loadProjectAndRunSpec({ enableCloudStudio: true })
+
+    cy.findByTestId('studio-panel').should('not.exist')
+
+    cy.intercept('/cypress/e2e/index.html', () => {
+      // wait for the promise to resolve before responding
+      // this will ensure the studio panel is loaded before the test finishes
+      return deferred.promise
+    }).as('indexHtml')
+
+    cy.contains('visits a basic html page')
+    .closest('.runnable-wrapper')
+    .findByTestId('launch-studio')
+    .click()
+
+    // regular studio is not loaded until after the test finishes
+    cy.get('[data-cy="hook-name-studio commands"]').should('not.exist')
+    // cloud studio is loaded immediately
+    cy.findByTestId('studio-panel').then(() => {
+      // check for the loading panel from the app first
+      cy.get('[data-cy="loading-studio-panel"]').should('be.visible')
+      // we've verified the studio panel is loaded, now resolve the promise so the test can finish
+      deferred.resolve()
+    })
+
+    cy.wait('@indexHtml')
+
+    // Studio re-executes spec before waiting for commands - wait for the spec to finish executing.
+    cy.waitForSpecToFinish()
+
+    // Verify the studio panel is still open
+    cy.findByTestId('studio-panel')
+    cy.get('[data-cy="hook-name-studio commands"]')
+
+    // make sure studio is not loading
+    cy.get('[data-cy="loading-studio-panel"]').should('not.exist')
+
+    // Verify that AI is coming soon
+    cy.get('[data-cy="ai-status-text"]').should('contain.text', 'Coming soon')
   })
 
   it('does not exit studio mode if the spec is changed on the file system', () => {
