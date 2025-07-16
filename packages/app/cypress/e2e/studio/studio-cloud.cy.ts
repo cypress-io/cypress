@@ -198,7 +198,7 @@ describe('Studio Cloud', () => {
 
     const deferred = pDefer()
 
-    loadProjectAndRunSpec({ enableCloudStudio: true })
+    loadProjectAndRunSpec()
 
     cy.findByTestId('studio-panel').should('not.exist')
 
