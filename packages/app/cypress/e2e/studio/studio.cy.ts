@@ -585,9 +585,9 @@ describe('studio functionality', () => {
     })
 
     cy.get('.open-in-ide-button').should('have.css', 'opacity', '0')
-    cy.get('[data-cy="studio-single-test-file-name"]').realHover()
+    cy.get('.spec-file-name').first().realHover()
     cy.get('.open-in-ide-button').first().should('have.css', 'opacity', '1').click()
-    cy.get('.open-in-ide-button').contains('Open in IDE')
+    cy.get('.open-in-ide-button').first().contains('Open in IDE')
 
     cy.percySnapshot()
   })
