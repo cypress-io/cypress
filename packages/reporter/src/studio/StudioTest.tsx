@@ -35,20 +35,22 @@ const getParentTitlesListElements = (parentTitles: string[]) => {
 }
 
 const StatusIcon = ({ test }: { test: Test }) => {
+  let className = 'state-icon'
+
   if (test.state === 'active') {
-    return <IconStatusRunningOutline data-cy='running-icon' size='16' fillColor='gray-700' strokeColor='indigo-400' />
+    return <IconStatusRunningOutline className={className} data-cy='running-icon' size='16' fillColor='gray-700' strokeColor='indigo-400' />
   }
 
   if (test.state === 'failed') {
-    return <IconStatusFailedSolid data-cy='failed-icon' size='16' strokeColor='red-400' />
+    return <IconStatusFailedSolid className={className} data-cy='failed-icon' size='16' strokeColor='red-400' />
   }
 
   if (test.state === 'passed') {
-    return <IconStatusPassedSolid data-cy='passed-icon' size='16' strokeColor='jade-400' />
+    return <IconStatusPassedSolid className={className} data-cy='passed-icon' size='16' strokeColor='jade-400' />
   }
 
   // processing state or default state
-  return <IconStatusQueuedOutline data-cy='queued-icon' size='16' strokeColor="gray-700" />
+  return <IconStatusQueuedOutline className={className} data-cy='queued-icon' size='16' strokeColor="gray-700" />
 }
 
 interface StudioTestProps {
