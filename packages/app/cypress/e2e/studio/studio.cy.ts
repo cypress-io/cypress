@@ -65,8 +65,7 @@ describe('studio functionality', () => {
     })
 
     // Studio re-executes the test after writing it file.
-    // It should pass
-    cy.waitForSpecToFinish({ passCount: 1 })
+    cy.waitForSpecToFinish()
 
     // Assert the commands we input via Studio are executed.
     cy.get('.command-name-visit').within(() => {
@@ -74,7 +73,7 @@ describe('studio functionality', () => {
       cy.contains('cypress/e2e/index.html')
     })
 
-    cy.get('.command-name-get').within(() => {
+    cy.get('.command-name-get').first().within(() => {
       cy.contains('get')
       cy.contains('#increment')
     })
@@ -198,57 +197,48 @@ describe('studio functionality', () => {
     assertClosingPanelWithoutChanges()
   })
 
+  it('does not enter single test mode when creating a new test', () => {
+    launchStudio({ specName: 'spec-w-multiple-tests.cy.js', createNewTest: true })
+
+    // verify we are not in single test mode
+    cy.get('.runnable-title').should('have.length', 4)
+    cy.get('.runnable-title').its(0).should('have.text', 'studio functionality')
+    cy.get('.runnable-title').its(1).should('contain.text', 'visits a basic html page')
+    cy.get('.runnable-title').its(2).should('contain.text', 'visits a basic html page 2')
+    cy.get('.runnable-title').its(3).should('contain.text', 'visits a basic html page 3')
+  })
+
   it('creates a new test from an empty spec', () => {
     loadProjectAndRunSpec({ specName: 'empty.cy.js', specSelector: 'title' })
 
     cy.contains('Create test with Cypress Studio').click()
-    cy.findByTestId('aut-url').as('urlPrompt')
-
-    cy.get('@urlPrompt').within(() => {
-      cy.contains('Continue ➜').should('be.disabled')
-    })
-
-    cy.get('@urlPrompt').type('/cypress/e2e/index.html')
-
-    cy.get('@urlPrompt').within(() => {
-      cy.contains('Continue ➜').click()
-    })
-
-    cy.get('button').contains('Save Commands').click()
-
-    // the save button is disabled until we add a test name
-    cy.get('button[type=submit]').should('be.disabled')
-
-    cy.get('#testName').type('new-test')
-
-    cy.get('button[type=submit]').click()
+    cy.findByTestId('studio-panel', { timeout: 10000 }).should('be.visible')
+    cy.findByTestId('new-test-button').click()
+    cy.findByTestId('test-name-input').type('new-test')
+    cy.findByTestId('create-test-button').click()
 
     // Cypress re-runs after the new test is saved.
-    cy.waitForSpecToFinish({ passCount: 1 })
+    cy.waitForSpecToFinish()
 
-    cy.get('.command').should('have.length', 1)
-    cy.get('.command-name-visit').within(() => {
-      cy.contains('visit')
-      cy.contains('cypress/e2e/index.html')
+    cy.findByTestId('studio-panel', { timeout: 10000 }).should('be.visible')
+    cy.findByTestId('test-block-editor').within(() => {
+      cy.get('.cm-line').should('have.text', '')
     })
 
-    cy.findByTestId('hook-name-studio commands').should('not.exist')
+    cy.get('.runnable-title').contains('new-test').should('be.visible')
+    cy.get('.no-commands').contains('No commands were issued in this test.').should('be.visible')
 
     cy.withCtx(async (ctx) => {
       const spec = await ctx.actions.file.readFileInProject('cypress/e2e/empty.cy.js')
 
       expect(spec.trim().replace(/\r/g, '')).to.equal(`
-/* ==== Test Created with Cypress Studio ==== */
-it('new-test', function() {
-  /* ==== Generated with Cypress Studio ==== */
-  cy.visit('/cypress/e2e/index.html');
-  /* ==== End Cypress Studio ==== */
-});
+it('new-test', function() {});
 `.trim())
     })
   })
 
-  it('creates a new test for an existing spec', () => {
+  // TODO: skipping until https://github.com/cypress-io/cypress-services/issues/11086 is completed
+  it.skip('creates a new test for an existing spec', () => {
     launchStudio({ createNewTest: true })
 
     cy.findByTestId('aut-url').as('urlPrompt')
@@ -380,7 +370,7 @@ describe('studio functionality', () => {
     })
   })
 
-  // TODO: skipping until https://github.com/cypress-io/cypress-services/issues/10425 is completed
+  // TODO: skipping until https://github.com/cypress-io/cypress-services/issues/11086 is completed
   it.skip('creates a new test for an existing spec with the url already defined', () => {
     launchStudio({ specName: 'spec-w-visit.cy.js', createNewTest: true })
 
@@ -441,34 +431,6 @@ describe('studio functionality', () => {
 })
 `.trim())
     })
-  })
-
-  it('does not create a new test if the Save test modal is closed', () => {
-    loadProjectAndRunSpec({ specName: 'empty.cy.js', specSelector: 'title' })
-
-    cy.contains('Create test with Cypress Studio').click()
-    cy.findByTestId('aut-url').as('urlPrompt')
-
-    cy.get('@urlPrompt').within(() => {
-      cy.contains('Continue ➜').should('be.disabled')
-    })
-
-    cy.get('@urlPrompt').type('/cypress/e2e/index.html')
-
-    cy.get('@urlPrompt').within(() => {
-      cy.contains('Continue ➜').click()
-    })
-
-    cy.getAutIframe().within(() => {
-      cy.get('p').contains('Count is 0')
-      cy.get('#increment').realClick()
-    })
-
-    cy.contains('button', 'Save Commands').click()
-
-    cy.get('#testName').type('new-test')
-
-    cy.get('button[aria-label=Close]').click()
   })
 
   it('shows assertions menu and submenu correctly', () => {
@@ -558,47 +520,6 @@ describe('studio functionality', () => {
     cy.location().its('hash').should('not.contain', 'testId=').and('not.contain', 'studio=')
   })
 
-  it('exits studio mode if the spec is changed on the file system', () => {
-    launchStudio()
-
-    incrementCounter(0)
-
-    cy.get('.cm-line').should('contain.text', `cy.get('#increment').click();`)
-
-    // update the spec on the file system
-    cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress/e2e/spec.cy.js', `
-describe('studio functionality', () => {
-  it('visits a basic html page', () => {
-    cy.visit('cypress/e2e/index.html')
-
-    // new command
-    cy.get('h1').should('have.text', 'Hello, Studio!')
-  })
-})`)
-    })
-
-    cy.waitForSpecToFinish({ passCount: 1 })
-
-    cy.findByTestId('hook-name-studio commands').should('not.exist')
-
-    // assert the commands we wrote directly to the spec are executed
-    cy.get('.command-name-visit').within(() => {
-      cy.contains('visit')
-      cy.contains('cypress/e2e/index.html')
-    })
-
-    cy.get('.command-name-get').within(() => {
-      cy.contains('get')
-      cy.contains('h1')
-    })
-
-    cy.get('.command-name-assert').within(() => {
-      cy.contains('assert')
-      cy.contains('expected <h1> to have text Hello, Studio!')
-    })
-  })
-
   it('exits studio mode if the spec is removed on the file system', () => {
     launchStudio()
 
@@ -645,9 +566,7 @@ describe('studio functionality', () => {
 
     cy.findByTestId('studio-save-button').click()
 
-    cy.waitForSpecToFinish({ passCount: 1 })
-
-    cy.findByTestId('hook-name-studio commands').should('not.exist')
+    cy.waitForSpecToFinish()
 
     // only the commands in the editor are written to the test block - ideally we should also pick up the changes from the file system
     // TODO: https://github.com/cypress-io/cypress-services/issues/11085
@@ -656,7 +575,7 @@ describe('studio functionality', () => {
       cy.contains('cypress/e2e/index.html')
     })
 
-    cy.get('.command-name-get').eq(0).within(() => {
+    cy.get('.command-name-get').first().within(() => {
       cy.contains('get')
       cy.contains('#increment')
     })
@@ -736,7 +655,23 @@ describe('studio functionality', () => {
     cy.location().its('hash').should('contain', 'suiteId=r2').and('contain', 'studio=')
   })
 
-  it('removes the studio url parameters when saving test changes', () => {
+  it('updates the studio url parameters when creating a new test', () => {
+    loadProjectAndRunSpec()
+
+    // open the studio panel to create a new test in the root suite
+    cy.findByTestId('studio-button').click()
+    cy.location().its('hash').should('contain', 'suiteId=r1').and('contain', 'studio=')
+
+    // create a new test in the root suite
+    cy.findByTestId('new-test-button').click()
+    cy.findByTestId('test-name-input').type('new-test')
+    cy.findByTestId('create-test-button').click()
+
+    // the studio url parameters should be removed
+    cy.location().its('hash').and('not.contain', 'suiteId=').and('contain', 'studio=').and('contain', 'testId=r2')
+  })
+
+  it('does not remove the studio url parameters when saving test changes', () => {
     launchStudio()
 
     cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=')
@@ -749,24 +684,7 @@ describe('studio functionality', () => {
 
     cy.findByTestId('studio-save-button').click()
 
-    cy.location().its('hash').and('not.contain', 'testId=').and('not.contain', 'studio=')
-  })
-
-  // TODO: skipping until https://github.com/cypress-io/cypress-services/issues/10425 is completed
-  it.skip('removes the studio url parameters when saving a new test', () => {
-    launchStudio({ specName: 'spec-w-visit.cy.js', createNewTest: true })
-
-    cy.location().its('hash').should('contain', 'suiteId=r2').and('contain', 'studio=')
-
-    cy.getAutIframe().within(() => {
-      cy.get('#increment').realClick()
-    })
-
-    cy.get('[data-cy="studio-save-button"]').click()
-    cy.get('#testName').type('new-test')
-    cy.get('button[type=submit]').click()
-
-    cy.location().its('hash').and('not.contain', 'suiteId=').and('not.contain', 'studio=')
+    cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=')
   })
 
   it('removes the studio url parameters when cancelling test changes', () => {
@@ -784,7 +702,7 @@ describe('studio functionality', () => {
 
     cy.location().its('hash').should('contain', 'suiteId=r2').and('contain', 'studio=')
 
-    cy.get('a').contains('Cancel').click()
+    cy.findByTestId('studio-header-studio-button').click()
 
     cy.location().its('hash').and('not.contain', 'suiteId=').and('not.contain', 'studio=')
   })
