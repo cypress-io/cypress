@@ -157,11 +157,6 @@ export class EventManager {
     })
 
     this.ws.on('watched:file:changed', () => {
-      // only cancel studio if cloud studio was not requested
-      if (!Cypress.env('LOCAL_STUDIO_PATH') && !Cypress.env('ENABLE_CLOUD_STUDIO')) {
-        this.studioStore.cancel()
-      }
-
       rerun()
     })
 
@@ -275,10 +270,6 @@ export class EventManager {
       this.ws.emit('open:file', url)
     })
 
-    const studioInit = () => {
-      rerun()
-    }
-
     const studioInitSuite = ({ suiteId, showUrlPrompt = true }: { suiteId: string, showUrlPrompt?: boolean }) => {
       this.studioStore.setSuiteId(suiteId)
       this.studioStore.setShowUrlPrompt(showUrlPrompt)
@@ -291,7 +282,9 @@ export class EventManager {
 
         this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
         this.studioStore.setCloudStudioSessionId(cloudStudioSessionId)
-        studioInit()
+        // when we enter studio with a new test, we don't want to rerun until
+        // the the test has been created, so we just set the studio active
+        this.studioStore.setActive(true)
       })
     }
 
@@ -306,7 +299,7 @@ export class EventManager {
 
         this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
         this.studioStore.setCloudStudioSessionId(cloudStudioSessionId)
-        studioInit()
+        rerun()
       })
     })
 
@@ -906,7 +899,7 @@ export class EventManager {
     Cypress.primaryOriginCommunicator.removeAllListeners()
     // clean up the cross origin logs in memory to prevent dangling references as the log objects themselves at this point will no longer be needed.
     crossOriginLogs = {}
-    this.studioStore.setInactive()
+    this.studioStore.setActive(false)
   }
 
   resetReporter () {

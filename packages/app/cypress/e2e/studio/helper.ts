@@ -32,19 +32,17 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTest = false, 
 
   if (createNewTest) {
     cy.get('@runnable-wrapper').realHover().findByTestId('create-new-test-button').click()
+    cy.findByTestId('studio-panel').should('be.visible')
+    cy.findByTestId('new-test-button').should('be.visible')
   } else {
     cy.get('@runnable-wrapper')
     .findByTestId('launch-studio')
     .click()
-  }
 
-  // Studio re-executes spec before waiting for commands - wait for the spec to finish executing.
-  cy.waitForSpecToFinish()
+    // Studio re-executes spec before waiting for commands - wait for the spec to finish executing.
+    cy.waitForSpecToFinish()
 
-  if (createNewTest) {
-    cy.get('span.runnable-title').contains('New Test').should('exist')
-  } else {
-    cy.get('[data-cy="hook-name-studio commands"]').should('exist')
+    cy.findByTestId('hook-name-studio commands').should('exist')
   }
 }
 
