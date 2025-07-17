@@ -2,7 +2,7 @@ import { launchStudio, loadProjectAndRunSpec, assertClosingPanelWithoutChanges }
 
 describe('Cypress Studio', () => {
   function incrementCounter (initialCount: number) {
-    cy.waitForSpecToFinish()
+    cy.waitForSpecToFinish(undefined, undefined, false)
 
     cy.getAutIframe().within(() => {
       cy.get('p').contains(`Count is ${initialCount}`)
@@ -88,7 +88,7 @@ describe('studio functionality', () => {
   it('updates an existing test with assertions', () => {
     launchStudio()
 
-    cy.waitForSpecToFinish()
+    cy.waitForSpecToFinish(undefined, undefined, false)
 
     cy.getAutIframe().within(() => {
       cy.get('#increment').rightclick().then(() => {
@@ -403,7 +403,7 @@ describe('studio functionality', () => {
   it('shows assertions menu and submenu correctly', () => {
     launchStudio()
 
-    cy.waitForSpecToFinish()
+    cy.waitForSpecToFinish(undefined, undefined, false)
 
     cy.contains('No commands were issued in this test.').should('not.exist')
 
@@ -442,7 +442,7 @@ describe('studio functionality', () => {
       win.location.href = win.location.href
     })
 
-    cy.waitForSpecToFinish()
+    cy.waitForSpecToFinish(undefined, undefined, false)
 
     // after reloading we should still be in studio mode but the commands should be removed
     // so the save button should be disabled
@@ -458,7 +458,7 @@ describe('studio functionality', () => {
 
     cy.get('button[aria-label="Rerun all tests"]').click()
 
-    cy.waitForSpecToFinish()
+    cy.waitForSpecToFinish(undefined, undefined, false)
     // after reloading we should still be in studio mode but the commands should be removed
     // the save button should be disabled since the commands were removed
     cy.findByTestId('studio-save-button').should('be.disabled')
@@ -524,7 +524,7 @@ describe('studio functionality', () => {
 
     cy.findByTestId('studio-save-button').click()
 
-    cy.waitForSpecToFinish()
+    cy.waitForSpecToFinish(undefined, undefined, false)
 
     // only the commands in the editor are written to the test block - ideally we should also pick up the changes from the file system
     // TODO: https://github.com/cypress-io/cypress-services/issues/11085
@@ -651,7 +651,7 @@ describe('studio functionality', () => {
 
     cy.findByTestId('record-button-recording').should('be.visible')
 
-    cy.waitForSpecToFinish()
+    cy.waitForSpecToFinish(undefined, undefined, false)
 
     cy.getAutIframe().within(() => {
       cy.get('#increment').realClick()
@@ -691,5 +691,35 @@ describe('studio functionality', () => {
     cy.findByTestId('studio-save-button').click()
 
     cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=')
+  })
+
+  it('removes the studio url parameters when closing studio existing test with the back button', () => {
+    launchStudio()
+
+    cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=')
+
+    cy.get('[data-cy="studio-back-button"]').click()
+
+    cy.location().its('hash').and('not.contain', 'testId=').and('not.contain', 'studio=')
+  })
+
+  it('removes the studio url parameters when closing studio existing test with the studio header button', () => {
+    launchStudio()
+
+    cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=')
+
+    cy.findByTestId('studio-header-studio-button').click()
+
+    cy.location().its('hash').and('not.contain', 'testId=').and('not.contain', 'studio=')
+  })
+
+  it('removes the studio url parameters when closing studio new test', () => {
+    launchStudio({ specName: 'spec-w-visit.cy.js', createNewTest: true })
+
+    cy.location().its('hash').should('contain', 'suiteId=r2').and('contain', 'studio=')
+
+    cy.findByTestId('studio-header-studio-button').click()
+
+    cy.location().its('hash').and('not.contain', 'suiteId=').and('not.contain', 'studio=')
   })
 })

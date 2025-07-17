@@ -17,23 +17,19 @@ declare global {
        * 3. Waits (with a timeout of 30s) for the Rerun all tests button to be present. This ensures all tests have completed
        *
        */
-      waitForSpecToFinish(expectedResults?: ExpectedResults, timeout?: number): void
+      waitForSpecToFinish(expectedResults?: ExpectedResults, timeout?: number, checkStats?: boolean): void
       verifyE2ESelected(): void
       verifyCtSelected(): void
     }
   }
 }
 
-export const waitForSpecToFinish = (expectedResults, timeout?: number) => {
-  // Check if we're in studio mode using URL hash parameters (same method as studio store)
-  cy.window().then((win) => {
-    const studioSingleTestActive = win.state?.studioSingleTestActive
-
-    if (!studioSingleTestActive) {
-      cy.get('.passed > .num').should('exist')
-      cy.get('.failed > .num').should('exist')
-    }
-  })
+export const waitForSpecToFinish = (expectedResults, timeout?: number, checkStats: boolean = true) => {
+  // when we're in studio single test mode, we don't have the stats so we can skip this
+  if (checkStats) {
+    cy.get('.passed > .num').should('exist')
+    cy.get('.failed > .num').should('exist')
+  }
 
   // Then ensure the tests are not running
   cy.contains('Your tests are loading...', { timeout: timeout || 30000 }).should('not.exist')
