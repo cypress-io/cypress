@@ -88,9 +88,10 @@ interface TestProps {
   model: TestModel
   studioEnabled: boolean
   canSaveStudioLogs: boolean
+  spec?: Cypress.Cypress['spec']
 }
 
-const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = events, appState: appStateProps = appState, scroller: scrollerProps = scroller, studioEnabled, canSaveStudioLogs }) => {
+const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = events, appState: appStateProps = appState, scroller: scrollerProps = scroller, studioEnabled, canSaveStudioLogs, spec }) => {
   const containerRef = useRef(null)
   const [isMounted, setIsMounted] = useState(false)
 
@@ -135,7 +136,10 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
   const _controls = () => {
     let controls: Array<JSX.Element> = []
 
-    if (studioEnabled && !appStateProps.studioActive && model.state !== 'pending') {
+    // Check if we're running all specs by looking at the spec relative path
+    const isRunningAllSpecs = spec?.relative === '__all'
+
+    if (studioEnabled && !appStateProps.studioActive && model.state !== 'pending' && !isRunningAllSpecs) {
       controls.push(
         <LaunchStudioIcon
           key={`studio-command-${model}`}

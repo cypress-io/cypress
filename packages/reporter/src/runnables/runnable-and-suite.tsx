@@ -25,6 +25,7 @@ interface SuiteProps {
   model: SuiteModel
   studioEnabled: boolean
   canSaveStudioLogs: boolean
+  spec?: Cypress.Cypress['spec']
 }
 
 const headerIconDefaultProps = {
@@ -33,7 +34,7 @@ const headerIconDefaultProps = {
   className: 'header-icon',
 }
 
-const Suite: React.FC<SuiteProps> = observer(({ eventManager = events, model, studioEnabled, canSaveStudioLogs }: SuiteProps) => {
+const Suite: React.FC<SuiteProps> = observer(({ eventManager = events, model, studioEnabled, canSaveStudioLogs, spec }: SuiteProps) => {
   const _launchStudio = useCallback((e: MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -78,7 +79,7 @@ const Suite: React.FC<SuiteProps> = observer(({ eventManager = events, model, st
           {getHeaderIcon(isOpen)}
         </div>
         <span className='runnable-title'>{model.title}</span>
-        {(studioEnabled && !appState.studioActive) && (
+        {(studioEnabled && !appState.studioActive && spec?.relative !== '__all') && (
           <>
             <Button data-cy='create-new-test-button' size='20' onClick={_launchStudio} variant='outline-dark' className={cs('launch-studio-button')} >
               <IconActionAddMedium strokeColor='gray-500' />
@@ -100,6 +101,7 @@ const Suite: React.FC<SuiteProps> = observer(({ eventManager = events, model, st
           studioEnabled={studioEnabled}
           canSaveStudioLogs={canSaveStudioLogs}
           shouldShowConnectingDots={shouldShowConnectionDots(model.children, runnable, index)}
+          spec={spec}
         />)
       })}
     </ul>
@@ -130,13 +132,14 @@ export interface RunnableProps {
   studioEnabled: boolean
   canSaveStudioLogs: boolean
   shouldShowConnectingDots: boolean
+  spec?: Cypress.Cypress['spec']
 }
 
 // NOTE: some of the driver tests dig into the React instance for this component
 // in order to mess with its internal state. converting it to a functional
 // component breaks that, so it needs to stay a Class-based component or
 // else the driver tests need to be refactored to support it being functional
-const Runnable: React.FC<RunnableProps> = observer(({ appState: appStateProps = appState, model, studioEnabled, canSaveStudioLogs, shouldShowConnectingDots }) => {
+const Runnable: React.FC<RunnableProps> = observer(({ appState: appStateProps = appState, model, studioEnabled, canSaveStudioLogs, shouldShowConnectingDots, spec }) => {
   return (<>
     <li
       className={cs(`${model.type} runnable runnable-${model.state}`, {
@@ -147,10 +150,11 @@ const Runnable: React.FC<RunnableProps> = observer(({ appState: appStateProps = 
       data-model-state={model.state}
     >
       {model.type === 'test'
-        ? <Test model={model as TestModel} studioEnabled={studioEnabled} canSaveStudioLogs={canSaveStudioLogs} />
+        ? <Test model={model as TestModel} studioEnabled={studioEnabled} canSaveStudioLogs={canSaveStudioLogs} spec={spec} />
         : <Suite model={model as SuiteModel}
           studioEnabled={studioEnabled}
           canSaveStudioLogs={canSaveStudioLogs}
+          spec={spec}
         />}
     </li>
     {shouldShowConnectingDots && <div className='runnable-dotted-line' />}

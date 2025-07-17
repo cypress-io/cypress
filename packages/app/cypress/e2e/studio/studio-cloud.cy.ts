@@ -296,6 +296,69 @@ describe('studio functionality', () => {
     cy.findByTestId('studio-toolbar').should('not.exist')
   })
 
+  it('hides studio button when running all specs', () => {
+    // Use the run-all-specs project which already has run-all-specs enabled
+    cy.scaffoldProject('run-all-specs')
+    cy.openProject('run-all-specs')
+
+    // Enable experimental studio by modifying the config
+    cy.withCtx(async (ctx) => {
+      const configPath = 'cypress.config.js'
+      const configContent = await ctx.actions.file.readFileInProject(configPath)
+      const updatedConfig = configContent.replace(
+        'experimentalRunAllSpecs: true,',
+        'experimentalRunAllSpecs: true,\n    experimentalStudio: true,',
+      )
+
+      await ctx.actions.file.writeFileInProject(configPath, updatedConfig)
+    })
+
+    cy.startAppServer('e2e')
+    cy.visitApp()
+    cy.specsPageIsVisible()
+
+    // Spawns new browser so we need to stub this
+    cy.withCtx((ctx, { sinon }) => {
+      sinon.stub(ctx.actions.project, 'launchProject').resolves()
+    })
+
+    // Run all specs
+    cy.findByTestId('run-all-specs-for-all').click()
+
+    // Wait for the runner to load
+    cy.waitForSpecToFinish()
+
+    // Verify that we're running all specs by checking the header
+    cy.get('.runnable-title').should('contain', 'All Specs')
+
+    // Verify that the studio button is NOT visible when running all specs
+    cy.findByTestId('studio-button').should('not.exist')
+
+    // Verify that the studio panel is NOT visible
+    cy.findByTestId('studio-panel').should('not.exist')
+  })
+
+  it('shows studio button when running a single spec', () => {
+    // Use the existing experimental-studio project
+    cy.scaffoldProject('experimental-studio')
+    cy.openProject('experimental-studio')
+    cy.startAppServer('e2e')
+    cy.visitApp()
+    cy.specsPageIsVisible()
+
+    // Run a single spec instead of all specs
+    cy.get('[data-cy-row="spec.cy.js"]').click()
+
+    cy.waitForSpecToFinish()
+
+    // Verify that we're running a single spec (not all specs)
+    cy.get('.runnable-title').should('contain', 'spec.cy.js')
+    cy.get('.runnable-title').should('not.contain', 'All Specs')
+
+    // Verify that the studio button IS visible when running a single spec
+    cy.findByTestId('studio-button').should('be.visible')
+  })
+
   describe('failing to load studio and retrying', () => {
     it('displays error panel when studio bundle fails to load', () => {
       // Intercept the studio bundle request and make it fail

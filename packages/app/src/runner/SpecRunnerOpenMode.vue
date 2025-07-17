@@ -116,6 +116,7 @@
 
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { REPORTER_ID, RUNNER_ID } from './utils'
 import InlineSpecList from '../specs/InlineSpecList.vue'
 import { getAutIframeModel, getEventManager } from '.'
@@ -218,6 +219,7 @@ const props = defineProps<{
   gql: SpecRunnerFragment
 }>()
 
+const route = useRoute()
 const eventManager = getEventManager()
 
 const autStore = useAutStore()
@@ -284,7 +286,10 @@ const shouldShowStudioButton = computed(() => {
   const experimentalStudioConfig = props.gql.currentProject?.config?.find((item) => item.field === 'experimentalStudio')
   const experimentalStudioEnabled = experimentalStudioConfig?.value === true
 
-  return !!cloudStudioRequested.value && !studioStore.isOpen && experimentalStudioEnabled
+  // Check if we're running all specs by looking at the route query
+  const isRunningAllSpecs = route.query.file === '__all'
+
+  return !!cloudStudioRequested.value && !studioStore.isOpen && experimentalStudioEnabled && !isRunningAllSpecs
 })
 
 const shouldShowStudioPanel = computed(() => {

@@ -5,7 +5,7 @@ import { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 let runner: EventEmitter
 let runnables: RootRunnable
 
-function visitAndRenderReporter (studioEnabled: boolean = false, studioActive: boolean = false) {
+function visitAndRenderReporter (studioEnabled: boolean = false, studioActive: boolean = false, specRelative: string = 'relative/path/to/foo.js') {
   cy.fixture('runnables').then((_runnables) => {
     runnables = _runnables
   })
@@ -16,7 +16,7 @@ function visitAndRenderReporter (studioEnabled: boolean = false, studioActive: b
 
   runnerStore.setSpec({
     name: 'foo.js',
-    relative: 'relative/path/to/foo.js',
+    relative: specRelative,
     absolute: '/absolute/path/to/foo.js',
   })
 
@@ -194,6 +194,36 @@ describe('tests', () => {
       cy.get('@testWrapper')
       .should('not.have.class', 'is-open')
       .find('.collapsible-content').should('not.exist')
+    })
+  })
+
+  describe('studio controls', () => {
+    it('hides launch studio icon when running all specs', () => {
+      visitAndRenderReporter(true, false, '__all')
+
+      cy.contains('test 1').realHover()
+      cy.get('[data-cy="launch-studio"]').should('not.exist')
+    })
+
+    it('shows launch studio icon when running a single spec', () => {
+      visitAndRenderReporter(true, false, 'relative/path/to/foo.js')
+
+      cy.contains('test 1').realHover()
+      cy.get('[data-cy="launch-studio"]').should('exist')
+    })
+
+    it('hides new test button in suites when running all specs', () => {
+      visitAndRenderReporter(true, false, '__all')
+
+      cy.contains('suite 1').realHover()
+      cy.get('[data-cy="create-new-test-button"]').should('not.exist')
+    })
+
+    it('shows new test button in suites when running a single spec', () => {
+      visitAndRenderReporter(true, false, 'relative/path/to/foo.js')
+
+      cy.contains('suite 1').realHover()
+      cy.get('[data-cy="create-new-test-button"]').should('exist')
     })
   })
 })
