@@ -329,7 +329,7 @@ describe('studio functionality', () => {
     cy.waitForSpecToFinish()
 
     // Verify that we're running all specs by checking the header
-    cy.get('.runnable-title').should('contain', 'All Specs')
+    cy.get('[data-cy="runnable-header"]').should('contain', 'All Specs')
 
     // Verify that the studio button is NOT visible when running all specs
     cy.findByTestId('studio-button').should('not.exist')
@@ -352,8 +352,8 @@ describe('studio functionality', () => {
     cy.waitForSpecToFinish()
 
     // Verify that we're running a single spec (not all specs)
-    cy.get('.runnable-title').should('contain', 'spec.cy.js')
-    cy.get('.runnable-title').should('not.contain', 'All Specs')
+    cy.get('[data-cy="runnable-header"]').should('contain', 'spec.cy.js')
+    cy.get('[data-cy="runnable-header"]').should('not.contain', 'All Specs')
 
     // Verify that the studio button IS visible when running a single spec
     cy.findByTestId('studio-button').should('be.visible')
