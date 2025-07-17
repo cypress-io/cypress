@@ -124,6 +124,7 @@ interface StudioRecorderState {
   showUrlPrompt: boolean
   cloudStudioRequested: boolean
   cloudStudioSessionId?: string
+  newTestLineNumber?: number
 }
 
 export const useStudioStore = defineStore('studioRecorder', {
@@ -156,7 +157,9 @@ export const useStudioStore = defineStore('studioRecorder', {
 
     setTestId (testId: string) {
       this.testId = testId
-      this._updateUrlParams(['testId', 'suiteId'])
+      this.suiteId = undefined
+      this.newTestLineNumber = undefined
+      this._updateUrlParams(['testId', 'suiteId', 'newTestLineNumber'])
     },
 
     setSuiteId (suiteId: string) {
@@ -173,9 +176,15 @@ export const useStudioStore = defineStore('studioRecorder', {
       this.cloudStudioSessionId = cloudStudioSessionId
     },
 
+    setNewTestLineNumber (newTestLineNumber: number) {
+      this.newTestLineNumber = newTestLineNumber
+      this._updateUrlParams(['newTestLineNumber'])
+    },
+
     clearRunnableIds () {
       this.testId = undefined
       this.suiteId = undefined
+      this.newTestLineNumber = undefined
     },
 
     openInstructionModal () {
@@ -198,8 +207,8 @@ export const useStudioStore = defineStore('studioRecorder', {
       this.isLoading = true
     },
 
-    setInactive () {
-      this.isActive = false
+    setActive (isActive: boolean) {
+      this.isActive = isActive
     },
 
     setUrl (url?: string) {
@@ -213,11 +222,11 @@ export const useStudioStore = defineStore('studioRecorder', {
     setup (config) {
       const studio = this._getUrlParams()
 
-      if (studio.testId) {
+      if (studio.newTestLineNumber) {
+        this.setNewTestLineNumber(studio.newTestLineNumber)
+      } else if (studio.testId) {
         this.setTestId(studio.testId)
-      }
-
-      if (studio.suiteId) {
+      } else if (studio.suiteId) {
         this.setSuiteId(studio.suiteId)
       }
 
@@ -225,37 +234,36 @@ export const useStudioStore = defineStore('studioRecorder', {
         this._initialUrl = studio.url
       }
 
-      if (this.testId || this.suiteId) {
+      // if we have an existing test or are creating a new test, we need to start loading
+      // otherwise if we have a suite, we can just set the studio active
+      if (this.testId || studio.newTestLineNumber) {
         this.setAbsoluteFile(config.spec.absolute)
         this.startLoading()
+      } else if (this.suiteId) {
+        this.setActive(true)
       }
     },
 
     initialize () {
-      if (this.suiteId) {
-        getCypress().runner.setOnlySuiteId(this.suiteId)
+      if (this.newTestLineNumber) {
+        getCypress().runner.setNewTestLineNumber(this.newTestLineNumber)
       } else if (this.testId) {
         getCypress().runner.setOnlyTestId(this.testId)
       }
     },
 
     interceptTest (test) {
-      if (this.suiteId) {
+      // if this test is the one we created, we can just set the test id
+      if (this.newTestLineNumber && test.invocationDetails?.line === this.newTestLineNumber) {
         this.setTestId(test.id)
       }
 
-      if (this.testId || this.suiteId) {
+      if (this.testId) {
         if (test.invocationDetails) {
           this.setFileDetails(test.invocationDetails)
         }
 
-        if (this.suiteId) {
-          if (test.parent && test.parent.id !== 'r1') {
-            this.setRunnableTitle(test.parent.title)
-          }
-        } else {
-          this.setRunnableTitle(test.title)
-        }
+        this.setRunnableTitle(test.title)
       }
     },
 
@@ -599,19 +607,20 @@ export const useStudioStore = defineStore('studioRecorder', {
       const testId = hashParams.get('testId')
       const suiteId = hashParams.get('suiteId')
       const visitUrl = hashParams.get('url')
+      const newTestLineNumber = hashParams.get('newTestLineNumber') ? Number(hashParams.get('newTestLineNumber')) : undefined
 
-      return { testId, suiteId, url: visitUrl }
+      return { testId, suiteId, url: visitUrl, newTestLineNumber }
     },
 
-    _updateUrlParams (filter: string[] = ['testId', 'suiteId', 'url']) {
+    _updateUrlParams (filter: string[] = ['testId', 'suiteId', 'url', 'newTestLineNumber']) {
       // if we don't have studio params, we don't need to update them
-      if (!this.testId && !this.suiteId && !this.url) return
-
-      const url = new URL(window.location.href)
-      const hashParams = new URLSearchParams(url.hash)
+      if (!this.testId && !this.suiteId && !this.url && !this.newTestLineNumber) return
 
       // if we have studio params, we need to remove them before adding them back
       this._removeUrlParams(filter)
+
+      const url = new URL(window.location.href)
+      const hashParams = new URLSearchParams(url.hash)
 
       // set the studio params
       hashParams.set('studio', '')
@@ -624,7 +633,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       window.history.replaceState({}, '', url.toString())
     },
 
-    _removeUrlParams (filter: string[] = ['testId', 'suiteId', 'url']) {
+    _removeUrlParams (filter: string[] = ['testId', 'suiteId', 'url', 'newTestLineNumber']) {
       const url = new URL(window.location.href)
       const hashParams = new URLSearchParams(url.hash)
 
@@ -636,8 +645,8 @@ export const useStudioStore = defineStore('studioRecorder', {
         hashParams.delete(param)
       })
 
-      // if the filter includes all the items, we can also remove the studio param
-      if (filter.length === 3) {
+      // if there are no studio specific params left, we can also remove the studio param
+      if (!hashParams.has('testId') && !hashParams.has('suiteId') && !hashParams.has('url') && !hashParams.has('newTestLineNumber')) {
         hashParams.delete('studio')
       }
 
@@ -1003,10 +1012,6 @@ export const useStudioStore = defineStore('studioRecorder', {
   },
 
   getters: {
-    hasRunnableId (state) {
-      return !!state.testId || !!state.suiteId
-    },
-
     isOpen: (state) => {
       return state.isActive || state.isLoading || state._hasStarted
     },

@@ -41,24 +41,28 @@ const Suite: React.FC<SuiteProps> = observer(({ eventManager = events, model, st
     eventManager.emit('studio:init:suite', model.id)
   }, [eventManager, model.id])
 
+  const headerIconStyle = {
+    marginTop: '1px',
+  }
+
   const getHeaderIcon = useCallback((isOpen: boolean) => {
     let headerIcon
 
     switch (model.state) {
       case 'active':
-        headerIcon = <IconObjectStackRunning {...headerIconDefaultProps} />
+        headerIcon = <IconObjectStackRunning {...headerIconDefaultProps} style={headerIconStyle} />
         break
       case 'passed':
-        headerIcon = <IconObjectStackPassed {...headerIconDefaultProps} secondaryStrokeColor='jade-400' />
+        headerIcon = <IconObjectStackPassed {...headerIconDefaultProps} secondaryStrokeColor='jade-400' style={headerIconStyle} />
         break
       case 'failed':
-        headerIcon = <IconObjectStackFailed {...headerIconDefaultProps} secondaryStrokeColor='red-400' />
+        headerIcon = <IconObjectStackFailed {...headerIconDefaultProps} secondaryStrokeColor='red-400' style={headerIconStyle} />
         break
       case 'pending':
-        headerIcon = <IconObjectStackSkipped {...headerIconDefaultProps} />
+        headerIcon = <IconObjectStackSkipped {...headerIconDefaultProps} style={headerIconStyle} />
         break
       case 'processing':
-        headerIcon = <IconObjectStackQueued {...headerIconDefaultProps} />
+        headerIcon = <IconObjectStackQueued {...headerIconDefaultProps} style={headerIconStyle} />
         break
       default:
         headerIcon = <></>
@@ -66,7 +70,7 @@ const Suite: React.FC<SuiteProps> = observer(({ eventManager = events, model, st
     }
 
     return <>
-      {isOpen ? <IconChevronDownMedium className='header-collapsible-indicator' strokeColor='gray-700' /> : <IconChevronRightMedium size='16' className='header-collapsible-indicator' strokeColor='gray-700' />}
+      {isOpen ? <IconChevronDownMedium className='header-collapsible-indicator' strokeColor='gray-700' style={headerIconStyle} /> : <IconChevronRightMedium size='16' className='header-collapsible-indicator' strokeColor='gray-700' style={headerIconStyle} />}
       {headerIcon}
     </>
   }, [model.state])

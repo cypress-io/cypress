@@ -279,12 +279,6 @@ $dotted-line-left-padding: 19px;
         border-radius: 0;
         background-color: $gray-1100;
 
-        .collapsible-header-text {
-          svg {
-            margin-top: 1px;
-          }
-        }
-
         .collapsible-header-inner {
           padding: 9px 11px;
           background-color: $gray-1100;
@@ -350,12 +344,6 @@ $dotted-line-left-padding: 19px;
             border-radius: 4px;
             border-bottom-left-radius: 0;
             border-top-left-radius: 0;
-
-            .collapsible-header-text {
-              svg {
-                margin-top: 1px;
-              }
-            }
 
             &:focus-visible {
               border-top: 1px solid $gray-800;
@@ -449,6 +437,7 @@ $dotted-line-left-padding: 19px;
 
     .runnable-state-icon {
       flex-shrink: 0;
+      margin-top: 1px;
 
       &.wand-icon {
         margin-top: 4px !important;
