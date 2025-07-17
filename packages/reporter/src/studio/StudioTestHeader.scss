@@ -14,24 +14,8 @@
     font-size: 14px;
     line-height: 20px;
     color: $gray-500;
-  
-    .studio-header__file-content {
-      position: relative;
-      width: 100%;
-  
-      &:hover,
-      &:focus-visible {
-        .open-in-ide-button {
-          opacity: 1;
-        }
-      }
-    }
-  
-    .studio-header__file-name {
-      font-weight: 300;
-      flex-grow: 1;
-    }
-  
+
+    
     .studio-header__back-button {
       padding: 0;
       width: 32px;

@@ -2,11 +2,10 @@ import { observer } from 'mobx-react'
 import React, { ReactElement } from 'react'
 
 import type { StatsStore } from '../header/stats-store'
-import { getFilenameParts } from '../lib/util'
 import { RunnablesStore } from './runnables-store'
 import { DebugDismiss } from '../header/DebugDismiss'
-import { OpenFileInIDEButton } from '../header/OpenFileInIDEButton'
 import { Duration } from '../duration/duration'
+import { SpecFileName } from '../shared/SpecFileName'
 
 const renderRunnableHeader = (children: ReactElement) => <div className="runnable-header" data-cy="runnable-header">{children}</div>
 
@@ -17,8 +16,6 @@ interface RunnableHeaderProps {
 }
 
 const RunnableHeader: React.FC<RunnableHeaderProps> = observer(({ spec, statsStore, runnablesStore }) => {
-  const relativeSpecPath = spec.relative
-
   if (spec.relative === '__all') {
     if (spec.specFilter) {
       return renderRunnableHeader(
@@ -31,31 +28,9 @@ const RunnableHeader: React.FC<RunnableHeaderProps> = observer(({ spec, statsSto
     )
   }
 
-  const displayFileName = () => {
-    const specParts = getFilenameParts(spec.name)
-
-    return (
-      <>
-        <span className='spec-name'>{specParts[0]}</span><span className='spec-file-extension'>{specParts[1]}</span>
-      </>
-    )
-  }
-
-  const fileDetails = {
-    absoluteFile: spec.absolute,
-    column: 0,
-    displayFile: displayFileName(),
-    line: 0,
-    originalFile: relativeSpecPath,
-    relativeFile: relativeSpecPath,
-  }
-
   return renderRunnableHeader(
     <>
-      <div className='runnable-header-file-name'>
-        {fileDetails.displayFile || fileDetails.originalFile}{!!fileDetails.line && `:${fileDetails.line}`}{!!fileDetails.column && `:${fileDetails.column}`}
-        <OpenFileInIDEButton fileDetails={fileDetails} />
-      </div>
+      <SpecFileName spec={spec} />
       {runnablesStore.testFilter && runnablesStore.totalTests > 0 && <DebugDismiss matched={runnablesStore.totalTests} total={runnablesStore.totalUnfilteredTests} />}
       <Duration duration={statsStore.duration} />
     </>,

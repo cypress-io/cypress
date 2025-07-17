@@ -25,8 +25,8 @@ describe('StudioTestHeader', () => {
 
     cy.get('.studio-header').should('be.visible')
     cy.get('.studio-header__file-section').should('be.visible')
-    cy.get('.studio-header__file-content').should('be.visible')
-    cy.get('[data-cy="studio-single-test-file-name"]').should('contain.text', 'example.cy.ts')
+    cy.get('.spec-file-name').should('be.visible')
+    cy.get('.spec-file-name').should('contain.text', 'example.cy.ts')
     cy.get('[data-cy="studio-back-button"]').should('be.visible')
     cy.percySnapshot()
   })

@@ -164,43 +164,6 @@ $color-transition: color 150ms ease-out;
     align-items: center;
     flex: 1;
 
-    .runnable-header-file-name {
-      display: inline-flex;
-      align-items: center;
-      flex: 1;
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      position: relative;
-      background: $gray-1100;
-
-      &:after {
-        content: none;
-      }
-
-      .spec-name {
-        color: $white;
-        font-weight: 500;
-      }
-
-      .spec-file-extension {
-        color: $gray-300;
-        font-weight: 300;
-      }
-
-      &:hover,
-      &:focus-visible {
-        .open-in-ide-button {
-          opacity: 1;
-        }
-
-        .button-hover-shadow {
-          opacity: 1;
-        }
-      }
-    }
-
     span > span > a > svg {
       margin-bottom: -2px;
       margin-right: 8px;
@@ -219,7 +182,7 @@ $color-transition: color 150ms ease-out;
       }
     }
   }
-
+  
   .toggle-specs-wrapper {
     .toggle-specs-button {
       padding: 0;
