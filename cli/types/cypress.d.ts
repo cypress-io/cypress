@@ -297,7 +297,7 @@ declare namespace Cypress {
   /**
    * The interface for user-defined properties in Window object under test.
    */
-  interface ApplicationWindow {} // tslint:disable-line
+  interface ApplicationWindow { } // tslint:disable-line
 
   /**
    * The configuration for Cypress.
