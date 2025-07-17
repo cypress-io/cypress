@@ -175,7 +175,8 @@ describe('studio functionality', () => {
     cy.get('.runnable-title').its(3).should('contain.text', 'visits a basic html page 3')
   })
 
-  it('creates a new test from an empty spec', () => {
+  // TODO: The URL prompt is in cloud studio now
+  it.skip('creates a new test from an empty spec', () => {
     loadProjectAndRunSpec({ specName: 'empty.cy.js', specSelector: 'title' })
 
     cy.contains('Create test with Cypress Studio').click()
@@ -204,7 +205,7 @@ it('new-test', function() {});
     })
   })
 
-  // TODO: skipping until https://github.com/cypress-io/cypress-services/issues/11086 is completed
+  // TODO: The URL prompt is in cloud studio now
   it.skip('creates a new test for an existing spec', () => {
     launchStudio({ createNewTest: true })
 

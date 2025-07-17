@@ -52,6 +52,7 @@ const props = defineProps<{
   eventManager: EventManager
   studioStatus: string | null
   cloudStudioSessionId?: string
+  autUrlSelector: string
 }>()
 
 interface StudioApp { default: StudioAppDefaultShape }
@@ -77,6 +78,7 @@ const maybeRenderReactComponent = () => {
     canAccessStudioAI: props.canAccessStudioAI,
     onStudioPanelClose: props.onStudioPanelClose,
     studioSessionId: props.cloudStudioSessionId,
+    autUrlSelector: props.autUrlSelector,
   })
 
   // Store the react root in a weak map keyed by the container. We do this so that we have a reference
