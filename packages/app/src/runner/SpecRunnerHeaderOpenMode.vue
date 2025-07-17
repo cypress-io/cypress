@@ -55,7 +55,7 @@
           @keyup.enter="visitUrl"
         >
         <StudioUrlPrompt
-          v-if="studioStore.needsUrl && !urlDisabled && studioStore.showUrlPrompt"
+          v-if="studioStore.needsUrl && !urlDisabled && studioStore.showUrlPrompt && !studioStore.cloudStudioRequested"
           :aut-url-input-ref="autUrlInputRef"
           :url-in-progress="urlInProgress"
           :overlay-z-index="studioOverlayZIndex"

@@ -256,26 +256,8 @@ const findTestInSuite = (suite, fn: any = _.identity) => {
   }
 }
 
-const findSuiteInSuite = (suite, fn: any = _.identity) => {
-  if (fn(suite)) {
-    return suite
-  }
-
-  for (const childSuite of suite.suites) {
-    const foundSuite = findSuiteInSuite(childSuite, fn)
-
-    if (foundSuite) {
-      return foundSuite
-    }
-  }
-}
-
 const suiteHasTest = (suite, testId) => {
   return findTestInSuite(suite, (test) => test.id === testId)
-}
-
-const suiteHasSuite = (suite, suiteId) => {
-  return findSuiteInSuite(suite, (s) => s.id === suiteId)
 }
 
 // same as findTestInSuite but iterates backwards
@@ -654,7 +636,7 @@ const pruneEmptySuites = (rootSuite, testFilter: NonNullable<TestFilter>) => {
   return totalUnfilteredTests
 }
 
-const normalizeAll = (suite, initialTests = {}, testFilter, setTestsById, setTests, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest) => {
+const normalizeAll = (suite, initialTests = {}, testFilter, setTestsById, setTests, getRunnableId, getHookId, setOnlyTestId, getOnlyTestId, getNewTestLineNumber) => {
   let totalUnfilteredTests = 0
 
   // Empty suites don't have any impact in run mode so let's avoid this extra work.
@@ -670,8 +652,7 @@ const normalizeAll = (suite, initialTests = {}, testFilter, setTestsById, setTes
   })
 
   // if we dont have any tests then bail
-  // unless we're using studio to add to the root suite
-  if (!hasTests && getOnlySuiteId() !== 'r1') {
+  if (!hasTests) {
     return
   }
 
@@ -681,7 +662,7 @@ const normalizeAll = (suite, initialTests = {}, testFilter, setTestsById, setTes
   // traversing through it multiple times
   const tests: Record<string, any> = {}
 
-  const normalizedSuite = normalize(suite, tests, initialTests, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
+  const normalizedSuite = normalize(suite, tests, initialTests, getRunnableId, getHookId, setOnlyTestId, getOnlyTestId, getNewTestLineNumber)
 
   if (setTestsById) {
     // use callback here to hand back
@@ -721,7 +702,7 @@ const normalizeAll = (suite, initialTests = {}, testFilter, setTestsById, setTes
   return normalizedSuite
 }
 
-const normalize = (runnable, tests, initialTests, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest) => {
+const normalize = (runnable, tests, initialTests, getRunnableId, getHookId, setOnlyTestId, getOnlyTestId, getNewTestLineNumber) => {
   const normalizeRunnable = (runnable) => {
     if (!runnable.id) {
       runnable.id = getRunnableId()
@@ -776,17 +757,18 @@ const normalize = (runnable, tests, initialTests, getRunnableId, getHookId, getO
   }
 
   const onlyIdMode = () => {
-    return !!getOnlyTestId() || !!getOnlySuiteId()
+    return !!getOnlyTestId() || !!getNewTestLineNumber()
   }
 
   const suiteHasOnlyId = (suite) => {
-    return suiteHasTest(suite, getOnlyTestId()) || suiteHasSuite(suite, getOnlySuiteId())
+    return suiteHasTest(suite, getOnlyTestId())
   }
 
   const normalizedRunnable = normalizeRunnable(runnable)
 
-  if (getOnlySuiteId() && runnable.id === getOnlySuiteId()) {
-    createEmptyOnlyTest(runnable)
+  // if we have a new test line number and the runnable is at that line, we can set the only test id
+  if (getNewTestLineNumber() && runnable.invocationDetails?.line === getNewTestLineNumber()) {
+    setOnlyTestId(runnable.id)
   }
 
   if ((runnable.type !== 'suite') || !hasOnly(runnable)) {
@@ -810,7 +792,7 @@ const normalize = (runnable, tests, initialTests, getRunnableId, getHookId, getO
     _.each({ tests: runnableTests, suites: runnableSuites }, (_runnables, type) => {
       if (runnable[type]) {
         return normalizedRunnable[type] = _.compact(_.map(_runnables, (childRunnable) => {
-          const normalizedChild = normalize(childRunnable, tests, initialTests, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
+          const normalizedChild = normalize(childRunnable, tests, initialTests, getRunnableId, getHookId, setOnlyTestId, getOnlyTestId, getNewTestLineNumber)
 
           if (type === 'tests' && onlyIdMode()) {
             if (normalizedChild.id === getOnlyTestId()) {
@@ -899,7 +881,7 @@ const normalize = (runnable, tests, initialTests, getRunnableId, getHookId, getO
       suite.suites = []
 
       normalizedSuite.suites = _.compact(_.map(suiteSuites, (childSuite) => {
-        const normalizedChildSuite = normalize(childSuite, tests, initialTests, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
+        const normalizedChildSuite = normalize(childSuite, tests, initialTests, getRunnableId, getHookId, setOnlyTestId, getOnlyTestId, getNewTestLineNumber)
 
         if ((suite._onlySuites.indexOf(childSuite) !== -1) || filterOnly(normalizedChildSuite, childSuite)) {
           if (onlyIdMode()) {
@@ -1331,7 +1313,7 @@ export default {
     }
     let _startTime: string | null = null
     let _onlyTestId = null
-    let _onlySuiteId = null
+    let _newTestLineNumber = null
 
     const getRunnableId = () => {
       return `r${++_runnableId}`
@@ -1390,11 +1372,11 @@ export default {
 
     const getOnlyTestId = () => _onlyTestId
 
-    const setOnlySuiteId = (suiteId) => {
-      _onlySuiteId = suiteId
+    const setNewTestLineNumber = (newTestLineNumber) => {
+      _newTestLineNumber = newTestLineNumber
     }
 
-    const getOnlySuiteId = () => _onlySuiteId
+    const getNewTestLineNumber = () => _newTestLineNumber
 
     const abort = () => {
       // abort the run
@@ -1575,25 +1557,11 @@ export default {
       return fail()
     }
 
-    const createEmptyOnlyTest = (suite) => {
-      const test = mocha.createTest('New Test', _.noop)
-
-      test.id = getRunnableId()
-
-      suite.addTest(test)
-      suite.appendOnlyTest(test)
-
-      test.invocationDetails = suite.invocationDetails
-
-      setOnlyTestId(test.id)
-
-      return test
-    }
-
     return {
       onSpecError,
       setOnlyTestId,
-      setOnlySuiteId,
+      setNewTestLineNumber,
+      getNewTestLineNumber,
       normalizeAll (tests, skipCollectingLogs, testFilter) {
         _skipCollectingLogs = skipCollectingLogs
         // if we have an uncaught error then slice out
@@ -1619,9 +1587,9 @@ export default {
           setTests,
           getRunnableId,
           getHookId,
+          setOnlyTestId,
           getOnlyTestId,
-          getOnlySuiteId,
-          createEmptyOnlyTest,
+          getNewTestLineNumber,
         )
       },
 
