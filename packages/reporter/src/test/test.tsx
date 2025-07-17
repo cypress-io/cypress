@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import React, { MouseEvent, useCallback } from 'react'
-import IconCypressStudio from '@cypress-design/react-icon'
+import { IconCypressStudio } from '@cypress-design/react-icon'
 
 import events, { Events } from '../lib/events'
 import appState, { AppState } from '../lib/app-state'
