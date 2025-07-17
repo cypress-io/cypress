@@ -25,9 +25,11 @@ declare global {
 }
 
 export const waitForSpecToFinish = (expectedResults, timeout?: number) => {
-  cy.get('body').then(($body) => {
-    // if we're in studio test mode, we don't have the stats so we can skip this
-    if ($body.find('.spec-container').length > 0) {
+  // Check if we're in studio mode using URL hash parameters (same method as studio store)
+  cy.window().then((win) => {
+    const studioSingleTestActive = win.state?.studioSingleTestActive
+
+    if (!studioSingleTestActive) {
       cy.get('.passed > .num').should('exist')
       cy.get('.failed > .num').should('exist')
     }
