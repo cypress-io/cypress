@@ -1,2 +1,2 @@
 # Bump this version to force CI to re-create the cache from scratch.
-7-7-2025-vite7
+7-16-2025-cy-15

@@ -494,9 +494,7 @@ export class AutIframe {
   startStudio () {
     const studioStore = useStudioStore()
 
-    if (studioStore.isLoading) {
-      studioStore.start(this._body()?.[0])
-    }
+    studioStore.start(this._body()?.[0])
   }
 
   reattachStudio () {

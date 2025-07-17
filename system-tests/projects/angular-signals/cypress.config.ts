@@ -16,6 +16,7 @@ export default defineConfig({
             '@angular/core/testing': require.resolve('@angular/core/testing'),
             '@angular/core/primitives/event-dispatch': require.resolve('@angular/core/primitives/event-dispatch'),
             '@angular/core/primitives/signals': require.resolve('@angular/core/primitives/signals'),
+            '@angular/core/rxjs-interop': require.resolve('@angular/core/rxjs-interop'),
             '@angular/core': require.resolve('@angular/core'),
             '@angular/platform-browser/testing': require.resolve('@angular/platform-browser/testing'),
             '@angular/platform-browser': require.resolve('@angular/platform-browser'),
