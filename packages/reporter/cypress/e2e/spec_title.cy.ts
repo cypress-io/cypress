@@ -55,7 +55,7 @@ describe('spec title', () => {
     })
 
     it('displays name without path', () => {
-      cy.get('.runnable-header-file-name').contains('foo.js')
+      cy.get('.spec-file-name').contains('foo.js')
 
       cy.percySnapshot()
     })
@@ -63,7 +63,7 @@ describe('spec title', () => {
     it('displays Open in IDE button on spec name hover', () => {
       cy.get('.open-in-ide-button').should('have.css', 'opacity', '0')
 
-      cy.get('.runnable-header-file-name').realHover()
+      cy.get('.spec-file-name').realHover()
       cy.get('.open-in-ide-button').should('have.css', 'opacity', '1')
       cy.get('.open-in-ide-button').contains('Open in IDE')
 
