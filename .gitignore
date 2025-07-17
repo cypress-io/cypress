@@ -402,4 +402,5 @@ system-tests/lib/validations
 .nx/workspace-data
 
 # IDE files
-.cursor
+.cursor/*
+!.cursor/BUGBOT.md
