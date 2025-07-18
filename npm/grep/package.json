@@ -6,7 +6,7 @@
   "scripts": {
     "cy:open": "node ../../scripts/cypress.js open --e2e -b electron --config specPattern='**/unit.js'",
     "cy:run": "node ../../scripts/cypress.js run --config specPattern='**/unit.js'",
-    "lint": "eslint ."
+    "lint": "eslint"
   },
   "dependencies": {
     "debug": "^4.3.4",
@@ -17,7 +17,7 @@
     "@packages/eslint-config": "0.0.0-development",
     "cypress-each": "^1.11.0",
     "cypress-expect": "^2.5.3",
-    "eslint": "^9.18.0",
+    "eslint": "^9.31.0",
     "typescript": "~5.4.5"
   },
   "peerDependencies": {
