@@ -38,7 +38,7 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTest = false, 
     .click()
 
     // Studio re-executes spec before waiting for commands - wait for the spec to finish executing.
-    cy.waitForSpecToFinish({ isStudioMode: true })
+    cy.waitForSpecToFinish()
 
     cy.get('[data-cy="studio-single-test-title"]').contains(testTitle)
 
@@ -50,7 +50,7 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTest = false, 
 export function assertClosingPanelWithoutChanges () {
   // Cypress re-runs after you cancel Studio.
   // Original spec should pass
-  cy.waitForSpecToFinish({ expectedResults: { passCount: 1 } })
+  cy.waitForSpecToFinish({ passCount: 1 })
 
   cy.get('.command').should('have.length', 1)
 
