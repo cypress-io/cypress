@@ -89,9 +89,10 @@ interface RunnablesListProps {
   runnables: RunnableArray
   studioEnabled: boolean
   canSaveStudioLogs: boolean
+  spec: Cypress.Cypress['spec']
 }
 
-const RunnablesList: React.FC<RunnablesListProps> = observer(({ runnables, studioEnabled, canSaveStudioLogs }: RunnablesListProps) => {
+const RunnablesList: React.FC<RunnablesListProps> = observer(({ runnables, studioEnabled, canSaveStudioLogs, spec }: RunnablesListProps) => {
   return (
     <div className='wrap'>
       <ul className='runnables'>
@@ -102,6 +103,7 @@ const RunnablesList: React.FC<RunnablesListProps> = observer(({ runnables, studi
             canSaveStudioLogs={canSaveStudioLogs}
             studioEnabled={studioEnabled}
             shouldShowConnectingDots={shouldShowConnectionDots(runnables, runnable, index)}
+            spec={spec}
           />))}
       </ul>
     </div>
@@ -150,6 +152,7 @@ const RunnablesContent: React.FC<RunnablesContentProps> = observer(({ runnablesS
       runnables={isRunning ? runnables : runnablesHistory[specPath]}
       studioEnabled={studioEnabled}
       canSaveStudioLogs={canSaveStudioLogs}
+      spec={spec}
     />
   )
 })

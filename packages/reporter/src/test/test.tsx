@@ -16,9 +16,10 @@ interface TestProps {
   appState?: AppState
   model: TestModel
   studioEnabled: boolean
+  spec?: Cypress.Cypress['spec']
 }
 
-const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = events, appState: appStateProps = appState, studioEnabled }) => {
+const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = events, appState: appStateProps = appState, studioEnabled, spec }) => {
   const { containerRef, isMounted, scrollIntoView } = useScrollIntoView({
     appState: appStateProps,
     testState: model.state,
@@ -52,7 +53,10 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
   const _controls = () => {
     let controls: Array<JSX.Element> = []
 
-    if (studioEnabled && !appStateProps.studioActive && model.state !== 'pending') {
+    // Check if we're running all specs by looking at the spec relative path
+    const isRunningAllSpecs = spec?.relative === '__all'
+
+    if (studioEnabled && !appStateProps.studioActive && model.state !== 'pending' && !isRunningAllSpecs) {
       controls.push(
         <LaunchStudioIcon
           key={`studio-command-${model}`}
