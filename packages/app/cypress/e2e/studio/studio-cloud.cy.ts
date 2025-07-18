@@ -40,7 +40,7 @@ describe('Studio Cloud', () => {
     cy.wait('@indexHtml')
 
     // Studio re-executes spec before waiting for commands - wait for the spec to finish executing.
-    cy.waitForSpecToFinish(undefined, undefined, false)
+    cy.waitForSpecToFinish()
 
     // Verify the studio panel is still open
     cy.findByTestId('studio-panel')
@@ -224,7 +224,7 @@ describe('Studio Cloud', () => {
     cy.wait('@indexHtml')
 
     // Studio re-executes spec before waiting for commands - wait for the spec to finish executing.
-    cy.waitForSpecToFinish(undefined, undefined, false)
+    cy.waitForSpecToFinish()
 
     // Verify the studio panel is still open
     cy.findByTestId('studio-panel')
