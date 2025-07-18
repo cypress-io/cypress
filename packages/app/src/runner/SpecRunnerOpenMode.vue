@@ -282,7 +282,7 @@ const cloudStudioRequested = computed(() => {
 })
 
 const studioAiAvailable = computed(() => {
-  return props.gql.studioAiAvailable
+  return props.gql.studioAiAvailable || false
 })
 
 const studioBetaAvailable = computed(() => {
