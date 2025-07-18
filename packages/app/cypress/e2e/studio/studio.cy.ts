@@ -2,6 +2,9 @@ import { launchStudio, loadProjectAndRunSpec, assertClosingPanelWithoutChanges }
 
 describe('Cypress Studio', () => {
   function incrementCounter (initialCount: number) {
+    // verify recording is enabled before clicking
+    cy.findByTestId('record-button-recording').should('have.text', 'Recording...')
+
     cy.getAutIframe().within(() => {
       cy.get('p').contains(`Count is ${initialCount}`)
 
