@@ -23,9 +23,10 @@ const ifThen = (condition: boolean, component: React.ReactNode) => (
 interface Props {
   events?: Events
   appState: AppState
+  displayPreferencesButton?: boolean
 }
 
-const Controls: React.FC<Props> = observer(({ events = defaultEvents, appState }: Props) => {
+const Controls: React.FC<Props> = observer(({ events = defaultEvents, appState, displayPreferencesButton = true }: Props) => {
   const emit = (event: string) => () => events.emit(event)
   const togglePreferencesMenu = () => {
     appState.togglePreferencesMenu()
@@ -34,19 +35,21 @@ const Controls: React.FC<Props> = observer(({ events = defaultEvents, appState }
 
   return (
     <div className={cs({ 'controls-container-studio': appState.studioActive, 'controls-container': !appState.studioActive })}>
-      <Tooltip placement='bottom' title={<p>Open Testing Preferences</p>} className='cy-tooltip'>
-        <button
-          aria-label='Open testing preferences'
-          className={cs('testing-preferences-toggle', { 'open': appState.isPreferencesMenuOpen })}
-          onClick={action('toggle:preferences:menu', togglePreferencesMenu)}
-        >
-          {appState.isPreferencesMenuOpen ? (
-            <ChevronUpIcon />
-          ) : (
-            <ChevronDownIcon />
-          )}
-        </button>
-      </Tooltip>
+      {displayPreferencesButton && (
+        <Tooltip placement='bottom' title={<p>Open Testing Preferences</p>} className='cy-tooltip'>
+          <button
+            aria-label='Open testing preferences'
+            className={cs('testing-preferences-toggle', { 'open': appState.isPreferencesMenuOpen })}
+            onClick={action('toggle:preferences:menu', togglePreferencesMenu)}
+          >
+            {appState.isPreferencesMenuOpen ? (
+              <ChevronUpIcon />
+            ) : (
+              <ChevronDownIcon />
+            )}
+          </button>
+        </Tooltip>
+      )}
       <div className='controls'>
         {ifThen(appState.isPaused, (
           <Tooltip placement='bottom' title={<p>Resume <span className='kbd'>C</span></p>} className='cy-tooltip'>
@@ -56,8 +59,8 @@ const Controls: React.FC<Props> = observer(({ events = defaultEvents, appState }
           </Tooltip>
         ))}
         {ifThen(appState.isRunning && !appState.isPaused, (
-          <Tooltip placement='bottom' title={<p>Stop Running <span className='kbd'>S</span></p>} className='cy-tooltip' visible={appState.studioActive ? false : null}>
-            <button aria-label='Stop' className='stop' onClick={emit('stop')} disabled={appState.studioActive}>
+          <Tooltip placement='bottom' title={<p>Stop Running <span className='kbd'>S</span></p>} className='cy-tooltip'>
+            <button aria-label='Stop' className='stop' onClick={emit('stop')}>
               <IconActionStopCircle size='16' strokeColor={iconStrokeColor} />
             </button>
           </Tooltip>

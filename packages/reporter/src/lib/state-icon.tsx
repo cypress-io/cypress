@@ -1,19 +1,16 @@
-import cs from 'classnames'
 import { observer } from 'mobx-react'
 import React from 'react'
 
 import type { TestState } from '@packages/types'
-import WandIcon from '@packages/frontend-shared/src/assets/icons/object-magic-wand-dark-mode_x16.svg'
 import { IconStatusFailedSimple, IconStatusPassedSimple, IconStatusQueuedOutline, IconStatusQueuedSimple, IconStatusRunningOutline, IconStatusRunningSimple, IconStatusSkippedOutline, IconStatusSkippedSimple } from '@cypress-design/react-icon'
 
 interface Props extends React.SVGProps<SVGSVGElement> {
   state: TestState
-  isStudio?: boolean
   iconSize?: '8' | '12' | '16'
 }
 
 const StateIcon: React.FC<Props> = observer((props: Props) => {
-  const { state, isStudio, ref, iconSize, ...rest } = props
+  const { state, ref, iconSize, ...rest } = props
 
   if (state === 'active') {
     return (
@@ -30,12 +27,6 @@ const StateIcon: React.FC<Props> = observer((props: Props) => {
   }
 
   if (state === 'passed') {
-    if (isStudio) {
-      return (
-        <WandIcon {...rest} className={cs('wand-icon', rest.className)} viewBox="0 0 16 16" width="12px" height="12px" />
-      )
-    }
-
     return (
       <IconStatusPassedSimple {...rest} size={iconSize || '16'} strokeColor='jade-400' />
     )

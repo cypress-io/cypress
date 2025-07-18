@@ -11,7 +11,7 @@ describe('Studio Cloud', () => {
     })
   })
 
-  it('immediately loads the studio panel', () => {
+  it('immediately loads the studio panel from existing test', () => {
     const deferred = pDefer()
 
     loadProjectAndRunSpec()
@@ -29,8 +29,6 @@ describe('Studio Cloud', () => {
     .findByTestId('launch-studio')
     .click()
 
-    // regular studio is not loaded until after the test finishes
-    cy.findByTestId('hook-name-studio commands').should('not.exist')
     // cloud studio is loaded immediately
     cy.findByTestId('studio-panel').then(() => {
       // check for the loading panel from the app first
@@ -42,14 +40,15 @@ describe('Studio Cloud', () => {
     cy.wait('@indexHtml')
 
     // Studio re-executes spec before waiting for commands - wait for the spec to finish executing.
-    cy.waitForSpecToFinish()
+    cy.waitForSpecToFinish(undefined, undefined, false)
 
     // Verify the studio panel is still open
     cy.findByTestId('studio-panel')
-    cy.findByTestId('hook-name-studio commands')
+
+    cy.percySnapshot()
   })
 
-  it('hides selector playground and studio controls when studio beta is available', () => {
+  it('hides selector playground and studio controls when experimentalStudio is enabled', () => {
     launchStudio()
 
     cy.findByTestId('studio-panel').should('be.visible')
@@ -136,8 +135,6 @@ describe('Studio Cloud', () => {
     .findByTestId('launch-studio')
     .click()
 
-    // regular studio is not loaded until after the test finishes
-    cy.findByTestId('hook-name-studio commands').should('not.exist')
     // cloud studio is loaded immediately
     cy.findByTestId('studio-panel').then(() => {
       // check for the loading panel from the app first
@@ -153,7 +150,6 @@ describe('Studio Cloud', () => {
 
     // Verify the studio panel is still open
     cy.findByTestId('studio-panel')
-    cy.findByTestId('hook-name-studio commands')
 
     // make sure studio is not loading
     cy.findByTestId('loading-studio-panel').should('not.exist')
@@ -217,8 +213,6 @@ describe('Studio Cloud', () => {
     .findByTestId('launch-studio')
     .click()
 
-    // regular studio is not loaded until after the test finishes
-    cy.get('[data-cy="hook-name-studio commands"]').should('not.exist')
     // cloud studio is loaded immediately
     cy.findByTestId('studio-panel').then(() => {
       // check for the loading panel from the app first
@@ -230,11 +224,10 @@ describe('Studio Cloud', () => {
     cy.wait('@indexHtml')
 
     // Studio re-executes spec before waiting for commands - wait for the spec to finish executing.
-    cy.waitForSpecToFinish()
+    cy.waitForSpecToFinish(undefined, undefined, false)
 
     // Verify the studio panel is still open
     cy.findByTestId('studio-panel')
-    cy.get('[data-cy="hook-name-studio commands"]')
 
     // make sure studio is not loading
     cy.get('[data-cy="loading-studio-panel"]').should('not.exist')
@@ -294,6 +287,69 @@ describe('studio functionality', () => {
     cy.findByTestId('studio-panel').should('be.visible')
 
     cy.findByTestId('studio-toolbar').should('not.exist')
+  })
+
+  it('hides studio button when running all specs', () => {
+    // Use the run-all-specs project which already has run-all-specs enabled
+    cy.scaffoldProject('run-all-specs')
+    cy.openProject('run-all-specs')
+
+    // Enable experimental studio by modifying the config
+    cy.withCtx(async (ctx) => {
+      const configPath = 'cypress.config.js'
+      const configContent = await ctx.actions.file.readFileInProject(configPath)
+      const updatedConfig = configContent.replace(
+        'experimentalRunAllSpecs: true,',
+        'experimentalRunAllSpecs: true,\n    experimentalStudio: true,',
+      )
+
+      await ctx.actions.file.writeFileInProject(configPath, updatedConfig)
+    })
+
+    cy.startAppServer('e2e')
+    cy.visitApp()
+    cy.specsPageIsVisible()
+
+    // Spawns new browser so we need to stub this
+    cy.withCtx((ctx, { sinon }) => {
+      sinon.stub(ctx.actions.project, 'launchProject').resolves()
+    })
+
+    // Run all specs
+    cy.findByTestId('run-all-specs-for-all').click()
+
+    // Wait for the runner to load
+    cy.waitForSpecToFinish()
+
+    // Verify that we're running all specs by checking the header
+    cy.get('[data-cy="runnable-header"]').should('contain', 'All Specs')
+
+    // Verify that the studio button is NOT visible when running all specs
+    cy.findByTestId('studio-button').should('not.exist')
+
+    // Verify that the studio panel is NOT visible
+    cy.findByTestId('studio-panel').should('not.exist')
+  })
+
+  it('shows studio button when running a single spec', () => {
+    // Use the existing experimental-studio project
+    cy.scaffoldProject('experimental-studio')
+    cy.openProject('experimental-studio')
+    cy.startAppServer('e2e')
+    cy.visitApp()
+    cy.specsPageIsVisible()
+
+    // Run a single spec instead of all specs
+    cy.get('[data-cy-row="spec.cy.js"]').click()
+
+    cy.waitForSpecToFinish()
+
+    // Verify that we're running a single spec (not all specs)
+    cy.get('[data-cy="runnable-header"]').should('contain', 'spec.cy.js')
+    cy.get('[data-cy="runnable-header"]').should('not.contain', 'All Specs')
+
+    // Verify that the studio button IS visible when running a single spec
+    cy.findByTestId('studio-button').should('be.visible')
   })
 
   describe('failing to load studio and retrying', () => {

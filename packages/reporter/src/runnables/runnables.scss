@@ -104,11 +104,6 @@ $dotted-line-left-padding: 19px;
     }
   }
 
-  .open-studio,
-  .open-studio-desc {
-    display: inline;
-  }
-
   .runnable {
     width: 100%;
     color: $gray-400;
@@ -255,11 +250,6 @@ $dotted-line-left-padding: 19px;
       border-left: $status-border-width solid $retried;
     }
 
-    &.runnable-studio.runnable-passed.test > div > .runnable-wrapper,
-    &.runnable-studio.runnable-passed > div > .runnable-instruments {
-      border-left: $status-border-width solid $purple-400;
-    }
-
     &.runnable-skipped > .runnable-wrapper {
       .runnable-title {
         color: $gray-600;
@@ -404,17 +394,6 @@ $dotted-line-left-padding: 19px;
       }
     }
 
-    &.test.runnable-passed.runnable-studio {
-      .studio-controls {
-        display: flex;
-
-        .studio-save,
-        .studio-copy {
-          display: flex;
-        }
-      }
-    }
-
     &.test.runnable-pending {
       .runnable-title {
         color: $indigo-300;
@@ -423,31 +402,11 @@ $dotted-line-left-padding: 19px;
       .runnable-commands-region {
         display: none;
       }
-
-      .studio-controls {
-        display: flex;
-      }
-    }
-
-    &.test.runnable-failed {
-      .studio-controls {
-        display: flex;
-      }
     }
 
     .runnable-state-icon {
       flex-shrink: 0;
       margin-top: 1px;
-
-      &.wand-icon {
-        margin-top: 4px !important;
-        margin-left: 4px;
-
-        .icon-light {
-          fill: $purple-300;
-          stroke: $purple-300;
-        }
-      }
     }
   }
 
@@ -538,84 +497,6 @@ $dotted-line-left-padding: 19px;
 
     svg {
       flex-shrink: 0;
-    }
-  }
-
-  .studio-controls {
-    display: none;
-    margin: 10px 16px;
-    align-items: center;
-
-    button {
-      border-radius: 5px;
-      font-family: $font-sans;
-      font-size: 12px;
-      padding: 6px 20px;
-
-      &:focus {
-        outline: none;
-      }
-
-      &:not(.studio-copy):active {
-        box-shadow: inset 0 3px 5px rgba($white, 0.125);
-      }
-    }
-
-    .studio-cancel {
-      color: rgba($white, 0.75);
-      cursor: pointer;
-
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-
-    .studio-copy-wrapper {
-      margin-left: auto;
-
-      .studio-copy {
-        background-color: $indigo-50;
-        color: $indigo-500;
-        display: none;
-        font-size: 16px;
-        padding: 6px 10px;
-
-        &:hover,
-        &:focus {
-          background-color: $indigo-100;
-        }
-
-        &.studio-copy-success {
-          color: $pass;
-        }
-
-        &[disabled],
-        &[disabled]:hover,
-        &[disabled]:active {
-          color: $white;
-          background-color: $gray-500;
-          cursor: not-allowed;
-        }
-      }
-    }
-
-    .studio-save {
-      background-color: $indigo-500;
-      color: $white;
-      display: none;
-      margin-left: 4px;
-
-      &:hover {
-        background-color: $indigo-400;
-      }
-
-      &[disabled],
-      &[disabled]:hover,
-      &[disabled]:active {
-        color: $white;
-        background-color: $gray-500;
-        cursor: not-allowed;
-      }
     }
   }
 

@@ -15,4 +15,5 @@ export interface ReporterStartInfo extends StatsStoreStartInfo {
   autoScrollingEnabled: boolean
   scrollTop: number
   studioActive: boolean
+  studioSingleTestActive: boolean
 }

@@ -1,14 +1,4 @@
 <template>
-  <StudioInstructionsModal
-    v-if="studioStore.instructionModalIsOpen"
-    :open="studioStore.instructionModalIsOpen"
-    @close="studioStore.closeInstructionModal"
-  />
-  <StudioSaveModal
-    v-if="studioStore.saveModalIsOpen"
-    :open="studioStore.saveModalIsOpen"
-    @close="studioStore.closeSaveModal"
-  />
   <AdjustRunnerStyleDuringScreenshot
     id="main-pane"
     class="flex"
@@ -117,6 +107,7 @@
 
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { REPORTER_ID, RUNNER_ID } from './utils'
 import InlineSpecList from '../specs/InlineSpecList.vue'
 import { getAutIframeModel, getEventManager } from '.'
@@ -142,8 +133,6 @@ import { useEventManager } from './useEventManager'
 import AutomationDisconnected from './automation/AutomationDisconnected.vue'
 import AutomationMissing from './automation/AutomationMissing.vue'
 import { runnerConstants } from './runner-constants'
-import StudioInstructionsModal from './studio/StudioInstructionsModal.vue'
-import StudioSaveModal from './studio/StudioSaveModal.vue'
 import { useStudioStore } from '../store/studio-store'
 import StudioPanel from '../studio/StudioPanel.vue'
 import { useSubscription } from '../graphql'
@@ -222,6 +211,7 @@ const props = defineProps<{
   gql: SpecRunnerFragment
 }>()
 
+const route = useRoute()
 const eventManager = getEventManager()
 
 const autStore = useAutStore()
@@ -288,7 +278,10 @@ const shouldShowStudioButton = computed(() => {
   const experimentalStudioConfig = props.gql.currentProject?.config?.find((item) => item.field === 'experimentalStudio')
   const experimentalStudioEnabled = experimentalStudioConfig?.value === true
 
-  return !!cloudStudioRequested.value && !studioStore.isOpen && experimentalStudioEnabled
+  // Check if we're running all specs by looking at the route query
+  const isRunningAllSpecs = route.query.file === '__all'
+
+  return !!cloudStudioRequested.value && !studioStore.isOpen && experimentalStudioEnabled && !isRunningAllSpecs
 })
 
 const shouldShowStudioPanel = computed(() => {

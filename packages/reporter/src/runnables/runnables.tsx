@@ -15,6 +15,7 @@ import OpenFileInIDE from '../lib/open-file-in-ide'
 import OpenIcon from '@packages/frontend-shared/src/assets/icons/technology-code-editor_x16.svg'
 import StudioIcon from '@packages/frontend-shared/src/assets/icons/object-magic-wand-dark-mode_x16.svg'
 import WarningIcon from '@packages/frontend-shared/src/assets/icons/warning_x16.svg'
+import { StudioTest } from '../studio/StudioTest'
 
 const Loading = () => (
   <div className='runnable-loading'>
@@ -88,9 +89,10 @@ interface RunnablesListProps {
   runnables: RunnableArray
   studioEnabled: boolean
   canSaveStudioLogs: boolean
+  spec: Cypress.Cypress['spec']
 }
 
-const RunnablesList: React.FC<RunnablesListProps> = observer(({ runnables, studioEnabled, canSaveStudioLogs }: RunnablesListProps) => {
+const RunnablesList: React.FC<RunnablesListProps> = observer(({ runnables, studioEnabled, canSaveStudioLogs, spec }: RunnablesListProps) => {
   return (
     <div className='wrap'>
       <ul className='runnables'>
@@ -101,6 +103,7 @@ const RunnablesList: React.FC<RunnablesListProps> = observer(({ runnables, studi
             canSaveStudioLogs={canSaveStudioLogs}
             studioEnabled={studioEnabled}
             shouldShowConnectingDots={shouldShowConnectionDots(runnables, runnable, index)}
+            spec={spec}
           />))}
       </ul>
     </div>
@@ -115,9 +118,11 @@ export interface RunnablesContentProps {
   error?: RunnablesErrorModel
   studioEnabled: boolean
   canSaveStudioLogs: boolean
+  appState?: AppState
+  statsStore: StatsStore
 }
 
-const RunnablesContent: React.FC<RunnablesContentProps> = observer(({ runnablesStore, spec, error, studioEnabled, canSaveStudioLogs }: RunnablesContentProps) => {
+const RunnablesContent: React.FC<RunnablesContentProps> = observer(({ runnablesStore, spec, error, studioEnabled, canSaveStudioLogs, appState, statsStore }: RunnablesContentProps) => {
   const { isReady, runnables, runnablesHistory } = runnablesStore
 
   if (!isReady) {
@@ -138,11 +143,16 @@ const RunnablesContent: React.FC<RunnablesContentProps> = observer(({ runnablesS
 
   const isRunning = specPath === runnablesStore.runningSpec
 
+  if (appState?.studioActive && appState?.studioSingleTestActive) {
+    return <StudioTest appState={appState} runnablesStore={runnablesStore} statsStore={statsStore} />
+  }
+
   return (
     <RunnablesList
       runnables={isRunning ? runnables : runnablesHistory[specPath]}
       studioEnabled={studioEnabled}
       canSaveStudioLogs={canSaveStudioLogs}
+      spec={spec}
     />
   )
 })
@@ -160,7 +170,7 @@ export interface RunnablesProps {
   canSaveStudioLogs: boolean
 }
 
-const Runnables: React.FC<RunnablesProps> = observer(({ appState, scroller, error, runnablesStore, spec, studioEnabled, canSaveStudioLogs }) => {
+const Runnables: React.FC<RunnablesProps> = observer(({ appState, scroller, error, runnablesStore, spec, studioEnabled, canSaveStudioLogs, statsStore }) => {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -185,11 +195,13 @@ const Runnables: React.FC<RunnablesProps> = observer(({ appState, scroller, erro
   return (
     <div ref={containerRef} className='container'>
       <RunnablesContent
+        appState={appState}
         runnablesStore={runnablesStore}
         studioEnabled={studioEnabled}
         canSaveStudioLogs={canSaveStudioLogs}
         spec={spec}
         error={error}
+        statsStore={statsStore}
       />
     </div>
   )

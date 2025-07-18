@@ -164,54 +164,6 @@ $color-transition: color 150ms ease-out;
     align-items: center;
     flex: 1;
 
-    .runnable-header-file-name {
-      display: inline-flex;
-      align-items: center;
-      flex: 1;
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      position: relative;
-      background: $gray-1100;
-
-      &:after {
-        content: none;
-      }
-
-      .spec-name {
-        color: $white;
-        font-weight: 500;
-      }
-
-      .spec-file-extension {
-        color: $gray-300;
-        font-weight: 300;
-      }
-
-      .button-hover-shadow {
-        @include button-hover-shadow(
-          $linear-gradient: linear-gradient(90deg, rgba(22, 24, 39, 0) 5.39%, $gray-1100 31.97%),
-          $width: 160px
-        );
-      }
-
-      .open-in-ide-button {
-        @include new-test-button;
-      }
-
-      &:hover,
-      &:focus-visible {
-        .open-in-ide-button {
-          opacity: 1;
-        }
-
-        .button-hover-shadow {
-          opacity: 1;
-        }
-      }
-    }
-
     span > span > a > svg {
       margin-bottom: -2px;
       margin-right: 8px;
@@ -229,19 +181,8 @@ $color-transition: color 150ms ease-out;
         font-weight: 500;
       }
     }
-
-    .duration {
-      border: 1px solid $gray-900;
-      border-radius: 18px;
-      color: $gray-400;
-      font-size: 12px;
-      font-weight: 500;
-      line-height: 20px;
-      padding: 0 8px;
-      font-variant-numeric: tabular-nums;
-    }
   }
-
+  
   .toggle-specs-wrapper {
     .toggle-specs-button {
       padding: 0;

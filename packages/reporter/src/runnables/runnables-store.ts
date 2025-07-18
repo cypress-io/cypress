@@ -125,7 +125,7 @@ export class RunnablesStore {
     return type === 'suite' ? this._createSuite(props as SuiteProps, level) : this._createTest(props as TestProps, level)
   }
 
-  _createSuite (props: SuiteProps, level: number) {
+  _getImmediateParentSuiteTitle (level: number): { parentTitle: string } {
     // Get parent suite titles by traversing up the queue
     const parentTitles: string[] = []
 
@@ -143,12 +143,25 @@ export class RunnablesStore {
     }
 
     // Combine parent titles with current suite title
-    const hierarchicalTitle = [...parentTitles, props.title].join(' > ')
+    // Combine parent titles
+    const parentTitle = [...parentTitles].join(' > ')
+
+    return { parentTitle }
+  }
+
+  _createSuite (props: SuiteProps, level: number) {
+    const { parentTitle } = this._getImmediateParentSuiteTitle(level)
 
     // Create new props with the hierarchical title
+    const hierarchicalTitle = parentTitle ? `${parentTitle} > ${props.title}` : props.title
+
     const suiteProps = {
       ...props,
       title: hierarchicalTitle,
+    }
+
+    if (parentTitle) {
+      suiteProps.parentTitle = parentTitle
     }
 
     const suite = new SuiteModel(suiteProps, level)
@@ -160,7 +173,17 @@ export class RunnablesStore {
   }
 
   _createTest (props: TestProps, level: number) {
-    const test = new TestModel(props, level, this)
+    const { parentTitle } = this._getImmediateParentSuiteTitle(level)
+
+    const testProps = {
+      ...props,
+    }
+
+    if (parentTitle) {
+      testProps.parentTitle = parentTitle
+    }
+
+    const test = new TestModel(testProps, level, this)
 
     this._runnablesQueue.push(test)
     this._tests[test.id] = test

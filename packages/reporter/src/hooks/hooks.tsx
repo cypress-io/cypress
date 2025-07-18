@@ -7,8 +7,7 @@ import Command from '../commands/command'
 import Collapsible from '../collapsible/collapsible'
 import type HookModel from './hook-model'
 import type { HookName } from './hook-model'
-import ArrowRightIcon from '@packages/frontend-shared/src/assets/icons/arrow-right_x16.svg'
-import { OpenFileInIDEButton } from '../OpenFileInIDEButton'
+import { OpenFileInIDEButton } from '../header/OpenFileInIDEButton'
 
 export interface HookHeaderProps {
   model: HookModel
@@ -22,25 +21,6 @@ const HookHeader = ({ model, number }: HookHeaderProps) => (
   </span>
 )
 
-const StudioNoCommands = () => (
-  <li className='command command-name-get command-state-pending command-type-parent studio-prompt'>
-    <span>
-      <div className='command-wrapper'>
-        <div className='command-wrapper-text'>
-          <span className='command-message'>
-            <span className='command-message-text'>
-              Interact with your site to add test commands. Right click to add assertions.
-            </span>
-          </span>
-          <span className='command-controls'>
-            <ArrowRightIcon />
-          </span>
-        </div>
-      </div>
-    </span>
-  </li>
-)
-
 export interface HookProps {
   model: HookModel
   showNumber: boolean
@@ -48,7 +28,7 @@ export interface HookProps {
 }
 
 const Hook: React.FC<HookProps> = observer(({ model, showNumber, scrollIntoView }: HookProps) => (
-  <li className={cs('hook-item', { 'hook-failed': model.failed, 'hook-studio': model.isStudio })}>
+  <li className={cs('hook-item', { 'hook-failed': model.failed })}>
     <Collapsible
       header={
         <>
@@ -61,7 +41,6 @@ const Hook: React.FC<HookProps> = observer(({ model, showNumber, scrollIntoView 
     >
       <ul className='commands-container'>
         {_.map(model.commands, (command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} scrollIntoView={scrollIntoView} />)}
-        {model.showStudioPrompt && <StudioNoCommands />}
       </ul>
     </Collapsible>
   </li>
@@ -84,7 +63,7 @@ export interface HooksProps {
 const Hooks: React.FC<HooksProps> = observer(({ state = appState, model, scrollIntoView }: HooksProps) => (
   <ul className='hooks-container'>
     {_.map(model.hooks, (hook) => {
-      if (hook.commands.length || (hook.isStudio && state.studioActive && model.state === 'passed')) {
+      if (hook.commands.length && hook.hookName !== 'studio commands') {
         return <Hook key={hook.hookId} model={hook} scrollIntoView={scrollIntoView} showNumber={model.hookCount[hook.hookName] > 1} />
       }
 

@@ -17,13 +17,12 @@ export function loadProjectAndRunSpec ({ projectName = 'experimental-studio' as 
 export function launchStudio ({ specName = 'spec.cy.js', createNewTest = false, cliArgs = [''] } = {}) {
   loadProjectAndRunSpec({ specName, cliArgs })
 
-  // Should not show "Studio Commands" until we've started a new Studio session.
-  cy.get('[data-cy="hook-name-studio commands"]').should('not.exist')
+  const testTitle = createNewTest ? 'New Test' : 'visits a basic html page'
 
   if (createNewTest) {
     cy.contains('studio functionality').as('item')
   } else {
-    cy.contains('visits a basic html page').as('item')
+    cy.contains(testTitle).as('item')
   }
 
   cy.get('@item')
@@ -42,7 +41,7 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTest = false, 
     // Studio re-executes spec before waiting for commands - wait for the spec to finish executing.
     cy.waitForSpecToFinish()
 
-    cy.findByTestId('hook-name-studio commands').should('exist')
+    cy.get('[data-cy="studio-single-test-title"]').contains(testTitle)
   }
 }
 
@@ -58,8 +57,6 @@ export function assertClosingPanelWithoutChanges () {
     cy.contains('visit')
     cy.contains('cypress/e2e/index.html')
   })
-
-  cy.findByTestId('hook-name-studio commands').should('not.exist')
 
   cy.withCtx(async (ctx) => {
     const spec = await ctx.actions.file.readFileInProject('cypress/e2e/spec.cy.js')

@@ -97,9 +97,6 @@
       :get-aut-iframe="getAutIframe"
       :event-manager="eventManager"
     />
-
-    <StudioControls v-if="!studioBetaAvailable && studioStore.isActive" />
-
     <Alert
       v-model="showAlert"
       status="success"
@@ -131,7 +128,6 @@ import Tag from '@cypress-design/vue-tag'
 import SelectorPlayground from './selector-playground/SelectorPlayground.vue'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 import Alert from '@packages/frontend-shared/src/components/Alert.vue'
-import StudioControls from './studio/StudioControls.vue'
 import StudioUrlPrompt from './studio/StudioUrlPrompt.vue'
 import VerticalBrowserListItems from '@packages/frontend-shared/src/gql-components/topnav/VerticalBrowserListItems.vue'
 import SpecRunnerDropdown from './SpecRunnerDropdown.vue'

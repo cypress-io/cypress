@@ -1,6 +1,6 @@
 import Button from '@cypress-design/react-button'
 import React from 'react'
-import events from './lib/events'
+import events from '../lib/events'
 import { IconWindowCodeEditor } from '@cypress-design/react-icon'
 import { FileDetails } from '@packages/types'
 import cx from 'classnames'

@@ -40,10 +40,9 @@ const AttemptHeader = ({ index, state }: { index: number, state: TestState }) =>
 interface AttemptProps {
   model: AttemptModel
   scrollIntoView: Function
-  studioActive: boolean
 }
 
-const Attempt: React.FC<AttemptProps> = observer(({ model, scrollIntoView, studioActive }) => {
+const Attempt: React.FC<AttemptProps> = observer(({ model, scrollIntoView }) => {
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
@@ -77,15 +76,6 @@ const Attempt: React.FC<AttemptProps> = observer(({ model, scrollIntoView, studi
           {model.state === 'failed' && (
             <div className='attempt-error-region'>
               <TestError {...model.error} />
-              {studioActive && (
-                <div className='runnable-err-wrapper studio-err-wrapper'>
-                  <div className='runnable-err'>
-                    <div className='runnable-err-message'>
-                      Studio cannot add commands to a failing test.
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           )}
         </div>
@@ -99,10 +89,9 @@ Attempt.displayName = 'Attempt'
 interface AttemptsProps {
   test: TestModel
   scrollIntoView: Function
-  studioActive: boolean
 }
 
-const Attempts: React.FC<AttemptsProps> = observer(({ test, scrollIntoView, studioActive }: AttemptsProps) => {
+const Attempts: React.FC<AttemptsProps> = observer(({ test, scrollIntoView }: AttemptsProps) => {
   return (<ul className={cs('attempts', {
     'has-multiple-attempts': test.hasMultipleAttempts,
   })}>
@@ -111,7 +100,6 @@ const Attempts: React.FC<AttemptsProps> = observer(({ test, scrollIntoView, stud
         <Attempt
           key={attempt.id}
           scrollIntoView={scrollIntoView}
-          studioActive={studioActive}
           model={attempt}
         />
       )

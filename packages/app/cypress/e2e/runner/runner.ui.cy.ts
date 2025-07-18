@@ -172,7 +172,7 @@ describe('src/cypress/runner', () => {
       })
 
       cy.get('.open-in-ide-button').should('have.css', 'opacity', '0')
-      cy.get('.runnable-header-file-name').realHover()
+      cy.get('.spec-file-name').realHover()
       cy.get('.open-in-ide-button').first().should('have.css', 'opacity', '1').click()
 
       cy.withCtx((ctx, o) => {
