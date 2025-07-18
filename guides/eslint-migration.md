@@ -241,7 +241,7 @@ For each package in the batch:
 
 **After ESLint 9.x:**
 ```json
-"lint": "eslint ."
+"lint": "eslint"
 ```
 ESLint 9.x auto-detects file extensions, so `--ext` flag is no longer needed.
 
