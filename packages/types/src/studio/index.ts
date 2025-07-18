@@ -19,6 +19,7 @@ export interface StudioLifecycleManagerShape {
   isStudioReady: () => boolean
   registerStudioReadyListener: (listener: (studioManager: StudioManagerShape) => void) => void
   cloudStudioRequested: boolean
+  studioAiAvailable: boolean
   updateStatus: (status: StudioStatus) => void
   getCurrentStatus: () => StudioStatus | undefined
   retry: () => void

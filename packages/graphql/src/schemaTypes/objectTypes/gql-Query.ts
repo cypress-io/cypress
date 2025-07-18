@@ -89,6 +89,12 @@ export const Query = objectType({
       resolve: (source, args, ctx) => ctx.coreData.studioLifecycleManager?.cloudStudioRequested ?? false,
     })
 
+    t.field('studioAiAvailable', {
+      type: 'Boolean',
+      description: 'Whether studio AI is available',
+      resolve: (source, args, ctx) => ctx.coreData.studioLifecycleManager?.studioAiAvailable ?? false,
+    })
+
     t.nonNull.field('localSettings', {
       type: LocalSettings,
       description: 'local settings on a device-by-device basis',

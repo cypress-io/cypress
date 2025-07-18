@@ -170,6 +170,13 @@ describe('StudioLifecycleManager', () => {
     })
   })
 
+  describe('studioAiAvailable', () => {
+    it('is true when CYPRESS_ENABLE_CLOUD_STUDIO_AI is true', () => {
+      process.env.CYPRESS_ENABLE_CLOUD_STUDIO_AI = 'true'
+      expect(studioLifecycleManager.studioAiAvailable).to.be.true
+    })
+  })
+
   describe('initializeStudioManager', () => {
     it('initializes the studio manager and registers it in the data context and does not set up protocol when studio is initialized', async () => {
       studioManagerSetupStub.callsFake((args) => {

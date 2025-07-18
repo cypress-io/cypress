@@ -1874,6 +1874,9 @@ type Query {
   """The files that have just been scaffolded"""
   scaffoldedFiles: [ScaffoldedFile!]
 
+  """Whether studio AI is available"""
+  studioAiAvailable: Boolean
+
   """Previous versions of cypress and their release date"""
   versions: VersionData
 
