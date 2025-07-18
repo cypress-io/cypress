@@ -1,20 +1,21 @@
 import js from '@eslint/js'
 import { InfiniteDepthConfigWithExtends, configs as tsConfigs, parser as tsParser } from 'typescript-eslint'
-// @ts-expect-error - this package has no type defs
-import cy from 'eslint-plugin-cypress/flat'
-// @ts-expect error - this package has no type defs
+
+import cy from 'eslint-plugin-cypress'
+
 import mocha from 'eslint-plugin-mocha'
 import globals from 'globals'
 import vue from 'eslint-plugin-vue'
 import stylistic from '@stylistic/eslint-plugin'
 import react from 'eslint-plugin-react'
-import eslintPluginImportX from 'eslint-plugin-import-x'
+
+import { flatConfigs as eslintPluginImportXFlatConfigs } from 'eslint-plugin-import-x'
 
 export default <InfiniteDepthConfigWithExtends[]>[
   js.configs.recommended,
   ...tsConfigs.recommended,
   cy.configs.recommended,
-  mocha.configs.flat.recommended,
+  mocha.configs?.recommended ?? {},
   ...vue.configs['flat/recommended'],
   {
     ...react.configs.flat.recommended,
@@ -29,8 +30,7 @@ export default <InfiniteDepthConfigWithExtends[]>[
     'braceStyle': '1tbs',
     'arrowParens': true,
   }),
-  eslintPluginImportX.flatConfigs.recommended,
-  eslintPluginImportX.flatConfigs.typescript,
+  eslintPluginImportXFlatConfigs.typescript,
 
   // set up ts parser & import plugin
   {
