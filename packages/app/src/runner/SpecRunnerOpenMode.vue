@@ -179,11 +179,6 @@ fragment SpecRunner_Preferences on Query {
 gql`
 fragment SpecRunner_Studio on Query {
   cloudStudioRequested
-}
-`
-
-gql`
-fragment SpecRunner_StudioAiAvailable on Query {
   studioAiAvailable
 }
 `
@@ -287,8 +282,6 @@ const cloudStudioRequested = computed(() => {
 })
 
 const studioAiAvailable = computed(() => {
-  studioStore.setStudioAiAvailable(props.gql.studioAiAvailable || false)
-
   return props.gql.studioAiAvailable
 })
 

@@ -125,7 +125,6 @@ interface StudioRecorderState {
   cloudStudioRequested: boolean
   cloudStudioSessionId?: string
   newTestLineNumber?: number
-  studioAiAvailable: boolean
 }
 
 export const useStudioStore = defineStore('studioRecorder', {
@@ -144,17 +143,12 @@ export const useStudioStore = defineStore('studioRecorder', {
       showUrlPrompt: true,
       cloudStudioRequested: false,
       cloudStudioSessionId: undefined,
-      studioAiAvailable: false,
     }
   },
 
   actions: {
     setCloudStudioRequested (cloudStudioRequested: boolean) {
       this.cloudStudioRequested = cloudStudioRequested
-    },
-
-    setStudioAiAvailable (studioAiAvailable: boolean) {
-      this.studioAiAvailable = studioAiAvailable
     },
 
     setShowUrlPrompt (shouldShowUrlPrompt: boolean) {
