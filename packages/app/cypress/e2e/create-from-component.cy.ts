@@ -82,7 +82,7 @@ function validateCreateFromVueComponentCard (beforeEachFn: () => void, expectedS
       .should('have.attr', 'href', `#/specs/runner?file=${expectedSpecPath}`).click()
     })
 
-    cy.waitForSpecToFinish({ passCount: 1 })
+    cy.waitForSpecToFinish({ expectedResults: { passCount: 1 } })
   })
 }
 
@@ -199,7 +199,7 @@ function validateCreateFromReactComponentCard (beforeEachFn: () => void, expecte
       .should('have.attr', 'href', `#/specs/runner?file=${expectedSpecPath}`).click()
     })
 
-    cy.waitForSpecToFinish({ passCount: 1 })
+    cy.waitForSpecToFinish({ expectedResults: { passCount: 1 } })
   })
 }
 

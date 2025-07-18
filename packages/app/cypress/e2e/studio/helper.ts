@@ -17,7 +17,7 @@ export function loadProjectAndRunSpec ({ projectName = 'experimental-studio' as 
 export function launchStudio ({ specName = 'spec.cy.js', createNewTest = false, cliArgs = [''] } = {}) {
   loadProjectAndRunSpec({ specName, cliArgs })
 
-  const testTitle = createNewTest ? 'New Test' : 'visits a basic html page'
+  const testTitle = 'visits a basic html page'
 
   if (createNewTest) {
     cy.contains('studio functionality').as('item')
@@ -27,7 +27,6 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTest = false, 
 
   cy.get('@item')
   .closest('.runnable-wrapper').as('runnable-wrapper')
-  .realHover()
 
   if (createNewTest) {
     cy.get('@runnable-wrapper').realHover().findByTestId('create-new-test-button').click()
@@ -39,16 +38,19 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTest = false, 
     .click()
 
     // Studio re-executes spec before waiting for commands - wait for the spec to finish executing.
-    cy.waitForSpecToFinish()
+    cy.waitForSpecToFinish({ isStudioMode: true })
 
     cy.get('[data-cy="studio-single-test-title"]').contains(testTitle)
+
+    // verify recording is enabled to ensure the panel is fully ready
+    cy.findByTestId('record-button-recording').should('have.text', 'Recording...')
   }
 }
 
 export function assertClosingPanelWithoutChanges () {
   // Cypress re-runs after you cancel Studio.
   // Original spec should pass
-  cy.waitForSpecToFinish({ passCount: 1 })
+  cy.waitForSpecToFinish({ expectedResults: { passCount: 1 } })
 
   cy.get('.command').should('have.length', 1)
 

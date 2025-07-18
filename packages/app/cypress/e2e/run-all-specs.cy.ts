@@ -44,7 +44,7 @@ describe('run-all-specs', () => {
 
     clickRunAllSpecs('folder-a')
 
-    cy.waitForSpecToFinish({ passCount: 2 })
+    cy.waitForSpecToFinish({ expectedResults: { passCount: 2 } })
 
     cy.withCtx((ctx, { specs, RUN_ALL_SPECS_KEY }) => {
       expect(ctx.actions.project.launchProject).to.have.been.calledWith('e2e', { shouldLaunchNewTab: true }, RUN_ALL_SPECS_KEY)
@@ -65,7 +65,7 @@ describe('run-all-specs', () => {
 
     clickRunAllSpecs('cypress/e2e')
 
-    cy.waitForSpecToFinish({ passCount: 2 })
+    cy.waitForSpecToFinish({ expectedResults: { passCount: 2 } })
 
     cy.withCtx((ctx, { specs }) => {
       expect(ctx.project.runAllSpecs).to.include.members(specs.map((spec) => spec.relative))
@@ -85,7 +85,7 @@ describe('run-all-specs', () => {
 
     clickRunAllSpecs('folder-a')
 
-    cy.waitForSpecToFinish({ passCount: 1 })
+    cy.waitForSpecToFinish({ expectedResults: { passCount: 1 } })
 
     cy.withCtx((ctx, { specs }) => {
       expect(ctx.project.runAllSpecs).to.include.members(specs.map((spec) => spec.relative))
@@ -106,7 +106,7 @@ describe('run-all-specs', () => {
       expect(ctx.project.runAllSpecs).to.include.members(specs.map((spec) => spec.relative))
     }, { specs: Object.values(ALL_SPECS) })
 
-    cy.waitForSpecToFinish({ passCount: 6 })
+    cy.waitForSpecToFinish({ expectedResults: { passCount: 6 } })
 
     for (const spec of Object.values(ALL_SPECS)) {
       cy.get('.runnable-title').contains(spec.name)
@@ -121,6 +121,6 @@ describe('run-all-specs', () => {
       await ctx.actions.file.writeFileInProject(spec.relative, newContent)
     }, { spec: ALL_SPECS.spec1 })
 
-    cy.waitForSpecToFinish({ passCount: 5, failCount: 1 })
+    cy.waitForSpecToFinish({ expectedResults: { passCount: 5, failCount: 1 } })
   })
 })

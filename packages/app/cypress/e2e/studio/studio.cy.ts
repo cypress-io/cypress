@@ -2,11 +2,6 @@ import { launchStudio, loadProjectAndRunSpec, assertClosingPanelWithoutChanges }
 
 describe('Cypress Studio', () => {
   function incrementCounter (initialCount: number) {
-    cy.waitForSpecToFinish(undefined, undefined, false)
-
-    // verify recording is enabled before clicking
-    cy.findByTestId('record-button-recording').should('have.text', 'Recording...')
-
     cy.getAutIframe().within(() => {
       cy.get('p').contains(`Count is ${initialCount}`)
 
@@ -91,7 +86,7 @@ describe('studio functionality', () => {
   it('updates an existing test with assertions', () => {
     launchStudio()
 
-    cy.waitForSpecToFinish(undefined, undefined, false)
+    cy.waitForSpecToFinish({ isStudioMode: true })
 
     cy.getAutIframe().within(() => {
       cy.get('#increment').rightclick().then(() => {
@@ -234,7 +229,7 @@ it('new-test', function() {});
     cy.get('button[type=submit]').click()
 
     // Cypress re-runs after the new test is saved.
-    cy.waitForSpecToFinish({ passCount: 2 })
+    cy.waitForSpecToFinish({ expectedResults: { passCount: 2 } })
 
     cy.contains('new-test').click()
     cy.get('.command').should('have.length', 1)
@@ -300,7 +295,7 @@ describe('studio functionality', () => {
       cy.get('button[type=submit]').click()
 
       // Cypress re-runs after the new test is saved.
-      cy.waitForSpecToFinish({ passCount: 2 })
+      cy.waitForSpecToFinish({ expectedResults: { passCount: 2 } })
 
       cy.contains('new-test').click()
       cy.get('.command').should('have.length', 1)
@@ -357,7 +352,7 @@ describe('studio functionality', () => {
     cy.get('button[type=submit]').click()
 
     // Cypress re-runs after the new test is saved.
-    cy.waitForSpecToFinish({ passCount: 2 })
+    cy.waitForSpecToFinish({ expectedResults: { passCount: 2 } })
 
     cy.contains('new-test').click()
 
@@ -407,7 +402,7 @@ describe('studio functionality', () => {
   it('shows assertions menu and submenu correctly', () => {
     launchStudio()
 
-    cy.waitForSpecToFinish(undefined, undefined, false)
+    cy.waitForSpecToFinish({ isStudioMode: true })
 
     cy.contains('No commands were issued in this test.').should('not.exist')
 
@@ -446,7 +441,7 @@ describe('studio functionality', () => {
       win.location.href = win.location.href
     })
 
-    cy.waitForSpecToFinish(undefined, undefined, false)
+    cy.waitForSpecToFinish({ isStudioMode: true })
 
     // after reloading we should still be in studio mode but the commands should be removed
     // so the save button should be disabled
@@ -462,7 +457,7 @@ describe('studio functionality', () => {
 
     cy.get('button[aria-label="Rerun all tests"]').click()
 
-    cy.waitForSpecToFinish(undefined, undefined, false)
+    cy.waitForSpecToFinish({ isStudioMode: true })
     // after reloading we should still be in studio mode but the commands should be removed
     // the save button should be disabled since the commands were removed
     cy.findByTestId('studio-save-button').should('be.disabled')
@@ -477,7 +472,7 @@ describe('studio functionality', () => {
     cy.findByTestId('sidebar-link-specs-page').click()
     cy.contains('spec.cy.js').click()
 
-    cy.waitForSpecToFinish({ passCount: 1 })
+    cy.waitForSpecToFinish({ expectedResults: { passCount: 1 } })
 
     cy.location().its('hash').should('not.contain', 'testId=').and('not.contain', 'studio=')
   })
@@ -528,7 +523,7 @@ describe('studio functionality', () => {
 
     cy.findByTestId('studio-save-button').click()
 
-    cy.waitForSpecToFinish(undefined, undefined, false)
+    cy.waitForSpecToFinish({ isStudioMode: true })
 
     // only the commands in the editor are written to the test block - ideally we should also pick up the changes from the file system
     // TODO: https://github.com/cypress-io/cypress-services/issues/11085
@@ -655,7 +650,7 @@ describe('studio functionality', () => {
 
     cy.findByTestId('record-button-recording').should('be.visible')
 
-    cy.waitForSpecToFinish(undefined, undefined, false)
+    cy.waitForSpecToFinish({ isStudioMode: true })
 
     cy.getAutIframe().within(() => {
       cy.get('#increment').realClick()

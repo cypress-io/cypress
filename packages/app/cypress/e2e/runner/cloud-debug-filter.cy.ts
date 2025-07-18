@@ -17,12 +17,12 @@ describe('cloud debug test filtering', () => {
     })
 
     cy.visitApp(`specs/runner?file=cypress/e2e/test.cy.js&mode=debug`)
-    cy.waitForSpecToFinish({ passCount: 0, failCount: 1 })
+    cy.waitForSpecToFinish({ expectedResults: { passCount: 0, failCount: 1 } })
 
     cy.get('.runnable-title').contains('t2')
 
     cy.get('.debug-dismiss').contains('1 / 4 tests').click()
-    cy.waitForSpecToFinish({ passCount: 2, failCount: 2 })
+    cy.waitForSpecToFinish({ expectedResults: { passCount: 2, failCount: 2 } })
 
     cy.withCtx((ctx) => {
       ctx.coreData.cloudProject.testsForRunResults = {
@@ -31,7 +31,7 @@ describe('cloud debug test filtering', () => {
     })
 
     cy.visitApp(`specs/runner?file=cypress/e2e/test.cy.js&mode=debug`)
-    cy.waitForSpecToFinish({ passCount: 0, failCount: 1 })
+    cy.waitForSpecToFinish({ expectedResults: { passCount: 0, failCount: 1 } })
 
     cy.get('.runnable-title').contains('t4')
   })
@@ -50,7 +50,7 @@ describe('cloud debug test filtering', () => {
     })
 
     cy.visitApp(`specs/runner?file=cypress/e2e/lots-of-tests.cy.js&mode=debug`)
-    cy.waitForSpecToFinish({ passCount: 50 })
+    cy.waitForSpecToFinish({ expectedResults: { passCount: 50 } })
 
     cy.get('@reporterPanel').then((el) => el.width(500))
     cy.get('@reporterPanel').percySnapshot('wide')
@@ -62,7 +62,7 @@ describe('cloud debug test filtering', () => {
   it('works with skips and onlys', () => {
     cy.visitApp(`specs/runner?file=cypress/e2e/skip-and-only.cy.js`)
 
-    cy.waitForSpecToFinish({ passCount: 0, failCount: 1 })
+    cy.waitForSpecToFinish({ expectedResults: { passCount: 0, failCount: 1 } })
 
     // .only is respected
     cy.withCtx((ctx) => {
@@ -72,7 +72,7 @@ describe('cloud debug test filtering', () => {
     })
 
     cy.visitApp(`specs/runner?file=cypress/e2e/skip-and-only.cy.js&mode=debug`)
-    cy.waitForSpecToFinish({ passCount: 0, failCount: 1 })
+    cy.waitForSpecToFinish({ expectedResults: { passCount: 0, failCount: 1 } })
 
     cy.get('.runnable-title').contains('t1')
 
@@ -86,7 +86,7 @@ describe('cloud debug test filtering', () => {
     })
 
     cy.visitApp(`specs/runner?file=cypress/e2e/skip-and-only.cy.js&mode=debug`)
-    cy.waitForSpecToFinish({ passCount: 0, failCount: 1 })
+    cy.waitForSpecToFinish({ expectedResults: { passCount: 0, failCount: 1 } })
 
     cy.get('.runnable-title').contains('t3')
 
@@ -100,7 +100,7 @@ describe('cloud debug test filtering', () => {
     })
 
     cy.visitApp(`specs/runner?file=cypress/e2e/skip-and-only.cy.js&mode=debug`)
-    cy.waitForSpecToFinish({ passCount: 0, failCount: 1, pendingCount: 1 })
+    cy.waitForSpecToFinish({ expectedResults: { passCount: 0, failCount: 1, pendingCount: 1 } })
     cy.get('.runnable-title').first().contains('t2')
     cy.get('.runnable-title').last().contains('t3')
 
@@ -114,7 +114,7 @@ describe('cloud debug test filtering', () => {
     })
 
     cy.visitApp(`specs/runner?file=cypress/e2e/skip-and-only.cy.js&mode=debug`)
-    cy.waitForSpecToFinish({ passCount: 0, failCount: 1 })
+    cy.waitForSpecToFinish({ expectedResults: { passCount: 0, failCount: 1 } })
     cy.get('.runnable-title').contains('t4')
   })
 
@@ -146,6 +146,6 @@ describe('cloud debug test filtering', () => {
     })
 
     cy.visitApp(`specs/runner?file=cypress/e2e/domain-change.cy.js&mode=debug`)
-    cy.waitForSpecToFinish({ failCount: 2 })
+    cy.waitForSpecToFinish({ expectedResults: { failCount: 2 } })
   })
 })
