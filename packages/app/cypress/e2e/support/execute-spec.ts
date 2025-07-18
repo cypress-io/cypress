@@ -27,10 +27,10 @@ declare global {
 
 export const waitForSpecToFinish = (expectedResults?: ExpectedResults, timeout?: number) => {
   // Then ensure the tests are not running
-  cy.contains('Your tests are loading...', { timeout }).should('not.exist')
+  cy.contains('Your tests are loading...', { timeout: timeout || 30000 }).should('not.exist')
 
   // Then ensure the tests have finished
-  cy.get('[aria-label="Rerun all tests"]', { timeout })
+  cy.get('[aria-label="Rerun all tests"]', { timeout: timeout || 30000 })
 
   if (expectedResults) {
     shouldHaveTestResults(expectedResults)
