@@ -3,9 +3,7 @@
 /// <reference path="./cypress-eventemitter.d.ts" />
 /// <reference path="./cypress-type-helpers.d.ts" />
 
-const CypressTasks = (await import('../../../cypress.config')).CypressTasks
-
-type AllTasks = typeof CypressTasks
+type AllTasks = typeof import('../../../cypress.config')['CypressTasks']
 type TaskEventNames = keyof AllTasks
 
 type MyParameter<T extends TaskEventNames> = Parameters<AllTasks[T]>[0]
@@ -2178,8 +2176,7 @@ declare namespace Cypress {
         ? [] | [
           arg: undefined,
           options?: (Partial<Loggable & Timeoutable>)
-        ]
-        : [
+        ] : [
           arg: MyParameter<T>,
           options?: (Partial<Loggable & Timeoutable>)
         ]
