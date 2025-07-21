@@ -2172,11 +2172,18 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/api/task
      */
-    task<TEvent extends TaskEventNames>(
-      event: TEvent,
-      arg: MyParameter<TEvent>,
-      options?: Partial<Loggable & Timeoutable>
-    ): Chainable<MyReturnType<TEvent>>
+    task<T extends TaskEventNames>(
+      event: T,
+      ...myArgs: Parameters<AllTasks[T]>['length'] extends 0
+        ? [] | [
+          arg: undefined,
+          options?: (Partial<Loggable & Timeoutable>)
+        ]
+        : [
+          arg: MyParameter<T>,
+          options?: (Partial<Loggable & Timeoutable>)
+        ]
+    ): Chainable<MyReturnType<T>>;
 
     /**
      * Enables you to work with the subject yielded from the previous command.
