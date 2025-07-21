@@ -451,6 +451,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
     _.extend(defaultLaunchOptions.preferences, {
       'network.proxy.allow_hijacking_localhost': true,
+      'network.proxy.testing_localhost_is_secure_when_hijacked': true,
       'network.proxy.http': hostname,
       'network.proxy.ssl': hostname,
       'network.proxy.http_port': +port,

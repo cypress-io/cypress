@@ -30,6 +30,7 @@ _Released 07/29/2025 (PENDING)_
 **Bugfixes:**
 
 - Fixed an issue where Create from Component feature might not be able to parse React components from project files. Fixed in [#31457](https://github.com/cypress-io/cypress/pull/31457).
+- Fixed an issue where `isSecureContext` would be `false` on localhost when testing with Cypress. Addresses [#18217](https://github.com/cypress-io/cypress/issues/18217).
 
 **Misc:**
 

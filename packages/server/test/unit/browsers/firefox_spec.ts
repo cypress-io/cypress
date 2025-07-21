@@ -423,6 +423,20 @@ describe('lib/browsers/firefox', () => {
       }), this.options)
     })
 
+    // @see https://github.com/cypress-io/cypress/issues/18217
+    it('sets "testing_locationhost_is_secure_when_hijacked" to true to allow window.isSecureContext to be true', async function () {
+      const executeBeforeBrowserLaunchSpy = sinon.spy(utils, 'executeBeforeBrowserLaunch')
+
+      this.options.proxyServer = 'http://proxy-server:1234'
+
+      await firefox.open(this.browser, 'http://', this.options, this.automation)
+      expect(executeBeforeBrowserLaunchSpy).to.have.been.calledWith(this.browser, sinon.match({
+        preferences: {
+          'network.proxy.testing_localhost_is_secure_when_hijacked': true,
+        },
+      }), this.options)
+    })
+
     describe('sets "remote.active-protocols"', function () {
       // CDP was deprecated in Firefox 129 and up and was removed in Firefox 141.
       // @see https://fxdx.dev/deprecating-cdp-support-in-firefox-embracing-the-future-with-webdriver-bidi/
