@@ -3,27 +3,27 @@ on:
   workflow_dispatch:
     inputs:
       debug-only:
-        description: 'debug-only'     
+        description: 'debug-only'
         required: false
         default: false
       max-operations-per-run:
-        description: 'max operations per run'     
+        description: 'max operations per run'
         required: false
         default: 3000
       days-before-stale:
-        description: 'days-before-stale'     
+        description: 'days-before-stale'
         required: false
         default: 180
       days-before-close:
-        description: 'days-before-close'     
+        description: 'days-before-close'
         required: false
         default: 14
       exempt-issue-labels:
-        description: 'exempt-issue-labels'     
+        description: 'exempt-issue-labels'
         required: false
         default: 'type: feature,type: enhancement,routed-to-e2e,routed-to-ct,routed-to-tools,routed-to-cloud,prevent-stale,triaged'
       exempt-pr-labels:
-        description: 'exempt-pr-labels'     
+        description: 'exempt-pr-labels'
         required: false
         default: 'type: feature,type: enhancement,prevent-stale,triaged'
   schedule:
@@ -41,6 +41,7 @@ env:
 jobs:
   stale:
     runs-on: ubuntu-latest
+    if: github.repository == 'cypress-io/cypress'
     steps:
       - uses: actions/stale@v8
         with:
