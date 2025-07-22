@@ -627,7 +627,7 @@ describe('studio functionality', () => {
     cy.location().its('hash').should('contain', 'suiteId=r2').and('contain', 'studio=')
   })
 
-  it('updates the studio url parameters when creating a new test', () => {
+  it('updates the studio url parameters and displays the single test view after creating a new test', () => {
     loadProjectAndRunSpec()
 
     // open the studio panel to create a new test in the root suite
@@ -641,6 +641,10 @@ describe('studio functionality', () => {
 
     // the studio url parameters should be removed
     cy.location().its('hash').and('not.contain', 'suiteId=').and('contain', 'studio=').and('contain', 'testId=r2')
+
+    cy.get('.studio-single-test-container').should('be.visible')
+
+    cy.percySnapshot()
   })
 
   it('does not remove the studio url parameters when saving test changes', () => {
