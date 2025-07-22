@@ -1,5 +1,5 @@
 /* Rule overrides specifically for CLI packages */
-import type { InfiniteDepthConfigWithExtends } from "typescript-eslint"
+import type { InfiniteDepthConfigWithExtends } from 'typescript-eslint'
 
 export const cliOverrides = [
   {
