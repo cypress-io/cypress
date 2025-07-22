@@ -132,6 +132,8 @@ function shouldTestRunTitle (parsedGrep, testName) {
   }
 
   if (!Array.isArray(parsedGrep)) {
+    console.error('Invalid parsed title grep')
+    console.error(parsedGrep)
     throw new Error('Expected title grep to be an array')
   }
 

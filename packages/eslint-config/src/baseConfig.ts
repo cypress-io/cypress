@@ -11,7 +11,7 @@ import react from 'eslint-plugin-react'
 
 import { flatConfigs as eslintPluginImportXFlatConfigs } from 'eslint-plugin-import-x'
 
-export default <InfiniteDepthConfigWithExtends[]>[
+export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
   js.configs.recommended,
   ...tsConfigs.recommended,
   cy.configs.recommended,

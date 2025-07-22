@@ -1,11 +1,11 @@
-import baseConfig from '../../packages/eslint-config'
+import { baseConfig, cliOverrides } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
+  ...cliOverrides,
   {
     files: ['**/*.js', '**/*.ts', '**/*.jsx', '**/*.tsx'],
     rules: {
-      'no-console': 'off',
       'no-restricted-syntax': 'off',
       'mocha/no-global-tests': 'off',
     },

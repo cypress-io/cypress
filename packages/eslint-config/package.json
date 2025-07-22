@@ -2,7 +2,7 @@
   "name": "@packages/eslint-config",
   "version": "0.0.0-development",
   "private": true,
-  "main": "src/baseConfig.ts",
+  "main": "src/index.ts",
   "scripts": {
     "lint": "eslint"
   },
