@@ -2180,10 +2180,14 @@ declare namespace Cypress {
         [
           arg?: any,
           options?: Partial<Loggable & Timeoutable>
-        ] : [
-          arg: MyParameter<T>,
-          options?: Partial<Loggable & Timeoutable>
-        ]
+        ] : Parameters<AllTasks[T]>['length'] extends 0 ?
+          [
+            arg?: undefined,
+            options?: Partial<Loggable & Timeoutable>
+          ] : [
+            arg: MyParameter<T>,
+            options?: Partial<Loggable & Timeoutable>
+          ]
     ): Chainable<
       Equals<MyReturnType<T>, any> extends true ? unknown : MyReturnType<T>
     >
