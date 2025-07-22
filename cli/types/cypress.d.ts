@@ -4,7 +4,7 @@
 /// <reference path="./cypress-type-helpers.d.ts" />
 
 type AllTasks = typeof import('../../../cypress.config')['CypressTasks']
-type TaskEventNames = keyof AllTasks
+type TaskEventNames = keyof AllTasks & string
 
 type MyParameter<T extends TaskEventNames> = Parameters<AllTasks[T]>[0]
 type MyReturnType<T extends TaskEventNames> = Awaited<ReturnType<AllTasks[T]>>
