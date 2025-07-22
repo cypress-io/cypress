@@ -109,28 +109,10 @@ const initializeCloudCyPrompt = async (Cypress: Cypress.Cypress, cy: Cypress.Cyp
 export default (Commands: Cypress.Cypress['Commands'], Cypress: Cypress.Cypress, cy: Cypress.Cypress['cy']) => {
   // @ts-expect-error - these types are not yet implemented until the prompt command is rolled out
   if (Cypress.config('experimentalPromptCommand')) {
-    let initializeCloudCyPromptPromise: Promise<ReturnType<CyPromptDriverDefaultShape['createCyPrompt']> | Error> | undefined
-
-    if (Cypress.browser.family === 'chromium' || Cypress.browser.name === 'electron') {
-      initializeCloudCyPromptPromise = initializeCloudCyPrompt(Cypress, cy)
-    }
+    let initializeCloudCyPromptPromise = initializeCloudCyPrompt(Cypress, cy)
 
     const prompt = (steps: string[], commandOptions: object = {}) => {
       const promptCmd = cy.state('current')
-
-      if (Cypress.testingType === 'component') {
-        $errUtils.throwErrByPath('prompt.promptTestingTypeError')
-
-        return
-      }
-
-      if (!initializeCloudCyPromptPromise) {
-        // TODO: (cy.prompt) We will look into supporting other browsers (and testing them)
-        // as this is rolled out
-        $errUtils.throwErrByPath('prompt.promptSupportedBrowser')
-
-        return
-      }
 
       // TODO: figure out how to handle timeout more generally
       return cy.wrap(initializeCloudCyPromptPromise, { log: false, timeout: 45000 }).then((bundleResult: ReturnType<CyPromptDriverDefaultShape['createCyPrompt']> | Error) => {

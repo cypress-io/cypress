@@ -1347,14 +1347,6 @@ export default {
         docsUrl: 'https://on.cypress.io/prompt-download-error',
       }
     },
-    promptSupportedBrowser: stripIndent`\
-        \`cy.prompt\` is only supported in Chromium-based browsers.
-
-        Use Chrome, Electron, Chromium, or Chrome for Testing.
-      `,
-    promptTestingTypeError: stripIndent`\
-      \`cy.prompt\` is currently only supported in end-to-end tests.
-    `,
   },
 
   proxy: {

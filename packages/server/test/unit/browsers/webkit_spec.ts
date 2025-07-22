@@ -78,14 +78,6 @@ describe('lib/browsers/webkit', () => {
     })
   })
 
-  context('#connectCyPromptToBrowser', () => {
-    it('throws error', () => {
-      const webkit = getWebkit()
-
-      expect(webkit.connectCyPromptToBrowser).to.throw('CyPrompt is not yet supported in WebKit.')
-    })
-  })
-
   context('#closeProtocolConnection', () => {
     it('throws error', async () => {
       const webkit = getWebkit()

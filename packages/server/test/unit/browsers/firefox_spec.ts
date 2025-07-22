@@ -684,12 +684,6 @@ describe('lib/browsers/firefox', () => {
     })
   })
 
-  context('#connectCyPromptToBrowser', () => {
-    it('throws error', () => {
-      expect(firefox.connectCyPromptToBrowser).to.throw('CyPrompt is not yet supported in firefox.')
-    })
-  })
-
   context('#closeProtocolConnection', () => {
     it('throws error', () => {
       expect(firefox.closeProtocolConnection).to.throw('Protocol is not yet supported in firefox.')
