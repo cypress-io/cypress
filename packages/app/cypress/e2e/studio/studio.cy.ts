@@ -194,7 +194,7 @@ describe('studio functionality', () => {
       const spec = await ctx.actions.file.readFileInProject('cypress/e2e/spec-w-visit.cy.js')
 
       expect(spec.trim().replace(/\r/g, '')).to.equal(`
-        describe('studio functionality', () => {
+describe('studio functionality', () => {
   beforeEach(() => {
     cy.visit('cypress/e2e/index.html')
   })
@@ -311,7 +311,7 @@ describe('studio functionality', () => {
       const spec = await ctx.actions.file.readFileInProject('cypress/e2e/spec-w-visit.cy.js')
 
       expect(spec.trim().replace(/\r/g, '')).to.equal(`
-            describe('studio functionality', () => {
+describe('studio functionality', () => {
   beforeEach(() => {
     cy.visit('cypress/e2e/index.html')
   })
@@ -324,8 +324,7 @@ describe('studio functionality', () => {
 
 cy.get('#increment').click();
   });
-})
-        `.trim())
+})`.trim())
     })
   })
 
