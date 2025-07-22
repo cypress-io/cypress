@@ -3,6 +3,20 @@
 /// <reference path="./cypress-eventemitter.d.ts" />
 /// <reference path="./cypress-type-helpers.d.ts" />
 
+type IsAny<X> =
+  (<T>() => T extends X ? 1 : 2) extends
+  (<T>() => T extends any ? 1 : 2) ? true : false;
+
+type CypressConfig_Data = typeof import('../../../cypress.config')
+type AllTasks_CJS = CypressConfig_Data['CypressTasks']
+type AllTasks_ESM = CypressConfig_Data['default']['CypressTasks']
+
+type AllTasks = IsAny<AllTasks_CJS> extends true ? AllTasks_ESM : AllTasks_CJS
+type TaskEventNames = keyof AllTasks & string
+
+type MyParameter<T extends TaskEventNames> = Parameters<AllTasks[T]>[0]
+type MyReturnType<T extends TaskEventNames> = Awaited<ReturnType<AllTasks[T]>>
+
 declare namespace Cypress {
   type FileContents = string | any[] | object
   type HistoryDirection = 'back' | 'forward'
@@ -2164,7 +2178,23 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/api/task
      */
-    task<S = unknown>(event: string, arg?: any, options?: Partial<Loggable & Timeoutable>): Chainable<S>
+    task<T extends TaskEventNames>(
+      event: T,
+      ...myArgs: IsAny<AllTasks> extends true ?
+        [
+          arg?: any,
+          options?: Partial<Loggable & Timeoutable>
+        ] : Parameters<AllTasks[T]>['length'] extends 0 ?
+          [
+            arg?: undefined,
+            options?: Partial<Loggable & Timeoutable>
+          ] : [
+            arg: MyParameter<T>,
+            options?: Partial<Loggable & Timeoutable>
+          ]
+    ): Chainable<
+      IsAny<AllTasks> extends true ? unknown : MyReturnType<T>
+    >
 
     /**
      * Enables you to work with the subject yielded from the previous command.
