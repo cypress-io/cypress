@@ -3,6 +3,10 @@
 /// <reference path="./cypress-eventemitter.d.ts" />
 /// <reference path="./cypress-type-helpers.d.ts" />
 
+type Equals<X, Y> =
+  (<T>() => T extends X ? 1 : 2) extends
+  (<T>() => T extends Y ? 1 : 2) ? true : false;
+
 type AllTasks = typeof import('../../../cypress.config')['CypressTasks']
 type TaskEventNames = keyof AllTasks & string
 
@@ -2172,9 +2176,17 @@ declare namespace Cypress {
      */
     task<T extends TaskEventNames>(
       event: T,
-      arg?: MyParameter<T>,
-      options?: Partial<Loggable & Timeoutable>
-    ): Chainable<MyReturnType<T>>
+      ...myArgs: Equals<AllTasks, any> extends true ?
+        [
+          arg?: any,
+          options?: Partial<Loggable & Timeoutable>
+        ] : [
+          arg: MyParameter<T>,
+          options?: Partial<Loggable & Timeoutable>
+        ]
+    ): Chainable<
+      Equals<MyReturnType<T>, any> extends true ? unknown : MyReturnType<T>
+    >
 
     /**
      * Enables you to work with the subject yielded from the previous command.
