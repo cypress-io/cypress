@@ -3,6 +3,10 @@
 
 _Released 7/30/2025 (PENDING)_
 
+**Features:**
+
+- Adds ability for cy.task function to have type-safety [#32075](https://github.com/cypress-io/cypress/pull/32075).
+
 **Bugfixes:**
 
 - Fixed missing support for setting an absolute path for `component.indexHtmlFile` in `@cypress/webpack-dev-server`. Fixes [#31819](https://github.com/cypress-io/cypress/issues/31819).
