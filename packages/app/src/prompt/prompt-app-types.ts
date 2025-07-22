@@ -1,5 +1,5 @@
 // Note: This file is owned by the cloud delivered
-// cy-prompt bundle. It is downloaded and copied to the app.
+// `cy-prompt` bundle. It is downloaded and copied to the app.
 // It should not be modified directly in the app.
 
 import type Emitter from 'component-emitter'

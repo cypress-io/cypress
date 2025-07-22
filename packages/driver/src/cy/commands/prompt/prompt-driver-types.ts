@@ -1,5 +1,5 @@
 // Note: This file is owned by the cloud delivered
-// cy-prompt bundle. It is downloaded and copied to the app.
+// `cy-prompt` bundle. It is downloaded and copied to the app.
 // It should not be modified directly in the app.
 
 import type Emitter from 'component-emitter'
@@ -22,6 +22,7 @@ export interface CypressInternalBase extends Cypress.Cypress {
     ...args: any[]
   ) => Promise<any>
   on: InternalActions
+  once: InternalActions
 }
 
 interface CrossOriginCypressInternal extends CypressInternalBase {
@@ -48,9 +49,22 @@ export interface CyPromptEventManager {
   ws: Emitter
 }
 
+export interface CyPromptErrorUtilsOpts {
+  message?: string
+  args?: unknown
+  onFail?: (err: any) => void
+  stack?: any
+  errProps?: {
+    name: string
+  }
+}
+
 export interface CyPromptErrorUtils {
   extendErrorMessages: (errorMessages: any) => void
-  throwErrByPath: (errPath: any, options?: any) => never
+  throwErrByPath: (
+    errPath: `cloudPrompt.${string}`,
+    options?: CyPromptErrorUtilsOpts
+  ) => never
 }
 
 export interface CyPromptStackLineDetail {
@@ -84,12 +98,16 @@ export interface CyPromptOptions {
   onMoreInfoNeeded: (options: CyPromptMoreInfoNeededOptions) => void
 }
 
+type MaybePromise<T> = T | Promise<T>
+
 export interface CyPromptDriverDefaultShape {
   createCyPrompt: (
     options: CyPromptOptions
-  ) => (args: {
-    steps: string | string[]
-    commandOptions?: object
-    promptCmd: any
-  }) => Promise<void>
+  ) => MaybePromise<
+    (args: {
+      steps: string[]
+      commandOptions?: object
+      promptCmd: any
+    }) => Cypress.Chainable<void>
+  >
 }

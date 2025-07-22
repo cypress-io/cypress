@@ -1,5 +1,5 @@
 // Note: This file is owned by the cloud delivered
-// cy-prompt bundle. It is downloaded and copied to the app.
+// `cy-prompt bundle. It is downloaded and copied to the app.
 // It should not be modified directly in the app.
 
 /// <reference types="cypress" />
@@ -26,17 +26,21 @@ interface RetryOptions {
   onRetry?: (delay: number, err: unknown) => void
 }
 
+declare module 'axios' {
+  interface AxiosRequestConfig {
+    encrypt?: 'always' | 'signed' | boolean
+  }
+}
+
 export interface CyPromptCloudApi {
   cloudUrl: string
-  CloudRequest: AxiosInstance
+  CloudRequest?: AxiosInstance
   createCloudRequest: (opts?: {
-    baseURL?: string
     additionalHeaders?: Record<string, string>
     enableLogging?: boolean
     enableErrorTransform?: boolean
   }) => AxiosInstance
   isRetryableError: (err: unknown) => boolean
-  cloudHeaders?: Record<string, string>
   asyncRetry: AsyncRetry
 }
 
@@ -65,9 +69,9 @@ export interface CyPromptServerOptions {
   cyPromptPath: string
   projectSlug?: string
   cloudApi: CyPromptCloudApi
-  manifest: Record<string, string>
-  verifyHash: (contents: BinaryLike, expectedHash: string) => boolean
   getProjectOptions: () => Promise<CyPromptProjectOptions>
+  manifest?: Record<string, string>
+  verifyHash: (contents: BinaryLike, expectedHash: string) => boolean
 }
 
 export interface CyPromptCDPClient {
@@ -76,6 +80,10 @@ export interface CyPromptCDPClient {
     params?: CyPromptCommand<T>['paramsType'][0]
   ): Promise<CyPromptCommand<T>['returnType']>
   on<T extends Extract<keyof CyPromptEvents, string>>(
+    eventName: T,
+    cb: (event: CyPromptEvent<T>[0]) => void | Promise<unknown>
+  ): void
+  off<T extends Extract<keyof CyPromptEvents, string>>(
     eventName: T,
     cb: (event: CyPromptEvent<T>[0]) => void | Promise<unknown>
   ): void
@@ -89,7 +97,9 @@ export interface CyPromptAddSocketListenerOptions {
 
 export interface CyPromptServerShape {
   initializeRoutes(router: Router): void
-  addSocketListeners(addSocketListenerOptions: CyPromptAddSocketListenerOptions): void
+  addSocketListeners(
+    addSocketListenerOptions: CyPromptAddSocketListenerOptions
+  ): void
   connectToBrowser: (cdpClient: CyPromptCDPClient) => void
   reset: (testId?: string) => void
 }
@@ -97,6 +107,6 @@ export interface CyPromptServerShape {
 export interface CyPromptServerDefaultShape {
   createCyPromptServer: (
     options: CyPromptServerOptions
-  ) => Promise<CyPromptServerShape>
+  ) => Promise<CyPromptServerShape> | CyPromptServerShape
   MOUNT_VERSION: number
 }
