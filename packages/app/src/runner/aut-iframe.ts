@@ -494,21 +494,7 @@ export class AutIframe {
   startStudio () {
     const studioStore = useStudioStore()
 
-    studioStore.start(this._body()?.[0])
-  }
-
-  reattachStudio () {
-    const studioStore = useStudioStore()
-
-    if (studioStore.isActive) {
-      const body = this._body()?.[0]
-
-      if (!body) {
-        throw Error(`Cannot reattach Studio without the HTMLBodyElement for the app`)
-      }
-
-      studioStore.attachListeners(body)
-    }
+    studioStore.start()
   }
 
   private _scrollIntoView (win: Window, el: HTMLElement) {
