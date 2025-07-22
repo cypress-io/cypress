@@ -7,11 +7,7 @@ type Equals<X, Y> =
   (<T>() => T extends X ? 1 : 2) extends
   (<T>() => T extends Y ? 1 : 2) ? true : false;
 
-type CypressConfig_Data = typeof import('../../../cypress.config')
-type AllTasks_CJS = CypressConfig_Data['CypressTasks']
-type AllTasks_ESM = CypressConfig_Data['default']['CypressTasks']
-
-type AllTasks = Equals<AllTasks_CJS, any> extends true ? AllTasks_ESM : AllTasks_CJS
+type AllTasks = typeof import('../../../cypress.config')['CypressTasks']
 type TaskEventNames = keyof AllTasks & string
 
 type MyParameter<T extends TaskEventNames> = Parameters<AllTasks[T]>[0]
