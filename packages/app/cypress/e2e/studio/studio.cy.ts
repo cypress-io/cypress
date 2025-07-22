@@ -185,6 +185,10 @@ describe('studio functionality', () => {
     // verify recording is enabled to ensure the panel is fully ready
     cy.findByTestId('record-button-recording').should('have.text', 'Recording...')
 
+    cy.get('.studio-single-test-container').should('be.visible')
+
+    cy.percySnapshot()
+
     incrementCounter(0)
 
     cy.findByTestId('studio-save-button').click()
@@ -301,6 +305,10 @@ describe('studio functionality', () => {
 
     // verify recording is enabled to ensure the panel is fully ready
     cy.findByTestId('record-button-recording').should('have.text', 'Recording...')
+
+    cy.get('.studio-single-test-container').should('be.visible')
+
+    cy.percySnapshot()
 
     incrementCounter(0)
 
