@@ -724,7 +724,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       return $el.hasClass('__cypress-studio-assertions-menu')
     },
 
-    _openAssertionsMenu (event, body: HTMLElement, addAssertion?: ($el: HTMLElement | JQuery<HTMLElement>, ...args: AssertionArgs) => void, generatePossibleAssertions?: ($el: JQuery<Element>) => PossibleAssertions) {
+    _openAssertionsMenu (event, body: HTMLElement, addAssertion: ($el: HTMLElement | JQuery<HTMLElement>, ...args: AssertionArgs) => void, generatePossibleAssertions?: ($el: JQuery<Element>) => PossibleAssertions) {
       event.preventDefault()
       event.stopPropagation()
 
@@ -741,7 +741,7 @@ export const useStudioStore = defineStore('studioRecorder', {
         $body: window.UnifiedRunner.CypressJQuery(body),
         props: {
           possibleAssertions: generatePossibleAssertions ? generatePossibleAssertions($el) : this._generatePossibleAssertions($el),
-          addAssertion: addAssertion || this._addAssertion,
+          addAssertion,
           closeMenu: () => this._closeAssertionsMenu(body),
         },
       })
