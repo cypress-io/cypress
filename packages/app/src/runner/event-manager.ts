@@ -858,7 +858,8 @@ export class EventManager {
     })
 
     const hasRunnableId = !!this.studioStore.testId || !!this.studioStore.suiteId
-    const studioSingleTestActive = !!this.studioStore.testId && !this.studioStore.suiteId
+
+    const studioSingleTestActive = this.studioStore.newTestLineNumber != null || !!this.studioStore.testId
 
     this.reporterBus.emit('reporter:start', {
       startTime: Cypress.runner.getStartTime(),

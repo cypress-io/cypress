@@ -52,24 +52,10 @@ export interface CommandLog {
   isStudio: boolean
 }
 
-const eventTypes = [
-  'click',
-  // 'dblclick',
-  'change',
-  'keydown',
-  'keyup',
-]
-
 const eventsWithValue = [
   'change',
   'keydown',
   'keyup',
-]
-
-const internalMouseEvents = [
-  'mousedown',
-  'mouseover',
-  'mouseout',
 ]
 
 const tagNamesWithoutText = [
@@ -117,7 +103,6 @@ interface StudioRecorderState {
     element: Element
     selector: string
   }
-  _body?: Element
   _currentId: number
 
   canAccessStudioAI: boolean
@@ -267,7 +252,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       }
     },
 
-    start (body: HTMLBodyElement) {
+    start () {
       this.isActive = true
       this.isLoading = false
       this.logs = []
@@ -283,13 +268,9 @@ export const useStudioStore = defineStore('studioRecorder', {
       if (!this.url && autStore.url) {
         this.setUrl(autStore.url)
       }
-
-      this.attachListeners(body)
     },
 
     stop () {
-      this.removeListeners()
-
       this.isActive = false
       this.isLoading = false
     },
@@ -364,59 +345,6 @@ export const useStudioStore = defineStore('studioRecorder', {
       }
     },
 
-    _recordEvent (event) {
-      if (this.isFailed || !this._trustEvent(event)) return
-
-      const $el = window.UnifiedRunner.CypressJQuery(event.target)
-
-      if (this._isAssertionsMenu($el)) {
-        return
-      }
-
-      this._closeAssertionsMenu()
-
-      if (!this._shouldRecordEvent(event, $el)) {
-        return
-      }
-
-      const name = this._getName(event, $el)
-      const message = this._getMessage(event, $el)
-
-      if (name === 'change') {
-        return
-      }
-
-      let selector: string | undefined = ''
-
-      if (name === 'click' && this._matchPreviousMouseEvent($el)) {
-        selector = this._previousMouseEvent?.selector
-      } else {
-        selector = getCypress().ElementSelector.getSelector($el)
-      }
-
-      this._clearPreviousMouseEvent()
-
-      if (name === 'type' && !message) {
-        return this._removeLastLogIfType(selector)
-      }
-
-      const updateOnly = this._updateLastLog(selector, name, message)
-
-      if (updateOnly) {
-        return
-      }
-
-      if (name === 'type') {
-        this._addClearLog(selector)
-      }
-
-      this._addLog({
-        selector,
-        name,
-        message,
-      })
-    },
-
     _removeLastLogIfType (selector?: string) {
       const lastLog = this.logs[this.logs.length - 1]
 
@@ -444,34 +372,6 @@ export const useStudioStore = defineStore('studioRecorder', {
       this._generateBothLogs(log).forEach((commandLog) => {
         getEventManager().emit('reporter:log:add', commandLog)
       })
-    },
-
-    _addAssertion ($el: HTMLElement | JQuery<HTMLElement>, ...args: AssertionArgs) {
-      const id = this._getId()
-      const selector = getCypress().ElementSelector.getSelector($el)
-
-      const log: StudioLog = {
-        id,
-        selector,
-        name: 'should',
-        message: args,
-        isAssertion: true,
-      }
-
-      this.logs.push(log)
-
-      const reporterLog = {
-        id,
-        selector,
-        name: 'assert',
-        message: this._generateAssertionMessage($el as HTMLElement, ...args),
-      }
-
-      this._generateBothLogs(reporterLog).forEach((commandLog) => {
-        getEventManager().emit('reporter:log:add', commandLog)
-      })
-
-      this._closeAssertionsMenu()
     },
 
     saveSuccess () {
@@ -509,61 +409,6 @@ export const useStudioStore = defineStore('studioRecorder', {
 
     _matchPreviousMouseEvent (el) {
       return this._previousMouseEvent && window.UnifiedRunner.CypressJQuery(el).is(this._previousMouseEvent.element)
-    },
-
-    attachListeners (body: HTMLBodyElement) {
-      if (this.isFailed) {
-        return
-      }
-
-      this._body = body
-
-      // if we're in cloud studio, we shouldn't attach our own listeners - cloud studio will handle it
-      if (this.cloudStudioRequested) {
-        return
-      }
-
-      for (const event of eventTypes) {
-        this._body.addEventListener(event, this._recordEvent, {
-          capture: true,
-          passive: true,
-        })
-      }
-
-      for (const event of internalMouseEvents) {
-        this._body.addEventListener(event, this._recordMouseEvent, {
-          capture: true,
-          passive: true,
-        })
-      }
-
-      this._body.addEventListener('contextmenu', this._openAssertionsMenu, {
-        capture: true,
-      })
-
-      this._clearPreviousMouseEvent()
-    },
-
-    removeListeners () {
-      if (!this._body) return
-
-      for (const event of eventTypes) {
-        this._body.removeEventListener(event, this._recordEvent, {
-          capture: true,
-        })
-      }
-
-      for (const event of internalMouseEvents) {
-        this._body.removeEventListener(event, this._recordMouseEvent, {
-          capture: true,
-        })
-      }
-
-      this._body.removeEventListener('contextmenu', this._openAssertionsMenu, {
-        capture: true,
-      })
-
-      this._clearPreviousMouseEvent()
     },
 
     copyToClipboard (commandsText) {
@@ -879,11 +724,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       return $el.hasClass('__cypress-studio-assertions-menu')
     },
 
-    _openAssertionsMenu (event, addAssertion?: ($el: HTMLElement | JQuery<HTMLElement>, ...args: AssertionArgs) => void, generatePossibleAssertions?: ($el: JQuery<Element>) => PossibleAssertions) {
-      if (!this._body) {
-        throw Error('this._body was not defined')
-      }
-
+    _openAssertionsMenu (event, body: HTMLElement, addAssertion: ($el: HTMLElement | JQuery<HTMLElement>, ...args: AssertionArgs) => void, generatePossibleAssertions?: ($el: JQuery<Element>) => PossibleAssertions) {
       event.preventDefault()
       event.stopPropagation()
 
@@ -893,25 +734,21 @@ export const useStudioStore = defineStore('studioRecorder', {
         return
       }
 
-      this._closeAssertionsMenu()
+      this._closeAssertionsMenu(body)
 
       openStudioAssertionsMenu({
         $el,
-        $body: window.UnifiedRunner.CypressJQuery(this._body),
+        $body: window.UnifiedRunner.CypressJQuery(body),
         props: {
           possibleAssertions: generatePossibleAssertions ? generatePossibleAssertions($el) : this._generatePossibleAssertions($el),
-          addAssertion: addAssertion || this._addAssertion,
-          closeMenu: this._closeAssertionsMenu,
+          addAssertion,
+          closeMenu: () => this._closeAssertionsMenu(body),
         },
       })
     },
 
-    _closeAssertionsMenu () {
-      if (!this._body) {
-        throw Error('this._body was not defined')
-      }
-
-      closeStudioAssertionsMenu(window.UnifiedRunner.CypressJQuery(this._body))
+    _closeAssertionsMenu (body: HTMLElement) {
+      closeStudioAssertionsMenu(window.UnifiedRunner.CypressJQuery(body))
     },
 
     _generatePossibleAssertions ($el: JQuery<Element>) {

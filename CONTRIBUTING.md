@@ -214,7 +214,7 @@ For Ubuntu `24.04` and above, refer also to the [Ubuntu 24.04 Release notes](htt
 
 #### Windows
 
-Sometimes, when using [`nvm`](https://github.com/coreybutler/nvm-windows) and changing node versions, node install tools are not installed automatically. This is needed for `node-gyp` to rebuild `better-sqlite3`. If you are failing to build Cypress because of this, either with a Python install missing or a VSCode version not being detected by `node-gyp`, you likely need to run the `install_tools.bat` outlined in the [better-sqlite3 troubleshooting guide](https://github.com/WiseLibs/better-sqlite3/blob/master/docs/troubleshooting.md).
+When using [`nvm`](https://github.com/coreybutler/nvm-windows) and changing node versions, node install tools are not installed automatically. This is needed for `node-gyp` to rebuild `better-sqlite3`. If you are failing to build Cypress because of this, either with a Python install missing or a VSCode version not being detected by `node-gyp`, you likely need to run the `install_tools.bat` outlined in the [better-sqlite3 troubleshooting guide](https://github.com/WiseLibs/better-sqlite3/blob/master/docs/troubleshooting.md).
 
 #### Corepack
 

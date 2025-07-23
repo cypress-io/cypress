@@ -176,36 +176,6 @@ describe('lib/cloud/studio', () => {
 
       expect(result).to.be.false
     })
-
-    it('returns true when CYPRESS_LOCAL_STUDIO_PATH is set and studio server can access AI', async () => {
-      process.env.CYPRESS_LOCAL_STUDIO_PATH = 'path/to/studio'
-
-      sinon.stub(studio, 'canAccessStudioAI').resolves(true)
-
-      const result = await studioManager.canAccessStudioAI(browser)
-
-      expect(result).to.be.true
-    })
-
-    it('returns false when CYPRESS_LOCAL_STUDIO_PATH is not set and studio server can access AI', async () => {
-      process.env.CYPRESS_LOCAL_STUDIO_PATH = undefined
-
-      sinon.stub(studio, 'canAccessStudioAI').resolves(true)
-
-      const result = await studioManager.canAccessStudioAI(browser)
-
-      expect(result).to.be.false
-    })
-
-    it('returns false when CYPRESS_LOCAL_STUDIO_PATH is set and studio server cannot access AI', async () => {
-      process.env.CYPRESS_LOCAL_STUDIO_PATH = 'path/to/studio'
-
-      sinon.stub(studio, 'canAccessStudioAI').resolves(false)
-
-      const result = await studioManager.canAccessStudioAI(browser)
-
-      expect(result).to.be.false
-    })
   })
 
   describe('addSocketListeners', () => {
