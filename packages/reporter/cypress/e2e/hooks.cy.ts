@@ -160,5 +160,16 @@ describe('hooks', () => {
         },
       })
     })
+
+    it('does not toggle hook collapsible when clicking Open in IDE button', () => {
+      cy.contains('before each').closest('.collapsible').find('.commands-container')
+      .should('be.visible')
+
+      cy.get('.hook-open-in-ide').first().invoke('show').click()
+
+      // Verify the hook remains open (doesn't toggle)
+      cy.contains('before each').closest('.collapsible').find('.commands-container')
+      .should('be.visible')
+    })
   })
 })

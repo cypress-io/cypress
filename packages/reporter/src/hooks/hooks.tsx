@@ -33,7 +33,11 @@ const Hook: React.FC<HookProps> = observer(({ model, showNumber, scrollIntoView 
       header={
         <>
           <HookHeader model={model} number={showNumber ? model.hookNumber : undefined} />
-          {model.invocationDetails && Cypress.testingType !== 'component' && <OpenFileInIDEButton fileDetails={model.invocationDetails} className='hook-open-in-ide' />}
+          {model.invocationDetails && Cypress.testingType !== 'component' && (
+            <span onClick={(e) => e.stopPropagation()}>
+              <OpenFileInIDEButton fileDetails={model.invocationDetails} className='hook-open-in-ide' />
+            </span>
+          )}
         </>
       }
       headerClass='hook-header'
