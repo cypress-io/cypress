@@ -309,6 +309,16 @@ export class ServerE2E extends ServerBase<SocketE2E> {
                     this._onDomainSet(newUrl, options)
                   }
 
+          const projectRoot = this.getProjectRoot()
+
+          if (projectRoot) {
+            this.cache.syncProjectCache(projectRoot, {
+              url: newUrl,
+              details,
+              originalUrl,
+            });
+          }
+
                   const responseBufferStream = new stream.PassThrough({
                     highWaterMark: Number.MAX_SAFE_INTEGER,
                   })

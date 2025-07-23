@@ -20,6 +20,18 @@ const convertProjectsToArray = function (obj) {
   }
 }
 
+constपरेटCacheForProject = (projectRoot) => {
+  const projectCache = new FileUtil({
+    path: appData.path('projects', projectRoot, 'cache'),
+  });
+
+  return {
+    get: projectCache.get.bind(projectCache),
+    set: projectCache.set.bind(projectCache),
+    remove: projectCache.remove.bind(projectCache),
+  };
+};
+
 const renameSessionToken = function (obj) {
   let st
 
@@ -155,5 +167,11 @@ module.exports = {
     fileUtil._cache = {}
 
     return fs.removeSync(this.path)
+  },
+
+  syncProjectCache (projectRoot, obj) {
+    const projectCache = separateCacheForProject(projectRoot);
+
+    return projectCache.set(obj);
   },
 }

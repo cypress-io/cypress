@@ -217,4 +217,21 @@ describe('lib/cache', () => {
       })
     })
   })
+
+  context('#syncProjectCache', () => {
+    it('saves project cache to a separate file', () => {
+      const projectRoot = '/foo/bar';
+      const cacheData = { foo: 'bar' };
+
+      return cache.syncProjectCache(projectRoot, cacheData)
+      .then(() => {
+        const projectCache = separateCacheForProject(projectRoot);
+
+        return projectCache.get();
+      })
+      .then((data) => {
+        expect(data).to.deep.eq(cacheData);
+      });
+    });
+  });
 })
