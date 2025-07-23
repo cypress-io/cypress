@@ -49,6 +49,7 @@ jobs:
       matrix:
         platform: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.platform }}
+    if: github.repository == 'cypress-io/cypress'
     env:
       CYPRESS_BOT_APP_ID: ${{ secrets.RAM_APP }}
       BASE_BRANCH: ${{ inputs.branch || github.ref_name }}
