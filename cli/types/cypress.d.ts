@@ -3,7 +3,9 @@
 /// <reference path="./cypress-eventemitter.d.ts" />
 /// <reference path="./cypress-type-helpers.d.ts" />
 
-type HasNoType<T> = unknown extends T ? true : false;
+type HasNoType<X> =
+  (<T>() => T extends X ? 1 : 2) extends
+  (() => 1) ? true : false;
 
 type CypressConfig_Data = typeof import('../../../cypress.config');
 type AllTasks_CJS = CypressConfig_Data['CypressTasks'];
