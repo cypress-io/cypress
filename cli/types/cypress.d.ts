@@ -3,15 +3,13 @@
 /// <reference path="./cypress-eventemitter.d.ts" />
 /// <reference path="./cypress-type-helpers.d.ts" />
 
-type IsAny<X> =
-  (<T>() => T extends X ? 1 : 2) extends
-  (() => 1) ? true : false;
+type HasNoType<T> = unknown extends T ? true : false;
 
 type CypressConfig_Data = typeof import('../../../cypress.config');
 type AllTasks_CJS = CypressConfig_Data['CypressTasks'];
 type AllTasks_ESM = CypressConfig_Data['default']['CypressTasks'];
 
-type AllTasks = IsAny<AllTasks_CJS> extends true ? AllTasks_ESM : AllTasks_CJS;
+type AllTasks = HasNoType<AllTasks_CJS> extends true ? AllTasks_ESM : AllTasks_CJS;
 type TaskEventNames = keyof AllTasks & string;
 
 type MyParameter<T extends TaskEventNames> = Parameters<AllTasks[T]>[0];
@@ -2180,7 +2178,7 @@ declare namespace Cypress {
      */
     task<T extends TaskEventNames>(
       event: T,
-      ...myArgs: IsAny<AllTasks> extends true ?
+      ...myArgs: HasNoType<AllTasks> extends true ?
         [
           arg?: any,
           options?: Partial<Loggable & Timeoutable>
@@ -2193,7 +2191,7 @@ declare namespace Cypress {
             options?: Partial<Loggable & Timeoutable>
           ]
     ): Chainable<
-      IsAny<AllTasks> extends true ? unknown : MyReturnType<T>
+      HasNoType<AllTasks> extends true ? unknown : MyReturnType<T>
     >
 
     /**
