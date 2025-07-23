@@ -76,3 +76,14 @@ it('can pass in complex props as signals and mutate them', () => {
   cy.get('ul[data-cy="signals-complex-acquaintances-list"] li').should('have.length', 4)
   cy.get('@acquaintancesChange').should('have.been.called')
 })
+
+it('can derive an observable from signals (test for https://github.com/cypress-io/cypress/issues/31238) - ensure mount is reference safe', () => {
+  cy.mount(SignalsComplexComponent, {
+    componentProperties: {
+      user: { age: 10, firstName: 'Foo', lastName: 'Bar' },
+      acquaintances: [],
+    },
+  })
+
+  cy.get('[data-cy="signals-complex-user-display"] [data-cy="initials"]').should('contain.text', 'FB')
+})
