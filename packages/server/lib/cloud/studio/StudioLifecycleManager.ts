@@ -51,10 +51,6 @@ export class StudioLifecycleManager {
     return true
   }
 
-  public get studioAiAvailable () {
-    return !!(process.env.CYPRESS_ENABLE_CLOUD_STUDIO_AI === 'true')
-  }
-
   /**
    * Initialize the studio manager and possibly set up protocol.
    * Also registers this instance in the data context.

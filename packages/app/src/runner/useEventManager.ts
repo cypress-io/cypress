@@ -42,14 +42,6 @@ export function useEventManager () {
       getAutIframeModel().showVisitFailure(payload)
     })
 
-    eventManager.on('page:loading', (isLoading) => {
-      if (isLoading) {
-        return
-      }
-
-      getAutIframeModel().reattachStudio()
-    })
-
     eventManager.on('visit:blank', async ({ testIsolation }) => {
       await getAutIframeModel().visitBlankPage(testIsolation)
     })

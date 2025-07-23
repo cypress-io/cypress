@@ -423,7 +423,6 @@ async function makeE2ETasks () {
       // Cypress in Cypress testing breaks pretty heavily in terms of the inner Cypress's protocol. For now, we essentially
       // disable the protocol by using a dummy protocol that does nothing and allowing tests to mock studio full snapshots as needed.
       process.env.CYPRESS_LOCAL_PROTOCOL_PATH = dummyProtocolPath
-      process.env.CYPRESS_ENABLE_CLOUD_STUDIO_AI = 'true'
 
       let projectMatched = false
 
