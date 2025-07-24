@@ -44,6 +44,16 @@ export function getOrCreateHelperDom ({ body, className, css }) {
 
   vueContainer.classList.add('vue-container')
 
+  // make the shadow dom an overlay so that clicks on the elements under it are not captured
+  Object.assign(vueContainer.style, {
+    position: 'absolute',
+    top: '0',
+    left: '0',
+    width: '100%',
+    height: '100%',
+    zIndex: '1000',
+  })
+
   shadowRoot.appendChild(vueContainer)
 
   // Prepend style element
