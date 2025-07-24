@@ -385,7 +385,7 @@ export class AutIframe {
 
     const Cypress = this.eventManager.getCypress()
 
-    const selector = Cypress.ElementSelector.getSelector($el)
+    const selector = Cypress.ElementSelector._getSelector($el)
     const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
     this._addOrUpdateSelectorPlaygroundHighlight({

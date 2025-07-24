@@ -520,7 +520,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       if (!this._matchPreviousMouseEvent(target)) {
         this._previousMouseEvent = {
           element: target,
-          selector: getCypress().ElementSelector.getSelector(window.UnifiedRunner.CypressJQuery(target)),
+          selector: getCypress().ElementSelector._getSelector(window.UnifiedRunner.CypressJQuery(target)),
         }
       }
     },

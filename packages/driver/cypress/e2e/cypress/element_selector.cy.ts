@@ -2,23 +2,27 @@
 import type { ElementSelectorAPI } from '../../../src/cypress/element_selector'
 import { DEFAULT_SELECTOR_PRIORITIES } from '../../../src/cypress/element_selector'
 const { $: $cypress } = Cypress.$Cypress
-const ElementSelector = Cypress.ElementSelector as ElementSelectorAPI
+const ElementSelector = Cypress.ElementSelector as ElementSelectorAPI & {
+  _reset(): void
+  _getSelectorPriority(): Cypress.SelectorPriority[]
+  _getSelector($el: any): string
+}
 
 const SELECTOR_DEFAULTS: Cypress.SelectorPriority[] = [...DEFAULT_SELECTOR_PRIORITIES]
 
 describe('src/cypress/element_selector', () => {
   beforeEach(() => {
-    ElementSelector.reset()
+    ElementSelector._reset()
   })
 
   it('has defaults', () => {
-    expect(ElementSelector.getSelectorPriority()).to.deep.eq(SELECTOR_DEFAULTS)
+    expect(ElementSelector._getSelectorPriority()).to.deep.eq(SELECTOR_DEFAULTS)
   })
 
   context('.defaults', () => {
     it('is noop if not called with selectorPriority', () => {
       ElementSelector.defaults({})
-      expect(ElementSelector.getSelectorPriority()).to.deep.eq(SELECTOR_DEFAULTS)
+      expect(ElementSelector._getSelectorPriority()).to.deep.eq(SELECTOR_DEFAULTS)
     })
 
     it('sets element:selector:priority if selectorPriority specified', () => {
@@ -39,7 +43,7 @@ describe('src/cypress/element_selector', () => {
         selectorPriority,
       })
 
-      expect(ElementSelector.getSelectorPriority()).to.eql(selectorPriority)
+      expect(ElementSelector._getSelectorPriority()).to.eql(selectorPriority)
     })
 
     it('throws if not passed an object', () => {
@@ -108,13 +112,13 @@ describe('src/cypress/element_selector', () => {
 
       Cypress.$('body').append($div)
 
-      expect(ElementSelector.getSelector($div)).to.eq('[data-cy="main button 123"]')
+      expect(ElementSelector._getSelector($div)).to.eq('[data-cy="main button 123"]')
 
       ElementSelector.defaults({
         selectorPriority: ['data-foo'],
       })
 
-      expect(ElementSelector.getSelector($div)).to.eq('[data-foo="bar"]')
+      expect(ElementSelector._getSelector($div)).to.eq('[data-foo="bar"]')
     })
   })
 
