@@ -1780,6 +1780,7 @@
     "./node_modules/es-errors/type.js",
     "./node_modules/es-errors/uri.js",
     "./node_modules/es-object-atoms/index.js",
+    "./node_modules/es-set-tostringtag/index.js",
     "./node_modules/escape-goat/index.js",
     "./node_modules/escape-html/index.js",
     "./node_modules/escape-string-regexp/index.js",
@@ -2136,6 +2137,7 @@
     "./node_modules/has-property-descriptors/index.js",
     "./node_modules/has-symbols/index.js",
     "./node_modules/has-symbols/shams.js",
+    "./node_modules/has-tostringtag/shams.js",
     "./node_modules/hasown/index.js",
     "./node_modules/he/he.js",
     "./node_modules/html-tags/html-tags.json",
@@ -4192,5 +4194,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "5c7471e201476b43558b003c4f5b6f1bee704b4d2cda4f4a49c6948044b52346"
+  "deferredHash": "ba8c7d98c7e5f31b73ee3450da51c93657ee502647ba4b7690241c6383fd49b1"
 }
