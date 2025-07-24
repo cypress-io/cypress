@@ -541,6 +541,33 @@ describe('studio functionality', () => {
     cy.get('.runnable-title').eq(1).should('contain.text', 'visits a basic html page')
   })
 
+  it('updates the AUT url when navigating to a different page', () => {
+    launchStudio({ specName: 'navigation.cy.js' })
+
+    cy.findByTestId('aut-url-input').should('have.value', 'http://localhost:4455/cypress/e2e/navigation.html')
+
+    cy.getAutIframe().within(() => {
+      cy.get('a').contains('Index').realClick()
+    })
+
+    cy.findByTestId('aut-url-input').should('have.value', 'http://localhost:4455/cypress/e2e/index.html')
+  })
+
+  it('updates the AUT url when creating a new test', () => {
+    launchStudio({ specName: 'navigation.cy.js', createNewTest: true })
+
+    cy.findByTestId('new-test-button').click()
+    cy.findByTestId('test-name-input').type('new-test')
+    cy.findByTestId('create-test-button').click()
+
+    cy.findByTestId('aut-url-input').should('have.focus').type('cypress/e2e/navigation.html{enter}')
+
+    // after entering the url, the test is saved and re-run
+    cy.waitForSpecToFinish()
+
+    cy.findByTestId('aut-url-input').should('have.value', 'http://localhost:4455/cypress/e2e/navigation.html')
+  })
+
   it('removes url parameters when going to a different page', () => {
     launchStudio()
 
