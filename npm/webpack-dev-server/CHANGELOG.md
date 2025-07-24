@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v4.1.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v4.1.0...@cypress/webpack-dev-server-v4.1.1) (2025-07-24)
+
+
+### Bug Fixes
+
+* check path for indexHtmlFile in onSpecsChange ([#31819](https://github.com/cypress-io/cypress/issues/31819)) ([#31821](https://github.com/cypress-io/cypress/issues/31821)) ([8ff4c7d](https://github.com/cypress-io/cypress/commit/8ff4c7d364571c25b116b6ca8016569bc24e228a))
+
 # [@cypress/webpack-dev-server-v4.1.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v4.0.2...@cypress/webpack-dev-server-v4.1.0) (2025-05-13)
 
 
