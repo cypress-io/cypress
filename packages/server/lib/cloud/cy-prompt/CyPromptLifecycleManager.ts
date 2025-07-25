@@ -52,6 +52,15 @@ export class CyPromptLifecycleManager {
       data.cyPromptLifecycleManager = this
     })
 
+    const recordingInfo = {
+      get runId () {
+        return ctx.coreData.currentRecordingInfo.runId
+      },
+      get instanceId () {
+        return ctx.coreData.currentRecordingInfo.instanceId
+      },
+    }
+
     const getProjectOptions = async () => {
       return {
         user: await ctx.actions.auth.authApi.getUser(),
@@ -59,16 +68,7 @@ export class CyPromptLifecycleManager {
         record,
         key,
         isOpenMode: ctx.isOpenMode,
-        ...(record ? {
-          recordingInfo: {
-            get runId () {
-              return ctx.coreData.currentRecordingInfo.runId
-            },
-            get instanceId () {
-              return ctx.coreData.currentRecordingInfo.instanceId
-            },
-          },
-        } : {}),
+        ...(record ? recordingInfo : {}),
       }
     }
 
