@@ -1,3 +1,10 @@
+# [@cypress/angular-v3.0.1](https://github.com/cypress-io/cypress/compare/@cypress/angular-v3.0.0...@cypress/angular-v3.0.1) (2025-07-24)
+
+
+### Bug Fixes
+
+* ensure cy.mount is reference safe ([#31238](https://github.com/cypress-io/cypress/issues/31238),[#31983](https://github.com/cypress-io/cypress/issues/31983)) ([#31993](https://github.com/cypress-io/cypress/issues/31993)) ([886878b](https://github.com/cypress-io/cypress/commit/886878b8b5353469abc2eaaf742c04b42d21cf54))
+
 # [@cypress/angular-v3.0.0](https://github.com/cypress-io/cypress/compare/@cypress/angular-v2.1.0...@cypress/angular-v3.0.0) (2025-01-08)
 
 

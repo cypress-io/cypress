@@ -1,3 +1,10 @@
+# [@cypress/webpack-batteries-included-preprocessor-v3.1.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v3.1.1...@cypress/webpack-batteries-included-preprocessor-v3.1.2) (2025-07-24)
+
+
+### Bug Fixes
+
+* Add extensionAlias for ESM TS to webpack-batteries-included ([#31994](https://github.com/cypress-io/cypress/issues/31994)) ([cabdae7](https://github.com/cypress-io/cypress/commit/cabdae708d43464f4f7e86e6f400823dcc95abe6)), closes [#26827](https://github.com/cypress-io/cypress/issues/26827) [#28805](https://github.com/cypress-io/cypress/issues/28805)
+
 # [@cypress/webpack-batteries-included-preprocessor-v3.1.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v3.1.0...@cypress/webpack-batteries-included-preprocessor-v3.1.1) (2025-07-01)
 
 # [@cypress/webpack-batteries-included-preprocessor-v3.1.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v3.0.7...@cypress/webpack-batteries-included-preprocessor-v3.1.0) (2025-05-13)
