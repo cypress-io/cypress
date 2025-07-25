@@ -1,4 +1,4 @@
-import type { CyPromptManagerShape, CyPromptStatus, CyPromptServerDefaultShape, CyPromptServerShape, CyPromptCloudApi, CyPromptCDPClient, CyPromptAuthenticatedUserShape, CyPromptAddSocketListenerOptions } from '@packages/types'
+import type { CyPromptManagerShape, CyPromptStatus, CyPromptServerDefaultShape, CyPromptServerShape, CyPromptCloudApi, CyPromptCDPClient, CyPromptAddSocketListenerOptions, CyPromptServerOptions } from '@packages/types'
 import type { Router } from 'express'
 import Debug from 'debug'
 import { requireScript } from '../require_script'
@@ -12,12 +12,7 @@ interface SetupOptions {
   cyPromptHash?: string
   projectSlug?: string
   cloudApi: CyPromptCloudApi
-  getProjectOptions: () => Promise<{
-    user?: CyPromptAuthenticatedUserShape
-    projectSlug?: string
-    record?: boolean
-    key?: string
-  }>
+  getProjectOptions: CyPromptServerOptions['getProjectOptions']
   manifest: Record<string, string>
 }
 

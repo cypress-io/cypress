@@ -6,7 +6,7 @@ import type { DataContext } from '@packages/data-context'
 import type { CloudDataSource } from '@packages/data-context/src/sources'
 import path from 'path'
 import os from 'os'
-import { CloudRequest } from '../../../../lib/cloud/api/cloud_request'
+import { CloudRequest, createCloudRequest } from '../../../../lib/cloud/api/cloud_request'
 import { isRetryableError } from '../../../../lib/cloud/network/is_retryable_error'
 import { asyncRetry } from '../../../../lib/util/async_retry'
 import * as reportCyPromptErrorPath from '../../../../lib/cloud/api/cy-prompt/report_cy-prompt_error'
@@ -70,8 +70,14 @@ describe('CyPromptLifecycleManager', () => {
     cyPromptStatusChangeEmitterStub = sinon.stub()
 
     mockCtx = {
+      isOpenMode: false,
       update: sinon.stub(),
-      coreData: {},
+      coreData: {
+        currentRecordingInfo: {
+          runId: 'test-run-id',
+          instanceId: 'test-instance-id',
+        },
+      },
       cloud: {
         getCloudUrl: sinon.stub().returns('https://cloud.cypress.io'),
         additionalHeaders: sinon.stub().resolves({ 'Authorization': 'Bearer test-token' }),
@@ -118,7 +124,7 @@ describe('CyPromptLifecycleManager', () => {
       cyPromptLifecycleManager.initializeCyPromptManager({
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
-        record: false,
+        record: true,
         key: '123e4567-e89b-12d3-a456-426614174000',
       })
 
@@ -150,11 +156,29 @@ describe('CyPromptLifecycleManager', () => {
         cloudApi: {
           cloudUrl: 'https://cloud.cypress.io',
           CloudRequest,
+          createCloudRequest,
           isRetryableError,
           asyncRetry,
         },
         getProjectOptions: sinon.match.func,
         manifest: mockManifest,
+      })
+
+      const getProjectOptions = cyPromptManagerSetupStub.args[0][0].getProjectOptions
+      const projectOptions = await getProjectOptions()
+
+      expect(projectOptions).to.deep.equal({
+        isOpenMode: false,
+        user: {
+          authToken: 'test-token',
+        },
+        projectSlug: 'test-project-id',
+        record: true,
+        key: '123e4567-e89b-12d3-a456-426614174000',
+        recordingInfo: {
+          runId: 'test-run-id',
+          instanceId: 'test-instance-id',
+        },
       })
 
       expect(postCyPromptSessionStub).to.be.calledWith({
@@ -170,7 +194,7 @@ describe('CyPromptLifecycleManager', () => {
       cyPromptLifecycleManager.initializeCyPromptManager({
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
-        record: false,
+        record: true,
         key: '123e4567-e89b-12d3-a456-426614174000',
       })
 
@@ -220,11 +244,29 @@ describe('CyPromptLifecycleManager', () => {
         cloudApi: {
           cloudUrl: 'https://cloud.cypress.io',
           CloudRequest,
+          createCloudRequest,
           isRetryableError,
           asyncRetry,
         },
         getProjectOptions: sinon.match.func,
         manifest: mockManifest,
+      })
+
+      const getProjectOptions = cyPromptManagerSetupStub.args[0][0].getProjectOptions
+      const projectOptions = await getProjectOptions()
+
+      expect(projectOptions).to.deep.equal({
+        isOpenMode: false,
+        user: {
+          authToken: 'test-token',
+        },
+        projectSlug: 'test-project-id',
+        record: true,
+        key: '123e4567-e89b-12d3-a456-426614174000',
+        recordingInfo: {
+          runId: 'test-run-id',
+          instanceId: 'test-instance-id',
+        },
       })
 
       expect(postCyPromptSessionStub).to.be.calledWith({
@@ -264,11 +306,25 @@ describe('CyPromptLifecycleManager', () => {
         cloudApi: {
           cloudUrl: 'https://cloud.cypress.io',
           CloudRequest,
+          createCloudRequest,
           isRetryableError,
           asyncRetry,
         },
         getProjectOptions: sinon.match.func,
         manifest: {},
+      })
+
+      const getProjectOptions = cyPromptManagerSetupStub.args[0][0].getProjectOptions
+      const projectOptions = await getProjectOptions()
+
+      expect(projectOptions).to.deep.equal({
+        isOpenMode: false,
+        user: {
+          authToken: 'test-token',
+        },
+        projectSlug: 'test-project-id',
+        record: false,
+        key: '123e4567-e89b-12d3-a456-426614174000',
       })
 
       expect(postCyPromptSessionStub).to.be.calledWith({
@@ -332,17 +388,18 @@ describe('CyPromptLifecycleManager', () => {
         cloudApi: {
           cloudUrl: 'https://cloud.cypress.io',
           CloudRequest,
+          createCloudRequest,
           isRetryableError,
           asyncRetry,
-          cloudHeaders: {
-            'Authorization': 'Bearer test-token',
-          },
         },
         cyPromptHash: 'abc',
         projectSlug: 'test-project-id',
         error,
         cyPromptMethod: 'initializeCyPromptManager',
         cyPromptMethodArgs: [],
+        additionalHeaders: {
+          'Authorization': 'Bearer test-token',
+        },
       })
     })
 
@@ -377,17 +434,18 @@ describe('CyPromptLifecycleManager', () => {
         cloudApi: {
           cloudUrl: 'https://cloud.cypress.io',
           CloudRequest,
+          createCloudRequest,
           isRetryableError,
           asyncRetry,
-          cloudHeaders: {
-            'Authorization': 'Bearer test-token',
-          },
         },
         cyPromptHash: 'abc',
         projectSlug: 'test-project-id',
         error,
         cyPromptMethod: 'initializeCyPromptManager',
         cyPromptMethodArgs: [],
+        additionalHeaders: {
+          'Authorization': 'Bearer test-token',
+        },
       })
     })
   })

@@ -132,6 +132,11 @@ interface CloudDataShape {
   }
 }
 
+interface RecordedRunInfo {
+  runId?: string
+  instanceId?: string
+}
+
 export interface CoreDataShape {
   cliBrowser: string | null
   cliTestingType: string | null
@@ -166,6 +171,7 @@ export interface CoreDataShape {
   didBrowserPreviouslyHaveUnexpectedExit: boolean
   studioLifecycleManager?: StudioLifecycleManagerShape
   cyPromptLifecycleManager?: CyPromptLifecycleManagerShape
+  currentRecordingInfo: RecordedRunInfo
 }
 
 /**
@@ -248,6 +254,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     eventCollectorSource: null,
     didBrowserPreviouslyHaveUnexpectedExit: false,
     studioLifecycleManager: undefined,
+    currentRecordingInfo: {},
   }
 
   async function machineId (): Promise<string | null> {

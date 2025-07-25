@@ -10,6 +10,7 @@ export interface ReportCyPromptErrorOptions {
   error: unknown
   cyPromptMethod: string
   cyPromptMethodArgs?: unknown[]
+  additionalHeaders?: Record<string, string>
 }
 
 interface CyPromptError {
@@ -33,6 +34,7 @@ export function reportCyPromptError ({
   error,
   cyPromptMethod,
   cyPromptMethodArgs,
+  additionalHeaders,
 }: ReportCyPromptErrorOptions): void {
   debug('Error reported:', error)
 
@@ -87,7 +89,7 @@ export function reportCyPromptError ({
       {
         headers: {
           'Content-Type': 'application/json',
-          ...cloudApi.cloudHeaders,
+          ...additionalHeaders,
         },
       },
     ).catch((e: unknown) => {
