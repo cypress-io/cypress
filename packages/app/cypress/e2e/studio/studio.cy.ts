@@ -371,7 +371,7 @@ cy.get('#increment').click();
 
   it('closes assertions menu when clicking outside', () => {
     showAssertionsMenu(() => {
-      // click on the highlighted element
+      // click outside the menu
       cy.get('.__cypress-studio-assertions-menu').shadow().find('.vue-container').click()
       // check that the menu is closed
       cy.get('.__cypress-studio-assertions-menu').should('not.exist')
