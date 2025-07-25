@@ -336,7 +336,7 @@ cy.get('#increment').click();
     })
   })
 
-  it('shows assertions menu and submenu correctly', () => {
+  const showAssertionsMenu = (autAssertions?: () => void) => {
     launchStudio()
 
     cy.waitForSpecToFinish()
@@ -360,6 +360,30 @@ cy.get('#increment').click();
       .find('.assertion-option')
       .should('have.text', 'Hello, Studio!')
       .should('be.visible')
+
+      autAssertions?.()
+    })
+  }
+
+  it('shows assertions menu and submenu correctly', () => {
+    showAssertionsMenu()
+  })
+
+  it('closes assertions menu when clicking outside', () => {
+    showAssertionsMenu(() => {
+      // click on the highlighted element
+      cy.get('.__cypress-studio-assertions-menu').shadow().find('.vue-container').click()
+      // check that the menu is closed
+      cy.get('.__cypress-studio-assertions-menu').should('not.exist')
+    })
+  })
+
+  it('closes assertions menu on the highlighted element', () => {
+    showAssertionsMenu(() => {
+      // click on the highlighted element
+      cy.get('.__cypress-studio-assertions-menu').shadow().find('.highlight').click()
+      // check that the menu is closed
+      cy.get('.__cypress-studio-assertions-menu').should('not.exist')
     })
   })
 
