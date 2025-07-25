@@ -68,7 +68,7 @@ export class CyPromptLifecycleManager {
         record,
         key,
         isOpenMode: ctx.isOpenMode,
-        ...(record ? recordingInfo : {}),
+        ...(record ? { recordingInfo } : {}),
       }
     }
 
