@@ -58,7 +58,7 @@ function dispatchEventToTarget (e: MouseEvent, targetClass: string): void {
 }
 
 // Event handlers
-function setupVueContainerListeners (vueContainer: HTMLElement): void {
+function setupVueContainerListeners (vueContainer: HTMLElement, closeMenu: () => void): void {
   vueContainer.addEventListener('click', (e) => {
     const paths = e.composedPath()
 
@@ -70,6 +70,25 @@ function setupVueContainerListeners (vueContainer: HTMLElement): void {
         break
       }
     }
+
+    const handleContainerClickOutside = () => {
+      const target = e.target as HTMLElement
+
+      const isMenuElement = target.closest('.assertions-menu') ||
+          target.closest('.assertion-type') ||
+          target.closest('.assertion-options') ||
+          target.closest('.assertion-option')
+
+      // Don't close menu if the click is on any menu-related elements
+      if (isMenuElement) {
+        return
+      }
+
+      closeMenu()
+    }
+
+    // Add click handler to the Vue container to detect clicks outside the menu
+    handleContainerClickOutside()
   })
 
   vueContainer.addEventListener('mouseover', (e) => {
@@ -84,38 +103,6 @@ function setupVueContainerListeners (vueContainer: HTMLElement): void {
 
     dispatchEventToTarget(e, 'assertion-type')
   })
-}
-
-// Add click handler to the Vue container to detect clicks outside the menu
-function setupVueContainerClickOutsideHandler (vueContainer: HTMLElement, closeMenu: () => void): void {
-  const handleVueContainerClick = (e: MouseEvent) => {
-    const target = e.target as HTMLElement
-
-    const isVueContainer = target === vueContainer || target.classList.contains('vue-container')
-    const isHighlight = target.classList.contains('highlight')
-
-    // Check if the click is on the Vue container itself (not on menu elements) or the highlight element
-    if (isVueContainer || isHighlight) {
-      closeMenu()
-
-      return
-    }
-
-    const isMenuElement = target.closest('.assertions-menu') ||
-        target.closest('.assertion-type') ||
-        target.closest('.assertion-options') ||
-        target.closest('.assertion-option')
-
-    // Don't close menu if the click is on any menu-related elements
-    if (isMenuElement) {
-      return
-    }
-
-    // If we get here, the click is outside the menu elements
-    closeMenu()
-  }
-
-  vueContainer.addEventListener('click', handleVueContainerClick)
 }
 
 // Component mounting
@@ -149,8 +136,7 @@ function unmountAssertionsMenu (): void {
 export function openStudioAssertionsMenu ({ $el, $body, props }: StudioAssertionsMenuArgs): void {
   const { vueContainer } = getStudioAssertionsMenuDom($body.get(0))
 
-  setupVueContainerListeners(vueContainer)
-  setupVueContainerClickOutsideHandler(vueContainer, props.closeMenu)
+  setupVueContainerListeners(vueContainer, props.closeMenu)
 
   const selectorHighlightStyles = getSelectorHighlightStyles([$el.get(0)])[0]
 
