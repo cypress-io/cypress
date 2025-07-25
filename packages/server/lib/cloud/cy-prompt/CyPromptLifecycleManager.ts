@@ -61,8 +61,12 @@ export class CyPromptLifecycleManager {
         isOpenMode: ctx.isOpenMode,
         ...(record ? {
           recordingInfo: {
-            runId: ctx.coreData.currentRecordingInfo.runId,
-            instanceId: ctx.coreData.currentRecordingInfo.instanceId,
+            get runId () {
+              return ctx.coreData.currentRecordingInfo.runId
+            },
+            get instanceId () {
+              return ctx.coreData.currentRecordingInfo.instanceId
+            },
           },
         } : {}),
       }
