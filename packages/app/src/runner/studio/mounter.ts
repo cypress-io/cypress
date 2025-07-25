@@ -34,6 +34,7 @@ function getStudioAssertionsMenuDom (body: HTMLElement) {
     body,
     className: '__cypress-studio-assertions-menu',
     css: `${AssertionsMenu.styles}\n${AssertionType.styles}\n${AssertionOptions.styles}`,
+    studioActive: true,
   })
 }
 

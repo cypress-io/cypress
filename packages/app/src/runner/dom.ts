@@ -12,7 +12,7 @@ export function getZIndex (el) {
   return parseFloat(value)
 }
 
-export function getOrCreateHelperDom ({ body, className, css }) {
+export function getOrCreateHelperDom ({ body, className, css, studioActive = false }) {
   let containers = body.querySelectorAll(`.${className}`)
 
   if (containers.length > 0) {
@@ -44,15 +44,17 @@ export function getOrCreateHelperDom ({ body, className, css }) {
 
   vueContainer.classList.add('vue-container')
 
+  if (studioActive) {
   // make the shadow dom an overlay so that all clicks on the elements are captured by it
-  Object.assign(vueContainer.style, {
-    position: 'absolute',
-    top: '0',
-    left: '0',
-    width: '100%',
-    height: '100%',
-    zIndex: '1000',
-  })
+    Object.assign(vueContainer.style, {
+      position: 'absolute',
+      top: '0',
+      left: '0',
+      width: '100%',
+      height: '100%',
+      zIndex: '1000',
+    })
+  }
 
   shadowRoot.appendChild(vueContainer)
 
