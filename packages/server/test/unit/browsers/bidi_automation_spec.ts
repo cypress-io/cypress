@@ -15,6 +15,13 @@ const flushPromises = () => {
   })
 }
 
+// Helper function to wait for async operations to complete
+const waitForAsyncOperation = async (stub: sinon.SinonStub) => {
+  if (stub.called) {
+    await stub.firstCall.returnValue
+  }
+}
+
 describe('lib/browsers/bidi_automation', () => {
   context('BidiAutomation', () => {
     let mockWebdriverClient: WebDriverClient
@@ -115,6 +122,9 @@ describe('lib/browsers/bidi_automation', () => {
 
             await flushPromises()
 
+            // Wait for the networkAddIntercept Promise to resolve if it was called
+            await waitForAsyncOperation(mockWebdriverClient.networkAddIntercept as sinon.SinonStub)
+
             // @ts-expect-error
             expect(bidiAutomationInstance.autContextId).to.equal('456')
             // @ts-expect-error
@@ -156,6 +166,9 @@ describe('lib/browsers/bidi_automation', () => {
             })
 
             await flushPromises()
+
+            // Wait for the networkAddIntercept Promise to resolve if it was called
+            await waitForAsyncOperation(mockWebdriverClient.networkAddIntercept as sinon.SinonStub)
 
             // @ts-expect-error
             expect(bidiAutomationInstance.autContextId).to.equal('456')
