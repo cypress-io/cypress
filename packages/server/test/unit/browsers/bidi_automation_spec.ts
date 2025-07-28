@@ -15,6 +15,13 @@ const flushPromises = () => {
   })
 }
 
+// Helper function to wait for async operations to complete
+const waitForAsyncOperation = async (stub: sinon.SinonStub) => {
+  if (stub.called) {
+    await stub.firstCall.returnValue
+  }
+}
+
 describe('lib/browsers/bidi_automation', () => {
   context('BidiAutomation', () => {
     let mockWebdriverClient: WebDriverClient
@@ -115,6 +122,9 @@ describe('lib/browsers/bidi_automation', () => {
 
             await flushPromises()
 
+            // Wait for the networkAddIntercept Promise to resolve if it was called
+            await waitForAsyncOperation(mockWebdriverClient.networkAddIntercept as sinon.SinonStub)
+
             // @ts-expect-error
             expect(bidiAutomationInstance.autContextId).to.equal('456')
             // @ts-expect-error
@@ -156,6 +166,9 @@ describe('lib/browsers/bidi_automation', () => {
             })
 
             await flushPromises()
+
+            // Wait for the networkAddIntercept Promise to resolve if it was called
+            await waitForAsyncOperation(mockWebdriverClient.networkAddIntercept as sinon.SinonStub)
 
             // @ts-expect-error
             expect(bidiAutomationInstance.autContextId).to.equal('456')
@@ -1044,7 +1057,7 @@ describe('lib/browsers/bidi_automation', () => {
 
             mockWebdriverClient.storageGetCookies = sinon.stub().rejects(mockError)
 
-            expect(bidiAutomationInstance.automationMiddleware.onRequest('get:cookies', {})).to.be.rejectedWith(mockError)
+            await expect(bidiAutomationInstance.automationMiddleware.onRequest('get:cookies', {})).to.be.rejectedWith(mockError)
           })
         })
 
@@ -1197,7 +1210,7 @@ describe('lib/browsers/bidi_automation', () => {
 
             mockWebdriverClient.storageGetCookies = sinon.stub().rejects(mockError)
 
-            expect(bidiAutomationInstance.automationMiddleware.onRequest('get:cookie', {})).to.be.rejectedWith(mockError)
+            await expect(bidiAutomationInstance.automationMiddleware.onRequest('get:cookie', {})).to.be.rejectedWith(mockError)
           })
         })
 
@@ -1277,7 +1290,7 @@ describe('lib/browsers/bidi_automation', () => {
 
             mockWebdriverClient.storageSetCookie = sinon.stub().rejects(mockError)
 
-            expect(bidiAutomationInstance.automationMiddleware.onRequest('set:cookie', cookie)).to.be.rejectedWith(mockError)
+            await expect(bidiAutomationInstance.automationMiddleware.onRequest('set:cookie', cookie)).to.be.rejectedWith(mockError)
           })
 
           describe('parsing', () => {
@@ -1722,7 +1735,7 @@ describe('lib/browsers/bidi_automation', () => {
 
             mockWebdriverClient.storageSetCookie = sinon.stub().rejects(mockError)
 
-            expect(bidiAutomationInstance.automationMiddleware.onRequest('add:cookies', cookies)).to.be.rejectedWith(mockError)
+            await expect(bidiAutomationInstance.automationMiddleware.onRequest('add:cookies', cookies)).to.be.rejectedWith(mockError)
           })
         })
 
@@ -1819,7 +1832,7 @@ describe('lib/browsers/bidi_automation', () => {
 
             mockWebdriverClient.storageSetCookie = sinon.stub().rejects(mockError)
 
-            expect(bidiAutomationInstance.automationMiddleware.onRequest('set:cookies', cookies)).to.be.rejectedWith(mockError)
+            await expect(bidiAutomationInstance.automationMiddleware.onRequest('set:cookies', cookies)).to.be.rejectedWith(mockError)
 
             expect(mockWebdriverClient.storageDeleteCookies).to.have.been.calledWith({})
           })
@@ -1920,7 +1933,7 @@ describe('lib/browsers/bidi_automation', () => {
 
             mockWebdriverClient.storageGetCookies = sinon.stub().rejects(mockError)
 
-            expect(bidiAutomationInstance.automationMiddleware.onRequest('clear:cookie', cookie)).to.be.rejectedWith(mockError)
+            await expect(bidiAutomationInstance.automationMiddleware.onRequest('clear:cookie', cookie)).to.be.rejectedWith(mockError)
           })
         })
 
@@ -2067,7 +2080,7 @@ describe('lib/browsers/bidi_automation', () => {
 
             mockWebdriverClient.storageGetCookies = sinon.stub().rejects(mockError)
 
-            expect(bidiAutomationInstance.automationMiddleware.onRequest('clear:cookies', cookies)).to.be.rejectedWith(mockError)
+            await expect(bidiAutomationInstance.automationMiddleware.onRequest('clear:cookies', cookies)).to.be.rejectedWith(mockError)
           })
         })
       })
@@ -2114,12 +2127,12 @@ describe('lib/browsers/bidi_automation', () => {
           mockWebdriverClient.browsingContextActivate = sinon.stub().resolves()
           mockWebdriverClient.browsingContextCaptureScreenshot = sinon.stub().rejects(mockError)
 
-          expect(bidiAutomationInstance.automationMiddleware.onRequest('take:screenshot', {})).to.be.rejectedWith(mockError)
+          await expect(bidiAutomationInstance.automationMiddleware.onRequest('take:screenshot', {})).to.be.rejectedWith(mockError)
         })
       })
 
       it('throws a AutomationNotImplemented error when "reset:browser:state" is emitted to inform the default automation client (web extension) to handle it', async () => {
-        expect(bidiAutomationInstance.automationMiddleware.onRequest('reset:browser:state')).to.be.rejectedWith(`Automation command 'reset:browser:state' not implemented by BiDiAutomation`)
+        await expect(bidiAutomationInstance.automationMiddleware.onRequest('reset:browser:state', {})).to.be.rejectedWith(`Automation command 'reset:browser:state' not implemented by BiDiAutomation`)
       })
 
       describe('reset:browser:tabs:for:next:spec', () => {
@@ -2213,7 +2226,7 @@ describe('lib/browsers/bidi_automation', () => {
           //@ts-expect-error
           bidiAutomationInstance.autContextId = undefined
 
-          expect(bidiAutomationInstance.automationMiddleware.onRequest('get:aut:url', undefined)).to.be.rejectedWith('Cannot get AUT url: no AUT context initialized')
+          await expect(bidiAutomationInstance.automationMiddleware.onRequest('get:aut:url', undefined)).to.be.rejectedWith('Cannot get AUT url: no AUT context initialized')
         })
       })
 
@@ -2256,7 +2269,7 @@ describe('lib/browsers/bidi_automation', () => {
           //@ts-expect-error
           bidiAutomationInstance.autContextId = undefined
 
-          expect(bidiAutomationInstance.automationMiddleware.onRequest('reload:aut:frame', undefined)).to.be.rejectedWith('Cannot reload AUT frame: no AUT context initialized')
+          await expect(bidiAutomationInstance.automationMiddleware.onRequest('reload:aut:frame', undefined)).to.be.rejectedWith('Cannot reload AUT frame: no AUT context initialized')
         })
       })
 
@@ -2282,7 +2295,7 @@ describe('lib/browsers/bidi_automation', () => {
           //@ts-expect-error
           bidiAutomationInstance.autContextId = undefined
 
-          expect(bidiAutomationInstance.automationMiddleware.onRequest('navigate:aut:history', undefined)).to.be.rejectedWith('Cannot navigate AUT frame history: no AUT context initialized')
+          await expect(bidiAutomationInstance.automationMiddleware.onRequest('navigate:aut:history', undefined)).to.be.rejectedWith('Cannot navigate AUT frame history: no AUT context initialized')
         })
       })
 
@@ -2314,13 +2327,13 @@ describe('lib/browsers/bidi_automation', () => {
           //@ts-expect-error
           bidiAutomationInstance.autContextId = undefined
 
-          expect(bidiAutomationInstance.automationMiddleware.onRequest('get:aut:title', undefined)).to.be.rejectedWith('Cannot get AUT title no AUT context initialized')
+          await expect(bidiAutomationInstance.automationMiddleware.onRequest('get:aut:title', undefined)).to.be.rejectedWith('Cannot get AUT title no AUT context initialized')
         })
       })
 
-      it('throws an error if an event passed in does not exist', () => {
+      it('throws an error if an event passed in does not exist', async () => {
         // @ts-expect-error
-        expect(bidiAutomationInstance.automationMiddleware.onRequest('foo:bar:baz', {})).to.be.rejectedWith('Automation command \'foo:bar:baz\' not implemented by BiDiAutomation')
+        await expect(bidiAutomationInstance.automationMiddleware.onRequest('foo:bar:baz', {})).to.be.rejectedWith('Automation command \'foo:bar:baz\' not implemented by BiDiAutomation')
       })
     })
   })
