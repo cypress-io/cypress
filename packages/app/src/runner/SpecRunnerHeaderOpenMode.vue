@@ -196,10 +196,6 @@ const displayScale = computed(() => {
 })
 
 const autUrl = computed(() => {
-  if (studioStore.isActive && studioStore.url) {
-    return studioStore.url
-  }
-
   return autStore.url
 })
 
