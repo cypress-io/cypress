@@ -11,7 +11,7 @@ describe('CurrentRecordingActions', () => {
 
   describe('startRun', () => {
     it('updates the current run id', () => {
-      ctx.actions.currentRecording.startRecording('12345')
+      ctx.actions.currentRecording.startRun('12345')
 
       expect(ctx.coreData.currentRecordingInfo.runId).to.equal('12345')
     })
