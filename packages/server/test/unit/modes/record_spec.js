@@ -141,7 +141,6 @@ describe('lib/modes/record', () => {
       afterEach(() => {
         resetEnv()
       })
- 
       it('calls api.createRun with the commit extracted from environment variables', () => {
         const createRun = sinon.stub(api, 'createRun').resolves()
         const runAllSpecs = sinon.stub()
