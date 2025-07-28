@@ -3,7 +3,7 @@
 ## Migration Checklist
 
 ### Batch 1: Small npm utilities
-- [x] npm/grep
+- [x] npm/grep ✅ **COMPLETED** - Uses unified ESLint config with package-specific lint-staged handling
 - [ ] npm/puppeteer
 - [ ] npm/mount-utils
 - [ ] npm/cypress-schematic
@@ -74,7 +74,16 @@ This guide describes how to migrate all packages in the Cypress monorepo to the 
 
 ## Migration Strategy
 
-### 1. **Batch Packages for Migration**
+### 1. **Lint-Staged Configuration**
+During the migration period, the root `package.json` uses explicit lint-staged patterns to ensure each package gets the correct linting treatment:
+
+- **Migrated packages** (like `npm/grep`): Use `yarn lint:fix` which runs ESLint from the package directory with the correct config
+- **Non-migrated packages**: Use `eslint --fix` which runs from the root with the root config
+- **Root files**: Covered by `*.{js,jsx,ts,tsx,json,eslintrc,vue}` pattern
+
+This configuration will be simplified once all packages are migrated to the unified ESLint setup.
+
+### 2. **Batch Packages for Migration**
 - **Batch by directory/type** to keep PRs manageable and reduce risk.
 - **Batch size:** 4–8 packages per PR, grouped by similarity.
 
@@ -131,7 +140,19 @@ For each package in the batch:
 ### 5. **Deprecate and Remove Old Plugin**
 - Once all packages are migrated, remove `@cypress/eslint-plugin-dev` from the repo and CI.
 
-### 6. **Update Lerna/Monorepo Config**
+### 6. **Simplify Lint-Staged Configuration**
+After all packages are migrated, simplify the lint-staged configuration in root `package.json`:
+
+```json
+{
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
+    "*workflows.yml": "node scripts/format-workflow-file.js"
+  }
+}
+```
+
+### 7. **Update Lerna/Monorepo Config**
 - Ensure all packages reference the new config in their `package.json`/`eslint.config.ts`.
 - Update documentation and developer onboarding guides.
 
@@ -225,13 +246,19 @@ For each package in the batch:
 **Root Cause:** Pre-commit hook runs ESLint from root directory using root-level config, not package-specific config
 
 **Solution:**
-- Add package-specific lint-staged rule in root `package.json`:
+- The root `package.json` now includes explicit lint-staged patterns for each package:
   ```json
   "lint-staged": {
-    "npm/grep/**/*.{js,jsx,ts,tsx}": "cd npm/grep && eslint --fix",
-    "*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix"
+    "npm/grep/**/*.{js,jsx,ts,tsx}": "yarn lint:fix",
+    "*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
+    "cli/**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
+    "packages/**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
+    // ... explicit patterns for each directory
   }
   ```
+- **For migrated packages:** Use `yarn lint:fix` which runs the lerna command to execute ESLint from the package directory
+- **For non-migrated packages:** Use `eslint --fix` which runs from the root with the root config
+- **Note:** This verbose configuration is temporary during migration and will be simplified once all packages are migrated
 
 #### 5. **ESLint Script Changes**
 **Before ESLint 9.x:**
@@ -292,9 +319,6 @@ For each package, ensure you've completed:
 - [ ] Added required dependencies (`eslint`, `@packages/eslint-config`, `jiti`)
 - [ ] Created/updated `tsconfig.json` that extends base config
 - [ ] Updated ESLint scripts (removed `--ext` flag)
-- [ ] Fixed skip comment violations
-- [ ] Resolved console statement issues
-- [ ] Added package-specific lint-staged rule (if needed)
 - [ ] Ran `yarn lint` successfully
 - [ ] Ran tests to ensure nothing broke
 
@@ -305,6 +329,10 @@ For each package, ensure you've completed:
 - If a package is especially noisy, consider splitting it into its own PR.
 - Communicate with the team about the migration timeline and process.
 - **Test the pre-commit hook** before pushing to ensure lint-staged works correctly.
+
+## Recent Updates
+- **Fixed lint-staged configuration** to properly handle migrated vs non-migrated packages
+- **Added explicit directory patterns** to ensure complete coverage during migration period
 
 ---
 
