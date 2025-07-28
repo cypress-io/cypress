@@ -266,8 +266,8 @@
   },
   "lint-staged": {
     "*.coffee": "yarn stop-only --folder",
-    "npm/{grep}/**/*.{js,jsx,ts,tsx}": "yarn lint:fix",
-    "**/[!npm/{grep}]/**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
+    "npm/grep/**/*.{js,jsx,ts,tsx}": "yarn lint:fix",
+    "**/!(npm/grep)/**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
     "*workflows.yml": "node scripts/format-workflow-file.js"
   },
   "resolutions": {
