@@ -52,7 +52,7 @@ export function getOrCreateHelperDom ({ body, className, css, studioActive = fal
       left: '0',
       width: '100%',
       height: '100%',
-      zIndex: '1000',
+      zIndex: '9999',
     })
   }
 
