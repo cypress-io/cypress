@@ -141,6 +141,36 @@ describe('lib/modes/record', () => {
       afterEach(() => {
         resetEnv()
       })
+      
+      it('calls api.createRun with the commit extracted from environment variables', () => {
+        const createRun = sinon.stub(api, 'createRun').resolves()
+        const runAllSpecs = sinon.stub()
+
+        return recordMode.createRunAndRecordSpecs({
+          key: 'foo',
+          sys: {},
+          browser: {},
+          runAllSpecs,
+        })
+        .then(() => {
+          expect(runAllSpecs).to.have.been.calledWith({ parallel: false })
+          expect(createRun).to.have.been.calledOnce
+          expect(createRun.firstCall.args).to.have.length(1)
+          const { commit } = createRun.firstCall.args[0]
+
+          debug('git is %o', commit)
+
+          expect(commit).to.deep.equal({
+            sha: env.COMMIT_INFO_SHA,
+            branch: env.COMMIT_INFO_BRANCH,
+            authorName: env.COMMIT_INFO_AUTHOR,
+            authorEmail: env.COMMIT_INFO_EMAIL,
+            message: env.COMMIT_INFO_MESSAGE,
+            remoteOrigin: env.COMMIT_INFO_REMOTE,
+            defaultBranch: null,
+          })
+        })
+      })
     })
 
     describe('override commit information', () => {
