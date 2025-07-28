@@ -57,6 +57,22 @@ function dispatchEventToTarget (e: MouseEvent, targetClass: string): void {
   }
 }
 
+function handleContainerClickOutside (e: MouseEvent, closeMenu: () => void): void {
+  const target = e.target as HTMLElement
+
+  const isMenuElement = target.closest('.assertions-menu') ||
+      target.closest('.assertion-type') ||
+      target.closest('.assertion-options') ||
+      target.closest('.assertion-option')
+
+  // Don't close menu if the click is on any menu-related elements
+  if (isMenuElement) {
+    return
+  }
+
+  closeMenu()
+}
+
 // Event handlers
 function setupVueContainerListeners (vueContainer: HTMLElement, closeMenu: () => void): void {
   vueContainer.addEventListener('click', (e) => {
@@ -71,24 +87,8 @@ function setupVueContainerListeners (vueContainer: HTMLElement, closeMenu: () =>
       }
     }
 
-    const handleContainerClickOutside = () => {
-      const target = e.target as HTMLElement
-
-      const isMenuElement = target.closest('.assertions-menu') ||
-          target.closest('.assertion-type') ||
-          target.closest('.assertion-options') ||
-          target.closest('.assertion-option')
-
-      // Don't close menu if the click is on any menu-related elements
-      if (isMenuElement) {
-        return
-      }
-
-      closeMenu()
-    }
-
     // Add click handler to the Vue container to detect clicks outside the menu
-    handleContainerClickOutside()
+    handleContainerClickOutside(e, closeMenu)
   })
 
   vueContainer.addEventListener('mouseover', (e) => {
