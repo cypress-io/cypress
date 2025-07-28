@@ -4,7 +4,7 @@ import { DEFAULT_SELECTOR_PRIORITIES } from '../../../src/cypress/element_select
 const { $: $cypress } = Cypress.$Cypress
 const ElementSelector = Cypress.ElementSelector as ElementSelectorAPI & {
   _reset(): void
-  _getSelectorPriority(): Cypress.SelectorPriority[]
+  getSelectorPriority(): Cypress.SelectorPriority[]
   _getSelector($el: any): string
 }
 
@@ -16,13 +16,13 @@ describe('src/cypress/element_selector', () => {
   })
 
   it('has defaults', () => {
-    expect(ElementSelector._getSelectorPriority()).to.deep.eq(SELECTOR_DEFAULTS)
+    expect(ElementSelector.getSelectorPriority()).to.deep.eq(SELECTOR_DEFAULTS)
   })
 
   context('.defaults', () => {
     it('is noop if not called with selectorPriority', () => {
       ElementSelector.defaults({})
-      expect(ElementSelector._getSelectorPriority()).to.deep.eq(SELECTOR_DEFAULTS)
+      expect(ElementSelector.getSelectorPriority()).to.deep.eq(SELECTOR_DEFAULTS)
     })
 
     it('sets element:selector:priority if selectorPriority specified', () => {
@@ -43,7 +43,7 @@ describe('src/cypress/element_selector', () => {
         selectorPriority,
       })
 
-      expect(ElementSelector._getSelectorPriority()).to.eql(selectorPriority)
+      expect(ElementSelector.getSelectorPriority()).to.eql(selectorPriority)
     })
 
     it('throws if not passed an object', () => {

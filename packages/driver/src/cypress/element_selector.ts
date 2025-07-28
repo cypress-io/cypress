@@ -30,11 +30,11 @@ export type ElementSelectorDefaultsOptions = {
 
 export interface ElementSelectorAPI {
   defaults(options: ElementSelectorDefaultsOptions): void
+  getSelectorPriority(): Cypress.SelectorPriority[]
 }
 
 interface ElementSelectorPrivate {
   _reset(): void
-  _getSelectorPriority(): Cypress.SelectorPriority[]
   _getSelector($el: any): string
 }
 
@@ -51,14 +51,14 @@ const ElementSelector: ElementSelectorAPI & ElementSelectorPrivate = {
     defaults = reset()
   },
 
-  _getSelectorPriority () {
-    return defaults.selectorPriority
-  },
-
   _getSelector ($el: any) {
     return uniqueSelector($el.get(0), {
       selectorTypes: defaults.selectorPriority,
     })
+  },
+
+  getSelectorPriority () {
+    return defaults.selectorPriority
   },
 
   defaults (props: ElementSelectorDefaultsOptions) {
