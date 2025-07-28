@@ -709,8 +709,9 @@ export class ProjectBase extends EE {
     const isDefaultProtocolEnabled = this._protocolManager?.isProtocolEnabled ?? false
 
     const hideRunnerUi = (
-      this.options?.args?.runnerUi === false ||
-      (isDefaultProtocolEnabled && this._cfg.isTextTerminal && !this.options?.args?.runnerUi)
+      (this.options?.args?.runnerUi === false ||
+      (isDefaultProtocolEnabled && this._cfg.isTextTerminal && !this.options?.args?.runnerUi)) &&
+      !process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE
     )
 
     // hide the command log if explicitly requested or if we are hiding the runner
