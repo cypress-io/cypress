@@ -336,54 +336,92 @@ cy.get('#increment').click();
     })
   })
 
-  const showAssertionsMenu = (autAssertions?: () => void) => {
-    launchStudio()
+  describe('assertions menu', () => {
+    const showAssertionsMenu = (autAssertions?: () => void) => {
+      launchStudio()
 
-    cy.waitForSpecToFinish()
+      cy.waitForSpecToFinish()
 
-    cy.contains('No commands were issued in this test.').should('not.exist')
+      cy.contains('No commands were issued in this test.').should('not.exist')
 
-    cy.getAutIframe().within(() => {
-      // Show menu
-      cy.get('h1').realClick({
-        button: 'right',
+      cy.getAutIframe().within(() => {
+        // Show menu
+        cy.get('h1').realClick({
+          button: 'right',
+        })
+
+        cy.get('.__cypress-studio-assertions-menu').shadow()
+        .find('.assertions-menu').should('be.visible')
+
+        // Show submenu
+        cy.get('.__cypress-studio-assertions-menu').shadow()
+        .find('.assertion-type-text:first').realHover()
+
+        cy.get('.__cypress-studio-assertions-menu').shadow()
+        .find('.assertion-option')
+        .should('have.text', 'Hello, Studio!')
+        .should('be.visible')
+
+        autAssertions?.()
+      })
+    }
+
+    const showAssertionsMenuForModal = (autAssertions?: () => void) => {
+      launchStudio({ specName: 'spec-w-modal.cy.js' })
+
+      cy.waitForSpecToFinish()
+
+      cy.contains('No commands were issued in this test.').should('not.exist')
+
+      cy.getAutIframe().within(() => {
+        // Show menu
+        cy.get('.modal-body').realClick({
+          button: 'right',
+        })
+
+        cy.get('.__cypress-studio-assertions-menu').shadow()
+        .find('.assertions-menu').should('be.visible')
+
+        // Show submenu
+        cy.get('.__cypress-studio-assertions-menu').shadow()
+        .find('.assertion-type-text:first').realHover()
+
+        cy.get('.__cypress-studio-assertions-menu').shadow()
+        .find('.assertion-option')
+        .should('have.text', 'Semi-transparent background overlay')
+        .should('be.visible')
+
+        autAssertions?.()
+      })
+    }
+
+    const assertionsMenuFns = [
+      { fn: showAssertionsMenu, name: 'handles normal element' },
+      { fn: showAssertionsMenuForModal, name: 'handles high z-index modal' },
+    ]
+
+    assertionsMenuFns.forEach(({ fn, name }) => {
+      it(`${name} - shows assertions menu and submenu correctly`, () => {
+        fn()
       })
 
-      cy.get('.__cypress-studio-assertions-menu').shadow()
-      .find('.assertions-menu').should('be.visible')
+      it(`${name} - closes assertions menu when clicking outside`, () => {
+        fn(() => {
+          // click outside the menu
+          cy.get('.__cypress-studio-assertions-menu').shadow().find('.vue-container').click()
+          // check that the menu is closed
+          cy.get('.__cypress-studio-assertions-menu').should('not.exist')
+        })
+      })
 
-      // Show submenu
-      cy.get('.__cypress-studio-assertions-menu').shadow()
-      .find('.assertion-type-text:first').realHover()
-
-      cy.get('.__cypress-studio-assertions-menu').shadow()
-      .find('.assertion-option')
-      .should('have.text', 'Hello, Studio!')
-      .should('be.visible')
-
-      autAssertions?.()
-    })
-  }
-
-  it('shows assertions menu and submenu correctly', () => {
-    showAssertionsMenu()
-  })
-
-  it('closes assertions menu when clicking outside', () => {
-    showAssertionsMenu(() => {
-      // click outside the menu
-      cy.get('.__cypress-studio-assertions-menu').shadow().find('.vue-container').click()
-      // check that the menu is closed
-      cy.get('.__cypress-studio-assertions-menu').should('not.exist')
-    })
-  })
-
-  it('closes assertions menu on the highlighted element', () => {
-    showAssertionsMenu(() => {
-      // click on the highlighted element
-      cy.get('.__cypress-studio-assertions-menu').shadow().find('.highlight').click()
-      // check that the menu is closed
-      cy.get('.__cypress-studio-assertions-menu').should('not.exist')
+      it(`${name} - closes assertions menu on the highlighted element`, () => {
+        fn(() => {
+          // click on the highlighted element
+          cy.get('.__cypress-studio-assertions-menu').shadow().find('.highlight').click()
+          // check that the menu is closed
+          cy.get('.__cypress-studio-assertions-menu').should('not.exist')
+        })
+      })
     })
   })
 
