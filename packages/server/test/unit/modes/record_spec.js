@@ -266,7 +266,7 @@ describe('lib/modes/record', () => {
         }
         const ctx = {
           actions: {
-            recordedRun: {
+            currentRecording: {
               startRun: sinon.stub(),
               startInstance: sinon.stub(),
             },
@@ -292,7 +292,7 @@ describe('lib/modes/record', () => {
           ctx,
         })
 
-        expect(ctx.actions.recordedRun.startRun).to.have.been.calledWith('run-id')
+        expect(ctx.actions.currentRecording.startRun).to.have.been.calledWith('run-id')
         expect(commitInfo.commitInfo).to.be.calledWith(projectRoot)
 
         expect(api.createRun).to.be.calledWith({
@@ -339,7 +339,7 @@ describe('lib/modes/record', () => {
         await beforeSpecRun()
 
         expect(api.createInstance).to.have.been.called
-        expect(ctx.actions.recordedRun.startInstance).to.have.been.calledWith('instance-id')
+        expect(ctx.actions.currentRecording.startInstance).to.have.been.calledWith('instance-id')
       })
     })
   })

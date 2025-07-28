@@ -14,7 +14,7 @@ import {
   CohortsActions,
   CodegenActions,
   CloudProjectActions,
-  RecordedRunActions,
+  CurrentRecordingActions,
 } from './actions'
 import { ErrorActions } from './actions/ErrorActions'
 import { EventCollectorActions } from './actions/EventCollectorActions'
@@ -40,7 +40,7 @@ export class DataActions {
   private _codegen: CodegenActions
   private _notification: NotificationActions
   private _cloudProject: CloudProjectActions
-  private _recordedRun: RecordedRunActions
+  private _currentRecording: CurrentRecordingActions
 
   constructor (private ctx: DataContext) {
     this._error = new ErrorActions(this.ctx)
@@ -61,7 +61,7 @@ export class DataActions {
     this._codegen = new CodegenActions(this.ctx)
     this._notification = new NotificationActions(this.ctx)
     this._cloudProject = new CloudProjectActions(this.ctx)
-    this._recordedRun = new RecordedRunActions(this.ctx)
+    this._currentRecording = new CurrentRecordingActions(this.ctx)
   }
 
   get error () {
@@ -136,7 +136,7 @@ export class DataActions {
     return this._cloudProject
   }
 
-  get recordedRun () {
-    return this._recordedRun
+  get currentRecording () {
+    return this._currentRecording
   }
 }

@@ -1,6 +1,6 @@
 import type { DataContext } from '..'
 
-export class RecordedRunActions {
+export class CurrentRecordingActions {
   constructor (private ctx: DataContext) {}
 
   startRun (runId: string) {

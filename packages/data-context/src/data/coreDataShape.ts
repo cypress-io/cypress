@@ -132,7 +132,7 @@ interface CloudDataShape {
   }
 }
 
-interface RecordedRunInfo {
+interface RecordingInfo {
   runId?: string
   instanceId?: string
 }
@@ -171,7 +171,7 @@ export interface CoreDataShape {
   didBrowserPreviouslyHaveUnexpectedExit: boolean
   studioLifecycleManager?: StudioLifecycleManagerShape
   cyPromptLifecycleManager?: CyPromptLifecycleManagerShape
-  currentRecordingInfo: RecordedRunInfo
+  currentRecordingInfo: RecordingInfo
 }
 
 /**

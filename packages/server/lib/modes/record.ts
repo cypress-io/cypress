@@ -622,7 +622,7 @@ const createRunAndRecordSpecs = (options: any = {}) => {
         })
       }
 
-      ctx.actions.recordedRun.startRun(resp.runId)
+      ctx.actions.currentRecording.startRun(resp.runId)
 
       const { runUrl, runId, machineId, groupId } = resp
       const protocolCaptureMeta = resp.capture || {}
@@ -648,7 +648,7 @@ const createRunAndRecordSpecs = (options: any = {}) => {
         })
         .then((resp: any = {}) => {
           instanceId = resp.instanceId
-          ctx.actions.recordedRun.startInstance(instanceId)
+          ctx.actions.currentRecording.startInstance(instanceId)
 
           // pull off only what we need
           const result = _
