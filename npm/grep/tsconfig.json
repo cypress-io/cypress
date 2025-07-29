@@ -1,0 +1,23 @@
+{
+  "extends": "../../packages/ts/tsconfig.json",
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "allowJs": true,
+    "checkJs": false,
+    "noEmit": true
+  },
+  "types": ["node"],
+  "include": [
+    "src/**/*",
+    "cypress/**/*",
+    "expects/**/*",
+    "*.js",
+    "*.ts",
+    "*.jsx",
+    "*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+} 

@@ -260,10 +260,16 @@ describe('lib/modes/record', () => {
           remoteOrigin: this.commitDefaults.remote,
         })
 
-        sinon.stub(api, 'createRun').resolves()
+        sinon.stub(api, 'createRun').resolves({
+          runId: 'run-id',
+        })
+
+        sinon.stub(api, 'createInstance').resolves({
+          instanceId: 'instance-id',
+        })
       })
 
-      it('calls api.createRun with the right args', () => {
+      it('calls api.createRun with the right args and updates the current run id', async () => {
         const key = 'recordKey'
         const projectId = 'pId123'
         const specPattern = ['spec/pattern1', 'spec/pattern2']
@@ -285,9 +291,19 @@ describe('lib/modes/record', () => {
         const tag = 'nightly,develop'
         const testingType = 'e2e'
         const autoCancelAfterFailures = 4
-        const project = {}
+        const project = {
+          setOnTestsReceived: sinon.stub(),
+        }
+        const ctx = {
+          actions: {
+            currentRecording: {
+              startRun: sinon.stub(),
+              startInstance: sinon.stub(),
+            },
+          },
+        }
 
-        return recordMode.createRunAndRecordSpecs({
+        await recordMode.createRunAndRecordSpecs({
           key,
           sys,
           specs,
@@ -303,47 +319,57 @@ describe('lib/modes/record', () => {
           testingType,
           autoCancelAfterFailures,
           project,
+          ctx,
         })
-        .then(() => {
-          expect(commitInfo.commitInfo).to.be.calledWith(projectRoot)
 
-          expect(api.createRun).to.be.calledWith({
-            projectRoot,
-            group,
-            parallel,
-            projectId,
-            ciBuildId,
-            recordKey: key,
-            testingType,
-            specPattern: 'spec/pattern1,spec/pattern2',
-            specs: ['path/to/spec/a', 'path/to/spec/b'],
-            platform: {
-              osCpus: 1,
-              osName: 2,
-              osMemory: 3,
-              osVersion: 4,
-              browserName: 'chrome',
-              browserVersion: '59',
+        expect(ctx.actions.currentRecording.startRun).to.have.been.calledWith('run-id')
+        expect(commitInfo.commitInfo).to.be.calledWith(projectRoot)
+
+        expect(api.createRun).to.be.calledWith({
+          projectRoot,
+          group,
+          parallel,
+          projectId,
+          ciBuildId,
+          recordKey: key,
+          testingType,
+          specPattern: 'spec/pattern1,spec/pattern2',
+          specs: ['path/to/spec/a', 'path/to/spec/b'],
+          platform: {
+            osCpus: 1,
+            osName: 2,
+            osMemory: 3,
+            osVersion: 4,
+            browserName: 'chrome',
+            browserVersion: '59',
+          },
+          ci: {
+            params: {
+              foo: 'bar',
             },
-            ci: {
-              params: {
-                foo: 'bar',
-              },
-              provider: 'circle',
-            },
-            commit: {
-              authorEmail: 'brian@cypress.io',
-              authorName: 'brian',
-              branch: 'master',
-              message: 'such hax',
-              remoteOrigin: 'https://github.com/foo/bar.git',
-              sha: 'sha-123',
-            },
-            tags: ['nightly', 'develop'],
-            autoCancelAfterFailures: 4,
-            project,
-          })
+            provider: 'circle',
+          },
+          commit: {
+            authorEmail: 'brian@cypress.io',
+            authorName: 'brian',
+            branch: 'master',
+            message: 'such hax',
+            remoteOrigin: 'https://github.com/foo/bar.git',
+            sha: 'sha-123',
+          },
+          tags: ['nightly', 'develop'],
+          autoCancelAfterFailures: 4,
+          project,
         })
+
+        expect(runAllSpecs).to.have.been.called
+
+        const beforeSpecRun = runAllSpecs.firstCall.args[0].beforeSpecRun
+
+        await beforeSpecRun()
+
+        expect(api.createInstance).to.have.been.called
+        expect(ctx.actions.currentRecording.startInstance).to.have.been.calledWith('instance-id')
       })
     })
   })

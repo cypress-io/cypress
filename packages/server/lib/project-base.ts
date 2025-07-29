@@ -67,8 +67,8 @@ type StartWebsocketOptions = Pick<Cfg, 'socketIoCookie' | 'namespace' | 'screens
 export class ProjectBase extends EE {
   // id is sha256 of projectRoot
   public id: string
+  public ctx: DataContext
 
-  protected ctx: DataContext
   protected _cfg?: Cfg
   protected _server?: ServerBase<any>
   protected _automation?: Automation

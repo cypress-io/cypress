@@ -34,7 +34,7 @@ declare module 'axios' {
 
 export interface CyPromptCloudApi {
   cloudUrl: string
-  CloudRequest?: AxiosInstance
+  CloudRequest: AxiosInstance
   createCloudRequest: (opts?: {
     additionalHeaders?: Record<string, string>
     enableLogging?: boolean
@@ -62,6 +62,10 @@ export interface CyPromptProjectOptions {
   record?: boolean
   key?: string
   isOpenMode?: boolean
+  recordingInfo?: {
+    readonly runId?: string
+    readonly instanceId?: string
+  }
 }
 
 export interface CyPromptServerOptions {

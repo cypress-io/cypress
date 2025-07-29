@@ -12,7 +12,7 @@ import { readFile } from 'fs-extra'
 import { ensureCyPromptBundle } from './ensure_cy_prompt_bundle'
 import chokidar from 'chokidar'
 import { getCloudMetadata } from '../get_cloud_metadata'
-import type { CyPromptAuthenticatedUserShape } from '@packages/types'
+import type { CyPromptAuthenticatedUserShape, CyPromptServerOptions } from '@packages/types'
 import crypto from 'crypto'
 import { reportCyPromptError } from '../api/cy-prompt/report_cy-prompt_error'
 
@@ -52,6 +52,15 @@ export class CyPromptLifecycleManager {
       data.cyPromptLifecycleManager = this
     })
 
+    const recordingInfo = {
+      get runId () {
+        return ctx.coreData.currentRecordingInfo.runId
+      },
+      get instanceId () {
+        return ctx.coreData.currentRecordingInfo.instanceId
+      },
+    }
+
     const getProjectOptions = async () => {
       return {
         user: await ctx.actions.auth.authApi.getUser(),
@@ -59,6 +68,7 @@ export class CyPromptLifecycleManager {
         record,
         key,
         isOpenMode: ctx.isOpenMode,
+        ...(record ? { recordingInfo } : {}),
       }
     }
 
@@ -75,12 +85,12 @@ export class CyPromptLifecycleManager {
       reportCyPromptError({
         cloudApi: {
           cloudUrl,
-          cloudHeaders,
           CloudRequest,
           createCloudRequest,
           isRetryableError,
           asyncRetry,
         },
+        additionalHeaders: cloudHeaders,
         cyPromptHash: this.cyPromptHash,
         projectSlug: (await ctx.project.getConfig()).projectId || undefined,
         error,
@@ -118,12 +128,7 @@ export class CyPromptLifecycleManager {
   }: {
     projectId?: string
     cloudDataSource: CloudDataSource
-    getProjectOptions: () => Promise<{
-      user?: CyPromptAuthenticatedUserShape
-      projectSlug?: string
-      record?: boolean
-      key?: string
-    }>
+    getProjectOptions: CyPromptServerOptions['getProjectOptions']
   }): Promise<{ cyPromptManager?: CyPromptManager, error?: Error }> {
     let cyPromptPath: string
     let manifest: Record<string, string>
