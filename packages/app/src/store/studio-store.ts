@@ -324,16 +324,6 @@ export const useStudioStore = defineStore('studioRecorder', {
     visitUrl (url?: string) {
       this.setUrl(url ?? this.url)
 
-      // if we're visiting a new url, update the visit url param
-      if (url) {
-        this._updateUrlParams(['url'])
-      }
-
-      getCypress().cy.visit(this.url).then(() => {
-        // after visiting a new url, remove the visit url param since it shouldn't be needed anymore
-        this._removeUrlParams(['url'])
-      })
-
       // if we're visiting a new url, add the visit log
       if (url) {
         this.logs.push({
