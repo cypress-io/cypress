@@ -1740,6 +1740,12 @@ export default {
         docsUrl: 'https://on.cypress.io/element-selector-api',
       }
     },
+    removed: ({ method }: { method: string }) => {
+      return {
+        message: `\`Cypress.SelectorPlayground.${method}()\` has been removed.`,
+        docsUrl: 'https://on.cypress.io/element-selector-api',
+      }
+    },
   },
 
   server: {

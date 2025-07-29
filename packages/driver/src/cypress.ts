@@ -159,7 +159,7 @@ class $Cypress {
       })
     },
     getSelector ($el: any) {
-      $errUtils.throwErrByPath('selector_playground.renamed', {
+      $errUtils.throwErrByPath('selector_playground.removed', {
         args: { method: 'getSelector' },
       })
     },

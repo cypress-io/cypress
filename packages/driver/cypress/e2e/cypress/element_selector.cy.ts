@@ -144,11 +144,7 @@ describe('src/cypress/element_selector', () => {
 
       expect(fn).to.throw()
       .with.property('message')
-      .and.include('`Cypress.SelectorPlayground.getSelector()` has been renamed to `Cypress.ElementSelector.getSelector()`')
-
-      expect(fn).to.throw()
-      .with.property('message')
-      .and.include('Please update your code to use `Cypress.ElementSelector` instead')
+      .and.include('`Cypress.SelectorPlayground.getSelector()` has been removed')
     })
   })
 })
