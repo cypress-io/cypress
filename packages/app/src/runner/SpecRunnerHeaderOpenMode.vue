@@ -231,7 +231,7 @@ function setStudioUrl (event: Event) {
 }
 
 function visitUrl () {
-  studioStore.visitUrl(urlInProgress.value)
+  studioStore.setUrl(urlInProgress.value)
 }
 
 function openExternally () {

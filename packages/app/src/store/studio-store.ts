@@ -262,7 +262,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       const autStore = useAutStore()
 
       if (this._initialUrl || this.url) {
-        this.visitUrl(this._initialUrl)
+        this.setUrl(this._initialUrl)
       }
 
       if (!this.url && autStore.url) {
@@ -319,20 +319,6 @@ export const useStudioStore = defineStore('studioRecorder', {
       }
 
       getEventManager().emit('studio:save', payload)
-    },
-
-    visitUrl (url?: string) {
-      this.setUrl(url ?? this.url)
-
-      // if we're visiting a new url, add the visit log
-      if (url) {
-        this.logs.push({
-          id: this._getId(),
-          selector: undefined,
-          name: 'visit',
-          message: this.url,
-        })
-      }
     },
 
     _removeLastLogIfType (selector?: string) {
