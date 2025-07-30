@@ -239,13 +239,12 @@ export const useStudioStore = defineStore('studioRecorder', {
         getCypress().runner.setIsStudioCreatedTest(true)
         this._wasStudioCreatedTest = true
       } else if (this.testId) {
+        getCypress().runner.setOnlyTestId(this.testId)
         if (this._wasStudioCreatedTest) {
           // This test was just created by studio, so we need to set the test id
-          getCypress().runner.setOnlyTestId(this.testId)
           getCypress().runner.setIsStudioCreatedTest(true)
         } else {
           // this is an existing test - respect .only filtering
-          getCypress().runner.setOnlyTestId(this.testId)
           getCypress().runner.setIsStudioCreatedTest(false)
         }
       }
@@ -253,11 +252,7 @@ export const useStudioStore = defineStore('studioRecorder', {
 
     interceptTest (test) {
       // if this test is the one we created, we can just set the test id
-      if (this.newTestLineNumber && test.invocationDetails?.line === this.newTestLineNumber) {
-        this._wasStudioCreatedTest = true
-        this.setTestId(test.id)
-        getCypress().runner.setIsStudioCreatedTest(true)
-      } else if (this.suiteId) {
+      if ((this.newTestLineNumber && test.invocationDetails?.line === this.newTestLineNumber) || this.suiteId) {
         this._wasStudioCreatedTest = true
         this.setTestId(test.id)
         getCypress().runner.setIsStudioCreatedTest(true)
