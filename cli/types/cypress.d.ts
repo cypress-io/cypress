@@ -702,7 +702,6 @@ declare namespace Cypress {
      */
     ElementSelector: {
       defaults(options: Partial<ElementSelectorDefaultsOptions>): void
-      getSelector($el: JQuery): JQuery.Selector
     }
 
     /**

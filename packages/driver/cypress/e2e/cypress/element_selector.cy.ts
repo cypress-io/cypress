@@ -2,13 +2,17 @@
 import type { ElementSelectorAPI } from '../../../src/cypress/element_selector'
 import { DEFAULT_SELECTOR_PRIORITIES } from '../../../src/cypress/element_selector'
 const { $: $cypress } = Cypress.$Cypress
-const ElementSelector = Cypress.ElementSelector as ElementSelectorAPI
+const ElementSelector = Cypress.ElementSelector as ElementSelectorAPI & {
+  _reset(): void
+  getSelectorPriority(): Cypress.SelectorPriority[]
+  _getSelector($el: any): string
+}
 
 const SELECTOR_DEFAULTS: Cypress.SelectorPriority[] = [...DEFAULT_SELECTOR_PRIORITIES]
 
 describe('src/cypress/element_selector', () => {
   beforeEach(() => {
-    ElementSelector.reset()
+    ElementSelector._reset()
   })
 
   it('has defaults', () => {
@@ -108,13 +112,13 @@ describe('src/cypress/element_selector', () => {
 
       Cypress.$('body').append($div)
 
-      expect(ElementSelector.getSelector($div)).to.eq('[data-cy="main button 123"]')
+      expect(ElementSelector._getSelector($div)).to.eq('[data-cy="main button 123"]')
 
       ElementSelector.defaults({
         selectorPriority: ['data-foo'],
       })
 
-      expect(ElementSelector.getSelector($div)).to.eq('[data-foo="bar"]')
+      expect(ElementSelector._getSelector($div)).to.eq('[data-foo="bar"]')
     })
   })
 
@@ -140,11 +144,7 @@ describe('src/cypress/element_selector', () => {
 
       expect(fn).to.throw()
       .with.property('message')
-      .and.include('`Cypress.SelectorPlayground.getSelector()` has been renamed to `Cypress.ElementSelector.getSelector()`')
-
-      expect(fn).to.throw()
-      .with.property('message')
-      .and.include('Please update your code to use `Cypress.ElementSelector` instead')
+      .and.include('`Cypress.SelectorPlayground.getSelector()` has been removed')
     })
   })
 })
