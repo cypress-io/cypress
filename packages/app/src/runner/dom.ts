@@ -52,7 +52,7 @@ export function getOrCreateHelperDom ({ body, className, css, studioActive = fal
       left: '0',
       width: '100%',
       height: '100%',
-      zIndex: '9999',
+      zIndex: '2147483647', // use the max z-index value to ensure the shadow dom is on top of all other elements
     })
   }
 
