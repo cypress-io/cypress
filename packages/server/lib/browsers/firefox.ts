@@ -411,6 +411,8 @@ export function clearInstanceState (options: GracefulShutdownOptions = {}) {
 
 function shouldUseBiDi (browser: Browser): boolean {
   try {
+    debug('should use bidi for?', browser.family, process.env.FORCE_FIREFOX_CDP, browser.majorVersion)
+
     // Gating on firefox version 135 to turn on BiDi as this is when all of our internal Cypress tests were able to pass.
     return (browser.family === 'firefox' && !process.env.FORCE_FIREFOX_CDP && Number(browser.majorVersion) >= 135)
   } catch (err: unknown) {
@@ -452,7 +454,8 @@ async function recordVideo (videoApi: RunModeVideoApi) {
 export async function open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance> {
   const USE_WEBDRIVER_BIDI = shouldUseBiDi(browser)
 
-  if (!USE_WEBDRIVER_BIDI) {
+  // Even if the user has set FORCE_FIREFOX_CDP, we override this and use BiDi in FF141+
+  if (!USE_WEBDRIVER_BIDI || (USE_WEBDRIVER_BIDI && !!process.env.FORCE_FIREFOX_CDP)) {
     errors.warning('CDP_FIREFOX_DEPRECATED')
   }
 
