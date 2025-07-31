@@ -114,10 +114,15 @@ const destroySourceMapConsumers = () => {
   sourceMapConsumers = {}
 }
 
+const areSourceMapsEnabled = () => {
+  return Object.keys(sourceMapConsumers).length > 0
+}
+
 export default {
   getSourcePosition,
   getSourceContents,
   extractSourceMap,
   initializeSourceMapConsumer,
   destroySourceMapConsumers,
+  areSourceMapsEnabled,
 }

@@ -863,6 +863,10 @@ class $Cypress {
     return ctx?.currentTest?._currentRetry || ctx?.test?._currentRetry
   }
 
+  get areSourceMapsEnabled (): boolean {
+    return $sourceMapUtils.areSourceMapsEnabled()
+  }
+
   static create (config: Record<string, any>) {
     const cypress = new $Cypress()
 
