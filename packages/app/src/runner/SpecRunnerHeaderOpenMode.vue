@@ -232,6 +232,9 @@ function setStudioUrl (event: Event) {
 
 function visitUrl () {
   studioStore.setUrl(urlInProgress.value)
+  // once we set the url in studio, we can clear the urlInProgress
+  // since we'll rerun the test which will set the url in the autStore
+  urlInProgress.value = ''
 }
 
 function openExternally () {
