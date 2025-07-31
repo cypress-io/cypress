@@ -1,0 +1,31 @@
+{
+  "name": "@packages/eslint-config",
+  "version": "0.0.0-development",
+  "private": true,
+  "main": "src/index.ts",
+  "scripts": {
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "jiti": "^2.4.2"
+  },
+  "devDependencies": {
+    "@babel/eslint-parser": "^7.28.0",
+    "@eslint/js": "^10.0.0",
+    "@stylistic/eslint-plugin": "^5.2",
+    "@typescript-eslint/eslint-plugin": "^8.37.0",
+    "@typescript-eslint/parser": "^8.37.0",
+    "eslint": "^9.31.0",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-cypress": "^5.1.0",
+    "eslint-plugin-import-x": "^4.16.1",
+    "eslint-plugin-mocha": "^11.1.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-vue": "^10.3.0",
+    "globals": "^15.14.0",
+    "typescript-eslint": "^8.37.0"
+  },
+  "peerDependencies": {
+    "eslint": "^9.31.0"
+  }
+}

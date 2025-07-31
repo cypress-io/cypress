@@ -1126,7 +1126,6 @@ async function ready (options: ReadyOptions) {
     trashAssets(config),
   ])
 
-  // @ts-expect-error ctx is protected
   const specs = project.ctx.project.specs
 
   if (!specs.length) {
@@ -1202,6 +1201,7 @@ async function ready (options: ReadyOptions) {
       runAllSpecs,
       onError,
       quiet: options.quiet,
+      ctx: project.ctx,
     })
   }
 

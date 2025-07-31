@@ -88,7 +88,7 @@ function parseTagsGrep (s) {
     })
 
     if (ORS_filtered.length === 0) {
-      ORS_filtered[ 0 ] = explicitNotTags
+      ORS_filtered[0] = explicitNotTags
     }
   }
 
