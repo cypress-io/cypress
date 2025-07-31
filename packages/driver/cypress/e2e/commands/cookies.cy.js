@@ -1515,7 +1515,7 @@ describe('src/cy/commands/cookies', () => {
           assertLogLength(this.logs, 1)
           expect(lastLog.get('error').message).to.eq(stripIndent`
             If a \`sameSite\` value is supplied to \`cy.setCookie()\`, it must be a string from the following list:
-              > no_restriction, lax, strict
+              > no_restriction, lax, strict, unspecified
             You passed:
               > bad`)
 
