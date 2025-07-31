@@ -176,7 +176,7 @@ describe('studio functionality', () => {
   })
 
   it('does not enter single test mode when creating a new test', () => {
-    launchStudio({ specName: 'spec-w-multiple-tests.cy.js', createNewTest: true })
+    launchStudio({ specName: 'spec-w-multiple-tests.cy.js', createNewTestFromSuite: true })
 
     // verify we are not in single test mode
     cy.get('.runnable-title').should('have.length', 4)
@@ -186,8 +186,8 @@ describe('studio functionality', () => {
     cy.get('.runnable-title').its(3).should('contain.text', 'visits a basic html page 3')
   })
 
-  it('creates a new test from an empty spec with url already defined', () => {
-    launchStudio({ specName: 'spec-w-visit.cy.js', createNewTest: true })
+  it('creates a new test from spec header', () => {
+    launchStudio({ specName: 'spec-w-visit.cy.js', createNewTestFromSpecHeader: true })
 
     inputNewTestName()
 
@@ -195,39 +195,12 @@ describe('studio functionality', () => {
 
     cy.percySnapshot()
 
-    incrementCounter(0)
+    cy.get('.cm-content').invoke('text', 'cy.visit("cypress/e2e/index.html")')
 
     cy.findByTestId('studio-save-button').click()
 
-    // we should have the commands we executed after we save
-    cy.withCtx(async (ctx) => {
-      const spec = await ctx.actions.file.readFileInProject('cypress/e2e/spec-w-visit.cy.js')
-
-      expect(spec.trim().replace(/\r/g, '')).to.equal(`
-describe('studio functionality', () => {
-  beforeEach(() => {
-    cy.visit('cypress/e2e/index.html')
-  })
-
-  it('visits a basic html page', () => {
-    cy.get('h1').should('have.text', 'Hello, Studio!')
-  })
-
-  it('new-test', function() {
-
-cy.get('#increment').click();
-  });
-})`.trim())
-    })
-  })
-
-  it('creates a new test from the spec header', () => {
-    launchStudio({ specName: 'spec-w-visit.cy.js', createNewTest: true })
-
-    cy.findAllByTestId('create-new-test-button').eq(1).click()
-    inputNewTestName()
-
-    cy.percySnapshot()
+    // verify recording is enabled to ensure the panel is fully ready
+    cy.findByTestId('record-button-recording').should('have.text', 'Recording...')
 
     incrementCounter(0)
 
@@ -246,19 +219,19 @@ describe('studio functionality', () => {
   it('visits a basic html page', () => {
     cy.get('h1').should('have.text', 'Hello, Studio!')
   })
+})
 
-  it('new-test', function() {
-
+it('new-test', function() {
+cy.visit("cypress/e2e/index.html")
 cy.get('#increment').click();
-  });
-})`.trim())
+});`.trim())
     })
   })
 
   // TODO: this test fails in CI but passes locally
   // http://github.com/cypress-io/cypress/issues/31248
   it.skip('creates a new test with a url that changes top', function () {
-    launchStudio({ specName: 'spec-w-foobar.cy.js', createNewTest: true })
+    launchStudio({ specName: 'spec-w-foobar.cy.js', createNewTestFromSuite: true })
 
     cy.origin('http://foobar.com:4455', () => {
       Cypress.require('../support/execute-spec')
@@ -332,10 +305,10 @@ describe('studio functionality', () => {
   })
 
   it('creates a new test for a specific suite with the url already defined', () => {
-    launchStudio({ specName: 'spec-w-visit.cy.js', createNewTest: true })
+    launchStudio({ specName: 'spec-w-visit.cy.js', createNewTestFromSuite: true })
 
     // create a new test from a specific suite
-    cy.findAllByTestId('create-new-test-button').eq(1).click()
+    cy.findByTestId('create-new-test-from-suite').click()
 
     inputNewTestName()
 
@@ -647,7 +620,7 @@ describe('studio functionality', () => {
   })
 
   it('updates the AUT url when creating a new test', () => {
-    launchStudio({ specName: 'navigation.cy.js', createNewTest: true })
+    launchStudio({ specName: 'navigation.cy.js', createNewTestFromSuite: true })
 
     inputNewTestName()
 
@@ -677,7 +650,7 @@ describe('studio functionality', () => {
   })
 
   it('update the url with the suiteId and studio parameters when entering studio with a suite', () => {
-    launchStudio({ createNewTest: true })
+    launchStudio({ createNewTestFromSuite: true })
 
     cy.location().its('hash').should('contain', 'suiteId=r2').and('contain', 'studio=')
   })
@@ -770,7 +743,7 @@ describe('studio functionality', () => {
   })
 
   it('removes the studio url parameters when closing studio new test', () => {
-    launchStudio({ specName: 'spec-w-visit.cy.js', createNewTest: true })
+    launchStudio({ specName: 'spec-w-visit.cy.js', createNewTestFromSuite: true })
 
     cy.location().its('hash').should('contain', 'suiteId=r2').and('contain', 'studio=')
 

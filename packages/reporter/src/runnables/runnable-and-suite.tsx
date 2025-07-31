@@ -78,7 +78,7 @@ const Suite: React.FC<SuiteProps> = observer(({ eventManager = events, model, st
         <span className='runnable-title'>{model.title}</span>
         {(studioEnabled && !appState.studioActive && spec?.relative !== '__all') && (
           <>
-            <CreateNewTestButton suiteId={model.id} />
+            <CreateNewTestButton suiteId={model.id} dataCy='create-new-test-from-suite' />
             <span className='button-hover-shadow' />
           </>
         )}
