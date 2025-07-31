@@ -1,5 +1,7 @@
 import { launchStudio, loadProjectAndRunSpec, assertClosingPanelWithoutChanges } from './helper'
 
+const urlPrompt = '// Visit a page by entering a url in the address bar or typing a cy.visit command here'
+
 describe('Cypress Studio', () => {
   function incrementCounter (initialCount: number) {
     cy.getAutIframe().within(() => {
@@ -750,5 +752,39 @@ describe('studio functionality', () => {
     cy.findByTestId('studio-header-studio-button').click()
 
     cy.location().its('hash').and('not.contain', 'suiteId=').and('not.contain', 'studio=')
+  })
+
+  it('clears url and prompts for a new url when removing a visit command from the test', () => {
+    launchStudio()
+
+    const autUrl = 'http://localhost:4455/cypress/e2e/index.html'
+    const visitUrl = 'cypress/e2e/index.html'
+
+    const assertClearUrl = () => {
+      cy.findByTestId('aut-url-input').should('have.value', autUrl)
+
+      cy.findByTestId('test-block-editor').type('{cmd}a{del}')
+
+      cy.findByTestId('studio-save-button').click()
+
+      cy.findByTestId('aut-url-input').should('have.value', '')
+
+      cy.findByTestId('aut-url-input').should('have.focus')
+
+      cy.get('.cm-line').should('contain.text', urlPrompt)
+      cy.findByTestId('aut-url-input').type(`${visitUrl}{enter}`)
+
+      cy.findByTestId('aut-url-input').should('have.value', autUrl)
+
+      cy.get('.cm-line').should('not.contain.text', urlPrompt)
+
+      cy.get('.cm-line').should('contain.text', `cy.visit('${visitUrl}')`)
+    }
+
+    cy.log('Clear url when there is an existing visit command')
+    assertClearUrl()
+
+    cy.log('Clear url after clearing the existing visit command and typing a new url in the aut url input')
+    assertClearUrl()
   })
 })
