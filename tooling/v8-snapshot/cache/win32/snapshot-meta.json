@@ -287,7 +287,6 @@
     "./node_modules/fs-extra/lib/json/index.js",
     "./node_modules/fs-extra/lib/json/jsonfile.js",
     "./node_modules/fs-extra/lib/path-exists/index.js",
-    "./node_modules/get-tsconfig/dist/index.cjs",
     "./node_modules/getenv/index.js",
     "./node_modules/globby/stream-utils.js",
     "./node_modules/graceful-fs/graceful-fs.js",
@@ -600,6 +599,7 @@
     "./packages/data-context/node_modules/fs-extra/lib/json/index.js",
     "./packages/data-context/node_modules/fs-extra/lib/json/jsonfile.js",
     "./packages/data-context/node_modules/fs-extra/lib/path-exists/index.js",
+    "./packages/data-context/node_modules/get-tsconfig/dist/index.cjs",
     "./packages/data-context/node_modules/glob-parent/index.js",
     "./packages/data-context/node_modules/readdirp/index.js",
     "./packages/data-context/src/DataActions.ts",
@@ -4191,5 +4191,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "4d8b2798b1ea8670db78d5ebb55e2d92b25da8d87bfe83ce95e6c137b1b644ad"
+  "deferredHash": "bd0761ef9a0a0ed246af2be80537fad659433599ac66f2246aa96e80a36917ac"
 }
