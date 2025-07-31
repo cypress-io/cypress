@@ -109,7 +109,7 @@ interface StudioRecorderState {
   showUrlPrompt: boolean
   cloudStudioRequested: boolean
   cloudStudioSessionId?: string
-  _wasStudioCreatedTest: boolean
+  _isStudioCreatedTest: boolean
   newTestLineNumber?: number
 }
 
@@ -130,7 +130,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       cloudStudioRequested: false,
       cloudStudioSessionId: undefined,
       newTestLineNumber: undefined,
-      _wasStudioCreatedTest: false,
+      _isStudioCreatedTest: false,
     }
   },
 
@@ -237,23 +237,17 @@ export const useStudioStore = defineStore('studioRecorder', {
         getCypress().runner.setNewTestLineNumber(this.newTestLineNumber)
         // Creating a new test - need to bypass .only filtering
         getCypress().runner.setIsStudioCreatedTest(true)
-        this._wasStudioCreatedTest = true
+        this._isStudioCreatedTest = true
       } else if (this.testId) {
         getCypress().runner.setOnlyTestId(this.testId)
-        if (this._wasStudioCreatedTest) {
-          // This test was just created by studio, so we need to set the test id
-          getCypress().runner.setIsStudioCreatedTest(true)
-        } else {
-          // this is an existing test - respect .only filtering
-          getCypress().runner.setIsStudioCreatedTest(false)
-        }
+        getCypress().runner.setIsStudioCreatedTest(this._isStudioCreatedTest)
       }
     },
 
     interceptTest (test) {
       // if this test is the one we created, we can just set the test id
       if ((this.newTestLineNumber && test.invocationDetails?.line === this.newTestLineNumber) || this.suiteId) {
-        this._wasStudioCreatedTest = true
+        this._isStudioCreatedTest = true
         this.setTestId(test.id)
         getCypress().runner.setIsStudioCreatedTest(true)
       }
@@ -299,7 +293,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       this._currentId = 1
       this.isFailed = false
       this.showUrlPrompt = true
-      this._wasStudioCreatedTest = false
+      this._isStudioCreatedTest = false
 
       this._maybeResetRunnables()
     },
