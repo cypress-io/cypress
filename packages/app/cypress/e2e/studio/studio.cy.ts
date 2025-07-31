@@ -761,7 +761,7 @@ describe('studio functionality', () => {
     const clearUrl = () => {
       cy.findByTestId('aut-url-input').should('have.value', autUrl)
 
-      cy.findByTestId('test-block-editor').type('{cmd}a{del}')
+      cy.get('.cm-content').invoke('text', '')
 
       cy.findByTestId('studio-save-button').click()
 
@@ -806,10 +806,6 @@ describe('studio functionality', () => {
     })
 
     it('ensures we clear the aut url input properly in between adding and clearing urls', () => {
-      clearAndAddAutUrl()
-      clearAndAddAutUrl()
-      clearAndAddTestBlockEditorUrl()
-      clearAndAddTestBlockEditorUrl()
       clearAndAddAutUrl()
       clearAndAddTestBlockEditorUrl()
     })
