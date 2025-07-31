@@ -627,6 +627,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   debug('launch in firefox', { url, args: launchOptions.args })
 
+  const { FORCE_FIREFOX_CDP, ...launchEnvs } = process.env
+
   const geckoDriverOptions: GeckodriverParameters = {
     host: '127.0.0.1',
     // geckodriver port is assigned under the hood by @wdio/utils
@@ -643,7 +645,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
       stdio: ['ignore', 'pipe', 'pipe'],
       env: {
         ...BROWSER_ENVS,
-        ...process.env,
+        ...launchEnvs,
       },
     },
     jsdebugger: Debug.enabled(GECKODRIVER_DEBUG_NAMESPACE_VERBOSE) || false,

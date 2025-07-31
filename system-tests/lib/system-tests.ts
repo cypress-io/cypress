@@ -396,8 +396,12 @@ const startServer = function (obj) {
     app.use(Express.static(path.join(__dirname, '../projects/e2e'), {}) as Express.RequestHandler)
   }
 
-  return new Bluebird((resolve) => {
-    return srv.listen(port, () => {
+  return new Bluebird((resolve, reject) => {
+    return srv.listen(port, (err) => {
+      if (err) {
+        reject(err)
+      }
+
       console.log(`listening on port: ${port}`)
       if (typeof onServer === 'function') {
         onServer(app, srv)
@@ -613,7 +617,12 @@ const systemTests = {
       const s = this.servers
 
       if (s) {
-        await Bluebird.map(s, stopServer)
+        try {
+          await Bluebird.map(s, stopServer)
+        } catch (err) {
+          console.error('Error stopping server', err)
+          throw err
+        }
       }
     })
   },
