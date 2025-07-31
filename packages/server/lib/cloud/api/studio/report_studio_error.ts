@@ -77,7 +77,7 @@ export function reportStudioError ({
         stack: stripPath(errorObject.stack ?? `Unknown stack`),
         message: stripPath(errorObject.message ?? `Unknown message`),
         studioMethod,
-        studioMethodArgs: studioMethodArgsString,
+        studioMethodArgs: studioMethodArgsString ? stripPath(studioMethodArgsString) : undefined,
       }],
     }
 

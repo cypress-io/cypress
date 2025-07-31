@@ -152,7 +152,7 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
 
     it('includes studioMethodArgs when provided', () => {
       const error = new Error('test error')
-      const args = ['arg1', { key: 'value' }]
+      const args = ['arg1', { key: '/path/to/file.js' }]
 
       reportStudioError({
         cloudApi,
@@ -173,7 +173,7 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
             message: 'test error',
             stack: sinon.match((stack) => stack.includes('<stripped-path>report_studio_error_spec.ts')),
             studioMethod: 'testMethod',
-            studioMethodArgs: JSON.stringify({ args }),
+            studioMethodArgs: JSON.stringify({ args: ['arg1', { key: '<stripped-path>file.js' }] }),
           }],
         },
         {
