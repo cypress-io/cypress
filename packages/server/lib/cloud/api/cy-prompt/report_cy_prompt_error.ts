@@ -1,7 +1,7 @@
 import type { CyPromptCloudApi } from '@packages/types/src/cy-prompt/cy-prompt-server-types'
 import Debug from 'debug'
 import { stripPath } from '../../strip_path'
-const debug = Debug('cypress:server:cloud:api:cy-prompt:report_cy-prompt_error')
+const debug = Debug('cypress:server:cloud:api:cy-prompt:report_cy_prompt_error')
 
 export interface ReportCyPromptErrorOptions {
   cloudApi: CyPromptCloudApi

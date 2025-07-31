@@ -14,7 +14,7 @@ import chokidar from 'chokidar'
 import { getCloudMetadata } from '../get_cloud_metadata'
 import type { CyPromptAuthenticatedUserShape } from '@packages/types'
 import crypto from 'crypto'
-import { reportCyPromptError } from '../api/cy-prompt/report_cy-prompt_error'
+import { reportCyPromptError } from '../api/cy-prompt/report_cy_prompt_error'
 
 const debug = Debug('cypress:server:cy-prompt-lifecycle-manager')
 
