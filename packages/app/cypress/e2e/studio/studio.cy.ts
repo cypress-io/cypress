@@ -754,13 +754,11 @@ describe('studio functionality', () => {
     cy.location().its('hash').and('not.contain', 'suiteId=').and('not.contain', 'studio=')
   })
 
-  it('clears url and prompts for a new url when removing a visit command from the test', () => {
-    launchStudio()
-
+  describe('prompt for a new url', () => {
     const autUrl = 'http://localhost:4455/cypress/e2e/index.html'
     const visitUrl = 'cypress/e2e/index.html'
 
-    const assertClearUrl = () => {
+    const clearUrl = () => {
       cy.findByTestId('aut-url-input').should('have.value', autUrl)
 
       cy.findByTestId('test-block-editor').type('{cmd}a{del}')
@@ -772,8 +770,9 @@ describe('studio functionality', () => {
       cy.findByTestId('aut-url-input').should('have.focus')
 
       cy.get('.cm-line').should('contain.text', urlPrompt)
-      cy.findByTestId('aut-url-input').type(`${visitUrl}{enter}`)
+    }
 
+    const assertAutUrlInput = () => {
       cy.findByTestId('aut-url-input').should('have.value', autUrl)
 
       cy.get('.cm-line').should('not.contain.text', urlPrompt)
@@ -781,10 +780,38 @@ describe('studio functionality', () => {
       cy.get('.cm-line').should('contain.text', `cy.visit('${visitUrl}')`)
     }
 
-    cy.log('Clear url when there is an existing visit command')
-    assertClearUrl()
+    const clearAndAddAutUrl = () => {
+      clearUrl()
+      cy.findByTestId('aut-url-input').type(`${visitUrl}{enter}`)
+      assertAutUrlInput()
+    }
 
-    cy.log('Clear url after clearing the existing visit command and typing a new url in the aut url input')
-    assertClearUrl()
+    const clearAndAddTestBlockEditorUrl = () => {
+      clearUrl()
+      cy.get('.cm-content').invoke('text', 'cy.visit(\'cypress/e2e/index.html\')')
+      cy.findByTestId('studio-save-button').click()
+      assertAutUrlInput()
+    }
+
+    beforeEach(() => {
+      launchStudio()
+    })
+
+    it('when an existing visit command is cleared and adds a new url via the aut url input', () => {
+      clearAndAddAutUrl()
+    })
+
+    it('when an existing visit command is cleared and adds a new url via test block editor', () => {
+      clearAndAddTestBlockEditorUrl()
+    })
+
+    it('ensures we clear the aut url input properly in between adding and clearing urls', () => {
+      clearAndAddAutUrl()
+      clearAndAddAutUrl()
+      clearAndAddTestBlockEditorUrl()
+      clearAndAddTestBlockEditorUrl()
+      clearAndAddAutUrl()
+      clearAndAddTestBlockEditorUrl()
+    })
   })
 })
