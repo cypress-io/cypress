@@ -2,6 +2,17 @@ import { launchStudio, loadProjectAndRunSpec, assertClosingPanelWithoutChanges }
 
 const urlPrompt = '// Visit a page by entering a url in the address bar or typing a cy.visit command here'
 
+const inputNewTestName = (name: string = 'new-test') => {
+  cy.findByTestId('new-test-button').click()
+  cy.findByTestId('test-name-input').type(name)
+  cy.findByTestId('create-test-button').click()
+
+  // verify recording is enabled to ensure the panel is fully ready
+  cy.findByTestId('record-button-recording').should('have.text', 'Recording...')
+
+  cy.get('.studio-single-test-container').should('be.visible')
+}
+
 describe('Cypress Studio', () => {
   function incrementCounter (initialCount: number) {
     cy.getAutIframe().within(() => {
@@ -178,16 +189,43 @@ describe('studio functionality', () => {
   it('creates a new test from an empty spec with url already defined', () => {
     launchStudio({ specName: 'spec-w-visit.cy.js', createNewTest: true })
 
-    cy.findByTestId('new-test-button').click()
-    cy.findByTestId('test-name-input').type('new-test')
-    cy.findByTestId('create-test-button').click()
+    inputNewTestName()
 
     cy.contains('new-test').click()
 
-    // verify recording is enabled to ensure the panel is fully ready
-    cy.findByTestId('record-button-recording').should('have.text', 'Recording...')
+    cy.percySnapshot()
 
-    cy.get('.studio-single-test-container').should('be.visible')
+    incrementCounter(0)
+
+    cy.findByTestId('studio-save-button').click()
+
+    // we should have the commands we executed after we save
+    cy.withCtx(async (ctx) => {
+      const spec = await ctx.actions.file.readFileInProject('cypress/e2e/spec-w-visit.cy.js')
+
+      expect(spec.trim().replace(/\r/g, '')).to.equal(`
+describe('studio functionality', () => {
+  beforeEach(() => {
+    cy.visit('cypress/e2e/index.html')
+  })
+
+  it('visits a basic html page', () => {
+    cy.get('h1').should('have.text', 'Hello, Studio!')
+  })
+
+  it('new-test', function() {
+
+cy.get('#increment').click();
+  });
+})`.trim())
+    })
+  })
+
+  it('creates a new test from the spec header', () => {
+    launchStudio({ specName: 'spec-w-visit.cy.js', createNewTest: true })
+
+    cy.findAllByTestId('create-new-test-button').eq(1).click()
+    inputNewTestName()
 
     cy.percySnapshot()
 
@@ -297,18 +335,9 @@ describe('studio functionality', () => {
     launchStudio({ specName: 'spec-w-visit.cy.js', createNewTest: true })
 
     // create a new test from a specific suite
-    cy.findByTestId('create-new-test-button').click()
+    cy.findAllByTestId('create-new-test-button').eq(1).click()
 
-    cy.findByTestId('new-test-button').click()
-    cy.findByTestId('test-name-input').type('new-test')
-    cy.findByTestId('create-test-button').click()
-
-    cy.contains('new-test').click()
-
-    // verify recording is enabled to ensure the panel is fully ready
-    cy.findByTestId('record-button-recording').should('have.text', 'Recording...')
-
-    cy.get('.studio-single-test-container').should('be.visible')
+    inputNewTestName()
 
     cy.percySnapshot()
 
@@ -620,9 +649,7 @@ describe('studio functionality', () => {
   it('updates the AUT url when creating a new test', () => {
     launchStudio({ specName: 'navigation.cy.js', createNewTest: true })
 
-    cy.findByTestId('new-test-button').click()
-    cy.findByTestId('test-name-input').type('new-test')
-    cy.findByTestId('create-test-button').click()
+    inputNewTestName()
 
     cy.findByTestId('aut-url-input').should('have.focus').type('cypress/e2e/navigation.html{enter}')
 
@@ -663,9 +690,7 @@ describe('studio functionality', () => {
     cy.location().its('hash').should('contain', 'suiteId=r1').and('contain', 'studio=')
 
     // create a new test in the root suite
-    cy.findByTestId('new-test-button').click()
-    cy.findByTestId('test-name-input').type('new-test')
-    cy.findByTestId('create-test-button').click()
+    inputNewTestName()
 
     // the studio url parameters should be removed
     cy.location().its('hash').and('not.contain', 'suiteId=').and('contain', 'studio=').and('contain', 'testId=r2')
