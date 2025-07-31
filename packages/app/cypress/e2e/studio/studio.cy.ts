@@ -199,6 +199,7 @@ describe('studio functionality', () => {
 
     cy.findByTestId('studio-save-button').click()
 
+    cy.waitForSpecToFinish()
     // verify recording is enabled to ensure the panel is fully ready
     cy.findByTestId('record-button-recording').should('have.text', 'Recording...')
 
