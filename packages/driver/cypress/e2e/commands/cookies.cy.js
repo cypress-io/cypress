@@ -1377,7 +1377,7 @@ describe('src/cy/commands/cookies', () => {
       // @see https://bugzilla.mozilla.org/show_bug.cgi?id=1624668
       // TODO(webkit): pw webkit has the same issue as firefox (no "unspecified" state), need a patched binary
       if (Cypress.isBrowser('firefox') || Cypress.isBrowser('webkit')) {
-        cy.getCookie('five').should('include', { sameSite: 'unspecified' })
+        cy.getCookie('five').should('include', { sameSite: 'no_restriction' })
       } else {
         cy.getCookie('five').should('not.have.property', 'sameSite')
       }
