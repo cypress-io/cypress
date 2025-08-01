@@ -871,10 +871,6 @@ class $Cypress {
     return this._areSourceMapsAvailable
   }
 
-  set areSourceMapsAvailable (value: boolean) {
-    this.areSourceMapsAvailable = value
-  }
-
   static create (config: Record<string, any>) {
     const cypress = new $Cypress()
 
