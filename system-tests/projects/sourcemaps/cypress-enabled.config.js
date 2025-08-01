@@ -5,6 +5,6 @@ module.exports = {
     },
   },
   env: {
-    areSourceMapsEnabled: true,
+    areSourceMapsAvailable: true,
   },
 }

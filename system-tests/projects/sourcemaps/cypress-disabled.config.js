@@ -6,6 +6,6 @@ module.exports = {
     },
   },
   env: {
-    areSourceMapsEnabled: false,
+    areSourceMapsAvailable: false,
   },
 }

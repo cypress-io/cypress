@@ -1,3 +1,3 @@
 it('should validate sourcemaps', () => {
-  expect(Cypress.areSourceMapsEnabled).to.be[Cypress.env('areSourceMapsEnabled')]
+  expect(Cypress.areSourceMapsAvailable).to.be[Cypress.env('areSourceMapsAvailable')]
 })
