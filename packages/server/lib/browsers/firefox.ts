@@ -459,7 +459,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   const USE_WEBDRIVER_BIDI = !shouldUseCdp(browser)
 
   // Even if the user has set FORCE_FIREFOX_CDP, we override this and use BiDi in FF141+
-  if (!USE_WEBDRIVER_BIDI || (shouldUseCdp(browser) && !!process.env.FORCE_FIREFOX_CDP)) {
+  if (!USE_WEBDRIVER_BIDI || (USE_WEBDRIVER_BIDI && !!process.env.FORCE_FIREFOX_CDP)) {
     errors.warning('CDP_FIREFOX_DEPRECATED')
   }
 
