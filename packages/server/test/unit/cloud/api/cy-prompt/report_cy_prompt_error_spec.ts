@@ -134,7 +134,6 @@ describe('lib/cloud/api/cy-prompt/report_cy_prompt_error', () => {
         {
           headers: {
             'Content-Type': 'application/json',
-            'x-cypress-version': '1.2.3',
           },
         },
       )
@@ -169,7 +168,6 @@ describe('lib/cloud/api/cy-prompt/report_cy_prompt_error', () => {
         {
           headers: {
             'Content-Type': 'application/json',
-            'x-cypress-version': '1.2.3',
           },
         },
       )
@@ -204,7 +202,6 @@ describe('lib/cloud/api/cy-prompt/report_cy_prompt_error', () => {
         {
           headers: {
             'Content-Type': 'application/json',
-            'x-cypress-version': '1.2.3',
           },
         },
       )
@@ -241,7 +238,6 @@ describe('lib/cloud/api/cy-prompt/report_cy_prompt_error', () => {
         {
           headers: {
             'Content-Type': 'application/json',
-            'x-cypress-version': '1.2.3',
           },
         },
       )
