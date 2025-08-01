@@ -113,7 +113,7 @@ For each package in the batch:
      ```json
      {
        "lint-staged": {
-         "*.{js,jsx,ts,tsx}": "eslint --fix"
+         "**/*.{js,jsx,ts,tsx}": "eslint --fix"
        }
      }
      ```

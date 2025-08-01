@@ -41,7 +41,7 @@
     "grep"
   ],
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,json}": "eslint --fix"
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "resolutions": {
     "jiti": "^2.4.2"
