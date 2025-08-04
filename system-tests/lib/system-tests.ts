@@ -397,11 +397,7 @@ const startServer = function (obj) {
   }
 
   return new Bluebird((resolve, reject) => {
-    return srv.listen(port, (err) => {
-      if (err) {
-        reject(err)
-      }
-
+    return srv.listen(port, () => {
       console.log(`listening on port: ${port}`)
       if (typeof onServer === 'function') {
         onServer(app, srv)
