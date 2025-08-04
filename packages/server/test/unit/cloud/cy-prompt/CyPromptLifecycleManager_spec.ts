@@ -9,7 +9,7 @@ import os from 'os'
 import { CloudRequest, createCloudRequest } from '../../../../lib/cloud/api/cloud_request'
 import { isRetryableError } from '../../../../lib/cloud/network/is_retryable_error'
 import { asyncRetry } from '../../../../lib/util/async_retry'
-import * as reportCyPromptErrorPath from '../../../../lib/cloud/api/cy-prompt/report_cy-prompt_error'
+import * as reportCyPromptErrorPath from '../../../../lib/cloud/api/cy-prompt/report_cy_prompt_error'
 
 describe('CyPromptLifecycleManager', () => {
   let cyPromptLifecycleManager: CyPromptLifecycleManager

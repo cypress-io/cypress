@@ -1,7 +1,7 @@
 import type { CyPromptCloudApi } from '@packages/types/src/cy-prompt/cy-prompt-server-types'
 import Debug from 'debug'
 import { stripPath } from '../../strip_path'
-const debug = Debug('cypress:server:cloud:api:cy-prompt:report_cy-prompt_error')
+const debug = Debug('cypress:server:cloud:api:cy-prompt:report_cy_prompt_error')
 
 export interface ReportCyPromptErrorOptions {
   cloudApi: CyPromptCloudApi
@@ -37,6 +37,10 @@ export function reportCyPromptError ({
   additionalHeaders,
 }: ReportCyPromptErrorOptions): void {
   debug('Error reported:', error)
+
+  if (process.env.CYPRESS_CRASH_REPORTS === '0') {
+    return
+  }
 
   // When developing locally, do not send to Sentry, but instead log to console.
   if (
@@ -79,7 +83,7 @@ export function reportCyPromptError ({
         stack: stripPath(errorObject.stack ?? `Unknown stack`),
         message: stripPath(errorObject.message ?? `Unknown message`),
         cyPromptMethod,
-        cyPromptMethodArgs: cyPromptMethodArgsString,
+        cyPromptMethodArgs: cyPromptMethodArgsString ? stripPath(cyPromptMethodArgsString) : undefined,
       }],
     }
 
