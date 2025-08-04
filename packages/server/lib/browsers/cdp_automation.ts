@@ -492,7 +492,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       }
 
       if (!frame) {
-        // if for whatever reason we cannot identify the AUT frame by name, we will fall back ot the first child frame that exists.
+        // if for whatever reason we cannot identify the AUT frame by name, we will fall back to the first child frame that exists.
         // The first child frame should always be the AUT frame, followed by the spec frame
         if (frameTree?.childFrames?.[0]) {
           frame = frameTree.childFrames[0]
