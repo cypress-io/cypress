@@ -64,6 +64,7 @@ const maybeRenderReactComponent = () => {
 
   const panel = window.UnifiedRunner.React.createElement(ReactGetCodeModalContents.value, {
     Cypress,
+    eventManager: window.getEventManager(),
     testId: promptStore.currentGetCodeModalInfo?.testId,
     logId: promptStore.currentGetCodeModalInfo?.logId,
     onClose: () => {
