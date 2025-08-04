@@ -567,10 +567,7 @@ export class BrowserCriClient {
       // Clone the target here so that we separate the protocol client and the main client.
       // This allows us to close the protocol client independently of the main client
       // which we do when we exit out of studio in open mode.
-      if (!this.currentlyAttachedProtocolTarget) {
-        this.currentlyAttachedProtocolTarget = await this.currentlyAttachedTarget.clone()
-      }
-
+      this.currentlyAttachedProtocolTarget = await this.currentlyAttachedTarget.clone()
       await this.protocolManager?.connectToBrowser(this.currentlyAttachedProtocolTarget)
 
       return this.currentlyAttachedTarget
