@@ -864,9 +864,9 @@ export class EventManager {
       performance.measure('run', 'run-s', 'run-e')
     })
 
-    // Studio is only considered "active" if it has actually started recording or editing a specific test
-    // Just having a suiteId (panel open for new test) shouldn't make it active
-    const hasActiveStudio = !!this.studioStore.testId || (!!this.studioStore.suiteId && this.studioStore._hasStarted)
+    const hasActiveStudio = !!this.studioStore.testId ||
+                           (!!this.studioStore.suiteId && this.studioStore._hasStarted) ||
+                           !!this.studioStore.newTestLineNumber
 
     const studioSingleTestActive = this.studioStore.newTestLineNumber != null || !!this.studioStore.testId
 
