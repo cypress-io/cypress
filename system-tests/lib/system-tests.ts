@@ -396,7 +396,7 @@ const startServer = function (obj) {
     app.use(Express.static(path.join(__dirname, '../projects/e2e'), {}) as Express.RequestHandler)
   }
 
-  return new Bluebird((resolve, reject) => {
+  return new Bluebird((resolve) => {
     return srv.listen(port, () => {
       console.log(`listening on port: ${port}`)
       if (typeof onServer === 'function') {
