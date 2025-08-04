@@ -108,39 +108,50 @@ For each package in the batch:
      - In each migrated package, add `@packages/eslint-config` to `devDependencies` (use a relative file path if not published to npm).
    - **Add ESLint as a dev dependency:**
      - Since `@packages/eslint-config` has ESLint as a peer dependency, add `eslint: "^9.18.0"` to `devDependencies`.
-4. **Run lint and autofix:**
+4. **Add lint-staged configuration:**
+   - Add a `lint-staged` section to the package's `package.json`:
+     ```json
+     {
+       "lint-staged": {
+         "**/*.{js,jsx,ts,tsx}": "eslint --fix"
+       }
+     }
+     ```
+   - This ensures that when files are staged for commit, they are automatically linted and fixed using the package's local ESLint configuration.
+5. **Run lint and autofix:**
    - From the package root, run:
      ```
      npx eslint . --ext .js,.ts,.tsx,.jsx --fix
      ```
    - Manually fix any remaining lint errors.
-5. **Verify TypeScript configuration:**
+6. **Verify TypeScript configuration:**
    - Ensure the package has a valid `tsconfig.json` that works with the new ESLint config.
    - Run `npx tsc --noEmit` to check for TypeScript compilation errors.
    - Verify that the new ESLint config can properly parse TypeScript files in the package.
-6. **Run tests for the package** to ensure nothing broke.
-7. **Commit changes** with a clear message, e.g.:
+7. **Run tests for the package** to ensure nothing broke.
+8. **Commit changes** with a clear message, e.g.:
    ```
    chore(npm/grep): migrate to @packages/eslint-config and remove legacy eslint-plugin-dev
    ```
 
-### 3. **Open a PR for Each Batch**
+### 4. **Open a PR for Each Batch**
 - Keep each migration PR focused (one batch per PR).
 - List all affected packages in the PR description.
 - Include a checklist for each package:
   - [ ] Removed old ESLint config
   - [ ] Added new config
+  - [ ] Added lint-staged configuration
   - [ ] Ran lint and fixed errors
   - [ ] Ran tests
 
-### 4. **Document Issues or Gaps**
+### 5. **Document Issues or Gaps**
 - If you hit any missing rules or plugin gaps, note them for follow-up.
 - If a package needs a custom override, add it in a local `eslint.config.ts` (prefer to upstream to the shared config if possible).
 
-### 5. **Deprecate and Remove Old Plugin**
+### 6. **Deprecate and Remove Old Plugin**
 - Once all packages are migrated, remove `@cypress/eslint-plugin-dev` from the repo and CI.
 
-### 6. **Simplify Lint-Staged Configuration**
+### 7. **Simplify Lint-Staged Configuration**
 After all packages are migrated, simplify the lint-staged configuration in root `package.json`:
 
 ```json
@@ -152,7 +163,7 @@ After all packages are migrated, simplify the lint-staged configuration in root 
 }
 ```
 
-### 7. **Update Lerna/Monorepo Config**
+### 8. **Update Lerna/Monorepo Config**
 - Ensure all packages reference the new config in their `package.json`/`eslint.config.ts`.
 - Update documentation and developer onboarding guides.
 
@@ -317,6 +328,7 @@ For each package, ensure you've completed:
 - [ ] Removed `.eslintrc*` files
 - [ ] Created `eslint.config.ts` with proper configuration
 - [ ] Added required dependencies (`eslint`, `@packages/eslint-config`, `jiti`)
+- [ ] Added lint-staged configuration to `package.json`
 - [ ] Created/updated `tsconfig.json` that extends base config
 - [ ] Updated ESLint scripts (removed `--ext` flag)
 - [ ] Ran `yarn lint` successfully
