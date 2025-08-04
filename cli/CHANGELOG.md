@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 14.5.4
+
+_Released 8/8/2025 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where `.fixture()` calls with different encoding options would return inconsistent content based on execution order. Fixes [#32138](https://github.com/cypress-io/cypress/issues/32138).
+
 ## 14.5.3
 
 _Released 7/25/2025_
