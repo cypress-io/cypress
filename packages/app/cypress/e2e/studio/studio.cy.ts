@@ -752,7 +752,7 @@ describe('studio functionality', () => {
     cy.location().its('hash').and('not.contain', 'suiteId=').and('not.contain', 'studio=')
   })
 
-  it('stays in new test mode when studio panel is opened before test runs', () => {
+  it('stays in new test mode when studio panel is opened when the spec is running', () => {
     loadProjectAndRunSpec()
 
     cy.waitForSpecToFinish()
