@@ -28,10 +28,9 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTestFromSuite 
   cy.get('@item')
   .closest('.runnable-wrapper').as('runnable-wrapper')
 
-  if (createNewTestFromSuite || createNewTestFromSpecHeader) {
     if (createNewTestFromSpecHeader) {
       cy.findByTestId('create-new-test-from-spec-header').click()
-    } else {
+    } else if (createNewTestFromSuite) {
       cy.get('@runnable-wrapper').realHover().findByTestId('create-new-test-from-suite').click()
     }
 
