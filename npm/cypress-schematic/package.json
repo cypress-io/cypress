@@ -47,6 +47,9 @@
     "angular",
     "automation"
   ],
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
+  },
   "publishConfig": {
     "access": "public"
   },
