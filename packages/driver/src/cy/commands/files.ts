@@ -16,6 +16,8 @@ interface ReadFileOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable
 type WriteFileOptions = Partial<Cypress.WriteFileOptions & Cypress.Timeoutable>
 
 export default (Commands, Cypress, cy, state) => {
+  const { defaultCommandTimeout, fixturesFolder } = Cypress.config()
+
   Commands.addQuery('readFile', function readFile (file: string, encoding: Cypress.Encodings | ReadFileOptions | undefined, userOptions?: ReadFileOptions, ...extras: never[]) {
     if (_.isObject(encoding)) {
       userOptions = encoding
@@ -26,7 +28,7 @@ export default (Commands, Cypress, cy, state) => {
 
     encoding = encoding === undefined ? 'utf8' : encoding
 
-    const timeout = userOptions.timeout ?? Cypress.config('defaultCommandTimeout') as number
+    const timeout = userOptions.timeout ?? defaultCommandTimeout as number
 
     this.set('timeout', timeout)
     this.set('ensureExistenceFor', 'subject')
@@ -173,7 +175,7 @@ export default (Commands, Cypress, cy, state) => {
         encoding: encoding === undefined ? 'utf8' : encoding,
         flag: userOptions.flag ? userOptions.flag : 'w',
         log: true,
-        timeout: Cypress.config('defaultCommandTimeout'),
+        timeout: defaultCommandTimeout,
       })
 
       const consoleProps = {}
@@ -224,6 +226,12 @@ export default (Commands, Cypress, cy, state) => {
       .then(({ filePath, contents }) => {
         consoleProps['File Path'] = filePath
         consoleProps['Contents'] = contents
+
+        if (fixturesFolder && filePath.startsWith(fixturesFolder)) {
+          const fixtureName = filePath.replace(`${fixturesFolder }/`, '').replace(/\\/g, '/')
+
+          Cypress.emit('fixture:cache:invalidate', fixtureName)
+        }
 
         return null
       })

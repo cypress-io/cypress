@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import Promise from 'bluebird'
-import { basename } from 'path'
+import { basename, extname } from 'path'
 
 import $errUtils from '../../cypress/error_utils'
 
@@ -16,11 +16,20 @@ export default (Commands, Cypress, cy, state, config) => {
   // this is called at the beginning of run, so clear the cache
   let cache = {}
 
-  const reset = () => {
+  const clearCache = () => {
     cache = {}
   }
 
-  Cypress.on('clear:fixtures:cache', reset)
+  const invalidateCacheEntry = (fixturePath: string) => {
+    const baseName = basename(fixturePath)
+    const baseNameWithoutExtension = baseName.replace(extname(baseName), '')
+
+    delete cache[baseName]
+    delete cache[baseNameWithoutExtension]
+  }
+
+  Cypress.on('clear:fixtures:cache', clearCache)
+  Cypress.on('fixture:cache:invalidate', invalidateCacheEntry)
 
   return Commands.addAll({
     fixture (fixture, ...args) {
