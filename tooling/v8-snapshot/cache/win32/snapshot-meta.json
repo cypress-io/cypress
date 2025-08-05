@@ -23,7 +23,6 @@
     "./node_modules/express/node_modules/debug/src/node.js",
     "./node_modules/finalhandler/node_modules/debug/src/node.js",
     "./node_modules/firefox-profile/node_modules/jsonfile/index.js",
-    "./node_modules/flatted/cjs/index.js",
     "./node_modules/front-matter/node_modules/js-yaml/lib/js-yaml/type/js/function.js",
     "./node_modules/fs-extra/node_modules/jsonfile/index.js",
     "./node_modules/get-stream/buffer-stream.js",
@@ -69,6 +68,7 @@
     "./packages/server/node_modules/get-stream/buffer-stream.js",
     "./packages/server/node_modules/graceful-fs/polyfills.js",
     "./packages/server/node_modules/mocha/node_modules/debug/src/node.js",
+    "./packages/socket/node_modules/flatted/cjs/index.js",
     "./packages/socket/node_modules/socket.io-parser/node_modules/debug/src/node.js",
     "./packages/socket/node_modules/socket.io/node_modules/debug/src/node.js",
     "./packages/socket/node_modules/socket.io/node_modules/ws/lib/websocket.js"
@@ -264,6 +264,7 @@
     "./node_modules/express/node_modules/body-parser/index.js",
     "./node_modules/express/node_modules/debug/src/browser.js",
     "./node_modules/express/node_modules/debug/src/index.js",
+    "./node_modules/fast-glob/node_modules/glob-parent/index.js",
     "./node_modules/fast-glob/out/settings.js",
     "./node_modules/fast-glob/out/utils/path.js",
     "./node_modules/file-uri-to-path/index.js",
@@ -289,7 +290,6 @@
     "./node_modules/fs-extra/lib/json/jsonfile.js",
     "./node_modules/fs-extra/lib/path-exists/index.js",
     "./node_modules/getenv/index.js",
-    "./node_modules/glob-parent/index.js",
     "./node_modules/globby/stream-utils.js",
     "./node_modules/graceful-fs/graceful-fs.js",
     "./node_modules/http-proxy/index.js",
@@ -600,6 +600,7 @@
     "./packages/data-context/node_modules/fs-extra/lib/json/index.js",
     "./packages/data-context/node_modules/fs-extra/lib/json/jsonfile.js",
     "./packages/data-context/node_modules/fs-extra/lib/path-exists/index.js",
+    "./packages/data-context/node_modules/glob-parent/index.js",
     "./packages/data-context/node_modules/readdirp/index.js",
     "./packages/data-context/src/DataActions.ts",
     "./packages/data-context/src/DataContext.ts",
@@ -787,6 +788,7 @@
     "./packages/server/node_modules/execa/lib/errname.js",
     "./packages/server/node_modules/fs-minipass/index.js",
     "./packages/server/node_modules/fs-minipass/node_modules/minipass/index.js",
+    "./packages/server/node_modules/glob-parent/index.js",
     "./packages/server/node_modules/glob/glob.js",
     "./packages/server/node_modules/glob/sync.js",
     "./packages/server/node_modules/graceful-fs/graceful-fs.js",
@@ -4197,5 +4199,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "c0ccb8f5c9dc15417579f027bf0efa646da7a5fd4bd109af72d94280e5847c49"
+  "deferredHash": "4d8b2798b1ea8670db78d5ebb55e2d92b25da8d87bfe83ce95e6c137b1b644ad"
 }
