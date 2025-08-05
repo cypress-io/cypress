@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import Promise from 'bluebird'
-import { basename, extname } from 'path'
+import { basename, extname, sep } from 'path'
 
 import $errUtils from '../../cypress/error_utils'
 
@@ -12,6 +12,8 @@ const clone = (obj) => {
   return JSON.parse(JSON.stringify(obj))
 }
 
+const normalizeKey = (key: string) => key.split(sep).join('/')
+
 export default (Commands, Cypress, cy, state, config) => {
   // this is called at the beginning of run, so clear the cache
   let cache = {}
@@ -21,11 +23,12 @@ export default (Commands, Cypress, cy, state, config) => {
   }
 
   const invalidateCacheEntry = (fixturePath: string) => {
-    const baseName = basename(fixturePath)
-    const baseNameWithoutExtension = baseName.replace(extname(baseName), '')
+    const extension = extname(fixturePath)
+    const keyWithExtension = normalizeKey(fixturePath)
+    const keyWithoutExtension = extension ? normalizeKey(fixturePath.slice(0, -extension.length)) : normalizeKey(fixturePath)
 
-    delete cache[baseName]
-    delete cache[baseNameWithoutExtension]
+    delete cache[keyWithExtension]
+    delete cache[keyWithoutExtension]
   }
 
   Cypress.on('clear:fixtures:cache', clearCache)
