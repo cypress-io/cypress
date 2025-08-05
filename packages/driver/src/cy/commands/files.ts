@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { basename, relative, resolve } from 'path'
+import { basename, isAbsolute, relative, resolve } from 'path'
 
 import $errUtils from '../../cypress/error_utils'
 import type { Log } from '../../cypress/log'
@@ -227,12 +227,21 @@ export default (Commands, Cypress, cy, state) => {
         consoleProps['File Path'] = filePath
         consoleProps['Contents'] = contents
 
-        if (fixturesFolder && filePath.startsWith(fixturesFolder)) {
+        const resolvedFixturesFolder = resolve(fixturesFolder)
+        const resolvedFilePath = resolve(filePath)
+        const relativePath = relative(resolvedFixturesFolder, resolvedFilePath)
+
+        // If `relativePath` does not start with ".." and is not equal to itself
+        // with a leading "..", then `filePath` is inside `fixturesFolder`.
+        const isInsideFixturesFolder =
+            relativePath && !relativePath.startsWith('..') && !isAbsolute(relativePath)
+
+        if (isInsideFixturesFolder) {
           /**
            * Relative path from the fixtures folder to the written file,
            * normalized with forward slashes.
            */
-          const fixtureName = relative(resolve(fixturesFolder), resolve(filePath)).replace(/\\/g, '/')
+          const fixtureName = relativePath.replace(/\\/g, '/')
 
           Cypress.emit('fixture:cache:invalidate', fixtureName)
         }
