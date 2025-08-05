@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { basename } from 'path'
+import { basename, relative, resolve } from 'path'
 
 import $errUtils from '../../cypress/error_utils'
 import type { Log } from '../../cypress/log'
@@ -228,7 +228,11 @@ export default (Commands, Cypress, cy, state) => {
         consoleProps['Contents'] = contents
 
         if (fixturesFolder && filePath.startsWith(fixturesFolder)) {
-          const fixtureName = filePath.replace(`${fixturesFolder}/`, '').replace(/\\/g, '/')
+          /**
+           * Relative path from the fixtures folder to the written file,
+           * normalized with forward slashes.
+           */
+          const fixtureName = relative(resolve(fixturesFolder), resolve(filePath)).replace(/\\/g, '/')
 
           Cypress.emit('fixture:cache:invalidate', fixtureName)
         }
