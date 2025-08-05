@@ -228,7 +228,7 @@ export default (Commands, Cypress, cy, state) => {
         consoleProps['Contents'] = contents
 
         if (fixturesFolder && filePath.startsWith(fixturesFolder)) {
-          const fixtureName = filePath.replace(`${fixturesFolder }/`, '').replace(/\\/g, '/')
+          const fixtureName = filePath.replace(`${fixturesFolder}/`, '').replace(/\\/g, '/')
 
           Cypress.emit('fixture:cache:invalidate', fixtureName)
         }
