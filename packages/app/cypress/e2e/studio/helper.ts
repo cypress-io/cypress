@@ -28,14 +28,15 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTestFromSuite 
   cy.get('@item')
   .closest('.runnable-wrapper').as('runnable-wrapper')
 
-    if (createNewTestFromSpecHeader) {
-      cy.findByTestId('create-new-test-from-spec-header').click()
-    } else if (createNewTestFromSuite) {
-      cy.get('@runnable-wrapper').realHover().findByTestId('create-new-test-from-suite').click()
-    }
-
+  if (createNewTestFromSuite || createNewTestFromSpecHeader) {
     cy.findByTestId('studio-panel').should('be.visible')
     cy.findByTestId('new-test-button').should('be.visible')
+
+    if (createNewTestFromSpecHeader) {
+      cy.findByTestId('create-new-test-from-spec-header').click()
+    } else {
+      cy.get('@runnable-wrapper').realHover().findByTestId('create-new-test-from-suite').click()
+    }
   } else {
     cy.get('@runnable-wrapper')
     .findByTestId('launch-studio')
