@@ -78,6 +78,7 @@ export function getSelectorHighlightStyles (elements) {
 
   return elements.map((el) => {
     let offset = getOffset(el)
+    let targetElement = el
 
     if (offset.top === 0 && offset.left === 0 && el.children.length > 0) {
       // Try to find the first child with non-zero offset
@@ -88,6 +89,7 @@ export function getSelectorHighlightStyles (elements) {
 
         if (childOffset.top !== 0 || childOffset.left !== 0) {
           offset = childOffset
+          targetElement = el.children[i]
           break
         }
       }
@@ -97,12 +99,12 @@ export function getSelectorHighlightStyles (elements) {
       position: 'absolute',
       margin: `0px`,
       padding: `0px`,
-      width: `${el.offsetWidth}px`,
-      height: `${el.offsetHeight}px`,
+      width: `${targetElement.offsetWidth}px`,
+      height: `${targetElement.offsetHeight}px`,
       top: `${offset.top - borderSize}px`,
       left: `${offset.left - borderSize}px`,
-      transform: getComputedStyle(el, null).transform,
-      zIndex: getZIndex(el),
+      transform: getComputedStyle(targetElement, null).transform,
+      zIndex: getZIndex(targetElement),
     }
   })
 }
