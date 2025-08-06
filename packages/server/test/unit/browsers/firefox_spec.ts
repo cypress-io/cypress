@@ -81,7 +81,7 @@ describe('lib/browsers/firefox', () => {
     beforeEach(function () {
       // majorVersion >= 86 indicates CDP support for Firefox, which provides
       // the CDP debugger URL for the after:browser:launch tests
-      this.browser = { name: 'firefox', channel: 'stable', majorVersion: 100, path: '/path/to/binary' }
+      this.browser = { name: 'firefox', family: 'firefox', channel: 'stable', majorVersion: 100, path: '/path/to/binary' }
       this.automation = {
         use: sinon.stub().returns({}),
       }

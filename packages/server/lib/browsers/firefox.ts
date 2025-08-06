@@ -409,25 +409,31 @@ export function clearInstanceState (options: GracefulShutdownOptions = {}) {
   }
 }
 
-function shouldUseBiDi (browser: Browser): boolean {
+function shouldUseCdp (browser: Browser): boolean {
   try {
     // Gating on firefox version 135 to turn on BiDi as this is when all of our internal Cypress tests were able to pass.
-    return (browser.family === 'firefox' && !process.env.FORCE_FIREFOX_CDP && Number(browser.majorVersion) >= 135)
+    // CDP is not supported in Firefox 141+, so we always use BiDi for FF141+.
+    return (
+      browser.family === 'firefox' && (
+        Number(browser.majorVersion) < 135 ||
+        (Number(browser.majorVersion) < 141 && !!process.env.FORCE_FIREFOX_CDP)
+      )
+    )
   } catch (err: unknown) {
     return false
   }
 }
 
 export async function connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
-  if (shouldUseBiDi(browser)) {
+  if (shouldUseCdp(browser)) {
+    debug('connectToNewSpec cdp')
+    await firefoxUtil.connectToNewSpecCDP(options, automation, browserCriClient!)
+  } else {
     debug('connectToNewSpec bidi')
     await firefoxUtil.connectToNewSpecBiDi(options, automation, browserBidiClient!)
 
     debug('registering middleware')
     automation.use(browserBidiClient!.automationMiddleware)
-  } else {
-    debug('connectToNewSpec cdp')
-    await firefoxUtil.connectToNewSpecCDP(options, automation, browserCriClient!)
   }
 }
 
@@ -450,9 +456,10 @@ async function recordVideo (videoApi: RunModeVideoApi) {
 }
 
 export async function open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance> {
-  const USE_WEBDRIVER_BIDI = shouldUseBiDi(browser)
+  const USE_WEBDRIVER_BIDI = !shouldUseCdp(browser)
 
-  if (!USE_WEBDRIVER_BIDI) {
+  // Even if the user has set FORCE_FIREFOX_CDP, we override this and use BiDi in FF141+
+  if (!USE_WEBDRIVER_BIDI || (USE_WEBDRIVER_BIDI && !!process.env.FORCE_FIREFOX_CDP)) {
     errors.warning('CDP_FIREFOX_DEPRECATED')
   }
 
@@ -620,6 +627,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   debug('launch in firefox', { url, args: launchOptions.args })
 
+  const { FORCE_FIREFOX_CDP, ...launchEnvs } = process.env
+
   const geckoDriverOptions: GeckodriverParameters = {
     host: '127.0.0.1',
     // geckodriver port is assigned under the hood by @wdio/utils
@@ -636,7 +645,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
       stdio: ['ignore', 'pipe', 'pipe'],
       env: {
         ...BROWSER_ENVS,
-        ...process.env,
+        ...launchEnvs,
       },
     },
     jsdebugger: Debug.enabled(GECKODRIVER_DEBUG_NAMESPACE_VERBOSE) || false,

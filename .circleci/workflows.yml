@@ -2,7 +2,7 @@ version: 2.1
 
 chrome-stable-version: &chrome-stable-version "138.0.7204.183"
 chrome-beta-version: &chrome-beta-version "139.0.7258.66"
-firefox-stable-version: &firefox-stable-version "137.0"
+firefox-stable-version: &firefox-stable-version "141.0"
 
 orbs:
   browser-tools: circleci/browser-tools@2.1.1

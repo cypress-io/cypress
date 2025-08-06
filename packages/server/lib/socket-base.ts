@@ -227,9 +227,10 @@ export class SocketBase {
 
           debug('automation:client connected')
 
+          debug('cdp forced for firefox?', !!process.env.FORCE_FIREFOX_CDP && Number(options.getCurrentBrowser()?.majorVersion) < 141)
           // only send the necessary config
           automationClient.emit('automation:config', {
-            IS_CDP_FORCED_FOR_FIREFOX: !!process.env.FORCE_FIREFOX_CDP,
+            IS_CDP_FORCED_FOR_FIREFOX: !!process.env.FORCE_FIREFOX_CDP && Number(options.getCurrentBrowser()?.majorVersion) < 141,
           })
 
           // if our automation disconnects then we're
