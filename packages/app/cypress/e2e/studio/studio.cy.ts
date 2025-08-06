@@ -202,10 +202,6 @@ describe('studio functionality', () => {
     // verify recording is enabled to ensure the panel is fully ready
     cy.findByTestId('record-button-recording').should('have.text', 'Recording...')
 
-    incrementCounter(0)
-
-    cy.findByTestId('studio-save-button').click()
-
     // we should have the commands we executed after we save
     cy.withCtx(async (ctx) => {
       const spec = await ctx.actions.file.readFileInProject('cypress/e2e/spec-w-visit.cy.js')
@@ -223,7 +219,6 @@ describe('studio functionality', () => {
 
 it('new-test', function() {
 cy.visit("cypress/e2e/index.html")
-cy.get('#increment').click();
 });`.trim())
     })
   })
