@@ -1,29 +1,12 @@
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import type { Protocol } from 'devtools-protocol'
-import type { KeyPressParams, KeyPressSupportedKeys } from '@packages/types'
+import type { SupportedKey, SupportedNamedKey } from '@packages/types'
 import type { SendDebuggerCommand } from '../../browsers/cdp_automation'
 import type { Client } from 'webdriver'
 import Debug from 'debug'
 import { isEqual, isError } from 'lodash'
-import { KEY_HEX_TABLE, getCDPKeyCode, getBidiValue } from './key_hex_table'
 
 const debug = Debug('cypress:server:automation:command:keypress')
-
-const invalidKeyErrorKind = 'InvalidKeyError'
-
-export class InvalidKeyError extends Error {
-  kind = invalidKeyErrorKind
-  constructor (key: string) {
-    super(`${key} is not supported by 'cy.press()'.`)
-  }
-  static isInvalidKeyError (e: any): e is InvalidKeyError {
-    return e.kind === invalidKeyErrorKind
-  }
-}
-
-export function isSupportedKey (key: string): key is KeyPressSupportedKeys {
-  return KEY_HEX_TABLE[key as KeyPressSupportedKeys] !== undefined
-}
 
 async function evaluateInFrameContext (expression: string,
   send: SendDebuggerCommand,
@@ -48,16 +31,12 @@ async function evaluateInFrameContext (expression: string,
 }
 
 export async function cdpKeyPress (
-  { key }: KeyPressParams, send: SendDebuggerCommand,
+  key: SupportedKey,
+  send: SendDebuggerCommand,
   contexts: Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription>,
   frameTree: Protocol.Page.FrameTree,
 ): Promise<void> {
   debug('cdp keypress', { key })
-  if (!isSupportedKey(key)) {
-    throw new InvalidKeyError(key)
-  }
-
-  const keyIdentifier = getCDPKeyCode(key)
 
   const autFrame = frameTree.childFrames?.find(({ frame }) => {
     return frame.name?.includes('Your project')
@@ -79,15 +58,11 @@ export async function cdpKeyPress (
     await send('Input.dispatchKeyEvent', {
       type: 'keyDown',
       key,
-      code: key,
-      keyIdentifier,
     })
 
     await send('Input.dispatchKeyEvent', {
       type: 'keyUp',
       key,
-      code: key,
-      keyIdentifier,
     })
   } catch (e) {
     debug(e)
@@ -103,15 +78,41 @@ async function getActiveWindow (client: Client) {
   }
 }
 
-export async function bidiKeyPress ({ key }: KeyPressParams, client: Client, autContext: string, idSuffix?: string): Promise<void> {
-  const value = getBidiValue(key)
+// While other browsers support the named keys, BiDi does not.
+// We need to override the codepoints for the named keys to work.
+export const BidiOverrideCodepoints: Record<SupportedNamedKey, string> = {
+  'ArrowDown': '\uE015',
+  'ArrowLeft': '\uE012',
+  'ArrowRight': '\uE014',
+  'ArrowUp': '\uE013',
+  'End': '\uE010',
+  'Home': '\uE011',
+  'PageDown': '\uE00F',
+  'PageUp': '\uE00E',
+  'Enter': '\uE007',
+  'Tab': '\uE004',
+  'Backspace': '\uE003',
+  'Delete': '\uE017',
+  'Insert': '\uE016',
+  'F1': '\uE031',
+  'F2': '\uE032',
+  'F3': '\uE033',
+  'F4': '\uE034',
+  'F5': '\uE035',
+  'F6': '\uE036',
+  'F7': '\uE037',
+  'F8': '\uE038',
+  'F9': '\uE039',
+  'F10': '\uE03A',
+  'F11': '\uE03B',
+  'F12': '\uE03C',
+}
 
-  if (!value) {
-    throw new InvalidKeyError(key)
-  }
-
+export async function bidiKeyPress (inKey: SupportedKey, client: Client, autContext: string, idSuffix?: string): Promise<void> {
   const activeWindow = await getActiveWindow(client)
   const { contexts: [{ context: topLevelContext }] } = await client.browsingContextGetTree({})
+
+  const key: string = BidiOverrideCodepoints[inKey] ?? inKey
 
   // TODO: refactor for Cy15 https://github.com/cypress-io/cypress/issues/31480
   if (activeWindow !== topLevelContext) {
@@ -148,14 +149,37 @@ export async function bidiKeyPress ({ key }: KeyPressParams, client: Client, aut
   }
 
   try {
+    // in Firefox, F6 changes the focus away from the aut iframe, so it must be
+    // refocused inbetween keydown and keyup for the keyup to register.
+
     await client.inputPerformActions({
       context: autContext,
       actions: [{
         type: 'key',
-        id: `${autContext}-${key}-${idSuffix || Date.now()}`,
+        id: `${autContext}-${inKey}-${idSuffix || Date.now()}`,
         actions: [
-          { type: 'keyDown', value },
-          { type: 'keyUp', value },
+          { type: 'keyDown', value: key },
+        ],
+      }],
+    })
+
+    if ((await getActiveWindow(client)) !== autContext) {
+      await client.scriptEvaluate(
+        {
+          expression: `window.focus()`,
+          target: { context: autContext },
+          awaitPromise: false,
+        },
+      )
+    }
+
+    await client.inputPerformActions({
+      context: autContext,
+      actions: [{
+        type: 'key',
+        id: `${autContext}-${inKey}-${idSuffix || Date.now()}`,
+        actions: [
+          { type: 'keyUp', value: key },
         ],
       }],
     })

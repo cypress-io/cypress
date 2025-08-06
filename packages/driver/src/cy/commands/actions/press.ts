@@ -1,17 +1,16 @@
 import type { $Cy } from '../../../cypress/cy'
 import type { StateFunc } from '../../../cypress/state'
-import type { KeyPressSupportedKeys, AutomationCommands } from '@packages/types'
+import { isSupportedKey, SupportedKey, AutomationCommands } from '@packages/types'
 import { defaults } from 'lodash'
-import { isSupportedKey } from '@packages/server/lib/automation/commands/key_press'
 import $errUtils from '../../../cypress/error_utils'
 import $utils from '../../../cypress/utils'
 
 export interface PressCommand {
-  (key: KeyPressSupportedKeys, userOptions?: Partial<Cypress.Loggable> & Partial<Cypress.Timeoutable>): void
+  (key: SupportedKey | string, userOptions?: Partial<Cypress.Loggable> & Partial<Cypress.Timeoutable>): void
 }
 
 export default function (Commands: Cypress.Commands, Cypress: Cypress.Cypress, cy: $Cy, state: StateFunc, config: any) {
-  async function pressCommand (key: KeyPressSupportedKeys, userOptions?: Partial<Cypress.Loggable> & Partial<Cypress.Timeoutable>) {
+  async function pressCommand (key: SupportedKey | string, userOptions?: Partial<Cypress.Loggable> & Partial<Cypress.Timeoutable>) {
     const options: Cypress.Loggable & Partial<Cypress.Timeoutable> = defaults({}, userOptions, {
       log: true,
     })

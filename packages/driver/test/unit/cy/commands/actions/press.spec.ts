@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { vi, describe, it, expect, beforeEach, Mock, MockedObject } from 'vitest'
-import type { KeyPressSupportedKeys } from '@packages/types'
+
 import addCommand, { PressCommand } from '../../../../../src/cy/commands/actions/press'
 import type { $Cy } from '../../../../../src/cypress/cy'
 import type { StateFunc } from '../../../../../src/cypress/state'
@@ -95,9 +95,9 @@ describe('cy/commands/actions/press', () => {
   })
 
   describe('with a valid key', () => {
-    for (const key in Object.values(Keyboard.Keys)) {
+    for (const key of Object.values(Keyboard.Keys)) {
       it(`dispatches a key:press automation command for key: ${key}`, async () => {
-        await press(key as KeyPressSupportedKeys)
+        await press(key)
         expect(automation).toHaveBeenCalledWith('key:press', { key })
       })
     }

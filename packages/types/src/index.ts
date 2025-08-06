@@ -4,7 +4,7 @@ export * from './constants'
 
 export * from './preferences'
 
-export { KeyPressSupportedKeys } from './automation'
+export { SupportedKey, isSupportedKey, toSupportedKey } from './automation'
 
 export * from './automation'
 

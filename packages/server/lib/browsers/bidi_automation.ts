@@ -2,7 +2,7 @@ import debugModule from 'debug'
 import type { Automation } from '../automation'
 import { AutomationNotImplemented } from '../automation/automation_not_implemented'
 import type { BrowserPreRequest, BrowserResponseReceived, ResourceType } from '@packages/proxy'
-import type { AutomationMiddleware, AutomationCommands } from '@packages/types'
+import { AutomationMiddleware, AutomationCommands, toSupportedKey } from '@packages/types'
 import type { Client as WebDriverClient } from 'webdriver'
 import type {
   NetworkBeforeRequestSentParameters,
@@ -296,7 +296,7 @@ export class BidiAutomation {
       switch (message) {
         case 'key:press':
           if (this.autContextId) {
-            await bidiKeyPress(data, this.webDriverClient, this.autContextId, this.topLevelContextId)
+            await bidiKeyPress(toSupportedKey(data.key), this.webDriverClient, this.autContextId, this.topLevelContextId)
           } else {
             throw new Error('Cannot emit key press: no AUT context initialized')
           }

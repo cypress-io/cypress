@@ -4,7 +4,7 @@ import type { PlatformName } from './platform'
 import type { RunModeVideoApi } from './video'
 import type { ProtocolManagerShape } from './protocol'
 import type Protocol from 'devtools-protocol'
-import type { KeyPressSupportedKeys } from './automation'
+import type { SupportedKey } from './automation'
 
 export type OpenProjectLaunchOpts = {
   projectRoot: string
@@ -63,7 +63,7 @@ interface CommandSignature<P = any, R = any> {
   returnType: R
 }
 export interface KeyPressParams {
-  key: KeyPressSupportedKeys
+  key: SupportedKey
 }
 
 export interface AutomationCommands {

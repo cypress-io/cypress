@@ -1,4 +1,4 @@
-import type { KeyPressSupportedKeys } from '@packages/types'
+import { NamedKeys, SupportedKey } from '@packages/types'
 
 describe('src/cy/commands/actions/press', () => {
   // Non-BiDi firefox is not supported
@@ -15,7 +15,7 @@ describe('src/cy/commands/actions/press', () => {
     cy.visit('/fixtures/input_events.html')
   })
 
-  const testKeyPress = (key: KeyPressSupportedKeys) => {
+  const testKeyPress = (key: SupportedKey) => {
     it(`dispatches ${key} keypress to the AUT`, () => {
       cy.press(key)
       cy.get('#keydown').should('have.value', key)
@@ -37,22 +37,5 @@ describe('src/cy/commands/actions/press', () => {
     '+', '[', ']', '{', '}', '\\', '|', ';', ':', '\'', '"', ',', '.',
     '<', '>', '/', '?', '`', '~', ' '].forEach(testKeyPress)
 
-  // Control keys
-  ;['Enter', 'Tab', 'Backspace', 'Delete', 'Insert', 'Home', 'End',
-    'PageUp', 'PageDown', 'Escape', 'CapsLock', 'Shift', 'Control',
-    'Alt', 'Meta'].forEach(testKeyPress)
-
-  // Arrow keys
-  ;['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].forEach(testKeyPress)
-
-  // Function keys
-  ;['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12'].forEach(testKeyPress)
-
-  // Media keys
-  ;['AudioVolumeMute', 'AudioVolumeDown', 'AudioVolumeUp',
-    'MediaTrackNext', 'MediaTrackPrevious', 'MediaStop',
-    'MediaPlayPause'].forEach(testKeyPress)
-
-  // Other keys
-  ;['NumLock', 'ScrollLock', 'Pause'].forEach(testKeyPress)
+  NamedKeys.forEach(testKeyPress)
 })

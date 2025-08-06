@@ -15,6 +15,7 @@ import type { Automation } from '../automation'
 import { cookieMatches, CyCookie, CyCookieFilter } from '../automation/util'
 import { DEFAULT_NETWORK_ENABLE_OPTIONS, CriClient } from './cri-client'
 import { cdpKeyPress } from '../automation/commands/key_press'
+import { toSupportedKey } from '@packages/types'
 
 export type CdpCommand = keyof ProtocolMapping.Commands
 
@@ -610,7 +611,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
           await this.gettingFrameTree
         }
 
-        return cdpKeyPress(data, this.sendDebuggerCommandFn, this.executionContexts, (await this.send('Page.getFrameTree')).frameTree)
+        return cdpKeyPress(toSupportedKey(data.key), this.sendDebuggerCommandFn, this.executionContexts, (await this.send('Page.getFrameTree')).frameTree)
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }
