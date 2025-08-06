@@ -32,7 +32,7 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTestFromSuite 
     if (createNewTestFromSpecHeader) {
       cy.findByTestId('create-new-test-from-spec-header').click()
     } else {
-      cy.findByTestId('create-new-test-from-suite').click()
+      cy.get('@runnable-wrapper').realHover().findByTestId('create-new-test-from-suite').click()
     }
 
     cy.findByTestId('studio-panel').should('be.visible')
