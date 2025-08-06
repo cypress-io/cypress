@@ -15,7 +15,7 @@ exports['CDP deprecated in Firefox / logs a warning to the user that CDP is depr
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  simple_passing.cy.js                                                            (1 of 1)
-Since Firefox 129, Chrome DevTools Protocol (CDP) has been deprecated in Firefox. In Firefox 135 and above, Cypress defaults to automating the Firefox browser with WebDriver BiDi. Cypress will no longer support CDP within Firefox in the future and is planned for removal in Cypress 15.
+Since Firefox 129, Chrome DevTools Protocol (CDP) has been deprecated in Firefox. In Firefox 135 and above, Cypress defaults to automating the Firefox browser with WebDriver BiDi. CDP support was removed in Firefox 141. Cypress will no longer support CDP in Firefox 141+, and will be removed for older versions of Firefox in Cypress 15.
 
 
   simple passing spec
