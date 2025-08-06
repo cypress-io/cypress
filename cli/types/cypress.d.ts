@@ -2,7 +2,7 @@
 /// <reference path="./cypress-npm-api.d.ts" />
 /// <reference path="./cypress-eventemitter.d.ts" />
 /// <reference path="./cypress-type-helpers.d.ts" />
-
+/// <reference path="./cypress-automation.d.ts" />
 declare namespace Cypress {
   type FileContents = string | any[] | object
   type HistoryDirection = 'back' | 'forward'
@@ -749,39 +749,39 @@ declare namespace Cypress {
         'Y': 'Y',
         'Z': 'Z',
         // Special characters
-        '!': '!',
-        '@': '@',
-        '#': '#',
-        '$': '$',
-        '%': '%',
-        '^': '^',
-        '&': '&',
-        '*': '*',
-        '(': '(',
-        ')': ')',
-        '-': '-',
-        '_': '_',
-        '=': '=',
-        '+': '+',
-        '[': '[',
-        ']': ']',
-        '{': '{',
-        '}': '}',
-        '\\': '\\',
-        '|': '|',
-        ';': ';',
-        ':': ':',
-        "'": "'",
-        '"': '"',
-        ',': ',',
-        '.': '.',
-        '<': '<',
-        '>': '>',
-        '/': '/',
-        '?': '?',
-        '`': '`',
-        '~': '~',
-        ' ': ' ',
+        ExclamationMark: '!',
+        AtSign: '@',
+        Hash: '#',
+        DollarSign: '$',
+        Percent: '%',
+        Caret: '^',
+        Ampersand: '&',
+        Asterisk: '*',
+        LeftParen: '(',
+        RightParen: ')',
+        Hyphen: '-',
+        Underscore: '_',
+        Equals: '=',
+        Plus: '+',
+        LeftBracket: '[',
+        RightBracket: ']',
+        LeftBrace: '{',
+        RightBrace: '}',
+        Backslash: '\\',
+        Pipe: '|',
+        Semicolon: ';',
+        Colon: ':',
+        SingleQuote: "'",
+        DoubleQuote: '"',
+        Comma: ',',
+        Period: '.',
+        LessThan: '<',
+        GreaterThan: '>',
+        ForwardSlash: '/',
+        QuestionMark: '?',
+        Backtick: '`',
+        Tilde: '~',
+        Space: ' ',
         // Control keys
         'Enter': 'Enter',
         'Tab': 'Tab',
@@ -1898,7 +1898,7 @@ declare namespace Cypress {
      *    cy.press(Cypress.Keyboard.Keys.TAB) // dispatches a keydown and press event to the browser, followed by a keyup event.
      * @see https://on.cypress.io/press
      */
-    press(key: typeof Cypress.Keyboard.Keys[keyof typeof Cypress.Keyboard.Keys], options?: Partial<Loggable & Timeoutable>): void
+    press(key: KeyPressSupportedKeys, options?: Partial<Loggable & Timeoutable>): void
 
     /**
      * Get the immediately preceding sibling of each element in a set of the elements.

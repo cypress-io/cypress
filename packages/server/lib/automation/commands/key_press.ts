@@ -374,7 +374,7 @@ export const BIDI_VALUE: KeyCodeLookup = {
   'MediaTrackNext': '\uE030',
   'MediaTrackPrevious': '\uE02C',
   'MediaStop': '\uE02B',
-  'MediaPlayPause': '\uE02A',
+  'MediaPlayPause': '\uE0B3',
 }
 
 export async function bidiKeyPress ({ key }: KeyPressParams, client: Client, autContext: string, idSuffix?: string): Promise<void> {

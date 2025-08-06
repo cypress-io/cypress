@@ -156,6 +156,21 @@ describe('key:press automation command', () => {
           code: 'Tab',
         })
       })
+
+      describe('when supplied a valid key', () => {
+        for (const [key, code] of Object.entries(CDP_KEYCODE)) {
+          it(`dispatches a keydown followed by a keyup event to the provided send fn with the ${key} keycode`, async () => {
+            await cdpKeyPress({ key: key as KeyPressSupportedKeys }, sendFn, executionContexts, frameTree)
+
+            expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
+              type: 'keyDown',
+              keyIdentifier: code,
+              key,
+              code: key,
+            })
+          })
+        }
+      })
     })
 
     describe('when supplied an invalid key', () => {
@@ -226,23 +241,31 @@ describe('key:press automation command', () => {
       })
     })
 
-    it('calls client.inputPerformActions with a keydown and keyup action', async () => {
-      client.findElement.withArgs('css selector ', 'iframe.aut-iframe').resolves(iframeElement)
-      // @ts-expect-error - webdriver types show this returning a string, but it actually returns an ElementReference, same as findElement
-      client.getActiveElement.resolves(iframeElement)
-      await bidiKeyPress({ key }, client as WebdriverClient, autContext, 'idSuffix')
-
-      expect(client.inputPerformActions.firstCall.args[0]).to.deep.equal({
-        context: autContext,
-        actions: [{
-          type: 'key',
-          id: 'someContextId-Tab-idSuffix',
-          actions: [
-            { type: 'keyDown', value: BIDI_VALUE[key] },
-            { type: 'keyUp', value: BIDI_VALUE[key] },
-          ],
-        }],
+    describe('when supplied a valid key', () => {
+      beforeEach(() => {
+        client.findElement.withArgs('css selector ', 'iframe.aut-iframe').resolves(iframeElement)
+        // @ts-expect-error - webdriver types show this returning a string, but it actually returns an ElementReference, same as findElement
+        client.getActiveElement.resolves(iframeElement)
       })
+
+      for (const [key, value] of Object.entries(BIDI_VALUE)) {
+        // special formatting for value; otherwise test output will show the rendered unicode character
+        it(`dispatches a keydown and keyup action with the value '\\u${(value as string).charCodeAt(0).toString(16).toUpperCase()}' for key '${key}'`, async () => {
+          await bidiKeyPress({ key: key as KeyPressSupportedKeys }, client as WebdriverClient, autContext, 'idSuffix')
+
+          expect(client.inputPerformActions.firstCall.args[0]).to.deep.equal({
+            context: autContext,
+            actions: [{
+              type: 'key',
+              id: `someContextId-${key}-idSuffix`,
+              actions: [
+                { type: 'keyDown', value },
+                { type: 'keyUp', value },
+              ],
+            }],
+          })
+        })
+      }
     })
   })
 })

@@ -95,14 +95,15 @@ describe('cy/commands/actions/press', () => {
   })
 
   describe('with a valid key', () => {
-    const key: KeyPressSupportedKeys = Keyboard.Keys.TAB
-
-    it('dispatches a key:press automation command', async () => {
-      await press(key)
-      expect(automation).toHaveBeenCalledWith('key:press', { key })
-    })
+    for (const key in Object.values(Keyboard.Keys)) {
+      it(`dispatches a key:press automation command for key: ${key}`, async () => {
+        await press(key as KeyPressSupportedKeys)
+        expect(automation).toHaveBeenCalledWith('key:press', { key })
+      })
+    }
 
     describe('with options', () => {
+      const key = 'Tab'
       let options: Cypress.Loggable & Cypress.Timeoutable
 
       beforeEach(() => {
