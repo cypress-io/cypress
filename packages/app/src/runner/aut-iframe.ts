@@ -126,10 +126,10 @@ export class AutIframe {
   visitBlankPage = (testIsolation?: boolean) => {
     return new Promise<void>((resolve) => {
       if (!this.$iframe) {
+        resolve()
+
         return
       }
-
-      this.$iframe[0].src = 'about:blank'
 
       this.$iframe.one('load', () => {
         if (testIsolation) {
@@ -140,6 +140,8 @@ export class AutIframe {
 
         resolve()
       })
+
+      this.$iframe[0].src = 'about:blank'
     })
   }
 

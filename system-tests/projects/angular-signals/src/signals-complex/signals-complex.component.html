@@ -5,6 +5,7 @@
     <p data-cy="firstName"> {{ user().firstName }} </p>
     <p data-cy="lastName"> {{ user().lastName }} </p>
     <p data-cy="age"> {{ user().age }} </p>
+    <p data-cy="initials"> {{ initials$ | async }} </p>
   </div>
   
   <div data-cy="signals-complex-acquaintances-display" *ngIf="acquaintances().length">

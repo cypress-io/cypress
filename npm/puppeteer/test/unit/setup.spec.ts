@@ -274,6 +274,17 @@ describe('#setup', () => {
       await task({ name: testTask, args: [] })
       expect(activateMainTabExport.activateMainTab).not.to.be.called
     })
+
+    it('catastrophically fails when the browser is Google Chrome Branded 137 and up and we are running in headed mode', async () => {
+      setup({ on, onMessage, puppeteer: mockPuppeteer as PuppeteerNode })
+      expect(() => {
+        on.withArgs('after:browser:launch').yield({ family: 'chromium', isHeaded: true, name: 'chrome', majorVersion: '137' }, { webSocketDebuggerUrl: 'ws://debugger' })
+      }).to.throw('@cypress/puppeteer does not work in Google Chrome v137 and higher in cypress open mode (or headed run mode). If you need to use @cypress/puppeteer in headed mode, please use Electron, Chrome for Testing, Chromium, or another Chrome variant that supports loading extensions.')
+
+      expect(() => {
+        on.withArgs('after:browser:launch').yield({ family: 'chromium', isHeaded: true, name: 'chrome', majorVersion: '141' }, { webSocketDebuggerUrl: 'ws://debugger' })
+      }).to.throw('@cypress/puppeteer does not work in Google Chrome v137 and higher in cypress open mode (or headed run mode). If you need to use @cypress/puppeteer in headed mode, please use Electron, Chrome for Testing, Chromium, or another Chrome variant that supports loading extensions.')
+    })
   })
 
   describe('validation', () => {

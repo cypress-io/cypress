@@ -2,8 +2,12 @@ const path = require('path')
 const webpack = require('webpack')
 const Debug = require('debug')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 
 const debug = Debug('cypress:webpack-batteries-included-preprocessor')
+const WBADebugNamespace = 'cypress-verbose:webpack-batteries-included-preprocessor:bundle-analyzer'
+
+const typescriptExtensionRegex = /\.m?tsx?$/
 
 const hasTsLoader = (rules) => {
   return rules.some((rule) => {
@@ -43,7 +47,7 @@ const addTypeScriptConfig = (file, options) => {
   configFile ? debug(`found user tsconfig.json at ${configFile?.path} with compilerOptions: ${JSON.stringify(configFile?.config?.compilerOptions)}`) : debug('no user tsconfig.json found')
 
   webpackOptions.module.rules.push({
-    test: /\.tsx?$/,
+    test: typescriptExtensionRegex,
     exclude: [/node_modules/],
     use: [
       {
@@ -59,6 +63,7 @@ const addTypeScriptConfig = (file, options) => {
   })
 
   webpackOptions.resolve.extensions = webpackOptions.resolve.extensions.concat(['.ts', '.tsx'])
+  webpackOptions.resolve.extensionAlias = webpackOptions.resolve.extensionAlias || { '.js': ['.ts', '.js'], '.mjs': ['.mts', '.mjs'] }
   webpackOptions.resolve.plugins = [new TsconfigPathsPlugin({
     configFile: configFile?.path,
     silent: true,
@@ -136,6 +141,10 @@ const getDefaultWebpackOptions = () => {
         // @see https://github.com/cypress-io/cypress/issues/27947.
         process: require.resolve('process/browser.js'),
       }),
+      // If the user is trying to debug their bundle, we'll add the BundleAnalyzerPlugin
+      // to see the size of the support file (first bundle when running `cypress open`)
+      // and spec files (subsequent bundles when running `cypress open`)
+      ...(Debug.enabled(WBADebugNamespace) ? [new BundleAnalyzerPlugin()] : []),
     ],
     resolve: {
       extensions: ['.js', '.json', '.jsx', '.mjs', '.coffee'],
@@ -181,8 +190,6 @@ const getDefaultWebpackOptions = () => {
     },
   }
 }
-
-const typescriptExtensionRegex = /\.tsx?$/
 
 const preprocessor = (options = {}) => {
   return (file) => {

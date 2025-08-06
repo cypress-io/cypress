@@ -105,7 +105,6 @@ exports['config/src/index .getDefaultValues returns list of public config keys 1
   'socketIoCookie': '__socket',
   'socketIoRoute': '/__socket',
   'isDefaultProtocolEnabled': false,
-  'isStudioProtocolEnabled': false,
   'hideCommandLog': false,
   'hideRunnerUi': false,
 }
@@ -197,7 +196,6 @@ exports['config/src/index .getDefaultValues returns list of public config keys f
   'socketIoCookie': '__socket',
   'socketIoRoute': '/__socket',
   'isDefaultProtocolEnabled': false,
-  'isStudioProtocolEnabled': false,
   'hideCommandLog': false,
   'hideRunnerUi': false,
 }

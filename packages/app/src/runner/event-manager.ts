@@ -43,7 +43,6 @@ interface AddGlobalListenerOptions {
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
 const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame dev-server:on-spec-update'.split(' ')
 const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed visit:blank cypress:in:cypress:runner:event'.split(' ')
-const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
 const socketToDriverEvents = 'net:stubbing:event request:event script:error cross:origin:cookies dev-server:on-spec-updated'.split(' ')
 const localToReporterEvents = 'reporter:log:add reporter:log:state:changed reporter:log:remove'.split(' ')
 
@@ -158,7 +157,11 @@ export class EventManager {
     })
 
     this.ws.on('watched:file:changed', () => {
-      this.studioStore.cancel()
+      // only cancel studio if cloud studio was not requested
+      if (!Cypress.env('LOCAL_STUDIO_PATH') && !Cypress.env('ENABLE_CLOUD_STUDIO')) {
+        this.studioStore.cancel()
+      }
+
       rerun()
     })
 
@@ -168,9 +171,7 @@ export class EventManager {
       }
     })
 
-    socketRerunEvents.forEach((event) => {
-      this.ws.on(event, rerun)
-    })
+    this.ws.on('runner:restart', rerun)
 
     socketToDriverEvents.forEach((event) => {
       this.ws.on(event, (...args) => {
@@ -278,32 +279,39 @@ export class EventManager {
       rerun()
     }
 
-    this.reporterBus.on('studio:init:test', (testId) => {
-      this.studioStore.setTestId(testId)
+    const studioInitSuite = ({ suiteId, showUrlPrompt = true }: { suiteId: string, showUrlPrompt?: boolean }) => {
+      this.studioStore.setSuiteId(suiteId)
+      this.studioStore.setShowUrlPrompt(showUrlPrompt)
 
-      this.ws.emit('studio:init', ({ canAccessStudioAI, error }) => {
+      this.ws.emit('studio:init', ({ canAccessStudioAI, cloudStudioSessionId, error }) => {
         if (error) {
           // eslint-disable-next-line no-console
           console.error(error)
         }
 
         this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
+        this.studioStore.setCloudStudioSessionId(cloudStudioSessionId)
+        studioInit()
+      })
+    }
+
+    this.reporterBus.on('studio:init:test', (testId) => {
+      this.studioStore.setTestId(testId)
+
+      this.ws.emit('studio:init', ({ canAccessStudioAI, cloudStudioSessionId, error }) => {
+        if (error) {
+          // eslint-disable-next-line no-console
+          console.error(error)
+        }
+
+        this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
+        this.studioStore.setCloudStudioSessionId(cloudStudioSessionId)
         studioInit()
       })
     })
 
     this.reporterBus.on('studio:init:suite', (suiteId) => {
-      this.studioStore.setSuiteId(suiteId)
-
-      this.ws.emit('studio:init', ({ canAccessStudioAI, error }) => {
-        if (error) {
-          // eslint-disable-next-line no-console
-          console.error(error)
-        }
-
-        this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
-        studioInit()
-      })
+      studioInitSuite({ suiteId })
     })
 
     this.reporterBus.on('studio:cancel', () => {
@@ -352,6 +360,10 @@ export class EventManager {
           })
         }
       })
+    })
+
+    this.localBus.on('studio:init:suite', (options: { suiteId: string, showUrlPrompt?: boolean }) => {
+      studioInitSuite(options)
     })
 
     this.localBus.on('studio:cancel', () => {
@@ -440,10 +452,20 @@ export class EventManager {
     this.studioStore.setup(config)
 
     const isDefaultProtocolEnabled = Cypress.config('isDefaultProtocolEnabled')
-    const isStudioProtocolEnabled = Cypress.config('isStudioProtocolEnabled')
+
     const isStudioInScope = this.studioStore.isActive || this.studioStore.isLoading
 
-    Cypress.state('isProtocolEnabled', isDefaultProtocolEnabled || (isStudioProtocolEnabled && isStudioInScope))
+    if (isStudioInScope && !isDefaultProtocolEnabled) {
+      await new Promise<void>((resolve) => {
+        this.ws.emit('studio:protocol:enabled', ({ studioProtocolEnabled }) => {
+          Cypress.state('isProtocolEnabled', studioProtocolEnabled)
+
+          resolve()
+        })
+      })
+    } else {
+      Cypress.state('isProtocolEnabled', isDefaultProtocolEnabled)
+    }
 
     this._addListeners()
   }

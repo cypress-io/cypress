@@ -5,14 +5,6 @@ describe('driver/src/cy/snapshots', () => {
     beforeEach(() => {
       cy.visit('/fixtures/invalid_html.html')
     })
-
-    it('can snapshot html with invalid attributes', () => {
-      const { htmlAttrs } = cy.createSnapshot()
-
-      expect(htmlAttrs).to.eql({
-        foo: 'bar',
-      })
-    })
   })
 
   context('snapshot no html/doc', () => {

@@ -13,6 +13,7 @@ import type {
 } from 'webdriver/build/bidi/localTypes'
 
 import { bidiKeyPress } from '../automation/commands/key_press'
+import type Protocol from 'devtools-protocol'
 
 const debug = debugModule('cypress:server:browsers:bidi_automation')
 const debugVerbose = debugModule('cypress-verbose:server:browsers:bidi_automation')
@@ -171,14 +172,17 @@ export class BidiAutomation {
 
     const resourceType = normalizeResourceType(params.request.initiatorType)
 
+    const urlWithoutHash = url.includes('#') ? url.substring(0, url.indexOf('#')) : url
+
     const browserPreRequest: BrowserPreRequest = {
       requestId: params.request.request,
       method: params.request.method,
-      url,
+      // urls coming into the http middleware contain query params, but lack the hash. To get an accurate key to match on the prerequest, we need to remove the hash.
+      url: urlWithoutHash,
       headers: parsedHeaders,
       resourceType,
       originalResourceType: params.request.initiatorType || params.request.destination,
-      initiator: params.initiator,
+      initiator: params.initiator as Protocol.Network.Initiator,
       // Since we are NOT using CDP, we set the values to 0 to indicate that we do not have this information.
       // This is important when determining pre-request timeout and removal behavior
       cdpRequestWillBeSentTimestamp: 0,
@@ -288,7 +292,7 @@ export class BidiAutomation {
   public readonly automationMiddleware: AutomationMiddleware = {
     onRequest: async <T extends keyof AutomationCommands> (message: T, data: AutomationCommands[T]['dataType']): Promise<AutomationCommands[T]['returnType']> => {
       debugVerbose('automation command \'%s\' requested with data: %O', message, data)
-
+      debug('BiDi middleware handling msg `%s` for top context %s', message, this.topLevelContextId)
       switch (message) {
         case 'key:press':
           if (this.autContextId) {

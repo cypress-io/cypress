@@ -274,7 +274,7 @@ Installing Cypress (version: 1.2.3)
 exports['error when installing on unsupported os'] = `
 Error: The Cypress App could not be installed. Your machine does not meet the operating system requirements.
 
-https://on.cypress.io/guides/getting-started/installing-cypress#system-requirements
+https://on.cypress.io/app/get-started/install-cypress#System-requirements
 
 ----------
 

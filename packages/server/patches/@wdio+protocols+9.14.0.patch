@@ -1,0 +1,18 @@
+diff --git a/node_modules/@wdio/protocols/build/index.js b/node_modules/@wdio/protocols/build/index.js
+index 374e3dd..9c820d0 100644
+--- a/node_modules/@wdio/protocols/build/index.js
++++ b/node_modules/@wdio/protocols/build/index.js
+@@ -5276,9 +5276,11 @@ var gecko_default = {
+       ],
+       parameters: [
+         {
+-          name: "addon",
++          // cypress uses 'path' over 'addon' to avoid zipping the extension,
++          // which is easier for cypress to incorporate and doesn't break users
++          name: "path",
+           type: "string",
+-          description: "base64 string of the add on file",
++          description: "path to the extension",
+           required: true
+         },
+         {

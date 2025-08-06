@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Kitchen Sink | Cypress Example" />
+    <meta name="author" content="Cypress.io" />
+    <meta name="copyright" content="Cypress.io, Inc" />
+
+    <title>Cypress.io: Kitchen Sink</title>
+
+  </head>
+
+  <body>
+    <nav class="navbar navbar-inverse">
+      <div class="container">
+        <div class="navbar-header">
+          <button
+            type="button"
+            class="navbar-toggle collapsed"
+            data-toggle="collapse"
+            data-target="#navbar"
+          >
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">cypress.io</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active">
+              <a
+                href="#"
+                class="dropdown-toggle"
+                data-toggle="dropdown"
+                role="button"
+                >Commands <span class="caret"></span
+              ></a>
+              <ul class="dropdown-menu">
+                <li><a href="/commands/querying">Querying</a></li>
+                <li><a href="/commands/traversal">Traversal</a></li>
+                <li class="active"><a href="/commands/actions">Actions</a></li>
+                <li><a href="/commands/window">Window</a></li>
+                <li><a href="/commands/viewport">Viewport</a></li>
+                <li><a href="/commands/location">Location</a></li>
+                <li><a href="/commands/navigation">Navigation</a></li>
+                <li><a href="/commands/assertions">Assertions</a></li>
+                <li><a href="/commands/misc">Misc</a></li>
+                <li><a href="/commands/connectors">Connectors</a></li>
+                <li><a href="/commands/aliasing">Aliasing</a></li>
+                <li><a href="/commands/waiting">Waiting</a></li>
+                <li>
+                  <a href="/commands/network-requests">Network Requests</a>
+                </li>
+                <li><a href="/commands/files">Files</a></li>
+                <li><a href="/commands/storage">Storage</a></li>
+                <li><a href="/commands/cookies">Cookies</a></li>
+                <li>
+                  <a href="/commands/spies-stubs-clocks"
+                    >Spies, Stubs &amp; Clocks</a
+                  >
+                </li>
+              </ul>
+            </li>
+            <li><a href="/utilities">Utilities</a></li>
+            <li><a href="/cypress-api">Cypress API</a></li>
+          </ul>
+          <ul class="nav navbar-nav pull-right">
+            <li>
+              <a
+                href="https://github.com/cypress-io/cypress-example-kitchensink"
+                >GitHub</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="banner">
+      <div class="container">
+        <h1>Actions</h1>
+        <p>
+          Examples of actions being performed on DOM elements in Cypress, for a
+          full reference of commands, go to
+          <a href="https://on.cypress.io/api" target="_blank"
+            >docs.cypress.io</a
+          >
+        </p>
+      </div>
+    </div>
+    <div class="container content-container">
+      <div id="actions">
+        <div class="row">
+          <div class="col-xs-7">
+            <h4 id="type"><a href="https://on.cypress.io/type">.type()</a></h4>
+            <p>
+              To type into a DOM element, use the
+              <a href="https://on.cypress.io/type"><code>.type()</code></a>
+              command.
+            </p>
+            <pre><code class="javascript hljs">cy.get(<span class="hljs-string">'.action-email'</span>).type(<span class="hljs-string">'fake@email.com'</span>)
+cy.get(<span class="hljs-string">'.action-email'</span>).should(<span class="hljs-string">'have.value'</span>, <span class="hljs-string">'fake@email.com'</span>)
+
+<span class="hljs-comment">// .type() with special character sequences</span>
+cy.get(<span class="hljs-string">'.action-email'</span>).type(<span class="hljs-string">'{leftarrow}{rightarrow}{uparrow}{downarrow}'</span>)
+cy.get(<span class="hljs-string">'.action-email'</span>).type(<span class="hljs-string">'{del}{selectall}{backspace}'</span>)
+
+<span class="hljs-comment">// .type() with key modifiers</span>
+cy.get(<span class="hljs-string">'.action-email'</span>).type(<span class="hljs-string">'{alt}{option}'</span>) <span class="hljs-comment">//these are equivalent</span>
+cy.get(<span class="hljs-string">'.action-email'</span>).type(<span class="hljs-string">'{ctrl}{control}'</span>) <span class="hljs-comment">//these are equivalent</span>
+cy.get(<span class="hljs-string">'.action-email'</span>).type(<span class="hljs-string">'{meta}{command}{cmd}'</span>) <span class="hljs-comment">//these are equivalent</span>
+cy.get(<span class="hljs-string">'.action-email'</span>).type(<span class="hljs-string">'{shift}'</span>)
+
+<span class="hljs-comment">// Delay each keypress by 0.1 sec</span>
+cy.get(<span class="hljs-string">'.action-email'</span>).type(<span class="hljs-string">'slow.typing@email.com'</span>, { delay: <span class="hljs-number">100</span> })
+cy.get(<span class="hljs-string">'.action-email'</span>).should(<span class="hljs-string">'have.value'</span>, <span class="hljs-string">'slow.typing@email.com'</span>)
+
+cy.get(<span class="hljs-string">'.action-disabled'</span>)
+  <span class="hljs-comment">// Ignore error checking prior to type</span>
+  <span class="hljs-comment">// like whether the input is visible or disabled</span>
+  .type(<span class="hljs-string">'disabled error checking'</span>, { force: <span class="hljs-literal">true</span> })
+cy.get(<span class="hljs-string">'.action-disabled'</span>).should(<span class="hljs-string">'have.value'</span>, <span class="hljs-string">'disabled error checking'</span>)</code></pre>
+          </div>
+          <div class="col-xs-5">
+            <div class="well">
+              <form>
+                <div class="form-group">
+                  <label for="email1">Email address</label>
+                  <input
+                    type="email"
+                    class="form-control action-email"
+                    id="email1"
+                    placeholder="Email"
+                  />
+                </div>
+                <div class="form-group">
+                  <label>Disabled Textarea</label>
+                  <textarea
+                    class="form-control action-disabled"
+                    disabled="disabled"
+                  ></textarea>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="col-xs-12"><hr /></div>
+
+          <div class="col-xs-7">
+            <h4 id="focus">
+              <a href="https://on.cypress.io/focus">.focus()</a>
+            </h4>
+            <p>
+              To focus on a DOM element, use the
+              <a href="https://on.cypress.io/focus"><code>.focus()</code></a>
+              command.
+            </p>
+            <pre><code class="javascript hljs">cy.get(<span class="hljs-string">'.action-focus'</span>).focus()
+cy.get(<span class="hljs-string">'.action-focus'</span>).should(<span class="hljs-string">'have.class'</span>, <span class="hljs-string">'focus'</span>)
+  .prev().should(<span class="hljs-string">'have.attr'</span>, <span class="hljs-string">'style'</span>, <span class="hljs-string">'color: orange;'</span>)</code></pre>
+          </div>
+          <div class="col-xs-5">
+            <div class="well">
+              <form>
+                <div class="form-group">
+                  <label for="password1">Password</label>
+                  <input
+                    type="password"
+                    class="form-control action-focus"
+                    id="password1"
+                    placeholder="Password"
+                  />
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="col-xs-12"><hr /></div>
+
+          <div class="col-xs-7">
+            <h4 id="blur"><a href="https://on.cypress.io/blur">.blur()</a></h4>
+            <p>
+              To blur on a DOM element, use the
+              <a href="https://on.cypress.io/blur"><code>.blur()</code></a>
+              command.
+            </p>
+            <pre><code class="javascript hljs">cy.get(<span class="hljs-string">'.action-blur'</span>).type(<span class="hljs-string">'About to blur'</span>)
+cy.get(<span class="hljs-string">'.action-blur'</span>).blur()
+cy.get(<span class="hljs-string">'.action-blur'</span>).should(<span class="hljs-string">'have.class'</span>, <span class="hljs-string">'error'</span>)
+  .prev().should(<span class="hljs-string">'have.attr'</span>, <span class="hljs-string">'style'</span>, <span class="hljs-string">'color: red;'</span>)
+          </code></pre>
+          </div>
+          <div class="col-xs-5">
+            <div class="well">
+              <form>
+                <div class="form-group">
+                  <label for="fullName1">Full Name</label>
+                  <input
+                    type="text"
+                    class="form-control action-blur"
+                    id="fullName1"
+                    placeholder="Enter your name"
+                  />
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="col-xs-12"><hr /></div>
+
+          <div class="col-xs-7">
+            <h4 id="clear">
+              <a href="https://on.cypress.io/clear">.clear()</a>
+            </h4>
+            <p>
+              To clear on a DOM element, use the
+              <a href="https://on.cypress.io/clear"><code>.clear()</code></a>
+              command.
+            </p>
+            <pre><code class="javascript hljs">cy.get(<span class="hljs-string">'.action-clear'</span>).type(<span class="hljs-string">'Clear this text'</span>)
+cy.get(<span class="hljs-string">'.action-clear'</span>).should(<span class="hljs-string">'have.value'</span>, <span class="hljs-string">'Clear this text'</span>)
+cy.get(<span class="hljs-string">'.action-clear'</span>).clear()
+cy.get(<span class="hljs-string">'.action-clear'</span>).should(<span class="hljs-string">'have.value'</span>, <span class="hljs-string">''</span>)</code></pre>
+          </div>
+          <div class="col-xs-5">
+            <div class="well">
+              <form>
+                <div class="form-group">
+                  <label for="description">Describe:</label>
+                  <input
+                    type="text"
+                    class="form-control action-clear"
+                    id="description"
+                  />
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="col-xs-12"><hr /></div>
+
+          <div class="col-xs-7">
+            <h4 id="submit">
+              <a href="https://on.cypress.io/submit">.submit()</a>
+            </h4>
+            <p>
+              To submit a form, use the
+              <a href="https://on.cypress.io/submit"
+                ><code>cy.submit()</code></a
+              >
+              command.
+            </p>
+            <pre><code class="javascript hljs">cy.get(<span class="hljs-string">'.action-form'</span>)
+  .find(<span class="hljs-string">'[type="text"]'</span>).type(<span class="hljs-string">'HALFOFF'</span>)
+      
+cy.get(<span class="hljs-string">'.action-form'</span>).submit()
+cy.get(<span class="hljs-string">'.action-form'</span>).next().should(<span class="hljs-string">'contain'</span>, <span class="hljs-string">'Your form has been submitted!'</span>)</code></pre>
+          </div>
+          <div class="col-xs-5">
+            <div class="well">
+              <form class="action-form">
+                <div class="form-group">
+                  <label for="couponCode1" val="HALFOFF">Coupon Code</label>
+                  <input type="text" class="form-control" id="couponCode1" />
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </form>
+            </div>
+          </div>
+
+          <div class="col-xs-12"><hr /></div>
+
+          <div class="col-xs-7">
+            <h4 id="click">
+              <a href="https://on.cypress.io/click">.click()</a>
+            </h4>
+            <p>
+              To click a DOM element, use the
+              <a href="https://on.cypress.io/click"><code>.click()</code></a>
+              command.
+            </p>
+            <pre><code class="javascript hljs">cy.get(<span class="hljs-string">'.action-btn'</span>).click()
+
+<span class="hljs-comment">// You can click on 9 specific positions of an element:</span>
+<span class="hljs-comment">//  -----------------------------------</span>
+<span class="hljs-comment">// | topLeft        top       topRight |</span>
+<span class="hljs-comment">// |                                   |</span>
+<span class="hljs-comment">// |                                   |</span>
+<span class="hljs-comment">// |                                   |</span>
+<span class="hljs-comment">// | left          center        right |</span>
+<span class="hljs-comment">// |                                   |</span>
+<span class="hljs-comment">// |                                   |</span>
+<span class="hljs-comment">// |                                   |</span>
+<span class="hljs-comment">// | bottomLeft   bottom   bottomRight |</span>
+<span class="hljs-comment">//  -----------------------------------</span>
+
+<span class="hljs-comment">// clicking in the center of the element is the default</span>
+cy.get(<span class="hljs-string">'#action-canvas'</span>).click()
+
+cy.get(<span class="hljs-string">'#action-canvas'</span>).click(<span class="hljs-string">'topLeft'</span>)
+cy.get(<span class="hljs-string">'#action-canvas'</span>).click(<span class="hljs-string">'top'</span>)
+cy.get(<span class="hljs-string">'#action-canvas'</span>).click(<span class="hljs-string">'topRight'</span>)
+cy.get(<span class="hljs-string">'#action-canvas'</span>).click(<span class="hljs-string">'left'</span>)
+cy.get(<span class="hljs-string">'#action-canvas'</span>).click(<span class="hljs-string">'right'</span>)
+cy.get(<span class="hljs-string">'#action-canvas'</span>).click(<span class="hljs-string">'bottomLeft'</span>)
+cy.get(<span class="hljs-string">'#action-canvas'</span>).click(<span class="hljs-string">'bottom'</span>)
+cy.get(<span class="hljs-string">'#action-canvas'</span>).click(<span class="hljs-string">'bottomRight'</span>)
+
+<span class="hljs-comment">// .click() accepts an x and y coordinate</span>
+<span class="hljs-comment">// that controls where the click occurs :)</span>
+
+cy.get(<span class="hljs-string">'#action-canvas'</span>)
+cy.get(<span class="hljs-string">'#action-canvas'</span>).click(<span class="hljs-number">80</span>, <span class="hljs-number">75</span>) <span class="hljs-comment">// click 80px on x coord and 75px on y coord</span>
+cy.get(<span class="hljs-string">'#action-canvas'</span>).click(<span class="hljs-number">170</span>, <span class="hljs-number">75</span>)
+cy.get(<span class="hljs-string">'#action-canvas'</span>).click(<span class="hljs-number">80</span>, <span class="hljs-number">165</span>)
+cy.get(<span class="hljs-string">'#action-canvas'</span>).click(<span class="hljs-number">100</span>, <span class="hljs-number">185</span>)
+cy.get(<span class="hljs-string">'#action-canvas'</span>).click(<span class="hljs-number">125</span>, <span class="hljs-number">190</span>)
+cy.get(<span class="hljs-string">'#action-canvas'</span>).click(<span class="hljs-number">150</span>, <span class="hljs-number">185</span>)
+cy.get(<span class="hljs-string">'#action-canvas'</span>).click(<span class="hljs-number">170</span>, <span class="hljs-number">165</span>)
+
+<span class="hljs-comment">// click multiple elements by passing multiple: true</span>
+cy.get(<span class="hljs-string">'.action-labels&gt;.label'</span>).click({ multiple: <span class="hljs-literal">true</span> })
+
+<span class="hljs-comment">// Ignore error checking prior to clicking</span>
+cy.get(<span class="hljs-string">'.action-opacity&gt;.btn'</span>).click({ force: <span class="hljs-literal">true</span> })</code></pre>
+          </div>
+          <div class="col-xs-5">
+            <div class="well">
+              <button
+                type="button"
+                class="btn btn-lg btn-danger action-btn"
+                data-toggle="popover"
+                title=""
+                data-placement="top"
+                data-content="This popover shows up on click"
+                data-original-title="Popover"
+              >
+                Click to toggle popover
+              </button>
+
+              <hr />
+
+              <h6>Canvas to Illustrate Click Positions</h6>
+              <canvas width="250" height="250" id="action-canvas"></canvas>
+
+              <hr />
+
+              <div class="action-labels">
+                <span
+                  class="label label-primary"
+                  data-toggle="popover"
+                  data-placement="bottom"
+                  data-content="clicked"
+                  data-original-title=""
+                  title=""
+                  >click me</span
+                >
+                <span
+                  class="label label-primary"
+                  data-toggle="popover"
+                  data-placement="bottom"
+                  data-content="clicked"
+                  data-original-title=""
+                  title=""
+                  >and me</span
+                >
+                <span
+                  class="label label-primary"
+                  data-toggle="popover"
+                  data-placement="bottom"
+                  data-content="clicked"
+                  data-original-title=""
+                  title=""
+                  >and me</span
+                >
+                <span
+                  class="label label-primary"
+                  data-toggle="popover"
+                  data-placement="bottom"
+                  data-content="clicked"
+                  data-original-title=""
+                  title=""
+                  >and me</span
+                >
+                <span
+                  class="label label-primary"
+                  data-toggle="popover"
+                  data-placement="bottom"
+                  data-content="clicked"
+                  data-original-title=""
+                  title=""
+                  >and me</span
+                >
+                <span
+                  class="label label-primary"
+                  data-toggle="popover"
+                  data-placement="bottom"
+                  data-content="clicked"
+                  data-original-title=""
+                  title=""
+                  >and me</span
+                >
+              </div>
+
+              <hr />
+
+              <div class="action-opacity">
+                <button
+                  type="button"
+                  class="btn btn-lg btn-primary"
+                  data-toggle="popover"
+                  data-placement="left"
+                  data-content="This popover shows up because we forced the click on the button"
+                  data-original-title=""
+                  title=""
+                >
+                  I'm being covered
+                </button>
+                <div class="opacity-cover"></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xs-12"><hr /></div>
+
+          <div class="col-xs-7">
+            <h4 id="dblclick">
+              <a href="https://on.cypress.io/dblclick">.dblclick()</a>
+            </h4>
+            <p>
+              To double click a DOM element, use the
+              <a href="https://on.cypress.io/dblclick"
+                ><code>.dblclick()</code></a
+              >
+              command.
+            </p>
+            <pre><code class="javascript hljs"><span class="hljs-comment">// Our app has a listener on 'dblclick' event in our 'scripts.js'</span>
+<span class="hljs-comment">// that hides the div and shows an input on double click</span>
+cy.get(<span class="hljs-string">'.action-div'</span>).dblclick()
+cy.get(<span class="hljs-string">'.action-div'</span>).should(<span class="hljs-string">'not.be.visible'</span>)
+cy.get(<span class="hljs-string">'.action-input-hidden'</span>).should(<span class="hljs-string">'be.visible'</span>)</code></pre>
+          </div>
+          <div class="col-xs-5">
+            <div class="well">
+              <form>
+                <div class="form-group">
+                  <div class="action-div">Double click to edit</div>
+                  <input
+                    type="text"
+                    class="action-input-hidden hidden form-control"
+                    value="Double click to edit"
+                  />
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="col-xs-12"><hr /></div>
+
+          <div class="col-xs-7">
+            <h4 id="rightclick">
+              <a href="https://on.cypress.io/rightclick">.rightclick()</a>
+            </h4>
+            <p>
+              To right click a DOM element, use the
+              <a href="https://on.cypress.io/rightclick"
+                ><code>.rightclick()</code></a
+              >
+              command.
+            </p>
+            <pre><code class="javascript hljs"><span class="hljs-comment">// Our app has a listener on 'contextmenu' event in our 'scripts.js'</span>
+<span class="hljs-comment">// that hides the div and shows an input on right click</span>
+cy.get(<span class="hljs-string">'.rightclick-action-div'</span>).rightclick()
+cy.get(<span class="hljs-string">'.rightclick-action-div'</span>).should(<span class="hljs-string">'not.be.visible'</span>)
+cy.get(<span class="hljs-string">'.rightclick-action-input-hidden'</span>).should(<span class="hljs-string">'be.visible'</span>)</code></pre>
+          </div>
+          <div class="col-xs-5">
+            <div class="well">
+              <form>
+                <div class="form-group">
+                  <div class="rightclick-action-div">Right click to edit</div>
+                  <input
+                    type="text"
+                    class="rightclick-action-input-hidden hidden form-control"
+                    value="Right click to edit"
+                  />
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="col-xs-12">
+            <hr />
+          </div>
+
+          <div class="col-xs-7">
+            <h4 id="check">
+              <a href="https://on.cypress.io/check">.check()</a>
+            </h4>
+            <p>
+              To check a checkbox or radio, use the
+              <a href="https://on.cypress.io/check"><code>.check()</code></a>
+              command.
+            </p>
+            <pre><code class="javascript hljs"><span class="hljs-comment">// By default, .check() will check all</span>
+<span class="hljs-comment">// matching checkbox or radio elements in succession, one after another</span>
+cy.get(<span class="hljs-string">'.action-checkboxes [type="checkbox"]'</span>).not(<span class="hljs-string">'[disabled]'</span>).check()
+cy.get(<span class="hljs-string">'.action-checkboxes [type="checkbox"]'</span>).not(<span class="hljs-string">'[disabled]'</span>).should(<span class="hljs-string">'be.checked'</span>)
+
+cy.get(<span class="hljs-string">'.action-radios [type="radio"]'</span>).not(<span class="hljs-string">'[disabled]'</span>).check()
+cy.get(<span class="hljs-string">'.action-radios [type="radio"]'</span>).not(<span class="hljs-string">'[disabled]'</span>).should(<span class="hljs-string">'be.checked'</span>)
+
+<span class="hljs-comment">// .check() accepts a value argument</span>
+cy.get(<span class="hljs-string">'.action-radios [type="radio"]'</span>).check(<span class="hljs-string">'radio1'</span>)
+cy.get(<span class="hljs-string">'.action-radios [type="radio"]'</span>).should(<span class="hljs-string">'be.checked'</span>)
+
+<span class="hljs-comment">// .check() accepts an array of values</span>
+cy.get(<span class="hljs-string">'.action-multiple-checkboxes [type="checkbox"]'</span>).check([<span class="hljs-string">'checkbox1'</span>, <span class="hljs-string">'checkbox2'</span>])
+cy.get(<span class="hljs-string">'.action-multiple-checkboxes [type="checkbox"]'</span>).should(<span class="hljs-string">'be.checked'</span>)
+
+<span class="hljs-comment">// Ignore error checking prior to checking</span>
+cy.get(<span class="hljs-string">'.action-checkboxes [disabled]'</span>).check({ force: <span class="hljs-literal">true</span> })
+cy.get(<span class="hljs-string">'.action-checkboxes [disabled]'</span>).should(<span class="hljs-string">'be.checked'</span>)
+
+cy.get(<span class="hljs-string">'.action-radios [type="radio"]'</span>).check(<span class="hljs-string">'radio3'</span>, { force: <span class="hljs-literal">true</span> })
+cy.get(<span class="hljs-string">'.action-radios [type="radio"]'</span>).should(<span class="hljs-string">'be.checked'</span>)</code></pre>
+          </div>
+          <div class="col-xs-5">
+            <div class="well">
+              <div class="action-checkboxes">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" value="checkbox1" />
+                    Checkbox one has value "checkbox1"
+                  </label>
+                </div>
+                <div class="checkbox disabled">
+                  <label>
+                    <input type="checkbox" value="checkbox2" disabled="" />
+                    Checkbox two is disabled
+                  </label>
+                </div>
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" value="checkbox3" />
+                    Checkbox three has value "checkbox3"
+                  </label>
+                </div>
+              </div>
+
+              <hr />
+
+              <div class="action-multiple-checkboxes">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" value="checkbox1" />
+                    Checkbox one has value "checkbox1"
+                  </label>
+                </div>
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" value="checkbox2" />
+                    Checkbox two has value "checkbox2"
+                  </label>
+                </div>
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" value="checkbox3" />
+                    Checkbox three has value "checkbox3"
+                  </label>
+                </div>
+              </div>
+
+              <hr />
+
+              <div class="action-radios">
+                <div class="radio">
+                  <label>
+                    <input
+                      type="radio"
+                      name="optionsRadios"
+                      id="optionsRadios1"
+                      value="radio1"
+                    />
+                    Radio one has value "radio1"
+                  </label>
+                </div>
+                <div class="radio">
+                  <label>
+                    <input
+                      type="radio"
+                      name="optionsRadios"
+                      id="optionsRadios2"
+                      value="radio2"
+                    />
+                    Radio two has value "radio2". When checked, it will uncheck
+                    Radio one.
+                  </label>
+                </div>
+                <div class="radio disabled">
+                  <label>
+                    <input
+                      type="radio"
+                      name="optionsRadios"
+                      id="optionsRadios3"
+                      value="radio3"
+                      disabled=""
+                    />
+                    Radio three is disabled
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xs-12"><hr /></div>
+
+          <div class="col-xs-7">
+            <h4 id="uncheck">
+              <a href="https://on.cypress.io/uncheck">.uncheck()</a>
+            </h4>
+            <p>
+              To uncheck a checkbox or radio, use the
+              <a href="https://on.cypress.io/uncheck"
+                ><code>.uncheck()</code></a
+              >
+              command.
+            </p>
+            <pre><code class="javascript hljs"><span class="hljs-comment">// By default, .uncheck() will uncheck all matching</span>
+<span class="hljs-comment">// checkbox elements in succession, one after another</span>
+cy.get(<span class="hljs-string">'.action-check [type="checkbox"]'</span>)
+  .not(<span class="hljs-string">'[disabled]'</span>)
+  .uncheck()
+cy.get(<span class="hljs-string">'.action-check [type="checkbox"]'</span>)
+  .not(<span class="hljs-string">'[disabled]'</span>)
+  .should(<span class="hljs-string">'not.be.checked'</span>)
+
+<span class="hljs-comment">// .uncheck() accepts a value argument</span>
+cy.get(<span class="hljs-string">'.action-check [type="checkbox"]'</span>)
+  .check(<span class="hljs-string">'checkbox1'</span>)
+cy.get(<span class="hljs-string">'.action-check [type="checkbox"]'</span>)
+  .uncheck(<span class="hljs-string">'checkbox1'</span>)
+cy.get(<span class="hljs-string">'.action-check [type="checkbox"][value="checkbox1"]'</span>)
+  .should(<span class="hljs-string">'not.be.checked'</span>)
+
+<span class="hljs-comment">// .uncheck() accepts an array of values</span>
+cy.get(<span class="hljs-string">'.action-check [type="checkbox"]'</span>)
+  .check([<span class="hljs-string">'checkbox1'</span>, <span class="hljs-string">'checkbox3'</span>])
+cy.get(<span class="hljs-string">'.action-check [type="checkbox"]'</span>)
+  .uncheck([<span class="hljs-string">'checkbox1'</span>, <span class="hljs-string">'checkbox3'</span>])
+cy.get(<span class="hljs-string">'.action-check [type="checkbox"][value="checkbox1"]'</span>)
+  .should(<span class="hljs-string">'not.be.checked'</span>)
+cy.get(<span class="hljs-string">'.action-check [type="checkbox"][value="checkbox3"]'</span>)
+  .should(<span class="hljs-string">'not.be.checked'</span>)
+
+<span class="hljs-comment">// Ignore error checking prior to unchecking</span>
+cy.get(<span class="hljs-string">'.action-check [disabled]'</span>).uncheck({ force: <span class="hljs-literal">true</span> })
+cy.get(<span class="hljs-string">'.action-check [disabled]'</span>).should(<span class="hljs-string">'not.be.checked'</span>)</code></pre>
+          </div>
+          <div class="col-xs-5">
+            <div class="well">
+              <div class="action-check">
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" value="checkbox1" checked="" />
+                    Checkbox one has value "checkbox1"
+                  </label>
+                </div>
+                <div class="checkbox disabled">
+                  <label>
+                    <input
+                      type="checkbox"
+                      value="checkbox2"
+                      disabled=""
+                      checked=""
+                    />
+                    Checkbox two is disabled
+                  </label>
+                </div>
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" value="checkbox3" checked="" />
+                    Checkbox three has value "checkbox3"
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xs-12"><hr /></div>
+
+          <div class="col-xs-7">
+            <h4 id="select">
+              <a href="https://on.cypress.io/select">.select()</a>
+            </h4>
+            <p>
+              To select an option in a <code>select</code>, use the
+              <a href="https://on.cypress.io/select"><code>.select()</code></a>
+              command.
+            </p>
+            <pre><code class="javascript hljs"><span class="hljs-comment">// at first, no option should be selected</span>
+cy.get(<span class="hljs-string">'.action-select'</span>)
+  .should(<span class="hljs-string">'have.value'</span>, <span class="hljs-string">'--Select a fruit--'</span>)
+
+<span class="hljs-comment">// Select option(s) with matching text content</span>
+cy.get(<span class="hljs-string">'.action-select'</span>).select(<span class="hljs-string">'apples'</span>)
+<span class="hljs-comment">// confirm the apples were selected</span>
+<span class="hljs-comment">// note that each value starts with "fr-" in our HTML</span>
+cy.get(<span class="hljs-string">'.action-select'</span>).should(<span class="hljs-string">'have.value'</span>, <span class="hljs-string">'fr-apples'</span>)
+
+cy.get(<span class="hljs-string">'.action-select-multiple'</span>)
+  .select([<span class="hljs-string">'apples'</span>, <span class="hljs-string">'oranges'</span>, <span class="hljs-string">'bananas'</span>])
+cy.get(<span class="hljs-string">'.action-select-multiple'</span>)
+  <span class="hljs-comment">// when getting multiple values, invoke "val" method first</span>
+  .invoke(<span class="hljs-string">'val'</span>)
+  .should(<span class="hljs-string">'deep.equal'</span>, [<span class="hljs-string">'fr-apples'</span>, <span class="hljs-string">'fr-oranges'</span>, <span class="hljs-string">'fr-bananas'</span>])
+
+<span class="hljs-comment">// Select option(s) with matching value</span>
+cy.get(<span class="hljs-string">'.action-select'</span>).select(<span class="hljs-string">'fr-bananas'</span>)
+cy.get(<span class="hljs-string">'.action-select'</span>)
+  <span class="hljs-comment">// can attach an assertion right away to the element</span>
+  .should(<span class="hljs-string">'have.value'</span>, <span class="hljs-string">'fr-bananas'</span>)
+
+cy.get(<span class="hljs-string">'.action-select-multiple'</span>)
+  .select([<span class="hljs-string">'fr-apples'</span>, <span class="hljs-string">'fr-oranges'</span>, <span class="hljs-string">'fr-bananas'</span>])
+cy.get(<span class="hljs-string">'.action-select-multiple'</span>)
+  .invoke(<span class="hljs-string">'val'</span>)
+  .should(<span class="hljs-string">'deep.equal'</span>, [<span class="hljs-string">'fr-apples'</span>, <span class="hljs-string">'fr-oranges'</span>, <span class="hljs-string">'fr-bananas'</span>])
+
+<span class="hljs-comment">// assert the selected values include oranges</span>
+cy.get(<span class="hljs-string">'.action-select-multiple'</span>)
+  .invoke(<span class="hljs-string">'val'</span>).should(<span class="hljs-string">'include'</span>, <span class="hljs-string">'fr-oranges'</span>)</code></pre>
+          </div>
+          <div class="col-xs-5">
+            <div class="well">
+              <form>
+                <select class="form-control action-select">
+                  <option>--Select a fruit--</option>
+                  <option value="fr-apples">apples</option>
+                  <option value="fr-oranges">oranges</option>
+                  <option value="fr-bananas">bananas</option>
+                </select>
+
+                <select
+                  class="form-control action-select-multiple"
+                  multiple="true"
+                >
+                  <option value="fr-apples">apples</option>
+                  <option value="fr-oranges">oranges</option>
+                  <option value="fr-bananas">bananas</option>
+                </select>
+              </form>
+            </div>
+          </div>
+
+          <div class="col-xs-12"><hr /></div>
+
+          <div class="col-xs-7">
+            <h4 id="scrollIntoView">
+              <a href="https://on.cypress.io/scrollintoview"
+                >.scrollIntoView()</a
+              >
+            </h4>
+            <p>
+              To scroll an element into view, use the
+              <a href="https://on.cypress.io/scrollintoview"
+                ><code>.scrollintoview()</code></a
+              >
+              command.
+            </p>
+            <pre><code class="javascript hljs"><span class="hljs-comment">// normally all of these buttons are hidden,</span>
+<span class="hljs-comment">// because they're not within</span>
+<span class="hljs-comment">// the viewable area of their parent</span>
+<span class="hljs-comment">// (we need to scroll to see them)</span>
+cy.get(<span class="hljs-string">'#scroll-horizontal button'</span>)
+  .should(<span class="hljs-string">'not.be.visible'</span>)
+
+<span class="hljs-comment">// scroll the button into view, as if the user had scrolled</span>
+cy.get(<span class="hljs-string">'#scroll-horizontal button'</span>).scrollIntoView()
+cy.get(<span class="hljs-string">'#scroll-horizontal button'</span>)
+  .should(<span class="hljs-string">'be.visible'</span>)
+
+cy.get(<span class="hljs-string">'#scroll-vertical button'</span>)
+  .should(<span class="hljs-string">'not.be.visible'</span>)
+
+<span class="hljs-comment">// Cypress handles the scroll direction needed</span>
+cy.get(<span class="hljs-string">'#scroll-vertical button'</span>).scrollIntoView()
+cy.get(<span class="hljs-string">'#scroll-vertical button'</span>)
+  .should(<span class="hljs-string">'be.visible'</span>)
+
+cy.get(<span class="hljs-string">'#scroll-both button'</span>)
+  .should(<span class="hljs-string">'not.be.visible'</span>)
+
+<span class="hljs-comment">// Cypress knows to scroll to the right and down</span>
+cy.get(<span class="hljs-string">'#scroll-both button'</span>).scrollIntoView()
+cy.get(<span class="hljs-string">'#scroll-both button'</span>)
+  .should(<span class="hljs-string">'be.visible'</span>)</code></pre>
+          </div>
+          <div class="col-xs-5">
+            <div class="well">
+              <div
+                id="scroll-horizontal"
+                style="height: 300px; width: 300px; overflow: auto"
+              >
+                <div style="width: 1000px; position: relative">
+                  Horizontal Scroll
+                  <button
+                    class="btn btn-danger"
+                    style="position: absolute; top: 0; left: 500px"
+                  >
+                    I'm Here
+                  </button>
+                </div>
+              </div>
+
+              <div
+                id="scroll-vertical"
+                style="height: 300px; width: 300px; overflow: auto"
+              >
+                <div style="height: 1000px; position: relative">
+                  Vertical Scroll
+                  <button
+                    class="btn btn-danger"
+                    style="position: absolute; top: 500px; left: 0"
+                  >
+                    I'm Here
+                  </button>
+                </div>
+              </div>
+
+              <div
+                id="scroll-both"
+                style="height: 300px; width: 300px; overflow: auto"
+              >
+                <div style="width: 1000px; height: 1000px; position: relative">
+                  Both Scroll
+                  <button
+                    class="btn btn-danger"
+                    style="position: absolute; top: 500px; left: 500px"
+                  >
+                    I'm Here
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xs-12"><hr /></div>
+
+          <div class="col-xs-7">
+            <h4 id="scrollTo">
+              <a href="https://on.cypress.io/scrollto">cy.scrollTo()</a>
+            </h4>
+            <p>
+              To scroll the window or a scrollable element to a specific
+              position, use the
+              <a href="https://on.cypress.io/scrollto"
+                ><code>cy.scrollTo()</code></a
+              >
+              command.
+            </p>
+            <pre><code class="javascript hljs"><span class="hljs-comment">// You can scroll to 9 specific positions of an element:</span>
+<span class="hljs-comment">//  -----------------------------------</span>
+<span class="hljs-comment">// | topLeft        top       topRight |</span>
+<span class="hljs-comment">// |                                   |</span>
+<span class="hljs-comment">// |                                   |</span>
+<span class="hljs-comment">// |                                   |</span>
+<span class="hljs-comment">// | left          center        right |</span>
+<span class="hljs-comment">// |                                   |</span>
+<span class="hljs-comment">// |                                   |</span>
+<span class="hljs-comment">// |                                   |</span>
+<span class="hljs-comment">// | bottomLeft   bottom   bottomRight |</span>
+<span class="hljs-comment">//  -----------------------------------</span>
+
+<span class="hljs-comment">// if you chain .scrollTo() off of cy, we will</span>
+<span class="hljs-comment">// scroll the entire window</span>
+cy.scrollTo(<span class="hljs-string">'bottom'</span>)
+
+cy.get(<span class="hljs-string">'#scrollable-horizontal'</span>).scrollTo(<span class="hljs-string">'right'</span>)
+
+<span class="hljs-comment">// or you can scroll to a specific coordinate:</span>
+<span class="hljs-comment">// (x axis, y axis) in pixels</span>
+cy.get(<span class="hljs-string">'#scrollable-vertical'</span>).scrollTo(<span class="hljs-number">250</span>, <span class="hljs-number">250</span>)
+
+<span class="hljs-comment">// or you can scroll to a specific percentage</span>
+<span class="hljs-comment">// of the (width, height) of the element</span>
+cy.get(<span class="hljs-string">'#scrollable-both'</span>).scrollTo(<span class="hljs-string">'75%'</span>, <span class="hljs-string">'25%'</span>)
+
+<span class="hljs-comment">// control the easing of the scroll (default is 'swing')</span>
+cy.get(<span class="hljs-string">'#scrollable-vertical'</span>).scrollTo(<span class="hljs-string">'center'</span>, { easing: <span class="hljs-string">'linear'</span> })
+
+<span class="hljs-comment">// control the duration of the scroll (in ms)</span>
+cy.get(<span class="hljs-string">'#scrollable-both'</span>).scrollTo(<span class="hljs-string">'center'</span>, { duration: <span class="hljs-number">2000</span> })</code></pre>
+          </div>
+          <div class="col-xs-5">
+            <div class="well">
+              <div
+                id="scrollable-horizontal"
+                style="height: 200px; width: 300px; overflow: auto"
+              >
+                <div style="width: 3000px">
+                  Horizontal Scroll
+                  <ul>
+                    <li>
+                      <div class="placeholder"></div>
+                    </li>
+                    <li>
+                      <div class="placeholder"></div>
+                    </li>
+                    <li>
+                      <div class="placeholder"></div>
+                    </li>
+                    <li>
+                      <div class="placeholder"></div>
+                    </li>
+                    <li>
+                      <div class="placeholder"></div>
+                    </li>
+                    <li>
+                      <div class="placeholder"></div>
+                    </li>
+                    <li>
+                      <div class="placeholder"></div>
+                    </li>
+                    <li>
+                      <div class="placeholder"></div>
+                    </li>
+                    <li>
+                      <div class="placeholder"></div>
+                    </li>
+                    <li>
+                      <div class="placeholder"></div>
+                    </li>
+                    <li>
+                      <div class="placeholder"></div>
+                    </li>
+                    <li>
+                      <div class="placeholder"></div>
+                    </li>
+                    <li>
+                      <div class="placeholder"></div>
+                    </li>
+                    <li>
+                      <div class="placeholder"></div>
+                    </li>
+                    <li>
+                      <div class="placeholder"></div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div
+                id="scrollable-vertical"
+                style="height: 150px; width: 300px; overflow: auto"
+              >
+                <div style="height: 1000px">
+                  Vertical Scroll
+                  <ul>
+                    <li>
+                      <div class="placeholder"></div>
+                    </li>
+                    <li>
+                      <div class="placeholder"></div>
+                    </li>
+                    <li>
+                      <div class="placeholder"></div>
+                    </li>
+                    <li>
+                      <div class="placeholder"></div>
+                    </li>
+                    <li>
+                      <div class="placeholder"></div>
+                    </li>
+                    <li>
+                      <div class="placeholder"></div>
+                    </li>
+                    <li>
+                      <div class="placeholder"></div>
+                    </li>
+                    <li>
+                      <div class="placeholder"></div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div
+                id="scrollable-both"
+                style="height: 150px; width: 300px; overflow: auto"
+              >
+                <div style="width: 1000px; height: 1000px; position: relative">
+                  Both Scroll
+                  <button
+                    class="btn btn-danger"
+                    style="position: absolute; top: 500px; left: 500px"
+                  >
+                    I'm Here
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xs-12"><hr /></div>
+
+          <div class="col-xs-7">
+            <h4 id="trigger">
+              <a href="https://on.cypress.io/trigger">.trigger()</a>
+            </h4>
+            <p>
+              To trigger an event on a DOM element, use the
+              <a href="https://on.cypress.io/trigger"
+                ><code>.trigger()</code></a
+              >
+              command.
+            </p>
+            <pre><code class="javascript hljs"><span class="hljs-comment">// To interact with a range input (slider)</span>
+<span class="hljs-comment">// we need to set its value &amp; trigger the</span>
+<span class="hljs-comment">// event to signal it changed</span>
+
+<span class="hljs-comment">// Here, we invoke jQuery's val() method to set</span>
+<span class="hljs-comment">// the value and trigger the 'change' event</span>
+cy.get(<span class="hljs-string">'.trigger-input-range'</span>)
+  .invoke(<span class="hljs-string">'val'</span>, <span class="hljs-number">25</span>)
+cy.get(<span class="hljs-string">'.trigger-input-range'</span>)
+  .trigger(<span class="hljs-string">'change'</span>)
+cy.get(<span class="hljs-string">'.trigger-input-range'</span>)
+  .get(<span class="hljs-string">'input[type=range]'</span>).siblings(<span class="hljs-string">'p'</span>)
+  .should(<span class="hljs-string">'have.text'</span>, <span class="hljs-string">'25'</span>)</code></pre>
+          </div>
+          <div class="col-xs-5">
+            <div class="well">
+              <form>
+                <fieldset>
+                  <label for="range-input">Range Input</label>
+                  <input
+                    class="trigger-input-range"
+                    name="range-input"
+                    type="range"
+                    value="0"
+                  />
+                  <p>0</p>
+                </fieldset>
+              </form>
+            </div>
+          </div>
+
+          <div class="col-xs-12"><hr /></div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,8 +1,19 @@
 import type { PushFragmentData } from '@packages/data-context/src/actions'
 import { enumType, idArg, list, nonNull, objectType, subscriptionType } from 'nexus'
-import { CurrentProject, DevState, Query, Wizard } from '.'
+import { CurrentProject, DevState, Query, StudioStatusTypeEnum, Wizard } from '.'
 import { Spec } from './gql-Spec'
 import { RelevantRun } from './gql-RelevantRun'
+
+export const StudioStatusPayload = objectType({
+  name: 'StudioStatusPayload',
+  definition (t) {
+    t.nonNull.field('status', {
+      type: StudioStatusTypeEnum,
+    })
+
+    t.nonNull.boolean('canAccessStudioAI')
+  },
+})
 
 export const Subscription = subscriptionType({
   definition (t) {
@@ -47,6 +58,38 @@ export const Subscription = subscriptionType({
       description: 'Status of the currently opened browser',
       subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('browserStatusChange'),
       resolve: (source, args, ctx) => ctx.lifecycleManager,
+    })
+
+    t.nonNull.field('studioStatusChange', {
+      type: StudioStatusPayload,
+      description: 'Status of the studio manager and AI access',
+      subscribe: (source, args, ctx) => ctx.emitter.subscribeTo('studioStatusChange'),
+      resolve: async (source, args, ctx) => {
+        const isStudioReady = ctx.coreData.studioLifecycleManager?.isStudioReady()
+
+        if (!isStudioReady) {
+          return {
+            status: 'INITIALIZING' as const,
+            canAccessStudioAI: false,
+          }
+        }
+
+        const studio = await ctx.coreData.studioLifecycleManager?.getStudio()
+
+        if (!studio) {
+          return {
+            status: 'NOT_INITIALIZED' as const,
+            canAccessStudioAI: false,
+          }
+        }
+
+        const canAccessStudioAI = studio.status === 'ENABLED' && ctx.coreData.activeBrowser && (await studio.canAccessStudioAI(ctx.coreData.activeBrowser as Cypress.Browser)) || false
+
+        return {
+          status: studio.status,
+          canAccessStudioAI,
+        }
+      },
     })
 
     t.field('configChange', {

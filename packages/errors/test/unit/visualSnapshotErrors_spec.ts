@@ -346,6 +346,11 @@ describe('visual error templates', () => {
         default: [err],
       }
     },
+    CHROME_137_LOAD_EXTENSION_NOT_SUPPORTED: () => {
+      return {
+        default: [],
+      }
+    },
     CHROME_WEB_SECURITY_NOT_SUPPORTED: () => {
       return {
         default: ['firefox'],
@@ -362,11 +367,6 @@ describe('visual error templates', () => {
 
       return {
         default: ['/path/does/not/exist', err.message],
-      }
-    },
-    NOT_LOGGED_IN: () => {
-      return {
-        default: [],
       }
     },
     TESTS_DID_NOT_START_RETRYING: () => {
@@ -969,34 +969,6 @@ describe('visual error templates', () => {
     INVOKED_BINARY_OUTSIDE_NPM_MODULE: () => {
       return {
         default: [],
-      }
-    },
-    FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS: () => {
-      return {
-        default: [{
-          link: 'https://cloud.cypress.io/project/abcd',
-          limit: 500,
-          usedTestsMessage: 'test',
-        }],
-      }
-    },
-    FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS: () => {
-      return {
-        default: [{
-          link: 'https://cloud.cypress.io/project/abcd',
-          limit: 500,
-          usedTestsMessage: 'test',
-          gracePeriodMessage: 'the grace period ends',
-        }],
-      }
-    },
-    PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS: () => {
-      return {
-        default: [{
-          link: 'https://on.cypress.io/set-up-billing',
-          limit: 25000,
-          usedTestsMessage: 'private test',
-        }],
       }
     },
     FREE_PLAN_EXCEEDS_MONTHLY_TESTS: () => {

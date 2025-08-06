@@ -42,7 +42,7 @@ const invalidOS = {
   description: 'The Cypress App could not be installed. Your machine does not meet the operating system requirements.',
   solution: stripIndent`
 
-  ${chalk.blue('https://on.cypress.io/guides/getting-started/installing-cypress#system-requirements')}`,
+  ${chalk.blue('https://on.cypress.io/app/get-started/install-cypress#System-requirements')}`,
 }
 
 const failedDownload = {

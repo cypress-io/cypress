@@ -412,10 +412,10 @@ exports['CLOUD_RECOMMENDATION_MESSAGE'] = `
 
 ----------------------------------------------------------------------------------------------------
 
-  Having trouble debugging your CI failures?
+  Debug faster with full visibility.
 
-  Record your runs to Cypress Cloud to watch video recordings for each test,
-  debug failing and flaky tests, and integrate with your favorite tools.
+  Record to Cypress Cloud and get instant access to full test details and replays.
+  Inspect the DOM, network events, and console logs exactly as they ran in CI.
 
   >> https://on.cypress.io/cloud-get-started
 

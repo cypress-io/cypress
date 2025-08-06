@@ -647,9 +647,11 @@ describe('App: Specs', () => {
           })
 
           cy.contains('Review the docs')
-          .should('have.attr', 'href', 'https://on.cypress.io/styling-components')
+          .should('be.visible')
+          .and('have.attr', 'href', 'https://on.cypress.io/styling-components')
 
           cy.log('should not contain the link if you navigate away and back')
+          cy.get('[data-cy="runnable-header"]').should('be.visible')
           cy.get('body').type('f')
           cy.get('[data-cy=spec-file-item]').first().click()
           cy.get('#spec-runner-header').should('not.contain', 'Review the docs')

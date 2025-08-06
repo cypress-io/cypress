@@ -91,23 +91,39 @@ module.exports = async function (params) {
       const encryptionFileSource = await getEncryptionFileSource(encryptionFilePath)
       const cloudEnvironmentFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/environment.ts')
       const cloudEnvironmentFileSource = await getCloudEnvironmentFileSource(cloudEnvironmentFilePath)
+
+      await Promise.all([
+        fs.writeFile(path.join(outputFolder, 'index.js'), binaryEntryPointSource),
+        fs.writeFile(encryptionFilePath, encryptionFileSource),
+        fs.writeFile(cloudEnvironmentFilePath, cloudEnvironmentFileSource),
+      ])
+
+      // Remove local protocol env
       const cloudApiFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/api/index.ts')
       const cloudApiFileSource = await getProtocolFileSource(cloudApiFilePath)
       const cloudProtocolFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/protocol.ts')
       const cloudProtocolFileSource = await getProtocolFileSource(cloudProtocolFilePath)
-      const projectBaseFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/project-base.ts')
-      const projectBaseFileSource = await getStudioFileSource(projectBaseFilePath)
-      const getAndInitializeStudioManagerFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/api/get_and_initialize_studio_manager.ts')
-      const getAndInitializeStudioManagerFileSource = await getStudioFileSource(getAndInitializeStudioManagerFilePath)
 
       await Promise.all([
-        fs.writeFile(encryptionFilePath, encryptionFileSource),
-        fs.writeFile(cloudEnvironmentFilePath, cloudEnvironmentFileSource),
         fs.writeFile(cloudApiFilePath, cloudApiFileSource),
         fs.writeFile(cloudProtocolFilePath, cloudProtocolFileSource),
-        fs.writeFile(projectBaseFilePath, projectBaseFileSource),
-        fs.writeFile(getAndInitializeStudioManagerFilePath, getAndInitializeStudioManagerFileSource),
-        fs.writeFile(path.join(outputFolder, 'index.js'), binaryEntryPointSource),
+      ])
+
+      // Remove local studio env
+      const reportStudioErrorPath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/api/studio/report_studio_error.ts')
+      const reportStudioErrorFileSource = await getStudioFileSource(reportStudioErrorPath)
+      const StudioLifecycleManagerPath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/studio/StudioLifecycleManager.ts')
+      const StudioLifecycleManagerFileSource = await getStudioFileSource(StudioLifecycleManagerPath)
+      const studioProtocolFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/protocol.ts')
+      const studioProtocolFileSource = await getStudioFileSource(studioProtocolFilePath)
+      const studioPath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/studio/studio.ts')
+      const studioPathFileSource = await getStudioFileSource(studioPath)
+
+      await Promise.all([
+        fs.writeFile(reportStudioErrorPath, reportStudioErrorFileSource),
+        fs.writeFile(StudioLifecycleManagerPath, StudioLifecycleManagerFileSource),
+        fs.writeFile(studioProtocolFilePath, studioProtocolFileSource),
+        fs.writeFile(studioPath, studioPathFileSource),
       ])
 
       const integrityCheckSource = getIntegrityCheckSource(outputFolder)
@@ -119,8 +135,10 @@ module.exports = async function (params) {
         validateCloudEnvironmentFile(cloudEnvironmentFilePath),
         validateProtocolFile(cloudApiFilePath),
         validateProtocolFile(cloudProtocolFilePath),
-        validateStudioFile(projectBaseFilePath),
-        validateStudioFile(getAndInitializeStudioManagerFilePath),
+        validateStudioFile(reportStudioErrorPath),
+        validateStudioFile(StudioLifecycleManagerPath),
+        validateStudioFile(studioProtocolFilePath),
+        validateStudioFile(studioPath),
       ])
 
       await flipFuses(

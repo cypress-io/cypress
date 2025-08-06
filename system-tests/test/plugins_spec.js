@@ -95,7 +95,8 @@ describe('e2e plugins', function () {
   })
 
   systemTests.it('works with user extensions', {
-    browser: 'chrome',
+    // as of Chrome 137, --load-extension does not work in chrome branded browsers. In order to test this, we need to use the chrome-for-testing browser or chromium.
+    browser: 'chrome-for-testing',
     spec: 'app.cy.js',
     headed: true,
     project: 'plugin-extension',

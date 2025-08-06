@@ -11,9 +11,9 @@ const otherHttpsUrl = Cypress.env('otherHttpsUrl')
 let defaultSameSite = undefined
 
 if (Cypress.isBrowser('firefox')) {
-  // firefox will default to "no_restriction"
+  // firefox will default to "unspecified"
   // @see https://bugzilla.mozilla.org/show_bug.cgi?id=1624668
-  defaultSameSite = 'no_restriction'
+  defaultSameSite = 'unspecified'
 }
 
 describe('cookies', () => {

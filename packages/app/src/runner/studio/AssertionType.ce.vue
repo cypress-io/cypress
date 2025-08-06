@@ -1,9 +1,17 @@
 <template>
   <div
     :class="['assertion-type', { 'single-assertion': !hasOptions }]"
+    tabindex="0"
+    role="button"
+    :aria-expanded="isOpen"
+    :aria-haspopup="hasOptions"
     @click.stop="onClick"
     @mouseover.stop="onOpen"
     @mouseout.stop="onClose"
+    @focus="onOpen"
+    @blur="onClose"
+    @keydown.enter="onClick"
+    @keydown.space="onClick"
   >
     <div class="assertion-type-text">
       <span>
@@ -13,24 +21,13 @@
         v-if="hasOptions"
         class="dropdown-arrow"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="12"
-          height="12"
-          fill="currentColor"
-          viewBox="0 0 16 16"
-        >
-          <path
-            fillRule="evenodd"
-            d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"
-          />
-        </svg>
+        <IconChevronRightMedium />
       </span>
     </div>
     <AssertionOptions
       v-if="hasOptions && isOpen"
       :type="type"
-      :options="options"
+      :options="options || []"
       @set-popper-element="setPopperElement"
       @add-assertion="addAssertion"
     />
@@ -40,10 +37,12 @@
 <script lang="ts" setup>
 import { Ref, ref } from 'vue'
 import AssertionOptions from './AssertionOptions.ce.vue'
+import { IconChevronRightMedium } from '@cypress-design/vue-icon'
+import type { AssertionType } from './types'
 
 const props = defineProps<{
-  type: string
-  options: any
+  type: AssertionType['type']
+  options: AssertionType['options']
 }>()
 
 const emit = defineEmits<{
@@ -58,7 +57,7 @@ const onOpen = () => {
   isOpen.value = true
 }
 
-const onClose = (e: MouseEvent) => {
+const onClose = (e: MouseEvent | FocusEvent) => {
   if (e.relatedTarget instanceof Element &&
     popperElement.value && popperElement.value.contains(e.relatedTarget)) {
     return
@@ -82,38 +81,47 @@ const addAssertion = ({ type, name, value }) => {
 }
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
 @import './assertions-style.scss';
 
 .assertion-type {
-  color: #202020;
   cursor: default;
   font-size: 14px;
   padding: 0.4rem 0.4rem 0.4rem 0.7rem;
   position: static;
+  outline: none;
+  border-radius: 4px;
+  border: 1px solid transparent;
 
   &:first-of-type {
     padding-top: 0.5rem;
   }
 
   &:last-of-type {
-    border-bottom-left-radius: $border-radius;
-    border-bottom-right-radius: $border-radius;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
     padding-bottom: 0.5rem;
   }
 
   &:hover {
-    background-color: #e9ecef;
+    background-color: $gray-1000;
+    border: 1px solid $gray-950;
+  }
+
+  &:focus {
+    color: $indigo-300;
+    outline: none;
+    @include box-shadow;
   }
 
   &.single-assertion {
     cursor: pointer;
-    font-weight: 600;
   }
 
   .assertion-type-text {
     align-items: center;
     display: flex;
+    cursor: pointer;
 
     .dropdown-arrow {
       margin-left: auto;

@@ -74,6 +74,21 @@ describe('lib/socket', () => {
           screenshotsFolder: this.cfg.screenshotsFolder,
         })
 
+        // Create a mock studio object with addSocketListeners method
+        const mockStudio = {
+          addSocketListeners: sinon.stub(),
+        }
+
+        const studioLifecycleManager = {
+          registerStudioReadyListener: sinon.stub().callsFake((callback) => {
+            callback(mockStudio)
+
+            return () => {}
+          }),
+        }
+
+        ctx.coreData.studioLifecycleManager = studioLifecycleManager
+
         this.server.startWebsockets(this.automation, this.cfg, this.options)
         this.socket = this.server._socket
 
@@ -527,12 +542,27 @@ describe('lib/socket', () => {
 
     context('on(studio:init)', () => {
       it('calls onStudioInit', async function () {
-        this.options.onStudioInit.resolves({ canAccessStudioAI: true })
+        this.options.onStudioInit.resolves({ canAccessStudioAI: true, cloudStudioSessionId: 'test-session-id' })
 
         await new Promise((resolve) => {
-          this.client.emit('studio:init', ({ canAccessStudioAI }) => {
+          this.client.emit('studio:init', ({ canAccessStudioAI, cloudStudioSessionId }) => {
             expect(this.options.onStudioInit).to.be.called
             expect(canAccessStudioAI).to.be.true
+            expect(cloudStudioSessionId).to.eq('test-session-id')
+
+            resolve()
+          })
+        })
+      })
+
+      it('calls onStudioInit and handles undefined cloudStudioSessionId', async function () {
+        this.options.onStudioInit.resolves({ canAccessStudioAI: false, cloudStudioSessionId: undefined })
+
+        await new Promise((resolve) => {
+          this.client.emit('studio:init', ({ canAccessStudioAI, cloudStudioSessionId }) => {
+            expect(this.options.onStudioInit).to.be.called
+            expect(canAccessStudioAI).to.be.false
+            expect(cloudStudioSessionId).to.be.undefined
 
             resolve()
           })
@@ -577,6 +607,24 @@ describe('lib/socket', () => {
             resolve()
           })
         })
+      })
+    })
+
+    context('studio.addSocketListeners', () => {
+      it('calls addSocketListeners on studio when socket connects', function () {
+        // Verify that registerStudioReadyListener was called
+        expect(ctx.coreData.studioLifecycleManager.registerStudioReadyListener).to.be.called
+
+        // Check that the callback was called with the mock studio object
+        const registerStudioReadyListenerCallback = ctx.coreData.studioLifecycleManager.registerStudioReadyListener.firstCall.args[0]
+
+        expect(registerStudioReadyListenerCallback).to.be.a('function')
+
+        // Verify the mock studio's addSocketListeners was called by the callback
+        const mockStudio = { addSocketListeners: sinon.stub() }
+
+        registerStudioReadyListenerCallback(mockStudio)
+        expect(mockStudio.addSocketListeners).to.be.called
       })
     })
 

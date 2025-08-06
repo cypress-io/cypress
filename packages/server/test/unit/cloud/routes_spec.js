@@ -51,7 +51,11 @@ describe('lib/cloud/routes', () => {
     })
 
     afterEach(() => {
-      process.env.CYPRESS_INTERNAL_ENV = oldCypressInternalEnv
+      if (oldCypressInternalEnv) {
+        process.env.CYPRESS_INTERNAL_ENV = oldCypressInternalEnv
+      } else {
+        delete process.env.CYPRESS_INTERNAL_ENV
+      }
     })
 
     it('supports development environment', () => {

@@ -1144,34 +1144,6 @@ describe('e2e record', () => {
       })
     })
 
-    describe('create run 402 - free plan exceeds monthly private tests', () => {
-      setupStubbedServer(createRoutes({
-        postRun: {
-          res (req, res) {
-            return res.status(402).json({
-              code: 'FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS',
-              payload: {
-                used: 600,
-                limit: 500,
-                orgId: 'org-id-1234',
-              },
-            })
-          },
-        },
-      }))
-
-      it('errors and exits when on free plan and over recorded runs limit', function () {
-        return systemTests.exec(this, {
-          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-          configFile: 'cypress-with-project-id.config.js',
-          spec: 'record_pass*',
-          record: true,
-          snapshot: true,
-          expectedExitCode: 1,
-        })
-      })
-    })
-
     describe('create run 402 - free plan exceeds monthly tests', () => {
       setupStubbedServer(createRoutes({
         postRun: {
@@ -1993,9 +1965,8 @@ describe('e2e record', () => {
                 warnings: [{
                   name: 'foo',
                   message: 'foo',
-                  code: 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS',
+                  code: 'PAID_PLAN_EXCEEDS_MONTHLY_TESTS',
                   limit: 500,
-                  gracePeriodEnds: '2999-12-31',
                   orgId: 'org-id-1234',
                 }],
               })
@@ -2022,43 +1993,6 @@ describe('e2e record', () => {
 
   describe('api interaction warnings', () => {
     describe('create run warnings', () => {
-      describe('grace period - over private tests limit', () => {
-        const mockServer = setupStubbedServer(createRoutes({
-          postRun: {
-            res (req, res) {
-              mockServer.setSpecs(req)
-
-              return res.status(200).json({
-                runId,
-                groupId,
-                machineId,
-                runUrl,
-                tags,
-                warnings: [{
-                  name: 'foo',
-                  message: 'foo',
-                  code: 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS',
-                  limit: 500,
-                  gracePeriodEnds: '2999-12-31',
-                  orgId: 'org-id-1234',
-                }],
-              })
-            },
-          },
-
-        }))
-
-        it('warns when over private test results', function () {
-          return systemTests.exec(this, {
-            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-            configFile: 'cypress-with-project-id.config.js',
-            spec: 'record_pass*',
-            record: true,
-            snapshot: true,
-          })
-        })
-      })
-
       describe('grace period - over tests limit', () => {
         const mockServer = setupStubbedServer(createRoutes({
           postRun: {
@@ -2155,42 +2089,6 @@ describe('e2e record', () => {
         }))
 
         it('warns when using parallel feature', function () {
-          return systemTests.exec(this, {
-            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-            configFile: 'cypress-with-project-id.config.js',
-            spec: 'record_pass*',
-            record: true,
-            snapshot: true,
-          })
-        })
-      })
-
-      describe('paid plan - over private tests limit', () => {
-        const mockServer = setupStubbedServer(createRoutes({
-          postRun: {
-            res (req, res) {
-              mockServer.setSpecs(req)
-
-              return res.status(200).json({
-                runId,
-                groupId,
-                machineId,
-                runUrl,
-                tags,
-                warnings: [{
-                  name: 'foo',
-                  message: 'foo',
-                  code: 'PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS',
-                  used: 700,
-                  limit: 500,
-                  orgId: 'org-id-1234',
-                }],
-              })
-            },
-          },
-        }))
-
-        it('warns when over private test results', function () {
           return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
             configFile: 'cypress-with-project-id.config.js',
@@ -2351,7 +2249,7 @@ describe('e2e record', () => {
 
             expect(urls).to.include.members([`PUT ${CAPTURE_PROTOCOL_UPLOAD_URL}`])
 
-            expect(artifactReport?.protocol).to.an('object')
+            expect(artifactReport?.protocol).to.be.an('object')
             expect(artifactReport?.protocol?.url).to.be.a('string')
             expect(artifactReport?.protocol?.uploadDuration).to.be.a('number')
             expect(artifactReport?.protocol).to.containSubset({
@@ -2461,10 +2359,13 @@ describe('e2e record', () => {
 
               const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
-              expect(artifactReport?.protocol).to.exist()
-              expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
-              expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
-              expect(artifactReport?.protocol?.url).to.exist().and.not.be.empty()
+              expect(artifactReport?.protocol).to.exist
+              expect(artifactReport?.protocol?.error).to.exist
+              expect(artifactReport?.protocol?.error).to.not.be.empty
+              expect(artifactReport?.protocol?.errorStack).to.exist
+              expect(artifactReport?.protocol?.errorStack).to.not.be.empty
+              expect(artifactReport?.protocol?.url).to.exist
+              expect(artifactReport?.protocol?.url).to.not.be.empty
             })
           })
         })
@@ -2492,10 +2393,13 @@ describe('e2e record', () => {
 
               const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
-              expect(artifactReport?.protocol).to.exist()
-              expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
-              expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
-              expect(artifactReport?.protocol?.url).to.exist().and.not.be.empty()
+              expect(artifactReport?.protocol).to.exist
+              expect(artifactReport?.protocol?.error).to.exist
+              expect(artifactReport?.protocol?.error).to.not.be.empty
+              expect(artifactReport?.protocol?.errorStack).to.exist
+              expect(artifactReport?.protocol?.errorStack).to.not.be.empty
+              expect(artifactReport?.protocol?.url).to.exist
+              expect(artifactReport?.protocol?.url).to.not.be.empty
             })
           })
         })
@@ -2518,10 +2422,13 @@ describe('e2e record', () => {
 
               const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
-              expect(artifactReport?.protocol).to.exist()
-              expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
-              expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
-              expect(artifactReport?.protocol?.url).to.exist().and.not.be.empty()
+              expect(artifactReport?.protocol).to.exist
+              expect(artifactReport?.protocol?.error).to.exist
+              expect(artifactReport?.protocol?.error).to.not.be.empty
+              expect(artifactReport?.protocol?.errorStack).to.exist
+              expect(artifactReport?.protocol?.errorStack).to.not.be.empty
+              expect(artifactReport?.protocol?.url).to.exist
+              expect(artifactReport?.protocol?.url).to.not.be.empty
             })
           })
         })
@@ -2544,10 +2451,13 @@ describe('e2e record', () => {
 
               const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
-              expect(artifactReport?.protocol).to.exist()
-              expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
-              expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
-              expect(artifactReport?.protocol?.url).to.exist().and.not.be.empty()
+              expect(artifactReport?.protocol).to.exist
+              expect(artifactReport?.protocol?.error).to.exist
+              expect(artifactReport?.protocol?.error).to.not.be.empty
+              expect(artifactReport?.protocol?.errorStack).to.exist
+              expect(artifactReport?.protocol?.errorStack).to.not.be.empty
+              expect(artifactReport?.protocol?.url).to.exist
+              expect(artifactReport?.protocol?.url).to.not.be.empty
             })
           })
         })
@@ -2570,9 +2480,11 @@ describe('e2e record', () => {
 
               const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
-              expect(artifactReport?.protocol).to.exist()
-              expect(artifactReport?.protocol?.error).to.exist().and.not.to.be.empty()
-              expect(artifactReport?.protocol?.url).to.exist().and.not.be.empty()
+              expect(artifactReport?.protocol).to.exist
+              expect(artifactReport?.protocol?.error).to.exist
+              expect(artifactReport?.protocol?.error).to.not.be.empty
+              expect(artifactReport?.protocol?.url).to.exist
+              expect(artifactReport?.protocol?.url).to.not.be.empty
             })
           })
         })
@@ -2688,7 +2600,7 @@ describe('capture-protocol api errors', () => {
 
         const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
-        expect(artifactReport?.protocol).to.exist()
+        expect(artifactReport?.protocol).to.exist
         expect(artifactReport?.protocol?.error).to.equal(
           'Failed to upload Test Replay: http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX responded with 500 Internal Server Error',
         )
@@ -2724,14 +2636,15 @@ describe('capture-protocol api errors', () => {
 
         const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
-        expect(artifactReport?.protocol).to.exist()
+        expect(artifactReport?.protocol).to.exist
 
         const expectedUrl = `http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX`
 
         const expectedErrorMessage = `${expectedUrl} responded with 503 Service Unavailable: ${wspTrimmedResponse}`
 
         expect(artifactReport?.protocol?.error).to.equal(`Failed to upload Test Replay after 3 attempts. Errors: ${[expectedErrorMessage, expectedErrorMessage, expectedErrorMessage].join(', ')}`)
-        expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
+        expect(artifactReport?.protocol?.errorStack).to.exist
+        expect(artifactReport?.protocol?.errorStack).to.not.be.empty
       })
     })
   })
@@ -2793,12 +2706,13 @@ describe('capture-protocol api errors', () => {
 
         const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
-        expect(artifactReport?.protocol).to.exist()
+        expect(artifactReport?.protocol).to.exist
         expect(artifactReport?.protocol?.error).to.equal(
           'Failed to upload Test Replay after 3 attempts. Errors: request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test, request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test, request to http://fake.test/url failed, reason: getaddrinfo ENOTFOUND fake.test',
         )
 
-        expect(artifactReport?.protocol?.errorStack).to.exist().and.not.to.be.empty()
+        expect(artifactReport?.protocol?.errorStack).to.exist
+        expect(artifactReport?.protocol?.errorStack).to.not.be.empty
       })
     })
   })

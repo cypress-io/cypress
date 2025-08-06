@@ -126,7 +126,7 @@ export const createProxySock = (opts: CreateProxySockOpts, cb: CreateProxySockCb
 
 export const isRequestHttps = (options: http.RequestOptions) => {
   // WSS connections will not have an href, but you can tell protocol from the defaultAgent
-  return _.get(options, '_defaultAgent.protocol') === 'https:' || (options.href || '').slice(0, 6) === 'https'
+  return _.get(options, '_defaultAgent.protocol') === 'https:' || options.protocol === 'https:' || (options.href || '').slice(0, 6) === 'https:'
 }
 
 export const isResponseStatusCode200 = (head: string) => {
@@ -210,7 +210,26 @@ export class CombinedAgent {
       }
     }
 
+    // If the path property is a fully qualified URL, which is what as Axios appears to set,
+    // parse the URL and set the href, path, and port based on this path
+    if (typeof options.path === 'string' && /^http(s)?:\/\//.test(options.path)) {
+      const pathUrl = new URL(options.path)
+      const portToSet = pathUrl.port ?? options.port
+
+      options.href = options.path
+      options.path = pathUrl.pathname
+
+      if (portToSet) {
+        options.port = Number(portToSet)
+      }
+    }
+
     const isHttps = isRequestHttps(options)
+
+    // Ensure that HTTPS requests are using 443
+    if (isHttps && options.port === 80) {
+      options.port = 443
+    }
 
     if (!options.href) {
       // options.path can contain query parameters, which url.format will not-so-kindly urlencode for us...
@@ -443,7 +462,3 @@ class HttpsAgent extends https.Agent {
 const agent = new CombinedAgent()
 
 export default agent
-
-export const httpsAgent = new HttpsAgent()
-
-export const httpAgent = new HttpAgent()

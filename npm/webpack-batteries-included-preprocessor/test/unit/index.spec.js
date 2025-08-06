@@ -2,6 +2,7 @@ const { expect } = require('chai')
 const decache = require('decache')
 const mock = require('mock-require')
 const sinon = require('sinon')
+const Debug = require('debug')
 
 describe('webpack-batteries-included-preprocessor', () => {
   beforeEach(() => {
@@ -28,6 +29,20 @@ describe('webpack-batteries-included-preprocessor', () => {
 
       expect(result.module.rules).to.have.length(4)
       expect(result.module.rules[3].use[0].loader).to.include('ts-loader')
+    })
+
+    it('adds the BundleAnalyzerPlugin if the user is trying to debug their bundle', () => {
+      Debug.enable('cypress-verbose:webpack-batteries-included-preprocessor:bundle-analyzer')
+
+      // since debug needs to be hydrated before requiring the preprocessor, we need to decache
+      // and require again
+      decache('../../index')
+      preprocessor = require('../../index')
+      const result = preprocessor.getFullWebpackOptions('file/path', 'typescript/path')
+
+      expect(result.plugins).to.have.length(2)
+      expect(result.plugins[1].constructor.name).to.equal('BundleAnalyzerPlugin')
+      Debug.disable()
     })
   })
 

@@ -41,6 +41,7 @@ env:
 jobs:
   stale:
     runs-on: ubuntu-latest
+    if: github.repository == 'cypress-io/cypress'
     steps:
       - uses: actions/stale@v8
         with:

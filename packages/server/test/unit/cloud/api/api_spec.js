@@ -55,7 +55,7 @@ const decryptReqBodyAndRespond = ({ reqBody, resBody }, fn) => {
       expect(params.body).to.deep.eq(reqBody)
     }
 
-    const { secretKey, jwe } = await encryptRequest(params, publicKey)
+    const { secretKey, jwe } = await encryptRequest(params, { publicKey })
 
     if (fn) {
       encryption.encryptRequest.restore()
@@ -219,14 +219,17 @@ describe('lib/cloud/api', () => {
       return api.ping()
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
-        expect(err.isApiError).to.be.true
+      })
+      .catch((err) => {
+        expect(err).to.have.property('isApiError', true)
       })
     })
   })
 
   context('.sendPreflight', () => {
     let prodApi
+    let originalCypressConfigEnv = process.env.CYPRESS_CONFIG_ENV
+    let originalCypressAPIUrl = process.env.CYPRESS_API_URL
 
     beforeEach(function () {
       this.timeout(30000)
@@ -244,6 +247,22 @@ describe('lib/cloud/api', () => {
         }, () => {
           require('../../../../lib/cloud/encryption')
         }, module)
+      }
+
+      prodApi.resetPreflightResult()
+    })
+
+    afterEach(() => {
+      if (originalCypressConfigEnv) {
+        process.env.CYPRESS_CONFIG_ENV = originalCypressConfigEnv
+      } else {
+        delete process.env.CYPRESS_CONFIG_ENV
+      }
+
+      if (originalCypressAPIUrl) {
+        process.env.CYPRESS_API_URL = originalCypressAPIUrl
+      } else {
+        delete process.env.CYPRESS_API_URL
       }
     })
 
@@ -323,12 +342,75 @@ describe('lib/cloud/api', () => {
       })
     })
 
-    it('sets timeout to 60 seconds', () => {
+    it('sets timeout to 5 seconds when no CYPRESS_INITIAL_PREFLIGHT_TIMEOUT env is set', () => {
       sinon.stub(api.rp, 'post').resolves({})
 
       return api.sendPreflight({})
       .then(() => {
-        expect(api.rp.post).to.be.calledWithMatch({ timeout: 60000 })
+        expect(api.rp.post).to.be.calledWithMatch({ timeout: 5000 })
+      })
+    })
+
+    describe('when CYPRESS_INITIAL_PREFLIGHT_TIMEOUT env is set to a negative number', () => {
+      const configuredTimeout = -1
+      let prevEnv
+
+      beforeEach(() => {
+        prevEnv = process.env.CYPRESS_INITIAL_PREFLIGHT_TIMEOUT
+        process.env.CYPRESS_INITIAL_PREFLIGHT_TIMEOUT = configuredTimeout
+      })
+
+      afterEach(() => {
+        process.env.CYPRESS_INITIAL_PREFLIGHT_TIMEOUT = prevEnv
+      })
+
+      it('skips the no-agent preflight request', () => {
+        preflightNock(API_PROD_PROXY_BASEURL)
+        .replyWithError('should not be called')
+
+        preflightNock(API_PROD_BASEURL)
+        .reply(200, decryptReqBodyAndRespond({
+          reqBody: {
+            envUrl: 'https://some.server.com',
+            dependencies: {},
+            errors: [],
+            apiUrl: 'https://api.cypress.io/',
+            projectId: 'abc123',
+          },
+          resBody: {
+            encrypt: true,
+            apiUrl: `${API_PROD_BASEURL}/`,
+          },
+        }))
+
+        return prodApi.sendPreflight({ projectId: 'abc123' })
+        .then((ret) => {
+          expect(ret).to.deep.eq({ encrypt: true, apiUrl: `${API_PROD_BASEURL}/` })
+        })
+      })
+    })
+
+    describe('when CYPRESS_INITIAL_PREFLIGHT_TIMEOUT env is set to a positive number', () => {
+      const configuredTimeout = 10000
+      let prevEnv
+
+      beforeEach(() => {
+        prevEnv = process.env.CYPRESS_INITIAL_PREFLIGHT_TIMEOUT
+        process.env.CYPRESS_INITIAL_PREFLIGHT_TIMEOUT = configuredTimeout
+      })
+
+      afterEach(() => {
+        process.env.CYPRESS_INITIAL_PREFLIGHT_TIMEOUT = prevEnv
+        api.rp.post.restore()
+      })
+
+      it('makes the initial request with the number set in the env', () => {
+        sinon.stub(api.rp, 'post').resolves({})
+
+        return api.sendPreflight({})
+        .then(() => {
+          expect(api.rp.post).to.be.calledWithMatch({ timeout: configuredTimeout })
+        })
       })
     })
 
@@ -435,10 +517,8 @@ describe('lib/cloud/api', () => {
           scopeApi.done()
 
           expect(err).not.to.have.property('statusCode')
-          expect(err).to.contain({
-            name: 'DecryptionError',
-            message: 'JWE Recipients missing or incorrect type',
-          })
+          expect(err).to.have.property('name', 'DecryptionError')
+          expect(err).to.have.property('message', 'JWE Recipients missing or incorrect type')
         })
       })
 
@@ -458,10 +538,8 @@ describe('lib/cloud/api', () => {
           scopeApi.done()
 
           expect(err).not.to.have.property('statusCode')
-          expect(err).to.contain({
-            name: 'DecryptionError',
-            message: 'General JWE must be an object',
-          })
+          expect(err).to.have.property('name', 'DecryptionError')
+          expect(err).to.have.property('message', 'General JWE must be an object')
         })
       })
 
@@ -481,10 +559,8 @@ describe('lib/cloud/api', () => {
           scopeApi.done()
 
           expect(err).not.to.have.property('statusCode')
-          expect(err).to.contain({
-            name: 'DecryptionError',
-            message: 'General JWE must be an object',
-          })
+          expect(err).to.have.property('name', 'DecryptionError')
+          expect(err).to.have.property('message', 'General JWE must be an object')
         })
       })
 
@@ -878,7 +954,7 @@ describe('lib/cloud/api', () => {
       .then(() => {
         throw new Error('should have thrown here')
       }).catch((err) => {
-        expect(err.isApiError).to.be.true
+        expect(err).to.have.property('isApiError', true)
         expect(this.protocolManager.prepareAndSetupProtocol).not.to.be.called
       })
     })
@@ -893,7 +969,7 @@ describe('lib/cloud/api', () => {
         throw new Error('should have thrown here')
       })
       .catch((err) => {
-        expect(err.isApiError).to.be.true
+        expect(err).to.have.property('isApiError', true)
       })
     })
   })
@@ -994,8 +1070,9 @@ describe('lib/cloud/api', () => {
       return api.postInstanceTests(this.props)
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
-        expect(err.isApiError).to.be.true
+      })
+      .catch((err) => {
+        expect(err).to.have.property('isApiError', true)
       })
     })
   })
@@ -1098,8 +1175,9 @@ describe('lib/cloud/api', () => {
       return api.postInstanceResults(this.updateProps)
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
-        expect(err.isApiError).to.be.true
+      })
+      .catch((err) => {
+        expect(err).to.have.property('isApiError', true)
       })
     })
   })
@@ -1195,8 +1273,9 @@ describe('lib/cloud/api', () => {
       })
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
-        expect(err.isApiError).to.be.true
+      })
+      .catch((err) => {
+        expect(err).to.have.property('isApiError', true)
       })
     })
   })
@@ -1220,8 +1299,9 @@ describe('lib/cloud/api', () => {
       return api.getAuthUrls()
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
-        expect(err.isApiError).to.be.true
+      })
+      .catch((err) => {
+        expect(err).to.have.property('isApiError', true)
       })
     })
 
@@ -1267,8 +1347,9 @@ describe('lib/cloud/api', () => {
       return api.postLogout('auth-token-123')
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
-        expect(err.isApiError).to.be.true
+      })
+      .catch((err) => {
+        expect(err).to.have.property('isApiError', true)
       })
     })
   })
@@ -1330,8 +1411,9 @@ describe('lib/cloud/api', () => {
       return api.createCrashReport({ foo: 'bar' }, 'auth-token-123')
       .then(() => {
         throw new Error('should have thrown here')
-      }).catch((err) => {
-        expect(err.isApiError).to.be.true
+      })
+      .catch((err) => {
+        expect(err).to.have.property('isApiError', true)
       })
     })
   })

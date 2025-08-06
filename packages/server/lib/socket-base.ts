@@ -227,9 +227,10 @@ export class SocketBase {
 
           debug('automation:client connected')
 
+          debug('cdp forced for firefox?', !!process.env.FORCE_FIREFOX_CDP && Number(options.getCurrentBrowser()?.majorVersion) < 141)
           // only send the necessary config
           automationClient.emit('automation:config', {
-            IS_CDP_FORCED_FOR_FIREFOX: !!process.env.FORCE_FIREFOX_CDP,
+            IS_CDP_FORCED_FOR_FIREFOX: !!process.env.FORCE_FIREFOX_CDP && Number(options.getCurrentBrowser()?.majorVersion) < 141,
           })
 
           // if our automation disconnects then we're
@@ -407,11 +408,32 @@ export class SocketBase {
           return socket.emit('dev-server:on-spec-updated')
         })
 
+        getCtx().coreData.studioLifecycleManager?.registerStudioReadyListener((studio) => {
+          studio.addSocketListeners(socket)
+        })
+
         socket.on('studio:init', async (cb) => {
           try {
-            const { canAccessStudioAI } = await options.onStudioInit()
+            const { canAccessStudioAI, cloudStudioSessionId } = await options.onStudioInit()
 
-            cb({ canAccessStudioAI })
+            cb({ canAccessStudioAI, cloudStudioSessionId })
+          } catch (error) {
+            cb({ error: errors.cloneErr(error) })
+          }
+        })
+
+        socket.on('studio:protocol:enabled', async (cb) => {
+          try {
+            const ctx = await getCtx()
+            const isStudioReady = ctx.coreData.studioLifecycleManager?.isStudioReady()
+
+            if (!isStudioReady) {
+              return cb({ studioProtocolEnabled: false })
+            }
+
+            const studio = await ctx.coreData.studioLifecycleManager?.getStudio()
+
+            cb({ studioProtocolEnabled: studio?.isProtocolEnabled })
           } catch (error) {
             cb({ error: errors.cloneErr(error) })
           }

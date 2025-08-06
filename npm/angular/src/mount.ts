@@ -8,7 +8,7 @@ window.Mocha['__zone_patch__'] = false
 import 'zone.js/testing'
 
 import { CommonModule } from '@angular/common'
-import { Component, ErrorHandler, EventEmitter, Injectable, SimpleChange, SimpleChanges, Type, OnChanges, Injector, InputSignal, WritableSignal, signal } from '@angular/core'
+import { Component, ErrorHandler, EventEmitter, Injectable, SimpleChange, SimpleChanges, Type, OnChanges, Injector, InputSignal, WritableSignal } from '@angular/core'
 import { toObservable } from '@angular/core/rxjs-interop'
 import {
   ComponentFixture,
@@ -305,63 +305,45 @@ function isWritableSignal (prop: any): boolean {
   return isSignal(prop) && typeof prop === 'function' && typeof prop.set === 'function'
 }
 
-function convertPropertyToSignalIfApplicable (propValue: any, componentValue: any, injector: Injector) {
-  const isComponentValueAnInputSignal = isInputSignal(componentValue)
-  const isComponentValueAModelSignal = isModelSignal(componentValue)
-  let convertedValueIfApplicable = propValue
+function registerSignalEventsIfNeeded<T> (
+  propKey: string,
+  propValue: any,
+  componentValue: any,
+  injector: Injector,
+  fixture: ComponentFixture<T>,
+) {
+  const isPropValueASignal = isSignal(propValue)
 
-  // If the component has the property defined as an InputSignal, we need to detect whether a non signal value or not was passed into the component as a prop
-  // and attempt to merge the value in correctly.
-  // We don't want to expose the primitive created signal as it should really be one-way binding from within the component.
-  // However, to make CT testing easier, a user can technically pass in a signal to an input component and assert on the signal itself and pass in updates
-  // down to the component as 1 way binding is supported by the test harness
-  if (isComponentValueAnInputSignal) {
-    const isPassedInValueNotASignal = !isSignal(propValue)
+  if (isPropValueASignal) {
+    // propValue -> componentValue
+    const convertedToObservable = toObservable(propValue, {
+      injector,
+    })
 
-    if (isPassedInValueNotASignal) {
-      // Input signals require an injection context to set initial values.
-      // Because of this, we cannot create them outside the scope of the component.
-      // Options for input signals also don't allow the passing of an injection contexts, so in order to work around this,
-      // we convert the non signal input passed into the input to a writable signal
-      convertedValueIfApplicable = signal(propValue)
-    }
-
-    // If the component has the property defined as a ModelSignal, we need to detect whether a signal value or not was passed into the component as a prop.
-    // If a non signal property is passed into the component model (primitive, object, array, etc), we need to set the model to that value and propagate changes of that model through the output spy.
-    // Since the non signal type likely lives outside the context of Angular, the non signal type will NOT be updated outside of this context. Instead, the output spy will allow you
-    // to see this change.
-    // If the value passed into the property is in fact a signal, we need to set up two-way binding between the signals to make sure changes from one propagate to the other.
-  } else if (isComponentValueAModelSignal) {
-    const isPassedInValueLikelyARegularSignal = isWritableSignal(propValue)
-
-    // if the value passed into the component is a signal, set up two-way binding
-    if (isPassedInValueLikelyARegularSignal) {
-      // update the passed in value with the models updates
-      componentValue.subscribe((value: any) => {
-        propValue.set(value)
-      })
-
-      // update the model signal with the properties updates
-      const convertedToObservable = toObservable(propValue, {
-        injector,
-      })
-
-      // push the subscription into an array to be cleaned up at the end of the test
-      // to prevent a memory leak
-      activeInternalSubscriptions.push(
-        convertedToObservable.subscribe((value) => {
-          componentValue.set(value)
-        }),
-      )
-    } else {
-      // it's a non signal type, set it as we only need to handle updating the model signal and emit changes on this through the output spy.
-      componentValue.set(propValue)
-
-      convertedValueIfApplicable = componentValue
-    }
+    // push the subscription into an array to be cleaned up at the end of the test
+    // to prevent a memory leak
+    activeInternalSubscriptions.push(
+      convertedToObservable.subscribe((value) => {
+        // keep the component up to date as prop signal changes
+        fixture.componentRef.setInput(propKey, value)
+      }),
+    )
   }
 
-  return convertedValueIfApplicable
+  const isComponentValueAModelSignal = isModelSignal(componentValue)
+
+  if (isPropValueASignal && isComponentValueAModelSignal) {
+    // propValue <- componentValue
+    const modelChanged$ = toObservable(componentValue, {
+      injector,
+    })
+
+    activeInternalSubscriptions.push(
+      modelChanged$.subscribe((value) => {
+        propValue.set(value)
+      }),
+    )
+  }
 }
 
 // In the case of signals, if we need to create an output spy, we need to check first whether or not a user has one defined first or has it created through
@@ -370,7 +352,15 @@ function convertPropertyToSignalIfApplicable (propValue: any, componentValue: an
 function detectAndRegisterOutputSpyToSignal<T> (config: MountConfig<T>, component: { [key: string]: any } & Partial<OnChanges>, key: string, injector: Injector): void {
   if (config.componentProperties) {
     const expectedChangeKey = `${key}Change`
-    let changeKeyIfExists = !!Object.keys(config.componentProperties).find((componentKey) => componentKey === expectedChangeKey)
+    let changeKeyIfExists = !!Object.keys(config.componentProperties).find(
+      (componentKey) => componentKey === expectedChangeKey,
+    )
+
+    if (changeKeyIfExists) {
+      component[expectedChangeKey] =
+        // @ts-expect-error
+        config.componentProperties[expectedChangeKey]
+    }
 
     // since spies do NOT make change handlers by default, similar to the Output() decorator, we need to create the spy and subscribe to the signal
     if (!changeKeyIfExists && config.autoSpyOutputs) {
@@ -410,23 +400,46 @@ function setupComponent<T> (
   const injector = fixture.componentRef.injector
 
   if (config?.componentProperties) {
-    // convert primitives to signals if passed in type is a primitive but expected type is signal
-    // a bit of magic. need to move to another function
-    Object.keys(component).forEach((key) => {
+    if (component instanceof WrapperComponent) {
+      component = Object.assign(component, config.componentProperties)
+    }
+
+    getComponentInputs(fixture.componentRef.componentType).forEach((key) => {
       // only assign props if they are passed into the component
       if (config?.componentProperties?.hasOwnProperty(key)) {
         // @ts-expect-error
         const passedInValue = config?.componentProperties[key]
 
-        const componentValue = component[key]
+        registerSignalEventsIfNeeded(
+          key,
+          passedInValue,
+          component[key],
+          injector,
+          fixture,
+        )
 
-        // @ts-expect-error
-        config.componentProperties[key] = convertPropertyToSignalIfApplicable(passedInValue, componentValue, injector)
         detectAndRegisterOutputSpyToSignal(config, component, key, injector)
+
+        fixture.componentRef.setInput(
+          key,
+          isSignal(passedInValue) ? passedInValue() : passedInValue,
+        )
       }
     })
 
-    component = Object.assign(component, config.componentProperties)
+    getComponentOutputs(fixture.componentRef.componentType).forEach((key) => {
+      const property = component[key]
+
+      if (property instanceof EventEmitter) {
+      // only assign props if they are passed into the component
+        if (config?.componentProperties?.hasOwnProperty(key)) {
+        // @ts-expect-error
+          const passedInValue = config?.componentProperties[key]
+
+          component[key] = passedInValue
+        }
+      }
+    })
   }
 
   if (config.autoSpyOutputs) {
@@ -455,6 +468,26 @@ function setupComponent<T> (
       component.ngOnChanges(simpleChanges)
     }
   }
+}
+
+/**
+ * Gets the input properties of a component - cannot rely on Object.keys() because inclusion of optional properties depends on useDefineForClassFields=true
+ *   Since Angular 15, useDefineForClassFields=false
+ * @param componentType
+ * @returns array of input property names
+ */
+function getComponentInputs (componentType: Type<any>): string[] {
+  // Access Angular's metadata to get input properties
+  const propMetadata = (componentType as any).ɵcmp?.inputs || {}
+
+  return Object.keys(propMetadata)
+}
+
+function getComponentOutputs (componentType: Type<any>): string[] {
+  // Access Angular's metadata to get output properties
+  const propMetadata = (componentType as any).ɵcmp?.outputs || {}
+
+  return Object.keys(propMetadata)
 }
 
 /**

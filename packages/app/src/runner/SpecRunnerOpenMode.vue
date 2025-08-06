@@ -14,36 +14,36 @@
     class="flex"
   >
     <AutomationElement />
-    <AutomationDisconnected
-      v-if="runnerUiStore.automationStatus === 'DISCONNECTED'"
-    />
+    <AutomationDisconnected v-if="runnerUiStore.automationStatus === 'DISCONNECTED'" />
     <AutomationMissing
       v-else-if="runnerUiStore.automationStatus === 'MISSING'"
       :gql="props.gql.currentProject"
     />
     <ResizablePanels
       v-else
-      :style="{width: `calc(100vw - ${screenshotStore.isScreenshotting ? 0 : collapsedNavBarWidth}px)`}"
+      :style="{ width: `calc(100vw - ${screenshotStore.isScreenshotting ? 0 : collapsedNavBarWidth}px)` }"
       :offset-left="collapsedNavBarWidth"
       :max-total-width="windowWidth - collapsedNavBarWidth"
       :initial-panel1-width="specsListWidthPreferences"
       :initial-panel2-width="reporterWidthPreferences"
+      :initial-panel4-width="studioWidthPreferences"
       :min-panel1-width="minWidths.specsList"
       :min-panel2-width="minWidths.reporter"
       :min-panel3-width="minWidths.aut"
+      :min-panel4-width="minWidths.studio"
       :show-panel1="runnerUiStore.isSpecsListOpen && !screenshotStore.isScreenshotting"
       :show-panel2="!screenshotStore.isScreenshotting && !hideCommandLog"
       :show-panel4="shouldShowStudioPanel"
       @resize-end="handleResizeEnd"
       @panel-width-updated="handlePanelWidthUpdated"
     >
-      <template #panel1="{isDragging}">
+      <template #panel1="{ isDragging }">
         <HideDuringScreenshot
           v-if="props.gql.currentProject"
           v-show="runnerUiStore.isSpecsListOpen"
           id="inline-spec-list"
           class="h-full bg-gray-1000 border-gray-900 border-r force-dark"
-          :class="{'pointer-events-none': isDragging}"
+          :class="{ 'pointer-events-none': isDragging }"
         >
           <InlineSpecList
             id="reporter-inline-specs-list"
@@ -58,9 +58,7 @@
         </HideDuringScreenshot>
       </template>
       <template #panel2>
-        <HideDuringScreenshot
-          class="h-full"
-        >
+        <HideDuringScreenshot class="h-full">
           <div
             v-if="!hideCommandLog"
             v-once
@@ -76,12 +74,12 @@
             :gql="props.gql.currentProject"
             :event-manager="eventManager"
             :get-aut-iframe="getAutIframeModel"
+            :should-show-studio-button="shouldShowStudioButton"
+            :studio-beta-available="studioBetaAvailable"
           />
         </HideDuringScreenshot>
 
-        <RemoveClassesDuringScreenshotting
-          class="h-0 p-[16px]"
-        >
+        <RemoveClassesDuringScreenshotting class="h-0 p-[16px]">
           <ScriptError
             v-if="autStore.scriptError"
             :error="autStore.scriptError.error"
@@ -100,18 +98,24 @@
         <ScreenshotHelperPixels />
       </template>
       <template #panel4>
-        <StudioPanel
-          v-if="shouldShowStudioPanel"
-          data-cy="studio-panel"
-          :can-access-studio-a-i="studioStore.canAccessStudioAI"
-        />
+        <HideDuringScreenshot>
+          <StudioPanel
+            v-if="shouldShowStudioPanel"
+            data-cy="studio-panel"
+            :cloud-studio-session-id="studioStore.cloudStudioSessionId"
+            :can-access-studio-a-i="studioStore.canAccessStudioAI"
+            :on-studio-panel-close="handleStudioPanelClose"
+            :event-manager="eventManager"
+            :studio-status="studioStatus"
+          />
+        </HideDuringScreenshot>
       </template>
     </ResizablePanels>
   </AdjustRunnerStyleDuringScreenshot>
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, onMounted } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { REPORTER_ID, RUNNER_ID } from './utils'
 import InlineSpecList from '../specs/InlineSpecList.vue'
 import { getAutIframeModel, getEventManager } from '.'
@@ -126,7 +130,7 @@ import ScreenshotHelperPixels from './screenshot/ScreenshotHelperPixels.vue'
 import { useScreenshotStore } from '../store/screenshot-store'
 import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
 import { useMutation, gql } from '@urql/vue'
-import { SpecRunnerOpenMode_OpenFileInIdeDocument } from '../generated/graphql'
+import { SpecRunnerOpenMode_OpenFileInIdeDocument, StudioStatus_ChangeDocument } from '../generated/graphql'
 import type { SpecRunnerFragment } from '../generated/graphql'
 import { usePreferences } from '../composables/usePreferences'
 import ScriptError from './ScriptError.vue'
@@ -141,12 +145,14 @@ import StudioInstructionsModal from './studio/StudioInstructionsModal.vue'
 import StudioSaveModal from './studio/StudioSaveModal.vue'
 import { useStudioStore } from '../store/studio-store'
 import StudioPanel from '../studio/StudioPanel.vue'
+import { useSubscription } from '../graphql'
 
 const {
   preferredMinimumPanelWidth,
   absoluteAutMinimum,
   absoluteSpecListMinimum,
   absoluteReporterMinimum,
+  absoluteStudioMinimum,
   collapsedNavBarWidth,
 } = runnerConstants
 
@@ -167,9 +173,7 @@ fragment SpecRunner_Preferences on Query {
 
 gql`
 fragment SpecRunner_Studio on Query {
-  studio {
-    status
-  }
+  cloudStudioRequested
 }
 `
 
@@ -201,6 +205,15 @@ mutation SpecRunnerOpenMode_OpenFileInIDE ($input: FileDetailsInput!) {
 }
 `
 
+gql`
+subscription StudioStatus_Change {
+  studioStatusChange {
+    status
+    canAccessStudioAI
+  }
+}
+`
+
 const props = defineProps<{
   gql: SpecRunnerFragment
 }>()
@@ -224,6 +237,10 @@ const {
 
 const studioStore = useStudioStore()
 
+const handleStudioPanelClose = () => {
+  eventManager.emit('studio:cancel', undefined)
+}
+
 const specsListWidthPreferences = computed(() => {
   return props.gql.localSettings.preferences.specListWidth ?? runnerUiStore.specListWidth
 })
@@ -240,12 +257,34 @@ const isSpecsListOpenPreferences = computed(() => {
   return props.gql.localSettings.preferences.isSpecsListOpen ?? false
 })
 
-const studioStatus = computed(() => {
-  return props.gql.studio?.status
+// Initialize with null and wait for subscription to update
+const studioStatus = ref<string | null>(null)
+
+useSubscription({ query: StudioStatus_ChangeDocument }, (_, data) => {
+  if (data?.studioStatusChange) {
+    studioStatus.value = data.studioStatusChange.status
+    studioStore.setCanAccessStudioAI(data.studioStatusChange.canAccessStudioAI)
+  }
+
+  return data
+})
+
+const cloudStudioRequested = computed(() => {
+  studioStore.setCloudStudioRequested(props.gql.cloudStudioRequested || false)
+
+  return props.gql.cloudStudioRequested
+})
+
+const studioBetaAvailable = computed(() => {
+  return !!cloudStudioRequested.value
+})
+
+const shouldShowStudioButton = computed(() => {
+  return !!cloudStudioRequested.value && !studioStore.isOpen
 })
 
 const shouldShowStudioPanel = computed(() => {
-  return studioStatus.value === 'INITIALIZED' && (studioStore.isLoading || studioStore.isActive)
+  return !!cloudStudioRequested.value && (studioStore.isLoading || studioStore.isActive) && !screenshotStore.isScreenshotting
 })
 
 const hideCommandLog = runnerUiStore.hideCommandLog
@@ -297,6 +336,7 @@ const minWidths = computed(() => {
     aut: getMinimum(absoluteAutMinimum, doesContentFit),
     specsList: getMinimum(absoluteSpecListMinimum, doesContentFit),
     reporter: getMinimum(absoluteReporterMinimum, doesContentFit),
+    studio: absoluteStudioMinimum,
   }
 })
 

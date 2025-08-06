@@ -1,3 +1,5 @@
+# [@cypress/puppeteer-v0.1.6](https://github.com/cypress-io/cypress/compare/@cypress/puppeteer-v0.1.5...@cypress/puppeteer-v0.1.6) (2025-05-16)
+
 # [@cypress/puppeteer-v0.1.5](https://github.com/cypress-io/cypress/compare/@cypress/puppeteer-v0.1.4...@cypress/puppeteer-v0.1.5) (2024-06-07)
 
 

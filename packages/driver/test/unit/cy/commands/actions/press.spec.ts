@@ -51,9 +51,9 @@ describe('cy/commands/actions/press', () => {
       },
     }
 
-    // @ts-expect-error - this is a generic mock impl
     Commands = {
-      add: vi.fn(),
+      // @ts-expect-error - this is a generic mock impl
+      addAll: vi.fn(),
     }
 
     // @ts-expect-error
@@ -84,14 +84,14 @@ describe('cy/commands/actions/press', () => {
 
     addCommand(Commands, Cypress, cy, state, config)
 
-    expect(Commands.add).toHaveBeenCalledOnce()
+    expect(Commands.addAll).toHaveBeenCalledOnce()
 
     // @ts-expect-error
-    const [[cmdName, cmd]]: [[string, PressCommand]] = Commands.add.mock.calls
+    const [[obj]]: [[{press: PressCommand}]] = Commands.addAll.mock.calls
 
-    expect(cmdName).toEqual('press')
+    expect(typeof obj.press).toBe('function')
 
-    press = cmd as PressCommand
+    press = obj.press as PressCommand
   })
 
   describe('with a valid key', () => {

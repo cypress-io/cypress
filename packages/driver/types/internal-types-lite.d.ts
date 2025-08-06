@@ -7,6 +7,12 @@ declare namespace Cypress {
   interface Cypress {
     runner: any
     state: State
+    emit: import('eventemitter2').EventEmitter2['emit']
+    removeListener: import('eventemitter2').EventEmitter2['removeListener']
+    primaryOriginCommunicator: import('eventemitter2').EventEmitter2 & {
+      toSpecBridge: (origin: string, event: string, data?: any, responseEvent?: string) => void
+      userInvocationStack?: string
+    }
   }
 
   interface Actions {
@@ -23,6 +29,7 @@ declare namespace Cypress {
     (action: 'test:after:run:async', fn: (attributes: ObjectLike, test: Mocha.Test) => void)
     (action: 'cy:protocol-snapshot', fn: () => void)
     (action: 'test:before:after:run:async', fn: (attributes: ObjectLike, test: Mocha.Test, options: ObjectLike) => void | Promise<any>): Cypress
+    (action: 'paused', fn: (nextCommandName: string) => void)
   }
 
   interface Backend {

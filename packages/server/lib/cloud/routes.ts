@@ -2,7 +2,8 @@ import _ from 'lodash'
 import UrlParse from 'url-parse'
 
 const app_config = require('../../config/app.json')
-const apiUrl = app_config[process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'development'].api_url
+
+export const apiUrl = app_config[process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'development'].api_url
 
 const CLOUD_ENDPOINTS = {
   api: '',
@@ -15,8 +16,7 @@ const CLOUD_ENDPOINTS = {
   instanceStdout: 'instances/:id/stdout',
   instanceArtifacts: 'instances/:id/artifacts',
   captureProtocolErrors: 'capture-protocol/errors',
-  captureProtocolCurrent: 'capture-protocol/script/current.js',
-  studio: 'studio/bundle/current.tgz',
+  studioSession: 'studio/session',
   studioErrors: 'studio/errors',
   exceptions: 'exceptions',
   telemetry: 'telemetry',
@@ -40,7 +40,7 @@ const parseArgs = function (url, args: any[] = []) {
   return url
 }
 
-const makeRoutes = (baseUrl: string, routes: typeof CLOUD_ENDPOINTS) => {
+const _makeRoutes = (baseUrl: string, routes: typeof CLOUD_ENDPOINTS) => {
   return _.reduce(routes, (memo, value, key) => {
     memo[key] = function (...args: any[]) {
       let url = new UrlParse(baseUrl, true)
@@ -60,10 +60,6 @@ const makeRoutes = (baseUrl: string, routes: typeof CLOUD_ENDPOINTS) => {
   }, {} as Record<keyof typeof CLOUD_ENDPOINTS, (...args: any[]) => string>)
 }
 
-const apiRoutes = makeRoutes(apiUrl, CLOUD_ENDPOINTS)
+export const apiRoutes = _makeRoutes(apiUrl, CLOUD_ENDPOINTS)
 
-module.exports = {
-  apiUrl,
-  apiRoutes,
-  makeRoutes: (baseUrl) => makeRoutes(baseUrl, CLOUD_ENDPOINTS),
-}
+export const makeRoutes = (baseUrl) => _makeRoutes(baseUrl, CLOUD_ENDPOINTS)

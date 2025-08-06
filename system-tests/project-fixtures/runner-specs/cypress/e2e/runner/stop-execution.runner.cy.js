@@ -1,10 +1,9 @@
 describe('stop execution', () => {
   it('test stops while running', () => {
-    cy.timeout(200)
+    // ensure the timeout is long enough so we can verify the
+    // UI changes but not too long so we can verify the error message
+    cy.timeout(2000)
     cy.get('.not-exist')
-    setTimeout(() => {
-      cy.$$('button.stop', parent.document).click()
-    }, 100)
   })
 
   afterEach(function () {

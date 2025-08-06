@@ -20,7 +20,7 @@ const routes = require('./routes')
 const debug = Debug('cypress:server:protocol')
 const debugVerbose = Debug('cypress-verbose:server:protocol')
 
-const CAPTURE_ERRORS = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
+const CAPTURE_ERRORS = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH && !process.env.CYPRESS_LOCAL_STUDIO_PATH
 const DELETE_DB = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 
 export const DB_SIZE_LIMIT = 5000000000
@@ -62,8 +62,8 @@ export class ProtocolManager implements ProtocolManagerShape {
     } : undefined
   }
 
-  get db () {
-    return this._db
+  get dbPath () {
+    return this._dbPath
   }
 
   async prepareProtocol (script: string, options: ProtocolManagerOptions) {
