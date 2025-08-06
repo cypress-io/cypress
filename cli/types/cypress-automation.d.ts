@@ -14,7 +14,7 @@ declare namespace Cypress {
     | '<' | '>' | '/' | '?' | '`' | '~' | ' '
     // Control keys
     | 'Enter' | 'Tab' | 'Backspace' | 'Delete' | 'Insert' | 'Home' | 'End'
-    | 'PageUp' | 'PageDown' | 'Escape' | 'CapsLock'
+    | 'PageUp' | 'PageDown' | 'Escape'
     // Arrow keys
     | 'ArrowUp' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight'
     // Function keys

@@ -793,11 +793,6 @@ declare namespace Cypress {
         'PageUp': 'PageUp',
         'PageDown': 'PageDown',
         'Escape': 'Escape',
-        'CapsLock': 'CapsLock',
-        'Shift': 'Shift',
-        'Control': 'Control',
-        'Alt': 'Alt',
-        'Meta': 'Meta',
         // Arrow keys
         'ArrowUp': 'ArrowUp',
         'ArrowDown': 'ArrowDown',

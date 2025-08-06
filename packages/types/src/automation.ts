@@ -14,8 +14,7 @@ export type KeyPressSupportedKeys =
   | '<' | '>' | '/' | '?' | '`' | '~' | ' '
   // Control keys
   | 'Enter' | 'Tab' | 'Backspace' | 'Delete' | 'Insert' | 'Home' | 'End'
-  | 'PageUp' | 'PageDown' | 'Escape' | 'CapsLock' | 'Shift' | 'Control'
-  | 'Alt' | 'Meta'
+  | 'PageUp' | 'PageDown' | 'Escape'
   // Arrow keys
   | 'ArrowUp' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight'
   // Function keys
