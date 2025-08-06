@@ -802,6 +802,46 @@ context('lib/browsers/cdp_automation', () => {
         })
       })
 
+      it('does not throw if the AUT frame cannot be found by name', async function () {
+        this.sendDebuggerCommand.withArgs('Page.getFrameTree').resolves({
+          frameTree:
+            {
+              childFrames: [
+                {
+                  frame: {
+                    id: '1',
+                    name: '123456789',
+                    url: 'http://localhost:3500/fixtures/dom.html',
+                  },
+                },
+              ],
+            },
+        })
+
+        this.sendDebuggerCommand.withArgs('Runtime.evaluate').resolves({
+          result: {
+            type: 'string',
+            value: 'mock title',
+          },
+        })
+
+        // @ts-expect-error
+        cdpAutomation.executionContexts.set(123, {
+          auxData: {
+            frameId: '1',
+          },
+        })
+
+        const resp = await this.onRequest('get:aut:title')
+
+        expect(resp).to.equal('mock title')
+
+        expect(this.sendDebuggerCommand).to.be.calledWith('Runtime.evaluate', {
+          expression: 'window.document.title',
+          contextId: 123,
+        })
+      })
+
       it('fails if the frame cannot be found', async function () {
         expect(this.onRequest('get:aut:title')).to.be.rejectedWith('Could not find AUT frame')
       })

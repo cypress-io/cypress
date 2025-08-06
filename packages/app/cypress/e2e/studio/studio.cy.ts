@@ -1,5 +1,7 @@
 import { launchStudio, loadProjectAndRunSpec, assertClosingPanelWithoutChanges } from './helper'
 
+const urlPrompt = '// Visit a page by entering a url in the address bar or typing a cy.visit command here'
+
 describe('Cypress Studio', () => {
   function incrementCounter (initialCount: number) {
     cy.getAutIframe().within(() => {
@@ -816,5 +818,62 @@ describe('studio functionality', () => {
 
     // Verify URL parameters show suite mode, not test mode
     cy.location().its('hash').should('contain', 'suiteId=r1').and('not.contain', 'testId=')
+  })
+
+  describe('prompt for a new url', () => {
+    const autUrl = 'http://localhost:4455/cypress/e2e/index.html'
+    const visitUrl = 'cypress/e2e/index.html'
+
+    const clearUrl = () => {
+      cy.findByTestId('aut-url-input').should('have.value', autUrl)
+
+      cy.get('.cm-content').invoke('text', '')
+
+      cy.findByTestId('studio-save-button').click()
+
+      cy.findByTestId('aut-url-input').should('have.value', '')
+
+      cy.findByTestId('aut-url-input').should('have.focus')
+
+      cy.get('.cm-line').should('contain.text', urlPrompt)
+    }
+
+    const assertAutUrlInput = () => {
+      cy.findByTestId('aut-url-input').should('have.value', autUrl)
+
+      cy.get('.cm-line').should('not.contain.text', urlPrompt)
+
+      cy.get('.cm-line').should('contain.text', `cy.visit('${visitUrl}')`)
+    }
+
+    const clearAndAddAutUrl = () => {
+      clearUrl()
+      cy.findByTestId('aut-url-input').type(`${visitUrl}{enter}`)
+      assertAutUrlInput()
+    }
+
+    const clearAndAddTestBlockEditorUrl = () => {
+      clearUrl()
+      cy.get('.cm-content').invoke('text', 'cy.visit(\'cypress/e2e/index.html\')')
+      cy.findByTestId('studio-save-button').click()
+      assertAutUrlInput()
+    }
+
+    beforeEach(() => {
+      launchStudio()
+    })
+
+    it('when an existing visit command is cleared and adds a new url via the aut url input', () => {
+      clearAndAddAutUrl()
+    })
+
+    it('when an existing visit command is cleared and adds a new url via test block editor', () => {
+      clearAndAddTestBlockEditorUrl()
+    })
+
+    it('ensures we clear the aut url input properly in between adding and clearing urls', () => {
+      clearAndAddAutUrl()
+      clearAndAddTestBlockEditorUrl()
+    })
   })
 })
