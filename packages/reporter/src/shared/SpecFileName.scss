@@ -9,6 +9,18 @@
   position: relative;
   background: $gray-1100;
 
+  .open-in-ide-button {
+    right: 100px;
+  }
+
+  .button-hover-shadow {
+    right: 100px;
+  }
+
+  .launch-studio-button {
+    @include new-test-button;
+  }
+
   &:after {
     content: none;
   }
@@ -26,6 +38,10 @@
   &:hover,
   &:focus-visible {
     .open-in-ide-button {
+      opacity: 1;
+    }
+
+    .launch-studio-button {
       opacity: 1;
     }
 
