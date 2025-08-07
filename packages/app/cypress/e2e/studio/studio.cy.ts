@@ -444,6 +444,8 @@ cy.get('#increment').click();
         .contains('Increment')
         .should('be.visible')
       })
+
+      cy.percySnapshot()
     })
   })
 
