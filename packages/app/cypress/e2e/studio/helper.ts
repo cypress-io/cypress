@@ -14,12 +14,12 @@ export function loadProjectAndRunSpec ({ projectName = 'experimental-studio' as 
   cy.waitForSpecToFinish()
 }
 
-export function launchStudio ({ specName = 'spec.cy.js', createNewTest = false, cliArgs = [''] } = {}) {
+export function launchStudio ({ specName = 'spec.cy.js', createNewTestFromSuite = false, createNewTestFromSpecHeader = false, cliArgs = [''] } = {}) {
   loadProjectAndRunSpec({ specName, cliArgs })
 
   const testTitle = 'visits a basic html page'
 
-  if (createNewTest) {
+  if (createNewTestFromSuite || createNewTestFromSpecHeader) {
     cy.contains('studio functionality').as('item')
   } else {
     cy.contains(testTitle).as('item')
@@ -28,8 +28,13 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTest = false, 
   cy.get('@item')
   .closest('.runnable-wrapper').as('runnable-wrapper')
 
-  if (createNewTest) {
-    cy.get('@runnable-wrapper').realHover().findByTestId('create-new-test-button').click()
+  if (createNewTestFromSuite || createNewTestFromSpecHeader) {
+    if (createNewTestFromSpecHeader) {
+      cy.findByTestId('create-new-test-from-spec-header').click()
+    } else {
+      cy.get('@runnable-wrapper').realHover().findByTestId('create-new-test-from-suite').click()
+    }
+
     cy.findByTestId('studio-panel').should('be.visible')
     cy.findByTestId('new-test-button').should('be.visible')
   } else {

@@ -216,14 +216,14 @@ describe('tests', () => {
       visitAndRenderReporter(true, false, '__all')
 
       cy.contains('suite 1').realHover()
-      cy.get('[data-cy="create-new-test-button"]').should('not.exist')
+      cy.get('[data-cy="create-new-test-from-suite"]').should('not.exist')
     })
 
     it('shows new test button in suites when running a single spec', () => {
       visitAndRenderReporter(true, false, 'relative/path/to/foo.js')
 
       cy.contains('suite 1').realHover()
-      cy.get('[data-cy="create-new-test-button"]').should('exist')
+      cy.get('[data-cy="create-new-test-from-suite"]').should('exist')
     })
   })
 })
