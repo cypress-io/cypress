@@ -1,11 +1,17 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 14.5.4
+## 14.5.5
 
 _Released 8/12/2025 (PENDING)_
 
 **Bugfixes:**
 
+- Fixed an issue where Angular legacy `Output()` decorators were broken when making component instance field references safe. Fixes [#32137](https://github.com/cypress-io/cypress/issues/32137).
+- Upgraded `tmp` from `~0.2.3` to `~0.2.4`. This removes the [CVE-2025-54798](https://github.com/advisories/GHSA-52f5-9888-hmc6) vulnerability being reported in security scans. Addresses [#32176](https://github.com/cypress-io/cypress/issues/32176).
 - Fixed an issue where `.fixture()` would not return updated content after the underlying file was modified via `.writeFile()`. The fixture cache is now properly invalidated when the backing file is written to, ensuring updated content is returned in subsequent `.fixture()` calls. Fixes [#4716](https://github.com/cypress-io/cypress/issues/4716).
+
+## 14.5.4
+
+_Released 8/07/2025_
 
 **Dependency Updates:**
 
