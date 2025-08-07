@@ -443,9 +443,9 @@ cy.get('#increment').click();
         .find('.assertion-option')
         .contains('Increment')
         .should('be.visible')
-      })
 
-      cy.percySnapshot()
+        cy.percySnapshot()
+      })
     })
   })
 
