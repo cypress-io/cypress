@@ -3815,7 +3815,7 @@ declare namespace Cypress {
     validate?: () => Promise<false | void> | void
   }
 
-  type SameSiteStatus = 'no_restriction' | 'strict' | 'lax'
+  type SameSiteStatus = 'no_restriction' | 'strict' | 'lax' | 'unspecified'
 
   interface SelectFileOptions extends Loggable, Timeoutable, ActionableOptions {
     /**
@@ -3866,8 +3866,8 @@ declare namespace Cypress {
      */
     expiry: number
     /**
-     * The cookie's SameSite value. If set, should be one of `lax`, `strict`, or `no_restriction`.
-     * `no_restriction` is the equivalent of `SameSite=None`. Pass `undefined` to use the browser's default.
+     * The cookie's SameSite value. If set, should be one of `lax`, `strict`, `no_restriction`, or `unspecified`.
+     * `no_restriction` is the equivalent of `SameSite=None`. Pass `undefined` to use the browser's default ('unspecified' is the default for Firefox 140 and up).
      * Note: `no_restriction` can only be used if the secure flag is set to `true`.
      * @default undefined
      */

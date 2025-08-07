@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "14.5.3",
+  "version": "14.5.4",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -132,7 +132,6 @@
     "chai": "4.5.0",
     "chai-as-promised": "7.1.1",
     "chalk": "2.4.2",
-    "check-dependencies": "1.1.0",
     "check-more-types": "2.24.0",
     "commander": "6.2.1",
     "common-tags": "1.8.0",

@@ -21,7 +21,7 @@ function pickCookieProps (cookie) {
 // different defaults, and Firefox lacks support for `unspecified`, so
 // `undefined` is used in lieu of `unspecified`
 // @see https://bugzilla.mozilla.org/show_bug.cgi?id=1624668
-const VALID_SAMESITE_VALUES = ['no_restriction', 'lax', 'strict']
+const VALID_SAMESITE_VALUES = ['no_restriction', 'lax', 'strict', 'unspecified']
 
 function normalizeSameSite (sameSite?: string) {
   if (_.isUndefined(sameSite)) {
