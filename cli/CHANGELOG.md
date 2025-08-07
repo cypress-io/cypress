@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 14.5.4
 
-_Released 8/12/2025 (PENDING)_
+_Released 8/07/2025_
 
 **Dependency Updates:**
 
