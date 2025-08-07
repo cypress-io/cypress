@@ -250,16 +250,6 @@ describe('key:press automation command', () => {
             id: 'someContextId-Tab-idSuffix',
             actions: [
               { type: 'keyDown', value: expectedValue },
-            ],
-          }],
-        })
-
-        expect(client.inputPerformActions.secondCall.args[0]).to.deep.equal({
-          context: autContext,
-          actions: [{
-            type: 'key',
-            id: 'someContextId-Tab-idSuffix',
-            actions: [
               { type: 'keyUp', value: expectedValue },
             ],
           }],
@@ -308,13 +298,8 @@ describe('key:press automation command', () => {
       })
 
       for (const [key, value] of Object.entries(BidiOverrideCodepoints)) {
-        // special formatting for value; otherwise test output will show the rendered unicode character
-
-        if (key === 'F6') {
-          continue
-        }
-
-        it(`dispatches a keydown and keyup action with the value '${value}' for key '${key}'`, async () => {
+        // special handling to render the source unicode instead of the rendered unicode
+        it(`dispatches a keydown and keyup action with the value '\\u${value.charCodeAt(0).toString(16).toUpperCase()}' for key '${key}'`, async () => {
           await bidiKeyPress(key as SupportedKey, client as WebdriverClient, autContext, 'idSuffix')
 
           expect(client.inputPerformActions.firstCall.args[0]).to.deep.equal({
@@ -324,65 +309,12 @@ describe('key:press automation command', () => {
               id: `someContextId-${key}-idSuffix`,
               actions: [
                 { type: 'keyDown', value },
-              ],
-            }],
-          })
-
-          expect(client.inputPerformActions.secondCall.args[0]).to.deep.equal({
-            context: autContext,
-            actions: [{
-              type: 'key',
-              id: `someContextId-${key}-idSuffix`,
-              actions: [
-                { type: 'keyUp', value },
+                { type: 'keyUp', value }, // in some browsers, F6 will cause the frame to lose focus, so the keyup will not be triggered
               ],
             }],
           })
         })
       }
-    })
-
-    describe('when the keydown causes the frame to lose focus (e.g., F6)', () => {
-      beforeEach(() => {
-        client.findElement.withArgs('css selector', 'iframe.aut-iframe').resolves(iframeElement)
-        // first call returns the iframe element, indicating that the frame is focused
-        // @ts-expect-error - webdriver types show this returning a string, but it actually returns an ElementReference, same as findElement
-        client.getActiveElement.onFirstCall().resolves(iframeElement)
-        // second call happens after the keydown, and returns a value indicating the frame is not focused
-        // @ts-expect-error - webdriver types show this returning a string, but it actually returns an ElementReference, same as findElement
-        client.getActiveElement.onSecondCall().resolves(otherElement)
-      })
-
-      it('re-focuses the aut iframe between keydown and keyup', async () => {
-        await bidiKeyPress('F6' as SupportedKey, client as WebdriverClient, autContext, 'idSuffix')
-        expect(client.inputPerformActions.firstCall.args[0]).to.deep.equal({
-          context: autContext,
-          actions: [{
-            type: 'key',
-            id: `someContextId-F6-idSuffix`,
-            actions: [
-              { type: 'keyDown', value: BidiOverrideCodepoints.F6 },
-            ],
-          }],
-        })
-
-        expect(client.scriptEvaluate.withArgs({
-          expression: 'window.focus()',
-          target: { context: autContext },
-          awaitPromise: false,
-        })).to.have.been.calledOnce
-
-        expect(client.inputPerformActions.secondCall.args[0]).to.deep.equal({
-          context: autContext,
-          actions: [{
-            type: 'key',
-            id: `someContextId-F6-idSuffix`,
-            actions: [
-              { type: 'keyUp', value: BidiOverrideCodepoints.F6 },
-            ],
-          }],
-        })
-      })
     })
   })
 })

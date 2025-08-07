@@ -19,7 +19,11 @@ describe('src/cy/commands/actions/press', () => {
     it(`dispatches ${key} keypress to the AUT`, () => {
       cy.press(key)
       cy.get('#keydown').should('have.value', key)
-      cy.get('#keyup').should('have.value', key)
+
+      // in some browsers, F6 will cause the frame to lose focus, so the keyup will not be triggered
+      if (key !== 'F6') {
+        cy.get('#keyup').should('have.value', key)
+      }
     })
   }
 

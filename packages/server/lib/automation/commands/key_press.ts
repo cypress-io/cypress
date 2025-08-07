@@ -159,26 +159,6 @@ export async function bidiKeyPress (inKey: SupportedKey, client: Client, autCont
         id: `${autContext}-${inKey}-${idSuffix || Date.now()}`,
         actions: [
           { type: 'keyDown', value: key },
-        ],
-      }],
-    })
-
-    if ((await getActiveWindow(client)) !== autContext) {
-      await client.scriptEvaluate(
-        {
-          expression: `window.focus()`,
-          target: { context: autContext },
-          awaitPromise: false,
-        },
-      )
-    }
-
-    await client.inputPerformActions({
-      context: autContext,
-      actions: [{
-        type: 'key',
-        id: `${autContext}-${inKey}-${idSuffix || Date.now()}`,
-        actions: [
           { type: 'keyUp', value: key },
         ],
       }],
