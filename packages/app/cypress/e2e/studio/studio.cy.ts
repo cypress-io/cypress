@@ -433,7 +433,7 @@ cy.get('#increment').click();
         })
 
         cy.get('.__cypress-studio-assertions-menu').shadow()
-        .find('.assertions-menu').should('be.visible')
+        .find('.assertions-menu').should('be.visible').should('have.css', 'transform', 'matrix(1, 0, 0, 1, 0, 141)')
 
         // Show submenu
         cy.get('.__cypress-studio-assertions-menu').shadow()
@@ -443,8 +443,6 @@ cy.get('#increment').click();
         .find('.assertion-option')
         .contains('Increment')
         .should('be.visible')
-
-        cy.percySnapshot()
       })
     })
   })
