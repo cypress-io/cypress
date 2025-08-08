@@ -38,7 +38,7 @@ import type { IncomingHttpHeaders } from 'http'
 import type { App as ElectronApp } from 'electron'
 import { globalPubSub } from '.'
 import { ProjectLifecycleManager } from './data/ProjectLifecycleManager'
-import type { CypressError, logError } from '@packages/errors'
+import { CypressError, logError } from '@packages/errors'
 import { resetIssuedWarnings } from '@packages/config'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
