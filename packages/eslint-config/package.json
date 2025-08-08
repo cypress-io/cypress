@@ -27,5 +27,8 @@
   },
   "peerDependencies": {
     "eslint": "^9.31.0"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   }
 }

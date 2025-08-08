@@ -31,6 +31,8 @@ _Released 07/29/2025 (PENDING)_
 
 - Fixed an issue where Create from Component feature might not be able to parse React components from project files. Fixed in [#31457](https://github.com/cypress-io/cypress/pull/31457).
 - Fixed an issue where `isSecureContext` would be `false` on localhost when testing with Cypress. Addresses [#18217](https://github.com/cypress-io/cypress/issues/18217).
+- Fixed an issue where Angular legacy `Output()` decorators were broken when making component instance field references safe. Fixes [#32137](https://github.com/cypress-io/cypress/issues/32137).
+- Upgraded `tmp` from `~0.2.3` to `~0.2.4`. This removes the [CVE-2025-54798](https://github.com/advisories/GHSA-52f5-9888-hmc6) vulnerability being reported in security scans. Addresses [#32176](https://github.com/cypress-io/cypress/issues/32176).
 
 **Misc:**
 
@@ -42,6 +44,14 @@ _Released 07/29/2025 (PENDING)_
 - Upgraded `electron` from `33.2.1` to `36.4.0`. Addresses [#31257](https://github.com/cypress-io/cypress/issues/31257). Addressed in [#31912](https://github.com/cypress-io/cypress/pull/31912).
 - Upgraded bundled Node.js version from `20.18.1` to `22.15.1`. Addresses [#31257](https://github.com/cypress-io/cypress/issues/31257). Addressed in [#31912](https://github.com/cypress-io/cypress/pull/31912).
 - Upgraded bundled Chromium version from `130.0.6723.137` to `136.0.7103.149`. Addresses [#31257](https://github.com/cypress-io/cypress/issues/31257). Addressed in [#31912](https://github.com/cypress-io/cypress/pull/31912).
+
+## 14.5.4
+
+_Released 8/07/2025_
+
+**Dependency Updates:**
+
+- Upgraded `tar-fs` to `2.1.3` and `3.1.0` in places we can control, to resolve [CVE-2024-12905](https://github.com/advisories/GHSA-pq67-2wwv-3xjx). `@puppeteer/browsers` still references `3.0.4`, but it is only used to download browsers which is not a feature of `puppeteer` that we utilize. Addressed in [#32160](https://github.com/cypress-io/cypress/pull/32160).
 
 ## 14.5.3
 

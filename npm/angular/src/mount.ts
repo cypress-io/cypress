@@ -424,7 +424,10 @@ function setupComponent<T> (
     getComponentOutputs(fixture.componentRef.componentType).forEach((key) => {
       const property = component[key]
 
-      if (property instanceof EventEmitter) {
+      // With the introduction of https://github.com/cypress-io/cypress/pull/31993, we want to make sure that component inputs are reference safe inside cy.mount().
+      // However, the exception to this is if the user passes in a Cypress output spy as a property in order to maintain backwards compatibility.
+      // @ts-expect-error
+      if (property instanceof EventEmitter || (config?.componentProperties?.hasOwnProperty(key) && config?.componentProperties[key] instanceof EventEmitter)) {
       // only assign props if they are passed into the component
         if (config?.componentProperties?.hasOwnProperty(key)) {
         // @ts-expect-error
