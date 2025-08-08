@@ -3,6 +3,7 @@ import { TransformOptions, transformSync } from 'esbuild'
 import type { TranspileCache } from './types'
 import path from 'path'
 import { installSourcemapSupport } from './sourcemap-support'
+import { logError } from '@packages/errors'
 
 type EnhancedModule = NodeModule & {
   _extensions: Record<string, (mod: EnhancedModule, filename: string) => void>
@@ -105,8 +106,7 @@ export function hookTranspileTs (
 
         return compiled
       } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error(err)
+        logError(err)
         if (diagnosticsEnabled) {
           // eslint-disable-next-line no-debugger
           debugger

@@ -38,7 +38,7 @@ import type { IncomingHttpHeaders } from 'http'
 import type { App as ElectronApp } from 'electron'
 import { globalPubSub } from '.'
 import { ProjectLifecycleManager } from './data/ProjectLifecycleManager'
-import type { CypressError } from '@packages/errors'
+import type { CypressError, logError } from '@packages/errors'
 import { resetIssuedWarnings } from '@packages/config'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
@@ -290,9 +290,7 @@ export class DataContext {
   }
 
   logTraceError (e: unknown) {
-    // TODO(tim): handle this consistently
-    // eslint-disable-next-line no-console
-    console.error(e)
+    logError(e)
   }
 
   onError = (cypressError: CypressError, title: string = 'Unexpected Error') => {

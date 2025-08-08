@@ -10,7 +10,7 @@ import type { DataContext } from '..'
 import { hasNonExampleSpec } from '../codegen'
 import templates from '../codegen/templates'
 import { insertValuesInConfigFile, toPosix } from '../util'
-import { getError } from '@packages/errors'
+import { getError, logError } from '@packages/errors'
 import { resetIssuedWarnings } from '@packages/config'
 import type { RunSpecErrorCode } from '@packages/graphql/src/schemaTypes'
 import debugLib from 'debug'
@@ -209,9 +209,7 @@ export class ProjectActions {
         }
       })
     } catch (e) {
-      // TODO(tim): remove / replace with ctx.log.error
-      // eslint-disable-next-line
-      console.error(e)
+      logError(e)
       throw e
     }
   }
