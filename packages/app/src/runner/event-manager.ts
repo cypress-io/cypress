@@ -865,7 +865,6 @@ export class EventManager {
     })
 
     const hasActiveStudio = !!this.studioStore.testId ||
-                           (!!this.studioStore.suiteId && this.studioStore._hasStarted) ||
                            !!this.studioStore.newTestLineNumber
 
     const studioSingleTestActive = this.studioStore.newTestLineNumber != null || !!this.studioStore.testId

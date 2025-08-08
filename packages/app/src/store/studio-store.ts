@@ -177,7 +177,7 @@ export const useStudioStore = defineStore('studioRecorder', {
 
     needsProtocolCleanup () {
       // Protocol cleanup (page reload) is only needed if Studio has actually been used for recording
-      return this._hasStarted || this.logs.length > 0 || this._isStudioCreatedTest
+      return this._hasStarted || this.testId || this._isStudioCreatedTest
     },
 
     openInstructionModal () {

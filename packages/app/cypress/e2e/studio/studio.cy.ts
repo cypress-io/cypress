@@ -767,8 +767,6 @@ describe('studio functionality', () => {
     cy.get('.test').should('have.length', 1)
     cy.get('.test').first().should('have.class', 'runnable-active')
 
-    cy.wait(500)
-
     // verify we're still in new test mode
     cy.findByTestId('studio-panel').should('be.visible')
     cy.findByTestId('new-test-button').should('be.visible')
@@ -779,8 +777,6 @@ describe('studio functionality', () => {
 
     // verify URL still shows suite mode, not edit test mode
     cy.location().its('hash').should('contain', 'suiteId=r1').and('not.contain', 'testId=')
-
-    cy.waitForSpecToFinish()
   })
 
   it('shows test body sections correctly when studio panel is open and page is refreshed', () => {
