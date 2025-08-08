@@ -28,20 +28,6 @@ export default (Commands, Cypress, cy, state, config) => {
         $errUtils.throwErrByPath('fixture.set_to_false')
       }
 
-      // if we already have cached
-      // this fixture then just return it
-
-      // always return a promise here
-      // to make our interface consistent
-      // for use by other code
-      const resp = cache[fixture]
-
-      if (resp) {
-        // clone the object first to prevent
-        // accidentally mutating the one in the cache
-        return Promise.resolve(clone(resp))
-      }
-
       let options: Record<string, any> = {}
 
       if (_.isObject(args[0])) {
@@ -52,6 +38,14 @@ export default (Commands, Cypress, cy, state, config) => {
 
       if (_.isString(args[0]) || args[0] === null) {
         options.encoding = args[0]
+      }
+
+      const cacheKey = `${fixture}\u0000${options.encoding || ''}`
+      const cachedContent = cache[cacheKey]
+
+      if (cachedContent) {
+        // Clone the cached content to prevent accidental mutation.
+        return Promise.resolve(clone(cachedContent))
       }
 
       const timeout = options.timeout ?? Cypress.config('responseTimeout')
@@ -81,7 +75,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
         // add the fixture to the cache
         // so it can just be returned next time
-        cache[fixture] = response
+        cache[cacheKey] = response
 
         // Add the filename as a symbol, in case we need it later (such as when storing an alias)
         state('current').set('fileName', basename(fixture))
