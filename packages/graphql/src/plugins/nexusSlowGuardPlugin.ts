@@ -1,7 +1,7 @@
 import { plugin } from 'nexus'
 import { isPromiseLike, pathToArray } from 'nexus/dist/utils'
 import chalk from 'chalk'
-import { logError } from '@packages/errors'
+import { logError } from '@packages/stderr-filtering'
 
 const HANGING_RESOLVER_THRESHOLD = 100
 

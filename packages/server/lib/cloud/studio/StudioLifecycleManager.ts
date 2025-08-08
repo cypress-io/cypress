@@ -23,7 +23,7 @@ import { telemetryManager } from './telemetry/TelemetryManager'
 import { BUNDLE_LIFECYCLE_MARK_NAMES, BUNDLE_LIFECYCLE_TELEMETRY_GROUP_NAMES } from './telemetry/constants/bundle-lifecycle'
 import { INITIALIZATION_TELEMETRY_GROUP_NAMES } from './telemetry/constants/initialization'
 import crypto from 'crypto'
-import { logError } from '@packages/errors'
+import { logError } from '@packages/stderr-filtering'
 
 const debug = Debug('cypress:server:studio-lifecycle-manager')
 const routes = require('../routes')

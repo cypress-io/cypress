@@ -3,7 +3,7 @@ import { TransformOptions, transformSync } from 'esbuild'
 import type { TranspileCache } from './types'
 import path from 'path'
 import { installSourcemapSupport } from './sourcemap-support'
-import { logError } from '@packages/errors'
+import { logError } from '@packages/stderr-filtering'
 
 type EnhancedModule = NodeModule & {
   _extensions: Record<string, (mod: EnhancedModule, filename: string) => void>

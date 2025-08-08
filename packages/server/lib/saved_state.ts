@@ -8,7 +8,7 @@ import FileUtil from './util/file'
 import { fs } from './util/fs'
 import { AllowedState, allowedKeys } from '@packages/types'
 import { globalPubSub } from '@packages/data-context'
-import { logError } from '@packages/errors'
+import { logError } from '@packages/stderr-filtering'
 
 const debug = Debug('cypress:server:saved_state')
 

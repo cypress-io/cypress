@@ -14,7 +14,7 @@ const debugStderr = require('debug')('cypress:internal-stderr')
 
 fs = Promise.promisifyAll(fs)
 
-const { FilterTaggedContent, FilterPrefixedContent, WriteToDebug, START_TAG, END_TAG } = require('@packages/errors')
+const { START_TAG, END_TAG, FilterTaggedContent, FilterPrefixedContent, WriteToDebug } = require('@packages/stderr-filtering')
 
 /**
  * If running as root on Linux, no-sandbox must be passed or Chrome will not start

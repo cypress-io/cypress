@@ -1,0 +1,17 @@
+{
+  "extends": "./../ts/tsconfig.json",
+  "include": [
+    "lib/*.ts",
+    "lib/**/*.ts",
+  ],
+  "compilerOptions": {
+    "lib": ["esnext"],
+    "outDir": "./dist",
+    "esModuleInterop": true,
+    "declaration": true,
+    "declarationMap": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": false,
+  }
+}

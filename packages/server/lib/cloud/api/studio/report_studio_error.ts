@@ -2,7 +2,7 @@ import type { StudioCloudApi } from '@packages/types/src/studio/studio-server-ty
 import Debug from 'debug'
 import { stripPath } from '../../strip_path'
 const debug = Debug('cypress:server:cloud:api:studio:report_studio_errors')
-import { logError } from '@packages/errors'
+import { logError } from '@packages/stderr-filtering'
 
 export interface ReportStudioErrorOptions {
   cloudApi: StudioCloudApi

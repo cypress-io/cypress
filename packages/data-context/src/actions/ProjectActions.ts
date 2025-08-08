@@ -10,10 +10,11 @@ import type { DataContext } from '..'
 import { hasNonExampleSpec } from '../codegen'
 import templates from '../codegen/templates'
 import { insertValuesInConfigFile, toPosix } from '../util'
-import { getError, logError } from '@packages/errors'
+import { getError } from '@packages/errors'
 import { resetIssuedWarnings } from '@packages/config'
 import type { RunSpecErrorCode } from '@packages/graphql/src/schemaTypes'
 import debugLib from 'debug'
+import { logError } from '@packages/stderr-filtering'
 
 export class RunSpecError extends Error {
   constructor (public code: typeof RunSpecErrorCode[number], msg: string) {
