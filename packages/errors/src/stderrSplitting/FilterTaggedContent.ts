@@ -8,13 +8,17 @@ export class FilterTaggedContent extends Transform {
   private inTaggedContent: boolean = false
 
   constructor (private startTag: string, private endTag: string, private filtered: Writable) {
-    super()
+    super({
+      transform: (chunk, encoding, next) => this.transform(chunk, encoding, next),
+      flush: (callback) => this.flush(callback),
+    })
   }
 
-  transform (chunk: Buffer, encoding: BufferEncoding, next: (err?: Error) => void) {
+  transform = (chunk: Buffer, encoding: BufferEncoding, next: (err?: Error) => void) => {
     try {
       if (!this.strDecoder) {
-        this.strDecoder = new StringDecoder(encoding)
+        // @ts-expect-error type here is not correct, 'buffer' is not a valid encoding but it does get passed in
+        this.strDecoder = new StringDecoder(encoding === 'buffer' ? 'utf8' : encoding)
       }
 
       if (!this.lineDecoder) {
@@ -28,17 +32,21 @@ export class FilterTaggedContent extends Transform {
       }
     } catch (err) {
       next(err)
+
+      return
     }
     next()
   }
 
-  flush (callback: (err?: Error) => void) {
+  flush = (callback: (err?: Error) => void) => {
     try {
       for (const line of this.lineDecoder?.end() || []) {
         this.handleLine(line)
       }
     } catch (err) {
       callback(err)
+
+      return
     }
     callback()
   }

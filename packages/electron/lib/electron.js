@@ -1,24 +1,20 @@
-import cp from 'child_process'
+const cp = require('child_process')
+const os = require('os')
+const path = require('path')
+const debugElectron = require('debug')('cypress:electron')
+const Promise = require('bluebird')
+const minimist = require('minimist')
+const inspector = require('inspector')
+const execa = require('execa')
+const paths = require('./paths')
+const install = require('./install')
+let fs = require('fs-extra')
 
-import os from 'os'
-import path from 'path'
-import debug from 'debug'
-import Promise from 'bluebird'
-import minimist from 'minimist'
-import inspector from 'inspector'
-import execa from 'execa'
-import paths from './paths'
-import install from './install'
-import { Writable } from 'stream'
-import fs from 'fs-extra'
-import { StringDecoder } from 'node:string_decoder'
-
-const debugElectron = debug('cypress:electron')
-const debugStderr = debug('cypress:internal-stderr')
+const debugStderr = require('debug')('cypress:internal-stderr')
 
 fs = Promise.promisifyAll(fs)
 
-import { FilterTaggedContent, FilterPrefixedContent, START_TAG, END_TAG } from '@packages/errors'
+const { FilterTaggedContent, FilterPrefixedContent, WriteToDebug, START_TAG, END_TAG } = require('@packages/errors')
 
 /**
  * If running as root on Linux, no-sandbox must be passed or Chrome will not start
@@ -145,7 +141,7 @@ module.exports = {
 
       debugElectron('spawning %s with args', execPath, argv)
 
-      if (debug.enabled) {
+      if (debugElectron.enabled) {
         // enable the internal chromium logger
         argv.push('--enable-logging')
       }
@@ -172,23 +168,9 @@ module.exports = {
 
       const filterTaggedContent = new FilterTaggedContent(START_TAG, END_TAG, process.stderr)
       const filterPrefixedContent = new FilterPrefixedContent(/^cypress:(\S+:)+ /, process.stderr)
-      let strDecoder = undefined
-      const writeToDebug = new Writable({
-        write (chunk, encoding, next) {
-          if (!strDecoder) {
-            strDecoder = new StringDecoder(encoding)
-          }
+      const toDebug = new WriteToDebug(debugStderr)
 
-          debugStderr(strDecoder.write(chunk))
-          next()
-        },
-        final (callback) {
-          strDecoder = undefined
-          callback()
-        },
-      })
-
-      spawned.stderr.pipe(filterTaggedContent).pipe(filterPrefixedContent).pipe(writeToDebug)
+      spawned.stderr.pipe(filterTaggedContent).pipe(filterPrefixedContent).pipe(toDebug)
       spawned.stdout.pipe(process.stdout)
 
       return spawned

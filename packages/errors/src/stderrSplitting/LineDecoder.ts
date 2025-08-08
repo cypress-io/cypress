@@ -11,13 +11,13 @@ export class LineDecoder {
     this.buffer = lines.pop() || ''
 
     for (const line of lines) {
-      yield line
+      yield `${line}${line.length > 0 ? '\n' : ''}`
     }
   }
 
   *end (chunk?: string) {
     for (const line of `${this.buffer}${(chunk || '')}`.split('\n')) {
-      yield line
+      yield `${line}\n`
     }
   }
 }
