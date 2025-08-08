@@ -33,6 +33,8 @@ _Released 07/29/2025 (PENDING)_
 - Fixed an issue where `isSecureContext` would be `false` on localhost when testing with Cypress. Addresses [#18217](https://github.com/cypress-io/cypress/issues/18217).
 - Fixed an issue where Angular legacy `Output()` decorators were broken when making component instance field references safe. Fixes [#32137](https://github.com/cypress-io/cypress/issues/32137).
 - Upgraded `tmp` from `~0.2.3` to `~0.2.4`. This removes the [CVE-2025-54798](https://github.com/advisories/GHSA-52f5-9888-hmc6) vulnerability being reported in security scans. Addresses [#32176](https://github.com/cypress-io/cypress/issues/32176).
+- Fixed an issue where `.fixture()` calls with a specified encoding would sometimes still attempt to parse the file based on its extension. Files with an explicit encoding are now always treated as raw content. Fixes [#32139](https://github.com/cypress-io/cypress/issues/32139).
+- Fixed an issue where `.fixture()` calls with different encoding options would return inconsistent content based on execution order. Fixes [#32138](https://github.com/cypress-io/cypress/issues/32138).
 
 **Misc:**
 
