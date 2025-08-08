@@ -39,7 +39,7 @@ function convertSameSiteExtensionToCdp (str: CyCookie['sameSite']): Protocol.Net
     'no_restriction': 'None',
     'lax': 'Lax',
     'strict': 'Strict',
-  })[str] : str as any
+  })[str] as Protocol.Network.CookieSameSite : str as undefined
 }
 
 function convertSameSiteCdpToExtension (str: Protocol.Network.CookieSameSite): chrome.cookies.SameSiteStatus {

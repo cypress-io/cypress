@@ -613,7 +613,12 @@ const systemTests = {
       const s = this.servers
 
       if (s) {
-        await Bluebird.map(s, stopServer)
+        try {
+          await Bluebird.map(s, stopServer)
+        } catch (err) {
+          console.error('Error stopping server', err)
+          throw err
+        }
       }
     })
   },

@@ -8,13 +8,9 @@ import path from 'path'
 import mime from 'mime'
 import { cookieMatches, CyCookieFilter } from '../automation/util'
 import utils from './utils'
+import type { CyCookie } from '../automation/util'
 
 const debug = Debug('cypress:server:browsers:webkit-automation')
-
-export type CyCookie = Pick<chrome.cookies.Cookie, 'name' | 'value' | 'expirationDate' | 'hostOnly' | 'domain' | 'path' | 'secure' | 'httpOnly'> & {
-  // use `undefined` instead of `unspecified`
-  sameSite?: 'no_restriction' | 'lax' | 'strict'
-}
 
 const extensionMap = {
   'no_restriction': 'None',

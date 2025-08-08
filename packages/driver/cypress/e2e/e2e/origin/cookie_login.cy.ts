@@ -192,8 +192,7 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
       verifyIdpNotLoggedIn({ expectNullCookie: false })
     })
 
-    // FIXME: Currently in Firefox, the default cookie setting in the extension is no_restriction, which can be set with Secure=false.
-    it('SameSite=None -> not logged in', { browser: '!firefox' }, () => {
+    it('SameSite=None -> not logged in', () => {
       cy.origin('http://www.foobar.com:3500', { args: { username } }, ({ username }) => {
         cy.get('[data-cy="username"]').type(username)
         cy.get('[data-cy="cookieProps"]').type('SameSite=None')
