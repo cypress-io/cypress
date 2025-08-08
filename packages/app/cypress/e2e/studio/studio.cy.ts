@@ -737,6 +737,27 @@ describe('studio functionality', () => {
     cy.location().its('hash').and('not.contain', 'testId=').and('not.contain', 'studio=')
   })
 
+  it('does not prompt for URL when creating a new test in studio', () => {
+    launchStudio({ specName: 'spec-w-visit.cy.js', createNewTestFromSuite: true })
+    cy.location().its('hash').should('contain', 'suiteId=r2').and('contain', 'studio=')
+    cy.waitForSpecToFinish()
+
+    cy.findByTestId('aut-url-input').should('have.value', 'http://localhost:4455/cypress/e2e/index.html')
+  })
+
+  it('does not reload the page if we didnt open a test in studio', () => {
+    launchStudio({ specName: 'spec-w-visit.cy.js', createNewTestFromSuite: true })
+
+    // set a property on the window to see if the page reloads
+    cy.window().then((w) => w['beforeReload'] = true)
+
+    // close new test mode
+    cy.findByTestId('studio-header-studio-button').click()
+
+    // if this property is still set on the window, then the page didn't reload
+    cy.window().then((w) => expect(w['beforeReload']).to.be.true)
+  })
+
   it('removes the studio url parameters when closing studio new test', () => {
     launchStudio({ specName: 'spec-w-visit.cy.js', createNewTestFromSuite: true })
 
