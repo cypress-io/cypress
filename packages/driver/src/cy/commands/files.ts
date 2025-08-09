@@ -16,8 +16,6 @@ interface ReadFileOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable
 type WriteFileOptions = Partial<Cypress.WriteFileOptions & Cypress.Timeoutable>
 
 export default (Commands, Cypress, cy, state) => {
-  const { defaultCommandTimeout, fixturesFolder } = Cypress.config()
-
   Commands.addQuery('readFile', function readFile (file: string, encoding: Cypress.Encodings | ReadFileOptions | undefined, userOptions?: ReadFileOptions, ...extras: never[]) {
     if (_.isObject(encoding)) {
       userOptions = encoding
@@ -28,7 +26,7 @@ export default (Commands, Cypress, cy, state) => {
 
     encoding = encoding === undefined ? 'utf8' : encoding
 
-    const timeout = userOptions.timeout ?? defaultCommandTimeout as number
+    const timeout = userOptions.timeout ?? Cypress.config('defaultCommandTimeout') as number
 
     this.set('timeout', timeout)
     this.set('ensureExistenceFor', 'subject')
@@ -159,6 +157,8 @@ export default (Commands, Cypress, cy, state) => {
 
   Commands.addAll({
     writeFile (fileName: string, contents: string, encoding: Cypress.Encodings | WriteFileOptions | undefined, userOptions: WriteFileOptions, ...extras: never[]) {
+      const { defaultCommandTimeout, fixturesFolder } = Cypress.config()
+
       if (_.isObject(encoding)) {
         userOptions = encoding
         encoding = undefined
@@ -227,23 +227,25 @@ export default (Commands, Cypress, cy, state) => {
         consoleProps['File Path'] = filePath
         consoleProps['Contents'] = contents
 
-        const resolvedFixturesFolder = resolve(fixturesFolder)
-        const resolvedFilePath = resolve(filePath)
-        const relativePath = relative(resolvedFixturesFolder, resolvedFilePath)
+        if (fixturesFolder !== false) {
+          const resolvedFixturesFolder = resolve(fixturesFolder)
+          const resolvedFilePath = resolve(filePath)
+          const relativePath = relative(resolvedFixturesFolder, resolvedFilePath)
 
-        // If `relativePath` does not start with ".." and is not equal to itself
-        // with a leading "..", then `filePath` is inside `fixturesFolder`.
-        const isInsideFixturesFolder =
+          // If `relativePath` does not start with ".." and is not equal to itself
+          // with a leading "..", then `filePath` is inside `fixturesFolder`.
+          const isInsideFixturesFolder =
             relativePath && !relativePath.startsWith('..') && !isAbsolute(relativePath)
 
-        if (isInsideFixturesFolder) {
-          /**
-           * Relative path from the fixtures folder to the written file,
-           * normalized with forward slashes.
-           */
-          const fixtureName = relativePath.replace(/\\/g, '/')
+          if (isInsideFixturesFolder) {
+            /**
+             * Relative path from the fixtures folder to the written file,
+             * normalized with forward slashes.
+             */
+            const fixtureName = relativePath.replace(/\\/g, '/')
 
-          Cypress.emit('fixture:cache:invalidate', fixtureName)
+            Cypress.emit('fixture:cache:invalidate', fixtureName)
+          }
         }
 
         return null
