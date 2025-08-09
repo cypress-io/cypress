@@ -17,27 +17,62 @@ Thanks for taking the time to contribute! :smile:
 
 ## Table of Contents
 
-- [Code of Conduct](#code-of-conduct)
-- [Opening Issues](#opening-issues)
-- [Writing Documentation](#writing-documentation)
-- [Writing Code](#writing-code)
-  - [What you need to know before getting started](#what-you-need-to-know-before-getting-started)
-  - [Requirements](#requirements)
-  - [Getting Started](#getting-started)
-  - [Coding Style](#coding-style)
-  - [Adding links within code](#adding-links-within-code)
-  - [Tests](#tests)
-  - [Packages](#packages)
-- [Committing Code](#committing-code)
-  - [Branches](#branches)
-  - [Pull Requests](#pull-requests)
-  - [Dependencies](#dependencies)
-- [Reviewing Code](#reviewing-code)
-  - [Some rules about Code Review](#some-rules-about-code-review)
-  - [Steps to take during Code Review](#steps-to-take-during-code-review)
-  - [Code Review Checklist](#code-review-checklist)
-  - [Code Review of Dependency Updates](#code-review-of-dependency-updates)
-- [Releases](#releases)
+- [Contributing to Cypress](#contributing-to-cypress)
+  - [Table of Contents](#table-of-contents)
+  - [Code of Conduct](#code-of-conduct)
+  - [Opening Issues](#opening-issues)
+    - [Update Cypress](#update-cypress)
+    - [Getting more information](#getting-more-information)
+    - [Fill out our Issue Template](#fill-out-our-issue-template)
+    - [Describe Problems](#describe-problems)
+    - [Reproducibility](#reproducibility)
+  - [Common issues](#common-issues)
+  - [Writing Documentation](#writing-documentation)
+  - [Writing code](#writing-code)
+    - [What you need to know before getting started](#what-you-need-to-know-before-getting-started)
+      - [Cypress and Packages](#cypress-and-packages)
+    - [Requirements](#requirements)
+      - [Debian/Ubuntu](#debianubuntu)
+      - [Windows](#windows)
+      - [Corepack](#corepack)
+    - [Getting Started](#getting-started)
+      - [Adding new Dependencies](#adding-new-dependencies)
+      - [Tasks](#tasks)
+        - [Common Top Level Tasks](#common-top-level-tasks)
+        - [Package-Level Scripts](#package-level-scripts)
+      - [Internal Vite Options](#internal-vite-options)
+        - [`CYPRESS_INTERNAL_VITE_DEV`](#cypress_internal_vite_dev)
+        - [`CYPRESS_INTERNAL_VITE_INSPECT`](#cypress_internal_vite_inspect)
+        - [`CYPRESS_INTERNAL_VITE_OPEN_MODE_TESTING`](#cypress_internal_vite_open_mode_testing)
+        - [`CYPRESS_INTERNAL_VITE_APP_PORT`](#cypress_internal_vite_app_port)
+        - [`CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT`](#cypress_internal_vite_launchpad_port)
+      - [Debug Logs](#debug-logs)
+    - [Coding Style](#coding-style)
+    - [Adding links within code](#adding-links-within-code)
+    - [Tests](#tests)
+      - [Docker](#docker)
+      - [Docker as a performance constrained environment](#docker-as-a-performance-constrained-environment)
+    - [Packages](#packages)
+  - [Committing Code](#committing-code)
+    - [Branches](#branches)
+    - [Pull Requests](#pull-requests)
+    - [Write Some Tests](#write-some-tests)
+    - [Dependencies](#dependencies)
+  - [Reviewing Code](#reviewing-code)
+    - [Some rules about Code Review](#some-rules-about-code-review)
+    - [Steps to take during Code Review](#steps-to-take-during-code-review)
+    - [Code Review Checklist](#code-review-checklist)
+      - [User Experience](#user-experience)
+      - [Functionality](#functionality)
+      - [Maintainability](#maintainability)
+      - [Quality](#quality)
+    - [Code Review of Dependency Updates](#code-review-of-dependency-updates)
+      - [Dependency Update Instructions](#dependency-update-instructions)
+      - [Dependency Updates Checklist](#dependency-updates-checklist)
+  - [Releases](#releases)
+  - [Known problems](#known-problems)
+    - [ENFILE or EMFILE](#enfile-or-emfile)
+    - [lock file](#lock-file)
 
 ## Code of Conduct
 
@@ -108,7 +143,6 @@ spec execution | Running all specs or some specs in some specific order |  [open
 test execution | Running tests inside a single spec | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20test%20execution), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+test+execution%22+is%3Aclosed)
 typescript | Transpiling or bundling TypeScript | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20typescript), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+typescript%22+is%3Aclosed)
 video | Problems with video recordings | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20video%20%F0%9F%93%B9), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+video+%F0%9F%93%B9%22+is%3Aclosed)
-
 
 ## Writing Documentation
 
@@ -329,15 +363,15 @@ Each package is responsible for building itself and testing itself and can do so
 
 #### Internal Vite Options
 When executing top or package level scripts, [Vite](https://vitejs.dev/) may be used to build/host parts of the application. This section is to serve as a general reference for these environment variables that may be leverage throughout the repository.
-###### `CYPRESS_INTERNAL_VITE_DEV`
+##### `CYPRESS_INTERNAL_VITE_DEV`
 Set to `1` if wanting to leverage [vite's](https://vitejs.dev/guide/#command-line-interface) `vite dev` over `vite build` to avoid a full [production build](https://vitejs.dev/guide/build.html).
-###### `CYPRESS_INTERNAL_VITE_INSPECT`
+##### `CYPRESS_INTERNAL_VITE_INSPECT`
 Used internally to leverage [vite-plugin-inspect](https://github.com/antfu/vite-plugin-inspect) to view intermediary vite plugin state. The `CYPRESS_INTERNAL_VITE_DEV` is required for this to be applied correctly. Set to `1` to enable.
-###### `CYPRESS_INTERNAL_VITE_OPEN_MODE_TESTING`
+##### `CYPRESS_INTERNAL_VITE_OPEN_MODE_TESTING`
 Leveraged only for internal cy-in-cy type tests to access the Cypress instance from the parent frame. Please see the [E2E Open Mode Testing](./guides/e2e-open-testing.md) Guide. Set to `true` when doing
-###### `CYPRESS_INTERNAL_VITE_APP_PORT`
+##### `CYPRESS_INTERNAL_VITE_APP_PORT`
 Leveraged only when `CYPRESS_INTERNAL_VITE_DEV` is set to spawn the vite dev server for the app on the specified port. The default port is `3333`.
-###### `CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT`
+##### `CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT`
 Leveraged only when `CYPRESS_INTERNAL_VITE_DEV` is set to spawn the vite dev server for the launchpad on the specified port. The default port is `3001`.
 #### Debug Logs
 

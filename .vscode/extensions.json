@@ -74,7 +74,8 @@
     // Name: Gremlins tracker for Visual Studio Code
     // Description: When you paste from Slack, Figma, or Google Docs, you'll get stylized quotes.
     // This extension reveals some characters that can be harmful because they are invisible or otherwise non-obvious. 
-    "nhoizey.gremlins"
+    "nhoizey.gremlins",
+    "streetsidesoftware.code-spell-checker"
   ],
 
 	// List of extensions recommended by VS Code that should not be recommended for Cypress contributors using VS Code:
