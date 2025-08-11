@@ -737,7 +737,7 @@ describe('studio functionality', () => {
     cy.location().its('hash').and('not.contain', 'testId=').and('not.contain', 'studio=')
   })
 
-  it('does not prompt for URL when creating a new test in studio', () => {
+  it('does not prompt for a URL until studio is active', () => {
     launchStudio({ specName: 'spec-w-visit.cy.js', createNewTestFromSuite: true })
     cy.location().its('hash').should('contain', 'suiteId=r2').and('contain', 'studio=')
     cy.waitForSpecToFinish()
