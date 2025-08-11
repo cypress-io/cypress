@@ -86,6 +86,8 @@ const events: Events = {
       appState.temporarilySetAutoScrolling(startInfo.autoScrollingEnabled)
       runnablesStore.setInitialScrollTop(startInfo.scrollTop)
       appState.setStudioActive(startInfo.studioActive)
+      appState.setStudioSingleTestActive(startInfo.studioSingleTestActive)
+
       if (runnablesStore.hasTests) {
         statsStore.start(startInfo)
       }

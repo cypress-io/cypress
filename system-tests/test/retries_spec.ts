@@ -29,10 +29,4 @@ describe('retries', () => {
   it('prints current retries', {
     spec: 'current_retries.cy.js',
   })
-
-  it('warns about retries plugin', {
-    project: 'plugin-retries',
-    spec: 'main.spec.cy.js',
-    snapshot: true,
-  })
 })

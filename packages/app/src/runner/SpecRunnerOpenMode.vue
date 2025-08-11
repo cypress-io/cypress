@@ -9,16 +9,6 @@
     :open="promptStore.moreInfoNeededModalIsOpen"
     @close="promptStore.closeMoreInfoNeededModal"
   />
-  <StudioInstructionsModal
-    v-if="studioStore.instructionModalIsOpen"
-    :open="studioStore.instructionModalIsOpen"
-    @close="studioStore.closeInstructionModal"
-  />
-  <StudioSaveModal
-    v-if="studioStore.saveModalIsOpen"
-    :open="studioStore.saveModalIsOpen"
-    @close="studioStore.closeSaveModal"
-  />
   <AdjustRunnerStyleDuringScreenshot
     id="main-pane"
     class="flex"
@@ -117,6 +107,7 @@
             :on-studio-panel-close="handleStudioPanelClose"
             :event-manager="eventManager"
             :studio-status="studioStatus"
+            :aut-url-selector="autUrlSelector"
           />
         </HideDuringScreenshot>
       </template>
@@ -126,6 +117,7 @@
 
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { REPORTER_ID, RUNNER_ID } from './utils'
 import InlineSpecList from '../specs/InlineSpecList.vue'
 import { getAutIframeModel, getEventManager } from '.'
@@ -151,14 +143,15 @@ import { useEventManager } from './useEventManager'
 import AutomationDisconnected from './automation/AutomationDisconnected.vue'
 import AutomationMissing from './automation/AutomationMissing.vue'
 import { runnerConstants } from './runner-constants'
-import StudioInstructionsModal from './studio/StudioInstructionsModal.vue'
-import StudioSaveModal from './studio/StudioSaveModal.vue'
 import { useStudioStore } from '../store/studio-store'
 import StudioPanel from '../studio/StudioPanel.vue'
 import { useSubscription } from '../graphql'
 import PromptGetCodeModal from '../prompt/PromptGetCodeModal.vue'
 import PromptMoreInfoNeededModal from '../prompt/PromptMoreInfoNeededModal.vue'
 import { usePromptStore } from '../store/prompt-store'
+
+// this is used by the StudioPanel to access the AUT URL input
+const autUrlSelector = '.aut-url-input'
 
 const {
   preferredMinimumPanelWidth,
@@ -231,6 +224,7 @@ const props = defineProps<{
   gql: SpecRunnerFragment
 }>()
 
+const route = useRoute()
 const eventManager = getEventManager()
 
 const autStore = useAutStore()
@@ -293,7 +287,14 @@ const studioBetaAvailable = computed(() => {
 })
 
 const shouldShowStudioButton = computed(() => {
-  return !!cloudStudioRequested.value && !studioStore.isOpen
+  // Find the experimentalStudio config field
+  const experimentalStudioConfig = props.gql.currentProject?.config?.find((item) => item.field === 'experimentalStudio')
+  const experimentalStudioEnabled = experimentalStudioConfig?.value === true
+
+  // Check if we're running all specs by looking at the route query
+  const isRunningAllSpecs = route.query.file === '__all'
+
+  return !!cloudStudioRequested.value && !studioStore.isOpen && experimentalStudioEnabled && !isRunningAllSpecs
 })
 
 const shouldShowStudioPanel = computed(() => {

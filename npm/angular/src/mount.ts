@@ -123,12 +123,6 @@ export type MountResponse<T> = {
   component: T
 };
 
-// 'zone.js/testing' is not properly aliasing `it.skip` but it does provide `xit`/`xspecify`
-// Written up under https://github.com/angular/angular/issues/46297 but is not seeing movement
-// so we'll patch here pending a fix in that library
-// @ts-ignore Ignore so that way we can bypass semantic error TS7017: Element implicitly has an 'any' type because type 'typeof globalThis' has no index signature.
-globalThis.it.skip = globalThis.xit
-
 @Injectable()
 class CypressAngularErrorHandler implements ErrorHandler {
   handleError (error: Error): void {
@@ -430,7 +424,10 @@ function setupComponent<T> (
     getComponentOutputs(fixture.componentRef.componentType).forEach((key) => {
       const property = component[key]
 
-      if (property instanceof EventEmitter) {
+      // With the introduction of https://github.com/cypress-io/cypress/pull/31993, we want to make sure that component inputs are reference safe inside cy.mount().
+      // However, the exception to this is if the user passes in a Cypress output spy as a property in order to maintain backwards compatibility.
+      // @ts-expect-error
+      if (property instanceof EventEmitter || (config?.componentProperties?.hasOwnProperty(key) && config?.componentProperties[key] instanceof EventEmitter)) {
       // only assign props if they are passed into the component
         if (config?.componentProperties?.hasOwnProperty(key)) {
         // @ts-expect-error

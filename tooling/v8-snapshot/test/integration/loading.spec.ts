@@ -1,6 +1,6 @@
 import path from 'path'
 import { SnapshotGenerator } from '../../src/generator/snapshot-generator'
-import { exec as execOrig } from 'child_process'
+import { exec as execOrig, spawn } from 'child_process'
 import { promisify } from 'util'
 import { electronExecutable } from '../utils/consts'
 import { expect, assert } from 'chai'
@@ -149,19 +149,37 @@ describe('loading', () => {
         PROJECT_BASE_DIR: projectBaseDir,
         DEBUG_COLORS: 1,
       }
-      const cmd =
-      `${electronExecutable} -r ${projectBaseDir}/hook-require.js` +
-      ` ${projectBaseDir}/app.js`
 
       try {
-        const { stdout } = await exec(cmd, { env })
+        const child = spawn(electronExecutable, ['-r', `${projectBaseDir}/hook-require.js`, `${projectBaseDir}/app.js`], { env, stdio: 'pipe' })
+
+        let stdout = ''
+
+        // Pipe stdout to process.stdout for real-time output
+        child.stdout.pipe(process.stdout)
+        child.stderr.pipe(process.stderr)
+
+        // Also collect the output
+        child.stdout.on('data', (data) => {
+          stdout += data.toString()
+        })
+
+        const exitCode = await new Promise((resolve, reject) => {
+          child.on('error', reject)
+          child.on('exit', resolve)
+        })
+
+        if (exitCode !== 0) {
+          throw new Error(`Process exited with code ${exitCode}`)
+        }
+
         const res = JSON.parse(stdout.trim())
 
         expect(res.itemIsDir).to.be.equal(131072)
       } catch (err: any) {
         assert.fail(err.toString())
       }
-    })
+    }).timeout(120000)
   }
 
   it('loads a cached module that modifies require cache', async () => {

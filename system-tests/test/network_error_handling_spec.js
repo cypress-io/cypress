@@ -373,41 +373,6 @@ describe('e2e network error handling', function () {
       })
     })
 
-    it('tests run as expected', function () {
-      return systemTests.exec(this, {
-        spec: 'network_error_handling.cy.js',
-        expectedExitCode: 2,
-        snapshot: true,
-      }).then(({ stdout }) => {
-        // sometimes <img>, <script> get retried, sometimes they do not
-
-        if (counts['/immediate-reset?load-img'] > 1) {
-          console.log('load-img was retried', counts['/immediate-reset?load-img'], 'times')
-          counts['/immediate-reset?load-img'] = 1
-        }
-
-        if (counts['/immediate-reset?load-js'] > 1) {
-          console.log('load-js was retried', counts['/immediate-reset?load-js'], 'times')
-          counts['/immediate-reset?load-js'] = 1
-        }
-
-        expect(counts).to.deep.eq({
-          '/immediate-reset?visit': 5,
-          '/immediate-reset?request': 5,
-          '/immediate-reset?load-img': 1,
-          '/immediate-reset?load-js': 1,
-          '/works-third-time-else-500/500-for-request': 3,
-          '/works-third-time/for-request': 3,
-          '/works-third-time-else-500/500-for-visit': 3,
-          '/works-third-time/for-visit': 3,
-          '/print-body-third-time': 3,
-          '/print-body-third-time-form': 1,
-          '/load-img-net-error.html': 1,
-          '/load-script-net-error.html': 1,
-        })
-      })
-    })
-
     it('does not connect to the upstream proxy for the SNI server request', function () {
       const onConnect = sinon.spy(() => {
         return true

@@ -22,7 +22,7 @@ export const itHandlesFileOpening = ({ getRunner, selector, file, stackTrace = f
       cy.stub(getRunner(), 'emit').callThrough()
 
       if (stackTrace) {
-        cy.contains('View stack trace').click()
+        cy.contains('Stack trace').click()
       }
 
       cy.get(selector).first().click().then(() => {

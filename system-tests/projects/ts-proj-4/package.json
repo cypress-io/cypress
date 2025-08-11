@@ -1,7 +1,0 @@
-{
-  "name": "ts-proj-4",
-  "version": "0.0.0-test",
-  "dependencies": {
-    "typescript": "4.9.5"
-  }
-}

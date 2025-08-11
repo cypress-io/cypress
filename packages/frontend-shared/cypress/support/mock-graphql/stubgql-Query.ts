@@ -13,9 +13,6 @@ export const stubQuery: MaybeResolver<Query> = {
   wizard (source, args, ctx) {
     return ctx.wizard
   },
-  migration (source, args, ctx) {
-    return ctx.migration
-  },
   currentProject (source, args, ctx) {
     return ctx.currentProject
   },

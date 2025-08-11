@@ -285,7 +285,7 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
     await fs.remove(path.join(buildAppDir, 'index2.js'))
   }
 
-  await testAlteringEntryPoint('console.log("simple alteration")', 'Integrity check failed with expected stack length 9 but got 10')
+  await testAlteringEntryPoint('console.log("simple alteration")', 'Integrity check failed with expected stack length 10 but got 12')
   await testAlteringEntryPoint('console.log("accessing " + global.getSnapshotResult())', 'getSnapshotResult can only be called once')
 
   function compareGlobals () {
@@ -299,9 +299,9 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
     console.error(`extra keys in electron process: ${extraKeys}`)
   }
 
-  const allowList = ['__core-js_shared__', 'getSnapshotResult', 'supportTypeScript', 'Iterator']
+  const allowList = ['__core-js_shared__', 'getSnapshotResult', 'supportTypeScript', 'SuppressedError', 'DisposableStack', 'AsyncDisposableStack', 'Float16Array']
 
-  await testAlteringEntryPoint(`(${compareGlobals.toString()})()`, `extra keys in electron process: ${allowList}\nIntegrity check failed with expected stack length 9 but got 10`)
+  await testAlteringEntryPoint(`(${compareGlobals.toString()})()`, `extra keys in electron process: ${allowList}\nIntegrity check failed with expected stack length 10 but got 12`)
 
   const testTemporarilyRewritingEntryPoint = async () => {
     const file = path.join(buildAppDir, 'index.js')

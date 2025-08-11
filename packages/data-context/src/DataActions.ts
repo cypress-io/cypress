@@ -6,7 +6,6 @@ import {
   FileActions,
   ProjectActions,
   WizardActions,
-  MigrationActions,
   BrowserActions,
   DevActions,
   AuthActions,
@@ -31,7 +30,6 @@ export class DataActions {
   private _wizard: WizardActions
   private _project: ProjectActions
   private _electron: ElectronActions
-  private _migration: MigrationActions
   private _browser: BrowserActions
   private _servers: ServersActions
   private _versions: VersionsActions
@@ -52,7 +50,6 @@ export class DataActions {
     this._wizard = new WizardActions(this.ctx)
     this._project = new ProjectActions(this.ctx)
     this._electron = new ElectronActions(this.ctx)
-    this._migration = new MigrationActions(this.ctx)
     this._browser = new BrowserActions(this.ctx)
     this._servers = new ServersActions(this.ctx)
     this._versions = new VersionsActions(this.ctx)
@@ -98,10 +95,6 @@ export class DataActions {
 
   get electron () {
     return this._electron
-  }
-
-  get migration () {
-    return this._migration
   }
 
   get browser () {

@@ -1374,10 +1374,17 @@ describe('src/cy/commands/cookies', () => {
 
       cy.setCookie('five', 'bar')
 
-      // @see https://bugzilla.mozilla.org/show_bug.cgi?id=1624668
-      // TODO(webkit): pw webkit has the same issue as firefox (no "unspecified" state), need a patched binary
-      if (Cypress.isBrowser('firefox') || Cypress.isBrowser('webkit')) {
-        cy.getCookie('five').should('include', { sameSite: 'no_restriction' })
+      // @see https://bugzilla.mozilla.org/show_bug.cgi?id=1550032
+      // Firefox bidi returns "unspecified" for sameSite;
+      // webkit & firefox < 135 return "no_restriction" for sameSite;
+      // other browsers do not return sameSite at all
+      const sameSite = (
+        Cypress.isBrowser('webkit')
+      ) ? 'no_restriction' :
+        Cypress.isBrowser('firefox') ? 'unspecified' : null
+
+      if (sameSite) {
+        cy.getCookie('five').should('include', { sameSite })
       } else {
         cy.getCookie('five').should('not.have.property', 'sameSite')
       }
@@ -1515,7 +1522,7 @@ describe('src/cy/commands/cookies', () => {
           assertLogLength(this.logs, 1)
           expect(lastLog.get('error').message).to.eq(stripIndent`
             If a \`sameSite\` value is supplied to \`cy.setCookie()\`, it must be a string from the following list:
-              > no_restriction, lax, strict
+              > no_restriction, lax, strict, unspecified
             You passed:
               > bad`)
 

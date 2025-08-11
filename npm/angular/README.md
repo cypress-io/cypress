@@ -6,7 +6,7 @@ Mount Angular components in the open source [Cypress.io](https://www.cypress.io/
 
 ## Requirements
 
-- Angular 17.2.0+ (Cypress 13 and under supports Angular 13 - 16)
+- Angular 18.0.0+ (`@cypress/angular@2` supports Angular 13 - 16 and `@cypress/angular@3` supports Angular 17).
 
 ## Development
 

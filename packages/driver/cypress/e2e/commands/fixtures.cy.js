@@ -265,6 +265,26 @@ describe('src/cy/commands/fixtures', () => {
           })
         })
       })
+
+      it('should respect encoding specification', () => {
+        const fixture = 'comma-separated.csv'
+
+        cy.fixture(fixture, 'base64').then((content) => {
+          cy.wrap(content).should('eq', 'T25lLFR3byxUaHJlZQoxLDIsMwo=')
+          cy.wrap(content).as('base64')
+        })
+
+        cy.fixture(fixture).then((content) => {
+          cy.wrap(content).should('eq', 'One,Two,Three\n1,2,3\n')
+          cy.wrap(content).as('utf8')
+        })
+
+        cy.get('@base64').then((base64) => {
+          cy.get('@utf8').then((utf8) => {
+            cy.wrap(base64).should('not.eq', utf8)
+          })
+        })
+      })
     })
   })
 })

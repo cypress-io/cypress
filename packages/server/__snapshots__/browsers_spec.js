@@ -38,8 +38,4 @@ Available browsers found on your system are:
  - chrome
  - chrome:canary
  - firefox
-
-Note: In Cypress version 4.0.0, Canary must be launched as chrome:canary, not canary.
-
-See https://on.cypress.io/migration-guide for more information on breaking changes in 4.0.0.
 `

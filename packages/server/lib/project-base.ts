@@ -173,7 +173,7 @@ export class ProjectBase extends EE {
       })
     }
 
-    if (!cfg.isTextTerminal) {
+    if (!cfg.isTextTerminal && cfg.resolved.experimentalStudio?.value) {
       const studioLifecycleManager = new StudioLifecycleManager()
 
       studioLifecycleManager.initializeStudioManager({

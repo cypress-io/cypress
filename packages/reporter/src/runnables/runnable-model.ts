@@ -5,6 +5,7 @@ export interface RunnableProps {
   id: string
   title?: string
   hooks: Array<HookProps>
+  parentTitle?: string
 }
 
 export default class Runnable {
@@ -12,6 +13,7 @@ export default class Runnable {
   title?: string
   level: number
   hooks: Array<HookProps> = []
+  parentTitle?: string
 
   constructor (props: RunnableProps, level: number) {
     makeObservable(this, {
@@ -19,11 +21,13 @@ export default class Runnable {
       title: observable,
       level: observable,
       hooks: observable,
+      parentTitle: observable,
     })
 
     this.id = props.id
     this.title = props.title
     this.level = level
     this.hooks = props.hooks
+    this.parentTitle = props.parentTitle
   }
 }

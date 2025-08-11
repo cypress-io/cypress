@@ -7,6 +7,7 @@ system-tests/projects/e2e/lib/fail.js
 system-tests/projects/e2e/static/fail.js
 system-tests/projects/ids/cypress/e2e/dom.jsx
 system-tests/projects/no-specs/src/Invalid.jsx
+system-tests/projects/no-specs-babel-conflict/src/Invalid.jsx
 system-tests/projects/todos/tests/_fixtures/bad_js.js
 system-tests/projects/todos/tests/_fixtures/bar.js
 system-tests/projects/todos/tests/_fixtures/foo.js

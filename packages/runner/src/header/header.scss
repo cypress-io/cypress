@@ -396,26 +396,6 @@
         text-decoration: none;
       }
     }
-
-    .studio-controls {
-      display: flex;
-      margin-left: auto;
-
-      .button-studio {
-        border-left: 1px solid #e3e3e3;
-        font-size: 1.25em;
-      }
-
-      .button-success {
-        color: $success;
-      }
-
-      .button-studio-copy {
-        i {
-          width: 15px;
-        }
-      }
-    }
   }
 
   .url-container {

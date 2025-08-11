@@ -1130,10 +1130,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         // doesn't trigger a confirmation dialog
         return undefined
       },
-      onPageHide (e) {
-        // unload is being actively deprecated/removed by chrome, so for
-        // compatibility, we are using `window`'s `pagehide` event as a proxy
-        // for the `window:unload` event that we emit. See: https://github.com/cypress-io/cypress/pull/29525
+      onUnload (e) {
         return cy.Cypress.action('app:window:unload', e)
       },
       onNavigation (...args) {

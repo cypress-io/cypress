@@ -22,11 +22,8 @@ export const urqlCacheKeys: Partial<UrqlCacheKeys> = {
   keys: {
     DevState: (data) => data.__typename,
     Wizard: (data) => data.__typename,
-    Migration: (data) => data.__typename,
     CloudRunCommitInfo: () => null,
     GitInfo: () => null,
-    MigrationFile: () => null,
-    MigrationFilePart: () => null,
     CodeFrame: () => null,
     ProjectPreferences: (data) => data.__typename,
     VersionData: () => null,

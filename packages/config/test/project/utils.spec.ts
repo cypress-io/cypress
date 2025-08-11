@@ -958,17 +958,6 @@ describe('config/src/project/utils', () => {
       })
     })
 
-    // @see https://github.com/cypress-io/cypress/issues/6892
-    it('warns if experimentalGetCookiesSameSite is passed', async function () {
-      const warning = sinon.spy(errors, 'warning')
-
-      await this.defaults('experimentalGetCookiesSameSite', true, {
-        experimentalGetCookiesSameSite: true,
-      })
-
-      expect(warning).to.be.calledWith('EXPERIMENTAL_SAMESITE_REMOVED')
-    })
-
     it('warns if experimentalJustInTimeCompile is passed', async function () {
       const warning = sinon.spy(errors, 'warning')
 
@@ -979,16 +968,6 @@ describe('config/src/project/utils', () => {
       expect(warning).to.be.calledWith('EXPERIMENTAL_JIT_COMPILE_REMOVED')
     })
 
-    it('warns if experimentalSessionSupport is passed', async function () {
-      const warning = sinon.spy(errors, 'warning')
-
-      await this.defaults('experimentalSessionSupport', true, {
-        experimentalSessionSupport: true,
-      })
-
-      expect(warning).to.be.calledWith('EXPERIMENTAL_SESSION_SUPPORT_REMOVED')
-    })
-
     it('warns if experimentalSessionAndOrigin is passed', async function () {
       const warning = sinon.spy(errors, 'warning')
 
@@ -997,47 +976,6 @@ describe('config/src/project/utils', () => {
       })
 
       expect(warning).to.be.calledWith('EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED')
-    })
-
-    it('warns if experimentalShadowDomSupport is passed', async function () {
-      const warning = sinon.spy(errors, 'warning')
-
-      await this.defaults('experimentalShadowDomSupport', true, {
-        experimentalShadowDomSupport: true,
-      })
-
-      expect(warning).to.be.calledWith('EXPERIMENTAL_SHADOW_DOM_REMOVED')
-    })
-
-    it('warns if experimentalRunEvents is passed', async function () {
-      const warning = sinon.spy(errors, 'warning')
-
-      await this.defaults('experimentalRunEvents', true, {
-        experimentalRunEvents: true,
-      })
-
-      expect(warning).to.be.calledWith('EXPERIMENTAL_RUN_EVENTS_REMOVED')
-    })
-
-    // @see https://github.com/cypress-io/cypress/pull/9185
-    it('warns if experimentalNetworkStubbing is passed', async function () {
-      const warning = sinon.spy(errors, 'warning')
-
-      await this.defaults('experimentalNetworkStubbing', true, {
-        experimentalNetworkStubbing: true,
-      })
-
-      expect(warning).to.be.calledWith('EXPERIMENTAL_NETWORK_STUBBING_REMOVED')
-    })
-
-    it('warns if firefoxGcInterval is passed', async function () {
-      const warning = sinon.spy(errors, 'warning')
-
-      await this.defaults('firefoxGcInterval', true, {
-        firefoxGcInterval: true,
-      })
-
-      expect(warning).to.be.calledWith('FIREFOX_GC_INTERVAL_REMOVED')
     })
 
     describe('.resolved', () => {

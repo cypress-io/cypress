@@ -91,6 +91,10 @@ export interface AutomationCommands {
   'remote:debugger:protocol': CommandSignature
   'response:received': CommandSignature
   'key:press': CommandSignature<KeyPressParams, void>
+  'get:aut:url': CommandSignature<void, string>
+  'reload:aut:frame': CommandSignature<{ forceReload: boolean }, void>
+  'navigate:aut:history': CommandSignature<{ historyNumber: number }, void>
+  'get:aut:title': CommandSignature<void, string>
 }
 
 export type OnRequestEvent = <T extends keyof AutomationCommands>(message: T, data: AutomationCommands[T]['dataType']) => Promise<AutomationCommands[T]['returnType']>

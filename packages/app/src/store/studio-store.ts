@@ -52,24 +52,10 @@ export interface CommandLog {
   isStudio: boolean
 }
 
-const eventTypes = [
-  'click',
-  // 'dblclick',
-  'change',
-  'keydown',
-  'keyup',
-]
-
 const eventsWithValue = [
   'change',
   'keydown',
   'keyup',
-]
-
-const internalMouseEvents = [
-  'mousedown',
-  'mouseover',
-  'mouseout',
 ]
 
 const tagNamesWithoutText = [
@@ -117,13 +103,14 @@ interface StudioRecorderState {
     element: Element
     selector: string
   }
-  _body?: Element
   _currentId: number
 
   canAccessStudioAI: boolean
   showUrlPrompt: boolean
   cloudStudioRequested: boolean
   cloudStudioSessionId?: string
+  _isStudioCreatedTest: boolean
+  newTestLineNumber?: number
 }
 
 export const useStudioStore = defineStore('studioRecorder', {
@@ -142,6 +129,8 @@ export const useStudioStore = defineStore('studioRecorder', {
       showUrlPrompt: true,
       cloudStudioRequested: false,
       cloudStudioSessionId: undefined,
+      newTestLineNumber: undefined,
+      _isStudioCreatedTest: false,
     }
   },
 
@@ -156,7 +145,9 @@ export const useStudioStore = defineStore('studioRecorder', {
 
     setTestId (testId: string) {
       this.testId = testId
-      this._updateUrlParams(['testId', 'suiteId'])
+      this.suiteId = undefined
+      this.newTestLineNumber = undefined
+      this._updateUrlParams(['testId', 'suiteId', 'newTestLineNumber'])
     },
 
     setSuiteId (suiteId: string) {
@@ -173,9 +164,15 @@ export const useStudioStore = defineStore('studioRecorder', {
       this.cloudStudioSessionId = cloudStudioSessionId
     },
 
+    setNewTestLineNumber (newTestLineNumber: number) {
+      this.newTestLineNumber = newTestLineNumber
+      this._updateUrlParams(['newTestLineNumber'])
+    },
+
     clearRunnableIds () {
       this.testId = undefined
       this.suiteId = undefined
+      this.newTestLineNumber = undefined
     },
 
     openInstructionModal () {
@@ -198,8 +195,8 @@ export const useStudioStore = defineStore('studioRecorder', {
       this.isLoading = true
     },
 
-    setInactive () {
-      this.isActive = false
+    setActive (isActive: boolean) {
+      this.isActive = isActive
     },
 
     setUrl (url?: string) {
@@ -213,11 +210,11 @@ export const useStudioStore = defineStore('studioRecorder', {
     setup (config) {
       const studio = this._getUrlParams()
 
-      if (studio.testId) {
+      if (studio.newTestLineNumber) {
+        this.setNewTestLineNumber(studio.newTestLineNumber)
+      } else if (studio.testId) {
         this.setTestId(studio.testId)
-      }
-
-      if (studio.suiteId) {
+      } else if (studio.suiteId) {
         this.setSuiteId(studio.suiteId)
       }
 
@@ -225,41 +222,46 @@ export const useStudioStore = defineStore('studioRecorder', {
         this._initialUrl = studio.url
       }
 
-      if (this.testId || this.suiteId) {
+      // if we have an existing test or are creating a new test, we need to start loading
+      // otherwise if we have a suite, we can just set the studio active
+      if (this.testId || studio.newTestLineNumber) {
         this.setAbsoluteFile(config.spec.absolute)
         this.startLoading()
+      } else if (this.suiteId) {
+        this.setActive(true)
       }
     },
 
     initialize () {
-      if (this.suiteId) {
-        getCypress().runner.setOnlySuiteId(this.suiteId)
+      if (this.newTestLineNumber) {
+        getCypress().runner.setNewTestLineNumber(this.newTestLineNumber)
+        // Creating a new test - need to bypass .only filtering
+        getCypress().runner.setIsStudioCreatedTest(true)
+        this._isStudioCreatedTest = true
       } else if (this.testId) {
         getCypress().runner.setOnlyTestId(this.testId)
+        getCypress().runner.setIsStudioCreatedTest(this._isStudioCreatedTest)
       }
     },
 
     interceptTest (test) {
-      if (this.suiteId) {
+      // if this test is the one we created, we can just set the test id
+      if ((this.newTestLineNumber && test.invocationDetails?.line === this.newTestLineNumber) || this.suiteId) {
+        this._isStudioCreatedTest = true
         this.setTestId(test.id)
+        getCypress().runner.setIsStudioCreatedTest(true)
       }
 
-      if (this.testId || this.suiteId) {
+      if (this.testId) {
         if (test.invocationDetails) {
           this.setFileDetails(test.invocationDetails)
         }
 
-        if (this.suiteId) {
-          if (test.parent && test.parent.id !== 'r1') {
-            this.setRunnableTitle(test.parent.title)
-          }
-        } else {
-          this.setRunnableTitle(test.title)
-        }
+        this.setRunnableTitle(test.title)
       }
     },
 
-    start (body: HTMLBodyElement) {
+    start () {
       this.isActive = true
       this.isLoading = false
       this.logs = []
@@ -269,19 +271,15 @@ export const useStudioStore = defineStore('studioRecorder', {
       const autStore = useAutStore()
 
       if (this._initialUrl || this.url) {
-        this.visitUrl(this._initialUrl)
+        this.setUrl(this._initialUrl)
       }
 
       if (!this.url && autStore.url) {
         this.setUrl(autStore.url)
       }
-
-      this.attachListeners(body)
     },
 
     stop () {
-      this.removeListeners()
-
       this.isActive = false
       this.isLoading = false
     },
@@ -295,6 +293,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       this._currentId = 1
       this.isFailed = false
       this.showUrlPrompt = true
+      this._isStudioCreatedTest = false
 
       this._maybeResetRunnables()
     },
@@ -332,83 +331,6 @@ export const useStudioStore = defineStore('studioRecorder', {
       getEventManager().emit('studio:save', payload)
     },
 
-    visitUrl (url?: string) {
-      this.setUrl(url ?? this.url)
-
-      // if we're visiting a new url, update the visit url param
-      if (url) {
-        this._updateUrlParams(['url'])
-      }
-
-      getCypress().cy.visit(this.url).then(() => {
-        // after visiting a new url, remove the visit url param since it shouldn't be needed anymore
-        this._removeUrlParams(['url'])
-      })
-
-      // if we're visiting a new url, add the visit log
-      if (url) {
-        this.logs.push({
-          id: this._getId(),
-          selector: undefined,
-          name: 'visit',
-          message: this.url,
-        })
-      }
-    },
-
-    _recordEvent (event) {
-      if (this.isFailed || !this._trustEvent(event)) return
-
-      const $el = window.UnifiedRunner.CypressJQuery(event.target)
-
-      if (this._isAssertionsMenu($el)) {
-        return
-      }
-
-      this._closeAssertionsMenu()
-
-      if (!this._shouldRecordEvent(event, $el)) {
-        return
-      }
-
-      const name = this._getName(event, $el)
-      const message = this._getMessage(event, $el)
-
-      if (name === 'change') {
-        return
-      }
-
-      let selector: string | undefined = ''
-
-      if (name === 'click' && this._matchPreviousMouseEvent($el)) {
-        selector = this._previousMouseEvent?.selector
-      } else {
-        selector = getCypress().SelectorPlayground.getSelector($el)
-      }
-
-      this._clearPreviousMouseEvent()
-
-      if (name === 'type' && !message) {
-        return this._removeLastLogIfType(selector)
-      }
-
-      const updateOnly = this._updateLastLog(selector, name, message)
-
-      if (updateOnly) {
-        return
-      }
-
-      if (name === 'type') {
-        this._addClearLog(selector)
-      }
-
-      this._addLog({
-        selector,
-        name,
-        message,
-      })
-    },
-
     _removeLastLogIfType (selector?: string) {
       const lastLog = this.logs[this.logs.length - 1]
 
@@ -436,34 +358,6 @@ export const useStudioStore = defineStore('studioRecorder', {
       this._generateBothLogs(log).forEach((commandLog) => {
         getEventManager().emit('reporter:log:add', commandLog)
       })
-    },
-
-    _addAssertion ($el: HTMLElement | JQuery<HTMLElement>, ...args: AssertionArgs) {
-      const id = this._getId()
-      const selector = getCypress().SelectorPlayground.getSelector($el)
-
-      const log: StudioLog = {
-        id,
-        selector,
-        name: 'should',
-        message: args,
-        isAssertion: true,
-      }
-
-      this.logs.push(log)
-
-      const reporterLog = {
-        id,
-        selector,
-        name: 'assert',
-        message: this._generateAssertionMessage($el as HTMLElement, ...args),
-      }
-
-      this._generateBothLogs(reporterLog).forEach((commandLog) => {
-        getEventManager().emit('reporter:log:add', commandLog)
-      })
-
-      this._closeAssertionsMenu()
     },
 
     saveSuccess () {
@@ -501,61 +395,6 @@ export const useStudioStore = defineStore('studioRecorder', {
 
     _matchPreviousMouseEvent (el) {
       return this._previousMouseEvent && window.UnifiedRunner.CypressJQuery(el).is(this._previousMouseEvent.element)
-    },
-
-    attachListeners (body: HTMLBodyElement) {
-      if (this.isFailed) {
-        return
-      }
-
-      this._body = body
-
-      // if we're in cloud studio, we shouldn't attach our own listeners - cloud studio will handle it
-      if (this.cloudStudioRequested) {
-        return
-      }
-
-      for (const event of eventTypes) {
-        this._body.addEventListener(event, this._recordEvent, {
-          capture: true,
-          passive: true,
-        })
-      }
-
-      for (const event of internalMouseEvents) {
-        this._body.addEventListener(event, this._recordMouseEvent, {
-          capture: true,
-          passive: true,
-        })
-      }
-
-      this._body.addEventListener('contextmenu', this._openAssertionsMenu, {
-        capture: true,
-      })
-
-      this._clearPreviousMouseEvent()
-    },
-
-    removeListeners () {
-      if (!this._body) return
-
-      for (const event of eventTypes) {
-        this._body.removeEventListener(event, this._recordEvent, {
-          capture: true,
-        })
-      }
-
-      for (const event of internalMouseEvents) {
-        this._body.removeEventListener(event, this._recordMouseEvent, {
-          capture: true,
-        })
-      }
-
-      this._body.removeEventListener('contextmenu', this._openAssertionsMenu, {
-        capture: true,
-      })
-
-      this._clearPreviousMouseEvent()
     },
 
     copyToClipboard (commandsText) {
@@ -599,19 +438,20 @@ export const useStudioStore = defineStore('studioRecorder', {
       const testId = hashParams.get('testId')
       const suiteId = hashParams.get('suiteId')
       const visitUrl = hashParams.get('url')
+      const newTestLineNumber = hashParams.get('newTestLineNumber') ? Number(hashParams.get('newTestLineNumber')) : undefined
 
-      return { testId, suiteId, url: visitUrl }
+      return { testId, suiteId, url: visitUrl, newTestLineNumber }
     },
 
-    _updateUrlParams (filter: string[] = ['testId', 'suiteId', 'url']) {
+    _updateUrlParams (filter: string[] = ['testId', 'suiteId', 'url', 'newTestLineNumber']) {
       // if we don't have studio params, we don't need to update them
-      if (!this.testId && !this.suiteId && !this.url) return
-
-      const url = new URL(window.location.href)
-      const hashParams = new URLSearchParams(url.hash)
+      if (!this.testId && !this.suiteId && !this.url && !this.newTestLineNumber) return
 
       // if we have studio params, we need to remove them before adding them back
       this._removeUrlParams(filter)
+
+      const url = new URL(window.location.href)
+      const hashParams = new URLSearchParams(url.hash)
 
       // set the studio params
       hashParams.set('studio', '')
@@ -624,7 +464,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       window.history.replaceState({}, '', url.toString())
     },
 
-    _removeUrlParams (filter: string[] = ['testId', 'suiteId', 'url']) {
+    _removeUrlParams (filter: string[] = ['testId', 'suiteId', 'url', 'newTestLineNumber']) {
       const url = new URL(window.location.href)
       const hashParams = new URLSearchParams(url.hash)
 
@@ -636,8 +476,8 @@ export const useStudioStore = defineStore('studioRecorder', {
         hashParams.delete(param)
       })
 
-      // if the filter includes all the items, we can also remove the studio param
-      if (filter.length === 3) {
+      // if there are no studio specific params left, we can also remove the studio param
+      if (!hashParams.has('testId') && !hashParams.has('suiteId') && !hashParams.has('url') && !hashParams.has('newTestLineNumber')) {
         hashParams.delete('studio')
       }
 
@@ -666,7 +506,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       if (!this._matchPreviousMouseEvent(target)) {
         this._previousMouseEvent = {
           element: target,
-          selector: getCypress().SelectorPlayground.getSelector(window.UnifiedRunner.CypressJQuery(target)),
+          selector: getCypress().ElementSelector._getSelector(window.UnifiedRunner.CypressJQuery(target)),
         }
       }
     },
@@ -870,11 +710,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       return $el.hasClass('__cypress-studio-assertions-menu')
     },
 
-    _openAssertionsMenu (event, addAssertion?: ($el: HTMLElement | JQuery<HTMLElement>, ...args: AssertionArgs) => void, generatePossibleAssertions?: ($el: JQuery<Element>) => PossibleAssertions) {
-      if (!this._body) {
-        throw Error('this._body was not defined')
-      }
-
+    _openAssertionsMenu (event, body: HTMLElement, addAssertion: ($el: HTMLElement | JQuery<HTMLElement>, ...args: AssertionArgs) => void, generatePossibleAssertions?: ($el: JQuery<Element>) => PossibleAssertions) {
       event.preventDefault()
       event.stopPropagation()
 
@@ -884,25 +720,21 @@ export const useStudioStore = defineStore('studioRecorder', {
         return
       }
 
-      this._closeAssertionsMenu()
+      this._closeAssertionsMenu(body)
 
       openStudioAssertionsMenu({
         $el,
-        $body: window.UnifiedRunner.CypressJQuery(this._body),
+        $body: window.UnifiedRunner.CypressJQuery(body),
         props: {
           possibleAssertions: generatePossibleAssertions ? generatePossibleAssertions($el) : this._generatePossibleAssertions($el),
-          addAssertion: addAssertion || this._addAssertion,
-          closeMenu: this._closeAssertionsMenu,
+          addAssertion,
+          closeMenu: () => this._closeAssertionsMenu(body),
         },
       })
     },
 
-    _closeAssertionsMenu () {
-      if (!this._body) {
-        throw Error('this._body was not defined')
-      }
-
-      closeStudioAssertionsMenu(window.UnifiedRunner.CypressJQuery(this._body))
+    _closeAssertionsMenu (body: HTMLElement) {
+      closeStudioAssertionsMenu(window.UnifiedRunner.CypressJQuery(body))
     },
 
     _generatePossibleAssertions ($el: JQuery<Element>) {
@@ -1003,10 +835,6 @@ export const useStudioStore = defineStore('studioRecorder', {
   },
 
   getters: {
-    hasRunnableId (state) {
-      return !!state.testId || !!state.suiteId
-    },
-
     isOpen: (state) => {
       return state.isActive || state.isLoading || state._hasStarted
     },

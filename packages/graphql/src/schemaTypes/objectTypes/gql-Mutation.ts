@@ -196,6 +196,16 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('retryStudio', {
+      type: 'Boolean',
+      description: 'Retry studio initialization after an error',
+      resolve: (_, args, ctx) => {
+        ctx.coreData.studioLifecycleManager?.retry()
+
+        return true
+      },
+    })
+
     t.field('wizardUpdate', {
       type: Wizard,
       description: 'Updates the different fields of the wizard data store',
@@ -486,102 +496,6 @@ export const mutation = mutationType({
         )
 
         return true
-      },
-    })
-
-    t.field('migrateRenameSpecs', {
-      description: 'While migrating to 10+ renames files to match the new .cy pattern',
-      type: Query,
-      args: {
-        skip: booleanArg(),
-        before: list(nonNull(stringArg({
-          description: 'specs to move - current name',
-        }))),
-        after: list(nonNull(stringArg({
-          description: 'specs to move - current name',
-        }))),
-      },
-      resolve: async (_, { skip, before, after }, ctx) => {
-        if (!skip && before && after) {
-          await ctx.actions.migration.renameSpecFiles(before, after)
-        }
-
-        await ctx.actions.migration.nextStep()
-
-        return {}
-      },
-    })
-
-    t.field('migrateRenameSpecsFolder', {
-      description: 'When the user decides to skip specs rename',
-      type: Query,
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.migration.renameSpecsFolder()
-        await ctx.actions.migration.nextStep()
-
-        return {}
-      },
-    })
-
-    t.field('migrateSkipManualRename', {
-      description: 'While migrating to 10+ skip manual rename step',
-      type: Query,
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.migration.nextStep()
-
-        return {}
-      },
-    })
-
-    t.field('migrateCloseManualRenameWatcher', {
-      description: 'While migrating to 10+ skip manual rename step',
-      type: 'Boolean',
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.migration.closeManualRenameWatcher()
-
-        return true
-      },
-    })
-
-    t.field('finishedRenamingComponentSpecs', {
-      description: 'user has finished migration component specs - move to next step',
-      type: Query,
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.migration.nextStep()
-
-        return {}
-      },
-    })
-
-    t.field('migrateRenameSupport', {
-      description: 'While migrating to 10+ launch renaming of support file',
-      type: Query,
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.migration.renameSupportFile()
-        await ctx.actions.migration.nextStep()
-
-        return {}
-      },
-    })
-
-    t.field('migrateConfigFile', {
-      description: 'Transforms cypress.json file into cypress.config.js file',
-      type: Query,
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.migration.createConfigFile()
-        await ctx.actions.migration.nextStep()
-
-        return {}
-      },
-    })
-
-    t.field('migrateComponentTesting', {
-      description: 'Merges the component testing config in cypress.config.{js,ts}',
-      type: Query,
-      resolve: async (_, args, ctx) => {
-        await ctx.actions.migration.nextStep()
-
-        return {}
       },
     })
 

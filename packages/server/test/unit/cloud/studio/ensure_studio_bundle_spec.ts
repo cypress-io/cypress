@@ -103,23 +103,4 @@ describe('ensureStudioBundle', () => {
 
     await expect(ensureStudioBundlePromise).to.be.rejectedWith('Unable to find studio manifest')
   })
-
-  it('should throw an error if the studio bundle download times out', async () => {
-    getStudioBundleStub.callsFake(() => {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve(new Error('Studio bundle download timed out'))
-        }, 3000)
-      })
-    })
-
-    const ensureStudioBundlePromise = ensureStudioBundle({
-      studioPath: '/tmp/cypress/studio/123',
-      studioUrl: 'https://cypress.io/studio',
-      projectId: '123',
-      downloadTimeoutMs: 500,
-    })
-
-    await expect(ensureStudioBundlePromise).to.be.rejectedWith('Studio bundle download timed out')
-  })
 })

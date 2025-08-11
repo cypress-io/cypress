@@ -57,7 +57,7 @@ describe('header', () => {
     })
 
     it('shows \'Tests\' when >= 398px wide', () => {
-      cy.get('.toggle-specs-wrapper span').should('be.visible')
+      cy.get('[data-cy=toggle-specs-button]').should('be.visible')
     })
   })
 

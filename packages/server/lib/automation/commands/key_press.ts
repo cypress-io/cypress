@@ -1,10 +1,11 @@
-import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import type { Protocol } from 'devtools-protocol'
 import type { KeyPressParams, KeyPressSupportedKeys } from '@packages/types'
 import type { SendDebuggerCommand } from '../../browsers/cdp_automation'
 import type { Client } from 'webdriver'
 import Debug from 'debug'
-import { isEqual, isError } from 'lodash'
+import { isEqual } from 'lodash'
+import { evaluateInFrameContext } from '../helpers/evaluate_in_frame_context'
+import { AUT_FRAME_NAME_IDENTIFIER } from '../helpers/aut_identifier'
 
 const debug = Debug('cypress:server:automation:command:keypress')
 
@@ -30,28 +31,6 @@ export const CDP_KEYCODE: KeyCodeLookup = {
   'Tab': 'U+000009',
 }
 
-async function evaluateInFrameContext (expression: string,
-  send: SendDebuggerCommand,
-  contexts: Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription>,
-  frame: Protocol.Page.Frame): Promise<ProtocolMapping.Commands['Runtime.evaluate']['returnType']> {
-  for (const [contextId, context] of contexts.entries()) {
-    if (context.auxData?.frameId === frame.id) {
-      try {
-        return await send('Runtime.evaluate', {
-          expression,
-          contextId,
-        })
-      } catch (e) {
-        if (isError(e) && (e as Error).message.includes('Cannot find context with specified id')) {
-          debug('found invalid context %d, removing', contextId)
-          contexts.delete(contextId)
-        }
-      }
-    }
-  }
-  throw new Error('Unable to find valid context for frame')
-}
-
 export async function cdpKeyPress (
   { key }: KeyPressParams, send: SendDebuggerCommand,
   contexts: Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription>,
@@ -65,7 +44,7 @@ export async function cdpKeyPress (
   const keyIdentifier = CDP_KEYCODE[key]
 
   const autFrame = frameTree.childFrames?.find(({ frame }) => {
-    return frame.name?.includes('Your project')
+    return frame.name?.includes(AUT_FRAME_NAME_IDENTIFIER)
   })
 
   if (!autFrame) {

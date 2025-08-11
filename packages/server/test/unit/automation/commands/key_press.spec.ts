@@ -41,7 +41,7 @@ describe('key:press automation command', () => {
     const autFrame = {
       frame: {
         id: autFrameId,
-        name: 'Your project',
+        name: 'Your project:',
       },
     }
 

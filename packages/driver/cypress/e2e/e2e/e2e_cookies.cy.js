@@ -8,7 +8,7 @@ const cleanse = (cookies) => {
   })
 }
 
-const firefoxDefaultSameSite = Cypress.isBrowser({ family: 'firefox' }) ? { sameSite: 'no_restriction' } : {}
+const firefoxDefaultSameSite = Cypress.isBrowser({ family: 'firefox' }) ? { sameSite: 'unspecified' } : {}
 
 describe('e2e cookies spec', () => {
   it('simple cookie', () => {

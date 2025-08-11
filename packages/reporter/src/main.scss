@@ -1,3 +1,8 @@
+// Tailwind CSS
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 // this file is used when developing the reporter in isolation via cypress tests
 // if you update this file, also update main-runner.scss
 @import 'lib/variables';

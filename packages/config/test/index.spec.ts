@@ -14,14 +14,14 @@ describe('config/src/index', () => {
     it('returns filter config only containing allowed keys', () => {
       const keys = configUtil.allowed({
         'baseUrl': 'https://url.com',
-        'blacklistHosts': 'breaking option',
+        'videoUploadOnPasses': true,
         'devServerPublicPathRoute': 'internal key',
         'random': 'not a config option',
       })
 
       expect(keys).to.deep.eq({
         'baseUrl': 'https://url.com',
-        'blacklistHosts': 'breaking option',
+        'videoUploadOnPasses': true,
       })
     })
   })
@@ -30,7 +30,7 @@ describe('config/src/index', () => {
     it('returns list of breaking config keys', () => {
       const breakingKeys = configUtil.getBreakingKeys()
 
-      expect(breakingKeys).to.include('blacklistHosts')
+      expect(breakingKeys).to.include('videoUploadOnPasses')
       snapshot(breakingKeys)
     })
   })
@@ -154,12 +154,12 @@ describe('config/src/index', () => {
       const errorFn = sinon.spy()
 
       configUtil.validateNoBreakingConfig({
-        'experimentalNetworkStubbing': 'should break',
+        'experimentalSessionAndOrigin': 'should break',
         configFile: 'config.js',
       }, warningFn, errorFn, 'e2e')
 
-      expect(warningFn).to.have.been.calledOnceWith('EXPERIMENTAL_NETWORK_STUBBING_REMOVED', {
-        name: 'experimentalNetworkStubbing',
+      expect(warningFn).to.have.been.calledOnceWith('EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED', {
+        name: 'experimentalSessionAndOrigin',
         newName: undefined,
         value: undefined,
         testingType: 'e2e',
@@ -174,14 +174,14 @@ describe('config/src/index', () => {
       const errorFn = sinon.spy()
 
       configUtil.validateNoBreakingConfig({
-        'blacklistHosts': 'should break',
+        experimentalSkipDomainInjection: true,
         configFile: 'config.js',
       }, warningFn, errorFn, 'e2e')
 
       expect(warningFn).to.have.been.callCount(0)
-      expect(errorFn).to.have.been.calledOnceWith('RENAMED_CONFIG_OPTION', {
-        name: 'blacklistHosts',
-        newName: 'blockHosts',
+      expect(errorFn).to.have.been.calledOnceWith('EXPERIMENTAL_SKIP_DOMAIN_INJECTION_REMOVED', {
+        name: 'experimentalSkipDomainInjection',
+        newName: undefined,
         value: undefined,
         testingType: 'e2e',
         configFile: 'config.js',

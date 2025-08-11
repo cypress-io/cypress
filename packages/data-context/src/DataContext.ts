@@ -25,7 +25,6 @@ import {
   HtmlDataSource,
   UtilDataSource,
   BrowserApiShape,
-  MigrationDataSource,
   RelevantRunsDataSource,
   RelevantRunSpecsDataSource,
   VersionsDataSource,
@@ -101,7 +100,6 @@ export class DataContext {
   private _html: HtmlDataSource
   private _error: ErrorDataSource
   private _util: UtilDataSource
-  private _migration: MigrationDataSource
 
   readonly lifecycleManager: ProjectLifecycleManager
 
@@ -136,7 +134,6 @@ export class DataContext {
     this._html = new HtmlDataSource(this)
     this._error = new ErrorDataSource(this)
     this._util = new UtilDataSource(this)
-    this._migration = new MigrationDataSource(this)
     // the lifecycle manager needs to be initialized last as it needs properties instantiated on the DataContext object
     this.lifecycleManager = new ProjectLifecycleManager(this)
   }
@@ -234,10 +231,6 @@ export class DataContext {
 
   get util () {
     return this._util
-  }
-
-  get migration () {
-    return this._migration
   }
 
   /**

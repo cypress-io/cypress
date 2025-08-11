@@ -101,17 +101,11 @@ exports['e2e config applies defaultCommandTimeout globally 1'] = `
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  1                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     dom_times_out.cy.js                                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/dom_times_out.cy.js/short defaultCommandTimeout     (1280x720)
-      -- times out looking for a missing element (failed).png                                       
 
 
 ====================================================================================================
@@ -170,97 +164,6 @@ Please delete the conflicting configuration files.
 
 `
 
-exports['e2e config throws error when cypress.json is found in project and need migration 1'] = `
-There is a cypress.json file at the path: /foo/bar/.projects/pristine
-
-Cypress version 10.0.0 no longer supports cypress.json.
-
-Please run cypress open to launch the migration tool to migrate to cypress.config.{js,ts,mjs,cjs}.
-
-https://on.cypress.io/migration-guide
-
-
-`
-
-exports['e2e config throws error when cypress.json is found in project and cypress.config.{js,ts,mjs,cjs} exists as well 1'] = `
-There is both a cypress.config.js and a cypress.json file at the location below:
-
-/foo/bar/.projects/multiple-config-files-with-json
-
-Cypress no longer supports cypress.json, please remove it from your project.
-
-
-`
-
-exports['e2e config throws an error if supportFile is set on the root level 1'] = `
-The supportFile configuration option is now invalid when set from the root of the config object in Cypress version 10.0.0.
-
-It is now configured separately as a testing type property: e2e.supportFile and component.supportFile
-
-{
-  e2e: {
-    specPattern: '...',
-  },
-  component: {
-    specPattern: '...',
-  },
-}
-
-https://on.cypress.io/migration-guide
-
-`
-
-exports['e2e config throws an error if specPattern is set on the root level 1'] = `
-The specPattern configuration option is now invalid when set from the root of the config object in Cypress version 10.0.0.
-
-It is now configured separately as a testing type property: e2e.specPattern and component.specPattern
-
-{
-  e2e: {
-    specPattern: '...',
-  },
-  component: {
-    specPattern: '...',
-  },
-}
-
-https://on.cypress.io/migration-guide
-
-`
-
-exports['e2e config throws an error if excludeSpecPattern is set on the root level 1'] = `
-The excludeSpecPattern configuration option is now invalid when set from the root of the config object in Cypress version 10.0.0.
-
-It is now configured separately as a testing type property: e2e.excludeSpecPattern and component.excludeSpecPattern
-
-{
-  e2e: {
-    specPattern: '...',
-  },
-  component: {
-    specPattern: '...',
-  },
-}
-
-https://on.cypress.io/migration-guide
-
-`
-
-exports['e2e config throws an error if baseUrl is set on the root level 1'] = `
-The baseUrl configuration option is now invalid when set from the root of the config object in Cypress version 10.0.0.
-
-It is now configured separately as a testing type property: e2e.baseUrl
-
-{
-  e2e: {
-    baseUrl: '...',
-  }
-}
-
-https://on.cypress.io/migration-guide
-
-`
-
 exports['e2e config throws an error if baseUrl is set on the component level 1'] = `
 The component.baseUrl configuration option is not valid for component testing.
 
@@ -271,23 +174,6 @@ Please remove this option or add this as an e2e testing type property: e2e.baseU
     baseUrl: '...',
   }
 }
-
-https://on.cypress.io/migration-guide
-
-`
-
-exports['e2e config throws an error if testFiles is set on the config file 1'] = `
-The testFiles configuration option is now invalid when set on the config object in Cypress version 10.0.0.
-
-It is now renamed to specPattern and configured separately as a testing type property: e2e.specPattern
-
-{
-  e2e: {
-    specPattern: '...',
-  },
-}
-
-https://on.cypress.io/migration-guide
 
 `
 
@@ -346,36 +232,6 @@ exports['e2e config setupNodeEvents modify specPattern for current testing type 
 
 `
 
-exports['e2e config throws an error if componentFolder is set on the config file 1'] = `
-The componentFolder configuration option is now invalid when set on the config object in Cypress version 10.0.0.
-
-It is now renamed to specPattern and configured separately as a component testing property: component.specPattern
-
-{
-  component: {
-    specPattern: '...',
-  },
-}
-
-https://on.cypress.io/migration-guide
-
-`
-
-exports['e2e config throws an error if indexHtml is set on the root level 1'] = `
-The indexHtmlFile configuration option is now invalid when set from the root of the config object in Cypress version 10.0.0.
-
-It is now configured separately as a testing type property: component.indexHtmlFile
-
-{
-  component: {
-    indexHtmlFile: '...',
-  }
-}
-
-https://on.cypress.io/migration-guide
-
-`
-
 exports['e2e config throws an error if indexHtml is set on the e2e level 1'] = `
 The e2e.indexHtmlFile configuration option is not valid for e2e testing.
 
@@ -386,8 +242,6 @@ Please remove this option or add this as a component testing type property: comp
     indexHtmlFile: '...',
   }
 }
-
-https://on.cypress.io/migration-guide
 
 `
 
@@ -450,5 +304,79 @@ Your configFile at /foo/bar/.projects/invalid-env-file/cypress.env.json set an i
 Expected reporter to be a string.
 
 Instead the value was: 5
+
+`
+
+exports['e2e config throws an error if supportFile is set on the root level 1'] = `
+The supportFile configuration option is invalid when set from the root of the config object.
+
+Set it within a testing type property: e2e.supportFile and component.supportFile
+
+{
+  e2e: {
+    specPattern: '...',
+  },
+  component: {
+    specPattern: '...',
+  },
+}
+
+`
+
+exports['e2e config throws an error if specPattern is set on the root level 1'] = `
+The specPattern configuration option is invalid when set from the root of the config object.
+
+Set it within a testing type property: e2e.specPattern and component.specPattern
+
+{
+  e2e: {
+    specPattern: '...',
+  },
+  component: {
+    specPattern: '...',
+  },
+}
+
+`
+
+exports['e2e config throws an error if excludeSpecPattern is set on the root level 1'] = `
+The excludeSpecPattern configuration option is invalid when set from the root of the config object.
+
+Set it within a testing type property: e2e.excludeSpecPattern and component.excludeSpecPattern
+
+{
+  e2e: {
+    specPattern: '...',
+  },
+  component: {
+    specPattern: '...',
+  },
+}
+
+`
+
+exports['e2e config throws an error if baseUrl is set on the root level 1'] = `
+The baseUrl configuration option is invalid when set from the root of the config object.
+
+Set it within a testing type property: e2e.baseUrl
+
+{
+  e2e: {
+    baseUrl: '...',
+  }
+}
+
+`
+
+exports['e2e config throws an error if indexHtml is set on the root level 1'] = `
+The indexHtmlFile configuration option is invalid when set from the root of the config object.
+
+Set it within a testing type property: component.indexHtmlFile
+
+{
+  component: {
+    indexHtmlFile: '...',
+  }
+}
 
 `

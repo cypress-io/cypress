@@ -18,7 +18,7 @@
       </button>
       <div
         data-cy="aut-url"
-        class="border rounded flex bg-gray-950 grow border-gray-800 h-[32px] align-middle"
+        class="aut-url-container border rounded flex bg-gray-950 grow border-gray-800 h-[32px] align-middle"
       >
         <SpecRunnerDropdown
           v-if="selectedBrowser?.displayName"
@@ -44,30 +44,22 @@
         <input
           ref="autUrlInputRef"
           data-cy="aut-url-input"
-          :disabled="urlDisabled"
+          :readonly="urlReadOnly"
           :value="inputValue"
           :placeholder="inputPlaceholder"
           aria-label="url of the application under test"
-          class="aut-url-input bg-gray-950 flex grow mr-[12px] leading-normal max-w-full text-gray-300 self-center hocus-link-default truncate w-full"
-          :style="{ zIndex: inputZIndex }"
+          class="aut-url-input bg-transparent text-gray-300 outline-none text-base font-normal leading-6 flex grow mr-[12px] max-w-full self-center truncate w-full placeholder:text-gray-400 placeholder:text-base placeholder:font-normal placeholder:leading-6 focus:text-indigo-300 focus-visible:outline-none"
           @input="setStudioUrl"
           @click="openExternally"
           @keyup.enter="visitUrl"
         >
-        <StudioUrlPrompt
-          v-if="studioStore.needsUrl && !urlDisabled && studioStore.showUrlPrompt"
-          :aut-url-input-ref="autUrlInputRef"
-          :url-in-progress="urlInProgress"
-          :overlay-z-index="studioOverlayZIndex"
-          @submit="visitUrl"
-          @cancel="() => eventManager.emit('studio:cancel', undefined)"
-        />
+
         <Tag
           data-cy="viewport-size"
           size="20"
-          color="gray"
-          :dark="true"
-          class="self-center rounded-[10px] mr-[5px] pr-[6px] pl-[6px]"
+          color="gray-dark"
+          :outline="true"
+          class="self-center mr-[5px] pr-[6px] pl-[6px] viewport-tag"
         >
           <span class="whitespace-nowrap text-[12px]">{{ autStore.viewportWidth }}x{{
             autStore.viewportHeight
@@ -77,9 +69,9 @@
           v-if="displayScale"
           data-cy="viewport-scale"
           size="20"
-          color="gray"
-          :dark="true"
-          class="self-center rounded-[10px] mr-[5px] pr-[6px] pl-[6px]"
+          color="gray-dark"
+          :outline="true"
+          class="self-center mr-[5px] pr-[6px] pl-[6px] viewport-tag"
         >
           <span class="text-[12px]">
             {{ displayScale }}
@@ -97,9 +89,6 @@
       :get-aut-iframe="getAutIframe"
       :event-manager="eventManager"
     />
-
-    <StudioControls v-if="!studioBetaAvailable && studioStore.isActive" />
-
     <Alert
       v-model="showAlert"
       status="success"
@@ -131,8 +120,7 @@ import Tag from '@cypress-design/vue-tag'
 import SelectorPlayground from './selector-playground/SelectorPlayground.vue'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 import Alert from '@packages/frontend-shared/src/components/Alert.vue'
-import StudioControls from './studio/StudioControls.vue'
-import StudioUrlPrompt from './studio/StudioUrlPrompt.vue'
+
 import VerticalBrowserListItems from '@packages/frontend-shared/src/gql-components/topnav/VerticalBrowserListItems.vue'
 import SpecRunnerDropdown from './SpecRunnerDropdown.vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
@@ -187,23 +175,11 @@ watchEffect(() => {
 
 const autIframe = props.getAutIframe()
 
-const studioOverlayZIndex = 50
-
-const inputZIndex = computed(() => {
-  // input needs to be above the Studio prompt overlay
-  // but other times it needs to be below other resizable panels
-  return studioStore.needsUrl ? studioOverlayZIndex + 1 : 5
-})
-
 const displayScale = computed(() => {
   return autStore.scale < 1 ? `${Math.round(autStore.scale * 100) }%` : 0
 })
 
 const autUrl = computed(() => {
-  if (studioStore.isActive && studioStore.url) {
-    return studioStore.url
-  }
-
   return autStore.url
 })
 
@@ -218,9 +194,19 @@ const activeSpecPath = specStore.activeSpec?.absolute
 
 const isDisabled = computed(() => autStore.isRunning || autStore.isLoading)
 
-const urlDisabled = computed(() => props.gql.currentTestingType === 'component')
+const urlReadOnly = computed(() => !studioStore.needsUrl || props.gql.currentTestingType === 'component')
 
-const inputPlaceholder = computed(() => props.gql.currentTestingType === 'e2e' ? '' : 'URL navigation disabled in component testing')
+const inputPlaceholder = computed(() => {
+  if (props.gql.currentTestingType === 'component') {
+    return 'URL navigation disabled in component testing'
+  }
+
+  if (studioStore.needsUrl) {
+    return 'Enter URL'
+  }
+
+  return ''
+})
 
 const inputValue = computed(() => {
   if (props.gql.currentTestingType === 'component') {
@@ -239,11 +225,14 @@ function setStudioUrl (event: Event) {
 }
 
 function visitUrl () {
-  studioStore.visitUrl(urlInProgress.value)
+  studioStore.setUrl(urlInProgress.value)
+  // once we set the url in studio, we can clear the urlInProgress
+  // since we'll rerun the test which will set the url in the autStore
+  urlInProgress.value = ''
 }
 
 function openExternally () {
-  if (!autStore.url || studioStore.isActive) {
+  if (!autStore.url || studioStore.needsUrl) {
     return
   }
 
@@ -252,11 +241,30 @@ function openExternally () {
 </script>
 
 <style scoped>
-.aut-url-input:disabled {
-  background-color: transparent;
+.aut-url-container {
+  border: 1px solid #434861;
+  padding: 1px;
+  background-color: #25283c;
+  border-radius: 4px;
 }
 
-.aut-url-input:disabled:hover {
-  text-decoration: none;
+.aut-url-container:hover {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1px;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+}
+
+.aut-url-container:focus-within,
+.aut-url-container:focus-visible,
+.aut-url-container:focus {
+  border: 2px solid #9aa2fc;
+  padding: 0;
+  box-shadow: 0 0 0 1px rgba(154, 162, 252, 0.35);
+  background-color: #25283c;
+}
+
+/* Override Tag component border-radius with higher specificity */
+.viewport-tag {
+  border-radius: 12px !important;
 }
 </style>
