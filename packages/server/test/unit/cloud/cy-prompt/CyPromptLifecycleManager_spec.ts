@@ -246,7 +246,7 @@ describe('CyPromptLifecycleManager', () => {
 
       const getProjectOptions = cyPromptManagerSetupStub.args[0][0].getProjectOptions
 
-      expect(getProjectOptions()).to.be.rejectedWith('getUser failed')
+      await expect(getProjectOptions()).to.be.rejectedWith('getUser failed')
     })
 
     it('handles errors when getProjectConfig fails', async () => {
@@ -305,7 +305,7 @@ describe('CyPromptLifecycleManager', () => {
 
       const getProjectOptions = cyPromptManagerSetupStub.args[0][0].getProjectOptions
 
-      expect(getProjectOptions()).to.be.rejectedWith('getProjectConfig failed')
+      await expect(getProjectOptions()).to.be.rejectedWith('getProjectConfig failed')
     })
 
     it('only calls ensureCyPromptBundle once per cy prompt hash', async () => {
