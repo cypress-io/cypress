@@ -108,7 +108,7 @@ interface StudioRecorderState {
   canAccessStudioAI: boolean
   showUrlPrompt: boolean
   cloudStudioRequested: boolean
-  cloudStudioSessionId?: string
+  sessionId?: string
   _isStudioCreatedTest: boolean
   newTestLineNumber?: number
 }
@@ -145,7 +145,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       canAccessStudioAI: false,
       showUrlPrompt: true,
       cloudStudioRequested: false,
-      cloudStudioSessionId: persistedSessionId,
+      sessionId: persistedSessionId,
       newTestLineNumber: undefined,
       _isStudioCreatedTest: false,
     }
@@ -178,12 +178,12 @@ export const useStudioStore = defineStore('studioRecorder', {
     },
 
     setCloudStudioSessionId (cloudStudioSessionId: string) {
-      this.cloudStudioSessionId = cloudStudioSessionId
+      this.sessionId = cloudStudioSessionId
       this._updateUrlParams(['sessionId'])
     },
 
     clearCloudStudioSessionId () {
-      this.cloudStudioSessionId = undefined
+      this.sessionId = undefined
       this._removeUrlParams(['sessionId'])
     },
 
@@ -251,7 +251,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       }
 
       if (studio.cloudStudioSessionId) {
-        this.cloudStudioSessionId = studio.cloudStudioSessionId
+        this.sessionId = studio.cloudStudioSessionId
       }
 
       // if we have an existing test or are creating a new test, we need to start loading
@@ -468,7 +468,7 @@ export const useStudioStore = defineStore('studioRecorder', {
 
     _updateUrlParams (filter: string[] = ['testId', 'suiteId', 'url', 'newTestLineNumber', 'sessionId']) {
       // if we don't have studio params, we don't need to update them
-      if (!this.testId && !this.suiteId && !this.url && !this.newTestLineNumber && !this.cloudStudioSessionId) return
+      if (!this.testId && !this.suiteId && !this.url && !this.newTestLineNumber && !this.sessionId) return
 
       // if we have studio params, we need to remove them before adding them back
       this._removeUrlParams(filter)
