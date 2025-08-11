@@ -1,19 +1,23 @@
 import { Transform, Writable } from 'stream'
 import { StringDecoder } from 'node:string_decoder'
 import { LineDecoder } from './LineDecoder'
+import { SplitStream } from './SplitStream'
 
 export class FilterPrefixedContent extends Transform {
   private strDecoder?: StringDecoder
   private lineDecoder?: LineDecoder
+  private splitStream: SplitStream<string>
 
   constructor (private prefix: RegExp, private filtered: Writable) {
     super(({
       transform: (chunk, encoding, next) => this.transform(chunk, encoding, next),
       flush: (callback) => this.flush(callback),
     }))
+
+    this.splitStream = new SplitStream(this.filtered, this)
   }
 
-  transform = (chunk: Buffer, encoding: BufferEncoding, next: (err?: Error) => void) => {
+  transform = async (chunk: Buffer, encoding: BufferEncoding, next: (err?: Error) => void) => {
     try {
       if (!this.strDecoder) {
         // @ts-expect-error type here is not correct, 'buffer' is not a valid encoding but it does get passed in
@@ -27,35 +31,32 @@ export class FilterPrefixedContent extends Transform {
       this.lineDecoder.write(this.strDecoder.write(chunk))
 
       for (const line of this.lineDecoder) {
-        this.handleLine(line)
+        await this.writeLine(line)
       }
+
+      next()
     } catch (err) {
       next(err)
-
-      return
     }
-    next()
   }
 
-  flush = (callback: (err?: Error) => void) => {
+  flush = async (callback: (err?: Error) => void) => {
     try {
       for (const line of this.lineDecoder?.end() || []) {
-        this.handleLine(line)
+        await this.writeLine(line)
       }
+
+      callback()
     } catch (err) {
       callback(err)
-
-      return
     }
-
-    callback()
   }
 
-  private handleLine (line: string): void {
+  private async writeLine (line: string): Promise<void> {
     if (this.prefix.test(line)) {
-      this.filtered.write(line)
+      await this.splitStream.writeLeft(line)
     } else {
-      this.push(line)
+      await this.splitStream.writeRight(line)
     }
   }
 }
