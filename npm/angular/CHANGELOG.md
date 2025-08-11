@@ -1,3 +1,38 @@
+# [@cypress/angular-v4.0.0](https://github.com/cypress-io/cypress/compare/@cypress/angular-v3.0.1...@cypress/angular-v4.0.0) (2025-08-08)
+
+
+### breaking
+
+* release version 4.0.0 of @cypress/angular. ([59637ad](https://github.com/cypress-io/cypress/commit/59637adc019ecda790a399ea2da6812fa53381b4))
+* remove Angular 17 support ([#31446](https://github.com/cypress-io/cypress/issues/31446)) ([971b7ae](https://github.com/cypress-io/cypress/commit/971b7ae3d7d3aa0fd608550e9d896b3d2b8c8634))
+
+
+### Bug Fixes
+
+* make sure legacy output spies work as intended ([#32158](https://github.com/cypress-io/cypress/issues/32158)) ([99055ec](https://github.com/cypress-io/cypress/commit/99055ec6ace3a932c57924dd8a064d2aa34d2d92))
+
+
+### BREAKING CHANGES
+
+* Cypress 15 drops support for Angular 17. Angular 18 and up is supported.
+* Removed support for Angular 17. Only Angular 18 and 19 are now supported. This change affects the @cypress/angular package. Addresses #31303.
+
+* empty commit to kick CI
+
+* update changelog references to make it clearer on where angular 17 packages live historically
+
+* fix cy framework errors app test to use angualr 18 and 19
+
+* fix issue where di was not discoverable in resolved system tests config
+
+* fix scaffold dependencies to use angular 18 and 19 and not 17 and 18
+
+* fix zonr.js system test dependency resolution
+
+* bump cache
+
+* fix failing handler test
+
 # [@cypress/angular-v3.0.1](https://github.com/cypress-io/cypress/compare/@cypress/angular-v3.0.0...@cypress/angular-v3.0.1) (2025-07-24)
 
 

@@ -1,3 +1,36 @@
+# [@cypress/webpack-dev-server-v5.0.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v4.1.1...@cypress/webpack-dev-server-v5.0.0) (2025-08-08)
+
+
+### breaking
+
+* remove Angular 17 support ([#31446](https://github.com/cypress-io/cypress/issues/31446)) ([971b7ae](https://github.com/cypress-io/cypress/commit/971b7ae3d7d3aa0fd608550e9d896b3d2b8c8634))
+
+
+### Features
+
+* allow for @cypress/webpack-batteries-included-preprocessor to fully resolve the user tsconfig compiler options ([#31590](https://github.com/cypress-io/cypress/issues/31590)) ([f369f50](https://github.com/cypress-io/cypress/commit/f369f50045685648b94d05ab6426099ee80d1245))
+
+
+### BREAKING CHANGES
+
+* Removed support for Angular 17. Only Angular 18 and 19 are now supported. This change affects the @cypress/angular package. Addresses #31303.
+
+* empty commit to kick CI
+
+* update changelog references to make it clearer on where angular 17 packages live historically
+
+* fix cy framework errors app test to use angualr 18 and 19
+
+* fix issue where di was not discoverable in resolved system tests config
+
+* fix scaffold dependencies to use angular 18 and 19 and not 17 and 18
+
+* fix zonr.js system test dependency resolution
+
+* bump cache
+
+* fix failing handler test
+
 # [@cypress/webpack-dev-server-v4.1.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v4.1.0...@cypress/webpack-dev-server-v4.1.1) (2025-07-24)
 
 

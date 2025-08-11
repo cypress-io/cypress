@@ -1,3 +1,20 @@
+# [@cypress/vite-dev-server-v7.0.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v6.0.3...@cypress/vite-dev-server-v7.0.0) (2025-08-08)
+
+
+### breaking
+
+* release version 7.x.x of @cypress/vite-dev-server. ([af5c6b4](https://github.com/cypress-io/cypress/commit/af5c6b44f549fc87e3402c042211949898098959))
+
+
+### Features
+
+* allow for @cypress/webpack-batteries-included-preprocessor to fully resolve the user tsconfig compiler options ([#31590](https://github.com/cypress-io/cypress/issues/31590)) ([f369f50](https://github.com/cypress-io/cypress/commit/f369f50045685648b94d05ab6426099ee80d1245))
+
+
+### BREAKING CHANGES
+
+* @cypress/vite-dev-server longer supports vite 4 and supports vite 7 via converting the package to an esm only package, which is a breaking change
+
 # [@cypress/vite-dev-server-v6.0.3](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v6.0.2...@cypress/vite-dev-server-v6.0.3) (2025-03-25)
 
 # [@cypress/vite-dev-server-v6.0.2](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v6.0.1...@cypress/vite-dev-server-v6.0.2) (2025-01-27)

@@ -36,17 +36,17 @@ describe('<MajorVersionWelcome />', { viewportWidth: 1280, viewportHeight: 1400 
   })
 
   it('renders correct time for releases and overflows correctly', () => {
-    cy.clock(Date.UTC(2025, 6, 29))
+    cy.clock(Date.UTC(2025, 7, 13))
     cy.mount(<MajorVersionWelcome />)
     cy.contains('15.0.0 Released just now')
-    cy.contains('14.0.0 Released 6 months ago')
+    cy.contains('14.0.0 Released 7 months ago')
     cy.contains('13.0.0 Released 2 years ago')
     cy.contains('12.0.0 Released 3 years ago')
     cy.tick(interval('1 minute'))
     cy.contains('15.0.0 Released 1 minute ago')
     cy.tick(interval('1 month'))
     cy.contains('15.0.0 Released last month')
-    cy.contains('14.0.0 Released 7 months ago')
+    cy.contains('14.0.0 Released 8 months ago')
 
     cy.viewport(1280, 500)
 
