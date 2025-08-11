@@ -1,17 +1,33 @@
 {
-  "extends": "./../ts/tsconfig.json",
   "include": [
-    "lib/*.ts",
     "lib/**/*.ts",
+    "lib/**/*.js"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "**/__spec__/**"
   ],
   "compilerOptions": {
-    "lib": ["esnext"],
+    "lib": ["es2022"],
+    "target": "es2022",
     "outDir": "./dist",
+    "rootDir": "./lib",
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "declaration": true,
     "declarationMap": true,
+    "sourceMap": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
     "noImplicitReturns": false,
+    "strict": true,
+    "moduleResolution": "node",
+    "module": "commonjs",
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true
   }
 }

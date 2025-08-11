@@ -19,20 +19,32 @@ export class LineDecoder {
   }
 
   /**
+   * Normalizes line endings to \n and splits on newlines.
+   *
+   * @param text The text to process
+   * @returns Array of lines with normalized line endings
+   */
+  private splitLines (text: string): string[] {
+    // Normalize \r\n to \n, then split
+    return text.replace(/\r\n/g, '\n').split('\n')
+  }
+
+  /**
    * Iterates over complete lines in the current buffer.
    *
    * This generator yields complete lines from the buffer, splitting on newline characters.
    * Any incomplete line at the end of the buffer is kept for the next iteration.
+   * Handles both Windows (\r\n) and Unix (\n) line endings.
    *
    * @yields Complete lines with newline characters preserved
    */
   *[Symbol.iterator] (): Generator<string> {
-    const lines = this.buffer.split('\n')
+    const lines = this.splitLines(this.buffer)
 
     this.buffer = lines.pop() || ''
 
     for (const line of lines) {
-      yield `${line}${line.length > 0 ? '\n' : ''}`
+      yield `${line}\n`
     }
   }
 
@@ -41,13 +53,16 @@ export class LineDecoder {
    *
    * This method should be called when processing is complete to ensure all buffered
    * content is yielded. It processes any remaining content in the buffer plus an
-   * optional final chunk.
+   * optional final chunk. Handles both Windows (\r\n) and Unix (\n) line endings.
    *
    * @param chunk Optional final chunk to process along with the buffer
    * @yields All remaining lines from the buffer and final chunk
    */
   *end (chunk?: string) {
-    for (const line of `${this.buffer}${(chunk || '')}`.split('\n')) {
+    const content = `${this.buffer}${(chunk || '')}`
+    const lines = this.splitLines(content)
+
+    for (const line of lines) {
       yield `${line}\n`
     }
   }

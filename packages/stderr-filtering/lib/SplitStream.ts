@@ -1,4 +1,6 @@
 import type { Writable } from 'stream'
+import Debug from 'debug'
+const debug = Debug('cypress-verbose:stderr-filtering:SplitStream')
 
 /**
  * Handles backpressure-aware routing of content to two different writable streams.
@@ -10,10 +12,6 @@ import type { Writable } from 'stream'
  * @template T The type of content being routed
  */
 export class SplitStream<T extends unknown> {
-  private isPaused: boolean = false
-  private pendingResolve?: () => void
-  private pendingReject?: (err: Error) => void
-
   /**
    * Creates a new SplitStream instance.
    *
@@ -48,52 +46,36 @@ export class SplitStream<T extends unknown> {
   private async write (chunk: T, isLeft: boolean): Promise<void> {
     const stream = isLeft ? this.left : this.right
 
+    debug('write', { isLeft, chunk })
     try {
-      const canWriteMore = stream.write(chunk)
+      if (!stream.writable) {
+        debug('stream is not writable, waiting for drain')
 
-      if (!canWriteMore) {
-        this.isPaused = true
-
-        return new Promise<void>((resolve, reject) => {
-          this.pendingResolve = resolve
-          this.pendingReject = reject
-
+        return new Promise<void>((resolve) => {
           stream.once('drain', () => {
-            this.isPaused = false
-            if (this.pendingResolve) {
-              this.pendingResolve()
-              this.pendingResolve = undefined
-              this.pendingReject = undefined
-            }
+            debug('stream drained')
+            resolve()
           })
         })
       }
+
+      debug('writing chunk', { chunk })
+      const canWriteMore = stream.write(chunk)
+
+      if (!canWriteMore) {
+        debug('stream is full, waiting for drain')
+
+        return new Promise<void>((resolve) => {
+          stream.once('drain', () => {
+            debug('stream drained')
+            resolve()
+          })
+        })
+      }
+
+      debug('wrote chunk', { chunk })
     } catch (err) {
       throw err as Error
-    }
-  }
-
-  /**
-   * Checks if the stream is currently paused due to backpressure.
-   *
-   * @returns True if the stream is paused, false otherwise
-   */
-  isCurrentlyPaused (): boolean {
-    return this.isPaused
-  }
-
-  /**
-   * Manually resumes processing if the stream is paused.
-   *
-   * This method can be used to force resumption of processing when the stream
-   * is in a paused state due to backpressure.
-   */
-  resume (): void {
-    if (this.isPaused && this.pendingResolve) {
-      this.isPaused = false
-      this.pendingResolve()
-      this.pendingResolve = undefined
-      this.pendingReject = undefined
     }
   }
 }

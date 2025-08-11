@@ -63,7 +63,7 @@ export class FilterPrefixedContent extends Transform {
 
       next()
     } catch (err) {
-      next(err)
+      next(err as Error)
     }
   }
 
@@ -80,7 +80,7 @@ export class FilterPrefixedContent extends Transform {
 
       callback()
     } catch (err) {
-      callback(err)
+      callback(err as Error)
     }
   }
 
