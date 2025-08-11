@@ -422,6 +422,29 @@ cy.get('#increment').click();
         })
       })
     })
+
+    it('shows the assertions menu for an element inside an invisible wrapper', () => {
+      launchStudio({ specName: 'spec-w-invisible-wrapper.cy.js' })
+
+      cy.getAutIframe().within(() => {
+        // Show menu
+        cy.contains('Increment').realClick({
+          button: 'right',
+        })
+
+        cy.get('.__cypress-studio-assertions-menu').shadow()
+        .find('.assertions-menu').should('be.visible').should('have.css', 'transform', 'matrix(1, 0, 0, 1, 0, 141)')
+
+        // Show submenu
+        cy.get('.__cypress-studio-assertions-menu').shadow()
+        .find('.assertion-type-text:first').realHover()
+
+        cy.get('.__cypress-studio-assertions-menu').shadow()
+        .find('.assertion-option')
+        .contains('Increment')
+        .should('be.visible')
+      })
+    })
   })
 
   it('removes pending commands if the page is reloaded', () => {
