@@ -2,6 +2,9 @@ import { Transform, Writable } from 'stream'
 import { StringDecoder } from 'node:string_decoder'
 import { LineDecoder } from './LineDecoder'
 import { SplitStream } from './SplitStream'
+import Debug from 'debug'
+
+const debug = Debug('cypress-verbose:stderr-filtering:FilterPrefixedContent')
 
 /**
  * Filters content based on a prefix pattern, routing matching lines to a filtered stream.
@@ -63,6 +66,7 @@ export class FilterPrefixedContent extends Transform {
 
       next()
     } catch (err) {
+      debug('error in transform', err)
       next(err as Error)
     }
   }
@@ -74,6 +78,14 @@ export class FilterPrefixedContent extends Transform {
    */
   flush = async (callback: (err?: Error) => void) => {
     try {
+      if (!this.strDecoder) {
+        this.strDecoder = new StringDecoder()
+      }
+
+      if (!this.lineDecoder) {
+        this.lineDecoder = new LineDecoder()
+      }
+
       for (const line of this.lineDecoder?.end() || []) {
         await this.writeLine(line)
       }

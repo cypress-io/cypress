@@ -50,10 +50,16 @@ export class WriteToDebug extends Writable {
         next()
       },
       final: (callback) => {
-        if (this.strDecoder && this.lineDecoder) {
-          for (const line of this.lineDecoder.end()) {
-            this.debugLine(line)
-          }
+        if (!this.strDecoder) {
+          this.strDecoder = new StringDecoder()
+        }
+
+        if (!this.lineDecoder) {
+          this.lineDecoder = new LineDecoder()
+        }
+
+        for (const line of this.lineDecoder.end()) {
+          this.debugLine(line)
         }
 
         this.strDecoder = undefined

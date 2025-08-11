@@ -48,18 +48,11 @@ export class FilterTaggedContent extends Transform {
    */
   transform = async (chunk: Buffer, encoding: BufferEncoding, next: (err?: Error) => void) => {
     try {
-      if (!this.strDecoder) {
-        // @ts-expect-error type here is not correct, 'buffer' is not a valid encoding but it does get passed in
-        this.strDecoder = new StringDecoder(encoding === 'buffer' ? 'utf8' : encoding)
-      }
+      this.ensureDecoders(encoding)
 
-      if (!this.lineDecoder) {
-        this.lineDecoder = new LineDecoder()
-      }
+      this.lineDecoder?.write(this.strDecoder?.write(chunk) ?? '')
 
-      this.lineDecoder.write(this.strDecoder.write(chunk))
-
-      for (const line of this.lineDecoder) {
+      for (const line of this.lineDecoder || []) {
         await this.processLine(line)
       }
 
@@ -75,6 +68,7 @@ export class FilterTaggedContent extends Transform {
    * @param callback Callback to call when flushing is complete
    */
   flush = async (callback: (err?: Error) => void) => {
+    this.ensureDecoders()
     try {
       for (const line of this.lineDecoder?.end() || []) {
         await this.processLine(line)
@@ -83,6 +77,18 @@ export class FilterTaggedContent extends Transform {
       callback()
     } catch (err) {
       callback(err as Error)
+    }
+  }
+
+  private ensureDecoders (encoding?: BufferEncoding | 'buffer') {
+    const enc = (encoding === 'buffer' ? 'utf8' : encoding) ?? 'utf8'
+
+    if (!this.lineDecoder) {
+      this.lineDecoder = new LineDecoder()
+    }
+
+    if (!this.strDecoder) {
+      this.strDecoder = new StringDecoder(enc)
     }
   }
 
@@ -106,7 +112,7 @@ export class FilterTaggedContent extends Transform {
         await this.splitStream.writeRight(line.slice(0, startPos))
       }
 
-      await this.splitStream.writeLeft(line.slice(startPos, endPos + this.endTag.length))
+      await this.splitStream.writeLeft(line.slice(startPos + this.startTag.length, endPos))
       if (endPos + this.endTag.length < line.length) {
         await this.splitStream.writeRight(line.slice(endPos + this.endTag.length))
       }
@@ -116,11 +122,11 @@ export class FilterTaggedContent extends Transform {
         await this.splitStream.writeRight(line.slice(0, startPos))
       }
 
-      await this.splitStream.writeLeft(line.slice(startPos))
+      await this.splitStream.writeLeft(line.slice(startPos + this.startTag.length))
       this.inTaggedContent = true
     } else if (endPos >= 0) {
       // End tag found
-      await this.splitStream.writeLeft(line.slice(0, endPos + this.endTag.length))
+      await this.splitStream.writeLeft(line.slice(0, endPos))
       if (endPos + this.endTag.length < line.length) {
         await this.splitStream.writeRight(line.slice(endPos + this.endTag.length))
       }
