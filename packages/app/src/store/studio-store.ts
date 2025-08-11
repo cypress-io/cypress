@@ -198,6 +198,11 @@ export const useStudioStore = defineStore('studioRecorder', {
       this.newTestLineNumber = undefined
     },
 
+    needsProtocolCleanup () {
+      // Protocol cleanup (page reload) is only needed if the user has actually entered single test mode in Studio
+      return this._hasStarted || this.testId || this._isStudioCreatedTest
+    },
+
     openInstructionModal () {
       this.instructionModalIsOpen = true
     },
@@ -273,7 +278,7 @@ export const useStudioStore = defineStore('studioRecorder', {
 
     interceptTest (test) {
       // if this test is the one we created, we can just set the test id
-      if ((this.newTestLineNumber && test.invocationDetails?.line === this.newTestLineNumber) || this.suiteId) {
+      if ((this.newTestLineNumber && test.invocationDetails?.line === this.newTestLineNumber) || (this.suiteId && this._hasStarted)) {
         this._isStudioCreatedTest = true
         this.setTestId(test.id)
         getCypress().runner.setIsStudioCreatedTest(true)
@@ -866,7 +871,7 @@ export const useStudioStore = defineStore('studioRecorder', {
     },
 
     needsUrl: (state) => {
-      return state.isActive && !state.url && !state.isFailed
+      return state.isActive && !state.url && !state.isFailed && state._hasStarted
     },
 
     testError: (state) => {

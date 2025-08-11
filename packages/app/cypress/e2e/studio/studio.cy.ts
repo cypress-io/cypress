@@ -760,6 +760,27 @@ describe('studio functionality', () => {
     cy.location().its('hash').and('not.contain', 'testId=').and('not.contain', 'studio=').and('not.contain', 'sessionId=')
   })
 
+  it('does not prompt for a URL until studio is active', () => {
+    launchStudio({ specName: 'spec-w-visit.cy.js', createNewTestFromSuite: true })
+    cy.location().its('hash').should('contain', 'suiteId=r2').and('contain', 'studio=')
+    cy.waitForSpecToFinish()
+
+    cy.findByTestId('aut-url-input').should('have.value', 'http://localhost:4455/cypress/e2e/index.html')
+  })
+
+  it('does not reload the page if we didnt open a test in studio', () => {
+    launchStudio({ specName: 'spec-w-visit.cy.js', createNewTestFromSuite: true })
+
+    // set a property on the window to see if the page reloads
+    cy.window().then((w) => w['beforeReload'] = true)
+
+    // close new test mode
+    cy.findByTestId('studio-header-studio-button').click()
+
+    // if this property is still set on the window, then the page didn't reload
+    cy.window().then((w) => expect(w['beforeReload']).to.be.true)
+  })
+
   it('removes the studio url parameters when closing studio new test', () => {
     launchStudio({ specName: 'spec-w-visit.cy.js', createNewTestFromSuite: true })
 
@@ -768,6 +789,68 @@ describe('studio functionality', () => {
     cy.findByTestId('studio-header-studio-button').click()
 
     cy.location().its('hash').and('not.contain', 'suiteId=').and('not.contain', 'studio=')
+  })
+
+  it('stays in new test mode when studio panel is opened when the spec is running', () => {
+    loadProjectAndRunSpec()
+
+    cy.waitForSpecToFinish()
+
+    cy.findByTestId('studio-button').click()
+    cy.findByTestId('studio-panel').should('be.visible')
+    cy.findByTestId('new-test-button').should('be.visible')
+
+    // Verify we're initially in new test mode
+    cy.location().its('hash').should('contain', 'suiteId=r1').and('not.contain', 'testId=')
+
+    // Now restart the spec, which will call interceptTest with the running test
+    // This is where the bug would manifest - it would incorrectly switch from
+    // "new test" mode to "edit the running test" mode
+    cy.get('button.restart').click()
+
+    cy.get('.test').should('have.length', 1)
+    cy.get('.test').first().should('have.class', 'runnable-active')
+
+    // verify we're still in new test mode
+    cy.findByTestId('studio-panel').should('be.visible')
+    cy.findByTestId('new-test-button').should('be.visible')
+
+    // these should not exist if we stayed in new test mode
+    cy.findByTestId('studio-single-test-title').should('not.exist')
+    cy.findByTestId('record-button-recording').should('not.exist')
+
+    // verify URL still shows suite mode, not edit test mode
+    cy.location().its('hash').should('contain', 'suiteId=r1').and('not.contain', 'testId=')
+  })
+
+  it('shows test body sections correctly when studio panel is open and page is refreshed', () => {
+    loadProjectAndRunSpec()
+
+    cy.waitForSpecToFinish()
+
+    cy.findByTestId('studio-button').click()
+    cy.findByTestId('studio-panel').should('be.visible')
+    cy.findByTestId('new-test-button').should('be.visible')
+
+    cy.reload()
+
+    cy.waitForSpecToFinish()
+
+    cy.findByTestId('studio-panel').should('be.visible')
+    cy.findByTestId('new-test-button').should('be.visible')
+
+    // verify test body section is visible after refresh
+    cy.get('.runnable-instruments').should('be.visible')
+    cy.get('.runnable-commands-region').should('be.visible')
+
+    // verify the test body hook is present
+    cy.get('.hook-item').contains('test body').should('be.visible')
+
+    // verify commands are visible within the test body
+    cy.get('.command-name-visit').should('be.visible')
+
+    // Verify URL parameters show suite mode, not test mode
+    cy.location().its('hash').should('contain', 'suiteId=r1').and('not.contain', 'testId=')
   })
 
   describe('prompt for a new url', () => {
