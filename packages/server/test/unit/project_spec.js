@@ -81,13 +81,18 @@ describe('lib/project-base', () => {
   })
 
   context('#saveState', function () {
-    beforeEach(function () {
+    beforeEach(async function () {
       const supportFile = path.join('the', 'save', 'state', 'test')
 
       this.project.cfg = { supportFile }
 
-      return savedState.create(this.project.projectRoot)
-      .then((state) => state.remove())
+      const globalState = await savedState.create()
+
+      await globalState.remove()
+
+      const projectState = await savedState.create(this.project.projectRoot)
+
+      await projectState.remove()
     })
 
     afterEach(function () {
@@ -118,6 +123,33 @@ describe('lib/project-base', () => {
       .then(() => this.project.saveState({ appWidth: 42 }))
       .then(() => this.project.saveState({ appWidth: 'modified' }))
       .then((state) => expect(state).to.deep.eq({ appWidth: 'modified' }))
+    })
+
+    it('saves global state when type is global', async function () {
+      await this.project.saveState({ reporterWidth: 1 }, { type: 'global' })
+
+      const state = await savedState.create()
+      .then((state) => state.get())
+
+      expect(state).to.deep.eq({ reporterWidth: 1 })
+    })
+
+    it('saves project state when type is project', async function () {
+      await this.project.saveState({ reporterWidth: 2 }, { type: 'project' })
+
+      const state = await savedState.create(this.project.projectRoot)
+      .then((state) => state.get())
+
+      expect(state).to.deep.eq({ reporterWidth: 2 })
+    })
+
+    it('saves project state when type is undefined', async function () {
+      await this.project.saveState({ reporterWidth: 3 })
+
+      const state = await savedState.create(this.project.projectRoot)
+      .then((state) => state.get())
+
+      expect(state).to.deep.eq({ reporterWidth: 3 })
     })
   })
 

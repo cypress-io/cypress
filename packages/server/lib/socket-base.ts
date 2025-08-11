@@ -582,7 +582,10 @@ export class SocketBase {
         })
 
         socket.on('save:app:state', (state, cb) => {
-          options.onSavedStateChanged(state)
+          const opts = state.__options
+          const stateWithoutOptions = _.omit(state, '__options')
+
+          options.onSavedStateChanged(stateWithoutOptions, opts)
 
           // we only use the 'ack' here in tests
           if (cb) {

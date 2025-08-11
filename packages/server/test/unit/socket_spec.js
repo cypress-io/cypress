@@ -251,11 +251,11 @@ describe('lib/socket', () => {
     })
 
     context('on(save:app:state)', () => {
-      it('calls onSavedStateChanged with the state', function (done) {
-        return this.client.emit('save:app:state', { reporterWidth: 500 }, () => {
-          expect(this.options.onSavedStateChanged).to.be.calledWith({ reporterWidth: 500 })
+      it('calls onSavedStateChanged with the state and options', function (done) {
+        this.client.emit('save:app:state', { reporterWidth: 500, __options: { type: 'global' } }, () => {
+          expect(this.options.onSavedStateChanged).to.be.calledWith({ reporterWidth: 500 }, { type: 'global' })
 
-          return done()
+          done()
         })
       })
     })
