@@ -1,35 +1,55 @@
+@import "../lib/mixins.scss";
+
 .reporter {
   .hooks-container {
-    .hook-item {
-      margin-bottom: 5px;
-
-      &:last-of-type {
-        margin-bottom: 0;
-      }
-    }
-
     .hook-header {
       font-family: $font-system;
       display: flex;
       width: 100%;
+      align-items: center;
+      padding: 0 8px;
 
-      &:hover {
-        background-color: $gray-900;
+      .button-hover-shadow {
+        @include button-hover-shadow();
+      }
+
+      &:hover,
+      &:focus-visible {
+        background-color: $gray-950;
 
         .hook-open-in-ide {
-          cursor: pointer;
-          display: block;
+          opacity: 1;
+
+          &:hover,
+          &:focus-visible {
+            background-color: $gray-950;
+
+            + .button-hover-shadow {
+              @include button-hover-shadow();
+              opacity: 1;
+            }
+          }
+        }
+
+        .button-hover-shadow {
+          opacity: 1;
         }
       }
 
       .collapsible-header {
         text-transform: uppercase;
         color: $gray-400;
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
         flex-grow: 1;
-        font-size: 11px;
+        font-size: 12px;
         cursor: pointer;
-        padding: 4px 0;
+        width: 100%;
+
+        .collapsible-header-inner {
+          padding: 6px 0 !important;
+          width: 100%;
+        }
 
         &:focus {
           outline: none;
@@ -38,6 +58,11 @@
         > .collapsible-header-inner:focus {
           outline: 0;
         }
+
+        .collapsible-header-inner {
+          display: flex;
+          align-items: center;
+        }
       }
 
       .hook-failed-message {
@@ -45,23 +70,42 @@
       }
 
       .hook-open-in-ide {
+        opacity: 0;
+        position: absolute;
+        top: 0;
+        right: 0;
+        cursor: pointer;
+        display: inline-flex;
         align-items: center;
-        color: $gray-400;
-        display: none;
-        padding: 4px;
+        gap: 4px;
+        color: $gray-300;
+        background-color: $gray-950;
+        border: 1px solid $gray-900;
+        z-index: 1;
 
-        &:hover, &:focus {
-          background-color: rgba($gray-700, 0.2);
+        &:hover,
+        &:focus-visible {
+          opacity: 1;
+          border: 1px solid rgb(255 255 255 / 0.6);
           outline: none;
           text-decoration: none;
         }
 
-        svg {
-          vertical-align: middle;
+        &:hover {
+          background-color: $gray-950;
+        }
 
-          path:nth-child(2) {
-            fill: $gray-800;
+        &:focus-visible {
+          background-color: $reporter-section-background;
+
+          + .button-hover-shadow {
+            opacity: 1;
+            background: linear-gradient(90deg, rgba(37, 40, 60, 0) -9.8%, $reporter-section-background 19.52%);
           }
+        }
+
+        svg {
+          flex-shrink: 0;
         }
       }
     }

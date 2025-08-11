@@ -5,8 +5,10 @@ import { reportStudioError } from '@packages/server/lib/cloud/api/studio/report_
 describe('lib/cloud/api/studio/report_studio_error', () => {
   let cloudRequestStub: sinon.SinonStub
   let cloudApi: any
+  let oldNodeEnv: string | undefined
 
   beforeEach(() => {
+    oldNodeEnv = process.env.NODE_ENV
     cloudRequestStub = sinon.stub()
     cloudApi = {
       cloudUrl: 'http://localhost:1234',
@@ -19,6 +21,14 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
 
   afterEach(() => {
     sinon.restore()
+    delete process.env.CYPRESS_CRASH_REPORTS
+    delete process.env.CYPRESS_LOCAL_STUDIO_PATH
+    delete process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF
+    if (oldNodeEnv) {
+      process.env.NODE_ENV = oldNodeEnv
+    } else {
+      delete process.env.NODE_ENV
+    }
   })
 
   describe('reportStudioError', () => {
@@ -80,6 +90,21 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
         'Error in testMethod:',
         error,
       )
+    })
+
+    it('does not report error when CYPRESS_CRASH_REPORTS is 0', () => {
+      process.env.CYPRESS_CRASH_REPORTS = '0'
+      const error = new Error('test error')
+
+      reportStudioError({
+        cloudApi,
+        studioHash: 'abc123',
+        projectSlug: 'test-project',
+        error,
+        studioMethod: 'testMethod',
+      })
+
+      expect(cloudRequestStub).to.not.have.been.called
     })
 
     it('converts non-Error objects to Error', () => {
@@ -152,7 +177,7 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
 
     it('includes studioMethodArgs when provided', () => {
       const error = new Error('test error')
-      const args = ['arg1', { key: 'value' }]
+      const args = ['arg1', { key: '/path/to/file.js' }]
 
       reportStudioError({
         cloudApi,
@@ -173,7 +198,7 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
             message: 'test error',
             stack: sinon.match((stack) => stack.includes('<stripped-path>report_studio_error_spec.ts')),
             studioMethod: 'testMethod',
-            studioMethodArgs: JSON.stringify({ args }),
+            studioMethodArgs: JSON.stringify({ args: ['arg1', { key: '<stripped-path>file.js' }] }),
           }],
         },
         {

@@ -14,55 +14,9 @@ import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
 
 Chai.use(SinonChai)
 
-const WEBPACK_DEV_SERVER_VERSIONS: (4 | 5)[] = [4, 5]
+const WEBPACK_DEV_SERVER_VERSIONS: (5)[] = [5]
 
 describe('makeWebpackConfig', () => {
-  it('ignores userland webpack `output.publicPath` and `devServer.overlay` with webpack-dev-server v4', async () => {
-    const devServerConfig: WebpackDevServerConfig = {
-      specs: [],
-      cypressConfig: {
-        isTextTerminal: false,
-        projectRoot: '.',
-        supportFile: '/support.js',
-        devServerPublicPathRoute: '/test-public-path', // This will be overridden by makeWebpackConfig.ts
-      } as Cypress.PluginConfigOptions,
-      webpackConfig: {
-        output: {
-          publicPath: '/this-will-be-ignored',
-        },
-        devServer: {
-          client: {
-            progress: false,
-            overlay: true, // This will be overridden by makeWebpackConfig.ts
-          },
-        },
-        optimization: {
-          emitOnErrors: false, // This will be overridden by makeWebpackConfig.ts
-        },
-        devtool: 'eval', // This will be overridden by makeWebpackConfig.ts
-      },
-      devServerEvents: new EventEmitter(),
-    }
-    const actual = await makeWebpackConfig({
-      devServerConfig,
-      sourceWebpackModulesResult: createModuleMatrixResult({
-        webpack: 5,
-        webpackDevServer: 4,
-      }),
-    })
-
-    // plugins contain circular deps which cannot be serialized in a snapshot.
-    // instead just compare the name and order of the plugins.
-    ;(actual as any).plugins = actual.plugins.map((p) => p.constructor.name)
-
-    // these will include paths from the user's local file system, so we should not include them the snapshot
-    delete actual.output.path
-    delete actual.entry
-
-    expect(actual.output.publicPath).to.eq('/test-public-path/')
-    snapshot(actual)
-  })
-
   it('ignores userland webpack `output.publicPath` and `devServer.overlay` with webpack-dev-server v5', async () => {
     const devServerConfig: WebpackDevServerConfig = {
       specs: [],
@@ -300,68 +254,6 @@ describe('makeWebpackConfig', () => {
       }
     })
 
-    describe('webpack-dev-server v3', () => {
-      beforeEach(() => {
-        sourceWebpackModulesResult = createModuleMatrixResult({
-          webpack: 4,
-          webpackDevServer: 4,
-        })
-      })
-
-      it('is disabled in run mode', async () => {
-        devServerConfig.cypressConfig.isTextTerminal = true
-
-        const actual = await makeWebpackConfig({
-          devServerConfig,
-          sourceWebpackModulesResult,
-        })
-
-        expect(actual.watchOptions.ignored).to.eql('**/*')
-      })
-
-      it('uses defaults in open mode', async () => {
-        devServerConfig.cypressConfig.isTextTerminal = false
-
-        const actual = await makeWebpackConfig({
-          devServerConfig,
-          sourceWebpackModulesResult,
-        })
-
-        expect(actual.watchOptions?.ignored).to.be.undefined
-      })
-    })
-
-    describe('webpack-dev-server v4', () => {
-      beforeEach(() => {
-        sourceWebpackModulesResult = createModuleMatrixResult({
-          webpack: 5,
-          webpackDevServer: 4,
-        })
-      })
-
-      it('is disabled in run mode', async () => {
-        devServerConfig.cypressConfig.isTextTerminal = true
-
-        const actual = await makeWebpackConfig({
-          devServerConfig,
-          sourceWebpackModulesResult,
-        })
-
-        expect(actual.watchOptions.ignored).to.eql('**/*')
-      })
-
-      it('uses defaults in open mode', async () => {
-        devServerConfig.cypressConfig.isTextTerminal = false
-
-        const actual = await makeWebpackConfig({
-          devServerConfig,
-          sourceWebpackModulesResult,
-        })
-
-        expect(actual.watchOptions?.ignored).to.be.undefined
-      })
-    })
-
     describe('webpack-dev-server v5', () => {
       beforeEach(() => {
         sourceWebpackModulesResult = createModuleMatrixResult({
@@ -398,17 +290,9 @@ describe('makeWebpackConfig', () => {
     let devServerConfig: WebpackDevServerConfig
 
     const WEBPACK_MATRIX: {
-      webpack: 4 | 5
-      wds: 4 | 5
+      webpack: 5
+      wds: 5
     }[] = [
-      {
-        webpack: 4,
-        wds: 4,
-      },
-      {
-        webpack: 5,
-        wds: 4,
-      },
       {
         webpack: 5,
         wds: 5,
@@ -457,7 +341,7 @@ describe('makeWebpackConfig', () => {
   // Gives users a diagnostic output with webpack-bundle-analyzer to get a visible representation of their webpack bundle, which they can send to us
   // to give us an idea what issues they may be experiencing
   describe('enables webpack-bundle-analyzer if DEBUG=cypress-verbose:webpack-dev-server:bundle-analyzer is set', async () => {
-    const WEBPACK_VERSIONS: (4 | 5)[] = [4, 5]
+    const WEBPACK_VERSIONS: (5)[] = [5]
 
     beforeEach(() => {
       debug.enable('cypress-verbose:webpack-dev-server:bundle-analyzer')

@@ -5,7 +5,6 @@ import { CurrentProject } from './gql-CurrentProject'
 import { DevState } from './gql-DevState'
 import { AuthState } from './gql-AuthState'
 import { LocalSettings } from './gql-LocalSettings'
-import { Migration } from './gql-Migration'
 import { VersionData } from './gql-VersionData'
 import { Wizard } from './gql-Wizard'
 import { ErrorWrapper } from './gql-ErrorWrapper'
@@ -38,23 +37,6 @@ export const Query = objectType({
       type: Wizard,
       description: 'Metadata about the wizard',
       resolve: (root, args, ctx) => ctx.coreData.wizard,
-    })
-
-    t.field('migration', {
-      type: Migration,
-      description: 'Metadata about the migration, null if we aren\'t showing it',
-      resolve: async (root, args, ctx) => {
-        // First check to see if "legacyConfigForMigration" is defined as that means we have started migration
-        if (ctx.coreData.migration.legacyConfigForMigration) return ctx.coreData.migration.legacyConfigForMigration
-
-        if (!ctx.migration.needsCypressJsonMigration()) {
-          return null
-        }
-
-        await ctx.lifecycleManager.legacyMigration()
-
-        return ctx.coreData.migration.legacyConfigForMigration
-      },
     })
 
     t.nonNull.field('dev', {

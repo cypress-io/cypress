@@ -24,7 +24,7 @@ import $Mocha from './cypress/mocha'
 import { create as createMouse } from './cy/mouse'
 import $Runner from './cypress/runner'
 import $Screenshot from './cypress/screenshot'
-import $SelectorPlayground from './cypress/selector_playground'
+import $ElementSelector from './cypress/element_selector'
 import $Server from './cypress/server'
 import $SetterGetter from './cypress/setter_getter'
 import { validateConfig } from './util/config'
@@ -151,7 +151,19 @@ class $Cypress {
   Runner = $Runner
   Server = $Server
   Screenshot = $Screenshot
-  SelectorPlayground = $SelectorPlayground
+  ElementSelector = $ElementSelector
+  SelectorPlayground = {
+    defaults (options: any) {
+      $errUtils.throwErrByPath('selector_playground.renamed', {
+        args: { method: 'defaults' },
+      })
+    },
+    getSelector ($el: any) {
+      $errUtils.throwErrByPath('selector_playground.removed', {
+        args: { method: 'getSelector' },
+      })
+    },
+  }
   utils = $utils
   _ = _
   Blob = blobUtil
@@ -160,6 +172,8 @@ class $Cypress {
   minimatch = minimatch
   sinon = sinon
   lolex = fakeTimers
+
+  areSourceMapsAvailable: boolean = false
 
   static $: any
   static utils: any
@@ -176,7 +190,7 @@ class $Cypress {
     this.primaryOriginCommunicator = new PrimaryOriginCommunicator()
     this.specBridgeCommunicator = new SpecBridgeCommunicator()
     this.isCrossOriginSpecBridge = false
-
+    this.areSourceMapsAvailable = false
     this.events = $Events.extend(this)
     this.$ = jqueryProxyFn.bind(this)
 
@@ -353,6 +367,7 @@ class $Cypress {
 
     this.events.proxyTo(this.cy)
 
+    this.areSourceMapsAvailable = false
     $scriptUtils.runScripts({
       browser: this.config('browser'),
       scripts,
@@ -360,6 +375,7 @@ class $Cypress {
       testingType: this.testingType,
     })
     .then(() => {
+      this.areSourceMapsAvailable = $sourceMapUtils.areSourceMapsAvailable()
       if (this.testingType === 'e2e') {
         return setSpecContentSecurityPolicy(specWindow)
       }

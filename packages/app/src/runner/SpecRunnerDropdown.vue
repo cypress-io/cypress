@@ -1,11 +1,11 @@
 <template>
   <Popover
     :key="`${props.disabled}`"
-    class="rounded-[50px] h-[30px] mx-[6px] py-[2px] relative"
+    class="rounded-[50px] h-[24px] mx-[6px] py-[2px] relative"
     #="{ open, close }"
   >
     <PopoverButton
-      class="border rounded-[50px] self-center h-full grow px-[5px] group outline-none hover:bg-gray-800"
+      class="border rounded-[50px] self-center h-[24px] grow px-[5px] group outline-none hover:bg-gray-800"
       :class="{
         'opacity-50 cursor-auto': props.disabled,
         'rounded-[5px] border-[1px] border-indigo-100': !props.minimal,

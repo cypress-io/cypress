@@ -60,10 +60,6 @@ describe('webpack-batteries-included-preprocessor features', () => {
     await runAndEval('node_shim_spec.js')
   })
 
-  it('shims node builtins', async () => {
-    await runAndEval('node_builtins_spec.js')
-  })
-
   it('outputs inline source map', async () => {
     const outputPath = await run('es_features_spec.js')
     const contents = await fs.readFile(outputPath)
@@ -88,6 +84,10 @@ describe('webpack-batteries-included-preprocessor features', () => {
 
     it('handles importing .ts and .tsx', async () => {
       await runAndEval('typescript_imports_spec.js', { ...options })
+    })
+
+    it('handles importing ESM .ts and .mts', async () => {
+      await runAndEval('typescript_esm_imports_spec.js', { ...options })
     })
 
     it('handles esModuleInterop: false (default)', async () => {

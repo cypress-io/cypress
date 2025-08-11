@@ -6,6 +6,7 @@ const fixture = require(`../../lib/fixture`)
 const { fs } = require(`../../lib/util/fs`)
 const FixturesHelper = require('@tooling/system-tests')
 const { getCtx } = require(`../../lib/makeDataContext`)
+const snapshot = require('snap-shot-it')
 
 let ctx
 
@@ -68,14 +69,11 @@ describe('lib/fixture', () => {
 
   context('json files', () => {
     it('throws when json is invalid', function () {
-      const e =
-        `\'bad_json.json\' is not valid JSON.\nExpected ',' or '}' after property value in JSON at position 20 while parsing near "{\\n  \\"bad\\": \\"json\\"\\n  \\"should\\": \\"not parse..."`
-
       return fixture.get(this.fixturesFolder, 'bad_json.json')
       .then(() => {
         throw new Error('should have failed but did not')
       }).catch((err) => {
-        expect(err.message).to.eq(e)
+        snapshot('invalid json error message', err.message)
       })
     })
 
@@ -168,6 +166,22 @@ describe('lib/fixture', () => {
           expect(result).to.deep.eq({ 'bar': 'baz' })
         })
       })
+    })
+
+    it('should return encoded JSON', async function () {
+      const fixtures = [
+        { encoding: '', content: Buffer.from('[{"json": true}]') },
+        { encoding: 'base64', content: 'W3sianNvbiI6IHRydWV9XQ==' },
+        { encoding: 'utf8', content: '[{"json": true}]' },
+        { encoding: null, content: Buffer.from('[{"json": true}]') },
+        { encoding: undefined, content: [{ json: true }] },
+      ]
+
+      for (const { encoding, content } of fixtures) {
+        const result = await fixture.get(this.fixturesFolder, 'foo', { encoding })
+
+        expect(result).to.deep.equal(content)
+      }
     })
   })
 

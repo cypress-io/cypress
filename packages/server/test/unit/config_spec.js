@@ -188,7 +188,7 @@ describe('lib/config', () => {
         it('fails if it is set on root level', function () {
           this.setup({ baseUrl: 'localhost' })
 
-          return this.expectValidationFails('It is now configured separately as a testing type property: e2e.baseUrl')
+          return this.expectValidationFails('Set it within a testing type property: e2e.baseUrl')
         })
       })
 
@@ -652,9 +652,9 @@ describe('lib/config', () => {
         it('fails if is set at root level', function () {
           this.setup({ supportFile: false })
 
-          return this.expectValidationFails('The supportFile configuration option is now invalid when set from the root of the config object in')
+          return this.expectValidationFails('The supportFile configuration option is invalid when set from the root of the config object')
           .then(() => {
-            return this.expectValidationFails('It is now configured separately as a testing type property: e2e.supportFile and component.supportFile')
+            return this.expectValidationFails('Set it within a testing type property: e2e.supportFile and component.supportFile')
           })
         })
       })

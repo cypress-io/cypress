@@ -2,8 +2,8 @@
 
 describe('Config options', () => {
   it('supports supportFile = false', () => {
-    cy.scaffoldProject('webpack5_wds4-react')
-    cy.openProject('webpack5_wds4-react', ['--config-file', 'cypress-webpack-no-support.config.ts', '--component'])
+    cy.scaffoldProject('webpack5_wds5-react')
+    cy.openProject('webpack5_wds5-react', ['--config-file', 'cypress-webpack-no-support.config.ts', '--component'])
     cy.startAppServer('component')
 
     cy.visitApp()
@@ -26,8 +26,8 @@ describe('Config options', () => {
   })
 
   it('supports @cypress/webpack-dev-server', () => {
-    cy.scaffoldProject('webpack5_wds4-react')
-    cy.openProject('webpack5_wds4-react', ['--config-file', 'cypress-webpack-dev-server-function.config.ts', '--component'])
+    cy.scaffoldProject('webpack5_wds5-react')
+    cy.openProject('webpack5_wds5-react', ['--config-file', 'cypress-webpack-dev-server-function.config.ts', '--component'])
     cy.startAppServer('component')
 
     cy.visitApp()
@@ -38,8 +38,8 @@ describe('Config options', () => {
   })
 
   it('supports webpackConfig as an async function', () => {
-    cy.scaffoldProject('webpack5_wds4-react')
-    cy.openProject('webpack5_wds4-react', ['--config-file', 'cypress-webpack-dev-server-async-config.config.ts', '--component'])
+    cy.scaffoldProject('webpack5_wds5-react')
+    cy.openProject('webpack5_wds5-react', ['--config-file', 'cypress-webpack-dev-server-async-config.config.ts', '--component'])
     cy.startAppServer('component')
 
     cy.visitApp()
@@ -56,8 +56,8 @@ describe('Config options', () => {
   })
 
   it('recompiles with new spec and custom indexHtmlFile', () => {
-    cy.scaffoldProject('webpack5_wds4-react')
-    cy.openProject('webpack5_wds4-react', ['--config-file', 'cypress-webpack-dev-server-custom-index.config.ts', '--component'])
+    cy.scaffoldProject('webpack5_wds5-react')
+    cy.openProject('webpack5_wds5-react', ['--config-file', 'cypress-webpack-dev-server-custom-index.config.ts', '--component'])
     cy.startAppServer('component')
 
     cy.visitApp()

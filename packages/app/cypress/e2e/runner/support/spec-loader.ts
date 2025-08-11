@@ -1,13 +1,15 @@
 import type { ProjectFixtureDir } from '@tooling/system-tests/lib/fixtureDirs'
+import type { ExpectedResults } from '../../support/execute-spec'
 
-export const shouldHaveTestResults = ({ passCount, failCount, pendingCount }) => {
+export const shouldHaveTestResults = ({ passCount, failCount, pendingCount }: ExpectedResults) => {
   passCount = passCount || '--'
   failCount = failCount || '--'
 
   cy.get('button.restart', { timeout: 30000 }).should('be.visible') // ensure tests are finished running
-  cy.findByLabelText('Stats', { timeout: 10000 }).within(() => {
-    cy.get('.passed .num', { timeout: 30000 }).should('have.text', `${passCount}`)
-    cy.get('.failed .num', { timeout: 30000 }).should('have.text', `${failCount}`)
+
+  cy.get('.stats', { timeout: 10000 }).within(() => {
+    cy.get('.passed .num', { timeout: 40000 }).should('have.text', `${passCount}`)
+    cy.get('.failed .num', { timeout: 40000 }).should('have.text', `${failCount}`)
 
     if (pendingCount) {
       cy.get('.pending .num', { timeout: 20000 }).should('have.text', `${pendingCount}`)

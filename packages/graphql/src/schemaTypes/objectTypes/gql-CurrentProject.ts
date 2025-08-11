@@ -112,13 +112,6 @@ export const CurrentProject = objectType({
       },
     })
 
-    t.boolean('needsLegacyConfigMigration', {
-      description: 'Whether the project needs to be migrated before proceeding',
-      resolve (source, args, ctx) {
-        return ctx.migration.needsCypressJsonMigration()
-      },
-    })
-
     t.boolean('hasValidConfigFile', {
       description: 'Whether the project has a valid config file',
       resolve (source, args, ctx) {

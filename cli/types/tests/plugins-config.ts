@@ -1,4 +1,4 @@
-// checking types passed to cypress/plugins/index.js file
+// checking types passed through setupNodeEvents
 
 // does nothing
 const pluginConfig: Cypress.PluginConfig = (on, config) => {}

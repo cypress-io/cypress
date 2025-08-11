@@ -58,8 +58,12 @@ const onOpen = () => {
 }
 
 const onClose = (e: MouseEvent | FocusEvent) => {
-  if (e.relatedTarget instanceof Element &&
-    popperElement.value && popperElement.value.contains(e.relatedTarget)) {
+  // Check if relatedTarget is a DOM element and is contained within the popper
+  if (e.relatedTarget &&
+      typeof e.relatedTarget === 'object' &&
+      'nodeType' in e.relatedTarget &&
+      popperElement.value &&
+      popperElement.value.contains(e.relatedTarget as Node)) {
     return
   }
 

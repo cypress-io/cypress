@@ -1,20 +1,7 @@
 exports['config/src/index .getBreakingKeys returns list of breaking config keys 1'] = [
-  'blacklistHosts',
-  'componentFolder',
-  'experimentalComponentTesting',
-  'experimentalGetCookiesSameSite',
   'experimentalJustInTimeCompile',
-  'experimentalNetworkStubbing',
-  'experimentalRunEvents',
-  'experimentalSessionSupport',
   'experimentalSessionAndOrigin',
-  'experimentalShadowDomSupport',
   'experimentalSkipDomainInjection',
-  'firefoxGcInterval',
-  'ignoreTestFiles',
-  'integrationFolder',
-  'pluginsFile',
-  'testFiles',
   'videoUploadOnPasses',
 ]
 

@@ -36,6 +36,10 @@ export function reportStudioError ({
 }: ReportStudioErrorOptions): void {
   debug('Error reported:', error)
 
+  if (process.env.CYPRESS_CRASH_REPORTS === '0') {
+    return
+  }
+
   // When developing locally, do not send to Sentry, but instead log to console.
   if (
     process.env.CYPRESS_LOCAL_STUDIO_PATH ||
@@ -77,7 +81,7 @@ export function reportStudioError ({
         stack: stripPath(errorObject.stack ?? `Unknown stack`),
         message: stripPath(errorObject.message ?? `Unknown message`),
         studioMethod,
-        studioMethodArgs: studioMethodArgsString,
+        studioMethodArgs: studioMethodArgsString ? stripPath(studioMethodArgsString) : undefined,
       }],
     }
 

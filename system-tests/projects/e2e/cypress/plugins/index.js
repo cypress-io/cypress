@@ -1,6 +1,5 @@
 require('@packages/ts/register')
 
-const _ = require('lodash')
 const Jimp = require('jimp')
 const path = require('path')
 const Promise = require('bluebird')
@@ -25,7 +24,6 @@ module.exports = (on, config) => {
   // save some time by only reading the originals once
   let cache = {}
 
-  const screenshotsTaken = []
   let browserArgs = null
 
   function getCachedImage (name) {
@@ -41,10 +39,6 @@ module.exports = (on, config) => {
       return image
     })
   }
-
-  on('after:screenshot', (details) => {
-    screenshotsTaken.push(details)
-  })
 
   on('before:browser:launch', (browser, options) => {
     useFixedBrowserLaunchSize(browser, options, config)
@@ -93,30 +87,6 @@ module.exports = (on, config) => {
       process.exit(1)
     },
 
-    'ensure:pixel:color' ({ name, colors, devicePixelRatio }) {
-      const imagePath = path.join(__dirname, '..', 'screenshots', `${name}.png`)
-
-      return Jimp.read(imagePath)
-      .then((image) => {
-        _.each(colors, ({ coords, color }) => {
-          let [x, y] = coords
-
-          x = x * devicePixelRatio
-          y = y * devicePixelRatio
-
-          const pixels = Jimp.intToRGBA(image.getPixelColor(x, y))
-
-          const { r, g, b } = pixels
-
-          if (!_.isEqual(color, [r, g, b])) {
-            throw new Error(`The pixel color at coords: [${x}, ${y}] does not match the expected pixel color. The color was [${r}, ${g}, ${b}] and was expected to be [${color.join(', ')}].`)
-          }
-        })
-
-        return null
-      })
-    },
-
     'compare:screenshots' ({ a, b, devicePixelRatio, blackout = false }) {
       function isBlack (rgba) {
         return `${rgba.r}${rgba.g}${rgba.b}` === '000'
@@ -150,20 +120,6 @@ module.exports = (on, config) => {
       })
     },
 
-    'check:screenshot:size' ({ name, width, height, devicePixelRatio }) {
-      return Jimp.read(path.join(__dirname, '..', 'screenshots', name))
-      .then((image) => {
-        width = width * devicePixelRatio
-        height = height * devicePixelRatio
-
-        if (image.bitmap.width !== width || image.bitmap.height !== height) {
-          throw new Error(`Screenshot does not match dimensions! Expected: ${width} x ${height} but got ${image.bitmap.width} x ${image.bitmap.height}`)
-        }
-
-        return null
-      })
-    },
-
     'record:fast_visit_spec' ({ percentiles, url, browser, currentRetry }) {
       percentiles.forEach(([percent, percentile]) => {
         console.log(`${percent}%\t of visits to ${url} finished in less than ${percentile}ms`)
@@ -182,10 +138,6 @@ module.exports = (on, config) => {
 
       return performance.track('fast_visit_spec percentiles', data)
       .return(null)
-    },
-
-    'get:screenshots:taken' () {
-      return screenshotsTaken
     },
 
     'get:browser:args' () {

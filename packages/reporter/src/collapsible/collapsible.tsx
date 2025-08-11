@@ -1,13 +1,19 @@
 import cs from 'classnames'
 import React, { CSSProperties, MouseEvent, ReactNode, RefObject, useCallback, useState } from 'react'
 import { onEnterOrSpace } from '../lib/util'
-import ChevronIcon from '@packages/frontend-shared/src/assets/icons/chevron-down-small_x8.svg'
+import DocumentBlankIcon from '@packages/frontend-shared/src/assets/icons/document-blank_x16.svg'
+import { IconChevronDownSmall } from '@cypress-design/react-icon'
+
+export interface CollapsibleHeaderComponentProps {
+  isOpen: boolean
+}
 
 interface CollapsibleProps {
   isOpen?: boolean
   headerClass?: string
   headerStyle?: CSSProperties
   header?: ReactNode
+  HeaderComponent?: React.FunctionComponent<CollapsibleHeaderComponentProps>
   headerExtras?: ReactNode
   containerRef?: RefObject<HTMLDivElement>
   contentClass?: string
@@ -16,7 +22,7 @@ interface CollapsibleProps {
   onOpenStateChangeRequested?: (isOpen: boolean) => void
 }
 
-const Collapsible: React.FC<CollapsibleProps> = ({ isOpen: isOpenAsProp = false, header, headerClass = '', headerStyle = {}, headerExtras, contentClass = '', hideExpander = false, containerRef = null, onOpenStateChangeRequested, children }) => {
+const Collapsible: React.FC<CollapsibleProps> = ({ isOpen: isOpenAsProp = false, header, headerClass = '', headerStyle = {}, headerExtras, contentClass = '', hideExpander = false, containerRef = null, onOpenStateChangeRequested, children, HeaderComponent }) => {
   const [isOpenState, setIsOpenState] = useState(isOpenAsProp)
 
   const toggleOpenState = useCallback((e?: MouseEvent) => {
@@ -46,9 +52,10 @@ const Collapsible: React.FC<CollapsibleProps> = ({ isOpen: isOpenAsProp = false,
             style={headerStyle}
             tabIndex={-1}
           >
-            {!hideExpander && <ChevronIcon className='collapsible-indicator' />}
+            {!hideExpander && headerClass === 'hook-header' && <IconChevronDownSmall size='16' strokeColor='gray-800' className='collapsible-indicator' />}
+            {!hideExpander && headerClass !== 'hook-header' && <DocumentBlankIcon className='collapsible-indicator' />}
             <span className='collapsible-header-text'>
-              {header}
+              {HeaderComponent ? <HeaderComponent isOpen={isOpen} /> : header}
             </span>
           </div>
         </div>

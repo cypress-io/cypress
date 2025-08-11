@@ -2,8 +2,12 @@ import { ErrorWrapperSource, stackUtils } from '@packages/errors'
 import path from 'path'
 import _ from 'lodash'
 import { codeFrameColumns } from '@babel/code-frame'
-
+import os from 'os'
 import type { DataContext } from '..'
+
+const tsxCodeFrameFilter = '/node_modules/tsx/dist/register'
+const windowsTsxCodeFrameFilter = tsxCodeFrameFilter.replaceAll('/', '\\')
+const isWindows = os.platform() === 'win32'
 
 export interface CodeFrameShape {
   line: number
@@ -24,7 +28,7 @@ export class ErrorDataSource {
       return null
     }
 
-    // If we saw a TSError,  or a esbuild error we will extract the error location from the message
+    // If we saw a TransformError, or a esbuild error we will extract the error location from the message
     const compilerErrorLocation = source.cypressError.originalError?.compilerErrorLocation
 
     let line: number | null | undefined
@@ -38,7 +42,9 @@ export class ErrorDataSource {
     } else {
       // Skip any stack trace lines which come from node:internal code
       const stackLines = stackUtils.getStackLines(source.cypressError.stack ?? '')
-      const filteredStackLines = stackLines.filter((stackLine) => !stackLine.includes('node:electron') && !stackLine.includes('node:internal') && !stackLine.includes('source-map-support'))
+
+      // we want to filter out any tsx transformation code in the stack to help identify the error. Windows stack can have both posix paths and dos paths so we need to filter both (last line is a no-op on posix as its the same thing)
+      const filteredStackLines = stackLines.filter((stackLine) => !stackLine.includes('node:') && !stackLine.includes('source-map-support') && !stackLine.includes(tsxCodeFrameFilter) && !(isWindows && stackLine.includes(windowsTsxCodeFrameFilter)))
       const parsedLine = stackUtils.parseStackLine(filteredStackLines[0] ?? '')
 
       if (parsedLine) {

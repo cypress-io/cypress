@@ -777,17 +777,6 @@ describe('network stubbing', { retries: 15 }, function () {
           })
         })
 
-        it('errors on matchUrlAgainstPath usage', function (done) {
-          testFail((err) => {
-            expect(err.message).to.include('`matchUrlAgainstPath` was removed in Cypress 7.0.0')
-
-            done()
-          })
-
-          // @ts-ignore
-          cy.intercept({ matchUrlAgainstPath: true })
-        })
-
         it('errors on unknown prop', function (done) {
           testFail((err) => {
             expect(err.message).to.include('An unknown \`RouteMatcher\` property was passed: `wrong`')
@@ -1023,7 +1012,7 @@ describe('network stubbing', { retries: 15 }, function () {
     context('cors preflight', function () {
       // a different domain from the page own domain
       // NOTE: this domain is redirected back to the local host test server
-      // using "hosts" setting in the "cypress.json" file
+      // using "hosts" setting in the "cypress.config.js" file
       let corsUrl = 'http://diff.foobar.com:3501/no-cors'
 
       beforeEach(() => {

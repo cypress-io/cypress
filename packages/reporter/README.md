@@ -16,20 +16,6 @@ The reporter shows the running results of the tests. It includes the following:
   - commands and assertions with detailed information
   - any failures/errors
 
-## Building
-
-### For development
-
-```bash
-yarn workspace @packages/reporter build
-```
-
-### For production
-
-```bash
-yarn workspace @packages/reporter build-prod
-```
-
 ## Developing
 
 To see the reporter render, see [Developing the driver](../driver/README.md#Developing).

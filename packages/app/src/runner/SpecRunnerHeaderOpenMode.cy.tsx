@@ -1,5 +1,6 @@
 import SpecRunnerHeaderOpenMode from './SpecRunnerHeaderOpenMode.vue'
 import { useAutStore } from '../store'
+import { useStudioStore } from '../store/studio-store'
 import { SpecRunnerHeaderFragment, SpecRunnerHeaderFragmentDoc } from '../generated/graphql-test'
 import { createEventManager, createTestAutIframe } from '../../cypress/component/support/ctSupport'
 import { ExternalLink_OpenExternalDocument } from '@packages/frontend-shared/src/generated/graphql'
@@ -86,251 +87,263 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
 
       cy.get('[data-cy="playground-activator"]').should('not.exist')
     })
-  })
 
-  it('shows url section if currentTestingType is e2e', () => {
-    const autStore = useAutStore()
-    const autUrl = 'http://localhost:3000'
-
-    autStore.updateUrl(autUrl)
-
-    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
-      onResult: (gql) => {
-        gql.currentTestingType = 'e2e'
-      },
-      render: (gqlVal) => {
-        return renderWithGql(gqlVal)
-      },
-    })
-
-    cy.get('[data-cy="aut-url"]').should('exist')
-    cy.findByTestId('aut-url-input').should('be.visible').should('have.value', autUrl)
-    cy.findByTestId('viewport-size').should('be.visible').contains('500x500')
-  })
-
-  it('url section handles long url/small viewport', {
-    viewportWidth: 500,
-  }, () => {
-    const autStore = useAutStore()
-    const autUrl = 'http://localhost:3000/pretty/long/url.spec.jsx'
-
-    autStore.updateUrl(autUrl)
-
-    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
-      onResult: (gql) => {
-        gql.currentTestingType = 'e2e'
-      },
-      render: (gqlVal) => {
-        return renderWithGql(gqlVal)
-      },
-    })
-
-    cy.get('[data-cy="aut-url"]').should('exist')
-    cy.findByTestId('aut-url-input').should('be.visible').should('have.value', autUrl)
-    cy.findByTestId('select-browser').should('be.visible').contains('Electron 73')
-    cy.findByTestId('viewport-size').should('be.visible').contains('500x500')
-    cy.percySnapshot()
-  })
-
-  it('links to aut url', () => {
-    const autStore = useAutStore()
-    const autUrl = 'http://localhost:3000/todo'
-
-    autStore.updateUrl(autUrl)
-
-    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
-      onResult: (gql) => {
-        gql.currentTestingType = 'e2e'
-      },
-      render: (gqlVal) => {
-        return renderWithGql(gqlVal)
-      },
-    })
-
-    cy.findByTestId('aut-url-input').invoke('val').should('contain', autUrl)
-  })
-
-  it('opens aut url externally', () => {
-    const autStore = useAutStore()
-    const autUrl = 'http://localhost:3000/todo'
-
-    autStore.updateUrl(autUrl)
-
-    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
-      onResult: (gql) => {
-        gql.currentTestingType = 'e2e'
-      },
-      render: (gqlVal) => {
-        return renderWithGql(gqlVal)
-      },
-    })
-
-    const openExternalStub = cy.stub()
-
-    cy.stubMutationResolver(ExternalLink_OpenExternalDocument, (defineResult, { url }) => {
-      openExternalStub(url)
-
-      return defineResult({
-        openExternal: true,
+    it('opens and closes selector playground', () => {
+      cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+        render: (gqlVal) => {
+          return renderWithGql(gqlVal)
+        },
       })
-    })
 
-    cy.findByTestId('aut-url-input').click()
-    cy.wrap(openExternalStub).should('have.been.calledWith', 'http://localhost:3000/todo')
+      cy.findByTestId('playground-activator').click()
+      cy.get('#selector-playground').should('be.visible')
+
+      cy.findByTestId('playground-activator').click()
+      cy.get('#selector-playground').should('not.exist')
+    })
   })
 
-  it('disables url section if currentTestingType is component', () => {
-    const autStore = useAutStore()
+  describe('url input', () => {
+    it('shows url if currentTestingType is e2e', () => {
+      const autStore = useAutStore()
+      const autUrl = 'http://localhost:3000'
 
-    autStore.updateUrl('http://localhost:3000')
+      autStore.updateUrl(autUrl)
 
-    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
-      onResult: (gql) => {
-        gql.currentTestingType = 'component'
-      },
-      render: (gqlVal) => {
-        return renderWithGql(gqlVal)
-      },
+      cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+        onResult: (gql) => {
+          gql.currentTestingType = 'e2e'
+        },
+        render: (gqlVal) => {
+          return renderWithGql(gqlVal)
+        },
+      })
+
+      cy.get('[data-cy="aut-url"]').should('exist')
+      cy.findByTestId('aut-url-input').should('be.visible').should('have.value', autUrl)
+      // no reason to type in the url input
+      cy.findByTestId('aut-url-input').should('have.prop', 'readOnly', true)
+      cy.findByTestId('viewport-size').should('be.visible').contains('500x500')
     })
 
-    cy.findByTestId('playground-activator').should('be.visible')
-    cy.findByTestId('aut-url-input').should('be.disabled')
-    cy.findByTestId('aut-url-input').should('have.prop', 'placeholder', 'URL navigation disabled in component testing')
-    cy.findByTestId('viewport-size').should('be.visible').contains('500x500')
-  })
+    it('url section handles long url/small viewport', {
+      viewportWidth: 500,
+    }, () => {
+      const autStore = useAutStore()
+      const autUrl = 'http://localhost:3000/pretty/long/url.spec.jsx'
 
-  it('shows current browser and possible browsers', () => {
-    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
-      onResult: (ctx) => {
-        ctx.activeBrowser = ctx.browsers?.find((x) => x.displayName === 'Chrome') ?? null
-      },
-      render: (gqlVal) => {
-        return renderWithGql(gqlVal)
-      },
+      autStore.updateUrl(autUrl)
+
+      cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+        onResult: (gql) => {
+          gql.currentTestingType = 'e2e'
+        },
+        render: (gqlVal) => {
+          return renderWithGql(gqlVal)
+        },
+      })
+
+      cy.get('[data-cy="aut-url"]').should('exist')
+      cy.findByTestId('aut-url-input').should('be.visible').should('have.value', autUrl)
+      cy.findByTestId('select-browser').should('be.visible').contains('Electron 73')
+      cy.findByTestId('viewport-size').should('be.visible').contains('500x500')
+      cy.percySnapshot()
     })
 
-    cy.get('[data-cy="select-browser"] > button').should('be.enabled').click()
-    cy.findByRole('list').within(() =>
-      ['Chrome', 'Electron', 'Firefox'].forEach((browser) => cy.findAllByText(browser)))
+    it('links to aut url', () => {
+      const autStore = useAutStore()
+      const autUrl = 'http://localhost:3000/todo'
 
-    cy.get('[data-cy="select-browser"] button[aria-controls]').focus().type('{enter}')
-    cy.contains('Firefox').should('be.hidden')
-    cy.percySnapshot()
-  })
+      autStore.updateUrl(autUrl)
 
-  it('shows generic browser icon when current browser icon is not configured', () => {
-    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
-      onResult: (ctx) => {
-        ctx.activeBrowser = ctx.browsers?.find((x) => x.displayName === 'Fake Browser') ?? null
-      },
-      render: (gqlVal) => {
-        return renderWithGql(gqlVal)
-      },
+      cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+        onResult: (gql) => {
+          gql.currentTestingType = 'e2e'
+        },
+        render: (gqlVal) => {
+          return renderWithGql(gqlVal)
+        },
+      })
+
+      cy.findByTestId('aut-url-input').invoke('val').should('contain', autUrl)
     })
 
-    cy.findByTestId('select-browser').contains('Fake Browser')
+    it('opens aut url externally', () => {
+      const autStore = useAutStore()
+      const autUrl = 'http://localhost:3000/todo'
 
-    cy.get('[data-cy="select-browser"] > button svg').eq(0).children().verifyBrowserIconSvg(cyGeneralGlobeX16.data)
-  })
+      autStore.updateUrl(autUrl)
 
-  it('shows selected browser as first browser in dropdown', () => {
-    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
-      render: (gqlVal) => {
-        return renderWithGql(gqlVal)
-      },
-    })
+      cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+        onResult: (gql) => {
+          gql.currentTestingType = 'e2e'
+        },
+        render: (gqlVal) => {
+          return renderWithGql(gqlVal)
+        },
+      })
 
-    cy.get('[data-cy="select-browser"] > button').should('be.enabled').click()
-    cy.get('[data-browser-id="1"]').should('contain', 'Electron').and('contain', 'Version 73')
-    cy.get('[data-browser-id="1"]').find('[data-cy="top-nav-browser-list-selected-item"]')
-  })
+      const openExternalStub = cy.stub()
 
-  it('shows current viewport info', () => {
-    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
-      render: (gqlVal) => {
-        return renderWithGql({
-          ...gqlVal,
-          configFile: 'cypress.config.js',
+      cy.stubMutationResolver(ExternalLink_OpenExternalDocument, (defineResult, { url }) => {
+        openExternalStub(url)
+
+        return defineResult({
+          openExternal: true,
         })
-      },
+      })
+
+      cy.findByTestId('aut-url-input').click()
+      cy.wrap(openExternalStub).should('have.been.calledWith', 'http://localhost:3000/todo')
     })
 
-    cy.get('[data-cy="viewport-size"]').contains('500x500')
+    it('when currentTestingType is component, url has placeholder text', () => {
+      const autStore = useAutStore()
+
+      autStore.updateUrl('http://localhost:3000')
+
+      cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+        onResult: (gql) => {
+          gql.currentTestingType = 'component'
+        },
+        render: (gqlVal) => {
+          return renderWithGql(gqlVal)
+        },
+      })
+
+      cy.findByTestId('playground-activator').should('be.visible')
+      cy.findByTestId('aut-url-input').should('have.prop', 'readOnly', true)
+      cy.findByTestId('aut-url-input').should('have.prop', 'placeholder', 'URL navigation disabled in component testing')
+      cy.findByTestId('viewport-size').should('be.visible').contains('500x500')
+    })
+
+    it('when studioStore.needsUrl is true, url input is enabled with Enter URL placeholder', () => {
+      const studioStore = useStudioStore()
+
+      // This emulates the 'needsUrl' state in the studio store
+      studioStore.setActive(true)
+      studioStore.setUrl(undefined)
+
+      cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+        render: (gqlVal) => {
+          return renderWithGql(gqlVal)
+        },
+      })
+
+      cy.findByTestId('aut-url-input').should('have.prop', 'readOnly', false)
+      cy.findByTestId('aut-url-input').should('have.prop', 'placeholder', 'Enter URL')
+      cy.percySnapshot()
+    })
   })
 
-  it('shows scale % in viewport info', () => {
-    const autStore = useAutStore()
+  describe('browser dropdown', () => {
+    it('shows current browser and possible browsers', () => {
+      cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+        onResult: (ctx) => {
+          ctx.activeBrowser = ctx.browsers?.find((x) => x.displayName === 'Chrome') ?? null
+        },
+        render: (gqlVal) => {
+          return renderWithGql(gqlVal)
+        },
+      })
 
-    autStore.setScale(0.4)
-    autStore.updateUrl('http://localhost:3000/todo')
-    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
-      render: (gqlVal) => {
-        return renderWithGql({
-          ...gqlVal,
-          configFile: 'cypress.config.js',
-        })
-      },
+      cy.get('[data-cy="select-browser"] > button').should('be.enabled').click()
+      cy.findByRole('list').within(() =>
+        ['Chrome', 'Electron', 'Firefox'].forEach((browser) => cy.findAllByText(browser)))
+
+      cy.get('[data-cy="select-browser"] button[aria-controls]').focus().type('{enter}')
+      cy.contains('Firefox').should('be.hidden')
+      cy.percySnapshot()
     })
 
-    cy.get('[data-cy="viewport-scale"]').contains('40%')
-    cy.percySnapshot()
+    it('shows generic browser icon when current browser icon is not configured', () => {
+      cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+        onResult: (ctx) => {
+          ctx.activeBrowser = ctx.browsers?.find((x) => x.displayName === 'Fake Browser') ?? null
+        },
+        render: (gqlVal) => {
+          return renderWithGql(gqlVal)
+        },
+      })
+
+      cy.findByTestId('select-browser').contains('Fake Browser')
+
+      cy.get('[data-cy="select-browser"] > button svg').eq(0).children().verifyBrowserIconSvg(cyGeneralGlobeX16.data)
+    })
+
+    it('shows selected browser as first browser in dropdown', () => {
+      cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+        render: (gqlVal) => {
+          return renderWithGql(gqlVal)
+        },
+      })
+
+      cy.get('[data-cy="select-browser"] > button').should('be.enabled').click()
+      cy.get('[data-browser-id="1"]').should('contain', 'Electron').and('contain', 'Version 73')
+      cy.get('[data-browser-id="1"]').find('[data-cy="top-nav-browser-list-selected-item"]')
+    })
+
+    it('disables browser dropdown button when isRunning is true', () => {
+      const autStore = useAutStore()
+
+      autStore.setIsRunning(true)
+
+      cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+        onResult: (ctx) => {
+          ctx.activeBrowser = ctx.browsers?.find((x) => x.displayName === 'Chrome') ?? null
+        },
+        render: (gqlVal) => {
+          return renderWithGql(gqlVal)
+        },
+      })
+
+      cy.findByTestId('select-browser').should('be.visible').contains('Chrome 78')
+      cy.get('[data-cy="select-browser"] > button').should('be.disabled')
+    })
   })
 
-  it('disables browser dropdown button when isRunning is true', () => {
-    const autStore = useAutStore()
+  describe('viewport info', () => {
+    it('shows current viewport info', () => {
+      cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+        render: (gqlVal) => {
+          return renderWithGql({
+            ...gqlVal,
+            configFile: 'cypress.config.js',
+          })
+        },
+      })
 
-    autStore.setIsRunning(true)
-
-    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
-      onResult: (ctx) => {
-        ctx.activeBrowser = ctx.browsers?.find((x) => x.displayName === 'Chrome') ?? null
-      },
-      render: (gqlVal) => {
-        return renderWithGql(gqlVal)
-      },
+      cy.get('[data-cy="viewport-size"]').contains('500x500')
     })
 
-    cy.findByTestId('select-browser').should('be.visible').contains('Chrome 78')
-    cy.get('[data-cy="select-browser"] > button').should('be.disabled')
+    it('shows scale % in viewport info', () => {
+      const autStore = useAutStore()
+
+      autStore.setScale(0.4)
+      autStore.updateUrl('http://localhost:3000/todo')
+      cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+        render: (gqlVal) => {
+          return renderWithGql({
+            ...gqlVal,
+            configFile: 'cypress.config.js',
+          })
+        },
+      })
+
+      cy.get('[data-cy="viewport-scale"]').contains('40%')
+      cy.percySnapshot()
+    })
   })
 
-  it('opens and closes selector playground', () => {
-    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
-      render: (gqlVal) => {
-        return renderWithGql(gqlVal)
-      },
+  describe('studio button', () => {
+    it('shows studio button', () => {
+      cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+        render: (gqlVal) => {
+          return renderWithGql(gqlVal, true)
+        },
+      })
+
+      cy.findByTestId('studio-button').should('be.visible')
     })
-
-    cy.findByTestId('playground-activator').click()
-    cy.get('#selector-playground').should('be.visible')
-
-    cy.findByTestId('playground-activator').click()
-    cy.get('#selector-playground').should('not.exist')
-  })
-
-  it('does not display', () => {
-    const autStore = useAutStore()
-    const autUrl = 'http://localhost:4000'
-
-    autStore.updateUrl(autUrl)
-    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
-      render: (gqlVal) => {
-        return renderWithGql(gqlVal)
-      },
-    })
-
-    cy.findByTestId('aut-url-input').should('be.visible').should('have.value', autUrl)
-    cy.findByTestId('select-browser').should('be.visible').contains('title', 'Electron 73')
-    cy.findByTestId('viewport-size').should('be.visible').contains('500x500')
-  })
-
-  it('shows studio button', () => {
-    cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
-      render: (gqlVal) => {
-        return renderWithGql(gqlVal, true)
-      },
-    })
-
-    cy.findByTestId('studio-button').should('be.visible')
   })
 })

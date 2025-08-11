@@ -70,7 +70,7 @@ describe('test errors', () => {
     it('does not expand or collapse stack trace when clicking', () => {
       cy.get('.runnable-err-print').click()
       cy.get('.runnable-err-stack-trace').should('not.exist')
-      cy.contains('View stack trace').click()
+      cy.contains('Stack trace').click()
       cy.get('.runnable-err-stack-trace').should('be.visible')
       cy.get('.runnable-err-print').click()
       cy.get('.runnable-err-stack-trace').should('be.visible')
@@ -87,13 +87,13 @@ describe('test errors', () => {
     })
 
     it('opens stack trace on click', () => {
-      cy.contains('View stack trace').click()
+      cy.contains('Stack trace').click()
       cy.get('.runnable-err-stack-trace').should('be.visible')
       cy.percySnapshot()
     })
 
     it('pairs down stack line whitespace', () => {
-      cy.contains('View stack trace').click()
+      cy.contains('Stack trace').click()
 
       cy.get('.runnable-err-stack-trace').within(() => {
         cy.get('.err-stack-line')
@@ -118,7 +118,7 @@ describe('test errors', () => {
     })
 
     it('does not include message in stack trace', () => {
-      cy.contains('View stack trace').click()
+      cy.contains('Stack trace').click()
       cy.get('.runnable-err-stack-trace')
       .invoke('text')
       .should('not.include', 'Some Error')
@@ -126,7 +126,7 @@ describe('test errors', () => {
     })
 
     it('turns files into links', () => {
-      cy.contains('View stack trace').click()
+      cy.contains('Stack trace').click()
 
       cy.get('.runnable-err-stack-trace .runnable-err-file-path')
       .should('have.length', 3)
@@ -141,34 +141,34 @@ describe('test errors', () => {
     })
 
     it('does not turn cypress:// files into links', () => {
-      cy.contains('View stack trace').click()
+      cy.contains('Stack trace').click()
       cy.contains('cypress://').find('a').should('not.exist')
     })
 
     it('does not turn cypress_runner.js files into links', () => {
-      cy.contains('View stack trace').click()
+      cy.contains('Stack trace').click()
       cy.contains('cypress_runner.js').find('a').should('not.exist')
     })
 
     it('does not turn lines without absoluteFile into links', () => {
-      cy.contains('View stack trace').click()
+      cy.contains('Stack trace').click()
       cy.contains('.err-stack-line', 'http://localhost:1234/me/dev/my/app.js:8:11')
       .find('a').should('not.exist')
     })
 
     it('does not turn anything after "From Node.js Internals" into links', () => {
-      cy.contains('View stack trace').click()
+      cy.contains('Stack trace').click()
       cy.contains('events.js').find('a').should('not.exist')
       cy.contains('node/internals.js').find('a').should('not.exist')
     })
 
     it('does not collapse test when clicking', () => {
-      cy.contains('View stack trace').click()
+      cy.contains('Stack trace').click()
       cy.get('.command-wrapper').should('be.visible')
     })
 
     it('displays tooltip on hover', () => {
-      cy.contains('View stack trace').click()
+      cy.contains('Stack trace').click()
 
       cy.get('.runnable-err-stack-trace a').first().trigger('mouseover')
       cy.get('.cy-tooltip').first().should('have.text', 'Open in IDE')
@@ -307,24 +307,6 @@ describe('test errors', () => {
       cy
       .get('.test-err-code-frame pre')
       .should('have.class', 'language-text')
-    })
-  })
-
-  describe('studio error', () => {
-    beforeEach(() => {
-      setError(runnablesWithErr)
-    })
-
-    it('is not visible by default', () => {
-      cy.get('.studio-err-wrapper').should('not.exist')
-    })
-
-    it('is visible when studio is active', () => {
-      runner.emit('reporter:start', { studioActive: true })
-
-      cy.get('.studio-err-wrapper').should('exist').should('be.visible')
-
-      cy.percySnapshot()
     })
   })
 })

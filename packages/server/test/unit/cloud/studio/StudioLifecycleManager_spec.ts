@@ -165,31 +165,7 @@ describe('StudioLifecycleManager', () => {
   })
 
   describe('cloudStudioRequested', () => {
-    it('is true when CYPRESS_ENABLE_CLOUD_STUDIO is set', async () => {
-      process.env.CYPRESS_ENABLE_CLOUD_STUDIO = '1'
-      delete process.env.CYPRESS_LOCAL_STUDIO_PATH
-
-      expect(studioLifecycleManager.cloudStudioRequested).to.be.true
-    })
-
-    it('is true when CYPRESS_LOCAL_STUDIO_PATH is set', async () => {
-      delete process.env.CYPRESS_ENABLE_CLOUD_STUDIO
-      process.env.CYPRESS_LOCAL_STUDIO_PATH = '/path/to/studio'
-
-      expect(studioLifecycleManager.cloudStudioRequested).to.be.true
-    })
-
-    it('is false when neither env variable is set', async () => {
-      delete process.env.CYPRESS_ENABLE_CLOUD_STUDIO
-      delete process.env.CYPRESS_LOCAL_STUDIO_PATH
-
-      expect(studioLifecycleManager.cloudStudioRequested).to.be.false
-    })
-
-    it('is true when both env variables are set', async () => {
-      process.env.CYPRESS_ENABLE_CLOUD_STUDIO = '1'
-      process.env.CYPRESS_LOCAL_STUDIO_PATH = '/path/to/studio'
-
+    it('is always true', () => {
       expect(studioLifecycleManager.cloudStudioRequested).to.be.true
     })
   })
@@ -243,7 +219,7 @@ describe('StudioLifecycleManager', () => {
           isRetryableError,
           asyncRetry,
         },
-        shouldEnableStudio: false,
+        shouldEnableStudio: true,
         manifest: mockManifest,
       })
 
@@ -327,7 +303,7 @@ describe('StudioLifecycleManager', () => {
           isRetryableError,
           asyncRetry,
         },
-        shouldEnableStudio: false,
+        shouldEnableStudio: true,
         manifest: mockManifest,
       })
 
@@ -586,7 +562,6 @@ describe('StudioLifecycleManager', () => {
       const listener1 = sinon.stub()
       const listener2 = sinon.stub()
 
-      // Register listeners that should be cleaned up
       studioLifecycleManager.registerStudioReadyListener(listener1)
       studioLifecycleManager.registerStudioReadyListener(listener2)
 
@@ -631,7 +606,7 @@ describe('StudioLifecycleManager', () => {
       })
 
       // @ts-expect-error - accessing private property
-      expect(studioLifecycleManager.listeners.length).to.equal(0)
+      expect(studioLifecycleManager.listeners.length).to.equal(2)
 
       expect(listener1).not.to.be.called
       expect(listener2).not.to.be.called
@@ -813,46 +788,9 @@ describe('StudioLifecycleManager', () => {
       expect(listener1).to.be.calledWith(mockStudioManager)
       expect(listener2).to.be.calledWith(mockStudioManager)
 
+      // Listeners should be cleared after successful initialization
       // @ts-expect-error - accessing private property
       expect(studioLifecycleManager.listeners.length).to.equal(0)
-    })
-
-    it('does not clean up listeners when CYPRESS_LOCAL_STUDIO_PATH is set', async () => {
-      process.env.CYPRESS_LOCAL_STUDIO_PATH = '/path/to/studio'
-
-      const listener1 = sinon.stub()
-      const listener2 = sinon.stub()
-
-      studioLifecycleManager.registerStudioReadyListener(listener1)
-      studioLifecycleManager.registerStudioReadyListener(listener2)
-
-      // @ts-expect-error - accessing private property
-      expect(studioLifecycleManager.listeners.length).to.equal(2)
-
-      const listenersCalledPromise = Promise.all([
-        new Promise<void>((resolve) => {
-          listener1.callsFake(() => resolve())
-        }),
-        new Promise<void>((resolve) => {
-          listener2.callsFake(() => resolve())
-        }),
-      ])
-
-      studioLifecycleManager.initializeStudioManager({
-        projectId: 'test-project-id',
-        cloudDataSource: mockCloudDataSource,
-        ctx: mockCtx,
-        cfg: mockCfg,
-        debugData: {},
-      })
-
-      await listenersCalledPromise
-
-      expect(listener1).to.be.calledWith(mockStudioManager)
-      expect(listener2).to.be.calledWith(mockStudioManager)
-
-      // @ts-expect-error - accessing private property
-      expect(studioLifecycleManager.listeners.length).to.equal(2)
     })
   })
 
@@ -949,6 +887,180 @@ describe('StudioLifecycleManager', () => {
       await new Promise((resolve) => setTimeout(resolve, 10))
 
       expect(statusChangesSpy).to.be.calledWith('IN_ERROR')
+    })
+  })
+
+  describe('getCurrentStatus', () => {
+    it('returns undefined when no status has been set', () => {
+      expect(studioLifecycleManager.getCurrentStatus()).to.be.undefined
+    })
+
+    it('returns the current status after it has been set', () => {
+      studioLifecycleManager.updateStatus('INITIALIZING')
+      expect(studioLifecycleManager.getCurrentStatus()).to.equal('INITIALIZING')
+
+      studioLifecycleManager.updateStatus('ENABLED')
+      expect(studioLifecycleManager.getCurrentStatus()).to.equal('ENABLED')
+
+      studioLifecycleManager.updateStatus('IN_ERROR')
+      expect(studioLifecycleManager.getCurrentStatus()).to.equal('IN_ERROR')
+    })
+  })
+
+  describe('retry', () => {
+    it('clears state and re-initializes studio manager', async () => {
+      // Cloud studio is enabled
+      studioManagerSetupStub.callsFake((args) => {
+        mockStudioManager.status = 'ENABLED'
+
+        return Promise.resolve()
+      })
+
+      const mockManifest = {
+        'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
+      }
+
+      ensureStudioBundleStub.resolves(mockManifest)
+
+      // First initialize with some state
+      studioLifecycleManager.initializeStudioManager({
+        projectId: 'test-project-id',
+        cloudDataSource: mockCloudDataSource,
+        ctx: mockCtx,
+        cfg: mockCfg,
+        debugData: {},
+      })
+
+      // Wait for initialization to complete
+      await new Promise((resolve) => {
+        studioLifecycleManager.registerStudioReadyListener(() => {
+          resolve(true)
+        })
+      })
+
+      // Initial state
+      expect(studioLifecycleManager.getCurrentStatus()).to.equal('ENABLED')
+      expect(studioLifecycleManager.isStudioReady()).to.be.true
+
+      const initialCallCount = postStudioSessionStub.callCount
+
+      studioLifecycleManager.retry()
+
+      // Verify state was cleared
+      expect(studioLifecycleManager.getCurrentStatus()).to.equal('INITIALIZING')
+      expect(studioLifecycleManager.isStudioReady()).to.be.false
+
+      // Wait for retry initialization to complete by waiting for the promise to resolve
+      // @ts-expect-error - accessing private property
+      const retryPromise = studioLifecycleManager.studioManagerPromise
+
+      await retryPromise
+
+      // Verify retry worked
+      expect(studioLifecycleManager.getCurrentStatus()).to.equal('ENABLED')
+      expect(studioLifecycleManager.isStudioReady()).to.be.true
+
+      // Verify initialization was called again (should be initial + 1 more for retry)
+      expect(postStudioSessionStub.callCount).to.equal(initialCallCount + 1)
+      expect(studioManagerSetupStub.callCount).to.equal(initialCallCount + 1)
+      expect(ensureStudioBundleStub.callCount).to.equal(initialCallCount + 1)
+    })
+
+    it('sets status to IN_ERROR when no initialization parameters are available', () => {
+      // Set up ctx so retry doesn't return early
+      // @ts-expect-error - accessing private property
+      studioLifecycleManager.ctx = mockCtx
+
+      // Don't initialize first, so no params are stored
+      studioLifecycleManager.retry()
+
+      expect(studioLifecycleManager.getCurrentStatus()).to.equal('IN_ERROR')
+    })
+
+    it('does nothing when no ctx is available', () => {
+      const statusChangesSpy = sinon.spy(studioLifecycleManager as any, 'updateStatus')
+
+      // Call retry without ctx
+      studioLifecycleManager.retry()
+
+      // Should not have updated status
+      expect(statusChangesSpy).not.to.be.called
+    })
+
+    it('clears the current studio hash from cached bundle promises on retry', async () => {
+      // Add some cached promises to the static map
+      const dummyPromise = Promise.resolve()
+
+      // @ts-expect-error - accessing private static property
+      StudioLifecycleManager.hashLoadingMap.set('test-hash-1', dummyPromise)
+      // @ts-expect-error - accessing private static property
+      StudioLifecycleManager.hashLoadingMap.set('abc', dummyPromise) // This should be the current hash (from studioUrl)
+
+      // @ts-expect-error - accessing private static property
+      expect(StudioLifecycleManager.hashLoadingMap.size).to.equal(2)
+
+      // Initialize with ctx so retry will work
+      studioLifecycleManager.initializeStudioManager({
+        projectId: 'test-project-id',
+        cloudDataSource: mockCloudDataSource,
+        ctx: mockCtx,
+        cfg: mockCfg,
+        debugData: {},
+      })
+
+      // @ts-expect-error - accessing private property
+      studioLifecycleManager.currentStudioHash = 'abc'
+
+      studioLifecycleManager.retry()
+
+      // Verify only the current studio hash was cleared (abc from the studioUrl)
+      // @ts-expect-error - accessing private static property
+      expect(StudioLifecycleManager.hashLoadingMap.has('test-hash-1')).to.be.true
+      // @ts-expect-error - accessing private static property
+      expect(StudioLifecycleManager.hashLoadingMap.has('abc')).to.be.false
+      // @ts-expect-error - accessing private static property
+      expect(StudioLifecycleManager.hashLoadingMap.size).to.equal(1)
+    })
+
+    it('clears the local hash when using local studio path', async () => {
+      process.env.CYPRESS_LOCAL_STUDIO_PATH = '/path/to/studio'
+
+      // Add some cached promises to the static map, including 'local' hash
+      const dummyPromise = Promise.resolve()
+
+      // @ts-expect-error - accessing private static property
+      StudioLifecycleManager.hashLoadingMap.set('test-hash-1', dummyPromise)
+      // @ts-expect-error - accessing private static property
+      StudioLifecycleManager.hashLoadingMap.set('local', dummyPromise) // This should be cleared
+
+      // @ts-expect-error - accessing private static property
+      expect(StudioLifecycleManager.hashLoadingMap.size).to.equal(2)
+
+      // Initialize with ctx so retry will work
+      studioLifecycleManager.initializeStudioManager({
+        projectId: 'test-project-id',
+        cloudDataSource: mockCloudDataSource,
+        ctx: mockCtx,
+        cfg: mockCfg,
+        debugData: {},
+      })
+
+      // Wait for initialization to complete
+      await new Promise((resolve) => {
+        studioLifecycleManager.registerStudioReadyListener(() => {
+          resolve(true)
+        })
+      })
+
+      studioLifecycleManager.retry()
+
+      // Verify only the 'local' hash was cleared
+      // @ts-expect-error - accessing private static property
+      expect(StudioLifecycleManager.hashLoadingMap.has('test-hash-1')).to.be.true
+      // @ts-expect-error - accessing private static property
+      expect(StudioLifecycleManager.hashLoadingMap.has('local')).to.be.false
+      // @ts-expect-error - accessing private static property
+      expect(StudioLifecycleManager.hashLoadingMap.size).to.equal(1)
     })
   })
 })

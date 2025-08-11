@@ -1041,9 +1041,6 @@ type CurrentProject implements Node & ProjectLike {
 
   """Whether the project has Typescript"""
   isUsingTypeScript: Boolean
-
-  """Whether the project needs to be migrated before proceeding"""
-  needsLegacyConfigMigration: Boolean
   packageManager: PackageManagerEnum!
 
   """Cached preferences for this project"""
@@ -1129,7 +1126,6 @@ enum ErrorTypeEnum {
   CANNOT_TRASH_ASSETS
   CDP_COULD_NOT_CONNECT
   CDP_COULD_NOT_RECONNECT
-  CDP_FIREFOX_DEPRECATED
   CDP_RETRYING_CONNECTION
   CDP_VERSION_TOO_OLD
   CHROME_137_LOAD_EXTENSION_NOT_SUPPORTED
@@ -1163,18 +1159,15 @@ enum ErrorTypeEnum {
   CLOUD_STALE_RUN
   CLOUD_UNKNOWN_CREATE_RUN_WARNING
   CLOUD_UNKNOWN_INVALID_REQUEST
-  COMPONENT_FOLDER_REMOVED
   COMPONENT_TESTING_MISMATCHED_DEPENDENCIES
   CONFIG_FILES_LANGUAGE_CONFLICT
   CONFIG_FILE_DEV_SERVER_INVALID_RETURN
   CONFIG_FILE_DEV_SERVER_IS_NOT_VALID
-  CONFIG_FILE_INVALID_DEV_START_EVENT
   CONFIG_FILE_INVALID_ROOT_CONFIG
   CONFIG_FILE_INVALID_ROOT_CONFIG_COMPONENT
   CONFIG_FILE_INVALID_ROOT_CONFIG_E2E
   CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT
   CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_E2E
-  CONFIG_FILE_MIGRATION_NEEDED
   CONFIG_FILE_NOT_FOUND
   CONFIG_FILE_REQUIRE_ERROR
   CONFIG_FILE_SETUP_NODE_EVENTS_ERROR
@@ -1187,46 +1180,31 @@ enum ErrorTypeEnum {
   DUPLICATE_TASK_KEY
   ERROR_READING_FILE
   ERROR_WRITING_FILE
-  EXPERIMENTAL_COMPONENT_TESTING_REMOVED
   EXPERIMENTAL_JIT_COMPILE_REMOVED
-  EXPERIMENTAL_NETWORK_STUBBING_REMOVED
   EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY
   EXPERIMENTAL_RUN_ALL_SPECS_E2E_ONLY
-  EXPERIMENTAL_RUN_EVENTS_REMOVED
-  EXPERIMENTAL_SAMESITE_REMOVED
   EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED
-  EXPERIMENTAL_SESSION_SUPPORT_REMOVED
-  EXPERIMENTAL_SHADOW_DOM_REMOVED
   EXPERIMENTAL_SINGLE_TAB_RUN_MODE
   EXPERIMENTAL_SKIP_DOMAIN_INJECTION_REMOVED
   EXPERIMENTAL_STUDIO_E2E_ONLY
-  EXPERIMENTAL_STUDIO_REMOVED
   EXTENSION_NOT_LOADED
   FIREFOX_CDP_FAILED_TO_CONNECT
   FIREFOX_COULD_NOT_CONNECT
-  FIREFOX_GC_INTERVAL_REMOVED
   FIREFOX_GECKODRIVER_FAILURE
   FIXTURE_NOT_FOUND
   FOLDER_NOT_WRITABLE
   FREE_PLAN_EXCEEDS_MONTHLY_TESTS
   FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS
   FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE
-  INCOMPATIBLE_PLUGIN_RETRIES
   INCORRECT_CI_BUILD_ID_USAGE
   INDETERMINATE_CI_BUILD_ID
   INJECT_DOCUMENT_DOMAIN_DEPRECATION
   INJECT_DOCUMENT_DOMAIN_E2E_ONLY
-  INTEGRATION_FOLDER_REMOVED
   INVALID_CONFIG_OPTION
   INVALID_CYPRESS_INTERNAL_ENV
   INVALID_REPORTER_NAME
   INVOKED_BINARY_OUTSIDE_NPM_MODULE
   JIT_COMPONENT_TESTING
-  LEGACY_CONFIG_ERROR_DURING_MIGRATION
-  LEGACY_CONFIG_FILE
-  MIGRATION_ALREADY_OCURRED
-  MIGRATION_CYPRESS_NOT_FOUND
-  MIGRATION_MISMATCHED_CYPRESS_VERSIONS
   MULTIPLE_SUPPORT_FILES_FOUND
   NO_DEFAULT_CONFIG_FILE_FOUND
   NO_PROJECT_FOUND_AT_PROJECT_ROOT
@@ -1235,7 +1213,6 @@ enum ErrorTypeEnum {
   PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN
   PLAN_EXCEEDS_MONTHLY_TESTS
   PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED
-  PLUGINS_FILE_CONFIG_OPTION_REMOVED
   PLUGINS_RUN_EVENT_ERROR
   PORT_IN_USE_LONG
   PORT_IN_USE_SHORT
@@ -1248,14 +1225,12 @@ enum ErrorTypeEnum {
   RENAMED_CONFIG_OPTION
   RENDERER_CRASHED
   RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN
-  SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER
   SETUP_NODE_EVENTS_INVALID_EVENT_NAME_ERROR
   SETUP_NODE_EVENTS_IS_NOT_FUNCTION
   SUPPORT_FILE_NOT_FOUND
   TESTING_TYPE_NOT_CONFIGURED
   TESTS_DID_NOT_START_FAILED
   TESTS_DID_NOT_START_RETRYING
-  TEST_FILES_RENAMED
   UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES
   UNEXPECTED_INTERNAL_ERROR
   UNEXPECTED_MUTATION_ERROR
@@ -1483,149 +1458,6 @@ input LocalTestCountsInput {
   totalTests: Int!
 }
 
-type ManualMigration implements Node {
-  """is the manual migration completed (all files are moved)"""
-  completed: Boolean!
-
-  """files needing manual migration"""
-  files: [ManualMigrationFile!]!
-
-  """Relay style Node ID field for the ManualMigration field"""
-  id: ID!
-}
-
-type ManualMigrationFile implements Node {
-  """Relay style Node ID field for the ManualMigrationFile field"""
-  id: ID!
-
-  """has the file been moved since opening the migration helper"""
-  moved: Boolean!
-
-  """name of file to migrate"""
-  relative: String!
-}
-
-"""Contains all data related to the 9.X to 10.0 migration UI"""
-type Migration {
-  """the component folder path used to store components tests"""
-  componentFolder: String!
-
-  """contents of the cypress.json file after conversion"""
-  configAfterCode: String!
-
-  """contents of the cypress.json file before conversion"""
-  configBeforeCode: String!
-
-  """the name of the config file after the migration"""
-  configFileNameAfter: String!
-
-  """the name of the config file to be migrated"""
-  configFileNameBefore: String!
-
-  """Steps filtered with the current context"""
-  filteredSteps: [MigrationStep!]!
-
-  """whether component testing is set up in the migrated config or not"""
-  hasComponentTesting: Boolean!
-
-  """whether the component folder is custom or not"""
-  hasCustomComponentFolder: Boolean!
-
-  """whether the testFiles member is custom or not in component testing"""
-  hasCustomComponentTestFiles: Boolean!
-
-  """whether the integration folder is custom or not"""
-  hasCustomIntegrationFolder: Boolean!
-
-  """whether the testFiles member is custom or not in integration"""
-  hasCustomIntegrationTestFiles: Boolean!
-
-  """the integration folder path used to store e2e tests"""
-  integrationFolder: String!
-
-  """Whether the project has Typescript"""
-  isUsingTypeScript: Boolean
-
-  """List of files needing manual conversion"""
-  manualFiles: ManualMigration
-
-  """whether the pre extension info should be displayed"""
-  shouldMigratePreExtension: Boolean
-
-  """All spec files after conversion"""
-  specFiles: [MigrationFile!]!
-
-  """Support files needing automated rename"""
-  supportFiles: MigrationFile
-}
-
-type MigrationFile {
-  after: MigrationFileData!
-  before: MigrationFileData!
-  testingType: TestingTypeEnum!
-}
-
-type MigrationFileData implements Node {
-  """Relay style Node ID field for the MigrationFileData field"""
-  id: ID!
-  parts: [MigrationFilePart!]!
-  relative: String!
-}
-
-type MigrationFilePart implements Node {
-  """is this part a folder or extension that needs migration"""
-  group: String
-
-  """should highlight in migration UI"""
-  highlight: Boolean!
-
-  """Relay style Node ID field for the MigrationFilePart field"""
-  id: ID!
-
-  """part of filename"""
-  text: String!
-}
-
-type MigrationRegexp {
-  """regexp to use to rename existing specs in component"""
-  afterComponent: String!
-
-  """regexp to use to rename existing specs in e2e"""
-  afterE2E: String!
-
-  """regexp to identify existing specs in component"""
-  beforeComponent: String!
-
-  """regexp to identify existing specs in e2e"""
-  beforeE2E: String!
-}
-
-"""Contains all data related to the 9.X to 10.0 migration UI"""
-type MigrationStep implements Node {
-  """Relay style Node ID field for the MigrationStep field"""
-  id: ID!
-
-  """Index of the step in the list"""
-  index: Int!
-
-  """Has the current step been completed"""
-  isCompleted: Boolean!
-
-  """This is the current step"""
-  isCurrentStep: Boolean!
-
-  """Identifier of the step"""
-  name: MigrationStepEnum!
-}
-
-enum MigrationStepEnum {
-  configFile
-  renameAuto
-  renameManual
-  renameSupport
-  setupComponent
-}
-
 type Mutation {
   """Internal use only, clears the cloud cache"""
   _clearCloudCache: Boolean
@@ -1677,9 +1509,6 @@ type Mutation {
   dismissWarning(id: ID!): Query
   e2eExamples: [ScaffoldedFile!]!
 
-  """user has finished migration component specs - move to next step"""
-  finishedRenamingComponentSpecs: Query
-
   """Sets focus to the active browser window"""
   focusActiveBrowserWindow: Boolean!
 
@@ -1722,34 +1551,6 @@ type Mutation {
 
   """Check if a give spec file will match the project spec pattern"""
   matchesSpecPattern(specFile: String!): Boolean!
-
-  """While migrating to 10+ skip manual rename step"""
-  migrateCloseManualRenameWatcher: Boolean
-
-  """Merges the component testing config in cypress.config.{js,ts}"""
-  migrateComponentTesting: Query
-
-  """Transforms cypress.json file into cypress.config.js file"""
-  migrateConfigFile: Query
-
-  """While migrating to 10+ renames files to match the new .cy pattern"""
-  migrateRenameSpecs(
-    """specs to move - current name"""
-    after: [String!]
-
-    """specs to move - current name"""
-    before: [String!]
-    skip: Boolean
-  ): Query
-
-  """When the user decides to skip specs rename"""
-  migrateRenameSpecsFolder: Query
-
-  """While migrating to 10+ launch renaming of support file"""
-  migrateRenameSupport: Query
-
-  """While migrating to 10+ skip manual rename step"""
-  migrateSkipManualRename: Query
 
   """
   Allow the relevant run for debugging marked as next to be considered the current relevant run
@@ -1810,6 +1611,9 @@ type Mutation {
 
   """Reset the Wizard to the starting position"""
   resetWizard: Boolean!
+
+  """Retry studio initialization after an error"""
+  retryStudio: Boolean
 
   """
   Run a single spec file using a supplied path. This initiates but does not wait for completion of the requested spec run.
@@ -2059,9 +1863,6 @@ type Query {
   Unique node machine identifier for this instance - may be nil if unable to resolve
   """
   machineId: String
-
-  """Metadata about the migration, null if we aren't showing it"""
-  migration: Migration
   node(id: ID!): Node
 
   """Defines the suggested polling intervals for various schema resources"""

@@ -15,6 +15,10 @@
     "watch": "yarn build-for-tests --watch --progress"
   },
   "devDependencies": {
+    "@cypress-design/constants-button": "^1.9.0",
+    "@cypress-design/css": "1.2.0",
+    "@cypress-design/react-button": "^1.10.1",
+    "@cypress-design/react-icon": "1.30.0",
     "@cypress/react-tooltip": "0.5.3",
     "@fontsource/mulish": "4.3.0",
     "@fontsource/open-sans": "4.3.0",
@@ -24,6 +28,7 @@
     "@packages/frontend-shared": "0.0.0-development",
     "@packages/types": "0.0.0-development",
     "@packages/web-config": "0.0.0-development",
+    "autoprefixer": "10.4.21",
     "classnames": "^2.5.1",
     "cross-env": "7.0.3",
     "css-element-queries": "1.2.3",
@@ -33,11 +38,13 @@
     "markdown-it": "^14.0.0",
     "mobx": "6.13.6",
     "mobx-react": "9.1.1",
+    "postcss": "8.5.6",
     "prismjs": "1.27.0",
     "prop-types": "15.7.2",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "sinon": "7.5.0",
+    "tailwindcss": "4.1.10",
     "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4"
   },

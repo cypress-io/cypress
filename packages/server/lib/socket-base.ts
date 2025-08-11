@@ -74,6 +74,14 @@ export class SocketBase {
     return this._cdpIo
   }
 
+  onBeforeSave (config) {
+
+  }
+
+  onAfterSave (config, error) {
+
+  }
+
   getIos () {
     return [this._cdpIo, this._socketIo]
   }
@@ -228,9 +236,7 @@ export class SocketBase {
           debug('automation:client connected')
 
           // only send the necessary config
-          automationClient.emit('automation:config', {
-            IS_CDP_FORCED_FOR_FIREFOX: !!process.env.FORCE_FIREFOX_CDP,
-          })
+          automationClient.emit('automation:config', {})
 
           // if our automation disconnects then we're
           // in trouble and should probably bomb everything
@@ -408,7 +414,15 @@ export class SocketBase {
         })
 
         getCtx().coreData.studioLifecycleManager?.registerStudioReadyListener((studio) => {
-          studio.addSocketListeners(socket)
+          studio.addSocketListeners({
+            socket,
+            onBeforeSave: () => {
+              this.onBeforeSave(config)
+            },
+            onAfterSave: ({ error }) => {
+              this.onAfterSave(config, error)
+            },
+          })
         })
 
         socket.on('studio:init', async (cb) => {

@@ -143,14 +143,16 @@ $ npx cypress run --env grepTags=@smoke,grepFilterSpecs=true
 $ npx cypress run --env grepUntagged=true
 ```
 
-You can use any way to modify the environment values `grep` and `grepTags`, except the run-time `Cypress.env('grep')` (because it is too late at run-time). You can set the `grep` value in the `cypress.json` file to run only tests with the substring `viewport` in their names
+You can use any way to modify the environment values `grep` and `grepTags`, except the run-time `Cypress.env('grep')` (because it is too late at run-time). You can set the `grep` value in the `cypress.config.js` file to run only tests with the substring `viewport` in their names
 
-```json
-{
-  "env": {
-    "grep": "viewport"
-  }
-}
+```js
+const { defineConfig } = require('cypress')
+
+module.exports = defineConfig({
+  env: {
+    grep: "viewport"
+  },
+})
 ```
 
 You can also set the `env.grep` object in the plugin file, but remember to return the changed config object:

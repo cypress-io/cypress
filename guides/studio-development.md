@@ -1,24 +1,17 @@
 # Studio Development
 
-In production, the code used to facilitate Studio functionality will be retrieved from the Cloud. While Studio is still in its early stages it is hidden behind an environment variable: `CYPRESS_ENABLE_CLOUD_STUDIO` but can also be run against local cloud Studio code via the environment variable: `CYPRESS_LOCAL_STUDIO_PATH`.
+In production, the code used to facilitate Studio functionality will be retrieved from the Cloud. During development, the environment variable `CYPRESS_LOCAL_STUDIO_PATH` can be used to run against a local version.
 
 To run against locally developed Studio:
 
 - Clone the `cypress-services` repo (this requires that you be a member of the Cypress organization)
   - Run `yarn`
   - Run `yarn watch` in `app/packages/studio`
-- Set:
-  - `CYPRESS_INTERNAL_ENV=<environment>` (e.g. `staging` or `production` if you want to hit those deployments of `cypress-services` or `development` if you want to hit a locally running version of `cypress-services`)
-  - `CYPRESS_LOCAL_STUDIO_PATH` to the path to the `cypress-services/app/packages/studio/dist/development` directory
- 
-To run against a deployed version of studio:
-
-- Set:
-  - `CYPRESS_INTERNAL_ENV=<environment>` (e.g. `staging` or `production` if you want to hit those deployments of `cypress-services` or `development` if you want to hit a locally running version of `cypress-services`)
-  - `CYPRESS_ENABLE_CLOUD_STUDIO=true`
-
-Regardless of running against local or deployed studio:
-
+  - If developing against locally running `cypress-services`: Run `yarn dev` in the `cypress-services` directory first
+- Set environment variables:
+  - `CYPRESS_INTERNAL_ENV=<environment>` (typically `staging` or `production` to hit those deployments of `cypress-services`, or `development` if you want to hit a locally running version of `cypress-services`)
+  - Set `CYPRESS_LOCAL_STUDIO_PATH` to a relative path pointing to the `cypress-services/app/packages/studio/dist/development` directory (regardless of the `CYPRESS_INTERNAL_ENV` set).
+  - `CYPRESS_ENABLE_CLOUD_STUDIO_AI` to `true` if AI functionality is needed (note, the feature flag will also need to be set in the appropriate environment).
 - Clone the `cypress` repo
   - Run `yarn`
   - Run `yarn cypress:open`
@@ -29,7 +22,7 @@ Regardless of running against local or deployed studio:
 
 Note: When using the `CYPRESS_LOCAL_STUDIO_PATH` environment variable or when running the Cypress app via the locally cloned repository, we bypass our error reporting and instead log errors to the browser or node console.
 
-Note: When using the `CYPRESS_LOCAL_STUDIO_PATH` the cloud studio code will be watched for changes so that you do not have to stop the app to incoprorate any new changes.
+Note: When using the `CYPRESS_LOCAL_STUDIO_PATH` the cloud studio code will be watched for changes so that you do not have to stop the app to incorporate any new changes.
 
 ## Types
 

@@ -125,8 +125,46 @@ export class RunnablesStore {
     return type === 'suite' ? this._createSuite(props as SuiteProps, level) : this._createTest(props as TestProps, level)
   }
 
+  _getImmediateParentSuiteTitle (level: number): { parentTitle: string } {
+    // Get parent suite titles by traversing up the queue
+    const parentTitles: string[] = []
+
+    // Find the immediate parent suite by looking for the last suite at a lower level
+    let parentLevel = level - 1
+
+    for (let i = this._runnablesQueue.length - 1; i >= 0; i--) {
+      const runnable = this._runnablesQueue[i]
+
+      if ('type' in runnable && runnable.type === 'suite' && runnable.level === parentLevel && runnable.title) {
+        // Add this parent's title
+        parentTitles.unshift(runnable.title)
+        break
+      }
+    }
+
+    // Combine parent titles with current suite title
+    // Combine parent titles
+    const parentTitle = [...parentTitles].join(' > ')
+
+    return { parentTitle }
+  }
+
   _createSuite (props: SuiteProps, level: number) {
-    const suite = new SuiteModel(props, level)
+    const { parentTitle } = this._getImmediateParentSuiteTitle(level)
+
+    // Create new props with the hierarchical title
+    const hierarchicalTitle = parentTitle ? `${parentTitle} > ${props.title}` : props.title
+
+    const suiteProps = {
+      ...props,
+      title: hierarchicalTitle,
+    }
+
+    if (parentTitle) {
+      suiteProps.parentTitle = parentTitle
+    }
+
+    const suite = new SuiteModel(suiteProps, level)
 
     this._runnablesQueue.push(suite)
     suite.children = this._createRunnableChildren(props, ++level)
@@ -135,7 +173,17 @@ export class RunnablesStore {
   }
 
   _createTest (props: TestProps, level: number) {
-    const test = new TestModel(props, level, this)
+    const { parentTitle } = this._getImmediateParentSuiteTitle(level)
+
+    const testProps = {
+      ...props,
+    }
+
+    if (parentTitle) {
+      testProps.parentTitle = parentTitle
+    }
+
+    const test = new TestModel(testProps, level, this)
 
     this._runnablesQueue.push(test)
     this._tests[test.id] = test
