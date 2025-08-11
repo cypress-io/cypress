@@ -121,10 +121,9 @@ type DetectLanguageParams = {
   projectRoot: string
   customConfigFile?: string | null
   pkgJson: PkgJson
-  isMigrating?: boolean
 }
 
-export function detectLanguage ({ projectRoot, customConfigFile, pkgJson, isMigrating = false }: DetectLanguageParams): 'js' | 'ts' {
+export function detectLanguage ({ projectRoot, customConfigFile, pkgJson }: DetectLanguageParams): 'js' | 'ts' {
   try {
     if (customConfigFile) {
       debug('Evaluating custom Cypress config file \'%s\'', customConfigFile)
@@ -198,9 +197,7 @@ export function detectLanguage ({ projectRoot, customConfigFile, pkgJson, isMigr
     joinPosix('cypress', '**/*.{ts,tsx}'),
   ]
 
-  if (!isMigrating) {
-    globs.push(joinPosix('**/*tsconfig.json'))
-  }
+  globs.push(joinPosix('**/*tsconfig.json'))
 
   const tsFiles = globby.sync(globs, { onlyFiles: true, gitignore: true, cwd: projectRoot, ignore: ['node_modules'] })
 

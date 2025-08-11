@@ -49,13 +49,13 @@ describe('lib/errors', () => {
     })
 
     it('logs err.message', () => {
-      const err = errors.getError('NO_PROJECT_ID', '/path/to/project/cypress.json')
+      const err = errors.getError('NO_PROJECT_ID', '/path/to/project/cypress.config.js')
 
       const ret = errors.log(err)
 
       expect(ret).to.be.undefined
 
-      expect(console.log).to.be.calledWithMatch('/path/to/project/cypress.json')
+      expect(console.log).to.be.calledWithMatch('/path/to/project/cypress.config.js')
     })
 
     it('logs err.details', () => {

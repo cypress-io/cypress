@@ -5,13 +5,6 @@ import debugFn from 'debug'
 
 const debug = debugFn('cypress:webpack-dev-server:sourceRelativeWebpackModules')
 
-class CypressWebpackDevServerError extends Error {
-  constructor (message: string) {
-    super(message)
-    this.name = 'CypressWebpackDevServerError'
-  }
-}
-
 export type ModuleClass = typeof Module & {
   _load(id: string, parent: Module, isMain: boolean): any
   _resolveFilename(request: string, parent: Module, isMain: boolean, options?: { paths: string[] }): string
@@ -147,7 +140,7 @@ export function sourceWebpack (config: WebpackDevServerConfig, framework: Source
   webpack.importPath = path.dirname(webpackJsonPath)
   webpack.packageJson = require(webpackJsonPath)
   webpack.module = require(webpack.importPath)
-  webpack.majorVersion = getMajorVersion(webpack.packageJson, [4, 5])
+  webpack.majorVersion = getMajorVersion(webpack.packageJson, [5])
 
   debug('Webpack: Successfully sourced webpack - %o', webpack)
 
@@ -211,25 +204,17 @@ export function sourceWebpackDevServer (config: WebpackDevServerConfig, webpackM
   webpackDevServer.importPath = path.dirname(webpackDevServerJsonPath)
   webpackDevServer.packageJson = require(webpackDevServerJsonPath)
   webpackDevServer.module = require(webpackDevServer.importPath)
-  webpackDevServer.majorVersion = getMajorVersion(webpackDevServer.packageJson, [4, 5])
+  webpackDevServer.majorVersion = getMajorVersion(webpackDevServer.packageJson, [5])
 
   debug('WebpackDevServer: Successfully sourced webpack-dev-server - %o', webpackDevServer)
-  if (webpackMajorVersion < 5 && webpackDevServer.majorVersion === 5) {
-    const json = webpackDevServer.packageJson
-
-    throw new CypressWebpackDevServerError(
-      `Incompatible major versions of webpack and webpack-dev-server!
-      webpack-dev-server major version ${webpackDevServer.majorVersion} only works with major versions of webpack 5 - saw webpack-dev-server version ${json.version}.
-      If using webpack major version 4, please install webpack-dev-server version 4 to be used with @cypress/webpack-dev-server or upgrade to webpack 5.`,
-    )
-  }
 
   return webpackDevServer
 }
 
 // Source the html-webpack-plugin module from the provided framework or projectRoot.
 // If none is found, we fallback to the version bundled with this package dependent on the major version of webpack.
-// We ship both v4 and v5 of 'html-webpack-plugin' by aliasing the package with the major version (check package.json).
+// We ship v5 of 'html-webpack-plugin' by aliasing the package with the major version (check package.json). This allows
+// us to support newer major versions of 'html-webpack-plugin' easily'.
 export function sourceHtmlWebpackPlugin (config: WebpackDevServerConfig, framework: SourcedDependency | null, webpack: SourcedWebpack): SourcedHtmlWebpackPlugin {
   const searchRoot = framework?.importPath ?? config.cypressConfig.projectRoot
 
@@ -244,9 +229,9 @@ export function sourceHtmlWebpackPlugin (config: WebpackDevServerConfig, framewo
     })
 
     htmlWebpackPlugin.packageJson = require(htmlWebpackPluginJsonPath)
-    // Check that they're not using v3 of html-webpack-plugin. Since we should be the only consumer of it,
+    // Check that they're not using v3 or v4 of html-webpack-plugin. Since we should be the only consumer of it,
     // we shouldn't be concerned with using our own copy if they've shipped w/ an earlier version
-    htmlWebpackPlugin.majorVersion = getMajorVersion(htmlWebpackPlugin.packageJson, [4, 5])
+    htmlWebpackPlugin.majorVersion = getMajorVersion(htmlWebpackPlugin.packageJson, [5])
   } catch (e) {
     const err = e as Error & {code?: string}
 

@@ -75,6 +75,7 @@ describe('getStudioBundle', () => {
         'x-cypress-version': '1.2.3',
       },
       encrypt: 'signed',
+      signal: sinon.match.any,
     })
 
     expect(writeResult).to.eq('console.log("studio bundle")')
@@ -117,6 +118,7 @@ describe('getStudioBundle', () => {
         'x-cypress-version': '1.2.3',
       },
       encrypt: 'signed',
+      signal: sinon.match.any,
     })
 
     expect(writeResult).to.eq('console.log("studio bundle")')
@@ -144,6 +146,7 @@ describe('getStudioBundle', () => {
         'x-cypress-version': '1.2.3',
       },
       encrypt: 'signed',
+      signal: sinon.match.any,
     })
   })
 
@@ -165,6 +168,7 @@ describe('getStudioBundle', () => {
         'x-cypress-version': '1.2.3',
       },
       encrypt: 'signed',
+      signal: sinon.match.any,
     })
   })
 
@@ -204,6 +208,7 @@ describe('getStudioBundle', () => {
         'x-cypress-version': '1.2.3',
       },
       encrypt: 'signed',
+      signal: sinon.match.any,
     })
 
     expect(verifySignatureFromFileStub).to.be.calledWith('/tmp/cypress/studio/abc/bundle.tar', '159')
@@ -235,6 +240,7 @@ describe('getStudioBundle', () => {
         'x-cypress-version': '1.2.3',
       },
       encrypt: 'signed',
+      signal: sinon.match.any,
     })
   })
 
@@ -264,6 +270,52 @@ describe('getStudioBundle', () => {
         'x-cypress-version': '1.2.3',
       },
       encrypt: 'signed',
+      signal: sinon.match.any,
     })
+  })
+
+  it('handles AbortError and converts to timeout message', async () => {
+    const abortError = new Error('AbortError')
+
+    abortError.name = 'AbortError'
+
+    crossFetchStub.rejects(abortError)
+
+    await expect(getStudioBundle({
+      studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz',
+      bundlePath: '/tmp/cypress/studio/abc/bundle.tar',
+    })).to.be.rejectedWith('Studio bundle fetch timed out')
+  })
+
+  it('calls cleanup function when pipe operation errors', async () => {
+    const errorStream = new Writable({
+      write: (chunk, encoding, callback) => {
+        callback(new Error('Write error'))
+      },
+    })
+
+    const destroySpy = sinon.spy(errorStream, 'destroy')
+
+    createWriteStreamStub.returns(errorStream)
+
+    crossFetchStub.resolves({
+      ok: true,
+      statusText: 'OK',
+      body: readStream,
+      headers: {
+        get: (header) => {
+          if (header === 'x-cypress-signature') return '159'
+
+          if (header === 'x-cypress-manifest-signature') return '160'
+        },
+      },
+    })
+
+    await expect(getStudioBundle({
+      studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz',
+      bundlePath: '/tmp/cypress/studio/abc/bundle.tar',
+    })).to.be.rejected
+
+    expect(destroySpy).to.have.been.called
   })
 })

@@ -7,7 +7,7 @@ import path from 'path'
 import stripAnsi from 'strip-ansi'
 import type { BreakingErrResult, TestingType } from '@packages/types'
 import { humanTime, logError, parseResolvedPattern, pluralize } from './errorUtils'
-import { errPartial, errTemplate, fmt, theme, PartialErr } from './errTemplate'
+import { errPartial, errTemplate, fmt, theme } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
 import type { ClonedError, ConfigValidationFailureInfo, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
 import { normalizeNetworkErrorMessage } from './normalizeNetworkErrorMessage'
@@ -109,16 +109,6 @@ export const AllCypressErrors = {
         ${fmt.listItems(options)}`
   },
   BROWSER_NOT_FOUND_BY_NAME: (browser: string, foundBrowsersStr: string[]) => {
-    let canarySuffix: PartialErr | null = null
-
-    if (browser === 'canary') {
-      canarySuffix = errPartial`\
-          ${fmt.off('\n\n')}
-          Note: In ${fmt.cypressVersion(`4.0.0`)}, Canary must be launched as ${fmt.highlightSecondary(`chrome:canary`)}, not ${fmt.highlightSecondary(`canary`)}.
-
-          See https://on.cypress.io/migration-guide for more information on breaking changes in 4.0.0.`
-    }
-
     return errTemplate`\
         Can't run because you've entered an invalid browser name.
 
@@ -130,7 +120,7 @@ export const AllCypressErrors = {
         You can also use a custom browser: https://on.cypress.io/customize-browsers
 
         Available browsers found on your system are:
-        ${fmt.listItems(foundBrowsersStr)}${canarySuffix}`
+        ${fmt.listItems(foundBrowsersStr)}`
   },
   BROWSER_NOT_FOUND_BY_PATH: (arg1: string, arg2: string) => {
     return errTemplate`\
@@ -895,7 +885,7 @@ export const AllCypressErrors = {
 
       Fix the error in your code and re-run your tests.`
   },
-  // happens when there is an error in configuration file like "cypress.json"
+  // happens when there is an error in configuration file like "cypress.config.js"
   // TODO: make this relative path, not absolute
   CONFIG_VALIDATION_MSG_ERROR: (fileType: 'configFile' | null, fileName: string | null, validationMsg: string) => {
     if (!fileType) {
@@ -1163,9 +1153,6 @@ export const AllCypressErrors = {
   CDP_RETRYING_CONNECTION: (attempt: string | number, browserName: string, connectRetryThreshold: number) => {
     return errTemplate`Still waiting to connect to ${fmt.off(_.capitalize(browserName))}, retrying in 1 second ${fmt.meta(`(attempt ${attempt}/${connectRetryThreshold})`)}`
   },
-  CDP_FIREFOX_DEPRECATED: () => {
-    return errTemplate`Since Firefox 129, Chrome DevTools Protocol (CDP) has been deprecated in Firefox. In Firefox 135 and above, Cypress defaults to automating the Firefox browser with WebDriver BiDi. CDP support was removed in Firefox 141. Cypress will no longer support CDP in Firefox 141+, and will be removed for older versions of Firefox in Cypress 15.`
-  },
   BROWSER_PROCESS_CLOSED_UNEXPECTEDLY: (browserName: string) => {
     return errTemplate`\
       We detected that the ${fmt.highlight(browserName)} browser process closed unexpectedly.
@@ -1219,41 +1206,11 @@ export const AllCypressErrors = {
 
         If you don't require screenshots or videos to be stored you can safely ignore this warning.`
   },
-  EXPERIMENTAL_SAMESITE_REMOVED: () => {
-    return errTemplate`\
-        The ${fmt.highlight(`experimentalGetCookiesSameSite`)} configuration option was removed in ${fmt.cypressVersion(`5.0.0`)}.
-
-        Returning the ${fmt.highlightSecondary(`sameSite`)} property is now the default behavior of the ${fmt.highlightSecondary(`cy.cookie`)} commands.
-
-        You can safely remove this option from your config.`
-  },
   EXPERIMENTAL_JIT_COMPILE_REMOVED: () => {
     return errTemplate`\
         The ${fmt.highlight(`experimentalJustInTimeCompile`)} configuration option was removed in ${fmt.cypressVersion(`14.0.0`)}.
         A new ${fmt.highlightSecondary(`justInTimeCompile`)} configuration option is available and is now ${fmt.highlightSecondary(`true`)} by default.
         You can safely remove this option from your config.`
-  },
-  // TODO: verify configFile is absolute path
-  // TODO: make this relative path, not absolute
-  EXPERIMENTAL_COMPONENT_TESTING_REMOVED: (arg1: {configFile: string}) => {
-    return errTemplate`\
-        The ${fmt.highlight('experimentalComponentTesting')} configuration option was removed in ${fmt.cypressVersion(`7.0.0`)}.
-
-        Please remove this flag from: ${fmt.path(arg1.configFile)}
-
-        Component Testing is now a supported testing type. You can run your component tests with:
-
-          ${fmt.terminal(`cypress open --component`)}
-
-        https://on.cypress.io/migration-guide`
-  },
-  EXPERIMENTAL_SESSION_SUPPORT_REMOVED: () => {
-    return errTemplate`\
-        The ${fmt.highlight(`experimentalSessionSupport`)} configuration option was removed in ${fmt.cypressVersion(`9.6.0`)}.
-
-        You can safely remove this option from your config.
-
-        https://on.cypress.io/session`
   },
   EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED: () => {
     return errTemplate`\
@@ -1263,34 +1220,6 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/session
         https://on.cypress.io/origin`
-  },
-  EXPERIMENTAL_SHADOW_DOM_REMOVED: () => {
-    return errTemplate`\
-        The ${fmt.highlight(`experimentalShadowDomSupport`)} configuration option was removed in ${fmt.cypressVersion(`5.2.0`)}. It is no longer necessary when utilizing the ${fmt.highlightSecondary(`includeShadowDom`)} option.
-
-        You can safely remove this option from your config.`
-  },
-  EXPERIMENTAL_NETWORK_STUBBING_REMOVED: () => {
-    return errTemplate`\
-        The ${fmt.highlight(`experimentalNetworkStubbing`)} configuration option was removed in ${fmt.cypressVersion(`6.0.0`)}.
-
-        It is no longer necessary for using ${fmt.highlightSecondary(`cy.intercept()`)}. You can safely remove this option from your config.`
-  },
-  EXPERIMENTAL_RUN_EVENTS_REMOVED: () => {
-    return errTemplate`\
-        The ${fmt.highlight(`experimentalRunEvents`)} configuration option was removed in ${fmt.cypressVersion(`6.7.0`)}. It is no longer necessary when listening to run events in the plugins file.
-
-        You can safely remove this option from your config.`
-  },
-  EXPERIMENTAL_STUDIO_REMOVED: () => {
-    return errTemplate`\
-        We're ending the experimental phase of Cypress Studio in ${fmt.cypressVersion(`10.0.0`)}.
-
-        If you don't think you can live without Studio or you'd like to learn about how to work around its removal, please join the discussion here: http://on.cypress.io/studio-removal
-
-        Your feedback will help us factor in product decisions that may see Studio return in a future release.
-
-        You can safely remove the ${fmt.highlight(`experimentalStudio`)} configuration option from your config.`
   },
   EXPERIMENTAL_SINGLE_TAB_RUN_MODE: () => {
     return errTemplate`\
@@ -1359,26 +1288,6 @@ export const AllCypressErrors = {
       Read the documentation for the injectDocumentDomain configuration option: https://on.cypress.io/inject-document-domain-configuration
     `
   },
-  FIREFOX_GC_INTERVAL_REMOVED: () => {
-    return errTemplate`\
-        The ${fmt.highlight(`firefoxGcInterval`)} configuration option was removed in ${fmt.cypressVersion(`8.0.0`)}. It was introduced to work around a bug in Firefox 79 and below.
-
-        Since Cypress no longer supports Firefox 85 and below in Cypress ${fmt.cypressVersion(`8.0.0`)}, this option was removed.
-
-        You can safely remove this option from your config.`
-  },
-  // TODO: make this relative path, not absolute
-  INCOMPATIBLE_PLUGIN_RETRIES: (arg1: string) => {
-    return errTemplate`\
-      We've detected that the incompatible plugin ${fmt.highlight(`cypress-plugin-retries`)} is installed at: ${fmt.path(arg1)}
-
-      Test retries is now natively supported in ${fmt.cypressVersion(`5.0.0`)}.
-
-      Remove the plugin from your dependencies to silence this warning.
-
-      https://on.cypress.io/test-retries
-      `
-  },
   INVALID_CONFIG_OPTION: (arg1: string[]) => {
     const phrase = arg1.length > 1 ? 'options are' : 'option is'
 
@@ -1398,30 +1307,10 @@ export const AllCypressErrors = {
 
         ${fmt.stackTrace(arg2)}`
   },
-  CONFIG_FILE_INVALID_DEV_START_EVENT: (pluginsFilePath: string) => {
-    const code = errPartial`
-      module.exports = (on, config) => {
-        on('dev-server:start', () => {
-          ${fmt.comment('// start dev server here')}
-          return startDevServer(...)
-        }
-      }`
-
-    return errTemplate`\
-        To run component tests, Cypress needs you to configure the ${fmt.highlight(`dev-server:start`)} event.
-
-        Please update this file: ${fmt.path(pluginsFilePath)}
-
-        ${fmt.code(code)}
-
-        https://on.cypress.io/component-testing`
-  },
 
   UNSUPPORTED_BROWSER_VERSION: (errorMsg: string) => {
     return errTemplate`${fmt.off(errorMsg)}`
   },
-
-  // V10 Added:
 
   MULTIPLE_SUPPORT_FILES_FOUND: (arg1: string, arg2: string[]) => {
     return errTemplate`\
@@ -1434,80 +1323,6 @@ export const AllCypressErrors = {
       ${fmt.listItems(arg2)}
 
       Please remove or combine the support files into a single file.`
-  },
-
-  CONFIG_FILE_MIGRATION_NEEDED: (projectRoot: string) => {
-    return errTemplate`
-        There is a ${fmt.highlight(`cypress.json`)} file at the path: ${fmt.path(projectRoot)}
-
-        ${fmt.cypressVersion('10.0.0')} no longer supports ${fmt.highlight(`cypress.json`)}.
-
-        Please run ${fmt.highlightTertiary('cypress open')} to launch the migration tool to migrate to ${fmt.highlightSecondary('cypress.config.{js,ts,mjs,cjs}')}.
-
-        https://on.cypress.io/migration-guide
-      `
-  },
-
-  LEGACY_CONFIG_ERROR_DURING_MIGRATION: (file: string, error: Error) => {
-    return errTemplate`
-        Your ${fmt.highlight(file)} file threw an error. ${fmt.stackTrace(error)}
-
-        Please ensure your pluginsFile is valid and relaunch the migration tool to migrate to ${fmt.cypressVersion('10.0.0')}.
-      `
-  },
-
-  LEGACY_CONFIG_FILE: (baseFileName: string, projectRoot: string, legacyConfigFile: string = 'cypress.json') => {
-    return errTemplate`
-      There is both a ${fmt.highlight(baseFileName)} and a ${fmt.highlight(legacyConfigFile)} file at the location below:
-
-      ${fmt.path(projectRoot)}
-
-      Cypress no longer supports ${fmt.off(legacyConfigFile)}, please remove it from your project.
-    `
-  },
-
-  SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER: (configFilePath: string) => {
-    const code = errPartial`
-      {
-        component: {
-          devServer (cypressDevServerConfig, devServerConfig) {
-            ${fmt.comment(`// start dev server here`)
-          }
-        }
-      }`
-
-    return errTemplate`\
-      Your ${fmt.highlightSecondary(`configFile`)} is invalid: ${fmt.path(configFilePath)}
-
-      Binding to the ${fmt.highlightSecondary(`on('dev-server:start')`)} event is no longer necessary.
-
-      Please update your code to use the ${fmt.highlight(`component.devServer()`)} function.
-
-      ${fmt.code(code)}
-
-      Learn more: https://on.cypress.io/dev-server
-    `
-  },
-
-  PLUGINS_FILE_CONFIG_OPTION_REMOVED: (_errShape: BreakingErrResult) => {
-    const code = errPartial`
-    {
-      e2e: {
-        setupNodeEvents()
-      },
-      component: {
-        setupNodeEvents()
-      },
-    }`
-
-    return errTemplate`\
-        The ${fmt.highlight('pluginsFile')} configuration option you have supplied has been replaced with ${fmt.highlightSecondary('setupNodeEvents')}.
-
-        This new option is not a one-to-one correlation and it must be configured separately as a testing type property: ${fmt.highlightSecondary('e2e.setupNodeEvents')} and ${fmt.highlightSecondary('component.setupNodeEvents')}
-
-        ${fmt.code(code)}
-
-        https://on.cypress.io/migration-guide`
   },
 
   VIDEO_UPLOAD_ON_PASSES_REMOVED: (_errShape: BreakingErrResult) => {
@@ -1531,13 +1346,11 @@ export const AllCypressErrors = {
       }`
 
     return errTemplate`\
-      The ${fmt.highlight(errShape.name)} configuration option is now invalid when set from the root of the config object in ${fmt.cypressVersion(`10.0.0`)}.
+      The ${fmt.highlight(errShape.name)} configuration option is invalid when set from the root of the config object.
 
-      It is now configured separately as a testing type property: ${fmt.highlightSecondary(`e2e.${errShape.name}`)} and ${fmt.highlightSecondary(`component.${errShape.name}`)}
+      Set it within a testing type property: ${fmt.highlightSecondary(`e2e.${errShape.name}`)} and ${fmt.highlightSecondary(`component.${errShape.name}`)}
 
-      ${fmt.code(code)}
-
-      https://on.cypress.io/migration-guide`
+      ${fmt.code(code)}`
   },
 
   CONFIG_FILE_INVALID_ROOT_CONFIG_E2E: (errShape: BreakingErrResult) => {
@@ -1549,13 +1362,11 @@ export const AllCypressErrors = {
       }`
 
     return errTemplate`\
-      The ${fmt.highlight(errShape.name)} configuration option is now invalid when set from the root of the config object in ${fmt.cypressVersion(`10.0.0`)}.
+      The ${fmt.highlight(errShape.name)} configuration option is invalid when set from the root of the config object.
 
-      It is now configured separately as a testing type property: ${fmt.highlightSecondary(`e2e.${errShape.name}`)}
+      Set it within a testing type property: ${fmt.highlightSecondary(`e2e.${errShape.name}`)}
 
-      ${fmt.code(code)}
-
-      https://on.cypress.io/migration-guide`
+      ${fmt.code(code)}`
   },
 
   CONFIG_FILE_INVALID_ROOT_CONFIG_COMPONENT: (errShape: BreakingErrResult) => {
@@ -1567,13 +1378,11 @@ export const AllCypressErrors = {
       }`
 
     return errTemplate`\
-      The ${fmt.highlight(errShape.name)} configuration option is now invalid when set from the root of the config object in ${fmt.cypressVersion(`10.0.0`)}.
+      The ${fmt.highlight(errShape.name)} configuration option is invalid when set from the root of the config object.
 
-      It is now configured separately as a testing type property: ${fmt.highlightSecondary(`component.${errShape.name}`)}
+      Set it within a testing type property: ${fmt.highlightSecondary(`component.${errShape.name}`)}
 
-      ${fmt.code(code)}
-
-      https://on.cypress.io/migration-guide`
+      ${fmt.code(code)}`
   },
 
   // TODO: add path to config file
@@ -1590,9 +1399,7 @@ export const AllCypressErrors = {
 
       Please remove this option or add this as an e2e testing type property: ${fmt.highlightSecondary(`e2e.${errShape.name}`)}
 
-      ${fmt.code(code)}
-
-      https://on.cypress.io/migration-guide`
+      ${fmt.code(code)}`
   },
 
   CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_E2E: (errShape: BreakingErrResult) => {
@@ -1608,9 +1415,7 @@ export const AllCypressErrors = {
 
       Please remove this option or add this as a component testing type property: ${fmt.highlightSecondary(`component.${errShape.name}`)}
 
-      ${fmt.code(code)}
-
-      https://on.cypress.io/migration-guide`
+      ${fmt.code(code)}`
   },
 
   CONFIG_FILE_DEV_SERVER_IS_NOT_VALID: (configFilePath: string, setupNodeEvents: any) => {
@@ -1681,120 +1486,6 @@ export const AllCypressErrors = {
       Please check GitHub or open a new issue if you don't see one already with the details below:
 
       ${fmt.stackTrace(err)}
-    `
-  },
-
-  MIGRATION_ALREADY_OCURRED: (configFile: string, legacyConfigFile: string) => {
-    return errTemplate`
-      You are attempting to use Cypress with an older config file: ${fmt.highlight(legacyConfigFile)}
-      When you upgraded to Cypress v10.0 the config file was updated and moved to a new location: ${fmt.highlight(configFile)}
-
-      You may need to update any CLI scripts to ensure that they are referring the new version. This would typically look something like:
-      "${fmt.highlight(`cypress open --config-file=${configFile}`)}"
-
-      https://on.cypress.io/migration-guide
-    `
-  },
-
-  TEST_FILES_RENAMED: (errShape: BreakingErrResult, err?: Error) => {
-    const stackTrace = err ? fmt.stackTrace(err) : null
-
-    const newName = errShape.newName || '<unknown>'
-
-    const testingTypedHelpMessage = errShape.testingType
-      ? errPartial`${fmt.highlightSecondary(`${errShape.testingType}.${newName}`)}`
-      : errPartial`${fmt.highlightSecondary(`e2e.${newName}`)} or ${fmt.highlightSecondary(`component.${newName}`)}`
-
-    const code = errShape.testingType
-      ? errPartial`
-        {
-          ${fmt.off(errShape.testingType)}: {
-            specPattern: '...',
-          },
-        }`
-      : errPartial`
-        {
-          e2e: {
-            specPattern: '...',
-          },
-          component: {
-            specPattern: '...',
-          },
-        }`
-
-    return errTemplate`\
-      The ${fmt.highlight(errShape.name)} configuration option is now invalid when set on the config object in ${fmt.cypressVersion(`10.0.0`)}.
-
-      It is now renamed to ${fmt.highlight(newName)} and configured separately as a testing type property: ${testingTypedHelpMessage}
-      ${fmt.code(code)}
-
-      https://on.cypress.io/migration-guide
-
-      ${stackTrace}
-      `
-  },
-
-  COMPONENT_FOLDER_REMOVED: (errShape: BreakingErrResult, err?: Error) => {
-    const stackTrace = err ? fmt.stackTrace(err) : null
-
-    const code = errPartial`
-    {
-      component: {
-        specPattern: '...',
-      },
-    }`
-
-    return errTemplate`\
-      The ${fmt.highlight(errShape.name)} configuration option is now invalid when set on the config object in ${fmt.cypressVersion(`10.0.0`)}.
-
-      It is now renamed to ${fmt.highlight('specPattern')} and configured separately as a component testing property: ${fmt.highlightSecondary('component.specPattern')}
-      ${fmt.code(code)}
-
-      https://on.cypress.io/migration-guide
-
-      ${stackTrace}
-      `
-  },
-
-  INTEGRATION_FOLDER_REMOVED: (errShape: BreakingErrResult, err?: Error) => {
-    const stackTrace = err ? fmt.stackTrace(err) : null
-
-    const code = errPartial`
-    {
-      e2e: {
-        specPattern: '...',
-      },
-    }`
-
-    return errTemplate`\
-      The ${fmt.highlight(errShape.name)} configuration option is now invalid when set on the config object in ${fmt.cypressVersion(`10.0.0`)}.
-
-      It is now renamed to ${fmt.highlight('specPattern')} and configured separately as a end to end testing property: ${fmt.highlightSecondary('e2e.specPattern')}
-      ${fmt.code(code)}
-
-      https://on.cypress.io/migration-guide
-
-      ${stackTrace}
-      `
-  },
-
-  MIGRATION_MISMATCHED_CYPRESS_VERSIONS: (version: string, currentVersion: string) => {
-    return errTemplate`
-      You are running ${fmt.cypressVersion(currentVersion)} in global mode, but you are attempting to migrate a project where ${fmt.cypressVersion(version)} is installed.
-
-      Ensure the project you are migrating has Cypress version ${fmt.cypressVersion(currentVersion)} installed.
-
-      https://on.cypress.io/migration-guide
-    `
-  },
-
-  MIGRATION_CYPRESS_NOT_FOUND: () => {
-    return errTemplate`
-      You are running Cypress 10+ in global mode and attempting to open or migrate a project where an install of ${fmt.code('cypress')} cannot be found.
-
-      Ensure that ${fmt.code('cypress@10')} or greater is installed in the project you are attempting to open or migrate.
-
-      https://on.cypress.io/migration-guide
     `
   },
 

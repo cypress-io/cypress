@@ -9,26 +9,15 @@ import type { TestingType } from '@packages/types'
 import * as validate from './validation'
 
 const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
-  'COMPONENT_FOLDER_REMOVED',
-  'INTEGRATION_FOLDER_REMOVED',
   'CONFIG_FILE_INVALID_ROOT_CONFIG',
   'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E',
   'CONFIG_FILE_INVALID_ROOT_CONFIG_COMPONENT',
   'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT',
   'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_E2E',
-  'EXPERIMENTAL_COMPONENT_TESTING_REMOVED',
-  'EXPERIMENTAL_SAMESITE_REMOVED',
-  'EXPERIMENTAL_NETWORK_STUBBING_REMOVED',
-  'EXPERIMENTAL_RUN_EVENTS_REMOVED',
-  'EXPERIMENTAL_SESSION_SUPPORT_REMOVED',
   'EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED',
   'EXPERIMENTAL_SINGLE_TAB_RUN_MODE',
-  'EXPERIMENTAL_SHADOW_DOM_REMOVED',
-  'FIREFOX_GC_INTERVAL_REMOVED',
-  'PLUGINS_FILE_CONFIG_OPTION_REMOVED',
   'VIDEO_UPLOAD_ON_PASSES_REMOVED',
   'RENAMED_CONFIG_OPTION',
-  'TEST_FILES_RENAMED',
 ] as const
 
 type ValidationOptions = {
@@ -258,7 +247,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
-    requireRestartOnChange: 'browser',
+    requireRestartOnChange: 'server',
   }, {
     name: 'experimentalWebKitSupport',
     defaultValue: false,
@@ -617,73 +606,16 @@ export const options: Array<DriverConfigOption | RuntimeConfigOption> = [
  */
 export const breakingOptions: Readonly<BreakingOption[]> = [
   {
-    name: 'blacklistHosts',
-    errorKey: 'RENAMED_CONFIG_OPTION',
-    newName: 'blockHosts',
-    isWarning: false,
-  }, {
-    name: 'componentFolder',
-    errorKey: 'COMPONENT_FOLDER_REMOVED',
-    isWarning: false,
-  }, {
-    name: 'experimentalComponentTesting',
-    errorKey: 'EXPERIMENTAL_COMPONENT_TESTING_REMOVED',
-    isWarning: false,
-  }, {
-    name: 'experimentalGetCookiesSameSite',
-    errorKey: 'EXPERIMENTAL_SAMESITE_REMOVED',
-    isWarning: true,
-  }, {
     name: 'experimentalJustInTimeCompile',
     errorKey: 'EXPERIMENTAL_JIT_COMPILE_REMOVED',
-    isWarning: true,
-  },
-  {
-    name: 'experimentalNetworkStubbing',
-    errorKey: 'EXPERIMENTAL_NETWORK_STUBBING_REMOVED',
-    isWarning: true,
-  }, {
-    name: 'experimentalRunEvents',
-    errorKey: 'EXPERIMENTAL_RUN_EVENTS_REMOVED',
-    isWarning: true,
-  }, {
-    name: 'experimentalSessionSupport',
-    errorKey: 'EXPERIMENTAL_SESSION_SUPPORT_REMOVED',
     isWarning: true,
   }, {
     name: 'experimentalSessionAndOrigin',
     errorKey: 'EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED',
     isWarning: true,
   }, {
-    name: 'experimentalShadowDomSupport',
-    errorKey: 'EXPERIMENTAL_SHADOW_DOM_REMOVED',
-    isWarning: true,
-  }, {
     name: 'experimentalSkipDomainInjection',
     errorKey: 'EXPERIMENTAL_SKIP_DOMAIN_INJECTION_REMOVED',
-    isWarning: false,
-  }, {
-    name: 'firefoxGcInterval',
-    errorKey: 'FIREFOX_GC_INTERVAL_REMOVED',
-    isWarning: true,
-  }, {
-    name: 'ignoreTestFiles',
-    errorKey: 'TEST_FILES_RENAMED',
-    newName: 'excludeSpecPattern',
-    isWarning: false,
-  }, {
-    name: 'integrationFolder',
-    errorKey: 'INTEGRATION_FOLDER_REMOVED',
-    isWarning: false,
-  }, {
-    name: 'pluginsFile',
-    errorKey: 'PLUGINS_FILE_CONFIG_OPTION_REMOVED',
-    isWarning: false,
-  },
-  {
-    name: 'testFiles',
-    errorKey: 'TEST_FILES_RENAMED',
-    newName: 'specPattern',
     isWarning: false,
   }, {
     name: 'videoUploadOnPasses',

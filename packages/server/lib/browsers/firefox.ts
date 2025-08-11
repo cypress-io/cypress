@@ -14,27 +14,14 @@ import utils from './utils'
 import type { Browser, BrowserInstance, GracefulShutdownOptions } from './types'
 import os from 'os'
 import mimeDb from 'mime-db'
-import { BrowserCriClient } from './browser-cri-client'
 import type { BidiAutomation } from './bidi_automation'
 import type { Automation } from '../automation'
 import { getCtx } from '@packages/data-context'
-import { getError, SerializedError, CypressError } from '@packages/errors'
+import { getError, CypressError } from '@packages/errors'
 import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
 import type { RemoteConfig } from 'webdriver'
 import type { GeckodriverParameters } from 'geckodriver'
 import { WebDriver } from './webdriver'
-
-export class CDPFailedToStartFirefox extends Error {
-  private static readonly ERROR_NAME = 'CDPFailedToStartFirefox'
-  constructor (message) {
-    super(message)
-    this.name = CDPFailedToStartFirefox.ERROR_NAME
-  }
-
-  public static isCDPFailedToStartFirefoxError (error?: SerializedError): error is CDPFailedToStartFirefox {
-    return error?.name === CDPFailedToStartFirefox.ERROR_NAME
-  }
-}
 
 const debug = Debug('cypress:server:browsers:firefox')
 const debugVerbose = Debug('cypress-verbose:server:browsers:firefox')
@@ -335,20 +322,18 @@ const defaultPreferences = {
   'browser.helperApps.neverAsk.saveToDisk': downloadMimeTypes,
 }
 
-// CDP is deprecated in Firefox 129 and up.
+// CDP was deprecated in Firefox 129 and up and was removed in Firefox 141.
 // To enable BiDi (without CDP), we need to set
 //    remote.active-protocol=1
-// In order to enable CDP (without BiDi), we need to set
+// Cypress no longer supports CDP within Firefox. However, it can be enabled if needed (but only on Firefox 141 and lower) by setting
 //    remote.active-protocol=2
 // both can be enabled via
 //    remote.active-protocol=3
 // @see https://fxdx.dev/deprecating-cdp-support-in-firefox-embracing-the-future-with-webdriver-bidi/
+// @see https://fxdx.dev/webdriver-bidi-becomes-the-default-for-cypress-in-firefox/
 // @see https://github.com/cypress-io/cypress/issues/29713
 const ACTIVE_PROTOCOLS = Object.freeze({
   BIDI: 1,
-  CDP: 2,
-  // this key isn't actively used but checked in here if we need to turn it on for internal debugging
-  CDP_AND_BIDI: 3,
 })
 
 const FIREFOX_HEADED_USERCSS = `\
@@ -387,7 +372,6 @@ toolbox {
 }
 `
 
-let browserCriClient: BrowserCriClient | undefined
 let browserBidiClient: BidiAutomation | undefined
 
 /**
@@ -396,12 +380,6 @@ let browserBidiClient: BidiAutomation | undefined
 export function clearInstanceState (options: GracefulShutdownOptions = {}) {
   debug('clearing instance state')
 
-  if (browserCriClient) {
-    debug('closing remote interface client')
-    browserCriClient.close(options.gracefulShutdown).catch(() => {})
-    browserCriClient = undefined
-  }
-
   if (browserBidiClient) {
     debug('unbinding bidi client events')
     browserBidiClient.close()
@@ -409,32 +387,9 @@ export function clearInstanceState (options: GracefulShutdownOptions = {}) {
   }
 }
 
-function shouldUseCdp (browser: Browser): boolean {
-  try {
-    // Gating on firefox version 135 to turn on BiDi as this is when all of our internal Cypress tests were able to pass.
-    // CDP is not supported in Firefox 141+, so we always use BiDi for FF141+.
-    return (
-      browser.family === 'firefox' && (
-        Number(browser.majorVersion) < 135 ||
-        (Number(browser.majorVersion) < 141 && !!process.env.FORCE_FIREFOX_CDP)
-      )
-    )
-  } catch (err: unknown) {
-    return false
-  }
-}
-
 export async function connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
-  if (shouldUseCdp(browser)) {
-    debug('connectToNewSpec cdp')
-    await firefoxUtil.connectToNewSpecCDP(options, automation, browserCriClient!)
-  } else {
-    debug('connectToNewSpec bidi')
-    await firefoxUtil.connectToNewSpecBiDi(options, automation, browserBidiClient!)
-
-    debug('registering middleware')
-    automation.use(browserBidiClient!.automationMiddleware)
-  }
+  debug('connectToNewSpec bidi')
+  await firefoxUtil.connectToNewSpecBiDi(options, automation, browserBidiClient!)
 }
 
 export function connectToExisting () {
@@ -456,13 +411,6 @@ async function recordVideo (videoApi: RunModeVideoApi) {
 }
 
 export async function open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance> {
-  const USE_WEBDRIVER_BIDI = !shouldUseCdp(browser)
-
-  // Even if the user has set FORCE_FIREFOX_CDP, we override this and use BiDi in FF141+
-  if (!USE_WEBDRIVER_BIDI || (USE_WEBDRIVER_BIDI && !!process.env.FORCE_FIREFOX_CDP)) {
-    errors.warning('CDP_FIREFOX_DEPRECATED')
-  }
-
   const defaultLaunchOptions = utils.getDefaultLaunchOptions({
     extensions: [] as string[],
     preferences: _.extend({}, defaultPreferences),
@@ -475,7 +423,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     ],
   })
 
-  defaultLaunchOptions.preferences['remote.active-protocols'] = USE_WEBDRIVER_BIDI ? ACTIVE_PROTOCOLS.BIDI : ACTIVE_PROTOCOLS.CDP
+  defaultLaunchOptions.preferences['remote.active-protocols'] = ACTIVE_PROTOCOLS.BIDI
 
   if (browser.isHeadless) {
     defaultLaunchOptions.args.push('-headless')
@@ -503,6 +451,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
     _.extend(defaultLaunchOptions.preferences, {
       'network.proxy.allow_hijacking_localhost': true,
+      'network.proxy.testing_localhost_is_secure_when_hijacked': true,
       'network.proxy.http': hostname,
       'network.proxy.ssl': hostname,
       'network.proxy.http_port': +port,
@@ -570,26 +519,6 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   debug('firefox directories %o', { path: profile.path(), cacheDir, extensionDest })
 
-  const xulStorePath = path.join(profile.path(), 'xulstore.json')
-
-  // if user has set custom window.sizemode pref or it's the first time launching on this profile, write to xulStore.
-  if (!await fs.pathExists(xulStorePath)) {
-    // this causes the browser to launch maximized, which chrome does by default
-    // otherwise an arbitrary size will be picked for the window size
-
-    // this used to not have an effect after first launch in 'interactive' mode.
-    // However, since Cypress 13.15.1,
-    // geckodriver creates unique profile names that copy over the xulstore.json to the used profile.
-    // The copy is ultimately updated on the unique profile name and is destroyed when the browser is torn down,
-    // so the values are not persisted. Cypress could hypothetically determine the profile is in use, copy the xulstore.json
-    // out of the profile and try to persist it in the next created profile, but this method is likely error prone as it requires
-    // moving/copying of files while creation/deletion of profiles occur, plus the ability to correlate the correct profile to the current run,
-    // which there are not guarantees we can deterministically do this in open mode.
-    const sizemode = 'maximized'
-
-    await fs.writeJSON(xulStorePath, { 'chrome://browser/content/browser.xhtml': { 'main-window': { 'width': 1280, 'height': 1024, sizemode } } })
-  }
-
   launchOptions.preferences['browser.cache.disk.parent_directory'] = cacheDir
 
   const userCSSPath = path.join(profileDir, 'chrome')
@@ -627,7 +556,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   debug('launch in firefox', { url, args: launchOptions.args })
 
-  const { FORCE_FIREFOX_CDP, ...launchEnvs } = process.env
+  const launchEnvs = process.env
 
   const geckoDriverOptions: GeckodriverParameters = {
     host: '127.0.0.1',
@@ -683,7 +612,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
         alwaysMatch: {
           browserName: 'firefox',
           acceptInsecureCerts: true,
-          webSocketUrl: USE_WEBDRIVER_BIDI,
+          webSocketUrl: true,
           // @see https://developer.mozilla.org/en-US/docs/Web/WebDriver/Capabilities/firefoxOptions
           'moz:firefoxOptions': {
             profile: base64EncodedProfile,
@@ -691,9 +620,6 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
             args: launchOptions.args,
             prefs: launchOptions.preferences,
           },
-          // @see https://firefox-source-docs.mozilla.org/testing/geckodriver/Capabilities.html#moz-debuggeraddress
-          // we specify the debugger address option for Webdriver, which will return us the CDP address when the capability is returned.
-          'moz:debuggerAddress': !USE_WEBDRIVER_BIDI,
           // @see https://webdriver.io/docs/capabilities/#wdiogeckodriveroptions
           // webdriver starts geckodriver with the correct options on behalf of Cypress
           'wdio:geckodriverOptions': geckoDriverOptions,
@@ -763,26 +689,12 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
       return browserReturnStatus || driverReturnStatus
     }
 
-    let cdpPort: number | undefined
-
-    if (!USE_WEBDRIVER_BIDI) {
-    // In some cases, the webdriver session will NOT return the moz:debuggerAddress capability even though
-    // we set it to true in the capabilities. This is out of our control, so when this happens, we fail the browser
-    // and gracefully terminate the related processes and attempt to relaunch the browser in the hopes we get a
-    // CDP address. @see https://github.com/cypress-io/cypress/issues/30352#issuecomment-2405701867 for more details.
-      if (!webdriverClient.capabilities['moz:debuggerAddress']) {
-        debugVerbose(`firefox failed to spawn with CDP connection. Failing current instance and retrying`)
-        // since this fails before the instance is created, we need to kill the processes here or else they will stay open
-        browserInstanceWrapper.kill()
-        throw new CDPFailedToStartFirefox(`webdriver session failed to start CDP even though "moz:debuggerAddress" was provided. Please try to relaunch the browser`)
-      }
-
-      cdpPort = parseInt(new URL(`ws://${webdriverClient.capabilities['moz:debuggerAddress']}`).port)
-
-      debug(`CDP running on port ${cdpPort}`)
-
-      // makes it so get getRemoteDebuggingPort() is calculated correctly
-      process.env.CYPRESS_REMOTE_DEBUGGING_PORT = cdpPort.toString()
+    // maximize the window if running headful and no width or height args are provided.
+    // NOTE: We used to do this with xulstore.json, but this is no longer possible with geckodriver
+    // as firefox will create the profile under the profile root that we cannot control and we cannot consistently provide
+    // a base 64 encoded profile.
+    if (!browser.isHeadless && (!launchOptions.args.includes('-width') || !launchOptions.args.includes('-height'))) {
+      await webdriverClient.maximizeWindow()
     }
 
     // install the browser extensions
@@ -796,16 +708,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     }))
 
     debug('setting up firefox utils')
-    const client = await firefoxUtil.setup({ automation, url, webdriverClient, remotePort: cdpPort, useWebDriverBiDi: USE_WEBDRIVER_BIDI, onError: options.onError })
-
-    if (client instanceof BrowserCriClient) {
-      browserCriClient = client
-      await utils.executeAfterBrowserLaunch(browser, {
-        webSocketDebuggerUrl: browserCriClient.getWebSocketDebuggerUrl(),
-      })
-    } else {
-      browserBidiClient = client
-    }
+    browserBidiClient = await firefoxUtil.setup({ automation, url, webdriverClient })
   } catch (err: unknown) {
     errors.throwErr('FIREFOX_COULD_NOT_CONNECT', err as Error)
   }

@@ -1,0 +1,81 @@
+.studio-single-test-container {
+  display: flex;
+  flex-direction: column;
+  background-color: $gray-1100;
+}
+
+.studio-header__test-section {
+  display: flex;
+  align-items: flex-start;
+  border-bottom: 1px solid $gray-900;
+  padding: 16px;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 20px;
+  flex-shrink: 0;
+
+  .state-icon {
+    margin-top: 3px;
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
+
+  .duration {
+    margin-right: 8px;
+  }
+}
+
+.studio-header__test-title {
+  color: $white;
+  font-weight: 500;
+  flex-grow: 1;
+}
+
+.studio-header__test-tooltip-wrapper {
+  display: flex;
+  flex-grow: 1;
+}
+
+.studio-single-test-attempts {
+  overflow: auto;
+  flex: 1;
+  min-height: 0; /* Needed for Firefox */
+}
+
+.studio-tooltip {
+  padding: 12px 16px;
+  max-width: 350px;
+}
+
+.studio-tooltip__breadcrumb-list {
+  display: flex;
+  flex-direction: column;
+
+  .studio-tooltip__breadcrumb-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 8px;
+    color: $gray-700;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    padding: 4px 0;
+    position: relative;
+    word-break: break-word;
+    text-align: left;
+
+    svg {
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+  }
+}
+
+.studio-tooltip__breadcrumb-connector {
+  position: absolute;
+  height: 100%;
+  border-left: 1px dotted $gray-300;
+}

@@ -65,9 +65,7 @@ describe('set:cookies', () => {
         'secure': false,
         'httpOnly': false,
         ...(
-          Cypress.isBrowser('webkit') || (
-            Cypress.isBrowser({ family: 'firefox' }) && Cypress.browser.majorVersion < 135
-          )
+          Cypress.isBrowser('webkit')
             ? { sameSite: 'no_restriction' }
             : Cypress.isBrowser({ family: 'firefox' }) ?
               { sameSite: 'unspecified' } :

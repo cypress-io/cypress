@@ -5,7 +5,7 @@ import { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 let runner: EventEmitter
 let runnables: RootRunnable
 
-function visitAndRenderReporter (studioEnabled: boolean = false, studioActive: boolean = false) {
+function visitAndRenderReporter (studioEnabled: boolean = false, studioActive: boolean = false, specRelative: string = 'relative/path/to/foo.js') {
   cy.fixture('runnables').then((_runnables) => {
     runnables = _runnables
   })
@@ -16,7 +16,7 @@ function visitAndRenderReporter (studioEnabled: boolean = false, studioActive: b
 
   runnerStore.setSpec({
     name: 'foo.js',
-    relative: 'relative/path/to/foo.js',
+    relative: specRelative,
     absolute: '/absolute/path/to/foo.js',
   })
 
@@ -48,13 +48,25 @@ describe('tests', () => {
   })
 
   it('includes the state as a class', () => {
-    cy.contains('suite 1')
-    .closest('.runnable')
-    .should('have.class', 'runnable-failed')
+    cy.get('.suite').first().within((el) => {
+      cy.wrap(el).contains('suite 1')
+      cy.get('.test').eq(0).should('have.class', 'runnable-passed')
+      cy.get('.test').eq(1).should('have.class', 'runnable-failed')
+    })
 
-    cy.contains('suite 2')
-    .closest('.runnable')
-    .should('have.class', 'runnable-passed')
+    cy.get('.suite').eq(1).within((el) => {
+      cy.wrap(el).contains('suite 1 > nested suite 1')
+      cy.get('.test').eq(0).should('have.class', 'runnable-pending')
+      cy.get('.test').eq(1).should('have.class', 'runnable-active')
+    })
+
+    cy.get('.suite').eq(2).within((el) => {
+      cy.wrap(el).contains('suite 2')
+      cy.get('.test').eq(0).should('have.class', 'runnable-passed')
+      cy.get('.test').eq(1).should('have.class', 'runnable-passed')
+      cy.get('.test').eq(2).should('have.class', 'runnable-passed')
+      .should('have.class', 'runnable-retried')
+    })
   })
 
   describe('expand and collapse', () => {
@@ -184,208 +196,73 @@ describe('tests', () => {
       .find('.collapsible-content').should('not.exist')
     })
   })
+
+  describe('studio controls', () => {
+    it('hides launch studio icon when running all specs', () => {
+      visitAndRenderReporter(true, false, '__all')
+
+      cy.contains('test 1').realHover()
+      cy.get('[data-cy="launch-studio"]').should('not.exist')
+    })
+
+    it('shows launch studio icon when running a single spec', () => {
+      visitAndRenderReporter(true, false, 'relative/path/to/foo.js')
+
+      cy.contains('test 1').realHover()
+      cy.get('[data-cy="launch-studio"]').should('exist')
+    })
+
+    it('hides new test button in suites when running all specs', () => {
+      visitAndRenderReporter(true, false, '__all')
+
+      cy.contains('suite 1').realHover()
+      cy.get('[data-cy="create-new-test-from-suite"]').should('not.exist')
+    })
+
+    it('shows new test button in suites when running a single spec', () => {
+      visitAndRenderReporter(true, false, 'relative/path/to/foo.js')
+
+      cy.contains('suite 1').realHover()
+      cy.get('[data-cy="create-new-test-from-suite"]').should('exist')
+    })
+  })
 })
 
 describe('studio controls', () => {
-  describe('canCopyStudioCommands is true', () => {
+  describe('launch studio button when studio is not active', () => {
     beforeEach(() => {
-      const runnerStore = visitAndRenderReporter(true, true)
+      const runnerStore = visitAndRenderReporter(true, false)
 
-      runnerStore.setCanSaveStudioLogs(true)
+      runnerStore.setCanSaveStudioLogs(false)
+    })
 
+    it('displays studio icon with half transparency when hovering over test title', { scrollBehavior: false }, () => {
       cy.contains('test 1')
-      .scrollIntoView()
-      .click()
-      .parents('.collapsible').first()
-      .find('.studio-controls').as('studioControls')
+      .closest('.runnable-wrapper')
+      .realHover()
+      .find('.runnable-controls-studio')
+      .should('be.visible')
+      .should('have.css', 'opacity', '1')
     })
 
-    it('is enabled with tooltip when there are commands', () => {
-      cy.get('@studioControls')
-      .find('.studio-copy')
-      .should('not.be.disabled')
-      .trigger('mouseover')
+    it('displays studio icon with no transparency and tooltip on hover', { scrollBehavior: false }, () => {
+      cy.contains('test 1')
+      .closest('.collapsible-header')
+      .find('.runnable-controls-studio')
+      .realHover()
+      .should('be.visible')
+      .should('have.css', 'opacity', '1')
 
-      cy.get('.cy-tooltip').should('have.text', 'Copy Commands to Clipboard')
+      cy.get('.cy-tooltip').contains('Edit in Studio')
     })
 
-    it('is enabled when there are commands', () => {
-      cy.get('@studioControls').find('.studio-save').should('not.be.disabled')
-    })
-
-    it('is emits studio:save when clicked', () => {
+    it('emits studio:init:test with the suite id when studio button clicked', () => {
       cy.stub(runner, 'emit')
 
-      cy.get('@studioControls').find('.studio-save').click()
+      cy.contains('test 1').parents('.collapsible-header')
+      .find('.runnable-controls-studio').click()
 
-      cy.wrap(runner.emit).should('be.calledWith', 'studio:save')
-    })
-
-    it('is emits studio:copy:to:clipboard when clicked', () => {
-      cy.stub(runner, 'emit')
-
-      cy.get('@studioControls').find('.studio-copy').click()
-
-      cy.wrap(runner.emit).should('be.calledWith', 'studio:copy:to:clipboard')
-    })
-
-    it('displays success state after commands are copied', () => {
-      cy.stub(runner, 'emit').callsFake((event, callback) => {
-        if (event === 'studio:copy:to:clipboard') {
-          callback('')
-        }
-      })
-
-      cy.get('@studioControls')
-      .find('.studio-copy')
-      .click()
-      .should('have.class', 'studio-copy-success')
-      .trigger('mouseover')
-
-      cy.get('.cy-tooltip').should('have.text', 'Commands Copied!')
-    })
-  })
-
-  describe('canCopyStudioCommands is false', () => {
-    describe('copy button', () => {
-      beforeEach(() => {
-        const runnerStore = visitAndRenderReporter(true, true)
-
-        runnerStore.setCanSaveStudioLogs(false)
-
-        cy.contains('test 1')
-        .scrollIntoView()
-        .click()
-        .parents('.collapsible').first()
-        .find('.studio-controls').as('studioControls')
-      })
-
-      it('is disabled without tooltip when there are no commands', () => {
-        cy.get('@studioControls')
-        .find('.studio-copy')
-        .should('be.disabled')
-        .parent('span')
-        .trigger('mouseover')
-
-        cy.get('.cy-tooltip').should('not.exist')
-      })
-    })
-
-    describe('launch studio button when studio is not active', () => {
-      beforeEach(() => {
-        const runnerStore = visitAndRenderReporter(true, false)
-
-        runnerStore.setCanSaveStudioLogs(false)
-      })
-
-      it('displays studio icon with half transparency when hovering over test title', { scrollBehavior: false }, () => {
-        cy.contains('test 1')
-        .closest('.runnable-wrapper')
-        .realHover()
-        .find('.runnable-controls-studio')
-        .should('be.visible')
-        .should('have.css', 'opacity', '0.5')
-      })
-
-      it('displays studio icon with no transparency and tooltip on hover', { scrollBehavior: false }, () => {
-        cy.contains('test 1')
-        .closest('.collapsible-header')
-        .find('.runnable-controls-studio')
-        .realHover()
-        .should('be.visible')
-        .should('have.css', 'opacity', '1')
-
-        cy.get('.cy-tooltip').contains('Add Commands to Test')
-      })
-
-      it('emits studio:init:test with the suite id when studio button clicked', () => {
-        cy.stub(runner, 'emit')
-
-        cy.contains('test 1').parents('.collapsible-header')
-        .find('.runnable-controls-studio').click()
-
-        cy.wrap(runner.emit).should('be.calledWith', 'studio:init:test', 'r3')
-      })
-    })
-
-    describe('controls', () => {
-      it('is not visible by default', () => {
-        visitAndRenderReporter(false, false)
-
-        cy.contains('test 1').click()
-        .parents('.collapsible').first()
-        .find('.studio-controls').should('not.exist')
-      })
-
-      describe('with studio active', () => {
-        beforeEach(() => {
-          const runnerStore = visitAndRenderReporter(true, true)
-
-          runnerStore.setCanSaveStudioLogs(false)
-
-          cy.contains('test 1')
-          .scrollIntoView()
-          .click()
-          .parents('.collapsible').first()
-          .find('.studio-controls').as('studioControls')
-        })
-
-        it('is visible with save and copy button when test passed', () => {
-          cy.get('@studioControls').should('be.visible')
-          cy.get('@studioControls').find('.studio-save').should('be.visible')
-          cy.get('@studioControls').find('.studio-copy').should('be.visible')
-
-          cy.percySnapshot()
-        })
-
-        it('is visible without save and copy button if test failed', () => {
-          cy.contains('test 2')
-          .parents('.collapsible').first()
-          .find('.studio-controls').should('be.visible')
-
-          cy.contains('test 2')
-          .parents('.collapsible').first()
-          .find('.studio-save').should('not.be.visible')
-
-          cy.contains('test 2')
-          .parents('.collapsible').first()
-          .find('.studio-copy').should('not.be.visible')
-        })
-
-        it('is visible without save and copy button if test was skipped', () => {
-          cy.contains('nested suite 1')
-          .parents('.collapsible').first()
-          .contains('test 1').click()
-          .parents('.collapsible').first()
-          .find('.studio-controls').as('pendingControls')
-          .should('be.visible')
-
-          cy.get('@pendingControls').find('.studio-save').should('not.be.visible')
-          cy.get('@pendingControls').find('.studio-copy').should('not.be.visible')
-        })
-
-        it('is not visible while test is running', () => {
-          cy.contains('nested suite 1')
-          .parents('.collapsible').first()
-          .contains('test 2').click()
-          .parents('.collapsible').first()
-          .find('.studio-controls').should('not.be.visible')
-        })
-
-        it('emits studio:cancel when cancel button clicked', () => {
-          cy.stub(runner, 'emit')
-
-          cy.get('@studioControls').find('.studio-cancel').click()
-
-          cy.wrap(runner.emit).should('be.calledWith', 'studio:cancel')
-        })
-
-        describe('save button', () => {
-          it('save button is disabled', () => {
-            cy.get('@studioControls').find('.studio-save').should('be.disabled')
-          })
-        })
-      })
+      cy.wrap(runner.emit).should('be.calledWith', 'studio:init:test', 'r3')
     })
   })
 })

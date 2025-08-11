@@ -385,7 +385,7 @@ export class AutIframe {
 
     const Cypress = this.eventManager.getCypress()
 
-    const selector = Cypress.SelectorPlayground.getSelector($el)
+    const selector = Cypress.ElementSelector._getSelector($el)
     const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
     this._addOrUpdateSelectorPlaygroundHighlight({
@@ -494,23 +494,7 @@ export class AutIframe {
   startStudio () {
     const studioStore = useStudioStore()
 
-    if (studioStore.isLoading) {
-      studioStore.start(this._body()?.[0])
-    }
-  }
-
-  reattachStudio () {
-    const studioStore = useStudioStore()
-
-    if (studioStore.isActive) {
-      const body = this._body()?.[0]
-
-      if (!body) {
-        throw Error(`Cannot reattach Studio without the HTMLBodyElement for the app`)
-      }
-
-      studioStore.attachListeners(body)
-    }
+    studioStore.start()
   }
 
   private _scrollIntoView (win: Window, el: HTMLElement) {

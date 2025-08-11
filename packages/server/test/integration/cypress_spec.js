@@ -830,7 +830,8 @@ describe('lib/cypress', () => {
     ]
 
     renamedConfigs.forEach(function (config) {
-      it(`logs error and exits when using an old configuration option: ${config.old}`, function () {
+      // TODO: remove this skip once we have a renamed config option - there are none active now
+      it.skip(`logs error and exits when using an old configuration option: ${config.old}`, function () {
         return cypress.start([
           `--run-project=${this.todosPath}`,
           `--config=${config.old}=''`,

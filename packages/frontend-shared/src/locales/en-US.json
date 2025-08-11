@@ -909,97 +909,6 @@
       "link": "install Cypress"
     }
   },
-  "migration": {
-    "before": "Before",
-    "after": "After",
-    "heresWhy": "here's why:",
-    "renameAuto": {
-      "title": "We recommend automatically renaming your specs in this step",
-      "changeButton": "change",
-      "changedSpecFolder": "We've changed the default spec folder from:",
-      "changedSpecExt": "We've changed the default spec file extension from:",
-      "changedSpecPatternExplain": "We've changed the default spec file extension to {0} in order to avoid conflicts with any existing testing frameworks.",
-      "optedOutMessage": "You've opted not to rename your spec file extension. You may need to change your specPattern later so we can still find your spec files.",
-      "folderRenameMessage": "You've opted not to rename your spec file extension, we'll only rename the folder",
-      "modal": {
-        "title": "Change the existing spec file extension",
-        "warning": "We recommend using the default extension to avoid inconsistencies, framework conflicts, and confusion with your team.",
-        "line1": "Cypress now supports the ability to create new spec files from within the UI for both E2E and component specs.",
-        "line2": "All new spec files created within Cypress will use the default pattern of: ",
-        "line3": "We want to rename your existing specs so that they have a consistent filename pattern for both E2E and component testing.",
-        "line4": "All documentation and example code will be using: ",
-        "line5": "We've changed the placement of component specs to be next to their source files (e.g. src/Button.jsx and src/Button.cy.jsx)",
-        "line6": "The new default pattern of {0} prevents targeting conflicts with other testing frameworks. (e.g. Jest)",
-        "label": "Choose from the following filename patterns:",
-        "option1": "{0} (recommended)",
-        "option2": "Don't rename anything — keep what I have.",
-        "option3": "Rename folder only.",
-        "optOutAdditional": "I may need to change my {0} later if I don't use the recommended filename extension.",
-        "buttonSave": "Save changes",
-        "buttonCancel": "Cancel"
-      }
-    },
-    "renameManual": {
-      "title": "We need you to move your component specs manually",
-      "componentFolderRemoved": "We've removed the {0} options from the Cypress config.",
-      "addedSpecPattern": "We've added a new {0} option in the Cypress config that tells us where to find your component specs.",
-      "cannotAuto": "We can't automatically migrate your existing component spec files. We recommend that you move the following component spec files next to your source component files (e.g. {0})",
-      "ifSkipNote": "If you skip this step, Cypress will still be able to find them, but any new specs that you create will automatically be created next to your component files."
-    },
-    "renameSupport": {
-      "title": "We'll automatically rename your existing E2E support file in this step",
-      "serveDifferentTypes": "We now serve different support files for E2E and Component Testing.",
-      "changedSupportFile": "We've renamed the E2E support file from:"
-    },
-    "configFile": {
-      "title": "We need to migrate to the new Cypress configuration file",
-      "changedDefault": "We've changed the default Cypress config file from:",
-      "customOptions": "We've set a custom {specPattern} option based on your {options}.",
-      "willConvert": "We'll automatically create a new {jsFile} file and seed it with your options from your existing {jsonFile}."
-    },
-    "setupComponent": {
-      "title": "You need to reconfigure Cypress for component testing",
-      "line1": "We've detected that you are currently using the experimental version of component testing.",
-      "line2": "Your existing configuration is no longer compatible with new component testing configuration options.",
-      "line3": "In a previous step, we renamed your component specs, but can't automatically migrate your existing component testing configuration.",
-      "line4": "In the next screen, you'll be able to reconfigure component testing in a new guided configuration wizard."
-    },
-    "wizard": {
-      "title": "Migrating to Cypress {version}",
-      "description": "Your project requires updates to work with this version.",
-      "typicalMigrationLabel": "Typical migration:",
-      "typicalMigrationTime": "5-10 minutes",
-      "step1": {
-        "title": "Migrate existing specs",
-        "description": "In this step, we'll automatically rename and/or move your existing spec files as needed.",
-        "button": "Rename these specs for me",
-        "buttonSkip": "Skip renaming specs",
-        "buttonRenameFolder": "Rename the folder for me"
-      },
-      "step2": {
-        "title": "Move your existing component specs",
-        "description": "In this step, you'll manually move your existing component specs to their new default location.",
-        "buttonWait": "Waiting for you to move your component specs...",
-        "buttonDone": "Continue to next step",
-        "button": "I'll do this later"
-      },
-      "step3": {
-        "title": "Rename the Cypress support file",
-        "description": "In this step, we'll automatically rename your existing support file.",
-        "button": "Rename the support file for me"
-      },
-      "step4": {
-        "title": "Migrate to the new Cypress configuration file",
-        "description": "In this step, we'll automatically migrate your existing Cypress configuration to the new Cypress configuration file.",
-        "button": "Migrate the configuration for me"
-      },
-      "step5": {
-        "title": "Reconfigure component testing",
-        "description": "In this step, we'll explain how you will reconfigure Cypress for component testing.",
-        "button": "Finish migration and continue"
-      }
-    }
-  },
   "majorVersionWelcome": {
     "title": "What's New in Cypress",
     "actionContinue": "Continue",
@@ -1079,33 +988,6 @@
       "shared": {
         "link": "Read more about browser management"
       }
-    },
-    "viewportTooltip": {
-      "buttonText": "Review the guide on viewports",
-      "buttonHref": "https://on.cypress.io/viewport",
-      "infoText": "The viewport determines the width and height of your application under test. By default the viewport will be {0} by {1} for {2} testing.",
-      "configText": "Additionally, you can override this value in your {configFile} or via the {viewportCommand} command."
-    },
-    "studio": {
-      "studio": "Studio",
-      "studioDescription": "Generate Cypress commands by interacting with your site as an end user would. Then, save these commands directly to your test file.",
-      "studioDetailedDescription": "Generate and save commands directly to your test suite by interacting with your app as an end user would. Right click on an element to add an assertion. Studio will track events that generate the following commands:",
-      "getStartedButton": "Get started",
-      "feedbackPrompt": "Your {0} will be highly influential to our team.",
-      "experimentalMessage": "This feature is currently experimental and we will be adding more commands and abilities in the future.",
-      "feedbackLink": "feedback",
-      "saveTest": "Save test",
-      "testName": "Test name",
-      "saveTestButton": "Save",
-      "closeStudio": "Close Studio",
-      "restartStudio": "Restart Studio",
-      "copyCommands": "Copy commands to clipboard",
-      "commandsCopied": "Commands copied!",
-      "availableCommands": "Available commands",
-      "giveFeedback": "Give feedback",
-      "enterValidUrl": "Enter a valid URL to visit",
-      "continue": "Continue",
-      "actionCancel": "Cancel"
     }
   },
   "warnings": {

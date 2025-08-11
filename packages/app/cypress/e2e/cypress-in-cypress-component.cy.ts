@@ -19,7 +19,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
 
-      cy.findByTestId('aut-url-input').should('be.disabled')
+      cy.findByTestId('aut-url-input').should('have.prop', 'readOnly', true)
       cy.findByTestId('select-browser').click()
 
       cy.contains('Canary').should('be.visible')
@@ -28,30 +28,6 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.findByTestId('viewport-size').should('be.visible')
 
       cy.get('body').click()
-
-      cy.findByTestId('playground-activator').click()
-      cy.findByTestId('playground-selector').clear()
-      cy.findByTestId('playground-selector').type('[data-cy-root]')
-
-      // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
-      // snapshotAUTPanel('cy.get selector')
-
-      cy.findByTestId('playground-num-elements').contains('1 match')
-
-      cy.window().then((win) => cy.spy(win.console, 'log'))
-      cy.findByTestId('playground-print').click().window().then((win) => {
-        expect(win.console.log).to.have.been.calledWith('%cCommand:  ', 'font-weight: bold', 'cy.get(\'[data-cy-root]\')')
-      })
-
-      cy.findByLabelText('Selector methods').click()
-      cy.findByRole('menuitem', { name: 'cy.contains' }).click()
-
-      cy.findByTestId('playground-selector').clear().type('Component Test')
-
-      // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
-      // snapshotAUTPanel('cy.contains selector')
-
-      cy.findByTestId('playground-num-elements').contains('1 match')
 
       // Temporarily removed from CT since it doesn't work. Invert this assertion when completing https://github.com/cypress-io/cypress/issues/24549
       cy.get('.hook-open-in-ide').should('not.exist')

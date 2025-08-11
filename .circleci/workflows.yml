@@ -1,7 +1,7 @@
 version: 2.1
 
-chrome-stable-version: &chrome-stable-version "138.0.7204.183"
-chrome-beta-version: &chrome-beta-version "139.0.7258.66"
+chrome-stable-version: &chrome-stable-version "139.0.7258.66"
+chrome-beta-version: &chrome-beta-version "140.0.7339.5"
 firefox-stable-version: &firefox-stable-version "141.0"
 
 orbs:
@@ -38,7 +38,7 @@ mainBuildFilters: &mainBuildFilters
         - /^release\/\d+\.\d+\.\d+$/
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'update-v8-snapshot-cache-on-develop'
-        - 'update-chrome-stable-from-136.0.7103.113-beta-from-137.0.7151.40'
+        - 'mabel/issue-10425-studio-redesign'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -49,11 +49,9 @@ macWorkflowFilters: &darwin-workflow-filters
       - equal: [ develop, << pipeline.git.branch >> ]
       # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-      - equal:
-          [
-            'update-chrome-stable-from-136.0.7103.113-beta-from-137.0.7151.40',
-            << pipeline.git.branch >>
-          ]
+      - equal: [ 'feat/support_vite_7', << pipeline.git.branch >> ]
+      - equal: [ 'chore/test_cypress_recipes_15', << pipeline.git.branch >> ]
+      - equal: [ 'mabel/issue-31677-reporter-redesign', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
@@ -64,11 +62,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
       - equal: [ develop, << pipeline.git.branch >> ]
       # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-      - equal:
-          [
-            'update-chrome-stable-from-136.0.7103.113-beta-from-137.0.7151.40',
-            << pipeline.git.branch >>
-          ]
+      - equal: [ 'feat/support_vite_7', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
@@ -91,11 +85,7 @@ windowsWorkflowFilters: &windows-workflow-filters
       - equal: [ develop, << pipeline.git.branch >> ]
       # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-      - equal:
-          [
-            'update-chrome-stable-from-136.0.7103.113-beta-from-137.0.7151.40',
-            << pipeline.git.branch >>
-          ]
+      - equal: [ 'feat/support_vite_7', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
@@ -104,7 +94,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/base-internal:20.18.1-bullseye
+      - image: cypress/base-internal:22.15.1-bullseye
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
@@ -112,7 +102,7 @@ executors:
 
   kitchensink-executor:
     docker:
-      - image: cypress/base-internal:20.18.1-bullseye
+      - image: cypress/base-internal:22.15.1-bullseye
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
@@ -121,7 +111,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/base-internal:20.18.1-bullseye
+      - image: cypress/base-internal:22.15.1-bullseye
         user: node
     environment:
       PLATFORM: linux
@@ -169,7 +159,7 @@ commands:
           name: Set environment variable to determine whether or not to persist artifacts
           command: |
             echo "Setting SHOULD_PERSIST_ARTIFACTS variable"
-            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "update-chrome-stable-from-136.0.7103.113-beta-from-137.0.7151.40" ]]; then
+            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "mabel/issue-10425-studio-redesign" ]]; then
                 export SHOULD_PERSIST_ARTIFACTS=true
             fi' >> "$BASH_ENV"
   # You must run `setup_should_persist_artifacts` command and be using bash before running this command
@@ -637,24 +627,24 @@ commands:
                       version: << parameters.google-chrome-for-testing-version >>
                       install_chromedriver: false
 
-  # This code builds better-sqlite3 on Debian 10 (Buster). This is necessary because Debian 10 has the oldest glibc version (2.28) that we support.
+  # This code builds better-sqlite3 on Debian 11 (Bullseye). This is necessary because Debian 10 has the oldest glibc version (2.31) that we support.
   #
   # Since this is running Docker remote (because the job running the command may not be using an executor with the appropriate glibc version), we need to 
   # copy the project into the container, and copy the built plugin out of the container because the host running docker does not have access to the 
   # project directory so volume mounts are not possible. The built plugin is copied to the project directory so it can be injected into the final binary.
   build-better-sqlite3:
-    description: Build better-sqlite3 for glibc 2.28
+    description: Build better-sqlite3 for glibc 2.31
     steps:
       - setup_remote_docker
       - run:
-          name: Build better-sqlite3 for glibc 2.28
+          name: Build better-sqlite3 for glibc 2.31
           command: |
             if [[ ! -f better_sqlite3.node ]]; then
               set -x
               apt update && apt install -y docker.io
-              docker run -d --name better-sqlite3-builder cypress/base-internal:20.15.0-buster-python3.8-gcc-10.5 /bin/bash -c "sleep 1000000000"
+              docker run -d --name better-sqlite3-builder cypress/base-internal:22.15.1-glibc2.31 /bin/bash -c "sleep 1000000000"
               docker cp ~/cypress/node_modules/better-sqlite3 better-sqlite3-builder:/better-sqlite3
-              docker exec -it better-sqlite3-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install prebuild -r electron -t 33.2.1 --include-regex 'better_sqlite3.node$'"
+              docker exec -it better-sqlite3-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install prebuild -r electron -t 36.4.0 --include-regex 'better_sqlite3.node$'"
               docker cp better-sqlite3-builder:/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
               docker rm -f better-sqlite3-builder
               cp ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/better_sqlite3.node
@@ -686,11 +676,6 @@ commands:
         default: *firefox-stable-version
       inject-document-domain:
         description: run subset of tests with injectDocumentDomain config enabled
-        type: boolean
-        default: false
-      is-firefox-cdp:
-        description: whether or not the group should be associated to the firefox CDP
-          run or not. This is determined by the browser version.
         type: boolean
         default: false
 
@@ -733,9 +718,6 @@ commands:
             if << parameters.inject-document-domain >> ; then
               YARN_CMD="cypress:run:inject-document-domain"
               PARALLEL="--parallel --group 5x-driver-inject-document-domain-<<parameters.browser>>"
-            elif << parameters.is-firefox-cdp >> ; then
-              YARN_CMD="cypress:run"
-              PARALLEL="--parallel --group 5x-driver-cdp-<<parameters.browser>>"
             else
               YARN_CMD="cypress:run"
               PARALLEL="--parallel --group 5x-driver-<<parameters.browser>>"
@@ -1201,23 +1183,6 @@ commands:
               CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm install --legacy-peer-deps ~/cypress/cypress.tgz
             fi
           working_directory: /tmp/<<parameters.repo>>
-      - run:
-          name: Scaffold new config file
-          working_directory: /tmp/<<parameters.repo>>
-          environment:
-            CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
-          command: |
-            if [[ -f cypress.json ]]; then
-              rm -rf cypress.json
-              echo 'module.exports = { e2e: {} }' > cypress.config.js
-            fi
-      - run:
-          name: Rename support file
-          working_directory: /tmp/<<parameters.repo>>
-          command: |
-            if [[ -f cypress/support/index.js ]]; then
-              mv cypress/support/index.js cypress/support/e2e.js
-            fi
       - run:
           name: Print Cypress version
           working_directory: /tmp/<<parameters.repo>>
@@ -1933,7 +1898,7 @@ jobs:
     working_directory: ~/cypress
     docker:
       # we need an image with yarn 4 berry installed on it to run this test
-      - image: cypress/base-internal:20.18.1-yarn-berry
+      - image: cypress/base-internal:22.15.1-yarn-berry
     environment:
       # needed to inform the bootstrap-docker-container.sh script to link the binary in the system-test project directory
       REPO_DIR: /root/cypress
@@ -1967,7 +1932,7 @@ jobs:
     parallelism: 1
     working_directory: ~/cypress
     docker:
-      - image: cypress/base-internal:20.18.1-bullseye
+      - image: cypress/base-internal:22.15.1-bullseye
     environment:
       # needed to inform the bootstrap-docker-container.sh script to link the binary in the system-test project directory
       REPO_DIR: /root/cypress
@@ -2169,18 +2134,6 @@ jobs:
     steps:
       - run-driver-integration-tests:
           browser: firefox
-
-  # Runs the driver tests using firefox 134, which does NOT use WebDriver BiDi
-  # This is to test and make sure there aren't regressions with the old CDP driver
-  driver-integration-tests-firefox-cdp:
-    <<: *defaults
-    resource_class: medium+
-    parallelism: 5
-    steps:
-      - run-driver-integration-tests:
-          browser: firefox
-          firefox-version: "134.0.2"
-          is-firefox-cdp: true
 
   driver-integration-tests-electron:
     <<: *defaults
@@ -2633,7 +2586,7 @@ jobs:
     <<: *defaults
     resource_class: small
     docker:
-      - image: cypress/base-internal:18.17.1
+      - image: cypress/base-internal:22.15.1
     steps:
       - maybe_skip_binary_jobs
       - restore_workspace_binaries
@@ -2757,6 +2710,7 @@ jobs:
     steps:
       - test-binary-against-repo:
           repo: cypress-example-recipes
+          pull_request_id: 921
           command: npm run test:ci:firefox
           browser: firefox
 
@@ -2765,6 +2719,7 @@ jobs:
     steps:
       - test-binary-against-repo:
           repo: cypress-example-recipes
+          pull_request_id: 921
           command: npm run test:ci:chrome
           browser: chrome
 
@@ -2774,6 +2729,7 @@ jobs:
     steps:
       - test-binary-against-repo:
           repo: cypress-example-recipes
+          pull_request_id: 921
           # Split the specs up across 4 different machines to run in parallel
           command: npm run test:ci -- --chunk $CIRCLE_NODE_INDEX --total-chunks
             $CIRCLE_NODE_TOTAL
@@ -2922,7 +2878,6 @@ linux-x64-workflow: &linux-x64-workflow
           - run-webpack-dev-server-integration-tests
           - run-vite-dev-server-integration-tests
           - driver-integration-tests-firefox
-          - driver-integration-tests-firefox-cdp
           - driver-integration-tests-chrome
           - driver-integration-tests-chrome-inject-document-domain
           - driver-integration-tests-chrome-beta-inject-document-domain
@@ -2995,10 +2950,6 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
     - driver-integration-tests-firefox:
-        context: test-runner:cypress-record-key
-        requires:
-          - build
-    - driver-integration-tests-firefox-cdp:
         context: test-runner:cypress-record-key
         requires:
           - build
@@ -3113,6 +3064,9 @@ linux-x64-workflow: &linux-x64-workflow
     - npm-mount-utils:
         requires:
           - build
+    - npm-grep:
+        requires:
+          - build
     - npm-eslint-plugin-dev:
         requires:
           - build
@@ -3133,6 +3087,7 @@ linux-x64-workflow: &linux-x64-workflow
           - npm-puppeteer-cypress-tests
           - npm-react
           - npm-mount-utils
+          - npm-grep
           - npm-vue
           - npm-webpack-batteries-included-preprocessor
           - npm-webpack-preprocessor
@@ -3144,7 +3099,6 @@ linux-x64-workflow: &linux-x64-workflow
           - linux-lint
           - percy-finalize
           - driver-integration-tests-firefox
-          - driver-integration-tests-firefox-cdp
           - driver-integration-tests-chrome
           - driver-integration-tests-chrome-beta
           - driver-integration-tests-chrome-inject-document-domain
@@ -3400,10 +3354,6 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
         context: test-runner:cypress-record-key
         requires:
           - contributor-pr
-    - driver-integration-tests-firefox-cdp:
-        context: test-runner:cypress-record-key
-        requires:
-          - contributor-pr
     - driver-integration-tests-electron:
         context: test-runner:cypress-record-key
         requires:
@@ -3515,6 +3465,9 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
     - npm-mount-utils:
         requires:
           - build
+    - npm-grep:
+        requires:
+          - build
     - npm-eslint-plugin-dev:
         requires:
           - build
@@ -3534,6 +3487,7 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
           - npm-puppeteer-cypress-tests
           - npm-react
           - npm-mount-utils
+          - npm-grep
           - npm-vue
           - npm-webpack-batteries-included-preprocessor
           - npm-webpack-preprocessor
@@ -3545,7 +3499,6 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
           - linux-lint
           - percy-finalize
           - driver-integration-tests-firefox
-          - driver-integration-tests-firefox-cdp
           - driver-integration-tests-chrome
           - driver-integration-tests-chrome-beta
           - driver-integration-tests-electron

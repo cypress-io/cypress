@@ -651,6 +651,8 @@ describe('App: Specs', () => {
           .and('have.attr', 'href', 'https://on.cypress.io/styling-components')
 
           cy.log('should not contain the link if you navigate away and back')
+          // A bit of a hack, but our cy-in-cy test needs to wait for the reporter to fully render before pressing the "f" key to expand the "Search specs" menu.
+          // Otherwise, the "f" keypress happens before the event is registered, which causes the "Search Specs" menu to not expand.
           cy.get('[data-cy="runnable-header"]').should('be.visible')
           cy.get('body').type('f')
           cy.get('[data-cy=spec-file-item]').first().click()

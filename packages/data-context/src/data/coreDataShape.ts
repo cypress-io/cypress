@@ -1,4 +1,4 @@
-import { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, MIGRATION_STEPS, MigrationStep, StudioLifecycleManagerShape } from '@packages/types'
+import type { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, StudioLifecycleManagerShape } from '@packages/types'
 import { WizardBundler, CT_FRAMEWORKS, resolveComponentFrameworkDefinition, ErroredFramework } from '@packages/scaffold-config'
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
@@ -7,7 +7,7 @@ import type { ChildProcess } from 'child_process'
 import type { SocketIONamespace, SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
 import type { ErrorWrapperSource } from '@packages/errors'
-import type { EventCollectorSource, GitDataSource, LegacyCypressConfigJson } from '../sources'
+import type { EventCollectorSource, GitDataSource } from '../sources'
 import { machineId as getMachineId } from 'node-machine-id'
 import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
 
@@ -83,26 +83,6 @@ export interface WizardDataShape {
   erroredFrameworks: ErroredFramework[]
 }
 
-export interface MigrationDataShape {
-  // TODO: have the model of migration here
-  step: MigrationStep
-  legacyConfigForMigration?: LegacyCypressConfigJson | null
-  filteredSteps: MigrationStep[]
-  flags: {
-    hasCustomIntegrationFolder: boolean
-    hasCustomIntegrationTestFiles: boolean
-
-    hasCustomComponentFolder: boolean
-    hasCustomComponentTestFiles: boolean
-
-    hasCustomSupportFile: boolean
-    hasComponentTesting: boolean
-    hasE2ESpec: boolean
-    hasPluginsFile: boolean
-    shouldAddCustomE2ESpecPattern: boolean
-  }
-}
-
 export interface ElectronShape {
   app: App | null
   browserWindow: BrowserWindow | null
@@ -150,7 +130,6 @@ export interface CoreDataShape {
   currentTestingType: TestingType | null
   diagnostics: Diagnostics
   wizard: WizardDataShape
-  migration: MigrationDataShape
   user: AuthenticatedUserShape | null
   electron: ElectronShape
   authState: AuthStateShape
@@ -214,22 +193,6 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       // TODO: API to add third party frameworks to this list.
       frameworks: CT_FRAMEWORKS.map((framework) => resolveComponentFrameworkDefinition(framework)),
       erroredFrameworks: [],
-    },
-    migration: {
-      step: 'renameAuto',
-      legacyConfigForMigration: null,
-      filteredSteps: [...MIGRATION_STEPS],
-      flags: {
-        hasCustomIntegrationFolder: false,
-        hasCustomIntegrationTestFiles: false,
-        hasCustomComponentFolder: false,
-        hasCustomComponentTestFiles: false,
-        hasCustomSupportFile: false,
-        hasComponentTesting: true,
-        hasE2ESpec: true,
-        hasPluginsFile: true,
-        shouldAddCustomE2ESpecPattern: false,
-      },
     },
     activeBrowser: null,
     user: null,

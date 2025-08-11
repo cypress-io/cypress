@@ -25,7 +25,6 @@ let ctx
 // NOTE: todo: come back to this
 describe('lib/project-base', () => {
   beforeEach(async function () {
-    delete process.env.CYPRESS_ENABLE_CLOUD_STUDIO
     delete process.env.CYPRESS_LOCAL_STUDIO_PATH
 
     ctx = getCtx()
@@ -509,6 +508,52 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         })
       })
     })
+
+    describe('studio initialization', function () {
+      it('does not create studio lifecycle manager when experimental flag is disabled', async function () {
+        const cfg = {
+          isTextTerminal: false,
+          resolved: {
+            experimentalStudio: {
+              value: false,
+            },
+          },
+          projectId: 'test-project',
+          port: 8080,
+        }
+
+        sinon.stub(this.project, 'initializeConfig').resolves(cfg)
+        sinon.stub(this.project, 'saveState').resolves()
+
+        sinon.stub(process, 'chdir')
+
+        await this.project.open()
+
+        expect(this.project.ctx.coreData.studioLifecycleManager).to.be.undefined
+      })
+
+      it('does not create studio lifecycle manager when in text terminal mode', async function () {
+        const cfg = {
+          isTextTerminal: true,
+          resolved: {
+            experimentalStudio: {
+              value: true,
+            },
+          },
+          projectId: 'test-project',
+          port: 8080,
+        }
+
+        sinon.stub(this.project, 'initializeConfig').resolves(cfg)
+        sinon.stub(this.project, 'saveState').resolves()
+
+        sinon.stub(process, 'chdir')
+
+        await this.project.open()
+
+        expect(this.project.ctx.coreData.studioLifecycleManager).to.be.undefined
+      })
+    })
   })
 
   context('#close', () => {
@@ -730,18 +775,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         const { canAccessStudioAI } = await studioInitPromise
 
         expect(canAccessStudioAI).to.be.true
-        expect(mockCaptureStudioEvent).to.be.calledWith({
-          type: 'studio:started',
-          machineId: 'test-machine-id',
-          projectId: 'test-project-id',
-          browser: {
-            name: 'chrome',
-            family: 'chromium',
-            channel: undefined,
-            version: undefined,
-          },
-          cypressVersion: pkg.version,
-        })
 
         expect(mockSetupProtocol).to.be.calledOnce
         expect(mockBeforeSpec).to.be.calledOnce
@@ -825,18 +858,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         const { canAccessStudioAI } = await studioInitPromise
 
         expect(canAccessStudioAI).to.be.false
-        expect(mockCaptureStudioEvent).to.be.calledWith({
-          type: 'studio:started',
-          machineId: 'test-machine-id',
-          projectId: 'test-project-id',
-          browser: {
-            name: 'chrome',
-            family: 'chromium',
-            channel: undefined,
-            version: undefined,
-          },
-          cypressVersion: pkg.version,
-        })
 
         expect(mockSetupProtocol).not.to.be.called
         expect(mockBeforeSpec).not.to.be.called
@@ -916,18 +937,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         const { canAccessStudioAI } = await studioInitPromise
 
         expect(canAccessStudioAI).to.be.false
-        expect(mockCaptureStudioEvent).to.be.calledWith({
-          type: 'studio:started',
-          machineId: 'test-machine-id',
-          projectId: 'test-project-id',
-          browser: {
-            name: 'chrome',
-            family: 'chromium',
-            channel: undefined,
-            version: undefined,
-          },
-          cypressVersion: pkg.version,
-        })
 
         expect(mockSetupProtocol).not.to.be.called
         expect(mockBeforeSpec).not.to.be.called
@@ -949,7 +958,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
 
       it('does not capture studio started event if the user is accessing cloud studio', async function () {
-        process.env.CYPRESS_ENABLE_CLOUD_STUDIO = 'true'
         process.env.CYPRESS_LOCAL_STUDIO_PATH = 'false'
 
         const mockAccessStudioAI = sinon.stub().resolves(true)

@@ -34,7 +34,7 @@ export async function insertValueInJSString (fileContents: string, obj: Record<s
         && nodePath.node.callee.type === 'Identifier') {
       const functionName = nodePath.node.callee.name
 
-      if (isDefineConfigFunction(ast, functionName)) {
+      if (isDefineConfigFunction(ast as File, functionName)) {
         return handleExport(nodePath.get('arguments', 0))
       }
     }

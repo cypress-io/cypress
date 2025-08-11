@@ -1,15 +1,19 @@
 @import "../../node_modules/prismjs/themes/prism";
 @import "../../node_modules/prismjs/plugins/line-highlight/prism-line-highlight";
 
-code[class*="language-"],
-pre[class*="language-"] {
+code.language-js,
+code.language-ts,
+pre.language-js,
+pre.language-ts {
 	color: $gray-400;
 	margin: 0;
 	text-shadow: $black 0px 1px;
 }
 
-:not(pre) > code[class*="language-"],
-pre[class*="language-"] {
+:not(pre) > code.language-js,
+:not(pre) > code.language-ts,
+pre.language-js,
+pre.language-ts {
 	background: $gray-1100;
 }
 

@@ -33,6 +33,7 @@ export class CodegenActions {
       let result = parseReactComponent(src, {
         resolver: findAllWithLink(exportResolver, reactDocgenResolvers),
         babelOptions: {
+          configFile: false,
           parserOpts: {
             plugins: ['typescript', 'jsx'],
           },

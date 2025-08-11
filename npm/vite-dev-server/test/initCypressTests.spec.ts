@@ -1,9 +1,4 @@
-import Chai, { expect } from 'chai'
-import sinon from 'sinon'
-import decache from 'decache'
-import SinonChai from 'sinon-chai'
-
-Chai.use(SinonChai)
+import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest'
 
 describe('initCypressTests', () => {
   let mockSupportFile: string | undefined
@@ -18,10 +13,10 @@ describe('initCypressTests', () => {
 
   const createMockCypress = () => {
     return {
-      on: sinon.stub(),
-      onSpecWindow: sinon.stub(),
-      action: sinon.stub(),
-      config: sinon.stub().callsFake((key) => {
+      on: vi.fn(),
+      onSpecWindow: vi.fn(),
+      action: vi.fn(),
+      config: vi.fn().mockImplementation((key) => {
         switch (key) {
           case 'supportFile':
             return mockSupportFile
@@ -49,6 +44,8 @@ describe('initCypressTests', () => {
   let mockCypressInstance = createMockCypress()
 
   beforeEach(() => {
+    vi.resetModules()
+
     mockSupportFile = '/users/mock_dir/mock_project/cypress/support/component.js'
     // relative "/cypress/support/component.js"
     mockProjectRoot = '/users/mock_dir/mock_project'
@@ -61,7 +58,7 @@ describe('initCypressTests', () => {
 
     mockCypressInstance = createMockCypress()
 
-    global.import = sinon.stub()
+    global.import = vi.fn()
     // @ts-expect-error
     global.window = {}
     // @ts-expect-error
@@ -75,18 +72,16 @@ describe('initCypressTests', () => {
     delete global.window
     // @ts-expect-error
     delete global.parent
-
-    decache('../client/initCypressTests.js')
   })
 
   describe('support file / spec file loading', () => {
-    it('doesn\'t load the support file if one is not provided', () => {
+    it('doesn\'t load the support file if one is not provided', async () => {
       mockSupportFile = undefined
-      require('../client/initCypressTests.js')
+      await import('../client/initCypressTests.js')
       // just includes the spec import
-      expect(mockCypressInstance.onSpecWindow).to.be.calledWith(global.window, [
+      expect(mockCypressInstance.onSpecWindow).toHaveBeenCalledWith(global.window, [
         {
-          load: sinon.match.func,
+          load: expect.any(Function),
           absolute: mockAbsolutePath,
           relative: mockRelativePath,
           relativeUrl: `${mockDevServerPublicPathRoute}/@fs${mockAbsolutePath}`,
@@ -94,18 +89,18 @@ describe('initCypressTests', () => {
       ])
     })
 
-    it('load the support file along with the spec', () => {
-      require('../client/initCypressTests.js')
+    it('load the support file along with the spec', async () => {
+      await import('../client/initCypressTests.js')
       // just includes the spec import
-      expect(mockCypressInstance.onSpecWindow).to.be.calledWith(global.window, [
+      expect(mockCypressInstance.onSpecWindow).toHaveBeenCalledWith(global.window, [
         {
-          load: sinon.match.func,
+          load: expect.any(Function),
           absolute: '/users/mock_dir/mock_project/cypress/support/component.js',
           relative: '/cypress/support/component.js',
           relativeUrl: '/__cypress/src/cypress/support/component.js',
         },
         {
-          load: sinon.match.func,
+          load: expect.any(Function),
           absolute: '/users/mock_dir/mock_project/src/Test.cy.jsx',
           relative: 'src/Test.cy.jsx',
           relativeUrl: '/__cypress/src/@fs/users/mock_dir/mock_project/src/Test.cy.jsx',
@@ -114,19 +109,19 @@ describe('initCypressTests', () => {
     })
 
     describe('empty devServerPublicPathRoute', () => {
-      it('load the support file along with the spec', () => {
+      it('load the support file along with the spec', async () => {
         mockDevServerPublicPathRoute = ''
-        require('../client/initCypressTests.js')
+        await import('../client/initCypressTests.js')
         // just includes the spec import
-        expect(mockCypressInstance.onSpecWindow).to.be.calledWith(global.window, [
+        expect(mockCypressInstance.onSpecWindow).toHaveBeenCalledWith(global.window, [
           {
-            load: sinon.match.func,
+            load: expect.any(Function),
             absolute: '/users/mock_dir/mock_project/cypress/support/component.js',
             relative: '/cypress/support/component.js',
             relativeUrl: './cypress/support/component.js',
           },
           {
-            load: sinon.match.func,
+            load: expect.any(Function),
             absolute: '/users/mock_dir/mock_project/src/Test.cy.jsx',
             relative: 'src/Test.cy.jsx',
             relativeUrl: './@fs/users/mock_dir/mock_project/src/Test.cy.jsx',
@@ -148,13 +143,13 @@ describe('initCypressTests', () => {
         mockCypressInstance.spec.relative = mockRelativePath
       })
 
-      it('doesn\'t load the support file if one is not provided', () => {
+      it('doesn\'t load the support file if one is not provided', async () => {
         mockSupportFile = undefined
-        require('../client/initCypressTests.js')
+        await import('../client/initCypressTests.js')
         // just includes the spec import
-        expect(mockCypressInstance.onSpecWindow).to.be.calledWith(sinon.match.any, [
+        expect(mockCypressInstance.onSpecWindow).toHaveBeenCalledWith(expect.any(Object), [
           {
-            load: sinon.match.func,
+            load: expect.any(Function),
             absolute: 'C:/users/mock_user/mock_dir/mock_project/src/Test.cy.jsx',
             relative: 'src\\Test.cy.jsx',
             relativeUrl: '/__cypress/src/@fs/C:/users/mock_user/mock_dir/mock_project/src/Test.cy.jsx',
@@ -162,18 +157,18 @@ describe('initCypressTests', () => {
         ])
       })
 
-      it('load the support file along with the spec', () => {
-        require('../client/initCypressTests.js')
+      it('load the support file along with the spec', async () => {
+        await import('../client/initCypressTests.js')
         // just includes the spec import
-        expect(mockCypressInstance.onSpecWindow).to.be.calledWith(global.window, [
+        expect(mockCypressInstance.onSpecWindow).toHaveBeenCalledWith(global.window, [
           {
-            load: sinon.match.func,
+            load: expect.any(Function),
             absolute: 'C:\\users\\mock_user\\mock_dir\\mock_project\\cypress\\support\\component.js',
             relative: '/cypress/support/component.js',
             relativeUrl: '/__cypress/src/cypress/support/component.js',
           },
           {
-            load: sinon.match.func,
+            load: expect.any(Function),
             absolute: 'C:/users/mock_user/mock_dir/mock_project/src/Test.cy.jsx',
             relative: 'src\\Test.cy.jsx',
             relativeUrl: '/__cypress/src/@fs/C:/users/mock_user/mock_dir/mock_project/src/Test.cy.jsx',
@@ -182,19 +177,19 @@ describe('initCypressTests', () => {
       })
 
       describe('empty devServerPublicPathRoute', () => {
-        it('load the support file along with the spec', () => {
+        it('load the support file along with the spec', async () => {
           mockDevServerPublicPathRoute = ''
-          require('../client/initCypressTests.js')
+          await import('../client/initCypressTests.js')
           // just includes the spec import
-          expect(mockCypressInstance.onSpecWindow).to.be.calledWith(global.window, [
+          expect(mockCypressInstance.onSpecWindow).toHaveBeenCalledWith(global.window, [
             {
-              load: sinon.match.func,
+              load: expect.any(Function),
               absolute: 'C:\\users\\mock_user\\mock_dir\\mock_project\\cypress\\support\\component.js',
               relative: '/cypress/support/component.js',
               relativeUrl: './cypress/support/component.js',
             },
             {
-              load: sinon.match.func,
+              load: expect.any(Function),
               absolute: 'C:/users/mock_user/mock_dir/mock_project/src/Test.cy.jsx',
               relative: 'src\\Test.cy.jsx',
               relativeUrl: './@fs/C:/users/mock_user/mock_dir/mock_project/src/Test.cy.jsx',

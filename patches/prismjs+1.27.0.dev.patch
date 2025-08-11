@@ -1,0 +1,69 @@
+diff --git a/node_modules/prismjs/themes/prism.css b/node_modules/prismjs/themes/prism.css
+index 5b8ed2d..8173ec6 100644
+--- a/node_modules/prismjs/themes/prism.css
++++ b/node_modules/prismjs/themes/prism.css
+@@ -4,8 +4,8 @@
+  * @author Lea Verou
+  */
+ 
+-code[class*="language-"],
+-pre[class*="language-"] {
++code.language-js, code.language-ts,
++pre.language-js, pre.language-ts {
+ 	color: black;
+ 	background: none;
+ 	text-shadow: 0 1px white;
+@@ -28,39 +28,43 @@ pre[class*="language-"] {
+ 	hyphens: none;
+ }
+ 
+-pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+-code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
++pre.language-js::-moz-selection, pre.language-js ::-moz-selection,
++pre.language-ts::-moz-selection, pre.language-ts ::-moz-selection,
++code.language-js::-moz-selection, code.language-js ::-moz-selection,
++code.language-ts::-moz-selection, code.language-ts ::-moz-selection {
+ 	text-shadow: none;
+ 	background: #b3d4fc;
+ }
+ 
+-pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+-code[class*="language-"]::selection, code[class*="language-"] ::selection {
++pre.language-js::selection, pre.language-js ::selection,
++pre.language-ts::selection, pre.language-ts ::selection,
++code.language-js::selection, code.language-js ::selection,
++code.language-ts::selection, code.language-ts ::selection {
+ 	text-shadow: none;
+ 	background: #b3d4fc;
+ }
+ 
+ @media print {
+-	code[class*="language-"],
+-	pre[class*="language-"] {
++	code.language-js, code.language-ts,
++	pre.language-js, pre.language-ts {
+ 		text-shadow: none;
+ 	}
+ }
+ 
+ /* Code blocks */
+-pre[class*="language-"] {
++pre.language-js, pre.language-ts {
+ 	padding: 1em;
+ 	margin: .5em 0;
+ 	overflow: auto;
+ }
+ 
+-:not(pre) > code[class*="language-"],
+-pre[class*="language-"] {
++:not(pre) > code.language-js, :not(pre) > code.language-ts,
++pre.language-js, pre.language-ts {
+ 	background: #f5f2f0;
+ }
+ 
+ /* Inline code */
+-:not(pre) > code[class*="language-"] {
++:not(pre) > code.language-js, :not(pre) > code.language-ts {
+ 	padding: .1em;
+ 	border-radius: .3em;
+ 	white-space: normal;

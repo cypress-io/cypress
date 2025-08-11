@@ -22,9 +22,9 @@ class Shortcuts {
     if (isAnyModifierKeyPressed || isTextLike) return
 
     switch (event.key) {
-      case 'r': !appState.studioActive && events.emit('restart')
+      case 'r': events.emit('restart')
         break
-      case 's': !appState.isPaused && !appState.studioActive && events.emit('stop')
+      case 's': !appState.isPaused && events.emit('stop')
         break
       case 'f': action('toggle:spec:list', () => {
         appState.toggleSpecList()

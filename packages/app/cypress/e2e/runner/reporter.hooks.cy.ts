@@ -53,11 +53,11 @@ describe('hooks', {
       o.sinon.stub(ctx.actions.file, 'openFile')
     })
 
-    cy.contains('Open in IDE').invoke('show').click({ force: true })
+    cy.get('.hook-open-in-ide').first().invoke('show').click()
 
     cy.withCtx((ctx, o) => {
-      expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`hooks/basic\.cy\.js$`)), o.ideLine, o.ideColumn)
-    }, { ideLine: 2, ideColumn: Cypress.browser.family === 'firefox' ? 5 : 2 })
+      expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`hooks/basic\.cy\.js$`)), 2, 2)
+    })
   })
 
   it('does not display commands from skipped tests', () => {
@@ -67,9 +67,7 @@ describe('hooks', {
     })
 
     // does not display commands from skipped tests
-    cy.contains('test 1').click()
-    cy.contains('test 1').parents('.collapsible').first().should('not.contain', 'testBody 1')
-    cy.contains('test 1').click()
+    cy.contains('test 1').should('have.css', 'pointer-events', 'none')
 
     // displays before hook when following it.skip
     // https://github.com/cypress-io/cypress/issues/8086
@@ -84,10 +82,20 @@ describe('hooks', {
       passCount: 1,
     })
 
-    cy.contains('test wrapper').parents('.collapsible').first().should(($suite) => {
+    cy.contains('test wrapper > nested suite 1').parents('.collapsible').first().should(($suite) => {
       expect($suite).not.to.contain('test 1')
       expect($suite).to.contain('nested suite 1')
       expect($suite).to.contain('test 2')
+      expect($suite).not.to.contain('nested suite 2')
+      expect($suite).not.to.contain('test 3')
+      expect($suite).not.to.contain('nested suite 3')
+      expect($suite).not.to.contain('test 4')
+    })
+
+    cy.contains('test wrapper > nested suite 3').parents('.collapsible').first().should(($suite) => {
+      expect($suite).not.to.contain('test 1')
+      expect($suite).not.to.contain('nested suite 1')
+      expect($suite).not.to.contain('test 2')
       expect($suite).not.to.contain('nested suite 2')
       expect($suite).not.to.contain('test 3')
       expect($suite).to.contain('nested suite 3')

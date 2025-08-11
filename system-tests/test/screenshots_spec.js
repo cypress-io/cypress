@@ -8,7 +8,7 @@ const { fs } = require('@packages/server/lib/util/fs')
 
 sizeOf = Promise.promisify(sizeOf)
 
-const e2ePath = Fixtures.projectPath('e2e')
+const screenshotsPath = Fixtures.projectPath('screenshots')
 
 const onServer = function (app) {
   app.get('/color/:color', (req, res) => {
@@ -62,6 +62,7 @@ describe('e2e screenshots', () => {
   // the test title as the file name
   systemTests.it('passes', {
     browser: '!webkit', // TODO(webkit): fix+unskip (failing partially due to broken stack trace)
+    project: 'screenshots',
     spec: 'screenshots.cy.js',
     expectedExitCode: 5,
     snapshot: true,
@@ -71,7 +72,7 @@ describe('e2e screenshots', () => {
       return exec()
       .then(() => {
         const screenshot = (...paths) => {
-          return path.join(e2ePath, 'cypress', 'screenshots', 'screenshots.cy.js', ...paths)
+          return path.join(screenshotsPath, 'cypress', 'screenshots', 'screenshots.cy.js', ...paths)
         }
 
         const screenshot1 = screenshot('black.png')

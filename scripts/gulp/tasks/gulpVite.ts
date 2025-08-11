@@ -27,12 +27,12 @@ export function viteApp () {
   if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
     const port = process.env.CYPRESS_INTERNAL_VITE_APP_PORT
 
-    return spawnViteDevServer('vite-app', `yarn vite --port ${port} ${baseSuffix}`, {
+    return spawnViteDevServer('vite-app', `./node_modules/.bin/vite --port ${port} ${baseSuffix}`, {
       cwd: monorepoPaths.pkgApp,
     })
   }
 
-  return watchViteBuild('vite-app', `yarn vite build --mode development --minify false --watch ${baseSuffix}`, {
+  return watchViteBuild('vite-app', `./node_modules/.bin/vite build --mode development --minify false --watch ${baseSuffix}`, {
     cwd: monorepoPaths.pkgApp,
   })
 }
@@ -43,12 +43,14 @@ export function viteLaunchpad () {
   if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
     const port = process.env.CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT
 
-    return spawnViteDevServer('vite-launchpad', `yarn vite --port ${port} ${baseSuffix}`, {
+    return spawnViteDevServer('vite-launchpad', `./node_modules/.bin/vite --port ${port} ${baseSuffix}`, {
       cwd: monorepoPaths.pkgLaunchpad,
     })
   }
 
-  return watchViteBuild('vite-launchpad', `yarn vite build --mode development --minify false --watch`, {
+  console.log('foobarbaz', monorepoPaths.pkgLaunchpad)
+
+  return watchViteBuild('vite-launchpad', `./node_modules/.bin/vite build --mode development --minify false --watch`, {
     cwd: monorepoPaths.pkgLaunchpad,
   })
 }

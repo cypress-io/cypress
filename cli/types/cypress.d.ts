@@ -696,10 +696,20 @@ declare namespace Cypress {
     }
 
     /**
-     * @see https://on.cypress.io/selector-playground-api
+     * Element selector logic used for generating selectors for elements
+     * in the Selector Playground and Cypress Studio.
+     * @see https://on.cypress.io/element-selector-api
+     */
+    ElementSelector: {
+      defaults(options: Partial<ElementSelectorDefaultsOptions>): void
+    }
+
+    /**
+     * @deprecated Use ElementSelector instead
+     * @see https://on.cypress.io/element-selector-api
      */
     SelectorPlayground: {
-      defaults(options: Partial<SelectorPlaygroundDefaultsOptions>): void
+      defaults(options: Partial<ElementSelectorDefaultsOptions>): void
       getSelector($el: JQuery): JQuery.Selector
     }
 
@@ -2126,12 +2136,6 @@ declare namespace Cypress {
      *    expect(o.toString).to.have.been.calledOnce
      */
     stub<T>(obj: T, method: keyof T): Agent<sinon.SinonStub>
-    /**
-     * Stubs a method on an object
-     *
-     * @deprecated Use `cy.stub(object, name).callsFake(fn)` instead
-     */
-    stub<T>(obj: T, method: keyof T, func: (...args: any[]) => any): Agent<sinon.SinonStub>
 
     /**
      * Submit a form.
@@ -2977,7 +2981,7 @@ declare namespace Cypress {
      */
     requestTimeout: number
     /**
-     * Time, in milliseconds, to wait until a response in a [cy.request()](https://on.cypress.io/request), [cy.wait()](https://on.cypress.io/wait), [cy.fixture()](https://on.cypress.io/fixture), [cy.getCookie()](https://on.cypress.io/getcookie), [cy.getCookies()](https://on.cypress.io/getcookies), [cy.setCookie()](https://on.cypress.io/setcookie), [cy.clearCookie()](https://on.cypress.io/clearcookie), [cy.clearCookies()](https://on.cypress.io/clearcookies), and [cy.screenshot()](https://on.cypress.io/screenshot) commands
+     * Time, in milliseconds, to wait for a response in a [cy.request()](https://on.cypress.io/request), [cy.wait()](https://on.cypress.io/wait), [cy.fixture()](https://on.cypress.io/fixture), [cy.getCookie()](https://on.cypress.io/getcookie), [cy.getCookies()](https://on.cypress.io/getcookies), [cy.setCookie()](https://on.cypress.io/setcookie), [cy.clearCookie()](https://on.cypress.io/clearcookie), [cy.clearCookies()](https://on.cypress.io/clearcookies), and [cy.screenshot()](https://on.cypress.io/screenshot) commands
      * @default 30000
      */
     responseTimeout: number
@@ -3720,9 +3724,18 @@ declare namespace Cypress {
     screenshotOnRunFailure: boolean
   }
 
-  interface SelectorPlaygroundDefaultsOptions {
-    selectorPriority: string[]
-    onElement: ($el: JQuery) => string | null | undefined
+  type SelectorPriority =
+    | `attribute:${string}`
+    | 'attributes'
+    | 'class'
+    | `data-${string}`
+    | 'id'
+    | 'name'
+    | 'nth-child'
+    | 'tag'
+
+  interface ElementSelectorDefaultsOptions {
+    selectorPriority?: SelectorPriority[]
   }
 
   interface ScrollToOptions extends Loggable, Timeoutable {

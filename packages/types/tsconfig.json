@@ -10,8 +10,6 @@
     "esModuleInterop": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    // explicitly turn this off as it defaults to true in the base tsconfig.json and it's not needed here
-    "experimentalDecorators": false,
     "allowJs": true,
     "types": [],
     "noUncheckedIndexedAccess": true,

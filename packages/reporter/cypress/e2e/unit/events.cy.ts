@@ -26,6 +26,7 @@ type AppStateStub = AppState & {
   end: SinonSpy
   temporarilySetAutoScrolling: SinonSpy
   setStudioActive: SinonSpy
+  setStudioSingleTestActive: SinonSpy
   stop: SinonSpy
 }
 
@@ -38,6 +39,7 @@ const appStateStub = () => {
     end: sinon.spy(),
     temporarilySetAutoScrolling: sinon.spy(),
     setStudioActive: sinon.spy(),
+    setStudioSingleTestActive: sinon.spy(),
     stop: sinon.spy(),
   } as AppStateStub
 }
