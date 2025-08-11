@@ -122,14 +122,14 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
     npm publish /tmp/cypress-prod.tgz --tag dev
     ```
 
-9. Double-check that the new version has been published under the `dev` tag using `npm info cypress` or [available-versions](https://github.com/bahmutov/available-versions). `latest` should still point to the previous version. Example output:
+9. Double-check that the new version has been published under the `dev` tag using `npm view cypress dist-tags`. The `latest` tag should still point to the previous version. Example output:
 
-    ```shell
-    dist-tags:
-    dev: 3.4.0     latest: 3.3.2
+    ```text
+    $ npm view cypress dist-tags
+    { latest: '14.5.3', dev: '14.5.4' }
     ```
 
-    **Note**: It may take several minutes for `npm info` to reflect the latest version info.
+    **Note**: It may take several minutes for `npm view` to reflect the latest version info.
 
 10. Test `cypress@X.Y.Z` to make sure everything is working.
     - Install the new version: `npm install -g cypress@X.Y.Z`
