@@ -716,6 +716,10 @@ export class ProjectBase extends EE {
   // Saved state
 
   async getSavedState (options: { type: 'global' | 'project' } = { type: 'project' }) {
+    if (!this.cfg) {
+      throw new Error('Missing project config trying to get saved state')
+    }
+
     const state = await savedState.create(options.type === 'project' ? this.projectRoot : undefined, this.cfg.isTextTerminal)
 
     return state.get()
@@ -724,7 +728,7 @@ export class ProjectBase extends EE {
   // forces saving of project's state by first merging with argument
   async saveState (stateChanges = {}, options: { type: 'global' | 'project' } = { type: 'project' }) {
     if (!this.cfg) {
-      throw new Error('Missing project config')
+      throw new Error('Missing project config trying to save state')
     }
 
     if (options.type === 'project' && !this.projectRoot) {
