@@ -167,6 +167,22 @@ describe('lib/fixture', () => {
         })
       })
     })
+
+    it('should return encoded JSON', async function () {
+      const fixtures = [
+        { encoding: '', content: Buffer.from('[{"json": true}]') },
+        { encoding: 'base64', content: 'W3sianNvbiI6IHRydWV9XQ==' },
+        { encoding: 'utf8', content: '[{"json": true}]' },
+        { encoding: null, content: Buffer.from('[{"json": true}]') },
+        { encoding: undefined, content: [{ json: true }] },
+      ]
+
+      for (const { encoding, content } of fixtures) {
+        const result = await fixture.get(this.fixturesFolder, 'foo', { encoding })
+
+        expect(result).to.deep.equal(content)
+      }
+    })
   })
 
   context('js files', () => {
