@@ -262,6 +262,19 @@ describe('lib/socket', () => {
           done()
         })
       })
+
+      it('handles errors thrown by getSavedState', function (done) {
+        const err = new Error('boom')
+
+        this.options.getSavedState.rejects(err)
+
+        this.client.emit('get:app:state', { type: 'global' }, (resp) => {
+          expect(this.options.getSavedState).to.be.calledWith({ type: 'global' })
+          expect(resp.error).to.deep.eq(errors.cloneErr(err))
+
+          done()
+        })
+      })
     })
 
     context('on(save:app:state)', () => {

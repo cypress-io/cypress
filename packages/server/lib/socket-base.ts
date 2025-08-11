@@ -583,9 +583,13 @@ export class SocketBase {
         })
 
         socket.on('get:app:state', async (opts, cb) => {
-          const state = await options.getSavedState(opts)
+          try {
+            const state = await options.getSavedState(opts)
 
-          cb({ data: state })
+            cb({ data: state })
+          } catch (error) {
+            cb({ error: errors.cloneErr(error) })
+          }
         })
 
         socket.on('save:app:state', (state, cb) => {
