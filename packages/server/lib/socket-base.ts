@@ -157,6 +157,7 @@ export class SocketBase {
       onChromiumRun () {},
       onReloadBrowser () {},
       closeExtraTargets () {},
+      getSavedState () {},
       onSavedStateChanged () {},
       onTestFileChange () {},
       onCaptureVideoFrames () {},
@@ -579,6 +580,12 @@ export class SocketBase {
           }
 
           return cb(s || {}, cachedTestState)
+        })
+
+        socket.on('get:app:state', async (opts, cb) => {
+          const state = await options.getSavedState(opts)
+
+          cb({ data: state })
         })
 
         socket.on('save:app:state', (state, cb) => {

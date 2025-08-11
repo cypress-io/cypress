@@ -80,6 +80,38 @@ describe('lib/project-base', () => {
     expect(p.projectRoot).to.eq(path.resolve(path.join('..', 'foo', 'bar')))
   })
 
+  context('#getSavedState', () => {
+    beforeEach(async function () {
+      const globalState = await savedState.create()
+
+      await globalState.remove()
+      await globalState.set({ reporterWidth: 400 })
+
+      const projectState = await savedState.create(this.project.projectRoot)
+
+      await projectState.remove()
+      await projectState.set({ reporterWidth: 500 })
+    })
+
+    it('returns global state when type is global', async function () {
+      const state = await this.project.getSavedState({ type: 'global' })
+
+      expect(state).to.deep.eq({ reporterWidth: 400 })
+    })
+
+    it('returns project state when type is project', async function () {
+      const state = await this.project.getSavedState({ type: 'project' })
+
+      expect(state).to.deep.eq({ reporterWidth: 500 })
+    })
+
+    it('returns project state when type is undefined', async function () {
+      const state = await this.project.getSavedState()
+
+      expect(state).to.deep.eq({ reporterWidth: 500 })
+    })
+  })
+
   context('#saveState', function () {
     beforeEach(async function () {
       const supportFile = path.join('the', 'save', 'state', 'test')

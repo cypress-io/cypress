@@ -64,6 +64,7 @@ describe('lib/socket', () => {
       })
       .then(() => {
         this.options = {
+          getSavedState: sinon.stub(),
           onSavedStateChanged: sinon.spy(),
           onStudioInit: sinon.stub(),
           onStudioDestroy: sinon.stub(),
@@ -246,6 +247,19 @@ describe('lib/socket', () => {
           expect(resp.error).to.deep.eq(errors.cloneErr(err))
 
           return done()
+        })
+      })
+    })
+
+    context('on(get:app:state)', () => {
+      it('calls getSavedState with options and returns the state', function (done) {
+        this.options.getSavedState.resolves({ reporterWidth: 500 })
+
+        this.client.emit('get:app:state', { type: 'global' }, (resp) => {
+          expect(this.options.getSavedState).to.be.calledWith({ type: 'global' })
+          expect(resp.data).to.deep.eq({ reporterWidth: 500 })
+
+          done()
         })
       })
     })

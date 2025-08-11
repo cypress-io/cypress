@@ -403,6 +403,7 @@ export class ProjectBase extends EE {
       onReloadBrowser: options.onReloadBrowser,
       onFocusTests: options.onFocusTests,
       onSpecChanged: options.onSpecChanged,
+      getSavedState: this.getSavedState.bind(this),
       onSavedStateChanged: this.saveState.bind(this),
       closeExtraTargets: this.closeExtraTargets,
 
@@ -713,6 +714,12 @@ export class ProjectBase extends EE {
   }
 
   // Saved state
+
+  async getSavedState (options: { type: 'global' | 'project' } = { type: 'project' }) {
+    const state = await savedState.create(options.type === 'project' ? this.projectRoot : undefined, this.cfg.isTextTerminal)
+
+    return state.get()
+  }
 
   // forces saving of project's state by first merging with argument
   async saveState (stateChanges = {}, options: { type: 'global' | 'project' } = { type: 'project' }) {
