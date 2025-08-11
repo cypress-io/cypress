@@ -22,30 +22,6 @@ chai.use(chaiPromise)
 describe('angularHandler', function () {
   this.timeout(1000 * 60)
 
-  it('sources the config from angular-18', async () => {
-    const projectRoot = await scaffoldMigrationProject('angular-18')
-
-    process.chdir(projectRoot)
-    const devServerConfig = {
-      cypressConfig: {
-        projectRoot,
-        specPattern: 'src/**/*.cy.ts',
-      } as Cypress.PluginConfigOptions,
-      framework: 'angular',
-    } as AngularWebpackDevServerConfig
-    const { frameworkConfig: webpackConfig, sourceWebpackModulesResult } = await angularHandler(devServerConfig)
-
-    expect(webpackConfig).to.exist
-    expect((webpackConfig?.entry as any).main).to.be.undefined
-    expect(sourceWebpackModulesResult.framework?.importPath).to.include(path.join('@angular-devkit', 'build-angular'))
-    const { buildOptions } = await expectNormalizeProjectConfig(projectRoot)
-
-    await expectLoadsAngularJson(projectRoot)
-    await expectLoadsAngularCLiModules(projectRoot)
-    await expectGeneratesTsConfig(devServerConfig, buildOptions)
-    expectLoadsAngularBuildOptions(buildOptions)
-  })
-
   it('sources the config from angular-19', async () => {
     const projectRoot = await scaffoldMigrationProject('angular-19')
 
@@ -62,12 +38,76 @@ describe('angularHandler', function () {
     expect(webpackConfig).to.exist
     expect((webpackConfig?.entry as any).main).to.be.undefined
     expect(sourceWebpackModulesResult.framework?.importPath).to.include(path.join('@angular-devkit', 'build-angular'))
-    const { buildOptions } = await expectNormalizeProjectConfig(projectRoot)
+    const projectConfig = await getProjectConfig(projectRoot)
+
+    expect(projectConfig).to.deep.eq({
+      root: '',
+      sourceRoot: 'src',
+      buildOptions: {
+        outputPath: 'dist/angular',
+        index: 'src/index.html',
+        main: 'src/main.ts',
+        polyfills: 'src/polyfills.ts',
+        tsConfig: 'tsconfig.app.json',
+        inlineStyleLanguage: 'scss',
+        assets: ['src/favicon.ico', 'src/assets'],
+        styles: ['src/styles.scss'],
+        scripts: [],
+        buildOptimizer: false,
+        optimization: false,
+        vendorChunk: true,
+        extractLicenses: false,
+        sourceMap: true,
+        namedChunks: true,
+      },
+    })
 
     await expectLoadsAngularJson(projectRoot)
     await expectLoadsAngularCLiModules(projectRoot)
-    await expectGeneratesTsConfig(devServerConfig, buildOptions)
-    expectLoadsAngularBuildOptions(buildOptions)
+    await expectGeneratesTsConfig(devServerConfig, projectConfig.buildOptions, true)
+    expectLoadsAngularBuildOptions(projectConfig.buildOptions)
+  })
+
+  it('sources the config from angular-20', async () => {
+    const projectRoot = await scaffoldMigrationProject('angular-20')
+
+    process.chdir(projectRoot)
+    const devServerConfig = {
+      cypressConfig: {
+        projectRoot,
+        specPattern: 'src/**/*.cy.ts',
+      } as Cypress.PluginConfigOptions,
+      framework: 'angular',
+    } as AngularWebpackDevServerConfig
+    const { frameworkConfig: webpackConfig, sourceWebpackModulesResult } = await angularHandler(devServerConfig)
+
+    expect(webpackConfig).to.exist
+    expect((webpackConfig?.entry as any).main).to.be.undefined
+    expect(sourceWebpackModulesResult.framework?.importPath).to.include(path.join('@angular-devkit', 'build-angular'))
+    const projectConfig = await getProjectConfig(projectRoot)
+
+    expect(projectConfig).to.deep.eq({
+      root: '',
+      sourceRoot: 'src',
+      buildOptions: {
+        browser: 'src/main.ts',
+        // because of the way the main fixtures are configured in the system-test projects, we need to run as a zone.js application
+        polyfills: [
+          'zone.js',
+        ],
+        tsConfig: 'tsconfig.app.json',
+        assets: ['src/favicon.ico', 'src/assets'],
+        styles: ['src/styles.scss'],
+        optimization: false,
+        extractLicenses: false,
+        sourceMap: true,
+      },
+    })
+
+    await expectLoadsAngularJson(projectRoot)
+    await expectLoadsAngularCLiModules(projectRoot)
+    await expectGeneratesTsConfig(devServerConfig, projectConfig.buildOptions, false)
+    expectLoadsAngularBuildOptions(projectConfig.buildOptions)
   })
 
   it('allows custom project config', async () => {
@@ -112,38 +152,11 @@ describe('angularHandler', function () {
     expect(sourceWebpackModulesResult.framework?.importPath).to.include(path.join('@angular-devkit', 'build-angular'))
     await expectLoadsAngularJson(projectRoot)
     await expectLoadsAngularCLiModules(projectRoot)
-    await expectGeneratesTsConfig(devServerConfig, customProjectConfig.buildOptions)
+    await expectGeneratesTsConfig(devServerConfig, customProjectConfig.buildOptions, true)
     expectLoadsAngularBuildOptions(customProjectConfig.buildOptions)
   })
 })
 
-const expectNormalizeProjectConfig = async (projectRoot: string) => {
-  const projectConfig = await getProjectConfig(projectRoot)
-
-  expect(projectConfig).to.deep.eq({
-    root: '',
-    sourceRoot: 'src',
-    buildOptions: {
-      outputPath: 'dist/angular',
-      index: 'src/index.html',
-      main: 'src/main.ts',
-      polyfills: 'src/polyfills.ts',
-      tsConfig: 'tsconfig.app.json',
-      inlineStyleLanguage: 'scss',
-      assets: ['src/favicon.ico', 'src/assets'],
-      styles: ['src/styles.scss'],
-      scripts: [],
-      buildOptimizer: false,
-      optimization: false,
-      vendorChunk: true,
-      extractLicenses: false,
-      sourceMap: true,
-      namedChunks: true,
-    },
-  })
-
-  return projectConfig
-}
 const expectLoadsAngularJson = async (projectRoot: string) => {
   const angularJson = await getAngularJson(projectRoot)
 
@@ -168,7 +181,7 @@ const expectLoadsAngularBuildOptions = (buildOptions: BuildOptions) => {
   expect(finalBuildOptions.outputHashing).to.equal('none')
   expect(finalBuildOptions.budgets).to.be.undefined
 }
-const expectGeneratesTsConfig = async (devServerConfig: AngularWebpackDevServerConfig, buildOptions: any) => {
+const expectGeneratesTsConfig = async (devServerConfig: AngularWebpackDevServerConfig, buildOptions: any, hasPolyfillsConfigured: boolean = false) => {
   const { projectRoot } = devServerConfig.cypressConfig
   let tsConfigPath = await generateTsConfig(devServerConfig, buildOptions)
   const tempDir = await getTempDir(path.basename(projectRoot))
@@ -193,7 +206,7 @@ const expectGeneratesTsConfig = async (devServerConfig: AngularWebpackDevServerC
     },
     include: [
       toPosix(path.join(projectRoot, 'src/**/*.cy.ts')),
-      toPosix(path.join(projectRoot, 'src/polyfills.ts')),
+      ...(hasPolyfillsConfigured ? [toPosix(path.join(projectRoot, 'src/polyfills.ts'))] : []),
     ],
   })
 

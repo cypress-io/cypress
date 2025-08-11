@@ -24,7 +24,7 @@ const copyAngularMount = async (projectPath: string) => {
 
 const cypressSchematicPackagePath = path.join(__dirname, '..')
 
-const ANGULAR_PROJECTS: ProjectFixtureDir[] = ['angular-18', 'angular-19']
+const ANGULAR_PROJECTS: ProjectFixtureDir[] = ['angular-19', 'angular-20']
 
 const timeout = 1000 * 60 * 5
 
