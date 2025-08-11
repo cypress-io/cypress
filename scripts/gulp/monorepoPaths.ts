@@ -11,6 +11,7 @@ export const monorepoPaths = {
   pkgDriver: path.join(__dirname, '../../packages/driver'),
   pkgElectron: path.join(__dirname, '../../packages/electron'),
   pkgErrors: path.join(__dirname, '../../packages/errors'),
+  pkgEslintConfig: path.join(__dirname, '../../packages/eslint-config'),
   pkgExample: path.join(__dirname, '../../packages/example'),
   pkgExtension: path.join(__dirname, '../../packages/extension'),
   pkgFrontendShared: path.join(__dirname, '../../packages/frontend-shared'),

@@ -1,8 +1,8 @@
 version: 2.1
 
-chrome-stable-version: &chrome-stable-version "138.0.7204.183"
-chrome-beta-version: &chrome-beta-version "139.0.7258.66"
-firefox-stable-version: &firefox-stable-version "137.0"
+chrome-stable-version: &chrome-stable-version "139.0.7258.66"
+chrome-beta-version: &chrome-beta-version "140.0.7339.5"
+firefox-stable-version: &firefox-stable-version "141.0"
 
 orbs:
   browser-tools: circleci/browser-tools@2.1.1
@@ -3064,6 +3064,9 @@ linux-x64-workflow: &linux-x64-workflow
     - npm-mount-utils:
         requires:
           - build
+    - npm-grep:
+        requires:
+          - build
     - npm-eslint-plugin-dev:
         requires:
           - build
@@ -3084,6 +3087,7 @@ linux-x64-workflow: &linux-x64-workflow
           - npm-puppeteer-cypress-tests
           - npm-react
           - npm-mount-utils
+          - npm-grep
           - npm-vue
           - npm-webpack-batteries-included-preprocessor
           - npm-webpack-preprocessor
@@ -3461,6 +3465,9 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
     - npm-mount-utils:
         requires:
           - build
+    - npm-grep:
+        requires:
+          - build
     - npm-eslint-plugin-dev:
         requires:
           - build
@@ -3480,6 +3487,7 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
           - npm-puppeteer-cypress-tests
           - npm-react
           - npm-mount-utils
+          - npm-grep
           - npm-vue
           - npm-webpack-batteries-included-preprocessor
           - npm-webpack-preprocessor

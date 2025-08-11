@@ -20,11 +20,12 @@ import type {
   BrowsingContextInfo,
   NetworkSameSite,
 } from 'webdriver/build/bidi/localTypes'
-import type { CyCookie } from './webkit-automation'
+import type { CyCookie as CyBaseCookie } from '../automation/util'
 import { bidiGetUrl } from '../automation/commands/get_url'
 import { bidiReloadFrame } from '../automation/commands/reload_frame'
 import { bidiNavigateHistory } from '../automation/commands/navigate_history'
 import { bidiGetFrameTitle } from '../automation/commands/get_frame_title'
+import type { StorageCookieFilter, StoragePartialCookie as BidiStoragePartialCookie } from 'webdriver/build/bidi/remoteTypes'
 
 const BIDI_DEBUG_NAMESPACE = 'cypress:server:browsers:bidi_automation'
 const BIDI_COOKIE_DEBUG_NAMESPACE = `${BIDI_DEBUG_NAMESPACE}:cookies`
@@ -33,6 +34,10 @@ const BIDI_SCREENSHOT_DEBUG_NAMESPACE = `${BIDI_DEBUG_NAMESPACE}:screenshot`
 const debug = debugModule(BIDI_DEBUG_NAMESPACE)
 const debugCookies = debugModule(BIDI_COOKIE_DEBUG_NAMESPACE)
 const debugScreenshot = debugModule(BIDI_SCREENSHOT_DEBUG_NAMESPACE)
+
+type CyCookie = Omit<CyBaseCookie, 'sameSite'> & {
+  sameSite: 'no_restriction' | 'lax' | 'strict' | 'unspecified'
+}
 
 // if the filter is not an exact match OR, if looselyMatchCookiePath is enabled, doesn't include the path.
 // ex: /foo/bar/baz path should include cookies for /foo/bar/baz, /foo/bar, /foo, and /
@@ -48,7 +53,7 @@ interface StoragePartialCookie extends Record<string, unknown> {
   httpOnly: boolean
   hostOnly?: boolean
   secure: boolean
-  sameSite: NetworkSameSite
+  sameSite: NetworkSameSite | 'default'
   expiry?: number
 }
 
@@ -98,22 +103,36 @@ const normalizeResourceType = (type: RequestInitiatorType): ResourceType => {
   }
 }
 
-function convertSameSiteBiDiToExtension (str: NetworkSameSite) {
+function convertSameSiteBiDiToExtension (str: NetworkSameSite | 'default') {
   if (str === 'none') {
     return 'no_restriction'
+  }
+
+  if (str === 'default') {
+    // put firefox version check here, under 140 we need to return 'no_restriction'
+    return 'unspecified'
   }
 
   return str
 }
 
-function convertSameSiteExtensionToBiDi (str: CyCookie['sameSite']) {
+function convertSameSiteExtensionToBiDi (str: CyCookie['sameSite'], majorFirefoxVersion?: number) {
   if (str === 'no_restriction') {
     return 'none'
   }
 
+  if (str === 'unspecified') {
+    // put firefox version check here, under 140 we need to return 'no_restriction'
+    return 'default'
+  }
+
+  // @see https://www.w3.org/TR/webdriver-bidi/#type-network-Cookie
+  // in Firefox 140, BiDi added the 'default' value to be able to assign 'unspecified', which was also added in Firefox 140.
+  const defaultValue = majorFirefoxVersion && majorFirefoxVersion < 140 ? 'none' : 'default'
+
   // if no value, default to 'none' as this is the browser default in firefox specifically.
   // Every other browser defaults to 'lax'
-  return str === undefined ? 'none' : str
+  return str === undefined ? defaultValue : str
 }
 
 // used to normalize cookies to CyCookie before returning them through the automation client
@@ -135,7 +154,7 @@ const convertBiDiCookieToCyCookie = (cookie: NetworkCookie): CyCookie => {
   return cyCookie
 }
 
-const convertCyCookieToBiDiCookie = (cookie: CyCookie): StoragePartialCookie => {
+const convertCyCookieToBiDiCookie = (cookie: CyCookie, majorFirefoxVersion?: number): StoragePartialCookie => {
   const cookieToSet: StoragePartialCookie = {
     name: cookie.name,
     value: {
@@ -146,7 +165,7 @@ const convertCyCookieToBiDiCookie = (cookie: CyCookie): StoragePartialCookie => 
     path: cookie.path,
     httpOnly: cookie.httpOnly,
     secure: cookie.secure,
-    sameSite: convertSameSiteExtensionToBiDi(cookie.sameSite),
+    sameSite: convertSameSiteExtensionToBiDi(cookie.sameSite, majorFirefoxVersion),
     // BiDi cookie expiry is in seconds from EPOCH, but sometimes the automation client feeds in a float and BiDi does not know how to handle it.
     // If trying to set a float on the expiry time in BiDi, the setting silently fails.
     expiry: (cookie.expirationDate === -Infinity ? 0 : (isNumber(cookie.expirationDate) ? toInteger(cookie.expirationDate) : null)) ?? undefined,
@@ -165,7 +184,7 @@ const convertCyCookieToBiDiCookie = (cookie: CyCookie): StoragePartialCookie => 
   return cookieToSet
 }
 
-const buildBiDiClearCookieFilterFromCyCookie = (cookie: CyCookie): StoragePartialCookie => {
+const buildBiDiClearCookieFilterFromCyCookie = (cookie: CyCookie, majorFirefoxVersion?: number): StoragePartialCookie => {
   const cookieToClearFilter: StoragePartialCookie = {
     name: cookie.name,
     value: {
@@ -176,7 +195,7 @@ const buildBiDiClearCookieFilterFromCyCookie = (cookie: CyCookie): StoragePartia
     path: cookie.path,
     httpOnly: cookie.httpOnly,
     secure: cookie.secure,
-    sameSite: convertSameSiteExtensionToBiDi(cookie.sameSite),
+    sameSite: convertSameSiteExtensionToBiDi(cookie.sameSite, majorFirefoxVersion),
   }
 
   if (!cookie.hostOnly && isHostOnlyCookie(cookie)) {
@@ -208,11 +227,13 @@ export class BidiAutomation {
   // set in firefox-utils when creating the webdriver session initially and in the 'reset:browser:tabs:for:next:spec' automation hook for subsequent tests when the top level context is recreated
   private topLevelContextId: string | undefined = undefined
   private interceptId: string | undefined = undefined
+  private majorFirefoxVersion: number | undefined
 
   private constructor (webDriverClient: WebDriverClient, automation: Automation) {
     debug('initializing bidi automation')
     this.automation = automation
     this.webDriverClient = webDriverClient
+    this.majorFirefoxVersion = parseInt(webDriverClient?.capabilities?.browserVersion || '') || undefined
     // bind Bidi Events to update the standard automation client
     // Error here is expected until webdriver adds initiatorType and destination to the request object
     // @ts-expect-error
@@ -464,7 +485,7 @@ export class BidiAutomation {
     // because of the above comment on the BiDi API, we get ALL cookies not filtering by domain
     // (name filter is safe to reduce the payload coming back)
     // and filter out all cookies that apply to the given domain, path, and name (which should already be done)
-    const filteredCookies = normalizedCookies.filter((cookie) => cookieMatches(cookie, filter))
+    const filteredCookies = normalizedCookies.filter((cookie) => cookieMatches(cookie as CyBaseCookie, filter))
 
     debugCookies(`filtered additional cookies based on domain, path, or name: %o`, filteredCookies)
 
@@ -495,7 +516,7 @@ export class BidiAutomation {
 
     // if it does, convert it to a BiDi cookie filter and delete the cookie
     await this.webDriverClient.storageDeleteCookies({
-      filter: buildBiDiClearCookieFilterFromCyCookie(cookieToBeCleared),
+      filter: buildBiDiClearCookieFilterFromCyCookie(cookieToBeCleared, this.majorFirefoxVersion) as StorageCookieFilter,
     })
 
     return cookieToBeCleared
@@ -537,7 +558,7 @@ export class BidiAutomation {
         {
           debugCookies(`set:cookie %o`, data)
           await this.webDriverClient.storageSetCookie({
-            cookie: convertCyCookieToBiDiCookie(data),
+            cookie: convertCyCookieToBiDiCookie(data, this.majorFirefoxVersion) as BidiStoragePartialCookie,
           })
 
           const cookies = await this.getAllCookiesMatchingFilter(data)
@@ -549,7 +570,7 @@ export class BidiAutomation {
           debugCookies(`add:cookies %o`, data)
           await Promise.all(data.map((cookie) => {
             return this.webDriverClient.storageSetCookie({
-              cookie: convertCyCookieToBiDiCookie(cookie),
+              cookie: convertCyCookieToBiDiCookie(cookie, this.majorFirefoxVersion) as BidiStoragePartialCookie,
             })
           }))
 
@@ -562,7 +583,7 @@ export class BidiAutomation {
 
           await Promise.all(data.map((cookie) => {
             return this.webDriverClient.storageSetCookie({
-              cookie: convertCyCookieToBiDiCookie(cookie),
+              cookie: convertCyCookieToBiDiCookie(cookie, this.majorFirefoxVersion) as BidiStoragePartialCookie,
             })
           }))
 

@@ -64,7 +64,13 @@ describe('set:cookies', () => {
         'domain': '127.0.0.3',
         'secure': false,
         'httpOnly': false,
-        ...(Cypress.isBrowser({ family: 'firefox' }) ? { sameSite: 'no_restriction' } : {}),
+        ...(
+          Cypress.isBrowser('webkit')
+            ? { sameSite: 'no_restriction' }
+            : Cypress.isBrowser({ family: 'firefox' }) ?
+              { sameSite: 'unspecified' } :
+              {}
+        ),
       },
 
       {

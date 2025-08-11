@@ -1295,7 +1295,7 @@ describe('lib/browsers/bidi_automation', () => {
 
           describe('parsing', () => {
             // NOTE: unique to Firefox. Chromium defaults to 'lax'
-            it('defaults sameSite to "none"', async () => {
+            it('defaults sameSite to "default"', async () => {
               const cyCookie = {
                 name: 'testCookie',
                 value: 'testValue',
@@ -1314,7 +1314,7 @@ describe('lib/browsers/bidi_automation', () => {
                   expiry: undefined,
                   name: 'testCookie',
                   path: '/',
-                  sameSite: 'none',
+                  sameSite: 'default',
                   secure: true,
                   size: 10,
                   value: {
@@ -1323,6 +1323,67 @@ describe('lib/browsers/bidi_automation', () => {
                   },
                 }],
               })
+
+              const cookie = await bidiAutomationInstance.automationMiddleware.onRequest('set:cookie', cyCookie)
+
+              expect(mockWebdriverClient.storageSetCookie).to.have.been.calledWith({
+                cookie: {
+                  name: 'testCookie',
+                  value: { type: 'string', value: 'testValue' },
+                  domain: '.foobar.com',
+                  path: '/',
+                  httpOnly: true,
+                  secure: true,
+                  sameSite: 'default',
+                  expiry: undefined,
+                },
+              })
+
+              expect(cookie).to.deep.equal({
+                name: 'testCookie',
+                value: 'testValue',
+                domain: '.foobar.com',
+                path: '/',
+                secure: true,
+                httpOnly: true,
+                hostOnly: false,
+                sameSite: 'unspecified',
+                expirationDate: undefined,
+              })
+            })
+
+            it('defaults sameSite to "none" on Firefox 139 and under', async () => {
+              const cyCookie = {
+                name: 'testCookie',
+                value: 'testValue',
+                domain: '.foobar.com',
+                path: '/',
+                secure: true,
+                httpOnly: true,
+              }
+
+              mockWebdriverClient.storageSetCookie = sinon.stub().resolves()
+
+              mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
+                cookies: [{
+                  domain: '.foobar.com',
+                  httpOnly: true,
+                  expiry: undefined,
+                  name: 'testCookie',
+                  path: '/',
+                  sameSite: 'no_restriction',
+                  secure: true,
+                  size: 10,
+                  value: {
+                    type: 'string',
+                    value: 'testValue',
+                  },
+                }],
+              })
+
+              // force firefox 139
+              // @ts-expect-error
+              bidiAutomationInstance.majorFirefoxVersion = 139
 
               const cookie = await bidiAutomationInstance.automationMiddleware.onRequest('set:cookie', cyCookie)
 
