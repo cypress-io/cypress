@@ -62,9 +62,14 @@ export class CyPromptLifecycleManager {
     }
 
     const getProjectOptions = async () => {
+      const [user, config] = await Promise.all([
+        ctx.actions.auth.authApi.getUser(),
+        ctx.project.getConfig(),
+      ])
+
       return {
-        user: await ctx.actions.auth.authApi.getUser(),
-        projectSlug: (await ctx.project.getConfig()).projectId || undefined,
+        user,
+        projectSlug: config.projectId || undefined,
         record,
         key,
         isOpenMode: ctx.isOpenMode,

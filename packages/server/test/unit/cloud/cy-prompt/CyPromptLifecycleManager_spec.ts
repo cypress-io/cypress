@@ -190,6 +190,124 @@ describe('CyPromptLifecycleManager', () => {
       expect(readFileStub).to.be.calledWith(path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc', 'server', 'index.js'), 'utf8')
     })
 
+    it('handles errors when getUser fails but getProjectConfig succeeds', async () => {
+      cyPromptLifecycleManager.initializeCyPromptManager({
+        cloudDataSource: mockCloudDataSource,
+        ctx: mockCtx,
+        record: true,
+        key: '123e4567-e89b-12d3-a456-426614174000',
+      })
+
+      const cyPromptReadyPromise = new Promise((resolve) => {
+        cyPromptLifecycleManager?.registerCyPromptReadyListener(async (cyPromptManager) => {
+          resolve(cyPromptManager)
+        })
+      })
+
+      const mockManifest = {
+        'server/index.js': 'c3c4ab913ca059819549f105e756a4c4471df19abef884ce85eafc7b7970e7b4',
+      }
+
+      ensureCyPromptBundleStub.resolves(mockManifest)
+
+      await cyPromptReadyPromise
+
+      expect(mockCtx.update).to.be.calledOnce
+      expect(ensureCyPromptBundleStub).to.be.calledWith({
+        cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc'),
+        cyPromptUrl: 'https://cloud.cypress.io/cy-prompt/bundle/abc.tgz',
+        projectId: 'test-project-id',
+      })
+
+      expect(cyPromptManagerSetupStub).to.be.calledWith({
+        script: 'console.log("cy-prompt script")',
+        cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc'),
+        cyPromptHash: 'abc',
+        cloudApi: {
+          cloudUrl: 'https://cloud.cypress.io',
+          CloudRequest,
+          createCloudRequest,
+          isRetryableError,
+          asyncRetry,
+        },
+        getProjectOptions: sinon.match.func,
+        manifest: mockManifest,
+      })
+
+      expect(postCyPromptSessionStub).to.be.calledWith({
+        projectId: 'test-project-id',
+      })
+
+      expect(mockCloudDataSource.getCloudUrl).to.be.calledWith('test')
+      expect(mockCloudDataSource.additionalHeaders).to.be.called
+      expect(readFileStub).to.be.calledWith(path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc', 'server', 'index.js'), 'utf8')
+
+      mockCtx.actions.auth.authApi.getUser = sinon.stub().rejects(new Error('getUser failed'))
+
+      const getProjectOptions = cyPromptManagerSetupStub.args[0][0].getProjectOptions
+
+      await expect(getProjectOptions()).to.be.rejectedWith('getUser failed')
+    })
+
+    it('handles errors when getProjectConfig fails', async () => {
+      cyPromptLifecycleManager.initializeCyPromptManager({
+        cloudDataSource: mockCloudDataSource,
+        ctx: mockCtx,
+        record: true,
+        key: '123e4567-e89b-12d3-a456-426614174000',
+      })
+
+      const cyPromptReadyPromise = new Promise((resolve) => {
+        cyPromptLifecycleManager?.registerCyPromptReadyListener(async (cyPromptManager) => {
+          resolve(cyPromptManager)
+        })
+      })
+
+      const mockManifest = {
+        'server/index.js': 'c3c4ab913ca059819549f105e756a4c4471df19abef884ce85eafc7b7970e7b4',
+      }
+
+      ensureCyPromptBundleStub.resolves(mockManifest)
+
+      await cyPromptReadyPromise
+
+      expect(mockCtx.update).to.be.calledOnce
+      expect(ensureCyPromptBundleStub).to.be.calledWith({
+        cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc'),
+        cyPromptUrl: 'https://cloud.cypress.io/cy-prompt/bundle/abc.tgz',
+        projectId: 'test-project-id',
+      })
+
+      expect(cyPromptManagerSetupStub).to.be.calledWith({
+        script: 'console.log("cy-prompt script")',
+        cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc'),
+        cyPromptHash: 'abc',
+        cloudApi: {
+          cloudUrl: 'https://cloud.cypress.io',
+          CloudRequest,
+          createCloudRequest,
+          isRetryableError,
+          asyncRetry,
+        },
+        getProjectOptions: sinon.match.func,
+        manifest: mockManifest,
+      })
+
+      expect(postCyPromptSessionStub).to.be.calledWith({
+        projectId: 'test-project-id',
+      })
+
+      expect(mockCloudDataSource.getCloudUrl).to.be.calledWith('test')
+      expect(mockCloudDataSource.additionalHeaders).to.be.called
+      expect(readFileStub).to.be.calledWith(path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc', 'server', 'index.js'), 'utf8')
+
+      mockCtx.project.getConfig = sinon.stub().rejects(new Error('getProjectConfig failed'))
+
+      const getProjectOptions = cyPromptManagerSetupStub.args[0][0].getProjectOptions
+
+      await expect(getProjectOptions()).to.be.rejectedWith('getProjectConfig failed')
+    })
+
     it('only calls ensureCyPromptBundle once per cy prompt hash', async () => {
       cyPromptLifecycleManager.initializeCyPromptManager({
         cloudDataSource: mockCloudDataSource,
