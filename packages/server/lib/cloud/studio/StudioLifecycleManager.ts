@@ -188,6 +188,7 @@ export class StudioLifecycleManager {
     if (!process.env.CYPRESS_LOCAL_STUDIO_PATH) {
       // The studio hash is the last part of the studio URL, after the last slash and before the extension
       const studioHash = studioSession.studioUrl.split('/').pop()?.split('.')[0] as string
+
       studioPath = path.join(os.tmpdir(), 'cypress', 'studio', studioHash)
 
       // Store the current studio hash so that we can clear the cache entry when retrying
