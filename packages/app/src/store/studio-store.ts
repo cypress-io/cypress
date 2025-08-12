@@ -178,7 +178,7 @@ export const useStudioStore = defineStore('studioRecorder', {
     },
 
     setSessionId (sessionId: string) {
-      this.sessionId = cloudStudioSessionId
+      this.sessionId = sessionId
       this._updateUrlParams(['sessionId'])
     },
 
