@@ -25,8 +25,8 @@
     "semver": "^7.3.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.25.2",
-    "@babel/preset-env": "^7.25.3",
+    "@babel/core": "^7.28.0",
+    "@babel/preset-env": "^7.26.0",
     "@types/mocha": "9.0.0",
     "babel-loader": "^10.0.0",
     "chai": "4.1.2",
@@ -45,8 +45,8 @@
     "webpack": "^5.39.0"
   },
   "peerDependencies": {
-    "@babel/core": "^7.25.2",
-    "@babel/preset-env": "^7.25.3",
+    "@babel/core": "^7.28.0",
+    "@babel/preset-env": "^7.26.0",
     "babel-loader": "^9 || ^10",
     "webpack": "^5"
   },
