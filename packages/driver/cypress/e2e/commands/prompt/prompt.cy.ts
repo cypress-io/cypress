@@ -7,18 +7,13 @@ describe('src/cy/commands/prompt', () => {
       return
     }
 
-    cy.visit('http://www.foobar.com:3500/fixtures/dom.html')
+    cy.visit('http://www.foobar.com:3500/fixtures/prompt.html')
 
     // TODO: add more tests when cy.prompt is built out, but for now this just
     // verifies that the command executes without throwing an error
     // @ts-expect-error - this will not error when we actually release the experimentalPromptCommand flag
-    cy.prompt(['Hello, world!'])
+    cy.prompt(['Click the "click me" button'])
 
-    cy.visit('http://www.barbaz.com:3500/fixtures/dom.html')
-
-    cy.origin('http://www.barbaz.com:3500', () => {
-      // @ts-expect-error - this will not error when we actually release the experimentalPromptCommand flag
-      cy.prompt(['Hello, world!'])
-    })
+    cy.get('#log').should('contain', 'clicked')
   })
 })
