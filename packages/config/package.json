@@ -18,12 +18,12 @@
     "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "dependencies": {
-    "@babel/core": "^7.25.2",
-    "@babel/parser": "^7.25.3",
-    "@babel/plugin-syntax-typescript": "^7.24.7",
-    "@babel/plugin-transform-typescript": "^7.25.2",
-    "@babel/traverse": "^7.25.3",
-    "@babel/types": "^7.25.2",
+    "@babel/core": "^7.28.0",
+    "@babel/parser": "^7.28.0",
+    "@babel/plugin-syntax-typescript": "^7.27.1",
+    "@babel/plugin-transform-typescript": "^7.28.0",
+    "@babel/traverse": "^7.28.0",
+    "@babel/types": "^7.28.0",
     "bluebird": "^3.7.2",
     "check-more-types": "2.24.0",
     "common-tags": "1.8.0",
