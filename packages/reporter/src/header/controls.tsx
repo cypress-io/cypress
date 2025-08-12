@@ -35,6 +35,7 @@ const Controls: React.FC<Props> = observer(({ events = defaultEvents, appState, 
               size='20'
               variant='outline-dark'
               aria-label='Open testing preferences'
+              data-cy='testing-preferences-toggle'
               onClick={action('toggle:preferences:menu', togglePreferencesMenu)}
             >
               {appState.isPreferencesMenuOpen ? (
