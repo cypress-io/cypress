@@ -505,4 +505,44 @@ describe('studio functionality', () => {
       })
     })
   })
+
+  it('persists sessionId across page refresh', () => {
+    launchStudio()
+
+    cy.findByTestId('studio-panel').should('be.visible')
+
+    cy.location().its('hash').should('contain', 'sessionId=')
+
+    let originalSessionId: string
+
+    cy.location('hash').then((hash) => {
+      const urlParams = new URLSearchParams(hash)
+
+      originalSessionId = urlParams.get('sessionId')!
+
+      expect(originalSessionId).to.be.a('string')
+      expect(originalSessionId).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)
+    })
+
+    cy.reload()
+
+    cy.waitForSpecToFinish()
+
+    cy.findByTestId('studio-panel').should('be.visible')
+
+    cy.location().its('hash').should('contain', 'sessionId=')
+
+    cy.location('hash').then((hash) => {
+      const urlParams = new URLSearchParams(hash)
+      const persistedSessionId = urlParams.get('sessionId')
+
+      expect(persistedSessionId).to.equal(originalSessionId)
+    })
+
+    cy.findByTestId('studio-header-studio-button').click()
+
+    cy.location().its('hash').should('not.contain', 'sessionId=')
+
+    cy.findByTestId('studio-panel').should('not.exist')
+  })
 })

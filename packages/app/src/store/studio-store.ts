@@ -108,13 +108,30 @@ interface StudioRecorderState {
   canAccessStudioAI: boolean
   showUrlPrompt: boolean
   cloudStudioRequested: boolean
-  cloudStudioSessionId?: string
+  sessionId?: string
   _isStudioCreatedTest: boolean
   newTestLineNumber?: number
 }
 
+function getUrlParams () {
+  const url = new URL(window.location.href)
+  const hashParams = new URLSearchParams(url.hash)
+
+  const testId = hashParams.get('testId')
+  const suiteId = hashParams.get('suiteId')
+  const visitUrl = hashParams.get('url')
+  const newTestLineNumber = hashParams.get('newTestLineNumber') ? Number(hashParams.get('newTestLineNumber')) : undefined
+  const sessionId = hashParams.get('sessionId')
+
+  return { testId, suiteId, url: visitUrl, newTestLineNumber, sessionId }
+}
+
 export const useStudioStore = defineStore('studioRecorder', {
   state: (): StudioRecorderState => {
+    // try to restore sessionId from URL parameters
+    const urlParams = getUrlParams()
+    const persistedSessionId = urlParams.sessionId || undefined
+
     return {
       saveModalIsOpen: false,
       instructionModalIsOpen: false,
@@ -128,7 +145,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       canAccessStudioAI: false,
       showUrlPrompt: true,
       cloudStudioRequested: false,
-      cloudStudioSessionId: undefined,
+      sessionId: persistedSessionId,
       newTestLineNumber: undefined,
       _isStudioCreatedTest: false,
     }
@@ -160,8 +177,14 @@ export const useStudioStore = defineStore('studioRecorder', {
       this.canAccessStudioAI = canAccessStudioAI
     },
 
-    setCloudStudioSessionId (cloudStudioSessionId: string) {
-      this.cloudStudioSessionId = cloudStudioSessionId
+    setSessionId (sessionId: string) {
+      this.sessionId = sessionId
+      this._updateUrlParams(['sessionId'])
+    },
+
+    clearSessionId () {
+      this.sessionId = undefined
+      this._removeUrlParams(['sessionId'])
     },
 
     setNewTestLineNumber (newTestLineNumber: number) {
@@ -213,7 +236,7 @@ export const useStudioStore = defineStore('studioRecorder', {
     },
 
     setup (config) {
-      const studio = this._getUrlParams()
+      const studio = this.getUrlParams()
 
       if (studio.newTestLineNumber) {
         this.setNewTestLineNumber(studio.newTestLineNumber)
@@ -225,6 +248,10 @@ export const useStudioStore = defineStore('studioRecorder', {
 
       if (studio.url) {
         this._initialUrl = studio.url
+      }
+
+      if (studio.sessionId) {
+        this.sessionId = studio.sessionId
       }
 
       // if we have an existing test or are creating a new test, we need to start loading
@@ -308,6 +335,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       this.clearRunnableIds()
       this._removeUrlParams()
       this._initialUrl = undefined
+      this.clearSessionId()
     },
 
     startSave () {
@@ -436,21 +464,11 @@ export const useStudioStore = defineStore('studioRecorder', {
       }
     },
 
-    _getUrlParams () {
-      const url = new URL(window.location.href)
-      const hashParams = new URLSearchParams(url.hash)
+    getUrlParams,
 
-      const testId = hashParams.get('testId')
-      const suiteId = hashParams.get('suiteId')
-      const visitUrl = hashParams.get('url')
-      const newTestLineNumber = hashParams.get('newTestLineNumber') ? Number(hashParams.get('newTestLineNumber')) : undefined
-
-      return { testId, suiteId, url: visitUrl, newTestLineNumber }
-    },
-
-    _updateUrlParams (filter: string[] = ['testId', 'suiteId', 'url', 'newTestLineNumber']) {
+    _updateUrlParams (filter: string[] = ['testId', 'suiteId', 'url', 'newTestLineNumber', 'sessionId']) {
       // if we don't have studio params, we don't need to update them
-      if (!this.testId && !this.suiteId && !this.url && !this.newTestLineNumber) return
+      if (!this.testId && !this.suiteId && !this.url && !this.newTestLineNumber && !this.sessionId) return
 
       // if we have studio params, we need to remove them before adding them back
       this._removeUrlParams(filter)
@@ -469,7 +487,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       window.history.replaceState({}, '', url.toString())
     },
 
-    _removeUrlParams (filter: string[] = ['testId', 'suiteId', 'url', 'newTestLineNumber']) {
+    _removeUrlParams (filter: string[] = ['testId', 'suiteId', 'url', 'newTestLineNumber', 'sessionId']) {
       const url = new URL(window.location.href)
       const hashParams = new URLSearchParams(url.hash)
 
@@ -482,7 +500,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       })
 
       // if there are no studio specific params left, we can also remove the studio param
-      if (!hashParams.has('testId') && !hashParams.has('suiteId') && !hashParams.has('url') && !hashParams.has('newTestLineNumber')) {
+      if (!hashParams.has('testId') && !hashParams.has('suiteId') && !hashParams.has('url') && !hashParams.has('newTestLineNumber') && !hashParams.has('sessionId')) {
         hashParams.delete('studio')
       }
 
