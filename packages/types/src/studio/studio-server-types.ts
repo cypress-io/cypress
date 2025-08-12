@@ -61,8 +61,8 @@ export type BrowserWindow = {
     loadURL: (url: string) => Promise<void>
     executeJavaScript: (script: string) => Promise<any>
   }
-  setSize: (width: number, height: number) => Promise<void>
-  destroy: () => Promise<void>
+  setSize: (width: number, height: number) => void
+  destroy: () => void
   isDestroyed: () => boolean
   show: () => void
 }

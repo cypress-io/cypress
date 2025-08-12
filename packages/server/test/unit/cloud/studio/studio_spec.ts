@@ -23,9 +23,21 @@ describe('lib/cloud/studio', () => {
 
   beforeEach(async () => {
     reportStudioError = sinon.stub()
+    // Fake StudioElectron so we can assert calls
+    class FakeStudioElectron {
+      // @ts-ignore - assigned in ctor
+      destroy: sinon.SinonStub
+      constructor () {
+        this.destroy = sinon.stub()
+      }
+    }
+
     StudioManager = (proxyquire('../lib/cloud/studio/studio', {
       '../api/studio/report_studio_error': {
         reportStudioError,
+      },
+      './StudioElectron': {
+        StudioElectron: FakeStudioElectron,
       },
     }) as typeof import('@packages/server/lib/cloud/studio/studio')).StudioManager
 
@@ -224,6 +236,11 @@ describe('lib/cloud/studio', () => {
       await studioManager.destroy()
 
       expect(studio.destroy).to.be.called
+
+      // Also destroys the StudioElectron window
+      const studioElectron = (studioManager as any)._studioElectron
+
+      expect(studioElectron.destroy).to.be.called
     })
   })
 })

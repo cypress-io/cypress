@@ -455,7 +455,7 @@ export class ProjectBase extends EE {
             try {
               studio?.captureStudioEvent({
                 type: StudioMetricsTypes.STUDIO_STARTED,
-                machineId: await this.ctx.coreData.machineId,
+                machineId: await this.ctx.coreData.machineId ?? '',
                 projectId: this.cfg.projectId,
                 browser: this.browser ? {
                   name: this.browser.name,
