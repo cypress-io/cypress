@@ -128,7 +128,7 @@ function getUrlParams () {
 
 export const useStudioStore = defineStore('studioRecorder', {
   state: (): StudioRecorderState => {
-    // try to restore cloudStudioSessionId from URL parameters
+    // try to restore sessionId from URL parameters
     const urlParams = getUrlParams()
     const persistedSessionId = urlParams.sessionId || undefined
 
