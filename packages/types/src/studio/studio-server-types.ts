@@ -64,6 +64,7 @@ export type BrowserWindow = {
   setSize: (width: number, height: number) => Promise<void>
   destroy: () => Promise<void>
   isDestroyed: () => boolean
+  show: () => void
 }
 
 export type StudioElectronApi = {
