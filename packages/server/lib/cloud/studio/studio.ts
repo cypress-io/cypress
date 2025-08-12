@@ -25,7 +25,7 @@ export class StudioManager implements StudioManagerShape {
   status: StudioStatus = 'NOT_INITIALIZED'
   protocolManager: ProtocolManagerShape | undefined
   private _studioServer: StudioServerShape | undefined
-  private _studioElectron = new StudioElectron()
+  private _studioElectron: StudioElectron | undefined
 
   static createInErrorManager ({ cloudApi, studioHash, projectSlug, error, studioMethod, studioMethodArgs }: ReportStudioErrorOptions): StudioManager {
     const manager = new StudioManager()
@@ -65,7 +65,6 @@ export class StudioManager implements StudioManagerShape {
 
         return actualHash === expectedHash
       },
-      studioElectron: this._studioElectron,
     })
 
     this.status = shouldEnableStudio ? 'ENABLED' : 'INITIALIZED'
@@ -99,7 +98,15 @@ export class StudioManager implements StudioManagerShape {
   }
 
   async initializeStudioAI (options: StudioAIInitializeOptions): Promise<void> {
-    await this.invokeAsync('initializeStudioAI', { isEssential: true }, options)
+    // Only create a studio electron instance when studio AI is enabled
+    if (!this._studioElectron) {
+      this._studioElectron = new StudioElectron()
+    }
+
+    await this.invokeAsync('initializeStudioAI', { isEssential: true }, {
+      ...options,
+      studioElectron: this._studioElectron,
+    })
   }
 
   updateSessionId (sessionId: string): void {
@@ -111,7 +118,6 @@ export class StudioManager implements StudioManagerShape {
   }
 
   async destroy (): Promise<void> {
-    this._studioElectron.destroy()
     await this.invokeAsync('destroy', { isEssential: true })
   }
 

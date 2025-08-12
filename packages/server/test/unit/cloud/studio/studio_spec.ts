@@ -223,9 +223,13 @@ describe('lib/cloud/studio', () => {
         protocolDbPath: 'test-db-path',
       })
 
-      expect(studio.initializeStudioAI).to.be.calledWith({
-        protocolDbPath: 'test-db-path',
-      })
+      expect((studioManager as any)._studioElectron).to.exist
+
+      expect(studio.initializeStudioAI).to.be.calledWith(
+        sinon.match.has('protocolDbPath', 'test-db-path').and(
+          sinon.match.has('studioElectron'),
+        ),
+      )
     })
   })
 
@@ -236,11 +240,6 @@ describe('lib/cloud/studio', () => {
       await studioManager.destroy()
 
       expect(studio.destroy).to.be.called
-
-      // Also destroys the StudioElectron window
-      const studioElectron = (studioManager as any)._studioElectron
-
-      expect(studioElectron.destroy).to.be.called
     })
   })
 })

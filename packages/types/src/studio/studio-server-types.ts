@@ -85,6 +85,7 @@ export interface StudioServerOptions {
 
 export interface StudioAIInitializeOptions {
   protocolDbPath: string
+  studioElectron?: StudioElectronApi
 }
 
 export interface StudioAddSocketListenersOptions {
