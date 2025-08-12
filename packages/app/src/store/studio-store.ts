@@ -121,9 +121,9 @@ function getUrlParams () {
   const suiteId = hashParams.get('suiteId')
   const visitUrl = hashParams.get('url')
   const newTestLineNumber = hashParams.get('newTestLineNumber') ? Number(hashParams.get('newTestLineNumber')) : undefined
-  const cloudStudioSessionId = hashParams.get('sessionId')
+  const sessionId = hashParams.get('sessionId')
 
-  return { testId, suiteId, url: visitUrl, newTestLineNumber, cloudStudioSessionId }
+  return { testId, suiteId, url: visitUrl, newTestLineNumber, sessionId }
 }
 
 export const useStudioStore = defineStore('studioRecorder', {
