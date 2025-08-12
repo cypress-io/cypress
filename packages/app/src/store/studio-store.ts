@@ -250,8 +250,8 @@ export const useStudioStore = defineStore('studioRecorder', {
         this._initialUrl = studio.url
       }
 
-      if (studio.cloudStudioSessionId) {
-        this.sessionId = studio.cloudStudioSessionId
+      if (studio.sessionId) {
+        this.sessionId = studio.sessionId
       }
 
       // if we have an existing test or are creating a new test, we need to start loading
