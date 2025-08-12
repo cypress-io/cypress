@@ -182,7 +182,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       this._updateUrlParams(['sessionId'])
     },
 
-    clearCloudStudioSessionId () {
+    clearSessionId () {
       this.sessionId = undefined
       this._removeUrlParams(['sessionId'])
     },
