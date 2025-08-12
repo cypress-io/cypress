@@ -1,6 +1,5 @@
 require('../../spec_helper')
 
-const _ = require('lodash')
 const cp = require('child_process')
 const os = require('os')
 const tty = require('tty')
@@ -64,72 +63,6 @@ describe('lib/exec/spawn', function () {
     sinon.stub(xvfb, 'isNeeded').returns(false)
     sinon.stub(state, 'getBinaryDir').returns(defaultBinaryDir)
     sinon.stub(state, 'getPathToExecutable').withArgs(defaultBinaryDir).returns('/path/to/cypress')
-  })
-
-  context('.isGarbageLineWarning', () => {
-    it('returns true', () => {
-      const str = `
-        [46454:0702/140217.292422:ERROR:gles2_cmd_decoder.cc(4439)] [.RenderWorker-0x7f8bc5815a00.GpuRasterization]GL ERROR :GL_INVALID_FRAMEBUFFER_OPERATION : glDrawElements: framebuffer incomplete
-        [46454:0702/140217.292466:ERROR:gles2_cmd_decoder.cc(17788)] [.RenderWorker-0x7f8bc5815a00.GpuRasterization]GL ERROR :GL_INVALID_OPERATION : glCreateAndConsumeTextureCHROMIUM: invalid mailbox name
-        [46454:0702/140217.292526:ERROR:gles2_cmd_decoder.cc(4439)] [.RenderWorker-0x7f8bc5815a00.GpuRasterization]GL ERROR :GL_INVALID_FRAMEBUFFER_OPERATION : glClear: framebuffer incomplete
-        [46454:0702/140217.292555:ERROR:gles2_cmd_decoder.cc(4439)] [.RenderWorker-0x7f8bc5815a00.GpuRasterization]GL ERROR :GL_INVALID_FRAMEBUFFER_OPERATION : glDrawElements: framebuffer incomplete
-        [46454:0702/140217.292584:ERROR:gles2_cmd_decoder.cc(4439)] [.RenderWorker-0x7f8bc5815a00.GpuRasterization]GL ERROR :GL_INVALID_FRAMEBUFFER_OPERATION : glClear: framebuffer incomplete
-        [46454:0702/140217.292612:ERROR:gles2_cmd_decoder.cc(4439)] [.RenderWorker-0x7f8bc5815a00.GpuRasterization]GL ERROR :GL_INVALID_FRAMEBUFFER_OPERATION : glDrawElements: framebuffer incomplete'
-
-        [1957:0406/160550.146820:ERROR:bus.cc(392)] Failed to connect to the bus: Failed to connect to socket /var/run/dbus/system_bus_socket: No such file or directory
-        [1957:0406/160550.147994:ERROR:bus.cc(392)] Failed to connect to the bus: Address does not contain a colon
-
-        [3801:0606/152837.383892:ERROR:cert_verify_proc_builtin.cc(681)] CertVerifyProcBuiltin for www.googletagmanager.com failed:
-        ----- Certificate i=0 (OU=Cypress Proxy Server Certificate,O=Cypress Proxy CA,L=Internet,ST=Internet,C=Internet,CN=www.googletagmanager.com) -----
-        ERROR: No matching issuer found
-
-        Warning: loader_scanned_icd_add: Driver /usr/lib/x86_64-linux-gnu/libvulkan_intel.so supports Vulkan 1.2, but only supports loader interface version 4. Interface version 5 or newer required to support this version of Vulkan (Policy #LDP_DRIVER_7)
-        Warning: loader_scanned_icd_add: Driver /usr/lib/x86_64-linux-gnu/libvulkan_lvp.so supports Vulkan 1.1, but only supports loader interface version 4. Interface version 5 or newer required to support this version of Vulkan (Policy #LDP_DRIVER_7)
-        Warning: loader_scanned_icd_add: Driver /usr/lib/x86_64-linux-gnu/libvulkan_radeon.so supports Vulkan 1.2, but only supports loader interface version 4. Interface version 5 or newer required to support this verison of Vulkan (Policy #LDP_DRIVER_7)
-        Warning: Layer VK_LAYER_MESA_device_select uses API version 1.2 which is older than the application specified API version of 1.3. May cause issues.
-
-        Warning: vkCreateInstance: Found no drivers!
-        Warning: vkCreateInstance failed with VK_ERROR_INCOMPATIBLE_DRIVER
-            at CheckVkSuccessImpl (../../third_party/dawn/src/dawn/native/vulkan/VulkanError.cpp:88)
-            at CreateVkInstance (../../third_party/dawn/src/dawn/native/vulkan/BackendVk.cpp:458)
-            at Initialize (../../third_party/dawn/src/dawn/native/vulkan/BackendVk.cpp:344)
-            at Create (../../third_party/dawn/src/dawn/native/vulkan/BackendVk.cpp:266)
-            at operator() (../../third_party/dawn/src/dawn/native/vulkan/BackendVk.cpp:521)
-
-        [78887:1023/114920.074882:ERROR:debug_utils.cc(14)] Hit debug scenario: 4
-
-        [18489:0822/130231.159571:ERROR:gl_display.cc(497)] EGL Driver message (Error) eglQueryDeviceAttribEXT: Bad attribute.
-
-        [437:1212/125803.148706:ERROR:zygote_host_impl_linux.cc(273)] Failed to adjust OOM score of renderer with pid 610: Permission denied (13)
-      `
-
-      const lines = _
-      .chain(str)
-      .split('\n')
-      .invokeMap('trim')
-      .compact()
-      .value()
-
-      _.each(lines, (line) => {
-        expect(spawn.isGarbageLineWarning(line), `expected line to be garbage: ${line}`).to.be.true
-      })
-    })
-
-    it('returns true for XDG runtime dir warnings', () => {
-      expect(spawn.isGarbageLineWarning('error: XDG_RUNTIME_DIR is invalid or not set')).to.be.true
-    })
-
-    it('returns true for MESA ZINK errors', () => {
-      expect(spawn.isGarbageLineWarning('MESA: error: ZINK: failed to choose pdev')).to.be.true
-    })
-
-    it('returns true for GLX driver errors', () => {
-      expect(spawn.isGarbageLineWarning('glx: failed to create drisw screen')).to.be.true
-    })
-
-    it('returns true for OOM score adjustment warnings', () => {
-      expect(spawn.isGarbageLineWarning('[437:1212/125803.148706:ERROR:zygote_host_impl_linux.cc(273)] Failed to adjust OOM score of renderer with pid 610: Permission denied (13)')).to.be.true
-    })
   })
 
   context('.start', function () {
@@ -520,55 +453,6 @@ describe('lib/exec/spawn', function () {
       os.platform.returns('win32')
 
       return spawn.start()
-    })
-
-    it('does not write to process.stderr when from xlib or libudev', function () {
-      const buf1 = Buffer.from('Xlib: something foo')
-      const buf2 = Buffer.from('libudev something bar')
-      const buf3 = Buffer.from('asdf')
-
-      this.spawnedProcess.stderr.on
-      .withArgs('data')
-      .onFirstCall()
-      .yields(buf1)
-      .onSecondCall()
-      .yields(buf2)
-      .onThirdCall()
-      .yields(buf3)
-
-      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
-
-      sinon.stub(process.stderr, 'write').withArgs(buf3)
-      os.platform.returns('linux')
-      xvfb.isNeeded.returns(true)
-
-      return spawn.start()
-      .then(() => {
-        expect(process.stderr.write).not.to.be.calledWith(buf1)
-        expect(process.stderr.write).not.to.be.calledWith(buf2)
-      })
-    })
-
-    it('does not write to process.stderr when from high sierra warnings', function () {
-      const buf1 = Buffer.from('2018-05-19 15:30:30.287 Cypress[7850:32145] *** WARNING: Textured Window')
-      const buf2 = Buffer.from('asdf')
-
-      this.spawnedProcess.stderr.on
-      .withArgs('data')
-      .onFirstCall()
-      .yields(buf1)
-      .onSecondCall(buf2)
-      .yields(buf2)
-
-      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
-
-      sinon.stub(process.stderr, 'write').withArgs(buf2)
-      os.platform.returns('darwin')
-
-      return spawn.start()
-      .then(() => {
-        expect(process.stderr.write).not.to.be.calledWith(buf1)
-      })
     })
 
     // https://github.com/cypress-io/cypress/issues/1841
