@@ -403,7 +403,8 @@ export class ProjectBase extends EE {
       onReloadBrowser: options.onReloadBrowser,
       onFocusTests: options.onFocusTests,
       onSpecChanged: options.onSpecChanged,
-      onSavedStateChanged: (state: any) => this.saveState(state),
+      getSavedState: this.getSavedState.bind(this),
+      onSavedStateChanged: this.saveState.bind(this),
       closeExtraTargets: this.closeExtraTargets,
 
       onStudioInit: async () => {
@@ -714,17 +715,27 @@ export class ProjectBase extends EE {
 
   // Saved state
 
-  // forces saving of project's state by first merging with argument
-  async saveState (stateChanges = {}) {
+  async getSavedState (options: { type: 'global' | 'project' } = { type: 'project' }) {
     if (!this.cfg) {
-      throw new Error('Missing project config')
+      throw new Error('Missing project config trying to get saved state')
     }
 
-    if (!this.projectRoot) {
+    const state = await savedState.create(options.type === 'project' ? this.projectRoot : undefined, this.cfg.isTextTerminal)
+
+    return state.get()
+  }
+
+  // forces saving of project's state by first merging with argument
+  async saveState (stateChanges = {}, options: { type: 'global' | 'project' } = { type: 'project' }) {
+    if (!this.cfg) {
+      throw new Error('Missing project config trying to save state')
+    }
+
+    if (options.type === 'project' && !this.projectRoot) {
       throw new Error('Missing project root')
     }
 
-    let state = await savedState.create(this.projectRoot, this.cfg.isTextTerminal)
+    let state = await savedState.create(options.type === 'project' ? this.projectRoot : undefined, this.cfg.isTextTerminal)
 
     state.set(stateChanges)
     this.cfg.state = await state.get()
