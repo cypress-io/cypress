@@ -177,7 +177,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       this.canAccessStudioAI = canAccessStudioAI
     },
 
-    setCloudStudioSessionId (cloudStudioSessionId: string) {
+    setSessionId (sessionId: string) {
       this.sessionId = cloudStudioSessionId
       this._updateUrlParams(['sessionId'])
     },
