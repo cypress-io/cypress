@@ -130,7 +130,7 @@ export const useStudioStore = defineStore('studioRecorder', {
   state: (): StudioRecorderState => {
     // try to restore cloudStudioSessionId from URL parameters
     const urlParams = getUrlParams()
-    const persistedSessionId = urlParams.cloudStudioSessionId || undefined
+    const persistedSessionId = urlParams.sessionId || undefined
 
     return {
       saveModalIsOpen: false,
