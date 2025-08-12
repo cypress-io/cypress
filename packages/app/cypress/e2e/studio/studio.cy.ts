@@ -664,13 +664,13 @@ describe('studio functionality', () => {
   it('updates the url with the testId and studio parameters when entering studio with a test', () => {
     launchStudio()
 
-    cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=')
+    cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=').and('contain', 'sessionId=')
   })
 
   it('update the url with the suiteId and studio parameters when entering studio with a suite', () => {
     launchStudio({ createNewTestFromSuite: true })
 
-    cy.location().its('hash').should('contain', 'suiteId=r2').and('contain', 'studio=')
+    cy.location().its('hash').should('contain', 'suiteId=r2').and('contain', 'studio=').and('contain', 'sessionId=')
   })
 
   it('updates the studio url parameters and displays the single test view after creating a new test', () => {
@@ -678,7 +678,7 @@ describe('studio functionality', () => {
 
     // open the studio panel to create a new test in the root suite
     cy.findByTestId('studio-button').click()
-    cy.location().its('hash').should('contain', 'suiteId=r1').and('contain', 'studio=')
+    cy.location().its('hash').should('contain', 'suiteId=r1').and('contain', 'studio=').and('contain', 'sessionId=')
 
     // create a new test in the root suite
     inputNewTestName()
@@ -694,7 +694,7 @@ describe('studio functionality', () => {
   it('does not remove the studio url parameters when saving test changes', () => {
     launchStudio()
 
-    cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=')
+    cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=').and('contain', 'sessionId=')
 
     cy.findByTestId('record-button-recording').should('be.visible')
 
@@ -706,7 +706,7 @@ describe('studio functionality', () => {
 
     cy.findByTestId('studio-save-button').click()
 
-    cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=')
+    cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=').and('contain', 'sessionId=')
   })
 
   it('does not remove the studio url parameters if saving fails', () => {
@@ -716,7 +716,7 @@ describe('studio functionality', () => {
 
     incrementCounter(0)
 
-    cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=')
+    cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=').and('contain', 'sessionId=')
 
     // update the spec on the file system by changing the
     // test name which will cause the save to fail since
@@ -757,7 +757,7 @@ describe('studio functionality', () => {
 
     cy.findByTestId('studio-header-studio-button').click()
 
-    cy.location().its('hash').and('not.contain', 'testId=').and('not.contain', 'studio=')
+    cy.location().its('hash').and('not.contain', 'testId=').and('not.contain', 'studio=').and('not.contain', 'sessionId=')
   })
 
   it('does not prompt for a URL until studio is active', () => {

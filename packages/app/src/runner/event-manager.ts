@@ -281,7 +281,7 @@ export class EventManager {
         }
 
         this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
-        this.studioStore.setCloudStudioSessionId(cloudStudioSessionId)
+        this.studioStore.setSessionId(cloudStudioSessionId)
         // when we enter studio with a new test, we don't want to rerun until
         // the the test has been created, so we just set the studio active
         this.studioStore.setActive(true)
@@ -298,7 +298,7 @@ export class EventManager {
         }
 
         this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
-        this.studioStore.setCloudStudioSessionId(cloudStudioSessionId)
+        this.studioStore.setSessionId(cloudStudioSessionId)
         rerun()
       })
     })
