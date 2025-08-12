@@ -5,6 +5,7 @@ import { requireScript } from '../require_script'
 import path from 'path'
 import { reportStudioError, ReportStudioErrorOptions } from '../api/studio/report_studio_error'
 import crypto, { BinaryLike } from 'crypto'
+import { StudioElectron } from './StudioElectron'
 
 interface StudioServer { default: StudioServerDefaultShape }
 
@@ -24,6 +25,7 @@ export class StudioManager implements StudioManagerShape {
   status: StudioStatus = 'NOT_INITIALIZED'
   protocolManager: ProtocolManagerShape | undefined
   private _studioServer: StudioServerShape | undefined
+  private _studioElectron = new StudioElectron()
 
   static createInErrorManager ({ cloudApi, studioHash, projectSlug, error, studioMethod, studioMethodArgs }: ReportStudioErrorOptions): StudioManager {
     const manager = new StudioManager()
@@ -63,6 +65,7 @@ export class StudioManager implements StudioManagerShape {
 
         return actualHash === expectedHash
       },
+      studioElectron: this._studioElectron,
     })
 
     this.status = shouldEnableStudio ? 'ENABLED' : 'INITIALIZED'
@@ -108,6 +111,7 @@ export class StudioManager implements StudioManagerShape {
   }
 
   async destroy (): Promise<void> {
+    this._studioElectron.destroy()
     await this.invokeAsync('destroy', { isEssential: true })
   }
 

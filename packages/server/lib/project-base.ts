@@ -508,6 +508,10 @@ export class ProjectBase extends EE {
 
             telemetryManager.mark(INITIALIZATION_MARK_NAMES.INITIALIZE_STUDIO_AI_END)
 
+            // Reset browser state on initialization to avoid issues
+            // with cached assets from previous test executions.
+            await this.resetBrowserState()
+
             endTelemetry({ status: 'success', canAccessStudioAI: true })
 
             return { canAccessStudioAI: true, cloudStudioSessionId }
