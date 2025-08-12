@@ -1,3 +1,4 @@
+// tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
 import { BrowserWindow } from 'electron'
 import Debug from 'debug'
 
