@@ -1,6 +1,6 @@
 import { chain, externalSchematic, noop, Rule, SchematicContext, Tree } from '@angular-devkit/schematics'
 import cypressTest from '../cypress-test'
-import path = require('path');
+import path = require('path')
 
 export default function (options: any): Rule {
   return (_: Tree, _context: SchematicContext) => {
