@@ -1,0 +1,52 @@
+.spec-file-name {
+  display: inline-flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  position: relative;
+  background: $gray-1100;
+
+  .open-in-ide-button {
+    right: 100px;
+  }
+
+  .button-hover-shadow {
+    right: 100px;
+  }
+
+  .launch-studio-button {
+    @include new-test-button;
+  }
+
+  &:after {
+    content: none;
+  }
+
+  .spec-name {
+    color: $white;
+    font-weight: 500;
+  }
+
+  .spec-file-extension {
+    color: $gray-500;
+    font-weight: 400;
+  }
+
+  &:hover,
+  &:focus-visible {
+    .open-in-ide-button {
+      opacity: 1;
+    }
+
+    .launch-studio-button {
+      opacity: 1;
+    }
+
+    .button-hover-shadow {
+      opacity: 1;
+    }
+  }
+}

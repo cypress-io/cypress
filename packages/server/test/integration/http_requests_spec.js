@@ -152,8 +152,6 @@ describe('Routes', () => {
         }
 
         const open = () => {
-          cfg.pluginsFile = false
-
           return ctx.lifecycleManager.waitForInitializeSuccess()
           .then(() => {
             return Promise.all([

@@ -1,8 +1,8 @@
 import debugFn from 'debug'
-import type { PluginOption } from 'vite-6'
-import type { Vite } from '../getVite'
+import type { PluginOption } from 'vite-7'
+import type { Vite } from '../getVite.js'
 
-import type { ViteDevServerConfig } from '../devServer'
+import type { ViteDevServerConfig } from '../devServer.js'
 
 const debug = debugFn('cypress:vite-dev-server:plugins:sourcemap')
 

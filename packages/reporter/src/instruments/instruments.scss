@@ -10,6 +10,10 @@
       padding: 0 2px 0 12px;
     }
 
+    > .hooks-container > .hook-item > .collapsible {
+      margin-bottom: 4px;
+    }
+
     .instrument-content h3,
     h2,
     h1:first-child {
@@ -21,7 +25,7 @@
 
       td {
         font-family: $monospace;
-        font-size: 11px;
+        font-size: 12px;
       }
     }
 

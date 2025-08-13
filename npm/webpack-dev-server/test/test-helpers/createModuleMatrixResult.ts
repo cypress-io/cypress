@@ -5,23 +5,20 @@ type ModulesDef = {[K in keyof ModuleMatrixResultOptions]: Record<ModuleMatrixRe
 
 const moduleSources: ModulesDef = {
   webpack: {
-    4: 'webpack-4',
     5: 'webpack',
   },
   webpackDevServer: {
-    4: 'webpack-dev-server-4',
     5: 'webpack-dev-server',
   },
   htmlWebpackPlugin: {
-    4: 'html-webpack-plugin-4',
     5: 'html-webpack-plugin-5',
   },
 }
 
 export interface ModuleMatrixResultOptions {
-  webpack: 4 | 5
-  webpackDevServer: 4 | 5
-  htmlWebpackPlugin?: 4 | 5
+  webpack: 5
+  webpackDevServer: 5
+  htmlWebpackPlugin?: 5
 }
 
 /**

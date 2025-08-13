@@ -9,7 +9,7 @@ export const getCommandLogWithText = (command, type?) => {
   cy.$$('.runnable-active .collapsible:not(.is-open) .collapsible-header', top?.document).click()
 
   return cy
-  .$$(`.runnable-active .command-${type}:contains(${command})`, top?.document)
+  .$$(`.test.runnable-active .command-${type}:contains(${command})`, top?.document)
   .closest('.command')
 }
 

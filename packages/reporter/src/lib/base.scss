@@ -1,4 +1,92 @@
-body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,button,textarea,p,blockquote,th,td{margin:0;padding:0;}table{border-collapse:collapse;border-spacing:0;}fieldset,img,a img{border:none;}address,caption,cite,code,dfn,em,strong,th,var,optgroup{font-style:inherit;font-weight:inherit;}del,ins{text-decoration:none;}li{list-style:none;}caption,th{text-align:left;}h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal;}q:before,q:after{content:'';}abbr,acronym{border:0;font-variant:normal;}sup{vertical-align:baseline;}sub{vertical-align:baseline;}legend{color:$white;}
+body,
+div,
+dl,
+dt,
+dd,
+ul,
+ol,
+li,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+pre,
+code,
+form,
+fieldset,
+legend,
+input,
+button,
+textarea,
+p,
+blockquote,
+th,
+td {
+  margin: 0;
+  padding: 0;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+fieldset,
+img,
+a img {
+  border: none;
+}
+address,
+caption,
+cite,
+code,
+dfn,
+em,
+strong,
+th,
+var,
+optgroup {
+  font-style: inherit;
+  font-weight: inherit;
+}
+del,
+ins {
+  text-decoration: none;
+}
+li {
+  list-style: none;
+}
+caption,
+th {
+  text-align: left;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: 100%;
+  font-weight: normal;
+}
+q:before,
+q:after {
+  content: "";
+}
+abbr,
+acronym {
+  border: 0;
+  font-variant: normal;
+}
+sup {
+  vertical-align: baseline;
+}
+sub {
+  vertical-align: baseline;
+}
+legend {
+  color: $white;
+}
 
 .reporter {
   background-color: $gray-1100;
@@ -12,10 +100,6 @@ body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input
   position: absolute;
   right: 0;
   top: 0;
-
-  * {
-    box-sizing: border-box;
-  }
 
   &,
   input,
@@ -56,25 +140,12 @@ body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input
     font-style: italic;
   }
 
-  button {
-    background: $black;
-    border: none;
-    border-radius: 2px;
-    color: $gray-200;
-    cursor: pointer;
-    display: inline-block;
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 1.4;
-    padding: 10px 16px;
-    text-align: center;
-    touch-action: manipulation;
-    vertical-align: middle;
-    white-space: nowrap;
-    user-select: none;
-  }
-
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-weight: 300;
     line-height: 1.1;
   }
@@ -136,13 +207,13 @@ body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input
 
   label {
     background-color: $gray-100;
-    border-radius: .25em;
+    border-radius: 0.25em;
     color: $black;
     display: inline;
     font-size: 75%;
     font-weight: bold;
     line-height: 1;
-    padding: .2em .6em .3em;
+    padding: 0.2em 0.6em 0.3em;
     text-align: center;
     white-space: nowrap;
     vertical-align: baseline;

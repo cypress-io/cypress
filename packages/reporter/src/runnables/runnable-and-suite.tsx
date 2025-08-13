@@ -1,67 +1,120 @@
 import cs from 'classnames'
 import _ from 'lodash'
 import { observer } from 'mobx-react'
-import React, { MouseEvent, useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
-import { indent } from '../lib/util'
-
-import appState, { AppState } from '../lib/app-state'
+import appState from '../lib/app-state'
 import events, { Events } from '../lib/events'
 import Test from '../test/test'
-import Collapsible from '../collapsible/collapsible'
+import Collapsible, { CollapsibleHeaderComponentProps } from '../collapsible/collapsible'
 
 import type SuiteModel from './suite-model'
 import type TestModel from '../test/test-model'
 
-import { LaunchStudioIcon } from '../components/LaunchStudioIcon'
+import { IconChevronDownMedium, IconChevronRightMedium, IconObjectStackFailed, IconObjectStackPassed, IconObjectStackQueued, IconObjectStackRunning, IconObjectStackSkipped, WindiColor } from '@cypress-design/react-icon'
+import { RunnableArray } from './runnables-store'
+import { CreateNewTestButton } from '../header/CreateNewTestButton'
+
+// should only show connection dots if the current runnable is a test and the next runnable is a test and is not the last runnable
+export const shouldShowConnectionDots = (runnables: RunnableArray, runnable: SuiteModel | TestModel, runnableIndex: number) => {
+  return runnable.type === 'test' && runnableIndex !== runnables.length - 1 && runnables[runnableIndex + 1].type === 'test'
+}
 
 interface SuiteProps {
   eventManager?: Events
   model: SuiteModel
   studioEnabled: boolean
   canSaveStudioLogs: boolean
+  spec?: Cypress.Cypress['spec']
 }
 
-const Suite: React.FC<SuiteProps> = observer(({ eventManager = events, model, studioEnabled, canSaveStudioLogs }: SuiteProps) => {
-  const _launchStudio = useCallback((e: MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
+const headerIconDefaultProps = {
+  fillColor: 'gray-900' as WindiColor,
+  strokeColor: 'gray-500' as WindiColor,
+  className: 'header-icon',
+}
 
-    eventManager.emit('studio:init:suite', model.id)
-  }, [eventManager, model.id])
+const Suite: React.FC<SuiteProps> = observer(({ eventManager = events, model, studioEnabled, canSaveStudioLogs, spec }: SuiteProps) => {
+  const headerIconStyle = {
+    marginTop: '1px',
+  }
 
-  const _header = () => (
-    <>
-      <span className='runnable-title'>{model.title}</span>
-      {(studioEnabled && !appState.studioActive) && (
-        <span className='runnable-controls'>
-          <LaunchStudioIcon
-            title='Add New Test'
-            onClick={_launchStudio}
-          />
-        </span>
-      )}
+  const getHeaderIcon = useCallback((isOpen: boolean) => {
+    let headerIcon
+
+    switch (model.state) {
+      case 'active':
+        headerIcon = <IconObjectStackRunning {...headerIconDefaultProps} style={headerIconStyle} />
+        break
+      case 'passed':
+        headerIcon = <IconObjectStackPassed {...headerIconDefaultProps} secondaryStrokeColor='jade-400' style={headerIconStyle} />
+        break
+      case 'failed':
+        headerIcon = <IconObjectStackFailed {...headerIconDefaultProps} secondaryStrokeColor='red-400' style={headerIconStyle} />
+        break
+      case 'pending':
+        headerIcon = <IconObjectStackSkipped {...headerIconDefaultProps} style={headerIconStyle} />
+        break
+      case 'processing':
+        headerIcon = <IconObjectStackQueued {...headerIconDefaultProps} style={headerIconStyle} />
+        break
+      default:
+        headerIcon = <></>
+        break
+    }
+
+    return <>
+      {isOpen ? <IconChevronDownMedium className='header-collapsible-indicator' strokeColor='gray-700' style={headerIconStyle} /> : <IconChevronRightMedium size='16' className='header-collapsible-indicator' strokeColor='gray-700' style={headerIconStyle} />}
+      {headerIcon}
     </>
-  )
+  }, [model.state])
+
+  const HeaderComponent = useCallback(({ isOpen }: CollapsibleHeaderComponentProps) => {
+    return (
+      <>
+        <div className='runnable-and-suite-header-icon'>
+          {getHeaderIcon(isOpen)}
+        </div>
+        <span className='runnable-title'>{model.title}</span>
+        {(studioEnabled && !appState.studioActive && spec?.relative !== '__all') && (
+          <>
+            <CreateNewTestButton suiteId={model.id} dataCy='create-new-test-from-suite' />
+            <span className='button-hover-shadow' />
+          </>
+        )}
+      </>
+    )
+  }, [getHeaderIcon, model.title, studioEnabled, appState.studioActive])
+
+  const runnablesList = useMemo(() => (
+    <ul className='runnables'>
+      {_.map(model.children, (runnable, index) => {
+        return (<Runnable
+          key={runnable.id}
+          model={runnable}
+          studioEnabled={studioEnabled}
+          canSaveStudioLogs={canSaveStudioLogs}
+          shouldShowConnectingDots={shouldShowConnectionDots(model.children, runnable, index)}
+          spec={spec}
+        />)
+      })}
+    </ul>
+  ), [model.children, studioEnabled, canSaveStudioLogs])
 
   return (
-    <Collapsible
-      header={_header()}
-      headerClass='runnable-wrapper'
-      headerStyle={{ paddingLeft: indent(model.level) }}
-      contentClass='runnables-region'
-      isOpen
-    >
-      <ul className='runnables'>
-        {_.map(model.children, (runnable) =>
-          (<Runnable
-            key={runnable.id}
-            model={runnable}
-            studioEnabled={studioEnabled}
-            canSaveStudioLogs={canSaveStudioLogs}
-          />))}
-      </ul>
-    </Collapsible>
+    // we don't want to show the collapsible if there are no tests in the suite
+    model.children && !model.children.some((c) => c.type === 'test') ? runnablesList : (
+      <Collapsible
+        HeaderComponent={HeaderComponent}
+        headerClass='runnable-wrapper'
+        headerStyle={{}}
+        hideExpander
+        contentClass='runnables-region'
+        isOpen
+      >
+        {runnablesList}
+      </Collapsible>
+    )
   )
 })
 
@@ -69,28 +122,35 @@ Suite.displayName = 'Suite'
 
 export interface RunnableProps {
   model: TestModel | SuiteModel
-  appState: AppState
   studioEnabled: boolean
   canSaveStudioLogs: boolean
+  shouldShowConnectingDots: boolean
+  spec?: Cypress.Cypress['spec']
 }
 
 // NOTE: some of the driver tests dig into the React instance for this component
 // in order to mess with its internal state. converting it to a functional
 // component breaks that, so it needs to stay a Class-based component or
 // else the driver tests need to be refactored to support it being functional
-const Runnable: React.FC<RunnableProps> = observer(({ appState: appStateProps = appState, model, studioEnabled, canSaveStudioLogs }) => {
-  return (
+const Runnable: React.FC<RunnableProps> = observer(({ model, studioEnabled, canSaveStudioLogs, shouldShowConnectingDots, spec }) => {
+  return (<>
     <li
       className={cs(`${model.type} runnable runnable-${model.state}`, {
         'runnable-retried': model.hasRetried,
-        'runnable-studio': appStateProps.studioActive,
+        'last-test-margin-bottom': model.type === 'test' && !shouldShowConnectingDots,
       })}
       data-model-state={model.state}
     >
       {model.type === 'test'
-        ? <Test model={model as TestModel} studioEnabled={studioEnabled} canSaveStudioLogs={canSaveStudioLogs} />
-        : <Suite model={model as SuiteModel} studioEnabled={studioEnabled} canSaveStudioLogs={canSaveStudioLogs} />}
+        ? <Test model={model as TestModel} studioEnabled={studioEnabled} spec={spec}/>
+        : <Suite model={model as SuiteModel}
+          studioEnabled={studioEnabled}
+          canSaveStudioLogs={canSaveStudioLogs}
+          spec={spec}
+        />}
     </li>
+    {shouldShowConnectingDots && <div className='runnable-dotted-line' />}
+  </>
   )
 })
 

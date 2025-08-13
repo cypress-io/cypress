@@ -11,6 +11,7 @@ on:
   pull_request:
     branches:
       - develop
+      - release/*
 jobs:
   Snyk_SCA_Scan:
     # Skip this job on PRs from forks
@@ -18,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [20.x]
+        node-version: [22.x]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,7 +29,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'yarn'
       - name: Run yarn
         run: yarn

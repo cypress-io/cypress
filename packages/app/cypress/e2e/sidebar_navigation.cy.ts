@@ -56,7 +56,7 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
 
       cy.contains('fixture.js').click()
 
-      cy.get('.toggle-specs-text').click()
+      cy.get('.toggle-specs-button').click()
 
       cy.findByTestId('reporter-panel').invoke('outerWidth').then(($initialWidth) => {
         expect($initialWidth).eq(100)
@@ -291,7 +291,7 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
     it.skip('resize nav and persist the state after refresh', () => {
       cy.contains('fixture.js').click()
 
-      cy.get('.toggle-specs-text').click()
+      cy.get('.toggle-specs-button').click()
 
       cy.withCtx((ctx, o) => {
         o.sinon.stub(ctx.actions.localSettings, 'setPreferences').resolves()

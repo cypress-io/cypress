@@ -1,15 +1,31 @@
 const _ = require('lodash')
 const EE = require('events')
 const Promise = require('bluebird')
-
+const path = require('path')
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'
+
+const buildErrorLocationFromTransformError = (err, projectRoot) => {
+  const cleanMessage = err.message
+  // replace the first line with better text (remove potentially misleading word TypeScript for example)
+  .replace(/^.*\n/g, 'Error compiling file\n')
+
+  // Regex to pull out the error from the message body of a tsx TransformError. It displays the relative path to a file
+  const transformErrorRegex = /\n(.*?):(\d+):(\d+):/g
+  const failurePath = transformErrorRegex.exec(cleanMessage)
+
+  return {
+    compilerErrorLocation: failurePath ? { filePath: path.relative(projectRoot, failurePath[1]), line: Number(failurePath[2]), column: Number(failurePath[3]) } : null,
+    originalMessage: err.message,
+    message: cleanMessage,
+  }
+}
 
 const serializeError = (err) => {
   const obj = _.pick(err,
     'name', 'message', 'stack', 'code', 'annotated', 'type',
     'details', 'isCypressErr', 'messageMarkdown',
     'originalError',
-    // Location of the error when a TSError or a esbuild error occurs (parse error from ts-node or esbuild)
+    // Location of the error when a TransformError or a esbuild error occurs (parse error from ts-node or esbuild)
     'compilerErrorLocation')
 
   if (obj.originalError) {
@@ -20,6 +36,8 @@ const serializeError = (err) => {
 }
 
 module.exports = {
+  buildErrorLocationFromTransformError,
+
   serializeError,
 
   nonNodeRequires () {

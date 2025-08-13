@@ -47,7 +47,7 @@ export class ElectronActions {
     this.electron.browserWindow?.show()
 
     if (this.isMac) {
-      this.ctx.config.electronApp?.dock.show().catch((e) => {
+      this.ctx.config.electronApp?.dock?.show().catch((e) => {
         this.ctx.logTraceError(e)
       })
     } else {

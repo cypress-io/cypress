@@ -1,0 +1,12 @@
+@import "../lib/mixins.scss";
+
+.open-in-ide-button {
+  @include new-test-button;
+}
+
+.button-hover-shadow {
+  @include button-hover-shadow(
+    $linear-gradient: linear-gradient(90deg, rgba(22, 24, 39, 0) 5.39%, $gray-1100 31.97%),
+    $width: 160px
+  );
+}

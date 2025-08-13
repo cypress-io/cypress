@@ -25,7 +25,6 @@ let ctx
 // NOTE: todo: come back to this
 describe('lib/project-base', () => {
   beforeEach(async function () {
-    delete process.env.CYPRESS_ENABLE_CLOUD_STUDIO
     delete process.env.CYPRESS_LOCAL_STUDIO_PATH
 
     ctx = getCtx()
@@ -81,14 +80,51 @@ describe('lib/project-base', () => {
     expect(p.projectRoot).to.eq(path.resolve(path.join('..', 'foo', 'bar')))
   })
 
+  context('#getSavedState', () => {
+    beforeEach(async function () {
+      const globalState = await savedState.create()
+
+      await globalState.remove()
+      await globalState.set({ reporterWidth: 400 })
+
+      const projectState = await savedState.create(this.project.projectRoot)
+
+      await projectState.remove()
+      await projectState.set({ reporterWidth: 500 })
+    })
+
+    it('returns global state when type is global', async function () {
+      const state = await this.project.getSavedState({ type: 'global' })
+
+      expect(state).to.deep.eq({ reporterWidth: 400 })
+    })
+
+    it('returns project state when type is project', async function () {
+      const state = await this.project.getSavedState({ type: 'project' })
+
+      expect(state).to.deep.eq({ reporterWidth: 500 })
+    })
+
+    it('returns project state when type is undefined', async function () {
+      const state = await this.project.getSavedState()
+
+      expect(state).to.deep.eq({ reporterWidth: 500 })
+    })
+  })
+
   context('#saveState', function () {
-    beforeEach(function () {
+    beforeEach(async function () {
       const supportFile = path.join('the', 'save', 'state', 'test')
 
       this.project.cfg = { supportFile }
 
-      return savedState.create(this.project.projectRoot)
-      .then((state) => state.remove())
+      const globalState = await savedState.create()
+
+      await globalState.remove()
+
+      const projectState = await savedState.create(this.project.projectRoot)
+
+      await projectState.remove()
     })
 
     afterEach(function () {
@@ -119,6 +155,33 @@ describe('lib/project-base', () => {
       .then(() => this.project.saveState({ appWidth: 42 }))
       .then(() => this.project.saveState({ appWidth: 'modified' }))
       .then((state) => expect(state).to.deep.eq({ appWidth: 'modified' }))
+    })
+
+    it('saves global state when type is global', async function () {
+      await this.project.saveState({ reporterWidth: 1 }, { type: 'global' })
+
+      const state = await savedState.create()
+      .then((state) => state.get())
+
+      expect(state).to.deep.eq({ reporterWidth: 1 })
+    })
+
+    it('saves project state when type is project', async function () {
+      await this.project.saveState({ reporterWidth: 2 }, { type: 'project' })
+
+      const state = await savedState.create(this.project.projectRoot)
+      .then((state) => state.get())
+
+      expect(state).to.deep.eq({ reporterWidth: 2 })
+    })
+
+    it('saves project state when type is undefined', async function () {
+      await this.project.saveState({ reporterWidth: 3 })
+
+      const state = await savedState.create(this.project.projectRoot)
+      .then((state) => state.get())
+
+      expect(state).to.deep.eq({ reporterWidth: 3 })
     })
   })
 
@@ -509,6 +572,52 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         })
       })
     })
+
+    describe('studio initialization', function () {
+      it('does not create studio lifecycle manager when experimental flag is disabled', async function () {
+        const cfg = {
+          isTextTerminal: false,
+          resolved: {
+            experimentalStudio: {
+              value: false,
+            },
+          },
+          projectId: 'test-project',
+          port: 8080,
+        }
+
+        sinon.stub(this.project, 'initializeConfig').resolves(cfg)
+        sinon.stub(this.project, 'saveState').resolves()
+
+        sinon.stub(process, 'chdir')
+
+        await this.project.open()
+
+        expect(this.project.ctx.coreData.studioLifecycleManager).to.be.undefined
+      })
+
+      it('does not create studio lifecycle manager when in text terminal mode', async function () {
+        const cfg = {
+          isTextTerminal: true,
+          resolved: {
+            experimentalStudio: {
+              value: true,
+            },
+          },
+          projectId: 'test-project',
+          port: 8080,
+        }
+
+        sinon.stub(this.project, 'initializeConfig').resolves(cfg)
+        sinon.stub(this.project, 'saveState').resolves()
+
+        sinon.stub(process, 'chdir')
+
+        await this.project.open()
+
+        expect(this.project.ctx.coreData.studioLifecycleManager).to.be.undefined
+      })
+    })
   })
 
   context('#close', () => {
@@ -730,18 +839,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         const { canAccessStudioAI } = await studioInitPromise
 
         expect(canAccessStudioAI).to.be.true
-        expect(mockCaptureStudioEvent).to.be.calledWith({
-          type: 'studio:started',
-          machineId: 'test-machine-id',
-          projectId: 'test-project-id',
-          browser: {
-            name: 'chrome',
-            family: 'chromium',
-            channel: undefined,
-            version: undefined,
-          },
-          cypressVersion: pkg.version,
-        })
 
         expect(mockSetupProtocol).to.be.calledOnce
         expect(mockBeforeSpec).to.be.calledOnce
@@ -825,18 +922,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         const { canAccessStudioAI } = await studioInitPromise
 
         expect(canAccessStudioAI).to.be.false
-        expect(mockCaptureStudioEvent).to.be.calledWith({
-          type: 'studio:started',
-          machineId: 'test-machine-id',
-          projectId: 'test-project-id',
-          browser: {
-            name: 'chrome',
-            family: 'chromium',
-            channel: undefined,
-            version: undefined,
-          },
-          cypressVersion: pkg.version,
-        })
 
         expect(mockSetupProtocol).not.to.be.called
         expect(mockBeforeSpec).not.to.be.called
@@ -916,18 +1001,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         const { canAccessStudioAI } = await studioInitPromise
 
         expect(canAccessStudioAI).to.be.false
-        expect(mockCaptureStudioEvent).to.be.calledWith({
-          type: 'studio:started',
-          machineId: 'test-machine-id',
-          projectId: 'test-project-id',
-          browser: {
-            name: 'chrome',
-            family: 'chromium',
-            channel: undefined,
-            version: undefined,
-          },
-          cypressVersion: pkg.version,
-        })
 
         expect(mockSetupProtocol).not.to.be.called
         expect(mockBeforeSpec).not.to.be.called
@@ -949,7 +1022,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
 
       it('does not capture studio started event if the user is accessing cloud studio', async function () {
-        process.env.CYPRESS_ENABLE_CLOUD_STUDIO = 'true'
         process.env.CYPRESS_LOCAL_STUDIO_PATH = 'false'
 
         const mockAccessStudioAI = sinon.stub().resolves(true)

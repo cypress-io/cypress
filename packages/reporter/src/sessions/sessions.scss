@@ -15,6 +15,10 @@
     padding: 4px;
     cursor: pointer;
 
+    > span {
+      width: max-content;
+    }
+
     &:hover,
     &:focus {
       color: $gray-50;

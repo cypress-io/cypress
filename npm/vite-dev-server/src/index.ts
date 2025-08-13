@@ -1,5 +1,5 @@
-import { devServer } from './devServer'
+import { devServer } from './devServer.js'
 
 export { devServer }
 
-export default devServer
+export default { devServer }

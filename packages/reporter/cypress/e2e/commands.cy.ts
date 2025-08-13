@@ -898,7 +898,10 @@ describe('commands', { viewportHeight: 1000 }, () => {
       })
 
       it('shows a tooltip', () => {
-        cy.get('.command-name-within').click('top')
+        cy.get('.command-name-within').within(() => {
+          cy.contains('within').click()
+        })
+
         cy.get('.cy-tooltip').should('have.text', 'Printed output to your console')
       })
 
@@ -911,21 +914,32 @@ describe('commands', { viewportHeight: 1000 }, () => {
 
       it('prints to console', () => {
         cy.spy(runner, 'emit')
-        cy.get('.command-name-within').click('top')
+        cy.get('.command-name-within').within(() => {
+          cy.contains('within').click()
+        })
 
         cy.wrap(runner.emit).should('be.calledWith', 'runner:console:log', 'r3', fakeIdForTest)
       })
 
       it('shows the snapshot', () => {
         cy.spy(runner, 'emit')
-        cy.get('.command-name-within').click('top')
+        cy.get('.command-name-within').within(() => {
+          cy.contains('within').click()
+        })
+
         cy.wrap(runner.emit).should('be.calledWith', 'runner:show:snapshot', 'r3', fakeIdForTest)
       })
 
       it('unpins after clicking again, does not re-print to the console', () => {
         cy.spy(runner, 'emit')
-        cy.get('.command-name-within').click('top')
-        cy.get('.command-name-within').click('top')
+        cy.get('.command-name-within').within(() => {
+          cy.contains('within').click()
+        })
+
+        cy.get('.command-name-within').within(() => {
+          cy.contains('within').click()
+        })
+
         // @ts-ignore
         cy.wrap(runner.emit.withArgs('runner:console:log')).should('be.calledOnce')
       })
@@ -1063,54 +1077,6 @@ describe('commands', { viewportHeight: 1000 }, () => {
       cy.contains('recreate session')
 
       cy.percySnapshot()
-    })
-  })
-
-  context('studio commands', () => {
-    beforeEach(() => {
-      addCommand(runner, {
-        id: 10,
-        number: 7,
-        name: 'get',
-        message: '#studio-command-parent',
-        state: 'success',
-        isStudio: true,
-        type: 'parent',
-      })
-
-      addCommand(runner, {
-        id: 11,
-        name: 'click',
-        message: '#studio-command-child',
-        state: 'success',
-        isStudio: true,
-        type: 'child',
-      })
-    })
-
-    it('studio commands have command-is-studio class', () => {
-      cy.contains('#studio-command-parent').closest('.command')
-      .should('have.class', 'command-is-studio')
-
-      cy.contains('#studio-command-child').closest('.command')
-      .should('have.class', 'command-is-studio')
-    })
-
-    it('only parent studio commands display remove button', () => {
-      cy.contains('#studio-command-parent').closest('.command')
-      .find('.studio-command-remove').should('exist')
-
-      cy.contains('#studio-command-child').closest('.command')
-      .find('.studio-command-remove').should('not.exist')
-    })
-
-    it('emits studio:remove:command with number when delete button is clicked', () => {
-      cy.spy(runner, 'emit')
-
-      cy.contains('#studio-command-parent').closest('.command')
-      .find('.studio-command-remove').click()
-
-      cy.wrap(runner.emit).should('be.calledWith', 'studio:remove:command', 7)
     })
   })
 })

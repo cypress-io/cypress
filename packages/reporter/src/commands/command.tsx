@@ -2,11 +2,11 @@ import _ from 'lodash'
 import cs from 'classnames'
 import Markdown from 'markdown-it'
 import { observer } from 'mobx-react'
-import React, { useCallback, useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
 import appState from '../lib/app-state'
-import events, { Events } from '../lib/events'
+import events from '../lib/events'
 import FlashOnClick from '../lib/flash-on-click'
 import StateIcon from '../lib/state-icon'
 import Tag from '../lib/tag'
@@ -55,13 +55,13 @@ export const formattedMessage = (message: string, name?: string) => {
 
   if (name === 'assert' && assertionArray) {
     const expectedActualArray = () => {
-    // get the expected and actual values of assertions
+      // get the expected and actual values of assertions
       const splitTrim = message.split(assertionRegex).filter(Boolean).map((s) => s.trim())
 
       // replace outside double asterisks with strong tags
       return splitTrim.map((s) => {
-      // we want to escape HTML chars so that they display
-      // correctly in the command log: <p> -> &lt;p&gt;
+        // we want to escape HTML chars so that they display
+        // correctly in the command log: <p> -> &lt;p&gt;
         const HTMLEscapedString = mdOnlyHTML.renderInline(s)
 
         return HTMLEscapedString.replace(asterisksRegex, `<strong>$1</strong>`)
@@ -192,8 +192,8 @@ const Interceptions: React.FC<RenderProps> = observer(({ interceptions, wentToOr
 
   const interceptsTitle = (
     <span>
-      {wentToOrigin ? '' : <>This request did not go to origin because the response was stubbed.<br/></>}
-        This request matched:
+      {wentToOrigin ? '' : <>This request did not go to origin because the response was stubbed.<br /></>}
+      This request matched:
       <ul>
         {interceptions?.map(({ command, alias, type }, i) => (
           <li key={i}>
@@ -314,7 +314,6 @@ interface CommandDetailsProps {
 interface CommandControlsProps {
   model: CommandModel
   commandName: string
-  events: Events
 }
 
 interface CommandProps {
@@ -331,7 +330,7 @@ const CommandDetails: React.FC<CommandDetailsProps> = observer(({ model, groupId
         {model.event && model.type !== 'system' ? `(${displayName(model)})` : displayName(model)}
       </span>
     </span>
-    {!!groupId && model.type === 'system' && model.state === 'failed' && <StateIcon aria-hidden className='failed-indicator' state={model.state}/>}
+    {!!groupId && model.type === 'system' && model.state === 'failed' && <StateIcon data-cy='failed-icon-indicator' aria-hidden state={model.state} iconSize='12' />}
     {model.referencesAlias ?
       <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
       : <Message model={model} />
@@ -341,27 +340,14 @@ const CommandDetails: React.FC<CommandDetailsProps> = observer(({ model, groupId
 
 CommandDetails.displayName = 'CommandDetails'
 
-const CommandControls: React.FC<CommandControlsProps> = observer(({ model, commandName, events }) => {
+const CommandControls: React.FC<CommandControlsProps> = observer(({ model, commandName }) => {
   const displayNumOfElements = model.state !== 'pending' && model.numElements != null && model.numElements !== 1
   const isSystemEvent = model.type === 'system' && model.event
   const isSessionCommand = commandName === 'session'
   const displayNumOfChildren = !isSystemEvent && !isSessionCommand && model.hasChildren && !model.isOpen
 
-  const _removeStudioCommand = useCallback((e: React.MouseEvent<HTMLElement, globalThis.MouseEvent>) => {
-    e.preventDefault()
-    e.stopPropagation()
-
-    events.emit('studio:remove:command', model.number)
-  }, [events, model.number])
-
   return (
     <span className='command-controls'>
-      {model.type === 'parent' && model.isStudio && (
-        <i
-          className='far fa-times-circle studio-command-remove'
-          onClick={_removeStudioCommand}
-        />
-      )}
       {isSessionCommand && (
         <Tag
           content={model.sessionInfo?.status}
@@ -505,17 +491,17 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
 
   return (
     <>
-      <li className={cs('command', `command-name-${commandName}`, { 'command-is-studio': model.isStudio })}>
+      <li className={cs('command', `command-name-${commandName}`)}>
         <div
           className={cs(
             'command-wrapper',
-              `command-state-${model.state}`,
-              `command-type-${model.type}`,
-              {
-                'command-is-event': !!model.event,
-                'command-is-pinned': _isPinned(),
-                'command-is-interactive': (model.hasConsoleProps || model.hasSnapshot),
-              },
+            `command-state-${model.state}`,
+            `command-type-${model.type}`,
+            {
+              'command-is-event': !!model.event,
+              'command-is-pinned': _isPinned(),
+              'command-is-interactive': (model.hasConsoleProps || model.hasSnapshot),
+            },
           )}
         >
           <NavColumns model={model} isPinned={_isPinned()} toggleColumnPin={_toggleColumnPin} />
@@ -544,7 +530,7 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
                 </div>
               )}
               <CommandDetails model={model} groupId={groupId} aliasesWithDuplicates={aliasesWithDuplicates} />
-              <CommandControls model={model} commandName={commandName} events={events} />
+              <CommandControls model={model} commandName={commandName}/>
             </div>
           </FlashOnClick>
         </div>

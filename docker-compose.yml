@@ -31,7 +31,7 @@ services:
       - .:/opt/cypress
   ci:
     # This should mirror the image used in workflows.yml
-    image: cypress/base-internal:20.18.1-bullseye
+    image: cypress/base-internal:22.15.1-bullseye
     ports:
       - 5566:5566
       - 5567:5567

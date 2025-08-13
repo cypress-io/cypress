@@ -1,4 +1,4 @@
-import * as head from 'lodash/head'
+import head from 'lodash/head'
 
 describe('yarn-v3.1.1-pnp', () => {
   it('can load package from pnp runtime', () => {

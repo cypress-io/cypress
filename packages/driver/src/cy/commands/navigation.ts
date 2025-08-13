@@ -9,10 +9,9 @@ import { bothUrlsMatchAndOneHasHash } from '../navigation'
 import { $Location, LocationObject } from '../../cypress/location'
 import { isRunnerAbleToCommunicateWithAut } from '../../util/commandAUTCommunication'
 import { whatIsCircular } from '../../util/what-is-circular'
-
-import type { RunState } from '@packages/types'
-
 import debugFn from 'debug'
+import type { RunState } from '@packages/types'
+import type { StateFunc } from '../../cypress/state'
 const debug = debugFn('cypress:driver:navigation')
 
 let id = null
@@ -444,6 +443,218 @@ interface InternalVisitOptions extends Partial<Cypress.VisitOptions> {
   hasAlreadyVisitedUrl: boolean
 }
 
+export const reload = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: StateFunc, config: Cypress.Config, args: any[]) => {
+  let forceReload
+  let userOptions
+  const throwArgsErr = () => {
+    $errUtils.throwErrByPath('reload.invalid_arguments')
+  }
+
+  switch (args.length) {
+    case 0:
+      forceReload = false
+      userOptions = {}
+      break
+
+    case 1:
+      if (_.isObject(args[0])) {
+        userOptions = args[0]
+      } else {
+        forceReload = args[0]
+      }
+
+      break
+
+    case 2:
+      forceReload = args[0]
+      userOptions = args[1]
+      break
+
+    default:
+      throwArgsErr()
+  }
+
+  // clear the current timeout
+  // @ts-expect-error
+  cy.clearTimeout('reload')
+
+  let cleanup: (() => any) | null = null
+  const options = _.defaults({}, userOptions, {
+    log: true,
+    // @ts-expect-error
+    timeout: config('pageLoadTimeout'),
+  })
+
+  const reload = () => {
+    return new Promise((resolve) => {
+      forceReload = forceReload || false
+      userOptions = userOptions || {}
+
+      if (!_.isObject(userOptions)) {
+        throwArgsErr()
+      }
+
+      if (!_.isBoolean(forceReload)) {
+        throwArgsErr()
+      }
+
+      options._log = Cypress.log({ timeout: options.timeout, hidden: options.log === false })
+
+      options._log?.snapshot('before', { next: 'after' })
+
+      cleanup = () => {
+        knownCommandCausedInstability = false
+
+        return cy.removeListener('window:load', resolve)
+      }
+
+      knownCommandCausedInstability = true
+
+      cy.once('window:load', resolve)
+
+      // Since webkit doesn't have an automation client and doesn't support cy.origin(), we need to use the legacy method to reload the page
+      return Cypress.isBrowser('webkit') ? $utils.locReload(forceReload, state('window')) : Cypress.automation('reload:aut:frame', {
+        forceReload,
+      })
+    })
+  }
+
+  return reload()
+  .timeout(options.timeout, 'reload')
+  .catch(Promise.TimeoutError, () => {
+    return timedOutWaitingForPageLoad(options.timeout, options._log)
+  })
+  .finally(() => {
+    if (typeof cleanup === 'function') {
+      cleanup()
+    }
+
+    if (Cypress.isBrowser('webkit')) {
+      // Make sure the reload command can communicate with the AUT.
+      // if we failed for any other reason, we need to display the correct error to the user.
+      // @ts-expect-error
+      Cypress.ensure.commandCanCommunicateWithAUT(cy)
+    }
+
+    return null
+  })
+}
+
+export const go = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: StateFunc, config: Cypress.Config, numberOrString: number | string, userOptions = {}) => {
+  const options: Record<string, any> = _.defaults({}, userOptions, {
+    log: true,
+    // @ts-expect-error
+    timeout: config('pageLoadTimeout'),
+  })
+
+  options._log = Cypress.log({ timeout: options.timeout, hidden: options.log === false })
+
+  const goNumber = (num) => {
+    if (num === 0) {
+      $errUtils.throwErrByPath('go.invalid_number', { onFail: options._log })
+    }
+
+    let cleanup: (() => any) | null = null
+
+    if (options._log) {
+      options._log.snapshot('before', { next: 'after' })
+    }
+
+    const go = () => {
+      return Promise.try(() => {
+        let didUnload = false
+
+        const beforeUnload = () => {
+          didUnload = true
+        }
+
+        // clear the current timeout
+        // @ts-expect-error
+        cy.clearTimeout()
+
+        cy.once('window:before:unload', beforeUnload)
+
+        const didLoad = new Promise((resolve) => {
+          cleanup = function () {
+            cy.removeListener('window:load', resolve)
+
+            return cy.removeListener('window:before:unload', beforeUnload)
+          }
+
+          return cy.once('window:load', resolve)
+        })
+
+        knownCommandCausedInstability = true
+
+        // need to set the attributes of 'go'
+        // consoleProps here with win
+        // make sure we resolve our go function
+        // with the remove window (just like cy.visit)
+        const retWin = () => state('window')
+
+        // Since webkit doesn't have an automation client and doesn't support cy.origin(), we need to use the legacy method to navigate the history
+        Cypress.isBrowser('webkit') ? state('window').history.go(num) : Cypress.automation('navigate:aut:history', { historyNumber: num })
+
+        Promise
+        .delay(100)
+        .then(() => {
+          knownCommandCausedInstability = false
+
+          // if we've didUnload then we know we're
+          // doing a full page refresh and we need
+          // to wait until
+          if (didUnload) {
+            return didLoad.then(retWin)
+          }
+
+          return retWin()
+        })
+      })
+    }
+
+    return go()
+    .timeout(options.timeout, 'go')
+    .catch(Promise.TimeoutError, () => {
+      return timedOutWaitingForPageLoad(options.timeout, options._log)
+    }).finally(() => {
+      if (typeof cleanup === 'function') {
+        cleanup()
+      }
+
+      if (Cypress.isBrowser('webkit')) {
+        // Make sure the reload command can communicate with the AUT.
+        // if we failed for any other reason, we need to display the correct error to the user.
+        // @ts-expect-error
+        Cypress.ensure.commandCanCommunicateWithAUT(cy)
+      }
+
+      return null
+    })
+  }
+
+  const goString = (str) => {
+    switch (str) {
+      case 'forward': return goNumber(1)
+      case 'back': return goNumber(-1)
+      default:
+        return $errUtils.throwErrByPath('go.invalid_direction', {
+          onFail: options._log,
+          args: { str },
+        })
+    }
+  }
+
+  if (_.isFinite(numberOrString)) {
+    return goNumber(numberOrString)
+  }
+
+  if (_.isString(numberOrString)) {
+    return goString(numberOrString)
+  }
+
+  return $errUtils.throwErrByPath('go.invalid_argument', { onFail: options._log })
+}
+
 export default (Commands, Cypress, cy, state, config) => {
   reset()
 
@@ -536,202 +747,11 @@ export default (Commands, Cypress, cy, state, config) => {
 
   Commands.addAll({
     reload (...args) {
-      let forceReload
-      let userOptions
-      const throwArgsErr = () => {
-        $errUtils.throwErrByPath('reload.invalid_arguments')
-      }
-
-      switch (args.length) {
-        case 0:
-          forceReload = false
-          userOptions = {}
-          break
-
-        case 1:
-          if (_.isObject(args[0])) {
-            userOptions = args[0]
-          } else {
-            forceReload = args[0]
-          }
-
-          break
-
-        case 2:
-          forceReload = args[0]
-          userOptions = args[1]
-          break
-
-        default:
-          throwArgsErr()
-      }
-
-      // clear the current timeout
-      cy.clearTimeout('reload')
-
-      let cleanup: (() => any) | null = null
-      const options = _.defaults({}, userOptions, {
-        log: true,
-        timeout: config('pageLoadTimeout'),
-      })
-
-      const reload = () => {
-        return new Promise((resolve) => {
-          forceReload = forceReload || false
-          userOptions = userOptions || {}
-
-          if (!_.isObject(userOptions)) {
-            throwArgsErr()
-          }
-
-          if (!_.isBoolean(forceReload)) {
-            throwArgsErr()
-          }
-
-          options._log = Cypress.log({ timeout: options.timeout, hidden: options.log === false })
-
-          options._log?.snapshot('before', { next: 'after' })
-
-          cleanup = () => {
-            knownCommandCausedInstability = false
-
-            return cy.removeListener('window:load', resolve)
-          }
-
-          knownCommandCausedInstability = true
-
-          cy.once('window:load', resolve)
-
-          return $utils.locReload(forceReload, state('window'))
-        })
-      }
-
-      return reload()
-      .timeout(options.timeout, 'reload')
-      .catch(Promise.TimeoutError, () => {
-        return timedOutWaitingForPageLoad(options.timeout, options._log)
-      })
-      .finally(() => {
-        if (typeof cleanup === 'function') {
-          cleanup()
-        }
-
-        // Make sure the reload command can communicate with the AUT.
-        // if we failed for any other reason, we need to display the correct error to the user.
-        Cypress.ensure.commandCanCommunicateWithAUT(cy)
-
-        return null
-      })
+      return reload.call(this, Cypress, cy, state, config, args)
     },
 
     go (numberOrString, userOptions = {}) {
-      const options: Record<string, any> = _.defaults({}, userOptions, {
-        log: true,
-        timeout: config('pageLoadTimeout'),
-      })
-
-      options._log = Cypress.log({ timeout: options.timeout, hidden: options.log === false })
-
-      const win = state('window')
-
-      const goNumber = (num) => {
-        if (num === 0) {
-          $errUtils.throwErrByPath('go.invalid_number', { onFail: options._log })
-        }
-
-        let cleanup: (() => any) | null = null
-
-        if (options._log) {
-          options._log.snapshot('before', { next: 'after' })
-        }
-
-        const go = () => {
-          return Promise.try(() => {
-            let didUnload = false
-
-            const beforeUnload = () => {
-              didUnload = true
-            }
-
-            // clear the current timeout
-            cy.clearTimeout()
-
-            cy.once('window:before:unload', beforeUnload)
-
-            const didLoad = new Promise((resolve) => {
-              cleanup = function () {
-                cy.removeListener('window:load', resolve)
-
-                return cy.removeListener('window:before:unload', beforeUnload)
-              }
-
-              return cy.once('window:load', resolve)
-            })
-
-            knownCommandCausedInstability = true
-
-            win.history.go(num)
-
-            // need to set the attributes of 'go'
-            // consoleProps here with win
-            // make sure we resolve our go function
-            // with the remove window (just like cy.visit)
-            const retWin = () => state('window')
-
-            return Promise
-            .delay(100)
-            .then(() => {
-              knownCommandCausedInstability = false
-
-              // if we've didUnload then we know we're
-              // doing a full page refresh and we need
-              // to wait until
-              if (didUnload) {
-                return didLoad.then(retWin)
-              }
-
-              return retWin()
-            })
-          })
-        }
-
-        return go()
-        .timeout(options.timeout, 'go')
-        .catch(Promise.TimeoutError, () => {
-          return timedOutWaitingForPageLoad(options.timeout, options._log)
-        }).finally(() => {
-          if (typeof cleanup === 'function') {
-            cleanup()
-          }
-
-          // Make sure the go command can communicate with the AUT.
-          Cypress.ensure.commandCanCommunicateWithAUT(cy)
-
-          return null
-        })
-      }
-
-      const goString = (str) => {
-        switch (str) {
-          case 'forward': return goNumber(1)
-          case 'back': return goNumber(-1)
-          default:
-            return $errUtils.throwErrByPath('go.invalid_direction', {
-              onFail: options._log,
-              args: { str },
-            })
-        }
-      }
-
-      if (_.isFinite(numberOrString)) {
-        return goNumber(numberOrString)
-      }
-
-      if (_.isString(numberOrString)) {
-        return goString(numberOrString)
-      }
-
-      return $errUtils.throwErrByPath('go.invalid_argument', { onFail: options._log })
+      return go.call(this, Cypress, cy, state, config, numberOrString, userOptions)
     },
 
     visit (url, userOptions: Partial<Cypress.VisitOptions> = {}) {

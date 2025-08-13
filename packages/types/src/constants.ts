@@ -20,11 +20,9 @@ export const CODE_LANGUAGES = [
 
 export type CodeLanguage = typeof CODE_LANGUAGES[number]
 
-export const MIGRATION_STEPS = ['renameAuto', 'renameManual', 'renameSupport', 'configFile', 'setupComponent'] as const
-
-export type MigrationStep = typeof MIGRATION_STEPS[number]
-
 export const PACKAGE_MANAGERS = ['npm', 'yarn', 'pnpm'] as const
+
+export type PackageManager = typeof PACKAGE_MANAGERS[number]
 
 // Note: ONLY change this in code that will be merged into a release branch
 // for a new major version of Cypress

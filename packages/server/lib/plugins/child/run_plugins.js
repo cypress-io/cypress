@@ -77,14 +77,6 @@ class RunPlugins {
         return
       }
 
-      if (event === 'dev-server:start' && this.registeredEventsByName[event]) {
-        const err = require('@packages/errors').getError('SETUP_NODE_EVENTS_DO_NOT_SUPPORT_DEV_SERVER', this.requiredFile)
-
-        this.ipc.send('setupTestingType:error', util.serializeError(err))
-
-        return
-      }
-
       if (event === 'task') {
         const existingEventId = this.registeredEventsByName[event]
 
@@ -264,7 +256,7 @@ class RunPlugins {
       ...tsPath && { typescript: tsPath },
     }
 
-    debug('creating webpack preprocessor with options %o', options)
+    debug('creating webpack batteries included preprocessor with options %o', options)
 
     const webpackPreprocessor = require('@cypress/webpack-batteries-included-preprocessor')
 

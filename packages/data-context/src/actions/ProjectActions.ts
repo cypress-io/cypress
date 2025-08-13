@@ -122,7 +122,6 @@ export class ProjectActions {
     // Also clear any data associated with the linked cloud project
     this.ctx.actions.cloudProject.clearCloudProject()
 
-    this.ctx.actions.migration.reset()
     await this.ctx.lifecycleManager.clearCurrentProject()
     resetIssuedWarnings()
     await this.api.closeActiveProject()

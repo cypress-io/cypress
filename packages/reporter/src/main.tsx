@@ -19,6 +19,7 @@ import Header, { ReporterHeaderProps } from './header/header'
 import Runnables from './runnables/runnables'
 import TestingPreferences from './preferences/testing-preferences'
 import type { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
+import { StudioTestHeader } from './studio/StudioTestHeader'
 
 function usePrevious (value) {
   const ref = useRef()
@@ -47,12 +48,12 @@ export interface BaseReporterProps {
   runnerStore: MobxRunnerStore
 }
 
-export interface SingleReporterProps extends BaseReporterProps{
+export interface SingleReporterProps extends BaseReporterProps {
   runMode?: 'single'
 }
 
 // In React Class components (now deprecated), we used to use appState as a default prop. Now since defaultProps are not supported in functional components, we can use ES6 default params to accomplish the same thing
-const Reporter: React.FC<SingleReporterProps> = observer(({ appState = appStateDefault, runner, className, error, runMode = 'single', studioEnabled, autoScrollingEnabled, isSpecsListOpen, resetStatsOnSpecChange, renderReporterHeader = (props: ReporterHeaderProps) => <Header {...props}/>, runnerStore }) => {
+const Reporter: React.FC<SingleReporterProps> = observer(({ appState = appStateDefault, runner, className, error, runMode = 'single', studioEnabled, autoScrollingEnabled, isSpecsListOpen, resetStatsOnSpecChange, renderReporterHeader = (props: ReporterHeaderProps) => <Header {...props} />, runnerStore }) => {
   const previousSpecRunId = usePrevious(runnerStore.specRunId)
   const [isMounted, setIsMounted] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
@@ -101,18 +102,21 @@ const Reporter: React.FC<SingleReporterProps> = observer(({ appState = appStateD
     runnablesStore.setRunningSpec(runnerStore.spec.relative)
     if (
       resetStatsOnSpecChange &&
-        runnerStore.specRunId !== previousSpecRunId
+      runnerStore.specRunId !== previousSpecRunId
     ) {
       statsStore.reset()
     }
   }, [runnerStore.spec, runnerStore.specRunId, resetStatsOnSpecChange, previousSpecRunId])
 
+  const isStudioSingleTest = appState?.studioActive && appState.studioSingleTestActive
+
   return (
     <div className={cs(className, 'reporter', {
-      'studio-active': appState.studioActive,
       'mounted': isMounted,
     })}>
-      {renderReporterHeader({ appState, statsStore, runnablesStore })}
+      {isStudioSingleTest && runnerStore.spec ? <StudioTestHeader
+        spec={runnerStore.spec}
+      /> : renderReporterHeader({ appState, statsStore, runnablesStore, spec: runnerStore.spec })}
       {appState?.isPreferencesMenuOpen ? (
         <TestingPreferences appState={appState} />
       ) : (

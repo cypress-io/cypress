@@ -23,12 +23,15 @@ describe('src/cy/commands/location', () => {
       cy.url().should('match', /baz/).and('eq', 'http://localhost:3500/foo/bar/baz.html')
     })
 
-    it('catches thrown errors', () => {
-      cy.stub(Cypress.utils, 'locToString')
-      .onFirstCall().throws(new Error)
-      .onSecondCall().returns('http://localhost:3500/baz.html')
+    it('propagates thrown errors from CDP', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('CDP was unable to find the AUT iframe')
+        done()
+      })
 
-      cy.url().should('include', '/baz.html')
+      cy.stub(Cypress, 'automation').withArgs('get:aut:url').rejects(new Error('CDP was unable to find the AUT iframe'))
+
+      cy.url()
     })
 
     // https://github.com/cypress-io/cypress/issues/17399
@@ -380,7 +383,16 @@ describe('src/cy/commands/location', () => {
   context('#location', () => {
     it('returns the location object', () => {
       cy.location().then((loc) => {
-        expect(loc).to.have.keys(['auth', 'authObj', 'hash', 'href', 'host', 'hostname', 'pathname', 'port', 'protocol', 'search', 'origin', 'superDomainOrigin', 'superDomain', 'toString'])
+        expect(loc).to.have.property('hash')
+        expect(loc).to.have.property('host')
+        expect(loc).to.have.property('hostname')
+        expect(loc).to.have.property('href')
+        expect(loc).to.have.property('origin')
+        expect(loc).to.have.property('pathname')
+        expect(loc).to.have.property('port')
+        expect(loc).to.have.property('protocol')
+        expect(loc).to.have.property('search')
+        expect(loc).to.have.property('searchParams')
       })
     })
 
@@ -402,15 +414,17 @@ describe('src/cy/commands/location', () => {
 
     // https://github.com/cypress-io/cypress/issues/16463
     it('eventually returns a given key', function () {
-      cy.stub(cy, 'getRemoteLocation')
-      .onFirstCall().returns('')
-      .onSecondCall().returns({
-        pathname: '/my/path',
-      })
+      cy.stub(Cypress, 'automation').withArgs('get:aut:url')
+      .onFirstCall().resolves('http://localhost:3500')
+      .resolves('http://localhost:3500/my/path')
 
       cy.location('pathname').should('equal', '/my/path')
       .then(() => {
-        expect(cy.getRemoteLocation).to.have.been.calledTwice
+        // should be called 3 times:
+        // 1. initial call cy.location('pathname')
+        // 2. the should() assertion
+        // 3. the then() callback
+        expect(Cypress.automation).to.have.been.calledThrice
       })
     })
 
@@ -614,7 +628,8 @@ describe('src/cy/commands/location', () => {
           expect(_.keys(consoleProps)).to.deep.eq(['name', 'type', 'props'])
           expect(consoleProps.name).to.eq('location')
           expect(consoleProps.type).to.eq('command')
-          expect(_.keys(consoleProps.props.Yielded)).to.deep.eq(['auth', 'authObj', 'hash', 'href', 'host', 'hostname', 'origin', 'pathname', 'port', 'protocol', 'search', 'superDomainOrigin', 'superDomain', 'toString'])
+
+          expect(_.keys(consoleProps.props.Yielded)).to.deep.eq(['hash', 'host', 'hostname', 'href', 'origin', 'pathname', 'port', 'protocol', 'search', 'searchParams'])
         })
       })
     })

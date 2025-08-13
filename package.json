@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "14.5.3",
+  "version": "15.0.0",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -76,7 +76,7 @@
   "devDependencies": {
     "@aws-sdk/client-s3": "3.485.0",
     "@aws-sdk/credential-providers": "3.53.0",
-    "@babel/eslint-parser": "7.25.1",
+    "@babel/eslint-parser": "7.28.0",
     "@cypress/request": "^3.0.9",
     "@cypress/request-promise": "^5.0.0",
     "@electron/fuses": "1.8.0",
@@ -133,7 +133,6 @@
     "chai": "4.5.0",
     "chai-as-promised": "7.1.1",
     "chalk": "2.4.2",
-    "check-dependencies": "1.1.0",
     "check-more-types": "2.24.0",
     "commander": "6.2.1",
     "common-tags": "1.8.0",
@@ -143,7 +142,7 @@
     "dedent": "^0.7.0",
     "del": "3.0.0",
     "detect-port": "^2.1.0",
-    "electron": "33.2.1",
+    "electron": "36.4.0",
     "electron-builder": "^25.1.8",
     "enzyme-adapter-react-16": "1.12.1",
     "eslint": "^8.56.0",
@@ -216,7 +215,7 @@
     "yarn-deduplicate": "3.1.0"
   },
   "engines": {
-    "node": ">=20.18.1",
+    "node": ">=22.15.1",
     "yarn": ">=1.22.22"
   },
   "productName": "Cypress",
@@ -280,6 +279,7 @@
     "@types/react": "18.3.12",
     "browserify-sign": "4.2.2",
     "devtools-protocol": "0.0.1459876",
+    "node-abi": "4.9.0",
     "sharp": "0.29.3",
     "vue-template-compiler": "2.6.12"
   },

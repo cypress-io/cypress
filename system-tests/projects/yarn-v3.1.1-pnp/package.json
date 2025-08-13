@@ -5,6 +5,7 @@
     "lodash": "^4.17.21"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.225",
     "typescript": "^5.6.3"
   },
   "_cyYarnV311": true

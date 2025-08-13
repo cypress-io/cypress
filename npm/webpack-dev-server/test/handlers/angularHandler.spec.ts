@@ -22,8 +22,8 @@ chai.use(chaiPromise)
 describe('angularHandler', function () {
   this.timeout(1000 * 60)
 
-  it('sources the config from angular-17', async () => {
-    const projectRoot = await scaffoldMigrationProject('angular-17')
+  it('sources the config from angular-18', async () => {
+    const projectRoot = await scaffoldMigrationProject('angular-18')
 
     process.chdir(projectRoot)
     const devServerConfig = {
