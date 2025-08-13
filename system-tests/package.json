@@ -42,7 +42,7 @@
     "babel-loader": "10.0.0",
     "base64url": "^3.0.1",
     "bluebird": "3.7.2",
-    "body-parser": "1.20.2",
+    "body-parser": "1.20.3",
     "cachedir": "2.3.0",
     "chai": "3.5.0",
     "chai-as-promised": "7.1.1",
