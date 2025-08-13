@@ -26480,15 +26480,15 @@ react-docgen@6.0.4:
     resolve "^1.22.1"
     strip-indent "^4.0.0"
 
-"react-dom-15.6.1@npm:react-dom@15.6.1":
-  version "15.6.1"
-  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-15.6.1.tgz#2cb0ed4191038e53c209eb3a79a23e2a4cf99470"
-  integrity sha1-LLDtQZEDjlPCCes6eaI+Kkz5lHA=
+"react-dom-15.6.1@npm:react-dom@16.0.1":
+  version "16.0.1"
+  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.0.1.tgz#bd2fc18d2bb81645cb807bb27a03a14d8b796e6d"
+  integrity sha512-gGJNmuS0VpkJsNStpzplcgc4iuHJ2X8rjiiaY/5YfHrsAd2cw1JkMXD6Z1kBOed8rDUNrRYrnDYptnhFghFFhA==
   dependencies:
-    fbjs "^0.8.9"
+    fbjs "^0.8.16"
     loose-envify "^1.1.0"
-    object-assign "^4.1.0"
-    prop-types "^15.5.10"
+    object-assign "^4.1.1"
+    prop-types "^15.6.0"
 
 "react-dom-16.0.0@npm:react-dom@16.0.1":
   version "16.0.1"
