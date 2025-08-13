@@ -111,34 +111,31 @@ export default (Commands: Cypress.Cypress['Commands'], Cypress: Cypress.Cypress,
   if (Cypress.config('experimentalPromptCommand')) {
     let initializeCloudCyPromptPromise = initializeCloudCyPrompt(Cypress, cy)
 
-    // cy.prompt
-    const prompt = (steps: string[], commandOptions: object = {}) => {
-      const promptCmd = cy.state('current')
+    const commands = {
+      prompt (steps: string[], commandOptions: object = {}) {
+        const promptCmd = cy.state('current')
 
-      return cy.wrap(initializeCloudCyPromptPromise, { log: false, timeout: 45000 }).then((bundleResult: Awaited<ReturnType<typeof initializeCloudCyPrompt>>) => {
-        if (bundleResult instanceof Error) {
-          throw bundleResult
-        }
+        return cy.wrap(initializeCloudCyPromptPromise, { log: false, timeout: 45000 }).then((bundleResult: Awaited<ReturnType<typeof initializeCloudCyPrompt>>) => {
+          if (bundleResult instanceof Error) {
+            throw bundleResult
+          }
 
-        const cyPrompt = bundleResult
+          const cyPrompt = bundleResult
 
-        return cyPrompt({
-          steps,
-          commandOptions,
-          promptCmd,
+          return cyPrompt({
+            steps,
+            commandOptions,
+            promptCmd,
+          })
         })
-      })
+      },
     }
 
-    // For testing purposes, we can reset the prompt command initialization
-    // by calling the __reset method.
-    prompt.__reset = () => {
+    commands.prompt['__resetPrompt'] = () => {
       initializedModule = null
       initializeCloudCyPromptPromise = initializeCloudCyPrompt(Cypress, cy)
     }
 
-    Commands.addAll({
-      prompt,
-    })
+    Commands.addAll(commands)
   }
 }

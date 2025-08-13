@@ -534,7 +534,7 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
                 <CommandDetails model={model} groupId={groupId} aliasesWithDuplicates={aliasesWithDuplicates} />
                 <CommandControls model={model} commandName={commandName} />
               </div>
-              {model.isCyPrompt && (model.state === 'passed' || model.state === 'failed') && (
+              {model.isCyPrompt && model.state === 'passed' && (
                 <div className='command-prompt-get-code' onClick={(e) => {
                   e.stopPropagation()
                   events.emit('prompt:get-code', { testId: model.testId, logId: model.id })
