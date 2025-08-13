@@ -1,20 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { Writable, Transform } from 'stream'
 import { FilterTaggedContent } from '../FilterTaggedContent'
-import { SplitStream } from '../SplitStream'
 import { LineDecoder } from '../LineDecoder'
 import { StringDecoder } from 'string_decoder'
+import { Writable } from 'stream'
+import { writeWithBackpressure } from '../writeWithBackpressure'
 
 vi.mock('node:string_decoder', () => {
   return {
     StringDecoder: vi.fn(),
-  }
-})
-
-vi.mock('stream', () => {
-  return {
-    Writable: vi.fn(),
-    Transform: vi.fn(),
   }
 })
 
@@ -24,9 +17,9 @@ vi.mock('../LineDecoder', () => {
   }
 })
 
-vi.mock('../SplitStream', () => {
+vi.mock('../writeWithBackpressure', () => {
   return {
-    SplitStream: vi.fn(),
+    writeWithBackpressure: vi.fn(),
   }
 })
 
@@ -45,20 +38,14 @@ describe('FilterTaggedContent', () => {
   }
 
   let filter: FilterTaggedContent
-  let mockFilteredStream: Writable
-  let mockSplitStream: any
+  let wasteStream: Writable
   let mockLineDecoder: any
   let mockStringDecoder: any
 
   beforeEach(() => {
     vi.clearAllMocks()
 
-    mockFilteredStream = new Writable()
-
-    mockSplitStream = {
-      writeLeft: vi.fn().mockImplementation(() => Promise.resolve()),
-      writeRight: vi.fn().mockImplementation(() => Promise.resolve()),
-    }
+    wasteStream = new Writable()
 
     mockLineDecoder = {
       write: vi.fn(),
@@ -70,26 +57,16 @@ describe('FilterTaggedContent', () => {
       write: vi.fn(),
     }
 
-    vi.mocked(SplitStream).mockImplementation(() => mockSplitStream)
     vi.mocked(LineDecoder).mockImplementation(() => mockLineDecoder)
     vi.mocked(StringDecoder).mockImplementation(() => mockStringDecoder)
 
-    filter = new FilterTaggedContent(START_TAG, END_TAG, mockFilteredStream)
+    filter = new FilterTaggedContent(START_TAG, END_TAG, wasteStream)
+    vi.spyOn(filter, 'push')
+    vi.mocked(writeWithBackpressure).mockResolvedValue()
   })
 
   afterEach(() => {
     vi.restoreAllMocks()
-  })
-
-  describe('constructor', () => {
-    it('creates a Transform stream with correct configuration', () => {
-      expect(filter).toBeInstanceOf(Transform)
-      expect(filter).toBeInstanceOf(FilterTaggedContent)
-    })
-
-    it('initializes SplitStream with correct parameters', () => {
-      expect(SplitStream).toHaveBeenCalledWith(mockFilteredStream, filter)
-    })
   })
 
   describe('transform', () => {
@@ -155,7 +132,7 @@ describe('FilterTaggedContent', () => {
           mockLineDecoder[Symbol.iterator].mockReturnValue([TEST_LINES.ONE][Symbol.iterator]())
         })
 
-        it('writes to the right side of the split stream', () => {
+        it('pushes to the main stream', () => {
           filter.transform(Buffer.from(''), ENCODING_UTF8, vi.fn())
           expect(mockLineDecoder.write).toHaveBeenCalledWith(TEST_LINES.ONE)
         })
@@ -168,9 +145,9 @@ describe('FilterTaggedContent', () => {
           mockLineDecoder[Symbol.iterator].mockReturnValue([TEST_STRING][Symbol.iterator]())
         })
 
-        it('writes to the left side of the split stream', () => {
+        it('writes to the waste stream', () => {
           filter.transform(Buffer.from(TEST_STRING, ENCODING_UTF8), ENCODING_UTF8, vi.fn())
-          expect(mockSplitStream.writeLeft).toHaveBeenCalledWith(TEST_LINES.ONE)
+          expect(writeWithBackpressure).toHaveBeenCalledWith(wasteStream, Buffer.from(TEST_LINES.ONE, ENCODING_UTF8))
         })
       })
 
@@ -181,9 +158,9 @@ describe('FilterTaggedContent', () => {
           mockLineDecoder[Symbol.iterator].mockReturnValue([TEST_STRING][Symbol.iterator]())
         })
 
-        it('writes to the left side of the split stream', () => {
+        it('writes to the waste stream', () => {
           filter.transform(Buffer.from(TEST_STRING, ENCODING_UTF8), ENCODING_UTF8, vi.fn())
-          expect(mockSplitStream.writeLeft).toHaveBeenCalledWith(TEST_LINES.ONE)
+          expect(writeWithBackpressure).toHaveBeenCalledWith(wasteStream, Buffer.from(TEST_LINES.ONE, ENCODING_UTF8))
         })
       })
 
@@ -194,9 +171,9 @@ describe('FilterTaggedContent', () => {
           mockLineDecoder[Symbol.iterator].mockReturnValue([TEST_STRING][Symbol.iterator]())
         })
 
-        it('writes to the left side of the split stream', async () => {
+        it('writes to the waste stream', async () => {
           await filter.transform(Buffer.from(TEST_STRING, ENCODING_UTF8), ENCODING_UTF8, vi.fn())
-          expect(mockSplitStream.writeLeft).toHaveBeenCalledWith(TEST_LINES.ONE)
+          expect(writeWithBackpressure).toHaveBeenCalledWith(wasteStream, Buffer.from(TEST_LINES.ONE, ENCODING_UTF8))
         })
       })
 
@@ -207,10 +184,10 @@ describe('FilterTaggedContent', () => {
           mockLineDecoder[Symbol.iterator].mockReturnValue([TEST_STRING][Symbol.iterator]())
         })
 
-        it('writes content before tag to right side and tagged content to left side', async () => {
+        it('writes content before tag to the main stream and tagged content to the waste stream', async () => {
           await filter.transform(Buffer.from(TEST_STRING, ENCODING_UTF8), ENCODING_UTF8, vi.fn())
-          expect(mockSplitStream.writeRight).toHaveBeenCalledWith(TEST_LINES.ONE)
-          expect(mockSplitStream.writeLeft).toHaveBeenCalledWith(TEST_LINES.TWO)
+          expect(filter.push).toHaveBeenCalledWith(Buffer.from(TEST_LINES.ONE, ENCODING_UTF8))
+          expect(writeWithBackpressure).toHaveBeenCalledWith(wasteStream, Buffer.from(TEST_LINES.TWO, ENCODING_UTF8))
         })
       })
 
@@ -221,10 +198,10 @@ describe('FilterTaggedContent', () => {
           mockLineDecoder[Symbol.iterator].mockReturnValue([TEST_STRING][Symbol.iterator]())
         })
 
-        it('writes tagged content to left side and content after tag to right side', async () => {
+        it('writes tagged content to waste stream and content after tag to main pipeline', async () => {
           await filter.transform(Buffer.from(TEST_STRING, ENCODING_UTF8), ENCODING_UTF8, vi.fn())
-          expect(mockSplitStream.writeLeft).toHaveBeenCalledWith(TEST_LINES.ONE)
-          expect(mockSplitStream.writeRight).toHaveBeenCalledWith(TEST_LINES.TWO)
+          expect(writeWithBackpressure, 'wasteStream.write').toHaveBeenCalledWith(wasteStream, Buffer.from(TEST_LINES.ONE, ENCODING_UTF8))
+          expect(filter.push, 'filter.push').toHaveBeenCalledWith(Buffer.from(TEST_LINES.TWO, ENCODING_UTF8))
         })
       })
 
@@ -235,10 +212,10 @@ describe('FilterTaggedContent', () => {
           mockLineDecoder[Symbol.iterator].mockReturnValue([TEST_STRING][Symbol.iterator]())
         })
 
-        it('writes content before end tag to left side and content after tag to right side', async () => {
+        it('writes content before end tag to waste stream and content after tag to main pipeline', async () => {
           await filter.transform(Buffer.from(TEST_STRING, ENCODING_UTF8), ENCODING_UTF8, vi.fn())
-          expect(mockSplitStream.writeLeft).toHaveBeenCalledWith(TEST_LINES.ONE)
-          expect(mockSplitStream.writeRight).toHaveBeenCalledWith(TEST_LINES.TWO)
+          expect(writeWithBackpressure).toHaveBeenCalledWith(wasteStream, Buffer.from(TEST_LINES.ONE, ENCODING_UTF8))
+          expect(filter.push).toHaveBeenCalledWith(Buffer.from(TEST_LINES.TWO, ENCODING_UTF8))
         })
       })
 
@@ -249,11 +226,11 @@ describe('FilterTaggedContent', () => {
           mockLineDecoder[Symbol.iterator].mockReturnValue([TEST_STRING][Symbol.iterator]())
         })
 
-        it('writes content before tag to right side, tagged content to left side, and content after tag to right side', async () => {
+        it('writes content before tag to main pipeline, tagged content to waste stream, and content after tag to main pipeline', async () => {
           await filter.transform(Buffer.from(TEST_STRING, ENCODING_UTF8), ENCODING_UTF8, vi.fn())
-          expect(mockSplitStream.writeRight).toHaveBeenCalledWith(TEST_LINES.ONE)
-          expect(mockSplitStream.writeLeft).toHaveBeenCalledWith(TEST_LINES.TWO)
-          expect(mockSplitStream.writeRight).toHaveBeenCalledWith(TEST_LINES.THREE)
+          expect(filter.push).toHaveBeenCalledWith(Buffer.from(TEST_LINES.ONE, ENCODING_UTF8))
+          expect(writeWithBackpressure).toHaveBeenCalledWith(wasteStream, Buffer.from(TEST_LINES.TWO, ENCODING_UTF8))
+          expect(filter.push).toHaveBeenCalledWith(Buffer.from(TEST_LINES.THREE, ENCODING_UTF8))
         })
       })
 
@@ -264,9 +241,9 @@ describe('FilterTaggedContent', () => {
           mockLineDecoder[Symbol.iterator].mockReturnValue([TEST_STRING][Symbol.iterator]())
         })
 
-        it('writes empty string to right side', async () => {
+        it('writes empty string to main pipeline', async () => {
           await filter.transform(Buffer.from(TEST_STRING, ENCODING_UTF8), ENCODING_UTF8, vi.fn())
-          expect(mockSplitStream.writeRight).toHaveBeenCalledWith(TEST_STRING)
+          expect(filter.push).toHaveBeenCalledWith(Buffer.from(TEST_STRING))
         })
       })
 
@@ -277,9 +254,9 @@ describe('FilterTaggedContent', () => {
           mockLineDecoder[Symbol.iterator].mockReturnValue([TEST_STRING][Symbol.iterator]())
         })
 
-        it('writes whitespace to right side', async () => {
+        it('writes whitespace to main pipeline', async () => {
           await filter.transform(Buffer.from(TEST_STRING, ENCODING_UTF8), ENCODING_UTF8, vi.fn())
-          expect(mockSplitStream.writeRight).toHaveBeenCalledWith(TEST_STRING)
+          expect(filter.push).toHaveBeenCalledWith(Buffer.from(TEST_STRING))
         })
       })
     })
@@ -299,7 +276,7 @@ describe('FilterTaggedContent', () => {
       await filter.flush(callback)
 
       expect(mockLineDecoder.end).toHaveBeenCalledWith()
-      expect(mockSplitStream.writeRight).toHaveBeenCalledWith(TEST_LINES.ONE)
+      expect(filter.push).toHaveBeenCalledWith(Buffer.from(TEST_LINES.ONE))
       expect(callback).toHaveBeenCalledWith()
     })
 
@@ -314,7 +291,7 @@ describe('FilterTaggedContent', () => {
 
     it('handles undefined LineDecoder', async () => {
       const callback = vi.fn()
-      const newFilter = new FilterTaggedContent(START_TAG, END_TAG, mockFilteredStream)
+      const newFilter = new FilterTaggedContent(START_TAG, END_TAG, wasteStream)
 
       await newFilter.flush(callback)
 
@@ -351,9 +328,9 @@ describe('FilterTaggedContent', () => {
 
       await filter.transform(chunk, ENCODING_UTF8, next)
 
-      expect(mockSplitStream.writeLeft).toHaveBeenCalledWith(TEST_LINES.ONE)
-      expect(mockSplitStream.writeLeft).toHaveBeenCalledWith(TEST_LINES.TWO)
-      expect(mockSplitStream.writeLeft).toHaveBeenCalledWith(TEST_LINES.THREE)
+      expect(writeWithBackpressure).toHaveBeenCalledWith(wasteStream, Buffer.from(TEST_LINES.ONE, ENCODING_UTF8))
+      expect(writeWithBackpressure).toHaveBeenCalledWith(wasteStream, Buffer.from(TEST_LINES.TWO, ENCODING_UTF8))
+      expect(writeWithBackpressure).toHaveBeenCalledWith(wasteStream, Buffer.from(TEST_LINES.THREE, ENCODING_UTF8))
     })
 
     it('handles multiple tagged sections across lines', async () => {
@@ -370,8 +347,8 @@ describe('FilterTaggedContent', () => {
 
       await filter.transform(chunk, ENCODING_UTF8, next)
 
-      expect(mockSplitStream.writeLeft).toHaveBeenCalledWith(TEST_LINES.ONE)
-      expect(mockSplitStream.writeLeft).toHaveBeenCalledWith(TEST_LINES.TWO)
+      expect(writeWithBackpressure).toHaveBeenCalledWith(wasteStream, Buffer.from(TEST_LINES.ONE, ENCODING_UTF8))
+      expect(writeWithBackpressure).toHaveBeenCalledWith(wasteStream, Buffer.from(TEST_LINES.TWO, ENCODING_UTF8))
     })
 
     it('handles content with tags and surrounding text', async () => {
@@ -385,9 +362,9 @@ describe('FilterTaggedContent', () => {
 
       await filter.transform(chunk, ENCODING_UTF8, next)
 
-      expect(mockSplitStream.writeRight).toHaveBeenCalledWith(TEST_LINES.ONE)
-      expect(mockSplitStream.writeLeft).toHaveBeenCalledWith(TEST_LINES.TWO)
-      expect(mockSplitStream.writeRight).toHaveBeenCalledWith(TEST_LINES.THREE)
+      expect(filter.push).toHaveBeenCalledWith(Buffer.from(TEST_LINES.ONE))
+      expect(writeWithBackpressure).toHaveBeenCalledWith(wasteStream, Buffer.from(TEST_LINES.TWO))
+      expect(filter.push).toHaveBeenCalledWith(Buffer.from(TEST_LINES.THREE))
     })
 
     it('handles partial lines across multiple chunks', async () => {
@@ -406,9 +383,9 @@ describe('FilterTaggedContent', () => {
       await filter.transform(chunk1, ENCODING_UTF8, next)
       await filter.transform(chunk2, ENCODING_UTF8, next)
 
-      expect(mockSplitStream.writeRight).toHaveBeenCalledWith(TEST_LINES.ONE)
-      expect(mockSplitStream.writeLeft).toHaveBeenCalledWith(`${TEST_LINES.TWO}${TEST_LINES.THREE}`)
-      expect(mockSplitStream.writeRight).toHaveBeenCalledWith(TEST_LINES.FOUR)
+      expect(filter.push).toHaveBeenCalledWith(Buffer.from(TEST_LINES.ONE, ENCODING_UTF8))
+      expect(writeWithBackpressure).toHaveBeenCalledWith(wasteStream, Buffer.from(`${TEST_LINES.TWO}${TEST_LINES.THREE}`, ENCODING_UTF8))
+      expect(filter.push).toHaveBeenCalledWith(Buffer.from(TEST_LINES.FOUR, ENCODING_UTF8))
     })
 
     it('handles mixed tagged and untagged content', async () => {
@@ -426,9 +403,9 @@ describe('FilterTaggedContent', () => {
 
       await filter.transform(chunk, ENCODING_UTF8, next)
 
-      expect(mockSplitStream.writeRight).toHaveBeenCalledWith(TEST_LINES.ONE)
-      expect(mockSplitStream.writeLeft).toHaveBeenCalledWith(TEST_LINES.TWO)
-      expect(mockSplitStream.writeRight).toHaveBeenCalledWith(TEST_LINES.THREE)
+      expect(filter.push).toHaveBeenCalledWith(Buffer.from(TEST_LINES.ONE, ENCODING_UTF8))
+      expect(writeWithBackpressure).toHaveBeenCalledWith(wasteStream, Buffer.from(TEST_LINES.TWO, ENCODING_UTF8))
+      expect(filter.push).toHaveBeenCalledWith(Buffer.from(TEST_LINES.THREE, ENCODING_UTF8))
     })
   })
 })

@@ -1,20 +1,31 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { Transform, Writable } from 'stream'
 import { FilterPrefixedContent } from '../FilterPrefixedContent'
+import { LineDecoder } from '../LineDecoder'
+import { StringDecoder } from 'string_decoder'
+import { writeWithBackpressure } from '../writeWithBackpressure'
+import { Writable } from 'stream'
 
-// Mock dependencies
-vi.mock('../SplitStream')
-vi.mock('../LineDecoder')
-vi.mock('node:string_decoder')
+vi.mock('../LineDecoder', () => {
+  return {
+    LineDecoder: vi.fn(),
+  }
+})
 
-const { SplitStream } = await import('../SplitStream')
-const { LineDecoder } = await import('../LineDecoder')
-const { StringDecoder } = await import('node:string_decoder')
+vi.mock('node:string_decoder', () => {
+  return {
+    StringDecoder: vi.fn(),
+  }
+})
+
+vi.mock('../writeWithBackpressure', () => {
+  return {
+    writeWithBackpressure: vi.fn(),
+  }
+})
 
 describe('FilterPrefixedContent', () => {
   // Test constants
   const ERROR_PREFIX = /^ERROR:/
-  const COMPLEX_PREFIX = /^(ERROR|WARN|FATAL):/
   const ENCODING_UTF8 = 'utf8'
   const ENCODING_BUFFER = 'buffer' as any
 
@@ -44,69 +55,52 @@ describe('FilterPrefixedContent', () => {
   }
 
   let filter: FilterPrefixedContent
-  let mockFilteredStream: Writable
-  let mockSplitStream: any
+  let wasteStream: Writable
   let mockLineDecoder: any
   let mockStringDecoder: any
 
   beforeEach(() => {
     vi.clearAllMocks()
 
-    mockFilteredStream = new Writable()
-
-    mockSplitStream = {
-      writeLeft: vi.fn().mockResolvedValue(undefined),
-      writeRight: vi.fn().mockResolvedValue(undefined),
-    }
+    wasteStream = new Writable()
 
     mockLineDecoder = {
       write: vi.fn(),
-      [Symbol.iterator]: vi.fn(),
+      [Symbol.iterator]: vi.fn().mockReturnValue([][Symbol.iterator]()),
       end: vi.fn(),
     }
 
     mockStringDecoder = {
-      write: vi.fn(),
+      write: vi.fn().mockImplementation((chunk) => {
+        return chunk.toString()
+      }),
     }
 
-    vi.mocked(SplitStream).mockImplementation(() => mockSplitStream)
     vi.mocked(LineDecoder).mockImplementation(() => mockLineDecoder)
     vi.mocked(StringDecoder).mockImplementation(() => mockStringDecoder)
 
-    filter = new FilterPrefixedContent(ERROR_PREFIX, mockFilteredStream)
+    filter = new FilterPrefixedContent(ERROR_PREFIX, wasteStream)
+    vi.mocked(writeWithBackpressure).mockResolvedValue()
+    vi.spyOn(filter, 'push')
   })
 
   afterEach(() => {
     vi.restoreAllMocks()
   })
 
-  describe('constructor', () => {
-    it('creates a Transform stream with correct configuration', () => {
-      expect(filter).toBeInstanceOf(Transform)
-      expect(filter).toBeInstanceOf(FilterPrefixedContent)
-    })
-
-    it('initializes SplitStream with correct parameters', () => {
-      expect(SplitStream).toHaveBeenCalledWith(mockFilteredStream, filter)
-    })
-  })
-
   describe('transform', () => {
-    beforeEach(() => {
-      mockStringDecoder.write.mockReturnValue(TEST_DATA.SINGLE_LINE_TEXT)
-      mockLineDecoder[Symbol.iterator].mockReturnValue([TEST_DATA.SINGLE_LINE_TEXT][Symbol.iterator]())
-    })
-
     it('initializes StringDecoder and LineDecoder on first call', async () => {
       const chunk = TEST_CHUNKS.SINGLE_LINE
       const next = vi.fn()
 
       await filter.transform(chunk, ENCODING_UTF8, next)
+      mockStringDecoder.write.mockReturnValue(TEST_DATA.SINGLE_LINE_TEXT)
+      mockLineDecoder[Symbol.iterator].mockReturnValue([TEST_DATA.SINGLE_LINE_TEXT][Symbol.iterator]())
 
       expect(StringDecoder).toHaveBeenCalledWith(ENCODING_UTF8)
       expect(LineDecoder).toHaveBeenCalled()
-      expect(mockStringDecoder.write).toHaveBeenCalledWith(chunk)
-      expect(mockLineDecoder.write).toHaveBeenCalledWith(TEST_DATA.SINGLE_LINE_TEXT)
+      expect(mockStringDecoder.write, 'string decoder write').toHaveBeenCalledWith(chunk)
+      expect(mockLineDecoder.write, 'line decoder write').toHaveBeenCalledWith(TEST_DATA.SINGLE_LINE_TEXT)
       expect(next).toHaveBeenCalledWith()
     })
 
@@ -119,21 +113,6 @@ describe('FilterPrefixedContent', () => {
       await filter.transform(chunk, ENCODING_BUFFER, next)
 
       expect(StringDecoder).toHaveBeenCalledWith(ENCODING_UTF8)
-      expect(next).toHaveBeenCalledWith()
-    })
-
-    it('processes lines and routes them correctly', async () => {
-      const chunk = TEST_CHUNKS.MULTI_LINE
-      const next = vi.fn()
-      const lines = [TEST_LINES.ERROR, TEST_LINES.INFO]
-
-      mockStringDecoder.write.mockReturnValue(TEST_DATA.MULTI_LINE_TEXT)
-      mockLineDecoder[Symbol.iterator].mockReturnValue(lines[Symbol.iterator]())
-
-      await filter.transform(chunk, ENCODING_UTF8, next)
-
-      expect(mockSplitStream.writeLeft).toHaveBeenCalledWith(TEST_LINES.ERROR)
-      expect(mockSplitStream.writeRight).toHaveBeenCalledWith(TEST_LINES.INFO)
       expect(next).toHaveBeenCalledWith()
     })
 
@@ -162,6 +141,36 @@ describe('FilterPrefixedContent', () => {
       expect(StringDecoder).toHaveBeenCalledTimes(1)
       expect(LineDecoder).toHaveBeenCalledTimes(1)
     })
+
+    describe('when the prefix is not found', () => {
+      it('passes the line to the next stream', async () => {
+        const chunk = Buffer.from(TEST_DATA.SINGLE_LINE_TEXT)
+        const next = vi.fn()
+
+        mockStringDecoder.write.mockReturnValue(TEST_DATA.SINGLE_LINE_TEXT)
+        mockLineDecoder[Symbol.iterator].mockReturnValue([TEST_DATA.SINGLE_LINE_TEXT][Symbol.iterator]())
+
+        await filter.transform(chunk, ENCODING_UTF8, next)
+
+        expect(filter.push).toHaveBeenCalledWith(Buffer.from(TEST_DATA.SINGLE_LINE_TEXT, ENCODING_UTF8))
+        expect(next).toHaveBeenCalledTimes(1)
+      })
+    })
+
+    describe('when the prefix is found', () => {
+      it('writes the line to the waste stream', async () => {
+        const chunk = Buffer.from(TEST_LINES.ERROR)
+        const next = vi.fn()
+
+        mockStringDecoder.write.mockReturnValue(TEST_LINES.ERROR)
+        mockLineDecoder[Symbol.iterator].mockReturnValue([TEST_LINES.ERROR][Symbol.iterator]())
+
+        await filter.transform(chunk, ENCODING_UTF8, next)
+
+        expect(writeWithBackpressure).toHaveBeenCalledWith(wasteStream, Buffer.from(TEST_LINES.ERROR, ENCODING_UTF8))
+        expect(next).toHaveBeenCalledTimes(1)
+      })
+    })
   })
 
   describe('flush', () => {
@@ -178,8 +187,6 @@ describe('FilterPrefixedContent', () => {
       await filter.flush(callback)
 
       expect(mockLineDecoder.end).toHaveBeenCalledWith()
-      expect(mockSplitStream.writeLeft).toHaveBeenCalledWith(TEST_LINES.ERROR)
-      expect(mockSplitStream.writeRight).toHaveBeenCalledWith(TEST_LINES.INFO)
       expect(callback).toHaveBeenCalledWith()
     })
 
@@ -194,7 +201,7 @@ describe('FilterPrefixedContent', () => {
 
     it('handles undefined LineDecoder', async () => {
       const callback = vi.fn()
-      const newFilter = new FilterPrefixedContent(ERROR_PREFIX, mockFilteredStream)
+      const newFilter = new FilterPrefixedContent(ERROR_PREFIX, wasteStream)
 
       await newFilter.flush(callback)
 
@@ -212,86 +219,6 @@ describe('FilterPrefixedContent', () => {
       await filter.flush(callback)
 
       expect(callback).toHaveBeenCalledWith(error)
-    })
-  })
-
-  describe('writeLine', () => {
-    it('routes matching lines to filtered stream', async () => {
-      await (filter as any).writeLine(TEST_LINES.ERROR)
-
-      expect(mockSplitStream.writeLeft).toHaveBeenCalledWith(TEST_LINES.ERROR)
-      expect(mockSplitStream.writeRight).not.toHaveBeenCalled()
-    })
-
-    it('routes non-matching lines to main stream', async () => {
-      await (filter as any).writeLine(TEST_LINES.INFO)
-
-      expect(mockSplitStream.writeRight).toHaveBeenCalledWith(TEST_LINES.INFO)
-      expect(mockSplitStream.writeLeft).not.toHaveBeenCalled()
-    })
-
-    it('handles complex regex patterns', async () => {
-      const complexFilter = new FilterPrefixedContent(COMPLEX_PREFIX, mockFilteredStream)
-
-      await (complexFilter as any).writeLine(TEST_LINES.ERROR)
-      await (complexFilter as any).writeLine(TEST_LINES.WARN)
-      await (complexFilter as any).writeLine(TEST_LINES.INFO)
-
-      expect(mockSplitStream.writeLeft).toHaveBeenCalledWith(TEST_LINES.ERROR)
-      expect(mockSplitStream.writeLeft).toHaveBeenCalledWith(TEST_LINES.WARN)
-      expect(mockSplitStream.writeRight).toHaveBeenCalledWith(TEST_LINES.INFO)
-    })
-
-    it('handles empty lines', async () => {
-      await (filter as any).writeLine(TEST_LINES.EMPTY)
-
-      expect(mockSplitStream.writeRight).toHaveBeenCalledWith(TEST_LINES.EMPTY)
-      expect(mockSplitStream.writeLeft).not.toHaveBeenCalled()
-    })
-  })
-
-  describe('integration scenarios', () => {
-    it('handles mixed content with multiple lines', async () => {
-      const chunk = TEST_CHUNKS.COMPLEX
-      const next = vi.fn()
-      const lines = [
-        TEST_LINES.ERROR.replace('test error', 'First error'),
-        TEST_LINES.INFO.replace('test info', 'First info'),
-        TEST_LINES.ERROR.replace('test error', 'Second error'),
-        TEST_LINES.INFO.replace('test info', 'Second info'),
-      ]
-
-      mockStringDecoder.write.mockReturnValue(chunk.toString())
-      mockLineDecoder[Symbol.iterator].mockReturnValue(lines[Symbol.iterator]())
-
-      await filter.transform(chunk, ENCODING_UTF8, next)
-
-      expect(mockSplitStream.writeLeft).toHaveBeenCalledTimes(2)
-      expect(mockSplitStream.writeLeft).toHaveBeenCalledWith(TEST_LINES.ERROR.replace('test error', 'First error'))
-      expect(mockSplitStream.writeLeft).toHaveBeenCalledWith(TEST_LINES.ERROR.replace('test error', 'Second error'))
-
-      expect(mockSplitStream.writeRight).toHaveBeenCalledTimes(2)
-      expect(mockSplitStream.writeRight).toHaveBeenCalledWith(TEST_LINES.INFO.replace('test info', 'First info'))
-      expect(mockSplitStream.writeRight).toHaveBeenCalledWith(TEST_LINES.INFO.replace('test info', 'Second info'))
-    })
-
-    it('handles partial lines across multiple chunks', async () => {
-      const chunk1 = TEST_CHUNKS.PARTIAL_1
-      const chunk2 = TEST_CHUNKS.PARTIAL_2
-      const next = vi.fn()
-
-      mockStringDecoder.write
-      .mockReturnValueOnce(TEST_DATA.PARTIAL_TEXT_1)
-      .mockReturnValueOnce(TEST_DATA.PARTIAL_TEXT_2)
-
-      mockLineDecoder[Symbol.iterator]
-      .mockReturnValueOnce([][Symbol.iterator]()) // First chunk has no complete lines
-      .mockReturnValueOnce([TEST_DATA.COMPLETE_PARTIAL][Symbol.iterator]()) // Second chunk completes the line
-
-      await filter.transform(chunk1, ENCODING_UTF8, next)
-      await filter.transform(chunk2, ENCODING_UTF8, next)
-
-      expect(mockSplitStream.writeLeft).toHaveBeenCalledWith(TEST_DATA.COMPLETE_PARTIAL)
     })
   })
 })

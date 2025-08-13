@@ -6,6 +6,11 @@
  * an internal buffer. The end() method should be called to flush any remaining buffered content
  * when processing is complete.
  */
+
+import Debug from 'debug'
+
+const debug = Debug(`cypress-verbose:stderr-filtering:LineDecoder:${process.pid}`)
+
 export class LineDecoder {
   private buffer: string = ''
 
@@ -15,20 +20,9 @@ export class LineDecoder {
    * @param chunk The string chunk to add to the buffer
    */
   public write (chunk: string) {
+    debug('writing chunk to line decoder', { chunk })
     this.buffer += chunk
   }
-
-  /**
-   * Normalizes line endings to \n and splits on newlines.
-   *
-   * @param text The text to process
-   * @returns Array of lines with normalized line endings
-   */
-  private splitLines (text: string): string[] {
-    // Normalize \r\n to \n, then split
-    return text.replace(/\r\n/g, '\n').split('\n')
-  }
-
   /**
    * Iterates over complete lines in the current buffer.
    *
@@ -39,13 +33,19 @@ export class LineDecoder {
    * @yields Complete lines with newline characters preserved
    */
   *[Symbol.iterator] (): Generator<string> {
-    const lines = this.splitLines(this.buffer)
+    debug('iterating over lines in line decoder')
 
-    this.buffer = lines.pop() || ''
+    let nextLine: string | null = null
 
-    for (const line of lines) {
-      yield `${line}\n`
-    }
+    do {
+      nextLine = this.nextLine()
+
+      if (nextLine) {
+        debug('yielding line:', nextLine)
+        debug('buffer size:', this.buffer.length)
+        yield nextLine
+      }
+    } while (nextLine)
   }
 
   /**
@@ -59,11 +59,28 @@ export class LineDecoder {
    * @yields All remaining lines from the buffer and final chunk
    */
   *end (chunk?: string) {
-    const content = `${this.buffer}${(chunk || '')}`
-    const lines = this.splitLines(content)
+    this.buffer = `${this.buffer}${(chunk || '')}`
+    let nextLine: string | null = null
 
-    for (const line of lines) {
-      yield `${line}\n`
+    do {
+      nextLine = this.nextLine()
+      if (nextLine) {
+        yield nextLine
+      }
+    } while (nextLine)
+  }
+
+  private nextLine () {
+    const nIdx = this.buffer.indexOf('\n')
+
+    if (nIdx === -1) {
+      return null
     }
+
+    const line = this.buffer.slice(0, nIdx + 1)
+
+    this.buffer = this.buffer.slice(nIdx + 1)
+
+    return line
   }
 }

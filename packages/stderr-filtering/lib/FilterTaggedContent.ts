@@ -1,7 +1,9 @@
 import { Transform, Writable } from 'stream'
 import { StringDecoder } from 'node:string_decoder'
 import { LineDecoder } from './LineDecoder'
-import { SplitStream } from './SplitStream'
+import Debug from 'debug'
+import { writeWithBackpressure } from './writeWithBackpressure'
+const debug = Debug('cypress:stderr-filtering:FilterTaggedContent')
 
 /**
  * Filters content based on start and end tags, supporting multi-line tagged content.
@@ -21,7 +23,6 @@ export class FilterTaggedContent extends Transform {
   private strDecoder?: StringDecoder
   private lineDecoder?: LineDecoder
   private inTaggedContent: boolean = false
-  private splitStream: SplitStream<string>
 
   /**
    * Creates a new FilterTaggedContent instance.
@@ -30,13 +31,11 @@ export class FilterTaggedContent extends Transform {
    * @param endTag The string that marks the end of content to filter
    * @param filtered The writable stream for filtered content
    */
-  constructor (private startTag: string, private endTag: string, private filtered: Writable) {
+  constructor (private startTag: string, private endTag: string, private wasteStream: Writable) {
     super({
       transform: (chunk, encoding, next) => this.transform(chunk, encoding, next),
       flush: (callback) => this.flush(callback),
     })
-
-    this.splitStream = new SplitStream(this.filtered, this)
   }
 
   /**
@@ -47,6 +46,7 @@ export class FilterTaggedContent extends Transform {
    * @param next Callback to call when processing is complete
    */
   transform = async (chunk: Buffer, encoding: BufferEncoding, next: (err?: Error) => void) => {
+    debug('processing chunk for tagged content', { chunk, encoding, next })
     try {
       this.ensureDecoders(encoding)
 
@@ -109,35 +109,43 @@ export class FilterTaggedContent extends Transform {
     if (startPos >= 0 && endPos >= 0) {
       // Both tags on same line
       if (startPos > 0) {
-        await this.splitStream.writeRight(line.slice(0, startPos))
+        await this.pass(line.slice(0, startPos))
       }
 
-      await this.splitStream.writeLeft(line.slice(startPos + this.startTag.length, endPos))
+      await this.writeToWasteStream(line.slice(startPos + this.startTag.length, endPos))
       if (endPos + this.endTag.length < line.length) {
-        await this.splitStream.writeRight(line.slice(endPos + this.endTag.length))
+        await this.pass(line.slice(endPos + this.endTag.length))
       }
     } else if (startPos >= 0) {
       // Start tag found
       if (startPos > 0) {
-        await this.splitStream.writeRight(line.slice(0, startPos))
+        await this.pass(line.slice(0, startPos))
       }
 
-      await this.splitStream.writeLeft(line.slice(startPos + this.startTag.length))
+      await this.writeToWasteStream(line.slice(startPos + this.startTag.length))
       this.inTaggedContent = true
     } else if (endPos >= 0) {
       // End tag found
-      await this.splitStream.writeLeft(line.slice(0, endPos))
+      await this.writeToWasteStream(line.slice(0, endPos))
       if (endPos + this.endTag.length < line.length) {
-        await this.splitStream.writeRight(line.slice(endPos + this.endTag.length))
+        await this.pass(line.slice(endPos + this.endTag.length))
       }
 
       this.inTaggedContent = false
     } else if (this.inTaggedContent) {
       // Currently in tagged content
-      await this.splitStream.writeLeft(line)
+      await this.writeToWasteStream(line)
     } else {
       // Not in tagged content
-      await this.splitStream.writeRight(line)
+      await this.pass(line)
     }
+  }
+
+  private async writeToWasteStream (line: string, encoding?: BufferEncoding | 'buffer') {
+    await writeWithBackpressure(this.wasteStream, Buffer.from(line, (encoding === 'buffer' ? 'utf8' : encoding) ?? 'utf8'))
+  }
+
+  private async pass (line: string, encoding?: BufferEncoding | 'buffer') {
+    this.push(Buffer.from(line, (encoding === 'buffer' ? 'utf8' : encoding) ?? 'utf8'))
   }
 }

@@ -1,10 +1,9 @@
 import { Transform, Writable } from 'stream'
-import { StringDecoder } from 'node:string_decoder'
+import { StringDecoder } from 'string_decoder'
 import { LineDecoder } from './LineDecoder'
-import { SplitStream } from './SplitStream'
 import Debug from 'debug'
-
-const debug = Debug('cypress-verbose:stderr-filtering:FilterPrefixedContent')
+const debugStderr = Debug('cypress:stderr')
+import { writeWithBackpressure } from './writeWithBackpressure'
 
 /**
  * Filters content based on a prefix pattern, routing matching lines to a filtered stream.
@@ -23,7 +22,6 @@ const debug = Debug('cypress-verbose:stderr-filtering:FilterPrefixedContent')
 export class FilterPrefixedContent extends Transform {
   private strDecoder?: StringDecoder
   private lineDecoder?: LineDecoder
-  private splitStream: SplitStream<string>
 
   /**
    * Creates a new FilterPrefixedContent instance.
@@ -31,13 +29,11 @@ export class FilterPrefixedContent extends Transform {
    * @param prefix The regular expression pattern to test against the beginning of each line
    * @param filtered The writable stream for lines that match the prefix pattern
    */
-  constructor (private prefix: RegExp, private filtered: Writable) {
+  constructor (private prefix: RegExp, private wasteStream: Writable) {
     super(({
       transform: (chunk, encoding, next) => this.transform(chunk, encoding, next),
       flush: (callback) => this.flush(callback),
     }))
-
-    this.splitStream = new SplitStream(this.filtered, this)
   }
 
   /**
@@ -58,15 +54,17 @@ export class FilterPrefixedContent extends Transform {
         this.lineDecoder = new LineDecoder()
       }
 
-      this.lineDecoder.write(this.strDecoder.write(chunk))
+      const str = this.strDecoder.write(chunk)
+
+      this.lineDecoder.write(str)
 
       for (const line of this.lineDecoder) {
-        await this.writeLine(line)
+        await this.writeLine(line, encoding)
       }
 
       next()
     } catch (err) {
-      debug('error in transform', err)
+      debugStderr('error in transform', err)
       next(err as Error)
     }
   }
@@ -104,11 +102,11 @@ export class FilterPrefixedContent extends Transform {
    *
    * @param line The line to test and route
    */
-  private async writeLine (line: string): Promise<void> {
+  private async writeLine (line: string, encoding?: BufferEncoding | 'buffer'): Promise<void> {
     if (this.prefix.test(line)) {
-      await this.splitStream.writeLeft(line)
+      await writeWithBackpressure(this.wasteStream, Buffer.from(line, (encoding === 'buffer' ? 'utf8' : encoding) ?? 'utf8'))
     } else {
-      await this.splitStream.writeRight(line)
+      await this.push(Buffer.from(line, (encoding === 'buffer' ? 'utf8' : encoding) ?? 'utf8'))
     }
   }
 }
