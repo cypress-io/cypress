@@ -3,10 +3,10 @@
 ## Migration Checklist
 
 ### Batch 1: Small npm utilities
-- [x] npm/grep ✅ **COMPLETED** - Uses unified ESLint config with package-specific lint-staged handling
-- [ ] npm/puppeteer
-- [ ] npm/mount-utils
-- [ ] npm/cypress-schematic
+- [x] npm/grep ✅ **COMPLETED** 
+- [x] npm/puppeteer ✅ **COMPLETED** 
+- [x] npm/mount-utils ✅ **COMPLETED** 
+- [x] npm/cypress-schematic ✅ **COMPLETED** 
 
 ### Batch 2: Framework adapters
 - [ ] npm/react
