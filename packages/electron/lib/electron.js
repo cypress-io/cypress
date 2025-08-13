@@ -147,6 +147,14 @@ module.exports = {
       }
 
       const spawned = cp.spawn(execPath, argv, { stdio: 'pipe' })
+      .on('error', (err) => {
+        // If electron is throwing an error event, we need to ensure it's
+        // printed to console.
+        // eslint-disable-next-line no-console
+        console.error(err)
+
+        return process.exit(1)
+      })
       .on('close', (code, signal) => {
         debugElectron('electron closing %o', { code, signal })
 
@@ -166,8 +174,18 @@ module.exports = {
         return process.exit(code)
       })
 
+      // the DEBUG env is comma separated list of namespaces;
+      // we want to send all stderr output that matches the top level of
+      // these namespaces to stderr, rather than the the specialized debug
+      // namespace used for unclassified stdout.
+      const debugPrefixes = new RegExp(`^(${
+        (process.env.DEBUG || '')
+        .split(',')
+        .map((p) => p.split(':')[0]?.trim())
+        .filter(Boolean)
+        .join('|')})(:\S+)* `) // for DEBUG=cypress:server,extlib:err -- /^(cypress|extlib)(:\S+)* /
       const filterTaggedContent = new FilterTaggedContent(START_TAG, END_TAG, process.stderr)
-      const filterPrefixedContent = new FilterPrefixedContent(/^cypress:(\S+:)+ /, process.stderr)
+      const filterPrefixedContent = new FilterPrefixedContent(debugPrefixes, process.stderr)
       const toDebug = new WriteToDebug(debugStderr)
 
       spawned.stderr.pipe(filterTaggedContent).pipe(filterPrefixedContent).pipe(toDebug)
