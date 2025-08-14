@@ -55,7 +55,6 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
     })
 
     it('logs error when NODE_ENV is development', () => {
-      sinon.stub(console, 'error')
       process.env.NODE_ENV = 'development'
       const error = new Error('test error')
 
@@ -75,7 +74,6 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
     })
 
     it('logs error when CYPRESS_INTERNAL_E2E_TESTING_SELF is set', () => {
-      sinon.stub(console, 'error')
       process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
       const error = new Error('test error')
 
