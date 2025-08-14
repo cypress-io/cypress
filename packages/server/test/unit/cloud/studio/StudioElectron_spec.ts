@@ -35,10 +35,10 @@ describe('StudioElectron', () => {
     sinon.restore()
   })
 
-  it('creates a hidden BrowserWindow with hidden title bar and returns it', async () => {
+  it('creates a hidden BrowserWindow with hidden title bar and returns it', () => {
     const studioElectron = new StudioElectron()
 
-    const win = await studioElectron.createBrowserWindow()
+    const win = studioElectron.createBrowserWindow()
 
     expect((win as any)).to.be.instanceOf(FakeBrowserWindow)
 
@@ -54,7 +54,7 @@ describe('StudioElectron', () => {
     expect((studioElectron as any).browserWindow).to.be.undefined
   })
 
-  it('destroys any existing window before creating a new one', async () => {
+  it('destroys any existing window before creating a new one', () => {
     const studioElectron = new StudioElectron()
 
     // Seed an existing window
@@ -63,7 +63,7 @@ describe('StudioElectron', () => {
 
     ;(studioElectron as any).browserWindow = existing
 
-    const win = await studioElectron.createBrowserWindow()
+    const win = studioElectron.createBrowserWindow()
 
     expect(destroyStub).to.be.calledOnce
     expect((win as any)).to.be.instanceOf(FakeBrowserWindow)

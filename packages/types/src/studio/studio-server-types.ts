@@ -68,7 +68,7 @@ export type BrowserWindow = {
 }
 
 export type StudioElectronApi = {
-  createBrowserWindow: () => Promise<BrowserWindow>
+  createBrowserWindow: () => BrowserWindow
 }
 
 export interface StudioServerOptions {

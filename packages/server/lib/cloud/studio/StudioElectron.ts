@@ -4,10 +4,14 @@ import Debug from 'debug'
 
 const debug = Debug('cypress:server:studio:electron')
 
+/**
+ * This interface exposes a selection of Electrons APIs
+ * to the dynamic studio bundle.
+ */
 export class StudioElectron {
   private browserWindow: BrowserWindow | undefined
 
-  async createBrowserWindow () {
+  createBrowserWindow () {
     debug('creating new browser window')
 
     this.destroy()
