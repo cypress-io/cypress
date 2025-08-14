@@ -19,9 +19,9 @@ import {
   printParseErrorCode,
 } from 'jsonc-parser'
 
-export type InsertionIndex = (properties: string[]) => number;
+export type InsertionIndex = (properties: string[]) => number
 
-export type JSONPath = (string | number)[];
+export type JSONPath = (string | number)[]
 
 /** @internal */
 export class JSONFile {

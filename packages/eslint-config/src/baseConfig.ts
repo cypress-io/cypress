@@ -38,7 +38,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     languageOptions: {
       parserOptions: {
         parser: tsParser,
-        projectService: true,
         extraFileExtensions: ['.vue'],
         ecmaFeatures: {
           jsx: true,

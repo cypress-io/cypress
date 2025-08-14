@@ -157,6 +157,7 @@ export class SocketBase {
       onChromiumRun () {},
       onReloadBrowser () {},
       closeExtraTargets () {},
+      getSavedState () {},
       onSavedStateChanged () {},
       onTestFileChange () {},
       onCaptureVideoFrames () {},
@@ -581,8 +582,21 @@ export class SocketBase {
           return cb(s || {}, cachedTestState)
         })
 
+        socket.on('get:app:state', async (opts, cb) => {
+          try {
+            const state = await options.getSavedState(opts)
+
+            cb({ data: state })
+          } catch (error) {
+            cb({ error: errors.cloneErr(error) })
+          }
+        })
+
         socket.on('save:app:state', (state, cb) => {
-          options.onSavedStateChanged(state)
+          const opts = state.__options
+          const stateWithoutOptions = _.omit(state, '__options')
+
+          options.onSavedStateChanged(stateWithoutOptions, opts)
 
           // we only use the 'ack' here in tests
           if (cb) {

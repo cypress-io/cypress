@@ -10,14 +10,13 @@ const { getNextVersionForBinary } = require('../get-next-version')
   const { nextVersion } = await getNextVersionForBinary()
 
   const body = JSON.stringify({
-    branch: 'release/15.0.0',
     parameters: {
       temp_dir: os.tmpdir(),
       sha: process.env.CIRCLE_SHA1,
       job_name: process.env.CIRCLE_JOB,
       triggered_workflow_id: process.env.CIRCLE_WORKFLOW_ID,
       triggered_job_url: process.env.CIRCLE_BUILD_URL,
-      branch: 'release/15.0.0',
+      branch: process.env.CIRCLE_BRANCH,
       should_persist_artifacts: Boolean(process.env.SHOULD_PERSIST_ARTIFACTS),
       binary_version: nextVersion,
     },

@@ -422,6 +422,29 @@ cy.get('#increment').click();
         })
       })
     })
+
+    it('shows the assertions menu for an element inside an invisible wrapper', () => {
+      launchStudio({ specName: 'spec-w-invisible-wrapper.cy.js' })
+
+      cy.getAutIframe().within(() => {
+        // Show menu
+        cy.contains('Increment').realClick({
+          button: 'right',
+        })
+
+        cy.get('.__cypress-studio-assertions-menu').shadow()
+        .find('.assertions-menu').should('be.visible').should('have.css', 'transform', 'matrix(1, 0, 0, 1, 0, 141)')
+
+        // Show submenu
+        cy.get('.__cypress-studio-assertions-menu').shadow()
+        .find('.assertion-type-text:first').realHover()
+
+        cy.get('.__cypress-studio-assertions-menu').shadow()
+        .find('.assertion-option')
+        .contains('Increment')
+        .should('be.visible')
+      })
+    })
   })
 
   it('removes pending commands if the page is reloaded', () => {
@@ -641,13 +664,13 @@ describe('studio functionality', () => {
   it('updates the url with the testId and studio parameters when entering studio with a test', () => {
     launchStudio()
 
-    cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=')
+    cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=').and('contain', 'sessionId=')
   })
 
   it('update the url with the suiteId and studio parameters when entering studio with a suite', () => {
     launchStudio({ createNewTestFromSuite: true })
 
-    cy.location().its('hash').should('contain', 'suiteId=r2').and('contain', 'studio=')
+    cy.location().its('hash').should('contain', 'suiteId=r2').and('contain', 'studio=').and('contain', 'sessionId=')
   })
 
   it('updates the studio url parameters and displays the single test view after creating a new test', () => {
@@ -655,7 +678,7 @@ describe('studio functionality', () => {
 
     // open the studio panel to create a new test in the root suite
     cy.findByTestId('studio-button').click()
-    cy.location().its('hash').should('contain', 'suiteId=r1').and('contain', 'studio=')
+    cy.location().its('hash').should('contain', 'suiteId=r1').and('contain', 'studio=').and('contain', 'sessionId=')
 
     // create a new test in the root suite
     inputNewTestName()
@@ -671,7 +694,7 @@ describe('studio functionality', () => {
   it('does not remove the studio url parameters when saving test changes', () => {
     launchStudio()
 
-    cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=')
+    cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=').and('contain', 'sessionId=')
 
     cy.findByTestId('record-button-recording').should('be.visible')
 
@@ -683,7 +706,7 @@ describe('studio functionality', () => {
 
     cy.findByTestId('studio-save-button').click()
 
-    cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=')
+    cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=').and('contain', 'sessionId=')
   })
 
   it('does not remove the studio url parameters if saving fails', () => {
@@ -693,7 +716,7 @@ describe('studio functionality', () => {
 
     incrementCounter(0)
 
-    cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=')
+    cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=').and('contain', 'sessionId=')
 
     // update the spec on the file system by changing the
     // test name which will cause the save to fail since
@@ -734,7 +757,28 @@ describe('studio functionality', () => {
 
     cy.findByTestId('studio-header-studio-button').click()
 
-    cy.location().its('hash').and('not.contain', 'testId=').and('not.contain', 'studio=')
+    cy.location().its('hash').and('not.contain', 'testId=').and('not.contain', 'studio=').and('not.contain', 'sessionId=')
+  })
+
+  it('does not prompt for a URL until studio is active', () => {
+    launchStudio({ specName: 'spec-w-visit.cy.js', createNewTestFromSuite: true })
+    cy.location().its('hash').should('contain', 'suiteId=r2').and('contain', 'studio=')
+    cy.waitForSpecToFinish()
+
+    cy.findByTestId('aut-url-input').should('have.value', 'http://localhost:4455/cypress/e2e/index.html')
+  })
+
+  it('does not reload the page if we didnt open a test in studio', () => {
+    launchStudio({ specName: 'spec-w-visit.cy.js', createNewTestFromSuite: true })
+
+    // set a property on the window to see if the page reloads
+    cy.window().then((w) => w['beforeReload'] = true)
+
+    // close new test mode
+    cy.findByTestId('studio-header-studio-button').click()
+
+    // if this property is still set on the window, then the page didn't reload
+    cy.window().then((w) => expect(w['beforeReload']).to.be.true)
   })
 
   it('removes the studio url parameters when closing studio new test', () => {
@@ -745,6 +789,68 @@ describe('studio functionality', () => {
     cy.findByTestId('studio-header-studio-button').click()
 
     cy.location().its('hash').and('not.contain', 'suiteId=').and('not.contain', 'studio=')
+  })
+
+  it('stays in new test mode when studio panel is opened when the spec is running', () => {
+    loadProjectAndRunSpec()
+
+    cy.waitForSpecToFinish()
+
+    cy.findByTestId('studio-button').click()
+    cy.findByTestId('studio-panel').should('be.visible')
+    cy.findByTestId('new-test-button').should('be.visible')
+
+    // Verify we're initially in new test mode
+    cy.location().its('hash').should('contain', 'suiteId=r1').and('not.contain', 'testId=')
+
+    // Now restart the spec, which will call interceptTest with the running test
+    // This is where the bug would manifest - it would incorrectly switch from
+    // "new test" mode to "edit the running test" mode
+    cy.get('button.restart').click()
+
+    cy.get('.test').should('have.length', 1)
+    cy.get('.test').first().should('have.class', 'runnable-active')
+
+    // verify we're still in new test mode
+    cy.findByTestId('studio-panel').should('be.visible')
+    cy.findByTestId('new-test-button').should('be.visible')
+
+    // these should not exist if we stayed in new test mode
+    cy.findByTestId('studio-single-test-title').should('not.exist')
+    cy.findByTestId('record-button-recording').should('not.exist')
+
+    // verify URL still shows suite mode, not edit test mode
+    cy.location().its('hash').should('contain', 'suiteId=r1').and('not.contain', 'testId=')
+  })
+
+  it('shows test body sections correctly when studio panel is open and page is refreshed', () => {
+    loadProjectAndRunSpec()
+
+    cy.waitForSpecToFinish()
+
+    cy.findByTestId('studio-button').click()
+    cy.findByTestId('studio-panel').should('be.visible')
+    cy.findByTestId('new-test-button').should('be.visible')
+
+    cy.reload()
+
+    cy.waitForSpecToFinish()
+
+    cy.findByTestId('studio-panel').should('be.visible')
+    cy.findByTestId('new-test-button').should('be.visible')
+
+    // verify test body section is visible after refresh
+    cy.get('.runnable-instruments').should('be.visible')
+    cy.get('.runnable-commands-region').should('be.visible')
+
+    // verify the test body hook is present
+    cy.get('.hook-item').contains('test body').should('be.visible')
+
+    // verify commands are visible within the test body
+    cy.get('.command-name-visit').should('be.visible')
+
+    // Verify URL parameters show suite mode, not test mode
+    cy.location().its('hash').should('contain', 'suiteId=r1').and('not.contain', 'testId=')
   })
 
   describe('prompt for a new url', () => {

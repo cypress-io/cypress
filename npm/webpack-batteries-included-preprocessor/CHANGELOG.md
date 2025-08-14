@@ -1,3 +1,20 @@
+# [@cypress/webpack-batteries-included-preprocessor-v4.0.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v3.1.2...@cypress/webpack-batteries-included-preprocessor-v4.0.0) (2025-08-08)
+
+
+### breaking
+
+* release version 4.0.0 of @cypress/webpack-batteries-included-preprocessor. ([a08bb7b](https://github.com/cypress-io/cypress/commit/a08bb7b33c2cfc6e4a1304ed17c110f35823387e))
+
+
+### Features
+
+* allow for @cypress/webpack-batteries-included-preprocessor to fully resolve the user tsconfig compiler options ([#31590](https://github.com/cypress-io/cypress/issues/31590)) ([f369f50](https://github.com/cypress-io/cypress/commit/f369f50045685648b94d05ab6426099ee80d1245))
+
+
+### BREAKING CHANGES
+
+* release a major version of @cypress/webpack-batteries-included-preprocessor as webpack 4 is no longer supported and built-ins are removed
+
 # [@cypress/webpack-batteries-included-preprocessor-v3.1.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v3.1.1...@cypress/webpack-batteries-included-preprocessor-v3.1.2) (2025-07-24)
 
 

@@ -65,7 +65,7 @@ describe('lib/browsers/firefox', () => {
   context('#open', () => {
     beforeEach(function () {
       // majorVersion >= 135 indicates BiDi support for Firefox
-      this.browser = { name: 'firefox', channel: 'stable', majorVersion: 135, path: '/path/to/binary' }
+      this.browser = { name: 'firefox', family: 'firefox', channel: 'stable', majorVersion: 135, path: '/path/to/binary' }
       this.automation = {
         use: sinon.stub().returns({}),
       }

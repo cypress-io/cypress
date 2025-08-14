@@ -223,6 +223,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
       // This emulates the 'needsUrl' state in the studio store
       studioStore.setActive(true)
       studioStore.setUrl(undefined)
+      studioStore._hasStarted = true
 
       cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
         render: (gqlVal) => {

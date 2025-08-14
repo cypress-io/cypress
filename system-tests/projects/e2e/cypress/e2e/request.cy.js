@@ -32,7 +32,7 @@ describe('redirects + requests', () => {
       }
 
       if (Cypress.isBrowser('firefox')) {
-        expectedCookie.sameSite = 'no_restriction'
+        expectedCookie.sameSite = 'unspecified'
       }
 
       expect(cookies[1]).to.deep.eq(expectedCookie)

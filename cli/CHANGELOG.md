@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.0.0
 
-_Released 07/29/2025 (PENDING)_
+_Released 08/12/2025 (PENDING)_
 
 **Breaking Changes:**
 
@@ -26,11 +26,17 @@ _Released 07/29/2025 (PENDING)_
 - Selectors accepted in the `selectorPriority` of the `SelectorPlayground` (renamed to `ElementSelector`) API have been expanded to accept `name` and `attributes:*`. Additionally, the default selector priority used by Cypress now includes `name`. Addresses [#31801](https://github.com/cypress-io/cypress/issues/30309) and [#6876](https://github.com/cypress-io/cypress/issues/6876). Addressed in [#31889](https://github.com/cypress-io/cypress/pull/31889).
 - [`tsx`](https://tsx.is/) is now used in all cases to run the Cypress config, replacing [ts-node](https://github.com/TypeStrong/ts-node) for TypeScript and Node.js for CommonJS/ESM. This should allow for more interoperability for users who are using any variant of ES Modules. Addresses [#8090](https://github.com/cypress-io/cypress/issues/8090), [#15724](https://github.com/cypress-io/cypress/issues/15724), [#21805](https://github.com/cypress-io/cypress/issues/21805), [#22273](https://github.com/cypress-io/cypress/issues/22273), [#22747](https://github.com/cypress-io/cypress/issues/22747), [#23141](https://github.com/cypress-io/cypress/issues/23141), [#25958](https://github.com/cypress-io/cypress/issues/25958), [#25959](https://github.com/cypress-io/cypress/issues/25959), [#26606](https://github.com/cypress-io/cypress/issues/26606), [#27359](https://github.com/cypress-io/cypress/issues/27359), [#27450](https://github.com/cypress-io/cypress/issues/27450), [#28442](https://github.com/cypress-io/cypress/issues/28442), [#30318](https://github.com/cypress-io/cypress/issues/30318), [#30718](https://github.com/cypress-io/cypress/issues/30718), [#30907](https://github.com/cypress-io/cypress/issues/30907), [#30915](https://github.com/cypress-io/cypress/issues/30915), [#30925](https://github.com/cypress-io/cypress/issues/30925), [#30954](https://github.com/cypress-io/cypress/issues/30954) and [#31185](https://github.com/cypress-io/cypress/issues/31185).
 - `@cypress/vite-dev-server` now supports [vite](https://vite.dev/) version 7. Addresses[#31882](https://github.com/cypress-io/cypress/issues/31882).
+- `Angular` version 20 is now supported within component testing. As of now, `cypress/angular` still requires `zone.js` and `@angular-devkit/build-angular`. Addresses [#31304](https://github.com/cypress-io/cypress/issues/31304).
+
 
 **Bugfixes:**
 
 - Fixed an issue where Create from Component feature might not be able to parse React components from project files. Fixed in [#31457](https://github.com/cypress-io/cypress/pull/31457).
 - Fixed an issue where `isSecureContext` would be `false` on localhost when testing with Cypress. Addresses [#18217](https://github.com/cypress-io/cypress/issues/18217).
+- Fixed an issue where Angular legacy `Output()` decorators were broken when making component instance field references safe. Fixes [#32137](https://github.com/cypress-io/cypress/issues/32137).
+- Upgraded `tmp` from `~0.2.3` to `~0.2.4`. This removes the [CVE-2025-54798](https://github.com/advisories/GHSA-52f5-9888-hmc6) vulnerability being reported in security scans. Addresses [#32176](https://github.com/cypress-io/cypress/issues/32176).
+- Fixed an issue where `.fixture()` calls with a specified encoding would sometimes still attempt to parse the file based on its extension. Files with an explicit encoding are now always treated as raw content. Fixes [#32139](https://github.com/cypress-io/cypress/issues/32139).
+- Fixed an issue where `.fixture()` calls with different encoding options would return inconsistent content based on execution order. Fixes [#32138](https://github.com/cypress-io/cypress/issues/32138).
 
 **Misc:**
 
@@ -42,6 +48,14 @@ _Released 07/29/2025 (PENDING)_
 - Upgraded `electron` from `33.2.1` to `36.4.0`. Addresses [#31257](https://github.com/cypress-io/cypress/issues/31257). Addressed in [#31912](https://github.com/cypress-io/cypress/pull/31912).
 - Upgraded bundled Node.js version from `20.18.1` to `22.15.1`. Addresses [#31257](https://github.com/cypress-io/cypress/issues/31257). Addressed in [#31912](https://github.com/cypress-io/cypress/pull/31912).
 - Upgraded bundled Chromium version from `130.0.6723.137` to `136.0.7103.149`. Addresses [#31257](https://github.com/cypress-io/cypress/issues/31257). Addressed in [#31912](https://github.com/cypress-io/cypress/pull/31912).
+
+## 14.5.4
+
+_Released 8/07/2025_
+
+**Dependency Updates:**
+
+- Upgraded `tar-fs` to `2.1.3` and `3.1.0` in places we can control, to resolve [CVE-2024-12905](https://github.com/advisories/GHSA-pq67-2wwv-3xjx). `@puppeteer/browsers` still references `3.0.4`, but it is only used to download browsers which is not a feature of `puppeteer` that we utilize. Addressed in [#32160](https://github.com/cypress-io/cypress/pull/32160).
 
 ## 14.5.3
 
@@ -154,7 +168,6 @@ _Released 5/6/2025_
 **Dependency Updates:**
 
 - Downgraded `cli-table3` to 0.6.1. Addressed in [31631](https://github.com/cypress-io/cypress/pull/31631).
-
 
 ## 14.3.2
 
@@ -315,7 +328,7 @@ _Released 1/28/2025_
 
 - Fixed an issue where Cypress would incorrectly navigate to `about:blank` when test isolation was disabled and the last test would fail and then retry. Fixes [#28527](https://github.com/cypress-io/cypress/issues/28527).
 - Fixed a regression introduced in [`14.0.0`](https://docs.cypress.io/guides/references/changelog#14-0-0) where an element would not return the correct visibility if its offset parent was within the clipping element. Fixes [#30922](https://github.com/cypress-io/cypress/issues/30922).
-- Fixed a regression introduced in [`14.0.0`](https://docs.cypress.io/guides/references/changelog#14-0-0) where the incorrect visiblity would be returned when either `overflow-x` or `overflow-y` was visible but the other one was clipping. Fixed in [#30934](https://github.com/cypress-io/cypress/pull/30934).
+- Fixed a regression introduced in [`14.0.0`](https://docs.cypress.io/guides/references/changelog#14-0-0) where the incorrect visibility would be returned when either `overflow-x` or `overflow-y` was visible but the other one was clipping. Fixed in [#30934](https://github.com/cypress-io/cypress/pull/30934).
 - Fixed an issue where an `option` element would not return the correct visibility if its parent element has a clipping overflow. Fixed in [#30934](https://github.com/cypress-io/cypress/pull/30934).
 - Fixed an issue where non-HTMLElement(s) may fail during assertions. Fixes [#30944](https://github.com/cypress-io/cypress/issues/30944)
 
@@ -671,8 +684,7 @@ _Released 6/4/2024_
 **Bugfixes:**
 
 - Fixed a situation where the Launchpad would hang if the project config had not been loaded when the Launchpad first queries the current project. Fixes [#29486](https://github.com/cypress-io/cypress/issues/29486).
-- Pre-emptively fix behavior with Chrome for when `unload` events are forcefully deprecated by using `pagehide` as a proxy. Fixes [#29241](https://github.com/cypress-io/cypress/issues/29241).
-
+- Preemptively fix behavior with Chrome for when `unload` events are forcefully deprecated by using `pagehide` as a proxy. Fixes [#29241](https://github.com/cypress-io/cypress/issues/29241).
 
 **Misc:**
 
@@ -923,7 +935,6 @@ _Released 1/16/2024_
 - Improved accessibility of some areas of the Cypress App. Addressed in [#28628](https://github.com/cypress-io/cypress/pull/28628).
 - Updated some documentation links to go through on.cypress.io. Addressed in [#28623](https://github.com/cypress-io/cypress/pull/28623).
 
-
 ## 13.6.2
 
 _Released 12/26/2023_
@@ -1032,7 +1043,7 @@ _Released 10/24/2023_
 **Bugfixes:**
 
 - Fixed a performance regression in `13.3.1` with proxy correlation timeouts and requests issued from web and shared workers. Fixes [#28104](https://github.com/cypress-io/cypress/issues/28104).
-- Fixed a performance problem with proxy correlation when requests get aborted and then get miscorrelated with follow up requests. Addressed in [#28094](https://github.com/cypress-io/cypress/pull/28094).
+- Fixed a performance problem with proxy correlation when requests are aborted and then incorrectly correlated with follow-up requests. Addressed in [#28094](https://github.com/cypress-io/cypress/pull/28094).
 - Fixed a regression in [10.0.0](#10.0.0), where search would not find a spec if the file name contains "-" or "\_", but search prompt contains " " instead (e.g. search file "spec-file.cy.ts" with prompt "spec file"). Fixes [#25303](https://github.com/cypress-io/cypress/issues/25303).
 
 ## 13.3.2
@@ -1161,7 +1172,7 @@ _Released 08/15/2023_
 
 **Dependency Updates:**
 
-- Upgraded [`webpack`](https://www.npmjs.com/package/webpack) from `v4` to `v5`. This means that we are now bundling your `e2e` tests with webpack 5. We don't anticipate this causing any noticeable changes. However, if you'd like to keep bundling your `e2e` tests with wepback 4 you can use the same process as before by pinning [@cypress/webpack-batteries-included-preprocessor](https://www.npmjs.com/package/@cypress/webpack-batteries-included-preprocessor) to `v2.x.x` and hooking into the [file:preprocessor](https://docs.cypress.io/api/plugins/preprocessors-api#Usage) plugin event. This will restore the previous bundling process. Additionally, if you're using [@cypress/webpack-batteries-included-preprocessor](https://www.npmjs.com/package/@cypress/webpack-batteries-included-preprocessor) already, a new version has been published to support webpack `v5`.
+- Upgraded [`webpack`](https://www.npmjs.com/package/webpack) from `v4` to `v5`. This means that we are now bundling your `e2e` tests with webpack 5. We don't anticipate this causing any noticeable changes. However, if you'd like to keep bundling your `e2e` tests with webpack 4 you can use the same process as before by pinning [@cypress/webpack-batteries-included-preprocessor](https://www.npmjs.com/package/@cypress/webpack-batteries-included-preprocessor) to `v2.x.x` and hooking into the [file:preprocessor](https://docs.cypress.io/api/plugins/preprocessors-api#Usage) plugin event. This will restore the previous bundling process. Additionally, if you're using [@cypress/webpack-batteries-included-preprocessor](https://www.npmjs.com/package/@cypress/webpack-batteries-included-preprocessor) already, a new version has been published to support webpack `v5`.
 - Upgraded [`tough-cookie`](https://www.npmjs.com/package/tough-cookie) from `4.0` to `4.1.3`, [`@cypress/request`](https://www.npmjs.com/package/@cypress/request) from `2.88.11` to `2.88.12` and [`@cypress/request-promise`](https://www.npmjs.com/package/@cypress/request-promise) from `4.2.6` to `4.2.7` to address a [security vulnerability](https://security.snyk.io/vuln/SNYK-JS-TOUGHCOOKIE-5672873). Fixes [#27261](https://github.com/cypress-io/cypress/issues/27261).
 
 ## 12.17.3
@@ -1272,7 +1283,7 @@ during Component Testing onboarding. Addresses [#26852](https://github.com/cypre
 
 **Dependency Updates:**
 
-- Upgraded [`find-process`](https://www.npmjs.com/package/find-process) from `1.4.1` to `1.4.7` to address this [Synk](https://security.snyk.io/vuln/SNYK-JS-FINDPROCESS-1090284) security vulnerability. Addressed in [#26906](https://github.com/cypress-io/cypress/pull/26906).
+- Upgraded [`find-process`](https://www.npmjs.com/package/find-process) from `1.4.1` to `1.4.7` to address this [Snyk](https://security.snyk.io/vuln/SNYK-JS-FINDPROCESS-1090284) security vulnerability. Addressed in [#26906](https://github.com/cypress-io/cypress/pull/26906).
 - Upgraded [`firefox-profile`](https://www.npmjs.com/package/firefox-profile) from `4.0.0` to `4.3.2` to address security vulnerabilities within sub-dependencies. Addressed in [#26912](https://github.com/cypress-io/cypress/pull/26912).
 
 ## 12.13.0
@@ -1352,7 +1363,7 @@ _Released 04/17/2023_
 
 - Capture the [Azure](https://azure.microsoft.com/) CI provider's environment variable [`SYSTEM_PULLREQUEST_PULLREQUESTNUMBER`](https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables?view=azure-devops&tabs=yaml#system-variables-devops-services) to display the linked PR number in the Cloud. Addressed in [#26215](https://github.com/cypress-io/cypress/pull/26215).
 - Fixed an issue in the onboarding wizard where project framework & bundler would not be auto-detected when opening directly into component testing mode using the `--component` CLI flag. Fixes [#22777](https://github.com/cypress-io/cypress/issues/22777) and [#26388](https://github.com/cypress-io/cypress/issues/26388).
-- Updated to use the `SEMAPHORE_GIT_WORKING_BRANCH` [Semphore](https://docs.semaphoreci.com) CI environment variable to correctly associate a Cloud run to the current branch. Previously this was incorrectly associating a run to the target branch. Fixes [#26309](https://github.com/cypress-io/cypress/issues/26309).
+- Updated to use the `SEMAPHORE_GIT_WORKING_BRANCH` [Semaphore](https://docs.semaphoreci.com) CI environment variable to correctly associate a Cloud run to the current branch. Previously this was incorrectly associating a run to the target branch. Fixes [#26309](https://github.com/cypress-io/cypress/issues/26309).
 - Fix an edge case in Component Testing where a custom `baseUrl` in `tsconfig.json` for Next.js 13.2.0+ is not respected. This was partially fixed in [#26005](https://github.com/cypress-io/cypress/pull/26005), but an edge case was missed. Fixes [#25951](https://github.com/cypress-io/cypress/issues/25951).
 - Fixed an issue where `click` events fired on `.type('{enter}')` did not propagate through shadow roots. Fixes [#26392](https://github.com/cypress-io/cypress/issues/26392).
 
