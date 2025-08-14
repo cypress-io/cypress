@@ -52,7 +52,7 @@ export function getLatestNodeVersion (packageName: string): Promise<NodePackage>
   }
 }
 
-const ctSpecContent = ({ componentName, componentFilename }: {componentName: string, componentFilename: string}): string => {
+const ctSpecContent = ({ componentName, componentFilename }: { componentName: string, componentFilename: string }): string => {
   return `import { ${componentName} } from './${componentFilename}.component'\n
   describe('${componentName}', () => {
     it('should mount', () => {
@@ -62,7 +62,7 @@ const ctSpecContent = ({ componentName, componentFilename }: {componentName: str
   `
 }
 
-function generateCTSpec ({ tree, appPath, component }: { tree: Tree, appPath: string, component: any}): Rule | void {
+function generateCTSpec ({ tree, appPath, component }: { tree: Tree, appPath: string, component: any }): Rule | void {
   const buffer = tree.read(`${appPath}/${component['name']}`)
   const componentString = buffer?.toString()
   const componentMatch = componentString?.match(/(?<=class )\S+/g)
@@ -74,7 +74,7 @@ function generateCTSpec ({ tree, appPath, component }: { tree: Tree, appPath: st
   return tree.create(`${appPath}/${componentFilename}.component.cy.ts`, ctSpecContent({ componentName, componentFilename }))
 }
 
-export function getDirectoriesAndCreateSpecs ({ appPath, tree }: { appPath: string, tree: Tree}) {
+export function getDirectoriesAndCreateSpecs ({ appPath, tree }: { appPath: string, tree: Tree }) {
   let components = []
   let directories = []
 
@@ -99,7 +99,7 @@ export function getDirectoriesAndCreateSpecs ({ appPath, tree }: { appPath: stri
   }
 }
 
-export function createTemplate ({ templatePath, options }: {templatePath: string, options: Schema}): any {
+export function createTemplate ({ templatePath, options }: { templatePath: string, options: Schema }): any {
   return apply(url(templatePath), [
     applyTemplates({
       classify: strings.classify,
