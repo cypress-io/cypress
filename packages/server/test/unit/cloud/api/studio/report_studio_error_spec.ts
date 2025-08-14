@@ -1,6 +1,7 @@
 import { expect } from 'chai'
 import { sinon } from '../../../../spec_helper'
 import { reportStudioError } from '@packages/server/lib/cloud/api/studio/report_studio_error'
+import * as logger from '@packages/stderr-filtering'
 
 describe('lib/cloud/api/studio/report_studio_error', () => {
   let cloudRequestStub: sinon.SinonStub
@@ -17,6 +18,8 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
         post: cloudRequestStub,
       },
     }
+
+    sinon.stub(logger, 'logError')
   })
 
   afterEach(() => {
@@ -33,7 +36,6 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
 
   describe('reportStudioError', () => {
     it('logs error when CYPRESS_LOCAL_STUDIO_PATH is set', () => {
-      sinon.stub(console, 'error')
       process.env.CYPRESS_LOCAL_STUDIO_PATH = '/path/to/studio'
       const error = new Error('test error')
 
@@ -46,7 +48,7 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
       })
 
       // eslint-disable-next-line no-console
-      expect(console.error).to.have.been.calledWith(
+      expect(logger.logError).to.have.been.calledWith(
         'Error in testMethod:',
         error,
       )
@@ -66,7 +68,7 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
       })
 
       // eslint-disable-next-line no-console
-      expect(console.error).to.have.been.calledWith(
+      expect(logger.logError).to.have.been.calledWith(
         'Error in testMethod:',
         error,
       )
@@ -86,7 +88,7 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
       })
 
       // eslint-disable-next-line no-console
-      expect(console.error).to.have.been.calledWith(
+      expect(logger.logError).to.have.been.calledWith(
         'Error in testMethod:',
         error,
       )
