@@ -6,13 +6,17 @@
 
 .studio-header__test-section {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   border-bottom: 1px solid $gray-900;
   padding: 16px;
   gap: 8px;
   font-size: 14px;
   line-height: 20px;
   flex-shrink: 0;
+
+  .state-icon {
+    margin-top: 3px;
+  }
 
   svg {
     flex-shrink: 0;
@@ -21,6 +25,19 @@
   .duration {
     margin-right: 8px;
   }
+}
+
+.studio-header__test-section-left {
+  display: flex;
+  flex-grow: 1;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.studio-header__test-section-right {
+  align-items: center;
+  display: flex;
+  gap: 8px;
 }
 
 .studio-header__test-title {

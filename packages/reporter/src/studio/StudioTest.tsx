@@ -85,19 +85,23 @@ export const StudioTest = observer(({ appState, runnablesStore, statsStore }: St
     currentTest && (
       <div className='studio-single-test-container' >
         <div className='studio-header__test-section'>
-          <StatusIcon test={currentTest} />
-          {parentTitles.length > 0 ? (
-            <Tooltip title={<ul className='studio-tooltip__breadcrumb-list' ref={tooltipRef}>
-              {getParentTitlesListElements(parentTitles)}
-            </ul>}
-            wrapperClassName='studio-header__test-tooltip-wrapper' className={cx(
-              'studio-tooltip cy-tooltip',
-            )}>
-              {testTitle}
-            </Tooltip>
-          ) : testTitle}
-          <Duration duration={statsStore.duration} />
-          <Controls appState={appState} displayPreferencesButton={false} />
+          <div className='studio-header__test-section-left'>
+            <StatusIcon test={currentTest} />
+            {parentTitles.length > 0 ? (
+              <Tooltip title={<ul className='studio-tooltip__breadcrumb-list' ref={tooltipRef}>
+                {getParentTitlesListElements(parentTitles)}
+              </ul>}
+              wrapperClassName='studio-header__test-tooltip-wrapper' className={cx(
+                'studio-tooltip cy-tooltip',
+              )}>
+                {testTitle}
+              </Tooltip>
+            ) : testTitle}
+          </div>
+          <div className='studio-header__test-section-right'>
+            <Duration duration={statsStore.duration} />
+            <Controls appState={appState} displayPreferencesButton={false} />
+          </div>
         </div>
         <div className='studio-single-test-attempts' ref={containerRef}>
           <Attempts test={currentTest} scrollIntoView={scrollIntoView} />
