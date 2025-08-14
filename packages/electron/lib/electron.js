@@ -175,7 +175,8 @@ module.exports = {
       })
 
       const toDebug = new WriteToDebug(debugStderr)
-      const prefixedContent = new FilterPrefixedContent(/^cypress:/, process.stderr)
+      // eslint-disable-next-line no-control-regex
+      const prefixedContent = new FilterPrefixedContent(/^\s+(?:\u001b\[[0-9;]*m)*((\S+):)+/u, process.stderr)
 
       const taggedContent = new FilterTaggedContent(START_TAG, END_TAG, process.stderr)
 
