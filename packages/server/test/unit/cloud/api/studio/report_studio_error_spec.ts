@@ -49,7 +49,7 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
       // eslint-disable-next-line no-console
       expect(console.error).to.have.been.calledWith(
         START_TAG,
-        'Error in testMethod',
+        'Error in testMethod:',
         error,
         END_TAG,
       )
@@ -71,7 +71,7 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
       // eslint-disable-next-line no-console
       expect(console.error).to.have.been.calledWith(
         START_TAG,
-        'Error in testMethod',
+        'Error in testMethod:',
         error,
         END_TAG,
       )
@@ -93,7 +93,7 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
       // eslint-disable-next-line no-console
       expect(console.error).to.have.been.calledWith(
         START_TAG,
-        'Error in testMethod',
+        'Error in testMethod:',
         error,
         END_TAG,
       )
