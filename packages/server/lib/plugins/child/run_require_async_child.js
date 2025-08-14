@@ -86,7 +86,9 @@ function run (ipc, file, projectRoot) {
     try {
       debug('Loading file %s', file)
 
-      return require(file)
+      const tsx = require('tsx/cjs/api')
+
+      return tsx.require(file, __filename)
     } catch (err) {
       if (!err.stack.includes('[ERR_REQUIRE_ESM]') && !err.stack.includes('SyntaxError: Cannot use import statement outside a module')) {
         throw err
