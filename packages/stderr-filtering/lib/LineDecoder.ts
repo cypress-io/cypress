@@ -23,6 +23,7 @@ export class LineDecoder {
     debug('writing chunk to line decoder', { chunk })
     this.buffer += chunk
   }
+
   /**
    * Iterates over complete lines in the current buffer.
    *
@@ -32,7 +33,7 @@ export class LineDecoder {
    *
    * @yields Complete lines with newline characters preserved
    */
-  *[Symbol.iterator] (): Generator<string> {
+  * [Symbol.iterator] (): Generator<string> {
     debug('iterating over lines in line decoder')
 
     let nextLine: string | null = null
@@ -58,7 +59,7 @@ export class LineDecoder {
    * @param chunk Optional final chunk to process along with the buffer
    * @yields All remaining lines from the buffer and final chunk
    */
-  *end (chunk?: string) {
+  * end (chunk?: string) {
     this.buffer = `${this.buffer}${(chunk || '')}`
     let nextLine: string | null = null
 
