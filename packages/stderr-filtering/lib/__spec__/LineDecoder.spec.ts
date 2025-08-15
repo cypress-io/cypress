@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { LineDecoder } from '../LineDecoder'
+import { END_TAG } from '../constants'
 
 describe('LineDecoder', () => {
   let decoder: LineDecoder
@@ -46,6 +47,20 @@ describe('LineDecoder', () => {
           expect(lines).toEqual([])
         })
       })
+    })
+  })
+
+  describe('when the only content in the buffer ends with override token and not a newline', () => {
+    const str = 'Some Text'
+
+    beforeEach(() => {
+      decoder.write(`${str}${END_TAG}`)
+    })
+
+    it('yields the line as if the end tag were a newline', () => {
+      const lines = Array.from(decoder)
+
+      expect(lines).toEqual([`${str}${END_TAG}`])
     })
   })
 })

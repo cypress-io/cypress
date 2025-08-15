@@ -2,6 +2,10 @@ export { FilterTaggedContent } from './FilterTaggedContent'
 
 export { FilterPrefixedContent } from './FilterPrefixedContent'
 
+export { TagStream } from './TagStream'
+
 export { WriteToDebug } from './WriteToDebug'
 
-export { logError, START_TAG, END_TAG } from './logError'
+export { logError } from './logError'
+
+export { START_TAG, END_TAG } from './constants'

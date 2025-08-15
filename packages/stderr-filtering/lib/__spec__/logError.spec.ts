@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { logError, START_TAG, END_TAG } from '../logError'
+import { logError } from '../logError'
+import { START_TAG, END_TAG } from '../constants'
 
 describe('logError', () => {
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>

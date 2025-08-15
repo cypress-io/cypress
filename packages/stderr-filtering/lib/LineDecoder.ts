@@ -8,11 +8,14 @@
  */
 
 import Debug from 'debug'
+import { END_TAG } from './constants'
 
-const debug = Debug(`cypress-verbose:stderr-filtering:LineDecoder:${process.pid}`)
+const debug = Debug(`cypress:stderr-filtering:LineDecoder:${process.pid}`)
 
 export class LineDecoder {
   private buffer: string = ''
+
+  constructor (private overrideToken: string = END_TAG) {}
 
   /**
    * Adds a chunk of string data to the internal buffer.
@@ -36,7 +39,7 @@ export class LineDecoder {
   * [Symbol.iterator] (): Generator<string> {
     debug('iterating over lines in line decoder')
 
-    let nextLine: string | null = null
+    let nextLine: string | undefined = undefined
 
     do {
       nextLine = this.nextLine()
@@ -61,7 +64,7 @@ export class LineDecoder {
    */
   * end (chunk?: string) {
     this.buffer = `${this.buffer}${(chunk || '')}`
-    let nextLine: string | null = null
+    let nextLine: string | undefined = undefined
 
     do {
       nextLine = this.nextLine()
@@ -72,16 +75,27 @@ export class LineDecoder {
   }
 
   private nextLine () {
-    const nIdx = this.buffer.indexOf('\n')
+    const [newlineIndex, length] = [this.buffer.indexOf('\n'), 1]
+    const endsWithOverrideToken = newlineIndex < 0 ? this.buffer.endsWith(this.overrideToken) : false
 
-    if (nIdx === -1) {
-      return null
+    if (endsWithOverrideToken) {
+      debug('ends with override token')
+      const line = this.buffer
+
+      this.buffer = ''
+
+      return line
     }
 
-    const line = this.buffer.slice(0, nIdx + 1)
+    if (newlineIndex >= 0) {
+      debug('contains a newline')
+      const line = this.buffer.slice(0, newlineIndex + length)
 
-    this.buffer = this.buffer.slice(nIdx + 1)
+      this.buffer = this.buffer.slice(newlineIndex + length)
 
-    return line
+      return line
+    }
+
+    return undefined
   }
 }

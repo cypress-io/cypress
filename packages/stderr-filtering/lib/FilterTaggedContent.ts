@@ -46,11 +46,14 @@ export class FilterTaggedContent extends Transform {
    * @param next Callback to call when processing is complete
    */
   transform = async (chunk: Buffer, encoding: BufferEncoding, next: (err?: Error) => void) => {
-    debug('processing chunk for tagged content', { chunk, encoding, next })
     try {
       this.ensureDecoders(encoding)
 
-      this.lineDecoder?.write(this.strDecoder?.write(chunk) ?? '')
+      const str = this.strDecoder?.write(chunk) ?? ''
+
+      this.lineDecoder?.write(str)
+
+      debug('processing str for tags: "%s"', str)
 
       for (const line of this.lineDecoder || []) {
         await this.processLine(line)
@@ -68,6 +71,7 @@ export class FilterTaggedContent extends Transform {
    * @param callback Callback to call when flushing is complete
    */
   flush = async (callback: (err?: Error) => void) => {
+    debug('flushing')
     this.ensureDecoders()
     try {
       for (const line of this.lineDecoder?.end() || []) {
@@ -142,10 +146,12 @@ export class FilterTaggedContent extends Transform {
   }
 
   private async writeToWasteStream (line: string, encoding?: BufferEncoding | 'buffer') {
+    debug('writing to waste stream: "%s"', line)
     await writeWithBackpressure(this.wasteStream, Buffer.from(line, (encoding === 'buffer' ? 'utf8' : encoding) ?? 'utf8'))
   }
 
   private async pass (line: string, encoding?: BufferEncoding | 'buffer') {
+    debug('passing: "%s"', line)
     this.push(Buffer.from(line, (encoding === 'buffer' ? 'utf8' : encoding) ?? 'utf8'))
   }
 }
