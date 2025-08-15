@@ -298,6 +298,14 @@ async function getAngularCliWebpackConfig (devServerConfig: AngularWebpackDevSer
     },
   )
 
+  // @see https://github.com/cypress-io/cypress/issues/26456
+  // if verbose is not set, we set the stats to errors-only
+  // users can either override this stat by passing in a custom webpack config
+  // or by setting the verbose option to true
+  if (!buildOptions.verbose) {
+    config.stats = 'errors-only'
+  }
+
   delete config.entry.main
 
   return config

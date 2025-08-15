@@ -38,6 +38,7 @@ describe('angularHandler', function () {
     expect(webpackConfig).to.exist
     expect((webpackConfig?.entry as any).main).to.be.undefined
     expect(sourceWebpackModulesResult.framework?.importPath).to.include(path.join('@angular-devkit', 'build-angular'))
+    expect(webpackConfig.stats).to.equal('errors-only')
     const projectConfig = await getProjectConfig(projectRoot)
 
     expect(projectConfig).to.deep.eq({
