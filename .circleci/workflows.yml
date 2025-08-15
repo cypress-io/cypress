@@ -1272,6 +1272,7 @@ commands:
           name: Check if binary exists, exit if it does
           command: |
             source ./scripts/ensure-node.sh
+            yarn workspace @packages/stderr-filtering build
             yarn gulp e2eTestScaffold
             yarn check-binary-on-cdn --version $(node ./scripts/get-next-version.js) --type binary --file cypress.zip
 
