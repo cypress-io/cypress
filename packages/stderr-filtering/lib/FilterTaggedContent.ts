@@ -55,7 +55,7 @@ export class FilterTaggedContent extends Transform {
 
       debug('processing str for tags: "%s"', str)
 
-      for (const line of this.lineDecoder || []) {
+      for (const line of Array.from(this.lineDecoder || [])) {
         await this.processLine(line)
       }
 
@@ -74,7 +74,7 @@ export class FilterTaggedContent extends Transform {
     debug('flushing')
     this.ensureDecoders()
     try {
-      for (const line of this.lineDecoder?.end() || []) {
+      for (const line of Array.from(this.lineDecoder?.end() || [])) {
         await this.processLine(line)
       }
 

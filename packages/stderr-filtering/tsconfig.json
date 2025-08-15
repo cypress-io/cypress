@@ -1,7 +1,7 @@
 {
+  "extends": "../ts/tsconfig.json",
   "include": [
     "lib/**/*.ts",
-    "lib/**/*.js"
   ],
   "exclude": [
     "dist",
@@ -11,8 +11,6 @@
     "**/__spec__/**"
   ],
   "compilerOptions": {
-    "lib": ["es2022"],
-    "target": "es2022",
     "outDir": "./dist",
     "rootDir": "./lib",
     "esModuleInterop": true,
@@ -24,10 +22,8 @@
     "noImplicitThis": true,
     "noImplicitReturns": false,
     "strict": true,
-    "moduleResolution": "node",
-    "module": "commonjs",
-    "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "skipLibCheck": true
   }
 }
