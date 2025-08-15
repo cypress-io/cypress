@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v5.1.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.0.0...@cypress/webpack-dev-server-v5.1.0) (2025-08-14)
+
+
+### Features
+
+* support Angular 20 ([#32198](https://github.com/cypress-io/cypress/issues/32198)) ([c96115d](https://github.com/cypress-io/cypress/commit/c96115df0fc29df23850c7b13dbb2c6cf257c552))
+
 # [@cypress/webpack-dev-server-v5.0.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v4.1.1...@cypress/webpack-dev-server-v5.0.0) (2025-08-08)
 
 

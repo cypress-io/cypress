@@ -30,7 +30,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: .node-version
       - name: install dependencies
         run: CI=true yarn
       - name: Check for new Chrome versions
