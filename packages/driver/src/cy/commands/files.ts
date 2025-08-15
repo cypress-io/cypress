@@ -228,8 +228,9 @@ export default (Commands, Cypress, cy, state) => {
         consoleProps['Contents'] = contents
 
         if (fixturesFolder !== false) {
-          const resolvedFixturesFolder = resolve(fixturesFolder)
-          const resolvedFilePath = resolve(filePath)
+          const normalizePath = (path) => path.replace(/\\/g, '/')
+          const resolvedFixturesFolder = normalizePath(resolve(fixturesFolder))
+          const resolvedFilePath = normalizePath(resolve(filePath))
           const relativePath = relative(resolvedFixturesFolder, resolvedFilePath)
 
           // If `relativePath` does not start with ".." and is not equal to itself
