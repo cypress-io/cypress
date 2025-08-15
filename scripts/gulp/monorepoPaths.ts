@@ -32,6 +32,7 @@ export const monorepoPaths = {
   pkgScaffoldConfig: path.join(__dirname, '../../packages/scaffold-config'),
   pkgServer: path.join(__dirname, '../../packages/server'),
   pkgSocket: path.join(__dirname, '../../packages/socket'),
+  pkgStderrFiltering: path.join(__dirname, '../../packages/stderr-filtering'),
   pkgTelemetry: path.join(__dirname, '../../packages/telemetry'),
   pkgTs: path.join(__dirname, '../../packages/ts'),
   pkgTypes: path.join(__dirname, '../../packages/types'),
