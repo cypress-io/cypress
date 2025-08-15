@@ -26307,10 +26307,10 @@ print-arch@1.0.0:
   resolved "https://registry.yarnpkg.com/print-arch/-/print-arch-1.0.0.tgz#2141cb9f08c6f70725ff40f55886675ef2666594"
   integrity sha512-JOBS+nICjbwLT9JU0IjQY2uES+U57Y7P8KAcaakkoJlS/6Wc7rRuZMnV2pT0iPdQMbXF68GnzNeNikh6bl6cHA==
 
-prismjs@1.27.0:
-  version "1.27.0"
-  resolved "https://registry.yarnpkg.com/prismjs/-/prismjs-1.27.0.tgz#bb6ee3138a0b438a3653dd4d6ce0cc6510a45057"
-  integrity sha512-t13BGPUlFDR7wRB5kQDG4jjl7XeuH6jbJGt11JHPL96qwsEHNX2+68tFXqc1/k+/jALsbSWJKUOT/hcYAZ5LkA==
+prismjs@1.30.0:
+  version "1.30.0"
+  resolved "https://registry.yarnpkg.com/prismjs/-/prismjs-1.30.0.tgz#d9709969d9d4e16403f6f348c63553b19f0975a9"
+  integrity sha512-DEvV2ZF2r2/63V+tK8hQvrR2ZGn10srHbXviTlcv7Kpzw8jWiNTqbVgjO3IY8RxrrOUF8VPMQQFysYYYv0YZxw==
 
 proc-log@^4.0.0, proc-log@^4.1.0, proc-log@^4.2.0:
   version "4.2.0"
