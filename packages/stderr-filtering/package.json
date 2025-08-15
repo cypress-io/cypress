@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "yarn clean && tsc",
+    "build-prod": "yarn build",
     "clean": "rm -rf ./{dist,coverage}",
     "lint": "eslint",
     "test": "vitest",
