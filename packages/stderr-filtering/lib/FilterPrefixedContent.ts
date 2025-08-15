@@ -58,7 +58,7 @@ export class FilterPrefixedContent extends Transform {
 
       this.lineDecoder.write(str)
 
-      for (const line of this.lineDecoder) {
+      for (const line of Array.from(this.lineDecoder || [])) {
         await this.writeLine(line, encoding)
       }
 
@@ -84,8 +84,10 @@ export class FilterPrefixedContent extends Transform {
         this.lineDecoder = new LineDecoder()
       }
 
-      for (const line of this.lineDecoder?.end() || []) {
-        await this.writeLine(line)
+      if (this.lineDecoder) {
+        for (const line of Array.from(this.lineDecoder?.end() || [])) {
+          await this.writeLine(line)
+        }
       }
 
       callback()
@@ -106,7 +108,11 @@ export class FilterPrefixedContent extends Transform {
     if (this.prefix.test(line)) {
       await writeWithBackpressure(this.wasteStream, Buffer.from(line, (encoding === 'buffer' ? 'utf8' : encoding) ?? 'utf8'))
     } else {
-      await this.push(Buffer.from(line, (encoding === 'buffer' ? 'utf8' : encoding) ?? 'utf8'))
+      const canWrite = this.push(Buffer.from(line, (encoding === 'buffer' ? 'utf8' : encoding) ?? 'utf8'))
+
+      if (!canWrite) {
+        await new Promise((resolve) => this.once('drain', resolve))
+      }
     }
   }
 }
