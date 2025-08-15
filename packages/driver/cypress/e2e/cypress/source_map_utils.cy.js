@@ -68,9 +68,15 @@ describe('driver/src/cypress/source_map_utils', () => {
     })
 
     it('returns source map when content has an inline map', () => {
-      const sourceMap = $sourceMapUtils.extractSourceMap(fileContents)
+      const extractedSourceMap = $sourceMapUtils.extractSourceMap(fileContents)
 
-      expect(sourceMap).to.be.eql(sourceMap)
+      expect(extractedSourceMap).to.be.eql(sourceMap)
+    })
+
+    it('returns source map when the data url does not have a charset', () => {
+      const extractedSourceMap = $sourceMapUtils.extractSourceMap(`${testContent}\n\/\/# sourceMappingURL=data:application/json;base64,${encodeBase64Unicode(JSON.stringify(sourceMap))}`)
+
+      expect(extractedSourceMap).to.be.eql(sourceMap)
     })
 
     // https://github.com/cypress-io/cypress/issues/7464
