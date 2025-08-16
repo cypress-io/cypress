@@ -46,6 +46,7 @@ export const addCommand = (runner: EventEmitter, log: Partial<CommandModel>) => 
     type: 'parent',
     url: 'http://example.com',
     hasConsoleProps: true,
+    defaultState: 'open',
   }
 
   const commandLog = Object.assign(defaultLog, log)
