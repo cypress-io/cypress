@@ -23,6 +23,7 @@ export interface InstrumentProps {
   referencesAlias?: Alias
   instrument?: Instrument
   testId: string
+  defaultState?: 'closed' | 'open'
 }
 
 export default class Log {
@@ -36,6 +37,7 @@ export default class Log {
   state: string
   referencesAlias?: Alias
   testId: string
+  defaultState: 'closed' | 'open'
 
   constructor (props: InstrumentProps) {
     makeObservable(this, {
@@ -48,6 +50,7 @@ export default class Log {
       type: observable,
       state: observable,
       referencesAlias: observable.ref,
+      defaultState: observable,
     })
 
     this.id = props.id
@@ -60,6 +63,7 @@ export default class Log {
     this.state = props.state
     this.referencesAlias = props.referencesAlias
     this.testId = props.testId
+    this.defaultState = props.defaultState || 'open'
   }
 
   update (props: InstrumentProps) {
@@ -71,5 +75,6 @@ export default class Log {
     this.type = props.type
     this.state = props.state
     this.referencesAlias = props.referencesAlias
+    this.defaultState = props.defaultState || 'open'
   }
 }
