@@ -3905,6 +3905,7 @@
     "./packages/server/lib/cloud/protocol.ts",
     "./packages/server/lib/cloud/require_script.ts",
     "./packages/server/lib/cloud/strip_path.ts",
+    "./packages/server/lib/cloud/studio/StudioElectron.ts",
     "./packages/server/lib/cloud/studio/ensure_studio_bundle.ts",
     "./packages/server/lib/cloud/studio/studio.ts",
     "./packages/server/lib/cloud/studio/telemetry/TelemetryManager.ts",
@@ -4221,5 +4222,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "0fbb0e5636cb3655a5331b5d70ebf71033a7aba600523ef138c51f4538680ca8"
+  "deferredHash": "2dbb1c5880f6aabda193a34ea2c131016707a864da0487f852ea028931b16a64"
 }
