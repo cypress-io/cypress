@@ -75,7 +75,8 @@ declare namespace Cypress {
       y: number
     }
     count?: number
-    defaultState?: 'closed' | 'open'
+    // the default collapsed state of the log (i.e. if the log is open or closed by default)
+    defaultCollapsedState?: 'closed' | 'open'
     // the name override for display purposes only
     displayName?: string
     // the JQuery element for the command. This will highlight the command

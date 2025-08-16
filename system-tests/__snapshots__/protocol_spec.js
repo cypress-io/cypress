@@ -3321,7 +3321,7 @@ exports['e2e events'] = `
   "commandLogAdded": [
     {
       "id": "log-http://localhost:3131-1",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "h1",
       "instrument": "command",
@@ -3341,7 +3341,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:3131-2",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -3361,7 +3361,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:3131-3",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -3381,7 +3381,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:3131-4",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -3404,7 +3404,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:3131-5",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -3424,7 +3424,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://foobar.com-6",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "groupLevel": 1,
       "hookId": "r3",
@@ -3446,7 +3446,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-1",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -3466,7 +3466,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-3",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -3486,7 +3486,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-4",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -3509,7 +3509,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-5",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -3529,7 +3529,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-6",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -3552,7 +3552,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-7",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r5",
       "instrument": "command",
@@ -3572,7 +3572,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-8",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r5",
       "instrument": "command",
@@ -3595,7 +3595,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-9",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r5",
       "instrument": "command",
@@ -3615,7 +3615,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-10",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r5",
       "instrument": "command",
@@ -3638,7 +3638,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-11",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r6",
       "instrument": "command",
@@ -3658,7 +3658,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-12",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r6",
       "instrument": "command",
@@ -3681,7 +3681,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-13",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r6",
       "instrument": "command",
@@ -3701,7 +3701,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-14",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r6",
       "instrument": "command",
@@ -3724,7 +3724,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-15",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r7",
       "instrument": "command",
@@ -3744,7 +3744,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-16",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r7",
       "instrument": "command",
@@ -3767,7 +3767,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-17",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r7",
       "instrument": "command",
@@ -3787,7 +3787,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-18",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r7",
       "instrument": "command",
@@ -3810,7 +3810,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-19",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r7",
       "instrument": "command",
@@ -3830,7 +3830,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-21",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r7",
       "instrument": "command",
@@ -3850,7 +3850,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-22",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r7",
       "instrument": "command",
@@ -3873,7 +3873,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-23",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r7",
       "instrument": "command",
@@ -3893,7 +3893,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-24",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r7",
       "instrument": "command",
@@ -3916,7 +3916,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-25",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r8",
       "instrument": "command",
@@ -3936,7 +3936,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-26",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r8",
       "instrument": "command",
@@ -3959,7 +3959,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-27",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r8",
       "instrument": "command",
@@ -3979,7 +3979,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-28",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r8",
       "instrument": "command",
@@ -4002,7 +4002,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-29",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r10",
       "instrument": "command",
@@ -4022,7 +4022,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-31",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r10",
       "instrument": "command",
@@ -4042,7 +4042,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-32",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r10",
       "instrument": "command",
@@ -4065,7 +4065,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-33",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r10",
       "instrument": "command",
@@ -4085,7 +4085,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-34",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r10",
       "instrument": "command",
@@ -4108,7 +4108,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-35",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r11",
       "instrument": "command",
@@ -4128,7 +4128,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-37",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r11",
       "instrument": "command",
@@ -4148,7 +4148,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-38",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r11",
       "instrument": "command",
@@ -4171,7 +4171,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-39",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r11",
       "instrument": "command",
@@ -4191,7 +4191,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-40",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r11",
       "instrument": "command",
@@ -4214,7 +4214,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-41",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r13",
       "instrument": "command",
@@ -4234,7 +4234,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-42",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r13",
       "instrument": "command",
@@ -4257,7 +4257,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-43",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r13",
       "instrument": "command",
@@ -4277,7 +4277,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-44",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r13",
       "instrument": "command",
@@ -4300,7 +4300,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-1",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -4320,7 +4320,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-2",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -4340,7 +4340,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-3",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -4363,7 +4363,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-4",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -4383,7 +4383,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-5",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -4403,7 +4403,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-6",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -4425,7 +4425,7 @@ exports['e2e events'] = `
   "commandLogChanged": [
     {
       "id": "log-http://foobar.com-6",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "groupLevel": 1,
       "hookId": "r3",
@@ -4448,7 +4448,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-1",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -4475,7 +4475,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-1",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -4502,7 +4502,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-10",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r5",
       "instrument": "command",
@@ -4532,7 +4532,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-11",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r6",
       "instrument": "command",
@@ -4562,7 +4562,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-12",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r6",
       "instrument": "command",
@@ -4599,7 +4599,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-13",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r6",
       "instrument": "command",
@@ -4629,7 +4629,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-14",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r6",
       "instrument": "command",
@@ -4659,7 +4659,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-15",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r7",
       "instrument": "command",
@@ -4689,7 +4689,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-16",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r7",
       "instrument": "command",
@@ -4726,7 +4726,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-17",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r7",
       "instrument": "command",
@@ -4756,7 +4756,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-18",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r7",
       "instrument": "command",
@@ -4786,7 +4786,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-19",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r7",
       "instrument": "command",
@@ -4813,7 +4813,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-2",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -4843,7 +4843,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-21",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r7",
       "instrument": "command",
@@ -4873,7 +4873,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-22",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r7",
       "instrument": "command",
@@ -4918,7 +4918,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-23",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r7",
       "instrument": "command",
@@ -4948,7 +4948,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-24",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r7",
       "instrument": "command",
@@ -4978,7 +4978,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-25",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r8",
       "instrument": "command",
@@ -5008,7 +5008,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-26",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r8",
       "instrument": "command",
@@ -5045,7 +5045,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-27",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r8",
       "instrument": "command",
@@ -5075,7 +5075,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-28",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r8",
       "instrument": "command",
@@ -5105,7 +5105,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-29",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r10",
       "instrument": "command",
@@ -5132,7 +5132,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-3",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -5162,7 +5162,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-3",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -5192,7 +5192,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-31",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r10",
       "instrument": "command",
@@ -5222,7 +5222,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-32",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r10",
       "instrument": "command",
@@ -5267,7 +5267,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-33",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r10",
       "instrument": "command",
@@ -5297,7 +5297,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-34",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r10",
       "instrument": "command",
@@ -5327,7 +5327,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-35",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r11",
       "instrument": "command",
@@ -5354,7 +5354,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-37",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r11",
       "instrument": "command",
@@ -5384,7 +5384,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-38",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r11",
       "instrument": "command",
@@ -5429,7 +5429,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-39",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r11",
       "instrument": "command",
@@ -5459,7 +5459,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-4",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -5504,7 +5504,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-4",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -5531,7 +5531,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-40",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r11",
       "instrument": "command",
@@ -5561,7 +5561,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-41",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r13",
       "instrument": "command",
@@ -5591,7 +5591,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-42",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r13",
       "instrument": "command",
@@ -5628,7 +5628,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-43",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r13",
       "instrument": "command",
@@ -5658,7 +5658,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-44",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r13",
       "instrument": "command",
@@ -5688,7 +5688,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-5",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -5718,7 +5718,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-5",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -5748,7 +5748,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-6",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -5778,7 +5778,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-6",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -5805,7 +5805,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-7",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r5",
       "instrument": "command",
@@ -5835,7 +5835,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-8",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r5",
       "instrument": "command",
@@ -5872,7 +5872,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:2121-9",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r5",
       "instrument": "command",
@@ -5902,7 +5902,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:3131-1",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "h1",
       "instrument": "command",
@@ -5929,7 +5929,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:3131-2",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -5956,7 +5956,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:3131-3",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -5986,7 +5986,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:3131-4",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -6031,7 +6031,7 @@ exports['e2e events'] = `
     },
     {
       "id": "log-http://localhost:3131-5",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -6985,7 +6985,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
   "commandLogAdded": [
     {
       "id": "log-http://localhost:2121-7",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -7008,7 +7008,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-8",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -7028,7 +7028,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-9",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -7051,7 +7051,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-10",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -7071,7 +7071,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-11",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -7094,7 +7094,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-15",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -7117,7 +7117,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-16",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -7137,7 +7137,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-17",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -7160,7 +7160,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-18",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -7180,7 +7180,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-19",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -7203,7 +7203,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-7",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -7226,7 +7226,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-8",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -7246,7 +7246,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-9",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -7269,7 +7269,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-10",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -7289,7 +7289,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-11",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -7312,7 +7312,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-15",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -7335,7 +7335,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-16",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -7355,7 +7355,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-17",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -7378,7 +7378,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-18",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -7398,7 +7398,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-19",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -7423,7 +7423,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
   "commandLogChanged": [
     {
       "id": "log-http://localhost:2121-10",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -7453,7 +7453,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-10",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -7483,7 +7483,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-11",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -7513,7 +7513,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-11",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -7543,7 +7543,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-15",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -7573,7 +7573,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-15",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -7603,7 +7603,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-16",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -7633,7 +7633,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-16",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -7663,7 +7663,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-17",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -7708,7 +7708,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-17",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -7753,7 +7753,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-18",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -7783,7 +7783,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-18",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -7813,7 +7813,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-19",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -7843,7 +7843,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-19",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -7873,7 +7873,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-7",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -7903,7 +7903,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-7",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -7933,7 +7933,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-8",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -7963,7 +7963,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-8",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -7993,7 +7993,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-9",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -8038,7 +8038,7 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
     },
     {
       "id": "log-http://localhost:2121-9",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -8844,7 +8844,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
   "commandLogAdded": [
     {
       "id": "log-http://localhost:2121-7",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -8867,7 +8867,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-8",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -8887,7 +8887,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-9",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -8910,7 +8910,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-10",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -8930,7 +8930,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-11",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -8953,7 +8953,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-15",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -8976,7 +8976,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-16",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -8996,7 +8996,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-17",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -9019,7 +9019,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-18",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -9039,7 +9039,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-19",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -9062,7 +9062,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-7",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -9085,7 +9085,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-8",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -9105,7 +9105,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-9",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -9128,7 +9128,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-10",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -9148,7 +9148,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-11",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -9171,7 +9171,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-15",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -9194,7 +9194,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-16",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -9214,7 +9214,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-17",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -9237,7 +9237,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-18",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -9257,7 +9257,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-19",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -9282,7 +9282,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
   "commandLogChanged": [
     {
       "id": "log-http://localhost:2121-10",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -9312,7 +9312,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-10",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -9342,7 +9342,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-11",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -9372,7 +9372,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-11",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -9402,7 +9402,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-15",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -9432,7 +9432,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-15",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -9462,7 +9462,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-16",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -9492,7 +9492,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-16",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -9522,7 +9522,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-17",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -9567,7 +9567,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-17",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -9612,7 +9612,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-18",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -9642,7 +9642,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-18",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -9672,7 +9672,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-19",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -9702,7 +9702,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-19",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r4",
       "instrument": "command",
@@ -9732,7 +9732,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-7",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -9762,7 +9762,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-7",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -9792,7 +9792,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-8",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -9822,7 +9822,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-8",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -9852,7 +9852,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-9",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",
@@ -9897,7 +9897,7 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
     },
     {
       "id": "log-http://localhost:2121-9",
-      "defaultState": "open",
+      "defaultCollapsedState": "open",
       "event": false,
       "hookId": "r3",
       "instrument": "command",

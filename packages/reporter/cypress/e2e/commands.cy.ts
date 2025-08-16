@@ -713,7 +713,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
         it('closed when nested logs that pass', () => {
           const nestedGroupId = addCommand(runner, {
             name: 'session',
-            defaultState: 'closed',
+            defaultCollapsedState: 'closed',
             state: 'passed',
             type: 'child',
           })
@@ -728,7 +728,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
 
           const nestedSessionGroupId = addCommand(runner, {
             name: 'session',
-            defaultState: 'closed',
+            defaultCollapsedState: 'closed',
             displayName: 'validate',
             type: 'child',
             groupLevel: 2,
@@ -771,7 +771,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
         it('closed when nested logs has failures but last log is successful', () => {
           const nestedGroupId = addCommand(runner, {
             name: 'session',
-            defaultState: 'closed',
+            defaultCollapsedState: 'closed',
             state: 'passed',
             type: 'child',
           })
@@ -786,7 +786,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
 
           const nestedSessionGroupId = addCommand(runner, {
             name: 'session',
-            defaultState: 'closed',
+            defaultCollapsedState: 'closed',
             displayName: 'validate',
             type: 'child',
             state: 'failed',
@@ -833,7 +833,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
         it('open when last log has failed', () => {
           const nestedGroupId = addCommand(runner, {
             name: 'session',
-            defaultState: 'closed',
+            defaultCollapsedState: 'closed',
             state: 'passed',
             type: 'child',
           })
@@ -848,7 +848,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
 
           const nestedSessionGroupId = addCommand(runner, {
             name: 'session',
-            defaultState: 'closed',
+            defaultCollapsedState: 'closed',
             displayName: 'validate',
             state: 'failed',
             type: 'system',
@@ -1003,7 +1003,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
       cy.fixture('command_error').then((_commandErr) => {
         const groupId = addCommand(runner, {
           name: 'session',
-          defaultState: 'closed',
+          defaultCollapsedState: 'closed',
           message: 'mock restore',
           state: 'passed',
           type: 'system',
@@ -1038,7 +1038,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
       cy.fixture('command_error').then((_commandErr) => {
         const groupId = addCommand(runner, {
           name: 'session',
-          defaultState: 'closed',
+          defaultCollapsedState: 'closed',
           message: 'mock restore',
           state: 'passed',
           type: 'system',

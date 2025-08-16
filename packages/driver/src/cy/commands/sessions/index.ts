@@ -151,7 +151,7 @@ export default function (Commands, Cypress, cy) {
           displayName: statusMap.stepName(step),
           message: '',
           type: 'system',
-          defaultState: 'closed',
+          defaultCollapsedState: 'closed',
         }, (setupLogGroup) => {
           return cy.then({ timeout: INTERNAL_COMMAND_TIMEOUT }, async () => {
             // Catch when a cypress command fails in the setup function to correctly update log status
@@ -214,7 +214,7 @@ export default function (Commands, Cypress, cy) {
           displayName: 'Restore saved session',
           message: '',
           type: 'system',
-          defaultState: 'closed',
+          defaultCollapsedState: 'closed',
           consoleProps: () => {
             return {
               Step: 'Restore saved session',
@@ -240,7 +240,7 @@ export default function (Commands, Cypress, cy) {
           displayName: 'Validate session',
           message: '',
           type: 'system',
-          defaultState: 'closed',
+          defaultCollapsedState: 'closed',
           consoleProps: () => {
             return {
               Step: 'Validate Session',
@@ -498,7 +498,7 @@ export default function (Commands, Cypress, cy) {
       let _log
       const groupDetails = {
         message: `${session.id.length > 50 ? `${session.id.substring(0, 47)}...` : session.id}`,
-        defaultState: 'closed' as 'closed' | 'open',
+        defaultCollapsedState: 'closed' as 'closed' | 'open',
       }
 
       return logGroup(Cypress, groupDetails, (log) => {
