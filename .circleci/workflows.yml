@@ -736,7 +736,7 @@ commands:
               if [[ -z "$TESTFILES" ]]; then
                 echo "Empty list of test files"
               fi
-              yarn $YARN_CMD --browser <<parameters.browser>> --spec $TESTFILES --runner-ui
+              yarn $YARN_CMD --browser <<parameters.browser>> --spec "$TESTFILES" --runner-ui
             fi
           working_directory: packages/driver
       - sanitize-verify-and-store-mocha-results
@@ -840,7 +840,7 @@ commands:
               PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
               PERCY_PARALLEL_TOTAL=-1 \
-              yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --spec $TESTFILES
+              yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --spec "$TESTFILES"
             fi
       - run:
           command: |
@@ -1952,7 +1952,7 @@ jobs:
           name: Bootstrap the Cypress binary and run binary system test
           command: |
             # we need to bootstrap the binary into our project directory and run the tests
-            source ./system-tests/scripts/bootstrap-docker-container.sh 'yarn cypress run --component --spec src/mount.cy.ts src/App.cy.ts'
+            source ./system-tests/scripts/bootstrap-docker-container.sh 'yarn cypress run --component --spec "src/mount.cy.ts,src/App.cy.ts"'
 
   system-tests-chrome:
     <<: *defaults
