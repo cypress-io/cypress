@@ -41,7 +41,7 @@ const registerCypressGrep = require('@cypress/grep')
 registerCypressGrep()
 ```
 
-Or using ES modules:
+Or using ES modules / TypeScript:
 
 ```ts
 // cypress/support/e2e.ts
