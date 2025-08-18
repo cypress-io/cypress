@@ -11,6 +11,10 @@ describe('driver/src/cypress/index', () => {
   })
 
   context('$Cypress', () => {
+    it('defaults areSourceMapsAvailable to undefined', () => {
+      expect(CypressInstance.areSourceMapsAvailable).to.be.undefined
+    })
+
     it('is attached but not global', () => {
       expect(window.$Cypress).to.be.undefined
       expect(window.top.$Cypress).to.be.undefined
