@@ -387,6 +387,43 @@ describe('webpack preprocessor', function () {
         },
       ]
 
+      // @see https://github.com/cypress-io/cypress/issues/32266
+      it('matches ts-loader explicitly and does not add configuration if not ts-loader', function () {
+        const options = {
+          webpackOptions: {
+            module: {
+              rules: [
+                {
+                  test: /\.tsx?$/,
+                  exclude: [/node_modules/],
+                  use: {
+                    loader: 'exports-loader',
+                    options: {},
+                  },
+                },
+              ],
+            },
+          },
+        }
+
+        return this.run(options).then(() => {
+          expect(webpack).to.be.calledWithMatch({
+            module: {
+              rules: [
+                {
+                  test: /\.tsx?$/,
+                  exclude: [/node_modules/],
+                  use: {
+                    loader: 'exports-loader',
+                    options: {},
+                  },
+                },
+              ],
+            },
+          })
+        })
+      })
+
       COMPILER_PERMUTATIONS.forEach((compilerOptions) => {
         describe(`sets Cypress overrides to compiler options when compiler options are ${compilerOptions ? 'defined' : 'undefined'} when`, function () {
           it('rules is an array of "use" objects', function () {
