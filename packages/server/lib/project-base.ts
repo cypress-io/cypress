@@ -455,7 +455,7 @@ export class ProjectBase extends EE {
             try {
               studio?.captureStudioEvent({
                 type: StudioMetricsTypes.STUDIO_STARTED,
-                machineId: await this.ctx.coreData.machineId,
+                machineId: await this.ctx.coreData.machineId ?? '',
                 projectId: this.cfg.projectId,
                 browser: this.browser ? {
                   name: this.browser.name,
@@ -502,9 +502,14 @@ export class ProjectBase extends EE {
             }
 
             telemetryManager.mark(INITIALIZATION_MARK_NAMES.INITIALIZE_STUDIO_AI_START)
-            await studio.initializeStudioAI({
-              protocolDbPath: studio.protocolManager.dbPath,
-            })
+            await Promise.all([
+              studio.initializeStudioAI({
+                protocolDbPath: studio.protocolManager.dbPath,
+              }),
+              // Reset browser state on initialization to avoid issues
+              // with cached assets from previous test executions.
+              this.resetBrowserState(),
+            ])
 
             telemetryManager.mark(INITIALIZATION_MARK_NAMES.INITIALIZE_STUDIO_AI_END)
 

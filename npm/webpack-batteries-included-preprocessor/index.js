@@ -38,7 +38,7 @@ const addTypeScriptConfig = (file, options) => {
   }
 
   debug(`found user tsconfig.json at ${configFile?.path} with compilerOptions: ${JSON.stringify(configFile?.config?.compilerOptions)}`)
-
+  debug(`using typescript found at ${options.typescript}`)
   // shortcut if we know we've already added typescript support
   if (options.__typescriptSupportAdded) return options
 
@@ -57,6 +57,13 @@ const addTypeScriptConfig = (file, options) => {
 
   const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
   // node will try to load a projects tsconfig.json instead of the node
+
+  // tsx parses the moduleResolution default to node10 as well as moduleResolution="node" to node10
+  // ts-loader struggles to validate the node10 moduleResolution option depending on the version of typescript used,
+  // so we set it to node which is the same as node 10. @see https://www.typescriptlang.org/tsconfig/#moduleResolution.
+  if (configFile?.config?.compilerOptions?.moduleResolution === 'node10') {
+    configFile.config.compilerOptions.moduleResolution = 'node'
+  }
 
   webpackOptions.module.rules.push({
     test: typescriptExtensionRegex,
