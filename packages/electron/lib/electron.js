@@ -174,7 +174,7 @@ module.exports = {
         return process.exit(code)
       })
 
-      if ([1, '1'].includes(process.env.CYPRESS_INTERNAL_DEBUG_ELECTRON)) {
+      if ([1, '1'].includes(process.env.ELECTRON_ENABLE_LOGGING)) {
         spawned.stderr.pipe(process.stderr)
       } else {
         const toDebug = new WriteToDebug(debugStderr)
