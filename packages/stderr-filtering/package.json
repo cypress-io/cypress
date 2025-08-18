@@ -5,7 +5,6 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "yarn clean && tsc",
-    "build-prod": "yarn build",
     "clean": "rm -rf ./{dist,coverage}",
     "lint": "eslint",
     "test": "vitest",
@@ -22,6 +21,9 @@
     "typescript": "^5.8.2",
     "vitest": "^3.0.9"
   },
+  "files": [
+    "dist"
+  ],
   "types": "dist/index.d.ts",
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix"
