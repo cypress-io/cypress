@@ -174,13 +174,18 @@ module.exports = {
         return process.exit(code)
       })
 
-      const toDebug = new WriteToDebug(debugStderr)
-      // eslint-disable-next-line no-control-regex
-      const prefixedContent = new FilterPrefixedContent(/^\s+(?:\u001b\[[0-9;]*m)*((\S+):)+/u, process.stderr)
+      if ([1, '1'].includes(process.env.CYPRESS_INTERNAL_DEBUG_ELECTRON)) {
+        const toDebug = new WriteToDebug(debugStderr)
+        // eslint-disable-next-line no-control-regex
+        const prefixedContent = new FilterPrefixedContent(/^\s+(?:\u001b\[[0-9;]*m)*((\S+):)+/u, process.stderr)
 
-      const taggedContent = new FilterTaggedContent(START_TAG, END_TAG, process.stderr)
+        const taggedContent = new FilterTaggedContent(START_TAG, END_TAG, process.stderr)
 
-      spawned.stderr.pipe(prefixedContent).pipe(taggedContent).pipe(toDebug)
+        spawned.stderr.pipe(prefixedContent).pipe(taggedContent).pipe(toDebug)
+      } else {
+        spawned.stderr.pipe(process.stderr)
+      }
+
       spawned.stdout.pipe(process.stdout)
 
       return spawned
