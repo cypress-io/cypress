@@ -48,8 +48,6 @@ const displayCompletionMsg = () => {
     logger.warn(stripIndent`
       ${logSymbols.warning} Warning: It looks like you\'ve installed Cypress globally.
 
-        This will work, but it'\s not recommended.
-
         The recommended way to install Cypress is as a devDependency per project.
 
         You should probably run these commands:
