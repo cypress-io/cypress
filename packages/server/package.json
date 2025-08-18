@@ -124,7 +124,7 @@
     "squirrelly": "7.9.2",
     "strip-ansi": "6.0.1",
     "syntax-error": "1.4.0",
-    "systeminformation": "5.22.8",
+    "systeminformation": "^5.27.7",
     "tar": "^6.1.0",
     "term-size": "2.1.0",
     "through": "2.3.8",
