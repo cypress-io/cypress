@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "debug": "^4.3.4",
-    "esbuild": "^0.25.0"
+    "esbuild": "^0.25.1"
   },
   "devDependencies": {
     "@packages/ts": "0.0.0-development",
