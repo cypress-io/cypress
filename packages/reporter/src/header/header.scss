@@ -10,10 +10,10 @@ $color-transition: color 150ms ease-out;
     flex-wrap: wrap;
     gap: 13px;
     font-family: $font-system;
-    min-height: $header-height;
+    min-height: $header-height - 1px;
     outline: 0;
     overflow: hidden;
-    padding: 16px;
+    padding: 0 16px;
     width: 100%;
     z-index: 1;
     align-items: center;
@@ -28,11 +28,11 @@ $color-transition: color 150ms ease-out;
     width: 100%;
     justify-content: space-between;
     align-items: center;
-    padding: 0 16px;
+    padding: 8px 16px;
     border: 1px solid $gray-900;
     border-left: none;
     flex-wrap: wrap;
-    gap: 4px;
+    gap: 12px;
     min-height: 64px;
   }
 
@@ -42,7 +42,7 @@ $color-transition: color 150ms ease-out;
     border-radius: 4px;
     display: flex;
     flex-wrap: wrap;
-    min-height: 24px;
+    min-height: 32px;
     justify-content: space-between;
 
     li {
@@ -51,7 +51,7 @@ $color-transition: color 150ms ease-out;
       font-size: 14px;
       font-weight: 700;
       list-style-type: none;
-      padding: 2px 8px;
+      padding: 2px 12px;
       gap: 4px;
       line-height: 20px;
 
@@ -65,90 +65,21 @@ $color-transition: color 150ms ease-out;
     }
   }
 
-  @mixin control-container-styles($size) {
-    height: $size;
-
-    .testing-preferences-toggle {
-      height: $size;
-      width: $size;
-    }
-
-    .controls {
-      height: $size;
-
-      span button {
-        width: $size;
-      }
-    }
-  }
-
-  .controls-container-studio {
-    // TODO: https://github.com/cypress-io/cypress-services/issues/10425 change this to 32px for the studio redesign
-    @include control-container-styles(24px);
-  }
-
-  .controls-container {
-    @include control-container-styles(24px);
-  }
-
-  .controls-container,
-  .controls-container-studio {
-    display: inline-flex;
+  .controls {
     align-items: center;
-    justify-content: center;
-    gap: 4px;
+    display: inline-flex;
     flex-wrap: wrap;
+    gap: 12px;
+    height: 32px;
+    justify-content: center;
 
-    span {
-      height: 100%;
-    }
-
-    .testing-preferences-toggle {
-      display: flex;
-      justify-content: center;
+    button {
       align-items: center;
-      height: 100%;
-      color: $gray-500;
-      border: 1px solid $gray-900;
-      border-radius: 4px;
-
-      &.open {
-        background-color: $gray-900;
-        color: $white;
-      }
-    }
-
-    .controls {
-      align-items: center;
-      border: 1px solid $gray-900;
-      border-radius: 4px;
       display: flex;
+      height: 32px;
       justify-content: center;
-
-      span {
-        button {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          height: 100%;
-          color: $gray-400;
-          padding: 0px;
-          border-left: 1px solid $gray-900;
-          margin-left: -1px;
-        }
-
-        &:first-child {
-          button {
-            border-left: none;
-          }
-        }
-
-        &:last-child {
-          button {
-            border-right: none;
-          }
-        }
-      }
+      padding: 0 !important;
+      width: 32px;
     }
   }
 
@@ -182,7 +113,7 @@ $color-transition: color 150ms ease-out;
       }
     }
   }
-  
+
   .toggle-specs-wrapper {
     .toggle-specs-button {
       padding: 0;

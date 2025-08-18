@@ -55,20 +55,18 @@ describe('Reporter Header', () => {
       })
 
       it('clicking the down arrow will open a panel showing Testing Preferences', () => {
-        cy.get('.testing-preferences-toggle').trigger('mouseover')
+        cy.get('[data-cy=testing-preferences-toggle]').trigger('mouseover')
         cy.get('.cy-tooltip').should('have.text', 'Open Testing Preferences')
 
         cy.get('.testing-preferences').should('not.exist')
-        cy.get('.testing-preferences-toggle').should('not.have.class', 'open').click()
-        cy.get('.testing-preferences-toggle').should('have.class', 'open')
+        cy.get('[data-cy=testing-preferences-toggle]').click()
         cy.get('.testing-preferences').should('be.visible')
-        cy.get('.testing-preferences-toggle').click()
-        cy.get('.testing-preferences-toggle').should('not.have.class', 'open')
+        cy.get('[data-cy=testing-preferences-toggle]').click()
         cy.get('.testing-preferences').should('not.exist')
       })
 
       it('will show a toggle beside the auto-scrolling option', () => {
-        cy.get('.testing-preferences-toggle').click()
+        cy.get('[data-cy=testing-preferences-toggle]').click()
         cy.get(switchSelector).invoke('attr', 'aria-checked').should('eq', 'true')
         cy.get(switchSelector).click()
         cy.get(switchSelector).invoke('attr', 'aria-checked').should('eq', 'false')
@@ -97,7 +95,7 @@ describe('Reporter Header', () => {
         })
       })
 
-      cy.get('.testing-preferences-toggle').click()
+      cy.get('[data-cy=testing-preferences-toggle]').click()
       cy.get(switchSelector).invoke('attr', 'aria-checked').should('eq', 'true')
     })
   })
