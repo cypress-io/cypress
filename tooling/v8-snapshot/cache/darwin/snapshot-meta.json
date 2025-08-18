@@ -3905,6 +3905,7 @@
     "./packages/server/lib/cloud/protocol.ts",
     "./packages/server/lib/cloud/require_script.ts",
     "./packages/server/lib/cloud/strip_path.ts",
+    "./packages/server/lib/cloud/studio/StudioElectron.ts",
     "./packages/server/lib/cloud/studio/ensure_studio_bundle.ts",
     "./packages/server/lib/cloud/studio/studio.ts",
     "./packages/server/lib/cloud/studio/telemetry/TelemetryManager.ts",
@@ -4222,5 +4223,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "53969cc2a609d90be9a5464481d1a78c3b1babdf42bed9248b1126ffe9995f0e"
+  "deferredHash": "dbe308846668b86632e1fd9e5ec29fc57c24794de6bd4450ff90de3660b6e8cf"
 }

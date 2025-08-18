@@ -1,24 +1,17 @@
-import cs from 'classnames'
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React from 'react'
+import Button from '@cypress-design/react-button'
 // @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
 
 import defaultEvents, { Events } from '../lib/events'
 import type { AppState } from '../lib/app-state'
 
-import ChevronDownIcon from '@packages/frontend-shared/src/assets/icons/chevron-down-small_x16.svg'
-import ChevronUpIcon from '@packages/frontend-shared/src/assets/icons/chevron-up-small_x16.svg'
-import { IconActionNext, IconActionPlayLarge, IconActionRestart, IconActionStopCircle } from '@cypress-design/react-icon'
+import { IconChevronDownSmall, IconChevronUpSmall, IconActionNext, IconActionPlayLarge, IconActionRestart, IconActionStopCircle } from '@cypress-design/react-icon'
 
 const iconStrokeColor = 'gray-500'
-
 const iconFillColor = 'gray-900'
-
-const ifThen = (condition: boolean, component: React.ReactNode) => (
-  condition ? component : null
-)
 
 interface Props {
   events?: Events
@@ -34,56 +27,66 @@ const Controls: React.FC<Props> = observer(({ events = defaultEvents, appState, 
   }
 
   return (
-    <div className={cs({ 'controls-container-studio': appState.studioActive, 'controls-container': !appState.studioActive })}>
+    <div className='controls'>
       {displayPreferencesButton && (
         <Tooltip placement='bottom' title={<p>Open Testing Preferences</p>} className='cy-tooltip'>
-          <button
-            aria-label='Open testing preferences'
-            className={cs('testing-preferences-toggle', { 'open': appState.isPreferencesMenuOpen })}
-            onClick={action('toggle:preferences:menu', togglePreferencesMenu)}
-          >
-            {appState.isPreferencesMenuOpen ? (
-              <ChevronUpIcon />
-            ) : (
-              <ChevronDownIcon />
-            )}
-          </button>
+          <div>
+            <Button
+              size='20'
+              variant='outline-dark'
+              aria-label='Open testing preferences'
+              data-cy='testing-preferences-toggle'
+              onClick={action('toggle:preferences:menu', togglePreferencesMenu)}
+            >
+              {appState.isPreferencesMenuOpen ? (
+                <IconChevronUpSmall strokeColor='gray-500' />
+              ) : (
+                <IconChevronDownSmall strokeColor='gray-500' />
+              )}
+            </Button>
+          </div>
         </Tooltip>
       )}
-      <div className='controls'>
-        {ifThen(appState.isPaused, (
-          <Tooltip placement='bottom' title={<p>Resume <span className='kbd'>C</span></p>} className='cy-tooltip'>
-            <button aria-label='Resume' className='play' onClick={emit('resume')}>
+      {appState.isPaused && (
+        <Tooltip placement='bottom' title={<p>Resume <span className='kbd'>C</span></p>} className='cy-tooltip'>
+          <div>
+            <Button size='20' variant='outline-dark' aria-label='Resume' className='play' onClick={emit('resume')}>
               <IconActionPlayLarge size='16' strokeColor={iconStrokeColor} fillColor={iconFillColor} />
-            </button>
-          </Tooltip>
-        ))}
-        {ifThen(appState.isRunning && !appState.isPaused, (
-          <Tooltip placement='bottom' title={<p>Stop Running <span className='kbd'>S</span></p>} className='cy-tooltip'>
-            <button aria-label='Stop' className='stop' onClick={emit('stop')}>
+            </Button>
+          </div>
+        </Tooltip>
+      )}
+      {appState.isRunning && !appState.isPaused && (
+        <Tooltip placement='bottom' title={<p>Stop Running <span className='kbd'>S</span></p>} className='cy-tooltip'>
+          <div>
+            <Button size='20' variant='outline-dark' aria-label='Stop' className='stop' onClick={emit('stop')}>
               <IconActionStopCircle size='16' strokeColor={iconStrokeColor} />
-            </button>
-          </Tooltip>
-        ))}
-        {ifThen(!appState.isRunning, (
-          <Tooltip placement='bottom' title={<p>Run All Tests <span className='kbd'>R</span></p>} className='cy-tooltip'>
-            <button aria-label='Rerun all tests' className='restart' onClick={emit('restart')}>
+            </Button>
+          </div>
+        </Tooltip>
+      )}
+      {!appState.isRunning && (
+        <Tooltip placement='bottom' title={<p>Run All Tests <span className='kbd'>R</span></p>} className='cy-tooltip'>
+          <div>
+            <Button size='20' variant='outline-dark' aria-label='Rerun all tests' className='restart' onClick={emit('restart')}>
               {appState.studioActive ? (
                 <IconActionRestart transform="scale(-1 1)" strokeColor={iconStrokeColor} />
               ) : (
                 <IconActionRestart strokeColor={iconStrokeColor} />
               )}
-            </button>
-          </Tooltip>
-        ))}
-        {ifThen(!!appState.nextCommandName, (
-          <Tooltip placement='bottom' title={<p>Next <span className='kbd'>[N]:</span>{appState.nextCommandName}</p>} className='cy-tooltip'>
-            <button aria-label={`Next '${appState.nextCommandName}'`} className='next' onClick={emit('next')}>
+            </Button>
+          </div>
+        </Tooltip>
+      )}
+      {!!appState.nextCommandName && (
+        <Tooltip placement='bottom' title={<p>Next <span className='kbd'>[N]:</span>{appState.nextCommandName}</p>} className='cy-tooltip'>
+          <div>
+            <Button size='20' variant='outline-dark' aria-label={`Next '${appState.nextCommandName}'`} className='next' onClick={emit('next')}>
               <IconActionNext size='16' strokeColor={iconStrokeColor} fillColor={iconFillColor} />
-            </button>
-          </Tooltip>
-        ))}
-      </div>
+            </Button>
+          </div>
+        </Tooltip>
+      )}
     </div>
   )
 })
