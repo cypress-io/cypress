@@ -289,7 +289,7 @@ describe('Launchpad: Open Mode', () => {
           // so just adding one here
           {
             id: 'well-known-editor',
-            binary: o.platform === 'win32' ? 'cmd.exe' : '/usr/bin/well-known',
+            binary: o.platform === 'win32' ? 'cmd.exe' : '/bin/bash',
             name: 'Well known editor',
           },
         ]
@@ -317,7 +317,7 @@ describe('Launchpad: Open Mode', () => {
       cy.get('@modal').contains('Choose your editor...').click()
       cy.get('@modal').contains('Well known editor').click()
       cy.get('@modal').contains('Save changes').click()
-      cy.wait('@SetPreferred').its('request.body.variables.value').should('include', Cypress.platform === 'win32' ? 'cmd.exe' : '/usr/bin/well-known')
+      cy.wait('@SetPreferred').its('request.body.variables.value').should('include', Cypress.platform === 'win32' ? 'cmd.exe' : '/bin/bash')
     })
 
     it('opens using finder', () => {
