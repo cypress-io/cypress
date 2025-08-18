@@ -7,7 +7,7 @@
     "lint": "eslint --ext .js,.ts,.json, ."
   },
   "dependencies": {
-    "@packages/electron": "development-0.0.0"
+    "@packages/electron": "0.0.0-development"
   },
   "nx": {}
 }
