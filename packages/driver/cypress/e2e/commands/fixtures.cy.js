@@ -3,6 +3,8 @@ const stripAnsi = require('strip-ansi')
 const { assertLogLength } = require('../../support/utils')
 const { Promise } = Cypress
 
+const { fixturesFolder } = Cypress.config()
+
 describe('src/cy/commands/fixtures', () => {
   beforeEach(() => {
     return Cypress.emit('clear:fixtures:cache')
@@ -263,6 +265,24 @@ describe('src/cy/commands/fixtures', () => {
           .then(() => {
             expect(Cypress.backend.withArgs('get:fixture')).to.be.calledOnce
           })
+        })
+      })
+
+      it('should invalidate fixture cache entry when `writeFile` modifies the fixture', () => {
+        const fixtureBaseName = 'invalidate'
+        const filePath = `${fixturesFolder}/${fixtureBaseName}.json`
+        const contents = [
+          { scene: '🌸🌷🐝🦋🌱' },
+          { scene: '🌞🌊🕶️🍉🏖️' },
+          { scene: '🍁🎃🦃🌰🍎' },
+          { scene: '❄️⛄🎄🎁🦌' },
+        ]
+
+        contents.forEach((content, i) => {
+          const fixtureName = `${fixtureBaseName}${(i % 2) ? '.json' : ''}`
+
+          cy.writeFile(filePath, content)
+          cy.fixture(fixtureName).should('deep.equal', content)
         })
       })
 

@@ -1,8 +1,10 @@
 import _ from 'lodash'
 import Promise from 'bluebird'
-import { basename } from 'path'
+import { basename, extname, sep } from 'path'
 
 import $errUtils from '../../cypress/error_utils'
+
+const NULL_SEP = '\u0000'
 
 const clone = (obj) => {
   if (Buffer.isBuffer(obj)) {
@@ -12,15 +14,73 @@ const clone = (obj) => {
   return JSON.parse(JSON.stringify(obj))
 }
 
+/**
+ * Given a path, returns an array containing the path with and without its extension.
+ * If there is no extension, returns an array containing only the original path.
+ *
+ * Used so invalidation can match both "foo.json" and "foo".
+ *
+ * @returns [pathWithExtension, pathWithoutExtension] if extension exists, otherwise [path].
+ */
+const withAndWithoutExt = (path: string) => {
+  const extension = extname(path)
+
+  return extension ? [path, path.slice(0, -extension.length)] : [path]
+}
+
+/**
+ * Builds path prefixes that might have been used in a cache key's fixture
+ * portion. Includes forward and backslash variants, with and without
+ * extensions, and lowercase variants on Windows.
+ */
+const buildPrefixes = (rawPath: string): string[] => {
+  const forward = rawPath.split(sep).join('/')
+  const backslash = forward.replace(/\//g, '\\')
+
+  const bases = [
+    ...withAndWithoutExt(forward),
+    ...withAndWithoutExt(backslash),
+  ]
+
+  if (Cypress.platform === 'win32') {
+    bases.push(
+      ...withAndWithoutExt(forward.toLowerCase()),
+      ...withAndWithoutExt(backslash.toLowerCase()),
+    )
+  }
+
+  return Array.from(new Set(bases))
+}
+
+/** Turn fixture path prefixes into matchable key prefixes. */
+const makeKeyPrefixes = (fixturePath: string): string[] => {
+  return buildPrefixes(fixturePath).map((prefix) => `${prefix}${NULL_SEP}`)
+}
+
 export default (Commands, Cypress, cy, state, config) => {
   // this is called at the beginning of run, so clear the cache
   let cache = {}
 
-  const reset = () => {
+  const clearCache = () => {
     cache = {}
   }
 
-  Cypress.on('clear:fixtures:cache', reset)
+  /**
+   * Removes all cached fixture entries that correspond to the given path,
+   * across all encodings.
+   */
+  const invalidateCacheEntry = (fixturePath: string) => {
+    const prefixes = makeKeyPrefixes(fixturePath)
+
+    for (const key of Object.keys(cache)) {
+      if (prefixes.some((prefix) => key.startsWith(prefix))) {
+        delete cache[key]
+      }
+    }
+  }
+
+  Cypress.on('clear:fixtures:cache', clearCache)
+  Cypress.on('fixture:cache:invalidate', invalidateCacheEntry)
 
   return Commands.addAll({
     fixture (fixture, ...args) {
@@ -40,7 +100,7 @@ export default (Commands, Cypress, cy, state, config) => {
         options.encoding = args[0]
       }
 
-      const cacheKey = `${fixture}\u0000${options.encoding || ''}`
+      const cacheKey = `${fixture}${NULL_SEP}${options.encoding || ''}`
       const cachedContent = cache[cacheKey]
 
       if (cachedContent) {
