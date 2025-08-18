@@ -22,7 +22,7 @@ const hasTsLoader = (rules) => {
     if (!rule.use || !Array.isArray(rule.use)) return false
 
     return rule.use.some((use) => {
-      return use.loader && use.loader.match(/(^|[^a-zA-z])ts-loader([^a-zA-z]|$)/)
+      return use.loader && use.loader.match(/(^|[^a-zA-Z])ts-loader([^a-zA-Z]|$)/)
     })
   })
 }
