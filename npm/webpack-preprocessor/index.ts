@@ -15,7 +15,7 @@ const getTsLoaderIfExists = (rules) => {
 
     if (Array.isArray(rule.use)) {
       const foundRule = rule.use.find((use) => {
-        return use.loader && use.loader.match(/(^|['"])ts-loader(['"]|$)/)
+        return use.loader && use.loader.match(/(^|[^a-zA-z])ts-loader([^a-zA-z]|$)/)
       })
 
       /**
@@ -35,7 +35,7 @@ const getTsLoaderIfExists = (rules) => {
       return tsLoaderRule
     }
 
-    if (_.isObject(rule.use) && rule.use.loader && rule.use.loader.match(/(^|['"])ts-loader(['"]|$)/)) {
+    if (_.isObject(rule.use) && rule.use.loader && rule.use.loader.match(/(^|[^a-zA-z])ts-loader([^a-zA-z]|$)/)) {
       /**
        * If the rule is found, it will look like this:
        * rules: [
@@ -64,7 +64,7 @@ const getTsLoaderIfExists = (rules) => {
        *  }
        * ]
        */
-      return rule.loader && rule.loader.match(/(^|['"])ts-loader(['"]|$)/)
+      return rule.loader && rule.loader.match(/(^|[^a-zA-z])ts-loader([^a-zA-z]|$)/)
     })
 
     return tsLoaderRule
