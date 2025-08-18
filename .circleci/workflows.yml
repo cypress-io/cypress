@@ -1289,7 +1289,8 @@ commands:
         type: string
     steps:
       - run:
-          name: Ensure a script is run on all dependencies of a given package via lerna.
+          name: Exec << parameters.command >> recursively on << parameters.package >>
+            dependencies.
           command: |
             yarn lerna run <<parameters.command>> --scope=<<parameters.package>> --include-dependencies
 
