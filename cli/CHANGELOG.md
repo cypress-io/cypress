@@ -53,6 +53,7 @@ _Released 08/12/2025 (PENDING)_
 - Upgraded bundled Node.js version from `20.18.1` to `22.15.1`. Addresses [#31257](https://github.com/cypress-io/cypress/issues/31257). Addressed in [#31912](https://github.com/cypress-io/cypress/pull/31912).
 - Upgraded bundled Chromium version from `130.0.6723.137` to `136.0.7103.149`. Addresses [#31257](https://github.com/cypress-io/cypress/issues/31257). Addressed in [#31912](https://github.com/cypress-io/cypress/pull/31912).
 - Upgraded `body-parser` from `1.20.2` to `1.20.3`.  This removes the [SNYK-JS-BODYPARSER-7926860](https://security.snyk.io/vuln/SNYK-JS-BODYPARSER-7926860) vulnerability being reported in security scans. Addressed in [#32225](https://github.com/cypress-io/cypress/pull/32225).
+- Upgraded `systeminformation` from `5.22.8` to `5.27.7`. Addressed in [#32234](https://github.com/cypress-io/cypress/pull/32234).
 
 ## 14.5.4
 
