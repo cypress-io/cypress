@@ -366,6 +366,9 @@ class $Cypress {
 
     this.events.proxyTo(this.cy)
 
+    // Ensure that areSourceMapsAvailable starts as undefined until we know for sure
+    // that they are or are not available
+    this.areSourceMapsAvailable = undefined
     $scriptUtils.runScripts({
       browser: this.config('browser'),
       scripts,
