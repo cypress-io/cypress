@@ -187,6 +187,7 @@ module.exports = {
       }
 
       spawned.stdout.pipe(process.stdout)
+      process.stdin.pipe(spawned.stdin)
 
       return spawned
     }).catch((err) => {
