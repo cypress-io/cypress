@@ -42,7 +42,7 @@ const buildPrefixes = (rawPath: string): string[] => {
     ...withAndWithoutExt(backslash),
   ]
 
-  if (process?.platform === 'win32') {
+  if (Cypress.platform === 'win32') {
     bases.push(
       ...withAndWithoutExt(forward.toLowerCase()),
       ...withAndWithoutExt(backslash.toLowerCase()),
