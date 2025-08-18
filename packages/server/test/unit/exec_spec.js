@@ -27,12 +27,12 @@ describe('lib/exec', function () {
   this.timeout(10000)
 
   describe('basic tests', () => {
-    it('returns only stdout, stderr, and code', () => {
+    it('returns only stdout, stderr, and exitCode', () => {
       return runCommand('echo foo')
       .then((result) => {
         const props = Object.keys(result)
 
-        expect(props).to.deep.eq(['stdout', 'stderr', 'code'])
+        expect(props).to.deep.eq(['stdout', 'stderr', 'exitCode'])
       })
     })
 
@@ -42,7 +42,7 @@ describe('lib/exec', function () {
         const expected = {
           stdout: 'foo',
           stderr: '',
-          code: 0,
+          exitCode: 0,
         }
 
         expect(result).to.deep.eq(expected)
@@ -64,7 +64,7 @@ describe('lib/exec', function () {
         const expected = {
           stdout: '\'foo\'',
           stderr: '',
-          code: 0,
+          exitCode: 0,
         }
 
         expect(result).to.deep.eq(expected)
@@ -77,7 +77,7 @@ describe('lib/exec', function () {
         const expected = {
           stdout: '\'foo bar\'',
           stderr: '',
-          code: 0,
+          exitCode: 0,
         }
 
         expect(result).to.deep.eq(expected)
@@ -119,7 +119,7 @@ describe('lib/exec', function () {
     it('reports the stderr', () => {
       return runCommand('>&2 echo \'some error\'')
       .then((result) => {
-        expect(result.code).to.eq(0)
+        expect(result.exitCode).to.eq(0)
 
         expect(result.stderr).to.equal('\'some error\'')
       })
@@ -131,7 +131,7 @@ describe('lib/exec', function () {
         .then((result) => {
           expect(result.stdout).to.equal('')
           expect(result.stderr).to.equal('The system cannot find the file specified.')
-          expect(result.code).to.equal(1)
+          expect(result.exitCode).to.equal(1)
 
           // stderr should be trimmed already
           expect(result.stderr.trim()).to.equal(result.stderr)
@@ -165,7 +165,7 @@ describe('lib/exec', function () {
         const expected = {
           stdout: 'foo',
           stderr: '',
-          code: 0,
+          exitCode: 0,
         }
 
         expect(result).to.deep.eq(expected)
@@ -178,7 +178,7 @@ describe('lib/exec', function () {
         const expected = {
           stdout: 'foo bar',
           stderr: '',
-          code: 0,
+          exitCode: 0,
         }
 
         expect(result).to.deep.eq(expected)
@@ -218,7 +218,7 @@ describe('lib/exec', function () {
     it('reports the stderr', () => {
       return runCommand('>&2 echo \'some error\'')
       .then((result) => {
-        expect(result.code).to.eq(0)
+        expect(result.exitCode).to.eq(0)
 
         expect(result.stderr).to.equal('some error')
       })
@@ -230,7 +230,7 @@ describe('lib/exec', function () {
         .then((result) => {
           expect(result.stdout).to.equal('')
           expect(result.stderr).to.equal('cat: nooope: No such file or directory')
-          expect(result.code).to.equal(1)
+          expect(result.exitCode).to.equal(1)
 
           // stderr should be trimmed already
           expect(result.stderr.trim()).to.equal(result.stderr)

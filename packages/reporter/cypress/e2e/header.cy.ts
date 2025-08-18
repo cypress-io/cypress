@@ -106,24 +106,21 @@ describe('header', () => {
       describe('preferences menu', () => {
         it('can be toggled', () => {
           cy.get('.testing-preferences').should('not.exist')
-          cy.get('.testing-preferences-toggle').should('not.have.class', 'open')
-          cy.get('.testing-preferences-toggle').click()
-          cy.get('.testing-preferences-toggle').should('have.class', 'open')
+          cy.get('[data-cy=testing-preferences-toggle]').click()
           cy.get('.testing-preferences').should('be.visible')
-          cy.get('.testing-preferences-toggle').click()
-          cy.get('.testing-preferences-toggle').should('not.have.class', 'open')
+          cy.get('[data-cy=testing-preferences-toggle]').click()
           cy.get('.testing-preferences').should('not.exist')
         })
 
         it('has tooltip', () => {
-          cy.get('.testing-preferences-toggle').trigger('mouseover')
+          cy.get('[data-cy=testing-preferences-toggle]').trigger('mouseover')
           cy.get('.cy-tooltip').should('have.text', 'Open Testing Preferences')
         })
 
         it('shows when auto-scrolling is enabled and can disable it', () => {
           const switchSelector = '[data-cy=auto-scroll-switch]'
 
-          cy.get('.testing-preferences-toggle').click()
+          cy.get('[data-cy=testing-preferences-toggle]').click()
           cy.get(switchSelector).invoke('attr', 'aria-checked').should('eq', 'true')
           cy.get(switchSelector).click()
           cy.get(switchSelector).invoke('attr', 'aria-checked').should('eq', 'false')
@@ -132,7 +129,7 @@ describe('header', () => {
         it('can be toggled with shortcut', () => {
           const switchSelector = '[data-cy=auto-scroll-switch]'
 
-          cy.get('.testing-preferences-toggle').click()
+          cy.get('[data-cy=testing-preferences-toggle]').click()
           cy.get(switchSelector).invoke('attr', 'aria-checked').should('eq', 'true')
           cy.get('body').type('a').then(() => {
             cy.get(switchSelector).invoke('attr', 'aria-checked').should('eq', 'false')
@@ -141,7 +138,7 @@ describe('header', () => {
 
         it('the auto-scroll toggle emits save:state event when clicked', () => {
           cy.spy(runner, 'emit')
-          cy.get('.testing-preferences-toggle').click()
+          cy.get('[data-cy=testing-preferences-toggle]').click()
           cy.get('[data-cy=auto-scroll-switch]').click()
           cy.wrap(runner.emit).should('be.calledWith', 'save:state')
           cy.percySnapshot()

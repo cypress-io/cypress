@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { basename } from 'path'
+import { basename, isAbsolute, relative, resolve } from 'path'
 
 import $errUtils from '../../cypress/error_utils'
 import type { Log } from '../../cypress/log'
@@ -157,6 +157,8 @@ export default (Commands, Cypress, cy, state) => {
 
   Commands.addAll({
     writeFile (fileName: string, contents: string, encoding: Cypress.Encodings | WriteFileOptions | undefined, userOptions: WriteFileOptions, ...extras: never[]) {
+      const { defaultCommandTimeout, fixturesFolder } = Cypress.config()
+
       if (_.isObject(encoding)) {
         userOptions = encoding
         encoding = undefined
@@ -173,7 +175,7 @@ export default (Commands, Cypress, cy, state) => {
         encoding: encoding === undefined ? 'utf8' : encoding,
         flag: userOptions.flag ? userOptions.flag : 'w',
         log: true,
-        timeout: Cypress.config('defaultCommandTimeout'),
+        timeout: defaultCommandTimeout,
       })
 
       const consoleProps = {}
@@ -224,6 +226,28 @@ export default (Commands, Cypress, cy, state) => {
       .then(({ filePath, contents }) => {
         consoleProps['File Path'] = filePath
         consoleProps['Contents'] = contents
+
+        if (fixturesFolder !== false) {
+          const normalizePath = (path) => path.replace(/\\/g, '/')
+          const resolvedFixturesFolder = normalizePath(resolve(fixturesFolder))
+          const resolvedFilePath = normalizePath(resolve(filePath))
+          const relativePath = relative(resolvedFixturesFolder, resolvedFilePath)
+
+          // If `relativePath` does not start with ".." and is not equal to itself
+          // with a leading "..", then `filePath` is inside `fixturesFolder`.
+          const isInsideFixturesFolder =
+            relativePath && !relativePath.startsWith('..') && !isAbsolute(relativePath)
+
+          if (isInsideFixturesFolder) {
+            /**
+             * Relative path from the fixtures folder to the written file,
+             * normalized with forward slashes.
+             */
+            const fixtureName = relativePath.replace(/\\/g, '/')
+
+            Cypress.emit('fixture:cache:invalidate', fixtureName)
+          }
+        }
 
         return null
       })
