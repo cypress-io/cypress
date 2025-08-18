@@ -30191,10 +30191,10 @@ syntax-error@1.4.0:
   dependencies:
     acorn-node "^1.2.0"
 
-systeminformation@5.22.8:
-  version "5.22.8"
-  resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-5.22.8.tgz#403126772defa1d2a2e4cf039e9f6d57d3f1f3ba"
-  integrity sha512-F1iWQ+PSfOzvLMGh2UXASaWLDq5o+1h1db13Kddl6ojcQ47rsJhpMtRrmBXfTA5QJgutC4KV67YRmXLuroIxrA==
+systeminformation@^5.27.7:
+  version "5.27.7"
+  resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-5.27.7.tgz#4dc9d436419948cd5e5f076779a1298220d19a72"
+  integrity sha512-saaqOoVEEFaux4v0K8Q7caiauRwjXC4XbD2eH60dxHXbpKxQ8kH9Rf7Jh+nryKpOUSEFxtCdBlSUx0/lO6rwRg==
 
 systemjs@^6.15.1:
   version "6.15.1"

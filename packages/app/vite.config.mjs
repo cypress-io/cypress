@@ -22,6 +22,7 @@ const config = makeConfig({
       '@headlessui/vue',
       '@cypress-design/vue-icon',
       '@cypress-design/vue-statusicon',
+      '@module-federation/runtime',
       'human-interval',
       'floating-vue',
       'dayjs',
@@ -40,6 +41,7 @@ const config = makeConfig({
       '@opentelemetry/semantic-conventions',
       '@opentelemetry/exporter-trace-otlp-http',
       '@opentelemetry/core',
+      'semver/functions/major',
     ],
     esbuildOptions: {
       target: 'ES2022',
