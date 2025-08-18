@@ -23,9 +23,21 @@ describe('lib/cloud/studio', () => {
 
   beforeEach(async () => {
     reportStudioError = sinon.stub()
+    // Fake StudioElectron so we can assert calls
+    class FakeStudioElectron {
+      // @ts-ignore - assigned in ctor
+      destroy: sinon.SinonStub
+      constructor () {
+        this.destroy = sinon.stub()
+      }
+    }
+
     StudioManager = (proxyquire('../lib/cloud/studio/studio', {
       '../api/studio/report_studio_error': {
         reportStudioError,
+      },
+      './StudioElectron': {
+        StudioElectron: FakeStudioElectron,
       },
     }) as typeof import('@packages/server/lib/cloud/studio/studio')).StudioManager
 
@@ -211,9 +223,13 @@ describe('lib/cloud/studio', () => {
         protocolDbPath: 'test-db-path',
       })
 
-      expect(studio.initializeStudioAI).to.be.calledWith({
-        protocolDbPath: 'test-db-path',
-      })
+      expect((studioManager as any)._studioElectron).to.exist
+
+      expect(studio.initializeStudioAI).to.be.calledWith(
+        sinon.match.has('protocolDbPath', 'test-db-path').and(
+          sinon.match.has('studioElectron'),
+        ),
+      )
     })
   })
 

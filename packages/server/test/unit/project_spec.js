@@ -828,6 +828,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
           this.project['_protocolManager'] = protocolManager
         })
 
+        sinon.stub(this.project, 'resetBrowserState').resolves()
+
         let studioInitPromise
 
         this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
@@ -867,6 +869,68 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
           status: 'success',
           canAccessStudioAI: true,
         })
+      })
+
+      it('calls resetBrowserState during onStudioInit when AI is enabled', async function () {
+        const mockSetupProtocol = sinon.stub()
+        const mockBeforeSpec = sinon.stub()
+        const mockAccessStudioAI = sinon.stub().resolves(true)
+        const mockCaptureStudioEvent = sinon.stub().resolves()
+
+        this.project.spec = {}
+
+        this.project._cfg = this.project._cfg || {}
+        this.project._cfg.projectId = 'test-project-id'
+        this.project.ctx.coreData.user = { email: 'test@example.com' }
+        this.project.ctx.coreData.machineId = Promise.resolve('test-machine-id')
+
+        const studioManager = new StudioManager()
+
+        studioManager.canAccessStudioAI = mockAccessStudioAI
+        studioManager.captureStudioEvent = mockCaptureStudioEvent
+        studioManager.protocolManager = {
+          setupProtocol: mockSetupProtocol,
+          beforeSpec: mockBeforeSpec,
+          dbPath: 'test-db-path',
+        }
+
+        const resetStub = sinon.stub(this.project, 'resetBrowserState').resolves()
+
+        const studioLifecycleManager = new StudioLifecycleManager()
+
+        this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
+
+        // Set up the studio manager promise directly
+        studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
+        studioLifecycleManager.isStudioReady = sinon.stub().returns(true)
+
+        // Create a browser object
+        this.project.browser = {
+          name: 'chrome',
+          family: 'chromium',
+        }
+
+        this.project.options = { browsers: [this.project.browser] }
+
+        sinon.stub(browsers, 'closeProtocolConnection').resolves()
+        sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
+        sinon.stub(this.project, 'protocolManager').get(() => {
+          return this.project['_protocolManager']
+        }).set((protocolManager) => {
+          this.project['_protocolManager'] = protocolManager
+        })
+
+        let studioInitPromise
+
+        this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
+          studioInitPromise = callbacks.onStudioInit()
+        })
+
+        this.project.startWebsockets({}, {})
+
+        await studioInitPromise
+
+        expect(resetStub).to.be.calledOnce
       })
 
       it('passes onStudioInit callback with AI enabled but no protocol manager', async function () {

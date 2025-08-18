@@ -119,6 +119,37 @@ describe('webpack-batteries-included-preprocessor', () => {
       })
     })
 
+    it('overrides node10 option as node as they are the same thing and is simpler for ts-loader to parse', () => {
+      getTsConfigMock.returns({
+        config: {
+          compilerOptions: {
+            module: 'commonjs',
+            moduleResolution: 'node10',
+          },
+          path: '/foo/tsconfig.json',
+        },
+      })
+
+      const preprocessorCB = preprocessor({
+        typescript: true,
+        webpackOptions,
+      })
+
+      preprocessorCB({
+        filePath: 'foo.ts',
+        outputPath: '.js',
+      })
+
+      const tsLoader = webpackOptions.module.rules[0].use[0]
+
+      expect(tsLoader.options.compiler).to.be.true
+
+      expect(tsLoader.options.compilerOptions).to.deep.equal({
+        module: 'commonjs',
+        moduleResolution: 'node',
+      })
+    })
+
     // @see https://github.com/cypress-io/cypress/issues/18938. ts-loader needs a tsconfig.json file to work.
     it('throws an error if the user\'s tsconfig.json is not found', () => {
       getTsConfigMock.returns(null)
