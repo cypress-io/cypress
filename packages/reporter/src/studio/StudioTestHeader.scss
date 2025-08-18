@@ -8,14 +8,14 @@
     width: 100%;
     align-items: center;
     gap: 13px;
-    padding: 16px;
+    padding: 0 16px;
     border-top: 1px solid $gray-900;
     border-bottom: 1px solid $gray-900;
     font-size: 14px;
     line-height: 20px;
     color: $gray-500;
+    min-height: $header-height;
 
-    
     .studio-header__back-button {
       padding: 0;
       width: 32px;
@@ -23,5 +23,3 @@
     }
   }
 }
-
-
