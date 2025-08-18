@@ -11,7 +11,7 @@ Cypress uses [GeckoDriver](https://firefox-source-docs.mozilla.org/testing/gecko
 
 The [WebDriver](https://w3c.github.io/webdriver) methods used come from the [webdriver](https://github.com/webdriverio/webdriverio/tree/main/packages/webdriver) package to drive WebDriver (and in the future, WebDriver BiDi), which also starts the [geckodriver](https://github.com/webdriverio-community/node-geckodriver#readme) for us using the [`wdio:geckodriverOptions`](https://webdriver.io/docs/capabilities/#wdiogeckodriveroptions) capability.
 
-Currently, [Chrome Devtools Protocol](https://chromedevtools.github.io/devtools-protocol/) automates most of our browser interactions with Firefox. However, [CDP will be removed towards the end of 2024](https://fxdx.dev/deprecating-cdp-support-in-firefox-embracing-the-future-with-webdriver-bidi/) now that [WebDriver BiDi](https://w3c.github.io/webdriver-bidi/) is fully supported in Firefox 130 and up. [GeckoDriver](https://firefox-source-docs.mozilla.org/testing/geckodriver/index.html) will be the entry point in which Cypress implements [WebDriver BiDi](https://w3c.github.io/webdriver-bidi/) for Firefox.
+As of Firefox 141 and Cypress 15, [WebDriver BiDi](https://w3c.github.io/webdriver-bidi/) is used to fully automate the firefox browser. [GeckoDriver](https://firefox-source-docs.mozilla.org/testing/geckodriver/index.html) will be the entry point in which Cypress implements [WebDriver BiDi](https://w3c.github.io/webdriver-bidi/) for Firefox.
 
 ### Historical Context
 
