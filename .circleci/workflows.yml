@@ -1292,6 +1292,7 @@ commands:
           name: Exec << parameters.command >> recursively on << parameters.package >>
             dependencies.
           command: |
+            source ./scripts/ensure-node.sh
             yarn lerna run <<parameters.command>> --scope=<<parameters.package>> --include-dependencies
 
   build-and-package-binary:
