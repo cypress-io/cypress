@@ -13,7 +13,17 @@ import { START_TAG, END_TAG } from './constants'
  *
  * @param args The arguments to log as an error message
  */
+
+const DISABLE_TAGS = process.env.ELECTRON_ENABLE_LOGGING === '1'
+
 export const logError = (...args: any[]) => {
-  // eslint-disable-next-line no-console
-  console.error(START_TAG, ...args, END_TAG)
+  // When electron debug is enabled, the output will not be filtered, so
+  // these tags are not needed.
+  if (DISABLE_TAGS) {
+    // eslint-disable-next-line no-console
+    console.error(...args)
+  } else {
+    // eslint-disable-next-line no-console
+    console.error(START_TAG, ...args, END_TAG)
+  }
 }

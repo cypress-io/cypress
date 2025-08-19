@@ -10,6 +10,8 @@ const xvfb = require('./xvfb')
 const verify = require('../tasks/verify')
 const errors = require('../errors')
 const readline = require('readline')
+const { filter, DEBUG_PREFIX } = require('@packages/stderr-filtering')
+const Debug = require('debug')
 
 function isPlatform (platform) {
   return os.platform() === platform
@@ -197,19 +199,23 @@ module.exports = {
         // if this is defined then we are manually piping for linux
         // to filter out the garbage
         if (child.stderr) {
-          debug('piping child STDERR to process STDERR')
-          child.stderr.on('data', (data) => {
-            const str = data.toString()
+          if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
+            child.stderr.pipe(filter(process.stderr, Debug('cypress:internal-stderr'), DEBUG_PREFIX))
+          } else {
+            debug('piping child STDERR to process STDERR')
+            child.stderr.on('data', (data) => {
+              const str = data.toString()
 
-            // if we have a callback and this explicitly returns
-            // false then bail
-            if (onStderrData && onStderrData(str)) {
-              return
-            }
+              // if we have a callback and this explicitly returns
+              // false then bail
+              if (onStderrData && onStderrData(str)) {
+                return
+              }
 
-            // else pass it along!
-            process.stderr.write(data)
-          })
+              // else pass it along!
+              process.stderr.write(data)
+            })
+          }
         }
 
         // https://github.com/cypress-io/cypress/issues/1841

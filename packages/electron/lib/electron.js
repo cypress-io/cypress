@@ -14,7 +14,7 @@ const debugStderr = require('debug')('cypress:internal-stderr')
 
 fs = Promise.promisifyAll(fs)
 
-const { FilterPrefixedContent, FilterTaggedContent, WriteToDebug, START_TAG, END_TAG } = require('@packages/stderr-filtering')
+const { filter, DEBUG_PREFIX } = require('@packages/stderr-filtering')
 
 /**
  * If running as root on Linux, no-sandbox must be passed or Chrome will not start
@@ -177,13 +177,7 @@ module.exports = {
       if ([1, '1'].includes(process.env.ELECTRON_ENABLE_LOGGING)) {
         spawned.stderr.pipe(process.stderr)
       } else {
-        const toDebug = new WriteToDebug(debugStderr)
-        // eslint-disable-next-line no-control-regex
-        const prefixedContent = new FilterPrefixedContent(/^\s+(?:\u001b\[[0-9;]*m)*((\S+):)+/u, process.stderr)
-
-        const taggedContent = new FilterTaggedContent(START_TAG, END_TAG, process.stderr)
-
-        spawned.stderr.pipe(prefixedContent).pipe(taggedContent).pipe(toDebug)
+        spawned.stderr.pipe(filter(process.stderr, debugStderr, DEBUG_PREFIX))
       }
 
       spawned.stdout.pipe(process.stdout)
