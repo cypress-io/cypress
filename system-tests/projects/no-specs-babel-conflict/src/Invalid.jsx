@@ -1,4 +1,4 @@
 import React from 'react'
 
-/*eslint-disable */
+/* eslint-disable */
 export function MyComponent (({

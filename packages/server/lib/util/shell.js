@@ -3,7 +3,7 @@ const Promise = require('bluebird')
 const execa = require('execa')
 const os = require('os')
 const commandExistsModule = require('command-exists')
-const log = require('../log')
+const log = require('debug')('cypress:server:util:shell')
 
 const isWindows = () => {
   return os.platform() === 'win32'
@@ -69,7 +69,7 @@ const sourceShellCommand = function (cmd, shell) {
 }
 
 const findBash = () => {
-  return execa.shell('which bash')
+  return execa('which bash', { shell: true })
   .then((val) => val.stdout)
 }
 

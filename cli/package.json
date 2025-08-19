@@ -66,8 +66,8 @@
     "yauzl": "^2.10.0"
   },
   "devDependencies": {
-    "@babel/cli": "7.24.8",
-    "@babel/preset-env": "7.25.3",
+    "@babel/cli": "7.28.0",
+    "@babel/preset-env": "7.28.0",
     "@cypress/angular": "0.0.0-development",
     "@cypress/grep": "0.0.0-development",
     "@cypress/mount-utils": "0.0.0-development",

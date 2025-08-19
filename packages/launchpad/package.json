@@ -75,7 +75,7 @@
     "vite-plugin-package-config": "0.1.1",
     "vite-svg-loader": "5.1.0",
     "vue": "3.2.47",
-    "vue-i18n": "9.13.1",
+    "vue-i18n": "9.14.5",
     "vue-tsc": "^2.0.19",
     "vue3-file-selector": "^1.0.1",
     "wonka": "^4.0.15"
