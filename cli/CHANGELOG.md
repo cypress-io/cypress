@@ -36,7 +36,6 @@ _Released 08/12/2025 (PENDING)_
 - Fixed an issue where Create from Component feature might not be able to parse React components from project files. Fixed in [#31457](https://github.com/cypress-io/cypress/pull/31457).
 - Fixed an issue where `isSecureContext` would be `false` on localhost when testing with Cypress. Addresses [#18217](https://github.com/cypress-io/cypress/issues/18217).
 - Fixed an issue where Angular legacy `Output()` decorators were broken when making component instance field references safe. Fixes [#32137](https://github.com/cypress-io/cypress/issues/32137).
-- Upgraded `tmp` from `~0.2.3` to `~0.2.4`. This removes the [CVE-2025-54798](https://github.com/advisories/GHSA-52f5-9888-hmc6) vulnerability being reported in security scans. Addresses [#32176](https://github.com/cypress-io/cypress/issues/32176).
 - Fixed an issue where `.fixture()` would not return updated content after the underlying file was modified via `.writeFile()`. The fixture cache is now properly invalidated when the backing file is written to, ensuring updated content is returned in subsequent `.fixture()` calls. Fixes [#4716](https://github.com/cypress-io/cypress/issues/4716).
 - Fixed an issue where `.fixture()` calls with a specified encoding would sometimes still attempt to parse the file based on its extension. Files with an explicit encoding are now always treated as raw content. Fixes [#32139](https://github.com/cypress-io/cypress/issues/32139).
 - Fixed an issue where `.fixture()` calls with different encoding options would return inconsistent content based on execution order. Fixes [#32138](https://github.com/cypress-io/cypress/issues/32138).
@@ -55,6 +54,7 @@ _Released 08/12/2025 (PENDING)_
 - Upgraded bundled Chromium version from `130.0.6723.137` to `136.0.7103.149`. Addresses [#31257](https://github.com/cypress-io/cypress/issues/31257). Addressed in [#31912](https://github.com/cypress-io/cypress/pull/31912).
 - Upgraded `body-parser` from `1.20.2` to `1.20.3`.  This removes the [SNYK-JS-BODYPARSER-7926860](https://security.snyk.io/vuln/SNYK-JS-BODYPARSER-7926860) vulnerability being reported in security scans. Addressed in [#32225](https://github.com/cypress-io/cypress/pull/32225).
 - Upgraded `systeminformation` from `5.22.8` to `5.27.7`. Addressed in [#32234](https://github.com/cypress-io/cypress/pull/32234).
+- Upgraded `tmp` from `~0.2.3` to `~0.2.4`. This removes the [CVE-2025-54798](https://github.com/advisories/GHSA-52f5-9888-hmc6) vulnerability being reported in security scans. Addresses [#32176](https://github.com/cypress-io/cypress/issues/32176).
 
 ## 14.5.4
 
