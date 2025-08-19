@@ -26,7 +26,7 @@
     "vite-6": "npm:vite@^6.2.5",
     "vite-7": "npm:vite@^7.0.0",
     "vite-plugin-inspect": "0.8.4",
-    "vitest": "2.1.4"
+    "vitest": "2.1.9"
   },
   "peerDependencies": {
     "cypress": ">=15.0.0"

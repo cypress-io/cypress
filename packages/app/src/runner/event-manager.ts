@@ -284,7 +284,7 @@ export class EventManager {
         }
 
         this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
-        this.studioStore.setCloudStudioSessionId(cloudStudioSessionId)
+        this.studioStore.setSessionId(cloudStudioSessionId)
         // when we enter studio with a new test, we don't want to rerun until
         // the the test has been created, so we just set the studio active
         this.studioStore.setActive(true)
@@ -301,7 +301,7 @@ export class EventManager {
         }
 
         this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
-        this.studioStore.setCloudStudioSessionId(cloudStudioSessionId)
+        this.studioStore.setSessionId(cloudStudioSessionId)
         rerun()
       })
     })
@@ -310,6 +310,17 @@ export class EventManager {
       studioInitSuite({ suiteId })
     })
 
+    const maybeCleanUpProtocol = () => {
+      const needsReload = this.studioStore.needsProtocolCleanup()
+
+      this.studioStore.cancel()
+
+      // only reload the page if Studio has actually been used for recording
+      if (needsReload) {
+        window.location.reload()
+      }
+    }
+
     this.reporterBus.on('studio:cancel', () => {
       this.ws.emit('studio:destroy', ({ error }) => {
         if (error) {
@@ -317,9 +328,7 @@ export class EventManager {
           console.error(error)
         }
 
-        this.studioStore.cancel()
-        // Reloading for now. This is the easiest way to clear out the protocol code from the front end
-        window.location.reload()
+        maybeCleanUpProtocol()
       })
     })
 
@@ -369,9 +378,7 @@ export class EventManager {
           console.error(error)
         }
 
-        this.studioStore.cancel()
-        // Reloading for now. This is the easiest way to clear out the protocol code from the front end
-        window.location.reload()
+        maybeCleanUpProtocol()
       })
     })
 
@@ -854,7 +861,8 @@ export class EventManager {
       performance.measure('run', 'run-s', 'run-e')
     })
 
-    const hasRunnableId = !!this.studioStore.testId || !!this.studioStore.suiteId
+    const hasActiveStudio = !!this.studioStore.testId ||
+                           !!this.studioStore.newTestLineNumber
 
     const studioSingleTestActive = this.studioStore.newTestLineNumber != null || !!this.studioStore.testId
 
@@ -866,7 +874,7 @@ export class EventManager {
       autoScrollingEnabled: runState.autoScrollingEnabled,
       isSpecsListOpen: runState.isSpecsListOpen,
       scrollTop: runState.scrollTop,
-      studioActive: hasRunnableId,
+      studioActive: hasActiveStudio,
       studioSingleTestActive,
     } as ReporterStartInfo)
   }
@@ -927,7 +935,9 @@ export class EventManager {
   }
 
   _interceptStudio (displayProps) {
-    if (this.studioStore.isActive) {
+    // Only intercept logs when Studio is actually recording a specific test
+    // Don't intercept when Studio is just open in "new test" mode
+    if (this.studioStore.isActive && this.studioStore.testId) {
       displayProps.hookId = this.studioStore.hookId
 
       if (displayProps.name === 'visit' && displayProps.state === 'failed') {

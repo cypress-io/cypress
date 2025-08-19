@@ -14,7 +14,7 @@ import { catchError, concatMap, first, map, switchMap, tap } from 'rxjs/operator
 import { CypressBuilderOptions } from './cypressBuilderOptions'
 
 type CypressOptions = Partial<CypressCommandLine.CypressRunOptions> &
-Partial<CypressCommandLine.CypressOpenOptions>;
+Partial<CypressCommandLine.CypressOpenOptions>
 
 type CypressStartDevServerProps = {
   devServerTarget: string

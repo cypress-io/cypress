@@ -27,6 +27,19 @@
   }
 }
 
+.studio-header__test-section-left {
+  display: flex;
+  flex-grow: 1;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.studio-header__test-section-right {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
 .studio-header__test-title {
   color: $white;
   font-weight: 500;

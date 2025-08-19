@@ -93,7 +93,7 @@ context('cy.origin misc', { browser: '!webkit' }, () => {
         expect(consoleProps.name).to.equal('exec')
         expect(consoleProps.type).to.equal('command')
         expect(consoleProps.props['Shell Used']).to.be.undefined
-        expect(consoleProps.props.Yielded).to.have.property('code').that.equals(0)
+        expect(consoleProps.props.Yielded).to.have.property('exitCode').that.equals(0)
         expect(consoleProps.props.Yielded).to.have.property('stderr').that.equals('')
         expect(consoleProps.props.Yielded).to.have.property('stdout').that.equals('foobar')
       })
