@@ -1,5 +1,5 @@
 import { Transform, Writable } from 'stream'
-import { StringDecoder } from 'node:string_decoder'
+import { StringDecoder } from 'string_decoder'
 import { LineDecoder } from './LineDecoder'
 import Debug from 'debug'
 import { writeWithBackpressure } from './writeWithBackpressure'

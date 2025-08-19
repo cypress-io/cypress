@@ -11,7 +11,7 @@ vi.mock('../LineDecoder', () => {
   }
 })
 
-vi.mock('node:string_decoder', () => {
+vi.mock('string_decoder', () => {
   return {
     StringDecoder: vi.fn(),
   }
