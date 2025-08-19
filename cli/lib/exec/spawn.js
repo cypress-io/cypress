@@ -10,8 +10,11 @@ const xvfb = require('./xvfb')
 const verify = require('../tasks/verify')
 const errors = require('../errors')
 const readline = require('readline')
-const { filter, DEBUG_PREFIX } = require('@packages/stderr-filtering')
-const Debug = require('debug')
+const { FilterTaggedContent } = require('../stderr-filtering/FilterTaggedContent')
+
+export const START_TAG = '<<<CYPRESS.STDERR.START>>>'
+
+export const END_TAG = '<<<CYPRESS.STDERR.END>>>'
 
 function isPlatform (platform) {
   return os.platform() === platform
@@ -200,7 +203,10 @@ module.exports = {
         // to filter out the garbage
         if (child.stderr) {
           if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
-            child.stderr.pipe(filter(process.stderr, Debug('cypress:internal-stderr'), DEBUG_PREFIX))
+            // strip out tags from stderr output during cy in cy tests
+            const tagFilter = new FilterTaggedContent(START_TAG, END_TAG, process.stderr)
+
+            child.stderr.pipe(tagFilter).pipe(process.stderr)
           } else {
             debug('piping child STDERR to process STDERR')
             child.stderr.on('data', (data) => {
