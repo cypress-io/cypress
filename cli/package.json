@@ -22,7 +22,6 @@
   "dependencies": {
     "@cypress/request": "^3.0.9",
     "@cypress/xvfb": "^1.2.4",
-    "@packages/stderr-filtering": "0.0.0-development",
     "@types/sinonjs__fake-timers": "8.1.1",
     "@types/sizzle": "^2.3.2",
     "arch": "^2.2.0",
@@ -77,6 +76,7 @@
     "@cypress/svelte": "0.0.0-development",
     "@cypress/vue": "0.0.0-development",
     "@packages/root": "0.0.0-development",
+    "@packages/stderr-filtering": "0.0.0-development",
     "@types/bluebird": "3.5.33",
     "@types/chai": "4.2.15",
     "@types/chai-jquery": "1.1.40",
