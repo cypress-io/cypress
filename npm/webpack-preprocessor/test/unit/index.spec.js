@@ -387,37 +387,165 @@ describe('webpack preprocessor', function () {
         },
       ]
 
+      // @see https://github.com/cypress-io/cypress/issues/32266
+      it('matches ts-loader explicitly and does not add configuration if not ts-loader', function () {
+        const options = {
+          webpackOptions: {
+            module: {
+              rules: [
+                {
+                  test: /\.tsx?$/,
+                  exclude: [/node_modules/],
+                  use: {
+                    loader: 'exports-loader',
+                    options: {},
+                  },
+                },
+              ],
+            },
+          },
+        }
+
+        return this.run(options).then(() => {
+          expect(webpack).to.be.calledWithMatch({
+            module: {
+              rules: [
+                {
+                  test: /\.tsx?$/,
+                  exclude: [/node_modules/],
+                  use: {
+                    loader: 'exports-loader',
+                    options: {},
+                  },
+                },
+              ],
+            },
+          })
+        })
+      })
+
+      // eslint-disable-next-line quotes
+      const TS_LOADER_NAMES = ['ts-loader', "ts-loader", 'foo/ts-loader/dist/index.js']
+
       COMPILER_PERMUTATIONS.forEach((compilerOptions) => {
-        describe(`sets Cypress overrides to compiler options when compiler options are ${compilerOptions ? 'defined' : 'undefined'} when`, function () {
-          it('rules is an array of "use" objects', function () {
-            const options = {
-              webpackOptions: {
-                module: {
-                  rules: [
-                    {
-                      test: /\.tsx?$/,
-                      exclude: [/node_modules/],
-                      use: {
-                        loader: 'ts-loader',
+        TS_LOADER_NAMES.forEach((tsLoaderName) => {
+          describe(`sets Cypress overrides to compiler options when compiler options are ${compilerOptions ? 'defined' : 'undefined'} when`, function () {
+            it(`rules is an array of "use" objects with ${tsLoaderName}`, function () {
+              const options = {
+                webpackOptions: {
+                  module: {
+                    rules: [
+                      {
+                        test: /\.tsx?$/,
+                        exclude: [/node_modules/],
+                        use: {
+                          loader: tsLoaderName,
+                          options: {
+                            compilerOptions,
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              }
+
+              return this.run(options).then(() => {
+                expect(webpack).to.be.calledWithMatch({
+                  module: {
+                    rules: [
+                      {
+                        test: /\.tsx?$/,
+                        exclude: [/node_modules/],
+                        use: {
+                          loader: tsLoaderName,
+                          options: {
+                            compilerOptions: {
+                              downlevelIteration: true,
+                              inlineSourceMap: false,
+                              inlineSources: false,
+                              sourceMap: true,
+                            },
+                          },
+                        },
+                      },
+                    ],
+                  },
+                })
+              })
+            })
+
+            it(`rules is an array of "use" array objects ${tsLoaderName}`, function () {
+              const options = {
+                webpackOptions: {
+                  module: {
+                    rules: [
+                      {
+                        test: /\.tsx?$/,
+                        exclude: [/node_modules/],
+                        use: [{
+                          loader: tsLoaderName,
+                          options: {
+                            compilerOptions,
+                          },
+                        }],
+                      },
+                    ],
+                  },
+                },
+              }
+
+              return this.run(options).then(() => {
+                expect(webpack).to.be.calledWithMatch({
+                  module: {
+                    rules: [
+                      {
+                        test: /\.tsx?$/,
+                        exclude: [/node_modules/],
+                        use: [{
+                          loader: tsLoaderName,
+                          options: {
+                            compilerOptions: {
+                              downlevelIteration: true,
+                              inlineSourceMap: false,
+                              inlineSources: false,
+                              sourceMap: true,
+                            },
+                          },
+                        }],
+                      },
+                    ],
+                  },
+                })
+              })
+            })
+
+            it(`rules is an array of "loader" objects ${tsLoaderName}`, function () {
+              const options = {
+                webpackOptions: {
+                  module: {
+                    rules: [
+                      {
+                        test: /\.tsx?$/,
+                        exclude: [/node_modules/],
+                        loader: tsLoaderName,
                         options: {
                           compilerOptions,
                         },
                       },
-                    },
-                  ],
+                    ],
+                  },
                 },
-              },
-            }
+              }
 
-            return this.run(options).then(() => {
-              expect(webpack).to.be.calledWithMatch({
-                module: {
-                  rules: [
-                    {
-                      test: /\.tsx?$/,
-                      exclude: [/node_modules/],
-                      use: {
-                        loader: 'ts-loader',
+              return this.run(options).then(() => {
+                expect(webpack).to.be.calledWithMatch({
+                  module: {
+                    rules: [
+                      {
+                        test: /\.tsx?$/,
+                        exclude: [/node_modules/],
+                        loader: tsLoaderName,
                         options: {
                           compilerOptions: {
                             downlevelIteration: true,
@@ -427,95 +555,9 @@ describe('webpack preprocessor', function () {
                           },
                         },
                       },
-                    },
-                  ],
-                },
-              })
-            })
-          })
-
-          it('rules is an array of "use" array objects', function () {
-            const options = {
-              webpackOptions: {
-                module: {
-                  rules: [
-                    {
-                      test: /\.tsx?$/,
-                      exclude: [/node_modules/],
-                      use: [{
-                        loader: 'ts-loader',
-                        options: {
-                          compilerOptions,
-                        },
-                      }],
-                    },
-                  ],
-                },
-              },
-            }
-
-            return this.run(options).then(() => {
-              expect(webpack).to.be.calledWithMatch({
-                module: {
-                  rules: [
-                    {
-                      test: /\.tsx?$/,
-                      exclude: [/node_modules/],
-                      use: [{
-                        loader: 'ts-loader',
-                        options: {
-                          compilerOptions: {
-                            downlevelIteration: true,
-                            inlineSourceMap: false,
-                            inlineSources: false,
-                            sourceMap: true,
-                          },
-                        },
-                      }],
-                    },
-                  ],
-                },
-              })
-            })
-          })
-
-          it('rules is an array of "loader" objects', function () {
-            const options = {
-              webpackOptions: {
-                module: {
-                  rules: [
-                    {
-                      test: /\.tsx?$/,
-                      exclude: [/node_modules/],
-                      loader: 'ts-loader',
-                      options: {
-                        compilerOptions,
-                      },
-                    },
-                  ],
-                },
-              },
-            }
-
-            return this.run(options).then(() => {
-              expect(webpack).to.be.calledWithMatch({
-                module: {
-                  rules: [
-                    {
-                      test: /\.tsx?$/,
-                      exclude: [/node_modules/],
-                      loader: 'ts-loader',
-                      options: {
-                        compilerOptions: {
-                          downlevelIteration: true,
-                          inlineSourceMap: false,
-                          inlineSources: false,
-                          sourceMap: true,
-                        },
-                      },
-                    },
-                  ],
-                },
+                    ],
+                  },
+                })
               })
             })
           })

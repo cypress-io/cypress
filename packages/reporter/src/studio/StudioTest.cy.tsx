@@ -77,6 +77,26 @@ describe('StudioTest', () => {
     cy.percySnapshot()
   })
 
+  it('renders long test title', () => {
+    const longTest = { ...mockTest, title: 'displays correct content where test title is very long and exceeds the normal length but the alignment in the header is correct' } as unknown as Test
+    const testRunnablesStore = { ...runnablesStore, _tests: { 'test-1': longTest } } as unknown as RunnablesStore
+
+    cy.mount(
+      <StudioTest
+        appState={appState}
+        runnablesStore={testRunnablesStore}
+        statsStore={statsStore}
+      />,
+    )
+
+    cy.get('.studio-single-test-container').should('be.visible')
+    cy.get('.studio-header__test-section').should('be.visible')
+    cy.get('.studio-single-test-attempts').should('be.visible')
+    cy.get('[data-cy="studio-single-test-title"]').should('contain.text', 'is very long')
+    cy.get('[data-cy="spec-duration"]').should('contain', '00:02')
+    cy.percySnapshot()
+  })
+
   it('shows correct status icon for passed test', () => {
     const passedTest = { ...mockTest, state: 'passed' } as unknown as Test
     const testRunnablesStore = { ...runnablesStore, _tests: { 'test-1': passedTest } } as unknown as RunnablesStore

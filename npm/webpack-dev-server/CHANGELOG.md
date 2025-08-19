@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v5.1.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.1.0...@cypress/webpack-dev-server-v5.1.1) (2025-08-18)
+
+
+### Bug Fixes
+
+* extranous angular warnings ([#32251](https://github.com/cypress-io/cypress/issues/32251)) ([c8606c2](https://github.com/cypress-io/cypress/commit/c8606c21ae148459fe54d74e040fd2ec5bdc3d08))
+
 # [@cypress/webpack-dev-server-v5.1.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.0.0...@cypress/webpack-dev-server-v5.1.0) (2025-08-14)
 
 
