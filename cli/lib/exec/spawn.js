@@ -10,11 +10,6 @@ const xvfb = require('./xvfb')
 const verify = require('../tasks/verify')
 const errors = require('../errors')
 const readline = require('readline')
-const { FilterTaggedContent } = require('../stderr-filtering/FilterTaggedContent')
-
-export const START_TAG = '<<<CYPRESS.STDERR.START>>>'
-
-export const END_TAG = '<<<CYPRESS.STDERR.END>>>'
 
 function isPlatform (platform) {
   return os.platform() === platform
@@ -202,26 +197,19 @@ module.exports = {
         // if this is defined then we are manually piping for linux
         // to filter out the garbage
         if (child.stderr) {
-          if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
-            // strip out tags from stderr output during cy in cy tests
-            const tagFilter = new FilterTaggedContent(START_TAG, END_TAG, process.stderr)
+          debug('piping child STDERR to process STDERR')
+          child.stderr.on('data', (data) => {
+            const str = data.toString()
 
-            child.stderr.pipe(tagFilter).pipe(process.stderr)
-          } else {
-            debug('piping child STDERR to process STDERR')
-            child.stderr.on('data', (data) => {
-              const str = data.toString()
+            // if we have a callback and this explicitly returns
+            // false then bail
+            if (onStderrData && onStderrData(str)) {
+              return
+            }
 
-              // if we have a callback and this explicitly returns
-              // false then bail
-              if (onStderrData && onStderrData(str)) {
-                return
-              }
-
-              // else pass it along!
-              process.stderr.write(data)
-            })
-          }
+            // else pass it along!
+            process.stderr.write(data)
+          })
         }
 
         // https://github.com/cypress-io/cypress/issues/1841
