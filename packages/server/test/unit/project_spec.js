@@ -518,7 +518,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       let initializeCyPromptManagerStub
 
       afterEach(function () {
-        delete process.env.CYPRESS_ENABLE_CY_PROMPT
         initializeCyPromptManagerStub.restore()
       })
 
@@ -537,25 +536,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
             ctx,
             record: true,
             key: '123e4567-e89b-12d3-a456-426614174000',
-          })
-        })
-      })
-
-      it('initializes cy prompt lifecycle manager if process.env.CYPRESS_ENABLE_CY_PROMPT is enabled', function () {
-        this.project.options.record = false
-        this.project.options.key = undefined
-
-        process.env.CYPRESS_ENABLE_CY_PROMPT = 'true'
-
-        initializeCyPromptManagerStub = sinon.stub(CyPromptLifecycleManager.prototype, 'initializeCyPromptManager')
-
-        return this.project.open()
-        .then(() => {
-          expect(initializeCyPromptManagerStub).to.be.calledWith({
-            cloudDataSource: ctx.cloud,
-            ctx,
-            record: false,
-            key: undefined,
           })
         })
       })
