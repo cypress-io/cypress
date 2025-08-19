@@ -329,7 +329,6 @@ describe('lib/socket', () => {
         })
       })
     })
-    
     context('on(get:app:state)', () => {
       it('calls getSavedState with options and returns the state', function (done) {
         this.options.getSavedState.resolves({ reporterWidth: 500 })
