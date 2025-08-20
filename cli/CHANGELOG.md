@@ -5,6 +5,7 @@ _Released 08/26/2025 (PENDING)_
 
 **Dependency Updates:**
 
+- Upgraded `image-size` from `1.1.1` to `1.2.1`. Addressed in [#32232](https://github.com/cypress-io/cypress/pull/32232).
 - Upgraded `tar` from `6.1.5` to `6.2.1`. Addressed in [#32229](https://github.com/cypress-io/cypress/pull/32229).
 
 ## 15.0.0
@@ -64,7 +65,6 @@ _Released 08/20/2025_
 - Upgraded bundled Node.js version from `20.18.1` to `22.15.1`. Addresses [#31257](https://github.com/cypress-io/cypress/issues/31257). Addressed in [#31912](https://github.com/cypress-io/cypress/pull/31912).
 - Upgraded bundled Chromium version from `130.0.6723.137` to `136.0.7103.149`. Addresses [#31257](https://github.com/cypress-io/cypress/issues/31257). Addressed in [#31912](https://github.com/cypress-io/cypress/pull/31912).
 - Upgraded `body-parser` from `1.20.2` to `1.20.3`.  This removes the [SNYK-JS-BODYPARSER-7926860](https://security.snyk.io/vuln/SNYK-JS-BODYPARSER-7926860) vulnerability being reported in security scans. Addressed in [#32225](https://github.com/cypress-io/cypress/pull/32225).
-- Upgraded `image-size` from `1.1.1` to `1.2.1`. Addressed in [#32232](https://github.com/cypress-io/cypress/pull/32232).
 - Upgraded `systeminformation` from `5.22.8` to `5.27.7`. Addressed in [#32234](https://github.com/cypress-io/cypress/pull/32234).
 - Upgraded `tmp` from `~0.2.3` to `~0.2.4`. This removes the [CVE-2025-54798](https://github.com/advisories/GHSA-52f5-9888-hmc6) vulnerability being reported in security scans. Addresses [#32176](https://github.com/cypress-io/cypress/issues/32176).
 
