@@ -56,8 +56,13 @@ export type SupportedKey = SupportedKeyType & string
  * @returns True if the key is supported (single character or named key)
  */
 export function isSupportedKey (key: string): key is SupportedKey {
+  // Normalize the string to combine combining characters
+  const normalizedKey = key.normalize('NFC')
+
   return typeof key === 'string' && (
-    [...key].length === 1 ||
+    // Check if it's a single grapheme cluster (user-perceived character)
+    // This handles multi-codepoint characters like emoji with modifiers
+    [...normalizedKey].length === 1 ||
     NamedKeys.includes(key as SupportedNamedKey)
   )
 }

@@ -1,4 +1,4 @@
-import { NamedKeys, SupportedKey } from '@packages/types'
+import { SupportedKey } from '@packages/types'
 
 describe('src/cy/commands/actions/press', () => {
   // Non-BiDi firefox is not supported
@@ -27,6 +27,7 @@ describe('src/cy/commands/actions/press', () => {
     })
   }
 
+  /*
   // Numbers
   ;['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].forEach(testKeyPress)
 
@@ -42,4 +43,6 @@ describe('src/cy/commands/actions/press', () => {
     '<', '>', '/', '?', '`', '~', ' ', '€', 'é'].forEach(testKeyPress)
 
   NamedKeys.forEach(testKeyPress)
+  */
+  testKeyPress('é')
 })

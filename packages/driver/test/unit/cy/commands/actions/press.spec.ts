@@ -25,7 +25,6 @@ vi.mock('../../../../../src/cypress/error_utils', async () => {
 })
 
 describe('cy/commands/actions/press', () => {
-  let log: Mock<typeof Cypress['log']>
   let automation: Mock<typeof Cypress['automation']>
   let press: PressCommand
   let Cypress: MockedObject<Cypress.Cypress>
@@ -36,11 +35,11 @@ describe('cy/commands/actions/press', () => {
   let logReturnValue: Cypress.Log
 
   beforeEach(() => {
-    log = vi.fn<typeof Cypress['log']>()
     automation = vi.fn<typeof Cypress['automation']>()
 
     Cypress = {
-      log,
+      // @ts-expect-error - <Cypress['log']> has a type conflict between Driver and CLI d.ts
+      log: vi.fn(),
       automation,
       // @ts-expect-error
       browser: {

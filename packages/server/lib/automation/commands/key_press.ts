@@ -15,7 +15,7 @@ export async function cdpKeyPress (
   contexts: Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription>,
   frameTree: Protocol.Page.FrameTree,
 ): Promise<void> {
-  debug('cdp keypress', { key })
+  debug('cdp keypress', { key, length: [...key].length })
 
   const autFrame = frameTree.childFrames?.find(({ frame }) => {
     return frame.name?.includes(AUT_FRAME_NAME_IDENTIFIER)
@@ -34,15 +34,19 @@ export async function cdpKeyPress (
   }
 
   try {
-    await send('Input.dispatchKeyEvent', {
-      type: 'keyDown',
-      key,
-    })
+    for (const char of [...key]) {
+      debug('dispatching keydown', { char })
+      await send('Input.dispatchKeyEvent', {
+        type: 'keyDown',
+        key: char,
+      })
 
-    await send('Input.dispatchKeyEvent', {
-      type: 'keyUp',
-      key,
-    })
+      debug('dispatching keyup', { char })
+      await send('Input.dispatchKeyEvent', {
+        type: 'keyUp',
+        key: char,
+      })
+    }
   } catch (e) {
     debug(e)
     throw e
