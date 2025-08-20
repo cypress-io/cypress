@@ -4,8 +4,6 @@ export * from './constants'
 
 export * from './preferences'
 
-export { SupportedKey, isSupportedKey, toSupportedKey } from './automation'
-
 export * from './automation'
 
 export * from './driver'

@@ -39,7 +39,7 @@ describe('src/cy/commands/actions/press', () => {
   // Special characters
   ;['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '=',
     '+', '[', ']', '{', '}', '\\', '|', ';', ':', '\'', '"', ',', '.',
-    '<', '>', '/', '?', '`', '~', ' '].forEach(testKeyPress)
+    '<', '>', '/', '?', '`', '~', ' ', '€', 'é'].forEach(testKeyPress)
 
   NamedKeys.forEach(testKeyPress)
 })

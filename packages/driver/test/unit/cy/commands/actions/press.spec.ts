@@ -40,8 +40,6 @@ describe('cy/commands/actions/press', () => {
     automation = vi.fn<typeof Cypress['automation']>()
 
     Cypress = {
-      // The overloads for `log` don't get applied correctly here
-      // @ts-expect-error
       log,
       automation,
       // @ts-expect-error

@@ -14,7 +14,6 @@ import $utils from '../cypress/utils'
 import $window from '../dom/window'
 import type { Log } from '../cypress/log'
 import type { StateFunc } from '../cypress/state'
-import type { SupportedNamedKey } from '@packages/types'
 
 const debug = Debug('cypress:driver:keyboard')
 
@@ -1398,7 +1397,33 @@ const defaults = (props: Partial<Cypress.KeyboardDefaultsOptions>) => {
   return getConfig()
 }
 
-const Keys: Record<string, SupportedNamedKey> = Cypress.Keyboard.Keys
+const Keys: Record<string, Cypress.SupportedNamedKey> = {
+  DOWN: 'ArrowDown',
+  LEFT: 'ArrowLeft',
+  RIGHT: 'ArrowRight',
+  UP: 'ArrowUp',
+  END: 'End',
+  HOME: 'Home',
+  PAGEDOWN: 'PageDown',
+  PAGEUP: 'PageUp',
+  ENTER: 'Enter',
+  TAB: 'Tab',
+  BACKSPACE: 'Backspace',
+  DELETE: 'Delete',
+  INSERT: 'Insert',
+  F1: 'F1',
+  F2: 'F2',
+  F3: 'F3',
+  F4: 'F4',
+  F5: 'F5',
+  F6: 'F6',
+  F7: 'F7',
+  F8: 'F8',
+  F9: 'F9',
+  F10: 'F10',
+  F11: 'F11',
+  F12: 'F12',
+}
 
 export default {
   defaults,

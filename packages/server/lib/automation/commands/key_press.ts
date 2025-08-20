@@ -128,9 +128,6 @@ export async function bidiKeyPress (inKey: SupportedKey, client: Client, autCont
   }
 
   try {
-    // in Firefox, F6 changes the focus away from the aut iframe, so it must be
-    // refocused inbetween keydown and keyup for the keyup to register.
-
     await client.inputPerformActions({
       context: autContext,
       actions: [{

@@ -1,32 +1,10 @@
+/// <reference path="../../../cli/types/cypress-automation.d.ts" />
+
 export type AutomationElementId = `${string}-string`
 
 const invalidKeyErrorKind = 'InvalidKeyError'
 
-export type SupportedNamedKey = 'ArrowDown' |
-'ArrowLeft' |
-'ArrowRight' |
-'ArrowUp' |
-'End' |
-'Home' |
-'PageDown' |
-'PageUp' |
-'Enter' |
-'Tab' |
-'Backspace' |
-'Delete' |
-'Insert' |
-'F1' |
-'F2' |
-'F3' |
-'F4' |
-'F5' |
-'F6' |
-'F7' |
-'F8' |
-'F9' |
-'F10' |
-'F11' |
-'F12'
+export type SupportedNamedKey = Cypress.SupportedNamedKey
 
 /**
  * Array of all supported named keys that can be used with cy.press().
