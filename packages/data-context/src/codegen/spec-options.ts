@@ -3,7 +3,7 @@ import type { CodeGenType } from '@packages/graphql/src/gen/nxs.gen'
 import fs from 'fs-extra'
 import { uniq, upperFirst } from 'lodash'
 import path from 'path'
-import { FileExtension, getDefaultSpecFileName } from '../sources/migration/utils'
+import { FileExtension, getDefaultSpecFileName } from '../util/files'
 import { toPosix } from '../util'
 import type { FoundSpec } from '@packages/types'
 

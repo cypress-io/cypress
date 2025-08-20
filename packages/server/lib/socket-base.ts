@@ -74,6 +74,14 @@ export class SocketBase {
     return this._cdpIo
   }
 
+  onBeforeSave (config) {
+
+  }
+
+  onAfterSave (config, error) {
+
+  }
+
   getIos () {
     return [this._cdpIo, this._socketIo]
   }
@@ -149,6 +157,7 @@ export class SocketBase {
       onChromiumRun () {},
       onReloadBrowser () {},
       closeExtraTargets () {},
+      getSavedState () {},
       onSavedStateChanged () {},
       onTestFileChange () {},
       onCaptureVideoFrames () {},
@@ -227,11 +236,8 @@ export class SocketBase {
 
           debug('automation:client connected')
 
-          debug('cdp forced for firefox?', !!process.env.FORCE_FIREFOX_CDP && Number(options.getCurrentBrowser()?.majorVersion) < 141)
           // only send the necessary config
-          automationClient.emit('automation:config', {
-            IS_CDP_FORCED_FOR_FIREFOX: !!process.env.FORCE_FIREFOX_CDP && Number(options.getCurrentBrowser()?.majorVersion) < 141,
-          })
+          automationClient.emit('automation:config', {})
 
           // if our automation disconnects then we're
           // in trouble and should probably bomb everything
@@ -409,7 +415,15 @@ export class SocketBase {
         })
 
         getCtx().coreData.studioLifecycleManager?.registerStudioReadyListener((studio) => {
-          studio.addSocketListeners(socket)
+          studio.addSocketListeners({
+            socket,
+            onBeforeSave: () => {
+              this.onBeforeSave(config)
+            },
+            onAfterSave: ({ error }) => {
+              this.onAfterSave(config, error)
+            },
+          })
         })
 
         socket.on('studio:init', async (cb) => {
@@ -568,8 +582,21 @@ export class SocketBase {
           return cb(s || {}, cachedTestState)
         })
 
+        socket.on('get:app:state', async (opts, cb) => {
+          try {
+            const state = await options.getSavedState(opts)
+
+            cb({ data: state })
+          } catch (error) {
+            cb({ error: errors.cloneErr(error) })
+          }
+        })
+
         socket.on('save:app:state', (state, cb) => {
-          options.onSavedStateChanged(state)
+          const opts = state.__options
+          const stateWithoutOptions = _.omit(state, '__options')
+
+          options.onSavedStateChanged(stateWithoutOptions, opts)
 
           // we only use the 'ack' here in tests
           if (cb) {

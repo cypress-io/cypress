@@ -32,9 +32,53 @@ new mode 100755
 diff --git a/node_modules/http-proxy/lib/http-proxy/common.js b/node_modules/http-proxy/lib/http-proxy/common.js
 old mode 100644
 new mode 100755
+index 6513e81..486d4c8
+--- a/node_modules/http-proxy/lib/http-proxy/common.js
++++ b/node_modules/http-proxy/lib/http-proxy/common.js
+@@ -1,6 +1,5 @@
+ var common   = exports,
+     url      = require('url'),
+-    extend   = require('util')._extend,
+     required = require('requires-port');
+ 
+ var upgradeHeader = /(^|,)\s*upgrade\s*($|,)/i,
+@@ -40,10 +39,10 @@ common.setupOutgoing = function(outgoing, options, req, forward) {
+   );
+ 
+   outgoing.method = options.method || req.method;
+-  outgoing.headers = extend({}, req.headers);
++  outgoing.headers = Object.assign({}, req.headers);
+ 
+   if (options.headers){
+-    extend(outgoing.headers, options.headers);
++    Object.assign(outgoing.headers, options.headers);
+   }
+ 
+   if (options.auth) {
 diff --git a/node_modules/http-proxy/lib/http-proxy/index.js b/node_modules/http-proxy/lib/http-proxy/index.js
 old mode 100644
 new mode 100755
+index 977a4b3..88b2d0f
+--- a/node_modules/http-proxy/lib/http-proxy/index.js
++++ b/node_modules/http-proxy/lib/http-proxy/index.js
+@@ -1,5 +1,4 @@
+ var httpProxy = module.exports,
+-    extend    = require('util')._extend,
+     parse_url = require('url').parse,
+     EE3       = require('eventemitter3'),
+     http      = require('http'),
+@@ -47,9 +46,9 @@ function createRightProxy(type) {
+         args[cntr] !== res
+       ) {
+         //Copy global options
+-        requestOptions = extend({}, options);
++        requestOptions = Object.assign({}, options);
+         //Overwrite with request options
+-        extend(requestOptions, args[cntr]);
++        Object.assign(requestOptions, args[cntr]);
+ 
+         cntr--;
+       }
 diff --git a/node_modules/http-proxy/lib/http-proxy/passes/web-incoming.js b/node_modules/http-proxy/lib/http-proxy/passes/web-incoming.js
 old mode 100644
 new mode 100755

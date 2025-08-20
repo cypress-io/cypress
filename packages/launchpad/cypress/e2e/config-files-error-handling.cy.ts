@@ -1,5 +1,3 @@
-import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
-import pkg from '../../../../package.json'
 import { getPathForPlatform } from './support/getPathForPlatform'
 
 const expectStackToBe = (mode: 'open' | 'closed') => {
@@ -34,54 +32,19 @@ describe('Config files error handling', () => {
     cy.contains('h1', 'Welcome to Cypress', { timeout: 10000 })
   })
 
-  it('shows the upgrade screen if there is a legacy config file', () => {
-    cy.openProject('pristine-with-e2e-testing')
-    cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.json', '{}')
-      await ctx.actions.file.removeFileInProject('cypress.config.js')
-    })
-
-    cy.openProject('pristine-with-e2e-testing')
-
-    cy.visitLaunchpad()
-
-    cy.get('body').should('contain.text', defaultMessages.migration.wizard.title.replace('{version}', pkg.version.split('.')[0]))
-    cy.get('body').should('contain.text', defaultMessages.migration.wizard.description)
-  })
-
-  it('handles config files with legacy config file in same project', () => {
-    cy.openProject('pristine-with-e2e-testing')
-    cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.json', '{}')
-    })
-
-    cy.openProject('pristine-with-e2e-testing')
-    cy.visitLaunchpad()
-
-    cy.contains('p', 'There is both a cypress.config.js and a cypress.json file at the location below:')
-    cy.contains('body', 'Cypress no longer supports cypress.json')
-    expectStackToBe('closed')
-
-    cy.withCtx(async (ctx) => {
-      await ctx.actions.file.removeFileInProject('cypress.json')
-    })
-
-    cy.findByRole('button', { name: 'Try again' }).click()
-
-    cy.contains('h1', 'Welcome to Cypress', { timeout: 10000 })
-  })
-
-  it('handles deprecated config fields', () => {
+  it('handles removed config fields', () => {
     cy.openProject('pristine')
     cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { e2e: { supportFile: false, experimentalComponentTesting: true } }')
+      // ensure the config set here has 'isWarning: false' to ensure it errors in UI
+      // supportFile is required so the config is valid
+      await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { e2e: { supportFile: false, experimentalSkipDomainInjection: true } }')
     })
 
     cy.openProject('pristine')
 
     cy.visitLaunchpad()
     cy.get('[data-cy-testingType=e2e]').click()
-    cy.get('body', { timeout: 10000 }).should('contain.text', 'experimentalComponentTesting')
+    cy.get('body', { timeout: 10000 }).should('contain.text', 'experimentalSkipDomainInjection')
     expectStackToBe('closed')
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { e2e: { supportFile: false } }')
@@ -149,7 +112,7 @@ describe('Launchpad: Error System Tests', () => {
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
 
     cy.findAllByTestId('collapsible').should('be.visible')
-    cy.contains('h2', 'TSError')
+    cy.contains('h2', 'TransformError')
     cy.contains('p', 'Your configFile is invalid:')
     cy.contains('p', getPathForPlatform('cy-projects/config-with-ts-syntax-error/cypress.config.ts'))
     cy.contains('p', 'It threw an error when required, check the stack trace below:')
@@ -207,48 +170,40 @@ describe('Launchpad: Error System Tests', () => {
     cy.visitLaunchpad()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
     cy.findAllByTestId('collapsible').should('be.visible')
-    cy.contains('h2', 'TSError')
+    cy.contains('h2', 'TransformError')
     cy.contains('p', 'Your configFile is invalid:')
     cy.contains('p', getPathForPlatform('cy-projects/config-with-ts-module-error/cypress.config.ts'))
     cy.contains('p', 'It threw an error when required, check the stack trace below:')
-    cy.get('[data-testid="error-code-frame"]').should('contain', 'cypress.config.ts:6:10')
+    cy.get('[data-testid="error-code-frame"]').should('contain', 'cypress.config.ts:6:9')
   })
 })
 
 describe('setupNodeEvents', () => {
-  it('throws an error when in setupNodeEvents updating a config value that was removed in 10.X', () => {
-    cy.scaffoldProject('config-update-non-migrated-value')
-    cy.openProject('config-update-non-migrated-value')
+  it('throws an error when in setupNodeEvents updating a config value in the root config that was removed', () => {
+    cy.scaffoldProject('config-update-in-setup-node-events')
+    cy.openProject('config-update-in-setup-node-events')
     cy.visitLaunchpad()
     cy.findByText('E2E Testing').click()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
     cy.findAllByTestId('collapsible').should('be.visible')
     cy.get('h2').contains('Error running e2e.setupNodeEvents()')
-    cy.get('p').contains('The integrationFolder configuration option is now invalid when set on the config object in Cypress version 10.0.0.')
-    cy.get('p').contains('It is now renamed to specPattern and configured separately as a end to end testing property: e2e.specPattern')
+    cy.get('p').contains('The experimentalSkipDomainInjection experiment is over.')
+    cy.get('p').contains('Read the migration guide for Cypress v14.0.0')
   })
 
-  it('throws an error when in setupNodeEvents updating a config value on a clone of config that was removed in 10.X', () => {
-    cy.scaffoldProject('config-update-non-migrated-value-clone')
-    cy.openProject('config-update-non-migrated-value-clone')
+  it('throws an error when in setupNodeEvents updating a config value on a clone of config in the root config that was removed', () => {
+    cy.scaffoldProject('config-update-in-setup-node-events-clone')
+    cy.openProject('config-update-in-setup-node-events-clone')
     cy.visitLaunchpad()
     cy.findByText('E2E Testing').click()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
     cy.percySnapshot()
 
-    cy.get('[data-cy="alert-body"]').should('contain', 'integrationFolder')
+    cy.get('p').contains('The experimentalSkipDomainInjection experiment is over.')
+    cy.get('p').contains('Read the migration guide for Cypress v14.0.0')
   })
 
-  it('throws an error when in setupNodeEvents updating an e2e config value that was removed in 10.X', () => {
-    cy.scaffoldProject('config-update-non-migrated-value-e2e')
-    cy.openProject('config-update-non-migrated-value-e2e')
-    cy.visitLaunchpad()
-    cy.findByText('E2E Testing').click()
-    cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
-    cy.percySnapshot()
-  })
-
-  it('handles deprecated config fields in setupNodeEvents', () => {
+  it('handles removed config fields in setupNodeEvents', () => {
     cy.scaffoldProject('pristine')
     cy.openProject('pristine')
     cy.withCtx(async (ctx) => {
@@ -257,7 +212,7 @@ describe('setupNodeEvents', () => {
   e2e: { 
     supportFile: false, 
     setupNodeEvents(on, config){
-      config.testFiles = '**/*.spec.js'
+      config.experimentalSkipDomainInjection = true
       return config
     }
   }
@@ -268,7 +223,7 @@ describe('setupNodeEvents', () => {
 
     cy.visitLaunchpad()
     cy.get('[data-cy-testingType=e2e]').click()
-    cy.get('body', { timeout: 10000 }).should('contain.text', 'testFiles')
+    cy.get('body', { timeout: 10000 }).should('contain.text', 'experimentalSkipDomainInjection')
     cy.get('body', { timeout: 10000 }).should('contain.text', 'setupNodeEvents')
     expectStackToBe('closed')
     cy.withCtx(async (ctx) => {
@@ -300,7 +255,7 @@ describe('setupNodeEvents', () => {
     cy.findByRole('button', { name: 'Try again' }).click()
     cy.get('[data-cy-testingType=e2e]').click()
     cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
-    cy.get('[data-cy="alert-body"]').should('contain', 'The baseUrl configuration option is now invalid when set from the root of the config object')
+    cy.get('[data-cy="alert-body"]').should('contain', 'The baseUrl configuration option is invalid when set from the root of the config object')
 
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', `module.exports = { e2e: { baseUrl: 'http://localhost:3000', supportFile: false } }`)

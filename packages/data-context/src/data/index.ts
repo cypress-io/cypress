@@ -3,7 +3,6 @@
 
 export * from './CypressEnv'
 export * from './EventRegistrar'
-export * from './LegacyPluginsIpc'
 export * from './ProjectConfigIpc'
 export * from './ProjectConfigManager'
 export * from './ProjectLifecycleManager'

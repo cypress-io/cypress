@@ -4,6 +4,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
+    "build": "echo 'electron package build: no build necessary'",
     "build-binary": "node ./bin/cypress-electron --install",
     "clean-deps": "rimraf node_modules",
     "postinstall": "echo '@packages/electron needs: yarn build'",
@@ -16,6 +17,7 @@
   },
   "dependencies": {
     "@packages/icons": "0.0.0-development",
+    "@packages/stderr-filtering": "0.0.0-development",
     "bluebird": "3.5.3",
     "debug": "^4.3.4",
     "fs-extra": "9.1.0",
@@ -24,10 +26,10 @@
   },
   "devDependencies": {
     "@electron/fuses": "1.8.0",
-    "@electron/packager": "18.3.4",
+    "@electron/packager": "18.3.6",
     "execa": "4.1.0",
     "mocha": "3.5.3",
-    "systeminformation": "5.22.8"
+    "systeminformation": "^5.27.7"
   },
   "files": [
     "dist",

@@ -4,7 +4,7 @@ Clear, consistent, errors are one of the important parts of the Cypress experien
 
 ### @packages/errors
 
-All error related logic for the server should be added to `@packages/errors`. This logic has been separated out from the `@packages/server` to enable strict type checking & use in other packages we have added in the `10.0-release` branch.
+All error related logic for the server should be added to `@packages/errors`.
 
 ### Errors Development Workflow
 
@@ -78,15 +78,15 @@ In this case, `arg1` will be highlighted in yellow when printed to the terminal.
 
 
 ```ts
-PLUGINS_FILE_ERROR: (arg1: string, arg2: Error) => {
+FAKE_ERROR: (arg1: string, arg2: Error) => {
   return errTemplate`\
-      The plugins file is missing or invalid.
+      The fake file is missing or invalid.
 
-      Your \`pluginsFile\` is set to ${arg1}, but either the file is missing, it contains a syntax error, or threw an error when required. The \`pluginsFile\` must be a \`.js\`, \`.ts\`, or \`.coffee\` file.
+      Your \`fakeFile\` is set to ${arg1}, but either the file is missing, it contains a syntax error, or threw an error when required. The \`fakeFile\` must be a \`.js\`, \`.ts\`, or \`.coffee\` file.
 
-      Or you might have renamed the extension of your \`pluginsFile\`. If that's the case, restart the test runner.
+      Or you might have renamed the extension of your \`fakeFile\`. If that's the case, restart the test runner.
 
-      Please fix this, or set \`pluginsFile\` to \`false\` if a plugins file is not necessary for your project.
+      Please fix this, or set \`fakeFile\` to \`false\` if a plugins file is not necessary for your project.
 
       ${details(arg2)}
     `

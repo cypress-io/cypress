@@ -25,7 +25,6 @@ import {
   HtmlDataSource,
   UtilDataSource,
   BrowserApiShape,
-  MigrationDataSource,
   RelevantRunsDataSource,
   RelevantRunSpecsDataSource,
   VersionsDataSource,
@@ -39,6 +38,7 @@ import type { IncomingHttpHeaders } from 'http'
 import type { App as ElectronApp } from 'electron'
 import { globalPubSub } from '.'
 import { ProjectLifecycleManager } from './data/ProjectLifecycleManager'
+import { logError } from '@packages/stderr-filtering'
 import type { CypressError } from '@packages/errors'
 import { resetIssuedWarnings } from '@packages/config'
 
@@ -101,7 +101,6 @@ export class DataContext {
   private _html: HtmlDataSource
   private _error: ErrorDataSource
   private _util: UtilDataSource
-  private _migration: MigrationDataSource
 
   readonly lifecycleManager: ProjectLifecycleManager
 
@@ -136,7 +135,6 @@ export class DataContext {
     this._html = new HtmlDataSource(this)
     this._error = new ErrorDataSource(this)
     this._util = new UtilDataSource(this)
-    this._migration = new MigrationDataSource(this)
     // the lifecycle manager needs to be initialized last as it needs properties instantiated on the DataContext object
     this.lifecycleManager = new ProjectLifecycleManager(this)
   }
@@ -236,10 +234,6 @@ export class DataContext {
     return this._util
   }
 
-  get migration () {
-    return this._migration
-  }
-
   /**
    * This will be replaced with Immer, for immutable state updates.
    */
@@ -297,9 +291,7 @@ export class DataContext {
   }
 
   logTraceError (e: unknown) {
-    // TODO(tim): handle this consistently
-    // eslint-disable-next-line no-console
-    console.error(e)
+    logError(e)
   }
 
   onError = (cypressError: CypressError, title: string = 'Unexpected Error') => {

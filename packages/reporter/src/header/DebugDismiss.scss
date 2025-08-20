@@ -1,15 +1,16 @@
 .debug-dismiss {
-  display: flex !important;
+  display: flex;
   align-items: center;
-  font-size: 12px !important;
-  font-weight: 600 !important;
-  line-height: 16px !important;
-  color: #9AA2FC !important;
-  border: solid 1px #9AA2FC !important;
-  border-radius: 16px !important;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  color: $indigo-300;
+  border: solid 1px $indigo-300;
+  border-radius: 16px;
   gap: 4px;
+  padding: 4px 8px;
 
   .delete-icon path {
-    fill: #9AA2FC
+    fill: $indigo-300;
   }
 }

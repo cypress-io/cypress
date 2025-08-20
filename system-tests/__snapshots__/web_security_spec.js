@@ -30,7 +30,7 @@ exports['e2e web security / when enabled / fails'] = `
 
   1) web security
        fails when clicking <a> to another origin:
-     CypressError: The command was expected to run against origin \`http://localhost:4466\` but the application is at origin \`https://www.foo.com:44665\`.
+     CypressError: Timed out retrying after 4000ms: The command was expected to run against origin \`http://localhost:4466\` but the application is at origin \`https://www.foo.com:44665\`.
 
 This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.
 
@@ -45,7 +45,7 @@ https://on.cypress.io/cy-visit-succeeded-but-commands-fail
 
   2) web security
        fails when submitted a form and being redirected to another origin:
-     CypressError: The command was expected to run against origin \`http://localhost:4466\` but the application is at origin \`https://www.foo.com:44665\`.
+     CypressError: Timed out retrying after 4000ms: The command was expected to run against origin \`http://localhost:4466\` but the application is at origin \`https://www.foo.com:44665\`.
 
 This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.
 
@@ -60,7 +60,7 @@ https://on.cypress.io/cy-visit-succeeded-but-commands-fail
 
   3) web security
        fails when using a javascript redirect to another origin:
-     CypressError: The command was expected to run against origin \`http://localhost:4466\` but the application is at origin \`https://www.foo.com:44665\`.
+     CypressError: Timed out retrying after 4000ms: The command was expected to run against origin \`http://localhost:4466\` but the application is at origin \`https://www.foo.com:44665\`.
 
 This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.
 

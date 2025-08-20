@@ -9,7 +9,7 @@ import $utils from './utils'
 import { toPosix } from './util/to_posix'
 
 const sourceMapExtractionRegex = /\/\/\s*[@#]\s*sourceMappingURL\s*=\s*(data:[^\s]*)/g
-const regexDataUrl = /data:[^;\n]+(?:;charset=[^;\n]+)?;base64,([a-zA-Z0-9+/]+={0,2})/ // matches data urls
+const regexDataUrl = /data:[^;\n]+(?:;charset=[^;\n]+)?;base64,(.*)/ // matches data urls
 
 let sourceMapConsumers: Record<string, BasicSourceMapConsumer> = {}
 
@@ -97,9 +97,9 @@ const getSourcePosition = (filePath, position) => {
 }
 
 const base64toJs = (base64) => {
-  const mapString = $utils.decodeBase64Unicode(base64)
-
   try {
+    const mapString = $utils.decodeBase64Unicode(base64)
+
     return JSON.parse(mapString)
   } catch (err) {
     return null

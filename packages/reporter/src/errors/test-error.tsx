@@ -16,6 +16,7 @@ import { formattedMessage } from '../commands/command'
 
 import WarningIcon from '@packages/frontend-shared/src/assets/icons/warning_x8.svg'
 import TerminalIcon from '@packages/frontend-shared/src/assets/icons/technology-terminal_x16.svg'
+import { IconChevronRightMedium } from '@cypress-design/react-icon'
 
 interface DocsUrlProps {
   url: string | string[]
@@ -70,6 +71,12 @@ const TestError: React.FC<TestErrorProps> = ({ err, groupLevel = 0, testId, comm
     }
   }
 
+  const _header =
+    <>
+      <IconChevronRightMedium className='err-collapsible-indicator' size='16' strokeColor='red-400' />
+      Stack trace
+    </>
+
   return (
     <div className={cs('runnable-err', { 'recovered-test-err': err.isRecovered })}>
       <div className='runnable-err-header'>
@@ -90,25 +97,26 @@ const TestError: React.FC<TestErrorProps> = ({ err, groupLevel = 0, testId, comm
           </div>
           {codeFrame && <ErrorCodeFrame codeFrame={codeFrame} />}
           {err.stack &&
-          <Collapsible
-            header='View stack trace'
-            headerClass='runnable-err-stack-expander'
-            headerExtras={
-              <FlashOnClick onClick={_onPrint} message="Printed output to your console">
-                <div
-                  className="runnable-err-print"
-                  onKeyDown={onEnterOrSpace(() => events.emit('show:error', { err, groupLevel, testId, commandId }))}
-                  role='button'
-                  tabIndex={0}
-                >
-                  <div tabIndex={-1}><TerminalIcon /> <span>Print to console</span></div>
-                </div>
-              </FlashOnClick>
-            }
-            contentClass='runnable-err-stack-trace'
-          >
-            <ErrorStack err={err} />
-          </Collapsible>
+            <Collapsible
+              header={_header}
+              hideExpander={true}
+              headerClass='runnable-err-stack-expander'
+              headerExtras={
+                <FlashOnClick onClick={_onPrint} message="Printed output to your console">
+                  <div
+                    className="runnable-err-print"
+                    onKeyDown={onEnterOrSpace(() => events.emit('show:error', { err, groupLevel, testId, commandId }))}
+                    role='button'
+                    tabIndex={0}
+                  >
+                    <div tabIndex={-1}><TerminalIcon /> <span>Print to console</span></div>
+                  </div>
+                </FlashOnClick>
+              }
+              contentClass='runnable-err-stack-trace'
+            >
+              <ErrorStack err={err} />
+            </Collapsible>
           }
         </div>
       </div>

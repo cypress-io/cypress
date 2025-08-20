@@ -1379,7 +1379,6 @@ describe('src/cy/commands/cookies', () => {
       // webkit & firefox < 135 return "no_restriction" for sameSite;
       // other browsers do not return sameSite at all
       const sameSite = (
-        (Cypress.isBrowser('firefox') && Number(Cypress.browser.majorVersion) < 135) ||
         Cypress.isBrowser('webkit')
       ) ? 'no_restriction' :
         Cypress.isBrowser('firefox') ? 'unspecified' : null

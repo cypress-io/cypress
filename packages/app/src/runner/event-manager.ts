@@ -157,11 +157,6 @@ export class EventManager {
     })
 
     this.ws.on('watched:file:changed', () => {
-      // only cancel studio if cloud studio was not requested
-      if (!Cypress.env('LOCAL_STUDIO_PATH') && !Cypress.env('ENABLE_CLOUD_STUDIO')) {
-        this.studioStore.cancel()
-      }
-
       rerun()
     })
 
@@ -275,10 +270,6 @@ export class EventManager {
       this.ws.emit('open:file', url)
     })
 
-    const studioInit = () => {
-      rerun()
-    }
-
     const studioInitSuite = ({ suiteId, showUrlPrompt = true }: { suiteId: string, showUrlPrompt?: boolean }) => {
       this.studioStore.setSuiteId(suiteId)
       this.studioStore.setShowUrlPrompt(showUrlPrompt)
@@ -290,8 +281,10 @@ export class EventManager {
         }
 
         this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
-        this.studioStore.setCloudStudioSessionId(cloudStudioSessionId)
-        studioInit()
+        this.studioStore.setSessionId(cloudStudioSessionId)
+        // when we enter studio with a new test, we don't want to rerun until
+        // the the test has been created, so we just set the studio active
+        this.studioStore.setActive(true)
       })
     }
 
@@ -305,14 +298,25 @@ export class EventManager {
         }
 
         this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
-        this.studioStore.setCloudStudioSessionId(cloudStudioSessionId)
-        studioInit()
+        this.studioStore.setSessionId(cloudStudioSessionId)
+        rerun()
       })
     })
 
     this.reporterBus.on('studio:init:suite', (suiteId) => {
       studioInitSuite({ suiteId })
     })
+
+    const maybeCleanUpProtocol = () => {
+      const needsReload = this.studioStore.needsProtocolCleanup()
+
+      this.studioStore.cancel()
+
+      // only reload the page if Studio has actually been used for recording
+      if (needsReload) {
+        window.location.reload()
+      }
+    }
 
     this.reporterBus.on('studio:cancel', () => {
       this.ws.emit('studio:destroy', ({ error }) => {
@@ -321,9 +325,7 @@ export class EventManager {
           console.error(error)
         }
 
-        this.studioStore.cancel()
-        // Reloading for now. This is the easiest way to clear out the protocol code from the front end
-        window.location.reload()
+        maybeCleanUpProtocol()
       })
     })
 
@@ -373,9 +375,7 @@ export class EventManager {
           console.error(error)
         }
 
-        this.studioStore.cancel()
-        // Reloading for now. This is the easiest way to clear out the protocol code from the front end
-        window.location.reload()
+        maybeCleanUpProtocol()
       })
     })
 
@@ -864,7 +864,10 @@ export class EventManager {
       performance.measure('run', 'run-s', 'run-e')
     })
 
-    const hasRunnableId = !!this.studioStore.testId || !!this.studioStore.suiteId
+    const hasActiveStudio = !!this.studioStore.testId ||
+                           !!this.studioStore.newTestLineNumber
+
+    const studioSingleTestActive = this.studioStore.newTestLineNumber != null || !!this.studioStore.testId
 
     this.reporterBus.emit('reporter:start', {
       startTime: Cypress.runner.getStartTime(),
@@ -874,7 +877,8 @@ export class EventManager {
       autoScrollingEnabled: runState.autoScrollingEnabled,
       isSpecsListOpen: runState.isSpecsListOpen,
       scrollTop: runState.scrollTop,
-      studioActive: hasRunnableId,
+      studioActive: hasActiveStudio,
+      studioSingleTestActive,
     } as ReporterStartInfo)
   }
 
@@ -906,7 +910,7 @@ export class EventManager {
     Cypress.primaryOriginCommunicator.removeAllListeners()
     // clean up the cross origin logs in memory to prevent dangling references as the log objects themselves at this point will no longer be needed.
     crossOriginLogs = {}
-    this.studioStore.setInactive()
+    this.studioStore.setActive(false)
   }
 
   resetReporter () {
@@ -932,7 +936,9 @@ export class EventManager {
   }
 
   _interceptStudio (displayProps) {
-    if (this.studioStore.isActive) {
+    // Only intercept logs when Studio is actually recording a specific test
+    // Don't intercept when Studio is just open in "new test" mode
+    if (this.studioStore.isActive && this.studioStore.testId) {
       displayProps.hookId = this.studioStore.hookId
 
       if (displayProps.name === 'visit' && displayProps.state === 'failed') {
@@ -943,7 +949,6 @@ export class EventManager {
 
     return displayProps
   }
-
   _studioCopyToClipboard (cb) {
     this.ws.emit('studio:get:commands:text', this.studioStore.logs, async (commandsText) => {
       await this.studioStore.copyToClipboard(commandsText)

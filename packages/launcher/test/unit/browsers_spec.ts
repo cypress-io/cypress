@@ -71,6 +71,25 @@ describe('browsers', () => {
         expect(result.isSupported).to.be.true
         expect(result.warningMessage).to.be.undefined
       })
+
+      describe('firefox validation', () => {
+        const FIREFOX_KNOWN_BROWSER_CHANNELS = knownBrowsers.filter((browser) => {
+          return browser.family === 'firefox'
+        })
+
+        FIREFOX_KNOWN_BROWSER_CHANNELS.forEach((browser) => {
+          it(`${browser.channel}: fails validation when Firefox major version is below 135`, () => {
+            // @ts-expect-error
+            const result = browser.validator({
+              majorVersion: '134',
+              displayName: 'Firefox',
+            })
+
+            expect(result.isSupported).to.be.false
+            expect(result.warningMessage).to.equal('Cypress does not support running Firefox version 134 due to lack of WebDriver BiDi support. To use Firefox with Cypress, install version 135 or newer.')
+          })
+        })
+      })
     })
   })
 })

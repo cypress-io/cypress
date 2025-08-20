@@ -8,7 +8,6 @@
  */
 import path from 'path'
 import _ from 'lodash'
-import resolve from 'resolve'
 import fs from 'fs'
 
 import { getError, CypressError, ConfigValidationFailureInfo } from '@packages/errors'
@@ -16,7 +15,7 @@ import type { DataContext } from '..'
 import assert from 'assert'
 import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
 import { autoBindDebug } from '../util/autoBindDebug'
-import { EventCollectorSource, GitDataSource, LegacyCypressConfigJson } from '../sources'
+import { EventCollectorSource, GitDataSource } from '../sources'
 import { OnFinalConfigLoadedOptions, ProjectConfigManager } from './ProjectConfigManager'
 import pDefer from 'p-defer'
 import { EventRegistrar } from './EventRegistrar'
@@ -56,23 +55,19 @@ export interface InjectedConfigApi {
 
 export interface ProjectMetaState {
   isUsingTypeScript: boolean
-  hasLegacyCypressJson: boolean
   hasCypressEnvFile: boolean
   hasValidConfigFile: boolean
   hasSpecifiedConfigViaCLI: false | string
   allFoundConfigFiles: string[]
-  needsCypressJsonMigration: boolean
   isProjectUsingESModules: boolean
 }
 
 const PROJECT_META_STATE: ProjectMetaState = {
   isUsingTypeScript: false,
-  hasLegacyCypressJson: false,
   allFoundConfigFiles: [],
   hasCypressEnvFile: false,
   hasSpecifiedConfigViaCLI: false,
   hasValidConfigFile: false,
-  needsCypressJsonMigration: false,
   isProjectUsingESModules: false,
 }
 
@@ -108,11 +103,6 @@ export class ProjectLifecycleManager {
 
   async getProjectId (): Promise<string | null> {
     try {
-      // No need to kick off config initialization if we need to migrate
-      if (this.ctx.migration.needsCypressJsonMigration()) {
-        return null
-      }
-
       const contents = await this.ctx.project.getConfig()
 
       return contents.projectId ?? null
@@ -514,35 +504,11 @@ export class ProjectLifecycleManager {
    * @returns true if we can initialize and false if not
    */
   private readyToInitialize (projectRoot: string): boolean {
-    const { needsCypressJsonMigration } = this.refreshMetaState()
-
-    const legacyConfigPath = path.join(projectRoot, this.ctx.migration.legacyConfigFile)
-
-    if (needsCypressJsonMigration && !this.ctx.isRunMode && this.ctx.fs.existsSync(legacyConfigPath)) {
-      return false
-    }
-
-    this.legacyPluginGuard()
-
+    // This calls a lot of methods that are necessary to check config-wise upfront
+    this.refreshMetaState()
     this.configFileWarningCheck()
 
     return this.metaState.hasValidConfigFile
-  }
-
-  async legacyMigration () {
-    try {
-      const legacyConfigPath = path.join(this.projectRoot, this.ctx.migration.legacyConfigFile)
-      // we run the legacy plugins/index.js in a child process
-      // and mutate the config based on the return value for migration
-      // only used in open mode (cannot migrate via terminal)
-      const legacyConfig = await this.ctx.fs.readJson(legacyConfigPath) as LegacyCypressConfigJson
-
-      // should never throw, unless there existing pluginsFile errors out,
-      // in which case they are attempting to migrate an already broken project.
-      await this.ctx.actions.migration.initialize(legacyConfig)
-    } catch (error) {
-      this.onLoadError(error)
-    }
   }
 
   get runModeExitEarly () {
@@ -658,19 +624,6 @@ export class ProjectLifecycleManager {
     return this._eventRegistrar.executeNodeEvent(event, args)
   }
 
-  private legacyPluginGuard () {
-    // test and warn for incompatible plugin
-    try {
-      const retriesPluginPath = path.dirname(resolve.sync('cypress-plugin-retries/package.json', {
-        basedir: this.projectRoot,
-      }))
-
-      this.ctx.onWarning(getError('INCOMPATIBLE_PLUGIN_RETRIES', path.relative(this.projectRoot, retriesPluginPath)))
-    } catch (e) {
-      // noop, incompatible plugin not installed
-    }
-  }
-
   /**
    * Find all information about the project we need to know to prompt different
    * onboarding screens, suggestions in the onboarding wizard, etc.
@@ -679,7 +632,6 @@ export class ProjectLifecycleManager {
     const configFile = this.ctx.modeOptions.configFile
     const metaState: ProjectMetaState = {
       ...PROJECT_META_STATE,
-      hasLegacyCypressJson: this.ctx.migration.legacyConfigFileExists(),
       hasCypressEnvFile: fs.existsSync(this._pathToFile('cypress.env.json')),
     }
 
@@ -696,7 +648,6 @@ export class ProjectLifecycleManager {
         projectRoot: this.projectRoot,
         customConfigFile: configFile,
         pkgJson,
-        isMigrating: metaState.hasLegacyCypressJson,
       }) === 'ts'
     } catch {
       // No need to handle
@@ -704,23 +655,10 @@ export class ProjectLifecycleManager {
 
     if (configFile) {
       metaState.hasSpecifiedConfigViaCLI = this._pathToFile(configFile)
-      if (configFile.endsWith('.json')) {
-        metaState.needsCypressJsonMigration = true
 
-        const configFileNameAfterMigration = configFile.replace('.json', `.config.${metaState.isUsingTypeScript ? 'ts' : 'js'}`)
-
-        if (this.ctx.fs.existsSync(this._pathToFile(configFileNameAfterMigration))) {
-          if (this.ctx.fs.existsSync(this._pathToFile(configFile))) {
-            this.ctx.onError(getError('LEGACY_CONFIG_FILE', configFileNameAfterMigration, this.projectRoot, configFile))
-          } else {
-            this.ctx.onError(getError('MIGRATION_ALREADY_OCURRED', configFileNameAfterMigration, configFile))
-          }
-        }
-      } else {
-        this.setConfigFilePath(configFile)
-        if (fs.existsSync(this.configFilePath)) {
-          metaState.hasValidConfigFile = true
-        }
+      this.setConfigFilePath(configFile)
+      if (fs.existsSync(this.configFilePath)) {
+        metaState.hasValidConfigFile = true
       }
 
       this._projectMetaState = metaState
@@ -756,10 +694,6 @@ export class ProjectLifecycleManager {
     if (!configFilePathSet) {
       this.setConfigFilePath(`cypress.config.${metaState.isUsingTypeScript ? 'ts' : 'js'}`)
       configFilePathSet = true
-    }
-
-    if (metaState.hasLegacyCypressJson && !metaState.hasValidConfigFile) {
-      metaState.needsCypressJsonMigration = true
     }
 
     this._projectMetaState = metaState
@@ -824,7 +758,7 @@ export class ProjectLifecycleManager {
       return
     }
 
-    if (testingType === 'e2e' && !this.ctx.migration.needsCypressJsonMigration()) {
+    if (testingType === 'e2e') {
       // E2E doesn't have a wizard, so if we have a testing type on load we just create/update their cypress.config.js.
       await this.ctx.actions.wizard.scaffoldTestingType()
     } else if (testingType === 'component') {
@@ -864,16 +798,8 @@ export class ProjectLifecycleManager {
       this.onLoadError(getError('CONFIG_FILE_NOT_FOUND', path.basename(this.metaState.hasSpecifiedConfigViaCLI), path.dirname(this.metaState.hasSpecifiedConfigViaCLI)))
     }
 
-    if (this.metaState.hasLegacyCypressJson && !this.metaState.hasValidConfigFile && this.ctx.isRunMode) {
-      this.onLoadError(getError('CONFIG_FILE_MIGRATION_NEEDED', this.projectRoot))
-    }
-
     if (this.metaState.allFoundConfigFiles.length > 1) {
       this.onLoadError(getError('CONFIG_FILES_LANGUAGE_CONFLICT', this.projectRoot, this.metaState.allFoundConfigFiles))
-    }
-
-    if (this.metaState.hasValidConfigFile && this.metaState.hasLegacyCypressJson) {
-      this.onLoadError(getError('LEGACY_CONFIG_FILE', path.basename(this.configFilePath), this.projectRoot))
     }
   }
 

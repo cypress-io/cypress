@@ -1,11 +1,19 @@
 const path = require('path')
-const webpack = require('webpack')
 const Debug = require('debug')
+const getTsConfig = require('get-tsconfig')
+const webpack = require('webpack')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 
 const debug = Debug('cypress:webpack-batteries-included-preprocessor')
 const WBADebugNamespace = 'cypress-verbose:webpack-batteries-included-preprocessor:bundle-analyzer'
+
+class TsConfigNotFoundError extends Error {
+  constructor () {
+    super('No tsconfig.json found, but typescript is installed. ts-loader needs a tsconfig.json file to work. Please add one to your project in either the root or the cypress directory.')
+    this.name = 'TsConfigNotFoundError'
+  }
+}
 
 const typescriptExtensionRegex = /\.m?tsx?$/
 
@@ -14,12 +22,23 @@ const hasTsLoader = (rules) => {
     if (!rule.use || !Array.isArray(rule.use)) return false
 
     return rule.use.some((use) => {
-      return use.loader && use.loader.includes('ts-loader')
+      return use.loader && use.loader.match(/(^|[^a-zA-Z])ts-loader([^a-zA-Z]|$)/)
     })
   })
 }
 
 const addTypeScriptConfig = (file, options) => {
+  // returns null if tsconfig cannot be found in the path/parent hierarchy
+  const configFile = getTsConfig.getTsconfig(file.filePath)
+
+  if (!configFile && typescriptExtensionRegex.test(file.filePath)) {
+    debug('no user tsconfig.json found. Throwing TsConfigNotFoundError')
+    // @see https://github.com/cypress-io/cypress/issues/18938
+    throw new TsConfigNotFoundError()
+  }
+
+  debug(`found user tsconfig.json at ${configFile?.path} with compilerOptions: ${JSON.stringify(configFile?.config?.compilerOptions)}`)
+  debug(`using typescript found at ${options.typescript}`)
   // shortcut if we know we've already added typescript support
   if (options.__typescriptSupportAdded) return options
 
@@ -39,12 +58,12 @@ const addTypeScriptConfig = (file, options) => {
   const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
   // node will try to load a projects tsconfig.json instead of the node
 
-  const getTsConfig = require('get-tsconfig')
-
-  // returns null if tsconfig cannot be found in the path/parent hierarchy
-  const configFile = getTsConfig.getTsconfig(file.filePath)
-
-  configFile ? debug(`found user tsconfig.json at ${configFile?.path} with compilerOptions: ${JSON.stringify(configFile?.config?.compilerOptions)}`) : debug('no user tsconfig.json found')
+  // tsx parses the moduleResolution default to node10 as well as moduleResolution="node" to node10
+  // ts-loader struggles to validate the node10 moduleResolution option depending on the version of typescript used,
+  // so we set it to node which is the same as node 10. @see https://www.typescriptlang.org/tsconfig/#moduleResolution.
+  if (configFile?.config?.compilerOptions?.moduleResolution === 'node10') {
+    configFile.config.compilerOptions.moduleResolution = 'node'
+  }
 
   webpackOptions.module.rules.push({
     test: typescriptExtensionRegex,
@@ -54,6 +73,10 @@ const addTypeScriptConfig = (file, options) => {
         loader: require.resolve('ts-loader'),
         options: {
           compiler: options.typescript,
+          // pass in the resolved compiler options from the tsconfig file into ts-loader to most accurately transpile the code
+          ...(configFile ? {
+            compilerOptions: configFile.config.compilerOptions,
+          } : {}),
           logLevel: 'error',
           silent: true,
           transpileOnly: true,
@@ -149,20 +172,20 @@ const getDefaultWebpackOptions = () => {
     resolve: {
       extensions: ['.js', '.json', '.jsx', '.mjs', '.coffee'],
       fallback: {
-        assert: require.resolve('assert/'),
+        assert: false,
         buffer: require.resolve('buffer/'),
         child_process: false,
         cluster: false,
         console: false,
-        constants: require.resolve('constants-browserify'),
-        crypto: require.resolve('crypto-browserify'),
+        constants: false,
+        crypto: false,
         dgram: false,
         dns: false,
-        domain: require.resolve('domain-browser'),
-        events: require.resolve('events/'),
+        domain: false,
+        events: false,
         fs: false,
-        http: require.resolve('stream-http'),
-        https: require.resolve('https-browserify'),
+        http: false,
+        https: false,
         http2: false,
         inspector: false,
         module: false,
@@ -170,21 +193,21 @@ const getDefaultWebpackOptions = () => {
         os: require.resolve('os-browserify/browser'),
         path: require.resolve('path-browserify'),
         perf_hooks: false,
-        punycode: require.resolve('punycode/'),
+        punycode: false,
         process: require.resolve('process/browser.js'),
-        querystring: require.resolve('querystring-es3'),
+        querystring: false,
         readline: false,
         repl: false,
         stream: require.resolve('stream-browserify'),
-        string_decoder: require.resolve('string_decoder/'),
-        sys: require.resolve('util/'),
-        timers: require.resolve('timers-browserify'),
+        string_decoder: false,
+        sys: false,
+        timers: false,
         tls: false,
-        tty: require.resolve('tty-browserify'),
-        url: require.resolve('url/'),
-        util: require.resolve('util/'),
-        vm: require.resolve('vm-browserify'),
-        zlib: require.resolve('browserify-zlib'),
+        tty: false,
+        url: false,
+        util: false,
+        vm: false,
+        zlib: false,
       },
       plugins: [],
     },

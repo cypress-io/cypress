@@ -56,8 +56,9 @@ We then merge the sourced config with the user's vite config, and layer on our o
 | <= v2                    | <= v9         |
 | >= v3 <= v5              | >= v10 <= v13 |
 | >= v6                    | >= v14        |
+| >= v7 (esm only)         | >= v15        |
 
-#### `devServerPublicPathRoute` for Vite v5
+#### `devServerPublicPathRoute` for Vite v5+
 
 If using Vite version 5, setting `devServerPublicPathRoute` may be needed if directly referencing public path url assets in components under test. This is due to Cypress using its own public path, `/__cypress/src`, when running component tests. This can be configured within the `component` namespace below if you wish you set your public path to be the same as your app:
 

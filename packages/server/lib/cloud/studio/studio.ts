@@ -1,11 +1,11 @@
-import type { StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape, StudioCloudApi, StudioAIInitializeOptions, StudioEvent } from '@packages/types'
+import type { StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape, StudioCloudApi, StudioAIInitializeOptions, StudioEvent, StudioAddSocketListenersOptions } from '@packages/types'
 import type { Router } from 'express'
-import type { Socket } from 'socket.io'
 import Debug from 'debug'
 import { requireScript } from '../require_script'
 import path from 'path'
 import { reportStudioError, ReportStudioErrorOptions } from '../api/studio/report_studio_error'
 import crypto, { BinaryLike } from 'crypto'
+import { StudioElectron } from './StudioElectron'
 
 interface StudioServer { default: StudioServerDefaultShape }
 
@@ -25,6 +25,7 @@ export class StudioManager implements StudioManagerShape {
   status: StudioStatus = 'NOT_INITIALIZED'
   protocolManager: ProtocolManagerShape | undefined
   private _studioServer: StudioServerShape | undefined
+  private _studioElectron: StudioElectron | undefined
 
   static createInErrorManager ({ cloudApi, studioHash, projectSlug, error, studioMethod, studioMethodArgs }: ReportStudioErrorOptions): StudioManager {
     const manager = new StudioManager()
@@ -84,18 +85,28 @@ export class StudioManager implements StudioManagerShape {
     return Promise.resolve()
   }
 
-  addSocketListeners (socket: Socket): void {
+  addSocketListeners (options: StudioAddSocketListenersOptions): void {
     if (this._studioServer) {
-      this.invokeSync('addSocketListeners', { isEssential: true }, socket)
+      this.invokeSync('addSocketListeners', { isEssential: true }, options)
     }
   }
 
   async canAccessStudioAI (browser: Cypress.Browser): Promise<boolean> {
-    return (await this.invokeAsync('canAccessStudioAI', { isEssential: true }, browser)) ?? false
+    const envEnabled = process.env.CYPRESS_ENABLE_CLOUD_STUDIO_AI === 'true'
+
+    return envEnabled && !!(await this.invokeAsync('canAccessStudioAI', { isEssential: true }, browser))
   }
 
   async initializeStudioAI (options: StudioAIInitializeOptions): Promise<void> {
-    await this.invokeAsync('initializeStudioAI', { isEssential: true }, options)
+    // Only create a studio electron instance when studio AI is enabled
+    if (!this._studioElectron) {
+      this._studioElectron = new StudioElectron()
+    }
+
+    await this.invokeAsync('initializeStudioAI', { isEssential: true }, {
+      ...options,
+      studioElectron: this._studioElectron,
+    })
   }
 
   updateSessionId (sessionId: string): void {

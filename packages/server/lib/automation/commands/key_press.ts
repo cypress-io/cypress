@@ -1,10 +1,11 @@
-import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import type { Protocol } from 'devtools-protocol'
 import type { SupportedKey, SupportedNamedKey } from '@packages/types'
 import type { SendDebuggerCommand } from '../../browsers/cdp_automation'
 import type { Client } from 'webdriver'
 import Debug from 'debug'
-import { isEqual, isError } from 'lodash'
+import { isEqual } from 'lodash'
+import { evaluateInFrameContext } from '../helpers/evaluate_in_frame_context'
+import { AUT_FRAME_NAME_IDENTIFIER } from '../helpers/aut_identifier'
 
 const debug = Debug('cypress:server:automation:command:keypress')
 
@@ -39,7 +40,7 @@ export async function cdpKeyPress (
   debug('cdp keypress', { key })
 
   const autFrame = frameTree.childFrames?.find(({ frame }) => {
-    return frame.name?.includes('Your project')
+    return frame.name?.includes(AUT_FRAME_NAME_IDENTIFIER)
   })
 
   if (!autFrame) {

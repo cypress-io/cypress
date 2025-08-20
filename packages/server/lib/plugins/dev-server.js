@@ -3,7 +3,6 @@ require('../cwd')
 const EE = require('events')
 const debug = require('debug')('cypress:ct:dev-server')
 const plugins = require('../plugins')
-const errors = require('../errors')
 
 const baseEmitter = new EE()
 
@@ -22,10 +21,6 @@ const API = {
   emitter: baseEmitter,
 
   start ({ specs, config }) {
-    if (!plugins.has('dev-server:start')) {
-      throw errors.get('CONFIG_FILE_INVALID_DEV_START_EVENT', config.pluginsFile)
-    }
-
     return plugins.execute('dev-server:start', { specs, config })
   },
 

@@ -2,6 +2,7 @@ import type { StudioCloudApi } from '@packages/types/src/studio/studio-server-ty
 import Debug from 'debug'
 import { stripPath } from '../../strip_path'
 const debug = Debug('cypress:server:cloud:api:studio:report_studio_errors')
+import { logError } from '@packages/stderr-filtering'
 
 export interface ReportStudioErrorOptions {
   cloudApi: StudioCloudApi
@@ -36,14 +37,17 @@ export function reportStudioError ({
 }: ReportStudioErrorOptions): void {
   debug('Error reported:', error)
 
+  if (process.env.CYPRESS_CRASH_REPORTS === '0') {
+    return
+  }
+
   // When developing locally, do not send to Sentry, but instead log to console.
   if (
     process.env.CYPRESS_LOCAL_STUDIO_PATH ||
     process.env.NODE_ENV === 'development' ||
     process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF
   ) {
-    // eslint-disable-next-line no-console
-    console.error(`Error in ${studioMethod}:`, error)
+    logError(`Error in ${studioMethod}:`, error)
 
     return
   }
@@ -77,7 +81,7 @@ export function reportStudioError ({
         stack: stripPath(errorObject.stack ?? `Unknown stack`),
         message: stripPath(errorObject.message ?? `Unknown message`),
         studioMethod,
-        studioMethodArgs: studioMethodArgsString,
+        studioMethodArgs: studioMethodArgsString ? stripPath(studioMethodArgsString) : undefined,
       }],
     }
 

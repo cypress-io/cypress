@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "14.5.3",
+  "version": "15.0.0",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -45,7 +45,8 @@
     "gulp:debug": "node --inspect-brk ./node_modules/.bin/gulp",
     "postinstall": "node ./scripts/run-postInstall.js",
     "lint": "lerna run lint --no-bail --concurrency 2",
-    "lint:fix": "lerna run lint --no-bail --concurrency 2 --scope=@cypress/grep -- --fix",
+    "lint:base": "lerna run lint --no-bail",
+    "lint:fix": "lerna run lint --no-bail --concurrency 2 --scope=@cypress/{grep,mount-utils,schematic,puppeteer} -- --fix",
     "npm-release": "node scripts/npm-release.js",
     "prepare": "husky install",
     "prepare-release-artifacts": "node ./scripts/prepare-release-artifacts.js",
@@ -75,7 +76,7 @@
   "devDependencies": {
     "@aws-sdk/client-s3": "3.485.0",
     "@aws-sdk/credential-providers": "3.53.0",
-    "@babel/eslint-parser": "7.25.1",
+    "@babel/eslint-parser": "7.28.0",
     "@cypress/request": "^3.0.9",
     "@cypress/request-promise": "^5.0.0",
     "@electron/fuses": "1.8.0",
@@ -141,7 +142,7 @@
     "dedent": "^0.7.0",
     "del": "3.0.0",
     "detect-port": "^2.1.0",
-    "electron": "33.2.1",
+    "electron": "36.4.0",
     "electron-builder": "^25.1.8",
     "enzyme-adapter-react-16": "1.12.1",
     "eslint": "^8.56.0",
@@ -153,7 +154,7 @@
     "eslint-plugin-react": "7.22.0",
     "eslint-plugin-react-hooks": "4.2.0",
     "eslint-plugin-vue": "7.18.0",
-    "execa": "4.0.0",
+    "execa": "4.1.0",
     "fast-xml-parser": "^4.5.1",
     "filesize": "10.1.1",
     "fs-extra": "9.1.0",
@@ -214,7 +215,7 @@
     "yarn-deduplicate": "3.1.0"
   },
   "engines": {
-    "node": ">=20.18.1",
+    "node": ">=22.15.1",
     "yarn": ">=1.22.22"
   },
   "productName": "Cypress",
@@ -278,6 +279,7 @@
     "@types/react": "18.3.12",
     "browserify-sign": "4.2.2",
     "devtools-protocol": "0.0.1459876",
+    "node-abi": "4.9.0",
     "sharp": "0.29.3",
     "vue-template-compiler": "2.6.12"
   },

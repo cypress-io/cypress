@@ -1,87 +1,39 @@
+@import "../lib/mixins.scss";
+
 $color-transition: color 150ms ease-out;
 
 .reporter {
-  header {
+  .spec-container {
     background-color: $gray-1100;
     display: flex;
     flex-shrink: 0;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 13px;
     font-family: $font-system;
-    min-height: $header-height;
+    min-height: $header-height - 1px;
     outline: 0;
     overflow: hidden;
-    padding: 20px 16px;
+    padding: 0 16px;
     width: 100%;
     z-index: 1;
+    align-items: center;
 
     .spacer {
       flex-grow: 2;
     }
-
-    button {
-      background-color: transparent;
-      border-color: transparent;
-      border-radius: 0;
-      display: inline-block;
-      font-weight: 300;
-      line-height: 26px;
-      outline: 0;
-      padding: 0 8px;
-      text-align: center;
-
-      &:hover {
-        background-color: $gray-900;
-      }
-
-      &[disabled],
-      &[disabled]:hover,
-      &[disabled]:active {
-        background: none;
-        box-shadow: none;
-        color: $gray-500;
-      }
-    }
   }
 
-  .toggle-specs-wrapper {
-    display: flex;
-    height: 24px;
-
-    button {
-      color: $gray-700;
-      font-size: 16px;
-      font-weight: 300;
-      padding-left: 0;
-      padding-right: 8px;
-      transition: $color-transition;
-      width: auto !important;
-
-      &:focus,
-      &:hover {
-        background-color: initial;
-
-        svg {
-          color: $gray-400;
-          transition: $color-transition;
-        }
-
-        .toggle-specs-text {
-          color: $gray-400;
-          transition: $color-transition;
-        }
-      }
-
-      .toggle-specs-text {
-        color: $gray-500;
-        transition: $color-transition;
-      }
-
-      svg {
-        margin-right: 8px;
-        margin-bottom: -2px;
-      }
-    }
+  .statsAndControls {
+    display: inline-flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    border: 1px solid $gray-900;
+    border-left: none;
+    flex-wrap: wrap;
+    gap: 12px;
+    min-height: 64px;
   }
 
   .stats {
@@ -90,29 +42,21 @@ $color-transition: color 150ms ease-out;
     border-radius: 4px;
     display: flex;
     flex-wrap: wrap;
-    height: 24px;
+    min-height: 32px;
     justify-content: space-between;
-    padding: 0 4px;
-    min-width: 124px;
 
     li {
       display: flex;
-      font-size: 12px;
-      font-weight: 600;
+      align-items: center;
+      font-size: 14px;
+      font-weight: 700;
       list-style-type: none;
-      padding: 0 4px;
-
-      svg {
-        margin-right: 2px;
-      }
+      padding: 2px 12px;
+      gap: 4px;
+      line-height: 20px;
 
       .num {
-        color: $white;
-        line-height: 12px;
-        vertical-align: text-top;
-        min-width: 16px;
-        display: inline-block;
-        text-align: center;
+        color: $gray-400;
 
         &.empty {
           color: $gray-800;
@@ -123,38 +67,59 @@ $color-transition: color 150ms ease-out;
 
   .controls {
     align-items: center;
-    border: 1px solid $gray-900;
-    border-radius: 4px;
-    display: flex;
+    display: inline-flex;
     flex-wrap: wrap;
+    gap: 12px;
+    height: 32px;
     justify-content: center;
-    height: 24px;
 
-    .testing-preferences-toggle {
-      border-left: none;
-      color: $gray-700;
-      margin-left: 0;
+    button {
+      align-items: center;
+      display: flex;
+      height: 32px;
+      justify-content: center;
+      padding: 0 !important;
+      width: 32px;
+    }
+  }
 
-      &.open {
-        background-color: $gray-900;
-        color: $white;
-      }
+  .runnable-header {
+    @include inner-header;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    position: unset;
+    line-height: 20px;
+    min-width: 0;
+    align-items: center;
+    flex: 1;
+
+    span > span > a > svg {
+      margin-bottom: -2px;
+      margin-right: 8px;
     }
 
-    span {
-      height: 100%;
+    a,
+    a:active,
+    a:focus,
+    a:hover {
+      color: $gray-500;
+      font-weight: 300;
 
-      button {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100%;
-        color: $gray-400;
-        width: 31px;
-        padding: 0px;
-        border-left: 1px solid $gray-900;
-        margin-left: -1px;
+      strong {
+        color: $white;
+        font-weight: 500;
       }
+    }
+  }
+
+  .toggle-specs-wrapper {
+    .toggle-specs-button {
+      padding: 0;
+      width: 32px;
+      justify-content: center;
+      color: $gray-500;
     }
   }
 }
