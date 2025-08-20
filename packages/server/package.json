@@ -126,7 +126,7 @@
     "strip-ansi": "6.0.1",
     "syntax-error": "1.4.0",
     "systeminformation": "^5.27.7",
-    "tar": "^6.1.0",
+    "tar": "^6.2.1",
     "term-size": "2.1.0",
     "through": "2.3.8",
     "tough-cookie": "4.1.3",
