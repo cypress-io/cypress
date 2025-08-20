@@ -1,5 +1,5 @@
 import type { Protocol } from 'devtools-protocol'
-import type { SupportedKey, SupportedNamedKey } from '@packages/types'
+import { NamedKeys, type SupportedKey, type SupportedNamedKey } from '@packages/types'
 import type { SendDebuggerCommand } from '../../browsers/cdp_automation'
 import type { Client } from 'webdriver'
 import Debug from 'debug'
@@ -8,6 +8,13 @@ import { evaluateInFrameContext } from '../helpers/evaluate_in_frame_context'
 import { AUT_FRAME_NAME_IDENTIFIER } from '../helpers/aut_identifier'
 
 const debug = Debug('cypress:server:automation:command:keypress')
+
+// This type is not exported from webdriver, but we need it to type the .map call in the bidi implementation
+type InputKeySourceAction = Parameters<Client['inputPerformActions']>[0]['actions'][number] extends infer ActionParams
+  ? ActionParams extends { type: 'key', actions: infer Actions }
+    ? Actions extends Array<infer Action> ? Action : never
+    : never
+  : never
 
 export async function cdpKeyPress (
   key: SupportedKey,
@@ -34,7 +41,11 @@ export async function cdpKeyPress (
   }
 
   try {
-    for (const char of [...key]) {
+    // Named keys must be dispatched as single characters,
+    // multi-codepoint characters must be dispatched as individual codepoints
+    const chars = NamedKeys.includes(key) ? [key] : [...key]
+
+    for (const char of chars) {
       debug('dispatching keydown', { char })
       await send('Input.dispatchKeyEvent', {
         type: 'keyDown',
@@ -132,15 +143,21 @@ export async function bidiKeyPress (inKey: SupportedKey, client: Client, autCont
   }
 
   try {
+    const chars = NamedKeys.includes(inKey) ? [key] : [...key]
+
     await client.inputPerformActions({
       context: autContext,
       actions: [{
         type: 'key',
         id: `${autContext}-${inKey}-${idSuffix || Date.now()}`,
-        actions: [
-          { type: 'keyDown', value: key },
-          { type: 'keyUp', value: key },
-        ],
+        actions: chars
+        .map((value): InputKeySourceAction[] => {
+          return [
+            { type: 'keyDown', value },
+            { type: 'keyUp', value },
+          ]
+        })
+        .reduce((arr, el) => [...arr, ...el], []),
       }],
     })
   } catch (e) {

@@ -183,10 +183,13 @@ describe('key:press automation command', () => {
       })
 
       describe('when supplied a utf8 key', () => {
+        const codeOne = 'e'
+        const codeTwo = '́'
+        const value = 'é'
         let key: SupportedKey
 
         beforeEach(() => {
-          key = toSupportedKey('€')
+          key = toSupportedKey(value)
         })
 
         it('dispatches a keydown followed by a keyup event to the provided send fn with the a keycode', async () => {
@@ -194,12 +197,22 @@ describe('key:press automation command', () => {
 
           expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
             type: 'keyDown',
-            key,
+            key: codeOne,
           })
 
           expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
             type: 'keyUp',
-            key,
+            key: codeOne,
+          })
+
+          expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
+            type: 'keyDown',
+            key: codeTwo,
+          })
+
+          expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
+            type: 'keyUp',
+            key: codeTwo,
           })
         })
       })
@@ -342,15 +355,17 @@ describe('key:press automation command', () => {
       }
     })
 
-    describe('when supplied a utf8 key', () => {
-      const value = '€'
+    describe('when supplied a multi-codepointutf8 key', () => {
+      const codeOne = 'e'
+      const codeTwo = '́'
+      const value = 'é'
       let key: SupportedKey
 
       beforeEach(() => {
         key = toSupportedKey(value)
       })
 
-      it('dispatches a keydown followed by a keyup event to the provided send fn with the a keycode', async () => {
+      it('dispatches one keydown followed by a keyup event for each codepoint', async () => {
         await bidiKeyPress(key, client, autContext, 'idSuffix')
 
         expect(client.inputPerformActions.firstCall.args[0]).to.deep.equal({
@@ -359,8 +374,10 @@ describe('key:press automation command', () => {
             type: 'key',
             id: `someContextId-${key}-idSuffix`,
             actions: [
-              { type: 'keyDown', value },
-              { type: 'keyUp', value }, // in some browsers, F6 will cause the frame to lose focus, so the keyup will not be triggered
+              { type: 'keyDown', value: codeOne },
+              { type: 'keyUp', value: codeOne },
+              { type: 'keyDown', value: codeTwo },
+              { type: 'keyUp', value: codeTwo },
             ],
           }],
         })
