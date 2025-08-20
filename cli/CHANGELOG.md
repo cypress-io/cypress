@@ -6,6 +6,7 @@ _Released 08/20/2025_
 **Breaking Changes:**
 
 - Removed support for Node.js 18 and Node.js 23. Addresses [#31302](https://github.com/cypress-io/cypress/issues/31302).
+- Removed support for Linux distributions with `glibc` older than `2.31`. This support is in-line with Node.js' support for Linux in Node v20+. Addressed in [#31912](https://github.com/cypress-io/cypress/pull/31912).
 - Removed support for [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol) with the [Firefox](https://www.mozilla.org/firefox/) browser. Addresses [#31189](https://github.com/cypress-io/cypress/issues/31189).
 - Removed support of the deprecated 3 argument signature of `cy.stub`. Use `cy.stub(object, name).callsFake(fn)` instead. Addresses [#31346](https://github.com/cypress-io/cypress/issues/31346).
 - `@cypress/webpack-preprocessor` no longer supports `webpack` version 4. Addresses [#31344](https://github.com/cypress-io/cypress/issues/31344). If you still need to use `webpack` version 4, please see our [migration guide](https://docs.cypress.io/app/references/migration-guide#Migrating-to-Cypress-150).
