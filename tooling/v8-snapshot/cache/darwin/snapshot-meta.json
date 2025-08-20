@@ -840,6 +840,11 @@
     "./packages/socket/node_modules/socket.io/node_modules/ws/lib/constants.js",
     "./packages/socket/node_modules/socket.io/node_modules/ws/lib/receiver.js",
     "./packages/socket/node_modules/socket.io/node_modules/ws/lib/websocket-server.js",
+    "./packages/stderr-filtering/dist/FilterPrefixedContent.js",
+    "./packages/stderr-filtering/dist/FilterTaggedContent.js",
+    "./packages/stderr-filtering/dist/LineDecoder.js",
+    "./packages/stderr-filtering/dist/TagStream.js",
+    "./packages/stderr-filtering/dist/WriteToDebug.js",
     "./packages/ts/register.js",
     "./packages/types/index.js",
     "./tooling/v8-snapshot/dist/setup/v8-snapshot-entry-cy-in-cy.js"
@@ -4152,6 +4157,11 @@
     "./packages/socket/node_modules/socket.io/node_modules/ws/lib/stream.js",
     "./packages/socket/node_modules/socket.io/node_modules/ws/lib/validation.js",
     "./packages/socket/node_modules/socket.io/package.json",
+    "./packages/stderr-filtering/dist/Filter.js",
+    "./packages/stderr-filtering/dist/constants.js",
+    "./packages/stderr-filtering/dist/index.js",
+    "./packages/stderr-filtering/dist/logError.js",
+    "./packages/stderr-filtering/dist/writeWithBackpressure.js",
     "./packages/telemetry/dist/detectors/circleCiDetectorSync.js",
     "./packages/telemetry/dist/index.js",
     "./packages/telemetry/dist/node.js",
@@ -4186,5 +4196,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "12f57ba8965d605eed281c5637ba10524d2f949525807eb12e1c6255601a3709"
+  "deferredHash": "0bd8a28484027edf51c642a44fb317008f8b1aa153d3ee3fe4f3223dcf6488af"
 }
