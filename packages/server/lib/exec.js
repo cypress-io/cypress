@@ -2,10 +2,10 @@ const Promise = require('bluebird')
 const execa = require('execa')
 const shellEnv = require('shell-env')
 const _ = require('lodash')
-const log = require('./log')
+const log = require('debug')('cypress:server:exec')
 const utils = require('./util/shell')
 
-const pickMainProps = (val) => _.pick(val, ['stdout', 'stderr', 'code'])
+const pickMainProps = (val) => _.pick(val, ['stdout', 'stderr', 'exitCode'])
 
 const trimStdio = (val) => {
   const result = { ...val }
@@ -32,7 +32,7 @@ module.exports = {
       log('and is running command:', options.cmd)
       log('in folder:', projectRoot)
 
-      return execa.shell(cmd, { cwd, env, shell })
+      return execa(cmd, { cwd, env, shell: shell || true })
       .then((result) => {
         // do we want to return all fields returned by execa?
         result.shell = shell
