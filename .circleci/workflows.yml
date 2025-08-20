@@ -1,6 +1,6 @@
 version: 2.1
 
-chrome-stable-version: &chrome-stable-version "139.0.7258.127"
+chrome-stable-version: &chrome-stable-version "139.0.7258.138"
 chrome-beta-version: &chrome-beta-version "140.0.7339.16"
 firefox-stable-version: &firefox-stable-version "141.0"
 
@@ -62,7 +62,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
       - equal: [ develop, << pipeline.git.branch >> ]
       # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-      - equal: [ 'breaking/update_execa', << pipeline.git.branch >> ]
+      - equal: [ 'chore/release_cypress_15', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
@@ -143,7 +143,7 @@ executors:
 
   linux-arm64: &linux-arm64-executor
     machine:
-      image: ubuntu-2004:2024.05.1
+      image: ubuntu-2004:2024.11.1
     resource_class: arm.medium
     environment:
       PLATFORM: linux
@@ -1268,12 +1268,32 @@ commands:
 
   check-if-binary-exists:
     steps:
+      - run-on-dependencies:
+          package: internal-scripts
+          command: build
       - run:
           name: Check if binary exists, exit if it does
           command: |
             source ./scripts/ensure-node.sh
             yarn gulp e2eTestScaffold
             yarn check-binary-on-cdn --version $(node ./scripts/get-next-version.js) --type binary --file cypress.zip
+
+  run-on-dependencies:
+    parameters:
+      package:
+        description: Package to build all dependencies for. All dependencies in the
+          dependency chain must have a build script.
+        type: string
+      command:
+        description: Command to run on the dependencies.
+        type: string
+    steps:
+      - run:
+          name: Exec << parameters.command >> recursively on << parameters.package >>
+            dependencies.
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn lerna run <<parameters.command>> --scope=<<parameters.package>> --include-dependencies
 
   build-and-package-binary:
     steps:

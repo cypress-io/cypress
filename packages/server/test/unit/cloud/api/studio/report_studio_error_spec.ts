@@ -1,6 +1,7 @@
 import { expect } from 'chai'
 import { sinon } from '../../../../spec_helper'
 import { reportStudioError } from '@packages/server/lib/cloud/api/studio/report_studio_error'
+import { START_TAG, END_TAG } from '@packages/stderr-filtering'
 
 describe('lib/cloud/api/studio/report_studio_error', () => {
   let cloudRequestStub: sinon.SinonStub
@@ -47,8 +48,10 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
 
       // eslint-disable-next-line no-console
       expect(console.error).to.have.been.calledWith(
+        START_TAG,
         'Error in testMethod:',
         error,
+        END_TAG,
       )
     })
 
@@ -67,8 +70,10 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
 
       // eslint-disable-next-line no-console
       expect(console.error).to.have.been.calledWith(
+        START_TAG,
         'Error in testMethod:',
         error,
+        END_TAG,
       )
     })
 
@@ -87,8 +92,10 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
 
       // eslint-disable-next-line no-console
       expect(console.error).to.have.been.calledWith(
+        START_TAG,
         'Error in testMethod:',
         error,
+        END_TAG,
       )
     })
 
