@@ -528,6 +528,7 @@
     "./node_modules/supports-color/index.js",
     "./node_modules/systeminformation/lib/dockerSocket.js",
     "./node_modules/systeminformation/lib/filesystem.js",
+    "./node_modules/systeminformation/lib/index.js",
     "./node_modules/systeminformation/lib/system.js",
     "./node_modules/throttle/throttle.js",
     "./node_modules/trash/node_modules/glob/glob.js",
@@ -845,6 +846,11 @@
     "./packages/socket/node_modules/socket.io/node_modules/ws/lib/constants.js",
     "./packages/socket/node_modules/socket.io/node_modules/ws/lib/receiver.js",
     "./packages/socket/node_modules/socket.io/node_modules/ws/lib/websocket-server.js",
+    "./packages/stderr-filtering/dist/FilterPrefixedContent.js",
+    "./packages/stderr-filtering/dist/FilterTaggedContent.js",
+    "./packages/stderr-filtering/dist/LineDecoder.js",
+    "./packages/stderr-filtering/dist/TagStream.js",
+    "./packages/stderr-filtering/dist/WriteToDebug.js",
     "./packages/ts/register.js",
     "./packages/types/index.js",
     "./tooling/v8-snapshot/dist/setup/v8-snapshot-entry-cy-in-cy.js"
@@ -3343,10 +3349,10 @@
     "./node_modules/systeminformation/lib/audio.js",
     "./node_modules/systeminformation/lib/battery.js",
     "./node_modules/systeminformation/lib/bluetooth.js",
+    "./node_modules/systeminformation/lib/bluetoothVendors.js",
     "./node_modules/systeminformation/lib/cpu.js",
     "./node_modules/systeminformation/lib/docker.js",
     "./node_modules/systeminformation/lib/graphics.js",
-    "./node_modules/systeminformation/lib/index.js",
     "./node_modules/systeminformation/lib/internet.js",
     "./node_modules/systeminformation/lib/memory.js",
     "./node_modules/systeminformation/lib/network.js",
@@ -4150,6 +4156,11 @@
     "./packages/socket/node_modules/socket.io/node_modules/ws/lib/stream.js",
     "./packages/socket/node_modules/socket.io/node_modules/ws/lib/validation.js",
     "./packages/socket/node_modules/socket.io/package.json",
+    "./packages/stderr-filtering/dist/Filter.js",
+    "./packages/stderr-filtering/dist/constants.js",
+    "./packages/stderr-filtering/dist/index.js",
+    "./packages/stderr-filtering/dist/logError.js",
+    "./packages/stderr-filtering/dist/writeWithBackpressure.js",
     "./packages/telemetry/dist/detectors/circleCiDetectorSync.js",
     "./packages/telemetry/dist/index.js",
     "./packages/telemetry/dist/node.js",
@@ -4184,5 +4195,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "eae238885ceaaa3a0e2aa1acb20da8b2da254dd49a399a54a01fdba63faa233f"
+  "deferredHash": "d3fd134e5a076c18064a70a15412357399427c90e4a2d09e46176052c1eadedd"
 }
