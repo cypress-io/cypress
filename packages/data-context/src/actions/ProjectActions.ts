@@ -14,6 +14,7 @@ import { getError } from '@packages/errors'
 import { resetIssuedWarnings } from '@packages/config'
 import type { RunSpecErrorCode } from '@packages/graphql/src/schemaTypes'
 import debugLib from 'debug'
+import { logError } from '@packages/stderr-filtering'
 
 export class RunSpecError extends Error {
   constructor (public code: typeof RunSpecErrorCode[number], msg: string) {
@@ -209,9 +210,7 @@ export class ProjectActions {
         }
       })
     } catch (e) {
-      // TODO(tim): remove / replace with ctx.log.error
-      // eslint-disable-next-line
-      console.error(e)
+      logError(e)
       throw e
     }
   }

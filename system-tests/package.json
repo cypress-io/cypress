@@ -59,7 +59,7 @@
     "dedent": "^0.7.0",
     "dockerode": "3.3.1",
     "esbuild": "^0.15.3",
-    "execa": "4",
+    "execa": "4.1.0",
     "express": "4.21.0",
     "express-session": "1.16.1",
     "express-useragent": "1.0.15",
@@ -87,7 +87,7 @@
     "snap-shot-it": "7.9.10",
     "ssestream": "1.0.1",
     "supertest": "4.0.2",
-    "systeminformation": "5.22.8",
+    "systeminformation": "^5.27.7",
     "temp-dir": "^2.0.0",
     "webpack": "^5.88.2",
     "ws": "5.2.4"
