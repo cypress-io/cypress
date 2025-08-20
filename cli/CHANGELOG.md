@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.0.1
+
+_Released 08/26/2025 (PENDING)_
+
+**Dependency Updates:**
+
+- Upgraded `tar` from `6.1.5` to `6.2.1`. Addressed in [#32229](https://github.com/cypress-io/cypress/pull/32229).
+
 ## 15.0.0
 
 _Released 08/20/2025_
