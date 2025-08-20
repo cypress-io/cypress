@@ -9,28 +9,6 @@ import { AUT_FRAME_NAME_IDENTIFIER } from '../helpers/aut_identifier'
 
 const debug = Debug('cypress:server:automation:command:keypress')
 
-async function evaluateInFrameContext (expression: string,
-  send: SendDebuggerCommand,
-  contexts: Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription>,
-  frame: Protocol.Page.Frame): Promise<ProtocolMapping.Commands['Runtime.evaluate']['returnType']> {
-  for (const [contextId, context] of contexts.entries()) {
-    if (context.auxData?.frameId === frame.id) {
-      try {
-        return await send('Runtime.evaluate', {
-          expression,
-          contextId,
-        })
-      } catch (e) {
-        if (isError(e) && (e as Error).message.includes('Cannot find context with specified id')) {
-          debug('found invalid context %d, removing', contextId)
-          contexts.delete(contextId)
-        }
-      }
-    }
-  }
-  throw new Error('Unable to find valid context for frame')
-}
-
 export async function cdpKeyPress (
   key: SupportedKey,
   send: SendDebuggerCommand,
