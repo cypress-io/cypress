@@ -129,7 +129,8 @@ else {
     .its('stderr').should('be.empty')
 
   cy.exec('pwd')
-    .its('code').should('eq', 0)
+    // for Cypress 14 and below, use 'code' instead of 'exitCode'
+    .its('exitCode').should('eq', 0)
 }</code></pre>
         </div>
 
