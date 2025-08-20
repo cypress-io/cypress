@@ -162,7 +162,7 @@ export class ProjectBase extends EE {
 
     this._server = new ServerBase(cfg)
     // @ts-expect-error - this will not error when we actually release the experimentalPromptCommand flag
-    if (process.env.CYPRESS_ENABLE_CY_PROMPT || cfg.experimentalPromptCommand) {
+    if (cfg.experimentalPromptCommand) {
       const cyPromptLifecycleManager = new CyPromptLifecycleManager()
 
       cyPromptLifecycleManager.initializeCyPromptManager({

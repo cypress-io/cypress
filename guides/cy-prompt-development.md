@@ -1,6 +1,6 @@
 # `cy.prompt` Development
 
-In production, the code used to facilitate the prompt command will be retrieved from the Cloud. While `cy.prompt` is still in its early stages it is hidden behind an environment variable: `CYPRESS_ENABLE_CY_PROMPT` but can also be run against local cloud prompt code via the environment variable: `CYPRESS_LOCAL_CY_PROMPT_PATH`.
+In production, the code used to facilitate the prompt command will be retrieved from the Cloud.
 
 To run against locally developed `cy.prompt`:
 
