@@ -1,6 +1,5 @@
-
 declare namespace Cypress {
-  export type SupportedNamedKey = 'ArrowDown' |
+  type SupportedNamedKey = 'ArrowDown' |
   'ArrowLeft' |
   'ArrowRight' |
   'ArrowUp' |
@@ -26,5 +25,5 @@ declare namespace Cypress {
   'F11' |
   'F12'
 
-  export type SupportedKey = SupportedNamedKey | string
+  type SupportedKey = SupportedNamedKey | string
 }
