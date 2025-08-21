@@ -10,6 +10,7 @@ export default (Cypress, userOptions: Cypress.LogGroup.Config, fn: Cypress.LogGr
     instrument: 'command',
     groupStart: true,
     hidden: userOptions.log === false,
+    defaultCollapsedState: userOptions.defaultCollapsedState || 'open',
   }
 
   const log = Cypress.log(options)
