@@ -3,7 +3,11 @@
   "version": "0.0.0-development",
   "private": true,
   "scripts": {
+    "build": "echo 'internal-scripts build: no build necessary'",
     "lint": "eslint --ext .js,.ts,.json, ."
+  },
+  "dependencies": {
+    "@packages/electron": "0.0.0-development"
   },
   "nx": {}
 }

@@ -48,7 +48,6 @@ body:
       options:
         - npm
         - yarn
-        - Direct download
         - pnpm
         - other
     validations:

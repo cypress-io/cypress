@@ -1,11 +1,18 @@
+// Note: This file is owned by the cloud delivered
+// `studio` bundle. It is downloaded and copied to the app.
+// It should not be modified directly in the app.
+
+export type RecordingState = 'recording' | 'paused' | 'disabled'
+
 export interface StudioPanelProps {
   canAccessStudioAI: boolean
   onStudioPanelClose?: () => void
   studioSessionId?: string
   useRunnerStatus?: RunnerStatusShape
   useTestContentRetriever?: TestContentRetrieverShape
-  useStudioAIStream?: StudioAIStreamShape
   useCypress?: CypressShape
+  autUrlSelector?: string
+  studioAiAvailable?: boolean
 }
 
 export type StudioPanelShape = (props: StudioPanelProps) => JSX.Element
@@ -19,6 +26,11 @@ export interface StudioAppDefaultShape {
 export type CypressInternal = Cypress.Cypress &
 CyEventEmitter & {
   state: (key: string) => any
+  $autIframe: JQuery<HTMLIFrameElement>
+  mocha: {
+    getRootSuite: () => Suite
+  }
+  areSourceMapsAvailable?: boolean
 }
 
 export interface TestBlock {
@@ -53,6 +65,7 @@ export interface StudioAIStreamProps {
   runnerStatus: RunnerStatus
   testCode?: string
   isCreatingNewTest: boolean
+  Cypress: CypressInternal
 }
 
 export interface StudioAIStream {
@@ -73,16 +86,12 @@ export type TestContentRetrieverShape = (props: TestContentRetrieverProps) => {
   isCreatingNewTest: boolean
 }
 
-export interface Command {
-  selector?: string
-  name: string
-  message?: string | string[]
-  isAssertion?: boolean
-}
-
-export interface SaveDetails {
-  absoluteFile: string
-  runnableTitle: string
-  contents: string
-  testName?: string
+export type Suite = {
+  id: string
+  title: string
+  suites?: Suite[]
+  invocationDetails: {
+    line: number
+    column: number
+  }
 }

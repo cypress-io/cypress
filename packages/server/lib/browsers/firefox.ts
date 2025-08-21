@@ -451,6 +451,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
     _.extend(defaultLaunchOptions.preferences, {
       'network.proxy.allow_hijacking_localhost': true,
+      'network.proxy.testing_localhost_is_secure_when_hijacked': true,
       'network.proxy.http': hostname,
       'network.proxy.ssl': hostname,
       'network.proxy.http_port': +port,
@@ -555,6 +556,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   debug('launch in firefox', { url, args: launchOptions.args })
 
+  const launchEnvs = process.env
+
   const geckoDriverOptions: GeckodriverParameters = {
     host: '127.0.0.1',
     // geckodriver port is assigned under the hood by @wdio/utils
@@ -571,7 +574,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
       stdio: ['ignore', 'pipe', 'pipe'],
       env: {
         ...BROWSER_ENVS,
-        ...process.env,
+        ...launchEnvs,
       },
     },
     jsdebugger: Debug.enabled(GECKODRIVER_DEBUG_NAMESPACE_VERBOSE) || false,

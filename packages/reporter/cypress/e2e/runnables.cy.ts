@@ -137,7 +137,7 @@ describe('runnables', () => {
 
   it('does not display time if no time taken', () => {
     start()
-    cy.get('.runnable-header .runnable-header-file-name').contains('foo.js')
+    cy.get('.runnable-header .spec-file-name').contains('foo.js')
     cy.get('.runnable-header .duration').should('not.exist')
   })
 
@@ -204,7 +204,7 @@ describe('runnables', () => {
     })
 
     it('contains name of spec and emits when clicked', () => {
-      const selector = '.runnable-header-file-name'
+      const selector = '.spec-file-name'
 
       cy.stub(runner, 'emit').callThrough()
 

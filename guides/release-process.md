@@ -106,6 +106,7 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
     * the binaries for `<commit sha>` are moved from `beta` to the `desktop` folder for `<new target version>` in S3
     * the Cloudflare cache for this version is purged
     * the pre-prod `cypress.tgz` NPM package is converted to a stable NPM package ready for release
+    * if on MacOS, you will need to prefix the command with `COPYFILE_DISABLE=1` as OSX may include hidden files in the `.tgz` file of the binary
 
     ```shell
     yarn prepare-release-artifacts --sha <commit sha> --version <new target version>
@@ -116,20 +117,20 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
 7. Validate you are logged in to `npm` with `npm whoami`. Otherwise log in with `npm login`.
    If you are not already a Cypress package maintainer, contact a team member who is to get you added.
 
-8. Publish the generated npm package under the `dev` tag, using your personal npm account.
+8. Publish the generated npm package under the `dev` tag, using the npm service account.
 
     ```shell
     npm publish /tmp/cypress-prod.tgz --tag dev
     ```
 
-9. Double-check that the new version has been published under the `dev` tag using `npm info cypress` or [available-versions](https://github.com/bahmutov/available-versions). `latest` should still point to the previous version. Example output:
+9. Double-check that the new version has been published under the `dev` tag using `npm view cypress dist-tags`. The `latest` tag should still point to the previous version. Example output:
 
-    ```shell
-    dist-tags:
-    dev: 3.4.0     latest: 3.3.2
+    ```text
+    $ npm view cypress dist-tags
+    { latest: '14.5.3', dev: '14.5.4' }
     ```
 
-    **Note**: It may take several minutes for `npm info` to reflect the latest version info.
+    **Note**: It may take several minutes for `npm view` to reflect the latest version info.
 
 10. Test `cypress@X.Y.Z` to make sure everything is working.
     - Install the new version: `npm install -g cypress@X.Y.Z`
@@ -141,7 +142,7 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
     - Optionally, do more thorough tests, for example test the new version of Cypress against the Cypress Cloud repo.
 
 11. Review the release-specific documentation and changelog PR in [cypress-documentation](https://github.com/cypress-io/cypress-documentation). If there is not already a release-specific PR open, create one.
-    - Copy the changelog content for this version from the release PR above into `/docs/guides/references/changelog.mdx`. Adjust any `docs.cypress.io` links to use host-relative paths.
+    - Copy the changelog content for this version from the release PR above into `/docs/app/references/changelog.mdx`. Adjust any `docs.cypress.io` links to use host-relative paths.
     - Merge any release-specific documentation changes into the main release PR.
     - You can view the doc's [branch deploy preview](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md#pull-requests) by clicking 'Details' on the PR's `netlify-cypress-docs/deploy-preview` GitHub status check.
 

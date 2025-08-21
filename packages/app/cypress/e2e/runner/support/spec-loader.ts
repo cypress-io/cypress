@@ -1,6 +1,7 @@
 import type { ProjectFixtureDir } from '@tooling/system-tests/lib/fixtureDirs'
+import type { ExpectedResults } from '../../support/execute-spec'
 
-export const shouldHaveTestResults = ({ passCount, failCount, pendingCount }) => {
+export const shouldHaveTestResults = ({ passCount, failCount, pendingCount }: ExpectedResults) => {
   passCount = passCount || '--'
   failCount = failCount || '--'
 

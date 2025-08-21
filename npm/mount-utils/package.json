@@ -7,14 +7,16 @@
     "build": "tsc || echo 'built, with type errors'",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
     "check-ts": "tsc --noEmit",
-    "lint": "eslint --ext .js,.ts,.json, .",
+    "lint": "eslint",
     "watch": "tsc -w"
   },
   "dependencies": {},
   "devDependencies": {
+    "@packages/eslint-config": "0.0.0-development",
     "@rollup/plugin-commonjs": "^17.1.0",
     "@rollup/plugin-node-resolve": "^11.1.1",
-    "rollup": "3.7.3",
+    "eslint": "^9.31.0",
+    "rollup": "3.29.5",
     "rollup-plugin-dts": "5.0.0",
     "rollup-plugin-typescript2": "^0.29.0",
     "typescript": "~5.4.5"
@@ -30,6 +32,9 @@
   },
   "homepage": "https://github.com/cypress-io/cypress/tree/develop/npm/mount-utils#readme",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?template=1-bug-report.md",
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
+  },
   "publishConfig": {
     "access": "public"
   },

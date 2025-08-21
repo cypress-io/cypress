@@ -39,7 +39,7 @@ function convertSameSiteExtensionToCdp (str: CyCookie['sameSite']): Protocol.Net
     'no_restriction': 'None',
     'lax': 'Lax',
     'strict': 'Strict',
-  })[str] : str as any
+  })[str] as Protocol.Network.CookieSameSite : str as undefined
 }
 
 function convertSameSiteCdpToExtension (str: Protocol.Network.CookieSameSite): chrome.cookies.SameSiteStatus {
@@ -492,7 +492,13 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       }
 
       if (!frame) {
-        throw new Error('Could not find AUT frame')
+        // if for whatever reason we cannot identify the AUT frame by name, we will fall back to the first child frame that exists.
+        // The first child frame should always be the AUT frame, followed by the spec frame
+        if (frameTree?.childFrames?.[0]) {
+          frame = frameTree.childFrames[0]
+        } else {
+          throw new Error('Could not find AUT frame')
+        }
       }
 
       return frame.frame

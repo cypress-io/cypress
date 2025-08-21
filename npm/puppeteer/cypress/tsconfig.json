@@ -2,10 +2,12 @@
   "compilerOptions": {
     "types": [
       "cypress"
-    ]
+    ],
+    "allowJs": true
   },
   "include": [
     "../index.d.ts",
-    "e2e/**/*.ts"
+    "e2e/**/*.ts",
+    "support/**/*",
   ]
 }

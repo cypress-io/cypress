@@ -47,7 +47,8 @@ Upgrading `electron` involves more than just bumping this package's `package.jso
     - [ ] Ensure it references the new `base-internal` Docker images
 
 - [ ] **Ensure that a matching Node.js version is enforced in the monorepo for local development and CI.** When Electron is upgraded, oftentimes, the bundled Node.js version that comes with Electron is updated as well. Because all unit and integration tests run in normal Node.js (not Electron's Node.js), it's important for this Node.js version to be synced with the monorepo. There are a few places where this needs to be done:
-    - [ ] [`/.node-version`](../../.node-version) - used by `nvm` and other Node version managers
+    - [ ] [`/.node-version`](../../.node-version) - used by some Node version managers
+    - [ ] [`/.nvmrc`](../../.nvmrc) - used by `nvm`
     - [ ] `@types/node` used throughout the monorepo to determine compatible node types. The major version of this package must reflect the node version set in [`/.node-version`](../../.node-version).
     - [ ] [github workflows](../../.github) - used for repository templates, vulnerability detection, and V8 snapshots. If the node version for Snyk needs to be updated, then the required pull request check into `develop` must also be updated. A repository administrator will need to accomplish this.
     - [ ] [`/package.json`](../../package.json) - update `engines`

@@ -19,7 +19,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
 
-      cy.findByTestId('aut-url-input').should('be.disabled')
+      cy.findByTestId('aut-url-input').should('have.prop', 'readOnly', true)
       cy.findByTestId('select-browser').click()
 
       cy.contains('Canary').should('be.visible')

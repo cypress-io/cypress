@@ -1,3 +1,7 @@
+// Note: This file is owned by the cloud delivered
+// `studio` bundle. It is downloaded and copied to the app.
+// It should not be modified directly in the app.
+
 /// <reference types="cypress" />
 
 import type { Router } from 'express'
@@ -7,6 +11,12 @@ import type { BinaryLike } from 'crypto'
 
 export const StudioMetricsTypes = {
   STUDIO_STARTED: 'studio:started',
+  STUDIO_PANEL_OPENED: 'studio:panel:opened',
+  STUDIO_RECORDING_RESUMED: 'studio:recording:resumed',
+  STUDIO_RECORDING_PAUSED: 'studio:recording:paused',
+  STUDIO_INTERACTION_RECORDED: 'studio:interaction:recorded',
+  STUDIO_ASSERTION_RECORDED: 'studio:assertion:recorded',
+  STUDIO_EDITOR_SAVED: 'studio:editor:saved',
 } as const
 
 export type StudioMetricsType =
@@ -14,8 +24,9 @@ export type StudioMetricsType =
 
 export interface StudioEvent {
   type: StudioMetricsType
-  machineId: string | null
+  machineId: string
   projectId?: string
+  studioSessionId?: string
   browser?: {
     name: string
     family: string
@@ -45,18 +56,36 @@ type AsyncRetry = <TArgs extends any[], TResult>(
   options: RetryOptions
 ) => (...args: TArgs) => Promise<TResult>
 
+export type BrowserWindow = {
+  webContents: {
+    loadURL: (url: string) => Promise<void>
+    executeJavaScript: (script: string) => Promise<any>
+  }
+  setSize: (width: number, height: number) => void
+  destroy: () => void
+  isDestroyed: () => boolean
+  show: () => void
+}
+
+export type StudioElectronApi = {
+  createBrowserWindow: () => BrowserWindow
+}
+
 export interface StudioServerOptions {
   studioHash?: string
   studioPath: string
   projectSlug?: string
   cloudApi: StudioCloudApi
   betterSqlite3Path: string
-  manifest: Record<string, string>
+  sessionId?: string
+  manifest?: Record<string, string>
   verifyHash: (contents: BinaryLike, expectedHash: string) => boolean
+  studioElectron?: StudioElectronApi
 }
 
 export interface StudioAIInitializeOptions {
   protocolDbPath: string
+  studioElectron?: StudioElectronApi
 }
 
 export interface StudioAddSocketListenersOptions {
@@ -68,7 +97,7 @@ export interface StudioAddSocketListenersOptions {
 export interface StudioServerShape {
   initializeRoutes(router: Router): void
   canAccessStudioAI(browser: Cypress.Browser): Promise<boolean>
-  addSocketListeners(options: StudioAddSocketListenersOptions): void
+  addSocketListeners(options: StudioAddSocketListenersOptions | Socket): void
   initializeStudioAI(options: StudioAIInitializeOptions): Promise<void>
   updateSessionId(sessionId: string): void
   reportError(

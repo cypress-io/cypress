@@ -14,24 +14,27 @@ export function loadProjectAndRunSpec ({ projectName = 'experimental-studio' as 
   cy.waitForSpecToFinish()
 }
 
-export function launchStudio ({ specName = 'spec.cy.js', createNewTest = false, cliArgs = [''] } = {}) {
+export function launchStudio ({ specName = 'spec.cy.js', createNewTestFromSuite = false, createNewTestFromSpecHeader = false, cliArgs = [''] } = {}) {
   loadProjectAndRunSpec({ specName, cliArgs })
 
-  // Should not show "Studio Commands" until we've started a new Studio session.
-  cy.get('[data-cy="hook-name-studio commands"]').should('not.exist')
+  const testTitle = 'visits a basic html page'
 
-  if (createNewTest) {
+  if (createNewTestFromSuite || createNewTestFromSpecHeader) {
     cy.contains('studio functionality').as('item')
   } else {
-    cy.contains('visits a basic html page').as('item')
+    cy.contains(testTitle).as('item')
   }
 
   cy.get('@item')
   .closest('.runnable-wrapper').as('runnable-wrapper')
-  .realHover()
 
-  if (createNewTest) {
-    cy.get('@runnable-wrapper').realHover().findByTestId('create-new-test-button').click()
+  if (createNewTestFromSuite || createNewTestFromSpecHeader) {
+    if (createNewTestFromSpecHeader) {
+      cy.findByTestId('create-new-test-from-spec-header').click()
+    } else {
+      cy.get('@runnable-wrapper').realHover().findByTestId('create-new-test-from-suite').click()
+    }
+
     cy.findByTestId('studio-panel').should('be.visible')
     cy.findByTestId('new-test-button').should('be.visible')
   } else {
@@ -42,7 +45,10 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTest = false, 
     // Studio re-executes spec before waiting for commands - wait for the spec to finish executing.
     cy.waitForSpecToFinish()
 
-    cy.findByTestId('hook-name-studio commands').should('exist')
+    cy.get('[data-cy="studio-single-test-title"]').contains(testTitle)
+
+    // verify recording is enabled to ensure the panel is fully ready
+    cy.findByTestId('record-button-recording').should('have.text', 'Recording...')
   }
 }
 
@@ -58,8 +64,6 @@ export function assertClosingPanelWithoutChanges () {
     cy.contains('visit')
     cy.contains('cypress/e2e/index.html')
   })
-
-  cy.findByTestId('hook-name-studio commands').should('not.exist')
 
   cy.withCtx(async (ctx) => {
     const spec = await ctx.actions.file.readFileInProject('cypress/e2e/spec.cy.js')

@@ -1,14 +1,4 @@
 <template>
-  <StudioInstructionsModal
-    v-if="studioStore.instructionModalIsOpen"
-    :open="studioStore.instructionModalIsOpen"
-    @close="studioStore.closeInstructionModal"
-  />
-  <StudioSaveModal
-    v-if="studioStore.saveModalIsOpen"
-    :open="studioStore.saveModalIsOpen"
-    @close="studioStore.closeSaveModal"
-  />
   <AdjustRunnerStyleDuringScreenshot
     id="main-pane"
     class="flex"
@@ -102,7 +92,7 @@
           <StudioPanel
             v-if="shouldShowStudioPanel"
             data-cy="studio-panel"
-            :cloud-studio-session-id="studioStore.cloudStudioSessionId"
+            :cloud-studio-session-id="studioStore.sessionId"
             :can-access-studio-a-i="studioStore.canAccessStudioAI"
             :on-studio-panel-close="handleStudioPanelClose"
             :event-manager="eventManager"
@@ -143,8 +133,6 @@ import { useEventManager } from './useEventManager'
 import AutomationDisconnected from './automation/AutomationDisconnected.vue'
 import AutomationMissing from './automation/AutomationMissing.vue'
 import { runnerConstants } from './runner-constants'
-import StudioInstructionsModal from './studio/StudioInstructionsModal.vue'
-import StudioSaveModal from './studio/StudioSaveModal.vue'
 import { useStudioStore } from '../store/studio-store'
 import StudioPanel from '../studio/StudioPanel.vue'
 import { useSubscription } from '../graphql'

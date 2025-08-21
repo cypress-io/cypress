@@ -1,9 +1,9 @@
 import cs from 'classnames'
 import _ from 'lodash'
 import { observer } from 'mobx-react'
-import React, { MouseEvent, useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
-import appState, { AppState } from '../lib/app-state'
+import appState from '../lib/app-state'
 import events, { Events } from '../lib/events'
 import Test from '../test/test'
 import Collapsible, { CollapsibleHeaderComponentProps } from '../collapsible/collapsible'
@@ -11,9 +11,9 @@ import Collapsible, { CollapsibleHeaderComponentProps } from '../collapsible/col
 import type SuiteModel from './suite-model'
 import type TestModel from '../test/test-model'
 
-import { IconActionAddMedium, IconChevronDownMedium, IconChevronRightMedium, IconObjectStackFailed, IconObjectStackPassed, IconObjectStackQueued, IconObjectStackRunning, IconObjectStackSkipped, WindiColor } from '@cypress-design/react-icon'
-import Button from '@cypress-design/react-button'
+import { IconChevronDownMedium, IconChevronRightMedium, IconObjectStackFailed, IconObjectStackPassed, IconObjectStackQueued, IconObjectStackRunning, IconObjectStackSkipped, WindiColor } from '@cypress-design/react-icon'
 import { RunnableArray } from './runnables-store'
+import { CreateNewTestButton } from '../header/CreateNewTestButton'
 
 // should only show connection dots if the current runnable is a test and the next runnable is a test and is not the last runnable
 export const shouldShowConnectionDots = (runnables: RunnableArray, runnable: SuiteModel | TestModel, runnableIndex: number) => {
@@ -35,13 +35,6 @@ const headerIconDefaultProps = {
 }
 
 const Suite: React.FC<SuiteProps> = observer(({ eventManager = events, model, studioEnabled, canSaveStudioLogs, spec }: SuiteProps) => {
-  const _launchStudio = useCallback((e: MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-
-    eventManager.emit('studio:init:suite', model.id)
-  }, [eventManager, model.id])
-
   const headerIconStyle = {
     marginTop: '1px',
   }
@@ -85,16 +78,13 @@ const Suite: React.FC<SuiteProps> = observer(({ eventManager = events, model, st
         <span className='runnable-title'>{model.title}</span>
         {(studioEnabled && !appState.studioActive && spec?.relative !== '__all') && (
           <>
-            <Button data-cy='create-new-test-button' size='20' onClick={_launchStudio} variant='outline-dark' className={cs('launch-studio-button')} >
-              <IconActionAddMedium strokeColor='gray-500' />
-              New Test
-            </Button>
+            <CreateNewTestButton suiteId={model.id} dataCy='create-new-test-from-suite' />
             <span className='button-hover-shadow' />
           </>
         )}
       </>
     )
-  }, [getHeaderIcon, model.title, studioEnabled, appState.studioActive, _launchStudio])
+  }, [getHeaderIcon, model.title, studioEnabled, appState.studioActive])
 
   const runnablesList = useMemo(() => (
     <ul className='runnables'>
@@ -131,7 +121,6 @@ const Suite: React.FC<SuiteProps> = observer(({ eventManager = events, model, st
 Suite.displayName = 'Suite'
 
 export interface RunnableProps {
-  appState?: AppState
   model: TestModel | SuiteModel
   studioEnabled: boolean
   canSaveStudioLogs: boolean
@@ -143,18 +132,17 @@ export interface RunnableProps {
 // in order to mess with its internal state. converting it to a functional
 // component breaks that, so it needs to stay a Class-based component or
 // else the driver tests need to be refactored to support it being functional
-const Runnable: React.FC<RunnableProps> = observer(({ appState: appStateProps = appState, model, studioEnabled, canSaveStudioLogs, shouldShowConnectingDots, spec }) => {
+const Runnable: React.FC<RunnableProps> = observer(({ model, studioEnabled, canSaveStudioLogs, shouldShowConnectingDots, spec }) => {
   return (<>
     <li
       className={cs(`${model.type} runnable runnable-${model.state}`, {
         'runnable-retried': model.hasRetried,
-        'runnable-studio': appStateProps.studioActive,
         'last-test-margin-bottom': model.type === 'test' && !shouldShowConnectingDots,
       })}
       data-model-state={model.state}
     >
       {model.type === 'test'
-        ? <Test model={model as TestModel} studioEnabled={studioEnabled} canSaveStudioLogs={canSaveStudioLogs} spec={spec} />
+        ? <Test model={model as TestModel} studioEnabled={studioEnabled} spec={spec}/>
         : <Suite model={model as SuiteModel}
           studioEnabled={studioEnabled}
           canSaveStudioLogs={canSaveStudioLogs}

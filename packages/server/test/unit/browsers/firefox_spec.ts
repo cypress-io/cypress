@@ -65,7 +65,7 @@ describe('lib/browsers/firefox', () => {
   context('#open', () => {
     beforeEach(function () {
       // majorVersion >= 135 indicates BiDi support for Firefox
-      this.browser = { name: 'firefox', channel: 'stable', majorVersion: 135, path: '/path/to/binary' }
+      this.browser = { name: 'firefox', family: 'firefox', channel: 'stable', majorVersion: 135, path: '/path/to/binary' }
       this.automation = {
         use: sinon.stub().returns({}),
       }
@@ -419,6 +419,20 @@ describe('lib/browsers/firefox', () => {
         preferences: {
           // NOTE: sinon.match treats the string itself as a regular expression. The backslashes need to be escaped.
           'browser.download.dir': 'C:\\\\Users\\\\test\\\\Downloads\\\\My_Test_Downloads_Folder',
+        },
+      }), this.options)
+    })
+
+    // @see https://github.com/cypress-io/cypress/issues/18217
+    it('sets "testing_locationhost_is_secure_when_hijacked" to true to allow window.isSecureContext to be true', async function () {
+      const executeBeforeBrowserLaunchSpy = sinon.spy(utils, 'executeBeforeBrowserLaunch')
+
+      this.options.proxyServer = 'http://proxy-server:1234'
+
+      await firefox.open(this.browser, 'http://', this.options, this.automation)
+      expect(executeBeforeBrowserLaunchSpy).to.have.been.calledWith(this.browser, sinon.match({
+        preferences: {
+          'network.proxy.testing_localhost_is_secure_when_hijacked': true,
         },
       }), this.options)
     })

@@ -23,9 +23,21 @@ describe('lib/cloud/studio', () => {
 
   beforeEach(async () => {
     reportStudioError = sinon.stub()
+    // Fake StudioElectron so we can assert calls
+    class FakeStudioElectron {
+      // @ts-ignore - assigned in ctor
+      destroy: sinon.SinonStub
+      constructor () {
+        this.destroy = sinon.stub()
+      }
+    }
+
     StudioManager = (proxyquire('../lib/cloud/studio/studio', {
       '../api/studio/report_studio_error': {
         reportStudioError,
+      },
+      './StudioElectron': {
+        StudioElectron: FakeStudioElectron,
       },
     }) as typeof import('@packages/server/lib/cloud/studio/studio')).StudioManager
 
@@ -176,36 +188,6 @@ describe('lib/cloud/studio', () => {
 
       expect(result).to.be.false
     })
-
-    it('returns true when CYPRESS_LOCAL_STUDIO_PATH is set and studio server can access AI', async () => {
-      process.env.CYPRESS_LOCAL_STUDIO_PATH = 'path/to/studio'
-
-      sinon.stub(studio, 'canAccessStudioAI').resolves(true)
-
-      const result = await studioManager.canAccessStudioAI(browser)
-
-      expect(result).to.be.true
-    })
-
-    it('returns false when CYPRESS_LOCAL_STUDIO_PATH is not set and studio server can access AI', async () => {
-      process.env.CYPRESS_LOCAL_STUDIO_PATH = undefined
-
-      sinon.stub(studio, 'canAccessStudioAI').resolves(true)
-
-      const result = await studioManager.canAccessStudioAI(browser)
-
-      expect(result).to.be.false
-    })
-
-    it('returns false when CYPRESS_LOCAL_STUDIO_PATH is set and studio server cannot access AI', async () => {
-      process.env.CYPRESS_LOCAL_STUDIO_PATH = 'path/to/studio'
-
-      sinon.stub(studio, 'canAccessStudioAI').resolves(false)
-
-      const result = await studioManager.canAccessStudioAI(browser)
-
-      expect(result).to.be.false
-    })
   })
 
   describe('addSocketListeners', () => {
@@ -241,9 +223,13 @@ describe('lib/cloud/studio', () => {
         protocolDbPath: 'test-db-path',
       })
 
-      expect(studio.initializeStudioAI).to.be.calledWith({
-        protocolDbPath: 'test-db-path',
-      })
+      expect((studioManager as any)._studioElectron).to.exist
+
+      expect(studio.initializeStudioAI).to.be.calledWith(
+        sinon.match.has('protocolDbPath', 'test-db-path').and(
+          sinon.match.has('studioElectron'),
+        ),
+      )
     })
   })
 

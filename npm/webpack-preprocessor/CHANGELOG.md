@@ -1,3 +1,22 @@
+# [@cypress/webpack-preprocessor-v7.0.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v7.0.0...@cypress/webpack-preprocessor-v7.0.1) (2025-08-19)
+
+
+### Bug Fixes
+
+* ts-loader detection (false positive) ([#32266](https://github.com/cypress-io/cypress/issues/32266)) ([f7c9847](https://github.com/cypress-io/cypress/commit/f7c98473f53ecfd944a1aace10ea888a62a01e8f))
+
+# [@cypress/webpack-preprocessor-v7.0.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v6.0.4...@cypress/webpack-preprocessor-v7.0.0) (2025-08-08)
+
+
+### breaking
+
+* release version 7.0.0 of @cypress/webpack-preprocessor. ([ddac377](https://github.com/cypress-io/cypress/commit/ddac37779c2d1e03afd2e5d2e038926a2dcbb587))
+
+
+### BREAKING CHANGES
+
+* release major version of @cypress/webpack-preprocessor as webpack 4 is no longer supported
+
 # [@cypress/webpack-preprocessor-v6.0.4](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v6.0.3...@cypress/webpack-preprocessor-v6.0.4) (2025-03-26)
 
 

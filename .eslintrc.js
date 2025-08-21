@@ -42,6 +42,8 @@ module.exports = {
     'npm/eslint-plugin-dev/test/fixtures/**',
     // Cloud generated
     'system-tests/lib/validations/**',
+    // ignore as the file has invalid syntax
+    'system-tests/projects/no-specs-babel-conflict/src/Invalid.jsx',
   ],
   overrides: [
     {

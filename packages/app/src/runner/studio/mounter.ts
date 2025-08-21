@@ -34,6 +34,7 @@ function getStudioAssertionsMenuDom (body: HTMLElement) {
     body,
     className: '__cypress-studio-assertions-menu',
     css: `${AssertionsMenu.styles}\n${AssertionType.styles}\n${AssertionOptions.styles}`,
+    studioActive: true,
   })
 }
 
@@ -56,8 +57,24 @@ function dispatchEventToTarget (e: MouseEvent, targetClass: string): void {
   }
 }
 
+function handleContainerClickOutside (e: MouseEvent, closeMenu: () => void): void {
+  const target = e.target as HTMLElement
+
+  const isMenuElement = target.closest('.assertions-menu') ||
+      target.closest('.assertion-type') ||
+      target.closest('.assertion-options') ||
+      target.closest('.assertion-option')
+
+  // Don't close menu if the click is on any menu-related elements
+  if (isMenuElement) {
+    return
+  }
+
+  closeMenu()
+}
+
 // Event handlers
-function setupVueContainerListeners (vueContainer: HTMLElement): void {
+function setupVueContainerListeners (vueContainer: HTMLElement, closeMenu: () => void): void {
   vueContainer.addEventListener('click', (e) => {
     const paths = e.composedPath()
 
@@ -69,6 +86,9 @@ function setupVueContainerListeners (vueContainer: HTMLElement): void {
         break
       }
     }
+
+    // Add click handler to the Vue container to detect clicks outside the menu
+    handleContainerClickOutside(e, closeMenu)
   })
 
   vueContainer.addEventListener('mouseover', (e) => {
@@ -116,7 +136,7 @@ function unmountAssertionsMenu (): void {
 export function openStudioAssertionsMenu ({ $el, $body, props }: StudioAssertionsMenuArgs): void {
   const { vueContainer } = getStudioAssertionsMenuDom($body.get(0))
 
-  setupVueContainerListeners(vueContainer)
+  setupVueContainerListeners(vueContainer, props.closeMenu)
 
   const selectorHighlightStyles = getSelectorHighlightStyles([$el.get(0)])[0]
 

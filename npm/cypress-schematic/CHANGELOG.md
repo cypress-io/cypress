@@ -1,3 +1,45 @@
+# [@cypress/schematic-v4.1.1](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v4.1.0...@cypress/schematic-v4.1.1) (2025-08-20)
+
+
+### Bug Fixes
+
+* Redirect spammy electron stderr to a debug sink ([#32188](https://github.com/cypress-io/cypress/issues/32188)) ([e463fdb](https://github.com/cypress-io/cypress/commit/e463fdbc61143238e38004ef242515920f16d60a))
+
+# [@cypress/schematic-v4.1.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v4.0.0...@cypress/schematic-v4.1.0) (2025-08-14)
+
+
+### Features
+
+* support Angular 20 ([#32198](https://github.com/cypress-io/cypress/issues/32198)) ([c96115d](https://github.com/cypress-io/cypress/commit/c96115df0fc29df23850c7b13dbb2c6cf257c552))
+
+# [@cypress/schematic-v4.0.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v3.0.0...@cypress/schematic-v4.0.0) (2025-08-08)
+
+
+### breaking
+
+* remove Angular 17 support ([#31446](https://github.com/cypress-io/cypress/issues/31446)) ([971b7ae](https://github.com/cypress-io/cypress/commit/971b7ae3d7d3aa0fd608550e9d896b3d2b8c8634))
+
+
+### BREAKING CHANGES
+
+* Removed support for Angular 17. Only Angular 18 and 19 are now supported. This change affects the @cypress/angular package. Addresses #31303.
+
+* empty commit to kick CI
+
+* update changelog references to make it clearer on where angular 17 packages live historically
+
+* fix cy framework errors app test to use angualr 18 and 19
+
+* fix issue where di was not discoverable in resolved system tests config
+
+* fix scaffold dependencies to use angular 18 and 19 and not 17 and 18
+
+* fix zonr.js system test dependency resolution
+
+* bump cache
+
+* fix failing handler test
+
 # [@cypress/schematic-v3.0.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.5.2...@cypress/schematic-v3.0.0) (2025-01-08)
 
 
