@@ -1,5 +1,3 @@
-import { SupportedKey, NamedKeys } from '@packages/types'
-
 describe('src/cy/commands/actions/press', () => {
   // Non-BiDi firefox is not supported
   if (Cypress.browser.family === 'firefox' && Cypress.browserMajorVersion() < 135) {
@@ -15,7 +13,7 @@ describe('src/cy/commands/actions/press', () => {
     cy.visit('/fixtures/input_events.html')
   })
 
-  const testKeyPress = (key: SupportedKey) => {
+  const testKeyPress = (key) => {
     it(`dispatches ${key} keypress to the AUT`, () => {
       cy.press(key)
       cy.get('#keydown').should('have.value', key)
@@ -41,7 +39,5 @@ describe('src/cy/commands/actions/press', () => {
     '+', '[', ']', '{', '}', '\\', '|', ';', ':', '\'', '"', ',', '.',
     '<', '>', '/', '?', '`', '~', ' ', '€', 'é'].forEach(testKeyPress)
 
-  NamedKeys.forEach(testKeyPress)
-
-  testKeyPress('é')
+  Object.values(Cypress.Keyboard.Keys).forEach(testKeyPress)
 })
