@@ -3,6 +3,10 @@
 
 _Released 08/26/2025 (PENDING)_
 
+**Misc:**
+
+- Updated the Cypress Studio panel to have a darker gray background. Addressed in [#32333](https://github.com/cypress-io/cypress/pull/32333).
+
 **Dependency Updates:**
 
 - Upgraded `tar` from `6.1.5` to `6.2.1`. Addressed in [#32229](https://github.com/cypress-io/cypress/pull/32229).
