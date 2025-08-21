@@ -24,7 +24,6 @@ import { cdpReloadFrame } from '../automation/commands/reload_frame'
 import { cdpNavigateHistory } from '../automation/commands/navigate_history'
 import { cdpGetFrameTitle } from '../automation/commands/get_frame_title'
 
-
 export type CdpCommand = keyof ProtocolMapping.Commands
 
 export type CdpEvent = keyof ProtocolMapping.Events
