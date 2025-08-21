@@ -1,0 +1,31 @@
+{
+  "name": "@packages/stderr-filtering",
+  "version": "0.0.0-development",
+  "private": true,
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "yarn clean && tsc",
+    "clean": "rm -rf ./{dist,coverage}",
+    "lint": "eslint",
+    "test": "vitest",
+    "watch": "tsc --watch"
+  },
+  "dependencies": {
+    "debug": "^4.3.4"
+  },
+  "devDependencies": {
+    "@packages/eslint-config": "0.0.0-development",
+    "@types/node": "^22.13.10",
+    "@vitest/coverage-v8": "^3.0.9",
+    "eslint": "^9.22.0",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.9"
+  },
+  "files": [
+    "dist"
+  ],
+  "types": "dist/index.d.ts",
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix"
+  }
+}

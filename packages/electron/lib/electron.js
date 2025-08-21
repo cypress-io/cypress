@@ -1,7 +1,7 @@
 const cp = require('child_process')
 const os = require('os')
 const path = require('path')
-const debug = require('debug')('cypress:electron')
+const debugElectron = require('debug')('cypress:electron')
 const Promise = require('bluebird')
 const minimist = require('minimist')
 const inspector = require('inspector')
@@ -10,7 +10,11 @@ const paths = require('./paths')
 const install = require('./install')
 let fs = require('fs-extra')
 
+const debugStderr = require('debug')('cypress:internal-stderr')
+
 fs = Promise.promisifyAll(fs)
+
+const { filter, DEBUG_PREFIX } = require('@packages/stderr-filtering')
 
 /**
  * If running as root on Linux, no-sandbox must be passed or Chrome will not start
@@ -26,7 +30,7 @@ module.exports = {
   },
 
   install (...args) {
-    debug('installing %o', { args })
+    debugElectron('installing %o', { args })
 
     return install.package.apply(install, args)
   },
@@ -39,7 +43,7 @@ module.exports = {
    * Returns the Node version bundled inside Electron.
    */
   getElectronNodeVersion () {
-    debug('getting Electron Node version')
+    debugElectron('getting Electron Node version')
 
     const args = []
 
@@ -50,7 +54,7 @@ module.exports = {
     // runs locally installed "electron" bin alias
     const localScript = path.join(__dirname, 'print-node-version.js')
 
-    debug('local script that prints Node version %s', localScript)
+    debugElectron('local script that prints Node version %s', localScript)
 
     args.push(localScript)
 
@@ -59,7 +63,7 @@ module.exports = {
       timeout: 10000, // prevents hanging Electron if there is an error for some reason
     }
 
-    debug('Running Electron with %o %o', args, options)
+    debugElectron('Running Electron with %o %o', args, options)
 
     return execa('electron', args, options)
     .then((result) => result.stdout)
@@ -72,7 +76,7 @@ module.exports = {
   cli (argv = []) {
     const opts = minimist(argv)
 
-    debug('cli options %j', opts)
+    debugElectron('cli options %j', opts)
 
     const pathToApp = argv[0]
 
@@ -88,26 +92,26 @@ module.exports = {
   },
 
   open (appPath, argv, cb) {
-    debug('opening %s', appPath)
+    debugElectron('opening %s', appPath)
 
     appPath = path.resolve(appPath)
     const dest = paths.getPathToResources('app')
 
-    debug('appPath %s', appPath)
+    debugElectron('appPath %s', appPath)
 
-    debug('dest path %s', dest)
+    debugElectron('dest path %s', dest)
 
     // make sure this path exists!
     return fs.accessAsync(appPath)
     .then(() => {
-      debug('appPath exists %s', appPath)
+      debugElectron('appPath exists %s', appPath)
 
       // clear out the existing symlink
       return fs.removeAsync(dest)
     }).then(() => {
       const symlinkType = paths.getSymlinkType()
 
-      debug('making symlink from %s to %s of type %s', appPath, dest, symlinkType)
+      debugElectron('making symlink from %s to %s of type %s', appPath, dest, symlinkType)
 
       return fs.ensureSymlinkAsync(appPath, dest, symlinkType)
     }).then(() => {
@@ -135,32 +139,49 @@ module.exports = {
         }
       }
 
-      debug('spawning %s with args', execPath, argv)
+      debugElectron('spawning %s with args', execPath, argv)
 
-      if (debug.enabled) {
+      if (debugElectron.enabled) {
         // enable the internal chromium logger
         argv.push('--enable-logging')
       }
 
-      const spawned = cp.spawn(execPath, argv, { stdio: 'inherit' })
+      const spawned = cp.spawn(execPath, argv, { stdio: 'pipe' })
+      .on('error', (err) => {
+        // If electron is throwing an error event, we need to ensure it's
+        // printed to console.
+        // eslint-disable-next-line no-console
+        console.error(err)
+
+        return process.exit(1)
+      })
       .on('close', (code, signal) => {
-        debug('electron closing %o', { code, signal })
+        debugElectron('electron closing %o', { code, signal })
 
         if (signal) {
-          debug('electron exited with a signal, forcing code = 1 %o', { signal })
+          debugElectron('electron exited with a signal, forcing code = 1 %o', { signal })
           code = 1
         }
 
         if (cb) {
-          debug('calling callback with code', code)
+          debugElectron('calling callback with code', code)
 
           return cb(code)
         }
 
-        debug('process.exit with code', code)
+        debugElectron('process.exit with code', code)
 
         return process.exit(code)
       })
+
+      if ([1, '1'].includes(process.env.ELECTRON_ENABLE_LOGGING)) {
+        spawned.stderr.pipe(process.stderr)
+      } else {
+        spawned.stderr.pipe(filter(process.stderr, debugStderr, DEBUG_PREFIX))
+      }
+
+      spawned.stdout.pipe(process.stdout)
+      process.stdin.pipe(spawned.stdin)
 
       return spawned
     }).catch((err) => {

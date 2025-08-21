@@ -1,6 +1,7 @@
 import { plugin } from 'nexus'
 import { isPromiseLike, pathToArray } from 'nexus/dist/utils'
 import chalk from 'chalk'
+import { logError } from '@packages/stderr-filtering'
 
 const HANGING_RESOLVER_THRESHOLD = 100
 
@@ -29,8 +30,7 @@ export const nexusSlowGuardPlugin = plugin({
           if (process.env.CYPRESS_INTERNAL_ENV !== 'production') {
             const totalMS = (process.hrtime.bigint() - start) / BigInt(1000000)
 
-            // eslint-disable-next-line no-console
-            console.error(chalk.red(`\n\nNexusSlowGuard: Taking more than ${threshold}ms to execute ${JSON.stringify(resolvePath)} for ${operationId} (total time ${totalMS}ms)\n\n`))
+            logError(chalk.red(`\n\nNexusSlowGuard: Taking more than ${threshold}ms to execute ${JSON.stringify(resolvePath)} for ${operationId} (total time ${totalMS}ms)\n\n`))
           }
         }, threshold)
 
