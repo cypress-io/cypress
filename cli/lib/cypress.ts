@@ -108,4 +108,4 @@ const cypressModuleApi = {
   },
 }
 
-export default cypressModuleApi
+export = cypressModuleApi

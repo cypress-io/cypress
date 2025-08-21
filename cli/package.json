@@ -103,7 +103,7 @@
     "snap-shot-it": "7.9.10",
     "spawn-mock": "1.0.0",
     "strip-ansi": "6.0.1",
-    "tsx": "4.19.2"
+    "tsx": "4.20.4"
   },
   "files": [
     "bin",
@@ -161,7 +161,8 @@
   },
   "workspaces": {
     "nohoist": [
-      "@types/*"
+      "@types/*",
+      "tsx"
     ]
   },
   "nx": {

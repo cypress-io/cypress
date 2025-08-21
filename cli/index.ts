@@ -41,12 +41,6 @@ if (args.exec) {
   debugCli('exporting Cypress module interface')
 }
 
-export default CLI
-
-export const defineConfig = CLI.defineConfig
-
-export const defineComponentFramework = CLI.defineComponentFramework
-
-export const run = CLI.run
-
-export const open = CLI.open
+// this is how the module needs to be exported to avoid a breaking change
+// default exports WILL BREAK in a CJS context through a require('cypress') call
+export = CLI
