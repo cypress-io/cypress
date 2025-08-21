@@ -1,5 +1,5 @@
 import type { Protocol } from 'devtools-protocol'
-import { NamedKeys, type SupportedKey, type SupportedNamedKey } from '@packages/types'
+import { NamedKeys, SupportedKey, SupportedNamedKey } from '@packages/types'
 import type { SendDebuggerCommand } from '../../browsers/cdp_automation'
 import type { Client } from 'webdriver'
 import Debug from 'debug'
