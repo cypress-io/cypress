@@ -21,6 +21,7 @@
     "@babel/parser": "7.28.0",
     "@graphql-tools/batch-execute": "^8.4.6",
     "@graphql-tools/delegate": "8.2.1",
+    "@packages/stderr-filtering": "0.0.0-development",
     "@packages/telemetry": "0.0.0-development",
     "@urql/core": "2.4.4",
     "@urql/exchange-execute": "1.1.0",

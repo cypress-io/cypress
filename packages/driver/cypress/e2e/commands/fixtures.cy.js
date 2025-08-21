@@ -305,6 +305,36 @@ describe('src/cy/commands/fixtures', () => {
           })
         })
       })
+
+      it('should cache `null` and `undefined` encodings separately', () => {
+        const fixture = '\u0000'
+
+        Cypress.backend.withArgs('get:fixture', fixture, { encoding: null })
+        .resolves(Buffer.from('binary-content'))
+        .withArgs('get:fixture', fixture, {})
+        .resolves({ reality: 'buffering...' })
+
+        cy.fixture(fixture, null).then((content1) => {
+          cy.wrap(Buffer.isBuffer(content1)).should('be.true')
+
+          cy.fixture(fixture).then((content2) => {
+            cy.wrap(Buffer.isBuffer(content2)).should('be.false')
+            cy.wrap(content2).should('deep.equal', { reality: 'buffering...' })
+
+            cy.fixture(fixture, null).then((content3) => {
+              cy.wrap(Buffer.isBuffer(content3)).should('be.true')
+              cy.wrap(content3).should('deep.equal', content1)
+
+              cy.fixture(fixture).then((content4) => {
+                cy.wrap(content4).should('deep.equal', { reality: 'buffering...' })
+                cy.wrap(content4).should('deep.equal', content2)
+              })
+            })
+          })
+        })
+
+        cy.wrap(Cypress.backend.withArgs('get:fixture')).should('have.callCount', 2)
+      })
     })
   })
 })
