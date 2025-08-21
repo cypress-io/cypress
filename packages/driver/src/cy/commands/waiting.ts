@@ -178,7 +178,7 @@ export default (Commands: Cypress.Commands, Cypress: Cypress.Cypress, cy: $Cy, s
       // because wait can reference an array of aliases
       if (log) {
         const referencesAlias = log.get('referencesAlias') ?? []
-        const aliases = structuredClone(referencesAlias)
+        const aliases = [...referencesAlias]
 
         if (str) {
           aliases.push({
