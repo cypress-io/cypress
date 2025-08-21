@@ -21595,11 +21595,6 @@ lint-staged@11.1.2:
     string-argv "0.3.1"
     stringify-object "^3.3.0"
 
-linux-release-info@3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/linux-release-info/-/linux-release-info-3.0.0.tgz#4de2ae640f0cbedf836b6074357d5e5562cf8fa0"
-  integrity sha512-qVARfxfp2uOM8XTlb+ZkzqVqvNDd6djySW7JL0ec+cnpB/SKZO2O/NJc9XR699fE7Wg1ERWN6aKcPm5Ejioj3A==
-
 listr-silent-renderer@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/listr-silent-renderer/-/listr-silent-renderer-1.1.1.tgz#924b5a3757153770bf1a8e3fbf74b8bbf3f9242e"
