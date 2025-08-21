@@ -131,6 +131,11 @@ const getInvocationDetails = (specWindow, config): InvocationDetails | undefined
   if (specWindow.Error) {
     let stack = (new specWindow.Error()).stack
 
+    // note: specWindow.Cypress can be undefined or null
+    // if the user quickly reloads the tests multiple times
+
+    // firefox and chrome throw stacks that include lines from cypress
+    // So we drop the lines until we get to the spec stackframe (includes __cypress)
     if (specWindow.Cypress) {
       // The stack includes frames internal to cypress, after the spec stackframe. In order
       // to determine the invocation details, the stack needs to be parsed and trimmed.
