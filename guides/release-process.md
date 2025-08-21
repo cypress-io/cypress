@@ -106,6 +106,7 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
     * the binaries for `<commit sha>` are moved from `beta` to the `desktop` folder for `<new target version>` in S3
     * the Cloudflare cache for this version is purged
     * the pre-prod `cypress.tgz` NPM package is converted to a stable NPM package ready for release
+    * if on MacOS, you will need to prefix the command with `COPYFILE_DISABLE=1` as OSX may include hidden files in the `.tgz` file of the binary
 
     ```shell
     yarn prepare-release-artifacts --sha <commit sha> --version <new target version>
@@ -116,7 +117,7 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
 7. Validate you are logged in to `npm` with `npm whoami`. Otherwise log in with `npm login`.
    If you are not already a Cypress package maintainer, contact a team member who is to get you added.
 
-8. Publish the generated npm package under the `dev` tag, using your personal npm account.
+8. Publish the generated npm package under the `dev` tag, using the npm service account.
 
     ```shell
     npm publish /tmp/cypress-prod.tgz --tag dev

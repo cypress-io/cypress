@@ -19,6 +19,7 @@ const debug = debugLib(`cypress:lifecycle:ProjectConfigIpc`)
 const debugVerbose = debugLib(`cypress-verbose:lifecycle:ProjectConfigIpc`)
 
 const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
+import { TagStream } from '@packages/stderr-filtering'
 
 // NOTE: need the file:// prefix to avoid https://nodejs.org/api/errors.html#err_unsupported_esm_url_scheme on windows
 const tsx = os.platform() === 'win32' ? `file://${toPosix(require.resolve('tsx'))}` : toPosix(require.resolve('tsx'))
@@ -150,8 +151,8 @@ export class ProjectConfigIpc extends EventEmitter {
       if (this._childProcess.stdout && this._childProcess.stderr) {
         // manually pipe plugin stdout and stderr for Cypress Cloud capture
         // @see https://github.com/cypress-io/cypress/issues/7434
-        this._childProcess.stdout.on('data', (data) => process.stdout.write(data))
-        this._childProcess.stderr.on('data', (data) => process.stderr.write(data))
+        this._childProcess.stdout.pipe(process.stdout)
+        this._childProcess.stderr.pipe(new TagStream()).pipe(process.stderr)
       }
 
       let resolved = false
@@ -260,7 +261,7 @@ export class ProjectConfigIpc extends EventEmitter {
     })
   }
 
-  private forkConfigProcess () {
+  private forkConfigProcess (): ChildProcess {
     const configProcessArgs = ['--projectRoot', this.projectRoot, '--file', this.configFilePath]
     // we do NOT want telemetry enabled within our cy-in-cy tests as it isn't configured to handled it
     const env = _.omit(process.env, 'CYPRESS_INTERNAL_E2E_TESTING_SELF', 'CYPRESS_INTERNAL_ENABLE_TELEMETRY')

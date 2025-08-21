@@ -100,7 +100,7 @@ export default (Commands, Cypress, cy, state, config) => {
         options.encoding = args[0]
       }
 
-      const cacheKey = `${fixture}${NULL_SEP}${options.encoding || ''}`
+      const cacheKey = `${fixture}${NULL_SEP}${options.encoding}`
       const cachedContent = cache[cacheKey]
 
       if (cachedContent) {

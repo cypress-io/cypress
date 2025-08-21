@@ -8,6 +8,7 @@ import FileUtil from './util/file'
 import { fs } from './util/fs'
 import { AllowedState, allowedKeys } from '@packages/types'
 import { globalPubSub } from '@packages/data-context'
+import { logError } from '@packages/stderr-filtering'
 
 const debug = Debug('cypress:server:saved_state')
 
@@ -81,8 +82,7 @@ const normalizeAndAllowSet = (set, key, value) => {
   })
 
   if (invalidKeys.length) {
-    // eslint-disable-next-line no-console
-    console.error(`WARNING: attempted to save state for non-allowed key(s): ${invalidKeys.join(', ')}. All keys must be allowed in server/lib/saved_state.ts`)
+    logError(`WARNING: attempted to save state for non-allowed key(s): ${invalidKeys.join(', ')}. All keys must be allowed in server/lib/saved_state.ts`)
   }
 
   return set(_.pick(valueObject, allowedKeys))

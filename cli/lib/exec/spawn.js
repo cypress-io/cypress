@@ -4,125 +4,12 @@ const cp = require('child_process')
 const path = require('path')
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:cli')
-const debugVerbose = require('debug')('cypress-verbose:cli')
-
 const util = require('../util')
 const state = require('../tasks/state')
 const xvfb = require('./xvfb')
 const verify = require('../tasks/verify')
 const errors = require('../errors')
 const readline = require('readline')
-
-const isXlibOrLibudevRe = /^(?:Xlib|libudev)/
-const isHighSierraWarningRe = /\*\*\* WARNING/
-const isRenderWorkerRe = /\.RenderWorker-/
-// This is a warning that occurs when running in a container on Linux.
-// https://github.com/cypress-io/cypress/issues/29563
-// Example:
-// [437:1212/125803.148706:ERROR:zygote_host_impl_linux.cc(273)] Failed to adjust OOM score of renderer with pid 610: Permission denied (13)
-const isOOMScoreWarningRe = /Failed to adjust OOM score of renderer with pid/
-
-// Chromium (which Electron uses) always makes several attempts to connect to the system dbus.
-// This works fine in most desktop environments, but in a docker container, there is no dbus service
-// and Chromium emits several error lines, similar to these:
-
-// [1957:0406/160550.146820:ERROR:bus.cc(392)] Failed to connect to the bus: Failed to connect to socket /var/run/dbus/system_bus_socket: No such file or directory
-// [1957:0406/160550.147994:ERROR:bus.cc(392)] Failed to connect to the bus: Address does not contain a colon
-
-// These warnings are absolutely harmless. Failure to connect to dbus means that electron won't be able to access the user's
-// credential wallet (none exists in a docker container) and won't show up in the system tray (again, none exists).
-// Failure to connect is expected and normal here, but users frequently misidentify these errors as the cause of their problems.
-
-// https://github.com/cypress-io/cypress/issues/19299
-const isDbusWarning = /Failed to connect to the bus:/
-
-// Electron began logging these on self-signed certs with 17.0.0-alpha.4.
-// Once this is fixed upstream this regex can be removed: https://github.com/electron/electron/issues/34583
-// Sample:
-// [3801:0606/152837.383892:ERROR:cert_verify_proc_builtin.cc(681)] CertVerifyProcBuiltin for www.googletagmanager.com failed:
-// ----- Certificate i=0 (OU=Cypress Proxy Server Certificate,O=Cypress Proxy CA,L=Internet,ST=Internet,C=Internet,CN=www.googletagmanager.com) -----
-// ERROR: No matching issuer found
-const isCertVerifyProcBuiltin = /(^\[.*ERROR:cert_verify_proc_builtin\.cc|^----- Certificate i=0 \(OU=Cypress Proxy|^ERROR: No matching issuer found$)/
-
-/**
- * Electron logs benign warnings about Vulkan when run on hosts that do not have a GPU. This is coming from the primary Electron process,
- * and not the browser being used for tests.
- * Samples:
- * Warning: loader_scanned_icd_add: Driver /usr/lib/x86_64-linux-gnu/libvulkan_intel.so supports Vulkan 1.2, but only supports loader interface version 4. Interface version 5 or newer required to support this version of Vulkan (Policy #LDP_DRIVER_7)
- * Warning: loader_scanned_icd_add: Driver /usr/lib/x86_64-linux-gnu/libvulkan_lvp.so supports Vulkan 1.1, but only supports loader interface version 4. Interface version 5 or newer required to support this version of Vulkan (Policy #LDP_DRIVER_7)
- * Warning: loader_scanned_icd_add: Driver /usr/lib/x86_64-linux-gnu/libvulkan_radeon.so supports Vulkan 1.2, but only supports loader interface version 4. Interface version 5 or newer required to support this verison of Vulkan (Policy #LDP_DRIVER_7)
- * Warning: Layer VK_LAYER_MESA_device_select uses API version 1.2 which is older than the application specified API version of 1.3. May cause issues.
- */
-
-const isHostVulkanDriverWarning = /^Warning:.+(#LDP_DRIVER_7|VK_LAYER_MESA_device_select).+/
-
-/**
- * Electron logs benign warnings about Vulkan when run in docker containers whose host does not have a GPU. This is coming from the primary
- * Electron process, and not the browser being used for tests.
- * Sample:
- * Warning: vkCreateInstance: Found no drivers!
- * Warning: vkCreateInstance failed with VK_ERROR_INCOMPATIBLE_DRIVER
- *     at CheckVkSuccessImpl (../../third_party/dawn/src/dawn/native/vulkan/VulkanError.cpp:88)
- *     at CreateVkInstance (../../third_party/dawn/src/dawn/native/vulkan/BackendVk.cpp:458)
- *     at Initialize (../../third_party/dawn/src/dawn/native/vulkan/BackendVk.cpp:344)
- *     at Create (../../third_party/dawn/src/dawn/native/vulkan/BackendVk.cpp:266)
- *     at operator() (../../third_party/dawn/src/dawn/native/vulkan/BackendVk.cpp:521)
- */
-
-const isContainerVulkanDriverWarning = /^Warning: vkCreateInstance/
-
-const isContainerVulkanStack = /^\s*at (CheckVkSuccessImpl|CreateVkInstance|Initialize|Create|operator).+(VulkanError|BackendVk).cpp/
-
-/**
- * In Electron 32.0.0 a new debug scenario log message started appearing when iframes navigate to about:blank. This is a benign message.
- * https://github.com/electron/electron/issues/44368
- * Sample:
- * [78887:1023/114920.074882:ERROR:debug_utils.cc(14)] Hit debug scenario: 4
- */
-const isDebugScenario4 = /^\[[^\]]+debug_utils\.cc[^\]]+\] Hit debug scenario: 4/
-
-/**
- * In Electron 32.0.0 a new EGL driver message started appearing when running on Linux. This is a benign message.
- * https://github.com/electron/electron/issues/43415
- * Sample:
- * [78887:1023/114920.074882:ERROR:gl_display.cc(14)] EGL Driver message (Error) eglQueryDeviceAttribEXT: Bad attribute.
- */
-const isEGLDriverMessage = /^\[[^\]]+gl_display\.cc[^\]]+\] EGL Driver message \(Error\) eglQueryDeviceAttribEXT: Bad attribute\./
-
-/**
- * Mesa/GLX related warnings that occur in certain Linux environments without proper GPU support
- * or when running in containers. These are benign warnings that don't affect functionality.
- * Samples:
- * error: XDG_RUNTIME_DIR is invalid or not set in the environment.
- * MESA: error: ZINK: failed to choose pdev
- * glx: failed to create drisw screen
- */
-const isXdgRuntimeError = /^error: XDG_RUNTIME_DIR is invalid or not set/
-const isMesaZinkError = /^MESA: error: ZINK: failed to choose pdev/
-const isGlxDriverError = /^glx: failed to create drisw screen/
-
-const GARBAGE_WARNINGS = [
-  isXlibOrLibudevRe,
-  isHighSierraWarningRe,
-  isRenderWorkerRe,
-  isOOMScoreWarningRe,
-  isDbusWarning,
-  isCertVerifyProcBuiltin,
-  isHostVulkanDriverWarning,
-  isContainerVulkanDriverWarning,
-  isContainerVulkanStack,
-  isDebugScenario4,
-  isEGLDriverMessage,
-  isXdgRuntimeError,
-  isMesaZinkError,
-  isGlxDriverError,
-]
-
-const isGarbageLineWarning = (str) => {
-  return _.some(GARBAGE_WARNINGS, (re) => {
-    return re.test(str)
-  })
-}
 
 function isPlatform (platform) {
   return os.platform() === platform
@@ -161,8 +48,6 @@ function getStdio (needsXvfb) {
 }
 
 module.exports = {
-  isGarbageLineWarning,
-
   start (args, options = {}) {
     const needsXvfb = xvfb.isNeeded()
     let executable = state.getPathToExecutable(state.getBinaryDir())
@@ -315,13 +200,6 @@ module.exports = {
           debug('piping child STDERR to process STDERR')
           child.stderr.on('data', (data) => {
             const str = data.toString()
-
-            // bail if this is warning line garbage
-            if (isGarbageLineWarning(str)) {
-              debugVerbose(str)
-
-              return
-            }
 
             // if we have a callback and this explicitly returns
             // false then bail
