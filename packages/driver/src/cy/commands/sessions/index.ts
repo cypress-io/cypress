@@ -498,7 +498,7 @@ export default function (Commands, Cypress, cy) {
       let _log
       const groupDetails = {
         message: `${session.id.length > 50 ? `${session.id.substring(0, 47)}...` : session.id}`,
-        defaultCollapsedState: 'closed' as 'closed' | 'open',
+        defaultCollapsedState: 'closed' as const,
       }
 
       return logGroup(Cypress, groupDetails, (log) => {

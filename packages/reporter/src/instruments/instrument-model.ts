@@ -9,6 +9,8 @@ export interface AliasObject {
 
 export type Alias = string | Array<string> | null | AliasObject | Array<AliasObject>
 
+export type DefaultCollapsedState = 'closed' | 'open'
+
 export interface InstrumentProps {
   id: number
   alias?: Alias
@@ -23,7 +25,7 @@ export interface InstrumentProps {
   referencesAlias?: Alias
   instrument?: Instrument
   testId: string
-  defaultCollapsedState?: 'closed' | 'open'
+  defaultCollapsedState?: DefaultCollapsedState
 }
 
 export default class Log {
@@ -37,7 +39,7 @@ export default class Log {
   state: string
   referencesAlias?: Alias
   testId: string
-  defaultCollapsedState: 'closed' | 'open'
+  defaultCollapsedState: DefaultCollapsedState
 
   constructor (props: InstrumentProps) {
     makeObservable(this, {
