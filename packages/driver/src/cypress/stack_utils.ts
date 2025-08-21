@@ -131,11 +131,6 @@ const getInvocationDetails = (specWindow, config): InvocationDetails | undefined
   if (specWindow.Error) {
     let stack = (new specWindow.Error()).stack
 
-    // note: specWindow.Cypress can be undefined or null
-    // if the user quickly reloads the tests multiple times
-
-    // firefox and chrome throw stacks that include lines from cypress
-    // So we drop the lines until we get to the spec stackframe (includes __cypress)
     if (specWindow.Cypress) {
       // The stack includes frames internal to cypress, after the spec stackframe. In order
       // to determine the invocation details, the stack needs to be parsed and trimmed.
@@ -149,7 +144,22 @@ const getInvocationDetails = (specWindow, config): InvocationDetails | undefined
       }
     }
 
-    const details: Omit<InvocationDetails, 'stack'> = getSourceDetailsForFirstLine(stack, config('projectRoot')) || {};
+    // Find the first stack line that is not a grep wrapper function
+    const stackLines = getStackLines(stack)
+    let targetLine = stackLines[0] // fallback to first line if no non-grep line found
+
+    for (const line of stackLines) {
+      // Skip lines that contain grep wrapper function names
+      if (line.includes('itGrep') || line.includes('describeGrep')) {
+        continue
+      }
+
+      // This should be the actual test invocation line
+      targetLine = line
+      break
+    }
+
+    const details: Omit<InvocationDetails, 'stack'> = (getSourceDetailsForLine(config('projectRoot'), targetLine) as StackLineDetail) || {};
 
     (details as any).stack = stack
 
@@ -405,7 +415,10 @@ const getSourceDetailsForLine = (projectRoot, line): MessageLineDetail | StackLi
 }
 
 const getSourceDetailsForFirstLine = (stack, projectRoot) => {
+  // console.log('getSourceDetailsForFirstLine', stack, projectRoot)
   const line = getStackLines(stack)[0]
+
+  // console.log('line', line)
 
   if (!line) return
 
