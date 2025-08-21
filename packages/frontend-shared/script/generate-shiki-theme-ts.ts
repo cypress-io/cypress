@@ -2,7 +2,7 @@
 import { colors } from '@cypress-design/css'
 import * as fs from 'fs'
 
-const filePath = './src/public/shiki/themes/cypress.theme'
+const filePath = './src/shiki/themes/cypress.theme'
 
 fs.readFile(`${filePath}.template.json`,
   { encoding: 'utf8' },
