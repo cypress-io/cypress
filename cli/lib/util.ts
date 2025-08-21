@@ -24,10 +24,6 @@ import fs from './fs'
 
 const debug = Debug('cypress:cli')
 
-// Type helpers as any since they're utility libraries with various checking functions
-const isAny: any = is
-const fsAny: any = fs
-
 // Import package.json dynamically to avoid TypeScript JSON import issues
 const pkg = require(path.join(__dirname, '..', 'package.json'))
 
@@ -39,15 +35,15 @@ const getosAsync = Bluebird.promisify(getos)
  * Returns SHA512 of a file
  */
 const getFileChecksum = (filename: string): any => {
-  la(isAny.unemptyString(filename), 'expected filename', filename)
+  la(is.unemptyString(filename), 'expected filename', filename)
 
   return hasha.fromFile(filename, { algorithm: 'sha512' })
 }
 
 const getFileSize = (filename: string): any => {
-  la(isAny.unemptyString(filename), 'expected filename', filename)
+  la(is.unemptyString(filename), 'expected filename', filename)
 
-  return fsAny.statAsync(filename).get('size')
+  return fs.statAsync(filename).get('size')
 }
 
 const isBrokenGtkDisplayRe = /Gtk: cannot open display/
@@ -168,7 +164,8 @@ function printNodeOptions (log: any = debug): void {
   ```
  */
 const dequote = (str: string): string => {
-  la(isAny.string(str), 'expected a string to remove double quotes', str)
+  // @ts-expect-error
+  la(is.string(str), 'expected a string to remove double quotes', str)
   if (str.length > 1 && str[0] === '"' && str[str.length - 1] === '"') {
     return str.substr(1, str.length - 2)
   }
@@ -503,7 +500,7 @@ const util = {
   },
 
   getEnv (varName: string, trim?: boolean): string | undefined {
-    la(isAny.unemptyString(varName), 'expected environment variable name, not', varName)
+    la(is.unemptyString(varName), 'expected environment variable name, not', varName)
 
     const configVarName = `npm_config_${varName}`
     const configVarNameLower = configVarName.toLowerCase()
@@ -562,7 +559,8 @@ const util = {
   isPossibleLinuxWithIncorrectDisplay,
 
   getGitHubIssueUrl (number: number): string {
-    la(isAny.positive(number), 'github issue should be a positive number', number)
+    // @ts-expect-error
+    la(is.positive(number), 'github issue should be a positive number', number)
     la(_.isInteger(number), 'github issue should be an integer', number)
 
     return `${issuesUrl}/${number}`

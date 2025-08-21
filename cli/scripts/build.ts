@@ -21,9 +21,6 @@ const {
 const packageJsonSrc = path.join('package.json')
 const packageJsonDest = path.join('build', 'package.json')
 
-// Type fs as any since it's promisified and has Async methods
-const fsAsync = fs as any
-
 function getStdout (cmd: string): string {
   return shell.exec(cmd).trim()
 }
@@ -62,17 +59,17 @@ function preparePackageForNpmRelease (json: any, branchName?: string): any {
 }
 
 function makeUserPackageFile (branchName?: string): Promise<any> {
-  return fsAsync.readJsonAsync(packageJsonSrc)
+  return fs.readJsonAsync(packageJsonSrc)
   .then((json: any) => preparePackageForNpmRelease(json, branchName))
   .then((json: any) => {
-    return fsAsync.outputJsonAsync(packageJsonDest, json, {
+    return fs.outputJsonAsync(packageJsonDest, json, {
       spaces: 2,
     })
     .return(json) // returning package json object makes it easy to test
   })
 }
 
-export = makeUserPackageFile
+export default makeUserPackageFile
 
 if (!module.parent) {
   makeUserPackageFile(process.env.BRANCH)

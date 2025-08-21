@@ -8,9 +8,6 @@ import util from '../util'
 
 const debug = Debug('cypress:cli')
 
-// Type fs as any since it's a custom wrapper with async methods
-const fsAny: any = fs
-
 const getPlatformExecutable = (): string => {
   const platform = os.platform()
 
@@ -97,7 +94,7 @@ const getCacheDir = (): string => {
 }
 
 const parseRealPlatformBinaryFolderAsync = (binaryPath: string): any => {
-  return fsAny.realpathAsync(binaryPath)
+  return fs.realpathAsync(binaryPath)
   .then((realPath: any) => {
     debug('CYPRESS_RUN_BINARY has realpath:', realPath)
     if (!realPath.toString().endsWith(getPlatformExecutable())) {
@@ -128,7 +125,7 @@ const getBinaryStatePath = (binaryDir: string): string => {
 const getBinaryStateContentsAsync = (binaryDir: string): any => {
   const fullPath = getBinaryStatePath(binaryDir)
 
-  return fsAny.readJsonAsync(fullPath)
+  return fs.readJsonAsync(fullPath)
   .catch({ code: 'ENOENT' }, SyntaxError, () => {
     debug('could not read binary_state.json file at "%s"', fullPath)
 
@@ -143,7 +140,7 @@ const getBinaryVerifiedAsync = (binaryDir: string): any => {
 }
 
 const clearBinaryStateAsync = (binaryDir: string): any => {
-  return fsAny.removeAsync(getBinaryStatePath(binaryDir))
+  return fs.removeAsync(getBinaryStatePath(binaryDir))
 }
 
 /**
@@ -155,7 +152,7 @@ const clearBinaryStateAsync = (binaryDir: string): any => {
 const writeBinaryVerifiedAsync = (verified: boolean, binaryDir: string): any => {
   return getBinaryStateContentsAsync(binaryDir)
   .then((contents: any) => {
-    return fsAny.outputJsonAsync(
+    return fs.outputJsonAsync(
       getBinaryStatePath(binaryDir),
       _.extend(contents, { verified }),
       { spaces: 2 },
@@ -176,13 +173,13 @@ const getBinaryPkgAsync = (binaryDir: string): any => {
 
   debug('Reading binary package.json from:', pathToPackageJson)
 
-  return fsAny.pathExistsAsync(pathToPackageJson)
+  return fs.pathExistsAsync(pathToPackageJson)
   .then((exists: boolean) => {
     if (!exists) {
       return null
     }
 
-    return fsAny.readJsonAsync(pathToPackageJson)
+    return fs.readJsonAsync(pathToPackageJson)
   })
 }
 

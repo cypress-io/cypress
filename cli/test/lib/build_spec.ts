@@ -5,11 +5,8 @@ import la from 'lazy-ass'
 import is from 'check-more-types'
 import fs from '../../lib/fs'
 
-// Type helper as any since it's a utility library
-const isAny: any = is
-
 const hasVersion = (json: any): void => {
-  la(isAny.semver(json.version), 'cannot find version', json)
+  la(is.semver(json.version), 'cannot find version', json)
 }
 
 const normalizePackageJson = (o: any): any => {

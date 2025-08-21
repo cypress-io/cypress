@@ -1,9 +1,6 @@
 import la from 'lazy-ass'
 import is from 'check-more-types'
 import os from 'os'
-
-// Type is as any since it's a helper library with various checking functions
-const isAny: any = is
 import url from 'url'
 import path from 'path'
 import Debug from 'debug'
@@ -17,9 +14,6 @@ import fs from '../fs'
 import util from '../util'
 
 const debug = Debug('cypress:cli')
-
-// Type fs as any since it's a custom wrapper with async methods
-const fsAny: any = fs
 
 const defaultBaseUrl = 'https://download.cypress.io/'
 const defaultMaxRedirects = 10
@@ -48,7 +42,7 @@ const getBaseUrl = (): string => {
 const getCA = (): any => {
   return new Bluebird((resolve: any) => {
     if (process.env.npm_config_cafile) {
-      fsAny.readFile(process.env.npm_config_cafile, 'utf8')
+      fs.readFile(process.env.npm_config_cafile, 'utf8')
       .then((cafileContent: string) => {
         resolve(cafileContent)
       })
@@ -86,7 +80,8 @@ const prepend = (arch: string, urlPath: string, version: string): string => {
 }
 
 const getUrl = (arch: string, version: string): string => {
-  if (isAny.url(version)) {
+  // @ts-expect-error
+  if (is.url(version)) {
     debug('version is already an url', version)
 
     return version
@@ -300,7 +295,7 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
         // there was a possible race condition between end of request and close of writeStream
         // that is made ordered with this Promise.all
         Bluebird.all([new Bluebird((r: any) => {
-          return response.pipe(fsAny.createWriteStream(downloadDestination).on('close', r))
+          return response.pipe(fs.createWriteStream(downloadDestination).on('close', r))
         }), new Bluebird((r: any) => response.on('end', r))])
         .then(() => {
           debug('downloading finished')
@@ -342,7 +337,7 @@ const start = async (opts: any): Promise<any> => {
   let { version, downloadDestination, progress, redirectTTL } = opts
 
   if (!downloadDestination) {
-    la(isAny.unemptyString(downloadDestination), 'missing download dir', opts)
+    la(is.unemptyString(downloadDestination), 'missing download dir', opts)
   }
 
   if (!progress) {
@@ -361,7 +356,7 @@ const start = async (opts: any): Promise<any> => {
   debug(`downloading cypress.zip to "${downloadDestination}"`)
 
   // ensure download dir exists
-  return fsAny.ensureDirAsync(path.dirname(downloadDestination))
+  return fs.ensureDirAsync(path.dirname(downloadDestination))
   .then(() => {
     return getCA()
   })

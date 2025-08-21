@@ -14,9 +14,6 @@ import util from '../util'
 
 const debug = Debug('cypress:cli:unzip')
 
-// Type fs as any since it's a custom wrapper with async methods
-const fsAny: any = fs
-
 const unzipTools = {
   extract,
 }
@@ -33,7 +30,7 @@ const unzip = ({ zipFilePath, installDir, progress }: any): any => {
   const startTime = Date.now()
   let yauzlDoneTime = 0
 
-  return fsAny.ensureDirAsync(installDir)
+  return fs.ensureDirAsync(installDir)
   .then(() => {
     return new Bluebird((resolve: any, reject: any) => {
       return yauzl.open(zipFilePath, (err: any, zipFile: any) => {
@@ -212,12 +209,12 @@ const start = async ({ zipFilePath, installDir, progress }: any): Promise<void> 
   }
 
   try {
-    const installDirExists = await fsAny.pathExists(installDir)
+    const installDirExists = await fs.pathExists(installDir)
 
     if (installDirExists) {
       debug('removing existing unzipped binary', installDir)
 
-      await fsAny.removeAsync(installDir)
+      await fs.removeAsync(installDir)
     }
 
     await unzip({ zipFilePath, installDir, progress })

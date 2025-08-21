@@ -18,9 +18,6 @@ import infoModule from './exec/info'
 
 const debug = Debug('cypress:cli:cli')
 
-// Type commander as any since it's a complex library
-const commanderAny: any = commander
-
 // patch "commander" method called when a user passed an unknown option
 // we want to print help for the current command and exit with an error
 function unknownOption (this: any, flag: string, type: string = 'option'): void {
@@ -32,7 +29,7 @@ function unknownOption (this: any, flag: string, type: string = 'option'): void 
   this.outputHelp()
   util.exit(1)
 }
-commanderAny.Command.prototype.unknownOption = unknownOption
+commander.Command.prototype.unknownOption = unknownOption
 
 const coerceFalse = (arg: string): boolean => {
   return arg !== 'false'
@@ -229,7 +226,7 @@ function showVersions (opts: any): any {
 }
 
 const createProgram = (): any => {
-  const program = new commanderAny.Command()
+  const program = new commander.Command()
 
   // bug in commander not printing name
   // in usage help docs

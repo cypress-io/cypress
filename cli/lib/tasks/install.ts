@@ -21,9 +21,6 @@ const debug = Debug('cypress:cli')
 // Import package.json dynamically to avoid TypeScript JSON import issues
 const { buildInfo, version } = require('../../package.json')
 
-// Type fs as any since it's a custom wrapper with async methods
-const fsAny: any = fs
-
 function _getBinaryUrlFromBuildInfo (arch: string, { commitSha, commitBranch }: any): string {
   const platform = os.platform()
 
@@ -127,7 +124,7 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }: any): any => {
         const cleanup = () => {
           debug('removing zip file %s', downloadDestination)
 
-          return fsAny.removeAsync(downloadDestination)
+          return fs.removeAsync(downloadDestination)
         }
 
         return cleanup()
@@ -248,7 +245,7 @@ const start = async (options: any = {}): Promise<any> => {
     return throwFormErrorText(errors.invalidOS)()
   }
 
-  await fsAny.ensureDirAsync(cacheDir)
+  await fs.ensureDirAsync(cacheDir)
   .catch({ code: 'EACCES' }, (err: any) => {
     return throwFormErrorText(errors.invalidCacheDirectory)(stripIndent`
     Failed to access ${chalk.cyan(cacheDir)}:
@@ -313,7 +310,7 @@ const start = async (options: any = {}): Promise<any> => {
 
   const getLocalFilePath = async (): Promise<string | false> => {
     // see if version supplied is a path to a binary
-    if (await fsAny.pathExistsAsync(versionToInstall)) {
+    if (await fs.pathExistsAsync(versionToInstall)) {
       return path.extname(versionToInstall) === '.zip' ? versionToInstall : false
     }
 
@@ -323,7 +320,7 @@ const start = async (options: any = {}): Promise<any> => {
 
     // if this exists return the path to it
     // else false
-    if ((await fsAny.pathExistsAsync(possibleFile)) && path.extname(possibleFile) === '.zip') {
+    if ((await fs.pathExistsAsync(possibleFile)) && path.extname(possibleFile) === '.zip') {
       return possibleFile
     }
 

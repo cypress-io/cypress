@@ -8,8 +8,6 @@ import runModule from './exec/run'
 import util from './util'
 import cli from './cli'
 
-// Type fs as any since it's a custom wrapper with async methods
-const fsAny: any = fs
 const tmp = Bluebird.promisifyAll(tmpModule) as any
 
 const cypressModuleApi = {
@@ -42,7 +40,7 @@ const cypressModuleApi = {
 
       return runModule.start(options)
       .then((failedTests: any) => {
-        return fsAny.readJsonAsync(outputPath, { throws: false })
+        return fs.readJsonAsync(outputPath, { throws: false })
         .then((output: any) => {
           if (!output) {
             return {

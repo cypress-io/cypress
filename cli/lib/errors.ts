@@ -5,9 +5,6 @@ import is from 'check-more-types'
 import util from './util'
 import state from './tasks/state'
 
-// Type is as any since it's a helper library with various checking functions
-const isAny: any = is
-
 const docsUrl = 'https://on.cypress.io'
 const requiredDependenciesUrl = `${docsUrl}/required-dependencies`
 const runDocumentationUrl = `${docsUrl}/cypress-run`
@@ -279,7 +276,7 @@ function addPlatformInformation (info: any): any {
  * Given an error object (see the errors above), forms error message text with details,
  * then resolves with Error instance you can throw or reject with.
  * @param {object} errorObject
- * @returns {Promise<e>} resolves with an Error
+ * @returns {Promise<Error>} resolves with an Error
  * @example
   ```js
   // inside a Promise with "resolve" and "reject"
@@ -287,7 +284,7 @@ function addPlatformInformation (info: any): any {
   return getError(errorObject).then(reject)
   ```
  */
-export function getError (errorObject: any): any {
+export function getError (errorObject: any): Promise<Error> {
   return formErrorText(errorObject).then((errorMessage: string) => {
     const err: any = new Error(errorMessage)
 
@@ -310,17 +307,17 @@ export function formErrorText (info: any, msg?: string, prevMessage?: string): a
     }
 
     la(
-      isAny.unemptyString(obj.description),
+      is.unemptyString(obj.description),
       'expected error description to be text',
       obj.description,
     )
 
     // assuming that if there the solution is a function it will handle
     // error message and (optional previous error message)
-    if (isAny.fn(obj.solution)) {
+    if (is.fn(obj.solution)) {
       const text = obj.solution(msg, prevMessage)
 
-      la(isAny.unemptyString(text), 'expected solution to be text', text)
+      la(is.unemptyString(text), 'expected solution to be text', text)
 
       add(`
         ${obj.description}
@@ -330,7 +327,7 @@ export function formErrorText (info: any, msg?: string, prevMessage?: string): a
       `)
     } else {
       la(
-        isAny.unemptyString(obj.solution),
+        is.unemptyString(obj.solution),
         'expected error solution to be text',
         obj.solution,
       )

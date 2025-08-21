@@ -58,7 +58,7 @@ const checkConfigFile = (options: any): void => {
   }
 }
 
-export {
+export default {
   throwInvalidOptionError,
   processTestingType,
   checkConfigFile,
