@@ -8,8 +8,13 @@ _Released 08/26/2025 (PENDING)_
 
 - Expanded `cy.press()` to support more key types. Addresses [#31051](https://github.com/cypress-io/cypress/issues/31049). Addressed in [#31496](https://github.com/cypress-io/cypress/pull/31496).
 
+**Bugfixes:**
+
+- Fixed an issue where the open Studio button would incorrectly show for component tests. Addressed in [#32315](https://github.com/cypress-io/cypress/pull/32315).
+
 **Dependency Updates:**
 
+- Upgraded `image-size` from `1.1.1` to `1.2.1`. Addressed in [#32232](https://github.com/cypress-io/cypress/pull/32232).
 - Upgraded `tar` from `6.1.5` to `6.2.1`. Addressed in [#32229](https://github.com/cypress-io/cypress/pull/32229).
 
 ## 15.0.0
