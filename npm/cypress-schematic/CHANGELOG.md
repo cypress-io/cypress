@@ -1,3 +1,10 @@
+# [@cypress/schematic-v4.1.1](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v4.1.0...@cypress/schematic-v4.1.1) (2025-08-20)
+
+
+### Bug Fixes
+
+* Redirect spammy electron stderr to a debug sink ([#32188](https://github.com/cypress-io/cypress/issues/32188)) ([e463fdb](https://github.com/cypress-io/cypress/commit/e463fdbc61143238e38004ef242515920f16d60a))
+
 # [@cypress/schematic-v4.1.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v4.0.0...@cypress/schematic-v4.1.0) (2025-08-14)
 
 
