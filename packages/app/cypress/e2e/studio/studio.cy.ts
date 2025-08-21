@@ -551,8 +551,7 @@ describe('studio functionality', () => {
 
     // update the spec on the file system
     cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress/e2e/spec.cy.js', `
-describe('studio functionality', () => {
+      await ctx.actions.file.writeFileInProject('cypress/e2e/spec.cy.js', `describe('studio functionality', () => {
   it('visits a basic html page', () => {
     cy.visit('cypress/e2e/index.html')
 

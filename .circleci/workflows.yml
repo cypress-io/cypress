@@ -1,8 +1,8 @@
 version: 2.1
 
-chrome-stable-version: &chrome-stable-version "139.0.7258.127"
+chrome-stable-version: &chrome-stable-version "139.0.7258.138"
 chrome-beta-version: &chrome-beta-version "140.0.7339.16"
-firefox-stable-version: &firefox-stable-version "141.0"
+firefox-stable-version: &firefox-stable-version "142.0"
 
 orbs:
   browser-tools: circleci/browser-tools@2.1.1
@@ -139,7 +139,7 @@ executors:
 
   linux-arm64: &linux-arm64-executor
     machine:
-      image: ubuntu-2004:2024.05.1
+      image: ubuntu-2004:2024.11.1
     resource_class: arm.medium
     environment:
       PLATFORM: linux
@@ -1264,12 +1264,32 @@ commands:
 
   check-if-binary-exists:
     steps:
+      - run-on-dependencies:
+          package: internal-scripts
+          command: build
       - run:
           name: Check if binary exists, exit if it does
           command: |
             source ./scripts/ensure-node.sh
             yarn gulp e2eTestScaffold
             yarn check-binary-on-cdn --version $(node ./scripts/get-next-version.js) --type binary --file cypress.zip
+
+  run-on-dependencies:
+    parameters:
+      package:
+        description: Package to build all dependencies for. All dependencies in the
+          dependency chain must have a build script.
+        type: string
+      command:
+        description: Command to run on the dependencies.
+        type: string
+    steps:
+      - run:
+          name: Exec << parameters.command >> recursively on << parameters.package >>
+            dependencies.
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn lerna run <<parameters.command>> --scope=<<parameters.package>> --include-dependencies
 
   build-and-package-binary:
     steps:
@@ -2706,7 +2726,6 @@ jobs:
     steps:
       - test-binary-against-repo:
           repo: cypress-example-recipes
-          pull_request_id: 921
           command: npm run test:ci:firefox
           browser: firefox
 
@@ -2715,7 +2734,6 @@ jobs:
     steps:
       - test-binary-against-repo:
           repo: cypress-example-recipes
-          pull_request_id: 921
           command: npm run test:ci:chrome
           browser: chrome
 
@@ -2725,7 +2743,6 @@ jobs:
     steps:
       - test-binary-against-repo:
           repo: cypress-example-recipes
-          pull_request_id: 921
           # Split the specs up across 4 different machines to run in parallel
           command: npm run test:ci -- --chunk $CIRCLE_NODE_INDEX --total-chunks
             $CIRCLE_NODE_TOTAL

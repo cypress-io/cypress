@@ -5,7 +5,7 @@ const Promise = require('bluebird')
 const { fs } = require(`../../lib/util/fs`)
 const FileUtil = require(`../../lib/util/file`)
 const appData = require(`../../lib/util/app_data`)
-
+const { START_TAG, END_TAG } = require(`@packages/stderr-filtering`)
 const savedState = require(`../../lib/saved_state`)
 
 describe('lib/saved_state', () => {
@@ -90,7 +90,7 @@ describe('lib/saved_state', () => {
         return state.set({ foo: 'bar', baz: 'qux' })
       }).then(() => {
         // eslint-disable-next-line no-console
-        expect(console.error).to.be.calledWith('WARNING: attempted to save state for non-allowed key(s): foo, baz. All keys must be allowed in server/lib/saved_state.ts')
+        expect(console.error).to.be.calledWith(START_TAG, 'WARNING: attempted to save state for non-allowed key(s): foo, baz. All keys must be allowed in server/lib/saved_state.ts', END_TAG)
       })
     })
   })

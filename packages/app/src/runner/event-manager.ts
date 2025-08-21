@@ -908,6 +908,7 @@ export class EventManager {
     // clean up the cross origin logs in memory to prevent dangling references as the log objects themselves at this point will no longer be needed.
     crossOriginLogs = {}
     this.studioStore.setActive(false)
+    this.promptStore.resetState()
   }
 
   resetReporter () {
