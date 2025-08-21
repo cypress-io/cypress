@@ -149,9 +149,8 @@ const getInvocationDetails = (specWindow, config): InvocationDetails | undefined
       }
     }
 
-    // Find the first stack line that is not a grep wrapper function
     const stackLines = getStackLines(stack)
-    let targetLine = stackLines[0] // fallback to first line if no non-grep line found
+    let targetLine = stackLines[0]
 
     for (const line of stackLines) {
       // Skip lines that contain grep wrapper function names
@@ -159,7 +158,6 @@ const getInvocationDetails = (specWindow, config): InvocationDetails | undefined
         continue
       }
 
-      // This should be the actual test invocation line
       targetLine = line
       break
     }
