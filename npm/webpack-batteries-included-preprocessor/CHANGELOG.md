@@ -1,3 +1,10 @@
+# [@cypress/webpack-batteries-included-preprocessor-v4.0.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v4.0.0...@cypress/webpack-batteries-included-preprocessor-v4.0.1) (2025-08-19)
+
+
+### Bug Fixes
+
+* ts-loader detection (false positive) ([#32266](https://github.com/cypress-io/cypress/issues/32266)) ([f7c9847](https://github.com/cypress-io/cypress/commit/f7c98473f53ecfd944a1aace10ea888a62a01e8f))
+
 # [@cypress/webpack-batteries-included-preprocessor-v4.0.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v3.1.2...@cypress/webpack-batteries-included-preprocessor-v4.0.0) (2025-08-08)
 
 
