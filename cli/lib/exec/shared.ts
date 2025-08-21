@@ -5,7 +5,7 @@ import { errors } from '../errors'
  * "errors" object.
  * @param {Object} details - Error details
  */
-const throwInvalidOptionError = (details?: any): never => {
+export const throwInvalidOptionError = (details?: any): never => {
   if (!details) {
     details = errors.unknownError
   }
@@ -23,7 +23,7 @@ const throwInvalidOptionError = (details?: any): never => {
  * @param {string} testingType The type of tests being executed
  * @returns {string[]} The array of new exec arguments
  */
-const processTestingType = (options: any): string[] => {
+export const processTestingType = (options: any): string[] => {
   if (options.e2e && options.component) {
     return throwInvalidOptionError(errors.incompatibleTestTypeFlags)
   }
@@ -51,15 +51,9 @@ const processTestingType = (options: any): string[] => {
  * Throws an error if configFile is string 'false' or boolean false
  * @param {*} options
  */
-const checkConfigFile = (options: any): void => {
+export const checkConfigFile = (options: any): void => {
   // CLI will parse as string, module API can pass in boolean
   if (options.configFile === 'false' || options.configFile === false) {
     throwInvalidOptionError(errors.invalidConfigFile)
   }
-}
-
-export default {
-  throwInvalidOptionError,
-  processTestingType,
-  checkConfigFile,
 }
