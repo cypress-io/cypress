@@ -420,10 +420,7 @@ const getSourceDetailsForLine = (projectRoot, line): MessageLineDetail | StackLi
 }
 
 const getSourceDetailsForFirstLine = (stack, projectRoot) => {
-  // console.log('getSourceDetailsForFirstLine', stack, projectRoot)
   const line = getStackLines(stack)[0]
-
-  // console.log('line', line)
 
   if (!line) return
 
