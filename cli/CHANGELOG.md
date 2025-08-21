@@ -3,6 +3,10 @@
 
 _Released 08/26/2025 (PENDING)_
 
+**Bugfixes:**
+
+* Fixed an issue where `cy.wait('@alias')` could time out when the underlying network request was canceled by navigation (e.g., `cy.visit`, `cy.reload`). Fixes [#19326](https://github.com/cypress-io/cypress/issues/19326).
+
 **Dependency Updates:**
 
 - Upgraded `tar` from `6.1.5` to `6.2.1`. Addressed in [#32229](https://github.com/cypress-io/cypress/pull/32229).

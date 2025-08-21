@@ -1878,6 +1878,28 @@ describe('src/cy/commands/navigation', () => {
         })
       })
     })
+
+    it('should resolve wait for a request canceled by navigation', () => {
+      const alias = crypto.randomUUID()
+
+      cy.intercept(/jsonplaceholder.cypress.io/).as(alias)
+
+      cy.visit('https://example.cypress.io/commands/network-requests')
+      cy.get('.network-btn').click()
+
+      cy.visit('https://example.cypress.io/commands/network-requests')
+      cy.wait(`@${alias}`).then((interception) => {
+        const actual = JSON.parse(
+          JSON.stringify(interception, (_, value) => value),
+        )
+
+        cy.wrap(actual).should('deep.equal', {
+          ...actual,
+          state: 'Errored',
+          error: { ...interception.error },
+        })
+      })
+    })
   })
 
   // TODO(webkit): fix+unskip for webkit release

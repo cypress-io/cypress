@@ -176,6 +176,18 @@ const pageLoading = (bool, Cypress, state) => {
   Cypress.action('app:page:loading', bool)
 }
 
+const markRequestAsCancelled = (request: any) => {
+  if (
+    request &&
+    request.state === 'Received' &&
+    !request.response &&
+    !request.error
+  ) {
+    request.state = 'Errored'
+    request.error = new Error('Request was cancelled due to navigation.')
+  }
+}
+
 const stabilityChanged = async (Cypress, state, config, stable) => {
   debug('stabilityChanged:', stable)
 
@@ -186,6 +198,25 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
   // then just return now
   if (stable !== false) {
     return
+  }
+
+  // Mark inflight requests as canceled at navigation start.
+  try {
+    const routes = state('routes') ?? {}
+
+    _.forEach(routes, ({ requests }) => {
+      _.forEach(requests, markRequestAsCancelled)
+    })
+
+    const aliasedRequests = state('aliasedRequests') ?? []
+
+    aliasedRequests.forEach(({ request }) => {
+      markRequestAsCancelled(request)
+    })
+  } catch (_) {
+    // TODO: Should I use `$errUtils.logError` or another method from
+    // `$errUtils` here? Alternatively, should I do nothing, since canceled
+    // requests aren't necessarily a problem in Cypress?
   }
 
   // if we purposefully just caused the page to load
