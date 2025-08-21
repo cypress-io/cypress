@@ -5,7 +5,7 @@ _Released 08/26/2025 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed an issue where Linux distributions were not properly populated for Module API results and Cloud recordings. Fixes [#30533](https://github.com/cypress-io/cypress/issues/30533). Addressed in [#32283](https://github.com/cypress-io/cypress/pull/32283).
+- Fixed an issue where OS distributions and releases were sometimes not properly populated for Module API results and Cloud recordings. Fixes [#30533](https://github.com/cypress-io/cypress/issues/30533). Addressed in [#32283](https://github.com/cypress-io/cypress/pull/32283).
 
 **Dependency Updates:**
 
