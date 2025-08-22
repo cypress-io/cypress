@@ -33,7 +33,7 @@ const getBaseUrl = (): string => {
       baseUrl += '/'
     }
 
-    return baseUrl || ''
+    return baseUrl || defaultBaseUrl
   }
 
   return defaultBaseUrl
@@ -80,8 +80,7 @@ const prepend = (arch: string, urlPath: string, version: string): string => {
 }
 
 const getUrl = (arch: string, version: string): string => {
-  // @ts-expect-error
-  if (is.url(version)) {
+  if (is.webUrl(version)) {
     debug('version is already an url', version)
 
     return version

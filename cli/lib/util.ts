@@ -164,7 +164,7 @@ function printNodeOptions (log: any = debug): void {
   ```
  */
 const dequote = (str: string): string => {
-  // @ts-expect-error
+  // @ts-expect-error method exists but is not typed
   la(is.string(str), 'expected a string to remove double quotes', str)
   if (str.length > 1 && str[0] === '"' && str[str.length - 1] === '"') {
     return str.substr(1, str.length - 2)
@@ -559,7 +559,7 @@ const util = {
   isPossibleLinuxWithIncorrectDisplay,
 
   getGitHubIssueUrl (number: number): string {
-    // @ts-expect-error
+    // @ts-expect-error method exists but is not typed
     la(is.positive(number), 'github issue should be a positive number', number)
     la(_.isInteger(number), 'github issue should be an integer', number)
 

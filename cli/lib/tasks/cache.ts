@@ -3,7 +3,6 @@ import logger from '../logger'
 import fs from '../fs'
 import util from '../util'
 
-// Type fs as any since it's a custom wrapper with async methods
 import { join } from 'path'
 import Table from 'cli-table3'
 import dayjs from 'dayjs'
