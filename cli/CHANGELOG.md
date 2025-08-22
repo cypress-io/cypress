@@ -3,6 +3,10 @@
 
 _Released 08/26/2025 (PENDING)_
 
+**Bugfixes:**
+
+- Fixed an issue where the open Studio button would incorrectly show for component tests. Addressed in [#32315](https://github.com/cypress-io/cypress/pull/32315).
+
 **Dependency Updates:**
 
 - Upgraded `image-size` from `1.1.1` to `1.2.1`. Addressed in [#32232](https://github.com/cypress-io/cypress/pull/32232).
