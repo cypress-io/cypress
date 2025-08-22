@@ -2,14 +2,10 @@ import _ from 'lodash'
 import { EventEmitter } from 'events'
 import Promise from 'bluebird'
 import path from 'path'
+import type { CompilerErrorLocation, ProcessIpcWrapper, TransformError } from '@packages/types'
+import type { SerializedError, ErrorLike } from '@packages/errors'
 
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'
-
-interface CompilerErrorLocation {
-  filePath: string
-  line: number
-  column: number
-}
 
 interface ErrorLocationResult {
   compilerErrorLocation: CompilerErrorLocation | null
@@ -17,69 +13,9 @@ interface ErrorLocationResult {
   message: string
 }
 
-interface SerializedError {
-  name?: string
-  message?: string
-  stack?: string
-  code?: string
-  annotated?: string
-  type?: string
-  details?: string | Record<string, unknown>
-  isCypressErr?: boolean
-  messageMarkdown?: string
-  originalError?: SerializedError
-  compilerErrorLocation?: CompilerErrorLocation
-}
-
-/**
- * Interface for wrapping child processes with EventEmitter functionality
- * Used by wrapIpc() to create a communication layer between parent and child processes
- * Provides send/receive capabilities while maintaining EventEmitter event handling
- */
-interface ProcessIpcWrapper {
-  send: (event: string, ...args: any[]) => void
-  on: (event: string, listener: (...args: any[]) => void) => EventEmitter
-  removeListener: (event: string, listener: (...args: any[]) => void) => EventEmitter
-}
-
 interface InvokeIds {
   eventId: string
   invocationId: string
-}
-
-/**
- * Interface for errors that can occur during file transformation/compilation
- * Covers TransformError (tsx) and esbuild errors with location information
- */
-interface TransformError extends Error {
-  name: string
-  message: string
-  errors?: Array<{
-    location?: {
-      file: string
-      line: number
-      column: number
-    }
-  }>
-}
-
-/**
- * Interface for any object that can be serialized as an error
- * Covers Node.js errors, Cypress errors, and custom error objects
- */
-interface ErrorLike {
-  name?: string
-  message?: string
-  stack?: string
-  code?: string
-  annotated?: string
-  type?: string
-  details?: string | Record<string, unknown>
-  isCypressErr?: boolean
-  messageMarkdown?: string
-  originalError?: ErrorLike
-  compilerErrorLocation?: CompilerErrorLocation
-  [key: string]: any // Allow additional properties
 }
 
 /**
