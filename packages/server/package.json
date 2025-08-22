@@ -186,6 +186,7 @@
     "esbuild": "^0.25.2",
     "eslint": "^9.31.0",
     "eventsource": "2.0.2",
+    "globals": "^15.12.0",
     "https-proxy-agent": "3.0.1",
     "jiti": "^2.4.2",
     "mocha": "7.1.0",
@@ -212,8 +213,7 @@
     "tsconfig-paths": "3.10.1",
     "webpack": "^5.88.2",
     "ws": "5.2.4",
-    "xvfb-maybe": "0.2.1",
-    "globals": "^15.12.0"
+    "xvfb-maybe": "0.2.1"
   },
   "files": [
     "config",
@@ -237,7 +237,7 @@
     ]
   },
   "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json}": "echo 'linting from lint-staged' && eslint --fix"
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "optionalDependencies": {
     "fsevents": "^2",
