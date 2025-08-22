@@ -3,6 +3,10 @@
 
 _Released 08/26/2025 (PENDING)_
 
+**Features:**
+
+- Added support for using [@cypress/grep](https://www.npmjs.com/package/@cypress/grep) with Cypress Studio. Addresses [#32292](https://github.com/cypress-io/cypress/issues/32292).
+
 **Bugfixes:**
 
 - Fixed an issue where the open Studio button would incorrectly show for component tests. Addressed in [#32315](https://github.com/cypress-io/cypress/pull/32315).
