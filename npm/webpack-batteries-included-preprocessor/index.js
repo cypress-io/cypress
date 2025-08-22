@@ -18,7 +18,7 @@ class TsConfigNotFoundError extends Error {
 class TypeScriptNotFoundError extends Error {
   constructor () {
     super('No typescript installable was found. ts-loader needs a version of typescript to work properly. Please install typescript in your project\'s package.json.')
-    this.name = 'TsConfigNotFoundError'
+    this.name = 'TypeScriptNotFoundError'
   }
 }
 
@@ -50,8 +50,10 @@ const addTypeScriptConfig = (file, options) => {
 
   try {
     if (options.typescript === true) {
+      const configFileDirectory = path.dirname(configFile?.path)
+
       // attempt to resolve typescript from the user's tsconfig.json file / project directory
-      typeScriptPath = require.resolve('typescript', { paths: [configFile?.path] })
+      typeScriptPath = require.resolve('typescript', { paths: [configFileDirectory] })
     } else {
       typeScriptPath = options.typescript
     }
