@@ -18,13 +18,17 @@ interface FileObject extends EventEmitter {
   filePath: string
   shouldWatch: boolean
   outputPath: string
+  on(event: 'rerun', listener: () => void): this
+  on(event: 'close', listener: () => void): this
+  emit(event: 'rerun'): boolean
+  emit(event: 'close'): boolean
 }
 
-const errorMessage = function (err: PreprocessorError = {} as PreprocessorError) {
+const errorMessage = function (err: PreprocessorError = {} as PreprocessorError): string {
   return err.stack || err.annotated || err.message || err.toString()
 }
 
-const clientSideError = function (err: PreprocessorError) {
+const clientSideError = function (err: PreprocessorError): string {
   // eslint-disable-next-line no-console
   console.log(err.message)
 
@@ -54,7 +58,6 @@ plugins.registerHandler((ipc: PluginIpcHandler) => {
 
   baseEmitter.on('close', (filePath: string) => {
     debugFn('base emitter plugin close event')
-
     ipc.send('preprocessor:close', filePath)
   })
 })

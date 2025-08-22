@@ -23,10 +23,10 @@ interface InvokeIds {
  * Covers Node.js process, ChildProcess objects, and test mocks
  */
 interface ProcessLike {
-  on(event: 'message', listener: (message: { event: string, args: any[] }) => void): void
+  on(event: 'message', listener: (message: { event: string, args: unknown[] }) => void): void
   killed?: boolean
   connected?: boolean
-  send(message: { event: string, args: any[] }): boolean | void
+  send(message: { event: string, args: unknown[] }): boolean | void
 }
 
 const buildErrorLocationFromTransformError = (err: TransformError, projectRoot: string): ErrorLocationResult => {
@@ -65,7 +65,7 @@ interface UtilAPI {
   serializeError: (err: ErrorLike) => SerializedError
   nonNodeRequires: () => string[]
   wrapIpc: (aProcess: ProcessLike) => ProcessIpcWrapper
-  wrapChildPromise: (ipc: ProcessIpcWrapper, invoke: (eventId: string, args: any[]) => any, ids: InvokeIds, args?: any[]) => Promise<void>
+  wrapChildPromise: (ipc: ProcessIpcWrapper, invoke: (eventId: string, args: unknown[]) => unknown, ids: InvokeIds, args?: unknown[]) => Promise<void>
 }
 
 const API: UtilAPI = {
@@ -80,7 +80,7 @@ const API: UtilAPI = {
   wrapIpc (aProcess: ProcessLike) {
     const emitter = new EventEmitter()
 
-    aProcess.on('message', (message: { event: string, args: any[] }) => {
+    aProcess.on('message', (message: { event: string, args: unknown[] }) => {
       return emitter.emit(message.event, ...message.args)
     })
 
@@ -89,7 +89,7 @@ const API: UtilAPI = {
     emitter.setMaxListeners(Infinity)
 
     return {
-      send (event: string, ...args: any[]) {
+      send (event: string, ...args: unknown[]) {
         if (aProcess.killed || !aProcess.connected) {
           return
         }
@@ -105,7 +105,7 @@ const API: UtilAPI = {
     }
   },
 
-  wrapChildPromise (ipc: ProcessIpcWrapper, invoke: (eventId: string, args: any[]) => any, ids: InvokeIds, args: any[] = []) {
+  wrapChildPromise (ipc: ProcessIpcWrapper, invoke: (eventId: string, args: unknown[]) => unknown, ids: InvokeIds, args: unknown[] = []) {
     return Promise.try(() => {
       return invoke(ids.eventId, args)
     })
@@ -117,8 +117,11 @@ const API: UtilAPI = {
       }
 
       return ipc.send(`promise:fulfilled:${ids.invocationId}`, null, value)
-    }).catch((err) => {
-      return ipc.send(`promise:fulfilled:${ids.invocationId}`, serializeError(err))
+    }).catch((err: unknown) => {
+      // Ensure we have a valid error object for serializeError
+      const error = err instanceof Error ? err : new Error(String(err))
+
+      return ipc.send(`promise:fulfilled:${ids.invocationId}`, serializeError(error as ErrorLike))
     })
   },
 }

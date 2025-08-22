@@ -13,12 +13,21 @@ interface SpecsChangedOptions {
   neededForJustInTimeCompile?: boolean
 }
 
+interface SpecsChangedData {
+  specs: SpecWithRelativeRoot[]
+  options?: SpecsChangedOptions
+}
+
+interface CompileSuccessData {
+  specFile?: string
+}
+
 plugins.registerHandler((ipc: PluginIpcHandler) => {
-  baseEmitter.on('dev-server:specs:changed', (specsAndOptions: { specs: SpecWithRelativeRoot[], options?: SpecsChangedOptions }) => {
+  baseEmitter.on('dev-server:specs:changed', (specsAndOptions: SpecsChangedData) => {
     ipc.send('dev-server:specs:changed', specsAndOptions)
   })
 
-  ipc.on('dev-server:compile:success', ({ specFile }: { specFile?: string } = {}) => {
+  ipc.on('dev-server:compile:success', ({ specFile }: CompileSuccessData = {}) => {
     baseEmitter.emit('dev-server:compile:success', { specFile })
   })
 })
