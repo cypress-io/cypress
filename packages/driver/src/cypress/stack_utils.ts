@@ -361,14 +361,14 @@ interface StackLineDetail {
   whitespace: any
 }
 
-const getSourceDetailsForLine = (projectRoot, line): MessageLineDetail | StackLineDetail => {
+const getSourceDetailsForLine = (projectRoot: string, line: string): MessageLineDetail | StackLineDetail => {
   const whitespace = getWhitespace(line)
   const generatedDetails = parseLine(line)
 
   // if it couldn't be parsed, it's a message line
   if (!generatedDetails) {
     return {
-      message: line.replace(whitespace, ''), // strip leading whitespace
+      message: line ? line.replace(whitespace, '') : '', // strip leading whitespace
       whitespace,
     }
   }
