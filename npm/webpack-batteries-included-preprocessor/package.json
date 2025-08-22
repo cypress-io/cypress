@@ -4,7 +4,7 @@
   "description": "Cypress preprocessor for bundling JavaScript via webpack with dependencies included and support for various ES features, TypeScript, and CoffeeScript",
   "private": false,
   "scripts": {
-    "lint": "eslint --ext .js,.json, .",
+    "lint": "eslint",
     "test": "mocha test/**/*.spec.* --timeout 4000"
   },
   "dependencies": {
@@ -33,10 +33,14 @@
   },
   "devDependencies": {
     "@cypress/webpack-preprocessor": "0.0.0-development",
+    "@packages/eslint-config": "0.0.0-development",
     "@types/mocha": "^8.0.2",
     "@types/webpack": "^5.28.1",
     "chai": "^4.2.0",
     "decache": "^4.6.2",
+    "eslint": "^9.31.0",
+    "globals": "^15.12.0",
+    "jiti": "^2.4.2",
     "mocha": "^8.1.1",
     "mock-require": "3.0.3",
     "react": "^16.13.1",
@@ -63,6 +67,9 @@
     "cypress-preprocessor",
     "webpack"
   ],
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
+  },
   "publishConfig": {
     "access": "public"
   },
