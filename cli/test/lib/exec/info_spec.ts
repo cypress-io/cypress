@@ -74,7 +74,7 @@ describe('exec info', function () {
   })
 
   it('logs additional info about pre-releases', async () => {
-    // @ts-expect-error
+    // @ts-expect-error - is shorthand stub on a function
     util.pkgBuildInfo.returns({
       stable: false,
       commitSha: 'abc123',
@@ -86,7 +86,7 @@ describe('exec info', function () {
   })
 
   it('logs if unbuilt development', async () => {
-    // @ts-expect-error
+    // @ts-expect-error - is shorthand stub on a function
     util.pkgBuildInfo.returns(undefined)
 
     await startInfoAndSnapshot('logs additional info about development')

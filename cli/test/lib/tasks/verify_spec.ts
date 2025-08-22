@@ -60,11 +60,10 @@ context('lib/tasks/verify', () => {
     sinon.stub(BluebirdPromise.prototype, 'delay').resolves()
     sinon.stub(process, 'geteuid').returns(1000)
 
-    // @ts-expect-error
-    sinon.stub(_, 'random').returns('222')
+    sinon.stub(_, 'random').returns(222)
 
     util.exec
-    // @ts-expect-error
+    // @ts-expect-error - is a sinon stub
     .withArgs(executablePath, ['--no-sandbox', '--smoke-test', '--ping=222'])
     .resolves(spawnedProcess)
   })
@@ -138,7 +137,7 @@ context('lib/tasks/verify', () => {
     })
 
     ;(process.geteuid as any).returns(0) // user is root
-    // @ts-expect-error
+    // @ts-expect-error - is a sinon stub
     util.exec.resolves({
       stdout: '222',
       stderr: '',
@@ -159,7 +158,7 @@ context('lib/tasks/verify', () => {
     })
 
     ;(process.geteuid as any).returns(1000) // user is non-root
-    // @ts-expect-error
+    // @ts-expect-error - is a sinon stub
     util.exec.resolves({
       stdout: '222',
       stderr: '',
@@ -228,13 +227,13 @@ context('lib/tasks/verify', () => {
       packageVersion,
     })
 
-    // @ts-expect-error
+    // @ts-expect-error - invalid number of arguments for given type
     sinon.stub(cp, 'spawn').withArgs('/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress').callsFake(mockSpawnModule.mockSpawn((cp: any) => {
       cp.stderr.write('some stderr')
       cp.stdout.write('some stdout')
     }))
 
-    // @ts-expect-error
+    // @ts-expect-error - is a sinon stub
     util.exec.restore()
 
     return verify
@@ -261,7 +260,7 @@ context('lib/tasks/verify', () => {
       cp.end()
     }))
 
-    // @ts-expect-error
+    // @ts-expect-error - is a sinon stub
     util.exec.restore()
 
     return verify
@@ -287,7 +286,7 @@ context('lib/tasks/verify', () => {
       cp.end()
     }))
 
-    // @ts-expect-error
+    // @ts-expect-error - is a sinon stub
     util.exec.restore()
 
     return verify
@@ -321,7 +320,7 @@ context('lib/tasks/verify', () => {
         packageVersion,
       })
 
-      // @ts-expect-error
+      // @ts-expect-error - is a sinon stub
       util.exec.resolves({
         stdout: '222',
         stderr: '',
@@ -355,7 +354,7 @@ context('lib/tasks/verify', () => {
     })
 
     it('clears verified version from state if verification fails', () => {
-      // @ts-expect-error
+    // @ts-expect-error - is a sinon stub
       util.exec.restore()
       sinon
       .stub(util, 'exec')
@@ -397,7 +396,7 @@ context('lib/tasks/verify', () => {
         after that more text
       `
 
-      // @ts-expect-error
+      // @ts-expect-error - is a sinon stub
       util.exec.withArgs(executablePath).resolves({
         stdout: stdoutWithDebugOutput,
       })
@@ -430,7 +429,7 @@ context('lib/tasks/verify', () => {
         packageVersion,
       })
 
-      // @ts-expect-error
+      // @ts-expect-error - is a sinon stub
       util.exec.restore()
       sinon.spy(logger, 'warn')
     })
@@ -441,11 +440,11 @@ context('lib/tasks/verify', () => {
 
     it('successfully retries with our Xvfb on Linux', () => {
       // initially we think the user has everything set
-      // @ts-expect-error
+      // @ts-expect-error - is a sinon stub
       xvfb.isNeeded.returns(false)
       sinon.stub(util, 'isPossibleLinuxWithIncorrectDisplay').returns(true)
 
-      // @ts-expect-error
+      // @ts-expect-error - is a sinon stub
       sinon.stub(util, 'exec').callsFake(() => {
         const firstSpawnError: any = new Error('')
 
@@ -459,7 +458,7 @@ context('lib/tasks/verify', () => {
         firstSpawnError.stdout = ''
 
         // the second time the binary returns expected ping
-        // @ts-expect-error
+        // @ts-expect-error - is a sinon stub
         util.exec.withArgs(executablePath).resolves({
           stdout: '222',
         })
@@ -478,12 +477,12 @@ context('lib/tasks/verify', () => {
 
     it('fails on both retries with our Xvfb on Linux', () => {
       // initially we think the user has everything set
-      // @ts-expect-error
+      // @ts-expect-error - is a sinon stub
       xvfb.isNeeded.returns(false)
 
       sinon.stub(util, 'isPossibleLinuxWithIncorrectDisplay').returns(true)
 
-      // @ts-expect-error
+      // @ts-expect-error - is a sinon stub
       sinon.stub(util, 'exec').callsFake(() => {
         (os.platform as any).returns('linux')
         expect(xvfb.start).to.not.have.been.called
@@ -507,7 +506,7 @@ context('lib/tasks/verify', () => {
               some weird indent
         `
 
-        // @ts-expect-error
+        // @ts-expect-error - is a sinon stub
         util.exec.withArgs(executablePath).rejects(new Error(secondMessage))
 
         return BluebirdPromise.reject(firstSpawnError)
@@ -644,7 +643,7 @@ context('lib/tasks/verify', () => {
       packageVersion,
     })
 
-    // @ts-expect-error
+    // @ts-expect-error - is a sinon stub
     util.exec.restore()
     sinon.stub(util, 'exec').rejects({
       stderr: '',
@@ -667,7 +666,7 @@ context('lib/tasks/verify', () => {
 
   describe('on linux', () => {
     beforeEach(() => {
-      // @ts-expect-error
+      // @ts-expect-error - is a sinon stub
       xvfb.isNeeded.returns(true)
 
       createfs({
@@ -692,7 +691,7 @@ context('lib/tasks/verify', () => {
     it('logs error and exits when starting xvfb fails', () => {
       const err: any = new Error('test without xvfb')
 
-      // @ts-expect-error
+      // @ts-expect-error - is a sinon stub
       xvfb.start.restore()
 
       err.nonZeroExitCode = true
@@ -721,7 +720,7 @@ context('lib/tasks/verify', () => {
         packageVersion,
       })
 
-      // @ts-expect-error
+      // @ts-expect-error - is a sinon stub
       util.isCi.returns(true)
     })
 
@@ -760,12 +759,12 @@ context('lib/tasks/verify', () => {
       })
 
       util.exec
-      // @ts-expect-error
+      // @ts-expect-error - is a sinon stub
       .withArgs(realEnvBinaryPath, ['--no-sandbox', '--smoke-test', '--ping=222'])
       .resolves(spawnedProcess)
 
       return verify.start({ listrRenderer: 'silent' }).then(() => {
-        // @ts-expect-error
+        // @ts-expect-error - is a sinon stub
         expect(util.exec.firstCall.args[0]).to.equal(realEnvBinaryPath)
         snapshot('valid CYPRESS_RUN_BINARY 1', normalize(stdout.toString()))
       })

@@ -308,7 +308,7 @@ describe('lib/exec/spawn', function () {
     it('does not unref by default', function () {
       (this as any).spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
-      // @ts-expect-error
+      // @ts-expect-error - invalid number of arguments for given type
       return spawn.start()
       .then(() => {
         expect((this as any).spawnedProcess.unref).not.to.be.called
@@ -320,7 +320,7 @@ describe('lib/exec/spawn', function () {
 
       process.env.FOO = 'bar'
 
-      // @ts-expect-error
+      // @ts-expect-error - invalid number of arguments for given type
       return spawn.start()
       .then(() => {
         expect((cp.spawn as any).firstCall.args[2].env.FOO).to.eq('bar')

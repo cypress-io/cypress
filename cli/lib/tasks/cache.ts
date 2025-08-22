@@ -74,7 +74,7 @@ const fileSizeInMB = (size: number): string => {
  * Collects all cached versions, finds when each was used
  * and prints a table with results to the terminal
  */
-const list = (showSize: boolean): any => {
+const list = (showSize: boolean = false): any => {
   return getCachedVersions(showSize)
   .then((binaries: any) => {
     const head = [colors.titles('version'), colors.titles('last used')]

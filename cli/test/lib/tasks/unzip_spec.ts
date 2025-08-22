@@ -115,7 +115,7 @@ describe('lib/tasks/unzip', function () {
         on () {},
       }
 
-      // @ts-expect-error
+      // @ts-expect-error - invalid number of arguments for given type
       sinon.stub(cp, 'spawn').withArgs('unzip').returns(unzipChildProcess as any)
 
       setTimeout(() => {

@@ -39,7 +39,7 @@ describe('lib/exec/versions', function () {
       sinon.stub(state, 'parseRealPlatformBinaryFolderAsync').resolves('/my/cypress/path')
       process.env.CYPRESS_RUN_BINARY = '/my/cypress/path'
       state.getBinaryPkgAsync
-      // @ts-expect-error
+      // @ts-expect-error - is shorthand stub on a function
       .withArgs('/my/cypress/path')
       .resolves({
         version: '7.8.9',
@@ -52,7 +52,7 @@ describe('lib/exec/versions', function () {
     })
 
     it('appends pre-release if not stable', async function () {
-      // @ts-expect-error
+      // @ts-expect-error - is shorthand stub on a function
       util.pkgBuildInfo.returns({ stable: false })
 
       const v = await versions.getVersions()
@@ -61,7 +61,7 @@ describe('lib/exec/versions', function () {
     })
 
     it('appends development if missing buildInfo', async function () {
-      // @ts-expect-error
+      // @ts-expect-error - is shorthand stub on a function
       util.pkgBuildInfo.returns(undefined)
 
       const v = await versions.getVersions()
@@ -71,7 +71,7 @@ describe('lib/exec/versions', function () {
 
     it('reports default versions if not found', function () {
       // imagine package.json only has version there
-      // @ts-expect-error
+      // @ts-expect-error - is shorthand stub on a function
       state.getBinaryPkgAsync.withArgs(binaryDir).resolves({
         version: '90.9.9',
       })

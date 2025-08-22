@@ -65,7 +65,7 @@ describe('exec open', function () {
     })
 
     it('spawns with cwd as --project if not installed globally', function () {
-      // @ts-expect-error
+      // @ts-expect-error - is shorthand stub on a function
       util.isInstalledGlobally.returns(false)
 
       return open.start()
@@ -77,7 +77,7 @@ describe('exec open', function () {
     })
 
     it('spawns without --project if not installed globally and passing --global option', function () {
-      // @ts-expect-error
+    // @ts-expect-error - is shorthand stub on a function
       util.isInstalledGlobally.returns(false)
 
       return open.start({ global: true })
@@ -89,7 +89,8 @@ describe('exec open', function () {
     })
 
     it('spawns with --project passed in as options even when not installed globally', function () {
-      // @ts-expect-error
+      // @ts-expect-error - is shorthand stub on a function
+
       util.isInstalledGlobally.returns(false)
 
       return open.start({ project: '/path/to/project' })
