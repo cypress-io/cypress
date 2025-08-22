@@ -401,7 +401,7 @@ describe('lib/exec/spawn', function () {
 
       ;(xvfb.isNeeded as any).returns(false)
 
-      // @ts-expect-error
+      // @ts-expect-error - invalid number of arguments for given type
       return spawn.start()
       .then(() => {
         expect((cp.spawn as any).firstCall.args[2].stdio).to.deep.eq('pipe')
@@ -418,7 +418,7 @@ describe('lib/exec/spawn', function () {
 
       ;(xvfb.isNeeded as any).returns(false)
 
-      // @ts-expect-error
+      // @ts-expect-error - invalid number of arguments for given type
       return spawn.start()
       .then(() => {
         expect((cp.spawn as any).firstCall.args[2].stdio).to.deep.eq('inherit')
@@ -432,7 +432,7 @@ describe('lib/exec/spawn', function () {
 
       ;(os.platform as any).returns('linux')
 
-      // @ts-expect-error
+      // @ts-expect-error - invalid number of arguments for given type
       return spawn.start()
       .then(() => {
         expect((cp.spawn as any).firstCall.args[2].stdio).to.deep.eq([
@@ -448,7 +448,7 @@ describe('lib/exec/spawn', function () {
 
       ;(os.platform as any).returns('darwin')
 
-      // @ts-expect-error
+      // @ts-expect-error - invalid number of arguments for given type
       return spawn.start()
       .then(() => {
         expect((cp.spawn as any).firstCall.args[2].stdio).to.deep.eq([
@@ -474,7 +474,7 @@ describe('lib/exec/spawn', function () {
 
       ;(os.platform as any).returns('win32')
 
-      // @ts-expect-error
+      // @ts-expect-error - invalid number of arguments for given type
       return spawn.start()
     })
 
@@ -484,7 +484,7 @@ describe('lib/exec/spawn', function () {
       it(`catches process.stdin errors and returns when code=${errCode}`, function () {
         (this as any).spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
-        // @ts-expect-error
+        // @ts-expect-error - invalid number of arguments for given type
         return spawn.start()
         .then(() => {
           let called = false
@@ -507,7 +507,7 @@ describe('lib/exec/spawn', function () {
     it('throws process.stdin errors code!=EPIPE', function () {
       (this as any).spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
-      // @ts-expect-error
+      // @ts-expect-error - invalid number of arguments for given type
       return spawn.start()
       .then(() => {
         const fn = () => {

@@ -90,7 +90,6 @@ describe('exec open', function () {
 
     it('spawns with --project passed in as options even when not installed globally', function () {
       // @ts-expect-error - is shorthand stub on a function
-
       util.isInstalledGlobally.returns(false)
 
       return open.start({ project: '/path/to/project' })
