@@ -10,7 +10,14 @@ const WBADebugNamespace = 'cypress-verbose:webpack-batteries-included-preprocess
 
 class TsConfigNotFoundError extends Error {
   constructor () {
-    super('No tsconfig.json found, but typescript is installed. ts-loader needs a tsconfig.json file to work. Please add one to your project in either the root or the cypress directory.')
+    super('No tsconfig.json found. ts-loader needs a tsconfig.json file to work. Please add one to your project in either the root or the cypress directory.')
+    this.name = 'TsConfigNotFoundError'
+  }
+}
+
+class TypeScriptNotFoundError extends Error {
+  constructor () {
+    super('No typescript installable was found. ts-loader needs a version of typescript to work properly. Please install typescript in your project\'s package.json.')
     this.name = 'TsConfigNotFoundError'
   }
 }
@@ -38,7 +45,23 @@ const addTypeScriptConfig = (file, options) => {
   }
 
   debug(`found user tsconfig.json at ${configFile?.path} with compilerOptions: ${JSON.stringify(configFile?.config?.compilerOptions)}`)
-  debug(`using typescript found at ${options.typescript}`)
+
+  let typeScriptPath = null
+
+  try {
+    if (options.typescript === true) {
+      // attempt to resolve typescript from the user's tsconfig.json file / project directory
+      typeScriptPath = require.resolve('typescript', { paths: [configFile?.path] })
+    } else {
+      typeScriptPath = options.typescript
+    }
+
+    debug(`using typescript found at ${typeScriptPath}`)
+  } catch {
+    debug('no user typescript found. Throwing TypeScriptNotFoundError')
+
+    throw new TypeScriptNotFoundError()
+  }
   // shortcut if we know we've already added typescript support
   if (options.__typescriptSupportAdded) return options
 
@@ -72,7 +95,7 @@ const addTypeScriptConfig = (file, options) => {
       {
         loader: require.resolve('ts-loader'),
         options: {
-          compiler: options.typescript,
+          compiler: typeScriptPath,
           // pass in the resolved compiler options from the tsconfig file into ts-loader to most accurately transpile the code
           ...(configFile ? {
             compilerOptions: configFile.config.compilerOptions,
