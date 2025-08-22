@@ -14,7 +14,7 @@
 - [ ] npm/svelte
 
 ### Batch 3: Build-related
-- [ ] npm/webpack-batteries-included-preprocessor
+- [x] npm/webpack-batteries-included-preprocessor
 - [ ] npm/webpack-preprocessor
 - [ ] npm/webpack-dev-server
 - [ ] npm/vite-plugin-cypress-esm
@@ -30,7 +30,7 @@
 - [ ] packages/driver
 - [ ] packages/rewriter
 - [ ] packages/reporter
-- [ ] packages/server
+- [x] packages/server
 
 ### Batch 4b: Core packages (part 2)
 - [ ] packages/runner
