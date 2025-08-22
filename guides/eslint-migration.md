@@ -21,6 +21,7 @@
 - [ ] npm/vite-dev-server
 
 ### Batch 4a: Core packages (part 1)
+- [x] cli
 - [ ] packages/frontend-shared
 - [ ] packages/icons
 - [ ] packages/launcher

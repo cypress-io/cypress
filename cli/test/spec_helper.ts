@@ -82,7 +82,6 @@ function throwIfFnNotStubbed (stub: any, method: string): void {
 const $stub = sinon.stub
 
 sinon.stub = function (obj?: any, method?: string): any {
-  /* eslint-disable prefer-rest-params */
   const stub = $stub.apply(this, arguments as any)
 
   let fns = [method]

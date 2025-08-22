@@ -18,7 +18,7 @@ declare namespace Cypress {
      * We have added a label property to "cy" object.
      * @example console.log(cy.myLabel)
     */
-    myLabel: string,
+    myLabel: string
     /**
      * Definition for a custom command "login" that was added separately
      * using `Cypress.Commands.add('login', (username, password) => {...})`.

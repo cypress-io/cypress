@@ -28,8 +28,6 @@ const DEFAULT_VERIFY_TIMEOUT = 30000
 let stdout: any
 let spawnedProcess: any
 
-/* eslint-disable no-octal */
-
 context('lib/tasks/verify', () => {
   before(async function () {
     const mochaMain = await import('mocha-banner')

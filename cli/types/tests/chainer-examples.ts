@@ -10,7 +10,7 @@ cy.wrap(6).should('be.at.least', 5)
 
 cy.wrap(4).should('be.below', 5)
 
-function argsTest() {
+function argsTest () {
   cy.wrap(arguments).should('be.arguments')
 }
 
@@ -47,14 +47,14 @@ cy.wrap(6).should('be.within', 5, 10)
 
 namespace ChangeSingleParam {
   let dots = ''
-  function addDot() { dots += '.' }
-  function getDots() { return dots }
+  function addDot () { dots += '.' }
+  function getDots () { return dots }
   cy.wrap(addDot).should('change', getDots)
 }
 
 () => {
   const myObj = { dots: '' }
-  function addDot() { myObj.dots += '.' }
+  function addDot () { myObj.dots += '.' }
   cy.wrap(addDot).should('change', myObj, 'dots')
 }
 
@@ -63,14 +63,14 @@ cy.wrap('tester').should('contain', 'test')
 ;
 () => {
   let val = 1
-  function subtractTwo() { val -= 2 }
-  function getVal() { return val }
+  function subtractTwo () { val -= 2 }
+  function getVal () { return val }
   cy.wrap(subtractTwo).should('decrease', getVal)
 }
 
 () => {
   const myObj = { val: 1 }
-  function subtractTwo() { myObj.val -= 2 }
+  function subtractTwo () { myObj.val -= 2 }
   cy.wrap(subtractTwo).should('decrease', myObj, 'val')
 }
 
@@ -92,7 +92,7 @@ cy.wrap({ a: 1, b: 2 }).should('have.all.key', 'a', 'b')
 
 cy.wrap({ a: 1, b: 2 }).should('have.any.key', 'a')
 
-cy.wrap({ x: {a: 1 }}).should('have.deep.property', 'x', { a: 1 })
+cy.wrap({ x: { a: 1 } }).should('have.deep.property', 'x', { a: 1 })
 
 cy.wrap([1, 2, 3]).should('have.length', 3)
 cy.wrap('foo').should('have.length', 3)
@@ -154,8 +154,8 @@ cy.wrap([1, 2, 3]).should('include.members', [1, 2])
 ;
 () => {
   let val = 1
-  function addTwo() { val += 2 }
-  function getVal() { return val }
+  function addTwo () { val += 2 }
+  function getVal () { return val }
   cy.wrap(addTwo).should('increase', getVal)
 
   const myObj = { val: 1 }
@@ -167,7 +167,7 @@ cy.wrap('foobar').should('match', /^foo/)
 ;
 () => {
   class Cat {
-    meow() {}
+    meow () {}
   }
   cy.wrap(new Cat()).should('respondTo', 'meow')
 }
@@ -176,14 +176,14 @@ cy.wrap(1).should('satisfy', (num) => num > 0)
 
 ;
 () => {
-  function badFn() { throw new TypeError('Illegal salmon!') }
+  function badFn () { throw new TypeError('Illegal salmon!') }
   cy.wrap(badFn).should('throw')
   cy.wrap(badFn).should('throw', 'salmon')
   cy.wrap(badFn).should('throw', /salmon/)
 }
 
 () => {
-  function badFn() { throw new TypeError('Illegal salmon!') }
+  function badFn () { throw new TypeError('Illegal salmon!') }
   cy.wrap(badFn).should('throw', TypeError)
   cy.wrap(badFn).should('throw', TypeError, /salmon/)
 }
@@ -238,14 +238,14 @@ cy.wrap('cypress').should('not.be.NaN')
 ;
 () => {
   let dots = ''
-  function addDot() { dots += '.' }
-  function getDots() { return dots }
+  function addDot () { dots += '.' }
+  function getDots () { return dots }
   cy.wrap(() => {}).should('not.change', getDots)
 }
 
 () => {
   const myObj = { dots: '' }
-  function addDot() { myObj.dots += '.' }
+  function addDot () { myObj.dots += '.' }
   cy.wrap(() => {}).should('not.change', myObj, 'dots')
 }
 
@@ -254,24 +254,24 @@ cy.wrap('tester').should('not.contain', 'foo')
 ;
 () => {
   let val = 1
-  function subtractTwo() { val -= 2 }
-  function getVal() { return val }
+  function subtractTwo () { val -= 2 }
+  function getVal () { return val }
   cy.wrap(() => {}).should('not.decrease', getVal)
 }
 
 () => {
   const myObj = { val: 1 }
-  function subtractTwo() { myObj.val -= 2 }
+  function subtractTwo () { myObj.val -= 2 }
   cy.wrap(() => {}).should('not.decrease', myObj, 'val')
 }
 
-cy.wrap<{a?: number, b?: number }>({ a: 1 }).should('not.deep.equal', { b: 1 })
+cy.wrap<{ a?: number, b?: number }>({ a: 1 }).should('not.deep.equal', { b: 1 })
 
 cy.wrap(null).should('not.exist')
 
 cy.wrap(1).should('not.eq', 2)
 
-cy.wrap({a: 1}).should('eql', {a: 1}).and('not.equal', {a: 1})
+cy.wrap({ a: 1 }).should('eql', { a: 1 }).and('not.equal', { a: 1 })
 
 cy.wrap(1).should('not.equal', 2)
 
@@ -279,7 +279,7 @@ cy.wrap({ a: 1, b: 2 }).should('not.have.all.keys', 'c', 'd')
 
 cy.wrap({ a: 1, b: 2 }).should('not.have.any.keys', 'c')
 
-cy.wrap({ x: {a: 1 }}).should('not.have.deep.property', 'y', { a: 1 })
+cy.wrap({ x: { a: 1 } }).should('not.have.deep.property', 'y', { a: 1 })
 
 cy.wrap([1, 2, 3]).should('not.have.length', 2)
 cy.wrap('foo').should('not.have.length', 2)
@@ -317,8 +317,8 @@ cy.wrap('foobar').should('not.include', 'baz')
 ;
 () => {
   let val = 1
-  function addTwo() { val += 2 }
-  function getVal() { return val }
+  function addTwo () { val += 2 }
+  function getVal () { return val }
   cy.wrap(() => {}).should('not.increase', getVal)
 }
 
@@ -327,7 +327,7 @@ cy.wrap('foobar').should('not.match', /baz$/)
 ;
 () => {
   class Cat {
-    meow() {}
+    meow () {}
   }
   cy.wrap(new Cat()).should('not.respondTo', 'bark')
 }
@@ -336,14 +336,16 @@ cy.wrap(1).should('not.satisfy', (num) => num < 0)
 
 ;
 () => {
-  function badFn() { console.log('Illegal salmon!') }
+  // eslint-disable-next-line no-console
+  function badFn () { console.log('Illegal salmon!') }
   cy.wrap(badFn).should('not.throw')
   cy.wrap(badFn).should('not.throw', 'salmon')
   cy.wrap(badFn).should('not.throw', /salmon/)
 }
 
 () => {
-  function badFn() { console.log('Illegal salmon!') }
+  // eslint-disable-next-line no-console
+  function badFn () { console.log('Illegal salmon!') }
   cy.wrap(badFn).should('not.throw')
   cy.wrap(badFn).should('not.throw', 'salmon')
   cy.wrap(badFn).should('not.throw', /salmon/)
@@ -447,7 +449,7 @@ cy
     expect($p.first()).to.contain('Hello World')
     // use jquery's map to grab all of their classes
     // jquery's map returns a new jquery object
-    const classes = $p.map(function(i, el) {
+    const classes = $p.map(function (i, el) {
       return Cypress.$(el).attr('class')
     })
     // call classes.get() to make this a plain array

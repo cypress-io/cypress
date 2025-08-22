@@ -9,7 +9,6 @@ const stdoutModule = {
     process.stdout.write = function (str: any): boolean {
       logs.push(str)
 
-      /* eslint-disable prefer-rest-params */
       return write.apply(this, arguments as any)
     }
 

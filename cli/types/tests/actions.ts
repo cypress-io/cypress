@@ -71,28 +71,28 @@ Cypress.on('log:changed', (attributes, log) => {
   log // $ExpectTyped any
 })
 
-Cypress.on('test:before:run', (attributes , test) => {
+Cypress.on('test:before:run', (attributes, test) => {
   attributes // $ExpectType ObjectLike
   test // $ExpectType Test
 })
 
-Cypress.on('test:before:run:async', (attributes , test) => {
+Cypress.on('test:before:run:async', (attributes, test) => {
   attributes // $ExpectType ObjectLike
   test // $ExpectType Test
 })
 
-Cypress.on('test:after:run', (attributes , test) => {
+Cypress.on('test:after:run', (attributes, test) => {
   attributes // $ExpectType ObjectLike
   test // $ExpectType Test
 })
 
 namespace CypressActionCommandOptionTests {
-  cy.get('el').clear({scrollBehavior: 'top'})
-  cy.get('el').check({scrollBehavior: 'bottom'})
-  cy.get('el').type('hello', {scrollBehavior: 'center'})
-  cy.get('el').trigger('mousedown', {scrollBehavior: 'nearest'})
-  cy.get('el').click({scrollBehavior: false})
-  cy.get('el').click({scrollBehavior: true}) // $ExpectError
+  cy.get('el').clear({ scrollBehavior: 'top' })
+  cy.get('el').check({ scrollBehavior: 'bottom' })
+  cy.get('el').type('hello', { scrollBehavior: 'center' })
+  cy.get('el').trigger('mousedown', { scrollBehavior: 'nearest' })
+  cy.get('el').click({ scrollBehavior: false })
+  cy.get('el').click({ scrollBehavior: true }) // $ExpectError
 }
 
 // https://github.com/cypress-io/cypress/pull/21286

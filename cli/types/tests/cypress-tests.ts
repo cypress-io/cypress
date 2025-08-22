@@ -56,15 +56,15 @@ namespace CypressEnvTests {
 }
 
 namespace CypressStopTests {
-  Cypress.stop()       // $ExpectType void
-  Cypress.stop('foo')  // $ExpectError
+  Cypress.stop() // $ExpectType void
+  Cypress.stop('foo') // $ExpectError
 }
 
 namespace CypressIsCyTests {
   Cypress.isCy(cy) // $ExpectType boolean
   Cypress.isCy(undefined) // $ExpectType boolean
 
-  const chainer = cy.wrap("foo").then(function() {
+  const chainer = cy.wrap("foo").then(function () {
     if (Cypress.isCy(chainer)) {
       chainer // $ExpectType Chainable<string>
     }
@@ -88,7 +88,7 @@ namespace CypressCommandsTests {
     // $ExpectType string
     arg
   })
-  Cypress.Commands.add('newCommand', function(arg) {
+  Cypress.Commands.add('newCommand', function (arg) {
     this // $ExpectType Context
     arg // $ExpectType string
   })
@@ -159,13 +159,13 @@ namespace CypressCommandsTests {
   })
 
   Cypress.Commands.addAll({
-    newCommand(arg) {
+    newCommand (arg) {
       // $ExpectType any
       arg
       this // $ExpectType Context
       return
     },
-    newCommand2(arg, arg2) {
+    newCommand2 (arg, arg2) {
       // $ExpectType any
       arg
       // $ExpectType any
@@ -274,7 +274,7 @@ namespace CypressCommandsTests {
     originalFn // $ExpectedType Chainable['newCommand']
     originalFn(arg) // $ExpectType Chainable<number>
   })
-  Cypress.Commands.overwrite('newCommand', function(originalFn, arg) {
+  Cypress.Commands.overwrite('newCommand', function (originalFn, arg) {
     this // $ExpectType Context
     arg // $ExpectType string
     originalFn // $ExpectedType Chainable['newCommand']
@@ -303,7 +303,7 @@ namespace CypressCommandsTests {
     options // $ExpectType Partial<Loggable & Timeoutable & ScreenshotOptions> | undefined
   })
 
-  Cypress.Commands.addQuery('newQuery', function(arg) {
+  Cypress.Commands.addQuery('newQuery', function (arg) {
     this // $ExpectType Command
     arg // $ExpectType string
     return () => 3
@@ -349,7 +349,7 @@ namespace CypressLogsTest {
 }
 
 namespace CypressLocalStorageTest {
-  Cypress.LocalStorage.clear = function(keys) {
+  Cypress.LocalStorage.clear = function (keys) {
     keys // $ExpectType string[] | undefined
   }
 }
@@ -715,7 +715,7 @@ namespace CypressClockTests {
   // timestamp
   cy.clock(new Date(2019, 3, 2).getTime(), ['Date'])
   // timestamp shortcut
-  cy.clock(+ new Date(), ['Date'])
+  cy.clock(+new Date(), ['Date'])
   // Date object
   cy.clock(new Date(2019, 3, 2))
   // restoring the clock
@@ -937,8 +937,8 @@ namespace CypressTestConfigOverridesTests {
 
   describe('suite', {
     browser: { family: 'firefox' },
-    keystrokeDelay: false // $ExpectError
-    foo: 'foo' // $ExpectError
+    keystrokeDelay: false, // $ExpectError
+    foo: 'foo', // $ExpectError
   }, () => { })
 
   describe.only('suite', {}, () => { })

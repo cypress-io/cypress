@@ -21,6 +21,7 @@ const pluginConfig2: Cypress.PluginConfig = (on, config) => {
     options.args // $ExpectType string[]
     options.env // $ExpectType { [key: string]: any; }
 
+    // eslint-disable-next-line no-console
     console.log('launching browser', browser.displayName)
     return options
   })
@@ -60,7 +61,7 @@ const pluginConfig2: Cypress.PluginConfig = (on, config) => {
   })
 
   on('task', {
-    foo() {
+    foo () {
       return true
     }
   })
@@ -101,7 +102,7 @@ const pluginConfig4: Cypress.PluginConfig = (on, config) => {
   })
 
   on('task', {
-    foo() {
+    foo () {
       return Promise.resolve([])
     }
   })
