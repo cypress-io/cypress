@@ -1,0 +1,7 @@
+{
+  "name": "cypress-grep-test-project",
+  "version": "0.0.0-test",
+  "devDependencies": {
+    "@cypress/grep": "latest"
+  }
+}

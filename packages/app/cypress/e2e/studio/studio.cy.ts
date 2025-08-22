@@ -1517,4 +1517,40 @@ describe('studio functionality', () => {
 
     cy.findByTestId('studio-panel').should('not.exist')
   })
+
+  describe('@cypress/grep support', () => {
+    it('shows allows a test to be edited when @cypress/grep is active', () => {
+      loadProjectAndRunSpec({ projectName: 'cypress-grep', specName: 'grep-spec.cy.js', cliArgs: ['--env', 'grepTags=@runs'] })
+
+      cy.waitForSpecToFinish()
+
+      // open edit in studio
+      cy.contains('should run')
+      .closest('.runnable-wrapper')
+      .findByTestId('launch-studio')
+      .click()
+
+      cy.findByTestId('studio-panel').should('be.visible')
+
+      cy.findByTestId('test-block-editor').should('be.visible')
+      cy.findByTestId('test-block-editor').within(() => {
+        cy.contains('cy.visit')
+      })
+    })
+
+    it('allows a test to be created when @cypress/grep is active', () => {
+      loadProjectAndRunSpec({ projectName: 'cypress-grep', specName: 'grep-spec.cy.js', cliArgs: ['--env', 'grepTags=@runs'] })
+
+      // open studio panel
+      cy.findByTestId('studio-header-studio-button').click()
+
+      cy.findByTestId('studio-panel').should('be.visible')
+
+      cy.findByTestId('new-test-button').should('be.visible')
+
+      inputNewTestName()
+
+      cy.findByTestId('create-test-button').click()
+    })
+  })
 })
