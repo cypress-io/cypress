@@ -6,20 +6,10 @@ import mockedEnv from 'mocked-env'
 import supportsColor from 'supports-color'
 import hasha from 'hasha'
 import la from 'lazy-ass'
+import util from '../../lib/util'
+import logger from '../../lib/logger'
 
 describe('util', () => {
-  let util: any
-  let logger: any
-  let normalizeModuleOptions: any
-  let stdoutLineMatches: any
-
-  before(async function () {
-    util = (await import(`${lib}/util`)).default
-    logger = (await import(`${lib}/logger`)).default
-    normalizeModuleOptions = util.normalizeModuleOptions
-    stdoutLineMatches = util.stdoutLineMatches
-  })
-
   beforeEach(() => {
     sinon.stub(process, 'exit')
     sinon.stub(logger, 'error')
@@ -60,34 +50,34 @@ describe('util', () => {
 
   context('.stdoutLineMatches', () => {
     it('is a function', () => {
-      expect(stdoutLineMatches).to.be.a('function')
+      expect(util.stdoutLineMatches).to.be.a('function')
     })
 
     it('matches entire output', () => {
       const line = '444'
 
-      expect(stdoutLineMatches(line, line)).to.be.true
+      expect(util.stdoutLineMatches(line, line)).to.be.true
     })
 
     it('matches a line in output', () => {
       const line = '444'
       const stdout = ['start', line, 'something else'].join('\n')
 
-      expect(stdoutLineMatches(line, stdout)).to.be.true
+      expect(util.stdoutLineMatches(line, stdout)).to.be.true
     })
 
     it('matches a trimmed line in output', () => {
       const line = '444'
       const stdout = ['start', `  ${line} `, 'something else'].join('\n')
 
-      expect(stdoutLineMatches(line, stdout)).to.be.true
+      expect(util.stdoutLineMatches(line, stdout)).to.be.true
     })
 
     it('does not find match', () => {
       const line = '445'
       const stdout = ['start', '444', 'something else'].join('\n')
 
-      expect(stdoutLineMatches(line, stdout)).to.be.false
+      expect(util.stdoutLineMatches(line, stdout)).to.be.false
     })
   })
 
@@ -97,7 +87,7 @@ describe('util', () => {
         foo: 'bar',
       }
 
-      snapshot('others_unchanged 1', normalizeModuleOptions(options))
+      snapshot('others_unchanged 1', util.normalizeModuleOptions(options))
     })
 
     it('passes string env unchanged', () => {
@@ -105,7 +95,7 @@ describe('util', () => {
         env: 'foo=bar',
       }
 
-      snapshot('env_as_string 1', normalizeModuleOptions(options))
+      snapshot('env_as_string 1', util.normalizeModuleOptions(options))
     })
 
     it('converts environment object', () => {
@@ -117,7 +107,7 @@ describe('util', () => {
         },
       }
 
-      snapshot('env_as_object 1', normalizeModuleOptions(options))
+      snapshot('env_as_object 1', util.normalizeModuleOptions(options))
     })
 
     it('converts config object', () => {
@@ -128,7 +118,7 @@ describe('util', () => {
         },
       }
 
-      snapshot('config_as_object 1', normalizeModuleOptions(options))
+      snapshot('config_as_object 1', util.normalizeModuleOptions(options))
     })
 
     it('converts reporterOptions object', () => {
@@ -139,7 +129,7 @@ describe('util', () => {
         },
       }
 
-      snapshot('reporter_options_as_object 1', normalizeModuleOptions(options))
+      snapshot('reporter_options_as_object 1', util.normalizeModuleOptions(options))
     })
 
     it('converts specs array', () => {
@@ -149,7 +139,7 @@ describe('util', () => {
         ],
       }
 
-      snapshot('spec_as_array 1', normalizeModuleOptions(options))
+      snapshot('spec_as_array 1', util.normalizeModuleOptions(options))
     })
 
     it('does not convert spec when string', () => {
@@ -157,7 +147,7 @@ describe('util', () => {
         spec: 'x,y,z',
       }
 
-      snapshot('spec_as_string 1', normalizeModuleOptions(options))
+      snapshot('spec_as_string 1', util.normalizeModuleOptions(options))
     })
   })
 
@@ -401,7 +391,7 @@ describe('util', () => {
 
       getos = sinon.stub().resolves(['distro-release'])
 
-      util = proxyquire.default(`${lib}/util`, { getos }).default
+      util = proxyquire.default(`../../lib/util`, { getos }).default
     })
 
     it('calls os.release on non-linux', () => {

@@ -360,7 +360,7 @@ describe('lib/exec/spawn', function () {
       const treeKillMock = sinon.stub().returns(0)
 
       const proxyquire = await import('proxyquire')
-      const spawn = proxyquire.default(`${lib}/exec/spawn`, { 'tree-kill': treeKillMock }).default
+      const spawn = proxyquire.default(`../../../lib/exec/spawn`, { 'tree-kill': treeKillMock }).default
 
       await spawn.start([], { env: {} })
 

@@ -2,9 +2,7 @@ import '../spec_helper'
 import os from 'os'
 import snapshot from '../support/snapshot'
 import util from '../../lib/util'
-
-// Import modules dynamically to handle template literal paths
-const { errors, getError, formErrorText } = require(`${(global as any).lib}/errors`)
+import { errors, getError, formErrorText } from '../../lib/errors'
 
 describe('errors', function () {
   const { missingXvfb } = errors

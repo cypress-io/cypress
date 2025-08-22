@@ -1,6 +1,5 @@
 import _ from 'lodash'
 import os from 'os'
-import path from 'path'
 import sinon from 'sinon'
 import mockfs from 'mock-fs'
 import Bluebird from 'bluebird'
@@ -34,8 +33,6 @@ declare global {
 (global as any).sinon = sinon
 
 ;(global as any).expect = chai.expect
-
-;(global as any).lib = path.join(__dirname, '..', 'lib')
 
 chai
 .use(sinonChai)

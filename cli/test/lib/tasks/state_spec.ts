@@ -140,7 +140,7 @@ describe('lib/tasks/state', function () {
 
     it('resolves path on windows', async function () {
       const proxyquire = await import('proxyquire')
-      const stateWithWin32Path = proxyquire.default(`${lib}/tasks/state`, { path: path.win32 }).default
+      const stateWithWin32Path = proxyquire.default(`../../../lib/tasks/state`, { path: path.win32 }).default
 
       ;(os.platform as any).returns('win32')
       const pathToExec = stateWithWin32Path.getBinaryDir()
