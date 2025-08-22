@@ -2178,6 +2178,8 @@
     "./node_modules/image-size/dist/types/j2c.js",
     "./node_modules/image-size/dist/types/jp2.js",
     "./node_modules/image-size/dist/types/jpg.js",
+    "./node_modules/image-size/dist/types/jxl-stream.js",
+    "./node_modules/image-size/dist/types/jxl.js",
     "./node_modules/image-size/dist/types/ktx.js",
     "./node_modules/image-size/dist/types/png.js",
     "./node_modules/image-size/dist/types/pnm.js",
@@ -2186,6 +2188,7 @@
     "./node_modules/image-size/dist/types/tga.js",
     "./node_modules/image-size/dist/types/tiff.js",
     "./node_modules/image-size/dist/types/webp.js",
+    "./node_modules/image-size/dist/utils/bit-reader.js",
     "./node_modules/indent-string/index.js",
     "./node_modules/inflight/inflight.js",
     "./node_modules/inherits/inherits.js",
@@ -4196,5 +4199,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "b4803a87a35ae8eccb5c5d392fe6d0d0cca812a7f105919cb7fac7fbe6da85e1"
+  "deferredHash": "708e1312cc99bb633217016c91da08879442b1a1822b48de5ff2e27790954041"
 }
