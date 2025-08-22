@@ -535,7 +535,7 @@ const util = {
     // so for sanity sake we should first trim whitespace characters and remove
     // double quotes around environment strings if the caller is expected to
     // use this environment string as a file path
-    return trim && result ? dequote(_.trim(result)) : result
+    return trim && (result !== null && result !== undefined) ? dequote(_.trim(result)) : result
   },
 
   getCacheDir (): string {
