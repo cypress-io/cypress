@@ -66,8 +66,6 @@
     "yauzl": "^2.10.0"
   },
   "devDependencies": {
-    "@babel/cli": "7.28.0",
-    "@babel/preset-env": "7.28.0",
     "@cypress/angular": "0.0.0-development",
     "@cypress/grep": "0.0.0-development",
     "@cypress/mount-utils": "0.0.0-development",
@@ -103,7 +101,8 @@
     "snap-shot-it": "7.9.10",
     "spawn-mock": "1.0.0",
     "strip-ansi": "6.0.1",
-    "tsx": "4.20.4"
+    "tsx": "4.20.4",
+    "typescript": "~5.9.2"
   },
   "files": [
     "bin",
