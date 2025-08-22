@@ -18,6 +18,7 @@ export class InvalidKeyError extends Error {
   constructor (key: string) {
     super(`${key} is not supported by 'cy.press()'.`)
   }
+
   static isInvalidKeyError (e: any): e is InvalidKeyError {
     return e.kind === invalidKeyErrorKind
   }

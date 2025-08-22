@@ -47,6 +47,7 @@ export class ProtocolManager implements ProtocolManagerShape {
   private _afterSpecDurations: AfterSpecDurations & {
     afterSpecTotal: number
   } | undefined
+
   private AppCaptureProtocol: AppCaptureProtocolConstructor | undefined
   private options: ProtocolManagerOptions | undefined
 

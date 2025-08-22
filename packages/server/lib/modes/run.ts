@@ -1,4 +1,4 @@
-/* eslint-disable no-console, @cypress/dev/arrow-body-multiline-braces */
+/* eslint-disable no-console */
 import _ from 'lodash'
 import pkg from '@packages/root'
 import path from 'path'
@@ -456,7 +456,6 @@ async function listenForProjectEnd (project: ProjectBase, exit: boolean): Promis
       earlyExitTerminator.waitForEarlyExit(project, exit),
     ]).then((results) => {
       if (exit === false) {
-        // eslint-disable-next-line no-console
         console.log('not exiting due to options.exit being false')
       } else {
         resolve(results)

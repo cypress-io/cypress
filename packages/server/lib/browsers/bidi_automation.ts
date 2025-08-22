@@ -221,6 +221,7 @@ export class BidiAutomation {
     'browsingContext.contextCreated',
     'browsingContext.contextDestroyed',
   ]
+
   private webDriverClient: WebDriverClient
   private automation: Automation
   private autContextId: string | undefined = undefined

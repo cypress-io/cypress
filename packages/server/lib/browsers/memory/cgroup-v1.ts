@@ -17,7 +17,7 @@ const getTotalMemoryLimit = async () => {
  * @returns object of memory stats
  */
 const convertRawStats = (rawStats: string): { total_inactive_file: string } => {
-  const stats = rawStats.split('\n').filter(Boolean).reduce((acc, arr): { total_inactive_file: string} => {
+  const stats = rawStats.split('\n').filter(Boolean).reduce((acc, arr): { total_inactive_file: string } => {
     const stat = arr.split(' ')
 
     acc[stat[0]] = stat[1]

@@ -65,7 +65,7 @@ export class CDPConnection {
 
   get ws () {
     // this is reached into by browser-cri-client to detect close events - needs rethinking
-    return (this._connection as { _ws?: WebSocket})._ws
+    return (this._connection as { _ws?: WebSocket })._ws
   }
 
   on<T extends CdpEvent> (event: T, callback: CDPListener<T>) {
@@ -73,13 +73,16 @@ export class CDPConnection {
 
     this._emitter.on(event, callback)
   }
+
   addConnectionEventListener<T extends CDPConnectionEvent> (event: T, callback: CDPConnectionEventListener<T>) {
     this.debug('adding connection event listener for ', event)
     this._emitter.on(event, callback)
   }
+
   off<T extends CdpEvent> (event: T, callback: CDPListener<T>) {
     this._emitter.off(event, callback)
   }
+
   removeConnectionEventListener<T extends CDPConnectionEvent> (event: T, callback: CDPConnectionEventListener<T>) {
     this._emitter.off(event, callback)
   }

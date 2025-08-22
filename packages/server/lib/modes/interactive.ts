@@ -11,7 +11,6 @@ import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
 import { globalPubSub, getCtx, clearCtx } from '@packages/data-context'
 import { telemetry } from '@packages/telemetry'
 
-// eslint-disable-next-line no-duplicate-imports
 // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
 import type { WebContents } from 'electron'
 import type { LaunchArgs, Preferences } from '@packages/types'
@@ -93,7 +92,7 @@ export = {
         y: 'appY',
         devTools: 'isAppDevToolsOpen',
       },
-      onBlur (this: {webContents: WebContents}) {
+      onBlur (this: { webContents: WebContents }) {
         if (this.webContents.isDevToolsOpened()) {
           return
         }

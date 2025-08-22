@@ -496,7 +496,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return ios
   }
 
-  createHosts (hosts: {[key: string]: string} | null = {}) {
+  createHosts (hosts: { [key: string]: string } | null = {}) {
     return _.each(hosts, (ip, host) => {
       return evilDns.add(host, ip)
     })

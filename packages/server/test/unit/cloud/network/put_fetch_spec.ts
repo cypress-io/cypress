@@ -41,7 +41,7 @@ describe('cloud/network/put_fetch', () => {
 
       describe('and parseJSON flag is true', () => {
         it('resolves with the parsed object', async () => {
-          const res = await fetch<{'content': string}>(url)
+          const res = await fetch<{ 'content': string }>(url)
 
           expect(res).to.eq(jsonObj)
         })

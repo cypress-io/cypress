@@ -117,13 +117,16 @@ function streamBuffer (initialSize = 2048) {
 
       return readable
     }
+
     unpipeAll () {
       buffer = null // aggressive GC
       _.invokeMap(this.readers, 'unpipe')
     }
+
     _buffer () {
       return buffer
     }
+
     _finished () {
       return finished
     }

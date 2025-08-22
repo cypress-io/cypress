@@ -265,7 +265,7 @@
     ]
   },
   "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
+    "**/*.{js,jsx,ts,tsx,json}": "echo 'linting from root' && eslint --fix",
     "*workflows.yml": "node scripts/format-workflow-file.js"
   },
   "resolutions": {

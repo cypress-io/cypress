@@ -105,7 +105,7 @@ describe('lib/browsers/cri-client', function () {
         criStub.send.resolves()
       })
 
-      describe('target type is service worker, page, or other', async () => {
+      describe('target type is service worker, page, or other', () => {
         it('does not enable network', async () => {
           await Promise.all(['service_worker', 'page', 'other'].map((type) => {
             return fireCDPEvent('Target.attachedToTarget', {

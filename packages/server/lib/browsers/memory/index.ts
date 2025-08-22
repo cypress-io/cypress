@@ -251,7 +251,7 @@ export const calculateMemoryStats: () => Promise<void> = measure(async () => {
  * @param automation - the automation client used to collect garbage
  * @param test - the current test
  */
-const checkMemoryPressureAndLog = async ({ automation, test }: { automation: Automation, test: { title: string, order: number, currentRetry: number }}) => {
+const checkMemoryPressureAndLog = async ({ automation, test }: { automation: Automation, test: { title: string, order: number, currentRetry: number } }) => {
   await checkMemoryPressure(automation)
 
   gcLog.testTitle = test.title

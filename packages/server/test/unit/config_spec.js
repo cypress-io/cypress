@@ -890,7 +890,7 @@ describe('lib/config', () => {
 
       context('retries', () => {
         // need to keep the const here or it'll get stripped by the build
-        // eslint-disable-next-line no-unused-vars
+
         const cases = [
           [{ retries: null }, 'with null', null],
           [{ retries: 3 }, 'when a number', null],

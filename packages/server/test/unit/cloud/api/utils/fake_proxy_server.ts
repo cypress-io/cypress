@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import http from 'http'
 import { AddressInfo } from 'net'
 import express, { Application } from 'express'

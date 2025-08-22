@@ -5,6 +5,7 @@ export class ParseError extends Error {
   constructor (public readonly originalError: Error, message?: string) {
     super(message)
   }
+
   static isParseError (err: Error & { kind: string }): err is ParseError {
     return err.kind === ParseErrorKind
   }

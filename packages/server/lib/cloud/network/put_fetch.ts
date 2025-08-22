@@ -20,8 +20,8 @@ type PutOptions = PutInit & {
   parse?: ParseKind
 }
 
-export async function putFetch <
-  TReturn extends any
+export async function putFetch<
+  TReturn,
 > (input: RequestInfo | URL, options: PutOptions = { parse: 'json' }): Promise<TReturn> {
   const {
     parse,

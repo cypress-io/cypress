@@ -308,7 +308,7 @@ const defaultPreferences = {
   'dom.timeout.enable_budget_timer_throttling': false,
 
   // allow getUserMedia APIs on insecure domains
-  'media.devices.insecure.enabled':	true,
+  'media.devices.insecure.enabled': true,
   'media.getusermedia.insecure.enabled': true,
 
   'marionette.log.level': launcherDebug.enabled ? 'Debug' : undefined,

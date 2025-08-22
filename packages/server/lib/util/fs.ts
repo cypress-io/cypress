@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-
 import Bluebird from 'bluebird'
 import fsExtra from 'fs-extra'
 import sanitize from 'sanitize-filename'

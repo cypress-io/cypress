@@ -68,7 +68,7 @@ describe('Video Capture', () => {
     })
 
     // https://github.com/cypress-io/cypress/issues/16648
-    context('deduping frames', async () => {
+    context('deduping frames', () => {
       it('does not dedupe when not webminput', async () => {
         const { writeVideoFrameAsBuffer, _pt } = await startSpiedVideoCapture(tmpFilename)
 
