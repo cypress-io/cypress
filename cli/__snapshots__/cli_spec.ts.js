@@ -75,7 +75,7 @@ exports['shows help for run --foo 1'] = `
     -C, --config-file <config-file>                             path to script file where configuration values are set. defaults to "cypress.config.{js,ts,mjs,cjs}".
     --e2e                                                       runs end to end tests
     -e, --env <env>                                             sets environment variables. separate multiple values with a comma. overrides any value in cypress.config.{js,ts,mjs,cjs} or cypress.env.json
-    --group <n>                                                 a named group for recorded runs in Cypress Cloud
+    --group <name>                                              a named group for recorded runs in Cypress Cloud
     -k, --key <record-key>                                      your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.
     --headed                                                    displays the browser instead of running headlessly
     --headless                                                  hide the browser instead of running headed (default for cypress run)

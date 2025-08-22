@@ -250,7 +250,7 @@ const addCypressRunCommand = (program: any): any => {
   .option('-C, --config-file <config-file>', text('configFile'))
   .option('--e2e', text('e2e'))
   .option('-e, --env <env>', text('env'))
-  .option('--group <n>', text('group'))
+  .option('--group <name>', text('group'))
   .option('-k, --key <record-key>', text('key'))
   .option('--headed', text('headed'))
   .option('--headless', text('headless'))
