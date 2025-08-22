@@ -79,6 +79,9 @@ const maybeRenderReactComponent = () => {
     onStudioPanelClose: props.onStudioPanelClose,
     studioSessionId: props.cloudStudioSessionId,
     autUrlSelector: props.autUrlSelector,
+    features: {
+      supportsCypressGrep: true,
+    },
   })
 
   // Store the react root in a weak map keyed by the container. We do this so that we have a reference

@@ -13,6 +13,9 @@ export interface StudioPanelProps {
   useCypress?: CypressShape
   autUrlSelector?: string
   studioAiAvailable?: boolean
+  features?: {
+    supportsCypressGrep?: boolean
+  }
 }
 
 export type StudioPanelShape = (props: StudioPanelProps) => JSX.Element
