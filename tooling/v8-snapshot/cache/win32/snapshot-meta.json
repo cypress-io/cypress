@@ -2182,6 +2182,8 @@
     "./node_modules/image-size/dist/types/j2c.js",
     "./node_modules/image-size/dist/types/jp2.js",
     "./node_modules/image-size/dist/types/jpg.js",
+    "./node_modules/image-size/dist/types/jxl-stream.js",
+    "./node_modules/image-size/dist/types/jxl.js",
     "./node_modules/image-size/dist/types/ktx.js",
     "./node_modules/image-size/dist/types/png.js",
     "./node_modules/image-size/dist/types/pnm.js",
@@ -2190,6 +2192,7 @@
     "./node_modules/image-size/dist/types/tga.js",
     "./node_modules/image-size/dist/types/tiff.js",
     "./node_modules/image-size/dist/types/webp.js",
+    "./node_modules/image-size/dist/utils/bit-reader.js",
     "./node_modules/indent-string/index.js",
     "./node_modules/inflight/inflight.js",
     "./node_modules/inherits/inherits.js",
@@ -4195,5 +4198,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "6108853fa91b4e5694b04989c1da39edc224835d6aa06412b4ccf4736bcc3f98"
+  "deferredHash": "3d12096054cbac1b6ba225b08e6604a0ba39523c5a752f7af18e56160ee6ebcf"
 }
