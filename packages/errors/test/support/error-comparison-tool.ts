@@ -140,13 +140,13 @@ app.get('/base-list', async (req, res) => {
   }
 })
 
-app.get<{offset: number}>('/load-more/:offset', async (req, res) => {
+app.get<{ offset: number }>('/load-more/:offset', async (req, res) => {
   const rows = await getRows(req.params.offset)
 
   res.send(rows)
 })
 
-app.get<{offset: number}>('/load-more-base/:offset', async (req, res) => {
+app.get<{ offset: number }>('/load-more-base/:offset', async (req, res) => {
   const rows = await getRows(req.params.offset, true)
 
   res.send(rows)
@@ -166,7 +166,7 @@ app.get('/looks-good/:name', async (req, res) => {
   }
 })
 
-app.get<{name: string, type: string}>('/html/:name/:type', async (req, res) => {
+app.get<{ name: string, type: string }>('/html/:name/:type', async (req, res) => {
   const pathToFile = path.join(ERRORS_DIR, req.params.type, `${req.params.name}.html`)
 
   try {
