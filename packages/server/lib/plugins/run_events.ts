@@ -12,8 +12,8 @@ const API: RunEventsAPI = {
 
     return plugins.execute(eventName, ...args)
     .catch((err: unknown) => {
-      // Ensure we have a valid error object for throwErr
-      const error = err instanceof Error ? err : new Error(String(err))
+      // Match original JavaScript behavior: err = err || {}
+      const error = (err || {}) as any
 
       errors.throwErr('PLUGINS_RUN_EVENT_ERROR', eventName, error)
     })
@@ -21,3 +21,5 @@ const API: RunEventsAPI = {
 }
 
 export default API
+
+module.exports = API

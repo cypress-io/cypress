@@ -127,3 +127,5 @@ const API: UtilAPI = {
 }
 
 export default API
+
+module.exports = API

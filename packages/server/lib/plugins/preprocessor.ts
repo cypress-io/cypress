@@ -175,3 +175,5 @@ const API: PreprocessorAPI = {
 }
 
 export default API
+
+module.exports = API
