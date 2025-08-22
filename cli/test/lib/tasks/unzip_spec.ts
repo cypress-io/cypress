@@ -115,6 +115,7 @@ describe('lib/tasks/unzip', function () {
         on () {},
       }
 
+      // @ts-expect-error
       sinon.stub(cp, 'spawn').withArgs('unzip').returns(unzipChildProcess as any)
 
       setTimeout(() => {
