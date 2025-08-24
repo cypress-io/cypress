@@ -1,9 +1,11 @@
 import chalk from 'chalk'
 import { stripIndent, stripIndents } from 'common-tags'
 import la from 'lazy-ass'
-import is from 'check-more-types'
 import util from './util'
 import state from './tasks/state'
+
+// TODO: this package needs to be replaced as we can't import it in vitest
+const is = require('check-more-types')
 
 const docsUrl = 'https://on.cypress.io'
 const requiredDependenciesUrl = `${docsUrl}/required-dependencies`
