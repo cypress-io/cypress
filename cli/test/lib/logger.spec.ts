@@ -1,7 +1,6 @@
-import '../spec_helper'
+import { describe, it, expect } from 'vitest'
 import la from 'lazy-ass'
 import { stripIndent, stripIndents } from 'common-tags'
-import snapshot from '../support/snapshot'
 
 describe('stripIndent', () => {
   it('removes indent from literal string', () => {
@@ -13,7 +12,7 @@ describe('stripIndent', () => {
     `
 
     // should preserve the structure of the text
-    snapshot(removed)
+    expect(removed).toMatchSnapshot()
   })
 
   it('can be called as a function', () => {
@@ -42,6 +41,6 @@ describe('stripIndent', () => {
     // bar
     //
     // last line
-    snapshot(str)
+    expect(str).toMatchSnapshot()
   })
 })
