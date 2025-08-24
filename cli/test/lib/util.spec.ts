@@ -1,9 +1,4 @@
-import '../spec_helper'
-import os from 'os'
-import tty from 'tty'
-import snapshot from '../support/snapshot'
-import mockedEnv from 'mocked-env'
-import supportsColor from 'supports-color'
+import { vi, describe, it, beforeEach, expect } from 'vitest'
 import hasha from 'hasha'
 import la from 'lazy-ass'
 import util from '../../lib/util'
@@ -11,13 +6,12 @@ import logger from '../../lib/logger'
 
 describe('util', () => {
   beforeEach(() => {
-    sinon.stub(process, 'exit')
-    sinon.stub(logger, 'error')
+    vi.unstubAllEnvs()
+    vi.resetModules()
   })
 
-  context('.isBrokenGtkDisplay', () => {
+  describe('.isBrokenGtkDisplay', () => {
     it('detects only GTK message', () => {
-      (os.platform as any).returns('linux')
       const text = '[some noise here] Gtk: cannot open display: 99'
 
       expect(util.isBrokenGtkDisplay(text)).to.be.true
@@ -26,7 +20,7 @@ describe('util', () => {
     })
   })
 
-  context('.getGitHubIssueUrl', () => {
+  describe('.getGitHubIssueUrl', () => {
     it('returns url for issue number', () => {
       const url = util.getGitHubIssueUrl(4034)
 
@@ -35,7 +29,7 @@ describe('util', () => {
 
     it('throws for anything but a positive integer', () => {
       expect(() => {
-        return util.getGitHubIssueUrl('4034')
+        return util.getGitHubIssueUrl(4024)
       }).to.throw
 
       expect(() => {
@@ -48,7 +42,7 @@ describe('util', () => {
     })
   })
 
-  context('.stdoutLineMatches', () => {
+  describe('.stdoutLineMatches', () => {
     it('is a function', () => {
       expect(util.stdoutLineMatches).to.be.a('function')
     })
@@ -81,13 +75,13 @@ describe('util', () => {
     })
   })
 
-  context('.normalizeModuleOptions', () => {
+  describe('.normalizeModuleOptions', () => {
     it('does not change other properties', () => {
       const options = {
         foo: 'bar',
       }
 
-      snapshot('others_unchanged 1', util.normalizeModuleOptions(options))
+      expect(util.normalizeModuleOptions(options)).toMatchSnapshot()
     })
 
     it('passes string env unchanged', () => {
@@ -95,7 +89,7 @@ describe('util', () => {
         env: 'foo=bar',
       }
 
-      snapshot('env_as_string 1', util.normalizeModuleOptions(options))
+      expect(util.normalizeModuleOptions(options)).toMatchSnapshot()
     })
 
     it('converts environment object', () => {
@@ -107,7 +101,7 @@ describe('util', () => {
         },
       }
 
-      snapshot('env_as_object 1', util.normalizeModuleOptions(options))
+      expect(util.normalizeModuleOptions(options)).toMatchSnapshot()
     })
 
     it('converts config object', () => {
@@ -118,7 +112,7 @@ describe('util', () => {
         },
       }
 
-      snapshot('config_as_object 1', util.normalizeModuleOptions(options))
+      expect(util.normalizeModuleOptions(options)).toMatchSnapshot()
     })
 
     it('converts reporterOptions object', () => {
@@ -129,7 +123,7 @@ describe('util', () => {
         },
       }
 
-      snapshot('reporter_options_as_object 1', util.normalizeModuleOptions(options))
+      expect(util.normalizeModuleOptions(options)).toMatchSnapshot()
     })
 
     it('converts specs array', () => {
@@ -139,7 +133,7 @@ describe('util', () => {
         ],
       }
 
-      snapshot('spec_as_array 1', util.normalizeModuleOptions(options))
+      expect(util.normalizeModuleOptions(options)).toMatchSnapshot()
     })
 
     it('does not convert spec when string', () => {
@@ -147,58 +141,129 @@ describe('util', () => {
         spec: 'x,y,z',
       }
 
-      snapshot('spec_as_string 1', util.normalizeModuleOptions(options))
+      expect(util.normalizeModuleOptions(options)).toMatchSnapshot()
     })
   })
 
-  context('.supportsColor', () => {
-    it('is true on obj return for stdout and stderr', () => {
-      sinon.stub(supportsColor, 'stdout').value({})
-      sinon.stub(supportsColor, 'stderr').value({})
+  describe('.supportsColor', () => {
+    it('is true on obj return for stdout and stderr', async () => {
+      vi.doMock('supports-color', async (importActual) => {
+        const actual = await importActual()
 
-      expect(util.supportsColor()).to.be.true
+        return {
+          // @ts-expect-error
+          ...actual,
+          default: {
+            stdout: true,
+            stderr: true,
+          },
+        }
+      })
+
+      const utils = (await import('../../lib/util')).default
+
+      expect(utils.supportsColor()).to.be.true
     })
 
-    it('is false on false return for stdout', () => {
-      delete process.env.CI
+    it('is false on false return for stdout', async () => {
+      vi.doMock('supports-color', async (importActual) => {
+        const actual = await importActual()
 
-      sinon.stub(supportsColor, 'stdout').value(false)
-      sinon.stub(supportsColor, 'stderr').value({})
+        return {
+          // @ts-expect-error
+          ...actual,
+          default: {
+            stdout: false,
+            stderr: true,
+          },
+        }
+      })
 
-      expect(util.supportsColor()).to.be.false
+      const utils = (await import('../../lib/util')).default
+
+      expect(utils.supportsColor()).to.be.false
     })
 
     it('is false on false return for stderr', () => {
-      delete process.env.CI
+      vi.doMock('supports-color', async (importActual) => {
+        const actual = await importActual()
 
-      sinon.stub(supportsColor, 'stdout').value({})
-      sinon.stub(supportsColor, 'stderr').value(false)
+        return {
+          // @ts-expect-error
+          ...actual,
+          default: {
+            stdout: true,
+            stderr: true,
+          },
+        }
+      })
 
       expect(util.supportsColor()).to.be.false
     })
 
     it('is true when running in CI', () => {
-      process.env.CI = '1'
-      sinon.stub(supportsColor, 'stdout').value(false)
+      vi.stubEnv('CI', '1')
+
+      vi.doMock('supports-color', async (importActual) => {
+        const actual = await importActual()
+
+        return {
+          // @ts-expect-error
+          ...actual,
+          default: {
+            stdout: false,
+            stderr: false,
+          },
+        }
+      })
 
       expect(util.supportsColor()).to.be.true
     })
 
     it('is false when NO_COLOR has been set', () => {
-      process.env.CI = '1'
-      process.env.NO_COLOR = '1'
-      sinon.stub(supportsColor, 'stdout').value({})
-      sinon.stub(supportsColor, 'stderr').value({})
+      vi.stubEnv('CI', '1')
+      vi.stubEnv('NO_COLOR', '1')
+
+      vi.doMock('supports-color', async (importActual) => {
+        const actual = await importActual()
+
+        return {
+          // @ts-expect-error
+          ...actual,
+          default: {
+            stdout: true,
+            stderr: true,
+          },
+        }
+      })
 
       expect(util.supportsColor()).to.be.false
     })
   })
 
-  context('.getEnvOverrides', () => {
-    it('returns object with colors + process overrides', () => {
-      // shouldn't be stubbing 'what we own' but its easiest in this case
-      sinon.stub(util, 'supportsColor').returns(true)
-      sinon.stub(tty, 'isatty').returns(true)
+  describe('.getEnvOverrides', () => {
+    it('returns object with colors + process overrides', async () => {
+      // force supportColors to return true
+      vi.stubEnv('CI', '1')
+
+      vi.doMock('tty', async (importActual) => {
+        const actual = await importActual()
+
+        return {
+          // @ts-expect-error
+          ...actual,
+          default: {
+            isatty: vi.fn(),
+          },
+        }
+      })
+
+      const tty = (await import('tty')).default
+
+      // @ts-expect-error is a mock
+      tty.isatty.mockImplementation(() => true)
+
+      const util = (await import('../../lib/util')).default
 
       expect(util.getEnvOverrides()).to.deep.eq({
         FORCE_STDIN_TTY: '1',
@@ -209,9 +274,12 @@ describe('util', () => {
         MOCHA_COLORS: '1',
       })
 
-      ;(util.supportsColor as any).returns(false)
+      // force supportColors to return false
+      vi.stubEnv('CI', undefined)
+      vi.stubEnv('NO_COLOR', '1')
 
-      ;(tty.isatty as any).returns(false)
+      // @ts-expect-error is a mock
+      tty.isatty.mockImplementation(() => false)
 
       expect(util.getEnvOverrides()).to.deep.eq({
         FORCE_STDIN_TTY: '0',
@@ -223,12 +291,32 @@ describe('util', () => {
     })
   })
 
-  context('.getForceTty', () => {
-    it('forces when each stream is a tty', () => {
-      sinon.stub(tty, 'isatty')
-      .withArgs(0).returns(true)
-      .withArgs(1).returns(true)
-      .withArgs(2).returns(true)
+  describe('.getForceTty', () => {
+    it('forces when each stream is a tty', async () => {
+      vi.doMock('tty', async (importActual) => {
+        const actual = await importActual()
+
+        return {
+          // @ts-expect-error
+          ...actual,
+          default: {
+            isatty: vi.fn(),
+          },
+        }
+      })
+
+      const tty = (await import('tty')).default
+
+      // @ts-expect-error is a mock
+      tty.isatty.mockImplementation((args) => {
+        if (args === 0 || args === 1 || args === 2) {
+          return true
+        }
+
+        return false
+      })
+
+      const util = (await import('../../lib/util')).default
 
       expect(util.getForceTty()).to.deep.eq({
         FORCE_STDIN_TTY: true,
@@ -236,10 +324,8 @@ describe('util', () => {
         FORCE_STDERR_TTY: true,
       })
 
-      ;(tty.isatty as any)
-      .withArgs(0).returns(false)
-      .withArgs(1).returns(false)
-      .withArgs(2).returns(false)
+      // @ts-expect-error is a mock
+      tty.isatty.mockImplementation((args) => false)
 
       expect(util.getForceTty()).to.deep.eq({
         FORCE_STDIN_TTY: false,
@@ -249,24 +335,11 @@ describe('util', () => {
     })
   })
 
-  context('.getOriginalNodeOptions', () => {
-    let restoreEnv: any
-    const sandbox = sinon.createSandbox()
+  describe('.getOriginalNodeOptions', () => {
+    it('copy NODE_OPTIONS to ORIGINAL_NODE_OPTIONS', async () => {
+      vi.stubEnv('NODE_OPTIONS', '--require foo.js')
 
-    afterEach(() => {
-      if (restoreEnv) {
-        restoreEnv()
-        restoreEnv = null
-      }
-    })
-
-    it('copy NODE_OPTIONS to ORIGINAL_NODE_OPTIONS', () => {
-      sandbox.stub(process.versions, 'node').value('v16.14.2')
-      sandbox.stub(process.versions, 'openssl').value('1.0.0')
-
-      restoreEnv = mockedEnv({
-        NODE_OPTIONS: '--require foo.js',
-      })
+      const util = (await import('../../lib/util')).default
 
       expect(util.getOriginalNodeOptions({})).to.deep.eq({
         ORIGINAL_NODE_OPTIONS: '--require foo.js',
@@ -274,23 +347,32 @@ describe('util', () => {
     })
   })
 
-  context('.exit', () => {
-    it('calls process.exit', () => {
-      (process.exit as any).withArgs(2).withArgs(0)
+  describe('.exit', () => {
+    it('calls process.exit', async () => {
+      // @ts-expect-error wrong signature for process.exit
+      const processExitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined)
+
+      const util = (await import('../../lib/util')).default
+
       util.exit(2)
       util.exit(0)
+
+      expect(processExitSpy).toHaveBeenCalledWith(2)
+      expect(processExitSpy).toHaveBeenCalledWith(0)
     })
   })
 
-  context('.logErrorExit1', () => {
+  describe('.logErrorExit1', () => {
     it('calls logger.error and process.exit', () => {
       const err = new Error('foo')
-
-      ;(logger.error as any).withArgs('foo')
-
-      ;(process.exit as any).withArgs(1)
+      // @ts-expect-error wrong signature for process.exit
+      const processExitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined)
+      const loggerErrorSpy = vi.spyOn(logger, 'error').mockImplementation(() => undefined)
 
       util.logErrorExit1(err)
+
+      expect(processExitSpy).toHaveBeenCalledWith(1)
+      expect(loggerErrorSpy).toHaveBeenCalledWith('foo')
     })
   })
 
@@ -318,11 +400,11 @@ describe('util', () => {
 
   describe('.calculateEta', () => {
     it('Remaining eta is same as elapsed when 50%', () => {
-      expect(util.calculateEta('50', 1000)).to.equal(1000)
+      expect(util.calculateEta(50, 1000)).to.equal(1000)
     })
 
     it('Remaining eta is 0 when 100%', () => {
-      expect(util.calculateEta('100', 500)).to.equal(0)
+      expect(util.calculateEta(100, 500)).to.equal(0)
     })
   })
 
@@ -340,78 +422,113 @@ describe('util', () => {
     })
   })
 
-  context('.printNodeOptions', () => {
+  describe('.printNodeOptions', () => {
     describe('NODE_OPTIONS is not set', () => {
       it('does nothing if debug is not enabled', () => {
-        const log = sinon.spy()
+        const log = vi.fn()
 
-        ;(log as any).enabled = false
+        // @ts-expect-error wrong signature for mock
+        log.enabled = false
         util.printNodeOptions(log)
-        expect(log).not.have.been.called
+        expect(log).not.toHaveBeenCalled()
       })
 
       it('prints message when debug is enabled', () => {
-        const log = sinon.spy()
+        const log = vi.fn()
 
-        ;(log as any).enabled = true
+        // @ts-expect-error wrong signature for mock
+        log.enabled = true
         util.printNodeOptions(log)
-        expect(log).to.be.calledWith('NODE_OPTIONS is not set')
+        expect(log).toHaveBeenCalledWith('NODE_OPTIONS is not set')
       })
     })
 
     describe('NODE_OPTIONS is set', () => {
       beforeEach(() => {
-        process.env.NODE_OPTIONS = 'foo'
+        vi.stubEnv('NODE_OPTIONS', 'foo')
       })
 
       it('does nothing if debug is not enabled', () => {
-        const log = sinon.spy()
+        const log = vi.fn()
 
-        ;(log as any).enabled = false
+        // @ts-expect-error wrong signature for mock
+        log.enabled = false
         util.printNodeOptions(log)
-        expect(log).not.have.been.called
+        expect(log).not.toHaveBeenCalled()
       })
 
       it('prints value when debug is enabled', () => {
-        const log = sinon.spy()
+        const log = vi.fn()
 
-        ;(log as any).enabled = true
+        // @ts-expect-error wrong signature for mock
+        log.enabled = true
         util.printNodeOptions(log)
-        expect(log).to.be.calledWith('NODE_OPTIONS=%s', 'foo')
+        expect(log).toHaveBeenCalledWith('NODE_OPTIONS=%s', 'foo')
       })
     })
   })
 
   describe('.getOsVersionAsync', () => {
-    let util: any
-    let getos: any
+    beforeEach(() => {
+      vi.doMock('os', async (importActual) => {
+        const actual = await importActual()
 
-    beforeEach(async () => {
-      const proxyquire = await import('proxyquire')
+        return {
+          // @ts-expect-error
+          ...actual,
+          default: {
+            platform: vi.fn(),
+            release: vi.fn(),
+          },
+        }
+      })
 
-      getos = sinon.stub().resolves(['distro-release'])
-
-      util = proxyquire.default(`../../lib/util`, { getos }).default
-    })
-
-    it('calls os.release on non-linux', () => {
-      (os.platform as any).returns('darwin')
-
-      ;(os.release as any).returns('some-release')
-      util.getOsVersionAsync()
-      .then(() => {
-        expect(os.release).to.be.called
-        expect(getos).to.not.be.called
+      vi.doMock('getos', async (importActual) => {
+        return {
+          default: vi.fn(),
+        }
       })
     })
 
-    it('NOT calls os.release on linux', () => {
-      (os.platform as any).returns('linux')
-      util.getOsVersionAsync()
-      .then(() => {
-        expect(os.release).to.not.be.called
-        expect(getos).to.be.called
-      })
+    it('calls os.release on non-linux', async () => {
+      const os = (await import('os')).default
+      const getOs = (await import('getos')).default
+
+      // @ts-expect-error wrong signature for mock
+      os.platform.mockImplementation(() => 'darwin')
+
+      // @ts-expect-error wrong signature for mock
+      os.release.mockImplementation(() => 'some-release')
+
+      const util = (await import('../../lib/util')).default
+
+      const result = await util.getOsVersionAsync()
+
+      expect(os.release).toHaveBeenCalled()
+      expect(result).to.equal('some-release')
+      expect(getOs).not.toHaveBeenCalled()
+    })
+
+    it('NOT calls os.release on linux', async () => {
+      const os = (await import('os')).default
+      const getOs = (await import('getos')).default
+
+      // @ts-expect-error wrong signature for mock
+      os.platform.mockImplementation(() => 'linux')
+
+      // @ts-expect-error wrong signature for mock
+      os.release.mockImplementation(() => 'some-release')
+
+      // @ts-expect-error wrong signature for mock
+      getOs.mockImplementation(() => ['distro-release'])
+
+      const util = (await import('../../lib/util')).default
+
+      await util.getOsVersionAsync()
+
+      expect(os.release).not.toHaveBeenCalled()
+
+      expect(getOs).toHaveBeenCalled()
     })
   })
 
@@ -443,46 +560,46 @@ describe('util', () => {
 
   describe('.getEnv', () => {
     it('reads from package.json config', () => {
-      process.env.npm_package_config_CYPRESS_FOO = 'bar'
+      vi.stubEnv('npm_package_config_CYPRESS_FOO', 'bar')
       expect(util.getEnv('CYPRESS_FOO')).to.eql('bar')
     })
 
     it('reads from .npmrc config', () => {
-      process.env.npm_config_CYPRESS_FOO = 'bar'
+      vi.stubEnv('npm_config_CYPRESS_FOO', 'bar')
       expect(util.getEnv('CYPRESS_FOO')).to.eql('bar')
     })
 
     it('reads from env var', () => {
-      process.env.CYPRESS_FOO = 'bar'
+      vi.stubEnv('CYPRESS_FOO', 'bar')
       expect(util.getEnv('CYPRESS_FOO')).to.eql('bar')
     })
 
     it('prefers env var over .npmrc config', () => {
-      process.env.CYPRESS_FOO = 'bar'
-      process.env.npm_config_CYPRESS_FOO = 'baz'
+      vi.stubEnv('CYPRESS_FOO', 'bar')
+      vi.stubEnv('npm_config_CYPRESS_FOO', 'baz')
       expect(util.getEnv('CYPRESS_FOO')).to.eql('bar')
     })
 
     it('prefers env var over .npmrc config even if it\'s an empty string', () => {
-      process.env.CYPRESS_FOO = ''
-      process.env.npm_config_CYPRESS_FOO = 'baz'
+      vi.stubEnv('CYPRESS_FOO', '')
+      vi.stubEnv('npm_config_CYPRESS_FOO', 'baz')
       expect(util.getEnv('CYPRESS_FOO')).to.eql('')
     })
 
     it('prefers .npmrc config over package config', () => {
-      process.env.npm_package_config_CYPRESS_FOO = 'baz'
-      process.env.npm_config_CYPRESS_FOO = 'bloop'
+      vi.stubEnv('npm_package_config_CYPRESS_FOO', 'baz')
+      vi.stubEnv('npm_config_CYPRESS_FOO', 'bloop')
       expect(util.getEnv('CYPRESS_FOO')).to.eql('bloop')
     })
 
     it('prefers .npmrc config over package config even if it\'s an empty string', () => {
-      process.env.npm_package_config_CYPRESS_FOO = 'baz'
-      process.env.npm_config_CYPRESS_FOO = ''
+      vi.stubEnv('npm_package_config_CYPRESS_FOO', 'baz')
+      vi.stubEnv('npm_config_CYPRESS_FOO', '')
       expect(util.getEnv('CYPRESS_FOO')).to.eql('')
     })
 
     it('npm config set should work', () => {
-      process.env.npm_config_cypress_foo_foo = 'bazz'
+      vi.stubEnv('npm_config_cypress_foo_foo', 'bazz')
       expect(util.getEnv('CYPRESS_FOO_FOO')).to.eql('bazz')
     })
 
@@ -496,52 +613,52 @@ describe('util', () => {
       }).to.throw()
     })
 
-    context('with trim = true', () => {
+    describe('with trim = true', () => {
       it('trims returned string', () => {
-        process.env.FOO = '  bar  '
+        vi.stubEnv('FOO', '  bar  ')
         expect(util.getEnv('FOO', true)).to.equal('bar')
       })
 
       it('removes quotes from the returned string', () => {
-        process.env.FOO = '  "bar"  '
+        vi.stubEnv('FOO', '  "bar"  ')
         expect(util.getEnv('FOO', true)).to.equal('bar')
       })
 
       it('removes only single level of double quotes', () => {
-        process.env.FOO = '  ""bar""  '
+        vi.stubEnv('FOO', '  ""bar""  ')
         expect(util.getEnv('FOO', true)).to.equal('"bar"')
       })
 
       it('keeps unbalanced double quote', () => {
-        process.env.FOO = '  "bar  '
+        vi.stubEnv('FOO', '  "bar  ')
         expect(util.getEnv('FOO', true)).to.equal('"bar')
       })
 
       it('trims but does not remove single quotes', () => {
-        process.env.FOO = '  \'bar\'  '
+        vi.stubEnv('FOO', '  \'bar\'  ')
         expect(util.getEnv('FOO', true)).to.equal('\'bar\'')
       })
 
       it('keeps whitespace inside removed quotes', () => {
-        process.env.FOO = '"foo.txt "'
+        vi.stubEnv('FOO', '"foo.txt "')
         expect(util.getEnv('FOO', true)).to.equal('foo.txt ')
       })
     })
   })
 
-  context('.getFileChecksum', () => {
-    it('computes same hash as Hasha SHA512', () => {
-      return Promise.all([
+  describe('.getFileChecksum', () => {
+    it('computes same hash as Hasha SHA512', async () => {
+      const [checksum, expectedChecksum] = await Promise.all([
         util.getFileChecksum(__filename),
         hasha.fromFile(__filename, { algorithm: 'sha512' }),
-      ]).then(([checksum, expectedChecksum]) => {
-        la(checksum === expectedChecksum, 'our computed checksum', checksum,
-          'is different from expected', expectedChecksum)
-      })
+      ])
+
+      la(checksum === expectedChecksum, 'our computed checksum', checksum,
+        'is different from expected', expectedChecksum)
     })
   })
 
-  context('parseOpts', () => {
+  describe('parseOpts', () => {
     it('passes normal options and strips unknown ones', () => {
       const result = util.parseOpts({
         unknownOptions: true,

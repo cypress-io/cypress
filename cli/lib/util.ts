@@ -4,12 +4,11 @@ import os from 'os'
 import ospath from 'ospath'
 import hasha from 'hasha'
 import la from 'lazy-ass'
-import is from 'check-more-types'
 import tty from 'tty'
 import path from 'path'
 import { isCI as isCi } from 'ci-info'
 import execa from 'execa'
-import getos from 'getos'
+import getOs from 'getos'
 import chalk from 'chalk'
 import Bluebird from 'bluebird'
 import cachedir from 'cachedir'
@@ -21,15 +20,14 @@ import isInstalledGlobally from 'is-installed-globally'
 import logger from './logger'
 import Debug from 'debug'
 import fs from './fs'
+import pkg from '../package.json'
+
+// TODO: this package needs to be replaced as we can't import it in vitest
+const is = require('check-more-types')
 
 const debug = Debug('cypress:cli')
 
-// Import package.json dynamically to avoid TypeScript JSON import issues
-const pkg = require(path.join(__dirname, '..', 'package.json'))
-
 const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
-
-const getosAsync = Bluebird.promisify(getos)
 
 /**
  * Returns SHA512 of a file
@@ -414,19 +412,17 @@ const util = {
   isLinux,
 
   getOsVersionAsync (): any {
-    return Bluebird.try(() => {
-      if (isLinux()) {
-        return getosAsync()
-        .then((osInfo: any) => {
-          return [osInfo.dist, osInfo.release].join(' - ')
-        })
-        .catch(() => {
-          return os.release()
-        })
-      }
+    if (isLinux()) {
+      try {
+        const osInfo = getOs()
 
-      return os.release()
-    })
+        return [osInfo.dist, osInfo.release].join(' - ')
+      } catch (err) {
+        return os.release()
+      }
+    }
+
+    return os.release()
   },
 
   async getPlatformInfo (): Promise<string> {
