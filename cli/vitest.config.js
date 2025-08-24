@@ -5,6 +5,7 @@ export default defineConfig({
     include: [
       'test/lib/util.spec.ts',
       'test/lib/logger.spec.ts',
+      'test/lib/errors.spec.ts',
     ],
   },
 })
