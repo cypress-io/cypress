@@ -16,6 +16,7 @@ _Released 08/26/2025 (PENDING)_
 - Upgraded `esbuild` from `0.15.3` to `0.25.2`. Addressed in [#32231](https://github.com/cypress-io/cypress/pull/32231).
 - Upgraded `image-size` from `1.1.1` to `1.2.1`. Addressed in [#32232](https://github.com/cypress-io/cypress/pull/32232).
 - Upgraded `tar` from `6.1.5` to `6.2.1`. Addressed in [#32229](https://github.com/cypress-io/cypress/pull/32229).
+- Upgraded `axios` from `1.8.3` to `1.11.0`. Addresses [#32347](https://github.com/cypress-io/cypress/issues/32347).
 
 ## 15.0.0
 
