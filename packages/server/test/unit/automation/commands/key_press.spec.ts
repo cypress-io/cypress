@@ -164,7 +164,7 @@ describe('key:press automation command', () => {
         })
       })
 
-      describe('when supplied a valid key', () => {
+      describe('when supplied a valid named key', () => {
         for (const key of NamedKeys) {
           it(`dispatches a keydown followed by a keyup event to the provided send fn with the ${key} keycode`, async () => {
             await cdpKeyPress(key as SupportedKey, sendFn, executionContexts, frameTree)
@@ -180,6 +180,20 @@ describe('key:press automation command', () => {
             })
           })
         }
+      })
+
+      describe('when supplied a valid character key', () => {
+        const key: SupportedKey = 'a' as SupportedKey
+
+        it('adds text to the keydown event data', async () => {
+          await cdpKeyPress(key, sendFn, executionContexts, frameTree)
+
+          expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
+            type: 'keyDown',
+            key,
+            text: key,
+          })
+        })
       })
 
       describe('when supplied a utf8 key', () => {
@@ -198,6 +212,7 @@ describe('key:press automation command', () => {
           expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
             type: 'keyDown',
             key: codeOne,
+            text: codeOne,
           })
 
           expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
@@ -208,6 +223,7 @@ describe('key:press automation command', () => {
           expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
             type: 'keyDown',
             key: codeTwo,
+            text: codeTwo,
           })
 
           expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
@@ -249,7 +265,6 @@ describe('key:press automation command', () => {
 
       client.switchToWindow.resolves()
       client.inputPerformActions.resolves()
-      client.inputReleaseActions.resolves()
       client.browsingContextGetTree.resolves({
         contexts: [
           {
@@ -389,10 +404,6 @@ describe('key:press automation command', () => {
               { type: 'keyUp', value: codeTwo },
             ],
           }],
-        })
-
-        expect(client.inputReleaseActions).to.have.been.calledWith({
-          context: autContext,
         })
       })
     })

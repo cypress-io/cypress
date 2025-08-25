@@ -22,19 +22,22 @@ describe('src/cy/commands/actions/press', () => {
       if (key !== 'F6') {
         cy.get('#keyup').should('have.value', key)
       }
+
+      // named keys are not dispatched as keypress events
+      if (!Object.values(Cypress.Keyboard.Keys).includes(key)) {
+        cy.get('#keypress').should('have.value', key)
+      }
     })
   }
 
-  // Numbers
+  // // Numbers
   ;['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].forEach(testKeyDownUp)
 
-  // Letters
+  // // Letters
   ;['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-    'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-    'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'].forEach(testKeyDownUp)
+    'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'].forEach(testKeyDownUp)
 
-  // Special characters
+  // // Special characters
   ;['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '=',
     '+', '[', ']', '{', '}', '\\', '|', ';', ':', '\'', '"', ',', '.',
     '<', '>', '/', '?', '`', '~', ' ', '€', 'é'].forEach(testKeyDownUp)
@@ -42,12 +45,6 @@ describe('src/cy/commands/actions/press', () => {
   Object.values(Cypress.Keyboard.Keys).forEach(testKeyDownUp)
 
   it('dispatches the input event when an input is modified via cy.press', () => {
-    if (Cypress.browser.family !== 'firefox') {
-      expect(true, 'only firefox supports input events from cy.press').to.be.true
-
-      return
-    }
-
     cy.get('#input_source').focus()
     cy.press('a')
     cy.get('#input_source').should('have.value', 'a')

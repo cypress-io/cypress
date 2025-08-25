@@ -23,7 +23,6 @@ export async function cdpKeyPress (
   frameTree: Protocol.Page.FrameTree,
 ): Promise<void> {
   debug('cdp keypress', { key, length: [...key].length })
-
   const autFrame = frameTree.childFrames?.find(({ frame }) => {
     return frame.name?.includes(AUT_FRAME_NAME_IDENTIFIER)
   })
@@ -43,16 +42,19 @@ export async function cdpKeyPress (
   try {
     // Named keys must be dispatched as single characters,
     // multi-codepoint characters must be dispatched as individual codepoints
-    const chars = NamedKeys.includes(key) ? [key] : [...key]
+    const isNamedKey = NamedKeys.includes(key)
+
+    const chars = [...key].length === 1 || isNamedKey ? [key] : [...key]
 
     for (const char of chars) {
       debug('dispatching keydown', { char })
       await send('Input.dispatchKeyEvent', {
         type: 'keyDown',
+        ...(isNamedKey ? {} : { text: char }),
         key: char,
       })
 
-      debug('dispatching keyup', { char })
+      debug('dispatching keyup', { key })
       await send('Input.dispatchKeyEvent', {
         type: 'keyUp',
         key: char,
