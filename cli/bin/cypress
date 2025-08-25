@@ -1,5 +1,6 @@
 #!/usr/bin/env node
+const tsx = require('tsx/cjs/api')
 
-const CLI = require('../lib/cli').default
+const CLI = tsx.require('../lib/cli.ts', __filename).default
 
 CLI.init()

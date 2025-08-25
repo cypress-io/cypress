@@ -341,6 +341,7 @@ const util = {
     return pkg.version
   },
 
+  // TODO: remove this method
   exit (code: number): never {
     process.exit(code)
   },
