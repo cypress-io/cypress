@@ -156,26 +156,6 @@ export class EventManager {
       }
     })
 
-    this.ws.on('watched:file:changed', () => {
-      // when studio is active, we need to re-initialize studio before rerunning
-      // studioInitTest will rerun the test once studio is re-initialized
-      if (this.studioStore.isActive) {
-        studioInitTest(this.studioStore.testId)
-
-        return
-      }
-
-      rerun()
-    })
-
-    this.ws.on('dev-server:compile:success', ({ specFile }) => {
-      if (!specFile || specFile === state?.spec?.absolute) {
-        rerun()
-      }
-    })
-
-    this.ws.on('runner:restart', rerun)
-
     socketToDriverEvents.forEach((event) => {
       this.ws.on(event, (...args) => {
         if (!Cypress) return
@@ -329,6 +309,26 @@ export class EventManager {
     })
 
     this.localBus.on('studio:init:suite', studioInitSuite)
+
+    this.ws.on('watched:file:changed', () => {
+      // when studio is active, we need to re-initialize studio before rerunning
+      // studioInitTest will rerun the test once studio is re-initialized
+      if (this.studioStore.isActive && this.studioStore.testId) {
+        studioInitTest(this.studioStore.testId)
+
+        return
+      }
+
+      rerun()
+    })
+
+    this.ws.on('dev-server:compile:success', ({ specFile }) => {
+      if (!specFile || specFile === state?.spec?.absolute) {
+        rerun()
+      }
+    })
+
+    this.ws.on('runner:restart', rerun)
 
     const maybeCleanUpProtocol = () => {
       const needsReload = this.studioStore.needsProtocolCleanup()
