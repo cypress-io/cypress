@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import path from 'path'
 import shell from 'shelljs'
-import fs from '../lib/fs'
+import fs from 'fs-extra'
 
 // grab the current version and a few other properties
 // from the root package.json
@@ -58,26 +58,15 @@ function preparePackageForNpmRelease (json: any, branchName?: string): any {
   return json
 }
 
-function makeUserPackageFile (branchName?: string): Promise<any> {
-  return fs.readJsonAsync(packageJsonSrc)
-  .then((json: any) => preparePackageForNpmRelease(json, branchName))
-  .then((json: any) => {
-    return fs.outputJsonAsync(packageJsonDest, json, {
-      spaces: 2,
-    })
-    .return(json) // returning package json object makes it easy to test
-  })
+async function makeUserPackageFile (branchName?: string): Promise<any> {
+  const json = await fs.readJson(packageJsonSrc)
+  const jsonPrepared = preparePackageForNpmRelease(json, branchName)
+
+  await fs.outputJson(packageJsonDest, jsonPrepared, {
+    spaces: 2,
+  }) // returning package json object makes it easy to test
+
+  return jsonPrepared
 }
 
 export default makeUserPackageFile
-
-if (!module.parent) {
-  makeUserPackageFile(process.env.BRANCH)
-  .catch((err: any) => {
-    /* eslint-disable no-console */
-    console.error('Could not write user package file')
-    console.error(err)
-    /* eslint-enable no-console */
-    process.exit(-1)
-  })
-}
