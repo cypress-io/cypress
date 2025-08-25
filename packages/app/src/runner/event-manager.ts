@@ -310,7 +310,9 @@ export class EventManager {
       studioInitSuite({ suiteId })
     })
 
-    this.localBus.on('studio:init:suite', studioInitSuite)
+    this.localBus.on('studio:init:suite', (suiteId) => {
+      studioInitSuite({ suiteId })
+    })
 
     this.ws.on('watched:file:changed', () => {
       // when studio is active, we need to re-initialize studio before rerunning
