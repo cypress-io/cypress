@@ -26,7 +26,7 @@ import type { Socket } from '@packages/socket'
 import type { RunState, CachedTestState, ProtocolManagerShape, AutomationCommands } from '@packages/types'
 import memory from './browsers/memory'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
-import { StudioInitOptions } from './types/studio'
+import type { StudioInitOptions } from './types/studio'
 
 type StartListeningCallbacks = {
   onSocketConnection: (socket: any) => void

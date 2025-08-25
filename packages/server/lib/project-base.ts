@@ -33,7 +33,7 @@ import { getCloudMetadata } from './cloud/get_cloud_metadata'
 import { telemetryManager } from './cloud/studio/telemetry/TelemetryManager'
 import { INITIALIZATION_MARK_NAMES, INITIALIZATION_TELEMETRY_GROUP_NAMES } from './cloud/studio/telemetry/constants/initialization'
 import { TelemetryReporter } from './cloud/studio/telemetry/TelemetryReporter'
-import { StudioInitOptions } from './types/studio'
+import type { StudioInitOptions } from './types/studio'
 
 export interface Cfg extends ReceivedCypressOptions {
   projectId?: string

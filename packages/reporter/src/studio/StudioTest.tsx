@@ -11,7 +11,7 @@ import { useScrollIntoView } from '../lib/useScrollIntoView'
 import { IconChevronDownSmall, IconStatusFailedSolid, IconStatusPassedSolid, IconStatusQueuedOutline, IconStatusRunningOutline } from '@cypress-design/react-icon'
 import Test from '../test/test-model'
 import { StatsStore } from '../header/stats-store'
-import defaultEvents, { Events } from '../lib/events'
+import defaultEvents, { type Events } from '../lib/events'
 
 const getConnectors = (num: number) => {
   let connectors: JSX.Element[] = []
