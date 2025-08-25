@@ -54,7 +54,7 @@ export async function cdpKeyPress (
         key: char,
       })
 
-      debug('dispatching keyup', { key })
+      debug('dispatching keyup', { char })
       await send('Input.dispatchKeyEvent', {
         type: 'keyUp',
         key: char,
