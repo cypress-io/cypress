@@ -298,7 +298,9 @@ export class EventManager {
     })
 
     this.reporterBus.on('studio:init:test:current', () => {
-      studioInitTest(this.studioStore.testId)
+      if (this.studioStore.testId) {
+        studioInitTest(this.studioStore.testId)
+      }
     })
 
     this.localBus.on('studio:init:test', studioInitTest)
