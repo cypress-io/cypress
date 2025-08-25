@@ -385,5 +385,10 @@ describe('events', () => {
       events.emit('studio:save')
       expect(runner.emit).to.have.been.calledWith('studio:save')
     })
+
+    it('emits studio:init:test:current on studio:restart', () => {
+      events.emit('studio:restart')
+      expect(runner.emit).to.have.been.calledWith('studio:init:test:current')
+    })
   })
 })

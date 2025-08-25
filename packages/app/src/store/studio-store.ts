@@ -111,6 +111,14 @@ interface StudioRecorderState {
   sessionId?: string
   _isStudioCreatedTest: boolean
   newTestLineNumber?: number
+  /**
+   * Whether studio was initialized from the reporter versus from the Studio UI.
+   * This is utilized by the Studio UI so it knows whether to re-initialize
+   * when the page is refreshed. Without tracking this, it causes a rerun to
+   * happen twice - once from the event that opens the Studio UI and once when
+   * the Studio Panel component is mounted.
+   */
+  initializedFromReporter: boolean
 }
 
 function getUrlParams () {
@@ -148,6 +156,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       sessionId: persistedSessionId,
       newTestLineNumber: undefined,
       _isStudioCreatedTest: false,
+      initializedFromReporter: false,
     }
   },
 
@@ -190,6 +199,10 @@ export const useStudioStore = defineStore('studioRecorder', {
     setNewTestLineNumber (newTestLineNumber: number) {
       this.newTestLineNumber = newTestLineNumber
       this._updateUrlParams(['newTestLineNumber'])
+    },
+
+    setInitializedFromReporter (initializedFromReporter: boolean) {
+      this.initializedFromReporter = initializedFromReporter
     },
 
     clearRunnableIds () {

@@ -152,6 +152,10 @@ const events: Events = {
       runner.emit('testFilter:cloudDebug:dismiss')
     })
 
+    localBus.on('studio:restart', () => {
+      runner.emit('studio:init:test:current')
+    })
+
     localBus.on('restart', action('restart', () => {
       runner.emit('runner:restart')
     }))

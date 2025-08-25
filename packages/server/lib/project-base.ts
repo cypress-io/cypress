@@ -33,6 +33,7 @@ import { getCloudMetadata } from './cloud/get_cloud_metadata'
 import { telemetryManager } from './cloud/studio/telemetry/TelemetryManager'
 import { INITIALIZATION_MARK_NAMES, INITIALIZATION_TELEMETRY_GROUP_NAMES } from './cloud/studio/telemetry/constants/initialization'
 import { TelemetryReporter } from './cloud/studio/telemetry/TelemetryReporter'
+import { StudioInitOptions } from './types/studio'
 
 export interface Cfg extends ReceivedCypressOptions {
   projectId?: string
@@ -74,6 +75,7 @@ export class ProjectBase extends EE {
   private _protocolManager?: ProtocolManagerShape
   private _recordTests?: any = null
   private _isServerOpen: boolean = false
+  private _isStudioInitialized: boolean = false
 
   public videoRecording?: VideoRecording
   public browser: any
@@ -399,6 +401,34 @@ export class ProjectBase extends EE {
       onServiceWorkerClientEvent,
     })
 
+    const destroyStudio = async () => {
+      if (!this._isStudioInitialized) {
+        debug('Studio is not initialized - skipping destroy')
+
+        return
+      }
+
+      const isStudioReady = await this.ctx.coreData.studioLifecycleManager?.isStudioReady()
+
+      if (!isStudioReady) {
+        debug('Studio is not ready - skipping destroy')
+
+        return
+      }
+
+      const studio = await this.ctx.coreData.studioLifecycleManager?.getStudio()
+
+      await studio?.destroy()
+
+      if (this.protocolManager) {
+        await browsers.closeProtocolConnection({ browser: this.browser, foundBrowsers: this.options.browsers })
+        this.protocolManager?.close()
+        this.protocolManager = undefined
+      }
+
+      this._isStudioInitialized = false
+    }
+
     const ios = this.server.startWebsockets(this.automation, this.cfg, {
       onReloadBrowser: options.onReloadBrowser,
       onFocusTests: options.onFocusTests,
@@ -407,7 +437,17 @@ export class ProjectBase extends EE {
       onSavedStateChanged: this.saveState.bind(this),
       closeExtraTargets: this.closeExtraTargets,
 
-      onStudioInit: async () => {
+      /**
+       * Called any time the test is run in Studio
+       */
+      onStudioInit: async ({ sessionId }: StudioInitOptions = {}) => {
+        // if already initialized, tear down studio first
+        if (this._isStudioInitialized) {
+          debug('Studio is already initialized - destroying studio')
+
+          await destroyStudio()
+        }
+
         telemetryManager.mark(INITIALIZATION_MARK_NAMES.INITIALIZATION_START)
 
         const endTelemetry = ({ status, canAccessStudioAI }: { status: string, canAccessStudioAI: boolean }) => {
@@ -419,7 +459,9 @@ export class ProjectBase extends EE {
           })
         }
 
-        const cloudStudioSessionId = v4()
+        // Only need a new session if Studio is being entered from a non-opened
+        // state. If the test is being re-run, we use the existing session
+        const cloudStudioSessionId = sessionId ?? v4()
 
         try {
           const isStudioReady = this.ctx.coreData.studioLifecycleManager?.isStudioReady()
@@ -515,6 +557,8 @@ export class ProjectBase extends EE {
 
             endTelemetry({ status: 'success', canAccessStudioAI: true })
 
+            this._isStudioInitialized = true
+
             return { canAccessStudioAI: true, cloudStudioSessionId }
           }
 
@@ -530,25 +574,7 @@ export class ProjectBase extends EE {
         }
       },
 
-      onStudioDestroy: async () => {
-        const isStudioReady = await this.ctx.coreData.studioLifecycleManager?.isStudioReady()
-
-        if (!isStudioReady) {
-          debug('Studio is not ready - skipping destroy')
-
-          return
-        }
-
-        const studio = await this.ctx.coreData.studioLifecycleManager?.getStudio()
-
-        await studio?.destroy()
-
-        if (this.protocolManager) {
-          await browsers.closeProtocolConnection({ browser: this.browser, foundBrowsers: this.options.browsers })
-          this.protocolManager?.close()
-          this.protocolManager = undefined
-        }
-      },
+      onStudioDestroy: destroyStudio,
 
       onCaptureVideoFrames: (data: any) => {
         // TODO: move this to browser automation middleware

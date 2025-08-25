@@ -17,9 +17,10 @@ interface Props {
   events?: Events
   appState: AppState
   displayPreferencesButton?: boolean
+  onRestart?: () => void
 }
 
-const Controls: React.FC<Props> = observer(({ events = defaultEvents, appState, displayPreferencesButton = true }: Props) => {
+const Controls: React.FC<Props> = observer(({ events = defaultEvents, appState, displayPreferencesButton = true, onRestart }: Props) => {
   const emit = (event: string) => () => events.emit(event)
   const togglePreferencesMenu = () => {
     appState.togglePreferencesMenu()
@@ -68,7 +69,7 @@ const Controls: React.FC<Props> = observer(({ events = defaultEvents, appState, 
       {!appState.isRunning && (
         <Tooltip placement='bottom' title={<p>Run All Tests <span className='kbd'>R</span></p>} className='cy-tooltip'>
           <div>
-            <Button size='20' variant='outline-dark' aria-label='Rerun all tests' className='restart' onClick={emit('restart')}>
+            <Button size='20' variant='outline-dark' aria-label='Rerun all tests' className='restart' onClick={onRestart ? onRestart : emit('restart')}>
               {appState.studioActive ? (
                 <IconActionRestart transform="scale(-1 1)" strokeColor={iconStrokeColor} />
               ) : (

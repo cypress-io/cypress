@@ -157,6 +157,14 @@ export class EventManager {
     })
 
     this.ws.on('watched:file:changed', () => {
+      // when studio is active, we need to re-initialize studio before rerunning
+      // studioInitTest will rerun the test once studio is re-initialized
+      if (this.studioStore.isActive) {
+        studioInitTest(this.studioStore.testId)
+
+        return
+      }
+
       rerun()
     })
 
@@ -274,7 +282,7 @@ export class EventManager {
       this.studioStore.setSuiteId(suiteId)
       this.studioStore.setShowUrlPrompt(showUrlPrompt)
 
-      this.ws.emit('studio:init', ({ canAccessStudioAI, cloudStudioSessionId, error }) => {
+      this.ws.emit('studio:init', { sessionId: this.studioStore.sessionId }, ({ canAccessStudioAI, cloudStudioSessionId, error }) => {
         if (error) {
           // eslint-disable-next-line no-console
           console.error(error)
@@ -288,10 +296,10 @@ export class EventManager {
       })
     }
 
-    this.reporterBus.on('studio:init:test', (testId) => {
+    const studioInitTest = (testId) => {
       this.studioStore.setTestId(testId)
 
-      this.ws.emit('studio:init', ({ canAccessStudioAI, cloudStudioSessionId, error }) => {
+      this.ws.emit('studio:init', { sessionId: this.studioStore.sessionId }, ({ canAccessStudioAI, cloudStudioSessionId, error }) => {
         if (error) {
           // eslint-disable-next-line no-console
           console.error(error)
@@ -299,13 +307,28 @@ export class EventManager {
 
         this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
         this.studioStore.setSessionId(cloudStudioSessionId)
+
         rerun()
       })
+    }
+
+    this.reporterBus.on('studio:init:test', (testId) => {
+      this.studioStore.setInitializedFromReporter(true)
+      studioInitTest(testId)
     })
 
+    this.reporterBus.on('studio:init:test:current', () => {
+      studioInitTest(this.studioStore.testId)
+    })
+
+    this.localBus.on('studio:init:test', studioInitTest)
+
     this.reporterBus.on('studio:init:suite', (suiteId) => {
+      this.studioStore.setInitializedFromReporter(true)
       studioInitSuite({ suiteId })
     })
+
+    this.localBus.on('studio:init:suite', studioInitSuite)
 
     const maybeCleanUpProtocol = () => {
       const needsReload = this.studioStore.needsProtocolCleanup()
@@ -362,10 +385,6 @@ export class EventManager {
           })
         }
       })
-    })
-
-    this.localBus.on('studio:init:suite', (options: { suiteId: string, showUrlPrompt?: boolean }) => {
-      studioInitSuite(options)
     })
 
     this.localBus.on('studio:cancel', () => {
