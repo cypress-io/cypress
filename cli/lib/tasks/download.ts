@@ -1,5 +1,4 @@
 import la from 'lazy-ass'
-import is from 'check-more-types'
 import os from 'os'
 import url from 'url'
 import path from 'path'
@@ -12,6 +11,9 @@ import { getProxyForUrl } from 'proxy-from-env'
 import { throwFormErrorText, errors } from '../errors'
 import fs from '../fs'
 import util from '../util'
+
+// TODO: this package needs to be replaced as we can't import it in vitest
+const is = require('check-more-types')
 
 const debug = Debug('cypress:cli')
 
