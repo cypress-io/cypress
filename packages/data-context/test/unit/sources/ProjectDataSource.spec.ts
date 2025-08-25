@@ -598,6 +598,10 @@ describe('startSpecWatcher', () => {
       ctx.coreData.currentProject = projectRoot
     })
 
+    afterEach(() => {
+      delete process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE
+    })
+
     it('early return specWatcher', () => {
       const onStub = sinon.stub()
 
@@ -632,6 +636,49 @@ describe('startSpecWatcher', () => {
       expect(chokidar.watch).to.have.not.been.called
 
       expect(onStub).to.have.not.been.called
+    })
+
+    it('creates file watcher when CYPRESS_INTERNAL_SIMULATE_OPEN_MODE is set in run mode', async () => {
+      process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE = 'true'
+
+      const onStub = sinon.stub()
+
+      sinon.stub(chokidar, 'watch').callsFake(() => {
+        const mockWatcher = {
+          on: onStub,
+          close: () => ({ catch: () => {} }),
+        } as unknown
+
+        return mockWatcher as chokidar.FSWatcher
+      })
+
+      let handleFsChange
+
+      sinon.stub(_, 'debounce').callsFake((funcToDebounce) => {
+        handleFsChange = (() => funcToDebounce())
+
+        return handleFsChange as _.DebouncedFunc<any>
+      })
+
+      await ctx.project.startSpecWatcher({
+        projectRoot,
+        testingType: 'e2e',
+        specPattern: ['**/*.{cy,spec}.{ts,js}'],
+        configSpecPattern: ['**/*.{cy,spec}.{ts,js}'],
+        excludeSpecPattern: ['**/ignore.spec.ts'],
+        additionalIgnorePattern: ['additional.ignore.cy.js'],
+      })
+
+      expect(_.debounce).to.have.been.calledWith(sinon.match.func, 250)
+
+      expect(chokidar.watch).to.have.been.calledWith('.', {
+        ignoreInitial: true,
+        cwd: projectRoot,
+        ignored: ['**/node_modules/**', '**/ignore.spec.ts', 'additional.ignore.cy.js', sinon.match.func],
+        ignorePermissionErrors: true,
+      })
+
+      expect(onStub).to.have.been.calledWith('all', handleFsChange)
     })
   })
 

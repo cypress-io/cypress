@@ -161,7 +161,7 @@ export class ProjectBase extends EE {
 
     this._server = new ServerBase(cfg)
 
-    if (!cfg.isTextTerminal && cfg.resolved.experimentalStudio?.value) {
+    if ((!cfg.isTextTerminal || process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE) && cfg.resolved.experimentalStudio?.value) {
       const studioLifecycleManager = new StudioLifecycleManager()
 
       studioLifecycleManager.initializeStudioManager({
@@ -699,8 +699,9 @@ export class ProjectBase extends EE {
     const isDefaultProtocolEnabled = this._protocolManager?.isProtocolEnabled ?? false
 
     const hideRunnerUi = (
-      this.options?.args?.runnerUi === false ||
-      (isDefaultProtocolEnabled && this._cfg.isTextTerminal && !this.options?.args?.runnerUi)
+      (this.options?.args?.runnerUi === false ||
+      (isDefaultProtocolEnabled && this._cfg.isTextTerminal && !this.options?.args?.runnerUi)) &&
+      !process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE
     )
 
     // hide the command log if explicitly requested or if we are hiding the runner
