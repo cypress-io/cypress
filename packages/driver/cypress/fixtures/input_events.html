@@ -3,9 +3,10 @@
 <head>
   <title>Input Event Monitor</title>
   <script defer>
-    ['keydown', 'keyup'].forEach((ev) => {
+    ['keydown', 'keyup', 'keypress', 'input'].forEach((ev) => {
+      document.addEventListener(ev,console.log.bind(console))
       document.addEventListener(ev, (data) => {
-        document.getElementById(ev).value += data.key
+        document.getElementById(ev).value += data.key ?? data.data
       })
     })
   </script>
@@ -14,4 +15,7 @@
 <body>
   <input type="text" id="keyup" />
   <input type="text" id="keydown" />
+  <input type="text" id="keypress" />
+  <input type="text" id="input_source" />
+  <input type="text" id="input" />
 </body>

@@ -160,6 +160,10 @@ export async function bidiKeyPress (inKey: SupportedKey, client: Client, autCont
         .reduce((arr, el) => [...arr, ...el], []),
       }],
     })
+
+    await client.inputReleaseActions({
+      context: autContext,
+    })
   } catch (e) {
     debug(e)
     const err = new Error(`Unable to perform key press command for '${key}' key: ${e?.message || 'Unknown Error Occurred'}. DEBUG namespace cypress:server:automation:command:keypress for more information.`)

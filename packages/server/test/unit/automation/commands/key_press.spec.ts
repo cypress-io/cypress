@@ -232,7 +232,7 @@ describe('key:press automation command', () => {
     const topLevelContext = 'b7173d71-c76c-41ec-beff-25a72f7cae13'
 
     beforeEach(() => {
-      const stubbedClientMethods: (keyof WebdriverClient)[] = ['inputPerformActions', 'getActiveElement', 'findElement', 'scriptEvaluate', 'getWindowHandle', 'switchToWindow', 'browsingContextGetTree']
+      const stubbedClientMethods: (keyof WebdriverClient)[] = ['inputPerformActions', 'inputReleaseActions', 'getActiveElement', 'findElement', 'scriptEvaluate', 'getWindowHandle', 'switchToWindow', 'browsingContextGetTree']
 
       // @ts-expect-error - webdriver doesn't export the constructor
       client = {
@@ -249,6 +249,7 @@ describe('key:press automation command', () => {
 
       client.switchToWindow.resolves()
       client.inputPerformActions.resolves()
+      client.inputReleaseActions.resolves()
       client.browsingContextGetTree.resolves({
         contexts: [
           {
@@ -271,7 +272,7 @@ describe('key:press automation command', () => {
         client.getActiveElement.resolves(otherElement)
       })
 
-      it('focuses the frame before dispatching keydown and keyup', async () => {
+      it('focuses the frame before dispatching keydown and keyup, and then releases the input actions', async () => {
         await bidiKeyPress(key, client, autContext, 'idSuffix')
         expect(client.scriptEvaluate).to.have.been.calledWith({
           expression: 'window.focus()',
@@ -291,6 +292,10 @@ describe('key:press automation command', () => {
               { type: 'keyUp', value: expectedValue },
             ],
           }],
+        })
+
+        expect(client.inputReleaseActions).to.have.been.calledWith({
+          context: autContext,
         })
       })
     })
@@ -351,6 +356,10 @@ describe('key:press automation command', () => {
               ],
             }],
           })
+
+          expect(client.inputReleaseActions).to.have.been.calledWith({
+            context: autContext,
+          })
         })
       }
     })
@@ -380,6 +389,10 @@ describe('key:press automation command', () => {
               { type: 'keyUp', value: codeTwo },
             ],
           }],
+        })
+
+        expect(client.inputReleaseActions).to.have.been.calledWith({
+          context: autContext,
         })
       })
     })
