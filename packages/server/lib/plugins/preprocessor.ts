@@ -116,7 +116,7 @@ const API: PreprocessorAPI = {
     }
 
     // Check if we already have a processor for this file in headless mode
-    if (config.isTextTerminal && processedFiles[filePath]) {
+    if (config.isTextTerminal && fileProcessors[filePath]) {
       debugFn('headless and already processed')
 
       return fileProcessors[filePath]
