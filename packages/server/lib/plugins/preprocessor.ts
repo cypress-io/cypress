@@ -47,7 +47,6 @@ const clientSideError = function (err: PreprocessorError): string {
 const baseEmitter = new EventEmitter()
 let fileObjects: Record<string, FileObject> = {}
 let fileProcessors: Record<string, Promise<string>> = {}
-let processedFiles: Record<string, boolean> = {}
 
 plugins.registerHandler((ipc: PluginIpcHandler) => {
   ipc.on('preprocessor:rerun', (filePath: string) => {
@@ -128,7 +127,6 @@ const API: PreprocessorAPI = {
       return plugins.execute('file:preprocessor', fileObject).then((arg: string) => {
         span?.setAttribute('file', arg)
         span?.end()
-        processedFiles[filePath] = true
 
         return arg
       })
@@ -159,7 +157,6 @@ const API: PreprocessorAPI = {
     delete fileObjects[filePath]
 
     delete fileProcessors[filePath]
-    delete processedFiles[filePath]
   },
 
   close () {
@@ -167,7 +164,6 @@ const API: PreprocessorAPI = {
 
     fileObjects = {}
     fileProcessors = {}
-    processedFiles = {}
     baseEmitter.emit('close')
 
     baseEmitter.removeAllListeners()
