@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "@packages/ts": "0.0.0-development",
-    "esbuild": "^0.15.3",
+    "esbuild": "^0.25.2",
     "mocha": "7.0.1"
   },
   "files": [
