@@ -292,7 +292,7 @@ describe('lib/socket', () => {
         this.options.onStudioInit.resolves({ canAccessStudioAI: true, cloudStudioSessionId: 'test-session-id' })
 
         await new Promise((resolve) => {
-          this.client.emit('studio:init', ({ canAccessStudioAI, cloudStudioSessionId }) => {
+          this.client.emit('studio:init', {}, ({ canAccessStudioAI, cloudStudioSessionId }) => {
             expect(this.options.onStudioInit).to.be.called
             expect(canAccessStudioAI).to.be.true
             expect(cloudStudioSessionId).to.eq('test-session-id')
@@ -306,10 +306,26 @@ describe('lib/socket', () => {
         this.options.onStudioInit.resolves({ canAccessStudioAI: false, cloudStudioSessionId: undefined })
 
         await new Promise((resolve) => {
-          this.client.emit('studio:init', ({ canAccessStudioAI, cloudStudioSessionId }) => {
+          this.client.emit('studio:init', {}, ({ canAccessStudioAI, cloudStudioSessionId }) => {
             expect(this.options.onStudioInit).to.be.called
             expect(canAccessStudioAI).to.be.false
             expect(cloudStudioSessionId).to.be.undefined
+
+            resolve()
+          })
+        })
+      })
+
+      it('passes through options to onStudioInit', async function () {
+        const sessionId = 'test-session-id'
+
+        this.options.onStudioInit.resolves({ canAccessStudioAI: false, cloudStudioSessionId: sessionId })
+
+        await new Promise((resolve) => {
+          this.client.emit('studio:init', { sessionId }, ({ canAccessStudioAI, cloudStudioSessionId }) => {
+            expect(this.options.onStudioInit).to.be.calledWith({ sessionId })
+            expect(canAccessStudioAI).to.be.false
+            expect(cloudStudioSessionId).to.eq(sessionId)
 
             resolve()
           })
@@ -320,7 +336,7 @@ describe('lib/socket', () => {
         this.options.onStudioInit.rejects(new Error('foo'))
 
         await new Promise((resolve) => {
-          this.client.emit('studio:init', ({ error }) => {
+          this.client.emit('studio:init', {}, ({ error }) => {
             expect(this.options.onStudioInit).to.be.called
             expect(error.message).to.eq('foo')
 
