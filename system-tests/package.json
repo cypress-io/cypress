@@ -58,7 +58,7 @@
     "debug": "^4.3.4",
     "dedent": "^0.7.0",
     "dockerode": "3.3.1",
-    "esbuild": "^0.15.3",
+    "esbuild": "^0.25.2",
     "execa": "4.1.0",
     "express": "4.21.0",
     "express-session": "1.16.1",

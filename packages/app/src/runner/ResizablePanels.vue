@@ -58,7 +58,7 @@
     <div
       v-show="showPanel4"
       data-cy="panel-4"
-      class="h-full shrink-0 z-10 bg-gray-100 relative"
+      class="h-full shrink-0 z-10 bg-gray-1100 relative"
       :style="{ width: `${panel4Width}px` }"
     >
       <slot name="panel4" />
