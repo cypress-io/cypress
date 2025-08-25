@@ -362,13 +362,13 @@ describe('events', () => {
     })
 
     it('emits studio:init:test with test id on studio:init:test', () => {
-      events.emit('studio:init:test', 'test id')
-      expect(runner.emit).to.have.been.calledWith('studio:init:test', 'test id')
+      events.emit('studio:init:test', { testId: 'test id' })
+      expect(runner.emit).to.have.been.calledWith('studio:init:test', { testId: 'test id' })
     })
 
-    it('emits studio:init:suite with test id on studio:init:suite', () => {
-      events.emit('studio:init:suite', 'suite id')
-      expect(runner.emit).to.have.been.calledWith('studio:init:suite', 'suite id')
+    it('emits studio:init:suite with suite id on studio:init:suite', () => {
+      events.emit('studio:init:suite', { suiteId: 'suite id' })
+      expect(runner.emit).to.have.been.calledWith('studio:init:suite', { suiteId: 'suite id' })
     })
 
     it('emits studio:remove:command with command id on studio:remove:command', () => {

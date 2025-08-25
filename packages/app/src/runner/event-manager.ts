@@ -276,7 +276,7 @@ export class EventManager {
       })
     }
 
-    const studioInitTest = (testId) => {
+    const studioInitTest = ({ testId }: { testId: string }) => {
       this.studioStore.setTestId(testId)
 
       this.ws.emit('studio:init', { sessionId: this.studioStore.sessionId }, ({ canAccessStudioAI, cloudStudioSessionId, error }) => {
@@ -292,33 +292,34 @@ export class EventManager {
       })
     }
 
-    this.reporterBus.on('studio:init:test', (testId) => {
+    // supports both string and object arguments for backwards compatibility.
+    // can be removed once we've updated the reporter submodule used by
+    // Test Replay
+    this.reporterBus.on('studio:init:test', (arg: string | { testId: string }) => {
       this.studioStore.setInitializedFromReporter(true)
-      studioInitTest(testId)
+      studioInitTest({ testId: typeof arg === 'string' ? arg : arg.testId })
     })
 
     this.reporterBus.on('studio:init:test:current', () => {
       if (this.studioStore.testId) {
-        studioInitTest(this.studioStore.testId)
+        studioInitTest({ testId: this.studioStore.testId })
       }
     })
 
     this.localBus.on('studio:init:test', studioInitTest)
 
-    this.reporterBus.on('studio:init:suite', (suiteId) => {
+    this.reporterBus.on('studio:init:suite', ({ suiteId }: { suiteId: string }) => {
       this.studioStore.setInitializedFromReporter(true)
       studioInitSuite({ suiteId })
     })
 
-    this.localBus.on('studio:init:suite', (suiteId) => {
-      studioInitSuite({ suiteId })
-    })
+    this.localBus.on('studio:init:suite', studioInitSuite)
 
     this.ws.on('watched:file:changed', () => {
       // when studio is active, we need to re-initialize studio before rerunning
       // studioInitTest will rerun the test once studio is re-initialized
       if (this.studioStore.isActive && this.studioStore.testId) {
-        studioInitTest(this.studioStore.testId)
+        studioInitTest({ testId: this.studioStore.testId })
 
         return
       }
