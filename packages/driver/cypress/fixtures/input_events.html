@@ -4,7 +4,6 @@
   <title>Input Event Monitor</title>
   <script defer>
     ['keydown', 'keyup', 'keypress', 'input'].forEach((ev) => {
-      document.addEventListener(ev,console.log.bind(console))
       document.addEventListener(ev, (data) => {
         document.getElementById(ev).value += data.key ?? data.data
       })
