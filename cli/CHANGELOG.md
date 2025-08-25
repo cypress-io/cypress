@@ -6,6 +6,7 @@ _Released 08/26/2025 (PENDING)_
 **Bugfixes:**
 
 - Fixed an issue where the open Studio button would incorrectly show for component tests. Addressed in [#32315](https://github.com/cypress-io/cypress/pull/32315).
+- Fixed an issue where Cypress would crash when Studio was open and the page was refreshed. Addressed in [#32349](https://github.com/cypress-io/cypress/pull/32349).
 
 **Misc:**
 
