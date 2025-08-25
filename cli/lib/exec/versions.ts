@@ -6,7 +6,7 @@ import { throwFormErrorText, errors } from '../errors'
 
 const debug = Debug('cypress:cli')
 
-const getVersions = async (): Promise<any> => {
+const getBinaryDirectory = async (): Promise<string> => {
   if (util.getEnv('CYPRESS_RUN_BINARY')) {
     let envBinaryPath = path.resolve(util.getEnv('CYPRESS_RUN_BINARY') as string)
 
@@ -25,7 +25,11 @@ const getVersions = async (): Promise<any> => {
     }
   }
 
-  const binDir = state.getBinaryDir()
+  return state.getBinaryDir()
+}
+
+const getVersions = async (): Promise<any> => {
+  const binDir = await getBinaryDirectory()
 
   const pkg = await state.getBinaryPkgAsync(binDir)
 
