@@ -143,6 +143,7 @@ describe('cli', () => {
 
     logger.reset()
 
+    // @ts-expect-error - mockImplementation
     processExitSpy = vi.spyOn(process, 'exit').mockImplementation(() => null)
 
     // @ts-expect-error - mockImplementation
@@ -801,7 +802,6 @@ describe('cli', () => {
 
     describe('cypress info', () => {
       beforeEach(() => {
-        // @ts-expect-error
         info.start.mockResolvedValue(undefined)
       })
 
@@ -823,8 +823,6 @@ describe('cli', () => {
         await exec('cache list')
 
         await flushPromises()
-
-        // expect(util.logErrorExit1).toHaveBeenCalledWith(err)
 
         expect(logger.print()).toMatchSnapshot()
       })
