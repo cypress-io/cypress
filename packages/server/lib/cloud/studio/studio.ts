@@ -4,7 +4,7 @@ import Debug from 'debug'
 import { requireScript } from '../require_script'
 import path from 'path'
 import { reportStudioError, ReportStudioErrorOptions } from '../api/studio/report_studio_error'
-import { serializeError } from '@packages/errors/src/errorUtils'
+import { ensureError } from '@packages/errors/src/errorUtils'
 import crypto, { BinaryLike } from 'crypto'
 import { StudioElectron } from './StudioElectron'
 
@@ -144,13 +144,7 @@ export class StudioManager implements StudioManagerShape {
       // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
       return this._studioServer[method].apply(this._studioServer, args)
     } catch (error: unknown) {
-      let actualError: Error
-
-      if (!(error instanceof Error)) {
-        actualError = new Error(serializeError(error))
-      } else {
-        actualError = error
-      }
+      const actualError = ensureError(error)
 
       this.status = 'IN_ERROR'
       this.reportError(actualError, method, ...args)
@@ -174,13 +168,7 @@ export class StudioManager implements StudioManagerShape {
       // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
       return await this._studioServer[method].apply(this._studioServer, args)
     } catch (error: unknown) {
-      let actualError: Error
-
-      if (!(error instanceof Error)) {
-        actualError = new Error(serializeError(error))
-      } else {
-        actualError = error
-      }
+      const actualError = ensureError(error)
 
       // only set error state if this request is essential
       if (isEssential) {

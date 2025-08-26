@@ -1,7 +1,7 @@
 import type { StudioCloudApi } from '@packages/types/src/studio/studio-server-types'
 import Debug from 'debug'
 import { stripPath } from '../../strip_path'
-import { serializeError, serializeArguments } from '@packages/errors/src/errorUtils'
+import { ensureError, serializeArgumentsToString } from '@packages/errors/src/errorUtils'
 const debug = Debug('cypress:server:cloud:api:studio:report_studio_errors')
 import { logError } from '@packages/stderr-filtering'
 
@@ -53,26 +53,12 @@ export function reportStudioError ({
     return
   }
 
-  let errorObject: Error
-
-  if (!(error instanceof Error)) {
-    errorObject = new Error(serializeError(error))
-  } else {
-    errorObject = error
-  }
+  const errorObject = ensureError(error)
 
   let studioMethodArgsString: string | undefined
 
   if (studioMethodArgs) {
-    try {
-      const serializedArgs = serializeArguments(studioMethodArgs)
-
-      studioMethodArgsString = JSON.stringify({
-        args: serializedArgs,
-      })
-    } catch (e: unknown) {
-      studioMethodArgsString = `Unknown args: ${e}`
-    }
+    studioMethodArgsString = serializeArgumentsToString(studioMethodArgs)
   }
 
   try {

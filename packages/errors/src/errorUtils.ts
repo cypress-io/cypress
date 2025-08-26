@@ -7,7 +7,6 @@ const pluralize = require('pluralize')
 const humanTime = require('@packages/server/lib/util/human_time')
 
 import type { CypressError, ErrorLike } from './errorTypes'
-import safeStringify from 'safe-stringify'
 import { serializeError as serializeErrorToObject, isErrorLike } from 'serialize-error'
 
 export {
@@ -95,10 +94,23 @@ export const serializeError = (error: unknown): string => {
       return error.toString()
     }
 
-    return safeStringify(error)
+    // Use serialize-error for safe object serialization (handles circular refs)
+    return JSON.stringify(serializeErrorToObject(error))
   }
 
   return String(error)
+}
+
+/**
+ * Creates an Error object from any value, ensuring it's always an Error instance
+ * This eliminates the need for manual error type checking and creation
+ */
+export const ensureError = (error: unknown): Error => {
+  if (error instanceof Error) {
+    return error
+  }
+
+  return new Error(serializeError(error))
 }
 
 /**
@@ -119,7 +131,8 @@ export const serializeArguments = (args: unknown[]): unknown[] => {
       }
 
       try {
-        return JSON.parse(safeStringify(arg))
+        // Use serialize-error for safe object serialization (handles circular refs)
+        return JSON.parse(JSON.stringify(serializeErrorToObject(arg)))
       } catch {
         // If parsing fails, fall back to string conversion
         return String(arg)
@@ -137,4 +150,18 @@ export const serializeArguments = (args: unknown[]): unknown[] => {
 
     return arg
   })
+}
+
+/**
+ * Safely serializes arguments to a JSON string, handling circular references
+ * This replaces manual JSON.stringify calls that might fail
+ */
+export const serializeArgumentsToString = (args: unknown[]): string => {
+  try {
+    const serialized = serializeArguments(args)
+
+    return JSON.stringify({ args: serialized })
+  } catch (e: unknown) {
+    return `Unknown args: ${e}`
+  }
 }
