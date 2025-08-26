@@ -164,7 +164,7 @@ const runModule = {
   processRunOptions,
   isValidProject,
   // resolves with the number of failed tests
-  start (options: any = {}): any {
+  async start (options: any = {}): Promise<any> {
     _.defaults(options, {
       key: null,
       spec: null,
@@ -195,8 +195,9 @@ const runModule = {
       return run()
     }
 
-    return verifyModule.start()
-    .then(run)
+    await verifyModule.start()
+
+    return run()
   },
 }
 
