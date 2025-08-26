@@ -1409,6 +1409,7 @@ const Keys: Record<string, Cypress.SupportedNamedKey> = {
   ENTER: 'Enter',
   TAB: 'Tab',
   BACKSPACE: 'Backspace',
+  SPACE: 'Space',
   DELETE: 'Delete',
   INSERT: 'Insert',
   F1: 'F1',

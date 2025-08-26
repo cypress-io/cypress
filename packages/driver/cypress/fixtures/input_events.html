@@ -8,6 +8,11 @@
         document.getElementById(ev).value += data.key ?? data.data
       })
     })
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('button').addEventListener('click', (data) => {
+        document.getElementById('checkbox').checked = !document.getElementById('checkbox').checked
+      })
+    })
   </script>
 </head>
 
@@ -18,4 +23,7 @@
   <input type="text" id="keypress" />
   <input type="text" id="input_source" />
   <input type="text" id="input" />
+
+  <input type="button" id="button" />
+  <input type="checkbox" id="checkbox" />
 </body>

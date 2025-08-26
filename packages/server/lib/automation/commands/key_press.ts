@@ -1,5 +1,5 @@
 import type { Protocol } from 'devtools-protocol'
-import { NamedKeys, SupportedKey, SupportedNamedKey, toSupportedKey } from '@packages/types'
+import { NamedKeys, SupportedKey, SupportedNamedKey, toSupportedKey, isSupportedKey, SpaceKey } from '@packages/types'
 import type { SendDebuggerCommand } from '../../browsers/cdp_automation'
 import type { Client } from 'webdriver'
 import Debug from 'debug'
@@ -15,6 +15,33 @@ type InputKeySourceAction = Parameters<Client['inputPerformActions']>[0]['action
     ? Actions extends Array<infer Action> ? Action : never
     : never
   : never
+
+function getKeyParams (key: SupportedKey): { text?: string, key: string, code?: string } {
+  if (!isSupportedKey(key)) {
+    throw new Error(`Invalid key: ${key}`)
+  }
+
+  if (key === SpaceKey) {
+    return {
+      text: ' ',
+      key: ' ',
+    }
+  }
+
+  const isNamedKey = NamedKeys.includes(key)
+
+  if (isNamedKey) {
+    return {
+      key,
+      code: key,
+    }
+  }
+
+  return {
+    key,
+    text: key,
+  }
+}
 
 export async function cdpKeyPress (
   inKey: SupportedKey,
@@ -42,24 +69,25 @@ export async function cdpKeyPress (
   }
 
   try {
-    // Named keys must be dispatched as single characters,
+    // Named keys must be dispatched as full strings,
+    // single-character keys must be dispatched as single characters,
     // multi-codepoint characters must be dispatched as individual codepoints
-    const isNamedKey = NamedKeys.includes(key)
-
     const chars = NamedKeys.includes(key) ? [key] : [...key]
 
     for (const char of chars) {
-      debug('dispatching keydown', { char })
+      const params = getKeyParams(toSupportedKey(char))
+
+      debug('dispatching keydown', params)
+
       await send('Input.dispatchKeyEvent', {
         type: 'keyDown',
-        ...(isNamedKey ? {} : { text: char }),
-        key: char,
+        ...params,
       })
 
-      debug('dispatching keyup', { char })
+      debug('dispatching keyup', params)
       await send('Input.dispatchKeyEvent', {
         type: 'keyUp',
-        key: char,
+        ...params,
       })
     }
   } catch (e) {

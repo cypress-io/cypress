@@ -17,11 +17,6 @@ describe('src/cy/commands/actions/press', () => {
       if (key !== 'F6') {
         cy.get('#keyup').should('have.value', key)
       }
-
-      // named keys are not dispatched as keypress events
-      if (!Object.values(Cypress.Keyboard.Keys).includes(key)) {
-        cy.get('#keypress').should('have.value', key)
-      }
     })
   }
 
@@ -37,12 +32,34 @@ describe('src/cy/commands/actions/press', () => {
     '+', '[', ']', '{', '}', '\\', '|', ';', ':', '\'', '"', ',', '.',
     '<', '>', '/', '?', '`', '~', ' ', '€', 'é'].forEach(testKeyDownUp)
 
-  Object.values(Cypress.Keyboard.Keys).forEach(testKeyDownUp)
+  Object.values(Cypress.Keyboard.Keys).filter((key) => key !== 'Space').forEach(testKeyDownUp)
 
   it('dispatches the input event when an input is modified via cy.press', () => {
     cy.get('#input_source').focus()
     cy.press('a')
     cy.get('#input_source').should('have.value', 'a')
     cy.get('#input').should('have.value', 'a')
+  })
+
+  it('sets the value of the keydown input to \&nbsp; from the onclick listener', () => {
+    cy.get('#input_source').focus()
+    cy.press(Cypress.Keyboard.Keys.SPACE)
+    cy.get('#keydown').should('have.value', ' ')
+  })
+
+  describe('when space is pressed when a button is focused', () => {
+    beforeEach(() => {
+      cy.get('#button').focus()
+    })
+
+    it('fires the click event on the button when the named key is sent', () => {
+      cy.press(Cypress.Keyboard.Keys.SPACE)
+      cy.get('#checkbox').should('be.checked')
+    })
+
+    it('fires the click event on the button when a space is sent', () => {
+      cy.press(' ')
+      cy.get('#checkbox').should('be.checked')
+    })
   })
 })

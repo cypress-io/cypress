@@ -6,6 +6,8 @@ const invalidKeyErrorKind = 'InvalidKeyError'
 
 export type SupportedNamedKey = Cypress.SupportedNamedKey
 
+export const SpaceKey = 'Space'
+
 /**
  * Array of all supported named keys that can be used with cy.press().
  * These are special keys that have specific meanings beyond single characters.
@@ -22,6 +24,7 @@ export const NamedKeys: SupportedNamedKey[] = [
   'Enter',
   'Tab',
   'Backspace',
+  SpaceKey,
   'Delete',
   'Insert',
   'F1',
