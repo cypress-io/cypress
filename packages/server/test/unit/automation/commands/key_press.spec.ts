@@ -150,7 +150,7 @@ describe('key:press automation command', () => {
         }).resolves(topActiveElement)
       })
 
-      it('dispaches a keydown followed by a keyup event to the provided send fn with the tab keycode', async () => {
+      it('dispatches a keydown followed by a keyup event to the provided send fn with the tab keycode', async () => {
         await cdpKeyPress(tab, sendFn, executionContexts, frameTree)
 
         expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {

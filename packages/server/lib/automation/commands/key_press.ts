@@ -1,5 +1,5 @@
 import type { Protocol } from 'devtools-protocol'
-import { NamedKeys, SupportedKey, SupportedNamedKey } from '@packages/types'
+import { NamedKeys, SupportedKey, SupportedNamedKey, toSupportedKey } from '@packages/types'
 import type { SendDebuggerCommand } from '../../browsers/cdp_automation'
 import type { Client } from 'webdriver'
 import Debug from 'debug'
@@ -17,11 +17,13 @@ type InputKeySourceAction = Parameters<Client['inputPerformActions']>[0]['action
   : never
 
 export async function cdpKeyPress (
-  key: SupportedKey,
+  inKey: SupportedKey,
   send: SendDebuggerCommand,
   contexts: Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription>,
   frameTree: Protocol.Page.FrameTree,
 ): Promise<void> {
+  const key = toSupportedKey(inKey)
+
   debug('cdp keypress', { key, length: [...key].length })
   const autFrame = frameTree.childFrames?.find(({ frame }) => {
     return frame.name?.includes(AUT_FRAME_NAME_IDENTIFIER)
@@ -44,7 +46,7 @@ export async function cdpKeyPress (
     // multi-codepoint characters must be dispatched as individual codepoints
     const isNamedKey = NamedKeys.includes(key)
 
-    const chars = [...key].length === 1 || isNamedKey ? [key] : [...key]
+    const chars = NamedKeys.includes(key) ? [key] : [...key]
 
     for (const char of chars) {
       debug('dispatching keydown', { char })
@@ -108,7 +110,7 @@ export async function bidiKeyPress (inKey: SupportedKey, client: Client, autCont
   const activeWindow = await getActiveWindow(client)
   const { contexts: [{ context: topLevelContext }] } = await client.browsingContextGetTree({})
 
-  const key: string = BidiOverrideCodepoints[inKey] ?? inKey
+  const key = toSupportedKey(BidiOverrideCodepoints[inKey] ?? inKey)
 
   // TODO: refactor for Cy15 https://github.com/cypress-io/cypress/issues/31480
   if (activeWindow !== topLevelContext) {

@@ -43,7 +43,7 @@ enum SupportedKeyType {}
 
 /**
  * Union type representing all keys supported by cy.press().
- * Includes single-character strings (inluding unicode characters with multiple code points)
+ * Includes single-character strings (including unicode characters with multiple code points)
  * and named utility keys.
  * Must be cast to via `toSupportedKey` or guarded with `isSupportedKey`
  * to ensure it is a valid key.
