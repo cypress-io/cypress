@@ -53,12 +53,20 @@ enum SupportedKeyType {}
  */
 export type SupportedKey = SupportedKeyType & string
 
+function isSingleDigitNumber (key: number | string): boolean {
+  return typeof key === 'number' && key === Math.floor(key) && key >= 0 && key <= 9
+}
+
 /**
  * Type guard that checks if a string is a supported key for cy.press().
  * @param key The string to check
  * @returns True if the key is supported (single character or named key)
  */
-export function isSupportedKey (key: string): key is SupportedKey {
+export function isSupportedKey (key: string | number): key is SupportedKey {
+  if (isSingleDigitNumber(key)) {
+    return isSupportedKey(String(key))
+  }
+
   if (!(typeof key === 'string')) {
     return false
   }
@@ -95,6 +103,10 @@ export class InvalidKeyError extends Error {
  * @throws InvalidKeyError when the key is not supported
  */
 export function toSupportedKey (key: string): SupportedKey {
+  if (typeof key === 'number' && key >= 0 && key <= 9) {
+    return toSupportedKey(String(key))
+  }
+
   if (isSupportedKey(key)) {
     return key
   }
