@@ -25,6 +25,7 @@
     "lodash": "^4.17.21",
     "pluralize": "8.0.0",
     "safe-stringify": "1.2.0",
+    "serialize-error": "12.0.0",
     "strip-ansi": "6.0.1"
   },
   "devDependencies": {

@@ -8,6 +8,7 @@ const humanTime = require('@packages/server/lib/util/human_time')
 
 import type { CypressError, ErrorLike } from './errorTypes'
 import safeStringify from 'safe-stringify'
+import { serializeError as serializeErrorToObject, isErrorLike } from 'serialize-error'
 
 export {
   pluralize,
@@ -84,8 +85,8 @@ export const logError = function (err: CypressError | ErrorLike, color: AllowedC
  */
 export const serializeError = (error: unknown): string => {
   if (typeof error === 'object' && error !== null) {
-    // Handle Error objects specially to include message and stack
-    if (error instanceof Error) {
+    // Handle Error objects specially using isErrorLike for robust detection
+    if (isErrorLike(error)) {
       return error.message || error.toString()
     }
 
@@ -107,13 +108,9 @@ export const serializeError = (error: unknown): string => {
 export const serializeArguments = (args: unknown[]): unknown[] => {
   return args.map((arg) => {
     if (typeof arg === 'object' && arg !== null) {
-      // Handle Error objects specially
-      if (arg instanceof Error) {
-        return {
-          name: arg.name,
-          message: arg.message,
-          stack: arg.stack,
-        }
+      // Handle Error objects specially using isErrorLike for robust detection
+      if (isErrorLike(arg)) {
+        return serializeErrorToObject(arg)
       }
 
       // Handle RegExp objects
