@@ -49,17 +49,6 @@ export default function (Commands: Cypress.Commands, Cypress: Cypress.Cypress, c
       return null
     }
 
-    if (Cypress.browser.name === 'firefox' && Number(Cypress.browser.majorVersion) < 135) {
-      $errUtils.throwErrByPath('press.unsupported_browser_version', {
-        onFail: log,
-        args: {
-          browser: Cypress.browser.name,
-          version: Cypress.browser.majorVersion,
-          minimumVersion: 135,
-        },
-      })
-    }
-
     try {
       const command: 'key:press' = 'key:press'
       const args: AutomationCommands[typeof command]['dataType'] = {

@@ -695,6 +695,7 @@ declare namespace Cypress {
         ENTER: 'Enter',
         TAB: 'Tab',
         BACKSPACE: 'Backspace',
+        SPACE: 'Space',
         DELETE: 'Delete',
         INSERT: 'Insert',
         F1: 'F1',

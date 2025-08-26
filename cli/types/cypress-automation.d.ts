@@ -7,6 +7,7 @@ declare namespace Cypress {
   'Home' |
   'PageDown' |
   'PageUp' |
+  'Space' |
   'Enter' |
   'Tab' |
   'Backspace' |

@@ -92,6 +92,7 @@ export const BidiOverrideCodepoints: Record<SupportedNamedKey, string> = {
   'Backspace': '\uE003',
   'Delete': '\uE017',
   'Insert': '\uE016',
+  'Space': '\uE00D',
   'F1': '\uE031',
   'F2': '\uE032',
   'F3': '\uE033',

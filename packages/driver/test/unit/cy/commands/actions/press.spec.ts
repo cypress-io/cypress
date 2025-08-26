@@ -150,23 +150,6 @@ describe('cy/commands/actions/press', () => {
     })
   })
 
-  describe('when in firefox below 135', () => {
-    it('throws an unsupported browser version error', async () => {
-      Cypress.browser.name = 'firefox'
-      Cypress.browser.majorVersion = '134'
-      await expect(press('Tab')).rejects.toThrow('`cy.press()` is not supported in firefox version 134. Upgrade to version 135 to use `cy.press()`.')
-
-      expect($errUtils.throwErrByPath).toHaveBeenCalledWith('press.unsupported_browser_version', {
-        onFail: logReturnValue,
-        args: {
-          browser: Cypress.browser.name,
-          version: Cypress.browser.majorVersion,
-          minimumVersion: 135,
-        },
-      })
-    })
-  })
-
   describe('when automation throws', () => {
     it('throws via $errUtils, passing in the results from Cypress.log', async () => {
       const thrown = new Error('Some error')
