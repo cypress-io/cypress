@@ -7,6 +7,7 @@ const pluralize = require('pluralize')
 const humanTime = require('@packages/server/lib/util/human_time')
 
 import type { CypressError, ErrorLike } from './errorTypes'
+import safeStringify from 'safe-stringify'
 
 export {
   pluralize,
@@ -82,16 +83,21 @@ export const logError = function (err: CypressError | ErrorLike, color: AllowedC
  * This prevents [object Object] issues when reporting errors to Sentry
  */
 export const serializeError = (error: unknown): string => {
-  try {
-    if (typeof error === 'object' && error !== null) {
-      return JSON.stringify(error)
+  if (typeof error === 'object' && error !== null) {
+    // Handle Error objects specially to include message and stack
+    if (error instanceof Error) {
+      return error.message || error.toString()
     }
 
-    return String(error)
-  } catch {
-    // Fallback if JSON.stringify fails (e.g., circular references)
-    return String(error)
+    // Handle RegExp objects
+    if (error instanceof RegExp) {
+      return error.toString()
+    }
+
+    return safeStringify(error)
   }
+
+  return String(error)
 }
 
 /**
@@ -101,11 +107,35 @@ export const serializeError = (error: unknown): string => {
 export const serializeArguments = (args: unknown[]): unknown[] => {
   return args.map((arg) => {
     if (typeof arg === 'object' && arg !== null) {
+      // Handle Error objects specially
+      if (arg instanceof Error) {
+        return {
+          name: arg.name,
+          message: arg.message,
+          stack: arg.stack,
+        }
+      }
+
+      // Handle RegExp objects
+      if (arg instanceof RegExp) {
+        return arg.toString()
+      }
+
       try {
-        return JSON.parse(JSON.stringify(arg))
+        return JSON.parse(safeStringify(arg))
       } catch {
+        // If parsing fails, fall back to string conversion
         return String(arg)
       }
+    }
+
+    // Handle functions and symbols
+    if (typeof arg === 'function') {
+      return String(arg)
+    }
+
+    if (typeof arg === 'symbol') {
+      return String(arg)
     }
 
     return arg
