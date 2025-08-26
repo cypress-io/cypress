@@ -25,11 +25,6 @@ import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/service-worker-manager'
 import { v4 } from 'uuid'
 import { StudioLifecycleManager } from './cloud/studio/StudioLifecycleManager'
-import { reportStudioError } from './cloud/api/studio/report_studio_error'
-import { CloudRequest } from './cloud/api/cloud_request'
-import { isRetryableError } from './cloud/network/is_retryable_error'
-import { asyncRetry } from './util/async_retry'
-import { getCloudMetadata } from './cloud/get_cloud_metadata'
 import { telemetryManager } from './cloud/studio/telemetry/TelemetryManager'
 import { INITIALIZATION_MARK_NAMES, INITIALIZATION_TELEMETRY_GROUP_NAMES } from './cloud/studio/telemetry/constants/initialization'
 import { TelemetryReporter } from './cloud/studio/telemetry/TelemetryReporter'
@@ -426,22 +421,6 @@ export class ProjectBase extends EE {
 
           if (!isStudioReady) {
             debug('User entered studio mode before cloud studio was initialized')
-            const { cloudUrl, cloudHeaders } = await getCloudMetadata(this.ctx.cloud)
-
-            reportStudioError({
-              cloudApi: {
-                cloudUrl,
-                cloudHeaders,
-                CloudRequest,
-                isRetryableError,
-                asyncRetry,
-              },
-              studioHash: this.id,
-              projectSlug: this.cfg.projectId,
-              error: new Error('User entered studio before cloud studio was initialized'),
-              studioMethod: 'onStudioInit',
-              studioMethodArgs: [],
-            })
 
             endTelemetry({ status: 'studio-not-ready', canAccessStudioAI: false })
 
