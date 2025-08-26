@@ -74,7 +74,7 @@ export const processOpenOptions = (options: any = {}): string[] => {
   return args
 }
 
-export const start = (options: any = {}): any => {
+export const start = async (options: any = {}): Promise<any> => {
   function open (): any {
     try {
       const args = processOpenOptions(options)
@@ -96,8 +96,9 @@ export const start = (options: any = {}): any => {
     return open()
   }
 
-  return verifyModule.start()
-  .then(open)
+  await verifyModule.start()
+
+  return open()
 }
 
 export default {
