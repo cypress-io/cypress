@@ -55,7 +55,19 @@ export function reportStudioError ({
   let errorObject: Error
 
   if (!(error instanceof Error)) {
-    errorObject = new Error(String(error))
+    // Properly serialize non-Error objects instead of using default toString()
+    let errorMessage: string
+    try {
+      if (typeof error === 'object' && error !== null) {
+        errorMessage = JSON.stringify(error)
+      } else {
+        errorMessage = String(error)
+      }
+    } catch {
+      // Fallback if JSON.stringify fails (e.g., circular references)
+      errorMessage = String(error)
+    }
+    errorObject = new Error(errorMessage)
   } else {
     errorObject = error
   }
@@ -64,8 +76,20 @@ export function reportStudioError ({
 
   if (studioMethodArgs) {
     try {
+      // Deep serialize arguments to avoid [object Object] issues
+      const serializedArgs = studioMethodArgs.map(arg => {
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.parse(JSON.stringify(arg))
+          } catch {
+            return String(arg)
+          }
+        }
+        return arg
+      })
+      
       studioMethodArgsString = JSON.stringify({
-        args: studioMethodArgs,
+        args: serializedArgs,
       })
     } catch (e: unknown) {
       studioMethodArgsString = `Unknown args: ${e}`

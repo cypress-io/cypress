@@ -146,7 +146,19 @@ export class StudioManager implements StudioManagerShape {
       let actualError: Error
 
       if (!(error instanceof Error)) {
-        actualError = new Error(String(error))
+        // Properly serialize non-Error objects instead of using default toString()
+        let errorMessage: string
+        try {
+          if (typeof error === 'object' && error !== null) {
+            errorMessage = JSON.stringify(error)
+          } else {
+            errorMessage = String(error)
+          }
+        } catch {
+          // Fallback if JSON.stringify fails (e.g., circular references)
+          errorMessage = String(error)
+        }
+        actualError = new Error(errorMessage)
       } else {
         actualError = error
       }
@@ -176,7 +188,19 @@ export class StudioManager implements StudioManagerShape {
       let actualError: Error
 
       if (!(error instanceof Error)) {
-        actualError = new Error(String(error))
+        // Properly serialize non-Error objects instead of using default toString()
+        let errorMessage: string
+        try {
+          if (typeof error === 'object' && error !== null) {
+            errorMessage = JSON.stringify(error)
+          } else {
+            errorMessage = String(error)
+          }
+        } catch {
+          // Fallback if JSON.stringify fails (e.g., circular references)
+          errorMessage = String(error)
+        }
+        actualError = new Error(errorMessage)
       } else {
         actualError = error
       }
