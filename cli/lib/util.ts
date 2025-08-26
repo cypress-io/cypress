@@ -270,13 +270,13 @@ const util = {
   getEnvOverrides (options: any = {}): any {
     return _
     .chain({})
-    .extend(util.getEnvColors())
-    .extend(util.getForceTty())
+    .extend(this.getEnvColors())
+    .extend(this.getForceTty())
     .omitBy(_.isUndefined) // remove undefined values
     .mapValues((value: any) => { // stringify to 1 or 0
       return value ? '1' : '0'
     })
-    .extend(util.getOriginalNodeOptions())
+    .extend(this.getOriginalNodeOptions())
     .value()
   },
 
@@ -292,14 +292,14 @@ const util = {
 
   getForceTty (): any {
     return {
-      FORCE_STDIN_TTY: util.isTty(process.stdin.fd),
-      FORCE_STDOUT_TTY: util.isTty(process.stdout.fd),
-      FORCE_STDERR_TTY: util.isTty(process.stderr.fd),
+      FORCE_STDIN_TTY: this.isTty(process.stdin.fd),
+      FORCE_STDOUT_TTY: this.isTty(process.stdout.fd),
+      FORCE_STDERR_TTY: this.isTty(process.stderr.fd),
     }
   },
 
   getEnvColors (): any {
-    const sc = util.supportsColor()
+    const sc = this.supportsColor()
 
     return {
       FORCE_COLOR: sc,
@@ -428,13 +428,13 @@ const util = {
 
   async getPlatformInfo (): Promise<string> {
     const [version, osArch] = await Bluebird.all([
-      util.getOsVersionAsync(),
+      this.getOsVersionAsync(),
       this.getRealArch(),
     ])
 
     return stripIndent`
       Platform: ${os.platform()}-${osArch} (${version})
-      Cypress Version: ${util.pkgVersion()}
+      Cypress Version: ${this.pkgVersion()}
     `
   },
 
