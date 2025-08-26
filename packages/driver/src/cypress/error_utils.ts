@@ -12,6 +12,7 @@ import chai from 'chai'
 import _ from 'lodash'
 import $dom from '../dom'
 import { stripAnsi } from '@packages/errors'
+import { serializeError } from '@packages/errors/src/errorUtils'
 import $errorMessages from './error_messages'
 import $stackUtils, { StackAndCodeFrameIndex } from './stack_utils'
 import $utils from './utils'
@@ -630,11 +631,7 @@ const isLoggableError = (error: unknown): error is LoggableError => {
 const toLoggableError = (maybeError: unknown): LoggableError => {
   if (isLoggableError(maybeError)) return maybeError
 
-  try {
-    return { message: JSON.stringify(maybeError) }
-  } catch {
-    return { message: String(maybeError) }
-  }
+  return { message: serializeError(maybeError) }
 }
 
 const getUnsupportedPlugin = (runnable) => {

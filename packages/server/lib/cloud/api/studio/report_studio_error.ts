@@ -1,6 +1,7 @@
 import type { StudioCloudApi } from '@packages/types/src/studio/studio-server-types'
 import Debug from 'debug'
 import { stripPath } from '../../strip_path'
+import { serializeError, serializeArguments } from '@packages/errors/src/errorUtils'
 const debug = Debug('cypress:server:cloud:api:studio:report_studio_errors')
 import { logError } from '@packages/stderr-filtering'
 
@@ -55,19 +56,7 @@ export function reportStudioError ({
   let errorObject: Error
 
   if (!(error instanceof Error)) {
-    // Properly serialize non-Error objects instead of using default toString()
-    let errorMessage: string
-    try {
-      if (typeof error === 'object' && error !== null) {
-        errorMessage = JSON.stringify(error)
-      } else {
-        errorMessage = String(error)
-      }
-    } catch {
-      // Fallback if JSON.stringify fails (e.g., circular references)
-      errorMessage = String(error)
-    }
-    errorObject = new Error(errorMessage)
+    errorObject = new Error(serializeError(error))
   } else {
     errorObject = error
   }
@@ -76,18 +65,8 @@ export function reportStudioError ({
 
   if (studioMethodArgs) {
     try {
-      // Deep serialize arguments to avoid [object Object] issues
-      const serializedArgs = studioMethodArgs.map(arg => {
-        if (typeof arg === 'object' && arg !== null) {
-          try {
-            return JSON.parse(JSON.stringify(arg))
-          } catch {
-            return String(arg)
-          }
-        }
-        return arg
-      })
-      
+      const serializedArgs = serializeArguments(studioMethodArgs)
+
       studioMethodArgsString = JSON.stringify({
         args: serializedArgs,
       })

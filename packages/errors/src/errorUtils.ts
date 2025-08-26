@@ -76,3 +76,38 @@ export const logError = function (err: CypressError | ErrorLike, color: AllowedC
 
   return err
 }
+
+/**
+ * Safely serializes an error or object to a string representation
+ * This prevents [object Object] issues when reporting errors to Sentry
+ */
+export const serializeError = (error: unknown): string => {
+  try {
+    if (typeof error === 'object' && error !== null) {
+      return JSON.stringify(error)
+    }
+
+    return String(error)
+  } catch {
+    // Fallback if JSON.stringify fails (e.g., circular references)
+    return String(error)
+  }
+}
+
+/**
+ * Deep serializes arguments to avoid [object Object] issues
+ * Useful for method arguments that need to be logged or reported
+ */
+export const serializeArguments = (args: unknown[]): unknown[] => {
+  return args.map((arg) => {
+    if (typeof arg === 'object' && arg !== null) {
+      try {
+        return JSON.parse(JSON.stringify(arg))
+      } catch {
+        return String(arg)
+      }
+    }
+
+    return arg
+  })
+}

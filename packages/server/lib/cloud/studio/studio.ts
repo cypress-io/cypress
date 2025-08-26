@@ -4,6 +4,7 @@ import Debug from 'debug'
 import { requireScript } from '../require_script'
 import path from 'path'
 import { reportStudioError, ReportStudioErrorOptions } from '../api/studio/report_studio_error'
+import { serializeError } from '@packages/errors/src/errorUtils'
 import crypto, { BinaryLike } from 'crypto'
 import { StudioElectron } from './StudioElectron'
 
@@ -146,19 +147,7 @@ export class StudioManager implements StudioManagerShape {
       let actualError: Error
 
       if (!(error instanceof Error)) {
-        // Properly serialize non-Error objects instead of using default toString()
-        let errorMessage: string
-        try {
-          if (typeof error === 'object' && error !== null) {
-            errorMessage = JSON.stringify(error)
-          } else {
-            errorMessage = String(error)
-          }
-        } catch {
-          // Fallback if JSON.stringify fails (e.g., circular references)
-          errorMessage = String(error)
-        }
-        actualError = new Error(errorMessage)
+        actualError = new Error(serializeError(error))
       } else {
         actualError = error
       }
@@ -188,19 +177,7 @@ export class StudioManager implements StudioManagerShape {
       let actualError: Error
 
       if (!(error instanceof Error)) {
-        // Properly serialize non-Error objects instead of using default toString()
-        let errorMessage: string
-        try {
-          if (typeof error === 'object' && error !== null) {
-            errorMessage = JSON.stringify(error)
-          } else {
-            errorMessage = String(error)
-          }
-        } catch {
-          // Fallback if JSON.stringify fails (e.g., circular references)
-          errorMessage = String(error)
-        }
-        actualError = new Error(errorMessage)
+        actualError = new Error(serializeError(error))
       } else {
         actualError = error
       }
