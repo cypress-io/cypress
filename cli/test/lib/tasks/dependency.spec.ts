@@ -1,3 +1,5 @@
+import { describe, it, expect } from 'vitest'
+
 /**
  * as of Webpack 5, dependencies that are polyfilled through the Provide plugin must be defined inside the CLI
  * in order to guarantee there is a version of the dependency accessible by the cypress CLI, either in the cypress directory
@@ -5,6 +7,7 @@
  */
 describe('dependencies', () => {
   it('process dependency exists in package.json and is available', async () => {
+    // @ts-expect-error resolveJsonModule is set to true in tsconfig.json
     const { dependencies } = (await import('../../../package.json')).default
 
     expect(dependencies.process).to.be.ok
@@ -15,6 +18,8 @@ describe('dependencies', () => {
   })
 
   it('buffer dependency exists in package.json and is available', async () => {
+    // @ts-expect-error resolveJsonModule is set to true in tsconfig.json
+
     const { dependencies } = (await import('../../../package.json')).default
 
     expect(dependencies.buffer).to.be.ok

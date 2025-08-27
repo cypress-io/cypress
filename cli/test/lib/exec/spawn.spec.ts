@@ -17,7 +17,7 @@ import util from '../../../lib/util'
 
 const flushPromises = () => {
   return new Promise<void>((resolve) => {
-    setTimeout(resolve)
+    setTimeout(resolve, 100)
   })
 }
 
