@@ -6,41 +6,28 @@ const logLevel = () => {
   return (process.env.npm_config_loglevel || 'notice')
 }
 
-// Simple serialization helper to prevent [object Object] issues
-const serializeMessage = (msg) => {
-  if (typeof msg === 'object' && msg !== null) {
-    try {
-      return JSON.stringify(msg)
-    } catch {
-      return String(msg)
-    }
-  }
-
-  return String(msg)
-}
-
 const error = (...messages) => {
   logs.push(messages.join(' '))
-  console.log(chalk.red(...messages.map(serializeMessage))) // eslint-disable-line no-console
+  console.log(chalk.red(...messages)) // eslint-disable-line no-console
 }
 
 const warn = (...messages) => {
   if (logLevel() === 'silent') return
 
   logs.push(messages.join(' '))
-  console.log(chalk.yellow(...messages.map(serializeMessage))) // eslint-disable-line no-console
+  console.log(chalk.yellow(...messages)) // eslint-disable-line no-console
 }
 
 const log = (...messages) => {
   if (logLevel() === 'silent' || logLevel() === 'warn') return
 
   logs.push(messages.join(' '))
-  console.log(...messages.map(serializeMessage)) // eslint-disable-line no-console
+  console.log(...messages) // eslint-disable-line no-console
 }
 
 const always = (...messages) => {
   logs.push(messages.join(' '))
-  console.log(...messages.map(serializeMessage)) // eslint-disable-line no-console
+  console.log(...messages) // eslint-disable-line no-console
 }
 
 // splits long text into lines and calls log()
