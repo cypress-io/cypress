@@ -1,11 +1,11 @@
-diff --git a/node_modules/socket.io-parser/dist/binary.js b/node_modules/socket.io-parser/dist/binary.js
-index 50ed998..0492ec4 100644
---- a/node_modules/socket.io-parser/dist/binary.js
-+++ b/node_modules/socket.io-parser/dist/binary.js
+diff --git a/node_modules/socket.io-parser/build/cjs/binary.js b/node_modules/socket.io-parser/build/cjs/binary.js
+index 4dfe08f..6fd7d98 100644
+--- a/node_modules/socket.io-parser/build/cjs/binary.js
++++ b/node_modules/socket.io-parser/build/cjs/binary.js
 @@ -2,6 +2,9 @@
  Object.defineProperty(exports, "__esModule", { value: true });
  exports.reconstructPacket = exports.deconstructPacket = void 0;
- const is_binary_1 = require("./is-binary");
+ const is_binary_js_1 = require("./is-binary.js");
 +/**
 + * This file is patched to enable circular objects to be sent over socket.io.
 + */
@@ -26,7 +26,7 @@ index 50ed998..0492ec4 100644
 +function _deconstructPacket(data, buffers, known, retvals) {
      if (!data)
          return data;
-     if (is_binary_1.isBinary(data)) {
+     if ((0, is_binary_js_1.isBinary)(data)) {
 @@ -26,18 +29,27 @@ function _deconstructPacket(data, buffers) {
          buffers.push(data);
          return placeholder;
@@ -41,7 +41,7 @@ index 50ed998..0492ec4 100644
 +    known.push(data)
 +    if (Array.isArray(data)) {
          const newData = new Array(data.length);
-+        retvals.set(data, newData)
++        retvals.set(data, newData);
          for (let i = 0; i < data.length; i++) {
 -            newData[i] = _deconstructPacket(data[i], buffers);
 +            newData[i] = _deconstructPacket(data[i], buffers, known, retvals);
@@ -50,11 +50,10 @@ index 50ed998..0492ec4 100644
      }
      else if (typeof data === "object" && !(data instanceof Date)) {
          const newData = {};
-+        retvals.set(data, newData)
++        retvals.set(data, newData);
          for (const key in data) {
--            if (data.hasOwnProperty(key)) {
+             if (Object.prototype.hasOwnProperty.call(data, key)) {
 -                newData[key] = _deconstructPacket(data[key], buffers);
-+            if (Object.prototype.hasOwnProperty.call(data, key)) {
 +                newData[key] = _deconstructPacket(data[key], buffers, known, retvals);
              }
          }
@@ -65,7 +64,7 @@ index 50ed998..0492ec4 100644
  function reconstructPacket(packet, buffers) {
 -    packet.data = _reconstructPacket(packet.data, buffers);
 +    packet.data = _reconstructPacket(packet.data, buffers, []);
-     packet.attachments = undefined; // no longer useful
+     delete packet.attachments; // no longer useful
      return packet;
  }
  exports.reconstructPacket = reconstructPacket;
@@ -74,14 +73,14 @@ index 50ed998..0492ec4 100644
      if (!data)
          return data;
      if (data && data._placeholder === true) {
-@@ -71,16 +83,19 @@ function _reconstructPacket(data, buffers) {
-         else {
+@@ -72,15 +84,19 @@ function _reconstructPacket(data, buffers) {
              throw new Error("illegal attachments");
          }
-+    } else if (known.includes(data)) {
-+        return data
      }
 -    else if (Array.isArray(data)) {
++    else if (known.includes(data)) {
++        return data
++    }
 +    known.push(data)
 +    if (Array.isArray(data)) {
          for (let i = 0; i < data.length; i++) {
@@ -91,46 +90,46 @@ index 50ed998..0492ec4 100644
      }
      else if (typeof data === "object") {
          for (const key in data) {
-             if (data.hasOwnProperty(key)) {
+             if (Object.prototype.hasOwnProperty.call(data, key)) {
 -                data[key] = _reconstructPacket(data[key], buffers);
 +                data[key] = _reconstructPacket(data[key], buffers, known);
              }
          }
      }
-diff --git a/node_modules/socket.io-parser/dist/index.js b/node_modules/socket.io-parser/dist/index.js
-index b0c8727..3b2dcc3 100644
---- a/node_modules/socket.io-parser/dist/index.js
-+++ b/node_modules/socket.io-parser/dist/index.js
-@@ -5,6 +5,7 @@ const Emitter = require("component-emitter");
- const binary_1 = require("./binary");
- const is_binary_1 = require("./is-binary");
- const debug = require("debug")("socket.io-parser");
+diff --git a/node_modules/socket.io-parser/build/cjs/index.js b/node_modules/socket.io-parser/build/cjs/index.js
+index df82588..64cc302 100644
+--- a/node_modules/socket.io-parser/build/cjs/index.js
++++ b/node_modules/socket.io-parser/build/cjs/index.js
+@@ -6,6 +6,7 @@ const binary_js_1 = require("./binary.js");
+ const is_binary_js_1 = require("./is-binary.js");
+ const debug_1 = require("debug"); // debug()
+ const debug = (0, debug_1.default)("socket.io-parser"); // debug()
 +const flatted = require("flatted");
  /**
-  * Protocol version.
-  *
-@@ -66,7 +67,7 @@ class Encoder {
+  * These strings must not be used as event names, as they have a special meaning.
+  */
+@@ -89,7 +90,7 @@ class Encoder {
          }
          // json data
          if (null != obj.data) {
--            str += JSON.stringify(obj.data);
-+            str += flatted.stringify(obj.data);
+-            str += JSON.stringify(obj.data, this.replacer);
++            str += flatted.stringify(obj.data, this.replacer);
          }
          debug("encoded %j as %s", obj, str);
          return str;
-@@ -235,7 +236,7 @@ class Decoder extends Emitter {
- exports.Decoder = Decoder;
- function tryParse(str) {
-     try {
--        return JSON.parse(str);
-+        return flatted.parse(str);
+@@ -243,7 +244,7 @@ class Decoder extends component_emitter_1.Emitter {
      }
-     catch (e) {
-         return false;
-diff --git a/node_modules/socket.io-parser/dist/is-binary.js b/node_modules/socket.io-parser/dist/is-binary.js
+     tryParse(str) {
+         try {
+-            return JSON.parse(str, this.reviver);
++            return flatted.parse(str, this.reviver);
+         }
+         catch (e) {
+             return false;
+diff --git a/node_modules/socket.io-parser/build/cjs/is-binary.js b/node_modules/socket.io-parser/build/cjs/is-binary.js
 index 4b7c234..73ec260 100644
---- a/node_modules/socket.io-parser/dist/is-binary.js
-+++ b/node_modules/socket.io-parser/dist/is-binary.js
+--- a/node_modules/socket.io-parser/build/cjs/is-binary.js
++++ b/node_modules/socket.io-parser/build/cjs/is-binary.js
 @@ -1,6 +1,7 @@
  "use strict";
  Object.defineProperty(exports, "__esModule", { value: true });
