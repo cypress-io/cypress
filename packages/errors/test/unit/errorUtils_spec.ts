@@ -84,7 +84,6 @@ describe('errorUtils', () => {
 
       const result = serializeError(obj)
 
-      // Should handle circular references gracefully with safe-stringify
       expect(result).to.include('name')
       expect(result).to.include('self')
       expect(result).to.include('[Circular]')
@@ -100,7 +99,6 @@ describe('errorUtils', () => {
 
       const result = serializeError(obj)
 
-      // Should handle mixed content gracefully
       expect(result).to.include('normal')
       expect(result).to.include('value')
     })
@@ -110,7 +108,6 @@ describe('errorUtils', () => {
         const bigInt = BigInt(123)
         const result = serializeError(bigInt)
 
-        // BigInt should be converted to string
         expect(result).to.equal('123')
       }
     })
@@ -119,7 +116,6 @@ describe('errorUtils', () => {
       const date = new Date('2023-01-01T00:00:00.000Z')
       const result = serializeError(date)
 
-      // Date should be serialized to ISO string
       expect(result).to.include('2023-01-01')
     })
 
@@ -127,7 +123,6 @@ describe('errorUtils', () => {
       const regex = /test-pattern/gi
       const result = serializeError(regex)
 
-      // RegExp should be serialized to string
       expect(result).to.include('test-pattern')
     })
   })
@@ -150,7 +145,6 @@ describe('errorUtils', () => {
       const args = [{ key: 'value' }, { nested: { deep: 'value' } }]
       const result = serializeArguments(args)
 
-      // serializeArguments now returns serialized strings for objects
       expect(result[0]).to.equal('{"key":"value"}')
       expect(result[1]).to.equal('{"nested":{"deep":"value"}}')
     })
@@ -159,7 +153,6 @@ describe('errorUtils', () => {
       const args = [[1, 2, 3], ['a', 'b', 'c']]
       const result = serializeArguments(args)
 
-      // serializeArguments now returns serialized strings for arrays
       expect(result[0]).to.equal('[1,2,3]')
       expect(result[1]).to.equal('["a","b","c"]')
     })
@@ -175,7 +168,6 @@ describe('errorUtils', () => {
       ]
       const result = serializeArguments(args)
 
-      // serializeArguments now returns serialized strings for objects/arrays
       expect(result[0]).to.equal('string')
       expect(result[1]).to.equal(42)
       expect(result[2]).to.equal('{"key":"value"}')
@@ -198,7 +190,6 @@ describe('errorUtils', () => {
 
       const result = serializeArguments(args)
 
-      // serializeArguments now returns serialized strings for complex objects
       expect(result[0]).to.be.a('string')
       expect(result[0]).to.include('John')
       expect(result[0]).to.include('Jane')
@@ -251,7 +242,6 @@ describe('errorUtils', () => {
 
       const result = serializeArguments(args)
 
-      // Error should be serialized to plain object
       expect(result[0]).to.have.property('message', 'Test error')
       expect(result[0]).to.have.property('stack')
       expect(result[1]).to.equal('string arg')
@@ -263,7 +253,6 @@ describe('errorUtils', () => {
 
       const result = serializeArguments(args)
 
-      // Date should be serialized to string by serialize-javascript
       expect(result[0]).to.be.a('string')
       expect(result[0]).to.include('2023-01-01')
       expect(result[1]).to.equal('string arg')
@@ -275,7 +264,6 @@ describe('errorUtils', () => {
 
       const result = serializeArguments(args)
 
-      // RegExp should be serialized to string by serialize-javascript
       expect(result[0]).to.be.a('string')
       expect(result[0]).to.include('test-pattern')
       expect(result[1]).to.equal('string arg')
@@ -289,7 +277,6 @@ describe('errorUtils', () => {
 
       const result = serializeArguments(args)
 
-      // Function should fall back to string conversion
       expect(result[0]).to.be.a('string')
       expect(result[0]).to.include('testFunction')
       expect(result[1]).to.equal('string arg')
@@ -301,7 +288,6 @@ describe('errorUtils', () => {
 
       const result = serializeArguments(args)
 
-      // Symbol should fall back to string conversion
       expect(result[0]).to.be.a('string')
       expect(result[0]).to.include('test symbol')
       expect(result[1]).to.equal('string arg')
@@ -377,11 +363,11 @@ describe('errorUtils', () => {
       // Complex objects should be preserved as objects for debug inspection
       expect(result[0]).to.be.an('object')
       expect(result[0]).to.have.property('users')
-      expect(result[0].users).to.be.an('array')
-      expect(result[0].users[0]).to.have.property('name', 'John')
-      expect(result[0].users[1]).to.have.property('name', 'Jane')
+      expect((result[0] as any).users).to.be.an('array')
+      expect((result[0] as any).users[0]).to.have.property('name', 'John')
+      expect((result[0] as any).users[1]).to.have.property('name', 'Jane')
       expect(result[0]).to.have.property('metadata')
-      expect(result[0].metadata).to.have.property('count', 2)
+      expect((result[0] as any).metadata).to.have.property('count', 2)
     })
 
     it('should handle circular references while preserving objects', () => {
@@ -392,7 +378,6 @@ describe('errorUtils', () => {
       const args = [obj, 'normal string']
       const result = serializeArgumentsForDebug(args)
 
-      // Objects should be preserved even with circular references
       expect(result[0]).to.be.an('object')
       expect(result[0]).to.have.property('name', 'test')
       expect(result[0]).to.have.property('self')
@@ -407,7 +392,6 @@ describe('errorUtils', () => {
 
       const result = serializeArgumentsForDebug(args)
 
-      // Functions should be converted to strings for debug safety
       expect(result[0]).to.be.a('string')
       expect(result[0]).to.include('testFunction')
       expect(result[1]).to.equal('string arg')
@@ -419,7 +403,6 @@ describe('errorUtils', () => {
 
       const result = serializeArgumentsForDebug(args)
 
-      // Symbols should be converted to strings for debug safety
       expect(result[0]).to.be.a('string')
       expect(result[0]).to.include('test symbol')
       expect(result[1]).to.equal('string arg')
@@ -431,7 +414,6 @@ describe('errorUtils', () => {
 
       const result = serializeArgumentsForDebug(args)
 
-      // Date objects should be preserved for debug inspection
       expect(result[0]).to.be.instanceOf(Date)
       expect(result[0]).to.deep.equal(date)
       expect(result[1]).to.equal('string arg')
@@ -443,7 +425,6 @@ describe('errorUtils', () => {
 
       const result = serializeArgumentsForDebug(args)
 
-      // RegExp objects should be preserved for debug inspection
       expect(result[0]).to.be.instanceOf(RegExp)
       expect(result[0]).to.deep.equal(regex)
       expect(result[1]).to.equal('string arg')
@@ -473,7 +454,6 @@ describe('errorUtils', () => {
       const args = [complexObj, 'simple string', 123]
       const result = serializeArguments(args)
 
-      // Should handle complex nested structure as serialized string
       expect(result[0]).to.be.a('string')
       expect(result[0]).to.include('value')
       expect(result[0]).to.include('42')
@@ -483,7 +463,6 @@ describe('errorUtils', () => {
     })
 
     it('should handle the specific [object Object] scenario we were solving', () => {
-      // This is the exact scenario we were trying to prevent
       const errorObj = {
         message: 'Something went wrong',
         details: {
