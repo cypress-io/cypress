@@ -8,6 +8,7 @@ const Promise = require('bluebird')
 const appData = require('../util/app_data')
 const plugins = require('../plugins')
 const { telemetry } = require('@packages/telemetry')
+const { serializeError } = require('@packages/errors/src/errorUtils')
 
 const errorMessage = function (err = {}) {
   return err.stack || err.annotated || err.message || err.toString()
@@ -23,7 +24,7 @@ const clientSideError = function (err) {
 (function () {
   Cypress.action("spec:script:error", {
     type: "BUNDLE_ERROR",
-    error: "${err}"
+    error: "${serializeError(err)}"
   })
 }())\
 `
