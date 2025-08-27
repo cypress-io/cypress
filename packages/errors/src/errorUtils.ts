@@ -92,12 +92,10 @@ export const logError = function (err: CypressError | ErrorLike, color: AllowedC
  */
 export const serializeError = (error: unknown): string => {
   if (typeof error === 'object' && error !== null) {
-    // Handle Error objects specially using isErrorLike for robust detection
     if (isErrorLike(error)) {
       return error.message || error.toString()
     }
 
-    // Try serialize-javascript first for comprehensive object serialization
     // This handles RegExp, Date, Function, Set, Map, BigInt, URLs
     try {
       return serialize(error)
@@ -135,20 +133,14 @@ export const ensureError = (error: unknown): Error => {
   return new Error(serializeError(error))
 }
 
-/**
- * Optimized serialization helper that avoids duplicate logic
- */
 const serializeObject = (obj: object): unknown => {
-  // Handle Error objects specially
   if (isErrorLike(obj)) {
     return serializeErrorToObject(obj)
   }
 
-  // Use serialize-javascript for comprehensive object serialization
   try {
     return serialize(obj)
   } catch {
-    // If serialize-javascript fails, fall back to serialize-error
     try {
       return serializeErrorToObject(obj)
     } catch {
@@ -175,7 +167,6 @@ export const serializeArguments = (args: unknown[]): unknown[] => {
       return serializeObject(arg)
     }
 
-    // Handle functions and symbols
     if (typeof arg === 'function' || typeof arg === 'symbol') {
       return String(arg)
     }
@@ -200,7 +191,6 @@ export const serializeArgumentsForDebug = (args: unknown[]): unknown[] => {
   return args.map((arg) => {
     // Keep objects as objects for interactive inspection
     if (typeof arg === 'object' && arg !== null) {
-      // Only handle functions and symbols by converting them
       return arg
     }
 
