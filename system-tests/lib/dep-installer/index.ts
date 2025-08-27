@@ -4,7 +4,6 @@ import execa from 'execa'
 import { cyTmpDir, projectPath, projects, root } from '../fixtures'
 import { getYarnCommand } from './yarn'
 import { getNpmCommand } from './npm'
-import { serializeArguments } from '@packages/errors/src/errorUtils'
 
 type Dependencies = Record<string, string>
 
@@ -31,7 +30,7 @@ type SystemTestPkgJson = {
   optionalDependencies?: Dependencies
 }
 
-const log = (...args) => console.log('📦', ...serializeArguments(args))
+const log = (...args) => console.log('📦', ...args)
 
 /**
 * Given a package name, returns the path to the module directory on disk.

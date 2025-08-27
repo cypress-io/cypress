@@ -1,6 +1,5 @@
 const minimist = require('minimist')
 const { execSync } = require('child_process')
-const { serializeArguments } = require('@packages/errors/src/errorUtils')
 
 const args = minimist(process.argv.slice(2))
 
@@ -12,7 +11,7 @@ if (!/^\d+\.\d+\.\d+$/.test(args.version)) {
   throw new Error('A valid semantic version (X.Y.Z) must be passed in `--version`.')
 }
 
-const log = (...args) => console.log('🏗', ...serializeArguments(args))
+const log = (...args) => console.log('🏗', ...args)
 
 const exec = args['dry-run'] ?
   (...args) => log('Dry run, not executing:', args[0])

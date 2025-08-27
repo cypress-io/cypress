@@ -1,16 +1,15 @@
 import chalk from 'chalk'
 import { Transform } from 'stream'
-import { serializeArguments } from '@packages/errors/src/errorUtils'
 
 export function prefixLog (prefixStr: string): Pick<typeof console, 'log' | 'error'> {
-  const prefix = `[${chalk.gray(prefixStr)}]: `
+  const prefix = chalk.cyan(prefixStr)
 
   return {
     log: (...args: string[]) => {
-      return console.log(prefix, ...serializeArguments(args))
+      return console.log(prefix, ...args)
     },
     error: (...args: string[]) => {
-      return console.error(prefix, ...args.map((a) => chalk.red(a)))
+      return console.error(prefix, ...args)
     },
   }
 }
