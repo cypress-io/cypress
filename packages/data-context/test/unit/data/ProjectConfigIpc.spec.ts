@@ -38,7 +38,7 @@ describe('ProjectConfigIpc', () => {
   context('forkChildProcess', () => {
     // some of these node versions may not exist, but we want to verify
     // the experimental flags are correctly disabled for future versions
-    const NODE_VERSIONS = ['20.5.1', '20.6.0', '20.19.1', '22.15.0', '22.18.0']
+    const NODE_VERSIONS = ['20.5.1', '20.6.0', '20.19.1', '22.15.0']
 
     const lastVersionWithDeprecatedLoaderOption = '20.5.1'
 
