@@ -1,6 +1,6 @@
 import type Sinon from 'sinon'
 import type { expect as Expect } from 'chai'
-import { SupportedKey, NamedKeys, toSupportedKey } from '@packages/types'
+import { SupportedKey, NamedKeys, toSupportedKey, SpaceKey } from '@packages/types'
 import type { SendDebuggerCommand } from '../../../../lib/browsers/cdp_automation'
 import { cdpKeyPress, bidiKeyPress, BidiOverrideCodepoints } from '../../../../lib/automation/commands/key_press'
 import { Client as WebdriverClient } from 'webdriver'
@@ -92,11 +92,13 @@ describe('key:press automation command', () => {
 
         expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
           type: 'keyDown',
+          code: 'Tab',
           key: 'Tab',
         })
 
         expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
           type: 'keyUp',
+          code: 'Tab',
           key: 'Tab',
         })
       })
@@ -156,30 +158,50 @@ describe('key:press automation command', () => {
         expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
           type: 'keyDown',
           key: 'Tab',
+          code: 'Tab',
         })
 
         expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
           type: 'keyUp',
           key: 'Tab',
+          code: 'Tab',
         })
       })
 
       describe('when supplied a valid named key', () => {
-        for (const key of NamedKeys) {
+        for (const key of NamedKeys.filter((k) => k !== SpaceKey)) {
           it(`dispatches a keydown followed by a keyup event to the provided send fn with the ${key} keycode`, async () => {
             await cdpKeyPress(key as SupportedKey, sendFn, executionContexts, frameTree)
 
             expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
               type: 'keyDown',
               key,
+              code: key,
             })
 
             expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
               type: 'keyUp',
               key,
+              code: key,
             })
           })
         }
+
+        it(`dispatches ' ' as text and key, with no code, when the named Space key is pressed`, async () => {
+          await cdpKeyPress(toSupportedKey(SpaceKey), sendFn, executionContexts, frameTree)
+
+          expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
+            type: 'keyDown',
+            key: ' ',
+            text: ' ',
+          })
+
+          expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
+            type: 'keyUp',
+            key: ' ',
+            text: ' ',
+          })
+        })
       })
 
       describe('when supplied a valid character key', () => {
@@ -218,6 +240,7 @@ describe('key:press automation command', () => {
           expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
             type: 'keyUp',
             key: codeOne,
+            text: codeOne,
           })
 
           expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
@@ -229,6 +252,7 @@ describe('key:press automation command', () => {
           expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
             type: 'keyUp',
             key: codeTwo,
+            text: codeTwo,
           })
         })
       })

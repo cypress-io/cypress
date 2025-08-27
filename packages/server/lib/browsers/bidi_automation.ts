@@ -681,6 +681,7 @@ export class BidiAutomation {
           return
         case 'key:press':
           if (this.autContextId) {
+            debug(`key:press %s`, data.key)
             await bidiKeyPress(toSupportedKey(data.key), this.webDriverClient, this.autContextId, this.topLevelContextId)
           } else {
             throw new Error('Cannot emit key press: no AUT context initialized')

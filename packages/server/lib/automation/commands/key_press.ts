@@ -135,10 +135,12 @@ export const BidiOverrideCodepoints: Record<SupportedNamedKey, string> = {
   'F12': '\uE03C',
 }
 
-export async function bidiKeyPress (inKey: SupportedKey, client: Client, autContext: string, idSuffix?: string): Promise<void> {
+// any is fine to be used here because the key must be typeguarded before it can be used as a supported key
+export async function bidiKeyPress (inKey: any, client: Client, autContext: string, idSuffix?: string): Promise<void> {
   const activeWindow = await getActiveWindow(client)
   const { contexts: [{ context: topLevelContext }] } = await client.browsingContextGetTree({})
 
+  debug('bidi keypress', { inKey, activeWindow, topLevelContext })
   const key = toSupportedKey(BidiOverrideCodepoints[inKey] ?? inKey)
 
   // TODO: refactor for Cy15 https://github.com/cypress-io/cypress/issues/31480
@@ -178,19 +180,22 @@ export async function bidiKeyPress (inKey: SupportedKey, client: Client, autCont
   try {
     const chars = NamedKeys.includes(inKey) ? [key] : [...key]
 
+    const actions = chars.map((value): InputKeySourceAction[] => {
+      return [
+        { type: 'keyDown', value },
+        { type: 'keyUp', value },
+      ]
+    })
+    .reduce((arr, el) => [...arr, ...el], [])
+
+    debug('preparing to perform InputKeySourceActions:', { actions })
+
     await client.inputPerformActions({
       context: autContext,
       actions: [{
         type: 'key',
         id: `${autContext}-${inKey}-${idSuffix || Date.now()}`,
-        actions: chars
-        .map((value): InputKeySourceAction[] => {
-          return [
-            { type: 'keyDown', value },
-            { type: 'keyUp', value },
-          ]
-        })
-        .reduce((arr, el) => [...arr, ...el], []),
+        actions,
       }],
     })
 

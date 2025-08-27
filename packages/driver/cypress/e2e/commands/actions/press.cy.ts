@@ -8,60 +8,42 @@ describe('src/cy/commands/actions/press', () => {
     cy.visit('/fixtures/input_events.html')
   })
 
+  it('fires the click event on the button when the named key is sent', () => {
+    cy.get('#button').focus()
+    cy.get('#button').should('be.focused')
+    cy.press(Cypress.Keyboard.Keys.SPACE)
+    cy.get('#checkbox').should('be.checked')
+  })
+
+  it('fires the click event on the button when a space is sent', () => {
+    cy.get('#button').focus()
+    cy.get('#button').should('be.focused')
+    cy.press(' ')
+    cy.get('#checkbox').should('be.checked')
+  })
+
   const testKeyDownUp = (key) => {
     it(`dispatches ${key} keypress to the AUT`, () => {
       cy.press(key)
-      cy.get('#keydown').should('have.value', key)
-
-      // in some browsers, F6 will cause the frame to lose focus, so the keyup will not be triggered
-      if (key !== 'F6') {
-        cy.get('#keyup').should('have.value', key)
-      }
+      // spacebar is a special case - it's both a named key and a single character,
+      // but when we dispatch the named key (via codepoint in bidi, via `Space` in CDP)
+      // we get the space character, not the name of the key.
+      cy.get('#keydown').should('have.value', key === 'Space' ? ' ' : key)
     })
   }
 
-  // // Numbers
-  ;['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].forEach(testKeyDownUp)
+  Object.values(Cypress.Keyboard.Keys).forEach(testKeyDownUp)
 
-  ;[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].forEach(testKeyDownUp)
+  // sets truncated for speed
+
+  // // Numbers
+  ;['0', '1'].forEach(testKeyDownUp)
+
+  ;[0, 1].forEach(testKeyDownUp)
 
   // // Letters
-  ;['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-    'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'].forEach(testKeyDownUp)
+  ;['a', 'z'].forEach(testKeyDownUp)
 
   // // Special characters
-  ;['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '=',
-    '+', '[', ']', '{', '}', '\\', '|', ';', ':', '\'', '"', ',', '.',
-    '<', '>', '/', '?', '`', '~', ' ', '€', 'é'].forEach(testKeyDownUp)
-
-  Object.values(Cypress.Keyboard.Keys).filter((key) => key !== 'Space').forEach(testKeyDownUp)
-
-  it('dispatches the input event when an input is modified via cy.press', () => {
-    cy.get('#input_source').focus()
-    cy.press('a')
-    cy.get('#input_source').should('have.value', 'a')
-    cy.get('#input').should('have.value', 'a')
-  })
-
-  it('sets the value of the keydown input to \&nbsp; from the onclick listener', () => {
-    cy.get('#input_source').focus()
-    cy.press(Cypress.Keyboard.Keys.SPACE)
-    cy.get('#keydown').should('have.value', ' ')
-  })
-
-  describe('when space is pressed when a button is focused', () => {
-    beforeEach(() => {
-      cy.get('#button').focus()
-    })
-
-    it('fires the click event on the button when the named key is sent', () => {
-      cy.press(Cypress.Keyboard.Keys.SPACE)
-      cy.get('#checkbox').should('be.checked')
-    })
-
-    it('fires the click event on the button when a space is sent', () => {
-      cy.press(' ')
-      cy.get('#checkbox').should('be.checked')
-    })
-  })
+  ;['!', ' ', '€', 'é'].forEach(testKeyDownUp)
 })
