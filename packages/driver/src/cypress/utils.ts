@@ -8,7 +8,7 @@ import $dom from '../dom'
 import $jquery from '../dom/jquery'
 import { $Location } from './location'
 import $errUtils from './error_utils'
-import { serializeArguments } from '@packages/errors/src/errorUtils'
+import { serializeArgumentsForDebug } from '@packages/errors/src/errorUtils'
 
 const tagOpen = /\[([a-z\s='"-]+)\]/g
 const tagClosed = /\[\/([a-z]+)\]/g
@@ -62,7 +62,7 @@ export default {
 
   log (...msgs) {
     // eslint-disable-next-line no-console
-    return console.log(...serializeArguments(msgs))
+    return console.log(...serializeArgumentsForDebug(msgs))
   },
 
   monkeypatchBefore (origFn, fn) {

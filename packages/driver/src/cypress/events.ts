@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { EventEmitter2 } from 'eventemitter2'
 import { debug as Debug } from 'debug'
 import Bluebird from 'bluebird'
-import { serializeArguments } from '@packages/errors/src/errorUtils'
+import { serializeArgumentsForDebug } from '@packages/errors/src/errorUtils'
 
 const log = Debug('cypress:driver')
 
@@ -72,7 +72,7 @@ export function extend (obj): Events {
       // is our log enabled and have we not silenced
       // this specific object?
       if (log.enabled && logEmit) {
-        log('emitted: \'%s\' to \'%d\' listeners - with args: %o', eventName, listeners.length, serializeArguments(args))
+        log('emitted: \'%s\' to \'%d\' listeners - with args: %o', eventName, listeners.length, serializeArgumentsForDebug(args))
       }
 
       const listener = (fn) => {
@@ -102,7 +102,7 @@ export function extend (obj): Events {
       }
 
       if (args.length) {
-        log('emitted: \'%s\' - with args: %o', eventName, serializeArguments(args))
+        log('emitted: \'%s\' - with args: %o', eventName, serializeArgumentsForDebug(args))
       } else {
         log('emitted: \'%s\'', eventName)
       }

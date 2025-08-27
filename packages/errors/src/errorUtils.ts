@@ -185,6 +185,36 @@ export const serializeArguments = (args: unknown[]): unknown[] => {
 }
 
 /**
+ * Serializes arguments for debug logging, preserving objects for interactive inspection.
+ *
+ * This function is specifically designed for debug() calls where you want to:
+ * - Keep objects as objects so they can be expanded in the console
+ * - Handle functions and symbols by converting them to strings
+ * - Preserve primitives as-is
+ * - Handle circular references gracefully
+ *
+ * Use this with debug() calls: debug('message %o', serializeArgumentsForDebug(args))
+ * Use serializeArguments() for other serialization needs (logging, storage, etc.)
+ */
+export const serializeArgumentsForDebug = (args: unknown[]): unknown[] => {
+  return args.map((arg) => {
+    // Keep objects as objects for interactive inspection
+    if (typeof arg === 'object' && arg !== null) {
+      // Only handle functions and symbols by converting them
+      return arg
+    }
+
+    // Handle functions and symbols by converting them to strings
+    if (typeof arg === 'function' || typeof arg === 'symbol') {
+      return String(arg)
+    }
+
+    // Keep primitives as-is
+    return arg
+  })
+}
+
+/**
  * Safely serializes an ARRAY of arguments to a JSON string, handling circular references.
  *
  * This is a convenience function that combines serializeArguments + JSON.stringify:

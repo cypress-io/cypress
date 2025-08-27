@@ -1,7 +1,7 @@
 import 'sinon-chai'
 import chai, { expect } from 'chai'
 import sinon from 'sinon'
-import { serializeError, serializeArguments } from '../../src/errorUtils'
+import { serializeError, serializeArguments, serializeArgumentsForDebug } from '../../src/errorUtils'
 
 chai.use(require('@cypress/sinon-chai'))
 
@@ -304,6 +304,148 @@ describe('errorUtils', () => {
       // Symbol should fall back to string conversion
       expect(result[0]).to.be.a('string')
       expect(result[0]).to.include('test symbol')
+      expect(result[1]).to.equal('string arg')
+    })
+  })
+
+  describe('serializeArgumentsForDebug', () => {
+    it('should return empty array for empty input', () => {
+      const result = serializeArgumentsForDebug([])
+
+      expect(result).to.deep.equal([])
+    })
+
+    it('should pass through primitive values unchanged', () => {
+      const args = ['string', 42, true, null, undefined]
+      const result = serializeArgumentsForDebug(args)
+
+      expect(result).to.deep.equal(['string', 42, true, null, undefined])
+    })
+
+    it('should preserve objects for interactive inspection', () => {
+      const args = [{ key: 'value' }, { nested: { deep: 'value' } }]
+      const result = serializeArgumentsForDebug(args)
+
+      // Objects should be preserved as objects for debug inspection
+      expect(result[0]).to.deep.equal({ key: 'value' })
+      expect(result[1]).to.deep.equal({ nested: { deep: 'value' } })
+    })
+
+    it('should preserve arrays for interactive inspection', () => {
+      const args = [[1, 2, 3], ['a', 'b', 'c']]
+      const result = serializeArgumentsForDebug(args)
+
+      // Arrays should be preserved as arrays for debug inspection
+      expect(result[0]).to.deep.equal([1, 2, 3])
+      expect(result[1]).to.deep.equal(['a', 'b', 'c'])
+    })
+
+    it('should handle mixed content while preserving objects', () => {
+      const args = [
+        'string',
+        42,
+        { key: 'value' },
+        [1, 2, 3],
+        null,
+        undefined,
+      ]
+      const result = serializeArgumentsForDebug(args)
+
+      // Objects and arrays should be preserved, primitives unchanged
+      expect(result[0]).to.equal('string')
+      expect(result[1]).to.equal(42)
+      expect(result[2]).to.deep.equal({ key: 'value' })
+      expect(result[3]).to.deep.equal([1, 2, 3])
+      expect(result[4]).to.equal(null)
+      expect(result[5]).to.equal(undefined)
+    })
+
+    it('should handle nested objects and arrays while preserving them', () => {
+      const args = [{
+        users: [
+          { name: 'John', age: 30 },
+          { name: 'Jane', age: 25 },
+        ],
+        metadata: {
+          count: 2,
+          active: true,
+        },
+      }]
+
+      const result = serializeArgumentsForDebug(args)
+
+      // Complex objects should be preserved as objects for debug inspection
+      expect(result[0]).to.be.an('object')
+      expect(result[0]).to.have.property('users')
+      expect(result[0].users).to.be.an('array')
+      expect(result[0].users[0]).to.have.property('name', 'John')
+      expect(result[0].users[1]).to.have.property('name', 'Jane')
+      expect(result[0]).to.have.property('metadata')
+      expect(result[0].metadata).to.have.property('count', 2)
+    })
+
+    it('should handle circular references while preserving objects', () => {
+      const obj: any = { name: 'test' }
+
+      obj.self = obj // Create circular reference
+
+      const args = [obj, 'normal string']
+      const result = serializeArgumentsForDebug(args)
+
+      // Objects should be preserved even with circular references
+      expect(result[0]).to.be.an('object')
+      expect(result[0]).to.have.property('name', 'test')
+      expect(result[0]).to.have.property('self')
+      expect(result[1]).to.equal('normal string')
+    })
+
+    it('should convert functions to strings for debug safety', () => {
+      const func = function testFunction () {
+        return 'test'
+      }
+      const args = [func, 'string arg']
+
+      const result = serializeArgumentsForDebug(args)
+
+      // Functions should be converted to strings for debug safety
+      expect(result[0]).to.be.a('string')
+      expect(result[0]).to.include('testFunction')
+      expect(result[1]).to.equal('string arg')
+    })
+
+    it('should convert symbols to strings for debug safety', () => {
+      const sym = Symbol('test symbol')
+      const args = [sym, 'string arg']
+
+      const result = serializeArgumentsForDebug(args)
+
+      // Symbols should be converted to strings for debug safety
+      expect(result[0]).to.be.a('string')
+      expect(result[0]).to.include('test symbol')
+      expect(result[1]).to.equal('string arg')
+    })
+
+    it('should preserve Date objects for interactive inspection', () => {
+      const date = new Date('2023-01-01T00:00:00.000Z')
+      const args = [date, 'string arg']
+
+      const result = serializeArgumentsForDebug(args)
+
+      // Date objects should be preserved for debug inspection
+      expect(result[0]).to.be.instanceOf(Date)
+      expect(result[0]).to.deep.equal(date)
+      expect(result[1]).to.equal('string arg')
+    })
+
+    it('should preserve RegExp objects for interactive inspection', () => {
+      const regex = /test-pattern/gi
+      const args = [regex, 'string arg']
+
+      const result = serializeArgumentsForDebug(args)
+
+      // RegExp objects should be preserved for debug inspection
+      expect(result[0]).to.be.instanceOf(RegExp)
+      expect(result[0]).to.deep.equal(regex)
       expect(result[1]).to.equal('string arg')
     })
   })
