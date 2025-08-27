@@ -228,7 +228,7 @@ describe('lib/tasks/cache', () => {
     it('lists all versions of cached binary with last access', async function () {
       sinon.stub(state, 'getPathToExecutable').returns('/.cache/Cypress/1.2.3/app/cypress')
 
-      const statAsync = sinon.stub(fs, 'statAsync')
+      const statAsync = sinon.stub(fs, 'stat')
 
       statAsync.onFirstCall().resolves({
         atime: dayjs().subtract(3, 'month').valueOf(),
@@ -245,7 +245,7 @@ describe('lib/tasks/cache', () => {
     it('some versions have never been opened', async function () {
       sinon.stub(state, 'getPathToExecutable').returns('/.cache/Cypress/1.2.3/app/cypress')
 
-      const statAsync = sinon.stub(fs, 'statAsync')
+      const statAsync = sinon.stub(fs, 'stat')
 
       statAsync.onFirstCall().resolves({
         atime: dayjs().subtract(3, 'month').valueOf(),
@@ -261,7 +261,7 @@ describe('lib/tasks/cache', () => {
     it('shows sizes', async function () {
       sinon.stub(state, 'getPathToExecutable').returns('/.cache/Cypress/1.2.3/app/cypress')
 
-      const statAsync = sinon.stub(fs, 'statAsync')
+      const statAsync = sinon.stub(fs, 'stat')
 
       statAsync.onFirstCall().resolves({
         atime: dayjs().subtract(3, 'month').valueOf(),
