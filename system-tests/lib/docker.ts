@@ -15,7 +15,7 @@ const getDocker = () => {
 }
 
 const log = (...args) => {
-  console.log('🐋', ...args)
+  console.error('🐋', ...args)
 }
 
 class DockerProcess extends EventEmitter implements SpawnerResult {

@@ -2,14 +2,14 @@ import chalk from 'chalk'
 import { Transform } from 'stream'
 
 export function prefixLog (prefixStr: string): Pick<typeof console, 'log' | 'error'> {
-  const prefix = chalk.cyan(prefixStr)
+  const prefix = `[${chalk.gray(prefixStr)}]: `
 
   return {
     log: (...args: string[]) => {
       return console.log(prefix, ...args)
     },
     error: (...args: string[]) => {
-      return console.error(prefix, ...args)
+      return console.error(prefix, ...args.map((a) => chalk.red(a)))
     },
   }
 }
