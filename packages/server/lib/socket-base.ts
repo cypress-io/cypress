@@ -122,7 +122,7 @@ export class SocketBase {
     return new CDPSocketServer({ path: socketIoRoute })
   }
 
-  createSocketIo (server: DestroyableHttpServer, path: string, cookie: string | boolean) {
+  createSocketIo (server: DestroyableHttpServer, path: string, cookie: string) {
     return new socketIo.SocketIOServer(server, {
       path,
       cookie: {
