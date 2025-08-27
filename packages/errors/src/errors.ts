@@ -1553,6 +1553,9 @@ export const AllCypressErrors = {
   },
 } as const
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _typeCheck: Record<keyof AllCypressErrorObj, (...args: any[]) => ErrTemplateResult> = AllCypressErrors
+
 export type AllCypressErrorObj = typeof AllCypressErrors
 
 export type AllCypressErrorNames = keyof typeof AllCypressErrors
