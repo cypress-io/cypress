@@ -1,0 +1,32 @@
+diff --git a/node_modules/engine.io-parser/build/cjs/encodePacket.browser.js b/node_modules/engine.io-parser/build/cjs/encodePacket.browser.js
+index b06ec9b..e69d616 100644
+--- a/node_modules/engine.io-parser/build/cjs/encodePacket.browser.js
++++ b/node_modules/engine.io-parser/build/cjs/encodePacket.browser.js
+@@ -5,6 +5,15 @@ const withNativeBlob = typeof Blob === "function" ||
+     (typeof Blob !== "undefined" &&
+         Object.prototype.toString.call(Blob) === "[object BlobConstructor]");
+ const withNativeArrayBuffer = typeof ArrayBuffer === "function";
++/**
++ * Returns true if obj is an ArrayBuffer.
++ * This extra check is made because the "instanceof ArrayBuffer" check does not work
++ * across different execution contexts.
++ * @private
++ */
++ function isArrayBuffer(obj) {
++    return typeof obj === 'object' && obj !== null && toString.call(obj) === '[object ArrayBuffer]';
++}
+ // ArrayBuffer.isView method is not defined in IE10
+ const isView = obj => {
+     return typeof ArrayBuffer.isView === "function"
+@@ -21,9 +30,9 @@ const encodePacket = ({ type, data }, supportsBinary, callback) => {
+         }
+     }
+     else if (withNativeArrayBuffer &&
+-        (data instanceof ArrayBuffer || isView(data))) {
++        (data instanceof ArrayBuffer || isArrayBuffer(data) || isView(data))) {
+         if (supportsBinary) {
+-            return callback(data);
++            return callback((data instanceof ArrayBuffer || isArrayBuffer(data)) ? data : data.buffer);
+         }
+         else {
+             return encodeBlobAsBase64(new Blob([data]), callback);
