@@ -5,7 +5,7 @@ _Released 08/26/2025 (PENDING)_
 
 **Features:**
 
-- Expanded `cy.press()` to support more key types. Addresses [#31051](https://github.com/cypress-io/cypress/issues/31051). Addressed in [#31496](https://github.com/cypress-io/cypress/pull/31496).
+- Expanded `cy.press()` to support more key types. Addresses [#31051](https://github.com/cypress-io/cypress/issues/31051) and [#31488](https://github.com/cypress-io/cypress/issues/31488). Addressed in [#31496](https://github.com/cypress-io/cypress/pull/31496).
 
 **Bugfixes:**
 
