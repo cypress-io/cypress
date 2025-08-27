@@ -268,10 +268,10 @@ const CYPRESS_RUN_BINARY = {
   },
 }
 
-function addPlatformInformation (info: any): any {
-  return util.getPlatformInfo().then((platform: string) => {
-    return { ...info, platform }
-  })
+async function addPlatformInformation (info: any): Promise<any> {
+  const platform = await util.getPlatformInfo()
+
+  return { ...info, platform }
 }
 
 /**
