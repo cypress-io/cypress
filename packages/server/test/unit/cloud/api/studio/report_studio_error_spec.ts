@@ -205,7 +205,7 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
             message: 'test error',
             stack: sinon.match((stack) => stack.includes('<stripped-path>report_studio_error_spec.ts')),
             studioMethod: 'testMethod',
-            studioMethodArgs: JSON.stringify({ args: ['arg1', { key: '<stripped-path>file.js' }] }),
+            studioMethodArgs: '{"args":["arg1",{"key":"<stripped-path>file.js"}]}',
           }],
         },
         {
@@ -217,7 +217,7 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
       )
     })
 
-    it('handles errors in JSON.stringify for studioMethodArgs', () => {
+    it('handles circular references in studioMethodArgs gracefully', () => {
       const error = new Error('test error')
       const circularObj: any = {}
 
@@ -242,7 +242,7 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
             message: 'test error',
             stack: sinon.match((stack) => stack.includes('<stripped-path>report_studio_error_spec.ts')),
             studioMethod: 'testMethod',
-            studioMethodArgs: sinon.match(/Unknown args/),
+            studioMethodArgs: '{"args":[{"self":"[Circular]"}]}',
           }],
         },
         {
