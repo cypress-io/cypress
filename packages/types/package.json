@@ -8,7 +8,8 @@
     "build-prod": "tsc || echo 'built, with type errors'",
     "check-ts": "tsc --noEmit",
     "clean": "rimraf src/*.js src/**/*.js",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
+    "test": "vitest run"
   },
   "dependencies": {
     "semver": "^7.7.1"
