@@ -10,7 +10,7 @@ export interface PressCommand {
 }
 
 export default function (Commands: Cypress.Commands, Cypress: Cypress.Cypress, cy: $Cy, state: StateFunc, config: any) {
-  async function pressCommand (key: SupportedKey | string, userOptions?: Partial<Cypress.Loggable> & Partial<Cypress.Timeoutable>) {
+  async function pressCommand (key: SupportedKey | string | number, userOptions?: Partial<Cypress.Loggable> & Partial<Cypress.Timeoutable>) {
     const options: Cypress.Loggable & Partial<Cypress.Timeoutable> = defaults({}, userOptions, {
       log: true,
     })

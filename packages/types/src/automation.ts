@@ -90,7 +90,7 @@ export class InvalidKeyError extends Error {
  * @returns The validated SupportedKey
  * @throws InvalidKeyError when the key is not supported
  */
-export function toSupportedKey (key: string): SupportedKey {
+export function toSupportedKey (key: string | number): SupportedKey {
   if (typeof key === 'number' && key >= 0 && key <= 9) {
     return toSupportedKey(String(key))
   }
@@ -99,5 +99,5 @@ export function toSupportedKey (key: string): SupportedKey {
     return key
   }
 
-  throw new InvalidKeyError(key)
+  throw new InvalidKeyError(String(key))
 }
