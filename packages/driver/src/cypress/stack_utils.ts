@@ -149,20 +149,7 @@ const getInvocationDetails = (specWindow, config): InvocationDetails | undefined
       }
     }
 
-    const stackLines = getStackLines(stack)
-    let targetLine = stackLines[0]
-
-    for (const line of stackLines) {
-      // Skip lines that contain grep wrapper function names
-      if (line.includes('itGrep') || line.includes('describeGrep')) {
-        continue
-      }
-
-      targetLine = line
-      break
-    }
-
-    const details: Omit<InvocationDetails, 'stack'> = (getSourceDetailsForLine(config('projectRoot'), targetLine) as StackLineDetail) || {};
+    const details: Omit<InvocationDetails, 'stack'> = getSourceDetailsForFirstLine(stack, config('projectRoot')) || {};
 
     (details as any).stack = stack
 
@@ -361,14 +348,14 @@ interface StackLineDetail {
   whitespace: any
 }
 
-const getSourceDetailsForLine = (projectRoot: string, line: string): MessageLineDetail | StackLineDetail => {
+const getSourceDetailsForLine = (projectRoot, line): MessageLineDetail | StackLineDetail => {
   const whitespace = getWhitespace(line)
   const generatedDetails = parseLine(line)
 
   // if it couldn't be parsed, it's a message line
   if (!generatedDetails) {
     return {
-      message: line ? line.replace(whitespace, '') : '', // strip leading whitespace
+      message: line.replace(whitespace, ''), // strip leading whitespace
       whitespace,
     }
   }

@@ -288,7 +288,6 @@ export const useStudioStore = defineStore('studioRecorder', {
       const grepEnvVars = [
         'grep',
         'grepTags', 'grep-tags',
-        'grepBurn', 'grep-burn', 'burn',
         'grepUntagged', 'grep-untagged',
         'grepOmitFiltered', 'grep-omit-filtered',
       ]
