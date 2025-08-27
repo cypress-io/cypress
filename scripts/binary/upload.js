@@ -131,6 +131,9 @@ module.exports = {
         return fs.removeAsync(manifest)
       })
     })
+    .then(() => {
+      return uploadUtils.purgeDesktopManifest()
+    })
   },
 
   toS3 ({ file, uploadPath }) {
