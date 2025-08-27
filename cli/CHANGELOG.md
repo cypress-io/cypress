@@ -5,6 +5,7 @@ _Released 08/26/2025 (PENDING)_
 
 **Bugfixes:**
 
+- Fixed an issue where OS distributions and releases were sometimes not properly populated for Module API results and Cloud recordings. Fixes [#30533](https://github.com/cypress-io/cypress/issues/30533). Addressed in [#32283](https://github.com/cypress-io/cypress/pull/32283).
 - Fixed an issue where the open Studio button would incorrectly show for component tests. Addressed in [#32315](https://github.com/cypress-io/cypress/pull/32315).
 - Fixed an issue where the TypeScript compiler wasn't being resolved correctly when `@cypress/webpack-batteries-included-preprocessor` was used as a standalone package. Fixes [#32338](https://github.com/cypress-io/cypress/issues/32338).
 

@@ -389,28 +389,54 @@ describe('util', () => {
 
   describe('.getOsVersionAsync', () => {
     let util
-    let getos = sinon.stub().resolves(['distro-release'])
+    let systeminformation = {
+      osInfo: sinon.stub(),
+    }
 
     beforeEach(() => {
-      util = proxyquire(`${lib}/util`, { getos })
+      util = proxyquire(`${lib}/util`, { systeminformation })
     })
 
-    it('calls os.release on non-linux', () => {
+    it('calls os.release when systeminformation fails', () => {
       os.platform.returns('darwin')
       os.release.returns('some-release')
-      util.getOsVersionAsync()
+      systeminformation.osInfo.rejects(new Error('systeminformation failed'))
+
+      return util.getOsVersionAsync()
       .then(() => {
         expect(os.release).to.be.called
-        expect(getos).to.not.be.called
+        expect(systeminformation.osInfo).to.be.called
       })
     })
 
-    it('NOT calls os.release on linux', () => {
+    it('uses systeminformation when it succeeds', () => {
       os.platform.returns('linux')
-      util.getOsVersionAsync()
-      .then(() => {
+      systeminformation.osInfo.resolves({
+        distro: 'Ubuntu',
+        release: '22.04',
+      })
+
+      return util.getOsVersionAsync()
+      .then((result) => {
+        expect(result).to.equal('Ubuntu - 22.04')
+        expect(systeminformation.osInfo).to.be.called
+        // os.release should not be called when systeminformation succeeds
         expect(os.release).to.not.be.called
-        expect(getos).to.be.called
+      })
+    })
+
+    it('falls back to os.release when systeminformation returns incomplete data', () => {
+      os.platform.returns('linux')
+      os.release.returns('5.15.0')
+      systeminformation.osInfo.resolves({
+        distro: 'Ubuntu',
+        // missing release property
+      })
+
+      return util.getOsVersionAsync()
+      .then(() => {
+        expect(systeminformation.osInfo).to.be.called
+        expect(os.release).to.be.called
       })
     })
   })
