@@ -52,7 +52,6 @@ export class CDPBrowserSocket extends Emitter implements SocketShape {
     }, 0)
   }
 
-  // @ts-expect-error TODO: fix emit type
   emit = async (event: string, ...args: any[]) => {
     // Generate a unique key for this event
     const uuid = uuidv4()
@@ -63,6 +62,7 @@ export class CDPBrowserSocket extends Emitter implements SocketShape {
     }
 
     if (callback) {
+      // @ts-expect-error TODO: Property 'once' does not exist on type 'CDPBrowserSocket'.
       this.once(uuid, callback)
     }
 
