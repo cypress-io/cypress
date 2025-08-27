@@ -12,7 +12,7 @@ import chai from 'chai'
 import _ from 'lodash'
 import $dom from '../dom'
 import { stripAnsi } from '@packages/errors'
-import { serializeError } from '@packages/errors/src/errorUtils'
+import { serializeError, ensureError } from '@packages/errors/src/errorUtils'
 import $errorMessages from './error_messages'
 import $stackUtils, { StackAndCodeFrameIndex } from './stack_utils'
 import $utils from './utils'
@@ -33,7 +33,7 @@ if (!Error.captureStackTrace) {
 
 const prepareErrorForSerialization = (err) => {
   if (typeof err === 'string') {
-    err = new Error(err)
+    err = ensureError(err)
   }
 
   if (err[ERR_PREPARED_FOR_SERIALIZATION]) {
@@ -224,7 +224,7 @@ const appendErrMsg = (err, errMsg) => {
 
 const makeErrFromObj = (obj: any) => {
   if (_.isString(obj)) {
-    return new Error(obj)
+    return ensureError(obj)
   }
 
   if (_.isObject(obj) && _.isString((obj as any).message)) {
@@ -234,7 +234,7 @@ const makeErrFromObj = (obj: any) => {
       stack?: string
     }
 
-    const err2 = new Error(obj.message)
+    const err2 = ensureError(obj.message)
 
     err2.name = (obj as any).name
     err2.stack = (obj as any).stack
@@ -249,7 +249,7 @@ const makeErrFromObj = (obj: any) => {
   }
 
   // handle all other errors gracefully (e.g. a promise is rejected with undefined)
-  return new Error(`An unknown error has occurred: ${obj}`)
+  return ensureError(`An unknown error has occurred: ${obj}`)
 }
 
 const makeErrFromErr = (err, options: any = {}) => {

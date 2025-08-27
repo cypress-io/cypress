@@ -4,9 +4,10 @@ const { promisify } = require('util')
 const glob = promisify(require('glob'))
 const Fixtures = require('../lib/fixtures')
 const { scaffoldProjectNodeModules } = require('../lib/dep-installer')
+const { serializeArguments } = require('@packages/errors/src/errorUtils')
 
 const logTag = '[update-cache.js]'
-const log = (...args) => console.log(logTag, ...args)
+const log = (...args) => console.log(logTag, ...serializeArguments(args))
 
 ;(async () => {
   /**

@@ -5,6 +5,7 @@ import * as ejs from 'ejs'
 import fm from 'front-matter'
 import _ from 'lodash'
 import Debug from 'debug'
+import { ensureError } from '@packages/errors/src/errorUtils'
 
 const debug = Debug('cypress:data-context:codegen:code-generator')
 
@@ -96,7 +97,7 @@ export async function codeGenerator (
         content: content.toString(),
       } as const
     } catch (e) {
-      return e instanceof Error ? e : new Error(String(e))
+      return ensureError(e)
     }
   }))
 

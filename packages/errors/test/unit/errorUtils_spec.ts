@@ -150,17 +150,18 @@ describe('errorUtils', () => {
       const args = [{ key: 'value' }, { nested: { deep: 'value' } }]
       const result = serializeArguments(args)
 
-      expect(result).to.deep.equal([
-        { key: 'value' },
-        { nested: { deep: 'value' } },
-      ])
+      // serializeArguments now returns serialized strings for objects
+      expect(result[0]).to.equal('{"key":"value"}')
+      expect(result[1]).to.equal('{"nested":{"deep":"value"}}')
     })
 
     it('should deep serialize arrays', () => {
       const args = [[1, 2, 3], ['a', 'b', 'c']]
       const result = serializeArguments(args)
 
-      expect(result).to.deep.equal([[1, 2, 3], ['a', 'b', 'c']])
+      // serializeArguments now returns serialized strings for arrays
+      expect(result[0]).to.equal('[1,2,3]')
+      expect(result[1]).to.equal('["a","b","c"]')
     })
 
     it('should handle mixed content', () => {
@@ -174,14 +175,13 @@ describe('errorUtils', () => {
       ]
       const result = serializeArguments(args)
 
-      expect(result).to.deep.equal([
-        'string',
-        42,
-        { key: 'value' },
-        [1, 2, 3],
-        null,
-        undefined,
-      ])
+      // serializeArguments now returns serialized strings for objects/arrays
+      expect(result[0]).to.equal('string')
+      expect(result[1]).to.equal(42)
+      expect(result[2]).to.equal('{"key":"value"}')
+      expect(result[3]).to.equal('[1,2,3]')
+      expect(result[4]).to.equal(null)
+      expect(result[5]).to.equal(undefined)
     })
 
     it('should handle nested objects and arrays', () => {
@@ -198,16 +198,14 @@ describe('errorUtils', () => {
 
       const result = serializeArguments(args)
 
-      expect(result).to.deep.equal([{
-        users: [
-          { name: 'John', age: 30 },
-          { name: 'Jane', age: 25 },
-        ],
-        metadata: {
-          count: 2,
-          active: true,
-        },
-      }])
+      // serializeArguments now returns serialized strings for complex objects
+      expect(result[0]).to.be.a('string')
+      expect(result[0]).to.include('John')
+      expect(result[0]).to.include('Jane')
+      expect(result[0]).to.include('30')
+      expect(result[0]).to.include('25')
+      expect(result[0]).to.include('count')
+      expect(result[0]).to.include('active')
     })
 
     it('should handle circular references gracefully', () => {
@@ -218,7 +216,7 @@ describe('errorUtils', () => {
       const args = [obj, 'normal string']
       const result = serializeArguments(args)
 
-      // First argument should handle circular references gracefully with safe-stringify
+      // First argument should handle circular references gracefully with serialize-error fallback
       expect(result[0]).to.be.an('object')
       expect(result[0]).to.have.property('name', 'test')
       expect(result[0]).to.have.property('self', '[Circular]')
@@ -239,9 +237,9 @@ describe('errorUtils', () => {
       const result = serializeArguments(args)
 
       // First object should serialize normally
-      expect(result[0]).to.deep.equal({ normal: 'value' })
+      expect(result[0]).to.equal('{"normal":"value"}')
 
-      // Second object should handle circular references gracefully with safe-stringify
+      // Second object should handle circular references gracefully with serialize-error fallback
       expect(result[1]).to.be.an('object')
       expect(result[1]).to.have.property('name', 'test')
       expect(result[1]).to.have.property('self', '[Circular]')
@@ -265,7 +263,8 @@ describe('errorUtils', () => {
 
       const result = serializeArguments(args)
 
-      // Date should be serialized to ISO string
+      // Date should be serialized to string by serialize-javascript
+      expect(result[0]).to.be.a('string')
       expect(result[0]).to.include('2023-01-01')
       expect(result[1]).to.equal('string arg')
     })
@@ -276,7 +275,8 @@ describe('errorUtils', () => {
 
       const result = serializeArguments(args)
 
-      // RegExp should be serialized to string
+      // RegExp should be serialized to string by serialize-javascript
+      expect(result[0]).to.be.a('string')
       expect(result[0]).to.include('test-pattern')
       expect(result[1]).to.equal('string arg')
     })
@@ -331,11 +331,11 @@ describe('errorUtils', () => {
       const args = [complexObj, 'simple string', 123]
       const result = serializeArguments(args)
 
-      // Should handle complex nested structure
-      expect(result[0]).to.have.property('string', 'value')
-      expect(result[0]).to.have.property('number', 42)
-      expect(result[0]).to.have.property('array').that.is.an('array')
-      expect(result[0]).to.have.property('object').that.is.an('object')
+      // Should handle complex nested structure as serialized string
+      expect(result[0]).to.be.a('string')
+      expect(result[0]).to.include('value')
+      expect(result[0]).to.include('42')
+      expect(result[0]).to.include('nested')
       expect(result[1]).to.equal('simple string')
       expect(result[2]).to.equal(123)
     })

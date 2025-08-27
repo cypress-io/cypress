@@ -1,4 +1,5 @@
 const chalk = require('chalk')
+const { serializeArguments } = require('@packages/errors/src/errorUtils')
 
 let logs = []
 
@@ -8,26 +9,26 @@ const logLevel = () => {
 
 const error = (...messages) => {
   logs.push(messages.join(' '))
-  console.log(chalk.red(...messages)) // eslint-disable-line no-console
+  console.log(chalk.red(...serializeArguments(messages))) // eslint-disable-line no-console
 }
 
 const warn = (...messages) => {
   if (logLevel() === 'silent') return
 
   logs.push(messages.join(' '))
-  console.log(chalk.yellow(...messages)) // eslint-disable-line no-console
+  console.log(chalk.yellow(...serializeArguments(messages))) // eslint-disable-line no-console
 }
 
 const log = (...messages) => {
   if (logLevel() === 'silent' || logLevel() === 'warn') return
 
   logs.push(messages.join(' '))
-  console.log(...messages) // eslint-disable-line no-console
+  console.log(...serializeArguments(messages)) // eslint-disable-line no-console
 }
 
 const always = (...messages) => {
   logs.push(messages.join(' '))
-  console.log(...messages) // eslint-disable-line no-console
+  console.log(...serializeArguments(messages)) // eslint-disable-line no-console
 }
 
 // splits long text into lines and calls log()

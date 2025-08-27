@@ -2,6 +2,7 @@ import { CloudRequest, isRetryableCloudError } from './cloud_request'
 import { asyncRetry, exponentialBackoff } from '../../util/async_retry'
 import * as errors from '../../errors'
 import { isAxiosError } from 'axios'
+import { ensureError } from '@packages/errors/src/errorUtils'
 
 const MAX_RETRIES = 3
 
@@ -60,7 +61,7 @@ export const createInstance = async (runId: string, instanceData: CreateInstance
         'CLOUD_API_RESPONSE_FAILED_RETRYING', {
           delayMs: delay,
           tries: MAX_RETRIES - attemptNumber,
-          response: isAxiosError(err) ? err : err instanceof Error ? err : new Error(String(err)),
+          response: isAxiosError(err) ? err : ensureError(err),
         },
       )
     },

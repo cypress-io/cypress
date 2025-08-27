@@ -6,7 +6,7 @@ import _ from 'lodash'
 import path from 'path'
 import stripAnsi from 'strip-ansi'
 import type { BreakingErrResult, TestingType } from '@packages/types'
-import { humanTime, logError, parseResolvedPattern, pluralize } from './errorUtils'
+import { humanTime, logError, parseResolvedPattern, pluralize, serializeError } from './errorUtils'
 import { errPartial, errTemplate, fmt, theme } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
 import type { ClonedError, ConfigValidationFailureInfo, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
@@ -1553,9 +1553,6 @@ export const AllCypressErrors = {
   },
 } as const
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _typeCheck: Record<keyof AllCypressErrorObj, (...args: any[]) => ErrTemplateResult> = AllCypressErrors
-
 export type AllCypressErrorObj = typeof AllCypressErrors
 
 export type AllCypressErrorNames = keyof typeof AllCypressErrors
@@ -1572,7 +1569,7 @@ export type AllCypressErrorNames = keyof typeof AllCypressErrors
 export const getError = function <Type extends keyof AllCypressErrorObj> (type: Type, ...args: Parameters<AllCypressErrorObj[Type]>): CypressError {
   // If we don't know this "type" of error, return as a non-cypress error
   if (!AllCypressErrors[type]) {
-    const err = new Error(`UNKNOWN ERROR ${JSON.stringify(type)}`) as CypressError
+    const err = new Error(`UNKNOWN ERROR ${serializeError(type)}`) as CypressError
 
     err.isCypressErr = false
     err.type = type

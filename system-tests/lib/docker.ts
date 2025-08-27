@@ -7,6 +7,7 @@ import { promises as fs } from 'fs'
 import execa from 'execa'
 import Fixtures from './fixtures'
 import { nock } from './spec_helper'
+import { serializeArguments } from '@packages/errors/src/errorUtils'
 
 let docker: Docker | null = null
 
@@ -15,7 +16,7 @@ const getDocker = () => {
 }
 
 const log = (...args) => {
-  console.error('🐋', ...args)
+  console.log('🐳', ...serializeArguments(args))
 }
 
 class DockerProcess extends EventEmitter implements SpawnerResult {

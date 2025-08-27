@@ -2,7 +2,7 @@ import assert from 'assert'
 import chalk from 'chalk'
 import _ from 'lodash'
 import stripAnsi from 'strip-ansi'
-import { trimMultipleNewLines } from './errorUtils'
+import { trimMultipleNewLines, serializeError } from './errorUtils'
 import { stripIndent } from './stripIndent'
 
 import type { ErrTemplateResult, SerializedError } from './errorTypes'
@@ -321,7 +321,7 @@ function prepMessage (templateStrings: TemplateStringsArray, args: AllowedTempla
         details = originalError.stack
       } else {
         if (process.env.CYPRESS_INTERNAL_ENV !== 'production') {
-          throw new Error(`Cannot use arg.stackTrace with a non error-like value, saw ${JSON.stringify(arg.val)}`)
+          throw new Error(`Cannot use arg.stackTrace with a non error-like value, saw ${serializeError(arg.val)}`)
         }
 
         const err = new Error()

@@ -23,7 +23,7 @@ const clientSideError = function (err) {
 (function () {
   Cypress.action("spec:script:error", {
     type: "BUNDLE_ERROR",
-    error: ${JSON.stringify(err)}
+    error: "${err}"
   })
 }())\
 `

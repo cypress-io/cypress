@@ -9,6 +9,7 @@ import colorString from 'color-string'
 import * as plugins from './plugins'
 import { fs, getPath } from './util/fs'
 import type { Data, ScreenshotsFolder } from './util/fs'
+import { serializeArguments } from '@packages/errors/src/errorUtils'
 
 let debug = Debug('cypress:server:screenshot')
 
@@ -47,7 +48,7 @@ interface SavedDetails {
 // when debugging logs automatically prefix the
 // screenshot id to the debug logs for easier association
 debug = _.wrap(debug, (fn, str, ...args) => {
-  return fn(`(${__ID__}) ${str}`, ...args)
+  return fn(`(${__ID__}) ${str}`, ...serializeArguments(args))
 }) as Debug.Debugger
 
 interface RGBA {

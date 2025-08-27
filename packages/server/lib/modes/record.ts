@@ -12,6 +12,7 @@ import { hideKeys } from '@packages/config'
 import { default as api } from '../cloud/api'
 import exception from '../cloud/exception'
 import { get as getErrors, warning as errorsWarning, throwErr } from '../errors'
+import { ensureError } from '@packages/errors/src/errorUtils'
 import capture from '../capture'
 import { getResolvedRuntimeConfig } from '../config'
 import env from '../util/env'
@@ -517,7 +518,7 @@ async function createInstance (options: InstanceOptions) {
       machineId,
     })
   } catch (thrown: unknown) {
-    const err = thrown instanceof Error ? thrown : new Error(thrown as any)
+    const err = ensureError(thrown)
 
     debug('failed creating instance %o', {
       stack: err.stack,

@@ -11,6 +11,7 @@ import { runner } from './controllers/runner'
 import { iframesController } from './controllers/iframes'
 import type { FoundSpec } from '@packages/types'
 import { getCtx } from '@packages/data-context'
+import { serializeError } from '@packages/errors/src/errorUtils'
 import { graphQLHTTP } from '@packages/graphql/src/makeGraphQLServer'
 import type { RemoteStates } from './remote_states'
 import bodyParser from 'body-parser'
@@ -297,7 +298,7 @@ export const createCommonRoutes = ({
     console.log(err.stack) // eslint-disable-line no-console
 
     res.set('x-cypress-error', err.message)
-    res.set('x-cypress-stack', JSON.stringify(err.stack))
+    res.set('x-cypress-stack', serializeError(err.stack))
 
     res.sendStatus(500)
   }

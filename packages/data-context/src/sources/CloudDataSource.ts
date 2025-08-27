@@ -26,6 +26,7 @@ import { urqlCacheKeys } from '../util/urqlCacheKeys'
 import { urqlSchema } from '../gen/urql-introspection.gen'
 import type { AuthenticatedUserShape } from '../data'
 import { pathToArray } from 'graphql/jsutils/Path'
+import { ensureError } from '@packages/errors/src/errorUtils'
 
 export type CloudDataResponse<T = any> = ExecutionResult<T> & Partial<OperationResult<T | null>> & { executing?: Promise<ExecutionResult<T> & Partial<OperationResult<T | null>>> }
 
@@ -383,7 +384,7 @@ export class CloudDataSource {
   }
 
   #ensureError (val: any): Error {
-    return val instanceof Error ? val : new Error(val)
+    return ensureError(val)
   }
 }
 

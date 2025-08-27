@@ -1,5 +1,6 @@
 import debugLib from 'debug'
 import _ from 'lodash'
+import { serializeArguments } from '@packages/errors/src/errorUtils'
 
 const debug = debugLib(`cypress:lifecycle:EventRegistrar`)
 
@@ -15,7 +16,7 @@ export class EventRegistrar {
   }
 
   executeNodeEvent (event: string, args: any[]) {
-    debug(`execute plugin event '${event}' Node '${process.version}' with args: %o %o %o`, ...args)
+    debug(`execute plugin event '${event}' Node '${process.version}' with args: %o`, serializeArguments(args))
 
     const evtFn = this._registeredEvents[event]
 

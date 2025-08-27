@@ -8,6 +8,7 @@ const humanTime = require('@packages/server/lib/util/human_time')
 
 import type { CypressError, ErrorLike } from './errorTypes'
 import { serializeError as serializeErrorToObject, isErrorLike } from 'serialize-error'
+import serialize from 'serialize-javascript'
 
 export {
   pluralize,
@@ -79,8 +80,15 @@ export const logError = function (err: CypressError | ErrorLike, color: AllowedC
 }
 
 /**
- * Safely serializes an error or object to a string representation
+ * Safely serializes a SINGLE value (error, object, primitive) to a string representation.
+ *
+ * Use this when you need a string representation of one thing:
+ * - Single error objects: serializeError(new Error('fail')) → "fail"
+ * - Single objects: serializeError({name: 'test'}) → "{name:'test'}"
+ * - Single primitives: serializeError(42) → "42"
+ *
  * This prevents [object Object] issues when reporting errors to Sentry
+ * and provides consistent string output for any input type.
  */
 export const serializeError = (error: unknown): string => {
   if (typeof error === 'object' && error !== null) {
@@ -89,21 +97,35 @@ export const serializeError = (error: unknown): string => {
       return error.message || error.toString()
     }
 
-    // Handle RegExp objects
-    if (error instanceof RegExp) {
-      return error.toString()
+    // Try serialize-javascript first for comprehensive object serialization
+    // This handles RegExp, Date, Function, Set, Map, BigInt, URLs
+    try {
+      return serialize(error)
+    } catch {
+      // If serialize-javascript fails (e.g., circular refs), fall back to serialize-error
+      try {
+        return JSON.stringify(serializeErrorToObject(error))
+      } catch {
+        // Final fallback for extreme cases
+        return String(error)
+      }
     }
-
-    // Use serialize-error for safe object serialization (handles circular refs)
-    return JSON.stringify(serializeErrorToObject(error))
   }
 
   return String(error)
 }
 
 /**
- * Creates an Error object from any value, ensuring it's always an Error instance
- * This eliminates the need for manual error type checking and creation
+ * Converts ANY value to a proper Error object, ensuring it's always an Error instance.
+ *
+ * Use this when you need to guarantee you have an Error object:
+ * - Already an Error: ensureError(new Error('fail')) → returns the same Error
+ * - String: ensureError('something went wrong') → new Error('something went wrong')
+ * - Object: ensureError({message: 'fail'}) → new Error('{message:"fail"}')
+ * - Number: ensureError(500) → new Error('500')
+ *
+ * This eliminates the need for manual error type checking and creation,
+ * providing consistent Error objects regardless of input type.
  */
 export const ensureError = (error: unknown): Error => {
   if (error instanceof Error) {
@@ -114,37 +136,47 @@ export const ensureError = (error: unknown): Error => {
 }
 
 /**
- * Deep serializes arguments to avoid [object Object] issues
- * Useful for method arguments that need to be logged or reported
+ * Optimized serialization helper that avoids duplicate logic
+ */
+const serializeObject = (obj: object): unknown => {
+  // Handle Error objects specially
+  if (isErrorLike(obj)) {
+    return serializeErrorToObject(obj)
+  }
+
+  // Use serialize-javascript for comprehensive object serialization
+  try {
+    return serialize(obj)
+  } catch {
+    // If serialize-javascript fails, fall back to serialize-error
+    try {
+      return serializeErrorToObject(obj)
+    } catch {
+      // If even that fails, fall back to string conversion
+      return String(obj)
+    }
+  }
+}
+
+/**
+ * Deep serializes an ARRAY of arguments, preserving the array structure.
+ *
+ * Use this when you have multiple arguments that need to be serialized together:
+ * - Function arguments: serializeArguments(['user', {id: 123}, new Error('fail')])
+ * - Method parameters: serializeArguments([param1, param2, param3])
+ * - Event data: serializeArguments([eventType, eventData, timestamp])
+ *
+ * Returns an array where each element is serialized but maintains its position.
+ * This is different from serializeError which converts a single value to a string.
  */
 export const serializeArguments = (args: unknown[]): unknown[] => {
   return args.map((arg) => {
     if (typeof arg === 'object' && arg !== null) {
-      // Handle Error objects specially using isErrorLike for robust detection
-      if (isErrorLike(arg)) {
-        return serializeErrorToObject(arg)
-      }
-
-      // Handle RegExp objects
-      if (arg instanceof RegExp) {
-        return arg.toString()
-      }
-
-      try {
-        // Use serialize-error for safe object serialization (handles circular refs)
-        return JSON.parse(JSON.stringify(serializeErrorToObject(arg)))
-      } catch {
-        // If parsing fails, fall back to string conversion
-        return String(arg)
-      }
+      return serializeObject(arg)
     }
 
     // Handle functions and symbols
-    if (typeof arg === 'function') {
-      return String(arg)
-    }
-
-    if (typeof arg === 'symbol') {
+    if (typeof arg === 'function' || typeof arg === 'symbol') {
       return String(arg)
     }
 
@@ -153,8 +185,15 @@ export const serializeArguments = (args: unknown[]): unknown[] => {
 }
 
 /**
- * Safely serializes arguments to a JSON string, handling circular references
- * This replaces manual JSON.stringify calls that might fail
+ * Safely serializes an ARRAY of arguments to a JSON string, handling circular references.
+ *
+ * This is a convenience function that combines serializeArguments + JSON.stringify:
+ * - First serializes each argument using serializeArguments
+ * - Then converts the result to a JSON string
+ * - Wraps the result in an {args: [...]} object for clarity
+ *
+ * Use this when you need a JSON string representation of multiple arguments
+ * for logging, storage, or transmission (e.g., to Sentry).
  */
 export const serializeArgumentsToString = (args: unknown[]): string => {
   try {

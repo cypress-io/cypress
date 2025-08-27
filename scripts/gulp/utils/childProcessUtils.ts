@@ -11,6 +11,7 @@ import util from 'util'
 import { prefixLog, prefixStream } from './prefixStream'
 import { addChildProcess } from '../tasks/gulpRegistry'
 import stripAnsi from 'strip-ansi'
+import { serializeError } from '@packages/errors/src/errorUtils'
 
 export type AllSpawnableApps =
   | `cmd-${string}`
@@ -156,7 +157,7 @@ export async function forked (
 }
 
 function writeError (e: Error) {
-  return JSON.stringify({ name: e.name, message: e.message, stack: e.stack })
+  return serializeError({ name: e.name, message: e.message, stack: e.stack })
 }
 
 const execAsyncLocal = util.promisify(exec)
