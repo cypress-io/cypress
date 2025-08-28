@@ -52,7 +52,7 @@ export class CDPBrowserSocket extends Emitter implements SocketShape {
     }, 0)
   }
 
-  emit = async (event: string, ...args: any[]) => {
+  emit = (event: string, ...args: any[]) => {
     // Generate a unique key for this event
     const uuid = uuidv4()
     let callback
@@ -65,8 +65,10 @@ export class CDPBrowserSocket extends Emitter implements SocketShape {
       this.once(uuid, callback)
     }
 
-    await encode([event, uuid, args], this._namespace).then((encoded: any) => {
+    encode([event, uuid, args], this._namespace).then((encoded: any) => {
       window[`cypressSendToServer-${this._namespace}`](JSON.stringify(encoded))
+    }).catch(() => {
+      // Silently handle encoding errors
     })
 
     return this

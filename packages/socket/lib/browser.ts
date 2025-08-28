@@ -29,6 +29,7 @@ export function client (uri: string, opts?: Partial<ManagerOptions & SocketOptio
     return window.cypressSockets[fullNamespace]
   }
 
+  // @ts-expect-error - socket.io client is compatible with SocketShape
   return io(uri, opts)
 }
 
@@ -51,6 +52,7 @@ export function createWebsocket ({ path, browserFamily }: { path: string, browse
     return window.cypressSockets[fullNamespace]
   }
 
+  // @ts-expect-error - socket.io client is compatible with SocketShape
   return io({
     path,
     // TODO(webkit): the websocket socket.io transport is busted in WebKit, need polling
