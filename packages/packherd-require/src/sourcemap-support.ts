@@ -212,7 +212,7 @@ class SourcemapSupport {
       state.curPos = pos
       frame = cloneCallSite(frame)
 
-      frame.getFileName = function getFileName () {
+      frame.getFileName = function getFileName (): string | undefined {
         return pos.source || pos.name || undefined
       }
 

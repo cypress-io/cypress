@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "@packages/eslint-config": "0.0.0-development",
-    "@types/node": "^22.13.10",
+    "@types/node": "^22.18.0",
     "@vitest/coverage-v8": "^3.0.9",
     "eslint": "^9.22.0",
     "typescript": "^5.8.2",
