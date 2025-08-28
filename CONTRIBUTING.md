@@ -242,7 +242,7 @@ You must have the following installed on your system to contribute locally:
 
 `sudo apt install build-essential` meets the additional requirements to run `node-gyp` in the context of building Cypress from source.
 `python` is pre-installed on Debian-based systems including Ubuntu.
-The Python versions shipped with Ubuntu versions `20.04`, `22.04` and `24.*` are compatible with Cypress requirements.
+The default Python versions included with Debian `>=11` and Ubuntu `>=22.04`, which range from Python `3.9` - `3.13`, are all compatible with Cypress requirements.
 
 For Ubuntu `>=24.04`, disable "Unprivileged user namespace restrictions" permanently for the entire system by executing the following commands that are derived from the [Ubuntu 24.04 Release notes](https://discourse.ubuntu.com/t/noble-numbat-release-notes/39890):
 
