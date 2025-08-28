@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist",
+    "types": ["node"],
+    "module": "NodeNext",
+    "allowJs": true,
+  },
+
+  "exclude": ["node_modules", "dist"]
+}

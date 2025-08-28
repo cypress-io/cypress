@@ -937,8 +937,8 @@ namespace CypressTestConfigOverridesTests {
 
   describe('suite', {
     browser: { family: 'firefox' },
-    keystrokeDelay: false // $ExpectError
-    foo: 'foo' // $ExpectError
+    keystrokeDelay: false, // $ExpectError
+    foo: 'foo'
   }, () => { })
 
   describe.only('suite', {}, () => { })
