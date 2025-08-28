@@ -10760,7 +10760,7 @@ async-settle@^1.0.0:
   dependencies:
     async-done "^1.2.2"
 
-async@>=0.2.9, async@^3.2.0, async@^3.2.3, async@^3.2.4:
+async@>=0.2.9, async@^3.2.3, async@^3.2.4:
   version "3.2.4"
   resolved "https://registry.yarnpkg.com/async/-/async-3.2.4.tgz#2d22e00f8cddeb5fde5dd33522b56d1cf569a81c"
   integrity sha512-iAB+JbDEGXhyIUavoDl9WP/Jj106Kz9DEn1DPgYw5ruDn0e3Wgi3sKFm55sASdGBNOQB8F59d9qQ7deqrHA8wQ==
@@ -10889,13 +10889,13 @@ axios@1.8.2:
     form-data "^4.0.0"
     proxy-from-env "^1.1.0"
 
-axios@^1.7.4, axios@^1.7.9, axios@^1.8.3:
-  version "1.8.3"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-1.8.3.tgz#9ebccd71c98651d547162a018a1a95a4b4ed4de8"
-  integrity sha512-iP4DebzoNlP/YN2dpwCgb8zoCmhtkajzS48JvwmkSkXvPI3DHc7m+XYL5tGnSlJtR6nImXZmdCuN5aP8dh1d8A==
+axios@^1.11.0, axios@^1.7.4, axios@^1.7.9, axios@^1.8.3:
+  version "1.11.0"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.11.0.tgz#c2ec219e35e414c025b2095e8b8280278478fdb6"
+  integrity sha512-1Lx3WLFQWm3ooKDYZD1eXmoGO9fxYQjrycfHFC8P0sCfQVXyROp0p9PFWBehewBOdCwHc+f/b8I0fMto5eSfwA==
   dependencies:
     follow-redirects "^1.15.6"
-    form-data "^4.0.0"
+    form-data "^4.0.4"
     proxy-from-env "^1.1.0"
 
 axobject-query@^4.1.0:
@@ -17246,7 +17246,7 @@ form-data@^3.0.0:
     hasown "^2.0.2"
     mime-types "^2.1.35"
 
-form-data@^4.0.0, form-data@^4.0.1, form-data@~4.0.4:
+form-data@^4.0.0, form-data@^4.0.1, form-data@^4.0.4, form-data@~4.0.4:
   version "4.0.4"
   resolved "https://registry.yarnpkg.com/form-data/-/form-data-4.0.4.tgz#784cdcce0669a9d68e94d11ac4eea98088edd2c4"
   integrity sha512-KrGhL9Q4zjj0kiUt5OO4Mr/A/jlI2jDYs5eHBpYHPcBEVSiipAvn2Ko2HnPe20rmcuuvMHNdZFp+4IlGTMF0Ow==
@@ -17737,13 +17737,6 @@ getenv@1.0.0, getenv@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/getenv/-/getenv-1.0.0.tgz#874f2e7544fbca53c7a4738f37de8605c3fcfc31"
   integrity sha512-7yetJWqbS9sbn0vIfliPsFgoXMKn/YMF+Wuiog97x+urnSRRRZ7xB+uVkwGKzRgq9CDFfMQnE9ruL5DHv9c6Xg==
-
-getos@3.2.1, getos@^3.2.1:
-  version "3.2.1"
-  resolved "https://registry.yarnpkg.com/getos/-/getos-3.2.1.tgz#0134d1f4e00eb46144c5a9c0ac4dc087cbb27dc5"
-  integrity sha512-U56CfOK17OKgTVqozZjUKNdkfEv6jk5WISBJ8SHoagjE6L69zOwl3Z+O8myjY9MEW3i2HPWQBt/LTbCgcC973Q==
-  dependencies:
-    async "^3.2.0"
 
 getpass@^0.1.1:
   version "0.1.7"
@@ -30145,7 +30138,7 @@ syntax-error@1.4.0:
   dependencies:
     acorn-node "^1.2.0"
 
-systeminformation@^5.27.7:
+systeminformation@5.27.7, systeminformation@^5.27.7:
   version "5.27.7"
   resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-5.27.7.tgz#4dc9d436419948cd5e5f076779a1298220d19a72"
   integrity sha512-saaqOoVEEFaux4v0K8Q7caiauRwjXC4XbD2eH60dxHXbpKxQ8kH9Rf7Jh+nryKpOUSEFxtCdBlSUx0/lO6rwRg==

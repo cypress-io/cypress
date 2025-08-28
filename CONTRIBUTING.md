@@ -244,7 +244,20 @@ You must have the following installed on your system to contribute locally:
 `python` is pre-installed on Debian-based systems including Ubuntu.
 The Python versions shipped with Ubuntu versions `20.04`, `22.04` and `24.*` are compatible with Cypress requirements.
 
-For Ubuntu `24.04` and above, refer also to the [Ubuntu 24.04 Release notes](https://discourse.ubuntu.com/t/noble-numbat-release-notes/39890) in the section "Unprivileged user namespace restrictions" and apply one of the workarounds to disable unprivileged user namespace restrictions for the entire system, either for one boot or persistently, as described. If you do not do this you may receive an error which includes the text `FATAL:setuid_sandbox_host.cc` when you try to run Cypress on these versions of Ubuntu after building Cypress from source.
+For Ubuntu `>=24.04`, disable "Unprivileged user namespace restrictions" permanently for the entire system by executing the following commands that are derived from the [Ubuntu 24.04 Release notes](https://discourse.ubuntu.com/t/noble-numbat-release-notes/39890):
+
+```shell
+echo "kernel.apparmor_restrict_unprivileged_userns=0" | sudo tee /etc/sysctl.d/60-apparmor-namespace.conf
+sudo sysctl --system
+```
+
+If you prefer to disable the restrictions for one boot only, use instead:
+
+```shell
+echo 0 | sudo tee /proc/sys/kernel/apparmor_restrict_unprivileged_userns
+```
+
+If you do not disable these restrictions for the affected Ubuntu versions, then Cypress may exit with a fatal error when you try to run Cypress after building Cypress from source. The error includes the text `FATAL:setuid_sandbox_host.cc` and may be hidden, pending resolution of issue https://github.com/cypress-io/cypress/issues/32358.
 
 #### Windows
 

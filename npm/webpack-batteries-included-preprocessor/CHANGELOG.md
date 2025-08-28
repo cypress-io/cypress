@@ -1,3 +1,10 @@
+# [@cypress/webpack-batteries-included-preprocessor-v4.0.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v4.0.1...@cypress/webpack-batteries-included-preprocessor-v4.0.2) (2025-08-27)
+
+
+### Bug Fixes
+
+* correctly discover TypeScript compiler in `@cypress/webpack-batteries-included-preprocessor` ([#32339](https://github.com/cypress-io/cypress/issues/32339)) ([05c1828](https://github.com/cypress-io/cypress/commit/05c1828b2e81eabd61644e6e05ef8c59ccfe7717))
+
 # [@cypress/webpack-batteries-included-preprocessor-v4.0.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v4.0.0...@cypress/webpack-batteries-included-preprocessor-v4.0.1) (2025-08-19)
 
 
