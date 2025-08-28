@@ -9,7 +9,7 @@ const tty = require('tty')
 const path = require('path')
 const isCi = require('ci-info').isCI
 const execa = require('execa')
-const getos = require('getos')
+const si = require('systeminformation')
 const chalk = require('chalk')
 const Promise = require('bluebird')
 const cachedir = require('cachedir')
@@ -25,8 +25,6 @@ const fs = require('./fs')
 const pkg = require(path.join(__dirname, '..', 'package.json'))
 
 const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
-
-const getosAsync = Promise.promisify(getos)
 
 /**
  * Returns SHA512 of a file
@@ -411,17 +409,16 @@ const util = {
 
   getOsVersionAsync () {
     return Promise.try(() => {
-      if (isLinux()) {
-        return getosAsync()
-        .then((osInfo) => {
-          return [osInfo.dist, osInfo.release].join(' - ')
-        })
-        .catch(() => {
-          return os.release()
-        })
-      }
+      return si.osInfo()
+      .then((osInfo) => {
+        if (osInfo.distro && osInfo.release) {
+          return `${osInfo.distro} - ${osInfo.release}`
+        }
 
-      return os.release()
+        return os.release()
+      }).catch(() => {
+        return os.release()
+      })
     })
   },
 

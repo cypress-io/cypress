@@ -1981,8 +1981,6 @@
     "./node_modules/get-proto/Reflect.getPrototypeOf.js",
     "./node_modules/get-proto/index.js",
     "./node_modules/get-stream/index.js",
-    "./node_modules/getos/index.js",
-    "./node_modules/getos/os.json",
     "./node_modules/gifwrap/src/bitmapimage.js",
     "./node_modules/gifwrap/src/gif.js",
     "./node_modules/gifwrap/src/gifcodec.js",
@@ -4199,5 +4197,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "708e1312cc99bb633217016c91da08879442b1a1822b48de5ff2e27790954041"
+  "deferredHash": "3e86e27d76c3b4b39d481b6197be664677a0e78d04aa91c341520802b31a6467"
 }
