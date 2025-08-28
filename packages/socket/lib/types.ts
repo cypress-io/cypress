@@ -1,3 +1,3 @@
 import type Emitter from 'component-emitter'
 
-export type SocketShape = typeof Emitter
+export type SocketShape = InstanceType<typeof Emitter>
