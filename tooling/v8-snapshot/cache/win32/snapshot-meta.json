@@ -1985,8 +1985,6 @@
     "./node_modules/get-proto/Reflect.getPrototypeOf.js",
     "./node_modules/get-proto/index.js",
     "./node_modules/get-stream/index.js",
-    "./node_modules/getos/index.js",
-    "./node_modules/getos/os.json",
     "./node_modules/gifwrap/src/bitmapimage.js",
     "./node_modules/gifwrap/src/gif.js",
     "./node_modules/gifwrap/src/gifcodec.js",
@@ -4198,5 +4196,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "663bcddd0c869464d3225d83f2872936fbb04cea7636ccab042b865b2b29b360"
+  "deferredHash": "cb55f9f4d63847deb26bae64527f9a23bc08c4cbd35ec24986fe400942f18009"
 }
