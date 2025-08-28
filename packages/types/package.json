@@ -22,7 +22,7 @@
     "express": "4.21.0",
     "socket.io": "4.0.1",
     "typescript": "~5.4.5",
-    "vitest": "2.1.8"
+    "vitest": "2.1.9"
   },
   "files": [
     "src/*"
