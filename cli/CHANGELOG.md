@@ -1,7 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.0.1
+## 15.1.0
 
 _Released 08/26/2025 (PENDING)_
+
+**Features:**
+
+- Expanded `cy.press()` to support more key types. Addresses [#31051](https://github.com/cypress-io/cypress/issues/31051) and [#31488](https://github.com/cypress-io/cypress/issues/31488). Addressed in [#31496](https://github.com/cypress-io/cypress/pull/31496).
 
 **Bugfixes:**
 
