@@ -167,7 +167,7 @@ const getFirstWorkingFamily = (
 
   if (process.env.HTTP_PROXY) {
     // can't make direct connections through the proxy, this won't work
-    return cb()
+    return cb(4) // Default to IPv4 when proxy is used
   }
 
   if (familyCache[host]) {
@@ -181,7 +181,7 @@ const getFirstWorkingFamily = (
     return cb(firstWorkingAddress.family)
   })
   .catch(() => {
-    return cb()
+    return cb(4) // Default to IPv4 on error
   })
 }
 
