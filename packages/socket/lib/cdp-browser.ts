@@ -62,7 +62,6 @@ export class CDPBrowserSocket extends Emitter implements SocketShape {
     }
 
     if (callback) {
-      // @ts-expect-error TODO: Property 'once' does not exist on type 'CDPBrowserSocket'.
       this.once(uuid, callback)
     }
 
