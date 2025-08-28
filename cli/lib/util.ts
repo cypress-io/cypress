@@ -14,6 +14,7 @@ import Bluebird from 'bluebird'
 import cachedir from 'cachedir'
 import logSymbols from 'log-symbols'
 import executable from 'executable'
+import { cwd } from 'process'
 import { stripIndent } from 'common-tags'
 import supportsColor from 'supports-color'
 import isInstalledGlobally from 'is-installed-globally'
@@ -330,7 +331,7 @@ const util = {
   },
 
   cwd (): string {
-    return process.cwd()
+    return cwd()
   },
 
   pkgBuildInfo (): any {
@@ -493,7 +494,7 @@ const util = {
       return filename
     }
 
-    return path.join(process.cwd(), '..', '..', filename)
+    return path.join(cwd(), '..', '..', filename)
   },
 
   getEnv (varName: string, trim?: boolean): string | undefined {
