@@ -166,6 +166,9 @@
       "eslint-plugin-expect-type"
     ]
   },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix"
+  },
   "nx": {
     "targets": {
       "build-cli": {
