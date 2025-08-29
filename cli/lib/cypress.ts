@@ -1,6 +1,6 @@
 // https://github.com/cypress-io/cypress/issues/316
 import tmpModule from 'tmp'
-import fs from './fs'
+import fs from 'fs-extra'
 import openModule from './exec/open'
 import runModule from './exec/run'
 import util from './util'

@@ -95,7 +95,7 @@ describe('cypress', function () {
       // @ts-expect-error
       run.start.mockResolvedValue(2)
 
-      vi.doMock('../../lib/fs', async (importActual) => {
+      vi.doMock('fs-extra', async (importActual) => {
         const actual = await importActual()
 
         return {
@@ -109,7 +109,7 @@ describe('cypress', function () {
         }
       })
 
-      const fs = (await import('../../lib/fs')).default
+      const fs = (await import('fs-extra')).default
 
       fs.readJson.mockImplementation((args) => {
         if (args === outputPath) {
@@ -178,7 +178,7 @@ describe('cypress', function () {
 
       let fsOriginal: typeof fs
 
-      vi.doMock('../../lib/fs', async (importActual) => {
+      vi.doMock('fs-extra', async (importActual) => {
         fsOriginal = await importActual()
 
         return {
@@ -190,7 +190,7 @@ describe('cypress', function () {
         }
       })
 
-      const fs = (await import('../../lib/fs')).default
+      const fs = (await import('fs-extra')).default
 
       fs.readJson.mockImplementation((args) => {
         if (args === outputPath) {

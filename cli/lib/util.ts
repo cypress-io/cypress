@@ -20,7 +20,7 @@ import supportsColor from 'supports-color'
 import isInstalledGlobally from 'is-installed-globally'
 import logger from './logger'
 import Debug from 'debug'
-import fs from './fs'
+import fs from 'fs-extra'
 import pkg from '../package.json'
 
 // TODO: this package needs to be replaced as we can't import it in vitest
@@ -39,10 +39,12 @@ const getFileChecksum = (filename: string): any => {
   return hasha.fromFile(filename, { algorithm: 'sha512' })
 }
 
-const getFileSize = (filename: string): any => {
+const getFileSize = async (filename: string): any => {
   la(is.unemptyString(filename), 'expected filename', filename)
 
-  return fs.statAsync(filename).get('size')
+  const { size } = await fs.stat(filename)
+
+  return size
 }
 
 const isBrokenGtkDisplayRe = /Gtk: cannot open display/
