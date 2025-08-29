@@ -87,12 +87,12 @@ const getUrl = (arch: string, version?: string): string => {
   if (is.webUrl(version)) {
     debug('version is already an url', version)
 
-    return version
+    return version as string
   }
 
   const urlPath = version ? `desktop/${version}` : 'desktop'
 
-  return prepend(arch, urlPath, version)
+  return prepend(arch, urlPath, version as string)
 }
 
 const statusMessage = (err: any): string => {
@@ -116,7 +116,7 @@ const prettyDownloadErr = (err: any, url: string): any => {
  * Checks checksum and file size for the given file. Allows both
  * values or just one of them to be checked.
  */
-const verifyDownloadedFile = async (filename: string, expectedSize?: number, expectedChecksum?: string): any => {
+const verifyDownloadedFile = async (filename: string, expectedSize?: number, expectedChecksum?: string): Promise<any> => {
   if (expectedSize && expectedChecksum) {
     debug('verifying checksum and file size')
 

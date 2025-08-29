@@ -51,7 +51,7 @@ function getStdio (needsXvfb: boolean): any {
 }
 
 const spawnModule = {
-  async start (args: any, options: any = {}): any {
+  async start (args: any, options: any = {}): Promise<any> {
     const needsXvfb = xvfb.isNeeded()
     let executable = state.getPathToExecutable(state.getBinaryDir())
 
@@ -150,7 +150,7 @@ const spawnModule = {
         const child = cp.spawn(executable, args, stdioOptions)
 
         function resolveOn (event: any): any {
-          return async function (code: any, signal: any): any {
+          return async function (code: any, signal: any): Promise<any> {
             debug('child event fired %o', { event, code, signal })
 
             if (code === null) {
@@ -250,7 +250,7 @@ const spawnModule = {
       }
     }
 
-    const userFriendlySpawn = async (linuxWithDisplayEnv: any): any => {
+    const userFriendlySpawn = async (linuxWithDisplayEnv: any): Promise<any> => {
       debug('spawning, should retry on display problem?', Boolean(linuxWithDisplayEnv))
 
       let brokenGtkDisplay: boolean = false

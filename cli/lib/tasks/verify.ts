@@ -64,7 +64,7 @@ const runSmokeTest = (binaryDir: string, options: any): any => {
    * Spawn Cypress running smoke test to check if all operating system
    * dependencies are good.
    */
-  const spawn = async (linuxWithDisplayEnv: boolean): any => {
+  const spawn = async (linuxWithDisplayEnv: boolean): Promise<any> => {
     const random = _.random(0, 1000)
     const args = ['--smoke-test', `--ping=${random}`]
 
@@ -143,7 +143,7 @@ const runSmokeTest = (binaryDir: string, options: any): any => {
     }
   }
 
-  const spawnInXvfb = async (linuxWithDisplayEnv?: boolean): any => {
+  const spawnInXvfb = async (linuxWithDisplayEnv?: boolean): Promise<any> => {
     try {
       await xvfb.start()
 
@@ -385,7 +385,7 @@ const isLinuxLike = (): boolean => os.platform() !== 'win32'
 const needsSandbox = (): boolean => isLinuxLike()
 
 const module: {
-  start: (options: any) => any
+  start: (options?: any) => any
   needsSandbox: () => boolean
   VERIFY_TEST_RUNNER_TIMEOUT_MS: number
 } = { start, needsSandbox, VERIFY_TEST_RUNNER_TIMEOUT_MS: 30000 }
