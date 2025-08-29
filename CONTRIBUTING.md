@@ -261,7 +261,9 @@ If you do not disable these restrictions for the affected Ubuntu versions, then 
 
 #### Windows
 
-When using [`nvm`](https://github.com/coreybutler/nvm-windows) and changing node versions, node install tools are not installed automatically. This is needed for `node-gyp` to rebuild `better-sqlite3`. If you are failing to build Cypress because of this, either with a Python install missing or a VSCode version not being detected by `node-gyp`, you likely need to run the `install_tools.bat` outlined in the [better-sqlite3 troubleshooting guide](https://github.com/WiseLibs/better-sqlite3/blob/master/docs/troubleshooting.md).
+Install the current [version of Python](https://devguide.python.org/versions/) (`3.13`) from the [Microsoft Store](https://apps.microsoft.com/store/search?publisher=Python+Software+Foundation) and install the [Visual Studio Community 2022](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=Community) edition, selecting the `Desktop development with C++` workload.
+
+Refer to the `node-gyp` [Windows](https://github.com/nodejs/node-gyp/blob/main/README.md#on-windows) documentation section for a description of alternate ways of providing the `node-gyp` execution environment and for troubleshooting information.
 
 #### Corepack
 

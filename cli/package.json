@@ -129,6 +129,9 @@
       "import": "./index.mjs",
       "require": "./index.js"
     },
+    "./types/net-stubbing": {
+      "types": "./types/net-stubbing.d.ts"
+    },
     "./vue": {
       "types": "./vue/dist/index.d.ts",
       "import": "./vue/dist/cypress-vue.esm-bundler.js",
