@@ -6704,7 +6704,7 @@
   resolved "https://registry.npmjs.org/@sindresorhus/merge-streams/-/merge-streams-2.3.0.tgz#719df7fb41766bc143369eaa0dd56d8dc87c9958"
   integrity sha512-LtoMMhxAlorcGhmFYI+LhPgbPZCkgP6ra1YL604EeF6U98pLlQ3iWIGMdWSC+vWmPBWBNgmDBAhnAobLROJmwg==
 
-"@sinonjs/commons@^1", "@sinonjs/commons@^1.2.0", "@sinonjs/commons@^1.3.0", "@sinonjs/commons@^1.4.0", "@sinonjs/commons@^1.6.0", "@sinonjs/commons@^1.7.0", "@sinonjs/commons@^1.7.2", "@sinonjs/commons@^1.8.1", "@sinonjs/commons@^1.8.3":
+"@sinonjs/commons@^1", "@sinonjs/commons@^1.3.0", "@sinonjs/commons@^1.4.0", "@sinonjs/commons@^1.6.0", "@sinonjs/commons@^1.7.0", "@sinonjs/commons@^1.7.2", "@sinonjs/commons@^1.8.1", "@sinonjs/commons@^1.8.3":
   version "1.8.3"
   resolved "https://registry.yarnpkg.com/@sinonjs/commons/-/commons-1.8.3.tgz#3802ddd21a50a949b6721ddd72da36e67e7f1b2d"
   integrity sha512-xkNcLAn/wZaX14RPlwizcKicDk9G3F8m2nU3L7Ukm5zBgTwiT0wsoFAHx9Jq56fJA1z/7uKGtCRu16sOUCLIHQ==
@@ -6753,7 +6753,7 @@
   dependencies:
     samsam "1.3.0"
 
-"@sinonjs/formatio@^3.1.0", "@sinonjs/formatio@^3.2.1":
+"@sinonjs/formatio@^3.2.1":
   version "3.2.2"
   resolved "https://registry.yarnpkg.com/@sinonjs/formatio/-/formatio-3.2.2.tgz#771c60dfa75ea7f2d68e3b94c7e888a78781372c"
   integrity sha512-B8SEsgd8gArBLMD6zpRw3juQ2FVSsmdd7qlevyDqzS9WTCtvF55/gAL+h6gue8ZvPYcdiPdvueM/qm//9XzyTQ==
@@ -6777,7 +6777,7 @@
     "@sinonjs/commons" "^1"
     "@sinonjs/samsam" "^5.0.2"
 
-"@sinonjs/samsam@^3.0.2", "@sinonjs/samsam@^3.1.0", "@sinonjs/samsam@^3.3.1", "@sinonjs/samsam@^3.3.3":
+"@sinonjs/samsam@^3.1.0", "@sinonjs/samsam@^3.3.1", "@sinonjs/samsam@^3.3.3":
   version "3.3.3"
   resolved "https://registry.yarnpkg.com/@sinonjs/samsam/-/samsam-3.3.3.tgz#46682efd9967b259b81136b9f120fd54585feb4a"
   integrity sha512-bKCMKZvWIjYD0BLGnNrxVuw4dkWCYsLqFOUWw8VgKF/+5Y+mE7LfHWPIYoDXowH+3a9LsWDMo0uAP8YDosPvHQ==
@@ -12019,11 +12019,6 @@ chai-as-promised@^7.1.1:
   integrity sha512-aBDHZxRzYnUYuIAIPBH2s511DjlKPzXNlXSGFC8CwmroWQLfrW0LtE1nK3MAwwNhJPa9raEjNCmRoFpG0Hurdw==
   dependencies:
     check-error "^1.0.2"
-
-chai-string@1.5.0:
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/chai-string/-/chai-string-1.5.0.tgz#0bdb2d8a5f1dbe90bc78ec493c1c1c180dd4d3d2"
-  integrity sha512-sydDC3S3pNAQMYwJrs6dQX0oBQ6KfIPuOZ78n7rocW0eJJlsHPh2t3kwW7xfwYA/1Bf6/arGtSUo16rxR2JFlw==
 
 chai-subset@1.6.0:
   version "1.6.0"
@@ -21957,7 +21952,7 @@ lolex@^2.4.2:
   resolved "https://registry.yarnpkg.com/lolex/-/lolex-2.7.5.tgz#113001d56bfc7e02d56e36291cc5c413d1aa0733"
   integrity sha512-l9x0+1offnKKIzYVjyXU2SiwhXDLekRzKyhnbyldPHvC7BvLPVpdNUNR2KeMAiCN2D/kLNttZgQD5WjSxuBx3Q==
 
-lolex@^3.0.0, lolex@^3.1.0:
+lolex@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/lolex/-/lolex-3.1.0.tgz#1a7feb2fefd75b3e3a7f79f0e110d9476e294434"
   integrity sha512-zFo5MgCJ0rZ7gQg69S4pqBsLURbFw11X68C18OcJjJQbqaXm2NoTrGl1IMM3TIz0/BnN1tIs2tzmmqvCsOMMjw==
@@ -23301,16 +23296,6 @@ mocked-env@1.2.4:
     lazy-ass "1.6.0"
     ramda "0.26.1"
 
-mocked-env@1.3.2:
-  version "1.3.2"
-  resolved "https://registry.yarnpkg.com/mocked-env/-/mocked-env-1.3.2.tgz#548eb2fde141d083de70dc6b231cd9f3210d8731"
-  integrity sha512-jwm3ziowCjpbLNhUNYwn2G0tawV/ZGRuWeEGt6PItrkQT74Nk3pDldL2pmwm9sQZw6a/x+ZBGeBVYq54acTauQ==
-  dependencies:
-    check-more-types "2.24.0"
-    debug "4.1.1"
-    lazy-ass "1.6.0"
-    ramda "0.26.1"
-
 mockery@2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/mockery/-/mockery-2.1.0.tgz#5b0aef1ff564f0f8139445e165536c7909713470"
@@ -23579,7 +23564,7 @@ nice-try@^1.0.4:
   resolved "https://registry.yarnpkg.com/nice-try/-/nice-try-1.0.5.tgz#a3378a7696ce7d223e88fc9b764bd7ef1089e366"
   integrity sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==
 
-nise@^1.3.3, nise@^1.4.10, nise@^1.4.7, nise@^1.5.2:
+nise@^1.3.3, nise@^1.4.10, nise@^1.5.2:
   version "1.5.3"
   resolved "https://registry.yarnpkg.com/nise/-/nise-1.5.3.tgz#9d2cfe37d44f57317766c6e9408a359c5d3ac1f7"
   integrity sha512-Ymbac/94xeIrMf59REBPOv0thr+CJVFMhrlAkW/gjCIE58BGQdCj0x7KRCb3yz+Ga2Rz3E9XXSvUyyxqqhjQAQ==
@@ -28726,19 +28711,6 @@ sinon@5.1.1:
     supports-color "^5.4.0"
     type-detect "^4.0.8"
 
-sinon@7.2.2:
-  version "7.2.2"
-  resolved "https://registry.yarnpkg.com/sinon/-/sinon-7.2.2.tgz#388ecabd42fa93c592bfc71d35a70894d5a0ca07"
-  integrity sha512-WLagdMHiEsrRmee3jr6IIDntOF4kbI6N2pfbi8wkv50qaUQcBglkzkjtoOEbeJ2vf1EsrHhLI+5Ny8//WHdMoA==
-  dependencies:
-    "@sinonjs/commons" "^1.2.0"
-    "@sinonjs/formatio" "^3.1.0"
-    "@sinonjs/samsam" "^3.0.2"
-    diff "^3.5.0"
-    lolex "^3.0.0"
-    nise "^1.4.7"
-    supports-color "^5.5.0"
-
 sinon@7.3.1:
   version "7.3.1"
   resolved "https://registry.yarnpkg.com/sinon/-/sinon-7.3.1.tgz#e8276522104e6c08d1cb52a907270b0e316655c4"
@@ -29203,13 +29175,6 @@ spawn-error-forwarder@~1.0.0:
   resolved "https://registry.yarnpkg.com/spawn-error-forwarder/-/spawn-error-forwarder-1.0.0.tgz#1afd94738e999b0346d7b9fc373be55e07577029"
   integrity sha1-Gv2Uc46ZmwNG17n8NzvlXgdXcCk=
 
-spawn-mock@1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/spawn-mock/-/spawn-mock-1.0.0.tgz#451f9b10045288abda63b844c2cec380e47721d9"
-  integrity sha1-RR+bEARSiKvaY7hEws7DgOR3Idk=
-  dependencies:
-    stdio-mock "^1.1.0"
-
 spdx-correct@^3.0.0:
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/spdx-correct/-/spdx-correct-3.1.1.tgz#dece81ac9c1e6713e5f7d1b6f17d468fa53d89a9"
@@ -29457,11 +29422,6 @@ stdin-discarder@^0.2.2:
   version "0.2.2"
   resolved "https://registry.yarnpkg.com/stdin-discarder/-/stdin-discarder-0.2.2.tgz#390037f44c4ae1a1ae535c5fe38dc3aba8d997be"
   integrity sha512-UhDfHmA92YAlNnCfhmq0VeNL5bDbiZGg7sZ2IvPsXubGkiNa9EC+tUTsjBRsYUAz87btI6/1wf4XoVvQ3uRnmQ==
-
-stdio-mock@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/stdio-mock/-/stdio-mock-1.1.0.tgz#cf6fcbbf03048436a83fe7ff647c5b9f28528005"
-  integrity sha1-z2/LvwMEhDaoP+f/ZHxbnyhSgAU=
 
 stealthy-require@^1.1.1:
   version "1.1.1"

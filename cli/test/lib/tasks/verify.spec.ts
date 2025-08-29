@@ -181,22 +181,22 @@ describe('lib/tasks/verify', () => {
   })
 
   it('has verify task timeout', () => {
-    expect(verify.VERIFY_TEST_RUNNER_TIMEOUT_MS).to.eql(DEFAULT_VERIFY_TIMEOUT)
+    expect(verify.verifyTestRunnerTimeoutMs()).to.eql(DEFAULT_VERIFY_TIMEOUT)
   })
 
   it('accepts custom verify task timeout', () => {
     vi.stubEnv('CYPRESS_VERIFY_TIMEOUT', '500000')
-    expect(verify.VERIFY_TEST_RUNNER_TIMEOUT_MS).toEqual(500000)
+    expect(verify.verifyTestRunnerTimeoutMs()).toEqual(500000)
   })
 
   it('accepts custom verify task timeout from npm', async () => {
     vi.stubEnv('npm_config_CYPRESS_VERIFY_TIMEOUT', '600000')
-    expect(verify.VERIFY_TEST_RUNNER_TIMEOUT_MS).toEqual(600000)
+    expect(verify.verifyTestRunnerTimeoutMs()).toEqual(600000)
   })
 
   it('falls back to default verify task timeout if custom value is invalid', async () => {
     vi.stubEnv('CYPRESS_VERIFY_TIMEOUT', 'foobar')
-    expect(verify.VERIFY_TEST_RUNNER_TIMEOUT_MS).toEqual(DEFAULT_VERIFY_TIMEOUT)
+    expect(verify.verifyTestRunnerTimeoutMs()).toEqual(DEFAULT_VERIFY_TIMEOUT)
   })
 
   it('returns early when `CYPRESS_SKIP_VERIFY` is set to true', async () => {

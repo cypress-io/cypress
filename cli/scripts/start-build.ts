@@ -23,16 +23,15 @@ includeTypes.forEach((folder: string) => {
 })
 
 // build the project and copy the build files over to the build directory
-shell.exec('tsc')
+shell.exec('tsc -p tsconfig.json')
+shell.exec('tsc -p tsconfig.esm.json')
 
-shell.cp('index.js', 'build/index.js')
-shell.cp('index.mjs', 'build/index.mjs')
+shell.mkdir('-p', 'build/dist')
+shell.cp('dist/*.js', 'build/dist/')
+shell.cp('dist/*.mjs', 'build/dist/')
 
-shell.mkdir('-p', 'build/lib')
-shell.cp('lib/*.js', 'build/lib/')
+shell.mkdir('-p', 'build/dist/exec')
+shell.cp('dist/exec/*.js', 'build/dist/exec')
 
-shell.mkdir('-p', 'build/lib/exec')
-shell.cp('lib/exec/*.js', 'build/lib/exec')
-
-shell.mkdir('-p', 'build/lib/tasks')
-shell.cp('lib/tasks/*.js', 'build/lib/tasks')
+shell.mkdir('-p', 'build/dist/tasks')
+shell.cp('dist/tasks/*.js', 'build/dist/tasks')

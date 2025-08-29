@@ -387,11 +387,7 @@ const needsSandbox = (): boolean => isLinuxLike()
 const module: {
   start: (options?: any) => any
   needsSandbox: () => boolean
-  VERIFY_TEST_RUNNER_TIMEOUT_MS: number
-} = { start, needsSandbox, VERIFY_TEST_RUNNER_TIMEOUT_MS: 30000 }
-
-Object.defineProperty(module, 'VERIFY_TEST_RUNNER_TIMEOUT_MS', {
-  get: () => verifyTestRunnerTimeoutMs(),
-})
+  verifyTestRunnerTimeoutMs: () => number
+} = { start, needsSandbox, verifyTestRunnerTimeoutMs }
 
 export default module
