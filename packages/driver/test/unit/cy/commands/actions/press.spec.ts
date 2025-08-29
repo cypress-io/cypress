@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { vi, describe, it, expect, beforeEach, Mock, MockedObject } from 'vitest'
-import type { KeyPressSupportedKeys } from '@packages/types'
+
 import addCommand, { PressCommand } from '../../../../../src/cy/commands/actions/press'
 import type { $Cy } from '../../../../../src/cypress/cy'
 import type { StateFunc } from '../../../../../src/cypress/state'
@@ -25,7 +25,6 @@ vi.mock('../../../../../src/cypress/error_utils', async () => {
 })
 
 describe('cy/commands/actions/press', () => {
-  let log: Mock<typeof Cypress['log']>
   let automation: Mock<typeof Cypress['automation']>
   let press: PressCommand
   let Cypress: MockedObject<Cypress.Cypress>
@@ -36,13 +35,11 @@ describe('cy/commands/actions/press', () => {
   let logReturnValue: Cypress.Log
 
   beforeEach(() => {
-    log = vi.fn<typeof Cypress['log']>()
     automation = vi.fn<typeof Cypress['automation']>()
 
     Cypress = {
-      // The overloads for `log` don't get applied correctly here
-      // @ts-expect-error
-      log,
+      // @ts-expect-error - <Cypress['log']> has a type conflict between Driver and CLI d.ts
+      log: vi.fn(),
       automation,
       // @ts-expect-error
       browser: {
@@ -95,14 +92,15 @@ describe('cy/commands/actions/press', () => {
   })
 
   describe('with a valid key', () => {
-    const key: KeyPressSupportedKeys = Keyboard.Keys.TAB
-
-    it('dispatches a key:press automation command', async () => {
-      await press(key)
-      expect(automation).toHaveBeenCalledWith('key:press', { key })
-    })
+    for (const key of Object.values(Keyboard.Keys)) {
+      it(`dispatches a key:press automation command for key: ${key}`, async () => {
+        await press(key)
+        expect(automation).toHaveBeenCalledWith('key:press', { key })
+      })
+    }
 
     describe('with options', () => {
+      const key = 'Tab'
       let options: Cypress.Loggable & Cypress.Timeoutable
 
       beforeEach(() => {
@@ -147,23 +145,6 @@ describe('cy/commands/actions/press', () => {
         onFail: logReturnValue,
         args: {
           family: Cypress.browser.family,
-        },
-      })
-    })
-  })
-
-  describe('when in firefox below 135', () => {
-    it('throws an unsupported browser version error', async () => {
-      Cypress.browser.name = 'firefox'
-      Cypress.browser.majorVersion = '134'
-      await expect(press('Tab')).rejects.toThrow('`cy.press()` is not supported in firefox version 134. Upgrade to version 135 to use `cy.press()`.')
-
-      expect($errUtils.throwErrByPath).toHaveBeenCalledWith('press.unsupported_browser_version', {
-        onFail: logReturnValue,
-        args: {
-          browser: Cypress.browser.name,
-          version: Cypress.browser.majorVersion,
-          minimumVersion: 135,
         },
       })
     })
