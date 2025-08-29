@@ -1311,15 +1311,24 @@ export default {
   },
 
   press: {
-    invalid_key: stripIndent`\
-      \`{{key}}\` is not supported by ${cmd('press')}. See \`Cypress.Keyboard.Keys\` for keys that are supported.
-    `,
-    unsupported_browser_version: stripIndent`\
-      ${cmd('press')} is not supported in {{browser}} version {{version}}. Upgrade to version {{minimumVersion}} to use \`cy.press()\`.
-    `,
-    unsupported_browser: stripIndent`\
+    invalid_key: {
+      message: stripIndent`\
+        \`{{key}}\` is not supported by ${cmd('press')}.
+      `,
+      docsUrl: 'https://on.cypress.io/press',
+    },
+    unsupported_browser_version: {
+      message: stripIndent`\
+        ${cmd('press')} is not supported in {{browser}} version {{version}}. Upgrade to version {{minimumVersion}} to use \`cy.press()\`.
+      `,
+      docsUrl: 'https://on.cypress.io/press',
+    },
+    unsupported_browser: {
+      message: stripIndent`\
       ${cmd('press')} is not supported in {{family}} browsers.
-    `,
+      `,
+      docsUrl: 'https://on.cypress.io/press',
+    },
   },
 
   proxy: {
