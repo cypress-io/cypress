@@ -31,7 +31,9 @@ describe('lib/connect', function () {
         })
       })
       .then(() => {
-        server.close()
+        return Bluebird.fromCallback((cb) => {
+          server.close(cb)
+        })
       })
     })
 
