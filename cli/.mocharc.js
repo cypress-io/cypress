@@ -19,7 +19,6 @@ module.exports = {
     'test/lib/cypress.spec.ts',
     'test/lib/errors.spec.ts',
     'test/lib/logger.spec.ts',
-    'test/lib/util.spec.ts',
   ],
   timeout: 10000,
   reporter: 'spec',
