@@ -44,6 +44,16 @@ describe('lib/environment', () => {
     return process.env['CYPRESS_INTERNAL_ENV'] = env
   })
 
+  // @see https://github.com/electron/electron/issues/46538
+  // @see https://github.com/cypress-io/cypress/issues/32361
+  context('sets gtk-version=3 in Electron >= 36', () => {
+    it('sets launch args', () => {
+      sinon.stub(app.commandLine, 'appendSwitch')
+      require(`../../lib/environment`)
+      expect(app.commandLine.appendSwitch).to.have.been.calledWith('--gtk-version', '3')
+    })
+  })
+
   context('parses ELECTRON_EXTRA_LAUNCH_ARGS', () => {
     let restore = null
 
