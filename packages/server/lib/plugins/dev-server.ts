@@ -58,5 +58,3 @@ const API: DevServerAPI = {
 }
 
 export default API
-
-module.exports = API
