@@ -13,6 +13,7 @@ _Released 08/26/2025 (PENDING)_
 - Fixed an issue where Cypress would fail to run on GNOME if GTK 4 and GTK 2/3 were detected in the Electron process. Addresses [#32361](https://github.com/cypress-io/cypress/issues/32361).
 - Fixed an issue where the open Studio button would incorrectly show for component tests. Addressed in [#32315](https://github.com/cypress-io/cypress/pull/32315).
 - Fixed an issue where the TypeScript compiler wasn't being resolved correctly when `@cypress/webpack-batteries-included-preprocessor` was used as a standalone package. Fixes [#32338](https://github.com/cypress-io/cypress/issues/32338).
+- Fixed an issue where `tsx` was not being loaded correctly into the Cypress configuration process due to spaces being present in the path. Fixes [#32398](https://github.com/cypress-io/cypress/issues/32398).
 
 **Misc:**
 
