@@ -53,6 +53,22 @@ const copyContents = (fromFile, toFile) => {
 // copies all of the project fixtures
 // to the cyTmpDir .projects in the root
 export function scaffold () {
+  // Prevent copying directory into itself
+  if (projects === cyTmpDir || projects.startsWith(cyTmpDir) || cyTmpDir.startsWith(projects)) {
+    throw new Error(`Cannot copy directory into itself: projects=${projects}, cyTmpDir=${cyTmpDir}`)
+  }
+
+  // Ensure temp directory is clean before copying
+  try {
+    fs.removeSync(cyTmpDir)
+  } catch (err) {
+    // Ignore errors if directory doesn't exist
+  }
+
+  // Create temp directory if it doesn't exist
+  fs.ensureDirSync(cyTmpDir)
+
+  // Copy projects to temp directory
   fs.copySync(projects, cyTmpDir)
 }
 

@@ -5,14 +5,19 @@ const Promise = require('bluebird')
 const fixture = require(`../../lib/fixture`)
 const { fs } = require(`../../lib/util/fs`)
 const FixturesHelper = require('@tooling/system-tests')
-const { getCtx } = require(`../../lib/makeDataContext`)
 const snapshot = require('snap-shot-it')
 
 let ctx
 
 describe('lib/fixture', () => {
   before(async function () {
-    ctx = getCtx()
+    const { setCtx, makeDataContext, clearCtx } = require('../../lib/makeDataContext')
+
+    // Clear and set up DataContext
+    await clearCtx()
+    setCtx(makeDataContext({}))
+    ctx = require('../../lib/makeDataContext').getCtx()
+
     FixturesHelper.scaffold()
 
     this.todosPath = FixturesHelper.projectPath('todos')
