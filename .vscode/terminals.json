@@ -89,6 +89,13 @@
       "onlySingle": true,
       "cwd": "[cwd]/packages/driver",
       "command": "yarn cypress:open"
+    },
+    {
+      "name": "packages/network test",
+      "focus": true,
+      "onlySingle": true,
+      "cwd": "[cwd]/packages/network",
+      "command": "yarn test-watch [file]"
     }
   ]
 }
