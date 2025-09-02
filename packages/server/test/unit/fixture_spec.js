@@ -11,24 +11,26 @@ const snapshot = require('snap-shot-it')
 let ctx
 
 describe('lib/fixture', () => {
-  beforeEach(async function () {
+  before(async function () {
     ctx = getCtx()
     FixturesHelper.scaffold()
 
     this.todosPath = FixturesHelper.projectPath('todos')
-    this.read = (folder, image, encoding) => {
-      return fs.readFileAsync(path.join(folder, image), encoding)
-    }
 
     await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
-    return ctx.lifecycleManager.getFullInitialConfig()
-    .then((cfg) => {
-      ({ fixturesFolder: this.fixturesFolder } = cfg)
-    })
+    const cfg = await ctx.lifecycleManager.getFullInitialConfig()
+
+    this.fixturesFolder = cfg.fixturesFolder
   })
 
-  afterEach(() => {
+  beforeEach(function () {
+    this.read = (folder, image, encoding) => {
+      return fs.readFileAsync(path.join(folder, image), encoding)
+    }
+  })
+
+  after(() => {
     return FixturesHelper.remove()
   })
 

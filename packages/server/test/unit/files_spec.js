@@ -7,7 +7,7 @@ const { getCtx } = require('../../lib/makeDataContext')
 let ctx
 
 describe('lib/files', () => {
-  beforeEach(async function () {
+  before(async function () {
     ctx = getCtx()
     FixturesHelper.scaffold()
 
@@ -15,14 +15,15 @@ describe('lib/files', () => {
 
     await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
-    return ctx.lifecycleManager.getFullInitialConfig().then(async (cfg) => {
-      this.config = cfg;
-      ({ projectRoot: this.projectRoot } = cfg)
-      await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.projectRoot)
-    })
+    const cfg = await ctx.lifecycleManager.getFullInitialConfig()
+
+    this.config = cfg
+    this.projectRoot = cfg.projectRoot
+
+    await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.projectRoot)
   })
 
-  afterEach(() => {
+  after(() => {
     return FixturesHelper.remove()
   })
 
