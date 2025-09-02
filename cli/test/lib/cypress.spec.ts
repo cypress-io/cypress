@@ -1,40 +1,75 @@
 import { vi, beforeEach, describe, it, expect } from 'vitest'
 import os from 'os'
 import path from 'path'
-import type Open from '../../lib/exec/open'
-import type Run from '../../lib/exec/run'
-import type Cypress from '../../lib/cypress'
+import tmp from 'tmp'
+import fs from 'fs-extra'
+import open from '../../lib/exec/open'
+import run from '../../lib/exec/run'
+import cypress from '../../lib/cypress'
+
+vi.mock('fs-extra', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    // @ts-expect-error
+    ...actual,
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      readJson: vi.fn(),
+    },
+  }
+})
+
+vi.mock('tmp', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    // @ts-expect-error
+    ...actual,
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      file: vi.fn(),
+    },
+  }
+})
+
+vi.mock('../../lib/exec/open', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    // @ts-expect-error
+    ...actual,
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      start: vi.fn(),
+    },
+  }
+})
+
+vi.mock('../../lib/exec/run', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    // @ts-expect-error
+    ...actual,
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      start: vi.fn(),
+    },
+  }
+})
 
 describe('cypress', function () {
-  let cypress: typeof Cypress
-
   beforeEach(function () {
     vi.unstubAllEnvs()
     vi.resetModules()
   })
 
   describe('.open', function () {
-    let open: typeof Open
-
-    beforeEach(async function () {
-      vi.doMock('../../lib/exec/open', async (importActual) => {
-        const actual = await importActual()
-
-        return {
-          // @ts-expect-error
-          ...actual,
-          default: {
-            // @ts-expect-error
-            ...actual.default,
-            start: vi.fn(),
-          },
-        }
-      })
-
-      open = (await import('../../lib/exec/open')).default
-      cypress = (await import('../../lib/cypress')).default
-    })
-
     it('calls open#start, passing in options', async function () {
       await cypress.open({ foo: 'foo' })
 
@@ -57,59 +92,11 @@ describe('cypress', function () {
     it('resolves with error object', async function () {
       const outputPath = path.join(os.tmpdir(), 'cypress/monorepo/cypress_spec/output.json')
 
-      vi.doMock('tmp', async (importActual) => {
-        const actual = await importActual()
-
-        return {
-          // @ts-expect-error
-          ...actual,
-          default: {
-            // @ts-expect-error
-            ...actual.default,
-            file: vi.fn(),
-          },
-        }
-      })
-
-      const tmp = (await import('tmp')).default
-
       // @ts-expect-error
       tmp.file.mockReturnValue(outputPath)
 
-      vi.doMock('../../lib/exec/run', async (importActual) => {
-        const actual = await importActual()
-
-        return {
-          // @ts-expect-error
-          ...actual,
-          default: {
-            // @ts-expect-error
-            ...actual.default,
-            start: vi.fn(),
-          },
-        }
-      })
-
-      const run = (await import('../../lib/exec/run')).default
-
       // @ts-expect-error
       run.start.mockResolvedValue(2)
-
-      vi.doMock('fs-extra', async (importActual) => {
-        const actual = await importActual()
-
-        return {
-          // @ts-expect-error
-          ...actual,
-          default: {
-            // @ts-expect-error
-            ...actual.default,
-            readJson: vi.fn(),
-          },
-        }
-      })
-
-      const fs = (await import('fs-extra')).default
 
       fs.readJson.mockImplementation((args) => {
         if (args === outputPath) {
@@ -118,8 +105,6 @@ describe('cypress', function () {
 
         throw new Error('Could not find Cypress test run results')
       })
-
-      const cypress = (await import('../../lib/cypress')).default
 
       const results = await cypress.run()
 
@@ -133,64 +118,15 @@ describe('cypress', function () {
 
   describe('.run', function () {
     let outputPath: string
-    let run: typeof Run
 
     beforeEach(async function () {
       outputPath = path.join(os.tmpdir(), 'cypress/monorepo/cypress_spec/output.json')
 
-      vi.doMock('tmp', async (importActual) => {
-        const actual = await importActual()
-
-        return {
-          // @ts-expect-error
-          ...actual,
-          default: {
-            // @ts-expect-error
-            ...actual.default,
-            file: vi.fn(),
-          },
-        }
-      })
-
-      const tmp = (await import('tmp')).default
-
       // @ts-expect-error
       tmp.file.mockReturnValue(outputPath)
 
-      vi.doMock('../../lib/exec/run', async (importActual) => {
-        const actual = await importActual()
-
-        return {
-          // @ts-expect-error
-          ...actual,
-          default: {
-            // @ts-expect-error
-            ...actual.default,
-            start: vi.fn(),
-          },
-        }
-      })
-
-      run = (await import('../../lib/exec/run')).default
-
       // @ts-expect-error
       run.start.mockResolvedValue(undefined)
-
-      let fsOriginal: typeof fs
-
-      vi.doMock('fs-extra', async (importActual) => {
-        fsOriginal = await importActual()
-
-        return {
-          ...fsOriginal,
-          default: {
-            ...fsOriginal.default,
-            readJson: vi.fn(),
-          },
-        }
-      })
-
-      const fs = (await import('fs-extra')).default
 
       fs.readJson.mockImplementation((args) => {
         if (args === outputPath) {
@@ -202,8 +138,6 @@ describe('cypress', function () {
 
         return fsOriginal.default.readJson(args)
       })
-
-      cypress = (await import('../../lib/cypress')).default
     })
 
     it('calls run#start, passing in options', async () => {
