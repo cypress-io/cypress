@@ -6705,9 +6705,9 @@
   integrity sha512-LtoMMhxAlorcGhmFYI+LhPgbPZCkgP6ra1YL604EeF6U98pLlQ3iWIGMdWSC+vWmPBWBNgmDBAhnAobLROJmwg==
 
 "@sinonjs/commons@^1", "@sinonjs/commons@^1.2.0", "@sinonjs/commons@^1.3.0", "@sinonjs/commons@^1.4.0", "@sinonjs/commons@^1.6.0", "@sinonjs/commons@^1.7.0", "@sinonjs/commons@^1.7.2", "@sinonjs/commons@^1.8.1", "@sinonjs/commons@^1.8.3":
-  version "1.8.3"
-  resolved "https://registry.yarnpkg.com/@sinonjs/commons/-/commons-1.8.3.tgz#3802ddd21a50a949b6721ddd72da36e67e7f1b2d"
-  integrity sha512-xkNcLAn/wZaX14RPlwizcKicDk9G3F8m2nU3L7Ukm5zBgTwiT0wsoFAHx9Jq56fJA1z/7uKGtCRu16sOUCLIHQ==
+  version "1.8.6"
+  resolved "https://registry.yarnpkg.com/@sinonjs/commons/-/commons-1.8.6.tgz#80c516a4dc264c2a69115e7578d62581ff455ed9"
+  integrity sha512-Ky+XkAkqPZSm3NLBeUng77EBQl3cmeJhITaGHdYH8kjVB+aun3S4XBRti2zt17mtt0mIUDiNxYeoJm6drVvBJQ==
   dependencies:
     type-detect "4.0.8"
 
@@ -29260,7 +29260,7 @@ spawn-error-forwarder@~1.0.0:
 spawn-mock@1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/spawn-mock/-/spawn-mock-1.0.0.tgz#451f9b10045288abda63b844c2cec380e47721d9"
-  integrity sha1-RR+bEARSiKvaY7hEws7DgOR3Idk=
+  integrity sha512-jV/GrvGZpvCfDlqbbamtFvPpQcwTtqb0NZCNdx0g/20RIYrQlo8j14swjnYL9LIaiDyPMm3UrKN/1cET2myebw==
   dependencies:
     stdio-mock "^1.1.0"
 
@@ -29513,9 +29513,9 @@ stdin-discarder@^0.2.2:
   integrity sha512-UhDfHmA92YAlNnCfhmq0VeNL5bDbiZGg7sZ2IvPsXubGkiNa9EC+tUTsjBRsYUAz87btI6/1wf4XoVvQ3uRnmQ==
 
 stdio-mock@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/stdio-mock/-/stdio-mock-1.1.0.tgz#cf6fcbbf03048436a83fe7ff647c5b9f28528005"
-  integrity sha1-z2/LvwMEhDaoP+f/ZHxbnyhSgAU=
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/stdio-mock/-/stdio-mock-1.2.0.tgz#ab4d7f357341bfc32d0ae4c6b75e13df5f225adb"
+  integrity sha512-chl4ckeF79whhswWK3IrBDsosxqKuINZGUBC6OSadLVHiIk93x7jEvqRvBzclLqB1D4rfdTo4OMcohZ1K79Iow==
 
 stealthy-require@^1.1.1:
   version "1.1.1"

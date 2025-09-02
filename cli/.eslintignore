@@ -14,3 +14,4 @@ package.json
 /vue
 /svelte
 /mount-utils
+tsconfig.esm.json

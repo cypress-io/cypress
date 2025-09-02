@@ -50,7 +50,7 @@ function preparePackageForNpmRelease (json: any, branchName?: string): any {
     keywords,
     types: 'types', // typescript types
     scripts: {
-      postinstall: 'node index.js --exec install',
+      postinstall: 'node dist/index.js --exec install',
       size: 't="$(npm pack .)"; wc -c "${t}"; tar tvf "${t}"; rm "${t}";',
     },
   })

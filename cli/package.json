@@ -2,9 +2,9 @@
   "name": "cypress",
   "version": "0.0.0-development",
   "private": true,
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "build-cli": "tsc && tsx ./scripts/build.ts && tsx ./scripts/post-build.ts",
+    "build-cli": "tsc && tsc -p tsconfig.esm.json && tsx ./scripts/build.ts && tsx ./scripts/post-build.ts",
     "clean": "tsx ./scripts/clean.ts",
     "dtslint": "dtslint types",
     "postinstall": "patch-package && tsx ./scripts/post-install.ts",
@@ -106,9 +106,7 @@
   },
   "files": [
     "bin",
-    "lib",
-    "index.js",
-    "index.mjs",
+    "dist",
     "types/**/*.d.ts",
     "mount-utils",
     "vue",
@@ -126,8 +124,8 @@
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
-      "import": "./index.mjs",
-      "require": "./index.js"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
     },
     "./types/net-stubbing": {
       "types": "./types/net-stubbing.d.ts"
