@@ -1,11 +1,29 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.0.1
+## 15.1.0
 
 _Released 08/26/2025 (PENDING)_
 
+**Features:**
+
+- Expanded `cy.press()` to support more key types. Addresses [#31051](https://github.com/cypress-io/cypress/issues/31051) and [#31488](https://github.com/cypress-io/cypress/issues/31488). Addressed in [#31496](https://github.com/cypress-io/cypress/pull/31496).
+
+**Bugfixes:**
+
+- Fixed an issue where OS distributions and releases were sometimes not properly populated for Module API results and Cloud recordings. Fixes [#30533](https://github.com/cypress-io/cypress/issues/30533). Addressed in [#32283](https://github.com/cypress-io/cypress/pull/32283).
+- Fixed an issue where Cypress would fail to run on GNOME if GTK 4 and GTK 2/3 were detected in the Electron process. Addresses [#32361](https://github.com/cypress-io/cypress/issues/32361).
+- Fixed an issue where the open Studio button would incorrectly show for component tests. Addressed in [#32315](https://github.com/cypress-io/cypress/pull/32315).
+- Fixed an issue where the TypeScript compiler wasn't being resolved correctly when `@cypress/webpack-batteries-included-preprocessor` was used as a standalone package. Fixes [#32338](https://github.com/cypress-io/cypress/issues/32338).
+
+**Misc:**
+
+- Updated the Cypress Studio panel to have a darker gray background. Addressed in [#32333](https://github.com/cypress-io/cypress/pull/32333).
+
 **Dependency Updates:**
 
+- Upgraded `esbuild` from `0.15.3` to `0.25.2`. Addressed in [#32231](https://github.com/cypress-io/cypress/pull/32231).
+- Upgraded `image-size` from `1.1.1` to `1.2.1`. Addressed in [#32232](https://github.com/cypress-io/cypress/pull/32232).
 - Upgraded `tar` from `6.1.5` to `6.2.1`. Addressed in [#32229](https://github.com/cypress-io/cypress/pull/32229).
+- Upgraded `axios` from `1.8.3` to `1.11.0`. Addresses [#32347](https://github.com/cypress-io/cypress/issues/32347).
 
 ## 15.0.0
 

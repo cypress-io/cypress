@@ -89,8 +89,8 @@ describe('webpack-batteries-included-preprocessor', () => {
             module: 'ESNext',
             moduleResolution: 'Bundler',
           },
-          path: '/foo/tsconfig.json',
         },
+        path: require.resolve('../../test/fixtures/tsconfig.json'),
       })
 
       const preprocessorCB = preprocessor({
@@ -107,7 +107,7 @@ describe('webpack-batteries-included-preprocessor', () => {
 
       expect(tsLoader.loader).to.contain('ts-loader')
 
-      expect(tsLoader.options.compiler).to.be.true
+      expect(tsLoader.options.compiler).to.equal(require.resolve('typescript'))
       expect(tsLoader.options.logLevel).to.equal('error')
       expect(tsLoader.options.silent).to.be.true
       expect(tsLoader.options.transpileOnly).to.be.true
@@ -126,8 +126,8 @@ describe('webpack-batteries-included-preprocessor', () => {
             module: 'commonjs',
             moduleResolution: 'node10',
           },
-          path: '/foo/tsconfig.json',
         },
+        path: require.resolve('../../test/fixtures/tsconfig.json'),
       })
 
       const preprocessorCB = preprocessor({
@@ -141,8 +141,6 @@ describe('webpack-batteries-included-preprocessor', () => {
       })
 
       const tsLoader = webpackOptions.module.rules[0].use[0]
-
-      expect(tsLoader.options.compiler).to.be.true
 
       expect(tsLoader.options.compilerOptions).to.deep.equal({
         module: 'commonjs',
@@ -164,7 +162,31 @@ describe('webpack-batteries-included-preprocessor', () => {
           filePath: 'foo.ts',
           outputPath: '.js',
         })
-      }).to.throw('No tsconfig.json found, but typescript is installed. ts-loader needs a tsconfig.json file to work. Please add one to your project in either the root or the cypress directory.')
+      }).to.throw('No tsconfig.json found. ts-loader needs a tsconfig.json file to work. Please add one to your project in either the root or the cypress directory.')
+    })
+
+    it('throws an error if the user\'s typescript is not found', () => {
+      getTsConfigMock.returns({
+        config: {
+          compilerOptions: {
+            module: 'commonjs',
+            moduleResolution: 'node16',
+          },
+        },
+        path: '/does/not/exist',
+      })
+
+      const preprocessorCB = preprocessor({
+        typescript: true,
+        webpackOptions,
+      })
+
+      expect(() => {
+        return preprocessorCB({
+          filePath: 'foo.ts',
+          outputPath: '.js',
+        })
+      }).to.throw('No typescript installable was found. ts-loader needs a version of typescript to work properly. Please install typescript in your project\'s package.json.')
     })
   })
 })

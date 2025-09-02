@@ -84,6 +84,12 @@ const getDesktopUrl = function (version, osName, zipName) {
   return [url, 'desktop', version, osName, zipName].join('/')
 }
 
+const purgeDesktopManifest = function () {
+  const url = getUploadUrl()
+
+  return purgeCloudflareCache([url, 'desktop', 'manifest.json'].join('/'))
+}
+
 // purges desktop application url from Cloudflare cache
 const purgeDesktopAppFromCache = function ({ version, platformArch, zipName }) {
   la(check.unemptyString(version), 'missing desktop version', version)
@@ -162,6 +168,7 @@ module.exports = {
   getPublisher,
   purgeDesktopAppFromCache,
   purgeDesktopAppAllPlatforms,
+  purgeDesktopManifest,
   getUploadNameByOsAndArch,
   validPlatformArchs,
   getValidPlatformArchs,

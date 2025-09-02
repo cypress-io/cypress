@@ -185,7 +185,7 @@ const testVisualError = <K extends CypressErrorType> (errorGeneratorFn: () => Er
   }
 }
 
-const testVisualErrors = (whichError: CypressErrorType | '*', errorsToTest: {[K in CypressErrorType]: () => ErrorGenerator<K>}) => {
+const testVisualErrors = (whichError: CypressErrorType | '*', errorsToTest: { [K in CypressErrorType]: () => ErrorGenerator<K> }) => {
   // if we aren't testing all the errors
   if (whichError !== '*') {
     // then just test this individual error
@@ -291,7 +291,7 @@ const makeErr = () => {
 
   err.stack = err.stack?.split('\n').slice(0, 3).join('\n') ?? ''
 
-  return err as Error & {stack: string}
+  return err as Error & { stack: string }
 }
 
 process.on('uncaughtException', (err) => {

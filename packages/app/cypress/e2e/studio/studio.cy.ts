@@ -1210,6 +1210,23 @@ describe('studio functionality', () => {
     cy.findByTestId('studio-toolbar').should('not.exist')
   })
 
+  it('does not show the studio button in component testing mode', () => {
+    // Load project in component testing mode
+    cy.scaffoldProject('experimental-studio')
+    cy.openProject('experimental-studio', ['--component'])
+    cy.startAppServer('component')
+    cy.visitApp()
+    cy.specsPageIsVisible()
+    cy.get('[data-cy-row="HelloWorld.cy.jsx"]').eq(1).click()
+    cy.waitForSpecToFinish({ passCount: 1 })
+
+    // Verify studio button is not present
+    cy.findByTestId('studio-button').should('not.exist')
+
+    // Verify no launch studio buttons are present in test results
+    cy.get('.runnable-wrapper').should('not.contain', '[data-cy="launch-studio"]')
+  })
+
   it('hides studio button when running all specs', () => {
     // Use the run-all-specs project which already has run-all-specs enabled
     cy.scaffoldProject('run-all-specs')
