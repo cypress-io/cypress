@@ -3,7 +3,7 @@ module.exports = {
     'test/unit/**/*.ts',
     'test/integration/**/*.ts'
   ],
-  require: '../web-config/node-register',
+  require: '@packages/ts/register',
   timeout: 10000,
   recursive: true
-} 
+}
