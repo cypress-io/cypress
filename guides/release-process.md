@@ -37,7 +37,7 @@ The `@cypress/`-namespaced NPM packages that live inside the [`/npm`](../npm) di
     GITHUB_PRIVATE_KEY=
     ```
 
-  - For purging the Cloudflare cache (needed for the `prepare-release-artifacts` script in step 6), you'll need `CF_ZONEID` and `CF_TOKEN` set. These can be found in 1Password.
+  - For purging the Cloudflare cache (needed for the `prepare-release-artifacts` script in step 6 and `binary-release` in step 14), you'll need `CF_ZONEID` and `CF_TOKEN` set. These can be found in 1Password.
       ```text
       CF_ZONEID="..."
       CF_TOKEN="..."

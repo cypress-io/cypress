@@ -1,8 +1,8 @@
 import type Sinon from 'sinon'
 import type { expect as Expect } from 'chai'
-import type { KeyPressSupportedKeys } from '@packages/types'
+import { SupportedKey, NamedKeys, toSupportedKey, SpaceKey } from '@packages/types'
 import type { SendDebuggerCommand } from '../../../../lib/browsers/cdp_automation'
-import { cdpKeyPress, bidiKeyPress, BIDI_VALUE, CDP_KEYCODE } from '../../../../lib/automation/commands/key_press'
+import { cdpKeyPress, bidiKeyPress, BidiOverrideCodepoints } from '../../../../lib/automation/commands/key_press'
 import { Client as WebdriverClient } from 'webdriver'
 import type { Protocol } from 'devtools-protocol'
 const { expect, sinon }: { expect: typeof Expect, sinon: Sinon.SinonSandbox } = require('../../../spec_helper')
@@ -16,6 +16,12 @@ type ClientReturn<T extends keyof WebdriverClient> = WebdriverClient[T] extends 
   never
 
 describe('key:press automation command', () => {
+  const tab: SupportedKey = toSupportedKey('Tab')
+
+  function stubClientMethod<T extends keyof WebdriverClient> (method: T) {
+    return sinon.stub<ClientParams<T>, ClientReturn<T>>()
+  }
+
   describe('cdp', () => {
     let sendFn: Sinon.SinonStub<Parameters<SendDebuggerCommand>, ReturnType<SendDebuggerCommand>>
     const topFrameId = 'abc'
@@ -78,7 +84,7 @@ describe('key:press automation command', () => {
       })
 
       it('focuses the frame and sends keydown and keyup', async () => {
-        await cdpKeyPress({ key: 'Tab' }, sendFn, executionContexts, frameTree)
+        await cdpKeyPress(tab, sendFn, executionContexts, frameTree)
         expect(sendFn).to.have.been.calledWith('Runtime.evaluate', {
           expression: 'window.focus()',
           contextId: autExecutionContext.id,
@@ -86,16 +92,14 @@ describe('key:press automation command', () => {
 
         expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
           type: 'keyDown',
-          keyIdentifier: CDP_KEYCODE.Tab,
-          key: 'Tab',
           code: 'Tab',
+          key: 'Tab',
         })
 
         expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
           type: 'keyUp',
-          keyIdentifier: CDP_KEYCODE.Tab,
-          key: 'Tab',
           code: 'Tab',
+          key: 'Tab',
         })
       })
 
@@ -123,7 +127,7 @@ describe('key:press automation command', () => {
           let thrown: any = undefined
 
           try {
-            await cdpKeyPress({ key: 'Tab' }, sendFn, executionContexts, frameTree)
+            await cdpKeyPress(tab, sendFn, executionContexts, frameTree)
           } catch (e) {
             thrown = e
           }
@@ -148,31 +152,109 @@ describe('key:press automation command', () => {
         }).resolves(topActiveElement)
       })
 
-      it('dispaches a keydown followed by a keyup event to the provided send fn with the tab keycode', async () => {
-        await cdpKeyPress({ key: 'Tab' }, sendFn, executionContexts, frameTree)
+      it('dispatches a keydown followed by a keyup event to the provided send fn with the tab keycode', async () => {
+        await cdpKeyPress(tab, sendFn, executionContexts, frameTree)
 
         expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
           type: 'keyDown',
-          keyIdentifier: CDP_KEYCODE.Tab,
           key: 'Tab',
           code: 'Tab',
         })
 
         expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
           type: 'keyUp',
-          keyIdentifier: CDP_KEYCODE.Tab,
           key: 'Tab',
           code: 'Tab',
         })
       })
-    })
 
-    describe('when supplied an invalid key', () => {
-      it('errors', async () => {
-        // typescript would keep this from happening, but it hasn't yet
-        // been checked for correctness since being received by automation
-        // @ts-expect-error
-        await expect(cdpKeyPress({ key: 'foo' }, sendFn, executionContexts, frameTree)).to.be.rejectedWith('foo is not supported by \'cy.press()\'.')
+      describe('when supplied a valid named key', () => {
+        for (const key of NamedKeys.filter((k) => k !== SpaceKey)) {
+          it(`dispatches a keydown followed by a keyup event to the provided send fn with the ${key} keycode`, async () => {
+            await cdpKeyPress(key as SupportedKey, sendFn, executionContexts, frameTree)
+
+            expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
+              type: 'keyDown',
+              key,
+              code: key,
+            })
+
+            expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
+              type: 'keyUp',
+              key,
+              code: key,
+            })
+          })
+        }
+
+        it(`dispatches ' ' as text and key, with no code, when the named Space key is pressed`, async () => {
+          await cdpKeyPress(toSupportedKey(SpaceKey), sendFn, executionContexts, frameTree)
+
+          expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
+            type: 'keyDown',
+            key: ' ',
+            text: ' ',
+          })
+
+          expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
+            type: 'keyUp',
+            key: ' ',
+            text: ' ',
+          })
+        })
+      })
+
+      describe('when supplied a valid character key', () => {
+        const key: SupportedKey = 'a' as SupportedKey
+
+        it('adds text to the keydown event data', async () => {
+          await cdpKeyPress(key, sendFn, executionContexts, frameTree)
+
+          expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
+            type: 'keyDown',
+            key,
+            text: key,
+          })
+        })
+      })
+
+      describe('when supplied a utf8 key', () => {
+        const codeOne = 'e'
+        const codeTwo = '́'
+        const value = 'é'
+        let key: SupportedKey
+
+        beforeEach(() => {
+          key = toSupportedKey(value)
+        })
+
+        it('dispatches a keydown followed by a keyup event to the provided send fn with the a keycode', async () => {
+          await cdpKeyPress(key, sendFn, executionContexts, frameTree)
+
+          expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
+            type: 'keyDown',
+            key: codeOne,
+            text: codeOne,
+          })
+
+          expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
+            type: 'keyUp',
+            key: codeOne,
+            text: codeOne,
+          })
+
+          expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
+            type: 'keyDown',
+            key: codeTwo,
+            text: codeTwo,
+          })
+
+          expect(sendFn).to.have.been.calledWith('Input.dispatchKeyEvent', {
+            type: 'keyUp',
+            key: codeTwo,
+            text: codeTwo,
+          })
+        })
       })
     })
   })
@@ -180,7 +262,7 @@ describe('key:press automation command', () => {
   describe('bidi', () => {
     let client: Sinon.SinonStubbedInstance<WebdriverClient>
     let autContext: string
-    let key: KeyPressSupportedKeys
+    let key: SupportedKey
     const iframeElement = {
       'element-6066-11e4-a52e-4f735466cecf': 'uuid-1',
     }
@@ -190,23 +272,22 @@ describe('key:press automation command', () => {
     const topLevelContext = 'b7173d71-c76c-41ec-beff-25a72f7cae13'
 
     beforeEach(() => {
-      // can't create a sinon stubbed instance because webdriver doesn't export the constructor. Because it's known that
-      // bidiKeypress only invokes inputPerformActions, and inputPerformActions is properly typed, this is okay.
-      // @ts-expect-error
+      const stubbedClientMethods: (keyof WebdriverClient)[] = ['inputPerformActions', 'inputReleaseActions', 'getActiveElement', 'findElement', 'scriptEvaluate', 'getWindowHandle', 'switchToWindow', 'browsingContextGetTree']
+
+      // @ts-expect-error - webdriver doesn't export the constructor
       client = {
-        inputPerformActions: sinon.stub<ClientParams<'inputPerformActions'>, ClientReturn<'inputPerformActions'>>(),
-        getActiveElement: sinon.stub<ClientParams<'getActiveElement'>, ClientReturn<'getActiveElement'>>(),
-        findElement: sinon.stub<ClientParams<'findElement'>, ClientReturn<'findElement'>>(),
-        scriptEvaluate: sinon.stub<ClientParams<'scriptEvaluate'>, ClientReturn<'scriptEvaluate'>>(),
-        getWindowHandle: sinon.stub<ClientParams<'getWindowHandle'>, ClientReturn<'getWindowHandle'>>(),
-        switchToWindow: sinon.stub<ClientParams<'switchToWindow'>, ClientReturn<'switchToWindow'>>().resolves(),
-        browsingContextGetTree: sinon.stub<ClientParams<'browsingContextGetTree'>, ClientReturn<'browsingContextGetTree'>>(),
+        ...stubbedClientMethods.reduce((acc, method) => {
+          acc[method] = stubClientMethod(method)
+
+          return acc
+        }, {} as Record<keyof WebdriverClient, Sinon.SinonStub<ClientParams<keyof WebdriverClient>, ClientReturn<keyof WebdriverClient>>>),
       }
 
       autContext = 'someContextId'
 
-      key = 'Tab'
+      key = toSupportedKey('Tab')
 
+      client.switchToWindow.resolves()
       client.inputPerformActions.resolves()
       client.browsingContextGetTree.resolves({
         contexts: [
@@ -215,6 +296,8 @@ describe('key:press automation command', () => {
             children: [],
             url: 'someUrl',
             userContext: 'userContext',
+            clientWindow: 'clientWindow',
+            originalOpener: 'originalOpener',
           },
         ],
       })
@@ -223,18 +306,20 @@ describe('key:press automation command', () => {
     describe('when the aut iframe is not in focus', () => {
       beforeEach(() => {
         client.getWindowHandle.resolves(topLevelContext)
-        client.findElement.withArgs('css selector ', 'iframe.aut-iframe').resolves(iframeElement)
+        client.findElement.withArgs('css selector', 'iframe.aut-iframe').resolves(iframeElement)
         // @ts-expect-error - webdriver types show this returning a string, but it actually returns an ElementReference, same as findElement
         client.getActiveElement.resolves(otherElement)
       })
 
-      it('focuses the frame before dispatching keydown and keyup', async () => {
-        await bidiKeyPress({ key }, client as WebdriverClient, autContext, 'idSuffix')
+      it('focuses the frame before dispatching keydown and keyup, and then releases the input actions', async () => {
+        await bidiKeyPress(key, client, autContext, 'idSuffix')
         expect(client.scriptEvaluate).to.have.been.calledWith({
           expression: 'window.focus()',
           target: { context: autContext },
           awaitPromise: false,
         })
+
+        const expectedValue = BidiOverrideCodepoints[key] ?? key
 
         expect(client.inputPerformActions.firstCall.args[0]).to.deep.equal({
           context: autContext,
@@ -242,10 +327,14 @@ describe('key:press automation command', () => {
             type: 'key',
             id: 'someContextId-Tab-idSuffix',
             actions: [
-              { type: 'keyDown', value: BIDI_VALUE[key] },
-              { type: 'keyUp', value: BIDI_VALUE[key] },
+              { type: 'keyDown', value: expectedValue },
+              { type: 'keyUp', value: expectedValue },
             ],
           }],
+        })
+
+        expect(client.inputReleaseActions).to.have.been.calledWith({
+          context: autContext,
         })
       })
     })
@@ -256,7 +345,7 @@ describe('key:press automation command', () => {
       })
 
       it('activates the top level context window', async () => {
-        await bidiKeyPress({ key }, client as WebdriverClient, autContext, 'idSuffix')
+        await bidiKeyPress(key, client, autContext, 'idSuffix')
         expect(client.switchToWindow).to.have.been.calledWith(topLevelContext)
       })
     })
@@ -267,7 +356,7 @@ describe('key:press automation command', () => {
       })
 
       it('does not activate the top level context window', async () => {
-        await bidiKeyPress({ key }, client as WebdriverClient, autContext, 'idSuffix')
+        await bidiKeyPress(key, client, autContext, 'idSuffix')
         expect(client.switchToWindow).not.to.have.been.called
       })
     })
@@ -278,28 +367,68 @@ describe('key:press automation command', () => {
       })
 
       it('activates the top level context window', async () => {
-        await bidiKeyPress({ key }, client as WebdriverClient, autContext, 'idSuffix')
+        await bidiKeyPress(key, client, autContext, 'idSuffix')
         expect(client.switchToWindow).to.have.been.calledWith(topLevelContext)
       })
     })
 
-    it('calls client.inputPerformActions with a keydown and keyup action', async () => {
-      client.getWindowHandle.resolves(topLevelContext)
-      client.findElement.withArgs('css selector ', 'iframe.aut-iframe').resolves(iframeElement)
-      // @ts-expect-error - webdriver types show this returning a string, but it actually returns an ElementReference, same as findElement
-      client.getActiveElement.resolves(iframeElement)
-      await bidiKeyPress({ key }, client as WebdriverClient, autContext, 'idSuffix')
+    describe('when supplied an overridden codepoint', () => {
+      beforeEach(() => {
+        client.findElement.withArgs('css selector', 'iframe.aut-iframe').resolves(iframeElement)
+        // @ts-expect-error - webdriver types show this returning a string, but it actually returns an ElementReference, same as findElement
+        client.getActiveElement.resolves(iframeElement)
+      })
 
-      expect(client.inputPerformActions.firstCall.args[0]).to.deep.equal({
-        context: autContext,
-        actions: [{
-          type: 'key',
-          id: 'someContextId-Tab-idSuffix',
-          actions: [
-            { type: 'keyDown', value: BIDI_VALUE[key] },
-            { type: 'keyUp', value: BIDI_VALUE[key] },
-          ],
-        }],
+      for (const [key, value] of Object.entries(BidiOverrideCodepoints) as [SupportedKey, string][]) {
+        // special handling to render the source unicode instead of the rendered unicode
+        it(`dispatches a keydown and keyup action with the value '\\u${value.charCodeAt(0).toString(16).toUpperCase()}' for key '${key}'`, async () => {
+          await bidiKeyPress(key, client, autContext, 'idSuffix')
+
+          expect(client.inputPerformActions.firstCall.args[0]).to.deep.equal({
+            context: autContext,
+            actions: [{
+              type: 'key',
+              id: `someContextId-${key}-idSuffix`,
+              actions: [
+                { type: 'keyDown', value },
+                { type: 'keyUp', value }, // in some browsers, F6 will cause the frame to lose focus, so the keyup will not be triggered
+              ],
+            }],
+          })
+
+          expect(client.inputReleaseActions).to.have.been.calledWith({
+            context: autContext,
+          })
+        })
+      }
+    })
+
+    describe('when supplied a multi-codepointutf8 key', () => {
+      const codeOne = 'e'
+      const codeTwo = '́'
+      const value = 'é'
+      let key: SupportedKey
+
+      beforeEach(() => {
+        key = toSupportedKey(value)
+      })
+
+      it('dispatches one keydown followed by a keyup event for each codepoint', async () => {
+        await bidiKeyPress(key, client, autContext, 'idSuffix')
+
+        expect(client.inputPerformActions.firstCall.args[0]).to.deep.equal({
+          context: autContext,
+          actions: [{
+            type: 'key',
+            id: `someContextId-${key}-idSuffix`,
+            actions: [
+              { type: 'keyDown', value: codeOne },
+              { type: 'keyUp', value: codeOne },
+              { type: 'keyDown', value: codeTwo },
+              { type: 'keyUp', value: codeTwo },
+            ],
+          }],
+        })
       })
     })
   })

@@ -113,4 +113,10 @@ export const formatElectronFlags = (flags) => {
 
 export const DEFAULT_CHROME_FLAGS = formatChromeFlags(DEFAULT_FLAGS)
 
-export const DEFAULT_ELECTRON_FLAGS = formatElectronFlags(DEFAULT_CHROME_FLAGS)
+export const DEFAULT_ELECTRON_FLAGS = [
+  ...formatElectronFlags(DEFAULT_CHROME_FLAGS),
+  // NOTE: Can likely be removed with Electron upgrade to 37+.
+  // @see https://github.com/electron/electron/issues/46538
+  // @see https://github.com/cypress-io/cypress/issues/32361
+  ...formatElectronFlags(['--gtk-version=3']),
+]

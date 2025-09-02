@@ -1,5 +1,5 @@
 import type { Protocol } from 'devtools-protocol'
-import type { KeyPressParams, KeyPressSupportedKeys } from '@packages/types'
+import { NamedKeys, SupportedKey, SupportedNamedKey, toSupportedKey, isSupportedKey, SpaceKey } from '@packages/types'
 import type { SendDebuggerCommand } from '../../browsers/cdp_automation'
 import type { Client } from 'webdriver'
 import Debug from 'debug'
@@ -9,40 +9,49 @@ import { AUT_FRAME_NAME_IDENTIFIER } from '../helpers/aut_identifier'
 
 const debug = Debug('cypress:server:automation:command:keypress')
 
-interface KeyCodeLookup extends Record<KeyPressSupportedKeys, string> {}
+// This type is not exported from webdriver, but we need it to type the .map call in the bidi implementation
+type InputKeySourceAction = Parameters<Client['inputPerformActions']>[0]['actions'][number] extends infer ActionParams
+  ? ActionParams extends { type: 'key', actions: infer Actions }
+    ? Actions extends Array<infer Action> ? Action : never
+    : never
+  : never
 
-const invalidKeyErrorKind = 'InvalidKeyError'
-
-export class InvalidKeyError extends Error {
-  kind = invalidKeyErrorKind
-  constructor (key: string) {
-    super(`${key} is not supported by 'cy.press()'.`)
+function getKeyParams (key: SupportedKey): { text?: string, key: string, code?: string } {
+  if (!isSupportedKey(key)) {
+    throw new Error(`Invalid key: ${key}`)
   }
-  static isInvalidKeyError (e: any): e is InvalidKeyError {
-    return e.kind === invalidKeyErrorKind
+
+  if (key === SpaceKey) {
+    return {
+      text: ' ',
+      key: ' ',
+    }
   }
-}
 
-export function isSupportedKey (key: string): key is KeyPressSupportedKeys {
-  return CDP_KEYCODE[key] && BIDI_VALUE[key]
-}
+  const isNamedKey = NamedKeys.includes(key)
 
-export const CDP_KEYCODE: KeyCodeLookup = {
-  'Tab': 'U+000009',
+  if (isNamedKey) {
+    return {
+      key,
+      code: key,
+    }
+  }
+
+  return {
+    key,
+    text: key,
+  }
 }
 
 export async function cdpKeyPress (
-  { key }: KeyPressParams, send: SendDebuggerCommand,
+  inKey: SupportedKey,
+  send: SendDebuggerCommand,
   contexts: Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription>,
   frameTree: Protocol.Page.FrameTree,
 ): Promise<void> {
-  debug('cdp keypress', { key })
-  if (!CDP_KEYCODE[key]) {
-    throw new InvalidKeyError(key)
-  }
+  const key = toSupportedKey(inKey)
 
-  const keyIdentifier = CDP_KEYCODE[key]
-
+  debug('cdp keypress', { key, length: [...key].length })
   const autFrame = frameTree.childFrames?.find(({ frame }) => {
     return frame.name?.includes(AUT_FRAME_NAME_IDENTIFIER)
   })
@@ -60,27 +69,31 @@ export async function cdpKeyPress (
   }
 
   try {
-    await send('Input.dispatchKeyEvent', {
-      type: 'keyDown',
-      key,
-      code: key,
-      keyIdentifier,
-    })
+    // Named keys must be dispatched as full strings,
+    // single-character keys must be dispatched as single characters,
+    // multi-codepoint characters must be dispatched as individual codepoints
+    const chars = NamedKeys.includes(key) ? [key] : [...key]
 
-    await send('Input.dispatchKeyEvent', {
-      type: 'keyUp',
-      key,
-      code: key,
-      keyIdentifier,
-    })
+    for (const char of chars) {
+      const params = getKeyParams(toSupportedKey(char))
+
+      debug('dispatching keydown', params)
+
+      await send('Input.dispatchKeyEvent', {
+        type: 'keyDown',
+        ...params,
+      })
+
+      debug('dispatching keyup', params)
+      await send('Input.dispatchKeyEvent', {
+        type: 'keyUp',
+        ...params,
+      })
+    }
   } catch (e) {
     debug(e)
     throw e
   }
-}
-
-export const BIDI_VALUE: KeyCodeLookup = {
-  'Tab': '\uE004',
 }
 
 async function getActiveWindow (client: Client) {
@@ -91,15 +104,32 @@ async function getActiveWindow (client: Client) {
   }
 }
 
-export async function bidiKeyPress ({ key }: KeyPressParams, client: Client, autContext: string, idSuffix?: string): Promise<void> {
-  const value = BIDI_VALUE[key]
+// While other browsers support the named keys, BiDi does not.
+// We need to override the codepoints for the named keys to work.
+export const BidiOverrideCodepoints: Record<SupportedNamedKey, string> = {
+  'ArrowDown': '\uE015',
+  'ArrowLeft': '\uE012',
+  'ArrowRight': '\uE014',
+  'ArrowUp': '\uE013',
+  'End': '\uE010',
+  'Home': '\uE011',
+  'PageDown': '\uE00F',
+  'PageUp': '\uE00E',
+  'Enter': '\uE007',
+  'Tab': '\uE004',
+  'Backspace': '\uE003',
+  'Delete': '\uE017',
+  'Insert': '\uE016',
+  'Space': '\uE00D',
+}
 
-  if (!value) {
-    throw new InvalidKeyError(key)
-  }
-
+// any is fine to be used here because the key must be typeguarded before it can be used as a supported key
+export async function bidiKeyPress (inKey: any, client: Client, autContext: string, idSuffix?: string): Promise<void> {
   const activeWindow = await getActiveWindow(client)
   const { contexts: [{ context: topLevelContext }] } = await client.browsingContextGetTree({})
+
+  debug('bidi keypress', { inKey, activeWindow, topLevelContext })
+  const key = toSupportedKey(BidiOverrideCodepoints[inKey] ?? inKey)
 
   // TODO: refactor for Cy15 https://github.com/cypress-io/cypress/issues/31480
   if (activeWindow !== topLevelContext) {
@@ -136,16 +166,29 @@ export async function bidiKeyPress ({ key }: KeyPressParams, client: Client, aut
   }
 
   try {
+    const chars = NamedKeys.includes(inKey) ? [key] : [...key]
+
+    const actions = chars.map((value): InputKeySourceAction[] => {
+      return [
+        { type: 'keyDown', value },
+        { type: 'keyUp', value },
+      ]
+    })
+    .reduce((arr, el) => [...arr, ...el], [])
+
+    debug('preparing to perform InputKeySourceActions:', { actions })
+
     await client.inputPerformActions({
       context: autContext,
       actions: [{
         type: 'key',
-        id: `${autContext}-${key}-${idSuffix || Date.now()}`,
-        actions: [
-          { type: 'keyDown', value },
-          { type: 'keyUp', value },
-        ],
+        id: `${autContext}-${inKey}-${idSuffix || Date.now()}`,
+        actions,
       }],
+    })
+
+    await client.inputReleaseActions({
+      context: autContext,
     })
   } catch (e) {
     debug(e)
