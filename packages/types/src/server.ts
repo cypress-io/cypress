@@ -4,6 +4,7 @@ import type { PlatformName } from './platform'
 import type { RunModeVideoApi } from './video'
 import type { ProtocolManagerShape } from './protocol'
 import type Protocol from 'devtools-protocol'
+import type { SupportedKey } from './automation'
 
 /**
  * Interface for compiler error location information
@@ -116,16 +117,12 @@ export interface LaunchArgs {
 }
 
 type NullableMiddlewareHook = ((message: unknown, data: unknown) => void) | null
-
-export type KeyPressSupportedKeys = 'Tab'
-
 interface CommandSignature<P = any, R = any> {
   dataType: P
   returnType: R
 }
-
 export interface KeyPressParams {
-  key: KeyPressSupportedKeys
+  key: SupportedKey
 }
 
 export interface AutomationCommands {
