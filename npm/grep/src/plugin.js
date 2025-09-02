@@ -109,7 +109,7 @@ function cypressGrepPlugin (config) {
 
       debug('found grep "%s" in %d specs', grep, greppedSpecs.length)
       debug('%o', greppedSpecs)
-    } else if (grepTags) {
+    } else if (grepTags || grepUntagged) {
       const parsedGrep = parseGrep(null, grepTags)
 
       debug('parsed grep tags %o', parsedGrep)
@@ -125,6 +125,11 @@ function cypressGrepPlugin (config) {
           return testInfo.tests.some((info) => {
             const shouldRun = shouldTestRun(parsedGrep, null, info.tags)
 
+            if (grepUntagged && info.tags.length !== 0) {
+                // If grepUntagged is true, and the test has tags, it should not run
+              return false
+            }
+
             return shouldRun
           })
         } catch (err) {
@@ -135,7 +140,12 @@ function cypressGrepPlugin (config) {
         }
       })
 
-      debug('found grep tags "%s" in %d specs', grepTags, greppedSpecs.length)
+      if (grepUntagged) {
+          debug('filtered for untagged tests in %d specs', greppedSpecs.length)
+      } else {
+          debug('found grep tags "%s" in %d specs', grepTags, greppedSpecs.length)
+      }
+
       debug('%o', greppedSpecs)
     }
 

@@ -95,9 +95,34 @@ function parseTagsGrep (s) {
   return ORS_filtered
 }
 
-function shouldTestRunTags (parsedGrepTags, tags = []) {
+function shouldTestRunTags (parsedGrepTags, tags = [], grepUntagged) {
+  // Check for presence of negative tags in parsedGrepTags
+  const negativeTags = parsedGrepTags.filter((tag) => tag.startsWith('-'))
+
+  // Check if the test has any of the negative tags (without the '-')
+  for (const negTag of negativeTags) {
+      if (tags.includes(negTag.substring(1))) {
+          return false // Don't run the test if it has a negated tag
+      }
+  }
+
+  // If grepUntagged is false and the test doesn't have any tags, but its parent describe does
+  if (!grepUntagged && tags.length === 0 && negativeTags.length > 0) {
+      return false // Don't run the test
+  }
+
   if (!parsedGrepTags.length) {
     // there are no parsed tags to search for, the test should run
+    return true
+  }
+
+  // If there are no tags on the test and we're trying to exclude a specific tag, run the test
+  if (!tags.length && parsedGrepTags.some((tag) => tag.invert)) {
+    return true
+  }
+
+  // If there are no tags on the test and we're NOT trying to exclude a specific tag, run all tests
+  if (!tags.length && !parsedGrepTags.some((tag) => tag.invert)) {
     return true
   }
 
@@ -165,7 +190,7 @@ function shouldTestRun (parsedGrep, testName, tags = [], grepUntagged = false) {
 
   return (
     shouldTestRunTitle(parsedGrep.title, testName) &&
-    shouldTestRunTags(parsedGrep.tags, tags)
+    shouldTestRunTags(parsedGrep.tags, tags, grepUntagged)
   )
 }
 
