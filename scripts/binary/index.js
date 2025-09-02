@@ -136,12 +136,42 @@ const deploy = {
         throw err
       })
       .then(() => {
+        return this.checkManifest({ version })
+      })
+      .then(() => {
         return this.checkDownloads({ version })
       })
     }
 
     return askMissingOptions(['version'])(options)
     .then(release)
+  },
+
+  checkManifest ({ version }) {
+    const checkManifest = () => {
+      const url = `https://download.cypress.io/desktop.json`
+
+      process.stdout.write(`Checking for ${chalk.yellow(version)} in the manifest at ${chalk.cyan(url)} ... `)
+
+      return rp.get(url)
+      .then((res) => {
+        const manifest = JSON.parse(res)
+
+        return manifest
+      })
+    }
+
+    return checkManifest().then((manifest) => {
+      const versionMatches = manifest.version === version
+
+      process.stdout.write(`${versionMatches ? '✅' : '❌'}\n`)
+
+      if (!versionMatches) {
+        console.log(chalk.red(`\nFound ${manifest.version} in the manifest, but ${version} was requested.`))
+
+        process.exit(1)
+      }
+    })
   },
 
   checkDownloads ({ version }) {

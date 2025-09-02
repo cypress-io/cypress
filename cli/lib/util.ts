@@ -9,7 +9,7 @@ import tty from 'tty'
 import path from 'path'
 import { isCI as isCi } from 'ci-info'
 import execa from 'execa'
-import getos from 'getos'
+import si from 'systeminformation'
 import chalk from 'chalk'
 import Bluebird from 'bluebird'
 import cachedir from 'cachedir'
@@ -28,8 +28,6 @@ const debug = Debug('cypress:cli')
 const pkg = require(path.join(__dirname, '..', 'package.json'))
 
 const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
-
-const getosAsync = Bluebird.promisify(getos)
 
 /**
  * Returns SHA512 of a file
@@ -413,19 +411,18 @@ const util = {
 
   isLinux,
 
-  getOsVersionAsync (): any {
+  getOsVersionAsync () {
     return Bluebird.try(() => {
-      if (isLinux()) {
-        return getosAsync()
-        .then((osInfo: any) => {
-          return [osInfo.dist, osInfo.release].join(' - ')
-        })
-        .catch(() => {
-          return os.release()
-        })
-      }
+      return si.osInfo()
+      .then((osInfo) => {
+        if (osInfo.distro && osInfo.release) {
+          return `${osInfo.distro} - ${osInfo.release}`
+        }
 
-      return os.release()
+        return os.release()
+      }).catch(() => {
+        return os.release()
+      })
     })
   },
 

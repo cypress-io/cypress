@@ -3,15 +3,29 @@
 <head>
   <title>Input Event Monitor</title>
   <script defer>
-    ['keydown', 'keyup'].forEach((ev) => {
+    ['keydown', 'keyup', 'keypress', 'input'].forEach((ev) => {
       document.addEventListener(ev, (data) => {
-        document.getElementById(ev).value = data.key
+        console.log(ev, data)
+        document.getElementById(ev).value += data.key ?? data.data
+      })
+    })
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('button').addEventListener('click', (data) => {
+        console.log('button click', data)
+        document.getElementById('checkbox').checked = !document.getElementById('checkbox').checked
       })
     })
   </script>
 </head>
 
 <body>
-  <input type="text" id="keyup" />
   <input type="text" id="keydown" />
+  <input type="text" id="keyup" />
+
+  <input type="text" id="keypress" />
+  <input type="text" id="input_source" />
+  <input type="text" id="input" />
+
+  <input type="button" id="button" onClick=""/>
+  <input type="checkbox" id="checkbox" />
 </body>
