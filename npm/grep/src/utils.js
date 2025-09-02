@@ -97,7 +97,7 @@ function parseTagsGrep (s) {
 
 function shouldTestRunTags (parsedGrepTags, tags = [], grepUntagged) {
   // Check for presence of negative tags in parsedGrepTags
-  const negativeTags = parsedGrepTags.filter((tag) => tag.startsWith('-'))
+  const negativeTags = parsedGrepTags.filter((tagArray) => tagArray.some(({ tag }) => tag.startsWith('-')))
 
   // Check if the test has any of the negative tags (without the '-')
   for (const negTag of negativeTags) {
@@ -117,13 +117,13 @@ function shouldTestRunTags (parsedGrepTags, tags = [], grepUntagged) {
   }
 
   // If there are no tags on the test and we're trying to exclude a specific tag, run the test
-  if (!tags.length && parsedGrepTags.some((tag) => tag.invert)) {
+  if (!tags.length && parsedGrepTags.some((tagArray) => tagArray.some((tag) => tag.invert))) {
     return true
   }
 
   // If there are no tags on the test and we're NOT trying to exclude a specific tag, run all tests
-  if (!tags.length && !parsedGrepTags.some((tag) => tag.invert)) {
-    return true
+  if (!tags.length && !parsedGrepTags.some((tagArray) => tagArray.some((tag) => tag.invert))) {
+    return false
   }
 
   // now the test has tags and the parsed tags are present
