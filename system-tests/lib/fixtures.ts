@@ -54,7 +54,12 @@ const copyContents = (fromFile, toFile) => {
 // to the cyTmpDir .projects in the root
 export function scaffold () {
   // Prevent copying directory into itself
-  if (projects === cyTmpDir || projects.startsWith(cyTmpDir) || cyTmpDir.startsWith(projects)) {
+  const resolvedProjects = _path.resolve(projects)
+  const resolvedCyTmpDir = _path.resolve(cyTmpDir)
+
+  if (resolvedProjects === resolvedCyTmpDir ||
+      resolvedCyTmpDir.startsWith(resolvedProjects + _path.sep) ||
+      resolvedProjects.startsWith(resolvedCyTmpDir + _path.sep)) {
     throw new Error(`Cannot copy directory into itself: projects=${projects}, cyTmpDir=${cyTmpDir}`)
   }
 
