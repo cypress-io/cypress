@@ -11,7 +11,6 @@ import { useScrollIntoView } from '../lib/useScrollIntoView'
 import { IconChevronDownSmall, IconStatusFailedSolid, IconStatusPassedSolid, IconStatusQueuedOutline, IconStatusRunningOutline } from '@cypress-design/react-icon'
 import Test from '../test/test-model'
 import { StatsStore } from '../header/stats-store'
-import defaultEvents, { type Events } from '../lib/events'
 
 const getConnectors = (num: number) => {
   let connectors: JSX.Element[] = []
@@ -58,10 +57,9 @@ interface StudioTestProps {
   appState: AppState
   runnablesStore: RunnablesStore
   statsStore: StatsStore
-  events?: Events
 }
 
-export const StudioTest = observer(({ appState, runnablesStore, statsStore, events = defaultEvents }: StudioTestProps) => {
+export const StudioTest = observer(({ appState, runnablesStore, statsStore }: StudioTestProps) => {
   // Single we're in single test mode, the current test is the first test in the runnablesStore._tests
   const currentTest = Object.values(runnablesStore._tests)[0]
   const tooltipRef = useRef<HTMLUListElement>(null)
@@ -80,10 +78,6 @@ export const StudioTest = observer(({ appState, runnablesStore, statsStore, even
   }, [isMounted, currentTest])
 
   const parentTitles = useMemo(() => currentTest?.parentTitle ? currentTest.parentTitle.split(' > ') : [], [currentTest])
-
-  const onRestart = React.useCallback(() => {
-    events.emit('studio:restart')
-  }, [events])
 
   const testTitle = currentTest ? <span data-cy='studio-single-test-title' className='studio-header__test-title'>{currentTest.title}</span> : null
 
@@ -106,7 +100,7 @@ export const StudioTest = observer(({ appState, runnablesStore, statsStore, even
           </div>
           <div className='studio-header__test-section-right'>
             <Duration duration={statsStore.duration} />
-            <Controls appState={appState} displayPreferencesButton={false} onRestart={onRestart} />
+            <Controls appState={appState} displayPreferencesButton={false} />
           </div>
         </div>
         <div className='studio-single-test-attempts' ref={containerRef}>

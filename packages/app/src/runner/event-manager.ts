@@ -266,12 +266,6 @@ export class EventManager {
     this.reporterBus.on('studio:init:test', studioInitTest)
     this.localBus.on('studio:init:test', studioInitTest)
 
-    this.reporterBus.on('studio:init:test:current', () => {
-      if (this.studioStore.testId) {
-        studioInitTest({ testId: this.studioStore.testId })
-      }
-    })
-
     const studioInitSuite = ({ suiteId, showUrlPrompt = true }: { suiteId: string, showUrlPrompt?: boolean }) => {
       this.studioStore.setSuiteId(suiteId)
       this.studioStore.setShowUrlPrompt(showUrlPrompt)
@@ -281,17 +275,7 @@ export class EventManager {
     this.reporterBus.on('studio:init:suite', studioInitSuite)
     this.localBus.on('studio:init:suite', studioInitSuite)
 
-    this.ws.on('watched:file:changed', () => {
-      // when studio is active, we need to re-initialize studio before rerunning
-      // studioInitTest will rerun the test once studio is re-initialized
-      if (this.studioStore.isActive && this.studioStore.testId) {
-        studioInitTest({ testId: this.studioStore.testId })
-
-        return
-      }
-
-      rerun()
-    })
+    this.ws.on('watched:file:changed', rerun)
 
     this.ws.on('dev-server:compile:success', ({ specFile }) => {
       if (!specFile || specFile === state?.spec?.absolute) {
