@@ -41,7 +41,7 @@
     "ast-types": "0.13.3",
     "axios": "^1.11.0",
     "base64url": "^3.0.1",
-    "better-sqlite3": "11.9.1",
+    "better-sqlite3": "11.10.0",
     "black-hole-stream": "0.0.1",
     "bluebird": "3.7.2",
     "body-parser": "1.20.3",

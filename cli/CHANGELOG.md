@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.1.1
+
+_Released 09/16/2025_
+
+**Dependency Updates:**
+
+- Updated [`better-sqlite3`](https://www.npmjs.com/package/better-sqlite3) from `11.9.1` to `11.10.1`. Addressed in [#](https://github.com/cypress-io/cypress/issues/).
+
 ## 15.1.0
 
 _Released 09/02/2025_
