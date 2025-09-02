@@ -13,6 +13,7 @@ const { Automation } = require(`../../lib/automation`)
 const savedState = require(`../../lib/saved_state`)
 const runEvents = require(`../../lib/plugins/run_events`)
 const system = require(`../../lib/util/system`)
+const { getCtx } = require(`../../lib/makeDataContext`)
 const browsers = require('../../lib/browsers')
 const { StudioLifecycleManager } = require('../../lib/cloud/studio/StudioLifecycleManager')
 const { StudioManager } = require('../../lib/cloud/studio/studio')
@@ -23,16 +24,10 @@ let ctx
 
 // NOTE: todo: come back to this
 describe('lib/project-base', () => {
-  before(async function () {
-    const { setCtx, makeDataContext, clearCtx } = require('../../lib/makeDataContext')
-
-    // Clear and set up DataContext
-    await clearCtx()
-    setCtx(makeDataContext({}))
-    ctx = require('../../lib/makeDataContext').getCtx()
-
+  beforeEach(async function () {
     delete process.env.CYPRESS_LOCAL_STUDIO_PATH
 
+    ctx = getCtx()
     Fixtures.scaffold()
 
     this.todosPath = Fixtures.projectPath('todos')
@@ -54,10 +49,7 @@ describe('lib/project-base', () => {
 
     await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
     this.config = await ctx.project.getConfig()
-  })
 
-  beforeEach(function () {
-    // Light setup for each test
     this.project = new ProjectBase({ projectRoot: this.todosPath, testingType: 'e2e' })
     this.project._server = {
       close () {},
@@ -67,11 +59,9 @@ describe('lib/project-base', () => {
     this.project._cfg = this.config
   })
 
-  after(function () {
-    Fixtures.remove()
-  })
-
   afterEach(function () {
+    Fixtures.remove()
+
     if (this.project) {
       this.project.close()
     }
