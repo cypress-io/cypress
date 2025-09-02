@@ -21,5 +21,3 @@ const API: RunEventsAPI = {
 }
 
 export default API
-
-module.exports = API
