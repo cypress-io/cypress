@@ -258,47 +258,13 @@ export class EventManager {
       this.ws.emit('open:file', url)
     })
 
-    const studioInitSuite = ({ suiteId, showUrlPrompt = true }: { suiteId: string, showUrlPrompt?: boolean }) => {
-      this.studioStore.setSuiteId(suiteId)
-      this.studioStore.setShowUrlPrompt(showUrlPrompt)
-
-      this.ws.emit('studio:init', { sessionId: this.studioStore.sessionId }, ({ canAccessStudioAI, cloudStudioSessionId, error }) => {
-        if (error) {
-          // eslint-disable-next-line no-console
-          console.error(error)
-        }
-
-        this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
-        this.studioStore.setSessionId(cloudStudioSessionId)
-        // when we enter studio with a new test, we don't want to rerun until
-        // the the test has been created, so we just set the studio active
-        this.studioStore.setActive(true)
-      })
-    }
-
-    const studioInitTest = ({ testId }: { testId: string }) => {
+    const studioInitTest = ({ testId }: { testId: string }, cb?: () => void) => {
       this.studioStore.setTestId(testId)
-
-      this.ws.emit('studio:init', { sessionId: this.studioStore.sessionId }, ({ canAccessStudioAI, cloudStudioSessionId, error }) => {
-        if (error) {
-          // eslint-disable-next-line no-console
-          console.error(error)
-        }
-
-        this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
-        this.studioStore.setSessionId(cloudStudioSessionId)
-
-        rerun()
-      })
+      rerun()
     }
 
-    // supports both string and object arguments for backwards compatibility.
-    // can be removed once we've updated the reporter submodule used by
-    // Test Replay
-    this.reporterBus.on('studio:init:test', (arg: string | { testId: string }) => {
-      this.studioStore.setInitializedFromReporter(true)
-      studioInitTest({ testId: typeof arg === 'string' ? arg : arg.testId })
-    })
+    this.reporterBus.on('studio:init:test', studioInitTest)
+    this.localBus.on('studio:init:test', studioInitTest)
 
     this.reporterBus.on('studio:init:test:current', () => {
       if (this.studioStore.testId) {
@@ -306,13 +272,13 @@ export class EventManager {
       }
     })
 
-    this.localBus.on('studio:init:test', studioInitTest)
+    const studioInitSuite = ({ suiteId, showUrlPrompt = true }: { suiteId: string, showUrlPrompt?: boolean }) => {
+      this.studioStore.setSuiteId(suiteId)
+      this.studioStore.setShowUrlPrompt(showUrlPrompt)
+      this.studioStore.setActive(true)
+    }
 
-    this.reporterBus.on('studio:init:suite', ({ suiteId }: { suiteId: string }) => {
-      this.studioStore.setInitializedFromReporter(true)
-      studioInitSuite({ suiteId })
-    })
-
+    this.reporterBus.on('studio:init:suite', studioInitSuite)
     this.localBus.on('studio:init:suite', studioInitSuite)
 
     this.ws.on('watched:file:changed', () => {
@@ -503,8 +469,32 @@ export class EventManager {
 
     const testFilter = this.specStore.testFilter
 
+    const { suiteId, testId } = this.studioStore
+    const isStudio = !!(testId || suiteId)
+
+    const onInitStudio = (cb: () => void) => {
+      if (testId) {
+        this.studioStore.setTestId(testId)
+      } else if (suiteId) {
+        this.studioStore.setSuiteId(suiteId)
+      }
+
+      this.ws.emit('studio:init', { sessionId: this.studioStore.sessionId }, ({ canAccessStudioAI, cloudStudioSessionId, error }) => {
+        if (error) {
+          // eslint-disable-next-line no-console
+          console.error(error)
+        }
+
+        this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
+        this.studioStore.setSessionId(cloudStudioSessionId)
+
+        cb()
+      })
+    }
+
     return Cypress.initialize({
       $autIframe,
+      onInitStudio: isStudio ? onInitStudio : undefined,
       onSpecReady: () => {
         // get the current runnable states and cached test state
         // in case we reran mid-test due to a visit to a new domain

@@ -416,11 +416,14 @@ export class ProjectBase extends EE {
       await studio?.destroy()
 
       if (this.protocolManager) {
+        debug('Closing protocol connection')
         await browsers.closeProtocolConnection({ browser: this.browser, foundBrowsers: this.options.browsers })
+        debug('Protocol connection closed')
         this.protocolManager?.close()
         this.protocolManager = undefined
       }
 
+      debug('Studio destroyed')
       this._isStudioInitialized = false
     }
 
@@ -442,6 +445,8 @@ export class ProjectBase extends EE {
 
           await destroyStudio()
         }
+
+        debug('Initializing studio')
 
         telemetryManager.mark(INITIALIZATION_MARK_NAMES.INITIALIZATION_START)
 
@@ -538,15 +543,21 @@ export class ProjectBase extends EE {
 
             this._isStudioInitialized = true
 
+            debug('Studio successfully initialized')
+
             return { canAccessStudioAI: true, cloudStudioSessionId }
           }
 
           this.protocolManager = undefined
 
+          debug('Studio not initialized - has spec: %o, has protocol manager: %o', !!this.spec, !!this.protocolManager)
+
           endTelemetry({ status: 'success', canAccessStudioAI: false })
 
           return { canAccessStudioAI: false, cloudStudioSessionId }
         } catch (error) {
+          debug('Error initializing studio', error)
+
           endTelemetry({ status: 'exception', canAccessStudioAI: false })
 
           return { canAccessStudioAI: false, cloudStudioSessionId }
