@@ -19,14 +19,22 @@ const iso8601Regex = /^\d{4}\-\d{2}\-\d{2}T\d{2}\:\d{2}\:\d{2}\.?\d*Z?$/
 let ctx
 
 describe('lib/screenshots', () => {
-  beforeEach(async function () {
+  before(async function () {
     ctx = getCtx()
+    Fixtures.scaffold()
+    this.todosPath = Fixtures.projectPath('todos')
+
+    await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
+
+    const config1 = await ctx.lifecycleManager.getFullInitialConfig()
+
+    this.config = config1
+  })
+
+  beforeEach(async function () {
     // make each test timeout after only 1 sec
     // so that durations are handled correctly
     this.currentTest.timeout(1000)
-
-    Fixtures.scaffold()
-    this.todosPath = Fixtures.projectPath('todos')
 
     this.appData = {
       capture: 'viewport',
@@ -60,16 +68,9 @@ describe('lib/screenshots', () => {
 
     Jimp.prototype.composite = sinon.stub()
     // Jimp.prototype.getBuffer = sinon.stub().resolves(@buffer)
-
-    await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
-
-    return ctx.lifecycleManager.getFullInitialConfig()
-    .then((config1) => {
-      this.config = config1
-    })
   })
 
-  afterEach(() => {
+  after(() => {
     return Fixtures.remove()
   })
 
