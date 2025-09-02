@@ -5,7 +5,7 @@ _Released 09/16/2025 (PENDING)_
 
 **Dependency Updates:**
 
-- Updated [`better-sqlite3`](https://www.npmjs.com/package/better-sqlite3) from `11.9.1` to `11.10.1`. Addressed in [#32404](https://github.com/cypress-io/cypress/issues/32404).
+- Updated [`better-sqlite3`](https://www.npmjs.com/package/better-sqlite3) from `11.9.1` to `11.10.1`. Addressed in [#32404](https://github.com/cypress-io/cypress/pull/32404).
 
 ## 15.1.0
 
