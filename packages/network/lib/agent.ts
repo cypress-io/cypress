@@ -170,13 +170,15 @@ export const getFirstWorkingFamily = (
     return cb()
   }
 
-  if (familyCache[host]) {
-    return cb(familyCache[host])
+  const cacheKey = `${host}:${port}`
+
+  if (familyCache[cacheKey]) {
+    return cb(familyCache[cacheKey])
   }
 
   return getAddress(port, host)
   .then((firstWorkingAddress: net.Address) => {
-    familyCache[`${host}:${port}`] = firstWorkingAddress.family
+    familyCache[cacheKey] = firstWorkingAddress.family
 
     return cb(firstWorkingAddress.family)
   })

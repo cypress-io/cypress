@@ -1002,18 +1002,24 @@ describe('lib/agent', function () {
   })
 
   context('.getFirstWorkingFamily', () => {
+    const listen = (options: ListenOptions) => {
+      return Bluebird.fromCallback((cb) => {
+        const server = http.createServer((req, res) => {
+          res.end('Hello, world!')
+        })
+
+        server.listen(options, cb.bind(server))
+      })
+    }
+
+    const getFamilyAsPromise = (host: string, port: number, familyCache): Promise<net.family | undefined> => {
+      return new Promise((resolve) => {
+        getFirstWorkingFamily({ host, port }, familyCache, resolve)
+      })
+    }
+
     it('caches host + port', async () => {
       const familyCache = {}
-
-      const listen = (options: ListenOptions) => {
-        return Bluebird.fromCallback((cb) => {
-          const server = http.createServer((req, res) => {
-            res.end('Hello, world!')
-          })
-
-          server.listen(options, cb.bind(server))
-        })
-      }
 
       await Promise.all([
         // v4 server only
@@ -1043,25 +1049,19 @@ describe('lib/agent', function () {
         }),
       ])
 
-      const getFamilyAsPromise = (host: string, port: number): Promise<net.family | undefined> => {
-        return new Promise((resolve) => {
-          getFirstWorkingFamily({ host, port }, familyCache, resolve)
-        })
-      }
-
       const families: Record<string, number> = {}
 
       // start with a v4 address
-      families.familySet1 = await getFamilyAsPromise('localhost', HTTP_PORT + 1)
+      families.familySet1 = await getFamilyAsPromise('localhost', HTTP_PORT + 1, familyCache)
 
       // then use a v6 only port with the same host
-      families.familySet1CachedNewPort = await getFamilyAsPromise('localhost', HTTP_PORT + 2)
+      families.familySet1CachedNewPort = await getFamilyAsPromise('localhost', HTTP_PORT + 2, familyCache)
 
       // start with a v6 address
-      families.familySet2 = await getFamilyAsPromise('localhost', HTTP_PORT + 3)
+      families.familySet2 = await getFamilyAsPromise('localhost', HTTP_PORT + 3, familyCache)
 
       // then use a v4 only port with the same host
-      families.familySet2CachedNewPort = await getFamilyAsPromise('localhost', HTTP_PORT + 4)
+      families.familySet2CachedNewPort = await getFamilyAsPromise('localhost', HTTP_PORT + 4, familyCache)
 
       expect(families).to.deep.eq({
         familySet1: 4,
@@ -1069,6 +1069,26 @@ describe('lib/agent', function () {
         familySet2: 6,
         familySet2CachedNewPort: 4,
       })
+
+      const expectedFamilyCache = {}
+
+      expectedFamilyCache[`localhost:${HTTP_PORT + 1}`] = 4
+      expectedFamilyCache[`localhost:${HTTP_PORT + 2}`] = 6
+      expectedFamilyCache[`localhost:${HTTP_PORT + 3}`] = 6
+      expectedFamilyCache[`localhost:${HTTP_PORT + 4}`] = 4
+
+      expect(familyCache).to.deep.eq(expectedFamilyCache)
+    })
+
+    it('returns from the cache', async () => {
+      const familyCache = {
+        // not a valid ip family to test it using the cache
+        'localhost:2222': 2,
+      }
+
+      const family = await getFamilyAsPromise('localhost', 2222, familyCache)
+
+      expect(family).to.eq(2)
     })
   })
 })
