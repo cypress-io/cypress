@@ -2,7 +2,7 @@ import Bluebird from 'bluebird'
 import chai from 'chai'
 import http from 'http'
 import https from 'https'
-import net from 'net'
+import net, { type ListenOptions } from 'net'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 import tls from 'tls'
@@ -19,6 +19,7 @@ import {
   CombinedAgent,
   clientCertificateStore,
   _resetBaseCaOptionsPromise,
+  getFirstWorkingFamily,
 } from '../../lib/agent'
 import { allowDestroy } from '../../lib/allow-destroy'
 import { AsyncServer, Servers } from '../support/servers'
@@ -996,6 +997,77 @@ describe('lib/agent', function () {
           'Connection: keep-alive',
           '', '',
         ].join('\r\n'))
+      })
+    })
+  })
+
+  context('.getFirstWorkingFamily', () => {
+    it('caches host + port', async () => {
+      const familyCache = {}
+
+      const listen = (options: ListenOptions) => {
+        return Bluebird.fromCallback((cb) => {
+          const server = http.createServer((req, res) => {
+            res.end('Hello, world!')
+          })
+
+          server.listen(options, cb.bind(server))
+        })
+      }
+
+      await Promise.all([
+        // v4 server only
+        listen({
+          port: HTTP_PORT + 1,
+          host: '127.0.0.1',
+        }),
+
+        // v6 server only
+        listen({
+          port: HTTP_PORT + 2,
+          host: '::1',
+          ipv6Only: true,
+        }),
+
+        // v6 server only
+        listen({
+          port: HTTP_PORT + 3,
+          host: '::1',
+          ipv6Only: true,
+        }),
+
+        // v4 server only
+        listen({
+          port: HTTP_PORT + 4,
+          host: '127.0.0.1',
+        }),
+      ])
+
+      const getFamilyAsPromise = (host: string, port: number): Promise<net.family | undefined> => {
+        return new Promise((resolve) => {
+          getFirstWorkingFamily({ host, port }, familyCache, resolve)
+        })
+      }
+
+      const families: Record<string, number> = {}
+
+      // start with a v4 address
+      families.familySet1 = await getFamilyAsPromise('localhost', HTTP_PORT + 1)
+
+      // then use a v6 only port with the same host
+      families.familySet1CachedNewPort = await getFamilyAsPromise('localhost', HTTP_PORT + 2)
+
+      // start with a v6 address
+      families.familySet2 = await getFamilyAsPromise('localhost', HTTP_PORT + 3)
+
+      // then use a v4 only port with the same host
+      families.familySet2CachedNewPort = await getFamilyAsPromise('localhost', HTTP_PORT + 4)
+
+      expect(families).to.deep.eq({
+        familySet1: 4,
+        familySet1CachedNewPort: 6,
+        familySet2: 6,
+        familySet2CachedNewPort: 4,
       })
     })
   })

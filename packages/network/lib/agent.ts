@@ -148,17 +148,17 @@ export const regenerateRequestHead = (req: http.ClientRequest) => {
   }
 }
 
-const getFirstWorkingFamily = (
-  { port, host }: http.RequestOptions,
+export const getFirstWorkingFamily = (
+  { port, host }: Pick<http.RequestOptions, 'port' | 'host'>,
   familyCache: FamilyCache,
-  cb: Function,
+  cb: (family?: net.family) => void,
 ) => {
   // this is a workaround for localhost (and potentially others) having invalid
   // A records but valid AAAA records. here, we just cache the family of the first
   // returned A/AAAA record for a host that we can establish a connection to.
   // https://github.com/cypress-io/cypress/issues/112
 
-  const isIP = net.isIP(host)
+  const isIP = net.isIP(host) as net.family
 
   if (isIP) {
     // isIP conveniently returns the family of the address
@@ -176,7 +176,7 @@ const getFirstWorkingFamily = (
 
   return getAddress(port, host)
   .then((firstWorkingAddress: net.Address) => {
-    familyCache[host] = firstWorkingAddress.family
+    familyCache[`${host}:${port}`] = firstWorkingAddress.family
 
     return cb(firstWorkingAddress.family)
   })
@@ -246,7 +246,7 @@ export class CombinedAgent {
 
     debug('addRequest called %o', { isHttps, ..._.pick(options, 'href') })
 
-    return getFirstWorkingFamily(options, this.familyCache, (family: net.family) => {
+    return getFirstWorkingFamily(options, this.familyCache, (family?: net.family) => {
       options.family = family
 
       debug('got family %o', _.pick(options, 'family', 'href'))
