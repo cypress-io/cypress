@@ -1780,8 +1780,8 @@ jobs:
           echo '{
             "ipv6": true,
             "fixed-cidr-v6": "2001:db8:1::/64"
-          }' | sudo tee /etc/docker/daemon.json
-          sudo systemctl restart docker || sudo service docker restart
+          }' | tee /etc/docker/daemon.json
+          systemctl restart docker || service docker restart
       - restore_cached_workspace
       - install-browsers:
           install-chrome: true
