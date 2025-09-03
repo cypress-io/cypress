@@ -411,7 +411,10 @@ describe('lib/agent', function () {
       it('#createUpstreamProxyConnection does not go to proxy if domain in NO_PROXY', function () {
         const spy = sinon.spy(agent.httpsAgent, 'createUpstreamProxyConnection')
 
-        process.env.HTTP_PROXY = process.env.HTTPS_PROXY = 'http://0.0.0.0:0'
+        // Random port that is not in use on the machine
+        const localPortWithoutAnythingListening = '127.0.0.1:10123'
+
+        process.env.HTTP_PROXY = process.env.HTTPS_PROXY = `http://${localPortWithoutAnythingListening}`
         process.env.NO_PROXY = 'mtgox.info,example.com,homestarrunner.com,'
 
         return request({
@@ -427,7 +430,7 @@ describe('lib/agent', function () {
             throw new Error('should not be able to connect')
           })
           .catch((err) => {
-            expect(err.message).to.include('Error: A connection to the upstream proxy could not be established: connect EADDRNOTAVAIL 0.0.0.0')
+            expect(err.message).to.include(`Error: A connection to the upstream proxy could not be established: connect ECONNREFUSED ${localPortWithoutAnythingListening}`)
             expect(spy).to.be.calledOnce
           })
         })
@@ -507,7 +510,10 @@ describe('lib/agent', function () {
       it('#addRequest does not go to proxy if domain in NO_PROXY', function () {
         const spy = sinon.spy(agent.httpAgent, '_addProxiedRequest')
 
-        process.env.HTTP_PROXY = process.env.HTTPS_PROXY = 'http://0.0.0.0:0'
+        // Random port that is not in use on the machine
+        const localPortWithoutAnythingListening = '127.0.0.1:10123'
+
+        process.env.HTTP_PROXY = process.env.HTTPS_PROXY = `http://${localPortWithoutAnythingListening}`
         process.env.NO_PROXY = 'mtgox.info,example.com,homestarrunner.com,'
 
         return request({
@@ -523,7 +529,7 @@ describe('lib/agent', function () {
             throw new Error('should not be able to connect')
           })
           .catch((err) => {
-            expect(err.message).to.include('Error: connect EADDRNOTAVAIL 0.0.0.0')
+            expect(err.message).to.include(`Error: connect ECONNREFUSED ${localPortWithoutAnythingListening}`)
             expect(spy).to.be.calledOnce
           })
         })
