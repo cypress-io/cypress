@@ -147,6 +147,12 @@ executors:
       PLATFORM: linux
       # TODO: Disabling snapshots for now on Linux Arm 64 architectures. Will revisit with https://github.com/cypress-io/cypress/issues/23557
       DISABLE_SNAPSHOT_REQUIRE: 1
+  linux-x64: &linux-x64-executor
+    machine:
+      image: ubuntu-2004:2024.11.1
+    resource_class: medium
+    environment:
+      PLATFORM: linux
 
 commands:
   # This command inserts SHOULD_PERSIST_ARTIFACTS into BASH_ENV. This way, we can define the variable in one place and use it in multiple steps.
@@ -2908,6 +2914,7 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
     - unit-tests:
+        executor: linux-x64
         requires:
           - build
     - verify-release-readiness:
