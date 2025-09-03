@@ -8,7 +8,6 @@
     "moduleResolution": "node",    
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "noEmit": true,
     "skipLibCheck": true
   },
   "types": ["node", "mocha", "cypress"],

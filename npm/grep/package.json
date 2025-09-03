@@ -4,6 +4,7 @@
   "description": "Filter tests using substring",
   "main": "dist/support.js",
   "scripts": {
+    "build": "tsc",
     "cypress:open": "node ../../scripts/cypress.js open",
     "cypress:run": "node ../../scripts/cypress.js run",
     "lint": "eslint"
@@ -24,9 +25,10 @@
     "cypress": ">=10"
   },
   "files": [
-    "dist"
+    "dist",
+    "index.d.ts"
   ],
-  "types": "dist/index.d.ts",
+  "types": "index.d.ts",
   "license": "MIT",
   "repository": {
     "type": "git",

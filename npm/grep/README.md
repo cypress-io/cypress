@@ -45,7 +45,7 @@ Or using ES modules / TypeScript:
 
 ```ts
 // cypress/support/e2e.ts
-import registerCypressGrep from '@cypress/grep/src/support'
+import registerCypressGrep from '@cypress/grep'
 registerCypressGrep()
 ```
 
@@ -227,9 +227,9 @@ npx cypress run --env grepUntagged=true
 ### In cypress.config.js
 
 ```js
-const { defineConfig } = require('cypress')
+import { defineConfig } from 'cypress'
 
-module.exports = defineConfig({
+export default defineConfig({
   env: {
     // Always filter by viewport tests
     grep: "viewport",

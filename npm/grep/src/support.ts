@@ -1,3 +1,5 @@
+/// <reference types="../index.d.ts" />
+
 import { parseGrep, shouldTestRun } from './utils'
 import { version } from '../package.json'
 import debug from 'debug'
@@ -201,4 +203,4 @@ if (!Cypress.grep) {
 }
 
 // TODO: this export likely needs to be updated to avoid a breaking change
-export default cypressGrep
+exports = cypressGrep
