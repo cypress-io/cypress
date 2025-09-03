@@ -4,12 +4,12 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build-cli": "node ./scripts/build.js && node ./scripts/post-build.js",
-    "clean": "node ./scripts/clean.js",
+    "build-cli": "tsc && tsx ./scripts/build.ts && tsx ./scripts/post-build.ts",
+    "clean": "tsx ./scripts/clean.ts",
     "dtslint": "dtslint types",
-    "postinstall": "patch-package && node ./scripts/post-install.js",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.vue .",
-    "prebuild": "yarn postinstall && node ./scripts/start-build.js",
+    "postinstall": "patch-package && tsx ./scripts/post-install.ts",
+    "lint": "eslint --ext .ts,.tsx,.json,.vue .",
+    "prebuild": "yarn postinstall && tsx ./scripts/start-build.ts",
     "size": "t=\"cypress-v0.0.0.tgz\"; yarn pack --filename \"${t}\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "test": "yarn test-unit",
     "test-debug": "node --inspect-brk $(yarn bin mocha)",
@@ -17,7 +17,7 @@
     "test-unit": "yarn unit",
     "test-watch": "yarn unit --watch",
     "types": "yarn dtslint",
-    "unit": "cross-env BLUEBIRD_DEBUG=1 NODE_ENV=test mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json"
+    "unit": "cross-env BLUEBIRD_DEBUG=1 NODE_ENV=test mocha -r ts-node/register/transpile-only --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json"
   },
   "dependencies": {
     "@cypress/request": "^3.0.9",
@@ -66,8 +66,6 @@
     "yauzl": "^2.10.0"
   },
   "devDependencies": {
-    "@babel/cli": "7.28.0",
-    "@babel/preset-env": "7.28.0",
     "@cypress/angular": "0.0.0-development",
     "@cypress/grep": "0.0.0-development",
     "@cypress/mount-utils": "0.0.0-development",
@@ -102,7 +100,9 @@
     "sinon": "7.2.2",
     "snap-shot-it": "7.9.10",
     "spawn-mock": "1.0.0",
-    "strip-ansi": "6.0.1"
+    "strip-ansi": "6.0.1",
+    "tsx": "4.20.4",
+    "typescript": "~5.9.2"
   },
   "files": [
     "bin",
@@ -163,7 +163,8 @@
   },
   "workspaces": {
     "nohoist": [
-      "@types/*"
+      "@types/*",
+      "tsx"
     ]
   },
   "nx": {

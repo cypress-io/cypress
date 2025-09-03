@@ -1,2 +1,2 @@
 # Bump this version to force CI to re-create the cache from scratch.
-8-28-2025-dtslint
+9-2-2025-cli2

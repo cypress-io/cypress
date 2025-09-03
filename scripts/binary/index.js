@@ -23,9 +23,9 @@ const uploadUtils = require('./util/upload')
 const { uploadArtifactToS3 } = require('./upload-build-artifact')
 const { moveBinaries } = require('./move-binaries')
 const { exec } = require('child_process')
-const xvfb = require('../../cli/lib/exec/xvfb')
+const xvfb = require('../../cli/lib/exec/xvfb').default
 const smoke = require('./smoke')
-const verify = require('../../cli/lib/tasks/verify')
+const verify = require('../../cli/lib/tasks/verify').default
 const execa = require('execa')
 
 const log = function (msg) {
