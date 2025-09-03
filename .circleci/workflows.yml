@@ -1776,7 +1776,6 @@ jobs:
     parallelism: 1
     steps:
       - setup_remote_docker:
-          version: 20.10.14
       - run: |
           echo '{
             "ipv6": true,
