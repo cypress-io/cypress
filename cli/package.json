@@ -15,7 +15,6 @@
     "test-dependencies": "dependency-check . --missing --no-dev --verbose",
     "test-unit": "yarn unit",
     "test-watch": "yarn unit --watch",
-    "types": "yarn dtslint",
     "unit": "cross-env BLUEBIRD_DEBUG=1 NODE_ENV=test mocha -r ts-node/register/transpile-only --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json"
   },
   "dependencies": {
