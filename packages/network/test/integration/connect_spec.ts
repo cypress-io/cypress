@@ -45,9 +45,9 @@ describe('lib/connect', function () {
     it('resolves localhost on ::1 immediately', function () {
       // This test requires ipv6 which isn't setup
       // in our docker container in circleci
-      if (process.env.CI) {
-        return this.skip()
-      }
+      // if (process.env.CI) {
+      //   return this.skip()
+      // }
 
       this.timeout(50)
 

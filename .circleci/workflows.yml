@@ -1774,7 +1774,21 @@ jobs:
         default: medium
     resource_class: << parameters.resource_class >>
     parallelism: 1
+    machine:
+      # using `machine` gives us a Linux VM that can run Docker
+      image: ubuntu-2404:2024.11.1
+      docker_layer_caching: true
     steps:
+      - run:
+          name: enable ipv6
+          command: |
+            cat \<<'EOF' | sudo tee /etc/docker/daemon.json
+            {
+              "ipv6": true,
+              "fixed-cidr-v6": "2001:db8:1::/64"
+            }
+            EOF
+            sudo service docker restart
       - restore_cached_workspace
       - install-browsers:
           install-chrome: true
