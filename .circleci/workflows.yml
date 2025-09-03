@@ -2431,10 +2431,44 @@ jobs:
     steps:
       - restore_cached_workspace
       - run:
-          name: Run tests
-          command: yarn workspace @cypress/grep cy:run
-      - sanitize-verify-and-store-mocha-results:
-          testResultsPath: npm/grep/test_results
+          name: Run before tag tags
+          command: yarn workspace @cypress/grep cypress:run:tags:before
+      - run:
+          name: Run describe tag tests
+          command: yarn workspace @cypress/grep cypress:run:tags:describe
+      - run:
+          name: Run config tag tests
+          command: yarn workspace @cypress/grep cypress:run:tags:config
+      - run:
+          name: Run burn-in tests
+          command: yarn workspace @cypress/grep cypress:run:burn
+      - run:
+          name: Run inherit tag tests
+          command: yarn workspace @cypress/grep cypress:run:tags:inherit
+      - run:
+          name: Run registration tag tests
+          command: yarn workspace @cypress/grep cypress:run:multiple-registrations
+      - run:
+          name: Run nested describe tag tests
+          command: yarn workspace @cypress/grep cypress:run:tags:nested-describe
+      - run:
+          name: Run skip tests
+          command: yarn workspace @cypress/grep cypress:run:skip
+      - run:
+          name: Run this test
+          command: yarn workspace @cypress/grep cypress:run:this
+      - run:
+          name: Run tag test
+          command: yarn workspace @cypress/grep cypress:run:tags
+      - run:
+          name: Run each test
+          command: yarn workspace @cypress/grep cypress:run:each
+      - run:
+          name: Run grep task test
+          command: yarn workspace @cypress/grep cypress:run:grep
+      - run:
+          name: Run unit tests
+          command: yarn workspace @cypress/grep test
 
   npm-eslint-plugin-dev:
     <<: *defaults

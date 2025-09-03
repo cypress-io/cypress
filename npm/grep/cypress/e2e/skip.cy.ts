@@ -1,4 +1,3 @@
-/// <reference types="cypress" />
 describe('tests that use .skip', () => {
   // use a template literal
   it(`works`, () => {})

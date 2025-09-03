@@ -37,16 +37,16 @@ yarn add --dev @cypress/grep
 
 ```js
 // cypress/support/e2e.js
-const registerCypressGrep = require('@cypress/grep')
-registerCypressGrep()
+const { register } = require('@cypress/grep')
+register()
 ```
 
 Or using ES modules / TypeScript:
 
 ```ts
 // cypress/support/e2e.ts
-import registerCypressGrep from '@cypress/grep/src/support'
-registerCypressGrep()
+import { register } from '@cypress/grep'
+register()
 ```
 
 ### 3. Optional: Add to config for spec filtering
@@ -60,7 +60,24 @@ const { defineConfig } = require('cypress')
 module.exports = defineConfig({
   e2e: {
     setupNodeEvents(on, config) {
-      require('@cypress/grep/src/plugin')(config)
+      const { plugin } = require('@cypress/grep/plugin')
+      plugin(config)
+      return config
+    },
+  },
+})
+```
+
+Or using ES modules / TypeScript:
+
+```ts
+// cypress.config.ts
+import { plugin } from '@cypress/grep/plugin'
+
+export default defineConfig({
+  e2e: {
+    setupNodeEvents(on, config) {
+      plugin(config)
       return config
     },
   },
@@ -227,9 +244,10 @@ npx cypress run --env grepUntagged=true
 ### In cypress.config.js
 
 ```js
-const { defineConfig } = require('cypress')
+import { defineConfig } from 'cypress'
+import { plugin } from '@cypress/grep/plugin'
 
-module.exports = defineConfig({
+export default defineConfig({
   env: {
     // Always filter by viewport tests
     grep: "viewport",
@@ -240,7 +258,7 @@ module.exports = defineConfig({
   },
   e2e: {
     setupNodeEvents(on, config) {
-      require('@cypress/grep/src/plugin')(config)
+      plugin(config)
       return config
     },
   },
