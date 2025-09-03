@@ -256,6 +256,8 @@ export const useStudioStore = defineStore('studioRecorder', {
         this.sessionId = studio.sessionId
       }
 
+      // if the user has any settings related to @cypress/grep, we need to temporarily remove them
+      // so that studio can run all of the tests regardless of whether they match the grep filters
       if (studio.newTestLineNumber || studio.testId) {
         if (this.detectAndStoreGrepSettings()) {
           this.clearGrepSettings()
