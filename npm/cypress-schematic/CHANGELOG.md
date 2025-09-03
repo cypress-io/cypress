@@ -1,3 +1,10 @@
+# [@cypress/schematic-v4.1.2](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v4.1.1...@cypress/schematic-v4.1.2) (2025-09-02)
+
+
+### Bug Fixes
+
+* move @cypress/schematic npm registry query to https ([#32390](https://github.com/cypress-io/cypress/issues/32390)) ([21be37e](https://github.com/cypress-io/cypress/commit/21be37e72e475be2122ab91f8119e48f1d82c32f))
+
 # [@cypress/schematic-v4.1.1](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v4.1.0...@cypress/schematic-v4.1.1) (2025-08-20)
 
 

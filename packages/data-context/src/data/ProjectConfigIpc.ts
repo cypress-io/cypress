@@ -312,10 +312,11 @@ export class ProjectConfigIpc extends EventEmitter {
     /**
      * use --import for node versions
      * 20.6.0 and above for 20.x.x as --import is supported
-     * use --loader for node under 20.6.0 for 20.x.x
+     * use --loader for node under 20.6.0 for 20.x.x.
+     * NOTE: we need to use double quotes around the tsx path to account for paths with spaces or special characters.
      * @see https://tsx.is/dev-api/node-cli#node-js-cli
      */
-    let tsxLoader = this.nodeVersion && semver.lt(this.nodeVersion, '20.6.0') ? `--loader ${tsx}` : `--import ${tsx}`
+    let tsxLoader = this.nodeVersion && semver.lt(this.nodeVersion, '20.6.0') ? `--loader "${tsx}"` : `--import "${tsx}"`
 
     // If they've got TypeScript installed, we can use tsx for CommonJS and ESM.
     // @see https://tsx.is/dev-api/node-cli#node-js-cli
