@@ -10,7 +10,7 @@ const errors = require('../../lib/errors')
 const { SocketE2E } = require('../../lib/socket-e2e')
 const { ServerBase } = require('../../lib/server-base')
 const { Automation } = require('../../lib/automation')
-const preprocessor = require('../../lib/plugins/preprocessor')
+const preprocessor = require('../../lib/plugins/preprocessor').default
 const { fs } = require('../../lib/util/fs')
 const session = require('../../lib/session')
 
