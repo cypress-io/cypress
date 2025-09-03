@@ -127,7 +127,7 @@ class $Cypress {
   specBridgeCommunicator: SpecBridgeCommunicator
   isCrossOriginSpecBridge: boolean
   on: any
-  stackUtils: any
+  stackUtils: typeof $stackUtils | null = null
 
   // attach to $Cypress to access
   // all of the constructors
