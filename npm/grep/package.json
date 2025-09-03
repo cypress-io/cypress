@@ -4,8 +4,8 @@
   "description": "Filter tests using substring",
   "main": "dist/support.js",
   "scripts": {
-    "cy:open": "node ../../scripts/cypress.js open --e2e -b electron --config specPattern='**/unit.js'",
-    "cy:run": "node ../../scripts/cypress.js run --config specPattern='**/unit.js'",
+    "cypress:open": "node ../../scripts/cypress.js open",
+    "cypress:run": "node ../../scripts/cypress.js run",
     "lint": "eslint"
   },
   "dependencies": {

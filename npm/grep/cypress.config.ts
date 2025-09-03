@@ -15,7 +15,6 @@ export default defineConfig({
 
       return config
     },
-    specPattern: '**/spec.js',
   },
   fixturesFolder: false,
 })

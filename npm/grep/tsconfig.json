@@ -1,20 +1,19 @@
 {
   "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist",
     "target": "ES2018",
     "lib": ["es2021"],   
     "module": "commonjs",
     "moduleResolution": "node",    
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "noEmit": true
+    "noEmit": true,
+    "skipLibCheck": true
   },
-  "types": ["node"],
+  "types": ["node", "mocha", "cypress"],
   "include": [
-    "src/**/*",
-    "cypress/**/*",
-    "expects/**/*",
-    "*.ts",
-    "*.tsx"
+    "src"
   ],
   "exclude": [
     "node_modules",

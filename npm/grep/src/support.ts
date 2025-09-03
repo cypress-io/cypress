@@ -57,8 +57,8 @@ function cypressGrep (): void {
     return
   }
 
-  // @ts-expect-error type signature mismatch
-  it = function itGrep (name: string, options: any, callback?: Function): void {
+  // @ts-expect-error - it is missing only, skip, and retries which are overridden below
+  it = function itGrep (name: string, options: any, callback?: Func | AsyncFunc): Mocha.Test | void[] {
     if (typeof options === 'function') {
       callback = options
       options = {}
@@ -122,7 +122,8 @@ function cypressGrep (): void {
 
   const suiteStack: SuiteStackItem[] = []
 
-  describe = function describeGrep (name: string, options: any, callback?: Function): void {
+    // @ts-expect-error - it is missing only and skip which are overridden below
+  describe = function describeGrep (name: string, options: any, callback?: Func | AsyncFunc): Mocha.Suite {
     if (typeof options === 'function') {
       callback = options
       options = {}
@@ -163,25 +164,30 @@ function cypressGrep (): void {
 
   it.skip = _it.skip
   it.only = _it.only
+  it.retries = _it.retries
+  // @ts-expect-error - is missing each on Mocha.TestFunction type
   if (typeof _it.each === 'function') {
+    // @ts-expect-error - is missing each on Mocha.TestFunction type
     it.each = _it.each
   }
 
   describe.skip = _describe.skip
   describe.only = _describe.only
+  // @ts-expect-error - is missing each on Mocha.Suite type
   if (typeof _describe.each === 'function') {
+    // @ts-expect-error - is missing each on Mocha.Suite type
     describe.each = _describe.each
   }
 }
 
 function restartTests (): void {
   setTimeout(() => {
-    window.top.document.querySelector('.reporter .restart').click()
+    window.top.document.querySelector<HTMLButtonElement>('.reporter .restart').click()
   }, 0)
 }
 
 if (!Cypress.grep) {
-  Cypress.grep = function grep (grep: string | null, tags: string | null, burn: number | null): void {
+  Cypress.grep = function grep (grep?: string, tags?: string, burn?: string): void {
     Cypress.env('grep', grep)
     Cypress.env('grepTags', tags)
     Cypress.env('grepBurn', burn)
