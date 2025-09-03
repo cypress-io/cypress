@@ -158,7 +158,7 @@ export const getFirstWorkingFamily = (
   // returned A/AAAA record for a host that we can establish a connection to.
   // https://github.com/cypress-io/cypress/issues/112
 
-  const isIP = net.isIP(host) as net.family
+  const isIP = net.isIP(host) as net.family | 0
 
   if (isIP) {
     // isIP conveniently returns the family of the address
