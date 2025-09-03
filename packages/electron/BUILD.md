@@ -5,7 +5,7 @@ This package is configured to build both CommonJS and ES Module versions using T
 ## Build Commands
 
 ```bash
-# Build both CJS and ESM versions
+# Build CJS - ESM is disabled for now
 npm run build
 
 # Build only CommonJS
