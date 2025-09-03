@@ -1776,12 +1776,16 @@ jobs:
     parallelism: 1
     steps:
       - setup_remote_docker
-      - run: |
-          echo '{
-            "ipv6": true,
-            "fixed-cidr-v6": "2001:db8:1::/64"
-          }' | tee /etc/docker/daemon.json
-          systemctl restart docker || service docker restart
+      # Create an IPv6-enabled Docker network (for multi-container IPv6 tests)
+      - run:
+          name: Create internal IPv6 network
+          command: |
+            docker network create --ipv6 --subnet=2001:db8:2::/64 ipv6net || true
+      # Run a test container attached to the IPv6 network
+      - run:
+          name: Run test container
+          command: |
+            docker run --rm --network ipv6net alpine ping6 -c 3 ::1
       - restore_cached_workspace
       - install-browsers:
           install-chrome: true
