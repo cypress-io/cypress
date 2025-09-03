@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import os from 'os'
 import path from 'path'
 import systeminformation from 'systeminformation'
@@ -196,6 +195,7 @@ export async function pkgElectronApp (
       })
       : undefined
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.log((err as Error).stack)
 
     return process.exit(1)
