@@ -414,7 +414,8 @@ describe('lib/agent', function () {
           .then(() => {
             throw new Error('should not be able to connect')
           })
-          .catch({ message: 'Error: A connection to the upstream proxy could not be established: connect ECONNREFUSED 0.0.0.0' }, () => {
+          .catch((err) => {
+            expect(err.message).to.include('Error: A connection to the upstream proxy could not be established: connect EADDRNOTAVAIL 0.0.0.0')
             expect(spy).to.be.calledOnce
           })
         })
@@ -488,9 +489,8 @@ describe('lib/agent', function () {
         })
       })
 
-      // NOTE: this does not work in develop nor release/14.0.0 locally due to EADDRNOTAVAIL - likely setup/teardown is improper
-      it.skip('#addRequest does not go to proxy if domain in NO_PROXY', function () {
-        const spy = sinon.spy(this.agent.httpAgent, '_addProxiedRequest')
+      it('#addRequest does not go to proxy if domain in NO_PROXY', function () {
+        const spy = sinon.spy(agent.httpAgent, '_addProxiedRequest')
 
         process.env.HTTP_PROXY = process.env.HTTPS_PROXY = 'http://0.0.0.0:0'
         process.env.NO_PROXY = 'mtgox.info,example.com,homestarrunner.com,'
@@ -507,7 +507,8 @@ describe('lib/agent', function () {
           .then(() => {
             throw new Error('should not be able to connect')
           })
-          .catch({ message: 'Error: connect ECONNREFUSED 0.0.0.0' }, () => {
+          .catch((err) => {
+            expect(err.message).to.include('Error: connect EADDRNOTAVAIL 0.0.0.0')
             expect(spy).to.be.calledOnce
           })
         })

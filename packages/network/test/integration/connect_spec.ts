@@ -19,7 +19,10 @@ describe('lib/connect', function () {
       const server = net.createServer(_.partialRight(_.invoke, 'close'))
 
       return Bluebird.fromCallback((cb) => {
-        server.listen(0, '127.0.0.1', cb)
+        server.listen({
+          port: 0,
+          host: '127.0.0.1',
+        }, cb.bind(server))
       })
       .then(() => {
         return connect.getAddress(server.address().port, 'localhost')
@@ -39,13 +42,16 @@ describe('lib/connect', function () {
 
     // Error: listen EADDRNOTAVAIL ::1
     // NOTE: add an ipv6 lo if to the docker container
-    it.skip('resolves localhost on ::1 immediately', function () {
+    it('resolves localhost on ::1 immediately', function () {
       this.timeout(50)
 
       const server = net.createServer(_.partialRight(_.invoke, 'close'))
 
       return Bluebird.fromCallback((cb) => {
-        server.listen(0, '::1', cb)
+        server.listen({
+          port: 0,
+          host: '::1',
+        }, cb.bind(server))
       })
       .then(() => {
         return connect.getAddress(server.address().port, 'localhost')
@@ -57,7 +63,9 @@ describe('lib/connect', function () {
         })
       })
       .then(() => {
-        server.close()
+        return Bluebird.fromCallback((cb) => {
+          server.close(cb)
+        })
       })
     })
   })
