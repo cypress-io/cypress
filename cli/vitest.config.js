@@ -6,6 +6,7 @@ export default defineConfig({
       'test/lib/util.spec.ts',
       'test/lib/logger.spec.ts',
       'test/lib/errors.spec.ts',
+      'test/lib/cypress.spec.ts',
     ],
   },
 })

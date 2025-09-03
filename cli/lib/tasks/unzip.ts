@@ -1,6 +1,5 @@
 import _ from 'lodash'
 import la from 'lazy-ass'
-import is from 'check-more-types'
 import cp from 'child_process'
 import os from 'os'
 import yauzl from 'yauzl'
@@ -11,6 +10,9 @@ import readline from 'readline'
 import { throwFormErrorText, errors } from '../errors'
 import fs from '../fs'
 import util from '../util'
+
+// TODO: this package needs to be replaced as we can't import it in vitest
+const is = require('check-more-types')
 
 const debug = Debug('cypress:cli:unzip')
 
