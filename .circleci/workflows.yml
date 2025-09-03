@@ -1775,7 +1775,7 @@ jobs:
     resource_class: << parameters.resource_class >>
     parallelism: 1
     steps:
-      - setup_remote_docker:
+      - setup_remote_docker
       - run: |
           echo '{
             "ipv6": true,
