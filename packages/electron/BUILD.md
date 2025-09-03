@@ -20,7 +20,7 @@ npm run clean
 
 ## Output Structure
 
-After building, the `dist/` directory contains:
+After building both `build:esm` and `build:cjs`, the `dist/` directory contains:
 
 ```
 dist/
