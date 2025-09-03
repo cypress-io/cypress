@@ -1,6 +1,6 @@
 # Electron Package Build Setup
 
-This package is configured to build both CommonJS and ES Module versions using TypeScript compiler (tsc) only.
+This package is configured to build to CJS, but ESM builds can easily be enabled.
 
 ## Build Commands
 
