@@ -1,12 +1,12 @@
-import type { IpcHandler } from '../data'
+import type { PluginIpcHandler } from '../data'
 
-let pluginHandlers: IpcHandler[] = []
+let pluginHandlers: PluginIpcHandler[] = []
 
 export const getServerPluginHandlers = () => {
   return pluginHandlers
 }
 
-export const registerServerPluginHandler = (handler: IpcHandler) => {
+export const registerServerPluginHandler = (handler: PluginIpcHandler) => {
   pluginHandlers.push(handler)
 }
 

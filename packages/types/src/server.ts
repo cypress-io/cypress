@@ -6,6 +6,65 @@ import type { ProtocolManagerShape } from './protocol'
 import type Protocol from 'devtools-protocol'
 import type { SupportedKey } from './automation'
 
+/**
+ * Interface for compiler error location information
+ * Used across error handling systems to provide file, line, and column details
+ */
+export interface CompilerErrorLocation {
+  filePath: string
+  line: number
+  column: number
+}
+
+/**
+ * Interface for wrapping child processes with EventEmitter functionality
+ * Used by wrapIpc() to create a communication layer between parent and child processes
+ * Provides send/receive capabilities while maintaining EventEmitter event handling
+ */
+export interface ProcessIpcWrapper {
+  send: (event: string, ...args: any[]) => void
+  on: (event: string, listener: (...args: any[]) => void) => any
+  removeListener: (event: string, listener: (...args: any[]) => void) => any
+}
+
+/**
+ * Interface for errors that can occur during file transformation/compilation
+ * Covers TransformError (tsx) and esbuild errors with location information
+ */
+export interface TransformError extends Error {
+  name: string
+  message: string
+  errors?: Array<{
+    location?: {
+      file: string
+      line: number
+      column: number
+    }
+  }>
+}
+
+/**
+ * Interface for errors that can occur during file preprocessing
+ * These are typically compilation errors, file system errors, or plugin execution errors
+ * Used across preprocessor packages and error handling systems
+ */
+export interface PreprocessorError extends Error {
+  stack?: string
+  annotated?: string
+  message: string
+  filePath?: string
+  originalStack?: string
+}
+
+/**
+ * Interface for IPC handlers that can send and receive messages
+ * Used by plugin handlers to communicate with the main process
+ */
+export interface PluginIpcHandler {
+  send: (event: string, ...args: any[]) => boolean
+  on: (event: string, listener: (...args: any[]) => void) => this
+}
+
 export type OpenProjectLaunchOpts = {
   projectRoot: string
   shouldLaunchNewTab: boolean

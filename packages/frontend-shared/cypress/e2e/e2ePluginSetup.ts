@@ -113,9 +113,9 @@ async function makeE2ETasks () {
   const Fixtures = require('@tooling/system-tests') as FixturesShape
   const { scaffoldCommonNodeModules, scaffoldProjectNodeModules } = require('@tooling/system-tests/lib/dep-installer')
 
-  const cli = require('../../../../cli/lib/cli')
-  const cliUtil = require('../../../../cli/lib/util')
-  const cliOpen = require('../../../../cli/lib/exec/open')
+  const cli = require('../../../../cli/lib/cli').default
+  const cliUtil = require('../../../../cli/lib/util').default
+  const cliOpen = require('../../../../cli/lib/exec/open').default
 
   // Remove all the fixtures when the plugin starts
   Fixtures.remove()

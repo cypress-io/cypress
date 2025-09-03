@@ -1,5 +1,5 @@
 import { CypressError, getError } from '@packages/errors'
-import { DebugData, IpcHandler, LoadConfigReply, ProjectConfigIpc, SetupNodeEventsReply } from './ProjectConfigIpc'
+import { DebugData, PluginIpcHandler, LoadConfigReply, ProjectConfigIpc, SetupNodeEventsReply } from './ProjectConfigIpc'
 import assert from 'assert'
 import type { AllModeOptions, FullConfig, TestingType } from '@packages/types'
 import debugLib from 'debug'
@@ -34,7 +34,7 @@ type ProjectConfigManagerOptions = {
   ctx: DataContext
   configFile: string | false
   projectRoot: string
-  handlers: IpcHandler[]
+  handlers: PluginIpcHandler[]
   hasCypressEnvFile: boolean
   eventRegistrar: EventRegistrar
   onError: (cypressError: CypressError) => void
