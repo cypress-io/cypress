@@ -1083,14 +1083,14 @@ describe('lib/agent', function () {
         // v6 server only
         listen({
           port: HTTP_PORT + 2,
-          host: '::',
+          host: '::1',
           ipv6Only: true,
         }),
 
         // v6 server only
         listen({
           port: HTTP_PORT + 3,
-          host: '::',
+          host: '::1',
           ipv6Only: true,
         }),
 
