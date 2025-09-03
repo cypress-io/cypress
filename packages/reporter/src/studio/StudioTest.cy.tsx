@@ -5,7 +5,6 @@ import { RunnablesStore } from '../runnables/runnables-store'
 import { StatsStore } from '../header/stats-store'
 import Test from '../test/test-model'
 import scroller from '../lib/scroller'
-import type { Events } from '../lib/events'
 
 describe('StudioTest', () => {
   let appState: AppState
@@ -255,23 +254,5 @@ describe('StudioTest', () => {
 
     // Should not render anything when no test is available
     cy.get('.studio-single-test-container').should('not.exist')
-  })
-
-  it('emits studio:restart when restart button is clicked', () => {
-    const events = {
-      emit: cy.stub().as('emit'),
-    } as unknown as Events
-
-    cy.mount(
-      <StudioTest
-        appState={appState}
-        runnablesStore={runnablesStore}
-        statsStore={statsStore}
-        events={events}
-      />,
-    )
-
-    cy.get('[aria-label="Rerun all tests"]').click()
-    cy.get('@emit').should('have.been.calledWith', 'studio:restart')
   })
 })

@@ -97,7 +97,7 @@ class $Cypress {
   Commands: any
   $autIframe: any
   onSpecReady: any
-  onInitStudio: any
+  waitForStudio: any
   events: any
   $: any
   arch: any
@@ -188,7 +188,7 @@ class $Cypress {
     this.Commands = null
     this.$autIframe = null
     this.onSpecReady = null
-    this.onInitStudio = null
+    this.waitForStudio = null
     this.primaryOriginCommunicator = new PrimaryOriginCommunicator()
     this.specBridgeCommunicator = new SpecBridgeCommunicator()
     this.isCrossOriginSpecBridge = false
@@ -314,10 +314,10 @@ class $Cypress {
     return this.action('cypress:config', config)
   }
 
-  initialize ({ $autIframe, onSpecReady, onInitStudio }) {
+  initialize ({ $autIframe, onSpecReady, waitForStudio }) {
     this.$autIframe = $autIframe
     this.onSpecReady = onSpecReady
-    this.onInitStudio = onInitStudio
+    this.waitForStudio = waitForStudio
     if (this._onInitialize) {
       this._onInitialize()
       this._onInitialize = undefined
@@ -407,8 +407,9 @@ class $Cypress {
       })
     }
 
-    if (this.onInitStudio) {
-      this.onInitStudio(run)
+    if (this.waitForStudio) {
+      // when running studio, wait until it's initialized before running
+      this.waitForStudio(run)
     } else {
       run()
     }
