@@ -1032,11 +1032,15 @@ describe('lib/agent', function () {
   })
 
   context('.getFirstWorkingFamily', () => {
+    let servers: http.Server[] = []
+
     const listen = (options: ListenOptions) => {
       return Bluebird.fromCallback((cb) => {
         const server = http.createServer((req, res) => {
           res.end('Hello, world!')
         })
+
+        servers.push(server)
 
         server.listen(options, cb.bind(server))
       })
@@ -1047,6 +1051,18 @@ describe('lib/agent', function () {
         getFirstWorkingFamily({ host, port }, familyCache, resolve)
       })
     }
+
+    beforeEach(() => {
+      servers = []
+    })
+
+    afterEach(() => {
+      return Bluebird.map(servers, (server) => {
+        return Bluebird.fromCallback((cb) => {
+          server.close(cb.bind(server))
+        })
+      })
+    })
 
     it('caches host + port', async () => {
       const familyCache = {}
