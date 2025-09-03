@@ -43,6 +43,12 @@ describe('lib/connect', function () {
     // Error: listen EADDRNOTAVAIL ::1
     // NOTE: add an ipv6 lo if to the docker container
     it('resolves localhost on ::1 immediately', function () {
+      // This test requires ipv6 which isn't setup
+      // in our docker container in circleci
+      if (process.env.CI) {
+        return this.skip()
+      }
+
       this.timeout(50)
 
       const server = net.createServer(_.partialRight(_.invoke, 'close'))
