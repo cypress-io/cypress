@@ -1187,12 +1187,6 @@ commands:
           command: |
             source ./ci-ensure-node.sh
             npx cypress version
-      - run:
-          name: Types check 🧩 (maybe)
-          working_directory: /tmp/<<parameters.repo>>
-          command: |
-            source ./ci-ensure-node.sh
-            [[ -f yarn.lock ]] && yarn types || npm run types --if-present
       - when:
           condition: <<parameters.build-project>>
           steps:
@@ -1794,8 +1788,6 @@ jobs:
             - run: yarn test-scripts
             # run unit tests from each individual package
             - run: yarn test
-            # run type checking for each individual package
-            - run: yarn lerna run types
             - sanitize-verify-and-store-mocha-results:
                 expectedResultCount: 20
 

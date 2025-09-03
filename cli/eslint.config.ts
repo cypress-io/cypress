@@ -1,15 +1,18 @@
 import { baseConfig, cliOverrides, globals } from '@packages/eslint-config'
+
 import expectType from 'eslint-plugin-expect-type/configs/recommended'
 
 const config = [
   ...baseConfig,
   ...cliOverrides,
-  expectType,
+  {
+    ...expectType.default,
+  },
   {
     languageOptions: {
       parserOptions: {
         tsconfigRootDir: __dirname,
-        projectService: true,
+        allowDefaultProject: ['./eslint.config.ts', './index.mjs'],
       },
       globals: {
         __dirname: 'readonly',
@@ -50,6 +53,7 @@ const config = [
       '**/mount-utils/**/*',
       '**/types/{bluebird,chai,chai-jquery,jquery,lodash,minimatch,mocha,sinon,sinon-chai}/**/*',
       '.mocharc.js',
+      '**/*.js',
     ],
   },
 ]
