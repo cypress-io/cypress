@@ -2,27 +2,32 @@ require('../spec_helper')
 
 const files = require('../../lib/files')
 const FixturesHelper = require('@tooling/system-tests')
-const { getCtx } = require('../../lib/makeDataContext')
 
 let ctx
 
 describe('lib/files', () => {
-  beforeEach(async function () {
-    ctx = getCtx()
-    FixturesHelper.scaffold()
+  before(async function () {
+    const { setCtx, makeDataContext, clearCtx } = require('../../lib/makeDataContext')
 
+    // Clear and set up DataContext
+    await clearCtx()
+    setCtx(makeDataContext({}))
+    ctx = require('../../lib/makeDataContext').getCtx()
+
+    FixturesHelper.scaffold()
     this.todosPath = FixturesHelper.projectPath('todos')
 
     await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
-    return ctx.lifecycleManager.getFullInitialConfig().then(async (cfg) => {
-      this.config = cfg;
-      ({ projectRoot: this.projectRoot } = cfg)
-      await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.projectRoot)
-    })
+    const cfg = await ctx.lifecycleManager.getFullInitialConfig()
+
+    this.config = cfg
+    this.projectRoot = cfg.projectRoot
+
+    await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.projectRoot)
   })
 
-  afterEach(() => {
+  after(() => {
     return FixturesHelper.remove()
   })
 

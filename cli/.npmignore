@@ -1,0 +1,2 @@
+# ignore all ts files in the library directory as they should be compiled to js
+lib/**/*.ts
