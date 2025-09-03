@@ -1,9 +1,11 @@
 {
-  "extends": "../../packages/ts/tsconfig.json",
   "compilerOptions": {
+    "target": "ES2018",
+    "lib": ["es2021"],   
+    "module": "commonjs",
+    "moduleResolution": "node",    
+    "resolveJsonModule": true,
     "esModuleInterop": true,
-    "allowJs": true,
-    "checkJs": false,
     "noEmit": true
   },
   "types": ["node"],
@@ -11,9 +13,7 @@
     "src/**/*",
     "cypress/**/*",
     "expects/**/*",
-    "*.js",
     "*.ts",
-    "*.jsx",
     "*.tsx"
   ],
   "exclude": [

@@ -12,6 +12,7 @@ export default [
     languageOptions: {
       parserOptions: {
         allowDefaultProject: true,
+        tsconfigRootDir: __dirname,
       },
     },
   },

@@ -57,6 +57,7 @@ function cypressGrep (): void {
     return
   }
 
+  // @ts-expect-error type signature mismatch
   it = function itGrep (name: string, options: any, callback?: Function): void {
     if (typeof options === 'function') {
       callback = options
@@ -193,4 +194,5 @@ if (!Cypress.grep) {
   }
 }
 
+// TODO: this export likely needs to be updated to avoid a breaking change
 export default cypressGrep
