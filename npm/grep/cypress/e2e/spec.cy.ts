@@ -1,5 +1,3 @@
-/// <reference types="cypress" />
-
 it('hello world', () => {})
 
 it('works', () => {})

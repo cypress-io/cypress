@@ -1,15 +1,22 @@
-const debug = require('debug')('@cypress/grep')
-const globby = require('globby')
-const { getTestNames } = require('find-test-names')
-const fs = require('fs')
-const { version } = require('../package.json')
-const { parseGrep, shouldTestRun } = require('./utils')
+import debugModule from 'debug'
+import { sync as globbySync } from 'globby'
+import { getTestNames } from 'find-test-names'
+import { readFileSync } from 'fs'
+import { version } from '../package.json'
+import { parseGrep, shouldTestRun } from './utils'
+const debug = debugModule('@cypress/grep')
+
+interface CypressConfigOptions {
+  env?: Record<string, any>
+  specPattern?: string | string[]
+  excludeSpecPattern?: string | string[]
+}
 
 /**
- * Prints the @cypress/grep environment values if any.
+ * Prints the "@cypress/grep" environment values if any.
  * @param {Cypress.ConfigOptions} config
  */
-function cypressGrepPlugin (config) {
+export function plugin (config: CypressConfigOptions): CypressConfigOptions {
   if (!config || !config.env) {
     return config
   }
@@ -67,7 +74,7 @@ function cypressGrepPlugin (config) {
     debug('specPattern', specPattern)
     debug('excludeSpecPattern', excludeSpecPattern)
     debug('integrationFolder', integrationFolder)
-    const specFiles = globby.sync(specPattern, {
+    const specFiles = globbySync(specPattern, {
       cwd: integrationFolder,
       ignore: Array.isArray(excludeSpecPattern) ? excludeSpecPattern : [excludeSpecPattern],
       absolute: true,
@@ -75,15 +82,15 @@ function cypressGrepPlugin (config) {
 
     debug('found %d spec files', specFiles.length)
     debug('%o', specFiles)
-    let greppedSpecs = []
+    let greppedSpecs: string[] = []
 
     if (grep) {
       console.log('@cypress/grep: filtering specs using "%s" in the title', grep)
       const parsedGrep = parseGrep(grep)
 
       debug('parsed grep %o', parsedGrep)
-      greppedSpecs = specFiles.filter((specFile) => {
-        const text = fs.readFileSync(specFile, { encoding: 'utf8' })
+      greppedSpecs = specFiles.filter((specFile: string) => {
+        const text = readFileSync(specFile, { encoding: 'utf8' })
 
         try {
           const names = getTestNames(text)
@@ -113,8 +120,8 @@ function cypressGrepPlugin (config) {
       const parsedGrep = parseGrep(null, grepTags)
 
       debug('parsed grep tags %o', parsedGrep)
-      greppedSpecs = specFiles.filter((specFile) => {
-        const text = fs.readFileSync(specFile, { encoding: 'utf8' })
+      greppedSpecs = specFiles.filter((specFile: string) => {
+        const text = readFileSync(specFile, { encoding: 'utf8' })
 
         try {
           const testInfo = getTestNames(text)
@@ -152,5 +159,3 @@ function cypressGrepPlugin (config) {
 
   return config
 }
-
-module.exports = cypressGrepPlugin
