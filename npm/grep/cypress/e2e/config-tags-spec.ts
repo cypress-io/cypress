@@ -1,5 +1,3 @@
-// @ts-check
-/// <reference path="../../src/index.d.ts" />
 describe('tags in the config object', () => {
   it('works as an array', { tags: ['config', 'some-other-tag'] }, () => {
     expect(true).to.be.true

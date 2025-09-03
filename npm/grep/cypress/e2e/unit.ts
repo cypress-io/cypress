@@ -1,5 +1,3 @@
-/// <reference types="cypress" />
-
 import {
   parseGrep,
   parseTitleGrep,

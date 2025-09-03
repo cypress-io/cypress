@@ -1,4 +1,3 @@
-/// <reference types="cypress" />
 describe('this context', () => {
   beforeEach(() => {
     cy.wrap(42).as('life')

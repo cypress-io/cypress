@@ -1,6 +1,3 @@
-/// <reference path="../../src/index.d.ts" />
-
-// @ts-check
 describe('Page', () => {
   describe('List', { tags: ['@us1'] }, () => {
     // NOTE: This test is skipped for demonstration purposes

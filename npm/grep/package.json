@@ -2,7 +2,7 @@
   "name": "@cypress/grep",
   "version": "0.0.0-development",
   "description": "Filter tests using substring",
-  "main": "src/support.js",
+  "main": "dist/support.js",
   "scripts": {
     "cy:open": "node ../../scripts/cypress.js open --e2e -b electron --config specPattern='**/unit.js'",
     "cy:run": "node ../../scripts/cypress.js run --config specPattern='**/unit.js'",
@@ -24,9 +24,9 @@
     "cypress": ">=10"
   },
   "files": [
-    "src"
+    "dist"
   ],
-  "types": "src/index.d.ts",
+  "types": "dist/index.d.ts",
   "license": "MIT",
   "repository": {
     "type": "git",

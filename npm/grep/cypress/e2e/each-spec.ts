@@ -1,5 +1,3 @@
-/// <reference types="cypress" />
-
 // https://github.com/bahmutov/cypress-each
 import 'cypress-each'
 
