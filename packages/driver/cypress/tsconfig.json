@@ -9,7 +9,8 @@
     // We are setting sourceMap=true in order to have full codeFrame support within the driver package.
     // We need to do this because we are using the standalone @cypress/webpack-preprocessor, which doesn't
     // default the sourceMap option for us
-    "sourceMap": true
+    "sourceMap": true,
+    "moduleResolution": "node"
   },
   "include": ["**/*.ts"]
 }

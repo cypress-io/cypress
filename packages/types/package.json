@@ -8,7 +8,8 @@
     "build-prod": "tsc || echo 'built, with type errors'",
     "check-ts": "tsc --noEmit",
     "clean": "rimraf src/*.js src/**/*.js",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
+    "test": "vitest run"
   },
   "dependencies": {
     "semver": "^7.7.1"
@@ -16,11 +17,12 @@
   "devDependencies": {
     "@types/node": "20.16.0",
     "axios": "^1.8.3",
-    "better-sqlite3": "11.5.0",
+    "better-sqlite3": "11.10.0",
     "devtools-protocol": "0.0.1459876",
     "express": "4.21.0",
     "socket.io": "4.0.1",
-    "typescript": "~5.4.5"
+    "typescript": "~5.4.5",
+    "vitest": "2.1.8"
   },
   "files": [
     "src/*"
