@@ -1797,11 +1797,17 @@ jobs:
           condition:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
-            - run: yarn test-scripts
-            # run unit tests from each individual package
-            - run: yarn test
-            # run type checking for each individual package
-            - run: yarn lerna run types
+            - run:
+              name: Build packages
+              command: |
+                - run: 
+                    command: |
+                      source ./scripts/ensure-node.sh
+                      yarn test-scripts
+                      # run unit tests from each individual package
+                      yarn test
+                      # run type checking for each individual package
+                      yarn lerna run types
             - sanitize-verify-and-store-mocha-results:
                 expectedResultCount: 20
 
