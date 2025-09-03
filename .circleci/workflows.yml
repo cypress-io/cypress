@@ -728,13 +728,13 @@ commands:
               yarn $YARN_CMD --record $PARALLEL --browser <<parameters.browser>> --runner-ui
             else
               # external PR
-              TESTFILES=$(circleci tests glob "cypress/e2e/**/*.cy.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL | tr '\n' ',' | sed 's/,$//')
+              TESTFILES=$(circleci tests glob "cypress/e2e/**/*.cy.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
               echo "Test files for this machine are $TESTFILES"
 
               if [[ -z "$TESTFILES" ]]; then
                 echo "Empty list of test files"
               fi
-              yarn $YARN_CMD --browser <<parameters.browser>> --spec "$TESTFILES" --runner-ui
+              yarn $YARN_CMD --browser <<parameters.browser>> --spec $TESTFILES --runner-ui
             fi
           working_directory: packages/driver
       - sanitize-verify-and-store-mocha-results
@@ -822,10 +822,10 @@ commands:
               if [[ <<parameters.type>> == 'ct' ]]; then
                 # component tests are located side by side with the source codes.
                 # for the app component tests, ignore specs that are known to cause failures on contributor PRs (see https://discuss.circleci.com/t/how-to-exclude-certain-files-from-circleci-test-globbing/41028)
-                TESTFILES=$(find src -regextype posix-extended -name '*.cy.*' | circleci tests split --total=$CIRCLE_NODE_TOTAL | tr '\n' ',' | sed 's/,$//')
+                TESTFILES=$(find src -regextype posix-extended -name '*.cy.*' | circleci tests split --total=$CIRCLE_NODE_TOTAL)
               else
                 GLOB="cypress/e2e/**/*cy.*"
-                TESTFILES=$(circleci tests glob "$GLOB" | circleci tests split --total=$CIRCLE_NODE_TOTAL | tr '\n' ',' | sed 's/,$//')
+                TESTFILES=$(circleci tests glob "$GLOB" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
               fi
 
               echo "Test files for this machine are $TESTFILES"
@@ -838,7 +838,7 @@ commands:
               PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
               PERCY_PARALLEL_TOTAL=-1 \
-              yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --spec "$TESTFILES"
+              yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --spec $TESTFILES
             fi
       - run:
           command: |
@@ -1970,7 +1970,7 @@ jobs:
           name: Bootstrap the Cypress binary and run binary system test
           command: |
             # we need to bootstrap the binary into our project directory and run the tests
-            source ./system-tests/scripts/bootstrap-docker-container.sh 'yarn cypress run --component --spec "src/mount.cy.ts,src/App.cy.ts"'
+            source ./system-tests/scripts/bootstrap-docker-container.sh 'yarn cypress run --component --spec src/mount.cy.ts src/App.cy.ts'
 
   system-tests-chrome:
     <<: *defaults
