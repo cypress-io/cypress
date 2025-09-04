@@ -1,9 +1,9 @@
 import minimist from 'minimist'
 import debug from 'debug'
-import util from './lib/util'
-import CLI from './lib/cypress'
-import installModule from './lib/tasks/install'
-import verifyModule from './lib/tasks/verify'
+import util from './util'
+import CLI from './cypress'
+import installModule from './tasks/install'
+import verifyModule from './tasks/verify'
 
 const debugCli = debug('cypress:cli')
 const args: any = minimist(process.argv.slice(2))

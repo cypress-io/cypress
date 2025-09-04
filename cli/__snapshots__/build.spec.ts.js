@@ -31,7 +31,7 @@ exports['package.json build outputs expected properties 1'] = {
   ],
   'types': 'types',
   'scripts': {
-    'postinstall': 'node index.js --exec install',
+    'postinstall': 'node dist/index.js --exec install',
     'size': 't="$(npm pack .)"; wc -c "${t}"; tar tvf "${t}"; rm "${t}";',
   },
 }
