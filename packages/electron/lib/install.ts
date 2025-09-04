@@ -53,7 +53,7 @@ export function getFileHash (filePath: string) {
   return fs.readFile(filePath).then((buf) => {
     const hashSum = crypto.createHash('sha1')
 
-    hashSum.update(buf.toString())
+    hashSum.update(new Uint8Array(buf))
     const hash = hashSum.digest('hex')
 
     return hash
