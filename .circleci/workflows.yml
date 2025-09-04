@@ -1798,14 +1798,30 @@ jobs:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
             - run:
-                name: Build packages
+                name: Enable IPv6 in Docker
+                command: |
+                  cat <<'EOF' | sudo tee /etc/docker/daemon.json
+                  {
+                    "ipv6": true,
+                    "fixed-cidr-v6": "2001:db8:1::/64"
+                  }
+                  EOF
+                  sudo service docker restart
+            - run:
+                name: Test scripts
                 command: |
                   source ./scripts/ensure-node.sh
-                  yarn test-scripts
-                  # run unit tests from each individual package
-                  yarn test
-                  # run type checking for each individual package
-                  yarn lerna run types
+                  sudo env "PATH=$PATH" yarn test-scripts
+            - run:
+                name: Test each individual package
+                command: |
+                  source ./scripts/ensure-node.sh
+                  sudo env "PATH=$PATH" yarn test
+            - run:
+                name: Test types
+                command: |
+                  source ./scripts/ensure-node.sh
+                  sudo env "PATH=$PATH" yarn lerna run types
             - sanitize-verify-and-store-mocha-results:
                 expectedResultCount: 20
 
