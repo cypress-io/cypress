@@ -1,3 +1,9 @@
+/* eslint-disable no-console */
+/*
+ *  ^- disabled because even though the eslint config for this pkg disables
+ * 'no-console', certain IDEs will still show errors.
+ */
+
 import cp from 'child_process'
 import os from 'os'
 import path from 'path'
