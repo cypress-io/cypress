@@ -400,8 +400,6 @@ export const useStudioStore = defineStore('studioRecorder', {
     },
 
     cancel () {
-      this.restoreGrepSettings()
-
       this.reset()
       this.clearRunnableIds()
       this._removeUrlParams()
