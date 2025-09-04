@@ -1806,6 +1806,10 @@ jobs:
                     "fixed-cidr-v6": "2001:db8:1::/64"
                   }
                   EOF
+                  cat \<<'EOF' | sudo tee /etc/hosts
+                  127.0.0.1 localhost
+                  ::1 localhost
+                  EOF
                   sudo service docker restart
             - run:
                 name: Test scripts
