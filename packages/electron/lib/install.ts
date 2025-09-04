@@ -9,6 +9,8 @@ import {
 } from './paths'
 import Debug from 'debug'
 import fs from 'fs/promises'
+import { createReadStream } from 'fs'
+import { pipeline } from 'stream/promises'
 import crypto from 'crypto'
 import { flipFuses, FuseVersion, FuseV1Options } from '@electron/fuses'
 import { move, remove } from 'fs-extra'
@@ -49,18 +51,16 @@ export function checkCurrentVersion (pathToVersion: string) {
   })
 }
 
-export function getFileHash (filePath: string) {
-  return fs.readFile(filePath).then((buf) => {
-    const hashSum = crypto.createHash('sha1')
+export async function getFileHash (filePath: string): Promise<string> {
+  const hash = crypto.createHash('sha1')
+  const stream = createReadStream(filePath)
 
-    hashSum.update(new Uint8Array(buf))
-    const hash = hashSum.digest('hex')
+  await pipeline(stream, hash)
 
-    return hash
-  })
+  return hash.digest('hex')
 }
 
-export function checkIconVersion () {
+export async function checkIconVersion () {
   // TODO: this seems wrong, it's hard coding the check only for OSX and not windows or linux (!?)
   const mainIconsPath = icons().getPathToIcon('cypress.icns')
   const cachedIconsPath = path.join(
@@ -68,14 +68,13 @@ export function checkIconVersion () {
     '..', '..', '..', 'dist/Cypress/Cypress.app/Contents/Resources/electron.icns',
   )
 
-  return Promise.all([
-    getFileHash(mainIconsPath),
-    getFileHash(cachedIconsPath),
-  ]).then(([mainHash, cachedHash]) => {
-    if (mainHash !== cachedHash) {
-      throw new Error('Icon mismatch')
-    }
-  })
+  const [mainHash, cachedHash] = await Promise.all(
+    [mainIconsPath, cachedIconsPath].map(getFileHash),
+  )
+
+  if (mainHash !== cachedHash) {
+    throw new Error('Icon mismatch')
+  }
 }
 
 export function checkExecExistence (pathToExec: string) {
