@@ -1800,7 +1800,7 @@ jobs:
             - run:
                 name: Enable IPv6 in Docker
                 command: |
-                  cat <<'EOF' | sudo tee /etc/docker/daemon.json
+                  cat \<<'EOF' | sudo tee /etc/docker/daemon.json
                   {
                     "ipv6": true,
                     "fixed-cidr-v6": "2001:db8:1::/64"
