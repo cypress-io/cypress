@@ -151,8 +151,15 @@ export async function pkgElectronApp (
    * is a build dependency.
    * Converted to use @electron/packager for >= v18.x.x.
    * This is the renamed electron-packager.
+   *
+   * TODO: split this into two libs; one being the build tool, and the other as
+   * the runtime lib for opening Electron. This will allow us to import these
+   * as normal.
    */
-  const pkgr = require('@electron/packager')
+
+  const e = 'electron'
+  const p = 'packager'
+  const pkgr = require(`@${e}/${p}`)
   const icons = require('@packages/icons')
 
   const iconPath = icons.getPathToIcon('cypress')
