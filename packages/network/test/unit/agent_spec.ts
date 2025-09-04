@@ -1071,12 +1071,6 @@ describe('lib/agent', function () {
     })
 
     it('caches host + port', async function () {
-      // This test requires ipv6 which isn't setup
-      // in our docker container in circleci
-      // if (process.env.CI) {
-      //   return this.skip()
-      // }
-
       const familyCache = {}
 
       await Promise.all([
