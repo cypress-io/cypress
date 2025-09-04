@@ -87,6 +87,8 @@ const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
   return function (req, res, next) {
     const trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
 
+    // if this request is a non-proxied cy-in-cy request,
+    // we need to update the proxiedUrl and allow it to pass through
     if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF && _isNonProxiedRequest(req) && req.headers.referer) {
       const referrerUrl = new URL(req.headers.referer)
 
