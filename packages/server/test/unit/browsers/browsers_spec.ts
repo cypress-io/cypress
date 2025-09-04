@@ -475,7 +475,7 @@ describe('lib/browsers/index', () => {
   })
 
   context('browser cleanup', () => {
-    it('calls onBrowserClose callback on close', async () => {
+    it('calls onBrowserClose callback on close', () => {
       const onBrowserClose = sinon.stub()
       const url: TestUrl = 'http://localhost:3000'
       const browserInstance = new EventEmitter() as BrowserInstance
