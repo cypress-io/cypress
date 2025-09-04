@@ -1815,17 +1815,17 @@ jobs:
                 name: Test scripts
                 command: |
                   source ./scripts/ensure-node.sh
-                  sudo -E yarn test-scripts
+                  sudo -E env "PATH=$PATH" yarn test-scripts
             - run:
                 name: Test each individual package
                 command: |
                   source ./scripts/ensure-node.sh
-                  sudo -E yarn test
+                  sudo -E env "PATH=$PATH" yarn test
             - run:
                 name: Test types
                 command: |
                   source ./scripts/ensure-node.sh
-                  sudo -E yarn lerna run types
+                  sudo -E env "PATH=$PATH" yarn lerna run types
             - sanitize-verify-and-store-mocha-results:
                 expectedResultCount: 20
 
