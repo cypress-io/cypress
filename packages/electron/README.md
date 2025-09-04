@@ -47,6 +47,8 @@ The package provides a binary script `cypress-electron` with several commands:
 ./bin/cypress-electron /path/to/your/app --inspect-brk
 ```
 
+These commands are parsed out from argv in the `cli()` function defined in `./lib/electron.ts`
+
 ### Public Interface
 
 ```typescript
