@@ -189,6 +189,6 @@ export async function open (appPath: string, argv: string[], cb?: (code: number)
     return spawned
   } catch (err) {
     console.debug((err as Error).stack)
-    throw err
+    process.exit(1)
   }
 }

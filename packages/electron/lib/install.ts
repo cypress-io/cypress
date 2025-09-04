@@ -6,6 +6,7 @@ import {
   getPathToDist,
   getPathToExec,
   getPathToVersion,
+  getPathToResources,
 } from './paths'
 import Debug from 'debug'
 import fs from 'fs/promises'
@@ -107,11 +108,10 @@ export async function checkBinaryArchCpuArch (
   }
 }
 
-export function packageAndExit () {
-  return pkgElectronApp()
-  .then(() => {
-    return process.exit()
-  })
+export async function packageAndExit () {
+  await pkgElectronApp()
+  await remove(getPathToResources('app'))
+  process.exit()
 }
 
 export async function getRealArch (platform: string, arch: string) {
