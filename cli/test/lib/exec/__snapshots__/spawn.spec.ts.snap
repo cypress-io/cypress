@@ -1,0 +1,41 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`lib/exec/spawn > .start > detects kill signal > exits with error on SIGKILL 1`] = `
+"The Test Runner unexpectedly exited via a exit event with signal SIGKILL
+
+Please search Cypress documentation for possible solutions:
+
+https://on.cypress.io
+
+Check if there is a GitHub issue describing this crash:
+
+https://github.com/cypress-io/cypress/issues
+
+Consider opening a new issue.
+
+----------
+
+Platform: darwin-x64 (Foo - OsVersion)
+Cypress Version: 0.0.0-development"
+`;
+
+exports[`lib/exec/spawn > .start > does not force colors and streams when not supported 1`] = `
+{
+  "DEBUG_COLORS": "0",
+  "FORCE_COLOR": "0",
+  "FORCE_STDERR_TTY": "0",
+  "FORCE_STDIN_TTY": "0",
+  "FORCE_STDOUT_TTY": "0",
+}
+`;
+
+exports[`lib/exec/spawn > .start > forces colors and streams when supported 1`] = `
+{
+  "DEBUG_COLORS": "1",
+  "FORCE_COLOR": "1",
+  "FORCE_STDERR_TTY": "1",
+  "FORCE_STDIN_TTY": "1",
+  "FORCE_STDOUT_TTY": "1",
+  "MOCHA_COLORS": "1",
+}
+`;
