@@ -187,7 +187,7 @@ export async function pkgElectronApp (
 
   try {
     return !['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE ?? '')
-      ? flipFuses(getPathToExec(), {
+      ? await flipFuses(getPathToExec(), {
         version: FuseVersion.V1,
         resetAdHocDarwinSignature: platform === 'darwin' && arch === 'arm64',
         [FuseV1Options.LoadBrowserProcessSpecificV8Snapshot]: true,
