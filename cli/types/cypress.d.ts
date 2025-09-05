@@ -3258,6 +3258,11 @@ declare namespace Cypress {
      * @default false
      */
     experimentalOriginDependencies?: boolean
+    /**
+     * Enables support for the prompt command.
+     * @default false
+     */
+    experimentalPromptCommand?: boolean
   }
 
   /**
