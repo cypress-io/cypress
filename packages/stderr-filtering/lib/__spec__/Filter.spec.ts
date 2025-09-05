@@ -31,8 +31,6 @@ describe('Filter', () => {
 
     mockDebug = vi.fn()
 
-    mockPrefix = /^ERROR:/
-
     // Mock FilterPrefixedContent
     mockFilterPrefixedContent = {
       pipe: vi.fn().mockImplementation((stream) => stream),

@@ -3,6 +3,7 @@ require('../spec_helper')
 const _ = require('lodash')
 const path = require('path')
 const Jimp = require('jimp')
+const sinon = require('sinon')
 const { Buffer } = require('buffer')
 const dataUriToBuffer = require('data-uri-to-buffer')
 const sizeOf = require('image-size')
@@ -11,22 +12,34 @@ const screenshots = require(`../../lib/screenshots`)
 const { fs } = require(`../../lib/util/fs`)
 const plugins = require(`../../lib/plugins`)
 const { Screenshot } = require(`../../lib/automation/screenshot`)
-const { getCtx } = require(`../../lib/makeDataContext`)
-
 const image = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAALlJREFUeNpi1F3xYAIDA4MBA35wgQWqyB5dRoaVmeHJ779wPhOM0aQtyBAoyglmOwmwM6z1lWY44CMDFgcBFmRTGp3EGGJe/WIQ5mZm4GRlBGJmhlm3PqGaeODpNzCtKsbGIARUCALvvv6FWw9XeOvrH4bbQNOQwfabnzHdGK3AwyAjyAqX2HPzC0Pn7Y9wPtyNIMGlD74wmAqwMZz+8AvFxzATVZAFQIqwABWQiWtgAY5uCnKAAwQYAPr8OZysiz4PAAAAAElFTkSuQmCC'
 const iso8601Regex = /^\d{4}\-\d{2}\-\d{2}T\d{2}\:\d{2}\:\d{2}\.?\d*Z?$/
 
 let ctx
 
 describe('lib/screenshots', () => {
-  beforeEach(async function () {
-    ctx = getCtx()
-    // make each test timeout after only 1 sec
-    // so that durations are handled correctly
-    this.currentTest.timeout(1000)
+  before(async function () {
+    const { setCtx, makeDataContext, clearCtx } = require('../../lib/makeDataContext')
+
+    // Clear and set up DataContext
+    await clearCtx()
+    setCtx(makeDataContext({}))
+    ctx = require('../../lib/makeDataContext').getCtx()
 
     Fixtures.scaffold()
     this.todosPath = Fixtures.projectPath('todos')
+
+    await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
+
+    const config1 = await ctx.lifecycleManager.getFullInitialConfig()
+
+    this.config = config1
+  })
+
+  beforeEach(async function () {
+    // make each test timeout after only 1 sec
+    // so that durations are handled correctly
+    this.currentTest.timeout(1000)
 
     this.appData = {
       capture: 'viewport',
@@ -60,16 +73,9 @@ describe('lib/screenshots', () => {
 
     Jimp.prototype.composite = sinon.stub()
     // Jimp.prototype.getBuffer = sinon.stub().resolves(@buffer)
-
-    await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
-
-    return ctx.lifecycleManager.getFullInitialConfig()
-    .then((config1) => {
-      this.config = config1
-    })
   })
 
-  afterEach(() => {
+  after(() => {
     return Fixtures.remove()
   })
 

@@ -44,10 +44,12 @@ describe('Packherd', () => {
     expect(meta.inputs[pathRelativeToCwd(projectBaseDir, 'entry.js')].imports).to.deep.equal([
       {
         kind: 'require-call',
+        original: './node_modules/isobject/index.cjs.js',
         path: pathRelativeToCwd(projectBaseDir, 'node_modules', 'isobject', 'index.cjs.js'),
       },
       {
         kind: 'require-call',
+        original: './node_modules/tmpfile/index.js',
         path: pathRelativeToCwd(projectBaseDir, 'node_modules', 'tmpfile', 'index.js'),
       },
     ])

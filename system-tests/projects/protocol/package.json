@@ -8,7 +8,7 @@
     "@babel/preset-react": "^7.25.9",
     "@babel/preset-typescript": "^7.26.0",
     "css-loader": "^7.1.2",
-    "esbuild": "^0.24.0",
+    "esbuild": "^0.25.2",
     "mini-css-extract-plugin": "^2.9.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

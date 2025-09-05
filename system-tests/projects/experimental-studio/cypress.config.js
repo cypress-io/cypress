@@ -4,4 +4,10 @@ module.exports = {
   e2e: {
     supportFile: false,
   },
+  component: {
+    devServer: {
+      framework: 'react',
+      bundler: 'webpack',
+    },
+  },
 }

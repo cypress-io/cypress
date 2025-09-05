@@ -5,7 +5,7 @@ const path = require('path')
 const appData = require(`../../../lib/util/app_data`)
 
 const plugins = require(`../../../lib/plugins`)
-const preprocessor = require(`../../../lib/plugins/preprocessor`)
+const preprocessor = require(`../../../lib/plugins/preprocessor`).default
 
 describe('lib/plugins/preprocessor', () => {
   beforeEach(function () {

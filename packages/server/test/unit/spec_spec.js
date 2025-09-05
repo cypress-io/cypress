@@ -1,7 +1,7 @@
 require('../spec_helper')
 
 const spec = require(`../../lib/controllers/spec`)
-const preprocessor = require(`../../lib/plugins/preprocessor`)
+const preprocessor = require(`../../lib/plugins/preprocessor`).default
 
 describe('lib/controllers/spec', () => {
   const specName = 'sample.js'

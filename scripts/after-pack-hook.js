@@ -23,7 +23,7 @@ const {
   validateCyPromptFile,
   DUMMY_INDEX_JSC_HASH,
 } = require('./binary/binary-sources')
-const verify = require('../cli/lib/tasks/verify')
+const verify = require('../cli/lib/tasks/verify').default
 const execa = require('execa')
 const meta = require('./binary/meta')
 

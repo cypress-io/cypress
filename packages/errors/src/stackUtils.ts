@@ -3,7 +3,7 @@ import type { ErrorLike } from './errorTypes'
 
 export const stackLineRegex = /^\s*(at )?.*@?(?:\(?.*(?::\d+:\d+|<unknown>|\[native code\])+\)?)$/
 
-type MessageLines = [string[], string[]] & {messageEnded?: boolean}
+type MessageLines = [string[], string[]] & { messageEnded?: boolean }
 
 // returns tuple of [message, stack]
 export const splitStack = (stack: string) => {
