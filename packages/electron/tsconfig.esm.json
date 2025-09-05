@@ -5,6 +5,7 @@
     "outDir": "./dist/esm",
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "noEmit": true
   }
 }
