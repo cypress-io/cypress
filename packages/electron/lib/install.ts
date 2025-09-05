@@ -195,7 +195,7 @@ export async function pkgElectronApp (
   }
 
   try {
-    if (['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE ?? '')) {
+    if (!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE ?? '')) {
       await flipFuses(getPathToExec(), {
         version: FuseVersion.V1,
         resetAdHocDarwinSignature: platform === 'darwin' && arch === 'arm64',
