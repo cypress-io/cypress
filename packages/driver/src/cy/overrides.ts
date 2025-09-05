@@ -54,10 +54,7 @@ export const create = (state: StateFunc, config: ICypress['config'], focused: IF
 
       contentWindow.CSSStyleSheet.prototype.insertRule = _.wrap(insertRule, cssModificationSpy)
       contentWindow.CSSStyleSheet.prototype.deleteRule = _.wrap(deleteRule, cssModificationSpy)
-    } catch (error) {
-    // eslint-disable-next-line no-console
-      console.error('[Cypress] Error in wrapNativeMethods:', error)
-    }
+    } catch (error) {} // eslint-disable-line no-empty
   }
 
   return {
