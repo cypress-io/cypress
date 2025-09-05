@@ -14,7 +14,7 @@ import execa from 'execa'
 import * as paths from './paths'
 import * as _install from './install'
 import fs from 'fs/promises'
-import { ensureSymlink } from 'fs-extra'
+import { ensureSymlink, access, remove } from 'fs-extra'
 import { filter, DEBUG_PREFIX } from '@packages/stderr-filtering'
 
 const debugElectron = Debug('cypress:electron')
@@ -121,9 +121,13 @@ export async function open (appPath: string, argv: string[], cb?: (code: number)
   debugElectron('dest path %s', dest)
 
   try {
-    await fs.stat(appPath)
-    debugElectron('appPath exists %s', appPath)
-    await fs.rm(dest, { recursive: true })
+    await access(appPath)
+    debugElectron('appPath is accessible %s', appPath)
+
+    if (await fs.stat(dest)) {
+      await remove(dest)
+    }
+
     const symlinkType = paths.getSymlinkType()
 
     debugElectron('making symlink from %s to %s of type %s', appPath, dest, symlinkType)

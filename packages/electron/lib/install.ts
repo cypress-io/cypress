@@ -188,18 +188,20 @@ export async function pkgElectronApp (
   const [appPath] = await pkgr(resolvedOptions)
 
   if (appPath && resolvedOptions.dist && (await fs.stat(appPath))) {
+    debug('moving app to dist', appPath, resolvedOptions.dist)
     await move(appPath, resolvedOptions.dist)
+    debug('removed app', path.dirname(appPath))
     await remove(path.dirname(appPath))
   }
 
   try {
-    return !['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE ?? '')
-      ? await flipFuses(getPathToExec(), {
+    if (['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE ?? '')) {
+      await flipFuses(getPathToExec(), {
         version: FuseVersion.V1,
         resetAdHocDarwinSignature: platform === 'darwin' && arch === 'arm64',
         [FuseV1Options.LoadBrowserProcessSpecificV8Snapshot]: true,
       })
-      : undefined
+    }
   } catch (err) {
     // eslint-disable-next-line no-console
     console.log((err as Error).stack)
