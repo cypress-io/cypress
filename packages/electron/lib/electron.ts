@@ -176,6 +176,8 @@ export async function open (appPath: string, argv: string[], cb?: (code: number)
         debugElectron('electron exited with a signal, forcing code = 1 %o', { signal })
         code = 1
       }
+
+      process.exit(code)
     })
 
     if ([1, '1'].includes(process.env.ELECTRON_ENABLE_LOGGING ?? '')) {
