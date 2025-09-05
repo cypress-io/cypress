@@ -3,7 +3,7 @@ import debug from 'debug'
 import util from './util'
 import CLI from './cypress'
 import installModule from './tasks/install'
-import verifyModule from './tasks/verify'
+import { start as verifyStart } from './tasks/verify'
 
 const debugCli = debug('cypress:cli')
 const args: any = minimist(process.argv.slice(2))
@@ -23,7 +23,7 @@ async function handleExec (): Promise<void> {
       // for simple testing in the monorepo
       debugCli('verifying Cypress')
 
-      verifyModule.start({ force: true }) // always force verification
+      verifyStart({ force: true }) // always force verification
       .catch(util.logErrorExit1)
 
       break

@@ -1,7 +1,7 @@
 import Debug from 'debug'
 import util from '../util'
 import spawn from './spawn'
-import verifyModule from '../tasks/verify'
+import { start as verifyStart } from '../tasks/verify'
 import { processTestingType, checkConfigFile } from './shared'
 import { exitWithError } from '../errors'
 
@@ -96,7 +96,7 @@ export const start = async (options: any = {}): Promise<any> => {
     return open()
   }
 
-  await verifyModule.start()
+  await verifyStart()
 
   return open()
 }

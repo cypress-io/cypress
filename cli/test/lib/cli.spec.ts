@@ -10,7 +10,7 @@ import run from '../../lib/exec/run'
 import open from '../../lib/exec/open'
 import cache from '../../lib/tasks/cache'
 import state from '../../lib/tasks/state'
-import verify from '../../lib/tasks/verify'
+import { start as verifyStart } from '../../lib/tasks/verify'
 import install from '../../lib/tasks/install'
 
 const debug = Debug('test')
@@ -89,15 +89,9 @@ vi.mock('../../lib/tasks/install', async (importActual) => {
   }
 })
 
-vi.mock('../../lib/tasks/verify', async (importActual) => {
-  const actual = await importActual()
-
+vi.mock('../../lib/tasks/verify', () => {
   return {
-    default: {
-      // @ts-expect-error
-      ...actual.default,
-      start: vi.fn(),
-    },
+    start: vi.fn(),
   }
 })
 
@@ -769,22 +763,22 @@ describe('cli', () => {
   describe('cypress verify', () => {
     beforeEach(() => {
       // @ts-expect-error - mockResolvedValue
-      verify.start.mockResolvedValue(undefined)
+      verifyStart.mockResolvedValue(undefined)
     })
 
-    it('verify calls verify.start with force: true', async () => {
+    it('verify calls verifyStart with force: true', async () => {
       await exec('verify')
-      expect(verify.start).toBeCalledWith({
+      expect(verifyStart).toBeCalledWith({
         force: true,
         welcomeMessage: false,
       })
     })
 
-    it('verify calls verify.start + catches errors', async () => {
+    it('verify calls verifyStart + catches errors', async () => {
       const err = new Error('foo')
 
       // @ts-expect-error - mockRejectedValue
-      verify.start.mockRejectedValue(err)
+      verifyStart.mockRejectedValue(err)
 
       await exec('verify')
       await flushPromises()

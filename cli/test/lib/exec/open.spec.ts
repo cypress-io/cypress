@@ -1,6 +1,6 @@
 import { vi, describe, it, beforeEach, expect } from 'vitest'
 import util from '../../../lib/util'
-import verify from '../../../lib/tasks/verify'
+import { start as verifyStart } from '../../../lib/tasks/verify'
 import spawn from '../../../lib/exec/spawn'
 import open from '../../../lib/exec/open'
 
@@ -28,15 +28,9 @@ vi.mock('../../../lib/exec/spawn', async (importActual) => {
   }
 })
 
-vi.mock('../../../lib/tasks/verify', async (importActual) => {
-  const actual = await importActual()
-
+vi.mock('../../../lib/tasks/verify', () => {
   return {
-    default: {
-      // @ts-expect-error
-      ...actual.default,
-      start: vi.fn(),
-    },
+    start: vi.fn(),
   }
 })
 
@@ -49,14 +43,14 @@ describe('exec open', function () {
       // @ts-expect-error - mockReturnValue
       util.isInstalledGlobally.mockReturnValue(true)
       // @ts-expect-error - mockResolvedValue
-      verify.start.mockResolvedValue(undefined)
+      verifyStart.mockResolvedValue(undefined)
       // @ts-expect-error - mockResolvedValue
       spawn.start.mockResolvedValue(undefined)
     })
 
     it('verifies download', async () => {
       await open.start()
-      expect(verify.start).toHaveBeenCalled()
+      expect(verifyStart).toHaveBeenCalled()
     })
 
     it('calls spawn with correct options', async () => {

@@ -1,21 +1,82 @@
-import '../../spec_helper'
+import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest'
 import mockfs from 'mock-fs'
-import stdout from '../../support/stdout'
-import snapshot from '../../support/snapshot'
 import dayjs from 'dayjs'
-import stripAnsi from 'strip-ansi'
 import path from 'path'
-import termToHtml from 'term-to-html'
-import mockedEnv from 'mocked-env'
-import fs from '../../../lib/fs'
+import fs from 'fs-extra'
+import { Console } from 'console'
+
 import state from '../../../lib/tasks/state'
 import util from '../../../lib/util'
 import cache from '../../../lib/tasks/cache'
 
-const outputHtmlFolder = path.join(__dirname, '..', '..', 'html')
+vi.mock('fs-extra', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      stat: vi.fn(),
+    },
+  }
+})
+
+vi.mock('../../../lib/tasks/state', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      getCacheDir: vi.fn(),
+      getBinaryDir: vi.fn(),
+      getPathToExecutable: vi.fn(),
+    },
+  }
+})
+
+vi.mock('../../../lib/util', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      pkgVersion: vi.fn(),
+    },
+  }
+})
 
 describe('lib/tasks/cache', () => {
-  let stdoutCapture: any
+  const createStdoutCapture = () => {
+    const logs: string[] = []
+    // eslint-disable-next-line no-console
+    const originalOut = process.stdout.write
+
+    vi.spyOn(process.stdout, 'write').mockImplementation((strOrBugger: string | Uint8Array<ArrayBufferLike>) => {
+      logs.push(strOrBugger as string)
+
+      return originalOut(strOrBugger)
+    })
+
+    return () => logs.join('')
+  }
+
+  // Direct console to process.stdout/stderr
+  let originalConsole: Console
+
+  beforeEach(() => {
+    vi.resetAllMocks()
+    vi.unstubAllEnvs()
+
+    originalConsole = globalThis.console
+    // Redirect console output to a custom stream or mock
+    globalThis.console = new Console(process.stdout, process.stderr)
+  })
+
+  afterEach(() => {
+    globalThis.console = originalConsole // Restore original console
+  })
 
   beforeEach(async function () {
     mockfs({
@@ -34,108 +95,65 @@ describe('lib/tasks/cache', () => {
       },
     })
 
-    sinon.stub(state, 'getCacheDir').returns('/.cache/Cypress')
-    sinon.stub(state, 'getBinaryDir').returns('/.cache/Cypress')
-    sinon.stub(util, 'pkgVersion').returns('1.2.3')
-
-    stdoutCapture = stdout.capture()
+    // @ts-expect-error mockReturnValue
+    state.getCacheDir.mockReturnValue('/.cache/Cypress')
+    // @ts-expect-error mockReturnValue
+    state.getBinaryDir.mockReturnValue('/.cache/Cypress')
+    // @ts-expect-error mockReturnValue
+    util.pkgVersion.mockReturnValue('1.2.3')
   })
-
-  const getSnapshotText = () => {
-    const output = stdoutCapture.toString().split('\n').slice(0, -1).join('\n')
-    const stdoutAsString = output || '[no output]'
-
-    // first restore the STDOUT, then confirm the value
-    // otherwise the error might not even appear or appear twice!
-    stdout.restore()
-
-    return stdoutAsString
-  }
-
-  const saveHtml = async (filename: string, html: string) => {
-    await fs.ensureDirAsync(outputHtmlFolder)
-    const htmlFilename = path.join(outputHtmlFolder, filename)
-
-    await fs.writeFileAsync(htmlFilename, html, 'utf8')
-  }
 
   afterEach(() => {
     mockfs.restore()
   })
 
-  const defaultSnapshot = (snapshotName?: string) => {
-    const stdoutAsString = getSnapshotText()
-
-    const withoutAnsi = stripAnsi(stdoutAsString)
-
-    if (snapshotName) {
-      snapshot(snapshotName, withoutAnsi)
-    } else {
-      snapshot(withoutAnsi)
-    }
-  }
-
-  const snapshotWithHtml = async (htmlFilename: string) => {
-    const stdoutAsString = getSnapshotText()
-
-    snapshot(stripAnsi(stdoutAsString))
-
-    // if the sanitized snapshot matches, let's save the ANSI colors converted into HTML
-    const html = termToHtml.strings(stdoutAsString, termToHtml.themes.dark.name)
-
-    await saveHtml(htmlFilename, html)
-  }
-
   describe('.path', () => {
-    let restoreEnv: any
-
-    afterEach(() => {
-      if (restoreEnv) {
-        restoreEnv()
-        restoreEnv = null
-      }
-    })
-
     it('lists path to cache', function () {
+      const output = createStdoutCapture()
+
       cache.path()
-      expect(stdoutCapture.toString()).to.eql('/.cache/Cypress\n')
-      defaultSnapshot()
+      const stdout = output()
+
+      expect(stdout).to.eql('/.cache/Cypress\n')
+      expect(stdout).toMatchSnapshot()
     })
 
     it('lists path to cache with silent npm loglevel', function () {
-      restoreEnv = mockedEnv({
-        npm_config_loglevel: 'silent',
-      })
+      const output = createStdoutCapture()
+
+      vi.stubEnv('npm_config_loglevel', 'silent')
 
       cache.path()
-      expect(stdoutCapture.toString()).to.eql('/.cache/Cypress\n')
+      expect(output()).to.eql('/.cache/Cypress\n')
     })
 
     it('lists path to cache with silent npm warn', function () {
-      restoreEnv = mockedEnv({
-        npm_config_loglevel: 'warn',
-      })
+      const output = createStdoutCapture()
+
+      vi.stubEnv('npm_config_loglevel', 'warn')
 
       cache.path()
-      expect(stdoutCapture.toString()).to.eql('/.cache/Cypress\n')
+      expect(output()).to.eql('/.cache/Cypress\n')
     })
   })
 
   describe('.clear', () => {
-    it('deletes cache folder and everything inside it', function () {
-      return cache.clear()
-      .then(() => {
-        return fs.pathExistsAsync('/.cache/Cypress')
-        .then((exists: any) => {
-          expect(exists).to.eql(false)
-          defaultSnapshot()
-        })
-      })
+    it('deletes cache folder and everything inside it', async function () {
+      const output = createStdoutCapture()
+
+      await cache.clear()
+
+      const exists = await fs.pathExists('/.cache/Cypress')
+
+      expect(exists).toEqual(false)
+      expect(output()).toMatchSnapshot()
     })
   })
 
   describe('.prune', () => {
     it('deletes cache binaries for all version but the current one', async function () {
+      const output = createStdoutCapture()
+
       await cache.prune()
 
       const checkedInBinaryVersion = util.pkgVersion()
@@ -148,19 +166,21 @@ describe('lib/tasks/cache', () => {
         expect(file).to.eq(checkedInBinaryVersion)
       })
 
-      defaultSnapshot()
+      expect(output()).toMatchSnapshot()
     })
 
     it('doesn\'t delete any cache binaries', async function () {
+      const output = createStdoutCapture()
+
       const dir = path.join(state.getCacheDir(), '2.3.4')
 
-      await fs.removeAsync(dir)
+      await fs.remove(dir)
 
       await cache.prune()
 
       const checkedInBinaryVersion = util.pkgVersion()
 
-      const files = await fs.readdirAsync('/.cache/Cypress')
+      const files = await fs.readdir('/.cache/Cypress')
 
       expect(files.length).to.eq(1)
 
@@ -168,110 +188,101 @@ describe('lib/tasks/cache', () => {
         expect(file).to.eq(checkedInBinaryVersion)
       })
 
-      defaultSnapshot()
+      expect(output()).toMatchSnapshot()
     })
 
     it('exits cleanly if cache dir DNE', async function () {
-      await fs.removeAsync(state.getCacheDir())
+      const output = createStdoutCapture()
+
+      await fs.remove(state.getCacheDir())
       await cache.prune()
 
-      defaultSnapshot()
+      expect(output()).toMatchSnapshot()
     })
   })
 
   describe('.list', () => {
-    let restoreEnv: any
-
-    afterEach(() => {
-      if (restoreEnv) {
-        restoreEnv()
-        restoreEnv = null
-      }
+    beforeEach(() => {
+      // @ts-expect-error mockReturnValue
+      state.getPathToExecutable.mockReturnValue('/.cache/Cypress/1.2.3/app/cypress')
     })
 
     it('lists all versions of cached binary', async function () {
-      // unknown access times
-      sinon.stub(state, 'getPathToExecutable').returns('/.cache/Cypress/1.2.3/app/cypress')
+      const output = createStdoutCapture()
 
       await cache.list()
 
-      defaultSnapshot()
+      expect(output()).toMatchSnapshot()
     })
 
     it('lists all versions of cached binary with npm log level silent', async function () {
-      restoreEnv = mockedEnv({
-        npm_config_loglevel: 'silent',
-      })
+      const output = createStdoutCapture()
 
-      // unknown access times
-      sinon.stub(state, 'getPathToExecutable').returns('/.cache/Cypress/1.2.3/app/cypress')
+      vi.stubEnv('npm_config_loglevel', 'silent')
 
       await cache.list()
       // log output snapshot should have a grid of versions
-      defaultSnapshot('cache list with silent log level')
+      expect(output()).toMatchSnapshot('cache list with silent log level')
     })
 
     it('lists all versions of cached binary with npm log level warn', async function () {
-      restoreEnv = mockedEnv({
-        npm_config_loglevel: 'warn',
-      })
+      const output = createStdoutCapture()
 
-      // unknown access times
-      sinon.stub(state, 'getPathToExecutable').returns('/.cache/Cypress/1.2.3/app/cypress')
+      vi.stubEnv('npm_config_loglevel', 'warn')
 
       await cache.list()
 
       // log output snapshot should have a grid of versions
-      defaultSnapshot('cache list with warn log level')
+      expect(output()).toMatchSnapshot('cache list with warn log level')
     })
 
     it('lists all versions of cached binary with last access', async function () {
-      sinon.stub(state, 'getPathToExecutable').returns('/.cache/Cypress/1.2.3/app/cypress')
+      const output = createStdoutCapture()
 
-      const statAsync = sinon.stub(fs, 'statAsync')
-
-      statAsync.onFirstCall().resolves({
+      // @ts-expect-error mockResolvedValueOnce
+      fs.stat.mockResolvedValueOnce({
         atime: dayjs().subtract(3, 'month').valueOf(),
       })
 
-      statAsync.onSecondCall().resolves({
+      // @ts-expect-error mockResolvedValueOnce
+      fs.stat.mockResolvedValueOnce({
         atime: dayjs().subtract(5, 'day').valueOf(),
       })
 
       await cache.list()
-      await snapshotWithHtml('list-of-versions.html')
+      await expect(output()).toMatchSnapshot('list-of-versions')
     })
 
     it('some versions have never been opened', async function () {
-      sinon.stub(state, 'getPathToExecutable').returns('/.cache/Cypress/1.2.3/app/cypress')
+      const output = createStdoutCapture()
 
-      const statAsync = sinon.stub(fs, 'statAsync')
-
-      statAsync.onFirstCall().resolves({
+      // @ts-expect-error mockResolvedValueOnce
+      fs.stat.mockResolvedValueOnce({
         atime: dayjs().subtract(3, 'month').valueOf(),
       })
 
       // the second binary has never been accessed
-      statAsync.onSecondCall().resolves()
+      // @ts-expect-error mockResolvedValueOnce
+      fs.stat.mockResolvedValueOnce()
 
       await cache.list()
-      await snapshotWithHtml('second-binary-never-used.html')
+      await expect(output()).toMatchSnapshot('second-binary-never-used')
     })
 
     it('shows sizes', async function () {
-      sinon.stub(state, 'getPathToExecutable').returns('/.cache/Cypress/1.2.3/app/cypress')
+      const output = createStdoutCapture()
 
-      const statAsync = sinon.stub(fs, 'statAsync')
-
-      statAsync.onFirstCall().resolves({
+      // @ts-expect-error mockResolvedValueOnce
+      fs.stat.mockResolvedValueOnce({
         atime: dayjs().subtract(3, 'month').valueOf(),
       })
 
       // the second binary has never been accessed
-      statAsync.onSecondCall().resolves()
+      // @ts-expect-error mockResolvedValueOnce
+      fs.stat.mockResolvedValueOnce()
 
       await cache.list(true)
-      await snapshotWithHtml('show-size.html')
+      await expect(output()).toMatchSnapshot('show-size')
     })
   })
 })

@@ -1,0 +1,44 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`lib/tasks/download > catches download status errors and exits > download status errors 1 1`] = `
+"Error: The Cypress App could not be downloaded.
+
+Does your workplace require a proxy to be used to access the Internet? If so, you must configure the HTTP_PROXY environment variable before downloading Cypress. Read more: https://on.cypress.io/proxy-configuration
+
+Otherwise, please check network connectivity and try again:
+
+----------
+
+URL: https://download.cypress.io/desktop?platform=OS&arch=x64
+404 - Not Found
+
+----------
+
+Platform: OS-x64 (Foo - OsVersion)
+Cypress Version: 1.2.3
+"
+`;
+
+exports[`lib/tasks/download > download base url from CYPRESS_DOWNLOAD_MIRROR env var > env var > base url from CYPRESS_DOWNLOAD_MIRROR 1 1`] = `"https://cypress.example.com/desktop/0.20.2?platform=OS&arch=ARCH"`;
+
+exports[`lib/tasks/download > download base url from CYPRESS_DOWNLOAD_MIRROR env var > env var with subdirectory > base url from CYPRESS_DOWNLOAD_MIRROR with subdirectory 1 1`] = `"https://cypress.example.com/example/desktop/0.20.2?platform=OS&arch=ARCH"`;
+
+exports[`lib/tasks/download > download base url from CYPRESS_DOWNLOAD_MIRROR env var > env var with subdirectory and trailing slash > base url from CYPRESS_DOWNLOAD_MIRROR with subdirectory and trailing slash 1 1`] = `"https://cypress.example.com/example/desktop/0.20.2?platform=OS&arch=ARCH"`;
+
+exports[`lib/tasks/download > download base url from CYPRESS_DOWNLOAD_MIRROR env var > env var with trailing slash > base url from CYPRESS_DOWNLOAD_MIRROR with trailing slash 1 1`] = `"https://cypress.example.com/desktop/0.20.2?platform=OS&arch=ARCH"`;
+
+exports[`lib/tasks/download > download url > returns custom url from template > desktop url from template 1`] = `"https://download.cypress.io/desktop/0.20.2/OS-ARCH/cypress.zip"`;
+
+exports[`lib/tasks/download > download url > returns custom url from template with escaped dollar sign > desktop url from template with escaped dollar sign 1`] = `"https://download.cypress.io/desktop/0.20.2/OS-ARCH/cypress.zip"`;
+
+exports[`lib/tasks/download > download url > returns custom url from template with escaped dollar sign wrapped in quote > desktop url from template with escaped dollar sign wrapped in quote 1`] = `"https://download.cypress.io/desktop/0.20.2/OS-ARCH/cypress.zip"`;
+
+exports[`lib/tasks/download > download url > returns custom url from template with multiple replacements > desktop url from template with multiple replacements 1`] = `"https://download.cypress.io/desktop/0.20.2/OS/ARCH/cypress-0.20.2-OS-ARCH.zip?referrer=https://download.cypress.io/desktop/0.20.2&version=0.20.2"`;
+
+exports[`lib/tasks/download > download url > returns custom url from template with version > desktop url from template with version 1`] = `"https://mycompany/0.20.2/OS-ARCH/cypress.zip"`;
+
+exports[`lib/tasks/download > download url > returns custom url from template wrapped in quote > desktop url from template wrapped in quote 1`] = `"https://download.cypress.io/desktop/0.20.2/OS-ARCH/cypress.zip"`;
+
+exports[`lib/tasks/download > download url > returns latest desktop url > latest desktop url 1 1`] = `"https://download.cypress.io/desktop?platform=OS&arch=ARCH"`;
+
+exports[`lib/tasks/download > download url > returns specific desktop version url > specific version desktop url 1 1`] = `"https://download.cypress.io/desktop/0.20.2?platform=OS&arch=ARCH"`;

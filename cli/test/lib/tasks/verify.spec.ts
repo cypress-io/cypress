@@ -1,23 +1,20 @@
-/* eslint-disable no-restricted-properties */
-import '../../spec_helper'
+import { vi, describe, it, beforeEach, afterEach, expect, MockInstance } from 'vitest'
 import path from 'path'
 import _ from 'lodash'
 import os from 'os'
-import cp from 'child_process'
-import BluebirdPromise from 'bluebird'
 import { stripIndent } from 'common-tags'
 import mockfs from 'mock-fs'
-import mockedEnv from 'mocked-env'
-import Stdout from '../../support/stdout'
 import normalize from '../../support/normalize'
-import snapshot from '../../support/snapshot'
-import mockSpawnModule from '../../support/spawn-mock'
+import { geteuid } from 'process'
+import { Console } from 'console'
+import fs from 'fs-extra'
+import si from 'systeminformation'
+import _xvfb from '@cypress/xvfb'
 
-import fs from '../../../lib/fs'
 import util from '../../../lib/util'
 import logger from '../../../lib/logger'
 import xvfb from '../../../lib/exec/xvfb'
-import verify from '../../../lib/tasks/verify'
+import { verifyTestRunnerTimeoutMs, start, needsSandbox } from '../../../lib/tasks/verify'
 
 const packageVersion = '1.2.3'
 const cacheDir = '/cache/Cypress'
@@ -25,110 +22,222 @@ const executablePath = '/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress'
 const binaryStatePath = '/cache/Cypress/1.2.3/binary_state.json'
 const DEFAULT_VERIFY_TIMEOUT = 30000
 
-let stdout: any
-let spawnedProcess: any
+vi.mock('systeminformation', async (importActual) => {
+  const actual = await importActual()
 
-/* eslint-disable no-octal */
+  return {
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      osInfo: vi.fn(),
+    },
+  }
+})
 
-context('lib/tasks/verify', () => {
-  before(async function () {
-    const mochaMain = await import('mocha-banner')
+vi.mock('@cypress/xvfb', async () => {
+  const XVFB_MOCK = vi.fn()
 
-    mochaMain.register()
-  })
+  XVFB_MOCK.prototype.start = vi.fn()
+
+  return {
+    default: XVFB_MOCK,
+  }
+})
+
+vi.mock('lodash', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      random: vi.fn(),
+    },
+  }
+})
+
+vi.mock('process', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    geteuid: vi.fn(),
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      geteuid: vi.fn(),
+    },
+  }
+})
+
+vi.mock('os', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      platform: vi.fn(),
+      release: vi.fn(),
+      arch: vi.fn(),
+    },
+  }
+})
+
+vi.mock('../../../lib/exec/xvfb', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      start: vi.fn(),
+      stop: vi.fn(),
+      isNeeded: vi.fn(),
+      startAsync: vi.fn(),
+    },
+  }
+})
+
+vi.mock('../../../lib/util', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      getCacheDir: vi.fn(),
+      isCi: vi.fn(),
+      pkgVersion: vi.fn(),
+      exec: vi.fn(),
+      getOsVersionAsync: vi.fn(),
+      isPossibleLinuxWithIncorrectDisplay: vi.fn(),
+    },
+  }
+})
+
+describe('lib/tasks/verify', () => {
+  const createStdoutCapture = () => {
+    const logs: string[] = []
+    // eslint-disable-next-line no-console
+    const originalOut = process.stdout.write
+
+    vi.spyOn(process.stdout, 'write').mockImplementation((strOrBugger: string | Uint8Array<ArrayBufferLike>) => {
+      logs.push(strOrBugger as string)
+
+      return originalOut(strOrBugger)
+    })
+
+    return () => logs.join('')
+  }
+  let spawnedProcess: any
+  // Direct console to process.stdout/stderr
+  let originalConsole: Console
 
   beforeEach(() => {
-    stdout = Stdout.capture()
+    vi.resetAllMocks()
+    vi.unstubAllEnvs()
+
+    vi.stubEnv('npm_config_loglevel', 'notice')
+
+    originalConsole = globalThis.console
+
+    globalThis.console = new Console(process.stdout, process.stderr)
+
     spawnedProcess = {
       code: 0,
-      stderr: sinon.stub(),
+      stderr: vi.fn(),
       stdout: '222',
     }
 
-    ;(os.platform as any).returns('darwin')
+    // @ts-expect-error - mockReturnValue
+    os.platform.mockReturnValue('darwin')
+    // @ts-expect-error - mockReturnValue
+    os.release.mockReturnValue('0.0.0')
+    // @ts-expect-error - mockReturnValue
+    os.arch.mockReturnValue('x64')
+    // @ts-expect-error mockResolvedValue
+    si.osInfo.mockResolvedValue({
+      distro: 'Foo',
+      release: 'OsVersion',
+    })
 
-    ;(os.release as any).returns('0.0.0')
+    // @ts-expect-error - mockReturnValue
+    util.getCacheDir.mockReturnValue(cacheDir)
+    // @ts-expect-error - mockReturnValue
+    util.isCi.mockReturnValue(false)
+    // @ts-expect-error - mockReturnValue
+    util.pkgVersion.mockReturnValue(packageVersion)
 
-    sinon.stub(util, 'getCacheDir').returns(cacheDir)
-    sinon.stub(util, 'isCi').returns(false)
-    sinon.stub(util, 'pkgVersion').returns(packageVersion)
-    sinon.stub(util, 'exec')
+    // @ts-expect-error - mockResolvedValue
+    xvfb.start.mockResolvedValue()
+    // @ts-expect-error - mockResolvedValue
+    xvfb.stop.mockResolvedValue()
+    // @ts-expect-error - mockReturnValue
+    xvfb.isNeeded.mockReturnValue(false)
 
-    sinon.stub(xvfb, 'start').resolves()
-    sinon.stub(xvfb, 'stop').resolves()
-    sinon.stub(xvfb, 'isNeeded').returns(false)
-    sinon.stub(BluebirdPromise.prototype, 'delay').resolves()
-    sinon.stub(process, 'geteuid').returns(1000)
+    // @ts-expect-error - mockReturnValue
+    geteuid.mockReturnValue(1000)
 
-    sinon.stub(_, 'random').returns(222)
+    // @ts-expect-error - mockReturnValue
+    _.random.mockReturnValue(222)
 
-    util.exec
-    // @ts-expect-error - is a sinon stub
-    .withArgs(executablePath, ['--no-sandbox', '--smoke-test', '--ping=222'])
-    .resolves(spawnedProcess)
+    // @ts-expect-error - mockImplementation
+    util.exec.mockImplementation((...args: any) => {
+      if (args[0] === executablePath && _.isEqual(args[1], ['--no-sandbox', '--smoke-test', '--ping=222'])) {
+        return Promise.resolve(spawnedProcess)
+      }
+
+      return Promise.reject(new Error('should have caught error'))
+    })
   })
 
   afterEach(() => {
-    Stdout.restore()
+    globalThis.console = originalConsole // Restore original console
+    mockfs.restore()
   })
 
   it('has verify task timeout', () => {
-    expect(verify.VERIFY_TEST_RUNNER_TIMEOUT_MS).to.eql(DEFAULT_VERIFY_TIMEOUT)
+    expect(verifyTestRunnerTimeoutMs()).to.eql(DEFAULT_VERIFY_TIMEOUT)
   })
 
-  it('accepts custom verify task timeout', async () => {
-    process.env.CYPRESS_VERIFY_TIMEOUT = '500000'
-    const proxyquire = await import('proxyquire')
-    const newVerifyInstance = proxyquire.default(`../../../lib/tasks/verify`, {}).default
-
-    expect(newVerifyInstance.VERIFY_TEST_RUNNER_TIMEOUT_MS).to.eql(500000)
+  it('accepts custom verify task timeout', () => {
+    vi.stubEnv('CYPRESS_VERIFY_TIMEOUT', '500000')
+    expect(verifyTestRunnerTimeoutMs()).toEqual(500000)
   })
 
   it('accepts custom verify task timeout from npm', async () => {
-    process.env.npm_config_CYPRESS_VERIFY_TIMEOUT = '500000'
-    const proxyquire = await import('proxyquire')
-    const newVerifyInstance = proxyquire.default(`../../../lib/tasks/verify`, {}).default
-
-    expect(newVerifyInstance.VERIFY_TEST_RUNNER_TIMEOUT_MS).to.eql(500000)
+    vi.stubEnv('npm_config_CYPRESS_VERIFY_TIMEOUT', '600000')
+    expect(verifyTestRunnerTimeoutMs()).toEqual(600000)
   })
 
   it('falls back to default verify task timeout if custom value is invalid', async () => {
-    process.env.CYPRESS_VERIFY_TIMEOUT = 'foobar'
-
-    const proxyquire = await import('proxyquire')
-    const newVerifyInstance = proxyquire.default(`../../../lib/tasks/verify`, {}).default
-
-    expect(newVerifyInstance.VERIFY_TEST_RUNNER_TIMEOUT_MS).to.eql(DEFAULT_VERIFY_TIMEOUT)
+    vi.stubEnv('CYPRESS_VERIFY_TIMEOUT', 'foobar')
+    expect(verifyTestRunnerTimeoutMs()).toEqual(DEFAULT_VERIFY_TIMEOUT)
   })
 
   it('returns early when `CYPRESS_SKIP_VERIFY` is set to true', async () => {
-    process.env.CYPRESS_SKIP_VERIFY = 'true'
+    vi.stubEnv('CYPRESS_SKIP_VERIFY', 'true')
 
-    const proxyquire = await import('proxyquire')
-    const newVerifyInstance = proxyquire.default(`../../../lib/tasks/verify`, {}).default
+    const result = await start({ listrRenderer: 'silent' })
 
-    return newVerifyInstance.start({ listrRenderer: 'silent' }).then((result: any) => {
-      expect(result).to.eq(undefined)
-    })
+    expect(result).toEqual(undefined)
   })
 
-  it('logs error and exits when no version of Cypress is installed', () => {
-    return verify
-    .start({ listrRenderer: 'silent' })
-    .then(() => {
+  it('logs error and exits when no version of Cypress is installed', async () => {
+    const output = createStdoutCapture()
+
+    try {
+      await start({ listrRenderer: 'silent' })
       throw new Error('should have caught error')
-    })
-    .catch((err: any) => {
+    } catch (err) {
+      expect(err.message).not.toContain('should have caught error')
       logger.error(err)
 
-      snapshot(
-        'no version of Cypress installed 1',
-        normalize(stdout.toString()),
-      )
-    })
+      expect(normalize(output())).toMatchSnapshot()
+    }
   })
 
-  it('adds --no-sandbox when user is root', () => {
+  it('adds --no-sandbox when user is root', async () => {
     // make it think the executable exists
     createfs({
       alreadyVerified: false,
@@ -136,20 +245,15 @@ context('lib/tasks/verify', () => {
       packageVersion,
     })
 
-    ;(process.geteuid as any).returns(0) // user is root
-    // @ts-expect-error - is a sinon stub
-    util.exec.resolves({
-      stdout: '222',
-      stderr: '',
-    })
+    // @ts-expect-error - mockReturnValue
+    geteuid.mockReturnValue(0) // user is root
 
-    return verify.start({ listrRenderer: 'silent' })
-    .then(() => {
-      expect(util.exec).to.be.calledWith(executablePath, ['--no-sandbox', '--smoke-test', '--ping=222'])
-    })
+    await start({ listrRenderer: 'silent' })
+
+    expect(util.exec).toHaveBeenCalledWith(executablePath, ['--no-sandbox', '--smoke-test', '--ping=222'], expect.anything())
   })
 
-  it('adds --no-sandbox when user is non-root', () => {
+  it('adds --no-sandbox when user is non-root', async () => {
     // make it think the executable exists
     createfs({
       alreadyVerified: false,
@@ -157,20 +261,17 @@ context('lib/tasks/verify', () => {
       packageVersion,
     })
 
-    ;(process.geteuid as any).returns(1000) // user is non-root
-    // @ts-expect-error - is a sinon stub
-    util.exec.resolves({
-      stdout: '222',
-      stderr: '',
-    })
+    // @ts-expect-error - mockReturnValue
+    geteuid.mockReturnValue(1000) // user is non-root
 
-    return verify.start({ listrRenderer: 'silent' })
-    .then(() => {
-      expect(util.exec).to.be.calledWith(executablePath, ['--no-sandbox', '--smoke-test', '--ping=222'])
-    })
+    await start({ listrRenderer: 'silent' })
+
+    expect(util.exec).toHaveBeenCalledWith(executablePath, ['--no-sandbox', '--smoke-test', '--ping=222'], expect.anything())
   })
 
-  it('is noop when binary is already verified', () => {
+  it('is noop when binary is already verified', async () => {
+    const output = createStdoutCapture()
+
     // make it think the executable exists and is verified
     createfs({
       alreadyVerified: true,
@@ -178,163 +279,139 @@ context('lib/tasks/verify', () => {
       packageVersion,
     })
 
-    return verify.start({ listrRenderer: 'silent' }).then(() => {
-      // nothing should have been logged to stdout
-      // since no verification took place
-      expect(stdout.toString()).to.be.empty
+    await start({ listrRenderer: 'silent' })
 
-      expect(util.exec).not.to.be.called
-    })
+    expect(output()).toEqual('')
+
+    expect(util.exec).not.toHaveBeenCalled()
   })
 
-  it('logs warning when installed version does not match verified version', () => {
+  it('logs warning when installed version does not match verified version', async () => {
+    const output = createStdoutCapture()
+
     createfs({
       alreadyVerified: true,
       executable: mockfs.file({ mode: 0o777 }),
       packageVersion: 'bloop',
     })
 
-    return verify
-    .start({ listrRenderer: 'silent' })
-    .then(() => {
+    await start({ listrRenderer: 'silent' })
+
+    expect(normalize(output())).toMatchSnapshot()
+  })
+
+  it('logs error and exits when executable cannot be found', async () => {
+    const output = createStdoutCapture()
+
+    try {
+      await start({ listrRenderer: 'silent' })
       throw new Error('should have caught error')
-    })
-    .catch(() => {
-      return snapshot(
-        'warning installed version does not match verified version 1',
-        normalize(stdout.toString()),
-      )
-    })
-  })
-
-  it('logs error and exits when executable cannot be found', () => {
-    return verify
-    .start({ listrRenderer: 'silent' })
-    .then(() => {
-      throw new Error('should have caught error')
-    })
-    .catch((err: any) => {
+    } catch (err) {
+      expect(err.message).not.toContain('should have caught error')
       logger.error(err)
 
-      snapshot('executable cannot be found 1', normalize(stdout.toString()))
-    })
+      expect(normalize(output())).toMatchSnapshot()
+    }
   })
 
-  it('logs error when child process hangs', () => {
+  it('logs error when child process hangs', async () => {
+    const output = createStdoutCapture()
+
     createfs({
       alreadyVerified: false,
       executable: mockfs.file({ mode: 0o777 }),
       packageVersion,
     })
 
-    // @ts-expect-error - invalid number of arguments for given type
-    sinon.stub(cp, 'spawn').withArgs('/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress').callsFake(mockSpawnModule.mockSpawn((cp: any) => {
-      cp.stderr.write('some stderr')
-      cp.stdout.write('some stdout')
-    }))
+    // @ts-expect-error - mockRejectedValue
+    util.exec.mockRejectedValue({
+      stderr: 'some stderr',
+      stdout: 'some stdout',
+      timedOut: true,
+    })
 
-    // @ts-expect-error - is a sinon stub
-    util.exec.restore()
-
-    return verify
-    .start({ smokeTestTimeout: 1, listrRenderer: 'silent' })
-    .catch((err: any) => {
+    try {
+      await start({ smokeTestTimeout: 1, listrRenderer: 'silent' })
+    } catch (err) {
       logger.error(err)
-    })
-    .then(() => {
-      snapshot(normalize(stdout.toString()))
-    })
+      expect(normalize(output())).toMatchSnapshot()
+    }
   })
 
-  it('logs error when child process returns incorrect stdout (stderr when exists)', () => {
+  it('logs error when child process returns incorrect stdout (stderr when exists)', async () => {
+    const output = createStdoutCapture()
+
     createfs({
       alreadyVerified: false,
       executable: mockfs.file({ mode: 0o777 }),
       packageVersion,
     })
 
-    sinon.stub(cp, 'spawn').callsFake(mockSpawnModule.mockSpawn((cp: any) => {
-      cp.stderr.write('some stderr')
-      cp.stdout.write('some stdout')
-      cp.emit('exit', 0, null)
-      cp.end()
-    }))
+    // @ts-expect-error - mockRejectedValue
+    util.exec.mockRejectedValue({
+      stderr: 'some stderr',
+      stdout: 'some stdout',
+      code: 0,
+    })
 
-    // @ts-expect-error - is a sinon stub
-    util.exec.restore()
-
-    return verify
-    .start({ listrRenderer: 'silent' })
-    .catch((err: any) => {
+    try {
+      await start({ smokeTestTimeout: 1, listrRenderer: 'silent' })
+    } catch (err) {
       logger.error(err)
-    })
-    .then(() => {
-      snapshot(normalize(stdout.toString()))
-    })
+      expect(normalize(output())).toMatchSnapshot()
+    }
   })
 
-  it('logs error when child process returns incorrect stdout (stdout when no stderr)', () => {
+  it('logs error when child process returns incorrect stdout (stdout when no stderr)', async () => {
+    const output = createStdoutCapture()
+
     createfs({
       alreadyVerified: false,
       executable: mockfs.file({ mode: 0o777 }),
       packageVersion,
     })
 
-    sinon.stub(cp, 'spawn').callsFake(mockSpawnModule.mockSpawn((cp: any) => {
-      cp.stdout.write('some stdout')
-      cp.emit('exit', 0, null)
-      cp.end()
-    }))
+    // @ts-expect-error - mockRejectedValue
+    util.exec.mockRejectedValue({
+      stdout: 'some stdout',
+      code: 0,
+    })
 
-    // @ts-expect-error - is a sinon stub
-    util.exec.restore()
-
-    return verify
-    .start({ listrRenderer: 'silent' })
-    .catch((err: any) => {
+    try {
+      await start({ smokeTestTimeout: 1, listrRenderer: 'silent' })
+    } catch (err) {
       logger.error(err)
-    })
-    .then(() => {
-      snapshot(normalize(stdout.toString()))
-    })
+      expect(normalize(output())).toMatchSnapshot()
+    }
   })
 
   describe('FORCE_COLOR', () => {
-    let previousForceColors: any
-
     beforeEach(() => {
-      previousForceColors = process.env.FORCE_COLOR
-
-      process.env.FORCE_COLOR = 'true' as any
-    })
-
-    afterEach(() => {
-      process.env.FORCE_COLOR = previousForceColors
+      // vi.unstubAllEnvs()
+      vi.stubEnv('FORCE_COLOR', 'true')
     })
 
     // @see https://github.com/cypress-io/cypress/issues/28982
-    it('sets FORCE_COLOR to 0 when piping stdioOptions to to the smoke test to avoid ANSI in binary smoke test', () => {
+    it('sets FORCE_COLOR to 0 when piping stdioOptions to to the smoke test to avoid ANSI in binary smoke test', async () => {
       createfs({
         alreadyVerified: false,
         executable: mockfs.file({ mode: 0o777 }),
         packageVersion,
       })
 
-      // @ts-expect-error - is a sinon stub
-      util.exec.resolves({
+      // @ts-expect-error - mockResolvedValue
+      util.exec.mockResolvedValue({
         stdout: '222',
         stderr: '',
       })
 
-      return verify.start({ listrRenderer: 'silent' })
-      .then(() => {
-        expect(util.exec).to.be.calledWith(executablePath, ['--no-sandbox', '--smoke-test', '--ping=222'],
-          sinon.match({
-            env: {
-              FORCE_COLOR: '0',
-            },
-          }))
-      })
+      await start({ listrRenderer: 'silent' })
+
+      expect(util.exec).toHaveBeenCalledWith(
+        executablePath,
+        ['--no-sandbox', '--smoke-test', '--ping=222'],
+        expect.objectContaining({ env: expect.objectContaining({ FORCE_COLOR: '0' }) }),
+      )
     })
   })
 
@@ -347,58 +424,56 @@ context('lib/tasks/verify', () => {
       })
     })
 
-    it('shows full path to executable when verifying', () => {
-      return verify.start({ force: true, listrRenderer: 'silent' }).then(() => {
-        snapshot('verification with executable 1', normalize(stdout.toString()))
-      })
+    it('shows full path to executable when verifying', async () => {
+      const output = createStdoutCapture()
+
+      await start({ force: true, listrRenderer: 'silent' })
+
+      expect(normalize(output())).toMatchSnapshot('verification with executable')
     })
 
-    it('clears verified version from state if verification fails', () => {
-    // @ts-expect-error - is a sinon stub
-      util.exec.restore()
-      sinon
-      .stub(util, 'exec')
-      .withArgs(executablePath)
-      .rejects({
+    it('clears verified version from state if verification fails', async () => {
+      const output = createStdoutCapture()
+
+      // @ts-expect-error - mockRejectedValue
+      util.exec.mockRejectedValue({
         code: 1,
         stderr: 'an error about dependencies',
       })
 
-      return verify
-      .start({ force: true, listrRenderer: 'silent' })
-      .then(() => {
+      try {
+        await start({ force: true, listrRenderer: 'silent' })
         throw new Error('Should have thrown')
-      })
-      .catch((err: any) => {
+      } catch (err) {
         logger.error(err)
-      })
-      .then(() => {
-        return fs.pathExistsAsync(binaryStatePath)
-      })
-      .then((exists: any) => {
-        return expect(exists).to.eq(false)
-      })
-      .then(() => {
-        return snapshot(
-          'fails verifying Cypress 1',
-          normalize(stdout.toString()),
-        )
-      })
+      }
+
+      const exists = await fs.pathExists(binaryStatePath)
+
+      expect(exists).toEqual(false)
+
+      expect(normalize(output())).toMatchSnapshot('fails verifying Cypress')
     })
   })
 
   describe('smoke test with DEBUG output', () => {
     beforeEach(() => {
       const stdoutWithDebugOutput = stripIndent`
-        some debug output
-        date: more debug output
-        222
-        after that more text
-      `
+          some debug output
+          date: more debug output
+          222
+          after that more text
+        `
 
-      // @ts-expect-error - is a sinon stub
-      util.exec.withArgs(executablePath).resolves({
-        stdout: stdoutWithDebugOutput,
+      // @ts-expect-error - mockImplementation
+      util.exec.mockImplementation((...args: any) => {
+        if (args[0] === executablePath) {
+          return Promise.resolve({
+            stdout: stdoutWithDebugOutput,
+          })
+        }
+
+        return Promise.reject(new Error('should have caught error'))
       })
 
       createfs({
@@ -408,20 +483,20 @@ context('lib/tasks/verify', () => {
       })
     })
 
-    it('finds ping value in the verbose output', () => {
-      return verify.start({ listrRenderer: 'silent' }).then(() => {
-        snapshot('verbose stdout output 1', normalize(stdout.toString()))
-      })
+    it('finds ping value in the verbose output', async () => {
+      const output = createStdoutCapture()
+
+      await start({ listrRenderer: 'silent' })
+
+      expect(normalize(output())).toMatchSnapshot('verbose stdout output')
     })
   })
 
   describe('smoke test retries on bad display with our Xvfb', () => {
-    let restore: any
+    let loggerWarnSpy: MockInstance<(...messages: any[]) => void>
 
     beforeEach(() => {
-      restore = mockedEnv({
-        DISPLAY: 'test-display',
-      })
+      vi.stubEnv('DISPLAY', 'test-display')
 
       createfs({
         alreadyVerified: false,
@@ -429,245 +504,252 @@ context('lib/tasks/verify', () => {
         packageVersion,
       })
 
-      // @ts-expect-error - is a sinon stub
-      util.exec.restore()
-      sinon.spy(logger, 'warn')
+      // sinon.spy(logger, 'warn')
+      loggerWarnSpy = vi.spyOn(logger, 'warn')
     })
 
-    afterEach(() => {
-      restore()
-    })
-
-    it('successfully retries with our Xvfb on Linux', () => {
+    it('successfully retries with our Xvfb on Linux', async () => {
       // initially we think the user has everything set
-      // @ts-expect-error - is a sinon stub
-      xvfb.isNeeded.returns(false)
-      sinon.stub(util, 'isPossibleLinuxWithIncorrectDisplay').returns(true)
+      // @ts-expect-error - mockReturnValue
+      xvfb.isNeeded.mockReturnValue(false)
+      // @ts-expect-error - mockReturnValue
+      util.isPossibleLinuxWithIncorrectDisplay.mockReturnValue(true)
 
-      // @ts-expect-error - is a sinon stub
-      sinon.stub(util, 'exec').callsFake(() => {
+      // @ts-expect-error - mockImplementationOnce
+      util.exec.mockImplementationOnce((...args: any) => {
         const firstSpawnError: any = new Error('')
 
         // this message contains typical Gtk error shown if X11 is incorrect
         // like in the case of DISPLAY=987
         firstSpawnError.stderr = stripIndent`
-          [some noise here] Gtk: cannot open display: 987
-            and maybe a few other lines here with weird indent
-        `
+            [some noise here] Gtk: cannot open display: 987
+              and maybe a few other lines here with weird indent
+          `
 
         firstSpawnError.stdout = ''
 
         // the second time the binary returns expected ping
-        // @ts-expect-error - is a sinon stub
-        util.exec.withArgs(executablePath).resolves({
-          stdout: '222',
+        // @ts-expect-error - mockImplementationOnce
+        util.exec.mockImplementationOnce((...args: any) => {
+          if (args[0] === executablePath) {
+            return Promise.resolve({
+              stdout: '222',
+            })
+          }
         })
 
-        return BluebirdPromise.reject(firstSpawnError)
+        return Promise.reject(firstSpawnError)
       })
 
-      return verify.start({ listrRenderer: 'silent' }).then(() => {
-        expect(util.exec).to.have.been.calledTwice
-        // user should have been warned
-        expect(logger.warn).to.have.been.calledWithMatch(
-          'This is likely due to a misconfigured DISPLAY environment variable.',
-        )
-      })
+      await start({ listrRenderer: 'silent' })
+
+      expect(util.exec).toHaveBeenCalledTimes(2)
+      // user should have been warned
+      expect(loggerWarnSpy).toHaveBeenCalledWith(expect.stringContaining(
+        'This is likely due to a misconfigured DISPLAY environment variable.',
+      ))
     })
 
-    it('fails on both retries with our Xvfb on Linux', () => {
+    it('fails on both retries with our Xvfb on Linux', async () => {
       // initially we think the user has everything set
-      // @ts-expect-error - is a sinon stub
-      xvfb.isNeeded.returns(false)
 
-      sinon.stub(util, 'isPossibleLinuxWithIncorrectDisplay').returns(true)
+      // @ts-expect-error - mockReturnValue
+      xvfb.isNeeded.mockReturnValue(false)
+      // @ts-expect-error - mockReturnValue
+      util.isPossibleLinuxWithIncorrectDisplay.mockReturnValue(true)
 
-      // @ts-expect-error - is a sinon stub
-      sinon.stub(util, 'exec').callsFake(() => {
-        (os.platform as any).returns('linux')
-        expect(xvfb.start).to.not.have.been.called
+      // @ts-expect-error - mockImplementationOnce
+      util.exec.mockImplementationOnce((...args: any) => {
+        // @ts-expect-error - mockImplementationOnce
+        os.platform.mockReturnValue('linux')
+        expect(xvfb.start).not.toHaveBeenCalled()
 
         const firstSpawnError: any = new Error('')
 
         // this message contains typical Gtk error shown if X11 is incorrect
         // like in the case of DISPLAY=987
         firstSpawnError.stderr = stripIndent`
-          [some noise here] Gtk: cannot open display: 987
-            and maybe a few other lines here with weird indent
-        `
+                  [some noise here] Gtk: cannot open display: 987
+                    and maybe a few other lines here with weird indent
+                `
 
         firstSpawnError.stdout = ''
 
         // the second time it runs, it fails for some other reason
         const secondMessage = stripIndent`
-          [some noise here] Gtk: cannot open display: 987
-          some other error
-            again with
-              some weird indent
-        `
+                  [some noise here] Gtk: cannot open display: 987
+                  some other error
+                    again with
+                      some weird indent
+                `
 
-        // @ts-expect-error - is a sinon stub
-        util.exec.withArgs(executablePath).rejects(new Error(secondMessage))
+        // @ts-expect-error - mockImplementationOnce
+        util.exec.mockImplementationOnce((...args: any) => {
+          if (args[0] === executablePath) {
+            return Promise.reject(new Error(secondMessage))
+          }
+        })
 
-        return BluebirdPromise.reject(firstSpawnError)
+        return Promise.reject(firstSpawnError)
       })
 
-      return verify.start({ listrRenderer: 'silent' }).then(() => {
-        throw new Error('Should have failed')
-      })
-      .catch((e: any) => {
-        expect(util.exec).to.have.been.calledTwice
+      try {
+        await start({ listrRenderer: 'silent' })
+      } catch (e) {
+        expect(util.exec).toHaveBeenCalledTimes(2)
         // second time around we should have called Xvfb
-        expect(xvfb.start).to.have.been.calledOnce
-        expect(xvfb.stop).to.have.been.calledOnce
+        expect(xvfb.start).toHaveBeenCalledOnce
+        expect(xvfb.stop).toHaveBeenCalledOnce
 
         // user should have been warned
-        expect(logger.warn).to.have.been.calledWithMatch('DISPLAY was set to: "test-display"')
+        expect(loggerWarnSpy).toHaveBeenCalledWith(expect.stringContaining('DISPLAY was set to: "test-display"'))
 
-        snapshot('tried to verify twice, on the first try got the DISPLAY error', e.message)
+        expect(e.message).toMatchSnapshot('tried to verify twice, on the first try got the DISPLAY error')
+
+        return
+      }
+
+      throw new Error('Should have failed')
+    })
+
+    it('logs an error if Cypress executable does not exist', async () => {
+      const output = createStdoutCapture()
+
+      createfs({
+        alreadyVerified: false,
+        executable: false,
+        packageVersion,
       })
-    })
-  })
 
-  it('logs an error if Cypress executable does not exist', () => {
-    createfs({
-      alreadyVerified: false,
-      executable: false,
-      packageVersion,
-    })
+      try {
+        await start({ listrRenderer: 'silent' })
+      } catch (err) {
+        logger.error(err)
 
-    return verify
-    .start({ listrRenderer: 'silent' })
-    .then(() => {
+        expect(normalize(output())).toMatchSnapshot('no Cypress executable')
+
+        return
+      }
+
       throw new Error('Should have thrown')
     })
-    .catch((err: any) => {
-      stdout = Stdout.capture()
-      logger.error(err)
 
-      return snapshot('no Cypress executable 1', normalize(stdout.toString()))
-    })
-  })
+    it('logs an error if Cypress executable does not have permissions', async () => {
+      const output = createStdoutCapture()
 
-  it('logs an error if Cypress executable does not have permissions', () => {
-    mockfs.restore()
-    createfs({
-      alreadyVerified: false,
-      executable: mockfs.file({ mode: 0o666 }),
-      packageVersion,
-    })
+      mockfs.restore()
 
-    return verify
-    .start({ listrRenderer: 'silent' })
-    .then(() => {
+      createfs({
+        alreadyVerified: false,
+        executable: mockfs.file({ mode: 0o666 }),
+        packageVersion,
+      })
+
+      try {
+        await start({ listrRenderer: 'silent' })
+      } catch (err) {
+        logger.error(err)
+
+        expect(normalize(output())).toMatchSnapshot('Cypress non-executable permission')
+
+        return
+      }
+
       throw new Error('Should have thrown')
     })
-    .catch((err: any) => {
-      stdout = Stdout.capture()
-      logger.error(err)
 
-      return snapshot(
-        'Cypress non-executable permissions 1',
-        normalize(stdout.toString()),
-      )
-    })
-  })
+    it('logs and runs when current version has not been verified', async () => {
+      const output = createStdoutCapture()
 
-  it('logs and runs when current version has not been verified', () => {
-    createfs({
-      alreadyVerified: false,
-      executable: mockfs.file({ mode: 0o777 }),
-      packageVersion,
+      createfs({
+        alreadyVerified: false,
+        executable: mockfs.file({ mode: 0o777 }),
+        packageVersion,
+      })
+
+      await start({ listrRenderer: 'silent' })
+
+      expect(normalize(output())).toMatchSnapshot('current version has not been verified')
     })
 
-    return verify.start({ listrRenderer: 'silent' }).then(() => {
-      return snapshot(
-        'current version has not been verified 1',
-        normalize(stdout.toString()),
-      )
-    })
-  })
+    it('logs and runs when installed version is different than package version', async () => {
+      const output = createStdoutCapture()
 
-  it('logs and runs when installed version is different than package version', () => {
-    createfs({
-      alreadyVerified: false,
-      executable: mockfs.file({ mode: 0o777 }),
-      packageVersion: '7.8.9',
-    })
+      createfs({
+        alreadyVerified: false,
+        executable: mockfs.file({ mode: 0o777 }),
+        packageVersion: '7.8.9',
+      })
 
-    return verify.start({ listrRenderer: 'silent' }).then(() => {
-      return snapshot(
-        'different version installed 1',
-        normalize(stdout.toString()),
-      )
-    })
-  })
+      await start({ listrRenderer: 'silent' })
 
-  it('is silent when logLevel is silent', () => {
-    createfs({
-      alreadyVerified: false,
-      executable: mockfs.file({ mode: 0o777 }),
-      packageVersion,
+      expect(normalize(output())).toMatchSnapshot('different version installed')
     })
 
-    process.env.npm_config_loglevel = 'silent'
+    it('is silent when logLevel is silent', async () => {
+      const output = createStdoutCapture()
 
-    return verify.start({ listrRenderer: 'silent' }).then(() => {
-      return snapshot(
-        'silent verify 1',
-        normalize(`[no output]${stdout.toString()}`),
-      )
-    })
-  })
+      createfs({
+        alreadyVerified: false,
+        executable: mockfs.file({ mode: 0o777 }),
+        packageVersion,
+      })
 
-  it('turns off Opening Cypress...', () => {
-    createfs({
-      alreadyVerified: true,
-      executable: mockfs.file({ mode: 0o777 }),
-      packageVersion: '7.8.9',
-    })
+      vi.stubEnv('npm_config_loglevel', 'silent')
 
-    return verify
-    .start({
-      welcomeMessage: false,
-    })
-    .then(() => {
-      return snapshot('no welcome message 1', normalize(stdout.toString()))
-    })
-  })
+      await start({ listrRenderer: 'silent' })
 
-  it('logs error when fails smoke test unexpectedly without stderr', () => {
-    createfs({
-      alreadyVerified: false,
-      executable: mockfs.file({ mode: 0o777 }),
-      packageVersion,
+      expect(normalize(output())).toMatchSnapshot('silent verify')
     })
 
-    // @ts-expect-error - is a sinon stub
-    util.exec.restore()
-    sinon.stub(util, 'exec').rejects({
-      stderr: '',
-      stdout: '',
-      message: 'Error: EPERM NOT PERMITTED',
+    it('turns off Opening Cypress...', async () => {
+      const output = createStdoutCapture()
+
+      createfs({
+        alreadyVerified: true,
+        executable: mockfs.file({ mode: 0o777 }),
+        packageVersion: '7.8.9',
+      })
+
+      await start({ welcomeMessage: false })
+
+      expect(normalize(output())).toMatchSnapshot('no welcome message')
     })
 
-    return verify
-    .start({ listrRenderer: 'silent' })
-    .then(() => {
+    it('logs error when fails smoke test unexpectedly without stderr', async () => {
+      const output = createStdoutCapture()
+
+      createfs({
+        alreadyVerified: false,
+        executable: mockfs.file({ mode: 0o777 }),
+        packageVersion,
+      })
+
+      // @ts-expect-error - mockRejectedValue
+      util.exec.mockRejectedValue({
+        stderr: '',
+        stdout: '',
+        message: 'Error: EPERM NOT PERMITTED',
+      })
+
+      try {
+        await start({ listrRenderer: 'silent' })
+      } catch (err) {
+        logger.error(err)
+
+        expect(normalize(output())).toMatchSnapshot('fails with no stderr')
+
+        return
+      }
+
       throw new Error('Should have thrown')
-    })
-    .catch((err: any) => {
-      stdout = Stdout.capture()
-      logger.error(err)
-
-      return snapshot('fails with no stderr 1', normalize(stdout.toString()))
     })
   })
 
   describe('on linux', () => {
     beforeEach(() => {
-      // @ts-expect-error - is a sinon stub
-      xvfb.isNeeded.returns(true)
+      // @ts-expect-error - mockReturnValue
+      xvfb.isNeeded.mockReturnValue(true)
 
       createfs({
         alreadyVerified: false,
@@ -676,39 +758,50 @@ context('lib/tasks/verify', () => {
       })
     })
 
-    it('starts xvfb', () => {
-      return verify.start({ listrRenderer: 'silent' }).then(() => {
-        expect(xvfb.start).to.be.called
-      })
+    it('starts xvfb', async () => {
+      await start({ listrRenderer: 'silent' })
+
+      expect(xvfb.start).toHaveBeenCalled()
     })
 
-    it('stops xvfb on spawned process close', () => {
-      return verify.start({ listrRenderer: 'silent' }).then(() => {
-        expect(xvfb.stop).to.be.called
-      })
+    it('stops xvfb on spawned process close', async () => {
+      await start({ listrRenderer: 'silent' })
+
+      expect(xvfb.stop).toHaveBeenCalled()
     })
 
-    it('logs error and exits when starting xvfb fails', () => {
+    it('logs error and exits when starting xvfb fails', async () => {
+      const output = createStdoutCapture()
+
+      const actualXvfb = (await vi.importActual<typeof import('../../../lib/exec/xvfb')>('../../../lib/exec/xvfb')).default
+
+      // @ts-expect-error - mockImplementation to test integration with xvfb module
+      xvfb.start.mockImplementation(actualXvfb.start)
+
       const err: any = new Error('test without xvfb')
-
-      // @ts-expect-error - is a sinon stub
-      xvfb.start.restore()
 
       err.nonZeroExitCode = true
       err.stack = 'xvfb? no dice'
-      sinon.stub(xvfb._xvfb, 'startAsync').rejects(err)
 
-      return verify.start({ listrRenderer: 'silent' })
-      .then(() => {
-        throw new Error('should have thrown')
+      // stub the xvfb module to test integration
+      vi.spyOn(_xvfb.prototype, 'start').mockImplementation((cb) => {
+        // mock a failure
+        cb(err)
       })
-      .catch((err: any) => {
-        expect(xvfb.stop).to.be.calledOnce
+
+      try {
+        await start({ listrRenderer: 'silent' })
+      } catch (err) {
+        expect(xvfb.stop).toHaveBeenCalledOnce
 
         logger.error(err)
 
-        snapshot('xvfb fails 1', normalize(stdout.toString()))
-      })
+        expect(normalize(output())).toMatchSnapshot('xvfb fails')
+
+        return
+      }
+
+      throw new Error('Should have thrown')
     })
   })
 
@@ -720,37 +813,46 @@ context('lib/tasks/verify', () => {
         packageVersion,
       })
 
-      // @ts-expect-error - is a sinon stub
-      util.isCi.returns(true)
+      // @ts-expect-error - mockReturnValue
+      util.isCi.mockReturnValue(true)
     })
 
-    it('uses verbose renderer', () => {
-      return verify.start({ listrRenderer: 'silent' }).then(() => {
-        snapshot('verifying in ci 1', normalize(stdout.toString()))
-      })
+    it('uses verbose renderer', async () => {
+      const output = createStdoutCapture()
+
+      await start({ listrRenderer: 'silent' })
+
+      expect(normalize(output())).toMatchSnapshot('verifying in ci')
     })
 
-    it('logs error when binary not found', () => {
+    it('logs error when binary not found', async () => {
+      const output = createStdoutCapture()
+
       mockfs({})
 
-      return verify
-      .start({ listrRenderer: 'silent' })
-      .then(() => {
-        throw new Error('Should have thrown')
-      })
-      .catch((err: any) => {
+      try {
+        await start({ listrRenderer: 'silent' })
+      } catch (err) {
         logger.error(err)
-        snapshot('error binary not found in ci 1', normalize(stdout.toString()))
-      })
+
+        expect(normalize(output())).toMatchSnapshot('error binary not found in ci')
+
+        return
+      }
+
+      throw new Error('Should have thrown')
     })
   })
 
-  describe('when env var CYPRESS_RUN_BINARY', () => {
-    it('can validate and use executable', () => {
+  describe('when env var CYPRESS_RUN_BINARY', async () => {
+    it('can validate and use executable', async () => {
+      const output = createStdoutCapture()
+
       const envBinaryPath = '/custom/Contents/MacOS/Cypress'
       const realEnvBinaryPath = `/real${envBinaryPath}`
 
-      process.env.CYPRESS_RUN_BINARY = envBinaryPath
+      vi.stubEnv('CYPRESS_RUN_BINARY', envBinaryPath)
+
       createfs({
         alreadyVerified: false,
         executable: mockfs.file({ mode: 0o777 }),
@@ -758,66 +860,77 @@ context('lib/tasks/verify', () => {
         customDir: '/real/custom',
       })
 
-      util.exec
-      // @ts-expect-error - is a sinon stub
-      .withArgs(realEnvBinaryPath, ['--no-sandbox', '--smoke-test', '--ping=222'])
-      .resolves(spawnedProcess)
+      // @ts-expect-error - mockImplementation
+      util.exec.mockImplementation((...args: any) => {
+        if (args[0] === realEnvBinaryPath && _.isEqual(args[1], ['--no-sandbox', '--smoke-test', '--ping=222'])) {
+          return Promise.resolve(spawnedProcess)
+        }
 
-      return verify.start({ listrRenderer: 'silent' }).then(() => {
-        // @ts-expect-error - is a sinon stub
-        expect(util.exec.firstCall.args[0]).to.equal(realEnvBinaryPath)
-        snapshot('valid CYPRESS_RUN_BINARY 1', normalize(stdout.toString()))
+        return Promise.reject(new Error('should have caught error'))
       })
+
+      await start({ listrRenderer: 'silent' })
+
+      expect(util.exec).toHaveBeenCalledWith(realEnvBinaryPath, ['--no-sandbox', '--smoke-test', '--ping=222'], expect.anything())
+      expect(normalize(output())).toMatchSnapshot('valid CYPRESS_RUN_BINARY')
     })
 
-    _.each(['darwin', 'linux', 'win32'], (platform) => {
-      return it('can log error to user', () => {
-        process.env.CYPRESS_RUN_BINARY = '/custom/'
+    for (const platform of ['darwin', 'linux', 'win32']) {
+      it(`can log error to user on ${platform}`, async () => {
+        const output = createStdoutCapture()
 
-        ;(os.platform as any).returns(platform)
+        vi.stubEnv('CYPRESS_RUN_BINARY', '/custom/')
 
-        return verify
-        .start({ listrRenderer: 'silent' })
-        .then(() => {
-          throw new Error('Should have thrown')
-        })
-        .catch((err: any) => {
+        // @ts-expect-error - mockReturnValue
+        os.platform.mockReturnValue(platform)
+
+        try {
+          await start({ listrRenderer: 'silent' })
+        } catch (err) {
           logger.error(err)
-          snapshot(
-            `${platform}: error when invalid CYPRESS_RUN_BINARY 1`,
-            normalize(stdout.toString()),
-          )
-        })
+          expect(normalize(output())).toMatchSnapshot(`${platform}: error when invalid CYPRESS_RUN_BINARY`)
+
+          return
+        }
+
+        throw new Error('Should have thrown')
       })
-    })
+    }
   })
 
   // tests for when Electron needs "--no-sandbox" CLI flag
-  context('.needsSandbox', () => {
+  describe('.needsSandbox', () => {
     it('needs --no-sandbox on Linux as a root', () => {
-      (os.platform as any).returns('linux')
-
-      ;(process.geteuid as any).returns(0) // user is root
-      expect(verify.needsSandbox()).to.be.true
+      // @ts-expect-error - mockReturnValue
+      os.platform.mockReturnValue('linux')
+      // @ts-expect-error - mockReturnValue
+      geteuid.mockReturnValue(0)
+      expect(needsSandbox()).toEqual(true)
     })
 
     it('needs --no-sandbox on Linux as a non-root', () => {
-      (os.platform as any).returns('linux')
+      // @ts-expect-error - mockReturnValue
+      os.platform.mockReturnValue('linux')
+      // @ts-expect-error - mockReturnValue
+      geteuid.mockReturnValue(1000)
 
-      ;(process.geteuid as any).returns(1000) // user is non-root
-      expect(verify.needsSandbox()).to.be.true
+      expect(needsSandbox()).toEqual(true)
     })
 
     it('needs --no-sandbox on Mac as a non-root', () => {
-      (os.platform as any).returns('darwin')
+      // @ts-expect-error - mockReturnValue
+      os.platform.mockReturnValue('darwin')
+      // @ts-expect-error - mockReturnValue
+      geteuid.mockReturnValue(1000)
 
-      ;(process.geteuid as any).returns(1000) // user is non-root
-      expect(verify.needsSandbox()).to.be.true
+      expect(needsSandbox()).toEqual(true)
     })
 
     it('does not need --no-sandbox on Windows', () => {
-      (os.platform as any).returns('win32')
-      expect(verify.needsSandbox()).to.be.false
+      // @ts-expect-error - mockReturnValue
+      os.platform.mockReturnValue('win32')
+
+      expect(needsSandbox()).toEqual(false)
     })
   })
 })

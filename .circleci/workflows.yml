@@ -1797,7 +1797,7 @@ jobs:
             # run type checking for each individual package
             - run: yarn lerna run types
             - sanitize-verify-and-store-mocha-results:
-                expectedResultCount: 20
+                expectedResultCount: 19
 
   verify-release-readiness:
     <<: *defaults

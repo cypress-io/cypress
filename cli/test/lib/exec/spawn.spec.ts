@@ -13,7 +13,7 @@ import { stdin, stdout, stderr } from 'process'
 import state from '../../../lib/tasks/state'
 import xvfb from '../../../lib/exec/xvfb'
 import spawn from '../../../lib/exec/spawn'
-import verify from '../../../lib/tasks/verify'
+import { needsSandbox } from '../../../lib/tasks/verify'
 import util from '../../../lib/util'
 
 const flushPromises = () => {
@@ -152,15 +152,9 @@ vi.mock('../../../lib/tasks/state', async (importActual) => {
   }
 })
 
-vi.mock('../../../lib/tasks/verify', async (importActual) => {
-  const actual = await importActual()
-
+vi.mock('../../../lib/tasks/verify', async () => {
   return {
-    default: {
-      // @ts-expect-error
-      ...actual.default,
-      needsSandbox: vi.fn(),
-    },
+    needsSandbox: vi.fn(),
   }
 })
 
@@ -253,7 +247,7 @@ describe('lib/exec/spawn', function () {
 
     it('passes args + options to spawn', async () => {
       // @ts-expect-error - mockReturnValue
-      verify.needsSandbox.mockReturnValue(false)
+      needsSandbox.mockReturnValue(false)
 
       // start the process
       const startPromise = spawn.start('--foo', { foo: 'bar' })
@@ -281,7 +275,7 @@ describe('lib/exec/spawn', function () {
 
     it('uses --no-sandbox when needed', async function () {
       // @ts-expect-error - mockReturnValue
-      verify.needsSandbox.mockReturnValue(true)
+      needsSandbox.mockReturnValue(true)
 
       const startPromise = spawn.start('--foo', { foo: 'bar' })
 
@@ -313,7 +307,7 @@ describe('lib/exec/spawn', function () {
 
     it('uses npm command when running in dev mode', async () => {
       // @ts-expect-error - mockReturnValue
-      verify.needsSandbox.mockReturnValue(false)
+      needsSandbox.mockReturnValue(false)
 
       const startPromise = spawn.start('--foo', { dev: true, foo: 'bar' })
 
@@ -341,7 +335,7 @@ describe('lib/exec/spawn', function () {
 
     it('does not pass --no-sandbox when running in dev mode', async function () {
       // @ts-expect-error - mockReturnValue
-      verify.needsSandbox.mockReturnValue(true)
+      needsSandbox.mockReturnValue(true)
 
       const startPromise = spawn.start('--foo', { dev: true, foo: 'bar' })
 

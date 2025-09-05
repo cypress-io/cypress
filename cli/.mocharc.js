@@ -1,14 +1,6 @@
 module.exports = {
   // hardcoding the spec file names as they will be converted 1 by 1 to vitest
-  spec: [
-    'test/lib/tasks/cache.spec.ts',
-    'test/lib/tasks/dependency.spec.ts',
-    'test/lib/tasks/download.spec.ts',
-    'test/lib/tasks/install.spec.ts',
-    'test/lib/tasks/state.spec.ts',
-    'test/lib/tasks/unzip.spec.ts',
-    'test/lib/tasks/verify.spec.ts',
-  ],
+  spec: [],
   timeout: 10000,
   reporter: 'spec',
   recursive: true

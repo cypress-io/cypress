@@ -11,7 +11,7 @@ import cache from './tasks/cache'
 
 import openModule from './exec/open'
 import runModule from './exec/run'
-import verifyModule from './tasks/verify'
+import { start } from './tasks/verify'
 import installModule from './tasks/install'
 import versionModule from './exec/versions'
 import infoModule from './exec/info'
@@ -525,7 +525,7 @@ const cliModule = {
       const options = _.extend(parsedOpts, defaultOpts)
 
       try {
-        await verifyModule.start(options)
+        await start(options)
       } catch (e: any) {
         util.logErrorExit1(e)
       }
