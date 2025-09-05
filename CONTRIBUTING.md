@@ -181,7 +181,7 @@ Here is a list of the core packages in this repository with a short description,
  | [https-proxy](./packages/https-proxy) | `@packages/https-proxy` | This does https proxy for handling http certs and traffic.                   |
  | [icons](./packages/icons)       | `@packages/icons`    | The Cypress icons.                        |
  | [launcher](./packages/launcher)       | `@packages/launcher`    | Finds and launches browsers installed on your system.                        |
- | [launchpad](./packages/launchpad)       | `@packages/launcher`    | The portal to running Cypress that displays in `open` mode.                        |
+ | [launchpad](./packages/launchpad)       | `@packages/launchpad`    | The portal to running Cypress that displays in `open` mode.                        |
  | [net-stubbing](./packages/net-stubbing) | `@packages/net-stubbing` | Contains server side code for Cypress' network stubbing features.         |
  | [network](./packages/network)         | `@packages/network`     | Various utilities related to networking.                                     |
  | [packherd-require](./packages/packherd-require) | `@packages/packherd-require` | Loads modules that have been bundled by `@tooling/packherd`.  |

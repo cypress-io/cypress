@@ -24,7 +24,7 @@ import { TagStream } from '@packages/stderr-filtering'
 // NOTE: need the file:// prefix to avoid https://nodejs.org/api/errors.html#err_unsupported_esm_url_scheme on windows
 const tsx = os.platform() === 'win32' ? `file://${toPosix(require.resolve('tsx'))}` : toPosix(require.resolve('tsx'))
 
-export type IpcHandler = (ipc: ProjectConfigIpc) => void
+export type PluginIpcHandler = (ipc: ProjectConfigIpc) => void
 
 /**
  * If running as root on Linux, no-sandbox must be passed or Chrome will not start
@@ -194,7 +194,7 @@ export class ProjectConfigIpc extends EventEmitter {
     })
   }
 
-  async callSetupNodeEventsWithConfig (testingType: TestingType, config: FullConfig, handlers: IpcHandler[]): Promise<SetupNodeEventsReply> {
+  async callSetupNodeEventsWithConfig (testingType: TestingType, config: FullConfig, handlers: PluginIpcHandler[]): Promise<SetupNodeEventsReply> {
     for (const handler of handlers) {
       handler(this)
     }
@@ -312,10 +312,11 @@ export class ProjectConfigIpc extends EventEmitter {
     /**
      * use --import for node versions
      * 20.6.0 and above for 20.x.x as --import is supported
-     * use --loader for node under 20.6.0 for 20.x.x
+     * use --loader for node under 20.6.0 for 20.x.x.
+     * NOTE: we need to use double quotes around the tsx path to account for paths with spaces or special characters.
      * @see https://tsx.is/dev-api/node-cli#node-js-cli
      */
-    let tsxLoader = this.nodeVersion && semver.lt(this.nodeVersion, '20.6.0') ? `--loader ${tsx}` : `--import ${tsx}`
+    let tsxLoader = this.nodeVersion && semver.lt(this.nodeVersion, '20.6.0') ? `--loader "${tsx}"` : `--import "${tsx}"`
 
     // If they've got TypeScript installed, we can use tsx for CommonJS and ESM.
     // @see https://tsx.is/dev-api/node-cli#node-js-cli

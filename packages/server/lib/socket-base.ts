@@ -26,6 +26,7 @@ import type { Socket } from '@packages/socket'
 import type { RunState, CachedTestState, ProtocolManagerShape, AutomationCommands } from '@packages/types'
 import memory from './browsers/memory'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
+import type { StudioInitOptions } from './types/studio'
 
 type StartListeningCallbacks = {
   onSocketConnection: (socket: any) => void
@@ -426,9 +427,9 @@ export class SocketBase {
           })
         })
 
-        socket.on('studio:init', async (cb) => {
+        socket.on('studio:init', async (initOptions: StudioInitOptions, cb) => {
           try {
-            const { canAccessStudioAI, cloudStudioSessionId } = await options.onStudioInit()
+            const { canAccessStudioAI, cloudStudioSessionId } = await options.onStudioInit(initOptions)
 
             cb({ canAccessStudioAI, cloudStudioSessionId })
           } catch (error) {
