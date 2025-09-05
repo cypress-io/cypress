@@ -54,62 +54,6 @@ export const create = (state: StateFunc, config: ICypress['config'], focused: IF
 
       contentWindow.CSSStyleSheet.prototype.insertRule = _.wrap(insertRule, cssModificationSpy)
       contentWindow.CSSStyleSheet.prototype.deleteRule = _.wrap(deleteRule, cssModificationSpy)
-
-      // Add ResizeObserver protection
-      // to handle Chrome crashes when using ResizeObserver
-      // https://github.com/cypress-io/cypress/issues/25443
-      if (contentWindow.ResizeObserver) {
-        const OriginalResizeObserver = contentWindow.ResizeObserver
-
-        contentWindow.ResizeObserver = class extends OriginalResizeObserver {
-          private _isProcessing = false
-          private _lastCallbackTime = 0
-          private _callbackCount = 0
-          private _maxCallbacksPerSecond = 60 // Limit to 60fps
-
-          constructor (callback: ResizeObserverCallback) {
-            super((entries, observer) => {
-            // Prevent excessive ResizeObserver callbacks
-              const now = Date.now()
-              const timeSinceLastCallback = now - this._lastCallbackTime
-
-              if (timeSinceLastCallback < 16) { // ~60fps throttling
-                return
-              }
-
-              // Prevent recursive calls
-              if (this._isProcessing) {
-                return
-              }
-
-              this._isProcessing = true
-              this._lastCallbackTime = now
-              this._callbackCount++
-
-              try {
-              // Check for problematic fractional dimensions
-                const hasFractionalChanges = entries.some((entry) => {
-                  const { width, height } = entry.contentRect
-
-                  return width % 1 !== 0 || height % 1 !== 0
-                })
-
-                if (hasFractionalChanges) {
-                // Block fractional dimension changes that cause Chrome crashes
-                  return
-                }
-
-                callback(entries, observer)
-              } catch (error) {
-              // eslint-disable-next-line no-console
-                console.error('[Cypress] ResizeObserver callback error:', error)
-              } finally {
-                this._isProcessing = false
-              }
-            })
-          }
-        }
-      }
     } catch (error) {
     // eslint-disable-next-line no-console
       console.error('[Cypress] Error in wrapNativeMethods:', error)
