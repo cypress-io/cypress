@@ -66,7 +66,7 @@ export async function checkIconVersion () {
   const mainIconsPath = icons().getPathToIcon('cypress.icns')
   const cachedIconsPath = path.join(
     __dirname,
-    '..', '..', '..', 'dist/Cypress/Cypress.app/Contents/Resources/electron.icns',
+    '../Cypress/Cypress.app/Contents/Resources/electron.icns',
   )
 
   const [mainHash, cachedHash] = await Promise.all(
