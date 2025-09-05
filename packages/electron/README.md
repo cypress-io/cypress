@@ -56,6 +56,8 @@ Upgrading `electron` involves more than just bumping this package's `package.jso
     - [ ] [`/system-tests/test-binary/*`](../../system-tests/test-binary) - update binary system tests to use the newly published Ubuntu and Node images mentioned above, if applicable
     - [ ] Do a global search for the old Node.js version to identify any new areas that may need updating/unification, and update those locations (and this document!)  
 
+- [ ] **Update `better-sqlite3` version if needed** Look through the [commit history](https://github.com/WiseLibs/better-sqlite3/commits/master/) of `better-sqlite3` and find the first version that supports the proper version of `electron`'s prebuilds. Update [`/packages/server/package.json`](../../packages/server/package) and [`/packages/types/package.json`](../../packages/types/package.json) to the appropriate version.
+
 - [ ] **Update `cypress-publish-binary`** For **binary publishing**, make sure the `electron` version that we updated in [`/package.json`](../../package.json) matches the `electron` version inside the [publish binary project](https://github.com/cypress-io/cypress-publish-binary/blob/main/package.json). This is to make sure add-on tests inside the publish-binary repository work locally, but are not required to install the correct version of `electron` in CI when publishing the binary. Ensure the `electron` target in this project's `.circleci` configuration is updated as well. Set the Remove this before merging, and ensure that branch is merged as well.
   - [ ] Create a new branch in `cypress-publish-binary`
   - [ ] Update `electron` version in `package.json`

@@ -5,7 +5,7 @@ module.exports = {
   extension: ['ts'],
   reporter: 'mocha-multi-reporters',
   reporterOptions: {
-    configFile: '../../mocha-reporter-config.json'
+    configFile: '../../mocha-reporter-config.json',
   },
-  exit: true
-} 
+  exit: true,
+}

@@ -1,0 +1,283 @@
+import '../../spec_helper'
+import events from 'events'
+import os from 'os'
+import path from 'path'
+import snapshot from '../../support/snapshot'
+import cp from 'child_process'
+import createDebug from 'debug'
+import readline from 'readline'
+import stdout from '../../support/stdout'
+import normalize from '../../support/normalize'
+import fs from '../../../lib/fs'
+import logger from '../../../lib/logger'
+import util from '../../../lib/util'
+import unzip from '../../../lib/tasks/unzip'
+
+const debug = createDebug('test')
+
+const version = '1.2.3'
+const installDir = path.join(os.tmpdir(), 'Cypress', version)
+
+describe('lib/tasks/unzip', function () {
+  before(async function () {
+    const mochaMain = await import('mocha-banner')
+
+    mochaMain.register()
+  })
+
+  beforeEach(function () {
+    (this as any).stdout = stdout.capture()
+
+    ;(os.platform as any).returns('darwin')
+    sinon.stub(util, 'pkgVersion').returns(version)
+  })
+
+  afterEach(function () {
+    stdout.restore()
+  })
+
+  it('throws when cannot unzip', async function () {
+    try {
+      await unzip.start({
+        zipFilePath: path.join('test', 'fixture', 'bad_example.zip'),
+        installDir,
+      })
+    } catch (err) {
+      logger.error(err)
+
+      return snapshot(normalize((this as any).stdout.toString()))
+    }
+
+    throw new Error('should have failed')
+  })
+
+  it('throws max path length error when cannot unzip due to realpath ENOENT on windows', async function () {
+    const err: any = new Error('failed')
+
+    err.code = 'ENOENT'
+    err.syscall = 'realpath'
+
+    ;(os.platform as any).returns('win32')
+    sinon.stub(fs, 'ensureDirAsync').rejects(err)
+
+    try {
+      await unzip.start({
+        zipFilePath: path.join('test', 'fixture', 'bad_example.zip'),
+        installDir,
+      })
+    } catch (err) {
+      logger.error(err)
+
+      return snapshot(normalize((this as any).stdout.toString()))
+    }
+
+    throw new Error('should have failed')
+  })
+
+  it('can really unzip', function () {
+    const onProgress = sinon.stub().returns(undefined)
+
+    return unzip
+    .start({
+      zipFilePath: path.join('test', 'fixture', 'example.zip'),
+      installDir,
+      progress: { onProgress },
+    })
+    .then(() => {
+      expect(onProgress).to.be.called
+
+      return fs.statAsync(installDir)
+    })
+  })
+
+  context('on linux', () => {
+    beforeEach(() => {
+      (os.platform as any).returns('linux')
+    })
+
+    it('can try unzip first then fall back to node unzip', function (done) {
+      const zipFilePath = path.join('test', 'fixture', 'example.zip')
+
+      sinon.stub(unzip.utils.unzipTools, 'extract').callsFake((filePath: any, opts: any) => {
+        debug('unzip extract called with %s', filePath)
+        expect(filePath, 'zipfile is the same').to.equal(zipFilePath)
+
+        return new Promise((resolve, reject) => resolve(undefined))
+      })
+
+      const unzipChildProcess = new events.EventEmitter()
+
+      ;(unzipChildProcess as any).stdout = {
+        on () {},
+      }
+
+      ;(unzipChildProcess as any).stderr = {
+        on () {},
+      }
+
+      // @ts-expect-error - invalid number of arguments for given type
+      sinon.stub(cp, 'spawn').withArgs('unzip').returns(unzipChildProcess as any)
+
+      setTimeout(() => {
+        debug('emitting unzip error')
+        unzipChildProcess.emit('error', new Error('unzip fails badly'))
+      }, 100)
+
+      unzip
+      .start({
+        zipFilePath,
+        installDir,
+      })
+      .then(() => {
+        debug('checking if unzip was called')
+        expect(cp.spawn, 'unzip spawn').to.have.been.calledWith('unzip')
+        expect(unzip.utils.unzipTools.extract, 'extract called').to.be.calledWith(zipFilePath)
+        expect(unzip.utils.unzipTools.extract, 'extract called once').to.be.calledOnce
+        done()
+      })
+    })
+
+    it('can try unzip first then fall back to node unzip and fails with an empty error', async function () {
+      const zipFilePath = path.join('test', 'fixture', 'example.zip')
+
+      sinon.stub(unzip.utils.unzipTools, 'extract').callsFake(() => {
+        return new Promise((_, reject) => reject())
+      })
+
+      const unzipChildProcess = new events.EventEmitter()
+
+      ;(unzipChildProcess as any).stdout = {
+        on () {},
+      }
+
+      ;(unzipChildProcess as any).stderr = {
+        on () {},
+      }
+
+      // @ts-expect-error - invalid number of arguments for given type
+      sinon.stub(cp, 'spawn').withArgs('unzip').returns(unzipChildProcess as any)
+
+      setTimeout(() => {
+        debug('emitting unzip error')
+        unzipChildProcess.emit('error', new Error('unzip fails badly'))
+      }, 100)
+
+      try {
+        await unzip
+        .start({
+          zipFilePath,
+          installDir,
+        })
+      } catch (err: any) {
+        logger.error(err)
+        expect(err.message).to.include('Unknown error with Node extract tool')
+
+        return
+      }
+      throw new Error('should have failed')
+    })
+
+    it('calls node unzip just once', function (done) {
+      const zipFilePath = path.join('test', 'fixture', 'example.zip')
+
+      sinon.stub(unzip.utils.unzipTools, 'extract').callsFake((filePath: any, opts: any) => {
+        debug('unzip extract called with %s', filePath)
+        expect(filePath, 'zipfile is the same').to.equal(zipFilePath)
+
+        return new Promise((resolve, reject) => resolve(undefined))
+      })
+
+      const unzipChildProcess = new events.EventEmitter()
+
+      ;(unzipChildProcess as any).stdout = {
+        on () {},
+      }
+
+      ;(unzipChildProcess as any).stderr = {
+        on () {},
+      }
+
+      // @ts-expect-error - invalid number of arguments for given type
+      sinon.stub(cp, 'spawn').withArgs('unzip').returns(unzipChildProcess as any)
+
+      setTimeout(() => {
+        debug('emitting unzip error')
+        unzipChildProcess.emit('error', new Error('unzip fails badly'))
+      }, 100)
+
+      setTimeout(() => {
+        debug('emitting unzip close')
+        unzipChildProcess.emit('close', 1)
+      }, 110)
+
+      unzip
+      .start({
+        zipFilePath,
+        installDir,
+      })
+      .then(() => {
+        debug('checking if unzip was called')
+        expect(cp.spawn, 'unzip spawn').to.have.been.calledWith('unzip')
+        expect(unzip.utils.unzipTools.extract, 'extract called').to.be.calledWith(zipFilePath)
+        expect(unzip.utils.unzipTools.extract, 'extract called once').to.be.calledOnce
+        done()
+      })
+    })
+  })
+
+  context('on Mac', () => {
+    beforeEach(() => {
+      (os.platform as any).returns('darwin')
+    })
+
+    it('calls node unzip just once', function (done) {
+      const zipFilePath = path.join('test', 'fixture', 'example.zip')
+
+      sinon.stub(unzip.utils.unzipTools, 'extract').callsFake((filePath: any, opts: any) => {
+        debug('unzip extract called with %s', filePath)
+        expect(filePath, 'zipfile is the same').to.equal(zipFilePath)
+
+        return new Promise((resolve) => resolve(undefined))
+      })
+
+      const unzipChildProcess = new events.EventEmitter()
+
+      ;(unzipChildProcess as any).stdout = {
+        on () {},
+      }
+
+      ;(unzipChildProcess as any).stderr = {
+        on () {},
+      }
+
+      // @ts-expect-error - invalid number of arguments for given type
+      sinon.stub(cp, 'spawn').withArgs('ditto').returns(unzipChildProcess as any)
+      sinon.stub(readline, 'createInterface').returns({
+        on: () => {},
+      } as any)
+
+      setTimeout(() => {
+        debug('emitting ditto error')
+        unzipChildProcess.emit('error', new Error('ditto fails badly'))
+      }, 100)
+
+      setTimeout(() => {
+        debug('emitting ditto close')
+        unzipChildProcess.emit('close', 1)
+      }, 110)
+
+      unzip
+      .start({
+        zipFilePath,
+        installDir,
+      })
+      .then(() => {
+        debug('checking if unzip was called')
+        expect(cp.spawn, 'unzip spawn').to.have.been.calledWith('ditto')
+        expect(unzip.utils.unzipTools.extract, 'extract called').to.be.calledWith(zipFilePath)
+        expect(unzip.utils.unzipTools.extract, 'extract called once').to.be.calledOnce
+        done()
+      })
+    })
+  })
+})

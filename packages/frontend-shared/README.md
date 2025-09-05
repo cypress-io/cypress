@@ -26,7 +26,7 @@ yarn workspace @packages/frontend-shared cypress:run:ct
 There are two shared components involved with links - `BaseLink`, and `ExternalLink`. `BaseLink` is responsible for default colors and hover/focus styles. `ExternalLink` wraps `BaseLink` is responsible for managing the GraphQL mutation that triggers links to open the in the user's default browser.
 
 ## Generate the theme for shiki
-See [the readme in the src/public/shiki/themes directory](./src/public/shiki/themes/ReadMe.md)
+See [the readme in the src/shiki/themes directory](./src/shiki/themes/ReadMe.md)
 
 ## Front-end Conventions, Underlying Ideas, and Gotchas
 These apply to this package, `app`, and `launchpad`, as well as any future work in this Vue-Tailwind-GQL stack. The goal is for this to provide useful context for new developers adding features to the codebase, or making changes to existing features. There are pros and cons to all of these decisions, but rather than get into those in detail, this is just a document of what practices we are following.
