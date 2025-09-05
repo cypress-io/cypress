@@ -20,7 +20,6 @@ export const baseConfig: Cypress.ConfigOptions = {
     configFile: '../../mocha-reporter-config.json',
   },
   e2e: {
-    // @ts-expect-error - this will not error when we actually release the experimentalPromptCommand flag
     experimentalPromptCommand: true,
     experimentalOriginDependencies: true,
     experimentalModifyObstructiveThirdPartyCode: true,

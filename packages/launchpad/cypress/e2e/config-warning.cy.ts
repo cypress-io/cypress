@@ -259,7 +259,7 @@ describe('experimentalPromptCommand', () => {
     cy.visitLaunchpad()
     cy.get('[data-cy-testingtype="component"]').click()
     cy.findByTestId('error-header')
-    cy.contains('The experimentalPromptCommand experiment is currently only supported for End to End Testing.')
+    cy.contains('The experimentalPromptCommand experiment is currently only supported for End to End Testing')
   })
 
   it('is not a valid config when specified at root', () => {
@@ -267,8 +267,8 @@ describe('experimentalPromptCommand', () => {
     cy.openProject('experimentalPromptCommand', ['--config-file', 'cypress-invalid-prompt-experiment-root.config.js'])
 
     cy.visitLaunchpad()
-    cy.get('[data-cy-testingtype="component"]').click()
+    cy.get('[data-cy-testingtype="e2e"]').click()
     cy.findByTestId('error-header')
-    cy.contains('The experimentalPromptCommand experiment is currently only supported for End to End Testing.')
+    cy.contains('The experimentalPromptCommand experiment is currently only supported for End to End Testing')
   })
 })
