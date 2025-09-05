@@ -1,27 +1,11 @@
 import { baseConfig, cliOverrides, globals } from '@packages/eslint-config'
-
 import expectType from 'eslint-plugin-expect-type/configs/recommended'
 
 const config = [
   ...baseConfig,
   ...cliOverrides,
+
   {
-    ...expectType.default,
-  },
-  {
-    languageOptions: {
-      parserOptions: {
-        tsconfigRootDir: __dirname,
-        allowDefaultProject: ['./eslint.config.ts', './index.mjs'],
-      },
-      globals: {
-        __dirname: 'readonly',
-        __filename: 'readonly',
-        Buffer: 'readonly',
-        process: 'readonly',
-        ...globals.specHelper,
-      },
-    },
     rules: {
       '@stylistic/comma-dangle': 'warn',
       '@stylistic/comma-spacing': 'warn',
@@ -39,6 +23,27 @@ const config = [
       '@stylistic/space-infix-ops': 'warn',
       '@stylistic/template-tag-spacing': 'warn',
       'no-var': 'warn',
+    },
+  },
+  {
+    // expect-type needs some special handling, otherwise eslint thinks
+    // it doesn't have parser options to determine type information
+    files: ['types/**/*.ts'],
+    ...expectType,
+    languageOptions: {
+      parserOptions: {
+        tsconfigRootDir: __dirname,
+        projectService: true,
+      },
+      globals: {
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        Buffer: 'readonly',
+        process: 'readonly',
+      },
+    },
+    rules: {
+      'expect-type/expect': 'error',
     },
   },
   {
