@@ -254,7 +254,7 @@ describe('component testing dependency warnings', () => {
 describe('experimentalPromptCommand', () => {
   it('is not a valid config for component testing', () => {
     cy.scaffoldProject('experimentalPromptCommand')
-    cy.openProject('experimentalPromptCommand', ['--config-file', 'cypress-invalid-prompt-command-experiment.config.js'])
+    cy.openProject('experimentalPromptCommand', ['--config-file', 'cypress-invalid-prompt-experiment.config.js'])
 
     cy.visitLaunchpad()
     cy.get('[data-cy-testingtype="component"]').click()
@@ -264,7 +264,7 @@ describe('experimentalPromptCommand', () => {
 
   it('is not a valid config when specified at root', () => {
     cy.scaffoldProject('experimentalPromptCommand')
-    cy.openProject('experimentalPromptCommand', ['--config-file', 'cypress-invalid-prompt-command-experiment-root.config.js'])
+    cy.openProject('experimentalPromptCommand', ['--config-file', 'cypress-invalid-prompt-experiment-root.config.js'])
 
     cy.visitLaunchpad()
     cy.get('[data-cy-testingtype="component"]').click()

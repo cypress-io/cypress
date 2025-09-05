@@ -1,8 +1,7 @@
 const { defineConfig } = require('cypress')
 
 module.exports = defineConfig({
-  // This property is invalid as `experimentalStudio` is only available for e2e
+  // This property is invalid as `experimentalPromptCommand` is only available for e2e
   experimentalPromptCommand: true,
-  e2e: {
-  },
+  e2e: {},
 })

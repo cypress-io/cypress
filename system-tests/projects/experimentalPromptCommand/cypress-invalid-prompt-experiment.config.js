@@ -2,7 +2,7 @@ const { defineConfig } = require('cypress')
 
 module.exports = defineConfig({
   component: {
-    // This property is invalid as `experimentalStudio` is only available for e2e
+    // This property is invalid as `experimentalPromptCommand` is only available for e2e
     experimentalPromptCommand: true,
     devServer () {
       // This test doesn't need to actually run any component tests
