@@ -250,3 +250,25 @@ describe('component testing dependency warnings', () => {
     cy.get('[data-cy="warning-alert"]').should('not.exist')
   })
 })
+
+describe('experimentalPromptCommand', () => {
+  it('is not a valid config for component testing', () => {
+    cy.scaffoldProject('experimentalPromptCommand')
+    cy.openProject('experimentalPromptCommand', ['--config-file', 'cypress-invalid-prompt-command-experiment.config.js'])
+
+    cy.visitLaunchpad()
+    cy.get('[data-cy-testingtype="component"]').click()
+    cy.findByTestId('error-header')
+    cy.contains('The experimentalPromptCommand experiment is currently only supported for End to End Testing.')
+  })
+
+  it('is not a valid config when specified at root', () => {
+    cy.scaffoldProject('experimentalPromptCommand')
+    cy.openProject('experimentalPromptCommand', ['--config-file', 'cypress-invalid-prompt-command-experiment-root.config.js'])
+
+    cy.visitLaunchpad()
+    cy.get('[data-cy-testingtype="component"]').click()
+    cy.findByTestId('error-header')
+    cy.contains('The experimentalPromptCommand experiment is currently only supported for End to End Testing.')
+  })
+})

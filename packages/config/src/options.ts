@@ -679,6 +679,12 @@ export const breakingRootOptions: Array<BreakingOption> = [
     testingTypes: ['e2e'],
   },
   {
+    name: 'experimentalPromptCommand',
+    errorKey: 'EXPERIMENTAL_PROMPT_COMMAND_E2E_ONLY',
+    isWarning: false,
+    testingTypes: ['e2e'],
+  },
+  {
     name: 'justInTimeCompile',
     errorKey: 'JIT_COMPONENT_TESTING',
     isWarning: false,
@@ -733,6 +739,11 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
     {
       name: 'experimentalOriginDependencies',
       errorKey: 'EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY',
+      isWarning: false,
+    },
+    {
+      name: 'experimentalPromptCommand',
+      errorKey: 'EXPERIMENTAL_PROMPT_COMMAND_E2E_ONLY',
       isWarning: false,
     },
     {
