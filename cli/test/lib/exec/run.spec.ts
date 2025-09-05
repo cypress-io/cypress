@@ -58,7 +58,7 @@ describe('exec run', () => {
     vi.clearAllMocks()
     vi.unstubAllEnvs()
 
-    // @ts-expect-error
+    // @ts-expect-error - mockReturnValue
     util.isInstalledGlobally.mockReturnValue(true)
   })
 
