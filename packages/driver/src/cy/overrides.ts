@@ -19,130 +19,34 @@ export const create = (state: StateFunc, config: ICypress['config'], focused: IF
         })
       }
 
-      // OPTIMIZATION 1: Batch DOM modifications to prevent multiple layout recalculations
-      let pendingDOMModifications = new Set()
-      let modificationTimeout: NodeJS.Timeout | null = null
-
-      const batchDOMModifications = (callback: () => void) => {
-        pendingDOMModifications.add(callback)
-
-        if (modificationTimeout) {
-          clearTimeout(modificationTimeout)
-        }
-
-        modificationTimeout = setTimeout(() => {
-          // Use requestAnimationFrame to batch all modifications in a single frame
-          requestAnimationFrame(() => {
-            pendingDOMModifications.forEach((fn) => fn())
-            pendingDOMModifications.clear()
-            modificationTimeout = null
-          })
-        }, 0)
-      }
-
-      // OPTIMIZATION 2: Debounced focus/blur to prevent rapid layout changes
-      const debouncedFocus = _.debounce(function (focusOption) {
-        return focused.interceptFocus(this, contentWindow, focusOption)
-      }, 16) // ~60fps throttling
-
-      const debouncedBlur = _.debounce(function () {
-        return focused.interceptBlur(this)
-      }, 16)
-
       contentWindow.HTMLElement.prototype.focus = function (focusOption) {
-        return batchDOMModifications(() => {
-          return debouncedFocus.call(this, focusOption)
-        })
+        return focused.interceptFocus(this, contentWindow, focusOption)
       }
 
       contentWindow.HTMLElement.prototype.blur = function () {
-        return batchDOMModifications(() => {
-          return debouncedBlur.call(this)
-        })
+        return focused.interceptBlur(this)
       }
 
       contentWindow.SVGElement.prototype.focus = function (focusOption) {
-        return batchDOMModifications(() => {
-          return debouncedFocus.call(this, focusOption)
-        })
+        return focused.interceptFocus(this, contentWindow, focusOption)
       }
 
       contentWindow.SVGElement.prototype.blur = function () {
-        return batchDOMModifications(() => {
-          return debouncedBlur.call(this)
-        })
+        return focused.interceptBlur(this)
       }
-
-      // OPTIMIZATION 3: Throttled select to prevent rapid text selection changes
-      const throttledSelect = _.throttle(function () {
-        return $selection.interceptSelect.call(this)
-      }, 16)
 
       contentWindow.HTMLInputElement.prototype.select = function () {
-        return batchDOMModifications(() => {
-          return throttledSelect.call(this)
-        })
+        return $selection.interceptSelect.call(this)
       }
-
-      // OPTIMIZATION 4: Cached document.hasFocus to prevent repeated DOM queries
-      let cachedHasFocus: boolean | null = null
-      let hasFocusCacheTimeout: NodeJS.Timeout | null = null
 
       contentWindow.document.hasFocus = function () {
-        if (cachedHasFocus === null) {
-          cachedHasFocus = focused.documentHasFocus.call(this)
-
-          // Clear cache after a short delay
-          if (hasFocusCacheTimeout) {
-            clearTimeout(hasFocusCacheTimeout)
-          }
-
-          hasFocusCacheTimeout = setTimeout(() => {
-            cachedHasFocus = null
-            hasFocusCacheTimeout = null
-          }, 100)
-        }
-
-        return cachedHasFocus
-      }
-
-      // OPTIMIZATION 5: Batched CSS modifications to prevent multiple layout recalculations
-      let pendingCSSModifications: Array<{ original: Function, args: any[], context: any }> = []
-      let cssModificationTimeout: NodeJS.Timeout | null = null
-
-      const batchCSSModifications = (original: Function, args: any[], context: any) => {
-        pendingCSSModifications.push({ original, args, context })
-
-        if (cssModificationTimeout) {
-          clearTimeout(cssModificationTimeout)
-        }
-
-        cssModificationTimeout = setTimeout(() => {
-          // Batch all CSS modifications in a single frame
-          requestAnimationFrame(() => {
-            pendingCSSModifications.forEach(({ original, args, context }) => {
-              snapshots.onCssModified(context.href)
-              original.apply(context, args)
-            })
-
-            pendingCSSModifications = []
-            cssModificationTimeout = null
-          })
-        }, 0)
+        return focused.documentHasFocus.call(this)
       }
 
       const cssModificationSpy = function (original, ...args) {
-        // Don't trigger immediate layout recalculation
-        // Instead, batch the modification
-        batchCSSModifications(original, args, this)
+        snapshots.onCssModified(this.href)
 
-        // Return a promise-like object to maintain compatibility
-        return {
-          then: (resolve: Function) => {
-            // Resolve after the batched modification
-            setTimeout(() => resolve(original.apply(this, args)), 0)
-          },
-        }
+        return original.apply(this, args)
       }
 
       const { insertRule } = contentWindow.CSSStyleSheet.prototype
@@ -151,7 +55,9 @@ export const create = (state: StateFunc, config: ICypress['config'], focused: IF
       contentWindow.CSSStyleSheet.prototype.insertRule = _.wrap(insertRule, cssModificationSpy)
       contentWindow.CSSStyleSheet.prototype.deleteRule = _.wrap(deleteRule, cssModificationSpy)
 
-      // OPTIMIZATION 6: Add ResizeObserver protection
+      // Add ResizeObserver protection
+      // to handle Chrome crashes when using ResizeObserver
+      // https://github.com/cypress-io/cypress/issues/25443
       if (contentWindow.ResizeObserver) {
         const OriginalResizeObserver = contentWindow.ResizeObserver
 
@@ -163,7 +69,7 @@ export const create = (state: StateFunc, config: ICypress['config'], focused: IF
 
           constructor (callback: ResizeObserverCallback) {
             super((entries, observer) => {
-              // Prevent excessive ResizeObserver callbacks
+            // Prevent excessive ResizeObserver callbacks
               const now = Date.now()
               const timeSinceLastCallback = now - this._lastCallbackTime
 
@@ -181,7 +87,7 @@ export const create = (state: StateFunc, config: ICypress['config'], focused: IF
               this._callbackCount++
 
               try {
-                // Check for problematic fractional dimensions
+              // Check for problematic fractional dimensions
                 const hasFractionalChanges = entries.some((entry) => {
                   const { width, height } = entry.contentRect
 
@@ -189,13 +95,13 @@ export const create = (state: StateFunc, config: ICypress['config'], focused: IF
                 })
 
                 if (hasFractionalChanges) {
-                  // Block fractional dimension changes that cause Chrome crashes
+                // Block fractional dimension changes that cause Chrome crashes
                   return
                 }
 
                 callback(entries, observer)
               } catch (error) {
-                // eslint-disable-next-line no-console
+              // eslint-disable-next-line no-console
                 console.error('[Cypress] ResizeObserver callback error:', error)
               } finally {
                 this._isProcessing = false
@@ -205,7 +111,7 @@ export const create = (state: StateFunc, config: ICypress['config'], focused: IF
         }
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
+    // eslint-disable-next-line no-console
       console.error('[Cypress] Error in wrapNativeMethods:', error)
     }
   }
@@ -214,3 +120,5 @@ export const create = (state: StateFunc, config: ICypress['config'], focused: IF
     wrapNativeMethods,
   }
 }
+
+export interface IOverrides extends ReturnType<typeof create> {}
