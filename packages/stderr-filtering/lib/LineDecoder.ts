@@ -10,7 +10,7 @@
 import Debug from 'debug'
 import { END_TAG } from './constants'
 
-const debug = Debug(`cypress-verbose::stderr-filtering:LineDecoder:${process.pid}`)
+const debug = Debug(`cypress:stderr-filtering:LineDecoder:${process.pid}`)
 
 export class LineDecoder {
   private buffer: string = ''
