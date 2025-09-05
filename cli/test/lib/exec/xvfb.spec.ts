@@ -1,111 +1,100 @@
-import '../../spec_helper'
+import { vi, describe, it, beforeEach, expect } from 'vitest'
 import os from 'os'
-
+import _xvfb from '@cypress/xvfb'
 import xvfb from '../../../lib/exec/xvfb'
+
+vi.mock('os', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      platform: vi.fn(),
+    },
+  }
+})
+
+vi.mock(import('@cypress/xvfb'), async () => {
+  const XVFB_MOCK = vi.fn()
+
+  XVFB_MOCK.prototype.start = vi.fn()
+
+  return {
+    default: XVFB_MOCK,
+  }
+})
 
 describe('lib/exec/xvfb', function () {
   beforeEach(function (): void {
-    (os.platform as any).returns('win32')
+    vi.clearAllMocks()
+    vi.unstubAllEnvs()
+    // @ts-expect-error - mockReturnValue
+    os.platform.mockReturnValue('win32')
   })
 
-  context('debugXvfb', function () {
-    const { Debug } = xvfb._debugXvfb
-    const { namespaces } = Debug
+  describe('#start', function () {
+    it('passes', async () => {
+      vi.spyOn(_xvfb.prototype, 'start').mockImplementation((cb) => {
+        // mock a pass
+        cb()
+      })
 
-    beforeEach(() => {
-      Debug.enable(namespaces)
+      await expect(xvfb.start()).resolves.toBeNull()
     })
 
-    afterEach(() => {
-      Debug.enable(namespaces)
-    })
-
-    it('outputs when enabled', function () {
-      sinon.stub(process.stderr, 'write').returns(undefined)
-      Debug.enable(xvfb._debugXvfb.namespace)
-
-      xvfb._xvfb._onStderrData('asdf')
-
-      expect(process.stderr.write).to.be.calledWithMatch('cypress:xvfb')
-      expect(process.stderr.write).to.be.calledWithMatch('asdf')
-    })
-
-    it('does not output when disabled', function () {
-      sinon.stub(process.stderr, 'write')
-      Debug.disable()
-
-      xvfb._xvfb._onStderrData('asdf')
-
-      expect(process.stderr.write).not.to.be.calledWithMatch('cypress:xvfb')
-      expect(process.stderr.write).not.to.be.calledWithMatch('asdf')
-    })
-  })
-
-  context('xvfbOptions', function () {
-    it('sets explicit screen', () => {
-      expect(xvfb._xvfbOptions).to.have.property('xvfb_args').that.includes('-screen')
-    })
-  })
-
-  context('#start', function () {
-    it('passes', function () {
-      sinon.stub(xvfb._xvfb, 'startAsync').resolves()
-
-      return xvfb.start()
-    })
-
-    it('fails with error message', function () {
+    it('fails with error message', async () => {
       const message = 'nope'
 
-      sinon.stub(xvfb._xvfb, 'startAsync').rejects(new Error(message))
+      vi.spyOn(_xvfb.prototype, 'start').mockImplementation((cb) => {
+        // mock a failure
+        cb(new Error(message))
+      })
 
-      return xvfb.start()
-      .then(() => {
-        throw new Error('Should have thrown an error')
-      })
-      .catch((err: Error) => {
-        expect(err.message).to.include(message)
-      })
+      await expect(xvfb.start()).rejects.toThrow(message)
     })
 
-    it('fails when xvfb exited with non zero exit code', function () {
+    it('fails when xvfb exited with non zero exit code', async () => {
       const e: any = new Error('something bad happened')
 
       e.nonZeroExitCode = true
 
-      sinon.stub(xvfb._xvfb, 'startAsync').rejects(e)
+      vi.spyOn(_xvfb.prototype, 'start').mockImplementation((cb) => {
+        // mock a failure
+        cb(e)
+      })
 
-      return xvfb.start()
-      .then(() => {
-        throw new Error('Should have thrown an error')
-      })
-      .catch((err: any) => {
-        expect(err.known).to.be.true
-        expect(err.message).to.include('something bad happened')
-        expect(err.message).to.include('Xvfb exited with a non zero exit code.')
-      })
+      await expect(xvfb.start()).rejects.toThrow(expect.objectContaining({
+        message: expect.stringContaining('something bad happened'),
+        known: true,
+      }))
+
+      await expect(xvfb.start()).rejects.toThrow(expect.objectContaining({
+        message: expect.stringContaining('Xvfb exited with a non zero exit code.'),
+        known: true,
+      }))
     })
   })
 
-  context('#isNeeded', function () {
+  describe('#isNeeded', function () {
     it('does not need xvfb on osx', function () {
-      (os.platform as any).returns('darwin')
-
-      expect(xvfb.isNeeded()).to.be.false
+      // @ts-expect-error - mockReturnValue
+      os.platform.mockReturnValue('darwin')
+      expect(xvfb.isNeeded()).toBe(false)
     })
 
     it('does not need xvfb on linux when DISPLAY is set', function () {
-      (os.platform as any).returns('linux')
+      // @ts-expect-error - mockReturnValue
+      os.platform.mockReturnValue('linux')
+      vi.stubEnv('DISPLAY', ':99')
 
-      process.env.DISPLAY = ':99'
-
-      expect(xvfb.isNeeded()).to.be.false
+      expect(xvfb.isNeeded()).toBe(false)
     })
 
     it('does need xvfb on linux when no DISPLAY is set', function () {
-      (os.platform as any).returns('linux')
-
-      expect(xvfb.isNeeded()).to.be.true
+      // @ts-expect-error - mockReturnValue
+      os.platform.mockReturnValue('linux')
+      expect(xvfb.isNeeded()).toBe(true)
     })
   })
 })

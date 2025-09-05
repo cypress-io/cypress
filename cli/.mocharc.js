@@ -1,12 +1,6 @@
 module.exports = {
   // hardcoding the spec file names as they will be converted 1 by 1 to vitest
   spec: [
-    'test/lib/exec/info.spec.ts',
-    'test/lib/exec/open.spec.ts',
-    'test/lib/exec/run.spec.ts',
-    'test/lib/exec/spawn.spec.ts',
-    'test/lib/exec/versions.spec.ts',
-    'test/lib/exec/xvfb.spec.ts',
     'test/lib/tasks/cache.spec.ts',
     'test/lib/tasks/dependency.spec.ts',
     'test/lib/tasks/download.spec.ts',

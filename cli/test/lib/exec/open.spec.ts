@@ -1,145 +1,164 @@
-import '../../spec_helper'
-
+import { vi, describe, it, beforeEach, expect } from 'vitest'
 import util from '../../../lib/util'
 import verify from '../../../lib/tasks/verify'
 import spawn from '../../../lib/exec/spawn'
 import open from '../../../lib/exec/open'
 
+vi.mock('../../../lib/util', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      isInstalledGlobally: vi.fn(),
+    },
+  }
+})
+
+vi.mock('../../../lib/exec/spawn', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      start: vi.fn(),
+    },
+  }
+})
+
+vi.mock('../../../lib/tasks/verify', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      start: vi.fn(),
+    },
+  }
+})
+
 describe('exec open', function () {
-  context('.start', function () {
+  describe('.start', function () {
     beforeEach(function (): void {
-      sinon.stub(util, 'isInstalledGlobally').returns(true)
-      sinon.stub(verify, 'start').resolves()
-      sinon.stub(spawn, 'start').resolves()
+      vi.clearAllMocks()
+      vi.unstubAllEnvs()
+
+      // @ts-expect-error - mockReturnValue
+      util.isInstalledGlobally.mockReturnValue(true)
+      // @ts-expect-error - mockResolvedValue
+      verify.start.mockResolvedValue(undefined)
+      // @ts-expect-error - mockResolvedValue
+      spawn.start.mockResolvedValue(undefined)
     })
 
-    it('verifies download', function () {
-      return open.start()
-      .then(() => {
-        expect(verify.start).to.be.called
+    it('verifies download', async () => {
+      await open.start()
+      expect(verify.start).toHaveBeenCalled()
+    })
+
+    it('calls spawn with correct options', async () => {
+      await open.start({ dev: true })
+      expect(spawn.start).toHaveBeenCalledWith([], {
+        detached: false,
+        dev: true,
       })
     })
 
-    it('calls spawn with correct options', function () {
-      return open.start({ dev: true })
-      .then(() => {
-        expect(spawn.start).to.be.calledWith([], {
-          detached: false,
-          dev: true,
-        })
-      })
+    it('spawns with port', async () => {
+      await open.start({ port: '1234' })
+      expect(spawn.start).toHaveBeenCalledWith(['--port', '1234'], expect.anything())
     })
 
-    it('spawns with port', function () {
-      return open.start({ port: '1234' })
-      .then(() => {
-        expect(spawn.start).to.be.calledWith(['--port', '1234'])
-      })
+    it('spawns with --env', async () => {
+      await open.start({ env: 'host=http://localhost:1337,name=brian' })
+      expect(spawn.start).toHaveBeenCalledWith(
+        ['--env', 'host=http://localhost:1337,name=brian'],
+        expect.anything(),
+      )
     })
 
-    it('spawns with --env', function () {
-      return open.start({ env: 'host=http://localhost:1337,name=brian' })
-      .then(() => {
-        expect(spawn.start).to.be.calledWith(
-          ['--env', 'host=http://localhost:1337,name=brian'],
-        )
-      })
+    it('spawns with --config', async () => {
+      await open.start({ config: 'watchForFileChanges=false,baseUrl=localhost' })
+      expect(spawn.start).toHaveBeenCalledWith(
+        ['--config', 'watchForFileChanges=false,baseUrl=localhost'],
+        expect.anything(),
+      )
     })
 
-    it('spawns with --config', function () {
-      return open.start({ config: 'watchForFileChanges=false,baseUrl=localhost' })
-      .then(() => {
-        expect(spawn.start).to.be.calledWith(
-          ['--config', 'watchForFileChanges=false,baseUrl=localhost'],
-        )
-      })
+    it('spawns with --config-file set', async () => {
+      await open.start({ configFile: 'special-cypress.config.js' })
+      expect(spawn.start).toHaveBeenCalledWith(
+        ['--config-file', 'special-cypress.config.js'],
+        expect.anything(),
+      )
     })
 
-    it('spawns with --config-file set', function () {
-      return open.start({ configFile: 'special-cypress.config.js' })
-      .then(() => {
-        expect(spawn.start).to.be.calledWith(
-          ['--config-file', 'special-cypress.config.js'],
-        )
-      })
-    })
-
-    it('spawns with cwd as --project if not installed globally', function () {
+    it('spawns with cwd as --project if not installed globally', async () => {
       // @ts-expect-error - is shorthand stub on a function
-      util.isInstalledGlobally.returns(false)
+      util.isInstalledGlobally.mockReturnValue(false)
 
-      return open.start()
-      .then(() => {
-        expect(spawn.start).to.be.calledWith(
-          ['--project', process.cwd()],
-        )
-      })
+      await open.start()
+      expect(spawn.start).toHaveBeenCalledWith(['--project', process.cwd()], expect.anything())
     })
 
-    it('spawns without --project if not installed globally and passing --global option', function () {
-    // @ts-expect-error - is shorthand stub on a function
-      util.isInstalledGlobally.returns(false)
-
-      return open.start({ global: true })
-      .then(() => {
-        expect(spawn.start).not.to.be.calledWith(
-          ['--project', process.cwd()],
-        )
-      })
-    })
-
-    it('spawns with --project passed in as options even when not installed globally', function () {
+    it('spawns without --project if not installed globally and passing --global option', async () => {
       // @ts-expect-error - is shorthand stub on a function
-      util.isInstalledGlobally.returns(false)
+      util.isInstalledGlobally.mockReturnValue(false)
 
-      return open.start({ project: '/path/to/project' })
-      .then(() => {
-        expect(spawn.start).to.be.calledWith(
-          ['--project', '/path/to/project'],
-        )
-      })
+      await open.start({ global: true })
+      expect(spawn.start).not.toHaveBeenCalledWith(
+        ['--project', process.cwd()],
+      )
     })
 
-    it('spawns with --project if specified and installed globally', function () {
-      return open.start({ project: '/path/to/project' })
-      .then(() => {
-        expect(spawn.start).to.be.calledWith(
-          ['--project', '/path/to/project'],
-        )
-      })
+    it('spawns with --project passed in as options even when not installed globally', async () => {
+      // @ts-expect-error - is shorthand stub on a function
+      util.isInstalledGlobally.mockReturnValue(false)
+
+      await open.start({ project: '/path/to/project' })
+      expect(spawn.start).toHaveBeenCalledWith(
+        ['--project', '/path/to/project'],
+        expect.anything(),
+      )
     })
 
-    it('spawns without --project if not specified and installed globally', function () {
-      return open.start()
-      .then(() => {
-        expect(spawn.start).to.be.calledWith([])
-      })
+    it('spawns with --project if specified and installed globally', async () => {
+      await open.start({ project: '/path/to/project' })
+      expect(spawn.start).toHaveBeenCalledWith(
+        ['--project', '/path/to/project'],
+        expect.anything(),
+      )
     })
 
-    it('spawns without --testing-type when not specified', () => {
-      return open.start().then(() => {
-        expect(spawn.start).to.be.calledWith([])
-      })
+    it('spawns without --project if not specified and installed globally', async () => {
+      await open.start()
+      expect(spawn.start).toHaveBeenCalledWith([], expect.anything())
     })
 
-    it('spawns with --testing-type e2e', () => {
-      return open.start({ testingType: 'e2e' }).then(() => {
-        expect(spawn.start).to.be.calledWith(['--testing-type', 'e2e'])
-      })
+    it('spawns without --testing-type when not specified', async () => {
+      await open.start()
+      expect(spawn.start).toHaveBeenCalledWith([], expect.anything())
     })
 
-    it('spawns with --testing-type component', () => {
-      return open.start({ testingType: 'component' }).then(() => {
-        expect(spawn.start).to.be.calledWith(['--testing-type', 'component'])
-      })
+    it('spawns with --testing-type e2e', async () => {
+      await open.start({ testingType: 'e2e' })
+      expect(spawn.start).toHaveBeenCalledWith(['--testing-type', 'e2e'], expect.anything())
+    })
+
+    it('spawns with --testing-type component', async () => {
+      await open.start({ testingType: 'component' })
+      expect(spawn.start).toHaveBeenCalledWith(['--testing-type', 'component'], expect.anything())
     })
 
     it('throws if --testing-type is invalid', () => {
-      expect(() => open.processOpenOptions({ testingType: 'randomTestingType' })).to.throw()
+      expect(() => open.processOpenOptions({ testingType: 'randomTestingType' })).toThrow()
     })
 
     it('throws if --config-file is false', () => {
-      expect(() => open.processOpenOptions({ configFile: 'false' })).to.throw()
+      expect(() => open.processOpenOptions({ configFile: 'false' })).toThrow()
     })
   })
 })

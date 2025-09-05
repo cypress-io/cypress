@@ -1,38 +1,88 @@
-import '../../spec_helper'
+import { vi, describe, it, beforeEach, expect } from 'vitest'
 import os from 'os'
-import snapshot from '../../support/snapshot'
 import util from '../../../lib/util'
 import run from '../../../lib/exec/run'
 import spawn from '../../../lib/exec/spawn'
 import verify from '../../../lib/tasks/verify'
 
-describe('exec run', function () {
-  beforeEach(function () {
-    sinon.stub(util, 'isInstalledGlobally').returns(true)
-    sinon.stub(process, 'exit')
+vi.mock('os', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      platform: vi.fn(),
+    },
+  }
+})
+
+vi.mock('../../../lib/util', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      isInstalledGlobally: vi.fn(),
+    },
+  }
+})
+
+vi.mock('../../../lib/exec/spawn', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      start: vi.fn(),
+    },
+  }
+})
+
+vi.mock('../../../lib/tasks/verify', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      start: vi.fn(),
+    },
+  }
+})
+
+describe('exec run', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.unstubAllEnvs()
+
+    // @ts-expect-error - mockReturnValue
+    util.isInstalledGlobally.mockReturnValue(true)
   })
 
-  context('.processRunOptions', function () {
+  describe('.processRunOptions', () => {
     it('allows string --project option', () => {
       const args = run.processRunOptions({
         project: '/path/to/project',
       })
 
-      expect(args).to.deep.equal(['--run-project', '/path/to/project'])
+      expect(args).toEqual(['--run-project', '/path/to/project'])
     })
 
     it('throws an error for empty string --project', () => {
-      expect(() => run.processRunOptions({ project: '' })).to.throw()
+      expect(() => run.processRunOptions({ project: '' })).toThrow()
     })
 
     it('throws an error for boolean --project', () => {
-      expect(() => run.processRunOptions({ project: false })).to.throw()
-      expect(() => run.processRunOptions({ project: true })).to.throw()
+      expect(() => run.processRunOptions({ project: false })).toThrow()
+      expect(() => run.processRunOptions({ project: true })).toThrow()
     })
 
     it('throws an error for --project "false" or "true"', () => {
-      expect(() => run.processRunOptions({ project: 'false' })).to.throw()
-      expect(() => run.processRunOptions({ project: 'true' })).to.throw()
+      expect(() => run.processRunOptions({ project: 'false' })).toThrow()
+      expect(() => run.processRunOptions({ project: 'true' })).toThrow()
     })
 
     it('passes --browser option', () => {
@@ -40,7 +90,7 @@ describe('exec run', function () {
         browser: 'test browser',
       })
 
-      snapshot(args)
+      expect(args).toMatchSnapshot()
     })
 
     it('passes --record option', () => {
@@ -48,19 +98,18 @@ describe('exec run', function () {
         record: 'my record id',
       })
 
-      snapshot(args)
+      expect(args).toMatchSnapshot()
     })
 
     it('does not allow setting paradoxical --headed and --headless flags', () => {
-      (os.platform as any).returns('linux')
+      // @ts-expect-error mockReturnValue
+      os.platform.mockReturnValue('linux')
 
-      ;(process.exit as any).returns()
-
-      expect(() => run.processRunOptions({ headed: true, headless: true })).to.throw()
+      expect(() => run.processRunOptions({ headed: true, headless: true })).toThrow()
     })
 
     it('passes --headed according to --headless', () => {
-      expect(run.processRunOptions({ headless: true })).to.deep.eq([
+      expect(run.processRunOptions({ headless: true })).toEqual([
         '--run-project', undefined, '--headed', 'false',
       ])
     })
@@ -71,176 +120,130 @@ describe('exec run', function () {
         browser: 'test browser',
       })
 
-      snapshot(args)
+      expect(args).toMatchSnapshot()
     })
 
     it('defaults to e2e testingType', () => {
       const args = run.processRunOptions()
 
-      snapshot(args)
+      expect(args).toMatchSnapshot()
     })
 
     it('passes e2e testingType', () => {
-      expect(run.processRunOptions({ testingType: 'e2e' })).to.deep.eq([
+      expect(run.processRunOptions({ testingType: 'e2e' })).toEqual([
         '--run-project', undefined, '--testing-type', 'e2e',
       ])
     })
 
     it('passes component testingType', () => {
-      expect(run.processRunOptions({ testingType: 'component' })).to.deep.eq([
+      expect(run.processRunOptions({ testingType: 'component' })).toEqual([
         '--run-project', undefined, '--testing-type', 'component',
       ])
     })
 
     it('throws if testingType is invalid', () => {
-      expect(() => run.processRunOptions({ testingType: 'randomTestingType' })).to.throw()
+      expect(() => run.processRunOptions({ testingType: 'randomTestingType' })).toThrow()
     })
 
     it('throws if both e2e and component are set', () => {
-      expect(() => run.processRunOptions({ e2e: true, component: true })).to.throw()
+      expect(() => run.processRunOptions({ e2e: true, component: true })).toThrow()
     })
 
     it('throws if both testingType and component are set', () => {
-      expect(() => run.processRunOptions({ testingType: 'component', component: true })).to.throw()
+      expect(() => run.processRunOptions({ testingType: 'component', component: true })).toThrow()
     })
 
     it('throws if --config-file is false', () => {
-      expect(() => run.processRunOptions({ configFile: 'false' })).to.throw()
+      expect(() => run.processRunOptions({ configFile: 'false' })).toThrow()
     })
   })
 
-  context('.start', function () {
-    beforeEach(function () {
-      sinon.stub(spawn, 'start').resolves()
-      sinon.stub(verify, 'start').resolves()
+  describe('.start', () => {
+    beforeEach(() => {
+      // @ts-expect-error - mockResolvedValue
+      spawn.start.mockResolvedValue(undefined)
+      // @ts-expect-error - mockResolvedValue
+      verify.start.mockResolvedValue(undefined)
     })
 
-    it('verifies cypress', function () {
-      return run.start()
-      .then(() => {
-        expect(verify.start).to.be.calledOnce
-      })
+    it('verifies cypress', async () => {
+      await run.start()
+      expect(verify.start).toHaveBeenCalledOnce()
     })
 
-    it('spawns with --key and xvfb', function () {
-      return run.start({ port: '1234' })
-      .then(() => {
-        expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--port', '1234'])
-      })
+    it('spawns with --key and xvfb', async () => {
+      await run.start({ port: '1234' })
+      expect(spawn.start).toHaveBeenCalledWith(['--run-project', process.cwd(), '--port', '1234'], expect.anything())
     })
 
-    it('spawns with --env', function () {
-      return run.start({ env: 'host=http://localhost:1337,name=brian' })
-      .then(() => {
-        expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--env', 'host=http://localhost:1337,name=brian'])
-      })
+    it('spawns with --env', async () => {
+      await run.start({ env: 'host=http://localhost:1337,name=brian' })
+      expect(spawn.start).toHaveBeenCalledWith(['--run-project', process.cwd(), '--env', 'host=http://localhost:1337,name=brian'], expect.anything())
     })
 
-    it('spawns with --config', function () {
-      return run.start({ config: 'watchForFileChanges=false,baseUrl=localhost' })
-      .then(() => {
-        expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--config', 'watchForFileChanges=false,baseUrl=localhost'])
-      })
+    it('spawns with --config', async () => {
+      await run.start({ config: 'watchForFileChanges=false,baseUrl=localhost' })
+      expect(spawn.start).toHaveBeenCalledWith(['--run-project', process.cwd(), '--config', 'watchForFileChanges=false,baseUrl=localhost'], expect.anything())
     })
 
-    it('spawns with --config-file set', function () {
-      return run.start({ configFile: 'special-cypress.config.js' })
-      .then(() => {
-        expect(spawn.start).to.be.calledWith(
-          ['--run-project', process.cwd(), '--config-file', 'special-cypress.config.js'],
-        )
-      })
+    it('spawns with --config-file set', async () => {
+      await run.start({ configFile: 'special-cypress.config.js' })
+      expect(spawn.start).toHaveBeenCalledWith(['--run-project', process.cwd(), '--config-file', 'special-cypress.config.js'], expect.anything())
     })
 
-    it('spawns with --record false', function () {
-      return run.start({ record: false })
-      .then(() => {
-        expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--record', false])
-      })
+    it('spawns with --record false', async () => {
+      await run.start({ record: false })
+      expect(spawn.start).toHaveBeenCalledWith(['--run-project', process.cwd(), '--record', false], expect.anything())
     })
 
-    it('spawns with --headed true', function () {
-      return run.start({ headed: true })
-      .then(() => {
-        expect(spawn.start).to.be.calledWith([
-          '--run-project', process.cwd(), '--headed', true,
-        ])
-      })
+    it('spawns with --headed true', async () => {
+      await run.start({ headed: true })
+      expect(spawn.start).toHaveBeenCalledWith(['--run-project', process.cwd(), '--headed', true], expect.anything())
     })
 
-    it('spawns with --no-exit', function () {
-      return run.start({ exit: false })
-      .then(() => {
-        expect(spawn.start).to.be.calledWith([
-          '--run-project', process.cwd(), '--no-exit',
-        ])
-      })
+    it('spawns with --no-exit', async () => {
+      await run.start({ exit: false })
+      expect(spawn.start).toHaveBeenCalledWith(['--run-project', process.cwd(), '--no-exit'], expect.anything())
     })
 
-    it('spawns with --output-path', function () {
-      return run.start({ outputPath: '/path/to/output' })
-      .then(() => {
-        expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--output-path', '/path/to/output'])
-      })
+    it('spawns with --output-path', async () => {
+      await run.start({ outputPath: '/path/to/output' })
+      expect(spawn.start).toHaveBeenCalledWith(['--run-project', process.cwd(), '--output-path', '/path/to/output'], expect.anything())
     })
 
-    it('spawns with --testing-type e2e when given --e2e', function () {
-      return run.start({ e2e: true })
-      .then(() => {
-        expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--testing-type', 'e2e'])
-      })
+    it('spawns with --testing-type e2e when given --e2e', async () => {
+      await run.start({ e2e: true })
+      expect(spawn.start).toHaveBeenCalledWith(['--run-project', process.cwd(), '--testing-type', 'e2e'], expect.anything())
     })
 
-    it('spawns with --testing-type component when given --component', function () {
-      return run.start({ component: true })
-      .then(() => {
-        expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--testing-type', 'component'])
-      })
+    it('spawns with --testing-type component when given --component', async () => {
+      await run.start({ component: true })
+      expect(spawn.start).toHaveBeenCalledWith(['--run-project', process.cwd(), '--testing-type', 'component'], expect.anything())
     })
 
-    it('spawns with --tag value', function () {
-      return run.start({ tag: 'nightly' })
-      .then(() => {
-        expect(spawn.start).to.be.calledWith([
-          '--run-project', process.cwd(), '--tag', 'nightly',
-        ])
-      })
+    it('spawns with --tag value', async () => {
+      await run.start({ tag: 'nightly' })
+      expect(spawn.start).toHaveBeenCalledWith(['--run-project', process.cwd(), '--tag', 'nightly'], expect.anything())
     })
 
-    it('spawns with several --tag words unchanged', function () {
-      return run.start({ tag: 'nightly, sanity' })
-      .then(() => {
-        expect(spawn.start).to.be.calledWith([
-          '--run-project', process.cwd(), '--tag', 'nightly, sanity',
-        ])
-      })
+    it('spawns with several --tag words unchanged', async () => {
+      await run.start({ tag: 'nightly, sanity' })
+      expect(spawn.start).toHaveBeenCalledWith(['--run-project', process.cwd(), '--tag', 'nightly, sanity'], expect.anything())
     })
 
-    it('spawns with --auto-cancel-after-failures value', function () {
-      return run.start({ autoCancelAfterFailures: 4 })
-      .then(() => {
-        expect(spawn.start).to.be.calledWith([
-          '--run-project', process.cwd(), '--auto-cancel-after-failures', 4,
-        ])
-      })
+    it('spawns with --auto-cancel-after-failures value', async () => {
+      await run.start({ autoCancelAfterFailures: 4 })
+      expect(spawn.start).toHaveBeenCalledWith(['--run-project', process.cwd(), '--auto-cancel-after-failures', 4], expect.anything())
     })
 
-    it('spawns with --auto-cancel-after-failures value false', function () {
-      return run.start({ autoCancelAfterFailures: false })
-      .then(() => {
-        expect(spawn.start).to.be.calledWith([
-          '--run-project', process.cwd(), '--auto-cancel-after-failures', false,
-        ])
-      })
+    it('spawns with --auto-cancel-after-failures value false', async () => {
+      await run.start({ autoCancelAfterFailures: false })
+      expect(spawn.start).toHaveBeenCalledWith(['--run-project', process.cwd(), '--auto-cancel-after-failures', false], expect.anything())
     })
 
-    it('spawns with --runner-ui', function () {
-      return run.start({ runnerUi: true })
-      .then(() => {
-        expect(spawn.start).to.be.calledWith([
-          '--run-project', process.cwd(), '--runner-ui', true,
-        ])
-      })
+    it('spawns with --runner-ui', async () => {
+      await run.start({ runnerUi: true })
+      expect(spawn.start).toHaveBeenCalledWith(['--run-project', process.cwd(), '--runner-ui', true], expect.anything())
     })
   })
 })
