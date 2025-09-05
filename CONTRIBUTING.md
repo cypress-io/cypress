@@ -181,7 +181,7 @@ Here is a list of the core packages in this repository with a short description,
  | [https-proxy](./packages/https-proxy) | `@packages/https-proxy` | This does https proxy for handling http certs and traffic.                   |
  | [icons](./packages/icons)       | `@packages/icons`    | The Cypress icons.                        |
  | [launcher](./packages/launcher)       | `@packages/launcher`    | Finds and launches browsers installed on your system.                        |
- | [launchpad](./packages/launchpad)       | `@packages/launcher`    | The portal to running Cypress that displays in `open` mode.                        |
+ | [launchpad](./packages/launchpad)       | `@packages/launchpad`    | The portal to running Cypress that displays in `open` mode.                        |
  | [net-stubbing](./packages/net-stubbing) | `@packages/net-stubbing` | Contains server side code for Cypress' network stubbing features.         |
  | [network](./packages/network)         | `@packages/network`     | Various utilities related to networking.                                     |
  | [packherd-require](./packages/packherd-require) | `@packages/packherd-require` | Loads modules that have been bundled by `@tooling/packherd`.  |
@@ -242,13 +242,28 @@ You must have the following installed on your system to contribute locally:
 
 `sudo apt install build-essential` meets the additional requirements to run `node-gyp` in the context of building Cypress from source.
 `python` is pre-installed on Debian-based systems including Ubuntu.
-The Python versions shipped with Ubuntu versions `20.04`, `22.04` and `24.*` are compatible with Cypress requirements.
+The default Python versions included with Debian `>=11` and Ubuntu `>=22.04`, which range from Python `3.9` - `3.13`, are all compatible with Cypress requirements.
 
-For Ubuntu `24.04` and above, refer also to the [Ubuntu 24.04 Release notes](https://discourse.ubuntu.com/t/noble-numbat-release-notes/39890) in the section "Unprivileged user namespace restrictions" and apply one of the workarounds to disable unprivileged user namespace restrictions for the entire system, either for one boot or persistently, as described. If you do not do this you may receive an error which includes the text `FATAL:setuid_sandbox_host.cc` when you try to run Cypress on these versions of Ubuntu after building Cypress from source.
+For Ubuntu `>=24.04`, disable "Unprivileged user namespace restrictions" permanently for the entire system by executing the following commands that are derived from the [Ubuntu 24.04 Release notes](https://discourse.ubuntu.com/t/noble-numbat-release-notes/39890):
+
+```shell
+echo "kernel.apparmor_restrict_unprivileged_userns=0" | sudo tee /etc/sysctl.d/60-apparmor-namespace.conf
+sudo sysctl --system
+```
+
+If you prefer to disable the restrictions for one boot only, use instead:
+
+```shell
+echo 0 | sudo tee /proc/sys/kernel/apparmor_restrict_unprivileged_userns
+```
+
+If you do not disable these restrictions for the affected Ubuntu versions, then Cypress may exit with a fatal error when you try to run Cypress after building Cypress from source. The error includes the text `FATAL:setuid_sandbox_host.cc` and may be hidden, pending resolution of issue https://github.com/cypress-io/cypress/issues/32358.
 
 #### Windows
 
-When using [`nvm`](https://github.com/coreybutler/nvm-windows) and changing node versions, node install tools are not installed automatically. This is needed for `node-gyp` to rebuild `better-sqlite3`. If you are failing to build Cypress because of this, either with a Python install missing or a VSCode version not being detected by `node-gyp`, you likely need to run the `install_tools.bat` outlined in the [better-sqlite3 troubleshooting guide](https://github.com/WiseLibs/better-sqlite3/blob/master/docs/troubleshooting.md).
+Install the current [version of Python](https://devguide.python.org/versions/) (`3.13`) from the [Microsoft Store](https://apps.microsoft.com/store/search?publisher=Python+Software+Foundation) and install the [Visual Studio Community 2022](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=Community) edition, selecting the `Desktop development with C++` workload.
+
+Refer to the `node-gyp` [Windows](https://github.com/nodejs/node-gyp/blob/main/README.md#on-windows) documentation section for a description of alternate ways of providing the `node-gyp` execution environment and for troubleshooting information.
 
 #### Corepack
 

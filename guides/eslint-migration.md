@@ -40,7 +40,7 @@
 - [ ] packages/socket
 - [ ] packages/telemetry
 - [ ] packages/launchpad
-- [ ] packages/errors
+- [x] packages/errors
 - [ ] packages/data-context
 - [ ] packages/app
 

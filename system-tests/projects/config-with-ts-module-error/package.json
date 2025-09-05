@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "esbuild": "0.24.0",
+    "esbuild": "0.25.2",
     "find-up": "^7.0.0"
   },
   "type": "module"

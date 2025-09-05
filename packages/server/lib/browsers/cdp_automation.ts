@@ -16,6 +16,9 @@ import { cookieMatches, CyCookie, CyCookieFilter } from '../automation/util'
 import { DEFAULT_NETWORK_ENABLE_OPTIONS, CriClient } from './cri-client'
 import { AUT_FRAME_NAME_IDENTIFIER } from '../automation/helpers/aut_identifier'
 import { cdpKeyPress } from '../automation/commands/key_press'
+
+import { toSupportedKey } from '@packages/types'
+
 import { cdpGetUrl } from '../automation/commands/get_url'
 import { cdpReloadFrame } from '../automation/commands/reload_frame'
 import { cdpNavigateHistory } from '../automation/commands/navigate_history'
@@ -649,7 +652,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       case 'collect:garbage':
         return this.sendDebuggerCommandFn('HeapProfiler.collectGarbage')
       case 'key:press':
-        return cdpKeyPress(data, this.sendDebuggerCommandFn, this.executionContexts, (await this.send('Page.getFrameTree')).frameTree)
+        return cdpKeyPress(toSupportedKey(data.key), this.sendDebuggerCommandFn, this.executionContexts, (await this.send('Page.getFrameTree')).frameTree)
       case 'get:aut:url':
         return cdpGetUrl(this.sendDebuggerCommandFn, this.executionContexts, await this._getAutFrame())
       case 'reload:aut:frame':
