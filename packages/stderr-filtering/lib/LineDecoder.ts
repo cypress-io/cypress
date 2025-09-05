@@ -10,7 +10,7 @@
 import Debug from 'debug'
 import { END_TAG } from './constants'
 
-const debugVerbose = Debug(`cypress-verbose:stderr-filtering:LineDecoder:${process.pid}`)
+const debug = Debug(`cypress-verbose::stderr-filtering:LineDecoder:${process.pid}`)
 
 export class LineDecoder {
   private buffer: string = ''
@@ -23,7 +23,7 @@ export class LineDecoder {
    * @param chunk The string chunk to add to the buffer
    */
   public write (chunk: string) {
-    debugVerbose('writing chunk to line decoder', { chunk })
+    debug('writing chunk to line decoder', { chunk })
     this.buffer += chunk
   }
 
@@ -37,7 +37,7 @@ export class LineDecoder {
    * @yields Complete lines with newline characters preserved
    */
   * [Symbol.iterator] (): Generator<string> {
-    debugVerbose('iterating over lines in line decoder')
+    debug('iterating over lines in line decoder')
 
     let nextLine: string | undefined = undefined
 
@@ -45,8 +45,8 @@ export class LineDecoder {
       nextLine = this.nextLine()
 
       if (nextLine) {
-        debugVerbose('yielding line:', nextLine)
-        debugVerbose('buffer size:', this.buffer.length)
+        debug('yielding line:', nextLine)
+        debug('buffer size:', this.buffer.length)
         yield nextLine
       }
     } while (nextLine)
@@ -79,7 +79,7 @@ export class LineDecoder {
     const endsWithOverrideToken = newlineIndex < 0 ? this.buffer.endsWith(this.overrideToken) : false
 
     if (endsWithOverrideToken) {
-      debugVerbose('ends with override token')
+      debug('ends with override token')
       const line = this.buffer
 
       this.buffer = ''
@@ -88,7 +88,7 @@ export class LineDecoder {
     }
 
     if (newlineIndex >= 0) {
-      debugVerbose('contains a newline')
+      debug('contains a newline')
       const line = this.buffer.slice(0, newlineIndex + length)
 
       this.buffer = this.buffer.slice(newlineIndex + length)
