@@ -160,7 +160,7 @@ describe('exec run', () => {
 
   describe('.start', () => {
     beforeEach(() => {
-      // @ts-expect-error
+      // @ts-expect-error - mockResolvedValue
       spawn.start.mockResolvedValue(undefined)
       // @ts-expect-error - mockResolvedValue
       verify.start.mockResolvedValue(undefined)
