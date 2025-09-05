@@ -109,7 +109,7 @@ Examples:
   throw new Error('No path to your app was provided.')
 }
 
-export async function open (appPath: string, argv: string[], cb?: (code: number) => void) {
+export async function open (appPath: string, argv: string[]) {
   debugElectron('opening %s', appPath)
 
   appPath = path.resolve(appPath)
