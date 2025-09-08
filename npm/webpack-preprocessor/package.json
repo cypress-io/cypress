@@ -23,7 +23,6 @@
     "debug": "^4.3.4",
     "lodash": "^4.17.20",
     "semver": "^7.3.2",
-    "webpack": "^5.39.0"
   },
   "devDependencies": {
     "@babel/core": "^7.28.0",
