@@ -30,7 +30,7 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
     e.preventDefault()
     e.stopPropagation()
 
-    eventsProps.emit('studio:init:test', model.id)
+    eventsProps.emit('studio:init:test', { testId: model.id })
   }, [eventsProps, model.id])
 
   React.useEffect(() => {

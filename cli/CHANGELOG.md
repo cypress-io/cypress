@@ -3,6 +3,10 @@
 
 _Released 09/16/2025 (PENDING)_
 
+**Features:**
+
+- Added support for using [@cypress/grep](https://www.npmjs.com/package/@cypress/grep) with Cypress Studio. Addresses [#32292](https://github.com/cypress-io/cypress/issues/32292).
+
 **Dependency Updates:**
 
 - Updated [`better-sqlite3`](https://www.npmjs.com/package/better-sqlite3) from `11.9.1` to `11.10.0`. Addressed in [#32404](https://github.com/cypress-io/cypress/pull/32404).
