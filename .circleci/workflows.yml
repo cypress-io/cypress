@@ -1187,6 +1187,12 @@ commands:
           command: |
             source ./ci-ensure-node.sh
             npx cypress version
+      - run:
+          name: Types check 🧩 (maybe)
+          working_directory: /tmp/<<parameters.repo>>
+          command: |
+            source ./ci-ensure-node.sh
+            [[ -f yarn.lock ]] && yarn types || npm run types --if-present 
       - when:
           condition: <<parameters.build-project>>
           steps:
@@ -1788,6 +1794,8 @@ jobs:
             - run: yarn test-scripts
             # run unit tests from each individual package
             - run: yarn test
+            # run type checking for each individual package
+            - run: yarn lerna run types
             - sanitize-verify-and-store-mocha-results:
                 expectedResultCount: 20
 
@@ -1804,7 +1812,20 @@ jobs:
       - run: node ./scripts/semantic-commits/validate-binary-changelog.js
       - store_artifacts:
           path: /tmp/releaseData
-
+  lint-types:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - restore_cached_workspace
+      - run:
+          command: ls -la types
+          working_directory: cli
+      - run:
+          command: ls -la chai
+          working_directory: cli/types
+      - run:
+          name: "Lint types 🧹"
+          command: yarn workspace cypress dtslint
   server-unit-tests:
     <<: *defaults
     parallelism: 1
@@ -2876,6 +2897,9 @@ linux-x64-workflow: &linux-x64-workflow
           - driver-integration-tests-electron
           - driver-integration-tests-webkit
           - driver-integration-memory-tests
+    - lint-types:
+        requires:
+          - build
     # unit, integration and e2e tests
     - cli-visual-tests:
         context: test-runner:percy
@@ -3084,6 +3108,7 @@ linux-x64-workflow: &linux-x64-workflow
           - npm-vite-plugin-cypress-esm
           - npm-webpack-dev-server
           - npm-cypress-schematic
+          - lint-types
           - linux-lint
           - percy-finalize
           - driver-integration-tests-firefox
@@ -3273,6 +3298,9 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
           - run-reporter-component-tests-chrome
           - run-webpack-dev-server-integration-tests
           - run-vite-dev-server-integration-tests
+    - lint-types:
+        requires:
+          - build
     # unit, integration and e2e tests
     - cli-visual-tests:
         context: test-runner:percy
@@ -3483,6 +3511,7 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
           - linux-lint
           - percy-finalize
           - driver-integration-tests-firefox
+          - lint-types
           - driver-integration-tests-chrome
           - driver-integration-tests-chrome-beta
           - driver-integration-tests-electron
