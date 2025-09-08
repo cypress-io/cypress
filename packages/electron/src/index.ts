@@ -1,7 +1,7 @@
 // Re-export the main electron functionality
-export * from '../lib/electron'
+export * from './electron'
 
 // Default export for CommonJS compatibility
-import * as electron from '../lib/electron'
+import * as electron from './electron'
 
 export default electron
