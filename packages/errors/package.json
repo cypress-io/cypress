@@ -43,7 +43,7 @@
     "jiti": "^2.4.2",
     "mocha": "7.0.1",
     "pngjs": "^7.0.0",
-    "rimraf": "5.0.10",
+    "rimraf": "6.0.1",
     "sinon": "7.5.0",
     "terminal-banner": "^1.1.0",
     "xvfb-maybe": "^0.2.1"
