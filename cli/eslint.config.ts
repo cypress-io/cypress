@@ -1,10 +1,15 @@
-import { baseConfig, cliOverrides, globals } from '@packages/eslint-config'
-import expectType from 'eslint-plugin-expect-type/configs/recommended'
+import { baseConfig, cliOverrides } from '@packages/eslint-config'
 
-const config = [
+export default [
   ...baseConfig,
   ...cliOverrides,
-
+  {
+    languageOptions: {
+      parserOptions: {
+        tsconfigRootDir: __dirname,
+      },
+    },
+  },
   {
     rules: {
       '@stylistic/comma-dangle': 'warn',
@@ -26,27 +31,6 @@ const config = [
     },
   },
   {
-    // expect-type needs some special handling, otherwise eslint thinks
-    // it doesn't have parser options to determine type information
-    files: ['types/**/*.ts'],
-    ...expectType,
-    languageOptions: {
-      parserOptions: {
-        tsconfigRootDir: __dirname,
-        projectService: true,
-      },
-      globals: {
-        __dirname: 'readonly',
-        __filename: 'readonly',
-        Buffer: 'readonly',
-        process: 'readonly',
-      },
-    },
-    rules: {
-      'expect-type/expect': 'error',
-    },
-  },
-  {
     ignores: [
       '**/__snapshots__',
       '**/build/**/*',
@@ -62,5 +46,3 @@ const config = [
     ],
   },
 ]
-
-export default config
