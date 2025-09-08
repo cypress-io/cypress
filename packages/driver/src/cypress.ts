@@ -97,6 +97,7 @@ class $Cypress {
   Commands: any
   $autIframe: any
   onSpecReady: any
+  waitForStudio: any
   events: any
   $: any
   arch: any
@@ -187,6 +188,7 @@ class $Cypress {
     this.Commands = null
     this.$autIframe = null
     this.onSpecReady = null
+    this.waitForStudio = null
     this.primaryOriginCommunicator = new PrimaryOriginCommunicator()
     this.specBridgeCommunicator = new SpecBridgeCommunicator()
     this.isCrossOriginSpecBridge = false
@@ -312,9 +314,10 @@ class $Cypress {
     return this.action('cypress:config', config)
   }
 
-  initialize ({ $autIframe, onSpecReady }) {
+  initialize ({ $autIframe, onSpecReady, waitForStudio }) {
     this.$autIframe = $autIframe
     this.onSpecReady = onSpecReady
+    this.waitForStudio = waitForStudio
     if (this._onInitialize) {
       this._onInitialize()
       this._onInitialize = undefined
@@ -368,38 +371,48 @@ class $Cypress {
     this.events.proxyTo(this.cy)
 
     this.areSourceMapsAvailable = false
-    $scriptUtils.runScripts({
-      browser: this.config('browser'),
-      scripts,
-      specWindow,
-      testingType: this.testingType,
-    })
-    .then(() => {
-      this.areSourceMapsAvailable = $sourceMapUtils.areSourceMapsAvailable()
-      if (this.testingType === 'e2e') {
-        return setSpecContentSecurityPolicy(specWindow)
-      }
-    })
-    .catch((error) => {
-      this.runner.onSpecError('error')({ error })
-    })
-    .then(() => {
-      return (new Promise((resolve) => {
-        if (this.$autIframe.prop('contentWindow')) {
-          resolve()
-        } else if (this.$autIframe) {
-          this.$autIframe.on('load', resolve)
-        } else {
-          // block initialization if the iframe has not been created yet
-          // Used in CT when async chunks for plugins take their time to download/parse
-          this._onInitialize = resolve
+
+    const run = () => {
+      $scriptUtils.runScripts({
+        browser: this.config('browser'),
+        scripts,
+        specWindow,
+        testingType: this.testingType,
+      })
+      .then(() => {
+        this.areSourceMapsAvailable = $sourceMapUtils.areSourceMapsAvailable()
+        if (this.testingType === 'e2e') {
+          return setSpecContentSecurityPolicy(specWindow)
         }
-      }))
-    })
-    .then(() => {
-      this.cy.initialize(this.$autIframe)
-      this.onSpecReady()
-    })
+      })
+      .catch((error) => {
+        this.runner.onSpecError('error')({ error })
+      })
+      .then(() => {
+        return (new Promise((resolve) => {
+          if (this.$autIframe.prop('contentWindow')) {
+            resolve()
+          } else if (this.$autIframe) {
+            this.$autIframe.on('load', resolve)
+          } else {
+            // block initialization if the iframe has not been created yet
+            // Used in CT when async chunks for plugins take their time to download/parse
+            this._onInitialize = resolve
+          }
+        }))
+      })
+      .then(() => {
+        this.cy.initialize(this.$autIframe)
+        this.onSpecReady()
+      })
+    }
+
+    if (this.waitForStudio) {
+      // when running studio, wait until it's initialized before running
+      this.waitForStudio(run)
+    } else {
+      run()
+    }
   }
 
   maybeEmitCypressInCypress (...args: unknown[]) {
