@@ -1,7 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.1.1
 
-_Released 09/16/2025 (PENDING)_
+_Released 9/9/2025 (PENDING)_
+
+**Bugfixes:**
+
+- We now properly partition the `host` with `port` when caching family DNS lookups. This resolves issues where some `localhost` URLs were not resolving in `cy.visit()` in Cypress when they should have. Fixes [#25397](https://github.com/cypress-io/cypress/issues/25397). Addressed in [#32403](https://github.com/cypress-io/cypress/pull/32403).
 
 **Features:**
 

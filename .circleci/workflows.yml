@@ -147,6 +147,12 @@ executors:
       PLATFORM: linux
       # TODO: Disabling snapshots for now on Linux Arm 64 architectures. Will revisit with https://github.com/cypress-io/cypress/issues/23557
       DISABLE_SNAPSHOT_REQUIRE: 1
+  linux-x64: &linux-x64-executor
+    machine:
+      image: ubuntu-2004:2024.11.1
+    resource_class: medium
+    environment:
+      PLATFORM: linux
 
 commands:
   # This command inserts SHOULD_PERSIST_ARTIFACTS into BASH_ENV. This way, we can define the variable in one place and use it in multiple steps.
@@ -1791,11 +1797,36 @@ jobs:
           condition:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
-            - run: yarn test-scripts
-            # run unit tests from each individual package
-            - run: yarn test
-            # run type checking for each individual package
-            - run: yarn lerna run types
+            - run:
+                name: Enable IPv6 in Docker
+                command: |
+                  cat \<<'EOF' | sudo tee /etc/docker/daemon.json
+                  {
+                    "ipv6": true,
+                    "fixed-cidr-v6": "2001:db8:1::/64"
+                  }
+                  EOF
+                  cat \<<'EOF' | sudo tee /etc/hosts
+                  127.0.0.1 localhost
+                  ::1 localhost
+                  EOF
+                  sudo service docker restart
+            - run:
+                name: Test scripts
+                command: |
+                  source ./scripts/ensure-node.sh
+                  yarn test-scripts
+            - run:
+                name: Test each individual package
+                command: |
+                  source ./scripts/ensure-node.sh
+                  # this is needed since we are have to be running as root to test some packages
+                  sudo -E env "PATH=$PATH" yarn test
+            - run:
+                name: Test types
+                command: |
+                  source ./scripts/ensure-node.sh
+                  yarn lerna run types
             - sanitize-verify-and-store-mocha-results:
                 expectedResultCount: 20
 
@@ -2908,6 +2939,7 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
     - unit-tests:
+        executor: linux-x64
         requires:
           - build
     - verify-release-readiness:

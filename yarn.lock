@@ -8198,6 +8198,13 @@
   dependencies:
     undici-types "~6.19.2"
 
+"@types/node@22.15.1":
+  version "22.15.1"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.15.1.tgz#4cd2c8717a61ae2979c6a0624b4d1b67415bf2c0"
+  integrity sha512-gSZyd0Qmv7qvbd2fJ9HGdYmv1yhNdelIA4YOtN6vkcmSwFhthxSEsBgU/JYZcXjWT6DFzoATcHrc52Ckh8SeRA==
+  dependencies:
+    undici-types "~6.21.0"
+
 "@types/node@^12.12.29", "@types/node@^12.12.7":
   version "12.20.55"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-12.20.55.tgz#c329cbd434c42164f846b909bd6f85b5537f6240"
