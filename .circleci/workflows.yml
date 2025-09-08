@@ -1192,7 +1192,7 @@ commands:
           working_directory: /tmp/<<parameters.repo>>
           command: |
             source ./ci-ensure-node.sh
-            [[ -f yarn.lock ]] && yarn types || npm run types --if-present 
+            [[ -f yarn.lock ]] && yarn types || npm run types --if-present
       - when:
           condition: <<parameters.build-project>>
           steps:
@@ -1812,6 +1812,7 @@ jobs:
       - run: node ./scripts/semantic-commits/validate-binary-changelog.js
       - store_artifacts:
           path: /tmp/releaseData
+
   lint-types:
     <<: *defaults
     parallelism: 1
@@ -1826,6 +1827,7 @@ jobs:
       - run:
           name: "Lint types 🧹"
           command: yarn workspace cypress dtslint
+
   server-unit-tests:
     <<: *defaults
     parallelism: 1
@@ -3508,10 +3510,10 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
           - npm-vite-plugin-cypress-esm
           - npm-webpack-dev-server
           - npm-cypress-schematic
+          - lint-types
           - linux-lint
           - percy-finalize
           - driver-integration-tests-firefox
-          - lint-types
           - driver-integration-tests-chrome
           - driver-integration-tests-chrome-beta
           - driver-integration-tests-electron
