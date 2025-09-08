@@ -1,5 +1,3 @@
-/* eslint-disable @cypress/dev/arrow-body-multiline-braces */
-
 import _ from 'lodash'
 import type { FoundBrowser, SpecWithRelativeRoot } from '@packages/types'
 import path from 'path'
