@@ -1,23 +1,20 @@
-/* eslint-disable no-console */
 /*
  *  ^- disabled because even though the eslint config for this pkg disables
  * 'no-console', certain IDEs will still show errors.
  */
 
-import cp from 'child_process'
 import os from 'os'
 import path from 'path'
 import Debug from 'debug'
 import minimist from 'minimist'
-import inspector from 'inspector'
 import execa from 'execa'
-import * as paths from './paths'
 import * as _install from './install'
-import { ensureSymlink, access, remove } from 'fs-extra'
-import { filter, DEBUG_PREFIX } from '@packages/stderr-filtering'
 
 const debugElectron = Debug('cypress:electron:electron')
-const debugStderr = Debug('cypress:internal-stderr')
+
+import { open } from './open'
+
+export { open }
 
 /**
  * If running as root on Linux, no-sandbox must be passed or Chrome will not start
@@ -75,7 +72,7 @@ export function icons () {
   return _install.icons()
 }
 
-export function cli (argv = []) {
+export function cli (argv: string[] = []) {
   const opts = minimist(argv)
 
   debugElectron('cli options %j', opts)
@@ -107,91 +104,4 @@ Examples:
   }
 
   throw new Error('No path to your app was provided.')
-}
-
-export async function open (appPath: string, argv: string[]) {
-  debugElectron('opening %s', appPath)
-
-  appPath = path.resolve(appPath)
-  const dest = paths.getPathToResources('app')
-
-  debugElectron('appPath %s', appPath)
-
-  debugElectron('dest path %s', dest)
-
-  try {
-    await access(appPath)
-    debugElectron('appPath is accessible %s', appPath)
-
-    await remove(dest)
-
-    const symlinkType = paths.getSymlinkType()
-
-    debugElectron('making symlink from %s to %s of type %s', appPath, dest, symlinkType)
-
-    await ensureSymlink(appPath, dest, symlinkType)
-
-    const execPath = paths.getPathToExec()
-
-    if (isSandboxNeeded()) {
-      argv.unshift('--no-sandbox')
-    }
-
-    // we have an active debugger session
-    if (inspector.url()) {
-      const dp = process.debugPort + 1
-      const inspectFlag = process.execArgv.some((f) => f === '--inspect' || f.startsWith('--inspect=')) ? '--inspect' : '--inspect-brk'
-
-      argv.unshift(`${inspectFlag}=${dp}`)
-    } else {
-      const opts = minimist(argv)
-
-      if (opts.inspectBrk) {
-        if (process.env.CYPRESS_DOCKER_DEV_INSPECT_OVERRIDE) {
-          argv.unshift(`--inspect-brk=${process.env.CYPRESS_DOCKER_DEV_INSPECT_OVERRIDE}`)
-        } else {
-          argv.unshift('--inspect-brk=5566')
-        }
-      }
-    }
-
-    debugElectron('spawning %s with args', execPath, argv)
-
-    if (debugElectron.enabled) {
-      argv.push('--enable-logging')
-    }
-
-    const spawned = cp.spawn(execPath, argv, { stdio: 'pipe' })
-
-    spawned.on('error', (err) => {
-      console.error(err)
-
-      return process.exit(1)
-    })
-
-    spawned.on('close', (code, signal) => {
-      debugElectron('electron closing %o', { code, signal })
-
-      if (signal) {
-        debugElectron('electron exited with a signal, forcing code = 1 %o', { signal })
-        code = 1
-      }
-
-      process.exit(code)
-    })
-
-    if ([1, '1'].includes(process.env.ELECTRON_ENABLE_LOGGING ?? '')) {
-      spawned.stderr.pipe(process.stderr)
-    } else {
-      spawned.stderr.pipe(filter(process.stderr, debugStderr, DEBUG_PREFIX))
-    }
-
-    spawned.stdout.pipe(process.stdout)
-    process.stdin.pipe(spawned.stdin)
-
-    return spawned
-  } catch (err) {
-    console.debug((err as Error).stack)
-    process.exit(1)
-  }
 }

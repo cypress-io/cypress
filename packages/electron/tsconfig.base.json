@@ -25,13 +25,11 @@
   "include": [
     "src/**/*",
     "lib/**/*",
-    "bin/**/*"
+    "bin/**/*",
+    "test/**/*"
   ],
   "exclude": [
     "node_modules",
     "dist",
-    "test",
-    "**/*.test.js",
-    "**/*.spec.js"
   ]
 }

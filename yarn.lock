@@ -9048,7 +9048,7 @@
   dependencies:
     "@rolldown/pluginutils" "1.0.0-beta.19"
 
-"@vitest/coverage-v8@^3.0.9":
+"@vitest/coverage-v8@^3.0.9", "@vitest/coverage-v8@^3.2.4":
   version "3.2.4"
   resolved "https://registry.yarnpkg.com/@vitest/coverage-v8/-/coverage-v8-3.2.4.tgz#a2d8d040288c1956a1c7d0a0e2cdcfc7a3319f13"
   integrity sha512-EyF9SXU6kS5Ku/U82E259WSnvg6c8KTjppUncuNdm5QHpe17mwREHnjDzozC8x9MZ0xfBUFSaLkRv4TMA75ALQ==
@@ -32182,7 +32182,7 @@ vitest@2.1.9, vitest@^2.1.9:
     vite-node "2.1.9"
     why-is-node-running "^2.3.0"
 
-vitest@3.2.4, vitest@^3.0.9:
+vitest@3.2.4, vitest@^3.0.9, vitest@^3.2.4:
   version "3.2.4"
   resolved "https://registry.yarnpkg.com/vitest/-/vitest-3.2.4.tgz#0637b903ad79d1539a25bc34c0ed54b5c67702ea"
   integrity sha512-LUCP5ev3GURDysTWiP47wRRUpLKMOfPh+yKTx3kVIEiu5KOMeqzpnYNsKyOoVrULivR8tLcks4+lga33Whn90A==
