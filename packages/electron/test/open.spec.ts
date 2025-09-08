@@ -27,8 +27,9 @@ vi.mock('../src/paths', () => {
   }
 })
 
-vi.mock('child_process', () => {
+vi.mock('child_process', async () => {
   return {
+    ...await vi.importActual('child_process'),
     spawn: vi.fn(),
   }
 })
@@ -133,7 +134,6 @@ describe('open', () => {
       }
     })
 
-    // @ts-expect-error
     filter.mockReturnValue(mockFilterWriter)
 
     // @ts-expect-error
@@ -171,6 +171,7 @@ describe('open', () => {
 
   describe('when electron logging is enabled via debug', () => {
     beforeEach(() => {
+      // @ts-expect-error
       mockElectronDebugFn.enabled = true
     })
 
@@ -279,12 +280,15 @@ describe('open', () => {
     beforeEach(async () => {
       vi.spyOn(process, 'exit')
       vi.spyOn(console, 'error').mockImplementation(() => {})
-      mockChildProcess.on.mockImplementation((command: 'error' | 'close', fn) => {
-        if (command === 'error') {
+
+      vi.mocked(mockChildProcess.on).mockImplementation((event: string, fn) => {
+        if (event === 'error') {
           errCb = fn
-        } else if (command === 'close') {
+        } else if (event === 'close') {
           closeCb = fn
         }
+
+        return mockChildProcess
       })
 
       await open(appPath, argv)

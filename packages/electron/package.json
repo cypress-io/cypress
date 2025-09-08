@@ -2,7 +2,7 @@
   "name": "@packages/electron",
   "version": "0.0.0-development",
   "private": true,
-  "main": "dist/src/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "rimraf dist && yarn build:esm && yarn build:cjs",
     "build-binary": "node ./bin/cypress-electron --install",
@@ -35,12 +35,13 @@
   },
   "files": [
     "dist",
-    "lib"
+    "bin",
+    "app"
   ],
   "bin": {
     "cypress-electron": "./bin/cypress-electron"
   },
-  "types": "dist/src/index.d.ts",
+  "types": "dist/index.d.ts",
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx}": "eslint --fix"
   },
