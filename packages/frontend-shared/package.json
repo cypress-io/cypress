@@ -5,7 +5,7 @@
   "scripts": {
     "build": "node ./script/build.js",
     "check-ts": "vue-tsc --noEmit && yarn -s tslint",
-    "clean": "rimraf dist ./node_modules/.vite src/*.js src/**/*.js && echo 'cleaned'",
+    "clean": "rimraf --glob dist ./node_modules/.vite 'src/*.js' 'src/**/*.js' && echo 'cleaned'",
     "clean-deps": "rimraf node_modules",
     "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open --component --project .",
     "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run --component --project .",

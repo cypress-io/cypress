@@ -1,15 +1,15 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.1.1
+## 15.2.0
 
-_Released 9/9/2025 (PENDING)_
-
-**Bugfixes:**
-
-- We now properly partition the `host` with `port` when caching family DNS lookups. This resolves issues where some `localhost` URLs were not resolving in `cy.visit()` in Cypress when they should have. Fixes [#25397](https://github.com/cypress-io/cypress/issues/25397). Addressed in [#32403](https://github.com/cypress-io/cypress/pull/32403).
+_Released 9/9/2025_
 
 **Features:**
 
 - Added support for using [@cypress/grep](https://www.npmjs.com/package/@cypress/grep) with Cypress Studio. Addresses [#32292](https://github.com/cypress-io/cypress/issues/32292).
+
+**Bugfixes:**
+
+- We now properly partition the `host` with `port` when caching family DNS lookups. This resolves issues where some `localhost` URLs were not resolving in `cy.visit()` in Cypress when they should have. Fixes [#25397](https://github.com/cypress-io/cypress/issues/25397). Addressed in [#32403](https://github.com/cypress-io/cypress/pull/32403).
 
 **Dependency Updates:**
 
