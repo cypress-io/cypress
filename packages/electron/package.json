@@ -2,13 +2,15 @@
   "name": "@packages/electron",
   "version": "0.0.0-development",
   "private": true,
-  "main": "index.js",
+  "main": "dist/src/index.js",
   "scripts": {
-    "build": "echo 'electron package build: no build necessary'",
+    "build": "rimraf dist && yarn build:esm && yarn build:cjs",
     "build-binary": "node ./bin/cypress-electron --install",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:esm": "tsc -p tsconfig.esm.json",
     "clean-deps": "rimraf node_modules",
     "postinstall": "echo '@packages/electron needs: yarn build'",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
+    "lint": "eslint",
     "start": "./bin/cypress-electron",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
@@ -37,6 +39,10 @@
   ],
   "bin": {
     "cypress-electron": "./bin/cypress-electron"
+  },
+  "types": "dist/cjs/src/index.d.ts",
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx}": "eslint --fix"
   },
   "nx": {}
 }

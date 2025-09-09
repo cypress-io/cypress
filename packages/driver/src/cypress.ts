@@ -30,6 +30,7 @@ import $SetterGetter from './cypress/setter_getter'
 import { validateConfig } from './util/config'
 import $utils from './cypress/utils'
 
+import $stackUtils from './cypress/stack_utils'
 import { $Chainer } from './cypress/chainer'
 import { $Cookies, ICookies } from './cypress/cookies'
 import { $Command } from './cypress/command'
@@ -127,6 +128,7 @@ class $Cypress {
   specBridgeCommunicator: SpecBridgeCommunicator
   isCrossOriginSpecBridge: boolean
   on: any
+  stackUtils: typeof $stackUtils | null = null
 
   // attach to $Cypress to access
   // all of the constructors
@@ -363,6 +365,7 @@ class $Cypress {
     this.mocha = $Mocha.create(specWindow, this, this.config)
     this.runner = $Runner.create(specWindow, this.mocha, this, this.cy, this.state)
     this.downloads = $Downloads.create(this)
+    this.stackUtils = $stackUtils
 
     // wire up command create to cy
     // @ts-expect-error

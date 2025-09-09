@@ -113,7 +113,7 @@
     "@types/lodash": "^4.14.168",
     "@types/markdown-it": "12.2.3",
     "@types/mocha": "8.0.3",
-    "@types/node": "20.16.0",
+    "@types/node": "22.15.1",
     "@types/prismjs": "1.16.0",
     "@types/react": "18.3.12",
     "@types/react-dom": "18.3.1",

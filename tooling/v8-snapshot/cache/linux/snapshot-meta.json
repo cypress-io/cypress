@@ -615,8 +615,10 @@
     "./packages/data-context/src/sources/BrowserDataSource.ts",
     "./packages/data-context/src/sources/index.ts",
     "./packages/data-context/src/util/testCounts.ts",
-    "./packages/electron/index.js",
-    "./packages/electron/lib/electron.js",
+    "./packages/electron/dist/lib/electron.js",
+    "./packages/electron/dist/lib/install.js",
+    "./packages/electron/dist/lib/paths.js",
+    "./packages/electron/dist/src/index.js",
     "./packages/errors/index.js",
     "./packages/errors/src/errTemplate.ts",
     "./packages/graphql/index.js",
@@ -3740,8 +3742,6 @@
     "./packages/data-context/src/util/pluginHandlers.ts",
     "./packages/data-context/src/util/urqlCacheKeys.ts",
     "./packages/data-context/src/util/weightedChoice.ts",
-    "./packages/electron/lib/install.js",
-    "./packages/electron/lib/paths.js",
     "./packages/errors/src/errorTypes.ts",
     "./packages/errors/src/errorUtils.ts",
     "./packages/errors/src/errors.ts",
@@ -4196,5 +4196,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "616ae6d87d6432c939b6600b0730f86e98a67d4259a38e56e7f5443265f934d9"
+  "deferredHash": "2425708d100fa21d6e16ca0cd55e4a2f9e0ee1803390145b3fd26db149c756ce"
 }

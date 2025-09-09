@@ -1,23 +1,136 @@
 # @packages/electron
 
-This is the lib responsible for installing + building Electron. This enables us to develop with the Electron shell that will match how the final compiled Cypress binary looks 1:1.
+This package is responsible for installing, building, and managing the Electron binary that powers Cypress. It enables development with an Electron shell that matches the final compiled Cypress binary 1:1 by using symlinks during development.
 
-It does this by using symlinks while in development.
+## Build System
+
+The package uses TypeScript to compile to CJS. ESM builds are not run by default, but can be enabled or tested with `build:esm`.
+- **CommonJS**: Primary build used by the binary script and other packages
+- **ES Modules**: Alternative build for modern Node.js applications
+- **Output**: Compiled JavaScript in `dist/cjs/`, and a binary in `dist/Cypress`.
 
 ## Building
 
 ```bash
+# Build both CommonJS and ES Module versions
 yarn workspace @packages/electron build
+
+# Build only CommonJS version
+yarn workspace @packages/electron build:cjs
+
+# Build only ES Module version
+yarn workspace @packages/electron build:esm
+
+# Clean build artifacts
+yarn workspace @packages/electron clean-deps
 ```
 
-Note: this just installs Electron binary for your OS specific platform
+**Note**: The build process compiles TypeScript source to JavaScript. The `--install` command packages the actual Electron binary for your OS-specific platform.
+
+## Usage
+
+### Command Line Interface
+
+The package provides a binary script `cypress-electron` with several commands:
+
+```bash
+# Install/build Electron binary for current platform
+./bin/cypress-electron --install
+
+# Show help and usage information
+./bin/cypress-electron --help
+
+# Launch an Electron app (development mode)
+./bin/cypress-electron /path/to/your/app
+
+# Launch with debugging enabled
+./bin/cypress-electron /path/to/your/app --inspect-brk
+```
+
+These commands are parsed out from argv in the `cli()` function defined in `./lib/electron.ts`
+
+### Public Interface
+
+```typescript
+/**
+ * Checks if Electron binary exists and is up-to-date, installs if needed
+ */
+function installIfNeeded(): Promise<void>
+
+/**
+ * Forces installation of Electron binary with optional arguments
+ */
+function install(...args: any[]): Promise<void>
+
+/**
+ * Launches an Electron app with the specified path and arguments
+ * @param appPath - Path to the application to launch
+ * @param argv - Command line arguments to pass to the app
+ * @param callback - Optional callback when the app exits
+ * @returns Promise that resolves to the spawned Electron process
+ */
+function open(
+  appPath: string, 
+  argv: string[], 
+  callback?: (code: number) => void
+): Promise<ChildProcess>
+
+/**
+ * Returns the Electron version being used
+ * @returns String version (e.g., "36.4.0")
+ */
+function getElectronVersion(): string
+
+/**
+ * Returns the Node.js version bundled with Electron
+ * @returns Promise that resolves to Node.js version string
+ */
+function getElectronNodeVersion(): Promise<string>
+
+/**
+ * Returns the icons package for platform-specific icon paths
+ * @returns Icons package object
+ */
+function icons(): any
+
+/**
+ * CLI entry point for command-line operations
+ * @param argv - Command line arguments array
+ */
+function cli(argv: string[]): void
+```
+
 
 ## Testing
 
 ```bash
+# Run unit tests
 yarn workspace @packages/electron test
+
+# Run tests with debugger
 yarn workspace @packages/electron test-debug
+
+# Run tests in watch mode
 yarn workspace @packages/electron test-watch
+```
+
+## Package Structure
+
+```
+packages/electron/
+├── bin/                    # Binary scripts
+│   └── cypress-electron   # Main CLI script
+├── lib/                    # TypeScript source
+│   ├── electron.ts        # Main entry point and CLI logic
+│   ├── install.ts         # Installation and packaging logic
+│   ├── paths.ts           # Platform-specific path resolution
+│   └── print-node-version.ts
+├── dist/                   # Compiled output
+│   ├── cjs/               # CommonJS build
+│   ├── esm/               # ES Module build
+│   └── Cypress/           # Electron app binary (created by --install)
+├── app/                    # App template for packaging
+└── test/                   # Test files
 ```
 
 ## Upgrading Electron
@@ -72,6 +185,51 @@ Upgrading `electron` involves more than just bumping this package's `package.jso
 - [ ] **Fix failing tests.** Usually, these are due to breaking changes in either Node.js or Electron. Check the changelogs of both to find relevant changes.
 
 - [ ] If needed, update the **[V8 Snapshot Cache](https://github.com/cypress-io/cypress/actions/workflows/update_v8_snapshot_cache.yml)** by running the GitHub workflow. Make sure to use the branch that contains the electron updates to populate the `'workflow from'` and `'branch to update'` arguments. Select `'Generate from scratch'` and `'commit directly to branch'`. This will usually take 6-8 hours to complete and is best to not be actively developing on the branch when this workflow runs.
+
+## Development
+
+### Local Development
+
+1. **Build the package**: `yarn build:cjs` (or `yarn build` for both formats)
+2. **Test the binary**: `./bin/cypress-electron --install`
+3. **Run tests**: `yarn test`
+
+### Debugging
+
+Enable debug logging by setting the `DEBUG` environment variable:
+
+```bash
+DEBUG=cypress:electron* ./bin/cypress-electron --install
+DEBUG=cypress:electron:install* ./bin/cypress-electron --install
+```
+
+### Common Issues
+
+#### Build Errors
+- **TypeScript compilation errors**: Check that all dependencies are installed and TypeScript config is correct
+- **Missing dependencies**: Ensure `@electron/packager` and other dev dependencies are available
+
+#### Runtime Errors
+- **Path resolution issues**: Verify that the compiled output structure matches the expected paths
+- **Binary not found**: Run `./bin/cypress-electron --install` to create the Electron binary
+- **Permission errors**: On Linux, ensure proper permissions for the binary directory
+
+#### Platform-Specific Issues
+- **macOS**: ARM64 vs x64 architecture detection may need updates
+- **Linux**: Sandbox issues when running as root (automatically handled)
+- **Windows**: Junction vs directory symlink handling (automatically handled)
+
+## Contributing
+
+When contributing to this package:
+
+1. **Follow the existing patterns** for error handling and logging
+2. **Test on multiple platforms** if making platform-specific changes
+3. **Update tests** for any new functionality
+4. **Rebuild after changes** using `yarn build:cjs`
+5. **Test the binary** with `./bin/cypress-electron --install`
+
+For more detailed information about the build system, see [BUILD.md](./BUILD.md).
 
 
 ### Common Upgrade Issues

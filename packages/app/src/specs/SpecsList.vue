@@ -408,7 +408,10 @@ useResizeObserver(containerProps.ref, (entries) => {
   if (containerElement) {
     const displayedScrollbarWidth = containerElement.offsetWidth - containerElement.clientWidth
 
-    scrollbarOffset.value = displayedScrollbarWidth
+    // Only update if the value actually changed to prevent unnecessary updates
+    if (scrollbarOffset.value !== displayedScrollbarWidth) {
+      scrollbarOffset.value = displayedScrollbarWidth
+    }
   } else {
     scrollbarOffset.value = 0
   }
