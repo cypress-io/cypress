@@ -1,4 +1,11 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
+# Pack CircleCI config if any files in pull-request were changed
+if git diff --cached --name-only | grep -q "^\.circleci/workflows-src/"; then
+  echo "Packing CircleCI configuration..."
+  circleci config pack ./.circleci/workflows-src > ./.circleci/workflows.yml
+  git add ./.circleci/workflows.yml
+fi
+
 npx lint-staged
