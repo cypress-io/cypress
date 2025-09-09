@@ -7,8 +7,6 @@ export const baseConfig: Cypress.ConfigOptions = {
   experimentalStudio: true,
   experimentalMemoryManagement: true,
   experimentalWebKitSupport: true,
-  // @ts-expect-error - this will not error when we actually release the experimentalPromptCommand flag
-  experimentalPromptCommand: true,
   hosts: {
     'foobar.com': '127.0.0.1',
     '*.foobar.com': '127.0.0.1',
@@ -22,6 +20,7 @@ export const baseConfig: Cypress.ConfigOptions = {
     configFile: '../../mocha-reporter-config.json',
   },
   e2e: {
+    experimentalPromptCommand: true,
     experimentalOriginDependencies: true,
     experimentalModifyObstructiveThirdPartyCode: true,
     setupNodeEvents: (on, config) => {

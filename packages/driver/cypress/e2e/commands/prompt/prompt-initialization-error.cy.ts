@@ -19,7 +19,6 @@ describe('src/cy/commands/prompt', () => {
     cy.visit('http://www.foobar.com:3500/fixtures/dom.html')
 
     cy['commandFns']['prompt'].__resetPrompt()
-    // @ts-expect-error - this will not error when we actually release the experimentalPromptCommand flag
     cy.prompt(['Hello, world!'])
   })
 
@@ -43,7 +42,6 @@ describe('src/cy/commands/prompt', () => {
     cy.visit('http://www.foobar.com:3500/fixtures/dom.html')
 
     cy['commandFns']['prompt'].__resetPrompt()
-    // @ts-expect-error - this will not error when we actually release the experimentalPromptCommand flag
     cy.prompt(['Hello, world!'])
   })
 })
