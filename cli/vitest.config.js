@@ -14,6 +14,8 @@ export default defineConfig({
       'test/lib/logger.spec.ts',
       'test/lib/errors.spec.ts',
       'test/lib/cypress.spec.ts',
+      'test/lib/build.spec.ts',
+      'test/lib/cli.spec.ts',
     ],
   },
 })

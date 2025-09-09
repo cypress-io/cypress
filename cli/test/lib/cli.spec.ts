@@ -1,15 +1,7 @@
-import '../spec_helper'
+import { vi, describe, it, beforeEach, expect } from 'vitest'
 import os from 'os'
-import snapshot from '../support/snapshot'
 import Debug from 'debug'
 import execa from 'execa-wrap'
-import mockedEnv from 'mocked-env'
-import { expect } from 'chai'
-import mochaBanner from 'mocha-banner'
-
-const debug = Debug('test')
-
-// Import modules dynamically to handle template literal paths
 import cli from '../../lib/cli'
 import util from '../../lib/util'
 import logger from '../../lib/logger'
@@ -20,23 +12,163 @@ import cache from '../../lib/tasks/cache'
 import state from '../../lib/tasks/state'
 import verify from '../../lib/tasks/verify'
 import install from '../../lib/tasks/install'
-import spawn from '../../lib/exec/spawn'
+
+const debug = Debug('test')
+
+vi.mock('os', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      platform: vi.fn(),
+    },
+  }
+})
+
+vi.mock('../../lib/util', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      logErrorExit1: vi.fn(),
+      pkgBuildInfo: vi.fn(),
+      pkgVersion: vi.fn(),
+    },
+  }
+})
+
+vi.mock('../../lib/exec/run', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      start: vi.fn(),
+    },
+  }
+})
+
+vi.mock('../../lib/exec/open', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      start: vi.fn(),
+    },
+  }
+})
+
+vi.mock('../../lib/exec/info', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      start: vi.fn(),
+    },
+  }
+})
+
+vi.mock('../../lib/tasks/install', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      start: vi.fn(),
+    },
+  }
+})
+
+vi.mock('../../lib/tasks/verify', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      start: vi.fn(),
+    },
+  }
+})
+
+vi.mock('../../lib/tasks/cache', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      list: vi.fn(),
+    },
+  }
+})
+
+vi.mock('../../lib/tasks/state', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      getBinaryDir: vi.fn(),
+      getBinaryPkgAsync: vi.fn(),
+    },
+  }
+})
+
+const flushPromises = () => {
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, 250)
+  })
+}
 
 describe('cli', () => {
-  mochaBanner.register()
+  const binaryDir = '/binary/dir'
+  let exec: (args: string) => Promise<any>
+  let processExitSpy: ReturnType<typeof vi.spyOn>
 
-  beforeEach(function (): void {
+  beforeEach(() => {
+    vi.unstubAllEnvs()
+    vi.clearAllMocks()
+
     logger.reset()
-    // @ts-expect-error
-    sinon.stub(process, 'exit').returns(null)
 
-    ;(os.platform as any).returns('darwin')
-    // @ts-expect-error
-    sinon.stub(util, 'logErrorExit1').returns(null)
+    // @ts-expect-error - mockReturnValue
+    processExitSpy = vi.spyOn(process, 'exit').mockReturnValue(null)
+    // @ts-expect-error - mockReturnValue
+    os.platform.mockReturnValue('darwin')
+    // @ts-expect-error - mockReturnValue
+    util.logErrorExit1.mockReturnValue(null)
+    // @ts-expect-error - mockReturnValue
+    util.pkgBuildInfo.mockReturnValue({ stable: true })
+    // @ts-expect-error - mockReturnValue
+    util.pkgVersion.mockReturnValue('1.2.3')
+    // @ts-expect-error - mockReturnValue
+    state.getBinaryDir.mockReturnValue(binaryDir)
+    // @ts-expect-error - mockImplementation
+    state.getBinaryPkgAsync.mockImplementation((args: string) => {
+      if (args === binaryDir) {
+        return {
+          version: 'X.Y.Z',
+          electronVersion: '10.9.8',
+          electronNodeVersion: '7.7.7',
+        }
+      }
 
-    sinon.stub(util, 'pkgBuildInfo').returns({ stable: true })
+      throw new Error('not found')
+    })
 
-    ;(this as any).exec = (args: string): any => {
+    exec = (args: string): any => {
       const cliArgs = `node test ${args}`.split(' ')
 
       debug('calling cli.init with: %o', cliArgs)
@@ -45,54 +177,68 @@ describe('cli', () => {
     }
   })
 
-  context('unknown option', () => {
+  describe('unknown option', () => {
     // note it shows help for that specific command
-    it('shows help', () => {
-      return execa('bin/cypress', ['open', '--foo']).then((result: any) => {
-        snapshot('shows help for open --foo 1', result)
-      })
+    it('shows help', async () => {
+      const result = await execa('bin/cypress', ['open', '--foo'])
+
+      expect(result).toMatchSnapshot()
     })
 
-    it('shows help for run command', () => {
-      return execa('bin/cypress', ['run', '--foo']).then((result: any) => {
-        snapshot('shows help for run --foo 1', result)
-      })
+    it('shows help for run command', async () => {
+      const result = await execa('bin/cypress', ['run', '--foo'])
+
+      expect(result).toMatchSnapshot()
     })
 
-    it('shows help for cache command - unknown option --foo', () => {
-      return execa('bin/cypress', ['cache', '--foo']).then(snapshot)
+    it('shows help for cache command - unknown option --foo', async () => {
+      const result = await execa('bin/cypress', ['cache', '--foo'])
+
+      expect(result).toMatchSnapshot()
     })
 
-    it('shows help for cache command - unknown sub-command foo', () => {
-      return execa('bin/cypress', ['cache', 'foo']).then(snapshot)
+    it('shows help for cache command - unknown sub-command foo', async () => {
+      const result = await execa('bin/cypress', ['cache', 'foo'])
+
+      expect(result).toMatchSnapshot()
     })
 
-    it('shows help for cache command - no sub-command', () => {
-      return execa('bin/cypress', ['cache']).then(snapshot)
-    })
-  })
+    it('shows help for cache command - no sub-command', async () => {
+      const result = await execa('bin/cypress', ['cache'])
 
-  context('help command', () => {
-    it('shows help', () => {
-      return execa('bin/cypress', ['help']).then(snapshot)
-    })
-
-    it('shows help for -h', () => {
-      return execa('bin/cypress', ['-h']).then(snapshot)
-    })
-
-    it('shows help for --help', () => {
-      return execa('bin/cypress', ['--help']).then(snapshot)
+      expect(result).toMatchSnapshot()
     })
   })
 
-  context('unknown command', () => {
-    it('shows usage and exits', () => {
-      return execa('bin/cypress', ['foo']).then(snapshot)
+  describe('help command', () => {
+    it('shows help', async () => {
+      const result = await execa('bin/cypress', ['help'])
+
+      expect(result).toMatchSnapshot()
+    })
+
+    it('shows help for -h', async () => {
+      const result = await execa('bin/cypress', ['-h'])
+
+      expect(result).toMatchSnapshot()
+    })
+
+    it('shows help for --help', async () => {
+      const result = await execa('bin/cypress', ['--help'])
+
+      expect(result).toMatchSnapshot()
     })
   })
 
-  context('CYPRESS_INTERNAL_ENV', () => {
+  describe('unknown command', () => {
+    it('shows usage and exits', async () => {
+      const result = await execa('bin/cypress', ['foo'])
+
+      expect(result).toMatchSnapshot()
+    })
+  })
+
+  describe('CYPRESS_INTERNAL_ENV', () => {
     /**
      * Replaces line "Platform: ..." with "Platform: xxx"
      * @param {string} s
@@ -119,7 +265,7 @@ describe('cli', () => {
       .join(os.eol)
     }
 
-    it('allows and warns when staging environment', () => {
+    it('allows and warns when staging environment', async () => {
       const options = {
         env: {
           CYPRESS_INTERNAL_ENV: 'staging',
@@ -127,10 +273,12 @@ describe('cli', () => {
         filter: ['code', 'stderr', 'stdout'],
       }
 
-      return execa('bin/cypress', ['help'], options).then(snapshot)
+      const result = await execa('bin/cypress', ['help'], options)
+
+      expect(result).toMatchSnapshot()
     })
 
-    it('catches environment "foo"', () => {
+    it('catches environment "foo"', async () => {
       const options = {
         env: {
           CYPRESS_INTERNAL_ENV: 'foo',
@@ -139,554 +287,550 @@ describe('cli', () => {
         filter: ['code', 'stderr'],
       }
 
-      return execa('bin/cypress', ['help'], options)
-      .then(sanitizePlatform)
-      .then(snapshot)
+      const result = await execa('bin/cypress', ['help'], options)
+
+      expect(sanitizePlatform(result)).toMatchSnapshot()
     })
   })
 
-  ;['--version', '-v', 'version'].forEach((versionCommand: string) => {
-    context(`cypress ${versionCommand}`, () => {
-      let restoreEnv: any
+  const versionCommands = ['--version', '-v', 'version']
 
-      afterEach(() => {
-        if (restoreEnv) {
-          restoreEnv()
-          restoreEnv = null
-        }
-      })
-
-      const binaryDir = '/binary/dir'
-
-      beforeEach((): void => {
-        sinon.stub(state, 'getBinaryDir').returns(binaryDir)
-      })
-
+  versionCommands.forEach((versionCommand: string) => {
+    describe(`cypress ${versionCommand}`, () => {
       describe('individual package versions', () => {
-        beforeEach((): void => {
-          sinon.stub(util, 'pkgVersion').returns('1.2.3')
-          sinon
-          .stub(state, 'getBinaryPkgAsync')
-          .withArgs(binaryDir)
-          .resolves({
-            version: 'X.Y.Z',
-            electronVersion: '10.9.8',
-            electronNodeVersion: '7.7.7',
-          })
+        it('reports just the package version', async () => {
+          await exec(`${versionCommand} --component package`)
+
+          await flushPromises()
+
+          expect(processExitSpy).toHaveBeenCalledWith(0)
+          expect(logger.print()).toEqual('1.2.3')
         })
 
-        it('reports just the package version', function (done) {
-          (this as any).exec(`${versionCommand} --component package`)
+        it('reports just the binary version', async () => {
+          await exec(`${versionCommand} --component binary`)
 
-          ;(process.exit as any).callsFake((exitCode: any) => {
-            expect(logger.print()).to.equal('1.2.3')
-            done()
-          })
+          await flushPromises()
+
+          expect(processExitSpy).toHaveBeenCalledWith(0)
+          expect(logger.print()).toEqual('X.Y.Z')
         })
 
-        it('reports just the binary version', function (done) {
-          (this as any).exec(`${versionCommand} --component binary`)
+        it('reports just the electron version', async () => {
+          await exec(`${versionCommand} --component electron`)
 
-          ;(process.exit as any).callsFake(() => {
-            expect(logger.print()).to.equal('X.Y.Z')
-            done()
-          })
+          await flushPromises()
+
+          expect(processExitSpy).toHaveBeenCalledWith(0)
+          expect(logger.print()).toEqual('10.9.8')
         })
 
-        it('reports just the electron version', function (done) {
-          (this as any).exec(`${versionCommand} --component electron`)
+        it('reports just the bundled Node version', async () => {
+          await exec(`${versionCommand} --component node`)
 
-          ;(process.exit as any).callsFake(() => {
-            expect(logger.print()).to.equal('10.9.8')
-            done()
-          })
+          await flushPromises()
+
+          expect(processExitSpy).toHaveBeenCalledWith(0)
+          expect(logger.print()).toEqual('7.7.7')
         })
 
-        it('reports just the bundled Node version', function (done) {
-          (this as any).exec(`${versionCommand} --component node`)
+        it('handles not found bundled Node version', async () => {
+          // @ts-expect-error - mockImplementation
+          state.getBinaryPkgAsync.mockImplementation((args: string) => {
+            if (args === binaryDir) {
+              return {
+                version: 'X.Y.Z',
+                electronVersion: '10.9.8',
+              }
+            }
 
-          ;(process.exit as any).callsFake(() => {
-            expect(logger.print()).to.equal('7.7.7')
-            done()
-          })
-        })
-
-        it('handles not found bundled Node version', function (done) {
-          state.getBinaryPkgAsync
-          .withArgs(binaryDir)
-          .resolves({
-            version: 'X.Y.Z',
-            electronVersion: '10.9.8',
+            throw new Error('not found')
           })
 
-          ;(this as any).exec(`${versionCommand} --component node`)
+          await exec(`${versionCommand} --component node`)
 
-          ;(process.exit as any).callsFake(() => {
-            expect(logger.print()).to.equal('not found')
-            done()
+          await flushPromises()
+
+          expect(processExitSpy).toHaveBeenCalledWith(0)
+          expect(logger.print()).toEqual('not found')
+        })
+
+        it('reports package version', async () => {
+          // @ts-expect-error - mockImplementation
+          state.getBinaryPkgAsync.mockImplementation((args: string) => {
+            if (args === binaryDir) {
+              return {
+                version: 'X.Y.Z',
+              }
+            }
+
+            throw new Error('not found')
           })
-        })
-      })
 
-      it('reports package version', function (done) {
-        sinon.stub(util, 'pkgVersion').returns('1.2.3')
-        sinon
-        .stub(state, 'getBinaryPkgAsync')
-        .withArgs(binaryDir)
-        .resolves({
-          version: 'X.Y.Z',
+          await exec(versionCommand)
+
+          await flushPromises()
+
+          expect(processExitSpy).toHaveBeenCalledWith(0)
+          expect(logger.print()).toMatchSnapshot()
         })
 
-        ;(this as any).exec(versionCommand)
+        it('reports package and binary message', async () => {
+          // @ts-expect-error - mockImplementation
+          state.getBinaryPkgAsync.mockImplementation((args: string) => {
+            if (args === binaryDir) {
+              return {
+                version: 'X.Y.Z',
+              }
+            }
 
-        ;(process.exit as any).callsFake(() => {
-          snapshot('cli version and binary version 1', logger.print(), { allowSharedSnapshot: true })
-          done()
-        })
-      })
+            throw new Error('not found')
+          })
 
-      it('reports package and binary message', function (done) {
-        sinon.stub(util, 'pkgVersion').returns('1.2.3')
-        sinon.stub(state, 'getBinaryPkgAsync').resolves({ version: 'X.Y.Z' })
+          await exec(versionCommand)
 
-        ;(this as any).exec(versionCommand)
+          await flushPromises()
 
-        ;(process.exit as any).callsFake(() => {
-          snapshot('cli version and binary version 2', logger.print(), { allowSharedSnapshot: true })
-          done()
-        })
-      })
-
-      it('reports electron and node message', function (done) {
-        sinon.stub(util, 'pkgVersion').returns('1.2.3')
-        sinon.stub(state, 'getBinaryPkgAsync').resolves({
-          version: 'X.Y.Z',
-          electronVersion: '10.10.88',
-          electronNodeVersion: '11.10.3',
+          expect(processExitSpy).toHaveBeenCalledWith(0)
+          expect(logger.print()).toMatchSnapshot()
         })
 
-        ;(this as any).exec(versionCommand)
+        it('reports electron and node message', async () => {
+          // @ts-expect-error - mockImplementation
+          state.getBinaryPkgAsync.mockImplementation((args: string) => {
+            if (args === binaryDir) {
+              return {
+                version: 'X.Y.Z',
+                electronVersion: '10.10.88',
+                electronNodeVersion: '11.10.3',
+              }
+            }
 
-        ;(process.exit as any).callsFake(() => {
-          snapshot('cli version with electron and node 1', logger.print(), { allowSharedSnapshot: true })
-          done()
-        })
-      })
+            throw new Error('not found')
+          })
 
-      it('reports package and binary message with npm log silent', function (done) {
-        restoreEnv = mockedEnv({
-          npm_config_loglevel: 'silent',
-        })
+          await exec(versionCommand)
 
-        sinon.stub(util, 'pkgVersion').returns('1.2.3')
-        sinon.stub(state, 'getBinaryPkgAsync').resolves({ version: 'X.Y.Z' })
+          await flushPromises()
 
-        ;(this as any).exec(versionCommand)
-
-        ;(process.exit as any).callsFake(() => {
-          // should not be empty!
-          snapshot('cli version and binary version with npm log silent', logger.print(), { allowSharedSnapshot: true })
-          done()
-        })
-      })
-
-      it('reports package and binary message with npm log warn', function (done) {
-        restoreEnv = mockedEnv({
-          npm_config_loglevel: 'warn',
+          expect(processExitSpy).toHaveBeenCalledWith(0)
+          expect(logger.print()).toMatchSnapshot()
         })
 
-        sinon.stub(util, 'pkgVersion').returns('1.2.3')
-        sinon.stub(state, 'getBinaryPkgAsync').resolves({
-          version: 'X.Y.Z',
+        it('reports package and binary message with npm log silent', async () => {
+          vi.stubEnv('npm_config_loglevel', 'silent')
+
+          // @ts-expect-error - mockImplementation
+          state.getBinaryPkgAsync.mockImplementation((args: string) => {
+            if (args === binaryDir) {
+              return {
+                version: 'X.Y.Z',
+              }
+            }
+
+            throw new Error('not found')
+          })
+
+          await exec(versionCommand)
+
+          await flushPromises()
+
+          expect(processExitSpy).toHaveBeenCalledWith(0)
+          expect(logger.print()).toMatchSnapshot()
         })
 
-        ;(this as any).exec(versionCommand)
+        it('reports package and binary message with npm log warn', async () => {
+          vi.stubEnv('npm_config_loglevel', 'warn')
 
-        ;(process.exit as any).callsFake(() => {
-        // should not be empty!
-          snapshot('cli version and binary version with npm log warn', logger.print(), { allowSharedSnapshot: true })
-          done()
+          // @ts-expect-error - mockImplementation
+          state.getBinaryPkgAsync.mockImplementation((args: string) => {
+            if (args === binaryDir) {
+              return {
+                version: 'X.Y.Z',
+              }
+            }
+
+            throw new Error('not found')
+          })
+
+          await exec(versionCommand)
+
+          await flushPromises()
+
+          expect(processExitSpy).toHaveBeenCalledWith(0)
+          expect(logger.print()).toMatchSnapshot()
         })
-      })
 
-      it('handles non-existent binary', function (done) {
-        sinon.stub(util, 'pkgVersion').returns('1.2.3')
-        sinon.stub(state, 'getBinaryPkgAsync').resolves(null)
+        it('handles non-existent binary', async () => {
+          // @ts-expect-error - mockImplementation
+          state.getBinaryPkgAsync.mockImplementation((args: string) => {
+            if (args === binaryDir) {
+              return null
+            }
 
-        ;(this as any).exec(versionCommand)
+            throw new Error('not found')
+          })
 
-        ;(process.exit as any).callsFake(() => {
-          snapshot('cli version no binary version 1', logger.print(), { allowSharedSnapshot: true })
-          done()
+          await exec(versionCommand)
+
+          await flushPromises()
+
+          expect(processExitSpy).toHaveBeenCalledWith(0)
+          expect(logger.print()).toMatchSnapshot()
         })
       })
     })
   })
 
-  context('cypress run', () => {
-    beforeEach((): void => {
-      sinon.stub(run, 'start').resolves(0)
-      sinon.stub(util, 'exit').withArgs(0)
+  describe('cypress run', () => {
+    beforeEach(() => {
+      //@ts-expect-error - mockResolvedValue
+      run.start.mockResolvedValue(0)
     })
 
-    it('calls run.start with options + exits with code', function (done) {
-      // @ts-expect-error
-      run.start.resolves(10)
+    it('calls run.start with options + exits with code', async () => {
+      // @ts-expect-error - mockResolvedValue
+      run.start.mockResolvedValue(10)
 
-      ;(this as any).exec('run')
+      await exec('run')
+      await flushPromises()
 
-      // @ts-expect-error
-      util.exit.callsFake((code: number) => {
-        expect(code).to.eq(10)
-        done()
-      })
+      expect(processExitSpy).toHaveBeenCalledWith(10)
     })
 
-    it('run.start with options + catches errors', function (done) {
+    it('run.start with options + catches errors', async () => {
       const err = new Error('foo')
 
-      // @ts-expect-error
-      run.start.rejects(err)
+      // @ts-expect-error - mockRejectedValue
+      run.start.mockRejectedValue(err)
 
-      ;(this as any).exec('run')
+      await exec('run')
+      await flushPromises()
 
-      // @ts-expect-error
-      util.logErrorExit1.callsFake((e: Error) => {
-        expect(e).to.eq(err)
-        done()
-      })
+      expect(util.logErrorExit1).toHaveBeenCalledWith(err)
     })
 
-    it('calls run with port', function (): void {
-      (this as any).exec('run --port 7878')
-      expect(run.start).to.be.calledWith({ port: '7878' })
+    it('calls run with port', async () => {
+      await exec('run --port 7878')
+      expect(run.start).toBeCalledWith({ port: '7878' })
     })
 
-    it('calls run with port with -p arg', function (): void {
-      (this as any).exec('run -p 8989')
-      expect(run.start).to.be.calledWith({ port: '8989' })
+    it('calls run with port with -p arg', async () => {
+      await exec('run -p 8989')
+      expect(run.start).toBeCalledWith({ port: '8989' })
     })
 
-    it('calls run with env variables', function (): void {
-      (this as any).exec('run --env foo=bar,host=http://localhost:8888')
-      expect(run.start).to.be.calledWith({
+    it('calls run with env variables', async () => {
+      await exec('run --env foo=bar,host=http://localhost:8888')
+      expect(run.start).toBeCalledWith({
         env: 'foo=bar,host=http://localhost:8888',
       })
     })
 
-    it('calls run with config', function (): void {
-      (this as any).exec('run --config watchForFileChanges=false,baseUrl=localhost')
-      expect(run.start).to.be.calledWith({
+    it('calls run with config', async () => {
+      await exec('run --config watchForFileChanges=false,baseUrl=localhost')
+      expect(run.start).toBeCalledWith({
         config: 'watchForFileChanges=false,baseUrl=localhost',
       })
     })
 
-    it('calls run with key', function (): void {
-      (this as any).exec('run --key asdf')
-      expect(run.start).to.be.calledWith({ key: 'asdf' })
+    it('calls run with key', async () => {
+      await exec('run --key asdf')
+      expect(run.start).toBeCalledWith({ key: 'asdf' })
     })
 
-    it('calls run with --record', function (): void {
-      (this as any).exec('run --record')
-      expect(run.start).to.be.calledWith({ record: true })
+    it('calls run with --record', async () => {
+      await exec('run --record')
+      expect(run.start).toBeCalledWith({ record: true })
     })
 
-    it('calls run with --record false', function (): void {
-      (this as any).exec('run --record false')
-      expect(run.start).to.be.calledWith({ record: false })
+    it('calls run with --record false', async () => {
+      await exec('run --record false')
+      expect(run.start).toBeCalledWith({ record: false })
     })
 
-    it('calls run with relative --project folder', function (): void {
-      (this as any).exec('run --project foo/bar')
-      expect(run.start).to.be.calledWith({ project: 'foo/bar' })
+    it('calls run with relative --project folder', async () => {
+      await exec('run --project foo/bar')
+      expect(run.start).toBeCalledWith({ project: 'foo/bar' })
     })
 
-    it('calls run with absolute --project folder', function (): void {
-      (this as any).exec('run --project /tmp/foo/bar')
-      expect(run.start).to.be.calledWith({ project: '/tmp/foo/bar' })
+    it('calls run with absolute --project folder', async () => {
+      await exec('run --project /tmp/foo/bar')
+      expect(run.start).toBeCalledWith({ project: '/tmp/foo/bar' })
     })
 
-    it('calls run with headed', function (): void {
-      (this as any).exec('run --headed')
-      expect(run.start).to.be.calledWith({ headed: true })
+    it('calls run with headed', async () => {
+      await exec('run --headed')
+      expect(run.start).toBeCalledWith({ headed: true })
     })
 
-    it('calls run with --no-exit', function (): void {
-      (this as any).exec('run --no-exit')
-      expect(run.start).to.be.calledWith({ exit: false })
+    it('calls run with --no-exit', async () => {
+      await exec('run --no-exit')
+      expect(run.start).toBeCalledWith({ exit: false })
     })
 
-    it('calls run with --parallel', function (): void {
-      (this as any).exec('run --parallel')
-      expect(run.start).to.be.calledWith({ parallel: true })
+    it('calls run with --parallel', async () => {
+      await exec('run --parallel')
+      expect(run.start).toBeCalledWith({ parallel: true })
     })
 
-    it('calls run with --ci-build-id', function (): void {
-      (this as any).exec('run --ci-build-id 123')
-      expect(run.start).to.be.calledWith({ ciBuildId: '123' })
+    it('calls run with --ci-build-id', async () => {
+      await exec('run --ci-build-id 123')
+      expect(run.start).toBeCalledWith({ ciBuildId: '123' })
     })
 
-    it('calls run with --group', function (): void {
-      (this as any).exec('run --group staging')
-      expect(run.start).to.be.calledWith({ group: 'staging' })
+    it('calls run with --group', async () => {
+      await exec('run --group staging')
+      expect(run.start).toBeCalledWith({ group: 'staging' })
     })
 
-    it('calls run with spec', function (): void {
-      (this as any).exec('run --spec cypress/integration/foo_spec.js')
-      expect(run.start).to.be.calledWith({
+    it('calls run with spec', async () => {
+      await exec('run --spec cypress/integration/foo_spec.js')
+      expect(run.start).toBeCalledWith({
         spec: 'cypress/integration/foo_spec.js',
       })
     })
 
-    it('calls run with space-separated --spec', function (): void {
-      (this as any).exec('run --spec a b c d e f g')
-      expect(run.start).to.be.calledWith({ spec: 'a,b,c,d,e,f,g' })
+    it('calls run with space-separated --spec', async () => {
+      await exec('run --spec a b c d e f g')
+      expect(run.start).toBeCalledWith({ spec: 'a,b,c,d,e,f,g' })
 
-      ;(this as any).exec('run --dev bang --spec foo bar baz -P ./')
-      expect(run.start).to.be.calledWithMatch({ spec: 'foo,bar,baz' })
+      await exec('run --dev bang --spec foo bar baz -P ./')
+      expect(run.start).toBeCalledWith(expect.objectContaining({ spec: 'foo,bar,baz' }))
     })
 
-    it('warns with space-separated --spec', function (done) {
-      sinon.spy(logger, 'warn')
+    it('warns with space-separated --spec', async () => {
+      await exec('run --spec a b c d e f g --dev')
 
-      ;(this as any).exec('run --spec a b c d e f g --dev')
-      snapshot(logger.warn.getCall(0).args[0])
-      done()
+      expect(logger.print()).toMatchSnapshot()
     })
 
-    it('calls run with --tag', function (): void {
-      (this as any).exec('run --tag nightly')
-      expect(run.start).to.be.calledWith({ tag: 'nightly' })
+    it('calls run with --tag', async () => {
+      await exec('run --tag nightly')
+      expect(run.start).toBeCalledWith({ tag: 'nightly' })
     })
 
-    it('calls run comma-separated --tag', function (): void {
-      (this as any).exec('run --tag nightly,staging')
-      expect(run.start).to.be.calledWith({ tag: 'nightly,staging' })
+    it('calls run comma-separated --tag', async () => {
+      await exec('run --tag nightly,staging')
+      expect(run.start).toBeCalledWith({ tag: 'nightly,staging' })
     })
 
-    it('does not remove double quotes from --tag', function (): void {
+    it('does not remove double quotes from --tag', async () => {
       // I think it is a good idea to lock down this behavior
       // to make sure we either preserve it or change it in the future
-      (this as any).exec('run --tag "nightly"')
-      expect(run.start).to.be.calledWith({ tag: '"nightly"' })
+      await exec('run --tag "nightly"')
+      expect(run.start).toBeCalledWith({ tag: '"nightly"' })
     })
 
-    it('calls run comma-separated --spec', function (): void {
-      (this as any).exec('run --spec main_spec.js,view_spec.js')
-      expect(run.start).to.be.calledWith({ spec: 'main_spec.js,view_spec.js' })
+    it('calls run comma-separated --spec', async () => {
+      await exec('run --spec main_spec.js,view_spec.js')
+      expect(run.start).toBeCalledWith({ spec: 'main_spec.js,view_spec.js' })
     })
 
-    it('calls run with space-separated --tag', function (): void {
-      (this as any).exec('run --tag a b c d e f g')
-      expect(run.start).to.be.calledWith({ tag: 'a,b,c,d,e,f,g' })
+    it('calls run with space-separated --tag', async () => {
+      await exec('run --tag a b c d e f g')
+      expect(run.start).toBeCalledWith({ tag: 'a,b,c,d,e,f,g' })
 
-      ;(this as any).exec('run --dev bang --tag foo bar baz -P ./')
-      expect(run.start).to.be.calledWithMatch({ tag: 'foo,bar,baz' })
+      await exec('run --dev bang --tag foo bar baz -P ./')
+      expect(run.start).toBeCalledWith(expect.objectContaining({ tag: 'foo,bar,baz' }))
     })
 
-    it('warns with space-separated --tag', function (done) {
-      sinon.spy(logger, 'warn')
-
-      ;(this as any).exec('run --tag a b c d e f g --dev')
-      snapshot(logger.warn.getCall(0).args[0])
-      done()
+    it('warns with space-separated --tag', async () => {
+      await exec('run --tag a b c d e f g --dev')
+      expect(logger.print()).toMatchSnapshot()
     })
 
-    it('calls run with space-separated --tag and --spec', function (): void {
-      (this as any).exec('run --tag a b c d e f g --spec h i j k l')
-      expect(run.start).to.be.calledWith({ tag: 'a,b,c,d,e,f,g', spec: 'h,i,j,k,l' })
+    it('calls run with space-separated --tag and --spec', async () => {
+      await exec('run --tag a b c d e f g --spec h i j k l')
+      expect(run.start).toBeCalledWith({ tag: 'a,b,c,d,e,f,g', spec: 'h,i,j,k,l' })
 
-      ;(this as any).exec('run --dev bang --tag foo bar baz -P ./ --spec fizz buzz --headed false')
-      expect(run.start).to.be.calledWithMatch({ tag: 'foo,bar,baz', spec: 'fizz,buzz' })
+      await exec('run --dev bang --tag foo bar baz -P ./ --spec fizz buzz --headed false')
+      expect(run.start).toBeCalledWith(expect.objectContaining({ tag: 'foo,bar,baz', spec: 'fizz,buzz' }))
     })
 
-    it('removes stray double quotes from --ci-build-id and --group', function (): void {
-      (this as any).exec('run --ci-build-id "123" --group "staging"')
-      expect(run.start).to.be.calledWith({ ciBuildId: '123', group: 'staging' })
+    it('removes stray double quotes from --ci-build-id and --group', async () => {
+      await exec('run --ci-build-id "123" --group "staging"')
+      expect(run.start).toBeCalledWith({ ciBuildId: '123', group: 'staging' })
     })
 
-    it('calls run with --auto-cancel-after-failures', function (): void {
-      (this as any).exec('run --auto-cancel-after-failures 4')
-      expect(run.start).to.be.calledWith({ autoCancelAfterFailures: '4' })
+    it('calls run with --auto-cancel-after-failures', async () => {
+      await exec('run --auto-cancel-after-failures 4')
+      expect(run.start).toBeCalledWith({ autoCancelAfterFailures: '4' })
     })
 
-    it('calls run with --auto-cancel-after-failures with false', function (): void {
-      (this as any).exec('run --auto-cancel-after-failures false')
-      expect(run.start).to.be.calledWith({ autoCancelAfterFailures: 'false' })
+    it('calls run with --auto-cancel-after-failures with false', async () => {
+      await exec('run --auto-cancel-after-failures false')
+      expect(run.start).toBeCalledWith({ autoCancelAfterFailures: 'false' })
     })
 
-    it('calls run with --runner-ui', function (): void {
-      (this as any).exec('run --runner-ui')
-      expect(run.start).to.be.calledWith({ runnerUi: true })
+    it('calls run with --runner-ui', async () => {
+      await exec('run --runner-ui')
+      expect(run.start).toBeCalledWith({ runnerUi: true })
     })
 
-    it('calls run with --no-runner-ui', function (): void {
-      (this as any).exec('run --no-runner-ui')
-      expect(run.start).to.be.calledWith({ runnerUi: false })
-    })
-  })
-
-  context('cypress open', () => {
-    beforeEach((): void => {
-      sinon.stub(open, 'start').resolves(0)
+    it('calls run with --no-runner-ui', async () => {
+      await exec('run --no-runner-ui')
+      expect(run.start).toBeCalledWith({ runnerUi: false })
     })
 
-    it('calls open.start with relative --project folder', function (): void {
-      (this as any).exec('open --project foo/bar')
-      expect(open.start).to.be.calledWith({ project: 'foo/bar' })
-    })
+    describe('component-testing', () => {
+      it('passes to run.start the correct args for component-testing', async () => {
+        await exec('run --component --dev')
 
-    it('calls open.start with absolute --project folder', function (): void {
-      (this as any).exec('open --project /tmp/foo/bar')
-      expect(open.start).to.be.calledWith({ project: '/tmp/foo/bar' })
-    })
-
-    it('calls open.start with options', function (): void {
-      // sinon.stub(open, 'start').resolves()
-      (this as any).exec('open --port 7878')
-      expect(open.start).to.be.calledWith({ port: '7878' })
-    })
-
-    it('calls open.start with global', function (): void {
-      // sinon.stub(open, 'start').resolves()
-      (this as any).exec('open --port 7878 --global')
-      expect(open.start).to.be.calledWith({ port: '7878', global: true })
-    })
-
-    it('calls open.start + catches errors', function (done) {
-      const err = new Error('foo')
-
-      // @ts-expect-error
-      open.start.rejects(err)
-
-      ;(this as any).exec('open --port 7878')
-
-      // @ts-expect-error
-      util.logErrorExit1.callsFake((e: Error) => {
-        expect(e).to.eq(err)
-        done()
+        expect(run.start).toHaveBeenNthCalledWith(1, {
+          component: true,
+          dev: true,
+        })
       })
     })
   })
 
-  context('cypress install', () => {
-    it('calls install.start without forcing', function (): void {
-      sinon.stub(install, 'start').resolves()
-
-      ;(this as any).exec('install')
-      expect(install.start).not.to.be.calledWith({ force: true })
+  describe('cypress open', () => {
+    beforeEach(() => {
+      // @ts-expect-error - mockResolvedValue
+      open.start.mockResolvedValue(0)
     })
 
-    it('calls install.start with force: true when passed', function (): void {
-      sinon.stub(install, 'start').resolves()
-
-      ;(this as any).exec('install --force')
-      expect(install.start).to.be.calledWith({ force: true })
+    it('calls open.start with relative --project folder', async () => {
+      await exec('open --project foo/bar')
+      expect(open.start).toBeCalledWith({ project: 'foo/bar' })
     })
 
-    it('install calls install.start + catches errors', function (done) {
+    it('calls open.start with absolute --project folder', async () => {
+      await exec('open --project /tmp/foo/bar')
+      expect(open.start).toBeCalledWith({ project: '/tmp/foo/bar' })
+    })
+
+    it('calls open.start with options', async () => {
+      await exec('open --port 7878')
+      expect(open.start).toBeCalledWith({ port: '7878' })
+    })
+
+    it('calls open.start with global', async () => {
+      await exec('open --port 7878 --global')
+      expect(open.start).toBeCalledWith({ port: '7878', global: true })
+    })
+
+    it('calls open.start + catches errors', async () => {
       const err = new Error('foo')
 
-      sinon.stub(install, 'start').rejects(err)
+      // @ts-expect-error - mockRejectedValue
+      open.start.mockRejectedValue(err)
 
-      ;(this as any).exec('install')
+      await exec('open --port 7878')
 
-      // @ts-expect-error
-      util.logErrorExit1.callsFake((e: Error) => {
-        expect(e).to.eq(err)
-        done()
+      await flushPromises()
+
+      expect(util.logErrorExit1).toHaveBeenCalledWith(err)
+    })
+
+    describe('component-testing', () => {
+      it('passes to open.start the correct args for component-testing', async () => {
+        await exec('open --component --dev')
+        await flushPromises()
+
+        expect(open.start).toHaveBeenNthCalledWith(1, {
+          component: true,
+          dev: true,
+        })
       })
     })
   })
 
-  context('cypress verify', () => {
-    it('verify calls verify.start with force: true', function (): void {
-      sinon.stub(verify, 'start').resolves()
+  describe('cypress install', () => {
+    beforeEach(() => {
+      // @ts-expect-error - mockResolvedValue
+      install.start.mockResolvedValue(undefined)
+    })
 
-      ;(this as any).exec('verify')
-      expect(verify.start).to.be.calledWith({
+    it('calls install.start without forcing', async () => {
+      await exec('install')
+      expect(install.start).not.toBeCalledWith({ force: true })
+    })
+
+    it('calls install.start with force: true when passed', async () => {
+      await exec('install --force')
+      expect(install.start).toBeCalledWith({ force: true })
+    })
+
+    it('install calls install.start + catches errors', async () => {
+      const err = new Error('foo')
+
+      // @ts-expect-error - mockRejectedValue
+      install.start.mockRejectedValue(err)
+
+      await exec('install')
+      await flushPromises()
+
+      expect(util.logErrorExit1).toHaveBeenCalledWith(err)
+    })
+  })
+
+  describe('cypress verify', () => {
+    beforeEach(() => {
+      // @ts-expect-error - mockResolvedValue
+      verify.start.mockResolvedValue(undefined)
+    })
+
+    it('verify calls verify.start with force: true', async () => {
+      await exec('verify')
+      expect(verify.start).toBeCalledWith({
         force: true,
         welcomeMessage: false,
       })
     })
 
-    it('verify calls verify.start + catches errors', function (done) {
+    it('verify calls verify.start + catches errors', async () => {
       const err = new Error('foo')
 
-      sinon.stub(verify, 'start').rejects(err)
+      // @ts-expect-error - mockRejectedValue
+      verify.start.mockRejectedValue(err)
 
-      ;(this as any).exec('verify')
+      await exec('verify')
+      await flushPromises()
 
-      // @ts-expect-error
-      util.logErrorExit1.callsFake((e: Error) => {
-        expect(e).to.eq(err)
-        done()
-      })
+      expect(util.logErrorExit1).toHaveBeenCalledWith(err)
     })
   })
 
-  context('cypress info', () => {
-    beforeEach((): void => {
-      sinon.stub(info, 'start').resolves(0)
-      sinon.stub(util, 'exit').withArgs(0)
+  describe('cypress info', () => {
+    beforeEach(() => {
+      info.start.mockResolvedValue(undefined)
     })
 
-    it('calls info start', function (): void {
-      (this as any).exec('info')
-      expect(info.start).to.have.been.calledWith()
+    it('calls info start', async () => {
+      await exec('info')
+      expect(info.start).toBeCalled()
     })
   })
 
-  context('cypress cache list', () => {
-    it('prints explanation when no cache', function (done) {
+  describe('cypress cache list', () => {
+    it('prints explanation when no cache', async () => {
       const err: any = new Error()
 
       err.code = 'ENOENT'
 
-      sinon.stub(cache, 'list').rejects(err)
+      // @ts-expect-error - mockRejectedValue
+      cache.list.mockRejectedValue(err)
 
-      ;(this as any).exec('cache list')
+      await exec('cache list')
 
-      ;(process.exit as any).callsFake(() => {
-        snapshot('prints explanation when no cache', logger.print())
-        done()
-      })
+      await flushPromises()
+
+      expect(logger.print()).toMatchSnapshot()
     })
 
-    it('catches rejection and exits', function (done) {
+    it('catches rejection and exits', async () => {
       const err = new Error('cache list failed badly')
 
-      sinon.stub(cache, 'list').rejects(err)
+      // @ts-expect-error - mockRejectedValue
+      cache.list.mockRejectedValue(err)
 
-      ;(this as any).exec('cache list')
+      await exec('cache list')
 
-      // @ts-expect-error
-      util.logErrorExit1.callsFake((e: Error) => {
-        expect(e).to.eq(err)
-        done()
-      })
-    })
-  })
+      await flushPromises()
 
-  context('component-testing', () => {
-    beforeEach((): void => {
-      sinon.stub(spawn, 'start').resolves()
-    })
-
-    it('spawns server with correct args for component-testing', function (): void {
-      (this as any).exec('open --component --dev')
-      // @ts-expect-error
-      expect(spawn.start.firstCall.args[0]).to.include('--testing-type')
-      // @ts-expect-error
-      expect(spawn.start.firstCall.args[0]).to.include('component')
-    })
-
-    it('runs server with correct args for component-testing', function (): void {
-      (this as any).exec('run --component --dev')
-      // @ts-expect-error
-      expect(spawn.start.firstCall.args[0]).to.include('--testing-type')
-      // @ts-expect-error
-      expect(spawn.start.firstCall.args[0]).to.include('component')
+      expect(util.logErrorExit1).toHaveBeenCalledWith(err)
     })
   })
 })

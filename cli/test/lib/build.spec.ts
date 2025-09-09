@@ -1,51 +1,56 @@
-import '../spec_helper'
+import { vi, describe, it, beforeEach, expect } from 'vitest'
+import fs from 'fs-extra'
+import semver from 'semver'
 import makeUserPackageFile from '../../scripts/build'
-import snapshot from '../support/snapshot'
-import la from 'lazy-ass'
-import is from 'check-more-types'
-import fs from '../../lib/fs'
 
-const hasVersion = (json: any): void => {
-  la(is.semver(json.version), 'cannot find version', json)
-}
-
-const normalizePackageJson = (o: any): any => {
-  expect(o.buildInfo).to.include({ stable: false })
-  expect(o.buildInfo.commitBranch).to.match(/.+/)
-  expect(o.buildInfo.commitSha).to.match(/[a-f0-9]+/)
+vi.mock('fs-extra', async (importActual) => {
+  const actual = await importActual()
 
   return {
-    ...o,
-    version: 'x.y.z',
-    buildInfo: 'replaced by normalizePackageJson',
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      readJson: vi.fn(),
+      outputJson: vi.fn(),
+    },
   }
-}
+})
 
 describe('package.json build', () => {
   beforeEach(function (): void {
     // stub package.json in CLI
     // with a few test props
     // the rest should come from root package.json file
-    sinon.stub(fs, 'readJsonAsync').resolves({
+
+    // @ts-expect-error - mockResolvedValue
+    fs.readJson.mockResolvedValue({
       name: 'test',
       engines: 'test engines',
     })
 
-    sinon.stub(fs, 'outputJsonAsync').resolves()
+    // @ts-expect-error - mockResolvedValue
+    fs.outputJson.mockResolvedValue(undefined)
   })
 
-  it('version', () => {
-    return makeUserPackageFile()
-    .then((result: any) => {
-      hasVersion(result)
+  it('has a semver version', async () => {
+    const result = await makeUserPackageFile()
 
-      return result
-    })
+    expect(semver.valid(result.version)).toBeTruthy()
   })
 
-  it('outputs expected properties', () => {
-    return makeUserPackageFile()
-    .then(normalizePackageJson)
-    .then(snapshot)
+  it('outputs expected properties', async () => {
+    const result = await makeUserPackageFile()
+
+    expect(result.buildInfo).to.include({ stable: false })
+    expect(result.buildInfo.commitBranch).to.match(/.+/)
+    expect(result.buildInfo.commitSha).to.match(/[a-f0-9]+/)
+
+    const snapshot = {
+      ...result,
+      version: 'x.y.z',
+      buildInfo: 'replaced by normalizePackageJson',
+    }
+
+    expect(snapshot).toMatchSnapshot()
   })
 })

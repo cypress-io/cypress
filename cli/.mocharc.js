@@ -8,8 +8,6 @@ module.exports = {
     'test/lib/tasks/state.spec.ts',
     'test/lib/tasks/unzip.spec.ts',
     'test/lib/tasks/verify.spec.ts',
-    'test/lib/build.spec.ts',
-    'test/lib/cli.spec.ts',
   ],
   timeout: 10000,
   reporter: 'spec',
