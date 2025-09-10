@@ -16,21 +16,22 @@ if git diff --cached --name-only | grep -q "^\.circleci/src/"; then
       dirname=$(basename "$dir")
       output_file="./.circleci/${dirname}.yml"
       
-      echo "📦 Packing ${dirname} configuration..."
+      echo "📦 Packing ${dirname}.yml configuration..."
       if ! circleci config pack "$dir" > "$output_file"; then
-        echo "❌ Failed to pack ${dirname} configuration!"
+        echo "  ❌ Failed to pack ${output_file}"
         exit 1
       fi
-      echo "✅ Packed ${dirname} configuration"
+      echo "  ✅ Packed ${output_file}"
       
-      echo "🔍 Validating ${dirname} configuration..."
+      echo "  🔍 Validating ${output_file}"
       if ! circleci config validate "$output_file"; then
-        echo "❌ ${dirname} configuration validation failed!"
+        echo "    ❌ Validating ${output_file} failed"
         exit 1
       fi
-      echo "✅ ${dirname} configuration validated successfully"
+      echo "    ✅ ${dirname}.yml configuration validated successfully"
       
       git add "$output_file"
+      echo "  📝 ${output_file} staged for commit"
     fi
   done
   
