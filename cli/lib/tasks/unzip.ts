@@ -10,9 +10,6 @@ import fs from 'fs-extra'
 import { throwFormErrorText, errors } from '../errors'
 import util from '../util'
 
-// TODO: this package needs to be replaced as we can't import it in vitest
-const is = require('check-more-types')
-
 const debug = Debug('cypress:cli:unzip')
 
 const unzipTools = {
@@ -199,7 +196,7 @@ function isMaybeWindowsMaxPathLengthError (err: any): boolean {
 }
 
 const start = async ({ zipFilePath, installDir, progress }: any): Promise<void> => {
-  la(is.unemptyString(installDir), 'missing installDir')
+  la(_.isString(installDir) && !_.isEmpty(installDir), 'missing installDir')
   if (!progress) {
     progress = { onProgress: () => {
       return {}
