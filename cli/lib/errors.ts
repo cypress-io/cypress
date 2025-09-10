@@ -1,7 +1,7 @@
 import chalk from 'chalk'
 import { stripIndent, stripIndents } from 'common-tags'
-import la from 'lazy-ass'
 import _ from 'lodash'
+import assert from 'assert'
 import util from './util'
 import state from './tasks/state'
 
@@ -307,18 +307,14 @@ export async function formErrorText (info: any, msg?: string, prevMessage?: stri
     formatted.push(stripIndents(msg))
   }
 
-  la(
-    _.isString(infoWithPlatform.description) && !_.isEmpty(infoWithPlatform.description),
-    'expected error description to be text',
-    infoWithPlatform.description,
-  )
+  assert.ok(_.isString(infoWithPlatform.description) && !_.isEmpty(infoWithPlatform.description), 'expected error description to be text.')
 
   // assuming that if there the solution is a function it will handle
   // error message and (optional previous error message)
   if (_.isFunction(infoWithPlatform.solution)) {
     const text = infoWithPlatform.solution(msg, prevMessage)
 
-    la(_.isString(text) && !_.isEmpty(text), 'expected solution to be text', text)
+    assert.ok(_.isString(text) && !_.isEmpty(text), 'expected solution to be text.')
 
     add(`
         ${infoWithPlatform.description}
@@ -327,11 +323,7 @@ export async function formErrorText (info: any, msg?: string, prevMessage?: stri
 
       `)
   } else {
-    la(
-      _.isString(infoWithPlatform.solution) && !_.isEmpty(infoWithPlatform.solution),
-      'expected error solution to be text',
-      infoWithPlatform.solution,
-    )
+    assert.ok(_.isString(infoWithPlatform.solution) && !_.isEmpty(infoWithPlatform.solution), 'expected error solution to be text.')
 
     add(`
         ${infoWithPlatform.description}

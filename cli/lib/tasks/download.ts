@@ -1,5 +1,5 @@
-import la from 'lazy-ass'
 import os from 'os'
+import assert from 'assert'
 import _ from 'lodash'
 import url from 'url'
 import path from 'path'
@@ -336,7 +336,7 @@ const start = async (opts: any): Promise<any> => {
   let { version, downloadDestination, progress, redirectTTL } = opts
 
   if (!downloadDestination) {
-    la(_.isString(downloadDestination) && !_.isEmpty(downloadDestination), 'missing download dir', opts)
+    assert.ok(_.isString(downloadDestination) && !_.isEmpty(downloadDestination), 'missing download dir')
   }
 
   if (!progress) {

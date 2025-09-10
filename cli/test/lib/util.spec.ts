@@ -1,6 +1,6 @@
 import { vi, describe, it, beforeEach, expect } from 'vitest'
+import assert from 'assert'
 import hasha from 'hasha'
-import la from 'lazy-ass'
 import util from '../../lib/util'
 import logger from '../../lib/logger'
 import { Systeminformation } from 'systeminformation'
@@ -666,8 +666,7 @@ describe('util', () => {
         hasha.fromFile(__filename, { algorithm: 'sha512' }),
       ])
 
-      la(checksum === expectedChecksum, 'our computed checksum', checksum,
-        'is different from expected', expectedChecksum)
+      assert.ok(checksum === expectedChecksum, `checksum ${checksum} is different from expected "${expectedChecksum}"`)
     })
   })
 

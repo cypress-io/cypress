@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import la from 'lazy-ass'
 import cp from 'child_process'
 import os from 'os'
 import yauzl from 'yauzl'
@@ -9,6 +8,7 @@ import readline from 'readline'
 import fs from 'fs-extra'
 import { throwFormErrorText, errors } from '../errors'
 import util from '../util'
+import assert from 'assert'
 
 const debug = Debug('cypress:cli:unzip')
 
@@ -196,7 +196,7 @@ function isMaybeWindowsMaxPathLengthError (err: any): boolean {
 }
 
 const start = async ({ zipFilePath, installDir, progress }: any): Promise<void> => {
-  la(_.isString(installDir) && !_.isEmpty(installDir), 'missing installDir')
+  assert.ok(_.isString(installDir) && !_.isEmpty(installDir), 'missing installDir')
   if (!progress) {
     progress = { onProgress: () => {
       return {}
