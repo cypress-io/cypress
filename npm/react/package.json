@@ -28,7 +28,7 @@
     "react-router-dom": "6.28.0",
     "semver": "^7.7.1",
     "typescript": "~5.4.5",
-    "vite": "6.3.5",
+    "vite": "6.3.6",
     "vite-plugin-require-transform": "1.0.21"
   },
   "peerDependencies": {
