@@ -1,8 +1,12 @@
 
 when:
-    matches:
-      pattern: /^pull\/[0-9]+/
-      value: << pipeline.git.branch >>
+  or:
+    - matches:
+        pattern: /^pull\/[0-9]+/
+        value: << pipeline.git.branch >>
+    - matches:
+        pattern: /^use-pack-for-circle/
+        value: << pipeline.git.branch >>
 
 jobs:
   - node_modules_install:
