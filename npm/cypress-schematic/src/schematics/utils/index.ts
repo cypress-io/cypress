@@ -2,7 +2,7 @@ import { readdirSync } from 'fs'
 import { resolve } from 'path'
 import { getSystemPath, normalize, strings } from '@angular-devkit/core'
 import { Tree, apply, url, applyTemplates, move, Rule } from '@angular-devkit/schematics'
-import { get } from 'http'
+import { get } from 'https'
 import { Schema } from '../ng-generate/cypress-test/schema'
 
 import { getPackageJsonDependency } from './dependencies'
@@ -30,7 +30,7 @@ export function getLatestNodeVersion (packageName: string): Promise<NodePackage>
   const DEFAULT_VERSION = 'latest'
 
   return new Promise((resolve) => {
-    return get(`http://registry.npmjs.org/${packageName}`, (res) => {
+    return get(`https://registry.npmjs.org/${packageName}`, (res) => {
       let rawData = ''
 
       res.on('data', (chunk) => (rawData += chunk))
@@ -69,7 +69,6 @@ function generateCTSpec ({ tree, appPath, component }: { tree: Tree, appPath: st
   const componentFilename = component['name'].split('.')[0]
   const componentName = componentMatch ? componentMatch[0] : componentFilename
 
-  // eslint-disable-next-line no-console
   console.log(`Creating new component spec for: ${componentName}\n`)
 
   return tree.create(`${appPath}/${componentFilename}.component.cy.ts`, ctSpecContent({ componentName, componentFilename }))

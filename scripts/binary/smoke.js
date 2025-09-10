@@ -5,7 +5,7 @@ const execa = require('execa')
 const path = require('path')
 const Promise = require('bluebird')
 const os = require('os')
-const verify = require('../../cli/lib/tasks/verify')
+const verify = require('../../cli/lib/tasks/verify').default
 const Fixtures = require('@tooling/system-tests')
 const { scaffoldCommonNodeModules } = require('@tooling/system-tests/lib/dep-installer')
 

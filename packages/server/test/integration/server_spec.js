@@ -354,16 +354,16 @@ describe('Server', () => {
                   res.write('ok')
 
                   return res.end()
-                }
-                , Number(ms))
+                },
+                 Number(ms))
               case 'pause-before-headers':
                 return setTimeout(() => {
                   res.writeHead(200, { 'content-type': 'text/html' })
                   res.write('ok')
 
                   return res.end()
-                }
-                , Number(ms))
+                },
+                 Number(ms))
               default:
             }
           })

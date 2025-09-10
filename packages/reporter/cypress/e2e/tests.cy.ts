@@ -262,7 +262,7 @@ describe('studio controls', () => {
       cy.contains('test 1').parents('.collapsible-header')
       .find('.runnable-controls-studio').click()
 
-      cy.wrap(runner.emit).should('be.calledWith', 'studio:init:test', 'r3')
+      cy.wrap(runner.emit).should('be.calledWith', 'studio:init:test', { testId: 'r3' })
     })
   })
 })

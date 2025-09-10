@@ -31,6 +31,13 @@ CyEventEmitter & {
     getRootSuite: () => Suite
   }
   areSourceMapsAvailable?: boolean
+  stackUtils?: {
+    getSourceDetailsForFirstLine: (stack: string, projectRoot: string) => {
+      line: number
+      column: number
+      file: string
+    }
+  }
 }
 
 export interface TestBlock {

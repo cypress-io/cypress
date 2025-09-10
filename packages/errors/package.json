@@ -8,7 +8,7 @@
     "build": "../../scripts/run-if-ci.sh tsc || echo 'type errors'",
     "build-prod": "tsc",
     "check-ts": "tsc --noEmit && yarn -s tslint",
-    "clean": "rimraf ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
+    "clean": "rimraf --glob './src/*.js' './src/**/*.js' './src/**/**/*.js' './test/**/*.js' || echo 'cleaned'",
     "clean-deps": "rimraf node_modules",
     "comparison": "node -r @packages/ts/register test/support/error-comparison-tool.ts",
     "lint": "eslint",

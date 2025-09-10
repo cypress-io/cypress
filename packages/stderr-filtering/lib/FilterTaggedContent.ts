@@ -3,7 +3,7 @@ import { StringDecoder } from 'string_decoder'
 import { LineDecoder } from './LineDecoder'
 import Debug from 'debug'
 import { writeWithBackpressure } from './writeWithBackpressure'
-const debug = Debug('cypress:stderr-filtering:FilterTaggedContent')
+const debugVerbose = Debug('cypress-verbose:stderr-filtering:FilterTaggedContent')
 
 /**
  * Filters content based on start and end tags, supporting multi-line tagged content.
@@ -53,7 +53,7 @@ export class FilterTaggedContent extends Transform {
 
       this.lineDecoder?.write(str)
 
-      debug('processing str for tags: "%s"', str)
+      debugVerbose('processing str for tags: "%s"', str)
 
       for (const line of Array.from(this.lineDecoder || [])) {
         await this.processLine(line)
@@ -71,7 +71,7 @@ export class FilterTaggedContent extends Transform {
    * @param callback Callback to call when flushing is complete
    */
   flush = async (callback: (err?: Error) => void) => {
-    debug('flushing')
+    debugVerbose('flushing')
     this.ensureDecoders()
     try {
       for (const line of Array.from(this.lineDecoder?.end() || [])) {
@@ -146,12 +146,12 @@ export class FilterTaggedContent extends Transform {
   }
 
   private async writeToWasteStream (line: string, encoding?: BufferEncoding | 'buffer') {
-    debug('writing to waste stream: "%s"', line)
+    debugVerbose('writing to waste stream: "%s"', line)
     await writeWithBackpressure(this.wasteStream, Buffer.from(line, (encoding === 'buffer' ? 'utf8' : encoding) ?? 'utf8'))
   }
 
   private async pass (line: string, encoding?: BufferEncoding | 'buffer') {
-    debug('passing: "%s"', line)
+    debugVerbose('passing: "%s"', line)
     this.push(Buffer.from(line, (encoding === 'buffer' ? 'utf8' : encoding) ?? 'utf8'))
   }
 }
