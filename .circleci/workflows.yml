@@ -3647,7 +3647,17 @@ workflows:
           requires:
             - darwin-arm64-build
           resource_class: cypress-io/m1-macstadium
-    when: null
+    when:
+      or:
+        - equal:
+            - develop
+            - << pipeline.git.branch >>
+        - equal:
+            - update-v8-snapshot-cache-on-develop
+            - << pipeline.git.branch >>
+        - matches:
+            pattern: /^release\/\d+\.\d+\.\d+$/
+            value: << pipeline.git.branch >>
   darwin-x64:
     jobs:
       - node_modules_install:
@@ -3698,9 +3708,6 @@ workflows:
             - << pipeline.git.branch >>
         - equal:
             - update-v8-snapshot-cache-on-develop
-            - << pipeline.git.branch >>
-        - equal:
-            - chore/migrate-electron-lib-ts
             - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/
@@ -3759,7 +3766,17 @@ workflows:
           requires:
             - linux-arm64-build
           resource_class: arm.medium
-    when: null
+    when:
+      or:
+        - equal:
+            - develop
+            - << pipeline.git.branch >>
+        - equal:
+            - update-v8-snapshot-cache-on-develop
+            - << pipeline.git.branch >>
+        - matches:
+            pattern: /^release\/\d+\.\d+\.\d+$/
+            value: << pipeline.git.branch >>
   linux-x64:
     jobs:
       - node_modules_install:
@@ -4235,15 +4252,16 @@ workflows:
             - get-published-artifacts
             - system-tests-node-modules-install
     when:
-      - equal:
-          - develop
-          - << pipeline.git.branch >>
-      - equal:
-          - update-v8-snapshot-cache-on-develop
-          - << pipeline.git.branch >>
-      - matches:
-          pattern: /^release\/\d+\.\d+\.\d+$/
-          value: << pipeline.git.branch >>
+      or:
+        - equal:
+            - develop
+            - << pipeline.git.branch >>
+        - equal:
+            - update-v8-snapshot-cache-on-develop
+            - << pipeline.git.branch >>
+        - matches:
+            pattern: /^release\/\d+\.\d+\.\d+$/
+            value: << pipeline.git.branch >>
   linux-x64-contributor:
     jobs:
       - node_modules_install
@@ -4939,7 +4957,6 @@ workflows:
       - test-kitchensink:
           requires:
             - build
-      - test-kitchensink-against-staging: null
       - test-npm-module-on-minimum-node-version:
           context: publish-binary
           requires:
@@ -4983,9 +5000,9 @@ workflows:
             - get-published-artifacts
             - system-tests-node-modules-install
     when:
-      - matches:
-          pattern: /^pull\/[0-9]+/
-          value: << pipeline.git.branch >>
+      matches:
+        pattern: /^pull\/[0-9]+/
+        value: << pipeline.git.branch >>
   windows:
     jobs:
       - node_modules_install:
@@ -5058,4 +5075,14 @@ workflows:
           requires:
             - windows-build
           resource_class: windows.medium
-    when: null
+    when:
+      or:
+        - equal:
+            - develop
+            - << pipeline.git.branch >>
+        - equal:
+            - update-v8-snapshot-cache-on-develop
+            - << pipeline.git.branch >>
+        - matches:
+            pattern: /^release\/\d+\.\d+\.\d+$/
+            value: << pipeline.git.branch >>

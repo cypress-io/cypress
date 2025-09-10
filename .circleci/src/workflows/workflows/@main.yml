@@ -2,12 +2,13 @@
 
 linux-x64:
   when: &full-workflow-filters
-    - equal: [ develop, << pipeline.git.branch >> ]
-    # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
-    - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - matches:
-        pattern: /^release\/\d+\.\d+\.\d+$/
-        value: << pipeline.git.branch >>
+    or:
+      - equal: [ develop, << pipeline.git.branch >> ]
+      # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
+      - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
+      - matches:
+          pattern: /^release\/\d+\.\d+\.\d+$/
+          value: << pipeline.git.branch >>
   jobs:
     - node_modules_install:
         build-better-sqlite3: true
@@ -808,7 +809,7 @@ linux-x64-contributor:
           - system-tests-node-modules-install
 
 linux-arm64:
-  when: &full-workflow-filters
+  when: *full-workflow-filters
   jobs:
     - node_modules_install:
         name: linux-arm64-node-modules-install
@@ -869,15 +870,7 @@ linux-arm64:
           - linux-arm64-build
 
 darwin-x64:
-  when: &full-workflow-filters
-    or:
-      - equal: [ develop, << pipeline.git.branch >> ]
-      # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
-      - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-      - equal: [ 'chore/migrate-electron-lib-ts', << pipeline.git.branch >> ]
-      - matches:
-          pattern: /^release\/\d+\.\d+\.\d+$/
-          value: << pipeline.git.branch >>
+  when: *full-workflow-filters
   jobs:
     - node_modules_install:
         name: darwin-x64-node-modules-install
@@ -927,7 +920,7 @@ darwin-x64:
           - darwin-x64-build
 
 darwin-arm64:
-  when: &full-workflow-filters
+  when: *full-workflow-filters
   jobs:
     - node_modules_install:
         name: darwin-arm64-node-modules-install
@@ -975,7 +968,7 @@ darwin-arm64:
           - darwin-arm64-build
 
 windows:
-  when: &full-workflow-filters
+  when: *full-workflow-filters
   jobs:
     - node_modules_install:
         name: windows-node-modules-install

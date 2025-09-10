@@ -1,6 +1,6 @@
 
 when:
-  - matches:
+    matches:
       pattern: /^pull\/[0-9]+/
       value: << pipeline.git.branch >>
 
@@ -265,7 +265,6 @@ jobs:
   - test-kitchensink:
       requires:
         - build
-  - test-kitchensink-against-staging:
   - test-npm-module-on-minimum-node-version:
       context: publish-binary
       requires:
