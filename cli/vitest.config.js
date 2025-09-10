@@ -10,6 +10,14 @@ export default defineConfig({
       'test/lib/exec/versions.spec.ts',
       'test/lib/exec/xvfb.spec.ts',
 
+      'test/lib/tasks/cache.spec.ts',
+      'test/lib/tasks/dependency.spec.ts',
+      'test/lib/tasks/download.spec.ts',
+      'test/lib/tasks/install.spec.ts',
+      'test/lib/tasks/state.spec.ts',
+      'test/lib/tasks/unzip.spec.ts',
+      'test/lib/tasks/verify.spec.ts',
+
       'test/lib/util.spec.ts',
       'test/lib/logger.spec.ts',
       'test/lib/errors.spec.ts',

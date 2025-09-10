@@ -7,7 +7,7 @@ import Debug from 'debug'
 import util from '../util'
 import state from '../tasks/state'
 import xvfb from './xvfb'
-import verifyModule from '../tasks/verify'
+import { needsSandbox } from '../tasks/verify'
 import { throwFormErrorText, getError, errors } from '../errors'
 import readline from 'readline'
 import { stdin, stdout, stderr } from 'process'
@@ -100,7 +100,7 @@ const spawnModule = {
           debug('in dev mode the args became %o', args)
         }
 
-        if (!options.dev && verifyModule.needsSandbox()) {
+        if (!options.dev && needsSandbox()) {
           electronArgs.push('--no-sandbox')
         }
 

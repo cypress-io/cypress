@@ -2,7 +2,7 @@ import _ from 'lodash'
 import Debug from 'debug'
 import util from '../util'
 import spawn from './spawn'
-import verifyModule from '../tasks/verify'
+import { start } from '../tasks/verify'
 import { exitWithError, errors } from '../errors'
 import { processTestingType, throwInvalidOptionError, checkConfigFile } from './shared'
 
@@ -195,7 +195,7 @@ const runModule = {
       return run()
     }
 
-    await verifyModule.start()
+    await start()
 
     return run()
   },

@@ -3,7 +3,7 @@ import os from 'os'
 import util from '../../../lib/util'
 import run from '../../../lib/exec/run'
 import spawn from '../../../lib/exec/spawn'
-import verify from '../../../lib/tasks/verify'
+import { start as verifyStart } from '../../../lib/tasks/verify'
 
 vi.mock('os', async (importActual) => {
   const actual = await importActual()
@@ -41,15 +41,9 @@ vi.mock('../../../lib/exec/spawn', async (importActual) => {
   }
 })
 
-vi.mock('../../../lib/tasks/verify', async (importActual) => {
-  const actual = await importActual()
-
+vi.mock('../../../lib/tasks/verify', () => {
   return {
-    default: {
-      // @ts-expect-error
-      ...actual.default,
-      start: vi.fn(),
-    },
+    start: vi.fn(),
   }
 })
 
@@ -163,12 +157,12 @@ describe('exec run', () => {
       // @ts-expect-error - mockResolvedValue
       spawn.start.mockResolvedValue(undefined)
       // @ts-expect-error - mockResolvedValue
-      verify.start.mockResolvedValue(undefined)
+      verifyStart.mockResolvedValue(undefined)
     })
 
     it('verifies cypress', async () => {
       await run.start()
-      expect(verify.start).toHaveBeenCalledOnce()
+      expect(verifyStart).toHaveBeenCalledOnce()
     })
 
     it('spawns with --key and xvfb', async () => {
