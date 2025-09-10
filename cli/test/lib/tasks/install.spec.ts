@@ -3,7 +3,6 @@ import os from 'os'
 import path from 'path'
 import chalk from 'chalk'
 import timers from 'timers/promises'
-import normalize from '../../support/normalize'
 import fs from 'fs-extra'
 import si, { Systeminformation } from 'systeminformation'
 import logger from '../../../lib/logger'
@@ -154,14 +153,15 @@ describe('/lib/tasks/install', function () {
   // Direct console to process.stdout/stderr
   let originalConsole: Console
 
+  let previousChalkLevel: 0 | 1 | 2 | 3
+
   beforeEach(() => {
     vi.resetAllMocks()
     vi.unstubAllEnvs()
     vi.stubEnv('npm_config_loglevel', 'notice')
 
-    // allow simpler log message comparison without
-    // chalk's terminal control strings
-    chalk.level = 0
+    previousChalkLevel = chalk.level
+    chalk.level = 3
 
     originalConsole = globalThis.console
     // Redirect console output to a custom stream or mock
@@ -170,7 +170,7 @@ describe('/lib/tasks/install', function () {
 
   afterEach(() => {
     globalThis.console = originalConsole // Restore original console
-    chalk.level = 3
+    chalk.level = previousChalkLevel
   })
 
   describe('.start', function () {
@@ -266,7 +266,7 @@ describe('/lib/tasks/install', function () {
           zipFilePath: downloadDestination,
         }))
 
-        expect(normalize(output())).toMatchSnapshot('specify version in env vars 1')
+        expect(output()).toMatchSnapshot('specify version in env vars 1')
       })
 
       it('trims environment variable before installing', async function () {
@@ -378,7 +378,7 @@ describe('/lib/tasks/install', function () {
 
           await install.start()
 
-          expect(normalize(output())).toMatchSnapshot('version already installed - cypress install 1')
+          expect(output()).toMatchSnapshot('version already installed - cypress install 1')
         })
 
         it('logs when already installed when run from postInstall', async function () {
@@ -388,7 +388,7 @@ describe('/lib/tasks/install', function () {
 
           await install.start()
 
-          expect(normalize(output())).toMatchSnapshot('version already installed - postInstall 1')
+          expect(output()).toMatchSnapshot('version already installed - postInstall 1')
         })
       })
 
@@ -408,7 +408,7 @@ describe('/lib/tasks/install', function () {
             installDir,
           }))
 
-          expect(normalize(output())).toMatchSnapshot('continues installing on failure 1')
+          expect(output()).toMatchSnapshot('continues installing on failure 1')
         })
       })
 
@@ -433,7 +433,7 @@ describe('/lib/tasks/install', function () {
             downloadDestination,
           )
 
-          expect(normalize(output())).toMatchSnapshot('installs without existing installation 1')
+          expect(output()).toMatchSnapshot('installs without existing installation 1')
         })
       })
 
@@ -452,7 +452,7 @@ describe('/lib/tasks/install', function () {
             installDir,
           }))
 
-          expect(normalize(output())).toMatchSnapshot('installed version does not match needed version 1')
+          expect(output()).toMatchSnapshot('installed version does not match needed version 1')
         })
       })
 
@@ -471,7 +471,7 @@ describe('/lib/tasks/install', function () {
             installDir,
           }))
 
-          expect(normalize(output())).toMatchSnapshot('forcing true always installs 1')
+          expect(output()).toMatchSnapshot('forcing true always installs 1')
         })
       })
 
@@ -493,7 +493,7 @@ describe('/lib/tasks/install', function () {
             installDir,
           }))
 
-          expect(normalize(output())).toMatchSnapshot('warning installing as global 1')
+          expect(output()).toMatchSnapshot('warning installing as global 1')
         })
       })
 
@@ -507,7 +507,7 @@ describe('/lib/tasks/install', function () {
 
           await install.start()
 
-          expect(normalize(output())).toMatchSnapshot('installing in ci 1')
+          expect(output()).toMatchSnapshot('installing in ci 1')
         })
       })
 
@@ -531,7 +531,7 @@ describe('/lib/tasks/install', function () {
             expect(err.message).not.toEqual('should have caught error')
             logger.error(err)
 
-            expect(normalize(output())).toMatchSnapshot('invalid cache directory 1')
+            expect(output()).toMatchSnapshot('invalid cache directory 1')
           }
         })
       })
@@ -606,7 +606,7 @@ describe('/lib/tasks/install', function () {
 
       await install.start()
 
-      expect(normalize(output())).toMatchSnapshot('silent install 1')
+      expect(output()).toMatchSnapshot('silent install 1')
     })
 
     it('exits with error when installing on unsupported os', async function () {
@@ -621,7 +621,7 @@ describe('/lib/tasks/install', function () {
         expect(err.message).not.toEqual('should have caught error')
         logger.error(err)
 
-        expect(normalize(output())).toMatchSnapshot('error when installing on unsupported os')
+        expect(output()).toMatchSnapshot('error when installing on unsupported os')
       }
     })
   })

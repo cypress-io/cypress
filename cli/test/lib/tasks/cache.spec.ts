@@ -1,4 +1,5 @@
 import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest'
+import chalk from 'chalk'
 import mockfs from 'mock-fs'
 import dayjs from 'dayjs'
 import path from 'path'
@@ -64,8 +65,11 @@ describe('lib/tasks/cache', () => {
 
   // Direct console to process.stdout/stderr
   let originalConsole: Console
+  let previousChalkLevel: 0 | 1 | 2 | 3
 
   beforeEach(() => {
+    previousChalkLevel = chalk.level
+    chalk.level = 3
     vi.resetAllMocks()
     vi.unstubAllEnvs()
 
@@ -76,6 +80,7 @@ describe('lib/tasks/cache', () => {
 
   afterEach(() => {
     globalThis.console = originalConsole // Restore original console
+    chalk.level = previousChalkLevel
   })
 
   beforeEach(async function () {

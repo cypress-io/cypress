@@ -10,7 +10,6 @@ import fs from 'fs-extra'
 import si, { Systeminformation } from 'systeminformation'
 import { Console } from 'console'
 
-import normalize from '../../support/normalize'
 import logger from '../../../lib/logger'
 import util from '../../../lib/util'
 import unzip from '../../../lib/tasks/unzip'
@@ -114,7 +113,7 @@ describe('lib/tasks/unzip', function () {
   })
 
   it('throws when cannot unzip', async function () {
-    const stdout = createStdoutCapture()
+    const output = createStdoutCapture()
 
     try {
       await unzip.start({
@@ -124,14 +123,14 @@ describe('lib/tasks/unzip', function () {
     } catch (err) {
       logger.error(err)
 
-      return expect(normalize(stdout())).toMatchSnapshot()
+      return expect(output()).toMatchSnapshot()
     }
 
     throw new Error('should have failed')
   })
 
   it('throws max path length error when cannot unzip due to realpath ENOENT on windows', async function () {
-    const stdout = createStdoutCapture()
+    const output = createStdoutCapture()
 
     const err: any = new Error('failed')
 
@@ -149,7 +148,7 @@ describe('lib/tasks/unzip', function () {
     } catch (err) {
       logger.error(err)
 
-      return expect(normalize(stdout())).toMatchSnapshot()
+      return expect(output()).toMatchSnapshot()
     }
 
     throw new Error('should have failed')

@@ -1,5 +1,6 @@
 import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest'
 import os from 'os'
+import chalk from 'chalk'
 import { Console } from 'console'
 import si, { Systeminformation } from 'systeminformation'
 import util from '../../../lib/util'
@@ -88,7 +89,12 @@ describe('exec info', () => {
   // Direct console to process.stdout/stderr
   let originalConsole: Console
 
+  let previousChalkLevel: 0 | 1 | 2 | 3
+
   beforeEach(() => {
+    previousChalkLevel = chalk.level
+    chalk.level = 3
+
     originalConsole = globalThis.console
     // Redirect console output to a custom stream or mock
     globalThis.console = new Console(process.stdout, process.stderr)
@@ -126,6 +132,7 @@ describe('exec info', () => {
 
   afterEach(() => {
     globalThis.console = originalConsole // Restore original console
+    chalk.level = previousChalkLevel
   })
 
   it('prints collected info without env vars', async () => {

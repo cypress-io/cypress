@@ -1,6 +1,8 @@
 import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest'
+import stripAnsi from 'strip-ansi'
 import os from 'os'
 import si, { Systeminformation } from 'systeminformation'
+import chalk from 'chalk'
 import path from 'path'
 import nock from 'nock'
 import hasha from 'hasha'
@@ -8,8 +10,6 @@ import createDebug from 'debug'
 import execa from 'execa'
 import fs from 'fs-extra'
 import { Console } from 'console'
-
-import normalize from '../../support/normalize'
 import logger from '../../../lib/logger'
 import util from '../../../lib/util'
 import download from '../../../lib/tasks/download'
@@ -19,6 +19,25 @@ const debug = createDebug('test')
 const downloadDestination = path.join(os.tmpdir(), 'Cypress', 'download', 'cypress.zip')
 const version = '1.2.3'
 const examplePath = 'test/fixture/example.zip'
+
+/**
+ * strip dates and ansi codes and excess whitespace
+ * @param {string} str input string
+ * @returns {string} cleaned output string
+ */
+const normalize = (str: string): string => {
+  return stripAnsi(
+    str
+    // replace dates
+    .replace(/(\d+:\d+:\d+)/g, 'xx:xx:xx')
+    .split('\n')
+    // remove whitespace at end of line
+    .map((str) => str.replace(/\s+$/g, ''))
+    .join('\n')
+    // replace download query with normalized platform and arch
+    .replace(/(\?platform=(darwin|linux|win32)&arch=x64)/, '?platform=OS&arch=ARCH'),
+  )
+}
 
 vi.mock('execa')
 
@@ -93,7 +112,12 @@ describe('lib/tasks/download', function () {
   // Direct console to process.stdout/stderr
   let originalConsole: Console
 
+  let previousChalkLevel: 0 | 1 | 2 | 3
+
   beforeEach(async () => {
+    previousChalkLevel = chalk.level
+    chalk.level = 3
+
     vi.resetAllMocks()
     vi.unstubAllEnvs()
 
@@ -128,6 +152,7 @@ describe('lib/tasks/download', function () {
 
   afterEach(() => {
     globalThis.console = originalConsole // Restore original console
+    chalk.level = previousChalkLevel
   })
 
   describe('download url', () => {
