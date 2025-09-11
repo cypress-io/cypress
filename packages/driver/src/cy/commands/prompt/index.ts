@@ -137,5 +137,15 @@ export default (Commands: Cypress.Cypress['Commands'], Cypress: Cypress.Cypress,
     }
 
     Commands.addAll(commands)
+  } else {
+    Commands.addAll({
+      prompt (steps: string[], commandOptions: object = {}) {
+        if (Cypress.testingType === 'component') {
+          $errUtils.throwErrByPath('prompt.promptTestingTypeError')
+        }
+
+        $errUtils.throwErrByPath('prompt.experimentalPromptCommandError')
+      },
+    })
   }
 }
