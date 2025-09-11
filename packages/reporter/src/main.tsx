@@ -4,8 +4,6 @@ import { observer } from 'mobx-react'
 import cs from 'classnames'
 import React, { useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-// @ts-ignore
-import EQ from 'css-element-queries/src/ElementQueries'
 
 import type { RunnablesErrorModel } from './runnables/runnable-error'
 import appStateDefault, { AppState } from './lib/app-state'
@@ -86,7 +84,6 @@ const Reporter: React.FC<SingleReporterProps> = observer(({ appState = appStateD
     })()
 
     shortcuts.start()
-    EQ.init()
     runnablesStore.setRunningSpec(runnerStore.spec.relative)
     // we need to know when the test is mounted for our reporter tests. see
     setIsMounted(true)

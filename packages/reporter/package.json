@@ -31,7 +31,6 @@
     "autoprefixer": "10.4.21",
     "classnames": "^2.5.1",
     "cross-env": "7.0.3",
-    "css-element-queries": "1.2.3",
     "cypress-multi-reporters": "1.4.0",
     "cypress-real-events": "1.14.0",
     "lodash": "^4.17.21",
