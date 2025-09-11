@@ -72,7 +72,8 @@ export const useRunnerStyle = () => {
       scale = Math.min(containerWidth.value / autStore.viewportDimensions.width, containerHeight.value / autStore.viewportDimensions.height, 1)
     }
 
-    return scale
+    // Round scale to prevent fractional dimensions
+    return Math.round(scale * 100) / 100 // Round to 2 decimal places for clean fractions
   })
 
   const viewportStyle = computed(() => {
@@ -81,8 +82,8 @@ export const useRunnerStyle = () => {
     // see this issue for details: https://github.com/cypress-io/cypress/issues/21881
 
     let style = `
-    width: ${autStore.viewportDimensions.width}px;
-    height: ${autStore.viewportDimensions.height}px;
+    width: ${Math.round(autStore.viewportDimensions.width)}px;
+    height: ${Math.round(autStore.viewportDimensions.height)}px;
     transform: scale(${scale.value});
     position: absolute;
     `
@@ -91,7 +92,7 @@ export const useRunnerStyle = () => {
     // viewport with midpoint and the the container width midpoint and apply a negative margin
     if (!screenshotStore.isScreenshotting) {
       style += `
-      margin-left: ${(containerWidth.value / 2) - (autStore.viewportDimensions.width / 2) }px`
+      margin-left: ${Math.round((containerWidth.value / 2) - (Math.round(autStore.viewportDimensions.width) / 2)) }px`
     }
 
     return style

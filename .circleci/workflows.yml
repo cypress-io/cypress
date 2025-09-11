@@ -1,5 +1,5 @@
-chrome-beta-version: 140.0.7339.41
-chrome-stable-version: 140.0.7339.80
+chrome-beta-version: 141.0.7390.16
+chrome-stable-version: 140.0.7339.127
 commands:
   build-and-package-binary:
     steps:
@@ -395,11 +395,11 @@ commands:
         description: Google Chrome channel to install
         type: string
       google-chrome-for-testing-version:
-        default: 140.0.7339.80
+        default: 140.0.7339.127
         description: Google Chrome for Testing version to install
         type: string
       google-chrome-version:
-        default: 140.0.7339.80
+        default: 140.0.7339.127
         description: Google Chrome version to install
         type: string
       install-chrome:
@@ -621,7 +621,7 @@ commands:
           steps:
             - install-browsers:
                 google-chrome-channel: << parameters.install-chrome-channel >>
-                google-chrome-version: 140.0.7339.41
+                google-chrome-version: 141.0.7390.16
                 install-chrome: true
       - when:
           condition:
