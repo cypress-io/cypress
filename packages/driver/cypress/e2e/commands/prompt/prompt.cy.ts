@@ -18,9 +18,6 @@ describe('src/cy/commands/prompt', () => {
     cy.prompt(['Click the "click me" button'])
 
     cy.get('#log').should('contain', 'clicked')
-
-    cy.visit('http://www.foobar.com:3501/fixtures/prompt.html')
-
   })
 
   it('fails when testingType is component', (done) => {
