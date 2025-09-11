@@ -4,6 +4,7 @@
 _Released 9/23/2025 (PENDING)_
 
 **Bugfixes:**
+
 - In development mode, Electron `stderr` is piped directly to Cypress' `stderr` to make it clear why Electron failed to start, if it fails to start. Addresses [32358](https://github.com/cypress-io/cypress/issues/32358). Addressed in [32468](https://github.com/cypress-io/cypress/pull/32468).
 
 ## 15.2.0
