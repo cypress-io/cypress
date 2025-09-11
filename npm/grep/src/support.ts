@@ -203,4 +203,4 @@ if (!Cypress.grep) {
 }
 
 // TODO: this export likely needs to be updated to avoid a breaking change
-exports = cypressGrep
+export default cypressGrep
