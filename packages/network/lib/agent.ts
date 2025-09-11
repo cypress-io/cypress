@@ -367,19 +367,19 @@ class HttpsAgent extends https.Agent {
     }
   }
 
-  createConnection (options: HttpsRequestOptions, cb: http.SocketCallback) {
+  createConnection (options: HttpsRequestOptions, cb?: any): any {
     if (process.env.HTTPS_PROXY) {
       const proxy = getProxyForUrl(options.href)
 
       if (proxy) {
         options.proxy = <string>proxy
 
-        return this.createUpstreamProxyConnection(<HttpsRequestOptionsWithProxy>options, cb)
+        return this.createUpstreamProxyConnection(<HttpsRequestOptionsWithProxy>options, cb as any)
       }
     }
 
     // @ts-ignore
-    cb(null, super.createConnection(options))
+    cb?.(null, super.createConnection(options) as any)
   }
 
   createUpstreamProxyConnection (options: HttpsRequestOptionsWithProxy, cb: http.SocketCallback) {
@@ -443,7 +443,7 @@ class HttpsAgent extends https.Agent {
             options.servername = hostname
           }
 
-          return cb(undefined, super.createConnection(options, undefined))
+          return cb(undefined, super.createConnection(options) as any)
         }
 
         cb(undefined, proxySocket)
