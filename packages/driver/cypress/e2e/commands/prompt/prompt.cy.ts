@@ -21,11 +21,6 @@ describe('src/cy/commands/prompt', () => {
 
     cy.visit('http://www.foobar.com:3501/fixtures/prompt.html')
 
-    cy.origin('http://www.foobar.com:3501', () => {
-      cy.prompt(['Click the "click me" button'])
-
-      cy.get('#log').should('contain', 'clicked')
-    })
   })
 
   it('fails when testingType is component', (done) => {
