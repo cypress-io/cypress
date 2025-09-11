@@ -79,7 +79,7 @@ export async function open (appPath: string, argv: string[]): Promise<ChildProce
     spawned.on('error', (err) => {
       console.error(err)
 
-      return process.exit(1)
+      process.exit(1)
     })
 
     spawned.on('close', (code, signal) => {

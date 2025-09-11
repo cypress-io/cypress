@@ -24,7 +24,7 @@ const unknownPlatformErr = function () {
 }
 
 const normalize = (...paths: string[]) => {
-  return path.join(__dirname, '..', ...paths)
+  return path.join(__dirname, '..', '..', ...paths)
 }
 
 export const getPathToDist = (...paths: string[]) => {
