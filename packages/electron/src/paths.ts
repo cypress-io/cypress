@@ -1,7 +1,22 @@
 import os from 'os'
 import path from 'path'
+import { existsSync } from 'fs'
 
 const distPath = 'dist/Cypress'
+
+function pkgRoot (): string {
+  let currentDir = path.dirname(__dirname)
+
+  do {
+    if (existsSync(path.join(currentDir, 'package.json'))) {
+      return currentDir
+    }
+
+    currentDir = path.resolve(currentDir, '..')
+  } while (currentDir !== '')
+
+  throw new Error('Could not find package.json to determine package root')
+}
 
 type OSLookup = Record<string, string>
 
@@ -23,14 +38,8 @@ const unknownPlatformErr = function () {
   throw new Error(`Unknown platform: '${os.platform()}'`)
 }
 
-const normalize = (...paths: string[]) => {
-  return path.join(__dirname, '..', '..', ...paths)
-}
-
 export const getPathToDist = (...paths: string[]) => {
-  paths = [distPath].concat(paths)
-
-  return normalize(...paths)
+  return path.resolve(pkgRoot(), distPath, ...paths)
 }
 
 export const getPathToExec = () => {
