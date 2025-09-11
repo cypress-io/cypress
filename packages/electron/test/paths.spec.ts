@@ -1,6 +1,6 @@
 import { describe, it, beforeEach, afterEach, vi, expect } from 'vitest'
 import os from 'os'
-import { getPathToDist, getPathToExec, getPathToResources } from '../src/paths'
+import { getPathToDist, getPathToExec, getPathToResources, pkgRoot } from '../src/paths'
 import { existsSync } from 'fs'
 import path from 'path'
 
@@ -34,7 +34,7 @@ vi.mock('path', async () => {
 
 describe('paths', () => {
   const dir = '/package/src'
-  const pkgRoot = '/package'
+  const root = '/package'
 
   let originalPath: typeof path
 
@@ -45,11 +45,11 @@ describe('paths', () => {
     })
 
     vi.mocked(path.dirname).mockImplementation((filePath) => {
-      return filePath === originalPath.resolve(__dirname, '../src') ? pkgRoot : originalPath.dirname(filePath)
+      return filePath === originalPath.resolve(__dirname, '../src') ? root : originalPath.dirname(filePath)
     })
 
     vi.mocked(existsSync).mockImplementation((filePath) => {
-      if (filePath === `${pkgRoot}/package.json`) {
+      if (filePath === `${root}/package.json`) {
         return true
       }
 
@@ -101,5 +101,15 @@ describe('paths', () => {
         expect(getPathToResources()).to.eq(expected)
       })
     }
+  })
+
+  describe('pkgRoot', () => {
+    it('does not get caught in an infinite loop', async () => {
+      vi.mocked(path.dirname).mockImplementation((...args) => originalPath.dirname(...args))
+      vi.mocked(path.resolve).mockImplementation((...args) => originalPath.resolve(...args))
+      vi.mocked(existsSync).mockImplementation(() => false)
+
+      expect(() => pkgRoot()).to.throw('Could not find package.json to determine package root')
+    })
   })
 })

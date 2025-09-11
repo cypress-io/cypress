@@ -4,16 +4,25 @@ import { existsSync } from 'fs'
 
 const distPath = 'dist/Cypress'
 
-function pkgRoot (): string {
+export function pkgRoot (): string {
   let currentDir = path.dirname(__dirname)
 
+  // arbitrary limit to prevent infinite loop
+  const limit = 200
+  let i = 0
+
   do {
+    if (i > limit) {
+      throw new Error('Could not find package.json to determine package root')
+    }
+
     if (existsSync(path.join(currentDir, 'package.json'))) {
       return currentDir
     }
 
     currentDir = path.resolve(currentDir, '..')
-  } while (currentDir !== '')
+    i++
+  } while (currentDir !== path.resolve('/'))
 
   throw new Error('Could not find package.json to determine package root')
 }
