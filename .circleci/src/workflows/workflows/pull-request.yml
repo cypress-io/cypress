@@ -9,17 +9,20 @@ when:
             pattern: /^pull\/[0-9]+/
             value: << pipeline.git.branch >>
         - not:
-          or:
-            - equal: [ "develop", << pipeline.git.branch >> ]
-            - matches:
+            or:
+              - equal: [ "develop", << pipeline.git.branch >> ]
+              - matches:
+                  pattern: /^release\/.*/
+                  value: << pipeline.git.branch >>
+    - not:
+        or:
+          - equal: [ "develop", << pipeline.git.branch >> ]
+          - matches:
               pattern: /^release\/.*/
               value: << pipeline.git.branch >>
-    - not:
-      or:
-       - equal: [ "develop", << pipeline.git.branch >> ]
-       - matches:
-          pattern: /^release\/.*/
-          value: << pipeline.git.branch >>
+          - matches:
+              pattern: /^pull\/[0-9]+/
+              value: << pipeline.git.branch >>
 
 jobs:
   - node_modules_install:

@@ -4588,22 +4588,25 @@ workflows:
             - matches:
                 pattern: /^pull\/[0-9]+/
                 value: << pipeline.git.branch >>
-            - not: null
-              or:
-                - equal:
-                    - develop
-                    - << pipeline.git.branch >>
-                - matches: null
+            - not:
+                or:
+                  - equal:
+                      - develop
+                      - << pipeline.git.branch >>
+                  - matches:
+                      pattern: /^release\/.*/
+                      value: << pipeline.git.branch >>
+        - not:
+            or:
+              - equal:
+                  - develop
+                  - << pipeline.git.branch >>
+              - matches:
                   pattern: /^release\/.*/
                   value: << pipeline.git.branch >>
-        - not: null
-          or:
-            - equal:
-                - develop
-                - << pipeline.git.branch >>
-            - matches:
-                pattern: /^release\/.*/
-                value: << pipeline.git.branch >>
+              - matches:
+                  pattern: /^pull\/[0-9]+/
+                  value: << pipeline.git.branch >>
   windows:
     jobs:
       - node_modules_install:
