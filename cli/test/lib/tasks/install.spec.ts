@@ -5,7 +5,7 @@ import chalk from 'chalk'
 import timers from 'timers/promises'
 import normalize from '../../support/normalize'
 import fs from 'fs-extra'
-import si from 'systeminformation'
+import si, { Systeminformation } from 'systeminformation'
 import logger from '../../../lib/logger'
 import util from '../../../lib/util'
 import download from '../../../lib/tasks/download'
@@ -176,43 +176,28 @@ describe('/lib/tasks/install', function () {
   describe('.start', function () {
     beforeEach(async () => {
       logger.reset()
-      // @ts-expect-error - mockReturnValue
-      util.isCi.mockReturnValue(false)
-      // @ts-expect-error - mockReturnValue
-      util.isPostInstall.mockReturnValue(false)
-      // @ts-expect-error - mockReturnValue
-      util.pkgVersion.mockReturnValue(packageVersion)
-      // @ts-expect-error - mockResolvedValue
-      download.start.mockResolvedValue(packageVersion)
-      // @ts-expect-error - mockResolvedValue
-      unzip.start.mockResolvedValue(undefined)
-      // @ts-expect-error - mockReturnValue
-      state.getVersionDir.mockReturnValue('/cache/Cypress/1.2.3')
-      // @ts-expect-error - mockReturnValue
-      state.getBinaryDir.mockReturnValue('/cache/Cypress/1.2.3/Cypress.app')
-      // @ts-expect-error - mockResolvedValue
-      state.getBinaryPkgAsync.mockResolvedValue(undefined)
-      // @ts-expect-error - mockResolvedValue
-      fs.remove.mockResolvedValue(undefined)
-      // @ts-expect-error - mockResolvedValue
-      fs.ensureDir.mockResolvedValue(undefined)
-      // @ts-expect-error - mockReturnValue
-      os.platform.mockReturnValue('darwin')
-      // @ts-expect-error - mockReturnValue
-      os.arch.mockReturnValue('x64')
-      // @ts-expect-error mockResolvedValue
-      si.osInfo.mockResolvedValue({
+      vi.mocked(util.isCi).mockReturnValue(false)
+      vi.mocked(util.isPostInstall).mockReturnValue(false)
+      vi.mocked(util.pkgVersion).mockReturnValue(packageVersion)
+      vi.mocked(download.start).mockResolvedValue(packageVersion)
+      vi.mocked(unzip.start).mockResolvedValue(undefined)
+      vi.mocked(state.getVersionDir).mockReturnValue('/cache/Cypress/1.2.3')
+      vi.mocked(state.getBinaryDir).mockReturnValue('/cache/Cypress/1.2.3/Cypress.app')
+      vi.mocked(state.getBinaryPkgAsync).mockResolvedValue(undefined)
+      vi.mocked(fs.remove).mockResolvedValue(undefined)
+      vi.mocked(fs.ensureDir).mockResolvedValue(undefined)
+      vi.mocked(os.platform).mockReturnValue('darwin')
+      vi.mocked(os.arch).mockReturnValue('x64')
+      vi.mocked(si.osInfo).mockResolvedValue({
         distro: 'Foo',
         release: 'OsVersion',
-      })
+      } as Systeminformation.OsData)
 
-      // @ts-expect-error - mockResolvedValue
-      timers.setTimeout.mockResolvedValue(undefined)
+      vi.mocked(timers.setTimeout).mockResolvedValue(undefined)
 
       const actualUtil = (await vi.importActual<typeof import('../../../lib/util')>('../../../lib/util')).default
 
-      // @ts-expect-error - mockImplementation
-      util.getPlatformInfo.mockImplementation(actualUtil.getPlatformInfo)
+      vi.mocked(util.getPlatformInfo).mockImplementation(actualUtil.getPlatformInfo)
     })
 
     describe('skips install', function () {
@@ -255,8 +240,7 @@ describe('/lib/tasks/install', function () {
       it('installs to the expected pre-release cache dir', async function () {
         const actualState = (await vi.importActual<typeof import('../../../lib/tasks/state')>('../../../lib/tasks/state')).default
 
-        // @ts-expect-error - mockImplementation
-        state.getVersionDir.mockImplementation(actualState.getVersionDir)
+        vi.mocked(state.getVersionDir).mockImplementation(actualState.getVersionDir)
 
         await install.start({ buildInfo })
         expect(unzip.start).toHaveBeenCalledWith(expect.objectContaining({
@@ -293,8 +277,7 @@ describe('/lib/tasks/install', function () {
         vi.stubEnv('CYPRESS_INSTALL_BINARY', version)
 
         // internally, the variable should be trimmed and just filename checked
-        // @ts-expect-error - mockImplementation
-        fs.pathExists.mockImplementation((args) => {
+        vi.mocked(fs.pathExists).mockImplementation((args) => {
           if (args === filename) {
             return true
           }
@@ -319,8 +302,7 @@ describe('/lib/tasks/install', function () {
         vi.stubEnv('CYPRESS_INSTALL_BINARY', version)
         // internally, the variable should be trimmed, double quotes removed
         //  and just filename checked against the file system
-        // @ts-expect-error - mockImplementation
-        fs.pathExists.mockImplementation((args) => {
+        vi.mocked(fs.pathExists).mockImplementation((args) => {
           if (args === filename) {
             return true
           }
@@ -341,8 +323,7 @@ describe('/lib/tasks/install', function () {
 
         vi.stubEnv('CYPRESS_INSTALL_BINARY', version)
 
-        // @ts-expect-error - mockImplementation
-        fs.pathExists.mockImplementation((args) => {
+        vi.mocked(fs.pathExists).mockImplementation((args) => {
           if (args === version) {
             return true
           }
@@ -361,8 +342,7 @@ describe('/lib/tasks/install', function () {
       it('can install local binary zip file from relative path', async function () {
         const version = './cypress-resources/file.zip'
 
-        // @ts-expect-error - mockImplementation
-        fs.pathExists.mockImplementation((args) => {
+        vi.mocked(fs.pathExists).mockImplementation((args) => {
           if (args === version) {
             return true
           }
@@ -383,8 +363,7 @@ describe('/lib/tasks/install', function () {
 
       describe('when version is already installed', function () {
         beforeEach(function () {
-          // @ts-expect-error - mockResolvedValue
-          state.getBinaryPkgAsync.mockResolvedValue({ version: packageVersion })
+          vi.mocked(state.getBinaryPkgAsync).mockResolvedValue({ version: packageVersion })
         })
 
         it('doesn\'t attempt to download', async function () {
@@ -405,8 +384,7 @@ describe('/lib/tasks/install', function () {
         it('logs when already installed when run from postInstall', async function () {
           const output = createStdoutCapture()
 
-          // @ts-expect-error - mockReturnValue
-          util.isPostInstall.mockReturnValue(true)
+          vi.mocked(util.isPostInstall).mockReturnValue(true)
 
           await install.start()
 
@@ -418,8 +396,7 @@ describe('/lib/tasks/install', function () {
         it('logs message and starts download', async function () {
           const output = createStdoutCapture()
 
-          // @ts-expect-error - mockResolvedValue
-          state.getBinaryPkgAsync.mockResolvedValue(null)
+          vi.mocked(state.getBinaryPkgAsync).mockResolvedValue(null)
 
           await install.start()
 
@@ -439,8 +416,7 @@ describe('/lib/tasks/install', function () {
         it('logs message and starts download', async function () {
           const output = createStdoutCapture()
 
-          // @ts-expect-error - mockResolvedValue
-          state.getBinaryPkgAsync.mockResolvedValue(null)
+          vi.mocked(state.getBinaryPkgAsync).mockResolvedValue(null)
 
           await install.start()
 
@@ -465,8 +441,7 @@ describe('/lib/tasks/install', function () {
         it('logs message and starts download', async function () {
           const output = createStdoutCapture()
 
-          // @ts-expect-error - mockResolvedValue
-          state.getBinaryPkgAsync.mockResolvedValue({ version: 'x.x.x' })
+          vi.mocked(state.getBinaryPkgAsync).mockResolvedValue({ version: 'x.x.x' })
 
           await install.start()
           expect(download.start).toHaveBeenCalledWith(expect.objectContaining({
@@ -485,8 +460,7 @@ describe('/lib/tasks/install', function () {
         it('logs message and starts download', async function () {
           const output = createStdoutCapture()
 
-          // @ts-expect-error - mockResolvedValue
-          state.getBinaryPkgAsync.mockResolvedValue({ version: packageVersion })
+          vi.mocked(state.getBinaryPkgAsync).mockResolvedValue({ version: packageVersion })
 
           await install.start({ force: true })
           expect(download.start).toHaveBeenCalledWith(expect.objectContaining({
@@ -505,11 +479,9 @@ describe('/lib/tasks/install', function () {
         it('logs global warning and download', async function () {
           const output = createStdoutCapture()
 
-          // @ts-expect-error - mockReturnValue
-          util.isInstalledGlobally.mockReturnValue(true)
+          vi.mocked(util.isInstalledGlobally).mockReturnValue(true)
 
-          // @ts-expect-error - mockResolvedValue
-          state.getBinaryPkgAsync.mockResolvedValue({ version: 'x.x.x' })
+          vi.mocked(state.getBinaryPkgAsync).mockResolvedValue({ version: 'x.x.x' })
 
           await install.start()
 
@@ -529,11 +501,9 @@ describe('/lib/tasks/install', function () {
         it('uses verbose renderer', async function () {
           const output = createStdoutCapture()
 
-          // @ts-expect-error - mockReturnValue
-          util.isCi.mockReturnValue(true)
+          vi.mocked(util.isCi).mockReturnValue(true)
 
-          // @ts-expect-error - mockResolvedValue
-          state.getBinaryPkgAsync.mockResolvedValue({ version: 'x.x.x' })
+          vi.mocked(state.getBinaryPkgAsync).mockResolvedValue({ version: 'x.x.x' })
 
           await install.start()
 
@@ -545,17 +515,14 @@ describe('/lib/tasks/install', function () {
         it('logs error on failure', async function () {
           const output = createStdoutCapture()
 
-          // @ts-expect-error - mockReturnValue
-          os.platform.mockReturnValue('darwin')
-          // @ts-expect-error - mockReturnValue
-          state.getCacheDir.mockReturnValue('/invalid/cache/dir')
+          vi.mocked(os.platform).mockReturnValue('darwin')
+          vi.mocked(state.getCacheDir).mockReturnValue('/invalid/cache/dir')
 
           const err: any = new Error('EACCES: permission denied, mkdir \'/invalid\'')
 
           err.code = 'EACCES'
 
-          // @ts-expect-error - mockRejectedValue
-          fs.ensureDir.mockRejectedValue(err)
+          vi.mocked(fs.ensureDir).mockRejectedValue(err)
 
           try {
             await install.start()
@@ -571,11 +538,9 @@ describe('/lib/tasks/install', function () {
 
       describe('CYPRESS_INSTALL_BINARY is URL or Zip', function () {
         it('uses cache when correct version installed given URL', async function () {
-          // @ts-expect-error - mockResolvedValue
-          state.getBinaryPkgAsync.mockResolvedValue({ version: '1.2.3' })
+          vi.mocked(state.getBinaryPkgAsync).mockResolvedValue({ version: '1.2.3' })
 
-          // @ts-expect-error - mockReturnValue
-          util.pkgVersion.mockReturnValue('1.2.3')
+          vi.mocked(util.pkgVersion).mockReturnValue('1.2.3')
 
           vi.stubEnv('CYPRESS_INSTALL_BINARY', 'www.cypress.io/cannot-download/2.4.5')
 
@@ -585,11 +550,9 @@ describe('/lib/tasks/install', function () {
         })
 
         it('uses cache when mismatch version given URL', async function () {
-          // @ts-expect-error - mockResolvedValue
-          state.getBinaryPkgAsync.mockResolvedValue({ version: '1.2.3' })
+          vi.mocked(state.getBinaryPkgAsync).mockResolvedValue({ version: '1.2.3' })
 
-          // @ts-expect-error - mockReturnValue
-          util.pkgVersion.mockReturnValue('4.0.0')
+          vi.mocked(util.pkgVersion).mockReturnValue('4.0.0')
 
           vi.stubEnv('CYPRESS_INSTALL_BINARY', 'www.cypress.io/cannot-download/2.4.5')
 
@@ -599,18 +562,15 @@ describe('/lib/tasks/install', function () {
         })
 
         it('uses cache when correct version installed given Zip', async function () {
-          // @ts-expect-error - mockImplementation
-          fs.pathExists.mockImplementation((args) => {
+          vi.mocked(fs.pathExists).mockImplementation((args) => {
             if (args === '/path/to/zip.zip') {
               return true
             }
           })
 
-          // @ts-expect-error - mockResolvedValue
-          state.getBinaryPkgAsync.mockResolvedValue({ version: '1.2.3' })
+          vi.mocked(state.getBinaryPkgAsync).mockResolvedValue({ version: '1.2.3' })
 
-          // @ts-expect-error - mockReturnValue
-          util.pkgVersion.mockReturnValue('1.2.3')
+          vi.mocked(util.pkgVersion).mockReturnValue('1.2.3')
 
           vi.stubEnv('CYPRESS_INSTALL_BINARY', '/path/to/zip.zip')
 
@@ -620,18 +580,15 @@ describe('/lib/tasks/install', function () {
         })
 
         it('uses cache when mismatch version given Zip ', async function () {
-          // @ts-expect-error - mockImplementation
-          fs.pathExists.mockImplementation((args) => {
+          vi.mocked(fs.pathExists).mockImplementation((args) => {
             if (args === '/path/to/zip.zip') {
               return true
             }
           })
 
-          // @ts-expect-error - mockResolvedValue
-          state.getBinaryPkgAsync.mockResolvedValue({ version: '1.2.3' })
+          vi.mocked(state.getBinaryPkgAsync).mockResolvedValue({ version: '1.2.3' })
 
-          // @ts-expect-error - mockReturnValue
-          util.pkgVersion.mockReturnValue('4.0.0')
+          vi.mocked(util.pkgVersion).mockReturnValue('4.0.0')
 
           vi.stubEnv('CYPRESS_INSTALL_BINARY', '/path/to/zip.zip')
 
@@ -655,8 +612,7 @@ describe('/lib/tasks/install', function () {
     it('exits with error when installing on unsupported os', async function () {
       const output = createStdoutCapture()
 
-      // @ts-expect-error - mockResolvedValue
-      util.getPlatformInfo.mockResolvedValue('Platform: win32-ia32')
+      vi.mocked(util.getPlatformInfo).mockResolvedValue('Platform: win32-ia32')
 
       try {
         await install.start()
@@ -677,18 +633,16 @@ describe('/lib/tasks/install', function () {
     }
 
     it('generates the expected URL', () => {
-      // @ts-expect-error - mockReturnValue
-      os.platform.mockReturnValue('linux')
+      vi.mocked(os.platform).mockReturnValue('linux')
 
       expect(install._getBinaryUrlFromBuildInfo('x64', buildInfo)).toEqual(`https://cdn.cypress.io/beta/binary/0.0.0-development/linux-x64/aBranchName-abc123/cypress.zip`)
     })
 
     it('overrides win32-arm64 to win32-x64 for pre-release', () => {
-      // @ts-expect-error - mockReturnValue
-      os.platform.mockReturnValue('win32')
+      vi.mocked(os.platform).mockReturnValue('win32')
 
       expect(install._getBinaryUrlFromBuildInfo('arm64', buildInfo))
-      .to.eq(`https://cdn.cypress.io/beta/binary/0.0.0-development/win32-x64/aBranchName-abc123/cypress.zip`)
+      .toEqual(`https://cdn.cypress.io/beta/binary/0.0.0-development/win32-x64/aBranchName-abc123/cypress.zip`)
     })
   })
 })

@@ -16,8 +16,7 @@ vi.mock('os', async (importActual) => {
 
 describe('lib/exec/xvfb-integration', function () {
   beforeEach(function (): void {
-    // @ts-expect-error - mockReturnValue
-    os.platform.mockReturnValue('win32')
+    vi.mocked(os.platform).mockReturnValue('win32')
   })
 
   describe('debugXvfb integration', function () {

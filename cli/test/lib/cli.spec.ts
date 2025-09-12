@@ -137,20 +137,14 @@ describe('cli', () => {
 
     logger.reset()
 
-    // @ts-expect-error - mockReturnValue
-    processExitSpy = vi.spyOn(process, 'exit').mockReturnValue(null)
-    // @ts-expect-error - mockReturnValue
-    os.platform.mockReturnValue('darwin')
-    // @ts-expect-error - mockReturnValue
-    util.logErrorExit1.mockReturnValue(null)
-    // @ts-expect-error - mockReturnValue
-    util.pkgBuildInfo.mockReturnValue({ stable: true })
-    // @ts-expect-error - mockReturnValue
-    util.pkgVersion.mockReturnValue('1.2.3')
-    // @ts-expect-error - mockReturnValue
-    state.getBinaryDir.mockReturnValue(binaryDir)
-    // @ts-expect-error - mockImplementation
-    state.getBinaryPkgAsync.mockImplementation((args: string) => {
+    processExitSpy = vi.spyOn(process, 'exit').mockReturnValue(null as never)
+    vi.mocked(os.platform).mockReturnValue('darwin')
+    vi.mocked(util.logErrorExit1).mockReturnValue(null as never)
+    vi.mocked(util.pkgBuildInfo).mockReturnValue({ stable: true } as any)
+    vi.mocked(util.pkgVersion).mockReturnValue('1.2.3')
+    vi.mocked(state.getBinaryDir).mockReturnValue(binaryDir)
+    // @ts-expect-error - mock args
+    vi.mocked(state.getBinaryPkgAsync).mockImplementation((args: string) => {
       if (args === binaryDir) {
         return {
           version: 'X.Y.Z',
@@ -329,13 +323,12 @@ describe('cli', () => {
         })
 
         it('handles not found bundled Node version', async () => {
-          // @ts-expect-error - mockImplementation
-          state.getBinaryPkgAsync.mockImplementation((args: string) => {
+          vi.mocked(state.getBinaryPkgAsync).mockImplementation((args: string) => {
             if (args === binaryDir) {
-              return {
+              return Promise.resolve({
                 version: 'X.Y.Z',
                 electronVersion: '10.9.8',
-              }
+              })
             }
 
             throw new Error('not found')
@@ -350,12 +343,11 @@ describe('cli', () => {
         })
 
         it('reports package version', async () => {
-          // @ts-expect-error - mockImplementation
-          state.getBinaryPkgAsync.mockImplementation((args: string) => {
+          vi.mocked(state.getBinaryPkgAsync).mockImplementation((args: string) => {
             if (args === binaryDir) {
-              return {
+              return Promise.resolve({
                 version: 'X.Y.Z',
-              }
+              })
             }
 
             throw new Error('not found')
@@ -370,12 +362,11 @@ describe('cli', () => {
         })
 
         it('reports package and binary message', async () => {
-          // @ts-expect-error - mockImplementation
-          state.getBinaryPkgAsync.mockImplementation((args: string) => {
+          vi.mocked(state.getBinaryPkgAsync).mockImplementation((args: string) => {
             if (args === binaryDir) {
-              return {
+              return Promise.resolve({
                 version: 'X.Y.Z',
-              }
+              })
             }
 
             throw new Error('not found')
@@ -390,14 +381,13 @@ describe('cli', () => {
         })
 
         it('reports electron and node message', async () => {
-          // @ts-expect-error - mockImplementation
-          state.getBinaryPkgAsync.mockImplementation((args: string) => {
+          vi.mocked(state.getBinaryPkgAsync).mockImplementation((args: string) => {
             if (args === binaryDir) {
-              return {
+              return Promise.resolve({
                 version: 'X.Y.Z',
                 electronVersion: '10.10.88',
                 electronNodeVersion: '11.10.3',
-              }
+              })
             }
 
             throw new Error('not found')
@@ -414,12 +404,11 @@ describe('cli', () => {
         it('reports package and binary message with npm log silent', async () => {
           vi.stubEnv('npm_config_loglevel', 'silent')
 
-          // @ts-expect-error - mockImplementation
-          state.getBinaryPkgAsync.mockImplementation((args: string) => {
+          vi.mocked(state.getBinaryPkgAsync).mockImplementation((args: string) => {
             if (args === binaryDir) {
-              return {
+              return Promise.resolve({
                 version: 'X.Y.Z',
-              }
+              })
             }
 
             throw new Error('not found')
@@ -436,12 +425,11 @@ describe('cli', () => {
         it('reports package and binary message with npm log warn', async () => {
           vi.stubEnv('npm_config_loglevel', 'warn')
 
-          // @ts-expect-error - mockImplementation
-          state.getBinaryPkgAsync.mockImplementation((args: string) => {
+          vi.mocked(state.getBinaryPkgAsync).mockImplementation((args: string) => {
             if (args === binaryDir) {
-              return {
+              return Promise.resolve({
                 version: 'X.Y.Z',
-              }
+              })
             }
 
             throw new Error('not found')
@@ -456,10 +444,9 @@ describe('cli', () => {
         })
 
         it('handles non-existent binary', async () => {
-          // @ts-expect-error - mockImplementation
-          state.getBinaryPkgAsync.mockImplementation((args: string) => {
+          vi.mocked(state.getBinaryPkgAsync).mockImplementation((args: string) => {
             if (args === binaryDir) {
-              return null
+              return Promise.resolve(null)
             }
 
             throw new Error('not found')
@@ -478,13 +465,11 @@ describe('cli', () => {
 
   describe('cypress run', () => {
     beforeEach(() => {
-      //@ts-expect-error - mockResolvedValue
-      run.start.mockResolvedValue(0)
+      vi.mocked(run.start).mockResolvedValue(0)
     })
 
     it('calls run.start with options + exits with code', async () => {
-      // @ts-expect-error - mockResolvedValue
-      run.start.mockResolvedValue(10)
+      vi.mocked(run.start).mockResolvedValue(10)
 
       await exec('run')
       await flushPromises()
@@ -495,8 +480,7 @@ describe('cli', () => {
     it('run.start with options + catches errors', async () => {
       const err = new Error('foo')
 
-      // @ts-expect-error - mockRejectedValue
-      run.start.mockRejectedValue(err)
+      vi.mocked(run.start).mockRejectedValue(err)
 
       await exec('run')
       await flushPromises()
@@ -681,8 +665,7 @@ describe('cli', () => {
 
   describe('cypress open', () => {
     beforeEach(() => {
-      // @ts-expect-error - mockResolvedValue
-      open.start.mockResolvedValue(0)
+      vi.mocked(open.start).mockResolvedValue(0)
     })
 
     it('calls open.start with relative --project folder', async () => {
@@ -708,8 +691,7 @@ describe('cli', () => {
     it('calls open.start + catches errors', async () => {
       const err = new Error('foo')
 
-      // @ts-expect-error - mockRejectedValue
-      open.start.mockRejectedValue(err)
+      vi.mocked(open.start).mockRejectedValue(err)
 
       await exec('open --port 7878')
 
@@ -733,8 +715,7 @@ describe('cli', () => {
 
   describe('cypress install', () => {
     beforeEach(() => {
-      // @ts-expect-error - mockResolvedValue
-      install.start.mockResolvedValue(undefined)
+      vi.mocked(install.start).mockResolvedValue(undefined)
     })
 
     it('calls install.start without forcing', async () => {
@@ -750,8 +731,7 @@ describe('cli', () => {
     it('install calls install.start + catches errors', async () => {
       const err = new Error('foo')
 
-      // @ts-expect-error - mockRejectedValue
-      install.start.mockRejectedValue(err)
+      vi.mocked(install.start).mockRejectedValue(err)
 
       await exec('install')
       await flushPromises()
@@ -762,8 +742,7 @@ describe('cli', () => {
 
   describe('cypress verify', () => {
     beforeEach(() => {
-      // @ts-expect-error - mockResolvedValue
-      verifyStart.mockResolvedValue(undefined)
+      vi.mocked(verifyStart).mockResolvedValue(undefined)
     })
 
     it('verify calls verifyStart with force: true', async () => {
@@ -777,8 +756,7 @@ describe('cli', () => {
     it('verify calls verifyStart + catches errors', async () => {
       const err = new Error('foo')
 
-      // @ts-expect-error - mockRejectedValue
-      verifyStart.mockRejectedValue(err)
+      vi.mocked(verifyStart).mockRejectedValue(err)
 
       await exec('verify')
       await flushPromises()
@@ -804,8 +782,7 @@ describe('cli', () => {
 
       err.code = 'ENOENT'
 
-      // @ts-expect-error - mockRejectedValue
-      cache.list.mockRejectedValue(err)
+      vi.mocked(cache.list).mockRejectedValue(err)
 
       await exec('cache list')
 
@@ -817,8 +794,7 @@ describe('cli', () => {
     it('catches rejection and exits', async () => {
       const err = new Error('cache list failed badly')
 
-      // @ts-expect-error - mockRejectedValue
-      cache.list.mockRejectedValue(err)
+      vi.mocked(cache.list).mockRejectedValue(err)
 
       await exec('cache list')
 

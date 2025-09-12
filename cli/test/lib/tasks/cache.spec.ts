@@ -95,12 +95,9 @@ describe('lib/tasks/cache', () => {
       },
     })
 
-    // @ts-expect-error mockReturnValue
-    state.getCacheDir.mockReturnValue('/.cache/Cypress')
-    // @ts-expect-error mockReturnValue
-    state.getBinaryDir.mockReturnValue('/.cache/Cypress')
-    // @ts-expect-error mockReturnValue
-    util.pkgVersion.mockReturnValue('1.2.3')
+    vi.mocked(state.getCacheDir).mockReturnValue('/.cache/Cypress')
+    vi.mocked(state.getBinaryDir).mockReturnValue('/.cache/Cypress')
+    vi.mocked(util.pkgVersion).mockReturnValue('1.2.3')
   })
 
   afterEach(() => {
@@ -203,8 +200,7 @@ describe('lib/tasks/cache', () => {
 
   describe('.list', () => {
     beforeEach(() => {
-      // @ts-expect-error mockReturnValue
-      state.getPathToExecutable.mockReturnValue('/.cache/Cypress/1.2.3/app/cypress')
+      vi.mocked(state.getPathToExecutable).mockReturnValue('/.cache/Cypress/1.2.3/app/cypress')
     })
 
     it('lists all versions of cached binary', async function () {
@@ -239,13 +235,13 @@ describe('lib/tasks/cache', () => {
     it('lists all versions of cached binary with last access', async function () {
       const output = createStdoutCapture()
 
-      // @ts-expect-error mockResolvedValueOnce
-      fs.stat.mockResolvedValueOnce({
+      vi.mocked(fs.stat).mockResolvedValueOnce({
+        // @ts-expect-error mock arguments
         atime: dayjs().subtract(3, 'month').valueOf(),
       })
 
-      // @ts-expect-error mockResolvedValueOnce
-      fs.stat.mockResolvedValueOnce({
+      vi.mocked(fs.stat).mockResolvedValueOnce({
+        // @ts-expect-error mock arguments
         atime: dayjs().subtract(5, 'day').valueOf(),
       })
 
@@ -256,14 +252,13 @@ describe('lib/tasks/cache', () => {
     it('some versions have never been opened', async function () {
       const output = createStdoutCapture()
 
-      // @ts-expect-error mockResolvedValueOnce
-      fs.stat.mockResolvedValueOnce({
+      vi.mocked(fs.stat).mockResolvedValueOnce({
+        // @ts-expect-error mock arguments
         atime: dayjs().subtract(3, 'month').valueOf(),
       })
 
       // the second binary has never been accessed
-      // @ts-expect-error mockResolvedValueOnce
-      fs.stat.mockResolvedValueOnce()
+      vi.mocked(fs.stat).mockResolvedValueOnce(undefined)
 
       await cache.list()
       await expect(output()).toMatchSnapshot('second-binary-never-used')
@@ -272,14 +267,13 @@ describe('lib/tasks/cache', () => {
     it('shows sizes', async function () {
       const output = createStdoutCapture()
 
-      // @ts-expect-error mockResolvedValueOnce
-      fs.stat.mockResolvedValueOnce({
+      vi.mocked(fs.stat).mockResolvedValueOnce({
+        // @ts-expect-error mock arguments
         atime: dayjs().subtract(3, 'month').valueOf(),
       })
 
       // the second binary has never been accessed
-      // @ts-expect-error mockResolvedValueOnce
-      fs.stat.mockResolvedValueOnce()
+      vi.mocked(fs.stat).mockResolvedValueOnce(undefined)
 
       await cache.list(true)
       await expect(output()).toMatchSnapshot('show-size')

@@ -40,12 +40,9 @@ describe('exec open', function () {
       vi.clearAllMocks()
       vi.unstubAllEnvs()
 
-      // @ts-expect-error - mockReturnValue
-      util.isInstalledGlobally.mockReturnValue(true)
-      // @ts-expect-error - mockResolvedValue
-      verifyStart.mockResolvedValue(undefined)
-      // @ts-expect-error - mockResolvedValue
-      spawn.start.mockResolvedValue(undefined)
+      vi.mocked(util.isInstalledGlobally).mockReturnValue(true)
+      vi.mocked(verifyStart).mockResolvedValue(undefined)
+      vi.mocked(spawn.start).mockResolvedValue(undefined)
     })
 
     it('verifies download', async () => {
@@ -91,16 +88,14 @@ describe('exec open', function () {
     })
 
     it('spawns with cwd as --project if not installed globally', async () => {
-      // @ts-expect-error - is shorthand stub on a function
-      util.isInstalledGlobally.mockReturnValue(false)
+      vi.mocked(util.isInstalledGlobally).mockReturnValue(false)
 
       await open.start()
       expect(spawn.start).toHaveBeenCalledWith(['--project', process.cwd()], expect.anything())
     })
 
     it('spawns without --project if not installed globally and passing --global option', async () => {
-      // @ts-expect-error - is shorthand stub on a function
-      util.isInstalledGlobally.mockReturnValue(false)
+      vi.mocked(util.isInstalledGlobally).mockReturnValue(false)
 
       await open.start({ global: true })
       expect(spawn.start).not.toHaveBeenCalledWith(
@@ -109,8 +104,7 @@ describe('exec open', function () {
     })
 
     it('spawns with --project passed in as options even when not installed globally', async () => {
-      // @ts-expect-error - is shorthand stub on a function
-      util.isInstalledGlobally.mockReturnValue(false)
+      vi.mocked(util.isInstalledGlobally).mockReturnValue(false)
 
       await open.start({ project: '/path/to/project' })
       expect(spawn.start).toHaveBeenCalledWith(

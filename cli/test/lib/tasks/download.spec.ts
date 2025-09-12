@@ -1,6 +1,6 @@
 import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest'
 import os from 'os'
-import si from 'systeminformation'
+import si, { Systeminformation } from 'systeminformation'
 import path from 'path'
 import nock from 'nock'
 import hasha from 'hasha'
@@ -112,23 +112,18 @@ describe('lib/tasks/download', function () {
       version,
     }
 
-    // @ts-expect-error mockReturnValue
-    os.platform.mockReturnValue('OS')
-    // @ts-expect-error mockReturnValue
-    util.pkgVersion.mockReturnValue('1.2.3')
-    // @ts-expect-error mockResolvedValue
-    si.osInfo.mockResolvedValue({
+    vi.mocked(os.platform).mockReturnValue('OS' as NodeJS.Platform)
+    vi.mocked(util.pkgVersion).mockReturnValue('1.2.3')
+    vi.mocked(si.osInfo).mockResolvedValue({
       distro: 'Foo',
       release: 'OsVersion',
-    })
+    } as Systeminformation.OsData)
 
-    // @ts-expect-error mockReturnValue
-    util.cwd.mockReturnValue(rootFolder)
+    vi.mocked(util.cwd).mockReturnValue(rootFolder)
 
     const actualFsExtra = await vi.importActual<typeof import('fs-extra')>('fs-extra')
 
-    // @ts-expect-error - mockImplementation to pass through to the actual implementation to prevent issues with request-progress
-    fs.ensureDir.mockImplementation(actualFsExtra.ensureDir)
+    vi.mocked(fs.ensureDir).mockImplementation(actualFsExtra.ensureDir)
   })
 
   afterEach(() => {
@@ -594,11 +589,8 @@ describe('lib/tasks/download', function () {
       }
 
       it('downloads darwin-arm64 on M1', async function () {
-        // @ts-expect-error mockReturnValue
-        os.platform.mockReturnValue('darwin')
-
-        // @ts-expect-error mockReturnValue
-        os.arch.mockReturnValue('arm64')
+        vi.mocked(os.platform).mockReturnValue('darwin')
+        vi.mocked(os.arch).mockReturnValue('arm64')
 
         nockDarwinArm64()
 
@@ -610,10 +602,8 @@ describe('lib/tasks/download', function () {
       })
 
       it('downloads darwin-arm64 on M1 translated by Rosetta', async function () {
-        // @ts-expect-error mockReturnValue
-        os.platform.mockReturnValue('darwin')
-        // @ts-expect-error mockReturnValue
-        os.arch.mockReturnValue('x64')
+        vi.mocked(os.platform).mockReturnValue('darwin')
+        vi.mocked(os.arch).mockReturnValue('x64')
 
         nockDarwinArm64()
 
@@ -646,10 +636,8 @@ describe('lib/tasks/download', function () {
       }
 
       it('downloads linux-arm64 on arm64 processor', async function () {
-        // @ts-expect-error mockReturnValue
-        os.platform.mockReturnValue('linux')
-        // @ts-expect-error mockReturnValue
-        os.arch.mockReturnValue('arm64')
+        vi.mocked(os.platform).mockReturnValue('linux')
+        vi.mocked(os.arch).mockReturnValue('arm64')
 
         nockLinuxArm64()
 
@@ -661,16 +649,14 @@ describe('lib/tasks/download', function () {
       })
 
       it('downloads linux-arm64 on non-arm64 node running on arm machine', async function () {
-        // @ts-expect-error mockReturnValue
-        os.platform.mockReturnValue('linux')
-        // @ts-expect-error mockReturnValue
-        os.arch.mockReturnValue('x64')
+        vi.mocked(os.platform).mockReturnValue('linux')
+        vi.mocked(os.arch).mockReturnValue('x64')
 
         for (const arch of ['aarch64_be', 'aarch64', 'armv8b', 'armv8l']) {
           nockLinuxArm64()
 
-          // @ts-expect-error mockImplementation
-          execa.mockImplementation((command, args, options) => {
+          // @ts-expect-error mock args
+          vi.mocked(execa).mockImplementation((command, args, options) => {
             if (command === 'uname' && args[0] === '-m') {
               return Promise.resolve({
                 // will force arm64 inside util.getRealArch()
@@ -701,8 +687,7 @@ describe('lib/tasks/download', function () {
 
     // not really the download error, but the easiest way to
     // test the error handling
-    // @ts-expect-error mockRejectedValue
-    fs.ensureDir.mockRejectedValue(err)
+    vi.mocked(fs.ensureDir).mockRejectedValue(err)
 
     try {
       await download.start(options)

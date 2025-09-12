@@ -98,24 +98,21 @@ describe('lib/tasks/state', function () {
     vi.unstubAllEnvs()
     logger.reset()
 
-    // @ts-expect-error - mockReturnValue
-    util.getCacheDir.mockReturnValue(cacheDir)
-    // @ts-expect-error - mockReturnValue
-    util.pkgVersion.mockReturnValue('1.2.3')
-    // @ts-expect-error - mockReturnValue
-    os.platform.mockReturnValue('darwin')
+    vi.mocked(util.getCacheDir).mockReturnValue(cacheDir)
+    vi.mocked(util.pkgVersion).mockReturnValue('1.2.3')
+    vi.mocked(os.platform).mockReturnValue('darwin')
 
+    // @ts-expect-error - default import
     const actualProcess = (await vi.importActual<typeof import('process')>('process')).default
 
-    // @ts-expect-error - mockImplementation
-    cwd.mockImplementation(() => {
+    vi.mocked(cwd).mockImplementation(() => {
       return actualProcess.cwd()
     })
 
+    // @ts-expect-error - default import
     const actualPath = (await vi.importActual<typeof import('path')>('path')).default
 
-    // @ts-expect-error - mockImplementation
-    path.resolve.mockImplementation((...args) => {
+    vi.mocked(path.resolve).mockImplementation((...args) => {
       return actualPath.resolve.apply(actualPath, args)
     })
   })
@@ -132,15 +129,13 @@ describe('lib/tasks/state', function () {
 
   describe('.getBinaryPkgAsync', function () {
     it('resolves with loaded file when the file exists', async function () {
-      // @ts-expect-error - mockImplementation
-      fs.pathExists.mockImplementation((args) => {
+      vi.mocked(fs.pathExists).mockImplementation((args) => {
         if (args === binaryPkgPath) {
           return true
         }
       })
 
-      // @ts-expect-error - mockImplementation
-      fs.readJson.mockImplementation((args) => {
+      vi.mocked(fs.readJson).mockImplementation((args) => {
         if (args === binaryPkgPath) {
           return { version: '2.0.48' }
         }
@@ -152,8 +147,7 @@ describe('lib/tasks/state', function () {
     })
 
     it('returns null if no version found', async function () {
-      // @ts-expect-error - mockImplementation
-      fs.pathExists.mockImplementation((args) => {
+      vi.mocked(fs.pathExists).mockImplementation((args) => {
         if (args === binaryPkgPath) {
           return false
         }
@@ -169,15 +163,13 @@ describe('lib/tasks/state', function () {
       const customBinaryPackageDir =
         '/custom/binary/dir/Contents/Resources/app/package.json'
 
-      // @ts-expect-error - mockImplementation
-      fs.pathExists.mockImplementation((args) => {
+      vi.mocked(fs.pathExists).mockImplementation((args) => {
         if (args === customBinaryPackageDir) {
           return true
         }
       })
 
-      // @ts-expect-error - mockImplementation
-      fs.readJson.mockImplementation((args) => {
+      vi.mocked(fs.readJson).mockImplementation((args) => {
         if (args === customBinaryPackageDir) {
           return { version: '3.4.5' }
         }
@@ -197,16 +189,14 @@ describe('lib/tasks/state', function () {
     })
 
     it('resolves path on linux', function () {
-      // @ts-expect-error - mockReturnValue
-      os.platform.mockReturnValue('linux')
+      vi.mocked(os.platform).mockReturnValue('linux')
       expect(state.getPathToExecutable(state.getBinaryDir())).toEqual(
         '.cache/Cypress/1.2.3/Cypress/Cypress',
       )
     })
 
     it('resolves path on windows', function () {
-      // @ts-expect-error - mockReturnValue
-      os.platform.mockReturnValue('win32')
+      vi.mocked(os.platform).mockReturnValue('win32')
       expect(state.getPathToExecutable(state.getBinaryDir())).toMatch(/\.exe$/)
     })
 
@@ -225,8 +215,7 @@ describe('lib/tasks/state', function () {
     })
 
     it('resolves path on linux', function () {
-      // @ts-expect-error - mockReturnValue
-      os.platform.mockReturnValue('linux')
+      vi.mocked(os.platform).mockReturnValue('linux')
       expect(state.getBinaryDir()).toEqual(path.join(versionDir, 'Cypress'))
     })
 
@@ -243,11 +232,10 @@ describe('lib/tasks/state', function () {
       vi.resetModules()
       const stateWithWin32Path = (await import('../../../lib/tasks/state')).default
 
-      // @ts-expect-error - mockReturnValue
-      os.platform.mockReturnValue('win32')
+      vi.mocked(os.platform).mockReturnValue('win32')
       const pathToExec = stateWithWin32Path.getBinaryDir()
 
-      expect(pathToExec).to.be.equal(path.win32.join(versionDir, 'Cypress'))
+      expect(pathToExec).toEqual(path.win32.join(versionDir, 'Cypress'))
     })
 
     it('resolves path to binary/installation directory', function () {
@@ -261,8 +249,7 @@ describe('lib/tasks/state', function () {
     })
 
     it('rejects on anything else', function () {
-      // @ts-expect-error - mockReturnValue
-      os.platform.mockReturnValue('unknown')
+      vi.mocked(os.platform).mockReturnValue('unknown' as NodeJS.Platform)
       expect(() => {
         return state.getBinaryDir()
       }).toThrow('Platform: "unknown" is not supported.')
@@ -271,8 +258,7 @@ describe('lib/tasks/state', function () {
 
   describe('.getBinaryVerifiedAsync', function () {
     it('resolves true if verified', async function () {
-      // @ts-expect-error - mockResolvedValue
-      fs.readJson.mockResolvedValue({ verified: true })
+      vi.mocked(fs.readJson).mockResolvedValue({ verified: true } as any)
 
       const isVerified = await state.getBinaryVerifiedAsync('/asdf')
 
@@ -283,8 +269,7 @@ describe('lib/tasks/state', function () {
       const err: any = new Error()
 
       err.code = 'ENOENT'
-      // @ts-expect-error - mockRejectedValue
-      fs.readJson.mockRejectedValue(err)
+      vi.mocked(fs.readJson).mockRejectedValue(err)
 
       const isVerified = await state.getBinaryVerifiedAsync('/asdf')
 
@@ -296,15 +281,13 @@ describe('lib/tasks/state', function () {
       const customBinaryDir = '/custom/binary/1.2.3/runner'
       const binaryStatePath = '/custom/binary/1.2.3/binary_state.json'
 
-      // @ts-expect-error - mockImplementation
-      fs.pathExists.mockImplementation((args) => {
+      vi.mocked(fs.pathExists).mockImplementation((args) => {
         if (args === binaryStatePath) {
           return true
         }
       })
 
-      // @ts-expect-error - mockImplementation
-      fs.readJson.mockImplementation((args) => {
+      vi.mocked(fs.readJson).mockImplementation((args) => {
         if (args === binaryStatePath) {
           return { verified: true }
         }
@@ -320,8 +303,7 @@ describe('lib/tasks/state', function () {
     const binaryStateFilename = path.join(versionDir, 'binary_state.json')
 
     it('writes to binary state verified:true', async function () {
-      // @ts-expect-error - mockResolvedValue
-      fs.outputJson.mockResolvedValue()
+      vi.mocked(fs.outputJson).mockResolvedValue()
 
       await state.writeBinaryVerifiedAsync(true, binaryDir)
 
@@ -329,8 +311,7 @@ describe('lib/tasks/state', function () {
     })
 
     it('write to binary state verified:false', async function () {
-      // @ts-expect-error - mockResolvedValue
-      fs.outputJson.mockResolvedValue()
+      vi.mocked(fs.outputJson).mockResolvedValue()
 
       await state.writeBinaryVerifiedAsync(false, binaryDir)
 
@@ -370,14 +351,12 @@ describe('lib/tasks/state', function () {
     it('CYPRESS_CACHE_FOLDER resolves from relative path during postinstall', async () => {
       vi.stubEnv('CYPRESS_CACHE_FOLDER', './local-cache/folder')
       // simulates current folder when running "npm postinstall" hook
-      // @ts-expect-error - mockReturnValue
-      cwd.mockReturnValue('/my/project/folder/node_modules/cypress')
+      vi.mocked(cwd).mockReturnValue('/my/project/folder/node_modules/cypress')
 
       // @ts-expect-error - default import
       const actualPath = (await vi.importActual<typeof import('path')>('path')).default
 
-      // @ts-expect-error - mockImplementation
-      path.resolve.mockImplementation((...args) => {
+      vi.mocked(path.resolve).mockImplementation((...args) => {
         return actualPath.resolve('/my/project/folder/node_modules/cypress', args[0])
       })
 
@@ -391,12 +370,11 @@ describe('lib/tasks/state', function () {
       vi.stubEnv('CYPRESS_CACHE_FOLDER', '/cache/folder/Cypress')
 
       // simulates current folder when running "npm postinstall" hook
-      // @ts-expect-error - mockReturnValue
-      cwd.mockReturnValue('/my/project/folder/node_modules/cypress')
+      vi.mocked(cwd).mockReturnValue('/my/project/folder/node_modules/cypress')
       const ret = state.getCacheDir()
 
       debug('returned cache dir %s', ret)
-      expect(ret).to.eql(path.resolve('/cache/folder/Cypress'))
+      expect(ret).toEqual(path.resolve('/cache/folder/Cypress'))
     })
 
     it('resolves ~ with user home folder', () => {
@@ -415,13 +393,11 @@ describe('lib/tasks/state', function () {
 
   describe('.parseRealPlatformBinaryFolderAsync', function () {
     beforeEach(function () {
-      // @ts-expect-error - mockImplementation
-      fs.realpath.mockImplementation((path) => Promise.resolve(path))
+      vi.mocked(fs.realpath).mockImplementation((path: string) => Promise.resolve(path))
     })
 
     it('can parse on darwin', async function () {
-      // @ts-expect-error - mockReturnValue
-      os.platform.mockReturnValue('darwin')
+      vi.mocked(os.platform).mockReturnValue('darwin')
 
       const path = await state.parseRealPlatformBinaryFolderAsync(
         '/Documents/Cypress.app/Contents/MacOS/Cypress',
@@ -431,8 +407,7 @@ describe('lib/tasks/state', function () {
     })
 
     it('can parse on linux', async function () {
-      // @ts-expect-error - mockReturnValue
-      os.platform.mockReturnValue('linux')
+      vi.mocked(os.platform).mockReturnValue('linux')
 
       const path = await state.parseRealPlatformBinaryFolderAsync('/Documents/Cypress/Cypress')
 
@@ -440,8 +415,7 @@ describe('lib/tasks/state', function () {
     })
 
     it('can parse on darwin', async function () {
-      // @ts-expect-error - mockReturnValue
-      os.platform.mockReturnValue('win32')
+      vi.mocked(os.platform).mockReturnValue('win32')
 
       const path = await state.parseRealPlatformBinaryFolderAsync('/Documents/Cypress/Cypress.exe')
 
@@ -449,8 +423,7 @@ describe('lib/tasks/state', function () {
     })
 
     it('throws when invalid on darwin', async function () {
-      // @ts-expect-error - mockReturnValue
-      os.platform.mockReturnValue('darwin')
+      vi.mocked(os.platform).mockReturnValue('darwin')
 
       const path = await state.parseRealPlatformBinaryFolderAsync('/Documents/Cypress/Cypress.exe')
 
@@ -458,8 +431,7 @@ describe('lib/tasks/state', function () {
     })
 
     it('throws when invalid on linux', async function () {
-      // @ts-expect-error - mockReturnValue
-      os.platform.mockReturnValue('linux')
+      vi.mocked(os.platform).mockReturnValue('linux')
 
       const path = await state.parseRealPlatformBinaryFolderAsync('/Documents/Cypress/Cypress.exe')
 
@@ -467,8 +439,7 @@ describe('lib/tasks/state', function () {
     })
 
     it('throws when invalid on windows', async function () {
-      // @ts-expect-error - mockReturnValue
-      os.platform.mockReturnValue('win32')
+      vi.mocked(os.platform).mockReturnValue('win32')
 
       const path = await state.parseRealPlatformBinaryFolderAsync('/Documents/Cypress/Cypress')
 
