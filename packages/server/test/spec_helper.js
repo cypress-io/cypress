@@ -14,6 +14,7 @@ global.expect = chai.expect
 global.mockery = require('mockery')
 global.proxyquire = require('proxyquire')
 global.sinon = require('sinon')
+
 const _ = require('lodash')
 const Promise = require('bluebird')
 const cache = require('../lib/cache').cache

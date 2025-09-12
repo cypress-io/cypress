@@ -2,13 +2,14 @@ import Bluebird from 'bluebird'
 import chai from 'chai'
 import http from 'http'
 import https from 'https'
-import net from 'net'
+import net, { type ListenOptions } from 'net'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 import tls from 'tls'
 import url from 'url'
 import DebuggingProxy from '@cypress/debugging-proxy'
-import request from '@cypress/request-promise'
+import Request from '@cypress/request-promise'
+
 import * as socketIo from '@packages/socket/lib/browser'
 import {
   buildConnectReqHead,
@@ -19,6 +20,7 @@ import {
   CombinedAgent,
   clientCertificateStore,
   _resetBaseCaOptionsPromise,
+  getFirstWorkingFamily,
 } from '../../lib/agent'
 import { allowDestroy } from '../../lib/allow-destroy'
 import { AsyncServer, Servers } from '../support/servers'
@@ -110,14 +112,16 @@ describe('lib/agent', function () {
   })
 
   context('CombinedAgent', function () {
-    before(function () {
-      this.servers = new Servers()
+    let servers: Servers
 
-      return this.servers.start(HTTP_PORT, HTTPS_PORT)
+    before(function () {
+      servers = new Servers()
+
+      return servers.start(HTTP_PORT, HTTPS_PORT)
     })
 
     after(function () {
-      return this.servers.stop()
+      return servers.stop()
     })
 
     ;[
@@ -146,6 +150,11 @@ describe('lib/agent', function () {
       },
     ].slice().map((testCase) => {
       context(testCase.name, function () {
+        let agent: CombinedAgent
+        let request: typeof Request
+        let debugProxy: DebuggingProxy
+        let fetchWithAgent: typeof fetch
+
         beforeEach(function () {
           if (testCase.proxyUrl) {
             // PROXY vars should override npm_config vars, so set them to cause failures if they are used
@@ -157,16 +166,17 @@ describe('lib/agent', function () {
             process.env.NO_PROXY = ''
           }
 
-          this.agent = new CombinedAgent()
+          agent = new CombinedAgent()
 
-          this.request = request.defaults({
+          request = Request.defaults({
             proxy: null,
-            agent: this.agent,
+            agent,
           })
 
-          this.fetch = function (this: any, input: RequestInfo, init?: RequestInit) {
-            return fetch.call(this, input, {
-              agent: this.agent,
+          fetchWithAgent = function (input: RequestInfo, init?: RequestInit) {
+            return fetch(input, {
+              // @ts-expect-error
+              agent,
               ...init,
             })
           }
@@ -179,7 +189,7 @@ describe('lib/agent', function () {
             }
 
             if (testCase.httpsProxy) {
-              options.https = this.servers.https
+              options.https = servers.https
             }
 
             if (testCase.proxyAuth) {
@@ -189,25 +199,25 @@ describe('lib/agent', function () {
               }
             }
 
-            this.debugProxy = new DebuggingProxy(options)
+            debugProxy = new DebuggingProxy(options)
 
-            return this.debugProxy.start(PROXY_PORT)
+            return debugProxy.start(PROXY_PORT)
           }
         })
 
         afterEach(function () {
           if (testCase.proxyUrl) {
-            this.debugProxy.stop()
+            debugProxy.stop()
           }
         })
 
         it('HTTP pages can be loaded', function () {
-          return this.request({
+          return request({
             url: `http://localhost:${HTTP_PORT}/get`,
           }).then((body) => {
             expect(body).to.eq('It worked!')
-            if (this.debugProxy) {
-              expect(this.debugProxy.requests[0]).to.include({
+            if (debugProxy) {
+              expect(debugProxy.requests[0]).to.include({
                 url: `http://localhost:${HTTP_PORT}/get`,
               })
             }
@@ -215,12 +225,12 @@ describe('lib/agent', function () {
         })
 
         it('HTTP pages can be loaded via fetch', function () {
-          return this.fetch(`http://localhost:${HTTP_PORT}/get`)
+          return fetchWithAgent(`http://localhost:${HTTP_PORT}/get`)
           .then((response) => response.text())
           .then((body) => {
             expect(body).to.eq('It worked!')
-            if (this.debugProxy) {
-              expect(this.debugProxy.requests[0]).to.include({
+            if (debugProxy) {
+              expect(debugProxy.requests[0]).to.include({
                 url: `http://localhost:${HTTP_PORT}/get`,
               })
             }
@@ -228,21 +238,21 @@ describe('lib/agent', function () {
         })
 
         it('HTTP pages are requested with correct host header when loaded via fetch', function () {
-          return this.fetch(`http://localhost:${HTTP_PORT}/get`)
+          return fetchWithAgent(`http://localhost:${HTTP_PORT}/get`)
           .then(() => {
-            expect(this.servers.lastRequestHeaders).to.include({
+            expect(servers.lastRequestHeaders).to.include({
               host: `localhost:${HTTP_PORT}`,
             })
           })
         })
 
         it('HTTPS pages can be loaded', function () {
-          return this.request({
+          return request({
             url: `https://localhost:${HTTPS_PORT}/get`,
           }).then((body) => {
             expect(body).to.eq('It worked!')
-            if (this.debugProxy) {
-              expect(this.debugProxy.requests[0]).to.include({
+            if (debugProxy) {
+              expect(debugProxy.requests[0]).to.include({
                 https: true,
                 url: `localhost:${HTTPS_PORT}`,
               })
@@ -251,12 +261,12 @@ describe('lib/agent', function () {
         })
 
         it('HTTPS pages can be loaded via fetch', function () {
-          return this.fetch(`https://localhost:${HTTPS_PORT}/get`)
+          return fetchWithAgent(`https://localhost:${HTTPS_PORT}/get`)
           .then((response) => response.text())
           .then((body) => {
             expect(body).to.eq('It worked!')
-            if (this.debugProxy) {
-              expect(this.debugProxy.requests[0]).to.include({
+            if (debugProxy) {
+              expect(debugProxy.requests[0]).to.include({
                 https: true,
                 url: `localhost:${HTTPS_PORT}`,
               })
@@ -265,21 +275,21 @@ describe('lib/agent', function () {
         })
 
         it('HTTPS pages are requested with correct host header when loaded via fetch', function () {
-          return this.fetch(`https://localhost:${HTTPS_PORT}/get`)
+          return fetchWithAgent(`https://localhost:${HTTPS_PORT}/get`)
           .then(() => {
-            expect(this.servers.lastRequestHeaders).to.include({
+            expect(servers.lastRequestHeaders).to.include({
               host: 'localhost',
             })
           })
         })
 
         it('HTTPS pages can be loaded via fetch with no explicit port', function () {
-          return this.fetch(`https://localhost/get`)
+          return fetchWithAgent(`https://localhost/get`)
           .then((response) => response.text())
           .then((body) => {
             expect(body).to.eq('It worked!')
-            if (this.debugProxy) {
-              expect(this.debugProxy.requests[0]).to.include({
+            if (debugProxy) {
+              expect(debugProxy.requests[0]).to.include({
                 https: true,
                 url: `localhost:${HTTPS_PORT}`,
               })
@@ -288,24 +298,24 @@ describe('lib/agent', function () {
         })
 
         it('HTTPS pages requested with correct host header when loaded via fetch with no explicit port', function () {
-          return this.fetch(`https://localhost/get`)
+          return fetchWithAgent(`https://localhost/get`)
           .then(() => {
-            expect(this.servers.lastRequestHeaders).to.include({
+            expect(servers.lastRequestHeaders).to.include({
               host: 'localhost',
             })
           })
         })
 
         it('HTTP errors are catchable', function () {
-          return this.request({
+          return request({
             url: `http://localhost:${HTTP_PORT}/empty-response`,
           })
           .then(() => {
             throw new Error('Shouldn\'t reach this')
           })
           .catch((err) => {
-            if (this.debugProxy) {
-              expect(this.debugProxy.requests[0]).to.include({
+            if (debugProxy) {
+              expect(debugProxy.requests[0]).to.include({
                 url: `http://localhost:${HTTP_PORT}/empty-response`,
               })
 
@@ -317,7 +327,7 @@ describe('lib/agent', function () {
         })
 
         it('HTTPS errors are catchable', function () {
-          return this.request({
+          return request({
             url: `https://localhost:${HTTPS_PORT}/empty-response`,
           })
           .then(() => {
@@ -330,7 +340,7 @@ describe('lib/agent', function () {
 
         it('HTTP websocket connections can be established and used', function () {
           const socket = socketIo.client(`http://localhost:${HTTP_PORT}`, {
-            agent: this.agent,
+            agent,
             transports: ['websocket'],
             rejectUnauthorized: false,
           })
@@ -340,9 +350,9 @@ describe('lib/agent', function () {
           })
           .then((msg) => {
             expect(msg).to.eq('It worked!')
-            if (this.debugProxy) {
-              expect(this.debugProxy.requests[0].ws).to.be.true
-              expect(this.debugProxy.requests[0].url).to.include('http://localhost:31080')
+            if (debugProxy) {
+              expect(debugProxy.requests[0].ws).to.be.true
+              expect(debugProxy.requests[0].url).to.include('http://localhost:31080')
             }
 
             socket.close()
@@ -351,7 +361,7 @@ describe('lib/agent', function () {
 
         it('HTTPS websocket connections can be established and used', function () {
           const socket = socketIo.client(`https://localhost:${HTTPS_PORT}`, {
-            agent: this.agent,
+            agent,
             transports: ['websocket'],
             rejectUnauthorized: false,
           })
@@ -361,8 +371,8 @@ describe('lib/agent', function () {
           })
           .then((msg) => {
             expect(msg).to.eq('It worked!')
-            if (this.debugProxy) {
-              expect(this.debugProxy.requests[0]).to.include({
+            if (debugProxy) {
+              expect(debugProxy.requests[0]).to.include({
                 url: `localhost:${HTTPS_PORT}`,
               })
             }
@@ -375,7 +385,7 @@ describe('lib/agent', function () {
         it('does not warn when making a request to an IP address', function () {
           const warningStub = sinon.spy(process, 'emitWarning')
 
-          return this.request({
+          return request({
             url: `https://127.0.0.1:${HTTPS_PORT}/get`,
           })
           .then(() => {
@@ -386,34 +396,41 @@ describe('lib/agent', function () {
     })
 
     context('HttpsAgent', function () {
-      beforeEach(function () {
-        this.agent = new CombinedAgent()
+      let agent: CombinedAgent
+      let request: typeof Request
 
-        this.request = request.defaults({
-          agent: this.agent as any,
+      beforeEach(function () {
+        agent = new CombinedAgent()
+
+        request = Request.defaults({
+          agent,
           proxy: null,
         })
       })
 
       it('#createUpstreamProxyConnection does not go to proxy if domain in NO_PROXY', function () {
-        const spy = sinon.spy(this.agent.httpsAgent, 'createUpstreamProxyConnection')
+        const spy = sinon.spy(agent.httpsAgent, 'createUpstreamProxyConnection')
 
-        process.env.HTTP_PROXY = process.env.HTTPS_PROXY = 'http://0.0.0.0:0'
+        // Random port that is not in use on the machine
+        const localPortWithoutAnythingListening = '127.0.0.1:10123'
+
+        process.env.HTTP_PROXY = process.env.HTTPS_PROXY = `http://${localPortWithoutAnythingListening}`
         process.env.NO_PROXY = 'mtgox.info,example.com,homestarrunner.com,'
 
-        return this.request({
+        return request({
           url: 'https://example.com/',
         })
         .then(() => {
           expect(spy).to.not.be.called
 
-          return this.request({
+          return request({
             url: 'https://example.org/',
           })
           .then(() => {
             throw new Error('should not be able to connect')
           })
-          .catch({ message: 'Error: A connection to the upstream proxy could not be established: connect ECONNREFUSED 0.0.0.0' }, () => {
+          .catch((err) => {
+            expect(err.message).to.include(`Error: A connection to the upstream proxy could not be established: connect ECONNREFUSED ${localPortWithoutAnythingListening}`)
             expect(spy).to.be.calledOnce
           })
         })
@@ -430,16 +447,16 @@ describe('lib/agent', function () {
 
         return proxy.start(proxyPort)
         .then(() => {
-          return this.request({
+          return request({
             url: `https://localhost:${HTTPS_PORT}/get`,
           })
         })
         .then(() => {
           const options = spy.getCall(0).args[0]
-          const session = this.agent.httpsAgent._sessionCache.map[options._agentKey]
+          const session = agent.httpsAgent._sessionCache.map[options._agentKey]
 
           expect(spy).to.be.calledOnce
-          expect(this.agent.httpsAgent._sessionCache.list).to.have.length(1)
+          expect(agent.httpsAgent._sessionCache.list).to.have.length(1)
           expect(session).to.not.be.undefined
 
           return proxy.stop()
@@ -462,7 +479,7 @@ describe('lib/agent', function () {
 
         return proxy.listenAsync(proxyPort)
         .then(() => {
-          return this.request({
+          return request({
             url: `https://localhost:${HTTPS_PORT}/get`,
           })
         })
@@ -478,51 +495,59 @@ describe('lib/agent', function () {
     })
 
     context('HttpAgent', function () {
-      beforeEach(function () {
-        this.agent = new CombinedAgent()
+      let agent: CombinedAgent
+      let request: typeof Request
 
-        this.request = request.defaults({
-          agent: this.agent as any,
+      beforeEach(function () {
+        agent = new CombinedAgent()
+
+        request = Request.defaults({
+          agent,
           proxy: null,
         })
       })
 
-      // NOTE: this does not work in develop nor release/14.0.0 locally due to EADDRNOTAVAIL - likely setup/teardown is improper
-      it.skip('#addRequest does not go to proxy if domain in NO_PROXY', function () {
-        const spy = sinon.spy(this.agent.httpAgent, '_addProxiedRequest')
+      it('#addRequest does not go to proxy if domain in NO_PROXY', function () {
+        const spy = sinon.spy(agent.httpAgent, '_addProxiedRequest')
 
-        process.env.HTTP_PROXY = process.env.HTTPS_PROXY = 'http://0.0.0.0:0'
+        // Random port that is not in use on the machine
+        const localPortWithoutAnythingListening = '127.0.0.1:10123'
+
+        process.env.HTTP_PROXY = process.env.HTTPS_PROXY = `http://${localPortWithoutAnythingListening}`
         process.env.NO_PROXY = 'mtgox.info,example.com,homestarrunner.com,'
 
-        return this.request({
+        return request({
           url: 'http://example.com/',
         })
         .then(() => {
           expect(spy).to.not.be.called
 
-          return this.request({
+          return request({
             url: 'http://example.org/',
           })
           .then(() => {
             throw new Error('should not be able to connect')
           })
-          .catch({ message: 'Error: connect ECONNREFUSED 0.0.0.0' }, () => {
+          .catch((err) => {
+            expect(err.message).to.include(`Error: connect ECONNREFUSED ${localPortWithoutAnythingListening}`)
             expect(spy).to.be.calledOnce
           })
         })
       })
 
-      it('HTTP pages can be loaded with the Upstream target URL', function (done) {
+      it('HTTP pages can be loaded with the Upstream target URL', function () {
         process.env.HTTP_PROXY = process.env.HTTPS_PROXY = ''
         process.env.NO_PROXY = ''
         process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS = `http://localhost:${HTTP_PORT}`
 
-        this.request({
-          url: `http://localhost:${HTTP_PORT}/get`,
-        }).on('response', (response) => {
+        return new Promise((resolve) => {
+          request({
+            url: `http://localhost:${HTTP_PORT}/get`,
+          })
+          .on('response', resolve)
+        })
+        .then((response) => {
           expect(response.req.path).to.equal('http://localhost:31080/get')
-
-          done()
         })
       })
     })
@@ -531,14 +556,16 @@ describe('lib/agent', function () {
   context('CombinedAgent with CA overrides', function () {
     const proxyUrl = `https://localhost:${PROXY_PORT}`
 
-    before(function () {
-      this.servers = new Servers()
+    let servers: Servers
 
-      return this.servers.start(HTTP_PORT, HTTPS_PORT)
+    before(function () {
+      servers = new Servers()
+
+      return servers.start(HTTP_PORT, HTTPS_PORT)
     })
 
     after(function () {
-      return this.servers.stop()
+      return servers.stop()
     })
 
     ;[
@@ -556,6 +583,10 @@ describe('lib/agent', function () {
       },
     ].slice().map((testCase) => {
       context(testCase.name, function () {
+        let agent: CombinedAgent
+        let request: typeof Request
+        let debugProxy: DebuggingProxy
+
         beforeEach(function () {
           // PROXY vars should override npm_config vars, so set them to cause failures if they are used
           // @see https://github.com/cypress-io/cypress/pull/8295
@@ -565,25 +596,25 @@ describe('lib/agent', function () {
           process.env.HTTP_PROXY = process.env.HTTPS_PROXY = proxyUrl
           process.env.NO_PROXY = ''
 
-          this.agent = new CombinedAgent()
+          agent = new CombinedAgent()
 
-          this.request = request.defaults({
+          request = Request.defaults({
             proxy: null,
-            agent: this.agent,
+            agent,
           })
 
           let options: any = {
             keepRequests: true,
             https: {
-              ...this.servers.https,
+              ...servers.https,
               ca: this.caContents,
             },
             auth: false,
           }
 
           if (testCase.option === 'npm_config_cafile') {
-            process.env.npm_config_cafile = this.servers.caCertificatePath
-            this.caContents = [fs.readFileSync(this.servers.caCertificatePath, 'utf-8')]
+            process.env.npm_config_cafile = servers.caCertificatePath
+            this.caContents = [fs.readFileSync(servers.caCertificatePath, 'utf-8')]
 
             // Ensure the priority picks cafile over the next two options
             process.env.npm_config_ca = 'a'
@@ -591,7 +622,7 @@ describe('lib/agent', function () {
           }
 
           if (testCase.option === 'npm_config_ca') {
-            this.caContents = [fs.readFileSync(this.servers.caCertificatePath, 'utf-8')]
+            this.caContents = [fs.readFileSync(servers.caCertificatePath, 'utf-8')]
             process.env.npm_config_ca = this.caContents[0]
 
             // Ensure the priority picks cafile over the next option
@@ -599,39 +630,39 @@ describe('lib/agent', function () {
           }
 
           if (testCase.option === 'NODE_EXTRA_CA_CERTS') {
-            process.env.NODE_EXTRA_CA_CERTS = this.servers.caCertificatePath
-            this.caContents = [fs.readFileSync(this.servers.caCertificatePath, 'utf-8'), ...tls.rootCertificates]
+            process.env.NODE_EXTRA_CA_CERTS = servers.caCertificatePath
+            this.caContents = [fs.readFileSync(servers.caCertificatePath, 'utf-8'), ...tls.rootCertificates]
           }
 
           _resetBaseCaOptionsPromise()
 
-          this.debugProxy = new DebuggingProxy(options)
+          debugProxy = new DebuggingProxy(options)
 
-          return this.debugProxy.start(PROXY_PORT)
+          return debugProxy.start(PROXY_PORT)
         })
 
         afterEach(function () {
           delete process.env.npm_config_cafile
           delete process.env.npm_config_ca
           delete process.env.NODE_EXTRA_CA_CERTS
-          this.debugProxy.stop()
+          debugProxy.stop()
         })
 
         it(`CA from ${testCase.option} presented for https request`, function () {
-          return this.request({
+          return request({
             url: `https://localhost:${HTTPS_PORT}/get`,
             rejectUnauthorized: true,
           }).then((body) => {
             // Test the CA options the first time through
             expect(body).to.eq('It worked!')
-            if (this.debugProxy) {
-              expect(this.debugProxy.requests[0]).to.include({
+            if (debugProxy) {
+              expect(debugProxy.requests[0]).to.include({
                 https: true,
                 url: `localhost:${HTTPS_PORT}`,
               })
             }
 
-            const socketKey = Object.keys(this.agent.httpsAgent.sockets).filter((key) => key.includes(`localhost:${HTTPS_PORT}`))
+            const socketKey = Object.keys(agent.httpsAgent.sockets).filter((key) => key.includes(`localhost:${HTTPS_PORT}`))
 
             expect(socketKey.length).to.eq(1, 'There should only be a single localhost TLS Socket')
 
@@ -639,20 +670,20 @@ describe('lib/agent', function () {
               expect(socketKey[0]).to.contain(ca, `${testCase.option} should be used for the TLS Socket`)
             }
 
-            return this.request({
+            return request({
               url: `https://localhost:${HTTPS_PORT}/get`,
             })
           }).then((body) => {
             // Test that the caching of the ca options works
             expect(body).to.eq('It worked!')
-            if (this.debugProxy) {
-              expect(this.debugProxy.requests[0]).to.include({
+            if (debugProxy) {
+              expect(debugProxy.requests[0]).to.include({
                 https: true,
                 url: `localhost:${HTTPS_PORT}`,
               })
             }
 
-            const socketKey = Object.keys(this.agent.httpsAgent.sockets).filter((key) => key.includes(`localhost:${HTTPS_PORT}`))
+            const socketKey = Object.keys(agent.httpsAgent.sockets).filter((key) => key.includes(`localhost:${HTTPS_PORT}`))
 
             expect(socketKey.length).to.eq(1, 'There should only be a single localhost TLS Socket')
 
@@ -668,14 +699,16 @@ describe('lib/agent', function () {
   context('CombinedAgent with client certificates', function () {
     const proxyUrl = `https://localhost:${PROXY_PORT}`
 
-    before(function () {
-      this.servers = new Servers()
+    let servers: Servers
 
-      return this.servers.start(HTTP_PORT, HTTPS_PORT)
+    before(function () {
+      servers = new Servers()
+
+      return servers.start(HTTP_PORT, HTTPS_PORT)
     })
 
     after(function () {
-      return this.servers.stop()
+      return servers.stop()
     })
 
     ;[
@@ -704,6 +737,10 @@ describe('lib/agent', function () {
       },
     ].slice().map((testCase) => {
       context(testCase.name, function () {
+        let agent: CombinedAgent
+        let request: typeof Request
+        let debugProxy: DebuggingProxy
+
         beforeEach(function () {
           // PROXY vars should override npm_config vars, so set them to cause failures if they are used
           // @see https://github.com/cypress-io/cypress/pull/8295
@@ -713,16 +750,16 @@ describe('lib/agent', function () {
           process.env.HTTP_PROXY = process.env.HTTPS_PROXY = proxyUrl
           process.env.NO_PROXY = ''
 
-          this.agent = new CombinedAgent()
+          agent = new CombinedAgent()
 
-          this.request = request.defaults({
+          request = Request.defaults({
             proxy: null,
-            agent: this.agent,
+            agent,
           })
 
           let options: any = {
             keepRequests: true,
-            https: this.servers.https,
+            https: servers.https,
             auth: false,
           }
 
@@ -741,8 +778,8 @@ describe('lib/agent', function () {
           }
 
           if (testCase.option === 'npm_config_cafile') {
-            process.env.npm_config_cafile = this.servers.caCertificatePath
-            this.caContents = [fs.readFileSync(this.servers.caCertificatePath, 'utf-8')]
+            process.env.npm_config_cafile = servers.caCertificatePath
+            this.caContents = [fs.readFileSync(servers.caCertificatePath, 'utf-8')]
 
             // Ensure the priority picks cafile over the next two options
             process.env.npm_config_ca = 'a'
@@ -750,7 +787,7 @@ describe('lib/agent', function () {
           }
 
           if (testCase.option === 'npm_config_ca') {
-            this.caContents = [fs.readFileSync(this.servers.caCertificatePath, 'utf-8')]
+            this.caContents = [fs.readFileSync(servers.caCertificatePath, 'utf-8')]
             process.env.npm_config_ca = this.caContents[0]
 
             // Ensure the priority picks cafile over the next option
@@ -758,37 +795,37 @@ describe('lib/agent', function () {
           }
 
           if (testCase.option === 'NODE_EXTRA_CA_CERTS') {
-            process.env.NODE_EXTRA_CA_CERTS = this.servers.caCertificatePath
-            this.caContents = [fs.readFileSync(this.servers.caCertificatePath, 'utf-8'), ...tls.rootCertificates]
+            process.env.NODE_EXTRA_CA_CERTS = servers.caCertificatePath
+            this.caContents = [fs.readFileSync(servers.caCertificatePath, 'utf-8'), ...tls.rootCertificates]
           }
 
           _resetBaseCaOptionsPromise()
 
-          this.debugProxy = new DebuggingProxy(options)
+          debugProxy = new DebuggingProxy(options)
 
-          return this.debugProxy.start(PROXY_PORT)
+          return debugProxy.start(PROXY_PORT)
         })
 
         afterEach(function () {
           delete process.env.npm_config_cafile
           delete process.env.npm_config_ca
           delete process.env.NODE_EXTRA_CA_CERTS
-          this.debugProxy.stop()
+          debugProxy.stop()
         })
 
         it(`Client certificate${testCase.presentClientCertificate ? ' ' : ' not '}presented for https request${testCase.option ? ` with config option ${testCase.option}` : '' }`, function () {
-          return this.request({
+          return request({
             url: `https://localhost:${HTTPS_PORT}/get`,
           }).then((body) => {
             expect(body).to.eq('It worked!')
-            if (this.debugProxy) {
-              expect(this.debugProxy.requests[0]).to.include({
+            if (debugProxy) {
+              expect(debugProxy.requests[0]).to.include({
                 https: true,
                 url: `localhost:${HTTPS_PORT}`,
               })
             }
 
-            const socketKey = Object.keys(this.agent.httpsAgent.sockets).filter((key) => key.includes(`localhost:${HTTPS_PORT}`))
+            const socketKey = Object.keys(agent.httpsAgent.sockets).filter((key) => key.includes(`localhost:${HTTPS_PORT}`))
 
             expect(socketKey.length).to.eq(1, 'There should only be a single localhost TLS Socket')
 
@@ -810,7 +847,7 @@ describe('lib/agent', function () {
 
         it(`Client certificate${testCase.presentClientCertificate ? ' ' : ' not '}presented for https websocket`, function () {
           const socket = socketIo.client(`https://localhost:${HTTPS_PORT}`, {
-            agent: this.agent,
+            agent,
             transports: ['websocket'],
             rejectUnauthorized: false,
           })
@@ -820,8 +857,8 @@ describe('lib/agent', function () {
           })
           .then((msg) => {
             expect(msg).to.eq('It worked!')
-            if (this.debugProxy) {
-              expect(this.debugProxy.requests[0]).to.include({
+            if (debugProxy) {
+              expect(debugProxy.requests[0]).to.include({
                 url: `localhost:${HTTPS_PORT}`,
               })
             }
@@ -905,7 +942,7 @@ describe('lib/agent', function () {
       it(`detects correctly from ${testCase.protocol} requests`, () => {
         const spy = sinon.spy(testCase.agent, 'addRequest')
 
-        return request({
+        return Request({
           url: `${testCase.protocol}://foo.bar.baz.invalid`,
           agent: testCase.agent,
         })
@@ -922,7 +959,7 @@ describe('lib/agent', function () {
       it(`detects correctly from ${testCase.protocol} websocket requests`, () => {
         const spy = sinon.spy(testCase.agent, 'addRequest')
         const socket = socketIo.client(`${testCase.protocol}://foo.bar.baz.invalid`, {
-          agent: <any>testCase.agent,
+          agent: testCase.agent as any,
           transports: ['websocket'],
           timeout: 1,
           rejectUnauthorized: false,
@@ -961,7 +998,7 @@ describe('lib/agent', function () {
     it('regenerates changed request head', () => {
       const spy = sinon.spy(http.globalAgent, 'createSocket')
 
-      return request({
+      return Request({
         url: 'http://foo.bar.baz.invalid',
         agent: http.globalAgent,
       })
@@ -997,6 +1034,113 @@ describe('lib/agent', function () {
           '', '',
         ].join('\r\n'))
       })
+    })
+  })
+
+  context('.getFirstWorkingFamily', () => {
+    let servers: http.Server[] = []
+
+    const listen = (options: ListenOptions) => {
+      return Bluebird.fromCallback((cb) => {
+        const server = http.createServer((req, res) => {
+          res.end('Hello, world!')
+        })
+
+        servers.push(server)
+
+        server.listen(options, cb.bind(server))
+      })
+    }
+
+    const getFamilyAsPromise = (host: string, port: number, familyCache): Promise<net.family | undefined> => {
+      return new Promise((resolve) => {
+        getFirstWorkingFamily({ host, port }, familyCache, resolve)
+      })
+    }
+
+    beforeEach(() => {
+      servers = []
+    })
+
+    afterEach(() => {
+      return Bluebird.map(servers, (server) => {
+        return Bluebird.fromCallback((cb) => {
+          server.close(cb.bind(server))
+        })
+      })
+    })
+
+    it('caches host + port', async function () {
+      const familyCache = {}
+
+      await Promise.all([
+        // v4 server only
+        listen({
+          port: HTTP_PORT + 1,
+          host: '127.0.0.1',
+        }),
+
+        // v6 server only
+        listen({
+          port: HTTP_PORT + 2,
+          host: '::1',
+          ipv6Only: true,
+        }),
+
+        // v6 server only
+        listen({
+          port: HTTP_PORT + 3,
+          host: '::1',
+          ipv6Only: true,
+        }),
+
+        // v4 server only
+        listen({
+          port: HTTP_PORT + 4,
+          host: '127.0.0.1',
+        }),
+      ])
+
+      const families: Record<string, number> = {}
+
+      // start with a v4 address
+      families.familySet1 = await getFamilyAsPromise('localhost', HTTP_PORT + 1, familyCache)
+
+      // then use a v6 only port with the same host
+      families.familySet1CachedNewPort = await getFamilyAsPromise('localhost', HTTP_PORT + 2, familyCache)
+
+      // start with a v6 address
+      families.familySet2 = await getFamilyAsPromise('localhost', HTTP_PORT + 3, familyCache)
+
+      // then use a v4 only port with the same host
+      families.familySet2CachedNewPort = await getFamilyAsPromise('localhost', HTTP_PORT + 4, familyCache)
+
+      expect(families).to.deep.eq({
+        familySet1: 4,
+        familySet1CachedNewPort: 6,
+        familySet2: 6,
+        familySet2CachedNewPort: 4,
+      })
+
+      const expectedFamilyCache = {}
+
+      expectedFamilyCache[`localhost:${HTTP_PORT + 1}`] = 4
+      expectedFamilyCache[`localhost:${HTTP_PORT + 2}`] = 6
+      expectedFamilyCache[`localhost:${HTTP_PORT + 3}`] = 6
+      expectedFamilyCache[`localhost:${HTTP_PORT + 4}`] = 4
+
+      expect(familyCache).to.deep.eq(expectedFamilyCache)
+    })
+
+    it('returns from the cache', async () => {
+      const familyCache = {
+        // not a valid ip family to test it using the cache
+        'localhost:2222': 2,
+      }
+
+      const family = await getFamilyAsPromise('localhost', 2222, familyCache)
+
+      expect(family).to.eq(2)
     })
   })
 })

@@ -4,6 +4,7 @@ import { get as errorsGet } from '../errors'
 import preprocessor from '../plugins/preprocessor'
 import type { Cfg } from '../project-base'
 import type { Request, Response } from 'express'
+import type { PreprocessorError } from '@packages/types'
 
 const debug = Debug('cypress:server:controllers:spec')
 
@@ -49,7 +50,7 @@ export = {
     })
     .catch({ code: 'ECONNABORTED' }, ignoreECONNABORTED)
     .catch({ code: 'EPIPE' }, ignoreEPIPE)
-    .catch((err: any) => {
+    .catch((err: PreprocessorError) => {
       debug(`preprocessor error for spec '%s': %s`, spec, err.stack)
 
       if (!config.isTextTerminal) {

@@ -7,7 +7,7 @@
     "build-prod": "tsc --project .",
     "build-test": "yarn build-prod --noEmit",
     "check-ts": "tsc --noEmit && yarn -s tslint",
-    "clean": "rimraf 'lib/**/*.js'",
+    "clean": "rimraf --glob 'lib/**/*.js'",
     "clean-deps": "rimraf node_modules",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "test": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",

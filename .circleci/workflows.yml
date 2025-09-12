@@ -1,7 +1,7 @@
 version: 2.1
 
-chrome-stable-version: &chrome-stable-version "139.0.7258.138"
-chrome-beta-version: &chrome-beta-version "140.0.7339.24"
+chrome-stable-version: &chrome-stable-version "140.0.7339.127"
+chrome-beta-version: &chrome-beta-version "141.0.7390.16"
 firefox-stable-version: &firefox-stable-version "142.0"
 
 orbs:
@@ -38,7 +38,7 @@ mainBuildFilters: &mainBuildFilters
         - /^release\/\d+\.\d+\.\d+$/
         # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
         - 'update-v8-snapshot-cache-on-develop'
-        - 'chore/updates_post_15'
+        - 'chore/refactor_cli_to_ts'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -49,7 +49,7 @@ macWorkflowFilters: &darwin-workflow-filters
       - equal: [ develop, << pipeline.git.branch >> ]
       # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-      - equal: [ 'chore/updates_post_15', << pipeline.git.branch >> ]
+      - equal: [ 'chore/migrate-electron-lib-ts', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
@@ -60,7 +60,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
       - equal: [ develop, << pipeline.git.branch >> ]
       # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-      - equal: [ 'chore/updates_post_15', << pipeline.git.branch >> ]
+      - equal: [ 'chore/migrate-electron-lib-ts', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
@@ -83,7 +83,7 @@ windowsWorkflowFilters: &windows-workflow-filters
       - equal: [ develop, << pipeline.git.branch >> ]
       # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-      - equal: [ 'chore/updates_post_15', << pipeline.git.branch >> ]
+      - equal: [ 'chore/migrate-electron-lib-ts', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
@@ -147,6 +147,12 @@ executors:
       PLATFORM: linux
       # TODO: Disabling snapshots for now on Linux Arm 64 architectures. Will revisit with https://github.com/cypress-io/cypress/issues/23557
       DISABLE_SNAPSHOT_REQUIRE: 1
+  linux-x64: &linux-x64-executor
+    machine:
+      image: ubuntu-2004:2024.11.1
+    resource_class: medium
+    environment:
+      PLATFORM: linux
 
 commands:
   # This command inserts SHOULD_PERSIST_ARTIFACTS into BASH_ENV. This way, we can define the variable in one place and use it in multiple steps.
@@ -157,7 +163,7 @@ commands:
           name: Set environment variable to determine whether or not to persist artifacts
           command: |
             echo "Setting SHOULD_PERSIST_ARTIFACTS variable"
-            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "chore/updates_post_15" ]]; then
+            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "chore/refactor_cli_to_ts" ]]; then
                 export SHOULD_PERSIST_ARTIFACTS=true
             fi' >> "$BASH_ENV"
   # You must run `setup_should_persist_artifacts` command and be using bash before running this command
@@ -1791,11 +1797,36 @@ jobs:
           condition:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
-            - run: yarn test-scripts
-            # run unit tests from each individual package
-            - run: yarn test
-            # run type checking for each individual package
-            - run: yarn lerna run types
+            - run:
+                name: Enable IPv6 in Docker
+                command: |
+                  cat \<<'EOF' | sudo tee /etc/docker/daemon.json
+                  {
+                    "ipv6": true,
+                    "fixed-cidr-v6": "2001:db8:1::/64"
+                  }
+                  EOF
+                  cat \<<'EOF' | sudo tee /etc/hosts
+                  127.0.0.1 localhost
+                  ::1 localhost
+                  EOF
+                  sudo service docker restart
+            - run:
+                name: Test scripts
+                command: |
+                  source ./scripts/ensure-node.sh
+                  yarn test-scripts
+            - run:
+                name: Test each individual package
+                command: |
+                  source ./scripts/ensure-node.sh
+                  # this is needed since we are have to be running as root to test some packages
+                  sudo -E env "PATH=$PATH" yarn test
+            - run:
+                name: Test types
+                command: |
+                  source ./scripts/ensure-node.sh
+                  yarn lerna run types
             - sanitize-verify-and-store-mocha-results:
                 expectedResultCount: 20
 
@@ -2908,6 +2939,7 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
     - unit-tests:
+        executor: linux-x64
         requires:
           - build
     - verify-release-readiness:

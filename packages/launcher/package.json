@@ -5,7 +5,7 @@
   "scripts": {
     "build-prod": "tsc --project .",
     "check-ts": "tsc --noEmit && yarn -s tslint",
-    "clean": "rimraf --glob \"lib/*.js\" && rimraf --glob \"lib/**/*.js\" || true",
+    "clean": "rimraf --glob 'lib/*.js' && rimraf --glob 'lib/**/*.js' || true",
     "clean-deps": "rimraf node_modules",
     "clean-js": "yarn clean",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",

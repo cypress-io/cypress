@@ -1,4 +1,3 @@
-/* global window */
 (({ browserFamily, isSpecBridge, key, namespace, scripts, url, win = window, documentDomainContext }) => {
   /**
    * This file is read as a string in the server and injected into the spec

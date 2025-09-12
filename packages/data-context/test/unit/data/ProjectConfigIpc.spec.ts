@@ -66,7 +66,6 @@ describe('ProjectConfigIpc', () => {
 
           PROJECTS.forEach((project) => {
             it(`${project}: tsx generic loader (esm/commonjs/typescript)`, async () => {
-              // @ts-expect-error ignoring due to nested directories in the system-test project directory not being included in the type.
               const projectPath = await scaffoldProject(project)
 
               projectConfigIpc = new ProjectConfigIpc(
@@ -85,14 +84,14 @@ describe('ProjectConfigIpc', () => {
                 // For node 20.5.1 and down, we need use the --loader flag
                 expect(forkSpy).to.have.been.calledWith(sinon.match.string, sinon.match.array, sinon.match({
                   env: {
-                    NODE_OPTIONS: sinon.match(/--loader .*cypress\/node_modules\/tsx\/dist\/loader.mjs/),
+                    NODE_OPTIONS: sinon.match(/--loader ".*cypress\/node_modules\/tsx\/dist\/loader.mjs"/),
                   },
                 }))
               } else {
                 // For node 20.6.0 and up, we need use the --import flag
                 expect(forkSpy).to.have.been.calledWith(sinon.match.string, sinon.match.array, sinon.match({
                   env: {
-                    NODE_OPTIONS: sinon.match(/--import .*cypress\/node_modules\/tsx\/dist\/loader.mjs/),
+                    NODE_OPTIONS: sinon.match(/--import ".*cypress\/node_modules\/tsx\/dist\/loader.mjs"/),
                   },
                 }))
               }

@@ -1,11 +1,35 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.0.1
+## 15.2.0
 
-_Released 08/26/2025 (PENDING)_
+_Released 9/9/2025_
+
+**Features:**
+
+- Added support for using [@cypress/grep](https://www.npmjs.com/package/@cypress/grep) with Cypress Studio. Addresses [#32292](https://github.com/cypress-io/cypress/issues/32292).
 
 **Bugfixes:**
 
+- We now properly partition the `host` with `port` when caching family DNS lookups. This resolves issues where some `localhost` URLs were not resolving in `cy.visit()` in Cypress when they should have. Fixes [#25397](https://github.com/cypress-io/cypress/issues/25397). Addressed in [#32403](https://github.com/cypress-io/cypress/pull/32403).
+
+**Dependency Updates:**
+
+- Updated [`better-sqlite3`](https://www.npmjs.com/package/better-sqlite3) from `11.9.1` to `11.10.0`. Addressed in [#32404](https://github.com/cypress-io/cypress/pull/32404).
+
+## 15.1.0
+
+_Released 09/02/2025_
+
+**Features:**
+
+- Expanded `cy.press()` to support more key types. Addresses [#31051](https://github.com/cypress-io/cypress/issues/31051) and [#31488](https://github.com/cypress-io/cypress/issues/31488). Addressed in [#31496](https://github.com/cypress-io/cypress/pull/31496).
+
+**Bugfixes:**
+
+- Fixed an issue where OS distributions and releases were sometimes not properly populated for Module API results and Cloud recordings. Fixes [#30533](https://github.com/cypress-io/cypress/issues/30533). Addressed in [#32283](https://github.com/cypress-io/cypress/pull/32283).
+- Fixed an issue where Cypress would fail to run on GNOME if GTK 4 and GTK 2/3 were detected in the Electron process. Addresses [#32361](https://github.com/cypress-io/cypress/issues/32361).
 - Fixed an issue where the open Studio button would incorrectly show for component tests. Addressed in [#32315](https://github.com/cypress-io/cypress/pull/32315).
+- Fixed an issue where the TypeScript compiler wasn't being resolved correctly when `@cypress/webpack-batteries-included-preprocessor` was used as a standalone package. Fixes [#32338](https://github.com/cypress-io/cypress/issues/32338).
+- Fixed an issue where `tsx` was not being loaded correctly into the Cypress configuration process due to spaces being present in the path. Fixes [#32398](https://github.com/cypress-io/cypress/issues/32398).
 * Fixed an issue where `cy.wait('@alias')` could time out when the underlying network request was canceled by navigation (e.g., `cy.visit`, `cy.reload`). Fixes [#19326](https://github.com/cypress-io/cypress/issues/19326).
 
 **Misc:**
@@ -17,6 +41,7 @@ _Released 08/26/2025 (PENDING)_
 - Upgraded `esbuild` from `0.15.3` to `0.25.2`. Addressed in [#32231](https://github.com/cypress-io/cypress/pull/32231).
 - Upgraded `image-size` from `1.1.1` to `1.2.1`. Addressed in [#32232](https://github.com/cypress-io/cypress/pull/32232).
 - Upgraded `tar` from `6.1.5` to `6.2.1`. Addressed in [#32229](https://github.com/cypress-io/cypress/pull/32229).
+- Upgraded `axios` from `1.8.3` to `1.11.0`. Addresses [#32347](https://github.com/cypress-io/cypress/issues/32347).
 
 ## 15.0.0
 
