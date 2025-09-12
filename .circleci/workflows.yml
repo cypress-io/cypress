@@ -3613,11 +3613,13 @@ workflows:
     jobs:
       - approve-contributor-pr:
           type: approval
-      - continuation/continue:
-          configuration_path: .circleci/workflows.yml
-          parameters: '{ approved_contributor_pr: true }'
+      - trigger-pull-request-workflow:
           requires:
             - approve-contributor-pr
+          steps:
+            - configuration_path: .circleci/workflows.yml
+              continuation/continue: null
+              parameters: '{ approved_contributor_pr: true }'
     when:
       matches:
         pattern: /^pull\/[0-9]+/

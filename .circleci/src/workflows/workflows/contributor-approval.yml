@@ -8,8 +8,10 @@ when:
 jobs:
   - approve-contributor-pr:
       type: approval
-  - continuation/continue:
-      configuration_path: .circleci/workflows.yml
-      parameters: '{ approved_contributor_pr: true }' # when set to true, the main pull-request workflow will run
+  - trigger-pull-request-workflow:
+      steps:
+        - continuation/continue:
+          configuration_path: .circleci/workflows.yml
+          parameters: '{ approved_contributor_pr: true }' # when set to true, the main pull-request workflow will run
       requires:
         - approve-contributor-pr
