@@ -4,4 +4,4 @@ docker:
 steps:
   - continuation/continue:
       configuration_path: .circleci/workflows.yml
-      parameters: '{ approved_contributor_pr: true >> }'
+      parameters: '{ "approved_contributor_pr": true }'
