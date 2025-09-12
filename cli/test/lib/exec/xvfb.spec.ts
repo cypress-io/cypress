@@ -92,6 +92,7 @@ describe('lib/exec/xvfb', function () {
     })
 
     it('does need xvfb on linux when no DISPLAY is set', function () {
+      vi.stubEnv('DISPLAY', undefined)
       // @ts-expect-error - mockReturnValue
       os.platform.mockReturnValue('linux')
       expect(xvfb.isNeeded()).toBe(true)
