@@ -91,7 +91,7 @@
     "resolve-pkg": "2.0.0",
     "shelljs": "0.8.5",
     "strip-ansi": "6.0.1",
-    "tsx": "4.20.4",
+    "tsx": "4.20.5",
     "typescript": "~5.9.2",
     "vitest": "3.2.4"
   },
@@ -109,7 +109,7 @@
     "cypress": "bin/cypress"
   },
   "engines": {
-    "node": "^20.0.0 || ^22.0.0 || >=24.0.0"
+    "node": "^20.1.0 || ^22.0.0 || >=24.0.0"
   },
   "types": "types",
   "exports": {

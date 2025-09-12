@@ -1,57 +1,95 @@
-require('../../spec_helper')
+import '../../spec_helper'
 
-const stripAnsi = require('strip-ansi')
-const os = require('os')
-const chalk = require('chalk')
-const browsers = require(`../../../lib/browsers`)
-const utils = require(`../../../lib/browsers/utils`)
-const snapshot = require('snap-shot-it')
-const { EventEmitter } = require('events')
-const { sinon } = require('../../spec_helper')
-const { exec } = require('child_process')
-const util = require('util')
-const { createTestDataContext } = require('@packages/data-context/test/unit/helper')
-const electron = require('../../../lib/browsers/electron')
-const chrome = require('../../../lib/browsers/chrome')
-const Promise = require('bluebird')
-const { deferred } = require('../../support/helpers/deferred')
+import stripAnsi from 'strip-ansi'
+import os from 'os'
+import chalk from 'chalk'
+import browsers from '../../../lib/browsers'
+import utils from '../../../lib/browsers/utils'
+import snapshot from 'snap-shot-it'
+import { EventEmitter } from 'events'
+import { exec } from 'child_process'
+import util from 'util'
+import { createTestDataContext } from '@packages/data-context/test/unit/helper'
+import electron from '../../../lib/browsers/electron'
+import chrome from '../../../lib/browsers/chrome'
+import Promise from 'bluebird'
+import { deferred } from '../../support/helpers/deferred'
+import type { DataContext } from '@packages/data-context/src/DataContext'
+import type { BrowserInstance } from '../../../lib/browsers/types'
+import type { FoundBrowser, BrowserStatus } from '@packages/types/src/browser'
 
-const normalizeSnapshot = (str) => {
+// Type for simplified browser objects used in tests
+type TestBrowser = Pick<FoundBrowser, 'name' | 'channel'>
+
+// Type for Cypress error objects used in tests
+type CypressErrorType = {
+  type: 'BROWSER_NOT_FOUND_BY_NAME'
+  message?: string
+}
+
+// Type for URL strings used in tests
+type TestUrl = 'http://localhost:3000'
+
+// Type for sinon spy on setBrowserStatus
+type SetBrowserStatusSpy = sinon.SinonSpy<[BrowserStatus], void>
+
+// Type for minimal browser instance data used in setFocus tests
+type MinimalBrowserData = {
+  pid: number
+}
+
+// Type for electron browser objects used in tests
+type TestElectronBrowser = {
+  name: 'electron'
+  family: 'chromium'
+}
+
+// Type for browser options array used in tests
+type BrowserOptionsArray = Array<{ family: 'chromium' } | { url: string, onBrowserOpen?: () => void } | null | DataContext>
+
+const normalizeSnapshot = (str: string) => {
   return snapshot(stripAnsi(str))
 }
 
-const normalizeBrowsers = (message) => {
-  return message.replace(/(found on your system are:)(?:\n - .*)*/, '$1\n - chrome\n - firefox\n - electron')
+const BROWSER_LIST_REGEX = /(found on your system are:)(?:\n - .*)*/
+
+const normalizeBrowsers = (message: string) => {
+  return message.replace(BROWSER_LIST_REGEX, '$1\n - chrome\n - firefox\n - electron')
 }
 
 // When we added component testing mode, we added the option for electron to be omitted
-const originalElectronVersion = process.versions.electron
+type ProcessVersionsWithElectron = Omit<NodeJS.ProcessVersions, 'electron'> & {
+  electron?: string | boolean | undefined
+}
+
+const processVersions = process.versions as ProcessVersionsWithElectron
+const originalElectronVersion = processVersions.electron
 
 before(() => {
-  process.versions.electron = true
+  processVersions.electron = true
 })
 
-let ctx
+let ctx: DataContext
 
 beforeEach(() => {
   ctx = createTestDataContext()
 })
 
 after(() => {
-  process.versions.electron = originalElectronVersion
+  processVersions.electron = originalElectronVersion
 })
 
 describe('lib/browsers/index', () => {
   context('.getBrowserInstance', () => {
     it('returns instance', () => {
-      const ee = new EventEmitter()
+      const browserInstance = new EventEmitter() as BrowserInstance
 
-      ee.kill = () => {
-        ee.emit('exit')
+      browserInstance.kill = () => {
+        browserInstance.emit('exit')
       }
 
-      ee.pid = 1234
-      const instance = ee
+      browserInstance.pid = 1234
+      const instance = browserInstance
 
       browsers._setInstance(instance)
 
@@ -59,9 +97,9 @@ describe('lib/browsers/index', () => {
     })
 
     it('returns undefined if no instance', () => {
-      browsers._setInstance()
+      browsers._setInstance(null)
 
-      expect(browsers.getBrowserInstance()).to.be.undefined
+      expect(browsers.getBrowserInstance()).to.be.null
     })
   })
 
@@ -78,41 +116,41 @@ describe('lib/browsers/index', () => {
 
   context('.ensureAndGetByNameOrPath', () => {
     it('returns browser by name', () => {
-      const foundBrowsers = [
+      const foundBrowsers: TestBrowser[] = [
         { name: 'foo', channel: 'stable' },
         { name: 'bar', channel: 'stable' },
       ]
 
-      return browsers.ensureAndGetByNameOrPath('foo', false, foundBrowsers)
-      .then((browser) => {
+      return browsers.ensureAndGetByNameOrPath('foo', false, foundBrowsers as FoundBrowser[])
+      .then((browser: TestBrowser) => {
         expect(browser).to.deep.eq({ name: 'foo', channel: 'stable' })
       })
     })
 
     it('throws when no browser can be found', () => {
-      const foundBrowsers = [
+      const foundBrowsers: TestBrowser[] = [
         { name: 'chrome', channel: 'stable' },
         { name: 'firefox', channel: 'stable' },
         { name: 'electron', channel: 'stable' },
       ]
 
-      return expect(browsers.ensureAndGetByNameOrPath('browserNotGonnaBeFound', false, foundBrowsers))
-      .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
-      .then((err) => {
+      return expect(browsers.ensureAndGetByNameOrPath('browserNotGonnaBeFound', false, foundBrowsers as FoundBrowser[]))
+      .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' } as any)
+      .then((err: CypressErrorType) => {
         return normalizeSnapshot(normalizeBrowsers(stripAnsi(err.message)))
       })
     })
 
     it('throws a special error when canary is passed', () => {
-      const foundBrowsers = [
+      const foundBrowsers: TestBrowser[] = [
         { name: 'chrome', channel: 'stable' },
         { name: 'chrome', channel: 'canary' },
         { name: 'firefox', channel: 'stable' },
       ]
 
-      return expect(browsers.ensureAndGetByNameOrPath('canary', false, foundBrowsers))
-      .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
-      .then((err) => {
+      return expect(browsers.ensureAndGetByNameOrPath('canary', false, foundBrowsers as FoundBrowser[]))
+      .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' } as any)
+      .then((err: CypressErrorType) => {
         return normalizeSnapshot(err.message)
       })
     })
@@ -124,7 +162,7 @@ describe('lib/browsers/index', () => {
       await browsers.closeProtocolConnection({
         browser: {
           family: 'chromium',
-        },
+        } as any,
       })
 
       expect(chrome.closeProtocolConnection).to.be.called
@@ -136,13 +174,13 @@ describe('lib/browsers/index', () => {
       return browsers.connectToNewSpec({
         name: 'foo-bad-bang',
         family: 'foo-bad',
-      }, {
+      } as any, {
         browsers: [],
-      })
-      .then((e) => {
+      } as any, null)
+      .then((e: any) => {
         throw new Error('should\'ve failed')
       })
-      .catch((err) => {
+      .catch((err: CypressErrorType) => {
         // by being explicit with assertions, if something is unexpected
         // we will get good error message that includes the "err" object
         expect(err).to.have.property('type').to.eq('BROWSER_NOT_FOUND_BY_NAME')
@@ -157,13 +195,13 @@ describe('lib/browsers/index', () => {
       return browsers.open({
         name: 'foo-bad-bang',
         family: 'foo-bad',
-      }, {
+      } as any, {
         browsers: [],
-      }, null, ctx)
-      .then((e) => {
+      } as any, null, ctx)
+      .then((e: any) => {
         throw new Error('should\'ve failed')
       })
-      .catch((err) => {
+      .catch((err: CypressErrorType) => {
         // by being explicit with assertions, if something is unexpected
         // we will get good error message that includes the "err" object
         expect(err).to.have.property('type').to.eq('BROWSER_NOT_FOUND_BY_NAME')
@@ -174,7 +212,7 @@ describe('lib/browsers/index', () => {
 
     // https://github.com/cypress-io/cypress/issues/24377
     it('terminates orphaned browser if it connects while launching another instance', async () => {
-      const browserOptions = [{
+      const browserOptions: BrowserOptionsArray = [{
         family: 'chromium',
       }, {
         url: 'http://example.com',
@@ -182,21 +220,23 @@ describe('lib/browsers/index', () => {
       }, null, ctx]
 
       const launchBrowser1 = deferred()
-      const browserInstance1 = new EventEmitter()
+      const browserInstance1 = new EventEmitter() as BrowserInstance
 
       browserInstance1.kill = sinon.stub()
-      sinon.stub(chrome, 'open').onCall(0).returns(launchBrowser1.promise)
+      const chromeOpenStub = sinon.stub(chrome, 'open')
+
+      chromeOpenStub.onCall(0).returns(launchBrowser1.promise as any)
 
       // attempt to launch browser
-      const openBrowser1 = browsers.open(...browserOptions)
+      const openBrowser1 = browsers.open.apply(null, browserOptions)
       const launchBrowser2 = deferred()
-      const browserInstance2 = new EventEmitter()
+      const browserInstance2 = new EventEmitter() as BrowserInstance
 
       browserInstance2.kill = sinon.stub()
-      chrome.open.onCall(1).returns(launchBrowser2.promise)
+      chromeOpenStub.onCall(1).returns(launchBrowser2.promise as any)
 
       // original browser launch times out, so we retry launching the browser
-      const openBrowser2 = browsers.open(...browserOptions)
+      const openBrowser2 = browsers.open.apply(null, browserOptions)
 
       // in the meantime, the 1st browser launches
       launchBrowser1.resolve(browserInstance1)
@@ -228,7 +268,7 @@ describe('lib/browsers/index', () => {
 
     // https://github.com/cypress-io/cypress/issues/24377
     it('terminates orphaned browser if it connects after another instance launches', async () => {
-      const browserOptions = [{
+      const browserOptions: BrowserOptionsArray = [{
         family: 'chromium',
       }, {
         url: 'http://example.com',
@@ -236,21 +276,23 @@ describe('lib/browsers/index', () => {
       }, null, ctx]
 
       const launchBrowser1 = deferred()
-      const browserInstance1 = new EventEmitter()
+      const browserInstance1 = new EventEmitter() as BrowserInstance
 
       browserInstance1.kill = sinon.stub()
-      sinon.stub(chrome, 'open').onCall(0).returns(launchBrowser1.promise)
+      const chromeOpenStub = sinon.stub(chrome, 'open')
+
+      chromeOpenStub.onCall(0).returns(launchBrowser1.promise as any)
 
       // attempt to launch browser
-      const openBrowser1 = browsers.open(...browserOptions)
+      const openBrowser1 = browsers.open.apply(null, browserOptions)
       const launchBrowser2 = deferred()
-      const browserInstance2 = new EventEmitter()
+      const browserInstance2 = new EventEmitter() as BrowserInstance
 
       browserInstance2.kill = sinon.stub()
-      chrome.open.onCall(1).returns(launchBrowser2.promise)
+      chromeOpenStub.onCall(1).returns(launchBrowser2.promise as any)
 
       // original browser launch times out, so we retry launching the browser
-      const openBrowser2 = browsers.open(...browserOptions)
+      const openBrowser2 = browsers.open.apply(null, browserOptions)
 
       // the 2nd browser launches
       launchBrowser2.resolve(browserInstance2)
@@ -284,11 +326,11 @@ describe('lib/browsers/index', () => {
   context('.extendLaunchOptionsFromPlugins', () => {
     it('throws an error if unexpected property passed', () => {
       const fn = () => {
-        return utils.extendLaunchOptionsFromPlugins({}, { foo: 'bar' })
+        return utils.extendLaunchOptionsFromPlugins({}, { foo: 'bar' }, {})
       }
 
       // this error is snapshotted in an e2e test, no need to do it here
-      expect(fn).to.throw({ type: 'UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES' })
+      expect(fn).to.throw({ type: 'UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES' } as any)
     })
   })
 
@@ -317,9 +359,11 @@ describe('lib/browsers/index', () => {
       sinon.stub(os, 'platform').returns('darwin')
       sinon.stub(util, 'promisify').returns(mockExec)
 
-      browsers._setInstance({
+      const browserData: MinimalBrowserData = {
         pid: 3333,
-      })
+      }
+
+      browsers._setInstance(browserData as any)
 
       browsers.setFocus()
 
@@ -333,9 +377,11 @@ describe('lib/browsers/index', () => {
       sinon.stub(os, 'platform').returns('win32')
       sinon.stub(util, 'promisify').returns(mockExec)
 
-      browsers._setInstance({
+      const browserData: MinimalBrowserData = {
         pid: 3333,
-      })
+      }
+
+      browsers._setInstance(browserData as any)
 
       browsers.setFocus()
 
@@ -346,21 +392,21 @@ describe('lib/browsers/index', () => {
 
   context('kill', () => {
     it('allows registered emitter events to fire before kill', () => {
-      const ee = new EventEmitter()
+      const browserInstance = new EventEmitter() as BrowserInstance
 
-      ee.kill = () => {
-        ee.emit('exit')
+      browserInstance.kill = () => {
+        browserInstance.emit('exit')
       }
 
-      const removeAllListenersSpy = sinon.spy(ee, 'removeAllListeners')
+      const removeAllListenersSpy = sinon.spy(browserInstance, 'removeAllListeners')
 
-      const instance = ee
+      const instance = browserInstance
 
       browsers._setInstance(instance)
 
       const exitSpy = sinon.spy()
 
-      ee.once('exit', () => {
+      browserInstance.once('exit', () => {
         exitSpy()
       })
 
@@ -373,14 +419,14 @@ describe('lib/browsers/index', () => {
 
   context('browserStatus', () => {
     it('calls setBrowserStatus with correct lifecycle state', () => {
-      const url = 'http://localhost:3000'
-      const ee = new EventEmitter()
+      const url: TestUrl = 'http://localhost:3000'
+      const browserInstance = new EventEmitter() as BrowserInstance
 
-      ee.kill = () => {
-        ee.emit('exit')
+      browserInstance.kill = () => {
+        browserInstance.emit('exit')
       }
 
-      const instance = ee
+      const instance = browserInstance
 
       browsers._setInstance(instance)
 
@@ -390,9 +436,14 @@ describe('lib/browsers/index', () => {
       // Stub to speed up test, we don't care about the delay
       sinon.stub(Promise, 'delay').resolves()
 
-      return browsers.open({ name: 'electron', family: 'chromium' }, { url }, null, ctx).then(browsers.close).then(() => {
+      const browserData: TestElectronBrowser = {
+        name: 'electron',
+        family: 'chromium',
+      }
+
+      return browsers.open(browserData as any, { url } as any, null, ctx).then(browsers.close).then(() => {
         ['opening', 'open', 'closed'].forEach((status, i) => {
-          expect(ctx.actions.app.setBrowserStatus.getCall(i).args[0]).eq(status)
+          expect((ctx.actions.app.setBrowserStatus as SetBrowserStatusSpy).getCall(i).args[0]).eq(status)
         })
       })
     })
@@ -400,14 +451,14 @@ describe('lib/browsers/index', () => {
 
   context('didBrowserPreviouslyHaveUnexpectedExit', () => {
     it('sets didBrowserPreviouslyHaveUnexpectedExit when the browser unexpectedly closes', () => {
-      const url = 'http://localhost:3000'
-      const ee = new EventEmitter()
+      const url: TestUrl = 'http://localhost:3000'
+      const browserInstance = new EventEmitter() as BrowserInstance
 
-      ee.kill = () => {
-        ee.emit('exit')
+      browserInstance.kill = () => {
+        browserInstance.emit('exit')
       }
 
-      const instance = ee
+      const instance = browserInstance
 
       browsers._setInstance(instance)
 
@@ -417,43 +468,108 @@ describe('lib/browsers/index', () => {
       // Stub to speed up test, we don't care about the delay
       sinon.stub(Promise, 'delay').resolves()
 
-      return browsers.open({ name: 'electron', family: 'chromium' }, { url }, null, ctx).then(browsers.close).then(() => {
+      return browsers.open({ name: 'electron', family: 'chromium' } as any, { url } as any, null, ctx).then(browsers.close).then(() => {
         expect(ctx.coreData.didBrowserPreviouslyHaveUnexpectedExit).eq(true)
       })
     })
   })
+
+  context('browser cleanup', () => {
+    it('calls onBrowserClose callback on close', () => {
+      const onBrowserClose = sinon.stub()
+      const url: TestUrl = 'http://localhost:3000'
+      const browserInstance = new EventEmitter() as BrowserInstance
+
+      browserInstance.kill = () => {
+        browserInstance.emit('exit')
+      }
+
+      const instance = browserInstance
+
+      browsers._setInstance(instance)
+
+      sinon.stub(electron, 'open').resolves(instance)
+      sinon.spy(ctx.actions.app, 'setBrowserStatus')
+
+      // Stub to speed up test, we don't care about the delay
+      sinon.stub(Promise, 'delay').resolves()
+
+      return browsers.open({ name: 'electron', family: 'chromium' } as any, { url, onBrowserClose } as any, null, ctx).then(() => {
+        // Simulate browser exit
+        browserInstance.emit('exit')
+
+        expect(onBrowserClose).to.be.called
+      })
+    })
+
+    it('calls onBrowserOpen callback', async () => {
+      const onBrowserOpen = sinon.stub()
+      const url: TestUrl = 'http://localhost:3000'
+      const browserInstance = new EventEmitter() as BrowserInstance
+
+      browserInstance.kill = () => {
+        browserInstance.emit('exit')
+      }
+
+      const instance = browserInstance
+
+      browsers._setInstance(instance)
+
+      sinon.stub(electron, 'open').resolves(instance)
+      sinon.spy(ctx.actions.app, 'setBrowserStatus')
+
+      // Stub to speed up test, we don't care about the delay
+      sinon.stub(Promise, 'delay').resolves()
+
+      return browsers.open({ name: 'electron', family: 'chromium' } as any, { url, onBrowserOpen } as any, null, ctx).then(() => {
+        expect(onBrowserOpen).to.be.called
+      })
+    })
+
+    it('waits a second to give browser time to open', async () => {
+      const url: TestUrl = 'http://localhost:3000'
+      const browserInstance = new EventEmitter() as BrowserInstance
+
+      browserInstance.kill = () => {
+        browserInstance.emit('exit')
+      }
+
+      const instance = browserInstance
+
+      browsers._setInstance(instance)
+
+      sinon.stub(electron, 'open').resolves(instance)
+      sinon.spy(ctx.actions.app, 'setBrowserStatus')
+
+      const delayStub = sinon.stub(Promise, 'delay').resolves()
+
+      return browsers.open({ name: 'electron', family: 'chromium' } as any, { url } as any, null, ctx).then(() => {
+        expect(delayStub).to.be.calledWith(1000)
+      })
+    })
+
+    it('returns instance with kill and removeAllListeners functions', async () => {
+      const url: TestUrl = 'http://localhost:3000'
+      const browserInstance = new EventEmitter() as BrowserInstance
+
+      browserInstance.kill = () => {
+        browserInstance.emit('exit')
+      }
+
+      const instance = browserInstance
+
+      browsers._setInstance(instance)
+
+      sinon.stub(electron, 'open').resolves(instance)
+      sinon.spy(ctx.actions.app, 'setBrowserStatus')
+
+      // Stub to speed up test, we don't care about the delay
+      sinon.stub(Promise, 'delay').resolves()
+
+      return browsers.open({ name: 'electron', family: 'chromium' } as any, { url } as any, null, ctx).then((returnedInstance: BrowserInstance | null) => {
+        expect(returnedInstance.kill).to.be.a('function')
+        expect(returnedInstance.removeAllListeners).to.be.a('function')
+      })
+    })
+  })
 })
-
-// Ooo, browser clean up tests are disabled?!!
-
-// it "calls onBrowserClose callback on close", ->
-//   onBrowserClose = sinon.stub()
-//   browsers.launch("electron", @url, {onBrowserClose}).then ->
-//     Windows.create.lastCall.args[0].onClose()
-//     expect(onBrowserClose).to.be.called
-//
-// it "calls onBrowserOpen callback", ->
-//    onBrowserOpen = sinon.stub()
-//    browsers.launch("electron", @url, {onBrowserOpen}).then =>
-//      expect(onBrowserOpen).to.be.called
-//
-// it "waits a second to give browser time to open", ->
-//   browsers.launch("electron").then ->
-//     expect(Promise.delay).to.be.calledWith(1000)
-//
-// it "returns 'instance'", ->
-//   browsers.launch("electron").then (instance) ->
-//     expect(instance.kill).to.be.a("function")
-//     expect(instance.removeAllListeners).to.be.a("function")
-//
-// it "closes window on kill if it's not destroyed", ->
-//   @win.isDestroyed.returns(false)
-//   browsers.launch("electron").then (instance) =>
-//     instance.kill()
-//     expect(@win.close).to.be.called
-//
-// it "does not close window on kill if it's destroyed", ->
-//   @win.isDestroyed.returns(true)
-//   browsers.launch("electron").then (instance) =>
-//     instance.kill()
-//     expect(@win.close).not.to.be.called

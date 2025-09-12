@@ -10,7 +10,7 @@ export class StreamStalledError extends Error {
     super(`Stream stalled: failed to transfer ${chunkSizeBytes} bytes over the previous ${maxActivityDwellTime}ms`)
   }
 
-  public static isStreamStalledError (error: Error & {kind?: any}): error is StreamStalledError {
+  public static isStreamStalledError (error: Error & { kind?: any }): error is StreamStalledError {
     return error.kind === StreamStalledErrorKind
   }
 }

@@ -1,4 +1,3 @@
-/* eslint-disable no-redeclare */
 import Bluebird from 'bluebird'
 import _ from 'lodash'
 import type { FoundBrowser } from '@packages/types'
@@ -55,10 +54,10 @@ const getMajorVersion = (version) => {
 }
 
 const defaultLaunchOptions: {
-  preferences: {[key: string]: any}
+  preferences: { [key: string]: any }
   extensions: string[]
   args: string[]
-  env: {[key: string]: any}
+  env: { [key: string]: any }
 } = {
   preferences: {},
   extensions: [],
@@ -318,8 +317,8 @@ const parseBrowserOption = (opt) => {
   }
 }
 
-function ensureAndGetByNameOrPath(nameOrPath: string, returnAll: false, browsers?: FoundBrowser[]): Bluebird<FoundBrowser>
-function ensureAndGetByNameOrPath(nameOrPath: string, returnAll: true, browsers?: FoundBrowser[]): Bluebird<FoundBrowser[]>
+function ensureAndGetByNameOrPath (nameOrPath: string, returnAll: false, browsers?: FoundBrowser[]): Bluebird<FoundBrowser>
+function ensureAndGetByNameOrPath (nameOrPath: string, returnAll: true, browsers?: FoundBrowser[]): Bluebird<FoundBrowser[]>
 
 async function ensureAndGetByNameOrPath (nameOrPath: string, returnAll = false, prevKnownBrowsers: FoundBrowser[] = []) {
   const browsers = prevKnownBrowsers.length ? prevKnownBrowsers : (await getBrowsers())
