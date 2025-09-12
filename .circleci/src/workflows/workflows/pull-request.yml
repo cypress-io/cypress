@@ -3,7 +3,7 @@
 # Internal PR for any branch that does is not develop or release/ related
 when:
   not:
-    and:
+    or:
       - equal: [ "develop", << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/.*/

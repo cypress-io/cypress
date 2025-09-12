@@ -4605,7 +4605,7 @@ workflows:
             - driver-integration-memory-tests
     when:
       not:
-        and:
+        or:
           - equal:
               - develop
               - << pipeline.git.branch >>
