@@ -1,0 +1,15 @@
+# Contributor / Forked PRs have a branch name that starts with "pull/" followed by the PR number
+
+when:
+  matches:
+    pattern: /^pull\/[0-9]+/
+    value: << pipeline.git.branch >>
+
+jobs:
+  - approve-contributor-pr:
+      type: approval
+  - continuation/continue:
+      configuration_path: .circleci/workflows.yml
+      parameters: '{ approved_contributor_pr: true }' # when set to true, the main pull-request workflow will run
+      requires:
+        - approve-contributor-pr
