@@ -374,6 +374,12 @@ class HttpsAgent extends https.Agent {
       if (proxy) {
         options.proxy = <string>proxy
 
+        // If no callback is provided, we can't handle the async proxy connection
+        // Return the direct connection instead
+        if (!cb) {
+          return super.createConnection(options)
+        }
+
         return this.createUpstreamProxyConnection(<HttpsRequestOptionsWithProxy>options, cb as any)
       }
     }
