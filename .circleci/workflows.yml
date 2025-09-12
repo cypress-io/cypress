@@ -3374,6 +3374,14 @@ jobs:
           name: Test types clash ⚔️
           working_directory: <<parameters.wd>>
     working_directory: ~/cypress
+  trigger-pull-request-workflow:
+    docker:
+      - image: cimg/node:current
+    resource_class: small
+    steps:
+      - continuation/continue:
+          configuration_path: .circleci/workflows.yml
+          parameters: '{ approved_contributor_pr: true }'
   unit-tests:
     environment:
       CIRCLE_ARTIFACTS: /tmp/artifacts
@@ -3616,14 +3624,14 @@ workflows:
       - trigger-pull-request-workflow:
           requires:
             - approve-contributor-pr
-          steps:
-            - configuration_path: .circleci/workflows.yml
-              continuation/continue: null
-              parameters: '{ approved_contributor_pr: true }'
     when:
-      matches:
-        pattern: /^pull\/[0-9]+/
-        value: << pipeline.git.branch >>
+      and:
+        - matches:
+            pattern: /^pull\/[0-9]+/
+            value: << pipeline.git.branch >>
+        - equal:
+            - << pipeline.parameters.approved_contributor_pr >>
+            - false
   darwin-arm64:
     jobs:
       - node_modules_install:
