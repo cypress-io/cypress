@@ -28,10 +28,10 @@ jobs:
   - lint-types:
       requires:
         - build
-  - approve-contributor-pr:
-      type: approval
-      when: << pipeline.parameters.is_contributor_pr >>
-
+  - approve-contributor-pr
+  - approve-internal-pr:
+      requires:
+        - approve-contributor-pr
   # The following jobs are only run for contributor PRs once they are approved
   # unit, integration and e2e tests
   - cli-visual-tests:

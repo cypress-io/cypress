@@ -1374,6 +1374,34 @@ executors:
     resource_class: windows.large
 firefox-stable-version: "142.0"
 jobs:
+  approve-contributor-pr:
+    type: approval
+  approve-internal-pr:
+    docker:
+      - image: cimg/node:current
+    resource_class: small
+    steps:
+      - run:
+          command: |
+            if [ << pipeline.parameters.is_contributor_pr >> ]; then
+              echo "External PR - manual approval required."
+              exit 0
+            fi
+
+            # Get all jobs in the current workflow
+            curl -H "Circle-Token: $CIRCLE_TOKEN" \
+              "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job"
+
+            # Parse the response to find the approve-contributor-pr job ID
+            JOB_ID=$(curl -s -H "Circle-Token: $CIRCLE_TOKEN" \
+              "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job" | \
+              jq -r '.items[] | select(.name == "approve-contributor-pr") | .id')
+
+            # Then approve it
+            curl -X POST \
+              -H "Circle-Token: $CIRCLE_TOKEN" \
+              "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/approve/$JOB_ID"
+          name: Internal PR - Run Approved
   binary-system-tests:
     environment:
       CIRCLE_ARTIFACTS: /tmp/artifacts
@@ -4298,9 +4326,10 @@ workflows:
       - lint-types:
           requires:
             - build
-      - approve-contributor-pr:
-          type: approval
-          when: << pipeline.parameters.is_contributor_pr >>
+      - approve-contributor-pr
+      - approve-internal-pr:
+          requires:
+            - approve-contributor-pr
       - cli-visual-tests:
           context: test-runner:percy
           requires:
