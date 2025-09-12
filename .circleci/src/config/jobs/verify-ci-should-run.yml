@@ -44,4 +44,4 @@ steps:
 
         echo "Skipping CI; branch in progress - $TRIGGER_INSTRUCTIONS"
         cancel_build
-  - checkout
+

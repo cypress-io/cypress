@@ -6,7 +6,7 @@ jobs:
         steps:
             - continuation/continue:
                 configuration_path: .circleci/workflows.yml
-                parameters: '{ approved_contributor_pr: true }'
+                parameters: '{ approved_contributor_pr: true >> }'
     verify-ci-should-run:
         docker:
             - image: cimg/node:current
@@ -54,7 +54,6 @@ jobs:
                     echo "Skipping CI; branch in progress - $TRIGGER_INSTRUCTIONS"
                     cancel_build
                 name: Verify CI should run
-            - checkout
 orbs:
     continuation: circleci/continuation@1.1.0
 setup: true
