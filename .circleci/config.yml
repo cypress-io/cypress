@@ -1,4 +1,12 @@
 jobs:
+    trigger-main-workflow:
+        docker:
+            - image: cimg/node:current
+        resource_class: small
+        steps:
+            - continuation/continue:
+                configuration_path: .circleci/workflows.yml
+                parameters: '{ approved_contributor_pr: true >> }'
     verify-ci-should-run:
         docker:
             - image: cimg/node:current
@@ -47,8 +55,6 @@ jobs:
                     cancel_build
                 name: Verify CI should run
             - checkout
-            - continuation/continue:
-                configuration_path: .circleci/workflows.yml
 orbs:
     continuation: circleci/continuation@1.1.0
 setup: true
@@ -57,4 +63,14 @@ workflows:
     setup-workflow:
         jobs:
             - verify-ci-should-run
+            - approve-contributor-pr:
+                type: approval
+                when:
+                    matches:
+                        pattern: /^pull\/[0-9]+/
+                        value: << pipeline.git.branch >>
+            - trigger-main-workflow:
+                requires:
+                    - approve-contributor-pr
+                    - verify-ci-should-run
 

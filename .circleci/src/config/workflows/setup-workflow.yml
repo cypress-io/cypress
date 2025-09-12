@@ -1,2 +1,12 @@
 jobs:
   - verify-ci-should-run
+  - approve-contributor-pr:
+      type: approval
+      when:
+        matches:
+            pattern: /^pull\/[0-9]+/
+            value: << pipeline.git.branch >>
+  - trigger-main-workflow:
+      requires:
+        - approve-contributor-pr
+        - verify-ci-should-run

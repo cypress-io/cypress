@@ -4,4 +4,4 @@ docker:
 steps:
   - continuation/continue:
       configuration_path: .circleci/workflows.yml
-      parameters: '{ approved_contributor_pr: true }' # when set to true, the main pull-request workflow will run
+      parameters: '{ approved_contributor_pr: true >> }'
