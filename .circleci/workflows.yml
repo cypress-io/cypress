@@ -3604,7 +3604,7 @@ orbs:
   browser-tools: circleci/browser-tools@2.1.1
   continuation: circleci/continuation@1.1.0
 parameters:
-  approved_contributor_pr:
+  is_contributor_pr:
     default: false
     type: boolean
 version: 2.1
@@ -4282,66 +4282,46 @@ workflows:
           name: linux-lint
           requires:
             - build
-      - percy-finalize:
-          context: test-runner:percy
-          required_env_var: PERCY_TOKEN
-          requires:
-            - cli-visual-tests
-            - reporter-integration-tests
-            - run-app-component-tests-chrome
-            - run-app-integration-tests-chrome
-            - run-frontend-shared-component-tests-chrome
-            - run-launchpad-component-tests-chrome
-            - run-launchpad-integration-tests-chrome
-            - run-reporter-component-tests-chrome
-            - run-webpack-dev-server-integration-tests
-            - run-vite-dev-server-integration-tests
-      - verify-accessibility-results:
-          context: test-runner:cypress-record-key
-          requires:
-            - reporter-integration-tests
-            - run-app-component-tests-chrome
-            - run-app-integration-tests-chrome
-            - run-frontend-shared-component-tests-chrome
-            - run-launchpad-component-tests-chrome
-            - run-launchpad-integration-tests-chrome
-            - run-reporter-component-tests-chrome
-            - run-webpack-dev-server-integration-tests
-            - run-vite-dev-server-integration-tests
-            - driver-integration-tests-firefox
-            - driver-integration-tests-chrome
-            - driver-integration-tests-chrome-inject-document-domain
-            - driver-integration-tests-chrome-beta-inject-document-domain
-            - driver-integration-tests-electron
-            - driver-integration-tests-webkit
-            - driver-integration-memory-tests
       - lint-types:
           requires:
             - build
+      - approve-contributor-pr:
+          type: approval
+          when:
+            equal:
+              - << pipeline.parameters.is_contributor_pr >>
+              - true
       - cli-visual-tests:
           context: test-runner:percy
           requires:
             - build
+            - approve-contributor-pr
       - unit-tests:
           requires:
             - build
+            - approve-contributor-pr
       - verify-release-readiness:
           context: test-runner:npm-release
           requires:
             - build
+            - approve-contributor-pr
       - server-unit-tests:
           requires:
             - build
+            - approve-contributor-pr
       - server-integration-tests:
           requires:
             - build
+            - approve-contributor-pr
       - server-performance-tests:
           requires:
             - build
+            - approve-contributor-pr
       - system-tests-node-modules-install:
           context: test-runner:performance-tracking
           requires:
             - build
+            - approve-contributor-pr
       - system-tests-chrome:
           context: test-runner:performance-tracking
           requires:
@@ -4367,33 +4347,41 @@ workflows:
           context: test-runner:cypress-record-key
           requires:
             - build
+            - approve-contributor-pr
       - driver-integration-tests-chrome-inject-document-domain:
           context: test-runner:cypress-record-key
           requires:
             - build
+            - approve-contributor-pr
       - driver-integration-tests-chrome-beta:
           context: test-runner:cypress-record-key
           requires:
             - build
+            - approve-contributor-pr
       - driver-integration-tests-chrome-beta-inject-document-domain:
           context: test-runner:cypress-record-key
           requires:
             - build
+            - approve-contributor-pr
       - driver-integration-tests-firefox:
           context: test-runner:cypress-record-key
           requires:
             - build
+            - approve-contributor-pr
       - driver-integration-tests-electron:
           context: test-runner:cypress-record-key
           requires:
             - build
+            - approve-contributor-pr
       - driver-integration-tests-webkit:
           context: test-runner:cypress-record-key
           requires:
             - build
+            - approve-contributor-pr
       - driver-integration-memory-tests:
           requires:
             - build
+            - approve-contributor-pr
       - run-frontend-shared-component-tests-chrome:
           context:
             - test-runner:cypress-record-key
@@ -4402,6 +4390,7 @@ workflows:
           percy: true
           requires:
             - build
+            - approve-contributor-pr
       - run-launchpad-integration-tests-chrome:
           context:
             - test-runner:cypress-record-key
@@ -4410,6 +4399,7 @@ workflows:
           percy: true
           requires:
             - build
+            - approve-contributor-pr
       - run-launchpad-component-tests-chrome:
           context:
             - test-runner:cypress-record-key
@@ -4418,6 +4408,7 @@ workflows:
           percy: true
           requires:
             - build
+            - approve-contributor-pr
       - run-app-integration-tests-chrome:
           context:
             - test-runner:cypress-record-key
@@ -4426,6 +4417,7 @@ workflows:
           percy: true
           requires:
             - build
+            - approve-contributor-pr
       - run-webpack-dev-server-integration-tests:
           context:
             - test-runner:cypress-record-key
@@ -4446,6 +4438,7 @@ workflows:
           percy: true
           requires:
             - build
+            - approve-contributor-pr
       - run-reporter-component-tests-chrome:
           context:
             - test-runner:cypress-record-key
@@ -4453,54 +4446,69 @@ workflows:
           percy: true
           requires:
             - build
+            - approve-contributor-pr
       - reporter-integration-tests:
           context:
             - test-runner:cypress-record-key
             - test-runner:percy
           requires:
             - build
+            - approve-contributor-pr
       - npm-webpack-dev-server:
           requires:
             - system-tests-node-modules-install
       - npm-vite-dev-server:
           requires:
             - build
+            - approve-contributor-pr
       - npm-vite-plugin-cypress-esm:
           requires:
             - build
+            - approve-contributor-pr
       - npm-webpack-preprocessor:
           requires:
             - build
+            - approve-contributor-pr
       - npm-webpack-batteries-included-preprocessor:
           requires:
             - build
+            - approve-contributor-pr
       - npm-vue:
           requires:
             - build
+            - approve-contributor-pr
       - npm-puppeteer-unit-tests:
           requires:
             - build
+            - approve-contributor-pr
       - npm-puppeteer-cypress-tests:
           requires:
             - build
+            - approve-contributor-pr
       - npm-react:
           requires:
             - build
+            - approve-contributor-pr
       - npm-angular:
           requires:
             - build
+            - approve-contributor-pr
       - npm-mount-utils:
           requires:
             - build
+            - approve-contributor-pr
       - npm-grep:
           requires:
             - build
+            - approve-contributor-pr
       - npm-eslint-plugin-dev:
           requires:
             - build
+            - approve-contributor-pr
       - npm-cypress-schematic:
           requires:
             - build
+            - approve-contributor-pr
       - v8-integration-tests:
           requires:
             - system-tests-node-modules-install
@@ -4511,6 +4519,7 @@ workflows:
             - publish-binary
           requires:
             - node_modules_install
+            - approve-contributor-pr
       - wait-for-binary-publish:
           requires:
             - create-and-trigger-packaging-artifacts
@@ -4524,6 +4533,7 @@ workflows:
       - test-kitchensink:
           requires:
             - build
+            - approve-contributor-pr
       - test-npm-module-on-minimum-node-version:
           context: publish-binary
           requires:
@@ -4566,34 +4576,48 @@ workflows:
           requires:
             - get-published-artifacts
             - system-tests-node-modules-install
+      - percy-finalize:
+          context: test-runner:percy
+          required_env_var: PERCY_TOKEN
+          requires:
+            - cli-visual-tests
+            - reporter-integration-tests
+            - run-app-component-tests-chrome
+            - run-app-integration-tests-chrome
+            - run-frontend-shared-component-tests-chrome
+            - run-launchpad-component-tests-chrome
+            - run-launchpad-integration-tests-chrome
+            - run-reporter-component-tests-chrome
+            - run-webpack-dev-server-integration-tests
+            - run-vite-dev-server-integration-tests
+      - verify-accessibility-results:
+          context: test-runner:cypress-record-key
+          requires:
+            - reporter-integration-tests
+            - run-app-component-tests-chrome
+            - run-app-integration-tests-chrome
+            - run-frontend-shared-component-tests-chrome
+            - run-launchpad-component-tests-chrome
+            - run-launchpad-integration-tests-chrome
+            - run-reporter-component-tests-chrome
+            - run-webpack-dev-server-integration-tests
+            - run-vite-dev-server-integration-tests
+            - driver-integration-tests-firefox
+            - driver-integration-tests-chrome
+            - driver-integration-tests-chrome-inject-document-domain
+            - driver-integration-tests-chrome-beta-inject-document-domain
+            - driver-integration-tests-electron
+            - driver-integration-tests-webkit
+            - driver-integration-memory-tests
     when:
-      or:
-        - and:
-            - equal:
-                - << pipeline.parameters.approved_contributor_pr >>
-                - true
-            - matches:
-                pattern: /^pull\/[0-9]+/
-                value: << pipeline.git.branch >>
-            - not:
-                or:
-                  - equal:
-                      - develop
-                      - << pipeline.git.branch >>
-                  - matches:
-                      pattern: /^release\/.*/
-                      value: << pipeline.git.branch >>
-        - not:
-            or:
-              - equal:
-                  - develop
-                  - << pipeline.git.branch >>
-              - matches:
-                  pattern: /^release\/.*/
-                  value: << pipeline.git.branch >>
-              - matches:
-                  pattern: /^pull\/[0-9]+/
-                  value: << pipeline.git.branch >>
+      not:
+        and:
+          - equal:
+              - develop
+              - << pipeline.git.branch >>
+          - matches:
+              pattern: /^release\/.*/
+              value: << pipeline.git.branch >>
   windows:
     jobs:
       - node_modules_install:

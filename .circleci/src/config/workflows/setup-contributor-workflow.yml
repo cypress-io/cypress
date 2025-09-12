@@ -1,0 +1,10 @@
+when:
+  matches:
+      pattern: /^pull\/[0-9]+/
+      value: << pipeline.git.branch >>
+jobs:
+  - verify-ci-should-run
+  - trigger-main-workflow:
+      is_contributor_pr: true
+      requires:
+        - verify-ci-should-run

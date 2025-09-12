@@ -1,8 +1,12 @@
 resource_class: small
+parameters:
+  is_contributor_pr:
+    type: boolean
+    default: false
 docker:
   - image: cimg/node:current
 steps:
   - checkout
   - continuation/continue:
       configuration_path: .circleci/workflows.yml
-      parameters: '{ "approved_contributor_pr": true }'
+      parameters: '{ "is_contributor_pr": << parameters.is_contributor_pr >> }'

@@ -5,7 +5,7 @@ chrome-beta-version: &chrome-beta-version "141.0.7390.16"
 firefox-stable-version: &firefox-stable-version "142.0"
 
 parameters:
-  approved_contributor_pr:
+  is_contributor_pr:
     type: boolean
     default: false
 
