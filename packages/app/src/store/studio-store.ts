@@ -111,6 +111,7 @@ interface StudioRecorderState {
   sessionId?: string
   _isStudioCreatedTest: boolean
   newTestLineNumber?: number
+  _originalGrepSettings: Record<string, string>
 }
 
 function getUrlParams () {
@@ -148,6 +149,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       sessionId: persistedSessionId,
       newTestLineNumber: undefined,
       _isStudioCreatedTest: false,
+      _originalGrepSettings: {},
     }
   },
 
@@ -254,6 +256,14 @@ export const useStudioStore = defineStore('studioRecorder', {
         this.sessionId = studio.sessionId
       }
 
+      // if the user has any settings related to @cypress/grep, we need to temporarily remove them
+      // so that studio can run all of the tests regardless of whether they match the grep filters
+      if (studio.newTestLineNumber || studio.testId) {
+        if (this.detectAndStoreGrepSettings()) {
+          this.clearGrepSettings()
+        }
+      }
+
       // if we have an existing test or are creating a new test, we need to start loading
       // otherwise if we have a suite, we can just set the studio active
       if (this.testId || studio.newTestLineNumber) {
@@ -273,6 +283,62 @@ export const useStudioStore = defineStore('studioRecorder', {
       } else if (this.testId) {
         getCypress().runner.setOnlyTestId(this.testId)
         getCypress().runner.setIsStudioCreatedTest(this._isStudioCreatedTest)
+      }
+    },
+
+    detectAndStoreGrepSettings () {
+      const grepEnvVars = [
+        'grep',
+        'grepTags', 'grep-tags',
+        'grepUntagged', 'grep-untagged',
+        'grepOmitFiltered', 'grep-omit-filtered',
+      ]
+
+      this._originalGrepSettings = {}
+
+      try {
+        const cypress = getCypress()
+
+        for (const envVar of grepEnvVars) {
+          const value = cypress.env(envVar)
+
+          if (value != null) {
+            this._originalGrepSettings[envVar] = value
+          }
+        }
+
+        return Object.keys(this._originalGrepSettings).length > 0
+      } catch {
+        return false
+      }
+    },
+
+    clearGrepSettings () {
+      try {
+        const cypress = getCypress()
+
+        for (const envVar of Object.keys(this._originalGrepSettings)) {
+          cypress.env(envVar, null)
+        }
+      } catch {
+        // Cypress not ready, skip
+      }
+    },
+
+    restoreGrepSettings () {
+      // Only restore if we have settings to restore
+      if (Object.keys(this._originalGrepSettings).length === 0) {
+        return
+      }
+
+      try {
+        const cypress = getCypress()
+
+        for (const [envVar, value] of Object.entries(this._originalGrepSettings)) {
+          cypress.env(envVar, value)
+        }
+      } catch {
+        // Cypress not ready, skip
       }
     },
 
@@ -319,6 +385,8 @@ export const useStudioStore = defineStore('studioRecorder', {
     reset () {
       this.stop()
 
+      this.restoreGrepSettings()
+
       this.logs = []
       this.url = undefined
       this._hasStarted = false
@@ -326,6 +394,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       this.isFailed = false
       this.showUrlPrompt = true
       this._isStudioCreatedTest = false
+      this._originalGrepSettings = {}
 
       this._maybeResetRunnables()
     },

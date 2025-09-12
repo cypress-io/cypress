@@ -62,7 +62,7 @@ This will stop developers on Windows from running `yarn clean` unless they are s
     "rimraf": "5.0.10"
   },
   "scripts": {
-    "clean": "rimraf '**/*.js'"
+    "clean": "rimraf --glob '**/*.js'"
   }
 }
 ```

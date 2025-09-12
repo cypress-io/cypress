@@ -9,7 +9,7 @@ import { AutomationNotImplemented } from '../automation/automation_not_implement
 import type Protocol from 'devtools-protocol'
 import type { Automation } from '../automation'
 import type { BrowserPreRequest, BrowserResponseReceived, ResourceType } from '@packages/proxy'
-import type { AutomationMiddleware, AutomationCommands } from '@packages/types'
+import { AutomationMiddleware, AutomationCommands, toSupportedKey } from '@packages/types'
 import type { Client as WebDriverClient } from 'webdriver'
 import type {
   NetworkBeforeRequestSentParameters,
@@ -221,6 +221,7 @@ export class BidiAutomation {
     'browsingContext.contextCreated',
     'browsingContext.contextDestroyed',
   ]
+
   private webDriverClient: WebDriverClient
   private automation: Automation
   private autContextId: string | undefined = undefined
@@ -681,7 +682,8 @@ export class BidiAutomation {
           return
         case 'key:press':
           if (this.autContextId) {
-            await bidiKeyPress(data, this.webDriverClient, this.autContextId, this.topLevelContextId)
+            debug(`key:press %s`, data.key)
+            await bidiKeyPress(toSupportedKey(data.key), this.webDriverClient, this.autContextId, this.topLevelContextId)
           } else {
             throw new Error('Cannot emit key press: no AUT context initialized')
           }

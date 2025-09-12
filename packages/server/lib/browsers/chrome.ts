@@ -148,7 +148,6 @@ const _normalizeArgExtensions = function (extPath, args, pluginExtensions, brows
   if (loadExtension || pluginExtensions.length > 0) {
     // @see https://github.com/cypress-io/cypress/issues/31702
     if (Number(browser.majorVersion) >= 137 && browser.name === 'chrome') {
-      // eslint-disable-next-line no-console
       errors.warning('CHROME_137_LOAD_EXTENSION_NOT_SUPPORTED')
     }
   }
@@ -575,7 +574,7 @@ export = {
     // first allows us to connect the remote interface,
     // start video recording and then
     // we will load the actual page
-    const launchedBrowser = await launch(browser, 'about:blank', port, args, launchOptions.env) as unknown as BrowserInstance & { browserCriClient: BrowserCriClient}
+    const launchedBrowser = await launch(browser, 'about:blank', port, args, launchOptions.env) as unknown as BrowserInstance & { browserCriClient: BrowserCriClient }
 
     la(launchedBrowser, 'did not get launched browser instance')
 

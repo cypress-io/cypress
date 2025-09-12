@@ -37,7 +37,27 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.get('.hook-open-in-ide').should('exist')
 
     cy.get('#unified-runner').then((el) => {
-      expect(el[0].getAttribute('style')).to.match(/width: 1000px; height: 660px; transform: scale\(0.854\d+\); position: absolute; margin-left: -25px;/)
+      expect(el[0].getAttribute('style')).to.match(/width: 1000px; height: 660px; transform: scale\(0.85\); position: absolute; margin-left: -25px;/)
+      expect(el[0].getBoundingClientRect().width).to.equal(1000 * 0.85)
+      expect(el[0].getBoundingClientRect().height).to.equal(660 * 0.85)
+      expect(parseInt(el[0].style.marginLeft)).to.equal(-25)
+    })
+  })
+
+  it('demonstrates fractional dimension calculations before rounding fixes', () => {
+    cy.viewport(1333, 777)
+    cy.visitApp()
+    cy.specsPageIsVisible()
+    cy.contains('dom-content.spec').click()
+    cy.waitForSpecToFinish()
+
+    cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
+    cy.findByTestId('aut-url').should('be.visible')
+
+    cy.get('#unified-runner').then((el) => {
+      const style = el[0].getAttribute('style')
+
+      expect(style).to.match(/width: 1000px; height: 660px; transform: scale\(0\.78\); position: absolute; margin-left: -108px;/)
     })
   })
 

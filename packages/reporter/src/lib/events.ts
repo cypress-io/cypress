@@ -216,12 +216,12 @@ const events: Events = {
       runner.emit('open:file:unified', fileDetails)
     })
 
-    localBus.on('studio:init:test', (testId) => {
-      runner.emit('studio:init:test', testId)
+    localBus.on('studio:init:test', ({ testId }: { testId: string }) => {
+      runner.emit('studio:init:test', { testId })
     })
 
-    localBus.on('studio:init:suite', (suiteId) => {
-      runner.emit('studio:init:suite', suiteId)
+    localBus.on('studio:init:suite', ({ suiteId }: { suiteId: string }) => {
+      runner.emit('studio:init:suite', { suiteId })
     })
 
     localBus.on('studio:remove:command', (commandId) => {

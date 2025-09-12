@@ -46,6 +46,7 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
     // needed in the server entry point
     'node_modules/tsx/dist/cjs/index.cjs',
     'node_modules/tsx/dist/loader.mjs',
+    'node_modules/tslib/tslib.js',
     // esbuild is also a runtime dependency with tsx
     'node_modules/esbuild/lib/main.js',
     'node_modules/find-up/index.js',

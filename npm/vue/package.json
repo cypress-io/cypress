@@ -19,7 +19,7 @@
     "@vitejs/plugin-vue": "6.0.0",
     "@vue/compiler-sfc": "3.2.47",
     "@vue/test-utils": "2.4.6",
-    "axios": "0.21.2",
+    "axios": "0.30.0",
     "cypress": "0.0.0-development",
     "debug": "^4.3.4",
     "globby": "^11.0.1",

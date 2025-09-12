@@ -2,7 +2,7 @@ require('../../spec_helper')
 
 const errors = require(`../../../lib/errors`)
 const plugins = require(`../../../lib/plugins`)
-const runEvents = require(`../../../lib/plugins/run_events`)
+const runEvents = require(`../../../lib/plugins/run_events`).default
 
 describe('lib/plugins/run_events', () => {
   context('#execute', () => {
