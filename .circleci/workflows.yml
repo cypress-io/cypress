@@ -4287,10 +4287,7 @@ workflows:
             - build
       - approve-contributor-pr:
           type: approval
-          when:
-            equal:
-              - << pipeline.parameters.is_contributor_pr >>
-              - true
+          when: << pipeline.parameters.is_contributor_pr >>
       - cli-visual-tests:
           context: test-runner:percy
           requires:

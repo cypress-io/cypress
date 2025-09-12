@@ -28,8 +28,7 @@ jobs:
         - build
   - approve-contributor-pr:
       type: approval
-      when:
-        equal: [ << pipeline.parameters.is_contributor_pr >>, true ]
+      when: << pipeline.parameters.is_contributor_pr >>
 
   # The following jobs are only run for contributor PRs once they are approved
   # unit, integration and e2e tests
