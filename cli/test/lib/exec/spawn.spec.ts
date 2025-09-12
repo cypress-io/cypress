@@ -184,6 +184,7 @@ describe('lib/exec/spawn', function () {
   beforeEach(function () {
     vi.resetAllMocks()
     vi.unstubAllEnvs()
+    vi.stubEnv('DISPLAY', undefined)
 
     // @ts-expect-error - mockReturnValue
     os.platform.mockReturnValue('darwin')
