@@ -1374,34 +1374,6 @@ executors:
     resource_class: windows.large
 firefox-stable-version: "142.0"
 jobs:
-  approve-contributor-pr:
-    type: approval
-  approve-internal-pr:
-    docker:
-      - image: cimg/node:current
-    resource_class: small
-    steps:
-      - run:
-          command: |
-            if [ << pipeline.parameters.is_contributor_pr >> ]; then
-              echo "External PR - manual approval required."
-              exit 0
-            fi
-
-            # Get all jobs in the current workflow
-            curl -H "Circle-Token: $CIRCLE_TOKEN" \
-              "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job"
-
-            # Parse the response to find the approve-contributor-pr job ID
-            JOB_ID=$(curl -s -H "Circle-Token: $CIRCLE_TOKEN" \
-              "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/job" | \
-              jq -r '.items[] | select(.name == "approve-contributor-pr") | .id')
-
-            # Then approve it
-            curl -X POST \
-              -H "Circle-Token: $CIRCLE_TOKEN" \
-              "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/approve/$JOB_ID"
-          name: Internal PR - Run Approved
   binary-system-tests:
     environment:
       CIRCLE_ARTIFACTS: /tmp/artifacts
@@ -1595,17 +1567,6 @@ jobs:
       - upload-build-artifacts
       - post-install-comment
     working_directory: ~/cypress
-  debug:
-    docker:
-      - image: cimg/node:current
-    parameters:
-      is_contributor_pr:
-        default: false
-        type: boolean
-    resource_class: small
-    steps:
-      - run:
-          command: 'echo "is_contributor_pr: << parameters.is_contributor_pr >>"'
   driver-integration-memory-tests:
     environment:
       CIRCLE_ARTIFACTS: /tmp/artifacts
@@ -3641,11 +3602,6 @@ jobs:
     working_directory: ~/cypress
 orbs:
   browser-tools: circleci/browser-tools@2.1.1
-  continuation: circleci/continuation@1.1.0
-parameters:
-  is_contributor_pr:
-    default: false
-    type: boolean
 version: 2.1
 workflows:
   darwin-arm64:
@@ -4308,8 +4264,6 @@ workflows:
             value: << pipeline.git.branch >>
   pull-request:
     jobs:
-      - debug:
-          is_contributor_pr: << pipeline.parameters.is_contributor_pr >>
       - node_modules_install:
           build-better-sqlite3: true
       - build:
@@ -4326,10 +4280,11 @@ workflows:
       - lint-types:
           requires:
             - build
-      - approve-contributor-pr
-      - approve-internal-pr:
-          requires:
-            - approve-contributor-pr
+      - approve-contributor-pr:
+          filters:
+            branches:
+              only: /^pull\/[0-9]+/
+          type: approval
       - cli-visual-tests:
           context: test-runner:percy
           requires:

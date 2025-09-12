@@ -10,8 +10,6 @@ when:
           value: << pipeline.git.branch >>
 
 jobs:
-  - debug:
-      is_contributor_pr: << pipeline.parameters.is_contributor_pr >>
   - node_modules_install:
       build-better-sqlite3: true
   - build:
@@ -28,10 +26,12 @@ jobs:
   - lint-types:
       requires:
         - build
-  - approve-contributor-pr
-  - approve-internal-pr:
-      requires:
-        - approve-contributor-pr
+  - approve-contributor-pr:
+      type: approval
+      filters:
+        branches:
+          only: /^pull\/[0-9]+/
+
   # The following jobs are only run for contributor PRs once they are approved
   # unit, integration and e2e tests
   - cli-visual-tests:

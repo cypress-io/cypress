@@ -2,16 +2,11 @@ jobs:
     trigger-main-workflow:
         docker:
             - image: cimg/node:current
-        parameters:
-            is_contributor_pr:
-                default: false
-                type: boolean
         resource_class: small
         steps:
             - checkout
             - continuation/continue:
                 configuration_path: .circleci/workflows.yml
-                parameters: '{ "is_contributor_pr": << parameters.is_contributor_pr >> }'
     verify-ci-should-run:
         docker:
             - image: cimg/node:current
@@ -64,27 +59,10 @@ orbs:
 setup: true
 version: 2.1
 workflows:
-    setup-contributor-workflow:
-        jobs:
-            - verify-ci-should-run
-            - trigger-main-workflow:
-                is_contributor_pr: true
-                requires:
-                    - verify-ci-should-run
-        when:
-            matches:
-                pattern: /^pull\/[0-9]+/
-                value: << pipeline.git.branch >>
     setup-workflow:
         jobs:
             - verify-ci-should-run
             - trigger-main-workflow:
-                is_contributor_pr: false
                 requires:
                     - verify-ci-should-run
-        when:
-            not:
-                matches:
-                    pattern: /^pull\/[0-9]+/
-                    value: << pipeline.git.branch >>
 
