@@ -10,6 +10,8 @@ when:
           value: << pipeline.git.branch >>
 
 jobs:
+  - debug:
+      is_contributor_pr: << pipeline.parameters.is_contributor_pr >>
   - node_modules_install:
       build-better-sqlite3: true
   - build:

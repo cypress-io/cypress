@@ -1567,6 +1567,17 @@ jobs:
       - upload-build-artifacts
       - post-install-comment
     working_directory: ~/cypress
+  debug:
+    docker:
+      - image: cimg/node:current
+    parameters:
+      is_contributor_pr:
+        default: false
+        type: boolean
+    resource_class: small
+    steps:
+      - run:
+          command: 'echo "is_contributor_pr: << parameters.is_contributor_pr >>"'
   driver-integration-memory-tests:
     environment:
       CIRCLE_ARTIFACTS: /tmp/artifacts
@@ -4269,6 +4280,8 @@ workflows:
             value: << pipeline.git.branch >>
   pull-request:
     jobs:
+      - debug:
+          is_contributor_pr: << pipeline.parameters.is_contributor_pr >>
       - node_modules_install:
           build-better-sqlite3: true
       - build:
