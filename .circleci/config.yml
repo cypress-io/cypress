@@ -4,6 +4,7 @@ jobs:
             - image: cimg/node:current
         resource_class: small
         steps:
+            - checkout
             - continuation/continue:
                 configuration_path: .circleci/workflows.yml
                 parameters: '{ "approved_contributor_pr": true }'
