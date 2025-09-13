@@ -104,7 +104,7 @@ export const StudioTest = observer(({ appState, runnablesStore, statsStore }: St
           </div>
         </div>
         <div className='studio-single-test-attempts' ref={containerRef}>
-          <Attempts test={currentTest} scrollIntoView={scrollIntoView} />
+          <Attempts isSingleStudioTest test={currentTest} scrollIntoView={scrollIntoView} />
         </div>
       </div>
     )
