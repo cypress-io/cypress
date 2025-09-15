@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.2.1 
+
+_Released xx/xx/xxxx (PENDING)_
+
+**Misc:**
+
+ - Updated the Cypress Studio panel to not show bottom border. Addresses [#32478](https://github.com/cypress-io/cypress/issues/32478).
+
 ## 15.2.0
 
 _Released 9/9/2025_
