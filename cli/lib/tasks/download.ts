@@ -1,5 +1,4 @@
 import la from 'lazy-ass'
-import is from 'check-more-types'
 import os from 'os'
 import url from 'url'
 import path from 'path'
@@ -10,8 +9,11 @@ import requestProgress from 'request-progress'
 import { stripIndent } from 'common-tags'
 import { getProxyForUrl } from 'proxy-from-env'
 import { throwFormErrorText, errors } from '../errors'
-import fs from '../fs'
+import fs from 'fs-extra'
 import util from '../util'
+
+// TODO: this package needs to be replaced as we can't import it in vitest
+const is = require('check-more-types')
 
 const debug = Debug('cypress:cli')
 
@@ -39,22 +41,24 @@ const getBaseUrl = (): string => {
   return defaultBaseUrl
 }
 
-const getCA = (): any => {
-  return new Bluebird((resolve: any) => {
-    if (process.env.npm_config_cafile) {
-      fs.readFile(process.env.npm_config_cafile, 'utf8')
-      .then((cafileContent: string) => {
-        resolve(cafileContent)
-      })
-      .catch(() => {
-        resolve()
-      })
-    } else if (process.env.npm_config_ca) {
-      resolve(process.env.npm_config_ca)
-    } else {
-      resolve()
+const getCA = async (): Promise<string | undefined> => {
+  if (process.env.npm_config_cafile) {
+    try {
+      const caFileContent = await fs.readFile(process.env.npm_config_cafile, 'utf8')
+
+      return caFileContent
+    } catch (error) {
+      debug('error reading ca file', error)
+
+      return
     }
-  })
+  }
+
+  if (process.env.npm_config_ca) {
+    return process.env.npm_config_ca
+  }
+
+  return
 }
 
 const prepend = (arch: string, urlPath: string, version: string): string => {
@@ -79,16 +83,16 @@ const prepend = (arch: string, urlPath: string, version: string): string => {
     : `${endpoint}?platform=${platform}&arch=${arch}`
 }
 
-const getUrl = (arch: string, version: string): string => {
+const getUrl = (arch: string, version?: string): string => {
   if (is.webUrl(version)) {
     debug('version is already an url', version)
 
-    return version
+    return version as string
   }
 
   const urlPath = version ? `desktop/${version}` : 'desktop'
 
-  return prepend(arch, urlPath, version)
+  return prepend(arch, urlPath, version || '')
 }
 
 const statusMessage = (err: any): string => {
@@ -112,7 +116,7 @@ const prettyDownloadErr = (err: any, url: string): any => {
  * Checks checksum and file size for the given file. Allows both
  * values or just one of them to be checked.
  */
-const verifyDownloadedFile = (filename: string, expectedSize?: number, expectedChecksum?: string): any => {
+const verifyDownloadedFile = async (filename: string, expectedSize?: number, expectedChecksum?: string): Promise<any> => {
   if (expectedSize && expectedChecksum) {
     debug('verifying checksum and file size')
 
@@ -147,24 +151,23 @@ const verifyDownloadedFile = (filename: string, expectedSize?: number, expectedC
   if (expectedChecksum) {
     debug('only checking expected file checksum %d', expectedChecksum)
 
-    return util.getFileChecksum(filename)
-    .then((checksum: string) => {
-      if (checksum === expectedChecksum) {
-        debug('downloaded file has the expected checksum ✅')
+    const checksum: string = await util.getFileChecksum(filename)
 
-        return
-      }
+    if (checksum === expectedChecksum) {
+      debug('downloaded file has the expected checksum ✅')
 
-      debug('raising error: file checksum mismatch')
-      const text = stripIndent`
-        Corrupted download
+      return
+    }
 
-        Expected downloaded file to have checksum: ${expectedChecksum}
-        Computed checksum: ${checksum}
-      `
+    debug('raising error: file checksum mismatch')
+    const text = stripIndent`
+      Corrupted download
 
-      throw new Error(text)
-    })
+      Expected downloaded file to have checksum: ${expectedChecksum}
+      Computed checksum: ${checksum}
+    `
+
+    throw new Error(text)
   }
 
   if (expectedSize) {
@@ -172,29 +175,28 @@ const verifyDownloadedFile = (filename: string, expectedSize?: number, expectedC
     // which we can check against the file size
     debug('only checking expected file size %d', expectedSize)
 
-    return util.getFileSize(filename)
-    .then((filesize: number) => {
-      if (filesize === expectedSize) {
-        debug('downloaded file has the expected size ✅')
+    const filesize: number = await util.getFileSize(filename)
 
-        return
-      }
+    if (filesize === expectedSize) {
+      debug('downloaded file has the expected size ✅')
 
-      debug('raising error: file size mismatch')
-      const text = stripIndent`
-          Corrupted download
+      return
+    }
 
-          Expected downloaded file to have size: ${expectedSize}
-          Computed size: ${filesize}
-        `
+    debug('raising error: file size mismatch')
+    const text = stripIndent`
+        Corrupted download
 
-      throw new Error(text)
-    })
+        Expected downloaded file to have size: ${expectedSize}
+        Computed size: ${filesize}
+      `
+
+    throw new Error(text)
   }
 
   debug('downloaded file lacks checksum or size to verify')
 
-  return Bluebird.resolve()
+  return
 }
 
 // downloads from given url
@@ -354,18 +356,16 @@ const start = async (opts: any): Promise<any> => {
   debug('source url %s', versionUrl)
   debug(`downloading cypress.zip to "${downloadDestination}"`)
 
-  // ensure download dir exists
-  return fs.ensureDirAsync(path.dirname(downloadDestination))
-  .then(() => {
-    return getCA()
-  })
-  .then((ca: any) => {
+  try {
+    // ensure download dir exists
+    await fs.ensureDir(path.dirname(downloadDestination))
+    const ca: string | undefined = await getCA()
+
     return downloadFromUrl({ url: versionUrl, downloadDestination, progress, ca, version,
       ...(redirectTTL ? { redirectTTL } : {}) })
-  })
-  .catch((err: any) => {
+  } catch (err: any) {
     return prettyDownloadErr(err, versionUrl)
-  })
+  }
 }
 
 const downloadModule = {
