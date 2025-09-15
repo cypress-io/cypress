@@ -20,7 +20,7 @@ import runEvents from './plugins/run_events'
 import type { OTLPTraceExporterCloud } from '@packages/telemetry'
 import { telemetry } from '@packages/telemetry'
 import type { Automation } from './automation'
-// eslint-disable-next-line no-duplicate-imports
+
 import type { Socket } from '@packages/socket'
 
 import type { RunState, CachedTestState, ProtocolManagerShape, AutomationCommands } from '@packages/types'

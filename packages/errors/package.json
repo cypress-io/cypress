@@ -8,7 +8,7 @@
     "build": "../../scripts/run-if-ci.sh tsc || echo 'type errors'",
     "build-prod": "tsc",
     "check-ts": "tsc --noEmit && yarn -s tslint",
-    "clean": "rimraf ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
+    "clean": "rimraf --glob './src/*.js' './src/**/*.js' './src/**/**/*.js' './test/**/*.js' || echo 'cleaned'",
     "clean-deps": "rimraf node_modules",
     "comparison": "node -r @packages/ts/register test/support/error-comparison-tool.ts",
     "lint": "eslint",
@@ -43,7 +43,7 @@
     "jiti": "^2.4.2",
     "mocha": "7.0.1",
     "pngjs": "^7.0.0",
-    "rimraf": "5.0.10",
+    "rimraf": "6.0.1",
     "sinon": "7.5.0",
     "terminal-banner": "^1.1.0",
     "xvfb-maybe": "^0.2.1"

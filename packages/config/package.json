@@ -8,7 +8,7 @@
   "scripts": {
     "build-prod": "tsc || echo 'built, with errors'",
     "check-ts": "tsc --noEmit && yarn -s tslint",
-    "clean": "rimraf --glob ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/!**__fixtures__**/**/*.js || echo 'cleaned'",
+    "clean": "rimraf --glob './src/*.js' './src/**/*.js' './src/**/**/*.js' './test/!**__fixtures__**/**/*.js' || echo 'cleaned'",
     "clean-deps": "rimraf node_modules",
     "lint": "eslint --ext .js,.ts,.json, .",
     "test": "yarn test-unit",
