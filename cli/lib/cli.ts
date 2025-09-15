@@ -11,7 +11,7 @@ import cache from './tasks/cache'
 
 import openModule from './exec/open'
 import runModule from './exec/run'
-import verifyModule from './tasks/verify'
+import { start } from './tasks/verify'
 import installModule from './tasks/install'
 import versionModule from './exec/versions'
 import infoModule from './exec/info'
@@ -27,7 +27,7 @@ function unknownOption (this: any, flag: string, type: string = 'option'): void 
   logger.error(`  error: unknown ${type}:`, flag)
   logger.error()
   this.outputHelp()
-  util.exit(1)
+  process.exit(1)
 }
 commander.Command.prototype.unknownOption = unknownOption
 
@@ -168,7 +168,7 @@ function includesVersion (args: string[]): boolean {
   )
 }
 
-function showVersions (opts: any): any {
+async function showVersions (opts: any): Promise<any> {
   debug('printing Cypress version')
   debug('additional arguments %o', opts)
 
@@ -211,9 +211,9 @@ function showVersions (opts: any): any {
     electronNodeVersion: undefined,
   }
 
-  return versionModule
-  .getVersions()
-  .then((versions: any = defaultVersions) => {
+  try {
+    const versions = (await versionModule.getVersions()) || defaultVersions
+
     if (opts?.component) {
       reportComponentVersion(opts.component, versions)
     } else {
@@ -221,8 +221,9 @@ function showVersions (opts: any): any {
     }
 
     process.exit(0)
-  })
-  .catch(util.logErrorExit1)
+  } catch (e: any) {
+    util.logErrorExit1(e)
+  }
 }
 
 const createProgram = (): any => {
@@ -403,7 +404,7 @@ const cliModule = {
   /**
    * Parses the command line and kicks off Cypress process.
    */
-  init (args?: string[]): any {
+  async init (args?: string[]): Promise<any> {
     if (!args) {
       args = process.argv
     }
@@ -472,21 +473,28 @@ const cliModule = {
     .description(text('version')))
 
     maybeAddInspectFlags(addCypressOpenCommand(program))
-    .action((opts: any) => {
+    .action(async (opts: any) => {
       debug('opening Cypress')
 
-      openModule.start(util.parseOpts(opts))
-      .then(util.exit)
-      .catch(util.logErrorExit1)
+      try {
+        const code = await openModule.start(util.parseOpts(opts))
+
+        process.exit(code)
+      } catch (e: any) {
+        util.logErrorExit1(e)
+      }
     })
 
     maybeAddInspectFlags(addCypressRunCommand(program))
-    .action((...fnArgs: any[]) => {
+    .action(async (...fnArgs: any[]) => {
       debug('running Cypress with args %o', fnArgs)
+      try {
+        const code = await runModule.start(parseVariableOpts(fnArgs, args as string[]))
 
-      runModule.start(parseVariableOpts(fnArgs, args as string[]))
-      .then(util.exit)
-      .catch(util.logErrorExit1)
+        process.exit(code)
+      } catch (e: any) {
+        util.logErrorExit1(e)
+      }
     })
 
     program
@@ -496,10 +504,12 @@ const cliModule = {
       'Installs the Cypress executable matching this package\'s version',
     )
     .option('-f, --force', text('forceInstall'))
-    .action((opts: any) => {
-      installModule
-      .start(util.parseOpts(opts))
-      .catch(util.logErrorExit1)
+    .action(async (opts: any) => {
+      try {
+        await installModule.start(util.parseOpts(opts))
+      } catch (e: any) {
+        util.logErrorExit1(e)
+      }
     })
 
     program
@@ -509,14 +519,16 @@ const cliModule = {
       'Verifies that Cypress is installed correctly and executable',
     )
     .option('--dev', text('dev'), coerceFalse)
-    .action((opts: any) => {
+    .action(async (opts: any) => {
       const defaultOpts = { force: true, welcomeMessage: false }
       const parsedOpts = util.parseOpts(opts)
       const options = _.extend(parsedOpts, defaultOpts)
 
-      verifyModule
-      .start(options)
-      .catch(util.logErrorExit1)
+      try {
+        await start(options)
+      } catch (e: any) {
+        util.logErrorExit1(e)
+      }
     })
 
     program
@@ -528,10 +540,10 @@ const cliModule = {
     .option('clear', text('cacheClear'))
     .option('prune', text('cachePrune'))
     .option('--size', text('cacheSize'))
-    .action(function (this: any, opts: any, args: string[]) {
+    .action(async function (this: any, opts: any, args: string[]) {
       if (!args || !args.length) {
         this.outputHelp()
-        util.exit(1)
+        process.exit(1)
       }
 
       const [command] = args
@@ -546,16 +558,18 @@ const cliModule = {
           size: opts.size,
         })
 
-        return cache.list(opts.size)
-        .catch({ code: 'ENOENT' }, () => {
-          logger.always('No cached binary versions were found.')
-          process.exit(0)
-        })
-        .catch((e: Error) => {
-          debug('cache list command failed with "%s"', e.message)
+        try {
+          const result = await cache.list(opts.size)
+
+          return result
+        } catch (e: any) {
+          if (e.code === 'ENOENT') {
+            logger.always('No cached binary versions were found.')
+            process.exit(0)
+          }
 
           util.logErrorExit1(e)
-        })
+        }
       }
 
       cache[command]()
@@ -566,11 +580,14 @@ const cliModule = {
     .usage('[command]')
     .description('Prints Cypress and system information')
     .option('--dev', text('dev'), coerceFalse)
-    .action((opts: any) => {
-      infoModule
-      .start(opts)
-      .then(util.exit)
-      .catch(util.logErrorExit1)
+    .action(async (opts: any) => {
+      try {
+        const code = await infoModule.start(opts)
+
+        process.exit(code)
+      } catch (e: any) {
+        util.logErrorExit1(e)
+      }
     })
 
     debug('cli starts with arguments %j', args)
@@ -590,7 +607,7 @@ const cliModule = {
       logger.error('Unknown command', `"${firstCommand}"`)
       program.outputHelp()
 
-      return util.exit(1)
+      return process.exit(1)
     }
 
     if (includesVersion(args)) {
@@ -608,11 +625,3 @@ const cliModule = {
 }
 
 export default cliModule
-
-// @ts-ignore
-if (!module.parent) {
-  logger.error('This CLI module should be required from another Node module')
-  logger.error('and not executed directly')
-
-  process.exit(-1)
-}
