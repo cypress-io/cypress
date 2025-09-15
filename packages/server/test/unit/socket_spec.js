@@ -934,8 +934,7 @@ describe('lib/socket', () => {
             expect(this.io.emit).to.be.calledWith('watched:file:changed')
 
             return done()
-          }
-          , 200)
+          }, 200)
         })
       })
 
