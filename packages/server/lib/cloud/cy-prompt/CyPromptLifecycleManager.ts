@@ -25,6 +25,7 @@ export class CyPromptLifecycleManager {
     cyPromptManager?: CyPromptManager
     error?: Error
   }>
+
   private cyPromptManager?: CyPromptManager
   private listeners: ((cyPromptManager: CyPromptManager) => void)[] = []
   private cyPromptHash: string | undefined
