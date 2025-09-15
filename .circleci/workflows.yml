@@ -1839,7 +1839,7 @@ jobs:
                       name: Test each individual package
                       command: |
                         source ./scripts/ensure-node.sh
-                        CYPRESS_IPV6_DISABLED=1 yarn test
+                        CIRCLE_IPV6_DISABLED=1 yarn test
             - run:
                 name: Test types
                 command: |

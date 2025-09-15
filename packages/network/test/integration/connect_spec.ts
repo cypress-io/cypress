@@ -45,7 +45,7 @@ describe('lib/connect', function () {
     it('resolves localhost on ::1 immediately', function () {
       // If we are on CI and IPV6 is explicitly disabled (like in the contributor PR workflow)
       // then we skip this test
-      if (process.env.CYPRESS_IPV6_DISABLED) {
+      if (process.env.CIRCLE_IPV6_DISABLED) {
         this.skip()
       }
 
