@@ -21,7 +21,6 @@ const stdout = function () {
     process.log = function (str) {
       logs.push(str)
 
-      // eslint-disable-next-line prefer-rest-params
       return log.apply(this, arguments)
     }
   }
@@ -29,7 +28,6 @@ const stdout = function () {
   process.stdout.write = function (str) {
     logs.push(str)
 
-    // eslint-disable-next-line prefer-rest-params
     return write.apply(this, arguments)
   }
 

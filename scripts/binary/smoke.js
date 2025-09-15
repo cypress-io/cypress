@@ -5,7 +5,7 @@ const execa = require('execa')
 const path = require('path')
 const Promise = require('bluebird')
 const os = require('os')
-const verify = require('../../cli/lib/tasks/verify').default
+const { needsSandbox } = require('../../cli/lib/tasks/verify')
 const Fixtures = require('@tooling/system-tests')
 const { scaffoldCommonNodeModules } = require('@tooling/system-tests/lib/dep-installer')
 
@@ -37,7 +37,7 @@ const runSmokeTest = function (buildAppExecutable, timeoutSeconds = 30) {
 
   const args = []
 
-  if (verify.needsSandbox()) {
+  if (needsSandbox()) {
     args.push('--no-sandbox')
   }
 
@@ -86,7 +86,7 @@ const runProjectTest = function (buildAppExecutable, e2e) {
       `--spec=${e2e}/cypress/e2e/simple_passing.cy.js`,
     ]
 
-    if (verify.needsSandbox()) {
+    if (needsSandbox()) {
       args.push('--no-sandbox')
     }
 
@@ -136,7 +136,7 @@ const runFailingProjectTest = function (buildAppExecutable, e2e) {
         `--spec=${e2e}/cypress/e2e/simple_failing.cy.js`,
       ]
 
-      if (verify.needsSandbox()) {
+      if (needsSandbox()) {
         args.push('--no-sandbox')
       }
 
@@ -178,7 +178,7 @@ const runV8SnapshotProjectTest = function (buildAppExecutable, e2e) {
         `--spec=${e2e}/cypress/e2e/simple_v8_snapshot.cy.js`,
       ]
 
-      if (verify.needsSandbox()) {
+      if (needsSandbox()) {
         args.push('--no-sandbox')
       }
 
@@ -215,7 +215,7 @@ const runErroringProjectTest = function (buildAppExecutable, e2e, testName, erro
       `--spec=${e2e}/cypress/e2e/simple_passing.cy.js`,
     ]
 
-    if (verify.needsSandbox()) {
+    if (needsSandbox()) {
       args.push('--no-sandbox')
     }
 

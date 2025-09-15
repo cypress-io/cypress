@@ -18,8 +18,8 @@ const createScreenshotArtifact = async (filePath: string, uploadUrl: string): Pr
 }
 
 export const createScreenshotArtifactBatch = (
-  screenshotUploadUrls: {screenshotId: string, uploadUrl: string}[],
-  screenshotFiles: {screenshotId: string, path: string}[],
+  screenshotUploadUrls: { screenshotId: string, uploadUrl: string }[],
+  screenshotFiles: { screenshotId: string, path: string }[],
 ): Promise<IArtifact[]> => {
   const correlatedPaths = screenshotUploadUrls.map(({ screenshotId, uploadUrl }) => {
     const correlatedFilePath = screenshotFiles.find((pathPair) => {

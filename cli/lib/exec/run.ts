@@ -2,7 +2,7 @@ import _ from 'lodash'
 import Debug from 'debug'
 import util from '../util'
 import spawn from './spawn'
-import verifyModule from '../tasks/verify'
+import { start } from '../tasks/verify'
 import { exitWithError, errors } from '../errors'
 import { processTestingType, throwInvalidOptionError, checkConfigFile } from './shared'
 
@@ -164,7 +164,7 @@ const runModule = {
   processRunOptions,
   isValidProject,
   // resolves with the number of failed tests
-  start (options: any = {}): any {
+  async start (options: any = {}): Promise<any> {
     _.defaults(options, {
       key: null,
       spec: null,
@@ -195,8 +195,9 @@ const runModule = {
       return run()
     }
 
-    return verifyModule.start()
-    .then(run)
+    await start()
+
+    return run()
   },
 }
 

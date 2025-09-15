@@ -7,7 +7,7 @@
   "scripts": {
     "build-prod": "tsc || echo 'built, with type errors'",
     "check-ts": "tsc --noEmit",
-    "clean": "rimraf src/*.js src/**/*.js",
+    "clean": "rimraf --glob 'src/*.js' 'src/**/*.js'",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "test": "vitest run"
   },
@@ -22,7 +22,7 @@
     "express": "4.21.0",
     "socket.io": "4.0.1",
     "typescript": "~5.4.5",
-    "vitest": "2.1.9"
+    "vitest": "^3.2.4"
   },
   "files": [
     "src/*"

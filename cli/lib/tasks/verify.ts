@@ -16,7 +16,7 @@ import state from './state'
 
 const debug = Debug('cypress:cli')
 
-const VERIFY_TEST_RUNNER_TIMEOUT_MS = (() => {
+export const verifyTestRunnerTimeoutMs = () => {
   const verifyTimeout = +(util?.getEnv('CYPRESS_VERIFY_TIMEOUT') || 'NaN')
 
   if (_.isNumber(verifyTimeout) && !_.isNaN(verifyTimeout)) {
@@ -24,59 +24,37 @@ const VERIFY_TEST_RUNNER_TIMEOUT_MS = (() => {
   }
 
   return 30000
-})()
+}
 
-const checkExecutable = (binaryDir: string): any => {
+const checkExecutable = async (binaryDir: string): Promise<void> => {
   const executable = state.getPathToExecutable(binaryDir)
 
   debug('checking if executable exists', executable)
 
-  return util.isExecutableAsync(executable)
-  .then((isExecutable: boolean) => {
+  try {
+    const isExecutable = await util.isExecutableAsync(executable)
+
     debug('Binary is executable? :', isExecutable)
     if (!isExecutable) {
       return throwFormErrorText(errors.binaryNotExecutable(executable))()
     }
-  })
-  .catch({ code: 'ENOENT' }, () => {
-    if (util.isCi()) {
-      return throwFormErrorText(errors.notInstalledCI(executable))()
+  } catch (err: any) {
+    if (err.code === 'ENOENT') {
+      if (util.isCi()) {
+        return throwFormErrorText(errors.notInstalledCI(executable))()
+      }
+
+      return throwFormErrorText(errors.missingApp(binaryDir))(stripIndent`
+        Cypress executable not found at: ${chalk.cyan(executable)}
+      `)
     }
 
-    return throwFormErrorText(errors.missingApp(binaryDir))(stripIndent`
-      Cypress executable not found at: ${chalk.cyan(executable)}
-    `)
-  })
+    throw err
+  }
 }
 
 const runSmokeTest = (binaryDir: string, options: any): any => {
   let executable = state.getPathToExecutable(binaryDir)
-
-  const onSmokeTestError = (smokeTestCommand: string, linuxWithDisplayEnv: boolean) => {
-    return (err: any) => {
-      debug('Smoke test failed:', err)
-
-      let errMessage = err.stderr || err.message
-
-      debug('error message:', errMessage)
-
-      if (err.timedOut) {
-        debug('error timedOut is true')
-
-        return throwFormErrorText(
-          errors.smokeTestFailure(smokeTestCommand, true),
-        )(errMessage)
-      }
-
-      if (linuxWithDisplayEnv && util.isBrokenGtkDisplay(errMessage)) {
-        util.logBrokenGtkDisplayWarning()
-
-        return throwFormErrorText(errors.invalidSmokeTestDisplayError)(errMessage)
-      }
-
-      return throwFormErrorText(errors.missingDependency)(errMessage)
-    }
-  }
 
   const needsXvfb = xvfb.isNeeded()
 
@@ -86,7 +64,7 @@ const runSmokeTest = (binaryDir: string, options: any): any => {
    * Spawn Cypress running smoke test to check if all operating system
    * dependencies are good.
    */
-  const spawn = (linuxWithDisplayEnv: boolean): any => {
+  const spawn = async (linuxWithDisplayEnv: boolean): Promise<any> => {
     const random = _.random(0, 1000)
     const args = ['--smoke-test', `--ping=${random}`]
 
@@ -118,13 +96,13 @@ const runSmokeTest = (binaryDir: string, options: any): any => {
       timeout: options.smokeTestTimeout,
     })
 
-    return Bluebird.resolve(util.exec(
-      executable,
-      args,
-      stdioOptions,
-    ))
-    .catch(onSmokeTestError(smokeTestCommand, linuxWithDisplayEnv))
-    .then((result: any) => {
+    try {
+      const result = await util.exec(
+        executable,
+        args,
+        stdioOptions,
+      )
+
       // TODO: when execa > 1.1 is released
       // change this to `result.all` for both stderr and stdout
       // use lodash to be robust during tests against null result or missing stdout
@@ -140,25 +118,51 @@ const runSmokeTest = (binaryDir: string, options: any): any => {
 
         return throwFormErrorText(errors.smokeTestFailure(smokeTestCommand, false))(errorText)
       }
+    } catch (err: any) {
+      debug('Smoke test failed:', err)
+
+      let errMessage = err.stderr || err.message
+
+      debug('error message:', errMessage)
+
+      if (err.timedOut) {
+        debug('error timedOut is true')
+
+        return throwFormErrorText(
+          errors.smokeTestFailure(smokeTestCommand, true),
+        )(errMessage)
+      }
+
+      if (linuxWithDisplayEnv && util.isBrokenGtkDisplay(errMessage)) {
+        util.logBrokenGtkDisplayWarning()
+
+        return throwFormErrorText(errors.invalidSmokeTestDisplayError)(errMessage)
+      }
+
+      return throwFormErrorText(errors.missingDependency)(errMessage)
+    }
+  }
+
+  const spawnInXvfb = async (linuxWithDisplayEnv?: boolean): Promise<any> => {
+    await xvfb.start()
+
+    return spawn(linuxWithDisplayEnv || false).finally(async () => {
+      await xvfb.stop()
     })
   }
 
-  const spawnInXvfb = (linuxWithDisplayEnv?: boolean): any => {
-    return xvfb
-    .start()
-    .then(() => {
-      return spawn(linuxWithDisplayEnv || false)
-    })
-    .finally(xvfb.stop)
-  }
-
-  const userFriendlySpawn = (linuxWithDisplayEnv: boolean): any => {
+  const userFriendlySpawn = async (linuxWithDisplayEnv: boolean): Promise<void> => {
     debug('spawning, should retry on display problem?', Boolean(linuxWithDisplayEnv))
 
-    return spawn(linuxWithDisplayEnv)
-    .catch({ code: 'INVALID_SMOKE_TEST_DISPLAY_ERROR' }, () => {
-      return spawnInXvfb(linuxWithDisplayEnv)
-    })
+    try {
+      await spawn(linuxWithDisplayEnv)
+    } catch (err: any) {
+      if (err.code === 'INVALID_SMOKE_TEST_DISPLAY_ERROR') {
+        return spawnInXvfb(linuxWithDisplayEnv)
+      }
+
+      throw err
+    }
   }
 
   if (needsXvfb) {
@@ -173,7 +177,7 @@ const runSmokeTest = (binaryDir: string, options: any): any => {
   return userFriendlySpawn(linuxWithDisplayEnv)
 }
 
-function testBinary (version: string, binaryDir: string, options: any): any {
+function testBinary (version: string, binaryDir: string, options: any): Promise<any> {
   debug('running binary verification check', version)
 
   // if running from 'cypress verify', don't print this message
@@ -200,31 +204,28 @@ function testBinary (version: string, binaryDir: string, options: any): any {
   const tasks = new Listr([
     {
       title: util.titleize('Verifying Cypress can run', chalk.gray(binaryDir)),
-      task: (ctx: any, task: any) => {
+      task: async (ctx: any, task: any) => {
         debug('clearing out the verified version')
 
-        return state.clearBinaryStateAsync(binaryDir)
-        .then(() => {
-          return Bluebird.all([
-            runSmokeTest(binaryDir, options),
-            Bluebird.delay(1500), // good user experience
-          ])
-        })
-        .then(() => {
-          debug('write verified: true')
+        await state.clearBinaryStateAsync(binaryDir)
 
-          return state.writeBinaryVerifiedAsync(true, binaryDir)
-        })
-        .then(() => {
-          util.setTaskTitle(
-            task,
-            util.titleize(
-              chalk.green('Verified Cypress!'),
-              chalk.gray(binaryDir),
-            ),
-            rendererOptions.renderer as string,
-          )
-        })
+        await Promise.all([
+          runSmokeTest(binaryDir, options),
+          Bluebird.delay(1500), // good user experience
+        ])
+
+        debug('write verified: true')
+
+        await state.writeBinaryVerifiedAsync(true, binaryDir)
+
+        util.setTaskTitle(
+          task,
+          util.titleize(
+            chalk.green('Verified Cypress!'),
+            chalk.gray(binaryDir),
+          ),
+          rendererOptions.renderer as string,
+        )
       },
     },
   ] as any, rendererOptions as any)
@@ -232,32 +233,30 @@ function testBinary (version: string, binaryDir: string, options: any): any {
   return tasks.run()
 }
 
-const maybeVerify = (installedVersion: string, binaryDir: string, options: any): any => {
-  return state.getBinaryVerifiedAsync(binaryDir)
-  .then((isVerified: boolean) => {
-    debug('is Verified ?', isVerified)
+const maybeVerify = async (installedVersion: string, binaryDir: string, options: any): Promise<void> => {
+  const isVerified = await state.getBinaryVerifiedAsync(binaryDir)
 
-    let shouldVerify = !isVerified
+  debug('is Verified ?', isVerified)
 
-    // force verify if options.force
-    if (options.force) {
-      debug('force verify')
-      shouldVerify = true
+  let shouldVerify = !isVerified
+
+  // force verify if options.force
+  if (options.force) {
+    debug('force verify')
+    shouldVerify = true
+  }
+
+  if (shouldVerify) {
+    await testBinary(installedVersion, binaryDir, options)
+
+    if (options.welcomeMessage) {
+      logger.log()
+      logger.log('Opening Cypress...')
     }
-
-    if (shouldVerify) {
-      return testBinary(installedVersion, binaryDir, options)
-      .then(() => {
-        if (options.welcomeMessage) {
-          logger.log()
-          logger.log('Opening Cypress...')
-        }
-      })
-    }
-  })
+  }
 }
 
-const start = (options: any = {}): any => {
+export const start = async (options: any = {}): Promise<void> => {
   debug('verifying Cypress app')
 
   const packageVersion = util.pkgVersion()
@@ -267,21 +266,21 @@ const start = (options: any = {}): any => {
     dev: false,
     force: false,
     welcomeMessage: true,
-    smokeTestTimeout: VERIFY_TEST_RUNNER_TIMEOUT_MS,
+    smokeTestTimeout: verifyTestRunnerTimeoutMs(),
     skipVerify: util.getEnv('CYPRESS_SKIP_VERIFY') === 'true',
   })
 
   if (options.skipVerify) {
     debug('skipping verification of the Cypress app')
 
-    return Bluebird.resolve()
+    return Promise.resolve()
   }
 
   if (options.dev) {
     return runSmokeTest('', options)
   }
 
-  const parseBinaryEnvVar = (): any => {
+  const parseBinaryEnvVar = async (): Promise<void> => {
     const envBinaryPath = util.getEnv('CYPRESS_RUN_BINARY')
 
     debug('CYPRESS_RUN_BINARY exists, =', envBinaryPath)
@@ -295,19 +294,18 @@ const start = (options: any = {}): any => {
 
     logger.log()
 
-    return util.isExecutableAsync(envBinaryPath as string)
-    .then((isExecutable: boolean) => {
+    try {
+      const isExecutable = await util.isExecutableAsync(envBinaryPath as string)
+
       debug('CYPRESS_RUN_BINARY is executable? :', isExecutable)
       if (!isExecutable) {
         return throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath as string))(stripIndent`
-          The supplied binary path is not executable
-          `)
+        The supplied binary path is not executable
+        `)
       }
-    })
-    .then(() => {
-      return state.parseRealPlatformBinaryFolderAsync(envBinaryPath as string)
-    })
-    .then((envBinaryDir: string) => {
+
+      const envBinaryDir = await state.parseRealPlatformBinaryFolderAsync(envBinaryPath as string)
+
       if (!envBinaryDir) {
         return throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath as string))()
       }
@@ -315,31 +313,26 @@ const start = (options: any = {}): any => {
       debug('CYPRESS_RUN_BINARY has binaryDir:', envBinaryDir)
 
       binaryDir = envBinaryDir
-    })
-    .catch({ code: 'ENOENT' }, (err: any) => {
-      return throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath as string))(err.message)
-    })
+    } catch (err: any) {
+      if (err.code === 'ENOENT') {
+        return throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath as string))(err.message)
+      }
+
+      throw err
+    }
   }
 
-  return Bluebird.try(() => {
+  try {
     debug('checking environment variables')
     if (util.getEnv('CYPRESS_RUN_BINARY')) {
-      return parseBinaryEnvVar()
+      await parseBinaryEnvVar()
     }
-  })
-  .then(() => {
-    return checkExecutable(binaryDir)
-  })
-  .tap(() => {
-    return debug('binaryDir is ', binaryDir)
-  })
-  .then(() => {
-    return state.getBinaryPkgAsync(binaryDir)
-  })
-  .then((pkg: any) => {
-    return state.getBinaryPkgVersion(pkg)
-  })
-  .then((binaryVersion: string) => {
+
+    await checkExecutable(binaryDir)
+    debug('binaryDir is ', binaryDir)
+    const pkg = await state.getBinaryPkgAsync(binaryDir)
+    const binaryVersion = state.getBinaryPkgVersion(pkg)
+
     if (!binaryVersion) {
       debug('no Cypress binary found for cli version ', packageVersion)
 
@@ -366,16 +359,14 @@ const start = (options: any = {}): any => {
       logger.log()
     }
 
-    return maybeVerify(binaryVersion, binaryDir, options)
-  })
-
-  .catch((err: any) => {
+    await maybeVerify(binaryVersion, binaryDir, options)
+  } catch (err: any) {
     if (err.known) {
       throw err
     }
 
     return throwFormErrorText(errors.unexpected)(err.stack)
-  })
+  }
 }
 
 const isLinuxLike = (): boolean => os.platform() !== 'win32'
@@ -389,10 +380,4 @@ const isLinuxLike = (): boolean => os.platform() !== 'win32'
  * Seems there is a lot of discussion around this issue among Electron users
  * @see https://github.com/electron/electron/issues/17972
 */
-const needsSandbox = (): boolean => isLinuxLike()
-
-export default {
-  start,
-  needsSandbox,
-  VERIFY_TEST_RUNNER_TIMEOUT_MS,
-}
+export const needsSandbox = (): boolean => isLinuxLike()
