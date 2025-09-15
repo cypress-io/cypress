@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "target": "ES2020",
+    "module": "node16",
+    "moduleResolution": "node16",
+    "lib": [
+      "es2015",
+      "dom"
+    ],
+    "declaration": true,
+    "outDir": "dist",
+    "importHelpers": true,
+    "strict": true,
+    "types": [
+      "cypress"
+    ],
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "stripInternal": true,
+    "ignoreDeprecations": "5.0",
+    "importsNotUsedAsValues": "error",
+    "skipLibCheck": true
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules",
+    "*.js"
+  ]
+}

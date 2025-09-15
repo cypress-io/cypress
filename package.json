@@ -125,6 +125,7 @@
     "@typescript-eslint/eslint-plugin": "7.2.0",
     "@typescript-eslint/parser": "7.2.0",
     "@urql/introspection": "^0.3.0",
+    "@vitest/coverage-v8": "^3.2.4",
     "ascii-table": "0.0.9",
     "autobarrel": "^1.1.0",
     "bluebird": "3.5.3",
@@ -211,6 +212,7 @@
     "tree-kill": "1.2.2",
     "ts-node": "^10.9.2",
     "typescript": "5.3.3",
+    "vitest": "^3.2.4",
     "yaml": "2.8.0",
     "yarn-deduplicate": "3.1.0"
   },
