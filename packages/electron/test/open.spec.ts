@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi, Mock, MockInstance } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi, Mock } from 'vitest'
 import { access, remove, ensureSymlink } from 'fs-extra'
 import { getPathToResources, getSymlinkType, getPathToExec } from '../src/paths'
 import { filter, DEBUG_PREFIX } from '@packages/stderr-filtering'
@@ -63,21 +63,8 @@ describe('open', () => {
   let mockFilterWriter: Writable
   let mockElectronDebugFn: Mock<ReturnType<typeof Debug>>
   let mockStderrDebugFn: Mock<ReturnType<typeof Debug>>
-  let originalEnv: Map<string, string>
-
-  function setEnv (key: string, value: string) {
-    originalEnv.set(process.env[key] ?? '', value)
-    process.env[key] = value
-  }
-
-  function restoreEnv () {
-    for (const [key, value] of originalEnv) {
-      process.env[key] = value
-    }
-  }
 
   beforeEach(() => {
-    originalEnv = new Map()
     // @ts-expect-error
     mockChildProcess = vi.mocked<ChildProcess>({
       on: vi.fn(),
@@ -120,7 +107,7 @@ describe('open', () => {
     vi.mocked(getPathToExec).mockReturnValue(execPath)
     vi.mocked(getPathToResources).mockReturnValue(resourcesPath)
     vi.mocked(getSymlinkType).mockReturnValue('dir')
-    vi.mocked(filter).mockReturnValue(process.stderr)
+    vi.mocked(filter).mockReturnValue(mockFilterWriter)
     mockElectronDebugFn = vi.fn()
     mockStderrDebugFn = vi.fn()
     // @ts-expect-error
@@ -134,15 +121,12 @@ describe('open', () => {
       }
     })
 
-    filter.mockReturnValue(mockFilterWriter)
-
     // @ts-expect-error
     vi.spyOn(process, 'exit').mockImplementation(() => {})
   })
 
   afterEach(() => {
     vi.clearAllMocks()
-    restoreEnv()
   })
 
   it('opens the electron app and returns the child process', async () => {
@@ -184,15 +168,8 @@ describe('open', () => {
   })
 
   describe('when electron logging is enabled via ELECTRON_ENABLE_LOGGING', () => {
-    let originalEnv: typeof process.env
-
     beforeEach(() => {
-      originalEnv = process.env
-      process.env.ELECTRON_ENABLE_LOGGING = '1'
-    })
-
-    afterEach(() => {
-      process.env = originalEnv
+      vi.stubEnv('ELECTRON_ENABLE_LOGGING', '1')
     })
 
     it('pipes child stderr direct to process stderr', async () => {
@@ -205,8 +182,8 @@ describe('open', () => {
 
   describe('when in non develop env, electron debug disabled, and enable logging is disabled', () => {
     beforeEach(() => {
-      setEnv('CYPRESS_INTERNAL_ENV', 'production')
-      setEnv('ELECTRON_ENABLE_LOGGING', '0')
+      vi.stubEnv('CYPRESS_INTERNAL_ENV', 'production')
+      vi.stubEnv('ELECTRON_ENABLE_LOGGING', '0')
       // @ts-expect-error
       mockElectronDebugFn.enabled = false
     })
@@ -301,6 +278,7 @@ describe('open', () => {
         errCb(err)
 
         expect(process.exit).toHaveBeenCalledWith(1)
+        // eslint-disable-next-line no-console
         expect(console.error).toHaveBeenCalledWith(err)
       })
     })
@@ -382,7 +360,7 @@ describe('open', () => {
         const overridePort = '1234'
 
         beforeEach(() => {
-          setEnv('CYPRESS_DOCKER_DEV_INSPECT_OVERRIDE', overridePort)
+          vi.stubEnv('CYPRESS_DOCKER_DEV_INSPECT_OVERRIDE', overridePort)
         })
 
         it('uses --inspect-brk with the override', async () => {
@@ -393,7 +371,7 @@ describe('open', () => {
 
       describe('and CYPRESS_DOCKER_DEV_INSPECT_OVERRIDE is not set', () => {
         beforeEach(() => {
-          setEnv('CYPRESS_DOCKER_DEV_INSPECT_OVERRIDE', '')
+          vi.stubEnv('CYPRESS_DOCKER_DEV_INSPECT_OVERRIDE', '')
         })
 
         it('uses --inspect-brk with default port', async () => {
@@ -407,6 +385,7 @@ describe('open', () => {
   describe('error handling', () => {
     beforeEach(() => {
       vi.spyOn(console, 'debug').mockImplementation(() => {})
+      // eslint-disable-next-line no-console
       vi.mocked(console.debug).mockName('console.debug')
     })
 
@@ -418,6 +397,7 @@ describe('open', () => {
       it('logs error stack and exits with code 1', async () => {
         await expect(open('nonexistent/path', argv))
 
+        // eslint-disable-next-line no-console
         expect(console.debug).toHaveBeenCalledWith(expect.any(String))
         expect(process.exit).toHaveBeenCalledWith(1)
       })
@@ -431,6 +411,7 @@ describe('open', () => {
       it('logs error stack and exits with code 1', async () => {
         await open(appPath, argv)
 
+        // eslint-disable-next-line no-console
         expect(console.debug).toHaveBeenCalledWith(expect.any(String))
         expect(process.exit).toHaveBeenCalledWith(1)
       })
