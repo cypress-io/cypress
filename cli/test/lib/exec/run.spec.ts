@@ -52,8 +52,7 @@ describe('exec run', () => {
     vi.clearAllMocks()
     vi.unstubAllEnvs()
 
-    // @ts-expect-error - mockReturnValue
-    util.isInstalledGlobally.mockReturnValue(true)
+    vi.mocked(util.isInstalledGlobally).mockReturnValue(true)
   })
 
   describe('.processRunOptions', () => {
@@ -96,8 +95,7 @@ describe('exec run', () => {
     })
 
     it('does not allow setting paradoxical --headed and --headless flags', () => {
-      // @ts-expect-error mockReturnValue
-      os.platform.mockReturnValue('linux')
+      vi.mocked(os.platform).mockReturnValue('linux')
 
       expect(() => run.processRunOptions({ headed: true, headless: true })).toThrow()
     })
@@ -154,10 +152,8 @@ describe('exec run', () => {
 
   describe('.start', () => {
     beforeEach(() => {
-      // @ts-expect-error - mockResolvedValue
-      spawn.start.mockResolvedValue(undefined)
-      // @ts-expect-error - mockResolvedValue
-      verifyStart.mockResolvedValue(undefined)
+      vi.mocked(spawn.start).mockResolvedValue(undefined)
+      vi.mocked(verifyStart).mockResolvedValue(undefined)
     })
 
     it('verifies cypress', async () => {

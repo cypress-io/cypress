@@ -1,5 +1,6 @@
-import la from 'lazy-ass'
 import os from 'os'
+import assert from 'assert'
+import _ from 'lodash'
 import url from 'url'
 import path from 'path'
 import Debug from 'debug'
@@ -11,9 +12,6 @@ import { getProxyForUrl } from 'proxy-from-env'
 import { throwFormErrorText, errors } from '../errors'
 import fs from 'fs-extra'
 import util from '../util'
-
-// TODO: this package needs to be replaced as we can't import it in vitest
-const is = require('check-more-types')
 
 const debug = Debug('cypress:cli')
 
@@ -84,7 +82,7 @@ const prepend = (arch: string, urlPath: string, version: string): string => {
 }
 
 const getUrl = (arch: string, version?: string): string => {
-  if (is.webUrl(version)) {
+  if (_.isString(version) && version.match(/^https?:\/\/.*$/)) {
     debug('version is already an url', version)
 
     return version as string
@@ -338,7 +336,7 @@ const start = async (opts: any): Promise<any> => {
   let { version, downloadDestination, progress, redirectTTL } = opts
 
   if (!downloadDestination) {
-    la(is.unemptyString(downloadDestination), 'missing download dir', opts)
+    assert.ok(_.isString(downloadDestination) && !_.isEmpty(downloadDestination), 'missing download dir')
   }
 
   if (!progress) {

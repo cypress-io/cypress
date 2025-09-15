@@ -1,7 +1,8 @@
 import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest'
 import os from 'os'
+import chalk from 'chalk'
 import { Console } from 'console'
-import si from 'systeminformation'
+import si, { Systeminformation } from 'systeminformation'
 import util from '../../../lib/util'
 import state from '../../../lib/tasks/state'
 import info from '../../../lib/exec/info'
@@ -88,7 +89,12 @@ describe('exec info', () => {
   // Direct console to process.stdout/stderr
   let originalConsole: Console
 
+  let previousChalkLevel: 0 | 1 | 2 | 3
+
   beforeEach(() => {
+    previousChalkLevel = chalk.level
+    chalk.level = 3
+
     originalConsole = globalThis.console
     // Redirect console output to a custom stream or mock
     globalThis.console = new Console(process.stdout, process.stderr)
@@ -99,17 +105,12 @@ describe('exec info', () => {
     vi.stubEnv('NO_PROXY', undefined)
     vi.stubEnv('CYPRESS_COMMERCIAL_RECOMMENDATIONS', undefined)
     // common stubs
-    // @ts-expect-error - mockReturnValue
-    spawn.start.mockResolvedValue(null)
-    // @ts-expect-error - mockReturnValue
-    os.platform.mockReturnValue('linux')
-    // @ts-expect-error - mockReturnValue
-    os.totalmem.mockReturnValue(1.2e+9)
-    // @ts-expect-error - mockReturnValue
-    os.freemem.mockReturnValue(4e+8)
+    vi.mocked(spawn.start).mockResolvedValue(null)
+    vi.mocked(os.platform).mockReturnValue('linux')
+    vi.mocked(os.totalmem).mockReturnValue(1.2e+9)
+    vi.mocked(os.freemem).mockReturnValue(4e+8)
 
-    // @ts-expect-error - mockImplementation
-    util.getApplicationDataFolder.mockImplementation((args) => {
+    vi.mocked(util.getApplicationDataFolder).mockImplementation((args) => {
       if (args === 'browsers') {
         return '/user/app/data/path/to/browsers'
       }
@@ -117,23 +118,21 @@ describe('exec info', () => {
       return '/user/app/data/path'
     })
 
-    // @ts-expect-error - mockReturnValue
-    util.pkgBuildInfo.mockReturnValue({
+    vi.mocked(util.pkgBuildInfo).mockReturnValue({
       stable: true,
     })
 
-    // @ts-expect-error - mockReturnValue
-    state.getCacheDir.mockReturnValue('/user/path/to/binary/cache')
+    vi.mocked(state.getCacheDir).mockReturnValue('/user/path/to/binary/cache')
 
-    // @ts-expect-error - mockReturnValue
-    si.osInfo.mockResolvedValue({
+    vi.mocked(si.osInfo).mockResolvedValue({
       distro: 'Foo',
       release: 'OsVersion',
-    })
+    } as Systeminformation.OsData)
   })
 
   afterEach(() => {
     globalThis.console = originalConsole // Restore original console
+    chalk.level = previousChalkLevel
   })
 
   it('prints collected info without env vars', async () => {
@@ -175,8 +174,7 @@ describe('exec info', () => {
   })
 
   it('logs additional info about pre-releases', async () => {
-    // @ts-expect-error - mockReturnValue
-    util.pkgBuildInfo.mockReturnValue({
+    vi.mocked(util.pkgBuildInfo).mockReturnValue({
       stable: false,
       commitSha: 'abc123',
       commitBranch: 'someBranchName',
@@ -191,8 +189,7 @@ describe('exec info', () => {
   })
 
   it('logs if unbuilt development', async () => {
-    // @ts-expect-error - mockReturnValue
-    util.pkgBuildInfo.mockReturnValue(undefined)
+    vi.mocked(util.pkgBuildInfo).mockReturnValue(undefined)
 
     const output = createStdoutCapture()
 
