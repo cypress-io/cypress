@@ -1,9 +1,11 @@
 import chalk from 'chalk'
 import { stripIndent, stripIndents } from 'common-tags'
 import la from 'lazy-ass'
-import is from 'check-more-types'
 import util from './util'
 import state from './tasks/state'
+
+// TODO: this package needs to be replaced as we can't import it in vitest
+const is = require('check-more-types')
 
 const docsUrl = 'https://on.cypress.io'
 const requiredDependenciesUrl = `${docsUrl}/required-dependencies`
@@ -266,10 +268,10 @@ const CYPRESS_RUN_BINARY = {
   },
 }
 
-function addPlatformInformation (info: any): any {
-  return util.getPlatformInfo().then((platform: string) => {
-    return { ...info, platform }
-  })
+async function addPlatformInformation (info: any): Promise<any> {
+  const platform = await util.getPlatformInfo()
+
+  return { ...info, platform }
 }
 
 /**
@@ -284,88 +286,88 @@ function addPlatformInformation (info: any): any {
   return getError(errorObject).then(reject)
   ```
  */
-export function getError (errorObject: any): Promise<Error> {
-  return formErrorText(errorObject).then((errorMessage: string) => {
-    const err: any = new Error(errorMessage)
+export async function getError (errorObject: any): Promise<Error> {
+  const errorMessage = await formErrorText(errorObject)
 
-    err.known = true
+  const err: any = new Error(errorMessage)
 
-    return err
-  })
+  err.known = true
+
+  return err
 }
 
 /**
  * Forms nice error message with error and platform information,
  * and if possible a way to solve it. Resolves with a string.
  */
-export function formErrorText (info: any, msg?: string, prevMessage?: string): any {
-  return addPlatformInformation(info).then((obj: any) => {
-    const formatted: string[] = []
+export async function formErrorText (info: any, msg?: string, prevMessage?: string): Promise<string> {
+  const infoWithPlatform = await addPlatformInformation(info)
 
-    function add (msg: string): void {
-      formatted.push(stripIndents(msg))
-    }
+  const formatted: string[] = []
 
-    la(
-      is.unemptyString(obj.description),
-      'expected error description to be text',
-      obj.description,
-    )
+  function add (msg: string): void {
+    formatted.push(stripIndents(msg))
+  }
 
-    // assuming that if there the solution is a function it will handle
-    // error message and (optional previous error message)
-    if (is.fn(obj.solution)) {
-      const text = obj.solution(msg, prevMessage)
+  la(
+    is.unemptyString(infoWithPlatform.description),
+    'expected error description to be text',
+    infoWithPlatform.description,
+  )
 
-      la(is.unemptyString(text), 'expected solution to be text', text)
+  // assuming that if there the solution is a function it will handle
+  // error message and (optional previous error message)
+  if (is.fn(infoWithPlatform.solution)) {
+    const text = infoWithPlatform.solution(msg, prevMessage)
 
-      add(`
-        ${obj.description}
+    la(is.unemptyString(text), 'expected solution to be text', text)
+
+    add(`
+        ${infoWithPlatform.description}
 
         ${text}
 
       `)
-    } else {
-      la(
-        is.unemptyString(obj.solution),
-        'expected error solution to be text',
-        obj.solution,
-      )
+  } else {
+    la(
+      is.unemptyString(infoWithPlatform.solution),
+      'expected error solution to be text',
+      infoWithPlatform.solution,
+    )
 
-      add(`
-        ${obj.description}
+    add(`
+        ${infoWithPlatform.description}
 
-        ${obj.solution}
+        ${infoWithPlatform.solution}
 
       `)
 
-      if (msg) {
-        add(`
+    if (msg) {
+      add(`
           ${hr}
 
           ${msg}
 
         `)
-      }
     }
+  }
 
-    add(`
+  add(`
       ${hr}
 
-      ${obj.platform}
+      ${infoWithPlatform.platform}
     `)
 
-    if (obj.footer) {
-      add(`
+  if (infoWithPlatform.footer) {
+    add(`
 
         ${hr}
 
-        ${obj.footer}
+        ${infoWithPlatform.footer}
       `)
-    }
+  }
 
-    return formatted.join('\n\n')
-  })
+  return formatted.join('\n\n')
 }
 
 export const raise = (info: any) => {
@@ -382,8 +384,10 @@ export const raise = (info: any) => {
 }
 
 export const throwFormErrorText = (info: any) => {
-  return (msg?: string, prevMessage?: string) => {
-    return formErrorText(info, msg, prevMessage).then(raise(info))
+  return async (msg?: string, prevMessage?: string) => {
+    const errorText = await formErrorText(info, msg, prevMessage)
+
+    raise(info)(errorText)
   }
 }
 
@@ -394,12 +398,12 @@ export const throwFormErrorText = (info: any) => {
  * @example return exitWithError(errors.invalidCypressEnv)('foo')
  */
 export const exitWithError = (info: any) => {
-  return (msg?: string) => {
-    return formErrorText(info, msg).then((text: string) => {
-      // eslint-disable-next-line no-console
-      console.error(text)
-      process.exit(info.exitCode || 1)
-    })
+  return async (msg?: string) => {
+    const text: string = await formErrorText(info, msg)
+
+    // eslint-disable-next-line no-console
+    console.error(text)
+    process.exit(info.exitCode || 1)
   }
 }
 

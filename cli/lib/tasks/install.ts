@@ -4,10 +4,11 @@ import path from 'path'
 import chalk from 'chalk'
 import Debug from 'debug'
 import { Listr } from 'listr2'
-import Bluebird from 'bluebird'
 import logSymbols from 'log-symbols'
 import { stripIndent } from 'common-tags'
-import fs from '../fs'
+import timers from 'timers/promises'
+
+import fs from 'fs-extra'
 import download from './download'
 import util from '../util'
 import state from './state'
@@ -92,24 +93,22 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }: any): any => {
   const tasks = new Listr([
     {
       options: { title: util.titleize('Downloading Cypress') },
-      task: (ctx: any, task: any) => {
+      task: async (ctx: any, task: any) => {
         // as our download progresses indicate the status
         progress.onProgress = progessify(task, 'Downloading Cypress')
 
-        return download.start({ version, downloadDestination, progress })
-        .then((redirectVersion: any) => {
-          if (redirectVersion) version = redirectVersion
+        const redirectVersion = await download.start({ version, downloadDestination, progress })
 
-          debug(`finished downloading file: ${downloadDestination}`)
-        })
-        .then(() => {
-          // save the download destination for unzipping
-          util.setTaskTitle(
-            task,
-            util.titleize(chalk.green('Downloaded Cypress')),
-            rendererOptions.renderer,
-          )
-        })
+        if (redirectVersion) version = redirectVersion
+
+        debug(`finished downloading file: ${downloadDestination}`)
+
+        // save the download destination for unzipping
+        util.setTaskTitle(
+          task,
+          util.titleize(chalk.green('Downloaded Cypress')),
+          rendererOptions.renderer,
+        )
       },
     },
     unzipTask({
@@ -120,35 +119,34 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }: any): any => {
     }),
     {
       options: { title: util.titleize('Finishing Installation') },
-      task: (ctx: any, task: any) => {
-        const cleanup = () => {
+      task: async (ctx: any, task: any) => {
+        const cleanup = async () => {
           debug('removing zip file %s', downloadDestination)
 
-          return fs.removeAsync(downloadDestination)
+          await fs.remove(downloadDestination)
         }
 
-        return cleanup()
-        .then(() => {
-          debug('finished installation in', installDir)
+        await cleanup()
 
-          util.setTaskTitle(
-            task,
-            util.titleize(chalk.green('Finished Installation'), chalk.gray(installDir)),
-            rendererOptions.renderer,
-          )
-        })
+        debug('finished installation in', installDir)
+
+        util.setTaskTitle(
+          task,
+          util.titleize(chalk.green('Finished Installation'), chalk.gray(installDir)),
+          rendererOptions.renderer,
+        )
       },
     },
   ], { rendererOptions })
 
   // start the tasks!
-  return Bluebird.resolve(tasks.run())
+  return tasks.run()
 }
 
-const validateOS = (): any => {
-  return util.getPlatformInfo().then((platformInfo: string) => {
-    return platformInfo.match(/(win32-x64|win32-arm64|linux-x64|linux-arm64|darwin-x64|darwin-arm64)/)
-  })
+const validateOS = async (): Promise<RegExpMatchArray | null> => {
+  const platformInfo = await util.getPlatformInfo()
+
+  return platformInfo.match(/(win32-x64|win32-arm64|linux-x64|linux-arm64|darwin-x64|darwin-arm64)/)
 }
 
 /**
@@ -245,14 +243,19 @@ const start = async (options: any = {}): Promise<any> => {
     return throwFormErrorText(errors.invalidOS)()
   }
 
-  await fs.ensureDirAsync(cacheDir)
-  .catch({ code: 'EACCES' }, (err: any) => {
-    return throwFormErrorText(errors.invalidCacheDirectory)(stripIndent`
-    Failed to access ${chalk.cyan(cacheDir)}:
+  try {
+    await fs.ensureDir(cacheDir)
+  } catch (err: any) {
+    if (err.code === 'EACCES') {
+      return throwFormErrorText(errors.invalidCacheDirectory)(stripIndent`
+        Failed to access ${chalk.cyan(cacheDir)}:
 
-    ${err.message}
-    `)
-  })
+        ${err.message}
+      `)
+    }
+
+    throw err
+  }
 
   const binaryPkg = await state.getBinaryPkgAsync(binaryDir)
   const binaryVersion = await state.getBinaryPkgVersion(binaryPkg)
@@ -310,7 +313,7 @@ const start = async (options: any = {}): Promise<any> => {
 
   const getLocalFilePath = async (): Promise<string | false> => {
     // see if version supplied is a path to a binary
-    if (await fs.pathExistsAsync(versionToInstall)) {
+    if (await fs.pathExists(versionToInstall)) {
       return path.extname(versionToInstall) === '.zip' ? versionToInstall : false
     }
 
@@ -320,7 +323,7 @@ const start = async (options: any = {}): Promise<any> => {
 
     // if this exists return the path to it
     // else false
-    if ((await fs.pathExistsAsync(possibleFile)) && path.extname(possibleFile) === '.zip') {
+    if ((await fs.pathExists(possibleFile)) && path.extname(possibleFile) === '.zip') {
       return possibleFile
     }
 
@@ -360,7 +363,7 @@ const start = async (options: any = {}): Promise<any> => {
   await downloadAndUnzip({ version: versionToInstall, installDir, downloadDir })
 
   // delay 1 sec for UX, unless we are testing
-  await Bluebird.delay(1000)
+  await timers.setTimeout(1000)
 
   displayCompletionMsg()
 }
@@ -368,18 +371,16 @@ const start = async (options: any = {}): Promise<any> => {
 const unzipTask = ({ zipFilePath, installDir, progress, rendererOptions }: any): any => {
   return {
     options: { title: util.titleize('Unzipping Cypress') },
-    task: (ctx: any, task: any) => {
+    task: async (ctx: any, task: any) => {
     // as our unzip progresses indicate the status
       progress.onProgress = progessify(task, 'Unzipping Cypress')
 
-      return unzip.start({ zipFilePath, installDir, progress })
-      .then(() => {
-        util.setTaskTitle(
-          task,
-          util.titleize(chalk.green('Unzipped Cypress')),
-          rendererOptions.renderer,
-        )
-      })
+      await unzip.start({ zipFilePath, installDir, progress })
+      util.setTaskTitle(
+        task,
+        util.titleize(chalk.green('Unzipped Cypress')),
+        rendererOptions.renderer,
+      )
     },
   }
 }
