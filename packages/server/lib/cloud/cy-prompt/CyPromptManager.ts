@@ -107,6 +107,7 @@ export class CyPromptManager implements CyPromptManagerShape {
       debug('Error invoking cy prompt server method %s: %o', method, actualError)
     }
   }
+
   /**
    * Abstracts invoking an asynchronous method on the CyPromptServer instance, so we can handle
    * errors in a uniform way
