@@ -139,12 +139,22 @@ export default (Commands: Cypress.Cypress['Commands'], Cypress: Cypress.Cypress,
     Commands.addAll(commands)
   } else {
     Commands.addAll({
-      prompt (steps: string[], commandOptions: object = {}) {
+      prompt () {
         if (Cypress.testingType === 'component') {
-          $errUtils.throwErrByPath('prompt.promptTestingTypeError')
+          $errUtils.throwErrByPath('prompt.promptTestingTypeError', {
+            stack: cy.state('current').get('userInvocationStack'),
+            errProps: {
+              name: 'PromptTestingTypeError',
+            },
+          })
         }
 
-        $errUtils.throwErrByPath('prompt.experimentalPromptCommandError')
+        $errUtils.throwErrByPath('prompt.experimentalPromptCommandError', {
+          stack: cy.state('current').get('userInvocationStack'),
+          errProps: {
+            name: 'PromptNotEnabledError',
+          },
+        })
       },
     })
   }
