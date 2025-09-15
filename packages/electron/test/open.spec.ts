@@ -142,7 +142,7 @@ describe('open', () => {
 
   describe('when in develop env', () => {
     beforeEach(() => {
-      setEnv('CYPRESS_INTERNAL_ENV', 'development')
+      vi.stubEnv('CYPRESS_INTERNAL_ENV', 'development')
     })
 
     it('pipes child stderr direct to process stderr', async () => {
