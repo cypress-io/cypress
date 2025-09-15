@@ -4,7 +4,6 @@ import os from 'os'
 import ospath from 'ospath'
 import hasha from 'hasha'
 import la from 'lazy-ass'
-import is from 'check-more-types'
 import tty from 'tty'
 import path from 'path'
 import { isCI as isCi } from 'ci-info'
@@ -15,17 +14,19 @@ import Bluebird from 'bluebird'
 import cachedir from 'cachedir'
 import logSymbols from 'log-symbols'
 import executable from 'executable'
+import { cwd } from 'process'
 import { stripIndent } from 'common-tags'
 import supportsColor from 'supports-color'
 import isInstalledGlobally from 'is-installed-globally'
 import logger from './logger'
 import Debug from 'debug'
-import fs from './fs'
+import fs from 'fs-extra'
+import pkg from '../package.json'
+
+// TODO: this package needs to be replaced as we can't import it in vitest
+const is = require('check-more-types')
 
 const debug = Debug('cypress:cli')
-
-// Import package.json dynamically to avoid TypeScript JSON import issues
-const pkg = require(path.join(__dirname, '..', 'package.json'))
 
 const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
 
@@ -38,10 +39,12 @@ const getFileChecksum = (filename: string): any => {
   return hasha.fromFile(filename, { algorithm: 'sha512' })
 }
 
-const getFileSize = (filename: string): any => {
+const getFileSize = async (filename: string): Promise<any> => {
   la(is.unemptyString(filename), 'expected filename', filename)
 
-  return fs.statAsync(filename).get('size')
+  const { size } = await fs.stat(filename)
+
+  return size
 }
 
 const isBrokenGtkDisplayRe = /Gtk: cannot open display/
@@ -162,7 +165,6 @@ function printNodeOptions (log: any = debug): void {
   ```
  */
 const dequote = (str: string): string => {
-  // @ts-expect-error method exists but is not typed
   la(is.string(str), 'expected a string to remove double quotes', str)
   if (str.length > 1 && str[0] === '"' && str[str.length - 1] === '"') {
     return str.substr(1, str.length - 2)
@@ -242,6 +244,7 @@ const getApplicationDataFolder = (...paths: string[]): string => {
   // allow overriding the app_data folder
   let folder = env.CYPRESS_CONFIG_ENV || env.CYPRESS_INTERNAL_ENV || 'development'
 
+  // @ts-expect-error value exists but is not typed
   const PRODUCT_NAME = pkg.productName || pkg.name
   const OS_DATA_PATH = ospath.data()
 
@@ -270,13 +273,13 @@ const util = {
   getEnvOverrides (options: any = {}): any {
     return _
     .chain({})
-    .extend(util.getEnvColors())
-    .extend(util.getForceTty())
+    .extend(this.getEnvColors())
+    .extend(this.getForceTty())
     .omitBy(_.isUndefined) // remove undefined values
     .mapValues((value: any) => { // stringify to 1 or 0
       return value ? '1' : '0'
     })
-    .extend(util.getOriginalNodeOptions())
+    .extend(this.getOriginalNodeOptions())
     .value()
   },
 
@@ -292,14 +295,14 @@ const util = {
 
   getForceTty (): any {
     return {
-      FORCE_STDIN_TTY: util.isTty(process.stdin.fd),
-      FORCE_STDOUT_TTY: util.isTty(process.stdout.fd),
-      FORCE_STDERR_TTY: util.isTty(process.stderr.fd),
+      FORCE_STDIN_TTY: this.isTty(process.stdin.fd),
+      FORCE_STDOUT_TTY: this.isTty(process.stdout.fd),
+      FORCE_STDERR_TTY: this.isTty(process.stderr.fd),
     }
   },
 
   getEnvColors (): any {
-    const sc = util.supportsColor()
+    const sc = this.supportsColor()
 
     return {
       FORCE_COLOR: sc,
@@ -330,10 +333,11 @@ const util = {
   },
 
   cwd (): string {
-    return process.cwd()
+    return cwd()
   },
 
   pkgBuildInfo (): any {
+    // @ts-expect-error value exists but is not typed
     return pkg.buildInfo
   },
 
@@ -341,6 +345,7 @@ const util = {
     return pkg.version
   },
 
+  // TODO: remove this method
   exit (code: number): never {
     process.exit(code)
   },
@@ -411,30 +416,29 @@ const util = {
 
   isLinux,
 
-  getOsVersionAsync () {
-    return Bluebird.try(() => {
-      return si.osInfo()
-      .then((osInfo) => {
-        if (osInfo.distro && osInfo.release) {
-          return `${osInfo.distro} - ${osInfo.release}`
-        }
+  async getOsVersionAsync (): Promise<any> {
+    try {
+      const osInfo = await si.osInfo()
 
-        return os.release()
-      }).catch(() => {
-        return os.release()
-      })
-    })
+      if (osInfo.distro && osInfo.release) {
+        return `${osInfo.distro} - ${osInfo.release}`
+      }
+    } catch (err) {
+      return os.release()
+    }
+
+    return os.release()
   },
 
   async getPlatformInfo (): Promise<string> {
     const [version, osArch] = await Bluebird.all([
-      util.getOsVersionAsync(),
+      this.getOsVersionAsync(),
       this.getRealArch(),
     ])
 
     return stripIndent`
       Platform: ${os.platform()}-${osArch} (${version})
-      Cypress Version: ${util.pkgVersion()}
+      Cypress Version: ${this.pkgVersion()}
     `
   },
 
@@ -493,7 +497,7 @@ const util = {
       return filename
     }
 
-    return path.join(process.cwd(), '..', '..', filename)
+    return path.join(cwd(), '..', '..', filename)
   },
 
   getEnv (varName: string, trim?: boolean): string | undefined {
@@ -556,7 +560,6 @@ const util = {
   isPossibleLinuxWithIncorrectDisplay,
 
   getGitHubIssueUrl (number: number): string {
-    // @ts-expect-error method exists but is not typed
     la(is.positive(number), 'github issue should be a positive number', number)
     la(_.isInteger(number), 'github issue should be an integer', number)
 
