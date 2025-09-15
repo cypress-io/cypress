@@ -71,7 +71,7 @@ describe('StudioTest', () => {
 
     cy.get('.studio-single-test-container').should('be.visible')
     cy.get('.studio-header__test-section').should('be.visible')
-    cy.get('.studio-single-test-attempts').should('be.visible')
+    cy.get('.studio-single-test-attempts').should('not.be.visible')
     cy.get('[data-cy="studio-single-test-title"]').should('contain.text', 'should display correct content')
     cy.get('[data-cy="spec-duration"]').should('contain', '00:02')
     cy.percySnapshot()
@@ -91,7 +91,7 @@ describe('StudioTest', () => {
 
     cy.get('.studio-single-test-container').should('be.visible')
     cy.get('.studio-header__test-section').should('be.visible')
-    cy.get('.studio-single-test-attempts').should('be.visible')
+    cy.get('.studio-single-test-attempts').should('not.be.visible')
     cy.get('[data-cy="studio-single-test-title"]').should('contain.text', 'is very long')
     cy.get('[data-cy="spec-duration"]').should('contain', '00:02')
     cy.percySnapshot()
