@@ -29,8 +29,7 @@ describe('lib/exec/xvfb', function () {
   beforeEach(function (): void {
     vi.clearAllMocks()
     vi.unstubAllEnvs()
-    // @ts-expect-error - mockReturnValue
-    os.platform.mockReturnValue('win32')
+    vi.mocked(os.platform).mockReturnValue('win32')
   })
 
   describe('#start', function () {
@@ -78,14 +77,12 @@ describe('lib/exec/xvfb', function () {
 
   describe('#isNeeded', function () {
     it('does not need xvfb on osx', function () {
-      // @ts-expect-error - mockReturnValue
-      os.platform.mockReturnValue('darwin')
+      vi.mocked(os.platform).mockReturnValue('darwin')
       expect(xvfb.isNeeded()).toBe(false)
     })
 
     it('does not need xvfb on linux when DISPLAY is set', function () {
-      // @ts-expect-error - mockReturnValue
-      os.platform.mockReturnValue('linux')
+      vi.mocked(os.platform).mockReturnValue('linux')
       vi.stubEnv('DISPLAY', ':99')
 
       expect(xvfb.isNeeded()).toBe(false)
@@ -93,8 +90,7 @@ describe('lib/exec/xvfb', function () {
 
     it('does need xvfb on linux when no DISPLAY is set', function () {
       vi.stubEnv('DISPLAY', undefined)
-      // @ts-expect-error - mockReturnValue
-      os.platform.mockReturnValue('linux')
+      vi.mocked(os.platform).mockReturnValue('linux')
       expect(xvfb.isNeeded()).toBe(true)
     })
   })
