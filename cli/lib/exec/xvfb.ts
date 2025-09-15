@@ -33,29 +33,40 @@ const xvfbModule = {
 
   _xvfbOptions: xvfbOptions, // expose for testing
 
-  start (): any {
+  async start (): Promise<any> {
     debug('Starting Xvfb')
 
-    return xvfb.startAsync()
-    .return(null)
-    .catch({ nonZeroExitCode: true }, throwFormErrorText(errors.nonZeroExitCodeXvfb))
-    .catch((err: any) => {
-      if (err.known) {
-        throw err
+    try {
+      await xvfb.startAsync()
+
+      return null
+    } catch (e: any) {
+      if (e.nonZeroExitCode === true) {
+        const raiseErrorFn = throwFormErrorText(errors.nonZeroExitCodeXvfb)
+
+        await raiseErrorFn(e)
       }
 
-      return throwFormErrorText(errors.missingXvfb)(err)
-    })
+      if (e.known) {
+        throw e
+      }
+
+      const raiseErrorFn = throwFormErrorText(errors.missingXvfb)
+
+      await raiseErrorFn(e)
+    }
   },
 
-  stop (): any {
+  async stop (): Promise<null> {
     debug('Stopping Xvfb')
 
-    return xvfb.stopAsync()
-    .return(null)
-    .catch(() => {
-      // noop
-    })
+    try {
+      await xvfb.stopAsync()
+
+      return null
+    } catch (e) {
+      return null
+    }
   },
 
   isNeeded (): boolean {
@@ -95,15 +106,18 @@ const xvfbModule = {
   },
 
   // async method, resolved with Boolean
-  verify (): any {
-    return xvfb.startAsync()
-    .return(true)
-    .catch((err: any) => {
+  async verify (): Promise<boolean> {
+    try {
+      await xvfb.startAsync()
+
+      return true
+    } catch (err: any) {
       debug('Could not verify xvfb: %s', err.message)
 
       return false
-    })
-    .finally(xvfb.stopAsync)
+    } finally {
+      await xvfb.stopAsync()
+    }
   },
 }
 

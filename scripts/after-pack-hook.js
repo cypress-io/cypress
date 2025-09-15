@@ -21,7 +21,7 @@ const {
   getIndexJscHash,
   DUMMY_INDEX_JSC_HASH,
 } = require('./binary/binary-sources')
-const verify = require('../cli/lib/tasks/verify').default
+const { needsSandbox } = require('../cli/lib/tasks/verify')
 const execa = require('execa')
 const meta = require('./binary/meta')
 
@@ -30,7 +30,7 @@ const CY_ROOT_DIR = path.join(__dirname, '..')
 const createJscFromCypress = async () => {
   const args = []
 
-  if (verify.needsSandbox()) {
+  if (needsSandbox()) {
     args.push('--no-sandbox')
   }
 

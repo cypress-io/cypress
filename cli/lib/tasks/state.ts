@@ -3,7 +3,8 @@ import os from 'os'
 import path from 'path'
 import untildify from 'untildify'
 import Debug from 'debug'
-import fs from '../fs'
+import { cwd } from 'process'
+import fs from 'fs-extra'
 import util from '../util'
 
 const debug = Debug('cypress:cli')
@@ -65,7 +66,7 @@ const getVersionDir = (version: string = util.pkgVersion(), buildInfo: any = uti
  */
 const isInstallingFromPostinstallHook = (): boolean => {
   // individual folders
-  const cwdFolders = process.cwd().split(path.sep)
+  const cwdFolders = cwd().split(path.sep)
   const length = cwdFolders.length
 
   return cwdFolders[length - 2] === 'node_modules' && cwdFolders[length - 1] === 'cypress'
@@ -93,20 +94,19 @@ const getCacheDir = (): string => {
   return cache_directory
 }
 
-const parseRealPlatformBinaryFolderAsync = (binaryPath: string): any => {
-  return fs.realpathAsync(binaryPath)
-  .then((realPath: any) => {
-    debug('CYPRESS_RUN_BINARY has realpath:', realPath)
-    if (!realPath.toString().endsWith(getPlatformExecutable())) {
-      return false
-    }
+const parseRealPlatformBinaryFolderAsync = async (binaryPath: string): Promise<any> => {
+  const realPath = await fs.realpath(binaryPath)
 
-    if (os.platform() === 'darwin') {
-      return path.resolve(realPath, '..', '..', '..')
-    }
+  debug('CYPRESS_RUN_BINARY has realpath:', realPath)
+  if (!realPath.toString().endsWith(getPlatformExecutable())) {
+    return false
+  }
 
-    return path.resolve(realPath, '..')
-  })
+  if (os.platform() === 'darwin') {
+    return path.resolve(realPath, '..', '..', '..')
+  }
+
+  return path.resolve(realPath, '..')
 }
 
 const getDistDir = (): string => {
@@ -122,25 +122,34 @@ const getBinaryStatePath = (binaryDir: string): string => {
   return path.join(binaryDir, '..', 'binary_state.json')
 }
 
-const getBinaryStateContentsAsync = (binaryDir: string): any => {
+const getBinaryStateContentsAsync = async (binaryDir: string): Promise<any> => {
   const fullPath = getBinaryStatePath(binaryDir)
 
-  return fs.readJsonAsync(fullPath)
-  .catch({ code: 'ENOENT' }, SyntaxError, () => {
-    debug('could not read binary_state.json file at "%s"', fullPath)
+  try {
+    const contents = await fs.readJson(fullPath)
 
-    return {}
-  })
+    debug('binary_state.json contents:', contents)
+
+    return contents
+  } catch (error: any) {
+    if (error.code === 'ENOENT' || error instanceof SyntaxError) {
+      debug('could not read binary_state.json file at "%s"', fullPath)
+
+      return {}
+    }
+
+    throw error
+  }
 }
 
-const getBinaryVerifiedAsync = (binaryDir: string): any => {
-  return getBinaryStateContentsAsync(binaryDir)
-  .tap(debug)
-  .get('verified')
+const getBinaryVerifiedAsync = async (binaryDir: string): Promise<boolean> => {
+  const contents = await getBinaryStateContentsAsync(binaryDir)
+
+  return contents.verified
 }
 
-const clearBinaryStateAsync = (binaryDir: string): any => {
-  return fs.removeAsync(getBinaryStatePath(binaryDir))
+const clearBinaryStateAsync = async (binaryDir: string): Promise<void> => {
+  await fs.remove(getBinaryStatePath(binaryDir))
 }
 
 /**
@@ -149,15 +158,14 @@ const clearBinaryStateAsync = (binaryDir: string): any => {
  * @param {string} binaryDir Folder holding the binary
  * @returns {Promise<void>} returns a promise
  */
-const writeBinaryVerifiedAsync = (verified: boolean, binaryDir: string): any => {
-  return getBinaryStateContentsAsync(binaryDir)
-  .then((contents: any) => {
-    return fs.outputJsonAsync(
-      getBinaryStatePath(binaryDir),
-      _.extend(contents, { verified }),
-      { spaces: 2 },
-    )
-  })
+const writeBinaryVerifiedAsync = async (verified: boolean, binaryDir: string): Promise<void> => {
+  const contents = await getBinaryStateContentsAsync(binaryDir)
+
+  await fs.outputJson(
+    getBinaryStatePath(binaryDir),
+    _.extend(contents, { verified }),
+    { spaces: 2 },
+  )
 }
 
 const getPathToExecutable = (binaryDir: string): string => {
@@ -168,19 +176,18 @@ const getPathToExecutable = (binaryDir: string): string => {
  * Resolves with an object read from the binary app package.json file.
  * If the file does not exist resolves with null
  */
-const getBinaryPkgAsync = (binaryDir: string): any => {
+const getBinaryPkgAsync = async (binaryDir: string): Promise<any> => {
   const pathToPackageJson = getBinaryPkgPath(binaryDir)
 
   debug('Reading binary package.json from:', pathToPackageJson)
 
-  return fs.pathExistsAsync(pathToPackageJson)
-  .then((exists: boolean) => {
-    if (!exists) {
-      return null
-    }
+  const exists: boolean = await fs.pathExists(pathToPackageJson)
 
-    return fs.readJsonAsync(pathToPackageJson)
-  })
+  if (!exists) {
+    return null
+  }
+
+  return fs.readJson(pathToPackageJson)
 }
 
 const getBinaryPkgVersion = (o: any): any => _.get(o, 'version', null)
