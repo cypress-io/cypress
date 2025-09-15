@@ -36,6 +36,7 @@
   </a><br />
 </p>
 
+
 ## What is Cypress?
 
 <p align="center">
