@@ -8,6 +8,7 @@
     "declaration": true,
     "module": "commonjs",
     "moduleResolution": "node",
+    "noEmit": true,
     "noEmitOnError": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
@@ -27,5 +28,4 @@
   "include": [
     "src/**/*"
   ],
-  "exclude": ["src/**/files-core/**/*", "src/**/files-ct/**/*", "src/**/*.spec.ts"]
 }
