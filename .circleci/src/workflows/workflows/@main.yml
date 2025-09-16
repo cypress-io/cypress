@@ -478,6 +478,7 @@ linux-x64-contributor:
         requires:
           - contributor-pr
     - unit-tests:
+        is_contributor_pr: true
         requires:
           - build
     - verify-release-readiness:
