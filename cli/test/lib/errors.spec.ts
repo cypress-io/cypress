@@ -1,6 +1,6 @@
 import { vi, describe, beforeEach, it, expect } from 'vitest'
 import os from 'os'
-import si from 'systeminformation'
+import si, { Systeminformation } from 'systeminformation'
 import util from '../../lib/util'
 import { errors, getError, formErrorText } from '../../lib/errors'
 
@@ -44,20 +44,15 @@ vi.mock('../../lib/util', async (importActual) => {
 
 describe('errors', function () {
   beforeEach(() => {
-    // @ts-expect-error mockReturnValue
-    os.platform.mockReturnValue('test platform')
-    // @ts-expect-error mockReturnValue
-    os.arch.mockReturnValue('x64')
-    // @ts-expect-error mockReturnValue
-    os.release.mockReturnValue('release')
-    // @ts-expect-error mockResolvedValue
-    si.osInfo.mockResolvedValue({
+    vi.mocked(os.platform).mockReturnValue('test platform' as NodeJS.Platform)
+    vi.mocked(os.arch).mockReturnValue('x64')
+    vi.mocked(os.release).mockReturnValue('release')
+    vi.mocked(si.osInfo).mockResolvedValue({
       distro: 'Foo',
       release: 'OsVersion',
-    })
+    } as Systeminformation.OsData)
 
-    // @ts-expect-error mockReturnValue
-    util.pkgVersion.mockReturnValue('1.2.3')
+    vi.mocked(util.pkgVersion).mockReturnValue('1.2.3')
   })
 
   describe('individual', () => {
@@ -74,8 +69,8 @@ describe('errors', function () {
 
       const e = await getError(errObject)
 
-      expect(e).to.be.an('Error')
-      expect(e).to.have.property('known', true)
+      expect(e).toBeInstanceOf(Error)
+      expect(e).toHaveProperty('known', true)
       expect(e.message).toMatchSnapshot()
     })
   })
@@ -84,11 +79,11 @@ describe('errors', function () {
     it('returns fully formed text message', async () => {
       const { missingXvfb } = errors
 
-      expect(missingXvfb).to.be.an('object')
+      expect(missingXvfb).toBeInstanceOf(Object)
 
       const text: string = await formErrorText(missingXvfb)
 
-      expect(text).to.be.a('string')
+      expect(typeof text).toBe('string')
       expect(text).toMatchSnapshot()
     })
 

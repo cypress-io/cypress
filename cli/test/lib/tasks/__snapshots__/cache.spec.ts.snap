@@ -4,66 +4,66 @@ exports[`lib/tasks/cache > .clear > deletes cache folder and everything inside i
 
 exports[`lib/tasks/cache > .list > lists all versions of cached binary 1`] = `
 "┌─────────┬───────────┐
-│ version │ last used │
+│ [37mversion[39m │ [37mlast used[39m │
 ├─────────┼───────────┤
-│ 1.2.3   │ unknown   │
+│ [32m1.2.3[39m   │ unknown   │
 ├─────────┼───────────┤
-│ 2.3.4   │ unknown   │
+│ [32m2.3.4[39m   │ unknown   │
 └─────────┴───────────┘
 "
 `;
 
 exports[`lib/tasks/cache > .list > lists all versions of cached binary with last access > list-of-versions 1`] = `
 "┌─────────┬──────────────┐
-│ version │ last used    │
+│ [37mversion[39m │ [37mlast used[39m    │
 ├─────────┼──────────────┤
-│ 1.2.3   │ 3 months ago │
+│ [32m1.2.3[39m   │ [36m3 months ago[39m │
 ├─────────┼──────────────┤
-│ 2.3.4   │ 5 days ago   │
+│ [32m2.3.4[39m   │ [36m5 days ago[39m   │
 └─────────┴──────────────┘
 "
 `;
 
 exports[`lib/tasks/cache > .list > lists all versions of cached binary with npm log level silent > cache list with silent log level 1`] = `
 "┌─────────┬───────────┐
-│ version │ last used │
+│ [37mversion[39m │ [37mlast used[39m │
 ├─────────┼───────────┤
-│ 1.2.3   │ unknown   │
+│ [32m1.2.3[39m   │ unknown   │
 ├─────────┼───────────┤
-│ 2.3.4   │ unknown   │
+│ [32m2.3.4[39m   │ unknown   │
 └─────────┴───────────┘
 "
 `;
 
 exports[`lib/tasks/cache > .list > lists all versions of cached binary with npm log level warn > cache list with warn log level 1`] = `
 "┌─────────┬───────────┐
-│ version │ last used │
+│ [37mversion[39m │ [37mlast used[39m │
 ├─────────┼───────────┤
-│ 1.2.3   │ unknown   │
+│ [32m1.2.3[39m   │ unknown   │
 ├─────────┼───────────┤
-│ 2.3.4   │ unknown   │
+│ [32m2.3.4[39m   │ unknown   │
 └─────────┴───────────┘
 "
 `;
 
 exports[`lib/tasks/cache > .list > shows sizes > show-size 1`] = `
 "┌─────────┬──────────────┬───────┐
-│ version │ last used    │ size  │
+│ [37mversion[39m │ [37mlast used[39m    │ [37msize[39m  │
 ├─────────┼──────────────┼───────┤
-│ 1.2.3   │ 3 months ago │ 0.2MB │
+│ [32m1.2.3[39m   │ [36m3 months ago[39m │ [90m0.2MB[39m │
 ├─────────┼──────────────┼───────┤
-│ 2.3.4   │ unknown      │ 0.2MB │
+│ [32m2.3.4[39m   │ unknown      │ [90m0.2MB[39m │
 └─────────┴──────────────┴───────┘
 "
 `;
 
 exports[`lib/tasks/cache > .list > some versions have never been opened > second-binary-never-used 1`] = `
 "┌─────────┬──────────────┐
-│ version │ last used    │
+│ [37mversion[39m │ [37mlast used[39m    │
 ├─────────┼──────────────┤
-│ 1.2.3   │ 3 months ago │
+│ [32m1.2.3[39m   │ [36m3 months ago[39m │
 ├─────────┼──────────────┤
-│ 2.3.4   │ unknown      │
+│ [32m2.3.4[39m   │ unknown      │
 └─────────┴──────────────┘
 "
 `;

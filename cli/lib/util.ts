@@ -1,9 +1,9 @@
 import _ from 'lodash'
+import assert from 'assert'
 import arch from 'arch'
 import os from 'os'
 import ospath from 'ospath'
 import hasha from 'hasha'
-import la from 'lazy-ass'
 import tty from 'tty'
 import path from 'path'
 import { isCI as isCi } from 'ci-info'
@@ -23,9 +23,6 @@ import Debug from 'debug'
 import fs from 'fs-extra'
 import pkg from '../package.json'
 
-// TODO: this package needs to be replaced as we can't import it in vitest
-const is = require('check-more-types')
-
 const debug = Debug('cypress:cli')
 
 const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
@@ -34,13 +31,13 @@ const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
  * Returns SHA512 of a file
  */
 const getFileChecksum = (filename: string): any => {
-  la(is.unemptyString(filename), 'expected filename', filename)
+  assert.ok(_.isString(filename) && !_.isEmpty(filename), 'expected filename')
 
   return hasha.fromFile(filename, { algorithm: 'sha512' })
 }
 
 const getFileSize = async (filename: string): Promise<any> => {
-  la(is.unemptyString(filename), 'expected filename', filename)
+  assert.ok(_.isString(filename) && !_.isEmpty(filename), 'expected filename')
 
   const { size } = await fs.stat(filename)
 
@@ -165,7 +162,7 @@ function printNodeOptions (log: any = debug): void {
   ```
  */
 const dequote = (str: string): string => {
-  la(is.string(str), 'expected a string to remove double quotes', str)
+  assert.ok(_.isString(str), 'expected a string to remove double quotes')
   if (str.length > 1 && str[0] === '"' && str[str.length - 1] === '"') {
     return str.substr(1, str.length - 2)
   }
@@ -501,7 +498,7 @@ const util = {
   },
 
   getEnv (varName: string, trim?: boolean): string | undefined {
-    la(is.unemptyString(varName), 'expected environment variable name, not', varName)
+    assert.ok(_.isString(varName) && !_.isEmpty(varName), 'expected environment variable name, not')
 
     const configVarName = `npm_config_${varName}`
     const configVarNameLower = configVarName.toLowerCase()
@@ -560,8 +557,8 @@ const util = {
   isPossibleLinuxWithIncorrectDisplay,
 
   getGitHubIssueUrl (number: number): string {
-    la(is.positive(number), 'github issue should be a positive number', number)
-    la(_.isInteger(number), 'github issue should be an integer', number)
+    assert.ok(_.isInteger(number), 'github issue should be an integer')
+    assert.ok(number > 0, 'github issue should be a positive number')
 
     return `${issuesUrl}/${number}`
   },

@@ -7,10 +7,9 @@ import cp from 'child_process'
 import createDebug from 'debug'
 import readline from 'readline'
 import fs from 'fs-extra'
-import si from 'systeminformation'
+import si, { Systeminformation } from 'systeminformation'
 import { Console } from 'console'
 
-import normalize from '../../support/normalize'
 import logger from '../../../lib/logger'
 import util from '../../../lib/util'
 import unzip from '../../../lib/tasks/unzip'
@@ -80,35 +79,28 @@ describe('lib/tasks/unzip', function () {
 
   beforeEach(async function () {
     vi.resetAllMocks()
-    // @ts-expect-error - mockReturnValue
-    os.platform.mockReturnValue('darwin')
-    // @ts-expect-error - mockReturnValue
-    os.arch.mockReturnValue('x64')
-    // @ts-expect-error - mockReturnValue
-    util.pkgVersion.mockReturnValue(version)
-    // @ts-expect-error mockResolvedValue
-    si.osInfo.mockResolvedValue({
+    vi.mocked(os.platform).mockReturnValue('darwin')
+    vi.mocked(os.arch).mockReturnValue('x64')
+    vi.mocked(util.pkgVersion).mockReturnValue(version)
+    vi.mocked(si.osInfo).mockResolvedValue({
       distro: 'Foo',
       release: 'OsVersion',
-    })
+    } as Systeminformation.OsData)
 
     // @ts-expect-error - default import
     const actualExtract = (await vi.importActual<typeof import('extract-zip')>('extract-zip')).default
 
-    // @ts-expect-error - mockImplementation
-    extract.mockImplementation(actualExtract)
+    vi.mocked(extract).mockImplementation(actualExtract)
 
     // @ts-expect-error - default import
     const actualChildProcess = (await vi.importActual<typeof import('child_process')>('child_process')).default
 
-    // @ts-expect-error - mockImplementation
-    cp.spawn.mockImplementation(actualChildProcess.spawn)
+    vi.mocked(cp.spawn).mockImplementation(actualChildProcess.spawn)
 
-    // @ts-expect-error - mockImplementation
-    readline.createInterface.mockImplementation(() => {
+    vi.mocked(readline.createInterface).mockImplementation(() => {
       return {
         on: vi.fn(),
-      }
+      } as any
     })
 
     originalConsole = globalThis.console
@@ -121,7 +113,7 @@ describe('lib/tasks/unzip', function () {
   })
 
   it('throws when cannot unzip', async function () {
-    const stdout = createStdoutCapture()
+    const output = createStdoutCapture()
 
     try {
       await unzip.start({
@@ -131,24 +123,22 @@ describe('lib/tasks/unzip', function () {
     } catch (err) {
       logger.error(err)
 
-      return expect(normalize(stdout())).toMatchSnapshot()
+      return expect(output()).toMatchSnapshot()
     }
 
     throw new Error('should have failed')
   })
 
   it('throws max path length error when cannot unzip due to realpath ENOENT on windows', async function () {
-    const stdout = createStdoutCapture()
+    const output = createStdoutCapture()
 
     const err: any = new Error('failed')
 
     err.code = 'ENOENT'
     err.syscall = 'realpath'
 
-    // @ts-expect-error - mockReturnValue
-    os.platform.mockReturnValue('win32')
-    // @ts-expect-error - mockRejectedValue
-    fs.ensureDir.mockRejectedValue(err)
+    vi.mocked(os.platform).mockReturnValue('win32')
+    vi.mocked(fs.ensureDir).mockRejectedValue(err)
 
     try {
       await unzip.start({
@@ -158,7 +148,7 @@ describe('lib/tasks/unzip', function () {
     } catch (err) {
       logger.error(err)
 
-      return expect(normalize(stdout())).toMatchSnapshot()
+      return expect(output()).toMatchSnapshot()
     }
 
     throw new Error('should have failed')
@@ -180,15 +170,13 @@ describe('lib/tasks/unzip', function () {
 
   describe('on linux', () => {
     beforeEach(() => {
-      // @ts-expect-error - mockReturnValue
-      os.platform.mockReturnValue('linux')
+      vi.mocked(os.platform).mockReturnValue('linux')
     })
 
     it('can try unzip first then fall back to node unzip', async function () {
       const zipFilePath = path.join('test', 'fixture', 'example.zip')
 
-      // @ts-expect-error - mockImplementation
-      extract.mockImplementation((filePath: any, opts: any) => {
+      vi.mocked(extract).mockImplementation((filePath: any, opts: any) => {
         debug('unzip extract called with %s', filePath)
         expect(filePath, 'zipfile is the same').toEqual(zipFilePath)
 
@@ -207,10 +195,9 @@ describe('lib/tasks/unzip', function () {
         on: vi.fn(),
       }
 
-      // @ts-expect-error - mockImplementation
-      cp.spawn.mockImplementation((args: string) => {
+      vi.mocked(cp.spawn).mockImplementation((args: string) => {
         if (args === 'unzip') {
-          return unzipChildProcess
+          return unzipChildProcess as any
         }
       })
 
@@ -235,8 +222,7 @@ describe('lib/tasks/unzip', function () {
     it('can try unzip first then fall back to node unzip and fails with an empty error', async function () {
       const zipFilePath = path.join('test', 'fixture', 'example.zip')
 
-      // @ts-expect-error - mockRejectedValue
-      extract.mockRejectedValue(undefined)
+      vi.mocked(extract).mockRejectedValue(undefined)
 
       const unzipChildProcess = new events.EventEmitter()
 
@@ -250,10 +236,9 @@ describe('lib/tasks/unzip', function () {
         on: vi.fn(),
       }
 
-      // @ts-expect-error - mockImplementation
-      cp.spawn.mockImplementation((args: string) => {
+      vi.mocked(cp.spawn).mockImplementation((args: string) => {
         if (args === 'unzip') {
-          return unzipChildProcess
+          return unzipChildProcess as any
         }
       })
 
@@ -279,8 +264,7 @@ describe('lib/tasks/unzip', function () {
     it('calls node unzip just once', async function () {
       const zipFilePath = path.join('test', 'fixture', 'example.zip')
 
-      // @ts-expect-error - mockImplementation
-      extract.mockImplementation((filePath: any, opts: any) => {
+      vi.mocked(extract).mockImplementation((filePath: any, opts: any) => {
         debug('unzip extract called with %s', filePath)
         expect(filePath, 'zipfile is the same').toEqual(zipFilePath)
 
@@ -299,10 +283,9 @@ describe('lib/tasks/unzip', function () {
         on: vi.fn(),
       }
 
-      // @ts-expect-error - mockImplementation
-      cp.spawn.mockImplementation((args: string) => {
+      vi.mocked(cp.spawn).mockImplementation((args: string) => {
         if (args === 'unzip') {
-          return unzipChildProcess
+          return unzipChildProcess as any
         }
       })
 
@@ -333,15 +316,13 @@ describe('lib/tasks/unzip', function () {
 
   describe('on Mac', () => {
     beforeEach(() => {
-      // @ts-expect-error - mockReturnValue
-      os.platform.mockReturnValue('darwin')
+      vi.mocked(os.platform).mockReturnValue('darwin')
     })
 
     it('calls node unzip just once', async function () {
       const zipFilePath = path.join('test', 'fixture', 'example.zip')
 
-      // @ts-expect-error - mockImplementation
-      extract.mockImplementation((filePath: any, opts: any) => {
+      vi.mocked(extract).mockImplementation((filePath: any, opts: any) => {
         debug('unzip extract called with %s', filePath)
         expect(filePath, 'zipfile is the same').toEqual(zipFilePath)
 
@@ -360,10 +341,9 @@ describe('lib/tasks/unzip', function () {
         on: vi.fn(),
       }
 
-      // @ts-expect-error - mockImplementation
-      cp.spawn.mockImplementation((args: string) => {
+      vi.mocked(cp.spawn).mockImplementation((args: string) => {
         if (args === 'ditto') {
-          return unzipChildProcess
+          return unzipChildProcess as any
         }
       })
 

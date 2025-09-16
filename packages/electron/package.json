@@ -2,7 +2,7 @@
   "name": "@packages/electron",
   "version": "0.0.0-development",
   "private": true,
-  "main": "dist/src/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "rimraf dist && yarn build:esm && yarn build:cjs",
     "build-binary": "node ./bin/cypress-electron --install",
@@ -12,10 +12,7 @@
     "postinstall": "echo '@packages/electron needs: yarn build'",
     "lint": "eslint",
     "start": "./bin/cypress-electron",
-    "test": "yarn test-unit",
-    "test-debug": "yarn test-unit --inspect-brk=5566",
-    "test-unit": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
-    "test-watch": "yarn test-unit --watch"
+    "test": "yarn vitest"
   },
   "dependencies": {
     "@packages/icons": "0.0.0-development",
@@ -29,18 +26,22 @@
   "devDependencies": {
     "@electron/fuses": "1.8.0",
     "@electron/packager": "18.3.6",
+    "@vitest/coverage-v8": "^3.2.4",
+    "eslint": "^9.31.0",
     "execa": "4.1.0",
     "mocha": "3.5.3",
-    "systeminformation": "^5.27.7"
+    "systeminformation": "^5.27.7",
+    "vitest": "^3.2.4"
   },
   "files": [
     "dist",
-    "lib"
+    "bin",
+    "app"
   ],
   "bin": {
     "cypress-electron": "./bin/cypress-electron"
   },
-  "types": "dist/cjs/src/index.d.ts",
+  "types": "dist/index.d.ts",
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx}": "eslint --fix"
   },

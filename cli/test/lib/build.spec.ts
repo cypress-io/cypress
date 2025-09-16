@@ -22,14 +22,12 @@ describe('package.json build', () => {
     // with a few test props
     // the rest should come from root package.json file
 
-    // @ts-expect-error - mockResolvedValue
-    fs.readJson.mockResolvedValue({
+    vi.mocked(fs.readJson).mockResolvedValue({
       name: 'test',
       engines: 'test engines',
-    })
+    } as any)
 
-    // @ts-expect-error - mockResolvedValue
-    fs.outputJson.mockResolvedValue(undefined)
+    vi.mocked(fs.outputJson).mockResolvedValue(undefined)
   })
 
   it('has a semver version', async () => {
