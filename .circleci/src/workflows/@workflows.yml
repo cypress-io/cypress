@@ -1726,6 +1726,9 @@ jobs:
       is_contributor_pr:
         type: boolean
         default: false
+      executor:
+        type: executor
+        default: linux-x64
       resource_class:
         type: string
         default: medium
