@@ -4,13 +4,6 @@ export default [
   ...baseConfig,
   ...cliOverrides,
   {
-    ignores: [
-      '**/dist',
-      '**/*.d.ts',
-      '**/package-lock.json',
-      '**/tsconfig.json',
-      '**/cypress/fixtures',
-    ],
   },
   {
     languageOptions: {
