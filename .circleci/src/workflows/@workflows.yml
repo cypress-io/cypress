@@ -90,6 +90,13 @@ executors:
       # TODO: Disabling snapshots for now on Linux Arm 64 architectures. Will revisit with https://github.com/cypress-io/cypress/issues/23557
       DISABLE_SNAPSHOT_REQUIRE: 1
 
+  linux-x64: &linux-x64-executor
+    machine:
+      image: ubuntu-2004:2024.11.1
+    resource_class: medium
+    environment:
+      PLATFORM: linux
+
 commands:
   # This command inserts SHOULD_PERSIST_ARTIFACTS into BASH_ENV. This way, we can define the variable in one place and use it in multiple steps.
   # Run this command in a job before you want to use the SHOULD_PERSIST_ARTIFACTS variable.
@@ -1717,6 +1724,9 @@ jobs:
       resource_class:
         type: string
         default: medium
+      executor:
+        type: executor
+        default: linux-x64
     resource_class: << parameters.resource_class >>
     parallelism: 1
     steps:
@@ -1742,6 +1752,7 @@ jobs:
                   - run:
                       name: Enable IPv6 in Docker
                       command: |
+                        apt-get update && apt-get install -y sudo
                         cat \<<'EOF' | sudo tee /etc/docker/daemon.json
                         {
                           "ipv6": true,

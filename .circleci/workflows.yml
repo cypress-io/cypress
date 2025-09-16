@@ -1359,6 +1359,12 @@ executors:
     machine:
       image: ubuntu-2004:2024.11.1
     resource_class: arm.medium
+  linux-x64:
+    environment:
+      PLATFORM: linux
+    machine:
+      image: ubuntu-2004:2024.11.1
+    resource_class: medium
   non-root-docker-user:
     docker:
       - image: cypress/base-internal:22.15.1-bullseye
@@ -3384,7 +3390,7 @@ jobs:
     parallelism: 1
     parameters:
       executor:
-        default: cy-doc
+        default: linux-x64
         type: executor
       is_contributor_pr:
         default: false
@@ -3430,6 +3436,7 @@ jobs:
                 steps:
                   - run:
                       command: |
+                        apt-get update && apt-get install -y sudo
                         cat \<<'EOF' | sudo tee /etc/docker/daemon.json
                         {
                           "ipv6": true,
