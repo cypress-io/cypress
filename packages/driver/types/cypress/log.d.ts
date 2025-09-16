@@ -8,7 +8,7 @@ declare namespace Cypress {
     _hasInitiallyLogged: boolean
     get<K extends keyof InternalLogConfig>(attr: K): InternalLogConfig[K]
     get(): InternalLogConfig
-    set<K extends keyof LogConfig | InternalLogConfig>(key: K, value: LogConfig[K]): InternalLog
+    set<K extends keyof LogConfig | keyof InternalLogConfig>(key: K, value: LogConfig[K]): InternalLog
     set(options: Partial<LogConfig | InternalLogConfig>)
     groupEnd(): void
   }
@@ -144,5 +144,6 @@ declare namespace Cypress {
     visible?: boolean
     // the timestamp of when the command started
     wallClockStartedAt?: string
+    options?: unknown
   }
 }
