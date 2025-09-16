@@ -1,6 +1,6 @@
 import state from './state'
 import logger from '../logger'
-import fs from '../fs'
+import fs from 'fs-extra'
 import util from '../util'
 
 import { join } from 'path'
@@ -28,7 +28,7 @@ const logCachePath = (): undefined => {
 }
 
 const clear = (): Promise<void> => {
-  return fs.removeAsync(state.getCacheDir())
+  return fs.remove(state.getCacheDir())
 }
 
 const prune = async (): Promise<void> => {
@@ -38,7 +38,7 @@ const prune = async (): Promise<void> => {
   let deletedBinary = false
 
   try {
-    const versions = await fs.readdirAsync(cacheDir)
+    const versions = await fs.readdir(cacheDir)
 
     for (const version of versions) {
       if (version !== checkedInBinaryVersion) {
@@ -46,7 +46,7 @@ const prune = async (): Promise<void> => {
 
         const versionDir = join(cacheDir, version)
 
-        await fs.removeAsync(versionDir)
+        await fs.remove(versionDir)
       }
     }
 
@@ -74,88 +74,98 @@ const fileSizeInMB = (size: number): string => {
  * Collects all cached versions, finds when each was used
  * and prints a table with results to the terminal
  */
-const list = (showSize: boolean = false): any => {
-  return getCachedVersions(showSize)
-  .then((binaries: any) => {
-    const head = [colors.titles('version'), colors.titles('last used')]
+const list = async (showSize: boolean = false): Promise<void> => {
+  const binaries = await getCachedVersions(showSize)
+
+  const head = [colors.titles('version'), colors.titles('last used')]
+
+  if (showSize) {
+    head.push(colors.titles('size'))
+  }
+
+  const table = new Table({
+    head,
+  })
+
+  binaries.forEach((binary: { version: string, accessed?: string, size?: number }) => {
+    const versionString = colors.values(binary.version)
+    const lastUsed = binary.accessed ? colors.dates(binary.accessed) : 'unknown'
+    const row = [versionString, lastUsed]
 
     if (showSize) {
-      head.push(colors.titles('size'))
+      const size = colors.size(fileSizeInMB(binary.size as number))
+
+      row.push(size)
     }
 
-    const table = new Table({
-      head,
-    })
-
-    binaries.forEach((binary: any) => {
-      const versionString = colors.values(binary.version)
-      const lastUsed = binary.accessed ? colors.dates(binary.accessed) : 'unknown'
-      const row = [versionString, lastUsed]
-
-      if (showSize) {
-        const size = colors.size(fileSizeInMB(binary.size))
-
-        row.push(size)
-      }
-
-      return table.push(row)
-    })
-
-    logger.always(table.toString())
+    return table.push(row)
   })
+
+  logger.always(table.toString())
 }
 
-const getCachedVersions = (showSize: boolean): Promise<any> => {
+const getCachedVersions = async (showSize: boolean): Promise<{
+  version: string
+  folderPath: string
+  accessed?: string
+  size?: number
+}[]> => {
   const cacheDir = state.getCacheDir()
 
-  return fs
-  .readdirAsync(cacheDir)
-  .filter(util.isSemver)
-  .map((version: any) => {
+  const versions = await fs.readdir(cacheDir)
+
+  const filteredVersions = versions.filter(util.isSemver).map((version: any) => {
     return {
       version,
       folderPath: join(cacheDir, version),
     }
   })
-  .mapSeries((binary: any) => {
-    // last access time on the folder is different from last access time
-    // on the Cypress binary
+
+  const binaries: {
+    version: string
+    folderPath: string
+    accessed?: string
+    size?: number
+  }[] = []
+
+  for (const binary of filteredVersions) {
     const binaryDir = state.getBinaryDir(binary.version)
     const executable = state.getPathToExecutable(binaryDir)
 
-    return fs.statAsync(executable).then((stat: any) => {
+    try {
+      const stat = await fs.stat(executable)
+
       const lastAccessedTime = _.get(stat, 'atime')
 
-      if (!lastAccessedTime) {
-        // the test runner has never been opened
-        // or could be a test simulating missing timestamp
-        return binary
+      if (lastAccessedTime) {
+        const accessed = dayjs(lastAccessedTime).fromNow()
+
+        // @ts-expect-error - accessed is not defined in the type
+        binary.accessed = accessed
       }
 
-      const accessed = dayjs(lastAccessedTime).fromNow()
-
-      binary.accessed = accessed
-
-      return binary
-    }, (e: any) => {
+      // if no lastAccessedTime
+      // the test runner has never been opened
+      // or could be a test simulating missing timestamp
+    } catch (e) {
       // could not find the binary or gets its stats
-      return binary
-    })
-  })
-  .mapSeries((binary: any) => {
+      // no-op
+    }
     if (showSize) {
       const binaryDir = state.getBinaryDir(binary.version)
 
-      return getFolderSize(binaryDir).then((size: number) => {
-        return {
-          ...binary,
-          size,
-        }
-      })
-    }
+      const size: number = await getFolderSize(binaryDir)
 
-    return binary
-  })
+      binaries.push({
+        ...binary,
+        size,
+      })
+    } else {
+      binaries.push(binary)
+    }
+  }
+
+  return binaries
 }
 
 const cacheModule = {
