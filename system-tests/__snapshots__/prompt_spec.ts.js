@@ -51,7 +51,7 @@ Please set this in your Cypress config file to continue using \`cy.prompt\`.
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/prompt.cy.js/prompt -- should fail when experim    (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/prompt.cy.js/prompt -- should fail when experim     (1280x720)
      entalPromptCommand is not set (failed).png                                                     
 
 
