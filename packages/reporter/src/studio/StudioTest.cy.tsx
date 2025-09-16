@@ -89,7 +89,9 @@ describe('StudioTest', () => {
 
     runnablesStore = {
       isReady: true,
-      _tests: [mockTest],
+      _tests: {
+        'test-1': mockTest,
+      },
     } as unknown as RunnablesStore
 
     statsStore = {
