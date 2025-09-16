@@ -4,7 +4,7 @@ import os from 'os'
 import tty from 'tty'
 import path from 'path'
 import treeKill from 'tree-kill'
-import si from 'systeminformation'
+import si, { Systeminformation } from 'systeminformation'
 import { EventEmitter as EE } from 'events'
 import readline from 'readline'
 import createDebug from 'debug'
@@ -186,15 +186,12 @@ describe('lib/exec/spawn', function () {
     vi.unstubAllEnvs()
     vi.stubEnv('DISPLAY', undefined)
 
-    // @ts-expect-error - mockReturnValue
-    os.platform.mockReturnValue('darwin')
-    // @ts-expect-error - mockReturnValue
-    os.arch.mockReturnValue('x64')
-    // @ts-expect-error mockResolvedValue
-    si.osInfo.mockResolvedValue({
+    vi.mocked(os.platform).mockReturnValue('darwin')
+    vi.mocked(os.arch).mockReturnValue('x64')
+    vi.mocked(si.osInfo).mockResolvedValue({
       distro: 'Foo',
       release: 'OsVersion',
-    })
+    } as Systeminformation.OsData)
 
     spawnedProcess = new EE()
     spawnedProcess.unref = vi.fn().mockReturnValue(undefined)
@@ -217,20 +214,13 @@ describe('lib/exec/spawn', function () {
 
     mockReadlineEE = new EE()
 
-    // @ts-expect-error - mockReturnValue
-    readline.createInterface.mockReturnValue(mockReadlineEE)
-    // @ts-expect-error - mockReturnValue
-    cp.spawn.mockReturnValue(spawnedProcess)
-    // @ts-expect-error - mockReturnValue
-    xvfb.start.mockResolvedValue(undefined)
-    // @ts-expect-error - mockReturnValue
-    xvfb.stop.mockResolvedValue(undefined)
-    // @ts-expect-error - mockReturnValue
-    xvfb.isNeeded.mockReturnValue(false)
-    // @ts-expect-error - mockReturnValue
-    state.getBinaryDir.mockReturnValue(defaultBinaryDir)
-    // @ts-expect-error - mockImplementation
-    state.getPathToExecutable.mockImplementation((args) => {
+    vi.mocked(readline.createInterface).mockReturnValue(mockReadlineEE)
+    vi.mocked(cp.spawn).mockReturnValue(spawnedProcess)
+    vi.mocked(xvfb.start).mockResolvedValue(undefined)
+    vi.mocked(xvfb.stop).mockResolvedValue(undefined)
+    vi.mocked(xvfb.isNeeded).mockReturnValue(false)
+    vi.mocked(state.getBinaryDir).mockReturnValue(defaultBinaryDir)
+    vi.mocked(state.getPathToExecutable).mockImplementation((args) => {
       if (args === '/default/binary/dir') {
         return '/path/to/cypress'
       }
@@ -247,8 +237,7 @@ describe('lib/exec/spawn', function () {
     // the environment variables when running tests on CI.
 
     it('passes args + options to spawn', async () => {
-      // @ts-expect-error - mockReturnValue
-      needsSandbox.mockReturnValue(false)
+      vi.mocked(needsSandbox).mockReturnValue(false)
 
       // start the process
       const startPromise = spawn.start('--foo', { foo: 'bar' })
@@ -275,8 +264,7 @@ describe('lib/exec/spawn', function () {
     })
 
     it('uses --no-sandbox when needed', async function () {
-      // @ts-expect-error - mockReturnValue
-      needsSandbox.mockReturnValue(true)
+      vi.mocked(needsSandbox).mockReturnValue(true)
 
       const startPromise = spawn.start('--foo', { foo: 'bar' })
 
@@ -307,8 +295,7 @@ describe('lib/exec/spawn', function () {
     })
 
     it('uses npm command when running in dev mode', async () => {
-      // @ts-expect-error - mockReturnValue
-      needsSandbox.mockReturnValue(false)
+      vi.mocked(needsSandbox).mockReturnValue(false)
 
       const startPromise = spawn.start('--foo', { dev: true, foo: 'bar' })
 
@@ -335,8 +322,7 @@ describe('lib/exec/spawn', function () {
     })
 
     it('does not pass --no-sandbox when running in dev mode', async function () {
-      // @ts-expect-error - mockReturnValue
-      needsSandbox.mockReturnValue(true)
+      vi.mocked(needsSandbox).mockReturnValue(true)
 
       const startPromise = spawn.start('--foo', { dev: true, foo: 'bar' })
 
@@ -363,8 +349,7 @@ describe('lib/exec/spawn', function () {
     })
 
     it('starts xvfb when needed', async () => {
-      // @ts-expect-error - mockReturnValue
-      xvfb.isNeeded.mockReturnValue(true)
+      vi.mocked(xvfb.isNeeded).mockReturnValue(true)
 
       const startPromise = spawn.start('--foo')
 
@@ -432,8 +417,7 @@ describe('lib/exec/spawn', function () {
     })
 
     it('stops xvfb when spawn closes', async () => {
-      // @ts-expect-error - mockReturnValue
-      xvfb.isNeeded.mockReturnValue(true)
+      vi.mocked(xvfb.isNeeded).mockReturnValue(true)
 
       const startPromise = spawn.start('--foo')
 
@@ -469,8 +453,7 @@ describe('lib/exec/spawn', function () {
           }
         })
 
-        // @ts-expect-error - mockReturnValue
-        os.platform.mockReturnValue('linux')
+        vi.mocked(os.platform).mockReturnValue('linux')
 
         const startPromise = spawn.start('--foo')
 
@@ -547,10 +530,8 @@ describe('lib/exec/spawn', function () {
     })
 
     it('forces colors and streams when supported', async () => {
-      // @ts-expect-error - mockReturnValue
-      util.supportsColor.mockReturnValue(true)
-      // @ts-expect-error - mockReturnValue
-      tty.isatty.mockReturnValue(true)
+      vi.mocked(util.supportsColor).mockReturnValue(true)
+      vi.mocked(tty.isatty).mockReturnValue(true)
 
       const startPromise = spawn.start([], { env: {} })
 
@@ -565,8 +546,7 @@ describe('lib/exec/spawn', function () {
     })
 
     it('sets windowsHide:false property in windows', async () => {
-      // @ts-expect-error - mockReturnValue
-      os.platform.mockReturnValue('win32')
+      vi.mocked(os.platform).mockReturnValue('win32')
 
       const startPromise = spawn.start([], { env: {} })
 
@@ -582,8 +562,7 @@ describe('lib/exec/spawn', function () {
 
     it('propagates treeKill if SIGINT is detected in windows console', async () => {
       spawnedProcess.pid = 7
-      // @ts-expect-error - mockReturnValue
-      os.platform.mockReturnValue('win32')
+      vi.mocked(os.platform).mockReturnValue('win32')
 
       const startPromise = spawn.start([], { env: {} })
 
@@ -612,10 +591,8 @@ describe('lib/exec/spawn', function () {
     })
 
     it('does not force colors and streams when not supported', async () => {
-      // @ts-expect-error - mockReturnValue
-      util.supportsColor.mockReturnValue(false)
-      // @ts-expect-error - mockReturnValue
-      tty.isatty.mockReturnValue(false)
+      vi.mocked(util.supportsColor).mockReturnValue(false)
+      vi.mocked(tty.isatty).mockReturnValue(false)
 
       const startPromise = spawn.start([], { env: {} })
 
@@ -630,11 +607,9 @@ describe('lib/exec/spawn', function () {
     })
 
     it('pipes when on win32', async () => {
-      // @ts-expect-error - mockReturnValue
-      os.platform.mockReturnValue('win32')
+      vi.mocked(os.platform).mockReturnValue('win32')
 
-      // @ts-expect-error - mockReturnValue
-      xvfb.isNeeded.mockReturnValue(false)
+      vi.mocked(xvfb.isNeeded).mockReturnValue(false)
 
       // @ts-expect-error - invalid number of arguments for given type
       const startPromise = spawn.start()
@@ -653,11 +628,8 @@ describe('lib/exec/spawn', function () {
     })
 
     it('inherits when on linux and xvfb isn\'t needed', async () => {
-      // @ts-expect-error - mockReturnValue
-      os.platform.mockReturnValue('linux')
-
-      // @ts-expect-error - mockReturnValue
-      xvfb.isNeeded.mockReturnValue(false)
+      vi.mocked(os.platform).mockReturnValue('linux')
+      vi.mocked(xvfb.isNeeded).mockReturnValue(false)
 
       // @ts-expect-error - invalid number of arguments for given type
       const startPromise = spawn.start()
@@ -673,11 +645,8 @@ describe('lib/exec/spawn', function () {
     })
 
     it('uses [inherit, inherit, pipe] when linux and xvfb is needed', async () => {
-      // @ts-expect-error - mockReturnValue
-      os.platform.mockReturnValue('linux')
-
-      // @ts-expect-error - mockReturnValue
-      xvfb.isNeeded.mockReturnValue(true)
+      vi.mocked(os.platform).mockReturnValue('linux')
+      vi.mocked(xvfb.isNeeded).mockReturnValue(true)
 
       // @ts-expect-error - invalid number of arguments for given type
       const startPromise = spawn.start()
@@ -695,11 +664,8 @@ describe('lib/exec/spawn', function () {
     })
 
     it('uses [inherit, inherit, pipe] on darwin', async () => {
-      // @ts-expect-error - mockReturnValue
-      os.platform.mockReturnValue('darwin')
-
-      // @ts-expect-error - mockReturnValue
-      xvfb.isNeeded.mockReturnValue(false)
+      vi.mocked(os.platform).mockReturnValue('darwin')
+      vi.mocked(xvfb.isNeeded).mockReturnValue(false)
 
       // @ts-expect-error - invalid number of arguments for given type
       const startPromise = spawn.start()
@@ -719,8 +685,7 @@ describe('lib/exec/spawn', function () {
     })
 
     it('writes everything on win32', async () => {
-      // @ts-expect-error - mockReturnValue
-      os.platform.mockReturnValue('win32')
+      vi.mocked(os.platform).mockReturnValue('win32')
 
       const buf1 = Buffer.from('asdf')
 
@@ -753,13 +718,12 @@ describe('lib/exec/spawn', function () {
         // create an EventEmitter and bind it to process.stdin
         const stdinEE = new EE()
 
-        // @ts-expect-error - mockImplementation
-        stdin.emit.mockImplementation((event, ...args) => {
-          stdinEE.emit(event, ...args)
+        vi.mocked(stdin.emit).mockImplementation((event, ...args) => {
+          return stdinEE.emit(event, ...args)
         })
 
-        // @ts-expect-error - mockImplementation
-        stdin.on.mockImplementation((event, callback) => {
+        // @ts-expect-error - mock arguments
+        vi.mocked(stdin.on).mockImplementation((event, callback) => {
           return stdinEE.on(event, callback)
         })
       })

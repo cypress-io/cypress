@@ -1,8 +1,9 @@
 import { vi, describe, it, beforeEach, expect } from 'vitest'
+import assert from 'assert'
 import hasha from 'hasha'
-import la from 'lazy-ass'
 import util from '../../lib/util'
 import logger from '../../lib/logger'
+import { Systeminformation } from 'systeminformation'
 
 describe('util', () => {
   beforeEach(() => {
@@ -28,7 +29,7 @@ describe('util', () => {
     })
 
     it('throws for anything but a positive integer', () => {
-      // @ts-expect-error
+      // @ts-expect-error - args don't fit type
       expect(() => util.getGitHubIssueUrl('4024')).toThrow()
 
       expect(() => util.getGitHubIssueUrl(-5)).toThrow()
@@ -266,8 +267,7 @@ describe('util', () => {
 
       const tty = (await import('tty')).default
 
-      // @ts-expect-error mockImplementation
-      tty.isatty.mockReturnValue(true)
+      vi.mocked(tty.isatty).mockReturnValue(true)
 
       const util = (await import('../../lib/util')).default
 
@@ -284,8 +284,7 @@ describe('util', () => {
       vi.stubEnv('CI', undefined)
       vi.stubEnv('NO_COLOR', '1')
 
-      // @ts-expect-error - mockImplementation
-      tty.isatty.mockReturnValue(false)
+      vi.mocked(tty.isatty).mockReturnValue(false)
 
       expect(util.getEnvOverrides()).toEqual({
         FORCE_STDIN_TTY: '0',
@@ -313,8 +312,7 @@ describe('util', () => {
 
       const tty = (await import('tty')).default
 
-      // @ts-expect-error mockImplementation
-      tty.isatty.mockImplementation((args) => {
+      vi.mocked(tty.isatty).mockImplementation((args: number) => {
         if (args === 0 || args === 1 || args === 2) {
           return true
         }
@@ -330,8 +328,7 @@ describe('util', () => {
         FORCE_STDERR_TTY: true,
       })
 
-      // @ts-expect-error mockImplementation
-      tty.isatty.mockReturnValue(false)
+      vi.mocked(tty.isatty).mockReturnValue(false)
 
       expect(util.getForceTty()).toEqual({
         FORCE_STDIN_TTY: false,
@@ -354,8 +351,7 @@ describe('util', () => {
 
   describe('.exit', () => {
     it('calls process.exit', () => {
-      // @ts-expect-error wrong signature for process.exit
-      const processExitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined)
+      const processExitSpy = vi.spyOn(process, 'exit').mockReturnValue(undefined as never)
 
       util.exit(2)
       util.exit(0)
@@ -368,9 +364,8 @@ describe('util', () => {
   describe('.logErrorExit1', () => {
     it('calls logger.error and process.exit', () => {
       const err = new Error('foo')
-      // @ts-expect-error wrong signature for process.exit
-      const processExitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined)
-      const loggerErrorSpy = vi.spyOn(logger, 'error').mockImplementation(() => undefined)
+      const processExitSpy = vi.spyOn(process, 'exit').mockReturnValue(undefined as never)
+      const loggerErrorSpy = vi.spyOn(logger, 'error').mockReturnValue(undefined as never)
 
       util.logErrorExit1(err)
 
@@ -503,10 +498,8 @@ describe('util', () => {
       const os = (await import('os')).default
       const si = (await import('systeminformation')).default
 
-      // @ts-expect-error - mockReturnValue
-      os.release.mockReturnValue('some-release')
-      // @ts-expect-error - mockRejectedValue
-      si.osInfo.mockRejectedValue(new Error('systeminformation failed'))
+      vi.mocked(os.release).mockReturnValue('some-release')
+      vi.mocked(si.osInfo).mockRejectedValue(new Error('systeminformation failed'))
 
       const util = (await import('../../lib/util')).default
 
@@ -521,11 +514,10 @@ describe('util', () => {
       const os = (await import('os')).default
       const si = (await import('systeminformation')).default
 
-      // @ts-expect-error - mockResolvedValue
-      si.osInfo.mockResolvedValue({
+      vi.mocked(si.osInfo).mockResolvedValue({
         distro: 'Ubuntu',
         release: '22.04',
-      })
+      } as Systeminformation.OsData)
 
       const util = (await import('../../lib/util')).default
 
@@ -540,14 +532,11 @@ describe('util', () => {
       const os = (await import('os')).default
       const si = (await import('systeminformation')).default
 
-      // @ts-expect-error - mockResolvedValue
-      os.release.mockReturnValue('5.15.0')
-
-      // @ts-expect-error - mockResolvedValue
-      si.osInfo.mockResolvedValue({
+      vi.mocked(os.release).mockReturnValue('5.15.0')
+      vi.mocked(si.osInfo).mockResolvedValue({
         distro: 'Ubuntu',
         // missing release property
-      })
+      } as Systeminformation.OsData)
 
       const util = (await import('../../lib/util')).default
 
@@ -631,8 +620,9 @@ describe('util', () => {
     })
 
     it('throws on non-string name', () => {
+      // @ts-expect-error - args don't fit type
       expect(() => util.getEnv()).toThrow()
-
+      // @ts-expect-error - args don't fit type
       expect(() => util.getEnv(42)).toThrow()
     })
 
@@ -676,8 +666,7 @@ describe('util', () => {
         hasha.fromFile(__filename, { algorithm: 'sha512' }),
       ])
 
-      la(checksum === expectedChecksum, 'our computed checksum', checksum,
-        'is different from expected', expectedChecksum)
+      assert.ok(checksum === expectedChecksum, `checksum ${checksum} is different from expected "${expectedChecksum}"`)
     })
   })
 

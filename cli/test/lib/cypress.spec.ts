@@ -92,16 +92,13 @@ describe('cypress', function () {
     it('resolves with error object', async function () {
       const outputPath = path.join(os.tmpdir(), 'cypress/monorepo/cypress_spec/output.json')
 
-      // @ts-expect-error - mockImplementation
-      tmp.fileSync.mockReturnValue({
+      vi.mocked(tmp.fileSync).mockReturnValue({
         name: outputPath,
-      })
+      } as any)
 
-      // @ts-expect-error - mockImplementation
-      run.start.mockResolvedValue(2)
+      vi.mocked(run.start).mockResolvedValue(2)
 
-      // @ts-expect-error - mockImplementation
-      fs.readJson.mockImplementation(async (args) => {
+      vi.mocked(fs.readJson).mockImplementation(async (args) => {
         if (args === outputPath) {
           return Promise.resolve(undefined)
         }
@@ -125,16 +122,13 @@ describe('cypress', function () {
     beforeEach(async function () {
       outputPath = path.join(os.tmpdir(), 'cypress/monorepo/cypress_spec/output.json')
 
-      // @ts-expect-error
-      tmp.fileSync.mockReturnValue({
+      vi.mocked(tmp.fileSync).mockReturnValue({
         name: outputPath,
-      })
+      } as any)
 
-      // @ts-expect-error
-      run.start.mockResolvedValue(undefined)
+      vi.mocked(run.start).mockResolvedValue(undefined)
 
-      // @ts-expect-error - mockImplementation
-      fs.readJson.mockImplementation(async (args) => {
+      vi.mocked(fs.readJson).mockImplementation(async (args) => {
         if (args === outputPath) {
           return Promise.resolve({
             code: 0,

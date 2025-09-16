@@ -10,9 +10,9 @@
     "resolveJsonModule": true,
     "strict": true,
     "skipLibCheck": true,
-    "noImplicitAny": false,
+    "noImplicitAny": false
   },
   "include": [
-    "lib/**/*.mts",
+    "lib/**/*.mts"
   ]
 }

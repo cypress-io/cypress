@@ -1071,6 +1071,12 @@ describe('lib/agent', function () {
     })
 
     it('caches host + port', async function () {
+      // If we are on CI and IPV6 is explicitly disabled (like in the contributor PR workflow)
+      // then we skip this test
+      if (process.env.CIRCLE_IPV6_DISABLED) {
+        this.skip()
+      }
+
       const familyCache = {}
 
       await Promise.all([

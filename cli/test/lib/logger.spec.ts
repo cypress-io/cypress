@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import la from 'lazy-ass'
+import assert from 'assert'
 import { stripIndent, stripIndents } from 'common-tags'
 
 describe('stripIndent', () => {
@@ -21,7 +21,7 @@ describe('stripIndent', () => {
     // removed 1 level of indentation and trimmed the string
     const expected = 'foo\n  bar'
 
-    la(removed === expected, `removed indent is\n${removed}`)
+    assert.ok(removed === expected, `removed indent is\n${removed}`)
   })
 
   it('can be used with nested message', () => {

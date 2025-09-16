@@ -5,19 +5,19 @@ exports[`exec info > logs additional info about pre-releases > logs additional i
 Proxy Settings: none detected
 Environment Variables: none detected
 
-Application Data: /user/app/data/path
-Browser Profiles: /user/app/data/path/to/browsers
-Binary Caches: /user/path/to/binary/cache
+Application Data: [36m/user/app/data/path[39m
+Browser Profiles: [36m/user/app/data/path/to/browsers[39m
+Binary Caches: [36m/user/path/to/binary/cache[39m
 
-Cypress Version: 0.0.0-development (pre-release)
-System Platform: linux (Foo - OsVersion)
-System Memory: 1.2 GB free 400 MB
+Cypress Version: [32m0.0.0-development[39m [31m(pre-release)[39m
+System Platform: [32mlinux[39m ([32mFoo - OsVersion[39m)
+System Memory: [32m1.2 GB[39m free [32m400 MB[39m
 
-This is a pre-release build of Cypress.
+This is a [31mpre-release[39m build of Cypress.
 Build info:
-  Commit SHA: abc123
-  Commit Branch: someBranchName
-  Commit Date: 2022-02-02T00:00:00.000Z
+  Commit SHA: [32mabc123[39m
+  Commit Branch: [32msomeBranchName[39m
+  Commit Date: [32m2022-02-02T00:00:00.000Z[39m
 "
 `;
 
@@ -26,15 +26,15 @@ exports[`exec info > logs if unbuilt development > logs additional info about de
 Proxy Settings: none detected
 Environment Variables: none detected
 
-Application Data: /user/app/data/path
-Browser Profiles: /user/app/data/path/to/browsers
-Binary Caches: /user/path/to/binary/cache
+Application Data: [36m/user/app/data/path[39m
+Browser Profiles: [36m/user/app/data/path/to/browsers[39m
+Binary Caches: [36m/user/path/to/binary/cache[39m
 
-Cypress Version: 0.0.0-development (pre-release)
-System Platform: linux (Foo - OsVersion)
-System Memory: 1.2 GB free 400 MB
+Cypress Version: [32m0.0.0-development[39m [31m(pre-release)[39m
+System Platform: [32mlinux[39m ([32mFoo - OsVersion[39m)
+System Memory: [32m1.2 GB[39m free [32m400 MB[39m
 
-This is the development (un-built) Cypress CLI.
+This is the [31mdevelopment[39m (un-built) Cypress CLI.
 "
 `;
 
@@ -43,36 +43,36 @@ exports[`exec info > prints collected info without env vars > cypress info witho
 Proxy Settings: none detected
 Environment Variables: none detected
 
-Application Data: /user/app/data/path
-Browser Profiles: /user/app/data/path/to/browsers
-Binary Caches: /user/path/to/binary/cache
+Application Data: [36m/user/app/data/path[39m
+Browser Profiles: [36m/user/app/data/path/to/browsers[39m
+Binary Caches: [36m/user/path/to/binary/cache[39m
 
-Cypress Version: 0.0.0-development (stable)
-System Platform: linux (Foo - OsVersion)
-System Memory: 1.2 GB free 400 MB
+Cypress Version: [32m0.0.0-development[39m [32m(stable)[39m
+System Platform: [32mlinux[39m ([32mFoo - OsVersion[39m)
+System Memory: [32m1.2 GB[39m free [32m400 MB[39m
 "
 `;
 
 exports[`exec info > prints proxy and cypress env vars > cypress info with proxy and vars 1`] = `
 "
 Proxy Settings:
-HTTP_PROXY: some proxy variable
-HTTPS_PROXY: another proxy variable
-NO_PROXY: no proxy variable
+HTTP_PROXY: [32msome proxy variable[39m
+HTTPS_PROXY: [32manother proxy variable[39m
+NO_PROXY: [32mno proxy variable[39m
 
-Learn More: https://on.cypress.io/proxy-configuration
+Learn More: [34m[4mhttps://on.cypress.io/proxy-configuration[24m[39m
 
 Environment Variables:
-CYPRESS_ENV_VAR1: my Cypress variable
-CYPRESS_ENV_VAR2: my other Cypress variable
+CYPRESS_ENV_VAR1: [32mmy Cypress variable[39m
+CYPRESS_ENV_VAR2: [32mmy other Cypress variable[39m
 
-Application Data: /user/app/data/path
-Browser Profiles: /user/app/data/path/to/browsers
-Binary Caches: /user/path/to/binary/cache
+Application Data: [36m/user/app/data/path[39m
+Browser Profiles: [36m/user/app/data/path/to/browsers[39m
+Binary Caches: [36m/user/path/to/binary/cache[39m
 
-Cypress Version: 0.0.0-development (stable)
-System Platform: linux (Foo - OsVersion)
-System Memory: 1.2 GB free 400 MB
+Cypress Version: [32m0.0.0-development[39m [32m(stable)[39m
+System Platform: [32mlinux[39m ([32mFoo - OsVersion[39m)
+System Memory: [32m1.2 GB[39m free [32m400 MB[39m
 "
 `;
 
@@ -80,17 +80,17 @@ exports[`exec info > redacts sensitive cypress variables > cypress redacts sensi
 "
 Proxy Settings: none detected
 Environment Variables:
-CYPRESS_ENV_VAR1: my Cypress variable
-CYPRESS_ENV_VAR2: my other Cypress variable
-CYPRESS_PROJECT_ID: abc123
-CYPRESS_RECORD_KEY: <redacted>
+CYPRESS_ENV_VAR1: [32mmy Cypress variable[39m
+CYPRESS_ENV_VAR2: [32mmy other Cypress variable[39m
+CYPRESS_PROJECT_ID: [32mabc123[39m
+CYPRESS_RECORD_KEY: [32m<redacted>[39m
 
-Application Data: /user/app/data/path
-Browser Profiles: /user/app/data/path/to/browsers
-Binary Caches: /user/path/to/binary/cache
+Application Data: [36m/user/app/data/path[39m
+Browser Profiles: [36m/user/app/data/path/to/browsers[39m
+Binary Caches: [36m/user/path/to/binary/cache[39m
 
-Cypress Version: 0.0.0-development (stable)
-System Platform: linux (Foo - OsVersion)
-System Memory: 1.2 GB free 400 MB
+Cypress Version: [32m0.0.0-development[39m [32m(stable)[39m
+System Platform: [32mlinux[39m ([32mFoo - OsVersion[39m)
+System Memory: [32m1.2 GB[39m free [32m400 MB[39m
 "
 `;
