@@ -1443,109 +1443,124 @@ jobs:
           name: Check env canaries
       - build-and-persist
     working_directory: ~/cypress
-executors:
-  cy-doc:
-    docker:
-      - image: cypress/base-internal:22.15.1-bullseye
+  check-ts:
     environment:
-      PLATFORM: linux
-    resource_class: medium
-  darwin-amd64:
+      CIRCLE_ARTIFACTS: /tmp/artifacts
+      COLUMNS: 100
+      LINES: 24
+      TZ: /usr/share/zoneinfo/America/New_York
+    executor: <<parameters.executor>>
+    parallelism: 1
+    parameters:
+      executor:
+        default: cy-doc
+        type: executor
+      only-cache-for-root-user:
+        default: false
+        type: boolean
+    steps:
+      - restore_cached_workspace
+      - install-required-node
+      - run:
+          command: NODE_OPTIONS=--max_old_space_size=4096 yarn check-ts --concurrency=1
+          name: Check TS Types
+    working_directory: ~/cypress
+  cli-visual-tests:
     environment:
-      PLATFORM: darwin
-    machine: true
-  darwin-arm64:
+      CIRCLE_ARTIFACTS: /tmp/artifacts
+      COLUMNS: 100
+      LINES: 24
+      TZ: /usr/share/zoneinfo/America/New_York
+    executor: <<parameters.executor>>
+    parallelism: 1
+    parameters:
+      executor:
+        default: cy-doc
+        type: executor
+      only-cache-for-root-user:
+        default: false
+        type: boolean
+    resource_class: small
+    steps:
+      - restore_cached_workspace
+      - run: mkdir -p cli/visual-snapshots
+      - run:
+          command: node cli/bin/cypress info --dev | yarn --silent term-to-html | node
+            scripts/sanitize --type cli-info >
+            cli/visual-snapshots/cypress-info.html
+          environment:
+            FORCE_COLOR: 2
+      - run:
+          command: node cli/bin/cypress help | yarn --silent term-to-html >
+            cli/visual-snapshots/cypress-help.html
+          environment:
+            FORCE_COLOR: 2
+      - run:
+          command: |
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
+            PERCY_ENABLE=${PERCY_TOKEN:-0} \
+            PERCY_PARALLEL_TOTAL=-1 \
+            yarn percy snapshot ./cli/visual-snapshots
+          name: Upload CLI snapshots for diffing
+    working_directory: ~/cypress
+  create-and-trigger-packaging-artifacts:
     environment:
-      PLATFORM: darwin
-    machine: true
-  kitchensink-executor:
-    docker:
-      - image: cypress/base-internal:22.15.1-bullseye
+      CIRCLE_ARTIFACTS: /tmp/artifacts
+      COLUMNS: 100
+      LINES: 24
+      TZ: /usr/share/zoneinfo/America/New_York
+    executor: <<parameters.executor>>
+    parallelism: 1
+    parameters:
+      executor:
+        default: cy-doc
+        type: executor
+      only-cache-for-root-user:
+        default: false
+        type: boolean
+      resource_class:
+        default: small
+        type: string
+    resource_class: << parameters.resource_class >>
+    steps:
+      - maybe_skip_binary_jobs
+      - restore_cached_workspace
+      - check-if-binary-exists
+      - setup_should_persist_artifacts
+      - trigger-publish-binary-pipeline
+    working_directory: ~/cypress
+  create-build-artifacts:
     environment:
-      PLATFORM: linux
-    resource_class: medium
-  linux-arm64:
-    environment:
-      DISABLE_SNAPSHOT_REQUIRE: 1
-      PLATFORM: linux
-    machine:
-      image: ubuntu-2004:2024.11.1
-    resource_class: arm.medium
-  linux-x64:
-    environment:
-      PLATFORM: linux
-    machine:
-      image: ubuntu-2004:2024.11.1
-    resource_class: medium
-  non-root-docker-user:
-    docker:
-      - image: cypress/base-internal:22.15.1-bullseye
-        user: node
-    environment:
-      PLATFORM: linux
-  windows:
-    environment:
-      PLATFORM: windows
-    machine:
-      image: windows-server-2022-gui:stable
-      shell: bash.exe -eo pipefail
-    resource_class: windows.large
-firefox-stable-version: "142.0"
-jobs:
-    binary-system-tests:
-        environment:
-            CIRCLE_ARTIFACTS: /tmp/artifacts
-            COLUMNS: 100
-            LINES: 24
-            PLATFORM: linux
-            TZ: /usr/share/zoneinfo/America/New_York
-        machine:
-            docker_layer_caching: true
-            image: ubuntu-2004:2024.05.1
-        parallelism: 2
-        resource_class: medium
-        steps:
-            - maybe_skip_binary_jobs
-            - run-binary-system-tests
-        working_directory: ~/cypress
-    build:
-        environment:
-            CIRCLE_ARTIFACTS: /tmp/artifacts
-            COLUMNS: 100
-            LINES: 24
-            TZ: /usr/share/zoneinfo/America/New_York
-        executor: <<parameters.executor>>
-        parallelism: 1
-        parameters:
-            executor:
-                default: cy-doc
-                type: executor
-            is_contributor_pr:
-                default: false
-                type: boolean
-            only-cache-for-root-user:
-                default: false
-                type: boolean
-            resource_class:
-                default: large
-                type: string
-        resource_class: << parameters.resource_class >>
-        steps:
-            - restore_cached_workspace
-            - when:
-                condition:
-                    equal:
-                        - environment:
-                            PLATFORM: windows
-                          machine:
-                            image: windows-server-2022-gui:stable
-                            shell: bash.exe -eo pipefail
-                          resource_class: windows.large
-                        - << parameters.executor >>
-                steps:
-                    - run:
-                        command: rm -rf node_modules && yarn
-                        name: reinstall dependencies to work around cache issue (Windows only)
+      CIRCLE_ARTIFACTS: /tmp/artifacts
+      COLUMNS: 100
+      LINES: 24
+      TZ: /usr/share/zoneinfo/America/New_York
+    executor: <<parameters.executor>>
+    parallelism: 1
+    parameters:
+      executor:
+        default: cy-doc
+        type: executor
+      only-cache-for-root-user:
+        default: false
+        type: boolean
+      resource_class:
+        default: xlarge
+        type: string
+    resource_class: << parameters.resource_class >>
+    steps:
+      - restore_cached_workspace
+      - when:
+          condition:
+            equal:
+              - environment:
+                  PLATFORM: windows
+                machine:
+                  image: windows-server-2022-gui:stable
+                  shell: bash.exe -eo pipefail
+                resource_class: windows.large
+              - << parameters.executor >>
+          steps:
             - run:
                 command: rm -rf node_modules && yarn
                 name: reinstall dependencies to work around cache issue (Windows only)
@@ -3418,10 +3433,6 @@ jobs:
           steps:
             - run:
                 command: |
-                  source ./scripts/ensure-node.sh
-                name: Ensure Node
-            - run:
-                command: |
                   apt-get update && apt-get install -y sudo
                   cat \<<'EOF' | sudo tee /etc/docker/daemon.json
                   {
@@ -3437,16 +3448,22 @@ jobs:
                 name: Enable IPv6 in Docker
             - run:
                 command: |
+                  source ./scripts/ensure-node.sh
                   yarn test-scripts
                 name: Test scripts
             - run:
                 command: |
+                  source ./scripts/ensure-node.sh
                   # this is needed since we are have to be running as root to test some packages
                   sudo -E env "PATH=$PATH" yarn test
                 name: Test each individual package
-            - run: yarn lerna run types
+            - run:
+                command: |
+                  source ./scripts/ensure-node.sh
+                  yarn lerna run types
+                name: Type check
             - sanitize-verify-and-store-mocha-results:
-                expectedResultCount: 19
+                expectedResultCount: 18
     working_directory: ~/cypress
   v8-integration-tests:
     environment:
