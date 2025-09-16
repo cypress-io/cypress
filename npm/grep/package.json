@@ -2,7 +2,6 @@
   "name": "@cypress/grep",
   "version": "0.0.0-development",
   "description": "Filter tests using substring",
-  "main": "dist/support.js",
   "scripts": {
     "build": "tsc",
     "cypress:open": "node ../../scripts/cypress.js open",
@@ -24,11 +23,20 @@
   "peerDependencies": {
     "cypress": ">=10"
   },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      ".": "./dist/index.js"
+    },
+    "./plugin": {
+      "types": "./dist/plugin.d.ts",
+      ".": "./dist/plugin.js"
+    }
+  },
   "files": [
     "dist",
     "index.d.ts"
   ],
-  "types": "index.d.ts",
   "license": "MIT",
   "repository": {
     "type": "git",

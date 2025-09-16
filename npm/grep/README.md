@@ -60,7 +60,7 @@ const { defineConfig } = require('cypress')
 module.exports = defineConfig({
   e2e: {
     setupNodeEvents(on, config) {
-      const { plugin } = require('@cypress/grep')
+      const { plugin } = require('@cypress/grep/plugin')
       plugin(config)
       return config
     },
@@ -72,7 +72,7 @@ Or using ES modules / TypeScript:
 
 ```ts
 // cypress.config.ts
-import { plugin } from '@cypress/grep'
+import { plugin } from '@cypress/grep/plugin'
 
 export default defineConfig({
   e2e: {
@@ -245,7 +245,7 @@ npx cypress run --env grepUntagged=true
 
 ```js
 import { defineConfig } from 'cypress'
-import { plugin } from '@cypress/grep'
+import { plugin } from '@cypress/grep/plugin'
 
 export default defineConfig({
   env: {

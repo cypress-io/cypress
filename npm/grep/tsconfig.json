@@ -8,6 +8,7 @@
     "moduleResolution": "node",    
     "resolveJsonModule": true,
     "skipLibCheck": true,
+    "declaration": true,
   },
   "types": ["node", "mocha", "cypress"],
   "include": [

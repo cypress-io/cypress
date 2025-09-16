@@ -2414,7 +2414,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Run tests
-          command: yarn workspace @cypress/grep cy:run
+          command: yarn workspace @cypress/grep cypress:run
       - sanitize-verify-and-store-mocha-results:
           testResultsPath: npm/grep/test_results
 

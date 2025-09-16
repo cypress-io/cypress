@@ -1,18 +1,12 @@
-/// <reference types="../index.d.ts" />
+/// <reference types="cypress" />
 
 import { parseGrep, shouldTestRun } from './utils'
 import { version } from '../package.json'
 import debug from 'debug'
-
 // @ts-ignore
 const debugInstance = debug('@cypress/grep')
 
 debugInstance.log = console.info.bind(console)
-
-// preserve the real "it" function
-const _it = it
-const _describe = describe
-
 interface SuiteStackItem {
   name: string
   tags?: string[]
@@ -20,6 +14,25 @@ interface SuiteStackItem {
 
 // function is intended to be called from the support file
 export function register (): void {
+  // preserve the real "it" function
+  const _it = it
+  const _describe = describe
+
+  // define Cypress.grep function
+  if (!Cypress.grep) {
+    Cypress.grep = function grep (grep?: string, tags?: string, burn?: string): void {
+      Cypress.env('grep', grep)
+      Cypress.env('grepTags', tags)
+      Cypress.env('grepBurn', burn)
+      Cypress.env('grep-tags', null)
+      Cypress.env('grep-burn', null)
+      Cypress.env('burn', null)
+
+      debugInstance('set new grep to "%o" restarting tests', { grep, tags, burn })
+      restartTests()
+    }
+  }
+
   let grep: string | undefined = Cypress.env('grep')
 
   if (grep) {
@@ -187,18 +200,4 @@ function restartTests (): void {
   setTimeout(() => {
     window.top.document.querySelector<HTMLButtonElement>('.reporter .restart').click()
   }, 0)
-}
-
-if (!Cypress.grep) {
-  Cypress.grep = function grep (grep?: string, tags?: string, burn?: string): void {
-    Cypress.env('grep', grep)
-    Cypress.env('grepTags', tags)
-    Cypress.env('grepBurn', burn)
-    Cypress.env('grep-tags', null)
-    Cypress.env('grep-burn', null)
-    Cypress.env('burn', null)
-
-    debugInstance('set new grep to "%o" restarting tests', { grep, tags, burn })
-    restartTests()
-  }
 }
