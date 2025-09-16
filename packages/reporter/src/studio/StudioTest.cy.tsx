@@ -111,7 +111,7 @@ describe('StudioTest', () => {
     cy.get('.studio-single-test-container').should('be.visible')
     cy.get('.studio-header__test-section').should('be.visible')
     cy.get('.studio-single-test-attempts').should('be.visible')
-    cy.get('.single-studio-test').should('have.css', 'border-bottom-style', 'none').and('have.css', 'border-right-style', 'none')
+    cy.get('.attempts.single-studio-test').should('have.css', 'border-bottom-style', 'none').and('have.css', 'border-right-style', 'none')
     cy.get('[data-cy="studio-single-test-title"]').should('contain.text', 'should display correct content')
     cy.get('[data-cy="spec-duration"]').should('contain', '00:02')
     cy.percySnapshot()
