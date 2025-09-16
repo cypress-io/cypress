@@ -43,6 +43,12 @@ describe('lib/connect', function () {
     // Error: listen EADDRNOTAVAIL ::1
     // NOTE: add an ipv6 lo if to the docker container
     it('resolves localhost on ::1 immediately', function () {
+      // If we are on CI and IPV6 is explicitly disabled (like in the contributor PR workflow)
+      // then we skip this test
+      if (process.env.CIRCLE_IPV6_DISABLED) {
+        this.skip()
+      }
+
       this.timeout(50)
 
       const server = net.createServer(_.partialRight(_.invoke, 'close'))
