@@ -1752,10 +1752,6 @@ jobs:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
             - run:
-                name: Ensure Node
-                command: |
-                  source ./scripts/ensure-node.sh
-            - run:
                 name: Enable IPv6 in Docker
                 command: |
                   apt-get update && apt-get install -y sudo
@@ -1773,14 +1769,20 @@ jobs:
             - run:
                 name: Test scripts
                 command: |
+                  source ./scripts/ensure-node.sh
                   yarn test-scripts
             - run:
                 name: Test each individual package
                 command: |
+                  source ./scripts/ensure-node.sh
                   # this is needed since we are have to be running as root to test some packages
                   sudo -E env "PATH=$PATH" yarn test
             # run type checking for each individual package
-            - run: yarn lerna run types
+            - run:
+                name: Type check
+                command: |
+                  source ./scripts/ensure-node.sh
+                  yarn lerna run types
             - sanitize-verify-and-store-mocha-results:
                 expectedResultCount: 19
 

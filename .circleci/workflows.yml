@@ -3433,10 +3433,6 @@ jobs:
           steps:
             - run:
                 command: |
-                  source ./scripts/ensure-node.sh
-                name: Ensure Node
-            - run:
-                command: |
                   apt-get update && apt-get install -y sudo
                   cat \<<'EOF' | sudo tee /etc/docker/daemon.json
                   {
@@ -3452,14 +3448,20 @@ jobs:
                 name: Enable IPv6 in Docker
             - run:
                 command: |
+                  source ./scripts/ensure-node.sh
                   yarn test-scripts
                 name: Test scripts
             - run:
                 command: |
+                  source ./scripts/ensure-node.sh
                   # this is needed since we are have to be running as root to test some packages
                   sudo -E env "PATH=$PATH" yarn test
                 name: Test each individual package
-            - run: yarn lerna run types
+            - run:
+                command: |
+                  source ./scripts/ensure-node.sh
+                  yarn lerna run types
+                name: Type check
             - sanitize-verify-and-store-mocha-results:
                 expectedResultCount: 19
     working_directory: ~/cypress
