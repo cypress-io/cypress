@@ -26,7 +26,7 @@ exports['e2e prompt / fails when experimentalPromptCommand is not set'] = `
 
   1) prompt
        should fail when experimentalPromptCommand is not set:
-     CypressError: \`cy.prompt\` cannot be called without the \`experimentalPromptCommand\` being set. 
+     PromptNotEnabledError: \`cy.prompt\` cannot be called without the \`experimentalPromptCommand\` being set. 
 
 Please set this in your Cypress config file to continue using \`cy.prompt\`.
       [stack trace lines]
