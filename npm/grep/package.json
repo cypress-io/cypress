@@ -16,6 +16,7 @@
     "cypress:run:this": "node ../../scripts/cypress.js run --env grep='this context' --config specPattern='**/this.cy.ts'" ,
     "cypress:run:tags": "node ../../scripts/cypress.js run --env grepTags=smoke --config specPattern='**/tags/*.cy.ts'" ,
     "cypress:run:each": "node ../../scripts/cypress.js run --config specPattern='**/each.cy.ts'" ,
+    "cypress:run:grep": "node ../../scripts/cypress.js run --config specPattern='**/grep-task.cy.ts'" ,
     "test": "vitest",
     "lint": "eslint"
   },

@@ -10,7 +10,7 @@
     "skipLibCheck": true,
     "declaration": true,
   },
-  "types": ["node", "mocha", "cypress"],
+  "types": ["node", "cypress"],
   "include": [
     "src"
   ],

@@ -2413,7 +2413,7 @@ jobs:
     steps:
       - restore_cached_workspace
       - run:
-          name: Run before tag tests
+          name: Run before tag tags
           command: yarn workspace @cypress/grep cypress:run:tags:before
       - run:
           name: Run describe tag tests
@@ -2445,6 +2445,12 @@ jobs:
       - run:
           name: Run each test
           command: yarn workspace @cypress/grep cypress:run:each
+      - run:
+          name: Run grep task test
+          command: yarn workspace @cypress/grep cypress:run:grep
+      - run:
+          name: Run unit tests
+          command: yarn workspace @cypress/grep test
 
   npm-eslint-plugin-dev:
     <<: *defaults
