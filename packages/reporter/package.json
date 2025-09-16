@@ -15,10 +15,10 @@
     "watch": "yarn build-for-tests --watch --progress"
   },
   "devDependencies": {
-    "@cypress-design/constants-button": "^1.9.0",
+    "@cypress-design/constants-button": "^1.10.0",
     "@cypress-design/css": "1.2.0",
-    "@cypress-design/react-button": "^1.10.1",
-    "@cypress-design/react-icon": "1.30.0",
+    "@cypress-design/react-button": "^1.11.0",
+    "@cypress-design/react-icon": "^1.31.0",
     "@cypress/react-tooltip": "0.5.3",
     "@fontsource/mulish": "4.3.0",
     "@fontsource/open-sans": "4.3.0",

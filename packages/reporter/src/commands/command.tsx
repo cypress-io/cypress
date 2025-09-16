@@ -4,6 +4,7 @@ import Markdown from 'markdown-it'
 import { observer } from 'mobx-react'
 import React, { useState, useEffect } from 'react'
 import Tooltip from '@cypress/react-tooltip'
+import Button from '@cypress-design/react-button'
 
 import appState from '../lib/app-state'
 import events from '../lib/events'
@@ -23,7 +24,7 @@ import ChevronIcon from '@packages/frontend-shared/src/assets/icons/chevron-down
 import HiddenIcon from '@packages/frontend-shared/src/assets/icons/general-eye-closed_x16.svg'
 import PinIcon from '@packages/frontend-shared/src/assets/icons/object-pin_x16.svg'
 import RunningIcon from '@packages/frontend-shared/src/assets/icons/status-running_x16.svg'
-import AngleBracketsIcon from '@packages/frontend-shared/src/assets/icons/technology-angle-brackets_x16.svg'
+import { IconTechnologyAngleBrackets } from '@cypress-design/react-icon'
 
 const displayName = (model: CommandModel) => model.displayName || model.name
 const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
@@ -535,13 +536,22 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
                 <CommandControls model={model} commandName={commandName} />
               </div>
               {model.isCyPrompt && model.state === 'passed' && (
-                <div className='command-prompt-get-code' onClick={(e) => {
-                  e.stopPropagation()
-                  events.emit('prompt:get-code', { testId: model.testId, logId: model.id })
-                }}>
-                  <AngleBracketsIcon className='command-prompt-get-code-indicator' width={12} height={12} />
+                <Button
+                  variant="indigo-dark-mode"
+                  size="20"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    events.emit('prompt:get-code', { testId: model.testId, logId: model.id })
+                  }}
+                  className="command-prompt-get-code mr-1 whitespace-nowrap"
+                >
+                  <IconTechnologyAngleBrackets
+                    className='command-prompt-get-code-indicator pr-1'
+                    size='16'
+                    strokeColor='white'
+                  />
                   <span>Get code</span>
-                </div>
+                </Button>
               )}
             </div>
           </FlashOnClick>
