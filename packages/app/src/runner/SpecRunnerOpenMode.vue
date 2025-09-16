@@ -98,6 +98,7 @@
             :event-manager="eventManager"
             :studio-status="studioStatus"
             :aut-url-selector="autUrlSelector"
+            :user-project-status-store="userProjectStatusStore"
           />
         </HideDuringScreenshot>
       </template>
@@ -136,6 +137,7 @@ import { runnerConstants } from './runner-constants'
 import { useStudioStore } from '../store/studio-store'
 import StudioPanel from '../studio/StudioPanel.vue'
 import { useSubscription } from '../graphql'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 
 // this is used by the StudioPanel to access the AUT URL input
 const autUrlSelector = '.aut-url-input'
@@ -148,6 +150,8 @@ const {
   absoluteStudioMinimum,
   collapsedNavBarWidth,
 } = runnerConstants
+
+const userProjectStatusStore = useUserProjectStatusStore()
 
 gql`
 fragment SpecRunner_Preferences on Query {

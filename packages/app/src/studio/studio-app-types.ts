@@ -2,6 +2,8 @@
 // `studio` bundle. It is downloaded and copied to the app.
 // It should not be modified directly in the app.
 
+import { UserProjectStatusStore } from '@cy/store/user-project-status-store'
+
 export type RecordingState = 'recording' | 'paused' | 'disabled'
 
 export interface StudioPanelProps {
@@ -13,6 +15,7 @@ export interface StudioPanelProps {
   useCypress?: CypressShape
   autUrlSelector?: string
   studioAiAvailable?: boolean
+  userProjectStatusStore: UserProjectStatusStore
 }
 
 export type StudioPanelShape = (props: StudioPanelProps) => JSX.Element
