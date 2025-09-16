@@ -32124,7 +32124,7 @@ vite-svg-loader@5.1.0:
   dependencies:
     svgo "^3.0.2"
 
-vite@6.3.6:
+vite@6.3.6, vite@^6.3.6:
   version "6.3.6"
   resolved "https://registry.yarnpkg.com/vite/-/vite-6.3.6.tgz#69a976b64930750d40219fbc68c5200874d315c1"
   integrity sha512-0msEVHJEScQbhkbVTb/4iHZdJ6SXp/AvxL2sjwYQFfBqleHtnCqv1J3sa9zbWz/6kW1m9Tfzn92vW+kZ1WV6QA==
@@ -32149,7 +32149,7 @@ vite@^5.0.0:
   optionalDependencies:
     fsevents "~2.3.3"
 
-"vite@^5.0.0 || ^6.0.0 || ^7.0.0-0", vite@^7.0.0:
+"vite@^5.0.0 || ^6.0.0 || ^7.0.0-0":
   version "7.1.5"
   resolved "https://registry.yarnpkg.com/vite/-/vite-7.1.5.tgz#4dbcb48c6313116689be540466fc80faa377be38"
   integrity sha512-4cKBO9wR75r0BeIWWWId9XK9Lj6La5X846Zw9dFfzMRw38IlTk2iCcUt6hsyiDRcPidc55ZParFYDXi0nXOeLQ==
