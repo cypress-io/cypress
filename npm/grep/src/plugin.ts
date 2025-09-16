@@ -1,7 +1,7 @@
 import debugModule from 'debug'
-import globby from 'globby'
+import { sync as globbySync } from 'globby'
 import { getTestNames } from 'find-test-names'
-import fs from 'fs'
+import { readFileSync } from 'fs'
 import { version } from '../package.json'
 import { parseGrep, shouldTestRun } from './utils'
 const debug = debugModule('@cypress/grep')
@@ -16,7 +16,7 @@ interface CypressConfigOptions {
  * Prints the @cypress/grep environment values if any.
  * @param {Cypress.ConfigOptions} config
  */
-function cypressGrepPlugin (config: CypressConfigOptions): CypressConfigOptions {
+export function plugin (config: CypressConfigOptions): CypressConfigOptions {
   if (!config || !config.env) {
     return config
   }
@@ -74,7 +74,7 @@ function cypressGrepPlugin (config: CypressConfigOptions): CypressConfigOptions 
     debug('specPattern', specPattern)
     debug('excludeSpecPattern', excludeSpecPattern)
     debug('integrationFolder', integrationFolder)
-    const specFiles = globby.sync(specPattern, {
+    const specFiles = globbySync(specPattern, {
       cwd: integrationFolder,
       ignore: Array.isArray(excludeSpecPattern) ? excludeSpecPattern : [excludeSpecPattern],
       absolute: true,
@@ -90,7 +90,7 @@ function cypressGrepPlugin (config: CypressConfigOptions): CypressConfigOptions 
 
       debug('parsed grep %o', parsedGrep)
       greppedSpecs = specFiles.filter((specFile: string) => {
-        const text = fs.readFileSync(specFile, { encoding: 'utf8' })
+        const text = readFileSync(specFile, { encoding: 'utf8' })
 
         try {
           const names = getTestNames(text)
@@ -121,7 +121,7 @@ function cypressGrepPlugin (config: CypressConfigOptions): CypressConfigOptions 
 
       debug('parsed grep tags %o', parsedGrep)
       greppedSpecs = specFiles.filter((specFile: string) => {
-        const text = fs.readFileSync(specFile, { encoding: 'utf8' })
+        const text = readFileSync(specFile, { encoding: 'utf8' })
 
         try {
           const testInfo = getTestNames(text)
@@ -159,5 +159,3 @@ function cypressGrepPlugin (config: CypressConfigOptions): CypressConfigOptions 
 
   return config
 }
-
-export default cypressGrepPlugin

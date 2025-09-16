@@ -18,7 +18,8 @@ interface SuiteStackItem {
   tags?: string[]
 }
 
-function cypressGrep (): void {
+// function is intended to be called from the support file
+export function register (): void {
   let grep: string | undefined = Cypress.env('grep')
 
   if (grep) {
@@ -201,6 +202,3 @@ if (!Cypress.grep) {
     restartTests()
   }
 }
-
-// TODO: this export likely needs to be updated to avoid a breaking change
-export default cypressGrep
