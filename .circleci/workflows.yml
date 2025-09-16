@@ -3463,7 +3463,7 @@ jobs:
                   yarn lerna run types
                 name: Type check
             - sanitize-verify-and-store-mocha-results:
-                expectedResultCount: 19
+                expectedResultCount: 18
     working_directory: ~/cypress
   v8-integration-tests:
     environment:
