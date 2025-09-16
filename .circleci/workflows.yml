@@ -3341,6 +3341,7 @@ linux-x64-contributor-workflow: &linux-x64-contributor-workflow
         requires:
           - contributor-pr
     - unit-tests:
+        executor: linux-x64
         requires:
           - build
     - verify-release-readiness:
