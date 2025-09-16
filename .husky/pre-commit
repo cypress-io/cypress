@@ -5,7 +5,7 @@
 if git diff --cached --name-only | grep -q "^\.circleci/src/"; then
   if ! which circleci > /dev/null; then
     echo "❌ Warning: CircleCI CLI not found! Install the CircleCi CLI to edit the CircleCI configuration."
-    exit 0
+    exit 1
   fi
 
   echo "Processing CircleCI configurations..."
