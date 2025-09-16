@@ -5,7 +5,7 @@ const yaml = require('yaml')
 const CHROME_STABLE_KEY = 'chrome-stable-version'
 const CHROME_BETA_KEY = 'chrome-beta-version'
 
-export const CIRCLECI_WORKFLOWS_FILEPATH = './.circleci/src/workflows/@workflows.yml'
+const CIRCLECI_WORKFLOWS_FILEPATH = './.circleci/src/workflows/@workflows.yml'
 
 // https://developer.chrome.com/docs/versionhistory/reference/#platform-identifiers
 const getLatestVersionData = ({ channel, currentVersion }) => {
@@ -125,4 +125,5 @@ module.exports = {
   checkNeedForBranchUpdate,
   updateBrowserVersionsFile,
   updatePRTitle,
+  CIRCLECI_WORKFLOWS_FILEPATH,
 }
