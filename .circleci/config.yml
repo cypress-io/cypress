@@ -2,7 +2,7 @@ jobs:
     verify-ci-should-run:
         docker:
             - image: cimg/node:current
-        resource_class: medium
+        resource_class: small
         steps:
             - run:
                 command: |

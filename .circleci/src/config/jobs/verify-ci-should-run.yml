@@ -1,4 +1,4 @@
-resource_class: medium
+resource_class: small
 docker:
   - image: cimg/node:current
 steps:
