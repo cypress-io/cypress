@@ -1,0 +1,15 @@
+[
+  {
+    "name": "before.cy.ts",
+    "tests": [
+      {
+        "name": "Runs before and beforeEach when first test is skipped",
+        "state": "pending"
+      },
+      {
+        "name": "Runs before and beforeEach when first test is skipped",
+        "state": "passed"
+      }
+    ]
+  }
+]

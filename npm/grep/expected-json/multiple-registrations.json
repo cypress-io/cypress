@@ -1,0 +1,11 @@
+[
+  {
+    "name": "multiple-registrations.cy.ts",
+    "tests": [
+      {
+        "name": "hello world",
+        "state": "passed"
+      }
+    ]
+  }
+]

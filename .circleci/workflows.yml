@@ -2002,31 +2002,31 @@ jobs:
     resource_class: small
     steps:
       - restore_cached_workspace
-      - run: yarn workspace @cypress/grep cypress:run:tags:before
-      - run: yarn workspace @cypress/grep cypress:run:tags:describe
-      - run: yarn workspace @cypress/grep cypress:run:tags:config
-      - run: yarn workspace @cypress/grep cypress:run:burn
-      - run: yarn workspace @cypress/grep cypress:run:tags:inherit
-      - run: yarn workspace @cypress/grep cypress:run:multiple-registrations
-      - run: yarn workspace @cypress/grep cypress:run:tags:nested-describe
-      - run: yarn workspace @cypress/grep cypress:run:skip
-      - run: yarn workspace @cypress/grep cypress:run:this
-      - run: yarn workspace @cypress/grep cypress:run:tags
-      - run: yarn workspace @cypress/grep cypress:run:each
-      - run: yarn workspace @cypress/grep cypress:run:grep
-      - run: yarn workspace @cypress/grep cypress:run:tags:or
-      - run: yarn workspace @cypress/grep cypress:run:tags:and
-      - run: yarn workspace @cypress/grep cypress:run:tags:and:not
-      - run: yarn workspace @cypress/grep cypress:run:or
-      - run: yarn workspace @cypress/grep cypress:run:and
-      - run: yarn workspace @cypress/grep cypress:run:and:not
-      - run: yarn workspace @cypress/grep cypress:run:filter:specs
-      - run: yarn workspace @cypress/grep cypress:run:tags:filter:specs
-      - run: yarn workspace @cypress/grep cypress:run:omit:specs
-      - run: yarn workspace @cypress/grep cypress:run:tags:omit:specs
-      - run: yarn workspace @cypress/grep cypress:run:untagged
-      - run: yarn workspace @cypress/grep cypress:run:tag:inverted
-      - run: yarn workspace @cypress/grep cypress:run:inverted
+      - run: yarn workspace @cypress/grep and
+      - run: yarn workspace @cypress/grep and:not
+      - run: yarn workspace @cypress/grep burn
+      - run: yarn workspace @cypress/grep each
+      - run: yarn workspace @cypress/grep filter:specs
+      - run: yarn workspace @cypress/grep grep
+      - run: yarn workspace @cypress/grep inverted
+      - run: yarn workspace @cypress/grep multiple-registrations
+      - run: yarn workspace @cypress/grep omit:specs
+      - run: yarn workspace @cypress/grep or
+      - run: yarn workspace @cypress/grep skip
+      - run: yarn workspace @cypress/grep tags
+      - run: yarn workspace @cypress/grep tags:inverted
+      - run: yarn workspace @cypress/grep tags:and
+      - run: yarn workspace @cypress/grep tags:and:not
+      - run: yarn workspace @cypress/grep tags:before
+      - run: yarn workspace @cypress/grep tags:config
+      - run: yarn workspace @cypress/grep tags:describe
+      - run: yarn workspace @cypress/grep tags:filter:specs
+      - run: yarn workspace @cypress/grep tags:inherit
+      - run: yarn workspace @cypress/grep tags:nested-describe
+      - run: yarn workspace @cypress/grep tags:omit:specs
+      - run: yarn workspace @cypress/grep tags:or
+      - run: yarn workspace @cypress/grep this
+      - run: yarn workspace @cypress/grep untagged
       - run:
           command: yarn workspace @cypress/grep test
           name: Run unit tests
