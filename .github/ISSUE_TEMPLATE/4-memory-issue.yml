@@ -4,7 +4,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Have a question? 👉 [Ask in chat](https://on.cypress.io/discord) or [start a new discussion](https://github.com/cypress-io/cypress/discussions).
+        Have a question? 👉 [Ask in chat](https://on.cypress.io/chat) or [start a new discussion](https://github.com/cypress-io/cypress/discussions).
 
         Prior to logging a memory issue, please make sure you are running the latest version of Cypress and have enabled [`experimentalMemoryManagement`](https://on.cypress.io/experiments) for Chromium-based browsers (introduced in Cypress 12.4.0). 
 
