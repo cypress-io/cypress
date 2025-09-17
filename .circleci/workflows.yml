@@ -3392,9 +3392,6 @@ jobs:
       executor:
         default: linux-x64
         type: executor
-      is_contributor_pr:
-        default: false
-        type: boolean
       only-cache-for-root-user:
         default: false
         type: boolean
@@ -3433,7 +3430,6 @@ jobs:
           steps:
             - run:
                 command: |
-                  apt-get update && apt-get install -y sudo
                   cat \<<'EOF' | sudo tee /etc/docker/daemon.json
                   {
                     "ipv6": true,
@@ -3461,7 +3457,7 @@ jobs:
                 command: |
                   source ./scripts/ensure-node.sh
                   yarn lerna run types
-                name: Type check
+                name: Test types
             - sanitize-verify-and-store-mocha-results:
                 expectedResultCount: 18
     working_directory: ~/cypress

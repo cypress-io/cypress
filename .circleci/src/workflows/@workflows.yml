@@ -1723,9 +1723,6 @@ jobs:
     <<: *defaults
     parameters:
       <<: *defaultsParameters
-      is_contributor_pr:
-        type: boolean
-        default: false
       resource_class:
         type: string
         default: medium
@@ -1754,7 +1751,6 @@ jobs:
             - run:
                 name: Enable IPv6 in Docker
                 command: |
-                  apt-get update && apt-get install -y sudo
                   cat \<<'EOF' | sudo tee /etc/docker/daemon.json
                   {
                     "ipv6": true,
@@ -1777,9 +1773,8 @@ jobs:
                   source ./scripts/ensure-node.sh
                   # this is needed since we are have to be running as root to test some packages
                   sudo -E env "PATH=$PATH" yarn test
-            # run type checking for each individual package
             - run:
-                name: Type check
+                name: Test types
                 command: |
                   source ./scripts/ensure-node.sh
                   yarn lerna run types
