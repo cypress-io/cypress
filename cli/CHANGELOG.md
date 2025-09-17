@@ -7,6 +7,10 @@ _Released 9/23/2025 (PENDING)_
 
 - In development mode, Electron `stderr` is piped directly to Cypress' `stderr` to make it clear why Electron failed to start, if it fails to start. Fixes [#32358](https://github.com/cypress-io/cypress/issues/32358). Addressed in [32468](https://github.com/cypress-io/cypress/pull/32468).
 
+**Misc**
+
+- Update the styles for command grouping 'line' so on expansion is displayed correctly. Addressed in [#32521](https://github.com/cypress-io/cypress/pull/32521)
+
 ## 15.2.0
 
 _Released 9/9/2025_
