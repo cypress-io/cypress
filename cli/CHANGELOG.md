@@ -9,7 +9,8 @@ _Released 9/23/2025 (PENDING)_
 
 **Misc:**
 
- - Updated the Cypress Studio panel to not show bottom border. Addresses [#32478](https://github.com/cypress-io/cypress/issues/32478).
+- Update the styles for command grouping 'line' so on expansion it is displayed correctly. Addressed in [#32521](https://github.com/cypress-io/cypress/pull/32521)
+- Updated the Cypress Studio panel to not show bottom border. Addresses [#32478](https://github.com/cypress-io/cypress/issues/32478).
 
 ## 15.2.0
 
