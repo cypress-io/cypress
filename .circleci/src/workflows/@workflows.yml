@@ -8,6 +8,11 @@ version: 2.1
 chrome-stable-version: &chrome-stable-version "140.0.7339.127"
 chrome-beta-version: &chrome-beta-version "141.0.7390.16"
 firefox-stable-version: &firefox-stable-version "142.0"
+base-internal-bullseye: &base-internal-bullseye cypress/base-internal:22.18.0-bullseye
+base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.18.0-yarn-berry
+base-internal-minimum-node: &base-internal-minimum-node cypress/base-internal:22.15.1
+ubuntu-2004-current: &ubuntu-2004-current ubuntu-2004:2024.11.1
+ubuntu-2004-older: &ubuntu-2004-older ubuntu-2004:2024.05.1
 
 orbs:
   browser-tools: circleci/browser-tools@2.1.1
@@ -39,7 +44,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/base-internal:22.15.1-bullseye
+      - image: *base-internal-bullseye
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
@@ -47,7 +52,7 @@ executors:
 
   kitchensink-executor:
     docker:
-      - image: cypress/base-internal:22.15.1-bullseye
+      - image: *base-internal-bullseye
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
@@ -56,7 +61,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/base-internal:22.15.1-bullseye
+      - image: *base-internal-bullseye
         user: node
     environment:
       PLATFORM: linux
@@ -594,9 +599,9 @@ commands:
             if [[ ! -f better_sqlite3.node ]]; then
               set -x
               apt update && apt install -y docker.io
-              docker run -d --name better-sqlite3-builder cypress/base-internal:22.15.1-glibc2.31 /bin/bash -c "sleep 1000000000"
+              docker run -d --name better-sqlite3-builder cypress/base-internal:22.18.0-glibc2.31 /bin/bash -c "sleep 1000000000"
               docker cp ~/cypress/node_modules/better-sqlite3 better-sqlite3-builder:/better-sqlite3
-              docker exec -it better-sqlite3-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install prebuild -r electron -t 36.4.0 --include-regex 'better_sqlite3.node$'"
+              docker exec -it better-sqlite3-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install prebuild -r electron -t 36.8.1 --include-regex 'better_sqlite3.node$'"
               docker cp better-sqlite3-builder:/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
               docker rm -f better-sqlite3-builder
               cp ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/better_sqlite3.node
@@ -1898,7 +1903,7 @@ jobs:
     working_directory: ~/cypress
     docker:
       # we need an image with yarn 4 berry installed on it to run this test
-      - image: cypress/base-internal:22.15.1-yarn-berry
+      - image: *base-internal-yarn-berry
     environment:
       # needed to inform the bootstrap-docker-container.sh script to link the binary in the system-test project directory
       REPO_DIR: /root/cypress
@@ -1932,7 +1937,7 @@ jobs:
     parallelism: 1
     working_directory: ~/cypress
     docker:
-      - image: cypress/base-internal:22.15.1-bullseye
+      - image: *base-internal-bullseye
     environment:
       # needed to inform the bootstrap-docker-container.sh script to link the binary in the system-test project directory
       REPO_DIR: /root/cypress
@@ -2586,7 +2591,7 @@ jobs:
     <<: *defaults
     resource_class: small
     docker:
-      - image: cypress/base-internal:22.15.1
+      - image: *base-internal-minimum-node
     steps:
       - maybe_skip_binary_jobs
       - restore_workspace_binaries

@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@packages/eslint-config": "0.0.0-development",
-    "@types/node": "^20.16.0",
+    "@types/node": "^22.18.0",
     "chai-as-promised": "^7.1.1",
     "chokidar": "^3.5.3",
     "eslint": "^9.31.0",
