@@ -3693,6 +3693,9 @@ workflows:
         - equal:
             - update-v8-snapshot-cache-on-develop
             - << pipeline.git.branch >>
+        - equal:
+            - chore/build_config_package_from_src
+            - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/
             value: << pipeline.git.branch >>
@@ -3746,6 +3749,9 @@ workflows:
             - << pipeline.git.branch >>
         - equal:
             - update-v8-snapshot-cache-on-develop
+            - << pipeline.git.branch >>
+        - equal:
+            - chore/build_config_package_from_src
             - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/
@@ -3811,6 +3817,9 @@ workflows:
             - << pipeline.git.branch >>
         - equal:
             - update-v8-snapshot-cache-on-develop
+            - << pipeline.git.branch >>
+        - equal:
+            - chore/build_config_package_from_src
             - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/
@@ -4296,6 +4305,9 @@ workflows:
             - << pipeline.git.branch >>
         - equal:
             - update-v8-snapshot-cache-on-develop
+            - << pipeline.git.branch >>
+        - equal:
+            - chore/build_config_package_from_src
             - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/
@@ -5131,6 +5143,9 @@ workflows:
             - << pipeline.git.branch >>
         - equal:
             - update-v8-snapshot-cache-on-develop
+            - << pipeline.git.branch >>
+        - equal:
+            - chore/build_config_package_from_src
             - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/

@@ -3,10 +3,11 @@
   "version": "0.0.0-development",
   "description": "Config contains the configuration types and validation function used in the cypress electron application.",
   "private": true,
-  "main": "index.js",
-  "browser": "src/browser.ts",
+  "main": "dist/index.js",
+  "browser": "dist/browser.js",
   "scripts": {
-    "build-prod": "tsc || echo 'built, with errors'",
+    "build": "rimraf dist && tsc",
+    "build-prod": "yarn build",
     "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean": "rimraf --glob './src/*.js' './src/**/*.js' './src/**/**/*.js' './test/!**__fixtures__**/**/*.js' || echo 'cleaned'",
     "clean-deps": "rimraf node_modules",
@@ -39,17 +40,17 @@
   "devDependencies": {
     "@packages/errors": "0.0.0-development",
     "@packages/network": "0.0.0-development",
-    "@packages/root": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
     "@packages/types": "0.0.0-development",
     "@types/mocha": "9.1.0",
     "babel-plugin-tester": "^10.1.0",
     "chai": "4.2.0",
-    "mocha": "7.0.1"
+    "mocha": "7.0.1",
+    "rimraf": "6.0.1"
   },
   "files": [
-    "src"
+    "dist"
   ],
-  "types": "src/index.ts",
+  "types": "dist/index.d.ts",
   "nx": {}
 }

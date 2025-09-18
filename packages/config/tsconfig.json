@@ -1,5 +1,4 @@
 {
-  "extends": "../ts/tsconfig.json",
   "include": [
     "src/*.ts"
   ],
@@ -7,11 +6,19 @@
     "test"
   ],
   "compilerOptions": {
-    "allowJs": false,
+    "target": "ES2020",
+    "module": "commonjs",
+    "moduleResolution": "node",
     "rootDir": "src",
+    "outDir": "dist",
+    "allowJs": false,
     "noImplicitAny": true,
     "noUncheckedIndexedAccess": true,
-    "types": ["node"],
+    "skipLibCheck": true,       
+    "esModuleInterop": true,
+    "resolveJsonModule": true,     
+    "declaration": true,                     /* Skip type checking all .d.ts files. */
+    "types": ["mocha", "node"],
     "typeRoots": [
       "../../node_modules/@types"
     ],
