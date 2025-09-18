@@ -11,6 +11,12 @@ _Released 9/23/2025 (PENDING)_
 
 - Update the styles for command grouping 'line' so on expansion it is displayed correctly. Addressed in [#32521](https://github.com/cypress-io/cypress/pull/32521)
 
+**Dependency Updates:**
+
+- Upgraded `electron` from `36.4.0` to `36.8.1`. Addressed in [#32371](https://github.com/cypress-io/cypress/pull/32371).
+- Upgraded bundled Node.js version from `22.15.1` to `22.18.0`. Addressed in [#32371](https://github.com/cypress-io/cypress/pull/32371).
+- Upgraded bundled Chromium version from `136.0.7103.149` to `136.0.7103.177`. Addressed in [#32371](https://github.com/cypress-io/cypress/pull/32371).
+
 ## 15.2.0
 
 _Released 9/9/2025_

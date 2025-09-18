@@ -69,7 +69,6 @@ function generateCTSpec ({ tree, appPath, component }: { tree: Tree, appPath: st
   const componentFilename = component['name'].split('.')[0]
   const componentName = componentMatch ? componentMatch[0] : componentFilename
 
-  // eslint-disable-next-line no-console
   console.log(`Creating new component spec for: ${componentName}\n`)
 
   return tree.create(`${appPath}/${componentFilename}.component.cy.ts`, ctSpecContent({ componentName, componentFilename }))
