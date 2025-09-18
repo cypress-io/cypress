@@ -94,7 +94,7 @@ function validateElectron (electron) {
 
 function validateFs (fs) {
   // Hard coded function as this is electron code and there's not an easy way to get the function string at package time. If this fails on an updated version of electron, we'll need to update this.
-  if (originalToString.call(fs.readFileSync) !== `function(t,e){const r=splitPath(t);return r.isAsar?readFileFromArchiveSync(r,e):R.apply(this,arguments)}`) {
+  if (originalToString.call(fs.readFileSync) !== `function(t,e){const r=splitPath(t);return r.isAsar?readFileFromArchiveSync(r,e):T.apply(this,arguments)}`) {
     console.error(`Integrity check failed for toString.call(fs.readFileSync)`)
     throw new Error(integrityErrorMessage)
   }
