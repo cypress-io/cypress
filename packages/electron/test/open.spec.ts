@@ -278,7 +278,7 @@ describe('open', () => {
         errCb(err)
 
         expect(process.exit).toHaveBeenCalledWith(1)
-        // eslint-disable-next-line no-console
+
         expect(console.error).toHaveBeenCalledWith(err)
       })
     })
@@ -385,7 +385,7 @@ describe('open', () => {
   describe('error handling', () => {
     beforeEach(() => {
       vi.spyOn(console, 'debug').mockImplementation(() => {})
-      // eslint-disable-next-line no-console
+
       vi.mocked(console.debug).mockName('console.debug')
     })
 
@@ -397,7 +397,6 @@ describe('open', () => {
       it('logs error stack and exits with code 1', async () => {
         await expect(open('nonexistent/path', argv))
 
-        // eslint-disable-next-line no-console
         expect(console.debug).toHaveBeenCalledWith(expect.any(String))
         expect(process.exit).toHaveBeenCalledWith(1)
       })
@@ -411,7 +410,6 @@ describe('open', () => {
       it('logs error stack and exits with code 1', async () => {
         await open(appPath, argv)
 
-        // eslint-disable-next-line no-console
         expect(console.debug).toHaveBeenCalledWith(expect.any(String))
         expect(process.exit).toHaveBeenCalledWith(1)
       })

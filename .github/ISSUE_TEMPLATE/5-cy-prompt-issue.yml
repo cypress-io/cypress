@@ -1,0 +1,45 @@
+name: "✨ cy.prompt Issue"
+description: Report unexpected behavior with cy.prompt.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## If you are a customer of Cypress Cloud please utilize our [Support Portal](https://www.cypress.io/support/) for our fastest support!
+
+        ### Have a question? 👉 [Ask in chat](https://on.cypress.io/chat) or [start a new discussion](https://github.com/cypress-io/cypress/discussions).
+  - type: textarea
+    id: current-behavior
+    attributes:
+      label: Current behavior
+      description: Please provide a description including screenshots, stack traces, etc. [Troubleshooting tips](https://on.cypress.io/troubleshooting).
+      placeholder: Currently...
+    validations:
+      required: true
+  - type: textarea
+    id: prompt-code
+    attributes:
+      label: cy.prompt code
+      description: Please provide the arguments you passed to cy.prompt.
+    validations:
+      required: true
+  - type: input
+    id: projectId
+    attributes:
+      label: Project ID
+      description: What is the project ID of the project you were running cy.prompt in?
+      placeholder: ex. ypt4pf
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Cypress Version
+      description: What version of Cypress are you running? Run `cypress version` to see your current version. If possible, please update Cypress to the latest version first.
+      placeholder: ex. 15.2.0
+    validations:
+      required: true
+  - type: textarea
+    id: other
+    attributes:
+      label: Other
+      placeholder: Any other details?
