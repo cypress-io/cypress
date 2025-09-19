@@ -11,6 +11,7 @@ export default defineConfig({
       'test/ast-utils/addToCypressConfigPlugin-e2e.spec.ts',
       'test/ast-utils/addToCypressConfigPlugin.spec.ts',
       'test/ast-utils/addToCypressConfig.spec.ts',
+      'test/validation.spec.ts',
     ],
     globals: true,
     environment: 'node',
