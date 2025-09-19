@@ -1856,7 +1856,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/prompt
      */
-    prompt(steps: string[], options?: PromptOptions): Chainable<null>
+    prompt<T extends any>(steps: string[], options?: PromptOptions): Chainable<T>
     /**
      * Read a file and yield its contents.
      *
