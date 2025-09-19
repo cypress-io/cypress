@@ -9,7 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CYPRESS_BOT_APP_ID: ${{ secrets.CYPRESS_BOT_APP_ID }}
-      CIRCLECI_CLI_TOKEN: ${{ secrets.CIRCLECI_CLI_TOKEN }}
       BASE_BRANCH: develop
     # Prevent from running this workflow on forks
     if: github.repository == 'cypress-io/cypress'
