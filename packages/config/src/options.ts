@@ -1,9 +1,6 @@
 import os from 'os'
 import path from 'path'
-// NOTE: we don't use @packages/root because we are building to a dist directory, which then installs @packages/root as a dependency
-// and the require path is too deep. It's better for us to just import from the path we know the root is and use the properties
-// on the package.json directly
-import pkg from '../../../package.json'
+import pkg from '@packages/root'
 import type { AllCypressErrorNames } from '@packages/errors'
 import type { TestingType } from '@packages/types'
 
