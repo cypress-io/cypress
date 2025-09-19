@@ -1,9 +1,13 @@
 const https = require('https')
 const fs = require('fs')
 const yaml = require('yaml')
+const path = require('path')
 
 const CHROME_STABLE_KEY = 'chrome-stable-version'
 const CHROME_BETA_KEY = 'chrome-beta-version'
+
+// This is the path to the CircleCI file that contains the browser version anchors
+const CIRCLECI_WORKFLOWS_FILEPATH = path.join(__dirname, '../../.circleci/src/workflows/@workflows.yml')
 
 // https://developer.chrome.com/docs/versionhistory/reference/#platform-identifiers
 const getLatestVersionData = ({ channel, currentVersion }) => {
@@ -37,8 +41,7 @@ const getLatestVersionData = ({ channel, currentVersion }) => {
 
 const getVersions = async ({ core }) => {
   try {
-    // file path is relative to repo root
-    const doc = yaml.parseDocument(fs.readFileSync('./.circleci/workflows.yml', 'utf8'))
+    const doc = yaml.parseDocument(fs.readFileSync(CIRCLECI_WORKFLOWS_FILEPATH, 'utf8'))
 
     const currentChromeStable = doc.contents.items.find((item) => item.key.value === CHROME_STABLE_KEY).value.value
     const currentChromeBeta = doc.contents.items.find((item) => item.key.value === CHROME_BETA_KEY).value.value
@@ -74,8 +77,7 @@ const getVersions = async ({ core }) => {
 }
 
 const checkNeedForBranchUpdate = ({ core, latestStableVersion, latestBetaVersion }) => {
-  // file path is relative to repo root
-  const doc = yaml.parseDocument(fs.readFileSync('./.circleci/workflows.yml', 'utf8'))
+  const doc = yaml.parseDocument(fs.readFileSync(CIRCLECI_WORKFLOWS_FILEPATH, 'utf8'))
 
   const currentChromeStable = doc.contents.items.find((item) => item.key.value === CHROME_STABLE_KEY).value.value
   const currentChromeBeta = doc.contents.items.find((item) => item.key.value === CHROME_BETA_KEY).value.value
@@ -87,7 +89,7 @@ const checkNeedForBranchUpdate = ({ core, latestStableVersion, latestBetaVersion
 }
 
 const updateBrowserVersionsFile = ({ latestBetaVersion, latestStableVersion }) => {
-  const doc = yaml.parseDocument(fs.readFileSync('./.circleci/workflows.yml', 'utf8'))
+  const doc = yaml.parseDocument(fs.readFileSync(CIRCLECI_WORKFLOWS_FILEPATH, 'utf8'))
 
   const currentChromeStableYamlRef = doc.contents.items.find((item) => item.key.value === CHROME_STABLE_KEY)
   const currentChromeBetaYamlRef = doc.contents.items.find((item) => item.key.value === CHROME_BETA_KEY)
@@ -95,8 +97,7 @@ const updateBrowserVersionsFile = ({ latestBetaVersion, latestStableVersion }) =
   currentChromeStableYamlRef.value.value = latestStableVersion
   currentChromeBetaYamlRef.value.value = latestBetaVersion
 
-  // file path is relative to repo root
-  fs.writeFileSync('./.circleci/workflows.yml', yaml.stringify(doc), 'utf8')
+  fs.writeFileSync(CIRCLECI_WORKFLOWS_FILEPATH, yaml.stringify(doc), 'utf8')
 }
 
 const updatePRTitle = async ({ context, github, baseBranch, branchName, description }) => {
@@ -126,4 +127,5 @@ module.exports = {
   checkNeedForBranchUpdate,
   updateBrowserVersionsFile,
   updatePRTitle,
+  CIRCLECI_WORKFLOWS_FILEPATH,
 }
