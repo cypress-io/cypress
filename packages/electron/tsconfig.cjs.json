@@ -1,11 +1,15 @@
 {
   "extends": "./tsconfig.base.json",
+  "exclude": [
+    "test/**/*"
+  ],
   "compilerOptions": {
     "module": "CommonJS",
     "outDir": "./dist",
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "noEmit": false
   }
 }
 

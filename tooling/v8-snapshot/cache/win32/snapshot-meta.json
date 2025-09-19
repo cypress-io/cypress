@@ -622,10 +622,11 @@
     "./packages/data-context/src/sources/BrowserDataSource.ts",
     "./packages/data-context/src/sources/index.ts",
     "./packages/data-context/src/util/testCounts.ts",
-    "./packages/electron/dist/lib/electron.js",
-    "./packages/electron/dist/lib/install.js",
-    "./packages/electron/dist/lib/paths.js",
-    "./packages/electron/dist/src/index.js",
+    "./packages/electron/dist/electron.js",
+    "./packages/electron/dist/index.js",
+    "./packages/electron/dist/install.js",
+    "./packages/electron/dist/open.js",
+    "./packages/electron/dist/paths.js",
     "./packages/errors/index.js",
     "./packages/errors/src/errTemplate.ts",
     "./packages/graphql/index.js",
@@ -4196,5 +4197,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "e82bf067c5096b02804f00f111163aadb69d3ef44f9cb898b63cc12bfdb332c6"
+  "deferredHash": "86e4c2ffeb4dbc02aee7d4bec3d8fd0cd605f5c0edf8b9cc6cbcfc798774842b"
 }

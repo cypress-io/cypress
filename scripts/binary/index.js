@@ -25,7 +25,7 @@ const { moveBinaries } = require('./move-binaries')
 const { exec } = require('child_process')
 const xvfb = require('../../cli/lib/exec/xvfb').default
 const smoke = require('./smoke')
-const verify = require('../../cli/lib/tasks/verify').default
+const { needsSandbox } = require('../../cli/lib/tasks/verify')
 const execa = require('execa')
 
 const log = function (msg) {
@@ -69,7 +69,7 @@ async function testExecutableVersion (buildAppExecutable, version) {
 
   const args = ['--version']
 
-  if (verify.needsSandbox()) {
+  if (needsSandbox()) {
     args.push('--no-sandbox')
   }
 
