@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CYPRESS_BOT_APP_ID: ${{ secrets.CYPRESS_BOT_APP_ID }}
+      CIRCLECI_CLI_TOKEN: ${{ secrets.CIRCLECI_CLI_TOKEN }}
       BASE_BRANCH: develop
     # Prevent from running this workflow on forks
     if: github.repository == 'cypress-io/cypress'
@@ -18,6 +19,9 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.BOT_GITHUB_ACTION_TOKEN }}
+      - name: Setup CircleCI CLI
+        run: |
+          sudo snap install circleci
       - name: Set committer info
         ## attribute the commit to cypress-bot: https://github.community/t/logging-into-git-as-a-github-app/115916
         run: |
