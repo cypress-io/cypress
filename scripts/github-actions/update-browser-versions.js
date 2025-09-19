@@ -1,11 +1,13 @@
 const https = require('https')
 const fs = require('fs')
 const yaml = require('yaml')
+const path = require('path')
 
 const CHROME_STABLE_KEY = 'chrome-stable-version'
 const CHROME_BETA_KEY = 'chrome-beta-version'
 
-const CIRCLECI_WORKFLOWS_FILEPATH = './.circleci/src/workflows/@workflows.yml'
+// This is the path to the CircleCI file that contains the browser version anchors
+const CIRCLECI_WORKFLOWS_FILEPATH = path.join(__dirname, '../../.circleci/src/workflows/@workflows.yml')
 
 // https://developer.chrome.com/docs/versionhistory/reference/#platform-identifiers
 const getLatestVersionData = ({ channel, currentVersion }) => {
