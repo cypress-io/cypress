@@ -1,19 +1,29 @@
-import { expect } from 'chai'
-
+import { vi, describe, it, expect } from 'vitest'
 import errors from '@packages/errors'
-
 import { updateWithPluginValues } from '../../src/project'
 
+vi.mock('@packages/errors', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      throwErr: vi.fn(),
+    },
+  }
+})
+
 describe('config/src/project/index', () => {
-  context('.updateWithPluginValues', () => {
+  describe('.updateWithPluginValues', () => {
     it('is noop when no overrides', () => {
-      expect(updateWithPluginValues({ foo: 'bar' } as any, null as any, 'e2e')).to.deep.eq({
+      expect(updateWithPluginValues({ foo: 'bar' } as any, null as any, 'e2e')).toEqual({
         foo: 'bar',
       })
     })
 
     it('is noop with empty overrides', () => {
-      expect(updateWithPluginValues({ foo: 'bar' } as any, {} as any, 'e2e')).to.deep.eq({
+      expect(updateWithPluginValues({ foo: 'bar' } as any, {} as any, 'e2e')).toEqual({
         foo: 'bar',
       })
     })
@@ -50,7 +60,7 @@ describe('config/src/project/index', () => {
         },
       }
 
-      expect(updateWithPluginValues(cfg as any, overrides, 'e2e')).to.deep.eq({
+      expect(updateWithPluginValues(cfg as any, overrides, 'e2e')).toEqual({
         foo: 'bar',
         baz: 'baz',
         lol: 1234,
@@ -96,7 +106,7 @@ describe('config/src/project/index', () => {
 
       const overrides = {}
 
-      expect(updateWithPluginValues(cfg as any, overrides, 'e2e')).to.deep.eq({
+      expect(updateWithPluginValues(cfg as any, overrides, 'e2e')).toEqual({
         browsers: [browser],
         resolved: {
           browsers: {
@@ -132,10 +142,11 @@ describe('config/src/project/index', () => {
         browsers: null,
       }
 
-      sinon.stub(errors, 'throwErr')
+      const throwErrSpy = vi.spyOn(errors, 'throwErr')
+
       updateWithPluginValues(cfg as any, overrides, 'e2e')
 
-      expect(errors.throwErr).to.have.been.calledWith('CONFIG_VALIDATION_MSG_ERROR')
+      expect(throwErrSpy).toHaveBeenCalledWith('CONFIG_VALIDATION_MSG_ERROR', 'configFile', undefined, 'Missing browsers list')
     })
 
     it('allows user to filter browsers', () => {
@@ -173,14 +184,14 @@ describe('config/src/project/index', () => {
 
       const updated = updateWithPluginValues(cfg as any, overrides, 'e2e')
 
-      expect(updated.resolved, 'resolved values').to.deep.eq({
+      expect(updated.resolved, 'resolved values').toEqual({
         browsers: {
           value: [browserTwo],
           from: 'plugin',
         },
       })
 
-      expect(updated, 'all values').to.deep.eq({
+      expect(updated, 'all values').toEqual({
         browsers: [browserTwo],
         resolved: {
           browsers: {

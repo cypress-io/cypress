@@ -1,11 +1,12 @@
 import path from 'path'
 import * as _ from 'lodash'
-import * as is from 'check-more-types'
 import { commaListsOr } from 'common-tags'
 import Debug from 'debug'
 import { BROWSER_FAMILY } from '@packages/types'
 
 const debug = Debug('cypress:server:validation')
+
+const is = require('check-more-types')
 
 // validation functions take a key and a value and should:
 //  - return true if it passes validation
