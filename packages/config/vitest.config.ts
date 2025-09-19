@@ -6,6 +6,7 @@ export default defineConfig({
       'test/project/index.spec.ts',
       'test/project/utils.spec.ts',
       'test/index.spec.ts',
+      'test/utils.spec.ts',
     ],
     globals: true,
     environment: 'node',

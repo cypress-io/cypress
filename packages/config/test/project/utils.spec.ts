@@ -22,6 +22,7 @@ import {
 } from '../../src/project/utils'
 import path from 'node:path'
 import { Config } from '../../src/project/types'
+import { resetIssuedWarnings } from '../../src/browser'
 
 const debug = Debug('test')
 
