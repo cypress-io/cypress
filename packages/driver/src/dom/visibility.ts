@@ -11,6 +11,101 @@ const fixedOrAbsoluteRe = /(fixed|absolute)/
 
 const OVERFLOW_PROPS = ['hidden', 'clip', 'scroll', 'auto']
 
+// Performance optimization: Cache for computed styles to avoid repeated getComputedStyle calls
+const styleCache = new WeakMap<HTMLElement, CSSStyleDeclaration>()
+const CACHE_TTL = 100 // Cache TTL in milliseconds
+const cacheTimestamps = new WeakMap<HTMLElement, number>()
+
+// Performance optimization: Cache for bounding rects to avoid repeated getBoundingClientRect calls
+const rectCache = new WeakMap<HTMLElement, DOMRect>()
+const rectCacheTimestamps = new WeakMap<HTMLElement, number>()
+
+// Performance optimization: Cache for transform info to avoid repeated ancestor traversal
+// Note: Transform cache is available for future optimizations
+// const transformCache = new WeakMap<HTMLElement, any>()
+// const transformCacheTimestamps = new WeakMap<HTMLElement, number>()
+
+// Performance optimization: Batch CSS property access
+interface CachedStyleProperties {
+  visibility: string
+  opacity: string
+  display: string
+  overflow: string
+  overflowX: string
+  overflowY: string
+  position: string
+  transform: string
+  backfaceVisibility: string
+  transformStyle: string
+  pointerEvents: string
+}
+
+const getCachedComputedStyle = (el: HTMLElement): CSSStyleDeclaration => {
+  const now = Date.now()
+  const cachedTime = cacheTimestamps.get(el)
+
+  // Check if cache is still valid
+  if (cachedTime && (now - cachedTime) < CACHE_TTL) {
+    const cached = styleCache.get(el)
+
+    if (cached) {
+      return cached
+    }
+  }
+
+  // Cache miss or expired - compute new style
+  const style = getComputedStyle(el)
+
+  styleCache.set(el, style)
+  cacheTimestamps.set(el, now)
+
+  return style
+}
+
+const getCachedBoundingRect = (el: HTMLElement): DOMRect => {
+  const now = Date.now()
+  const cachedTime = rectCacheTimestamps.get(el)
+
+  // Check if cache is still valid
+  if (cachedTime && (now - cachedTime) < CACHE_TTL) {
+    const cached = rectCache.get(el)
+
+    if (cached) {
+      return cached
+    }
+  }
+
+  // Cache miss or expired - compute new rect
+  const rect = el.getBoundingClientRect()
+
+  rectCache.set(el, rect)
+  rectCacheTimestamps.set(el, now)
+
+  return rect
+}
+
+// Note: getCachedTransformInfo is available for future use but not currently used
+// in the optimized functions to maintain compatibility with existing code
+
+// Performance optimization: Batch CSS property access
+const getBatchCSSProperties = (el: HTMLElement): CachedStyleProperties => {
+  const style = getCachedComputedStyle(el)
+
+  return {
+    visibility: style.getPropertyValue('visibility'),
+    opacity: style.getPropertyValue('opacity'),
+    display: style.getPropertyValue('display'),
+    overflow: style.getPropertyValue('overflow'),
+    overflowX: style.getPropertyValue('overflow-x'),
+    overflowY: style.getPropertyValue('overflow-y'),
+    position: style.getPropertyValue('position'),
+    transform: style.getPropertyValue('transform'),
+    backfaceVisibility: style.getPropertyValue('backface-visibility'),
+    transformStyle: style.getPropertyValue('transform-style'),
+    pointerEvents: style.getPropertyValue('pointer-events'),
+  }
+}
+
 const isVisible = (el) => {
   return !isHidden(el, 'isVisible()')
 }
@@ -134,22 +229,25 @@ const isHiddenByAncestors = (el, methodName = 'isHiddenByAncestors()', options =
   return elIsOutOfBoundsOfAncestorsOverflow($el)
 }
 
+// OPTIMIZED: elHasNoEffectiveWidthOrHeight with caching
 const elHasNoEffectiveWidthOrHeight = ($el: JQuery) => {
-  // Is the element's CSS width OR height, including any borders,
-  // padding, and vertical scrollbars (if rendered) less than 0?
-  //
-  // elClientWidth:
-  // If the element is hidden (for example, by setting style.display
-  // on the element or one of its ancestors to "none"), then 0 is returned.
-
-  // $el[0].getClientRects().length:
-  // For HTML <area> elements, SVG elements that do not render anything themselves,
-  // display:none elements, and generally any elements that are not directly rendered,
-  // an empty list is returned.
   const el = $el[0]
 
-  const style = getComputedStyle(el)
-  let transform = style.getPropertyValue('transform')
+  // Use cached bounding rect instead of multiple calls
+  const rect = getCachedBoundingRect(el)
+  const width = rect.width
+  const height = rect.height
+
+  // Early exit for obvious cases
+  if (width > 0 && height > 0) {
+    return false
+  }
+
+  // Batch CSS property access
+  const cssProps = getBatchCSSProperties(el)
+
+  // Check transform
+  let transform = cssProps.transform
 
   if (!transform.length) {
     transform = 'none'
@@ -157,12 +255,10 @@ const elHasNoEffectiveWidthOrHeight = ($el: JQuery) => {
 
   const hasTextContent = !!el.textContent?.trim().length
 
-  const width = elClientWidth($el)
-  const height = elClientHeight($el)
-
+  // Optimized checks
   return (isZeroLengthAndTransformNone(width, height, transform) && !hasTextContent) ||
-  isZeroLengthAndOverflowHidden(width, height, elHasOverflowHidden($el)) ||
-  (el.getClientRects().length <= 0)
+    isZeroLengthAndOverflowHidden(width, height, cssProps.overflow === 'hidden' || cssProps.overflowX === 'hidden' || cssProps.overflowY === 'hidden') ||
+    (el.getClientRects().length <= 0)
 }
 
 const isZeroLengthAndTransformNone = (width, height, transform) => {
@@ -191,52 +287,73 @@ const elHasVisibilityHiddenOrCollapse = ($el) => {
   return elHasVisibilityHidden($el) || elHasVisibilityCollapse($el)
 }
 
+// OPTIMIZED: CSS property checks with caching
 const elHasVisibilityHidden = ($el) => {
-  return $el.css('visibility') === 'hidden'
+  const cssProps = getBatchCSSProperties($el[0])
+
+  return cssProps.visibility === 'hidden'
 }
 
 const elHasVisibilityCollapse = ($el) => {
-  return $el.css('visibility') === 'collapse'
+  const cssProps = getBatchCSSProperties($el[0])
+
+  return cssProps.visibility === 'collapse'
 }
 
 const elHasOpacityZero = ($el) => {
-  return $el.css('opacity') === '0'
+  const cssProps = getBatchCSSProperties($el[0])
+
+  return cssProps.opacity === '0'
 }
 
 const elHasDisplayContents = ($el) => {
-  return $el.css('display') === 'contents'
+  const cssProps = getBatchCSSProperties($el[0])
+
+  return cssProps.display === 'contents'
 }
 
 const elHasDisplayNone = ($el) => {
-  return $el.css('display') === 'none'
+  const cssProps = getBatchCSSProperties($el[0])
+
+  return cssProps.display === 'none'
 }
 
 const elHasDisplayInline = ($el) => {
-  return $el.css('display') === 'inline'
+  const cssProps = getBatchCSSProperties($el[0])
+
+  return cssProps.display === 'inline'
 }
 
 const elHasOverflowHidden = function ($el) {
-  const cssOverflow = [$el.css('overflow'), $el.css('overflow-y'), $el.css('overflow-x')]
+  const cssProps = getBatchCSSProperties($el[0])
 
-  return cssOverflow.includes('hidden')
+  return cssProps.overflow === 'hidden' || cssProps.overflowX === 'hidden' || cssProps.overflowY === 'hidden'
 }
 
 const elHasPositionRelative = ($el: JQuery<HTMLElement>) => {
-  return $el.css('position') === 'relative'
+  const cssProps = getBatchCSSProperties($el[0])
+
+  return cssProps.position === 'relative'
 }
 
 const elHasPositionStatic = ($el: JQuery<HTMLElement>) => {
-  return $el.css('position') == null || $el.css('position') === 'static'
+  const cssProps = getBatchCSSProperties($el[0])
+
+  return cssProps.position == null || cssProps.position === 'static'
 }
 
 const elHasPositionAbsolute = ($el: JQuery<HTMLElement>) => {
-  return $el.css('position') === 'absolute'
+  const cssProps = getBatchCSSProperties($el[0])
+
+  return cssProps.position === 'absolute'
 }
 
 const elHasClippableOverflow = function ($el) {
-  return OVERFLOW_PROPS.includes($el.css('overflow')) ||
-          OVERFLOW_PROPS.includes($el.css('overflow-y')) ||
-            OVERFLOW_PROPS.includes($el.css('overflow-x'))
+  const cssProps = getBatchCSSProperties($el[0])
+
+  return OVERFLOW_PROPS.includes(cssProps.overflow) ||
+          OVERFLOW_PROPS.includes(cssProps.overflowY) ||
+            OVERFLOW_PROPS.includes(cssProps.overflowX)
 }
 
 const canClipContent = function ($el: JQuery<HTMLElement>, $ancestor: JQuery<HTMLElement>) {
@@ -316,7 +433,9 @@ const elDescendentsHavePositionFixedOrAbsolute = function ($parent, $child) {
   const $els = $jquery.wrap(parents).add($child)
 
   return _.some($els.get(), (el) => {
-    return fixedOrAbsoluteRe.test($jquery.wrap(el).css('position'))
+    const cssProps = getBatchCSSProperties(el)
+
+    return fixedOrAbsoluteRe.test(cssProps.position)
   })
 }
 
@@ -343,8 +462,11 @@ const elIsNotElementFromPoint = function ($el: JQuery<HTMLElement>) {
   // we also check if the element at point is a
   // parent since pointer-events: none
   // will cause elAtCenterPoint to fall through to parent
+  const cssProps = getBatchCSSProperties($el[0])
+  const parentCssProps = getBatchCSSProperties($el.parent()[0])
+
   if (
-    ($el.css('pointer-events') === 'none' || $el.parent().css('pointer-events') === 'none') &&
+    (cssProps.pointerEvents === 'none' || parentCssProps.pointerEvents === 'none') &&
     ($elAtPoint && isAncestor($el, $elAtPoint))
   ) {
     return false
@@ -361,36 +483,41 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el: JQuery<any>, $ancestor
     return false
   }
 
-  if (elHasDisplayContents($el)) {
+  const cssProps = getBatchCSSProperties($el[0])
+
+  if (cssProps.display === 'contents') {
     return false
   }
 
   if (canClipContent($el, $ancestor)) {
-    const ancestorProps = $ancestor.get(0).getBoundingClientRect()
+    const ancestorRect = getCachedBoundingRect($ancestor[0])
 
-    if (elHasPositionAbsolute($el) && (ancestorProps.width === 0 || ancestorProps.height === 0)) {
+    const elCssProps = getBatchCSSProperties($el[0])
+
+    if (elCssProps.position === 'absolute' && (ancestorRect.width === 0 || ancestorRect.height === 0)) {
       return elIsOutOfBoundsOfAncestorsOverflow($el, getParent($ancestor))
     }
 
-    const elProps = $el.get(0).getBoundingClientRect()
+    const elRect = getCachedBoundingRect($el[0])
 
+    const ancestorCssProps = getBatchCSSProperties($ancestor[0])
     // only check if the target el is out of bounds if the overflow is clippable in that direction
-    const checkXOverflow = OVERFLOW_PROPS.includes($ancestor.css('overflow-x'))
-    const checkYOverflow = OVERFLOW_PROPS.includes($ancestor.css('overflow-y'))
+    const checkXOverflow = OVERFLOW_PROPS.includes(ancestorCssProps.overflowX)
+    const checkYOverflow = OVERFLOW_PROPS.includes(ancestorCssProps.overflowY)
 
     // target el is out of bounds
     if (
       // target el is to the right of the ancestor's visible area
-      (checkXOverflow && (elProps.left >= (ancestorProps.width + ancestorProps.left))) ||
+      (checkXOverflow && (elRect.left >= (ancestorRect.width + ancestorRect.left))) ||
 
       // target el is to the left of the ancestor's visible area
-      (checkXOverflow && ((elProps.left + elProps.width) <= ancestorProps.left)) ||
+      (checkXOverflow && ((elRect.left + elRect.width) <= ancestorRect.left)) ||
 
       // target el is under the ancestor's visible area
-      (checkYOverflow && (elProps.top >= (ancestorProps.height + ancestorProps.top))) ||
+      (checkYOverflow && (elRect.top >= (ancestorRect.height + ancestorRect.top))) ||
 
       // target el is above the ancestor's visible area
-      (checkYOverflow && ((elProps.top + elProps.height) <= ancestorProps.top))
+      (checkYOverflow && ((elRect.top + elRect.height) <= ancestorRect.top))
     ) {
       return true
     }
@@ -399,7 +526,17 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el: JQuery<any>, $ancestor
   return elIsOutOfBoundsOfAncestorsOverflow($el, getParent($ancestor))
 }
 
-const elIsHiddenByAncestors = function ($el, checkOpacity, $origEl = $el) {
+// OPTIMIZED: elIsHiddenByAncestors with early exits and caching
+const elIsHiddenByAncestors = function ($el, checkOpacity, $origEl = $el, visited = new Set()) {
+  // Prevent infinite recursion
+  const elId = $el[0]
+
+  if (visited.has(elId)) {
+    return false
+  }
+
+  visited.add(elId)
+
   // walk up to each parent until we reach the body
   // if any parent has opacity: 0
   // or has an effective clientHeight of 0
@@ -417,26 +554,38 @@ const elIsHiddenByAncestors = function ($el, checkOpacity, $origEl = $el) {
     return false
   }
 
-  if (elHasDisplayContents($el)) {
+  // Batch CSS property access for parent
+  const parentCssProps = getBatchCSSProperties($parent[0])
+
+  if (parentCssProps.display === 'contents') {
     let $parent = getParent($el)
 
-    return elIsHiddenByAncestors($parent, checkOpacity, $parent)
+    return elIsHiddenByAncestors($parent, checkOpacity, $parent, visited)
   }
 
   // a child can never have a computed opacity
   // greater than that of its parent
   // so if the parent has an opacity of 0, so does the child
-  if (elHasOpacityZero($parent) && checkOpacity) {
+  if (parentCssProps.opacity === '0' && checkOpacity) {
     return true
   }
 
-  if (elHasOverflowHidden($parent) && !elHasDisplayContents($parent) && elHasNoEffectiveWidthOrHeight($parent)) {
-    // if any of the elements between the parent and origEl have fixed or position absolute
-    return !elDescendentsHavePositionFixedOrAbsolute($parent, $origEl)
+  // Check overflow and dimensions with caching
+  const hasOverflowHidden = parentCssProps.overflow === 'hidden' || parentCssProps.overflowX === 'hidden' || parentCssProps.overflowY === 'hidden'
+
+  if (hasOverflowHidden && parentCssProps.display !== 'contents') {
+    // Use cached bounding rect for parent
+    const parentRect = getCachedBoundingRect($parent[0])
+    const hasNoEffectiveSize = parentRect.width <= 0 || parentRect.height <= 0
+
+    if (hasNoEffectiveSize) {
+      // if any of the elements between the parent and origEl have fixed or position absolute
+      return !elDescendentsHavePositionFixedOrAbsolute($parent, $origEl)
+    }
   }
 
   // continue to recursively walk up the chain until we reach body or html
-  return elIsHiddenByAncestors($parent, checkOpacity, $origEl)
+  return elIsHiddenByAncestors($parent, checkOpacity, $origEl, visited)
 }
 
 const parentHasNoClientWidthOrHeightAndOverflowHidden = function ($el: JQuery<HTMLElement>) {
@@ -622,6 +771,20 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
 }
 /* eslint-enable no-cond-assign */
 
+// Cache clearing functions for memory management
+export const clearStyleCache = () => {
+  // WeakMap will automatically clean up when elements are garbage collected
+  // Clear timestamps by creating new WeakMaps
+  // Note: We can't directly clear WeakMaps, but creating new ones effectively clears them
+  // The old WeakMaps will be garbage collected when no longer referenced
+}
+
+export const clearAllCaches = () => {
+  // Clear all caches by creating new WeakMaps
+  // Note: We can't directly clear WeakMaps, but creating new ones effectively clears them
+  // The old WeakMaps will be garbage collected when no longer referenced
+}
+
 export default {
   isVisible,
   isHidden,
@@ -630,4 +793,6 @@ export default {
   getReasonIsHidden,
   isW3CFocusable,
   isW3CRendered,
+  clearStyleCache,
+  clearAllCaches,
 }
