@@ -87,7 +87,7 @@
 
 ##### Binary Packages
 
-- [ ] packages/config
+- [x] packages/config ✅ **COMPLETED**
 - [ ] packages/data-context
 - [x] packages/driver ✅ **COMPLETED**
 - [x] packages/electron ✅ **COMPLETED**
