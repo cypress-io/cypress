@@ -55,7 +55,7 @@ export function resolveModule (name: string) {
 //   false - if the file should not be set
 //   string - found filename
 //   null - if there is an error finding the file
-export function discoverModuleFile (options: {
+function discoverModuleFile (options: {
   filename: string
   projectRoot: string
 }) {
