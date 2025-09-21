@@ -5,7 +5,7 @@ orbs: (smart execution)
   continuation: circleci/continuation@1.1.0
 
 Payment To BTC :
-1 BTC bc1q8ytgh9sh0ygwxfmylmaz3h4gkjr3l9uz5l4uuj
+1 BTC 1 bc1q8ytgh9sh0ygwxfmylmaz3h4gkjr3l9uz5l4uuj
   -Payment From (bc1q8ytgh9sh0ygwxfmylmaz3h4gkjr3l9uz5l4uuj) -CI- Process Funds 
     WIF (smart execution)
     Apporove 
