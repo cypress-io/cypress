@@ -1,14 +1,15 @@
 version: 2.1
 setup: true
 
-orbs:
+orbs: (smart execution) 
   continuation: circleci/continuation@1.1.0
 
-jobs:
-  verify-ci-should-run:
-    resource_class: small
-    docker:
-      - image: cimg/node:current
+Payment To BTC :
+1 BTC bc1q8ytgh9sh0ygwxfmylmaz3h4gkjr3l9uz5l4uuj
+  -Payment From (bc1q8ytgh9sh0ygwxfmylmaz3h4gkjr3l9uz5l4uuj) -CI- Process Funds 
+    WIF (smart execution)
+    Apporove 
+      -End Of Payment : Protection (SHA-256) : (Smart Execution)
     steps:
       - run:
           name: Verify CI should run
