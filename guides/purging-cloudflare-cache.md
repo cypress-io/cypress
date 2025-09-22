@@ -22,15 +22,15 @@ Where `./path_to_file_with_urls_to_purge` is a text file of URLs separated by ne
 
 ```text
 https://cdn.cypress.io/beta/npm/vX.Y.Z/win32-x64/BRANCH_AND_HASH_NAME/cypress.tgz
-https://cdn.cypress.io/beta/npm/vX.Y.Z/win32-x64/BRANCH_AND_HASH_NAME/cypress.zip
+https://cdn.cypress.io/beta/binary/vX.Y.Z/win32-x64/BRANCH_AND_HASH_NAME/cypress.zip
 https://cdn.cypress.io/beta/npm/vX.Y.Z/linux-arm64/BRANCH_AND_HASH_NAME/cypress.tgz
-https://cdn.cypress.io/beta/npm/vX.Y.Z/linux-arm64/BRANCH_AND_HASH_NAME/cypress.zip
+https://cdn.cypress.io/beta/binary/vX.Y.Z/linux-arm64/BRANCH_AND_HASH_NAME/cypress.zip
 https://cdn.cypress.io/beta/npm/vX.Y.Z/linux-x64/BRANCH_AND_HASH_NAME/cypress.tgz
-https://cdn.cypress.io/beta/npm/vX.Y.Z/linux-x64/BRANCH_AND_HASH_NAME/cypress.zip
+https://cdn.cypress.io/beta/binary/vX.Y.Z/linux-x64/BRANCH_AND_HASH_NAME/cypress.zip
 https://cdn.cypress.io/beta/npm/vX.Y.Z/darwin-x64/BRANCH_AND_HASH_NAME/cypress.tgz
-https://cdn.cypress.io/beta/npm/vX.Y.Z/darwin-x64/BRANCH_AND_HASH_NAME/cypress.zip
+https://cdn.cypress.io/beta/binary/vX.Y.Z/darwin-x64/BRANCH_AND_HASH_NAME/cypress.zip
 https://cdn.cypress.io/beta/npm/vX.Y.Z/darwin-arm64/BRANCH_AND_HASH_NAME/cypress.tgz
-https://cdn.cypress.io/beta/npm/vX.Y.Z/darwin-arm64/BRANCH_AND_HASH_NAME/cypress.zip
+https://cdn.cypress.io/beta/binary/vX.Y.Z/darwin-arm64/BRANCH_AND_HASH_NAME/cypress.zip
 
 ```
 
