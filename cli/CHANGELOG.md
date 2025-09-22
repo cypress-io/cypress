@@ -5,7 +5,7 @@ _Released 9/23/2025 (PENDING)_
 
 **Features:**
 
-- Added Escape key support to `cy.press()`. Addresses[#32429](https://github.com/cypress-io/cypress/issues/32429). Addressed in [#32545](https://github.com/cypress-io/cypress/pull/32545).
+- Added Escape key support to [`cy.press()`](http://on.cypress.io/api/press). Addresses[#32429](https://github.com/cypress-io/cypress/issues/32429). Addressed in [#32545](https://github.com/cypress-io/cypress/pull/32545).
 
 **Bugfixes:**
 
