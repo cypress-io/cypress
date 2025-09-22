@@ -4,7 +4,7 @@
   "private": true,
   "main": "dist/index.js",
   "scripts": {
-    "build-cli": "tsc && tsc -p tsconfig.esm.json && tsx ./scripts/build.ts && tsx ./scripts/post-build.ts",
+    "build-cli": "tsc -p tsconfig.build.json && tsc -p tsconfig.esm.json && tsx ./scripts/build.ts && tsx ./scripts/post-build.ts",
     "clean": "tsx ./scripts/clean.ts",
     "dtslint": "dtslint types",
     "postinstall": "patch-package && tsx ./scripts/post-install.ts",
