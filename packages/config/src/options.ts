@@ -1,7 +1,5 @@
 import os from 'os'
 import path from 'path'
-
-// @ts-ignore
 import pkg from '@packages/root'
 import type { AllCypressErrorNames } from '@packages/errors'
 import type { TestingType } from '@packages/types'
@@ -485,7 +483,7 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     // having the final config that has the e2e property flattened/compacted
     // we may not be able to get the value to ignore.
     name: 'additionalIgnorePattern',
-    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? defaultSpecPattern.e2e : [],
+    defaultValue: (options: Record<string, any> = {}): string | any[] => options.testingType === 'component' ? defaultSpecPattern.e2e : [],
     validation: validate.isStringOrArrayOfStrings,
     isInternal: true,
   }, {

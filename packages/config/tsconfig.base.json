@@ -1,0 +1,25 @@
+{
+  "include": [
+    "src/*.ts"
+  ],
+  "exclude": [
+    "test"
+  ],
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "esModuleInterop": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "allowJs": true,
+    "noUncheckedIndexedAccess": true,
+    "ignoreDeprecations": "5.0",
+    "importsNotUsedAsValues": "error",
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "types": [
+      "mocha",
+      "node"
+    ]
+  }
+}

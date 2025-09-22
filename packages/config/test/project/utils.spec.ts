@@ -22,6 +22,7 @@ import {
   setSupportFileAndFolder,
   mergeDefaults,
 } from '../../src/project/utils'
+import { resetIssuedWarnings } from '../../src/browser'
 import path from 'node:path'
 
 const debug = Debug('test')
@@ -29,6 +30,7 @@ const debug = Debug('test')
 describe('config/src/project/utils', () => {
   beforeEach(function () {
     delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
+    resetIssuedWarnings()
   })
 
   before(function () {
