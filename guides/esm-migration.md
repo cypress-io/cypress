@@ -33,7 +33,7 @@
 ##### Binary Packages
 
 - [ ] packages/app **PARTIAL** - low priority: frontend package
-- [ ] packages/config **PARTIAL** - entry point is JS
+- [x] packages/config ✅ **COMPLETED**
 - [ ] packages/data-context  **PARTIAL** - entry point is JS
 - [x] packages/driver ✅ **COMPLETED** - source complete, cypress tests need migration
 - [x] packages/electron ✅ **COMPLETED**
