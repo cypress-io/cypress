@@ -37,7 +37,7 @@ yarn add --dev @cypress/grep
 
 ```js
 // cypress/support/e2e.js
-const registerCypressGrep = require('@cypress/grep')
+const { register: registerCypressGrep } = require('@cypress/grep')
 registerCypressGrep()
 ```
 
@@ -45,7 +45,7 @@ Or using ES modules / TypeScript:
 
 ```ts
 // cypress/support/e2e.ts
-import registerCypressGrep from '@cypress/grep/src/support'
+import { register as registerCypressGrep } from '@cypress/grep'
 registerCypressGrep()
 ```
 
@@ -60,7 +60,24 @@ const { defineConfig } = require('cypress')
 module.exports = defineConfig({
   e2e: {
     setupNodeEvents(on, config) {
-      require('@cypress/grep/src/plugin')(config)
+      const { plugin: cypressGrepPlugin } = require('@cypress/grep/plugin')
+      cypressGrepPlugin(config)
+      return config
+    },
+  },
+})
+```
+
+Or using ES modules / TypeScript:
+
+```ts
+// cypress.config.ts
+import { plugin as cypressGrepPlugin } from '@cypress/grep/plugin'
+
+export default defineConfig({
+  e2e: {
+    setupNodeEvents(on, config) {
+      cypressGrepPlugin(config)
       return config
     },
   },
@@ -227,9 +244,10 @@ npx cypress run --env grepUntagged=true
 ### In cypress.config.js
 
 ```js
-const { defineConfig } = require('cypress')
+import { defineConfig } from 'cypress'
+import { plugin as cypressGrepPlugin } from '@cypress/grep/plugin'
 
-module.exports = defineConfig({
+export default defineConfig({
   env: {
     // Always filter by viewport tests
     grep: "viewport",
@@ -240,7 +258,7 @@ module.exports = defineConfig({
   },
   e2e: {
     setupNodeEvents(on, config) {
-      require('@cypress/grep/src/plugin')(config)
+      cypressGrepPlugin(config)
       return config
     },
   },
@@ -261,6 +279,10 @@ module.exports = defineConfig({
 ```
 
 ## TypeScript Support
+
+As of v5 of `@cypress/grep`, TypeScript declaration files are now included.
+These definitions should be automatically detected, but in the case you are using
+an older `moduleResolution` or configuration, some of the below techniques should work.
 
 ### Option 1: Reference types (Recommended)
 
@@ -400,15 +422,39 @@ Then refresh and run tests.
 
 ## Migration
 
+### From v4 to v5
+
+The support file registration and plugin have changed their export signature, meaning:
+
+In your support file, change the registration function from
+```js
+const registerCypressGrep = require('@cypress/grep')
+```
+
+to the following
+```js
+const { register: registerCypressGrep } = require('@cypress/grep')
+```
+
+Additionally, in your support file, change the plugin registration from
+```js
+const cypressGrepPlugin = require('@cypress/grep/src/plugin')
+```
+
+to the following
+```js
+const { plugin: cypressGrepPlugin } = require('@cypress/grep/plugin')
+```
+
+### From v2 to v3/v4
+
+- Requires Cypress 10.0.0+
+- No breaking changes in functionality
+
 ### From v1 to v2
 
 - `--env grep="tag1 tag2"` → `--env grepTags="tag1 tag2"`
 - Title filtering and tag filtering are now separate
-
-### From v2 to v3+
-
-- Requires Cypress 10.0.0+
-- No breaking changes in functionality
 
 ## Support
 

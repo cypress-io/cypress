@@ -1,5 +1,4 @@
-/// <reference types="cypress" />
-
+import { expect, describe } from 'vitest'
 import {
   parseGrep,
   parseTitleGrep,
@@ -8,14 +7,14 @@ import {
   shouldTestRun,
   shouldTestRunTags,
   shouldTestRunTitle,
-} from '../../src/utils'
+} from '../src/utils'
 
 describe('utils', () => {
-  context('parseTitleGrep', () => {
+  describe('parseTitleGrep', () => {
     it('grabs the positive title', () => {
       const parsed = parseTitleGrep('hello w')
 
-      expect(parsed).to.deep.equal({
+      expect(parsed).toEqual({
         title: 'hello w',
         invert: false,
       })
@@ -24,7 +23,7 @@ describe('utils', () => {
     it('trims the string', () => {
       const parsed = parseTitleGrep('   hello w  ')
 
-      expect(parsed).to.deep.equal({
+      expect(parsed).toEqual({
         title: 'hello w',
         invert: false,
       })
@@ -33,7 +32,7 @@ describe('utils', () => {
     it('inverts the string', () => {
       const parsed = parseTitleGrep('-hello w')
 
-      expect(parsed).to.deep.equal({
+      expect(parsed).toEqual({
         title: 'hello w',
         invert: true,
       })
@@ -42,24 +41,25 @@ describe('utils', () => {
     it('trims the inverted the string', () => {
       const parsed = parseTitleGrep('  -hello w  ')
 
-      expect(parsed).to.deep.equal({
+      expect(parsed).toEqual({
         title: 'hello w',
         invert: true,
       })
     })
 
     it('returns null for undefined input', () => {
+      // @ts-expect-error - bad args
       const parsed = parseTitleGrep()
 
-      expect(parsed).to.equal(null)
+      expect(parsed).toEqual(null)
     })
   })
 
-  context('parseFullTitleGrep', () => {
+  describe('parseFullTitleGrep', () => {
     it('returns list of title greps', () => {
       const parsed = parseFullTitleGrep('hello; one; -two')
 
-      expect(parsed).to.deep.equal([
+      expect(parsed).toEqual([
         { title: 'hello', invert: false },
         { title: 'one', invert: false },
         { title: 'two', invert: true },
@@ -67,12 +67,12 @@ describe('utils', () => {
     })
   })
 
-  context('parseTagsGrep', () => {
+  describe('parseTagsGrep', () => {
     it('parses AND tags', () => {
       // run only the tests with all 3 tags
       const parsed = parseTagsGrep('@tag1+@tag2+@tag3')
 
-      expect(parsed).to.deep.equal([
+      expect(parsed).toEqual([
         // single OR part
         [
           // with 3 AND parts
@@ -86,7 +86,7 @@ describe('utils', () => {
     it('handles dashes in the tag', () => {
       const parsed = parseTagsGrep('@smoke+@screen-b')
 
-      expect(parsed).to.deep.equal([
+      expect(parsed).toEqual([
         [
           { tag: '@smoke', invert: false },
           { tag: '@screen-b', invert: false },
@@ -98,7 +98,7 @@ describe('utils', () => {
       // run tests with tag1 OR tag2 or tag3
       const parsed = parseTagsGrep('@tag1 @tag2 @tag3')
 
-      expect(parsed).to.deep.equal([
+      expect(parsed).toEqual([
         [{ tag: '@tag1', invert: false }],
         [{ tag: '@tag2', invert: false }],
         [{ tag: '@tag3', invert: false }],
@@ -109,7 +109,7 @@ describe('utils', () => {
       // run tests with tag1 OR tag2 or tag3
       const parsed = parseTagsGrep('@tag1,@tag2,@tag3')
 
-      expect(parsed).to.deep.equal([
+      expect(parsed).toEqual([
         [{ tag: '@tag1', invert: false }],
         [{ tag: '@tag2', invert: false }],
         [{ tag: '@tag3', invert: false }],
@@ -119,13 +119,13 @@ describe('utils', () => {
     it('parses inverted tag', () => {
       const parsed = parseTagsGrep('-@tag1')
 
-      expect(parsed).to.deep.equal([[{ tag: '@tag1', invert: true }]])
+      expect(parsed).toEqual([[{ tag: '@tag1', invert: true }]])
     })
 
     it('parses tag1 but not tag2 with space', () => {
       const parsed = parseTagsGrep('@tag1 -@tag2')
 
-      expect(parsed).to.deep.equal([
+      expect(parsed).toEqual([
         [{ tag: '@tag1', invert: false }],
         [{ tag: '@tag2', invert: true }],
       ])
@@ -134,7 +134,7 @@ describe('utils', () => {
     it('forgives extra spaces', () => {
       const parsed = parseTagsGrep('  @tag1   -@tag2 ')
 
-      expect(parsed).to.deep.equal([
+      expect(parsed).toEqual([
         [{ tag: '@tag1', invert: false }],
         [{ tag: '@tag2', invert: true }],
       ])
@@ -143,7 +143,7 @@ describe('utils', () => {
     it('parses tag1 but not tag2 with comma', () => {
       const parsed = parseTagsGrep('@tag1,-@tag2')
 
-      expect(parsed).to.deep.equal([
+      expect(parsed).toEqual([
         [{ tag: '@tag1', invert: false }],
         [{ tag: '@tag2', invert: true }],
       ])
@@ -152,7 +152,7 @@ describe('utils', () => {
     it('filters out empty tags', () => {
       const parsed = parseTagsGrep(',, @tag1,-@tag2,, ,, ,')
 
-      expect(parsed).to.deep.equal([
+      expect(parsed).toEqual([
         [{ tag: '@tag1', invert: false }],
         [{ tag: '@tag2', invert: true }],
       ])
@@ -162,7 +162,7 @@ describe('utils', () => {
     it.skip('parses tag1 but not tag2', () => {
       const parsed = parseTagsGrep('@tag1-@tag2')
 
-      expect(parsed).to.deep.equal([
+      expect(parsed).toEqual([
         [
           { tag: '@tag1', invert: false },
           { tag: '@tag2', invert: true },
@@ -173,13 +173,13 @@ describe('utils', () => {
     it('allows all tags to be inverted', () => {
       const parsed = parseTagsGrep('--@tag1,--@tag2')
 
-      expect(parsed).to.deep.equal([
+      expect(parsed).toEqual([
         [{ tag: '@tag1', invert: true }, { tag: '@tag2', invert: true }],
       ])
     })
   })
 
-  context('parseGrep', () => {
+  describe('parseGrep', () => {
     // no need to exhaustively test the parsing
     // since we want to confirm it works via test names
     // and not through the implementation details of
@@ -188,7 +188,7 @@ describe('utils', () => {
     it('creates just the title grep', () => {
       const parsed = parseGrep('hello w')
 
-      expect(parsed).to.deep.equal({
+      expect(parsed).toEqual({
         title: [
           {
             title: 'hello w',
@@ -202,7 +202,7 @@ describe('utils', () => {
     it('creates object from the grep string only', () => {
       const parsed = parseGrep('hello w')
 
-      expect(parsed).to.deep.equal({
+      expect(parsed).toEqual({
         title: [
           {
             title: 'hello w',
@@ -213,15 +213,15 @@ describe('utils', () => {
       })
 
       // check how the parsed grep works against specific tests
-      expect(shouldTestRun(parsed, 'hello w')).to.equal(true)
-      expect(shouldTestRun(parsed, 'hello no')).to.equal(false)
+      expect(shouldTestRun(parsed, 'hello w')).toEqual(true)
+      expect(shouldTestRun(parsed, 'hello no')).toEqual(false)
     })
 
     it('matches one of the titles', () => {
       // also should trim each title
       const parsed = parseGrep('  hello w; work 2  ')
 
-      expect(parsed).to.deep.equal({
+      expect(parsed).toEqual({
         title: [
           {
             title: 'hello w',
@@ -236,15 +236,15 @@ describe('utils', () => {
       })
 
       // check how the parsed grep works against specific tests
-      expect(shouldTestRun(parsed, 'hello w')).to.equal(true)
-      expect(shouldTestRun(parsed, 'this work 2 works')).to.equal(true)
-      expect(shouldTestRun(parsed, 'hello no')).to.equal(false)
+      expect(shouldTestRun(parsed, 'hello w')).toEqual(true)
+      expect(shouldTestRun(parsed, 'this work 2 works')).toEqual(true)
+      expect(shouldTestRun(parsed, 'hello no')).toEqual(false)
     })
 
     it('creates object from the grep string and tags', () => {
       const parsed = parseGrep('hello w', '@tag1+@tag2+@tag3')
 
-      expect(parsed).to.deep.equal({
+      expect(parsed).toEqual({
         title: [
           {
             title: 'hello w',
@@ -263,28 +263,28 @@ describe('utils', () => {
       })
 
       // check how the parsed grep works against specific tests
-      expect(shouldTestRun(parsed, 'hello w'), 'needs tags').to.equal(false)
-      expect(shouldTestRun(parsed, 'hello no')).to.equal(false)
+      expect(shouldTestRun(parsed, 'hello w'), 'needs tags').toEqual(false)
+      expect(shouldTestRun(parsed, 'hello no')).toEqual(false)
       // not every tag is present
-      expect(shouldTestRun(parsed, ['@tag1', '@tag2'])).to.equal(false)
-      expect(shouldTestRun(parsed, ['@tag1', '@tag2', '@tag3'])).to.equal(true)
+      expect(shouldTestRun(parsed, '', ['@tag1', '@tag2'])).toEqual(false)
+      expect(shouldTestRun(parsed, '', ['@tag1', '@tag2', '@tag3'])).toEqual(true)
       expect(
-        shouldTestRun(parsed, ['@tag1', '@tag2', '@tag3', '@tag4']),
-      ).to.equal(true)
+        shouldTestRun(parsed, '', ['@tag1', '@tag2', '@tag3', '@tag4']),
+      ).toEqual(true)
 
       // title matches, but tags do not
-      expect(shouldTestRun(parsed, 'hello w', ['@tag1', '@tag2'])).to.equal(
+      expect(shouldTestRun(parsed, 'hello w', ['@tag1', '@tag2'])).toEqual(
         false,
       )
 
       // tags and title match
       expect(
         shouldTestRun(parsed, 'hello w', ['@tag1', '@tag2', '@tag3']),
-      ).to.equal(true)
+      ).toEqual(true)
     })
   })
 
-  context('shouldTestRunTags', () => {
+  describe('shouldTestRunTags', () => {
     // when the user types "used" string
     // and the test has the given tags, make sure
     // our parsing and decision logic computes the expected result
@@ -294,7 +294,7 @@ describe('utils', () => {
       expect(
         shouldTestRunTags(parsedTags, tags),
         `"${used}" against "${tags}"`,
-      ).to.equal(expected)
+      ).toEqual(expected)
     }
 
     it('handles AND tags', () => {
@@ -325,17 +325,17 @@ describe('utils', () => {
     })
   })
 
-  context('shouldTestRun', () => {
+  describe('shouldTestRun', () => {
     // a little utility function to parse the given grep string
     // and apply the first argument in shouldTestRun
-    const checkName = (grep, grepTags) => {
+    const checkName = (grep: string, grepTags?: string) => {
       const parsed = parseGrep(grep, grepTags)
 
-      expect(parsed).to.be.an('object')
+      expect(typeof parsed).toEqual('object')
 
       return (testName, testTags = []) => {
-        expect(testName, 'test title').to.be.a('string')
-        expect(testTags, 'test tags').to.be.an('array')
+        expect(typeof testName, 'test title').toEqual('string')
+        expect(testTags, 'test tags').toBeInstanceOf(Array)
 
         return shouldTestRun(parsed, testName, testTags)
       }
@@ -344,52 +344,51 @@ describe('utils', () => {
     it('simple tag', () => {
       const parsed = parseGrep('@tag1')
 
-      expect(shouldTestRun(parsed, 'no tag1 here')).to.be.false
-      expect(shouldTestRun(parsed, 'has @tag1 in the name')).to.be.true
+      expect(shouldTestRun(parsed, 'no tag1 here')).toEqual(false)
+      expect(shouldTestRun(parsed, 'has @tag1 in the name')).toEqual(true)
     })
 
     it('with invert title', () => {
       const t = checkName('-hello')
 
-      expect(t('no greetings')).to.be.true
-      expect(t('has hello world')).to.be.false
+      expect(t('no greetings')).toEqual(true)
+      expect(t('has hello world')).toEqual(false)
     })
 
     it('with invert option', () => {
       const t = checkName(null, '-@tag1')
 
-      expect(t('no tags here')).to.be.true
-      expect(t('has tag1', ['@tag1'])).to.be.false
-      expect(t('has other tags', ['@tag2'])).to.be.true
+      expect(t('no tags here')).toEqual(true)
+      expect(t('has tag1', ['@tag1'])).toEqual(false)
+      expect(t('has other tags', ['@tag2'])).toEqual(true)
     })
 
     it('with AND option', () => {
       const t = checkName('', '@tag1+@tag2')
 
-      expect(t('no tag1 here')).to.be.false
-      expect(t('has only @tag1', ['@tag1'])).to.be.false
-      expect(t('has only @tag2', ['@tag2'])).to.be.false
-      expect(t('has both tags', ['@tag1', '@tag2'])).to.be.true
+      expect(t('no tag1 here')).toEqual(false)
+      expect(t('has only @tag1', ['@tag1'])).toEqual(false)
+      expect(t('has only @tag2', ['@tag2'])).toEqual(false)
+      expect(t('has both tags', ['@tag1', '@tag2'])).toEqual(true)
     })
 
     it('with OR option', () => {
       const t = checkName(null, '@tag1 @tag2')
 
-      expect(t('no tag1 here')).to.be.false
-      expect(t('has only @tag1 in the name', ['@tag1'])).to.be.true
-      expect(t('has only @tag2 in the name', ['@tag2'])).to.be.true
-      expect(t('has @tag1 and @tag2 in the name', ['@tag1', '@tag2'])).to.be
-      .true
+      expect(t('no tag1 here')).toEqual(false)
+      expect(t('has only @tag1 in the name', ['@tag1'])).toEqual(true)
+      expect(t('has only @tag2 in the name', ['@tag2'])).toEqual(true)
+      expect(t('has @tag1 and @tag2 in the name', ['@tag1', '@tag2'])).toEqual(true)
     })
 
     it('OR with AND option', () => {
       const t = checkName(null, '@tag1 @tag2+@tag3')
 
-      expect(t('no tag1 here')).to.be.false
-      expect(t('has only @tag1 in the name', ['@tag1'])).to.be.true
-      expect(t('has only @tag2 in the name', ['@tag2'])).to.be.false
+      expect(t('no tag1 here')).toEqual(false)
+      expect(t('has only @tag1 in the name', ['@tag1'])).toEqual(true)
+      expect(t('has only @tag2 in the name', ['@tag2'])).toEqual(false)
       expect(t('has only @tag2 in the name and also @tag3', ['@tag2', '@tag3']))
-      .to.be.true
+      .toEqual(true)
 
       expect(
         t('has @tag1 and @tag2 and @tag3 in the name', [
@@ -397,76 +396,43 @@ describe('utils', () => {
           '@tag2',
           '@tag3',
         ]),
-      ).to.be.true
+      ).toEqual(true)
     })
 
     it('Multiple invert strings and a simple one', () => {
       const t = checkName('-name;-hey;number')
 
-      expect(t('number should only be matches without a n-a-m-e')).to.be.true
-      expect(t('number can\'t be name')).to.be.false
-      expect(t('The man needs a name')).to.be.false
-      expect(t('number hey name')).to.be.false
-      expect(t('numbers hey name')).to.be.false
-      expect(t('number hsey nsame')).to.be.true
-      expect(t('This wont match')).to.be.false
+      expect(t('number should only be matches without a n-a-m-e')).toEqual(true)
+      expect(t('number can\'t be name')).toEqual(false)
+      expect(t('The man needs a name')).toEqual(false)
+      expect(t('number hey name')).toEqual(false)
+      expect(t('numbers hey name')).toEqual(false)
+      expect(t('number hsey nsame')).toEqual(true)
+      expect(t('This wont match')).toEqual(false)
     })
 
     it('Only inverted strings', () => {
       const t = checkName('-name;-hey')
 
-      expect(t('I\'m matched')).to.be.true
-      expect(t('hey! I\'m not')).to.be.false
-      expect(t('My name is weird')).to.be.false
+      expect(t('I\'m matched')).toEqual(true)
+      expect(t('hey! I\'m not')).toEqual(false)
+      expect(t('My name is weird')).toEqual(false)
     })
   })
 
-  context('parseFullTitleGrep', () => {
+  describe('parseFullTitleGrep', () => {
     const shouldIt = (search, testName, expected) => {
       const parsed = parseFullTitleGrep(search)
 
       expect(
         shouldTestRunTitle(parsed, testName),
         `"${search}" against title "${testName}"`,
-      ).to.equal(expected)
+      ).toEqual(expected)
     }
 
     it('passes for substring', () => {
       shouldIt('hello w', 'hello world', true)
       shouldIt('-hello w', 'hello world', false)
-    })
-  })
-})
-
-describe('plugin', () => {
-  context('excludeSpecPattern', () => {
-    it('supports an array value', () => {
-      cy.task('grep', {
-        excludeSpecPattern: ['**/test2.spec.js', '**/test3.spec.js'],
-        specPattern: '**/*.spec.js',
-        env: {
-          grepTags: 'smoke',
-          grepFilterSpecs: true,
-        },
-      }).then((config) => {
-        expect(config.specPattern.length).to.equal(1)
-        expect(config.specPattern[0]).to.contain('test1.spec.js')
-      })
-    })
-
-    it('supports a string value', () => {
-      cy.task('grep', {
-        excludeSpecPattern: '**/test2.spec.js',
-        specPattern: '**/*.spec.js',
-        env: {
-          grepTags: 'smoke',
-          grepFilterSpecs: true,
-        },
-      }).then((config) => {
-        expect(config.specPattern.length).to.equal(2)
-        expect(config.specPattern[0]).to.contain('test1.spec.js')
-        expect(config.specPattern[1]).to.contain('test3.spec.js')
-      })
     })
   })
 })

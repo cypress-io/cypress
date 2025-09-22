@@ -1,8 +1,8 @@
 // @ts-check
 /// <reference types="cypress" />
 
-import cypressGrep from '../../src/support'
+import { register } from '../../src/index'
 
 // register the grep feature
 // https://github.com/cypress-io/cypress-grep
-cypressGrep()
+register()
