@@ -5,7 +5,7 @@ In some cases, pre-released cypress binaries will 404 when being downloaded from
 ```sh
 yarn add -D cypress@https://cdn.cypress.io/beta/npm/vX.Y.Z/OPERATING_ARCH/BRANCH_AND_HASH_NAME/cypress.tgz
 
-npm ERR! URL:https://cdn.cypress.io/beta/npm/vX.Y.Z/OPERATING_ARCH/BRANCH_AND_HASH_NAME/cypress.zip
+npm ERR! URL:https://cdn.cypress.io/beta/binary/vX.Y.Z/OPERATING_ARCH/BRANCH_AND_HASH_NAME/cypress.zip
 npm ERR! Error: Failed downloading the Cypress binary.
 npm ERR! Response code: 404
 npm ERR! Response message: Not Found
