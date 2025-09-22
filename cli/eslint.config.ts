@@ -17,7 +17,6 @@ export default [
       '@stylistic/type-generic-spacing': 'warn',
       '@stylistic/quotes': 'warn',
       '@stylistic/arrow-parens': 'warn',
-      '@stylistic/space-before-function-paren': 'warn',
       '@stylistic/no-multi-spaces': 'warn',
       'padding-line-between-statements': 'warn',
       '@stylistic/space-unary-ops': 'warn',
@@ -28,6 +27,7 @@ export default [
       '@stylistic/space-infix-ops': 'warn',
       '@stylistic/template-tag-spacing': 'warn',
       'no-var': 'warn',
+      '@stylistic/space-before-function-paren': ['warn', 'always'],
     },
   },
   {
