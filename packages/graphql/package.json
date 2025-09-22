@@ -73,6 +73,9 @@
         "outputs": [
           "{projectRoot}/src/gen/nxs.gen.ts",
           "{projectRoot}/schemas/schema.graphql"
+        ],
+        "dependsOn": [
+          "^build"
         ]
       },
       "build": {
