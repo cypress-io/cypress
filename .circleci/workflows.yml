@@ -3719,7 +3719,7 @@ workflows:
             - update-v8-snapshot-cache-on-develop
             - << pipeline.git.branch >>
         - equal:
-            - chore/bundle_package_root
+            - chore/bundle_packages
             - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/
@@ -3776,7 +3776,7 @@ workflows:
             - update-v8-snapshot-cache-on-develop
             - << pipeline.git.branch >>
         - equal:
-            - chore/bundle_package_root
+            - chore/bundle_packages
             - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/
@@ -3844,7 +3844,7 @@ workflows:
             - update-v8-snapshot-cache-on-develop
             - << pipeline.git.branch >>
         - equal:
-            - chore/bundle_package_root
+            - chore/bundle_packages
             - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/
@@ -4332,7 +4332,7 @@ workflows:
             - update-v8-snapshot-cache-on-develop
             - << pipeline.git.branch >>
         - equal:
-            - chore/bundle_package_root
+            - chore/bundle_packages
             - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/
@@ -5170,7 +5170,7 @@ workflows:
             - update-v8-snapshot-cache-on-develop
             - << pipeline.git.branch >>
         - equal:
-            - chore/bundle_package_root
+            - chore/bundle_packages
             - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/
