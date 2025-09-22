@@ -1,7 +1,7 @@
-const { defineConfig } = require('cypress')
-const cypressGrepPlugin = require('./src/plugin')
+import { defineConfig } from 'cypress'
+import { plugin as cypressGrepPlugin } from './src/plugin'
 
-module.exports = defineConfig({
+export default defineConfig({
   e2e: {
     defaultCommandTimeout: 1000,
     setupNodeEvents (on, config) {
@@ -15,7 +15,6 @@ module.exports = defineConfig({
 
       return config
     },
-    specPattern: '**/spec.js',
   },
   fixturesFolder: false,
 })

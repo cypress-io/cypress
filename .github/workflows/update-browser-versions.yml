@@ -18,6 +18,9 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.BOT_GITHUB_ACTION_TOKEN }}
+      - name: Setup CircleCI CLI
+        run: |
+          sudo snap install circleci
       - name: Set committer info
         ## attribute the commit to cypress-bot: https://github.community/t/logging-into-git-as-a-github-app/115916
         run: |

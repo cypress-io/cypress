@@ -13,6 +13,7 @@ const {
   checkNeedForBranchUpdate,
   updateBrowserVersionsFile,
   updatePRTitle,
+  CIRCLECI_WORKFLOWS_FILEPATH,
 } = require('../../github-actions/update-browser-versions')
 
 const coreStub = () => {
@@ -29,7 +30,7 @@ const stubChromeVersionResult = (channel, result) => {
 
 const stubRepoVersions = ({ betaVersion, stableVersion }) => {
   mockfs({
-    './.circleci/workflows.yml': `chrome-stable-version: &chrome-stable-version "${stableVersion}"\nchrome-beta-version: &chrome-beta-version "${betaVersion}"\n`,
+    [CIRCLECI_WORKFLOWS_FILEPATH]: `chrome-stable-version: &chrome-stable-version "${stableVersion}"\nchrome-beta-version: &chrome-beta-version "${betaVersion}"\n`,
   })
 }
 
@@ -254,7 +255,7 @@ describe('update browser version github action', () => {
         latestStableVersion: '2.0',
       })
 
-      expect(fs.writeFileSync).to.be.calledWith('./.circleci/workflows.yml', `chrome-stable-version: &chrome-stable-version "2.0"\nchrome-beta-version: &chrome-beta-version "2.1"\n`, 'utf8')
+      expect(fs.writeFileSync).to.be.calledWith(CIRCLECI_WORKFLOWS_FILEPATH, `chrome-stable-version: &chrome-stable-version "2.0"\nchrome-beta-version: &chrome-beta-version "2.1"\n`, 'utf8')
     })
   })
 

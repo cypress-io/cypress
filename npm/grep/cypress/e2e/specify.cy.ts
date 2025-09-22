@@ -1,5 +1,3 @@
-/// <reference types="cypress" />
-
 // specify is the same as it()
 
 specify('hello world', () => {})
