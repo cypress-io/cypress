@@ -131,7 +131,7 @@ Essential rules for reviewing code changes in the Cypress monorepo.
   - Focus: Scaffolding logic, template accuracy, project initialization
 
 ### Utility Packages (Lower Priority)
-- **@packages/root**: Root package (dummy package)
+- **@packages/root**: Root package
   - Focus: Monorepo setup, package coordination
 - **@packages/example**: Example project
   - Focus: Example accuracy, documentation quality, test examples

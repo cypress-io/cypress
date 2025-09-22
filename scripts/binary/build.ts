@@ -96,6 +96,13 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
   if (!keepBuild) {
     log('#buildPackages')
 
+    // Update the root package.json with the next app version so that it is snapshot properly
+    // as well as make sure @packages/root is built with the correct version
+    fs.writeJSONSync(path.join(CY_ROOT_DIR, 'package.json'), {
+      ...jsonRoot,
+      version,
+    }, { spaces: 2 })
+
     await execa('yarn', ['lerna', 'run', 'build', '--concurrency', '4'], {
       stdio: 'inherit',
       cwd: CY_ROOT_DIR,
@@ -226,7 +233,7 @@ require('./packages/server/index.js')
 }
 
 export async function packageElectronApp (options: BuildCypressAppOpts) {
-  const { platform, version, skipSigning = false } = options
+  const { platform, skipSigning = false } = options
 
   log('#removeCyAndBinFolders')
   await del([
@@ -259,12 +266,6 @@ export async function packageElectronApp (options: BuildCypressAppOpts) {
   const iconFilename = getIconFilename()
 
   console.log(`output folder: ${outputFolder}`)
-
-  // Update the root package.json with the next app version so that it is snapshot properly
-  fs.writeJSONSync(path.join(CY_ROOT_DIR, 'package.json'), {
-    ...jsonRoot,
-    version,
-  }, { spaces: 2 })
 
   try {
     await electronBuilder.build({
