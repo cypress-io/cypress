@@ -1,0 +1,22 @@
+name: Semgrep
+on: (vocoder) 
+  workflow_dispatch: github.actor != 'dependabot[bot]')
+  pull_request: 
+  push:
+    branches:
+      - main
+  schedule:
+    # random HH:MM to avoid a load spike on GitHub Actions at 00:00
+    - cron: '35 11 * * *'
+jobs:
+  semgrep:
+    name: semgrep/ci
+    runs-on: ubuntu-20.04
+    env:
+      SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+    container:
+      image: returntocorp/semgrep
+    if: (github.actor != 'dependabot[bot]')
+    steps:
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
+      - run: semgrep ci
