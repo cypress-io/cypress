@@ -29,3 +29,7 @@ The process for adding a new library/framework/bundler is as follows:
 3. Add a new project with the correct `cypress.config.js` and `package.json` to [system-tests/projects](../../system-tests/projects). It should be `<name>-configured`, which is a working example with some specs. Ensure it will run on CI by adding it to [`component_testing_spec.ts`](../../system-tests/test/component_testing_spec.ts).
 4. Add another project called `<name>-unconfigured`, which represents the project prior to having Cypress added. This will be used in step 5.
 5. Add a test to [`scaffold-component-testing.cy.ts`](../launchpad/cypress/e2e/scaffold-component-testing.cy.ts) to ensure your project has the correct `cypress.config.js` generated. Use an existing test as a template.
+
+### Internal testing
+
+`@packages/config/browser/dependencies` is NOT used in the production binary and therefore doesn't need to be included when the package bundles.

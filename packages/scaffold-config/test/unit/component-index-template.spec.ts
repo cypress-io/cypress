@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import dedent from 'dedent'
-import componentIndexHtmlGenerator from '../../src/component-index-template'
+import { componentIndexHtmlGenerator } from '../../src/component-index-template'
 import { CT_FRAMEWORKS } from '../../src/frameworks'
 
 describe('componentIndexHtmlGenerator', () => {

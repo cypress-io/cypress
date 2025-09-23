@@ -1,6 +1,7 @@
 {
-  "extends": "../ts/tsconfig.json",
-  "include": ["src"],
+  "include": [
+    "src"
+  ],
   "exclude": [
     "test",
     "script"
@@ -9,10 +10,15 @@
     "./../ts/index.d.ts"
   ],
   "compilerOptions": {
-    "lib": ["esnext"],
+    "lib": [
+      "esnext"
+    ],
     "allowJs": false,
     "noImplicitAny": true,
     "noUncheckedIndexedAccess": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
     "types": []
   }
 }
