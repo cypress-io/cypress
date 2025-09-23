@@ -119,7 +119,7 @@ jobs:
     steps:
         - halt-early
         - restore_cache:
-            key: circleci-packed-pipelines-{{ .Revision }}-{{ checksum ".circleci/src/**/*.yml" }}
+            key: circleci-packed-pipelines-{{ checksum ".circleci/src/**/*.yml" }}-{{ .Revision }}
             paths:
                 - .circleci/packed
         - run: # this should only run if: the cache wass not restored OR forece_pack is true
@@ -146,7 +146,7 @@ jobs:
                   fi
               done
         - save_cache:
-            key: circleci-packed-pipelines-{{ .Revision }}-{{ checksum ".circleci/src/**/*.yml" }}
+            key: circleci-packed-pipelines-{{ checksum ".circleci/src/**/*.yml" }}-{{ .Revision }}
             paths:
                 - .circleci/packed
         - persist_to_workspace: *persist_packed_configs
