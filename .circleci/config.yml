@@ -1,5 +1,6 @@
 orbs:
     continuation: circleci/continuation@1.1.0
+    circleci-cli: circleci/circleci-cli@0.1.9
 setup: true
 version: 2.1
 
@@ -149,7 +150,7 @@ jobs:
 
   pack-workflows:
     docker:
-        - image: cimg/base:stable
+        - image: circleci/circleci-cli:latest
     resource_class: small
     steps:
         - halt-early
@@ -179,6 +180,7 @@ jobs:
             paths:
                 - .circleci/packed
         - persist-to-workspace-and-exit-early
+        - circleci-cli/install
         - pack-workflows
         - save_cache:
             key: circleci-packed-pipelines-{{ .Revision }} # for caching same-rev reruns - no need to checkout code. early term optimization.
