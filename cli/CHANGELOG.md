@@ -15,7 +15,7 @@ _Released 9/23/2025 (PENDING)_
 **Misc:**
 
 - Update the styles for command grouping 'line' so on expansion it is displayed correctly. Addressed in [#32521](https://github.com/cypress-io/cypress/pull/32521)
-- Test hook names now correctly display with a semi-bold font weight. Addressed in [#32491](https://github.com/cypress-io/cypress/pull/32491).
+- Test hook names now correctly display with a semi-bold font weight. Addresses [#32477](https://github.com/cypress-io/cypress/issues/32477). Addressed in [#32491](https://github.com/cypress-io/cypress/pull/32491).
 - Updated the Cypress Studio panel to not show bottom border. Addresses [#32478](https://github.com/cypress-io/cypress/issues/32478).
 
 **Dependency Updates:**
