@@ -171,8 +171,19 @@ describe('header', () => {
           cy.get('.restart').should('not.exist')
         })
 
-        it('does not display next button', () => {
-          cy.get('.next').should('not.exist')
+        it('displays the next button but disabled', () => {
+          cy.get('.next').should('be.visible').and('be.disabled')
+        })
+
+        it('shows "Step (not available)" tooltip when next button is disabled', () => {
+          cy.get('.next').trigger('mouseover', { force: true })
+          cy.get('.cy-tooltip').should('have.text', 'Step (not available)')
+        })
+
+        it('does not emit runner:next when disabled next button is clicked', () => {
+          cy.spy(runner, 'emit')
+          cy.get('.next').click({ force: true })
+          cy.wrap(runner.emit).should('not.be.calledWith', 'runner:next')
         })
       })
     })
