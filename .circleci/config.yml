@@ -76,7 +76,7 @@ commands:
               mkdir -p .circleci/packed # persist empty dir to workspace
             fi
       - persist_to_workspace:
-          root: .
+          root: ~/project
           paths:
             - .circleci/packed
       - run:
