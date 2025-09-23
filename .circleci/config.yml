@@ -176,9 +176,9 @@ jobs:
             paths:
                 - ~/.circleci/packed
         - persist_to_workspace:
-            root: .
+            root: ~/
             paths:
-                - ~/.circleci/packed
+                - .circleci/packed
 
 
 
