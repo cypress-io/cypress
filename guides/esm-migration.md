@@ -64,7 +64,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [ ] packages/server **PARTIAL** - many source/test files in JS. highest priority
 - [ ] packages/socket **PARTIAL** - entry point is JS. Tests are JS
 - [x] packages/stderr-filtering ✅ **COMPLETED**
-- [ ] packages/telemetry **PARTIAL** - entry point is JS
+- [x] packages/telemetry ✅ **COMPLETED**
 - [ ] packages/ts **PARTIAL** - ultimate goal is removal and likely not worth the effort to convert
 - [x] packages/types ✅ **COMPLETED**
 - [x] packages/v8-snapshot-require

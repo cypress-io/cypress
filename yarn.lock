@@ -6720,6 +6720,14 @@
     is-module "^1.0.0"
     resolve "^1.19.0"
 
+"@rollup/plugin-typescript@12.0.0":
+  version "12.0.0"
+  resolved "https://registry.yarnpkg.com/@rollup/plugin-typescript/-/plugin-typescript-12.0.0.tgz#e92dee7ac5a686864067e34daa5a7df1e3b82c55"
+  integrity sha512-w5PTCahNqP8bokY9/7DO+hjbJF7ru0yBuWM9QMNb9m+GQgwb7zYsOBbPxqdjDqYSVCgvvDprcNH2kevsev8IBg==
+  dependencies:
+    "@rollup/pluginutils" "^5.1.0"
+    resolve "^1.22.1"
+
 "@rollup/pluginutils@^3.0.4", "@rollup/pluginutils@^3.1.0":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@rollup/pluginutils/-/pluginutils-3.1.0.tgz#706b4524ee6dc8b103b3c995533e5ad680c02b9b"
@@ -28782,7 +28790,7 @@ rollup@3.29.5:
   optionalDependencies:
     fsevents "~2.3.2"
 
-rollup@^4.20.0, rollup@^4.24.4, rollup@^4.34.9, rollup@^4.43.0, rollup@^4.52.0:
+rollup@4.52.0, rollup@^4.20.0, rollup@^4.24.4, rollup@^4.34.9, rollup@^4.43.0, rollup@^4.52.0:
   version "4.52.0"
   resolved "https://registry.yarnpkg.com/rollup/-/rollup-4.52.0.tgz#5a906bf98f7c7a2c08d2b18fbfa52955552423d7"
   integrity sha512-+IuescNkTJQgX7AkIDtITipZdIGcWF0pnVvZTWStiazUmcGA2ag8dfg0urest2XlXUi9kuhfQ+qmdc5Stc3z7g==
@@ -32178,6 +32186,11 @@ typescript@5.4.5, typescript@~5.4.5:
   version "5.4.5"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.4.5.tgz#42ccef2c571fdbd0f6718b1d1f5e6e5ef006f611"
   integrity sha512-vcI4UpRgg81oIRUFwR0WSIHKt11nJ7SAVlYNIu+QpqeyXP+gpQJy/Z4+F0aGxSE4MqwjyXvW/TzgkLAx2AGHwQ==
+
+typescript@5.6.3:
+  version "5.6.3"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.6.3.tgz#5f3449e31c9d94febb17de03cc081dd56d81db5b"
+  integrity sha512-hjcS1mhfuyi4WW8IWtjP7brDrG2cuDZukyrYrSauoXGNgx0S7zceP07adYkJycEr56BOUTNPzbInooiN3fn1qw==
 
 "typescript@>=3 < 6", typescript@^5.4.3, typescript@^5.6.3, typescript@^5.8.2, typescript@~5.9.2:
   version "5.9.2"

@@ -3,12 +3,16 @@
   "version": "0.0.0-development",
   "description": "open telemetry wrapper used throughout the cypress monorepo to instrument the cypress app",
   "private": true,
-  "main": "dist/node.js",
-  "browser": "src/browser.ts",
+  "main": "cjs/node.js",
   "scripts": {
-    "build": "tsc",
-    "check-ts": "tsc --noEmit && yarn -s tslint",
-    "clean": "rimraf dist",
+    "build": "yarn build:esm && yarn build:cjs && yarn build:browser",
+    "build-prod": "yarn build",
+    "build:browser": "rimraf browser && rollup -c rollup.config.mjs",
+    "build:cjs": "rimraf cjs && tsc -p tsconfig.cjs.json",
+    "build:esm": "rimraf esm && tsc -p tsconfig.esm.json",
+    "check-ts": "tsc -p tsconfig.cjs.json --noEmit && yarn -s tslint -p tsconfig.cjs.json",
+    "clean": "rimraf esm cjs",
+    "clean-deps": "rimraf node_modules",
     "test": "yarn test-unit",
     "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0",
     "test-unit": "vitest run",
@@ -28,12 +32,18 @@
   },
   "devDependencies": {
     "@packages/ts": "0.0.0-development",
+    "@rollup/plugin-typescript": "12.0.0",
+    "rimraf": "6.0.1",
+    "rollup": "4.52.0",
+    "typescript": "5.6.3",
     "vitest": "^3.2.4"
   },
   "files": [
-    "dist",
-    "src"
+    "esm",
+    "cjs",
+    "browser"
   ],
-  "types": "src/node.ts",
+  "types": "cjs/node.d.ts",
+  "module": "esm/node.js",
   "nx": {}
 }
