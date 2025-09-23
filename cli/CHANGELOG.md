@@ -7,10 +7,12 @@ _Released 9/23/2025 (PENDING)_
 
 - In development mode, Electron `stderr` is piped directly to Cypress' `stderr` to make it clear why Electron failed to start, if it fails to start. Fixes [#32358](https://github.com/cypress-io/cypress/issues/32358). Addressed in [32468](https://github.com/cypress-io/cypress/pull/32468).
 - Fixed Next button placement and behavior during test stepping workflow. The button now maintains consistent visibility during stepping sessions, staying visible but disabled when no immediate next command is available, providing clear visual feedback to users about stepping state. Fixes [#32476](https://github.com/cypress-io/cypress/issues/32476).
+- Fixed an issue where ESM Cypress configurations were not being interpreted correctly. Fixes [#32493](https://github.com/cypress-io/cypress/issues/32493). Fixed in [#32515](https://github.com/cypress-io/cypress/pull/32515).
 
 **Misc:**
 
 - Update the styles for command grouping 'line' so on expansion it is displayed correctly. Addressed in [#32521](https://github.com/cypress-io/cypress/pull/32521)
+- Test hook names now correctly display with a semi-bold font weight. Addressed in [#32491](https://github.com/cypress-io/cypress/pull/32491).
 - Updated the Cypress Studio panel to not show bottom border. Addresses [#32478](https://github.com/cypress-io/cypress/issues/32478).
 
 **Dependency Updates:**

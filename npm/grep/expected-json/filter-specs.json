@@ -1,0 +1,11 @@
+[
+  {
+    "name": "test2.cy.ts",
+    "tests": [
+      {
+        "name": "Test 2",
+        "state": "passed"
+      }
+    ]
+  }
+]
