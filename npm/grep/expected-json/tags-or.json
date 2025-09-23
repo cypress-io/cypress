@@ -1,0 +1,29 @@
+[
+  {
+    "name": "test1.cy.ts",
+    "tests": [
+      {
+        "name": "Test 1",
+        "state": "passed"
+      }
+    ]
+  },
+  {
+    "name": "test2.cy.ts",
+    "tests": [
+      {
+        "name": "Test 2",
+        "state": "passed"
+      }
+    ]
+  },
+  {
+    "name": "test3.cy.ts",
+    "tests": [
+      {
+        "name": "Test 3",
+        "state": "pending"
+      }
+    ]
+  }
+]

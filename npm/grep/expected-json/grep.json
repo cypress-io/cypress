@@ -1,0 +1,15 @@
+[
+  {
+    "name": "grep-task.cy.ts",
+    "tests": [
+      {
+        "name": "plugin",
+        "state": "passed"
+      },
+      {
+        "name": "plugin",
+        "state": "passed"
+      }
+    ]
+  }
+]
