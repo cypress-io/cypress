@@ -21,7 +21,7 @@ commands:
     parameters:
         key:
           type: string
-          default: circleci-packed-pipelines-{{ pipeline.git.hash }}
+          default: circleci-packed-pipelines-{{ pipeline.git.revision }}
     steps:
       - unless:
           condition: << pipeline.parameters.force-pack >>
@@ -118,12 +118,12 @@ jobs:
         - halt-early
         # restores the cache, persists to workspace & returns early if this is a re-run of the same commit
         - check-for-packed-config-cache: 
-            key: circleci-packed-pipelines-{{ pipeline.git.hash }}
+            key: circleci-packed-pipelines-{{ pipeline.git.revision }}
         - checkout:
             at: ~/
         # restores the cache, persists to workspace & returns early if there is a cache hit for the ./circleci/src dir
         - check-for-packed-config-cache:
-            key: circleci-packed-pipelines-{{ pipeline.git.hash}}-{{ checksum ".circleci/src/**/*.yml" }}
+            key: circleci-packed-pipelines-{{ pipeline.git.revision}}-{{ checksum ".circleci/src/**/*.yml" }}
         # if there's a cache miss, pack the config and persist to workspace
         - run:
             name: Pack configurations
@@ -146,7 +146,7 @@ jobs:
                     fi
                 done
         - save_cache:
-            key: circleci-packed-pipelines-{{ pipeline.git.hash }}-{{ checksum ".circleci/src/**/*.yml" }}
+            key: circleci-packed-pipelines-{{ pipeline.git.revision }}-{{ checksum ".circleci/src/**/*.yml" }}
             paths:
                 - .circleci/packed
         - persist_to_workspace: *persist_packed_configs
