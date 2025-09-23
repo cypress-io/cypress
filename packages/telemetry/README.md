@@ -140,10 +140,10 @@ const { OTLPTraceExporterIPC } = require('@packages/telemetry')
 
 ### Browser
 
-To access the browser telemetry singleton use the browser export directly.
+To access the browser telemetry singleton use the browser export.
 
 ```js
-import { telemetry } from '@packages/telemetry/src/browser'
+import { telemetry } from '@packages/telemetry/browser/client'
 
 telemetry.init({options})
 ```
@@ -151,7 +151,7 @@ telemetry.init({options})
 The browser singleton is also stored on window, in some cases when the telemetry package is included in multiple packages you can use the `attach` method to retrieve and setup the singleton from the instance saved on window.
 
 ```js
-import { telemetry } from '@packages/telemetry/src/browser'
+import { telemetry } from '@packages/telemetry/browser/client'
 
 telemetry.attach()
 ```
@@ -198,7 +198,7 @@ const { telemetry } = require('@packages/telemetry')
 Browser:
 
 ```js
-import { telemetry } from '@packages/telemetry/src/browser'
+import { telemetry } from '@packages/telemetry/browser/client'
 ```
 
 ### Spans

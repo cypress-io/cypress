@@ -3,9 +3,9 @@ global.window = {}
 
 import { expect } from 'chai'
 
-import { telemetry } from '../src/browser'
+import { telemetry } from '../src/client'
 
-import { Telemetry as TelemetryClass } from '../src/index'
+import { Telemetry as TelemetryClass } from '../src/telemetry/index'
 
 describe('telemetry is disabled', () => {
   describe('init', () => {

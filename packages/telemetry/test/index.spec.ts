@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 
-import { Telemetry } from '../src'
+import { Telemetry } from '../src/telemetry'
 
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
