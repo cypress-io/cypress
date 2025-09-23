@@ -54,7 +54,7 @@
 - [x] packages/packherd-require ✅ **COMPLETED**
 - [ ] packages/proxy **PARTIAL** - entry point is JS
 - [x] packages/reporter ✅ **COMPLETED**
-- [ ] packages/resolve-dist **PARTIAL** - entry point is JS
+- [x] packages/resolve-dist ✅ **COMPLETED**
 - [ ] packages/rewriter **PARTIAL** - entry point is JS
 - [ ] packages/root
 - [x] packages/runner ✅ **COMPLETED**
