@@ -1,0 +1,11 @@
+[
+  {
+    "name": "this.cy.ts",
+    "tests": [
+      {
+        "name": "this context",
+        "state": "passed"
+      }
+    ]
+  }
+]
