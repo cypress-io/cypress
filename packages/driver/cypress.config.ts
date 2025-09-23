@@ -4,7 +4,6 @@ import { devServer as cypressWebpackDevServer } from '@cypress/webpack-dev-serve
 
 export const baseConfig: Cypress.ConfigOptions = {
   projectId: 'ypt4pf',
-  experimentalStudio: true,
   experimentalMemoryManagement: true,
   experimentalWebKitSupport: true,
   hosts: {

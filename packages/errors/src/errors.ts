@@ -1225,14 +1225,14 @@ export const AllCypressErrors = {
 
         If you have feedback about the experiment, please join the discussion here: http://on.cypress.io/single-tab-run-mode`
   },
-  EXPERIMENTAL_STUDIO_E2E_ONLY: () => {
+  EXPERIMENTAL_STUDIO_REMOVED: () => {
     return errTemplate`\
-        The ${fmt.highlight(`experimentalStudio`)} experiment is currently only supported for End to End Testing.
-
-        If you have feedback about the experiment, please join the discussion here: http://on.cypress.io/studio-beta`
+        The ${fmt.highlight(`experimentalStudio`)} was removed in ${fmt.cypressVersion(`13.0.0`)}.
+        
+        You can safely remove this option from your config.`
   },
   EXPERIMENTAL_RUN_ALL_SPECS_E2E_ONLY: () => {
-    const code = errPartial`
+    const code = errPartial`  
     {
       e2e: {
         experimentalRunAllSpecs: true
@@ -1553,7 +1553,6 @@ export const AllCypressErrors = {
   },
 } as const
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _typeCheck: Record<keyof AllCypressErrorObj, (...args: any[]) => ErrTemplateResult> = AllCypressErrors
 
 export type AllCypressErrorObj = typeof AllCypressErrors
