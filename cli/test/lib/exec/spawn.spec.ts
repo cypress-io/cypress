@@ -712,7 +712,11 @@ describe('lib/exec/spawn', function () {
     it('filters out dbus errors on linux', async () => {
       vi.mocked(os.platform).mockReturnValue('linux')
 
-      const dbusError = Buffer.from('ERROR:dbus/bus.cc:123: Failed to connect to session bus')
+      const dbusErrors = [
+        Buffer.from('ERROR:dbus/bus.cc:123: Failed to connect to session bus'),
+        Buffer.from('[246:0820/083339.099956:ERROR:dbus/object_proxy.cc:590] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type:'),
+      ]
+
       const normalError = Buffer.from('Some other error message')
 
       let dataCallback: (data: Buffer) => void
@@ -728,20 +732,19 @@ describe('lib/exec/spawn', function () {
       const startPromise = start()
 
       // Emit dbus error - should be filtered out (not written to stderr)
-      dataCallback!(dbusError)
+      dbusErrors.forEach((err) => {
+        dataCallback!(err)
+        expect(stderr.write).not.toHaveBeenCalledWith(err)
+      })
 
       // Emit normal error - should be written to stderr
       dataCallback!(normalError)
 
+      expect(stderr.write).toHaveBeenCalledWith(normalError)
+
       spawnedProcess.emit('close', 0)
 
       await startPromise
-
-      // dbus error should not be written to stderr
-      expect(stderr.write).not.toHaveBeenCalledWith(dbusError)
-
-      // normal error should be written to stderr
-      expect(stderr.write).toHaveBeenCalledWith(normalError)
     })
 
     // https://github.com/cypress-io/cypress/issues/1841

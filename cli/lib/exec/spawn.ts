@@ -14,7 +14,7 @@ import { stdin, stdout, stderr } from 'process'
 
 const debug = Debug('cypress:cli')
 
-const DBUS_ERROR_PATTERN = 'ERROR:dbus/bus.cc'
+const DBUS_ERROR_PATTERN = /ERROR:dbus\/(bus|object_proxy)\.cc/
 
 function isPlatform (platform: string): boolean {
   return os.platform() === platform
@@ -191,7 +191,7 @@ function createSpawnFunction (
             return
           }
 
-          if (str.includes(DBUS_ERROR_PATTERN)) {
+          if (str.match(DBUS_ERROR_PATTERN)) {
             debug(str)
           } else {
           // else pass it along!
