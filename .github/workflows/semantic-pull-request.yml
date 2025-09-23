@@ -22,6 +22,9 @@ on:
       - opened
       - edited
       - synchronize
+    branches:
+      - develop
+      - release/*
 
 jobs:
   main:
