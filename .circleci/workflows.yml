@@ -1411,9 +1411,6 @@ jobs:
       executor:
         default: cy-doc
         type: executor
-      is_contributor_pr:
-        default: false
-        type: boolean
       only-cache-for-root-user:
         default: false
         type: boolean
@@ -1441,8 +1438,9 @@ jobs:
           command: yarn list --depth=0 || true
           name: Top level packages
       - run:
-          command: node ./scripts/circle-env.js --check-canaries --is-contributor-pr <<
-            parameters.is_contributor_pr >>
+          command: |
+            IS_CONTRIBUTOR_PR=$([[ "<< pipeline.git.branch >>" =~ ^pull/[0-9]+$ ]] && echo "true" || echo "false")
+            node ./scripts/circle-env.js --check-canaries --is-contributor-pr $IS_CONTRIBUTOR_PR
           name: Check env canaries
       - build-and-persist
     working_directory: ~/cypress
