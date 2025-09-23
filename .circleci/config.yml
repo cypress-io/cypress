@@ -35,7 +35,9 @@ commands:
                     if [ -d ".circleci/packed" ] && [ "$(ls -A .circleci/packed 2>/dev/null)" ]; then
                         echo "✅ Cache restored - packed configurations are up-to-date"
                         echo "echo CACHE_HIT=true" >> $BASH_ENV
-                    fi
+                    else
+                        echo "❌ Cache miss - packed configurations are not up-to-date"
+                    
             - persist_to_workspace: &persist_packed_configs
                 root: .
                 paths:
@@ -116,35 +118,33 @@ jobs:
     resource_class: small
     steps:
         - halt-early
-        # restores the cache, persists to workspace & returns early if this is a re-run of the same commit
-        - check-for-packed-config-cache: 
-            key: circleci-packed-pipelines-{{ .Revision }}
-        - checkout:
-            at: ~/
-        # restores the cache, persists to workspace & returns early if there is a cache hit for the ./circleci/src dir
-        - check-for-packed-config-cache:
-            key: circleci-packed-pipelines-{{ .Revision}}-{{ checksum ".circleci/src/**/*.yml" }}
-        # if there's a cache miss, pack the config and persist to workspace
-        - run:
+        - restore_cache:
+            key: circleci-packed-pipelines-{{ .Revision }}-{{ checksum ".circleci/src/**/*.yml" }}
+            paths:
+                - .circleci/packed
+        - run: # this should only run if: the cache wass not restored OR forece_pack is true
             name: Pack configurations
             command: |
-                echo "📦 Cache miss - packing configurations..."
-                
-                src_dir="./.circleci/src"
-                outdir="./.circleci/packed"
+              if [[ -d ".circleci/packed" ]] && [[ "$(ls -A .circleci/packed 2>/dev/null)" ]] && [[ << pipeline.parameters.force-pack >> == false ]]; then
+                echo "📦 Cache hit - skipping packaging"
+                exit 0
+              fi
 
-                # Create the output directory if it doesn't exist
-                mkdir -p "$outdir"
+              src_dir="./.circleci/src"
+              outdir="./.circleci/packed"
 
-                for cfg_path in "${src_dir}"/*/; do
-                    cfg_name=$(basename "$cfg_path")
-                    output_file="${outdir}/${cfg_name}.yml"
-                    echo "📦 Packing ${cfg_name}.yml configuration..."
-                    if ! circleci config pack "$cfg_path" > "$output_file"; then
-                        echo "  ❌ Failed to pack ${output_file}"
-                        exit 1
-                    fi
-                done
+              # Create the output directory if it doesn't exist
+              mkdir -p "$outdir"
+
+              for cfg_path in "${src_dir}"/*/; do
+                  cfg_name=$(basename "$cfg_path")
+                  output_file="${outdir}/${cfg_name}.yml"
+                  echo "📦 Packing ${cfg_name}.yml configuration..."
+                  if ! circleci config pack "$cfg_path" > "$output_file"; then
+                      echo "  ❌ Failed to pack ${output_file}"
+                      exit 1
+                  fi
+              done
         - save_cache:
             key: circleci-packed-pipelines-{{ .Revision }}-{{ checksum ".circleci/src/**/*.yml" }}
             paths:
