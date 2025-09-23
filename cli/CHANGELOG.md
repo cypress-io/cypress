@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.3.0
 
-_Released 9/23/2025 (PENDING)_
+_Released 9/23/2025_
 
 **Features:**
 
@@ -14,7 +14,7 @@ _Released 9/23/2025 (PENDING)_
 
 **Misc:**
 
-- Update the styles for command grouping 'line' so on expansion it is displayed correctly. Addressed in [#32521](https://github.com/cypress-io/cypress/pull/32521)
+- Update the styles for command grouping 'line' so on expansion it is displayed correctly. Addressed in [#32521](https://github.com/cypress-io/cypress/pull/32521).
 - Test hook names now correctly display with a semi-bold font weight. Addresses [#32477](https://github.com/cypress-io/cypress/issues/32477). Addressed in [#32491](https://github.com/cypress-io/cypress/pull/32491).
 - Updated the Cypress Studio panel to not show bottom border. Addresses [#32478](https://github.com/cypress-io/cypress/issues/32478).
 
