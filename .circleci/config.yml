@@ -17,38 +17,6 @@ workflows:
                   - pack-workflows
 
 commands:
-  check-for-packed-config-cache:
-    parameters:
-        key:
-          type: string
-          default: circleci-packed-pipelines-{{ .Revision }}
-    steps:
-      - unless:
-          condition: << pipeline.parameters.force-pack >>
-          steps:
-            - restore_cache:
-                key: << parameters.key >>
-            - run:
-                name: Check for cached packed configurations
-                command: |
-                    # Check if cache was restored and packed configs exist
-                    if [ -d ".circleci/packed" ] && [ "$(ls -A .circleci/packed 2>/dev/null)" ]; then
-                        echo "✅ Cache restored - packed configurations are up-to-date"
-                        echo "echo CACHE_HIT=true" >> $BASH_ENV
-                    else
-                        echo "❌ Cache miss - packed configurations are not up-to-date"
-                    
-            - persist_to_workspace: &persist_packed_configs
-                root: .
-                paths:
-                    - .circleci/packed
-            - run:
-                name: Skipping Packed Config Cache
-                command: |
-                    if [ -n "$CACHE_HIT" ]; then
-                        echo "Skipping packing step"
-                        circleci-agent step halt
-                    fi
   halt-early:
     steps:
       - run:
@@ -92,6 +60,53 @@ commands:
 
             echo "Skipping CI; branch in progress - $TRIGGER_INSTRUCTIONS"
             cancel_build
+  persist_cache_to_workspace_and_exit_early:
+    steps:
+      - run:
+          name: Check cache status and exit early if needed
+          command: |
+            if [[ -d ".circleci/packed" ]] && [[ "$(ls -A .circleci/packed 2>/dev/null)" ]] && [[ << pipeline.parameters.force-pack >> == false ]]; then
+              echo "📦 Cache hit - packed configurations exist and force-pack is false"
+              echo "✅ Persisting packed configurations to workspace and halting job"
+              echo "CACHE_HIT=true" >> $BASH_ENV
+            else
+              echo "📦 Cache miss or force-pack is true - continuing with packaging"
+              echo "CACHE_HIT=false" >> $BASH_ENV
+              mkdir -p .circleci/packed # persist empty dir to workspace
+            fi
+      - persist_to_workspace: &persist_packed_configs
+          root: .
+          paths:
+            - .circleci/packed
+      - end-job:
+          command: |
+            if [[ "$CACHE_HIT" == "true" ]]; then
+              echo "✅ Cache hit - packed configurations exist and force-pack is false"
+              exit 0
+            else
+              echo "📦 Cache miss or force-pack is true - continuing with packaging"
+            fi
+
+  pack-workflows:
+    steps:
+      - run:
+          name: Pack workflows
+          command: |
+            src_dir="./.circleci/src"
+            outdir="./.circleci/packed"
+
+            # Create the output directory if it doesn't exist
+            mkdir -p "$outdir"
+
+            for cfg_path in "${src_dir}"/*/; do
+                cfg_name=$(basename "$cfg_path")
+                output_file="${outdir}/${cfg_name}.yml"
+                echo "📦 Packing ${cfg_name}.yml configuration..."
+                if ! circleci config pack "$cfg_path" > "$output_file"; then
+                    echo "  ❌ Failed to pack ${output_file}"
+                    exit 1
+                fi
+            done
 
 jobs:
   launch-primary-workflow:
@@ -112,6 +127,7 @@ jobs:
           - continuation/continue:
               configuration_path: .circleci/workflows.yml
 
+
   pack-workflows:
     docker:
         - image: cimg/base:stable
@@ -119,34 +135,54 @@ jobs:
     steps:
         - halt-early
         - restore_cache:
-            key: circleci-packed-pipelines-{{ checksum ".circleci/src/**/*.yml" }}-{{ .Revision }}
+            keys:
+              - circleci-packed-pipelines-{{ .Revision }}
             paths:
-                - .circleci/packed
+                - ~/.circleci/packed
+        - persist_cache_to_workspace_and_exit_early
+        - checkout:
+            at: ~/
+        - restore_cache:
+            keys:
+              - circleci-packed-pipelines-{{ checksum ".circleci/src/**/*.yml" }}
+            paths:
+                - ~/.circleci/packed
+        - persist_cache_to_workspace_and_exit_early
         - run: # this should only run if: the cache wass not restored OR forece_pack is true
             name: Pack configurations
             command: |
-              if [[ -d ".circleci/packed" ]] && [[ "$(ls -A .circleci/packed 2>/dev/null)" ]] && [[ << pipeline.parameters.force-pack >> == false ]]; then
-                echo "📦 Cache hit - skipping packaging"
-                exit 0
+              if [[ -z "$CACHE_HIT" ]]; then
+                echo "📦 Cache miss - packing configurations"
+                echo "CACHE_HIT=false" >> $BASH_ENV
               fi
 
-              src_dir="./.circleci/src"
-              outdir="./.circleci/packed"
-
-              # Create the output directory if it doesn't exist
-              mkdir -p "$outdir"
-
-              for cfg_path in "${src_dir}"/*/; do
-                  cfg_name=$(basename "$cfg_path")
-                  output_file="${outdir}/${cfg_name}.yml"
-                  echo "📦 Packing ${cfg_name}.yml configuration..."
-                  if ! circleci config pack "$cfg_path" > "$output_file"; then
-                      echo "  ❌ Failed to pack ${output_file}"
-                      exit 1
+              for dir in ./.circleci/src/*/; do
+                if [ -d "$dir" ]; then
+                  dirname=$(basename "$dir")
+                  output_file="./.circleci/${dirname}.yml"
+                  
+                  echo "📦 Packing ${dirname}.yml configuration..."
+                  if ! circleci config pack "$dir" > "$output_file"; then
+                    echo "  ❌ Failed to pack ${output_file}"
+                    exit 1
                   fi
+                  echo "  ✅ Packed ${output_file}"
+                  
+                  echo "  🔍 Validating ${output_file}"
+                  if ! circleci config validate "$output_file"; then
+                    echo "    ❌ Validating ${output_file} failed"
+                    exit 1
+                  fi
+                  echo "    ✅ ${dirname}.yml configuration validated successfully"
+                  
+                  git add "$output_file"
+                  echo "  📝 ${output_file} staged for commit"
+                fi
               done
         - save_cache:
-            key: circleci-packed-pipelines-{{ checksum ".circleci/src/**/*.yml" }}-{{ .Revision }}
+            keys: 
+              - circleci-packed-pipelines-{{ checksum ".circleci/src/**/*.yml" }}
+              - circleci-packed-pipelines-{{ .Revision }}
             paths:
                 - .circleci/packed
         - persist_to_workspace: *persist_packed_configs
