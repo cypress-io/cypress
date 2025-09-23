@@ -38,7 +38,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 
 - [ ] packages/app **PARTIAL** - low priority: frontend package
 - [x] packages/config ✅ **COMPLETED**
-- [ ] packages/data-context  **PARTIAL** - entry point is JS
+- [x] packages/data-context ✅ **COMPLETED**
 - [x] packages/driver ✅ **COMPLETED** - source complete, cypress tests need migration
 - [x] packages/electron ✅ **COMPLETED**
 - [x] packages/error ✅ **COMPLETED**

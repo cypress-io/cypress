@@ -1,7 +1,7 @@
-const fs = require('fs-extra')
-const { buildSchema, introspectionFromSchema } = require('graphql')
-const path = require('path')
-const { minifyIntrospectionQuery } = require('@urql/introspection')
+import fs from 'fs-extra'
+import { buildSchema, introspectionFromSchema } from 'graphql'
+import path from 'path'
+import { minifyIntrospectionQuery } from '@urql/introspection'
 
 const graphQlPackageRoot = path.join(__dirname, '..', '..', 'graphql')
 const dataContextRoot = path.join(__dirname, '..')

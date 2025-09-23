@@ -310,7 +310,7 @@ export class DataEmitterActions extends DataEmitterEvents {
       [Symbol.asyncIterator] () {
         return iterator
       },
-    }
+    } as unknown as AsyncGenerator<T>
 
     return iterator
   }

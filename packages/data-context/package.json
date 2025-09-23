@@ -2,13 +2,15 @@
   "name": "@packages/data-context",
   "version": "0.0.0-development",
   "description": "Centralized data access for the Cypress application",
-  "main": "index.js",
-  "browser": "src/index.ts",
+  "main": "cjs/index.js",
   "scripts": {
-    "build": "node ./scripts/build.js",
-    "build-prod": "tsc || echo 'built, with errors'",
-    "check-ts": "tsc --noEmit && yarn -s tslint",
-    "clean": "rimraf --glob \"./{src,test}/**/*.js\"",
+    "build": "yarn build:schema && yarn build:cjs && yarn build:esm",
+    "build-prod": "yarn build",
+    "build:cjs": "rimraf cjs && tsc -p tsconfig.cjs.json",
+    "build:esm": "rimraf esm && tsc -p tsconfig.esm.json",
+    "build:schema": "tsx ./scripts/build.ts",
+    "check-ts": "tsc -p tsconfig.cjs.json --noEmit && yarn -s tslint -p tsconfig.cjs.json",
+    "clean": "rimraf esm cjs",
     "clean-deps": "rimraf node_modules",
     "lint": "eslint --ext .js,.ts,.json, .",
     "test": "yarn test-unit",
@@ -95,14 +97,19 @@
     "mocha-junit-reporter": "2.2.0",
     "mocha-multi-reporters": "1.5.1",
     "nexus": "^1.2.0-next.15",
+    "rimraf": "6.0.1",
     "sinon": "13.0.2",
     "sinon-chai": "3.7.0",
-    "tslint": "^6.1.3"
+    "tslint": "^6.1.3",
+    "tsx": "4.20.5",
+    "typescript": "5.9.2"
   },
   "files": [
-    "src"
+    "cjs/*",
+    "esm/*"
   ],
   "types": "src/index.ts",
+  "module": "esm/index.js",
   "nx": {
     "targets": {
       "build": {
