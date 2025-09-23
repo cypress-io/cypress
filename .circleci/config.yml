@@ -140,12 +140,12 @@ jobs:
           - run:
               name: Check for primary workflow definition
               command: |
-                if [ ! -f .circleci/workflows.yml ]; then
+                if [ ! -f ~/project/.circleci/workflows.yml ]; then
                     echo "❌ Primary workflow definition not found!"
                     exit 1
                 fi
           - continuation/continue:
-              configuration_path: .circleci/workflows.yml
+              configuration_path: ~/project/.circleci/workflows.yml
 
 
   pack-workflows:
