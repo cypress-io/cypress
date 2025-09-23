@@ -1,0 +1,19 @@
+[
+  {
+    "name": "config-tags.cy.ts",
+    "tests": [
+      {
+        "name": "tags in the config object",
+        "state": "passed"
+      },
+      {
+        "name": "tags in the config object",
+        "state": "passed"
+      },
+      {
+        "name": "tags in the config object",
+        "state": "pending"
+      }
+    ]
+  }
+]

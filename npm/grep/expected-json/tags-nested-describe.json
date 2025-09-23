@@ -1,0 +1,15 @@
+[
+  {
+    "name": "nested-describe.cy.ts",
+    "tests": [
+      {
+        "name": "grand",
+        "state": "passed"
+      },
+      {
+        "name": "top",
+        "state": "passed"
+      }
+    ]
+  }
+]
