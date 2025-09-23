@@ -1,3 +1,5 @@
+# [@cypress/schematic-v4.1.3](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v4.1.2...@cypress/schematic-v4.1.3) (2025-09-18)
+
 # [@cypress/schematic-v4.1.2](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v4.1.1...@cypress/schematic-v4.1.2) (2025-09-02)
 
 

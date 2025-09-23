@@ -1,11 +1,28 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.2.1
+## 15.3.0
 
-_Released 9/23/2025 (PENDING)_
+_Released 9/23/2025_
+
+**Features:**
+
+- Added Escape key support to [`cy.press()`](http://on.cypress.io/api/press). Addresses[#32429](https://github.com/cypress-io/cypress/issues/32429). Addressed in [#32545](https://github.com/cypress-io/cypress/pull/32545).
 
 **Bugfixes:**
 
 - In development mode, Electron `stderr` is piped directly to Cypress' `stderr` to make it clear why Electron failed to start, if it fails to start. Fixes [#32358](https://github.com/cypress-io/cypress/issues/32358). Addressed in [32468](https://github.com/cypress-io/cypress/pull/32468).
+- Fixed an issue where ESM Cypress configurations were not being interpreted correctly. Fixes [#32493](https://github.com/cypress-io/cypress/issues/32493). Fixed in [#32515](https://github.com/cypress-io/cypress/pull/32515).
+
+**Misc:**
+
+- Update the styles for command grouping 'line' so on expansion it is displayed correctly. Addressed in [#32521](https://github.com/cypress-io/cypress/pull/32521).
+- Test hook names now correctly display with a semi-bold font weight. Addresses [#32477](https://github.com/cypress-io/cypress/issues/32477). Addressed in [#32491](https://github.com/cypress-io/cypress/pull/32491).
+- Updated the Cypress Studio panel to not show bottom border. Addresses [#32478](https://github.com/cypress-io/cypress/issues/32478).
+
+**Dependency Updates:**
+
+- Upgraded `electron` from `36.4.0` to `36.8.1`. Addressed in [#32371](https://github.com/cypress-io/cypress/pull/32371).
+- Upgraded bundled Node.js version from `22.15.1` to `22.18.0`. Addressed in [#32371](https://github.com/cypress-io/cypress/pull/32371).
+- Upgraded bundled Chromium version from `136.0.7103.149` to `136.0.7103.177`. Addressed in [#32371](https://github.com/cypress-io/cypress/pull/32371).
 
 ## 15.2.0
 

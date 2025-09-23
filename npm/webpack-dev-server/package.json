@@ -29,15 +29,13 @@
     "webpack-merge": "^5.4.0"
   },
   "devDependencies": {
-    "@types/node": "20.16.0",
-    "@types/proxyquire": "^1.3.28",
+    "@types/node": "22.18.0",
     "@types/speed-measure-webpack-plugin": "^1.3.4",
     "@types/webpack-bundle-analyzer": "4.7.0",
     "chai": "^4.3.6",
     "cross-env": "7.0.3",
     "dedent": "^0.7.0",
     "mocha": "^9.2.2",
-    "proxyquire": "2.1.3",
     "sinon": "^13.0.1",
     "snap-shot-it": "^7.9.10",
     "ts-node": "^10.9.2",
