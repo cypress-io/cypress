@@ -33,7 +33,46 @@ describe('StudioTest', () => {
       title: 'should display correct content',
       state: 'passed',
       parentTitle: 'Example Test Suite > Nested Suite',
-      attempts: [],
+      attempts: [
+        {
+          id: 'attempt-1',
+          state: 'passed',
+          hooks: [
+            {
+              id: 'hook-1',
+              type: 'hook',
+              name: 'test body',
+              hookName: 'test body',
+              state: 'passed',
+              duration: 1000,
+              commands: [
+                {
+                  id: 'command-1',
+                  type: 'command',
+                  name: 'command-1',
+                  state: 'passed',
+                  duration: 1000,
+                  _isPending: () => false,
+                  renderProps: {},
+                  displayMessage: null,
+                },
+              ],
+            },
+          ],
+          hookCount: {
+            'before all': 0,
+            'before each': 0,
+            'after all': 0,
+            'after each': 0,
+            'test body': 1,
+          },
+          hasCommands: true,
+          isOpen: true,
+          sessions: [],
+          agents: [],
+          routes: [],
+        },
+      ],
       callbackAfterUpdate: cy.stub().as('callbackAfterUpdate'),
     } as unknown as Test
 
@@ -72,6 +111,7 @@ describe('StudioTest', () => {
     cy.get('.studio-single-test-container').should('be.visible')
     cy.get('.studio-header__test-section').should('be.visible')
     cy.get('.studio-single-test-attempts').should('be.visible')
+    cy.get('.attempts.single-studio-test').should('have.css', 'border-bottom-style', 'none').and('have.css', 'border-right-style', 'none')
     cy.get('[data-cy="studio-single-test-title"]').should('contain.text', 'should display correct content')
     cy.get('[data-cy="spec-duration"]').should('contain', '00:02')
     cy.percySnapshot()

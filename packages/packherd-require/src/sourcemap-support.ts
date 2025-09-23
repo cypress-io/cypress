@@ -210,27 +210,27 @@ class SourcemapSupport {
       )
 
       state.curPos = pos
-      frame = cloneCallSite(frame)
+      const clonedFrame = cloneCallSite(frame) as any
 
-      frame.getFileName = function getFileName () {
-        return pos.source || pos.name || undefined
+      clonedFrame.getFileName = function getFileName (): string | null {
+        return pos.source || pos.name || null
       }
 
-      frame.getLineNumber = function getLineNumber () {
+      clonedFrame.getLineNumber = function getLineNumber () {
         return pos.line
       }
 
-      frame.getColumnNumber = function getColumnNumber () {
+      clonedFrame.getColumnNumber = function getColumnNumber () {
         return pos.column + 1
       }
 
-      frame.getScriptNameOrSourceURL = function getScriptNameOrSourceURL () {
+      clonedFrame.getScriptNameOrSourceURL = function getScriptNameOrSourceURL () {
         return pos.source || pos.name || ''
       }
 
-      frame.codeFrames = pos.codeFrames
+      clonedFrame.codeFrames = pos.codeFrames
 
-      return frame
+      return clonedFrame
     }
 
     return frame

@@ -1,21 +1,21 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`lib/tasks/download > catches download status errors and exits > download status errors 1 1`] = `
-"Error: The Cypress App could not be downloaded.
-
-Does your workplace require a proxy to be used to access the Internet? If so, you must configure the HTTP_PROXY environment variable before downloading Cypress. Read more: https://on.cypress.io/proxy-configuration
-
-Otherwise, please check network connectivity and try again:
-
-----------
-
-URL: https://download.cypress.io/desktop?platform=OS&arch=x64
-404 - Not Found
-
-----------
-
-Platform: OS-x64 (Foo - OsVersion)
-Cypress Version: 1.2.3
+"[31mError: The Cypress App could not be downloaded.[39m
+[31m[39m
+[31mDoes your workplace require a proxy to be used to access the Internet? If so, you must configure the HTTP_PROXY environment variable before downloading Cypress. Read more: https://on.cypress.io/proxy-configuration[39m
+[31m[39m
+[31mOtherwise, please check network connectivity and try again:[39m
+[31m[39m
+[31m----------[39m
+[31m[39m
+[31mURL: https://download.cypress.io/desktop?platform=OS&arch=x64[39m
+[31m404 - Not Found[39m
+[31m[39m
+[31m----------[39m
+[31m[39m
+[31mPlatform: OS-x64 (Foo - OsVersion)[39m
+[31mCypress Version: 1.2.3[39m
 "
 `;
 

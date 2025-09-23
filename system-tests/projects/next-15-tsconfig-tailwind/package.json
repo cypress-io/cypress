@@ -13,7 +13,7 @@
     "react-dom": "19.0.0"
   },
   "devDependencies": {
-    "@types/node": "^20",
+    "@types/node": "^22.18.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "postcss": "^8",

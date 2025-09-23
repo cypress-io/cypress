@@ -36,27 +36,22 @@ describe('lib/exec/versions', function () {
   beforeEach(function (): void {
     vi.unstubAllEnvs()
     vi.clearAllMocks()
-    // @ts-expect-error - mockReturnValue
-    state.getBinaryDir.mockReturnValue(binaryDir)
+    vi.mocked(state.getBinaryDir).mockReturnValue(binaryDir)
 
-    // @ts-expect-error - mockImplementation
-    state.getBinaryPkgAsync.mockImplementation((args: string) => {
+    vi.mocked(state.getBinaryPkgAsync).mockImplementation((args: string) => {
       if (args === binaryDir) {
-        return {
+        return Promise.resolve({
           version: '1.2.3',
           electronVersion: '10.1.2',
           electronNodeVersion: '12.16.3',
-        }
+        })
       }
 
       throw new Error('not found')
     })
 
-    // @ts-expect-error - mockReturnValue
-    util.pkgVersion.mockReturnValue('4.5.6')
-
-    // @ts-expect-error - mockReturnValue
-    util.pkgBuildInfo.mockReturnValue({ stable: true })
+    vi.mocked(util.pkgVersion).mockReturnValue('4.5.6')
+    vi.mocked(util.pkgBuildInfo).mockReturnValue({ stable: true })
   })
 
   describe('.getVersions', () => {
@@ -75,16 +70,14 @@ describe('lib/exec/versions', function () {
     })
 
     it('gets correct binary version if CYPRESS_RUN_BINARY', async () => {
-      // @ts-expect-error - mockImplementation
-      state.parseRealPlatformBinaryFolderAsync.mockResolvedValue('/my/cypress/path')
+      vi.mocked(state.parseRealPlatformBinaryFolderAsync).mockResolvedValue('/my/cypress/path')
       vi.stubEnv('CYPRESS_RUN_BINARY', '/my/cypress/path')
 
-      // @ts-expect-error
-      state.getBinaryPkgAsync.mockImplementation((args: string) => {
+      vi.mocked(state.getBinaryPkgAsync).mockImplementation((args: string) => {
         if (args === '/my/cypress/path') {
-          return {
+          return Promise.resolve({
             version: '7.8.9',
-          }
+          })
         }
 
         throw new Error('not found')
@@ -97,8 +90,7 @@ describe('lib/exec/versions', function () {
     })
 
     it('appends pre-release if not stable', async () => {
-    // @ts-expect-error - mockReturnValue
-      util.pkgBuildInfo.mockReturnValue({ stable: false })
+      vi.mocked(util.pkgBuildInfo).mockReturnValue({ stable: false })
 
       const version = await versions.getVersions()
 
@@ -106,8 +98,7 @@ describe('lib/exec/versions', function () {
     })
 
     it('appends development if missing buildInfo', async () => {
-    // @ts-expect-error - mockReturnValue
-      util.pkgBuildInfo.mockReturnValue(undefined)
+      vi.mocked(util.pkgBuildInfo).mockReturnValue(undefined)
       const version = await versions.getVersions()
 
       expect(version.package).to.eql('4.5.6 (development)')
@@ -115,12 +106,11 @@ describe('lib/exec/versions', function () {
 
     it('reports default versions if not found', async () => {
       // imagine package.json only has version there
-      // @ts-expect-error - mockImplementation
-      state.getBinaryPkgAsync.mockImplementation((args: string) => {
+      vi.mocked(state.getBinaryPkgAsync).mockImplementation((args: string) => {
         if (args === binaryDir) {
-          return {
+          return Promise.resolve({
             version: '90.9.9',
-          }
+          })
         }
 
         throw new Error('not found')

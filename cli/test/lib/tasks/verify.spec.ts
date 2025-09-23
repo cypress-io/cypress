@@ -1,14 +1,14 @@
 import { vi, describe, it, beforeEach, afterEach, expect, MockInstance } from 'vitest'
 import path from 'path'
+import chalk from 'chalk'
 import _ from 'lodash'
 import os from 'os'
 import { stripIndent } from 'common-tags'
 import mockfs from 'mock-fs'
-import normalize from '../../support/normalize'
 import { geteuid } from 'process'
 import { Console } from 'console'
 import fs from 'fs-extra'
-import si from 'systeminformation'
+import si, { Systeminformation } from 'systeminformation'
 import _xvfb from '@cypress/xvfb'
 
 import util from '../../../lib/util'
@@ -133,7 +133,12 @@ describe('lib/tasks/verify', () => {
   // Direct console to process.stdout/stderr
   let originalConsole: Console
 
+  let previousChalkLevel: 0 | 1 | 2 | 3
+
   beforeEach(() => {
+    previousChalkLevel = chalk.level
+    chalk.level = 3
+
     vi.resetAllMocks()
     vi.unstubAllEnvs()
 
@@ -149,40 +154,24 @@ describe('lib/tasks/verify', () => {
       stdout: '222',
     }
 
-    // @ts-expect-error - mockReturnValue
-    os.platform.mockReturnValue('darwin')
-    // @ts-expect-error - mockReturnValue
-    os.release.mockReturnValue('0.0.0')
-    // @ts-expect-error - mockReturnValue
-    os.arch.mockReturnValue('x64')
-    // @ts-expect-error mockResolvedValue
-    si.osInfo.mockResolvedValue({
+    vi.mocked(os.platform).mockReturnValue('darwin')
+    vi.mocked(os.release).mockReturnValue('0.0.0')
+    vi.mocked(os.arch).mockReturnValue('x64')
+    vi.mocked(si.osInfo).mockResolvedValue({
       distro: 'Foo',
       release: 'OsVersion',
-    })
+    } as Systeminformation.OsData)
 
-    // @ts-expect-error - mockReturnValue
-    util.getCacheDir.mockReturnValue(cacheDir)
-    // @ts-expect-error - mockReturnValue
-    util.isCi.mockReturnValue(false)
-    // @ts-expect-error - mockReturnValue
-    util.pkgVersion.mockReturnValue(packageVersion)
-
-    // @ts-expect-error - mockResolvedValue
-    xvfb.start.mockResolvedValue()
-    // @ts-expect-error - mockResolvedValue
-    xvfb.stop.mockResolvedValue()
-    // @ts-expect-error - mockReturnValue
-    xvfb.isNeeded.mockReturnValue(false)
-
-    // @ts-expect-error - mockReturnValue
-    geteuid.mockReturnValue(1000)
-
-    // @ts-expect-error - mockReturnValue
-    _.random.mockReturnValue(222)
-
-    // @ts-expect-error - mockImplementation
-    util.exec.mockImplementation((...args: any) => {
+    vi.mocked(util.getCacheDir).mockReturnValue(cacheDir)
+    vi.mocked(util.isCi).mockReturnValue(false)
+    vi.mocked(util.pkgVersion).mockReturnValue(packageVersion)
+    vi.mocked(xvfb.start).mockResolvedValue(undefined)
+    vi.mocked(xvfb.stop).mockResolvedValue(undefined)
+    vi.mocked(xvfb.isNeeded).mockReturnValue(false)
+    vi.mocked(geteuid).mockReturnValue(1000)
+    vi.mocked(_.random).mockReturnValue(222)
+    // @ts-expect-error - mock args
+    vi.mocked(util.exec).mockImplementation((...args: any) => {
       if (args[0] === executablePath && _.isEqual(args[1], ['--no-sandbox', '--smoke-test', '--ping=222'])) {
         return Promise.resolve(spawnedProcess)
       }
@@ -194,10 +183,11 @@ describe('lib/tasks/verify', () => {
   afterEach(() => {
     globalThis.console = originalConsole // Restore original console
     mockfs.restore()
+    chalk.level = previousChalkLevel
   })
 
   it('has verify task timeout', () => {
-    expect(verifyTestRunnerTimeoutMs()).to.eql(DEFAULT_VERIFY_TIMEOUT)
+    expect(verifyTestRunnerTimeoutMs()).toEqual(DEFAULT_VERIFY_TIMEOUT)
   })
 
   it('accepts custom verify task timeout', () => {
@@ -233,7 +223,7 @@ describe('lib/tasks/verify', () => {
       expect(err.message).not.toContain('should have caught error')
       logger.error(err)
 
-      expect(normalize(output())).toMatchSnapshot()
+      expect(output()).toMatchSnapshot()
     }
   })
 
@@ -245,8 +235,7 @@ describe('lib/tasks/verify', () => {
       packageVersion,
     })
 
-    // @ts-expect-error - mockReturnValue
-    geteuid.mockReturnValue(0) // user is root
+    vi.mocked(geteuid).mockReturnValue(0) // user is root
 
     await start({ listrRenderer: 'silent' })
 
@@ -261,8 +250,7 @@ describe('lib/tasks/verify', () => {
       packageVersion,
     })
 
-    // @ts-expect-error - mockReturnValue
-    geteuid.mockReturnValue(1000) // user is non-root
+    vi.mocked(geteuid).mockReturnValue(1000) // user is non-root
 
     await start({ listrRenderer: 'silent' })
 
@@ -297,7 +285,7 @@ describe('lib/tasks/verify', () => {
 
     await start({ listrRenderer: 'silent' })
 
-    expect(normalize(output())).toMatchSnapshot()
+    expect(output()).toMatchSnapshot()
   })
 
   it('logs error and exits when executable cannot be found', async () => {
@@ -310,7 +298,7 @@ describe('lib/tasks/verify', () => {
       expect(err.message).not.toContain('should have caught error')
       logger.error(err)
 
-      expect(normalize(output())).toMatchSnapshot()
+      expect(output()).toMatchSnapshot()
     }
   })
 
@@ -323,8 +311,7 @@ describe('lib/tasks/verify', () => {
       packageVersion,
     })
 
-    // @ts-expect-error - mockRejectedValue
-    util.exec.mockRejectedValue({
+    vi.mocked(util.exec).mockRejectedValue({
       stderr: 'some stderr',
       stdout: 'some stdout',
       timedOut: true,
@@ -334,7 +321,7 @@ describe('lib/tasks/verify', () => {
       await start({ smokeTestTimeout: 1, listrRenderer: 'silent' })
     } catch (err) {
       logger.error(err)
-      expect(normalize(output())).toMatchSnapshot()
+      expect(output()).toMatchSnapshot()
     }
   })
 
@@ -347,8 +334,7 @@ describe('lib/tasks/verify', () => {
       packageVersion,
     })
 
-    // @ts-expect-error - mockRejectedValue
-    util.exec.mockRejectedValue({
+    vi.mocked(util.exec).mockRejectedValue({
       stderr: 'some stderr',
       stdout: 'some stdout',
       code: 0,
@@ -358,7 +344,7 @@ describe('lib/tasks/verify', () => {
       await start({ smokeTestTimeout: 1, listrRenderer: 'silent' })
     } catch (err) {
       logger.error(err)
-      expect(normalize(output())).toMatchSnapshot()
+      expect(output()).toMatchSnapshot()
     }
   })
 
@@ -371,8 +357,7 @@ describe('lib/tasks/verify', () => {
       packageVersion,
     })
 
-    // @ts-expect-error - mockRejectedValue
-    util.exec.mockRejectedValue({
+    vi.mocked(util.exec).mockRejectedValue({
       stdout: 'some stdout',
       code: 0,
     })
@@ -381,13 +366,12 @@ describe('lib/tasks/verify', () => {
       await start({ smokeTestTimeout: 1, listrRenderer: 'silent' })
     } catch (err) {
       logger.error(err)
-      expect(normalize(output())).toMatchSnapshot()
+      expect(output()).toMatchSnapshot()
     }
   })
 
   describe('FORCE_COLOR', () => {
     beforeEach(() => {
-      // vi.unstubAllEnvs()
       vi.stubEnv('FORCE_COLOR', 'true')
     })
 
@@ -399,11 +383,10 @@ describe('lib/tasks/verify', () => {
         packageVersion,
       })
 
-      // @ts-expect-error - mockResolvedValue
-      util.exec.mockResolvedValue({
+      vi.mocked(util.exec).mockResolvedValue({
         stdout: '222',
         stderr: '',
-      })
+      } as any)
 
       await start({ listrRenderer: 'silent' })
 
@@ -429,14 +412,13 @@ describe('lib/tasks/verify', () => {
 
       await start({ force: true, listrRenderer: 'silent' })
 
-      expect(normalize(output())).toMatchSnapshot('verification with executable')
+      expect(output()).toMatchSnapshot('verification with executable')
     })
 
     it('clears verified version from state if verification fails', async () => {
       const output = createStdoutCapture()
 
-      // @ts-expect-error - mockRejectedValue
-      util.exec.mockRejectedValue({
+      vi.mocked(util.exec).mockRejectedValue({
         code: 1,
         stderr: 'an error about dependencies',
       })
@@ -452,7 +434,7 @@ describe('lib/tasks/verify', () => {
 
       expect(exists).toEqual(false)
 
-      expect(normalize(output())).toMatchSnapshot('fails verifying Cypress')
+      expect(output()).toMatchSnapshot('fails verifying Cypress')
     })
   })
 
@@ -465,8 +447,8 @@ describe('lib/tasks/verify', () => {
           after that more text
         `
 
-      // @ts-expect-error - mockImplementation
-      util.exec.mockImplementation((...args: any) => {
+      // @ts-expect-error - mock args
+      vi.mocked(util.exec).mockImplementation((...args: any) => {
         if (args[0] === executablePath) {
           return Promise.resolve({
             stdout: stdoutWithDebugOutput,
@@ -488,7 +470,7 @@ describe('lib/tasks/verify', () => {
 
       await start({ listrRenderer: 'silent' })
 
-      expect(normalize(output())).toMatchSnapshot('verbose stdout output')
+      expect(output()).toMatchSnapshot('verbose stdout output')
     })
   })
 
@@ -504,19 +486,14 @@ describe('lib/tasks/verify', () => {
         packageVersion,
       })
 
-      // sinon.spy(logger, 'warn')
       loggerWarnSpy = vi.spyOn(logger, 'warn')
     })
 
     it('successfully retries with our Xvfb on Linux', async () => {
       // initially we think the user has everything set
-      // @ts-expect-error - mockReturnValue
-      xvfb.isNeeded.mockReturnValue(false)
-      // @ts-expect-error - mockReturnValue
-      util.isPossibleLinuxWithIncorrectDisplay.mockReturnValue(true)
-
-      // @ts-expect-error - mockImplementationOnce
-      util.exec.mockImplementationOnce((...args: any) => {
+      vi.mocked(xvfb.isNeeded).mockReturnValue(false)
+      vi.mocked(util.isPossibleLinuxWithIncorrectDisplay).mockReturnValue(true)
+      vi.mocked(util.exec).mockImplementationOnce((...args: any) => {
         const firstSpawnError: any = new Error('')
 
         // this message contains typical Gtk error shown if X11 is incorrect
@@ -529,8 +506,8 @@ describe('lib/tasks/verify', () => {
         firstSpawnError.stdout = ''
 
         // the second time the binary returns expected ping
-        // @ts-expect-error - mockImplementationOnce
-        util.exec.mockImplementationOnce((...args: any) => {
+        // @ts-expect-error - mock args
+        vi.mocked(util.exec).mockImplementationOnce((...args: any) => {
           if (args[0] === executablePath) {
             return Promise.resolve({
               stdout: '222',
@@ -552,16 +529,11 @@ describe('lib/tasks/verify', () => {
 
     it('fails on both retries with our Xvfb on Linux', async () => {
       // initially we think the user has everything set
-
-      // @ts-expect-error - mockReturnValue
-      xvfb.isNeeded.mockReturnValue(false)
-      // @ts-expect-error - mockReturnValue
-      util.isPossibleLinuxWithIncorrectDisplay.mockReturnValue(true)
-
-      // @ts-expect-error - mockImplementationOnce
-      util.exec.mockImplementationOnce((...args: any) => {
-        // @ts-expect-error - mockImplementationOnce
-        os.platform.mockReturnValue('linux')
+      vi.mocked(xvfb.isNeeded).mockReturnValue(false)
+      vi.mocked(util.isPossibleLinuxWithIncorrectDisplay).mockReturnValue(true)
+      // @ts-expect-error - mock args
+      vi.mocked(util.exec).mockImplementationOnce((...args: any) => {
+        vi.mocked(os.platform).mockReturnValue('linux')
         expect(xvfb.start).not.toHaveBeenCalled()
 
         const firstSpawnError: any = new Error('')
@@ -583,8 +555,8 @@ describe('lib/tasks/verify', () => {
                       some weird indent
                 `
 
-        // @ts-expect-error - mockImplementationOnce
-        util.exec.mockImplementationOnce((...args: any) => {
+        // @ts-expect-error - mock args
+        vi.mocked(util.exec).mockImplementationOnce((...args: any) => {
           if (args[0] === executablePath) {
             return Promise.reject(new Error(secondMessage))
           }
@@ -626,7 +598,7 @@ describe('lib/tasks/verify', () => {
       } catch (err) {
         logger.error(err)
 
-        expect(normalize(output())).toMatchSnapshot('no Cypress executable')
+        expect(output()).toMatchSnapshot('no Cypress executable')
 
         return
       }
@@ -650,7 +622,7 @@ describe('lib/tasks/verify', () => {
       } catch (err) {
         logger.error(err)
 
-        expect(normalize(output())).toMatchSnapshot('Cypress non-executable permission')
+        expect(output()).toMatchSnapshot('Cypress non-executable permission')
 
         return
       }
@@ -669,7 +641,7 @@ describe('lib/tasks/verify', () => {
 
       await start({ listrRenderer: 'silent' })
 
-      expect(normalize(output())).toMatchSnapshot('current version has not been verified')
+      expect(output()).toMatchSnapshot('current version has not been verified')
     })
 
     it('logs and runs when installed version is different than package version', async () => {
@@ -683,7 +655,7 @@ describe('lib/tasks/verify', () => {
 
       await start({ listrRenderer: 'silent' })
 
-      expect(normalize(output())).toMatchSnapshot('different version installed')
+      expect(output()).toMatchSnapshot('different version installed')
     })
 
     it('is silent when logLevel is silent', async () => {
@@ -699,7 +671,7 @@ describe('lib/tasks/verify', () => {
 
       await start({ listrRenderer: 'silent' })
 
-      expect(normalize(output())).toMatchSnapshot('silent verify')
+      expect(output()).toMatchSnapshot('silent verify')
     })
 
     it('turns off Opening Cypress...', async () => {
@@ -713,7 +685,7 @@ describe('lib/tasks/verify', () => {
 
       await start({ welcomeMessage: false })
 
-      expect(normalize(output())).toMatchSnapshot('no welcome message')
+      expect(output()).toMatchSnapshot('no welcome message')
     })
 
     it('logs error when fails smoke test unexpectedly without stderr', async () => {
@@ -725,8 +697,7 @@ describe('lib/tasks/verify', () => {
         packageVersion,
       })
 
-      // @ts-expect-error - mockRejectedValue
-      util.exec.mockRejectedValue({
+      vi.mocked(util.exec).mockRejectedValue({
         stderr: '',
         stdout: '',
         message: 'Error: EPERM NOT PERMITTED',
@@ -737,7 +708,7 @@ describe('lib/tasks/verify', () => {
       } catch (err) {
         logger.error(err)
 
-        expect(normalize(output())).toMatchSnapshot('fails with no stderr')
+        expect(output()).toMatchSnapshot('fails with no stderr')
 
         return
       }
@@ -748,8 +719,7 @@ describe('lib/tasks/verify', () => {
 
   describe('on linux', () => {
     beforeEach(() => {
-      // @ts-expect-error - mockReturnValue
-      xvfb.isNeeded.mockReturnValue(true)
+      vi.mocked(xvfb.isNeeded).mockReturnValue(true)
 
       createfs({
         alreadyVerified: false,
@@ -775,8 +745,7 @@ describe('lib/tasks/verify', () => {
 
       const actualXvfb = (await vi.importActual<typeof import('../../../lib/exec/xvfb')>('../../../lib/exec/xvfb')).default
 
-      // @ts-expect-error - mockImplementation to test integration with xvfb module
-      xvfb.start.mockImplementation(actualXvfb.start)
+      vi.mocked(xvfb.start).mockImplementation(actualXvfb.start)
 
       const err: any = new Error('test without xvfb')
 
@@ -796,7 +765,7 @@ describe('lib/tasks/verify', () => {
 
         logger.error(err)
 
-        expect(normalize(output())).toMatchSnapshot('xvfb fails')
+        expect(output()).toMatchSnapshot('xvfb fails')
 
         return
       }
@@ -813,8 +782,7 @@ describe('lib/tasks/verify', () => {
         packageVersion,
       })
 
-      // @ts-expect-error - mockReturnValue
-      util.isCi.mockReturnValue(true)
+      vi.mocked(util.isCi).mockReturnValue(true)
     })
 
     it('uses verbose renderer', async () => {
@@ -822,7 +790,7 @@ describe('lib/tasks/verify', () => {
 
       await start({ listrRenderer: 'silent' })
 
-      expect(normalize(output())).toMatchSnapshot('verifying in ci')
+      expect(output()).toMatchSnapshot('verifying in ci')
     })
 
     it('logs error when binary not found', async () => {
@@ -835,7 +803,7 @@ describe('lib/tasks/verify', () => {
       } catch (err) {
         logger.error(err)
 
-        expect(normalize(output())).toMatchSnapshot('error binary not found in ci')
+        expect(output()).toMatchSnapshot('error binary not found in ci')
 
         return
       }
@@ -860,8 +828,8 @@ describe('lib/tasks/verify', () => {
         customDir: '/real/custom',
       })
 
-      // @ts-expect-error - mockImplementation
-      util.exec.mockImplementation((...args: any) => {
+      // @ts-expect-error - mock args
+      vi.mocked(util.exec).mockImplementation((...args: any) => {
         if (args[0] === realEnvBinaryPath && _.isEqual(args[1], ['--no-sandbox', '--smoke-test', '--ping=222'])) {
           return Promise.resolve(spawnedProcess)
         }
@@ -872,7 +840,7 @@ describe('lib/tasks/verify', () => {
       await start({ listrRenderer: 'silent' })
 
       expect(util.exec).toHaveBeenCalledWith(realEnvBinaryPath, ['--no-sandbox', '--smoke-test', '--ping=222'], expect.anything())
-      expect(normalize(output())).toMatchSnapshot('valid CYPRESS_RUN_BINARY')
+      expect(output()).toMatchSnapshot('valid CYPRESS_RUN_BINARY')
     })
 
     for (const platform of ['darwin', 'linux', 'win32']) {
@@ -881,14 +849,13 @@ describe('lib/tasks/verify', () => {
 
         vi.stubEnv('CYPRESS_RUN_BINARY', '/custom/')
 
-        // @ts-expect-error - mockReturnValue
-        os.platform.mockReturnValue(platform)
+        vi.mocked(os.platform).mockReturnValue(platform as NodeJS.Platform)
 
         try {
           await start({ listrRenderer: 'silent' })
         } catch (err) {
           logger.error(err)
-          expect(normalize(output())).toMatchSnapshot(`${platform}: error when invalid CYPRESS_RUN_BINARY`)
+          expect(output()).toMatchSnapshot(`${platform}: error when invalid CYPRESS_RUN_BINARY`)
 
           return
         }
@@ -901,35 +868,25 @@ describe('lib/tasks/verify', () => {
   // tests for when Electron needs "--no-sandbox" CLI flag
   describe('.needsSandbox', () => {
     it('needs --no-sandbox on Linux as a root', () => {
-      // @ts-expect-error - mockReturnValue
-      os.platform.mockReturnValue('linux')
-      // @ts-expect-error - mockReturnValue
-      geteuid.mockReturnValue(0)
+      vi.mocked(os.platform).mockReturnValue('linux')
+      vi.mocked(geteuid).mockReturnValue(0)
       expect(needsSandbox()).toEqual(true)
     })
 
     it('needs --no-sandbox on Linux as a non-root', () => {
-      // @ts-expect-error - mockReturnValue
-      os.platform.mockReturnValue('linux')
-      // @ts-expect-error - mockReturnValue
-      geteuid.mockReturnValue(1000)
-
+      vi.mocked(os.platform).mockReturnValue('linux')
+      vi.mocked(geteuid).mockReturnValue(1000)
       expect(needsSandbox()).toEqual(true)
     })
 
     it('needs --no-sandbox on Mac as a non-root', () => {
-      // @ts-expect-error - mockReturnValue
-      os.platform.mockReturnValue('darwin')
-      // @ts-expect-error - mockReturnValue
-      geteuid.mockReturnValue(1000)
-
+      vi.mocked(os.platform).mockReturnValue('darwin')
+      vi.mocked(geteuid).mockReturnValue(1000)
       expect(needsSandbox()).toEqual(true)
     })
 
     it('does not need --no-sandbox on Windows', () => {
-      // @ts-expect-error - mockReturnValue
-      os.platform.mockReturnValue('win32')
-
+      vi.mocked(os.platform).mockReturnValue('win32')
       expect(needsSandbox()).toEqual(false)
     })
   })
