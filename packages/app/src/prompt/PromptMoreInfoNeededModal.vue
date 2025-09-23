@@ -48,6 +48,7 @@ withDefaults(defineProps<{
 })
 
 const closeModal = () => {
+  promptStore.currentMoreInfoNeededModalInfo?.onCancel()
   emit('close')
 }
 
@@ -68,7 +69,6 @@ const maybeRenderReactComponent = () => {
     logId: promptStore.currentMoreInfoNeededModalInfo?.logId,
     eventManager: window.getEventManager(),
     onClose: () => {
-      promptStore.currentMoreInfoNeededModalInfo?.onCancel()
       closeModal()
     },
   })
