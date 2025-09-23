@@ -1,0 +1,4 @@
+# packed CircleCI configurations should not be checked in - they are packed dynamically by the main config ci pipeline,
+# and verified pre-commit with the circleci cli via ./scripts/verify-ci.sh
+
+packed

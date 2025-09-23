@@ -1,60 +1,155 @@
-jobs:
-    verify-ci-should-run:
-        docker:
-            - image: cimg/node:current
-        resource_class: small
-        steps:
-            - run:
-                command: |
-                    # run CI when manually triggers via CircleCi Dashboard
-                    if [ <<pipeline.trigger_source>> == 'api' ]; then
-                      echo "Always run CI when manually triggered from the UI."
-                      exit 0
-                    fi
-
-                    if [[ "$CIRCLE_BRANCH" == "develop" || "$CIRCLE_BRANCH" == "release/"* ]]; then
-                      echo "Always run CI for develop and for release candidate branches."
-                      exit 0
-                    fi
-
-                    LAST_COMMIT_MESSAGE=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/commits/${CIRCLE_BRANCH}" | jq '.commit.message')
-
-                    if [[ "$LAST_COMMIT_MESSAGE" =~ "run ci" ]]; then
-                      echo "Always run CI when the commit message includes 'run ci'."
-                      exit 0
-                    fi
-
-                    cancel_build () {
-                      echo "Canceling the CI build..."
-                      circleci-agent step halt
-                    }
-
-                    TRIGGER_INSTRUCTIONS="to trigger CI , include 'run ci' in the commit message or click the 'Trigger Pipeline' button in the CircleCI UI."
-
-                    if [ ! -z "${CIRCLE_PULL_REQUEST##*/}" ]; then
-                      DRAFT=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pulls/${CIRCLE_PULL_REQUEST##*/}" | jq '.draft')
-
-                      if [[ "${DRAFT}" == true ]]; then
-                        echo "Skipping CI; PR is in draft - $TRIGGER_INSTRUCTIONS"
-                        cancel_build
-                      fi
-
-                      echo "Always run CI for PR that is ready for review."
-                      exit 0
-                    fi
-
-                    echo "Skipping CI; branch in progress - $TRIGGER_INSTRUCTIONS"
-                    cancel_build
-                name: Verify CI should run
-            - checkout
-            - continuation/continue:
-                configuration_path: .circleci/workflows.yml
 orbs:
     continuation: circleci/continuation@1.1.0
 setup: true
 version: 2.1
+
+parameters:
+  force-pack:
+    type: boolean
+    default: false
+
 workflows:
     setup-workflow:
         jobs:
-            - verify-ci-should-run
+            - pack-workflows
+            - launch-primary-workflow:
+                requires:
+                  - pack-workflows
+
+commands:
+  check-for-packed-config-cache:
+    parameters:
+        key:
+          type: string
+          default: circleci-packed-pipelines-{{ pipeline.git.hash }}
+    steps:
+      - unless:
+          condition: << pipeline.parameters.force-pack >>
+          steps:
+            - restore_cache:
+                key: << parameters.key >>
+            - run:
+                name: Check for cached packed configurations
+                command: |
+                    # Check if cache was restored and packed configs exist
+                    if [ -d ".circleci/packed" ] && [ "$(ls -A .circleci/packed 2>/dev/null)" ]; then
+                        echo "✅ Cache restored - packed configurations are up-to-date"
+                        echo "echo CACHE_HIT=true" >> $BASH_ENV
+                    fi
+            - persist_to_workspace: &persist_packed_configs
+                root: .
+                paths:
+                    - .circleci/packed
+            - run:
+                name: Skipping Packed Config Cache
+                command: |
+                    if [ -n "$CACHE_HIT" ]; then
+                        echo "Skipping packing step"
+                        circleci-agent step halt
+                    fi
+  halt-early:
+    steps:
+      - run:
+          name: Halt if CI should not run
+          command: |
+            # run CI when manually triggers via CircleCi Dashboard
+            if [ <<pipeline.trigger_source>> == 'api' ]; then
+              echo "Always run CI when manually triggered from the UI."
+              exit 0
+            fi
+
+            if [[ "$CIRCLE_BRANCH" == "develop" || "$CIRCLE_BRANCH" == "release/"* ]]; then
+              echo "Always run CI for develop and for release candidate branches."
+              exit 0
+            fi
+
+            LAST_COMMIT_MESSAGE=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/commits/${CIRCLE_BRANCH}" | jq '.commit.message')
+
+            if [[ "$LAST_COMMIT_MESSAGE" =~ "run ci" ]]; then
+              echo "Always run CI when the commit message includes 'run ci'."
+              exit 0
+            fi
+
+            cancel_build () {
+              echo "Canceling the CI build..."
+              circleci-agent step halt
+            }
+
+            TRIGGER_INSTRUCTIONS="to trigger CI , include 'run ci' in the commit message or click the 'Trigger Pipeline' button in the CircleCI UI."
+
+            if [ ! -z "${CIRCLE_PULL_REQUEST##*/}" ]; then
+              DRAFT=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pulls/${CIRCLE_PULL_REQUEST##*/}" | jq '.draft')
+
+              if [[ "${DRAFT}" == true ]]; then
+                echo "Skipping CI; PR is in draft - $TRIGGER_INSTRUCTIONS"
+              fi
+
+              echo "Always run CI for PR that is ready for review."
+              exit 0
+            fi
+
+            echo "Skipping CI; branch in progress - $TRIGGER_INSTRUCTIONS"
+            cancel_build
+
+jobs:
+  launch-primary-workflow:
+      docker:
+          - image: cimg/base:stable
+      resource_class: small
+      steps:
+          - halt-early
+          - attach_workspace:
+              at: ~/
+          - run:
+              name: Check for primary workflow definition
+              command: |
+                if [ ! -f .circleci/workflows.yml ]; then
+                    echo "❌ Primary workflow definition not found!"
+                    exit 1
+                fi
+          - continuation/continue:
+              configuration_path: .circleci/workflows.yml
+
+  pack-workflows:
+    docker:
+        - image: cimg/base:stable
+    resource_class: small
+    steps:
+        - halt-early
+        # restores the cache, persists to workspace & returns early if this is a re-run of the same commit
+        - check-for-packed-config-cache: 
+            key: circleci-packed-pipelines-{{ pipeline.git.hash }}
+        - checkout:
+            at: ~/
+        # restores the cache, persists to workspace & returns early if there is a cache hit for the ./circleci/src dir
+        - check-for-packed-config-cache:
+            key: circleci-packed-pipelines-{{ pipeline.git.hash}}-{{ checksum ".circleci/src/**/*.yml" }}
+        # if there's a cache miss, pack the config and persist to workspace
+        - run:
+            name: Pack configurations
+            command: |
+                echo "📦 Cache miss - packing configurations..."
+                
+                src_dir="./.circleci/src"
+                outdir="./.circleci/packed"
+
+                # Create the output directory if it doesn't exist
+                mkdir -p "$outdir"
+
+                for cfg_path in "${src_dir}"/*/; do
+                    cfg_name=$(basename "$cfg_path")
+                    output_file="${outdir}/${cfg_name}.yml"
+                    echo "📦 Packing ${cfg_name}.yml configuration..."
+                    if ! circleci config pack "$cfg_path" > "$output_file"; then
+                        echo "  ❌ Failed to pack ${output_file}"
+                        exit 1
+                    fi
+                done
+        - save_cache:
+            key: circleci-packed-pipelines-{{ pipeline.git.hash }}-{{ checksum ".circleci/src/**/*.yml" }}
+            paths:
+                - .circleci/packed
+        - persist_to_workspace: *persist_packed_configs
+
+
 
