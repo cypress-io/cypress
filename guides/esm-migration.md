@@ -10,6 +10,10 @@
 - Unit tests in package are written in TypeScript
 - Does not include scripts or system test migrations
 
+#### Notes
+
+When migrating some of these projects away from the `ts-node` entry [see `@packages/scaffold-config` example](https://github.com/cypress-io/cypress/blob/v15.2.0/packages/scaffold-config/index.js), it is somewhat difficult to make separate browser/node entries as the v8-snapshot [tsconfig.json](https://github.com/cypress-io/cypress/blob/v15.2.0/tooling/v8-snapshot/tsconfig.json) is using an older style of module resolution where the `exports` key inside a package's `package.json` is not well supported. Because of this, we need to find ways to bundle code that is needed internally in the browser vs in node without them being a part of the same bundle. This is a temporary work around until we are able to get every package being able to build as an ES Module, which as that point we can re assess how the Cypress binary is being built as well as v8-snapshots, and will allow us to reconfigure this packages to export content in a more proper fashion.
+
 #### Status
 
 ##### NPM Packages
@@ -57,7 +61,7 @@
 - [ ] packages/rewriter **PARTIAL** - entry point is JS
 - [x] packages/root ✅ **COMPLETED**
 - [x] packages/runner ✅ **COMPLETED**
-- [ ] packages/scaffold-config **PARTIAL** - entry point is JS
+- [x] packages/scaffold-config ✅ **COMPLETED**
 - [ ] packages/server **PARTIAL** - many source/test files in JS. highest priority
 - [ ] packages/socket **PARTIAL** - entry point is JS. Tests are JS
 - [x] packages/stderr-filtering ✅ **COMPLETED**
