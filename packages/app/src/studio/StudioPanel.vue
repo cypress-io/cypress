@@ -27,7 +27,7 @@
 <script lang="ts" setup>
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { init, loadRemote, registerRemotes } from '@module-federation/runtime'
-import type { StudioAppDefaultShape, StudioPanelShape } from './studio-app-types'
+import type { StudioAppDefaultShape, StudioPanelShape, RequestProjectAccessMutation } from './studio-app-types'
 import LoadingStudioPanel from './LoadingStudioPanel.vue'
 import StudioErrorPanel from './StudioErrorPanel.vue'
 import type { EventManager } from '../runner/event-manager'
@@ -54,6 +54,8 @@ const props = defineProps<{
   cloudStudioSessionId?: string
   autUrlSelector: string
   userProjectStatusStore: UserProjectStatusStore
+  hasRequestedProjectAccess: boolean
+  requestProjectAccessMutation: RequestProjectAccessMutation
 }>()
 
 interface StudioApp { default: StudioAppDefaultShape }
@@ -81,6 +83,8 @@ const maybeRenderReactComponent = () => {
     studioSessionId: props.cloudStudioSessionId,
     autUrlSelector: props.autUrlSelector,
     userProjectStatusStore: props.userProjectStatusStore,
+    hasRequestedProjectAccess: props.hasRequestedProjectAccess,
+    requestProjectAccessMutation: props.requestProjectAccessMutation,
   })
 
   // Store the react root in a weak map keyed by the container. We do this so that we have a reference
