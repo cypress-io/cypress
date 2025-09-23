@@ -46,6 +46,8 @@ async function run ({ context, core, github }) {
     const changedFiles = data.map((fileDetails) => fileDetails.filename)
 
     await validateChangelog({
+      github,
+      contextPullRequest,
       changedFiles,
       commits: [{
         commitMessage: header,
