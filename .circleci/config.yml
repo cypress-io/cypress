@@ -164,11 +164,11 @@ jobs:
         - run:
             name: clear packed directory so git can checkout
             command: |
-              rm -rf .circleci/packed
+              rm -rf .circleci
+              ls -la .circleci/**/*.yml
 
         - checkout
 
-        - run: ls -la .
 
         - run:
             name: Generate config checksum for cache lookup
