@@ -129,7 +129,7 @@ const _handleErrors = (errors) => {
  * environment variable in CircleCI to a branch or comma-separated list of
  * branches
  */
-async function validateChangelog ({ changedFiles, nextVersion, pendingRelease, commits, github, contextPullRequest }) {
+async function validateChangelog ({ changedFiles, nextVersion, pendingRelease, commits, changelogContent }) {
   if (process.env.SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES) {
     const branches = process.env.SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES.split(',')
 
@@ -170,15 +170,6 @@ async function validateChangelog ({ changedFiles, nextVersion, pendingRelease, c
       return _handleErrors(errors)
     }
   }
-
-  const { data: changelogData } = await github.rest.repos.getContent({
-    owner: contextPullRequest.head.user.login,
-    repo: contextPullRequest.head.repo.name,
-    path: 'cli/CHANGELOG.md',
-    ref: contextPullRequest.head.sha,
-  })
-
-  const changelogContent = Buffer.from(changelogData.content, 'base64').toString('utf8')
 
   const changelog = await parseChangelog({ pendingRelease, changelogContent })
 

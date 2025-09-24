@@ -1,6 +1,7 @@
 const { expect, use } = require('chai')
 const sinonChai = require('sinon-chai')
 const sinon = require('sinon')
+const fs = require('fs')
 
 const { validateChangelog, _validateEntry, _getResolvedMessage } = require('../../semantic-commits/validate-changelog')
 
@@ -114,35 +115,19 @@ describe('semantic-pull-request/validate-changelog', () => {
 
   context('validateChangelog', () => {
     let circleBranch
-    let contextPullRequest
-    let mockGithub
 
     beforeEach(function () {
       sinon.spy(console, 'log')
+      sinon.stub(fs, 'readFileSync')
 
       circleBranch = process.env.CIRCLE_BRANCH
       // delete this in case it's set in actual Circle env vars
       delete process.env.SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES
-
-      contextPullRequest = {
-        head: {
-          user: { login: 'test-org' },
-          repo: { name: 'test-repo' },
-          sha: '1234567890',
-        },
-      }
-
-      mockGithub = {
-        rest: {
-          repos: {
-            getContent: sinon.stub(),
-          },
-        },
-      }
     })
 
     afterEach(function () {
       console.log.restore()
+      fs.readFileSync.restore()
 
       process.env.CIRCLE_BRANCH = circleBranch
       // clean up after the test that sets and tests it
@@ -150,6 +135,32 @@ describe('semantic-pull-request/validate-changelog', () => {
     })
 
     it('verifies changelog entry has been included', async () => {
+      const changedFiles = [
+        'packages/driver/lib/index.js',
+        'cli/CHANGELOG.md',
+      ]
+
+      fs.readFileSync.returns(`
+## 120.2.0
+
+_Released 01/17/2033 (PENDING)_
+
+**Performance:**
+
+- Fixed in [#77](https://github.com/cypress-io/cypress/pull/77).`)
+
+      await validateChangelog({
+        changedFiles,
+        commits: [{
+          prNumber: 77,
+          semanticType: 'perf',
+        }],
+      })
+
+      expect(console.log).to.be.calledWith('It appears at a high-level your changelog entry is correct! The remaining validation is left to the pull request reviewers.')
+    })
+
+    it('verifies changelog entry has been included when the changelog is passed in', async () => {
       const changedFiles = [
         'packages/driver/lib/index.js',
         'cli/CHANGELOG.md',
@@ -164,11 +175,8 @@ _Released 01/17/2033 (PENDING)_
 
 - Fixed in [#77](https://github.com/cypress-io/cypress/pull/77).`
 
-      mockGithub.rest.repos.getContent.resolves({ data: { content: Buffer.from(changelogContent).toString('base64') } })
-
       await validateChangelog({
-        github: mockGithub,
-        contextPullRequest,
+        changelogContent,
         changedFiles,
         commits: [{
           prNumber: 77,
@@ -185,20 +193,16 @@ _Released 01/17/2033 (PENDING)_
         'cli/CHANGELOG.md',
       ]
 
-      const changelogContent = `
+      fs.readFileSync.returns(`
 ## 120.2.0
 
 _Released 01/17/2033 (PENDING)_
 
 **Misc:**
 
-- Addresses [#77](https://github.com/cypress-io/cypress/issues/77) and [#88](https://github.com/cypress-io/cypress/issues/88).`
-
-      mockGithub.rest.repos.getContent.resolves({ data: { content: Buffer.from(changelogContent).toString('base64') } })
+- Addresses [#77](https://github.com/cypress-io/cypress/issues/77) and [#88](https://github.com/cypress-io/cypress/issues/88).`)
 
       await validateChangelog({
-        github: mockGithub,
-        contextPullRequest,
         changedFiles,
         commits: [{
           prNumber: 74,
@@ -221,8 +225,6 @@ _Released 01/17/2033 (PENDING)_
         ]
 
         await validateChangelog({
-          github: mockGithub,
-          contextPullRequest,
           changedFiles,
           commits: [{
             prNumber: 77,
@@ -240,8 +242,6 @@ _Released 01/17/2033 (PENDING)_
         ]
 
         await validateChangelog({
-          github: mockGithub,
-          contextPullRequest,
           changedFiles,
           commits: [{
             prNumber: 77,
@@ -262,8 +262,6 @@ _Released 01/17/2033 (PENDING)_
         ]
 
         await validateChangelog({
-          github: mockGithub,
-          contextPullRequest,
           changedFiles,
           commits: [{
             prNumber: 77,
@@ -282,18 +280,14 @@ _Released 01/17/2033 (PENDING)_
           'packages/driver/lib/index.js',
         ]
 
-        const changelogContent = `
+        fs.readFileSync.returns(`
 ## 120.2.0
 
 _Released 01/17/2033 (PENDING)_
 
-`
-
-        mockGithub.rest.repos.getContent.resolves({ data: { content: Buffer.from(changelogContent).toString('base64') } })
+`)
 
         return validateChangelog({
-          github: mockGithub,
-          contextPullRequest,
           changedFiles,
           commits: [{
             commitMessage: 'feat: do something new (#77)',
@@ -313,20 +307,16 @@ _Released 01/17/2033 (PENDING)_
           'cli/CHANGELOG.md',
         ]
 
-        const changelogContent = `
+        fs.readFileSync.returns(`
 ## 120.2.0
 
 _Released 01/17/2033 (PENDING)_
 
 **Features:**
 
-- Addresses [#75](https://github.com/cypress-io/cypress/issues/75).`
-
-        mockGithub.rest.repos.getContent.resolves({ data: { content: Buffer.from(changelogContent).toString('base64') } })
+- Addresses [#75](https://github.com/cypress-io/cypress/issues/75).`)
 
         return validateChangelog({
-          github: mockGithub,
-          contextPullRequest,
           changedFiles,
           commits: [{
             commitMessage: 'perf: do something faster (#77)',
@@ -346,7 +336,7 @@ _Released 01/17/2033 (PENDING)_
           'cli/CHANGELOG.md',
         ]
 
-        const changelogContent = `
+        fs.readFileSync.returns(`
 ## 120.2.0
 
 _Released 01/17/2033 (PENDING)_
@@ -357,13 +347,9 @@ _Released 01/17/2033 (PENDING)_
 
 **Features:**
 
-- Fixes [#75](https://github.com/cypress-io/cypress/issues/75).`
-
-        mockGithub.rest.repos.getContent.resolves({ data: { content: Buffer.from(changelogContent).toString('base64') } })
+- Fixes [#75](https://github.com/cypress-io/cypress/issues/75).`)
 
         return validateChangelog({
-          github: mockGithub,
-          contextPullRequest,
           changedFiles,
           commits: [{
             commitMessage: 'perf: do something faster (#77)',
@@ -383,20 +369,16 @@ _Released 01/17/2033 (PENDING)_
           'cli/CHANGELOG.md',
         ]
 
-        const changelogContent = `
+        fs.readFileSync.returns(`
 ## 120.2.0
 
 _Released 01/17/2033 (PENDING)_
 
 **Performance:**
 
-- comment without link.`
-
-        mockGithub.rest.repos.getContent.resolves({ data: { content: Buffer.from(changelogContent).toString('base64') } })
+- comment without link.`)
 
         return validateChangelog({
-          github: mockGithub,
-          contextPullRequest,
           changedFiles,
           commits: [{
             commitMessage: 'perf: do something faster (#77)',
@@ -416,20 +398,16 @@ _Released 01/17/2033 (PENDING)_
           'cli/CHANGELOG.md',
         ]
 
-        const changelogContent = `
+        fs.readFileSync.returns(`
 ## 120.2.0
 
 _Released 01/17/2033 (PENDING)_
 
 **Performance:**
 
-- comment without link.`
-
-        mockGithub.rest.repos.getContent.resolves({ data: { content: Buffer.from(changelogContent).toString('base64') } })
+- comment without link.`)
 
         return validateChangelog({
-          github: mockGithub,
-          contextPullRequest,
           changedFiles,
           commits: [{
             commitMessage: 'perf: do something faster (#77)',

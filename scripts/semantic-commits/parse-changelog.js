@@ -1,8 +1,11 @@
+const fs = require('fs')
+const path = require('path')
 const { userFacingChanges } = require('./change-categories')
 const userFacingSections = Object.values(userFacingChanges).map(({ section }) => section)
 
-async function parseChangelog ({ pendingRelease = true, changelogContent }) {
-  const changeLogLines = changelogContent.split('\n')
+async function parseChangelog ({ pendingRelease = true, changelogContent = null }) {
+  const changelog = changelogContent || fs.readFileSync(path.join(__dirname, '..', '..', 'cli', 'CHANGELOG.md'), 'utf8')
+  const changeLogLines = changelog.split('\n')
 
   let parseChangelog = true
   const sections = {}
