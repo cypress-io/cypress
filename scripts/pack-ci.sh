@@ -66,9 +66,10 @@ if [ "$PACK" = true ]; then
       fi
     done
   else
-    echo "📦 Packing modified configurations"
+    echo "📦 Packing staged configurations"
     # Find directories in .circleci/src that contain modified files
-    modified_files=$(git diff --name-only HEAD)
+    # Only check staged changes (for pre-commit hooks)
+    modified_files=$(git diff --name-only --cached 2>/dev/null || echo "")
     dirs_to_process=()
 
     # Check which directories in .circleci/src contain modified files
