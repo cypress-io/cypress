@@ -2,7 +2,7 @@ base-internal-bullseye: cypress/base-internal:22.18.0-bullseye
 base-internal-minimum-node: cypress/base-internal:22.15.1
 base-internal-yarn-berry: cypress/base-internal:22.18.0-yarn-berry
 chrome-beta-version: 141.0.7390.30
-chrome-stable-version: 140.0.7339.185
+chrome-stable-version: 140.0.7339.207
 commands:
   build-and-package-binary:
     steps:
@@ -398,11 +398,11 @@ commands:
         description: Google Chrome channel to install
         type: string
       google-chrome-for-testing-version:
-        default: 140.0.7339.185
+        default: 140.0.7339.207
         description: Google Chrome for Testing version to install
         type: string
       google-chrome-version:
-        default: 140.0.7339.185
+        default: 140.0.7339.207
         description: Google Chrome version to install
         type: string
       install-chrome:
@@ -2013,7 +2013,6 @@ jobs:
       - run: yarn workspace @cypress/grep omit:specs
       - run: yarn workspace @cypress/grep or
       - run: yarn workspace @cypress/grep skip
-      - run: yarn workspace @cypress/grep tags
       - run: yarn workspace @cypress/grep tags:inverted
       - run: yarn workspace @cypress/grep tags:and
       - run: yarn workspace @cypress/grep tags:and:not
