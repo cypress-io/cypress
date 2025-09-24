@@ -165,18 +165,20 @@ jobs:
             command: |
               rm -rf .circleci
 
-        - checkout
+        - checkout:
+            to: .
+
+        - run: ls -la . && ls -la ~/project
 
         - run:
             name: Generate config checksum for cache lookup
             command: |
               # Generate checksum of all .yml files in src directory
               find .circleci/src -name "*.yml" -type f | sort | xargs cat | md5sum | cut -d' ' -f1 > /tmp/config_checksum.txt
-              echo "CONFIG_CHECKSUM=$(cat /tmp/config_checksum.txt)" >> $BASH_ENV
-              echo "Generated config checksum: $(cat /tmp/config_checksum.txt)"
+
         - restore_cache:
             keys:
-              - circleci-packed-pipelines-{{ .Environment.CONFIG_CHECKSUM }} # if this cache hits, we don't need to pack the workflows again
+              - circleci-packed-pipelines-{{ checksum "/tmp/config_checksum.txt" }} # if this cache hits, we don't need to pack the workflows again
             paths:
                 - .circleci/packed
         - persist-to-workspace-and-exit-early
@@ -187,11 +189,11 @@ jobs:
             paths:
                 - .circleci/packed
         - save_cache:
-            key: circleci-packed-pipelines-{{ .Environment.CONFIG_CHECKSUM }} # for caching runs w/ no circleci config changes, slower b/c of git checkout
+            key: circleci-packed-pipelines-{{ checksum "/tmp/config_checksum.txt" }} # for caching runs w/ no circleci config changes, slower b/c of git checkout
             paths:
                 - .circleci/packed
         - persist_to_workspace:
-            root: ~/project
+            root: .
             paths:
                 - .circleci/packed
 
