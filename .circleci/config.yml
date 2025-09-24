@@ -73,16 +73,17 @@ commands:
             else
               echo "📦 Cache miss or force-pack is true - continuing with packaging"
               echo "CACHE_HIT=false" >> $BASH_ENV
-              mkdir -p .circleci/packed # persist empty dir to workspace
+              mkdir -p ./cypress/.circleci/packed # persist empty dir to workspace
             fi
       - persist_to_workspace:
           root: ~/project
           paths:
-            - .circleci/packed
+            - ./cypress/.circleci/packed
       - run:
           name: End job if cache hit
           command: |
-            if [[ "$CACHE_HIT" == "true" ]]; then
+            
+            if [[ "$CACHE_HIT" == "true" ]] && [[ "$(ls -A ./cypress/.circleci/packed 2>/dev/null)" ]]; then
               echo "✅ Cache hit - packed configurations exist and force-pack is false"
               exit 0
             else
@@ -94,8 +95,8 @@ commands:
       - run:
           name: Pack workflows
           command: |
-            src_dir=".circleci/src"
-            outdir=".circleci/packed"
+            src_dir="./cypress/.circleci/src"
+            outdir="./cypress/.circleci/packed"
 
             # Create the output directory if it doesn't exist
             mkdir -p "$outdir"
@@ -115,14 +116,14 @@ commands:
           name: Validate workflows
           command: |
 
-            if ![[ -d ".circleci/packed" ]]; then
+            if ![[ -d "./cypress/.circleci/packed" ]]; then
               echo "❌ Packed configurations not found!"
               exit 1
             fi
 
-            outdir="./.circleci/packed"
+            outdir="../cypress/.circleci/packed"
 
-            for cfg in "${./.circleci/packed}/*.yml"; do
+            for cfg in "${../cypress/.circleci/packed}/*.yml"; do
                 if ! circleci config validate "$cfg"; then
                     echo "❌ Failed to validate ${cfg}"
                     exit 1
@@ -136,16 +137,16 @@ jobs:
       steps:
           - halt-early
           - attach_workspace:
-              at: ~/
+              at: .
           - run:
               name: Check for primary workflow definition
               command: |
-                if [ ! -f ~/project/.circleci/workflows.yml ]; then
+                if [ ! -f ./cypress/.circleci/packed/workflows.yml ]; then
                     echo "❌ Primary workflow definition not found!"
                     exit 1
                 fi
           - continuation/continue:
-              configuration_path: ~/project/.circleci/workflows.yml
+              configuration_path: ./cypress/.circleci/packed/workflows.yml
 
 
   pack-workflows:
@@ -158,44 +159,46 @@ jobs:
             keys:
               - circleci-packed-pipelines-{{ .Revision }} # first check the rev, if it's there we don't need to checkout code to continue.
             paths:
-                - .circleci/packed
+                - ./cypress/.circleci/packed
         - persist-to-workspace-and-exit-early
         - run:
             name: clear packed directory so git can checkout
             command: |
-              rm -rf .circleci
+              rm -rf ./cypress/.circleci
 
         - checkout:
-            to: .
+            to: ./cypress
 
-        - run: ls -la . && ls -la ~/project
+        - run: ls -la .
 
         - run:
             name: Generate config checksum for cache lookup
             command: |
               # Generate checksum of all .yml files in src directory
-              find .circleci/src -name "*.yml" -type f | sort | xargs cat | md5sum | cut -d' ' -f1 > /tmp/config_checksum.txt
+              find ./cypress/.circleci/src -name "*.yml" -type f | sort | xargs cat | md5sum | cut -d' ' -f1 > /tmp/config_checksum.txt
 
         - restore_cache:
             keys:
               - circleci-packed-pipelines-{{ checksum "/tmp/config_checksum.txt" }} # if this cache hits, we don't need to pack the workflows again
             paths:
-                - .circleci/packed
+                - ./cypress/.circleci/packed
+        - run: ls -la ./cypress/.circleci/**/*.yml
         - persist-to-workspace-and-exit-early
         - circleci-cli/install
         - pack-workflows
         - save_cache:
             key: circleci-packed-pipelines-{{ .Revision }} # for caching same-rev reruns - no need to checkout code. early term optimization.
             paths:
-                - .circleci/packed
+                - ./cypress/.circleci/packed
         - save_cache:
             key: circleci-packed-pipelines-{{ checksum "/tmp/config_checksum.txt" }} # for caching runs w/ no circleci config changes, slower b/c of git checkout
             paths:
-                - .circleci/packed
+                - ./cypress/.circleci/packed
         - persist_to_workspace:
             root: .
             paths:
-                - .circleci/packed
+                - ./cypress/.circleci/packed
+        - run: ls -la ./cypress/.circleci/**/*.yml
 
 
 
