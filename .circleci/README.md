@@ -35,7 +35,7 @@ For more detailed installation instructions, see the [CircleCI Local CLI documen
 When files in `.circleci/src/` are modified, the pre-commit hook automatically runs:
 
 ```bash
-yarn verify-ci
+yarn pack-ci --verify
 ```
 
 This command:
@@ -53,4 +53,8 @@ This command:
 
 1. Make changes to files in `src/` directories
 2. Stage and commit changes - pre-commit hook automatically validates and packs configurations
-3. Push to origin - CI uses intelligent caching for fast execution
+3. The jobs defined in `config.yml` will pack these source directories on-the-fly when CI gets kicked off.
+
+## `config.yml`
+
+This is the main entrypoint to Cypress CI. It loads packed workflow files from cache, or builds them if necessary. Then it continues to the primary workflow. The main entrypoint to our CI must be available in source control and not packed on-the-fly.
