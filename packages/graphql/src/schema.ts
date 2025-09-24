@@ -23,7 +23,7 @@ export const graphqlSchema = makeSchema({
     schema: path.join(__dirname, '..', 'schemas', 'schema.graphql'),
   },
   contextType: {
-    module: '@packages/data-context',
+    module: '@packages/data-context/src/DataContext.ts',
     export: 'DataContext',
   },
   mergeSchema: {

@@ -1,0 +1,19 @@
+{
+  "include": [
+    "src"
+  ],
+  "compilerOptions": {
+    "lib": [
+      "esnext"
+    ],
+    "allowJs": false,
+    "noImplicitAny": true,
+    "noUncheckedIndexedAccess": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "useUnknownInCatchVariables": false
+  }
+}

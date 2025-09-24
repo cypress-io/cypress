@@ -2,11 +2,14 @@
   "name": "@packages/graphql",
   "version": "0.0.0-development",
   "private": true,
-  "main": "index.js",
-  "browser": "src/index.ts",
+  "main": "cjs/index.js",
   "scripts": {
-    "build": "graphql-codegen --config graphql-codegen.yml",
-    "build-prod": "tsc || echo 'built, with errors'",
+    "prebuild": "yarn build:schema",
+    "build": "yarn build:cjs && yarn build:esm",
+    "build-prod": "yarn build",
+    "build:cjs": "rimraf cjs && tsc -p tsconfig.cjs.json",
+    "build:esm": "rimraf esm && tsc -p tsconfig.esm.json",
+    "build:schema": "graphql-codegen --config graphql-codegen.yml",
     "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean": "rimraf --glob \"./{src,test}/**/*.js\"",
     "clean-deps": "rimraf node_modules",
@@ -67,6 +70,7 @@
     "schemas"
   ],
   "types": "src/index.ts",
+  "module": "esm/index.js",
   "nx": {
     "targets": {
       "nexus-build": {
@@ -75,7 +79,7 @@
           "{projectRoot}/schemas/schema.graphql"
         ],
         "dependsOn": [
-          "^build"
+          "packages/data-context:prebuild"
         ]
       },
       "build": {

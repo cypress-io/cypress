@@ -1,2 +1,4 @@
 **/tsconfig.json
 *.gen.ts
+cjs/
+esm/

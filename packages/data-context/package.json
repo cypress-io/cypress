@@ -4,7 +4,8 @@
   "description": "Centralized data access for the Cypress application",
   "main": "cjs/index.js",
   "scripts": {
-    "build": "yarn build:schema && yarn build:cjs && yarn build:esm",
+    "prebuild": "yarn build:schema",
+    "build": "yarn build:cjs && yarn build:esm",
     "build-prod": "yarn build",
     "build:cjs": "rimraf cjs && tsc -p tsconfig.cjs.json",
     "build:esm": "rimraf esm && tsc -p tsconfig.esm.json",
