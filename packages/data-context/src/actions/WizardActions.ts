@@ -1,4 +1,4 @@
-import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
+import type { NexusGenObjects } from '../gen/nxs.gen'
 import { detectFramework, commandsFileBody, supportFileComponent, supportFileE2E, getBundler, CT_FRAMEWORKS, resolveComponentFrameworkDefinition, detectThirdPartyCTFrameworks } from '@packages/scaffold-config'
 import assert from 'assert'
 import path from 'path'

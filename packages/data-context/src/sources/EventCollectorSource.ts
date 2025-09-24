@@ -1,7 +1,7 @@
 import Debug from 'debug'
 import dayjs from 'dayjs'
 import type { DataContext } from '..'
-import type { CloudTestingTypeEnum, LocalTestCountsInput } from '@packages/graphql/src/gen/nxs.gen'
+import type { CloudTestingTypeEnum, LocalTestCountsInput } from '../gen/nxs.gen'
 import { getTestCounts } from '../util/testCounts'
 import { debounce } from 'lodash'
 

@@ -3718,7 +3718,7 @@ workflows:
             - update-v8-snapshot-cache-on-develop
             - << pipeline.git.branch >>
         - equal:
-            - fix/dbus-messages
+            - chore/merge_gql_package_w_data_context
             - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/
@@ -3775,7 +3775,7 @@ workflows:
             - update-v8-snapshot-cache-on-develop
             - << pipeline.git.branch >>
         - equal:
-            - fix/dbus-messages
+            - chore/merge_gql_package_w_data_context
             - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/
@@ -3843,7 +3843,7 @@ workflows:
             - update-v8-snapshot-cache-on-develop
             - << pipeline.git.branch >>
         - equal:
-            - fix/dbus-messages
+            - chore/merge_gql_package_w_data_context
             - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/
@@ -4331,7 +4331,7 @@ workflows:
             - update-v8-snapshot-cache-on-develop
             - << pipeline.git.branch >>
         - equal:
-            - fix/dbus-messages
+            - chore/merge_gql_package_w_data_context
             - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/
@@ -5169,7 +5169,7 @@ workflows:
             - update-v8-snapshot-cache-on-develop
             - << pipeline.git.branch >>
         - equal:
-            - fix/dbus-messages
+            - chore/merge_gql_package_w_data_context
             - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/

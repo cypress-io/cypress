@@ -5,15 +5,18 @@
   "main": "index.js",
   "browser": "src/index.ts",
   "scripts": {
-    "build": "node ./scripts/build.js",
+    "build": "yarn build:schema && yarn build:graphql && yarn nexus-build",
     "build-prod": "tsc || echo 'built, with errors'",
+    "build:graphql": "graphql-codegen --config ./graphql/graphql-codegen.yml",
+    "build:schema": "node ./scripts/build.js",
     "check-ts": "tsc --noEmit && yarn -s tslint",
-    "clean": "rimraf --glob \"./{src,test}/**/*.js\"",
+    "clean": "rimraf --glob \"./{src,test,graphql}/**/*.js\"",
     "clean-deps": "rimraf node_modules",
     "lint": "eslint --ext .js,.ts,.json, .",
+    "nexus-build": "ts-node ./scripts/nexus-build.ts",
     "test": "yarn test-unit",
     "test-unit": "mocha -r @packages/ts/register --config ./test/.mocharc.js --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
-    "tslint": "tslint --config ../ts/tslint.json --project ."
+    "tslint": "tslint --config ../ts/tslint.json --project . --exclude ./src/gen/nxs.gen.ts"
   },
   "dependencies": {
     "@babel/code-frame": "7.27.1",
@@ -21,6 +24,7 @@
     "@babel/parser": "7.28.0",
     "@graphql-tools/batch-execute": "^8.4.6",
     "@graphql-tools/delegate": "8.2.1",
+    "@graphql-tools/wrap": "8.1.1",
     "@packages/stderr-filtering": "0.0.0-development",
     "@packages/telemetry": "0.0.0-development",
     "@urql/core": "2.4.4",
@@ -30,6 +34,7 @@
     "chalk": "4.1.2",
     "chokidar": "3.5.1",
     "common-path-prefix": "3.0.0",
+    "cors": "2.8.5",
     "cross-fetch": "^4.1.0",
     "dataloader": "^2.0.0",
     "dayjs": "^1.9.3",
@@ -38,17 +43,26 @@
     "ejs": "^3.1.10",
     "endent": "2.0.1",
     "execa": "4.1.0",
+    "express": "4.21.0",
+    "express-graphql": "^0.12.0",
+    "fake-uuid": "^1.0.0",
     "front-matter": "^4.0.2",
     "fs-extra": "8.1.0",
     "get-tsconfig": "4.10.0",
     "getenv": "1.0.0",
     "globby": "^11.0.1",
     "graphql": "^15.5.1",
+    "graphql-relay": "^0.9.0",
+    "graphql-resolve-batch": "1.0.3",
+    "graphql-scalars": "^1.10.0",
+    "graphql-ws": "^5.5.5",
+    "http-proxy": "1.18.1",
     "isbinaryfile": "^4.0.8",
     "launch-editor": "2.9.1",
     "lodash": "4.17.21",
     "micromatch": "^4.0.8",
     "minimatch": "3.1.2",
+    "nexus": "^1.2.0-next.15",
     "node-machine-id": "1.1.12",
     "p-defer": "^3.0.0",
     "parse-glob": "3.0.4",
@@ -59,19 +73,21 @@
     "recast": "0.20.4",
     "resolve": "^1.22.10",
     "semver": "^7.7.1",
+    "send": "0.19.0",
     "server-destroy": "1.0.1",
     "simple-git": "^3.27.0",
     "stringify-object": "^3.0.0",
     "tsx": "4.20.5",
     "underscore.string": "^3.3.6",
-    "wonka": "^4.0.15"
+    "wonka": "^4.0.15",
+    "ws": "^8.5.0"
   },
   "devDependencies": {
     "@babel/types": "7.28.2",
+    "@packages/app": "0.0.0-development",
     "@packages/config": "0.0.0-development",
     "@packages/errors": "0.0.0-development",
     "@packages/example": "0.0.0-development",
-    "@packages/graphql": "0.0.0-development",
     "@packages/network": "0.0.0-development",
     "@packages/resolve-dist": "0.0.0-development",
     "@packages/root": "0.0.0-development",
@@ -84,35 +100,31 @@
     "@types/dedent": "^0.7.0",
     "@types/ejs": "^3.1.2",
     "@types/fs-extra": "^8.0.1",
+    "@types/graphql-resolve-batch": "1.1.6",
     "@types/micromatch": "4.0.9",
     "@types/mocha": "^8.0.3",
     "@types/parse-glob": "3.0.29",
     "@types/prettier": "2.4.3",
+    "@types/server-destroy": "^1.0.1",
     "@types/sinon": "10.0.11",
     "@types/sinon-chai": "3.2.12",
     "@types/stringify-object": "^3.0.0",
+    "chai": "^4.2.0",
+    "chokidar": "3.6.0",
+    "fs-extra": "9.1.0",
     "mocha": "7.0.1",
     "mocha-junit-reporter": "2.2.0",
     "mocha-multi-reporters": "1.5.1",
     "nexus": "^1.2.0-next.15",
     "sinon": "13.0.2",
     "sinon-chai": "3.7.0",
+    "snap-shot-it": "7.9.10",
     "tslint": "^6.1.3"
   },
   "files": [
-    "src"
+    "src",
+    "schemas",
+    "graphql"
   ],
-  "types": "src/index.ts",
-  "nx": {
-    "targets": {
-      "build": {
-        "outputs": [
-          "{projectRoot}/src/gen/urql-introspection.gen.ts"
-        ]
-      }
-    },
-    "implicitDependencies": [
-      "@packages/graphql"
-    ]
-  }
+  "types": "src/index.ts"
 }
