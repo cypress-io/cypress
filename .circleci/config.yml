@@ -53,6 +53,7 @@ commands:
 
               if [[ "${DRAFT}" == true ]]; then
                 echo "Skipping CI; PR is in draft - $TRIGGER_INSTRUCTIONS"
+                cancel_build
               fi
 
               echo "Always run CI for PR that is ready for review."
