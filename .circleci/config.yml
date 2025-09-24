@@ -73,21 +73,21 @@ commands:
             else
               echo "📦 Cache miss or force-pack is true - continuing with packaging"
               echo "CACHE_HIT=false" >> $BASH_ENV
-              mkdir -p ~/project/.circleci/packed # persist empty dir to workspace
+              mkdir -p .circleci/packed # persist empty dir to workspace
             fi
       - persist_to_workspace:
-          root: ~/project
+          root: .
           paths:
             - .circleci/packed
       - run:
           name: End job if cache hit
           command: |
             
-            if [[ "$CACHE_HIT" == "true" ]] && [[ "$(ls -A ~/project/.circleci/packed 2>/dev/null)" ]]; then
+            if [[ "$CACHE_HIT" == "true" ]] && [[ "$(ls -A .circleci/packed 2>/dev/null)" ]]; then
               echo "✅ Cache hit - packed configurations exist and force-pack is false"
-              exit 0
             else
               echo "📦 Cache miss or force-pack is true - continuing with packaging"
+              rm -rf .circleci # remove empty directories
             fi
 
   pack-workflows:
@@ -161,27 +161,25 @@ jobs:
             paths:
                 - .circleci/packed
         - persist-to-workspace-and-exit-early
-        - run:
-            name: clear packed directory so git can checkout
-            command: |
-              rm -rf .circleci
-              ls -la .circleci/**/*.yml
-
         - checkout
-
-
         - run:
             name: Generate config checksum for cache lookup
             command: |
               # Generate checksum of all .yml files in src directory
               find .circleci/src -name "*.yml" -type f | sort | xargs cat | md5sum | cut -d' ' -f1 > /tmp/config_checksum.txt
-
         - restore_cache:
             keys:
               - circleci-packed-pipelines-{{ checksum "/tmp/config_checksum.txt" }} # if this cache hits, we don't need to pack the workflows again
             paths:
                 - .circleci/packed
-        - run: ls -la .circleci/**/*.yml
+        - run:
+            name: List packed files after cache restore
+            command: |
+              if [ -d .circleci/packed ]; then
+                ls -la .circleci/packed/*.yml 2>/dev/null || echo "No .yml files found in packed directory"
+              else
+                echo "Packed directory does not exist"
+              fi
         - persist-to-workspace-and-exit-early
         - circleci-cli/install
         - pack-workflows
