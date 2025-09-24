@@ -17,7 +17,7 @@ import $stackUtils, { StackAndCodeFrameIndex } from './stack_utils'
 import $utils from './utils'
 import type { HandlerType } from './runner'
 
-const ERROR_PROPS = ['message', 'type', 'name', 'stack', 'parsedStack', 'fileName', 'lineNumber', 'columnNumber', 'host', 'uncaught', 'actual', 'expected', 'showDiff', 'isPending', 'isRecovered', 'docsUrl', 'codeFrame'] as const
+const ERROR_PROPS = ['message', 'type', 'name', 'stack', 'parsedStack', 'fileName', 'lineNumber', 'columnNumber', 'host', 'uncaught', 'actual', 'expected', 'showDiff', 'isPending', 'isRecovered', 'docsUrl', 'codeFrame', 'docsUrlTitle'] as const
 const ERR_PREPARED_FOR_SERIALIZATION = Symbol('ERR_PREPARED_FOR_SERIALIZATION')
 
 const crossOriginScriptRe = /^script error/i
@@ -329,6 +329,7 @@ export class InternalCypressError extends Error {
 
 export class CypressError extends Error {
   docsUrl?: string
+  docsUrlTitle?: string | null
   retry?: boolean
   userInvocationStack?: any
   onFail?: Function
@@ -407,6 +408,23 @@ const docsUrlByParents = (msgPath) => {
   return docsUrlByParents(msgPath)
 }
 
+// recursively try for a default docsUrlTitle
+const docsUrlTitleByParents = (msgPath) => {
+  msgPath = msgPath.split('.').slice(0, -1).join('.')
+
+  if (!msgPath) {
+    return // reached root
+  }
+
+  const obj = _.get(allErrorMessages, msgPath)
+
+  if (obj.hasOwnProperty('docsUrlTitle')) {
+    return obj.docsUrlTitle
+  }
+
+  return docsUrlTitleByParents(msgPath)
+}
+
 const errByPath = (msgPath, args?) => {
   let msgValue = _.get(allErrorMessages, msgPath)
 
@@ -427,10 +445,12 @@ const errByPath = (msgPath, args?) => {
   }
 
   const docsUrl = (msgObj.hasOwnProperty('docsUrl') && msgObj.docsUrl) || docsUrlByParents(msgPath)
+  const docsUrlTitle = (msgObj.hasOwnProperty('docsUrlTitle') && msgObj.docsUrlTitle) || docsUrlTitleByParents(msgPath)
 
   return cypressErr({
     message: replaceErrMsgTokens(msgObj.message, args),
     docsUrl: docsUrl ? replaceErrMsgTokens(docsUrl, args) : undefined,
+    docsUrlTitle: docsUrlTitle ? replaceErrMsgTokens(docsUrlTitle, args) : undefined,
   })
 }
 
@@ -544,6 +564,7 @@ export interface ErrorFromErrorEvent {
 const errorFromErrorEvent = (event): ErrorFromErrorEvent => {
   let { message, filename, lineno, colno, error } = event
   let docsUrl = error?.docsUrl
+  let docsUrlTitle = error?.docsUrlTitle
 
   // reset the message on a cross origin script error
   // since no details are accessible
@@ -552,6 +573,7 @@ const errorFromErrorEvent = (event): ErrorFromErrorEvent => {
 
     message = crossOriginErr.message
     docsUrl = crossOriginErr.docsUrl
+    docsUrlTitle = crossOriginErr.docsUrlTitle
   }
 
   // it's possible the error was thrown as a string (throw 'some error')
@@ -561,6 +583,7 @@ const errorFromErrorEvent = (event): ErrorFromErrorEvent => {
   })) as CypressError
 
   err.docsUrl = docsUrl
+  err.docsUrlTitle = docsUrlTitle
 
   // makeErrFromObj clones the error, so the original doesn't get mutated
   return {

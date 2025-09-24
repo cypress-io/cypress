@@ -668,7 +668,9 @@ export class SocketBase {
           // if one does not already exist for the user's default browser.
           const start = (process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open')
 
-          return require('child_process').exec(`${start} ${url}`)
+          // url needs to be quoted because if there're multiples query params then the url will be split
+          // and the query params will be lost
+          return require('child_process').exec(`${start} "${url}"`)
         })
 
         socket.on('get:user:editor', (cb) => {
