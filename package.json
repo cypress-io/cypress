@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "15.2.0",
+  "version": "15.3.0",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -268,8 +268,7 @@
     ]
   },
   "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
-    "*workflows.yml": "node scripts/format-workflow-file.js"
+    "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix"
   },
   "resolutions": {
     "**/@types/cheerio": "0.22.21",
