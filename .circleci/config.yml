@@ -102,40 +102,13 @@ commands:
       - run:
           name: Pack workflows
           command: |
-            src_dir=".circleci/src"
-            outdir=".circleci/packed"
-
-            # Create the output directory if it doesn't exist
-            mkdir -p "$outdir"
-
-            for cfg_path in "${src_dir}"/*/; do
-                cfg_name=$(basename "$cfg_path")
-                output_file="${outdir}/${cfg_name}.yml"
-                echo "📦 Packing ${cfg_name}.yml configuration..."
-                if ! circleci config pack "$cfg_path" > "$output_file"; then
-                    echo "  ❌ Failed to pack ${output_file}"
-                    exit 1
-                fi
-            done
+            ./scripts/pack-ci.sh --all
   validate-workflows:
     steps:
       - run:
           name: Validate workflows
           command: |
-
-            if [[ ! -d ".circleci/packed" ]]; then
-              echo "❌ Packed configurations not found!"
-              exit 1
-            fi
-
-            outdir=".circleci/packed"
-
-            for cfg in .circleci/packed/*.yml; do
-                if ! circleci config validate "$cfg"; then
-                    echo "❌ Failed to validate ${cfg}"
-                    exit 1
-                fi
-            done
+            ./scripts/pack-ci.sh --validate --pack=false
 jobs:
   launch-primary-workflow:
       docker:
