@@ -27,6 +27,7 @@ export const NamedKeys: SupportedNamedKey[] = [
   SpaceKey,
   'Delete',
   'Insert',
+  'Escape',
 ]
 
 // utility type to enable the SupportedKey union type

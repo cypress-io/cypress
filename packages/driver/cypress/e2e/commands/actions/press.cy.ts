@@ -8,7 +8,7 @@ describe('src/cy/commands/actions/press', () => {
     cy.visit('/fixtures/input_events.html')
   })
 
-  it('fires the click event on the button when the named key is sent', () => {
+  it('fires the click event on the button when the named key for Space is sent', () => {
     cy.get('#button').focus()
     cy.get('#button').should('be.focused')
     cy.press(Cypress.Keyboard.Keys.SPACE)
