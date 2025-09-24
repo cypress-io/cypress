@@ -129,7 +129,7 @@ const _handleErrors = (errors) => {
  * environment variable in CircleCI to a branch or comma-separated list of
  * branches
  */
-async function validateChangelog ({ changedFiles, nextVersion, pendingRelease, commits }) {
+async function validateChangelog ({ changedFiles, nextVersion, pendingRelease, commits, changelogContent }) {
   if (process.env.SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES) {
     const branches = process.env.SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES.split(',')
 
@@ -171,7 +171,7 @@ async function validateChangelog ({ changedFiles, nextVersion, pendingRelease, c
     }
   }
 
-  const changelog = await parseChangelog(pendingRelease)
+  const changelog = await parseChangelog({ pendingRelease, changelogContent })
 
   if (nextVersion && !changelog.version === `## ${nextVersion}`) {
     errors.push(`The changelog version does not contain the next Cypress version of ${nextVersion}. If the changelog version is correct, please correct the pull request title to correctly reflect the change being made.`)
