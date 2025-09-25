@@ -5,6 +5,7 @@ export default defineConfig({
     include: [
       'test/unit/supportFile.spec.ts',
       'test/unit/frameworks.spec.ts',
+      'test/unit/detect.spec.ts',
     ],
     globals: true,
     environment: 'node',

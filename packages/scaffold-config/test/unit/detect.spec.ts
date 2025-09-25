@@ -1,19 +1,10 @@
-import Module from 'module'
-import { expect } from 'chai'
+import { vi, describe, it, expect, beforeEach } from 'vitest'
 import fs from 'fs-extra'
 import type { ProjectFixtureDir } from '@tooling/system-tests'
 import { detectFramework, detectLanguage, PkgJson, CT_FRAMEWORKS, resolveComponentFrameworkDefinition, WIZARD_DEPENDENCY_WEBPACK } from '../../src'
 import Fixtures from '@tooling/system-tests'
 import path from 'path'
 import solidJs, { solidDep } from './fixtures'
-
-beforeEach(() => {
-  // @ts-ignore
-  Module._cache = Object.create(null)
-  // @ts-ignore
-  Module._pathCache = Object.create(null)
-  require.cache = Object.create(null)
-})
 
 export async function scaffoldMigrationProject (project: ProjectFixtureDir) {
   const projectPath = Fixtures.projectPath(project)
@@ -74,6 +65,10 @@ export function fakeDepsInNodeModules (cwd: string, deps: Array<DepToFake | DevD
 const resolvedCtFrameworks = CT_FRAMEWORKS.map((x) => resolveComponentFrameworkDefinition(x))
 
 describe('detectFramework', () => {
+  beforeEach(() => {
+    vi.resetModules()
+  })
+
   it('React App with webpack 5', async () => {
     const projectPath = await scaffoldMigrationProject('react18-webpack-unconfigured')
 
@@ -84,8 +79,8 @@ describe('detectFramework', () => {
 
     const actual = await detectFramework(projectPath, resolvedCtFrameworks)
 
-    expect(actual.framework?.type).to.eq('react')
-    expect(actual.bundler).to.eq('webpack')
+    expect(actual.framework?.type).toEqual('react')
+    expect(actual.bundler).toEqual('webpack')
   })
 
   it(`Webpack with Vue 3`, async () => {
@@ -98,8 +93,8 @@ describe('detectFramework', () => {
 
     const actual = await detectFramework(projectPath, resolvedCtFrameworks)
 
-    expect(actual.framework?.type).to.eq('vue3')
-    expect(actual.bundler).to.eq('webpack')
+    expect(actual.framework?.type).toEqual('vue3')
+    expect(actual.bundler).toEqual('webpack')
   })
 
   it(`React with Vite`, async () => {
@@ -112,8 +107,8 @@ describe('detectFramework', () => {
 
     const actual = await detectFramework(projectPath, resolvedCtFrameworks)
 
-    expect(actual.framework?.type).to.eq('react')
-    expect(actual.bundler).to.eq('vite')
+    expect(actual.framework?.type).toEqual('react')
+    expect(actual.bundler).toEqual('vite')
   })
 
   it(`Vue with Vite`, async () => {
@@ -126,8 +121,8 @@ describe('detectFramework', () => {
 
     const actual = await detectFramework(projectPath, resolvedCtFrameworks)
 
-    expect(actual.framework?.type).to.eq('vue3')
-    expect(actual.bundler).to.eq('vite')
+    expect(actual.framework?.type).toEqual('vue3')
+    expect(actual.bundler).toEqual('vite')
   })
 
   ;['14.0.0', '15.0.4'].forEach((v) => {
@@ -141,8 +136,8 @@ describe('detectFramework', () => {
 
       const actual = await detectFramework(projectPath, resolvedCtFrameworks)
 
-      expect(actual.framework?.type).to.eq('nextjs')
-      expect(actual.bundler).to.eq('webpack')
+      expect(actual.framework?.type).toEqual('nextjs')
+      expect(actual.bundler).toEqual('webpack')
     })
   })
 
@@ -156,8 +151,8 @@ describe('detectFramework', () => {
 
       const actual = await detectFramework(projectPath, resolvedCtFrameworks)
 
-      expect(actual.framework?.type).to.eq('angular')
-      expect(actual.bundler).to.eq('webpack')
+      expect(actual.framework?.type).toEqual('angular')
+      expect(actual.bundler).toEqual('webpack')
     })
   })
 
@@ -172,8 +167,8 @@ describe('detectFramework', () => {
 
       const actual = await detectFramework(projectPath, resolvedCtFrameworks)
 
-      expect(actual.framework?.type).to.eq('svelte')
-      expect(actual.bundler).to.eq('vite')
+      expect(actual.framework?.type).toEqual('svelte')
+      expect(actual.bundler).toEqual('vite')
     })
   })
 
@@ -187,8 +182,8 @@ describe('detectFramework', () => {
 
     const actual = await detectFramework(projectPath, resolvedCtFrameworks)
 
-    expect(actual.framework?.type).to.eq('svelte')
-    expect(actual.bundler).to.eq('webpack')
+    expect(actual.framework?.type).toEqual('svelte')
+    expect(actual.bundler).toEqual('webpack')
   })
 
   it(`no framework or library`, async () => {
@@ -201,18 +196,18 @@ describe('detectFramework', () => {
     fs.rmSync(path.join(Fixtures.cyTmpDir, 'node_modules'), { recursive: true, force: true })
     const actual = await detectFramework(projectPath, resolvedCtFrameworks)
 
-    expect(actual.framework).to.be.undefined
-    expect(actual.bundler).to.be.undefined
+    expect(actual.framework).toBeUndefined()
+    expect(actual.bundler).toBeUndefined()
   })
 })
 
 describe('detectLanguage', () => {
-  context('existing project', () => {
+  describe('existing project', () => {
     it('with `cypress.config.ts` should return `ts`', async () => {
       const projectRoot = await scaffoldMigrationProject('config-with-ts')
       const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
-      expect(actual).to.eq('ts')
+      expect(actual).toEqual('ts')
     })
 
     it('with `cypress.config.mts` should return `ts`', async () => {
@@ -221,14 +216,14 @@ describe('detectLanguage', () => {
       fs.moveSync(path.join(projectRoot, 'cypress.config.ts'), path.join(projectRoot, 'cypress.config.mts'))
       const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
-      expect(actual).to.eq('ts')
+      expect(actual).toEqual('ts')
     })
 
     it('with `cypress.config.js` should return `js`', async () => {
       const projectRoot = await scaffoldMigrationProject('config-with-js')
       const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
-      expect(actual).to.eq('js')
+      expect(actual).toEqual('js')
     })
 
     it('with `cypress.config.cjs` should return `js`', async () => {
@@ -237,7 +232,7 @@ describe('detectLanguage', () => {
       await fs.move(path.join(projectRoot, 'cypress.config.js'), path.join(projectRoot, 'cypress.config.cjs'))
       const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
-      expect(actual).to.eq('js')
+      expect(actual).toEqual('js')
     })
 
     it('with `cypress.config.mjs` should return `js`', async () => {
@@ -246,7 +241,7 @@ describe('detectLanguage', () => {
       await fs.move(path.join(projectRoot, 'cypress.config.js'), path.join(projectRoot, 'cypress.config.mjs'))
       const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
-      expect(actual).to.eq('js')
+      expect(actual).toEqual('js')
     })
 
     it('with custom TS cypress config file should return `ts`', async () => {
@@ -257,7 +252,7 @@ describe('detectLanguage', () => {
       ;['ts', 'mts'].forEach((extension) => {
         const actual = detectLanguage({ projectRoot, customConfigFile: `custom_config/cypress.config-custom.${extension}`, pkgJson: {} as PkgJson })
 
-        expect(actual).to.eq('ts')
+        expect(actual).toEqual('ts')
       })
     })
 
@@ -269,7 +264,7 @@ describe('detectLanguage', () => {
       ;['js', 'cjs', 'mjs'].forEach((extension) => {
         const actual = detectLanguage({ projectRoot, customConfigFile: `custom_config/cypress.config-custom.${extension}`, pkgJson: {} as PkgJson })
 
-        expect(actual).to.eq('js')
+        expect(actual).toEqual('js')
       })
     })
 
@@ -279,7 +274,7 @@ describe('detectLanguage', () => {
       fakeDepsInNodeModules(projectRoot, [{ devDependency: 'typescript', version: '5.8.3' }])
       const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
-      expect(actual).to.eq('ts')
+      expect(actual).toEqual('ts')
     })
 
     it('with only .d.ts files', async () => {
@@ -289,11 +284,11 @@ describe('detectLanguage', () => {
 
       const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
-      expect(actual).to.eq('js')
+      expect(actual).toEqual('js')
     })
   })
 
-  context('pristine project', () => {
+  describe('pristine project', () => {
     it('with typescript in package.json', async () => {
       const projectRoot = await scaffoldMigrationProject('pristine-yarn')
 
@@ -301,7 +296,7 @@ describe('detectLanguage', () => {
       const pkgJson = fs.readJsonSync(path.join(projectRoot, 'package.json'))
       const actual = detectLanguage({ projectRoot, pkgJson })
 
-      expect(actual).to.eq('ts')
+      expect(actual).toEqual('ts')
     })
 
     it('with root level tsconfig.json', async () => {
@@ -310,23 +305,23 @@ describe('detectLanguage', () => {
       fakeDepsInNodeModules(projectRoot, [{ devDependency: 'typescript', version: '4.3.6' }])
       const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
-      expect(actual).to.eq('ts')
+      expect(actual).toEqual('ts')
     })
 
     it('detects js if typescript is not resolvable when there is a tsconfig.json', async () => {
-      let projectRoot = await scaffoldMigrationProject('pristine-npm')
+      const projectRoot = await scaffoldMigrationProject('pristine-npm')
 
       const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
-      expect(actual).to.eq('js')
+      expect(actual).toEqual('js')
 
-      projectRoot = await scaffoldMigrationProject('pristine-npm')
+      const projectRoot2 = await scaffoldMigrationProject('pristine-npm')
 
-      fakeDepsInNodeModules(projectRoot, [{ devDependency: 'typescript', version: '4.3.6' }])
+      fakeDepsInNodeModules(projectRoot2, [{ devDependency: 'typescript', version: '4.3.6' }])
 
       const actualTypescript = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
 
-      expect(actualTypescript).to.eq('ts')
+      expect(actualTypescript).toEqual('ts')
     })
 
     it('ignores node_modules when checking for tsconfig.json', async () => {
@@ -340,7 +335,7 @@ describe('detectLanguage', () => {
 
       const actual = detectLanguage({ projectRoot, pkgJson })
 
-      expect(actual).to.eq('js')
+      expect(actual).toEqual('js')
     })
   })
 })
