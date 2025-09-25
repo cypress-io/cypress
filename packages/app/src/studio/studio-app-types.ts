@@ -2,7 +2,7 @@
 // `studio` bundle. It is downloaded and copied to the app.
 // It should not be modified directly in the app.
 
-import { UserProjectStatusStore } from '@cy/store/user-project-status-store'
+import type { UserProjectStatusStore } from '@cy/store/user-project-status-store'
 
 export type RecordingState = 'recording' | 'paused' | 'disabled'
 
@@ -16,6 +16,19 @@ export interface StudioPanelProps {
   autUrlSelector?: string
   studioAiAvailable?: boolean
   userProjectStatusStore: UserProjectStatusStore
+  hasRequestedProjectAccess: boolean
+  requestProjectAccessMutation: {
+    executeMutation: (variables: {
+      projectId: string
+    }) => Promise<{
+      data?: {
+        cloudProjectRequestAccess: {
+          hasRequestedAccess: boolean
+        }
+      }
+    }>
+  }
+
 }
 
 export type StudioPanelShape = (props: StudioPanelProps) => JSX.Element
