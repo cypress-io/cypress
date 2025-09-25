@@ -698,6 +698,7 @@ declare namespace Cypress {
         SPACE: 'Space',
         DELETE: 'Delete',
         INSERT: 'Insert',
+        ESC: 'Escape',
       },
     }
 

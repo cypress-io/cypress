@@ -5,8 +5,8 @@ version: 2.1
 # the new location and/or names:
 # - ./scripts/github-actions/update-browser-versions.js
 
-chrome-stable-version: &chrome-stable-version "140.0.7339.127"
-chrome-beta-version: &chrome-beta-version "141.0.7390.16"
+chrome-stable-version: &chrome-stable-version "140.0.7339.207"
+chrome-beta-version: &chrome-beta-version "141.0.7390.30"
 firefox-stable-version: &firefox-stable-version "142.0"
 base-internal-bullseye: &base-internal-bullseye cypress/base-internal:22.18.0-bullseye
 base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.18.0-yarn-berry
@@ -2368,9 +2368,33 @@ jobs:
     resource_class: small
     steps:
       - restore_cached_workspace
+      - run: yarn workspace @cypress/grep and
+      - run: yarn workspace @cypress/grep and:not
+      - run: yarn workspace @cypress/grep burn
+      - run: yarn workspace @cypress/grep each
+      - run: yarn workspace @cypress/grep filter:specs
+      - run: yarn workspace @cypress/grep grep
+      - run: yarn workspace @cypress/grep inverted
+      - run: yarn workspace @cypress/grep multiple-registrations
+      - run: yarn workspace @cypress/grep omit:specs
+      - run: yarn workspace @cypress/grep or
+      - run: yarn workspace @cypress/grep skip
+      - run: yarn workspace @cypress/grep tags:inverted
+      - run: yarn workspace @cypress/grep tags:and
+      - run: yarn workspace @cypress/grep tags:and:not
+      - run: yarn workspace @cypress/grep tags:before
+      - run: yarn workspace @cypress/grep tags:config
+      - run: yarn workspace @cypress/grep tags:describe
+      - run: yarn workspace @cypress/grep tags:filter:specs
+      - run: yarn workspace @cypress/grep tags:inherit
+      - run: yarn workspace @cypress/grep tags:nested-describe
+      - run: yarn workspace @cypress/grep tags:omit:specs
+      - run: yarn workspace @cypress/grep tags:or
+      - run: yarn workspace @cypress/grep this
+      - run: yarn workspace @cypress/grep untagged
       - run:
-          name: Run tests
-          command: yarn workspace @cypress/grep cy:run
+          name: Run unit tests
+          command: yarn workspace @cypress/grep test
       - sanitize-verify-and-store-mocha-results:
           testResultsPath: npm/grep/test_results
 

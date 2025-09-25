@@ -1,0 +1,47 @@
+[
+  {
+    "name": "burn.cy.ts",
+    "tests": [
+      {
+        "name": "burning a test N times",
+        "state": "passed"
+      },
+      {
+        "name": "burning a test N times",
+        "state": "passed"
+      },
+      {
+        "name": "burning a test N times",
+        "state": "passed"
+      },
+      {
+        "name": "burning a test N times",
+        "state": "passed"
+      },
+      {
+        "name": "burning a test N times",
+        "state": "passed"
+      },
+      {
+        "name": "burning a test N times",
+        "state": "passed"
+      },
+      {
+        "name": "burning a test N times",
+        "state": "passed"
+      },
+      {
+        "name": "burning a test N times",
+        "state": "passed"
+      },
+      {
+        "name": "burning a test N times",
+        "state": "passed"
+      },
+      {
+        "name": "burning a test N times",
+        "state": "passed"
+      }
+    ]
+  }
+]

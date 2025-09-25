@@ -12,7 +12,8 @@ declare namespace Cypress {
   'Tab' |
   'Backspace' |
   'Delete' |
-  'Insert'
+  'Insert' |
+  'Escape'
 
   type SupportedKey = SupportedNamedKey | string | number
 }

@@ -1,0 +1,19 @@
+[
+  {
+    "name": "each.cy.ts",
+    "tests": [
+      {
+        "name": "tests that use .each work",
+        "state": "passed"
+      },
+      {
+        "name": "tests that use .each work",
+        "state": "passed"
+      },
+      {
+        "name": "tests that use .each work",
+        "state": "passed"
+      }
+    ]
+  }
+]
