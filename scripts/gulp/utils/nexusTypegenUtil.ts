@@ -36,18 +36,18 @@ export async function nexusTypegen (cfg: NexusTypegenCfg) {
   const dfd = pDefer()
 
   if (cfg.outputPath) {
-    await fs.ensureDir(path.join(monorepoPaths.pkgGraphql, 'src/gen'))
+    await fs.ensureDir(path.join(monorepoPaths.pkgDataContext, 'src/gen'))
 
-    const pkgGraphql = path.join(monorepoPaths.pkgGraphql, 'src/gen/cloud-source-types.gen.ts')
+    const pkgDataContext = path.join(monorepoPaths.pkgDataContext, 'src/gen/cloud-source-types.gen.ts')
 
     // on windows there is no `touch` equivalent command
     if (process.platform === 'win32') {
       const time = new Date()
 
-      await windowsTouch(pkgGraphql, time)
+      await windowsTouch(pkgDataContext, time)
       await windowsTouch(cfg.outputPath, time)
     } else {
-      execSync(`touch ${pkgGraphql}`)
+      execSync(`touch ${pkgDataContext}`)
       execSync(`touch ${cfg.outputPath}`)
     }
   }

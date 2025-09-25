@@ -42,7 +42,6 @@
 - [ ] packages/example
 - [ ] packages/extension
 - [ ] packages/frontend-shared **PARTIAL** - entry point is JS
-- [ ] packages/graphql **PARTIAL** - entry point is JS
 - [ ] packages/https-proxy - higher priority
 - [x] packages/electron ✅ **COMPLETED**
 - [ ] packages/https-proxy **PARTIAL** - entry point is JS
@@ -87,13 +86,12 @@
 
 ##### Binary Packages
 
-- [ ] packages/config
+- [x] packages/config ✅ **COMPLETED**
 - [ ] packages/data-context
 - [x] packages/driver ✅ **COMPLETED**
 - [x] packages/electron ✅ **COMPLETED**
 - [ ] packages/error
 - [ ] packages/extension
-- [ ] packages/graphql (configured but doesn't have tests)
 - [ ] packages/https-proxy
 - [x] packages/electron ✅ **COMPLETED**
 - [ ] packages/https-proxy
