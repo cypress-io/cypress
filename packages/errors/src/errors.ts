@@ -1232,7 +1232,7 @@ export const AllCypressErrors = {
         You can safely remove this option from your config.`
   },
   EXPERIMENTAL_RUN_ALL_SPECS_E2E_ONLY: () => {
-    const code = errPartial`  
+    const code = errPartial` 
     {
       e2e: {
         experimentalRunAllSpecs: true
