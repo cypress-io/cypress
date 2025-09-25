@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import chalk from 'chalk'
-import { errTemplate, fmt, theme } from '../../src/errTemplate'
-import { stripIndent } from '../../src/stripIndent'
+import { errTemplate, fmt, theme } from '../src/errTemplate'
+import { stripIndent } from '../src/stripIndent'
 
 describe('errTemplate', () => {
   it('returns an object w/ basic props & forBrowser', () => {

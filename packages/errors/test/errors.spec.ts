@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import style from 'ansi-styles'
 import chalk from 'chalk'
 import sinon, { SinonSpy } from 'sinon'
-import * as errors from '../../src'
-import { parseResolvedPattern } from '../../src/errorUtils'
+import * as errors from '../src'
+import { parseResolvedPattern } from '../src/errorUtils'
 
 describe('lib/errors', () => {
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>

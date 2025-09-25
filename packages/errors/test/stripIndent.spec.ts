@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { stripIndent } from '../../src/stripIndent'
+import { stripIndent } from '../src/stripIndent'
 
 describe('src/stripIndent', () => {
   it('does not trip right end', () => {

@@ -24,7 +24,7 @@ Errors can be compared directly in your code error. Comparing old vs new errors 
 6. Verify the changes expected.
 7. To make edits, re-run the `yarn test -u` command. `-u` will update the test snapshots.
 8. Run `yarn test` after updating the snapshot to validate the changes were applied.
-9. Commit the files changed in `./test/unit/__snapshots__`.
+9. Commit the files changed in `./test/__snapshots__`.
 
 ### Technical Overview
 

@@ -5,5 +5,5 @@
 [31mTo avoid this error, ensure that there are no other instances of Firefox launched by Cypress running.[39m
 [35m[39m
 [35mError: fail whale[39m
-[35m    at makeErr (cypress/packages/errors/test/unit/visualSnapshotErrors.spec.ts)[39m
-[35m    at FIREFOX_GECKODRIVER_FAILURE (cypress/packages/errors/test/unit/visualSnapshotErrors.spec.ts)[39m
+[35m    at makeErr (cypress/packages/errors/test/visualSnapshotErrors.spec.ts)[39m
+[35m    at FIREFOX_GECKODRIVER_FAILURE (cypress/packages/errors/test/visualSnapshotErrors.spec.ts)[39m

@@ -1,0 +1,7 @@
+[31mWarning: We failed to trash the existing run results.[39m
+[31m[39m
+[31mThis error will not affect or change the exit code.[39m
+[35m[39m
+[35mError: fail whale[39m
+[35m    at makeErr (cypress/packages/errors/test/visualSnapshotErrors.spec.ts)[39m
+[35m    at CANNOT_TRASH_ASSETS (cypress/packages/errors/test/visualSnapshotErrors.spec.ts)[39m

@@ -4,7 +4,7 @@ import fse from 'fs-extra'
 import globby from 'globby'
 import _ from 'lodash'
 import path from 'path'
-import * as errors from '../../src'
+import * as errors from '../src'
 import os from 'os'
 
 // these packages need process.env.CYPRESS_INTERNAL_ENV to be set to 'test' to work, which is set in the global vitest config
@@ -19,7 +19,7 @@ interface ErrorGenerator<T extends CypressErrorType> {
 
 type CypressErrorType = keyof typeof errors.AllCypressErrors
 
-const cypressRootPath = path.join(__dirname, '..', '..', '..', '..')
+const cypressRootPath = path.join(__dirname, '..', '..', '..')
 const lineAndColNumsRe = /:\d+:\d+/
 
 const sanitize = (str: string) => {
