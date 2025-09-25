@@ -1,0 +1,11 @@
+[31mYour [33mconfigFile[39m[31m at [94mcypress.config.js[39m[31m set an invalid value:[39m
+[31m[39m
+[31mExpected [33mdefaultCommandTimeout[39m[31m to be a number.[39m
+[31m[39m
+[31mInstead the value was: [39m
+[31m[39m
+[31m[95m[[39m[31m[39m
+[31m[95m  1,[39m[31m[39m
+[31m[95m  2,[39m[31m[39m
+[31m[95m  3[39m[31m[39m
+[31m[95m][39m[31m[39m

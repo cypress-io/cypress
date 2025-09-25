@@ -1,0 +1,3 @@
+[31mThe [33mexperimentalJustInTimeCompile[39m[31m configuration option was removed in Cypress version 14.0.0.[39m
+[31mA new [95mjustInTimeCompile[39m[31m configuration option is available and is now [95mtrue[39m[31m by default.[39m
+[31mYou can safely remove this option from your config.[39m

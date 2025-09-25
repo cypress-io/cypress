@@ -1,0 +1,6 @@
+[31mCan't run because [95mno spec files[39m[31m were found.[39m
+[31m[39m
+[31mWe searched for specs matching these glob patterns:[39m
+[31m[39m
+[31m[90m  > [39m[31m[94m/path/to/project/[33m**_spec.js[39m[31m[94m[39m[31m[39m
+[31m[90m  > [39m[31m[94m/path/to/project/[33m**/*.cy.*[39m[31m[94m[39m[31m[39m

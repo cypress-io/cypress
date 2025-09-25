@@ -1,0 +1,10 @@
+[31mYou passed the [95m--group[39m[31m flag, but this group name has already been used for this run.[39m
+[31m[39m
+[31mThe existing run is: [94mhttps://cloud.cypress.io/project/abcd/runs/1[39m[31m[39m
+[31m[39m
+[31mThe --group flag you passed was: [33mfoo[39m[31m[39m
+[31mThe --parallel flag you passed was: [33mtrue[39m[31m[39m
+[31m[39m
+[31mIf you are trying to parallelize this run, then also pass the [95m--parallel[39m[31m flag, else pass a different group name.[39m
+[31m[39m
+[31mhttps://on.cypress.io/run-group-name-not-unique[39m
