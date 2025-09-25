@@ -11,9 +11,11 @@
     "clean": "rimraf --glob './src/*.js' './src/**/*.js' './src/**/**/*.js' './test/**/*.js' || echo 'cleaned'",
     "clean-deps": "rimraf node_modules",
     "lint": "eslint",
+    "pretest": "yarn clean",
     "test": "yarn test-unit",
-    "test-unit": "npx vitest",
-    "test-debug": "npx vitest --inspect-brk --no-file-parallelism --test-timeout=0",
+    "posttest": "yarn build",
+    "test-unit": "vitest run",
+    "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0",
     "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "dependencies": {
