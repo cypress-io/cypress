@@ -1,35 +1,43 @@
-import 'sinon-chai'
+import { describe, it, expect, beforeEach } from 'vitest'
 import style from 'ansi-styles'
-import chai, { expect } from 'chai'
-/* eslint-disable no-console */
 import chalk from 'chalk'
 import sinon, { SinonSpy } from 'sinon'
 import * as errors from '../../src'
 import { parseResolvedPattern } from '../../src/errorUtils'
 
-chai.use(require('@cypress/sinon-chai'))
-
 describe('lib/errors', () => {
+  let consoleErrorSpy: ReturnType<typeof vi.spyOn>
+  let previousChalkLevel: 0 | 1 | 2 | 3
+
   beforeEach(() => {
-    sinon.restore()
-    sinon.spy(console, 'log')
+    vi.resetAllMocks()
+    vi.unstubAllEnvs()
+    // turns chalk on
+    previousChalkLevel = chalk.level
+    chalk.level = 3
+    // Mock console.log at the module boundary
+    consoleErrorSpy = vi.spyOn(console, 'log')
   })
 
-  context('.log', () => {
+  afterEach(() => {
+    chalk.level = previousChalkLevel
+  })
+
+  describe('.log', () => {
     it('uses red by default', () => {
       const err = errors.get('TESTS_DID_NOT_START_FAILED')
 
       const ret = errors.log(err)
 
-      expect(ret).to.be.undefined
+      expect(ret).toBeUndefined()
 
       const {
         red,
       } = style
 
-      expect(console.log).to.be.calledWithMatch(red.open)
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining(red.open))
 
-      expect(console.log).to.be.calledWithMatch(red.close)
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining(red.close))
     })
 
     it('can change the color', () => {
@@ -37,15 +45,15 @@ describe('lib/errors', () => {
 
       const ret = errors.log(err, 'yellow')
 
-      expect(ret).to.be.undefined
+      expect(ret).toBeUndefined()
 
       const {
         yellow,
       } = style
 
-      expect(console.log).to.be.calledWithMatch(yellow.open)
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining(yellow.open))
 
-      expect(console.log).to.be.calledWithMatch(yellow.close)
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining(yellow.close))
     })
 
     it('logs err.message', () => {
@@ -53,9 +61,9 @@ describe('lib/errors', () => {
 
       const ret = errors.log(err)
 
-      expect(ret).to.be.undefined
+      expect(ret).toBeUndefined()
 
-      expect(console.log).to.be.calledWithMatch('/path/to/project/cypress.config.js')
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('/path/to/project/cypress.config.js'))
     })
 
     it('logs err.details', () => {
@@ -65,11 +73,11 @@ describe('lib/errors', () => {
 
       const ret = errors.log(err)
 
-      expect(ret).to.be.undefined
+      expect(ret).toBeUndefined()
 
-      expect(console.log).to.be.calledWithMatch('foo/bar/baz')
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('foo/bar/baz'))
 
-      expect(console.log).to.be.calledWithMatch(chalk.magenta(userError.stack ?? ''))
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining(chalk.magenta(userError.stack ?? '')))
     })
 
     describe('err.stack', () => {
@@ -78,9 +86,9 @@ describe('lib/errors', () => {
 
         const ret = errors.log(err)
 
-        expect(ret).to.eq(err)
+        expect(ret).toEqual(err)
 
-        expect(console.log).to.be.calledWith(chalk.red(err.stack ?? ''))
+        expect(consoleErrorSpy).toHaveBeenCalledWith(chalk.red(err.stack ?? ''))
       })
 
       it('is not logged if a known Cypress error', () => {
@@ -90,13 +98,13 @@ describe('lib/errors', () => {
 
         const ret = errors.log(err)
 
-        expect(ret).to.be.undefined
+        expect(ret).toBeUndefined()
 
-        expect(console.log).not.to.be.calledWith(chalk.red(err.stack ?? ''))
+        expect(consoleErrorSpy).not.toHaveBeenCalledWith(chalk.red(err.stack ?? ''))
       })
     })
 
-    context('err.cause', () => {
+    describe('err.cause', () => {
       let err
 
       beforeEach(() => {
@@ -109,44 +117,42 @@ describe('lib/errors', () => {
 
         const ret = errors.log(err)
 
-        expect(ret).to.be.undefined
+        expect(ret).toBeUndefined()
 
-        expect(console.log).not.to.be.calledWith(chalk.red('Caused by:'))
+        expect(consoleErrorSpy).not.toHaveBeenCalledWith(chalk.red('Caused by:'))
       })
 
       it('is not logged if max cause depth === 0', () => {
         const ret = errors.log(err, 'red', 0)
 
-        expect(ret).to.eq(ret)
+        expect(ret).toEqual(ret)
 
-        expect(console.log).not.to.be.calledWith(chalk.red('Caused by:'))
+        expect(consoleErrorSpy).not.toHaveBeenCalledWith(chalk.red('Caused by:'))
       })
 
       it('is logged to a specified max depth', () => {
         const ret = errors.log(err, 'red', 5)
 
-        expect(ret).to.eq(err)
+        expect(ret).toEqual(err)
 
-        const causeLogs = (console.log as SinonSpy).getCalls().filter((call) => call.args[0] === chalk.red('Caused by:'))
-
-        expect(causeLogs).to.have.length(5)
+        expect(consoleErrorSpy).toHaveBeenNthCalledWith(6, chalk.red('Caused by:'))
       })
     })
   })
 
-  context('.clone', () => {
+  describe('.clone', () => {
     it('converts err.message from ansi to html with span classes when html true', () => {
       const err = new Error(`foo${chalk.blue('bar')}${chalk.yellow('baz')}`)
       const obj = errors.cloneErr(err, { html: true })
 
-      expect(obj.message).to.eq('foo<span class="ansi-blue-fg">bar</span><span class="ansi-yellow-fg">baz</span>')
+      expect(obj.message).toEqual('foo<span class="ansi-blue-fg">bar</span><span class="ansi-yellow-fg">baz</span>')
     })
 
     it('does not convert err.message from ansi to html when no html option', () => {
       const err = new Error(`foo${chalk.blue('bar')}${chalk.yellow('baz')}`)
       const obj = errors.cloneErr(err)
 
-      expect(obj.message).to.eq('foo\u001b[34mbar\u001b[39m\u001b[33mbaz\u001b[39m')
+      expect(obj.message).toEqual('foo\u001b[34mbar\u001b[39m\u001b[33mbaz\u001b[39m')
     })
   })
 
@@ -158,8 +164,8 @@ describe('lib/errors', () => {
 
       const [resolvedBasePath, resolvedPattern] = parseResolvedPattern(folderPath, pattern)
 
-      expect(resolvedBasePath).to.eq('/dev/cypress/packages/server')
-      expect(resolvedPattern).to.eq('cypress/integration/**notfound**')
+      expect(resolvedBasePath).toEqual('/dev/cypress/packages/server')
+      expect(resolvedPattern).toEqual('cypress/integration/**notfound**')
     })
 
     it('splits common paths factoring in ../', () => {
@@ -167,8 +173,8 @@ describe('lib/errors', () => {
 
       const [resolvedBasePath, resolvedPattern] = parseResolvedPattern(folderPath, pattern)
 
-      expect(resolvedBasePath).to.eq('/dev/cypress')
-      expect(resolvedPattern).to.eq('integration/**notfound**')
+      expect(resolvedBasePath).toEqual('/dev/cypress')
+      expect(resolvedPattern).toEqual('integration/**notfound**')
     })
 
     it('splits common paths until falsy instead of doing an intersection', () => {
@@ -176,8 +182,8 @@ describe('lib/errors', () => {
 
       const [resolvedBasePath, resolvedPattern] = parseResolvedPattern(folderPath, pattern)
 
-      expect(resolvedBasePath).to.eq('')
-      expect(resolvedPattern).to.eq('/private/var/cypress/integration/cypress/integration/**notfound**')
+      expect(resolvedBasePath).toEqual('')
+      expect(resolvedPattern).toEqual('/private/var/cypress/integration/cypress/integration/**notfound**')
     })
 
     it('splits common paths up directories until root is reached', () => {
@@ -185,8 +191,8 @@ describe('lib/errors', () => {
 
       const [resolvedBasePath, resolvedPattern] = parseResolvedPattern(folderPath, pattern)
 
-      expect(resolvedBasePath).to.eq('')
-      expect(resolvedPattern).to.eq('/cypress/integration/**notfound**')
+      expect(resolvedBasePath).toEqual('')
+      expect(resolvedPattern).toEqual('/cypress/integration/**notfound**')
     })
   })
 })
