@@ -2,6 +2,7 @@ import _ from 'lodash'
 import type { $Cy } from '../cypress/cy'
 
 import $errUtils from '../cypress/error_utils'
+import type { SubjectChain } from '../cypress/state'
 
 export const aliasRe = /^@.+/
 
@@ -12,13 +13,13 @@ const requestXhrRe = /\.request$/
 
 const reserved = ['test', 'runnable', 'timeout', 'slow', 'skip', 'inspect']
 
-export const aliasDisplayName = (name) => {
+export const aliasDisplayName = (name: string) => {
   return name.replace(aliasDisplayRe, '')
 }
 
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
 export const create = (cy: $Cy) => ({
-  addAlias (ctx, aliasObj) {
+  addAlias (ctx: Mocha.Context, aliasObj: { alias: string, subjectChain: SubjectChain }) {
     const { alias } = aliasObj
 
     const aliases = cy.state('aliases') || {}

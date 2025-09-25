@@ -15,7 +15,7 @@
     "semver": "^7.7.1"
   },
   "devDependencies": {
-    "@types/node": "20.16.0",
+    "@types/node": "22.18.0",
     "axios": "^1.8.3",
     "better-sqlite3": "11.10.0",
     "devtools-protocol": "0.0.1459876",

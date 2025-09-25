@@ -203,7 +203,6 @@ export async function pkgElectronApp (
       })
     }
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.log((err as Error).stack)
 
     return process.exit(1)
