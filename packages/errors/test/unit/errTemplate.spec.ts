@@ -1,4 +1,4 @@
-import { expect } from 'chai'
+import { describe, it, expect } from 'vitest'
 import chalk from 'chalk'
 import { errTemplate, fmt, theme } from '../../src/errTemplate'
 import { stripIndent } from '../../src/stripIndent'
@@ -7,22 +7,22 @@ describe('errTemplate', () => {
   it('returns an object w/ basic props & forBrowser', () => {
     const obj = errTemplate`Hello world`
 
-    expect(obj).to.include({ message: 'Hello world' })
-    expect(obj).to.include({ messageMarkdown: 'Hello world' })
+    expect(obj).toMatchObject({ message: 'Hello world' })
+    expect(obj).toMatchObject({ messageMarkdown: 'Hello world' })
   })
 
   it('colors yellow by default for the console, backticks passed arguments for the browser,', () => {
     const obj = errTemplate`Hello world ${fmt.highlight('special')}`
 
-    expect(obj).to.include({ message: `Hello world ${chalk.yellow('special')}` })
-    expect(obj).to.include({ messageMarkdown: 'Hello world `special`' })
+    expect(obj).toMatchObject({ message: `Hello world ${chalk.yellow('special')}` })
+    expect(obj).toMatchObject({ messageMarkdown: 'Hello world `special`' })
   })
 
   it('uses fmt.off to guard passed values', () => {
     const obj = errTemplate`Hello world ${fmt.off('special')}`
 
-    expect(obj).to.include({ message: `Hello world special` })
-    expect(obj).to.include({ messageMarkdown: `Hello world special` })
+    expect(obj).toMatchObject({ message: `Hello world special` })
+    expect(obj).toMatchObject({ messageMarkdown: `Hello world special` })
   })
 
   it('will stringify non scalar values', () => {
@@ -32,7 +32,7 @@ describe('errTemplate', () => {
 
       ${fmt.highlightTertiary(someObj)}`
 
-    expect(obj).to.include({
+    expect(obj).toMatchObject({
       messageMarkdown: stripIndent`
         This was returned from the app:
 
@@ -41,7 +41,7 @@ describe('errTemplate', () => {
         \`\`\``,
     })
 
-    expect(obj).to.include({
+    expect(obj).toMatchObject({
       message: stripIndent`
         This was returned from the app:
 
@@ -57,8 +57,8 @@ describe('errTemplate', () => {
 
       ${fmt.stackTrace(err)}`
 
-    expect(obj).to.include({ messageMarkdown: `This was an error in \`specFile.js\`` })
-    expect(obj).to.include({
+    expect(obj).toMatchObject({ messageMarkdown: `This was an error in \`specFile.js\`` })
+    expect(obj).toMatchObject({
       message: `This was an error in ${chalk.yellow(specFile)}`,
       details: err.stack ?? '',
     })
@@ -73,6 +73,6 @@ describe('errTemplate', () => {
 
         ${fmt.stackTrace(new Error())}
       `
-    }).to.throw(/Cannot use fmt.stackTrace\(\) multiple times in the same errTemplate/)
+    }).toThrow(/Cannot use fmt.stackTrace\(\) multiple times in the same errTemplate/)
   })
 })
