@@ -1,4 +1,4 @@
-import { expect } from 'chai'
+import { describe, it, expect } from 'vitest'
 import { stripIndent } from '../../src/stripIndent'
 
 describe('src/stripIndent', () => {
@@ -9,7 +9,7 @@ describe('src/stripIndent', () => {
       [Stack Trace]
     `
 
-    expect(str).to.eq(`
+    expect(str).toEqual(`
 There was an error reconnecting to the Chrome DevTools protocol. Please restart the browser.
 
 [Stack Trace]
@@ -28,7 +28,7 @@ There was an error reconnecting to the Chrome DevTools protocol. Please restart 
 
       ${arg}`
 
-    expect(str).to.eq(`
+    expect(str).toEqual(`
 Something went wrong.
 
 - a
