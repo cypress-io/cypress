@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.3.1
+
+_Released 10/07/2025_
+
+**Bugfixes:**
+
+- Fixed a regression introduced in [`15.0.0`](https://docs.cypress.io/guides/references/changelog#15-0-0) where `dbus` connection error messages appear in docker containers when launching Cypress. Fixes [#32290](https://github.com/cypress-io/cypress/issues/32290).
+
 ## 15.3.0
 
 _Released 9/23/2025_
@@ -9,7 +17,6 @@ _Released 9/23/2025_
 
 **Bugfixes:**
 
-- `dbus` connection error messages should no longer appear in docker containers when launching Cypress. Fixes [#32290](https://github.com/cypress-io/cypress/issues/32290).
 - In development mode, Electron `stderr` is piped directly to Cypress' `stderr` to make it clear why Electron failed to start, if it fails to start. Fixes [#32358](https://github.com/cypress-io/cypress/issues/32358). Addressed in [32468](https://github.com/cypress-io/cypress/pull/32468).
 - Fixed an issue where ESM Cypress configurations were not being interpreted correctly. Fixes [#32493](https://github.com/cypress-io/cypress/issues/32493). Fixed in [#32515](https://github.com/cypress-io/cypress/pull/32515).
 
