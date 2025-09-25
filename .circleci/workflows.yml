@@ -868,7 +868,7 @@ commands:
       - run:
           command: |
             echo "Setting SHOULD_PERSIST_ARTIFACTS variable"
-            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "chore/refactor_cli_to_ts" ]]; then
+            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "fix/dbus-messages" ]]; then
                 export SHOULD_PERSIST_ARTIFACTS=true
             fi' >> "$BASH_ENV"
           name: Set environment variable to determine whether or not to persist artifacts
@@ -3717,6 +3717,9 @@ workflows:
         - equal:
             - update-v8-snapshot-cache-on-develop
             - << pipeline.git.branch >>
+        - equal:
+            - fix/dbus-messages
+            - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/
             value: << pipeline.git.branch >>
@@ -3770,6 +3773,9 @@ workflows:
             - << pipeline.git.branch >>
         - equal:
             - update-v8-snapshot-cache-on-develop
+            - << pipeline.git.branch >>
+        - equal:
+            - fix/dbus-messages
             - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/
@@ -3835,6 +3841,9 @@ workflows:
             - << pipeline.git.branch >>
         - equal:
             - update-v8-snapshot-cache-on-develop
+            - << pipeline.git.branch >>
+        - equal:
+            - fix/dbus-messages
             - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/
@@ -4320,6 +4329,9 @@ workflows:
             - << pipeline.git.branch >>
         - equal:
             - update-v8-snapshot-cache-on-develop
+            - << pipeline.git.branch >>
+        - equal:
+            - fix/dbus-messages
             - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/
@@ -5155,6 +5167,9 @@ workflows:
             - << pipeline.git.branch >>
         - equal:
             - update-v8-snapshot-cache-on-develop
+            - << pipeline.git.branch >>
+        - equal:
+            - fix/dbus-messages
             - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/

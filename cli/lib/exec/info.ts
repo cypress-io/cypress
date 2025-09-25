@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import spawn from './spawn'
+import { start as spawnStart } from './spawn'
 import util from '../util'
 import state from '../tasks/state'
 import os from 'os'
@@ -47,7 +47,7 @@ const formatCypressVariables = (): any => {
 methods.start = async (options: any = {}): Promise<void> => {
   const args = ['--mode=info']
 
-  await spawn.start(args, {
+  await spawnStart(args, {
     dev: options.dev,
   })
 
