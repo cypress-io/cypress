@@ -135,7 +135,9 @@ describe('lib/errors', () => {
 
         expect(ret).toEqual(err)
 
-        expect(consoleErrorSpy).toHaveBeenNthCalledWith(6, chalk.red('Caused by:'))
+        const consoleErrorSpyCalls = consoleErrorSpy.mock.calls.filter((call) => call[0] === chalk.red('Caused by:'))
+
+        expect(consoleErrorSpyCalls).toHaveLength(5)
       })
     })
   })
