@@ -5,7 +5,7 @@ import { monorepoPaths } from '../monorepoPaths'
 /**
  * Creates "barrel" files according to config in autobarrel.json:
  * https://github.com/tgriesser/autobarrel
- * Particularly useful in @packages/graphql because we want to import all
+ * Particularly useful in @packages/data-context/graphql because we want to import all
  * types into the root schema
  */
 export async function autobarrelWatcher () {

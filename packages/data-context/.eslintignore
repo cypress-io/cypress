@@ -7,3 +7,5 @@
 /test/unit/codegen/tmp
 /test/fixtures/**
 **/__snapshots__
+**/tsconfig.json
+*.gen.ts

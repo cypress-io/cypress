@@ -88,7 +88,7 @@ One thing to be aware of, is the subscription is only mounted/responded to when 
 
 Subscriptions are implemented on the server as an `AsyncIterator`. This is handled for us by the [graphql-ws](https://github.com/enisdenjo/graphql-ws) package.
 
-To add a new Subscription field, add a new entry in the [`gql-Subscriptions`](../packages/graphql/src/schemaTypes/objectTypes/gql-Subscription.ts):
+To add a new Subscription field, add a new entry in the [`gql-Subscriptions`](../packages/data-context/graphql/schemaTypes/objectTypes/gql-Subscription.ts):
 
 ```ts
 t.field('browserStatusChange', {

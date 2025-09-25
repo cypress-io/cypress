@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import Debug from 'debug'
 import util from '../util'
-import spawn from './spawn'
+import { start as spawnStart } from './spawn'
 import { start } from '../tasks/verify'
 import { exitWithError, errors } from '../errors'
 import { processTestingType, throwInvalidOptionError, checkConfigFile } from './shared'
@@ -179,7 +179,7 @@ const runModule = {
 
         debug('run to spawn.start args %j', args)
 
-        return spawn.start(args, {
+        return spawnStart(args, {
           dev: options.dev,
         })
       } catch (err: any) {

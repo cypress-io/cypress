@@ -1,7 +1,19 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.2.1
+## 15.3.1
 
-_Released 9/23/2025 (PENDING)_
+_Released 10/07/2025 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed a regression introduced in [`15.0.0`](https://docs.cypress.io/guides/references/changelog#15-0-0) where `dbus` connection error messages appear in docker containers when launching Cypress. Fixes [#32290](https://github.com/cypress-io/cypress/issues/32290).
+
+## 15.3.0
+
+_Released 9/23/2025_
+
+**Features:**
+
+- Added Escape key support to [`cy.press()`](http://on.cypress.io/api/press). Addresses[#32429](https://github.com/cypress-io/cypress/issues/32429). Addressed in [#32545](https://github.com/cypress-io/cypress/pull/32545).
 
 **Bugfixes:**
 
@@ -10,8 +22,8 @@ _Released 9/23/2025 (PENDING)_
 
 **Misc:**
 
-- Update the styles for command grouping 'line' so on expansion it is displayed correctly. Addressed in [#32521](https://github.com/cypress-io/cypress/pull/32521)
-- Test hook names now correctly display with a semi-bold font weight. Addressed in [#32491](https://github.com/cypress-io/cypress/pull/32491).
+- Update the styles for command grouping 'line' so on expansion it is displayed correctly. Addressed in [#32521](https://github.com/cypress-io/cypress/pull/32521).
+- Test hook names now correctly display with a semi-bold font weight. Addresses [#32477](https://github.com/cypress-io/cypress/issues/32477). Addressed in [#32491](https://github.com/cypress-io/cypress/pull/32491).
 - Updated the Cypress Studio panel to not show bottom border. Addresses [#32478](https://github.com/cypress-io/cypress/issues/32478).
 
 **Dependency Updates:**
