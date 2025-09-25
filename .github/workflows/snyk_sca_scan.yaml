@@ -41,6 +41,6 @@ jobs:
       - name: Perform SCA Scan
         continue-on-error: false
         run: |
-          snyk test --all-projects --strict-out-of-sync=false --detection-depth=6 --exclude=.nx,system-tests,tooling,docker,Dockerfile --severity-threshold=critical
+          snyk test --all-projects --strict-out-of-sync=false --detection-depth=6 --exclude=.nx,system-tests,tooling,docker,Dockerfile --severity-threshold=critical --org=cypress-opensource
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}

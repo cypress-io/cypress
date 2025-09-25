@@ -47,7 +47,7 @@ describe('src/cy/commands/waiting', () => {
         cy
         .wait(50)
         .then(() => {
-          expect(timeout).to.be.calledWith(50, true, 'wait')
+          expect(timeout).to.be.calledWith(50, true)
         })
       })
     })
