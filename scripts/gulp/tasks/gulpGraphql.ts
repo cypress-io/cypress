@@ -14,9 +14,9 @@ import { DEFAULT_INTERNAL_CLOUD_ENV } from '../gulpConstants'
 
 export async function nexusCodegen () {
   return nexusTypegen({
-    cwd: monorepoPaths.pkgGraphql,
-    filePath: path.join(monorepoPaths.pkgGraphql, 'src/schema.ts'),
-    outputPath: path.join(monorepoPaths.pkgGraphql, 'src/gen/nxs.gen.ts'),
+    cwd: monorepoPaths.pkgDataContext,
+    filePath: path.join(monorepoPaths.pkgDataContext, 'src/schema.ts'),
+    outputPath: path.join(monorepoPaths.pkgDataContext, 'src/gen/nxs.gen.ts'),
   })
 }
 
@@ -25,25 +25,25 @@ export async function nexusCodegen () {
  */
 export async function nexusCodegenWatch () {
   return watchNexusTypegen({
-    cwd: monorepoPaths.pkgGraphql,
+    cwd: monorepoPaths.pkgDataContext,
     watchPaths: [
       'src/**/*.ts',
     ],
-    filePath: path.join(monorepoPaths.pkgGraphql, 'src/schema.ts'),
-    outputPath: path.join(monorepoPaths.pkgGraphql, 'src/gen/nxs.gen.ts'),
+    filePath: path.join(monorepoPaths.pkgDataContext, 'graphql/schema.ts'),
+    outputPath: path.join(monorepoPaths.pkgDataContext, 'src/gen/nxs.gen.ts'),
   })
 }
 
 export async function graphqlCodegen () {
   return spawned('gql-codegen', 'yarn graphql-codegen --config graphql-codegen.yml', {
-    cwd: monorepoPaths.pkgGraphql,
+    cwd: monorepoPaths.pkgDataContext,
     waitForExit: true,
   })
 }
 
 export async function graphqlCodegenWatch () {
   const spawned = universalSpawn('graphql-codegen', ['--watch', '--config', 'graphql-codegen.yml'], {
-    cwd: monorepoPaths.pkgGraphql,
+    cwd: monorepoPaths.pkgDataContext,
   })
   const dfd = pDefer()
   let hasResolved = false
@@ -96,8 +96,8 @@ export async function syncRemoteGraphQL () {
     const body = await rp.get(`${ENV_MAP[DEFAULT_INTERNAL_CLOUD_ENV]}/test-runner-graphql-schema`)
 
     // TODO(tim): fix
-    await fs.ensureDir(path.join(monorepoPaths.pkgGraphql, 'src/gen'))
-    await fs.promises.writeFile(path.join(monorepoPaths.pkgGraphql, 'schemas/cloud.graphql'), body)
+    await fs.ensureDir(path.join(monorepoPaths.pkgDataContext, 'src/gen'))
+    await fs.promises.writeFile(path.join(monorepoPaths.pkgDataContext, 'schemas/cloud.graphql'), body)
   } catch (error) {
     console.error('Could not sync remote GraphQL schema', error)
   }
@@ -107,7 +107,7 @@ export async function syncRemoteGraphQL () {
  * Generates the schema so the urql GraphCache is
  */
 export async function generateFrontendSchema () {
-  const schemaContents = await fs.promises.readFile(path.join(monorepoPaths.pkgGraphql, 'schemas/schema.graphql'), 'utf8')
+  const schemaContents = await fs.promises.readFile(path.join(monorepoPaths.pkgDataContext, 'schemas/schema.graphql'), 'utf8')
   const schema = buildSchema(schemaContents, { assumeValid: true })
   const testExtensions = generateTestExtensions(schema)
   const extendedSchema = extendSchema(schema, parse(testExtensions))

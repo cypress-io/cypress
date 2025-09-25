@@ -33,51 +33,48 @@ const hideSpecialVals = function (val: string, key: string) {
   return val
 }
 
-// an object with a few utility methods for easy stubbing from unit tests
-export const utils = {
-  getProcessEnvVars (obj: NodeJS.ProcessEnv) {
-    return _.reduce(obj, (memo: Record<string, string>, value: string | undefined, key: string) => {
-      if (!value) {
-        return memo
-      }
-
-      if (isCypressEnvLike(key)) {
-        memo[removeEnvPrefix(key)] = coerce(value)
-      }
-
+export function getProcessEnvVars (obj: NodeJS.ProcessEnv) {
+  return _.reduce(obj, (memo: Record<string, string>, value: string | undefined, key: string) => {
+    if (!value) {
       return memo
-    }, {})
-  },
+    }
 
-  resolveModule (name: string) {
-    return require.resolve(name)
-  },
+    if (isCypressEnvLike(key)) {
+      memo[removeEnvPrefix(key)] = coerce(value)
+    }
 
-  // returns:
-  //   false - if the file should not be set
-  //   string - found filename
-  //   null - if there is an error finding the file
-  discoverModuleFile (options: {
-    filename: string
-    projectRoot: string
-  }) {
-    debug('discover module file %o', options)
-    const { filename } = options
+    return memo
+  }, {})
+}
 
-    // they have it explicitly set, so it should be there
-    return fs.pathExists(filename)
-    .then((found) => {
-      if (found) {
-        debug('file exists, assuming it will load')
+export function resolveModule (name: string) {
+  return require.resolve(name)
+}
 
-        return filename
-      }
+// returns:
+//   false - if the file should not be set
+//   string - found filename
+//   null - if there is an error finding the file
+function discoverModuleFile (options: {
+  filename: string
+  projectRoot: string
+}) {
+  debug('discover module file %o', options)
+  const { filename } = options
 
-      debug('could not find %o', { filename })
+  // they have it explicitly set, so it should be there
+  return fs.pathExists(filename)
+  .then((found) => {
+    if (found) {
+      debug('file exists, assuming it will load')
 
-      return null
-    })
-  },
+      return filename
+    }
+
+    debug('could not find %o', { filename })
+
+    return null
+  })
 }
 
 const CYPRESS_ENV_PREFIX = 'CYPRESS_'
@@ -118,7 +115,8 @@ export function parseEnv (cfg: Record<string, any>, cliEnvs: Record<string, any>
 
   const configEnv = cfg.env != null ? cfg.env : {}
   const envFile = cfg.envFile != null ? cfg.envFile : {}
-  let processEnvs = utils.getProcessEnvVars(process.env) || {}
+
+  let processEnvs = getProcessEnvVars(process.env) || {}
 
   cliEnvs = cliEnvs != null ? cliEnvs : {}
 
@@ -304,7 +302,7 @@ export async function setSupportFileAndFolder (obj: Config, getFilesByGlob: any)
   return Bluebird
   .try(() => {
     // resolve full path with extension
-    obj.supportFile = utils.resolveModule(sf)
+    obj.supportFile = resolveModule(sf)
 
     return debug('resolved support file %s', obj.supportFile)
   }).then(() => {
@@ -333,7 +331,7 @@ export async function setSupportFileAndFolder (obj: Config, getFilesByGlob: any)
   }).catch({ code: 'MODULE_NOT_FOUND' }, () => {
     debug('support JS module %s does not load', sf)
 
-    return utils.discoverModuleFile({
+    return discoverModuleFile({
       filename: sf,
       projectRoot: obj.projectRoot,
     })

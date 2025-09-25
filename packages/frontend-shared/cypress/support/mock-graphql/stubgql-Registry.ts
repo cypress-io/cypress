@@ -3,7 +3,7 @@ import type { MaybeResolver } from './clientTestUtils'
 import { stubMutation } from './stubgql-Mutation'
 import { stubQuery } from './stubgql-Query'
 import { stubGlobalProject, stubProject } from './stubgql-Project'
-import { CloudOrganizationStubs, CloudProjectStubs, CloudRecordKeyStubs, CloudRunStubs, CloudUserStubs } from '@packages/graphql/test/stubCloudTypes'
+import { CloudOrganizationStubs, CloudProjectStubs, CloudRecordKeyStubs, CloudRunStubs, CloudUserStubs } from '@packages/data-context/test/graphql/stubCloudTypes'
 import type { CodegenTypeMap } from '../generated/test-graphql-types.gen'
 import { StubErrorWrapper } from './stubgql-ErrorWrapper'
 

@@ -1,6 +1,6 @@
 import SpecRunSummary from './SpecRunSummary.vue'
 import { exampleRuns } from '@packages/frontend-shared/cypress/support/mock-graphql/fakeCloudSpecRun'
-import type { CloudSpecRun } from '@packages/graphql/src/gen/cloud-source-types.gen'
+import type { CloudSpecRun } from '@packages/data-context/src/gen/cloud-source-types.gen'
 
 function validateTopBorder (color: string): void {
   cy.findByTestId('spec-run-summary')
