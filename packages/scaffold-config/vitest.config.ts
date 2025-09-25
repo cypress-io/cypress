@@ -7,6 +7,7 @@ export default defineConfig({
       'test/unit/frameworks.spec.ts',
       'test/unit/detect.spec.ts',
       'test/unit/ct-detect-third-party.spec.ts',
+      'test/unit/component-index-template.spec.ts',
     ],
     globals: true,
     environment: 'node',

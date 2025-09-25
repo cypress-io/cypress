@@ -1,4 +1,4 @@
-import { expect } from 'chai'
+import { describe, it, expect } from 'vitest'
 import dedent from 'dedent'
 import componentIndexHtmlGenerator from '../../src/component-index-template'
 import { CT_FRAMEWORKS } from '../../src/frameworks'
@@ -21,7 +21,7 @@ describe('componentIndexHtmlGenerator', () => {
       </body>
     </html>`
 
-    expect(generator()).to.eq(expected)
+    expect(generator()).toEqual(expected)
   })
 
   it('handles header modifier', () => {
@@ -42,7 +42,7 @@ describe('componentIndexHtmlGenerator', () => {
       </body>
     </html>`
 
-    expect(generator()).to.eq(expected)
+    expect(generator()).toEqual(expected)
   })
 
   it('generates correct template for Next.js', () => {
@@ -66,6 +66,6 @@ describe('componentIndexHtmlGenerator', () => {
       </body>
     </html>`
 
-    expect(actual).to.eq(expected)
+    expect(actual).toEqual(expected)
   })
 })
