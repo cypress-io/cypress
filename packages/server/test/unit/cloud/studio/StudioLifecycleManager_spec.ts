@@ -130,6 +130,20 @@ describe('StudioLifecycleManager', () => {
       emitter: {
         studioStatusChange: studioStatusChangeEmitterStub,
       },
+      actions: {
+        auth: {
+          authApi: {
+            getUser: sinon.stub().resolves({
+              authToken: 'test-token',
+            }),
+          },
+        },
+      },
+      project: {
+        getConfig: sinon.stub().resolves({
+          projectId: 'test-project-id',
+        }),
+      },
     } as unknown as DataContext
 
     mockCloudDataSource = {
@@ -179,7 +193,6 @@ describe('StudioLifecycleManager', () => {
       })
 
       studioLifecycleManager.initializeStudioManager({
-        projectId: 'test-project-id',
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
         cfg: mockCfg,
@@ -211,7 +224,7 @@ describe('StudioLifecycleManager', () => {
         script: 'console.log("studio script")',
         studioPath: path.join(os.tmpdir(), 'cypress', 'studio', 'abc'),
         studioHash: 'abc',
-        projectSlug: 'test-project-id',
+        getProjectOptions: sinon.match.func,
         cloudApi: {
           cloudUrl: 'https://cloud.cypress.io',
           cloudHeaders: { 'Authorization': 'Bearer test-token' },
@@ -219,7 +232,6 @@ describe('StudioLifecycleManager', () => {
           isRetryableError,
           asyncRetry,
         },
-        shouldEnableStudio: true,
         manifest: mockManifest,
       })
 
@@ -263,7 +275,6 @@ describe('StudioLifecycleManager', () => {
       })
 
       studioLifecycleManager.initializeStudioManager({
-        projectId: 'test-project-id',
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
         cfg: mockCfg,
@@ -295,7 +306,7 @@ describe('StudioLifecycleManager', () => {
         script: 'console.log("studio script")',
         studioPath: path.join(os.tmpdir(), 'cypress', 'studio', 'abc'),
         studioHash: 'abc',
-        projectSlug: 'test-project-id',
+        getProjectOptions: sinon.match.func,
         cloudApi: {
           cloudUrl: 'https://cloud.cypress.io',
           cloudHeaders: { 'Authorization': 'Bearer test-token' },
@@ -303,7 +314,6 @@ describe('StudioLifecycleManager', () => {
           isRetryableError,
           asyncRetry,
         },
-        shouldEnableStudio: true,
         manifest: mockManifest,
       })
 
@@ -367,7 +377,6 @@ describe('StudioLifecycleManager', () => {
       })
 
       studioLifecycleManager.initializeStudioManager({
-        projectId: 'test-project-id',
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
         cfg: mockCfg,
@@ -395,7 +404,7 @@ describe('StudioLifecycleManager', () => {
         script: 'console.log("studio script")',
         studioPath: '/path/to/studio',
         studioHash: 'local',
-        projectSlug: 'test-project-id',
+        getProjectOptions: sinon.match.func,
         cloudApi: {
           cloudUrl: 'https://cloud.cypress.io',
           cloudHeaders: { 'Authorization': 'Bearer test-token' },
@@ -403,7 +412,6 @@ describe('StudioLifecycleManager', () => {
           isRetryableError,
           asyncRetry,
         },
-        shouldEnableStudio: true,
         manifest: {},
       })
 
@@ -485,7 +493,6 @@ describe('StudioLifecycleManager', () => {
       ensureStudioBundleStub.resolves(mockManifest)
 
       studioLifecycleManager.initializeStudioManager({
-        projectId: 'test-project-id',
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
         cfg: mockCfg,
@@ -502,7 +509,7 @@ describe('StudioLifecycleManager', () => {
       expect(reportStudioErrorStub).to.be.calledOnce
       expect(reportStudioErrorStub).to.be.calledWithMatch({
         cloudApi: sinon.match.object,
-        studioHash: 'test-project-id',
+        studioHash: 'abc',
         projectSlug: 'abc123',
         error: sinon.match.instanceOf(Error).and(sinon.match.has('message', 'Expected hash for studio server script not found in manifest')),
         studioMethod: 'initializeStudioManager',
@@ -532,7 +539,6 @@ describe('StudioLifecycleManager', () => {
       ensureStudioBundleStub.resolves(mockManifest)
 
       studioLifecycleManager.initializeStudioManager({
-        projectId: 'test-project-id',
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
         cfg: mockCfg,
@@ -549,7 +555,7 @@ describe('StudioLifecycleManager', () => {
       expect(reportStudioErrorStub).to.be.calledOnce
       expect(reportStudioErrorStub).to.be.calledWithMatch({
         cloudApi: sinon.match.object,
-        studioHash: 'test-project-id',
+        studioHash: 'abc',
         projectSlug: 'abc123',
         error: sinon.match.instanceOf(Error).and(sinon.match.has('message', 'Invalid hash for studio server script')),
         studioMethod: 'initializeStudioManager',
@@ -579,7 +585,6 @@ describe('StudioLifecycleManager', () => {
       })
 
       await studioLifecycleManager.initializeStudioManager({
-        projectId: 'test-project-id',
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
         cfg: mockCfg,
@@ -598,7 +603,7 @@ describe('StudioLifecycleManager', () => {
       expect(reportStudioErrorStub).to.be.calledOnce
       expect(reportStudioErrorStub).to.be.calledWithMatch({
         cloudApi: sinon.match.object,
-        studioHash: 'test-project-id',
+        studioHash: 'abc',
         projectSlug: 'abc123',
         error: sinon.match.instanceOf(Error).and(sinon.match.has('message', 'Test error')),
         studioMethod: 'initializeStudioManager',
@@ -776,7 +781,6 @@ describe('StudioLifecycleManager', () => {
       ])
 
       studioLifecycleManager.initializeStudioManager({
-        projectId: 'test-project-id',
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
         cfg: mockCfg,
@@ -848,7 +852,6 @@ describe('StudioLifecycleManager', () => {
       const statusChangesSpy = sinon.spy(studioLifecycleManager as any, 'updateStatus')
 
       studioLifecycleManager.initializeStudioManager({
-        projectId: 'test-project-id',
         cloudDataSource: mockCloudDataSource,
         cfg: mockCfg,
         debugData: {},
@@ -875,7 +878,6 @@ describe('StudioLifecycleManager', () => {
       const statusChangesSpy = sinon.spy(studioLifecycleManager as any, 'updateStatus')
 
       studioLifecycleManager.initializeStudioManager({
-        projectId: 'test-project-id',
         cloudDataSource: mockCloudDataSource,
         cfg: mockCfg,
         debugData: {},
@@ -924,7 +926,6 @@ describe('StudioLifecycleManager', () => {
 
       // First initialize with some state
       studioLifecycleManager.initializeStudioManager({
-        projectId: 'test-project-id',
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
         cfg: mockCfg,
@@ -1001,7 +1002,6 @@ describe('StudioLifecycleManager', () => {
 
       // Initialize with ctx so retry will work
       studioLifecycleManager.initializeStudioManager({
-        projectId: 'test-project-id',
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
         cfg: mockCfg,
@@ -1038,7 +1038,6 @@ describe('StudioLifecycleManager', () => {
 
       // Initialize with ctx so retry will work
       studioLifecycleManager.initializeStudioManager({
-        projectId: 'test-project-id',
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
         cfg: mockCfg,

@@ -26,23 +26,6 @@ export class StudioManager implements StudioManagerShape {
   private _studioServer: StudioServerShape | undefined
   private _studioElectron: StudioElectron | undefined
 
-  static createInErrorManager ({ cloudApi, studioHash, projectSlug, error, studioMethod, studioMethodArgs }: ReportStudioErrorOptions): StudioManager {
-    const manager = new StudioManager()
-
-    manager.status = 'IN_ERROR'
-
-    reportStudioError({
-      cloudApi,
-      studioHash,
-      projectSlug,
-      error,
-      studioMethod,
-      studioMethodArgs,
-    })
-
-    return manager
-  }
-
   async setup ({ script, studioPath, studioHash, cloudApi, manifest, getProjectOptions }: SetupOptions): Promise<void> {
     const { createStudioServer } = requireScript<StudioServer>(script).default
 
@@ -78,10 +61,8 @@ export class StudioManager implements StudioManagerShape {
   async captureStudioEvent (event: StudioEvent): Promise<void> {
     if (this._studioServer) {
       // this request is not essential - we don't want studio to error out if a telemetry request fails
-      return (await this.invokeAsync('captureStudioEvent', { isEssential: false }, event))
+      await this.invokeAsync('captureStudioEvent', { isEssential: false }, event)
     }
-
-    return Promise.resolve()
   }
 
   addSocketListeners (options: StudioAddSocketListenersOptions): void {

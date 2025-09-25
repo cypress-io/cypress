@@ -46,9 +46,10 @@ describe('lib/cloud/studio', () => {
       script: stubStudio,
       studioPath: 'path',
       studioHash: 'abcdefg',
-      projectSlug: '1234',
+      getProjectOptions: sinon.stub().resolves({
+        projectSlug: '1234',
+      }),
       cloudApi: {} as any,
-      shouldEnableStudio: true,
       manifest: {
         'server/index.js': 'abcdefg',
       },
@@ -99,29 +100,6 @@ describe('lib/cloud/studio', () => {
       await studioManager.captureStudioEvent({} as any)
 
       expect(studioManager.status).to.eq('ENABLED')
-    })
-  })
-
-  describe('createInErrorManager', () => {
-    it('creates a studio manager in error state', () => {
-      const error = new Error('foo')
-      const manager = StudioManager.createInErrorManager({
-        error,
-        cloudApi: {} as any,
-        studioHash: 'abcdefg',
-        projectSlug: '1234',
-        studioMethod: 'initializeRoutes',
-      })
-
-      expect(manager.status).to.eq('IN_ERROR')
-      expect(reportStudioError).to.be.calledWithMatch({
-        error,
-        cloudApi: {} as any,
-        studioHash: 'abcdefg',
-        projectSlug: '1234',
-        studioMethod: 'initializeRoutes',
-        studioMethodArgs: undefined,
-      })
     })
   })
 
@@ -230,6 +208,83 @@ describe('lib/cloud/studio', () => {
           sinon.match.has('studioElectron'),
         ),
       )
+    })
+  })
+
+  describe('captureStudioEvent', () => {
+    it('captures a studio event', async () => {
+      sinon.stub(studio, 'captureStudioEvent').resolves()
+
+      await studioManager.captureStudioEvent({
+        type: 'studio:started',
+        machineId: 'test-machine-id',
+      })
+
+      expect(studio.captureStudioEvent).to.be.calledWith({
+        type: 'studio:started',
+        machineId: 'test-machine-id',
+      })
+    })
+
+    it('does not call captureStudioEvent when studio server is not defined', () => {
+      // Set _studioServer to undefined
+      (studioManager as any)._studioServer = undefined
+
+      // Create a spy on invokeSync to verify it's not called
+      const invokeSyncSpy = sinon.spy(studioManager, 'invokeSync')
+
+      studioManager.captureStudioEvent({
+        type: 'studio:started',
+        machineId: 'test-machine-id',
+      })
+
+      expect(invokeSyncSpy).to.not.be.called
+    })
+  })
+
+  describe('updateSessionId', () => {
+    it('updates the session ID', () => {
+      sinon.stub(studio, 'updateSessionId')
+      const mockSessionId = 'test-session-id'
+
+      studioManager.updateSessionId(mockSessionId)
+
+      expect(studio.updateSessionId).to.be.calledWith(mockSessionId)
+    })
+
+    it('does not call updateSessionId when studio server is not defined', () => {
+      // Set _studioServer to undefined
+      (studioManager as any)._studioServer = undefined
+
+      // Create a spy on invokeSync to verify it's not called
+      const invokeSyncSpy = sinon.spy(studioManager, 'invokeSync')
+
+      studioManager.updateSessionId('test-session-id')
+
+      expect(invokeSyncSpy).to.not.be.called
+    })
+
+    it('does not call updateSessionId when _studioServer.updateSessionId is not a function', () => {
+      // Set _studioServer.updateSessionId to undefined
+      (studioManager as any)._studioServer.updateSessionId = undefined
+
+      // Create a spy on invokeSync to verify it's not called
+      const invokeSyncSpy = sinon.spy(studioManager, 'invokeSync')
+
+      studioManager.updateSessionId('test-session-id')
+
+      expect(invokeSyncSpy).to.not.be.called
+    })
+  })
+
+  describe('reportError', () => {
+    it('reports an error', () => {
+      sinon.stub(studio, 'reportError')
+      const error = new Error('foo')
+
+      studioManager.reportError(error, 'reportError', 'test-args')
+
+      expect(studio.reportError).to.be.calledWith(error, 'reportError', 'test-args')
     })
   })
 

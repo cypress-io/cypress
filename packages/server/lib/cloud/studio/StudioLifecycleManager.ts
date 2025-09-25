@@ -39,7 +39,6 @@ export class StudioLifecycleManager {
   private currentStudioHash?: string
 
   private initializationParams?: {
-    projectId?: string
     cloudDataSource: CloudDataSource
     cfg: Cfg
     debugData: any
@@ -55,20 +54,17 @@ export class StudioLifecycleManager {
   /**
    * Initialize the studio manager and possibly set up protocol.
    * Also registers this instance in the data context.
-   * @param projectId The project ID
    * @param cloudDataSource The cloud data source
    * @param cfg The project configuration
    * @param debugData Debug data for the configuration
    * @param ctx Data context to register this instance with
    */
   initializeStudioManager ({
-    projectId,
     cloudDataSource,
     cfg,
     debugData,
     ctx,
   }: {
-    projectId?: string
     cloudDataSource: CloudDataSource
     cfg: Cfg
     debugData: any
@@ -77,7 +73,7 @@ export class StudioLifecycleManager {
     debug('Initializing studio manager')
 
     // Store initialization parameters for retry
-    this.initializationParams = { projectId, cloudDataSource, cfg, debugData, ctx }
+    this.initializationParams = { cloudDataSource, cfg, debugData, ctx }
 
     // Register this instance in the data context
     ctx.update((data) => {
