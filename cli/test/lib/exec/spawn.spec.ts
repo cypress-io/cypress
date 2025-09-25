@@ -12,7 +12,7 @@ import { stdin, stdout, stderr } from 'process'
 
 import state from '../../../lib/tasks/state'
 import xvfb from '../../../lib/exec/xvfb'
-import spawn from '../../../lib/exec/spawn'
+import { start } from '../../../lib/exec/spawn'
 import { needsSandbox } from '../../../lib/tasks/verify'
 import util from '../../../lib/util'
 
@@ -240,7 +240,7 @@ describe('lib/exec/spawn', function () {
       vi.mocked(needsSandbox).mockReturnValue(false)
 
       // start the process
-      const startPromise = spawn.start('--foo', { foo: 'bar' })
+      const startPromise = start('--foo', { foo: 'bar' })
 
       // simulate the process closing successfully
       spawnedProcess.emit('close', 0)
@@ -266,7 +266,7 @@ describe('lib/exec/spawn', function () {
     it('uses --no-sandbox when needed', async function () {
       vi.mocked(needsSandbox).mockReturnValue(true)
 
-      const startPromise = spawn.start('--foo', { foo: 'bar' })
+      const startPromise = start('--foo', { foo: 'bar' })
 
       spawnedProcess.emit('close', 0)
 
@@ -297,7 +297,7 @@ describe('lib/exec/spawn', function () {
     it('uses npm command when running in dev mode', async () => {
       vi.mocked(needsSandbox).mockReturnValue(false)
 
-      const startPromise = spawn.start('--foo', { dev: true, foo: 'bar' })
+      const startPromise = start('--foo', { dev: true, foo: 'bar' })
 
       spawnedProcess.emit('close', 0)
 
@@ -324,7 +324,7 @@ describe('lib/exec/spawn', function () {
     it('does not pass --no-sandbox when running in dev mode', async function () {
       vi.mocked(needsSandbox).mockReturnValue(true)
 
-      const startPromise = spawn.start('--foo', { dev: true, foo: 'bar' })
+      const startPromise = start('--foo', { dev: true, foo: 'bar' })
 
       spawnedProcess.emit('close', 0)
 
@@ -351,7 +351,7 @@ describe('lib/exec/spawn', function () {
     it('starts xvfb when needed', async () => {
       vi.mocked(xvfb.isNeeded).mockReturnValue(true)
 
-      const startPromise = spawn.start('--foo')
+      const startPromise = start('--foo')
 
       await flushPromises()
 
@@ -365,7 +365,7 @@ describe('lib/exec/spawn', function () {
     describe('closes', function () {
       ['close', 'exit'].forEach((event) => {
         it(`if '${event}' event fired`, async () => {
-          const startPromise = spawn.start('--foo')
+          const startPromise = start('--foo')
 
           spawnedProcess.emit(event, 0)
 
@@ -376,7 +376,7 @@ describe('lib/exec/spawn', function () {
       })
 
       it('if exit event fired and close event fired', async () => {
-        const startPromise = spawn.start('--foo')
+        const startPromise = start('--foo')
 
         spawnedProcess.emit('exit', 0)
         spawnedProcess.emit('close', 0)
@@ -390,7 +390,7 @@ describe('lib/exec/spawn', function () {
     describe('detects kill signal', async () => {
       it('exits with error on SIGKILL', async () => {
         try {
-          const startPromise = spawn.start('--foo')
+          const startPromise = start('--foo')
 
           spawnedProcess.emit('exit', null, 'SIGKILL')
 
@@ -405,7 +405,7 @@ describe('lib/exec/spawn', function () {
     })
 
     it('does not start xvfb when its not needed', async () => {
-      const startPromise = spawn.start('--foo')
+      const startPromise = start('--foo')
 
       await flushPromises()
 
@@ -419,7 +419,7 @@ describe('lib/exec/spawn', function () {
     it('stops xvfb when spawn closes', async () => {
       vi.mocked(xvfb.isNeeded).mockReturnValue(true)
 
-      const startPromise = spawn.start('--foo')
+      const startPromise = start('--foo')
 
       await flushPromises()
 
@@ -431,7 +431,7 @@ describe('lib/exec/spawn', function () {
     })
 
     it('resolves with spawned close code in the message', async () => {
-      const startPromise = spawn.start('--foo')
+      const startPromise = start('--foo')
 
       spawnedProcess.emit('close', 10)
 
@@ -455,7 +455,7 @@ describe('lib/exec/spawn', function () {
 
         vi.mocked(os.platform).mockReturnValue('linux')
 
-        const startPromise = spawn.start('--foo')
+        const startPromise = start('--foo')
 
         // mock display error due to missing display
         spawnedProcess.emit('close', 1)
@@ -478,7 +478,7 @@ describe('lib/exec/spawn', function () {
     it('rejects with error from spawn', async () => {
       const msg = 'the error message'
 
-      const startPromise = spawn.start('--foo')
+      const startPromise = start('--foo')
 
       spawnedProcess.emit('error', new Error(msg))
 
@@ -493,7 +493,7 @@ describe('lib/exec/spawn', function () {
     })
 
     it('unrefs if options.detached is true', async () => {
-      const startPromise = spawn.start(null, { detached: true })
+      const startPromise = start(null, { detached: true })
 
       spawnedProcess.emit('close', 0)
 
@@ -504,7 +504,7 @@ describe('lib/exec/spawn', function () {
 
     it('does not unref by default', async () => {
       // @ts-expect-error - invalid number of arguments for given type
-      const startPromise = spawn.start()
+      const startPromise = start()
 
       spawnedProcess.emit('close', 0)
 
@@ -517,7 +517,7 @@ describe('lib/exec/spawn', function () {
       vi.stubEnv('FOO', 'bar')
 
       // @ts-expect-error - invalid number of arguments for given type
-      const startPromise = spawn.start()
+      const startPromise = start()
 
       spawnedProcess.emit('close', 0)
 
@@ -533,7 +533,7 @@ describe('lib/exec/spawn', function () {
       vi.mocked(util.supportsColor).mockReturnValue(true)
       vi.mocked(tty.isatty).mockReturnValue(true)
 
-      const startPromise = spawn.start([], { env: {} })
+      const startPromise = start([], { env: {} })
 
       spawnedProcess.emit('close', 0)
 
@@ -548,7 +548,7 @@ describe('lib/exec/spawn', function () {
     it('sets windowsHide:false property in windows', async () => {
       vi.mocked(os.platform).mockReturnValue('win32')
 
-      const startPromise = spawn.start([], { env: {} })
+      const startPromise = start([], { env: {} })
 
       spawnedProcess.emit('close', 0)
 
@@ -564,7 +564,7 @@ describe('lib/exec/spawn', function () {
       spawnedProcess.pid = 7
       vi.mocked(os.platform).mockReturnValue('win32')
 
-      const startPromise = spawn.start([], { env: {} })
+      const startPromise = start([], { env: {} })
 
       spawnedProcess.emit('close', 0)
 
@@ -578,7 +578,7 @@ describe('lib/exec/spawn', function () {
     })
 
     it('does not set windowsHide property when in darwin', async () => {
-      const startPromise = spawn.start([], { env: {} })
+      const startPromise = start([], { env: {} })
 
       spawnedProcess.emit('close', 0)
 
@@ -594,7 +594,7 @@ describe('lib/exec/spawn', function () {
       vi.mocked(util.supportsColor).mockReturnValue(false)
       vi.mocked(tty.isatty).mockReturnValue(false)
 
-      const startPromise = spawn.start([], { env: {} })
+      const startPromise = start([], { env: {} })
 
       spawnedProcess.emit('close', 0)
 
@@ -612,7 +612,7 @@ describe('lib/exec/spawn', function () {
       vi.mocked(xvfb.isNeeded).mockReturnValue(false)
 
       // @ts-expect-error - invalid number of arguments for given type
-      const startPromise = spawn.start()
+      const startPromise = start()
 
       spawnedProcess.emit('close', 0)
 
@@ -632,7 +632,7 @@ describe('lib/exec/spawn', function () {
       vi.mocked(xvfb.isNeeded).mockReturnValue(false)
 
       // @ts-expect-error - invalid number of arguments for given type
-      const startPromise = spawn.start()
+      const startPromise = start()
 
       spawnedProcess.emit('close', 0)
 
@@ -649,7 +649,7 @@ describe('lib/exec/spawn', function () {
       vi.mocked(xvfb.isNeeded).mockReturnValue(true)
 
       // @ts-expect-error - invalid number of arguments for given type
-      const startPromise = spawn.start()
+      const startPromise = start()
 
       await flushPromises()
 
@@ -668,7 +668,7 @@ describe('lib/exec/spawn', function () {
       vi.mocked(xvfb.isNeeded).mockReturnValue(false)
 
       // @ts-expect-error - invalid number of arguments for given type
-      const startPromise = spawn.start()
+      const startPromise = start()
 
       await flushPromises()
 
@@ -697,7 +697,7 @@ describe('lib/exec/spawn', function () {
       })
 
       // @ts-expect-error - invalid number of arguments for given type
-      const startPromise = spawn.start()
+      const startPromise = start()
 
       spawnedProcess.emit('close', 0)
 
@@ -707,6 +707,44 @@ describe('lib/exec/spawn', function () {
       expect(stderr.write).toHaveBeenCalledWith(buf1)
       expect(stdin.pipe).toHaveBeenCalledExactlyOnceWith(spawnedProcess.stdin)
       expect(spawnedProcess.stdout.pipe).toHaveBeenCalledExactlyOnceWith(stdout)
+    })
+
+    it('filters out dbus errors on linux', async () => {
+      vi.mocked(os.platform).mockReturnValue('linux')
+
+      const dbusErrors = [
+        Buffer.from('ERROR:dbus/bus.cc:123: Failed to connect to session bus'),
+        Buffer.from('[246:0820/083339.099956:ERROR:dbus/object_proxy.cc:590] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type:'),
+      ]
+
+      const normalError = Buffer.from('Some other error message')
+
+      let dataCallback: (data: Buffer) => void
+
+      // mock stderr data handler
+      spawnedProcess.stderr.on.mockImplementation((event, callback) => {
+        if (event === 'data') {
+          dataCallback = callback
+        }
+      })
+
+      // @ts-expect-error - invalid number of arguments for given type
+      const startPromise = start()
+
+      // Emit dbus error - should be filtered out (not written to stderr)
+      dbusErrors.forEach((err) => {
+        dataCallback!(err)
+        expect(stderr.write).not.toHaveBeenCalledWith(err)
+      })
+
+      // Emit normal error - should be written to stderr
+      dataCallback!(normalError)
+
+      expect(stderr.write).toHaveBeenCalledWith(normalError)
+
+      spawnedProcess.emit('close', 0)
+
+      await startPromise
     })
 
     // https://github.com/cypress-io/cypress/issues/1841
@@ -732,7 +770,7 @@ describe('lib/exec/spawn', function () {
         expect(() => {
           // kick off the mock process
           // @ts-expect-error - invalid number of arguments for given type
-          spawn.start()
+          start()
 
           const err: any = new Error()
 
@@ -747,7 +785,7 @@ describe('lib/exec/spawn', function () {
       expect(() => {
         // kick off the mock process
         // @ts-expect-error - invalid number of arguments for given type
-        spawn.start()
+        start()
 
         const err: any = new Error('wattttt')
 

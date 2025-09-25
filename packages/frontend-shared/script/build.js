@@ -2,7 +2,7 @@ const fs = require('fs-extra')
 const { buildSchema, extendSchema, parse, introspectionFromSchema, isObjectType } = require('graphql')
 const path = require('path')
 
-const graphQlPackageRoot = path.join(__dirname, '..', '..', 'graphql')
+const dataContextPackageRoot = path.join(__dirname, '..', '..', 'data-context')
 const frontendSharedRoot = path.join(__dirname, '..')
 
 /**
@@ -34,7 +34,7 @@ function generateTestExtensions (schema) {
 }
 
 async function generateFrontendSchema () {
-  const schemaContents = await fs.promises.readFile(path.join(graphQlPackageRoot, 'schemas/schema.graphql'), 'utf8')
+  const schemaContents = await fs.promises.readFile(path.join(dataContextPackageRoot, 'schemas/schema.graphql'), 'utf8')
   const schema = buildSchema(schemaContents, { assumeValid: true })
   const testExtensions = generateTestExtensions(schema)
   const extendedSchema = extendSchema(schema, parse(testExtensions))

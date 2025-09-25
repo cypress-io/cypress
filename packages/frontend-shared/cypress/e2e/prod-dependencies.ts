@@ -1,4 +1,4 @@
-export { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
+export { makeGraphQLServer } from '@packages/data-context/graphql/makeGraphQLServer'
 
 export { clearCtx, DataContext, globalPubSub, setCtx } from '@packages/data-context'
 

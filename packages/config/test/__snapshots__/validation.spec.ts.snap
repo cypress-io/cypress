@@ -1,0 +1,513 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`config/src/validation > .isArray > returns error message when value is a non-array 1`] = `
+{
+  "key": "mockConfigKey",
+  "type": "an array",
+  "value": 1,
+}
+`;
+
+exports[`config/src/validation > .isArrayIncludingAny > returned validation function will fail if any values are not present in the provided values > not a subset of error message 1`] = `
+{
+  "key": "fakeKey",
+  "type": "an array including any of these values: ["fakeValue", "fakeValue1", "fakeValue2"]",
+  "value": [
+    null,
+  ],
+}
+`;
+
+exports[`config/src/validation > .isArrayIncludingAny > returned validation function will fail if any values are not present in the provided values > not all in subset error message 1`] = `
+{
+  "key": "fakeKey",
+  "type": "an array including any of these values: ["fakeValue", "fakeValue1", "fakeValue2"]",
+  "value": [
+    "fakeValue",
+    "fakeValue1",
+    "fakeValue2",
+    "fakeValue3",
+  ],
+}
+`;
+
+exports[`config/src/validation > .isArrayIncludingAny > returned validation function will fail if values is not an array > not an array error message 1`] = `
+{
+  "key": "fakeKey",
+  "type": "an array including any of these values: [true, false]",
+  "value": "fakeValue",
+}
+`;
+
+exports[`config/src/validation > .isBoolean > returns error message when value is a not a string 1`] = `
+{
+  "key": "mockConfigKey",
+  "type": "a string",
+  "value": 1,
+}
+`;
+
+exports[`config/src/validation > .isFullyQualifiedUrl > returns error message when value is a not qualified url > empty string 1`] = `
+{
+  "key": "mockConfigKey",
+  "type": "a fully qualified URL (starting with \`http://\` or \`https://\`)",
+  "value": "",
+}
+`;
+
+exports[`config/src/validation > .isFullyQualifiedUrl > returns error message when value is a not qualified url > not qualified url 1`] = `
+{
+  "key": "mockConfigKey",
+  "type": "a fully qualified URL (starting with \`http://\` or \`https://\`)",
+  "value": "url.com",
+}
+`;
+
+exports[`config/src/validation > .isNumber > returns error message when value is a not a number 1`] = `
+{
+  "key": "mockConfigKey",
+  "type": "a number",
+  "value": "string",
+}
+`;
+
+exports[`config/src/validation > .isNumberOrFalse > returns error message when value is a not number or false 1`] = `
+{
+  "key": "mockConfigKey",
+  "type": "a number or false",
+  "value": null,
+}
+`;
+
+exports[`config/src/validation > .isOneOf > validates a number > not one of the numbers error message 1`] = `
+{
+  "key": "test",
+  "type": "one of these values: 1, 2, 3",
+  "value": 4,
+}
+`;
+
+exports[`config/src/validation > .isOneOf > validates a number > null instead of a number 1`] = `
+{
+  "key": "test",
+  "type": "one of these values: 1, 2, 3",
+  "value": null,
+}
+`;
+
+exports[`config/src/validation > .isOneOf > validates a number > string instead of a number 1`] = `
+{
+  "key": "test",
+  "type": "one of these values: 1, 2, 3",
+  "value": "foo",
+}
+`;
+
+exports[`config/src/validation > .isOneOf > validates a string > not one of the strings error message 1`] = `
+{
+  "key": "test",
+  "type": "one of these values: "foo", "bar"",
+  "value": "nope",
+}
+`;
+
+exports[`config/src/validation > .isOneOf > validates a string > null instead of string 1`] = `
+{
+  "key": "test",
+  "type": "one of these values: "foo", "bar"",
+  "value": null,
+}
+`;
+
+exports[`config/src/validation > .isOneOf > validates a string > number instead of string 1`] = `
+{
+  "key": "test",
+  "type": "one of these values: "foo", "bar"",
+  "value": 42,
+}
+`;
+
+exports[`config/src/validation > .isPlainObject > returns error message when value is a not an object 1`] = `
+{
+  "key": "mockConfigKey",
+  "type": "a plain object",
+  "value": 1,
+}
+`;
+
+exports[`config/src/validation > .isString > returns error message when value is a not a string 1`] = `
+{
+  "key": "mockConfigKey",
+  "type": "a string",
+  "value": 1,
+}
+`;
+
+exports[`config/src/validation > .isStringOrArrayOfStrings > returns error message when value is neither string nor array of string > array of non-strings 1`] = `
+{
+  "key": "mockConfigKey",
+  "type": "a string or an array of strings",
+  "value": [
+    1,
+    2,
+    3,
+  ],
+}
+`;
+
+exports[`config/src/validation > .isStringOrArrayOfStrings > returns error message when value is neither string nor array of string > not string or array 1`] = `
+{
+  "key": "mockConfigKey",
+  "type": "a string or an array of strings",
+  "value": null,
+}
+`;
+
+exports[`config/src/validation > .isStringOrFalse > returns error message when value is neither string nor false 1`] = `
+{
+  "key": "mockConfigKey",
+  "type": "a string or false",
+  "value": null,
+}
+`;
+
+exports[`config/src/validation > .isValidBrowser > passes valid browsers and forms error messages for invalid ones > isValidBrowser Chrome 1`] = `
+{
+  "browser": {
+    "displayName": "Chrome Browser",
+    "family": "chromium",
+    "majorVersion": 1,
+    "name": "Chrome",
+    "path": "/path/to/chrome",
+    "version": "1.2.3",
+  },
+  "isValid": true,
+}
+`;
+
+exports[`config/src/validation > .isValidBrowser > passes valid browsers and forms error messages for invalid ones > isValidBrowser Electron 1`] = `
+{
+  "browser": {
+    "displayName": "Electron",
+    "family": "chromium",
+    "majorVersion": 99,
+    "name": "Electron",
+    "path": "",
+    "version": "99.101.3",
+  },
+  "isValid": true,
+}
+`;
+
+exports[`config/src/validation > .isValidBrowser > passes valid browsers and forms error messages for invalid ones > isValidBrowser FF 1`] = `
+{
+  "browser": {
+    "displayName": "Firefox",
+    "family": "firefox",
+    "majorVersion": "1",
+    "name": "FF",
+    "path": "/path/to/firefox",
+    "version": "1.2.3",
+  },
+  "isValid": true,
+}
+`;
+
+exports[`config/src/validation > .isValidBrowser > passes valid browsers and forms error messages for invalid ones > isValidBrowser No display name 1`] = `
+{
+  "browser": {
+    "family": "chromium",
+    "name": "No display name",
+  },
+  "isValid": {
+    "key": "displayName",
+    "type": "a non-empty string",
+    "value": {
+      "family": "chromium",
+      "name": "No display name",
+    },
+  },
+}
+`;
+
+exports[`config/src/validation > .isValidBrowser > passes valid browsers and forms error messages for invalid ones > isValidBrowser bad family 1`] = `
+{
+  "browser": {
+    "displayName": "Bad family browser",
+    "family": "unknown family",
+    "name": "bad family",
+  },
+  "isValid": {
+    "key": "family",
+    "type": "either chromium, firefox or webkit",
+    "value": {
+      "displayName": "Bad family browser",
+      "family": "unknown family",
+      "name": "bad family",
+    },
+  },
+}
+`;
+
+exports[`config/src/validation > .isValidBrowserList > does not allow empty or not browsers > browsers list with a string 1`] = `
+{
+  "key": "name",
+  "list": "browsers",
+  "type": "a non-empty string",
+  "value": "foo",
+}
+`;
+
+exports[`config/src/validation > .isValidBrowserList > does not allow empty or not browsers > empty list of browsers 1`] = `"Expected at least one browser"`;
+
+exports[`config/src/validation > .isValidBrowserList > does not allow empty or not browsers > undefined browsers 1`] = `"Missing browsers list"`;
+
+exports[`config/src/validation > .isValidClientCertificatesSet > returns error message for certs not passed as an array array 1`] = `
+{
+  "key": "mockConfigKey",
+  "type": "a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy",
+  "value": "1",
+}
+`;
+
+exports[`config/src/validation > .isValidClientCertificatesSet > returns error message for certs object without url 1`] = `
+{
+  "key": "clientCertificates[0].url",
+  "type": "a URL matcher",
+  "value": undefined,
+}
+`;
+
+exports[`config/src/validation > .isValidClientCertificatesSet > returns error message for certs url not matching * > invalid url 1`] = `
+{
+  "key": "clientCertificates[0].url",
+  "type": "a valid URL",
+  "value": "not *",
+}
+`;
+
+exports[`config/src/validation > .isValidClientCertificatesSet > returns error message for certs url not matching * > missing https protocol 1`] = `
+{
+  "key": "clientCertificates[0].url",
+  "type": "an https protocol",
+  "value": "http://url.com",
+}
+`;
+
+exports[`config/src/validation > .isValidCrfOrBoolean > invalidates lower bound > invalid lower bound 1`] = `
+{
+  "key": "test",
+  "type": "a valid CRF number between 1 & 51, 0 or false to disable compression, or true to use the default compression of 32",
+  "value": -1,
+}
+`;
+
+exports[`config/src/validation > .isValidCrfOrBoolean > invalidates upper bound > invalid upper bound 1`] = `
+{
+  "key": "test",
+  "type": "a valid CRF number between 1 & 51, 0 or false to disable compression, or true to use the default compression of 32",
+  "value": 52,
+}
+`;
+
+exports[`config/src/validation > .isValidRetriesConfig > experimental options > fails with > detect-flake-and-pass-on-threshold > passesRequired is 0 1`] = `
+{
+  "key": "mockConfigKey.experimentalOptions.passesRequired",
+  "type": "a positive whole number less than or equals to maxRetries",
+  "value": 0,
+}
+`;
+
+exports[`config/src/validation > .isValidRetriesConfig > experimental options > fails with > detect-flake-and-pass-on-threshold > passesRequired is floating 1`] = `
+{
+  "key": "mockConfigKey.experimentalOptions.passesRequired",
+  "type": "a positive whole number less than or equals to maxRetries",
+  "value": 3.5,
+}
+`;
+
+exports[`config/src/validation > .isValidRetriesConfig > experimental options > fails with > detect-flake-and-pass-on-threshold > passesRequired is negative 1`] = `
+{
+  "key": "mockConfigKey.experimentalOptions.passesRequired",
+  "type": "a positive whole number less than or equals to maxRetries",
+  "value": -4,
+}
+`;
+
+exports[`config/src/validation > .isValidRetriesConfig > experimental options > fails with > detect-flake-and-pass-on-threshold > provides passesRequired that is greater than maxRetries 1`] = `
+{
+  "key": "mockConfigKey.experimentalOptions.passesRequired",
+  "type": "a positive whole number less than or equals to maxRetries",
+  "value": 5,
+}
+`;
+
+exports[`config/src/validation > .isValidRetriesConfig > experimental options > fails with > detect-flake-and-pass-on-threshold > provides passesRequired without maxRetries 1`] = `
+{
+  "key": "mockConfigKey.experimentalOptions.maxRetries",
+  "type": "a positive whole number greater than or equals 1 or null",
+  "value": undefined,
+}
+`;
+
+exports[`config/src/validation > .isValidRetriesConfig > experimental options > fails with > detect-flake-and-pass-on-threshold > provides stopIfAnyPassed option 1`] = `
+{
+  "key": "mockConfigKey.experimentalOptions",
+  "type": "an object with keys maxRetries, passesRequired",
+  "value": {
+    "maxRetries": 3,
+    "passesRequired": 2,
+    "stopIfAnyPassed": true,
+  },
+}
+`;
+
+exports[`config/src/validation > .isValidRetriesConfig > experimental options > fails with > detect-flake-and-pass-on-threshold: maxRetries is 0 1`] = `
+{
+  "key": "mockConfigKey.experimentalOptions.maxRetries",
+  "type": "a positive whole number greater than or equals 1 or null",
+  "value": 0,
+}
+`;
+
+exports[`config/src/validation > .isValidRetriesConfig > experimental options > fails with > detect-flake-and-pass-on-threshold: maxRetries is floating 1`] = `
+{
+  "key": "mockConfigKey.experimentalOptions.maxRetries",
+  "type": "a positive whole number greater than or equals 1 or null",
+  "value": 3.5,
+}
+`;
+
+exports[`config/src/validation > .isValidRetriesConfig > experimental options > fails with > detect-flake-and-pass-on-threshold: maxRetries is negative 1`] = `
+{
+  "key": "mockConfigKey.experimentalOptions.maxRetries",
+  "type": "a positive whole number greater than or equals 1 or null",
+  "value": -2,
+}
+`;
+
+exports[`config/src/validation > .isValidRetriesConfig > experimental options > fails with > detect-flake-and-pass-on-threshold: valid strategy w/ other invalid options with experiment 1`] = `
+{
+  "key": "mockConfigKey.runMode",
+  "type": "a boolean since an experimental strategy is provided",
+  "value": 1,
+}
+`;
+
+exports[`config/src/validation > .isValidRetriesConfig > experimental options > fails with > detect-flake-but-always-fail > provides maxRetries without stopIfAnyPassed 1`] = `
+{
+  "key": "mockConfigKey.experimentalOptions.stopIfAnyPassed",
+  "type": "is required when using the "detect-flake-but-always-fail" strategy",
+  "value": undefined,
+}
+`;
+
+exports[`config/src/validation > .isValidRetriesConfig > experimental options > fails with > detect-flake-but-always-fail > provides passesRequired option 1`] = `
+{
+  "key": "mockConfigKey.experimentalOptions",
+  "type": "an object with keys maxRetries, stopIfAnyPassed",
+  "value": {
+    "maxRetries": 3,
+    "passesRequired": 2,
+    "stopIfAnyPassed": true,
+  },
+}
+`;
+
+exports[`config/src/validation > .isValidRetriesConfig > experimental options > fails with > detect-flake-but-always-fail > provides stopIfAnyPassed without maxRetries 1`] = `
+{
+  "key": "mockConfigKey.experimentalOptions.maxRetries",
+  "type": "a positive whole number greater than or equals 1 or null",
+  "value": undefined,
+}
+`;
+
+exports[`config/src/validation > .isValidRetriesConfig > experimental options > fails with > detect-flake-but-always-fail > stopIfAnyPassed is a number (0 and 1 do not work) 1`] = `
+{
+  "key": "mockConfigKey.experimentalOptions.stopIfAnyPassed",
+  "type": "a boolean",
+  "value": 1,
+}
+`;
+
+exports[`config/src/validation > .isValidRetriesConfig > experimental options > fails with > detect-flake-but-always-fail: maxRetries is 0 1`] = `
+{
+  "key": "mockConfigKey.experimentalOptions.maxRetries",
+  "type": "a positive whole number greater than or equals 1 or null",
+  "value": 0,
+}
+`;
+
+exports[`config/src/validation > .isValidRetriesConfig > experimental options > fails with > detect-flake-but-always-fail: maxRetries is floating 1`] = `
+{
+  "key": "mockConfigKey.experimentalOptions.maxRetries",
+  "type": "a positive whole number greater than or equals 1 or null",
+  "value": 3.5,
+}
+`;
+
+exports[`config/src/validation > .isValidRetriesConfig > experimental options > fails with > detect-flake-but-always-fail: maxRetries is negative 1`] = `
+{
+  "key": "mockConfigKey.experimentalOptions.maxRetries",
+  "type": "a positive whole number greater than or equals 1 or null",
+  "value": -2,
+}
+`;
+
+exports[`config/src/validation > .isValidRetriesConfig > experimental options > fails with > detect-flake-but-always-fail: valid strategy w/ other invalid options with experiment 1`] = `
+{
+  "key": "mockConfigKey.runMode",
+  "type": "a boolean since an experimental strategy is provided",
+  "value": 1,
+}
+`;
+
+exports[`config/src/validation > .isValidRetriesConfig > experimental options > fails with > invalid strategy 1`] = `
+{
+  "key": "mockConfigKey.experimentalStrategy",
+  "type": "one of "detect-flake-but-always-fail", "detect-flake-and-pass-on-threshold"",
+  "value": "foo",
+}
+`;
+
+exports[`config/src/validation > .isValidRetriesConfig > experimental options > fails with > invalid strategy w/ other options (valid) 1`] = `
+{
+  "key": "mockConfigKey.experimentalStrategy",
+  "type": "one of "detect-flake-but-always-fail", "detect-flake-and-pass-on-threshold"",
+  "value": "bar",
+}
+`;
+
+exports[`config/src/validation > .isValidRetriesConfig > returns error message for invalid retry config > invalid retry object 1`] = `
+{
+  "key": "mockConfigKey",
+  "type": "an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls",
+  "value": {
+    "fakeMode": 1,
+  },
+}
+`;
+
+exports[`config/src/validation > .isValidRetriesConfig > returns error message for invalid retry config > invalid retry value 1`] = `
+{
+  "key": "mockConfigKey",
+  "type": "a positive number or null or an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls, or experimental configuration with key "experimentalStrategy" with value "detect-flake-but-always-fail" or "detect-flake-and-pass-on-threshold" and key "experimentalOptions" to provide a valid configuration for your selected strategy",
+  "value": "1",
+}
+`;
+
+exports[`config/src/validation > .isValidRetriesConfig > returns error message for openMode as boolean without strategy 1`] = `
+{
+  "key": "mockConfigKey.openMode",
+  "type": "a number since no experimental strategy is provided",
+  "value": true,
+}
+`;
+
+exports[`config/src/validation > .isValidRetriesConfig > returns error message for runMode as boolean without strategy 1`] = `
+{
+  "key": "mockConfigKey.runMode",
+  "type": "a number since no experimental strategy is provided",
+  "value": true,
+}
+`;

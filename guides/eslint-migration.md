@@ -35,7 +35,6 @@
 ### Batch 4b: Core packages (part 2)
 - [ ] packages/runner
 - [ ] packages/extension
-- [ ] packages/graphql
 - [ ] packages/network
 - [ ] packages/socket
 - [ ] packages/telemetry

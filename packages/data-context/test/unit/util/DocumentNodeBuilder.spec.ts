@@ -1,4 +1,4 @@
-import { graphqlSchema } from '@packages/graphql'
+import { graphqlSchema } from '../../../graphql/schema'
 import { expect } from 'chai'
 import dedent from 'dedent'
 import { FieldNode, GraphQLObjectType, OperationDefinitionNode, parse, print } from 'graphql'
