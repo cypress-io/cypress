@@ -13,7 +13,13 @@ export const transformError = (err: AxiosError | Error & { error?: any, statusCo
     { data: err.error, status: err.statusCode }
 
   if (isObject(data)) {
-    const body = JSON.stringify(data, null, 2)
+    let body = ''
+
+    try {
+      body = JSON.stringify(data, null, 2)
+    } catch (e) {
+      // do nothing
+    }
 
     err.message = [status, body].join('\n\n')
   }
