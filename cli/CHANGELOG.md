@@ -1,4 +1,10 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.4.0
+_Released 9/30/2025 (PENDING)_
+
+**Features:**
+- Remove `experimentalStudio` config flag and turn Studio Beta on for all users of Cypress. Addresses [#30997](https://github.com/cypress-io/cypress/issues/30997). Addressed in [#32571](https://github.com/cypress-io/cypress/pull/32571).
+
 ## 15.3.1
 
 _Released 10/07/2025 (PENDING)_
