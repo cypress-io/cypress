@@ -5,7 +5,6 @@ import globby from 'globby'
 import _ from 'lodash'
 import path from 'path'
 import * as errors from '../../src'
-import { convertHtmlToImage } from '../support/utils'
 import os from 'os'
 
 // these packages need process.env.CYPRESS_INTERNAL_ENV to be set to 'test' to work, which is set in the global vitest config
@@ -101,7 +100,7 @@ describe('visual error templates', () => {
 
         const consoleLogOutput = getConsoleLogOutput()
 
-       expect(consoleLogOutput).toMatchFileSnapshot(`./snapshot/${filename}.ansi`)
+       expect(consoleLogOutput).toMatchFileSnapshot(`./__snapshots__/${filename}.ansi`)
       })
     }
   }
