@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import fs from 'fs-extra'
 import path from 'path'
 import os from 'os'
-import { isDependencyInstalledByName } from '../../src/frameworks'
+import { isDependencyInstalledByName } from '../src/frameworks'
 
 describe('frameworks', () => {
   describe('isDependencyInstalledByName', () => {

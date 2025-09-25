@@ -1,10 +1,10 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 import fs from 'fs-extra'
 import Fixtures from '@tooling/system-tests'
-import { detectFramework, detectLanguage, PkgJson, CT_FRAMEWORKS, resolveComponentFrameworkDefinition, WIZARD_DEPENDENCY_WEBPACK } from '../../src'
+import { detectFramework, detectLanguage, PkgJson, CT_FRAMEWORKS, resolveComponentFrameworkDefinition, WIZARD_DEPENDENCY_WEBPACK } from '../src'
 import path from 'path'
 import solidJs, { solidDep } from './fixtures'
-import { fakeDepsInNodeModules, scaffoldMigrationProject } from '../scaffolding'
+import { fakeDepsInNodeModules, scaffoldMigrationProject } from './scaffolding'
 
 const resolvedCtFrameworks = CT_FRAMEWORKS.map((x) => resolveComponentFrameworkDefinition(x))
 

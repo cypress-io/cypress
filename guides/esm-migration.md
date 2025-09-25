@@ -102,7 +102,7 @@
 - [ ] packages/packherd-require
 - [ ] packages/proxy
 - [ ] packages/rewriter
-- [ ] packages/scaffold-config
+- [x] packages/scaffold-config ✅ **COMPLETED**
 - [ ] packages/server
 - [ ] packages/socket
 - [x] packages/stderr-filtering ✅ **COMPLETED**

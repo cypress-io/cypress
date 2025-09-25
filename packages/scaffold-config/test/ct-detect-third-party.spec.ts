@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { scaffoldMigrationProject, fakeDepsInNodeModules } from '../scaffolding'
+import { scaffoldMigrationProject, fakeDepsInNodeModules } from './scaffolding'
 import fs from 'fs-extra'
 import path from 'path'
-import { detectThirdPartyCTFrameworks, validateThirdPartyModule, isThirdPartyDefinition, isRepositoryRoot } from '../../src'
+import { detectThirdPartyCTFrameworks, validateThirdPartyModule, isThirdPartyDefinition, isRepositoryRoot } from '../src'
 import os from 'os'
 import solidJs from './fixtures'
 

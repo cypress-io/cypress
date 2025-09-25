@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { supportFileComponent } from '../../src/supportFile'
+import { supportFileComponent } from '../src/supportFile'
 import dedent from 'dedent'
-// import { expect } from 'chai'
 
 describe('supportFileComponent', () => {
   describe('react', () => {
