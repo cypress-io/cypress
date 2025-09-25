@@ -11,7 +11,7 @@ import { CloudRequest } from '../api/cloud_request'
 import { isRetryableError } from '../network/is_retryable_error'
 import { asyncRetry } from '../../util/async_retry'
 import { postStudioSession } from '../api/studio/post_studio_session'
-import type { StudioStatus } from '@packages/types'
+import type { StudioServerOptions, StudioStatus } from '@packages/types'
 import path from 'path'
 import os from 'os'
 import { ensureStudioBundle } from './ensure_studio_bundle'
@@ -88,11 +88,23 @@ export class StudioLifecycleManager {
 
     this.updateStatus('INITIALIZING')
 
+    const getProjectOptions = async () => {
+      const [user, config] = await Promise.all([
+        ctx.actions.auth.authApi.getUser(),
+        ctx.project.getConfig(),
+      ])
+
+      return {
+        user,
+        projectSlug: config.projectId || undefined,
+      }
+    }
+
     const studioManagerPromise = this.createStudioManager({
-      projectId,
       cloudDataSource,
       cfg,
       debugData,
+      getProjectOptions,
     }).catch(async (error) => {
       debug('Error during studio manager setup: %o', error)
 
@@ -106,7 +118,8 @@ export class StudioLifecycleManager {
           isRetryableError,
           asyncRetry,
         },
-        studioHash: projectId,
+        studioHash: this.currentStudioHash,
+        // TODO: verify cfg.projectId is correct, otherwise use (await ctx.project.getConfig()).projectId || undefined
         projectSlug: cfg.projectId,
         error,
         studioMethod: 'initializeStudioManager',
@@ -126,10 +139,10 @@ export class StudioLifecycleManager {
     this.studioManagerPromise = studioManagerPromise
 
     this.setupWatcher({
-      projectId,
       cloudDataSource,
       cfg,
       debugData,
+      getProjectOptions,
     })
   }
 
@@ -158,22 +171,24 @@ export class StudioLifecycleManager {
   }
 
   private async createStudioManager ({
-    projectId,
     cloudDataSource,
     cfg,
     debugData,
+    getProjectOptions,
   }: {
-    projectId?: string
     cloudDataSource: CloudDataSource
     cfg: Cfg
     debugData: any
+    getProjectOptions: StudioServerOptions['getProjectOptions']
   }): Promise<StudioManager> {
     let studioPath: string
     let studioHash: string
     let manifest: Record<string, string>
 
+    const currentProjectOptions = await getProjectOptions()
+
     initializeTelemetryReporter({
-      projectSlug: projectId,
+      projectSlug: currentProjectOptions.projectSlug,
       cloudDataSource,
     })
 
@@ -181,7 +196,7 @@ export class StudioLifecycleManager {
 
     telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.POST_STUDIO_SESSION_START)
     const studioSession = await postStudioSession({
-      projectId,
+      projectId: currentProjectOptions.projectSlug,
     })
 
     telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.POST_STUDIO_SESSION_END)
@@ -201,7 +216,7 @@ export class StudioLifecycleManager {
         hashLoadingPromise = ensureStudioBundle({
           studioUrl: studioSession.studioUrl,
           studioPath,
-          projectId,
+          projectId: currentProjectOptions.projectSlug,
         })
 
         StudioLifecycleManager.hashLoadingMap.set(studioHash, hashLoadingPromise)
@@ -244,7 +259,6 @@ export class StudioLifecycleManager {
       script,
       studioPath,
       studioHash,
-      projectSlug: projectId,
       cloudApi: {
         cloudUrl,
         cloudHeaders,
@@ -252,8 +266,8 @@ export class StudioLifecycleManager {
         isRetryableError,
         asyncRetry,
       },
-      shouldEnableStudio: this.cloudStudioRequested,
       manifest,
+      getProjectOptions,
     })
 
     telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_MANAGER_SETUP_END)
@@ -320,15 +334,15 @@ export class StudioLifecycleManager {
   }
 
   private setupWatcher ({
-    projectId,
     cloudDataSource,
     cfg,
     debugData,
+    getProjectOptions,
   }: {
-    projectId?: string
     cloudDataSource: CloudDataSource
     cfg: Cfg
     debugData: any
+    getProjectOptions: StudioServerOptions['getProjectOptions']
   }) {
     // Don't setup a watcher if the studio bundle is NOT local
     if (!process.env.CYPRESS_LOCAL_STUDIO_PATH) {
@@ -348,10 +362,10 @@ export class StudioLifecycleManager {
       await this.studioManager?.destroy()
       this.studioManager = undefined
       this.studioManagerPromise = this.createStudioManager({
-        projectId,
         cloudDataSource,
         cfg,
         debugData,
+        getProjectOptions,
       }).then((studioManager) => {
         // eslint-disable-next-line no-console
         console.log('Studio manager reloaded')
