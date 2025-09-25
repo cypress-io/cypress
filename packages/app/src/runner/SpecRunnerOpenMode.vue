@@ -265,7 +265,7 @@ const {
 const studioStore = useStudioStore()
 
 const hasRequestedProjectAccess = computed(() => {
-  return props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized' && props.gql.currentProject?.cloudProject?.hasRequestedAccess
+  return (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized' && props.gql.currentProject?.cloudProject?.hasRequestedAccess) ?? false
 })
 
 const requestProjectAccessMutation = useMutation(SpecRunner_Studio_RequestAccessDocument)

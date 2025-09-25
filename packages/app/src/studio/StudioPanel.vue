@@ -27,11 +27,12 @@
 <script lang="ts" setup>
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { init, loadRemote, registerRemotes } from '@module-federation/runtime'
-import type { StudioAppDefaultShape, StudioPanelShape, RequestProjectAccessMutation } from './studio-app-types'
+import type { StudioAppDefaultShape, StudioPanelShape } from './studio-app-types'
+import type { UserProjectStatusStore } from '@cy/store/user-project-status-store'
 import LoadingStudioPanel from './LoadingStudioPanel.vue'
 import StudioErrorPanel from './StudioErrorPanel.vue'
 import type { EventManager } from '../runner/event-manager'
-import { useMutation, gql } from '@urql/vue'
+import { useMutation, gql, UseMutationResponse } from '@urql/vue'
 
 // Mirrors the ReactDOM.Root type since incorporating those types
 // messes up vue typing elsewhere
@@ -55,7 +56,7 @@ const props = defineProps<{
   autUrlSelector: string
   userProjectStatusStore: UserProjectStatusStore
   hasRequestedProjectAccess: boolean
-  requestProjectAccessMutation: RequestProjectAccessMutation
+  requestProjectAccessMutation: UseMutationResponse<any, any>
 }>()
 
 interface StudioApp { default: StudioAppDefaultShape }

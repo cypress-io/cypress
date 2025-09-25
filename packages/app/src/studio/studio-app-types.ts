@@ -2,9 +2,37 @@
 // `studio` bundle. It is downloaded and copied to the app.
 // It should not be modified directly in the app.
 
-import type { UserProjectStatusStore } from '@cy/store/user-project-status-store'
+import type { CloudStatus } from '@cy/store/user-project-status-store'
 
 export type RecordingState = 'recording' | 'paused' | 'disabled'
+
+export interface UserProjectStatusStore {
+  user: {
+    isLoggedIn: boolean
+  }
+  project: {
+    isProjectConnected: boolean
+    isNotAuthorized: boolean
+  }
+  openLoginConnectModal: (options: { utmMedium: string }) => void
+  cloudStatus: CloudStatus
+  projectId: string
+}
+
+export interface RequestProjectAccessMutationResult {
+  data?: {
+    cloudProjectRequestAccess: {
+      hasRequestedAccess: boolean
+    }
+  }
+  error?: any
+}
+
+export interface RequestProjectAccessMutation {
+  executeMutation: (variables: {
+    projectId: string
+  }) => Promise<RequestProjectAccessMutationResult>
+}
 
 export interface StudioPanelProps {
   canAccessStudioAI: boolean
@@ -17,17 +45,7 @@ export interface StudioPanelProps {
   studioAiAvailable?: boolean
   userProjectStatusStore: UserProjectStatusStore
   hasRequestedProjectAccess: boolean
-  requestProjectAccessMutation: {
-    executeMutation: (variables: {
-      projectId: string
-    }) => Promise<{
-      data?: {
-        cloudProjectRequestAccess: {
-          hasRequestedAccess: boolean
-        }
-      }
-    }>
-  }
+  requestProjectAccessMutation: RequestProjectAccessMutation
 
 }
 
