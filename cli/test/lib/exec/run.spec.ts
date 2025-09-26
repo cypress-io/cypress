@@ -2,7 +2,7 @@ import { vi, describe, it, beforeEach, expect } from 'vitest'
 import os from 'os'
 import util from '../../../lib/util'
 import run from '../../../lib/exec/run'
-import spawn from '../../../lib/exec/spawn'
+import { start as spawnStart } from '../../../lib/exec/spawn'
 import { start as verifyStart } from '../../../lib/tasks/verify'
 
 vi.mock('os', async (importActual) => {
@@ -29,15 +29,9 @@ vi.mock('../../../lib/util', async (importActual) => {
   }
 })
 
-vi.mock('../../../lib/exec/spawn', async (importActual) => {
-  const actual = await importActual()
-
+vi.mock('../../../lib/exec/spawn', async () => {
   return {
-    default: {
-      // @ts-expect-error
-      ...actual.default,
-      start: vi.fn(),
-    },
+    start: vi.fn(),
   }
 })
 
@@ -152,7 +146,7 @@ describe('exec run', () => {
 
   describe('.start', () => {
     beforeEach(() => {
-      vi.mocked(spawn.start).mockResolvedValue(undefined)
+      vi.mocked(spawnStart).mockResolvedValue(undefined)
       vi.mocked(verifyStart).mockResolvedValue(undefined)
     })
 
@@ -163,77 +157,77 @@ describe('exec run', () => {
 
     it('spawns with --key and xvfb', async () => {
       await run.start({ port: '1234' })
-      expect(spawn.start).toHaveBeenCalledWith(['--run-project', process.cwd(), '--port', '1234'], expect.anything())
+      expect(spawnStart).toHaveBeenCalledWith(['--run-project', process.cwd(), '--port', '1234'], expect.anything())
     })
 
     it('spawns with --env', async () => {
       await run.start({ env: 'host=http://localhost:1337,name=brian' })
-      expect(spawn.start).toHaveBeenCalledWith(['--run-project', process.cwd(), '--env', 'host=http://localhost:1337,name=brian'], expect.anything())
+      expect(spawnStart).toHaveBeenCalledWith(['--run-project', process.cwd(), '--env', 'host=http://localhost:1337,name=brian'], expect.anything())
     })
 
     it('spawns with --config', async () => {
       await run.start({ config: 'watchForFileChanges=false,baseUrl=localhost' })
-      expect(spawn.start).toHaveBeenCalledWith(['--run-project', process.cwd(), '--config', 'watchForFileChanges=false,baseUrl=localhost'], expect.anything())
+      expect(spawnStart).toHaveBeenCalledWith(['--run-project', process.cwd(), '--config', 'watchForFileChanges=false,baseUrl=localhost'], expect.anything())
     })
 
     it('spawns with --config-file set', async () => {
       await run.start({ configFile: 'special-cypress.config.js' })
-      expect(spawn.start).toHaveBeenCalledWith(['--run-project', process.cwd(), '--config-file', 'special-cypress.config.js'], expect.anything())
+      expect(spawnStart).toHaveBeenCalledWith(['--run-project', process.cwd(), '--config-file', 'special-cypress.config.js'], expect.anything())
     })
 
     it('spawns with --record false', async () => {
       await run.start({ record: false })
-      expect(spawn.start).toHaveBeenCalledWith(['--run-project', process.cwd(), '--record', false], expect.anything())
+      expect(spawnStart).toHaveBeenCalledWith(['--run-project', process.cwd(), '--record', false], expect.anything())
     })
 
     it('spawns with --headed true', async () => {
       await run.start({ headed: true })
-      expect(spawn.start).toHaveBeenCalledWith(['--run-project', process.cwd(), '--headed', true], expect.anything())
+      expect(spawnStart).toHaveBeenCalledWith(['--run-project', process.cwd(), '--headed', true], expect.anything())
     })
 
     it('spawns with --no-exit', async () => {
       await run.start({ exit: false })
-      expect(spawn.start).toHaveBeenCalledWith(['--run-project', process.cwd(), '--no-exit'], expect.anything())
+      expect(spawnStart).toHaveBeenCalledWith(['--run-project', process.cwd(), '--no-exit'], expect.anything())
     })
 
     it('spawns with --output-path', async () => {
       await run.start({ outputPath: '/path/to/output' })
-      expect(spawn.start).toHaveBeenCalledWith(['--run-project', process.cwd(), '--output-path', '/path/to/output'], expect.anything())
+      expect(spawnStart).toHaveBeenCalledWith(['--run-project', process.cwd(), '--output-path', '/path/to/output'], expect.anything())
     })
 
     it('spawns with --testing-type e2e when given --e2e', async () => {
       await run.start({ e2e: true })
-      expect(spawn.start).toHaveBeenCalledWith(['--run-project', process.cwd(), '--testing-type', 'e2e'], expect.anything())
+      expect(spawnStart).toHaveBeenCalledWith(['--run-project', process.cwd(), '--testing-type', 'e2e'], expect.anything())
     })
 
     it('spawns with --testing-type component when given --component', async () => {
       await run.start({ component: true })
-      expect(spawn.start).toHaveBeenCalledWith(['--run-project', process.cwd(), '--testing-type', 'component'], expect.anything())
+      expect(spawnStart).toHaveBeenCalledWith(['--run-project', process.cwd(), '--testing-type', 'component'], expect.anything())
     })
 
     it('spawns with --tag value', async () => {
       await run.start({ tag: 'nightly' })
-      expect(spawn.start).toHaveBeenCalledWith(['--run-project', process.cwd(), '--tag', 'nightly'], expect.anything())
+      expect(spawnStart).toHaveBeenCalledWith(['--run-project', process.cwd(), '--tag', 'nightly'], expect.anything())
     })
 
     it('spawns with several --tag words unchanged', async () => {
       await run.start({ tag: 'nightly, sanity' })
-      expect(spawn.start).toHaveBeenCalledWith(['--run-project', process.cwd(), '--tag', 'nightly, sanity'], expect.anything())
+      expect(spawnStart).toHaveBeenCalledWith(['--run-project', process.cwd(), '--tag', 'nightly, sanity'], expect.anything())
     })
 
     it('spawns with --auto-cancel-after-failures value', async () => {
       await run.start({ autoCancelAfterFailures: 4 })
-      expect(spawn.start).toHaveBeenCalledWith(['--run-project', process.cwd(), '--auto-cancel-after-failures', 4], expect.anything())
+      expect(spawnStart).toHaveBeenCalledWith(['--run-project', process.cwd(), '--auto-cancel-after-failures', 4], expect.anything())
     })
 
     it('spawns with --auto-cancel-after-failures value false', async () => {
       await run.start({ autoCancelAfterFailures: false })
-      expect(spawn.start).toHaveBeenCalledWith(['--run-project', process.cwd(), '--auto-cancel-after-failures', false], expect.anything())
+      expect(spawnStart).toHaveBeenCalledWith(['--run-project', process.cwd(), '--auto-cancel-after-failures', false], expect.anything())
     })
 
     it('spawns with --runner-ui', async () => {
       await run.start({ runnerUi: true })
-      expect(spawn.start).toHaveBeenCalledWith(['--run-project', process.cwd(), '--runner-ui', true], expect.anything())
+      expect(spawnStart).toHaveBeenCalledWith(['--run-project', process.cwd(), '--runner-ui', true], expect.anything())
     })
   })
 })

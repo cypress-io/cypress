@@ -2,7 +2,7 @@
 import { defaultMessages } from '@cy/i18n'
 import { CloudUserStubs,
   CloudOrganizationConnectionStubs,
-} from '@packages/graphql/test/stubCloudTypes'
+} from '@packages/data-context/test/graphql/stubCloudTypes'
 import { CloudConnectModalsFragmentDoc } from '../../generated/graphql-test'
 import CloudConnectModals from './CloudConnectModals.vue'
 import cloneDeep from 'lodash/cloneDeep'

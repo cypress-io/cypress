@@ -9,7 +9,7 @@ import _ from 'lodash'
 import 'server-destroy'
 
 import { AppApiShape, CohortsApiShape, DataEmitterActions, LocalSettingsApiShape, ProjectApiShape } from './actions'
-import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.gen'
+import type { NexusGenAbstractTypeMembers } from './gen/nxs.gen'
 import type { AuthApiShape } from './actions/AuthActions'
 import type { ElectronApiShape } from './actions/ElectronActions'
 import debugLib from 'debug'

@@ -4,8 +4,8 @@ import DebugContainer from './DebugContainer.vue'
 import { defaultMessages } from '@cy/i18n'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import { specsList } from './utils/DebugMapping'
-import { CloudRunStubs, createCloudRun } from '@packages/graphql/test/stubCloudTypes'
-import type { CloudRun, CloudSpecRun, CloudTestResult } from '@packages/graphql/src/gen/test-cloud-graphql-types.gen'
+import { CloudRunStubs, createCloudRun } from '@packages/data-context/test/graphql/stubCloudTypes'
+import type { CloudRun, CloudSpecRun, CloudTestResult } from '@packages/data-context/src/gen/test-cloud-graphql-types.gen'
 
 const DebugSpecVariableTypes = {
   runNumber: 'Int',

@@ -7,7 +7,7 @@ const graphqlOpts = {
   tagName: 'gql',
   // eslint-disable-next-line no-restricted-syntax
   schemaString: fs.readFileSync(
-    path.join(__dirname, 'packages/graphql/schemas/schema.graphql'),
+    path.join(__dirname, 'packages/data-context/schemas/schema.graphql'),
     'utf8',
   ),
 }
