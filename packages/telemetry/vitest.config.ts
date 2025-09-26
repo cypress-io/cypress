@@ -6,6 +6,7 @@ export default defineConfig({
       'test/detectors/circleCiDetectorSync.spec.ts',
       'test/detectors/githubActionsDetectorSync.spec.ts',
       'test/processors/on-start-span-processor.spec.ts',
+      'test/span-exporters/cloud-span-exporter.spec.ts',
     ],
     globals: true,
     environment: 'node',
