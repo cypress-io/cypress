@@ -9,11 +9,6 @@ when:
         matches:
             pattern: /^develop/
             value: << pipeline.git.branch >>
-    - not:
-        matches:
-            pattern: /^pull\/[0-9]+/
-            value: << pipeline.git.branch >>
-
 jobs:
   - node_modules_install:
       build-better-sqlite3: true
