@@ -3281,7 +3281,7 @@ declare namespace Cypress {
      */
     experimentalOriginDependencies?: boolean
     /**
-     * Enables support for the prompt command.
+     * Enables support for `cy.prompt`, an AI-powered command that turns natural language steps into executable Cypress test code.
      * @default false
      */
     experimentalPromptCommand?: boolean
