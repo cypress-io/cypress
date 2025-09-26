@@ -1,6 +1,6 @@
 import { Auth_LoginDocument, LoginConnectModalsContentFragmentDoc } from '../generated/graphql-test'
 import LoginConnectModalsContent from './LoginConnectModalsContent.vue'
-import { CloudUserStubs } from '@packages/graphql/test/stubCloudTypes'
+import { CloudUserStubs } from '@packages/data-context/test/graphql/stubCloudTypes'
 import { SelectCloudProjectModal_CreateCloudProjectDocument } from '../generated/graphql'
 
 import { useUserProjectStatusStore } from '../store/user-project-status-store'

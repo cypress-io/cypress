@@ -1,4 +1,4 @@
-import type { NexusGenArgTypes } from '@packages/graphql/src/gen/nxs.gen'
+import type { NexusGenArgTypes } from '@packages/data-context/src/gen/nxs.gen'
 import type { TypedDocumentNode } from '@urql/core'
 import type { GraphQLResolveInfo, OperationTypeNode } from 'graphql'
 import type { SetOptional } from 'type-fest'

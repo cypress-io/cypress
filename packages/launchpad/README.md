@@ -22,7 +22,7 @@ It is using the following technologies:
 
 More details on the front-end setup are found in the `@packages/frontend-shared` [package README](../frontend-shared/README.md).
 
-Cypress' entire back-end is powered by the `@packages/server` package. Launchpad interfaces with it via a GraphQL layer, found in `@packages/graphql`.
+Cypress' entire back-end is powered by the `@packages/server` package. Launchpad interfaces with it via a GraphQL layer, found in `@packages/data-context/graphql`.
 
 [Here is a short tutorial](https://github.com/lmiller1990/vue-3-urql-example) building a simple app using the same technologies we are using for launchpad. There are a lot of moving pieces; understanding how everything works will help you contribute to Launchpad.
 
