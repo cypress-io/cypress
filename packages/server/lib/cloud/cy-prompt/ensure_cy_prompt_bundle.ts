@@ -9,7 +9,6 @@ interface EnsureCyPromptBundleOptions {
   cyPromptPath: string
   cyPromptUrl: string
   projectId?: string
-  downloadTimeoutMs?: number
 }
 
 /**
@@ -25,8 +24,6 @@ export const ensureCyPromptBundle = async ({ cyPromptPath, cyPromptUrl, projectI
   // First remove cyPromptPath to ensure we have a clean slate
   await remove(cyPromptPath)
   await ensureDir(cyPromptPath)
-
-  let timeoutId: NodeJS.Timeout
 
   const responseManifestSignature: string = await getCyPromptBundle({
     cyPromptUrl,
