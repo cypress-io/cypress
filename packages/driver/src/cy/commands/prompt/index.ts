@@ -145,6 +145,7 @@ export default (Commands: Cypress.Cypress['Commands'], Cypress: Cypress.Cypress,
         const timeoutPromise = new Promise((resolve) => {
           timeoutId = setTimeout(() => {
             resolve({
+              error: undefined,
               timedOut: true,
             })
           }, downloadTimeout)
