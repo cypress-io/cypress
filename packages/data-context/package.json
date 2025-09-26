@@ -15,8 +15,8 @@
     "lint": "eslint --ext .js,.ts,.json, .",
     "nexus-build": "ts-node ./scripts/nexus-build.ts",
     "test": "yarn test-unit",
-    "test-debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
-    "test-jest": "jest",
+    "test-debug": "node --experimental-vm-modules --inspect-brk node_modules/.bin/jest --runInBand",
+    "test-jest": "yarn node --experimental-vm-modules $(yarn bin jest)",
     "test-unit": "mocha -r @packages/ts/register --config ./test/.mocharc.js --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
     "tslint": "tslint --config ../ts/tslint.json --project . --exclude ./src/gen/nxs.gen.ts"
   },
