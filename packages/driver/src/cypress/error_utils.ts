@@ -288,7 +288,7 @@ const throwErr = (err, options: any = {}): never => {
 }
 
 const throwErrByPath = (errPath, options: any = {}): never => {
-  const err = errByPath(errPath, options.args)
+  const err = errByPath(errPath, options.args, options.docs)
 
   if (options.stack) {
     err.stack = $stackUtils.replacedStack(err, options.stack)
@@ -425,7 +425,7 @@ const docsUrlTitleByParents = (msgPath) => {
   return docsUrlTitleByParents(msgPath)
 }
 
-const errByPath = (msgPath, args?) => {
+const errByPath = (msgPath, args?, docs?) => {
   let msgValue = _.get(allErrorMessages, msgPath)
 
   if (!msgValue) {
@@ -435,7 +435,7 @@ const errByPath = (msgPath, args?) => {
   let msgObj = msgValue
 
   if (_.isFunction(msgValue)) {
-    msgObj = msgValue(args)
+    msgObj = msgValue(args, docs)
   }
 
   if (_.isString(msgObj)) {
