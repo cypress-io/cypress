@@ -86,7 +86,7 @@ async function getLockFilename (dir: string) {
   const hasYarnLock = !!await fs.stat(path.join(dir, 'yarn.lock')).catch(() => false)
   const hasNpmLock = !!await fs.stat(path.join(dir, 'package-lock.json')).catch(() => false)
   const hasPnpmLock = !!await fs.stat(path.join(dir, 'pnpm-lock.yaml')).catch(() => false)
-  const hasBunLock = !!await fs.stat(path.join(dir, 'bun.lockb')).catch(() => false)
+  const hasBunLock = !!await fs.stat(path.join(dir, 'bun.lock')).catch(() => false)
 
   const lockfileCount = [hasYarnLock, hasNpmLock, hasPnpmLock, hasBunLock].filter(Boolean).length
 
@@ -94,7 +94,7 @@ async function getLockFilename (dir: string) {
     throw new Error(`The example project at '${dir}' has conflicting lockfiles. Only use one package manager's lockfile per project.`)
   }
 
-  if (hasBunLock) return 'bun.lockb'
+  if (hasBunLock) return 'bun.lock'
 
   if (hasPnpmLock) return 'pnpm-lock.yaml'
 
@@ -210,7 +210,7 @@ export async function scaffoldProjectNodeModules ({
     const lockFilename = await getLockFilename(projectDir)
     const hasYarnLock = lockFilename === 'yarn.lock'
     const hasPnpmLock = lockFilename === 'pnpm-lock.yaml'
-    const hasBunLock = lockFilename === 'bun.lockb'
+    const hasBunLock = lockFilename === 'bun.lock'
 
     // 1. Ensure there is a cache directory set up for this test project's `node_modules`.
     await ensureCacheDir(cacheNodeModulesDir)
