@@ -4,6 +4,8 @@ import execa from 'execa'
 import { cyTmpDir, projectPath, projects, root } from '../fixtures'
 import { getYarnCommand } from './yarn'
 import { getNpmCommand } from './npm'
+import { getBunCommand } from './bun'
+import { getPnpmCommand } from './pnpm'
 
 type Dependencies = Record<string, string>
 
@@ -83,8 +85,18 @@ async function copyNodeModulesFromCache (tmpNodeModulesDir: string, cacheDir: st
 async function getLockFilename (dir: string) {
   const hasYarnLock = !!await fs.stat(path.join(dir, 'yarn.lock')).catch(() => false)
   const hasNpmLock = !!await fs.stat(path.join(dir, 'package-lock.json')).catch(() => false)
+  const hasPnpmLock = !!await fs.stat(path.join(dir, 'pnpm-lock.yaml')).catch(() => false)
+  const hasBunLock = !!await fs.stat(path.join(dir, 'bun.lockb')).catch(() => false)
 
-  if (hasYarnLock && hasNpmLock) throw new Error(`The example project at '${dir}' has conflicting lockfiles. Only use one package manager's lockfile per project.`)
+  const lockfileCount = [hasYarnLock, hasNpmLock, hasPnpmLock, hasBunLock].filter(Boolean).length
+
+  if (lockfileCount > 1) {
+    throw new Error(`The example project at '${dir}' has conflicting lockfiles. Only use one package manager's lockfile per project.`)
+  }
+
+  if (hasBunLock) return 'bun.lockb'
+
+  if (hasPnpmLock) return 'pnpm-lock.yaml'
 
   if (hasNpmLock) return 'package-lock.json'
 
@@ -197,6 +209,8 @@ export async function scaffoldProjectNodeModules ({
 
     const lockFilename = await getLockFilename(projectDir)
     const hasYarnLock = lockFilename === 'yarn.lock'
+    const hasPnpmLock = lockFilename === 'pnpm-lock.yaml'
+    const hasBunLock = lockFilename === 'bun.lockb'
 
     // 1. Ensure there is a cache directory set up for this test project's `node_modules`.
     await ensureCacheDir(cacheNodeModulesDir)
@@ -226,8 +240,8 @@ export async function scaffoldProjectNodeModules ({
     log(`Writing ${lockFilename} with fixed relative paths to temp dir`)
     await restoreLockFileRelativePaths({ projectDir, lockFilePath, relativePathToMonorepoRoot })
 
-    // 5. Run `yarn/npm install`.
-    const getCommandFn = hasYarnLock ? getYarnCommand : getNpmCommand
+    // 5. Run `yarn/npm/bun/pnpm install`.
+    const getCommandFn = hasBunLock ? getBunCommand : (hasYarnLock ? getYarnCommand : (hasPnpmLock ? getPnpmCommand : getNpmCommand))
     const cmd = getCommandFn({
       updateLockFile,
       yarnV311: pkgJson._cyYarnV311,

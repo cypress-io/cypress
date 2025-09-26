@@ -1,0 +1,8 @@
+{
+  "name": "@bun-workspace/shared",
+  "version": "0.0.0-test",
+  "main": "index.js",
+  "dependencies": {
+    "lodash": "^4.17.21"
+  }
+}

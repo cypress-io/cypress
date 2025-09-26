@@ -1,0 +1,11 @@
+{
+  "name": "bun-with-deps",
+  "version": "0.0.0-test",
+  "dependencies": {
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.225",
+    "typescript": "^5.6.3"
+  }
+}

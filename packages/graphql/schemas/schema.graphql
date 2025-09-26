@@ -1695,6 +1695,7 @@ enum PackageManagerEnum {
   npm
   pnpm
   yarn
+  bun
 }
 
 """

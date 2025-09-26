@@ -38,6 +38,9 @@ export CYPRESS_CACHE_FOLDER=/tmp/CYPRESS_CACHE_FOLDER/
 if [ "$USE_YARN_TO_INSTALL_CYPRESS_BINARY" = true ]; then
   # if using yarn to install the built cypress binary, we can just install the tarball that is in the monorepo root directory
   yarn add cypress@file:$TARBALL_PATH
+elif [ "$USE_BUN_TO_INSTALL_CYPRESS_BINARY" = true ]; then
+  # if using bun to install the built cypress binary, we can just install the tarball that is in the monorepo root directory
+  bun add cypress@file:$TARBALL_PATH
 else
   export npm_config_cache=/tmp/npm_config_cache/
   export npm_config_package_lock=false
