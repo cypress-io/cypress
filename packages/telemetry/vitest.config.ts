@@ -8,6 +8,7 @@ export default defineConfig({
       'test/processors/on-start-span-processor.spec.ts',
       'test/span-exporters/cloud-span-exporter.spec.ts',
       'test/span-exporters/console-trace-link-exporter.spec.ts',
+      'test/span-exporters/ipc-span-exporter.spec.ts',
     ],
     globals: true,
     environment: 'node',
