@@ -170,14 +170,13 @@ Here is a list of the core packages in this repository with a short description,
  | [cli](./cli)                          | `cypress`               | The command-line tool that is packaged as an `npm` module.                   |
  | [app](./packages/app)           | `@packages/app`      | The front-end for the Cypress App that renders in the launched browser instance.             |
  | [config](./packages/config)           | `@packages/config`      | The Cypress configuration types and validation used in the server, data-context and driver.             |
- | [data-context](./packages/data-context)           | `@packages/data-context`      | Centralized data access for the Cypress application.             |
+ | [data-context](./packages/data-context)           | `@packages/data-context`      | Centralized data access for the Cypress application. Contains the GraphQL layer that the `launchpad` and `app` use to interact with the `server`.   |
  | [driver](./packages/driver)           | `@packages/driver`      | The code that is used to drive the behavior of the API commands.             |
  | [electron](./packages/electron)       | `@packages/electron`    | The Cypress implementation of Electron.                                      |
  | [errors](./packages/errors)           | `@packages/errors`      | Error definitions and utilities for Cypress                                  |
  | [example](./packages/example)         | `@packages/example`     | Our example kitchen-sink application.                                        |
  | [extension](./packages/extension)     | `@packages/extension`   | The Cypress Chrome browser extension                                         |
  | [frontend-shared](./packages/frontend-shared)     | `@packages/frontend-shared`   | Shared components and styles used in the `app` and `launchpad`.                                         |
- | [graphql](./packages/graphql)     | `@packages/graphql`   | The GraphQL layer that the `launchpad` and `app` use to interact with the `server`.                                  |
  | [https-proxy](./packages/https-proxy) | `@packages/https-proxy` | This does https proxy for handling http certs and traffic.                   |
  | [icons](./packages/icons)       | `@packages/icons`    | The Cypress icons.                        |
  | [launcher](./packages/launcher)       | `@packages/launcher`    | Finds and launches browsers installed on your system.                        |

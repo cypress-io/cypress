@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.3.1
+
+_Released 10/07/2025 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed a regression introduced in [`15.0.0`](https://docs.cypress.io/guides/references/changelog#15-0-0) where `dbus` connection error messages appear in docker containers when launching Cypress. Fixes [#32290](https://github.com/cypress-io/cypress/issues/32290).
+
 ## 15.3.0
 
 _Released 9/23/2025_

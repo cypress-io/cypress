@@ -1,4 +1,5 @@
-import { expect } from 'chai'
+import { vi, describe, it, expect } from 'vitest'
+
 import {
   hideKeys,
   setUrls,
@@ -6,37 +7,39 @@ import {
   isResolvedConfigPropDefault,
 } from '../src/utils'
 import {
-  utils as projectUtils,
+  getProcessEnvVars,
 } from '../src/project/utils'
 
 describe('config/src/utils', () => {
   beforeEach(function () {
-    delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
+    vi.unstubAllEnvs()
+    vi.stubEnv('CYPRESS_COMMERCIAL_RECOMMENDATIONS', undefined)
+    vi.stubEnv('CYPRESS_LOCAL_CY_PROMPT_PATH', undefined)
   })
 
   describe('hideKeys', () => {
     it('removes middle part of the string', () => {
       const hidden = hideKeys('12345-xxxx-abcde')
 
-      expect(hidden).to.equal('12345...abcde')
+      expect(hidden).toEqual('12345...abcde')
     })
 
     it('returns undefined for missing key', () => {
-      expect(hideKeys()).to.be.undefined
+      expect(hideKeys()).toBeUndefined()
     })
 
     // https://github.com/cypress-io/cypress/issues/14571
     it('returns undefined for non-string argument', () => {
-      expect(hideKeys(true)).to.be.undefined
-      expect(hideKeys(1234)).to.be.undefined
+      expect(hideKeys(true)).toBeUndefined()
+      expect(hideKeys(1234)).toBeUndefined()
     })
   })
 
-  context('.setUrls', () => {
+  describe('.setUrls', () => {
     it('does not mutate existing obj', () => {
       const obj = {}
 
-      expect(setUrls(obj)).not.to.eq(obj)
+      expect(setUrls(obj)).not.toEqual(obj)
     })
 
     it('uses baseUrl when set', () => {
@@ -48,8 +51,8 @@ describe('config/src/utils', () => {
 
       const urls = setUrls(obj)
 
-      expect(urls.browserUrl).to.eq('https://www.google.com/__/')
-      expect(urls.proxyUrl).to.eq('http://localhost:65432')
+      expect(urls.browserUrl).toEqual('https://www.google.com/__/')
+      expect(urls.proxyUrl).toEqual('http://localhost:65432')
     })
 
     it('strips baseUrl to host when set', () => {
@@ -61,58 +64,50 @@ describe('config/src/utils', () => {
 
       const urls = setUrls(obj)
 
-      expect(urls.browserUrl).to.eq('http://localhost:9999/__/')
-      expect(urls.proxyUrl).to.eq('http://localhost:65432')
+      expect(urls.browserUrl).toEqual('http://localhost:9999/__/')
+      expect(urls.proxyUrl).toEqual('http://localhost:65432')
     })
   })
 
-  context('coerce', () => {
-    beforeEach(function () {
-      this.env = process.env
-    })
-
-    afterEach(function () {
-      process.env = this.env
-    })
-
+  describe('coerce', () => {
     it('coerces string', () => {
-      expect(coerce('foo')).to.eq('foo')
+      expect(coerce('foo')).toEqual('foo')
     })
 
     it('coerces string from process.env', () => {
       process.env['CYPRESS_STRING'] = 'bar'
-      const cypressEnvVar = projectUtils.getProcessEnvVars(process.env)
+      const cypressEnvVar = getProcessEnvVars(process.env)
 
-      expect(coerce(cypressEnvVar)).to.deep.include({ STRING: 'bar' })
+      expect(coerce(cypressEnvVar)).toEqual(expect.objectContaining({ STRING: 'bar' }))
     })
 
     it('coerces number', () => {
-      expect(coerce('123')).to.eq(123)
+      expect(coerce('123')).toEqual(123)
     })
 
     // NOTE: When exporting shell variables, they are saved in `process.env` as strings, hence why
     // all `process.env` variables are assigned as strings in these unit tests
     it('coerces number from process.env', () => {
       process.env['CYPRESS_NUMBER'] = '8000'
-      const cypressEnvVar = projectUtils.getProcessEnvVars(process.env)
+      const cypressEnvVar = getProcessEnvVars(process.env)
 
-      expect(coerce(cypressEnvVar)).to.deep.include({ NUMBER: 8000 })
+      expect(coerce(cypressEnvVar)).toEqual(expect.objectContaining({ NUMBER: 8000 }))
     })
 
     it('coerces boolean', () => {
-      expect(coerce('true')).to.be.true
+      expect(coerce('true')).toBe(true)
     })
 
     it('coerces boolean from process.env', () => {
       process.env['CYPRESS_BOOLEAN'] = 'false'
-      const cypressEnvVar = projectUtils.getProcessEnvVars(process.env)
+      const cypressEnvVar = getProcessEnvVars(process.env)
 
-      expect(coerce(cypressEnvVar)).to.deep.include({ BOOLEAN: false })
+      expect(coerce(cypressEnvVar)).toEqual(expect.objectContaining({ BOOLEAN: false }))
     })
 
     // https://github.com/cypress-io/cypress/issues/8818
     it('coerces JSON string', () => {
-      expect(coerce('[{"type": "foo", "value": "bar"}, {"type": "fizz", "value": "buzz"}]')).to.deep.equal(
+      expect(coerce('[{"type": "foo", "value": "bar"}, {"type": "fizz", "value": "buzz"}]')).toEqual(
         [{ 'type': 'foo', 'value': 'bar' }, { 'type': 'fizz', 'value': 'buzz' }],
       )
     })
@@ -120,33 +115,38 @@ describe('config/src/utils', () => {
     // https://github.com/cypress-io/cypress/issues/8818
     it('coerces JSON string from process.env', () => {
       process.env['CYPRESS_stringified_json'] = '[{"type": "foo", "value": "bar"}, {"type": "fizz", "value": "buzz"}]'
-      const cypressEnvVar = projectUtils.getProcessEnvVars(process.env)
+      const cypressEnvVar = getProcessEnvVars(process.env)
       const coercedCypressEnvVar = coerce(cypressEnvVar)
 
-      expect(coercedCypressEnvVar).to.have.keys('stringified_json')
-      expect(coercedCypressEnvVar['stringified_json']).to.deep.equal([{ 'type': 'foo', 'value': 'bar' }, { 'type': 'fizz', 'value': 'buzz' }])
+      expect(coercedCypressEnvVar).toHaveProperty('stringified_json')
+      expect(coercedCypressEnvVar['stringified_json']).toHaveLength(2)
+      expect(coercedCypressEnvVar['stringified_json']).toEqual(expect.arrayContaining([{ 'type': 'foo', 'value': 'bar' }, { 'type': 'fizz', 'value': 'buzz' }]))
     })
 
     it('coerces array', () => {
-      expect(coerce('[foo,bar]')).to.have.members(['foo', 'bar'])
+      const coercedCypressEnvVar = coerce('[foo,bar]')
+
+      expect(coercedCypressEnvVar).toHaveLength(2)
+      expect(coercedCypressEnvVar).toEqual(expect.arrayContaining(['foo', 'bar']))
     })
 
     it('coerces array from process.env', () => {
       process.env['CYPRESS_ARRAY'] = '[google.com,yahoo.com]'
-      const cypressEnvVar = projectUtils.getProcessEnvVars(process.env)
+      const cypressEnvVar = getProcessEnvVars(process.env)
 
       const coercedCypressEnvVar = coerce(cypressEnvVar)
 
-      expect(coercedCypressEnvVar).to.have.keys('ARRAY')
-      expect(coercedCypressEnvVar['ARRAY']).to.have.members(['google.com', 'yahoo.com'])
+      expect(coercedCypressEnvVar).toHaveProperty('ARRAY')
+      expect(coercedCypressEnvVar['ARRAY']).toHaveLength(2)
+      expect(coercedCypressEnvVar['ARRAY']).toEqual(expect.arrayContaining(['google.com', 'yahoo.com']))
     })
 
     it('defaults value with multiple types to string', () => {
-      expect(coerce('123foo456')).to.eq('123foo456')
+      expect(coerce('123foo456')).toEqual('123foo456')
     })
   })
 
-  context('.isResolvedConfigPropDefault', () => {
+  describe('.isResolvedConfigPropDefault', () => {
     it('returns true if value is default value', () => {
       const options = {
         resolved: {
@@ -154,7 +154,7 @@ describe('config/src/utils', () => {
         },
       }
 
-      expect(isResolvedConfigPropDefault(options, 'baseUrl')).to.be.true
+      expect(isResolvedConfigPropDefault(options, 'baseUrl')).toBe(true)
     })
 
     it('returns false if value is not default value', () => {
@@ -164,7 +164,7 @@ describe('config/src/utils', () => {
         },
       }
 
-      expect(isResolvedConfigPropDefault(options, 'baseUrl')).to.be.false
+      expect(isResolvedConfigPropDefault(options, 'baseUrl')).toBe(false)
     })
   })
 })

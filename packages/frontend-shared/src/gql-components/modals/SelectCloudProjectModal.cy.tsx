@@ -3,7 +3,7 @@ import { defaultMessages } from '@cy/i18n'
 import {
   CloudOrganizationConnectionStubs,
   CloudUserStubs,
-} from '@packages/graphql/test/stubCloudTypes'
+} from '@packages/data-context/test/graphql/stubCloudTypes'
 import { SelectCloudProjectModalFragmentDoc } from '../../generated/graphql-test'
 import SelectCloudProjectModal from '../modals/SelectCloudProjectModal.vue'
 import { SelectCloudProjectModal_CreateCloudProjectDocument, SelectCloudProjectModal_SetProjectIdDocument } from '../../generated/graphql'

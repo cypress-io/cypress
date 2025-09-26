@@ -6,7 +6,7 @@ import si, { Systeminformation } from 'systeminformation'
 import util from '../../../lib/util'
 import state from '../../../lib/tasks/state'
 import info from '../../../lib/exec/info'
-import spawn from '../../../lib/exec/spawn'
+import { start as spawnStart } from '../../../lib/exec/spawn'
 
 vi.mock('os', async (importActual) => {
   const actual = await importActual()
@@ -34,15 +34,9 @@ vi.mock('systeminformation', async (importActual) => {
   }
 })
 
-vi.mock('../../../lib/exec/spawn', async (importActual) => {
-  const actual = await importActual()
-
+vi.mock('../../../lib/exec/spawn', async () => {
   return {
-    default: {
-      // @ts-expect-error
-      ...actual.default,
-      start: vi.fn(),
-    },
+    start: vi.fn(),
   }
 })
 
@@ -105,7 +99,7 @@ describe('exec info', () => {
     vi.stubEnv('NO_PROXY', undefined)
     vi.stubEnv('CYPRESS_COMMERCIAL_RECOMMENDATIONS', undefined)
     // common stubs
-    vi.mocked(spawn.start).mockResolvedValue(null)
+    vi.mocked(spawnStart).mockResolvedValue(null)
     vi.mocked(os.platform).mockReturnValue('linux')
     vi.mocked(os.totalmem).mockReturnValue(1.2e+9)
     vi.mocked(os.freemem).mockReturnValue(4e+8)
@@ -142,7 +136,7 @@ describe('exec info', () => {
 
     expect(output()).toMatchSnapshot('cypress info without browsers or vars')
 
-    expect(spawn.start).toBeCalledWith(['--mode=info'], { dev: undefined })
+    expect(spawnStart).toBeCalledWith(['--mode=info'], { dev: undefined })
   })
 
   it('prints proxy and cypress env vars', async () => {

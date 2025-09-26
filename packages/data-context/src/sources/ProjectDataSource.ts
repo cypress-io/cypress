@@ -18,7 +18,7 @@ import assert from 'assert'
 
 import type { DataContext } from '..'
 import { toPosix } from '../util/file'
-import type { FilePartsShape } from '@packages/graphql/src/schemaTypes/objectTypes/gql-FileParts'
+import type { FilePartsShape } from '../../graphql/schemaTypes/objectTypes/gql-FileParts'
 import type { ProjectShape } from '../data'
 import type { FindSpecs } from '../actions'
 import { FileExtension, getDefaultSpecFileName } from '../util/files'
