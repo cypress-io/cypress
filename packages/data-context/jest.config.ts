@@ -15,6 +15,7 @@ export default async (): Promise<Config> => {
       '<rootDir>/test/unit/actions/CodegenActions.spec.ts',
       '<rootDir>/test/unit/actions/CohortsActions.spec.ts',
       '<rootDir>/test/unit/actions/DataEmitterActions.spec.ts',
+      '<rootDir>/test/unit/actions/EventCollectorActions.spec.ts',
     ],
     testEnvironment: 'node',
     transform: {
