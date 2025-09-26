@@ -44,6 +44,7 @@
 - [ ] packages/app
 
 ### Batch 4c: Core packages (part 3)
+- [x] cli
 - [ ] packages/config
 - [ ] packages/root
 - [ ] packages/resolve-dist
