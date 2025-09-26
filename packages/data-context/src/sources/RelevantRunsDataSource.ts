@@ -5,7 +5,7 @@ import { isEqual, take, takeWhile } from 'lodash'
 import type { DataContext } from '../DataContext'
 import type { Query, RelevantRun, RelevantRunInfo, RelevantRunLocationEnum } from '../gen/graphcache-config.gen'
 import { Poller } from '../polling'
-import type { CloudRun } from '@packages/graphql/src/gen/cloud-source-types.gen'
+import type { CloudRun } from '../gen/cloud-source-types.gen'
 
 const debug = debugLib('cypress:data-context:sources:RelevantRunsDataSource')
 

@@ -44,7 +44,7 @@
   "types": "index.ts",
   "nx": {
     "implicitDependencies": [
-      "@packages/graphql"
+      "@packages/data-context"
     ]
   }
 }

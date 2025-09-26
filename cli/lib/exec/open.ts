@@ -1,6 +1,6 @@
 import Debug from 'debug'
 import util from '../util'
-import spawn from './spawn'
+import { start as spawnStart } from './spawn'
 import { start as verifyStart } from '../tasks/verify'
 import { processTestingType, checkConfigFile } from './shared'
 import { exitWithError } from '../errors'
@@ -79,7 +79,7 @@ export const start = async (options: any = {}): Promise<any> => {
     try {
       const args = processOpenOptions(options)
 
-      return spawn.start(args, {
+      return spawnStart(args, {
         dev: options.dev,
         detached: Boolean(options.detached),
       })

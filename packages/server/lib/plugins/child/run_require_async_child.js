@@ -83,17 +83,19 @@ function run (ipc, file, projectRoot) {
   // Config file loading of modules is tested within
   // system-tests/projects/config-cjs-and-esm/*
   const loadFile = async (file) => {
+    let errorLoadingCJSConfig = null
+
     try {
       debug('Loading file %s', file)
 
       return require(file)
     } catch (err) {
       if (!err.stack.includes('[ERR_REQUIRE_ESM]') && !err.stack.includes('SyntaxError: Cannot use import statement outside a module')) {
-        throw err
+        errorLoadingCJSConfig = err
       }
     }
 
-    debug('User is loading an ESM config file')
+    debug('User may be trying to load an ESM config file')
 
     try {
       // We cannot replace the initial `require` with `await import` because
@@ -101,11 +103,17 @@ function run (ipc, file, projectRoot) {
       // pathToFileURL for windows interop: https://github.com/nodejs/node/issues/31710
       const fileURL = pathToFileURL(file).href
 
-      debug(`importing esm file %s`, fileURL)
+      debug(`importing config as esm file %s`, fileURL)
+      const config = await import(fileURL)
 
-      return await import(fileURL)
+      return config
     } catch (err) {
       debug('error loading file via native Node.js module loader %s', err.message)
+      if (errorLoadingCJSConfig) {
+        debug('CJS loading initially failed. Rethrowing %s', errorLoadingCJSConfig.message)
+        throw errorLoadingCJSConfig
+      }
+
       throw err
     }
   }

@@ -88,12 +88,14 @@ Attempt.displayName = 'Attempt'
 
 interface AttemptsProps {
   test: TestModel
+  isSingleStudioTest?: boolean
   scrollIntoView: Function
 }
 
-const Attempts: React.FC<AttemptsProps> = observer(({ test, scrollIntoView }: AttemptsProps) => {
+const Attempts: React.FC<AttemptsProps> = observer(({ test, isSingleStudioTest, scrollIntoView }: AttemptsProps) => {
   return (<ul className={cs('attempts', {
     'has-multiple-attempts': test.hasMultipleAttempts,
+    'single-studio-test': Boolean(isSingleStudioTest),
   })}>
     {test.attempts.map((attempt) => {
       return (

@@ -5,6 +5,9 @@ export default [
   ...baseConfig,
   {
     languageOptions: {
+      parserOptions: {
+        tsconfigRootDir: __dirname,
+      },
       globals: {
         ...globals.node,
         globalThis: 'readonly',

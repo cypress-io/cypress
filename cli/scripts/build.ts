@@ -74,10 +74,9 @@ export default makeUserPackageFile
 if (require.main === module) {
   makeUserPackageFile(process.env.BRANCH)
   .catch((err: any) => {
-    /* eslint-disable no-console */
     console.error('Could not write user package file')
     console.error(err)
-    /* eslint-enable no-console */
+
     process.exit(-1)
   })
 }

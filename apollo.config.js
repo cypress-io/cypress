@@ -6,7 +6,7 @@ module.exports = {
   client: {
     service: {
       name: 'cypress-io',
-      localSchemaFile: path.join(__dirname, 'packages/graphql/schemas/schema.graphql'),
+      localSchemaFile: path.join(__dirname, 'packages/data-context/schemas/schema.graphql'),
     },
     tagName: 'gql',
     includes: [path.join(__dirname, 'packages/{launchpad,app,frontend-shared}/src/**/*.{vue,ts,js,tsx,jsx}')],
