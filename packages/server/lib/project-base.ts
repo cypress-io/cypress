@@ -17,7 +17,18 @@ import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
 import system from './util/system'
-import { BannersState, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ProtocolManagerShape, ReceivedCypressOptions, ResolvedConfigurationOptions, TestingType, VideoRecording, AutomationCommands } from '@packages/types'
+import type {
+  BannersState,
+  FoundBrowser,
+  FoundSpec,
+  OpenProjectLaunchOptions,
+  ProtocolManagerShape,
+  ReceivedCypressOptions,
+  ResolvedConfigurationOptions,
+  TestingType,
+  VideoRecording,
+  AutomationCommands,
+} from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { createHmac } from 'crypto'
 import { ServerBase } from './server-base'
