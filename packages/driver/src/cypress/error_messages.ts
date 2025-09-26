@@ -1335,7 +1335,7 @@ export default {
     promptDownloadError (obj) {
       return {
         message: stripIndent`\
-        Failed to download cy.prompt Cloud code:
+        Failed to download \`cy.prompt\` Cloud code:
 
         - ${obj.error.code ? `${obj.error.code}: ` : ''}${obj.error.message}
 
@@ -1347,7 +1347,7 @@ export default {
     promptDownloadTimedOut (obj) {
       return {
         message: stripIndent`\
-        Timed out waiting for cy.prompt Cloud code:
+        Timed out waiting for \`cy.prompt\` Cloud code:
 
         - Timeout: bundle.tar timed out after 45s
 

@@ -1,7 +1,7 @@
 describe('src/cy/commands/prompt', () => {
   it('errors if download timeout is reached', (done) => {
     cy.on('fail', (err) => {
-      expect(err.message).to.include('Timed out waiting for cy.prompt Cloud code')
+      expect(err.message).to.include('Timed out waiting for `cy.prompt` Cloud code')
       done()
     })
 
@@ -23,7 +23,7 @@ describe('src/cy/commands/prompt', () => {
     backendStub.withArgs('wait:for:prompt:ready').resolves({ success: false, error })
 
     cy.on('fail', (err) => {
-      expect(err.message).to.include('Failed to download cy.prompt Cloud code')
+      expect(err.message).to.include('Failed to download `cy.prompt` Cloud code')
       expect(err.message).to.include(`no space left on device, open '<stripped-path>bundle.tar`)
 
       done()
