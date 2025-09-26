@@ -10,6 +10,11 @@ const tsJestTransformCfg = createDefaultPreset({
 export default async (): Promise<Config> => {
   return {
     // testMatch: ['./test/**/foobar.spec.ts'],
+    testMatch: [
+      '<rootDir>/test/unit/actions/AuthActions.spec.ts',
+      '<rootDir>/test/unit/actions/CodegenActions.spec.ts',
+      '<rootDir>/test/unit/actions/CohortsActions.spec.ts',
+    ],
     testEnvironment: 'node',
     transform: {
       ...tsJestTransformCfg,
