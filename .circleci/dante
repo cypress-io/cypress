@@ -1,4 +1,36 @@
-{
+{name: Run commands on different operating systems
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  Run-npm-on-Ubuntu:
+    name: Run npm on Ubuntu
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '14'
+      - run: npm help
+
+  Run-PSScriptAnalyzer-on-Windows:
+    name: Run PSScriptAnalyzer on Windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install PSScriptAnalyzer module
+        shell: pwsh
+        run: |
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module PSScriptAnalyzer -ErrorAction Stop
+      - name: Get list of rules
+        shell: pwsh
+        run: |
+          Get-ScriptAnalyzerRule
+
   "version" : 3,
   "crypto" : {
     "ciphertext" : "e8e5c4fa6f07e01cdfd6440ceb42ec7338ce7a247f1009d0fd50f81c2cb52c74ceba99ab3b3f9978f0f152d4d2134f728581e613f596963df7f5b91d4db50a5774cf01b68517f6a61e68d2afe8",
