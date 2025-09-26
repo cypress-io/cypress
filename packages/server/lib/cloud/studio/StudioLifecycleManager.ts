@@ -203,12 +203,15 @@ export class StudioLifecycleManager {
       studioHash = studioSession.studioUrl.split('/').pop()?.split('.')[0]
       studioPath = path.join(os.tmpdir(), 'cypress', 'studio', studioHash)
 
+      debug('Setting current studio hash: %s', studioHash)
       // Store the current studio hash so that we can clear the cache entry when retrying
       this.currentStudioHash = studioHash
 
       let hashLoadingPromise = StudioLifecycleManager.hashLoadingMap.get(studioHash)
 
       if (!hashLoadingPromise) {
+        debug('Ensuring studio bundle for hash: %s', studioHash)
+
         hashLoadingPromise = ensureStudioBundle({
           studioUrl: studioSession.studioUrl,
           studioPath,
@@ -219,6 +222,8 @@ export class StudioLifecycleManager {
       }
 
       manifest = await hashLoadingPromise
+
+      debug('Manifest: %o', manifest)
     } else {
       studioPath = process.env.CYPRESS_LOCAL_STUDIO_PATH
       studioHash = 'local'
@@ -237,10 +242,14 @@ export class StudioLifecycleManager {
       const actualHash = crypto.createHash('sha256').update(script).digest('hex')
 
       if (!expectedHash) {
+        debug('Expected hash %s for studio server script not found in manifest: %o', expectedHash, manifest)
+
         throw new Error('Expected hash for studio server script not found in manifest')
       }
 
       if (actualHash !== expectedHash) {
+        debug('Invalid hash for studio server script: %s !== %s', actualHash, expectedHash)
+
         throw new Error('Invalid hash for studio server script')
       }
     }

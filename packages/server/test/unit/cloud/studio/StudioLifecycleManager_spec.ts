@@ -989,16 +989,21 @@ describe('StudioLifecycleManager', () => {
     })
 
     it('clears the current studio hash from cached bundle promises on retry', async () => {
+      const mockManifest = {
+        'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
+      }
+
+      ensureStudioBundleStub.resolves(mockManifest)
+
       // Add some cached promises to the static map
-      const dummyPromise = Promise.resolve()
+      const dummyPromise = Promise.resolve({
+        'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
+      })
 
       // @ts-expect-error - accessing private static property
       StudioLifecycleManager.hashLoadingMap.set('test-hash-1', dummyPromise)
       // @ts-expect-error - accessing private static property
       StudioLifecycleManager.hashLoadingMap.set('abc', dummyPromise) // This should be the current hash (from studioUrl)
-
-      // @ts-expect-error - accessing private static property
-      expect(StudioLifecycleManager.hashLoadingMap.size).to.equal(2)
 
       // Initialize with ctx so retry will work
       studioLifecycleManager.initializeStudioManager({
@@ -1008,8 +1013,15 @@ describe('StudioLifecycleManager', () => {
         debugData: {},
       })
 
-      // @ts-expect-error - accessing private property
-      studioLifecycleManager.currentStudioHash = 'abc'
+      // @ts-expect-error - accessing private static property
+      expect(StudioLifecycleManager.hashLoadingMap.size).to.equal(2)
+
+      // Wait for initialization to complete
+      await new Promise((resolve) => {
+        studioLifecycleManager.registerStudioReadyListener(() => {
+          resolve(true)
+        })
+      })
 
       studioLifecycleManager.retry()
 
@@ -1020,6 +1032,13 @@ describe('StudioLifecycleManager', () => {
       expect(StudioLifecycleManager.hashLoadingMap.has('abc')).to.be.false
       // @ts-expect-error - accessing private static property
       expect(StudioLifecycleManager.hashLoadingMap.size).to.equal(1)
+
+      // Wait for retry to complete
+      await new Promise((resolve) => {
+        studioLifecycleManager.registerStudioReadyListener(() => {
+          resolve(true)
+        })
+      })
     })
 
     it('clears the local hash when using local studio path', async () => {
@@ -1052,6 +1071,13 @@ describe('StudioLifecycleManager', () => {
       })
 
       studioLifecycleManager.retry()
+
+      // Wait for retry to complete
+      await new Promise((resolve) => {
+        studioLifecycleManager.registerStudioReadyListener(() => {
+          resolve(true)
+        })
+      })
 
       // Verify only the 'local' hash was cleared
       // @ts-expect-error - accessing private static property
