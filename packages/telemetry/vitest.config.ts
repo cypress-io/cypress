@@ -10,6 +10,7 @@ export default defineConfig({
       'test/span-exporters/console-trace-link-exporter.spec.ts',
       'test/span-exporters/ipc-span-exporter.spec.ts',
       'test/span-exporters/websocket-span-exporter.spec.ts',
+      'test/browser.spec.ts',
     ],
     globals: true,
     environment: 'node',
