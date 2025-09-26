@@ -1337,7 +1337,7 @@ export default {
         message: stripIndent`\
         Failed to download cy.prompt Cloud code:
 
-        - ${obj.error.code}: ${obj.error.message}
+        - ${obj.error.code ? `${obj.error.code}: ` : ''}${obj.error.message}
 
          Check your network connection and file settings to ensure download is not interrupted.
       `,
@@ -1349,7 +1349,7 @@ export default {
         message: stripIndent`\
         Timed out waiting for cy.prompt Cloud code:
 
-        - ${obj.error.code ? `${obj.error.code}: ` : ''}${obj.error.message}
+        - Timeout: bundle.tar timed out after 45s
 
          Check your network connection and system configuration.
       `,
