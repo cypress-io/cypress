@@ -1,14 +1,13 @@
-import { expect } from 'chai'
-import sinon from 'sinon'
+import { describe, expect, it, beforeAll, jest } from '@jest/globals'
 import type { DataContext } from '../../../src'
 import { DataEmitterActions } from '../../../src/actions/DataEmitterActions'
 import { createTestDataContext } from '../helper'
 
 describe('DataEmitterActions', () => {
-  context('.subscribeTo', () => {
+  describe('.subscribeTo', () => {
     let ctx: DataContext
 
-    before(() => {
+    beforeAll(() => {
       ctx = createTestDataContext('open')
     })
 
@@ -44,8 +43,8 @@ describe('DataEmitterActions', () => {
 
       await iteratorPromise
 
-      expect(items).to.eql(3)
-      expect(completed).to.be.true
+      expect(items).toEqual(3)
+      expect(completed).toBe(true)
     })
 
     it('handles iterating through events if an event is emitted before the iteration', async () => {
@@ -75,8 +74,8 @@ describe('DataEmitterActions', () => {
 
       await iteratorPromise
 
-      expect(items).to.eql(3)
-      expect(completed).to.be.true
+      expect(items).toEqual(3)
+      expect(completed).toBe(true)
     })
 
     it('handles stopping the loop if return is called before the iteration', async () => {
@@ -103,8 +102,8 @@ describe('DataEmitterActions', () => {
 
       await iteratorPromise
 
-      expect(items).to.eql(0)
-      expect(completed).to.be.true
+      expect(items).toEqual(0)
+      expect(completed).toBe(true)
     })
 
     const createTestIterator = (subscription) => {
@@ -130,7 +129,7 @@ describe('DataEmitterActions', () => {
     it('handles multiple subscriptions', async () => {
       const actions = new DataEmitterActions(ctx)
 
-      const unsubscribe1 = sinon.stub()
+      const unsubscribe1 = jest.fn()
 
       const subscription1 = actions.subscribeTo('specsChange', { sendInitial: true, onUnsubscribe: unsubscribe1 })
 
@@ -146,7 +145,7 @@ describe('DataEmitterActions', () => {
       let subscription2
       let iteratorFactory2
       let iteratorPromise2
-      let unsubscribe2 = sinon.stub()
+      let unsubscribe2 = jest.fn()
 
       setImmediate(() => {
         subscription2 = actions.subscribeTo('specsChange', { sendInitial: true, onUnsubscribe: unsubscribe2 })
@@ -168,14 +167,17 @@ describe('DataEmitterActions', () => {
       await iteratorPromise1
       await iteratorPromise2
 
-      expect(iteratorFactory1.items, 'first subscription should be called 3 times').to.eql(3)
-      expect(iteratorFactory1.completed).to.be.true
+      // first subscription should be called 3 times
+      expect(iteratorFactory1.items).toEqual(3)
+      expect(iteratorFactory1.completed).toBe(true)
 
-      expect(iteratorFactory2.items, 'second subscription should be called 2 times').to.eql(2)
-      expect(iteratorFactory2.completed).to.be.true
+      // second subscription should be called 2 times
+      expect(iteratorFactory2.items).toEqual(2)
+      expect(iteratorFactory2.completed).toBe(true)
 
-      expect(unsubscribe1, 'should unsubscribe and see there is 1 subscription still listening').to.have.been.calledOnceWith(1)
-      expect(unsubscribe2).to.have.been.calledOnceWith(0)
+      // should unsubscribe and see there is 1 subscription still listening
+      expect(unsubscribe1).toHaveBeenNthCalledWith(1, 1)
+      expect(unsubscribe2).toHaveBeenNthCalledWith(1, 0)
     })
   })
 })
