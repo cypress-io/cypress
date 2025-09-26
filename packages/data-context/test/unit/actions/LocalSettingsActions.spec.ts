@@ -1,5 +1,4 @@
-import { expect } from 'chai'
-import sinon from 'sinon'
+import { describe, expect, it, jest } from '@jest/globals'
 import { LocalSettingsActions } from '../../../src/actions/LocalSettingsActions'
 import { createTestDataContext } from '../helper'
 import type { DataContext } from '../../../src'
@@ -10,54 +9,53 @@ describe('LocalSettingsActions', () => {
   let actions: LocalSettingsActions
 
   beforeEach(() => {
-    sinon.restore()
-
     ctx = createTestDataContext('open')
 
     actions = new LocalSettingsActions(ctx)
   })
 
-  context('refreshLocalSettings', () => {
-    context('notifyWhenRunCompletes', () => {
+  describe('refreshLocalSettings', () => {
+    describe('notifyWhenRunCompletes', () => {
       it('should fix false value', async () => {
-        ctx._apis.localSettingsApi.getPreferences = sinon.stub().resolves({
-        //@ts-ignore
+        // @ts-expect-error - mocked method
+        ctx._apis.localSettingsApi.getPreferences = jest.fn().mockResolvedValue({
           notifyWhenRunCompletes: false,
         })
 
         await actions.refreshLocalSettings()
 
-        expect(ctx.coreData.localSettings.preferences.notifyWhenRunCompletes).to.eql([])
+        expect(ctx.coreData.localSettings.preferences.notifyWhenRunCompletes).toEqual([])
       })
 
       it('should fix true value', async () => {
-        ctx._apis.localSettingsApi.getPreferences = sinon.stub().resolves({
-        //@ts-ignore
+        // @ts-expect-error - mocked method
+        ctx._apis.localSettingsApi.getPreferences = jest.fn().mockResolvedValue({
           notifyWhenRunCompletes: true,
         })
 
         await actions.refreshLocalSettings()
 
-        expect(ctx.coreData.localSettings.preferences.notifyWhenRunCompletes).to.eql([...NotifyCompletionStatuses])
+        expect(ctx.coreData.localSettings.preferences.notifyWhenRunCompletes).toEqual([...NotifyCompletionStatuses])
       })
 
       it('should leave value alone if value is an array', async () => {
-        ctx._apis.localSettingsApi.getPreferences = sinon.stub().resolves({
-        //@ts-ignore
+        // @ts-expect-error - mocked method
+        ctx._apis.localSettingsApi.getPreferences = jest.fn().mockResolvedValue({
           notifyWhenRunCompletes: ['errored'],
         })
 
         await actions.refreshLocalSettings()
 
-        expect(ctx.coreData.localSettings.preferences.notifyWhenRunCompletes).to.eql(['errored'])
+        expect(ctx.coreData.localSettings.preferences.notifyWhenRunCompletes).toEqual(['errored'])
       })
 
       it('should pass through default value if not set ', async () => {
-        ctx._apis.localSettingsApi.getPreferences = sinon.stub().resolves({})
+        // @ts-expect-error - mocked method
+        ctx._apis.localSettingsApi.getPreferences = jest.fn().mockResolvedValue({})
 
         await actions.refreshLocalSettings()
 
-        expect(ctx.coreData.localSettings.preferences.notifyWhenRunCompletes).to.eql(['failed'])
+        expect(ctx.coreData.localSettings.preferences.notifyWhenRunCompletes).toEqual(['failed'])
       })
     })
   })
