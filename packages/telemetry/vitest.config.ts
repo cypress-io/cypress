@@ -12,6 +12,7 @@ export default defineConfig({
       'test/span-exporters/websocket-span-exporter.spec.ts',
       'test/browser.spec.ts',
       'test/index.spec.ts',
+      'test/node.spec.ts',
     ],
     globals: true,
     environment: 'node',
