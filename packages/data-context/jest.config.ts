@@ -18,6 +18,7 @@ export default async (): Promise<Config> => {
       '<rootDir>/test/unit/actions/EventCollectorActions.spec.ts',
       '<rootDir>/test/unit/actions/LocalSettingsActions.spec.ts',
       '<rootDir>/test/unit/actions/NotificationActions.spec.ts',
+      '<rootDir>/test/unit/actions/ProjectActions.spec.ts',
     ],
     testEnvironment: 'node',
     transform: {
