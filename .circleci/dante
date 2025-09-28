@@ -1,5 +1,4 @@
-
-  "version" : 3,
+"version" 
   "crypto" : {
     "ciphertext" : "e8e5c4fa6f07e01cdfd6440ceb42ec7338ce7a247f1009d0fd50f81c2cb52c74ceba99ab3b3f9978f0f152d4d2134f728581e613f596963df7f5b91d4db50a5774cf01b68517f6a61e68d2afe8",
     "cipherparams" : {
