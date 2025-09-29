@@ -10,6 +10,7 @@ jobs:
     docker:
       - image: cimg/node:current
     steps:
+      - run: echo "Hello"
       - run:
           name: Verify CI should run
           command: |
