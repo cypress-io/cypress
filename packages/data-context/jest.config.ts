@@ -27,6 +27,7 @@ export default async (): Promise<Config> => {
       '<rootDir>/test/unit/polling/poller.spec.ts',
       '<rootDir>/test/unit/sources/BrowserDataSource.spec.ts',
       '<rootDir>/test/unit/sources/CloudDataSource.spec.ts',
+      '<rootDir>/test/unit/sources/GitDataSource_unit.spec.ts',
     ],
     testEnvironment: 'node',
     transform: {
