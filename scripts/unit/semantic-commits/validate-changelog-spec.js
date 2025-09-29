@@ -160,6 +160,33 @@ _Released 01/17/2033 (PENDING)_
       expect(console.log).to.be.calledWith('It appears at a high-level your changelog entry is correct! The remaining validation is left to the pull request reviewers.')
     })
 
+    it('verifies changelog entry has been included when the changelog is passed in', async () => {
+      const changedFiles = [
+        'packages/driver/lib/index.js',
+        'cli/CHANGELOG.md',
+      ]
+
+      const changelogContent = `
+## 120.2.0
+
+_Released 01/17/2033 (PENDING)_
+
+**Performance:**
+
+- Fixed in [#77](https://github.com/cypress-io/cypress/pull/77).`
+
+      await validateChangelog({
+        changelogContent,
+        changedFiles,
+        commits: [{
+          prNumber: 77,
+          semanticType: 'perf',
+        }],
+      })
+
+      expect(console.log).to.be.calledWith('It appears at a high-level your changelog entry is correct! The remaining validation is left to the pull request reviewers.')
+    })
+
     it('verifies changelog with shared entry', async () => {
       const changedFiles = [
         'packages/driver/lib/index.js',

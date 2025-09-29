@@ -1,3 +1,15 @@
+# [@cypress/grep-v5.0.0](https://github.com/cypress-io/cypress/compare/@cypress/grep-v4.1.1...@cypress/grep-v5.0.0) (2025-09-19)
+
+
+### breaking
+
+* convert @cypress/grep to TypeScript and change what is exported ([c83df82](https://github.com/cypress-io/cypress/commit/c83df82db01ffecc6e217fb1ab01103ef72f1095))
+
+
+### BREAKING CHANGES
+
+* @cypress/grep now exports a register function that can be imported from the users spec file. Additionally, the plugin can be imported via @cypress/grep/plugin.
+
 # [@cypress/grep-v4.1.1](https://github.com/cypress-io/cypress/compare/@cypress/grep-v4.1.0...@cypress/grep-v4.1.1) (2025-08-08)
 
 # [@cypress/grep-v4.1.0](https://github.com/cypress-io/cypress/compare/@cypress/grep-v4.0.2...@cypress/grep-v4.1.0) (2024-07-02)

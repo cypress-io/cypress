@@ -8,7 +8,7 @@ import type {
   Spec,
 } from '../generated/test-graphql-types.gen'
 import { testNodeId } from './clientTestUtils'
-import { CloudProjectStubs } from '@packages/graphql/test/stubCloudTypes'
+import { CloudProjectStubs } from '@packages/data-context/test/graphql/stubCloudTypes'
 import { stubBrowsers } from './stubgql-Browser'
 
 export const createTestGlobalProject = (title: string, additionalConfig: Partial<GlobalProject> = {}): GlobalProject => {

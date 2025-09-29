@@ -1,4 +1,4 @@
-import { CloudRunStubs } from '@packages/graphql/test/stubCloudTypes'
+import { CloudRunStubs } from '@packages/data-context/test/graphql/stubCloudTypes'
 import { RunCardFragmentDoc } from '../generated/graphql-test'
 import RunCard from './RunCard.vue'
 import _ from 'lodash'

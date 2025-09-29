@@ -1,5 +1,5 @@
 import type { ParsedPath } from 'path'
-import type { CodeGenType } from '@packages/graphql/src/gen/nxs.gen'
+import type { CodeGenType } from '../gen/nxs.gen'
 import fs from 'fs-extra'
 import { uniq, upperFirst } from 'lodash'
 import path from 'path'

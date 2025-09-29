@@ -1,6 +1,6 @@
 import { DebugTestingProgress_SpecsDocument } from '../generated/graphql'
 import DebugTestingProgress from './DebugTestingProgress.vue'
-import { createRelevantRunSpecChangeEvent } from '@packages/graphql/test/stubCloudTypes'
+import { createRelevantRunSpecChangeEvent } from '@packages/data-context/test/graphql/stubCloudTypes'
 
 describe('<DebugTestingProgress />', () => {
   it('renders as expected', () => {

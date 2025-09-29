@@ -1,0 +1,36 @@
+[
+  {
+    "name": "omit-and-skip.cy.ts",
+    "tests": [
+      {
+        "name": "Page",
+        "state": "pending"
+      },
+      {
+        "name": "Page",
+        "state": "passed"
+      },
+      {
+        "name": "Page",
+        "state": "passed"
+      }
+    ]
+  },
+  {
+    "name": "skip.cy.ts",
+    "tests": [
+      {
+        "name": "tests that use .skip",
+        "state": "passed"
+      },
+      {
+        "name": "tests that use .skip",
+        "state": "pending"
+      },
+      {
+        "name": "tests that use .skip",
+        "state": "pending"
+      }
+    ]
+  }
+]

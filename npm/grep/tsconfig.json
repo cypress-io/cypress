@@ -1,20 +1,18 @@
 {
-  "extends": "../../packages/ts/tsconfig.json",
   "compilerOptions": {
-    "esModuleInterop": true,
-    "allowJs": true,
-    "checkJs": false,
-    "noEmit": true
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "target": "ES2020",
+    "lib": ["es2021"],   
+    "module": "commonjs",
+    "moduleResolution": "node",    
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "declaration": true,
   },
-  "types": ["node"],
+  "types": ["node", "cypress"],
   "include": [
-    "src/**/*",
-    "cypress/**/*",
-    "expects/**/*",
-    "*.js",
-    "*.ts",
-    "*.jsx",
-    "*.tsx"
+    "src"
   ],
   "exclude": [
     "node_modules",

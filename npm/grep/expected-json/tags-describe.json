@@ -1,0 +1,31 @@
+[
+  {
+    "name": "describe-tags.cy.ts",
+    "tests": [
+      {
+        "name": "is a test outside any suites",
+        "state": "pending"
+      },
+      {
+        "name": "block with no tags",
+        "state": "pending"
+      },
+      {
+        "name": "block with no tags",
+        "state": "pending"
+      },
+      {
+        "name": "block with tag smoke",
+        "state": "passed"
+      },
+      {
+        "name": "block with tag smoke",
+        "state": "passed"
+      },
+      {
+        "name": "block without any tags",
+        "state": "passed"
+      }
+    ]
+  }
+]

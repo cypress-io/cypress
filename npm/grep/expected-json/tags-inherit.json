@@ -1,0 +1,11 @@
+[
+  {
+    "name": "inherits-tag.cy.ts",
+    "tests": [
+      {
+        "name": "Screen A",
+        "state": "passed"
+      }
+    ]
+  }
+]

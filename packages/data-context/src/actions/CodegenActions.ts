@@ -1,4 +1,4 @@
-import type { NexusGenObjects, NexusGenUnions } from '@packages/graphql/src/gen/nxs.gen'
+import type { NexusGenObjects, NexusGenUnions } from '../gen/nxs.gen'
 import assert from 'assert'
 import path from 'path'
 import type { DataContext } from '..'
