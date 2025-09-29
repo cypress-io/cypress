@@ -107,11 +107,8 @@ commands:
     steps:
       - run:
           name: Fetch develop HEAD sha
-          command: >
-            curl -s
-              "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/branches/<< parameters.branch >>" |
-              jq -r '.commit.sha' >
-              /tmp/sha_checksum.txt
+          command: |
+            curl -s "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/branches/<< parameters.branch >>" | jq -r '.commit.sha' > /tmp/sha_checksum.txt
       - restore_cache:
           keys:
             - circleci-packed-pipelines-{{ checksum "/tmp/sha_checksum.txt" }}
@@ -127,11 +124,11 @@ commands:
           # this is saved to a file, so that we can use {{ checksum }} - which
           # can only operate on the contents of a single file, not a list of
           # files or a directory.
-          command: >
-            find .circleci/src -name "*.yml" -type f |
-              sort |
-              xargs cat |
-              md5sum |
+          command: |
+            find .circleci/src -name "*.yml" -type f | \
+              sort | \
+              xargs cat | \
+              md5sum | \
               cut -d' ' -f1 > /tmp/config_checksum.txt
   restore-src-checksum-cache:
     steps:
@@ -160,7 +157,7 @@ commands:
           steps:
             - run:
                 name: Cancel CI
-                command: >
+                command: |
                   cancel_build() {
                     curl --request POST
                       --url https://circleci.com/api/v2/jobs/${CIRCLE_JOB}/cancel
