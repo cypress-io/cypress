@@ -65,7 +65,7 @@
 
       <div
         data-cy="panel4ResizeHandle"
-        class="cursor-ew-resize h-full top-0 left-[-6px] w-[10px] z-30 absolute"
+        class="cursor-ew-resize h-full top-0 left-[-5px] w-[10px] z-30 absolute"
         @mousedown="handleMousedown('panel4', $event)"
       />
     </div>
