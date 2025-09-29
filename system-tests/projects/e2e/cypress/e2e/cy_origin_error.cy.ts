@@ -19,8 +19,8 @@ describe('cy.origin errors', () => {
   })
 
   verify('command failure', this, {
-    line: 16,
-    column: 8,
+    line: 17,
+    column: 10,
     message: 'Expected to find element',
     stack: ['cy_origin_error.cy.ts'],
     before () {
@@ -37,8 +37,25 @@ describe('cy.origin errors', () => {
   })
 
   verify('failure when using dependency', this, {
-    line: 32,
-    column: 8,
+    line: 35,
+    column: 10,
+    message: 'Expected to find element',
+    stack: ['cy_origin_error.cy.ts'],
+    before () {
+      cy.visit('/primary_origin.html')
+    },
+    skipTitleValidation: true,
+  })
+
+  fail('failure when using assertion', this, () => {
+    cy.origin('http://www.foobar.com:4466', () => {
+      cy.get('#doesnotexist', { timeout: 1 }).should('exist')
+    })
+  })
+
+  verify('failure when using assertion', this, {
+    line: 52,
+    column: 47,
     message: 'Expected to find element',
     stack: ['cy_origin_error.cy.ts'],
     before () {
