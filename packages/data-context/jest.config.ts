@@ -32,6 +32,7 @@ export default async (): Promise<Config> => {
       '<rootDir>/test/unit/sources/GitDataSource.spec.ts',
       '<rootDir>/test/unit/sources/GraphQLDataSource.spec.ts',
       '<rootDir>/test/unit/sources/ProjectDataSource.spec.ts',
+      '<rootDir>/test/unit/sources/RelevantRunsDataSource.spec.ts',
     ],
     testEnvironment: 'node',
     transform: {
