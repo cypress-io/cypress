@@ -139,6 +139,7 @@ const handleMousedown = (panel: DraggablePanel, event: MouseEvent) => {
     panel4InitialWidth.value = cachedPanel4Width.value
   }
 }
+
 const handleMousemove = (event: MouseEvent) => {
   if (!panel1IsDragging.value && !panel2IsDragging.value && !panel4IsDragging.value) {
     // nothing is dragging, ignore mousemove
@@ -155,8 +156,7 @@ const handleMousemove = (event: MouseEvent) => {
     panel2Width.value = event.clientX - props.offsetLeft - panel1Width.value
     emit('panelWidthUpdated', { panel: 'panel2', width: panel2Width.value })
   } else if (panel4IsDragging.value && isNewWidthAllowed(event.clientX, 'panel4')) {
-    // Panel4 resizes from the right edge, so we calculate based on mouse movement
-    // from the initial position to avoid jumping when drag starts
+    // panel4 resizes from the right edge, so we calculate based on mouse movement from the initial position
     const mouseDelta = event.clientX - panel4InitialMouseX.value
     const newWidth = panel4InitialWidth.value - mouseDelta
 
@@ -259,7 +259,6 @@ function isNewWidthAllowed (mouseClientX: number, panel: DraggablePanel) {
   }
 
   if (panel === 'panel4') {
-    // Use the same calculation method as in handleMousemove for consistency
     const mouseDelta = mouseClientX - panel4InitialMouseX.value
     const newWidth = panel4InitialWidth.value - mouseDelta
 
@@ -272,6 +271,7 @@ function isNewWidthAllowed (mouseClientX: number, panel: DraggablePanel) {
 
   return false
 }
+
 watchEffect(() => {
   if (!props.showPanel1) {
     emit('panelWidthUpdated', { panel: 'panel1', width: 0 })
