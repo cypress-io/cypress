@@ -1,19 +1,22 @@
-import { expect } from 'chai'
-
+import { describe, it, expect } from 'vitest'
 import { OnStartSpanProcessor } from '../../src/processors/on-start-span-processor'
 
 describe('on-start-span-processor', () => {
-  it('calls onEnd on start', (done) => {
+  it('calls onEnd on start', async () => {
     const processor = new OnStartSpanProcessor(undefined)
 
     const span = 'span'
 
-    processor.onEnd = (span) => {
-      expect(span).to.equal
-      done()
-    }
+    const promise = new Promise((resolve) => {
+      processor.onEnd = (span) => {
+        expect(span).toEqual('span')
+        resolve()
+      }
+    })
 
-    //@ts-expect-error
+    // @ts-expect-error
     processor.onStart(span, undefined)
+
+    await promise
   })
 })
