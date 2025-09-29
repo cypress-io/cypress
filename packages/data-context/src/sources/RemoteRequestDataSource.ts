@@ -1,14 +1,14 @@
 import { CombinedError, stringifyVariables } from '@urql/core'
-import type { NexusGenAbstractTypeMembers, NexusGenInterfaces, RemoteFetchableStatus } from '@packages/graphql/src/gen/nxs.gen'
+import type { NexusGenAbstractTypeMembers, NexusGenInterfaces, RemoteFetchableStatus } from '../gen/nxs.gen'
 import { DocumentNode, FieldNode, GraphQLResolveInfo, SelectionNode, visit, print, ArgumentNode, VariableDefinitionNode, TypeNode, ValueNode, parseType, VariableNode, GraphQLObjectType } from 'graphql'
 import crypto from 'crypto'
 import _ from 'lodash'
 import type { DataContext } from '../DataContext'
 import { pathToArray } from 'graphql/jsutils/Path'
-import type { RemoteFieldDefinitionConfig, RemoteQueryArgsResolver } from '@packages/graphql/src/plugins'
+import type { RemoteFieldDefinitionConfig, RemoteQueryArgsResolver } from '../../graphql/plugins'
 import type { CloudExecuteQuery } from './CloudDataSource'
 import assert from 'assert'
-import type { RemoteFetchableShape } from '@packages/graphql/src/schemaTypes'
+import type { RemoteFetchableShape } from '../../graphql/schemaTypes'
 import { DocumentNodeBuilder } from '../util'
 
 interface MaybeLoadRemoteFetchable extends CloudExecuteQuery {

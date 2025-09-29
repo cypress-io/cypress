@@ -154,7 +154,6 @@
     "@packages/eslint-config": "0.0.0-development",
     "@packages/example": "0.0.0-development",
     "@packages/extension": "0.0.0-development",
-    "@packages/graphql": "0.0.0-development",
     "@packages/https-proxy": "0.0.0-development",
     "@packages/launcher": "0.0.0-development",
     "@packages/net-stubbing": "0.0.0-development",

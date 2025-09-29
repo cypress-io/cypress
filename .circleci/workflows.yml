@@ -2,7 +2,7 @@ base-internal-bullseye: cypress/base-internal:22.18.0-bullseye
 base-internal-minimum-node: cypress/base-internal:22.15.1
 base-internal-yarn-berry: cypress/base-internal:22.18.0-yarn-berry
 chrome-beta-version: 141.0.7390.30
-chrome-stable-version: 140.0.7339.185
+chrome-stable-version: 140.0.7339.207
 commands:
   build-and-package-binary:
     steps:
@@ -398,11 +398,11 @@ commands:
         description: Google Chrome channel to install
         type: string
       google-chrome-for-testing-version:
-        default: 140.0.7339.185
+        default: 140.0.7339.207
         description: Google Chrome for Testing version to install
         type: string
       google-chrome-version:
-        default: 140.0.7339.185
+        default: 140.0.7339.207
         description: Google Chrome version to install
         type: string
       install-chrome:
@@ -868,7 +868,7 @@ commands:
       - run:
           command: |
             echo "Setting SHOULD_PERSIST_ARTIFACTS variable"
-            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "chore/refactor_cli_to_ts" ]]; then
+            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "fix/dbus-messages" ]]; then
                 export SHOULD_PERSIST_ARTIFACTS=true
             fi' >> "$BASH_ENV"
           name: Set environment variable to determine whether or not to persist artifacts
@@ -2013,7 +2013,6 @@ jobs:
       - run: yarn workspace @cypress/grep omit:specs
       - run: yarn workspace @cypress/grep or
       - run: yarn workspace @cypress/grep skip
-      - run: yarn workspace @cypress/grep tags
       - run: yarn workspace @cypress/grep tags:inverted
       - run: yarn workspace @cypress/grep tags:and
       - run: yarn workspace @cypress/grep tags:and:not
@@ -3487,7 +3486,7 @@ jobs:
                   yarn lerna run types
                 name: Test types
             - sanitize-verify-and-store-mocha-results:
-                expectedResultCount: 18
+                expectedResultCount: 17
     working_directory: ~/cypress
   v8-integration-tests:
     environment:
@@ -3718,6 +3717,9 @@ workflows:
         - equal:
             - update-v8-snapshot-cache-on-develop
             - << pipeline.git.branch >>
+        - equal:
+            - chore/merge_gql_package_w_data_context
+            - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/
             value: << pipeline.git.branch >>
@@ -3771,6 +3773,9 @@ workflows:
             - << pipeline.git.branch >>
         - equal:
             - update-v8-snapshot-cache-on-develop
+            - << pipeline.git.branch >>
+        - equal:
+            - chore/merge_gql_package_w_data_context
             - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/
@@ -3836,6 +3841,9 @@ workflows:
             - << pipeline.git.branch >>
         - equal:
             - update-v8-snapshot-cache-on-develop
+            - << pipeline.git.branch >>
+        - equal:
+            - chore/merge_gql_package_w_data_context
             - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/
@@ -4321,6 +4329,9 @@ workflows:
             - << pipeline.git.branch >>
         - equal:
             - update-v8-snapshot-cache-on-develop
+            - << pipeline.git.branch >>
+        - equal:
+            - chore/merge_gql_package_w_data_context
             - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/
@@ -5156,6 +5167,9 @@ workflows:
             - << pipeline.git.branch >>
         - equal:
             - update-v8-snapshot-cache-on-develop
+            - << pipeline.git.branch >>
+        - equal:
+            - chore/merge_gql_package_w_data_context
             - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/

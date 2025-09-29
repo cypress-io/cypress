@@ -4,7 +4,7 @@ import LoginModal from './LoginModal.vue'
 import { defaultMessages } from '@cy/i18n'
 import Tooltip from '../../components/Tooltip.vue'
 import { ref } from 'vue'
-import { CloudUserStubs } from '@packages/graphql/test/stubCloudTypes'
+import { CloudUserStubs } from '@packages/data-context/test/graphql/stubCloudTypes'
 import { useUserProjectStatusStore } from '../../store'
 
 const text = defaultMessages.topNav
