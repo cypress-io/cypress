@@ -1,12 +1,12 @@
 # CircleCI Configuration
 
-This directory contains CircleCI configuration files that are automatically generated and updated.
+This directory contains CircleCI configuration files that use a dynamic workflow packing system for efficient CI development and execution.
 
 ## Prerequisites
 
 ### CircleCI Local CLI
 
-The CircleCI Local CLI is required to generate the `pull-request.yml` file from the source configuration.
+The CircleCI Local CLI is required to pack the source configurations.
 
 **Installation:**
 
@@ -30,28 +30,31 @@ The CircleCI Local CLI is required to generate the `pull-request.yml` file from 
 
 For more detailed installation instructions, see the [CircleCI Local CLI documentation](https://circleci.com/docs/2.0/local-cli/).
 
-## Lint-Staged Rules
+## Pre-commit Validation
 
-When files in this directory are modified, the following lint-staged rule will automatically run:
+When files in `.circleci/src/` are modified, the pre-commit hook automatically runs:
 
 ```bash
-circleci config pack .circleci/workflows-src > .circleci/workflows.yml
+yarn pack-ci --verify
 ```
 
 This command:
-1. Takes the source configuration from `./.circleci/workflows-src/`
-2. Packs it into a single YAML file
-3. Outputs the result to `./circleci/workflows.yml`
+1. Scans all directories in `./.circleci/src/` for modifications
+2. Packs only the modified directories (e.g., `workflows/` → `workflows.yml`)
+3. Validates the packed configurations
+4. Exits with error if validation fails
 
 ## File Structure
 
-- `workflows-src/` - Source configuration files (modify these)
-- `workflows.yml` - Generated configuration file (auto-generated, do not edit manually)
+- `src/` - Source configuration directories (modify these)
+- `packed/` - Generated configuration files (ignored by git)
 
 ## Development Workflow
 
-1. Make changes to files in `workflows-src/`
-2. The lint-staged hook will automatically regenerate `workflows.yml` and stage it
-3. Commit both the source changes and the generated file
+1. Make changes to files in `src/` directories
+2. Stage and commit changes - pre-commit hook automatically validates and packs configurations
+3. The jobs defined in `config.yml` will pack these source directories on-the-fly when CI gets kicked off.
 
-**Note:** Always commit both the source files and the generated `workflows.yml` file together to ensure the CircleCI configuration stays in sync. 
+## `config.yml`
+
+This is the main entrypoint to Cypress CI. It loads packed workflow files from cache, or builds them if necessary. Then it continues to the primary workflow. The main entrypoint to our CI must be available in source control and not packed on-the-fly.
