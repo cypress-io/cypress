@@ -157,17 +157,32 @@ commands:
               or:
                 - <<pipeline.trigger_source>> == 'api'
                 - <<pipeline.git.branch>> in ['develop', 'release/*']
-                - and:
-                    - << pipeline.event.name >> == 'pull_request'
-                    - << pipeline.event.github.pull_request.draft >> == false
           steps:
             - run:
                 name: Cancel CI
                 command: >
-                  curl --request POST
-                    --url https://circleci.com/api/v2/jobs/${CIRCLE_JOB}/cancel
-                    --header "Circle-Token: ${CIRCLE_TOKEN}"
-                  exit 0
+                  cancel_build() {
+                    curl --request POST
+                      --url https://circleci.com/api/v2/jobs/${CIRCLE_JOB}/cancel
+                      --header "Circle-Token: ${CIRCLE_TOKEN}"
+                    exit 0
+                  }
+                  TRIGGER_INSTRUCTIONS="to trigger CI , include 'run ci' in the commit message or click the 'Trigger Pipeline' button in the CircleCI UI."
+
+                  if [ ! -z "${CIRCLE_PULL_REQUEST##*/}" ]; then
+                    DRAFT=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pulls/${CIRCLE_PULL_REQUEST##*/}" | jq '.draft')
+
+                    if [[ "${DRAFT}" == true ]]; then
+                      echo "Skipping CI; PR is in draft - $TRIGGER_INSTRUCTIONS"
+                      cancel_build
+                    fi
+
+                    echo "Always run CI for PR that is ready for review."
+                    exit 0
+                  fi
+
+                  # otherwise, the build is not a PR so we cancel it 
+                  cancel_build
 
 jobs:
   should-run-ci:
