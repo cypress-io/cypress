@@ -152,7 +152,8 @@ commands:
             not:
               or:
                 - <<pipeline.trigger_source>> == 'api'
-                - <<pipeline.git.branch>> in ['develop', 'release/*']
+                - <<pipeline.git.branch>> =='develop'
+                - <<pipeline.git.branch>> starts-with 'release/'
           steps:
             - run:
                 name: Cancel CI
@@ -220,7 +221,7 @@ jobs:
               name: Check for primary workflow definition
               command: |
                 if [ ! -f .circleci/packed/workflows.yml ]; then
-                    echo "❌ Primary workflow definition not found in ./circleci/packed/workflows.yml!"
+                    echo "❌ Primary workflow definition not found in .circleci/packed/workflows.yml!"
                     exit 1
                 fi
           - continuation/continue:
