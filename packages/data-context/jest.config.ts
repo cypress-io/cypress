@@ -41,6 +41,7 @@ export default async (): Promise<Config> => {
       '<rootDir>/test/unit/util/DocumentNodeBuilder.spec.ts',
       '<rootDir>/test/unit/util/hasTypescript.spec.ts',
       '<rootDir>/test/unit/util/testCounts.spec.ts',
+      '<rootDir>/test/unit/util/weightedChoice.spec.ts',
     ],
     testEnvironment: 'node',
     transform: {
