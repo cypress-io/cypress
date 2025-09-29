@@ -1,7 +1,7 @@
 describe('src/cy/commands/prompt', () => {
   it('errors if download timeout is reached', (done) => {
     cy.on('fail', (err) => {
-      expect(err.message).to.include('Timed out waiting for `cy.prompt` Cloud code')
+      expect(err.message).to.include('Timed out downloading `cy.prompt` Cloud code')
       done()
     })
 
@@ -15,7 +15,7 @@ describe('src/cy/commands/prompt', () => {
   it('errors if wait for ready does not return success and error is ENOSPC', (done) => {
     const backendStub = cy.stub(Cypress, 'backend').log(false)
 
-    const error = new Error(`no space left on device, open '<stripped-path>bundle.tar`)
+    const error = new Error(`no space left on device, open /Users/ruby/dev/bundle.tar`)
 
     ;(error as any).code = 'ENOSPC'
 
@@ -24,7 +24,7 @@ describe('src/cy/commands/prompt', () => {
 
     cy.on('fail', (err) => {
       expect(err.message).to.include('Failed to download `cy.prompt` Cloud code')
-      expect(err.message).to.include(`no space left on device, open '<stripped-path>bundle.tar`)
+      expect(err.message).to.include(`no space left on device, open /Users/ruby/dev/bundle.tar`)
 
       done()
     })

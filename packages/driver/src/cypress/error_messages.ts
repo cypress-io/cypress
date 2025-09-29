@@ -1339,7 +1339,7 @@ export default {
 
         - ${obj.error.code ? `${obj.error.code}: ` : ''}${obj.error.message}
 
-         Check your network connection and file settings to ensure download is not interrupted.
+        Check your network connection and file settings to ensure download is not interrupted.
       `,
         docsUrl: 'https://on.cypress.io/prompt-download-error',
       }
@@ -1347,11 +1347,9 @@ export default {
     promptDownloadTimedOut (obj) {
       return {
         message: stripIndent`\
-        Timed out waiting for \`cy.prompt\` Cloud code:
+        Timed out downloading \`cy.prompt\` Cloud code.
 
-        - Timeout: bundle.tar timed out after 45s
-
-         Check your network connection and system configuration.
+        Check your network connection and system configuration to ensure download is not interrupted.
       `,
         docsUrl: 'https://on.cypress.io/prompt-download-error',
       }
