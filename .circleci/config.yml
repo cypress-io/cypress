@@ -4,11 +4,6 @@ orbs:
 setup: true
 version: 2.1
 
-parameters:
-  force-pack:
-    type: boolean
-    default: false
-
 # Define anchor for contributor PR detection
 x-is-contributor-pr: &is_contributor_pr
   matches:
@@ -29,15 +24,6 @@ workflows:
 commands:
   persist:
     steps:
-      - run:
-          name: Packed workflows available?
-          command: |
-            if [[ -d ".circleci/packed" ]] && [[ "$(ls -A .circleci/packed 2>/dev/null)" ]]; then
-              echo "📦 Packed workflows available"
-            else
-              echo "❌ Packed workflows not available"
-              exit 1
-            fi
       - persist_to_workspace:
           root: .
           paths:
@@ -47,12 +33,12 @@ commands:
       - run:
           name: Check cache status and exit early if needed
           command: |
-            if [[ -d ".circleci/packed" ]] && [[ "$(ls -A .circleci/packed 2>/dev/null)" ]] && [[ << pipeline.parameters.force-pack >> == false ]]; then
-              echo "📦 Cache hit - packed configurations exist and force-pack is false"
+            if [[ -d ".circleci/packed" ]] && [[ "$(ls -A .circleci/packed 2>/dev/null)" ]]; then
+              echo "📦 Cache hit - packed configurations exist"
               echo "✅ Persisting packed configurations to workspace and halting job"
               echo "CACHE_HIT=true" >> $BASH_ENV
             else
-              echo "📦 Cache miss or force-pack is true - continuing with packaging"
+              echo "📦 Cache miss - continuing with packaging"
               echo "CACHE_HIT=false" >> $BASH_ENV
               mkdir -p .circleci/packed # persist empty dir to workspace
             fi
@@ -61,10 +47,10 @@ commands:
           name: End job if cache hit
           command: |
             if [[ "$CACHE_HIT" == "true" ]] && [[ "$(ls -A .circleci/packed 2>/dev/null)" ]]; then
-              echo "✅ Cache hit - packed configurations exist and force-pack is false"
+              echo "✅ Cache hit - packed configurations exist"
               exit 0
             else
-              echo "📦 Cache miss or force-pack is true - continuing with packaging"
+              echo "📦 Cache miss - continuing with packaging"
             fi
   pack-workflows:
     steps:
@@ -241,7 +227,7 @@ jobs:
               name: Check for primary workflow definition
               command: |
                 if [ ! -f .circleci/packed/workflows.yml ]; then
-                    echo "❌ Primary workflow definition not found!"
+                    echo "❌ Primary workflow definition not found in ./circleci/packed/workflows.yml!"
                     exit 1
                 fi
           - continuation/continue:
