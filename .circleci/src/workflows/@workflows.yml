@@ -1470,6 +1470,7 @@ jobs:
         default: false
     resource_class: << parameters.resource_class >>
     steps:
+      - run: echo "Hello"
       - update_known_hosts
       - checkout
       - install-required-node
