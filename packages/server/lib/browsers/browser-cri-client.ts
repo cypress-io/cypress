@@ -516,20 +516,6 @@ export class BrowserCriClient {
   }
 
   /**
-   * Ensures that the minimum protocol version for the browser is met
-   *
-   * @param protocolVersion the minimum version to ensure
-   */
-  ensureMinimumProtocolVersion = (protocolVersion: string): void => {
-    const actualVersion = getMajorMinorVersion(this.versionInfo['Protocol-Version'])
-    const minimum = getMajorMinorVersion(protocolVersion)
-
-    if (!isVersionGte(actualVersion, minimum)) {
-      errors.throwErr('CDP_VERSION_TOO_OLD', protocolVersion, actualVersion)
-    }
-  }
-
-  /**
    * Attaches to a target with the given url
    *
    * @param url the url to attach to

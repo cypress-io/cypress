@@ -594,15 +594,6 @@ export = {
 
     la(browserCriClient, 'expected Chrome remote interface reference', browserCriClient)
 
-    try {
-      browserCriClient.ensureMinimumProtocolVersion('1.3')
-    } catch (err: any) {
-      // if this minimum chrome version changes, sync it with
-      // packages/web-config/webpack.config.base.ts and
-      // npm/webpack-batteries-included-preprocessor/index.js
-      throw new Error(`Cypress requires at least Chrome 64.\n\nDetails:\n${err.message}`)
-    }
-
     // monkey-patch the .kill method to that the CDP connection is closed
     const originalBrowserKill = launchedBrowser.kill
 
