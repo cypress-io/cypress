@@ -69,16 +69,6 @@ interface TargetDestroyedOptions {
   onAsynchronousError: Function
 }
 
-const isVersionGte = (a: Version, b: Version) => {
-  return a.major > b.major || (a.major === b.major && a.minor >= b.minor)
-}
-
-const getMajorMinorVersion = (version: string): Version => {
-  const [major, minor] = version.split('.', 2).map(Number)
-
-  return { major, minor }
-}
-
 const ensureLiveBrowser = async (hosts: string[], port: number, browserName: string): Promise<string> => {
   // since we may be attempting to connect to multiple hosts, 'connected'
   // is set to true once one of the connections succeeds so the others
