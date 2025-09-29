@@ -1,4 +1,4 @@
-import type { CloudSpecRun } from '../../../../graphql/src/gen/cloud-source-types.gen'
+import type { CloudSpecRun } from '@packages/data-context/src/gen/cloud-source-types.gen'
 import type { CloudRunGroupStatusEnum } from '@packages/app/src/generated/graphql'
 
 export const randomRunStatus = (): CloudRunGroupStatusEnum => {

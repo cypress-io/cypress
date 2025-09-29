@@ -9,64 +9,31 @@ parameters:
     type: boolean
     default: false
 
+# Define anchor for contributor PR detection
+x-is-contributor-pr: &is_contributor_pr
+  matches:
+    pattern: '^/pull/\d+'
+    value: << pipeline.git.branch >>
+
 workflows:
     setup-workflow:
         jobs:
-            - pack-workflows
+            - should-run-ci
+            - pack-workflows:
+                requires:
+                  - should-run-ci: success
             - launch-primary-workflow:
                 requires:
                   - pack-workflows
 
 commands:
-  halt-early:
+  persist:
     steps:
-      - run:
-          name: Halt if CI should not run
-          command: |
-            # run CI when manually triggers via CircleCi Dashboard
-            if [ <<pipeline.trigger_source>> == 'api' ]; then
-              echo "Always run CI when manually triggered from the UI."
-              exit 0
-            fi
-
-            if [[ "$CIRCLE_BRANCH" == "develop" || "$CIRCLE_BRANCH" == "release/"* ]]; then
-              echo "Always run CI for develop and for release candidate branches."
-              exit 0
-            fi
-
-            LAST_COMMIT_MESSAGE=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/commits/${CIRCLE_BRANCH}" | jq '.commit.message')
-
-            if [[ "$LAST_COMMIT_MESSAGE" =~ "run ci" ]]; then
-              echo "Always run CI when the commit message includes 'run ci'."
-              exit 0
-            fi
-
-            cancel_build () {
-              echo "Canceling the CI build..."
-              circleci-agent step halt
-            }
-
-            TRIGGER_INSTRUCTIONS="to trigger CI , include 'run ci' in the commit message or click the 'Trigger Pipeline' button in the CircleCI UI."
-
-            if [ ! -z "${CIRCLE_PULL_REQUEST##*/}" ]; then
-              DRAFT=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pulls/${CIRCLE_PULL_REQUEST##*/}" | jq '.draft')
-
-              if [[ "${DRAFT}" == true ]]; then
-                echo "Skipping CI; PR is in draft - $TRIGGER_INSTRUCTIONS"
-                cancel_build
-              fi
-
-              echo "Always run CI for PR that is ready for review."
-              exit 0
-            fi
-
-            echo "Skipping CI; branch in progress - $TRIGGER_INSTRUCTIONS"
-            cancel_build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .circleci/packed
   persist-to-workspace-and-exit-early:
-    parameters:
-      cleanup:
-        type: boolean
-        default: false
     steps:
       - run:
           name: Check cache status and exit early if needed
@@ -80,24 +47,16 @@ commands:
               echo "CACHE_HIT=false" >> $BASH_ENV
               mkdir -p .circleci/packed # persist empty dir to workspace
             fi
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .circleci/packed
+      - persist
       - run:
           name: End job if cache hit
           command: |
-            
             if [[ "$CACHE_HIT" == "true" ]] && [[ "$(ls -A .circleci/packed 2>/dev/null)" ]]; then
               echo "✅ Cache hit - packed configurations exist and force-pack is false"
               exit 0
             else
               echo "📦 Cache miss or force-pack is true - continuing with packaging"
-              if [[ << parameters.cleanup >> == true ]]; then
-                rm -rf .circleci # remove empty directories
-              fi
             fi
-
   pack-workflows:
     steps:
       - run:
@@ -110,13 +69,165 @@ commands:
           name: Validate workflows
           command: |
             ./scripts/pack-ci.sh --validate --pack=false
+  checkout-workflow-source:
+    steps:
+        - run:
+            name: Clear target directory
+            command: |
+              if [[ -d ".circleci" ]]; then
+                rm -rf .circleci
+              fi
+        - unless:
+            condition: *is_contributor_pr
+            steps:
+              - checkout
+  save-sha-cache:
+    steps:
+      - when:
+          condition:
+              # We only want to cache shas for internal commits - caches keyed 
+              # by internal commits on `develop` are used for contributor PR
+              # workflows.
+              not: *is_contributor_pr
+          steps:
+            - run:
+                # saves the sha to  to a file so that we can use {{ checksum }}
+                name: Save git SHA to file
+                command: |
+                  git rev-parse HEAD > /tmp/sha.txt 
+            - save_cache:
+                key: circleci-packed-pipelines-{{ checksum "/tmp/sha.txt" }}
+                paths:
+                  - .circleci/packed
+  restore-sha-cache:
+    parameters:
+      branch:
+        type: string
+        default: develop
+    steps:
+      - run:
+          name: Fetch develop HEAD sha
+          command: >
+            curl -s
+              "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/branches/<< parameters.branch >>" |
+              jq -r '.commit.sha' >
+              /tmp/sha_checksum.txt
+      - restore_cache:
+          keys:
+            - circleci-packed-pipelines-{{ checksum "/tmp/sha_checksum.txt" }}
+          paths:
+            - .circleci/packed
+ 
+  # Retrieving and saving packed workflows based on the checksum of the hash
+  # of the yml files in ./.circleci/src
+  calc-src-checksum:
+    steps:
+      - run:
+          name: Generate config checksum for cache lookup
+          # this is saved to a file, so that we can use {{ checksum }} - which
+          # can only operate on the contents of a single file, not a list of
+          # files or a directory.
+          command: >
+            find .circleci/src -name "*.yml" -type f |
+              sort |
+              xargs cat |
+              md5sum |
+              cut -d' ' -f1 > /tmp/config_checksum.txt
+  restore-src-checksum-cache:
+    steps:
+      - calc-src-checksum
+      - restore_cache:
+            keys:
+              - circleci-packed-pipelines-{{ checksum "/tmp/config_checksum.txt" }}
+            paths:
+                - .circleci/packed
+  save-src-checksum-cache:
+    steps:
+      - calc-src-checksum
+      - save_cache:
+          key: circleci-packed-pipelines-{{ checksum "/tmp/config_checksum.txt" }}
+          paths:
+            - .circleci/packed
+
+  cancel-unnecessary-ci:
+    steps:
+      - when:
+          condition:
+            not:
+              or:
+                - <<pipeline.trigger_source>> == 'api'
+                - <<pipeline.git.branch>> in ['develop', 'release/*']
+          steps:
+            - run:
+                name: Cancel CI
+                command: >
+                  cancel_build() {
+                    curl --request POST
+                      --url https://circleci.com/api/v2/jobs/${CIRCLE_JOB}/cancel
+                      --header "Circle-Token: ${CIRCLE_TOKEN}"
+                    exit 0
+                  }
+                  TRIGGER_INSTRUCTIONS="to trigger CI , include 'run ci' in the commit message or click the 'Trigger Pipeline' button in the CircleCI UI."
+
+                  if [ ! -z "${CIRCLE_PULL_REQUEST##*/}" ]; then
+                    DRAFT=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pulls/${CIRCLE_PULL_REQUEST##*/}" | jq '.draft')
+
+                    if [[ "${DRAFT}" == true ]]; then
+                      echo "Skipping CI; PR is in draft - $TRIGGER_INSTRUCTIONS"
+                      cancel_build
+                    fi
+
+                    echo "Always run CI for PR that is ready for review."
+                    exit 0
+                  fi
+
+                  # otherwise, the build is not a PR so we cancel it 
+                  cancel_build
+
 jobs:
+  should-run-ci:
+    docker:
+        - image: cimg/base:stable
+    resource_class: small
+    steps:
+      # it needs at least one unconditional step
+      - run:
+          name: Checking if CI should run
+          command: |
+            echo "Checking if CI should run."
+            
+      - cancel-unnecessary-ci
+
+  pack-workflows:
+    docker:
+        - image: cimg/base:stable
+    resource_class: small
+    steps:
+        - when:
+            condition: *is_contributor_pr
+            steps:
+              - restore-sha-cache:
+                  branch: "develop"
+              - persist
+        - unless:
+            condition: *is_contributor_pr
+            steps:
+                - restore-sha-cache:
+                    branch: $CIRCLE_BRANCH
+                - persist-to-workspace-and-exit-early
+                - checkout-workflow-source
+                - restore-src-checksum-cache
+                - persist-to-workspace-and-exit-early
+                - pack-workflows
+                - save-sha-cache
+                - save-src-checksum-cache
+                - persist
+
   launch-primary-workflow:
       docker:
           - image: cimg/base:stable
       resource_class: small
       steps:
-          - halt-early
           - attach_workspace:
               at: .
           - run:
@@ -130,45 +241,6 @@ jobs:
               configuration_path: .circleci/packed/workflows.yml
 
 
-  pack-workflows:
-    docker:
-        - image: cimg/base:stable
-    resource_class: small
-    steps:
-        - halt-early
-        - restore_cache:
-            keys:
-              - circleci-packed-pipelines-{{ .Revision }} # first check the rev, if it's there we don't need to checkout code to continue.
-            paths:
-                - .circleci/packed
-        - persist-to-workspace-and-exit-early:
-            cleanup: true
-        - checkout
-        - run:
-            name: Generate config checksum for cache lookup
-            command: |
-              # Generate checksum of all .yml files in src directory
-              find .circleci/src -name "*.yml" -type f | sort | xargs cat | md5sum | cut -d' ' -f1 > /tmp/config_checksum.txt
-        - restore_cache:
-            keys:
-              - circleci-packed-pipelines-{{ checksum "/tmp/config_checksum.txt" }} # if this cache hits, we don't need to pack the workflows again
-            paths:
-                - .circleci/packed
-        - persist-to-workspace-and-exit-early
-        - circleci-cli/install
-        - pack-workflows
-        - save_cache:
-            key: circleci-packed-pipelines-{{ .Revision }} # for caching same-rev reruns - no need to checkout code. early term optimization.
-            paths:
-                - .circleci/packed
-        - save_cache:
-            key: circleci-packed-pipelines-{{ checksum "/tmp/config_checksum.txt" }} # for caching runs w/ no circleci config changes, slower b/c of git checkout
-            paths:
-                - .circleci/packed
-        - persist_to_workspace:
-            root: .
-            paths:
-                - .circleci/packed
-
+  
 
 

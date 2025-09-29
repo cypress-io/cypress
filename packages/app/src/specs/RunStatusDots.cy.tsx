@@ -2,7 +2,7 @@ import type { RunStatusDotsFragment } from '../generated/graphql'
 import RunStatusDots from './RunStatusDots.vue'
 import { fakeRuns } from '@packages/frontend-shared/cypress/support/mock-graphql/fakeCloudSpecRun'
 import { fill } from 'lodash'
-import type { CloudSpecRun } from '@packages/graphql/src/gen/cloud-source-types.gen'
+import type { CloudSpecRun } from '@packages/data-context/src/gen/cloud-source-types.gen'
 
 function mountWithRuns (runs: Required<CloudSpecRun>[]) {
   const gql: RunStatusDotsFragment = {

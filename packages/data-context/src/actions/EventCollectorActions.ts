@@ -1,7 +1,7 @@
 import { gql } from '@urql/core'
 import type { DataContext } from '..'
 import Debug from 'debug'
-import type { LocalTestCountsInput } from '@packages/graphql/src/gen/nxs.gen'
+import type { LocalTestCountsInput } from '../gen/nxs.gen'
 
 const pkg = require('@packages/root')
 

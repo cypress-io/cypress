@@ -2,7 +2,7 @@ import RunResults from './RunResults.vue'
 import { RunResultsFragmentDoc } from '../generated/graphql-test'
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
-import { CloudRunStubs } from '@packages/graphql/test/stubCloudTypes'
+import { CloudRunStubs } from '@packages/data-context/test/graphql/stubCloudTypes'
 
 describe('<RunResults />', () => {
   it('shows the failed icon and the number of passed, skipped, pending, failed tests passed through gql props', () => {

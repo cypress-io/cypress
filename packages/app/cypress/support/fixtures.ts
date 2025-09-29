@@ -1,4 +1,4 @@
-import { createCloudRun, createCloudRunCommitInfo } from '@packages/graphql/test/stubCloudTypes'
+import { createCloudRun, createCloudRunCommitInfo } from '@packages/data-context/test/graphql/stubCloudTypes'
 import type { CloudRunStatus } from '../../src/generated/graphql-test'
 import type { AutSnapshot } from '../../src/runner/iframe-model'
 
