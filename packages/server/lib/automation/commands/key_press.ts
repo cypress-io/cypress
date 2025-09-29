@@ -121,6 +121,7 @@ export const BidiOverrideCodepoints: Record<SupportedNamedKey, string> = {
   'Delete': '\uE017',
   'Insert': '\uE016',
   'Space': '\uE00D',
+  'Escape': '\uE00C',
 }
 
 // any is fine to be used here because the key must be typeguarded before it can be used as a supported key

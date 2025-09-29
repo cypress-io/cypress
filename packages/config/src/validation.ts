@@ -1,6 +1,5 @@
 import path from 'path'
 import * as _ from 'lodash'
-import * as is from 'check-more-types'
 import { commaListsOr } from 'common-tags'
 import Debug from 'debug'
 import { BROWSER_FAMILY } from '@packages/types'
@@ -60,19 +59,19 @@ export const validateAny = (...validations: ValidationFn[]): ValidationFn => {
  * @returns {string|true} Returns `true` if the object is matching browser object schema. Returns an error message if it does not.
  */
 export const isValidBrowser = (browser: any): ErrResult | true => {
-  if (!is.unemptyString(browser.name)) {
+  if (!_.isString(browser.name) || _.isEmpty(browser.name)) {
     return errMsg('name', browser, 'a non-empty string')
   }
 
-  if (!is.oneOf(BROWSER_FAMILY)(browser.family)) {
+  if (!_.includes(BROWSER_FAMILY, browser.family)) {
     return errMsg('family', browser, commaListsOr`either ${BROWSER_FAMILY}`)
   }
 
-  if (!is.unemptyString(browser.displayName)) {
+  if (!_.isString(browser.displayName) || _.isEmpty(browser.displayName)) {
     return errMsg('displayName', browser, 'a non-empty string')
   }
 
-  if (!is.unemptyString(browser.version)) {
+  if (!_.isString(browser.version) || _.isEmpty(browser.version)) {
     return errMsg('version', browser, 'a non-empty string')
   }
 
@@ -80,7 +79,7 @@ export const isValidBrowser = (browser: any): ErrResult | true => {
     return errMsg('path', browser, 'a string')
   }
 
-  if (typeof browser.majorVersion !== 'string' && !(is.number(browser.majorVersion) && browser.majorVersion > 0)) {
+  if (typeof browser.majorVersion !== 'string' && !(_.isNumber(browser.majorVersion) && browser.majorVersion > 0)) {
     return errMsg('majorVersion', browser, 'a string or a positive number')
   }
 

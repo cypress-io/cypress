@@ -1,4 +1,4 @@
-import type { NexusGenAbstractTypeMembers } from '@packages/graphql/src/gen/nxs.gen'
+import type { NexusGenAbstractTypeMembers } from '../gen/nxs.gen'
 import debugLib from 'debug'
 import { execute, FieldNode, GraphQLResolveInfo, print, visit } from 'graphql'
 import type { core } from 'nexus'

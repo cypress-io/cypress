@@ -65,6 +65,10 @@
         }
       }
 
+      .hook-name {
+        font-weight: 600;
+      }
+      
       .hook-failed-message {
         color: $red-400;
       }
