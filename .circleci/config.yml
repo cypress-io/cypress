@@ -54,6 +54,7 @@ commands:
             fi
   pack-workflows:
     steps:
+      - circleci-cli/install
       - run:
           name: Pack workflows
           command: |
@@ -201,10 +202,6 @@ jobs:
     docker:
         - image: cimg/base:stable
     resource_class: small
-    parameters:
-      use_develop_branch:
-        type: boolean
-        default: true
     steps:
         - restore-sha-cache:
             branch: $CIRCLE_BRANCH
