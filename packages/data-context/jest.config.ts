@@ -25,6 +25,7 @@ export default async (): Promise<Config> => {
       '<rootDir>/test/unit/data/ProjectConfigManager.spec.ts',
       '<rootDir>/test/unit/data/ProjectLifecycleManager.spec.ts',
       '<rootDir>/test/unit/polling/poller.spec.ts',
+      '<rootDir>/test/unit/sources/BrowserDataSource.spec.ts',
     ],
     testEnvironment: 'node',
     transform: {
