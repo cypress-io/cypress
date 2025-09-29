@@ -6,6 +6,7 @@ _Released 10/07/2025 (PENDING)_
 **Bugfixes:**
 
 - Fixed a regression introduced in [`15.0.0`](https://docs.cypress.io/guides/references/changelog#15-0-0) where `dbus` connection error messages appear in docker containers when launching Cypress. Fixes [#32290](https://github.com/cypress-io/cypress/issues/32290).
+- Fixed code frames in `cy.origin` so that failed commands will show the correct line/column within the corresponding spec file. Addressed in [#32597](https://github.com/cypress-io/cypress/pull/32597).
 
 **Misc:**
 
