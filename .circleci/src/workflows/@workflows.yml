@@ -1473,6 +1473,7 @@ jobs:
       - update_known_hosts
       - checkout
       - install-required-node
+      - run: echo "foobarbaz"
       - verify-build-setup:
           executor: << parameters.executor >>
       - persist_to_workspace:
