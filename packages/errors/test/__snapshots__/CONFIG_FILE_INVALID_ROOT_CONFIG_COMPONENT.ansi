@@ -1,0 +1,9 @@
+[31mThe [33mindexHtmlFile[39m[31m configuration option is invalid when set from the root of the config object.[39m
+[31m[39m
+[31mSet it within a testing type property: [95mcomponent.indexHtmlFile[39m[31m[39m
+[31m[39m
+[31m[94m{[39m[31m[39m
+[31m[94m  component: {[39m[31m[39m
+[31m[94m    indexHtmlFile: '...',[39m[31m[39m
+[31m[94m  }[39m[31m[39m
+[31m[94m}[39m[31m[39m

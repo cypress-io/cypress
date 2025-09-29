@@ -1,0 +1,9 @@
+[31mCould not load a Cypress configuration file because there are multiple matches.[39m
+[31m[39m
+[31mWe've found [33m3[39m[31m Cypress configuration files named[39m
+[31m[33mcypress.config.js, cypress.config.ts, cypress.config.mjs[39m[31m at the location below:[39m
+[31m[39m
+[31m[90m  > [39m[31m[94m/path/to/project/root[39m[31m[39m
+[31m[39m
+[31mPlease delete the conflicting configuration files.[39m
+[31m[39m

@@ -1,0 +1,3 @@
+[31mCan't run project because port is currently in use: [33m2020[39m[31m[39m
+[31m[39m
+[31mAssign a different port with the [95m--port <port>[39m[31m argument or shut down the other running process.[39m

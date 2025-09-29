@@ -1,0 +1,7 @@
+[31mWarning: Multiple attempts to register the following task(s):[39m
+[31m[39m
+[31m[90m - [39m[31m[33mfoo[39m[31m[39m
+[31m[90m - [39m[31m[33mbar[39m[31m[39m
+[31m[90m - [39m[31m[33mbaz[39m[31m[39m
+[31m[39m
+[31mOnly the last attempt will be registered.[39m
