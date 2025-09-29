@@ -18,7 +18,11 @@ describe('CodegenActions', () => {
   })
 
   describe('getReactComponentsFromFile', () => {
-    const absolutePathPrefix = path.resolve('./test/unit/actions/project')
+    let absolutePathPrefix: string
+
+    beforeEach(() => {
+      absolutePathPrefix = path.resolve(__dirname, './project')
+    })
 
     it('returns React components from file with class component', async () => {
       const { components } = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/counter-class.jsx`, reactDocgen)
@@ -149,7 +153,7 @@ describe('CodegenActions', () => {
         },
       }
 
-      const filePath = path.join(process.cwd(), 'test/unit/actions/project/counter-class.jsx')
+      const filePath = path.join(__dirname, 'project/counter-class.jsx')
 
       await actions.getReactComponentsFromFile(filePath, mockReactDocgen as unknown as typeof import('react-docgen'))
 

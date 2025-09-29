@@ -1,5 +1,6 @@
 import { describe, expect, it, beforeEach, afterEach } from '@jest/globals'
 import dedent from 'dedent'
+import path from 'path'
 import { execute, ExecutionResult, parse, subscribe } from 'graphql'
 import { DataContext } from '../../../src'
 import { createTestDataContext, scaffoldProject } from '../helper'
@@ -40,6 +41,7 @@ describe('GraphQLDataSource', () => {
   })
 
   afterEach(() => {
+    process.chdir(path.join(__dirname, '../../../'))
     pushFragmentIterator.return()
     ctx.destroy()
   })

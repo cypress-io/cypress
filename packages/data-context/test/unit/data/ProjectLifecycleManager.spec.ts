@@ -1,5 +1,6 @@
 import { describe, expect, it, beforeEach, jest } from '@jest/globals'
 import type { DataContext } from '../../../src'
+import path from 'path'
 import { createTestDataContext } from '../helper'
 import { FoundBrowser, FullConfig } from '@packages/types'
 
@@ -38,6 +39,11 @@ describe('ProjectLifecycleManager', () => {
   beforeEach(() => {
     ctx = createDataContext()
     jest.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
+  })
+
+  afterEach(() => {
+    // reset the working directory to the root of @packages/data-context
+    process.chdir(path.join(__dirname, '../../../'))
   })
 
   describe('#setInitialActiveBrowser', () => {

@@ -8808,7 +8808,7 @@
     "@types/chai" "*"
     "@types/sinon" "*"
 
-"@types/sinon@*", "@types/sinon@10.0.11":
+"@types/sinon@*":
   version "10.0.11"
   resolved "https://registry.yarnpkg.com/@types/sinon/-/sinon-10.0.11.tgz#8245827b05d3fc57a6601bd35aee1f7ad330fc42"
   integrity sha512-dmZsHlBsKUtBpHriNjlK0ndlvEh8dcb9uV9Afsbt89QIyydpC7NcR+nWlAhASfy3GHnxTl4FX/aKE7XZUt/B4g==
@@ -23875,14 +23875,6 @@ mocha-multi-reporters@1.1.7:
   dependencies:
     debug "^3.1.0"
     lodash "^4.16.4"
-
-mocha-multi-reporters@1.5.1:
-  version "1.5.1"
-  resolved "https://registry.yarnpkg.com/mocha-multi-reporters/-/mocha-multi-reporters-1.5.1.tgz#c73486bed5519e1d59c9ce39ac7a9792600e5676"
-  integrity sha512-Yb4QJOaGLIcmB0VY7Wif5AjvLMUFAdV57D2TWEva1Y0kU/3LjKpeRVmlMIfuO1SVbauve459kgtIizADqxMWPg==
-  dependencies:
-    debug "^4.1.1"
-    lodash "^4.17.15"
 
 mocha-teamcity-reporter@3.0.0:
   version "3.0.0"
