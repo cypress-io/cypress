@@ -50,8 +50,8 @@ describe('ipcSpanExporter', () => {
 
       exporter.send = (objects, onSuccess, onError) => {
         expect(objects[0].name).toEqual('span')
-        expect(onSuccess).not.toBeUndefined()
-        expect(onError).not.toBeUndefined()
+        expect(onSuccess).toBeDefined()
+        expect(onError).toBeDefined()
       }
 
       expect(exporter.delayedExport.length).toEqual(0)

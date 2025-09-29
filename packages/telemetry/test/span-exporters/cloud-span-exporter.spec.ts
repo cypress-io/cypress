@@ -11,7 +11,7 @@ describe('cloudSpanExporter', () => {
 
       expect(exporter.headers['x-cypress-encrypted']).toEqual('1')
       expect(exporter.requirementsToExport).toEqual('unknown')
-      expect(exporter.enc).not.toBeUndefined()
+      expect(exporter.enc).toBeDefined()
     })
 
     it('does not set encrypted header if not set', () => {
@@ -344,8 +344,8 @@ describe('cloudSpanExporter', () => {
           expect(collector).to.not.be.undefined
           expect(body).toEqual(JSON.stringify('string'))
           expect(contentType).toEqual('application/json')
-          expect(resolve).not.toBeUndefined()
-          expect(reject).not.toBeUndefined()
+          expect(resolve).toBeDefined()
+          expect(reject).toBeDefined()
           // @ts-expect-error
           reject('err')
         }
@@ -385,11 +385,11 @@ describe('cloudSpanExporter', () => {
         }
 
         exporter.sendWithHttp = (collector, body, contentType, resolve, reject) => {
-          expect(collector).not.toBeUndefined()
+          expect(collector).toBeDefined()
           expect(body).toEqual(JSON.stringify('encrypted'))
           expect(contentType).toEqual('application/json')
-          expect(resolve).not.toBeUndefined()
-          expect(reject).not.toBeUndefined()
+          expect(resolve).toBeDefined()
+          expect(reject).toBeDefined()
           resolve()
         }
 

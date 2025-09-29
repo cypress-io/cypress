@@ -50,8 +50,8 @@ describe('ipcSpanExporter', () => {
 
       exporter.send = (objects, onSuccess, onError) => {
         expect(objects[0].name).toEqual('span')
-        expect(onSuccess).not.toBeUndefined()
-        expect(onError).not.toBeUndefined()
+        expect(onSuccess).toBeDefined()
+        expect(onError).toBeDefined()
       }
 
       expect(exporter.delayedExport.length).toEqual(0)
@@ -106,7 +106,7 @@ describe('ipcSpanExporter', () => {
             expect(event).toEqual('backend:request')
             expect(subEvent).toEqual('telemetry')
             expect(request).toEqual(JSON.stringify('span'))
-            expect(callback).not.toBeUndefined()
+            expect(callback).toBeDefined()
             callback({})
           },
         }
@@ -139,7 +139,7 @@ describe('ipcSpanExporter', () => {
             expect(event).toEqual('backend:request')
             expect(subEvent).toEqual('telemetry')
             expect(request).toEqual(JSON.stringify('span'))
-            expect(callback).not.toBeUndefined()
+            expect(callback).toBeDefined()
             callback({
               res: {
                 error: 'this broke',
