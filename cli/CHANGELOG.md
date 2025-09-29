@@ -9,7 +9,7 @@ _Released 10/07/2025 (PENDING)_
 
 **Misc:**
 
-- Fixed the Studio panel resizing when dragging. Addresses [#11793](https://github.com/cypress-io/cypress-services/issues/11793).
+- Fixed the Studio panel resizing when dragging. Addressed in [#32584](https://github.com/cypress-io/cypress/pull/32584).
 
 ## 15.3.0
 
