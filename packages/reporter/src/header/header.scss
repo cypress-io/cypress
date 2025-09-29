@@ -95,6 +95,29 @@ $color-transition: color 150ms ease-out;
     align-items: center;
     flex: 1;
 
+    &.sticky-header {
+      position: sticky;
+      top: 64px; // Height of main header
+      z-index: 10;
+      background-color: $gray-1100;
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+          height: 16px;
+        background: linear-gradient(
+          to bottom,
+          $gray-1100 0%,
+          rgba(22, 24, 39, 0.3) 100%
+        );
+        pointer-events: none;
+        z-index: 9;
+      }
+    }
+
     span > span > a > svg {
       margin-bottom: -2px;
       margin-right: 8px;

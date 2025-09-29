@@ -19,6 +19,21 @@ import TestingPreferences from './preferences/testing-preferences'
 import type { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 import { StudioTestHeader } from './studio/StudioTestHeader'
 
+// Import the config function to access experimental features
+function getRunnerConfigFromWindow () {
+  try {
+    // Use the same approach as the app's reporter.ts
+    if (typeof window !== 'undefined' && window.__CYPRESS_CONFIG__?.base64Config) {
+      const { decodeBase64Unicode } = require('@packages/frontend-shared/src/utils/base64')
+      return JSON.parse(decodeBase64Unicode(window.__CYPRESS_CONFIG__.base64Config)) as Cypress.Config
+    }
+  } catch (e) {
+    // Fallback to empty config if parsing fails
+    console.warn('Failed to parse Cypress config:', e)
+  }
+  return {} as Cypress.Config
+}
+
 function usePrevious (value) {
   const ref = useRef()
 
@@ -51,7 +66,10 @@ export interface SingleReporterProps extends BaseReporterProps {
 }
 
 // In React Class components (now deprecated), we used to use appState as a default prop. Now since defaultProps are not supported in functional components, we can use ES6 default params to accomplish the same thing
-const Reporter: React.FC<SingleReporterProps> = observer(({ appState = appStateDefault, runner, className, error, runMode = 'single', studioEnabled, autoScrollingEnabled, isSpecsListOpen, resetStatsOnSpecChange, renderReporterHeader = (props: ReporterHeaderProps) => <Header {...props} />, runnerStore }) => {
+const Reporter: React.FC<SingleReporterProps> = observer(({ appState = appStateDefault, runner, className, error, runMode = 'single', studioEnabled, autoScrollingEnabled, isSpecsListOpen, resetStatsOnSpecChange, renderReporterHeader = (props: ReporterHeaderProps) => {
+  const config = getRunnerConfigFromWindow()
+  return <Header {...props} experimentalStudio={config.experimentalStudio} />
+}, runnerStore }) => {
   const previousSpecRunId = usePrevious(runnerStore.specRunId)
   const [isMounted, setIsMounted] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
