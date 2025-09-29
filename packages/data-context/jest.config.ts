@@ -22,6 +22,7 @@ export default async (): Promise<Config> => {
       '<rootDir>/test/unit/codegen/code-generator.spec.ts',
       '<rootDir>/test/unit/codegen/spec-options.spec.ts',
       '<rootDir>/test/unit/data/ProjectConfigIpc.spec.ts',
+      '<rootDir>/test/unit/data/ProjectConfigManager.spec.ts',
     ],
     testEnvironment: 'node',
     transform: {
