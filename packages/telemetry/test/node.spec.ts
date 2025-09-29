@@ -2,6 +2,9 @@ import { describe, it, expect, beforeAll, vi } from 'vitest'
 import { telemetry, encodeTelemetryContext, decodeTelemetryContext } from '../src/node'
 import { OTLPTraceExporter as OTLPTraceExporterCloud } from '../src/span-exporters/cloud-span-exporter'
 
+// stub out the otlp exporter so we don't send requests to localhost:4318
+vi.mock('@opentelemetry/exporter-trace-otlp-http')
+
 describe('telemetry is disabled', () => {
   describe('init', () => {
     it('does not throw', () => {
