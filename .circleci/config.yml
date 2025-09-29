@@ -12,7 +12,7 @@ parameters:
 # Define anchor for contributor PR detection
 x-is-contributor-pr: &is_contributor_pr
   matches:
-    pattern: '^/pull/\d+'
+    pattern: /^pull\/[0-9]+/
     value: << pipeline.git.branch >>
 
 workflows:
