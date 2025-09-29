@@ -202,11 +202,6 @@ describe('visual error templates', () => {
         retryingAgain: ['Retrying again...'],
       }
     },
-    FIREFOX_CDP_FAILED_TO_CONNECT: () => {
-      return {
-        default: ['Retrying...'],
-      }
-    },
     TESTS_DID_NOT_START_FAILED: () => {
       return {
         default: [],
