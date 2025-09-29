@@ -90,7 +90,7 @@
 - [ ] packages/data-context
 - [x] packages/driver ✅ **COMPLETED**
 - [x] packages/electron ✅ **COMPLETED**
-- [ ] packages/error
+- [x] packages/error ✅ **COMPLETED**
 - [ ] packages/extension
 - [ ] packages/https-proxy
 - [x] packages/electron ✅ **COMPLETED**

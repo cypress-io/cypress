@@ -1,0 +1,11 @@
+[31mWe detected that the [33mChrome[39m[31m process just crashed with code '[33mcode[39m[31m' and signal '[33msignal[39m[31m'.[39m
+[31m[39m
+[31mWe have failed the current spec but will continue running the next spec.[39m
+[31m[39m
+[31mThis can happen for many different reasons:[39m
+[31m[39m
+[31m- You wrote an endless loop and you must fix your own code[39m
+[31m- You are running lots of tests on a memory intense application[39m
+[31m- You are running in a memory starved VM environment[39m
+[31m- There are problems with your GPU / GPU drivers[39m
+[31m- There are browser bugs[39m

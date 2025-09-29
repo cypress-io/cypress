@@ -1,0 +1,21 @@
+[31mYour [33mconfigFile[39m[31m is invalid: [94m/path/to/cypress.config.js[39m[31m[39m
+[31m[39m
+[31mThe [95mcomponent.setupNodeEvents()[39m[31m function must be defined with the following signature:[39m
+[31m[39m
+[31m[94m{[39m[31m[39m
+[31m[94m  component: {[39m[31m[39m
+[31m[94m    setupNodeEvents(on, config) {[39m[31m[39m
+[31m[94m      [90m// configure tasks and plugins here[39m[31m[94m[39m[31m[39m
+[31m[94m    }[39m[31m[39m
+[31m[94m  }[39m[31m[39m
+[31m[94m}[39m[31m[39m
+[31m[39m
+[31mInstead we saw:[39m
+[31m[39m
+[31m[95m[[39m[31m[39m
+[31m[95m  "some",[39m[31m[39m
+[31m[95m  "array"[39m[31m[39m
+[31m[95m][39m[31m[39m
+[31m[39m
+[31mhttps://on.cypress.io/plugins-api[39m
+[31m[39m

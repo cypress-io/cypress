@@ -1,0 +1,5 @@
+[31m[95mParallelization[39m[31m is not included under your free plan.[39m
+[31m[39m
+[31mYour plan is now in a grace period, which means your tests will still run in parallel until [33mFeb 1, 2022[39m[31m. Please upgrade your plan to continue running your tests in parallel in the future.[39m
+[31m[39m
+[31mhttps://on.cypress.io/set-up-billing[39m

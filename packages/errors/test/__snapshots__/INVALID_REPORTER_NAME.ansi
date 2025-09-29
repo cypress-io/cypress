@@ -1,0 +1,12 @@
+[31mError loading the reporter: [33mmissing-reporter-name[39m[31m[39m
+[31m[39m
+[31mWe searched for the reporter in these paths:[39m
+[31m[39m
+[31m[90m - [39m[31m[94m/path/to/reporter[39m[31m[39m
+[31m[90m - [39m[31m[94m/path/reporter[39m[31m[39m
+[31m[39m
+[31mLearn more at https://on.cypress.io/reporters[39m
+[35m[39m
+[35mError: fail whale[39m
+[35m    at makeErr (cypress/packages/errors/test/visualSnapshotErrors.spec.ts)[39m
+[35m    at INVALID_REPORTER_NAME (cypress/packages/errors/test/visualSnapshotErrors.spec.ts)[39m
