@@ -19,16 +19,35 @@ workflows:
     setup-workflow:
         jobs:
             - should-run-ci
+            - restore-workflows-only:
+                filters:
+                  branches:
+                    only: /^pull\/[0-9]+/
+                requires:
+                  - should-run-ci: success 
             - pack-workflows:
+                filters:
+                  branches:
+                    ignore: /^pull\/[0-9]+/
                 requires:
                   - should-run-ci: success
             - launch-primary-workflow:
                 requires:
                   - pack-workflows
+                  - restore-workflows-only
 
 commands:
   persist:
     steps:
+      - run:
+          name: Packed workflows available?
+          command: |
+            if [[ -d ".circleci/packed" ]] && [[ "$(ls -A .circleci/packed 2>/dev/null)" ]]; then
+              echo "📦 Packed workflows available"
+            else
+              echo "❌ Packed workflows not available"
+              exit 1
+            fi
       - persist_to_workspace:
           root: .
           paths:
@@ -195,30 +214,44 @@ jobs:
             
       - cancel-unnecessary-ci
 
+
+  # For contributor PRs, we only restore workflows the cache. We never build them from source.
+  # If this job fails to find the cache, it means the most recent commit on Develop either failed to 
+  # pack and cache the workflows, or the latest commit to develop is older than the max CircleCI cache
+  # age (15 days).
+  restore-workflows-only:
+    docker:
+        - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - restore-sha-cache:
+          branch: "develop"
+      - run:
+          name: Are packed workflows available?
+          command: |
+            if [[ -d ".circleci/packed" ]] && [[ "$(ls -A .circleci/packed 2>/dev/null)" ]]; then
+              echo "📦 Packed workflows available"
+            else
+              echo "❌ Packed workflow cache unavailable. Is there a recent commit to develop?"
+              exit 1
+            fi
+      - persist
+
   pack-workflows:
     docker:
         - image: cimg/base:stable
     resource_class: small
     steps:
-        - when:
-            condition: *is_contributor_pr
-            steps:
-              - restore-sha-cache:
-                  branch: "develop"
-              - persist
-        - unless:
-            condition: *is_contributor_pr
-            steps:
-                - restore-sha-cache:
-                    branch: $CIRCLE_BRANCH
-                - persist-to-workspace-and-exit-early
-                - checkout-workflow-source
-                - restore-src-checksum-cache
-                - persist-to-workspace-and-exit-early
-                - pack-workflows
-                - save-sha-cache
-                - save-src-checksum-cache
-                - persist
+        - restore-sha-cache:
+            branch: $CIRCLE_BRANCH
+        - persist-to-workspace-and-exit-early
+        - checkout-workflow-source
+        - restore-src-checksum-cache
+        - persist-to-workspace-and-exit-early
+        - pack-workflows
+        - save-sha-cache
+        - save-src-checksum-cache
+        - persist
 
   launch-primary-workflow:
       docker:
