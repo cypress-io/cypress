@@ -263,7 +263,7 @@ describe('detectLanguage', () => {
 
       fakeDepsInNodeModules(projectRoot2, [{ devDependency: 'typescript', version: '4.3.6' }])
 
-      const actualTypescript = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
+      const actualTypescript = detectLanguage({ projectRoot: projectRoot2, pkgJson: {} as PkgJson })
 
       expect(actualTypescript).toEqual('ts')
     })
