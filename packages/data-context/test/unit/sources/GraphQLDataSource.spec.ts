@@ -1,4 +1,4 @@
-import { expect } from 'chai'
+import { describe, expect, it, beforeEach, afterEach } from '@jest/globals'
 import dedent from 'dedent'
 import { execute, ExecutionResult, parse, subscribe } from 'graphql'
 import { DataContext } from '../../../src'
@@ -57,18 +57,18 @@ describe('GraphQLDataSource', () => {
       const result = await executeQuery(`{ cloudViewer { id } }`)
 
       // Initial cloudViewer result returns null
-      expect(result.data.cloudViewer).to.eq(null)
+      expect(result.data.cloudViewer).toEqual(null)
 
       const { target, data, fragment } = (await pushFragmentNextVal).data.pushFragment[0]
 
-      expect(target).to.eq('Query')
-      expect(data).to.eql({
+      expect(target).toEqual('Query')
+      expect(data).toEqual({
         cloudViewer: {
           id: 'Q2xvdWRVc2VyOjE=',
         },
       })
 
-      expect(fragment.trim()).to.eq(dedent`
+      expect(fragment.trim()).toEqual(dedent`
         fragment GeneratedFragment on Query {
           cloudViewer {
             id
@@ -83,12 +83,12 @@ describe('GraphQLDataSource', () => {
       const result = await executeQuery(`{ currentProject { id cloudProject { __typename ... on CloudProject { id name } } } }`)
 
       // Initial cloudProject result returns null
-      expect(result.data.currentProject.cloudProject).to.eq(null)
+      expect(result.data.currentProject.cloudProject).toBeNull()
 
       const { target, data, fragment } = (await pushFragmentNextVal).data.pushFragment[0]
 
-      expect(target).to.eq('CurrentProject')
-      expect(data).to.eql({
+      expect(target).toEqual('CurrentProject')
+      expect(data).toEqual({
         __typename: 'CurrentProject',
         cloudProject: {
           __typename: 'CloudProject',
@@ -98,7 +98,7 @@ describe('GraphQLDataSource', () => {
         id: Buffer.from(`CurrentProject:${projectPath}`, 'utf8').toString('base64'),
       })
 
-      expect(fragment.trim()).to.eq(dedent`
+      expect(fragment.trim()).toEqual(dedent`
         fragment GeneratedFragment on CurrentProject {
           id
           cloudProject {
@@ -116,7 +116,7 @@ describe('GraphQLDataSource', () => {
       const result = await executeQuery(`{ cloudViewer { id } }`)
 
       // Initial cloudProject result returns null
-      expect(result.data.cloudViewer).to.eql(null)
+      expect(result.data.cloudViewer).toBeNull()
       await pushFragmentNextVal
 
       pushFragmentNextVal = pushFragmentIterator.next().then(({ value }) => value)
@@ -124,19 +124,19 @@ describe('GraphQLDataSource', () => {
       const result2 = await executeQuery(`{ cloudViewer { id cloudOrganizationsUrl } }`)
 
       // Initial cloudProject result returns null
-      expect(result2.data.cloudViewer).to.eql({ id: 'Q2xvdWRVc2VyOjE=', cloudOrganizationsUrl: null })
+      expect(result2.data.cloudViewer).toEqual({ id: 'Q2xvdWRVc2VyOjE=', cloudOrganizationsUrl: null })
 
       const { target, data, fragment } = (await pushFragmentNextVal).data.pushFragment[0]
 
-      expect(target).to.eq('Query')
-      expect(data).to.eql({
+      expect(target).toEqual('Query')
+      expect(data).toEqual({
         cloudViewer: {
           id: 'Q2xvdWRVc2VyOjE=',
           cloudOrganizationsUrl: 'http://dummy.cypress.io/organizations',
         },
       })
 
-      expect(fragment.trim()).to.eq(dedent`
+      expect(fragment.trim()).toEqual(dedent`
         fragment GeneratedFragment on Query {
           cloudViewer {
             id
