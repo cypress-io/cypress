@@ -7,6 +7,10 @@ _Released 10/07/2025 (PENDING)_
 
 - Fixed a regression introduced in [`15.0.0`](https://docs.cypress.io/guides/references/changelog#15-0-0) where `dbus` connection error messages appear in docker containers when launching Cypress. Fixes [#32290](https://github.com/cypress-io/cypress/issues/32290).
 
+**Misc:**
+
+- Fixed the Studio panel resizing when dragging. Addresses [#11793](https://github.com/cypress-io/cypress-services/issues/11793).
+
 ## 15.3.0
 
 _Released 9/23/2025_
