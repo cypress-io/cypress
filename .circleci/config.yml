@@ -103,15 +103,11 @@ commands:
                 paths:
                   - .circleci/packed
   restore-sha-cache:
-    parameters:
-      branch:
-        type: string
-        default: develop
     steps:
       - run:
-          name: Fetch develop HEAD sha
+          name: Fetch SHA of HEAD
           command: |
-            curl -s "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/branches/<< parameters.branch >>" | jq -r '.commit.sha' > /tmp/sha_checksum.txt
+            curl -s "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/branches/${CIRCLE_BRANCH}" | jq -r '.commit.sha' > /tmp/sha_checksum.txt
       - restore_cache:
           keys:
             - circleci-packed-pipelines-{{ checksum "/tmp/sha_checksum.txt" }}
@@ -203,8 +199,7 @@ jobs:
         - image: cimg/base:stable
     resource_class: small
     steps:
-        - restore-sha-cache:
-            branch: $CIRCLE_BRANCH
+        - restore-sha-cache
         - persist-to-workspace-and-exit-early
         - checkout-workflow-source
         - restore-src-checksum-cache
