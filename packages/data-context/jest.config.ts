@@ -3,8 +3,7 @@ import type { Config } from 'jest'
 import { createDefaultPreset } from 'ts-jest'
 
 const tsJestTransformCfg = createDefaultPreset({
-  isolatedModules: true,
-  tsconfig: 'tsconfig.json',
+  tsconfig: 'tsconfig.test.json',
 }).transform
 
 export default async (): Promise<Config> => {
