@@ -1,5 +1,4 @@
-import { expect } from 'chai'
-import sinon from 'sinon'
+import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
 import { DataContext } from '../../../src'
 
 import { Poller } from '../../../src/polling'
@@ -7,92 +6,94 @@ import { createTestDataContext } from '../helper'
 
 describe('Poller', () => {
   let ctx: DataContext
-  let clock: sinon.SinonFakeTimers
 
   beforeEach(() => {
-    sinon.restore()
-    clock = sinon.useFakeTimers()
+    jest.useFakeTimers()
     ctx = createTestDataContext('open')
   })
 
   afterEach(() => {
-    clock.restore()
+    jest.useRealTimers()
   })
 
   it('polls', async () => {
-    const callback = sinon.stub()
+    const callback = jest.fn()
     const interval = 5
 
     const poller = new Poller(ctx, 'relevantRunChange', interval, callback)
 
     const iterator = poller.start()
 
-    expect(callback).to.have.been.calledOnce
+    expect(callback).toHaveBeenCalledTimes(1)
 
-    await clock.tickAsync(interval * 1000)
-    expect(callback).to.have.been.calledTwice
+    await jest.advanceTimersByTimeAsync(interval * 1000)
+    expect(callback).toHaveBeenCalledTimes(2)
 
     //stop iterator
     iterator.return(undefined)
 
-    await clock.tickAsync(interval * 1000)
-    expect(callback, 'should not be called again after iterator stopped').to.have.been.calledTwice
+    await jest.advanceTimersByTimeAsync(interval * 1000)
+    // should not be called again after iterator stopped
+    expect(callback).toHaveBeenCalledTimes(2)
   })
 
   it('can change interval', async () => {
-    const callback = sinon.stub()
+    const callback = jest.fn()
     const interval = 5
 
     const poller = new Poller(ctx, 'relevantRunChange', interval, callback)
 
     const iterator = poller.start()
 
-    expect(callback).to.have.been.calledOnce
+    expect(callback).toHaveBeenCalledTimes(1)
 
-    await clock.tickAsync(interval * 1000)
-    expect(callback).to.have.been.calledTwice
+    await jest.advanceTimersByTimeAsync(interval * 1000)
+    expect(callback).toHaveBeenCalledTimes(2)
 
     poller.interval = 10
 
-    await clock.tickAsync(interval * 1000)
-    expect(callback, 'should be called at one original interval after interval change').to.have.been.calledThrice
+    await jest.advanceTimersByTimeAsync(interval * 1000)
+    // should be called at one original interval after interval change'
+    expect(callback).toHaveBeenCalledTimes(3)
 
-    await clock.tickAsync(interval * 1000)
-    expect(callback, 'should not be called yet with longer interval').to.have.been.calledThrice
+    await jest.advanceTimersByTimeAsync(interval * 1000)
+    // should not be called yet with longer interval
+    expect(callback).toHaveBeenCalledTimes(3)
 
-    await clock.tickAsync(interval * 1000)
-    expect(callback, 'should be called after longer interval').to.have.callCount(4)
+    await jest.advanceTimersByTimeAsync(interval * 1000)
+    // should be called after longer interval
+    expect(callback).toHaveBeenCalledTimes(4)
 
     //stop iterator
     iterator.return(undefined)
   })
 
   it('handles multiple pollers for the same event', async () => {
-    const callback = sinon.stub()
+    const callback = jest.fn()
     const interval = 5
 
     const poller = new Poller(ctx, 'relevantRunChange', interval, callback)
     const iterator1 = poller.start()
 
-    expect(callback).to.have.been.calledOnce
+    expect(callback).toHaveBeenCalledTimes(1)
 
-    await clock.tickAsync(interval * 1000)
-    expect(callback).to.have.been.calledTwice
+    await jest.advanceTimersByTimeAsync(interval * 1000)
+    expect(callback).toHaveBeenCalledTimes(2)
 
     const iterator2 = poller.start()
 
-    await clock.tickAsync(interval * 1000)
-    expect(callback).to.have.been.calledThrice
+    await jest.advanceTimersByTimeAsync(interval * 1000)
+    expect(callback).toHaveBeenCalledTimes(3)
 
     iterator1.return(undefined)
     iterator2.return(undefined)
 
-    await clock.tickAsync(interval * 1000)
-    expect(callback).to.have.been.calledThrice
+    await jest.advanceTimersByTimeAsync(interval * 1000)
+    expect(callback).toHaveBeenCalledTimes(3)
   })
 
   it('returns initial value', async () => {
-    const callback = sinon.stub()
+    const callback = jest.fn()
     const interval = 5
 
     const initialValue = { foo: true }
@@ -100,38 +101,38 @@ describe('Poller', () => {
     const poller = new Poller<any, any>(ctx, 'relevantRunChange', interval, callback)
     const iterator1 = poller.start({ initialValue })
 
-    expect(callback).to.have.been.calledOnce
+    expect(callback).toHaveBeenCalledTimes(1)
 
     const result1 = await iterator1.next()
 
-    expect(result1.value).to.eq(initialValue)
+    expect(result1.value).toEqual(initialValue)
   })
 
   it('stores and returns meta values for each subscription', async () => {
-    const callback = sinon.stub()
+    const callback = jest.fn()
     const interval = 5
 
     const poller = new Poller<'relevantRunChange', { name: string }, { name: string}>(ctx, 'relevantRunChange', interval, callback)
 
-    expect(poller.subscriptions).to.have.length(0)
+    expect(poller.subscriptions).toHaveLength(0)
 
     const iterator1 = poller.start({ meta: { name: 'one' } })
 
-    expect(poller.subscriptions).to.have.length(1)
-    expect(poller.subscriptions.map((sub) => sub.meta.name)).to.eql(['one'])
+    expect(poller.subscriptions).toHaveLength(1)
+    expect(poller.subscriptions.map((sub) => sub.meta.name)).toEqual(['one'])
 
     const iterator2 = poller.start({ meta: { name: 'two' } })
 
-    expect(poller.subscriptions).to.have.length(2)
-    expect(poller.subscriptions.map((sub) => sub.meta.name)).to.eql(['one', 'two'])
+    expect(poller.subscriptions).toHaveLength(2)
+    expect(poller.subscriptions.map((sub) => sub.meta.name)).toEqual(['one', 'two'])
 
     iterator1.return(undefined)
 
-    expect(poller.subscriptions).to.have.length(1)
-    expect(poller.subscriptions.map((sub) => sub.meta.name)).to.eql(['two'])
+    expect(poller.subscriptions).toHaveLength(1)
+    expect(poller.subscriptions.map((sub) => sub.meta.name)).toEqual(['two'])
 
     iterator2.return(undefined)
 
-    expect(poller.subscriptions).to.have.length(0)
+    expect(poller.subscriptions).toHaveLength(0)
   })
 })
