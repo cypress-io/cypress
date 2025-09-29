@@ -121,20 +121,8 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
         const onQueueFinished = ({ err, userInvocationStack, currentAssertionUserInvocationStack, subject, unserializableSubjectType }) => {
           if (err) {
             if (!currentAssertionUserInvocationStack) {
-              err = $errUtils.enhanceStack({
-                err,
-                userInvocationStack,
-                projectRoot: Cypress.config('projectRoot'),
-              })
-
               err.crossOriginUserInvocationStack = userInvocationStack
             } else {
-              err = $errUtils.enhanceStack({
-                err,
-                userInvocationStack: currentAssertionUserInvocationStack,
-                projectRoot: Cypress.config('projectRoot'),
-              })
-
               err.crossOriginUserInvocationStack = currentAssertionUserInvocationStack
             }
 
