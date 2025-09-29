@@ -537,7 +537,7 @@ const mergeCrossOriginUserInvocationStack = (userInvocationStack: string, origin
   const originStackLines = getStackLines(originUserInvocationStack)
   const userStackLines = getStackLines(userInvocationStack)
 
-  if (userStackLines.length === 0) return userInvocationStack
+  if (userStackLines.length === 0 || originStackLines.length === 0) return userInvocationStack
 
   const userStackMatch = userStackLines[0].match(/(\d+):(\d+)\)/)
 
