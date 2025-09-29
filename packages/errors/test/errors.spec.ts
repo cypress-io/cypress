@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import style from 'ansi-styles'
 import chalk from 'chalk'
 import sinon, { SinonSpy } from 'sinon'

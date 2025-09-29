@@ -1,7 +1,6 @@
-import Debug from 'debug'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+
 import chalk from 'chalk'
-import fse from 'fs-extra'
-import globby from 'globby'
 import _ from 'lodash'
 import path from 'path'
 import * as errors from '../src'
@@ -137,7 +136,7 @@ describe('visual error templates', () => {
     })
   }
 
-  testVisualErrors(process.env.ERROR_TYPE || '*', {
+  testVisualErrors(errorType, {
     CANNOT_TRASH_ASSETS: () => {
       const err = makeErr()
 
