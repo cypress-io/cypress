@@ -78,7 +78,7 @@ const Controls: React.FC<Props> = observer(({ events = defaultEvents, appState, 
           </div>
         </Tooltip>
       )}
-      {(!!appState.nextCommandName || (appState.isRunning && !appState.nextCommandName)) && (
+      {(appState.isPaused || (appState.isRunning && appState.isResumed)) && (
         <Tooltip
           placement='bottom'
           title={appState.nextCommandName ? <p>Next <span className='kbd'>[N]:</span>{appState.nextCommandName}</p> : <p>Step (not available)</p>}
@@ -89,7 +89,7 @@ const Controls: React.FC<Props> = observer(({ events = defaultEvents, appState, 
               size='20'
               variant='outline-dark'
               aria-label={appState.nextCommandName ? `Next '${appState.nextCommandName}'` : 'Next (not available)'}
-              className='next'
+              className='next disabled:hover:border-white/20 disabled:focus:border-white/20'
               disabled={!appState.nextCommandName}
               onClick={appState.nextCommandName ? emit('next') : () => { }}
             >
