@@ -35,6 +35,7 @@ export default async (): Promise<Config> => {
       '<rootDir>/test/unit/sources/RelevantRunsDataSource.spec.ts',
       '<rootDir>/test/unit/sources/RelevantRunSpecsDataSource.spec.ts',
       '<rootDir>/test/unit/sources/RecentRunsDataSource.spec.ts',
+      '<rootDir>/test/unit/sources/RemoteRequestDataSource.spec.ts',
     ],
     testEnvironment: 'node',
     transform: {
