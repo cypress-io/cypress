@@ -44,6 +44,7 @@ describe('cy.origin errors', () => {
     before () {
       cy.visit('/primary_origin.html')
     },
+    // Skip title validation here since the command is deep enough in the test that it does not show the command title
     skipTitleValidation: true,
   })
 
