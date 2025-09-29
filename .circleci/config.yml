@@ -79,9 +79,10 @@ commands:
                   name: Checkout develop branch
                   command: |
                     git clone --depth=1 --single-branch -b develop $CIRCLE_REPOSITORY_URL .
-            else:
-              steps:
-                - checkout
+        - unless:
+            condition: *is_contributor_pr
+            steps:
+              - checkout
   save-sha-cache:
     steps:
       - when:
