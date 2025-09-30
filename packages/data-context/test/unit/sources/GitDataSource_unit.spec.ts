@@ -1,64 +1,52 @@
-import { expect, use } from 'chai'
-import sinonChai from 'sinon-chai'
-import sinon from 'sinon'
-import proxyquire from 'proxyquire'
+import { describe, expect, it, jest } from '@jest/globals'
 import pDefer, { DeferredPromise } from 'p-defer'
+import EventEmitter from 'events'
 
-import { SimpleGit } from 'simple-git'
-import type { GitDataSource, GitDataSourceConfig } from '../../../src/sources/GitDataSource'
+import type { SimpleGit } from 'simple-git'
+import { GitDataSource } from '../../../src/sources/GitDataSource'
 import Chokidar from 'chokidar'
 
-use(sinonChai)
+const stubbedSimpleGit: {
+  // Parameters<> only gets the last overload defined, which is
+  // supposed to be the most permissive. However, SimpleGit defines
+  // overloads in the opposite order, and we need the one that takes
+  // a string.
+  revparse: jest.Mock<(option: string) => R<'revparse'>>
+  branch: jest.Mock<(options: P<'branch'>) => R<'branch'>>
+  status: jest.Mock<(options: P<'status'>) => R<'status'>>
+  log: jest.Mock<(options: P<'log'>) => R<'log'>>
+} = {
+  revparse: jest.fn(),
+  branch: jest.fn(),
+  status: jest.fn(),
+  log: jest.fn(),
+}
+
+jest.mock('simple-git', () => {
+  // use a module factory to return the stubbed SimpleGit instance
+  // @see https://jestjs.io/docs/es6-class-mocks#calling-jestmock-with-the-module-factory-parameter
+  return jest.fn().mockImplementation(() => {
+    return stubbedSimpleGit
+  })
+})
 
 type P<F extends keyof SimpleGit> = Parameters<SimpleGit[F]>
 type R<F extends keyof SimpleGit> = ReturnType<SimpleGit[F]>
 
-interface GitDataSourceConstructor {
-  new (config: GitDataSourceConfig): GitDataSource
-}
-
-type GDSImport = {
-  GitDataSource: GitDataSourceConstructor
-}
-
 describe('GitDataSource', () => {
-  let stubbedSimpleGit: {
-    // Parameters<> only gets the last overload defined, which is
-    // supposed to be the most permissive. However, SimpleGit defines
-    // overloads in the opposite order, and we need the one that takes
-    // a string.
-    revparse: sinon.SinonStub<[option: string], R<'revparse'>>
-    branch: sinon.SinonStub<P<'branch'>, R<'branch'>>
-    status: sinon.SinonStub<P<'status'>, R<'status'>>
-    log: sinon.SinonStub<P<'log'>, R<'log'>>
-  }
-  let stubbedWatchInstance: sinon.SinonStubbedInstance<Chokidar.FSWatcher>
-
-  let gitDataSourceImport: GDSImport
-  let fakeTimers: sinon.SinonFakeTimers
-
   beforeEach(() => {
-    fakeTimers = sinon.useFakeTimers()
-    stubbedSimpleGit = {
-      revparse: sinon.stub<[option: string], R<'revparse'>>(),
-      branch: sinon.stub<P<'branch'>, R<'branch'>>(),
-      status: sinon.stub<P<'status'>, R<'status'>>(),
-      log: sinon.stub<P<'log'>, R<'log'>>(),
-    }
+    jest.useFakeTimers()
 
-    stubbedWatchInstance = sinon.createStubInstance(Chokidar.FSWatcher)
-    sinon.stub(Chokidar, 'watch').returns(stubbedWatchInstance)
-
-    gitDataSourceImport = proxyquire.noCallThru()('../../../src/sources/GitDataSource', {
-      'simple-git' () {
-        return stubbedSimpleGit
-      },
-    })
+    // @ts-expect-error - incorrect type to stub
+    jest.spyOn(Chokidar, 'watch').mockReturnValue(new EventEmitter())
   })
 
   afterEach(() => {
-    sinon.restore()
-    fakeTimers.restore()
+    stubbedSimpleGit.log.mockReset()
+    stubbedSimpleGit.revparse.mockReset()
+    stubbedSimpleGit.branch.mockReset()
+    stubbedSimpleGit.status.mockReset()
+    jest.useRealTimers()
   })
 
   describe('Unit', () => {
@@ -66,10 +54,10 @@ describe('GitDataSource', () => {
       let gds: GitDataSource
       let projectRoot: string
       let branchName: string
-      let onBranchChange: sinon.SinonStub<[branch: string | null], void>
-      let onGitInfoChange: sinon.SinonStub<[specPath: string[]], void>
-      let onError: sinon.SinonStub<[err: any], void>
-      let onGitLogChange: sinon.SinonStub<[shas: string[]], void>
+      let onBranchChange: jest.Mock<(branch: string | null) => void>
+      let onGitInfoChange: jest.Mock<(specPath: string[]) => void>
+      let onError: jest.Mock<(err: any) => void>
+      let onGitLogChange: jest.Mock<(shas: string[]) => void>
       const firstHashes = [
         { hash: 'abc' },
       ]
@@ -83,27 +71,21 @@ describe('GitDataSource', () => {
         firstGitLogCall = pDefer()
         secondGitLogCall = pDefer()
         branchName = 'main'
-        onBranchChange = sinon.stub()
-        onGitInfoChange = sinon.stub()
-        onError = sinon.stub()
-        onGitLogChange = sinon.stub()
+        onBranchChange = jest.fn()
+        onGitInfoChange = jest.fn()
+        onError = jest.fn()
+        onGitLogChange = jest.fn()
 
         projectRoot = '/root'
 
-        // @ts-ignore
-        stubbedSimpleGit.log.onFirstCall()
-        // @ts-expect-error
-        .callsFake(() => {
+        stubbedSimpleGit.log.mockImplementationOnce((opts: P<'log'>) => {
           firstGitLogCall.resolve()
 
-          return { all: firstHashes }
-        })
-        .onSecondCall()
-        // @ts-expect-error
-        .callsFake(() => {
+          return { all: firstHashes } as unknown as R<'log'>
+        }).mockImplementationOnce((opts: P<'log'>) => {
           secondGitLogCall.resolve()
 
-          return { all: secondHashes }
+          return { all: secondHashes } as unknown as R<'log'>
         })
 
         // #verifyGitRepo
@@ -111,12 +93,10 @@ describe('GitDataSource', () => {
         // constructor verifies the repo in open mode via #refreshAllGitData, but does not wait for it :womp:
         const revparseP = pDefer<void>()
 
-        // SimpleGit returns a chainable, but we only care about the promise
-        // @ts-expect-error
-        stubbedSimpleGit.revparse.callsFake(() => {
+        stubbedSimpleGit.revparse.mockImplementationOnce((opts: string) => {
           revparseP.resolve()
 
-          return Promise.resolve(projectRoot)
+          return Promise.resolve(projectRoot) as unknown as R<'revparse'>
         })
 
         // wait for revparse to be called, so we can be assured that GitDataSource has initialized
@@ -128,18 +108,17 @@ describe('GitDataSource', () => {
         const branchP = pDefer<void>()
 
         // again, ignoring type warning re: chaining
-        // @ts-expect-error
-        stubbedSimpleGit.branch.callsFake(() => {
+        stubbedSimpleGit.branch.mockImplementationOnce((opts: P<'branch'>) => {
           branchP.resolve()
 
-          return Promise.resolve({ current: branchName })
+          return Promise.resolve({ current: branchName }) as unknown as R<'branch'>
         })
 
         const onBranchChangeP = pDefer<void>()
 
-        onBranchChange.callsFake(() => onBranchChangeP.resolve())
+        onBranchChange.mockImplementationOnce(() => onBranchChangeP.resolve())
 
-        gds = new gitDataSourceImport.GitDataSource({
+        gds = new GitDataSource({
           isRunMode: false,
           projectRoot,
           onBranchChange,
@@ -151,7 +130,7 @@ describe('GitDataSource', () => {
         await revparseP.promise
         await branchP.promise
         await onBranchChangeP.promise
-        expect(onBranchChange).to.be.calledWith(branchName)
+        expect(onBranchChange).toHaveBeenCalledWith(branchName)
       })
 
       describe('.get currentHashes', () => {
@@ -161,15 +140,15 @@ describe('GitDataSource', () => {
           })
 
           it('returns the current hashes', () => {
-            expect(gds.currentHashes).to.have.same.members(firstHashesReturnValue)
+            expect(gds.currentHashes).toEqual(firstHashesReturnValue)
           })
         })
 
         describe('after sixty seconds, when there are additional hashes', () => {
           it('returns the current hashes', async () => {
-            await fakeTimers.tickAsync(60001)
+            await jest.advanceTimersByTimeAsync(60001)
             await secondGitLogCall.promise
-            expect(gds.currentHashes).to.have.same.members(secondHashesReturnValue)
+            expect(gds.currentHashes).toEqual(secondHashesReturnValue)
           })
         })
       })

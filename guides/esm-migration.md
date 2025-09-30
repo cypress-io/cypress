@@ -87,7 +87,7 @@
 ##### Binary Packages
 
 - [x] packages/config ✅ **COMPLETED**
-- [ ] packages/data-context
+- [x] packages/data-context **COMPLETED** (migrated from `mocha`/`sinon`/`chai` to `jest`). See package README for more details as to why `jest` over `vitest`
 - [x] packages/driver ✅ **COMPLETED**
 - [x] packages/electron ✅ **COMPLETED**
 - [x] packages/error ✅ **COMPLETED**

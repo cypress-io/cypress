@@ -158,3 +158,9 @@ export const Query = objectType({
   }
 })
 ```
+
+### Testing
+
+This package uses [jest](https://jestjs.io/) to integration/unit test this package. [vitest](https://vitest.dev/) currently cannot be used due to how `graphql` in this package is loaded into the vitest service worker, which is likely due to multiple instances of the GraphQL server being available. Since `jest` runs in a shared process, we are currently leveraging `jest` in place of `vitest`.
+
+Additionally, Because the [ProjectLifecycleManager](https://github.com/cypress-io/cypress/blob/v15.3.0/packages/data-context/src/data/ProjectLifecycleManager.ts#L436) changes the current working directory for the process, we cannot run the tests in parallel, hence why the `--runInBand` option is utilized for running the tests.

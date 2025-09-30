@@ -1,14 +1,14 @@
-import { expect } from 'chai'
+import { describe, expect, it, beforeEach, jest } from '@jest/globals'
 import type { DataContext } from '../../../src'
+import path from 'path'
 import { createTestDataContext } from '../helper'
-import sinon from 'sinon'
 import { FoundBrowser, FullConfig } from '@packages/types'
 
 const browsers = [
-  { name: 'electron', family: 'chromium', channel: 'stable', displayName: 'Electron' },
-  { name: 'chrome', family: 'chromium', channel: 'stable', displayName: 'Chrome' },
-  { name: 'chrome', family: 'chromium', channel: 'beta', displayName: 'Chrome Beta' },
-  { name: 'firefox', family: 'firefox', channel: 'stable', displayName: 'Firefox' },
+  { name: 'electron', family: 'chromium', channel: 'stable', displayName: 'Electron', path: '', version: '' },
+  { name: 'chrome', family: 'chromium', channel: 'stable', displayName: 'Chrome', path: '', version: '' },
+  { name: 'chrome', family: 'chromium', channel: 'beta', displayName: 'Chrome Beta', path: '', version: '' },
+  { name: 'firefox', family: 'firefox', channel: 'stable', displayName: 'Firefox', path: '', version: '' },
 ]
 
 let ctx: DataContext
@@ -16,10 +16,10 @@ let ctx: DataContext
 function createDataContext (modeOptions?: Parameters<typeof createTestDataContext>[1]) {
   const context = createTestDataContext('open', modeOptions)
 
-  context._apis.browserApi.getBrowsers = sinon.stub().resolves(browsers)
-  context._apis.projectApi.insertProjectPreferencesToCache = sinon.stub()
-  context.actions.project.launchProject = sinon.stub().resolves()
-  context.project.getProjectPreferences = sinon.stub().resolves(null)
+  jest.spyOn(context._apis.browserApi, 'getBrowsers').mockResolvedValue(browsers)
+  context._apis.projectApi.insertProjectPreferencesToCache = jest.fn()
+  jest.spyOn(context.actions.project, 'launchProject').mockResolvedValue(undefined)
+  jest.spyOn(context.project, 'getProjectPreferences').mockResolvedValue(null)
 
   // @ts-expect-error
   context.lifecycleManager._projectRoot = 'foo'
@@ -35,31 +35,42 @@ const fullConfig: FullConfig = {
 describe('ProjectLifecycleManager', () => {
   beforeEach(() => {
     ctx = createDataContext()
-    sinon.stub(ctx.lifecycleManager, 'getFullInitialConfig').resolves(fullConfig)
+    jest.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
   })
 
-  context('#setInitialActiveBrowser', () => {
+  afterEach(() => {
+    // reset the working directory to the root of @packages/data-context
+    process.chdir(path.join(__dirname, '../../../'))
+  })
+
+  describe('#setInitialActiveBrowser', () => {
     it('falls back to browsers[0] if preferences and cliBrowser do not exist', async () => {
       ctx.coreData.activeBrowser = null
       ctx.coreData.cliBrowser = null
 
       await ctx.lifecycleManager.setInitialActiveBrowser()
 
-      expect(ctx.coreData.activeBrowser).to.include({ name: 'electron' })
-      expect(ctx.actions.project.launchProject).to.not.be.called
+      expect(ctx.coreData.activeBrowser).toEqual(expect.objectContaining({ name: 'electron' }))
+      expect(ctx.actions.project.launchProject).not.toHaveBeenCalled()
     })
 
     it('uses cli --browser option if one is set', async () => {
-      ctx._apis.browserApi.ensureAndGetByNameOrPath = sinon.stub().withArgs('electron').resolves(browsers[0])
+      jest.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockImplementation((name) => {
+        if (name === 'electron') {
+          return Promise.resolve(browsers[0])
+        }
+
+        throw new Error('Browser not found')
+      })
 
       ctx.coreData.activeBrowser = null
       ctx.coreData.cliBrowser = 'electron'
 
       await ctx.lifecycleManager.setInitialActiveBrowser()
 
-      expect(ctx.coreData.cliBrowser).to.eq('electron')
-      expect(ctx.coreData.activeBrowser).to.include({ name: 'electron' })
-      expect(ctx.actions.project.launchProject).to.not.be.called
+      expect(ctx.coreData.cliBrowser).toEqual('electron')
+      expect(ctx.coreData.activeBrowser).toEqual(expect.objectContaining({ name: 'electron' }))
+      expect(ctx.actions.project.launchProject).not.toHaveBeenCalled()
     })
 
     it('uses cli --browser option and launches project if `--project --testingType` were used', async () => {
@@ -68,38 +79,44 @@ describe('ProjectLifecycleManager', () => {
         testingType: 'e2e',
       })
 
-      ctx._apis.browserApi.ensureAndGetByNameOrPath = sinon.stub().withArgs('electron').resolves(browsers[0])
+      jest.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockImplementation((name) => {
+        if (name === 'electron') {
+          return Promise.resolve(browsers[0])
+        }
+
+        throw new Error('Browser not found')
+      })
 
       ctx.coreData.activeBrowser = null
       ctx.coreData.cliBrowser = 'electron'
 
       await ctx.lifecycleManager.setInitialActiveBrowser()
 
-      expect(ctx.coreData.cliBrowser).to.eq('electron')
-      expect(ctx.coreData.activeBrowser).to.include({ name: 'electron' })
-      expect(ctx.actions.project.launchProject).to.be.calledOnce
+      expect(ctx.coreData.cliBrowser).toEqual('electron')
+      expect(ctx.coreData.activeBrowser).toEqual(expect.objectContaining({ name: 'electron' }))
+      expect(ctx.actions.project.launchProject).toHaveBeenCalledTimes(1)
     })
 
     it('uses lastBrowser if available', async () => {
-      ctx.project.getProjectPreferences = sinon.stub().resolves({ lastBrowser: { name: 'chrome', channel: 'beta' } })
+      jest.spyOn(ctx.project, 'getProjectPreferences').mockResolvedValue({ lastBrowser: { name: 'chrome', channel: 'beta' } })
       ctx.coreData.activeBrowser = null
       ctx.coreData.cliBrowser = null
 
       await ctx.lifecycleManager.setInitialActiveBrowser()
 
-      expect(ctx.coreData.activeBrowser).to.include({ name: 'chrome', displayName: 'Chrome Beta' })
-      expect(ctx.actions.project.launchProject).to.not.be.called
+      expect(ctx.coreData.activeBrowser).toEqual(expect.objectContaining({ name: 'chrome', displayName: 'Chrome Beta' }))
+      expect(ctx.actions.project.launchProject).not.toHaveBeenCalled()
     })
 
     it('falls back to browsers[0] if lastBrowser does not exist', async () => {
-      ctx.project.getProjectPreferences = sinon.stub().resolves({ lastBrowser: { name: 'chrome', channel: 'dev' } })
+      jest.spyOn(ctx.project, 'getProjectPreferences').mockResolvedValue({ lastBrowser: { name: 'chrome', channel: 'dev' } })
       ctx.coreData.activeBrowser = null
       ctx.coreData.cliBrowser = null
 
       await ctx.lifecycleManager.setInitialActiveBrowser()
 
-      expect(ctx.coreData.activeBrowser).to.include({ name: 'electron' })
-      expect(ctx.actions.project.launchProject).to.not.be.called
+      expect(ctx.coreData.activeBrowser).toEqual(expect.objectContaining({ name: 'electron' }))
+      expect(ctx.actions.project.launchProject).not.toHaveBeenCalled()
     })
 
     it('uses config defaultBrowser option if --browser is not given', async () => {
@@ -109,18 +126,25 @@ describe('ProjectLifecycleManager', () => {
         isBrowserGivenByCli: false,
       })
 
-      ctx._apis.browserApi.ensureAndGetByNameOrPath = sinon.stub().withArgs('chrome').resolves(browsers[1])
-      sinon.stub(ctx.lifecycleManager, 'loadedFullConfig').get(() => ({ defaultBrowser: 'chrome' }))
+      jest.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockImplementation((name) => {
+        if (name === 'chrome') {
+          return Promise.resolve(browsers[1])
+        }
 
-      expect(ctx.modeOptions.browser).to.eq(undefined)
-      expect(ctx.coreData.cliBrowser).to.eq(null)
-      expect(ctx.coreData.activeBrowser).to.eq(null)
+        throw new Error('Browser not found')
+      })
+
+      jest.spyOn(ctx.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: 'chrome' } as unknown as FullConfig)
+
+      expect(ctx.modeOptions.browser).toEqual(undefined)
+      expect(ctx.coreData.cliBrowser).toEqual(null)
+      expect(ctx.coreData.activeBrowser).toEqual(null)
 
       await ctx.lifecycleManager.setInitialActiveBrowser()
 
-      expect(ctx.modeOptions.browser).to.eq('chrome')
-      expect(ctx.coreData.cliBrowser).to.eq('chrome')
-      expect(ctx.coreData.activeBrowser).to.eq(browsers[1])
+      expect(ctx.modeOptions.browser).toEqual('chrome')
+      expect(ctx.coreData.cliBrowser).toEqual('chrome')
+      expect(ctx.coreData.activeBrowser).toEqual(browsers[1])
     })
 
     it('doesn\'t use config defaultBrowser option if --browser is given', async () => {
@@ -131,19 +155,26 @@ describe('ProjectLifecycleManager', () => {
         isBrowserGivenByCli: true,
       })
 
-      sinon.stub(ctx.lifecycleManager, 'getFullInitialConfig').resolves(fullConfig)
-      ctx._apis.browserApi.ensureAndGetByNameOrPath = sinon.stub().withArgs('firefox').resolves(browsers[3])
-      sinon.stub(ctx.lifecycleManager, 'loadedFullConfig').get(() => ({ defaultBrowser: 'chrome' }))
+      jest.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
+      jest.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockImplementation((name) => {
+        if (name === 'firefox') {
+          return Promise.resolve(browsers[3])
+        }
 
-      expect(ctx.modeOptions.browser).to.eq('firefox')
-      expect(ctx.coreData.cliBrowser).to.eq('firefox')
-      expect(ctx.coreData.activeBrowser).to.eq(null)
+        throw new Error('Browser not found')
+      })
+
+      jest.spyOn(ctx.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: 'chrome' } as unknown as FullConfig)
+
+      expect(ctx.modeOptions.browser).toEqual('firefox')
+      expect(ctx.coreData.cliBrowser).toEqual('firefox')
+      expect(ctx.coreData.activeBrowser).toEqual(null)
 
       await ctx.lifecycleManager.setInitialActiveBrowser()
 
-      expect(ctx.modeOptions.browser).to.eq('firefox')
-      expect(ctx.coreData.cliBrowser).to.eq('firefox')
-      expect(ctx.coreData.activeBrowser).to.eq(browsers[3])
+      expect(ctx.modeOptions.browser).toEqual('firefox')
+      expect(ctx.coreData.cliBrowser).toEqual('firefox')
+      expect(ctx.coreData.activeBrowser).toEqual(browsers[3])
     })
 
     it('ignores the defaultBrowser if there is an active browser and updates the CLI browser to the active browser', async () => {
@@ -153,27 +184,34 @@ describe('ProjectLifecycleManager', () => {
         isBrowserGivenByCli: false,
       })
 
-      sinon.stub(ctx.lifecycleManager, 'getFullInitialConfig').resolves(fullConfig)
-      ctx._apis.browserApi.ensureAndGetByNameOrPath = sinon.stub().withArgs('chrome:beta').resolves(browsers[2])
+      jest.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
+      jest.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockImplementation((name) => {
+        if (name === 'chrome:beta') {
+          return Promise.resolve(browsers[2])
+        }
+
+        throw new Error('Browser not found')
+      })
+
       // the default browser will be ignored since we have an active browser
-      sinon.stub(ctx.lifecycleManager, 'loadedFullConfig').get(() => ({ defaultBrowser: 'firefox' }))
+      jest.spyOn(ctx.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: 'firefox' } as unknown as FullConfig)
 
       // set the active browser to chrome:beta
       ctx.actions.browser.setActiveBrowser(browsers[2] as FoundBrowser)
 
-      expect(ctx.modeOptions.browser).to.eq(undefined)
-      expect(ctx.coreData.cliBrowser).to.eq(null)
-      expect(ctx.coreData.activeBrowser).to.eq(browsers[2])
+      expect(ctx.modeOptions.browser).toEqual(undefined)
+      expect(ctx.coreData.cliBrowser).toBeNull()
+      expect(ctx.coreData.activeBrowser).toEqual(browsers[2])
 
       await ctx.lifecycleManager.setInitialActiveBrowser()
 
-      expect(ctx.modeOptions.browser).to.eq('chrome:beta')
-      expect(ctx.coreData.cliBrowser).to.eq('chrome:beta')
-      expect(ctx.coreData.activeBrowser).to.eq(browsers[2])
+      expect(ctx.modeOptions.browser).toEqual('chrome:beta')
+      expect(ctx.coreData.cliBrowser).toEqual('chrome:beta')
+      expect(ctx.coreData.activeBrowser).toEqual(browsers[2])
     })
   })
 
-  context('#eventProcessPid', () => {
+  describe('#eventProcessPid', () => {
     it('returns process id from config manager', () => {
       // @ts-expect-error
       ctx.lifecycleManager._configManager = {
@@ -181,13 +219,13 @@ describe('ProjectLifecycleManager', () => {
         destroy: () => {},
       }
 
-      expect(ctx.lifecycleManager.eventProcessPid).to.eq(12399)
+      expect(ctx.lifecycleManager.eventProcessPid).toEqual(12399)
     })
 
     it('does not throw if config manager is not initialized', () => {
       // @ts-expect-error
       ctx.lifecycleManager._configManager = undefined
-      expect(ctx.lifecycleManager.eventProcessPid).to.eq(undefined)
+      expect(ctx.lifecycleManager.eventProcessPid).toEqual(undefined)
     })
   })
 })
