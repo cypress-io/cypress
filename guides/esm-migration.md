@@ -55,7 +55,7 @@
 - [x] packages/reporter ✅ **COMPLETED**
 - [ ] packages/resolve-dist **PARTIAL** - entry point is JS
 - [ ] packages/rewriter **PARTIAL** - entry point is JS
-- [ ] packages/root
+- [x] packages/root ✅ **COMPLETED**
 - [x] packages/runner ✅ **COMPLETED**
 - [ ] packages/scaffold-config **PARTIAL** - entry point is JS
 - [ ] packages/server **PARTIAL** - many source/test files in JS. highest priority
