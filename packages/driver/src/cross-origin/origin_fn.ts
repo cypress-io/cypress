@@ -179,8 +179,11 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
         return
       }
 
+      const currentAssertionUserInvocationStack = cy.state('current').get('currentAssertionCommand')?.get('userInvocationStack')
+      const userInvocationStack = cy.state('current').get('userInvocationStack')
+
       cy.stop()
-      Cypress.specBridgeCommunicator.toPrimary('queue:finished', { err }, { syncGlobals: true })
+      Cypress.specBridgeCommunicator.toPrimary('queue:finished', { err, crossOriginUserInvocationStack: currentAssertionUserInvocationStack || userInvocationStack }, { syncGlobals: true })
     })
 
     // the name of this function is used to verify if privileged commands are
