@@ -1,0 +1,8 @@
+[31mCypress detected policy settings on your computer that may cause issues.[39m
+[31m[39m
+[31mThe following policies were detected that may prevent Cypress from automating Chrome:[39m
+[31m[39m
+[31m[90m - [39m[31m[94mHKEY_LOCAL_MACHINE\Software\Policies\Google\Chrome\ProxyServer[39m[31m[39m
+[31m[90m - [39m[31m[94mHKEY_CURRENT_USER\Software\Policies\Google\Chromium\ExtensionSettings[39m[31m[39m
+[31m[39m
+[31mFor more information, see https://on.cypress.io/bad-browser-policy[39m

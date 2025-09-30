@@ -1,0 +1,11 @@
+[31mThe [33mlaunchOptions[39m[31m object returned by your plugin's [95mbefore:browser:launch[39m[31m handler contained unexpected properties:[39m
+[31m[39m
+[31m[90m - [39m[31m[94mbaz[39m[31m[39m
+[31m[39m
+[31mlaunchOptions may only contain the properties:[39m
+[31m[39m
+[31m[90m - [39m[31m[94mpreferences[39m[31m[39m
+[31m[90m - [39m[31m[94mextensions[39m[31m[39m
+[31m[90m - [39m[31m[94margs[39m[31m[39m
+[31m[39m
+[31mhttps://on.cypress.io/browser-launch-api[39m
