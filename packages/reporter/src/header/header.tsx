@@ -19,9 +19,10 @@ export interface ReporterHeaderProps {
   statsStore: StatsStore
   runnablesStore: RunnablesStore
   spec?: Cypress.Cypress['spec']
+  displayStatsAndControls?: boolean
 }
 
-const Header: React.FC<ReporterHeaderProps> = observer(({ appState, events = defaultEvents, statsStore, runnablesStore, spec }: ReporterHeaderProps) => {
+const Header: React.FC<ReporterHeaderProps> = observer(({ appState, events = defaultEvents, statsStore, runnablesStore, spec, displayStatsAndControls = true }: ReporterHeaderProps) => {
   return <header>
     <div className='spec-container'>
       <Tooltip placement='bottom' title={<p>{appState.isSpecsListOpen ? 'Collapse' : 'Expand'} Specs List <span className='kbd'>F</span></p>} wrapperClassName='toggle-specs-wrapper' className='cy-tooltip'>
@@ -46,10 +47,10 @@ const Header: React.FC<ReporterHeaderProps> = observer(({ appState, events = def
       </Tooltip>
       {spec && <RunnableHeader spec={spec} statsStore={statsStore} runnablesStore={runnablesStore} />}
     </div>
-    <div className='statsAndControls'>
+    {displayStatsAndControls && <div className='statsAndControls'>
       <Stats stats={statsStore} />
       <Controls appState={appState} />
-    </div>
+    </div>}
   </header>
 })
 

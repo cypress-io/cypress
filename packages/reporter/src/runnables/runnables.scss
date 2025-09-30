@@ -590,6 +590,10 @@ $dotted-line-left-padding: 19px;
     justify-content: center;
     color: $gray-500;
   }
+  
+  .runnable-options-button-border {
+    border-color: rgb(255 255 255 / 0.2);
+  }
 
   .runnable-options-button-icon {
    rotate: 90deg;

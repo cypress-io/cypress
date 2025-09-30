@@ -2,6 +2,7 @@ import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import cs from 'classnames'
 
 import Tooltip from '@cypress/react-tooltip'
 import Button from '@cypress-design/react-button'
@@ -55,7 +56,7 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
   }
 
   const handleNewTest = () => {
-    events.emit('studio:init:suite', { suiteId: spec.id })
+    events.emit('studio:init:suite', { suiteId: 'r1' })
     setIsOpen(false)
   }
 
@@ -174,12 +175,14 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
           <div>
             <Button
               size="32"
-              variant="outline-dark"
+              variant="outline-indigo"
               aria-label="Options"
               aria-expanded={isOpen}
               data-cy="runnable-options-button"
               onClick={togglePopover}
-              className="runnable-options-button"
+              className={cs('runnable-options-button', {
+                'runnable-options-button-border': !isOpen,
+              })}
             >
               <IconMenuDotsVertical className='runnable-options-button-icon' />
             </Button>

@@ -15,9 +15,7 @@ import shortcuts from './lib/shortcuts'
 
 import Header, { ReporterHeaderProps } from './header/header'
 import Runnables from './runnables/runnables'
-import TestingPreferences from './preferences/testing-preferences'
 import type { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
-import { StudioTestHeader } from './studio/StudioTestHeader'
 
 function usePrevious (value) {
   const ref = useRef()
@@ -111,12 +109,8 @@ const Reporter: React.FC<SingleReporterProps> = observer(({ appState = appStateD
     <div className={cs(className, 'reporter', {
       'mounted': isMounted,
     })}>
-      {isStudioSingleTest && runnerStore.spec ? <StudioTestHeader
-        spec={runnerStore.spec}
-      /> : renderReporterHeader({ appState, statsStore, runnablesStore, spec: runnerStore.spec })}
-      {appState?.isPreferencesMenuOpen ? (
-        <TestingPreferences appState={appState} />
-      ) : (
+      {renderReporterHeader({ appState, statsStore, runnablesStore, spec: runnerStore.spec, displayStatsAndControls: !isStudioSingleTest })}
+      {
         runnerStore.spec && <Runnables
           appState={appState}
           error={error}
@@ -127,7 +121,7 @@ const Reporter: React.FC<SingleReporterProps> = observer(({ appState = appStateD
           studioEnabled={studioEnabled}
           canSaveStudioLogs={runnerStore.canSaveStudioLogs}
         />
-      )}
+      }
     </div>
   )
 })

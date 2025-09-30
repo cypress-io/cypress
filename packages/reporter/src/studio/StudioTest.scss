@@ -6,8 +6,10 @@
 
 .studio-header__test-section {
   display: flex;
-  align-items: flex-start;
-  border-bottom: 1px solid $gray-900;
+  align-items: center;
+  border: 1px solid $gray-900;
+  border-left: none;
+  border-right: none;
   padding: 16px;
   gap: 8px;
   font-size: 14px;
@@ -30,8 +32,19 @@
 .studio-header__test-section-left {
   display: flex;
   flex-grow: 1;
-  gap: 8px;
-  margin-top: 5px;
+  gap: 16px;
+
+  .studio-header__back-button {
+    padding: 0;
+    width: 32px;
+    justify-content: center;
+  }
+
+  .studio-header__test-section-left-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
 }
 
 .studio-header__test-section-right {
