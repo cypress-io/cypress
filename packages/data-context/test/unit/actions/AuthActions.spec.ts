@@ -11,8 +11,7 @@ describe('AuthActions', () => {
 
     beforeEach(() => {
       ctx = createTestDataContext('open')
-      // @ts-expect-error - incorrect return type
-      ctx._apis.authApi.logIn = jest.fn().mockResolvedValue({ name: 'steve', email: 'steve@apple.com', authToken: 'foo' })
+      jest.mocked(ctx._apis.authApi.logIn).mockResolvedValue({ name: 'steve', email: 'steve@apple.com', authToken: 'foo' })
 
       actions = new AuthActions(ctx)
     })
@@ -57,13 +56,12 @@ describe('AuthActions', () => {
 
       ctx.coreData.app.browserStatus = 'closed'
 
-      // @ts-expect-error
-      ctx.browser.isFocusSupported = jest.fn().mockImplementation((args) => {
+      jest.spyOn(ctx.browser, 'isFocusSupported').mockImplementation((args) => {
         if (args === browser) {
-          return true
+          return Promise.resolve(true)
         }
 
-        return false
+        return Promise.resolve(false)
       })
 
       // @ts-expect-error - incorrect number of arguments
@@ -78,13 +76,12 @@ describe('AuthActions', () => {
 
       ctx.coreData.app.browserStatus = 'opening'
 
-      // @ts-expect-error
-      ctx.browser.isFocusSupported = jest.fn().mockImplementation((args) => {
+      jest.spyOn(ctx.browser, 'isFocusSupported').mockImplementation((args) => {
         if (args === browser) {
-          return true
+          return Promise.resolve(true)
         }
 
-        return false
+        return Promise.resolve(false)
       })
 
       // @ts-expect-error - incorrect number of arguments
@@ -99,16 +96,15 @@ describe('AuthActions', () => {
 
       ctx.coreData.app.browserStatus = 'open'
 
-      // @ts-expect-error
-      ctx.browser.isFocusSupported = jest.fn().mockImplementation((args) => {
+      jest.spyOn(ctx.browser, 'isFocusSupported').mockImplementation((args) => {
         if (args === browser) {
-          return true
+          return Promise.resolve(true)
         }
 
-        return false
+        return Promise.resolve(false)
       })
 
-      // @ts-expect-error
+      // @ts-expect-error - incorrect number of arguments
       await actions.login()
 
       expect(ctx._apis.electronApi.focusMainWindow).not.toHaveBeenCalled()
@@ -118,17 +114,15 @@ describe('AuthActions', () => {
     it('does not focus anything if the activeBrowser does support focus but the main window is focused', async () => {
       const browser = ctx.coreData.activeBrowser = { name: 'foo' } as FoundBrowser
 
-      // @ts-expect-error
-      ctx.browser.isFocusSupported = jest.fn().mockImplementation((args) => {
+      jest.spyOn(ctx.browser, 'isFocusSupported').mockImplementation((args) => {
         if (args === browser) {
-          return true
+          return Promise.resolve(true)
         }
 
-        return false
+        return Promise.resolve(false)
       })
 
-      // @ts-expect-error
-      ctx._apis.electronApi.isMainWindowFocused = jest.fn().mockReturnValue(true)
+      jest.spyOn(ctx._apis.electronApi, 'isMainWindowFocused').mockReturnValue(true)
 
       // @ts-expect-error - incorrect number of arguments
       await actions.login()

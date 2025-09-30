@@ -29,8 +29,7 @@ describe('CohortsActions', () => {
         cohort: 'A',
       }
 
-      // @ts-expect-error - mocked method
-      ctx._apis.cohortsApi.getCohort = jest.fn().mockResolvedValue(cohort)
+      jest.spyOn(ctx._apis.cohortsApi, 'getCohort').mockResolvedValue(cohort)
 
       const cohortReturned = await actions.getCohort(cohort.name)
 

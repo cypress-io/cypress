@@ -5,10 +5,10 @@ import { createTestDataContext } from '../helper'
 import { FoundBrowser, FullConfig } from '@packages/types'
 
 const browsers = [
-  { name: 'electron', family: 'chromium', channel: 'stable', displayName: 'Electron' },
-  { name: 'chrome', family: 'chromium', channel: 'stable', displayName: 'Chrome' },
-  { name: 'chrome', family: 'chromium', channel: 'beta', displayName: 'Chrome Beta' },
-  { name: 'firefox', family: 'firefox', channel: 'stable', displayName: 'Firefox' },
+  { name: 'electron', family: 'chromium', channel: 'stable', displayName: 'Electron', path: '', version: '' },
+  { name: 'chrome', family: 'chromium', channel: 'stable', displayName: 'Chrome', path: '', version: '' },
+  { name: 'chrome', family: 'chromium', channel: 'beta', displayName: 'Chrome Beta', path: '', version: '' },
+  { name: 'firefox', family: 'firefox', channel: 'stable', displayName: 'Firefox', path: '', version: '' },
 ]
 
 let ctx: DataContext
@@ -16,13 +16,10 @@ let ctx: DataContext
 function createDataContext (modeOptions?: Parameters<typeof createTestDataContext>[1]) {
   const context = createTestDataContext('open', modeOptions)
 
-  // @ts-expect-error - mocked resolved value
-  context._apis.browserApi.getBrowsers = jest.fn().mockResolvedValue(browsers)
+  jest.spyOn(context._apis.browserApi, 'getBrowsers').mockResolvedValue(browsers)
   context._apis.projectApi.insertProjectPreferencesToCache = jest.fn()
-  // @ts-expect-error - mocked resolved value
-  context.actions.project.launchProject = jest.fn().mockResolvedValue(undefined)
-  // @ts-expect-error - mocked resolved value
-  context.project.getProjectPreferences = jest.fn().mockResolvedValue(null)
+  jest.spyOn(context.actions.project, 'launchProject').mockResolvedValue(undefined)
+  jest.spyOn(context.project, 'getProjectPreferences').mockResolvedValue(null)
 
   // @ts-expect-error
   context.lifecycleManager._projectRoot = 'foo'
@@ -58,10 +55,9 @@ describe('ProjectLifecycleManager', () => {
     })
 
     it('uses cli --browser option if one is set', async () => {
-      // @ts-expect-error - mocked implementation
-      ctx._apis.browserApi.ensureAndGetByNameOrPath = jest.fn().mockImplementation((name) => {
+      jest.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockImplementation((name) => {
         if (name === 'electron') {
-          return browsers[0]
+          return Promise.resolve(browsers[0])
         }
 
         throw new Error('Browser not found')
@@ -83,10 +79,9 @@ describe('ProjectLifecycleManager', () => {
         testingType: 'e2e',
       })
 
-      // @ts-expect-error - mocked implementation
-      ctx._apis.browserApi.ensureAndGetByNameOrPath = jest.fn().mockImplementation((name) => {
+      jest.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockImplementation((name) => {
         if (name === 'electron') {
-          return browsers[0]
+          return Promise.resolve(browsers[0])
         }
 
         throw new Error('Browser not found')
@@ -103,8 +98,7 @@ describe('ProjectLifecycleManager', () => {
     })
 
     it('uses lastBrowser if available', async () => {
-      // @ts-expect-error - mocked implementation
-      ctx.project.getProjectPreferences = jest.fn().mockResolvedValue({ lastBrowser: { name: 'chrome', channel: 'beta' } })
+      jest.spyOn(ctx.project, 'getProjectPreferences').mockResolvedValue({ lastBrowser: { name: 'chrome', channel: 'beta' } })
       ctx.coreData.activeBrowser = null
       ctx.coreData.cliBrowser = null
 
@@ -115,8 +109,7 @@ describe('ProjectLifecycleManager', () => {
     })
 
     it('falls back to browsers[0] if lastBrowser does not exist', async () => {
-      // @ts-expect-error - mocked implementation
-      ctx.project.getProjectPreferences = jest.fn().mockResolvedValue({ lastBrowser: { name: 'chrome', channel: 'dev' } })
+      jest.spyOn(ctx.project, 'getProjectPreferences').mockResolvedValue({ lastBrowser: { name: 'chrome', channel: 'dev' } })
       ctx.coreData.activeBrowser = null
       ctx.coreData.cliBrowser = null
 
@@ -133,17 +126,15 @@ describe('ProjectLifecycleManager', () => {
         isBrowserGivenByCli: false,
       })
 
-      // @ts-expect-error - mocked implementation
-      ctx._apis.browserApi.ensureAndGetByNameOrPath = jest.fn().mockImplementation((name) => {
+      jest.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockImplementation((name) => {
         if (name === 'chrome') {
-          return browsers[1]
+          return Promise.resolve(browsers[1])
         }
 
         throw new Error('Browser not found')
       })
 
-      // @ts-expect-error - mocked implementation
-      jest.spyOn(ctx.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: 'chrome' })
+      jest.spyOn(ctx.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: 'chrome' } as unknown as FullConfig)
 
       expect(ctx.modeOptions.browser).toEqual(undefined)
       expect(ctx.coreData.cliBrowser).toEqual(null)
@@ -165,17 +156,15 @@ describe('ProjectLifecycleManager', () => {
       })
 
       jest.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
-      // @ts-expect-error - mocked implementation
-      ctx._apis.browserApi.ensureAndGetByNameOrPath = jest.fn().mockImplementation((name) => {
+      jest.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockImplementation((name) => {
         if (name === 'firefox') {
-          return browsers[3]
+          return Promise.resolve(browsers[3])
         }
 
         throw new Error('Browser not found')
       })
 
-      // @ts-expect-error - mocked implementation
-      jest.spyOn(ctx.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: 'chrome' })
+      jest.spyOn(ctx.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: 'chrome' } as unknown as FullConfig)
 
       expect(ctx.modeOptions.browser).toEqual('firefox')
       expect(ctx.coreData.cliBrowser).toEqual('firefox')
@@ -196,18 +185,16 @@ describe('ProjectLifecycleManager', () => {
       })
 
       jest.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
-      // @ts-expect-error - mocked implementation
-      ctx._apis.browserApi.ensureAndGetByNameOrPath = jest.fn().mockImplementation((name) => {
+      jest.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockImplementation((name) => {
         if (name === 'chrome:beta') {
-          return browsers[2]
+          return Promise.resolve(browsers[2])
         }
 
         throw new Error('Browser not found')
       })
 
       // the default browser will be ignored since we have an active browser
-      // @ts-expect-error - mocked implementation
-      jest.spyOn(ctx.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: 'firefox' })
+      jest.spyOn(ctx.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: 'firefox' } as unknown as FullConfig)
 
       // set the active browser to chrome:beta
       ctx.actions.browser.setActiveBrowser(browsers[2] as FoundBrowser)

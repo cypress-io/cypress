@@ -72,6 +72,7 @@ export function createTestDataContext (mode: DataContextConfig['mode'] = 'run', 
       copyTextToClipboard: (text: string) => {},
     } as unknown as ElectronApiShape,
     browserApi: {
+      ensureAndGetByNameOrPath: jest.fn(),
       focusActiveBrowserWindow: jest.fn(),
       getBrowsers: jest.fn().mockResolvedValue([]),
     } as unknown as BrowserApiShape,
