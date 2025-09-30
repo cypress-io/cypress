@@ -519,9 +519,45 @@ const normalizedUserInvocationStack = (userInvocationStack) => {
     || line.includes('Chainer.prototype[key]')
     || line.includes('cy.<computed>')
     || line.includes('$Chainer.<computed>')
+    // Remove cross origin stack lines
+    || line.includes('SpecBridgeCommunicator')
+    || (line.includes('at invokeOriginFn') && !line.includes('at eval'))
   }).join('\n')
 
   return normalizeStackIndentation(nonCypressStackLines)
+}
+
+const mergeCrossOriginUserInvocationStack = (userInvocationStack: string, originUserInvocationStack: string) => {
+  // The method here is:
+  // 1. Grab the line/column from the first line of the origin user invocation stack
+  // 2. Add it to and replace the line/column of the first line of the user invocation stack
+  //
+  // Note: If any of our assumptions about the stack format are violated, this will just
+  // return the original user invocation stack to avoid breaking the stack trace.
+  const originStackLines = getStackLines(originUserInvocationStack)
+  const userStackLines = getStackLines(userInvocationStack)
+
+  if (userStackLines.length === 0 || originStackLines.length === 0) return userInvocationStack
+
+  // Note: chrome adds a parenthesis to the end of the stack line and firefox does not
+  const userStackMatch = userStackLines[0].match(/(\d+):(\d+)\)?$/)
+
+  if (!userStackMatch) return userInvocationStack
+
+  const userLine = Number(userStackMatch[1])
+  const userColumn = Number(userStackMatch[2])
+
+  // Note: chrome adds a parenthesis to the end of the stack line and firefox does not
+  const originStackMatch = originStackLines[0].match(/(\d+):(\d+)\)?$/)
+
+  if (!originStackMatch) return userInvocationStack
+
+  const originLine = Number(originStackMatch[1])
+
+  // Note: chrome adds a parenthesis to the end of the stack line and firefox does not so we need to keep whatever we find
+  const newUserStackLine = `${originStackLines[0].replace(/(\d+:\d+)(\)?)$/, `${originLine + userLine - 1}:${userColumn}$2`)}`
+
+  return userInvocationStack.replace(userStackLines[0], newUserStackLine)
 }
 
 export default {
@@ -543,4 +579,5 @@ export default {
   stackWithUserInvocationStackSpliced,
   captureUserInvocationStack,
   getInvocationDetails,
+  mergeCrossOriginUserInvocationStack,
 }
