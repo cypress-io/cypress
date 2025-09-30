@@ -223,7 +223,7 @@ exports[`config/src/index > .getPublicConfigKeys > returns list of public config
   "experimentalModifyObstructiveThirdPartyCode",
   "injectDocumentDomain",
   "experimentalOriginDependencies",
-  "experimentalPromptCommand": false,
+  "experimentalPromptCommand",
   "experimentalSourceRewriting",
   "experimentalSingleTabRunMode",
   "experimentalStudio",

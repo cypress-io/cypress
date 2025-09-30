@@ -615,7 +615,7 @@
       },
       "experimentalPromptCommand": {
         "name": "Prompt command",
-        "description": "Enables support for the prompt command."
+        "description": "Enables support for `cy.prompt`, an AI-powered command that turns natural language steps into executable Cypress test code."
       },
       "experimentalWebKitSupport": {
         "name": "WebKit Support",
