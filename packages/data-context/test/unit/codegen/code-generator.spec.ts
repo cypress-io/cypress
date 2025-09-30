@@ -422,13 +422,13 @@ describe('code-generator', () => {
     it('should error if template dir does not exist', () => {
       const singleSpec = ['sample.spec.ts']
 
-      expect(async () => await hasNonExampleSpec('', singleSpec)).rejects.toThrow()
+      expect((async () => await hasNonExampleSpec('', singleSpec))()).rejects.toThrow()
     })
   })
 
   describe('hasNonExampleSpec', () => {
     it('should error if template dir does not exist', () => {
-      expect(async () => await getExampleSpecPaths('')).rejects.toThrow()
+      expect((async () => await getExampleSpecPaths(''))()).rejects.toThrow()
     })
 
     it('should return relative paths to example specs', async () => {

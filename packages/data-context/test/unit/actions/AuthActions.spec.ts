@@ -35,8 +35,7 @@ describe('AuthActions', () => {
     it('focuses the main window if the activeBrowser does not support focus', async () => {
       const browser = ctx.coreData.activeBrowser = { name: 'foo' } as FoundBrowser
 
-      // @ts-expect-error
-      ctx.browser.isFocusSupported = jest.fn().mockImplementation((args) => {
+      jest.spyOn(ctx.browser, 'isFocusSupported').mockImplementation((args) => {
         if (args === browser) {
           return Promise.resolve(false)
         }
