@@ -99,6 +99,7 @@ const initializeCloudCyPrompt = async (Cypress: Cypress.Cypress, cy: Cypress.Cyp
         window.getEventManager!().localBus.emit('prompt:more-info-needed', { testId, logId, onSave, onCancel })
       })
 
+      Cypress.primaryOriginCommunicator.removeAllListeners('get:source:details:for:line')
       Cypress.primaryOriginCommunicator.on('get:source:details:for:line', ({ line, projectRoot }, { origin, responseEvent }) => {
         const sourceDetails = $stackUtils.getSourceDetailsForFirstLine(line, projectRoot)
 
