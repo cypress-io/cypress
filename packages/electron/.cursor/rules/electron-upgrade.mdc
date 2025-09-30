@@ -161,15 +161,6 @@ An Electron upgrade is **NOT a breaking change** if:
 - Upgraded bundled Chromium version from `OLD_CHROMIUM_VERSION` to `NEW_CHROMIUM_VERSION`
 ```
 
-**Example for Electron 38.2.0 upgrade** (likely non-breaking since Node.js stays at 22.x):
-```markdown
-## Dependency Updates
-
-- Upgraded `electron` from `36.8.1` to `38.2.0`
-- Upgraded bundled Node.js version from `22.18.0` to `22.19.0`
-- Upgraded bundled Chromium version from `136.0.7103.177` to `140.0.7339.133`
-```
-
 ## Step 10: Testing and Validation
 
 ### Manual Smoke Tests
