@@ -69,16 +69,6 @@ interface TargetDestroyedOptions {
   onAsynchronousError: Function
 }
 
-const isVersionGte = (a: Version, b: Version) => {
-  return a.major > b.major || (a.major === b.major && a.minor >= b.minor)
-}
-
-const getMajorMinorVersion = (version: string): Version => {
-  const [major, minor] = version.split('.', 2).map(Number)
-
-  return { major, minor }
-}
-
 const ensureLiveBrowser = async (hosts: string[], port: number, browserName: string): Promise<string> => {
   // since we may be attempting to connect to multiple hosts, 'connected'
   // is set to true once one of the connections succeeds so the others
@@ -513,20 +503,6 @@ export class BrowserCriClient {
 
       onAsynchronousError(err)
     })
-  }
-
-  /**
-   * Ensures that the minimum protocol version for the browser is met
-   *
-   * @param protocolVersion the minimum version to ensure
-   */
-  ensureMinimumProtocolVersion = (protocolVersion: string): void => {
-    const actualVersion = getMajorMinorVersion(this.versionInfo['Protocol-Version'])
-    const minimum = getMajorMinorVersion(protocolVersion)
-
-    if (!isVersionGte(actualVersion, minimum)) {
-      errors.throwErr('CDP_VERSION_TOO_OLD', protocolVersion, actualVersion)
-    }
   }
 
   /**
