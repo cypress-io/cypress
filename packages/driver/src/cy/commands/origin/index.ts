@@ -118,13 +118,9 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
           reject(err)
         }
 
-        const onQueueFinished = ({ err, userInvocationStack, currentAssertionUserInvocationStack, subject, unserializableSubjectType }) => {
+        const onQueueFinished = ({ err, crossOriginUserInvocationStack, subject, unserializableSubjectType }) => {
           if (err) {
-            if (!currentAssertionUserInvocationStack) {
-              err.crossOriginUserInvocationStack = userInvocationStack
-            } else {
-              err.crossOriginUserInvocationStack = currentAssertionUserInvocationStack
-            }
+            err.crossOriginUserInvocationStack = crossOriginUserInvocationStack
 
             return _reject(err)
           }
