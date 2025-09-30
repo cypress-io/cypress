@@ -539,18 +539,23 @@ const mergeCrossOriginUserInvocationStack = (userInvocationStack: string, origin
 
   if (userStackLines.length === 0 || originStackLines.length === 0) return userInvocationStack
 
-  const userStackMatch = userStackLines[0].match(/(\d+):(\d+)\)/)
+  // Note: chrome adds a parenthesis to the end of the stack line and firefox does not
+  const userStackMatch = userStackLines[0].match(/(\d+):(\d+)\)?$/)
 
   if (!userStackMatch) return userInvocationStack
 
   const userLine = Number(userStackMatch[1])
   const userColumn = Number(userStackMatch[2])
-  const originStackMatch = originStackLines[0].match(/(\d+):(\d+)\)/)
+
+  // Note: chrome adds a parenthesis to the end of the stack line and firefox does not
+  const originStackMatch = originStackLines[0].match(/(\d+):(\d+)\)?$/)
 
   if (!originStackMatch) return userInvocationStack
 
   const originLine = Number(originStackMatch[1])
-  const newUserStackLine = `${originStackLines[0].replace(/\d+:\d+\)/, `${originLine + userLine - 1}:${userColumn})`)}`
+
+  // Note: chrome adds a parenthesis to the end of the stack line and firefox does not so we need to keep whatever we find
+  const newUserStackLine = `${originStackLines[0].replace(/(\d+:\d+)(\)?)$/, `${originLine + userLine - 1}:${userColumn}$2`)}`
 
   return userInvocationStack.replace(userStackLines[0], newUserStackLine)
 }

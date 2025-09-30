@@ -55,7 +55,7 @@ describe('cy.origin errors', () => {
   })
 
   verify('failure when using assertion', this, {
-    line: 52,
+    line: 53,
     column: 47,
     message: 'Expected to find element',
     stack: ['cy_origin_error.cy.ts'],

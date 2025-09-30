@@ -45,7 +45,7 @@ describe('e2e cy.origin errors', () => {
       // check to make sure stack trace contains the 'cy.origin' source
       expect(stdout).to.contain('webpack://e2e/./cypress/e2e/cy_origin_error.cy.ts:17:9')
       expect(stdout).to.contain('webpack://e2e/./cypress/e2e/cy_origin_error.cy.ts:35:9')
-      expect(stdout).to.contain('webpack://e2e/./cypress/e2e/cy_origin_error.cy.ts:52:46')
+      expect(stdout).to.contain('webpack://e2e/./cypress/e2e/cy_origin_error.cy.ts:53:46')
     },
   })
 })
