@@ -42,7 +42,7 @@ commands:
           command: |
             if [[ "$CACHE_HIT" == "true" ]] && [[ "$(ls -A .circleci/packed 2>/dev/null)" ]]; then
               echo "✅ Cache hit - packed configurations exist"
-              exit 0
+              circleci-agent step halt
             else
               echo "📦 Cache miss - continuing with packaging"
             fi
