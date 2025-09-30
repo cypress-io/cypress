@@ -1,15 +1,15 @@
-import { supportFileComponent } from '../../src/supportFile'
+import { describe, it, expect } from 'vitest'
+import { supportFileComponent } from '../src/supportFile'
 import dedent from 'dedent'
-import { expect } from 'chai'
 
 describe('supportFileComponent', () => {
-  context('react', () => {
+  describe('react', () => {
     const mountModule = 'cypress/react'
 
     it(`handles ${mountModule} and JS`, () => {
       const actual = supportFileComponent('js', mountModule)
 
-      expect(actual).to.eq(dedent`
+      expect(actual).toEqual(dedent`
           // ***********************************************************
           // This example support/component.js is processed and
           // loaded automatically before your test files.
@@ -40,7 +40,7 @@ describe('supportFileComponent', () => {
     it(`handles ${mountModule} and TS`, () => {
       const actual = supportFileComponent('ts', mountModule)
 
-      expect(actual).to.eq(dedent`
+      expect(actual).toEqual(dedent`
         // ***********************************************************
         // This example support/component.ts is processed and
         // loaded automatically before your test files.
@@ -81,13 +81,13 @@ describe('supportFileComponent', () => {
     })
   })
 
-  context('vue', () => {
+  describe('vue', () => {
     const mountModule = 'cypress/vue'
 
     it(`handles ${mountModule} and JS`, () => {
       const actual = supportFileComponent('js', mountModule)
 
-      expect(actual).to.eq(dedent`
+      expect(actual).toEqual(dedent`
           // ***********************************************************
           // This example support/component.js is processed and
           // loaded automatically before your test files.
@@ -118,7 +118,7 @@ describe('supportFileComponent', () => {
     it(`handles ${mountModule} and TS`, () => {
       const actual = supportFileComponent('ts', mountModule)
 
-      expect(actual).to.eq(dedent`
+      expect(actual).toEqual(dedent`
         // ***********************************************************
         // This example support/component.ts is processed and
         // loaded automatically before your test files.
@@ -159,12 +159,12 @@ describe('supportFileComponent', () => {
     })
   })
 
-  context('angular', () => {
+  describe('angular', () => {
     for (const mountModule of ['cypress/angular'] as const) {
       it(`handles ${mountModule} and TS`, () => {
         const actual = supportFileComponent('ts', mountModule)
 
-        expect(actual).to.eq(dedent`
+        expect(actual).toEqual(dedent`
         // ***********************************************************
         // This example support/component.ts is processed and
         // loaded automatically before your test files.
@@ -206,11 +206,11 @@ describe('supportFileComponent', () => {
     }
   })
 
-  context('svelte', () => {
+  describe('svelte', () => {
     it(`handles cypress/svelte and JS`, () => {
       const actual = supportFileComponent('js', 'cypress/svelte')
 
-      expect(actual).to.eq(dedent`
+      expect(actual).toEqual(dedent`
           // ***********************************************************
           // This example support/component.js is processed and
           // loaded automatically before your test files.
@@ -241,7 +241,7 @@ describe('supportFileComponent', () => {
     it(`handles cypress/svelte and TS`, () => {
       const actual = supportFileComponent('ts', 'cypress/svelte')
 
-      expect(actual).to.eq(dedent`
+      expect(actual).toEqual(dedent`
         // ***********************************************************
         // This example support/component.ts is processed and
         // loaded automatically before your test files.

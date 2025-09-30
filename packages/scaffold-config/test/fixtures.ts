@@ -12,15 +12,10 @@ export const solidDep: Cypress.CypressComponentDependency = {
 // must be default export
 export default defineComponentFramework({
   type: 'cypress-ct-solid-js',
-
   category: 'library',
-
   name: 'Solid.js',
-
   supportedBundlers: ['webpack', 'vite'],
-
   detectors: [solidDep],
-
   // Cypress will include the bundler dependency here, if they selected one.
   dependencies: () => {
     return [solidDep]

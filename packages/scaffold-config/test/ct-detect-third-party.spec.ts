@@ -1,8 +1,8 @@
-import { scaffoldMigrationProject, fakeDepsInNodeModules } from './detect.spec'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { scaffoldMigrationProject, fakeDepsInNodeModules } from './scaffolding'
 import fs from 'fs-extra'
 import path from 'path'
-import { detectThirdPartyCTFrameworks, validateThirdPartyModule, isThirdPartyDefinition, isRepositoryRoot } from '../../src'
-import { expect } from 'chai'
+import { detectThirdPartyCTFrameworks, validateThirdPartyModule, isThirdPartyDefinition, isRepositoryRoot } from '../src'
 import os from 'os'
 import solidJs from './fixtures'
 
@@ -25,31 +25,31 @@ async function scaffoldQwikApp (thirdPartyModuleNames: Array<'cypress-ct-qwik' |
 }
 
 describe('isThirdPartyDefinition', () => {
-  context('global package', () => {
+  describe('global package', () => {
     it('returns false for invalid prefix', () => {
       const res = isThirdPartyDefinition({ ...solidJs, type: 'non-cypress-ct' })
 
-      expect(res).to.be.false
+      expect(res).toBe(false)
     })
 
     it('returns true for valid prefix', () => {
       const res = isThirdPartyDefinition({ ...solidJs, type: 'cypress-ct-solid-js' })
 
-      expect(res).to.be.true
+      expect(res).toBe(true)
     })
   })
 
-  context('namespaced package', () => {
+  describe('namespaced package', () => {
     it('returns false for non third party with namespace', () => {
       const res = isThirdPartyDefinition({ ...solidJs, type: '@org/non-cypress-ct' })
 
-      expect(res).to.be.false
+      expect(res).toBe(false)
     })
 
     it('returns true for third party with namespace', () => {
       const res = isThirdPartyDefinition({ ...solidJs, type: '@org/cypress-ct-solid-js' })
 
-      expect(res).to.be.true
+      expect(res).toBe(true)
     })
   })
 })
@@ -68,7 +68,7 @@ describe('isRepositoryRoot', () => {
   it('returns false if there is nothing in the directory', async () => {
     const isCurrentRepositoryRoot = await isRepositoryRoot(TEMP_DIR)
 
-    expect(isCurrentRepositoryRoot).to.be.false
+    expect(isCurrentRepositoryRoot).toBe(false)
   })
 
   it('returns true if there is a Git directory', async () => {
@@ -76,7 +76,7 @@ describe('isRepositoryRoot', () => {
 
     const isCurrentRepositoryRoot = await isRepositoryRoot(TEMP_DIR)
 
-    expect(isCurrentRepositoryRoot).to.be.true
+    expect(isCurrentRepositoryRoot).toBe(true)
   })
 
   it('returns false if there is a package.json without workspaces field', async () => {
@@ -91,7 +91,7 @@ describe('isRepositoryRoot', () => {
 
     const isCurrentRepositoryRoot = await isRepositoryRoot(TEMP_DIR)
 
-    expect(isCurrentRepositoryRoot).to.be.false
+    expect(isCurrentRepositoryRoot).toBe(false)
   })
 
   it('returns true if there is a package.json with workspaces field', async () => {
@@ -109,7 +109,7 @@ describe('isRepositoryRoot', () => {
 
     const isCurrentRepositoryRoot = await isRepositoryRoot(TEMP_DIR)
 
-    expect(isCurrentRepositoryRoot).to.be.true
+    expect(isCurrentRepositoryRoot).toBe(true)
   })
 })
 
@@ -119,7 +119,7 @@ describe('detectThirdPartyCTFrameworks', () => {
 
     const thirdPartyFrameworks = await detectThirdPartyCTFrameworks(projectRoot)
 
-    expect(thirdPartyFrameworks.frameworks[0].type).eq('cypress-ct-qwik')
+    expect(thirdPartyFrameworks.frameworks[0].type).toEqual('cypress-ct-qwik')
   })
 
   it('detects third party frameworks in org namespace', async () => {
@@ -127,7 +127,7 @@ describe('detectThirdPartyCTFrameworks', () => {
 
     const thirdPartyFrameworks = await detectThirdPartyCTFrameworks(projectRoot)
 
-    expect(thirdPartyFrameworks.frameworks[0].type).eq('@org/cypress-ct-qwik')
+    expect(thirdPartyFrameworks.frameworks[0].type).toEqual('@org/cypress-ct-qwik')
   })
 
   it('ignores misconfigured third party frameworks', async () => {
@@ -135,8 +135,8 @@ describe('detectThirdPartyCTFrameworks', () => {
 
     const thirdPartyFrameworks = await detectThirdPartyCTFrameworks(projectRoot)
 
-    expect(thirdPartyFrameworks.frameworks.length).eq(1)
-    expect(thirdPartyFrameworks.frameworks[0].type).eq('cypress-ct-qwik')
+    expect(thirdPartyFrameworks.frameworks.length).toEqual(1)
+    expect(thirdPartyFrameworks.frameworks[0].type).toEqual('cypress-ct-qwik')
   })
 
   it('detects third party frameworks in monorepos with hoisted dependencies', async () => {
@@ -150,19 +150,19 @@ describe('detectThirdPartyCTFrameworks', () => {
     // Look for third-party modules in packages/foo (where Cypress was launched from)
     const thirdPartyFrameworks = await detectThirdPartyCTFrameworks(projectRoot)
 
-    expect(thirdPartyFrameworks.frameworks[0].type).eq('cypress-ct-qwik')
+    expect(thirdPartyFrameworks.frameworks[0].type).toEqual('cypress-ct-qwik')
   })
 
   it('validates third party module', () => {
-    expect(() => validateThirdPartyModule(solidJs)).to.not.throw()
+    expect(() => validateThirdPartyModule(solidJs)).not.toThrow()
 
     const gen = (m: any) => m
 
-    expect(() => validateThirdPartyModule(gen({ ...solidJs, type: 'misconfigured' }))).to.throw()
+    expect(() => validateThirdPartyModule(gen({ ...solidJs, type: 'misconfigured' }))).toThrow()
     expect(() => validateThirdPartyModule(gen({ ...solidJs, name: 5 }))).to.throw()
-    expect(() => validateThirdPartyModule(gen({ ...solidJs, supportedBundlers: ['random'] }))).to.throw()
-    expect(() => validateThirdPartyModule(gen({ ...solidJs, detectors: {} }))).to.throw()
-    expect(() => validateThirdPartyModule(gen({ ...solidJs, dependencies: {} }))).to.throw()
-    expect(() => validateThirdPartyModule(gen({ ...solidJs, componentIndexHtml: {} }))).to.throw()
+    expect(() => validateThirdPartyModule(gen({ ...solidJs, supportedBundlers: ['random'] }))).toThrow()
+    expect(() => validateThirdPartyModule(gen({ ...solidJs, detectors: {} }))).toThrow()
+    expect(() => validateThirdPartyModule(gen({ ...solidJs, dependencies: {} }))).toThrow()
+    expect(() => validateThirdPartyModule(gen({ ...solidJs, componentIndexHtml: {} }))).toThrow()
   })
 })

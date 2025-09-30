@@ -1,8 +1,8 @@
-import { expect } from 'chai'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import fs from 'fs-extra'
 import path from 'path'
 import os from 'os'
-import { isDependencyInstalledByName } from '../../src/frameworks'
+import { isDependencyInstalledByName } from '../src/frameworks'
 
 describe('frameworks', () => {
   describe('isDependencyInstalledByName', () => {
@@ -21,7 +21,7 @@ describe('frameworks', () => {
     it('returns null version if dependency is not found', async () => {
       const result = await isDependencyInstalledByName('my-dep', TEMP_DIR)
 
-      expect(result).to.eql({ dependency: 'my-dep', detectedVersion: null })
+      expect(result).toEqual({ dependency: 'my-dep', detectedVersion: null })
     })
 
     it('returns null version if there is no version in the package file', async () => {
@@ -36,7 +36,7 @@ describe('frameworks', () => {
 
       const result = await isDependencyInstalledByName('my-dep', TEMP_DIR)
 
-      expect(result).to.eql({ dependency: 'my-dep', detectedVersion: null })
+      expect(result).toEqual({ dependency: 'my-dep', detectedVersion: null })
     })
 
     it('returns package version if it finds the dependency', async () => {
@@ -52,7 +52,7 @@ describe('frameworks', () => {
 
       const result = await isDependencyInstalledByName('my-dep', TEMP_DIR)
 
-      expect(result).to.eql({ dependency: 'my-dep', detectedVersion: '1.2.3' })
+      expect(result).toEqual({ dependency: 'my-dep', detectedVersion: '1.2.3' })
     })
   })
 })
