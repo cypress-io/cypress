@@ -1,7 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.3.1
+## 15.4.0
 
 _Released 10/07/2025 (PENDING)_
+
+**Features:**
+
+- Added the `--posix-exit-codes` flag for the `run` command. When this flag is passed, Cypress will exit with 1 if any tests fail, rather than the number of failed tests. Addressed in [#32606](https://github.com/cypress-io/cypress/pull/32606).
 
 **Bugfixes:**
 
