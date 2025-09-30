@@ -449,13 +449,14 @@ describe('getPathFromSpecPattern', () => {
 describe('_makeSpecWatcher', () => {
   let ctx: DataContext
   let specWatcher: chokidar.FSWatcher
+  let specWatcherPath: string
 
   beforeEach(async function () {
     FixturesHelper.remove()
 
-    this.specWatcherPath = await FixturesHelper.scaffoldProject('spec-watcher')
+    specWatcherPath = await FixturesHelper.scaffoldProject('spec-watcher')
 
-    ctx = createTestDataContext('open', { projectRoot: this.specWatcherPath })
+    ctx = createTestDataContext('open', { projectRoot: specWatcherPath })
   }, 20000)
 
   afterEach(async () => {
@@ -481,7 +482,7 @@ describe('_makeSpecWatcher', () => {
 
   it('watch for changes on files based on the specPattern', async function () {
     specWatcher = ctx.project._makeSpecWatcher({
-      projectRoot: this.specWatcherPath,
+      projectRoot: specWatcherPath,
       specPattern: ['**/*.{cy,spec}.{ts,js}'],
       excludeSpecPattern: ['**/ignore.spec.ts'],
       additionalIgnorePattern: ['additional.ignore.cy.js'],
@@ -513,7 +514,7 @@ describe('_makeSpecWatcher', () => {
 
   it('watch for changes on files with multiple specPatterns', async function () {
     specWatcher = ctx.project._makeSpecWatcher({
-      projectRoot: this.specWatcherPath,
+      projectRoot: specWatcherPath,
       specPattern: ['**/*.{cy,spec}.{ts,js}', '**/abc.ts'],
       excludeSpecPattern: ['**/ignore.spec.ts'],
       additionalIgnorePattern: ['additional.ignore.cy.js'],
@@ -546,7 +547,7 @@ describe('_makeSpecWatcher', () => {
 
   it('do not throw if file/folder is deleted while ignoring files', async function () {
     specWatcher = ctx.project._makeSpecWatcher({
-      projectRoot: this.specWatcherPath,
+      projectRoot: specWatcherPath,
       specPattern: ['**/*.{cy,spec}.{ts,js}', '**/abc.ts'],
       excludeSpecPattern: ['**/ignore.spec.ts'],
       additionalIgnorePattern: ['additional.ignore.cy.js'],
