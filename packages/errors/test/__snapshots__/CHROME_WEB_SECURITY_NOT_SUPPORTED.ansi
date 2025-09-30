@@ -1,0 +1,3 @@
+[31mYour project has set the configuration option: `chromeWebSecurity` to `false`.[39m
+[31m[39m
+[31mThis option will not have an effect in Firefox. Tests that rely on web security being disabled will not run as expected.[39m

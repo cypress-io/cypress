@@ -1,0 +1,7 @@
+[31mWarning: It looks like you are trying to record this run from a forked PR.[39m
+[31m[39m
+[31mThe [33mRecord Key[39m[31m is missing. Your CI provider is likely not passing private environment variables to builds from forks.[39m
+[31m[39m
+[31mThese results will not be recorded.[39m
+[31m[39m
+[31mThis error will not affect or change the exit code.[39m

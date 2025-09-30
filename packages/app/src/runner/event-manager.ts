@@ -919,6 +919,7 @@ export class EventManager {
     crossOriginLogs = {}
     this.studioStore.setActive(false)
     this.promptStore.resetState()
+    await new Promise((resolve) => this.ws.emit('prompt:reset', resolve))
   }
 
   resetReporter () {

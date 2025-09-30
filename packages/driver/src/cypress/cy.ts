@@ -747,8 +747,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       let userInvocationStack = $stackUtils.captureUserInvocationStack(cy.specWindow.Error)
 
       if (cy.state('originUserInvocationStack')) {
-        // console.log('originUserInvocationStack', cy.state('originUserInvocationStack'))
-        // console.log('userInvocationStack', userInvocationStack)
         userInvocationStack = $stackUtils.mergeCrossOriginUserInvocationStack(userInvocationStack, cy.state('originUserInvocationStack'))
       }
 
@@ -856,8 +854,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       let userInvocationStack = $stackUtils.captureUserInvocationStack(cy.specWindow.Error)
 
       if (cy.state('originUserInvocationStack')) {
-        // console.log('originUserInvocationStack', cy.state('originUserInvocationStack'))
-        // console.log('userInvocationStack', userInvocationStack)
         userInvocationStack = $stackUtils.mergeCrossOriginUserInvocationStack(userInvocationStack, cy.state('originUserInvocationStack'))
       }
 

@@ -1,0 +1,14 @@
+[31mWe detected that the [33mElectron[39m[31m Renderer process just crashed.[39m
+[31m[39m
+[31mWe have failed the current spec but will continue running the next spec.[39m
+[31m[39m
+[31mThis can happen for a number of different reasons.[39m
+[31m[39m
+[31mIf you're running lots of tests on a memory intense application.[39m
+[31m  - Try increasing the CPU/memory on the machine you're running on.[39m
+[31m  - Try enabling [33mexperimentalMemoryManagement[39m[31m in your config file.[39m
+[31m  - Try lowering [33mnumTestsKeptInMemory[39m[31m in your config file during 'cypress open'.[39m
+[31m[39m
+[31mYou can learn more here:[39m
+[31m[39m
+[31mhttps://on.cypress.io/renderer-process-crashed[39m

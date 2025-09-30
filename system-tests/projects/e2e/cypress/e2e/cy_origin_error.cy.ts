@@ -44,6 +44,7 @@ describe('cy.origin errors', () => {
     before () {
       cy.visit('/primary_origin.html')
     },
+    // Skip title validation here since the command is deep enough in the test that it does not show the command title
     skipTitleValidation: true,
   })
 
@@ -54,7 +55,7 @@ describe('cy.origin errors', () => {
   })
 
   verify('failure when using assertion', this, {
-    line: 52,
+    line: 53,
     column: 47,
     message: 'Expected to find element',
     stack: ['cy_origin_error.cy.ts'],

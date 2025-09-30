@@ -1,110 +1,69 @@
-import { expect } from 'chai'
-
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { githubActionsDetectorSync } from '../../src/detectors/githubActionsDetectorSync'
 
 describe('githubActionsDetectorSync', () => {
   describe('undefined values', () => {
-    const processValues: any = {}
-
     beforeEach(() => {
-      // cache values
-      processValues.GITHUB_ACTION = process.env.GITHUB_ACTION
-      processValues.GH_BRANCH = process.env.GH_BRANCH
-      processValues.GITHUB_HEAD_REF = process.env.GITHUB_HEAD_REF
-      processValues.GITHUB_REF_NAME = process.env.GITHUB_REF_NAME
-      processValues.GITHUB_RUN_NUMBER = process.env.GITHUB_RUN_NUMBER
-      processValues.GITHUB_SHA = process.env.GITHUB_SHA
-
-      //reset values
-      delete process.env.GITHUB_ACTION
-      delete process.env.GH_BRANCH
-      delete process.env.GITHUB_HEAD_REF
-      delete process.env.GITHUB_REF_NAME
-      delete process.env.GITHUB_RUN_NUMBER
-      delete process.env.GITHUB_SHA
-    })
-
-    afterEach(() => {
-      // Replace values
-      process.env.GITHUB_ACTION = processValues.GITHUB_ACTION
-      process.env.GH_BRANCH = processValues.GH_BRANCH
-      process.env.GITHUB_HEAD_REF = processValues.GITHUB_HEAD_REF
-      process.env.GITHUB_REF_NAME = processValues.GITHUB_REF_NAME
-      process.env.GITHUB_RUN_NUMBER = processValues.GITHUB_RUN_NUMBER
-      process.env.GITHUB_SHA = processValues.GITHUB_SHA
+      vi.unstubAllEnvs()
+      vi.stubEnv('GITHUB_ACTION', undefined)
+      vi.stubEnv('GH_BRANCH', undefined)
+      vi.stubEnv('GITHUB_HEAD_REF', undefined)
+      vi.stubEnv('GITHUB_REF_NAME', undefined)
+      vi.stubEnv('GITHUB_RUN_NUMBER', undefined)
+      vi.stubEnv('GITHUB_SHA', undefined)
     })
 
     describe('detect', () => {
       it('returns an empty resource', () => {
         const resource = githubActionsDetectorSync.detect()
 
-        expect(resource.attributes).to.be.empty
+        expect(resource.attributes).toEqual({})
       })
     })
   })
 
   describe('defined values', () => {
-    const processValues: any = {}
-
     beforeEach(() => {
-      // cache values
-      processValues.GITHUB_ACTION = process.env.GITHUB_ACTION
-      processValues.GH_BRANCH = process.env.GH_BRANCH
-      processValues.GITHUB_HEAD_REF = process.env.GITHUB_HEAD_REF
-      processValues.GITHUB_REF_NAME = process.env.GITHUB_REF_NAME
-      processValues.GITHUB_RUN_NUMBER = process.env.GITHUB_RUN_NUMBER
-      processValues.GITHUB_SHA = process.env.GITHUB_SHA
-
-      //reset values
-      process.env.GITHUB_ACTION = 'githubAction'
-      process.env.GH_BRANCH = 'ghBranch'
-      process.env.GITHUB_HEAD_REF = 'ghHeadRef'
-      process.env.GITHUB_REF_NAME = 'ghRefName'
-      process.env.GITHUB_RUN_NUMBER = 'ghRunNumber'
-      process.env.GITHUB_SHA = 'ghSha'
-    })
-
-    afterEach(() => {
-      // Replace values
-      process.env.GITHUB_ACTION = processValues.GITHUB_ACTION
-      process.env.GH_BRANCH = processValues.GH_BRANCH
-      process.env.GITHUB_HEAD_REF = processValues.GITHUB_HEAD_REF
-      process.env.GITHUB_REF_NAME = processValues.GITHUB_REF_NAME
-      process.env.GITHUB_RUN_NUMBER = processValues.GITHUB_RUN_NUMBER
-      process.env.GITHUB_SHA = processValues.GITHUB_SHA
+      vi.unstubAllEnvs()
+      vi.stubEnv('GITHUB_ACTION', 'githubAction')
+      vi.stubEnv('GH_BRANCH', 'ghBranch')
+      vi.stubEnv('GITHUB_HEAD_REF', 'ghHeadRef')
+      vi.stubEnv('GITHUB_REF_NAME', 'ghRefName')
+      vi.stubEnv('GITHUB_RUN_NUMBER', 'ghRunNumber')
+      vi.stubEnv('GITHUB_SHA', 'ghSha')
     })
 
     describe('detect', () => {
       it('returns a resource with attributes', () => {
         const resource = githubActionsDetectorSync.detect()
 
-        expect(resource.attributes['ci.github_action']).to.equal('githubAction')
-        expect(resource.attributes['ci.branch']).to.equal('ghBranch')
-        expect(resource.attributes['ci.build-number']).to.equal('ghRunNumber')
-        expect(resource.attributes['SHA1']).to.equal('ghSha')
+        expect(resource.attributes['ci.github_action']).toEqual('githubAction')
+        expect(resource.attributes['ci.branch']).toEqual('ghBranch')
+        expect(resource.attributes['ci.build-number']).toEqual('ghRunNumber')
+        expect(resource.attributes['SHA1']).toEqual('ghSha')
       })
 
       it('returns a resource with attributes when GH_BRANCH is missing', () => {
-        delete process.env.GH_BRANCH
+        vi.stubEnv('GH_BRANCH', undefined)
 
         const resource = githubActionsDetectorSync.detect()
 
-        expect(resource.attributes['ci.github_action']).to.equal('githubAction')
-        expect(resource.attributes['ci.branch']).to.equal('ghHeadRef')
-        expect(resource.attributes['ci.build-number']).to.equal('ghRunNumber')
-        expect(resource.attributes['SHA1']).to.equal('ghSha')
+        expect(resource.attributes['ci.github_action']).toEqual('githubAction')
+        expect(resource.attributes['ci.branch']).toEqual('ghHeadRef')
+        expect(resource.attributes['ci.build-number']).toEqual('ghRunNumber')
+        expect(resource.attributes['SHA1']).toEqual('ghSha')
       })
 
       it('returns a resource with attributes when GH_BRANCH and GITHUB_HEAD_REF is missing', () => {
-        delete process.env.GH_BRANCH
-        delete process.env.GITHUB_HEAD_REF
+        vi.stubEnv('GH_BRANCH', undefined)
+        vi.stubEnv('GITHUB_HEAD_REF', undefined)
 
         const resource = githubActionsDetectorSync.detect()
 
-        expect(resource.attributes['ci.github_action']).to.equal('githubAction')
-        expect(resource.attributes['ci.branch']).to.equal('ghRefName')
-        expect(resource.attributes['ci.build-number']).to.equal('ghRunNumber')
-        expect(resource.attributes['SHA1']).to.equal('ghSha')
+        expect(resource.attributes['ci.github_action']).toEqual('githubAction')
+        expect(resource.attributes['ci.branch']).toEqual('ghRefName')
+        expect(resource.attributes['ci.build-number']).toEqual('ghRunNumber')
+        expect(resource.attributes['SHA1']).toEqual('ghSha')
       })
     })
   })

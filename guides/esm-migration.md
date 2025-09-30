@@ -90,7 +90,7 @@
 - [ ] packages/data-context
 - [x] packages/driver ✅ **COMPLETED**
 - [x] packages/electron ✅ **COMPLETED**
-- [ ] packages/error
+- [x] packages/error ✅ **COMPLETED**
 - [ ] packages/extension
 - [ ] packages/https-proxy
 - [x] packages/electron ✅ **COMPLETED**
@@ -102,11 +102,11 @@
 - [ ] packages/packherd-require
 - [ ] packages/proxy
 - [ ] packages/rewriter
-- [ ] packages/scaffold-config
+- [x] packages/scaffold-config ✅ **COMPLETED**
 - [ ] packages/server
 - [ ] packages/socket
 - [x] packages/stderr-filtering ✅ **COMPLETED**
-- [ ] packages/telemetry
+- [x] packages/telemetry ✅ **COMPLETED**
 - [ ] packages/ts - ultimate goal is removal and likely not worth the effort to convert
 - [x] packages/types ✅ **COMPLETED**
 - [ ] packages/v8-snapshot-require
