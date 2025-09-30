@@ -10,7 +10,7 @@
   "compilerOptions": {
     "lib": ["esnext"],
     "allowJs": false,
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "noUncheckedIndexedAccess": true,
     "types": ["cypress"],
   }
