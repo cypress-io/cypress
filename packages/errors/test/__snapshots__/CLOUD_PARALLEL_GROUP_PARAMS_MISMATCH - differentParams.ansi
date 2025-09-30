@@ -1,0 +1,30 @@
+[31mYou passed the [95m--parallel[39m[31m flag, but we do not parallelize tests across different environments.[39m
+[31m[39m
+[31mThis machine is sending different environment parameters than the first machine that started this parallel run.[39m
+[31m[39m
+[31mThe existing run is: [94mhttps://cloud.cypress.io/project/abcd/runs/1[39m[31m[39m
+[31m[39m
+[31mIn order to run in parallel mode each machine must send identical environment parameters such as:[39m
+[31m[39m
+[31m[90m - [39m[31m[94mspecs[39m[31m[39m
+[31m[90m - [39m[31m[94mosName[39m[31m[39m
+[31m[90m - [39m[31m[94mosVersion[39m[31m[39m
+[31m[90m - [39m[31m[94mbrowserName[39m[31m[39m
+[31m[90m - [39m[31m[94mbrowserVersion (major)[39m[31m[39m
+[31m[39m
+[31mThis machine sent the following parameters:[39m
+[31m[39m
+[31m[90m{[39m[31m[39m
+[31m[90m  "osName": "darwin",[39m[31m[39m
+[31m[90m  "osVersion": "v1",[39m[31m[39m
+[31m[90m  "browserName": "Electron.... (Expected: Electron)",[39m[31m[39m
+[31m[90m  "browserVersion": "59.1.2.3.... (Expected: 64)",[39m[31m[39m
+[31m[90m  "differentSpecs": {[39m[31m[39m
+[31m[90m    "added": [[39m[31m[39m
+[31m[90m      "cypress/integration/foo_spec.js"[39m[31m[39m
+[31m[90m    ],[39m[31m[39m
+[31m[90m    "missing": [][39m[31m[39m
+[31m[90m  }[39m[31m[39m
+[31m[90m}[39m[31m[39m
+[31m[39m
+[31mhttps://on.cypress.io/parallel-group-params-mismatch[39m

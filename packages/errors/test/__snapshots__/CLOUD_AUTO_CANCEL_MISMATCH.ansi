@@ -1,0 +1,11 @@
+[31mYou passed the [95m--auto-cancel-after-failures[39m[31m flag, but this run originally started with a different value for the [95m--auto-cancel-after-failures[39m[31m flag.[39m
+[31m[39m
+[31mThe existing run is: [94mhttps://cloud.cypress.io/project/abcd/runs/1[39m[31m[39m
+[31m[39m
+[31mThe --group flag you passed was: [33mfoo[39m[31m[39m
+[31mThe --parallel flag you passed was: [33mtrue[39m[31m[39m
+[31mThe --auto-cancel-after-failures flag you passed was: [33m3[39m[31m[39m
+[31m[39m
+[31mThe first setting of --auto-cancel-after-failures for any given run takes precedent.[39m
+[31m[39m
+[31mhttps://on.cypress.io/auto-cancellation-mismatch[39m

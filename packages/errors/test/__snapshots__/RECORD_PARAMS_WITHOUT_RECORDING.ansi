@@ -1,0 +1,7 @@
+[31mYou passed the [95m--ci-build-id[39m[31m, [95m--group[39m[31m, [95m--tag[39m[31m, [95m--parallel[39m[31m, or [95m--auto-cancel-after-failures[39m[31m flag without also passing the [95m--record[39m[31m flag.[39m
+[31m[39m
+[31mThe --parallel flag you passed was: [33mtrue[39m[31m[39m
+[31m[39m
+[31mThese flags can only be used when recording to Cypress Cloud.[39m
+[31m[39m
+[31mhttps://on.cypress.io/record-params-without-recording[39m

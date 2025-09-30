@@ -1,0 +1,3 @@
+[31mElectron could not install the extension at path: [94m/path/to/extension[39m[31m[39m
+[31m[39m
+[31mPlease verify that this is the path to a valid, unpacked WebExtension.[39m

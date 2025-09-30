@@ -1,0 +1,9 @@
+[31mYou passed the [95m--record[39m[31m flag but did not provide us your Record Key.[39m
+[31m[39m
+[31mYou can pass us your Record Key like this:[39m
+[31m[39m
+[31m  [90m$[39m[31m [94mcypress run --record --key <record_key>[39m[31m[39m
+[31m[39m
+[31mYou can also set the key as an environment variable with the name: [95mCYPRESS_RECORD_KEY[39m[31m[39m
+[31m[39m
+[31mhttps://on.cypress.io/how-do-i-record-runs[39m

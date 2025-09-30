@@ -8,30 +8,23 @@ All error related logic for the server should be added to `@packages/errors`.
 
 ### Errors Development Workflow
 
-Adding and editing errors is best done with the help of the Error Comparison tool.
+Adding and editing errors is best done with the help of an ANSI Comparison tool. Cursor/VSCode offer the [vscode-ansi](https://marketplace.cursorapi.com/items/?itemName=iliazeus.vscode-ansi) comparison tool.
 
-Start off by launching the Error Comparison tool from `packages/errors` via `yarn comparison`. This will launch a mini-webapp at http://localhost:5555.
-
-The Error Comparison app has three pages: Ansi Compare, Ansi Base List, and Markdown.
-
-1. Ansi Compare - Used to compare and accept changes made during development
-2. Ansi Base List - Used to preview errors as they will be rendered to users in the Terminal.
-3. Markdown - Used to preview errors as they will be rendered to users within the App, Launchpad, and Reporter.
+Errors can be compared directly in your code error. Comparing old vs new errors can be done via comparing the git diff or the snapshot diff.
 
 #### Editing or Adding New Errors and Updating Snapshots
 
-<img src="./error-handling-accept-snapshot.png" width="1200" />
+<img src="./error-handling-snapshot-compare.png" width="1200"/>
 
 1. Add (or update) errors in `packages/errors/src/errors.ts`
-2. Add test cases to `visualSnapshotErrors_spec.ts`
-3. Run `yarn test` in the `packages/errors` directory
-4. Run `yarn comparison` in the `packages/errors` directory
-5. Open http://localhost:5555/
-6. Search for the error you're working on by the error key. (e.g. `AUTOMATION_SERVER_DISCONNECTED`)
-7. Click "Looks Good" if it looks good.
-8. To make edits, re-run the `yarn test` command and do a full refresh of the webapp.
-9. Run `yarn test` after updating the snapshot to validate the changes were applied.
-10. Commit the files changed in `__snapshot-html__`
+2. Add test cases to `visualSnapshotErrors.spec.ts`.
+3. Run `yarn test` in the `packages/errors` directory.
+4. See the `.ansi` file generated/edited for your added test case. The file should be named by the error key. (e.g. `AUTOMATION_SERVER_DISCONNECTED`).
+5. click the "Open Preview to the Side" icon in the top right portion of your code editor.
+6. Verify the changes expected.
+7. To make edits, re-run the `yarn test -u` command. `-u` will update the test snapshots.
+8. Run `yarn test` after updating the snapshot to validate the changes were applied.
+9. Commit the files changed in `./test/__snapshots__`.
 
 ### Technical Overview
 

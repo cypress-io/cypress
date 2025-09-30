@@ -1,0 +1,10 @@
+[31mA fixture file could not be found at any of the following paths:[39m
+[31m[39m
+[31m  [90m  > [39m[31m[94mfile[39m[31m[39m
+[31m  [90m  > [39m[31m[94mfile[39m[31m.[ext][39m
+[31m[39m
+[31mCypress looked for these file extensions at the provided path:[39m
+[31m[39m
+[31m  [90m  > [39m[31m[94mjs, ts, json[39m[31m[39m
+[31m[39m
+[31mProvide a path to an existing fixture file.[39m

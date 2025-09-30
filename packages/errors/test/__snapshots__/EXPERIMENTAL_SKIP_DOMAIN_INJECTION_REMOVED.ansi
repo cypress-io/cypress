@@ -1,0 +1,4 @@
+[31mThe [33mexperimentalSkipDomainInjection[39m[31m experiment is over. [33mdocument.domain[39m[31m injection is now off by default.[39m
+[31m[39m
+[31mRead the migration guide for Cypress v14.0.0: https://on.cypress.io/migration-guide[39m
+[31m[39m
