@@ -1,0 +1,18 @@
+[31mRecording this run failed. The request was invalid.[39m
+[31m[39m
+[31m[33mRequest Validation Error[39m[31m[39m
+[31m[39m
+[31mErrors:[39m
+[31m[39m
+[31m[90m[[39m[31m[39m
+[31m[90m  "data.commit has additional properties",[39m[31m[39m
+[31m[90m  "data.ci.buildNumber is required"[39m[31m[39m
+[31m[90m][39m[31m[39m
+[31m[39m
+[31mRequest Sent:[39m
+[31m[39m
+[31m[90m{[39m[31m[39m
+[31m[90m  "foo": "foo",[39m[31m[39m
+[31m[90m  "bar": "bar",[39m[31m[39m
+[31m[90m  "baz": "baz"[39m[31m[39m
+[31m[90m}[39m[31m[39m

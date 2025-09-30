@@ -1,0 +1,10 @@
+[31mThe returned value of the [33mdevServer[39m[31m function is not valid.[39m
+[31m[39m
+[31mThe returned value must be an object with a [33mport[39m[31m property of the dev-server that is running.[39m
+[31m[39m
+[31mInstead, we saw:[39m
+[31m[39m
+[31m[95m{}[39m[31m[39m
+[31m[39m
+[31mLearn more: https://on.cypress.io/dev-server[39m
+[31m[39m
