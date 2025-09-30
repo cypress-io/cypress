@@ -1,0 +1,9 @@
+[31mCypress could not connect to Firefox.[39m
+[31m[39m
+[31mAn unexpected error was received from GeckoDriver: [95mconnection[39m[31m[39m
+[31m[39m
+[31mTo avoid this error, ensure that there are no other instances of Firefox launched by Cypress running.[39m
+[35m[39m
+[35mError: fail whale[39m
+[35m    at makeErr (cypress/packages/errors/test/visualSnapshotErrors.spec.ts)[39m
+[35m    at FIREFOX_GECKODRIVER_FAILURE (cypress/packages/errors/test/visualSnapshotErrors.spec.ts)[39m

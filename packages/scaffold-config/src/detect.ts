@@ -171,6 +171,15 @@ export function detectLanguage ({ projectRoot, customConfigFile, pkgJson }: Dete
   try {
     const typescriptFile = require.resolve('typescript', { paths: [projectRoot] })
 
+    // sometimes require.resolve returns a path that does not exist but is cached by require.resolve()
+    const exists = fs.existsSync(typescriptFile)
+
+    if (!exists) {
+      debug('Resolved typescript from %s does not exist', typescriptFile)
+
+      return 'js'
+    }
+
     debug('Resolved typescript from %s', typescriptFile)
   } catch {
     debug('No typescript installed - using js')

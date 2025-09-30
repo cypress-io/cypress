@@ -1,0 +1,6 @@
+[31mWe encountered an unexpected error communicating with our servers.[39m
+[31m[39m
+[31m[95mStatusCodeError: 500 - "Internal Server Error"[39m[31m[39m
+[31m[39m
+[31mWe will retry 1 more time in 5 seconds...[39m
+[31m[39m

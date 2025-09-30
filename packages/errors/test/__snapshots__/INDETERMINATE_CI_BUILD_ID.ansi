@@ -1,0 +1,36 @@
+[31mYou passed the [95m--group[39m[31m or [95m--parallel[39m[31m flag but we could not automatically determine or generate a ciBuildId.[39m
+[31m[39m
+[31mThe --group flag you passed was: [33mfoo[39m[31m[39m
+[31mThe --parallel flag you passed was: [33mfalse[39m[31m[39m
+[31m[39m
+[31mIn order to use either of these features a ciBuildId must be determined.[39m
+[31m[39m
+[31mThe ciBuildId is automatically detected if you are running Cypress in any of the these CI providers:[39m
+[31m[39m
+[31m[90m - [39m[31m[94mappveyor[39m[31m[39m
+[31m[90m - [39m[31m[94mazure[39m[31m[39m
+[31m[90m - [39m[31m[94mawsCodeBuild[39m[31m[39m
+[31m[90m - [39m[31m[94mbamboo[39m[31m[39m
+[31m[90m - [39m[31m[94mbitbucket[39m[31m[39m
+[31m[90m - [39m[31m[94mbuildkite[39m[31m[39m
+[31m[90m - [39m[31m[94mcircle[39m[31m[39m
+[31m[90m - [39m[31m[94mcodeshipBasic[39m[31m[39m
+[31m[90m - [39m[31m[94mcodeshipPro[39m[31m[39m
+[31m[90m - [39m[31m[94mconcourse[39m[31m[39m
+[31m[90m - [39m[31m[94mcodeFresh[39m[31m[39m
+[31m[90m - [39m[31m[94mdrone[39m[31m[39m
+[31m[90m - [39m[31m[94mgithubActions[39m[31m[39m
+[31m[90m - [39m[31m[94mgitlab[39m[31m[39m
+[31m[90m - [39m[31m[94mgoCD[39m[31m[39m
+[31m[90m - [39m[31m[94mgoogleCloud[39m[31m[39m
+[31m[90m - [39m[31m[94mjenkins[39m[31m[39m
+[31m[90m - [39m[31m[94msemaphore[39m[31m[39m
+[31m[90m - [39m[31m[94mshippable[39m[31m[39m
+[31m[90m - [39m[31m[94mteamfoundation[39m[31m[39m
+[31m[90m - [39m[31m[94mtravis[39m[31m[39m
+[31m[90m - [39m[31m[94mnetlify[39m[31m[39m
+[31m[90m - [39m[31m[94mwebappio[39m[31m[39m
+[31m[39m
+[31mBecause the ciBuildId could not be auto-detected you must pass the --ci-build-id flag manually.[39m
+[31m[39m
+[31mhttps://on.cypress.io/indeterminate-ci-build-id[39m

@@ -1,0 +1,10 @@
+[31mWarning from Cypress Cloud: [33mYou are almost out of time[39m[31m[39m
+[31m[39m
+[31mDetails:[39m
+[31m[39m
+[31m[90m{[39m[31m[39m
+[31m[90m  "code": "OUT_OF_TIME",[39m[31m[39m
+[31m[90m  "name": "OutOfTime",[39m[31m[39m
+[31m[90m  "hadTime": 1000,[39m[31m[39m
+[31m[90m  "spentTime": 999[39m[31m[39m
+[31m[90m}[39m[31m[39m

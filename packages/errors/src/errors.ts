@@ -135,9 +135,6 @@ export const AllCypressErrors = {
   TESTS_DID_NOT_START_RETRYING: (arg1: string) => {
     return errTemplate`Timed out waiting for the browser to connect. ${fmt.off(arg1)}`
   },
-  FIREFOX_CDP_FAILED_TO_CONNECT: (arg1: string) => {
-    return errTemplate`Failed to spawn CDP with Firefox. ${fmt.off(arg1)}`
-  },
   TESTS_DID_NOT_START_FAILED: () => {
     return errTemplate`The browser never connected. Something is wrong. The tests cannot run. Aborting...`
   },
@@ -1553,7 +1550,6 @@ export const AllCypressErrors = {
   },
 } as const
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _typeCheck: Record<keyof AllCypressErrorObj, (...args: any[]) => ErrTemplateResult> = AllCypressErrors
 
 export type AllCypressErrorObj = typeof AllCypressErrors

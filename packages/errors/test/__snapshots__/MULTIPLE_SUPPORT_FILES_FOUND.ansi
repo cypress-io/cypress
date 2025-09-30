@@ -1,0 +1,10 @@
+[31mThere were multiple support files found matching your [95msupportFile[39m[31m pattern.[39m
+[31m[39m
+[31mYour supportFile is set to: [33mspec.{ts,js}[39m[31m[39m
+[31m[39m
+[31mWe found the following files:[39m
+[31m[39m
+[31m[90m - [39m[31m[94msupport.ts[39m[31m[39m
+[31m[90m - [39m[31m[94msupport.js[39m[31m[39m
+[31m[39m
+[31mPlease remove or combine the support files into a single file.[39m

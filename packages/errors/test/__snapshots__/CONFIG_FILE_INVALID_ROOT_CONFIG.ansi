@@ -1,0 +1,12 @@
+[31mThe [33mspecPattern[39m[31m configuration option is invalid when set from the root of the config object.[39m
+[31m[39m
+[31mSet it within a testing type property: [95me2e.specPattern[39m[31m and [95mcomponent.specPattern[39m[31m[39m
+[31m[39m
+[31m[94m{[39m[31m[39m
+[31m[94m  e2e: {[39m[31m[39m
+[31m[94m    specPattern: '...',[39m[31m[39m
+[31m[94m  },[39m[31m[39m
+[31m[94m  component: {[39m[31m[39m
+[31m[94m    specPattern: '...',[39m[31m[39m
+[31m[94m  },[39m[31m[39m
+[31m[94m}[39m[31m[39m

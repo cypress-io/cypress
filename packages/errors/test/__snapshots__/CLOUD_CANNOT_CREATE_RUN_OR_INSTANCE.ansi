@@ -1,0 +1,7 @@
+[31mWarning: We encountered an error communicating with our servers.[39m
+[31m[39m
+[31mThis run will proceed, but will not be recorded.[39m
+[31m[39m
+[31mThis error will not affect or change the exit code.[39m
+[31m[39m
+[31m[95mStatusCodeError: 500 - "Internal Server Error"[39m[31m[39m

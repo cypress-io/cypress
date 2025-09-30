@@ -1,0 +1,19 @@
+[31mYour [95mconfigFile[39m[31m is invalid: [94m/path/to/config.ts[39m[31m[39m
+[31m[39m
+[31mThe [33mcomponent.devServer[39m[31m must be an object with a supported [33mframework[39m[31m and [33mbundler[39m[31m.[39m
+[31m[39m
+[31m[94m{[39m[31m[39m
+[31m[94m  component: {[39m[31m[39m
+[31m[94m    devServer: {[39m[31m[39m
+[31m[94m      framework: 'react', [90m// Your framework[39m[31m[94m[39m[31m[39m
+[31m[94m      bundler: 'webpack' [90m// Your dev server[39m[31m[94m[39m[31m[39m
+[31m[94m    }[39m[31m[39m
+[31m[94m  }[39m[31m[39m
+[31m[94m}[39m[31m[39m
+[31m[39m
+[31mInstead, we saw:[39m
+[31m[39m
+[31m[95m{}[39m[31m[39m
+[31m[39m
+[31mLearn more: https://on.cypress.io/dev-server[39m
+[31m[39m

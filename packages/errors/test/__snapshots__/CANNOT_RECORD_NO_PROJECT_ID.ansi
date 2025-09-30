@@ -1,0 +1,11 @@
+[31mYou passed the [95m--record[39m[31m flag but this project has not been setup to record.[39m
+[31m[39m
+[31mThis project is missing the [33mprojectId[39m[31m inside of: [94m/path/to/cypress.config.js[39m[31m[39m
+[31m[39m
+[31mWe cannot uniquely identify this project without this id.[39m
+[31m[39m
+[31mYou need to setup this project to record. This will generate a unique projectId.[39m
+[31m[39m
+[31mAlternatively if you omit the [95m--record[39m[31m flag this project will run without recording.[39m
+[31m[39m
+[31mhttps://on.cypress.io/recording-project-runs[39m
