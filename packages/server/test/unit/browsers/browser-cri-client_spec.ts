@@ -421,32 +421,6 @@ describe('lib/browsers/browser-cri-client', function () {
     })
   })
 
-  context('#ensureMinimumProtocolVersion', function () {
-    function withProtocolVersion (actual, test) {
-      return getClient()
-      .then((client: any) => {
-        client.versionInfo = { 'Protocol-Version': actual }
-
-        return client.ensureMinimumProtocolVersion(test)
-      })
-    }
-
-    it('resolves if protocolVersion = current', function () {
-      return expect(withProtocolVersion('1.3', '1.3')).to.be.fulfilled
-    })
-
-    it('resolves if protocolVersion > current', function () {
-      return expect(withProtocolVersion('1.4', '1.3')).to.be.fulfilled
-    })
-
-    it('rejects if protocolVersion < current', function () {
-      return expect(withProtocolVersion('1.2', '1.3')).to.be
-      .rejected.then((err) => {
-        expect(stripAnsi(err.message)).to.eq(`A minimum CDP version of 1.3 is required, but the current browser has 1.2.`)
-      })
-    })
-  })
-
   context('#attachToTargetUrl', function () {
     it('creates a page client when the passed in url is found', async function () {
       const mockProtocolClient = {}

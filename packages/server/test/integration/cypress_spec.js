@@ -1007,7 +1007,6 @@ describe('lib/cypress', () => {
             send: sinon.stub(),
           }
           const browserCriClient = {
-            ensureMinimumProtocolVersion: sinon.stub().resolves(),
             attachToTargetUrl: sinon.stub().resolves(criClient),
             close: sinon.stub().resolves(),
             getWebSocketDebuggerUrl: sinon.stub().returns('ws://debugger'),
@@ -1077,7 +1076,6 @@ describe('lib/cypress', () => {
             send: sinon.stub(),
           }
           const browserCriClient = {
-            ensureMinimumProtocolVersion: sinon.stub().resolves(),
             attachToTargetUrl: sinon.stub().resolves(criClient),
             currentlyAttachedTarget: criClient,
             currentlyAttachedProtocolTarget: criClient,
@@ -1127,7 +1125,6 @@ describe('lib/cypress', () => {
         })
       })
 
-      // TODO: handle PORT_IN_USE short integration test
       it('logs error and exits when port is in use', async function () {
         sinon.stub(ProjectBase.prototype, 'getAutomation').returns({ use: () => {} })
         let server = http.createServer()
