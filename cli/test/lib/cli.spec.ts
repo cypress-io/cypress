@@ -651,7 +651,7 @@ describe('cli', () => {
       expect(run.start).toBeCalledWith({ runnerUi: false })
     })
 
-    it.only('calls run with --posix-exit-codes', async () => {
+    it('calls run with --posix-exit-codes', async () => {
       await exec('run --posix-exit-codes')
       expect(run.start).toBeCalledWith({ posixExitCodes: true })
     })
