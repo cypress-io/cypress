@@ -96,7 +96,14 @@ const initializeCloudCyPrompt = async (Cypress: Cypress.Cypress, cy: Cypress.Cyp
     if (!Cypress.isCrossOriginSpecBridge) {
       Cypress.primaryOriginCommunicator.removeAllListeners('prompt:more-info-needed')
       Cypress.primaryOriginCommunicator.on('prompt:more-info-needed', ({ testId, logId, onSave, onCancel }: CyPromptMoreInfoNeededOptions) => {
-        window.getEventManager!().ws.emit('prompt:more-info-needed', { testId, logId, onSave, onCancel })
+        window.getEventManager!().localBus.emit('prompt:more-info-needed', { testId, logId, onSave, onCancel })
+      })
+
+      Cypress.primaryOriginCommunicator.removeAllListeners('get:source:details:for:line')
+      Cypress.primaryOriginCommunicator.on('get:source:details:for:line', ({ line, projectRoot }, { origin, responseEvent }) => {
+        const sourceDetails = $stackUtils.getSourceDetailsForFirstLine(line, projectRoot)
+
+        Cypress.primaryOriginCommunicator.toSpecBridge(origin, responseEvent, sourceDetails)
       })
     }
 
@@ -109,7 +116,17 @@ const initializeCloudCyPrompt = async (Cypress: Cypress.Cypress, cy: Cypress.Cyp
           extendErrorMessages: $errUtils.extendErrorMessages,
           throwErrByPath: $errUtils.throwErrByPath,
         },
-        getSourceDetailsForFirstLine: $stackUtils.getSourceDetailsForFirstLine,
+        getSourceDetailsForFirstLine: (line, projectRoot) => {
+          if (Cypress.isCrossOriginSpecBridge) {
+            return Cypress.specBridgeCommunicator.toPrimaryPromise({
+              event: 'get:source:details:for:line',
+              data: { line, projectRoot },
+              timeout: Cypress.config().defaultCommandTimeout,
+            })
+          }
+
+          return $stackUtils.getSourceDetailsForFirstLine(line, projectRoot)
+        },
         onMoreInfoNeeded: ({ testId, logId, onSave, onCancel }: CyPromptMoreInfoNeededOptions) => {
           if (Cypress.isCrossOriginSpecBridge) {
             Cypress.specBridgeCommunicator.toPrimary('prompt:more-info-needed', { testId, logId, onSave, onCancel })
