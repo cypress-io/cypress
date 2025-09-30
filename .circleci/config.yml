@@ -118,7 +118,7 @@ commands:
       - when:
           condition:
             not:
-              and:
+              or:
                 - equal: [<<pipeline.trigger_source>>, 'api']
                 - equal: [<<pipeline.git.branch>>, 'develop']
                 - matches:
