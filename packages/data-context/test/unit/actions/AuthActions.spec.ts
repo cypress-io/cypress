@@ -38,10 +38,10 @@ describe('AuthActions', () => {
       // @ts-expect-error
       ctx.browser.isFocusSupported = jest.fn().mockImplementation((args) => {
         if (args === browser) {
-          return false
+          return Promise.resolve(false)
         }
 
-        return true
+        return Promise.resolve(true)
       })
 
       // @ts-expect-error - incorrect number of arguments
