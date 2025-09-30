@@ -116,9 +116,9 @@ const initializeCloudCyPrompt = async (Cypress: Cypress.Cypress, cy: Cypress.Cyp
           extendErrorMessages: $errUtils.extendErrorMessages,
           throwErrByPath: $errUtils.throwErrByPath,
         },
-        getSourceDetailsForFirstLine: async (line, projectRoot) => {
+        getSourceDetailsForFirstLine: (line, projectRoot) => {
           if (Cypress.isCrossOriginSpecBridge) {
-            return await Cypress.specBridgeCommunicator.toPrimaryPromise({
+            return Cypress.specBridgeCommunicator.toPrimaryPromise({
               event: 'get:source:details:for:line',
               data: { line, projectRoot },
               timeout: Cypress.config().defaultCommandTimeout,
