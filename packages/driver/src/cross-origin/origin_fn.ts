@@ -170,14 +170,11 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
     })
 
     cy.state('onFail', (err) => {
-      const currentAssertionUserInvocationStack = cy.state('current').get('currentAssertionCommand')?.get('userInvocationStack')
-      const userInvocationStack = cy.state('current').get('userInvocationStack')
-
       setRunnableStateToPassed()
       if (queueFinished) {
         // If the queue is already finished, send this event instead because
         // the primary won't be listening for 'queue:finished' anymore
-        Cypress.specBridgeCommunicator.toPrimary('uncaught:error', { err, userInvocationStack, currentAssertionUserInvocationStack })
+        Cypress.specBridgeCommunicator.toPrimary('uncaught:error', { err })
 
         return
       }
