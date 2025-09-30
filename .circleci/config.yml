@@ -4,12 +4,6 @@ orbs:
 setup: true
 version: 2.1
 
-# Define anchor for contributor PR detection
-x-is-contributor-pr: &is_contributor_pr
-  matches:
-    pattern: /^pull\/[0-9]+/
-    value: << pipeline.git.branch >>
-
 workflows:
     setup-workflow:
         jobs:
@@ -65,43 +59,17 @@ commands:
           name: Validate workflows
           command: |
             ./scripts/pack-ci.sh --validate --pack=false
-  checkout-workflow-source:
-    steps:
-        - run:
-            name: Clear target directory
-            command: |
-              if [[ -d ".circleci" ]]; then
-                rm -rf .circleci
-              fi
-        - when:
-            condition: *is_contributor_pr
-            steps:
-              - run: 
-                  name: Checkout develop branch
-                  command: |
-                    git clone --depth=1 --single-branch -b develop $CIRCLE_REPOSITORY_URL .
-        - unless:
-            condition: *is_contributor_pr
-            steps:
-              - checkout
   save-sha-cache:
     steps:
-      - when:
-          condition:
-              # We only want to cache shas for internal commits - caches keyed 
-              # by internal commits on `develop` are used for contributor PR
-              # workflows.
-              not: *is_contributor_pr
-          steps:
-            - run:
-                # saves the sha to  to a file so that we can use {{ checksum }}
-                name: Save git SHA to file
-                command: |
-                  git rev-parse HEAD > /tmp/sha.txt 
-            - save_cache:
-                key: circleci-packed-pipelines-{{ checksum "/tmp/sha.txt" }}
-                paths:
-                  - .circleci/packed
+      - run:
+          # saves the sha to  to a file so that we can use {{ checksum }}
+          name: Save git SHA to file
+          command: |
+            git rev-parse HEAD > /tmp/sha.txt 
+      - save_cache:
+          key: circleci-packed-pipelines-{{ checksum "/tmp/sha.txt" }}
+          paths:
+            - .circleci/packed
   restore-sha-cache:
     steps:
       - run:
@@ -164,13 +132,12 @@ commands:
                       --header "Circle-Token: ${CIRCLE_TOKEN}"
                     exit 0
                   }
-                  TRIGGER_INSTRUCTIONS="to trigger CI , include 'run ci' in the commit message or click the 'Trigger Pipeline' button in the CircleCI UI."
 
                   if [ ! -z "${CIRCLE_PULL_REQUEST##*/}" ]; then
                     DRAFT=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pulls/${CIRCLE_PULL_REQUEST##*/}" | jq '.draft')
 
                     if [[ "${DRAFT}" == true ]]; then
-                      echo "Skipping CI; PR is in draft - $TRIGGER_INSTRUCTIONS"
+                      echo "Skipping CI; PR is in draft - to trigger CI , click the 'Trigger Pipeline' button in the CircleCI UI."
                       cancel_build
                     fi
 
@@ -202,7 +169,11 @@ jobs:
     steps:
         - restore-sha-cache
         - persist-to-workspace-and-exit-early
-        - checkout-workflow-source
+        - run:
+            name: Remove empty directories # Otherwise, checkout will fail
+            command: |
+              rm -rf .circleci/
+        - checkout
         - restore-src-checksum-cache
         - persist-to-workspace-and-exit-early
         - pack-workflows
