@@ -10,7 +10,7 @@ chrome-beta-version: &chrome-beta-version "141.0.7390.30"
 firefox-stable-version: &firefox-stable-version "142.0"
 base-internal-bullseye: &base-internal-bullseye cypress/base-internal:22.19.0-bullseye
 base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.19.0-yarn-berry
-base-internal-minimum-node: &base-internal-minimum-node cypress/base-internal:22.15.1
+base-internal-minimum-node: &base-internal-minimum-node cypress/base-internal:22.19.0
 ubuntu-2004-current: &ubuntu-2004-current ubuntu-2004:2024.11.1
 ubuntu-2004-older: &ubuntu-2004-older ubuntu-2004:2024.05.1
 
