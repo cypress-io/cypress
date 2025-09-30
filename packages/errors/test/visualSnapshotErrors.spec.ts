@@ -578,22 +578,7 @@ describe('visual error templates', () => {
         default: ['/path/to/project'],
       }
     },
-    CANNOT_FETCH_PROJECT_TOKEN: () => {
-      return {
-        default: [],
-      }
-    },
-    CANNOT_CREATE_PROJECT_TOKEN: () => {
-      return {
-        default: [],
-      }
-    },
     PORT_IN_USE_SHORT: () => {
-      return {
-        default: [2020],
-      }
-    },
-    PORT_IN_USE_LONG: () => {
       return {
         default: [2020],
       }
@@ -860,11 +845,6 @@ describe('visual error templates', () => {
         ]],
       }
     },
-    BAD_POLICY_WARNING_TOOLTIP: () => {
-      return {
-        default: [],
-      }
-    },
     EXTENSION_NOT_LOADED: () => {
       return {
         default: ['Electron', '/path/to/extension'],
@@ -873,12 +853,6 @@ describe('visual error templates', () => {
     INVALID_CYPRESS_INTERNAL_ENV: () => {
       return {
         default: ['foo'],
-      }
-    },
-    CDP_VERSION_TOO_OLD: () => {
-      return {
-        default: ['1.3', { major: 1, minor: 2 }],
-        older: ['1.3', { major: 0, minor: 0 }],
       }
     },
     CDP_COULD_NOT_CONNECT: () => {
@@ -925,13 +899,6 @@ describe('visual error templates', () => {
     COULD_NOT_PARSE_ARGUMENTS: () => {
       return {
         default: ['spec', '1', 'spec must be a string or comma-separated list'],
-      }
-    },
-    FIREFOX_GECKODRIVER_FAILURE: () => {
-      const err = makeErr()
-
-      return {
-        default: ['connection', err],
       }
     },
     FOLDER_NOT_WRITABLE: () => {

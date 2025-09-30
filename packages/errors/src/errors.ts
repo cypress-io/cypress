@@ -683,20 +683,8 @@ export const AllCypressErrors = {
   NO_PROJECT_FOUND_AT_PROJECT_ROOT: (projectRoot: string) => {
     return errTemplate`Can't find a project at the path: ${fmt.path(projectRoot)}`
   },
-  CANNOT_FETCH_PROJECT_TOKEN: () => {
-    return errTemplate`Can't find project's secret key.`
-  },
-  CANNOT_CREATE_PROJECT_TOKEN: () => {
-    return errTemplate`Can't create project's secret key.`
-  },
   PORT_IN_USE_SHORT: (arg1: string | number) => {
     return errTemplate`Port ${fmt.highlight(arg1)} is already in use.`
-  },
-  PORT_IN_USE_LONG: (arg1: string | number) => {
-    return errTemplate`\
-      Can't run project because port is currently in use: ${fmt.highlight(arg1)}
-
-      Assign a different port with the ${fmt.flag(`--port <port>`)} argument or shut down the other running process.`
   },
   ERROR_READING_FILE: (filePath: string, err: Error) => {
     return errTemplate`\
@@ -1093,9 +1081,6 @@ export const AllCypressErrors = {
 
         For more information, see https://on.cypress.io/bad-browser-policy`
   },
-  BAD_POLICY_WARNING_TOOLTIP: () => {
-    return errTemplate`Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see https://on.cypress.io/bad-browser-policy`
-  },
   EXTENSION_NOT_LOADED: (browserName: string, extensionPath: string) => {
     return errTemplate`\
         ${fmt.off(browserName)} could not install the extension at path: ${fmt.path(extensionPath)}
@@ -1107,13 +1092,6 @@ export const AllCypressErrors = {
         We have detected an unknown or unsupported ${fmt.highlightSecondary(`CYPRESS_INTERNAL_ENV`)} value: ${fmt.highlight(val)}
 
         CYPRESS_INTERNAL_ENV is reserved for internal use and cannot be modified.`
-  },
-  CDP_VERSION_TOO_OLD: (minimumVersion: string, currentVersion: { major: number, minor: string | number }) => {
-    const phrase = currentVersion.major !== 0
-      ? fmt.highlight(`${currentVersion.major}.${currentVersion.minor}`)
-      : fmt.off('an older version')
-
-    return errTemplate`A minimum CDP version of ${fmt.highlight(minimumVersion)} is required, but the current browser has ${phrase}.`
   },
   CDP_COULD_NOT_CONNECT: (browserName: string, port: number, err: Error) => {
     // we include a stack trace here because it may contain useful information
@@ -1180,16 +1158,6 @@ export const AllCypressErrors = {
         You passed: ${fmt.highlightTertiary(argValue)}
 
         The error was: ${fmt.highlightSecondary(errMsg)}`
-  },
-  FIREFOX_GECKODRIVER_FAILURE: (origin: string, err: Error) => {
-    return errTemplate`\
-        Cypress could not connect to Firefox.
-
-        An unexpected error was received from GeckoDriver: ${fmt.highlightSecondary(origin)}
-
-        To avoid this error, ensure that there are no other instances of Firefox launched by Cypress running.
-
-        ${fmt.stackTrace(err)}`
   },
   FOLDER_NOT_WRITABLE: (arg1: string) => {
     return errTemplate`\
