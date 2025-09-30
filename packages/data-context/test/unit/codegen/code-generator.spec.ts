@@ -337,7 +337,7 @@ describe('code-generator', () => {
 
     expect(codeGenResult.files.length).toBeGreaterThan(0)
     for (const res of codeGenResult.files) {
-      expect(async () => await fs.access(res.file, fs.constants.F_OK)).not.toThrow()
+      expect(fs.access(res.file, fs.constants.F_OK)).resolves.not.toThrow()
       const shouldParse = ['js', 'ts'].some((ext) => res.file.endsWith(ext))
 
       if (shouldParse) {

@@ -1,4 +1,6 @@
 // necessary to have mocha types working correctly
+// NOTE: this is the sinon version of @packages/data-context/test/unit/helper.ts and will eventually be replaced with the a different version
+
 import 'mocha'
 import path from 'path'
 import fs from 'fs-extra'
