@@ -2,7 +2,7 @@
 import { defaultMessages } from '@cy/i18n'
 import InstallDependencies from './InstallDependencies.vue'
 import { InstallDependenciesFragmentDoc } from '../generated/graphql-test'
-import * as wizardDeps from '@packages/scaffold-config/src/dependencies'
+import { WIZARD_DEPENDENCY_REACT, WIZARD_DEPENDENCY_REACT_DOM, WIZARD_DEPENDENCY_TYPESCRIPT } from '@packages/scaffold-config/browser/dependencies'
 
 describe('<InstallDependencies />', () => {
   beforeEach(function () {
@@ -73,21 +73,21 @@ describe('<InstallDependencies />', () => {
             id: 'react',
             satisfied: true,
             detectedVersion: '18.3.1',
-            ...wizardDeps.WIZARD_DEPENDENCY_REACT,
+            ...WIZARD_DEPENDENCY_REACT,
           },
           {
             __typename: 'WizardNpmPackage',
             id: 'react-dom',
             satisfied: true,
             detectedVersion: '18.3.1',
-            ...wizardDeps.WIZARD_DEPENDENCY_REACT_DOM,
+            ...WIZARD_DEPENDENCY_REACT_DOM,
           },
           {
             __typename: 'WizardNpmPackage',
             id: 'typescript',
             satisfied: true,
             detectedVersion: '2.0.1',
-            ...wizardDeps.WIZARD_DEPENDENCY_TYPESCRIPT,
+            ...WIZARD_DEPENDENCY_TYPESCRIPT,
           },
         ]
 

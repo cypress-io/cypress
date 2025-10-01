@@ -1,5 +1,5 @@
 import semverMajor from 'semver/functions/major'
-import packageInfo from '../../../package.json'
+import packageInfo from '@packages/root'
 
 import type { SpecFile } from './spec'
 
