@@ -49,7 +49,7 @@ export async function addToCypressConfig (filePath: string, code: string, toAdd:
     traverse(ast, addToCypressConfigPlugin(toAdd).visitor)
 
     return print(ast).code
-  } catch (e) {
+  } catch (e: any) {
     debug(`Error adding properties to %s: %s`, filePath, e.stack)
     throw new Error(`Unable to automerge with the config file`)
   }
@@ -125,7 +125,7 @@ export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCy
     return {
       result: resultStatus,
     }
-  } catch (e) {
+  } catch (e: any) {
     return {
       result: 'NEEDS_MERGE',
       error: e,
