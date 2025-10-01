@@ -9,14 +9,13 @@ workflows:
         when:
           condition:
             or:
-              - equal: [<<pipeline.trigger_source>>, 'api']
-              - equal: [<<pipeline.git.branch>>, 'develop']
+              - equal: [ <<pipeline.trigger_source>>, 'api' ]
+              - equal: [ <<pipeline.git.branch>>, 'develop' ]
               - matches:
                   pattern: /^release\/.*/
                   value: <<pipeline.git.branch>>
               - and:
-                - equal: [ pipeline.event.name, "pull_request" ]
-                - equal: [ pipeline.event.github.pull_request.draft, false ]
+                - equal: [ <<pipeline.trigger_source>>, 'webhook' ]
 
         jobs:
             - pack-workflows
@@ -104,6 +103,7 @@ jobs:
            name: debug
            command: |
               echo "<< pipeline.trigger_source >>"
+              echo $CIRCLE_PULL_REQUEST
 
 
         - checkout
