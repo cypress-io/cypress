@@ -7,7 +7,7 @@ version: 2.1
 workflows:
     setup-workflow:
         jobs:
-            - pack-workflows:
+            - pack-workflows
             - launch-primary-workflow:
                 requires:
                   - pack-workflows

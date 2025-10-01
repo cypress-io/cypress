@@ -268,7 +268,8 @@
     ]
   },
   "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix"
+    "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
+    ".circleci/*.yml": "circleci config validate"
   },
   "resolutions": {
     "**/@types/cheerio": "0.22.21",
