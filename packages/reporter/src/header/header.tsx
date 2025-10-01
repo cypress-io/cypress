@@ -19,10 +19,11 @@ export interface ReporterHeaderProps {
   statsStore: StatsStore
   runnablesStore: RunnablesStore
   spec?: Cypress.Cypress['spec']
-  displayStatsAndControls?: boolean
 }
 
-const Header: React.FC<ReporterHeaderProps> = observer(({ appState, events = defaultEvents, statsStore, runnablesStore, spec, displayStatsAndControls = true }: ReporterHeaderProps) => {
+const Header: React.FC<ReporterHeaderProps> = observer(({ appState, events = defaultEvents, statsStore, runnablesStore, spec }: ReporterHeaderProps) => {
+  const isStudioSingleTest = appState?.studioActive && appState.studioSingleTestActive
+
   return <header>
     <div className='spec-container'>
       <Tooltip placement='bottom' title={<p>{appState.isSpecsListOpen ? 'Collapse' : 'Expand'} Specs List <span className='kbd'>F</span></p>} wrapperClassName='toggle-specs-wrapper' className='cy-tooltip'>
@@ -45,9 +46,9 @@ const Header: React.FC<ReporterHeaderProps> = observer(({ appState, events = def
           </Button>
         </div>
       </Tooltip>
-      {spec && <RunnableHeader spec={spec} statsStore={statsStore} runnablesStore={runnablesStore} />}
+      {spec && <RunnableHeader spec={spec} statsStore={statsStore} runnablesStore={runnablesStore} isStudioSingleTest={isStudioSingleTest} />}
     </div>
-    {displayStatsAndControls && <div className='statsAndControls'>
+    {!isStudioSingleTest && <div className='statsAndControls'>
       <Stats stats={statsStore} />
       <Controls appState={appState} />
     </div>}

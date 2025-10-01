@@ -103,13 +103,11 @@ const Reporter: React.FC<SingleReporterProps> = observer(({ appState = appStateD
     }
   }, [runnerStore.spec, runnerStore.specRunId, resetStatsOnSpecChange, previousSpecRunId])
 
-  const isStudioSingleTest = appState?.studioActive && appState.studioSingleTestActive
-
   return (
     <div className={cs(className, 'reporter', {
       'mounted': isMounted,
     })}>
-      {renderReporterHeader({ appState, statsStore, runnablesStore, spec: runnerStore.spec, displayStatsAndControls: !isStudioSingleTest })}
+      {renderReporterHeader({ appState, statsStore, runnablesStore, spec: runnerStore.spec })}
       {
         runnerStore.spec && <Runnables
           appState={appState}

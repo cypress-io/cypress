@@ -19,9 +19,10 @@ interface Props {
 export const RunnablePopoverOptions: React.FC<Props> = observer(({
   events = defaultEvents,
   spec,
-
 }: Props) => {
   const relativeSpecPath = spec.relative
+
+  const isStudioSingleTest = appState?.studioActive && appState.studioSingleTestActive
 
   const fileDetails = {
     absoluteFile: spec.absolute,
@@ -65,7 +66,8 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
     events.emit('save:state')
   }
 
-  const toggleShowHttpRequests = () => {}
+  // TODO: to be implemented
+  // const toggleShowHttpRequests = () => {}
 
   // Close popover when clicking outside
   useEffect(() => {
@@ -120,20 +122,21 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
           <span>Open in IDE</span>
         </button>
 
-        <button
+        {!isStudioSingleTest && <button
           className="runnable-popover-item"
           onClick={handleNewTest}
           data-cy="runnable-popover-new-test"
         >
           <IconActionAddMedium strokeColor="gray-500" />
           <span>New test</span>
-        </button>
+        </button>}
       </div>
 
       <div className="runnable-popover-section">
         <div className="runnable-popover-section-title">Testing preferences</div>
 
-        <div className="runnable-popover-item-with-toggle">
+        {/* // TODO: to be implemented */}
+        {/* <div className="runnable-popover-item-with-toggle">
           <div className="runnable-popover-item-with-toggle-content">
             <div className="runnable-popover-item-text">
               <span className="runnable-popover-item-label">Show HTTP requests</span>
@@ -145,7 +148,7 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
               onUpdate={action('toggle:show:http:requests', toggleShowHttpRequests)}
             />
           </div>
-        </div>
+        </div> */}
 
         <div className="runnable-popover-item-with-toggle">
           <div className="runnable-popover-item-with-toggle-content">
@@ -168,26 +171,34 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
     </div>
   )
 
+  const buttonComponent = () => (
+    <div>
+      <Button
+        size="32"
+        variant="outline-indigo"
+        aria-label="Options"
+        aria-expanded={isOpen}
+        data-cy="runnable-options-button"
+        onClick={togglePopover}
+        className={cs('runnable-options-button', {
+          'runnable-options-button-border': !isOpen,
+        })}
+      >
+        <IconMenuDotsVertical className='runnable-options-button-icon' />
+      </Button>
+    </div>
+  )
+
   return (
     <>
       <div className="runnable-popover-container" ref={buttonContainerRef}>
-        <Tooltip placement='bottom' title={<p>Options</p>} className='cy-tooltip'>
-          <div>
-            <Button
-              size="32"
-              variant="outline-indigo"
-              aria-label="Options"
-              aria-expanded={isOpen}
-              data-cy="runnable-options-button"
-              onClick={togglePopover}
-              className={cs('runnable-options-button', {
-                'runnable-options-button-border': !isOpen,
-              })}
-            >
-              <IconMenuDotsVertical className='runnable-options-button-icon' />
-            </Button>
-          </div>
-        </Tooltip>
+        {
+          isOpen ? buttonComponent() : (
+            <Tooltip placement='bottom' title={<p>Options</p>} className='cy-tooltip'>
+              {buttonComponent()}
+            </Tooltip>
+          )
+        }
       </div>
       {isOpen && createPortal(popoverContent, document.body)}
     </>
