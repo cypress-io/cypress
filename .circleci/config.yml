@@ -59,28 +59,6 @@ commands:
           name: Validate workflows
           command: |
             ./scripts/pack-ci.sh --validate --pack=false
-  save-sha-cache:
-    steps:
-      - run:
-          # saves the sha to  to a file so that we can use {{ checksum }}
-          name: Save git SHA to file
-          command: |
-            git rev-parse HEAD > /tmp/sha.txt 
-      - save_cache:
-          key: circleci-packed-pipelines-{{ checksum "/tmp/sha.txt" }}
-          paths:
-            - .circleci/packed
-  restore-sha-cache:
-    steps:
-      - run:
-          name: Fetch SHA of HEAD
-          command: |
-            curl -s "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/branches/${CIRCLE_BRANCH}" | jq -r '.commit.sha' > /tmp/sha_checksum.txt
-      - restore_cache:
-          keys:
-            - circleci-packed-pipelines-{{ checksum "/tmp/sha_checksum.txt" }}
-          paths:
-            - .circleci/packed
 
   # Retrieving and saving packed workflows based on the checksum of the hash
   # of the yml files in ./.circleci/src
@@ -169,17 +147,10 @@ jobs:
         - image: cimg/base:stable
     resource_class: small
     steps:
-        - restore-sha-cache
-        - persist-to-workspace-and-exit-early
-        - run:
-            name: Remove empty directories # Otherwise, checkout will fail
-            command: |
-              rm -rf .circleci/
         - checkout
         - restore-src-checksum-cache
         - persist-to-workspace-and-exit-early
         - pack-workflows
-        - save-sha-cache
         - save-src-checksum-cache
         - persist
 
