@@ -98,6 +98,26 @@ commands:
           paths:
             - .circleci/packed
 
+  fail-on-draft:
+    steps:
+      - run:
+          name: Detect Draft PRs
+          command: |
+            if [ ! -z "${CIRCLE_PULL_REQUEST##*/}" ]; then
+              DRAFT=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pulls/${CIRCLE_PULL_REQUEST##*/}" | jq '.draft')
+
+              if [[ "${DRAFT}" == true ]]; then
+                echo "Skipping CI; PR is in draft - to run CI, click the 'Trigger Pipeline' button in the CircleCI UI."
+                echo "DRAFT=true" >> $BASH_ENV
+
+                circleci-agent step halt
+              fi
+            else
+              echo "Webhook triggered with no pull request."
+              exit 1
+            fi
+      
+
 jobs:
   pack-workflows:
     docker:
@@ -108,22 +128,7 @@ jobs:
             condition:
                 equal: [<<pipeline.trigger_source>>, 'webhook']
             steps:
-              - run:
-                  name: Detect Draft PRs
-                  command: |
-                    if [ ! -z "${CIRCLE_PULL_REQUEST##*/}" ]; then
-                      DRAFT=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pulls/${CIRCLE_PULL_REQUEST##*/}" | jq '.draft')
-
-                      if [[ "${DRAFT}" == true ]]; then
-                        echo "Skipping CI; PR is in draft - to run CI, click the 'Trigger Pipeline' button in the CircleCI UI."
-                        echo "DRAFT=true" >> $BASH_ENV
-
-                        circleci-agent step halt
-                      fi
-                    else
-                      echo "Webhook triggered with no pull request."
-                      exit 1
-                    fi
+              - fail-on-draft
         - checkout
         - restore-src-checksum-cache
         - persist-to-workspace-and-exit-early
@@ -136,13 +141,11 @@ jobs:
           - image: cimg/base:stable
       resource_class: small
       steps:
-          - run:
-               name: Halt on drafts
-               command: |
-                if [[ $DRAFT == true ]]; then
-                  echo "❌ Draft branch - halting job"
-                  circleci-agent step halt
-                fi
+          - when:
+              condition:
+                  equal: [<<pipeline.trigger_source>>, 'webhook']
+              steps:
+                - fail-on-draft
           - attach_workspace:
               at: .
           - run:
