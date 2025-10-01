@@ -1572,7 +1572,7 @@ export const getError = function <Type extends keyof AllCypressErrorObj> (type: 
   return err
 }
 
-export const logWarning = function <Type extends keyof AllCypressErrorObj> (type: Type, ...args: Parameters<AllCypressErrorObj[Type]>) {
+export const logWarning = function <Type extends keyof AllCypressErrorObj> (type: Type, ...args: Parameters<AllCypressErrorObj[Type]>): null {
   const err = getError(type, ...args)
 
   logError(err, 'magenta')

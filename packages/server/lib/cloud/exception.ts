@@ -1,17 +1,17 @@
 import _ from 'lodash'
-const Promise = require('bluebird')
-const pkg = require('@packages/root')
-const api = require('./api').default
-const user = require('./user')
-const system = require('../util/system')
-const { stripPath } = require('./strip_path')
+import Bluebird from 'bluebird'
+import pkg from '@packages/root'
+import api from './api'
+import user from './user'
+import system from '../util/system'
+import { stripPath } from './strip_path'
 
 export = {
   getErr (err: Error) {
     return {
       name: stripPath(err.name),
       message: stripPath(err.message),
-      stack: stripPath(err.stack),
+      stack: stripPath(err.stack as string),
     }
   },
 
@@ -42,7 +42,7 @@ export = {
     }
 
     try {
-      const [body, authToken] = await Promise.all([
+      const [body, authToken] = await Bluebird.all([
         this.getBody(err),
         this.getAuthToken(),
       ])
