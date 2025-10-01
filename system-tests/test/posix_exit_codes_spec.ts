@@ -6,7 +6,7 @@ describe('posix exit codes', () => {
   describe('when posix exit codes are enabled', () => {
     const posixExitCodes = true
 
-    systemTests.it('returns 1 when there are failing tests', {
+    systemTests.it('returns 1 when there are multiple failing tests', {
       spec: 'simple_failing.cy.js',
       posixExitCodes,
       expectedExitCode: 1,
