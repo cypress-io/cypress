@@ -46,7 +46,7 @@ const Header: React.FC<ReporterHeaderProps> = observer(({ appState, events = def
           </Button>
         </div>
       </Tooltip>
-      {spec && <RunnableHeader spec={spec} statsStore={statsStore} runnablesStore={runnablesStore} isStudioSingleTest={isStudioSingleTest} />}
+      {spec && <RunnableHeader spec={spec} statsStore={statsStore} runnablesStore={runnablesStore} />}
     </div>
     {!isStudioSingleTest && <div className='statsAndControls'>
       <Stats stats={statsStore} />
