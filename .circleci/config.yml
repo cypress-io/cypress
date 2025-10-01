@@ -101,10 +101,10 @@ jobs:
     resource_class: small
     steps:
         - run:
+           name: debug
            command: |
-              echo "<< pipeline.event.github.pull_request.draft >>"
-              echo "<< pipeline.event.name >>"
-              echo "<< pipeline.event.github >>"
+              echo "<< pipeline.trigger_source >>"
+
 
         - checkout
         - restore-src-checksum-cache
