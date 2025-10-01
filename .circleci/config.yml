@@ -9,13 +9,12 @@ workflows:
         when:
           condition:
             or:
-              - equal: [ <<pipeline.trigger_source>>, 'api' ]
-              - equal: [ <<pipeline.git.branch>>, 'develop' ]
+              - equal: [<<pipeline.trigger_source>>, 'api']
+              - equal: [<<pipeline.trigger_source>>, 'webhook']
+              - equal: [<<pipeline.git.branch>>, 'develop']
               - matches:
                   pattern: /^release\/.*/
                   value: <<pipeline.git.branch>>
-              - and:
-                - equal: [ <<pipeline.trigger_source>>, 'webhook' ]
 
         jobs:
             - pack-workflows
@@ -54,13 +53,19 @@ commands:
             else
               echo "📦 Cache miss - continuing with packaging"
             fi
-  pack-workflows-from-src:
+  pack-workflows:
     steps:
       - circleci-cli/install
       - run:
           name: Pack workflows
           command: |
-            ./scripts/pack-ci.sh --all --validate
+            ./scripts/pack-ci.sh --all
+  validate-workflows:
+    steps:
+      - run:
+          name: Validate workflows
+          command: |
+            ./scripts/pack-ci.sh --validate --pack=false
 
   # Retrieving and saving packed workflows based on the checksum of the hash
   # of the yml files in ./.circleci/src
@@ -99,17 +104,30 @@ jobs:
         - image: cimg/base:stable
     resource_class: small
     steps:
-        - run:
-           name: debug
-           command: |
-              echo "<< pipeline.trigger_source >>"
-              echo $CIRCLE_PULL_REQUEST
+        - when:
+            condition:
+                equal: [<<pipeline.trigger_source>>, 'webhook']
+            steps:
+              - run:
+                  name: Detect Draft PRs
+                  command: |
+                    if [ ! -z "${CIRCLE_PULL_REQUEST##*/}" ]; then
+                      DRAFT=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pulls/${CIRCLE_PULL_REQUEST##*/}" | jq '.draft')
 
+                      if [[ "${DRAFT}" == true ]]; then
+                        echo "Skipping CI; PR is in draft - to run CI, click the 'Trigger Pipeline' button in the CircleCI UI."
+                        echo "DRAFT=true" >> $BASH_ENV
 
+                        circleci-agent step halt
+                      fi
+                    else
+                      echo "Webhook triggered with no pull request."
+                      exit 1
+                    fi
         - checkout
         - restore-src-checksum-cache
         - persist-to-workspace-and-exit-early
-        - pack-workflows-from-src
+        - pack-workflows
         - save-src-checksum-cache
         - persist
 
@@ -118,6 +136,13 @@ jobs:
           - image: cimg/base:stable
       resource_class: small
       steps:
+          - run:
+               name: Halt on drafts
+               command: |
+                if [[ $DRAFT == true ]]; then
+                  echo "❌ Draft branch - halting job"
+                  circleci-agent step halt
+                fi
           - attach_workspace:
               at: .
           - run:
