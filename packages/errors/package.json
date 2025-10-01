@@ -2,18 +2,23 @@
   "name": "@packages/errors",
   "version": "0.0.0-development",
   "description": "Error definitions and utilities for Cypress",
-  "main": "index.js",
-  "browser": "src/index.ts",
+  "main": "cjs/index.js",
+  "module": "esm/index.js",
+  "browser": "esm/index.js",
+  "files": [
+    "cjs/*",
+    "esm/*"
+  ],
+  "types": "src/index.ts",
   "scripts": {
-    "build": "../../scripts/run-if-ci.sh tsc || echo 'type errors'",
-    "build-prod": "tsc",
-    "check-ts": "tsc --noEmit && yarn -s tslint",
-    "clean": "rimraf --glob './src/*.js' './src/**/*.js' './src/**/**/*.js' './test/**/*.js' || echo 'cleaned'",
-    "clean-deps": "rimraf node_modules",
+    "build": "yarn build:esm && yarn build:cjs",
+    "build-prod": "yarn build",
+    "build:cjs": "rimraf cjs && tsc -p tsconfig.cjs.json",
+    "build:esm": "rimraf esm && tsc -p tsconfig.esm.json",
+    "check-ts": "tsc -p tsconfig.cjs.json --noEmit && yarn -s tslint -p tsconfig.cjs.json",
+    "clean": "rimraf cjs esm",
     "lint": "eslint",
-    "pretest": "yarn clean",
     "test": "yarn test-unit",
-    "posttest": "yarn build",
     "test-unit": "vitest run",
     "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0",
     "tslint": "tslint --config ../ts/tslint.json --project ."
@@ -31,8 +36,6 @@
     "@packages/server": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
     "@packages/types": "0.0.0-development",
-    "@types/chai": "4.2.15",
-    "@types/mocha": "8.2.2",
     "@types/node": "22.18.0",
     "@types/pngjs": "^6.0.1",
     "ansi-styles": "^5",
@@ -45,11 +48,6 @@
     "vitest": "^3.2.4",
     "xvfb-maybe": "^0.2.1"
   },
-  "files": [
-    "src",
-    "dist"
-  ],
-  "types": "src/index.ts",
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
