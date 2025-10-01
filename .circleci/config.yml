@@ -147,12 +147,12 @@ jobs:
           - run:
               name: Check for primary workflow definition
               command: |
-                if [ ! -f .circleci/packed/workflows.yml ]; then
-                    echo "❌ Primary workflow definition not found in .circleci/packed/workflows.yml!"
+                if [ ! -f .circleci/packed/pipeline.yml ]; then
+                    echo "❌ Primary workflow definition not found in .circleci/packed/pipeline.yml!"
                     exit 1
                 fi
           - continuation/continue:
-              configuration_path: .circleci/packed/workflows.yml
+              configuration_path: .circleci/packed/pipeline.yml
 
 
   
