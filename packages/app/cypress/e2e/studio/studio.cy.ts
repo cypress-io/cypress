@@ -623,10 +623,13 @@ describe('studio functionality', () => {
       o.sinon.stub(ctx.actions.file, 'openFile')
     })
 
-    cy.get('.open-in-ide-button').should('have.css', 'opacity', '0')
-    cy.get('.spec-file-name').first().realHover()
-    cy.get('.open-in-ide-button').first().should('have.css', 'opacity', '1').click()
-    cy.get('.open-in-ide-button').first().contains('Open in IDE')
+    cy.get('[data-cy="runnable-options-button"]').click()
+    cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
+
+    cy.get('[data-cy="runnable-popover-open-ide"]').contains('Open in IDE')
+    cy.get('[data-cy="runnable-popover-open-ide"]').click()
+
+    cy.contains('External editor preferences')
 
     cy.percySnapshot()
   })

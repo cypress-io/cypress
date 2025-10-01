@@ -104,7 +104,7 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
     <div
       ref={popoverRef}
       className="runnable-popover"
-      data-cy="runnable-popover"
+      data-cy="more-options-runnable-popover"
       style={{
         top: `${popoverPosition.top}px`,
         left: `${popoverPosition.left}px`,
@@ -156,7 +156,7 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
               <span className="runnable-popover-item-label">Auto-scrolling</span>
             </div>
             <Switch
-              data-cy="auto-scroll-switch-popover"
+              data-cy="auto-scroll-switch"
               value={appState.autoScrollingUserPref}
 
               onUpdate={action('toggle:auto:scrolling', toggleAutoScrollingUserPref)}
