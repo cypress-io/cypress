@@ -3718,7 +3718,7 @@ workflows:
             - update-v8-snapshot-cache-on-develop
             - << pipeline.git.branch >>
         - equal:
-            - chore/merge_gql_package_w_data_context
+            - feat/cy-prompt
             - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/
@@ -3775,7 +3775,7 @@ workflows:
             - update-v8-snapshot-cache-on-develop
             - << pipeline.git.branch >>
         - equal:
-            - chore/merge_gql_package_w_data_context
+            - feat/cy-prompt
             - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/
@@ -3843,7 +3843,7 @@ workflows:
             - update-v8-snapshot-cache-on-develop
             - << pipeline.git.branch >>
         - equal:
-            - chore/merge_gql_package_w_data_context
+            - feat/cy-prompt
             - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/
@@ -4142,7 +4142,7 @@ workflows:
                 - develop
                 - /^release\/\d+\.\d+\.\d+$/
                 - update-v8-snapshot-cache-on-develop
-                - chore/refactor_cli_to_ts
+                - feat/cy-prompt
           requires:
             - ready-to-release
       - create-and-trigger-packaging-artifacts:
@@ -4170,7 +4170,7 @@ workflows:
                 - develop
                 - /^release\/\d+\.\d+\.\d+$/
                 - update-v8-snapshot-cache-on-develop
-                - chore/refactor_cli_to_ts
+                - feat/cy-prompt
           requires:
             - build
       - test-kitchensink:
@@ -4185,7 +4185,7 @@ workflows:
                 - develop
                 - /^release\/\d+\.\d+\.\d+$/
                 - update-v8-snapshot-cache-on-develop
-                - chore/refactor_cli_to_ts
+                - feat/cy-prompt
           requires:
             - build
       - test-npm-module-on-minimum-node-version:
@@ -4211,7 +4211,7 @@ workflows:
                 - develop
                 - /^release\/\d+\.\d+\.\d+$/
                 - update-v8-snapshot-cache-on-develop
-                - chore/refactor_cli_to_ts
+                - feat/cy-prompt
           requires:
             - get-published-artifacts
       - test-binary-against-staging:
@@ -4222,7 +4222,7 @@ workflows:
                 - develop
                 - /^release\/\d+\.\d+\.\d+$/
                 - update-v8-snapshot-cache-on-develop
-                - chore/refactor_cli_to_ts
+                - feat/cy-prompt
           requires:
             - get-published-artifacts
       - test-binary-against-kitchensink-chrome:
@@ -4232,7 +4232,7 @@ workflows:
                 - develop
                 - /^release\/\d+\.\d+\.\d+$/
                 - update-v8-snapshot-cache-on-develop
-                - chore/refactor_cli_to_ts
+                - feat/cy-prompt
           requires:
             - get-published-artifacts
       - test-binary-against-recipes-firefox:
@@ -4242,7 +4242,7 @@ workflows:
                 - develop
                 - /^release\/\d+\.\d+\.\d+$/
                 - update-v8-snapshot-cache-on-develop
-                - chore/refactor_cli_to_ts
+                - feat/cy-prompt
           requires:
             - get-published-artifacts
       - test-binary-against-recipes-chrome:
@@ -4252,7 +4252,7 @@ workflows:
                 - develop
                 - /^release\/\d+\.\d+\.\d+$/
                 - update-v8-snapshot-cache-on-develop
-                - chore/refactor_cli_to_ts
+                - feat/cy-prompt
           requires:
             - get-published-artifacts
       - test-binary-against-recipes:
@@ -4262,7 +4262,7 @@ workflows:
                 - develop
                 - /^release\/\d+\.\d+\.\d+$/
                 - update-v8-snapshot-cache-on-develop
-                - chore/refactor_cli_to_ts
+                - feat/cy-prompt
           requires:
             - get-published-artifacts
       - test-binary-against-kitchensink-firefox:
@@ -4272,7 +4272,7 @@ workflows:
                 - develop
                 - /^release\/\d+\.\d+\.\d+$/
                 - update-v8-snapshot-cache-on-develop
-                - chore/refactor_cli_to_ts
+                - feat/cy-prompt
           requires:
             - get-published-artifacts
       - test-binary-against-todomvc-firefox:
@@ -4282,7 +4282,7 @@ workflows:
                 - develop
                 - /^release\/\d+\.\d+\.\d+$/
                 - update-v8-snapshot-cache-on-develop
-                - chore/refactor_cli_to_ts
+                - feat/cy-prompt
           requires:
             - get-published-artifacts
       - test-binary-against-cypress-realworld-app:
@@ -4293,7 +4293,7 @@ workflows:
                 - develop
                 - /^release\/\d+\.\d+\.\d+$/
                 - update-v8-snapshot-cache-on-develop
-                - chore/refactor_cli_to_ts
+                - feat/cy-prompt
           requires:
             - get-published-artifacts
       - test-binary-as-specific-user:
@@ -4331,7 +4331,7 @@ workflows:
             - update-v8-snapshot-cache-on-develop
             - << pipeline.git.branch >>
         - equal:
-            - chore/merge_gql_package_w_data_context
+            - feat/cy-prompt
             - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/
@@ -4628,7 +4628,7 @@ workflows:
                 - develop
                 - /^release\/\d+\.\d+\.\d+$/
                 - update-v8-snapshot-cache-on-develop
-                - chore/refactor_cli_to_ts
+                - feat/cy-prompt
           requires:
             - build
       - test-kitchensink:
@@ -4643,7 +4643,7 @@ workflows:
                 - develop
                 - /^release\/\d+\.\d+\.\d+$/
                 - update-v8-snapshot-cache-on-develop
-                - chore/refactor_cli_to_ts
+                - feat/cy-prompt
           requires:
             - build
       - test-npm-module-on-minimum-node-version:
@@ -4669,7 +4669,7 @@ workflows:
                 - develop
                 - /^release\/\d+\.\d+\.\d+$/
                 - update-v8-snapshot-cache-on-develop
-                - chore/refactor_cli_to_ts
+                - feat/cy-prompt
           requires:
             - get-published-artifacts
       - test-binary-against-staging:
@@ -4680,7 +4680,7 @@ workflows:
                 - develop
                 - /^release\/\d+\.\d+\.\d+$/
                 - update-v8-snapshot-cache-on-develop
-                - chore/refactor_cli_to_ts
+                - feat/cy-prompt
           requires:
             - get-published-artifacts
       - test-binary-against-kitchensink-chrome:
@@ -4690,7 +4690,7 @@ workflows:
                 - develop
                 - /^release\/\d+\.\d+\.\d+$/
                 - update-v8-snapshot-cache-on-develop
-                - chore/refactor_cli_to_ts
+                - feat/cy-prompt
           requires:
             - get-published-artifacts
       - test-binary-against-recipes-firefox:
@@ -4700,7 +4700,7 @@ workflows:
                 - develop
                 - /^release\/\d+\.\d+\.\d+$/
                 - update-v8-snapshot-cache-on-develop
-                - chore/refactor_cli_to_ts
+                - feat/cy-prompt
           requires:
             - get-published-artifacts
       - test-binary-against-recipes-chrome:
@@ -4710,7 +4710,7 @@ workflows:
                 - develop
                 - /^release\/\d+\.\d+\.\d+$/
                 - update-v8-snapshot-cache-on-develop
-                - chore/refactor_cli_to_ts
+                - feat/cy-prompt
           requires:
             - get-published-artifacts
       - test-binary-against-recipes:
@@ -4720,7 +4720,7 @@ workflows:
                 - develop
                 - /^release\/\d+\.\d+\.\d+$/
                 - update-v8-snapshot-cache-on-develop
-                - chore/refactor_cli_to_ts
+                - feat/cy-prompt
           requires:
             - get-published-artifacts
       - test-binary-against-kitchensink-firefox:
@@ -4730,7 +4730,7 @@ workflows:
                 - develop
                 - /^release\/\d+\.\d+\.\d+$/
                 - update-v8-snapshot-cache-on-develop
-                - chore/refactor_cli_to_ts
+                - feat/cy-prompt
           requires:
             - get-published-artifacts
       - test-binary-against-todomvc-firefox:
@@ -4740,7 +4740,7 @@ workflows:
                 - develop
                 - /^release\/\d+\.\d+\.\d+$/
                 - update-v8-snapshot-cache-on-develop
-                - chore/refactor_cli_to_ts
+                - feat/cy-prompt
           requires:
             - get-published-artifacts
       - test-binary-against-cypress-realworld-app:
@@ -4751,7 +4751,7 @@ workflows:
                 - develop
                 - /^release\/\d+\.\d+\.\d+$/
                 - update-v8-snapshot-cache-on-develop
-                - chore/refactor_cli_to_ts
+                - feat/cy-prompt
           requires:
             - get-published-artifacts
       - test-binary-as-specific-user:
@@ -5085,6 +5085,10 @@ workflows:
               value: << pipeline.git.branch >>
         - not:
             matches:
+              pattern: /^feat\/cy-prompt/
+              value: << pipeline.git.branch >>
+        - not:
+            matches:
               pattern: /^pull\/[0-9]+/
               value: << pipeline.git.branch >>
   windows:
@@ -5168,7 +5172,7 @@ workflows:
             - update-v8-snapshot-cache-on-develop
             - << pipeline.git.branch >>
         - equal:
-            - chore/merge_gql_package_w_data_context
+            - feat/cy-prompt
             - << pipeline.git.branch >>
         - matches:
             pattern: /^release\/\d+\.\d+\.\d+$/
