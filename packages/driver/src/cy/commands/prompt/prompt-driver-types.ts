@@ -94,7 +94,7 @@ export interface CyPromptOptions {
   getSourceDetailsForFirstLine: (
     stack: string,
     projectRoot?: string
-  ) => CyPromptStackLineDetail | undefined
+  ) => CyPromptStackLineDetail | Promise<CyPromptStackLineDetail | undefined> | undefined
   onMoreInfoNeeded: (options: CyPromptMoreInfoNeededOptions) => void
 }
 

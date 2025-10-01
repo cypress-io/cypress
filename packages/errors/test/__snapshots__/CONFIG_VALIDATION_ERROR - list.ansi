@@ -1,0 +1,13 @@
+[31mYour [33mconfigFile[39m[31m at [94mcypress.config.js[39m[31m set an invalid value:[39m
+[31m[39m
+[31mThe error occurred while validating the [95mbrowsers[39m[31m list.[39m
+[31m[39m
+[31mExpected [33mdisplayName[39m[31m to be a non-empty string.[39m
+[31m[39m
+[31mInstead the value was: [39m
+[31m[39m
+[31m[95m{[39m[31m[39m
+[31m[95m  "name": "chrome",[39m[31m[39m
+[31m[95m  "version": "1.2.3",[39m[31m[39m
+[31m[95m  "displayName": null[39m[31m[39m
+[31m[95m}[39m[31m[39m

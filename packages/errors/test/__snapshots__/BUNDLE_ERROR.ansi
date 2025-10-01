@@ -1,0 +1,14 @@
+[31mOops...we found an error preparing this test file:[39m
+[31m[39m
+[31m[90m  > [39m[31m[94m/path/to/file[39m[31m[39m
+[31m[39m
+[31mThe error was:[39m
+[31m[39m
+[31m[33mfail whale[39m[31m[39m
+[31m[39m
+[31mThis occurred while Cypress was compiling and bundling your test code. This is usually caused by:[39m
+[31m[39m
+[31m- A missing file or dependency[39m
+[31m- A syntax error in the file or one of its dependencies[39m
+[31m[39m
+[31mFix the error in your code and re-run your tests.[39m

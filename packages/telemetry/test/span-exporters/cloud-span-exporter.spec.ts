@@ -1,6 +1,5 @@
-import { expect } from 'chai'
+import { describe, it, expect } from 'vitest'
 import type { ReadableSpan } from '@opentelemetry/sdk-trace-base'
-
 import { OTLPTraceExporter } from '../../src/span-exporters/cloud-span-exporter'
 
 const genericRequest = { encryption: { encryptRequest: ({ url, method, body }: {url: string, method: string, body: string}) => Promise.resolve({ jwe: 'req' }) } }
@@ -10,17 +9,17 @@ describe('cloudSpanExporter', () => {
     it('sets encrypted header if set', () => {
       const exporter = new OTLPTraceExporter(genericRequest)
 
-      expect(exporter.headers['x-cypress-encrypted']).to.equal('1')
-      expect(exporter.requirementsToExport).to.equal('unknown')
-      expect(exporter.enc).to.not.be.undefined
+      expect(exporter.headers['x-cypress-encrypted']).toEqual('1')
+      expect(exporter.requirementsToExport).toEqual('unknown')
+      expect(exporter.enc).toBeDefined()
     })
 
     it('does not set encrypted header if not set', () => {
       const exporter = new OTLPTraceExporter()
 
-      expect(exporter.headers['x-cypress-encrypted']).to.be.undefined
-      expect(exporter.requirementsToExport).to.equal('met')
-      expect(exporter.enc).to.be.undefined
+      expect(exporter.headers['x-cypress-encrypted']).toBeUndefined()
+      expect(exporter.requirementsToExport).toEqual('met')
+      expect(exporter.enc).toBeUndefined()
     })
   })
 
@@ -34,14 +33,14 @@ describe('cloudSpanExporter', () => {
         callCount++
       }
 
-      expect(exporter.headers['x-project-id']).to.be.undefined
-      expect(exporter.projectId).to.be.undefined
+      expect(exporter.headers['x-project-id']).toBeUndefined()
+      expect(exporter.projectId).toBeUndefined()
 
       exporter.attachProjectId('123')
 
-      expect(exporter.headers['x-project-id']).to.equal('123')
-      expect(exporter.projectId).to.equal('123')
-      expect(callCount).to.equal(1)
+      expect(exporter.headers['x-project-id']).toEqual('123')
+      expect(exporter.projectId).toEqual('123')
+      expect(callCount).toEqual(1)
     })
 
     it('sets requirements to unmet if id is not passed', () => {
@@ -58,17 +57,17 @@ describe('cloudSpanExporter', () => {
         abortCallCount++
       }
 
-      expect(exporter.headers['x-project-id']).to.be.undefined
-      expect(exporter.projectId).to.be.undefined
+      expect(exporter.headers['x-project-id']).toBeUndefined()
+      expect(exporter.projectId).toBeUndefined()
 
       exporter.attachProjectId(undefined)
 
-      expect(exporter.headers['x-project-id']).to.be.undefined
-      expect(exporter.projectId).to.be.undefined
-      expect(callCount).to.equal(0)
+      expect(exporter.headers['x-project-id']).toBeUndefined()
+      expect(exporter.projectId).toBeUndefined()
+      expect(callCount).toEqual(0)
 
-      expect(exporter.requirementsToExport).to.equal('unmet')
-      expect(abortCallCount).to.equal(1)
+      expect(exporter.requirementsToExport).toEqual('unmet')
+      expect(abortCallCount).toEqual(1)
     })
   })
 
@@ -82,12 +81,12 @@ describe('cloudSpanExporter', () => {
         callCount++
       }
 
-      expect(exporter.recordKey).to.be.undefined
+      expect(exporter.recordKey).toBeUndefined()
 
       exporter.attachRecordKey('123')
 
-      expect(exporter.recordKey).to.equal('123')
-      expect(callCount).to.equal(1)
+      expect(exporter.recordKey).toEqual('123')
+      expect(callCount).toEqual(1)
     })
 
     it('sets requirements to unmet  if record key is not passed', () => {
@@ -104,15 +103,15 @@ describe('cloudSpanExporter', () => {
         abortCallCount++
       }
 
-      expect(exporter.recordKey).to.be.undefined
+      expect(exporter.recordKey).toBeUndefined()
 
       exporter.attachRecordKey(undefined)
 
-      expect(exporter.recordKey).to.be.undefined
-      expect(callCount).to.equal(0)
+      expect(exporter.recordKey).toBeUndefined()
+      expect(callCount).toEqual(0)
 
-      expect(exporter.requirementsToExport).to.equal('unmet')
-      expect(abortCallCount).to.equal(1)
+      expect(exporter.requirementsToExport).toEqual('unmet')
+      expect(abortCallCount).toEqual(1)
     })
   })
 
@@ -128,8 +127,8 @@ describe('cloudSpanExporter', () => {
       const authorization = exporter.headers.Authorization
 
       // MTIzOjQ1Ng== is 123:456 base64 encoded
-      expect(authorization).to.equal(`Basic MTIzOjQ1Ng==`)
-      expect(exporter.requirementsToExport).to.equal('met')
+      expect(authorization).toEqual(`Basic MTIzOjQ1Ng==`)
+      expect(exporter.requirementsToExport).toEqual('met')
     })
   })
 
@@ -151,8 +150,8 @@ describe('cloudSpanExporter', () => {
 
       exporter.sendDelayedItems()
 
-      expect(callCount).to.equal(0)
-      expect(exporter.delayedItemsToExport.length).to.equal(1)
+      expect(callCount).toEqual(0)
+      expect(exporter.delayedItemsToExport.length).toEqual(1)
     })
 
     it('does not send if project id is not set', () => {
@@ -173,8 +172,8 @@ describe('cloudSpanExporter', () => {
       exporter.attachRecordKey('123')
       exporter.sendDelayedItems()
 
-      expect(callCount).to.equal(0)
-      expect(exporter.delayedItemsToExport.length).to.equal(1)
+      expect(callCount).toEqual(0)
+      expect(exporter.delayedItemsToExport.length).toEqual(1)
     })
 
     it('does not send if record key is not set', () => {
@@ -195,8 +194,8 @@ describe('cloudSpanExporter', () => {
       exporter.attachProjectId('123')
       exporter.sendDelayedItems()
 
-      expect(callCount).to.equal(0)
-      expect(exporter.delayedItemsToExport.length).to.equal(1)
+      expect(callCount).toEqual(0)
+      expect(exporter.delayedItemsToExport.length).toEqual(1)
     })
 
     it('does send if record key and project id are set', () => {
@@ -218,26 +217,28 @@ describe('cloudSpanExporter', () => {
       exporter.attachRecordKey('123')
       exporter.sendDelayedItems()
 
-      expect(callCount).to.equal(1)
-      expect(exporter.delayedItemsToExport.length).to.equal(0)
+      expect(callCount).toEqual(1)
+      expect(exporter.delayedItemsToExport.length).toEqual(0)
     })
   })
 
   describe('abortDelayedItems', () => {
-    it('aborts any delayed items', (done) => {
+    it('aborts any delayed items', () => {
       const exporter = new OTLPTraceExporter()
 
-      exporter.delayedItemsToExport.push({
-        serviceRequest: 'req',
-        onSuccess: () => {},
-        onError: (error) => {
-          expect(error.message).to.equal('Spans cannot be sent, exporter has unmet requirements, either project id or record key are undefined.')
-          done()
-        },
-      })
+      return new Promise((resolvePromise) => {
+        exporter.delayedItemsToExport.push({
+          serviceRequest: 'req',
+          onSuccess: () => {},
+          onError: (error) => {
+            expect(error.message).toEqual('Spans cannot be sent, exporter has unmet requirements, either project id or record key are undefined.')
+            resolvePromise()
+          },
+        })
 
-      exporter.abortDelayedItems()
-      expect(exporter.delayedItemsToExport.length).to.equal(0)
+        exporter.abortDelayedItems()
+        expect(exporter.delayedItemsToExport.length).toEqual(0)
+      })
     })
   })
 
@@ -264,102 +265,108 @@ describe('cloudSpanExporter', () => {
       // @ts-expect-error
       exporter._shutdownOnce = { isCalled: true }
 
-      expect(exporter.send([{ name: 'string' }] as ReadableSpan[], onSuccess, onError)).to.be.undefined
+      expect(exporter.send([{ name: 'string' }] as ReadableSpan[], onSuccess, onError)).toBeUndefined()
     })
 
-    it('sends a string', (done) => {
+    it('sends a string', () => {
+      return new Promise((resolvePromise, rejectPromise) => {
+        const exporter = new OTLPTraceExporter()
+
+        exporter.convert = (objects) => {
+          throw 'convert should not be called'
+        }
+
+        exporter.sendWithHttp = (collector, body, contentType, resolve, reject) => {
+          expect(collector).to.not.be.undefined
+          expect(body).toEqual('string')
+          expect(contentType).toEqual('application/json')
+          expect(resolve).to.not.be.undefined
+          expect(reject).to.not.be.undefined
+          resolve()
+        }
+
+        const onSuccess = () => {
+          resolvePromise()
+        }
+
+        const onError = () => {
+          rejectPromise('onError should not be called')
+        }
+
+        exporter.send('string', onSuccess, onError)
+      })
+    })
+
+    it('sends an array of readable spans', () => {
       const exporter = new OTLPTraceExporter()
 
-      exporter.convert = (objects) => {
-        throw 'convert should not be called'
-      }
+      return new Promise((resolvePromise, rejectPromise) => {
+        // @ts-expect-error
+        exporter.convert = (objects) => {
+          expect(objects[0].name).toEqual('string')
 
-      exporter.sendWithHttp = (collector, body, contentType, resolve, reject) => {
-        expect(collector).to.not.be.undefined
-        expect(body).to.equal('string')
-        expect(contentType).to.equal('application/json')
-        expect(resolve).to.not.be.undefined
-        expect(reject).to.not.be.undefined
-        resolve()
-      }
+          return 'string'
+        }
 
-      const onSuccess = () => {
-        done()
-      }
+        exporter.sendWithHttp = (collector, body, contentType, resolve, reject) => {
+          expect(collector).to.not.be.undefined
+          expect(body).toEqual(JSON.stringify('string'))
+          expect(contentType).toEqual('application/json')
+          expect(resolve).to.not.be.undefined
+          expect(reject).to.not.be.undefined
+          resolve()
+        }
 
-      const onError = () => {
-        throw 'onError should not be called'
-      }
+        const onSuccess = () => {
+          resolvePromise()
+        }
 
-      exporter.send('string', onSuccess, onError)
+        const onError = () => {
+          rejectPromise('onError should not be called')
+        }
+
+        exporter.send([{ name: 'string' }] as ReadableSpan[], onSuccess, onError)
+      })
     })
 
-    it('sends an array of readable spans', (done) => {
+    it('fails to send the request', () => {
       const exporter = new OTLPTraceExporter()
 
-      // @ts-expect-error
-      exporter.convert = (objects) => {
-        expect(objects[0].name).to.equal('string')
+      return new Promise((resolvePromise, rejectPromise) => {
+        // @ts-expect-error
+        exporter.convert = (objects) => {
+          expect(objects[0].name).toEqual('string')
 
-        return 'string'
-      }
+          return 'string'
+        }
 
-      exporter.sendWithHttp = (collector, body, contentType, resolve, reject) => {
-        expect(collector).to.not.be.undefined
-        expect(body).to.equal(JSON.stringify('string'))
-        expect(contentType).to.equal('application/json')
-        expect(resolve).to.not.be.undefined
-        expect(reject).to.not.be.undefined
-        resolve()
-      }
+        exporter.sendWithHttp = (collector, body, contentType, resolve, reject) => {
+          expect(collector).to.not.be.undefined
+          expect(body).toEqual(JSON.stringify('string'))
+          expect(contentType).toEqual('application/json')
+          expect(resolve).toBeDefined()
+          expect(reject).toBeDefined()
+          // @ts-expect-error
+          reject('err')
+        }
 
-      const onSuccess = () => {
-        done()
-      }
+        const onSuccess = () => {
+          rejectPromise('onSuccess should not be called')
+        }
 
-      const onError = () => {
-        throw 'onError should not be called'
-      }
+        const onError = (err) => {
+          expect(err).toEqual('err')
+          resolvePromise()
+        }
 
-      exporter.send([{ name: 'string' }] as ReadableSpan[], onSuccess, onError)
+        exporter.send([{ name: 'string' }] as ReadableSpan[], onSuccess, onError)
+      })
     })
 
-    it('fails to send the request', (done) => {
-      const exporter = new OTLPTraceExporter()
-
-      // @ts-expect-error
-      exporter.convert = (objects) => {
-        expect(objects[0].name).to.equal('string')
-
-        return 'string'
-      }
-
-      exporter.sendWithHttp = (collector, body, contentType, resolve, reject) => {
-        expect(collector).to.not.be.undefined
-        expect(body).to.equal(JSON.stringify('string'))
-        expect(contentType).to.equal('application/json')
-        expect(resolve).to.not.be.undefined
-        expect(reject).to.not.be.undefined
-        // @ts-expect-error;'
-        reject('err')
-      }
-
-      const onSuccess = () => {
-        throw 'onSuccess should not be called'
-      }
-
-      const onError = (err) => {
-        expect(err).to.equal('err')
-        done()
-      }
-
-      exporter.send([{ name: 'string' }] as ReadableSpan[], onSuccess, onError)
-    })
-
-    it('encrypts the request', (done) => {
+    it('encrypts the request', () => {
       const encryption = {
         encryptRequest: ({ url, method, body }) => {
-          expect(body).to.equal('string')
+          expect(body).toEqual('string')
 
           return Promise.resolve({ jwe: 'encrypted' })
         },
@@ -372,28 +379,30 @@ describe('cloudSpanExporter', () => {
         },
       })
 
-      exporter.convert = (objects) => {
-        throw 'convert should not be called'
-      }
+      return new Promise((resolvePromise, rejectPromise) => {
+        exporter.convert = (objects) => {
+          throw 'convert should not be called'
+        }
 
-      exporter.sendWithHttp = (collector, body, contentType, resolve, reject) => {
-        expect(collector).to.not.be.undefined
-        expect(body).to.equal(JSON.stringify('encrypted'))
-        expect(contentType).to.equal('application/json')
-        expect(resolve).to.not.be.undefined
-        expect(reject).to.not.be.undefined
-        resolve()
-      }
+        exporter.sendWithHttp = (collector, body, contentType, resolve, reject) => {
+          expect(collector).toBeDefined()
+          expect(body).toEqual(JSON.stringify('encrypted'))
+          expect(contentType).toEqual('application/json')
+          expect(resolve).toBeDefined()
+          expect(reject).toBeDefined()
+          resolve()
+        }
 
-      const onSuccess = () => {
-        done()
-      }
+        const onSuccess = () => {
+          resolvePromise()
+        }
 
-      const onError = () => {
-        throw 'onError should not be called'
-      }
+        const onError = () => {
+          rejectPromise('onError should not be called')
+        }
 
-      exporter.send('string', onSuccess, onError)
+        exporter.send('string', onSuccess, onError)
+      })
     })
 
     it('delays the request if encryption is enabled authorization is not present', () => {
@@ -423,37 +432,39 @@ describe('cloudSpanExporter', () => {
         throw 'onError should not be called'
       }
 
-      expect(exporter.delayedItemsToExport.length).to.equal(0)
+      expect(exporter.delayedItemsToExport.length).toEqual(0)
 
       exporter.send('string', onSuccess, onError)
 
-      expect(exporter.delayedItemsToExport.length).to.equal(1)
-      expect(exporter.delayedItemsToExport[0].serviceRequest).to.equal('string')
+      expect(exporter.delayedItemsToExport.length).toEqual(1)
+      expect(exporter.delayedItemsToExport[0].serviceRequest).toEqual('string')
     })
 
-    it('errors if requirements are unmet', (done) => {
+    it('errors if requirements are unmet', () => {
       const exporter = new OTLPTraceExporter()
 
-      exporter.requirementsToExport = 'unmet'
+      return new Promise((resolvePromise, rejectPromise) => {
+        exporter.requirementsToExport = 'unmet'
 
-      exporter.convert = (objects) => {
-        throw 'convert should not be called'
-      }
+        exporter.convert = (objects) => {
+          throw 'convert should not be called'
+        }
 
-      exporter.sendWithHttp = (collector, body, contentType, resolve, reject) => {
-        throw 'sendWithHttp should not be called'
-      }
+        exporter.sendWithHttp = (collector, body, contentType, resolve, reject) => {
+          throw 'sendWithHttp should not be called'
+        }
 
-      const onSuccess = () => {
-        throw 'onSuccess should not be called'
-      }
+        const onSuccess = () => {
+          rejectPromise('onSuccess should not be called')
+        }
 
-      const onError = (error) => {
-        expect(error.message).to.equal('Spans cannot be sent, exporter has unmet requirements, either project id or record key are undefined.')
-        done()
-      }
+        const onError = (error) => {
+          expect(error.message).toEqual('Spans cannot be sent, exporter has unmet requirements, either project id or record key are undefined.')
+          resolvePromise()
+        }
 
-      exporter.send('string', onSuccess, onError)
+        exporter.send('string', onSuccess, onError)
+      })
     })
   })
 })

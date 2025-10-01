@@ -1,0 +1,5 @@
+[31mCypress could not verify that this server is running:[39m
+[31m[39m
+[31m[90m  > [39m[31m[94mhttp://localhost:3000[39m[31m[39m
+[31m[39m
+[31mThis server has been configured as your [33mbaseUrl[39m[31m, and tests will likely fail if it is not running.[39m

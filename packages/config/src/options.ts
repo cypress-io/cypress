@@ -231,6 +231,12 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     overrideLevel: 'any',
     requireRestartOnChange: 'browser',
   }, {
+    name: 'experimentalPromptCommand',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isExperimental: true,
+    requireRestartOnChange: 'server',
+  }, {
     name: 'experimentalSourceRewriting',
     defaultValue: false,
     validation: validate.isBoolean,
@@ -244,12 +250,6 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     requireRestartOnChange: 'server',
   }, {
     name: 'experimentalStudio',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isExperimental: true,
-    requireRestartOnChange: 'server',
-  }, {
-    name: 'experimentalPromptCommand',
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,

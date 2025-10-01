@@ -1335,11 +1335,11 @@ export default {
     promptDownloadError (obj) {
       return {
         message: stripIndent`\
-        Failed to download cy.prompt Cloud code:
+        Failed to download \`cy.prompt\` Cloud code:
 
-        - ${obj.error.code}: ${obj.error.message}
+        - ${obj.error.code ? `${obj.error.code}: ` : ''}${obj.error.message}
 
-         Check your network connection and file settings to ensure download is not interrupted.
+        Check your network connection and file settings to ensure download is not interrupted.
       `,
         docsUrl: 'https://on.cypress.io/prompt-download-error',
       }
@@ -1347,11 +1347,9 @@ export default {
     promptDownloadTimedOut (obj) {
       return {
         message: stripIndent`\
-        Timed out waiting for cy.prompt Cloud code:
+        Timed out downloading \`cy.prompt\` Cloud code.
 
-        - ${obj.error.code ? `${obj.error.code}: ` : ''}${obj.error.message}
-
-         Check your network connection and system configuration.
+        Check your network connection and system configuration to ensure download is not interrupted.
       `,
         docsUrl: 'https://on.cypress.io/prompt-download-error',
       }

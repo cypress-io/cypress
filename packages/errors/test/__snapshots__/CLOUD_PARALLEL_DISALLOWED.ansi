@@ -1,0 +1,10 @@
+[31mYou passed the [95m--parallel[39m[31m flag, but this run group was originally created without the --parallel flag.[39m
+[31m[39m
+[31mThe existing run is: [94mhttps://cloud.cypress.io/project/abcd/runs/1[39m[31m[39m
+[31m[39m
+[31mThe --group flag you passed was: [33mfoo[39m[31m[39m
+[31mThe --parallel flag you passed was: [33mtrue[39m[31m[39m
+[31m[39m
+[31mYou can not use the --parallel flag with this group.[39m
+[31m[39m
+[31mhttps://on.cypress.io/parallel-disallowed[39m

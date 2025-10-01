@@ -32,7 +32,6 @@ describe('lib/browsers/chrome', () => {
       this.browserCriClient = {
         attachToTargetUrl: sinon.stub().resolves(this.pageCriClient),
         close: sinon.stub().resolves(),
-        ensureMinimumProtocolVersion: sinon.stub().withArgs('1.3').resolves(),
         getWebSocketDebuggerUrl: sinon.stub().returns('ws://debugger'),
       }
 
@@ -74,7 +73,6 @@ describe('lib/browsers/chrome', () => {
 
     afterEach(function () {
       mockfs.restore()
-      expect(this.browserCriClient.ensureMinimumProtocolVersion).to.be.calledOnce
     })
 
     it('focuses on the page, calls CRI Page.navigate, enables Page/Network/Fetch events, and sets download behavior', function () {
@@ -332,12 +330,6 @@ describe('lib/browsers/chrome', () => {
         expect(this.browserCriClient.close).to.be.calledOnce
         expect(kill).to.be.calledOnce
       })
-    })
-
-    it('rejects if CDP version check fails', function () {
-      this.browserCriClient.ensureMinimumProtocolVersion.throws()
-
-      return expect(chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)).to.be.rejectedWith('Cypress requires at least Chrome 64.')
     })
 
     it('sends after:browser:launch with debugger url', function () {
