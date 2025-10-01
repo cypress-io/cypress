@@ -1,12 +1,10 @@
-import sinon from 'sinon'
+import { describe, expect, it, jest } from '@jest/globals'
 import { execute } from 'graphql'
-import chaiAsPromised from 'chai-as-promised'
 import { Response } from 'cross-fetch'
 
 import { DataContext } from '../../../src/DataContext'
 import { CloudDataResponse, CloudDataSource } from '../../../src/sources'
 import { createTestDataContext, scaffoldProject } from '../helper'
-import chai, { expect } from 'chai'
 import { ExecutionResult } from '@urql/core'
 import {
   CLOUD_PROJECT_QUERY,
@@ -20,24 +18,22 @@ import {
   FAKE_USER_WITH_REQUIRED_RESOLVED_RESPONSE,
 } from './fixtures/graphqlFixtures'
 
-chai.use(chaiAsPromised)
-
 describe('CloudDataSource', () => {
   let cloudDataSource: CloudDataSource
-  let fetchStub: sinon.SinonStub
-  let getUserStub: sinon.SinonStub
-  let logoutStub: sinon.SinonStub
-  let invalidateCacheStub: sinon.SinonStub
+  let fetchStub: jest.Mock<() => Promise<Response>>
+  let getUserStub: jest.Mock<() => { authToken: string } | null>
+  let logoutStub: jest.Mock<() => void>
+  let invalidateCacheStub: jest.Mock<() => void>
   let ctx: DataContext
 
   beforeEach(() => {
-    sinon.restore()
-    fetchStub = sinon.stub()
-    fetchStub.resolves(new Response(JSON.stringify(FAKE_USER_RESPONSE), { status: 200 }))
-    getUserStub = sinon.stub()
-    getUserStub.returns({ authToken: '1234' })
-    logoutStub = sinon.stub()
-    invalidateCacheStub = sinon.stub()
+    jest.restoreAllMocks()
+    fetchStub = jest.fn()
+    fetchStub.mockResolvedValue(new Response(JSON.stringify(FAKE_USER_RESPONSE), { status: 200 }))
+    getUserStub = jest.fn()
+    getUserStub.mockReturnValue({ authToken: '1234' })
+    logoutStub = jest.fn()
+    invalidateCacheStub = jest.fn()
     ctx = createTestDataContext('open')
     cloudDataSource = new CloudDataSource({
       fetch: fetchStub,
@@ -53,7 +49,7 @@ describe('CloudDataSource', () => {
 
   describe('excecuteRemoteGraphQL', () => {
     it('returns immediately with { data: null } when no user is defined', () => {
-      getUserStub.returns(null)
+      getUserStub.mockReturnValue(null)
       const result = cloudDataSource.executeRemoteGraphQL({
         fieldName: 'cloudViewer',
         operationDoc: FAKE_USER_QUERY,
@@ -61,8 +57,8 @@ describe('CloudDataSource', () => {
         operationType: 'query',
       })
 
-      expect(result).to.eql({ data: null })
-      expect(fetchStub).not.to.be.called
+      expect(result).toEqual({ data: null })
+      expect(fetchStub).not.toHaveBeenCalled()
     })
 
     it('issues a fetch request for the data when the user is defined', async () => {
@@ -75,7 +71,7 @@ describe('CloudDataSource', () => {
 
       const resolved = await result
 
-      expect(resolved.data).to.eql(FAKE_USER_RESPONSE.data)
+      expect(resolved.data).toEqual(FAKE_USER_RESPONSE.data)
     })
 
     it('only issues a single fetch if the operation is called twice', async () => {
@@ -92,12 +88,12 @@ describe('CloudDataSource', () => {
         operationType: 'query',
       })
 
-      expect(result1).to.eq(result2)
+      expect(result1).toEqual(result2)
 
       const resolved = await result1
 
-      expect(resolved.data).to.eql(FAKE_USER_RESPONSE.data)
-      expect(fetchStub).to.have.been.calledOnce
+      expect(resolved.data).toEqual(FAKE_USER_RESPONSE.data)
+      expect(fetchStub).toHaveBeenCalledTimes(1)
     })
 
     it('resolves eagerly with the cached data if the data has already been resolved', async () => {
@@ -117,8 +113,8 @@ describe('CloudDataSource', () => {
         operationType: 'query',
       })
 
-      expect((immediateResult as ExecutionResult).data).to.eql(FAKE_USER_RESPONSE.data)
-      expect(fetchStub).to.have.been.calledOnce
+      expect((immediateResult as ExecutionResult).data).toEqual(FAKE_USER_RESPONSE.data)
+      expect(fetchStub).toHaveBeenCalledTimes(1)
     })
 
     it('when there is a nullable field missing, resolves with the eager result & fetches for the rest', async () => {
@@ -131,7 +127,7 @@ describe('CloudDataSource', () => {
 
       await result
 
-      fetchStub.resolves(new Response(JSON.stringify(FAKE_USER_WITH_OPTIONAL_RESOLVED_RESPONSE), { status: 200 }))
+      fetchStub.mockResolvedValue(new Response(JSON.stringify(FAKE_USER_WITH_OPTIONAL_RESOLVED_RESPONSE), { status: 200 }))
 
       const immediateResult = cloudDataSource.executeRemoteGraphQL({
         fieldName: 'cloudViewer',
@@ -140,14 +136,14 @@ describe('CloudDataSource', () => {
         operationType: 'query',
       })
 
-      expect((immediateResult as CloudDataResponse).data).to.eql(FAKE_USER_WITH_OPTIONAL_MISSING_RESPONSE.data)
-      expect((immediateResult as CloudDataResponse).stale).to.eql(true)
+      expect((immediateResult as CloudDataResponse).data).toEqual(FAKE_USER_WITH_OPTIONAL_MISSING_RESPONSE.data)
+      expect((immediateResult as CloudDataResponse).stale).toEqual(true)
 
       const executingResponse = await (immediateResult as CloudDataResponse).executing
 
-      expect(executingResponse.data).to.eql(FAKE_USER_WITH_OPTIONAL_RESOLVED_RESPONSE.data)
+      expect(executingResponse.data).toEqual(FAKE_USER_WITH_OPTIONAL_RESOLVED_RESPONSE.data)
 
-      expect(fetchStub).to.have.been.calledTwice
+      expect(fetchStub).toHaveBeenCalledTimes(2)
     })
 
     it('when there is a non-nullable field missing, issues the remote query immediately', async () => {
@@ -160,7 +156,7 @@ describe('CloudDataSource', () => {
 
       await result
 
-      fetchStub.resolves(new Response(JSON.stringify(FAKE_USER_WITH_REQUIRED_RESOLVED_RESPONSE), { status: 200 }))
+      fetchStub.mockResolvedValue(new Response(JSON.stringify(FAKE_USER_WITH_REQUIRED_RESOLVED_RESPONSE), { status: 200 }))
 
       const requiredResult = cloudDataSource.executeRemoteGraphQL({
         fieldName: 'cloudViewer',
@@ -169,15 +165,15 @@ describe('CloudDataSource', () => {
         operationType: 'query',
       })
 
-      expect(requiredResult).to.be.instanceOf(Promise)
+      expect(requiredResult).toBeInstanceOf(Promise)
 
-      expect((await requiredResult).data).to.eql(FAKE_USER_WITH_REQUIRED_RESOLVED_RESPONSE.data)
+      expect((await requiredResult).data).toEqual(FAKE_USER_WITH_REQUIRED_RESOLVED_RESPONSE.data)
 
-      expect(fetchStub).to.have.been.calledTwice
+      expect(fetchStub).toHaveBeenCalledTimes(2)
     })
 
     it('returns error property on response', async () => {
-      fetchStub.resolves(new Response(JSON.stringify(new Error('Unauthorized')), { status: 200 }))
+      fetchStub.mockResolvedValue(new Response(JSON.stringify(new Error('Unauthorized')), { status: 200 }))
 
       const result = cloudDataSource.executeRemoteGraphQL({
         fieldName: 'cloudViewer',
@@ -188,13 +184,13 @@ describe('CloudDataSource', () => {
 
       const resolved = await result
 
-      expect(resolved.data).to.eql(undefined)
-      expect(resolved.errors).to.exist
-      expect(resolved.error?.networkError?.message).to.eql('No Content')
+      expect(resolved.data).toEqual(undefined)
+      expect(resolved.errors).toBeDefined()
+      expect(resolved.error?.networkError?.message).toEqual('No Content')
     })
 
     it('logout user on 401 response', async () => {
-      fetchStub.resolves(new Response(JSON.stringify(new Error('Unauthorized')), { status: 401 }))
+      fetchStub.mockResolvedValue(new Response(JSON.stringify(new Error('Unauthorized')), { status: 401 }))
 
       const result = cloudDataSource.executeRemoteGraphQL({
         fieldName: 'cloudViewer',
@@ -205,11 +201,11 @@ describe('CloudDataSource', () => {
 
       const resolved = await result
 
-      expect(resolved.data).to.eql(undefined)
-      expect(resolved.errors).to.exist
-      expect(resolved.error?.networkError?.message).to.eql('Unauthorized')
+      expect(resolved.data).toEqual(undefined)
+      expect(resolved.errors).toBeDefined()
+      expect(resolved.error?.networkError?.message).toEqual('Unauthorized')
 
-      expect(logoutStub).to.have.been.calledOnce
+      expect(logoutStub).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -220,7 +216,7 @@ describe('CloudDataSource', () => {
         operationVariables: {},
       })
 
-      expect(result).to.eql(false)
+      expect(result).toEqual(false)
     })
 
     it('returns true if we are currently resolving the request', () => {
@@ -236,7 +232,7 @@ describe('CloudDataSource', () => {
         operationVariables: {},
       })
 
-      expect(result).to.eql(true)
+      expect(result).toEqual(true)
     })
   })
 
@@ -247,7 +243,7 @@ describe('CloudDataSource', () => {
         operationVariables: {},
       })
 
-      expect(result).to.eql(false)
+      expect(result).toEqual(false)
     })
 
     it('returns true if we have resolved the data for the query', async () => {
@@ -263,7 +259,7 @@ describe('CloudDataSource', () => {
         operationVariables: {},
       })
 
-      expect(result).to.eql(true)
+      expect(result).toEqual(true)
     })
   })
 
@@ -279,24 +275,26 @@ describe('CloudDataSource', () => {
       expect(cloudDataSource.hasResolved({
         operationDoc: FAKE_USER_QUERY,
         operationVariables: {},
-      })).to.eq(true)
+      })).toEqual(true)
 
       await cloudDataSource.invalidate('Query', 'cloudViewer')
 
       expect(cloudDataSource.hasResolved({
         operationDoc: FAKE_USER_QUERY,
         operationVariables: {},
-      })).to.eq(false)
+      })).toEqual(false)
     })
   })
 
   describe('delegateCloudField', () => {
     it('delegates a field to the remote schema, which calls executeRemoteGraphQL', async () => {
-      fetchStub.resolves(new Promise((resolve) => {
-        setTimeout(() => {
-          resolve(new Response(JSON.stringify(CLOUD_PROJECT_RESPONSE), { status: 200 }))
-        }, 200)
-      }))
+      fetchStub.mockImplementation(() => {
+        return new Promise<Response>((resolve) => {
+          setTimeout(() => {
+            resolve(new Response(JSON.stringify(CLOUD_PROJECT_RESPONSE), { status: 200 }))
+          }, 200)
+        })
+      })
 
       Object.defineProperty(ctx, 'cloud', { value: cloudDataSource })
 
@@ -304,13 +302,13 @@ describe('CloudDataSource', () => {
 
       const delegateCloudField = cloudDataSource.delegateCloudField
 
-      const delegateCloudSpy = sinon.stub(cloudDataSource, 'delegateCloudField').callsFake(async function (...args) {
+      const delegateCloudSpy = jest.spyOn(cloudDataSource, 'delegateCloudField').mockImplementation(async function (...args) {
         return delegateCloudField.apply(this, args)
       })
 
       await ctx.actions.project.setCurrentProject(dir)
 
-      sinon.stub(ctx.project, 'projectId').resolves('abc1234')
+      jest.spyOn(ctx.project, 'projectId').mockResolvedValue('abc1234')
 
       const result = await execute({
         rootValue: {},
@@ -319,16 +317,16 @@ describe('CloudDataSource', () => {
         contextValue: ctx,
       })
 
-      expect(delegateCloudSpy).to.have.been.calledOnce
+      expect(delegateCloudSpy).toHaveBeenCalledTimes(1)
 
-      expect(result.data).to.eql({
+      expect(result.data).toEqual({
         currentProject: {
           cloudProject: null,
           id: Buffer.from(`CurrentProject:${dir}`, 'utf8').toString('base64'),
         },
       })
 
-      expect(await delegateCloudSpy.firstCall.returnValue)
+      await new Promise((resolve) => setTimeout(resolve, 300))
 
       const result2 = await execute({
         rootValue: {},
@@ -337,7 +335,7 @@ describe('CloudDataSource', () => {
         contextValue: ctx,
       })
 
-      expect(result2.data).to.eql({
+      expect(result2.data).toEqual({
         currentProject: {
           cloudProject: {
             __typename: 'CloudProject',
@@ -347,7 +345,7 @@ describe('CloudDataSource', () => {
         },
       })
 
-      expect(fetchStub).to.have.been.calledOnce
+      expect(fetchStub).toHaveBeenCalledTimes(1)
     })
   })
 })
