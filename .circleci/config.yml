@@ -104,7 +104,7 @@ commands:
                 name: Cancel CI
                 command: |
                   cancel_build() {
-                    circleci agent step halt
+                    circleci-agent step halt
                   }
 
                   if [ ! -z "${CIRCLE_PULL_REQUEST##*/}" ]; then
