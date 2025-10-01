@@ -10,7 +10,9 @@ chrome-beta-version: &chrome-beta-version "141.0.7390.30"
 firefox-stable-version: &firefox-stable-version "142.0"
 base-internal-bullseye: &base-internal-bullseye cypress/base-internal:22.19.0-bullseye
 base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.19.0-yarn-berry
-base-internal-minimum-node: &base-internal-minimum-node cypress/base-internal:22.19.0
+# Lowest Node.js version we support of the minimum major version supported
+# See https://docs.cypress.io/app/get-started/install-cypress#Nodejs
+base-internal-minimum-node: &base-internal-minimum-node cypress/base-internal:20.15.0
 ubuntu-2004-current: &ubuntu-2004-current ubuntu-2004:2024.11.1
 ubuntu-2004-older: &ubuntu-2004-older ubuntu-2004:2024.05.1
 
@@ -2595,13 +2597,13 @@ jobs:
           command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip npm i
             /root/cypress/cypress.tgz
       - run:
-          name: Cypress version
-          working_directory: test-binary
-          command: $(yarn bin cypress) version
-      - run:
           name: Verify Cypress binary
           working_directory: test-binary
           command: $(yarn bin cypress) verify
+      - run:
+          name: Cypress version
+          working_directory: test-binary
+          command: $(yarn bin cypress) version
       - run:
           name: Cypress help
           working_directory: test-binary
@@ -2611,6 +2613,7 @@ jobs:
           working_directory: test-binary
           command: $(yarn bin cypress) info
 
+  # Test NPM module on minimum node version we support
   test-npm-module-on-minimum-node-version:
     <<: *defaults
     resource_class: small
@@ -2634,9 +2637,13 @@ jobs:
           working_directory: test-binary
           command: npx cypress verify
       - run:
-          name: Print Cypress version
+          name: Cypress version
           working_directory: test-binary
           command: npx cypress version
+      - run:
+          name: Cypress help
+          working_directory: test-binary
+          command: npx cypress help
       - run:
           name: Cypress info
           working_directory: test-binary

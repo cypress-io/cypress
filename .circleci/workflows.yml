@@ -1,5 +1,5 @@
 base-internal-bullseye: cypress/base-internal:22.19.0-bullseye
-base-internal-minimum-node: cypress/base-internal:22.19.0
+base-internal-minimum-node: cypress/base-internal:20.15.0
 base-internal-yarn-berry: cypress/base-internal:22.19.0-yarn-berry
 chrome-beta-version: 141.0.7390.30
 chrome-stable-version: 140.0.7339.207
@@ -3306,12 +3306,12 @@ jobs:
           name: Install Cypress
           working_directory: test-binary
       - run:
-          command: $(yarn bin cypress) version
-          name: Cypress version
-          working_directory: test-binary
-      - run:
           command: $(yarn bin cypress) verify
           name: Verify Cypress binary
+          working_directory: test-binary
+      - run:
+          command: $(yarn bin cypress) version
+          name: Cypress version
           working_directory: test-binary
       - run:
           command: $(yarn bin cypress) help
@@ -3324,7 +3324,7 @@ jobs:
     working_directory: ~/cypress
   test-npm-module-on-minimum-node-version:
     docker:
-      - image: cypress/base-internal:22.19.0
+      - image: cypress/base-internal:20.15.0
     environment:
       CIRCLE_ARTIFACTS: /tmp/artifacts
       COLUMNS: 100
@@ -3359,7 +3359,11 @@ jobs:
           working_directory: test-binary
       - run:
           command: npx cypress version
-          name: Print Cypress version
+          name: Cypress version
+          working_directory: test-binary
+      - run:
+          command: npx cypress help
+          name: Cypress help
           working_directory: test-binary
       - run:
           command: npx cypress info
