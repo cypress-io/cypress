@@ -1,30 +1,26 @@
-import chai, { expect } from 'chai'
+import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
 import os from 'os'
-import sinon from 'sinon'
-import sinonChai from 'sinon-chai'
 import { Response } from 'cross-fetch'
 
 import { DataContext } from '../../../src'
 import { VersionsDataSource } from '../../../src/sources'
 import { createTestDataContext } from '../helper'
-import { CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types'
-
-const pkg = require('@packages/root')
-
-chai.use(sinonChai)
+import { AllowedState, CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types'
+import pkg from '@packages/root'
 
 describe('VersionsDataSource', () => {
-  context('.versions', () => {
+  describe('.versions', () => {
     let ctx: DataContext
-    let fetchStub: sinon.SinonStub
-    let isDependencyInstalledByNameStub: sinon.SinonStub
+    let fetchMock: jest.Mock
+    let isDependencyInstalledByNameStub: jest.Mock
     let mockNow: Date = new Date()
     let currentCypressVersion: string = pkg.version
 
     beforeEach(() => {
       ctx = createTestDataContext('open')
 
-      ;(ctx.lifecycleManager as any)._cachedInitialConfig = {
+      // @ts-expect-error
+      ctx.lifecycleManager._cachedInitialConfig = {
         component: {
           devServer: {
             framework: 'react',
@@ -37,59 +33,66 @@ describe('VersionsDataSource', () => {
       ctx.coreData.currentProject = '/abc'
       ctx.coreData.currentTestingType = 'e2e'
 
-      fetchStub = sinon.stub()
+      fetchMock = jest.fn()
 
-      fetchStub
-      .withArgs(NPM_CYPRESS_REGISTRY_URL)
-      .resolves({
-        json: sinon.stub().resolves({
-          'time': {
-            modified: '2022-01-31T21:14:41.593Z',
-            created: '2014-03-09T01:07:35.219Z',
-            [currentCypressVersion]: '2014-03-09T01:07:37.369Z',
-            '18.0.0': '2015-05-07T00:09:41.109Z',
-          },
-        }),
-      })
+      isDependencyInstalledByNameStub = jest.fn()
 
-      isDependencyInstalledByNameStub = sinon.stub()
-
-      sinon.stub(ctx.util, 'fetch').callsFake(fetchStub)
-      sinon.stub(ctx.util, 'isDependencyInstalledByName').callsFake(isDependencyInstalledByNameStub)
-      sinon.stub(os, 'platform').returns('darwin')
-      sinon.stub(os, 'arch').returns('x64')
-      sinon.useFakeTimers({ now: mockNow })
+      // @ts-expect-error
+      jest.spyOn(ctx.util, 'fetch').mockImplementation(fetchMock)
+      // @ts-expect-error
+      jest.spyOn(ctx.util, 'isDependencyInstalledByName').mockImplementation(isDependencyInstalledByNameStub)
+      jest.spyOn(os, 'platform').mockReturnValue('darwin')
+      jest.spyOn(os, 'arch').mockReturnValue('x64')
+      jest.useFakeTimers({ now: mockNow })
     })
 
     afterEach(() => {
-      sinon.restore()
+      jest.useRealTimers()
     })
 
     it('loads the manifest for the latest version with all headers and queries npm for release dates', async () => {
-      fetchStub
-      .withArgs(CYPRESS_REMOTE_MANIFEST_URL, {
-        headers: sinon.match({
-          'Content-Type': 'application/json',
-          'x-cypress-version': currentCypressVersion,
-          'x-os-name': 'darwin',
-          'x-arch': 'x64',
-          'x-initial-launch': String(true),
-          'x-machine-id': 'abcd123',
-          'x-testing-type': 'e2e',
-          'x-logged-in': 'false',
-        }),
-      }).resolves({
-        json: sinon.stub().resolves({
-          name: 'Cypress',
-          version: '18.0.0',
-        }),
+      fetchMock.mockImplementation((url: string, options: { headers: Record<string, string> }) => {
+        if (url === NPM_CYPRESS_REGISTRY_URL) {
+          return Promise.resolve({
+            // @ts-expect-error
+            json: jest.fn().mockResolvedValue({
+              'time': {
+                modified: '2022-01-31T21:14:41.593Z',
+                created: '2014-03-09T01:07:35.219Z',
+                [currentCypressVersion]: '2014-03-09T01:07:37.369Z',
+                '18.0.0': '2015-05-07T00:09:41.109Z',
+              },
+            }),
+          })
+        }
+
+        if (
+          url === CYPRESS_REMOTE_MANIFEST_URL &&
+          options.headers['Content-Type'] === 'application/json' &&
+          options.headers['x-cypress-version'] === currentCypressVersion &&
+          options.headers['x-os-name'] === 'darwin' &&
+          options.headers['x-arch'] === 'x64' &&
+          options.headers['x-initial-launch'] === String(true) &&
+          options.headers['x-machine-id'] === 'abcd123' &&
+          options.headers['x-testing-type'] === 'e2e' &&
+          options.headers['x-logged-in'] === 'false') {
+          return Promise.resolve({
+            // @ts-expect-error
+            json: jest.fn().mockResolvedValue({
+              name: 'Cypress',
+              version: '18.0.0',
+            }),
+          })
+        }
+
+        throw new Error('not found')
       })
 
       const versionsDataSource = new VersionsDataSource(ctx)
 
       const versionInfo = await versionsDataSource.versionData()
 
-      expect(versionInfo).to.eql({
+      expect(versionInfo).toEqual({
         current: {
           id: currentCypressVersion,
           version: currentCypressVersion,
@@ -107,97 +110,125 @@ describe('VersionsDataSource', () => {
       ctx.coreData.machineId = Promise.resolve(null)
       ctx.coreData.currentTestingType = 'component'
 
-      const mockRequest = {
-        'Content-Type': 'application/json',
-        'x-cypress-version': currentCypressVersion,
-        'x-os-name': 'darwin',
-        'x-arch': 'x64',
-        'x-initial-launch': String(true),
-        'x-testing-type': 'component',
-        'x-logged-in': 'false',
-      }
+      fetchMock.mockImplementation((url: string, options: { headers: Record<string, string> }) => {
+        if (url === NPM_CYPRESS_REGISTRY_URL) {
+          return Promise.resolve({
+            // @ts-expect-error
+            json: jest.fn().mockResolvedValue({
+              'time': {
+                modified: '2022-01-31T21:14:41.593Z',
+                created: '2014-03-09T01:07:35.219Z',
+                [currentCypressVersion]: '2014-03-09T01:07:37.369Z',
+                '18.0.0': '2015-05-07T00:09:41.109Z',
+              },
+            }),
+          })
+        }
 
-      fetchStub
-      .withArgs(CYPRESS_REMOTE_MANIFEST_URL, {
-        headers: sinon.match(mockRequest),
-      }).resolves({
-        json: sinon.stub().resolves({
-          name: 'Cypress',
-          version: '15.0.0',
-        }),
-      })
+        // first mocked response
+        if (
+          url === CYPRESS_REMOTE_MANIFEST_URL &&
+          options.headers['Content-Type'] === 'application/json' &&
+          options.headers['x-cypress-version'] === currentCypressVersion &&
+          options.headers['x-os-name'] === 'darwin' &&
+          options.headers['x-arch'] === 'x64' &&
+          options.headers['x-initial-launch'] === String(true) &&
+          options.headers['x-testing-type'] === 'component' &&
+          options.headers['x-logged-in'] === 'false') {
+          return Promise.resolve({
+            // @ts-expect-error
+            json: jest.fn().mockResolvedValue({
+              name: 'Cypress',
+              version: '15.0.0',
+            }),
+          })
+        }
 
-      const mockRequest2 = {
-        ...mockRequest,
-        'x-initial-launch': String(false),
-        'x-testing-type': 'e2e',
-      }
+        // second mocked response
+        if (
+          url === CYPRESS_REMOTE_MANIFEST_URL &&
+          options.headers['Content-Type'] === 'application/json' &&
+          options.headers['x-cypress-version'] === currentCypressVersion &&
+          options.headers['x-os-name'] === 'darwin' &&
+          options.headers['x-arch'] === 'x64' &&
+          options.headers['x-initial-launch'] === String(false) &&
+          options.headers['x-testing-type'] === 'e2e' &&
+          options.headers['x-logged-in'] === 'false' &&
+          options.headers['x-initial-launch'] === String(false)) {
+          return Promise.resolve({
+            // @ts-expect-error
+            json: jest.fn().mockResolvedValue({
+              name: 'Cypress',
+              version: '16.0.0',
+            }),
+          })
+        }
 
-      fetchStub
-      .withArgs(CYPRESS_REMOTE_MANIFEST_URL, {
-        headers: sinon.match(mockRequest2),
-      }).resolves({
-        json: sinon.stub().resolves({
-          name: 'Cypress',
-          version: '16.0.0',
-        }),
+        throw new Error('not found')
       })
 
       const versionsDataSource = new VersionsDataSource(ctx)
 
       await versionsDataSource.versionData()
 
-      expect(await ctx.coreData.versionData?.latestVersion).to.eql('15.0.0')
+      expect(await ctx.coreData.versionData?.latestVersion).toEqual('15.0.0')
 
       ctx.coreData.currentTestingType = 'e2e'
 
       versionsDataSource.resetLatestVersionTelemetry()
 
-      expect(await ctx.coreData.versionData?.latestVersion).to.eql('16.0.0')
+      expect(await ctx.coreData.versionData?.latestVersion).toEqual('16.0.0')
     })
 
     it('handles errors fetching version data', async () => {
-      fetchStub
-      .withArgs(CYPRESS_REMOTE_MANIFEST_URL, {
-        headers: sinon.match({
-          'Content-Type': 'application/json',
-          'x-cypress-version': currentCypressVersion,
-          'x-os-name': 'darwin',
-          'x-arch': 'x64',
-          'x-initial-launch': String(true),
-          'x-machine-id': 'abcd123',
-          'x-testing-type': 'e2e',
-          'x-logged-in': 'false',
-        }),
+      fetchMock.mockImplementation((url: string, options: { headers: Record<string, string> }) => {
+        if (url === NPM_CYPRESS_REGISTRY_URL) {
+          return Promise.reject(new Error('NPM_CYPRESS_REGISTRY_URL mocked response failed'))
+        }
+
+        if (
+          url === CYPRESS_REMOTE_MANIFEST_URL &&
+          options.headers['Content-Type'] === 'application/json' &&
+          options.headers['x-cypress-version'] === currentCypressVersion &&
+          options.headers['x-os-name'] === 'darwin' &&
+          options.headers['x-arch'] === 'x64' &&
+          options.headers['x-initial-launch'] === String(true) &&
+          options.headers['x-testing-type'] === 'e2e' &&
+          options.headers['x-logged-in'] === 'false') {
+          return Promise.reject(new Error('CYPRESS_REMOTE_MANIFEST_URL mocked response failed'))
+        }
+
+        throw new Error('not found')
       })
-      .rejects()
-      .withArgs(NPM_CYPRESS_REGISTRY_URL)
-      .rejects()
 
       const versionsDataSource = new VersionsDataSource(ctx)
 
       const versionInfo = await versionsDataSource.versionData()
 
-      expect(versionInfo.current.version).to.eql(currentCypressVersion)
+      expect(versionInfo.current.version).toEqual(currentCypressVersion)
     })
 
     it('handles invalid response errors', async () => {
-      fetchStub
-      .withArgs(CYPRESS_REMOTE_MANIFEST_URL, {
-        headers: sinon.match({
-          'Content-Type': 'application/json',
-          'x-cypress-version': currentCypressVersion,
-          'x-os-name': 'darwin',
-          'x-arch': 'x64',
-          'x-initial-launch': String(true),
-          'x-machine-id': 'abcd123',
-          'x-testing-type': 'e2e',
-          'x-logged-in': 'false',
-        }),
+      fetchMock.mockImplementation((url: string, options: { headers: Record<string, string> }) => {
+        if (url === NPM_CYPRESS_REGISTRY_URL) {
+          return Promise.reject(new Response('Error'))
+        }
+
+        if (
+          url === CYPRESS_REMOTE_MANIFEST_URL &&
+          options.headers['Content-Type'] === 'application/json' &&
+          options.headers['x-cypress-version'] === currentCypressVersion &&
+          options.headers['x-os-name'] === 'darwin' &&
+          options.headers['x-arch'] === 'x64' &&
+          options.headers['x-initial-launch'] === String(true) &&
+          options.headers['x-machine-id'] === 'abcd123' &&
+          options.headers['x-testing-type'] === 'e2e' &&
+          options.headers['x-logged-in'] === 'false') {
+          return Promise.reject(new Response('Error'))
+        }
+
+        throw new Error('not found')
       })
-      .callsFake(async () => new Response('Error'))
-      .withArgs(NPM_CYPRESS_REGISTRY_URL)
-      .callsFake(async () => new Response('Error'))
 
       const versionsDataSource = new VersionsDataSource(ctx)
 
@@ -211,17 +242,17 @@ describe('VersionsDataSource', () => {
 
       await ctx.coreData.versionData?.latestVersion
 
-      expect(versionInfo.current.version).to.eql(currentCypressVersion)
+      expect(versionInfo.current.version).toEqual(currentCypressVersion)
     })
 
     it('generates x-framework, x-bundler, and x-dependencies headers', async () => {
-      isDependencyInstalledByNameStub.callsFake(async (packageName) => {
+      isDependencyInstalledByNameStub.mockImplementation(async (packageName) => {
         // Should include any resolved dependency with a valid version
         if (packageName === 'react') {
           return {
             dependency: packageName,
             detectedVersion: '1.2.3',
-          } as Cypress.DependencyToInstall
+          } as unknown as Cypress.DependencyToInstall
         }
 
         if (packageName === 'vue') {
@@ -264,10 +295,10 @@ describe('VersionsDataSource', () => {
       versionsDataSource.resetLatestVersionTelemetry()
       await versionsDataSource.versionData()
 
-      expect(fetchStub).to.have.been.calledWith(
+      expect(fetchMock).toHaveBeenCalledWith(
         CYPRESS_REMOTE_MANIFEST_URL,
         {
-          headers: sinon.match({
+          headers: expect.objectContaining({
             'x-framework': 'react',
             'x-dev-server': 'vite',
             'x-dependencies': 'react@1.2.3,vue@4.5.6,@builder.io/qwik@1.1.4,@playwright/experimental-ct-core@1.33.0',
@@ -277,22 +308,22 @@ describe('VersionsDataSource', () => {
     })
 
     it('generates x-notifications header', async () => {
-      (ctx.config.localSettingsApi.getPreferences as sinon.SinonStub).callsFake(() => {
-        return {
+      (ctx.config.localSettingsApi.getPreferences as jest.Mock<typeof ctx.config.localSettingsApi.getPreferences>).mockImplementation(() => {
+        return Promise.resolve({
           notifyWhenRunCompletes: ['errored'],
           notifyWhenRunStarts: true,
           notifyWhenRunStartsFailing: true,
-        }
+        }as unknown as AllowedState)
       })
 
       const versionsDataSource = new VersionsDataSource(ctx)
 
       await versionsDataSource.versionData()
 
-      expect(fetchStub).to.have.been.calledWith(
+      expect(fetchMock).toHaveBeenCalledWith(
         CYPRESS_REMOTE_MANIFEST_URL,
         {
-          headers: sinon.match({
+          headers: expect.objectContaining({
             'x-notifications': 'errored,started,failing',
           }),
         },
