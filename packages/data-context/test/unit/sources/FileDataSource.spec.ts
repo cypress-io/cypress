@@ -1,6 +1,5 @@
-import sinon from 'sinon'
+import { describe, expect, it, jest } from '@jest/globals'
 import fs from 'fs-extra'
-import { expect } from 'chai'
 import path from 'path'
 import os from 'os'
 
@@ -31,7 +30,6 @@ describe('FileDataSource', () => {
 
       afterEach(() => {
         removeProject('globby-test-bed')
-        sinon.restore()
       })
 
       describe('#getFilesByGlob', () => {
@@ -41,9 +39,9 @@ describe('FileDataSource', () => {
             'root-script-*.js',
           )
 
-          expect(files).to.have.length(2)
-          expect(files[0]).to.eq(path.join(projectPath, 'root-script-1.js'))
-          expect(files[1]).to.eq(path.join(projectPath, 'root-script-2.js'))
+          expect(files).toHaveLength(2)
+          expect(files[0]).toEqual(path.join(projectPath, 'root-script-1.js'))
+          expect(files[1]).toEqual(path.join(projectPath, 'root-script-2.js'))
         })
 
         it('finds files matching relative patterns in working dir', async () => {
@@ -52,7 +50,7 @@ describe('FileDataSource', () => {
             './root-script-*.js',
           )
 
-          expect(files).to.have.length(2)
+          expect(files).toHaveLength(2)
         })
 
         it('finds files matching patterns that include working dir', async () => {
@@ -61,7 +59,7 @@ describe('FileDataSource', () => {
             `${projectPath}/root-script-*.js`,
           )
 
-          expect(files).to.have.length(2)
+          expect(files).toHaveLength(2)
         })
 
         it('does not replace working directory in glob pattern if it is not leading', async () => {
@@ -79,7 +77,7 @@ describe('FileDataSource', () => {
             `./cypress${projectPath}/nested-script.js`,
           )
 
-          expect(files).to.have.length(1)
+          expect(files).toHaveLength(1)
         })
 
         it('finds files matching multiple patterns', async () => {
@@ -88,7 +86,7 @@ describe('FileDataSource', () => {
             ['root-script-*.js', 'scripts/**/*.js'],
           )
 
-          expect(files).to.have.length(5)
+          expect(files).toHaveLength(5)
         })
 
         it('does not find files outside of working dir', async () => {
@@ -97,7 +95,7 @@ describe('FileDataSource', () => {
             ['root-script-*.js', './**/*.js'],
           )
 
-          expect(files).to.have.length(3)
+          expect(files).toHaveLength(3)
         })
 
         it('by default ignores files within node_modules', async () => {
@@ -115,7 +113,7 @@ describe('FileDataSource', () => {
 
           // only scripts at root should be found, as node_modules is implicitly ignored
           // and ./scripts is explicitly ignored
-          expect(files).to.have.length(2)
+          expect(files).toHaveLength(2)
         })
 
         it('does not ignores files within node_modules, if node_modules is in the glob path', async () => {
@@ -132,7 +130,7 @@ describe('FileDataSource', () => {
 
           // scripts at root (2 of them) and scripts at node_modules should be found
           // and ./scripts is explicitly ignored
-          expect(files).to.have.length(4)
+          expect(files).toHaveLength(4)
         })
 
         it('does not ignores files within node_modules, if node_modules is in the project path', async () => {
@@ -149,15 +147,18 @@ describe('FileDataSource', () => {
           )
 
           // only scripts at node_modules should be found, since it is the project path
-          expect(files).to.have.length(3)
+          expect(files).toHaveLength(3)
         })
 
         it('converts globs to POSIX paths on windows', async () => {
           const windowsSeperator = '\\'
 
-          sinon.stub(os, 'platform').returns('win32')
-          const toPosixStub = sinon.stub(fileUtil, 'toPosix').callsFake((path) => {
-            return toPosixStub.wrappedMethod(path, windowsSeperator)
+          jest.spyOn(os, 'platform').mockReturnValue('win32')
+
+          const { toPosix: toPosixActual } = jest.requireActual<typeof import('../../../src/util/file')>('../../../src/util/file')
+
+          jest.spyOn(fileUtil, 'toPosix').mockImplementation((path) => {
+            return toPosixActual(path, windowsSeperator)
           })
 
           const files = await fileDataSource.getFilesByGlob(
@@ -165,7 +166,7 @@ describe('FileDataSource', () => {
             `**${windowsSeperator}*script-*.js`,
           )
 
-          expect(files).to.have.length(5)
+          expect(files).toHaveLength(5)
         })
 
         it('finds files using given globby options', async () => {
@@ -175,9 +176,9 @@ describe('FileDataSource', () => {
             { absolute: false },
           )
 
-          expect(files).to.have.length(2)
-          expect(files[0]).to.eq('root-script-1.js')
-          expect(files[1]).to.eq('root-script-2.js')
+          expect(files).toHaveLength(2)
+          expect(files[0]).toEqual('root-script-1.js')
+          expect(files[1]).toEqual('root-script-2.js')
         })
       })
     })
@@ -195,14 +196,8 @@ describe('FileDataSource', () => {
         ignore: ['**/node_modules/**'],
       }
 
-      let matchGlobsStub: sinon.SinonStub
-
       beforeEach(() => {
-        matchGlobsStub = sinon.stub(FileDataSourceModule, 'matchGlobs').resolves(mockMatches)
-      })
-
-      afterEach(() => {
-        sinon.restore()
+        jest.spyOn(FileDataSourceModule, 'matchGlobs').mockResolvedValue(mockMatches)
       })
 
       it('matches absolute patterns when working directory is root', async () => {
@@ -211,8 +206,8 @@ describe('FileDataSource', () => {
           '/cypress/e2e/**.cy.js',
         )
 
-        expect(files).to.eq(mockMatches)
-        expect(matchGlobsStub).to.have.been.calledWith(
+        expect(files).toEqual(mockMatches)
+        expect(FileDataSourceModule.matchGlobs).toHaveBeenCalledWith(
           ['cypress/e2e/**.cy.js'],
           { ...defaultGlobbyOptions, cwd: '/' },
         )
@@ -224,8 +219,8 @@ describe('FileDataSource', () => {
           './project/**.cy.js',
         )
 
-        expect(files).to.eq(mockMatches)
-        expect(matchGlobsStub).to.have.been.calledWith(
+        expect(files).toEqual(mockMatches)
+        expect(FileDataSourceModule.matchGlobs).toHaveBeenCalledWith(
           ['./project/**.cy.js'],
           { ...defaultGlobbyOptions, cwd: '/' },
         )
@@ -237,8 +232,8 @@ describe('FileDataSource', () => {
           'project/**.cy.js',
         )
 
-        expect(files).to.eq(mockMatches)
-        expect(matchGlobsStub).to.have.been.calledWith(
+        expect(files).toEqual(mockMatches)
+        expect(FileDataSourceModule.matchGlobs).toHaveBeenCalledWith(
           ['project/**.cy.js'],
           { ...defaultGlobbyOptions, cwd: '/' },
         )
@@ -250,8 +245,8 @@ describe('FileDataSource', () => {
           '/my/project/cypress/e2e/**.cy.js',
         )
 
-        expect(files).to.eq(mockMatches)
-        expect(matchGlobsStub).to.have.been.calledWith(
+        expect(files).toEqual(mockMatches)
+        expect(FileDataSourceModule.matchGlobs).toHaveBeenCalledWith(
           ['cypress/e2e/**.cy.js'],
           { ...defaultGlobbyOptions, cwd: '/my/project' },
         )
@@ -263,8 +258,8 @@ describe('FileDataSource', () => {
           '/my/project/cypress/my/project/e2e/**.cy.js',
         )
 
-        expect(files).to.eq(mockMatches)
-        expect(matchGlobsStub).to.have.been.calledWith(
+        expect(files).toEqual(mockMatches)
+        expect(FileDataSourceModule.matchGlobs).toHaveBeenCalledWith(
           ['cypress/my/project/e2e/**.cy.js'],
           { ...defaultGlobbyOptions, cwd: '/my/project' },
         )
@@ -277,8 +272,8 @@ describe('FileDataSource', () => {
           { ignore: ['ignore/foo.*', '/ignore/bar.*'] },
         )
 
-        expect(files).to.eq(mockMatches)
-        expect(matchGlobsStub).to.have.been.calledWith(
+        expect(files).toEqual(mockMatches)
+        expect(FileDataSourceModule.matchGlobs).toHaveBeenCalledWith(
           ['cypress/e2e/**.cy.js'],
           {
             ...defaultGlobbyOptions,
@@ -294,8 +289,8 @@ describe('FileDataSource', () => {
           '/cypress/e2e/**.cy.js',
         )
 
-        expect(files).to.eq(mockMatches)
-        expect(matchGlobsStub).to.have.been.calledWith(
+        expect(files).toEqual(mockMatches)
+        expect(FileDataSourceModule.matchGlobs).toHaveBeenCalledWith(
           ['/cypress/e2e/**.cy.js'],
           {
             ...defaultGlobbyOptions,
@@ -314,8 +309,8 @@ describe('FileDataSource', () => {
           ],
         )
 
-        expect(files).to.eq(mockMatches)
-        expect(matchGlobsStub).to.have.been.calledWith(
+        expect(files).toEqual(mockMatches)
+        expect(FileDataSourceModule.matchGlobs).toHaveBeenCalledWith(
           [
             'node_modules/cypress/e2e/**.cy.js',
             'cypress/e2e/**.cy.js',
@@ -335,8 +330,8 @@ describe('FileDataSource', () => {
           { ignore: ['ignore/foo.*', '/ignore/bar.*'] },
         )
 
-        expect(files).to.eq(mockMatches)
-        expect(matchGlobsStub).to.have.been.calledWith(
+        expect(files).toEqual(mockMatches)
+        expect(FileDataSourceModule.matchGlobs).toHaveBeenCalledWith(
           ['/node_modules/test_package/e2e/**.cy.js'],
           {
             ...defaultGlobbyOptions,
@@ -353,8 +348,8 @@ describe('FileDataSource', () => {
           { absolute: false, objectMode: true },
         )
 
-        expect(files).to.eq(mockMatches)
-        expect(matchGlobsStub).to.have.been.calledWith(
+        expect(files).toEqual(mockMatches)
+        expect(FileDataSourceModule.matchGlobs).toHaveBeenCalledWith(
           ['cypress/e2e/**.cy.js'],
           {
             ...defaultGlobbyOptions,
@@ -366,8 +361,13 @@ describe('FileDataSource', () => {
       })
 
       it('should retry search with `suppressErrors` if non-suppressed attempt fails', async () => {
-        matchGlobsStub.onFirstCall().rejects(new Error('mocked filesystem error'))
-        matchGlobsStub.onSecondCall().resolves(mockMatches)
+        jest.spyOn(FileDataSourceModule, 'matchGlobs')
+        .mockReset()
+        .mockImplementationOnce(() => {
+          return Promise.reject(new Error('mocked filesystem error'))
+        }).mockImplementationOnce(() => {
+          return Promise.resolve(mockMatches)
+        })
 
         const files = await fileDataSource.getFilesByGlob(
           '/',
@@ -375,14 +375,18 @@ describe('FileDataSource', () => {
           { absolute: false, objectMode: true },
         )
 
-        expect(files).to.eq(mockMatches)
-        expect(matchGlobsStub).to.have.callCount(2)
-        expect(matchGlobsStub.getCall(0).args[1].suppressErrors).to.be.undefined
-        expect(matchGlobsStub.getCall(1).args[1].suppressErrors).to.equal(true)
+        expect(files).toEqual(mockMatches)
+        expect(FileDataSourceModule.matchGlobs).toHaveBeenCalledTimes(2)
+        expect(FileDataSourceModule.matchGlobs).toHaveBeenNthCalledWith(1, expect.any(Array), expect.not.objectContaining({ suppressErrors: expect.any(Boolean) }))
+        expect(FileDataSourceModule.matchGlobs).toHaveBeenNthCalledWith(2, expect.any(Array), expect.objectContaining({ suppressErrors: true }))
       })
 
       it('should return empty array if retry with suppression fails', async () => {
-        matchGlobsStub.rejects(new Error('mocked filesystem error'))
+        jest.spyOn(FileDataSourceModule, 'matchGlobs')
+        .mockReset()
+        .mockImplementation(() => {
+          return Promise.reject(new Error('mocked filesystem error'))
+        })
 
         const files = await fileDataSource.getFilesByGlob(
           '/',
@@ -390,8 +394,8 @@ describe('FileDataSource', () => {
           { absolute: false, objectMode: true },
         )
 
-        expect(files).to.eql([])
-        expect(matchGlobsStub).to.have.callCount(2)
+        expect(files).toEqual([])
+        expect(FileDataSourceModule.matchGlobs).toHaveBeenCalledTimes(2)
       })
     })
   })
