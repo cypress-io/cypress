@@ -7,10 +7,7 @@ version: 2.1
 workflows:
     setup-workflow:
         jobs:
-            - should-run-ci
             - pack-workflows:
-                requires:
-                  - should-run-ci: success
             - launch-primary-workflow:
                 requires:
                   - pack-workflows
@@ -91,7 +88,7 @@ commands:
           paths:
             - .circleci/packed
 
-  cancel-unnecessary-ci:
+  cancel-draft-prs:
     steps:
       - when:
           condition:
@@ -107,7 +104,7 @@ commands:
                 name: Cancel CI
                 command: |
                   cancel_build() {
-                    exit 1
+                    circleci agent step halt
                   }
 
                   if [ ! -z "${CIRCLE_PULL_REQUEST##*/}" ]; then
@@ -126,24 +123,12 @@ commands:
                   cancel_build
 
 jobs:
-  should-run-ci:
-    docker:
-        - image: cimg/base:stable
-    resource_class: small
-    steps:
-      # it needs at least one unconditional step
-      - run:
-          name: Checking if CI should run
-          command: |
-            echo "Checking if CI should run."
-            
-      - cancel-unnecessary-ci
-
   pack-workflows:
     docker:
         - image: cimg/base:stable
     resource_class: small
     steps:
+        - cancel-draft-prs
         - checkout
         - restore-src-checksum-cache
         - persist-to-workspace-and-exit-early
@@ -156,6 +141,7 @@ jobs:
           - image: cimg/base:stable
       resource_class: small
       steps:
+          - cancel-draft-prs
           - attach_workspace:
               at: .
           - run:
