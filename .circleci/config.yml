@@ -107,14 +107,7 @@ commands:
                 name: Cancel CI
                 command: |
                   cancel_build() {
-                    if [ ! -z "${CIRCLE_TOKEN}" ]; then
-                      echo "No CIRCLE_TOKEN set. Cannot cancel job."
-                      exit 1
-                    fi
-                    curl --request POST \
-                      --url https://circleci.com/api/v2/jobs/${CIRCLE_JOB}/cancel \
-                      --header "Circle-Token: ${CIRCLE_TOKEN}"
-                    exit 0
+                    exit 1
                   }
 
                   if [ ! -z "${CIRCLE_PULL_REQUEST##*/}" ]; then
