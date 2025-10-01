@@ -1,21 +1,24 @@
 // necessary to have mocha types working correctly
-import { jest } from '@jest/globals'
+// NOTE: this is the sinon version of @packages/data-context/test/unit/helper.ts and will eventually be replaced with the a different version
+
+import 'mocha'
 import path from 'path'
 import fs from 'fs-extra'
 import { Response } from 'cross-fetch'
 import Fixtures, { fixtureDirs, scaffoldProject, removeProject } from '@tooling/system-tests'
-import { DataContext, DataContextConfig } from '../../src'
-import { graphqlSchema } from '../../graphql/schema'
-import { remoteSchemaWrapped as schemaCloud } from '../../graphql/stitching/remoteSchemaWrapped'
-import type { BrowserApiShape } from '../../src/sources/BrowserDataSource'
-import type { AppApiShape, AuthApiShape, ElectronApiShape, LocalSettingsApiShape, ProjectApiShape, CohortsApiShape } from '../../src/actions'
+import { DataContext, DataContextConfig } from '@packages/data-context/src'
+import { graphqlSchema } from '@packages/data-context/graphql/schema'
+import { remoteSchemaWrapped as schemaCloud } from '@packages/data-context/graphql/stitching/remoteSchemaWrapped'
+import type { BrowserApiShape } from '@packages/data-context/src/sources/BrowserDataSource'
+import type { AppApiShape, AuthApiShape, ElectronApiShape, LocalSettingsApiShape, ProjectApiShape, CohortsApiShape } from '@packages/data-context/src/actions'
+import sinon from 'sinon'
 import { execute, parse } from 'graphql'
 import { getOperationName } from '@urql/core'
-import { CloudQuery } from '../../test/graphql/stubCloudTypes'
-import { remoteSchema } from '../../graphql/stitching/remoteSchema'
+import { CloudQuery } from '@packages/data-context/test/graphql/stubCloudTypes'
+import { remoteSchema } from '@packages/data-context/graphql/stitching/remoteSchema'
 import type { OpenModeOptions, RunModeOptions } from '@packages/types'
 import { GET_MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
-import type { RelevantRunInfo } from '../../src/gen/graphcache-config.gen'
+import { RelevantRunInfo } from '@packages/data-context/src/gen/graphcache-config.gen'
 
 type SystemTestProject = typeof fixtureDirs[number]
 type SystemTestProjectPath<T extends SystemTestProject> = `${string}/system-tests/projects/${T}`
@@ -46,41 +49,38 @@ export function createTestDataContext (mode: DataContextConfig['mode'] = 'run', 
     modeOptions,
     appApi: {} as AppApiShape,
     localSettingsApi: {
-      getPreferences: jest.fn().mockResolvedValue({
+      getPreferences: sinon.stub().resolves({
         majorVersionWelcomeDismissed: { [GET_MAJOR_VERSION_FOR_CONTENT()]: 123456 },
         notifyWhenRunCompletes: ['failed'],
       }),
-      getAvailableEditors: jest.fn(),
-      setPreferences: jest.fn(),
+      getAvailableEditors: sinon.stub(),
+      setPreferences: sinon.stub(),
     } as unknown as LocalSettingsApiShape,
     authApi: {
-      logIn: jest.fn().mockImplementation(() => {
-        throw new Error('not stubbed')
-      }),
-      resetAuthState: jest.fn(),
+      logIn: sinon.stub().throws('not stubbed'),
+      resetAuthState: sinon.stub(),
     } as unknown as AuthApiShape,
     projectApi: {
-      closeActiveProject: jest.fn(),
-      insertProjectToCache: jest.fn().mockResolvedValue(undefined),
-      getProjectRootsFromCache: jest.fn().mockResolvedValue([]),
-      runSpec: jest.fn(),
-      routeToDebug: jest.fn(),
+      closeActiveProject: sinon.stub(),
+      insertProjectToCache: sinon.stub().resolves(),
+      getProjectRootsFromCache: sinon.stub().resolves([]),
+      runSpec: sinon.stub(),
+      routeToDebug: sinon.stub(),
     } as unknown as ProjectApiShape,
     electronApi: {
-      isMainWindowFocused: jest.fn().mockReturnValue(false),
-      focusMainWindow: jest.fn(),
-      copyTextToClipboard: (text: string) => {},
+      isMainWindowFocused: sinon.stub().returns(false),
+      focusMainWindow: sinon.stub(),
+      copyTextToClipboard: (text) => {},
     } as unknown as ElectronApiShape,
     browserApi: {
-      ensureAndGetByNameOrPath: jest.fn(),
-      focusActiveBrowserWindow: jest.fn(),
-      getBrowsers: jest.fn().mockResolvedValue([]),
+      focusActiveBrowserWindow: sinon.stub(),
+      getBrowsers: sinon.stub().resolves([]),
     } as unknown as BrowserApiShape,
     cohortsApi: {
-      getCohorts: jest.fn().mockResolvedValue(undefined),
-      getCohort: jest.fn().mockResolvedValue(undefined),
-      insertCohort: jest.fn(),
-      determineCohort: jest.fn().mockResolvedValue(undefined),
+      getCohorts: sinon.stub().resolves(),
+      getCohort: sinon.stub().resolves(),
+      insertCohort: sinon.stub(),
+      determineCohort: sinon.stub().resolves(),
     } as unknown as CohortsApiShape,
   })
 
@@ -117,7 +117,6 @@ export function createTestDataContext (mode: DataContextConfig['mode'] = 'run', 
 export function createRelevantRun (runNumber: number): RelevantRunInfo {
   return {
     runNumber,
-    // @ts-expect-error - ciBuildNumber is not in the type
     ciBuildNumber: '123',
     branch: 'feature/branch',
     organizationId: 'org-id',
