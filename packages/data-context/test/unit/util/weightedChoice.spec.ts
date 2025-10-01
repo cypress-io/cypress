@@ -1,9 +1,9 @@
-import { expect } from 'chai'
+import { describe, expect, it } from '@jest/globals'
 
 import { WEIGHTED, WEIGHTED_EVEN } from '../../../src/util/weightedChoice'
 
 describe('weightedChoice', () => {
-  context('WeightedAlgorithm', () => {
+  describe('WeightedAlgorithm', () => {
     it('should error if invalid arguments', () => {
       const weights = [25, 75, 45]
       const options = ['A', 'B']
@@ -12,7 +12,7 @@ describe('weightedChoice', () => {
         WEIGHTED(weights).pick(options)
       }
 
-      expect(func).to.throw()
+      expect(func).toThrow()
     })
 
     it('should error if weights is empty', () => {
@@ -23,7 +23,7 @@ describe('weightedChoice', () => {
         WEIGHTED(weights).pick(options)
       }
 
-      expect(func).to.throw()
+      expect(func).toThrow()
     })
 
     it('should error if options is empty', () => {
@@ -34,7 +34,7 @@ describe('weightedChoice', () => {
         WEIGHTED(weights).pick(options)
       }
 
-      expect(func).to.throw()
+      expect(func).toThrow()
     })
 
     it('should return an option', () => {
@@ -42,20 +42,20 @@ describe('weightedChoice', () => {
       const options = ['A', 'B']
       const selected = WEIGHTED(weights).pick(options)
 
-      expect(options.includes(selected)).to.be.true
+      expect(options.includes(selected)).toBe(true)
     })
   })
 
-  context('WEIGHTED_EVEN', () => {
+  describe('WEIGHTED_EVEN', () => {
     it('should return an option', () => {
       const options = ['A', 'B']
       const selected = WEIGHTED_EVEN(options).pick(options)
 
-      expect(options.includes(selected)).to.be.true
+      expect(options.includes(selected)).toBe(true)
     })
   })
 
-  context('randomness', () => {
+  describe('randomness', () => {
     it('should return values close to supplied weights', () => {
       const results = {}
       const options = ['A', 'B']
@@ -68,7 +68,7 @@ describe('weightedChoice', () => {
       }
 
       Object.keys(results).forEach((key) => {
-        expect(Math.round(results[key] / 100)).to.equal(5)
+        expect(Math.round(results[key] / 100)).toEqual(5)
       })
     })
   })

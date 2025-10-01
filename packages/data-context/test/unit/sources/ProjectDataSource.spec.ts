@@ -1,22 +1,17 @@
-import chai from 'chai'
+import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
 import os from 'os'
 import fs from 'fs-extra'
 
 import { matchedSpecs, transformSpec, SpecWithRelativeRoot, getLongestCommonPrefixFromPaths, getPathFromSpecPattern } from '../../../src/sources'
 import path from 'path'
-import sinon from 'sinon'
 import chokidar from 'chokidar'
 import _ from 'lodash'
-import sinonChai from 'sinon-chai'
 import { FoundSpec } from '@packages/types'
 import { DataContext } from '../../../src'
 import type { FindSpecs } from '../../../src/actions'
 import { createTestDataContext } from '../helper'
 import { defaultExcludeSpecPattern, defaultSpecPattern } from '@packages/config'
 import FixturesHelper from '@tooling/system-tests'
-
-chai.use(sinonChai)
-const { expect } = chai
 
 function delay (ms) {
   return new Promise((resolve) => {
@@ -25,7 +20,7 @@ function delay (ms) {
 }
 
 describe('matchedSpecs', () => {
-  context('got a single spec pattern from --spec via cli', () => {
+  describe('got a single spec pattern from --spec via cli', () => {
     it('returns spec name only', () => {
       const result = matchedSpecs({
         projectRoot: '/var/folders/T/cy-projects/e2e',
@@ -48,11 +43,11 @@ describe('matchedSpecs', () => {
         specType: 'integration',
       }]
 
-      expect(result).to.eql(actual)
+      expect(result).toEqual(actual)
     })
   })
 
-  context('got a multi spec pattern from --spec via cli', () => {
+  describe('got a multi spec pattern from --spec via cli', () => {
     it('removes all common path', () => {
       const result = matchedSpecs({
         projectRoot: '/var/folders/T/cy-projects/e2e',
@@ -71,14 +66,14 @@ describe('matchedSpecs', () => {
         ],
       })
 
-      expect(result[0].relativeToCommonRoot).to.eq('simple_passing_spec.js')
-      expect(result[1].relativeToCommonRoot).to.eq('simple_hooks_spec.js')
-      expect(result[2].relativeToCommonRoot).to.eq('simple_failing_spec.js')
-      expect(result[3].relativeToCommonRoot).to.eq('simple_failing_hook_spec.js')
+      expect(result[0].relativeToCommonRoot).toEqual('simple_passing_spec.js')
+      expect(result[1].relativeToCommonRoot).toEqual('simple_hooks_spec.js')
+      expect(result[2].relativeToCommonRoot).toEqual('simple_failing_spec.js')
+      expect(result[3].relativeToCommonRoot).toEqual('simple_failing_hook_spec.js')
     })
   })
 
-  context('generic glob from config', () => {
+  describe('generic glob from config', () => {
     it('infers common path from glob and returns spec name', () => {
       const result = matchedSpecs({
         projectRoot: '/Users/lachlan/code/work/cypress6/packages/app',
@@ -90,12 +85,12 @@ describe('matchedSpecs', () => {
         specPattern: 'cypress/e2e/integration/**/*.spec.ts',
       })
 
-      expect(result[0].relativeToCommonRoot).to.eq('files.spec.ts')
-      expect(result[1].relativeToCommonRoot).to.eq('index.spec.ts')
+      expect(result[0].relativeToCommonRoot).toEqual('files.spec.ts')
+      expect(result[1].relativeToCommonRoot).toEqual('index.spec.ts')
     })
   })
 
-  context('deeply nested test', () => {
+  describe('deeply nested test', () => {
     it('removes superfluous leading directories', () => {
       const result = matchedSpecs({
         projectRoot: '/var/folders/y5/T/cy-projects/e2e',
@@ -106,7 +101,7 @@ describe('matchedSpecs', () => {
         specPattern: '/var/folders/y5/T/cy-projects/e2e/cypress/integration/nested-1/nested-2/screenshot_nested_file_spec.js',
       })
 
-      expect(result[0].relativeToCommonRoot).to.eq('screenshot_nested_file_spec.js')
+      expect(result[0].relativeToCommonRoot).toEqual('screenshot_nested_file_spec.js')
     })
   })
 })
@@ -134,7 +129,7 @@ describe('transformSpec', () => {
       relativeToCommonRoot: 'C:/Windows/Project/src/spec.cy.js',
     }
 
-    expect(result).to.eql(actual)
+    expect(result).toEqual(actual)
   })
 })
 
@@ -176,7 +171,7 @@ describe('findSpecs', () => {
       additionalIgnorePattern: [],
     })
 
-    expect(specs).to.have.length(3)
+    expect(specs).toHaveLength(3)
   })
 
   it('find all the *.cy.{ts,js} excluding the e2e', async () => {
@@ -189,7 +184,7 @@ describe('findSpecs', () => {
       additionalIgnorePattern: ['e2e/*.{spec,cy}.{ts,js}'],
     })
 
-    expect(specs).to.have.length(2)
+    expect(specs).toHaveLength(2)
   })
 
   it('find all the *.{cy,spec}.{ts,js} excluding the e2e', async () => {
@@ -202,7 +197,7 @@ describe('findSpecs', () => {
       additionalIgnorePattern: ['e2e/*.{spec,cy}.{ts,js}'],
     })
 
-    expect(specs).to.have.length(3)
+    expect(specs).toHaveLength(3)
   })
 
   it('find all the e2e specs', async () => {
@@ -215,7 +210,7 @@ describe('findSpecs', () => {
       additionalIgnorePattern: [],
     })
 
-    expect(specs).to.have.length(3)
+    expect(specs).toHaveLength(3)
   })
 
   it('ignores node_modules if excludeSpecPattern is empty array', async () => {
@@ -228,7 +223,7 @@ describe('findSpecs', () => {
       additionalIgnorePattern: [],
     })
 
-    expect(specs).to.have.length(6)
+    expect(specs).toHaveLength(6)
   })
 
   it('ignores e2e tests if additionalIgnorePattern is set', async () => {
@@ -241,7 +236,7 @@ describe('findSpecs', () => {
       excludeSpecPattern: [],
     })
 
-    expect(specs).to.have.length(3)
+    expect(specs).toHaveLength(3)
   })
 
   it('respects excludeSpecPattern', async () => {
@@ -254,7 +249,7 @@ describe('findSpecs', () => {
       excludeSpecPattern: ['**/*'],
     })
 
-    expect(specs).to.have.length(0)
+    expect(specs).toHaveLength(0)
   })
 })
 
@@ -265,7 +260,7 @@ describe('getLongestCommonPrefixFromPaths', () => {
       'cypress/component/bar/meta-component-test.cy.ts',
     ])
 
-    expect(lcp).to.equal('cypress/component')
+    expect(lcp).toEqual('cypress/component')
   })
 
   it('with src and cypress', () => {
@@ -275,7 +270,7 @@ describe('getLongestCommonPrefixFromPaths', () => {
       'src/frontend/MyComponent.cy.ts',
     ])
 
-    expect(lcp).to.equal('')
+    expect(lcp).toEqual('')
   })
 
   it('with src', () => {
@@ -284,7 +279,7 @@ describe('getLongestCommonPrefixFromPaths', () => {
       'src/MyComponent.cy.ts',
     ])
 
-    expect(lcp).to.equal('src')
+    expect(lcp).toEqual('src')
   })
 
   it('with 1 path', () => {
@@ -292,133 +287,133 @@ describe('getLongestCommonPrefixFromPaths', () => {
       'src/frontend/MyComponent.cy.ts',
     ])
 
-    expect(lcp).to.equal('src/frontend')
+    expect(lcp).toEqual('src/frontend')
   })
 })
 
 describe('getPathFromSpecPattern', () => {
-  context('dirname', () => {
+  describe('dirname', () => {
     it('returns pattern without change if it is do not a glob', () => {
       const specPattern = 'cypress/e2e/foo.spec.ts'
       const defaultFileName = getPathFromSpecPattern({ specPattern, testingType: 'e2e' })
 
-      expect(defaultFileName).to.eq(specPattern)
+      expect(defaultFileName).toEqual(specPattern)
     })
 
     it('remove ** from glob if it is not in the beginning', () => {
       const defaultFileName = getPathFromSpecPattern({ specPattern: 'cypress/**/foo.spec.ts', testingType: 'e2e' })
 
-      expect(defaultFileName).to.eq('cypress/foo.spec.ts')
+      expect(defaultFileName).toEqual('cypress/foo.spec.ts')
     })
 
     it('replace ** for cypress if it starts with **', () => {
       const defaultFileName = getPathFromSpecPattern({ specPattern: '**/e2e/foo.spec.ts', testingType: 'e2e' })
 
-      expect(defaultFileName).to.eq('cypress/e2e/foo.spec.ts')
+      expect(defaultFileName).toEqual('cypress/e2e/foo.spec.ts')
     })
 
     it('replace ** for cypress if it starts with ** and omit extra **', () => {
       const defaultFileName = getPathFromSpecPattern({ specPattern: '**/**/foo.spec.ts', testingType: 'e2e' })
 
-      expect(defaultFileName).to.eq('cypress/foo.spec.ts')
+      expect(defaultFileName).toEqual('cypress/foo.spec.ts')
     })
 
     it('selects first option if there are multiples possibilities of values', () => {
       const defaultFileName = getPathFromSpecPattern({ specPattern: '{cypress,tests}/{integration,e2e}/foo.spec.ts', testingType: 'e2e' })
 
-      expect(defaultFileName).to.eq('cypress/integration/foo.spec.ts')
+      expect(defaultFileName).toEqual('cypress/integration/foo.spec.ts')
     })
   })
 
-  context('filename', () => {
+  describe('filename', () => {
     it('replace * for filename', () => {
       const defaultFileName = getPathFromSpecPattern({ specPattern: 'cypress/e2e/*.spec.ts', testingType: 'e2e' })
 
-      expect(defaultFileName).to.eq('cypress/e2e/spec.spec.ts')
+      expect(defaultFileName).toEqual('cypress/e2e/spec.spec.ts')
     })
 
     it('selects first option if there are multiples possibilities of values', () => {
       const defaultFileName = getPathFromSpecPattern({ specPattern: 'cypress/e2e/{foo,filename}.spec.ts', testingType: 'e2e' })
 
-      expect(defaultFileName).to.eq('cypress/e2e/foo.spec.ts')
+      expect(defaultFileName).toEqual('cypress/e2e/foo.spec.ts')
     })
   })
 
-  context('test extension', () => {
+  describe('test extension', () => {
     it('replace * for filename', () => {
       const defaultFileName = getPathFromSpecPattern({ specPattern: 'cypress/e2e/filename.*.ts', testingType: 'e2e' })
 
-      expect(defaultFileName).to.eq('cypress/e2e/filename.cy.ts')
+      expect(defaultFileName).toEqual('cypress/e2e/filename.cy.ts')
     })
 
     it('selects first option if there are multiples possibilities of values', () => {
       const defaultFileName = getPathFromSpecPattern({ specPattern: 'cypress/e2e/filename.{spec,cy}.ts', testingType: 'e2e' })
 
-      expect(defaultFileName).to.eq('cypress/e2e/filename.spec.ts')
+      expect(defaultFileName).toEqual('cypress/e2e/filename.spec.ts')
     })
   })
 
-  context('lang extension', () => {
+  describe('lang extension', () => {
     it('if project use TS, set TS as extension if it exists in the glob', () => {
       const defaultFileName = getPathFromSpecPattern({ specPattern: 'cypress/e2e/filename.cy.ts', testingType: 'e2e', fileExtensionToUse: 'ts' })
 
-      expect(defaultFileName).to.eq('cypress/e2e/filename.cy.ts')
+      expect(defaultFileName).toEqual('cypress/e2e/filename.cy.ts')
     })
 
     it('if project use TS, set TS as extension if it exists in the options of extensions', () => {
       const defaultFileName = getPathFromSpecPattern({ specPattern: 'cypress/e2e/filename.cy.{js,ts,tsx}', testingType: 'e2e', fileExtensionToUse: 'ts' })
 
-      expect(defaultFileName).to.eq('cypress/e2e/filename.cy.ts')
+      expect(defaultFileName).toEqual('cypress/e2e/filename.cy.ts')
     })
 
     it('if project use TS, do not set TS as extension if it do not exists in the options of extensions', () => {
       const defaultFileName = getPathFromSpecPattern({ specPattern: 'cypress/e2e/filename.cy.{js,jsx}', testingType: 'e2e', fileExtensionToUse: 'ts' })
 
-      expect(defaultFileName).to.eq('cypress/e2e/filename.cy.js')
+      expect(defaultFileName).toEqual('cypress/e2e/filename.cy.js')
     })
 
     it('selects first option if there are multiples possibilities of values', () => {
       const defaultFileName = getPathFromSpecPattern({ specPattern: 'cypress/e2e/filename.cy.{ts,js}', testingType: 'e2e' })
 
-      expect(defaultFileName).to.eq('cypress/e2e/filename.cy.ts')
+      expect(defaultFileName).toEqual('cypress/e2e/filename.cy.ts')
     })
   })
 
-  context('extra cases', () => {
+  describe('extra cases', () => {
     it('creates specName for tests/*.js', () => {
       const defaultFileName = getPathFromSpecPattern({ specPattern: 'tests/*.js', testingType: 'e2e' })
 
-      expect(defaultFileName).to.eq('tests/spec.js')
+      expect(defaultFileName).toEqual('tests/spec.js')
     })
 
     it('creates specName for src/*-test.js', () => {
       const defaultFileName = getPathFromSpecPattern({ specPattern: 'src/*-test.js', testingType: 'e2e' })
 
-      expect(defaultFileName).to.eq('src/spec-test.js')
+      expect(defaultFileName).toEqual('src/spec-test.js')
     })
 
     it('creates specName for src/*.foo.bar.js', () => {
       const defaultFileName = getPathFromSpecPattern({ specPattern: 'src/*.foo.bar.js', testingType: 'e2e' })
 
-      expect(defaultFileName).to.eq('src/spec.foo.bar.js')
+      expect(defaultFileName).toEqual('src/spec.foo.bar.js')
     })
 
     it('creates specName for src/prefix.*.test.js', () => {
       const defaultFileName = getPathFromSpecPattern({ specPattern: 'src/prefix.*.test.js', testingType: 'e2e' })
 
-      expect(defaultFileName).to.eq('src/prefix.cy.test.js')
+      expect(defaultFileName).toEqual('src/prefix.cy.test.js')
     })
 
     it('creates specName for src/*/*.test.js', () => {
       const defaultFileName = getPathFromSpecPattern({ specPattern: 'src/*/*.test.js', testingType: 'e2e' })
 
-      expect(defaultFileName).to.eq('src/e2e/spec.test.js')
+      expect(defaultFileName).toEqual('src/e2e/spec.test.js')
     })
 
     it('creates specName for src-*/**/*.test.js', () => {
       const defaultFileName = getPathFromSpecPattern({ specPattern: 'src-*/**/*.test.js', testingType: 'e2e' })
 
-      expect(defaultFileName).to.eq('src-e2e/spec.test.js')
+      expect(defaultFileName).toEqual('src-e2e/spec.test.js')
     })
 
     it('creates specName for src/*.test.(js|jsx)', () => {
@@ -426,7 +421,7 @@ describe('getPathFromSpecPattern', () => {
 
       const possiblesFileNames = ['src/ComponentName.test.jsx', 'src/ComponentName.test.js']
 
-      expect(possiblesFileNames.includes(defaultFileName)).to.eq(true)
+      expect(possiblesFileNames.includes(defaultFileName)).toEqual(true)
     })
 
     it('creates specName for (src|components)/**/*.test.js', () => {
@@ -434,19 +429,19 @@ describe('getPathFromSpecPattern', () => {
 
       const possiblesFileNames = ['src/ComponentName.test.js', 'components/ComponentName.test.js']
 
-      expect(possiblesFileNames.includes(defaultFileName)).to.eq(true)
+      expect(possiblesFileNames.includes(defaultFileName)).toEqual(true)
     })
 
     it('creates specName for e2e/**/*.cy.{js,jsx,ts,tsx}', () => {
       const defaultFileName = getPathFromSpecPattern({ specPattern: 'e2e/**/*.cy.{js,jsx,ts,tsx}', testingType: 'e2e' })
 
-      expect(defaultFileName).to.eq('e2e/spec.cy.js')
+      expect(defaultFileName).toEqual('e2e/spec.cy.js')
     })
 
     it('creates specName for cypress/component-tests/**/*', () => {
       const defaultFileName = getPathFromSpecPattern({ specPattern: 'cypress/component-tests/**/*', testingType: 'component', fileExtensionToUse: 'ts' })
 
-      expect(defaultFileName).to.eq('cypress/component-tests/ComponentName.cy.ts')
+      expect(defaultFileName).toEqual('cypress/component-tests/ComponentName.cy.ts')
     })
   })
 })
@@ -454,18 +449,17 @@ describe('getPathFromSpecPattern', () => {
 describe('_makeSpecWatcher', () => {
   let ctx: DataContext
   let specWatcher: chokidar.FSWatcher
+  let specWatcherPath: string
 
   beforeEach(async function () {
-    this.timeout(20000) // fixture cleanup can take awhile
     FixturesHelper.remove()
 
-    this.specWatcherPath = await FixturesHelper.scaffoldProject('spec-watcher')
+    specWatcherPath = await FixturesHelper.scaffoldProject('spec-watcher')
 
-    ctx = createTestDataContext('open', { projectRoot: this.specWatcherPath })
-  })
+    ctx = createTestDataContext('open', { projectRoot: specWatcherPath })
+  }, 20000)
 
   afterEach(async () => {
-    sinon.restore()
     await specWatcher.close()
     ctx.destroy()
   })
@@ -488,7 +482,7 @@ describe('_makeSpecWatcher', () => {
 
   it('watch for changes on files based on the specPattern', async function () {
     specWatcher = ctx.project._makeSpecWatcher({
-      projectRoot: this.specWatcherPath,
+      projectRoot: specWatcherPath,
       specPattern: ['**/*.{cy,spec}.{ts,js}'],
       excludeSpecPattern: ['**/ignore.spec.ts'],
       additionalIgnorePattern: ['additional.ignore.cy.js'],
@@ -509,18 +503,18 @@ describe('_makeSpecWatcher', () => {
       await delay(10)
     }
 
-    expect(Array.from(allFiles).sort()).to.eql([
+    expect(Array.from(allFiles).sort()).toEqual([
       SPEC_FILE1,
       SPEC_FILE2,
       SPEC_FILE3,
     ])
 
-    expect(Array.from(allFiles)).to.not.include(SUPPORT_FILE)
+    expect(Array.from(allFiles)).not.toContain(SUPPORT_FILE)
   })
 
   it('watch for changes on files with multiple specPatterns', async function () {
     specWatcher = ctx.project._makeSpecWatcher({
-      projectRoot: this.specWatcherPath,
+      projectRoot: specWatcherPath,
       specPattern: ['**/*.{cy,spec}.{ts,js}', '**/abc.ts'],
       excludeSpecPattern: ['**/ignore.spec.ts'],
       additionalIgnorePattern: ['additional.ignore.cy.js'],
@@ -541,19 +535,19 @@ describe('_makeSpecWatcher', () => {
       await delay(10)
     }
 
-    expect(Array.from(allFiles).sort()).to.eql([
+    expect(Array.from(allFiles).sort()).toEqual([
       SPEC_FILE1,
       SPEC_FILE_ABC,
       SPEC_FILE2,
       SPEC_FILE3,
     ])
 
-    expect(Array.from(allFiles)).to.not.include(SUPPORT_FILE)
+    expect(Array.from(allFiles)).not.toContain(SUPPORT_FILE)
   })
 
   it('do not throw if file/folder is deleted while ignoring files', async function () {
     specWatcher = ctx.project._makeSpecWatcher({
-      projectRoot: this.specWatcherPath,
+      projectRoot: specWatcherPath,
       specPattern: ['**/*.{cy,spec}.{ts,js}', '**/abc.ts'],
       excludeSpecPattern: ['**/ignore.spec.ts'],
       additionalIgnorePattern: ['additional.ignore.cy.js'],
@@ -571,14 +565,14 @@ describe('_makeSpecWatcher', () => {
     await ctx.actions.file.removeFileInProject(SPEC_FILE1)
     await delay(1000)
 
-    expect(Array.from(allFiles).sort()).to.eql([
+    expect(Array.from(allFiles).sort()).toEqual([
       SPEC_FILE_ABC,
       SPEC_FILE2,
       SPEC_FILE3,
     ])
 
-    expect(Array.from(allFiles)).to.not.include(SPEC_FILE1)
-    expect(Array.from(allFiles)).to.not.include(SUPPORT_FILE)
+    expect(Array.from(allFiles)).not.toContain(SPEC_FILE1)
+    expect(Array.from(allFiles)).not.toContain(SUPPORT_FILE)
   })
 })
 
@@ -586,10 +580,6 @@ describe('startSpecWatcher', () => {
   const projectRoot = 'tmp'
 
   let ctx: DataContext
-
-  afterEach(async () => {
-    sinon.restore()
-  })
 
   describe('run mode', () => {
     beforeEach(async () => {
@@ -599,9 +589,9 @@ describe('startSpecWatcher', () => {
     })
 
     it('early return specWatcher', () => {
-      const onStub = sinon.stub()
+      const onStub = jest.fn()
 
-      sinon.stub(chokidar, 'watch').callsFake(() => {
+      jest.spyOn(chokidar, 'watch').mockImplementation(() => {
         const mockWatcher = {
           on: onStub,
           close: () => ({ catch: () => {} }),
@@ -612,7 +602,7 @@ describe('startSpecWatcher', () => {
 
       let handleFsChange
 
-      sinon.stub(_, 'debounce').callsFake((funcToDebounce) => {
+      jest.spyOn(_, 'debounce').mockImplementation((funcToDebounce) => {
         handleFsChange = (() => funcToDebounce())
 
         return handleFsChange as _.DebouncedFunc<any>
@@ -627,11 +617,11 @@ describe('startSpecWatcher', () => {
         additionalIgnorePattern: ['additional.ignore.cy.js'],
       })
 
-      expect(_.debounce).to.have.not.been.called
+      expect(_.debounce).not.toHaveBeenCalled()
 
-      expect(chokidar.watch).to.have.not.been.called
+      expect(chokidar.watch).not.toHaveBeenCalled()
 
-      expect(onStub).to.have.not.been.called
+      expect(onStub).not.toHaveBeenCalled()
     })
   })
 
@@ -662,9 +652,9 @@ describe('startSpecWatcher', () => {
     })
 
     it('creates file watcher based on given config properties', async () => {
-      const onStub = sinon.stub()
+      const onStub = jest.fn()
 
-      sinon.stub(chokidar, 'watch').callsFake(() => {
+      jest.spyOn(chokidar, 'watch').mockImplementation(() => {
         const mockWatcher = {
           on: onStub,
           close: () => ({ catch: () => {} }),
@@ -675,7 +665,7 @@ describe('startSpecWatcher', () => {
 
       let handleFsChange
 
-      sinon.stub(_, 'debounce').callsFake((funcToDebounce) => {
+      jest.spyOn(_, 'debounce').mockImplementation((funcToDebounce) => {
         handleFsChange = (() => funcToDebounce())
 
         return handleFsChange as _.DebouncedFunc<any>
@@ -690,16 +680,16 @@ describe('startSpecWatcher', () => {
         additionalIgnorePattern: ['additional.ignore.cy.js'],
       })
 
-      expect(_.debounce).to.have.been.calledWith(sinon.match.func, 250)
+      expect(_.debounce).toHaveBeenCalledWith(expect.any(Function), 250)
 
-      expect(chokidar.watch).to.have.been.calledWith('.', {
+      expect(chokidar.watch).toHaveBeenCalledWith('.', {
         ignoreInitial: true,
         cwd: projectRoot,
-        ignored: ['**/node_modules/**', '**/ignore.spec.ts', 'additional.ignore.cy.js', sinon.match.func],
+        ignored: ['**/node_modules/**', '**/ignore.spec.ts', 'additional.ignore.cy.js', expect.any(Function)],
         ignorePermissionErrors: true,
       })
 
-      expect(onStub).to.have.been.calledWith('all', handleFsChange)
+      expect(onStub).toHaveBeenCalledWith('all', handleFsChange)
     })
 
     it('implements change handler with duplicate result handling', async () => {
@@ -709,10 +699,11 @@ describe('startSpecWatcher', () => {
         { name: 'test-3.cy.js' },
       ] as FoundSpec[]
 
-      sinon.stub(ctx.project, 'findSpecs').resolves(mockFoundSpecs)
-      sinon.stub(ctx.actions.project, 'setSpecs')
+      // @ts-expect-error
+      jest.spyOn(ctx.project, 'findSpecs').mockResolvedValue(mockFoundSpecs)
+      jest.spyOn(ctx.actions.project, 'setSpecs')
 
-      sinon.stub(chokidar, 'watch').callsFake(() => {
+      jest.spyOn(chokidar, 'watch').mockImplementation(() => {
         const mockWatcher = {
           on: () => {},
           close: () => ({ catch: () => {} }),
@@ -723,7 +714,7 @@ describe('startSpecWatcher', () => {
 
       let handleFsChange
 
-      sinon.stub(_, 'debounce').callsFake((funcToDebounce) => {
+      jest.spyOn(_, 'debounce').mockImplementation((funcToDebounce) => {
         handleFsChange = (() => funcToDebounce())
 
         return handleFsChange as _.DebouncedFunc<any>
@@ -741,22 +732,25 @@ describe('startSpecWatcher', () => {
       await ctx.project.startSpecWatcher(watchOptions)
 
       // Set internal specs state to the stubbed found value to simulate irrelevant FS changes
+      // @ts-expect-error
       ctx.project.setSpecs(mockFoundSpecs)
 
       await handleFsChange()
 
-      expect(ctx.project.findSpecs).to.have.been.calledWith(watchOptions)
-      expect(ctx.actions.project.setSpecs).not.to.have.been.called
+      expect(ctx.project.findSpecs).toHaveBeenCalledWith(watchOptions)
+      expect(ctx.actions.project.setSpecs).not.toHaveBeenCalled()
 
       // Update internal specs state so that a change will be detected on next FS event
       const updatedSpecs = [...mockFoundSpecs, { name: 'test-4.cy.js' }] as FoundSpec[]
 
+      // @ts-expect-error
       ctx.project.setSpecs(updatedSpecs)
 
       await handleFsChange()
 
-      expect(ctx.project.findSpecs).to.have.been.calledWith(watchOptions)
-      expect(ctx.actions.project.setSpecs).to.have.been.calledWith(mockFoundSpecs)
+      expect(ctx.project.findSpecs).toHaveBeenCalledWith(watchOptions)
+      // @ts-expect-error
+      expect(ctx.actions.project.setSpecs).toHaveBeenCalledWith(mockFoundSpecs)
     })
   })
 })
@@ -770,24 +764,25 @@ describe('ProjectDataSource', () => {
     ctx.coreData.currentTestingType = 'e2e'
   })
 
-  context('#defaultSpecFilename', () => {
+  describe('#defaultSpecFilename', () => {
     it('yields default if no spec pattern is set', async () => {
-      sinon.stub(ctx.project, 'specPatterns').resolves({ specPattern: [] })
+      jest.spyOn(ctx.project, 'specPatterns').mockResolvedValue({ specPattern: [] })
 
       const defaultSpecFileName = await ctx.project.defaultSpecFileName()
 
-      expect(defaultSpecFileName).to.equal('cypress/e2e/spec.cy.js')
+      expect(defaultSpecFileName).toEqual('cypress/e2e/spec.cy.js')
     })
 
     it('yields default if the spec pattern is default', async () => {
-      sinon.stub(ctx.project, 'specPatterns').resolves({ specPattern: [defaultSpecPattern.e2e] })
+      jest.spyOn(ctx.project, 'specPatterns').mockResolvedValue({ specPattern: [defaultSpecPattern.e2e] })
       const defaultSpecFileName = await ctx.project.defaultSpecFileName()
 
-      expect(defaultSpecFileName).to.equal('cypress/e2e/spec.cy.js')
+      expect(defaultSpecFileName).toEqual('cypress/e2e/spec.cy.js')
     })
 
     it('yields common prefix if there are existing specs', async () => {
-      sinon.stub(ctx.project, 'specPatterns').resolves({ specPattern: ['cypress/e2e/**/*'] })
+      jest.spyOn(ctx.project, 'specPatterns').mockResolvedValue({ specPattern: ['cypress/e2e/**/*'] })
+      // @ts-expect-error
       ctx.project.setSpecs([
         { relative: 'cypress/e2e/foo/spec.js' },
         { relative: 'cypress/e2e/foo/bar/spec.js' },
@@ -795,20 +790,23 @@ describe('ProjectDataSource', () => {
 
       const defaultSpecFileName = await ctx.project.defaultSpecFileName()
 
-      expect(defaultSpecFileName).to.equal('cypress/e2e/foo/spec.cy.js')
+      expect(defaultSpecFileName).toEqual('cypress/e2e/foo/spec.cy.js')
     })
 
     it('yields spec pattern guess if there are no existing specs', async () => {
-      sinon.stub(ctx.project, 'specPatterns').resolves({ specPattern: ['cypress/integration/**/*'] })
+      jest.spyOn(ctx.project, 'specPatterns').mockResolvedValue({ specPattern: ['cypress/integration/**/*'] })
 
       const defaultSpecFileName = await ctx.project.defaultSpecFileName()
 
-      expect(defaultSpecFileName).to.equal('cypress/integration/spec.cy.js')
+      expect(defaultSpecFileName).toEqual('cypress/integration/spec.cy.js')
     })
 
     it('yields correct filename from specpattern if there are existing specs', async () => {
+      jest.spyOn(ctx.lifecycleManager, 'getConfigFileContents').mockResolvedValue({})
+
       ctx.coreData.currentTestingType = 'component'
-      sinon.stub(ctx.project, 'specPatterns').resolves({ specPattern: ['cypress/component-tests/*.spec.js'] })
+      jest.spyOn(ctx.project, 'specPatterns').mockResolvedValue({ specPattern: ['cypress/component-tests/*.spec.js'] })
+      // @ts-expect-error
       ctx.project.setSpecs([
         { relative: 'cypress/component-tests/foo/spec.spec.js' },
         { relative: 'cypress/component-tests/foo/spec2.spec.js' },
@@ -816,7 +814,7 @@ describe('ProjectDataSource', () => {
 
       const defaultSpecFileName = await ctx.project.defaultSpecFileName()
 
-      expect(defaultSpecFileName).to.equal('cypress/component-tests/foo/ComponentName.spec.js')
+      expect(defaultSpecFileName).toEqual('cypress/component-tests/foo/ComponentName.spec.js')
     })
 
     describe('jsx/tsx handling', () => {
@@ -826,30 +824,30 @@ describe('ProjectDataSource', () => {
       })
 
       it('yields correct jsx extension if there are jsx files and specPattern allows', async () => {
-        sinon.stub(ctx.project, 'specPatterns').resolves({ specPattern: [defaultSpecPattern.component] })
-        sinon.stub(ctx.project, 'specPatternsByTestingType').resolves({ specPattern: [defaultSpecPattern.component] })
+        jest.spyOn(ctx.project, 'specPatterns').mockResolvedValue({ specPattern: [defaultSpecPattern.component] })
+        jest.spyOn(ctx.project, 'specPatternsByTestingType').mockResolvedValue({ specPattern: [defaultSpecPattern.component] })
 
         const defaultSpecFileName = await ctx.project.defaultSpecFileName()
 
-        expect(defaultSpecFileName).to.equal('cypress/component/ComponentName.cy.jsx', defaultSpecFileName)
+        expect(defaultSpecFileName).toEqual('cypress/component/ComponentName.cy.jsx', defaultSpecFileName)
       })
 
       it('yields non-jsx extension if there are jsx files but specPattern disallows', async () => {
-        sinon.stub(ctx.project, 'specPatterns').resolves({ specPattern: ['cypress/component/*.cy.js'] })
-        sinon.stub(ctx.project, 'specPatternsByTestingType').resolves({ specPattern: ['cypress/component/*.cy.js'] })
+        jest.spyOn(ctx.project, 'specPatterns').mockResolvedValue({ specPattern: ['cypress/component/*.cy.js'] })
+        jest.spyOn(ctx.project, 'specPatternsByTestingType').mockResolvedValue({ specPattern: ['cypress/component/*.cy.js'] })
 
         const defaultSpecFileName = await ctx.project.defaultSpecFileName()
 
         // specPattern does not allow for jsx, so generated spec name should not use jsx extension
-        expect(defaultSpecFileName).to.equal('cypress/component/ComponentName.cy.js', defaultSpecFileName)
+        expect(defaultSpecFileName).toEqual('cypress/component/ComponentName.cy.js', defaultSpecFileName)
       })
     })
   })
 
   describe('specPatternsByTestingType', () => {
-    context('when custom patterns configured', () => {
+    describe('when custom patterns configured', () => {
       beforeEach(() => {
-        sinon.stub(ctx.lifecycleManager, 'getConfigFileContents').resolves({
+        jest.spyOn(ctx.lifecycleManager, 'getConfigFileContents').mockResolvedValue({
           e2e: {
             specPattern: 'abc',
             excludeSpecPattern: 'def',
@@ -862,38 +860,38 @@ describe('ProjectDataSource', () => {
       })
 
       it('should return custom e2e patterns', async () => {
-        expect(await ctx.project.specPatternsByTestingType('e2e')).to.eql({
+        expect(await ctx.project.specPatternsByTestingType('e2e')).toEqual({
           specPattern: ['abc'],
           excludeSpecPattern: ['def'],
         })
       })
 
       it('should return custom component patterns', async () => {
-        expect(await ctx.project.specPatternsByTestingType('component')).to.eql({
+        expect(await ctx.project.specPatternsByTestingType('component')).toEqual({
           specPattern: ['uvw'],
           excludeSpecPattern: ['xyz'],
         })
       })
     })
 
-    context('when no custom patterns configured', () => {
+    describe('when no custom patterns configured', () => {
       const wrapInArray = (value: string | string[]): string[] => {
         return Array.isArray(value) ? value : [value]
       }
 
       beforeEach(() => {
-        sinon.stub(ctx.lifecycleManager, 'getConfigFileContents').resolves({})
+        jest.spyOn(ctx.lifecycleManager, 'getConfigFileContents').mockResolvedValue({})
       })
 
       it('should return default e2e patterns', async () => {
-        expect(await ctx.project.specPatternsByTestingType('e2e')).to.eql({
+        expect(await ctx.project.specPatternsByTestingType('e2e')).toEqual({
           specPattern: wrapInArray(defaultSpecPattern.e2e),
           excludeSpecPattern: wrapInArray(defaultExcludeSpecPattern.e2e),
         })
       })
 
       it('should return default component patterns', async () => {
-        expect(await ctx.project.specPatternsByTestingType('component')).to.eql({
+        expect(await ctx.project.specPatternsByTestingType('component')).toEqual({
           specPattern: wrapInArray(defaultSpecPattern.component),
           excludeSpecPattern: wrapInArray(defaultExcludeSpecPattern.component),
         })

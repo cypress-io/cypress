@@ -55,7 +55,7 @@
 - [x] packages/reporter ✅ **COMPLETED**
 - [ ] packages/resolve-dist **PARTIAL** - entry point is JS
 - [ ] packages/rewriter **PARTIAL** - entry point is JS
-- [ ] packages/root
+- [x] packages/root ✅ **COMPLETED**
 - [x] packages/runner ✅ **COMPLETED**
 - [ ] packages/scaffold-config **PARTIAL** - entry point is JS
 - [ ] packages/server **PARTIAL** - many source/test files in JS. highest priority
@@ -87,7 +87,7 @@
 ##### Binary Packages
 
 - [x] packages/config ✅ **COMPLETED**
-- [ ] packages/data-context
+- [x] packages/data-context **COMPLETED** (migrated from `mocha`/`sinon`/`chai` to `jest`). See package README for more details as to why `jest` over `vitest`
 - [x] packages/driver ✅ **COMPLETED**
 - [x] packages/electron ✅ **COMPLETED**
 - [x] packages/error ✅ **COMPLETED**

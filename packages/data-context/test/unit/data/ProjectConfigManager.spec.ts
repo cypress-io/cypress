@@ -1,4 +1,4 @@
-import { expect } from 'chai'
+import { describe, expect, it, beforeEach } from '@jest/globals'
 import { createTestDataContext } from '../helper'
 import { ProjectConfigManager } from '../../../src/data/ProjectConfigManager'
 import { EventRegistrar } from '../../../src/data/EventRegistrar'
@@ -23,20 +23,20 @@ describe('ProjectConfigManager', () => {
     })
   })
 
-  context('#eventProcessPid', () => {
+  describe('#eventProcessPid', () => {
     it('returns process id from events ipc', () => {
       // @ts-expect-error
       configManager._eventsIpc = {
         childProcessPid: 45699,
       }
 
-      expect(configManager.eventProcessPid).to.eq(45699)
+      expect(configManager.eventProcessPid).toEqual(45699)
     })
 
     it('does not throw if config manager is not initialized', () => {
       // @ts-expect-error
       configManager._eventsIpc = undefined
-      expect(configManager.eventProcessPid).to.eq(undefined)
+      expect(configManager.eventProcessPid).toEqual(undefined)
     })
   })
 })
