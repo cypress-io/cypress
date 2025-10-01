@@ -55,19 +55,13 @@ commands:
             else
               echo "📦 Cache miss - continuing with packaging"
             fi
-  pack-workflows:
+  pack-workflows-from-src:
     steps:
       - circleci-cli/install
       - run:
           name: Pack workflows
           command: |
-            ./scripts/pack-ci.sh --all
-  validate-workflows:
-    steps:
-      - run:
-          name: Validate workflows
-          command: |
-            ./scripts/pack-ci.sh --validate --pack=false
+            ./scripts/pack-ci.sh --all --validate
 
   # Retrieving and saving packed workflows based on the checksum of the hash
   # of the yml files in ./.circleci/src
@@ -106,10 +100,16 @@ jobs:
         - image: cimg/base:stable
     resource_class: small
     steps:
+        - run:
+           command: |
+              echo "<< pipeline.event.github.pull_request.draft >>"
+              echo "<< pipeline.event.name >>"
+              echo "<< pipeline.event.github >>"
+
         - checkout
         - restore-src-checksum-cache
         - persist-to-workspace-and-exit-early
-        - pack-workflows
+        - pack-workflows-from-src
         - save-src-checksum-cache
         - persist
 
