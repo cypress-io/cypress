@@ -6,20 +6,11 @@ version: 2.1
 
 workflows:
     setup-workflow:
-        when:
-          condition:
-            or:
-              - equal: [<<pipeline.trigger_source>>, 'api']
-              - equal: [<<pipeline.git.branch>>, 'develop']
-              - matches:
-                  pattern: /^release\/.*/
-                  value: <<pipeline.git.branch>>
-              - and:
-                - equal: [ pipeline.event.name, "pull_request" ]
-                - equal: [ pipeline.event.github.pull_request.draft, false ]
-
         jobs:
-            - pack-workflows
+            - should-run-ci
+            - pack-workflows:
+                requires:
+                  - should-run-ci: success
             - launch-primary-workflow:
                 requires:
                   - pack-workflows
@@ -100,7 +91,61 @@ commands:
           paths:
             - .circleci/packed
 
+  cancel-unnecessary-ci:
+    steps:
+      - when:
+          condition:
+            not:
+              or:
+                - equal: [<<pipeline.trigger_source>>, 'api']
+                - equal: [<<pipeline.git.branch>>, 'develop']
+                - matches:
+                    pattern: /^release\/.*/
+                    value: <<pipeline.git.branch>>
+          steps:
+            - run:
+                name: Cancel CI
+                command: |
+                  cancel_build() {
+                    if [ ! -z "${CIRCLE_TOKEN}" ]; then
+                      echo "No CIRCLE_TOKEN set. Cannot cancel job."
+                      exit 1
+                    fi
+                    curl --request POST \
+                      --url https://circleci.com/api/v2/jobs/${CIRCLE_JOB}/cancel \
+                      --header "Circle-Token: ${CIRCLE_TOKEN}"
+                    exit 0
+                  }
+
+                  if [ ! -z "${CIRCLE_PULL_REQUEST##*/}" ]; then
+                    DRAFT=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pulls/${CIRCLE_PULL_REQUEST##*/}" | jq '.draft')
+
+                    if [[ "${DRAFT}" == true ]]; then
+                      echo "Skipping CI; PR is in draft - to trigger CI , click the 'Trigger Pipeline' button in the CircleCI UI."
+                      cancel_build
+                    fi
+
+                    echo "Always run CI for PR that is ready for review."
+                    exit 0
+                  fi
+
+                  # otherwise, the build is not a PR so we cancel it 
+                  cancel_build
+
 jobs:
+  should-run-ci:
+    docker:
+        - image: cimg/base:stable
+    resource_class: small
+    steps:
+      # it needs at least one unconditional step
+      - run:
+          name: Checking if CI should run
+          command: |
+            echo "Checking if CI should run."
+            
+      - cancel-unnecessary-ci
+
   pack-workflows:
     docker:
         - image: cimg/base:stable
@@ -121,11 +166,15 @@ jobs:
           - attach_workspace:
               at: .
           - run:
-              name: Check for primary pipeline definition
+              name: Check for primary workflow definition
               command: |
-                if [ ! -f .circleci/packed/pipeline.yml ]; then
-                    echo "❌ Primary pipeline definition not found in .circleci/packed/pipeline.yml!"
+                if [ ! -f .circleci/packed/workflows.yml ]; then
+                    echo "❌ Primary workflow definition not found in .circleci/packed/workflows.yml!"
                     exit 1
                 fi
           - continuation/continue:
-              configuration_path: .circleci/packed/pipeline.yml
+              configuration_path: .circleci/packed/workflows.yml
+
+
+  
+
