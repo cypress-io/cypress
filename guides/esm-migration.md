@@ -37,7 +37,7 @@
 - [ ] packages/data-context  **PARTIAL** - entry point is JS
 - [x] packages/driver ✅ **COMPLETED** - source complete, cypress tests need migration
 - [x] packages/electron ✅ **COMPLETED**
-- [ ] packages/error **PARTIAL** - entry point is JS
+- [x] packages/error ✅ **COMPLETED**
 - [x] packages/eslint-config ✅ **COMPLETED**
 - [ ] packages/example
 - [ ] packages/extension
@@ -63,7 +63,7 @@
 - [x] packages/stderr-filtering ✅ **COMPLETED**
 - [ ] packages/telemetry **PARTIAL** - entry point is JS
 - [ ] packages/ts **PARTIAL** - ultimate goal is removal and likely not worth the effort to convert
-- [ ] packages/types **PARTIAL** - entry point is JS
+- [x] packages/types ✅ **COMPLETED**
 - [x] packages/v8-snapshot-require
 - [x] packages/web-config
 

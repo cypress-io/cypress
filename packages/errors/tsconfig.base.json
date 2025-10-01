@@ -1,5 +1,4 @@
 {
-  "extends": "../ts/tsconfig.json",
   "include": [
     "src",
   ],
@@ -8,5 +7,8 @@
     "noImplicitAny": true,
     "noImplicitReturns": false,
     "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true
   }
 }
