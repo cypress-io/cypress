@@ -29,10 +29,12 @@
   display: flex;
   flex-grow: 1;
   gap: 16px;
+  align-items: center;
 
   .studio-header__back-button {
     padding: 0;
     width: 32px;
+    min-width: 32px;
     justify-content: center;
   }
 
