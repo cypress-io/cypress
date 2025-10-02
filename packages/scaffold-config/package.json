@@ -2,12 +2,15 @@
   "name": "@packages/scaffold-config",
   "version": "0.0.0-development",
   "description": "Logic related to scaffolding new projects using launchpad",
-  "main": "index.js",
-  "browser": "src/index.ts",
+  "main": "cjs/index.js",
   "scripts": {
-    "build-prod": "tsc || echo 'built, with errors'",
-    "check-ts": "tsc --noEmit && yarn -s tslint",
-    "clean": "rimraf --glob './src/*.js' './src/**/*.js' './src/**/**/*.js' './test/**/*.js' || echo 'cleaned'",
+    "build": "yarn build:cjs && yarn build:esm && yarn build:browser",
+    "build-prod": "yarn build",
+    "build:browser": "rimraf browser && tsc -p tsconfig.browser.json",
+    "build:cjs": "rimraf cjs && tsc -p tsconfig.cjs.json",
+    "build:esm": "rimraf esm && tsc -p tsconfig.esm.json",
+    "check-ts": "tsc -p tsconfig.cjs.json --noEmit && yarn -s tslint -p tsconfig.cjs.json",
+    "clean": "rimraf esm cjs browser",
     "clean-deps": "rimraf node_modules",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "test": "vitest run",
@@ -28,11 +31,14 @@
   "devDependencies": {
     "@packages/ts": "0.0.0-development",
     "@packages/types": "0.0.0-development",
+    "rimraf": "^6.0.1",
     "vitest": "^3.2.4"
   },
   "files": [
-    "src"
+    "cjs/*",
+    "esm/*"
   ],
   "types": "src/index.ts",
+  "module": "esm/index.js",
   "nx": {}
 }
