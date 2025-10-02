@@ -17,13 +17,12 @@ import {
   isResponseStatusCode200,
   regenerateRequestHead,
   CombinedAgent,
-  clientCertificateStore,
   _resetBaseCaOptionsPromise,
   getFirstWorkingFamily,
 } from '../../lib/agent'
 import { allowDestroy } from '../../lib/allow-destroy'
 import { AsyncServer, Servers } from '../support/servers'
-import { UrlClientCertificates, ClientCertificates, PemKey } from '../../lib/client-certificates'
+import { clientCertificateStoreSingleton, UrlClientCertificates, ClientCertificates, PemKey } from '../../lib/client-certificates'
 import { pki } from 'node-forge'
 import fetch from 'cross-fetch'
 import os from 'os'
@@ -762,7 +761,7 @@ describe('lib/agent', function () {
           }
 
           if (testCase.presentClientCertificate) {
-            clientCertificateStore.clear()
+            clientCertificateStoreSingleton.clear()
             const certAndKey = createCertAndKey()
             const pemCert = pki.certificateToPem(certAndKey[0])
 
@@ -772,7 +771,7 @@ describe('lib/agent', function () {
             testCerts.clientCertificates = new ClientCertificates()
             testCerts.clientCertificates.cert.push(Buffer.from(pemCert, 'utf-8'))
             testCerts.clientCertificates.key.push(new PemKey(Buffer.from(pki.privateKeyToPem(certAndKey[1]), 'utf-8'), undefined))
-            clientCertificateStore.addClientCertificatesForUrl(testCerts)
+            clientCertificateStoreSingleton.addClientCertificatesForUrl(testCerts)
           } else {
             clientCert = ''
           }
