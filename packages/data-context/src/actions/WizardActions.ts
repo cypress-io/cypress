@@ -1,5 +1,5 @@
 import type { NexusGenObjects } from '../gen/nxs.gen'
-import { detectFramework, commandsFileBody, supportFileComponent, supportFileE2E, getBundler, CT_FRAMEWORKS, resolveComponentFrameworkDefinition, detectThirdPartyCTFrameworks } from '@packages/scaffold-config'
+import { detectFramework, commandsFileBody, supportFileComponent, supportFileE2E, getBundler, CT_FRAMEWORKS, resolveComponentFrameworkDefinition, detectThirdPartyCTFrameworks, componentIndexHtmlGenerator } from '@packages/scaffold-config'
 import assert from 'assert'
 import path from 'path'
 import Debug from 'debug'
@@ -9,7 +9,6 @@ const debug = Debug('cypress:data-context:wizard-actions')
 
 import type { DataContext } from '..'
 import { addTestingTypeToCypressConfig, AddTestingTypeToCypressConfigOptions } from '@packages/config'
-import componentIndexHtmlGenerator from '@packages/scaffold-config/src/component-index-template'
 
 export class WizardActions {
   constructor (private ctx: DataContext) {}
