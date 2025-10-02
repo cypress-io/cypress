@@ -1,7 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.3.1
+## 15.4.0
 
 _Released 10/07/2025 (PENDING)_
+
+**Features:**
+
+- Added the `--posix-exit-codes` flag for the `run` command. When this flag is passed, Cypress will exit with 1 if any tests fail, rather than the number of failed tests. Addresses [#32605](https://github.com/cypress-io/cypress/issues/32605) and [#24695](https://github.com/cypress-io/cypress/issues/24695). Addressed in [#32609](https://github.com/cypress-io/cypress/pull/32609).
 
 **Bugfixes:**
 
@@ -10,6 +14,8 @@ _Released 10/07/2025 (PENDING)_
 
 **Misc:**
 
+- Added a dropdown menu in the Command Log that includes actions like Open in IDE and Add New Test in Studio, along with test preferences such as Auto-Scroll. Addresses [#32556](https://github.com/cypress-io/cypress/issues/32556). Addressed in [#32611](https://github.com/cypress-io/cypress/pull/32611).
+- Updated the Studio test editing header to include a Back button. This change ensures the Specs button remains functional for expanding or collapsing the specs panel. Addresses [#32558](https://github.com/cypress-io/cypress/issues/32558). Addressed in [#32611](https://github.com/cypress-io/cypress/pull/32611).
 - Fixed the Studio panel resizing when dragging. Addressed in [#32584](https://github.com/cypress-io/cypress/pull/32584).
 
 ## 15.3.0

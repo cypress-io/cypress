@@ -37,6 +37,7 @@ const allowList = [
   'parallel',
   'ping',
   'port',
+  'posixExitCodes',
   'project',
   'proxySource',
   'quiet',
@@ -366,6 +367,7 @@ module.exports = {
       'run-project': 'runProject',
       'smoke-test': 'smokeTest',
       'testing-type': 'testingType',
+      'posix-exit-codes': 'posixExitCodes',
     }
 
     // takes an array of args and converts
