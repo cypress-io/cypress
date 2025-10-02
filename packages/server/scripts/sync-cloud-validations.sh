@@ -27,25 +27,20 @@ sync_cloud_validations() {
   # Create output directory if it doesn't exist
   mkdir -p "$OUTPUT_FOLDER"
   
-  # Download validations with headers
-  echo "Downloading validations..."
-  curl -s -D /tmp/validations_headers "$VALIDATION_BASE/cypress-app/validations" > "$JS_FILE"
-  
+  # Download types only (safer than downloading executable .js schemas)
   echo "Downloading types..."
   curl -s -D /tmp/types_headers "$VALIDATION_BASE/cypress-app/validations/types" > "$DTS_FILE"
   
+  # TODO: Download .js validations when cloud package publishes an npm SDK
+  # For now, we only download TypeScript definitions for type safety
+  # echo "Downloading validations..."
+  # curl -s -D /tmp/validations_headers "$VALIDATION_BASE/cypress-app/validations" > "$JS_FILE"
+  
   # Extract ETag headers
-  VALIDATIONS_ETAG=$(grep -i "etag:" /tmp/validations_headers | cut -d' ' -f2 | tr -d '\r\n')
+  # VALIDATIONS_ETAG=$(grep -i "etag:" /tmp/validations_headers | cut -d' ' -f2 | tr -d '\r\n')
   TYPES_ETAG=$(grep -i "etag:" /tmp/types_headers | cut -d' ' -f2 | tr -d '\r\n')
   
-  # Add ETag as comment to the files
-  {
-    echo "// ETag: $VALIDATIONS_ETAG"
-    echo "// Last-Synced: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-    echo ""
-    cat "$JS_FILE"
-  } > "$JS_FILE.tmp" && mv "$JS_FILE.tmp" "$JS_FILE"
-  
+  # Add ETag as comment to the types file
   {
     echo "// ETag: $TYPES_ETAG"
     echo "// Last-Synced: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
@@ -54,14 +49,14 @@ sync_cloud_validations() {
   } > "$DTS_FILE.tmp" && mv "$DTS_FILE.tmp" "$DTS_FILE"
   
   # Clean up temp files
-  rm -f /tmp/validations_headers /tmp/types_headers
+  rm -f /tmp/types_headers
   
   echo "✅ Cloud validations synced successfully"
 }
 
 ensure_cloud_validations() {
-  if [[ ! -f "$JS_FILE" || ! -f "$DTS_FILE" ]]; then
-    echo "Cloud validation files missing, syncing..."
+  if [[ ! -f "$DTS_FILE" ]]; then
+    echo "Cloud validation types file missing, syncing..."
     if ! sync_cloud_validations; then
       echo "❌ Failed to sync cloud validations. Build may fail without these files."
       exit 1
@@ -69,31 +64,29 @@ ensure_cloud_validations() {
     return
   fi
   
-  # Extract stored ETags from the files
-  STORED_JS_ETAG=$(head -n 1 "$JS_FILE" | sed 's|// ETag: ||' | tr -d '\r\n')
+  # Extract stored ETag from the types file
   STORED_DTS_ETAG=$(head -n 1 "$DTS_FILE" | sed 's|// ETag: ||' | tr -d '\r\n')
   
   echo "Checking if cloud validations are up to date..."
   
-  # Get current ETags without downloading the full content
-  # If we can't fetch ETags (offline), just use existing files
-  CURRENT_JS_ETAG=$(curl -s -I "$VALIDATION_BASE/cypress-app/validations" 2>/dev/null | grep -i "etag:" | cut -d' ' -f2 | tr -d '\r\n')
+  # Get current ETag without downloading the full content
+  # If we can't fetch ETag (offline), just use existing file
   CURRENT_DTS_ETAG=$(curl -s -I "$VALIDATION_BASE/cypress-app/validations/types" 2>/dev/null | grep -i "etag:" | cut -d' ' -f2 | tr -d '\r\n')
   
-  # If we couldn't fetch ETags (offline), use existing files
-  if [[ -z "$CURRENT_JS_ETAG" || -z "$CURRENT_DTS_ETAG" ]]; then
-    echo "⚠️  Could not check ETags (offline?), using existing files"
+  # If we couldn't fetch ETag (offline), use existing file
+  if [[ -z "$CURRENT_DTS_ETAG" ]]; then
+    echo "⚠️  Could not check ETag (offline?), using existing file"
     return
   fi
   
   # Compare ETags
-  if [[ "$STORED_JS_ETAG" != "$CURRENT_JS_ETAG" || "$STORED_DTS_ETAG" != "$CURRENT_DTS_ETAG" ]]; then
-    echo "Cloud validation files are outdated (ETags changed), syncing..."
+  if [[ "$STORED_DTS_ETAG" != "$CURRENT_DTS_ETAG" ]]; then
+    echo "Cloud validation types are outdated (ETag changed), syncing..."
     if ! sync_cloud_validations; then
-      echo "⚠️  Failed to sync, but existing files will be used"
+      echo "⚠️  Failed to sync, but existing file will be used"
     fi
   else
-    echo "✅ Cloud validation files are up to date (ETags match)"
+    echo "✅ Cloud validation types are up to date (ETag matches)"
   fi
 }
 
