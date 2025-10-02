@@ -1,0 +1,7 @@
+[31mWe could not identify a known browser at the path you provided: [94m/path/does/not/exist[39m[31m[39m
+[31m[39m
+[31mRead more about how to troubleshoot launching browsers: https://on.cypress.io/troubleshooting-launching-browsers[39m
+[31m[39m
+[31mThe output from the command we ran was:[39m
+[31m[39m
+[31m[95mfail whale[39m[31m[39m

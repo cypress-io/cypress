@@ -1,7 +1,7 @@
 import type { Wizard, WizardBundler } from '../generated/test-graphql-types.gen'
-import * as wizardDeps from '@packages/scaffold-config/src/dependencies'
 import type { MaybeResolver } from './clientTestUtils'
 import { testNodeId } from './clientTestUtils'
+import { WIZARD_DEPENDENCY_REACT, WIZARD_DEPENDENCY_REACT_DOM, WIZARD_DEPENDENCY_TYPESCRIPT } from '@packages/scaffold-config/browser/dependencies'
 
 const testBundlerVite = {
   type: 'vite',
@@ -34,28 +34,28 @@ const testFrameworks = [
 
 export const stubWizard: MaybeResolver<Wizard> = {
   __typename: 'Wizard',
-  installDependenciesCommand: `npm install -D ${wizardDeps.WIZARD_DEPENDENCY_REACT.package} ${wizardDeps.WIZARD_DEPENDENCY_REACT_DOM.package} ${wizardDeps.WIZARD_DEPENDENCY_TYPESCRIPT.package}`,
+  installDependenciesCommand: `npm install -D ${WIZARD_DEPENDENCY_REACT.package} ${WIZARD_DEPENDENCY_REACT_DOM.package} ${WIZARD_DEPENDENCY_TYPESCRIPT.package}`,
   packagesToInstall: [
     {
       __typename: 'WizardNpmPackage',
       id: 'react',
       satisfied: true,
       detectedVersion: '18.3.1',
-      ...wizardDeps.WIZARD_DEPENDENCY_REACT,
+      ...WIZARD_DEPENDENCY_REACT,
     },
     {
       __typename: 'WizardNpmPackage',
       id: 'react-dom',
       satisfied: true,
       detectedVersion: '18.3.1',
-      ...wizardDeps.WIZARD_DEPENDENCY_REACT_DOM,
+      ...WIZARD_DEPENDENCY_REACT_DOM,
     },
     {
       __typename: 'WizardNpmPackage',
       id: 'typescript',
       satisfied: false,
       detectedVersion: '3.9.4',
-      ...wizardDeps.WIZARD_DEPENDENCY_TYPESCRIPT,
+      ...WIZARD_DEPENDENCY_TYPESCRIPT,
     },
   ],
   allBundlers,

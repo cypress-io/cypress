@@ -7,9 +7,18 @@ _Released 9/30/2025 (PENDING)_
 
 - Remove `experimentalStudio` config flag and turn Studio Beta on for all users of Cypress. Addresses [#30997](https://github.com/cypress-io/cypress/issues/30997). Addressed in [#32571](https://github.com/cypress-io/cypress/pull/32571).
 
+**Features:**
+
+- Added the `--posix-exit-codes` flag for the `run` command. When this flag is passed, Cypress will exit with 1 if any tests fail, rather than the number of failed tests. Addresses [#32605](https://github.com/cypress-io/cypress/issues/32605) and [#24695](https://github.com/cypress-io/cypress/issues/24695). Addressed in [#32609](https://github.com/cypress-io/cypress/pull/32609).
+
 **Bugfixes:**
 
 - Fixed a regression introduced in [`15.0.0`](https://docs.cypress.io/guides/references/changelog#15-0-0) where `dbus` connection error messages appear in docker containers when launching Cypress. Fixes [#32290](https://github.com/cypress-io/cypress/issues/32290).
+- Fixed code frames in `cy.origin` so that failed commands will show the correct line/column within the corresponding spec file. Addressed in [#32597](https://github.com/cypress-io/cypress/pull/32597).
+
+**Misc:**
+
+- Fixed the Studio panel resizing when dragging. Addressed in [#32584](https://github.com/cypress-io/cypress/pull/32584).
 
 ## 15.3.0
 

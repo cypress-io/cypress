@@ -118,8 +118,10 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
           reject(err)
         }
 
-        const onQueueFinished = ({ err, subject, unserializableSubjectType }) => {
+        const onQueueFinished = ({ err, crossOriginUserInvocationStack, subject, unserializableSubjectType }) => {
           if (err) {
+            err.crossOriginUserInvocationStack = crossOriginUserInvocationStack
+
             return _reject(err)
           }
 
@@ -223,6 +225,7 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
                   autLocation: Cypress.state('autLocation')?.href,
                   crossOriginCookies: Cypress.state('crossOriginCookies'),
                   isProtocolEnabled: Cypress.state('isProtocolEnabled'),
+                  originUserInvocationStack: userInvocationStack,
                 },
                 config: preprocessConfig(Cypress.config()),
                 env: preprocessEnv(Cypress.env()),

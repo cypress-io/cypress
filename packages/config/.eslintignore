@@ -1,3 +1,5 @@
+**/cjs
+**/esm
 **/dist
 **/*.d.ts
 **/package-lock.json

@@ -1,4 +1,4 @@
-import { expect } from 'chai'
+import { describe, expect, it, beforeEach, afterEach } from '@jest/globals'
 import crypto from 'crypto'
 
 import { DataContext } from '../../../src'
@@ -26,8 +26,8 @@ describe('RemoteRequestDataSource', () => {
         { b: '2', a: 1 },
       )
 
-      expect(id).to.eql('UmVtb3RlRmV0Y2hhYmxlQ2xvdWRQcm9qZWN0U3BlY1Jlc3VsdDo1Y2MyNWQ4YTM5YTY1NGViMjNiNTI1NzM0NWFiYmY0MmJlNDBjOGQxOmV5SmhJam94TENKaUlqb2lNaUo5')
-      expect(Buffer.from(id, 'base64').toString('utf-8')).to.eql('RemoteFetchableCloudProjectSpecResult:5cc25d8a39a654eb23b5257345abbf42be40c8d1:eyJhIjoxLCJiIjoiMiJ9')
+      expect(id).toEqual('UmVtb3RlRmV0Y2hhYmxlQ2xvdWRQcm9qZWN0U3BlY1Jlc3VsdDo1Y2MyNWQ4YTM5YTY1NGViMjNiNTI1NzM0NWFiYmY0MmJlNDBjOGQxOmV5SmhJam94TENKaUlqb2lNaUo5')
+      expect(Buffer.from(id, 'base64').toString('utf-8')).toEqual('RemoteFetchableCloudProjectSpecResult:5cc25d8a39a654eb23b5257345abbf42be40c8d1:eyJhIjoxLCJiIjoiMiJ9')
     })
 
     it('stable stringifies via stringifyVariables', () => {
@@ -42,13 +42,13 @@ describe('RemoteRequestDataSource', () => {
         { a: 1, b: '2' },
       )
 
-      expect(id).to.eql(id2)
+      expect(id).toEqual(id2)
     })
   })
 
   describe('unpackFetchableNodeId', () => {
     it('takes the identifier created from makeRefetchableId and decodes the variables', () => {
-      expect(remoteRequestSource.unpackFetchableNodeId('UmVtb3RlRmV0Y2hhYmxlQ2xvdWRQcm9qZWN0U3BlY1Jlc3VsdDo1Y2MyNWQ4YTM5YTY1NGViMjNiNTI1NzM0NWFiYmY0MmJlNDBjOGQxOmV5SmhJam94TENKaUlqb2lNaUo5')).to.eql({
+      expect(remoteRequestSource.unpackFetchableNodeId('UmVtb3RlRmV0Y2hhYmxlQ2xvdWRQcm9qZWN0U3BlY1Jlc3VsdDo1Y2MyNWQ4YTM5YTY1NGViMjNiNTI1NzM0NWFiYmY0MmJlNDBjOGQxOmV5SmhJam94TENKaUlqb2lNaUo5')).toEqual({
         name: 'RemoteFetchableCloudProjectSpecResult',
         operationHash: '5cc25d8a39a654eb23b5257345abbf42be40c8d1',
         operationVariables: { a: 1, b: '2' },

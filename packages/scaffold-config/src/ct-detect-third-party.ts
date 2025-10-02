@@ -99,7 +99,7 @@ export async function detectThirdPartyCTFrameworks (
 
     // Start at the project root and check each directory above it until we see
     // an indication that the current directory is the root of the repository.
-    await findUp(async (directory: string) => {
+    await findUp(async (directory: string): Promise<findUp.Match> => {
       fullPathGlobs = [
         path.join(directory, CT_FRAMEWORK_GLOBAL_GLOB),
         path.join(directory, CT_FRAMEWORK_NAMESPACED_GLOB),
