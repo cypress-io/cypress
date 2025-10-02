@@ -1,0 +1,9 @@
+[31mThe [33mexperimentalRunAllSpecs[39m[31m experiment is currently only supported for End to End Testing and must be configured as an e2e testing type property: [95me2e.experimentalRunAllSpecs[39m[31m.[39m
+[31m[39m
+[31m[94m{[39m[31m[39m
+[31m[94m  e2e: {[39m[31m[39m
+[31m[94m    experimentalRunAllSpecs: true[39m[31m[39m
+[31m[94m  },[39m[31m[39m
+[31m[94m}[39m[31m[39m
+[31m[39m
+[31mIf you have feedback about the experiment, please join the discussion here: http://on.cypress.io/run-all-specs[39m

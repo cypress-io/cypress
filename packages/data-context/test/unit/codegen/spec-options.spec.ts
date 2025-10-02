@@ -1,9 +1,8 @@
+import { describe, expect, it, beforeEach, jest } from '@jest/globals'
 import { defaultSpecPattern } from '@packages/config'
 import { CT_FRAMEWORKS } from '@packages/scaffold-config'
-import { expect } from 'chai'
 import fs from 'fs-extra'
 import path from 'path'
-import sinon from 'sinon'
 import { DataContext } from '../../../src'
 import { SpecOptions, expectedSpecExtensions } from '../../../src/codegen/spec-options'
 import { createTestDataContext } from '../helper'
@@ -25,10 +24,10 @@ describe('spec-options', () => {
 
   describe('getCodeGenOptions', () => {
     it('uses expected set of spec extensions', () => {
-      expect(expectedSpecExtensions).to.deep.eq(['.cy', '.spec', '.test', '-spec', '-test', '_spec'])
+      expect(expectedSpecExtensions).toEqual(['.cy', '.spec', '.test', '-spec', '-test', '_spec'])
     })
 
-    context('unique file names', () => {
+    describe('unique file names', () => {
       for (const specExtension of expectedSpecExtensions) {
         it(`generates options for names with extension ${specExtension}`, async () => {
           const testSpecOptions = new SpecOptions({
@@ -41,8 +40,8 @@ describe('spec-options', () => {
 
           const result = await testSpecOptions.getCodeGenOptions()
 
-          expect(result.codeGenType).to.eq('e2e')
-          expect(result.fileName).to.eq(`TestName${specExtension}.js`)
+          expect(result.codeGenType).toEqual('e2e')
+          expect(result.fileName).toEqual(`TestName${specExtension}.js`)
         })
       }
 
@@ -57,8 +56,8 @@ describe('spec-options', () => {
 
         const result = await testSpecOptions.getCodeGenOptions()
 
-        expect(result.codeGenType).to.eq('e2e')
-        expect(result.fileName).to.eq(`TestName.js`)
+        expect(result.codeGenType).toEqual('e2e')
+        expect(result.fileName).toEqual(`TestName.js`)
       })
 
       it('generates options for file name with multiple extensions', async () => {
@@ -72,61 +71,60 @@ describe('spec-options', () => {
 
         const result = await testSpecOptions.getCodeGenOptions()
 
-        expect(result.codeGenType).to.eq('e2e')
-        expect(result.fileName).to.eq(`TestName.foo.bar.js`)
+        expect(result.codeGenType).toEqual('e2e')
+        expect(result.fileName).toEqual(`TestName.foo.bar.js`)
       })
     })
 
-    context('create from component', () => {
-      afterEach(function () {
-        sinon.restore()
-      })
-
-      context('Vue', () => {
+    describe('create from component', () => {
+      describe('Vue', () => {
         it('generates options for generating a Vue component spec', async () => {
           const testSpecOptions = new SpecOptions({
             currentProject: 'path/to/myProject',
             codeGenPath: `${tmpPath}/MyComponent.vue`,
             codeGenType: 'component',
             isDefaultSpecPattern: true,
+            // @ts-expect-error
             framework: CT_FRAMEWORKS[1],
             specPattern: [defaultSpecPattern.component],
           })
 
           const result = await testSpecOptions.getCodeGenOptions()
 
-          expect(result.codeGenType).to.eq('component')
-          expect(result.templateKey).to.eq('vueComponent')
-          expect(result.fileName).to.eq('MyComponent.cy.js')
+          expect(result.codeGenType).toEqual('component')
+          expect(result.templateKey).toEqual('vueComponent')
+          expect(result.fileName).toEqual('MyComponent.cy.js')
         })
 
         it('creates copy file if spec already exists', async () => {
-          sinon.stub(fs, 'access').onFirstCall().resolves().onSecondCall().rejects()
+          jest.spyOn(fs, 'access').mockImplementationOnce(() => Promise.resolve()).mockImplementationOnce(() => Promise.reject())
 
           const testSpecOptions = new SpecOptions({
             currentProject: 'path/to/myProject',
             codeGenPath: `${tmpPath}/MyComponent.vue`,
             codeGenType: 'component',
             isDefaultSpecPattern: true,
+            // @ts-expect-error
             framework: CT_FRAMEWORKS[1],
             specPattern: [defaultSpecPattern.component],
           })
 
           const result = await testSpecOptions.getCodeGenOptions()
 
-          expect(result.codeGenType).to.eq('component')
-          expect(result.templateKey).to.eq('vueComponent')
-          expect(result.fileName).to.eq('MyComponent-copy-1.cy.js')
+          expect(result.codeGenType).toEqual('component')
+          expect(result.templateKey).toEqual('vueComponent')
+          expect(result.fileName).toEqual('MyComponent-copy-1.cy.js')
         })
       })
 
-      context('React', () => {
+      describe('React', () => {
         it('generates options for generating a React component spec', async () => {
           const testSpecOptions = new SpecOptions({
             currentProject: 'path/to/myProject',
             codeGenPath: `${tmpPath}/Counter.tsx`,
             codeGenType: 'component',
             isDefaultSpecPattern: true,
+            // @ts-expect-error
             framework: CT_FRAMEWORKS[2],
             specPattern: [defaultSpecPattern.component],
             componentName: 'Counter',
@@ -135,9 +133,9 @@ describe('spec-options', () => {
 
           const result = await testSpecOptions.getCodeGenOptions()
 
-          expect(result.codeGenType).to.eq('component')
-          expect(result.templateKey).to.eq('reactComponent')
-          expect(result.fileName).to.eq('Counter.cy.tsx')
+          expect(result.codeGenType).toEqual('component')
+          expect(result.templateKey).toEqual('reactComponent')
+          expect(result.fileName).toEqual('Counter.cy.tsx')
         })
 
         it('creates a spec file with file and component names combined if they are different', async () => {
@@ -146,6 +144,7 @@ describe('spec-options', () => {
             codeGenPath: `${tmpPath}/Counter.tsx`,
             codeGenType: 'component',
             isDefaultSpecPattern: true,
+            // @ts-expect-error
             framework: CT_FRAMEWORKS[2],
             specPattern: [defaultSpecPattern.component],
             componentName: 'View',
@@ -153,19 +152,22 @@ describe('spec-options', () => {
 
           const result = await testSpecOptions.getCodeGenOptions()
 
-          expect(result.codeGenType).to.eq('component')
-          expect(result.templateKey).to.eq('reactComponent')
-          expect(result.fileName).to.eq('CounterView.cy.tsx')
+          expect(result.codeGenType).toEqual('component')
+          expect(result.templateKey).toEqual('reactComponent')
+          expect(result.fileName).toEqual('CounterView.cy.tsx')
         })
 
         it('creates copy file if spec already exists', async () => {
-          sinon.stub(fs, 'access').onFirstCall().resolves().onSecondCall().rejects()
+          jest.spyOn(fs, 'access')
+          .mockImplementationOnce(() => Promise.resolve())
+          .mockImplementationOnce(() => Promise.reject())
 
           const testSpecOptions = new SpecOptions({
             currentProject: 'path/to/myProject',
             codeGenPath: `${tmpPath}/Counter.tsx`,
             codeGenType: 'component',
             isDefaultSpecPattern: true,
+            // @ts-expect-error
             framework: CT_FRAMEWORKS[2],
             specPattern: [defaultSpecPattern.component],
             componentName: 'View',
@@ -173,13 +175,13 @@ describe('spec-options', () => {
 
           const result = await testSpecOptions.getCodeGenOptions()
 
-          expect(result.codeGenType).to.eq('component')
-          expect(result.templateKey).to.eq('reactComponent')
-          expect(result.fileName).to.eq('CounterView-copy-1.cy.tsx')
+          expect(result.codeGenType).toEqual('component')
+          expect(result.templateKey).toEqual('reactComponent')
+          expect(result.fileName).toEqual('CounterView-copy-1.cy.tsx')
         })
       })
 
-      context('custom spec pattern', () => {
+      describe('custom spec pattern', () => {
         [{ testName: 'src/specs-folder/*.cy.{js,jsx}', componentPath: 'ComponentName.vue', specs: [], pattern: 'src/specs-folder/*.cy.{js,jsx}', expectedPath: 'src/specs-folder/ComponentName.cy.js' },
           { testName: 'src/**/*.{spec,cy}.{js,jsx,ts,tsx}', componentPath: 'MyComponent.vue', specs: [], pattern: 'src/**/*.{spec,cy}.{js,jsx,ts,tsx}', expectedPath: 'src/MyComponent.spec.ts', isTypescriptComponent: true },
           { testName: '**/*.test.js', componentPath: 'src/Foo.vue', specs: [], pattern: '**/*.test.js', expectedPath: 'cypress/Foo.test.js' },
@@ -195,13 +197,18 @@ describe('spec-options', () => {
           it(testName, async () => {
             // This stub simulates the spec file already existing the first time we try, which should cause a copy to be created
             if (makeCopy) {
-              sinon.stub(fs, 'access').onFirstCall().resolves().onSecondCall().rejects()
+              jest.spyOn(fs, 'access')
+              .mockImplementationOnce(() => Promise.resolve())
+              .mockImplementationOnce(() => Promise.reject())
             }
 
             // This stub simulates that the component we are generating a spec from is using Typescript.
             if (isTypescriptComponent) {
               // @ts-ignore
-              sinon.stub(fs, 'readFile').resolves('lang="ts"')
+              jest.spyOn(fs, 'readFile').mockResolvedValue('lang="ts"')
+            } else {
+              // @ts-ignore
+              jest.spyOn(fs, 'readFile').mockResolvedValue('lang="js"')
             }
 
             const currentProject = 'path/to/myProject'
@@ -212,6 +219,7 @@ describe('spec-options', () => {
               codeGenPath: `${tmpPath}/${componentPath}`,
               codeGenType: 'component',
               isDefaultSpecPattern: false,
+              // @ts-expect-error
               framework: CT_FRAMEWORKS[1],
               specPattern,
               specs,
@@ -219,15 +227,15 @@ describe('spec-options', () => {
 
             const result = await testSpecOptions.getCodeGenOptions()
 
-            expect(result.codeGenType).to.eq('component')
-            expect(result.templateKey).to.eq('vueComponent')
-            expect(`${result.overrideCodeGenDir}/${result.fileName}`).to.eq(expectedPath)
+            expect(result.codeGenType).toEqual('component')
+            expect(result.templateKey).toEqual('vueComponent')
+            expect(`${result.overrideCodeGenDir}/${result.fileName}`).toEqual(expectedPath)
           })
         })
       })
     })
 
-    context('duplicate files names', () => {
+    describe('duplicate files names', () => {
       for (const specExtension of expectedSpecExtensions) {
         it(`generates options for file name with extension ${specExtension}`, async () => {
           const testSpecOptions = new SpecOptions({
@@ -242,16 +250,16 @@ describe('spec-options', () => {
 
           let result = await testSpecOptions.getCodeGenOptions()
 
-          expect(result.codeGenType).to.eq('e2e')
-          expect(result.fileName).to.eq(`TestName-copy-1${specExtension}.js`)
+          expect(result.codeGenType).toEqual('e2e')
+          expect(result.fileName).toEqual(`TestName-copy-1${specExtension}.js`)
 
           // Add copy to file system and generate options again, index should increment
           await fs.outputFile(`${tmpPath}/TestName-copy-1${specExtension}.js`, '// foo')
 
           result = await testSpecOptions.getCodeGenOptions()
 
-          expect(result.codeGenType).to.eq('e2e')
-          expect(result.fileName).to.eq(`TestName-copy-2${specExtension}.js`)
+          expect(result.codeGenType).toEqual('e2e')
+          expect(result.fileName).toEqual(`TestName-copy-2${specExtension}.js`)
         })
       }
 
@@ -268,16 +276,16 @@ describe('spec-options', () => {
 
         let result = await testSpecOptions.getCodeGenOptions()
 
-        expect(result.codeGenType).to.eq('e2e')
-        expect(result.fileName).to.eq(`TestName-copy-1.js`)
+        expect(result.codeGenType).toEqual('e2e')
+        expect(result.fileName).toEqual(`TestName-copy-1.js`)
 
         // Add copy to file system and generate options again, index should increment
         await fs.outputFile(`${tmpPath}/TestName-copy-1.js`, '// foo')
 
         result = await testSpecOptions.getCodeGenOptions()
 
-        expect(result.codeGenType).to.eq('e2e')
-        expect(result.fileName).to.eq(`TestName-copy-2.js`)
+        expect(result.codeGenType).toEqual('e2e')
+        expect(result.fileName).toEqual(`TestName-copy-2.js`)
       })
 
       it('generates options for file name with multiple extensions', async () => {
@@ -293,19 +301,19 @@ describe('spec-options', () => {
 
         let result = await testSpecOptions.getCodeGenOptions()
 
-        expect(result.codeGenType).to.eq('e2e')
-        expect(result.fileName).to.eq(`TestName.foo.bar-copy-1.js`)
+        expect(result.codeGenType).toEqual('e2e')
+        expect(result.fileName).toEqual(`TestName.foo.bar-copy-1.js`)
 
         // Add copy to file system and generate options again, index should increment
         await fs.outputFile(`${tmpPath}/TestName.foo.bar-copy-1.js`, '// foo')
 
         result = await testSpecOptions.getCodeGenOptions()
 
-        expect(result.codeGenType).to.eq('e2e')
-        expect(result.fileName).to.eq(`TestName.foo.bar-copy-2.js`)
+        expect(result.codeGenType).toEqual('e2e')
+        expect(result.fileName).toEqual(`TestName.foo.bar-copy-2.js`)
       })
 
-      context('file name contains special characters', async () => {
+      describe('file name contains special characters', () => {
         [
           { condition: 'braces', fileName: '[...MyComponent].vue', expectedFileName: '[...MyComponent].cy.js', expectedComponentName: 'MyComponent' },
           { condition: 'hyphens', fileName: 'my-component.vue', expectedFileName: 'my-component.cy.js', expectedComponentName: 'MyComponent' },
@@ -322,6 +330,7 @@ describe('spec-options', () => {
               codeGenType: 'component',
               isDefaultSpecPattern: true,
               specPattern: [defaultSpecPattern.component],
+              // @ts-expect-error
               framework: CT_FRAMEWORKS[1],
             })
 
@@ -329,9 +338,9 @@ describe('spec-options', () => {
 
             const result = await testSpecOptions.getCodeGenOptions()
 
-            expect(result.codeGenType).to.eq('component')
-            expect(result.fileName).to.eq(expectedFileName)
-            expect(result['componentName']).to.eq(expectedComponentName)
+            expect(result.codeGenType).toEqual('component')
+            expect(result.fileName).toEqual(expectedFileName)
+            expect(result['componentName']).toEqual(expectedComponentName)
           })
         })
       })

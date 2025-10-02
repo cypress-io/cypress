@@ -1,5 +1,4 @@
 import Bluebird from 'bluebird'
-import check from 'check-more-types'
 import debugModule from 'debug'
 import la from 'lazy-ass'
 import _ from 'lodash'
@@ -216,8 +215,7 @@ async function _recordVideo (cdpAutomation: CdpAutomation, videoOptions: RunMode
 // a utility function that navigates to the given URL
 // once Chrome remote interface client is passed to it.
 const _navigateUsingCRI = async function (client, url) {
-  // @ts-ignore
-  la(check.url(url), 'missing url to navigate to', url)
+  la(_.isString(url) && url.match(/^https?:\/\/.*$/), 'missing url to navigate to', url)
   la(client, 'could not get CRI client')
   debug('received CRI client')
   debug('navigating to page %s', url)
@@ -595,15 +593,6 @@ export = {
     })
 
     la(browserCriClient, 'expected Chrome remote interface reference', browserCriClient)
-
-    try {
-      browserCriClient.ensureMinimumProtocolVersion('1.3')
-    } catch (err: any) {
-      // if this minimum chrome version changes, sync it with
-      // packages/web-config/webpack.config.base.ts and
-      // npm/webpack-batteries-included-preprocessor/index.js
-      throw new Error(`Cypress requires at least Chrome 64.\n\nDetails:\n${err.message}`)
-    }
 
     // monkey-patch the .kill method to that the CDP connection is closed
     const originalBrowserKill = launchedBrowser.kill

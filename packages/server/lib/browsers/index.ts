@@ -3,7 +3,6 @@ import Bluebird from 'bluebird'
 import Debug from 'debug'
 import utils from './utils'
 import * as errors from '../errors'
-import check from 'check-more-types'
 import { exec } from 'child_process'
 import util from 'util'
 import os from 'os'
@@ -14,7 +13,7 @@ import type { DataContext } from '@packages/data-context'
 import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
 
 const debug = Debug('cypress:server:browsers')
-const isBrowserFamily = check.oneOf(BROWSER_FAMILY)
+const isBrowserFamily = (browser: string) => BROWSER_FAMILY.includes(browser)
 
 let instance: BrowserInstance | null = null
 let launchAttempt = 0

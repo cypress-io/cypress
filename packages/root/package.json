@@ -1,7 +1,20 @@
 {
   "name": "@packages/root",
   "version": "0.0.0-development",
-  "description": "dummy package pointing at the root package",
+  "description": "bundles the root package.json as an installable package",
   "main": "index.js",
+  "scripts": {
+    "build": "yarn build:cjs && yarn build:esm",
+    "build:cjs": "rimraf index.js && rollup -c rollup.config.mjs -f cjs -o index.js",
+    "build:esm": "rimraf index.mjs && rollup -c rollup.config.mjs -f esm -o index.mjs",
+    "build:prod": "yarn build"
+  },
+  "devDependencies": {
+    "@rollup/plugin-json": "^6.1.0",
+    "rimraf": "^6.0.1",
+    "rollup": "^4.52.0",
+    "typescript": "^5.6.3"
+  },
+  "module": "index.mjs",
   "nx": {}
 }

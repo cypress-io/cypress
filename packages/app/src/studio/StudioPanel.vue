@@ -28,10 +28,11 @@
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { init, loadRemote, registerRemotes } from '@module-federation/runtime'
 import type { StudioAppDefaultShape, StudioPanelShape } from './studio-app-types'
+import type { UserProjectStatusStore } from '@cy/store/user-project-status-store'
 import LoadingStudioPanel from './LoadingStudioPanel.vue'
 import StudioErrorPanel from './StudioErrorPanel.vue'
 import type { EventManager } from '../runner/event-manager'
-import { useMutation, gql } from '@urql/vue'
+import { useMutation, gql, UseMutationResponse } from '@urql/vue'
 
 // Mirrors the ReactDOM.Root type since incorporating those types
 // messes up vue typing elsewhere
@@ -53,6 +54,9 @@ const props = defineProps<{
   studioStatus: string | null
   cloudStudioSessionId?: string
   autUrlSelector: string
+  userProjectStatusStore: UserProjectStatusStore
+  hasRequestedProjectAccess: boolean
+  requestProjectAccessMutation: UseMutationResponse<any, any>
 }>()
 
 interface StudioApp { default: StudioAppDefaultShape }
@@ -79,6 +83,9 @@ const maybeRenderReactComponent = () => {
     onStudioPanelClose: props.onStudioPanelClose,
     studioSessionId: props.cloudStudioSessionId,
     autUrlSelector: props.autUrlSelector,
+    userProjectStatusStore: props.userProjectStatusStore,
+    hasRequestedProjectAccess: props.hasRequestedProjectAccess,
+    requestProjectAccessMutation: props.requestProjectAccessMutation,
   })
 
   // Store the react root in a weak map keyed by the container. We do this so that we have a reference

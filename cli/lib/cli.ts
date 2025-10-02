@@ -127,6 +127,7 @@ const descriptions: any = {
   parallel: 'enables concurrent runs and automatic load balancing of specs across multiple machines or processes',
   port: 'runs Cypress on a specific port. overrides any value in cypress.config.{js,ts,mjs,cjs}.',
   project: 'path to the project',
+  posixExitCodes: 'use POSIX exit codes for error handling',
   quiet: 'run quietly, using only the configured reporter',
   record: 'records the run. sends test results, screenshots and videos to Cypress Cloud.',
   reporter: 'runs a specific mocha reporter. pass a path to use a custom reporter. defaults to "spec"',
@@ -259,6 +260,7 @@ const addCypressRunCommand = (program: any): any => {
   .option('--parallel', text('parallel'))
   .option('-p, --port <port>', text('port'))
   .option('-P, --project <project-path>', text('project'))
+  .option('--posix-exit-codes', text('posixExitCodes'))
   .option('-q, --quiet', text('quiet'))
   .option('--record [bool]', text('record'), coerceFalse)
   .option('-r, --reporter <reporter>', text('reporter'))

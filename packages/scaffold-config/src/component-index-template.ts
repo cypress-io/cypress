@@ -1,6 +1,6 @@
 import dedent from 'dedent'
 
-const componentIndexHtmlGenerator = (headModifier: string = '') => {
+export const componentIndexHtmlGenerator = (headModifier: string = '') => {
   return () => {
     const template = dedent`
     <!DOCTYPE html>
@@ -23,5 +23,3 @@ const componentIndexHtmlGenerator = (headModifier: string = '') => {
     return template.replace(/\n {4}\n/g, '\n')
   }
 }
-
-export default componentIndexHtmlGenerator

@@ -1,4 +1,3 @@
-import check from 'check-more-types'
 import Debug from 'debug'
 import EE from 'events'
 import _ from 'lodash'
@@ -106,7 +105,7 @@ export class ProjectBase extends EE {
       throw new Error('Instantiating lib/project requires a projectRoot!')
     }
 
-    if (!check.unemptyString(projectRoot)) {
+    if (!_.isString(projectRoot) || _.isEmpty(projectRoot)) {
       throw new Error(`Expected project root path, not ${projectRoot}`)
     }
 

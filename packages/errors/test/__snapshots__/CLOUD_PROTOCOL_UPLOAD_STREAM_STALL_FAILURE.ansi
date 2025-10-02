@@ -1,0 +1,10 @@
+[31mWarning: We encountered slow network conditions while uploading the Test Replay recording for this spec.[39m
+[31m[39m
+[31mThe upload transfer rate fell below [95m6.4kbps[39m[31m over a sampling period of [95m10 seconds[39m[31m.[39m
+[31m[39m
+[31mTo prevent long CI execution durations, this Test Replay recording will not be uploaded.[39m
+[31m[39m
+[31mThe results for this spec will not display Test Replay recordings.[39m
+[31m[39m
+[31mIf this error occurs often, the sampling period may be configured by setting the [95mCYPRESS_TEST_REPLAY_UPLOAD_SAMPLING_INTERVAL[39m[31m environment variable to a higher value than [95m10000[39m[31m.[39m
+[31m[39m

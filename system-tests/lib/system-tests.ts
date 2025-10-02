@@ -238,6 +238,10 @@ type ExecOptions = {
    * Run Cypress with a custom user node version.
    */
   userNodeVersion?: string
+  /**
+   * Run Cypress with POSIX exit codes.
+   */
+  posixExitCodes?: boolean
 }
 
 type Server = {
@@ -762,6 +766,12 @@ const systemTests = {
 
     if (options.userNodeVersion) {
       args.push(`--userNodeVersion=${options.userNodeVersion}`)
+    }
+
+    debug('posixExitCodes', options.posixExitCodes)
+
+    if (options.posixExitCodes) {
+      args.push('--posix-exit-codes')
     }
 
     return args
