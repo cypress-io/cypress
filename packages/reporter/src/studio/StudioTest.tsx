@@ -94,9 +94,15 @@ export const StudioTest = observer(({ appState, runnablesStore, statsStore }: St
       <div className='studio-single-test-container' >
         <div className='studio-header__test-section'>
           <div className='studio-header__test-section-left'>
-            <Button data-cy='studio-back-button' size='32' variant='outline-indigo' className='studio-header__back-button' onClick={handleBackButton}>
-              <IconArrowLeft size='16' strokeColor='indigo-400' />
-            </Button>
+
+            <Tooltip placement='bottom' title={<p>All tests</p>} className='cy-tooltip'>
+              <div>
+                <Button data-cy='studio-back-button' size='32' variant='outline-indigo' className='studio-header__back-button' onClick={handleBackButton}>
+                  <IconArrowLeft size='16' strokeColor='indigo-400' />
+                </Button>
+              </div>
+            </Tooltip>
+
             <div className='studio-header__test-section-left-content'>
               <StatusIcon test={currentTest} />
               {parentTitles.length > 0 ? (

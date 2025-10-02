@@ -308,6 +308,10 @@ describe('StudioTest', () => {
       />,
     )
 
+    cy.get('[data-cy="studio-back-button"]').realHover()
+    cy.get('.cy-tooltip').should('be.visible')
+    cy.get('.cy-tooltip').should('contain.text', 'All tests')
+
     cy.get('[data-cy="studio-back-button"]').click()
     cy.get('@emitSpy').should('have.been.calledWith', 'studio:cancel', undefined)
   })
