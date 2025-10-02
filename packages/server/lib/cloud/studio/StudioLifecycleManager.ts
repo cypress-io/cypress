@@ -104,30 +104,33 @@ export class StudioLifecycleManager {
     }).catch(async (error) => {
       debug('Error during studio manager setup: %o', error)
 
-      const { cloudUrl, cloudHeaders } = await getCloudMetadata(cloudDataSource)
+      try {
+        const { cloudUrl, cloudHeaders } = await getCloudMetadata(cloudDataSource)
 
-      reportStudioError({
-        cloudApi: {
-          cloudUrl,
-          cloudHeaders,
-          CloudRequest,
-          isRetryableError,
-          asyncRetry,
-        },
-        studioHash: this.currentStudioHash,
-        // TODO: verify cfg.projectId is correct, otherwise use (await ctx.project.getConfig()).projectId || undefined
-        projectSlug: cfg.projectId,
-        error,
-        studioMethod: 'initializeStudioManager',
-        studioMethodArgs: [],
-      })
+        reportStudioError({
+          cloudApi: {
+            cloudUrl,
+            cloudHeaders,
+            CloudRequest,
+            isRetryableError,
+            asyncRetry,
+          },
+          studioHash: this.currentStudioHash,
+          projectSlug: (await getProjectOptions()).projectSlug,
+          error,
+          studioMethod: 'initializeStudioManager',
+          studioMethodArgs: [],
+        })
 
-      this.updateStatus('IN_ERROR')
+        this.updateStatus('IN_ERROR')
 
-      telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.BUNDLE_LIFECYCLE_END)
-      reportTelemetry(BUNDLE_LIFECYCLE_TELEMETRY_GROUP_NAMES.COMPLETE_BUNDLE_LIFECYCLE, {
-        success: false,
-      })
+        telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.BUNDLE_LIFECYCLE_END)
+        reportTelemetry(BUNDLE_LIFECYCLE_TELEMETRY_GROUP_NAMES.COMPLETE_BUNDLE_LIFECYCLE, {
+          success: false,
+        })
+      } catch (error) {
+        debug('Error reporting studio error: %o', error)
+      }
 
       return null
     })
