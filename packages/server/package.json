@@ -4,8 +4,8 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build-prod": "tsc || echo 'built, with type errors'",
-    "check-ts": "tsc --noEmit",
+    "build-prod": "yarn ensure-cloud-validations && tsc || echo 'built, with type errors'",
+    "check-ts": "yarn ensure-cloud-validations && tsc --noEmit",
     "clean-deps": "rimraf node_modules",
     "codecov": "codecov",
     "dev": "node index.js",
