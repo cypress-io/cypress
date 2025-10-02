@@ -30,13 +30,24 @@ import type { ProjectBase } from '../../project-base'
 
 import { PUBLIC_KEY_VERSION } from '../constants'
 
-// axios implementation disabled until proxy issues can be diagnosed/fixed
-// TODO: https://github.com/cypress-io/cypress/issues/31490
-//import { createInstance } from './create_instance'
-import type { CreateInstanceRequestBody, CreateInstanceResponse } from './create_instance'
-
 import { transformError } from './axios_middleware/transform_error'
 import { DecryptionError } from './cloud_request_errors'
+
+// Import cloud validation types for better type safety
+import type {
+  PostRunRequest_v3Type as CreateRunRequestType,
+  PostRunResponse_v3Type as CreateRunResponseType,
+  PostRunInstanceRequest_v2Type as CreateInstanceRequestType,
+  PostRunInstanceResponse_v2 as CreateInstanceResponse,
+  PostInstanceResultsRequest_v1Type as PostInstanceResultsRequestType,
+  PostInstanceResultsResponse_v1Type as PostInstanceResultsResponseType,
+  PostInstanceTestsResponse_v1Type as PostInstanceTestsResponseType,
+  PutInstanceResponse_v2Type as UpdateInstanceStdoutResponseType,
+  PutInstanceStdoutRequest_v1Type as UpdateInstanceStdoutRequestType,
+} from '../../validations/cloudValidations'
+
+// Define response type for putInstanceArtifacts (returns z.ZodAny with resExample: {})
+type PutInstanceArtifactsResponseType = any
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
@@ -242,47 +253,15 @@ function noProxyPreflightTimeout (): number {
   }
 }
 
-export type CreateRunOptions = {
+// Use cloud validation types for better type safety
+export type CreateRunOptions = CreateRunRequestType & {
   projectRoot: string
-  ci: {
-    params: string
-    provider: string
-  }
-  ciBuildId: string
-  projectId: string
-  recordKey: string
-  commit: string
-  specs: string[]
-  group: string
-  platform: string
-  parallel: boolean
-  specPattern: string[]
-  tags: string[]
-  testingType: 'e2e' | 'component'
-  timeout?: number
   project: ProjectBase
-  autoCancelAfterFailures?: number | undefined
+  timeout?: number
 }
 
-type CreateRunResponse = {
-  groupId: string
-  machineId: string
-  runId: string
-  tags: string[] | null
-  runUrl: string
-  warnings: (Record<string, unknown> & {
-    code: string
-    message: string
-    name: string
-  })[]
-  captureProtocolUrl?: string | undefined
-  capture?: {
-    url?: string
-    tags: string[] | null
-    mountVersion?: number
-    disabledMessage?: string
-  } | undefined
-}
+// Use cloud validation types for better type safety
+type CreateRunResponse = CreateRunResponseType
 
 export type ArtifactMetadata = {
   url: string
@@ -341,26 +320,26 @@ export default {
   rp,
 
   // For internal testing
-  setPreflightResult (toSet) {
+  setPreflightResult (toSet: any): void {
     preflightResult = {
       ...preflightResult,
       ...toSet,
     }
   },
 
-  resetPreflightResult () {
+  resetPreflightResult (): void {
     recordRoutes = apiRoutes
     preflightResult = {
       encrypt: true,
     }
   },
 
-  ping () {
+  ping (): Bluebird<any> {
     return rp.get(apiRoutes.ping())
     .catch(tagError)
   },
 
-  getAuthUrls () {
+  getAuthUrls (): Bluebird<any> {
     return rp.get({
       url: apiRoutes.auth(),
       json: true,
@@ -446,7 +425,7 @@ export default {
         }
       }
 
-      if (script) {
+      if (script && options.testingType === 'e2e' || options.testingType === 'component') {
         const config = options.project.getConfig()
 
         await options.project.protocolManager.prepareAndSetupProtocol(script, {
@@ -471,7 +450,7 @@ export default {
     .catch(tagError)
   },
 
-  createInstance (runId: string, body: CreateInstanceRequestBody, timeout?: number): Bluebird<CreateInstanceResponse> {
+  createInstance (runId: string, body: CreateInstanceRequestType, timeout?: number): Bluebird<CreateInstanceResponse> {
     return retryWithBackoff((attemptIndex) => {
       return rp.post({
         body,
@@ -490,7 +469,7 @@ export default {
     }) as Bluebird<CreateInstanceResponse>
   },
 
-  postInstanceTests (options) {
+  postInstanceTests (options: { instanceId: string, runId: string, timeout?: number, [key: string]: any }): Bluebird<PostInstanceTestsResponseType> {
     const { instanceId, runId, timeout, ...body } = options
 
     return retryWithBackoff((attemptIndex) => {
@@ -511,7 +490,7 @@ export default {
     })
   },
 
-  updateInstanceStdout (options) {
+  updateInstanceStdout (options: UpdateInstanceStdoutRequestType & { instanceId: string, runId: string, timeout?: number }): Bluebird<UpdateInstanceStdoutResponseType> {
     return retryWithBackoff((attemptIndex) => {
       return rp.put({
         url: recordRoutes.instanceStdout(options.instanceId),
@@ -531,7 +510,7 @@ export default {
     })
   },
 
-  updateInstanceArtifacts (options: UpdateInstanceArtifactsOptions, body: UpdateInstanceArtifactsPayload) {
+  updateInstanceArtifacts (options: UpdateInstanceArtifactsOptions, body: UpdateInstanceArtifactsPayload): Bluebird<PutInstanceArtifactsResponseType> {
     debug('PUT %s %o', recordRoutes.instanceArtifacts(options.instanceId), body)
 
     return retryWithBackoff((attemptIndex) => {
@@ -551,7 +530,7 @@ export default {
     })
   },
 
-  postInstanceResults (options) {
+  postInstanceResults (options: PostInstanceResultsRequestType & { instanceId: string, runId: string, timeout?: number }): Bluebird<PostInstanceResultsResponseType> {
     return retryWithBackoff((attemptIndex) => {
       return rp.post({
         url: recordRoutes.instanceResults(options.instanceId),
@@ -578,7 +557,7 @@ export default {
     })
   },
 
-  createCrashReport (body, authToken, timeout = 3000) {
+  createCrashReport (body: any, authToken: string, timeout = 3000): Bluebird<any> {
     return rp.post({
       url: apiRoutes.exceptions(),
       json: true,
@@ -591,7 +570,7 @@ export default {
     .catch(tagError)
   },
 
-  postLogout (authToken) {
+  postLogout (authToken: string): Bluebird<any> {
     return Bluebird.join(
       this.getAuthUrls(),
       machineId.machineId(),
@@ -612,11 +591,11 @@ export default {
     )
   },
 
-  clearCache () {
+  clearCache (): void {
     responseCache = {}
   },
 
-  sendPreflight (preflightInfo) {
+  sendPreflight (preflightInfo: any): Bluebird<any> {
     return retryWithBackoff(async (attemptIndex) => {
       const { projectRoot, timeout, ...preflightRequestBody } = preflightInfo
 
@@ -674,7 +653,7 @@ export default {
     })
   },
 
-  async getCaptureProtocolScript (url: string) {
+  async getCaptureProtocolScript (url: string): Promise<string> {
     // TODO(protocol): Ensure this is removed in production
     if (process.env.CYPRESS_LOCAL_PROTOCOL_PATH) {
       debugProtocol(`Loading protocol via script at local path %s`, process.env.CYPRESS_LOCAL_PROTOCOL_PATH)
