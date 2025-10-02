@@ -1,7 +1,6 @@
 import { SystemError } from '../../../../../lib/cloud/network/system_error'
 import { proxyquire } from '../../../../spec_helper'
 import os from 'os'
-import { agent } from '@packages/network'
 import pkg from '@packages/root'
 import { ParseKinds } from '../../../../../lib/cloud/network/fetch'
 
