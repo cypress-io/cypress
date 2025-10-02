@@ -3,6 +3,7 @@ import fetch from 'cross-fetch'
 import { createTestDataContext } from '../helper'
 import { UtilDataSource } from '../../../src/sources/UtilDataSource'
 import { DataContext } from '../../../src'
+import { strictAgent } from '@packages/network'
 
 // Mock cross-fetch
 jest.mock('cross-fetch')
@@ -40,7 +41,7 @@ describe('UtilDataSource', () => {
       const result = await utilDataSource.fetch(url, init)
 
       expect(mockedFetch).toHaveBeenCalledWith(url, {
-        agent: expect.any(Object), // strictAgent
+        agent: strictAgent,
         method: 'POST',
         body: 'test',
       })
@@ -86,7 +87,7 @@ describe('UtilDataSource', () => {
       await utilDataSource.fetch(url, init)
 
       expect(mockedFetch).toHaveBeenCalledWith(url, {
-        agent: expect.any(Object),
+        agent: strictAgent,
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ test: 'data' }),
