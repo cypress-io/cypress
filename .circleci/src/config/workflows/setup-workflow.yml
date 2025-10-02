@@ -1,5 +1,0 @@
-jobs:
-  - verify-ci-should-run
-  - trigger-main-workflow:
-      requires:
-        - verify-ci-should-run

@@ -1,0 +1,10 @@
+[31mYou are attempting to pass the [95m--parallel[39m[31m flag to a run that was completed over 24 hours ago.[39m
+[31m[39m
+[31mThe existing run is: [94mhttps://cloud.cypress.io/project/abcd/runs/1[39m[31m[39m
+[31m[39m
+[31mYou cannot parallelize a run that has been complete for that long.[39m
+[31m[39m
+[31mThe --group flag you passed was: [33mfoo[39m[31m[39m
+[31mThe --parallel flag you passed was: [33mtrue[39m[31m[39m
+[31m[39m
+[31mhttps://on.cypress.io/stale-run[39m

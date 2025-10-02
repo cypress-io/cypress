@@ -1,0 +1,7 @@
+[31mYou passed the [95m--ci-build-id[39m[31m flag but did not provide either a [95m--group[39m[31m or [95m--parallel[39m[31m flag.[39m
+[31m[39m
+[31mThe --ci-build-id flag you passed was: [33mciBuildId123[39m[31m[39m
+[31m[39m
+[31mThe --ci-build-id flag is used to either group or parallelize multiple runs together.[39m
+[31m[39m
+[31mhttps://on.cypress.io/incorrect-ci-build-id-usage[39m

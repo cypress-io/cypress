@@ -1,0 +1,6 @@
+[31mThe testing type selected ([33mcomponent[39m[31m) is not configured in your config file.[39m
+[31m[39m
+[31mPlease run ‘cypress open’ and choose your testing type to automatically update your configuration file.[39m
+[31m[39m
+[31mhttps://on.cypress.io/configuration[39m
+[31m[39m

@@ -2,12 +2,15 @@
   "name": "@packages/types",
   "version": "0.0.0-development",
   "private": true,
-  "main": "index.js",
-  "browser": "src/index.ts",
+  "main": "cjs/index.js",
+  "browser": "esm/index.js",
   "scripts": {
-    "build-prod": "tsc || echo 'built, with type errors'",
-    "check-ts": "tsc --noEmit",
-    "clean": "rimraf --glob 'src/*.js' 'src/**/*.js'",
+    "build": "yarn build:esm && yarn build:cjs",
+    "build-prod": "yarn build",
+    "build:cjs": "rimraf cjs && tsc -p tsconfig.cjs.json",
+    "build:esm": "rimraf esm && tsc -p tsconfig.esm.json",
+    "check-ts": "tsc -p tsconfig.cjs.json --noEmit",
+    "clean": "rimraf cjs esm",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "test": "vitest run"
   },
@@ -15,19 +18,23 @@
     "semver": "^7.7.1"
   },
   "devDependencies": {
+    "@packages/root": "0.0.0-development",
     "@types/node": "22.18.0",
     "axios": "^1.8.3",
     "better-sqlite3": "11.10.0",
     "devtools-protocol": "0.0.1459876",
     "express": "4.21.0",
+    "rimraf": "^6.0.1",
     "socket.io": "4.0.1",
     "typescript": "~5.4.5",
     "vitest": "^3.2.4"
   },
   "files": [
-    "src/*"
+    "cjs/*",
+    "esm/*"
   ],
   "types": "src/index.ts",
+  "module": "esm/index.js",
   "workspaces": {
     "nohoist": [
       "devtools-protocol"

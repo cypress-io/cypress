@@ -1,10 +1,10 @@
 import sinon from 'sinon'
 import { ManualInstallFragmentDoc } from '../generated/graphql-test'
 import ManualInstall from './ManualInstall.vue'
-import * as deps from '@packages/scaffold-config/src/dependencies'
 // tslint:disable-next-line: no-implicit-dependencies - need to handle this
 import { defaultMessages } from '@cy/i18n'
 import { Clipboard_CopyToClipboardDocument } from '../generated/graphql'
+import { WIZARD_DEPENDENCY_REACT, WIZARD_DEPENDENCY_TYPESCRIPT } from '@packages/scaffold-config/browser/dependencies'
 
 describe('<ManualInstall />', () => {
   it('playground', () => {
@@ -18,8 +18,8 @@ describe('<ManualInstall />', () => {
   })
 
   it('lists packages and can copy install command to clipboard', { viewportWidth: 800, viewportHeight: 600 }, () => {
-    const framework = deps.WIZARD_DEPENDENCY_REACT
-    const language = deps.WIZARD_DEPENDENCY_TYPESCRIPT
+    const framework = WIZARD_DEPENDENCY_REACT
+    const language = WIZARD_DEPENDENCY_TYPESCRIPT
 
     const stubCopy = sinon.stub()
 

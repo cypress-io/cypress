@@ -35,14 +35,14 @@ export async function nexusCodegenWatch () {
 }
 
 export async function graphqlCodegen () {
-  return spawned('gql-codegen', 'yarn graphql-codegen --config graphql-codegen.yml', {
+  return spawned('gql-codegen', 'yarn graphql-codegen --config graphql/graphql-codegen.yml', {
     cwd: monorepoPaths.pkgDataContext,
     waitForExit: true,
   })
 }
 
 export async function graphqlCodegenWatch () {
-  const spawned = universalSpawn('graphql-codegen', ['--watch', '--config', 'graphql-codegen.yml'], {
+  const spawned = universalSpawn('graphql-codegen', ['--watch', '--config', 'graphql/graphql-codegen.yml'], {
     cwd: monorepoPaths.pkgDataContext,
   })
   const dfd = pDefer()

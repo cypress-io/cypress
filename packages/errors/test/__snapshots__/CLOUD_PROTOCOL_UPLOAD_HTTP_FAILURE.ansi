@@ -1,0 +1,9 @@
+[31mWarning: We encountered an HTTP error while uploading the Test Replay recording for this spec.[39m
+[31m[39m
+[31mThese results will not display Test Replay recordings.[39m
+[31m[39m
+[31mThis error will not affect or change the exit code.[39m
+[31m[39m
+[31m[94mhttps://some/url[39m[31m responded with HTTP [95m500[39m[31m: [95mInternal Server Error[39m[31m[39m
+[31m[39m
+[31m[94m{ status: 500, reason: 'unknown'}[39m[31m[39m
