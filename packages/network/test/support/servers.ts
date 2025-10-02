@@ -1,4 +1,4 @@
-import Promise from 'bluebird'
+import Bluebird from 'bluebird'
 import express from 'express'
 import http from 'http'
 import https from 'https'
@@ -31,11 +31,12 @@ function createExpressApp (requestCallback: (req) => void) {
   return app
 }
 
-function getCAInformation () {
-  return CA.create()
-  .then((ca) => {
-    return Promise.all([ca.generateServerCertificateKeys('localhost'), ca.getCACertPath()])
-  })
+async function getCAInformation () {
+  const ca = await CA.create()
+
+  const [serverCertificateKeys, caCertificatePath] = await Promise.all([ca.generateServerCertificateKeys('localhost'), ca.getCACertPath()])
+
+  return { serverCertificateKeys, caCertificatePath }
 }
 
 function onWsConnection (socket) {
@@ -51,43 +52,42 @@ export class Servers {
   caCertificatePath: string
   lastRequestHeaders: any
 
-  start (httpPort: number, httpsPort: number) {
-    return Promise.join(
+  async start (httpPort: number, httpsPort: number) {
+    const [app, { serverCertificateKeys, caCertificatePath }]: [Express.Application, {serverCertificateKeys: string[], caCertificatePath: string}] = await Promise.all([
       createExpressApp((req) => this.lastRequestHeaders = req.headers),
       getCAInformation(),
-    )
-    .spread((app: Express.Application, [serverCertificateKeys, caCertificatePath]: [serverCertificateKeys: string[], caCertificatePath: string]) => {
-      this.httpServer = Promise.promisifyAll(
-        allowDestroy(http.createServer(app)),
-      ) as http.Server & AsyncServer
+    ])
 
-      this.wsServer = new SocketIOServer(this.httpServer)
+    this.httpServer = Bluebird.promisifyAll(
+      allowDestroy(http.createServer(app)),
+    ) as http.Server & AsyncServer
 
-      this.caCertificatePath = caCertificatePath
-      this.https = { cert: serverCertificateKeys[0], key: serverCertificateKeys[1] }
-      this.httpsServer = Promise.promisifyAll(
-        allowDestroy(https.createServer(this.https, <http.RequestListener>app)),
-      ) as https.Server & AsyncServer
+    this.wsServer = new SocketIOServer(this.httpServer)
 
-      this.wssServer = new SocketIOServer(this.httpsServer)
+    this.caCertificatePath = caCertificatePath
+    this.https = { cert: serverCertificateKeys[0], key: serverCertificateKeys[1] }
+    this.httpsServer = Bluebird.promisifyAll(
+      allowDestroy(https.createServer(this.https, <http.RequestListener>app)),
+    ) as https.Server & AsyncServer
 
-      ;[this.wsServer, this.wssServer].map((ws) => {
-        ws.on('connection', onWsConnection)
-      })
+    this.wssServer = new SocketIOServer(this.httpsServer)
 
-      // @ts-skip
-      return Promise.join(
-        this.httpServer.listenAsync(httpPort),
-        this.httpsServer.listenAsync(httpsPort),
-      )
-      .return()
+    ;[this.wsServer, this.wssServer].map((ws) => {
+      ws.on('connection', onWsConnection)
     })
+
+    await Promise.all([
+      this.httpServer.listenAsync(httpPort),
+      this.httpsServer.listenAsync(httpsPort),
+    ])
+
+    return undefined
   }
 
-  stop () {
-    return Promise.join(
+  async stop () {
+    await Promise.all([
       this.httpServer.destroyAsync(),
       this.httpsServer.destroyAsync(),
-    )
+    ])
   }
 }
