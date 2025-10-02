@@ -6,7 +6,7 @@
 
 .studio-header__test-section {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   border: 1px solid $gray-900;
   border-left: none;
   border-right: none;
@@ -15,6 +15,11 @@
   font-size: 14px;
   line-height: 20px;
   flex-shrink: 0;
+
+  .state-icon {
+    height: 32px;
+    min-height: 32px;
+  }
 
   svg {
     flex-shrink: 0;
@@ -29,7 +34,6 @@
   display: flex;
   flex-grow: 1;
   gap: 16px;
-  align-items: center;
 
   .studio-header__back-button {
     padding: 0;
@@ -40,7 +44,6 @@
 
   .studio-header__test-section-left-content {
     display: flex;
-    align-items: center;
     gap: 8px;
   }
 }
@@ -55,6 +58,8 @@
   color: $white;
   font-weight: 500;
   flex-grow: 1;
+  min-height: 32px;
+  margin-top: 5px;
 }
 
 .studio-header__test-tooltip-wrapper {
