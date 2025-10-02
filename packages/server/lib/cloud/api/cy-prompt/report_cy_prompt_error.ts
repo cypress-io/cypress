@@ -17,6 +17,8 @@ interface CyPromptError {
   name: string
   stack: string
   message: string
+  code?: string | number
+  errno?: string | number
   cyPromptMethod: string
   cyPromptMethodArgs?: string
 }
@@ -82,6 +84,8 @@ export function reportCyPromptError ({
         name: stripPath(errorObject.name ?? `Unknown name`),
         stack: stripPath(errorObject.stack ?? `Unknown stack`),
         message: stripPath(errorObject.message ?? `Unknown message`),
+        code: 'code' in errorObject ? errorObject.code as string : undefined,
+        errno: 'errno' in errorObject ? errorObject.errno as number : undefined,
         cyPromptMethod,
         cyPromptMethodArgs: cyPromptMethodArgsString ? stripPath(cyPromptMethodArgsString) : undefined,
       }],

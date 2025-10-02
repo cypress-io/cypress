@@ -127,6 +127,8 @@ describe('lib/cloud/api/cy-prompt/report_cy_prompt_error', () => {
             name: 'Error',
             message: 'string error',
             stack: sinon.match((stack) => stack.includes('<stripped-path>report_cy_prompt_error_spec.ts')),
+            code: undefined,
+            errno: undefined,
             cyPromptMethod: 'testMethod',
             cyPromptMethodArgs: undefined,
           }],
@@ -142,6 +144,9 @@ describe('lib/cloud/api/cy-prompt/report_cy_prompt_error', () => {
     it('handles Error objects correctly', () => {
       const error = new Error('test error')
 
+      ;(error as any).code = 'test code'
+
+      ;(error as any).errno = 123
       error.stack = 'test stack'
 
       reportCyPromptError({
@@ -161,6 +166,8 @@ describe('lib/cloud/api/cy-prompt/report_cy_prompt_error', () => {
             name: 'Error',
             message: 'test error',
             stack: 'test stack',
+            code: 'test code',
+            errno: 123,
             cyPromptMethod: 'testMethod',
             cyPromptMethodArgs: undefined,
           }],
@@ -195,6 +202,8 @@ describe('lib/cloud/api/cy-prompt/report_cy_prompt_error', () => {
             name: 'Error',
             message: 'test error',
             stack: sinon.match((stack) => stack.includes('<stripped-path>report_cy_prompt_error_spec.ts')),
+            code: undefined,
+            errno: undefined,
             cyPromptMethod: 'testMethod',
             cyPromptMethodArgs: JSON.stringify({ args: ['arg1', { key: '<stripped-path>file.js' }] }),
           }],
@@ -231,6 +240,8 @@ describe('lib/cloud/api/cy-prompt/report_cy_prompt_error', () => {
             name: 'Error',
             message: 'test error',
             stack: sinon.match((stack) => stack.includes('<stripped-path>report_cy_prompt_error_spec.ts')),
+            code: undefined,
+            errno: undefined,
             cyPromptMethod: 'testMethod',
             cyPromptMethodArgs: sinon.match(/Unknown args/),
           }],

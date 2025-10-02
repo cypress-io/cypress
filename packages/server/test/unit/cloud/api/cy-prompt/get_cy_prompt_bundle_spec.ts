@@ -1,6 +1,7 @@
 import { sinon, proxyquire } from '../../../../spec_helper'
 import { Readable, Writable } from 'stream'
 import { HttpError } from '../../../../../lib/cloud/network/http_error'
+import { strictAgent } from '@packages/network'
 
 describe('getCyPromptBundle', () => {
   let writeResult: string
@@ -68,7 +69,7 @@ describe('getCyPromptBundle', () => {
     const responseSignature = await getCyPromptBundle({ cyPromptUrl: 'http://localhost:1234/cy-prompt/bundle/abc.tgz', projectId, bundlePath: '/tmp/cypress/cy-prompt/abc/bundle.tar' })
 
     expect(crossFetchStub).to.be.calledWith('http://localhost:1234/cy-prompt/bundle/abc.tgz', {
-      agent: sinon.match.any,
+      agent: sinon.match((agent) => agent.httpsAgent.options.rejectUnauthorized === true),
       method: 'GET',
       headers: {
         'x-route-version': '1',
@@ -114,7 +115,7 @@ describe('getCyPromptBundle', () => {
     const responseSignature = await getCyPromptBundle({ cyPromptUrl: 'http://localhost:1234/cy-prompt/bundle/abc.tgz', projectId, bundlePath: '/tmp/cypress/cy-prompt/abc/bundle.tar' })
 
     expect(crossFetchStub).to.be.calledWith('http://localhost:1234/cy-prompt/bundle/abc.tgz', {
-      agent: sinon.match.any,
+      agent: sinon.match((agent) => agent.httpsAgent.options.rejectUnauthorized === true),
       method: 'GET',
       headers: {
         'x-route-version': '1',
@@ -145,7 +146,7 @@ describe('getCyPromptBundle', () => {
 
     expect(crossFetchStub).to.be.calledThrice
     expect(crossFetchStub).to.be.calledWith('http://localhost:1234/cy-prompt/bundle/abc.tgz', {
-      agent: sinon.match.any,
+      agent: sinon.match((agent) => agent.httpsAgent.options.rejectUnauthorized === true),
       method: 'GET',
       headers: {
         'x-route-version': '1',
@@ -170,7 +171,7 @@ describe('getCyPromptBundle', () => {
     await expect(getCyPromptBundle({ cyPromptUrl: 'http://localhost:1234/cy-prompt/bundle/abc.tgz', projectId, bundlePath: '/tmp/cypress/cy-prompt/abc/bundle.tar' })).to.be.rejected
 
     expect(crossFetchStub).to.be.calledWith('http://localhost:1234/cy-prompt/bundle/abc.tgz', {
-      agent: sinon.match.any,
+      agent: sinon.match((agent) => agent.httpsAgent.options.rejectUnauthorized === true),
       method: 'GET',
       headers: {
         'x-route-version': '1',
@@ -213,7 +214,7 @@ describe('getCyPromptBundle', () => {
     expect(writeResult).to.eq('console.log("cy-prompt script")')
 
     expect(crossFetchStub).to.be.calledWith('http://localhost:1234/cy-prompt/bundle/abc.tgz', {
-      agent: sinon.match.any,
+      agent: sinon.match((agent) => agent.httpsAgent.options.rejectUnauthorized === true),
       method: 'GET',
       headers: {
         'x-route-version': '1',
@@ -248,7 +249,7 @@ describe('getCyPromptBundle', () => {
     await expect(getCyPromptBundle({ cyPromptUrl: 'http://localhost:1234/cy-prompt/bundle/abc.tgz', projectId, bundlePath: '/tmp/cypress/cy-prompt/abc/bundle.tar' })).to.be.rejectedWith('Unable to get cy-prompt signature')
 
     expect(crossFetchStub).to.be.calledWith('http://localhost:1234/cy-prompt/bundle/abc.tgz', {
-      agent: sinon.match.any,
+      agent: sinon.match((agent) => agent.httpsAgent.options.rejectUnauthorized === true),
       method: 'GET',
       headers: {
         'x-route-version': '1',
@@ -281,7 +282,7 @@ describe('getCyPromptBundle', () => {
     await expect(getCyPromptBundle({ cyPromptUrl: 'http://localhost:1234/cy-prompt/bundle/abc.tgz', projectId, bundlePath: '/tmp/cypress/cy-prompt/abc/bundle.tar' })).to.be.rejectedWith('Unable to get cy-prompt manifest signature')
 
     expect(crossFetchStub).to.be.calledWith('http://localhost:1234/cy-prompt/bundle/abc.tgz', {
-      agent: sinon.match.any,
+      agent: sinon.match((agent) => agent.httpsAgent.options.rejectUnauthorized === true),
       method: 'GET',
       headers: {
         'x-route-version': '1',

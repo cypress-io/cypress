@@ -39,10 +39,6 @@ export const getStudioBundle = async ({ studioUrl, bundlePath }: { studioUrl: st
       })
 
       if (!response.ok) {
-        throw new Error(`Failed to download studio bundle: ${response.statusText}`)
-      }
-
-      if (response.status >= 400) {
         const err = await HttpError.fromResponse(response)
 
         throw err

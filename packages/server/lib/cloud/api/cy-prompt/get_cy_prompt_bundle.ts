@@ -34,10 +34,6 @@ export const getCyPromptBundle = async ({ cyPromptUrl, projectId, bundlePath }: 
       })
 
       if (!response.ok) {
-        throw new Error(`Failed to download cy-prompt bundle: ${response.statusText}`)
-      }
-
-      if (response.status >= 400) {
         const err = await HttpError.fromResponse(response)
 
         throw err
