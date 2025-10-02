@@ -292,7 +292,7 @@ export class StudioLifecycleManager {
       telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_PROTOCOL_PREPARE_START)
       await protocolManager.prepareProtocol(script, {
         runId: 'studio',
-        projectId: cfg.projectId,
+        projectId: currentProjectOptions.projectSlug,
         testingType: cfg.testingType,
         cloudApi: {
           url: routes.apiUrl,

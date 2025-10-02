@@ -1,4 +1,5 @@
-import { sinon, proxyquire } from '../../../spec_helper'
+import { proxyquire } from '../../../spec_helper'
+import sinon from 'sinon'
 import { expect } from 'chai'
 import { StudioManager } from '../../../../lib/cloud/studio/studio'
 import { StudioLifecycleManager } from '../../../../lib/cloud/studio/StudioLifecycleManager'
@@ -141,7 +142,7 @@ describe('StudioLifecycleManager', () => {
       },
       project: {
         getConfig: sinon.stub().resolves({
-          projectId: 'test-project-id',
+          projectId: 'abc123',
         }),
       },
     } as unknown as DataContext
@@ -149,7 +150,7 @@ describe('StudioLifecycleManager', () => {
     mockCloudDataSource = {
       getCloudUrl: sinon.stub().returns('https://cloud.cypress.io'),
       additionalHeaders: sinon.stub().resolves({ 'Authorization': 'Bearer test-token' }),
-    } as CloudDataSource
+    } as unknown as CloudDataSource
 
     mockCfg = {
       projectId: 'abc123',
@@ -217,7 +218,7 @@ describe('StudioLifecycleManager', () => {
       expect(ensureStudioBundleStub).to.be.calledWith({
         studioPath: path.join(os.tmpdir(), 'cypress', 'studio', 'abc'),
         studioUrl: 'https://cloud.cypress.io/studio/bundle/abc.tgz',
-        projectId: 'test-project-id',
+        projectId: 'abc123',
       })
 
       expect(studioManagerSetupStub).to.be.calledWith({
@@ -236,7 +237,7 @@ describe('StudioLifecycleManager', () => {
       })
 
       expect(postStudioSessionStub).to.be.calledWith({
-        projectId: 'test-project-id',
+        projectId: 'abc123',
       })
 
       expect(readFileStub).to.be.calledWith(path.join(os.tmpdir(), 'cypress', 'studio', 'abc', 'server', 'index.js'), 'utf8')
@@ -245,7 +246,7 @@ describe('StudioLifecycleManager', () => {
       expect(prepareProtocolStub).not.to.be.called
 
       expect(initializeTelemetryReporterStub).to.be.calledWith({
-        projectSlug: 'test-project-id',
+        projectSlug: 'abc123',
         cloudDataSource: mockCloudDataSource,
       })
 
@@ -299,7 +300,7 @@ describe('StudioLifecycleManager', () => {
       expect(ensureStudioBundleStub).to.be.calledWith({
         studioPath: path.join(os.tmpdir(), 'cypress', 'studio', 'abc'),
         studioUrl: 'https://cloud.cypress.io/studio/bundle/abc.tgz',
-        projectId: 'test-project-id',
+        projectId: 'abc123',
       })
 
       expect(studioManagerSetupStub).to.be.calledWith({
@@ -318,7 +319,7 @@ describe('StudioLifecycleManager', () => {
       })
 
       expect(postStudioSessionStub).to.be.calledWith({
-        projectId: 'test-project-id',
+        projectId: 'abc123',
       })
 
       expect(readFileStub).to.be.calledWith(path.join(os.tmpdir(), 'cypress', 'studio', 'abc', 'server', 'index.js'), 'utf8')
@@ -345,7 +346,7 @@ describe('StudioLifecycleManager', () => {
       })
 
       expect(initializeTelemetryReporterStub).to.be.calledWith({
-        projectSlug: 'test-project-id',
+        projectSlug: 'abc123',
         cloudDataSource: mockCloudDataSource,
       })
 
@@ -416,7 +417,7 @@ describe('StudioLifecycleManager', () => {
       })
 
       expect(postStudioSessionStub).to.be.calledWith({
-        projectId: 'test-project-id',
+        projectId: 'abc123',
       })
 
       expect(readFileStub).to.be.calledWith(path.join('/path', 'to', 'studio', 'server', 'index.js'), 'utf8')
@@ -623,7 +624,7 @@ describe('StudioLifecycleManager', () => {
       }
 
       expect(initializeTelemetryReporterStub).to.be.calledWith({
-        projectSlug: 'test-project-id',
+        projectSlug: 'abc123',
         cloudDataSource: mockCloudDataSource,
       })
 
