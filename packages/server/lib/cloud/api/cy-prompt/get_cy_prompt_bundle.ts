@@ -2,10 +2,12 @@ import { asyncRetry, linearDelay } from '../../../util/async_retry'
 import { isRetryableError } from '../../network/is_retryable_error'
 import fetch from 'cross-fetch'
 import os from 'os'
-import { agent } from '@packages/network'
+import { strictAgent } from '@packages/network'
 import { PUBLIC_KEY_VERSION } from '../../constants'
 import { createWriteStream } from 'fs'
 import { verifySignatureFromFile } from '../../encryption'
+import { HttpError } from '../../network/http_error'
+import { SystemError } from '../../network/system_error'
 
 const pkg = require('@packages/root')
 const _delay = linearDelay(500)
@@ -15,39 +17,60 @@ export const getCyPromptBundle = async ({ cyPromptUrl, projectId, bundlePath }: 
   let responseManifestSignature: string | null = null
 
   await (asyncRetry(async () => {
-    const response = await fetch(cyPromptUrl, {
-      // @ts-expect-error - this is supported
-      agent,
-      method: 'GET',
-      headers: {
-        'x-route-version': '1',
-        'x-cypress-signature': PUBLIC_KEY_VERSION,
-        ...(projectId ? { 'x-cypress-project-slug': projectId } : {}),
-        'x-cypress-cy-prompt-mount-version': '1',
-        'x-os-name': os.platform(),
-        'x-cypress-version': pkg.version,
-      },
-      encrypt: 'signed',
-    })
-
-    if (!response.ok) {
-      throw new Error(`Failed to download cy-prompt bundle: ${response.statusText}`)
-    }
-
-    responseSignature = response.headers.get('x-cypress-signature')
-    responseManifestSignature = response.headers.get('x-cypress-manifest-signature')
-
-    await new Promise<void>((resolve, reject) => {
-      const writeStream = createWriteStream(bundlePath)
-
-      writeStream.on('error', reject)
-      writeStream.on('finish', () => {
-        resolve()
+    try {
+      const response = await fetch(cyPromptUrl, {
+        // @ts-expect-error - this is supported
+        agent: strictAgent,
+        method: 'GET',
+        headers: {
+          'x-route-version': '1',
+          'x-cypress-signature': PUBLIC_KEY_VERSION,
+          ...(projectId ? { 'x-cypress-project-slug': projectId } : {}),
+          'x-cypress-cy-prompt-mount-version': '1',
+          'x-os-name': os.platform(),
+          'x-cypress-version': pkg.version,
+        },
+        encrypt: 'signed',
       })
 
-      // @ts-expect-error - this is supported
-      response.body?.pipe(writeStream)
-    })
+      if (!response.ok) {
+        throw new Error(`Failed to download cy-prompt bundle: ${response.statusText}`)
+      }
+
+      if (response.status >= 400) {
+        const err = await HttpError.fromResponse(response)
+
+        throw err
+      }
+
+      responseSignature = response.headers.get('x-cypress-signature')
+      responseManifestSignature = response.headers.get('x-cypress-manifest-signature')
+
+      await new Promise<void>((resolve, reject) => {
+        const writeStream = createWriteStream(bundlePath)
+
+        writeStream.on('error', reject)
+        writeStream.on('finish', () => {
+          resolve()
+        })
+
+        // @ts-expect-error - this is supported
+        response.body?.pipe(writeStream)
+      })
+    } catch (error) {
+      if (HttpError.isHttpError(error)) {
+        throw error
+      }
+
+      if (error.errno || error.code) {
+        const sysError = new SystemError(error, cyPromptUrl, error.code, error.errno)
+
+        sysError.stack = error.stack
+        throw sysError
+      }
+
+      throw error
+    }
   }, {
     maxAttempts: 3,
     retryDelay: _delay,

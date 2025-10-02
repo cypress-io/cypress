@@ -469,4 +469,10 @@ class HttpsAgent extends https.Agent {
 
 const agent = new CombinedAgent()
 
+const strictAgent = new CombinedAgent({}, {
+  rejectUnauthorized: true,
+})
+
 export default agent
+
+export { strictAgent }
