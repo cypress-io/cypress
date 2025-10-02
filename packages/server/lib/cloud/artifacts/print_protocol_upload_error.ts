@@ -1,5 +1,5 @@
-import { HttpError } from '../network/http_error'
-import { SystemError } from '../network/system_error'
+import { HttpError } from '@packages/errors/src/network/http_error'
+import { SystemError } from '@packages/errors/src/network/system_error'
 import { StreamStalledError } from '../upload/stream_stalled_error'
 import Debug from 'debug'
 import * as errors from '../../errors'
