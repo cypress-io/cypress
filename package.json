@@ -48,6 +48,7 @@
     "lint:base": "lerna run lint --no-bail",
     "lint:fix": "lerna run lint --no-bail --concurrency 2 --scope=@cypress/{grep,mount-utils,schematic,puppeteer} -- --fix",
     "npm-release": "node scripts/npm-release.js",
+    "pack-ci": "./scripts/pack-ci.sh",
     "prepare": "husky install",
     "prepare-release-artifacts": "node ./scripts/prepare-release-artifacts.js",
     "pretest-e2e": "yarn ensure-deps",
@@ -268,7 +269,7 @@
   },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
-    "*workflows.yml": "node scripts/format-workflow-file.js"
+    ".circleci/*.yml": "circleci config validate"
   },
   "resolutions": {
     "**/@types/cheerio": "0.22.21",
