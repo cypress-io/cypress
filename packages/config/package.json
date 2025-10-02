@@ -3,12 +3,15 @@
   "version": "0.0.0-development",
   "description": "Config contains the configuration types and validation function used in the cypress electron application.",
   "private": true,
-  "main": "index.js",
-  "browser": "src/browser.ts",
+  "main": "cjs/index.js",
+  "browser": "esm/browser.js",
   "scripts": {
-    "build-prod": "tsc || echo 'built, with errors'",
-    "check-ts": "tsc --noEmit && yarn -s tslint",
-    "clean": "rimraf --glob './src/*.js' './src/**/*.js' './src/**/**/*.js' './test/!**__fixtures__**/**/*.js' || echo 'cleaned'",
+    "build": "yarn build:esm && yarn build:cjs",
+    "build-prod": "yarn build",
+    "build:cjs": "rimraf cjs && tsc -p tsconfig.cjs.json",
+    "build:esm": "rimraf esm && tsc -p tsconfig.esm.json",
+    "check-ts": "tsc -p tsconfig.cjs.json --noEmit && yarn -s tslint -p tsconfig.cjs.json",
+    "clean": "rimraf cjs esm",
     "clean-deps": "rimraf node_modules",
     "lint": "eslint --ext .js,.ts,.json, .",
     "test": "yarn test-unit",
@@ -42,11 +45,14 @@
     "@packages/ts": "0.0.0-development",
     "@packages/types": "0.0.0-development",
     "babel-plugin-tester": "^10.1.0",
+    "rimraf": "6.0.1",
     "vitest": "^3.2.4"
   },
   "files": [
-    "src"
+    "cjs/*",
+    "esm/*"
   ],
   "types": "src/index.ts",
+  "module": "esm/index.js",
   "nx": {}
 }

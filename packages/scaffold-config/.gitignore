@@ -1,1 +1,3 @@
-src/**/*.js
+cjs/
+esm/
+browser/

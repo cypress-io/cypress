@@ -99,7 +99,7 @@ describe('visual error templates', () => {
 
         const consoleLogOutput = getConsoleLogOutput()
 
-       expect(consoleLogOutput).toMatchFileSnapshot(`./__snapshots__/${filename}.ansi`)
+        await expect(consoleLogOutput).toMatchFileSnapshot(`./__snapshots__/${filename}.ansi`)
       })
     }
   }
