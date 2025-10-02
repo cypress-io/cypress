@@ -11,6 +11,6 @@ export const NON_RETRIABLE_CERT_ERROR_CODES = Object.freeze({
 
 type NonRetriableCertErrorCode = typeof NON_RETRIABLE_CERT_ERROR_CODES[keyof typeof NON_RETRIABLE_CERT_ERROR_CODES]
 
-export const isNonRetriableCertErrorCode = (errorCode: string): errorCode is NonRetriableCertErrorCode => {
+export const isNonRetriableCertErrorCode = (errorCode: string | number): errorCode is NonRetriableCertErrorCode => {
   return Object.values(NON_RETRIABLE_CERT_ERROR_CODES).includes(errorCode as NonRetriableCertErrorCode)
 }
