@@ -1,4 +1,4 @@
-import agent from './agent'
+import agent, { strictAgent } from './agent'
 import * as blocked from './blocked'
 import * as connect from './connect'
 import * as cors from './cors'
@@ -14,6 +14,7 @@ export {
   httpUtils,
   uri,
   clientCertificates,
+  strictAgent,
 }
 
 export { allowDestroy } from './allow-destroy'

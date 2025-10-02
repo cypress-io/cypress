@@ -1,52 +1,53 @@
+import { describe, expect, jest, it } from '@jest/globals'
 import type { DataContext } from '../../../src'
 import { AuthActions } from '../../../src/actions/AuthActions'
 import { createTestDataContext } from '../helper'
-import sinon, { SinonStub } from 'sinon'
-import sinonChai from 'sinon-chai'
-import chai, { expect } from 'chai'
 import { FoundBrowser } from '@packages/types'
 
-chai.use(sinonChai)
-
 describe('AuthActions', () => {
-  context('.login', () => {
+  describe('.login', () => {
     let ctx: DataContext
     let actions: AuthActions
 
     beforeEach(() => {
-      sinon.restore()
-
       ctx = createTestDataContext('open')
-
-      ;(ctx._apis.authApi.logIn as SinonStub)
-      .resolves({ name: 'steve', email: 'steve@apple.com', authToken: 'foo' })
+      jest.mocked(ctx._apis.authApi.logIn).mockResolvedValue({ name: 'steve', email: 'steve@apple.com', authToken: 'foo' })
 
       actions = new AuthActions(ctx)
     })
 
     it('sets coreData.user', async () => {
+      // @ts-expect-error - incorrect number of arguments
       await actions.login()
-      expect(ctx.coreData.user).to.include({ name: 'steve', email: 'steve@apple.com', authToken: 'foo' })
+      expect(ctx.coreData.user).toEqual(expect.objectContaining({ name: 'steve', email: 'steve@apple.com', authToken: 'foo' }))
     })
 
     it('focuses the main window if there is no activeBrowser', async () => {
       ctx.coreData.activeBrowser = null
 
+      // @ts-expect-error - incorrect number of arguments
       await actions.login()
 
-      expect(ctx._apis.electronApi.focusMainWindow).to.be.calledOnce
-      expect(ctx._apis.browserApi.focusActiveBrowserWindow).to.not.be.called
+      expect(ctx._apis.electronApi.focusMainWindow).toHaveBeenCalledTimes(1)
+      expect(ctx._apis.browserApi.focusActiveBrowserWindow).not.toHaveBeenCalled()
     })
 
     it('focuses the main window if the activeBrowser does not support focus', async () => {
       const browser = ctx.coreData.activeBrowser = { name: 'foo' } as FoundBrowser
 
-      sinon.stub(ctx.browser, 'isFocusSupported').withArgs(browser).resolves(false)
+      jest.spyOn(ctx.browser, 'isFocusSupported').mockImplementation((args) => {
+        if (args === browser) {
+          return Promise.resolve(false)
+        }
 
+        return Promise.resolve(true)
+      })
+
+      // @ts-expect-error - incorrect number of arguments
       await actions.login()
 
-      expect(ctx._apis.electronApi.focusMainWindow).to.be.calledOnce
-      expect(ctx._apis.browserApi.focusActiveBrowserWindow).to.not.be.called
+      expect(ctx._apis.electronApi.focusMainWindow).toHaveBeenCalledTimes(1)
+      expect(ctx._apis.browserApi.focusActiveBrowserWindow).not.toHaveBeenCalled()
     })
 
     it('focuses the main window if the activeBrowser supports focus, but browser is closed', async () => {
@@ -54,12 +55,19 @@ describe('AuthActions', () => {
 
       ctx.coreData.app.browserStatus = 'closed'
 
-      sinon.stub(ctx.browser, 'isFocusSupported').withArgs(browser).resolves(true)
+      jest.spyOn(ctx.browser, 'isFocusSupported').mockImplementation((args) => {
+        if (args === browser) {
+          return Promise.resolve(true)
+        }
 
+        return Promise.resolve(false)
+      })
+
+      // @ts-expect-error - incorrect number of arguments
       await actions.login()
 
-      expect(ctx._apis.electronApi.focusMainWindow).to.be.calledOnce
-      expect(ctx._apis.browserApi.focusActiveBrowserWindow).to.not.be.called
+      expect(ctx._apis.electronApi.focusMainWindow).toHaveBeenCalledTimes(1)
+      expect(ctx._apis.browserApi.focusActiveBrowserWindow).not.toHaveBeenCalled()
     })
 
     it('focuses the main window if the activeBrowser supports focus, but browser is opening', async () => {
@@ -67,12 +75,19 @@ describe('AuthActions', () => {
 
       ctx.coreData.app.browserStatus = 'opening'
 
-      sinon.stub(ctx.browser, 'isFocusSupported').withArgs(browser).resolves(true)
+      jest.spyOn(ctx.browser, 'isFocusSupported').mockImplementation((args) => {
+        if (args === browser) {
+          return Promise.resolve(true)
+        }
 
+        return Promise.resolve(false)
+      })
+
+      // @ts-expect-error - incorrect number of arguments
       await actions.login()
 
-      expect(ctx._apis.electronApi.focusMainWindow).to.be.calledOnce
-      expect(ctx._apis.browserApi.focusActiveBrowserWindow).to.not.be.called
+      expect(ctx._apis.electronApi.focusMainWindow).toHaveBeenCalledTimes(1)
+      expect(ctx._apis.browserApi.focusActiveBrowserWindow).not.toHaveBeenCalled()
     })
 
     it('focuses the browser if the activeBrowser does support focus and browser is open', async () => {
@@ -80,25 +95,39 @@ describe('AuthActions', () => {
 
       ctx.coreData.app.browserStatus = 'open'
 
-      sinon.stub(ctx.browser, 'isFocusSupported').withArgs(browser).resolves(true)
+      jest.spyOn(ctx.browser, 'isFocusSupported').mockImplementation((args) => {
+        if (args === browser) {
+          return Promise.resolve(true)
+        }
 
+        return Promise.resolve(false)
+      })
+
+      // @ts-expect-error - incorrect number of arguments
       await actions.login()
 
-      expect(ctx._apis.electronApi.focusMainWindow).to.not.be.called
-      expect(ctx._apis.browserApi.focusActiveBrowserWindow).to.be.calledOnce
+      expect(ctx._apis.electronApi.focusMainWindow).not.toHaveBeenCalled()
+      expect(ctx._apis.browserApi.focusActiveBrowserWindow).toHaveBeenCalledTimes(1)
     })
 
     it('does not focus anything if the activeBrowser does support focus but the main window is focused', async () => {
       const browser = ctx.coreData.activeBrowser = { name: 'foo' } as FoundBrowser
 
-      sinon.stub(ctx.browser, 'isFocusSupported').withArgs(browser).resolves(true)
+      jest.spyOn(ctx.browser, 'isFocusSupported').mockImplementation((args) => {
+        if (args === browser) {
+          return Promise.resolve(true)
+        }
 
-      ;(ctx._apis.electronApi.isMainWindowFocused as SinonStub).returns(true)
+        return Promise.resolve(false)
+      })
 
+      jest.spyOn(ctx._apis.electronApi, 'isMainWindowFocused').mockReturnValue(true)
+
+      // @ts-expect-error - incorrect number of arguments
       await actions.login()
 
-      expect(ctx._apis.electronApi.focusMainWindow).to.not.be.called
-      expect(ctx._apis.browserApi.focusActiveBrowserWindow).to.not.be.called
+      expect(ctx._apis.electronApi.focusMainWindow).not.toHaveBeenCalled()
+      expect(ctx._apis.browserApi.focusActiveBrowserWindow).not.toHaveBeenCalled()
     })
   })
 })

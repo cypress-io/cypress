@@ -8,7 +8,7 @@ import chaiAsPromised from 'chai-as-promised'
 import { ReadStream } from 'fs'
 import { StreamActivityMonitor } from '../../../../lib/cloud/upload/stream_activity_monitor'
 import { HttpError } from '../../../../lib/cloud/network/http_error'
-import { putFetch, ParseKinds } from '../../../../lib/cloud/network/put_fetch'
+import { putFetch, ParseKinds } from '../../../../lib/cloud/network/fetch'
 import { linearDelay, asyncRetry } from '../../../../lib/util/async_retry'
 import { isRetryableError } from '../../../../lib/cloud/network/is_retryable_error'
 import type { putProtocolArtifact } from '../../../../lib/cloud/api/put_protocol_artifact'
@@ -77,7 +77,7 @@ describe('putProtocolArtifact', () => {
 
     putFetchStub = sinon.stub()
 
-    mockery.registerMock('../network/put_fetch', {
+    mockery.registerMock('../network/fetch', {
       putFetch: putFetchStub,
       ParseKinds,
     })

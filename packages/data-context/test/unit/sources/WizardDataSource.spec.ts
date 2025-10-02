@@ -1,5 +1,5 @@
+import { describe, expect, it, beforeAll } from '@jest/globals'
 import { WizardBundler, WIZARD_BUNDLERS, CT_FRAMEWORKS, resolveComponentFrameworkDefinition } from '@packages/scaffold-config'
-import { expect } from 'chai'
 import { createTestDataContext, scaffoldMigrationProject, removeCommonNodeModules } from '../helper'
 
 function findFramework (type: Cypress.ResolvedComponentFrameworkDefinition['type']) {
@@ -11,7 +11,7 @@ function findBundler (type: WizardBundler['type']) {
 }
 
 describe('packagesToInstall', () => {
-  before(() => {
+  beforeAll(() => {
     removeCommonNodeModules()
   })
 
@@ -28,7 +28,7 @@ describe('packagesToInstall', () => {
 
     const actual = await ctx.wizard.installDependenciesCommand()
 
-    expect(actual).to.eq(`npm install -D webpack react react-dom`)
+    expect(actual).toEqual(`npm install -D webpack react react-dom`)
   })
 
   it('regular vue project with webpack', async () => {
@@ -44,7 +44,7 @@ describe('packagesToInstall', () => {
 
     const actual = await ctx.wizard.installDependenciesCommand()
 
-    expect(actual).to.eq(`npm install -D webpack vue`)
+    expect(actual).toEqual(`npm install -D webpack vue`)
   })
 
   it('regular react project with vite', async () => {
@@ -60,7 +60,7 @@ describe('packagesToInstall', () => {
 
     const actual = await ctx.wizard.installDependenciesCommand()
 
-    expect(actual).to.eq(`npm install -D vite react react-dom`)
+    expect(actual).toEqual(`npm install -D vite react react-dom`)
   })
 
   it('regular vue project with vite', async () => {
@@ -76,7 +76,7 @@ describe('packagesToInstall', () => {
 
     const actual = await ctx.wizard.installDependenciesCommand()
 
-    expect(actual).to.eq(`npm install -D vite vue`)
+    expect(actual).toEqual(`npm install -D vite vue`)
   })
 
   it('nextjs-unconfigured', async () => {
@@ -92,7 +92,7 @@ describe('packagesToInstall', () => {
 
     const actual = await ctx.wizard.installDependenciesCommand()
 
-    expect(actual).to.eq(`npm install -D next react react-dom`)
+    expect(actual).toEqual(`npm install -D next react react-dom`)
   })
 
   it('framework and bundler are undefined', async () => {
@@ -108,6 +108,6 @@ describe('packagesToInstall', () => {
 
     const actual = await ctx.wizard.installDependenciesCommand()
 
-    expect(actual).to.eq('')
+    expect(actual).toEqual('')
   })
 })

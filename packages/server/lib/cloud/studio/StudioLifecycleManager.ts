@@ -262,7 +262,7 @@ export class StudioLifecycleManager {
       const protocolManager = new ProtocolManager()
 
       telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_PROTOCOL_GET_START)
-      const script = await api.getCaptureProtocolScript(studioSession.protocolUrl)
+      const script = await api.getCaptureProtocolScript(studioSession.protocolUrl, { displayRetryErrors: false })
 
       telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_PROTOCOL_GET_END)
 
