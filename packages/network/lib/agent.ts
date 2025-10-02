@@ -7,7 +7,7 @@ import { getProxyForUrl } from 'proxy-from-env'
 import url from 'url'
 import { createRetryingSocket, getAddress } from './connect'
 import { lenientOptions } from './http-utils'
-import { ClientCertificateStore } from './client-certificates'
+import { clientCertificateStoreSingleton } from './client-certificates'
 import { CaOptions, getCaOptions } from './ca'
 
 const debug = debugModule('cypress:network:agent')
@@ -54,8 +54,6 @@ const mergeCAOptions = (options: https.RequestOptions, caOptions: CaOptions): ht
     ca: [...caArray, ...caOptions.ca],
   }
 }
-
-export const clientCertificateStore = new ClientCertificateStore()
 
 type WithProxyOpts<RequestOptions> = RequestOptions & {
   proxy: string
@@ -254,7 +252,7 @@ export class CombinedAgent {
       debug('got family %o', _.pick(options, 'family', 'href'))
 
       if (isHttps) {
-        _.assign(options, clientCertificateStore.getClientCertificateAgentOptionsForUrl(uri))
+        _.assign(options, clientCertificateStoreSingleton.getClientCertificateAgentOptionsForUrl(uri))
 
         return this.httpsAgent.addRequest(req, options as https.RequestOptions)
       }
