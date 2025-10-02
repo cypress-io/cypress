@@ -1,8 +1,7 @@
 import { asyncRetry, linearDelay } from '../../../util/async_retry'
 import { isRetryableError } from '../../network/is_retryable_error'
-import fetch from 'cross-fetch'
 import os from 'os'
-import { strictAgent } from '@packages/network'
+import { ParseKinds, postFetch } from '../../network/fetch'
 
 const pkg = require('@packages/root')
 const routes = require('../../routes') as typeof import('../../routes')
@@ -15,10 +14,8 @@ const _delay = linearDelay(500)
 
 export const postStudioSession = async ({ projectId }: PostStudioSessionOptions) => {
   return await (asyncRetry(async () => {
-    const response = await fetch(routes.apiRoutes.studioSession(), {
-      // @ts-expect-error - this is supported
-      agent: strictAgent,
-      method: 'POST',
+    return postFetch<{ studioUrl: string, protocolUrl: string }>(routes.apiRoutes.studioSession(), {
+      parse: ParseKinds.JSON,
       headers: {
         'Content-Type': 'application/json',
         'x-os-name': os.platform(),
@@ -26,17 +23,6 @@ export const postStudioSession = async ({ projectId }: PostStudioSessionOptions)
       },
       body: JSON.stringify({ projectSlug: projectId, studioMountVersion: 1, protocolMountVersion: 2 }),
     })
-
-    if (!response.ok) {
-      throw new Error(`Failed to create studio session: ${response.statusText}`)
-    }
-
-    const data = await response.json()
-
-    return {
-      studioUrl: data.studioUrl,
-      protocolUrl: data.protocolUrl,
-    }
   }, {
     maxAttempts: 3,
     retryDelay: _delay,

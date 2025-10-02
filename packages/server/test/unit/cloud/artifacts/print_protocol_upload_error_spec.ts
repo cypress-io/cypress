@@ -43,7 +43,7 @@ describe('printProtocolUploadError', () => {
 
   describe('when passed a system error', () => {
     it('prints a CLOUD_PROTOCOL_UPLOAD_NETWORK_FAILURE warning', () => {
-      const err = new SystemError(new Error('msg'), 'http://some.url')
+      const err = new SystemError(new Error('msg'), 'http://some.url', 'ECONNRESET', 101)
 
       print(err)
       expect(stubbedErrorWarning).to.have.been.calledWith('CLOUD_PROTOCOL_UPLOAD_NETWORK_FAILURE', err)

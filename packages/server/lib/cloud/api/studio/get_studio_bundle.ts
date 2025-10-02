@@ -6,6 +6,8 @@ import { strictAgent } from '@packages/network'
 import { PUBLIC_KEY_VERSION } from '../../constants'
 import { createWriteStream } from 'fs'
 import { verifySignatureFromFile } from '../../encryption'
+import { HttpError } from '../../network/http_error'
+import { SystemError } from '../../network/system_error'
 
 const pkg = require('@packages/root')
 const _delay = linearDelay(500)
@@ -37,7 +39,9 @@ export const getStudioBundle = async ({ studioUrl, bundlePath }: { studioUrl: st
       })
 
       if (!response.ok) {
-        throw new Error(`Failed to download studio bundle: ${response.statusText}`)
+        const err = await HttpError.fromResponse(response)
+
+        throw err
       }
 
       responseSignature = response.headers.get('x-cypress-signature')
@@ -69,6 +73,17 @@ export const getStudioBundle = async ({ studioUrl, bundlePath }: { studioUrl: st
       clearTimeout(fetchTimeout)
       if (error.name === 'AbortError') {
         throw new Error('Studio bundle fetch timed out')
+      }
+
+      if (HttpError.isHttpError(error)) {
+        throw error
+      }
+
+      if (error.errno || error.code) {
+        const sysError = new SystemError(error, studioUrl, error.code, error.errno)
+
+        sysError.stack = error.stack
+        throw sysError
       }
 
       throw error

@@ -7,7 +7,9 @@ import Debug from 'debug'
 
 const debug = Debug('cypress-verbose:server:cloud:api:put')
 
-type PutInit = Omit<RequestInit, 'agent' | 'method'>
+type FetchInit = Omit<RequestInit, 'agent'>
+
+type MethodlessFetchInit = Omit<FetchInit, 'method'>
 
 export const ParseKinds = Object.freeze({
   JSON: 'json',
@@ -16,23 +18,46 @@ export const ParseKinds = Object.freeze({
 
 type ParseKind = typeof ParseKinds[keyof typeof ParseKinds]
 
-type PutOptions = PutInit & {
+type FetchOptions = FetchInit & {
   parse?: ParseKind
 }
 
-export async function putFetch<
+type MethodlessFetchOptions = MethodlessFetchInit & {
+  parse: ParseKind
+}
+
+export function putFetch<
   TReturn,
-> (input: RequestInfo | URL, options: PutOptions = { parse: 'json' }): Promise<TReturn> {
+> (input: RequestInfo | URL, options: MethodlessFetchOptions): Promise<TReturn> {
+  return fetch(input, {
+    ...options,
+    method: 'PUT',
+  })
+}
+
+export function postFetch<
+  TReturn,
+> (input: RequestInfo | URL, options: MethodlessFetchOptions): Promise<TReturn> {
+  return fetch(input, {
+    ...options,
+    method: 'POST',
+  })
+}
+
+export async function fetch<
+  TReturn,
+> (input: RequestInfo | URL, options: FetchOptions): Promise<TReturn> {
   const {
     parse,
+    method,
     ...init
   } = options
 
-  debug('Initiating PUT %s', input)
+  debug('Initiating %s %s', method, input)
   try {
     const response = await crossFetch(input, {
       ...(init || {}),
-      method: 'PUT',
+      method,
       // cross-fetch thinks this is in the browser, so declares
       // types based on that rather than on node-fetch which it
       // actually uses under the hood. node-fetch supports `agent`.
@@ -74,7 +99,7 @@ export async function putFetch<
       const url = typeof input === 'string' ? input :
         input instanceof URL ? input.href :
           input instanceof Request ? input.url : 'UNKNOWN_URL'
-      const sysError = new SystemError(err, url)
+      const sysError = new SystemError(err, url, err.code, err.errno)
 
       sysError.stack = err.stack
       throw sysError
