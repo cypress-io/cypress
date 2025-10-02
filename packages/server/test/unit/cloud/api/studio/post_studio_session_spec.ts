@@ -3,6 +3,7 @@ import { proxyquire } from '../../../../spec_helper'
 import os from 'os'
 import pkg from '@packages/root'
 import { ParseKinds } from '../../../../../lib/cloud/network/fetch'
+import sinon from 'sinon'
 
 describe('postStudioSession', () => {
   let postStudioSession: typeof import('@packages/server/lib/cloud/api/studio/post_studio_session').postStudioSession

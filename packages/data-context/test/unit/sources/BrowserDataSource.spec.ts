@@ -1,12 +1,7 @@
-import chai from 'chai'
-import sinon from 'sinon'
-import sinonChai from 'sinon-chai'
+import { describe, expect, it, jest } from '@jest/globals'
 import { FullConfig } from '@packages/types'
 import { createTestDataContext } from '../helper'
 import { userBrowser, foundBrowserChrome } from '../../fixtures/browsers'
-
-chai.use(sinonChai)
-const { expect } = chai
 
 describe('BrowserDataSource', () => {
   describe('#allBrowsers', () => {
@@ -18,12 +13,12 @@ describe('BrowserDataSource', () => {
 
       const ctx = createTestDataContext('run')
 
-      sinon.stub(ctx.lifecycleManager, 'getFullInitialConfig').resolves(fullConfig)
+      jest.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
       ctx.coreData.machineBrowsers = Promise.resolve([foundBrowserChrome])
 
       const result = await ctx.browser.allBrowsers()
 
-      expect(result).to.eql([foundBrowserChrome])
+      expect(result).toEqual([foundBrowserChrome])
     })
 
     it('populates coreData.allBrowsers is not populated', async () => {
@@ -34,13 +29,13 @@ describe('BrowserDataSource', () => {
 
       const ctx = createTestDataContext('run')
 
-      sinon.stub(ctx.lifecycleManager, 'getFullInitialConfig').resolves(fullConfig)
+      jest.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
       ctx.coreData.machineBrowsers = Promise.resolve([foundBrowserChrome])
 
       const result = await ctx.browser.allBrowsers()
 
-      expect(result.length).to.eq(2)
-      expect(result[1].custom).to.be.true
+      expect(result.length).toEqual(2)
+      expect(result[1].custom).toEqual(true)
     })
 
     it('does not add user custom browser if name and version matches a machine browser', async () => {
@@ -54,12 +49,12 @@ describe('BrowserDataSource', () => {
 
       const ctx = createTestDataContext('run')
 
-      sinon.stub(ctx.lifecycleManager, 'getFullInitialConfig').resolves(fullConfig)
+      jest.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
       ctx.coreData.machineBrowsers = Promise.resolve([machineBrowser])
 
       const result = await ctx.browser.allBrowsers()
 
-      expect(result).to.eql([machineBrowser])
+      expect(result).toEqual([machineBrowser])
     })
 
     it('returns coreData.allBrowsers if populated', async () => {
@@ -70,7 +65,7 @@ describe('BrowserDataSource', () => {
 
       const result = await ctx.browser.allBrowsers()
 
-      expect(result).to.eql(allBrowsers)
+      expect(result).toEqual(allBrowsers)
     })
   })
 })

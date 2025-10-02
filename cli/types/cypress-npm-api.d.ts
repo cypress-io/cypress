@@ -69,6 +69,10 @@ declare namespace CypressCommandLine {
      */
     port: number
     /**
+     * Use POSIX exit codes for error handling
+     */
+    posixExitCodes: boolean
+    /**
      * Run quietly, using only the configured reporter
      */
     quiet: boolean

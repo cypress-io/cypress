@@ -1,6 +1,6 @@
 import fs from 'fs-extra'
 import * as dependencies from './dependencies'
-import componentIndexHtmlGenerator from './component-index-template'
+import { componentIndexHtmlGenerator } from './component-index-template'
 import debugLib from 'debug'
 import semver from 'semver'
 import { isThirdPartyDefinition } from './ct-detect-third-party'

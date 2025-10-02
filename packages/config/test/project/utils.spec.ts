@@ -20,9 +20,9 @@ import {
   setSupportFileAndFolder,
   mergeDefaults,
 } from '../../src/project/utils'
+import { resetIssuedWarnings } from '../../src/browser'
 import path from 'node:path'
 import { Config } from '../../src/project/types'
-import { resetIssuedWarnings } from '../../src/browser'
 
 const debug = Debug('test')
 

@@ -1,6 +1,5 @@
+import { describe, expect, it } from '@jest/globals'
 import { SpecWithRelativeRoot } from '@packages/types'
-import { expect } from 'chai'
-
 import fs from 'fs-extra'
 import { scaffoldMigrationProject } from '../helper'
 import { getTestCounts } from '../../../src/util/testCounts'
@@ -12,7 +11,7 @@ describe('getTestCounts', () => {
 
     const counts = await getTestCounts(specs)
 
-    expect(counts).to.deep.equal({
+    expect(counts).toEqual({
       totalSpecs: 0,
       totalTests: 0,
       exampleSpecs: 0,
@@ -20,7 +19,7 @@ describe('getTestCounts', () => {
     })
   })
 
-  context('with e2e project', () => {
+  describe('with e2e project', () => {
     let specs: SpecWithRelativeRoot[]
 
     beforeEach(async () => {
@@ -44,11 +43,11 @@ describe('getTestCounts', () => {
     it('should return counts for tests e2e migration project', async () => {
       const counts = await getTestCounts(specs)
 
-      expect(counts.totalSpecs).to.equal(specs.length)
+      expect(counts.totalSpecs).toEqual(specs.length)
       // don't test for exact number since tests in sample project might change
-      expect(counts.totalTests).to.be.greaterThan(0)
-      expect(counts.exampleSpecs).to.eq(0)
-      expect(counts.exampleTests).to.eq(0)
+      expect(counts.totalTests).toBeGreaterThan(0)
+      expect(counts.exampleSpecs).toEqual(0)
+      expect(counts.exampleTests).toEqual(0)
     })
   })
 })
