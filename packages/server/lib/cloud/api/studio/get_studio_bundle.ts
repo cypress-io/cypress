@@ -2,7 +2,7 @@ import { asyncRetry, linearDelay } from '../../../util/async_retry'
 import { isRetryableError } from '../../network/is_retryable_error'
 import fetch from 'cross-fetch'
 import os from 'os'
-import { agent } from '@packages/network'
+import { strictAgent } from '@packages/network'
 import { PUBLIC_KEY_VERSION } from '../../constants'
 import { createWriteStream } from 'fs'
 import { verifySignatureFromFile } from '../../encryption'
@@ -24,7 +24,7 @@ export const getStudioBundle = async ({ studioUrl, bundlePath }: { studioUrl: st
     try {
       const response = await fetch(studioUrl, {
         // @ts-expect-error - this is supported
-        agent,
+        agent: strictAgent,
         method: 'GET',
         headers: {
           'x-route-version': '1',

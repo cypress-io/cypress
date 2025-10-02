@@ -1,7 +1,7 @@
 import { SystemError } from '../../../../../lib/cloud/network/system_error'
 import { proxyquire } from '../../../../spec_helper'
 import os from 'os'
-import { agent } from '@packages/network'
+import { strictAgent } from '@packages/network'
 import pkg from '@packages/root'
 
 describe('postStudioSession', () => {
@@ -40,7 +40,7 @@ describe('postStudioSession', () => {
       'http://localhost:1234/studio/session',
       {
         method: 'POST',
-        agent,
+        agent: strictAgent,
         headers: {
           'Content-Type': 'application/json',
           'x-os-name': os.platform(),

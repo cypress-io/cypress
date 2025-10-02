@@ -2,7 +2,7 @@ import crossFetch from 'cross-fetch'
 import { SystemError } from './system_error'
 import { HttpError } from './http_error'
 import { ParseError } from './parse_error'
-import { agent } from '@packages/network'
+import { strictAgent } from '@packages/network'
 import Debug from 'debug'
 
 const debug = Debug('cypress-verbose:server:cloud:api:put')
@@ -37,7 +37,7 @@ export async function putFetch<
       // types based on that rather than on node-fetch which it
       // actually uses under the hood. node-fetch supports `agent`.
       // @ts-expect-error
-      agent,
+      agent: strictAgent,
     })
 
     if (response.status >= 400) {
