@@ -425,7 +425,7 @@ export default {
         }
       }
 
-      if (script && options.testingType === 'e2e' || options.testingType === 'component') {
+      if (script && (options.testingType === 'e2e' || options.testingType === 'component')) {
         const config = options.project.getConfig()
 
         await options.project.protocolManager.prepareAndSetupProtocol(script, {
