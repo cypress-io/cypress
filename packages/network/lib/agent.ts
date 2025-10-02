@@ -467,8 +467,11 @@ class HttpsAgent extends https.Agent {
   }
 }
 
+// This agent honors NODE_TLS_REJECT_UNAUTHORIZED (though this is overridden
+// in some places; for example, by request promise defaults in api/index.ts).
 const agent = new CombinedAgent()
 
+// This agent always rejects unauthorized certificates.
 const strictAgent = new CombinedAgent({}, {
   rejectUnauthorized: true,
 })

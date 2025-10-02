@@ -12,7 +12,7 @@ export const isRetryableError = (error: any) => {
     (error as HttpError)?.status)
 
   if (SystemError.isSystemError(error)) {
-    if (isNonRetriableCertErrorCode(error.code)) {
+    if (error.code && isNonRetriableCertErrorCode(error.code)) {
       return false
     }
 

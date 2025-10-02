@@ -1354,6 +1354,12 @@ export default {
         docsUrl: 'https://on.cypress.io/prompt-download-error',
       }
     },
+    promptProxyError: {
+      message: stripIndent`\
+      \`cy.prompt\` requires internet access to work. To continue, you may need to configure Cypress with your proxy settings.
+      `,
+      docsUrl: 'https://on.cypress.io/proxy-configuration',
+    },
     promptTestingTypeError: stripIndent`\
       \`cy.prompt\` is currently only supported in end-to-end tests.
     `,

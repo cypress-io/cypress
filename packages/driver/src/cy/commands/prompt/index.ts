@@ -3,6 +3,7 @@ import type { CypressInternal, CyPromptDriverDefaultShape, CyPromptMoreInfoNeede
 import type Emitter from 'component-emitter'
 import $errUtils from '../../../cypress/error_utils'
 import $stackUtils from '../../../cypress/stack_utils'
+import { isNonRetriableCertErrorCode } from '@packages/server/lib/cloud/network/nonretriable_cert_error_codes'
 
 interface CyPromptDriver { default: CyPromptDriverDefaultShape }
 
@@ -39,6 +40,14 @@ const initializeModule = async (Cypress: Cypress.Cypress): Promise<CyPromptDrive
   const { success, error } = await Cypress.backend('wait:for:prompt:ready')
 
   if (error) {
+    if ('code' in error && isNonRetriableCertErrorCode(error.code as string)) {
+      $errUtils.throwErrByPath('prompt.promptProxyError', {
+        args: {
+          error,
+        },
+      })
+    }
+
     $errUtils.throwErrByPath('prompt.promptDownloadError', {
       args: {
         error,

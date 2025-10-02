@@ -230,7 +230,7 @@ const isRetriableError = (err) => {
     return false
   }
 
-  if (isNonRetriableCertErrorCode(err.cause?.code)) {
+  if (err.cause?.code && isNonRetriableCertErrorCode(err.cause?.code)) {
     return false
   }
 
