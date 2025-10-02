@@ -110,6 +110,10 @@ const processRunOptions = (options: any = {}): string[] => {
     args.push('--parallel')
   }
 
+  if (options.posixExitCodes) {
+    args.push('--posix-exit-codes')
+  }
+
   if (options.port) {
     args.push('--port', options.port)
   }

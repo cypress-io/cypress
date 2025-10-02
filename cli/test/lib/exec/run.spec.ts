@@ -142,6 +142,10 @@ describe('exec run', () => {
     it('throws if --config-file is false', () => {
       expect(() => run.processRunOptions({ configFile: 'false' })).toThrow()
     })
+
+    it('adds --posix-exit-codes', () => {
+      expect(run.processRunOptions({ posixExitCodes: true })).toEqual(expect.arrayContaining(['--posix-exit-codes']))
+    })
   })
 
   describe('.start', () => {
