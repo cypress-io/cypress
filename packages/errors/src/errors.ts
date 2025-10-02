@@ -1227,7 +1227,9 @@ export const AllCypressErrors = {
   },
   EXPERIMENTAL_STUDIO_REMOVED: () => {
     return errTemplate`\
-        The ${fmt.highlight(`experimentalStudio`)} was removed in ${fmt.cypressVersion(`15.4.0`)}.
+        The ${fmt.highlight(`experimentalStudio`)} option was removed in ${fmt.cypressVersion(`15.4.0`)}.
+        
+        Cypress Studio is now available for all users.
         
         You can safely remove this option from your config.`
   },
