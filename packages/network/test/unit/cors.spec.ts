@@ -1,12 +1,12 @@
+import { describe, it, expect, beforeEach } from 'vitest'
 import { cors } from '../../lib'
 import { Policy } from '../../lib/cors'
-import { expect } from 'chai'
 import type { ParsedHostWithProtocolAndHost } from '../../lib/types'
 
 describe('lib/cors', () => {
-  context('.parseUrlIntoHostProtocolDomainTldPort', () => {
+  describe('.parseUrlIntoHostProtocolDomainTldPort', () => {
     const expectUrlToBeParsedCorrectly = (url, obj) => {
-      expect(cors.parseUrlIntoHostProtocolDomainTldPort(url)).to.deep.eq(obj)
+      expect(cors.parseUrlIntoHostProtocolDomainTldPort(url)).toEqual(obj)
     }
 
     it('parses https://www.google.com', function () {
@@ -111,13 +111,13 @@ describe('lib/cors', () => {
     })
   })
 
-  context('.urlOriginsMatch', () => {
-    const assertOriginsDoNotMatch = (url1, url2) => {
-      expect(cors.urlOriginsMatch(url1, url2)).to.be.false
+  describe('.urlOriginsMatch', () => {
+    const assertOriginsDoNotMatch = (url1: string, url2: string) => {
+      expect(cors.urlOriginsMatch(url1, url2)).toBe(false)
     }
 
-    const assertOriginsDoMatch = (url1, url2) => {
-      expect(cors.urlOriginsMatch(url1, url2)).to.be.true
+    const assertOriginsDoMatch = (url1: string, url2: string) => {
+      expect(cors.urlOriginsMatch(url1, url2)).toBe(true)
     }
 
     describe('domain + subdomain', () => {
@@ -215,13 +215,13 @@ describe('lib/cors', () => {
     })
   })
 
-  context('.urlSameSiteMatch', () => {
-    const assertsUrlsAreNotSameSite = (url1, url2) => {
-      expect(cors.urlSameSiteMatch(url1, url2)).to.be.false
+  describe('.urlSameSiteMatch', () => {
+    const assertsUrlsAreNotSameSite = (url1: string, url2: string) => {
+      expect(cors.urlSameSiteMatch(url1, url2)).toBe(false)
     }
 
-    const assertsUrlsAreSameSite = (url1, url2) => {
-      expect(cors.urlSameSiteMatch(url1, url2)).to.be.true
+    const assertsUrlsAreSameSite = (url1: string, url2: string) => {
+      expect(cors.urlSameSiteMatch(url1, url2)).toBe(true)
     }
 
     describe('domain + subdomain', () => {
@@ -323,7 +323,7 @@ describe('lib/cors', () => {
     })
   })
 
-  context('.urlMatchesPolicyProps', () => {
+  describe('.urlMatchesPolicyProps', () => {
     let policy: Policy
     let frameUrl: string
     let topProps: ParsedHostWithProtocolAndHost
@@ -340,7 +340,7 @@ describe('lib/cors', () => {
         })
 
         it('matches', () => {
-          expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).to.be.true
+          expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(true)
         })
       })
 
@@ -351,7 +351,7 @@ describe('lib/cors', () => {
         })
 
         it('does not match', () => {
-          expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).to.be.false
+          expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(false)
         })
       })
     })
@@ -368,7 +368,7 @@ describe('lib/cors', () => {
         })
 
         it('matches', () => {
-          expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).to.be.true
+          expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(true)
         })
       })
 
@@ -383,7 +383,7 @@ describe('lib/cors', () => {
 
         describe('and the ports are not strictly equal', () => {
           it('does not match', () => {
-            expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).to.be.false
+            expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(false)
           })
         })
 
@@ -394,7 +394,7 @@ describe('lib/cors', () => {
           })
 
           it('does match', () => {
-            expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).to.be.true
+            expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(true)
           })
         })
       })
@@ -406,7 +406,7 @@ describe('lib/cors', () => {
         })
 
         it('does not match', () => {
-          expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).to.be.false
+          expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(false)
         })
       })
     })
@@ -423,7 +423,7 @@ describe('lib/cors', () => {
         })
 
         it('matches', () => {
-          expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).to.be.true
+          expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(true)
         })
       })
 
@@ -440,7 +440,7 @@ describe('lib/cors', () => {
           })
 
           it('matches', () => {
-            expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).to.be.true
+            expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(true)
           })
         })
 
@@ -451,7 +451,7 @@ describe('lib/cors', () => {
           })
 
           it('does not match', () => {
-            expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).to.be.false
+            expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(false)
           })
         })
 
@@ -462,7 +462,7 @@ describe('lib/cors', () => {
           })
 
           it('does not match', () => {
-            expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).to.be.false
+            expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(false)
           })
         })
 
@@ -473,25 +473,20 @@ describe('lib/cors', () => {
           })
 
           it('matches', () => {
-            expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).to.be.true
+            expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(true)
           })
         })
       })
     })
   })
 
-  context('.urlMatchesOriginProtectionSpace', () => {
-    const assertMatchesOriginProtectionSpace = (urlStr, origin) => {
-      expect(urlStr, `the url: '${urlStr}' did not match origin protection space: '${origin}'`).to.satisfy(() => {
-        return cors.urlMatchesOriginProtectionSpace(urlStr, origin)
-      })
+  describe('.urlMatchesOriginProtectionSpace', () => {
+    const assertMatchesOriginProtectionSpace = (urlStr: string, origin: string) => {
+      expect(cors.urlMatchesOriginProtectionSpace(urlStr, origin), `the url: '${urlStr}' did not match origin protection space '${origin}' when it should have`).toBe(true)
     }
 
     const assertDoesNotMatchOriginProtectionSpace = (urlStr, origin) => {
-      expect(urlStr, `the url: '${urlStr}' matched origin protection space: '${origin}'`)
-      .not.to.satisfy(() => {
-        return cors.urlMatchesOriginProtectionSpace(urlStr, origin)
-      })
+      expect(cors.urlMatchesOriginProtectionSpace(urlStr, origin), `the url: '${urlStr}' matched origin protection space '${origin}' when it should not have`).toBe(false)
     }
 
     it('ports', () => {
@@ -531,25 +526,25 @@ describe('lib/cors', () => {
     })
   })
 
-  context('.getSuperDomainOrigin', () => {
+  describe('.getSuperDomainOrigin', () => {
     it('ports', () => {
-      expect(cors.getSuperDomainOrigin('https://example.com')).to.equal('https://example.com')
-      expect(cors.getSuperDomainOrigin('http://example.com:8080')).to.equal('http://example.com:8080')
+      expect(cors.getSuperDomainOrigin('https://example.com')).toEqual('https://example.com')
+      expect(cors.getSuperDomainOrigin('http://example.com:8080')).toEqual('http://example.com:8080')
     })
 
     it('subdomain', () => {
-      expect(cors.getSuperDomainOrigin('http://www.example.com')).to.equal('http://example.com')
-      expect(cors.getSuperDomainOrigin('http://www.app.herokuapp.com:8080')).to.equal('http://app.herokuapp.com:8080')
+      expect(cors.getSuperDomainOrigin('http://www.example.com')).toEqual('http://example.com')
+      expect(cors.getSuperDomainOrigin('http://www.app.herokuapp.com:8080')).toEqual('http://app.herokuapp.com:8080')
     })
   })
 
-  context('.policyFromConfig', () => {
+  describe('.policyFromConfig', () => {
     it('returns \'same-origin\' when injectDocumentDomain is false', () => {
-      expect(cors.policyFromConfig({ injectDocumentDomain: false })).to.equal('same-origin')
+      expect(cors.policyFromConfig({ injectDocumentDomain: false })).toEqual('same-origin')
     })
 
     it('returns \'same-super-domain-origin\' when injectDocumentDomain is true', () => {
-      expect(cors.policyFromConfig({ injectDocumentDomain: true })).to.equal('same-super-domain-origin')
+      expect(cors.policyFromConfig({ injectDocumentDomain: true })).toEqual('same-super-domain-origin')
     })
   })
 })
