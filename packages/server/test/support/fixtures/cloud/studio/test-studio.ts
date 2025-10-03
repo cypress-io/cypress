@@ -32,6 +32,10 @@ class StudioServer implements StudioServerShape {
   captureStudioEvent (event: StudioEvent): Promise<void> {
     return Promise.resolve()
   }
+
+  updateSessionId (sessionId: string): void {
+    // This is a test implementation that does nothing
+  }
 }
 
 const studioServerDefault: StudioServerDefaultShape = {
