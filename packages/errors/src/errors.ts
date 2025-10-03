@@ -10,7 +10,7 @@ import { humanTime, logError, parseResolvedPattern, pluralize } from './errorUti
 import { errPartial, errTemplate, fmt, theme } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
 import type { ClonedError, ConfigValidationFailureInfo, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
-import { normalizeNetworkErrorMessage } from './network/normalizeNetworkErrorMessage'
+import { normalizeNetworkErrorMessage } from './normalizeNetworkErrorMessage'
 
 const ansi_up = new AU()
 

@@ -3,7 +3,7 @@ import type { CypressInternal, CyPromptDriverDefaultShape, CyPromptMoreInfoNeede
 import type Emitter from 'component-emitter'
 import $errUtils from '../../../cypress/error_utils'
 import $stackUtils from '../../../cypress/stack_utils'
-import { isNonRetriableCertErrorCode } from '@packages/errors'
+import { isNonRetriableCertErrorCode } from '@packages/server/lib/cloud/network/non_retriable_cert_error_codes'
 
 interface CyPromptDriver { default: CyPromptDriverDefaultShape }
 
