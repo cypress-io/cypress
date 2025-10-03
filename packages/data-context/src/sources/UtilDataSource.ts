@@ -3,7 +3,7 @@ import type { DataContext } from '../DataContext'
 import { isDependencyInstalled, isDependencyInstalledByName } from '@packages/scaffold-config'
 
 // Require rather than import since data-context is stricter than network and there are a fair amount of errors in agent.
-const { agent } = require('@packages/network')
+const { strictAgent } = require('@packages/network')
 
 /**
  * this.ctx.util....
@@ -17,7 +17,7 @@ export class UtilDataSource {
   fetch (input: RequestInfo | URL, init?: RequestInit) {
     // @ts-ignore agent isn't a part of cross-fetch's API since it's not a part of the browser's fetch but it is a part of node-fetch
     // which is what will be used here
-    return fetch(input, { agent, ...init })
+    return fetch(input, { ...init, agent: strictAgent })
   }
 
   isDependencyInstalled (dependency: Cypress.CypressComponentDependency, projectPath: string) {
