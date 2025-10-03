@@ -856,7 +856,7 @@ class $Cypress {
     const tests = this.runner.getTestsState(testId)
     let runState: RunState = {
       currentId: testId,
-      tests: this.runner.getTestsState(testId),
+      tests,
       startTime: this.runner.getStartTime(),
       emissions: this.runner.getEmissions(),
       passed: this.runner.countByTestState(tests, 'passed'),
