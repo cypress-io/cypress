@@ -152,6 +152,9 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
     it('handles Error objects correctly', () => {
       const error = new Error('test error')
 
+      ;(error as any).code = 'test code'
+
+      ;(error as any).errno = 123
       error.stack = 'test stack'
 
       ;(error as any).code = 'test code'

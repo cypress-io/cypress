@@ -34,4 +34,25 @@ describe('src/cy/commands/prompt', () => {
     cy['commandFns']['prompt'].__resetPrompt()
     cy.prompt(['Hello, world!'])
   })
+
+  it('errors with a proxy error', (done) => {
+    const backendStub = cy.stub(Cypress, 'backend').log(false)
+
+    const error = new Error('UNABLE_TO_VERIFY_LEAF_SIGNATURE')
+
+    ;(error as any).code = 'UNABLE_TO_VERIFY_LEAF_SIGNATURE'
+
+    backendStub.callThrough()
+    backendStub.withArgs('wait:for:prompt:ready').resolves({ success: false, error })
+
+    cy.on('fail', (err) => {
+      expect(err.message).to.include('`cy.prompt` requires an internet connection to work. To continue, you may need to configure Cypress with your proxy settings.')
+      done()
+    })
+
+    cy.visit('http://www.foobar.com:3500/fixtures/dom.html')
+
+    cy['commandFns']['prompt'].__resetPrompt()
+    cy.prompt(['Hello, world!'])
+  })
 })
