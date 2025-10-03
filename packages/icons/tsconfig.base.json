@@ -1,0 +1,13 @@
+{
+  "include": [
+    "index.ts"
+  ],
+  "compilerOptions": {
+    "allowJs": false,
+    "noImplicitAny": true,
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "declaration": true
+  }
+}

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import * as icons from '../src/icons'
+import * as icons from '../index'
 
 const cwd = process.cwd()
 
