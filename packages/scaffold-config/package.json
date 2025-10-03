@@ -14,7 +14,7 @@
     "clean-deps": "rimraf node_modules",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "test": "vitest run",
-    "test-debug": "npx vitest --inspect-brk --no-file-parallelism --test-timeout=0",
+    "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0",
     "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "dependencies": {
