@@ -114,7 +114,7 @@
     "@types/lodash": "^4.14.168",
     "@types/markdown-it": "12.2.3",
     "@types/mocha": "8.0.3",
-    "@types/node": "22.18.0",
+    "@types/node": "22.18.7",
     "@types/prismjs": "1.16.0",
     "@types/react": "18.3.12",
     "@types/react-dom": "18.3.1",
@@ -144,7 +144,7 @@
     "dedent": "^0.7.0",
     "del": "3.0.0",
     "detect-port": "^2.1.0",
-    "electron": "36.8.1",
+    "electron": "37.6.0",
     "electron-builder": "^25.1.8",
     "enzyme-adapter-react-16": "1.12.1",
     "eslint": "^8.56.0",
@@ -218,7 +218,7 @@
     "yarn-deduplicate": "3.1.0"
   },
   "engines": {
-    "node": ">=22.18.0",
+    "node": ">=22.19.0",
     "yarn": ">=1.22.22"
   },
   "productName": "Cypress",

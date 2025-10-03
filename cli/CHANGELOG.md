@@ -21,6 +21,12 @@ _Released 10/7/2025 (PENDING)_
 - Updated the Studio test editing header to include a Back button. This change ensures the Specs button remains functional for expanding or collapsing the specs panel. Addresses [#32556](https://github.com/cypress-io/cypress/issues/32556) and [#32558](https://github.com/cypress-io/cypress/issues/32558). Addressed in [#32611](https://github.com/cypress-io/cypress/pull/32611).
 - Fixed the Studio panel resizing when dragging. Addressed in [#32584](https://github.com/cypress-io/cypress/pull/32584).
 
+**Dependency Updates:**
+
+- Upgraded `electron` from `36.8.1` to `37.6.0`. Addressed in [#32607](https://github.com/cypress-io/cypress/pull/32607).
+- Upgraded bundled Node.js version from `22.18.0` to `22.19.0`. Addressed in [#32607](https://github.com/cypress-io/cypress/pull/32607).
+- Upgraded bundled Chromium version from `136.0.7103.177` to `138.0.7204.251`. Addressed in [#32607](https://github.com/cypress-io/cypress/pull/32607).
+
 ## 15.3.0
 
 _Released 9/23/2025_
@@ -39,12 +45,6 @@ _Released 9/23/2025_
 - Update the styles for command grouping 'line' so on expansion it is displayed correctly. Addressed in [#32521](https://github.com/cypress-io/cypress/pull/32521).
 - Test hook names now correctly display with a semi-bold font weight. Addresses [#32477](https://github.com/cypress-io/cypress/issues/32477). Addressed in [#32491](https://github.com/cypress-io/cypress/pull/32491).
 - Updated the Cypress Studio panel to not show bottom border. Addresses [#32478](https://github.com/cypress-io/cypress/issues/32478).
-
-**Dependency Updates:**
-
-- Upgraded `electron` from `36.4.0` to `36.8.1`. Addressed in [#32371](https://github.com/cypress-io/cypress/pull/32371).
-- Upgraded bundled Node.js version from `22.15.1` to `22.18.0`. Addressed in [#32371](https://github.com/cypress-io/cypress/pull/32371).
-- Upgraded bundled Chromium version from `136.0.7103.149` to `136.0.7103.177`. Addressed in [#32371](https://github.com/cypress-io/cypress/pull/32371).
 
 ## 15.2.0
 

@@ -11,7 +11,7 @@ const { getNextVersionForBinary } = require('../get-next-version')
 
   const body = JSON.stringify({
     // This branch is the branch of the `cypress-publish-binary` repository
-    // branch: <cypress-publish-binary-branch>,
+    branch: 'electron-37-publish-binary',
     parameters: {
       temp_dir: os.tmpdir(),
       sha: process.env.CIRCLE_SHA1,
