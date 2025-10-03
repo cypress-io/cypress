@@ -16,7 +16,7 @@ import argsUtils from './util/args'
 import { telemetry } from '@packages/telemetry'
 import { getCtx, hasCtx } from '@packages/data-context'
 import { warning as errorsWarning } from './errors'
-import { CypressError } from '@packages/errors'
+import type { CypressError } from '@packages/errors'
 import { toNumber } from 'lodash'
 const debug = Debug('cypress:server:cypress')
 
