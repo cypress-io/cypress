@@ -773,6 +773,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         const mockBeforeSpec = sinon.stub()
         const mockAccessStudioAI = sinon.stub().resolves(true)
         const mockCaptureStudioEvent = sinon.stub().resolves()
+        const mockUpdateSessionId = sinon.stub()
 
         this.project.spec = {}
 
@@ -791,6 +792,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
           db: { test: 'db' },
           dbPath: 'test-db-path',
         }
+
+        studioManager.updateSessionId = mockUpdateSessionId
 
         const studioLifecycleManager = new StudioLifecycleManager()
 
@@ -838,6 +841,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
           name: 'chrome',
         })
 
+        expect(mockUpdateSessionId.getCall(0).args[0]).to.be.a.uuid()
+
         expect(browsers.connectProtocolToBrowser).to.be.calledWith({
           browser: this.project.browser,
           foundBrowsers: this.project.options.browsers,
@@ -865,6 +870,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         const mockBeforeSpec = sinon.stub()
         const mockAccessStudioAI = sinon.stub().resolves(true)
         const mockCaptureStudioEvent = sinon.stub().resolves()
+        const mockUpdateSessionId = sinon.stub()
 
         this.project.spec = {}
 
@@ -883,6 +889,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
           db: { test: 'db' },
           dbPath: 'test-db-path',
         }
+
+        studioManager.updateSessionId = mockUpdateSessionId
 
         const studioLifecycleManager = new StudioLifecycleManager()
 
@@ -922,6 +930,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         const { cloudStudioSessionId } = await studioInitPromise
 
         expect(cloudStudioSessionId).to.equal('existing-session-id')
+        expect(mockUpdateSessionId).to.be.calledOnceWith('existing-session-id')
       })
 
       it('calls resetBrowserState during onStudioInit when AI is enabled', async function () {
