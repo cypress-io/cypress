@@ -5,6 +5,7 @@ _Released 10/07/2025 (PENDING)_
 
 **Features:**
 
+- `cy.prompt` is now a reserved Cypress command, currently gated behind a feature flag that requires an invite from Cypress. This means any custom commands named 'prompt' will no longer work. Stay tuned for updates on when this feature will become more widely available. Addressed in [#31752](https://github.com/cypress-io/cypress/pull/31752).
 - Added the `--posix-exit-codes` flag for the `run` command. When this flag is passed, Cypress will exit with 1 if any tests fail, rather than the number of failed tests. Addresses [#32605](https://github.com/cypress-io/cypress/issues/32605) and [#24695](https://github.com/cypress-io/cypress/issues/24695). Addressed in [#32609](https://github.com/cypress-io/cypress/pull/32609).
 
 **Bugfixes:**
