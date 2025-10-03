@@ -1,36 +1,25 @@
+import { describe, expect, it, vi } from 'vitest'
 import { DeferredSourceMapCache } from '../../lib/deferred-source-map-cache'
-import sinon from 'sinon'
-import chai, { expect } from 'chai'
-import chaiAsPromised from 'chai-as-promised'
-import sinonChai from 'sinon-chai'
 import {
   testSourceWithExternalSourceMap,
   testSourceWithInlineSourceMap,
   testSourceMap,
   testSourceWithNoSourceMap,
 } from '../fixtures'
-import snapshot from 'snap-shot-it'
-
-chai.use(chaiAsPromised)
-chai.use(sinonChai)
 
 describe('DeferredSourceMapCache', function () {
   let cache: DeferredSourceMapCache
 
   beforeEach(() => {
-    cache = new DeferredSourceMapCache(sinon.stub())
+    cache = new DeferredSourceMapCache(vi.fn())
   })
 
-  afterEach(() => {
-    sinon.restore()
-  })
-
-  context('#defer', () => {
+  describe('#defer', () => {
     it('adds to requests', () => {
       const request = { uniqueId: 'foo', url: 'bar' }
 
       cache.defer(request)
-      expect(cache.requests).to.deep.eq([request])
+      expect(cache.requests).toEqual([request])
     })
 
     it('replaces existing requests for same URL', () => {
@@ -41,25 +30,25 @@ describe('DeferredSourceMapCache', function () {
       cache.defer(request0)
       cache.defer(request1)
       cache.defer(request2)
-      expect(cache.requests).to.deep.eq([request0, request2])
+      expect(cache.requests).toEqual([request0, request2])
     })
 
     it('throws if uniqueId is duplicated', () => {
       cache.defer({ uniqueId: 'foo', url: 'bar' })
       expect(() => {
         cache.defer({ uniqueId: 'foo', url: 'baz' })
-      }).to.throw
+      }).toThrow()
     })
   })
 
-  context('#resolve', () => {
+  describe('#resolve', () => {
     it('rejects if unknown uniqueId', async () => {
       cache.defer({
         uniqueId: 'baz',
         url: 'quux',
       })
 
-      await expect(cache.resolve('foo', {})).to.be.rejectedWith('Missing request with ID \'foo\'')
+      await expect(cache.resolve('foo', {})).rejects.toThrow('Missing request with ID \'foo\'')
     })
 
     it('rejects if request missing JS', async () => {
@@ -68,10 +57,10 @@ describe('DeferredSourceMapCache', function () {
         url: 'bar',
       })
 
-      await expect(cache.resolve('foo', {})).to.be.rejectedWith(/^Missing JS/)
+      await expect(cache.resolve('foo', {})).rejects.toThrow(/^Missing JS/)
     })
 
-    context('sourcemap generation', () => {
+    describe('sourcemap generation', () => {
       it('for JS with no original sourcemap', async () => {
         cache.defer({
           uniqueId: 'foo',
@@ -80,7 +69,9 @@ describe('DeferredSourceMapCache', function () {
           resHeaders: {},
         })
 
-        snapshot(await cache.resolve('foo', {}))
+        const result = await cache.resolve('foo', {})
+
+        expect(result).toMatchSnapshot()
       })
 
       it('resolves with cached sourceMap on retry', async () => {
@@ -94,10 +85,10 @@ describe('DeferredSourceMapCache', function () {
         const result0 = await cache.resolve('foo', {})
         const result1 = await cache.resolve('foo', {})
 
-        expect(result0).to.eq(result1) // same object reference
+        expect(result0).toEqual(result1) // same object reference
       })
 
-      context('composition', () => {
+      describe('composition', () => {
         const URL = 'http://somedomain.net/dir/foo.js'
 
         const testExternalSourceMap = (js, resHeaders, expectRequest = true) => {
@@ -110,22 +101,24 @@ describe('DeferredSourceMapCache', function () {
             })
 
             // @ts-ignore: https://github.com/bahmutov/snap-shot-it/issues/522
-            snapshot('composed sourcemap', await cache.resolve('foo', {}), { allowSharedSnapshot: true })
+            const result = await cache.resolve('foo', {})
+
+            expect(result).toMatchSnapshot()
 
             if (!expectRequest) {
               return
             }
 
-            expect(cache.requestLib).to.be.calledWith({
+            expect(cache.requestLib).toHaveBeenCalledWith({
               url: 'http://somedomain.net/dir/test.js.map',
               headers: {},
               timeout: 5000,
-            })
+            }, true)
           }
         }
 
         beforeEach(() => {
-          cache.requestLib.resolves({ body: testSourceMap })
+          cache.requestLib.mockResolvedValue({ body: testSourceMap })
         })
 
         it('with inlined base64 sourceMappingURL', testExternalSourceMap(testSourceWithInlineSourceMap, {}, false))

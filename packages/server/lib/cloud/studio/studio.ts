@@ -1,4 +1,4 @@
-import type { StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape, StudioCloudApi, StudioAIInitializeOptions, StudioEvent, StudioAddSocketListenersOptions } from '@packages/types'
+import type { StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape, StudioCloudApi, StudioAIInitializeOptions, StudioEvent, StudioAddSocketListenersOptions, StudioServerOptions } from '@packages/types'
 import type { Router } from 'express'
 import Debug from 'debug'
 import { requireScript } from '../require_script'
@@ -13,10 +13,9 @@ interface SetupOptions {
   script: string
   studioPath: string
   studioHash?: string
-  projectSlug?: string
   cloudApi: StudioCloudApi
-  shouldEnableStudio: boolean
   manifest: Record<string, string>
+  getProjectOptions: StudioServerOptions['getProjectOptions']
 }
 
 const debug = Debug('cypress:server:studio')
@@ -27,30 +26,12 @@ export class StudioManager implements StudioManagerShape {
   private _studioServer: StudioServerShape | undefined
   private _studioElectron: StudioElectron | undefined
 
-  static createInErrorManager ({ cloudApi, studioHash, projectSlug, error, studioMethod, studioMethodArgs }: ReportStudioErrorOptions): StudioManager {
-    const manager = new StudioManager()
-
-    manager.status = 'IN_ERROR'
-
-    reportStudioError({
-      cloudApi,
-      studioHash,
-      projectSlug,
-      error,
-      studioMethod,
-      studioMethodArgs,
-    })
-
-    return manager
-  }
-
-  async setup ({ script, studioPath, studioHash, projectSlug, cloudApi, shouldEnableStudio, manifest }: SetupOptions): Promise<void> {
+  async setup ({ script, studioPath, studioHash, cloudApi, manifest, getProjectOptions }: SetupOptions): Promise<void> {
     const { createStudioServer } = requireScript<StudioServer>(script).default
 
     this._studioServer = await createStudioServer({
       studioHash,
       studioPath,
-      projectSlug,
       cloudApi,
       betterSqlite3Path: path.dirname(require.resolve('better-sqlite3/package.json')),
       manifest,
@@ -65,9 +46,10 @@ export class StudioManager implements StudioManagerShape {
 
         return actualHash === expectedHash
       },
+      getProjectOptions,
     })
 
-    this.status = shouldEnableStudio ? 'ENABLED' : 'INITIALIZED'
+    this.status = 'ENABLED'
   }
 
   initializeRoutes (router: Router): void {
@@ -79,10 +61,8 @@ export class StudioManager implements StudioManagerShape {
   async captureStudioEvent (event: StudioEvent): Promise<void> {
     if (this._studioServer) {
       // this request is not essential - we don't want studio to error out if a telemetry request fails
-      return (await this.invokeAsync('captureStudioEvent', { isEssential: false }, event))
+      await this.invokeAsync('captureStudioEvent', { isEssential: false }, event)
     }
-
-    return Promise.resolve()
   }
 
   addSocketListeners (options: StudioAddSocketListenersOptions): void {

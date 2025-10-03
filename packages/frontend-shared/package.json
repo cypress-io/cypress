@@ -70,7 +70,7 @@
     "cross-env": "7.0.3",
     "cross-fetch": "^4.1.0",
     "cypress-plugin-tab": "1.0.5",
-    "cypress-real-events": "1.14.0",
+    "cypress-real-events": "1.15.0",
     "dayjs": "^1.9.3",
     "dedent": "^0.7.0",
     "execa": "4.1.0",
