@@ -40,7 +40,7 @@ describe('Reporter Header', () => {
     })
   })
 
-  context('Testing Preferences', () => {
+  context('More actions button', () => {
     const switchSelector = '[data-cy=auto-scroll-switch]'
 
     context('preferences menu', () => {
@@ -54,19 +54,23 @@ describe('Reporter Header', () => {
         cy.waitForSpecToFinish()
       })
 
-      it('clicking the down arrow will open a panel showing Testing Preferences', () => {
-        cy.get('[data-cy=testing-preferences-toggle]').trigger('mouseover')
-        cy.get('.cy-tooltip').should('have.text', 'Open Testing Preferences')
+      it('clicking down more options will open a popover with more options', () => {
+        cy.get('[data-cy="runnable-options-button"]').trigger('mouseover')
+        cy.get('.cy-tooltip').should('have.text', 'Options')
 
-        cy.get('.testing-preferences').should('not.exist')
-        cy.get('[data-cy=testing-preferences-toggle]').click()
-        cy.get('.testing-preferences').should('be.visible')
-        cy.get('[data-cy=testing-preferences-toggle]').click()
-        cy.get('.testing-preferences').should('not.exist')
+        cy.get('[data-cy="more-options-runnable-popover"]').should('not.exist')
+        cy.get('[data-cy="runnable-options-button"]').click()
+        cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
+        cy.get('[data-cy="runnable-options-button"]').click()
+        cy.get('[data-cy="more-options-runnable-popover"]').should('not.exist')
       })
 
-      it('will show a toggle beside the auto-scrolling option', () => {
-        cy.get('[data-cy=testing-preferences-toggle]').click()
+      it('will show multiples actions in the popover', () => {
+        cy.get('[data-cy="runnable-options-button"]').click()
+        cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
+        cy.get('[data-cy="more-options-runnable-popover"]').should('contain', 'Open in IDE')
+        cy.get('[data-cy="more-options-runnable-popover"]').should('contain', 'New test')
+        cy.get('[data-cy="more-options-runnable-popover"]').should('contain', 'Auto-scrolling')
         cy.get(switchSelector).invoke('attr', 'aria-checked').should('eq', 'true')
         cy.get(switchSelector).click()
         cy.get(switchSelector).invoke('attr', 'aria-checked').should('eq', 'false')
@@ -95,7 +99,9 @@ describe('Reporter Header', () => {
         })
       })
 
-      cy.get('[data-cy=testing-preferences-toggle]').click()
+      cy.get('[data-cy="runnable-options-button"]').click()
+      cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
+
       cy.get(switchSelector).invoke('attr', 'aria-checked').should('eq', 'true')
     })
   })

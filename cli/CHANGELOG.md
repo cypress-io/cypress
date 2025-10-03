@@ -11,9 +11,12 @@ _Released 10/07/2025 (PENDING)_
 
 - Fixed a regression introduced in [`15.0.0`](https://docs.cypress.io/guides/references/changelog#15-0-0) where `dbus` connection error messages appear in docker containers when launching Cypress. Fixes [#32290](https://github.com/cypress-io/cypress/issues/32290).
 - Fixed code frames in `cy.origin` so that failed commands will show the correct line/column within the corresponding spec file. Addressed in [#32597](https://github.com/cypress-io/cypress/pull/32597).
+- Fixed Cypress cloud requests so that they properly verify SSL certificates. Addressed in [#32629](https://github.com/cypress-io/cypress/pull/32629).
 
 **Misc:**
 
+- Added a dropdown menu in the Command Log that includes actions like Open in IDE and Add New Test in Studio, along with test preferences such as Auto-Scroll. Addresses [#32556](https://github.com/cypress-io/cypress/issues/32556) and [#32558](https://github.com/cypress-io/cypress/issues/32558). Addressed in [#32611](https://github.com/cypress-io/cypress/pull/32611).
+- Updated the Studio test editing header to include a Back button. This change ensures the Specs button remains functional for expanding or collapsing the specs panel. Addresses [#32556](https://github.com/cypress-io/cypress/issues/32556) and [#32558](https://github.com/cypress-io/cypress/issues/32558). Addressed in [#32611](https://github.com/cypress-io/cypress/pull/32611).
 - Fixed the Studio panel resizing when dragging. Addressed in [#32584](https://github.com/cypress-io/cypress/pull/32584).
 
 ## 15.3.0

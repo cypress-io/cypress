@@ -1,16 +1,26 @@
+import { describe, expect, it, vi, beforeEach } from 'vitest'
 import _ from 'lodash'
-import { expect } from 'chai'
 import { _rewriteJsUnsafe } from '../../lib/js'
 import fse from 'fs-extra'
 import Bluebird from 'bluebird'
 import rp from '@cypress/request-promise'
-import snapshot from 'snap-shot-it'
 import * as astTypes from 'ast-types'
-import sinon from 'sinon'
 import {
   testSourceWithExternalSourceMap,
   testSourceWithInlineSourceMap,
 } from '../fixtures'
+
+vi.mock('ast-types', async (importActual) => {
+  const actual = await importActual<typeof import('ast-types')>()
+
+  return {
+    ...actual,
+    PathVisitor: {
+      ...actual.PathVisitor,
+      fromMethodsObject: vi.fn(),
+    },
+  }
+})
 
 const URL = 'http://example.com/foo.js'
 
@@ -26,17 +36,19 @@ function testExpectedJs (string: string, expected: string) {
   // use _rewriteJsUnsafe so exceptions can cause the test to fail
   const actual = _rewriteJsUnsafe(URL, string)
 
-  expect(actual).to.eq(expected)
+  expect(actual).toEqual(expected)
 }
 
 describe('js rewriter', function () {
-  afterEach(() => {
-    sinon.restore()
+  beforeEach(async () => {
+    const { PathVisitor } = await vi.importActual<typeof import('ast-types')>('ast-types')
+
+    vi.mocked(astTypes.PathVisitor.fromMethodsObject).mockImplementation(PathVisitor.fromMethodsObject)
   })
 
-  context('.rewriteJs', function () {
-    context('transformations', function () {
-      context('injects Cypress window property resolver', () => {
+  describe('.rewriteJs', function () {
+    describe('transformations', function () {
+      describe('injects Cypress window property resolver', () => {
         [
           ['window.top', match('window', 'top')],
           ['window.parent', match('window', 'parent')],
@@ -164,11 +176,13 @@ describe('js rewriter', function () {
 
         err.stack = 'stack'
 
-        sinon.stub(astTypes.PathVisitor, 'fromMethodsObject').throws(err)
+        vi.mocked(astTypes.PathVisitor.fromMethodsObject).mockImplementation(() => {
+          throw err
+        })
 
         const actual = _rewriteJsUnsafe(URL, 'console.log()')
 
-        snapshot(actual)
+        expect(actual).toMatchSnapshot()
       })
 
       it('replaces jira window getter', () => {
@@ -290,9 +304,6 @@ describe('js rewriter', function () {
 
         _.each(libs, (url, lib) => {
           it(`does not corrupt code from '${lib}'`, function () {
-            // may have to download and rewrite large files
-            this.timeout(30000)
-
             const pathToLib = `/tmp/${lib}`
 
             const downloadFile = () => {
@@ -313,36 +324,44 @@ describe('js rewriter', function () {
 
               expect(() => eval(stripped), 'is valid JS').to.not.throw
             })
-          })
+            // may have to download and rewrite large files
+            // hence 30 second timeout
+          }, 30000)
         })
       })
     })
 
-    context('source maps', function () {
-      it('emits sourceInfo as expected', function (done) {
-        _rewriteJsUnsafe(URL, 'window.top', (sourceInfo) => {
-          snapshot(sourceInfo)
-          done()
+    describe('source maps', function () {
+      it('emits sourceInfo as expected', function () {
+        return new Promise<void>((resolve) => {
+          _rewriteJsUnsafe(URL, 'window.top', (sourceInfo) => {
+            expect(sourceInfo).toMatchSnapshot()
+            resolve()
 
-          return ''
+            return ''
+          })
         })
       })
 
-      it('emits info about existing inline sourcemap', function (done) {
-        _rewriteJsUnsafe(URL, testSourceWithInlineSourceMap, (sourceInfo) => {
-          snapshot(sourceInfo)
-          done()
+      it('emits info about existing inline sourcemap', function () {
+        return new Promise<void>((resolve) => {
+          _rewriteJsUnsafe(URL, testSourceWithInlineSourceMap, (sourceInfo) => {
+            expect(sourceInfo).toMatchSnapshot()
+            resolve()
 
-          return ''
+            return ''
+          })
         })
       })
 
-      it('emits info about existing external sourcemap', function (done) {
-        _rewriteJsUnsafe(URL, testSourceWithExternalSourceMap, (sourceInfo) => {
-          snapshot(sourceInfo)
-          done()
+      it('emits info about existing external sourcemap', function () {
+        return new Promise<void>((resolve) => {
+          _rewriteJsUnsafe(URL, testSourceWithExternalSourceMap, (sourceInfo) => {
+            expect(sourceInfo).toMatchSnapshot()
+            resolve()
 
-          return ''
+            return ''
+          })
         })
       })
     })

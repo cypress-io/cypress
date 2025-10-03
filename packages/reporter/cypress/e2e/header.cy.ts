@@ -103,24 +103,28 @@ describe('header', () => {
         runner.emit('run:start')
       })
 
-      describe('preferences menu', () => {
-        it('can be toggled', () => {
-          cy.get('.testing-preferences').should('not.exist')
-          cy.get('[data-cy=testing-preferences-toggle]').click()
-          cy.get('.testing-preferences').should('be.visible')
-          cy.get('[data-cy=testing-preferences-toggle]').click()
-          cy.get('.testing-preferences').should('not.exist')
+      describe('more options menu', () => {
+        it('can be opened', () => {
+          cy.get('[data-cy="runnable-options-button"]').click()
+          cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
+
+          cy.get('[data-cy="runnable-options-button"]').click()
+          cy.get('[data-cy="more-options-runnable-popover"]').should('not.exist')
+          cy.get('[data-cy="runnable-options-button"]').click()
+          cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
         })
 
         it('has tooltip', () => {
-          cy.get('[data-cy=testing-preferences-toggle]').trigger('mouseover')
-          cy.get('.cy-tooltip').should('have.text', 'Open Testing Preferences')
+          cy.get('[data-cy="runnable-options-button"]').trigger('mouseover')
+          cy.get('.cy-tooltip').should('have.text', 'Options')
         })
 
         it('shows when auto-scrolling is enabled and can disable it', () => {
           const switchSelector = '[data-cy=auto-scroll-switch]'
 
-          cy.get('[data-cy=testing-preferences-toggle]').click()
+          cy.get('[data-cy="runnable-options-button"]').click()
+          cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
+
           cy.get(switchSelector).invoke('attr', 'aria-checked').should('eq', 'true')
           cy.get(switchSelector).click()
           cy.get(switchSelector).invoke('attr', 'aria-checked').should('eq', 'false')
@@ -129,7 +133,9 @@ describe('header', () => {
         it('can be toggled with shortcut', () => {
           const switchSelector = '[data-cy=auto-scroll-switch]'
 
-          cy.get('[data-cy=testing-preferences-toggle]').click()
+          cy.get('[data-cy="runnable-options-button"]').click()
+          cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
+
           cy.get(switchSelector).invoke('attr', 'aria-checked').should('eq', 'true')
           cy.get('body').type('a').then(() => {
             cy.get(switchSelector).invoke('attr', 'aria-checked').should('eq', 'false')
@@ -138,10 +144,33 @@ describe('header', () => {
 
         it('the auto-scroll toggle emits save:state event when clicked', () => {
           cy.spy(runner, 'emit')
-          cy.get('[data-cy=testing-preferences-toggle]').click()
+
+          cy.get('[data-cy="runnable-options-button"]').click()
+          cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
+
           cy.get('[data-cy=auto-scroll-switch]').click()
           cy.wrap(runner.emit).should('be.calledWith', 'save:state')
           cy.percySnapshot()
+        })
+
+        it('opens the open in IDE button', () => {
+          cy.spy(runner, 'emit')
+
+          cy.get('[data-cy="runnable-options-button"]').click()
+          cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
+
+          cy.get('[data-cy="runnable-popover-open-ide"]').click()
+          cy.wrap(runner.emit).should('be.calledWith', 'open:file:unified')
+        })
+
+        it('opens the new test button', () => {
+          cy.spy(runner, 'emit')
+
+          cy.get('[data-cy="runnable-options-button"]').click()
+          cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
+
+          cy.get('[data-cy="runnable-popover-new-test"]').click()
+          cy.wrap(runner.emit).should('be.calledWith', 'studio:init:suite')
         })
       })
 

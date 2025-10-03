@@ -118,11 +118,15 @@ describe('shortcuts', function () {
 
     it('toggles auto-scrolling', () => {
       cy.get('body').type('a')
-      cy.get('[data-cy=testing-preferences-toggle]').click()
+      cy.get('[data-cy="runnable-options-button"]').click()
+      cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
       cy.get('[data-cy=auto-scroll-switch]').invoke('attr', 'aria-checked').should('eq', 'false')
-      cy.get('[data-cy=testing-preferences-toggle]').click()
+      cy.get('[data-cy=runnable-options-button]').click()
+      cy.get('[data-cy="more-options-runnable-popover"]').should('not.exist')
+
       cy.get('body').type('a')
-      cy.get('[data-cy=testing-preferences-toggle]').click()
+      cy.get('[data-cy="runnable-options-button"]').click()
+      cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
       cy.get('[data-cy=auto-scroll-switch]').invoke('attr', 'aria-checked').should('eq', 'true')
     })
 
