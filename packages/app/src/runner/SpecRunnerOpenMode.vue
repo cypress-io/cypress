@@ -1,12 +1,12 @@
 <template>
   <PromptGetCodeModal
     v-if="promptStore.getCodeModalIsOpen"
-    :open="promptStore.getCodeModalIsOpen"
+    :is-open="promptStore.getCodeModalIsOpen"
     @close="promptStore.closeGetCodeModal"
   />
   <PromptMoreInfoNeededModal
     v-if="promptStore.moreInfoNeededModalIsOpen"
-    :open="promptStore.moreInfoNeededModalIsOpen"
+    :is-open="promptStore.moreInfoNeededModalIsOpen"
     @close="promptStore.closeMoreInfoNeededModal"
   />
   <AdjustRunnerStyleDuringScreenshot
