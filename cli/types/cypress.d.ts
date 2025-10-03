@@ -59,7 +59,7 @@ declare namespace Cypress {
     [key: string]: any
   }
   interface PromptOptions {
-    excludeFromAI?: Record<string, string>
+    parameters?: Record<string, string>
   }
   interface Auth {
     username: string
