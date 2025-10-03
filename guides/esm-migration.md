@@ -100,7 +100,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] packages/electron ✅ **COMPLETED**
 - [ ] packages/https-proxy
 - [ ] packages/icons
-- [ ] packages/launcher
+- [x] packages/launcher ✅ **COMPLETED**
 - [ ] packages/net-stubbing
 - [x] packages/network ✅ **COMPLETED**
 - [ ] packages/packherd-require
