@@ -246,9 +246,9 @@ export = {
           const pong = await this.runElectron(mode, options)
 
           if (!this.isCurrentlyRunningElectron()) {
-            await exit(pong)
+            return exit(pong)
           } else if (pong !== options.ping) {
-            await exit(1)
+            return exit(1)
           }
 
           break
@@ -261,14 +261,12 @@ export = {
           break
         }
         case 'exitWithCode': {
-          await exit(toNumber(options.exitWithCode))
-
+          return exit(toNumber(options.exitWithCode))
           break
         }
         case 'run': {
           const results = await this.runElectron(mode, options)
 
-          debug('results', results, results.runs, options.posixExitCodes)
           if (results.runs) {
             const isCanceled = results.runs.filter((run) => run.skippedSpec).length
 
@@ -276,17 +274,17 @@ export = {
               // eslint-disable-next-line no-console
               console.log(require('chalk').magenta('\n  Exiting with non-zero exit code because the run was canceled.'))
 
-              await exit(1)
+              return exit(1)
             }
           }
 
+          debug('results.totalFailed, posix?', results.totalFailed, options.posixExitCodes)
+
           if (options.posixExitCodes) {
-            await exit(results.totalFailed ? 1 : 0)
+            return exit(results.totalFailed ? 1 : 0)
           }
 
-          await exit(results.totalFailed ?? 0)
-
-          break
+          return exit(results.totalFailed ?? 0)
         }
         default: {
             throw new Error(`Cannot start. Invalid mode: '${mode}'`)
@@ -296,6 +294,7 @@ export = {
       return exitErr(err, options.posixExitCodes)
     }
     debug('end of startInMode, exit 0')
-    await exit(0)
+
+    return exit(0)
   },
 }
