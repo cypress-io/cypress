@@ -11,9 +11,8 @@
     "postinstall": "patch-package",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "test": "yarn test-unit",
-    "test-debug": "yarn test-unit --inspect-brk=5566",
-    "test-unit": "cross-env NODE_ENV=test mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
-    "test-watch": "cross-env NODE_ENV=test mocha -r @packages/ts/register --watch",
+    "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0 --hook-timeout=0",
+    "test-unit": "vitest",
     "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "dependencies": {
@@ -30,11 +29,10 @@
   "devDependencies": {
     "@packages/types": "0.0.0-development",
     "@types/uuid": "8.3.2",
-    "chai": "3.5.0",
     "cross-env": "7.0.3",
     "devtools-protocol": "0.0.1459876",
-    "mocha": "3.5.3",
-    "resolve-pkg": "2.0.0"
+    "resolve-pkg": "2.0.0",
+    "vitest": "^3.2.4"
   },
   "files": [
     "index.js",

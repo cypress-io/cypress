@@ -10,7 +10,7 @@
     "clean-deps": "rimraf node_modules",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "test": "yarn test-unit",
-    "test-debug": "npx vitest --inspect-brk --no-file-parallelism --test-timeout=0 --hook-timeout=0",
+    "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0 --hook-timeout=0",
     "test-unit": "vitest run",
     "test-watch": "yarn test-unit --watch",
     "tslint": "tslint --config ../ts/tslint.json --project ."
