@@ -465,6 +465,18 @@ class HttpsAgent extends https.Agent {
   }
 }
 
+// NODE_TLS_REJECT_UNAUTHORIZED is set to '0' in Cypress to cover
+// all traffic to the user's app and `agent` honors this by default.
+// Calls to the Cloud should use the `strictAgent` or `api/index`'s
+// request promise implementation instead as they override
+// this functionality to actually reject in unauthorized situations.
 const agent = new CombinedAgent()
 
+// This agent always rejects unauthorized certificates.
+const strictAgent = new CombinedAgent({}, {
+  rejectUnauthorized: true,
+})
+
 export default agent
+
+export { strictAgent }

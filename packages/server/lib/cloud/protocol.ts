@@ -6,7 +6,7 @@ import Debug from 'debug'
 import fs from 'fs-extra'
 import os from 'os'
 import path from 'path'
-import { agent } from '@packages/network'
+import { strictAgent } from '@packages/network'
 import pkg from '@packages/root'
 import env from '../util/env'
 import { putProtocolArtifact } from './api/put_protocol_artifact'
@@ -416,7 +416,7 @@ export class ProtocolManager implements ProtocolManagerShape {
 
       await fetch(routes.apiRoutes.captureProtocolErrors() as string, {
         // @ts-expect-error - this is supported
-        agent,
+        agent: strictAgent,
         method: 'POST',
         body,
         headers: {
