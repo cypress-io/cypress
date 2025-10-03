@@ -4,6 +4,19 @@ orbs:
 setup: true
 version: 2.1
 
+parameters:
+  persist-artifacts:
+    type: boolean
+    default: false
+
+_should_persist_artifacts: &should-persist-artifacts
+  or:
+    - equal: [<< pipeline.git.branch >>, "develop"]
+    - matches:
+        pattern: /^release\/.*/
+        value: << pipeline.git.branch >>
+    - << pipeline.parameters.persist-artifacts >>
+
 workflows:
     setup-workflow:
         jobs:
@@ -151,8 +164,18 @@ jobs:
                     echo "❌ Primary workflow definition not found in .circleci/packed/pipeline.yml!"
                     exit 1
                 fi
-          - continuation/continue:
-              configuration_path: .circleci/packed/pipeline.yml
+          - when:
+              condition: *should-persist-artifacts
+              steps:
+                - continuation/continue:
+                    configuration_path: .circleci/packed/pipeline.yml
+                    parameters: '{ "persist-artifacts": true }'
+          - unless:
+              condition: *should-persist-artifacts
+              steps:
+                - continuation/continue:
+                    configuration_path: .circleci/packed/pipeline.yml
+                    parameters: '{ "persist-artifacts": false }'
 
 
   
