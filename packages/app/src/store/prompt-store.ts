@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 
-// TODO: Share this
 interface GetCodeModalInfo {
   testId: string
   logId: string
