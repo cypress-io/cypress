@@ -168,7 +168,7 @@ export class ProjectBase extends EE {
 
     this._server = new ServerBase(cfg)
 
-    if (!cfg.isTextTerminal && cfg.resolved.experimentalStudio?.value) {
+    if (!cfg.isTextTerminal && this.testingType === 'e2e') {
       const studioLifecycleManager = new StudioLifecycleManager()
 
       studioLifecycleManager.initializeStudioManager({

@@ -1,7 +1,6 @@
 import { getMobxRunnerStore, MobxRunnerStore, useSpecStore } from '../store'
 import { getReporterElement } from './utils'
 import { getEventManager } from '.'
-import { getRunnerConfigFromWindow } from './get-runner-config-from-window'
 import type { EventManager } from './event-manager'
 import { useRunnerUiStore } from '../store/runner-ui-store'
 
@@ -43,8 +42,6 @@ function renderReporter (
   const runnerUiStore = useRunnerUiStore()
   const specsStore = useSpecStore()
 
-  const config = getRunnerConfigFromWindow()
-
   const reporter = window.UnifiedRunner.React.createElement(window.UnifiedRunner.Reporter, {
     runMode: 'single' as const,
     runner: eventManager.reporterBus,
@@ -53,7 +50,7 @@ function renderReporter (
     error: null,
     resetStatsOnSpecChange: true,
     // Studio can only be enabled for e2e testing
-    studioEnabled: window.__CYPRESS_TESTING_TYPE__ === 'e2e' && config.experimentalStudio,
+    studioEnabled: window.__CYPRESS_TESTING_TYPE__ === 'e2e',
     runnerStore: store,
     testFilter: specsStore.testFilter,
   })

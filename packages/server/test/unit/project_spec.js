@@ -574,19 +574,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     describe('studio initialization', function () {
-      it('does not create studio lifecycle manager when experimental flag is disabled', async function () {
-        const cfg = {
-          isTextTerminal: false,
-          resolved: {
-            experimentalStudio: {
-              value: false,
-            },
-          },
-          projectId: 'test-project',
-          port: 8080,
-        }
-
-        sinon.stub(this.project, 'initializeConfig').resolves(cfg)
+      it('does not create studio lifecycle manager when in text terminal mode', async function () {
+        this.project.cfg.isTextTerminal = true
         sinon.stub(this.project, 'saveState').resolves()
 
         sinon.stub(process, 'chdir')
@@ -596,19 +585,9 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         expect(this.project.ctx.coreData.studioLifecycleManager).to.be.undefined
       })
 
-      it('does not create studio lifecycle manager when in text terminal mode', async function () {
-        const cfg = {
-          isTextTerminal: true,
-          resolved: {
-            experimentalStudio: {
-              value: true,
-            },
-          },
-          projectId: 'test-project',
-          port: 8080,
-        }
+      it('does not create studio lifecycle manager for component testing', async function () {
+        this.project.testingType = 'component'
 
-        sinon.stub(this.project, 'initializeConfig').resolves(cfg)
         sinon.stub(this.project, 'saveState').resolves()
 
         sinon.stub(process, 'chdir')
@@ -616,6 +595,16 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         await this.project.open()
 
         expect(this.project.ctx.coreData.studioLifecycleManager).to.be.undefined
+      })
+
+      it('creates studio lifecycle manager for e2e testing', async function () {
+        sinon.stub(this.project, 'saveState').resolves()
+
+        sinon.stub(process, 'chdir')
+
+        await this.project.open()
+
+        expect(this.project.ctx.coreData.studioLifecycleManager).to.not.be.undefined
       })
     })
   })

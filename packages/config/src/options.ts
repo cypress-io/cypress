@@ -16,6 +16,7 @@ const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
   'EXPERIMENTAL_SINGLE_TAB_RUN_MODE',
   'VIDEO_UPLOAD_ON_PASSES_REMOVED',
   'RENAMED_CONFIG_OPTION',
+  'EXPERIMENTAL_STUDIO_REMOVED',
 ] as const
 
 type ValidationOptions = {
@@ -236,12 +237,6 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     requireRestartOnChange: 'server',
   }, {
     name: 'experimentalSingleTabRunMode',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isExperimental: true,
-    requireRestartOnChange: 'server',
-  }, {
-    name: 'experimentalStudio',
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
@@ -620,6 +615,11 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
     errorKey: 'VIDEO_UPLOAD_ON_PASSES_REMOVED',
     isWarning: true,
   },
+  {
+    name: 'experimentalStudio',
+    errorKey: 'EXPERIMENTAL_STUDIO_REMOVED',
+    isWarning: true,
+  },
 ] as const
 
 export const breakingRootOptions: Array<BreakingOption> = [
@@ -705,11 +705,6 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
     {
       name: 'baseUrl',
       errorKey: 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT',
-      isWarning: false,
-    },
-    {
-      name: 'experimentalStudio',
-      errorKey: 'EXPERIMENTAL_STUDIO_E2E_ONLY',
       isWarning: false,
     },
     {

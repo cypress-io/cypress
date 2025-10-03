@@ -29,18 +29,6 @@ describe('Cypress Studio', () => {
     })
   }
 
-  it('does not show the studio button if experimentalStudio is not enabled', () => {
-    loadProjectAndRunSpec({ cliArgs: ['--config', 'experimentalStudio=false'] })
-
-    cy.findByTestId('studio-button').should('not.exist')
-  })
-
-  it('shows the studio button if experimentalStudio is enabled', () => {
-    loadProjectAndRunSpec({ cliArgs: ['--config', 'experimentalStudio=true'] })
-
-    cy.findByTestId('studio-button').should('be.visible')
-  })
-
   it('does not display the launch studio button when test is pending', () => {
     loadProjectAndRunSpec({ specName: 'skipped.cy.js' })
 
@@ -1042,7 +1030,7 @@ it('new-test', function() {
     cy.percySnapshot()
   })
 
-  it('hides selector playground and studio controls when experimentalStudio is enabled', () => {
+  it('hides selector playground and studio controls', () => {
     launchStudio()
 
     cy.findByTestId('studio-panel').should('be.visible')
@@ -1234,18 +1222,6 @@ describe('studio functionality', () => {
     // Use the run-all-specs project which already has run-all-specs enabled
     cy.scaffoldProject('run-all-specs')
     cy.openProject('run-all-specs')
-
-    // Enable experimental studio by modifying the config
-    cy.withCtx(async (ctx) => {
-      const configPath = 'cypress.config.js'
-      const configContent = await ctx.actions.file.readFileInProject(configPath)
-      const updatedConfig = configContent.replace(
-        'experimentalRunAllSpecs: true,',
-        'experimentalRunAllSpecs: true,\n    experimentalStudio: true,',
-      )
-
-      await ctx.actions.file.writeFileInProject(configPath, updatedConfig)
-    })
 
     cy.startAppServer('e2e')
     cy.visitApp()

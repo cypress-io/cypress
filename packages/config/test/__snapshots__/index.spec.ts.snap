@@ -6,6 +6,7 @@ exports[`config/src/index > .getBreakingKeys > returns list of breaking config k
   "experimentalSessionAndOrigin",
   "experimentalSkipDomainInjection",
   "videoUploadOnPasses",
+  "experimentalStudio",
 ]
 `;
 
@@ -44,7 +45,6 @@ exports[`config/src/index > .getDefaultValues > returns list of public config ke
   "experimentalRunAllSpecs": false,
   "experimentalSingleTabRunMode": false,
   "experimentalSourceRewriting": false,
-  "experimentalStudio": false,
   "experimentalWebKitSupport": false,
   "fileServerFolder": "",
   "fixturesFolder": "cypress/fixtures",
@@ -139,7 +139,6 @@ exports[`config/src/index > .getDefaultValues > returns list of public config ke
   "experimentalRunAllSpecs": false,
   "experimentalSingleTabRunMode": false,
   "experimentalSourceRewriting": false,
-  "experimentalStudio": false,
   "experimentalWebKitSupport": false,
   "fileServerFolder": "",
   "fixturesFolder": "cypress/fixtures",
@@ -223,7 +222,6 @@ exports[`config/src/index > .getPublicConfigKeys > returns list of public config
   "experimentalOriginDependencies",
   "experimentalSourceRewriting",
   "experimentalSingleTabRunMode",
-  "experimentalStudio",
   "experimentalWebKitSupport",
   "fileServerFolder",
   "fixturesFolder",

@@ -313,17 +313,13 @@ const studioBetaAvailable = computed(() => {
 })
 
 const shouldShowStudioButton = computed(() => {
-  // Find the experimentalStudio config field
-  const experimentalStudioConfig = props.gql.currentProject?.config?.find((item) => item.field === 'experimentalStudio')
-  const experimentalStudioEnabled = experimentalStudioConfig?.value === true
-
   // Check if we're running all specs by looking at the route query
   const isRunningAllSpecs = route.query.file === '__all'
 
   // Studio can only be enabled for e2e testing
   const isE2ETesting = props.gql.currentProject?.currentTestingType === 'e2e'
 
-  return !!cloudStudioRequested.value && !studioStore.isOpen && experimentalStudioEnabled && !isRunningAllSpecs && isE2ETesting
+  return !!cloudStudioRequested.value && !studioStore.isOpen && !isRunningAllSpecs && isE2ETesting
 })
 
 const shouldShowStudioPanel = computed(() => {

@@ -16,7 +16,6 @@ export default defineConfig({
   },
 
   e2e: {
-    experimentalStudio: true,
     baseUrl: 'http://localhost:5006',
     setupNodeEvents (on, config) {
       const express = require('express')

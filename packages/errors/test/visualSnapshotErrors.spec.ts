@@ -1036,7 +1036,7 @@ describe('visual error templates', () => {
       }
     },
 
-    EXPERIMENTAL_STUDIO_E2E_ONLY: () => {
+    EXPERIMENTAL_STUDIO_REMOVED: () => {
       return {
         default: [],
       }
