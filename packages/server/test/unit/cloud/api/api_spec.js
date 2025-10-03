@@ -11,6 +11,7 @@ const encryption = require('../../../../lib/cloud/encryption')
 
 const {
   agent,
+  CombinedAgent,
 } = require('@packages/network')
 const pkg = require('@packages/root')
 const api = require('../../../../lib/cloud/api').default
@@ -140,7 +141,10 @@ describe('lib/cloud/api', () => {
 
   context('.rp', () => {
     beforeEach(() => {
-      sinon.spy(agent, 'addRequest')
+      // Because @packages/network is a bundled ES6 class with https://github.com/cypress-io/cypress/pull/32633
+      // we can no longer mock the addRequest method on the agent singleton instance directly
+      // Until we are able to convert this test to Vitest/TypeScript, we need to spy on the prototype
+      sinon.spy(CombinedAgent.prototype, 'addRequest')
 
       return nock.enableNetConnect()
     }) // nock will prevent requests from reaching the agent
@@ -151,9 +155,9 @@ describe('lib/cloud/api', () => {
       return api.ping()
       .thenThrow()
       .catch(() => {
-        expect(agent.addRequest).to.be.calledOnce
+        expect(CombinedAgent.prototype.addRequest).to.be.calledOnce
 
-        expect(agent.addRequest).to.be.calledWithMatch(sinon.match.any, {
+        expect(CombinedAgent.prototype.addRequest).to.be.calledWithMatch(sinon.match.any, {
           href: 'http://localhost:1234/ping',
         })
       })
@@ -165,9 +169,9 @@ describe('lib/cloud/api', () => {
       return api.ping()
       .thenThrow()
       .catch(() => {
-        expect(agent.addRequest).to.be.calledOnce
+        expect(CombinedAgent.prototype.addRequest).to.be.calledOnce
 
-        expect(agent.addRequest).to.be.calledWithMatch(sinon.match.any, {
+        expect(CombinedAgent.prototype.addRequest).to.be.calledWithMatch(sinon.match.any, {
           rejectUnauthorized: true,
         })
       })
@@ -185,9 +189,9 @@ describe('lib/cloud/api', () => {
         return api.ping()
         .thenThrow()
         .catch(() => {
-          expect(agent.addRequest).to.be.calledOnce
+          expect(CombinedAgent.prototype.addRequest).to.be.calledOnce
 
-          expect(agent.addRequest).to.be.calledWithMatch(sinon.match.any, {
+          expect(CombinedAgent.prototype.addRequest).to.be.calledWithMatch(sinon.match.any, {
             href: 'http://localhost:1234/ping',
           })
         })

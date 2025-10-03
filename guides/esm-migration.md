@@ -52,7 +52,8 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] packages/launcher ✅ **COMPLETED**
 - [x] packages/launchpad ✅ **COMPLETED**
 - [x] packages/net-stubbing ✅ **COMPLETED**
-- [ ] packages/network **PARTIAL** - entry point is JS
+- [x] packages/network ✅ **COMPLETED**
+- [x] packages/network-tools ✅ **COMPLETED**
 - [x] packages/packherd-require ✅ **COMPLETED**
 - [ ] packages/proxy **PARTIAL** - entry point is JS
 - [x] packages/reporter ✅ **COMPLETED**
@@ -101,6 +102,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] packages/launcher ✅ **COMPLETED**
 - [ ] packages/net-stubbing
 - [x] packages/network ✅ **COMPLETED**
+- [x] packages/network-tools ✅ **COMPLETED**
 - [ ] packages/packherd-require
 - [ ] packages/proxy
 - [x] packages/rewriter ✅ **COMPLETED**

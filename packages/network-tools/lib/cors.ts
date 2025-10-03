@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import * as uri from './uri'
+import { addDefaultPort, parse as parseUrl } from './uri'
 import debugModule from 'debug'
 import _parseDomain from '@cypress/parse-domain'
 import type { ParsedHost, ParsedHostWithProtocolAndHost } from './types'
@@ -25,7 +25,7 @@ export function parseDomain (domain: string, options = {}) {
 }
 
 export function parseUrlIntoHostProtocolDomainTldPort (str: string) {
-  let { hostname, port, protocol } = uri.parse(str)
+  let { hostname, port, protocol } = parseUrl(str)
 
   if (!hostname) {
     hostname = ''
@@ -200,9 +200,9 @@ declare module 'url' {
   }
 }
 
-export function urlMatchesOriginProtectionSpace (urlStr, origin) {
-  const normalizedUrl = uri.addDefaultPort(urlStr).format()
-  const normalizedOrigin = uri.addDefaultPort(origin).format()
+export function urlMatchesOriginProtectionSpace (urlStr: string, origin: string) {
+  const normalizedUrl = addDefaultPort(urlStr).format()
+  const normalizedOrigin = addDefaultPort(origin).format()
 
   return _.startsWith(normalizedUrl, normalizedOrigin)
 }

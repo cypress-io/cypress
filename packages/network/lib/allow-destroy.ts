@@ -10,7 +10,7 @@ import type net from 'net'
 export function allowDestroy (server: net.Server) {
   let connections: net.Socket[] = []
 
-  function trackConn (conn) {
+  function trackConn (conn: net.Socket) {
     connections.push(conn)
 
     conn.on('close', () => {

@@ -4,7 +4,7 @@ import chaiAsPromised from 'chai-as-promised'
 import chaiSubset from 'chai-subset'
 import sinonChai from '@cypress/sinon-chai'
 import Sinon from 'sinon'
-import { OriginBehavior } from '@packages/network/lib/document-domain-injection'
+import { OriginBehavior } from '@packages/network-tools'
 
 import { RemoteStates, DEFAULT_DOMAIN_NAME } from '../../lib/remote_states'
 

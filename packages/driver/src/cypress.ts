@@ -45,7 +45,7 @@ import { PrimaryOriginCommunicator, SpecBridgeCommunicator } from './cross-origi
 import { setupAutEventHandlers } from './cypress/aut_event_handlers'
 
 import type { CachedTestState, ReporterRunState, RunState } from '@packages/types'
-import { DocumentDomainInjection } from '@packages/network/lib/document-domain-injection'
+import { DocumentDomainInjection } from '@packages/network-tools'
 import { setSpecContentSecurityPolicy } from './util/privileged_channel'
 
 import { telemetry } from '@packages/telemetry/browser/client'

@@ -100,6 +100,7 @@ export const create = (projectRoot?: string, isTextTerminal: boolean = false): B
     return Bluebird.resolve(FileUtil.noopFile)
   }
 
+  // @ts-ignore
   return formStatePath(projectRoot)
   .then((statePath: string) => {
     const fullStatePath = appData.projectsPath(statePath)
@@ -120,6 +121,7 @@ export const create = (projectRoot?: string, isTextTerminal: boolean = false): B
 
     stateFile.set = _.wrap(stateFile.set.bind(stateFile), normalizeAndAllowSet)
 
+    // @ts-ignore
     stateFiles[fullStatePath] = stateFile
 
     return stateFile as SavedStateAPI

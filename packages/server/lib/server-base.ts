@@ -14,7 +14,8 @@ import url from 'url'
 import la from 'lazy-ass'
 import httpsProxy from '@packages/https-proxy'
 import { getRoutesForRequest, netStubbingState, NetStubbingState } from '@packages/net-stubbing'
-import { agent, clientCertificates, cors, httpUtils, uri, concatStream, DocumentDomainInjection } from '@packages/network'
+import { agent, clientCertificates, httpUtils, concatStream } from '@packages/network'
+import { DocumentDomainInjection, getPath, parseUrlIntoHostProtocolDomainTldPort, removeDefaultPort } from '@packages/network-tools'
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import type { SocketCt } from './socket-ct'
 import * as errors from './errors'
@@ -123,9 +124,9 @@ const setProxiedUrl = function (req) {
   // and only leave the path which is
   // how browsers would normally send
   // use their url
-  req.proxiedUrl = uri.removeDefaultPort(req.url).format()
+  req.proxiedUrl = removeDefaultPort(req.url).format()
 
-  req.url = uri.getPath(req.url)
+  req.url = getPath(req.url)
 }
 
 const notSSE = (req, res) => {
@@ -163,6 +164,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _nodeProxy?: httpProxy
   protected _networkProxy?: NetworkProxy
   protected _netStubbingState?: NetStubbingState
+  // @ts-ignore
   protected _httpsProxy?: httpsProxy
   protected _graphqlWS?: WebSocketServer
   protected _eventBus: EventEmitter
@@ -620,7 +622,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       // get the port & hostname from host header
       const fullUrl = `${req.connection.encrypted ? 'https' : 'http'}://${host}`
       const { hostname, protocol } = url.parse(fullUrl)
-      const { port } = cors.parseUrlIntoHostProtocolDomainTldPort(fullUrl)
+      const { port } = parseUrlIntoHostProtocolDomainTldPort(fullUrl)
 
       const onProxyErr = (err, req, res) => {
         return debug('Got ERROR proxying websocket connection', { err, port, protocol, hostname, req })
@@ -1016,6 +1018,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       debug('sending request with options %o', options)
 
       return runPhase(() => {
+        // @ts-ignore
         return request.sendStream(userAgent, automationRequest, options)
         .then((createReqStream) => {
           const stream = createReqStream()
