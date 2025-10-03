@@ -59,7 +59,7 @@ declare namespace Cypress {
     [key: string]: any
   }
   interface PromptOptions {
-    parameters?: Record<string, string>
+    privateNoCache?: Record<string, string>
   }
   interface Auth {
     username: string
