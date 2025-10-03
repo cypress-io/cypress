@@ -193,15 +193,15 @@ commands:
     description: Save entire folder as artifact for other jobs to run without reinstalling
     steps:
       - run:
-          name: Sync Cloud Validations
-          command: |
-            source ./scripts/ensure-node.sh
-            yarn gulp syncCloudValidations
-      - run:
           name: Build packages
           command: |
             source ./scripts/ensure-node.sh
             yarn build
+      - run:
+          name: Sync Cloud Validations
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn gulp syncCloudValidations
       - run:
           name: Generate v8 snapshot
           command: |
