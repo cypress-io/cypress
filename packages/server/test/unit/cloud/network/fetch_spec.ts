@@ -4,8 +4,8 @@ import { Response } from 'cross-fetch'
 import proxyquire from 'proxyquire'
 import type { fetch, putFetch, postFetch } from '../../../../lib/cloud/network/fetch'
 import { ParseError } from '../../../../lib/cloud/network/parse_error'
-import { HttpError } from '@packages/errors/src/network/http_error'
-import { SystemError } from '@packages/errors/src/network/system_error'
+import { HttpError } from '@packages/errors'
+import { SystemError } from '@packages/errors'
 
 describe('cloud/network/fetch', () => {
   const url = 'https://some.test/url'

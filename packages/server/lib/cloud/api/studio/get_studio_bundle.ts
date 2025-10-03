@@ -6,8 +6,8 @@ import { strictAgent } from '@packages/network'
 import { PUBLIC_KEY_VERSION } from '../../constants'
 import { createWriteStream } from 'fs'
 import { verifySignatureFromFile } from '../../encryption'
-import { HttpError } from '@packages/errors/src/network/http_error'
-import { SystemError } from '@packages/errors/src/network/system_error'
+import { HttpError } from '@packages/errors'
+import { SystemError } from '@packages/errors'
 
 const pkg = require('@packages/root')
 const _delay = linearDelay(500)

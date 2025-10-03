@@ -7,7 +7,7 @@ import chaiAsPromised from 'chai-as-promised'
 
 import { ReadStream } from 'fs'
 import { StreamActivityMonitor } from '../../../../lib/cloud/upload/stream_activity_monitor'
-import { HttpError } from '@packages/errors/src/network/http_error'
+import { HttpError } from '@packages/errors'
 import { putFetch, ParseKinds } from '../../../../lib/cloud/network/fetch'
 import { linearDelay, asyncRetry } from '../../../../lib/util/async_retry'
 import { isRetryableError } from '../../../../lib/cloud/network/is_retryable_error'

@@ -1,6 +1,6 @@
 import { sinon, proxyquire } from '../../../../spec_helper'
 import { Readable, Writable } from 'stream'
-import { HttpError } from '@packages/errors/src/network/http_error'
+import { HttpError } from '@packages/errors'
 
 describe('getStudioBundle', () => {
   let writeResult: string

@@ -1,7 +1,7 @@
-import { SystemError } from '@packages/errors/src/network/system_error'
-import { HttpError } from '@packages/errors/src/network/http_error'
+import { SystemError } from '@packages/errors'
+import { HttpError } from '@packages/errors'
 import Debug from 'debug'
-import { isNonRetriableCertErrorCode } from '@packages/errors/src/network/nonretriable_cert_error_codes'
+import { isNonRetriableCertErrorCode } from '@packages/errors'
 
 const debug = Debug('cypress-verbose:server:is-retryable-error')
 
