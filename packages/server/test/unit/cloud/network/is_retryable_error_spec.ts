@@ -12,7 +12,7 @@ describe('isRetryableError', () => {
   const url = 'http://some/url'
 
   it('returns true with a NetworkError', () => {
-    expect(isRetryableError(new SystemError(new Error(), url))).to.be.true
+    expect(isRetryableError(new SystemError(new Error(), url, 'ECONNRESET', 100))).to.be.true
   })
 
   it('returns true with retryable http errors', () => {
@@ -29,6 +29,18 @@ describe('isRetryableError', () => {
 
       expect(isRetryableError(err)).to.be.false
     })
+  })
+
+  it('returns false with non-retryable cert errors', () => {
+    const err1 = new SystemError(new Error(), url, 'UNABLE_TO_VERIFY_LEAF_SIGNATURE', 100)
+    const err2 = new SystemError(new Error(), url, 'DEPTH_ZERO_SELF_SIGNED_CERT', 100)
+    const err3 = new SystemError(new Error(), url, 'SELF_SIGNED_CERT_IN_CHAIN', 100)
+    const err4 = new SystemError(new Error(), url, 'UNABLE_TO_GET_ISSUER_CERT_LOCALLY', 100)
+
+    expect(isRetryableError(err1)).to.be.false
+    expect(isRetryableError(err2)).to.be.false
+    expect(isRetryableError(err3)).to.be.false
+    expect(isRetryableError(err4)).to.be.false
   })
 
   it('returns false for other errors', () => {

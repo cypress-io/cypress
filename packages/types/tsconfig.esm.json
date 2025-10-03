@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./esm",
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "node"
+  }
+}

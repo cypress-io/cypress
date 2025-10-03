@@ -2,24 +2,28 @@
   "name": "@packages/resolve-dist",
   "version": "0.0.0-development",
   "private": true,
-  "main": "index.js",
+  "main": "cjs/index.js",
   "scripts": {
-    "build-prod": "tsc --project .",
-    "check-ts": "tsc --noEmit && yarn -s tslint",
-    "clean": "rimraf --glob 'lib/**/*.js'",
+    "build": "yarn build:cjs && yarn build:esm",
+    "build-prod": "yarn build",
+    "build:cjs": "rimraf cjs && tsc -p tsconfig.cjs.json",
+    "build:esm": "rimraf esm && tsc -p tsconfig.esm.json",
+    "check-ts": "tsc -p tsconfig.cjs.json --noEmit && yarn -s tslint -p tsconfig.cjs.json",
+    "clean": "rimraf cjs esm",
     "clean-deps": "rimraf node_modules",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "dependencies": {
-    "fs-extra": "9.1.0"
-  },
-  "devDependencies": {
-    "@packages/ts": "0.0.0-development"
+    "fs-extra": "9.1.0",
+    "rimraf": "^6.0.1",
+    "typescript": "~5.4.5"
   },
   "files": [
-    "lib"
+    "cjs/*",
+    "esm/*"
   ],
   "types": "./lib/index.ts",
+  "module": "esm/index.js",
   "nx": {}
 }
