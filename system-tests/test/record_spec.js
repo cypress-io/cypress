@@ -883,6 +883,19 @@ describe('e2e record', () => {
         })
       })
 
+      it('errors and exits with 112 when posix exit codes are enabled', function () {
+        process.env.DISABLE_API_RETRIES = 'true'
+
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          record: true,
+          posixExitCodes: true,
+          expectedExitCode: 112,
+        })
+      })
+
       it('when grouping without parallelization errors and exits', function () {
         process.env.DISABLE_API_RETRIES = 'true'
 
@@ -902,6 +915,21 @@ describe('e2e record', () => {
           expect(urls).to.deep.eq([
             'POST /runs',
           ])
+        })
+      })
+
+      it('when grouping without parallelization errors and exits with 112 when posix exit codes are enabled', function () {
+        process.env.DISABLE_API_RETRIES = 'true'
+
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          group: 'foo',
+          record: true,
+          posixExitCodes: true,
+          ciBuildId: 'ciBuildId123',
+          expectedExitCode: 112,
         })
       })
 
@@ -926,6 +954,23 @@ describe('e2e record', () => {
           expect(urls).to.deep.eq([
             'POST /runs',
           ])
+        })
+      })
+
+      it('does not proceed and exits with error with 112 when posix exit codes are enabled when parallelizing', function () {
+        process.env.DISABLE_API_RETRIES = 'true'
+
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          group: 'foo',
+          tag: 'nightly',
+          record: true,
+          parallel: true,
+          posixExitCodes: true,
+          ciBuildId: 'ciBuildId123',
+          expectedExitCode: 112,
         })
       })
     })
@@ -966,6 +1011,23 @@ describe('e2e record', () => {
         })
       })
 
+      it('does not proceed and exits with error with 112 when posix exit codes are enabled when parallelizing and creating instance', function () {
+        process.env.DISABLE_API_RETRIES = 'true'
+
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          group: 'foo',
+          tag: 'nightly',
+          record: true,
+          parallel: true,
+          posixExitCodes: true,
+          ciBuildId: 'ciBuildId123',
+          expectedExitCode: 112,
+        })
+      })
+
       it('without parallelization - does not proceed', async function () {
         process.env.DISABLE_API_RETRIES = 'true'
 
@@ -984,6 +1046,19 @@ describe('e2e record', () => {
             'POST /runs',
             'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
           ])
+        })
+      })
+
+      it('without parallelization - does not proceed with 112 when posix exit codes are enabled', async function () {
+        process.env.DISABLE_API_RETRIES = 'true'
+
+        await systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'a_record.cy.js,b_record.cy.js',
+          record: true,
+          posixExitCodes: true,
+          expectedExitCode: 112,
         })
       })
     })
@@ -1036,6 +1111,23 @@ describe('e2e record', () => {
           ])
         })
       })
+
+      it('does not proceed and exits with error with 112 when posix exit codes are enabled when parallelizing and updating instance', function () {
+        process.env.DISABLE_API_RETRIES = 'true'
+
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          group: 'foo',
+          tag: 'nightly',
+          record: true,
+          parallel: true,
+          ciBuildId: 'ciBuildId123',
+          expectedExitCode: 112,
+          posixExitCodes: true,
+        })
+      })
     })
 
     describe('create run 422', () => {
@@ -1065,6 +1157,27 @@ describe('e2e record', () => {
           record: true,
           snapshot: true,
           expectedExitCode: 1,
+        })
+        .then(() => {
+          const urls = getRequestUrls()
+
+          expect(urls).to.deep.eq([
+            'POST /runs',
+          ])
+        })
+      })
+
+      it('errors and exits with 112 when posix exit codes are enabled when group name is in use', function () {
+        process.env.CIRCLECI = '1'
+
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          group: 'e2e-tests',
+          record: true,
+          posixExitCodes: true,
+          expectedExitCode: 112,
         })
         .then(() => {
           const urls = getRequestUrls()
@@ -1142,6 +1255,21 @@ describe('e2e record', () => {
           ])
         })
       })
+
+      it('errors and exits with 112 when posix exit codes are enabled when there is an unknown 422 response', function () {
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          group: 'e2e-tests',
+          tag: 'nightly',
+          record: true,
+          parallel: true,
+          ciBuildId: 'ciBuildId123',
+          expectedExitCode: 112,
+          posixExitCodes: true,
+        })
+      })
     })
 
     describe('create run 402 - free plan exceeds monthly tests', () => {
@@ -1170,6 +1298,17 @@ describe('e2e record', () => {
           expectedExitCode: 1,
         })
       })
+
+      it('errors and exits with 112 when posix exit codes are enabled when on free plan and over recorded tests limit', function () {
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          record: true,
+          posixExitCodes: true,
+          expectedExitCode: 112,
+        })
+      })
     })
 
     describe('create run 402 - parallel feature not available in plan', () => {
@@ -1193,6 +1332,17 @@ describe('e2e record', () => {
           record: true,
           snapshot: true,
           expectedExitCode: 1,
+        })
+      })
+
+      it('errors and exits with 112 when posix exit codes are enabled when attempting parallel run when not available in plan', function () {
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          record: true,
+          posixExitCodes: true,
+          expectedExitCode: 112,
         })
       })
     })
@@ -1219,6 +1369,17 @@ describe('e2e record', () => {
           expectedExitCode: 1,
         })
       })
+
+      it('errors and exits when attempting parallel run when not available in plan with 112 when posix exit codes are enabled', function () {
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          record: true,
+          expectedExitCode: 112,
+          posixExitCodes: true,
+        })
+      })
     })
 
     describe('create run 402 - unknown error', () => {
@@ -1238,6 +1399,17 @@ describe('e2e record', () => {
           record: true,
           snapshot: true,
           expectedExitCode: 1,
+        })
+      })
+
+      it(`errors and exits when there's an unknown 402 error with 112 when posix exit codes are enabled`, function () {
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          record: true,
+          posixExitCodes: true,
+          expectedExitCode: 112,
         })
       })
     })
@@ -1263,6 +1435,17 @@ describe('e2e record', () => {
           record: true,
           snapshot: true,
           expectedExitCode: 1,
+        })
+      })
+
+      it('errors and exits when auto cancel not available in plan', function () {
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          record: true,
+          expectedExitCode: 112,
+          posixExitCodes: true,
         })
       })
     })
@@ -1294,6 +1477,19 @@ describe('e2e record', () => {
             'POST /runs',
             `POST /runs/${runId}/instances`,
           ])
+        })
+      })
+
+      it('errors and exits on createInstance error with 112 when posix exit codes are enabled', function () {
+        process.env.DISABLE_API_RETRIES = 'true'
+
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'a_record_instantfail.cy.js',
+          record: true,
+          expectedExitCode: 112,
+          posixExitCodes: true,
         })
       })
     })
@@ -1354,6 +1550,21 @@ describe('e2e record', () => {
         })
       })
 
+      it('without parallelization errors and exits with 112 when posix exit codes are enabled', async function () {
+        process.env.DISABLE_API_RETRIES = 'true'
+
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'a_record.cy.js,b_record.cy.js',
+          group: 'foo',
+          ciBuildId: 1,
+          expectedExitCode: 112,
+          record: true,
+          posixExitCodes: true,
+        })
+      })
+
       it('with parallelization errors and exits', async function () {
         process.env.DISABLE_API_RETRIES = 'true'
 
@@ -1376,6 +1587,22 @@ describe('e2e record', () => {
             'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
             'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
           ])
+        })
+      })
+
+      it('with parallelization errors and exits with 112 when posix exit codes are enabled', async function () {
+        process.env.DISABLE_API_RETRIES = 'true'
+
+        await systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'a_record.cy.js,b_record.cy.js',
+          record: true,
+          group: 'foo',
+          ciBuildId: 'ciBuildId123',
+          expectedExitCode: 112,
+          parallel: true,
+          posixExitCodes: true,
         })
       })
     })
@@ -1411,6 +1638,19 @@ describe('e2e record', () => {
             `POST /instances/${instanceId}/tests`,
             `POST /instances/${instanceId}/results`,
           ])
+        })
+      })
+
+      it('exits with code 112 when posix exit codes are enabled', function () {
+        process.env.DISABLE_API_RETRIES = 'true'
+
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          record: true,
+          posixExitCodes: true,
+          expectedExitCode: 112,
         })
       })
     })
