@@ -102,10 +102,10 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [ ] packages/icons
 - [ ] packages/launcher
 - [ ] packages/net-stubbing
-- [ ] packages/network
+- [x] packages/network ✅ **COMPLETED**
 - [ ] packages/packherd-require
 - [ ] packages/proxy
-- [ ] packages/rewriter
+- [x] packages/rewriter ✅ **COMPLETED**
 - [x] packages/scaffold-config ✅ **COMPLETED**
 - [ ] packages/server
 - [ ] packages/socket

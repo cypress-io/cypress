@@ -1,7 +1,7 @@
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 import chai, { expect } from 'chai'
-import agent from '@packages/network/lib/agent'
+import agent, { strictAgent } from '@packages/network/lib/agent'
 import axios, { CreateAxiosDefaults, AxiosInstance } from 'axios'
 import debugLib from 'debug'
 import stripAnsi from 'strip-ansi'
@@ -11,11 +11,13 @@ import app_config from '../../../../config/app.json'
 import os from 'os'
 import pkg from '@packages/root'
 import { transformError } from '../../../../lib/cloud/api/axios_middleware/transform_error'
-import { DestroyableProxy, fakeServer, fakeProxy } from './utils/fake_proxy_server'
+import { DestroyableProxy, fakeServer, fakeProxy, getCA } from './utils/fake_proxy_server'
 import dedent from 'dedent'
 import { PassThrough } from 'stream'
 import fetch from 'cross-fetch'
 import nock from 'nock'
+import { CA } from '@packages/https-proxy'
+import fs from 'fs-extra'
 
 chai.use(sinonChai)
 
@@ -38,8 +40,8 @@ describe('CloudRequest', () => {
     createCloudRequest()
     const cfg = getCreatedConfig()
 
-    expect(cfg.httpAgent).to.eq(agent)
-    expect(cfg.httpsAgent).to.eq(agent)
+    expect(cfg.httpAgent).to.eq(strictAgent)
+    expect(cfg.httpsAgent).to.eq(strictAgent)
   })
 
   describe('Proxy Requests', () => {
@@ -61,9 +63,15 @@ describe('CloudRequest', () => {
     let fakeHttpsProxy: DestroyableProxy
     let fakeHttpsProxyAuth: DestroyableProxy
 
-    let addRequestSpy: sinon.SinonSpy<Parameters<typeof agent['addRequest']>, ReturnType<typeof agent['addRequest']>>
-    let addHttpRequestSpy: sinon.SinonSpy<Parameters<typeof agent.httpAgent['addRequest']>, ReturnType<typeof agent.httpAgent['addRequest']>>
-    let addHttpsRequestSpy: sinon.SinonSpy<Parameters<typeof agent.httpsAgent['addRequest']>, ReturnType<typeof agent.httpsAgent['addRequest']>>
+    let addNormalAgentRequestSpy: sinon.SinonSpy<Parameters<typeof agent['addRequest']>, ReturnType<typeof agent['addRequest']>>
+    let addNormalAgentHttpRequestSpy: sinon.SinonSpy<Parameters<typeof agent.httpAgent['addRequest']>, ReturnType<typeof agent.httpAgent['addRequest']>>
+    let addNormalAgentHttpsRequestSpy: sinon.SinonSpy<Parameters<typeof agent.httpsAgent['addRequest']>, ReturnType<typeof agent.httpsAgent['addRequest']>>
+    let addStrictAgentRequestSpy: sinon.SinonSpy<Parameters<typeof strictAgent['addRequest']>, ReturnType<typeof strictAgent['addRequest']>>
+    let addStrictAgentHttpRequestSpy: sinon.SinonSpy<Parameters<typeof strictAgent.httpAgent['addRequest']>, ReturnType<typeof strictAgent.httpAgent['addRequest']>>
+    let addStrictAgentHttpsRequestSpy: sinon.SinonSpy<Parameters<typeof strictAgent.httpsAgent['addRequest']>, ReturnType<typeof strictAgent.httpsAgent['addRequest']>>
+    let currentAgentRequestSpy: typeof addNormalAgentRequestSpy | typeof addStrictAgentRequestSpy
+    let currentAgentHttpRequestSpy: typeof addNormalAgentHttpRequestSpy | typeof addStrictAgentHttpRequestSpy
+    let currentAgentHttpsRequestSpy: typeof addNormalAgentHttpsRequestSpy | typeof addStrictAgentHttpsRequestSpy
 
     const PROXY_AUTH = `Basic ${Buffer.from('Proxy:test2').toString('base64')}`
     const UPSTREAM_AUTH = `Basic ${Buffer.from('upstream:test').toString('base64')}`
@@ -79,9 +87,13 @@ describe('CloudRequest', () => {
       delete process.env.NO_PROXY
       delete process.env.NODE_TLS_REJECT_UNAUTHORIZED
 
-      addRequestSpy = sinon.spy(agent, 'addRequest')
-      addHttpRequestSpy = sinon.spy(agent.httpAgent, 'addRequest')
-      addHttpsRequestSpy = sinon.spy(agent.httpsAgent, 'addRequest')
+      addNormalAgentRequestSpy = sinon.spy(agent, 'addRequest')
+      addNormalAgentHttpRequestSpy = sinon.spy(agent.httpAgent, 'addRequest')
+      addNormalAgentHttpsRequestSpy = sinon.spy(agent.httpsAgent, 'addRequest')
+
+      addStrictAgentRequestSpy = sinon.spy(strictAgent, 'addRequest')
+      addStrictAgentHttpRequestSpy = sinon.spy(strictAgent.httpAgent, 'addRequest')
+      addStrictAgentHttpsRequestSpy = sinon.spy(strictAgent.httpsAgent, 'addRequest')
 
       fakeHttpUpstream = await fakeServer({})
       fakeHttpUpstreamAuth = await fakeServer({ auth: { username: 'upstream', password: 'test' } })
@@ -92,6 +104,8 @@ describe('CloudRequest', () => {
       fakeHttpProxyAuth = await fakeProxy({ auth: { username: 'Proxy', password: 'test2' } })
       fakeHttpsProxy = await fakeProxy({ https: true })
       fakeHttpsProxyAuth = await fakeProxy({ https: true, auth: { username: 'Proxy', password: 'test2' } })
+
+      strictAgent.httpsAgent.options.ca = [await fs.promises.readFile(getCA().getCACertPath(), 'utf8')]
     })
 
     afterEach(async () => {
@@ -137,6 +151,9 @@ describe('CloudRequest', () => {
       }
 
       if (adapter === 'Axios') {
+        currentAgentRequestSpy = addStrictAgentRequestSpy
+        currentAgentHttpRequestSpy = addStrictAgentHttpRequestSpy
+        currentAgentHttpsRequestSpy = addStrictAgentHttpsRequestSpy
         const CloudReq = createCloudRequest({ baseURL: targetServer.baseUrl })
 
         return CloudReq[method](`/ping`, {}).then((r) => r.data)
@@ -146,6 +163,10 @@ describe('CloudRequest', () => {
         body: {},
         json: true,
       } : {}
+
+      currentAgentRequestSpy = addNormalAgentRequestSpy
+      currentAgentHttpRequestSpy = addNormalAgentHttpRequestSpy
+      currentAgentHttpsRequestSpy = addNormalAgentHttpsRequestSpy
 
       return cloudApi.rp[method]({
         url: `${targetServer.baseUrl}/ping`,
@@ -187,13 +208,13 @@ describe('CloudRequest', () => {
         expect(fakeHttpProxy.requests[0].rawHeaders).to.eql(['Host', `localhost:${fakeHttpsUpstream.port}`])
         expect(fakeHttpProxy.requests[0].method).to.eql('CONNECT')
 
-        expect(addRequestSpy.getCalls().length).to.eq(1)
-        expect(addHttpRequestSpy.getCalls().length).to.eql(0)
-        expect(addHttpsRequestSpy.getCalls().length).to.eql(1)
+        expect(currentAgentRequestSpy.getCalls().length).to.eq(1)
+        expect(currentAgentHttpRequestSpy.getCalls().length).to.eql(0)
+        expect(currentAgentHttpsRequestSpy.getCalls().length).to.eql(1)
       })
 
       it(`${adapter}: issues requests to the correct location when using HTTPS -> HTTPS via Proxy`, async () => {
-        const result = await await executeProxyRequest({ adapter, proxyServer: fakeHttpsProxy, targetServer: fakeHttpsUpstream })
+        const result = await executeProxyRequest({ adapter, proxyServer: fakeHttpsProxy, targetServer: fakeHttpsUpstream })
 
         expect(result).to.eql('OK')
 
@@ -202,9 +223,9 @@ describe('CloudRequest', () => {
         expect(fakeHttpsProxy.requests[0].rawHeaders).to.eql(['Host', `localhost:${fakeHttpsUpstream.port}`])
         expect(fakeHttpsProxy.requests[0].method).to.eql('CONNECT')
 
-        expect(addRequestSpy.getCalls().length).to.eq(1)
-        expect(addHttpRequestSpy.getCalls().length).to.eql(0)
-        expect(addHttpsRequestSpy.getCalls().length).to.eql(1)
+        expect(currentAgentRequestSpy.getCalls().length).to.eq(1)
+        expect(currentAgentHttpRequestSpy.getCalls().length).to.eql(0)
+        expect(currentAgentHttpsRequestSpy.getCalls().length).to.eql(1)
       })
 
       it(`${adapter}: issues requests to the correct location when doing HTTP -> HTTP proxy`, async () => {
@@ -249,9 +270,9 @@ describe('CloudRequest', () => {
         }
 
         expect(fakeHttpProxy.requests[0].method).to.eql('POST')
-        expect(addRequestSpy.getCalls().length).to.eq(1)
-        expect(addHttpRequestSpy.getCalls().length).to.eql(1)
-        expect(addHttpsRequestSpy.getCalls().length).to.eql(0)
+        expect(currentAgentRequestSpy.getCalls().length).to.eq(1)
+        expect(currentAgentHttpRequestSpy.getCalls().length).to.eql(1)
+        expect(currentAgentHttpsRequestSpy.getCalls().length).to.eql(0)
       })
 
       it(`${adapter}: issues requests to the correct location when doing HTTP (auth) -> HTTPS (auth) proxy`, async () => {
@@ -308,9 +329,9 @@ describe('CloudRequest', () => {
 
         expect(fakeHttpProxyAuth.requests[0].method).to.eql('CONNECT')
         expect(fakeHttpsUpstreamAuth.requests[0].method).to.eql('POST')
-        expect(addRequestSpy.getCalls().length).to.eq(1)
-        expect(addHttpRequestSpy.getCalls().length).to.eql(0)
-        expect(addHttpsRequestSpy.getCalls().length).to.eql(1)
+        expect(currentAgentRequestSpy.getCalls().length).to.eq(1)
+        expect(currentAgentHttpRequestSpy.getCalls().length).to.eql(0)
+        expect(currentAgentHttpsRequestSpy.getCalls().length).to.eql(1)
       })
     }
   })
@@ -451,7 +472,7 @@ describe('CloudRequest', () => {
       nock.restore()
 
       // @ts-ignore
-      const addRequestSpy = sinon.stub(agent.httpsAgent, 'addRequest').callsFake((req, options) => {
+      const addRequestSpy = sinon.stub(strictAgent.httpsAgent, 'addRequest').callsFake((req, options) => {
         // fake IncomingMessage
         const res = new PassThrough() as any
 
@@ -479,7 +500,7 @@ describe('CloudRequest', () => {
         method: 'POST',
         body: '{}',
         // @ts-expect-error - this is supported
-        agent,
+        agent: strictAgent,
       })
 
       expect(await result3.json()).to.eql({ ok: true })

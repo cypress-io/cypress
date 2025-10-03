@@ -22,6 +22,8 @@ export interface ReporterHeaderProps {
 }
 
 const Header: React.FC<ReporterHeaderProps> = observer(({ appState, events = defaultEvents, statsStore, runnablesStore, spec }: ReporterHeaderProps) => {
+  const isStudioSingleTest = appState?.studioActive && appState.studioSingleTestActive
+
   return <header>
     <div className='spec-container'>
       <Tooltip placement='bottom' title={<p>{appState.isSpecsListOpen ? 'Collapse' : 'Expand'} Specs List <span className='kbd'>F</span></p>} wrapperClassName='toggle-specs-wrapper' className='cy-tooltip'>
@@ -46,10 +48,10 @@ const Header: React.FC<ReporterHeaderProps> = observer(({ appState, events = def
       </Tooltip>
       {spec && <RunnableHeader spec={spec} statsStore={statsStore} runnablesStore={runnablesStore} />}
     </div>
-    <div className='statsAndControls'>
+    {!isStudioSingleTest && <div className='statsAndControls'>
       <Stats stats={statsStore} />
       <Controls appState={appState} />
-    </div>
+    </div>}
   </header>
 })
 

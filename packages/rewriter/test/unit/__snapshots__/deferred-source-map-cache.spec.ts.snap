@@ -1,0 +1,113 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`DeferredSourceMapCache > #resolve > sourcemap generation > composition > with external sourceMappingURL 1`] = `
+{
+  "file": "foo.js (original).map",
+  "mappings": ";AAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,EAAA;EAAA,CAAA,EAAA,CAAA,CAAA,CAAA,EAAA,CAAA,EAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,EAAA,CAAA,EAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,EAAA,CAAA,EAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,EAAA;;;EAIA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAW,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,EAAA;IACT,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA;IAAA,CAAA,CAAA,EAAA,CAAA,CAAA,CAAA;WACA,CAAA,CAAA,EAAA,EAAM,CAAA,CAAA,2DAAG,CAAA,CAAA,CAAA,CAAA,CAAA,SAAU,CAAC,CAAA,CAAA,CAAd,CAAA;EAFG,CAAX,EAGE,CAAA,CAAA,CAAA,CAHF,CAAA",
+  "names": [],
+  "sourceRoot": "http://somedomain.net/dir",
+  "sources": [
+    "test.coffee",
+  ],
+  "sourcesContent": [
+    "# just an example of transpilation w/ sourcemap -
+# \`test.coffee\` is not directly transpiled/executed by any test code
+# regenerate JS + sourcemap with \`coffee -c -m test.coffee\`
+
+setTimeout ->
+  window
+  foo = "#{window.top.foo}"
+, 1000
+",
+  ],
+  "version": 3,
+}
+`;
+
+exports[`DeferredSourceMapCache > #resolve > sourcemap generation > composition > with inlined base64 sourceMappingURL 1`] = `
+{
+  "file": "foo.js (original).map",
+  "mappings": ";AAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,EAAA;EAAA,CAAA,EAAA,CAAA,CAAA,CAAA,EAAA,CAAA,EAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,EAAA,CAAA,EAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,EAAA,CAAA,EAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,EAAA;;;EAIA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAW,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,EAAA;IACT,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA;IAAA,CAAA,CAAA,EAAA,CAAA,CAAA,CAAA;WACA,CAAA,CAAA,EAAA,EAAM,CAAA,CAAA,2DAAG,CAAA,CAAA,CAAA,CAAA,CAAA,SAAU,CAAC,CAAA,CAAA,CAAd,CAAA;EAFG,CAAX,EAGE,CAAA,CAAA,CAAA,CAHF,CAAA",
+  "names": [],
+  "sourceRoot": "http://somedomain.net/dir",
+  "sources": [
+    "test.coffee",
+  ],
+  "sourcesContent": [
+    "# just an example of transpilation w/ sourcemap -
+# \`test.coffee\` is not directly transpiled/executed by any test code
+# regenerate JS + sourcemap with \`coffee -c -m test.coffee\`
+
+setTimeout ->
+  window
+  foo = "#{window.top.foo}"
+, 1000
+",
+  ],
+  "version": 3,
+}
+`;
+
+exports[`DeferredSourceMapCache > #resolve > sourcemap generation > composition > with map referenced by sourcemap header 1`] = `
+{
+  "file": "foo.js (original).map",
+  "mappings": ";AAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,EAAA;EAAA,CAAA,EAAA,CAAA,CAAA,CAAA,EAAA,CAAA,EAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,EAAA,CAAA,EAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,EAAA,CAAA,EAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,EAAA;;;EAIA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAW,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,EAAA;IACT,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA;IAAA,CAAA,CAAA,EAAA,CAAA,CAAA,CAAA;WACA,CAAA,CAAA,EAAA,EAAM,CAAA,CAAA,2DAAG,CAAA,CAAA,CAAA,CAAA,CAAA,SAAU,CAAC,CAAA,CAAA,CAAd,CAAA;EAFG,CAAX,EAGE,CAAA,CAAA,CAAA,CAHF,CAAA",
+  "names": [],
+  "sourceRoot": "http://somedomain.net/dir",
+  "sources": [
+    "test.coffee",
+  ],
+  "sourcesContent": [
+    "# just an example of transpilation w/ sourcemap -
+# \`test.coffee\` is not directly transpiled/executed by any test code
+# regenerate JS + sourcemap with \`coffee -c -m test.coffee\`
+
+setTimeout ->
+  window
+  foo = "#{window.top.foo}"
+, 1000
+",
+  ],
+  "version": 3,
+}
+`;
+
+exports[`DeferredSourceMapCache > #resolve > sourcemap generation > composition > with map referenced by x-sourcemap header 1`] = `
+{
+  "file": "foo.js (original).map",
+  "mappings": ";AAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,EAAA;EAAA,CAAA,EAAA,CAAA,CAAA,CAAA,EAAA,CAAA,EAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,EAAA,CAAA,EAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,EAAA,CAAA,EAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,EAAA;;;EAIA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAW,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA,EAAA;IACT,CAAA,CAAA,CAAA,CAAA,CAAA,CAAA;IAAA,CAAA,CAAA,EAAA,CAAA,CAAA,CAAA;WACA,CAAA,CAAA,EAAA,EAAM,CAAA,CAAA,2DAAG,CAAA,CAAA,CAAA,CAAA,CAAA,SAAU,CAAC,CAAA,CAAA,CAAd,CAAA;EAFG,CAAX,EAGE,CAAA,CAAA,CAAA,CAHF,CAAA",
+  "names": [],
+  "sourceRoot": "http://somedomain.net/dir",
+  "sources": [
+    "test.coffee",
+  ],
+  "sourcesContent": [
+    "# just an example of transpilation w/ sourcemap -
+# \`test.coffee\` is not directly transpiled/executed by any test code
+# regenerate JS + sourcemap with \`coffee -c -m test.coffee\`
+
+setTimeout ->
+  window
+  foo = "#{window.top.foo}"
+, 1000
+",
+  ],
+  "version": 3,
+}
+`;
+
+exports[`DeferredSourceMapCache > #resolve > sourcemap generation > for JS with no original sourcemap 1`] = `
+{
+  "file": "bar (original).map",
+  "mappings": "AAAA,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC",
+  "names": [],
+  "sourceRoot": ".",
+  "sources": [
+    "bar (original)",
+  ],
+  "sourcesContent": [
+    "console.log()",
+  ],
+  "version": 3,
+}
+`;

@@ -1499,6 +1499,18 @@ describe('lib/cloud/api', () => {
       })
     })
 
+    it('does not retry if it is a non retriable cert error', () => {
+      const fn1 = sinon.stub().rejects(makeError({ message: '600 error', statusCode: 600, cause: { code: 'UNABLE_TO_VERIFY_LEAF_SIGNATURE' } }))
+
+      return api.retryWithBackoff(fn1)
+      .then(() => {
+        throw new Error('Should not resolve 600 error')
+      })
+      .catch((err) => {
+        expect(err.message).to.equal('600 error')
+      })
+    })
+
     it('backs off with strategy: 30s, 60s, 2m', () => {
       const fn = sinon.stub().rejects(new Promise.TimeoutError())
 
@@ -1552,6 +1564,19 @@ describe('lib/cloud/api', () => {
           tries: 1,
           response: err,
         })
+      })
+    })
+
+    it('does not call errors.warning if displayRetryErrors is false', () => {
+      const err = makeError({ message: '500 error', statusCode: 500 })
+
+      sinon.spy(errors, 'warning')
+      const fn = sinon.stub().rejects(err)
+
+      fn.onCall(3).resolves()
+
+      return api.retryWithBackoff(fn, { displayRetryErrors: false }).then(() => {
+        expect(errors.warning).to.not.be.called
       })
     })
   })

@@ -17,6 +17,8 @@ interface StudioError {
   name: string
   stack: string
   message: string
+  code?: string | number
+  errno?: string | number
   studioMethod: string
   studioMethodArgs?: string
 }
@@ -80,6 +82,8 @@ export function reportStudioError ({
         name: stripPath(errorObject.name ?? `Unknown name`),
         stack: stripPath(errorObject.stack ?? `Unknown stack`),
         message: stripPath(errorObject.message ?? `Unknown message`),
+        code: 'code' in errorObject ? errorObject.code as string | number : undefined,
+        errno: 'errno' in errorObject ? errorObject.errno as string | number : undefined,
         studioMethod,
         studioMethodArgs: studioMethodArgsString ? stripPath(studioMethodArgsString) : undefined,
       }],
