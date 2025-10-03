@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 
-import type { StudioServerShape, StudioServerDefaultShape } from '@packages/types'
+import type { StudioServerShape, StudioServerDefaultShape, StudioEvent } from '@packages/types'
 import type { Router } from 'express'
 import type { Socket } from '@packages/socket'
 
@@ -31,6 +31,10 @@ class StudioServer implements StudioServerShape {
 
   captureStudioEvent (event: StudioEvent): Promise<void> {
     return Promise.resolve()
+  }
+
+  updateSessionId (sessionId: string): void {
+    // This is a test implementation that does nothing
   }
 }
 

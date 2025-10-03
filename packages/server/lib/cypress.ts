@@ -266,6 +266,10 @@ export = {
             }
           }
 
+          if (options.posixExitCodes) {
+            return results.totalFailed ? 1 : 0
+          }
+
           return results.totalFailed
         })
         .then(exit)

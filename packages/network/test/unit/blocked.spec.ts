@@ -1,5 +1,5 @@
-import { blocked } from '../..'
-import { expect } from 'chai'
+import { describe, it, expect } from 'vitest'
+import { blocked } from '../../lib'
 
 const hosts = [
   '*.google.com',
@@ -9,20 +9,20 @@ const hosts = [
   '*yahoo.com',
 ]
 
-const matchesStr = function (url, host, val) {
+const matchesStr = function (url: string, host: string, val: boolean) {
   const m = blocked.matches(url, host)
 
-  expect(!!m).to.eq(val, `url: '${url}' did not pass`)
+  expect(!!m, `url: '${url}' did not pass`).toEqual(val)
 }
 
-const matchesArray = function (url, val) {
+const matchesArray = function (url: string, val: boolean) {
   const m = blocked.matches(url, hosts)
 
-  expect(!!m).to.eq(val, `url: '${url}' did not pass`)
+  expect(!!m, `url: '${url}' did not pass`).toEqual(val)
 }
 
-const matchesHost = (url, host) => {
-  expect(blocked.matches(url, hosts)).to.eq(host)
+const matchesHost = (url: string, host: string) => {
+  expect(blocked.matches(url, hosts)).toEqual(host)
 }
 
 describe('lib/blocked', () => {

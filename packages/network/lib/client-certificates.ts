@@ -2,7 +2,6 @@ import { URL, Url } from 'url'
 import debugModule from 'debug'
 import minimatch from 'minimatch'
 import fs from 'fs-extra'
-import { clientCertificateStore } from './agent'
 
 const { pki, asn1, pkcs12, util } = require('node-forge')
 
@@ -188,6 +187,8 @@ export class ClientCertificateStore {
   }
 }
 
+export const clientCertificateStoreSingleton = new ClientCertificateStore()
+
 /**
  * Load and parse the client certificate configuration.  The structure and content of this
  * has already been validated; this function reads cert content from file and adds it to the
@@ -200,7 +201,7 @@ export function loadClientCertificateConfig (config) {
   let index = 0
 
   try {
-    clientCertificateStore.clear()
+    clientCertificateStoreSingleton.clear()
 
     // The basic validation of the certificate configuration has already been done by this point
     // within the 'isValidClientCertificatesSet' function within packages/config/src/validation.js
@@ -324,12 +325,12 @@ export function loadClientCertificateConfig (config) {
           }
         })
 
-        clientCertificateStore.addClientCertificatesForUrl(urlClientCertificates)
+        clientCertificateStoreSingleton.addClientCertificatesForUrl(urlClientCertificates)
         index++
       })
 
       debug(
-        `loaded client certificates for ${clientCertificateStore.getCertCount()} URL(s)`,
+        `loaded client certificates for ${clientCertificateStoreSingleton.getCertCount()} URL(s)`,
       )
     }
   } catch (e: any) {
