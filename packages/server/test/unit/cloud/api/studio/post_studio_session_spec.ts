@@ -1,4 +1,4 @@
-import { SystemError } from '@packages/errors'
+import { SystemError } from '../../../../../lib/cloud/network/system_error'
 import { proxyquire } from '../../../../spec_helper'
 import os from 'os'
 import pkg from '@packages/root'

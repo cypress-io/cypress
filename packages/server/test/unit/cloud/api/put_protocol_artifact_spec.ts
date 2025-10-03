@@ -7,7 +7,7 @@ import chaiAsPromised from 'chai-as-promised'
 
 import { ReadStream } from 'fs'
 import { StreamActivityMonitor } from '../../../../lib/cloud/upload/stream_activity_monitor'
-import { HttpError } from '@packages/errors'
+import { HttpError } from '../../../../lib/cloud/network/http_error'
 import { putFetch, ParseKinds } from '../../../../lib/cloud/network/fetch'
 import { linearDelay, asyncRetry } from '../../../../lib/util/async_retry'
 import { isRetryableError } from '../../../../lib/cloud/network/is_retryable_error'
@@ -213,7 +213,7 @@ describe('putProtocolArtifact', () => {
         let error: Error | undefined
 
         try {
-          await putArtifact(filePath, maxFileSize, destinationUrl)
+          await putArtifact(filePath, maxFileSize, destinationUrl, uploadMonitorSamplingRate)
         } catch (e) {
           error = e
         }

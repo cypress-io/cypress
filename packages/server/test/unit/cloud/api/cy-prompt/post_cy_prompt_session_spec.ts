@@ -1,9 +1,9 @@
-import { SystemError } from '@packages/errors'
+import { SystemError } from '../../../../../lib/cloud/network/system_error'
 import { proxyquire } from '../../../../spec_helper'
 import os from 'os'
-import { strictAgent } from '@packages/network'
 import pkg from '@packages/root'
 import { ParseKinds } from '../../../../../lib/cloud/network/fetch'
+import sinon from 'sinon'
 
 describe('postCyPromptSession', () => {
   let postCyPromptSession: typeof import('@packages/server/lib/cloud/api/cy-prompt/post_cy_prompt_session').postCyPromptSession

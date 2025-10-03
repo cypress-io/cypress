@@ -1,6 +1,6 @@
 import crossFetch from 'cross-fetch'
-import { SystemError } from '@packages/errors'
-import { HttpError } from '@packages/errors'
+import { SystemError } from './system_error'
+import { HttpError } from './http_error'
 import { ParseError } from './parse_error'
 import { strictAgent } from '@packages/network'
 import Debug from 'debug'

@@ -1,6 +1,6 @@
 import { isRetryableError } from '../../../../lib/cloud/network/is_retryable_error'
-import { SystemError } from '@packages/errors'
-import { HttpError } from '@packages/errors'
+import { SystemError } from '../../../../lib/cloud/network/system_error'
+import { HttpError } from '../../../../lib/cloud/network/http_error'
 
 import sinon from 'sinon'
 import chai, { expect } from 'chai'
