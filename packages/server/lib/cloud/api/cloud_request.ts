@@ -5,7 +5,7 @@ import os from 'os'
 import followRedirects from 'follow-redirects'
 import axios, { AxiosInstance } from 'axios'
 import pkg from '@packages/root'
-import agent from '@packages/network/lib/agent'
+import { strictAgent } from '@packages/network/lib/agent'
 
 import app_config from '../../../config/app.json'
 import { installErrorTransform } from './axios_middleware/transform_error'
@@ -40,8 +40,8 @@ export const createCloudRequest = (options: CreateCloudRequestOptions = {}): Axi
 
   const instance = axios.create({
     baseURL,
-    httpAgent: agent,
-    httpsAgent: agent,
+    httpAgent: strictAgent,
+    httpsAgent: strictAgent,
     headers: {
       'x-os-name': os.platform(),
       'x-cypress-version': pkg.version,

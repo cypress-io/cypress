@@ -32,6 +32,7 @@ import { PUBLIC_KEY_VERSION } from '../constants'
 
 import { transformError } from './axios_middleware/transform_error'
 import { DecryptionError } from './cloud_request_errors'
+import { isNonRetriableCertErrorCode } from '../network/nonretriable_cert_error_codes'
 
 // Import cloud validation types for better type safety
 import type {
@@ -180,7 +181,7 @@ const getCachedResponse = (params) => {
   return responseCache[params.url]
 }
 
-const retryWithBackoff = (fn) => {
+const retryWithBackoff = (fn, options: { displayRetryErrors?: boolean } = { displayRetryErrors: true }) => {
   if (process.env.DISABLE_API_RETRIES) {
     debug('api retries disabled')
 
@@ -203,13 +204,15 @@ const retryWithBackoff = (fn) => {
 
       const delayMs = delays[retryIndex]
 
-      errors.warning(
-        'CLOUD_API_RESPONSE_FAILED_RETRYING', {
-          delayMs,
-          tries: delays.length - retryIndex,
-          response: err,
-        },
-      )
+      if (options.displayRetryErrors) {
+        errors.warning(
+          'CLOUD_API_RESPONSE_FAILED_RETRYING', {
+            delayMs,
+            tries: delays.length - retryIndex,
+            response: err,
+          },
+        )
+      }
 
       retryIndex++
 
@@ -235,6 +238,10 @@ const tagError = function (err) {
 // including decryption errors
 const isRetriableError = (err) => {
   if (err instanceof DecryptionError) {
+    return false
+  }
+
+  if (err.cause?.code && isNonRetriableCertErrorCode(err.cause?.code)) {
     return false
   }
 
@@ -652,8 +659,8 @@ export default {
       return result
     })
   },
-
-  async getCaptureProtocolScript (url: string): Promise<string> {
+  
+  async getCaptureProtocolScript (url: string, options: { displayRetryErrors?: boolean } = { displayRetryErrors: true }) {
     // TODO(protocol): Ensure this is removed in production
     if (process.env.CYPRESS_LOCAL_PROTOCOL_PATH) {
       debugProtocol(`Loading protocol via script at local path %s`, process.env.CYPRESS_LOCAL_PROTOCOL_PATH)
@@ -673,7 +680,7 @@ export default {
         encrypt: 'signed',
         resolveWithFullResponse: true,
       })
-    })
+    }, options)
 
     const verified = enc.verifySignature(res.body, res.headers['x-cypress-signature'])
 

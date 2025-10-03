@@ -30,7 +30,9 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTestFromSuite 
 
   if (createNewTestFromSuite || createNewTestFromSpecHeader) {
     if (createNewTestFromSpecHeader) {
-      cy.findByTestId('create-new-test-from-spec-header').click()
+      cy.get('[data-cy="runnable-options-button"]').click()
+      cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
+      cy.get('[data-cy="runnable-popover-new-test"]').click()
     } else {
       cy.get('@runnable-wrapper').realHover().findByTestId('create-new-test-from-suite').click()
     }
