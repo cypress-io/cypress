@@ -613,10 +613,6 @@
         "name": "Prompt command",
         "description": "Enables support for `cy.prompt`, an AI-powered command that turns natural language steps into executable Cypress test code."
       },
-      "experimentalPromptCommand": {
-        "name": "Prompt command",
-        "description": "Enables support for `cy.prompt`, an AI-powered command that turns natural language steps into executable Cypress test code."
-      },
       "experimentalWebKitSupport": {
         "name": "WebKit Support",
         "description": "Adds support for testing in the WebKit browser engine used by Safari. See https://on.cypress.io/webkit-experiment for more information."
