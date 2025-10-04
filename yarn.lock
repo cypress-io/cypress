@@ -7863,10 +7863,10 @@
     "@tanstack/query-core" "4.36.1"
     use-sync-external-store "^1.2.0"
 
-"@testing-library/cypress@10.0.3":
-  version "10.0.3"
-  resolved "https://registry.yarnpkg.com/@testing-library/cypress/-/cypress-10.0.3.tgz#4514b1bcace4f28acab7ba7db6b8f5c017f0bfd1"
-  integrity sha512-TeZJMCNtiS59cPWalra7LgADuufO5FtbqQBYxuAgdX6ZFAR2D9CtQwAG8VbgvFcchW3K414va/+7P4OkQ80UVg==
+"@testing-library/cypress@10.1.0":
+  version "10.1.0"
+  resolved "https://registry.yarnpkg.com/@testing-library/cypress/-/cypress-10.1.0.tgz#e1f12e2f8206e7cdf12d3ca23b6d303d08f44180"
+  integrity sha512-tNkNtYRqPQh71xXKuMizr146zlellawUfDth7A/urYU4J66g0VGZ063YsS0gqS79Z58u1G/uo9UxN05qvKXMag==
   dependencies:
     "@babel/runtime" "^7.14.6"
     "@testing-library/dom" "^10.1.0"
@@ -8597,10 +8597,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node@*", "@types/node@22.18.0", "@types/node@>=10.0.0", "@types/node@^22.18.0", "@types/node@^22.7.7":
-  version "22.18.0"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.18.0.tgz#9e4709be4f104e3568f7dd1c71e2949bf147a47b"
-  integrity sha512-m5ObIqwsUp6BZzyiy4RdZpzWGub9bqLJMvZDD0QMXhxjqMHMENlj+SqF5QxoUwaQNFe+8kz8XM8ZQhqkQPTgMQ==
+"@types/node@*", "@types/node@22.18.7", "@types/node@>=10.0.0", "@types/node@^22.18.7", "@types/node@^22.7.7":
+  version "22.18.7"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.18.7.tgz#e1d013d5759fa50ff4d334aee3fd6254f1dbae74"
+  integrity sha512-3E97nlWEVp2V6J7aMkR8eOnw/w0pArPwf/5/W0865f+xzBoGL/ZuHkTAKAGN7cOWNwd+sG+hZOqj+fjzeHS75g==
   dependencies:
     undici-types "~6.21.0"
 
@@ -15427,10 +15427,10 @@ electron-to-chromium@^1.5.173:
   resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.185.tgz#b4f9189c4ef652ddf9f1bb37529e2b79f865e912"
   integrity sha512-dYOZfUk57hSMPePoIQ1fZWl1Fkj+OshhEVuPacNKWzC1efe56OsHY3l/jCfiAgIICOU3VgOIdoq7ahg7r7n6MQ==
 
-electron@36.8.1:
-  version "36.8.1"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-36.8.1.tgz#c27dfb13fcc1bedf29929fe67430ee13a778c4df"
-  integrity sha512-honaH58/cyCb9QAzIvD+WXWuNIZ0tW9zfBqMz5wZld/rXB+LCTEDb2B3TAv8+pDmlzPlkPio95RkUe86l6MNjg==
+electron@37.6.0:
+  version "37.6.0"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-37.6.0.tgz#4f13cd6fe57c9577d11385ffecea5edb4fbf24bd"
+  integrity sha512-8AANcn6irYQ7cTAJRY7r0CovWckcGCHUniQecyGhw/jJ25vWwitVhF97skF+EyDztiEI6YBoF0G6tx1s37bO3g==
   dependencies:
     "@electron/get" "^2.0.0"
     "@types/node" "^22.7.7"

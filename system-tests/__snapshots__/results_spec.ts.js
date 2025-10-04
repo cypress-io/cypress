@@ -31,7 +31,6 @@ exports['module api and after:run results'] = `
     "experimentalPromptCommand": false,
     "experimentalSourceRewriting": false,
     "experimentalSingleTabRunMode": false,
-    "experimentalStudio": false,
     "experimentalWebKitSupport": false,
     "fileServerFolder": "/path/to/fileServerFolder",
     "fixturesFolder": "/path/to/fixturesFolder",

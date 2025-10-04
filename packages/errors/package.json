@@ -36,7 +36,7 @@
     "@packages/server": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
     "@packages/types": "0.0.0-development",
-    "@types/node": "22.18.0",
+    "@types/node": "22.18.7",
     "@types/pngjs": "^6.0.1",
     "ansi-styles": "^5",
     "ci-info": "^4.1.0",

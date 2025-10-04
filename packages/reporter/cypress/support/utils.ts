@@ -14,15 +14,20 @@ interface HandlesFileOpeningProps {
   selector: string
   file: File
   stackTrace?: boolean
+  previousClickSelector?: string
 }
 
-export const itHandlesFileOpening = ({ getRunner, selector, file, stackTrace = false }: HandlesFileOpeningProps) => {
+export const itHandlesFileOpening = ({ getRunner, selector, file, stackTrace = false, previousClickSelector }: HandlesFileOpeningProps) => {
   describe('it handles file opening', () => {
     it('emits unified file open event', () => {
       cy.stub(getRunner(), 'emit').callThrough()
 
       if (stackTrace) {
         cy.contains('Stack trace').click()
+      }
+
+      if (previousClickSelector) {
+        cy.get(previousClickSelector).click()
       }
 
       cy.get(selector).first().click().then(() => {

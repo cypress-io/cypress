@@ -171,9 +171,9 @@ describe('src/cypress/runner', () => {
         o.sinon.stub(ctx.actions.file, 'openFile')
       })
 
-      cy.get('.open-in-ide-button').should('have.css', 'opacity', '0')
-      cy.get('.spec-file-name').realHover()
-      cy.get('.open-in-ide-button').first().should('have.css', 'opacity', '1').click()
+      cy.get('[data-cy="runnable-options-button"]').click()
+      cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
+      cy.get('[data-cy="runnable-popover-open-ide"]').click()
 
       cy.withCtx((ctx, o) => {
         expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`simple-cy-assert\.runner\.cy\.js$`)), 1, 1)
