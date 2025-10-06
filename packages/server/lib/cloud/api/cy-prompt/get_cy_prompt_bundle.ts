@@ -26,7 +26,6 @@ export const getCyPromptBundle = async ({ cyPromptUrl, projectId, bundlePath }: 
           'x-route-version': '1',
           'x-cypress-signature': PUBLIC_KEY_VERSION,
           ...(projectId ? { 'x-cypress-project-slug': projectId } : {}),
-          'x-cypress-cy-prompt-mount-version': '1',
           'x-os-name': os.platform(),
           'x-cypress-version': pkg.version,
         },

@@ -41,7 +41,7 @@ describe('postCyPromptSession', () => {
           'x-os-name': os.platform(),
           'x-cypress-version': pkg.version,
         },
-        body: JSON.stringify({ projectSlug: '12345', cyPromptMountVersion: 1 }),
+        body: JSON.stringify({ projectSlug: '12345', cyPromptMountVersion: 2 }),
       },
     )
   })
