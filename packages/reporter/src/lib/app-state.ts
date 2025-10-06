@@ -4,7 +4,6 @@ import { observable, makeObservable } from 'mobx'
 interface DefaultAppState {
   isPaused: boolean
   isRunning: boolean
-  isPreferencesMenuOpen: boolean
   nextCommandName: string | null | undefined
   pinnedSnapshotId: number | string | null
   studioActive: boolean
@@ -17,7 +16,6 @@ interface DefaultAppState {
 const defaults: DefaultAppState = {
   isPaused: false,
   isRunning: false,
-  isPreferencesMenuOpen: false,
   nextCommandName: null,
   pinnedSnapshotId: null,
   studioActive: false,
@@ -31,7 +29,6 @@ class AppState {
   isSpecsListOpen = false
   isPaused = defaults.isPaused
   isRunning = defaults.isRunning
-  isPreferencesMenuOpen = defaults.isPreferencesMenuOpen
   nextCommandName = defaults.nextCommandName
   pinnedSnapshotId = defaults.pinnedSnapshotId
   studioActive = defaults.studioActive
@@ -48,7 +45,6 @@ class AppState {
       isSpecsListOpen: observable,
       isPaused: observable,
       isRunning: observable,
-      isPreferencesMenuOpen: observable,
       nextCommandName: observable,
       pinnedSnapshotId: observable,
       studioActive: observable,
@@ -102,10 +98,6 @@ class AppState {
 
   toggleSpecList () {
     this.isSpecsListOpen = !this.isSpecsListOpen
-  }
-
-  togglePreferencesMenu () {
-    this.isPreferencesMenuOpen = !this.isPreferencesMenuOpen
   }
 
   setSpecsList (status: boolean) {

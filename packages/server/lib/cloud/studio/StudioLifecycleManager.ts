@@ -11,7 +11,7 @@ import { CloudRequest } from '../api/cloud_request'
 import { isRetryableError } from '../network/is_retryable_error'
 import { asyncRetry } from '../../util/async_retry'
 import { postStudioSession } from '../api/studio/post_studio_session'
-import type { StudioStatus } from '@packages/types'
+import type { StudioServerOptions, StudioStatus } from '@packages/types'
 import path from 'path'
 import os from 'os'
 import { ensureStudioBundle } from './ensure_studio_bundle'
@@ -39,7 +39,6 @@ export class StudioLifecycleManager {
   private currentStudioHash?: string
 
   private initializationParams?: {
-    projectId?: string
     cloudDataSource: CloudDataSource
     cfg: Cfg
     debugData: any
@@ -55,20 +54,17 @@ export class StudioLifecycleManager {
   /**
    * Initialize the studio manager and possibly set up protocol.
    * Also registers this instance in the data context.
-   * @param projectId The project ID
    * @param cloudDataSource The cloud data source
    * @param cfg The project configuration
    * @param debugData Debug data for the configuration
    * @param ctx Data context to register this instance with
    */
   initializeStudioManager ({
-    projectId,
     cloudDataSource,
     cfg,
     debugData,
     ctx,
   }: {
-    projectId?: string
     cloudDataSource: CloudDataSource
     cfg: Cfg
     debugData: any
@@ -77,7 +73,7 @@ export class StudioLifecycleManager {
     debug('Initializing studio manager')
 
     // Store initialization parameters for retry
-    this.initializationParams = { projectId, cloudDataSource, cfg, debugData, ctx }
+    this.initializationParams = { cloudDataSource, cfg, debugData, ctx }
 
     // Register this instance in the data context
     ctx.update((data) => {
@@ -88,37 +84,53 @@ export class StudioLifecycleManager {
 
     this.updateStatus('INITIALIZING')
 
+    const getProjectOptions = async () => {
+      const [user, config] = await Promise.all([
+        ctx.actions.auth.authApi.getUser(),
+        ctx.project.getConfig(),
+      ])
+
+      return {
+        user,
+        projectSlug: config.projectId || undefined,
+      }
+    }
+
     const studioManagerPromise = this.createStudioManager({
-      projectId,
       cloudDataSource,
       cfg,
       debugData,
+      getProjectOptions,
     }).catch(async (error) => {
       debug('Error during studio manager setup: %o', error)
 
-      const { cloudUrl, cloudHeaders } = await getCloudMetadata(cloudDataSource)
+      try {
+        const { cloudUrl, cloudHeaders } = await getCloudMetadata(cloudDataSource)
 
-      reportStudioError({
-        cloudApi: {
-          cloudUrl,
-          cloudHeaders,
-          CloudRequest,
-          isRetryableError,
-          asyncRetry,
-        },
-        studioHash: projectId,
-        projectSlug: cfg.projectId,
-        error,
-        studioMethod: 'initializeStudioManager',
-        studioMethodArgs: [],
-      })
+        reportStudioError({
+          cloudApi: {
+            cloudUrl,
+            cloudHeaders,
+            CloudRequest,
+            isRetryableError,
+            asyncRetry,
+          },
+          studioHash: this.currentStudioHash,
+          projectSlug: (await getProjectOptions()).projectSlug,
+          error,
+          studioMethod: 'initializeStudioManager',
+          studioMethodArgs: [],
+        })
 
-      this.updateStatus('IN_ERROR')
+        this.updateStatus('IN_ERROR')
 
-      telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.BUNDLE_LIFECYCLE_END)
-      reportTelemetry(BUNDLE_LIFECYCLE_TELEMETRY_GROUP_NAMES.COMPLETE_BUNDLE_LIFECYCLE, {
-        success: false,
-      })
+        telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.BUNDLE_LIFECYCLE_END)
+        reportTelemetry(BUNDLE_LIFECYCLE_TELEMETRY_GROUP_NAMES.COMPLETE_BUNDLE_LIFECYCLE, {
+          success: false,
+        })
+      } catch (error) {
+        debug('Error reporting studio error: %o', error)
+      }
 
       return null
     })
@@ -126,10 +138,10 @@ export class StudioLifecycleManager {
     this.studioManagerPromise = studioManagerPromise
 
     this.setupWatcher({
-      projectId,
       cloudDataSource,
       cfg,
       debugData,
+      getProjectOptions,
     })
   }
 
@@ -158,22 +170,23 @@ export class StudioLifecycleManager {
   }
 
   private async createStudioManager ({
-    projectId,
     cloudDataSource,
     cfg,
     debugData,
+    getProjectOptions,
   }: {
-    projectId?: string
     cloudDataSource: CloudDataSource
     cfg: Cfg
     debugData: any
+    getProjectOptions: StudioServerOptions['getProjectOptions']
   }): Promise<StudioManager> {
     let studioPath: string
-    let studioHash: string
     let manifest: Record<string, string>
 
+    const currentProjectOptions = await getProjectOptions()
+
     initializeTelemetryReporter({
-      projectSlug: projectId,
+      projectSlug: currentProjectOptions.projectSlug,
       cloudDataSource,
     })
 
@@ -181,7 +194,7 @@ export class StudioLifecycleManager {
 
     telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.POST_STUDIO_SESSION_START)
     const studioSession = await postStudioSession({
-      projectId,
+      projectId: currentProjectOptions.projectSlug,
     })
 
     telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.POST_STUDIO_SESSION_END)
@@ -189,29 +202,34 @@ export class StudioLifecycleManager {
     telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.ENSURE_STUDIO_BUNDLE_START)
     if (!process.env.CYPRESS_LOCAL_STUDIO_PATH) {
       // The studio hash is the last part of the studio URL, after the last slash and before the extension
-      studioHash = studioSession.studioUrl.split('/').pop()?.split('.')[0]
+      const studioHash = studioSession.studioUrl.split('/').pop()?.split('.')[0] as string
+
       studioPath = path.join(os.tmpdir(), 'cypress', 'studio', studioHash)
 
+      debug('Setting current studio hash: %s', studioHash)
       // Store the current studio hash so that we can clear the cache entry when retrying
       this.currentStudioHash = studioHash
 
       let hashLoadingPromise = StudioLifecycleManager.hashLoadingMap.get(studioHash)
 
       if (!hashLoadingPromise) {
+        debug('Ensuring studio bundle for hash: %s', studioHash)
+
         hashLoadingPromise = ensureStudioBundle({
           studioUrl: studioSession.studioUrl,
           studioPath,
-          projectId,
+          projectId: currentProjectOptions.projectSlug,
         })
 
         StudioLifecycleManager.hashLoadingMap.set(studioHash, hashLoadingPromise)
       }
 
       manifest = await hashLoadingPromise
+
+      debug('Manifest: %o', manifest)
     } else {
       studioPath = process.env.CYPRESS_LOCAL_STUDIO_PATH
-      studioHash = 'local'
-      this.currentStudioHash = studioHash
+      this.currentStudioHash = 'local'
       manifest = {}
     }
 
@@ -226,10 +244,14 @@ export class StudioLifecycleManager {
       const actualHash = crypto.createHash('sha256').update(script).digest('hex')
 
       if (!expectedHash) {
+        debug('Expected hash %s for studio server script not found in manifest: %o', expectedHash, manifest)
+
         throw new Error('Expected hash for studio server script not found in manifest')
       }
 
       if (actualHash !== expectedHash) {
+        debug('Invalid hash for studio server script: %s !== %s', actualHash, expectedHash)
+
         throw new Error('Invalid hash for studio server script')
       }
     }
@@ -243,8 +265,7 @@ export class StudioLifecycleManager {
     await studioManager.setup({
       script,
       studioPath,
-      studioHash,
-      projectSlug: projectId,
+      studioHash: this.currentStudioHash,
       cloudApi: {
         cloudUrl,
         cloudHeaders,
@@ -252,8 +273,8 @@ export class StudioLifecycleManager {
         isRetryableError,
         asyncRetry,
       },
-      shouldEnableStudio: this.cloudStudioRequested,
       manifest,
+      getProjectOptions,
     })
 
     telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_MANAGER_SETUP_END)
@@ -263,14 +284,14 @@ export class StudioLifecycleManager {
       const protocolManager = new ProtocolManager()
 
       telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_PROTOCOL_GET_START)
-      const script = await api.getCaptureProtocolScript(studioSession.protocolUrl)
+      const script = await api.getCaptureProtocolScript(studioSession.protocolUrl, { displayRetryErrors: false })
 
       telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_PROTOCOL_GET_END)
 
       telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_PROTOCOL_PREPARE_START)
       await protocolManager.prepareProtocol(script, {
         runId: 'studio',
-        projectId: cfg.projectId,
+        projectId: currentProjectOptions.projectSlug,
         testingType: cfg.testingType,
         cloudApi: {
           url: routes.apiUrl,
@@ -320,15 +341,15 @@ export class StudioLifecycleManager {
   }
 
   private setupWatcher ({
-    projectId,
     cloudDataSource,
     cfg,
     debugData,
+    getProjectOptions,
   }: {
-    projectId?: string
     cloudDataSource: CloudDataSource
     cfg: Cfg
     debugData: any
+    getProjectOptions: StudioServerOptions['getProjectOptions']
   }) {
     // Don't setup a watcher if the studio bundle is NOT local
     if (!process.env.CYPRESS_LOCAL_STUDIO_PATH) {
@@ -348,10 +369,10 @@ export class StudioLifecycleManager {
       await this.studioManager?.destroy()
       this.studioManager = undefined
       this.studioManagerPromise = this.createStudioManager({
-        projectId,
         cloudDataSource,
         cfg,
         debugData,
+        getProjectOptions,
       }).then((studioManager) => {
         // eslint-disable-next-line no-console
         console.log('Studio manager reloaded')

@@ -1,0 +1,7 @@
+[31mIt looks like you are running the Cypress binary directly.[39m
+[31m[39m
+[31mThis is not the recommended approach, and Cypress may not work correctly.[39m
+[31m[39m
+[31mPlease install the [33mcypress[39m[31m NPM package and follow the instructions here:[39m
+[31m[39m
+[31mhttps://on.cypress.io/installing-cypress[39m

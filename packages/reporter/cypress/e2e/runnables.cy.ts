@@ -132,7 +132,7 @@ describe('runnables', () => {
       runner.emit('reporter:start', { startTime: startTime.toISOString() })
     })
 
-    cy.get('.runnable-header span:last').should('have.text', '00:12')
+    cy.get('.runnable-header .duration').should('have.text', '00:12')
   })
 
   it('does not display time if no time taken', () => {
@@ -208,8 +208,9 @@ describe('runnables', () => {
 
       cy.stub(runner, 'emit').callThrough()
 
-      cy.get(selector).as('spec-title').contains('foo.js').realHover()
-      cy.get('.open-in-ide-button').click()
+      cy.get('[data-cy="runnable-options-button"]').click()
+      cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
+      cy.get('[data-cy="runnable-popover-open-ide"]').click()
       cy.get(selector).click().then(() => {
         expect(runner.emit).to.be.calledWith('open:file:unified')
       })

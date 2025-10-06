@@ -3,18 +3,17 @@ import Bluebird from 'bluebird'
 import Debug from 'debug'
 import utils from './utils'
 import * as errors from '../errors'
-import check from 'check-more-types'
 import { exec } from 'child_process'
 import util from 'util'
 import os from 'os'
-import { BROWSER_FAMILY, BrowserLaunchOpts, BrowserNewTabOpts, FoundBrowser, ProtocolManagerShape } from '@packages/types'
+import { BROWSER_FAMILY, BrowserLaunchOpts, BrowserNewTabOpts, FoundBrowser, ProtocolManagerShape, CyPromptManagerShape } from '@packages/types'
 import type { Browser, BrowserInstance, BrowserLauncher } from './types'
 import type { Automation } from '../automation'
 import type { DataContext } from '@packages/data-context'
 import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
 
 const debug = Debug('cypress:server:browsers')
-const isBrowserFamily = check.oneOf(BROWSER_FAMILY)
+const isBrowserFamily = (browser: string) => BROWSER_FAMILY.includes(browser)
 
 let instance: BrowserInstance | null = null
 let launchAttempt = 0
@@ -145,6 +144,12 @@ export = {
     const browserLauncher = await getBrowserLauncher(options.browser, options.foundBrowsers || [])
 
     await browserLauncher.connectProtocolToBrowser(options)
+  },
+
+  async connectCyPromptToBrowser (options: { browser: Browser, foundBrowsers?: FoundBrowser[], cyPromptManager?: CyPromptManagerShape }) {
+    const browserLauncher = await getBrowserLauncher(options.browser, options.foundBrowsers || [])
+
+    await browserLauncher.connectCyPromptToBrowser(options)
   },
 
   async closeProtocolConnection (options: { browser: Browser, foundBrowsers?: FoundBrowser[] }) {

@@ -1,0 +1,7 @@
+[31mThis folder is not writable: [94m/path/to/folder[39m[31m[39m
+[31m[39m
+[31mWriting to this directory is required by Cypress in order to store screenshots and videos.[39m
+[31m[39m
+[31mEnable write permissions to this directory to ensure screenshots and videos are stored.[39m
+[31m[39m
+[31mIf you don't require screenshots or videos to be stored you can safely ignore this warning.[39m

@@ -71,10 +71,26 @@ export type StudioElectronApi = {
   createBrowserWindow: () => BrowserWindow
 }
 
+export interface StudioAuthenticatedUserShape {
+  id?: string // Cloud user id
+  name?: string
+  email?: string
+  authToken?: string
+}
+
+export interface StudioProjectOptions {
+  user?: StudioAuthenticatedUserShape
+  projectSlug?: string
+}
+
 export interface StudioServerOptions {
   studioHash?: string
   studioPath: string
+  /**
+   * @deprecated use getProjectOptions instead
+   */
   projectSlug?: string
+  getProjectOptions: () => Promise<StudioProjectOptions>
   cloudApi: StudioCloudApi
   betterSqlite3Path: string
   sessionId?: string

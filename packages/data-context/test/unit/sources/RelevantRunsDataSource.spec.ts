@@ -1,5 +1,4 @@
-import { expect } from 'chai'
-import sinon from 'sinon'
+import { describe, expect, it, beforeEach, jest } from '@jest/globals'
 import debugLib from 'debug'
 
 import { DataContext } from '../../../src'
@@ -29,32 +28,33 @@ describe('RelevantRunsDataSource', () => {
   beforeEach(() => {
     ctx = createTestDataContext('open')
     dataSource = new RelevantRunsDataSource(ctx)
+    jest.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockReset()
   })
 
   it('returns empty with no shas', async () => {
     const result = await dataSource.getRelevantRuns([])
 
-    expect(result).to.eql([])
+    expect(result).toEqual([])
   })
 
   it('returns empty with no project set', async () => {
-    sinon.stub(ctx.project, 'projectId').resolves(undefined)
+    jest.spyOn(ctx.project, 'projectId').mockResolvedValue(undefined)
 
     const result = await dataSource.getRelevantRuns([FAKE_SHAS[0]])
 
-    expect(result).to.eql([])
+    expect(result).toEqual([])
   })
 
   it('returns empty if error', async () => {
-    sinon.stub(ctx.cloud, 'executeRemoteGraphQL').resolves(FAKE_PROJECT_WITH_ERROR)
+    jest.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue(FAKE_PROJECT_WITH_ERROR)
     const result = await dataSource.getRelevantRuns([])
 
-    expect(result).to.eql([])
+    expect(result).toEqual([])
   })
 
-  context('cloud responses', () => {
+  describe('cloud responses', () => {
     beforeEach(() => {
-      sinon.stub(ctx.project, 'projectId').resolves('test123')
+      jest.spyOn(ctx.project, 'projectId').mockResolvedValue('test123')
     })
 
     const getShasForTestData = (testData: TestProject) => {
@@ -62,13 +62,14 @@ describe('RelevantRunsDataSource', () => {
     }
 
     const testScenario = async (testData: TestProject, expectedResult: RelevantRunInfo[]) => {
-      sinon.stub(ctx.cloud, 'executeRemoteGraphQL').resolves(testData)
+      // @ts-expect-error
+      jest.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue(testData)
 
       const testShas: string[] = getShasForTestData(testData)
 
       const result = await dataSource.getRelevantRuns(testShas)
 
-      expect(result).to.eql(expectedResult)
+      expect(result).toEqual(expectedResult)
     }
 
     it('returns empty if cloud project not loaded', async () => {
@@ -104,30 +105,37 @@ describe('RelevantRunsDataSource', () => {
     })
 
     it('returns the same current if current already set only one running', async () => {
-      sinon.stub(ctx.cloud, 'executeRemoteGraphQL')
-      .onFirstCall().resolves(FAKE_PROJECT_ONE_RUNNING_RUN)
-      .onSecondCall().resolves(FAKE_PROJECT_ONE_RUNNING_RUN)
+      jest.spyOn(ctx.cloud, 'executeRemoteGraphQL')
+      // @ts-expect-error
+      .mockResolvedValueOnce(FAKE_PROJECT_ONE_RUNNING_RUN)
+      // @ts-expect-error
+      .mockResolvedValueOnce(FAKE_PROJECT_ONE_RUNNING_RUN)
 
       const firstResult = await dataSource.getRelevantRuns([FAKE_SHAS[0]])
 
-      expect(firstResult, 'running should be current after first check').to.eql(
+      // running should be current after first check
+      expect(firstResult).toEqual(
         [formatRun(FAKE_PROJECT_ONE_RUNNING_RUN, 0)],
       )
 
       const secondResult = await dataSource.getRelevantRuns([FAKE_SHAS[0]])
 
-      expect(secondResult, 'running should be current after second check').to.eql(
+      // running should be current after second check
+      expect(secondResult).toEqual(
         [formatRun(FAKE_PROJECT_ONE_RUNNING_RUN, 0)],
       )
     })
 
     it('returns the same current if current already set and updates after movesToNext is called', async () => {
-      sinon.stub(ctx.cloud, 'executeRemoteGraphQL')
-      .onFirstCall().resolves(FAKE_PROJECT_ONE_RUNNING_RUN)
-      .onSecondCall().resolves(FAKE_PROJECT_MULTIPLE_COMPLETED)
-      .onThirdCall().resolves(FAKE_PROJECT_MULTIPLE_COMPLETED)
+      jest.spyOn(ctx.cloud, 'executeRemoteGraphQL')
+      // @ts-expect-error
+      .mockResolvedValueOnce(FAKE_PROJECT_ONE_RUNNING_RUN)
+      // @ts-expect-error
+      .mockResolvedValueOnce(FAKE_PROJECT_MULTIPLE_COMPLETED)
+      // @ts-expect-error
+      .mockResolvedValueOnce(FAKE_PROJECT_MULTIPLE_COMPLETED)
 
-      const maybeSendRunNotificationStub = sinon.stub(ctx.actions.notification, 'maybeSendRunNotification')
+      const maybeSendRunNotificationStub = jest.spyOn(ctx.actions.notification, 'maybeSendRunNotification')
 
       const subscription = ctx.emitter.subscribeTo('relevantRunChange')
       const subValues: any[] = []
@@ -145,12 +153,13 @@ describe('RelevantRunsDataSource', () => {
       debug('first check with only one running run')
       await dataSource.checkRelevantRuns([FAKE_SHAS[0]], true)
 
-      expect(maybeSendRunNotificationStub).not.to.have.been.called
+      expect(maybeSendRunNotificationStub).not.toHaveBeenCalled()
 
       debug('second check with the running run completing, but should stay selected')
       await dataSource.checkRelevantRuns([FAKE_SHAS[1], FAKE_SHAS[0]], true)
 
-      expect(maybeSendRunNotificationStub).to.have.been.calledWithMatch(
+      expect(maybeSendRunNotificationStub).toHaveBeenCalledWith(
+        // @ts-expect-error
         { runNumber: 1, status: 'RUNNING', sha: 'fcb90f', totalFailed: 0 },
         { runNumber: 4, status: 'FAILED', sha: 'fc753a', totalFailed: 1 },
       )
@@ -158,7 +167,7 @@ describe('RelevantRunsDataSource', () => {
       debug('moving runs will cause another check')
       await dataSource.moveToRun(4, [FAKE_SHAS[1], FAKE_SHAS[0]])
 
-      expect(maybeSendRunNotificationStub).to.have.been.calledOnce
+      expect(maybeSendRunNotificationStub).toHaveBeenCalledTimes(1)
 
       setImmediate(() => {
         subscription.return(undefined)
@@ -166,16 +175,18 @@ describe('RelevantRunsDataSource', () => {
 
       await watchSubscription()
 
-      expect(subValues).to.have.lengthOf(3)
+      expect(subValues).toHaveLength(3)
 
-      expect(subValues[0], 'should emit first result of running').to.eql({
+      expect(subValues[0]).toEqual({
+        // should emit first result of running
         all: [formatRun(FAKE_PROJECT_ONE_RUNNING_RUN, 0)],
         commitsAhead: 0,
         latest: [formatRun(FAKE_PROJECT_ONE_RUNNING_RUN, 0)],
         selectedRunNumber: 1,
       })
 
-      expect(subValues[1], 'should keep run if selected but no longer in all').to.eql({
+      expect(subValues[1]).toEqual({
+        // should keep run if selected but no longer in all
         all: [
           formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 0),
           formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 1),
@@ -188,7 +199,8 @@ describe('RelevantRunsDataSource', () => {
         selectedRunNumber: 1,
       })
 
-      expect(subValues[2], 'should emit selected run after moving').to.eql({
+      expect(subValues[2]).toEqual({
+        // should emit selected run after moving
         all: [formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 0)],
         latest: [
           formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 0),
@@ -200,9 +212,11 @@ describe('RelevantRunsDataSource', () => {
     })
 
     it('moves to new sha once completed', async () => {
-      sinon.stub(ctx.cloud, 'executeRemoteGraphQL')
-      .onFirstCall().resolves(FAKE_PROJECT_ONE_RUNNING_RUN)
-      .onSecondCall().resolves(FAKE_PROJECT_MULTIPLE_COMPLETED)
+      jest.spyOn(ctx.cloud, 'executeRemoteGraphQL')
+      // @ts-expect-error
+      .mockResolvedValueOnce(FAKE_PROJECT_ONE_RUNNING_RUN)
+      // @ts-expect-error
+      .mockResolvedValueOnce(FAKE_PROJECT_MULTIPLE_COMPLETED)
 
       const subscription = ctx.emitter.subscribeTo('relevantRunChange')
       const subValues: any[] = []
@@ -229,16 +243,18 @@ describe('RelevantRunsDataSource', () => {
 
       await watchSubscription()
 
-      expect(subValues).to.have.lengthOf(2)
+      expect(subValues).toHaveLength(2)
 
-      expect(subValues[0], 'should emit first result of running').to.eql({
+      expect(subValues[0]).toEqual({
+        // should emit first result of running
         all: [formatRun(FAKE_PROJECT_ONE_RUNNING_RUN, 0)],
         latest: [formatRun(FAKE_PROJECT_ONE_RUNNING_RUN, 0)],
         commitsAhead: 0,
         selectedRunNumber: 1,
       })
 
-      expect(subValues[1], 'should emit newer completed run on different sha').to.eql({
+      expect(subValues[1]).toEqual({
+        // should emit newer completed run on different sha
         all: [formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 0)],
         latest: [
           formatRun(FAKE_PROJECT_MULTIPLE_COMPLETED, 0),

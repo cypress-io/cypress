@@ -651,6 +651,11 @@ describe('cli', () => {
       expect(run.start).toBeCalledWith({ runnerUi: false })
     })
 
+    it('calls run with --posix-exit-codes', async () => {
+      await exec('run --posix-exit-codes')
+      expect(run.start).toBeCalledWith({ posixExitCodes: true })
+    })
+
     describe('component-testing', () => {
       it('passes to run.start the correct args for component-testing', async () => {
         await exec('run --component --dev')

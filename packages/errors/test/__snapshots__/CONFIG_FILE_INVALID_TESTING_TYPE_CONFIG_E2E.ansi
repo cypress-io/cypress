@@ -1,0 +1,9 @@
+[31mThe [33me2e.indexHtmlFile[39m[31m configuration option is not valid for e2e testing.[39m
+[31m[39m
+[31mPlease remove this option or add this as a component testing type property: [95mcomponent.indexHtmlFile[39m[31m[39m
+[31m[39m
+[31m[94m{[39m[31m[39m
+[31m[94m  e2e: {[39m[31m[39m
+[31m[94m    indexHtmlFile: '...',[39m[31m[39m
+[31m[94m  }[39m[31m[39m
+[31m[94m}[39m[31m[39m

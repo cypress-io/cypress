@@ -9,7 +9,7 @@ import snapshot from 'snap-shot-it'
 import { EventEmitter } from 'events'
 import { exec } from 'child_process'
 import util from 'util'
-import { createTestDataContext } from '@packages/data-context/test/unit/helper'
+import { createTestDataContext } from '../../support/helpers/data-context-helper'
 import electron from '../../../lib/browsers/electron'
 import chrome from '../../../lib/browsers/chrome'
 import Promise from 'bluebird'
@@ -153,6 +153,19 @@ describe('lib/browsers/index', () => {
       .then((err: CypressErrorType) => {
         return normalizeSnapshot(err.message)
       })
+    })
+  })
+
+  context('.connectCyPromptToBrowser', () => {
+    it('connects browser to cy prompt', async () => {
+      sinon.stub(chrome, 'connectCyPromptToBrowser').resolves()
+      await browsers.connectCyPromptToBrowser({
+        browser: {
+          family: 'chromium',
+        },
+      })
+
+      expect(chrome.connectCyPromptToBrowser).to.be.called
     })
   })
 

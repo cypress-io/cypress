@@ -1,0 +1,1 @@
+[31mCypress does not support running chrome version 64. To use chrome with Cypress, install a version of chrome newer than or equal to 64.[39m

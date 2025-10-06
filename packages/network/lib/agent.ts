@@ -7,7 +7,7 @@ import { getProxyForUrl } from 'proxy-from-env'
 import url from 'url'
 import { createRetryingSocket, getAddress } from './connect'
 import { lenientOptions } from './http-utils'
-import { ClientCertificateStore } from './client-certificates'
+import { clientCertificateStoreSingleton } from './client-certificates'
 import { CaOptions, getCaOptions } from './ca'
 
 const debug = debugModule('cypress:network:agent')
@@ -54,8 +54,6 @@ const mergeCAOptions = (options: https.RequestOptions, caOptions: CaOptions): ht
     ca: [...caArray, ...caOptions.ca],
   }
 }
-
-export const clientCertificateStore = new ClientCertificateStore()
 
 type WithProxyOpts<RequestOptions> = RequestOptions & {
   proxy: string
@@ -254,7 +252,7 @@ export class CombinedAgent {
       debug('got family %o', _.pick(options, 'family', 'href'))
 
       if (isHttps) {
-        _.assign(options, clientCertificateStore.getClientCertificateAgentOptionsForUrl(uri))
+        _.assign(options, clientCertificateStoreSingleton.getClientCertificateAgentOptionsForUrl(uri))
 
         return this.httpsAgent.addRequest(req, options as https.RequestOptions)
       }
@@ -329,7 +327,7 @@ class HttpAgent extends http.Agent {
 
     if (proxy.protocol === 'https:') {
       // gonna have to use the https module to reach the proxy, even though this is an http req
-      req.agent = this.httpsAgent
+      req.agent = this.httpsAgent as any
 
       return this.httpsAgent.addRequest(req, options)
     }
@@ -467,6 +465,18 @@ class HttpsAgent extends https.Agent {
   }
 }
 
+// NODE_TLS_REJECT_UNAUTHORIZED is set to '0' in Cypress to cover
+// all traffic to the user's app and `agent` honors this by default.
+// Calls to the Cloud should use the `strictAgent` or `api/index`'s
+// request promise implementation instead as they override
+// this functionality to actually reject in unauthorized situations.
 const agent = new CombinedAgent()
 
+// This agent always rejects unauthorized certificates.
+const strictAgent = new CombinedAgent({}, {
+  rejectUnauthorized: true,
+})
+
 export default agent
+
+export { strictAgent }

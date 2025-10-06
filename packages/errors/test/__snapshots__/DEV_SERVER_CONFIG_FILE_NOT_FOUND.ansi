@@ -1,0 +1,12 @@
+[31mYou are using [33mvite[39m[31m for your dev server, but a configuration file was not found. We traversed upwards from:[39m
+[31m[39m
+[31m[95m/dev/project[39m[31m[39m
+[31m[39m
+[31mlooking for a file named:[39m
+[31m[39m
+[31m[90m - [39m[31m[94mvite.config.js[39m[31m[39m
+[31m[90m - [39m[31m[94mvite.config.ts[39m[31m[39m
+[31m[39m
+[31mAdd your [33mvite[39m[31m config at one of the above paths, or import your configuration file and provide it to[39m
+[31mthe devServer config as a [33mviteConfig[39m[31m option.[39m
+[31m[39m

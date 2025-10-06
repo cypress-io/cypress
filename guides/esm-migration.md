@@ -10,6 +10,10 @@
 - Unit tests in package are written in TypeScript
 - Does not include scripts or system test migrations
 
+#### Notes
+
+When migrating some of these projects away from the `ts-node` entry [see `@packages/scaffold-config` example](https://github.com/cypress-io/cypress/blob/v15.2.0/packages/scaffold-config/index.js), it is somewhat difficult to make separate browser/node entries as the v8-snapshot [tsconfig.json](https://github.com/cypress-io/cypress/blob/v15.2.0/tooling/v8-snapshot/tsconfig.json) is using an older style of module resolution where the `exports` key inside a package's `package.json` is not well supported. Because of this, we need to find ways to bundle code that is needed internally in the browser vs in node without them being a part of the same bundle. This is a temporary work around until we are able to get every package being able to build as an ES Module, which as that point we can re assess how the Cypress binary is being built as well as v8-snapshots, and will allow us to reconfigure this packages to export content in a more proper fashion.
+
 #### Status
 
 ##### NPM Packages
@@ -33,11 +37,11 @@
 ##### Binary Packages
 
 - [ ] packages/app **PARTIAL** - low priority: frontend package
-- [ ] packages/config **PARTIAL** - entry point is JS
+- [x] packages/config ✅ **COMPLETED**
 - [ ] packages/data-context  **PARTIAL** - entry point is JS
 - [x] packages/driver ✅ **COMPLETED** - source complete, cypress tests need migration
 - [x] packages/electron ✅ **COMPLETED**
-- [ ] packages/error **PARTIAL** - entry point is JS
+- [x] packages/error ✅ **COMPLETED**
 - [x] packages/eslint-config ✅ **COMPLETED**
 - [ ] packages/example
 - [ ] packages/extension
@@ -53,17 +57,17 @@
 - [x] packages/packherd-require ✅ **COMPLETED**
 - [ ] packages/proxy **PARTIAL** - entry point is JS
 - [x] packages/reporter ✅ **COMPLETED**
-- [ ] packages/resolve-dist **PARTIAL** - entry point is JS
+- [x] packages/resolve-dist ✅ **COMPLETED**
 - [ ] packages/rewriter **PARTIAL** - entry point is JS
-- [ ] packages/root
+- [x] packages/root ✅ **COMPLETED**
 - [x] packages/runner ✅ **COMPLETED**
-- [ ] packages/scaffold-config **PARTIAL** - entry point is JS
+- [x] packages/scaffold-config ✅ **COMPLETED**
 - [ ] packages/server **PARTIAL** - many source/test files in JS. highest priority
 - [ ] packages/socket **PARTIAL** - entry point is JS. Tests are JS
 - [x] packages/stderr-filtering ✅ **COMPLETED**
 - [ ] packages/telemetry **PARTIAL** - entry point is JS
 - [ ] packages/ts **PARTIAL** - ultimate goal is removal and likely not worth the effort to convert
-- [ ] packages/types **PARTIAL** - entry point is JS
+- [x] packages/types ✅ **COMPLETED**
 - [x] packages/v8-snapshot-require
 - [x] packages/web-config
 
@@ -87,10 +91,10 @@
 ##### Binary Packages
 
 - [x] packages/config ✅ **COMPLETED**
-- [ ] packages/data-context
+- [x] packages/data-context **COMPLETED** (migrated from `mocha`/`sinon`/`chai` to `jest`). See package README for more details as to why `jest` over `vitest`
 - [x] packages/driver ✅ **COMPLETED**
 - [x] packages/electron ✅ **COMPLETED**
-- [ ] packages/error
+- [x] packages/error ✅ **COMPLETED**
 - [ ] packages/extension
 - [ ] packages/https-proxy
 - [x] packages/electron ✅ **COMPLETED**
@@ -98,15 +102,15 @@
 - [ ] packages/icons
 - [ ] packages/launcher
 - [ ] packages/net-stubbing
-- [ ] packages/network
+- [x] packages/network ✅ **COMPLETED**
 - [ ] packages/packherd-require
 - [ ] packages/proxy
-- [ ] packages/rewriter
-- [ ] packages/scaffold-config
+- [x] packages/rewriter ✅ **COMPLETED**
+- [x] packages/scaffold-config ✅ **COMPLETED**
 - [ ] packages/server
-- [ ] packages/socket
+- [x] packages/socket ✅ **COMPLETED**
 - [x] packages/stderr-filtering ✅ **COMPLETED**
-- [ ] packages/telemetry
+- [x] packages/telemetry ✅ **COMPLETED**
 - [ ] packages/ts - ultimate goal is removal and likely not worth the effort to convert
 - [x] packages/types ✅ **COMPLETED**
 - [ ] packages/v8-snapshot-require

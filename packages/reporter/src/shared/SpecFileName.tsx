@@ -1,7 +1,5 @@
 import React from 'react'
 import { getFilenameParts } from '../lib/util'
-import { OpenFileInIDEButton } from '../header/OpenFileInIDEButton'
-import { CreateNewTestButton } from '../header/CreateNewTestButton'
 
 const displayFileName = (spec: Cypress.Cypress['spec']) => {
   const specParts = getFilenameParts(spec.name)
@@ -27,7 +25,5 @@ export const SpecFileName = ({ spec }: { spec: Cypress.Cypress['spec'] }) => {
 
   return <div className='spec-file-name'>
     {fileDetails.displayFile || fileDetails.originalFile}{!!fileDetails.line && `:${fileDetails.line}`}{!!fileDetails.column && `:${fileDetails.column}`}
-    <OpenFileInIDEButton fileDetails={fileDetails} />
-    <CreateNewTestButton suiteId='r1' dataCy='create-new-test-from-spec-header' />
   </div>
 }

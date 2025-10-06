@@ -1,7 +1,5 @@
-import { expect } from 'chai'
-
+import { describe, it, expect } from 'vitest'
 import { Telemetry } from '../src'
-
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
 
@@ -20,15 +18,15 @@ describe('init', () => {
       SpanProcessor: BatchSpanProcessor,
     })
 
-    expect(tel).to.not.be.undefined
+    expect(tel).toBeDefined()
     expect(tel.provider).is.instanceOf(NodeTracerProvider)
-    expect(tel.provider.resource.attributes['service.namespace']).to.equal('namespace')
-    expect(tel.provider.resource.attributes['service.version']).to.equal('version')
-    expect(tel.provider.resource.attributes['service.name']).to.equal('cypress-app')
+    expect(tel.provider.resource.attributes['service.namespace']).toEqual('namespace')
+    expect(tel.provider.resource.attributes['service.version']).toEqual('version')
+    expect(tel.provider.resource.attributes['service.name']).toEqual('cypress-app')
     // @ts-expect-error
-    expect(tel.provider.activeSpanProcessor._spanProcessors[0]).is.instanceOf(BatchSpanProcessor)
-    expect(tel.getExporter()).to.equal(exporter)
-    expect(tel.rootContext).to.be.undefined
+    expect(tel.provider.activeSpanProcessor._spanProcessors[0]).toBeInstanceOf(BatchSpanProcessor)
+    expect(tel.getExporter()).toEqual(exporter)
+    expect(tel.rootContext).toBeUndefined()
   })
 
   it('creates a new instance with root context', () => {
@@ -44,9 +42,9 @@ describe('init', () => {
       SpanProcessor: BatchSpanProcessor,
     })
 
-    expect(tel).to.not.be.undefined
-    expect(tel.rootContext).to.not.be.undefined
-    expect(tel.rootAttributes).to.not.be.undefined
+    expect(tel).toBeDefined()
+    expect(tel.rootContext).toBeDefined()
+    expect(tel.rootAttributes).toBeDefined()
   })
 })
 
@@ -67,12 +65,12 @@ describe('startSpan', () => {
     const span = tel.startSpan({ name: 'span' })
 
     // @ts-expect-error
-    expect(span.name).to.equal('span')
+    expect(span.name).toEqual('span')
     // @ts-expect-error
-    expect(span.parentSpanId).to.equal('4ad8bd26672a01b0')
-    expect(tel.activeSpanQueue.length).to.be.lessThan(1)
+    expect(span.parentSpanId).toEqual('4ad8bd26672a01b0')
+    expect(tel.activeSpanQueue.length).toBeLessThan(1)
     // @ts-expect-error
-    expect(tel.spans[span.name]).to.equal(span)
+    expect(tel.spans[span.name]).toEqual(span)
   })
 
   it('starts a span with no parent id', () => {
@@ -90,9 +88,9 @@ describe('startSpan', () => {
     const span = tel.startSpan({ name: 'span' })
 
     // @ts-expect-error
-    expect(span.name).to.equal('span')
+    expect(span.name).toEqual('span')
     // @ts-expect-error
-    expect(span.parentSpanId).to.be.undefined
+    expect(span.parentSpanId).toBeUndefined()
   })
 
   it('starts a span with specific parent', () => {
@@ -112,10 +110,10 @@ describe('startSpan', () => {
     const span = tel.startSpan({ name: 'span', parentSpan })
 
     // @ts-expect-error
-    expect(span.name).to.equal('span')
+    expect(span.name).toEqual('span')
     // @ts-expect-error
-    expect(span.parentSpanId).to.equal(parentSpan._spanContext.spanId)
-    expect(tel.activeSpanQueue.length).to.be.lessThan(1)
+    expect(span.parentSpanId).toEqual(parentSpan._spanContext.spanId)
+    expect(tel.activeSpanQueue.length).toBeLessThan(1)
   })
 
   it('starts an active span', () => {
@@ -133,32 +131,32 @@ describe('startSpan', () => {
     const span = tel.startSpan({ name: 'span', active: true })
 
     // @ts-expect-error
-    expect(span.name).to.equal('span')
+    expect(span.name).toEqual('span')
     // @ts-expect-error
-    expect(span.parentSpanId).to.be.undefined
+    expect(span.parentSpanId).toBeUndefined()
     // @ts-expect-error
-    expect(tel.activeSpanQueue[0].name).to.equal('span')
+    expect(tel.activeSpanQueue[0].name).toEqual('span')
 
     // Start a child that should have the previous span as a parent
     const spanChild = tel.startSpan({ name: 'child' })
 
     // @ts-expect-error
-    expect(spanChild.name).to.equal('child')
+    expect(spanChild.name).toEqual('child')
     // @ts-expect-error
-    expect(spanChild.parentSpanId).to.equal(span._spanContext.spanId)
+    expect(spanChild.parentSpanId).toEqual(span._spanContext.spanId)
 
     // Start a root child that does not have the active parent
     const spanRoot = tel.startSpan({ name: 'root', attachType: 'root' })
 
     // @ts-expect-error
-    expect(spanRoot.name).to.equal('root')
+    expect(spanRoot.name).toEqual('root')
     // @ts-expect-error
-    expect(spanRoot.parentSpanId).to.be.undefined
+    expect(spanRoot.parentSpanId).toBeUndefined()
 
     // end the active span to see it removed from the queue
     span?.end()
 
-    expect(tel.activeSpanQueue.length).to.be.lessThan(1)
+    expect(tel.activeSpanQueue.length).toBeLessThan(1)
   })
 
   it('starts a span with key other than name', () => {
@@ -178,9 +176,9 @@ describe('startSpan', () => {
     const retrievedSpan = tel.getSpan('key')
 
     // @ts-expect-error
-    expect(retrievedSpan.name).to.equal('span')
+    expect(retrievedSpan.name).toEqual('span')
     // @ts-expect-error
-    expect(retrievedSpan._spanContext.spanId).to.equal(span._spanContext.spanId)
+    expect(retrievedSpan._spanContext.spanId).toEqual(span._spanContext.spanId)
   })
 })
 
@@ -200,9 +198,9 @@ describe('getSpan', () => {
 
     const spanny = tel.startSpan({ name: 'spanny' })
 
-    expect(tel.getSpan('spanny')).to.equal(spanny)
+    expect(tel.getSpan('spanny')).toEqual(spanny)
 
-    expect(tel.getSpan('not-found')).to.be.undefined
+    expect(tel.getSpan('not-found')).toBeUndefined()
   })
 })
 
@@ -228,7 +226,7 @@ describe('findActiveSpan', () => {
       return span.name === 'spanny'
     })
 
-    expect(foundSpan).to.equal(spanny)
+    expect(foundSpan).toEqual(spanny)
   })
 })
 
@@ -248,19 +246,19 @@ describe('endActiveSpanAndChildren', () => {
 
     const spanny = tel.startSpan({ name: 'spanny', active: true })
 
-    expect(spanny).to.exist
+    expect(spanny).toBeDefined()
 
     tel.startSpan({ name: 'spannyChild', active: true })
 
-    expect(tel.activeSpanQueue.length).to.equal(2)
+    expect(tel.activeSpanQueue.length).toEqual(2)
 
     tel.endActiveSpanAndChildren(spanny)
 
-    expect(tel.activeSpanQueue.length).to.equal(0)
+    expect(tel.activeSpanQueue.length).toEqual(0)
 
     tel.endActiveSpanAndChildren(spanny)
 
-    expect(tel.activeSpanQueue.length).to.equal(0)
+    expect(tel.activeSpanQueue.length).toEqual(0)
   })
 })
 
@@ -280,13 +278,13 @@ describe('getActiveContextObject', () => {
 
     const emptyContext = tel.getActiveContextObject()
 
-    expect(emptyContext.context).to.be.undefined
+    expect(emptyContext.context).toBeUndefined()
 
     tel.startSpan({ name: 'spanny', active: true })
 
     const context = tel.getActiveContextObject()
 
-    expect(context.context.traceparent).to.exist
+    expect(context.context.traceparent).toBeDefined()
   })
 })
 
@@ -308,14 +306,14 @@ describe('getResources', () => {
       },
     })
 
-    expect(tel.getResources()).to.contain({
+    expect(tel.getResources()).toEqual(expect.objectContaining({
       'service.name': 'cypress-app',
       'telemetry.sdk.language': 'nodejs',
       'telemetry.sdk.name': 'opentelemetry',
       herp: 'derp',
       'service.namespace': 'namespace',
       'service.version': 'version',
-    })
+    }))
   })
 })
 
@@ -344,7 +342,7 @@ describe('shutdown', () => {
 
     await tel.shutdown()
 
-    expect(shutdownCalled).to.be.true
+    expect(shutdownCalled).toBe(true)
   })
 })
 
@@ -362,7 +360,7 @@ describe('getExporter', () => {
       SpanProcessor: BatchSpanProcessor,
     })
 
-    expect(tel.getExporter()).to.equal(exporter)
+    expect(tel.getExporter()).toEqual(exporter)
   })
 })
 
@@ -381,12 +379,12 @@ describe('setRootContext', () => {
     })
 
     // @ts-expect-error
-    expect(tel.rootContext?.getValue(Symbol.for('OpenTelemetry Context Key SPAN'))._spanContext.spanId).to.equal('4ad8bd26672a01b0')
+    expect(tel.rootContext?.getValue(Symbol.for('OpenTelemetry Context Key SPAN'))._spanContext.spanId).toEqual('4ad8bd26672a01b0')
 
     tel.setRootContext({ context: { traceparent: '00-a14c8519972996a2a0748f2c8db5a775-4ad8bd26672a01b1-01' } })
 
     // @ts-expect-error
-    expect(tel.rootContext?.getValue(Symbol.for('OpenTelemetry Context Key SPAN'))._spanContext.spanId).to.equal('4ad8bd26672a01b1')
+    expect(tel.rootContext?.getValue(Symbol.for('OpenTelemetry Context Key SPAN'))._spanContext.spanId).toEqual('4ad8bd26672a01b1')
   })
 
   it('sets root context', () => {
@@ -403,16 +401,16 @@ describe('setRootContext', () => {
     })
 
     // @ts-expect-error
-    expect(tel.rootContext?.getValue(Symbol.for('OpenTelemetry Context Key SPAN'))._spanContext.spanId).to.equal('4ad8bd26672a01b0')
+    expect(tel.rootContext?.getValue(Symbol.for('OpenTelemetry Context Key SPAN'))._spanContext.spanId).toEqual('4ad8bd26672a01b0')
 
     tel.setRootContext()
 
     // @ts-expect-error
-    expect(tel.rootContext?.getValue(Symbol.for('OpenTelemetry Context Key SPAN'))._spanContext.spanId).to.equal('4ad8bd26672a01b0')
+    expect(tel.rootContext?.getValue(Symbol.for('OpenTelemetry Context Key SPAN'))._spanContext.spanId).toEqual('4ad8bd26672a01b0')
 
     tel.setRootContext({})
 
     // @ts-expect-error
-    expect(tel.rootContext?.getValue(Symbol.for('OpenTelemetry Context Key SPAN'))._spanContext.spanId).to.equal('4ad8bd26672a01b0')
+    expect(tel.rootContext?.getValue(Symbol.for('OpenTelemetry Context Key SPAN'))._spanContext.spanId).toEqual('4ad8bd26672a01b0')
   })
 })

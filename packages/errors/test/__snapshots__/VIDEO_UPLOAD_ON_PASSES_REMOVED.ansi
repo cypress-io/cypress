@@ -1,0 +1,5 @@
+[31mThe [33mvideoUploadOnPasses[39m[31m configuration option was removed in Cypress version 13.0.0.[39m
+[31m[39m
+[31mYou can safely remove this option from your config.[39m
+[31m[39m
+[31mhttps://on.cypress.io/migration-guide[39m

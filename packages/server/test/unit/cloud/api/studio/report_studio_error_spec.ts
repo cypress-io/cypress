@@ -134,6 +134,8 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
             name: 'Error',
             message: 'string error',
             stack: sinon.match((stack) => stack.includes('<stripped-path>report_studio_error_spec.ts')),
+            code: undefined,
+            errno: undefined,
             studioMethod: 'testMethod',
             studioMethodArgs: undefined,
           }],
@@ -150,7 +152,14 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
     it('handles Error objects correctly', () => {
       const error = new Error('test error')
 
+      ;(error as any).code = 'test code'
+
+      ;(error as any).errno = 123
       error.stack = 'test stack'
+
+      ;(error as any).code = 'test code'
+
+      ;(error as any).errno = 123
 
       reportStudioError({
         cloudApi,
@@ -169,6 +178,8 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
             name: 'Error',
             message: 'test error',
             stack: 'test stack',
+            code: 'test code',
+            errno: 123,
             studioMethod: 'testMethod',
             studioMethodArgs: undefined,
           }],
@@ -204,6 +215,8 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
             name: 'Error',
             message: 'test error',
             stack: sinon.match((stack) => stack.includes('<stripped-path>report_studio_error_spec.ts')),
+            code: undefined,
+            errno: undefined,
             studioMethod: 'testMethod',
             studioMethodArgs: JSON.stringify({ args: ['arg1', { key: '<stripped-path>file.js' }] }),
           }],
@@ -241,6 +254,8 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
             name: 'Error',
             message: 'test error',
             stack: sinon.match((stack) => stack.includes('<stripped-path>report_studio_error_spec.ts')),
+            code: undefined,
+            errno: undefined,
             studioMethod: 'testMethod',
             studioMethodArgs: sinon.match(/Unknown args/),
           }],

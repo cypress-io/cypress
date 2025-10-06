@@ -3,7 +3,7 @@ import fs from 'fs'
 import Debug from 'debug'
 import { StreamActivityMonitor } from '../upload/stream_activity_monitor'
 import { asyncRetry, linearDelay } from '../../util/async_retry'
-import { putFetch, ParseKinds } from '../network/put_fetch'
+import { putFetch, ParseKinds } from '../network/fetch'
 import { isRetryableError } from '../network/is_retryable_error'
 const debug = Debug('cypress:server:cloud:api:protocol-artifact')
 

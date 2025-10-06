@@ -20,9 +20,10 @@ import { IconChevronRightMedium } from '@cypress-design/react-icon'
 
 interface DocsUrlProps {
   url: string | string[]
+  title: string | null
 }
 
-const DocsUrl = ({ url }: DocsUrlProps) => {
+const DocsUrl = ({ url, title }: DocsUrlProps) => {
   if (!url) return null
 
   const openUrl = (url: string) => (e: React.MouseEvent) => {
@@ -35,7 +36,7 @@ const DocsUrl = ({ url }: DocsUrlProps) => {
 
   return _.map(urlArray, (url) => (
     <a className='runnable-err-docs-url' href={url} key={url} onClick={openUrl(url)}>
-      Learn more
+      {title || 'Learn more'}
     </a>
   ))
 }
@@ -93,7 +94,7 @@ const TestError: React.FC<TestErrorProps> = ({ err, groupLevel = 0, testId, comm
         <div className='runnable-err-content'>
           <div className='runnable-err-message'>
             <span dangerouslySetInnerHTML={{ __html: formattedMessage(err.message) }} />
-            <DocsUrl url={err.docsUrl} />
+            <DocsUrl url={err.docsUrl} title={err.docsUrlTitle} />
           </div>
           {codeFrame && <ErrorCodeFrame codeFrame={codeFrame} />}
           {err.stack &&

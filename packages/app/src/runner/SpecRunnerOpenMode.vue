@@ -1,4 +1,14 @@
 <template>
+  <PromptGetCodeModal
+    v-if="promptStore.getCodeModalIsOpen"
+    :is-open="promptStore.getCodeModalIsOpen"
+    @close="promptStore.closeGetCodeModal"
+  />
+  <PromptMoreInfoNeededModal
+    v-if="promptStore.moreInfoNeededModalIsOpen"
+    :is-open="promptStore.moreInfoNeededModalIsOpen"
+    @close="promptStore.closeMoreInfoNeededModal"
+  />
   <AdjustRunnerStyleDuringScreenshot
     id="main-pane"
     class="flex"
@@ -98,6 +108,9 @@
             :event-manager="eventManager"
             :studio-status="studioStatus"
             :aut-url-selector="autUrlSelector"
+            :user-project-status-store="userProjectStatusStore"
+            :has-requested-project-access="hasRequestedProjectAccess"
+            :request-project-access-mutation="requestProjectAccessMutation"
           />
         </HideDuringScreenshot>
       </template>
@@ -122,7 +135,7 @@ import ScreenshotHelperPixels from './screenshot/ScreenshotHelperPixels.vue'
 import { useScreenshotStore } from '../store/screenshot-store'
 import ChooseExternalEditorModal from '@packages/frontend-shared/src/gql-components/ChooseExternalEditorModal.vue'
 import { useMutation, gql } from '@urql/vue'
-import { SpecRunnerOpenMode_OpenFileInIdeDocument, StudioStatus_ChangeDocument } from '../generated/graphql'
+import { SpecRunnerOpenMode_OpenFileInIdeDocument, StudioStatus_ChangeDocument, SpecRunner_Studio_RequestAccessDocument } from '../generated/graphql'
 import type { SpecRunnerFragment } from '../generated/graphql'
 import { usePreferences } from '../composables/usePreferences'
 import ScriptError from './ScriptError.vue'
@@ -136,6 +149,10 @@ import { runnerConstants } from './runner-constants'
 import { useStudioStore } from '../store/studio-store'
 import StudioPanel from '../studio/StudioPanel.vue'
 import { useSubscription } from '../graphql'
+import PromptGetCodeModal from '../prompt/PromptGetCodeModal.vue'
+import PromptMoreInfoNeededModal from '../prompt/PromptMoreInfoNeededModal.vue'
+import { usePromptStore } from '../store/prompt-store'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 
 // this is used by the StudioPanel to access the AUT URL input
 const autUrlSelector = '.aut-url-input'
@@ -148,6 +165,8 @@ const {
   absoluteStudioMinimum,
   collapsedNavBarWidth,
 } = runnerConstants
+
+const userProjectStatusStore = useUserProjectStatusStore()
 
 gql`
 fragment SpecRunner_Preferences on Query {
@@ -167,6 +186,32 @@ fragment SpecRunner_Preferences on Query {
 gql`
 fragment SpecRunner_Studio on Query {
   cloudStudioRequested
+  currentProject {
+    id
+    projectId
+    cloudProject {
+      __typename
+      ... on CloudProjectUnauthorized {
+        message
+        hasRequestedAccess
+      }
+      ... on CloudProject {
+        id
+      }
+    }
+  }
+}
+`
+
+gql`
+mutation SpecRunner_Studio_RequestAccess( $projectId: String! ) {
+  cloudProjectRequestAccess(projectSlug: $projectId) {
+    __typename
+    ... on CloudProjectUnauthorized {
+      message
+      hasRequestedAccess
+    }
+  }
 }
 `
 
@@ -231,6 +276,13 @@ const {
 } = useEventManager()
 
 const studioStore = useStudioStore()
+const promptStore = usePromptStore()
+
+const hasRequestedProjectAccess = computed(() => {
+  return (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized' && props.gql.currentProject?.cloudProject?.hasRequestedAccess) ?? false
+})
+
+const requestProjectAccessMutation = useMutation(SpecRunner_Studio_RequestAccessDocument)
 
 const handleStudioPanelClose = () => {
   eventManager.emit('studio:cancel', undefined)
@@ -275,17 +327,13 @@ const studioBetaAvailable = computed(() => {
 })
 
 const shouldShowStudioButton = computed(() => {
-  // Find the experimentalStudio config field
-  const experimentalStudioConfig = props.gql.currentProject?.config?.find((item) => item.field === 'experimentalStudio')
-  const experimentalStudioEnabled = experimentalStudioConfig?.value === true
-
   // Check if we're running all specs by looking at the route query
   const isRunningAllSpecs = route.query.file === '__all'
 
   // Studio can only be enabled for e2e testing
   const isE2ETesting = props.gql.currentProject?.currentTestingType === 'e2e'
 
-  return !!cloudStudioRequested.value && !studioStore.isOpen && experimentalStudioEnabled && !isRunningAllSpecs && isE2ETesting
+  return !!cloudStudioRequested.value && !studioStore.isOpen && !isRunningAllSpecs && isE2ETesting
 })
 
 const shouldShowStudioPanel = computed(() => {

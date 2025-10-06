@@ -118,6 +118,7 @@ export class ProjectActions {
       d.scaffoldedFiles = null
       d.app.browserStatus = 'closed'
       d.app.browserUserAgent = null
+      d.currentRecordingInfo = {}
     })
 
     // Also clear any data associated with the linked cloud project

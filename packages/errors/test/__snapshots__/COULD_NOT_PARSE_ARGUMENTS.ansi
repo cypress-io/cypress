@@ -1,0 +1,5 @@
+[31mCypress encountered an error while parsing the argument: [33m--spec[39m[31m[39m
+[31m[39m
+[31mYou passed: [94m1[39m[31m[39m
+[31m[39m
+[31mThe error was: [95mspec must be a string or comma-separated list[39m[31m[39m
