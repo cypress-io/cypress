@@ -14,7 +14,7 @@ import { bindToListeners } from '../cy/listeners'
 import { handleOriginFn } from './origin_fn'
 import { FINAL_SNAPSHOT_NAME } from '../cy/snapshots'
 import { handleLogs } from './events/logs'
-import { handleSocketEvents } from './events/socket'
+import { handleCrossOriginSocketEvent, handleDefaultCrossOriginSocketEvents } from './events/socket'
 import { handleSpecWindowEvents } from './events/spec_window'
 import { handleErrorEvent } from './events/errors'
 import { handleScreenshots } from './events/screenshots'
@@ -120,6 +120,12 @@ const setup = ({ cypressConfig, env, isProtocolEnabled }: { cypressConfig: Cypre
 
   const { state, config } = Cypress
 
+  // These need to happen before the commands are created so that commands can
+  // use things like Cypress.backend during their creation.
+  handleDefaultCrossOriginSocketEvents(Cypress)
+
+  Cypress.handleCrossOriginSocketEvent = handleCrossOriginSocketEvent
+
   // @ts-ignore
   Cypress.Commands = $Commands.create(Cypress, cy, state, config)
   // @ts-ignore
@@ -141,7 +147,6 @@ const setup = ({ cypressConfig, env, isProtocolEnabled }: { cypressConfig: Cypre
 
   handleOriginFn(Cypress, cy)
   handleLogs(Cypress)
-  handleSocketEvents(Cypress)
   handleSpecWindowEvents(cy)
   handleMiscEvents(Cypress, cy)
   handleScreenshots(Cypress)

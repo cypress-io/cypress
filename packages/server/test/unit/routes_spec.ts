@@ -263,56 +263,24 @@ describe('lib/routes', () => {
       expect(studioManager.initializeRoutes).to.be.calledWith(router)
     })
 
-    it('initializes a dummy route for studio if studio is not present', () => {
-      delete getCtx().coreData.studioLifecycleManager
-
-      const studioRouter = {
-        get: sinon.stub(),
-        post: sinon.stub(),
-        all: sinon.stub(),
-        use: sinon.stub(),
-      }
-
-      const router = {
-        get: sinon.stub(),
-        post: sinon.stub(),
-        all: sinon.stub(),
-        use: sinon.stub().withArgs('/').returns(studioRouter),
-      }
-
-      const Router = sinon.stub()
-
-      Router.onFirstCall().returns(router)
-      Router.onSecondCall().returns(studioRouter)
-
-      const { createCommonRoutes } = proxyquire('../../lib/routes', {
-        'express': { Router },
-      })
-
-      createCommonRoutes(routeOptions)
-
-      expect(router.use).to.have.been.calledWith('/')
-
-      expect(Router).to.have.been.calledTwice
-
-      expect(getCtx().coreData.studioLifecycleManager).to.be.undefined
-    })
-
-    it('does not initialize routes on studio if status is in error', () => {
-      const studioManager = {
-        status: 'IN_ERROR',
+    it('initializes routes on cy prompt if present', () => {
+      const cyPromptManager = {
         initializeRoutes: sinon.stub(),
       }
 
-      const studioLifecycleManager = {
-        registerStudioReadyListener: sinon.stub().returns(() => {}),
+      const cyPromptLifecycleManager = {
+        registerCyPromptReadyListener: sinon.stub().callsFake((callback) => {
+          callback(cyPromptManager)
+
+          return () => {}
+        }),
       }
 
-      getCtx().coreData.studioLifecycleManager = studioLifecycleManager as any
+      getCtx().coreData.cyPromptLifecycleManager = cyPromptLifecycleManager as any
 
-      setupCommonRoutes()
+      const { router } = setupCommonRoutes()
 
-      expect(studioManager.initializeRoutes).not.to.be.called
+      expect(cyPromptManager.initializeRoutes).to.be.calledWith(router)
     })
   })
 })

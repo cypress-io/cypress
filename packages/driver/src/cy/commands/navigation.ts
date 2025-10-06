@@ -4,13 +4,12 @@ import Promise from 'bluebird'
 
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
-import { LogUtils, Log } from '../../cypress/log'
+import type { Log } from '../../cypress/log'
 import { bothUrlsMatchAndOneHasHash } from '../navigation'
 import { $Location, LocationObject } from '../../cypress/location'
 import { isRunnerAbleToCommunicateWithAut } from '../../util/commandAUTCommunication'
 import { whatIsCircular } from '../../util/what-is-circular'
 import debugFn from 'debug'
-import type { RunState } from '@packages/types'
 import type { StateFunc } from '../../cypress/state'
 const debug = debugFn('cypress:driver:navigation')
 
@@ -1089,30 +1088,7 @@ export default (Commands, Cypress, cy, state, config) => {
             })
           }
 
-          // tell our backend we're changing origins
-          // TODO: add in other things we want to preserve
-          // state for like scrollTop
-          let runState: RunState = {
-            currentId: id,
-            tests: Cypress.runner.getTestsState(),
-            startTime: Cypress.runner.getStartTime(),
-            emissions: Cypress.runner.getEmissions(),
-          }
-
-          runState.passed = Cypress.runner.countByTestState(runState.tests, 'passed')
-          runState.failed = Cypress.runner.countByTestState(runState.tests, 'failed')
-          runState.pending = Cypress.runner.countByTestState(runState.tests, 'pending')
-          runState.numLogs = LogUtils.countLogsByTests(runState.tests)
-
-          return Cypress.action('cy:collect:run:state')
-          .then((otherRunStates = []) => {
-            // merge all the states together holla'
-            runState = _.reduce(otherRunStates, (memo, obj) => {
-              return _.extend(memo, obj)
-            }, runState)
-
-            return Cypress.backend('preserve:run:state', runState)
-          })
+          return Cypress.preserveRunState(id)
           .then(() => {
             // and now we must change the url to be the new
             // origin but include the test that we're currently on

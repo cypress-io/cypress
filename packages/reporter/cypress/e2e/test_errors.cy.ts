@@ -309,4 +309,21 @@ describe('test errors', () => {
       .should('have.class', 'language-text')
     })
   })
+
+  describe('docs url', () => {
+    it('renders docs url with default title', () => {
+      setError(commandErr)
+
+      cy.get('.runnable-err-docs-url').should('have.attr', 'href', commandErr.docsUrl)
+      cy.get('.runnable-err-docs-url').should('have.text', 'Learn more')
+    })
+
+    it('renders docs url with custom title', () => {
+      commandErr.docsUrlTitle = 'Custom title'
+      setError(commandErr)
+
+      cy.get('.runnable-err-docs-url').should('have.attr', 'href', commandErr.docsUrl)
+      cy.get('.runnable-err-docs-url').should('have.text', 'Custom title')
+    })
+  })
 })
