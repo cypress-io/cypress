@@ -200,7 +200,7 @@ describe('header', () => {
           cy.get('.restart').should('not.exist')
         })
 
-        it('does not displays the next button', () => {
+        it('does not display the next button', () => {
           cy.get('.next').should('not.exist')
         })
       })
