@@ -14,10 +14,9 @@
       :title="errorPanelProps.title"
       :message="errorPanelProps.message"
       :icon="errorPanelProps.icon"
-      :icon-props="errorPanelProps.iconProps"
       :show-learn-more="errorPanelProps.showLearnMore"
       :learn-more-url="errorPanelProps.learnMoreUrl"
-      :on-retry="handleRetry"
+      :on-retry="errorPanelProps.onRetry"
     />
   </div>
   <div
@@ -31,7 +30,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch, computed, h } from 'vue'
 import { init, loadRemote, registerRemotes } from '@module-federation/runtime'
 import type { StudioAppDefaultShape, StudioPanelShape } from './studio-app-types'
 import type { UserProjectStatusStore } from '@cy/store/user-project-status-store'
@@ -81,16 +80,21 @@ const errorPanelProps = computed(() => {
     return {
       title: 'Configure your proxy to use Cypress Studio',
       message: 'Cypress Studio requires an internet connection. To continue, you may need to configure Cypress with your proxy settings.',
-      icon: IconCypressStudio,
-      iconProps: {
-        'fill-color': 'gray-700',
+      icon: () => {
+        return h(IconCypressStudio, {
+          size: '48',
+          'fill-color': 'gray-700',
+        })
       },
       showLearnMore: true,
       learnMoreUrl: 'https://on.cypress.io/proxy-configuration',
+      onRetry: handleRetry,
     }
   }
 
-  return {}
+  return {
+    onRetry: handleRetry,
+  }
 })
 
 const maybeRenderReactComponent = () => {

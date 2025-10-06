@@ -5,11 +5,7 @@
     container-class="text-center"
   >
     <div class="relative">
-      <component
-        :is="props.icon"
-        size="48"
-        v-bind="props.iconProps"
-      />
+      <component :is="props.icon" />
     </div>
 
     <div class="flex flex-col items-center gap-[4px] max-w-[448px]">
@@ -31,7 +27,6 @@
       Learn more
     </Button>
     <Button
-      v-if="props.showRetry"
       variant="outline-dark"
       size="32"
       data-cy="studio-error-retry-button"
@@ -48,7 +43,7 @@
 </template>
 
 <script lang="ts" setup>
-import { withDefaults } from 'vue'
+import { withDefaults, h } from 'vue'
 import Button from '@cypress-design/vue-button'
 import { IconTechnologyDashboardFail, IconActionRefresh } from '@cypress-design/vue-icon'
 import StudioPanelContainer from './StudioPanelContainer.vue'
@@ -59,25 +54,21 @@ const props = withDefaults(defineProps<{
   title?: string
   message?: string
   icon?: any
-  iconProps?: Record<string, any>
-  showRetry?: boolean
   showLearnMore?: boolean
   learnMoreUrl?: string
-  onRetry?: () => void
+  onRetry: () => void
 }>(), {
   title: 'Something went wrong',
   message: 'There was a problem with Cypress Studio. Our team has been notified. If the problem persists, please try again later.',
-  icon: IconTechnologyDashboardFail,
-  iconProps: () => {
-    return {
+  icon: () => {
+    return h(IconTechnologyDashboardFail, {
+      size: '48',
       'stroke-color': 'gray-500',
       'fill-color': 'gray-900',
       'secondary-fill-color': 'red-200',
       'secondary-stroke-color': 'red-500',
-    }
+    })
   },
-  showRetry: true,
   learnMoreUrl: 'https://on.cypress.io/proxy-configuration',
-  onRetry: () => {},
 })
 </script>
