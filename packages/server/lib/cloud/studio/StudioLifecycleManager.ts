@@ -182,7 +182,6 @@ export class StudioLifecycleManager {
     getProjectOptions: StudioServerOptions['getProjectOptions']
   }): Promise<StudioManager> {
     let studioPath: string
-    let studioHash: string
     let manifest: Record<string, string>
 
     const currentProjectOptions = await getProjectOptions()
@@ -204,7 +203,8 @@ export class StudioLifecycleManager {
     telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.ENSURE_STUDIO_BUNDLE_START)
     if (!process.env.CYPRESS_LOCAL_STUDIO_PATH) {
       // The studio hash is the last part of the studio URL, after the last slash and before the extension
-      studioHash = studioSession.studioUrl.split('/').pop()?.split('.')[0] ?? ''
+      const studioHash = studioSession.studioUrl.split('/').pop()?.split('.')[0] as string
+
       studioPath = path.join(os.tmpdir(), 'cypress', 'studio', studioHash)
 
       debug('Setting current studio hash: %s', studioHash)
@@ -230,8 +230,7 @@ export class StudioLifecycleManager {
       debug('Manifest: %o', manifest)
     } else {
       studioPath = process.env.CYPRESS_LOCAL_STUDIO_PATH
-      studioHash = 'local'
-      this.currentStudioHash = studioHash
+      this.currentStudioHash = 'local'
       manifest = {}
     }
 
@@ -267,7 +266,7 @@ export class StudioLifecycleManager {
     await studioManager.setup({
       script: studioScript,
       studioPath,
-      studioHash,
+      studioHash: this.currentStudioHash,
       cloudApi: {
         cloudUrl,
         cloudHeaders,

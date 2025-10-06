@@ -6,6 +6,8 @@ import { RunnablesStore } from './runnables-store'
 import { DebugDismiss } from '../header/DebugDismiss'
 import { Duration } from '../duration/duration'
 import { SpecFileName } from '../shared/SpecFileName'
+import { RunnablePopoverOptions } from './runnable-popover-options'
+import appState from '../lib/app-state'
 
 const renderRunnableHeader = (children: ReactElement) => <div className="runnable-header" data-cy="runnable-header">{children}</div>
 
@@ -28,11 +30,14 @@ const RunnableHeader: React.FC<RunnableHeaderProps> = observer(({ spec, statsSto
     )
   }
 
+  const isStudioSingleTest = appState?.studioActive && appState.studioSingleTestActive
+
   return renderRunnableHeader(
     <>
       <SpecFileName spec={spec} />
       {runnablesStore.testFilter && runnablesStore.totalTests > 0 && <DebugDismiss matched={runnablesStore.totalTests} total={runnablesStore.totalUnfilteredTests} />}
-      <Duration duration={statsStore.duration} />
+      {!isStudioSingleTest && <Duration duration={statsStore.duration} />}
+      <RunnablePopoverOptions spec={spec} />
     </>,
   )
 })

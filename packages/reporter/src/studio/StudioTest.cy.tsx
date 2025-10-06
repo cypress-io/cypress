@@ -5,6 +5,7 @@ import { RunnablesStore } from '../runnables/runnables-store'
 import { StatsStore } from '../header/stats-store'
 import Test from '../test/test-model'
 import scroller from '../lib/scroller'
+import events from '../lib/events'
 
 describe('StudioTest', () => {
   let appState: AppState
@@ -97,6 +98,8 @@ describe('StudioTest', () => {
     statsStore = {
       duration: 1500,
     } as unknown as StatsStore
+
+    cy.spy(events, 'emit').as('emitSpy')
   })
 
   it('renders component with test information', () => {
@@ -294,5 +297,22 @@ describe('StudioTest', () => {
 
     // Should not render anything when no test is available
     cy.get('.studio-single-test-container').should('not.exist')
+  })
+
+  it('handles back button click', () => {
+    cy.mount(
+      <StudioTest
+        appState={appState}
+        runnablesStore={runnablesStore}
+        statsStore={statsStore}
+      />,
+    )
+
+    cy.get('[data-cy="studio-back-button"]').realHover()
+    cy.get('.cy-tooltip').should('be.visible')
+    cy.get('.cy-tooltip').should('contain.text', 'All tests')
+
+    cy.get('[data-cy="studio-back-button"]').click()
+    cy.get('@emitSpy').should('have.been.calledWith', 'studio:cancel', undefined)
   })
 })

@@ -50,4 +50,21 @@ describe('event-manager', () => {
       cy.wrap(() => eventManager.reporterBus.listeners('runner:next').length).invoke('call').should('equal', 1)
     })
   })
+
+  it('should reset the prompt store', () => {
+    loadSpec({
+      filePath: 'hooks/basic.cy.js',
+      passCount: 2,
+    })
+
+    cy.window().then((win) => {
+      const eventManager = win.getEventManager()
+
+      cy.spy(eventManager['promptStore'], 'resetState').as('resetState')
+    })
+
+    cy.visitApp(`specs`)
+
+    cy.get('@resetState').should('have.been.calledOnce')
+  })
 })

@@ -1190,11 +1190,13 @@ export const AllCypressErrors = {
 
         If you have feedback about the experiment, please join the discussion here: http://on.cypress.io/single-tab-run-mode`
   },
-  EXPERIMENTAL_STUDIO_E2E_ONLY: () => {
+  EXPERIMENTAL_STUDIO_REMOVED: () => {
     return errTemplate`\
-        The ${fmt.highlight(`experimentalStudio`)} experiment is currently only supported for End to End Testing.
-
-        If you have feedback about the experiment, please join the discussion here: http://on.cypress.io/studio-beta`
+        The ${fmt.highlight(`experimentalStudio`)} option was removed in ${fmt.cypressVersion(`15.4.0`)}.
+        
+        Cypress Studio is now available for all users.
+        
+        You can safely remove this option from your config.`
   },
   EXPERIMENTAL_RUN_ALL_SPECS_E2E_ONLY: () => {
     const code = errPartial`
@@ -1221,6 +1223,19 @@ export const AllCypressErrors = {
 
     return errTemplate`\
         The ${fmt.highlight(`experimentalOriginDependencies`)} experiment is currently only supported for End to End Testing and must be configured as an e2e testing type property: ${fmt.highlightSecondary(`e2e.experimentalOriginDependencies`)}.
+
+        ${fmt.code(code)}`
+  },
+  EXPERIMENTAL_PROMPT_COMMAND_E2E_ONLY: () => {
+    const code = errPartial`
+    {
+      e2e: {
+        experimentalPromptCommand: true
+      },
+    }`
+
+    return errTemplate`\
+        The ${fmt.highlight(`experimentalPromptCommand`)} experiment is currently only supported for End to End Testing and must be configured as an e2e testing type property: ${fmt.highlightSecondary(`e2e.experimentalPromptCommand`)}.
 
         ${fmt.code(code)}`
   },

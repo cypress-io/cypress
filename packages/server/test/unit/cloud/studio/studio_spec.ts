@@ -137,9 +137,7 @@ describe('lib/cloud/studio', () => {
       process.env = originalEnv
     })
 
-    it('returns true when CYPRESS_ENABLE_CLOUD_STUDIO_AI is true and studio server can access AI', async () => {
-      process.env.CYPRESS_ENABLE_CLOUD_STUDIO_AI = 'true'
-
+    it('returns true when studio server can access AI', async () => {
       sinon.stub(studio, 'canAccessStudioAI').resolves(true)
 
       const result = await studioManager.canAccessStudioAI(browser)
@@ -147,19 +145,7 @@ describe('lib/cloud/studio', () => {
       expect(result).to.be.true
     })
 
-    it('returns false when CYPRESS_ENABLE_CLOUD_STUDIO_AI is false and studio server can access AI', async () => {
-      process.env.CYPRESS_ENABLE_CLOUD_STUDIO_AI = 'false'
-
-      sinon.stub(studio, 'canAccessStudioAI').resolves(true)
-
-      const result = await studioManager.canAccessStudioAI(browser)
-
-      expect(result).to.be.false
-    })
-
-    it('returns false when CYPRESS_ENABLE_CLOUD_STUDIO_AI is true and studio server cannot access AI', async () => {
-      process.env.CYPRESS_ENABLE_CLOUD_STUDIO_AI = 'true'
-
+    it('returns false when studio server cannot access AI', async () => {
       sinon.stub(studio, 'canAccessStudioAI').resolves(false)
 
       const result = await studioManager.canAccessStudioAI(browser)

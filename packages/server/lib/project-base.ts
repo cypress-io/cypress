@@ -22,6 +22,7 @@ import type {
   FoundSpec,
   OpenProjectLaunchOptions,
   ProtocolManagerShape,
+  CyPromptManagerShape,
   ReceivedCypressOptions,
   ResolvedConfigurationOptions,
   TestingType,
@@ -35,6 +36,7 @@ import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/service-worker-manager'
 import { v4 } from 'uuid'
 import { StudioLifecycleManager } from './cloud/studio/StudioLifecycleManager'
+import { CyPromptLifecycleManager } from './cloud/cy-prompt/CyPromptLifecycleManager'
 import { telemetryManager } from './cloud/studio/telemetry/TelemetryManager'
 import { INITIALIZATION_MARK_NAMES, INITIALIZATION_TELEMETRY_GROUP_NAMES } from './cloud/studio/telemetry/constants/initialization'
 import { TelemetryReporter } from './cloud/studio/telemetry/TelemetryReporter'
@@ -72,8 +74,8 @@ type StartWebsocketOptions = Pick<Cfg, 'socketIoCookie' | 'namespace' | 'screens
 export class ProjectBase extends EE {
   // id is sha256 of projectRoot
   public id: string
+  public ctx: DataContext
 
-  protected ctx: DataContext
   protected _cfg?: Cfg
   protected _server?: ServerBase<any>
   protected _automation?: Automation
@@ -167,8 +169,18 @@ export class ProjectBase extends EE {
     process.chdir(this.projectRoot)
 
     this._server = new ServerBase(cfg)
+    if (cfg.experimentalPromptCommand) {
+      const cyPromptLifecycleManager = new CyPromptLifecycleManager()
 
-    if (!cfg.isTextTerminal && cfg.resolved.experimentalStudio?.value) {
+      cyPromptLifecycleManager.initializeCyPromptManager({
+        cloudDataSource: this.ctx.cloud,
+        ctx: this.ctx,
+        record: this.options.record,
+        key: this.options.key,
+      })
+    }
+
+    if (!cfg.isTextTerminal && this.testingType === 'e2e') {
       const studioLifecycleManager = new StudioLifecycleManager()
 
       studioLifecycleManager.initializeStudioManager({
@@ -485,6 +497,9 @@ export class ProjectBase extends EE {
 
           const studio = await this.ctx.coreData.studioLifecycleManager?.getStudio()
 
+          // Update the session id in the studio manager
+          studio?.updateSessionId(cloudStudioSessionId)
+
           if (this.spec && studio?.protocolManager) {
             telemetryManager.mark(INITIALIZATION_MARK_NAMES.CAN_ACCESS_STUDIO_AI_START)
             const canAccessStudioAI = await studio?.canAccessStudioAI(this.browser) ?? false
@@ -554,6 +569,10 @@ export class ProjectBase extends EE {
       },
 
       onStudioDestroy: destroyStudio,
+
+      onCyPromptReady: async (cyPromptManager: CyPromptManagerShape) => {
+        await browsers.connectCyPromptToBrowser({ browser: this.browser, foundBrowsers: this.options.browsers, cyPromptManager })
+      },
 
       onCaptureVideoFrames: (data: any) => {
         // TODO: move this to browser automation middleware
@@ -704,8 +723,9 @@ export class ProjectBase extends EE {
     const isDefaultProtocolEnabled = this._protocolManager?.isProtocolEnabled ?? false
 
     const hideRunnerUi = (
-      this.options?.args?.runnerUi === false ||
-      (isDefaultProtocolEnabled && this._cfg.isTextTerminal && !this.options?.args?.runnerUi)
+      (this.options?.args?.runnerUi === false ||
+      (isDefaultProtocolEnabled && this._cfg.isTextTerminal && !this.options?.args?.runnerUi)) &&
+      !process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE
     )
 
     // hide the command log if explicitly requested or if we are hiding the runner
