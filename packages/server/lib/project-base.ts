@@ -497,6 +497,9 @@ export class ProjectBase extends EE {
 
           const studio = await this.ctx.coreData.studioLifecycleManager?.getStudio()
 
+          // Update the session id in the studio manager
+          studio?.updateSessionId(cloudStudioSessionId)
+
           if (this.spec && studio?.protocolManager) {
             telemetryManager.mark(INITIALIZATION_MARK_NAMES.CAN_ACCESS_STUDIO_AI_START)
             const canAccessStudioAI = await studio?.canAccessStudioAI(this.browser) ?? false
