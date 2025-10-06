@@ -78,7 +78,7 @@ const Controls: React.FC<Props> = observer(({ events = defaultEvents, appState, 
           </div>
         </Tooltip>
       )}
-      {(appState.isPaused || (appState.isRunning && appState.isResumed)) && (
+      {(appState.isPaused || (appState.isRunning && appState.hasBeenPaused)) && (
         <Tooltip
           placement='bottom'
           title={appState.nextCommandName ? <p>Next <span className='kbd'>[N]:</span>{appState.nextCommandName}</p> : <p>Step (not available)</p>}

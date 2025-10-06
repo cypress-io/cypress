@@ -9,7 +9,7 @@ interface DefaultAppState {
   pinnedSnapshotId: number | string | null
   studioActive: boolean
   studioSingleTestActive: boolean
-  isResumed: boolean
+  hasBeenPaused: boolean
 }
 
 // these are used for the `reset` method
@@ -22,7 +22,7 @@ const defaults: DefaultAppState = {
   pinnedSnapshotId: null,
   studioActive: false,
   studioSingleTestActive: false,
-  isResumed: false,
+  hasBeenPaused: false,
 }
 
 class AppState {
@@ -37,7 +37,7 @@ class AppState {
   studioActive = defaults.studioActive
   studioSingleTestActive = defaults.studioSingleTestActive
   isStopped = false
-  isResumed = defaults.isResumed
+  hasBeenPaused = defaults.hasBeenPaused
   _resetAutoScrollingEnabledTo = true;
   [key: string]: any
 
@@ -53,7 +53,7 @@ class AppState {
       pinnedSnapshotId: observable,
       studioActive: observable,
       studioSingleTestActive: observable,
-      isResumed: observable,
+      hasBeenPaused: observable,
     })
   }
 
@@ -65,12 +65,12 @@ class AppState {
   pause (nextCommandName?: string) {
     this.isPaused = true
     this.nextCommandName = nextCommandName
+    this.hasBeenPaused = true
   }
 
   resume () {
     this.isPaused = false
     this.nextCommandName = null
-    this.isResumed = true
   }
 
   stop () {
