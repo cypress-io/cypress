@@ -16,4 +16,5 @@ export interface ReporterStartInfo extends StatsStoreStartInfo {
   scrollTop: number
   studioActive: boolean
   studioSingleTestActive: boolean
+  showFetchRequests: boolean
 }

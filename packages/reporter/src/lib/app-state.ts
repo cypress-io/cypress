@@ -31,6 +31,7 @@ class AppState {
   pinnedSnapshotId = defaults.pinnedSnapshotId
   studioActive = defaults.studioActive
   studioSingleTestActive = defaults.studioSingleTestActive
+  showFetchRequests = true
   isStopped = false
   _resetAutoScrollingEnabledTo = true;
   [key: string]: any
@@ -46,6 +47,7 @@ class AppState {
       pinnedSnapshotId: observable,
       studioActive: observable,
       studioSingleTestActive: observable,
+      showFetchRequests: observable,
     })
   }
 
@@ -125,6 +127,14 @@ class AppState {
 
   setStudioSingleTestActive (studioSingleTestActive: boolean) {
     this.studioSingleTestActive = studioSingleTestActive
+  }
+
+  toggleShowFetchRequests () {
+    this.showFetchRequests = !this.showFetchRequests
+  }
+
+  setShowFetchRequests (showFetchRequests: boolean) {
+    this.showFetchRequests = showFetchRequests
   }
 
   reset () {

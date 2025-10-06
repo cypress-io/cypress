@@ -1421,6 +1421,7 @@ type LocalSettingsPreferences {
   Determine if the browser should launch when the browser flag is passed alone
   """
   shouldLaunchBrowserFromOpenBrowser: Boolean
+  showFetchRequests: Boolean
   specListWidth: Int
   studioWidth: Int
   wasBrowserSetInCLI: Boolean

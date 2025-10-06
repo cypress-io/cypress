@@ -202,6 +202,11 @@ describe('events', () => {
       expect(runnablesStore.setInitialScrollTop).to.have.been.calledWith(123)
     })
 
+    it('sets showFetchRequests on the app state on reporter:start', () => {
+      runner.on.withArgs('reporter:start').callArgWith(1, { showFetchRequests: false })
+      expect(appState.setShowFetchRequests).to.have.been.calledWith(false)
+    })
+
     it('sends runnable started on test:before:run:async', () => {
       runner.on.withArgs('test:before:run:async').callArgWith(1, 'the runnable')
       expect(runnablesStore.runnableStarted).to.have.been.calledWith('the runnable')
@@ -354,10 +359,12 @@ describe('events', () => {
     it('emits save:state on save:state', () => {
       appState.autoScrollingUserPref = false
       appState.isSpecsListOpen = true
+      appState.showFetchRequests = false
       events.emit('save:state')
       expect(runner.emit).to.have.been.calledWith('save:state', {
         autoScrollingEnabled: false,
         isSpecsListOpen: true,
+        showFetchRequests: false,
       })
     })
 

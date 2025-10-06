@@ -8,6 +8,7 @@ export const LocalSettingsPreferences = objectType({
     t.boolean('autoScrollingEnabled')
     t.string('preferredEditorBinary')
     t.boolean('isSpecsListOpen')
+    t.boolean('showFetchRequests')
     t.int('reporterWidth')
     t.int('specListWidth')
     t.int('studioWidth')

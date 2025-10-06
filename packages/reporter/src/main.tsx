@@ -36,6 +36,7 @@ export interface BaseReporterProps {
   statsStore: StatsStore
   autoScrollingEnabled?: boolean
   isSpecsListOpen?: boolean
+  showFetchRequests?: boolean
   events: Events
   error?: RunnablesErrorModel
   resetStatsOnSpecChange?: boolean
@@ -49,7 +50,7 @@ export interface SingleReporterProps extends BaseReporterProps {
 }
 
 // In React Class components (now deprecated), we used to use appState as a default prop. Now since defaultProps are not supported in functional components, we can use ES6 default params to accomplish the same thing
-const Reporter: React.FC<SingleReporterProps> = observer(({ appState = appStateDefault, runner, className, error, runMode = 'single', studioEnabled, autoScrollingEnabled, isSpecsListOpen, resetStatsOnSpecChange, renderReporterHeader = (props: ReporterHeaderProps) => <Header {...props} />, runnerStore }) => {
+const Reporter: React.FC<SingleReporterProps> = observer(({ appState = appStateDefault, runner, className, error, runMode = 'single', studioEnabled, autoScrollingEnabled, isSpecsListOpen, showFetchRequests, resetStatsOnSpecChange, renderReporterHeader = (props: ReporterHeaderProps) => <Header {...props} />, runnerStore }) => {
   const previousSpecRunId = usePrevious(runnerStore.specRunId)
   const [isMounted, setIsMounted] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
@@ -79,6 +80,10 @@ const Reporter: React.FC<SingleReporterProps> = observer(({ appState = appStateD
 
     action('set:specs:list', () => {
       appState.setSpecsList(isSpecsListOpen ?? false)
+    })()
+
+    action('set:show:fetch:requests', () => {
+      appState.setShowFetchRequests(showFetchRequests ?? true)
     })()
 
     shortcuts.start()

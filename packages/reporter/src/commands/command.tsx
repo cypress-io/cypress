@@ -323,6 +323,7 @@ interface CommandProps {
   aliasesWithDuplicates: Array<Alias> | null
   groupId?: number
   scrollIntoView: Function
+  showFetchRequests: boolean
 }
 
 const CommandDetails: React.FC<CommandDetailsProps> = observer(({ model, groupId, aliasesWithDuplicates }) => (
@@ -489,6 +490,10 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
         }
       }, 50)
     }
+  }
+
+  if (model.name === 'request' && !appState.showFetchRequests) {
+    return null
   }
 
   return (
