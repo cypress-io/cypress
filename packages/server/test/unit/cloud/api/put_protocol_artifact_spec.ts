@@ -213,7 +213,7 @@ describe('putProtocolArtifact', () => {
         let error: Error | undefined
 
         try {
-          await putArtifact(filePath, maxFileSize, destinationUrl)
+          await putArtifact(filePath, maxFileSize, destinationUrl, uploadMonitorSamplingRate)
         } catch (e) {
           error = e
         }

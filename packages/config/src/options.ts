@@ -230,6 +230,12 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     overrideLevel: 'any',
     requireRestartOnChange: 'browser',
   }, {
+    name: 'experimentalPromptCommand',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isExperimental: true,
+    requireRestartOnChange: 'server',
+  }, {
     name: 'experimentalSourceRewriting',
     defaultValue: false,
     validation: validate.isBoolean,
@@ -671,6 +677,12 @@ export const breakingRootOptions: Array<BreakingOption> = [
     testingTypes: ['e2e'],
   },
   {
+    name: 'experimentalPromptCommand',
+    errorKey: 'EXPERIMENTAL_PROMPT_COMMAND_E2E_ONLY',
+    isWarning: false,
+    testingTypes: ['e2e'],
+  },
+  {
     name: 'justInTimeCompile',
     errorKey: 'JIT_COMPONENT_TESTING',
     isWarning: false,
@@ -720,6 +732,11 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
     {
       name: 'experimentalOriginDependencies',
       errorKey: 'EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY',
+      isWarning: false,
+    },
+    {
+      name: 'experimentalPromptCommand',
+      errorKey: 'EXPERIMENTAL_PROMPT_COMMAND_E2E_ONLY',
       isWarning: false,
     },
     {

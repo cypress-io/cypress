@@ -12,7 +12,7 @@ import type { Browser, BrowserInstance, GracefulShutdownOptions } from './types'
 // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
 import type { BrowserWindow } from 'electron'
 import type { Automation } from '../automation'
-import type { BrowserLaunchOpts, Preferences, ProtocolManagerShape, RunModeVideoApi } from '@packages/types'
+import type { BrowserLaunchOpts, Preferences, ProtocolManagerShape, CyPromptManagerShape, RunModeVideoApi } from '@packages/types'
 import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
 import memory from './memory'
 import { BrowserCriClient } from './browser-cri-client'
@@ -498,6 +498,19 @@ export = {
     }
 
     await options.protocolManager?.connectToBrowser(browserCriClient.currentlyAttachedProtocolTarget)
+  },
+
+  async connectCyPromptToBrowser (options: { cyPromptManager?: CyPromptManagerShape }) {
+    const browserCriClient = this._getBrowserCriClient()
+
+    if (!browserCriClient?.currentlyAttachedTarget) throw new Error('Missing pageCriClient in connectCyPromptToBrowser')
+
+    // Clone the target here so that we separate the cy prompt client and the main client.
+    if (!browserCriClient.currentlyAttachedCyPromptTarget) {
+      browserCriClient.currentlyAttachedCyPromptTarget = await browserCriClient.currentlyAttachedTarget.clone()
+    }
+
+    await options.cyPromptManager?.connectToBrowser(browserCriClient.currentlyAttachedCyPromptTarget)
   },
 
   async closeProtocolConnection () {

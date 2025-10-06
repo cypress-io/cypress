@@ -1,6 +1,5 @@
 /// <reference path="./cy/logGroup.d.ts" />
 /// <reference path="./cypress/log.d.ts" />
-
 // All of the types needed by packages/app, without any of the additional APIs used in the driver only
 
 declare namespace Cypress {
@@ -12,7 +11,9 @@ declare namespace Cypress {
     primaryOriginCommunicator: import('eventemitter2').EventEmitter2 & {
       toSpecBridge: (origin: string, event: string, data?: any, responseEvent?: string) => void
       userInvocationStack?: string
+      toSource: (source: string, responseEvent: string, response: any) => void
     }
+    backendRequestHandler: (backendRequestNamespace: string, emitter: Emitter, eventName: string, ...args: any[]) => Promise<any>
   }
 
   interface Actions {
@@ -41,6 +42,8 @@ declare namespace Cypress {
     (task: 'protocol:test:before:after:run:async', attributes: any, options: any): Promise<void>
     (task: 'protocol:url:changed', input: any): Promise<void>
     (task: 'protocol:page:loading', input: any): Promise<void>
+    (task: 'wait:for:prompt:ready'): Promise<{ success: boolean, error?: Error }>
+    (task: 'preserve:run:state', runState: any): Promise<void>
   }
 
   interface Devices {

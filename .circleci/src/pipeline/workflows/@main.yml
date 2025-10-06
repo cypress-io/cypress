@@ -5,7 +5,7 @@ linux-x64:
       - equal: [ develop, << pipeline.git.branch >> ]
       # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-      - equal: [ 'electron-37', << pipeline.git.branch >> ]
+      - equal: [ 'feat/cy-prompt', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
@@ -309,7 +309,7 @@ linux-x64:
                 - /^release\/\d+\.\d+\.\d+$/
                 # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
                 - 'update-v8-snapshot-cache-on-develop'
-                - 'chore/refactor_cli_to_ts'
+                - 'feat/cy-prompt'
         context: test-runner:npm-release
         requires:
           - ready-to-release
