@@ -1786,7 +1786,7 @@ jobs:
                   source ./scripts/ensure-node.sh
                   yarn lerna run types
             - sanitize-verify-and-store-mocha-results:
-                expectedResultCount: 10
+                expectedResultCount: 9
 
   verify-release-readiness:
     <<: *defaults
