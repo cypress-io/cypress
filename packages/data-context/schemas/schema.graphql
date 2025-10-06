@@ -2170,8 +2170,8 @@ enum SpecType {
 type StudioStatusPayload {
   canAccessStudioAI: Boolean!
 
-  """Error code for an IN_ERROR studio status"""
-  errorCode: String
+  """Whether the studio status is an IN_ERROR due to a certificate error"""
+  isCertError: Boolean
   status: StudioStatusType!
 }
 

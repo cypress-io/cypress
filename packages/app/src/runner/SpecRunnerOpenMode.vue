@@ -107,7 +107,7 @@
             :on-studio-panel-close="handleStudioPanelClose"
             :event-manager="eventManager"
             :studio-status="studioStatus"
-            :studio-error-code="studioErrorCode"
+            :is-cert-error="isCertError"
             :aut-url-selector="autUrlSelector"
             :user-project-status-store="userProjectStatusStore"
             :has-requested-project-access="hasRequestedProjectAccess"
@@ -249,7 +249,7 @@ gql`
 subscription StudioStatus_Change {
   studioStatusChange {
     status
-    errorCode
+    isCertError
     canAccessStudioAI
   }
 }
@@ -306,14 +306,14 @@ const isSpecsListOpenPreferences = computed(() => {
   return props.gql.localSettings.preferences.isSpecsListOpen ?? false
 })
 
-// Initialize with null and wait for subscription to update
+// Initialize and wait for subscription to update
 const studioStatus = ref<string | null>(null)
-const studioErrorCode = ref<string | null>(null)
+const isCertError = ref<boolean | null>(null)
 
 useSubscription({ query: StudioStatus_ChangeDocument }, (_, data) => {
   if (data?.studioStatusChange) {
     studioStatus.value = data.studioStatusChange.status
-    studioErrorCode.value = data.studioStatusChange.errorCode
+    isCertError.value = data.studioStatusChange.isCertError
     studioStore.setCanAccessStudioAI(data.studioStatusChange.canAccessStudioAI)
   }
 

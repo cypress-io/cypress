@@ -21,7 +21,7 @@ export interface StudioLifecycleManagerShape {
   cloudStudioRequested: boolean
   updateStatus: (status: StudioStatus) => void
   getCurrentStatus: () => StudioStatus | undefined
-  getErrorCode: () => string | undefined
+  getIsCertError: () => boolean
   retry: () => void
 }
 

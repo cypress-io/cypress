@@ -24,6 +24,7 @@ import { BUNDLE_LIFECYCLE_MARK_NAMES, BUNDLE_LIFECYCLE_TELEMETRY_GROUP_NAMES } f
 import { INITIALIZATION_TELEMETRY_GROUP_NAMES } from './telemetry/constants/initialization'
 import crypto from 'crypto'
 import { logError } from '@packages/stderr-filtering'
+import { isNonRetriableCertErrorCode } from '../network/non_retriable_cert_error_codes'
 
 const debug = Debug('cypress:server:studio-lifecycle-manager')
 const routes = require('../routes')
@@ -403,8 +404,8 @@ export class StudioLifecycleManager {
     return this.lastStatus
   }
 
-  public getErrorCode (): string | undefined {
-    return this.lastErrorCode
+  public getIsCertError (): boolean {
+    return !!(this.lastErrorCode && isNonRetriableCertErrorCode(this.lastErrorCode))
   }
 
   public retry (): void {
