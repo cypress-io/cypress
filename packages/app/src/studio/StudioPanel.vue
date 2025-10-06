@@ -11,6 +11,7 @@
   <div v-else-if="props.studioStatus === 'IN_ERROR' || error">
     <StudioErrorPanel
       :event-manager="props.eventManager"
+      :studio-error-code="props.studioErrorCode"
       :on-retry="handleRetry"
     />
   </div>
@@ -52,6 +53,7 @@ const props = defineProps<{
   onStudioPanelClose: () => void
   eventManager: EventManager
   studioStatus: string | null
+  studioErrorCode?: string | null
   cloudStudioSessionId?: string
   autUrlSelector: string
   userProjectStatusStore: UserProjectStatusStore

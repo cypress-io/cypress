@@ -36,6 +36,7 @@ export class StudioLifecycleManager {
   private listeners: ((studioManager: StudioManager) => void)[] = []
   private ctx?: DataContext
   private lastStatus?: StudioStatus
+  private lastErrorCode?: string
   private currentStudioHash?: string
 
   private initializationParams?: {
@@ -122,7 +123,7 @@ export class StudioLifecycleManager {
           studioMethodArgs: [],
         })
 
-        this.updateStatus('IN_ERROR')
+        this.updateStatus('IN_ERROR', error)
 
         telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.BUNDLE_LIFECYCLE_END)
         reportTelemetry(BUNDLE_LIFECYCLE_TELEMETRY_GROUP_NAMES.COMPLETE_BUNDLE_LIFECYCLE, {
@@ -238,11 +239,11 @@ export class StudioLifecycleManager {
 
     const serverFilePath = path.join(studioPath, 'server', 'index.js')
 
-    const script = await readFile(serverFilePath, 'utf8')
+    const studioScript = await readFile(serverFilePath, 'utf8')
 
     if (!process.env.CYPRESS_LOCAL_STUDIO_PATH) {
       const expectedHash = manifest['server/index.js']
-      const actualHash = crypto.createHash('sha256').update(script).digest('hex')
+      const actualHash = crypto.createHash('sha256').update(studioScript).digest('hex')
 
       if (!expectedHash) {
         debug('Expected hash %s for studio server script not found in manifest: %o', expectedHash, manifest)
@@ -264,7 +265,7 @@ export class StudioLifecycleManager {
     const { cloudUrl, cloudHeaders } = await getCloudMetadata(cloudDataSource)
 
     await studioManager.setup({
-      script,
+      script: studioScript,
       studioPath,
       studioHash,
       cloudApi: {
@@ -280,37 +281,33 @@ export class StudioLifecycleManager {
 
     telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_MANAGER_SETUP_END)
 
-    if (studioManager.status === 'ENABLED') {
-      debug('Cloud studio is enabled - setting up protocol')
-      const protocolManager = new ProtocolManager()
+    debug('Cloud studio is enabled - setting up protocol')
+    const protocolManager = new ProtocolManager()
 
-      telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_PROTOCOL_GET_START)
-      const script = await api.getCaptureProtocolScript(studioSession.protocolUrl, { displayRetryErrors: false })
+    telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_PROTOCOL_GET_START)
+    const protocolScript = await api.getCaptureProtocolScript(studioSession.protocolUrl, { displayRetryErrors: false })
 
-      telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_PROTOCOL_GET_END)
+    telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_PROTOCOL_GET_END)
 
-      telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_PROTOCOL_PREPARE_START)
-      await protocolManager.prepareProtocol(script, {
-        runId: 'studio',
-        projectId: currentProjectOptions.projectSlug,
-        testingType: cfg.testingType,
-        cloudApi: {
-          url: routes.apiUrl,
-          retryWithBackoff: api.retryWithBackoff,
-          requestPromise: api.rp,
-        },
-        projectConfig: _.pick(cfg, ['devServerPublicPathRoute', 'port', 'proxyUrl', 'namespace']),
-        mountVersion: api.runnerCapabilities.protocolMountVersion,
-        debugData,
-        mode: 'studio',
-      })
+    telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_PROTOCOL_PREPARE_START)
+    await protocolManager.prepareProtocol(protocolScript, {
+      runId: 'studio',
+      projectId: currentProjectOptions.projectSlug,
+      testingType: cfg.testingType,
+      cloudApi: {
+        url: routes.apiUrl,
+        retryWithBackoff: api.retryWithBackoff,
+        requestPromise: api.rp,
+      },
+      projectConfig: _.pick(cfg, ['devServerPublicPathRoute', 'port', 'proxyUrl', 'namespace']),
+      mountVersion: api.runnerCapabilities.protocolMountVersion,
+      debugData,
+      mode: 'studio',
+    })
 
-      telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_PROTOCOL_PREPARE_END)
+    telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_PROTOCOL_PREPARE_END)
 
-      studioManager.protocolManager = protocolManager
-    } else {
-      debug('Cloud studio is not enabled - skipping protocol setup')
-    }
+    studioManager.protocolManager = protocolManager
 
     debug('Studio is ready')
     this.studioManager = studioManager
@@ -407,6 +404,10 @@ export class StudioLifecycleManager {
     return this.lastStatus
   }
 
+  public getErrorCode (): string | undefined {
+    return this.lastErrorCode
+  }
+
   public retry (): void {
     if (!this.ctx) {
       debug('No ctx available, cannot retry studio initialization')
@@ -419,6 +420,7 @@ export class StudioLifecycleManager {
     this.studioManager = undefined
     this.studioManagerPromise = undefined
     this.lastStatus = undefined
+    this.lastErrorCode = undefined
 
     // Clear the cache entry for the current studio hash
     if (this.currentStudioHash) {
@@ -440,7 +442,7 @@ export class StudioLifecycleManager {
     }
   }
 
-  public updateStatus (status: StudioStatus) {
+  public updateStatus (status: StudioStatus, error?: any) {
     if (status === this.lastStatus) {
       debug('Studio status unchanged: %s', status)
 
@@ -449,6 +451,14 @@ export class StudioLifecycleManager {
 
     debug('Studio status changed: %s → %s', this.lastStatus, status)
     this.lastStatus = status
+
+    if (error instanceof AggregateError) {
+      const errors = (error as AggregateError).errors
+
+      this.lastErrorCode = errors[errors.length - 1]?.code ?? undefined
+    } else {
+      this.lastErrorCode = error?.code ?? undefined
+    }
 
     if (this.ctx) {
       this.ctx?.emitter.studioStatusChange()

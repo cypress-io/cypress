@@ -49,5 +49,6 @@ import type { EventManager } from '../runner/event-manager'
 const props = defineProps<{
   eventManager: EventManager
   onRetry: () => void
+  studioErrorCode?: string | null
 }>()
 </script>

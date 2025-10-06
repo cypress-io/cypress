@@ -2168,6 +2168,9 @@ enum SpecType {
 
 type StudioStatusPayload {
   canAccessStudioAI: Boolean!
+
+  """Error code for an IN_ERROR studio status"""
+  errorCode: String
   status: StudioStatusType!
 }
 

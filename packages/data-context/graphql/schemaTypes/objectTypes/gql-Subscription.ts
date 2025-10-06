@@ -11,6 +11,10 @@ export const StudioStatusPayload = objectType({
       type: StudioStatusTypeEnum,
     })
 
+    t.string('errorCode', {
+      description: 'Error code for an IN_ERROR studio status',
+    })
+
     t.nonNull.boolean('canAccessStudioAI')
   },
 })
@@ -70,6 +74,7 @@ export const Subscription = subscriptionType({
         if (currentStatus === 'IN_ERROR') {
           return {
             status: 'IN_ERROR' as const,
+            errorCode: ctx.coreData.studioLifecycleManager?.getErrorCode(),
             canAccessStudioAI: false,
           }
         }
