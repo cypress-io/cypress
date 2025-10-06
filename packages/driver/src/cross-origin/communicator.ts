@@ -336,7 +336,7 @@ export class SpecBridgeCommunicator extends EventEmitter {
   }: {
     event: string
     data?: Cypress.ObjectLike
-    options: {syncGlobals: boolean}
+    options?: {syncGlobals: boolean}
     timeout: number
   }) {
     return new Promise<T>((resolve, reject) => {

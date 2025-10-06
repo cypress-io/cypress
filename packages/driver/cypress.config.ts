@@ -19,6 +19,7 @@ export const baseConfig: Cypress.ConfigOptions = {
     configFile: '../../mocha-reporter-config.json',
   },
   e2e: {
+    experimentalPromptCommand: true,
     experimentalOriginDependencies: true,
     experimentalModifyObstructiveThirdPartyCode: true,
     setupNodeEvents: (on, config) => {
@@ -37,7 +38,7 @@ export const baseConfig: Cypress.ConfigOptions = {
   },
   component: {
     experimentalSingleTabRunMode: true,
-    specPattern: 'cypress/component/**/*.cy.js',
+    specPattern: 'cypress/component/**/*.cy.{js,ts}',
     supportFile: false,
     devServer: (devServerOptions) => {
       return cypressWebpackDevServer({

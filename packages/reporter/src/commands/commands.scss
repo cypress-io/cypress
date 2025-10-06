@@ -70,6 +70,7 @@
     .command-wrapper-text {
       display: flex;
       flex-wrap: nowrap;
+      width: 100%;
     }
 
     .command-interceptions {
@@ -92,6 +93,18 @@
 
       > *:first-child {
         margin-left: 0;
+      }
+    }
+
+    .command-wrapper-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+
+      .command-prompt-get-code {
+        cursor: pointer;
+        font-family: $font-system;     
       }
     }
   }

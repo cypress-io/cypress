@@ -1226,6 +1226,19 @@ export const AllCypressErrors = {
 
         ${fmt.code(code)}`
   },
+  EXPERIMENTAL_PROMPT_COMMAND_E2E_ONLY: () => {
+    const code = errPartial`
+    {
+      e2e: {
+        experimentalPromptCommand: true
+      },
+    }`
+
+    return errTemplate`\
+        The ${fmt.highlight(`experimentalPromptCommand`)} experiment is currently only supported for End to End Testing and must be configured as an e2e testing type property: ${fmt.highlightSecondary(`e2e.experimentalPromptCommand`)}.
+
+        ${fmt.code(code)}`
+  },
   JIT_COMPONENT_TESTING: () => {
     return errTemplate`\
     The ${fmt.highlight(`justInTimeCompile`)} configuration is only supported for Component Testing.`

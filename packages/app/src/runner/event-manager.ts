@@ -17,6 +17,7 @@ import { addTelemetryListeners } from './events/telemetry'
 import { telemetry } from '@packages/telemetry/src/browser'
 import { addCaptureProtocolListeners } from './events/capture-protocol'
 import { getRunnerConfigFromWindow } from './get-runner-config-from-window'
+import { usePromptStore } from '../store/prompt-store'
 
 export type CypressInCypressMochaEvent = Array<Array<string | Record<string, any>>>
 
@@ -61,6 +62,7 @@ export class EventManager {
   ws: SocketShape
   specStore: ReturnType<typeof useSpecStore>
   studioStore: ReturnType<typeof useStudioStore>
+  promptStore: ReturnType<typeof usePromptStore>
 
   constructor (
     // import '@packages/driver'
@@ -75,6 +77,7 @@ export class EventManager {
     this.ws = ws
     this.specStore = useSpecStore()
     this.studioStore = useStudioStore()
+    this.promptStore = usePromptStore()
   }
 
   getCypress () {
@@ -402,6 +405,8 @@ export class EventManager {
       this._clearAllCookies()
       this._setUnload()
     })
+
+    this.addPromptListeners()
   }
 
   start (config) {
@@ -452,6 +457,12 @@ export class EventManager {
     }
 
     this._addListeners()
+
+    if (Cypress.config('experimentalPromptCommand')) {
+      await new Promise((resolve) => {
+        this.ws.emit('prompt:reset', resolve)
+      })
+    }
   }
 
   isBrowserFamily (family: string) {
@@ -810,21 +821,7 @@ export class EventManager {
       },
     )
 
-    /**
-     * Call a backend request for the requesting spec bridge since we cannot have websockets in the spec bridges.
-     * Return it's response.
-     */
-    Cypress.primaryOriginCommunicator.on('backend:request', async ({ args }, { source, responseEvent }) => {
-      let response
-
-      try {
-        response = await Cypress.backend(...args)
-      } catch (error) {
-        response = { error }
-      }
-
-      Cypress.primaryOriginCommunicator.toSource(source, responseEvent, response)
-    })
+    Cypress.handlePrimaryOriginSocketEvent(Cypress, 'backend:request')
 
     /**
      * Call an automation request for the requesting spec bridge since we cannot have websockets in the spec bridges.
@@ -921,6 +918,8 @@ export class EventManager {
     // clean up the cross origin logs in memory to prevent dangling references as the log objects themselves at this point will no longer be needed.
     crossOriginLogs = {}
     this.studioStore.setActive(false)
+    this.promptStore.resetState()
+    await new Promise((resolve) => this.ws.emit('prompt:reset', resolve))
   }
 
   resetReporter () {
@@ -935,6 +934,8 @@ export class EventManager {
       // if the tests have been reloaded then there is nothing to rerun
       return
     }
+
+    this.promptStore.resetState()
 
     await this.resetReporter()
 
@@ -983,6 +984,10 @@ export class EventManager {
 
   off (event: string, listener: (...args: any[]) => void) {
     this.localBus.off(event, listener)
+  }
+
+  removeAllListeners (event: string) {
+    this.localBus.removeAllListeners(event)
   }
 
   notifyRunningSpec (specFile) {
@@ -1034,5 +1039,24 @@ export class EventManager {
   // useful for testing
   _testingOnlySetCypress (cypress: any) {
     Cypress = cypress
+  }
+
+  private addPromptListeners () {
+    this.reporterBus.on('prompt:get-code', ({ testId, logId }) => {
+      this.promptStore.openGetCodeModal({
+        testId,
+        logId,
+      })
+    })
+
+    this.localBus.removeAllListeners('prompt:more-info-needed')
+    this.localBus.on('prompt:more-info-needed', ({ testId, logId, onSave, onCancel }) => {
+      this.promptStore.openMoreInfoNeededModal({
+        testId,
+        logId,
+        onSave,
+        onCancel,
+      })
+    })
   }
 }

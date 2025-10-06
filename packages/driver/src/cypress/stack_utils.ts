@@ -519,6 +519,11 @@ const normalizedUserInvocationStack = (userInvocationStack) => {
     || line.includes('Chainer.prototype[key]')
     || line.includes('cy.<computed>')
     || line.includes('$Chainer.<computed>')
+    // Note that these are hard coded for now, because they are happening in the prompt command
+    // for some reason. Long term, we should make this more dynamic if necessary.
+    || line.includes('$Cy.prompt')
+    || line.includes('$Chainer.prompt')
+    || line.includes('CyPrompt.prototype.prompt')
     // Remove cross origin stack lines
     || line.includes('SpecBridgeCommunicator')
     || (line.includes('at invokeOriginFn') && !line.includes('at eval'))
