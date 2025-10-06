@@ -405,7 +405,7 @@ export class StudioLifecycleManager {
   }
 
   public getIsCertError (): boolean {
-    return !!(this.lastErrorCode && isNonRetriableCertErrorCode(this.lastErrorCode))
+    return !!(this.lastStatus === 'IN_ERROR' && this.lastErrorCode && isNonRetriableCertErrorCode(this.lastErrorCode))
   }
 
   public retry (): void {

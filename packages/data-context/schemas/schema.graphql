@@ -2177,7 +2177,6 @@ type StudioStatusPayload {
 
 enum StudioStatusType {
   ENABLED
-  INITIALIZED
   INITIALIZING
   IN_ERROR
   NOT_INITIALIZED

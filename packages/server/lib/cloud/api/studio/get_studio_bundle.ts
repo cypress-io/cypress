@@ -13,6 +13,7 @@ import Debug from 'debug'
 const pkg = require('@packages/root')
 const _delay = linearDelay(500)
 const debug = Debug('cypress:server:cloud:api:studio:get_studio_bundle')
+
 const DEFAULT_TIMEOUT = 25000
 
 export const getStudioBundle = async ({ studioUrl, bundlePath }: { studioUrl: string, bundlePath: string }): Promise<string> => {
