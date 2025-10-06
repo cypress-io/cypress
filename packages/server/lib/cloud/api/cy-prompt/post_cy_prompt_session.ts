@@ -21,7 +21,7 @@ export const postCyPromptSession = async ({ projectId }: PostCyPromptSessionOpti
         'x-os-name': os.platform(),
         'x-cypress-version': pkg.version,
       },
-      body: JSON.stringify({ projectSlug: projectId, cyPromptMountVersion: 1 }),
+      body: JSON.stringify({ projectSlug: projectId, cyPromptMountVersion: 2 }),
     })
   }, {
     maxAttempts: 3,
