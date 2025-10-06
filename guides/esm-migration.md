@@ -97,7 +97,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [ ] packages/extension
 - [ ] packages/https-proxy
 - [x] packages/electron ✅ **COMPLETED**
-- [ ] packages/icons
+- [x] packages/icons ✅ **COMPLETED**
 - [ ] packages/launcher
 - [ ] packages/net-stubbing
 - [x] packages/network ✅ **COMPLETED**
