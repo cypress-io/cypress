@@ -1,0 +1,291 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`windows browser detection > detects Chrome 64-bit install 1`] = `
+{
+  "binary": [
+    "google-chrome",
+    "chrome",
+    "google-chrome-stable",
+  ],
+  "channel": "stable",
+  "displayName": "Chrome",
+  "family": "chromium",
+  "name": "chrome",
+  "path": "C:/Program Files/Google/Chrome/Application/chrome.exe",
+  "validator": [Function],
+  "version": "4.4.4",
+  "versionRegex": /Google Chrome\\(\\?! for Testing\\) \\(\\\\S\\+\\)/m,
+}
+`;
+
+exports[`windows browser detection > detects Chrome Beta 64-bit install 1`] = `
+{
+  "binary": "google-chrome-beta",
+  "channel": "beta",
+  "displayName": "Chrome Beta",
+  "family": "chromium",
+  "name": "chrome",
+  "path": "C:/Program Files/Google/Chrome Beta/Application/chrome.exe",
+  "version": "9.0.1",
+  "versionRegex": /Google Chrome \\(\\\\S\\+\\) beta/m,
+}
+`;
+
+exports[`windows browser detection > detects Chrome for Testing 32-bit install 1`] = `
+{
+  "binary": "chrome",
+  "channel": "stable",
+  "displayName": "Chrome for Testing",
+  "family": "chromium",
+  "name": "chrome-for-testing",
+  "path": "C:/Program Files (x86)/Google/Chrome for Testing/chrome.exe",
+  "version": "5.5.5",
+  "versionRegex": /Google Chrome for Testing \\(\\\\S\\+\\)/m,
+}
+`;
+
+exports[`windows browser detection > detects Chromium 32-bit install in Chromium folder 1`] = `
+{
+  "binary": [
+    "chromium-browser",
+    "chromium",
+  ],
+  "channel": "stable",
+  "displayName": "Chromium",
+  "family": "chromium",
+  "name": "chromium",
+  "path": "C:/Program Files (x86)/Google/Chromium/chrome.exe",
+  "version": "7.7.7",
+  "versionRegex": /Chromium \\(\\\\S\\+\\)/m,
+}
+`;
+
+exports[`windows browser detection > detects Chromium 64-bit install 1`] = `
+{
+  "binary": [
+    "chromium-browser",
+    "chromium",
+  ],
+  "channel": "stable",
+  "displayName": "Chromium",
+  "family": "chromium",
+  "name": "chromium",
+  "path": "C:/Program Files/Google/chrome-win/chrome.exe",
+  "version": "6.6.6",
+  "versionRegex": /Chromium \\(\\\\S\\+\\)/m,
+}
+`;
+
+exports[`windows browser detection > detects Chromium 64-bit install in Chromium folder 1`] = `
+{
+  "binary": [
+    "chromium-browser",
+    "chromium",
+  ],
+  "channel": "stable",
+  "displayName": "Chromium",
+  "family": "chromium",
+  "name": "chromium",
+  "path": "C:/Program Files/Google/Chromium/chrome.exe",
+  "version": "8.8.8",
+  "versionRegex": /Chromium \\(\\\\S\\+\\)/m,
+}
+`;
+
+exports[`windows browser detection > detects Firefox local installs 1`] = `
+[
+  {
+    "binary": "firefox",
+    "channel": "stable",
+    "displayName": "Firefox",
+    "family": "firefox",
+    "name": "firefox",
+    "path": "C:/Users/flotwig/AppData/Local/Mozilla Firefox/firefox.exe",
+    "validator": [Function],
+    "version": "100",
+    "versionRegex": /\\^Mozilla Firefox \\(\\[\\^\\\\sab\\]\\+\\)\\$/m,
+  },
+  {
+    "binary": [
+      "firefox-developer-edition",
+      "firefox",
+    ],
+    "channel": "dev",
+    "displayName": "Firefox Developer Edition",
+    "family": "firefox",
+    "name": "firefox",
+    "path": "C:/Users/flotwig/AppData/Local/Firefox Developer Edition/firefox.exe",
+    "validator": [Function],
+    "version": "300",
+    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\+b\\\\S\\*\\)\\$/m,
+  },
+  {
+    "binary": [
+      "firefox-nightly",
+      "firefox-trunk",
+    ],
+    "channel": "nightly",
+    "displayName": "Firefox Nightly",
+    "family": "firefox",
+    "name": "firefox",
+    "path": "C:/Users/flotwig/AppData/Local/Firefox Nightly/firefox.exe",
+    "validator": [Function],
+    "version": "200",
+    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\+a\\\\S\\*\\)\\$/m,
+  },
+]
+`;
+
+exports[`windows browser detection > detects browsers as expected 1`] = `
+[
+  {
+    "binary": [
+      "google-chrome",
+      "chrome",
+      "google-chrome-stable",
+    ],
+    "channel": "stable",
+    "displayName": "Chrome",
+    "family": "chromium",
+    "name": "chrome",
+    "path": "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",
+    "validator": [Function],
+    "version": "1.2.3",
+    "versionRegex": /Google Chrome\\(\\?! for Testing\\) \\(\\\\S\\+\\)/m,
+  },
+  {
+    "binary": "google-chrome-beta",
+    "channel": "beta",
+    "displayName": "Chrome Beta",
+    "family": "chromium",
+    "name": "chrome",
+    "path": "C:/Program Files (x86)/Google/Chrome Beta/Application/chrome.exe",
+    "version": "6.7.8",
+    "versionRegex": /Google Chrome \\(\\\\S\\+\\) beta/m,
+  },
+  {
+    "binary": "google-chrome-canary",
+    "channel": "canary",
+    "displayName": "Chrome Canary",
+    "family": "chromium",
+    "name": "chrome",
+    "path": "C:/Users/flotwig/AppData/Local/Google/Chrome SxS/Application/chrome.exe",
+    "version": "3.4.5",
+    "versionRegex": /Google Chrome Canary \\(\\\\S\\+\\)/m,
+  },
+  {
+    "binary": "chrome",
+    "channel": "stable",
+    "displayName": "Chrome for Testing",
+    "family": "chromium",
+    "name": "chrome-for-testing",
+    "path": "C:/Program Files/Google/Chrome for Testing/chrome.exe",
+    "version": "1.2.3",
+    "versionRegex": /Google Chrome for Testing \\(\\\\S\\+\\)/m,
+  },
+  {
+    "binary": [
+      "chromium-browser",
+      "chromium",
+    ],
+    "channel": "stable",
+    "displayName": "Chromium",
+    "family": "chromium",
+    "name": "chromium",
+    "path": "C:/Program Files/Google/chrome-win/chrome.exe",
+    "version": "2.3.4",
+    "versionRegex": /Chromium \\(\\\\S\\+\\)/m,
+  },
+  {
+    "binary": "firefox",
+    "channel": "stable",
+    "displayName": "Firefox",
+    "family": "firefox",
+    "name": "firefox",
+    "path": "C:/Program Files/Mozilla Firefox/firefox.exe",
+    "validator": [Function],
+    "version": "72",
+    "versionRegex": /\\^Mozilla Firefox \\(\\[\\^\\\\sab\\]\\+\\)\\$/m,
+  },
+  {
+    "binary": [
+      "firefox-developer-edition",
+      "firefox",
+    ],
+    "channel": "dev",
+    "displayName": "Firefox Developer Edition",
+    "family": "firefox",
+    "name": "firefox",
+    "path": "C:/Program Files (x86)/Firefox Developer Edition/firefox.exe",
+    "validator": [Function],
+    "version": "73",
+    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\+b\\\\S\\*\\)\\$/m,
+  },
+  {
+    "binary": [
+      "firefox-nightly",
+      "firefox-trunk",
+    ],
+    "channel": "nightly",
+    "displayName": "Firefox Nightly",
+    "family": "firefox",
+    "name": "firefox",
+    "path": "C:/Program Files/Firefox Nightly/firefox.exe",
+    "validator": [Function],
+    "version": "74",
+    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\+a\\\\S\\*\\)\\$/m,
+  },
+  {
+    "binary": [
+      "edge",
+      "microsoft-edge",
+    ],
+    "channel": "stable",
+    "displayName": "Edge",
+    "family": "chromium",
+    "name": "edge",
+    "path": "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
+    "version": "11",
+    "versionRegex": /Microsoft Edge \\(\\\\S\\+\\)/im,
+  },
+  {
+    "binary": [
+      "edge-beta",
+      "microsoft-edge-beta",
+    ],
+    "channel": "beta",
+    "displayName": "Edge Beta",
+    "family": "chromium",
+    "name": "edge",
+    "path": "C:/Program Files (x86)/Microsoft/Edge Beta/Application/msedge.exe",
+    "version": "12",
+    "versionRegex": /Microsoft Edge\\.\\+\\?\\(\\\\S\\*\\(\\?= beta\\)\\|\\(\\?<=beta \\)\\\\S\\*\\)/im,
+  },
+  {
+    "binary": [
+      "edge-canary",
+      "microsoft-edge-canary",
+    ],
+    "channel": "canary",
+    "displayName": "Edge Canary",
+    "family": "chromium",
+    "name": "edge",
+    "path": "C:/Users/flotwig/AppData/Local/Microsoft/Edge SxS/Application/msedge.exe",
+    "version": "14",
+    "versionRegex": /Microsoft Edge\\.\\+\\?\\(\\\\S\\*\\(\\?= canary\\)\\|\\(\\?<=canary \\)\\\\S\\*\\)/im,
+  },
+  {
+    "binary": [
+      "edge-dev",
+      "microsoft-edge-dev",
+    ],
+    "channel": "dev",
+    "displayName": "Edge Dev",
+    "family": "chromium",
+    "name": "edge",
+    "path": "C:/Program Files (x86)/Microsoft/Edge Dev/Application/msedge.exe",
+    "version": "13",
+    "versionRegex": /Microsoft Edge\\.\\+\\?\\(\\\\S\\*\\(\\?= dev\\)\\|\\(\\?<=dev \\)\\\\S\\*\\)/im,
+  },
+]
+`;
