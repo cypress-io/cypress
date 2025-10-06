@@ -153,6 +153,28 @@ describe('header', () => {
           cy.percySnapshot()
         })
 
+        it('shows when show fetch requests is enabled and can disable it', () => {
+          const switchSelector = '[data-cy=show-http-requests-switch]'
+
+          cy.get('[data-cy="runnable-options-button"]').click()
+          cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
+
+          cy.get(switchSelector).invoke('attr', 'aria-checked').should('eq', 'true')
+          cy.get(switchSelector).click()
+          cy.get(switchSelector).invoke('attr', 'aria-checked').should('eq', 'false')
+        })
+
+        it('the show fetch requests toggle emits save:state event when clicked', () => {
+          cy.spy(runner, 'emit')
+
+          cy.get('[data-cy="runnable-options-button"]').click()
+          cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
+
+          cy.get('[data-cy=show-http-requests-switch]').click()
+          cy.wrap(runner.emit).should('be.calledWith', 'save:state')
+          cy.percySnapshot()
+        })
+
         it('opens the open in IDE button', () => {
           cy.spy(runner, 'emit')
 
