@@ -69,6 +69,10 @@ describe('detect', () => {
     vi.mocked(linuxDetect).mockImplementation(linuxDetectActual)
     vi.mocked(darwinDetect).mockImplementation(darwinDetectActual)
     vi.mocked(windowsDetect).mockImplementation(windowsDetectActual)
+
+    const { spawn } = await vi.importActual<typeof import('child_process')>('child_process')
+
+    vi.mocked(cp.spawn).mockImplementation(spawn)
   })
 
   // making simple to debug tests
@@ -98,7 +102,7 @@ describe('detect', () => {
   describe('#getMajorVersion', () => {
     it('parses major version from provided string', () => {
       expect(getMajorVersion('123.45.67')).toEqual('123')
-      expect(getMajorVersion('Browser 77.1.0')).to.eq('Browser 77')
+      expect(getMajorVersion('Browser 77.1.0')).toEqual('Browser 77')
       expect(getMajorVersion('999')).toEqual('999')
     })
   })
@@ -249,7 +253,7 @@ describe('detect', () => {
         throw Error('Should not find a browser')
       })
       .catch((err) => {
-        expect(err.notDetectedAtPath).to.be.true
+        expect(err.notDetectedAtPath).toBe(true)
       })
     })
 
