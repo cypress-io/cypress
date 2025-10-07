@@ -23,40 +23,37 @@ const absPath = (pathStr) => {
 describe('e2e launching browsers by path', () => {
   systemTests.setup()
 
-  it('fails with bad browser path', function () {
+  it('fails with bad browser path', async function () {
+    try {
+      await systemTests.exec(this, {
+        project: 'e2e',
+        spec: 'simple.cy.js',
+        browser: '/this/aint/gonna/be/found',
+        expectedExitCode: 1,
+      })
+    } catch (err) {
+      expect(err.message).to.contain('We could not identify a known browser at the path you provided: `/this/aint/gonna/be/found`')
+
+      expect(err.code).to.eq(1)
+    }
+  })
+
+  it('works with an installed browser path', async function () {
+    const browsers = await launcher.detect()
+    const browser = browsers.find((browser) => browser.family === 'chromium')
+
+    if (!browser) {
+      throw new Error('A \'chromium\' family browser must be installed for this test')
+    }
+
+    const absolutePath = await absPath(browser.path)
+
     return systemTests.exec(this, {
       project: 'e2e',
       spec: 'simple.cy.js',
-      browser: '/this/aint/gonna/be/found',
-      expectedExitCode: 1,
-    })
-    .then((res) => {
-      expect(res.stdout).to.contain('We could not identify a known browser at the path you provided: `/this/aint/gonna/be/found`')
-
-      expect(res.code).to.eq(1)
-    })
-  })
-
-  it('works with an installed browser path', function () {
-    return launcher.detect().then((browsers) => {
-      return browsers.find((browser) => {
-        return browser.family === 'chromium'
-      })
-    }).tap((browser) => {
-      if (!browser) {
-        throw new Error('A \'chromium\' family browser must be installed for this test')
-      }
-    }).get('path')
-    // turn binary browser names ("google-chrome") into their absolute paths
-    // so that server recognizes them as a path, not as a browser name
-    .then((absPath))
-    .then((foundPath) => {
-      return systemTests.exec(this, {
-        project: 'e2e',
-        spec: 'simple.cy.js',
-        browser: foundPath,
-        snapshot: true,
-      })
+      browser: absolutePath,
+      snapshot: true,
+      video: false,
     })
   })
 })
