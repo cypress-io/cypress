@@ -4308,3 +4308,27 @@ We will retry 3 more times in X second(s)...
 
 
 `
+
+exports['e2e record network errors create run network errors uses CLOUD_CANNOT_PROCEED_IN_PARALLEL_NETWORK for parallel runs with network errors 1'] = `
+We encountered an unexpected error communicating with our servers.
+
+StatusCodeError: 502 - "Bad Gateway"
+
+Because you passed the --parallel flag, this run cannot proceed since it requires a valid response from our servers.
+
+The --group flag you passed was: foo
+The --ciBuildId flag you passed was: ciBuildId123
+
+`
+
+exports['e2e record network errors create run network errors uses CLOUD_CANNOT_PROCEED_IN_SERIAL_NETWORK for serial runs with network errors 1'] = `
+We encountered an unexpected error communicating with our servers.
+
+StatusCodeError: 502 - "Bad Gateway"
+
+Because you passed the --record flag, this run cannot proceed since it requires a valid response from our servers.
+
+The --group flag you passed was: foo
+The --ciBuildId flag you passed was: ciBuildId123
+
+`

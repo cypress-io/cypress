@@ -2214,6 +2214,189 @@ describe('e2e record', () => {
     })
   })
 
+  describe('network errors', () => {
+    describe('create run network errors', () => {
+      const routes = createRoutes({
+        postRun: {
+          res (req, res) {
+            return res.sendStatus(502) // Bad Gateway - should trigger default case
+          },
+        },
+      })
+
+      setupStubbedServer(routes)
+
+      it('uses CLOUD_CANNOT_PROCEED_IN_PARALLEL_NETWORK for parallel runs with network errors', function () {
+        process.env.DISABLE_API_RETRIES = 'true'
+
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          group: 'foo',
+          tag: 'nightly',
+          record: true,
+          parallel: true,
+          ciBuildId: 'ciBuildId123',
+          expectedExitCode: 1,
+        })
+        .then(() => {
+          const urls = getRequestUrls()
+
+          expect(urls).to.deep.eq([
+            'POST /runs',
+          ])
+        })
+      })
+
+      it('uses CLOUD_CANNOT_PROCEED_IN_SERIAL_NETWORK for serial runs with network errors', function () {
+        process.env.DISABLE_API_RETRIES = 'true'
+
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          group: 'foo',
+          record: true,
+          ciBuildId: 'ciBuildId123',
+          expectedExitCode: 1,
+        })
+        .then(() => {
+          const urls = getRequestUrls()
+
+          expect(urls).to.deep.eq([
+            'POST /runs',
+          ])
+        })
+      })
+
+      it('exits with code 112 when posix exit codes are enabled for network errors in parallel mode', function () {
+        process.env.DISABLE_API_RETRIES = 'true'
+
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          group: 'foo',
+          tag: 'nightly',
+          record: true,
+          parallel: true,
+          posixExitCodes: true,
+          ciBuildId: 'ciBuildId123',
+          expectedExitCode: 112,
+        })
+      })
+
+      it('exits with code 112 when posix exit codes are enabled for network errors in serial mode', function () {
+        process.env.DISABLE_API_RETRIES = 'true'
+
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          group: 'foo',
+          record: true,
+          posixExitCodes: true,
+          ciBuildId: 'ciBuildId123',
+          expectedExitCode: 112,
+        })
+      })
+    })
+
+    describe('create run connection timeout', () => {
+      const routes = createRoutes({
+        postRun: {
+          res (req, res) {
+            // Simulate connection timeout by not responding
+            return new Promise(() => {}) // Never resolves
+          },
+        },
+      })
+
+      setupStubbedServer(routes)
+
+      beforeEach(() => {
+        process.env.DISABLE_API_RETRIES = 'true'
+        process.env.CYPRESS_INTERNAL_API_TIMEOUT = '10'
+      })
+
+      afterEach(() => {
+        delete process.env.DISABLE_API_RETRIES
+        delete process.env.CYPRESS_INTERNAL_API_TIMEOUT
+      })
+
+      it('handles connection timeout errors in parallel mode', function () {
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          group: 'foo',
+          tag: 'nightly',
+          record: true,
+          parallel: true,
+          ciBuildId: 'ciBuildId123',
+          expectedExitCode: 1,
+        })
+      })
+
+      it('handles connection timeout errors in serial mode', function () {
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          group: 'foo',
+          record: true,
+          ciBuildId: 'ciBuildId123',
+          expectedExitCode: 1,
+        })
+      })
+    })
+
+    describe('create run DNS resolution failure', () => {
+      const routes = createRoutes({
+        postRun: {
+          res (req, res) {
+            return res.sendStatus(504) // Gateway Timeout - should trigger default case
+          },
+        },
+      })
+
+      setupStubbedServer(routes)
+
+      it('handles DNS resolution failures in parallel mode', function () {
+        process.env.DISABLE_API_RETRIES = 'true'
+
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          group: 'foo',
+          tag: 'nightly',
+          record: true,
+          parallel: true,
+          posixExitCodes: true,
+          ciBuildId: 'ciBuildId123',
+          expectedExitCode: 112,
+        })
+      })
+
+      it('handles DNS resolution failures in serial mode', function () {
+        process.env.DISABLE_API_RETRIES = 'true'
+
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          group: 'foo',
+          record: true,
+          posixExitCodes: true,
+          ciBuildId: 'ciBuildId123',
+          expectedExitCode: 112,
+        })
+      })
+    })
+  })
+
   describe('api interaction warnings', () => {
     describe('create run warnings', () => {
       describe('grace period - over tests limit', () => {

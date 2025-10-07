@@ -43,6 +43,10 @@ const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
 const TWO_MINUTES = humanInterval('2 minutes')
 
+function defaultTimeout () {
+  return process.env.CYPRESS_INTERNAL_API_TIMEOUT && !isNaN(Number(process.env.CYPRESS_INTERNAL_API_TIMEOUT)) ? Number(process.env.CYPRESS_INTERNAL_API_TIMEOUT) : SIXTY_SECONDS
+}
+
 function retryDelays (): number[] {
   return process.env.API_RETRY_INTERVALS
     ? process.env.API_RETRY_INTERVALS.split(',').map(_.toNumber)
@@ -411,7 +415,7 @@ export default {
           url: recordRoutes.runs(),
           json: true,
           encrypt: preflightResult.encrypt,
-          timeout: options.timeout ?? SIXTY_SECONDS,
+          timeout: options.timeout ?? defaultTimeout(),
           headers: {
             'x-route-version': '4',
             'x-cypress-request-attempt': attemptIndex,
@@ -485,7 +489,7 @@ export default {
         url: recordRoutes.instances(runId),
         json: true,
         encrypt: preflightResult.encrypt,
-        timeout: timeout ?? SIXTY_SECONDS,
+        timeout: timeout ?? defaultTimeout(),
         headers: {
           'x-route-version': '5',
           'x-cypress-run-id': runId,
@@ -505,7 +509,7 @@ export default {
         url: recordRoutes.instanceTests(instanceId),
         json: true,
         encrypt: preflightResult.encrypt,
-        timeout: timeout ?? SIXTY_SECONDS,
+        timeout: timeout ?? defaultTimeout(),
         headers: {
           'x-route-version': '1',
           'x-cypress-run-id': runId,
@@ -523,7 +527,7 @@ export default {
       return rp.put({
         url: recordRoutes.instanceStdout(options.instanceId),
         json: true,
-        timeout: options.timeout ?? SIXTY_SECONDS,
+        timeout: options.timeout ?? defaultTimeout(),
         body: {
           stdout: options.stdout,
         },
@@ -545,7 +549,7 @@ export default {
       return rp.put({
         url: recordRoutes.instanceArtifacts(options.instanceId),
         json: true,
-        timeout: options.timeout ?? SIXTY_SECONDS,
+        timeout: options.timeout ?? defaultTimeout(),
         body,
         headers: {
           'x-route-version': '1',
@@ -564,7 +568,7 @@ export default {
         url: recordRoutes.instanceResults(options.instanceId),
         json: true,
         encrypt: preflightResult.encrypt,
-        timeout: options.timeout ?? SIXTY_SECONDS,
+        timeout: options.timeout ?? defaultTimeout(),
         headers: {
           'x-route-version': '1',
           'x-cypress-run-id': options.runId,
