@@ -200,9 +200,76 @@ describe('header', () => {
           cy.get('.restart').should('not.exist')
         })
 
-        it('does not display next button', () => {
+        it('does not display the next button', () => {
           cy.get('.next').should('not.exist')
         })
+      })
+    })
+
+    describe('when running after resume', () => {
+      beforeEach(() => {
+        runner.emit('run:start')
+        runner.emit('paused')
+        cy.get('.play').click()
+      })
+
+      it('displays next button as disabled when running after resume', () => {
+        cy.get('.next').should('be.visible').and('be.disabled')
+      })
+
+      it('shows "Step (not available)" tooltip when running after resume', () => {
+        cy.get('.next').trigger('mouseover', { force: true })
+        cy.get('.cy-tooltip').should('have.text', 'Step (not available)')
+      })
+
+      it('does not emit runner:next when disabled button is clicked', () => {
+        cy.spy(runner, 'emit')
+        cy.get('.next').click({ force: true })
+        cy.wrap(runner.emit).should('not.be.calledWith', 'runner:next')
+      })
+
+      it('displays stop button when running after resume', () => {
+        cy.get('.stop').should('be.visible')
+      })
+    })
+
+    describe('when paused without next command', () => {
+      beforeEach(() => {
+        runner.emit('paused')
+      })
+
+      it('displays play button', () => {
+        cy.get('.play').should('be.visible')
+      })
+
+      it('displays tooltip for play button', () => {
+        cy.get('.play').trigger('mouseover')
+        cy.get('.cy-tooltip').should('have.text', 'Resume C')
+      })
+
+      it('emits runner:resume when play button is clicked', () => {
+        cy.spy(runner, 'emit')
+        cy.get('.play').click()
+        cy.wrap(runner.emit).should('be.calledWith', 'runner:resume')
+      })
+
+      it('displays next button', () => {
+        cy.get('.next').should('be.visible').and('be.disabled')
+      })
+
+      it('shows "Step (not available)" tooltip when next button is disabled', () => {
+        cy.get('.next').trigger('mouseover', { force: true })
+        cy.get('.cy-tooltip').should('have.text', 'Step (not available)')
+      })
+
+      it('does not emit runner:next when disabled next button is clicked', () => {
+        cy.spy(runner, 'emit')
+        cy.get('.next').click({ force: true })
+        cy.wrap(runner.emit).should('not.be.calledWith', 'runner:next')
+      })
+
+      it('does not display stop button', () => {
+        cy.get('.stop').should('not.exist')
       })
     })
 

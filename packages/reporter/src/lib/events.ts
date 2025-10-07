@@ -79,6 +79,7 @@ const events: Events = {
     runner.on('run:start', action('run:start', () => {
       if (runnablesStore.hasTests) {
         appState.startRunning()
+        appState.hasBeenPaused = false
       }
     }))
 

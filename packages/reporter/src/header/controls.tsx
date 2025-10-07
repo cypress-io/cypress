@@ -53,11 +53,26 @@ const Controls: React.FC<Props> = observer(({ events = defaultEvents, appState }
           </div>
         </Tooltip>
       )}
-      {!!appState.nextCommandName && (
-        <Tooltip placement='bottom' title={<p>Next <span className='kbd'>[N]:</span>{appState.nextCommandName}</p>} className='cy-tooltip'>
+      {(appState.isPaused || (appState.isRunning && appState.hasBeenPaused)) && (
+        <Tooltip
+          placement='bottom'
+          title={appState.nextCommandName ? <p>Next <span className='kbd'>[N]:</span>{appState.nextCommandName}</p> : <p>Step (not available)</p>}
+          className='cy-tooltip'
+        >
           <div>
-            <Button size='20' variant='outline-dark' aria-label={`Next '${appState.nextCommandName}'`} className='next' onClick={emit('next')}>
-              <IconActionNext size='16' strokeColor={iconStrokeColor} fillColor={iconFillColor} />
+            <Button
+              size='20'
+              variant='outline-dark'
+              aria-label={appState.nextCommandName ? `Next '${appState.nextCommandName}'` : 'Next (not available)'}
+              className='next disabled:hover:border-white/20 disabled:focus:border-white/20'
+              disabled={!appState.nextCommandName}
+              onClick={appState.nextCommandName ? emit('next') : () => { }}
+            >
+              <IconActionNext
+                size='16'
+                strokeColor={(appState.nextCommandName) ? iconStrokeColor : 'gray-700'}
+                fillColor={iconFillColor}
+              />
             </Button>
           </div>
         </Tooltip>

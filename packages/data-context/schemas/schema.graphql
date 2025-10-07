@@ -2169,12 +2169,14 @@ enum SpecType {
 
 type StudioStatusPayload {
   canAccessStudioAI: Boolean!
+
+  """Whether the studio status is an IN_ERROR due to a certificate error"""
+  isCertError: Boolean
   status: StudioStatusType!
 }
 
 enum StudioStatusType {
   ENABLED
-  INITIALIZED
   INITIALIZING
   IN_ERROR
   NOT_INITIALIZED
