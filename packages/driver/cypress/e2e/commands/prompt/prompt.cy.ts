@@ -11,6 +11,16 @@ describe('src/cy/commands/prompt', () => {
       return
     }
 
+    cy.on('fail', (err) => {
+      // Don't fail when in CI and we don't have a record key and we're failing with the correct error message
+      // This is a sign we are dealing with a contributor PR
+      if (!Cypress.env('RECORD_KEY') && err.message.includes('Record key not provided')) {
+        return
+      }
+
+      throw err
+    })
+
     cy.visit('http://www.foobar.com:3500/fixtures/prompt.html')
 
     // TODO: add more tests when cy.prompt is built out, but for now this just
