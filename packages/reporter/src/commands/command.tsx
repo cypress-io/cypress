@@ -491,7 +491,7 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
     }
   }
 
-  if (model.name === 'request' && !appState.showFetchRequests) {
+  if (model.name === 'request' && model.event && !appState.showFetchRequests) {
     return null
   }
 
