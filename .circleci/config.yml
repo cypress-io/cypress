@@ -4,6 +4,11 @@ orbs:
 setup: true
 version: 2.1
 
+parameters:
+  publish-binary-branch:
+    type: string
+    default: main
+
 workflows:
     setup-workflow:
         jobs:
@@ -152,7 +157,8 @@ jobs:
                     exit 1
                 fi
           - continuation/continue:
-              configuration_path: .circleci/packed/pipeline.yml
+              configuration_path: .circleci/packed/pipeline.yml 
+              parameters: '{ "publish-binary-branch": << pipeline.parameters.publish-binary-branch >> }'
 
 
   
