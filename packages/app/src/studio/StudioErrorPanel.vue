@@ -4,21 +4,30 @@
     data-cy="studio-error-panel"
     container-class="text-center"
   >
-    <div class="relative">
+    <div
+      data-cy="studio-error-icon"
+      class="relative"
+    >
       <component :is="props.icon" />
     </div>
 
     <div class="flex flex-col items-center gap-[4px] max-w-[448px]">
-      <h2 class="text-white text-[16px] leading-[24px] font-medium">
+      <h2
+        data-cy="studio-error-title"
+        class="text-white text-[16px] leading-[24px] font-medium"
+      >
         {{ props.title }}
       </h2>
-      <p class="text-gray-400 text-[16px] leading-[24px]">
+      <p
+        data-cy="studio-error-message"
+        class="text-gray-400 text-[16px] leading-[24px]"
+      >
         {{ props.message }}
       </p>
     </div>
 
     <Button
-      v-if="props.showLearnMore"
+      v-if="props.learnMoreUrl"
       variant="outline-dark"
       size="32"
       data-cy="studio-error-learn-more-button"
@@ -54,7 +63,6 @@ const props = withDefaults(defineProps<{
   title?: string
   message?: string
   icon?: any
-  showLearnMore?: boolean
   learnMoreUrl?: string
   onRetry: () => void
 }>(), {
@@ -69,6 +77,5 @@ const props = withDefaults(defineProps<{
       'secondary-stroke-color': 'red-500',
     })
   },
-  learnMoreUrl: 'https://on.cypress.io/proxy-configuration',
 })
 </script>

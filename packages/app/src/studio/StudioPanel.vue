@@ -14,7 +14,6 @@
       :title="errorPanelProps.title"
       :message="errorPanelProps.message"
       :icon="errorPanelProps.icon"
-      :show-learn-more="errorPanelProps.showLearnMore"
       :learn-more-url="errorPanelProps.learnMoreUrl"
       :on-retry="errorPanelProps.onRetry"
     />
@@ -83,10 +82,9 @@ const errorPanelProps = computed(() => {
       icon: () => {
         return h(IconCypressStudio, {
           size: '48',
-          'fill-color': 'gray-700',
+          'fill-color': 'gray-500',
         })
       },
-      showLearnMore: true,
       learnMoreUrl: 'https://on.cypress.io/proxy-configuration',
       onRetry: handleRetry,
     }
