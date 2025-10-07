@@ -159,6 +159,8 @@ const openProjectCreate = (projectRoot, socketId, args) => {
     onWarning,
     spec: args.spec,
     onError: args.onError,
+    record: args.record,
+    key: args.key,
   }
 
   return openProject.create(projectRoot, args, options)
@@ -1106,7 +1108,6 @@ async function ready (options: ReadyOptions) {
     trashAssets(config),
   ])
 
-  // @ts-expect-error ctx is protected
   const specs = project.ctx.project.specs
 
   if (!specs.length) {
@@ -1182,6 +1183,7 @@ async function ready (options: ReadyOptions) {
       runAllSpecs,
       onError,
       quiet: options.quiet,
+      ctx: project.ctx,
     })
   }
 

@@ -15,7 +15,7 @@
     "clean-deps": "rimraf node_modules",
     "lint": "eslint --ext .js,.ts,.json, .",
     "test": "yarn test-unit",
-    "test-debug": "npx vitest --inspect-brk --no-file-parallelism --test-timeout=0",
+    "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0",
     "test-unit": "vitest run",
     "test:clean": "find ./test/__fixtures__ -depth -name 'output.*' -type f -exec rm {} \\;",
     "tslint": "tslint --config ../ts/tslint.json --project ."

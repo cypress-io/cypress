@@ -8,9 +8,11 @@ version: 2.1
 chrome-stable-version: &chrome-stable-version "140.0.7339.207"
 chrome-beta-version: &chrome-beta-version "141.0.7390.30"
 firefox-stable-version: &firefox-stable-version "142.0"
-base-internal-bullseye: &base-internal-bullseye cypress/base-internal:22.18.0-bullseye
-base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.18.0-yarn-berry
-base-internal-minimum-node: &base-internal-minimum-node cypress/base-internal:22.15.1
+base-internal-bullseye: &base-internal-bullseye cypress/base-internal:22.19.0-bullseye
+base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.19.0-yarn-berry
+# Lowest Node.js version we support of the minimum major version supported
+# See https://docs.cypress.io/app/get-started/install-cypress#Nodejs
+base-internal-minimum-node: &base-internal-minimum-node cypress/base-internal:20.15.0
 ubuntu-2004-current: &ubuntu-2004-current ubuntu-2004:2024.11.1
 ubuntu-2004-older: &ubuntu-2004-older ubuntu-2004:2024.05.1
 
@@ -116,7 +118,7 @@ commands:
           name: Set environment variable to determine whether or not to persist artifacts
           command: |
             echo "Setting SHOULD_PERSIST_ARTIFACTS variable"
-            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "fix/dbus-messages" ]]; then
+            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "ryanm/fix/rename-exclude-from-ai" ]]; then
                 export SHOULD_PERSIST_ARTIFACTS=true
             fi' >> "$BASH_ENV"
   # You must run `setup_should_persist_artifacts` command and be using bash before running this command
@@ -599,9 +601,9 @@ commands:
             if [[ ! -f better_sqlite3.node ]]; then
               set -x
               apt update && apt install -y docker.io
-              docker run -d --name better-sqlite3-builder cypress/base-internal:22.18.0-glibc-2.31 /bin/bash -c "sleep 1000000000"
+              docker run -d --name better-sqlite3-builder cypress/base-internal:22.19.0-glibc-2.31 /bin/bash -c "sleep 1000000000"
               docker cp ~/cypress/node_modules/better-sqlite3 better-sqlite3-builder:/better-sqlite3
-              docker exec -it better-sqlite3-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install prebuild -r electron -t 36.8.1 --include-regex 'better_sqlite3.node$'"
+              docker exec -it better-sqlite3-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install prebuild -r electron -t 37.6.0 --include-regex 'better_sqlite3.node$'"
               docker cp better-sqlite3-builder:/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
               docker rm -f better-sqlite3-builder
               cp ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/better_sqlite3.node
@@ -1784,7 +1786,7 @@ jobs:
                   source ./scripts/ensure-node.sh
                   yarn lerna run types
             - sanitize-verify-and-store-mocha-results:
-                expectedResultCount: 11
+                expectedResultCount: 10
 
   verify-release-readiness:
     <<: *defaults
@@ -2595,13 +2597,13 @@ jobs:
           command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip npm i
             /root/cypress/cypress.tgz
       - run:
-          name: Cypress version
-          working_directory: test-binary
-          command: $(yarn bin cypress) version
-      - run:
           name: Verify Cypress binary
           working_directory: test-binary
           command: $(yarn bin cypress) verify
+      - run:
+          name: Cypress version
+          working_directory: test-binary
+          command: $(yarn bin cypress) version
       - run:
           name: Cypress help
           working_directory: test-binary
@@ -2611,6 +2613,7 @@ jobs:
           working_directory: test-binary
           command: $(yarn bin cypress) info
 
+  # Test NPM module on minimum node version we support
   test-npm-module-on-minimum-node-version:
     <<: *defaults
     resource_class: small
@@ -2634,9 +2637,13 @@ jobs:
           working_directory: test-binary
           command: npx cypress verify
       - run:
-          name: Print Cypress version
+          name: Cypress version
           working_directory: test-binary
           command: npx cypress version
+      - run:
+          name: Cypress help
+          working_directory: test-binary
+          command: npx cypress help
       - run:
           name: Cypress info
           working_directory: test-binary

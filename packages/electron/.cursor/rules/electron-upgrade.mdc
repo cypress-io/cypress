@@ -1,0 +1,287 @@
+---
+alwaysApply: false
+---
+
+# Electron Upgrade Rule
+
+When upgrading Electron in the Cypress monorepo, follow this systematic approach to ensure all dependencies and configurations are properly updated.
+
+## Prerequisites
+
+Before starting, gather the following information:
+- Current Electron version (from `/package.json`)
+- Target Electron version (must be specified in chat prompt)
+- New Node.js version bundled with target Electron
+- New Chromium version bundled with target Electron
+
+### Finding Version Information
+
+**IMPORTANT**: The target Electron version, Chromium version, and Node.js verions must be specified in the chat prompt.
+
+## Step 1: Update Core Electron Version
+
+### Update Main Package.json
+```bash
+# Update the electron version in the root package.json
+# File: /package.json
+# Line: "electron": "36.8.1" -> "electron": "NEW_VERSION"
+```
+
+### Update Electron Package Dependencies
+```bash
+# Check if @electron/packager needs updating
+# File: /packages/electron/package.json
+# Update @electron/packager version if needed for compatibility
+```
+
+## Step 2: Update Node.js Version Synchronization
+
+When Electron is upgraded, the bundled Node.js version often changes. Sync this across the monorepo:
+
+### Node Version Files
+```bash
+# Update these files with the new Node.js version:
+# File: /.node-version
+# File: /.nvmrc
+# Both should match the Node.js version bundled with the new Electron
+```
+
+### Package.json Engines
+```bash
+# File: /package.json
+# Update engines.node to match the new Node.js version
+# Example: "node": ">=22.18.0" -> "node": ">=NEW_NODE_VERSION"
+```
+
+### TypeScript Node Types
+```bash
+# Update @types/node throughout the monorepo
+# The major version must match the Node.js version in .node-version
+# Search for: "@types/node": "CURRENT_VERSION"
+# Replace with: "@types/node": "NEW_VERSION"
+```
+
+## Step 3: Update Docker Configuration
+
+### Docker Compose
+```bash
+# File: /docker-compose.yml
+# Update the base-internal image reference:
+# "cypress/base-internal:22.18.0-bullseye" -> "cypress/base-internal:NEW_NODE_VERSION-bullseye"
+```
+
+### CircleCI Workflows
+```bash
+# File: /.circleci/src/@workflows.yml
+# Update base-internal image references:
+# "base-internal-bullseye: &base-internal-bullseye cypress/base-internal:22.18.0-bullseye" -> "base-internal-bullseye: &base-internal-bullseye cypress/base-internal:NEW_NODE_VERSION-bullseye"
+# "base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.18.0-yarn-berry" -> "base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:NEW_NODE_VERSION-yarn-berry"
+# "base-internal-minimum-node: &base-internal-minimum-node cypress/base-internal:22.18.0" -> "base-internal-minimum-node: &base-internal-minimum-node cypress/base-internal:NEW_NODE_VERSION"
+```
+
+## Step 4: Update Dependencies
+
+### Better SQLite3
+
+```bash
+# Check if better-sqlite3 needs updating for new Electron prebuilds looking through https://github.com/WiseLibs/better-sqlite3/commits/master/ to find the version number released after 'Prebuild for Election NEW_VERSION'.
+# Files to update:
+# /packages/server/package.json
+# /packages/types/package.json
+# Look for versions that support the new Electron version
+```
+
+### Node ABI Resolution
+```bash
+# File: /package.json
+# Update node-abi resolution if needed:
+# "node-abi": "4.9.0" -> "node-abi": "NEW_VERSION"
+# Check https://github.com/electron/node-abi/releases for latest version
+```
+
+## Step 5: Switch to new Node.js and npm versions
+
+```bash
+# Ensure you are using the new Node.js version
+# nvm install NEW_NODE_VERSION
+# nvm use NEW_NODE_VERSION
+```
+
+## Step 6: Run yarn to update lockfiles
+
+```bash
+yarn
+```
+
+## Step 7: Pack CircleCI workflow files
+
+```bash
+# Run husky pre-commit
+```
+
+## Step 8: Update System Tests
+
+### Binary System Tests
+```bash
+# Files in /system-tests/test-binary/
+# Update any Ubuntu/Node image references to match new versions
+# Check if system binary tests need new Docker images
+```
+
+## Step 9: Changelog and Breaking Changes
+
+### Determine Breaking Changes
+An Electron upgrade is a **breaking change** if:
+- Major Node.js version changes (affects plugin loading)
+- New shared libraries required on Linux (breaks CI)
+- Web API changes in bundled Chromium
+
+An Electron upgrade is **NOT a breaking change** if:
+- Only patch/minor version changes within the same major Node.js version
+- No new system dependencies required
+- No significant API changes
+
+### Write Changelog Entry
+
+**For Breaking Changes**:
+```markdown
+## Breaking Changes
+
+- Upgraded `electron` from `OLD_VERSION` to `NEW_VERSION`
+- Upgraded bundled Node.js version from `OLD_NODE_VERSION` to `NEW_NODE_VERSION`
+- Upgraded bundled Chromium version from `OLD_CHROMIUM_VERSION` to `NEW_CHROMIUM_VERSION`
+```
+
+**For Non-Breaking Changes**:
+```markdown
+## Dependency Updates
+
+- Upgraded `electron` from `OLD_VERSION` to `NEW_VERSION`
+- Upgraded bundled Node.js version from `OLD_NODE_VERSION` to `NEW_NODE_VERSION`
+- Upgraded bundled Chromium version from `OLD_CHROMIUM_VERSION` to `NEW_CHROMIUM_VERSION`
+```
+
+## Step 10: Testing and Validation
+
+### Manual Smoke Tests
+```bash
+# Test cypress open
+yarn cypress:open
+
+# Test cypress run in record mode
+yarn cypress:run --record
+
+# Verify Electron binary builds correctly
+yarn workspace @packages/electron build-binary
+```
+
+### Fix Failing Tests
+```bash
+# Run tests and fix any failures
+yarn test
+
+# Common issues:
+# - Node.js API changes
+# - Electron API changes
+# - Chromium behavior changes
+```
+
+## Step 11: V8 Snapshot Cache (if needed)
+
+### Update V8 Snapshot Cache
+```bash
+# Run GitHub workflow: update_v8_snapshot_cache.yml
+# Use branch with electron updates
+# Select 'Generate from scratch' and 'commit directly to branch'
+# Takes 6-8 hours to complete
+```
+
+## Common Issues and Solutions
+
+### Integrity Check Failures
+```bash
+# Update fs.readFileSync string representation in:
+# /scripts/binary/binary-integrity-check-source.js
+# Create throwaway script: console.log(fs.readFileSync.toString())
+# Run with: electron throwaway-script.js
+```
+
+### ResizeObserver Errors
+```bash
+# Update error message matching in support files
+# Error message changes between Chromium versions
+```
+
+### Electron Crashes After Protocol Database Init
+```bash
+# Usually due to mismatched better-sqlite3 prebuild
+# Solution: git clean -xfd && yarn
+# Ensure latest OS version
+```
+
+### Node ABI Out of Date
+```bash
+# Error: "Could not detect abi for version X.X.X and runtime electron"
+# Check for newer @electron/rebuild version
+# Update node-abi resolution in package.json
+```
+
+## Files to Search and Update
+
+### Global Search for Old Versions
+```bash
+# Search for old Node.js version across codebase
+grep -r "OLD_NODE_VERSION" . --exclude-dir=node_modules --exclude-dir=dist
+
+# Search for old Electron version
+grep -r "OLD_ELECTRON_VERSION" . --exclude-dir=node_modules --exclude-dir=dist
+
+# Update any found references
+```
+
+### Key Files Checklist
+- [ ] `/package.json` - electron version, engines.node, node-abi resolution
+- [ ] `/.node-version` - Node.js version
+- [ ] `/.nvmrc` - Node.js version  
+- [ ] `/docker-compose.yml` - base-internal image
+- [ ] `/.circleci/workflows.yml` - base-internal images
+- [ ] `/packages/server/package.json` - better-sqlite3 version
+- [ ] `/packages/types/package.json` - better-sqlite3 version
+- [ ] `/system-tests/test-binary/*` - Docker image references
+- [ ] All `@types/node` references across monorepo
+
+## External Dependencies (Manual Steps)
+
+These require manual updates in external repositories:
+
+### Docker Images
+- Update `cypress-docker-images` repository
+- Create new `base-internal` images with matching Node.js/Chromium versions
+- Publish to Docker Hub
+
+### Binary Publishing
+- Update `cypress-publish-binary` repository
+- Update electron version in package.json
+- Update CircleCI configuration
+- Update Docker image references
+
+## Validation Commands
+
+```bash
+# Verify Electron version
+yarn workspace @packages/electron getElectronVersion
+
+# Verify Node.js version
+yarn workspace @packages/electron getElectronNodeVersion
+
+# Build and test
+yarn build
+yarn test
+
+# Test binary
+yarn binary-smoke-test
+```
+
+## Notes
+
+- Update this rule if new patterns are discovered

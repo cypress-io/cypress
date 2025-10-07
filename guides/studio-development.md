@@ -11,13 +11,12 @@ To run against locally developed Studio:
 - Set environment variables:
   - `CYPRESS_INTERNAL_ENV=<environment>` (typically `staging` or `production` to hit those deployments of `cypress-services`, or `development` if you want to hit a locally running version of `cypress-services`)
   - Set `CYPRESS_LOCAL_STUDIO_PATH` to a relative path pointing to the `cypress-services/app/packages/studio/dist/development` directory (regardless of the `CYPRESS_INTERNAL_ENV` set).
-  - `CYPRESS_ENABLE_CLOUD_STUDIO_AI` to `true` if AI functionality is needed (note, the feature flag will also need to be set in the appropriate environment).
 - Clone the `cypress` repo
   - Run `yarn`
   - Run `yarn cypress:open`
   - Log In to the Cloud via the App
   - Ensure the project has been setup in the `Cypress (staging)` if in staging environment or `Cypress Internal Org` if in production environment and has a `projectId` that represents that. If developing against locally running `cypress-services`, ensure that the project has the feature `studio-ai` enabled for it.
-  - Open a project that has `experimentalStudio: true` set in the `e2e` config of the `cypress.config.js|ts` file.
+  - Open a project with `e2e` tests.
   - Click to 'Add Commands to Test' after hovering over a test command.
 
 Note: When using the `CYPRESS_LOCAL_STUDIO_PATH` environment variable or when running the Cypress app via the locally cloned repository, we bypass our error reporting and instead log errors to the browser or node console.

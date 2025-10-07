@@ -994,6 +994,20 @@ describe('config/src/project/utils', () => {
       })
     })
 
+    it('warns if experimentalStudio is passed', async function () {
+      await defaults('experimentalStudio', true, {
+        experimentalStudio: true,
+      })
+
+      expect(errors.warning).toBeCalledWith('EXPERIMENTAL_STUDIO_REMOVED', {
+        configFile: 'cypress.config.js',
+        name: 'experimentalStudio',
+        newName: undefined,
+        testingType: undefined,
+        value: undefined,
+      })
+    })
+
     describe('.resolved', () => {
       it('sets reporter and port to cli', async () => {
         const obj = {
@@ -1029,9 +1043,9 @@ describe('config/src/project/utils', () => {
           experimentalInteractiveRunEvents: { value: false, from: 'default' },
           experimentalMemoryManagement: { value: false, from: 'default' },
           experimentalOriginDependencies: { value: false, from: 'default' },
+          experimentalPromptCommand: { value: false, from: 'default' },
           experimentalRunAllSpecs: { value: false, from: 'default' },
           experimentalSingleTabRunMode: { value: false, from: 'default' },
-          experimentalStudio: { value: false, from: 'default' },
           experimentalSourceRewriting: { value: false, from: 'default' },
           experimentalWebKitSupport: { value: false, from: 'default' },
           fileServerFolder: { value: '', from: 'default' },
@@ -1145,9 +1159,9 @@ describe('config/src/project/utils', () => {
           experimentalInteractiveRunEvents: { value: false, from: 'default' },
           experimentalMemoryManagement: { value: false, from: 'default' },
           experimentalOriginDependencies: { value: false, from: 'default' },
+          experimentalPromptCommand: { value: false, from: 'default' },
           experimentalRunAllSpecs: { value: false, from: 'default' },
           experimentalSingleTabRunMode: { value: false, from: 'default' },
-          experimentalStudio: { value: false, from: 'default' },
           experimentalSourceRewriting: { value: false, from: 'default' },
           experimentalWebKitSupport: { value: false, from: 'default' },
           fileServerFolder: { value: '', from: 'default' },

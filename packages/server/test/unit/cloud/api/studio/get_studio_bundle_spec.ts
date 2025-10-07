@@ -1,6 +1,7 @@
-import { sinon, proxyquire } from '../../../../spec_helper'
+import { proxyquire } from '../../../../spec_helper'
 import { Readable, Writable } from 'stream'
 import { HttpError } from '../../../../../lib/cloud/network/http_error'
+import sinon from 'sinon'
 
 describe('getStudioBundle', () => {
   let writeResult: string
@@ -86,7 +87,7 @@ describe('getStudioBundle', () => {
   })
 
   it('downloads the studio bundle and extracts it after 1 fetch failure', async () => {
-    crossFetchStub.onFirstCall().rejects(new HttpError('Failed to fetch', 'url', 502, 'Bad Gateway', 'Bad Gateway', sinon.stub()))
+    crossFetchStub.onFirstCall().rejects(new HttpError('Failed to fetch', 'url', 502, 'Bad Gateway', 'Bad Gateway', sinon.stub() as any))
     crossFetchStub.onSecondCall().resolves({
       ok: true,
       statusText: 'OK',
@@ -129,7 +130,7 @@ describe('getStudioBundle', () => {
   })
 
   it('throws an error and returns a studio manager in error state if the fetch fails more than twice', async () => {
-    const error = new HttpError('Failed to fetch', 'url', 502, 'Bad Gateway', 'Bad Gateway', sinon.stub())
+    const error = new HttpError('Failed to fetch', 'url', 502, 'Bad Gateway', 'Bad Gateway', sinon.stub() as any)
 
     crossFetchStub.rejects(error)
 

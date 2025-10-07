@@ -1036,7 +1036,7 @@ describe('visual error templates', () => {
       }
     },
 
-    EXPERIMENTAL_STUDIO_E2E_ONLY: () => {
+    EXPERIMENTAL_STUDIO_REMOVED: () => {
       return {
         default: [],
       }
@@ -1055,6 +1055,12 @@ describe('visual error templates', () => {
     },
 
     EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY: () => {
+      return {
+        default: [],
+      }
+    },
+
+    EXPERIMENTAL_PROMPT_COMMAND_E2E_ONLY: () => {
       return {
         default: [],
       }

@@ -91,13 +91,13 @@ export default class Command extends Instrument {
     return this._isOpen || (this._isOpen === null
       && (
         this.err?.isRecovered ||
-        (this.name === 'session' && this.state === 'failed') ||
+        (this.defaultCollapsedState === 'closed' && this.state === 'failed') ||
         // command has nested commands
-        (this.name !== 'session' && this.hasChildren && !this.event && this.type !== 'system') ||
+        (this.defaultCollapsedState !== 'closed' && this.hasChildren && !this.event && this.type !== 'system') ||
         // command has nested commands with children
-        (this.name !== 'session' && _.some(this.children, (v) => v.hasChildren)) ||
+        (this.defaultCollapsedState !== 'closed' && _.some(this.children, (v) => v.hasChildren)) ||
         // last nested command is open
-        (this.name !== 'session' && _.last(this.children)?.isOpen) ||
+        (this.defaultCollapsedState !== 'closed' && _.last(this.children)?.isOpen) ||
         // show slow command when test is running
         (_.some(this.children, (v) => v.isLongRunning) && _.last(this.children)?.state === 'pending') ||
         // at last nested command failed
@@ -126,6 +126,12 @@ export default class Command extends Instrument {
     }
 
     return this.err?.isRecovered
+  }
+
+  get isCyPrompt () {
+    // @ts-expect-error - experimentalPromptCommand is not typed until we
+    // release the feature
+    return Cypress.config('experimentalPromptCommand') && Cypress.config('isInteractive') && this.name === 'prompt'
   }
 
   constructor (props: CommandProps) {

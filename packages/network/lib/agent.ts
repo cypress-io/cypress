@@ -327,7 +327,7 @@ class HttpAgent extends http.Agent {
 
     if (proxy.protocol === 'https:') {
       // gonna have to use the https module to reach the proxy, even though this is an http req
-      req.agent = this.httpsAgent
+      req.agent = this.httpsAgent as any
 
       return this.httpsAgent.addRequest(req, options)
     }

@@ -32,7 +32,7 @@ import { PUBLIC_KEY_VERSION } from '../constants'
 
 import { transformError } from './axios_middleware/transform_error'
 import { DecryptionError } from './cloud_request_errors'
-import { isNonRetriableCertErrorCode } from '../network/nonretriable_cert_error_codes'
+import { isNonRetriableCertErrorCode } from '../network/non_retriable_cert_error_codes'
 
 // Import cloud validation types for better type safety
 import type {

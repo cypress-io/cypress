@@ -79,6 +79,7 @@ const events: Events = {
     runner.on('run:start', action('run:start', () => {
       if (runnablesStore.hasTests) {
         appState.startRunning()
+        appState.hasBeenPaused = false
       }
     }))
 
@@ -238,6 +239,10 @@ const events: Events = {
 
     localBus.on('studio:copy:to:clipboard', (cb) => {
       runner.emit('studio:copy:to:clipboard', cb)
+    })
+
+    localBus.on('prompt:get-code', (args: { testId: string, logId: string }) => {
+      runner.emit('prompt:get-code', args)
     })
   },
 

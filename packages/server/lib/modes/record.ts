@@ -572,6 +572,7 @@ const createRunAndRecordSpecs = (options: any = {}) => {
     testingType,
     quiet,
     autoCancelAfterFailures,
+    ctx,
   } = options
   const recordKey = options.key
 
@@ -622,6 +623,8 @@ const createRunAndRecordSpecs = (options: any = {}) => {
         })
       }
 
+      ctx.actions.currentRecording.startRun(resp.runId)
+
       const { runUrl, runId, machineId, groupId } = resp
       const protocolCaptureMeta = resp.capture || {}
 
@@ -646,6 +649,7 @@ const createRunAndRecordSpecs = (options: any = {}) => {
         })
         .then((resp: any = {}) => {
           instanceId = resp.instanceId
+          ctx.actions.currentRecording.startInstance(instanceId)
 
           // pull off only what we need
           const result = _
