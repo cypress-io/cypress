@@ -246,15 +246,15 @@ describe('detect', () => {
       })
     })
 
-    it('rejects when there was no matching versionRegex', () => {
-      // @ts-ignore
-      return detectByPath('/not/a/browser', goalBrowsers)
-      .then(() => {
+    it('rejects when there was no matching versionRegex', async () => {
+      try {
+        // @ts-expect-error
+        await detectByPath('/not/a/browser', goalBrowsers)
+
         throw Error('Should not find a browser')
-      })
-      .catch((err) => {
+      } catch (err) {
         expect(err.notDetectedAtPath).toBe(true)
-      })
+      }
     })
 
     it('rejects when there was an error executing the command', async () => {
