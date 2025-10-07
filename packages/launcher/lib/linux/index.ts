@@ -21,23 +21,29 @@ const createTimeoutPromise = (timeout: number = 30000, message: string = `Timed 
 
 async function isFirefoxSnap (binary: string): Promise<boolean> {
   try {
-    const binaryPath = await which(binary)
+    const result = await Promise.race([getFirefoxSnap(binary), createTimeoutPromise(30000, 'Timed out after 30 seconds checking if Firefox is a snap')]) as Promise<boolean>
 
-    // if the bin path or what it's symlinked to start with `/snap/bin`, it's a snap
-    if (binaryPath.startsWith('/snap/bin/') || (await fs.realpath(binaryPath)).startsWith('/snap/bin')) return true
-
-    // read the first 16kb, don't read the entire file into memory in case it is a binary
-    const fd = await fs.open(binaryPath, 'r')
-    const { buffer, bytesRead } = await fd.read<Buffer>({ length: 16384 })
-
-    await fd.close()
-
-    return buffer.slice(0, bytesRead).toString('utf8').includes('exec /snap/bin/firefox')
+    return result
   } catch (err) {
     debug('failed to check if Firefox is a snap, assuming it isn\'t %o', { err, binary })
 
     return false
   }
+}
+
+async function getFirefoxSnap (binary: string): Promise<boolean> {
+  const binaryPath = await which(binary)
+
+  // if the bin path or what it's symlinked to start with `/snap/bin`, it's a snap
+  if (binaryPath.startsWith('/snap/bin/') || (await fs.realpath(binaryPath)).startsWith('/snap/bin')) return true
+
+  // read the first 16kb, don't read the entire file into memory in case it is a binary
+  const fd = await fs.open(binaryPath, 'r')
+  const { buffer, bytesRead } = await fd.read<Buffer>({ length: 16384 })
+
+  await fd.close()
+
+  return buffer.slice(0, bytesRead).toString('utf8').includes('exec /snap/bin/firefox')
 }
 
 async function getLinuxBrowser (
@@ -89,7 +95,7 @@ async function getLinuxBrowser (
       return
     }
 
-    if (name === 'firefox' && (await Promise.race([isFirefoxSnap(binary), createTimeoutPromise(30000, 'Timed out after 30 seconds checking if Firefox is a snap')]))) {
+    if (name === 'firefox' && await isFirefoxSnap(binary)) {
       // if the binary in the path points to a script that calls the snap, set a snap-specific profile path
       // @see https://github.com/cypress-io/cypress/issues/19793
       debug('firefox is running as a snap, changing profile path')
