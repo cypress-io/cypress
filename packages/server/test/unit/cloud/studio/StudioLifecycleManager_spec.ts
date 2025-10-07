@@ -62,7 +62,7 @@ describe('StudioLifecycleManager', () => {
     markStub = sinon.stub()
     initializeTelemetryReporterStub = sinon.stub()
     mockStudioManager = {
-      status: 'INITIALIZED',
+      status: 'ENABLED',
       setup: studioManagerSetupStub.resolves(),
       destroy: studioManagerDestroyStub.resolves(),
     } as unknown as StudioManager
@@ -186,88 +186,6 @@ describe('StudioLifecycleManager', () => {
   })
 
   describe('initializeStudioManager', () => {
-    it('initializes the studio manager and registers it in the data context and does not set up protocol when studio is initialized', async () => {
-      studioManagerSetupStub.callsFake((args) => {
-        mockStudioManager.status = 'INITIALIZED'
-
-        return Promise.resolve()
-      })
-
-      studioLifecycleManager.initializeStudioManager({
-        cloudDataSource: mockCloudDataSource,
-        ctx: mockCtx,
-        cfg: mockCfg,
-        debugData: {},
-      })
-
-      const studioReadyPromise = new Promise((resolve) => {
-        studioLifecycleManager?.registerStudioReadyListener((studioManager) => {
-          resolve(studioManager)
-        })
-      })
-
-      const mockManifest = {
-        'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
-      }
-
-      ensureStudioBundleStub.resolves(mockManifest)
-
-      await studioReadyPromise
-
-      expect(mockCtx.update).to.be.calledOnce
-      expect(ensureStudioBundleStub).to.be.calledWith({
-        studioPath: path.join(os.tmpdir(), 'cypress', 'studio', 'abc'),
-        studioUrl: 'https://cloud.cypress.io/studio/bundle/abc.tgz',
-        projectId: 'abc123',
-      })
-
-      expect(studioManagerSetupStub).to.be.calledWith({
-        script: 'console.log("studio script")',
-        studioPath: path.join(os.tmpdir(), 'cypress', 'studio', 'abc'),
-        studioHash: 'abc',
-        getProjectOptions: sinon.match.func,
-        cloudApi: {
-          cloudUrl: 'https://cloud.cypress.io',
-          cloudHeaders: { 'Authorization': 'Bearer test-token' },
-          CloudRequest,
-          isRetryableError,
-          asyncRetry,
-        },
-        manifest: mockManifest,
-      })
-
-      expect(postStudioSessionStub).to.be.calledWith({
-        projectId: 'abc123',
-      })
-
-      expect(readFileStub).to.be.calledWith(path.join(os.tmpdir(), 'cypress', 'studio', 'abc', 'server', 'index.js'), 'utf8')
-
-      expect(getCaptureProtocolScriptStub).not.to.be.called
-      expect(prepareProtocolStub).not.to.be.called
-
-      expect(initializeTelemetryReporterStub).to.be.calledWith({
-        projectSlug: 'abc123',
-        cloudDataSource: mockCloudDataSource,
-      })
-
-      expect(markStub).to.be.calledWith(BUNDLE_LIFECYCLE_MARK_NAMES.BUNDLE_LIFECYCLE_START)
-      expect(markStub).to.be.calledWith(BUNDLE_LIFECYCLE_MARK_NAMES.BUNDLE_LIFECYCLE_END)
-      expect(markStub).to.be.calledWith(BUNDLE_LIFECYCLE_MARK_NAMES.POST_STUDIO_SESSION_START)
-      expect(markStub).to.be.calledWith(BUNDLE_LIFECYCLE_MARK_NAMES.POST_STUDIO_SESSION_END)
-      expect(markStub).to.be.calledWith(BUNDLE_LIFECYCLE_MARK_NAMES.ENSURE_STUDIO_BUNDLE_START)
-      expect(markStub).to.be.calledWith(BUNDLE_LIFECYCLE_MARK_NAMES.ENSURE_STUDIO_BUNDLE_END)
-      expect(markStub).to.be.calledWith(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_MANAGER_SETUP_START)
-      expect(markStub).to.be.calledWith(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_MANAGER_SETUP_END)
-      expect(markStub).not.to.be.calledWith(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_PROTOCOL_GET_START)
-      expect(markStub).not.to.be.calledWith(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_PROTOCOL_GET_END)
-      expect(markStub).not.to.be.calledWith(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_PROTOCOL_PREPARE_START)
-      expect(markStub).not.to.be.calledWith(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_PROTOCOL_PREPARE_END)
-
-      expect(reportTelemetryStub).to.be.calledWith(BUNDLE_LIFECYCLE_TELEMETRY_GROUP_NAMES.COMPLETE_BUNDLE_LIFECYCLE, {
-        success: true,
-      })
-    })
-
     it('initializes the studio manager and registers it in the data context and sets up protocol when studio is enabled', async () => {
       studioManagerSetupStub.callsFake((args) => {
         mockStudioManager.status = 'ENABLED'
@@ -846,7 +764,7 @@ describe('StudioLifecycleManager', () => {
       const result = await studioLifecycleManager.getStudio()
 
       expect(result).to.equal(mockStudioManager)
-      expect(updateStatusSpy).to.be.calledWith('INITIALIZED')
+      expect(updateStatusSpy).to.be.calledWith('ENABLED')
     })
 
     it('handles status updates properly during initialization', async () => {
@@ -870,7 +788,7 @@ describe('StudioLifecycleManager', () => {
 
       await studioReadyPromise
 
-      expect(statusChangesSpy).to.be.calledWith('INITIALIZED')
+      expect(statusChangesSpy).to.be.calledWith('ENABLED')
     })
 
     it('updates status to IN_ERROR when initialization fails', async () => {
@@ -891,6 +809,69 @@ describe('StudioLifecycleManager', () => {
 
       expect(statusChangesSpy).to.be.calledWith('IN_ERROR')
     })
+
+    describe('updateStatus with error parameter', () => {
+      it('stores error code from regular error', () => {
+        const error = new Error('Test error') as any
+
+        error.code = 'CERT_HAS_EXPIRED'
+
+        studioLifecycleManager.updateStatus('IN_ERROR', error)
+
+        expect(studioLifecycleManager.getCurrentStatus()).to.equal('IN_ERROR')
+        // @ts-expect-error - accessing private property
+        expect(studioLifecycleManager.lastErrorCode).to.equal('CERT_HAS_EXPIRED')
+      })
+
+      it('stores error code from AggregateError', () => {
+        const error1 = new Error('First error') as any
+
+        error1.code = 'UNABLE_TO_VERIFY_LEAF_SIGNATURE'
+        const error2 = new Error('Second error') as any
+
+        error2.code = 'DEPTH_ZERO_SELF_SIGNED_CERT'
+        const aggregateError = new AggregateError([error1, error2], 'Multiple errors')
+
+        studioLifecycleManager.updateStatus('IN_ERROR', aggregateError)
+
+        expect(studioLifecycleManager.getCurrentStatus()).to.equal('IN_ERROR')
+        // @ts-expect-error - accessing private property
+        expect(studioLifecycleManager.lastErrorCode).to.equal('DEPTH_ZERO_SELF_SIGNED_CERT')
+      })
+
+      it('handles error without code', () => {
+        const error = new Error('Test error without code')
+
+        studioLifecycleManager.updateStatus('IN_ERROR', error)
+
+        expect(studioLifecycleManager.getCurrentStatus()).to.equal('IN_ERROR')
+        // @ts-expect-error - accessing private property
+        expect(studioLifecycleManager.lastErrorCode).to.be.undefined
+      })
+
+      it('handles non-error parameter', () => {
+        studioLifecycleManager.updateStatus('IN_ERROR', 'string error')
+
+        expect(studioLifecycleManager.getCurrentStatus()).to.equal('IN_ERROR')
+        // @ts-expect-error - accessing private property
+        expect(studioLifecycleManager.lastErrorCode).to.be.undefined
+      })
+
+      it('emits status change event when error is provided', async () => {
+        // @ts-expect-error - accessing private property
+        studioLifecycleManager.ctx = mockCtx
+
+        const error = new Error('Test error') as any
+
+        error.code = 'CERT_HAS_EXPIRED'
+
+        studioLifecycleManager.updateStatus('IN_ERROR', error)
+
+        await nextTick()
+
+        expect(studioStatusChangeEmitterStub).to.be.calledOnce
+      })
+    })
   })
 
   describe('getCurrentStatus', () => {
@@ -907,6 +888,56 @@ describe('StudioLifecycleManager', () => {
 
       studioLifecycleManager.updateStatus('IN_ERROR')
       expect(studioLifecycleManager.getCurrentStatus()).to.equal('IN_ERROR')
+    })
+  })
+
+  describe('getIsCertError', () => {
+    it('returns false when no error code is stored', () => {
+      expect(studioLifecycleManager.getIsCertError()).to.be.false
+    })
+
+    it('returns false when error code is not a cert error', () => {
+      const error = new Error('Test error') as any
+
+      error.code = 'NETWORK_ERROR'
+
+      studioLifecycleManager.updateStatus('IN_ERROR', error)
+
+      expect(studioLifecycleManager.getIsCertError()).to.be.false
+    })
+
+    it('returns true for a cert error', () => {
+      const error = new Error('Certificate error') as any
+
+      error.code = 'SELF_SIGNED_CERT_IN_CHAIN'
+
+      studioLifecycleManager.updateStatus('IN_ERROR', error)
+
+      expect(studioLifecycleManager.getIsCertError()).to.be.true
+    })
+
+    it('returns true for cert error from AggregateError', () => {
+      const error1 = new Error('First error') as any
+
+      error1.code = 'NETWORK_ERROR'
+      const error2 = new Error('Second error') as any
+
+      error2.code = 'CERT_HAS_EXPIRED'
+      const aggregateError = new AggregateError([error1, error2], 'Multiple errors')
+
+      studioLifecycleManager.updateStatus('IN_ERROR', aggregateError)
+
+      expect(studioLifecycleManager.getIsCertError()).to.be.true
+    })
+
+    it('returns false when status is not IN_ERROR', () => {
+      const error = new Error('Certificate error') as any
+
+      error.code = 'CERT_HAS_EXPIRED'
+
+      studioLifecycleManager.updateStatus('INITIALIZING', error)
+
+      expect(studioLifecycleManager.getIsCertError()).to.be.false
     })
   })
 

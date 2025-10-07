@@ -7,6 +7,8 @@ export const NON_RETRIABLE_CERT_ERROR_CODES = Object.freeze({
   SELF_SIGNED_CERT_IN_CHAIN: 'SELF_SIGNED_CERT_IN_CHAIN',
   // The issuer certificate is not available locally
   UNABLE_TO_GET_ISSUER_CERT_LOCALLY: 'UNABLE_TO_GET_ISSUER_CERT_LOCALLY',
+  // The certificate is expired
+  CERT_HAS_EXPIRED: 'CERT_HAS_EXPIRED',
 })
 
 type NonRetriableCertErrorCode = typeof NON_RETRIABLE_CERT_ERROR_CODES[keyof typeof NON_RETRIABLE_CERT_ERROR_CODES]
