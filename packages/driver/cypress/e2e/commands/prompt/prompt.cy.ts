@@ -3,7 +3,7 @@ describe('src/cy/commands/prompt', () => {
     Cypress.testingType = 'e2e'
   })
 
-  it('executes the prompt command', () => {
+  it('executes the prompt command', (done) => {
     // TODO: (cy.prompt) We will look into supporting other browsers
     // as this is rolled out. We will add error messages for other browsers
     // and add tests if necessary
@@ -11,23 +11,26 @@ describe('src/cy/commands/prompt', () => {
       return
     }
 
-    cy.on('fail', (err) => {
-      // Don't fail when in CI and we don't have a record key and we're failing with the correct error message
-      // This is a sign we are dealing with a contributor PR
-      if (!Cypress.env('RECORD_KEY') && err.message.includes('Record key not provided')) {
-        return
-      }
+    const contributorPr = !Cypress.env('RECORD_KEY') && Cypress.config('isTextTerminal')
 
-      throw err
-    })
+    if (contributorPr) {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('Record key not provided')
 
-    cy.visit('http://www.foobar.com:3500/fixtures/prompt.html')
+        done()
+      })
 
-    // TODO: add more tests when cy.prompt is built out, but for now this just
-    // verifies that the command executes without throwing an error
-    cy.prompt(['Click the "click me" button'])
-
-    cy.get('#log').should('contain', 'clicked')
+      cy.visit('http://www.foobar.com:3500/fixtures/prompt.html')
+      cy.prompt(['Click the "click me" button']).then(() => {
+        done(new Error('Expected prompt to fail'))
+      })
+    } else {
+      cy.visit('http://www.foobar.com:3500/fixtures/prompt.html')
+      cy.prompt(['Click the "click me" button'])
+      cy.get('#log').should('contain', 'clicked').then(() => {
+        done()
+      })
+    }
   })
 
   it('fails when testingType is component', (done) => {
