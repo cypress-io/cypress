@@ -21,9 +21,7 @@ describe('src/cy/commands/prompt', () => {
       })
 
       cy.visit('http://www.foobar.com:3500/fixtures/prompt.html')
-      cy.prompt(['Click the "click me" button']).then(() => {
-        done(new Error('Expected prompt to fail'))
-      })
+      cy.prompt(['Click the "click me" button'])
     } else {
       cy.visit('http://www.foobar.com:3500/fixtures/prompt.html')
       cy.prompt(['Click the "click me" button'])
