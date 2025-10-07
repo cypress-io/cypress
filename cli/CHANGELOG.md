@@ -20,6 +20,7 @@ _Released 10/7/2025 (PENDING)_
 - Added a dropdown menu in the Command Log that includes actions like Open in IDE and Add New Test in Studio, along with test preferences such as Auto-Scroll. Addresses [#32556](https://github.com/cypress-io/cypress/issues/32556) and [#32558](https://github.com/cypress-io/cypress/issues/32558). Addressed in [#32611](https://github.com/cypress-io/cypress/pull/32611).
 - Updated the Studio test editing header to include a Back button. This change ensures the Specs button remains functional for expanding or collapsing the specs panel. Addresses [#32556](https://github.com/cypress-io/cypress/issues/32556) and [#32558](https://github.com/cypress-io/cypress/issues/32558). Addressed in [#32611](https://github.com/cypress-io/cypress/pull/32611).
 - Fixed the Studio panel resizing when dragging. Addressed in [#32584](https://github.com/cypress-io/cypress/pull/32584).
+- The Next button now maintains consistent visibility during stepping sessions when using `cy.pause`, staying visible but disabled when no immediate next command is available, providing clear visual feedback to users about stepping state. Addresses [#32476](https://github.com/cypress-io/cypress/issues/32476). Addressed in [#32536](https://github.com/cypress-io/cypress/pull/32536).
 
 **Dependency Updates:**
 
