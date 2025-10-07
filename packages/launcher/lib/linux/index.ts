@@ -2,33 +2,37 @@ import Debug from 'debug'
 import type { FoundBrowser, Browser } from '@packages/types'
 import type { PathData } from '../types'
 import { notInstalledErr } from '../errors'
-import { utils } from '../utils'
+import { getOutput } from '../utils'
 import os from 'os'
 import { promises as fs } from 'fs'
 import path from 'path'
-import Bluebird from 'bluebird'
 import which from 'which'
 
 const debug = Debug('cypress:launcher:linux')
 const debugVerbose = Debug('cypress-verbose:launcher:linux')
 
+const createTimeoutPromise = (timeout: number = 30000, message: string = `Timed out after ${timeout} seconds`) => {
+  return new Promise((_, reject) => {
+    setTimeout(() => {
+      reject(new Error(message))
+    }, timeout)
+  })
+}
+
 async function isFirefoxSnap (binary: string): Promise<boolean> {
   try {
-    return await Bluebird.resolve((async () => {
-      const binaryPath = await which(binary)
+    const binaryPath = await which(binary)
 
-      // if the bin path or what it's symlinked to start with `/snap/bin`, it's a snap
-      if (binaryPath.startsWith('/snap/bin/') || (await fs.realpath(binaryPath)).startsWith('/snap/bin')) return true
+    // if the bin path or what it's symlinked to start with `/snap/bin`, it's a snap
+    if (binaryPath.startsWith('/snap/bin/') || (await fs.realpath(binaryPath)).startsWith('/snap/bin')) return true
 
-      // read the first 16kb, don't read the entire file into memory in case it is a binary
-      const fd = await fs.open(binaryPath, 'r')
-      const { buffer, bytesRead } = await fd.read<Buffer>({ length: 16384 })
+    // read the first 16kb, don't read the entire file into memory in case it is a binary
+    const fd = await fs.open(binaryPath, 'r')
+    const { buffer, bytesRead } = await fd.read<Buffer>({ length: 16384 })
 
-      await fd.close()
+    await fd.close()
 
-      return buffer.slice(0, bytesRead).toString('utf8').includes('exec /snap/bin/firefox')
-    })())
-    .timeout(30000)
+    return buffer.slice(0, bytesRead).toString('utf8').includes('exec /snap/bin/firefox')
   } catch (err) {
     debug('failed to check if Firefox is a snap, assuming it isn\'t %o', { err, binary })
 
@@ -36,7 +40,7 @@ async function isFirefoxSnap (binary: string): Promise<boolean> {
   }
 }
 
-function getLinuxBrowser (
+async function getLinuxBrowser (
   name: string,
   binary: string,
   versionRegex: RegExp,
@@ -46,7 +50,7 @@ function getLinuxBrowser (
     path: binary,
   }
 
-  const getVersion = (stdout: string) => {
+  const getVersion = async (stdout: string) => {
     const m = versionRegex.exec(stdout)
 
     if (m) {
@@ -85,7 +89,7 @@ function getLinuxBrowser (
       return
     }
 
-    if (name === 'firefox' && (await isFirefoxSnap(binary))) {
+    if (name === 'firefox' && (await Promise.race([isFirefoxSnap(binary), createTimeoutPromise(30000, 'Timed out after 30 seconds checking if Firefox is a snap')]))) {
       // if the binary in the path points to a script that calls the snap, set a snap-specific profile path
       // @see https://github.com/cypress-io/cypress/issues/19793
       debug('firefox is running as a snap, changing profile path')
@@ -95,29 +99,30 @@ function getLinuxBrowser (
     }
   }
 
-  return getVersionString(binary)
-  .tap(maybeSetSnapProfilePath)
-  .then(getVersion)
-  .then((version?: string): FoundBrowser => {
+  try {
+    const versionString = await getVersionString(binary)
+
+    await maybeSetSnapProfilePath(versionString)
+    const version = await getVersion(versionString)
+
     foundBrowser.version = version
 
-    return foundBrowser
-  })
-  .catch(logAndThrowError)
+    return foundBrowser as FoundBrowser
+  } catch (err) {
+    return logAndThrowError(err)
+  }
 }
 
-export function getVersionString (path: string) {
+export async function getVersionString (path: string) {
   debugVerbose('finding version string using command "%s --version"', path)
 
-  return Bluebird.resolve(utils.getOutput(path, ['--version']))
-  .timeout(30000, `Timed out after 30 seconds getting browser version for ${path}`)
-  .then((val) => val.stdout)
-  .then((val) => val.trim())
-  .then((val) => {
-    debugVerbose('stdout for "%s --version": %s', path, val)
+  const timeoutPromise = createTimeoutPromise(30000, `Timed out after 30 seconds getting browser version for ${path}`)
+  const { stdout } = await Promise.race([getOutput(path, ['--version']), timeoutPromise]) as { stdout: string }
+  const trimmedStdout = stdout.trim()
 
-    return val
-  })
+  debugVerbose('stdout for "%s --version": %s', path, trimmedStdout)
+
+  return trimmedStdout
 }
 
 export function getVersionNumber (version: string, browser: Browser) {

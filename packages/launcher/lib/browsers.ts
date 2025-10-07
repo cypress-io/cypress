@@ -1,6 +1,6 @@
 import Debug from 'debug'
 import type * as cp from 'child_process'
-import { utils } from './utils'
+import { spawnWithArch } from './utils'
 import type { FoundBrowser } from '@packages/types'
 import type { Readable } from 'stream'
 
@@ -36,7 +36,7 @@ export function launch (
 
   debug('spawning browser with opts %o', { browser, url, spawnOpts })
 
-  const proc = utils.spawnWithArch(browser.path, args, spawnOpts)
+  const proc = spawnWithArch(browser.path, args, spawnOpts)
 
   proc.stdout.on('data', (buf) => {
     debug('%s stdout: %s', browser.name, String(buf).trim())

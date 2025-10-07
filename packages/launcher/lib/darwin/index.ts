@@ -103,7 +103,7 @@ export const getVersionNumber = linuxHelper.getVersionNumber
 
 export const getPathData = linuxHelper.getPathData
 
-export function detect (browser: Browser): Promise<DetectedBrowser> {
+export async function detect (browser: Browser): Promise<DetectedBrowser> {
   let findAppParams = get(browsers, [browser.name, browser.channel])
 
   if (!findAppParams) {
@@ -113,11 +113,13 @@ export function detect (browser: Browser): Promise<DetectedBrowser> {
     return linuxHelper.detect(browser)
   }
 
-  return findApp(findAppParams)
-  .then((val) => ({ name: browser.name, ...val }))
-  .catch((err) => {
+  try {
+    const val = await findApp(findAppParams)
+
+    return { name: browser.name, ...val }
+  } catch (err) {
     debugVerbose('could not detect %s using findApp %o, falling back to linux detection method', browser.name, err)
 
     return linuxHelper.detect(browser)
-  })
+  }
 }

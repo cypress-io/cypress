@@ -1,5 +1,4 @@
 import type { ChildProcess } from 'child_process'
-import type Bluebird from 'bluebird'
 import type { Browser, FoundBrowser } from '@packages/types'
 
 export type NotInstalledError = Error & { notInstalled: boolean }
@@ -7,7 +6,7 @@ export type NotInstalledError = Error & { notInstalled: boolean }
 export type NotDetectedAtPathError = Error & { notDetectedAtPath: boolean }
 
 export type LauncherApi = {
-  detect: (goalBrowsers?: Browser[]) => Bluebird<FoundBrowser[]>
+  detect: (goalBrowsers?: Browser[]) => Promise<FoundBrowser[]>
   detectByPath: (
     path: string,
     goalBrowsers?: Browser[]

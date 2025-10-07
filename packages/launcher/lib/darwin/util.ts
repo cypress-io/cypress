@@ -1,6 +1,6 @@
 import Debug from 'debug'
 import { notInstalledErr } from '../errors'
-import { utils } from '../utils'
+import execa from 'execa'
 import fs from 'fs-extra'
 import path from 'path'
 import plist from 'plist'
@@ -8,7 +8,7 @@ import plist from 'plist'
 const debugVerbose = Debug('cypress-verbose:launcher:darwin:util')
 
 /** parses Info.plist file from given application and returns a property */
-export function parsePlist (p: string, property: string): Promise<string> {
+export async function parsePlist (p: string, property: string): Promise<string> {
   const pl = path.join(p, 'Contents', 'Info.plist')
 
   debugVerbose('reading property file "%s"', pl)
@@ -21,16 +21,18 @@ export function parsePlist (p: string, property: string): Promise<string> {
     throw notInstalledErr('', msg)
   }
 
-  return fs
-  .readFile(pl, 'utf8')
-  .then(plist.parse)
-  .then((val) => val[property])
-  .then(String) // explicitly convert value to String type
-  .catch(failed) // to make TS compiler happy
+  try {
+    const file = await fs.readFile(pl, 'utf8')
+    const val = plist.parse(file)
+
+    return String(val[property]) // explicitly convert value to String type
+  } catch (err) {
+    return failed(err) // to make TS compiler happy
+  }
 }
 
 /** uses mdfind to find app using Ma app id like 'com.google.Chrome.canary' */
-export function mdfind (id: string): Promise<string> {
+export async function mdfind (id: string): Promise<string> {
   const cmd = `mdfind 'kMDItemCFBundleIdentifier=="${id}"' | head -1`
 
   debugVerbose('looking for bundle id %s using command: %s', id, cmd)
@@ -46,16 +48,15 @@ export function mdfind (id: string): Promise<string> {
     throw notInstalledErr(id)
   }
 
-  return utils.execa(cmd)
-  .then((val) => {
-    return val.stdout
-  })
-  .then((val) => {
-    logFound(val)
+  try {
+    const val = await execa(cmd)
 
-    return val
-  })
-  .catch(failedToFind)
+    logFound(val.stdout)
+
+    return val.stdout
+  } catch (err) {
+    return failedToFind()
+  }
 }
 
 export type AppInfo = {
@@ -79,22 +80,24 @@ function formApplicationPath (appName: string) {
 }
 
 /** finds an application and its version */
-export function findApp ({ appName, executable, bundleId, versionProperty }: FindAppParams): Promise<AppInfo> {
+export async function findApp ({ appName, executable, bundleId, versionProperty }: FindAppParams): Promise<AppInfo> {
   debugVerbose('looking for app %s bundle id %s', executable, bundleId)
 
-  const findVersion = (foundPath: string) => {
-    return parsePlist(foundPath, versionProperty).then((version) => {
-      debugVerbose('got plist: %o', { foundPath, version })
+  const findVersion = async (foundPath: string) => {
+    const version = await parsePlist(foundPath, versionProperty)
 
-      return {
-        path: path.join(foundPath, executable),
-        version,
-      }
-    })
+    debugVerbose('got plist: %o', { foundPath, version })
+
+    return {
+      path: path.join(foundPath, executable),
+      version,
+    }
   }
 
-  const tryMdFind = () => {
-    return mdfind(bundleId).then(findVersion)
+  const tryMdFind = async () => {
+    const foundPath = await mdfind(bundleId)
+
+    return findVersion(foundPath)
   }
 
   const tryFullApplicationFind = () => {
@@ -105,5 +108,11 @@ export function findApp ({ appName, executable, bundleId, versionProperty }: Fin
     return findVersion(applicationPath)
   }
 
-  return tryMdFind().catch(tryFullApplicationFind)
+  try {
+    const val = await tryMdFind()
+
+    return val
+  } catch (err) {
+    return tryFullApplicationFind()
+  }
 }

@@ -1,4 +1,3 @@
-import Bluebird from 'bluebird'
 import _, { compact, extend, find } from 'lodash'
 import os from 'os'
 import { removeDuplicateBrowsers } from '@packages/data-context/src/sources/BrowserDataSource'
@@ -94,17 +93,19 @@ function lookup (
  * one for each binary. If Windows is detected, only one `checkOneBrowser` will be called, because
  * we don't use the `binary` field on Windows.
  */
-function checkBrowser (browser: Browser): Bluebird<(boolean | HasVersion)[]> {
+async function checkBrowser (browser: Browser): Promise<(boolean | HasVersion)[]> {
   if (Array.isArray(browser.binary) && os.platform() !== 'win32') {
-    return Bluebird.map(browser.binary, (binary: string) => {
-      return checkOneBrowser(extend({}, browser, { binary }))
-    })
+    const checkedBrowsers = await Promise.all(browser.binary.map((binary) => checkOneBrowser(extend({}, browser, { binary }))))
+
+    return checkedBrowsers
   }
 
-  return Bluebird.map([browser], checkOneBrowser)
+  const checkedBrowsers = await checkOneBrowser(browser)
+
+  return [checkedBrowsers]
 }
 
-function checkOneBrowser (browser: Browser): Promise<boolean | HasVersion> {
+async function checkOneBrowser (browser: Browser): Promise<boolean | HasVersion> {
   const platform = os.platform()
   const pickBrowserProps = [
     'name',
@@ -131,21 +132,25 @@ function checkOneBrowser (browser: Browser): Promise<boolean | HasVersion> {
     throw err
   }
 
-  return lookup(platform, browser)
-  .then((val) => ({ ...browser, ...val }))
-  .then((val) => _.pick(val, pickBrowserProps) as FoundBrowser)
-  .then((foundBrowser) => {
+  try {
+    const detectedBrowser = await lookup(platform, browser)
+
+    const browserWithDetected = { ...browser, ...detectedBrowser }
+
+    const foundBrowser = _.pick(browserWithDetected, pickBrowserProps) as FoundBrowser
+
     foundBrowser.majorVersion = getMajorVersion(foundBrowser.version)
 
     validateCypressSupport(browser.validator, foundBrowser, platform)
 
     return foundBrowser
-  })
-  .catch(failed)
+  } catch (error) {
+    return failed(error as NotInstalledError)
+  }
 }
 
 /** returns list of detected browsers */
-export const detect = (goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> => {
+export const detect = async (goalBrowsers?: Browser[]): Promise<FoundBrowser[]> => {
   // we can detect same browser under different aliases
   // tell them apart by the name and the version property
   if (!goalBrowsers) {
@@ -158,13 +163,27 @@ export const detect = (goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> => {
 
   debug('detecting if the following browsers are present %o', goalBrowsers)
 
-  return Bluebird.mapSeries(goalBrowsers, checkBrowser)
-  .then((val) => _.flatten(val))
-  .then(compactFalse)
-  .then(removeDuplicateBrowsers)
+  let foundBrowsers: FoundBrowser[] = []
+
+  {
+    const hasVersionOrFalse: (boolean | HasVersion)[][] = []
+
+    for (const browser of goalBrowsers) {
+      const browserOrFalse = await checkBrowser(browser)
+
+      hasVersionOrFalse.push(browserOrFalse)
+    }
+
+    const flattenedFoundBrowsers = _.flatten(hasVersionOrFalse)
+    const compactedFoundBrowsers = compactFalse(flattenedFoundBrowsers)
+
+    foundBrowsers = removeDuplicateBrowsers(compactedFoundBrowsers)
+  }
+
+  return foundBrowsers
 }
 
-export const detectByPath = (
+export const detectByPath = async (
   path: string,
   goalBrowsers?: Browser[],
 ): Promise<FoundBrowser> => {
@@ -210,8 +229,9 @@ export const detectByPath = (
 
   const pathData = helper.getPathData(path)
 
-  return helper.getVersionString(pathData.path)
-  .then((version) => {
+  try {
+    const version = await helper.getVersionString(pathData.path)
+
     let browser
 
     if (pathData.browserKey) {
@@ -227,12 +247,11 @@ export const detectByPath = (
     }
 
     return setCustomBrowserData(browser, pathData.path, version)
-  })
-  .catch((err: NotDetectedAtPathError) => {
-    if (err.notDetectedAtPath) {
-      throw err
+  } catch (error: any) {
+    if (error.notDetectedAtPath) {
+      throw error as NotDetectedAtPathError
     }
 
-    throw notDetectedAtPathErr(err.message)
-  })
+    throw notDetectedAtPathErr(error.message)
+  }
 }

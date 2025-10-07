@@ -144,8 +144,9 @@ function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
 
     let path = doubleEscape(exePath)
 
-    return fs.pathExists(path)
-    .then((exists) => {
+    try {
+      const exists = await fs.pathExists(path)
+
       debugVerbose('found %s ? %o', path, { exists })
 
       if (!exists) {
@@ -154,21 +155,20 @@ function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
 
       // Use module.exports.getVersionString here, rather than our local reference
       // to that variable so that the tests can easily mock it
-      return getVersionString(path).then((version) => {
-        debug('got version string for %s: %o', browser.name, { exePath, version })
+      const version = await getVersionString(path)
 
-        return {
-          name: browser.name,
-          version,
-          path: exePath,
-        } as FoundBrowser
-      })
-    })
-    .catch((err) => {
+      debug('got version string for %s: %o', browser.name, { exePath, version })
+
+      return {
+        name: browser.name,
+        version,
+        path: exePath,
+      } as FoundBrowser
+    } catch (err) {
       debug('error while looking up exe, trying next exePath %o', { exePath, exePaths, err })
 
       return tryNextExePath()
-    })
+    }
   }
 
   return tryNextExePath()
