@@ -84,8 +84,8 @@ async function exitErr (err: unknown, posixExitCodes?: boolean) {
   if (isCypressError(err)) {
     if (
       posixExitCodes && (
-      err.type === 'CLOUD_CANNOT_PROCEED_IN_PARALLEL' ||
-      err.type === 'CLOUD_CANNOT_PROCEED_IN_SERIAL'
+      err.type === 'CLOUD_CANNOT_PROCEED_IN_PARALLEL_NETWORK' ||
+      err.type === 'CLOUD_CANNOT_PROCEED_IN_SERIAL_NETWORK'
     )) {
       return exit(112)
     }
