@@ -1,7 +1,14 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.4.1
+
+_Released 10/21/2025 (PENDING)_
+
+**Bugfixes:**
+- When running `cypress` in Cypress development environments, or when `ELECTRON_ENABLE_LOGGING` is otherwise set to 1, certain messages written to `stderr` will no longer be bracketed with verbose tags. Addresses [#32569](https://github.com/cypress-io/cypress/issues/32569). Addressed in []().
+
 ## 15.4.0
 
-_Released 10/7/2025 (PENDING)_
+_Released 10/7/2025_
 
 **Features:**
 
