@@ -66,8 +66,10 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
     events.emit('save:state')
   }
 
-  // TODO: to be implemented
-  // const toggleShowHttpRequests = () => {}
+  const toggleShowFetchRequests = () => {
+    appState.toggleShowFetchRequests()
+    events.emit('save:state')
+  }
 
   // Close popover when clicking outside
   useEffect(() => {
@@ -135,20 +137,18 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
       <div className="runnable-popover-section">
         <div className="runnable-popover-section-title">Testing preferences</div>
 
-        {/* // TODO: to be implemented */}
-        {/* <div className="runnable-popover-item-with-toggle">
+        <div className="runnable-popover-item-with-toggle">
           <div className="runnable-popover-item-with-toggle-content">
             <div className="runnable-popover-item-text">
               <span className="runnable-popover-item-label">Show HTTP requests</span>
             </div>
             <Switch
               data-cy="show-http-requests-switch"
-              value={false}
-
-              onUpdate={action('toggle:show:http:requests', toggleShowHttpRequests)}
+              value={appState.showFetchRequests}
+              onUpdate={action('toggle:show:http:requests', toggleShowFetchRequests)}
             />
           </div>
-        </div> */}
+        </div>
 
         <div className="runnable-popover-item-with-toggle">
           <div className="runnable-popover-item-with-toggle-content">
@@ -158,7 +158,6 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
             <Switch
               data-cy="auto-scroll-switch"
               value={appState.autoScrollingUserPref}
-
               onUpdate={action('toggle:auto:scrolling', toggleAutoScrollingUserPref)}
             />
           </div>

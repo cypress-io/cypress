@@ -15,8 +15,9 @@ _Released 10/7/2025_
 **Features:**
 
 - Cypress Studio is now available by default. You no longer have to set the `experimentalStudio` flag. Addresses [#30997](https://github.com/cypress-io/cypress/issues/30997). Addressed in [#32571](https://github.com/cypress-io/cypress/pull/32571).
+- An option is now available to 'Hide HTTP Requests' in the Cypress Command Log. This can be found in the new dropdown menu at the top of the Command Log. Addresses [#7362](https://github.com/cypress-io/cypress/issues/7362). Addressed in [#32658](https://github.com/cypress-io/cypress/pull/32658).
 - Added the `--posix-exit-codes` flag for the `run` command. When this flag is passed, Cypress will exit with 1 if any tests fail, rather than the number of failed tests. Addresses [#32605](https://github.com/cypress-io/cypress/issues/32605) and [#24695](https://github.com/cypress-io/cypress/issues/24695). Addressed in [#32609](https://github.com/cypress-io/cypress/pull/32609).
-- `cy.prompt` is now a reserved Cypress command, currently gated behind a feature flag that requires an invite from Cypress. This means any custom commands named 'prompt' will no longer work. Stay tuned for updates on when this feature will become more widely available. Addresses [#31826](https://github.com/cypress-io/cypress/issues/31826).
+- [`cy.prompt()`](https://docs.cypress.io/api/commands/prompt) is now a reserved Cypress command, currently gated behind a feature flag that requires an invite from Cypress. This means any custom commands named 'prompt' will no longer work. Stay tuned for updates on when this feature will become more widely available. Addresses [#31826](https://github.com/cypress-io/cypress/issues/31826).
 
 **Bugfixes:**
 
@@ -26,7 +27,7 @@ _Released 10/7/2025_
 
 **Misc:**
 
-- Added a dropdown menu in the Command Log that includes actions like Open in IDE and Add New Test in Studio, along with test preferences such as Auto-Scroll. Addresses [#32556](https://github.com/cypress-io/cypress/issues/32556) and [#32558](https://github.com/cypress-io/cypress/issues/32558). Addressed in [#32611](https://github.com/cypress-io/cypress/pull/32611).
+- Added a dropdown menu in the Command Log that includes actions like Open in IDE and Add New Test in Studio, along with test preferences such as Auto-Scroll and Hide HTTP Requests. Addresses [#32556](https://github.com/cypress-io/cypress/issues/32556) and [#32558](https://github.com/cypress-io/cypress/issues/32558). Addressed in [#32611](https://github.com/cypress-io/cypress/pull/32611).
 - Updated the Studio test editing header to include a Back button. This change ensures the Specs button remains functional for expanding or collapsing the specs panel. Addresses [#32556](https://github.com/cypress-io/cypress/issues/32556) and [#32558](https://github.com/cypress-io/cypress/issues/32558). Addressed in [#32611](https://github.com/cypress-io/cypress/pull/32611).
 - Fixed the Studio panel resizing when dragging. Addressed in [#32584](https://github.com/cypress-io/cypress/pull/32584).
 - The Next button now maintains consistent visibility during stepping sessions when using `cy.pause`, staying visible but disabled when no immediate next command is available, providing clear visual feedback to users about stepping state. Addresses [#32476](https://github.com/cypress-io/cypress/issues/32476). Addressed in [#32536](https://github.com/cypress-io/cypress/pull/32536).
