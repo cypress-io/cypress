@@ -121,6 +121,7 @@ describe('lib/cloud/studio', () => {
                  error.message === JSON.stringify({
                    message: 'Circular reference error',
                    code: 'CIRCULAR_ERROR',
+                   self: '[Circular]',
                  })
         }),
         'initializeRoutes',
@@ -185,6 +186,7 @@ describe('lib/cloud/studio', () => {
                  error.message === JSON.stringify({
                    message: 'Async circular reference error',
                    code: 'ASYNC_CIRCULAR_ERROR',
+                   self: '[Circular]',
                  })
         }),
         'initializeStudioAI',
@@ -245,6 +247,7 @@ describe('lib/cloud/studio', () => {
                  error.message === JSON.stringify({
                    message: 'Non-essential circular reference error',
                    code: 'NON_ESSENTIAL_CIRCULAR_ERROR',
+                   self: '[Circular]',
                  })
         }),
         'captureStudioEvent',

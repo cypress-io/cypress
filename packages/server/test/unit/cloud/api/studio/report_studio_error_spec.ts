@@ -215,6 +215,7 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
             message: JSON.stringify({
               message: 'Circular reference error',
               code: 'CIRCULAR_ERROR',
+              self: '[Circular]',
             }),
             stack: sinon.match((stack) => stack.includes('<stripped-path>report_studio_error_spec.ts')),
             code: undefined,
