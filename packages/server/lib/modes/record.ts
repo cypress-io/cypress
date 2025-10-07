@@ -800,6 +800,7 @@ const createRunAndRecordSpecs = (options: any = {}) => {
 
           return cb(response)
         } catch (err: unknown) {
+          onError(err)
           debug('postInstanceTests failed, allowing browser to hang until it is killed: Error %o', { err })
         }
       })
