@@ -7,6 +7,7 @@ export type NotifyWhenRunCompletes = typeof NotifyCompletionStatuses[number]
 export const defaultPreferences: AllowedState = {
   autoScrollingEnabled: true,
   isSpecsListOpen: false,
+  showFetchRequests: true,
   isSideNavigationOpen: true,
   desktopNotificationsEnabled: null,
   notifyWhenRunStarts: false,
@@ -35,6 +36,7 @@ export const allowedKeys: Readonly<Array<keyof AllowedState>> = [
   'showedStudioModal',
   'preferredOpener',
   'isSpecsListOpen',
+  'showFetchRequests',
   'firstOpened',
   'lastOpened',
   'lastProjectId',
@@ -62,6 +64,7 @@ export type AllowedState = Partial<{
   appX: Maybe<number>
   appY: Maybe<number>
   isSpecsListOpen: Maybe<boolean>
+  showFetchRequests: Maybe<boolean>
   autoScrollingEnabled: Maybe<boolean>
   banners: Maybe<BannersState>
   browserWidth: Maybe<number>
