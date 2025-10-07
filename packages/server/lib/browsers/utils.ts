@@ -353,12 +353,12 @@ async function ensureAndGetByNameOrPath (nameOrPath: string, returnAll = false, 
 
       return browser
     } catch (err) {
-      return errors.throwErr('BROWSER_NOT_FOUND_BY_PATH', nameOrPath, err.message)
+      errors.throwErr('BROWSER_NOT_FOUND_BY_PATH', nameOrPath, err.message)
     }
   }
 
   // not a path, not found by name
-  return throwBrowserNotFound(nameOrPath, browsers)
+  throwBrowserNotFound(nameOrPath, browsers)
 }
 
 const formatBrowsersToOptions = (browsers) => {
