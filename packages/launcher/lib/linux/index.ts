@@ -21,7 +21,7 @@ const createTimeoutPromise = (timeout: number = 30000, message: string = `Timed 
 
 async function isFirefoxSnap (binary: string): Promise<boolean> {
   try {
-    const result = await Promise.race([getFirefoxSnap(binary), createTimeoutPromise(30000, 'Timed out after 30 seconds checking if Firefox is a snap')]) as Promise<boolean>
+    const result = await Promise.race([getFirefoxSnap(binary), createTimeoutPromise(30000, 'Timed out after 30 seconds checking if Firefox is a snap')]) as boolean
 
     return result
   } catch (err) {
