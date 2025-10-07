@@ -4,17 +4,17 @@ import { START_TAG, END_TAG } from './constants'
 import { FilterPrefixedContent } from './FilterPrefixedContent'
 import { FilterTaggedContent } from './FilterTaggedContent'
 import { WriteToDebug } from './WriteToDebug'
+import { tagsDisabled } from './tagsDisabled'
 
-const DISABLE_TAGS = process.env.ELECTRON_ENABLE_LOGGING === '1'
-
-export function filter (stderr: Writable, debug: Debugger, prefix: RegExp, disableTags: boolean = false): Writable {
+export function filter (stderr: Writable, debug: Debugger, prefix: RegExp): Writable {
   const prefixTx = new FilterPrefixedContent(prefix, stderr)
-  const tagTx = new FilterTaggedContent(START_TAG, END_TAG, stderr)
   const debugWriter = new WriteToDebug(debug)
 
-  if (DISABLE_TAGS || disableTags) {
+  if (tagsDisabled()) {
     prefixTx.pipe(debugWriter)
   } else {
+    const tagTx = new FilterTaggedContent(START_TAG, END_TAG, stderr)
+
     prefixTx.pipe(tagTx).pipe(debugWriter)
   }
 

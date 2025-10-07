@@ -2,6 +2,7 @@ import { Transform } from 'stream'
 import { START_TAG, END_TAG } from './constants'
 import { StringDecoder } from 'string_decoder'
 import Debug from 'debug'
+import { tagsDisabled } from './tagsDisabled'
 
 const debug = Debug('cypress:stderr-filtering:TagStream')
 const debugVerbose = Debug('cypress-verbose:stderr-filtering:TagStream')
@@ -63,16 +64,14 @@ export class TagStream extends Transform {
    * @returns Promise that resolves when transformation is complete.
    */
   async transform (chunk: Buffer | string | any, encoding: string, callback: (error?: Error, data?: Buffer) => void) {
-    const DISABLE_TAGS = process.env.CYPRESS_INTERNAL_ENV === 'development' || process.env.ELECTRON_ENABLE_LOGGING === '1'
-
     try {
       const out = chunk instanceof Buffer ?
         this.initializedDecoder.write(chunk) :
         chunk
-      const transformed = DISABLE_TAGS ? out : `${this.startTag}${out}${this.endTag}`
+      const transformed = this.tag(out)
 
-      debugVerbose(`transformed: "${transformed.replaceAll('\n', '\\n')}"`)
-      const canWrite = this.push(out ? Buffer.from(transformed) : '')
+      debugVerbose(`transformed: "${transformed.toString().replaceAll('\n', '\\n')}"`)
+      const canWrite = this.push(out ? transformed : '')
 
       if (!canWrite) {
         debugVerbose('waiting for drain')
@@ -98,6 +97,14 @@ export class TagStream extends Transform {
     debug('flushing')
     const out = this.initializedDecoder.end()
 
-    callback(undefined, Buffer.from(`${this.startTag}${out}${this.endTag}`))
+    if (tagsDisabled()) {
+      callback(undefined, Buffer.from(out))
+    } else {
+      callback(undefined, this.tag(out))
+    }
+  }
+
+  private tag (out: string): Buffer {
+    return tagsDisabled() ? Buffer.from(out) : Buffer.from(`${this.startTag}${out}${this.endTag}`)
   }
 }

@@ -10,9 +10,6 @@ vi.mock('../FilterPrefixedContent')
 vi.mock('../FilterTaggedContent')
 vi.mock('../WriteToDebug')
 
-// Mock process.env
-const originalEnv = process.env
-
 describe('Filter', () => {
   let mockStderr: any
   let mockDebug: any
@@ -21,9 +18,6 @@ describe('Filter', () => {
   let mockWriteToDebug: any
 
   beforeEach(() => {
-    // Reset environment
-    process.env = { ...originalEnv }
-
     // Create mock objects
     mockStderr = {
       write: vi.fn(),
@@ -54,48 +48,38 @@ describe('Filter', () => {
 
   afterEach(() => {
     vi.clearAllMocks()
-    process.env = originalEnv
+    vi.unstubAllEnvs()
   })
 
-  describe('when disableTags is false', () => {
-    beforeEach(() => {
-      process.env.ELECTRON_ENABLE_LOGGING = '0'
-    })
-
+  describe('when tags are enabled', () => {
     it('pipes prefixTx -> tagTx -> debugWriter', () => {
-      const result = filter(mockStderr, mockDebug, DEBUG_PREFIX, false)
+      vi.stubEnv('ELECTRON_ENABLE_LOGGING', '0')
+      vi.stubEnv('CYPRESS_INTERNAL_ENV', 'production')
 
-      // Verify FilterPrefixedContent was created with correct args
+      const result = filter(mockStderr, mockDebug, DEBUG_PREFIX)
+
       expect(FilterPrefixedContent).toHaveBeenCalledWith(DEBUG_PREFIX, mockStderr)
 
-      // Verify FilterTaggedContent was created with correct args
       expect(FilterTaggedContent).toHaveBeenCalledWith(START_TAG, END_TAG, mockStderr)
 
-      // Verify WriteToDebug was created with correct args
       expect(WriteToDebug).toHaveBeenCalledWith(mockDebug)
 
-      // Verify the pipe chain: prefixTx -> tagTx -> debugWriter
       expect(mockFilterPrefixedContent.pipe).toHaveBeenCalledWith(mockFilterTaggedContent)
       expect(mockFilterTaggedContent.pipe).toHaveBeenCalledWith(mockWriteToDebug)
 
-      // Verify the result is the prefixTx
       expect(result).toBe(mockFilterPrefixedContent)
     })
   })
 
-  describe('when disableTags parameter is true', () => {
-    beforeEach(() => {
-      process.env.ELECTRON_ENABLE_LOGGING = '0'
-    })
-
-    it('should pipe prefixTx -> debugWriter (skip tagTx)', () => {
-      const result = filter(mockStderr, mockDebug, DEBUG_PREFIX, true)
+  describe('disabling tags', () => {
+    function expectNoTags () {
+      const result = filter(mockStderr, mockDebug, DEBUG_PREFIX)
 
       // Verify FilterPrefixedContent was created with correct args
       expect(FilterPrefixedContent).toHaveBeenCalledWith(DEBUG_PREFIX, mockStderr)
 
       // Verify FilterTaggedContent was created with correct args
-      expect(FilterTaggedContent).toHaveBeenCalledWith(START_TAG, END_TAG, mockStderr)
+      expect(FilterTaggedContent).not.toHaveBeenCalled()
 
       // Verify WriteToDebug was created with correct args
       expect(WriteToDebug).toHaveBeenCalledWith(mockDebug)
@@ -106,6 +90,16 @@ describe('Filter', () => {
 
       // Verify the result is the prefixTx
       expect(result).toBe(mockFilterPrefixedContent)
+    }
+
+    it('does not add tags when ELECTRON_ENABLE_LOGGING is enabled', () => {
+      vi.stubEnv('ELECTRON_ENABLE_LOGGING', '1')
+      expectNoTags()
+    })
+
+    it('does not add tags when CYPRESS_INTERNAL_ENV is development', () => {
+      vi.stubEnv('CYPRESS_INTERNAL_ENV', 'development')
+      expectNoTags()
     })
   })
 })
