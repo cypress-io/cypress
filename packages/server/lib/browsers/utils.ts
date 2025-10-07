@@ -344,20 +344,21 @@ async function ensureAndGetByNameOrPath (nameOrPath: string, returnAll = false, 
   // did the user give a bad name, or is this actually a path?
   if (isValidPathToBrowser(nameOrPath)) {
     // looks like a path - try to resolve it to a FoundBrowser
-    return launcher.detectByPath(nameOrPath)
-    .then((browser) => {
+    try {
+      const browser = await launcher.detectByPath(nameOrPath)
+
       if (returnAll) {
         return [browser].concat(browsers)
       }
 
       return browser
-    }).catch((err) => {
-      errors.throwErr('BROWSER_NOT_FOUND_BY_PATH', nameOrPath, err.message)
-    })
+    } catch (err) {
+      return errors.throwErr('BROWSER_NOT_FOUND_BY_PATH', nameOrPath, err.message)
+    }
   }
 
   // not a path, not found by name
-  throwBrowserNotFound(nameOrPath, browsers)
+  return throwBrowserNotFound(nameOrPath, browsers)
 }
 
 const formatBrowsersToOptions = (browsers) => {

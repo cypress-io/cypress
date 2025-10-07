@@ -1,6 +1,6 @@
 require('../../spec_helper')
 
-const info = require(`../../../lib/modes/info`)
+const { info } = require(`../../../lib/modes/info`)
 const capture = require(`../../../lib/capture`)
 const browserUtils = require(`../../../lib/browsers/utils`)
 const { fs } = require(`../../../lib/util/fs`)

@@ -127,10 +127,9 @@ const print = (browsers: FoundBrowser[] = []) => {
   }
 }
 
-const info = () => {
-  return launcherDetect()
-  .then(addProfilePath)
-  .then(print)
-}
+export const info = async () => {
+  const browsers = await launcherDetect()
+  const browsersWithProfilePath = await addProfilePath(browsers)
 
-module.exports = info
+  print(browsersWithProfilePath)
+}
