@@ -57,7 +57,10 @@ export function reportStudioError ({
   let errorObject: Error
 
   if (!(error instanceof Error)) {
-    errorObject = new Error(String(error))
+    // For strings, use them directly. For objects, serialize them.
+    const message = typeof error === 'string' ? error : JSON.stringify(error)
+
+    errorObject = new Error(message)
   } else {
     errorObject = error
   }

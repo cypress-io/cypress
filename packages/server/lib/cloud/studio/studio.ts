@@ -124,7 +124,10 @@ export class StudioManager implements StudioManagerShape {
       let actualError: Error
 
       if (!(error instanceof Error)) {
-        actualError = new Error(String(error))
+        // For strings, use them directly. For objects, serialize them.
+        const message = typeof error === 'string' ? error : JSON.stringify(error)
+
+        actualError = new Error(message)
       } else {
         actualError = error
       }
@@ -154,7 +157,10 @@ export class StudioManager implements StudioManagerShape {
       let actualError: Error
 
       if (!(error instanceof Error)) {
-        actualError = new Error(String(error))
+        // For strings, use them directly. For objects, serialize them.
+        const message = typeof error === 'string' ? error : JSON.stringify(error)
+
+        actualError = new Error(message)
       } else {
         actualError = error
       }
