@@ -188,6 +188,50 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
       )
     })
 
+    it('handles circular reference objects safely without throwing', () => {
+      // Create an object with circular reference
+      const circularError: any = {
+        message: 'Circular reference error',
+        code: 'CIRCULAR_ERROR',
+      }
+
+      circularError.self = circularError // Create circular reference
+
+      reportStudioError({
+        cloudApi,
+        studioHash: 'abc123',
+        projectSlug: 'test-project',
+        error: circularError,
+        studioMethod: 'circularTest',
+      })
+
+      expect(cloudRequestStub).to.be.calledWithMatch(
+        'http://localhost:1234/studio/errors',
+        {
+          studioHash: 'abc123',
+          projectSlug: 'test-project',
+          errors: [{
+            name: 'Error',
+            message: JSON.stringify({
+              message: 'Circular reference error',
+              code: 'CIRCULAR_ERROR',
+            }),
+            stack: sinon.match((stack) => stack.includes('<stripped-path>report_studio_error_spec.ts')),
+            code: undefined,
+            errno: undefined,
+            studioMethod: 'circularTest',
+            studioMethodArgs: undefined,
+          }],
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'x-cypress-version': '1.2.3',
+          },
+        },
+      )
+    })
+
     it('handles Error objects correctly', () => {
       const error = new Error('test error')
 

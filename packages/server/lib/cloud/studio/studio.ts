@@ -6,6 +6,7 @@ import path from 'path'
 import { reportStudioError, ReportStudioErrorOptions } from '../api/studio/report_studio_error'
 import crypto, { BinaryLike } from 'crypto'
 import { StudioElectron } from './StudioElectron'
+import { safeErrorSerialize } from './utils'
 
 interface StudioServer { default: StudioServerDefaultShape }
 
@@ -124,8 +125,8 @@ export class StudioManager implements StudioManagerShape {
       let actualError: Error
 
       if (!(error instanceof Error)) {
-        // For strings, use them directly. For objects, serialize them.
-        const message = typeof error === 'string' ? error : JSON.stringify(error)
+        // Use safe serialization that handles circular references and other edge cases
+        const message = safeErrorSerialize(error)
 
         actualError = new Error(message)
       } else {
@@ -157,8 +158,8 @@ export class StudioManager implements StudioManagerShape {
       let actualError: Error
 
       if (!(error instanceof Error)) {
-        // For strings, use them directly. For objects, serialize them.
-        const message = typeof error === 'string' ? error : JSON.stringify(error)
+        // Use safe serialization that handles circular references and other edge cases
+        const message = safeErrorSerialize(error)
 
         actualError = new Error(message)
       } else {

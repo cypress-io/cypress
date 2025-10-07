@@ -3,6 +3,7 @@ import Debug from 'debug'
 import { stripPath } from '../../strip_path'
 const debug = Debug('cypress:server:cloud:api:studio:report_studio_errors')
 import { logError } from '@packages/stderr-filtering'
+import { safeErrorSerialize } from '../../studio/utils'
 
 export interface ReportStudioErrorOptions {
   cloudApi: StudioCloudApi
@@ -57,8 +58,8 @@ export function reportStudioError ({
   let errorObject: Error
 
   if (!(error instanceof Error)) {
-    // For strings, use them directly. For objects, serialize them.
-    const message = typeof error === 'string' ? error : JSON.stringify(error)
+    // Use safe serialization that handles circular references and other edge cases
+    const message = safeErrorSerialize(error)
 
     errorObject = new Error(message)
   } else {

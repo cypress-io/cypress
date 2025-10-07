@@ -99,6 +99,34 @@ describe('lib/cloud/studio', () => {
         {},
       )
     })
+
+    it('handles circular reference objects safely in sync methods without throwing', () => {
+      // Create an object with circular reference
+      const circularError: any = {
+        message: 'Circular reference error',
+        code: 'CIRCULAR_ERROR',
+      }
+
+      circularError.self = circularError // Create circular reference
+
+      sinon.stub(studio, 'initializeRoutes').throws(circularError)
+      sinon.stub(studio, 'reportError')
+
+      studioManager.initializeRoutes({} as any)
+
+      expect(studioManager.status).to.eq('IN_ERROR')
+      expect(studio.reportError).to.be.calledWithMatch(
+        sinon.match((error) => {
+          return error instanceof Error &&
+                 error.message === JSON.stringify({
+                   message: 'Circular reference error',
+                   code: 'CIRCULAR_ERROR',
+                 })
+        }),
+        'initializeRoutes',
+        {},
+      )
+    })
   })
 
   describe('asynchronous method invocation', () => {
@@ -136,6 +164,34 @@ describe('lib/cloud/studio', () => {
       )
     })
 
+    it('handles circular reference objects safely in async methods without throwing', async () => {
+      // Create an object with circular reference
+      const circularError: any = {
+        message: 'Async circular reference error',
+        code: 'ASYNC_CIRCULAR_ERROR',
+      }
+
+      circularError.self = circularError // Create circular reference
+
+      sinon.stub(studio, 'initializeStudioAI').throws(circularError)
+      sinon.stub(studio, 'reportError')
+
+      await studioManager.initializeStudioAI({} as any)
+
+      expect(studioManager.status).to.eq('IN_ERROR')
+      expect(studio.reportError).to.be.calledWithMatch(
+        sinon.match((error) => {
+          return error instanceof Error &&
+                 error.message === JSON.stringify({
+                   message: 'Async circular reference error',
+                   code: 'ASYNC_CIRCULAR_ERROR',
+                 })
+        }),
+        'initializeStudioAI',
+        {},
+      )
+    })
+
     it('does not set state IN_ERROR when a non-essential async method fails', async () => {
       const error = new Error('foo')
 
@@ -162,6 +218,34 @@ describe('lib/cloud/studio', () => {
         sinon.match((error) => {
           return error instanceof Error &&
                  error.message === JSON.stringify(objectError)
+        }),
+        'captureStudioEvent',
+        {},
+      )
+    })
+
+    it('handles circular reference objects safely in non-essential async methods without throwing', async () => {
+      // Create an object with circular reference
+      const circularError: any = {
+        message: 'Non-essential circular reference error',
+        code: 'NON_ESSENTIAL_CIRCULAR_ERROR',
+      }
+
+      circularError.self = circularError // Create circular reference
+
+      sinon.stub(studio, 'captureStudioEvent').throws(circularError)
+      sinon.stub(studio, 'reportError')
+
+      await studioManager.captureStudioEvent({} as any)
+
+      expect(studioManager.status).to.eq('ENABLED')
+      expect(studio.reportError).to.be.calledWithMatch(
+        sinon.match((error) => {
+          return error instanceof Error &&
+                 error.message === JSON.stringify({
+                   message: 'Non-essential circular reference error',
+                   code: 'NON_ESSENTIAL_CIRCULAR_ERROR',
+                 })
         }),
         'captureStudioEvent',
         {},
