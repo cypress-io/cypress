@@ -27,5 +27,7 @@ describe('StudioPanel', () => {
     cy.findByTestId('studio-error-message').should('have.text', 'Cypress Studio requires an internet connection. To continue, you may need to configure Cypress with your proxy settings.')
     cy.findByTestId('studio-error-learn-more-button').should('have.text', ' Learn more ')
     cy.findByTestId('studio-error-retry-button').should('have.text', ' Retry ')
+
+    cy.percySnapshot()
   })
 })
