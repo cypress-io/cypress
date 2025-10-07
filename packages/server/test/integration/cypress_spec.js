@@ -469,10 +469,10 @@ describe('lib/cypress', () => {
     })
 
     it('exits with code 112 for cloud API failures when posix-exit-codes is enabled', function () {
-      // Mock cloud API to fail with a 500 error
+      // Mock cloud API to fail with a 504 error
       sinon.stub(api, 'createRun').rejects({
-        statusCode: 500,
-        message: 'Cloud service unavailable',
+        statusCode: 504,
+        message: 'Gateway timeout',
       })
 
       return cypress.start([
@@ -486,7 +486,7 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('exits with code 112 for parallel cloud API failures when posix-exit-codes is enabled', function () {
+    it('exits with code 1 for parallel cloud API failures when posix-exit-codes is enabled', function () {
       // Mock cloud API to fail with a 500 error
       sinon.stub(api, 'createRun').rejects({
         statusCode: 500,
