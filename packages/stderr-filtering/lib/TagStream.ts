@@ -97,10 +97,10 @@ export class TagStream extends Transform {
     debug('flushing')
     const out = this.initializedDecoder.end()
 
-    if (tagsDisabled()) {
-      callback(undefined, Buffer.from(out))
-    } else {
+    if (out) {
       callback(undefined, this.tag(out))
+    } else {
+      callback()
     }
   }
 
