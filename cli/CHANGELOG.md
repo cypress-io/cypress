@@ -1,7 +1,16 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+
+## 15.5.0
+
+_Released 10/21/2025 (PENDING)_
+
+**Features:**
+
+- When the `run` command requires successful negotiation with the Cypress Cloud API and the `--posix-exit-codes` flag is set, Cypress will now exit with code `112` when it cannot determine which spec to run next due to network conditions. These Cloud API negotiations are required when either `--record` or `--parallel` flags are set. Addresses [#32485](https://github.com/cypress-io/cypress/issues/32485). Addressed in [#32635](https://github.com/cypress-io/cypress/pull/32635).
+
 ## 15.4.0
 
-_Released 10/7/2025 (PENDING)_
+_Released 10/7/2025_
 
 **Features:**
 
