@@ -108,7 +108,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] packages/rewriter ✅ **COMPLETED**
 - [x] packages/scaffold-config ✅ **COMPLETED**
 - [ ] packages/server
-- [ ] packages/socket
+- [x] packages/socket ✅ **COMPLETED**
 - [x] packages/stderr-filtering ✅ **COMPLETED**
 - [x] packages/telemetry ✅ **COMPLETED**
 - [ ] packages/ts - ultimate goal is removal and likely not worth the effort to convert

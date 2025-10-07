@@ -52,6 +52,8 @@ import Window from './window'
 
 import * as Xhr from './xhr'
 
+import * as Prompt from './prompt'
+
 export const allCommands = {
   ...Actions,
   Agents,
@@ -70,6 +72,7 @@ export const allCommands = {
   Misc,
   Origin,
   Popups,
+  Prompt,
   Navigation,
   ...Querying,
   Request,

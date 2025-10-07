@@ -13,7 +13,7 @@ interface PostStudioSessionOptions {
 const _delay = linearDelay(500)
 
 export const postStudioSession = async ({ projectId }: PostStudioSessionOptions) => {
-  return await (asyncRetry(async () => {
+  return await (asyncRetry(() => {
     return postFetch<{ studioUrl: string, protocolUrl: string }>(routes.apiRoutes.studioSession(), {
       parse: ParseKinds.JSON,
       headers: {

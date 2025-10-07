@@ -1,7 +1,8 @@
-const { encode, decode } = require('../lib/utils')
-const expect = require('chai').expect
-const { promises: fs } = require('fs')
-const path = require('path')
+import { describe, it, expect } from 'vitest'
+import { promisify } from 'util'
+import fs from 'fs'
+import path from 'path'
+import { encode, decode } from '../lib/utils'
 
 describe('utils', () => {
   it('encodes and decodes a message with simple data', async () => {
@@ -14,7 +15,7 @@ describe('utils', () => {
 
     const decoded = await decode(parsedEncoded)
 
-    expect(decoded).to.deep.equal(message)
+    expect(decoded).toEqual(message)
   })
 
   it('encodes and decodes a message with complex data', async () => {
@@ -33,11 +34,13 @@ describe('utils', () => {
 
     const decoded = await decode(parsedEncoded)
 
-    expect(decoded).to.deep.equal(message)
+    expect(decoded).toEqual(message)
   })
 
   it('encodes and decodes a message with binary data', async () => {
-    const message = [{ file: await fs.readFile(path.join(__dirname, 'fixtures', 'cypress.png')) }]
+    const readFileAsync = promisify(fs.readFile)
+
+    const message = [{ file: await readFileAsync(path.join(__dirname, 'fixtures', 'cypress.png')) }]
     const encoded = await encode(message, '/namespace')
 
     // Ensure we can stringify and parse the result
@@ -46,12 +49,13 @@ describe('utils', () => {
 
     const decoded = await decode(parsedEncoded)
 
-    expect(decoded).to.deep.equal(message)
+    expect(decoded).toEqual(message)
   })
 
   it('encodes and decodes a message with circular data', async () => {
     const inner = { foo: 'bar' }
 
+    // @ts-expect-error
     inner.self = inner
     const message = [{ type: 'test', data: { inner } }]
     const encoded = await encode(message, '/namespace')
@@ -62,6 +66,6 @@ describe('utils', () => {
 
     const decoded = await decode(parsedEncoded)
 
-    expect(decoded).to.deep.equal(message)
+    expect(decoded).toEqual(message)
   })
 })

@@ -18,6 +18,8 @@ const CLOUD_ENDPOINTS = {
   captureProtocolErrors: 'capture-protocol/errors',
   studioSession: 'studio/session',
   studioErrors: 'studio/errors',
+  cyPromptSession: 'cy-prompt/session',
+  cyPromptErrors: 'cy-prompt/errors',
   exceptions: 'exceptions',
   telemetry: 'telemetry',
 } as const

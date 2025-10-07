@@ -37,7 +37,7 @@ import type { CreateInstanceRequestBody, CreateInstanceResponse } from './create
 
 import { transformError } from './axios_middleware/transform_error'
 import { DecryptionError } from './cloud_request_errors'
-import { isNonRetriableCertErrorCode } from '../network/nonretriable_cert_error_codes'
+import { isNonRetriableCertErrorCode } from '../network/non_retriable_cert_error_codes'
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')

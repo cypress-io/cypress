@@ -49,3 +49,5 @@ export * from './proxy'
 export * from './cloud'
 
 export * from './studio'
+
+export * from './cy-prompt'

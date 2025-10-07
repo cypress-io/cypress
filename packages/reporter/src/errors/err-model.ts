@@ -31,6 +31,7 @@ export interface ErrProps {
   docsUrl: string | string[]
   templateType: string
   codeFrame: CodeFrame
+  docsUrlTitle: string | null
 }
 
 export default class Err {
@@ -43,6 +44,7 @@ export default class Err {
   // @ts-ignore
   codeFrame: CodeFrame
   isRecovered: boolean = false
+  docsUrlTitle: string | null = null
 
   constructor (props?: Partial<ErrProps>) {
     makeObservable(this, {
@@ -56,6 +58,7 @@ export default class Err {
       isRecovered: observable,
       displayMessage: computed,
       isCommandErr: computed,
+      docsUrlTitle: observable,
     })
 
     this.update(props)
@@ -79,6 +82,7 @@ export default class Err {
     if (props.parsedStack) this.parsedStack = props.parsedStack
     if (props.templateType) this.templateType = props.templateType
     if (props.codeFrame) this.codeFrame = props.codeFrame
+    if (props.docsUrlTitle) this.docsUrlTitle = props.docsUrlTitle
     this.isRecovered = !!props.isRecovered
   }
 }

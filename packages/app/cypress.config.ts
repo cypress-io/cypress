@@ -31,7 +31,6 @@ export default defineConfig({
   },
   'e2e': {
     experimentalRunAllSpecs: true,
-    experimentalStudio: true,
     experimentalOriginDependencies: true,
     baseUrl: 'http://localhost:5555',
     supportFile: 'cypress/e2e/support/e2eSupport.ts',

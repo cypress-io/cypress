@@ -58,6 +58,9 @@ declare namespace Cypress {
   interface ObjectLike {
     [key: string]: any
   }
+  interface PromptOptions {
+    placeholders?: Record<string, string>
+  }
   interface Auth {
     username: string
     password: string
@@ -1848,7 +1851,12 @@ declare namespace Cypress {
      * @see https://on.cypress.io/prevuntil
      */
     prevUntil<E extends Node = HTMLElement>(element: E | JQuery<E>, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
-
+    /**
+     * An AI-powered command that generates Cypress commands from natural language test steps.
+     *
+     * @see https://on.cypress.io/prompt
+     */
+    prompt<T>(steps: string[], options?: PromptOptions): Chainable<T>
     /**
      * Read a file and yield its contents.
      *
@@ -3271,6 +3279,11 @@ declare namespace Cypress {
      * @default false
      */
     experimentalOriginDependencies?: boolean
+    /**
+     * Enables support for `cy.prompt`, an AI-powered command that turns natural language steps into executable Cypress test code.
+     * @default false
+     */
+    experimentalPromptCommand?: boolean
   }
 
   /**
