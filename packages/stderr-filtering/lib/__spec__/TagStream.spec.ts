@@ -115,4 +115,24 @@ describe('TagStream', () => {
       })
     })
   })
+
+  describe('disabling tags', () => {
+    it('passes on the string without the tags in CYPRESS_INTERNAL_ENV development mode', async () => {
+      vi.stubEnv('CYPRESS_INTERNAL_ENV', 'development')
+      const cb = vi.fn()
+
+      await tagStream.transform(strInput, 'utf-8', cb)
+      expect(tagStream.push).toHaveBeenCalledWith(Buffer.from(strInput))
+      expect(cb).toHaveBeenCalled()
+    })
+
+    it('passes on the string without the tags in ELECTRON_ENABLE_LOGGING enabled', async () => {
+      vi.stubEnv('ELECTRON_ENABLE_LOGGING', '1')
+      const cb = vi.fn()
+
+      await tagStream.transform(strInput, 'utf-8', cb)
+      expect(tagStream.push).toHaveBeenCalledWith(Buffer.from(strInput))
+      expect(cb).toHaveBeenCalled()
+    })
+  })
 })

@@ -4,6 +4,7 @@ import { StringDecoder } from 'string_decoder'
 import Debug from 'debug'
 
 const debug = Debug('cypress:stderr-filtering:TagStream')
+const debugVerbose = Debug('cypress-verbose:stderr-filtering:TagStream')
 
 /**
  * A Transform stream that wraps input data with start and end tags.
@@ -62,17 +63,19 @@ export class TagStream extends Transform {
    * @returns Promise that resolves when transformation is complete.
    */
   async transform (chunk: Buffer | string | any, encoding: string, callback: (error?: Error, data?: Buffer) => void) {
+    const DISABLE_TAGS = process.env.CYPRESS_INTERNAL_ENV === 'development' || process.env.ELECTRON_ENABLE_LOGGING === '1'
+
     try {
       const out = chunk instanceof Buffer ?
         this.initializedDecoder.write(chunk) :
         chunk
-      const transformed = `${this.startTag}${out}${this.endTag}`
+      const transformed = DISABLE_TAGS ? out : `${this.startTag}${out}${this.endTag}`
 
-      debug(`transformed: "${transformed.replaceAll('\n', '\\n')}"`)
+      debugVerbose(`transformed: "${transformed.replaceAll('\n', '\\n')}"`)
       const canWrite = this.push(out ? Buffer.from(transformed) : '')
 
       if (!canWrite) {
-        debug('waiting for drain')
+        debugVerbose('waiting for drain')
         await new Promise((resolve) => this.once('drain', resolve))
       }
 
