@@ -1,14 +1,14 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.4.0
 
-_Released 10/7/2025 (PENDING)_
+_Released 10/7/2025_
 
 **Features:**
 
 - Cypress Studio is now available by default. You no longer have to set the `experimentalStudio` flag. Addresses [#30997](https://github.com/cypress-io/cypress/issues/30997). Addressed in [#32571](https://github.com/cypress-io/cypress/pull/32571).
 - An option is now available to 'Hide HTTP Requests' in the Cypress Command Log. This can be found in the new dropdown menu at the top of the Command Log. Addresses [#7362](https://github.com/cypress-io/cypress/issues/7362). Addressed in [#32658](https://github.com/cypress-io/cypress/pull/32658).
 - Added the `--posix-exit-codes` flag for the `run` command. When this flag is passed, Cypress will exit with 1 if any tests fail, rather than the number of failed tests. Addresses [#32605](https://github.com/cypress-io/cypress/issues/32605) and [#24695](https://github.com/cypress-io/cypress/issues/24695). Addressed in [#32609](https://github.com/cypress-io/cypress/pull/32609).
-- `cy.prompt` is now a reserved Cypress command, currently gated behind a feature flag that requires an invite from Cypress. This means any custom commands named 'prompt' will no longer work. Stay tuned for updates on when this feature will become more widely available. Addresses [#31826](https://github.com/cypress-io/cypress/issues/31826).
+- [`cy.prompt()`](https://docs.cypress.io/api/commands/prompt) is now a reserved Cypress command, currently gated behind a feature flag that requires an invite from Cypress. This means any custom commands named 'prompt' will no longer work. Stay tuned for updates on when this feature will become more widely available. Addresses [#31826](https://github.com/cypress-io/cypress/issues/31826).
 
 **Bugfixes:**
 
