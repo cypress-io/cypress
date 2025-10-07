@@ -1,15 +1,20 @@
 {
-  "extends": "./../ts/tsconfig.json",
   "include": [
-    "**/*.ts",
-    "./index.ts"
-  ],
-  "compilerOptions": {
-  },
-  "files": [
-    "./../ts/index.d.ts"
+    "lib"
   ],
   "exclude": [
     "test"
-  ]
+  ],
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "esModuleInterop": true,
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "types": [
+      "node"
+    ],
+    "declaration": true,
+  }
 }

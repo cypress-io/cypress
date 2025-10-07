@@ -50,7 +50,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] packages/electron ✅ **COMPLETED**
 - [ ] packages/https-proxy **PARTIAL** - entry point is JS
 - [x] packages/icons ✅ **COMPLETED**
-- [x] packages/launcher ✅ **COMPLETED** (needs independent bundle but lower priority)
+- [x] packages/launcher ✅ **COMPLETED**
 - [x] packages/launchpad ✅ **COMPLETED**
 - [x] packages/net-stubbing ✅ **COMPLETED**
 - [ ] packages/network **PARTIAL** - entry point is JS

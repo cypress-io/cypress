@@ -1,6 +1,5 @@
-import _, { compact, extend, find } from 'lodash'
+import _, { compact, extend, find, uniqBy } from 'lodash'
 import os from 'os'
-import { removeDuplicateBrowsers } from '@packages/data-context/src/sources/BrowserDataSource'
 import { knownBrowsers } from './known-browsers'
 import * as darwinHelper from './darwin'
 import { notDetectedAtPathErr } from './errors'
@@ -26,8 +25,16 @@ type HasVersion = Omit<Partial<FoundBrowser>, 'version' | 'name'> & {
   name: string
 }
 
+function getBrowserKey<T extends {name: string, version: string | number}> (browser: T) {
+  return `${browser.name}-${browser.version}`
+}
+
+function removeDuplicateBrowsers (browsers: FoundBrowser[]) {
+  return uniqBy(browsers, getBrowserKey)
+}
+
 export const getMajorVersion = (version: string): string => {
-  return version.split('.')[0]
+  return version.split('.')[0] as string
 }
 
 // Determines if found browser is supported by Cypress. If found to be
@@ -199,7 +206,7 @@ export const detectByPath = async (
     })
   }
 
-  const detectBrowserFromKey = (browserKey): Browser | undefined => {
+  const detectBrowserFromKey = (browserKey: string): Browser | undefined => {
     return find(goalBrowsers, (goalBrowser) => {
       return (
         goalBrowser.name === browserKey ||

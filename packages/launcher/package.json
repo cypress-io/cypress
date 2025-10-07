@@ -2,12 +2,14 @@
   "name": "@packages/launcher",
   "version": "0.0.0-development",
   "private": true,
+  "main": "./cjs/index.js",
   "scripts": {
-    "build-prod": "tsc --project .",
-    "check-ts": "tsc --noEmit && yarn -s tslint",
-    "clean": "rimraf --glob 'lib/*.js' && rimraf --glob 'lib/**/*.js' || true",
+    "build": "yarn build:cjs && yarn build:esm",
+    "build-prod": "yarn build",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "check-ts": "tsc --noEmit -p tsconfig.cjs.json && tsc --noEmit -p tsconfig.esm.json && yarn -s tslint -p tsconfig.cjs.json",
     "clean-deps": "rimraf node_modules",
-    "clean-js": "yarn clean",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "size": "t=\"cypress-v0.0.0.tgz\"; yarn pack --filename \"${t}\"; wc -c \"cli/${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "test": "yarn test-unit",
@@ -29,15 +31,18 @@
     "@packages/data-context": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
     "@packages/types": "0.0.0-development",
+    "@types/plist": "^3.0.5",
+    "@types/win-version-info": "^3.1.3",
     "mock-fs": "5.4.0",
     "typescript": "~5.4.5",
     "vitest": "^3.2.4"
   },
   "files": [
-    "index.js",
-    "lib"
+    "cjs/*",
+    "esm/*"
   ],
-  "types": "index.ts",
+  "types": "./cjs/index.d.ts",
+  "module": "./esm/index.js",
   "nx": {
     "implicitDependencies": [
       "@packages/data-context"

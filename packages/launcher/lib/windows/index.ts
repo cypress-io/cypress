@@ -56,7 +56,7 @@ function formChromeForTestingAppPath () {
   ].map(normalize)
 }
 
-function getFirefoxPaths (editionFolder) {
+function getFirefoxPaths (editionFolder: string) {
   return () => {
     return (['Program Files', 'Program Files (x86)'])
     .map((programFiles) => {
@@ -134,7 +134,7 @@ function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
   debugVerbose('looking at possible paths... %o', { browser, exePaths })
 
   // shift and try paths 1-by-1 until we find one that works
-  const tryNextExePath = async () => {
+  const tryNextExePath = async (): Promise<FoundBrowser> => {
     const exePath = exePaths.shift()
 
     if (!exePath) {
@@ -180,12 +180,18 @@ export function doubleEscape (s: string) {
   return win32.join(...s.split(win32.sep)).replace(/\\/g, '\\\\')
 }
 
-export function getVersionString (path: string) {
+export function getVersionString (path: string): Promise<string> {
   // on Windows using "--version" seems to always start the full
   // browser, no matter what one does.
 
   try {
-    return Promise.resolve(winVersionInfo(path).FileVersion)
+    const fileVersion = winVersionInfo(path).FileVersion
+
+    if (!fileVersion) {
+      throw new Error(`Failed to get version string for ${path}`)
+    }
+
+    return Promise.resolve(fileVersion)
   } catch (err) {
     return Promise.reject(err)
   }

@@ -4,6 +4,7 @@ import execa from 'execa'
 import fs from 'fs-extra'
 import path from 'path'
 import plist from 'plist'
+import type { PlistValue } from 'plist'
 
 const debugVerbose = Debug('cypress-verbose:launcher:darwin:util')
 
@@ -25,9 +26,9 @@ export async function parsePlist (p: string, property: string): Promise<string> 
     const file = await fs.readFile(pl, 'utf8')
     const val = plist.parse(file)
 
-    return String(val[property]) // explicitly convert value to String type
+    return String(val[property as keyof PlistValue]) // explicitly convert value to String type
   } catch (err) {
-    return failed(err) // to make TS compiler happy
+    return failed(err as Error) // to make TS compiler happy
   }
 }
 

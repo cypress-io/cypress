@@ -115,7 +115,7 @@ async function getLinuxBrowser (
 
     return foundBrowser as FoundBrowser
   } catch (err) {
-    return logAndThrowError(err)
+    return logAndThrowError(err as Error)
   }
 }
 
