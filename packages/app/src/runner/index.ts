@@ -190,7 +190,7 @@ function teardownSpec (isRerun: boolean = false) {
 export async function teardown () {
   UnifiedReporterAPI.setInitializedReporter(false)
   _eventManager?.stop()
-  _eventManager?.teardown(getMobxRunnerStore())
+  await _eventManager?.teardown(getMobxRunnerStore())
   await _eventManager?.resetReporter()
   _eventManager = undefined
 }

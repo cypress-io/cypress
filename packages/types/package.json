@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@packages/root": "0.0.0-development",
-    "@types/node": "22.18.0",
+    "@types/node": "22.18.7",
     "axios": "^1.8.3",
     "better-sqlite3": "11.10.0",
     "devtools-protocol": "0.0.1459876",

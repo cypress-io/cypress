@@ -44,7 +44,7 @@ import * as resolvers from './cypress/resolvers'
 import { PrimaryOriginCommunicator, SpecBridgeCommunicator } from './cross-origin/communicator'
 import { setupAutEventHandlers } from './cypress/aut_event_handlers'
 
-import type { CachedTestState } from '@packages/types'
+import type { CachedTestState, ReporterRunState, RunState } from '@packages/types'
 import { DocumentDomainInjection } from '@packages/network/lib/document-domain-injection'
 import { setSpecContentSecurityPolicy } from './util/privileged_channel'
 
@@ -88,6 +88,31 @@ interface AutomationError extends Error {
 
 // Are we running Cypress in Cypress? (Used for E2E Testing for Cypress in Cypress only)
 const isCypressInCypress = document.defaultView !== top
+
+const handlePrimaryOriginSocketEvent = (Cypress, backendRequestNamespace: string) => {
+  Cypress.primaryOriginCommunicator.on(
+    backendRequestNamespace,
+    async ({ args: [eventName, ...args] }: { args: [string, any[]] }, { source, responseEvent }) => {
+      let response
+
+      try {
+        response = await Cypress.backendRequestHandler(
+          backendRequestNamespace,
+          eventName,
+          ...args,
+        )
+      } catch (error) {
+        response = { error }
+      }
+
+      Cypress.primaryOriginCommunicator.toSource(
+        source,
+        responseEvent,
+        response,
+      )
+    },
+  )
+}
 
 class $Cypress {
   cy: any
@@ -175,7 +200,7 @@ class $Cypress {
   minimatch = minimatch
   sinon = sinon
   lolex = fakeTimers
-
+  handlePrimaryOriginSocketEvent = handlePrimaryOriginSocketEvent
   areSourceMapsAvailable: boolean = false
 
   static $: any
@@ -226,7 +251,7 @@ class $Cypress {
     // not we're in a text terminal, but we keep this
     // as a separate property so we can potentially
     // slice up the behavior
-    config.isInteractive = !config.isTextTerminal
+    config.isInteractive = !config.isTextTerminal || config.env.INTERNAL_SIMULATE_OPEN_MODE
 
     // true if this Cypress belongs to a cross origin spec bridge
     this.isCrossOriginSpecBridge = config.isCrossOriginSpecBridge || false
@@ -796,7 +821,7 @@ class $Cypress {
     }
   }
 
-  backend (eventName, ...args) {
+  backendRequestHandler (backendRequestNamespace: string, eventName, ...args) {
     return new Promise((resolve, reject) => {
       const fn = function (reply) {
         const e = reply.error
@@ -819,7 +844,34 @@ class $Cypress {
         return resolve(reply.response)
       }
 
-      return this.emit('backend:request', eventName, ...args, fn)
+      return this.emit(backendRequestNamespace, eventName, ...args, fn)
+    })
+  }
+
+  backend (eventName, ...args) {
+    return this.backendRequestHandler('backend:request', eventName, ...args)
+  }
+
+  preserveRunState (testId: string) {
+    const tests = this.runner.getTestsState(testId)
+    let runState: RunState = {
+      currentId: testId,
+      tests,
+      startTime: this.runner.getStartTime(),
+      emissions: this.runner.getEmissions(),
+      passed: this.runner.countByTestState(tests, 'passed'),
+      failed: this.runner.countByTestState(tests, 'failed'),
+      pending: this.runner.countByTestState(tests, 'pending'),
+      numLogs: LogUtils.countLogsByTests(tests),
+    }
+
+    return this.action('cy:collect:run:state').then((otherRunStates: ReporterRunState) => {
+      // merge all the states together
+      runState = _.reduce(otherRunStates, (memo, obj) => {
+        return _.extend(memo, obj)
+      }, runState)
+
+      return this.backend('preserve:run:state', runState)
     })
   }
 

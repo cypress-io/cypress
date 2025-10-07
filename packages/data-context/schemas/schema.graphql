@@ -1178,6 +1178,7 @@ enum ErrorTypeEnum {
   ERROR_WRITING_FILE
   EXPERIMENTAL_JIT_COMPILE_REMOVED
   EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY
+  EXPERIMENTAL_PROMPT_COMMAND_E2E_ONLY
   EXPERIMENTAL_RUN_ALL_SPECS_E2E_ONLY
   EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED
   EXPERIMENTAL_SINGLE_TAB_RUN_MODE
@@ -2168,12 +2169,14 @@ enum SpecType {
 
 type StudioStatusPayload {
   canAccessStudioAI: Boolean!
+
+  """Whether the studio status is an IN_ERROR due to a certificate error"""
+  isCertError: Boolean
   status: StudioStatusType!
 }
 
 enum StudioStatusType {
   ENABLED
-  INITIALIZED
   INITIALIZING
   IN_ERROR
   NOT_INITIALIZED

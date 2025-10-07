@@ -1,4 +1,14 @@
 <template>
+  <PromptGetCodeModal
+    v-if="promptStore.getCodeModalIsOpen"
+    :is-open="promptStore.getCodeModalIsOpen"
+    @close="promptStore.closeGetCodeModal"
+  />
+  <PromptMoreInfoNeededModal
+    v-if="promptStore.moreInfoNeededModalIsOpen"
+    :is-open="promptStore.moreInfoNeededModalIsOpen"
+    @close="promptStore.closeMoreInfoNeededModal"
+  />
   <AdjustRunnerStyleDuringScreenshot
     id="main-pane"
     class="flex"
@@ -97,6 +107,7 @@
             :on-studio-panel-close="handleStudioPanelClose"
             :event-manager="eventManager"
             :studio-status="studioStatus"
+            :is-cert-error="isCertError"
             :aut-url-selector="autUrlSelector"
             :user-project-status-store="userProjectStatusStore"
             :has-requested-project-access="hasRequestedProjectAccess"
@@ -139,6 +150,9 @@ import { runnerConstants } from './runner-constants'
 import { useStudioStore } from '../store/studio-store'
 import StudioPanel from '../studio/StudioPanel.vue'
 import { useSubscription } from '../graphql'
+import PromptGetCodeModal from '../prompt/PromptGetCodeModal.vue'
+import PromptMoreInfoNeededModal from '../prompt/PromptMoreInfoNeededModal.vue'
+import { usePromptStore } from '../store/prompt-store'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 
 // this is used by the StudioPanel to access the AUT URL input
@@ -235,6 +249,7 @@ gql`
 subscription StudioStatus_Change {
   studioStatusChange {
     status
+    isCertError
     canAccessStudioAI
   }
 }
@@ -263,6 +278,7 @@ const {
 } = useEventManager()
 
 const studioStore = useStudioStore()
+const promptStore = usePromptStore()
 
 const hasRequestedProjectAccess = computed(() => {
   return (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized' && props.gql.currentProject?.cloudProject?.hasRequestedAccess) ?? false
@@ -290,12 +306,14 @@ const isSpecsListOpenPreferences = computed(() => {
   return props.gql.localSettings.preferences.isSpecsListOpen ?? false
 })
 
-// Initialize with null and wait for subscription to update
+// Initialize and wait for subscription to update
 const studioStatus = ref<string | null>(null)
+const isCertError = ref<boolean | null>(null)
 
 useSubscription({ query: StudioStatus_ChangeDocument }, (_, data) => {
   if (data?.studioStatusChange) {
     studioStatus.value = data.studioStatusChange.status
+    isCertError.value = data.studioStatusChange.isCertError
     studioStore.setCanAccessStudioAI(data.studioStatusChange.canAccessStudioAI)
   }
 
