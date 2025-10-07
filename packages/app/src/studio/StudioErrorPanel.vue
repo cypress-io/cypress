@@ -26,28 +26,30 @@
       </p>
     </div>
 
-    <Button
-      v-if="props.learnMoreUrl"
-      variant="outline-dark"
-      size="32"
-      data-cy="studio-error-learn-more-button"
-      @click="() => props.eventManager?.ws?.emit('external:open', props.learnMoreUrl)"
-    >
-      Learn more
-    </Button>
-    <Button
-      variant="outline-dark"
-      size="32"
-      data-cy="studio-error-retry-button"
-      @click="props.onRetry"
-    >
-      <IconActionRefresh
-        size="16"
-        class="mr-2 pt-[1px]"
-        stroke-color="gray-500"
-      />
-      Retry
-    </Button>
+    <div class="flex gap-3">
+      <Button
+        v-if="props.learnMoreUrl"
+        variant="outline-dark"
+        size="32"
+        data-cy="studio-error-learn-more-button"
+        @click="() => props.eventManager?.ws?.emit('external:open', props.learnMoreUrl)"
+      >
+        Learn more
+      </Button>
+      <Button
+        variant="outline-dark"
+        size="32"
+        data-cy="studio-error-retry-button"
+        @click="props.onRetry"
+      >
+        <IconActionRefresh
+          size="16"
+          class="mr-2 pt-[1px]"
+          stroke-color="gray-500"
+        />
+        Retry
+      </Button>
+    </div>
   </StudioPanelContainer>
 </template>
 
