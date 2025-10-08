@@ -3,7 +3,7 @@ import Debug from 'debug'
 import { stripPath } from '../../strip_path'
 const debug = Debug('cypress:server:cloud:api:studio:report_studio_errors')
 import { logError } from '@packages/stderr-filtering'
-import { safeErrorSerialize } from '../../studio/utils'
+import exception from '../../exception'
 
 export interface ReportStudioErrorOptions {
   cloudApi: StudioCloudApi
@@ -59,7 +59,7 @@ export function reportStudioError ({
 
   if (!(error instanceof Error)) {
     // Use safe serialization that handles circular references and other edge cases
-    const message = safeErrorSerialize(error)
+    const message = exception.safeErrorSerialize(error)
 
     errorObject = new Error(message)
   } else {

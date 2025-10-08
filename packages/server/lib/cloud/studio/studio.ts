@@ -6,7 +6,7 @@ import path from 'path'
 import { reportStudioError, ReportStudioErrorOptions } from '../api/studio/report_studio_error'
 import crypto, { BinaryLike } from 'crypto'
 import { StudioElectron } from './StudioElectron'
-import { safeErrorSerialize } from './utils'
+import exception from '../exception'
 
 interface StudioServer { default: StudioServerDefaultShape }
 
@@ -126,7 +126,7 @@ export class StudioManager implements StudioManagerShape {
 
       if (!(error instanceof Error)) {
         // Use safe serialization that handles circular references and other edge cases
-        const message = safeErrorSerialize(error)
+        const message = exception.safeErrorSerialize(error)
 
         actualError = new Error(message)
       } else {
@@ -159,7 +159,7 @@ export class StudioManager implements StudioManagerShape {
 
       if (!(error instanceof Error)) {
         // Use safe serialization that handles circular references and other edge cases
-        const message = safeErrorSerialize(error)
+        const message = exception.safeErrorSerialize(error)
 
         actualError = new Error(message)
       } else {
