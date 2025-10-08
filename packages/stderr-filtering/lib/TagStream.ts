@@ -68,10 +68,10 @@ export class TagStream extends Transform {
       const out = chunk instanceof Buffer ?
         this.initializedDecoder.write(chunk) :
         chunk
-      const transformed = this.tag(out)
+      const transformed = out ? this.tag(out) : Buffer.from('')
 
       debugVerbose(`transformed: "${transformed.toString().replaceAll('\n', '\\n')}"`)
-      const canWrite = this.push(out ? transformed : '')
+      const canWrite = this.push(transformed)
 
       if (!canWrite) {
         debugVerbose('waiting for drain')
@@ -97,14 +97,10 @@ export class TagStream extends Transform {
     debug('flushing')
     const out = this.initializedDecoder.end()
 
-    if (out) {
-      callback(undefined, this.tag(out))
-    } else {
-      callback(undefined, Buffer.from(''))
-    }
+    callback(undefined, out ? this.tag(out) : Buffer.from(''))
   }
 
-  private tag (out: string): Buffer {
-    return tagsDisabled() ? Buffer.from(out) : Buffer.from(`${this.startTag}${out}${this.endTag}`)
+  private tag (str: string): Buffer {
+    return tagsDisabled() ? Buffer.from(str) : Buffer.from(`${this.startTag}${str}${this.endTag}`)
   }
 }

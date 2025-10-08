@@ -93,7 +93,7 @@ describe('TagStream', () => {
         const cb = vi.fn()
 
         await tagStream.transform(bufInput, 'buffer', cb)
-        expect(tagStream.push).toHaveBeenCalledWith('')
+        expect(tagStream.push).toHaveBeenCalledWith(Buffer.from(''))
         expect(cb).toHaveBeenCalled()
       })
     })
