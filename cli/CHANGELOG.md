@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.4.1
+
+_Released 10/21/2025 (PENDING)_
+
+**Misc:**
+
+Browser detection in Cypress now always prefers 64-bit browser installs to 32-bit browser installs. Addressed in [#32656](https://github.com/cypress-io/cypress/pull/32656).
+
 ## 15.4.0
 
 _Released 10/7/2025_
