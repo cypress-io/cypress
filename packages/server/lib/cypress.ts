@@ -167,7 +167,7 @@ export = {
       debug('could not parse CLI arguments: %o', argv)
 
       // note - this is promise-returned call
-      return exitErr(argumentsError, options?.posixExitCodes)
+      return exitErr(argumentsError, Boolean(options?.posixExitCodes))
     }
 
     debug('from argv %o got options %o', argv, options)
