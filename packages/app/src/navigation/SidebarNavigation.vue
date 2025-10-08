@@ -121,6 +121,7 @@ fragment SidebarNavigation_Settings on Query {
       isSideNavigationOpen
       isSpecsListOpen
       autoScrollingEnabled
+      showFetchRequests
       reporterWidth
       specListWidth
     }

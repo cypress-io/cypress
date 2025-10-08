@@ -883,6 +883,7 @@ export class EventManager {
       numPending: runState.pending,
       autoScrollingEnabled: runState.autoScrollingEnabled,
       isSpecsListOpen: runState.isSpecsListOpen,
+      showFetchRequests: runState.showFetchRequests,
       scrollTop: runState.scrollTop,
       studioActive: hasActiveStudio,
       studioSingleTestActive,
