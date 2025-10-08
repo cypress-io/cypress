@@ -5,26 +5,32 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build": "ts-node ./scripts/build.ts && ts-node ./scripts/ico.ts",
-    "check-ts": "tsc --noEmit && yarn -s tslint",
+    "build": "yarn build-assets && yarn build:cjs && yarn build:esm",
+    "build-assets": "tsx ./scripts/build.ts && tsx ./scripts/ico.ts",
+    "build-prod": "yarn build",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "check-ts": "tsc -p tsconfig.cjs.json --noEmit && yarn -s tslint -p tsconfig.cjs.json",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "test": "yarn test-unit",
-    "test-unit": "NODE_ENV=test mocha -r @packages/ts/register test/*.ts",
+    "test-unit": "vitest run",
     "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "devDependencies": {
     "@types/mocha": "^8.0.3",
     "@types/to-ico": "^1.1.1",
-    "chai": "^4.2.0",
     "fs-extra": "9.1.0",
-    "mocha": "^8.1.3",
-    "to-ico": "^1.1.5"
+    "to-ico": "^1.1.5",
+    "tsx": "^4.20.5",
+    "vitest": "^3.2.4"
   },
   "files": [
     "dist",
     "index.js",
     "index.d.ts"
   ],
+  "types": "index.d.ts",
   "license": "MIT",
+  "module": "index.mjs",
   "nx": {}
 }
