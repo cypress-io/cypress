@@ -1,4 +1,4 @@
-import { serializeError } from 'serialize-error'
+const { serializeError } = require('serialize-error')
 
 /**
  * Safely serializes an error object to a string, handling circular references
