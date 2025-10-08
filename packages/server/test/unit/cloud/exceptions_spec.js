@@ -285,7 +285,7 @@ at bar <stripped-path>bar.js:92\
 
     it('handles null and undefined gracefully', () => {
       expect(exception.safeErrorSerialize(null)).to.eq('null')
-      expect(exception.safeErrorSerialize(undefined)).to.be.undefined
+      expect(exception.safeErrorSerialize(undefined)).to.eq('undefined')
     })
 
     it('handles primitive types', () => {

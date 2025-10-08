@@ -22,7 +22,14 @@ export = {
       // Use serialize-error package to handle complex error objects safely
       const serialized = serializeError(error)
 
-      return JSON.stringify(serialized)
+      const result = JSON.stringify(serialized)
+
+      // JSON.stringify returns undefined for undefined input, but we need to return a string
+      if (result === undefined) {
+        return 'undefined'
+      }
+
+      return result
     } catch (e) {
       // If even serialize-error fails, use a generic fallback
       return `[Non-serializable object: ${error?.constructor?.name || 'Object'}]`
