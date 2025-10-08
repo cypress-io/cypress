@@ -1356,7 +1356,7 @@ export default {
     },
     promptProxyError: {
       message: stripIndent`\
-      \`cy.prompt\` requires an internet connection to work. To continue, you may need to configure Cypress with your proxy settings.
+      \`cy.prompt\` requires an internet connection. To continue, you may need to configure Cypress with your proxy settings.
       `,
       docsUrl: 'https://on.cypress.io/proxy-configuration',
     },

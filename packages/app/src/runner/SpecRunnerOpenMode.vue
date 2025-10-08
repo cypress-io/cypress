@@ -107,6 +107,7 @@
             :on-studio-panel-close="handleStudioPanelClose"
             :event-manager="eventManager"
             :studio-status="studioStatus"
+            :is-cert-error="isCertError"
             :aut-url-selector="autUrlSelector"
             :user-project-status-store="userProjectStatusStore"
             :has-requested-project-access="hasRequestedProjectAccess"
@@ -175,6 +176,7 @@ fragment SpecRunner_Preferences on Query {
       isSideNavigationOpen
       isSpecsListOpen
       autoScrollingEnabled
+      showFetchRequests
       reporterWidth
       specListWidth
       studioWidth
@@ -248,6 +250,7 @@ gql`
 subscription StudioStatus_Change {
   studioStatusChange {
     status
+    isCertError
     canAccessStudioAI
   }
 }
@@ -304,12 +307,14 @@ const isSpecsListOpenPreferences = computed(() => {
   return props.gql.localSettings.preferences.isSpecsListOpen ?? false
 })
 
-// Initialize with null and wait for subscription to update
+// Initialize and wait for subscription to update
 const studioStatus = ref<string | null>(null)
+const isCertError = ref<boolean | null>(null)
 
 useSubscription({ query: StudioStatus_ChangeDocument }, (_, data) => {
   if (data?.studioStatusChange) {
     studioStatus.value = data.studioStatusChange.status
+    isCertError.value = data.studioStatusChange.isCertError
     studioStore.setCanAccessStudioAI(data.studioStatusChange.canAccessStudioAI)
   }
 
@@ -350,6 +355,8 @@ onMounted(() => {
 })
 
 preferences.update('autoScrollingEnabled', props.gql.localSettings.preferences.autoScrollingEnabled ?? true)
+
+preferences.update('showFetchRequests', props.gql.localSettings.preferences.showFetchRequests ?? true)
 
 // if the CYPRESS_NO_COMMAND_LOG environment variable is set,
 // don't use the widths or the open status of specs list from GraphQL
@@ -433,6 +440,7 @@ onMounted(() => {
   eventManager.on('save:app:state', (state) => {
     preferences.update('isSpecsListOpen', state.isSpecsListOpen)
     preferences.update('autoScrollingEnabled', state.autoScrollingEnabled)
+    preferences.update('showFetchRequests', state.showFetchRequests)
   })
 })
 

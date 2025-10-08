@@ -1421,6 +1421,7 @@ type LocalSettingsPreferences {
   Determine if the browser should launch when the browser flag is passed alone
   """
   shouldLaunchBrowserFromOpenBrowser: Boolean
+  showFetchRequests: Boolean
   specListWidth: Int
   studioWidth: Int
   wasBrowserSetInCLI: Boolean
@@ -2169,12 +2170,14 @@ enum SpecType {
 
 type StudioStatusPayload {
   canAccessStudioAI: Boolean!
+
+  """Whether the studio status is an IN_ERROR due to a certificate error"""
+  isCertError: Boolean
   status: StudioStatusType!
 }
 
 enum StudioStatusType {
   ENABLED
-  INITIALIZED
   INITIALIZING
   IN_ERROR
   NOT_INITIALIZED

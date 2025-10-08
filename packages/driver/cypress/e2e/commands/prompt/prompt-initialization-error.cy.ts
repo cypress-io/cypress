@@ -46,7 +46,7 @@ describe('src/cy/commands/prompt', () => {
     backendStub.withArgs('wait:for:prompt:ready').resolves({ success: false, error })
 
     cy.on('fail', (err) => {
-      expect(err.message).to.include('`cy.prompt` requires an internet connection to work. To continue, you may need to configure Cypress with your proxy settings.')
+      expect(err.message).to.include('`cy.prompt` requires an internet connection. To continue, you may need to configure Cypress with your proxy settings.')
       done()
     })
 
