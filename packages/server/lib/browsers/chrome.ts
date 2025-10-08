@@ -4,7 +4,7 @@ import la from 'lazy-ass'
 import _ from 'lodash'
 import os from 'os'
 import path from 'path'
-import extension from '@packages/extension'
+import * as extension from '@packages/extension'
 import mime from 'mime'
 import { launch } from '@packages/launcher'
 

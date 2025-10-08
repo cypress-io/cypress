@@ -48,7 +48,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] packages/error ✅ **COMPLETED**
 - [x] packages/eslint-config ✅ **COMPLETED**
 - [ ] packages/example
-- [ ] packages/extension
+- [x] packages/extension ✅ **COMPLETED**
 - [ ] packages/frontend-shared **PARTIAL** - entry point is JS
 - [x] packages/electron ✅ **COMPLETED**
 - [x] packages/https-proxy - ✅ **COMPLETED**
@@ -99,7 +99,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] packages/driver ✅ **COMPLETED**
 - [x] packages/electron ✅ **COMPLETED**
 - [x] packages/error ✅ **COMPLETED**
-- [ ] packages/extension
+- [x] packages/extension ✅ **COMPLETED**
 - [x] packages/https-proxy ✅ **COMPLETED**
 - [x] packages/electron ✅ **COMPLETED**
 - [x] packages/icons ✅ **COMPLETED**
