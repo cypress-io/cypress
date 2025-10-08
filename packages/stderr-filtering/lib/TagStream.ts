@@ -100,7 +100,7 @@ export class TagStream extends Transform {
     if (out) {
       callback(undefined, this.tag(out))
     } else {
-      callback()
+      callback(undefined, Buffer.from(''))
     }
   }
 
