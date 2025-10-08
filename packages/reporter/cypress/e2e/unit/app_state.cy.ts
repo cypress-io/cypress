@@ -152,6 +152,15 @@ describe('app state', () => {
     })
   })
 
+  context('#setShowFetchRequests', () => {
+    it('sets showFetchRequests', () => {
+      const instance = new AppState()
+
+      instance.setShowFetchRequests(true)
+      expect(instance.showFetchRequests).to.eq(true)
+    })
+  })
+
   context('#reset', () => {
     it('resets autoScrollingEnabled when it has not been toggled', () => {
       const instance = new AppState()
