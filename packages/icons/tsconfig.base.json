@@ -1,9 +1,10 @@
 {
-  "extends": "../ts/tsconfig.json",
   "compilerOptions": {
     "allowJs": false,
     "noImplicitAny": true,
     "noUncheckedIndexedAccess": true,
-    "outDir": "dist",
-  },
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "declaration": true
+  }
 }

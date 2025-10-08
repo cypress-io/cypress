@@ -1,6 +1,6 @@
 import path from 'path'
 
-const dist = [__dirname, '..', 'dist']
+const dist = [__dirname, 'dist']
 
 function distPath (...args: string[]) {
   return path.join.apply(path, dist.concat([...args]))

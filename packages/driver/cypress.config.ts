@@ -6,6 +6,9 @@ export const baseConfig: Cypress.ConfigOptions = {
   projectId: 'ypt4pf',
   experimentalMemoryManagement: true,
   experimentalWebKitSupport: true,
+  env: {
+    CI: process.env.CI,
+  },
   hosts: {
     'foobar.com': '127.0.0.1',
     '*.foobar.com': '127.0.0.1',
