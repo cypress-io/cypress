@@ -1,9 +1,7 @@
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 import chai, { expect } from 'chai'
-// NOTE: having to import directly from the lib folder as we cannot test ES6 classes effectively with sinon.
-// Since this is a test, this is OK, but testing directly from lib in other modules is not a best practice.
-import agent, { strictAgent } from '@packages/network/lib/agent'
+import { agent, strictAgent } from '@packages/network'
 import axios, { CreateAxiosDefaults, AxiosInstance } from 'axios'
 import debugLib from 'debug'
 import stripAnsi from 'strip-ansi'
