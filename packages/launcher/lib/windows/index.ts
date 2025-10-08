@@ -152,8 +152,6 @@ function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
         return tryNextExePath()
       }
 
-      // Use module.exports.getVersionString here, rather than our local reference
-      // to that variable so that the tests can easily mock it
       return getVersionString(path).then((version) => {
         debug('got version string for %s: %o', browser.name, { exePath, version })
 
