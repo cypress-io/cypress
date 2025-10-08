@@ -25,7 +25,7 @@ export = {
       const result = JSON.stringify(serialized)
 
       // JSON.stringify returns undefined for undefined input, but we need to return a string
-      if (result === undefined) {
+      if (typeof result === 'undefined') {
         return 'undefined'
       }
 
