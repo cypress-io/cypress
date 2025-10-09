@@ -74,7 +74,6 @@ describe('src/dom/jquery', () => {
     })
 
     it('reproduces the exact user issue: window.$ = "foo" with h1 element', () => {
-      // This test reproduces the exact scenario from the user's issue report
       cy.visit('fixtures/jquery-conflict-test.html')
 
       // The HTML already has window.$ = 'foo' set
@@ -87,13 +86,12 @@ describe('src/dom/jquery', () => {
     it('assertions work correctly when window.$ is overridden', () => {
       cy.visit('fixtures/jquery-conflict-test.html')
 
-      // Test that assertions work properly with our fix
+      // Test that assertions work properly
       cy.get('h1')
       .should('contain', 'Hello world')
       .should('be.visible')
       .should('have.text', 'Hello world')
       .then(($el) => {
-        // Test that the element is accessible in the callback
         expect($el).to.exist
         expect($el.text()).to.equal('Hello world')
       })
