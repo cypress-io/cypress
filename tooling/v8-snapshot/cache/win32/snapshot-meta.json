@@ -778,7 +778,6 @@
     "./packages/errors/node_modules/chalk/source/index.js",
     "./packages/https-proxy/index.js",
     "./packages/https-proxy/test/helpers/certs.js",
-    "./packages/icons/dist/icons.js",
     "./packages/icons/index.js",
     "./packages/launcher/lib/browsers.ts",
     "./packages/net-stubbing/lib/internal-types.ts",
@@ -4356,5 +4355,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "7734ab1a32c776b8c36a27490fc074553a4325c3a27f610cb7df4f9e1738700b"
+  "deferredHash": "1e3c55486eafb49439d262dcc52d18588254325ee01eb44ad3258d7ff82f469e"
 }
