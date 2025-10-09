@@ -1,6 +1,7 @@
 describe('src/dom/jquery', () => {
   context('.isJquery', () => {
     it('does not get confused when window contains jquery function', () => {
+      // @ts-ignore - Intentionally adding jquery property to test conflict detection
       window.jquery = () => {}
 
       expect(Cypress.dom.isJquery(window)).to.be.false
@@ -41,6 +42,7 @@ describe('src/dom/jquery', () => {
 
       // Override window.$ with a string value after page load
       cy.window().then((win) => {
+        // @ts-ignore - Intentionally overriding jQuery with non-function to test conflict handling
         win.$ = 'foo'
       })
 
@@ -55,6 +57,7 @@ describe('src/dom/jquery', () => {
 
       // Override window.$ with an object value after page load
       cy.window().then((win) => {
+        // @ts-ignore - Intentionally overriding jQuery with non-function to test conflict handling
         win.$ = { notAFunction: true }
       })
 
