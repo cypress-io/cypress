@@ -34,6 +34,7 @@ describe('src/dom/jquery', () => {
     cy.noop(cy.$$('#should-not-exist')).scrollTo('250px', '250px')
   })
 
+  // https://github.com/cypress-io/cypress/issues/1502
   context('jQuery conflicts', () => {
     it('handles window.$ overridden with non-function value (dynamic)', () => {
       cy.visit('fixtures/dom.html')
