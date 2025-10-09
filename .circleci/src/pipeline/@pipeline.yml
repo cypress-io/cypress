@@ -17,7 +17,7 @@ ubuntu-2004-current: &ubuntu-2004-current ubuntu-2004:2024.11.1
 ubuntu-2004-older: &ubuntu-2004-older ubuntu-2004:2024.05.1
 
 orbs:
-  browser-tools: circleci/browser-tools@2.1.1
+  browser-tools: circleci/browser-tools@2.3.1
 
 defaults: &defaults
   parallelism: 1
@@ -563,6 +563,7 @@ commands:
                       # https://www.ubuntuupdates.org/package/google_chrome/stable/main/base/google-chrome-stable
                       channel: << parameters.google-chrome-channel >>
                       chrome_version: << parameters.google-chrome-version >>
+                      replace_existing: true
                   - when:
                       condition:
                         equal: [ 'beta', << parameters.google-chrome-channel>> ]
@@ -1786,7 +1787,7 @@ jobs:
                   source ./scripts/ensure-node.sh
                   yarn lerna run types
             - sanitize-verify-and-store-mocha-results:
-                expectedResultCount: 10
+                expectedResultCount: 9
 
   verify-release-readiness:
     <<: *defaults
