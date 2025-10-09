@@ -1,0 +1,11 @@
+[31mWe could not find a Cypress Cloud project with the projectId: [33mproject-id-123[39m[31m[39m
+[31m[39m
+[31mThis [95mprojectId[39m[31m came from your [94m/path/to/cypress.config.js[39m[31m file or an environment variable.[39m
+[31m[39m
+[31mPlease log into Cypress Cloud and find your project.[39m
+[31m[39m
+[31mWe will list the correct projectId in the 'Settings' tab.[39m
+[31m[39m
+[31mAlternatively, you can create a new project directly from within the Cypress app.[39m
+[31m[39m
+[31mhttps://on.cypress.io/cloud[39m

@@ -308,7 +308,7 @@ const defaultPreferences = {
   'dom.timeout.enable_budget_timer_throttling': false,
 
   // allow getUserMedia APIs on insecure domains
-  'media.devices.insecure.enabled':	true,
+  'media.devices.insecure.enabled': true,
   'media.getusermedia.insecure.enabled': true,
 
   'marionette.log.level': launcherDebug.enabled ? 'Debug' : undefined,
@@ -398,6 +398,10 @@ export function connectToExisting () {
 
 export function connectProtocolToBrowser (): Promise<void> {
   throw new Error('Protocol is not yet supported in firefox.')
+}
+
+export function connectCyPromptToBrowser (): Promise<void> {
+  return Promise.resolve()
 }
 
 export function closeProtocolConnection (): Promise<void> {

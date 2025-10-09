@@ -35,7 +35,7 @@
     "mobx": "6.13.6",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "rimraf": "^5.0.10",
+    "rimraf": "^6.0.1",
     "tough-cookie": "2.5.0",
     "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4"

@@ -1,4 +1,3 @@
-import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React from 'react'
 import Button from '@cypress-design/react-button'
@@ -8,7 +7,7 @@ import Tooltip from '@cypress/react-tooltip'
 import defaultEvents, { Events } from '../lib/events'
 import type { AppState } from '../lib/app-state'
 
-import { IconChevronDownSmall, IconChevronUpSmall, IconActionNext, IconActionPlayLarge, IconActionRestart, IconActionStopCircle } from '@cypress-design/react-icon'
+import { IconActionNext, IconActionPlayLarge, IconActionRestart, IconActionStopCircle } from '@cypress-design/react-icon'
 
 const iconStrokeColor = 'gray-500'
 const iconFillColor = 'gray-900'
@@ -16,37 +15,13 @@ const iconFillColor = 'gray-900'
 interface Props {
   events?: Events
   appState: AppState
-  displayPreferencesButton?: boolean
 }
 
-const Controls: React.FC<Props> = observer(({ events = defaultEvents, appState, displayPreferencesButton = true }: Props) => {
+const Controls: React.FC<Props> = observer(({ events = defaultEvents, appState }: Props) => {
   const emit = (event: string) => () => events.emit(event)
-  const togglePreferencesMenu = () => {
-    appState.togglePreferencesMenu()
-    events.emit('save:state')
-  }
 
   return (
     <div className='controls'>
-      {displayPreferencesButton && (
-        <Tooltip placement='bottom' title={<p>Open Testing Preferences</p>} className='cy-tooltip'>
-          <div>
-            <Button
-              size='20'
-              variant='outline-dark'
-              aria-label='Open testing preferences'
-              data-cy='testing-preferences-toggle'
-              onClick={action('toggle:preferences:menu', togglePreferencesMenu)}
-            >
-              {appState.isPreferencesMenuOpen ? (
-                <IconChevronUpSmall strokeColor='gray-500' />
-              ) : (
-                <IconChevronDownSmall strokeColor='gray-500' />
-              )}
-            </Button>
-          </div>
-        </Tooltip>
-      )}
       {appState.isPaused && (
         <Tooltip placement='bottom' title={<p>Resume <span className='kbd'>C</span></p>} className='cy-tooltip'>
           <div>
@@ -78,11 +53,26 @@ const Controls: React.FC<Props> = observer(({ events = defaultEvents, appState, 
           </div>
         </Tooltip>
       )}
-      {!!appState.nextCommandName && (
-        <Tooltip placement='bottom' title={<p>Next <span className='kbd'>[N]:</span>{appState.nextCommandName}</p>} className='cy-tooltip'>
+      {(appState.isPaused || (appState.isRunning && appState.hasBeenPaused)) && (
+        <Tooltip
+          placement='bottom'
+          title={appState.nextCommandName ? <p>Next <span className='kbd'>[N]:</span>{appState.nextCommandName}</p> : <p>Step (not available)</p>}
+          className='cy-tooltip'
+        >
           <div>
-            <Button size='20' variant='outline-dark' aria-label={`Next '${appState.nextCommandName}'`} className='next' onClick={emit('next')}>
-              <IconActionNext size='16' strokeColor={iconStrokeColor} fillColor={iconFillColor} />
+            <Button
+              size='20'
+              variant='outline-dark'
+              aria-label={appState.nextCommandName ? `Next '${appState.nextCommandName}'` : 'Next (not available)'}
+              className='next disabled:hover:border-white/20 disabled:focus:border-white/20'
+              disabled={!appState.nextCommandName}
+              onClick={appState.nextCommandName ? emit('next') : () => { }}
+            >
+              <IconActionNext
+                size='16'
+                strokeColor={(appState.nextCommandName) ? iconStrokeColor : 'gray-700'}
+                fillColor={iconFillColor}
+              />
             </Button>
           </div>
         </Tooltip>

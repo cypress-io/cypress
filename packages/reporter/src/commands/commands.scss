@@ -70,6 +70,7 @@
     .command-wrapper-text {
       display: flex;
       flex-wrap: nowrap;
+      width: 100%;
     }
 
     .command-interceptions {
@@ -94,6 +95,18 @@
         margin-left: 0;
       }
     }
+
+    .command-wrapper-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+
+      .command-prompt-get-code {
+        cursor: pointer;
+        font-family: $font-system;     
+      }
+    }
   }
 
   .command-number-column {
@@ -104,7 +117,7 @@
   // when no children, add padding to act as the .command-expander-column's width
   // to prevent adding another element to the page
   .command-number-column + span.command-pin-target {
-    margin-left: 24px;
+    margin-left: $gutter-margin;
   }
 
   .command-pin-target.command-group {

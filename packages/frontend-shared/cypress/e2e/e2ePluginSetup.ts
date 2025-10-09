@@ -34,7 +34,7 @@ import fs from 'fs-extra'
 import nock from 'nock'
 import { CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types'
 
-import { CloudQuery } from '@packages/graphql/test/stubCloudTypes'
+import { CloudQuery } from '@packages/data-context/test/graphql/stubCloudTypes'
 import pDefer from 'p-defer'
 import { Readable } from 'stream'
 
@@ -52,7 +52,7 @@ interface InternalAddProjectOpts {
   open?: boolean
 }
 
-const cloudSchema = buildSchema(fs.readFileSync(path.join(__dirname, '../../../graphql/schemas/cloud.graphql'), 'utf8'))
+const cloudSchema = buildSchema(fs.readFileSync(path.join(__dirname, '../../../data-context/schemas/cloud.graphql'), 'utf8'))
 
 // require'd so we don't conflict with globals loaded in @packages/types
 const chai = require('chai')
@@ -113,9 +113,9 @@ async function makeE2ETasks () {
   const Fixtures = require('@tooling/system-tests') as FixturesShape
   const { scaffoldCommonNodeModules, scaffoldProjectNodeModules } = require('@tooling/system-tests/lib/dep-installer')
 
-  const cli = require('../../../../cli/lib/cli')
-  const cliUtil = require('../../../../cli/lib/util')
-  const cliOpen = require('../../../../cli/lib/exec/open')
+  const cli = require('../../../../cli/lib/cli').default
+  const cliUtil = require('../../../../cli/lib/util').default
+  const cliOpen = require('../../../../cli/lib/exec/open').default
 
   // Remove all the fixtures when the plugin starts
   Fixtures.remove()

@@ -45,7 +45,22 @@ async function run ({ context, core, github }) {
 
     const changedFiles = data.map((fileDetails) => fileDetails.filename)
 
+    // retrieve the changelog content from the pull request
+    let changelogContent = null
+
+    if (changedFiles.includes('cli/CHANGELOG.md')) {
+      const { data: changelogData } = await github.rest.repos.getContent({
+        owner: contextPullRequest.head.user.login,
+        repo: contextPullRequest.head.repo.name,
+        path: 'cli/CHANGELOG.md',
+        ref: contextPullRequest.head.sha,
+      })
+
+      changelogContent = Buffer.from(changelogData.content, 'base64').toString('utf8')
+    }
+
     await validateChangelog({
+      changelogContent,
       changedFiles,
       commits: [{
         commitMessage: header,

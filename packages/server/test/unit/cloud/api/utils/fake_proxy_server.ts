@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import http from 'http'
 import { AddressInfo } from 'net'
 import express, { Application } from 'express'
@@ -26,6 +25,8 @@ app.post('/ping', (req, res) => {
 app.get('/error', (req, res) => {
   res.status(404).json({ ok: false })
 })
+
+let ca: ReturnType<typeof CA.create>
 
 interface DestroyableProxyOptions {
   keepRequests?: boolean
@@ -138,8 +139,12 @@ export async function fakeProxy (opts: FakeProxyOptions) {
 }
 
 async function getHttpsOptions () {
-  const ca = await CA.create()
+  ca = await CA.create()
   const [cert, key] = await ca.generateServerCertificateKeys('localhost')
 
   return { cert, key }
+}
+
+export function getCA () {
+  return ca
 }

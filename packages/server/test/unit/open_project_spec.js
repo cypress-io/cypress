@@ -4,8 +4,8 @@ const Bluebird = require('bluebird')
 const browsers = require(`../../lib/browsers`)
 const ProjectBase = require(`../../lib/project-base`).ProjectBase
 const { openProject } = require('../../lib/open_project')
-const preprocessor = require(`../../lib/plugins/preprocessor`)
-const runEvents = require(`../../lib/plugins/run_events`)
+const preprocessor = require(`../../lib/plugins/preprocessor`).default
+const runEvents = require(`../../lib/plugins/run_events`).default
 const Fixtures = require('@tooling/system-tests')
 const delay = require('lodash/delay')
 
@@ -264,6 +264,15 @@ describe('lib/open_project', () => {
       await openProject.connectProtocolToBrowser(options)
 
       expect(browsers.connectProtocolToBrowser).to.be.calledWith(options)
+    })
+  })
+
+  context('#connectCyPromptToBrowser', () => {
+    it('connects cy prompt to browser', async () => {
+      sinon.stub(browsers, 'connectCyPromptToBrowser').resolves()
+      const options = sinon.stub()
+
+      await openProject.connectCyPromptToBrowser(options)
     })
   })
 })

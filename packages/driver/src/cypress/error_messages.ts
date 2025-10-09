@@ -1311,14 +1311,62 @@ export default {
   },
 
   press: {
-    invalid_key: stripIndent`\
-      \`{{key}}\` is not supported by ${cmd('press')}. See \`Cypress.Keyboard.Keys\` for keys that are supported.
-    `,
-    unsupported_browser_version: stripIndent`\
-      ${cmd('press')} is not supported in {{browser}} version {{version}}. Upgrade to version {{minimumVersion}} to use \`cy.press()\`.
-    `,
-    unsupported_browser: stripIndent`\
+    invalid_key: {
+      message: stripIndent`\
+        \`{{key}}\` is not supported by ${cmd('press')}.
+      `,
+      docsUrl: 'https://on.cypress.io/press',
+    },
+    unsupported_browser_version: {
+      message: stripIndent`\
+        ${cmd('press')} is not supported in {{browser}} version {{version}}. Upgrade to version {{minimumVersion}} to use \`cy.press()\`.
+      `,
+      docsUrl: 'https://on.cypress.io/press',
+    },
+    unsupported_browser: {
+      message: stripIndent`\
       ${cmd('press')} is not supported in {{family}} browsers.
+      `,
+      docsUrl: 'https://on.cypress.io/press',
+    },
+  },
+
+  prompt: {
+    promptDownloadError (obj) {
+      return {
+        message: stripIndent`\
+        Failed to download \`cy.prompt\` Cloud code:
+
+        - ${obj.error.code ? `${obj.error.code}: ` : ''}${obj.error.message}
+
+        Check your network connection and file settings to ensure download is not interrupted.
+      `,
+        docsUrl: 'https://on.cypress.io/prompt-download-error',
+      }
+    },
+    promptDownloadTimedOut (obj) {
+      return {
+        message: stripIndent`\
+        Timed out downloading \`cy.prompt\` Cloud code.
+
+        Check your network connection and system configuration to ensure download is not interrupted.
+      `,
+        docsUrl: 'https://on.cypress.io/prompt-download-error',
+      }
+    },
+    promptProxyError: {
+      message: stripIndent`\
+      \`cy.prompt\` requires an internet connection. To continue, you may need to configure Cypress with your proxy settings.
+      `,
+      docsUrl: 'https://on.cypress.io/proxy-configuration',
+    },
+    promptTestingTypeError: stripIndent`\
+      \`cy.prompt\` is currently only supported in end-to-end tests.
+    `,
+    experimentalPromptCommandError: stripIndent`\
+      \`cy.prompt\` cannot be called without the \`experimentalPromptCommand\` being set. 
+
+      Please set this in your Cypress config file to continue using \`cy.prompt\`.
     `,
   },
 

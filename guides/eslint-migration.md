@@ -14,7 +14,7 @@
 - [ ] npm/svelte
 
 ### Batch 3: Build-related
-- [ ] npm/webpack-batteries-included-preprocessor
+- [x] npm/webpack-batteries-included-preprocessor
 - [ ] npm/webpack-preprocessor
 - [ ] npm/webpack-dev-server
 - [ ] npm/vite-plugin-cypress-esm
@@ -30,12 +30,11 @@
 - [ ] packages/driver
 - [ ] packages/rewriter
 - [ ] packages/reporter
-- [ ] packages/server
+- [x] packages/server
 
 ### Batch 4b: Core packages (part 2)
 - [ ] packages/runner
 - [ ] packages/extension
-- [ ] packages/graphql
 - [ ] packages/network
 - [ ] packages/socket
 - [ ] packages/telemetry
@@ -45,6 +44,7 @@
 - [ ] packages/app
 
 ### Batch 4c: Core packages (part 3)
+- [x] cli
 - [ ] packages/config
 - [ ] packages/root
 - [ ] packages/resolve-dist
@@ -158,7 +158,6 @@ After all packages are migrated, simplify the lint-staged configuration in root 
 {
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
-    "*workflows.yml": "node scripts/format-workflow-file.js"
   }
 }
 ```

@@ -1,4 +1,3 @@
-import check from 'check-more-types'
 import Debug from 'debug'
 import EE from 'events'
 import _ from 'lodash'
@@ -17,7 +16,19 @@ import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
 import system from './util/system'
-import { BannersState, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ProtocolManagerShape, ReceivedCypressOptions, ResolvedConfigurationOptions, TestingType, VideoRecording, AutomationCommands, StudioMetricsTypes } from '@packages/types'
+import type {
+  BannersState,
+  FoundBrowser,
+  FoundSpec,
+  OpenProjectLaunchOptions,
+  ProtocolManagerShape,
+  CyPromptManagerShape,
+  ReceivedCypressOptions,
+  ResolvedConfigurationOptions,
+  TestingType,
+  VideoRecording,
+  AutomationCommands,
+} from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { createHmac } from 'crypto'
 import { ServerBase } from './server-base'
@@ -25,14 +36,11 @@ import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/service-worker-manager'
 import { v4 } from 'uuid'
 import { StudioLifecycleManager } from './cloud/studio/StudioLifecycleManager'
-import { reportStudioError } from './cloud/api/studio/report_studio_error'
-import { CloudRequest } from './cloud/api/cloud_request'
-import { isRetryableError } from './cloud/network/is_retryable_error'
-import { asyncRetry } from './util/async_retry'
-import { getCloudMetadata } from './cloud/get_cloud_metadata'
+import { CyPromptLifecycleManager } from './cloud/cy-prompt/CyPromptLifecycleManager'
 import { telemetryManager } from './cloud/studio/telemetry/TelemetryManager'
 import { INITIALIZATION_MARK_NAMES, INITIALIZATION_TELEMETRY_GROUP_NAMES } from './cloud/studio/telemetry/constants/initialization'
 import { TelemetryReporter } from './cloud/studio/telemetry/TelemetryReporter'
+import type { StudioInitOptions } from './types/studio'
 
 export interface Cfg extends ReceivedCypressOptions {
   projectId?: string
@@ -66,14 +74,15 @@ type StartWebsocketOptions = Pick<Cfg, 'socketIoCookie' | 'namespace' | 'screens
 export class ProjectBase extends EE {
   // id is sha256 of projectRoot
   public id: string
+  public ctx: DataContext
 
-  protected ctx: DataContext
   protected _cfg?: Cfg
   protected _server?: ServerBase<any>
   protected _automation?: Automation
   private _protocolManager?: ProtocolManagerShape
   private _recordTests?: any = null
   private _isServerOpen: boolean = false
+  private _isStudioInitialized: boolean = false
 
   public videoRecording?: VideoRecording
   public browser: any
@@ -98,7 +107,7 @@ export class ProjectBase extends EE {
       throw new Error('Instantiating lib/project requires a projectRoot!')
     }
 
-    if (!check.unemptyString(projectRoot)) {
+    if (!_.isString(projectRoot) || _.isEmpty(projectRoot)) {
       throw new Error(`Expected project root path, not ${projectRoot}`)
     }
 
@@ -160,12 +169,21 @@ export class ProjectBase extends EE {
     process.chdir(this.projectRoot)
 
     this._server = new ServerBase(cfg)
+    if (cfg.experimentalPromptCommand) {
+      const cyPromptLifecycleManager = new CyPromptLifecycleManager()
 
-    if ((!cfg.isTextTerminal || process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE) && cfg.resolved.experimentalStudio?.value) {
+      cyPromptLifecycleManager.initializeCyPromptManager({
+        cloudDataSource: this.ctx.cloud,
+        ctx: this.ctx,
+        record: this.options.record,
+        key: this.options.key,
+      })
+    }
+
+    if ((!cfg.isTextTerminal || process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE) && this.testingType === 'e2e') {
       const studioLifecycleManager = new StudioLifecycleManager()
 
       studioLifecycleManager.initializeStudioManager({
-        projectId: cfg.projectId,
         cloudDataSource: this.ctx.cloud,
         cfg,
         debugData: this.configDebugData,
@@ -399,6 +417,37 @@ export class ProjectBase extends EE {
       onServiceWorkerClientEvent,
     })
 
+    const destroyStudio = async () => {
+      if (!this._isStudioInitialized) {
+        debug('Studio is not initialized - skipping destroy')
+
+        return
+      }
+
+      const isStudioReady = await this.ctx.coreData.studioLifecycleManager?.isStudioReady()
+
+      if (!isStudioReady) {
+        debug('Studio is not ready - skipping destroy')
+
+        return
+      }
+
+      const studio = await this.ctx.coreData.studioLifecycleManager?.getStudio()
+
+      await studio?.destroy()
+
+      if (this.protocolManager) {
+        debug('Closing protocol connection')
+        await browsers.closeProtocolConnection({ browser: this.browser, foundBrowsers: this.options.browsers })
+        debug('Protocol connection closed')
+        this.protocolManager?.close()
+        this.protocolManager = undefined
+      }
+
+      debug('Studio destroyed')
+      this._isStudioInitialized = false
+    }
+
     const ios = this.server.startWebsockets(this.automation, this.cfg, {
       onReloadBrowser: options.onReloadBrowser,
       onFocusTests: options.onFocusTests,
@@ -407,7 +456,19 @@ export class ProjectBase extends EE {
       onSavedStateChanged: this.saveState.bind(this),
       closeExtraTargets: this.closeExtraTargets,
 
-      onStudioInit: async () => {
+      /**
+       * Called any time the test is run in Studio
+       */
+      onStudioInit: async ({ sessionId }: StudioInitOptions = {}) => {
+        // if already initialized, tear down studio first
+        if (this._isStudioInitialized) {
+          debug('Studio is already initialized - destroying studio')
+
+          await destroyStudio()
+        }
+
+        debug('Initializing studio')
+
         telemetryManager.mark(INITIALIZATION_MARK_NAMES.INITIALIZATION_START)
 
         const endTelemetry = ({ status, canAccessStudioAI }: { status: string, canAccessStudioAI: boolean }) => {
@@ -419,29 +480,15 @@ export class ProjectBase extends EE {
           })
         }
 
-        const cloudStudioSessionId = v4()
+        // Only need a new session if Studio is being entered from a non-opened
+        // state. If the test is being re-run, we use the existing session
+        const cloudStudioSessionId = sessionId ?? v4()
 
         try {
           const isStudioReady = this.ctx.coreData.studioLifecycleManager?.isStudioReady()
 
           if (!isStudioReady) {
             debug('User entered studio mode before cloud studio was initialized')
-            const { cloudUrl, cloudHeaders } = await getCloudMetadata(this.ctx.cloud)
-
-            reportStudioError({
-              cloudApi: {
-                cloudUrl,
-                cloudHeaders,
-                CloudRequest,
-                isRetryableError,
-                asyncRetry,
-              },
-              studioHash: this.id,
-              projectSlug: this.cfg.projectId,
-              error: new Error('User entered studio before cloud studio was initialized'),
-              studioMethod: 'onStudioInit',
-              studioMethodArgs: [],
-            })
 
             endTelemetry({ status: 'studio-not-ready', canAccessStudioAI: false })
 
@@ -450,25 +497,8 @@ export class ProjectBase extends EE {
 
           const studio = await this.ctx.coreData.studioLifecycleManager?.getStudio()
 
-          // only capture studio started event if the user is accessing legacy studio
-          if (!this.ctx.coreData.studioLifecycleManager?.cloudStudioRequested) {
-            try {
-              studio?.captureStudioEvent({
-                type: StudioMetricsTypes.STUDIO_STARTED,
-                machineId: await this.ctx.coreData.machineId ?? '',
-                projectId: this.cfg.projectId,
-                browser: this.browser ? {
-                  name: this.browser.name,
-                  family: this.browser.family,
-                  channel: this.browser.channel,
-                  version: this.browser.version,
-                } : undefined,
-                cypressVersion: pkg.version,
-              })
-            } catch (error) {
-              debug('Error capturing studio event:', error)
-            }
-          }
+          // Update the session id in the studio manager
+          studio?.updateSessionId(cloudStudioSessionId)
 
           if (this.spec && studio?.protocolManager) {
             telemetryManager.mark(INITIALIZATION_MARK_NAMES.CAN_ACCESS_STUDIO_AI_START)
@@ -515,39 +545,33 @@ export class ProjectBase extends EE {
 
             endTelemetry({ status: 'success', canAccessStudioAI: true })
 
+            this._isStudioInitialized = true
+
+            debug('Studio successfully initialized')
+
             return { canAccessStudioAI: true, cloudStudioSessionId }
           }
 
           this.protocolManager = undefined
 
+          debug('Studio not initialized - has spec: %o, has protocol manager: %o', !!this.spec, !!this.protocolManager)
+
           endTelemetry({ status: 'success', canAccessStudioAI: false })
 
           return { canAccessStudioAI: false, cloudStudioSessionId }
         } catch (error) {
+          debug('Error initializing studio', error)
+
           endTelemetry({ status: 'exception', canAccessStudioAI: false })
 
           return { canAccessStudioAI: false, cloudStudioSessionId }
         }
       },
 
-      onStudioDestroy: async () => {
-        const isStudioReady = await this.ctx.coreData.studioLifecycleManager?.isStudioReady()
+      onStudioDestroy: destroyStudio,
 
-        if (!isStudioReady) {
-          debug('Studio is not ready - skipping destroy')
-
-          return
-        }
-
-        const studio = await this.ctx.coreData.studioLifecycleManager?.getStudio()
-
-        await studio?.destroy()
-
-        if (this.protocolManager) {
-          await browsers.closeProtocolConnection({ browser: this.browser, foundBrowsers: this.options.browsers })
-          this.protocolManager?.close()
-          this.protocolManager = undefined
-        }
+      onCyPromptReady: async (cyPromptManager: CyPromptManagerShape) => {
+        await browsers.connectCyPromptToBrowser({ browser: this.browser, foundBrowsers: this.options.browsers, cyPromptManager })
       },
 
       onCaptureVideoFrames: (data: any) => {

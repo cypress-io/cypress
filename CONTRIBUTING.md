@@ -170,18 +170,17 @@ Here is a list of the core packages in this repository with a short description,
  | [cli](./cli)                          | `cypress`               | The command-line tool that is packaged as an `npm` module.                   |
  | [app](./packages/app)           | `@packages/app`      | The front-end for the Cypress App that renders in the launched browser instance.             |
  | [config](./packages/config)           | `@packages/config`      | The Cypress configuration types and validation used in the server, data-context and driver.             |
- | [data-context](./packages/data-context)           | `@packages/data-context`      | Centralized data access for the Cypress application.             |
+ | [data-context](./packages/data-context)           | `@packages/data-context`      | Centralized data access for the Cypress application. Contains the GraphQL layer that the `launchpad` and `app` use to interact with the `server`.   |
  | [driver](./packages/driver)           | `@packages/driver`      | The code that is used to drive the behavior of the API commands.             |
  | [electron](./packages/electron)       | `@packages/electron`    | The Cypress implementation of Electron.                                      |
  | [errors](./packages/errors)           | `@packages/errors`      | Error definitions and utilities for Cypress                                  |
  | [example](./packages/example)         | `@packages/example`     | Our example kitchen-sink application.                                        |
  | [extension](./packages/extension)     | `@packages/extension`   | The Cypress Chrome browser extension                                         |
  | [frontend-shared](./packages/frontend-shared)     | `@packages/frontend-shared`   | Shared components and styles used in the `app` and `launchpad`.                                         |
- | [graphql](./packages/graphql)     | `@packages/graphql`   | The GraphQL layer that the `launchpad` and `app` use to interact with the `server`.                                  |
  | [https-proxy](./packages/https-proxy) | `@packages/https-proxy` | This does https proxy for handling http certs and traffic.                   |
  | [icons](./packages/icons)       | `@packages/icons`    | The Cypress icons.                        |
  | [launcher](./packages/launcher)       | `@packages/launcher`    | Finds and launches browsers installed on your system.                        |
- | [launchpad](./packages/launchpad)       | `@packages/launcher`    | The portal to running Cypress that displays in `open` mode.                        |
+ | [launchpad](./packages/launchpad)       | `@packages/launchpad`    | The portal to running Cypress that displays in `open` mode.                        |
  | [net-stubbing](./packages/net-stubbing) | `@packages/net-stubbing` | Contains server side code for Cypress' network stubbing features.         |
  | [network](./packages/network)         | `@packages/network`     | Various utilities related to networking.                                     |
  | [packherd-require](./packages/packherd-require) | `@packages/packherd-require` | Loads modules that have been bundled by `@tooling/packherd`.  |
@@ -237,18 +236,34 @@ You must have the following installed on your system to contribute locally:
 - [`Node.js`](https://nodejs.org/en/) (See the root [.node-version](.node-version) file for the required version. You can find a list of tools on [node-version-usage](https://github.com/shadowspawn/node-version-usage) to switch the version of [`Node.js`](https://nodejs.org/en/) based on [.node-version](.node-version).)
 - [`Yarn v1 Classic`](https://yarnpkg.com/en/docs/install) (See also [Corepack](#corepack) below.)
 - [`python`](https://www.python.org/downloads/) (since we use `node-gyp`. See their [repo](https://github.com/nodejs/node-gyp) for Python version requirements.)
+- [`circleci CLI`](https://circleci.com/docs/guides/toolkit/local-cli/) if you intend on editing the CI configuration.
 
 #### Debian/Ubuntu
 
 `sudo apt install build-essential` meets the additional requirements to run `node-gyp` in the context of building Cypress from source.
 `python` is pre-installed on Debian-based systems including Ubuntu.
-The Python versions shipped with Ubuntu versions `20.04`, `22.04` and `24.*` are compatible with Cypress requirements.
+The default Python versions included with Debian `>=11` and Ubuntu `>=22.04`, which range from Python `3.9` - `3.13`, are all compatible with Cypress requirements.
 
-For Ubuntu `24.04` and above, refer also to the [Ubuntu 24.04 Release notes](https://discourse.ubuntu.com/t/noble-numbat-release-notes/39890) in the section "Unprivileged user namespace restrictions" and apply one of the workarounds to disable unprivileged user namespace restrictions for the entire system, either for one boot or persistently, as described. If you do not do this you may receive an error which includes the text `FATAL:setuid_sandbox_host.cc` when you try to run Cypress on these versions of Ubuntu after building Cypress from source.
+For Ubuntu `>=24.04`, disable "Unprivileged user namespace restrictions" permanently for the entire system by executing the following commands that are derived from the [Ubuntu 24.04 Release notes](https://discourse.ubuntu.com/t/noble-numbat-release-notes/39890):
+
+```shell
+echo "kernel.apparmor_restrict_unprivileged_userns=0" | sudo tee /etc/sysctl.d/60-apparmor-namespace.conf
+sudo sysctl --system
+```
+
+If you prefer to disable the restrictions for one boot only, use instead:
+
+```shell
+echo 0 | sudo tee /proc/sys/kernel/apparmor_restrict_unprivileged_userns
+```
+
+If you do not disable these restrictions for the affected Ubuntu versions, then Cypress may exit with a fatal error when you try to run Cypress after building Cypress from source. The error includes the text `FATAL:setuid_sandbox_host.cc` and may be hidden, pending resolution of issue https://github.com/cypress-io/cypress/issues/32358.
 
 #### Windows
 
-When using [`nvm`](https://github.com/coreybutler/nvm-windows) and changing node versions, node install tools are not installed automatically. This is needed for `node-gyp` to rebuild `better-sqlite3`. If you are failing to build Cypress because of this, either with a Python install missing or a VSCode version not being detected by `node-gyp`, you likely need to run the `install_tools.bat` outlined in the [better-sqlite3 troubleshooting guide](https://github.com/WiseLibs/better-sqlite3/blob/master/docs/troubleshooting.md).
+Install the current [version of Python](https://devguide.python.org/versions/) (`3.13`) from the [Microsoft Store](https://apps.microsoft.com/store/search?publisher=Python+Software+Foundation) and install the [Visual Studio Community 2022](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=Community) edition, selecting the `Desktop development with C++` workload.
+
+Refer to the `node-gyp` [Windows](https://github.com/nodejs/node-gyp/blob/main/README.md#on-windows) documentation section for a description of alternate ways of providing the `node-gyp` execution environment and for troubleshooting information.
 
 #### Corepack
 

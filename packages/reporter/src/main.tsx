@@ -4,8 +4,6 @@ import { observer } from 'mobx-react'
 import cs from 'classnames'
 import React, { useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-// @ts-ignore
-import EQ from 'css-element-queries/src/ElementQueries'
 
 import type { RunnablesErrorModel } from './runnables/runnable-error'
 import appStateDefault, { AppState } from './lib/app-state'
@@ -17,9 +15,7 @@ import shortcuts from './lib/shortcuts'
 
 import Header, { ReporterHeaderProps } from './header/header'
 import Runnables from './runnables/runnables'
-import TestingPreferences from './preferences/testing-preferences'
 import type { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
-import { StudioTestHeader } from './studio/StudioTestHeader'
 
 function usePrevious (value) {
   const ref = useRef()
@@ -40,6 +36,7 @@ export interface BaseReporterProps {
   statsStore: StatsStore
   autoScrollingEnabled?: boolean
   isSpecsListOpen?: boolean
+  showFetchRequests?: boolean
   events: Events
   error?: RunnablesErrorModel
   resetStatsOnSpecChange?: boolean
@@ -53,7 +50,7 @@ export interface SingleReporterProps extends BaseReporterProps {
 }
 
 // In React Class components (now deprecated), we used to use appState as a default prop. Now since defaultProps are not supported in functional components, we can use ES6 default params to accomplish the same thing
-const Reporter: React.FC<SingleReporterProps> = observer(({ appState = appStateDefault, runner, className, error, runMode = 'single', studioEnabled, autoScrollingEnabled, isSpecsListOpen, resetStatsOnSpecChange, renderReporterHeader = (props: ReporterHeaderProps) => <Header {...props} />, runnerStore }) => {
+const Reporter: React.FC<SingleReporterProps> = observer(({ appState = appStateDefault, runner, className, error, runMode = 'single', studioEnabled, autoScrollingEnabled, isSpecsListOpen, showFetchRequests, resetStatsOnSpecChange, renderReporterHeader = (props: ReporterHeaderProps) => <Header {...props} />, runnerStore }) => {
   const previousSpecRunId = usePrevious(runnerStore.specRunId)
   const [isMounted, setIsMounted] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
@@ -85,8 +82,11 @@ const Reporter: React.FC<SingleReporterProps> = observer(({ appState = appStateD
       appState.setSpecsList(isSpecsListOpen ?? false)
     })()
 
+    action('set:show:fetch:requests', () => {
+      appState.setShowFetchRequests(showFetchRequests ?? true)
+    })()
+
     shortcuts.start()
-    EQ.init()
     runnablesStore.setRunningSpec(runnerStore.spec.relative)
     // we need to know when the test is mounted for our reporter tests. see
     setIsMounted(true)
@@ -108,18 +108,12 @@ const Reporter: React.FC<SingleReporterProps> = observer(({ appState = appStateD
     }
   }, [runnerStore.spec, runnerStore.specRunId, resetStatsOnSpecChange, previousSpecRunId])
 
-  const isStudioSingleTest = appState?.studioActive && appState.studioSingleTestActive
-
   return (
     <div className={cs(className, 'reporter', {
       'mounted': isMounted,
     })}>
-      {isStudioSingleTest && runnerStore.spec ? <StudioTestHeader
-        spec={runnerStore.spec}
-      /> : renderReporterHeader({ appState, statsStore, runnablesStore, spec: runnerStore.spec })}
-      {appState?.isPreferencesMenuOpen ? (
-        <TestingPreferences appState={appState} />
-      ) : (
+      {renderReporterHeader({ appState, statsStore, runnablesStore, spec: runnerStore.spec })}
+      {
         runnerStore.spec && <Runnables
           appState={appState}
           error={error}
@@ -130,7 +124,7 @@ const Reporter: React.FC<SingleReporterProps> = observer(({ appState = appStateD
           studioEnabled={studioEnabled}
           canSaveStudioLogs={runnerStore.canSaveStudioLogs}
         />
-      )}
+      }
     </div>
   )
 })

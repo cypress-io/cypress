@@ -1,4 +1,9 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
+# Pack CircleCI config if any files in .circleci/src were changed
+if git diff --cached --name-only | grep -q "^\.circleci/src/"; then
+  yarn pack-ci --validate
+fi
+
 npx lint-staged

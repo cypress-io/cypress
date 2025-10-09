@@ -30,6 +30,7 @@ import $SetterGetter from './cypress/setter_getter'
 import { validateConfig } from './util/config'
 import $utils from './cypress/utils'
 
+import $stackUtils from './cypress/stack_utils'
 import { $Chainer } from './cypress/chainer'
 import { $Cookies, ICookies } from './cypress/cookies'
 import { $Command } from './cypress/command'
@@ -43,7 +44,7 @@ import * as resolvers from './cypress/resolvers'
 import { PrimaryOriginCommunicator, SpecBridgeCommunicator } from './cross-origin/communicator'
 import { setupAutEventHandlers } from './cypress/aut_event_handlers'
 
-import type { CachedTestState } from '@packages/types'
+import type { CachedTestState, ReporterRunState, RunState } from '@packages/types'
 import { DocumentDomainInjection } from '@packages/network/lib/document-domain-injection'
 import { setSpecContentSecurityPolicy } from './util/privileged_channel'
 
@@ -88,6 +89,31 @@ interface AutomationError extends Error {
 // Are we running Cypress in Cypress? (Used for E2E Testing for Cypress in Cypress only)
 const isCypressInCypress = document.defaultView !== top
 
+const handlePrimaryOriginSocketEvent = (Cypress, backendRequestNamespace: string) => {
+  Cypress.primaryOriginCommunicator.on(
+    backendRequestNamespace,
+    async ({ args: [eventName, ...args] }: { args: [string, any[]] }, { source, responseEvent }) => {
+      let response
+
+      try {
+        response = await Cypress.backendRequestHandler(
+          backendRequestNamespace,
+          eventName,
+          ...args,
+        )
+      } catch (error) {
+        response = { error }
+      }
+
+      Cypress.primaryOriginCommunicator.toSource(
+        source,
+        responseEvent,
+        response,
+      )
+    },
+  )
+}
+
 class $Cypress {
   cy: any
   chai: any
@@ -97,6 +123,7 @@ class $Cypress {
   Commands: any
   $autIframe: any
   onSpecReady: any
+  waitForStudio: any
   events: any
   $: any
   arch: any
@@ -126,6 +153,7 @@ class $Cypress {
   specBridgeCommunicator: SpecBridgeCommunicator
   isCrossOriginSpecBridge: boolean
   on: any
+  stackUtils: typeof $stackUtils | null = null
 
   // attach to $Cypress to access
   // all of the constructors
@@ -172,7 +200,7 @@ class $Cypress {
   minimatch = minimatch
   sinon = sinon
   lolex = fakeTimers
-
+  handlePrimaryOriginSocketEvent = handlePrimaryOriginSocketEvent
   areSourceMapsAvailable: boolean = false
 
   static $: any
@@ -187,6 +215,7 @@ class $Cypress {
     this.Commands = null
     this.$autIframe = null
     this.onSpecReady = null
+    this.waitForStudio = null
     this.primaryOriginCommunicator = new PrimaryOriginCommunicator()
     this.specBridgeCommunicator = new SpecBridgeCommunicator()
     this.isCrossOriginSpecBridge = false
@@ -222,7 +251,7 @@ class $Cypress {
     // not we're in a text terminal, but we keep this
     // as a separate property so we can potentially
     // slice up the behavior
-    config.isInteractive = !config.isTextTerminal || !!process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE
+    config.isInteractive = !config.isTextTerminal || config.env.INTERNAL_SIMULATE_OPEN_MODE
 
     // true if this Cypress belongs to a cross origin spec bridge
     this.isCrossOriginSpecBridge = config.isCrossOriginSpecBridge || false
@@ -312,9 +341,10 @@ class $Cypress {
     return this.action('cypress:config', config)
   }
 
-  initialize ({ $autIframe, onSpecReady }) {
+  initialize ({ $autIframe, onSpecReady, waitForStudio }) {
     this.$autIframe = $autIframe
     this.onSpecReady = onSpecReady
+    this.waitForStudio = waitForStudio
     if (this._onInitialize) {
       this._onInitialize()
       this._onInitialize = undefined
@@ -360,6 +390,7 @@ class $Cypress {
     this.mocha = $Mocha.create(specWindow, this, this.config)
     this.runner = $Runner.create(specWindow, this.mocha, this, this.cy, this.state)
     this.downloads = $Downloads.create(this)
+    this.stackUtils = $stackUtils
 
     // wire up command create to cy
     // @ts-expect-error
@@ -368,38 +399,48 @@ class $Cypress {
     this.events.proxyTo(this.cy)
 
     this.areSourceMapsAvailable = false
-    $scriptUtils.runScripts({
-      browser: this.config('browser'),
-      scripts,
-      specWindow,
-      testingType: this.testingType,
-    })
-    .then(() => {
-      this.areSourceMapsAvailable = $sourceMapUtils.areSourceMapsAvailable()
-      if (this.testingType === 'e2e') {
-        return setSpecContentSecurityPolicy(specWindow)
-      }
-    })
-    .catch((error) => {
-      this.runner.onSpecError('error')({ error })
-    })
-    .then(() => {
-      return (new Promise((resolve) => {
-        if (this.$autIframe.prop('contentWindow')) {
-          resolve()
-        } else if (this.$autIframe) {
-          this.$autIframe.on('load', resolve)
-        } else {
-          // block initialization if the iframe has not been created yet
-          // Used in CT when async chunks for plugins take their time to download/parse
-          this._onInitialize = resolve
+
+    const run = () => {
+      $scriptUtils.runScripts({
+        browser: this.config('browser'),
+        scripts,
+        specWindow,
+        testingType: this.testingType,
+      })
+      .then(() => {
+        this.areSourceMapsAvailable = $sourceMapUtils.areSourceMapsAvailable()
+        if (this.testingType === 'e2e') {
+          return setSpecContentSecurityPolicy(specWindow)
         }
-      }))
-    })
-    .then(() => {
-      this.cy.initialize(this.$autIframe)
-      this.onSpecReady()
-    })
+      })
+      .catch((error) => {
+        this.runner.onSpecError('error')({ error })
+      })
+      .then(() => {
+        return (new Promise((resolve) => {
+          if (this.$autIframe.prop('contentWindow')) {
+            resolve()
+          } else if (this.$autIframe) {
+            this.$autIframe.on('load', resolve)
+          } else {
+            // block initialization if the iframe has not been created yet
+            // Used in CT when async chunks for plugins take their time to download/parse
+            this._onInitialize = resolve
+          }
+        }))
+      })
+      .then(() => {
+        this.cy.initialize(this.$autIframe)
+        this.onSpecReady()
+      })
+    }
+
+    if (this.waitForStudio) {
+      // when running studio, wait until it's initialized before running
+      this.waitForStudio(run)
+    } else {
+      run()
+    }
   }
 
   maybeEmitCypressInCypress (...args: unknown[]) {
@@ -780,7 +821,7 @@ class $Cypress {
     }
   }
 
-  backend (eventName, ...args) {
+  backendRequestHandler (backendRequestNamespace: string, eventName, ...args) {
     return new Promise((resolve, reject) => {
       const fn = function (reply) {
         const e = reply.error
@@ -803,7 +844,34 @@ class $Cypress {
         return resolve(reply.response)
       }
 
-      return this.emit('backend:request', eventName, ...args, fn)
+      return this.emit(backendRequestNamespace, eventName, ...args, fn)
+    })
+  }
+
+  backend (eventName, ...args) {
+    return this.backendRequestHandler('backend:request', eventName, ...args)
+  }
+
+  preserveRunState (testId: string) {
+    const tests = this.runner.getTestsState(testId)
+    let runState: RunState = {
+      currentId: testId,
+      tests,
+      startTime: this.runner.getStartTime(),
+      emissions: this.runner.getEmissions(),
+      passed: this.runner.countByTestState(tests, 'passed'),
+      failed: this.runner.countByTestState(tests, 'failed'),
+      pending: this.runner.countByTestState(tests, 'pending'),
+      numLogs: LogUtils.countLogsByTests(tests),
+    }
+
+    return this.action('cy:collect:run:state').then((otherRunStates: ReporterRunState) => {
+      // merge all the states together
+      runState = _.reduce(otherRunStates, (memo, obj) => {
+        return _.extend(memo, obj)
+      }, runState)
+
+      return this.backend('preserve:run:state', runState)
     })
   }
 

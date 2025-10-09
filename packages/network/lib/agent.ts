@@ -7,7 +7,7 @@ import { getProxyForUrl } from 'proxy-from-env'
 import url from 'url'
 import { createRetryingSocket, getAddress } from './connect'
 import { lenientOptions } from './http-utils'
-import { ClientCertificateStore } from './client-certificates'
+import { clientCertificateStoreSingleton } from './client-certificates'
 import { CaOptions, getCaOptions } from './ca'
 
 const debug = debugModule('cypress:network:agent')
@@ -54,8 +54,6 @@ const mergeCAOptions = (options: https.RequestOptions, caOptions: CaOptions): ht
     ca: [...caArray, ...caOptions.ca],
   }
 }
-
-export const clientCertificateStore = new ClientCertificateStore()
 
 type WithProxyOpts<RequestOptions> = RequestOptions & {
   proxy: string
@@ -148,17 +146,17 @@ export const regenerateRequestHead = (req: http.ClientRequest) => {
   }
 }
 
-const getFirstWorkingFamily = (
-  { port, host }: http.RequestOptions,
+export const getFirstWorkingFamily = (
+  { port, host }: Pick<http.RequestOptions, 'port' | 'host'>,
   familyCache: FamilyCache,
-  cb: Function,
+  cb: (family?: net.family) => void,
 ) => {
   // this is a workaround for localhost (and potentially others) having invalid
   // A records but valid AAAA records. here, we just cache the family of the first
   // returned A/AAAA record for a host that we can establish a connection to.
   // https://github.com/cypress-io/cypress/issues/112
 
-  const isIP = net.isIP(host)
+  const isIP = net.isIP(host) as net.family | 0
 
   if (isIP) {
     // isIP conveniently returns the family of the address
@@ -170,13 +168,15 @@ const getFirstWorkingFamily = (
     return cb()
   }
 
-  if (familyCache[host]) {
-    return cb(familyCache[host])
+  const cacheKey = `${host}:${port}`
+
+  if (familyCache[cacheKey]) {
+    return cb(familyCache[cacheKey])
   }
 
   return getAddress(port, host)
   .then((firstWorkingAddress: net.Address) => {
-    familyCache[host] = firstWorkingAddress.family
+    familyCache[cacheKey] = firstWorkingAddress.family
 
     return cb(firstWorkingAddress.family)
   })
@@ -246,13 +246,13 @@ export class CombinedAgent {
 
     debug('addRequest called %o', { isHttps, ..._.pick(options, 'href') })
 
-    return getFirstWorkingFamily(options, this.familyCache, (family: net.family) => {
+    return getFirstWorkingFamily(options, this.familyCache, (family?: net.family) => {
       options.family = family
 
       debug('got family %o', _.pick(options, 'family', 'href'))
 
       if (isHttps) {
-        _.assign(options, clientCertificateStore.getClientCertificateAgentOptionsForUrl(uri))
+        _.assign(options, clientCertificateStoreSingleton.getClientCertificateAgentOptionsForUrl(uri))
 
         return this.httpsAgent.addRequest(req, options as https.RequestOptions)
       }
@@ -327,7 +327,7 @@ class HttpAgent extends http.Agent {
 
     if (proxy.protocol === 'https:') {
       // gonna have to use the https module to reach the proxy, even though this is an http req
-      req.agent = this.httpsAgent
+      req.agent = this.httpsAgent as any
 
       return this.httpsAgent.addRequest(req, options)
     }
@@ -365,19 +365,25 @@ class HttpsAgent extends https.Agent {
     }
   }
 
-  createConnection (options: HttpsRequestOptions, cb: http.SocketCallback) {
+  createConnection (options: HttpsRequestOptions, cb?: any): any {
     if (process.env.HTTPS_PROXY) {
       const proxy = getProxyForUrl(options.href)
 
       if (proxy) {
         options.proxy = <string>proxy
 
-        return this.createUpstreamProxyConnection(<HttpsRequestOptionsWithProxy>options, cb)
+        // If no callback is provided, we can't handle the async proxy connection
+        // Return the direct connection instead
+        if (!cb) {
+          return super.createConnection(options)
+        }
+
+        return this.createUpstreamProxyConnection(<HttpsRequestOptionsWithProxy>options, cb as any)
       }
     }
 
     // @ts-ignore
-    cb(null, super.createConnection(options))
+    cb?.(null, super.createConnection(options) as any)
   }
 
   createUpstreamProxyConnection (options: HttpsRequestOptionsWithProxy, cb: http.SocketCallback) {
@@ -441,7 +447,7 @@ class HttpsAgent extends https.Agent {
             options.servername = hostname
           }
 
-          return cb(undefined, super.createConnection(options, undefined))
+          return cb(undefined, super.createConnection(options) as any)
         }
 
         cb(undefined, proxySocket)
@@ -459,6 +465,18 @@ class HttpsAgent extends https.Agent {
   }
 }
 
+// NODE_TLS_REJECT_UNAUTHORIZED is set to '0' in Cypress to cover
+// all traffic to the user's app and `agent` honors this by default.
+// Calls to the Cloud should use the `strictAgent` or `api/index`'s
+// request promise implementation instead as they override
+// this functionality to actually reject in unauthorized situations.
 const agent = new CombinedAgent()
 
+// This agent always rejects unauthorized certificates.
+const strictAgent = new CombinedAgent({}, {
+  rejectUnauthorized: true,
+})
+
 export default agent
+
+export { strictAgent }

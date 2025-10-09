@@ -135,9 +135,6 @@ export const AllCypressErrors = {
   TESTS_DID_NOT_START_RETRYING: (arg1: string) => {
     return errTemplate`Timed out waiting for the browser to connect. ${fmt.off(arg1)}`
   },
-  FIREFOX_CDP_FAILED_TO_CONNECT: (arg1: string) => {
-    return errTemplate`Failed to spawn CDP with Firefox. ${fmt.off(arg1)}`
-  },
   TESTS_DID_NOT_START_FAILED: () => {
     return errTemplate`The browser never connected. Something is wrong. The tests cannot run. Aborting...`
   },
@@ -686,20 +683,8 @@ export const AllCypressErrors = {
   NO_PROJECT_FOUND_AT_PROJECT_ROOT: (projectRoot: string) => {
     return errTemplate`Can't find a project at the path: ${fmt.path(projectRoot)}`
   },
-  CANNOT_FETCH_PROJECT_TOKEN: () => {
-    return errTemplate`Can't find project's secret key.`
-  },
-  CANNOT_CREATE_PROJECT_TOKEN: () => {
-    return errTemplate`Can't create project's secret key.`
-  },
   PORT_IN_USE_SHORT: (arg1: string | number) => {
     return errTemplate`Port ${fmt.highlight(arg1)} is already in use.`
-  },
-  PORT_IN_USE_LONG: (arg1: string | number) => {
-    return errTemplate`\
-      Can't run project because port is currently in use: ${fmt.highlight(arg1)}
-
-      Assign a different port with the ${fmt.flag(`--port <port>`)} argument or shut down the other running process.`
   },
   ERROR_READING_FILE: (filePath: string, err: Error) => {
     return errTemplate`\
@@ -1096,9 +1081,6 @@ export const AllCypressErrors = {
 
         For more information, see https://on.cypress.io/bad-browser-policy`
   },
-  BAD_POLICY_WARNING_TOOLTIP: () => {
-    return errTemplate`Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see https://on.cypress.io/bad-browser-policy`
-  },
   EXTENSION_NOT_LOADED: (browserName: string, extensionPath: string) => {
     return errTemplate`\
         ${fmt.off(browserName)} could not install the extension at path: ${fmt.path(extensionPath)}
@@ -1110,13 +1092,6 @@ export const AllCypressErrors = {
         We have detected an unknown or unsupported ${fmt.highlightSecondary(`CYPRESS_INTERNAL_ENV`)} value: ${fmt.highlight(val)}
 
         CYPRESS_INTERNAL_ENV is reserved for internal use and cannot be modified.`
-  },
-  CDP_VERSION_TOO_OLD: (minimumVersion: string, currentVersion: { major: number, minor: string | number }) => {
-    const phrase = currentVersion.major !== 0
-      ? fmt.highlight(`${currentVersion.major}.${currentVersion.minor}`)
-      : fmt.off('an older version')
-
-    return errTemplate`A minimum CDP version of ${fmt.highlight(minimumVersion)} is required, but the current browser has ${phrase}.`
   },
   CDP_COULD_NOT_CONNECT: (browserName: string, port: number, err: Error) => {
     // we include a stack trace here because it may contain useful information
@@ -1184,16 +1159,6 @@ export const AllCypressErrors = {
 
         The error was: ${fmt.highlightSecondary(errMsg)}`
   },
-  FIREFOX_GECKODRIVER_FAILURE: (origin: string, err: Error) => {
-    return errTemplate`\
-        Cypress could not connect to Firefox.
-
-        An unexpected error was received from GeckoDriver: ${fmt.highlightSecondary(origin)}
-
-        To avoid this error, ensure that there are no other instances of Firefox launched by Cypress running.
-
-        ${fmt.stackTrace(err)}`
-  },
   FOLDER_NOT_WRITABLE: (arg1: string) => {
     return errTemplate`\
         This folder is not writable: ${fmt.path(arg1)}
@@ -1225,11 +1190,13 @@ export const AllCypressErrors = {
 
         If you have feedback about the experiment, please join the discussion here: http://on.cypress.io/single-tab-run-mode`
   },
-  EXPERIMENTAL_STUDIO_E2E_ONLY: () => {
+  EXPERIMENTAL_STUDIO_REMOVED: () => {
     return errTemplate`\
-        The ${fmt.highlight(`experimentalStudio`)} experiment is currently only supported for End to End Testing.
-
-        If you have feedback about the experiment, please join the discussion here: http://on.cypress.io/studio-beta`
+        The ${fmt.highlight(`experimentalStudio`)} option was removed in ${fmt.cypressVersion(`15.4.0`)}.
+        
+        Cypress Studio is now available for all users.
+        
+        You can safely remove this option from your config.`
   },
   EXPERIMENTAL_RUN_ALL_SPECS_E2E_ONLY: () => {
     const code = errPartial`
@@ -1256,6 +1223,19 @@ export const AllCypressErrors = {
 
     return errTemplate`\
         The ${fmt.highlight(`experimentalOriginDependencies`)} experiment is currently only supported for End to End Testing and must be configured as an e2e testing type property: ${fmt.highlightSecondary(`e2e.experimentalOriginDependencies`)}.
+
+        ${fmt.code(code)}`
+  },
+  EXPERIMENTAL_PROMPT_COMMAND_E2E_ONLY: () => {
+    const code = errPartial`
+    {
+      e2e: {
+        experimentalPromptCommand: true
+      },
+    }`
+
+    return errTemplate`\
+        The ${fmt.highlight(`experimentalPromptCommand`)} experiment is currently only supported for End to End Testing and must be configured as an e2e testing type property: ${fmt.highlightSecondary(`e2e.experimentalPromptCommand`)}.
 
         ${fmt.code(code)}`
   },
@@ -1553,7 +1533,6 @@ export const AllCypressErrors = {
   },
 } as const
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _typeCheck: Record<keyof AllCypressErrorObj, (...args: any[]) => ErrTemplateResult> = AllCypressErrors
 
 export type AllCypressErrorObj = typeof AllCypressErrors
@@ -1608,7 +1587,7 @@ export const getError = function <Type extends keyof AllCypressErrorObj> (type: 
   return err
 }
 
-export const logWarning = function <Type extends keyof AllCypressErrorObj> (type: Type, ...args: Parameters<AllCypressErrorObj[Type]>) {
+export const logWarning = function <Type extends keyof AllCypressErrorObj> (type: Type, ...args: Parameters<AllCypressErrorObj[Type]>): null {
   const err = getError(type, ...args)
 
   logError(err, 'magenta')

@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    "rootDir": "./",
+    "outDir": "./dist",
+    "target": "ES2022",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "noImplicitAny": false,
+    "noEmit": true,
+    "types": [
+      "mocha"
+    ]
+  },
+  "include": [
+    "lib/**/*.ts",
+    "test/**/*.ts",
+    "*.ts"
+  ],
+  "exclude": [
+    "types/bluebird",
+    "types/chai",
+    "types/chai-jquery",
+    "types/jquery",
+    "types/lodash",
+    "types/minimatch",
+    "types/mocha",
+    "types/sinon",
+    "types/sinon-chai",
+    "react",
+    "vue",
+    "angular",
+    "svelte",
+    "mount-utils",
+  ]
+}

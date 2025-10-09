@@ -1,0 +1,19 @@
+{
+  "include": [
+    "src/*.ts"
+  ],
+  "exclude": [
+    "test"
+  ],
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "esModuleInterop": true,
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "types": [
+      "node"
+    ]
+  }
+}

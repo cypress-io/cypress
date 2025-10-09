@@ -3,7 +3,7 @@ import Debug from 'debug'
 import EventEmitter from 'events'
 import _ from 'lodash'
 import { getCtx } from '@packages/data-context'
-import { handleGraphQLSocketRequest } from '@packages/graphql/src/makeGraphQLServer'
+import { handleGraphQLSocketRequest } from '@packages/data-context/graphql/makeGraphQLServer'
 import { onNetStubbingEvent } from '@packages/net-stubbing'
 import * as socketIo from '@packages/socket'
 import { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
@@ -20,12 +20,14 @@ import runEvents from './plugins/run_events'
 import type { OTLPTraceExporterCloud } from '@packages/telemetry'
 import { telemetry } from '@packages/telemetry'
 import type { Automation } from './automation'
-// eslint-disable-next-line no-duplicate-imports
+import { openExternal } from './gui/links'
+
 import type { Socket } from '@packages/socket'
 
 import type { RunState, CachedTestState, ProtocolManagerShape, AutomationCommands } from '@packages/types'
 import memory from './browsers/memory'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
+import type { StudioInitOptions } from './types/studio'
 
 type StartListeningCallbacks = {
   onSocketConnection: (socket: any) => void
@@ -163,6 +165,7 @@ export class SocketBase {
       onCaptureVideoFrames () {},
       onStudioInit () {},
       onStudioDestroy () {},
+      onCyPromptReady () {},
     })
 
     let automationClient
@@ -426,9 +429,21 @@ export class SocketBase {
           })
         })
 
-        socket.on('studio:init', async (cb) => {
+        getCtx().coreData.cyPromptLifecycleManager?.registerCyPromptReadyListener((cyPrompt) => {
+          cyPrompt.addSocketListeners({
+            socket,
+            onBeforeSave: () => {
+              this.onBeforeSave(config)
+            },
+            onAfterSave: ({ error }) => {
+              this.onAfterSave(config, error)
+            },
+          })
+        })
+
+        socket.on('studio:init', async (initOptions: StudioInitOptions, cb) => {
           try {
-            const { canAccessStudioAI, cloudStudioSessionId } = await options.onStudioInit()
+            const { canAccessStudioAI, cloudStudioSessionId } = await options.onStudioInit(initOptions)
 
             cb({ canAccessStudioAI, cloudStudioSessionId })
           } catch (error) {
@@ -460,6 +475,21 @@ export class SocketBase {
             cb({})
           } catch (error) {
             cb({ error: errors.cloneErr(error) })
+          }
+        })
+
+        socket.on('prompt:reset', async (cb) => {
+          try {
+            const cyPrompt = await getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt()
+
+            // If we have runState, then we shouldn't reset the full prompt manager because
+            // we are just changing top. We will clear the prompt manager for a specific test
+            // later.
+            if (!runState) {
+              cyPrompt?.cyPromptManager?.reset()
+            }
+          } finally {
+            cb()
           }
         })
 
@@ -549,6 +579,17 @@ export class SocketBase {
                 })
               case 'close:extra:targets':
                 return options.closeExtraTargets()
+              case 'wait:for:prompt:ready':
+                return getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt().then(async (cyPrompt) => {
+                  if (cyPrompt.cyPromptManager) {
+                    await options.onCyPromptReady(cyPrompt.cyPromptManager)
+                  }
+
+                  return {
+                    success: cyPrompt.cyPromptManager && cyPrompt.cyPromptManager.status === 'INITIALIZED',
+                    error: cyPrompt.error ? errors.cloneErr(cyPrompt.error) : undefined,
+                  }
+                })
               default:
                 throw new Error(`You requested a backend event we cannot handle: ${eventName}`)
             }
@@ -562,7 +603,7 @@ export class SocketBase {
           })
         })
 
-        socket.on('get:cached:test:state', (cb: (runState: RunState | null, testState: CachedTestState) => void) => {
+        socket.on('get:cached:test:state', async (cb: (runState: RunState | null, testState: CachedTestState) => void) => {
           const s = runState
 
           const cachedTestState: CachedTestState = {
@@ -573,9 +614,21 @@ export class SocketBase {
             runState = undefined
 
             // if we have cached test state, then we need to reset
-            // the test state on the protocol manager
+            // the test state on the protocol manager and prompt manager
             if (s.currentId) {
-              this._protocolManager?.resetTest(s.currentId)
+              const testId = s.currentId
+
+              this._protocolManager?.resetTest(testId)
+
+              try {
+                const cyPrompt = await getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt()
+
+                // reset the prompt manager for the current test to clear any
+                // cached state when top changes for the current test
+                cyPrompt?.cyPromptManager?.reset(testId)
+              } catch (error) {
+                debug('error resetting prompt manager', error)
+              }
             }
           }
 
@@ -606,17 +659,8 @@ export class SocketBase {
 
         socket.on('external:open', (url: string) => {
           debug('received external:open %o', { url })
-          // using this instead of require('electron').shell.openExternal
-          // because CT runner does not spawn an electron shell
-          // if we eventually decide to exclusively launch CT from
-          // the desktop-gui electron shell, we should update this to use
-          // electron.shell.openExternal.
 
-          // cross platform way to open a new tab in default browser, or a new browser window
-          // if one does not already exist for the user's default browser.
-          const start = (process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open')
-
-          return require('child_process').exec(`${start} ${url}`)
+          return openExternal(url)
         })
 
         socket.on('get:user:editor', (cb) => {

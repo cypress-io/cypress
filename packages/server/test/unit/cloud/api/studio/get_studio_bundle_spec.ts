@@ -1,6 +1,7 @@
-import { sinon, proxyquire } from '../../../../spec_helper'
+import { proxyquire } from '../../../../spec_helper'
 import { Readable, Writable } from 'stream'
 import { HttpError } from '../../../../../lib/cloud/network/http_error'
+import sinon from 'sinon'
 
 describe('getStudioBundle', () => {
   let writeResult: string
@@ -66,7 +67,7 @@ describe('getStudioBundle', () => {
     const responseSignature = await getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })
 
     expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
-      agent: sinon.match.any,
+      agent: sinon.match((agent) => agent.httpsAgent.options.rejectUnauthorized === true),
       method: 'GET',
       headers: {
         'x-route-version': '1',
@@ -86,7 +87,7 @@ describe('getStudioBundle', () => {
   })
 
   it('downloads the studio bundle and extracts it after 1 fetch failure', async () => {
-    crossFetchStub.onFirstCall().rejects(new HttpError('Failed to fetch', 'url', 502, 'Bad Gateway', 'Bad Gateway', sinon.stub()))
+    crossFetchStub.onFirstCall().rejects(new HttpError('Failed to fetch', 'url', 502, 'Bad Gateway', 'Bad Gateway', sinon.stub() as any))
     crossFetchStub.onSecondCall().resolves({
       ok: true,
       statusText: 'OK',
@@ -109,7 +110,7 @@ describe('getStudioBundle', () => {
     const responseSignature = await getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })
 
     expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
-      agent: sinon.match.any,
+      agent: sinon.match((agent) => agent.httpsAgent.options.rejectUnauthorized === true),
       method: 'GET',
       headers: {
         'x-route-version': '1',
@@ -129,7 +130,7 @@ describe('getStudioBundle', () => {
   })
 
   it('throws an error and returns a studio manager in error state if the fetch fails more than twice', async () => {
-    const error = new HttpError('Failed to fetch', 'url', 502, 'Bad Gateway', 'Bad Gateway', sinon.stub())
+    const error = new HttpError('Failed to fetch', 'url', 502, 'Bad Gateway', 'Bad Gateway', sinon.stub() as any)
 
     crossFetchStub.rejects(error)
 
@@ -137,7 +138,7 @@ describe('getStudioBundle', () => {
 
     expect(crossFetchStub).to.be.calledThrice
     expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
-      agent: sinon.match.any,
+      agent: sinon.match((agent) => agent.httpsAgent.options.rejectUnauthorized === true),
       method: 'GET',
       headers: {
         'x-route-version': '1',
@@ -159,7 +160,7 @@ describe('getStudioBundle', () => {
     await expect(getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })).to.be.rejected
 
     expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
-      agent: sinon.match.any,
+      agent: sinon.match((agent) => agent.httpsAgent.options.rejectUnauthorized === true),
       method: 'GET',
       headers: {
         'x-route-version': '1',
@@ -199,7 +200,7 @@ describe('getStudioBundle', () => {
     expect(writeResult).to.eq('console.log("studio bundle")')
 
     expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
-      agent: sinon.match.any,
+      agent: sinon.match((agent) => agent.httpsAgent.options.rejectUnauthorized === true),
       method: 'GET',
       headers: {
         'x-route-version': '1',
@@ -231,7 +232,7 @@ describe('getStudioBundle', () => {
     await expect(getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })).to.be.rejectedWith('Unable to get studio signature')
 
     expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
-      agent: sinon.match.any,
+      agent: sinon.match((agent) => agent.httpsAgent.options.rejectUnauthorized === true),
       method: 'GET',
       headers: {
         'x-route-version': '1',
@@ -261,7 +262,7 @@ describe('getStudioBundle', () => {
     await expect(getStudioBundle({ studioUrl: 'http://localhost:1234/studio/bundle/abc.tgz', bundlePath: '/tmp/cypress/studio/abc/bundle.tar' })).to.be.rejectedWith('Unable to get studio manifest signature')
 
     expect(crossFetchStub).to.be.calledWith('http://localhost:1234/studio/bundle/abc.tgz', {
-      agent: sinon.match.any,
+      agent: sinon.match((agent) => agent.httpsAgent.options.rejectUnauthorized === true),
       method: 'GET',
       headers: {
         'x-route-version': '1',

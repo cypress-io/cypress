@@ -1,11 +1,92 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.0.1
+## 15.4.1
 
-_Released 08/26/2025 (PENDING)_
+_Released 10/21/2025 (PENDING)_
+
+**Misc:**
+
+Browser detection in Cypress now always prefers 64-bit browser installs to 32-bit browser installs. Addressed in [#32656](https://github.com/cypress-io/cypress/pull/32656).
+
+## 15.4.0
+
+_Released 10/7/2025_
+
+**Features:**
+
+- Cypress Studio is now available by default. You no longer have to set the `experimentalStudio` flag. Addresses [#30997](https://github.com/cypress-io/cypress/issues/30997). Addressed in [#32571](https://github.com/cypress-io/cypress/pull/32571).
+- An option is now available to 'Hide HTTP Requests' in the Cypress Command Log. This can be found in the new dropdown menu at the top of the Command Log. Addresses [#7362](https://github.com/cypress-io/cypress/issues/7362). Addressed in [#32658](https://github.com/cypress-io/cypress/pull/32658).
+- Added the `--posix-exit-codes` flag for the `run` command. When this flag is passed, Cypress will exit with 1 if any tests fail, rather than the number of failed tests. Addresses [#32605](https://github.com/cypress-io/cypress/issues/32605) and [#24695](https://github.com/cypress-io/cypress/issues/24695). Addressed in [#32609](https://github.com/cypress-io/cypress/pull/32609).
+- [`cy.prompt()`](https://docs.cypress.io/api/commands/prompt) is now a reserved Cypress command, currently gated behind a feature flag that requires an invite from Cypress. This means any custom commands named 'prompt' will no longer work. Stay tuned for updates on when this feature will become more widely available. Addresses [#31826](https://github.com/cypress-io/cypress/issues/31826).
 
 **Bugfixes:**
 
+- Fixed a regression introduced in [`15.0.0`](https://docs.cypress.io/guides/references/changelog#15-0-0) where `dbus` connection error messages appear in docker containers when launching Cypress. Fixes [#32290](https://github.com/cypress-io/cypress/issues/32290).
+- Fixed code frames in `cy.origin` so that failed commands will show the correct line/column within the corresponding spec file. Addressed in [#32597](https://github.com/cypress-io/cypress/pull/32597).
+- Fixed Cypress cloud requests so that they properly verify SSL certificates. Addressed in [#32629](https://github.com/cypress-io/cypress/pull/32629).
+
+**Misc:**
+
+- Added a dropdown menu in the Command Log that includes actions like Open in IDE and Add New Test in Studio, along with test preferences such as Auto-Scroll and Hide HTTP Requests. Addresses [#32556](https://github.com/cypress-io/cypress/issues/32556) and [#32558](https://github.com/cypress-io/cypress/issues/32558). Addressed in [#32611](https://github.com/cypress-io/cypress/pull/32611).
+- Updated the Studio test editing header to include a Back button. This change ensures the Specs button remains functional for expanding or collapsing the specs panel. Addresses [#32556](https://github.com/cypress-io/cypress/issues/32556) and [#32558](https://github.com/cypress-io/cypress/issues/32558). Addressed in [#32611](https://github.com/cypress-io/cypress/pull/32611).
+- Fixed the Studio panel resizing when dragging. Addressed in [#32584](https://github.com/cypress-io/cypress/pull/32584).
+- The Next button now maintains consistent visibility during stepping sessions when using `cy.pause`, staying visible but disabled when no immediate next command is available, providing clear visual feedback to users about stepping state. Addresses [#32476](https://github.com/cypress-io/cypress/issues/32476). Addressed in [#32536](https://github.com/cypress-io/cypress/pull/32536).
+
+**Dependency Updates:**
+
+- Upgraded `electron` from `36.8.1` to `37.6.0`. Addressed in [#32607](https://github.com/cypress-io/cypress/pull/32607).
+- Upgraded bundled Node.js version from `22.18.0` to `22.19.0`. Addressed in [#32607](https://github.com/cypress-io/cypress/pull/32607).
+- Upgraded bundled Chromium version from `136.0.7103.177` to `138.0.7204.251`. Addressed in [#32607](https://github.com/cypress-io/cypress/pull/32607).
+
+## 15.3.0
+
+_Released 9/23/2025_
+
+**Features:**
+
+- Added Escape key support to [`cy.press()`](http://on.cypress.io/api/press). Addresses[#32429](https://github.com/cypress-io/cypress/issues/32429). Addressed in [#32545](https://github.com/cypress-io/cypress/pull/32545).
+
+**Bugfixes:**
+
+- In development mode, Electron `stderr` is piped directly to Cypress' `stderr` to make it clear why Electron failed to start, if it fails to start. Fixes [#32358](https://github.com/cypress-io/cypress/issues/32358). Addressed in [32468](https://github.com/cypress-io/cypress/pull/32468).
+- Fixed an issue where ESM Cypress configurations were not being interpreted correctly. Fixes [#32493](https://github.com/cypress-io/cypress/issues/32493). Fixed in [#32515](https://github.com/cypress-io/cypress/pull/32515).
+
+**Misc:**
+
+- Update the styles for command grouping 'line' so on expansion it is displayed correctly. Addressed in [#32521](https://github.com/cypress-io/cypress/pull/32521).
+- Test hook names now correctly display with a semi-bold font weight. Addresses [#32477](https://github.com/cypress-io/cypress/issues/32477). Addressed in [#32491](https://github.com/cypress-io/cypress/pull/32491).
+- Updated the Cypress Studio panel to not show bottom border. Addresses [#32478](https://github.com/cypress-io/cypress/issues/32478).
+
+## 15.2.0
+
+_Released 9/9/2025_
+
+**Features:**
+
+- Added support for using [@cypress/grep](https://www.npmjs.com/package/@cypress/grep) with Cypress Studio. Addresses [#32292](https://github.com/cypress-io/cypress/issues/32292).
+
+**Bugfixes:**
+
+- We now properly partition the `host` with `port` when caching family DNS lookups. This resolves issues where some `localhost` URLs were not resolving in `cy.visit()` in Cypress when they should have. Fixes [#25397](https://github.com/cypress-io/cypress/issues/25397). Addressed in [#32403](https://github.com/cypress-io/cypress/pull/32403).
+
+**Dependency Updates:**
+
+- Updated [`better-sqlite3`](https://www.npmjs.com/package/better-sqlite3) from `11.9.1` to `11.10.0`. Addressed in [#32404](https://github.com/cypress-io/cypress/pull/32404).
+
+## 15.1.0
+
+_Released 09/02/2025_
+
+**Features:**
+
+- Expanded `cy.press()` to support more key types. Addresses [#31051](https://github.com/cypress-io/cypress/issues/31051) and [#31488](https://github.com/cypress-io/cypress/issues/31488). Addressed in [#31496](https://github.com/cypress-io/cypress/pull/31496).
+
+**Bugfixes:**
+
+- Fixed an issue where OS distributions and releases were sometimes not properly populated for Module API results and Cloud recordings. Fixes [#30533](https://github.com/cypress-io/cypress/issues/30533). Addressed in [#32283](https://github.com/cypress-io/cypress/pull/32283).
+- Fixed an issue where Cypress would fail to run on GNOME if GTK 4 and GTK 2/3 were detected in the Electron process. Addresses [#32361](https://github.com/cypress-io/cypress/issues/32361).
 - Fixed an issue where the open Studio button would incorrectly show for component tests. Addressed in [#32315](https://github.com/cypress-io/cypress/pull/32315).
+- Fixed an issue where the TypeScript compiler wasn't being resolved correctly when `@cypress/webpack-batteries-included-preprocessor` was used as a standalone package. Fixes [#32338](https://github.com/cypress-io/cypress/issues/32338).
+- Fixed an issue where `tsx` was not being loaded correctly into the Cypress configuration process due to spaces being present in the path. Fixes [#32398](https://github.com/cypress-io/cypress/issues/32398).
 
 **Misc:**
 
@@ -16,6 +97,7 @@ _Released 08/26/2025 (PENDING)_
 - Upgraded `esbuild` from `0.15.3` to `0.25.2`. Addressed in [#32231](https://github.com/cypress-io/cypress/pull/32231).
 - Upgraded `image-size` from `1.1.1` to `1.2.1`. Addressed in [#32232](https://github.com/cypress-io/cypress/pull/32232).
 - Upgraded `tar` from `6.1.5` to `6.2.1`. Addressed in [#32229](https://github.com/cypress-io/cypress/pull/32229).
+- Upgraded `axios` from `1.8.3` to `1.11.0`. Addresses [#32347](https://github.com/cypress-io/cypress/issues/32347).
 
 ## 15.0.0
 

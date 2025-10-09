@@ -25,6 +25,7 @@ export interface RunModeOptions extends CommonModeOptions {
   ciBuildId?: string | null
   tag?: (string)[] | null
   isBrowserGivenByCli: boolean
+  posixExitCodes?: boolean | null
 }
 
 export type TestingType = 'e2e' | 'component'

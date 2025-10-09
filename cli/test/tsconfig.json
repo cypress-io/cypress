@@ -1,0 +1,13 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "noImplicitAny": false,
+    "types": [
+      "mocha", "chai", "sinon"
+    ],
+  },
+  "include": [
+    "**/*.ts"
+  ]
+}

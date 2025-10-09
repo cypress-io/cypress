@@ -4,8 +4,8 @@
   "description": "Launches Vite Dev Server for Component Testing",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc || echo 'built, with type errors'",
-    "check-ts": "tsc --noEmit",
+    "build": "tsc --project tsconfig.build.json || echo 'built, with type errors'",
+    "check-ts": "tsc --noEmit --project tsconfig.build.json",
     "cypress:open": "yarn cypress:run-cypress-in-cypress gulp open --project .",
     "cypress:run": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --project . --browser chrome",
     "cypress:run-cypress-in-cypress": "cross-env CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=1 HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS=http://localhost:4455 CYPRESS_REMOTE_DEBUGGING_PORT=6666 TZ=America/New_York",
@@ -22,9 +22,9 @@
   "devDependencies": {
     "cross-env": "7.0.3",
     "dedent": "^0.7.0",
-    "vite-5": "npm:vite@^5.4.18",
-    "vite-6": "npm:vite@^6.2.5",
-    "vite-7": "npm:vite@^7.0.0",
+    "vite-5": "npm:vite@^5.4.20",
+    "vite-6": "npm:vite@^6.3.6",
+    "vite-7": "npm:vite@^7.1.5",
     "vite-plugin-inspect": "0.8.4",
     "vitest": "2.1.9"
   },

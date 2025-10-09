@@ -1,4 +1,4 @@
-/* eslint-disable no-console, @cypress/dev/arrow-body-multiline-braces */
+/* eslint-disable no-console */
 import _ from 'lodash'
 import pkg from '@packages/root'
 import path from 'path'
@@ -159,6 +159,8 @@ const openProjectCreate = (projectRoot, socketId, args) => {
     onWarning,
     spec: args.spec,
     onError: args.onError,
+    record: args.record,
+    key: args.key,
   }
 
   return openProject.create(projectRoot, args, options)
@@ -456,7 +458,6 @@ async function listenForProjectEnd (project: ProjectBase, exit: boolean): Promis
       earlyExitTerminator.waitForEarlyExit(project, exit),
     ]).then((results) => {
       if (exit === false) {
-        // eslint-disable-next-line no-console
         console.log('not exiting due to options.exit being false')
       } else {
         resolve(results)
@@ -1107,7 +1108,6 @@ async function ready (options: ReadyOptions) {
     trashAssets(config),
   ])
 
-  // @ts-expect-error ctx is protected
   const specs = project.ctx.project.specs
 
   if (!specs.length) {
@@ -1183,6 +1183,7 @@ async function ready (options: ReadyOptions) {
       runAllSpecs,
       onError,
       quiet: options.quiet,
+      ctx: project.ctx,
     })
   }
 

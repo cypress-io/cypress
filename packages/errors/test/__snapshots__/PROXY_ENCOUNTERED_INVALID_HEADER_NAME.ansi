@@ -1,0 +1,10 @@
+[31mWarning: While proxying a [33mGET[39m[31m request to [94mhttp://localhost:8080[39m[31m, an HTTP header did not pass validation, and was removed. This header will not be present in the response received by the application under test.[39m
+[31m[39m
+[31mInvalid header name: [39m
+[31m[39m
+[31m[94m{[39m[31m[39m
+[31m[94m  "invalidHeaderName": "Value"[39m[31m[39m
+[31m[94m}[39m[31m[39m
+[31m[39m
+[31m[95mError: fail whale[39m[31m[39m
+[31m[39m

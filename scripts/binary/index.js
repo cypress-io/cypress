@@ -23,9 +23,9 @@ const uploadUtils = require('./util/upload')
 const { uploadArtifactToS3 } = require('./upload-build-artifact')
 const { moveBinaries } = require('./move-binaries')
 const { exec } = require('child_process')
-const xvfb = require('../../cli/lib/exec/xvfb')
+const xvfb = require('../../cli/lib/exec/xvfb').default
 const smoke = require('./smoke')
-const verify = require('../../cli/lib/tasks/verify')
+const { needsSandbox } = require('../../cli/lib/tasks/verify')
 const execa = require('execa')
 
 const log = function (msg) {
@@ -69,7 +69,7 @@ async function testExecutableVersion (buildAppExecutable, version) {
 
   const args = ['--version']
 
-  if (verify.needsSandbox()) {
+  if (needsSandbox()) {
     args.push('--no-sandbox')
   }
 
@@ -136,12 +136,42 @@ const deploy = {
         throw err
       })
       .then(() => {
+        return this.checkManifest({ version })
+      })
+      .then(() => {
         return this.checkDownloads({ version })
       })
     }
 
     return askMissingOptions(['version'])(options)
     .then(release)
+  },
+
+  checkManifest ({ version }) {
+    const checkManifest = () => {
+      const url = `https://download.cypress.io/desktop.json`
+
+      process.stdout.write(`Checking for ${chalk.yellow(version)} in the manifest at ${chalk.cyan(url)} ... `)
+
+      return rp.get(url)
+      .then((res) => {
+        const manifest = JSON.parse(res)
+
+        return manifest
+      })
+    }
+
+    return checkManifest().then((manifest) => {
+      const versionMatches = manifest.version === version
+
+      process.stdout.write(`${versionMatches ? '✅' : '❌'}\n`)
+
+      if (!versionMatches) {
+        console.log(chalk.red(`\nFound ${manifest.version} in the manifest, but ${version} was requested.`))
+
+        process.exit(1)
+      }
+    })
   },
 
   checkDownloads ({ version }) {
