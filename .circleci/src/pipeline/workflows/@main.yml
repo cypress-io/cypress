@@ -320,7 +320,7 @@ linux-x64:
           - test-runner:build-binary
           - publish-binary
         requires:
-          - node_modules_install
+          - build
     - wait-for-binary-publish:
         type: approval
         requires:
@@ -837,7 +837,7 @@ linux-arm64:
         executor: linux-arm64
         resource_class: arm.medium
         requires:
-          - linux-arm64-node-modules-install
+          - linux-arm64-build
 
     - wait-for-binary-publish:
         name: linux-arm64-wait-for-binary-publish
