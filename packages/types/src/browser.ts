@@ -50,7 +50,7 @@ export type Browser = {
 /**
  * Represents a real browser that exists on the user's system.
  */
-export type FoundBrowser = Omit<Browser, 'versionRegex' | 'binary' | 'validator'> & {
+export interface FoundBrowser extends Omit<Browser, 'versionRegex' | 'binary' | 'validator'> {
   path: string
   version: string
   majorVersion?: string | null

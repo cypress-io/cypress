@@ -7,7 +7,7 @@ import { goalBrowsers } from '../fixtures'
 import os from 'os'
 import { log } from '../log'
 import { detect as linuxDetect } from '../../lib/linux'
-import { detect as darwinDetect } from '../../lib/darwin'
+import { detect as darwinDetect } from '../../lib/darwinHelpers'
 import { detect as windowsDetect } from '../../lib/windows'
 import type { Browser } from '@packages/types'
 
@@ -33,7 +33,7 @@ vi.mock('../../lib/linux', async (importActual) => {
   }
 })
 
-vi.mock('../../lib/darwin', async (importActual) => {
+vi.mock('../../lib/darwinHelpers', async (importActual) => {
   const actual = await importActual()
 
   return {
@@ -63,7 +63,7 @@ describe('detect', () => {
     vi.resetAllMocks()
 
     const { detect: linuxDetectActual } = await vi.importActual<typeof import('../../lib/linux')>('../../lib/linux')
-    const { detect: darwinDetectActual } = await vi.importActual<typeof import('../../lib/darwin')>('../../lib/darwin')
+    const { detect: darwinDetectActual } = await vi.importActual<typeof import('../../lib/darwinHelpers')>('../../lib/darwinHelpers')
     const { detect: windowsDetectActual } = await vi.importActual<typeof import('../../lib/windows')>('../../lib/windows')
 
     vi.mocked(linuxDetect).mockImplementation(linuxDetectActual)
