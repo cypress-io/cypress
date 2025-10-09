@@ -100,7 +100,8 @@ export const create = (projectRoot?: string, isTextTerminal: boolean = false): B
     return Bluebird.resolve(FileUtil.noopFile)
   }
 
-  // @ts-ignore
+  // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
+  // After some package refactoring, we should be able to remove this.
   return formStatePath(projectRoot)
   .then((statePath: string) => {
     const fullStatePath = appData.projectsPath(statePath)
@@ -121,7 +122,8 @@ export const create = (projectRoot?: string, isTextTerminal: boolean = false): B
 
     stateFile.set = _.wrap(stateFile.set.bind(stateFile), normalizeAndAllowSet)
 
-    // @ts-ignore
+    // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
+    // After some package refactoring, we should be able to remove this.
     stateFiles[fullStatePath] = stateFile
 
     return stateFile as SavedStateAPI

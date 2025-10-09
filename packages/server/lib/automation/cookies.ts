@@ -182,9 +182,9 @@ export class Cookies {
 
     debug(`${eventName} %o`, cookies)
 
-    let automationCookies = await automate(eventName, cookies as AutomationCookie[])
+    await automate(eventName, cookies as AutomationCookie[])
 
-    return automationCookies
+    return cookies
   }
 
   // set:cookies will clear cookies first in browsers that use CDP. this is the

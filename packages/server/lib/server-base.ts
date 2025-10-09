@@ -164,7 +164,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _nodeProxy?: httpProxy
   protected _networkProxy?: NetworkProxy
   protected _netStubbingState?: NetStubbingState
-  // @ts-ignore
+  // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
+  // After some package refactoring, we should be able to remove this.
   protected _httpsProxy?: httpsProxy
   protected _graphqlWS?: WebSocketServer
   protected _eventBus: EventEmitter
@@ -1018,7 +1019,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       debug('sending request with options %o', options)
 
       return runPhase(() => {
-        // @ts-ignore
+        // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
+        // After some package refactoring, we should be able to remove this.
         return request.sendStream(userAgent, automationRequest, options)
         .then((createReqStream) => {
           const stream = createReqStream()
