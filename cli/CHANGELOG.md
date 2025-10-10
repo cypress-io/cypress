@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.4.1
+
+_Released 10/21/2025_
+
+**Bugfixes:**
+
+- An error is no longer thrown during command execution when the application under test overwrites the `window.$` property with a non-function. Fixes [#1502](https://github.com/cypress-io/cypress/issues/1502). Fixed in [#32682](https://github.com/cypress-io/cypress/pull/32682).
+
 ## 15.4.0
 
 _Released 10/7/2025_
