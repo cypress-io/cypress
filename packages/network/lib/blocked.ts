@@ -1,18 +1,18 @@
 import _ from 'lodash'
 import minimatch from 'minimatch'
-import { stripProtocolAndDefaultPorts } from './uri'
+import { stripProtocolAndDefaultPorts } from '@packages/network-tools'
 
-export function matches (urlToCheck, blockHosts) {
+export function matches (urlToCheck: string, blockHosts: string[] | string) {
   // normalize into flat array
-  blockHosts = [].concat(blockHosts)
+  const blockHostsNormalized: string[] = ([] as string[]).concat(blockHosts)
 
-  urlToCheck = stripProtocolAndDefaultPorts(urlToCheck)
+  const urlToCheckStripped = stripProtocolAndDefaultPorts(urlToCheck) as string
 
   // use minimatch against the url
   // to see if any match
-  const matchUrl = (hostMatcher) => {
-    return minimatch(urlToCheck, hostMatcher)
+  const matchUrl = (hostMatcher: string) => {
+    return minimatch(urlToCheckStripped, hostMatcher)
   }
 
-  return _.find(blockHosts, matchUrl)
+  return _.find(blockHostsNormalized, matchUrl)
 }

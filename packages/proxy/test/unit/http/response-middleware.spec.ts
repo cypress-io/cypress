@@ -9,7 +9,7 @@ import { Readable } from 'stream'
 import * as rewriter from '../../../lib/http/util/rewriter'
 import { nonceDirectives, problematicCspDirectives, unsupportedCSPDirectives } from '../../../lib/http/util/csp-header'
 import * as serviceWorkerInjector from '../../../lib/http/util/service-worker-injector'
-import { DocumentDomainInjection } from '@packages/network'
+import { DocumentDomainInjection } from '@packages/network-tools'
 
 describe('http/response-middleware', function () {
   const serverPort = 3030

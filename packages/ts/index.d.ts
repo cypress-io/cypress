@@ -1,5 +1,4 @@
 // missing type definitions for libraries
-// https://glebbahmutov.com/blog/trying-typescript/#manual-types-for-3rd-party-libraries
 
 declare module '@cypress/get-windows-proxy' {
   type ProxyConfig = {

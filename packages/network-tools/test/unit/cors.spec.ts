@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { cors } from '../../lib'
+import { parseUrlIntoHostProtocolDomainTldPort, urlOriginsMatch, urlSameSiteMatch, urlMatchesPolicyProps, urlMatchesOriginProtectionSpace, getSuperDomainOrigin, policyFromConfig } from '../../lib'
 import { Policy } from '../../lib/cors'
 import type { ParsedHostWithProtocolAndHost } from '../../lib/types'
 
 describe('lib/cors', () => {
   describe('.parseUrlIntoHostProtocolDomainTldPort', () => {
     const expectUrlToBeParsedCorrectly = (url, obj) => {
-      expect(cors.parseUrlIntoHostProtocolDomainTldPort(url)).toEqual(obj)
+      expect(parseUrlIntoHostProtocolDomainTldPort(url)).toEqual(obj)
     }
 
     it('parses https://www.google.com', function () {
@@ -113,11 +113,11 @@ describe('lib/cors', () => {
 
   describe('.urlOriginsMatch', () => {
     const assertOriginsDoNotMatch = (url1: string, url2: string) => {
-      expect(cors.urlOriginsMatch(url1, url2)).toBe(false)
+      expect(urlOriginsMatch(url1, url2)).toBe(false)
     }
 
     const assertOriginsDoMatch = (url1: string, url2: string) => {
-      expect(cors.urlOriginsMatch(url1, url2)).toBe(true)
+      expect(urlOriginsMatch(url1, url2)).toBe(true)
     }
 
     describe('domain + subdomain', () => {
@@ -217,11 +217,11 @@ describe('lib/cors', () => {
 
   describe('.urlSameSiteMatch', () => {
     const assertsUrlsAreNotSameSite = (url1: string, url2: string) => {
-      expect(cors.urlSameSiteMatch(url1, url2)).toBe(false)
+      expect(urlSameSiteMatch(url1, url2)).toBe(false)
     }
 
     const assertsUrlsAreSameSite = (url1: string, url2: string) => {
-      expect(cors.urlSameSiteMatch(url1, url2)).toBe(true)
+      expect(urlSameSiteMatch(url1, url2)).toBe(true)
     }
 
     describe('domain + subdomain', () => {
@@ -336,22 +336,22 @@ describe('lib/cors', () => {
       describe('and origin matches', () => {
         beforeEach(() => {
           frameUrl = 'http://www.foo.com'
-          topProps = cors.parseUrlIntoHostProtocolDomainTldPort(frameUrl)
+          topProps = parseUrlIntoHostProtocolDomainTldPort(frameUrl)
         })
 
         it('matches', () => {
-          expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(true)
+          expect(urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(true)
         })
       })
 
       describe('and origin does not match', () => {
         beforeEach(() => {
           frameUrl = 'http://www.foo.com'
-          topProps = cors.parseUrlIntoHostProtocolDomainTldPort('http://www.bar.com')
+          topProps = parseUrlIntoHostProtocolDomainTldPort('http://www.bar.com')
         })
 
         it('does not match', () => {
-          expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(false)
+          expect(urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(false)
         })
       })
     })
@@ -364,11 +364,11 @@ describe('lib/cors', () => {
       describe('and origin matches', () => {
         beforeEach(() => {
           frameUrl = 'http://www.foo.com'
-          topProps = cors.parseUrlIntoHostProtocolDomainTldPort(frameUrl)
+          topProps = parseUrlIntoHostProtocolDomainTldPort(frameUrl)
         })
 
         it('matches', () => {
-          expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(true)
+          expect(urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(true)
         })
       })
 
@@ -378,12 +378,12 @@ describe('lib/cors', () => {
 
         beforeEach(() => {
           frameUrl = `http://www.${superdomain}`
-          topProps = cors.parseUrlIntoHostProtocolDomainTldPort(`http://docs.${superdomain}:${port}`)
+          topProps = parseUrlIntoHostProtocolDomainTldPort(`http://docs.${superdomain}:${port}`)
         })
 
         describe('and the ports are not strictly equal', () => {
           it('does not match', () => {
-            expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(false)
+            expect(urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(false)
           })
         })
 
@@ -394,7 +394,7 @@ describe('lib/cors', () => {
           })
 
           it('does match', () => {
-            expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(true)
+            expect(urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(true)
           })
         })
       })
@@ -402,11 +402,11 @@ describe('lib/cors', () => {
       describe('and superdomains do not match', () => {
         beforeEach(() => {
           frameUrl = 'http://www.foo.com'
-          topProps = cors.parseUrlIntoHostProtocolDomainTldPort('http://www.bar.com')
+          topProps = parseUrlIntoHostProtocolDomainTldPort('http://www.bar.com')
         })
 
         it('does not match', () => {
-          expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(false)
+          expect(urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(false)
         })
       })
     })
@@ -419,18 +419,18 @@ describe('lib/cors', () => {
       describe('and origin matches', () => {
         beforeEach(() => {
           frameUrl = 'http://www.foo.com'
-          topProps = cors.parseUrlIntoHostProtocolDomainTldPort('http://www.foo.com')
+          topProps = parseUrlIntoHostProtocolDomainTldPort('http://www.foo.com')
         })
 
         it('matches', () => {
-          expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(true)
+          expect(urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(true)
         })
       })
 
       describe('and superdomains match', () => {
         beforeEach(() => {
           frameUrl = 'http://www.foo.com'
-          topProps = cors.parseUrlIntoHostProtocolDomainTldPort('http://docs.foo.com')
+          topProps = parseUrlIntoHostProtocolDomainTldPort('http://docs.foo.com')
         })
 
         describe('and neither ports match with neither being 443', () => {
@@ -440,7 +440,7 @@ describe('lib/cors', () => {
           })
 
           it('matches', () => {
-            expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(true)
+            expect(urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(true)
           })
         })
 
@@ -451,18 +451,18 @@ describe('lib/cors', () => {
           })
 
           it('does not match', () => {
-            expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(false)
+            expect(urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(false)
           })
         })
 
         describe('and neither ports match but topProps is 443 / https', () => {
           beforeEach(() => {
             frameUrl = `${frameUrl}:8080`
-            topProps = cors.parseUrlIntoHostProtocolDomainTldPort('https://www.foo.com')
+            topProps = parseUrlIntoHostProtocolDomainTldPort('https://www.foo.com')
           })
 
           it('does not match', () => {
-            expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(false)
+            expect(urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(false)
           })
         })
 
@@ -473,7 +473,7 @@ describe('lib/cors', () => {
           })
 
           it('matches', () => {
-            expect(cors.urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(true)
+            expect(urlMatchesPolicyProps({ policy, frameUrl, topProps })).toBe(true)
           })
         })
       })
@@ -482,11 +482,11 @@ describe('lib/cors', () => {
 
   describe('.urlMatchesOriginProtectionSpace', () => {
     const assertMatchesOriginProtectionSpace = (urlStr: string, origin: string) => {
-      expect(cors.urlMatchesOriginProtectionSpace(urlStr, origin), `the url: '${urlStr}' did not match origin protection space '${origin}' when it should have`).toBe(true)
+      expect(urlMatchesOriginProtectionSpace(urlStr, origin), `the url: '${urlStr}' did not match origin protection space '${origin}' when it should have`).toBe(true)
     }
 
     const assertDoesNotMatchOriginProtectionSpace = (urlStr, origin) => {
-      expect(cors.urlMatchesOriginProtectionSpace(urlStr, origin), `the url: '${urlStr}' matched origin protection space '${origin}' when it should not have`).toBe(false)
+      expect(urlMatchesOriginProtectionSpace(urlStr, origin), `the url: '${urlStr}' matched origin protection space '${origin}' when it should not have`).toBe(false)
     }
 
     it('ports', () => {
@@ -528,23 +528,23 @@ describe('lib/cors', () => {
 
   describe('.getSuperDomainOrigin', () => {
     it('ports', () => {
-      expect(cors.getSuperDomainOrigin('https://example.com')).toEqual('https://example.com')
-      expect(cors.getSuperDomainOrigin('http://example.com:8080')).toEqual('http://example.com:8080')
+      expect(getSuperDomainOrigin('https://example.com')).toEqual('https://example.com')
+      expect(getSuperDomainOrigin('http://example.com:8080')).toEqual('http://example.com:8080')
     })
 
     it('subdomain', () => {
-      expect(cors.getSuperDomainOrigin('http://www.example.com')).toEqual('http://example.com')
-      expect(cors.getSuperDomainOrigin('http://www.app.herokuapp.com:8080')).toEqual('http://app.herokuapp.com:8080')
+      expect(getSuperDomainOrigin('http://www.example.com')).toEqual('http://example.com')
+      expect(getSuperDomainOrigin('http://www.app.herokuapp.com:8080')).toEqual('http://app.herokuapp.com:8080')
     })
   })
 
   describe('.policyFromConfig', () => {
     it('returns \'same-origin\' when injectDocumentDomain is false', () => {
-      expect(cors.policyFromConfig({ injectDocumentDomain: false })).toEqual('same-origin')
+      expect(policyFromConfig({ injectDocumentDomain: false })).toEqual('same-origin')
     })
 
     it('returns \'same-super-domain-origin\' when injectDocumentDomain is true', () => {
-      expect(cors.policyFromConfig({ injectDocumentDomain: true })).toEqual('same-super-domain-origin')
+      expect(policyFromConfig({ injectDocumentDomain: true })).toEqual('same-super-domain-origin')
     })
   })
 })

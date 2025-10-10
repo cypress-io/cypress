@@ -195,15 +195,15 @@ commands:
     description: Save entire folder as artifact for other jobs to run without reinstalling
     steps:
       - run:
-          name: Sync Cloud Validations
-          command: |
-            source ./scripts/ensure-node.sh
-            yarn gulp syncCloudValidations
-      - run:
           name: Build packages
           command: |
             source ./scripts/ensure-node.sh
             yarn build
+      - run:
+          name: Sync Cloud Validations
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn gulp syncCloudValidations
       - run:
           name: Generate v8 snapshot
           command: |
@@ -2812,13 +2812,6 @@ jobs:
           repo: cypress-example-kitchensink
           browser: chrome
           executor: << parameters.executor >>
-
-  test-binary-against-todomvc-firefox:
-    <<: *defaults
-    steps:
-      - test-binary-against-repo:
-          repo: cypress-example-todomvc
-          browser: firefox
 
   test-binary-against-cypress-realworld-app:
     <<: *defaults

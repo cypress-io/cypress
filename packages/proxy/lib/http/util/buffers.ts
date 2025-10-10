@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import debugModule from 'debug'
-import { uri } from '@packages/network'
+import { removeDefaultPort } from '@packages/network-tools'
 import type { Readable } from 'stream'
 import type { IncomingMessage } from 'http'
 
@@ -17,7 +17,7 @@ export type HttpBuffer = {
 
 const stripPort = (url) => {
   try {
-    return uri.removeDefaultPort(url).format()
+    return removeDefaultPort(url).format()
   } catch (e) {
     return url
   }
