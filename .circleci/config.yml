@@ -158,7 +158,7 @@ jobs:
                 fi
           - continuation/continue:
               configuration_path: .circleci/packed/pipeline.yml 
-              parameters: '{ "publish-binary-branch": << pipeline.parameters.publish-binary-branch >> }'
+              parameters: '{ "publish-binary-branch": "<< pipeline.parameters.publish-binary-branch >>" }'
 
 
   
