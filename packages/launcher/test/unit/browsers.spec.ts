@@ -1,0 +1,94 @@
+import { describe, it, expect } from 'vitest'
+import _ from 'lodash'
+import { knownBrowsers } from '../../lib/known-browsers'
+
+describe('browsers', () => {
+  it('returns the expected list of browsers', () => {
+    expect(knownBrowsers).toMatchSnapshot()
+  })
+
+  // https://github.com/cypress-io/cypress/issues/6669
+  it('exports multiline versionRegexes', () => {
+    expect(_.every(knownBrowsers.map(({ versionRegex }) => {
+      return versionRegex.multiline
+    }))).toBe(true)
+  })
+
+  describe('browser.validator', () => {
+    const firefoxBrowser = {
+      ...knownBrowsers.find(({ name, channel }) => name === 'firefox' && channel === 'stable'),
+      path: '/path/to/firefox',
+    }
+
+    describe('validator defined', () => {
+      it('when conditions met: marks browser as not supported and generates warning message', () => {
+        const foundBrowser = {
+          ...firefoxBrowser,
+          version: '101.1.0',
+          majorVersion: '101',
+          validator: (browser, platform) => {
+            if (platform === 'win32' && browser.majorVersion && ['101', '102'].includes(browser.majorVersion)) {
+              return {
+                isSupported: false,
+                warningMessage: `Cypress does not support running ${browser.displayName} version ${browser.majorVersion} on Windows due to a blocking bug in ${browser.displayName}. To use ${browser.displayName} with Cypress on Windows, install version 103 or newer.`,
+              }
+            }
+
+            return {
+              isSupported: true,
+            }
+          },
+        }
+
+        const result = foundBrowser.validator(foundBrowser, 'win32')
+
+        expect(result.isSupported).toBe(false)
+        expect(result.warningMessage).toContain('Cypress does not support running Firefox version 101 on Windows due to a blocking bug in Firefox.')
+      })
+
+      it('when conditions not met: marks browser as not supported and generates warning message', () => {
+        const foundBrowser = {
+          ...firefoxBrowser,
+          version: '101.1.0',
+          majorVersion: '140',
+          validator: (browser, platform) => {
+            if (platform === 'win32' && browser.majorVersion && ['101', '102'].includes(browser.majorVersion)) {
+              return {
+                isSupported: false,
+                warningMessage: `Cypress does not support running ${browser.displayName} version ${browser.majorVersion} on Windows due to a blocking bug in ${browser.displayName}. To use ${browser.displayName} with Cypress on Windows, install version 103 or newer.`,
+              }
+            }
+
+            return {
+              isSupported: true,
+            }
+          },
+        }
+
+        const result = foundBrowser.validator(foundBrowser, 'win32')
+
+        expect(result.isSupported).toBe(true)
+        expect(result.warningMessage).toBeUndefined()
+      })
+
+      describe('firefox validation', () => {
+        const FIREFOX_KNOWN_BROWSER_CHANNELS = knownBrowsers.filter((browser) => {
+          return browser.family === 'firefox'
+        })
+
+        FIREFOX_KNOWN_BROWSER_CHANNELS.forEach((browser) => {
+          it(`${browser.channel}: fails validation when Firefox major version is below 135`, () => {
+            // @ts-expect-error
+            const result = browser.validator({
+              majorVersion: '134',
+              displayName: 'Firefox',
+            })
+
+            expect(result.isSupported).toBe(false)
+            expect(result.warningMessage).toEqual('Cypress does not support running Firefox version 134 due to lack of WebDriver BiDi support. To use Firefox with Cypress, install version 135 or newer.')
+          })
+        })
+      })
+    })
+  })
+})

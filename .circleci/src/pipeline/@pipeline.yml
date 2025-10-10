@@ -17,7 +17,7 @@ ubuntu-2004-current: &ubuntu-2004-current ubuntu-2004:2024.11.1
 ubuntu-2004-older: &ubuntu-2004-older ubuntu-2004:2024.05.1
 
 orbs:
-  browser-tools: circleci/browser-tools@2.1.1
+  browser-tools: circleci/browser-tools@2.3.1
 
 defaults: &defaults
   parallelism: 1
@@ -195,15 +195,15 @@ commands:
     description: Save entire folder as artifact for other jobs to run without reinstalling
     steps:
       - run:
-          name: Sync Cloud Validations
-          command: |
-            source ./scripts/ensure-node.sh
-            yarn gulp syncCloudValidations
-      - run:
           name: Build packages
           command: |
             source ./scripts/ensure-node.sh
             yarn build
+      - run:
+          name: Sync Cloud Validations
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn gulp syncCloudValidations
       - run:
           name: Generate v8 snapshot
           command: |
@@ -563,6 +563,7 @@ commands:
                       # https://www.ubuntuupdates.org/package/google_chrome/stable/main/base/google-chrome-stable
                       channel: << parameters.google-chrome-channel >>
                       chrome_version: << parameters.google-chrome-version >>
+                      replace_existing: true
                   - when:
                       condition:
                         equal: [ 'beta', << parameters.google-chrome-channel>> ]
@@ -1784,7 +1785,7 @@ jobs:
                   source ./scripts/ensure-node.sh
                   yarn lerna run types
             - sanitize-verify-and-store-mocha-results:
-                expectedResultCount: 10
+                expectedResultCount: 8
 
   verify-release-readiness:
     <<: *defaults
@@ -2809,13 +2810,6 @@ jobs:
           repo: cypress-example-kitchensink
           browser: chrome
           executor: << parameters.executor >>
-
-  test-binary-against-todomvc-firefox:
-    <<: *defaults
-    steps:
-      - test-binary-against-repo:
-          repo: cypress-example-todomvc
-          browser: firefox
 
   test-binary-against-cypress-realworld-app:
     <<: *defaults

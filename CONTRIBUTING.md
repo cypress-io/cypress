@@ -257,7 +257,7 @@ If you prefer to disable the restrictions for one boot only, use instead:
 echo 0 | sudo tee /proc/sys/kernel/apparmor_restrict_unprivileged_userns
 ```
 
-If you do not disable these restrictions for the affected Ubuntu versions, then Cypress may exit with a fatal error when you try to run Cypress after building Cypress from source. The error includes the text `FATAL:setuid_sandbox_host.cc` and may be hidden, pending resolution of issue https://github.com/cypress-io/cypress/issues/32358.
+If you do not disable these restrictions for the affected Ubuntu versions, then Cypress may exit with a fatal error when you try to run Cypress after building Cypress from source. The error message includes the text `FATAL:setuid_sandbox_host.cc`.
 
 #### Windows
 

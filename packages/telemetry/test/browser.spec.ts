@@ -2,8 +2,8 @@
 global.window = {}
 
 import { describe, it, expect, beforeAll } from 'vitest'
-import { telemetry } from '../src/browser'
-import { Telemetry as TelemetryClass } from '../src/index'
+import { telemetry } from '../src/client'
+import { Telemetry as TelemetryClass } from '../src/telemetry/index'
 
 describe('telemetry is disabled', () => {
   describe('init', () => {

@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.base.json",
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "src/client.ts"
+  ],
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./esm",
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "node",
+    "noEmit": true
+  }
+}

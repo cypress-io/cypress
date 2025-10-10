@@ -1,6 +1,6 @@
 # network
 
-This package contains networking-related classes and utilities.
+This package contains networking-related classes and utilities pertaining to the Node.js execution context.
 
 ## Exports
 
@@ -11,14 +11,12 @@ You can see a list of the modules exported from this package in [./lib/index.ts]
 * `blocked` is a utility for matching blocked globs
 * `concatStream` is a wrapper around [`concat-stream@1.6.2`][2] that makes it always yield a `Buffer`
 * `connect` contains utilities for making network connections, including `createRetryingSocket`
-* `cors` contains utilities for Cross-Origin Resource Sharing
-* `uri` contains utilities for URL parsing and formatting
 
 See the individual class files in [`./lib`](./lib) for more information.
 
 ## Building
 
-Note: you should not ever need to build the .js files manually. `@packages/ts` provides require-time transpilation when in development.
+We currently build a CommonJS and an ESM version of this package. However, since this package is only consumed via CommonJS, we currently only build the CommonJS variant of the package.
 
 ```shell
 yarn workspace @packages/network build-prod

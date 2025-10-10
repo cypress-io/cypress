@@ -1,0 +1,131 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`browsers > returns the expected list of browsers 1`] = `
+[
+  {
+    "binary": [
+      "google-chrome",
+      "chrome",
+      "google-chrome-stable",
+    ],
+    "channel": "stable",
+    "displayName": "Chrome",
+    "family": "chromium",
+    "name": "chrome",
+    "validator": [Function],
+    "versionRegex": /Google Chrome\\(\\?! for Testing\\) \\(\\\\S\\+\\)/m,
+  },
+  {
+    "binary": "google-chrome-beta",
+    "channel": "beta",
+    "displayName": "Chrome Beta",
+    "family": "chromium",
+    "name": "chrome",
+    "versionRegex": /Google Chrome \\(\\\\S\\+\\) beta/m,
+  },
+  {
+    "binary": "google-chrome-canary",
+    "channel": "canary",
+    "displayName": "Chrome Canary",
+    "family": "chromium",
+    "name": "chrome",
+    "versionRegex": /Google Chrome Canary \\(\\\\S\\+\\)/m,
+  },
+  {
+    "binary": "chrome",
+    "channel": "stable",
+    "displayName": "Chrome for Testing",
+    "family": "chromium",
+    "name": "chrome-for-testing",
+    "versionRegex": /Google Chrome for Testing \\(\\\\S\\+\\)/m,
+  },
+  {
+    "binary": [
+      "chromium-browser",
+      "chromium",
+    ],
+    "channel": "stable",
+    "displayName": "Chromium",
+    "family": "chromium",
+    "name": "chromium",
+    "versionRegex": /Chromium \\(\\\\S\\+\\)/m,
+  },
+  {
+    "binary": "firefox",
+    "channel": "stable",
+    "displayName": "Firefox",
+    "family": "firefox",
+    "name": "firefox",
+    "validator": [Function],
+    "versionRegex": /\\^Mozilla Firefox \\(\\[\\^\\\\sab\\]\\+\\)\\$/m,
+  },
+  {
+    "binary": [
+      "firefox-developer-edition",
+      "firefox",
+    ],
+    "channel": "dev",
+    "displayName": "Firefox Developer Edition",
+    "family": "firefox",
+    "name": "firefox",
+    "validator": [Function],
+    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\+b\\\\S\\*\\)\\$/m,
+  },
+  {
+    "binary": [
+      "firefox-nightly",
+      "firefox-trunk",
+    ],
+    "channel": "nightly",
+    "displayName": "Firefox Nightly",
+    "family": "firefox",
+    "name": "firefox",
+    "validator": [Function],
+    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\+a\\\\S\\*\\)\\$/m,
+  },
+  {
+    "binary": [
+      "edge",
+      "microsoft-edge",
+    ],
+    "channel": "stable",
+    "displayName": "Edge",
+    "family": "chromium",
+    "name": "edge",
+    "versionRegex": /Microsoft Edge \\(\\\\S\\+\\)/im,
+  },
+  {
+    "binary": [
+      "edge-beta",
+      "microsoft-edge-beta",
+    ],
+    "channel": "beta",
+    "displayName": "Edge Beta",
+    "family": "chromium",
+    "name": "edge",
+    "versionRegex": /Microsoft Edge\\.\\+\\?\\(\\\\S\\*\\(\\?= beta\\)\\|\\(\\?<=beta \\)\\\\S\\*\\)/im,
+  },
+  {
+    "binary": [
+      "edge-canary",
+      "microsoft-edge-canary",
+    ],
+    "channel": "canary",
+    "displayName": "Edge Canary",
+    "family": "chromium",
+    "name": "edge",
+    "versionRegex": /Microsoft Edge\\.\\+\\?\\(\\\\S\\*\\(\\?= canary\\)\\|\\(\\?<=canary \\)\\\\S\\*\\)/im,
+  },
+  {
+    "binary": [
+      "edge-dev",
+      "microsoft-edge-dev",
+    ],
+    "channel": "dev",
+    "displayName": "Edge Dev",
+    "family": "chromium",
+    "name": "edge",
+    "versionRegex": /Microsoft Edge\\.\\+\\?\\(\\\\S\\*\\(\\?= dev\\)\\|\\(\\?<=dev \\)\\\\S\\*\\)/im,
+  },
+]
+`;
