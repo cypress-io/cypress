@@ -1,7 +1,8 @@
+/// <reference path="./jquery.d.ts" />
+
 describe('src/dom/jquery', () => {
   context('.isJquery', () => {
     it('does not get confused when window contains jquery function', () => {
-      // @ts-expect-error - Intentionally adding jquery property to test conflict detection
       window.jquery = () => {}
 
       expect(Cypress.dom.isJquery(window)).to.be.false
