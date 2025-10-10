@@ -298,4 +298,4 @@ For the frontend telemetry collector, we use `rollup` to bundle the telemetry co
 
 For the server, we bundle a CommonJS version to be used in the Node.js context. 
 
-We also build an ESM version of `@packages/scaffold-config` for the `node` client but it isn't currently in use as the consumption server-side is CommonJS currently.
+We also build an ESM version of `@packages/telemetry` for the `node` client but it isn't currently in use as the consumption server-side is CommonJS currently.
