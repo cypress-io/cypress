@@ -261,7 +261,7 @@ jobs:
         - test-runner:build-binary
         - publish-binary
       requires:
-        - node_modules_install
+        - build
   - wait-for-binary-publish:
       type: approval
       requires:

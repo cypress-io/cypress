@@ -3,7 +3,7 @@ import Debug from 'debug'
 import { ErrorRequestHandler, Request, Router } from 'express'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
-import { cors } from '@packages/network'
+import { domainPropsToHostname } from '@packages/network-tools'
 import type { NetworkProxy } from '@packages/proxy'
 import type { Cfg } from './project-base'
 import xhrs from './controllers/xhrs'
@@ -86,7 +86,7 @@ export const createCommonRoutes = ({
       return next()
     }
 
-    const primaryHostname = cors.domainPropsToHostname(primary.props)
+    const primaryHostname = domainPropsToHostname(primary.props)
 
     // domain matches (example.com === example.com), but incoming request is
     // https:// (established above), while the domain the user is trying to

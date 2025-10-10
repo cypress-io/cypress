@@ -1,7 +1,7 @@
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 import chai, { expect } from 'chai'
-import agent, { strictAgent } from '@packages/network/lib/agent'
+import { agent, strictAgent } from '@packages/network'
 import axios, { CreateAxiosDefaults, AxiosInstance } from 'axios'
 import debugLib from 'debug'
 import stripAnsi from 'strip-ansi'

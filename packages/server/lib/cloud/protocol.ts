@@ -11,11 +11,10 @@ import pkg from '@packages/root'
 import env from '../util/env'
 import { putProtocolArtifact } from './api/put_protocol_artifact'
 import { requireScript } from './require_script'
+import * as routes from './routes'
 
 import type { Readable } from 'stream'
 import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions, ResponseEndedWithEmptyBodyOptions, ResponseStreamTimedOutOptions, AfterSpecDurations, FoundSpec } from '@packages/types'
-
-const routes = require('./routes')
 
 const debug = Debug('cypress:server:protocol')
 const debugVerbose = Debug('cypress-verbose:server:protocol')

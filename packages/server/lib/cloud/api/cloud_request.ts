@@ -5,7 +5,7 @@ import os from 'os'
 import followRedirects from 'follow-redirects'
 import axios, { AxiosInstance } from 'axios'
 import pkg from '@packages/root'
-import { strictAgent } from '@packages/network/lib/agent'
+import { strictAgent } from '@packages/network'
 
 import app_config from '../../../config/app.json'
 import { installErrorTransform } from './axios_middleware/transform_error'

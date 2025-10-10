@@ -778,7 +778,6 @@
     "./packages/errors/node_modules/chalk/source/index.js",
     "./packages/https-proxy/index.js",
     "./packages/https-proxy/test/helpers/certs.js",
-    "./packages/icons/dist/icons.js",
     "./packages/icons/index.js",
     "./packages/launcher/lib/browsers.ts",
     "./packages/net-stubbing/lib/internal-types.ts",
@@ -3461,6 +3460,7 @@
     "./node_modules/send/node_modules/debug/node_modules/ms/index.js",
     "./node_modules/send/node_modules/debug/src/debug.js",
     "./node_modules/send/node_modules/encodeurl/index.js",
+    "./node_modules/serialize-error/index.js",
     "./node_modules/serve-static/index.js",
     "./node_modules/server-destroy/index.js",
     "./node_modules/setprototypeof/index.js",
@@ -4356,5 +4356,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "7734ab1a32c776b8c36a27490fc074553a4325c3a27f610cb7df4f9e1738700b"
+  "deferredHash": "c353653b61cdd0af874a0bde6c10bcb0b21f40bcb4add3b87a29380702febc35"
 }

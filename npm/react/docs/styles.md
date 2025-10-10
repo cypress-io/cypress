@@ -62,7 +62,7 @@ it('is stylish', () => {
 ```
 ### Additional markup
 
-The global style might assume a certain DOM structure. You can "mimic" this structure by surrounding the component with additional elements with necessary styles. For example, this is the Footer component from [bahmutov/todomvc-react](https://github.com/bahmutov/todomvc-react) repository:
+The global style might assume a certain DOM structure. You can "mimic" this structure by surrounding the component with additional elements with necessary styles.
 
 ```css
 .todoapp {
