@@ -659,7 +659,7 @@ export default {
       return result
     })
   },
-  
+
   async getCaptureProtocolScript (url: string, options: { displayRetryErrors?: boolean } = { displayRetryErrors: true }) {
     // TODO(protocol): Ensure this is removed in production
     if (process.env.CYPRESS_LOCAL_PROTOCOL_PATH) {
