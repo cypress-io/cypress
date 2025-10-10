@@ -387,7 +387,7 @@ Error: spec iframe stack
           at eval (http://localhost:8888/__cypress/tests?p=cypress/integration/spec.js:87:10)
           at eval (<anonymous>)
       `
-      const projectRoot = '/Users/gleb/git/cypress-example-todomvc'
+      const projectRoot = '/Users/cypress/git/cypress-example'
       const details = $stackUtils.getSourceDetailsForFirstLine(stack, projectRoot)
 
       expect(details.function, 'function name').to.equal('Suite.eval')
@@ -435,7 +435,7 @@ Error: spec iframe stack
             at timeslice (cypress:///../driver/node_modules/mocha/browser-entry.js:80:27)
       `
 
-      const projectRoot = '/Users/gleb/git/cypress-example-todomvc'
+      const projectRoot = '/Users/cypress/git/cypress-example'
       const details = $stackUtils.getSourceDetailsForFirstLine(stack, projectRoot)
 
       expect(details, 'minimal details').to.deep.equal({
@@ -464,7 +464,7 @@ Error: spec iframe stack
           at Object../cypress/integration/spec%with space &^$ emoji👍_你好.js (http://localhost:50129/__cypress/tests?p=cypress/integration/spec%25with%20space%20%26^$%20emoji👍_你好.js:99:1)
       `
 
-      const projectRoot = '/Users/gleb/git/cypress-example-todomvc'
+      const projectRoot = '/Users/cypress/git/cypress-example'
       const details = $stackUtils.getSourceDetailsForFirstLine(stack, projectRoot)
 
       expect(details.originalFile).to.equal('webpack:///cypress/integration/spec%with space &^$ emoji👍_你好.js')
@@ -485,7 +485,7 @@ Error: spec iframe stack
           at Object../cypress/integration/spec.js (http://localhost:50129/__cypress/tests?p=/root/path/cypress/integration/spec.js:99:1)
       `
 
-      const projectRoot = '/Users/gleb/git/cypress-example-todomvc'
+      const projectRoot = '/Users/cypress/git/cypress-example'
       const details = $stackUtils.getSourceDetailsForFirstLine(stack, projectRoot)
 
       expect(details.originalFile).to.equal('/root/path/cypress/integration/spec.js')

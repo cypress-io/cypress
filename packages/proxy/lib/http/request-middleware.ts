@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { blocked, cors } from '@packages/network'
+import { blocked } from '@packages/network'
 import { InterceptRequest, SetMatchingRoutes } from '@packages/net-stubbing'
 import { telemetry } from '@packages/telemetry'
 import { isVerboseTelemetry as isVerbose } from '.'
@@ -10,6 +10,7 @@ import { doesTopNeedToBeSimulated } from './util/top-simulation'
 
 import type { HttpMiddleware } from './'
 import type { CypressIncomingRequest } from '../types'
+import { urlMatchesOriginProtectionSpace } from '@packages/network-tools'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
@@ -375,7 +376,7 @@ const EndRequestsToBlockedHosts: RequestMiddleware = function () {
   })
 
   if (blockHosts) {
-    const matches = blocked.matches(this.req.proxiedUrl, blockHosts)
+    const matches = blocked.matches(this.req.proxiedUrl, blockHosts as string[])
 
     span?.setAttributes({
       didUrlMatchBlockedHosts: !!matches,
@@ -430,7 +431,7 @@ const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
 
 function reqNeedsBasicAuthHeaders (req, { auth, origin }: Cypress.RemoteState) {
   //if we have auth headers, this request matches our origin, protection space, and the user has not supplied auth headers
-  return auth && !req.headers['authorization'] && cors.urlMatchesOriginProtectionSpace(req.proxiedUrl, origin)
+  return auth && !req.headers['authorization'] && urlMatchesOriginProtectionSpace(req.proxiedUrl, origin)
 }
 
 const MaybeSetBasicAuthHeaders: RequestMiddleware = function () {

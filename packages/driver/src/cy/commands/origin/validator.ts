@@ -2,8 +2,7 @@ import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
 import { difference, isPlainObject, isString, isFunction } from 'lodash'
 import type { LocationObject } from '../../../cypress/location'
-import * as cors from '@packages/network/lib/cors'
-import { DocumentDomainInjection } from '@packages/network/lib/document-domain-injection'
+import { policyFromConfig, DocumentDomainInjection } from '@packages/network-tools'
 
 const validOptionKeys = Object.freeze(['args'])
 
@@ -87,7 +86,7 @@ export class Validator {
 
     const injector = DocumentDomainInjection.InjectionBehavior(Cypress.config())
 
-    const policy = cors.policyFromConfig({ injectDocumentDomain: Cypress.config('injectDocumentDomain') })
+    const policy = policyFromConfig({ injectDocumentDomain: Cypress.config('injectDocumentDomain') })
 
     if (injector.urlsMatch(originLocation.href, specHref)) {
       $errUtils.throwErrByPath('origin.invalid_url_argument_same_origin', {

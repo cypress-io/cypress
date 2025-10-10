@@ -1,4 +1,4 @@
-import * as fse from 'fs-extra'
+import fs from 'fs-extra'
 import winVersionInfo from 'win-version-info'
 import os from 'os'
 import { join, normalize, win32 } from 'path'
@@ -13,23 +13,23 @@ const debugVerbose = Debug('cypress-verbose:launcher:windows')
 
 function formFullAppPath (name: string) {
   return [
-    `C:/Program Files (x86)/Google/Chrome/Application/${name}.exe`,
     `C:/Program Files/Google/Chrome/Application/${name}.exe`,
+    `C:/Program Files (x86)/Google/Chrome/Application/${name}.exe`,
   ].map(normalize)
 }
 
 function formChromeBetaAppPath () {
   return [
-    'C:/Program Files (x86)/Google/Chrome Beta/Application/chrome.exe',
     'C:/Program Files/Google/Chrome Beta/Application/chrome.exe',
+    'C:/Program Files (x86)/Google/Chrome Beta/Application/chrome.exe',
   ].map(normalize)
 }
 
 function formChromiumAppPath () {
   return [
-    'C:/Program Files (x86)/Google/chrome-win32/chrome.exe',
     'C:/Program Files/Google/chrome-win/chrome.exe',
     'C:/Program Files/Google/Chromium/chrome.exe',
+    'C:/Program Files (x86)/Google/chrome-win32/chrome.exe',
     'C:/Program Files (x86)/Google/Chromium/chrome.exe',
   ].map(normalize)
 }
@@ -144,7 +144,7 @@ function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
 
     let path = doubleEscape(exePath)
 
-    return fse.pathExists(path)
+    return fs.pathExists(path)
     .then((exists) => {
       debugVerbose('found %s ? %o', path, { exists })
 
@@ -152,9 +152,7 @@ function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
         return tryNextExePath()
       }
 
-      // Use module.exports.getVersionString here, rather than our local reference
-      // to that variable so that the tests can easily mock it
-      return module.exports.getVersionString(path).then((version) => {
+      return getVersionString(path).then((version) => {
         debug('got version string for %s: %o', browser.name, { exePath, version })
 
         return {

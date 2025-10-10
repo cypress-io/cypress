@@ -1,0 +1,21 @@
+{
+  "include": [
+    "lib/*.ts"
+  ],
+  "files": [
+    "./../ts/index.d.ts"
+  ],
+  "compilerOptions": {
+    "types": [
+      "node"
+    ],
+    "esModuleInterop": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "useUnknownInCatchVariables": true,
+    "noUnusedLocals": true,
+    "noImplicitReturns": true,
+    "declaration": true,
+    "skipLibCheck": true
+  }
+}

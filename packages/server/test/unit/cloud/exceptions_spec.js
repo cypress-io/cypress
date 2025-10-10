@@ -228,4 +228,116 @@ at bar <stripped-path>bar.js:92\
       })
     })
   })
+
+  context('.safeErrorSerialize', () => {
+    it('returns string as-is when error is already a string', () => {
+      const stringError = 'Simple string error'
+
+      expect(exception.safeErrorSerialize(stringError)).to.eq('Simple string error')
+    })
+
+    it('serializes plain objects properly', () => {
+      const objectError = {
+        additionalData: { type: 'studio:panel:opened' },
+        message: 'Something went wrong',
+        code: 'TELEMETRY_ERROR',
+      }
+
+      const result = exception.safeErrorSerialize(objectError)
+
+      expect(result).to.eq(JSON.stringify(objectError))
+    })
+
+    it('handles circular reference objects safely without throwing', () => {
+      // Create an object with circular reference
+      const circularError = {
+        message: 'Circular reference error',
+        code: 'CIRCULAR_ERROR',
+      }
+
+      circularError.self = circularError // Create circular reference
+
+      const result = exception.safeErrorSerialize(circularError)
+
+      expect(result).to.eq(JSON.stringify({
+        message: 'Circular reference error',
+        code: 'CIRCULAR_ERROR',
+        self: '[Circular]',
+      }))
+    })
+
+    it('handles Error objects correctly', () => {
+      const error = new Error('test error')
+
+      error.code = 'TEST_CODE'
+      error.errno = 123
+
+      const result = exception.safeErrorSerialize(error)
+
+      // serializeError should preserve Error properties
+      const parsed = JSON.parse(result)
+
+      expect(parsed.message).to.eq('test error')
+      expect(parsed.name).to.eq('Error')
+      expect(parsed.code).to.eq('TEST_CODE')
+      expect(parsed.errno).to.eq(123)
+    })
+
+    it('handles null and undefined gracefully', () => {
+      expect(exception.safeErrorSerialize(null)).to.eq('null')
+      expect(exception.safeErrorSerialize(undefined)).to.eq('undefined')
+    })
+
+    it('handles primitive types', () => {
+      expect(exception.safeErrorSerialize(42)).to.eq('42')
+      expect(exception.safeErrorSerialize(true)).to.eq('true')
+      expect(exception.safeErrorSerialize(false)).to.eq('false')
+    })
+
+    it('provides fallback for non-serializable objects', () => {
+      // Create an object that might cause issues
+      const problematicObject = {
+        get value () {
+          throw new Error('Cannot access value')
+        },
+      }
+
+      const result = exception.safeErrorSerialize(problematicObject)
+
+      expect(result).to.match(/^\[Non-serializable object:/)
+    })
+
+    it('handles deeply nested objects', () => {
+      const deepObject = {
+        level1: {
+          level2: {
+            level3: {
+              level4: {
+                message: 'Deep error',
+                data: [1, 2, 3, { nested: true }],
+              },
+            },
+          },
+        },
+      }
+
+      const result = exception.safeErrorSerialize(deepObject)
+
+      expect(result).to.eq(JSON.stringify(deepObject))
+    })
+
+    it('handles arrays with mixed content', () => {
+      const arrayError = [
+        'string',
+        42,
+        { message: 'object in array' },
+        null,
+        undefined,
+      ]
+
+      const result = exception.safeErrorSerialize(arrayError)
+
+      expect(result).to.eq(JSON.stringify(arrayError))
+    })
+  })
 })

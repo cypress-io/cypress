@@ -1,22 +1,21 @@
-const _ = require('lodash')
-const os = require('os')
-const debug = require('debug')('cypress:server:cloud:api')
-const debugProtocol = require('debug')('cypress:server:protocol')
-const request = require('@cypress/request-promise')
-const humanInterval = require('human-interval')
+import _ from 'lodash'
+import os from 'os'
+import debugModule from 'debug'
+import request from '@cypress/request-promise'
+import humanInterval from 'human-interval'
 
-const RequestErrors = require('@cypress/request-promise/errors')
+import * as RequestErrors from '@cypress/request-promise/errors'
 
-const pkg = require('@packages/root')
+import pkg from '@packages/root'
 
-const machineId = require('../machine_id')
-const errors = require('../../errors')
+import * as machineId from '../machine_id'
+import * as errors from '../../errors'
 
 import Bluebird from 'bluebird'
 
 import type { AfterSpecDurations } from '@packages/types'
-import agent from '@packages/network/lib/agent'
-import type { CombinedAgent } from '@packages/network/lib/agent'
+import { agent } from '@packages/network'
+import type { CombinedAgent } from '@packages/network'
 
 import { apiUrl, apiRoutes, makeRoutes } from '../routes'
 import { getText } from '../../util/status_code'
@@ -49,6 +48,8 @@ import type {
 
 // Define response type for putInstanceArtifacts (returns z.ZodAny with resExample: {})
 type PutInstanceArtifactsResponseType = any
+const debug = debugModule('cypress:server:cloud:api')
+const debugProtocol = debugModule('cypress:server:protocol')
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')

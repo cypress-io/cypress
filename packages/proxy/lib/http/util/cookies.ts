@@ -1,12 +1,10 @@
 import _ from 'lodash'
 import type Debug from 'debug'
 import { URL } from 'url'
-import { cors } from '@packages/network'
-import { urlOriginsMatch, urlSameSiteMatch } from '@packages/network/lib/cors'
 import { SerializableAutomationCookie, Cookie, CookieJar, toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
 import type { RequestCredentialLevel } from '../../types'
-// tslint:disable-next-line: no-implicit-dependencies - wants us to explicitly define cypress dep
-import type { ResourceType } from 'cypress/types/net-stubbing'
+import type { ResourceType } from '@packages/net-stubbing'
+import { urlOriginsMatch, urlSameSiteMatch } from '@packages/network-tools'
 
 type SiteContext = 'same-origin' | 'same-site' | 'cross-site'
 
@@ -123,7 +121,7 @@ export const getSameSiteContext = (autUrl: string | undefined, requestUrl: strin
   // if there's no AUT URL, it's a request for the first URL visited, or if
   // the request origin is considered the same site as the AUT origin;
   // both indicate that it's not a cross-site request
-  if (!autUrl || cors.urlSameSiteMatch(autUrl, requestUrl)) {
+  if (!autUrl || urlSameSiteMatch(autUrl, requestUrl)) {
     return 'strict'
   }
 
