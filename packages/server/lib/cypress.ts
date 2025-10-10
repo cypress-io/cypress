@@ -91,8 +91,6 @@ async function exitErr (err: unknown, posixExitCodes?: boolean) {
     }
   }
 
-  debug('calling exit 1')
-
   return exit(1)
 }
 
