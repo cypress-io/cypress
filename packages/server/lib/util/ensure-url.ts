@@ -70,5 +70,12 @@ export const isListening = (urlStr: string) => {
     .catch({ name: 'StatusCodeError' }, () => {}) // we just care if it can connect, not if it's a valid resource
   }
 
-  return connect.getAddress(Number(port), String(hostname))
+  // With https://github.com/cypress-io/cypress/pull/32633, the @packages/network package has refactored some methods to use
+  // native promises. This method wraps the native promise in a Bluebird promise to ensure that the method returns a Bluebird promise
+  // until we are able to refactor it.
+  return new Bluebird((resolve, reject) => {
+    connect.getAddress(Number(port), String(hostname))
+    .then(resolve)
+    .catch(reject)
+  })
 }

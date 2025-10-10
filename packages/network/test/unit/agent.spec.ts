@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest'
-import Bluebird from 'bluebird'
+import { promisify } from 'util'
 
 import http from 'http'
 import https from 'https'
@@ -451,13 +451,15 @@ describe('lib/agent', function () {
       })
 
       it('#createUpstreamProxyConnection throws when connection is accepted then closed', async () => {
-        const proxy = Bluebird.promisifyAll(
-          allowDestroy(
-            net.createServer((socket) => {
-              socket.end()
-            }),
-          ),
-        ) as net.Server & AsyncServer
+        const proxyServer = allowDestroy(
+          net.createServer((socket) => {
+            socket.end()
+          }),
+        )
+        const proxy = Object.assign(proxyServer, {
+          destroyAsync: promisify(proxyServer.destroy.bind(proxyServer)),
+          listenAsync: promisify(proxyServer.listen.bind(proxyServer)),
+        }) as net.Server & AsyncServer
 
         const proxyPort = PROXY_PORT + 2
 

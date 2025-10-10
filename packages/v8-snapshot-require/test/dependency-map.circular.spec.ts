@@ -1,7 +1,7 @@
+import { describe, it, expect } from 'vitest'
 import { buildDependencyMap } from '@tooling/v8-snapshot'
 import { DependencyMap } from '../src/dependency-map'
 import type { Metadata } from '../src/types'
-import { expect } from 'chai'
 
 const ROOT = 'lib/root.js'
 const FOO = 'lib/foo.js'
@@ -84,18 +84,18 @@ const dp = new DependencyMap(map)
 
 describe('dependency map: circular', () => {
   it('creates a map with circular dep - all deps ', () => {
-    expect(dp.allDepsOf(ROOT)).to.deep.equal(ALL_ROOT)
-    expect(dp.allDepsOf(FOO)).to.deep.equal(ALL_FOO)
-    expect(dp.allDepsOf(BAR)).to.deep.equal(ALL_BAR)
-    expect(dp.allDepsOf(BAZ)).to.deep.equal(ALL_BAZ)
-    expect(dp.allDepsOf(FOZ)).to.deep.equal(ALL_FOZ)
+    expect(dp.allDepsOf(ROOT)).toEqual(ALL_ROOT)
+    expect(dp.allDepsOf(FOO)).toEqual(ALL_FOO)
+    expect(dp.allDepsOf(BAR)).toEqual(ALL_BAR)
+    expect(dp.allDepsOf(BAZ)).toEqual(ALL_BAZ)
+    expect(dp.allDepsOf(FOZ)).toEqual(ALL_FOZ)
   })
 
   it('creates a map with circular dep - direct deps ', () => {
-    expect(dp.directDepsOf(ROOT)).to.deep.equal(DIRECT_ROOT)
-    expect(dp.directDepsOf(FOO)).to.deep.equal(DIRECT_FOO)
-    expect(dp.directDepsOf(BAR)).to.deep.equal(DIRECT_BAR)
-    expect(dp.directDepsOf(BAZ)).to.deep.equal(DIRECT_BAZ)
-    expect(dp.directDepsOf(FOZ)).to.deep.equal(DIRECT_FOZ)
+    expect(dp.directDepsOf(ROOT)).toEqual(DIRECT_ROOT)
+    expect(dp.directDepsOf(FOO)).toEqual(DIRECT_FOO)
+    expect(dp.directDepsOf(BAR)).toEqual(DIRECT_BAR)
+    expect(dp.directDepsOf(BAZ)).toEqual(DIRECT_BAZ)
+    expect(dp.directDepsOf(FOZ)).toEqual(DIRECT_FOZ)
   })
 })

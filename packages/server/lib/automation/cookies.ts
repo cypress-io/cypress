@@ -4,9 +4,9 @@ import extension from '@packages/extension'
 import { isHostOnlyCookie } from '../browsers/cdp_automation'
 import type { SerializableAutomationCookie } from '../util/cookies'
 
-type AutomationFn<V, T> = (data: V) => Bluebird.Promise<T>
+type AutomationFn<V, T> = (data: V) => Promise<T>
 
-type AutomationMessageFn<V, T> = (message: string, data: V) => Bluebird.Promise<T>
+type AutomationMessageFn<V, T> = (message: string, data: V) => Promise<T>
 
 export interface AutomationCookie {
   domain: string
@@ -108,23 +108,22 @@ export class Cookies {
     }
   }
 
-  getCookies (data: {
+  async getCookies (data: {
     domain?: string
   }, automate: AutomationMessageFn<any, (AutomationCookie | null)[]>) {
     debug('getting:cookies %o', data)
 
-    return automate('get:cookies', data)
-    .then((cookies) => {
-      cookies = normalizeGetCookies(cookies)
-      cookies = _.reject(cookies, (cookie) => this.isNamespaced(cookie)) as AutomationCookie[]
+    let cookies = await automate('get:cookies', data)
 
-      debug('received get:cookies %o', cookies)
+    cookies = normalizeGetCookies(cookies)
+    cookies = _.reject(cookies, (cookie) => this.isNamespaced(cookie)) as AutomationCookie[]
 
-      return cookies
-    })
+    debug('received get:cookies %o', cookies)
+
+    return cookies
   }
 
-  getCookie (data: {
+  async getCookie (data: {
     domain: string
     name: string
   }, automate: AutomationFn<{
@@ -133,8 +132,8 @@ export class Cookies {
   }, AutomationCookie | null>) {
     debug('getting:cookie %o', data)
 
-    return automate(data)
-    .then((cookie) => {
+    let cookie = await automate(data)
+
       if (this.isNamespaced(cookie)) {
         throw new Error('Sorry, you cannot get a Cypress namespaced cookie.')
       } else {
@@ -144,10 +143,9 @@ export class Cookies {
 
         return cookie
       }
-    })
   }
 
-  setCookie (data: SerializableAutomationCookie, automate: AutomationFn<AutomationCookie, AutomationCookie | null>) {
+  async setCookie (data: SerializableAutomationCookie, automate: AutomationFn<AutomationCookie, AutomationCookie | null>) {
     this.throwIfNamespaced(data)
     const cookie = normalizeCookieProps(data) as AutomationCookie
 
@@ -157,17 +155,16 @@ export class Cookies {
 
     debug('set:cookie %o', cookie)
 
-    return automate(cookie)
-    .then((cookie) => {
-      cookie = normalizeGetCookieProps(cookie)
+    let automationCookie = await automate(cookie)
 
-      debug('received set:cookie %o', cookie)
+    automationCookie = normalizeGetCookieProps(automationCookie)
 
-      return cookie
-    })
+      debug('received set:cookie %o', automationCookie)
+
+      return automationCookie
   }
 
-  setCookies (
+  async setCookies (
     cookies: SerializableAutomationCookie[] | AutomationCookie[],
     automate: AutomationMessageFn<AutomationCookie[], AutomationCookie[]>,
     eventName: 'set:cookies' | 'add:cookies' = 'set:cookies',
@@ -185,8 +182,9 @@ export class Cookies {
 
     debug(`${eventName} %o`, cookies)
 
-    return automate(eventName, cookies as AutomationCookie[])
-    .return(cookies)
+    await automate(eventName, cookies as AutomationCookie[])
+
+    return cookies
   }
 
   // set:cookies will clear cookies first in browsers that use CDP. this is the
@@ -199,7 +197,7 @@ export class Cookies {
     return this.setCookies(cookies, automate, 'add:cookies')
   }
 
-  clearCookie (data: {
+  async clearCookie (data: {
     domain: string
     name: string
   }, automate: AutomationFn<{
@@ -209,14 +207,13 @@ export class Cookies {
     this.throwIfNamespaced(data)
     debug('clear:cookie %o', data)
 
-    return automate(data)
-    .then((cookie) => {
-      cookie = normalizeCookieProps(cookie)
+    const cookie = await automate(data)
 
-      debug('received clear:cookie %o', cookie)
+    const normalizedCookie = normalizeCookieProps(cookie)
 
-      return cookie
-    })
+    debug('received clear:cookie %o', normalizedCookie)
+
+    return normalizedCookie
   }
 
   async clearCookies (data: AutomationCookie[], automate: AutomationMessageFn<AutomationCookie[], AutomationCookie[]>) {
@@ -226,8 +223,10 @@ export class Cookies {
 
     debug('clear:cookies %o', cookies.length)
 
-    return automate('clear:cookies', cookies)
-    .mapSeries(normalizeCookieProps)
+    const automationCookies = await automate('clear:cookies', cookies)
+    const normalizedCookies = _.map(automationCookies, normalizeCookieProps)
+
+    return normalizedCookies
   }
 
   changeCookie (data: {

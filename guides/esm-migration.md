@@ -52,7 +52,8 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] packages/launcher ✅ **COMPLETED**
 - [x] packages/launchpad ✅ **COMPLETED**
 - [x] packages/net-stubbing ✅ **COMPLETED**
-- [ ] packages/network **PARTIAL** - entry point is JS
+- [x] packages/network ✅ **COMPLETED**
+- [x] packages/network-tools ✅ **COMPLETED**
 - [x] packages/packherd-require ✅ **COMPLETED**
 - [ ] packages/proxy **PARTIAL** - entry point is JS
 - [x] packages/reporter ✅ **COMPLETED**
@@ -64,7 +65,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [ ] packages/server **PARTIAL** - many source/test files in JS. highest priority
 - [ ] packages/socket **PARTIAL** - entry point is JS. Tests are JS
 - [x] packages/stderr-filtering ✅ **COMPLETED**
-- [ ] packages/telemetry **PARTIAL** - entry point is JS
+- [x] packages/telemetry ✅ **COMPLETED**
 - [ ] packages/ts **PARTIAL** - ultimate goal is removal and likely not worth the effort to convert
 - [x] packages/types ✅ **COMPLETED**
 - [x] packages/v8-snapshot-require
@@ -101,6 +102,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] packages/launcher ✅ **COMPLETED**
 - [ ] packages/net-stubbing
 - [x] packages/network ✅ **COMPLETED**
+- [x] packages/network-tools ✅ **COMPLETED**
 - [ ] packages/packherd-require
 - [ ] packages/proxy
 - [x] packages/rewriter ✅ **COMPLETED**
@@ -111,7 +113,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] packages/telemetry ✅ **COMPLETED**
 - [ ] packages/ts - ultimate goal is removal and likely not worth the effort to convert
 - [x] packages/types ✅ **COMPLETED**
-- [ ] packages/v8-snapshot-require
+- [x] packages/v8-snapshot-require ✅ **COMPLETED**
 
 ### Phase 3: Bundle ESM/CJS versions of NPM packages 
 

@@ -159,6 +159,7 @@
     "@packages/launcher": "0.0.0-development",
     "@packages/net-stubbing": "0.0.0-development",
     "@packages/network": "0.0.0-development",
+    "@packages/network-tools": "0.0.0-development",
     "@packages/proxy": "0.0.0-development",
     "@packages/resolve-dist": "0.0.0-development",
     "@packages/rewriter": "0.0.0-development",

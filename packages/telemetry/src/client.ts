@@ -1,6 +1,6 @@
 import type { Span, Attributes } from '@opentelemetry/api'
-import type { startSpanOptions, findActiveSpanOptions, contextObject } from './index'
-import { Telemetry as TelemetryClass, TelemetryNoop } from './index'
+import type { startSpanOptions, findActiveSpanOptions, contextObject } from './telemetry/index'
+import { Telemetry as TelemetryClass, TelemetryNoop } from './telemetry/index'
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web'
 import { browserDetectorSync } from '@opentelemetry/resources'
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
