@@ -77,6 +77,27 @@ describe('lib/cloud/studio', () => {
       expect(studioManager.status).to.eq('IN_ERROR')
       expect(studio.reportError).to.be.calledWithMatch(error, 'initializeRoutes', {})
     })
+
+    it('handles non-Error objects by converting them to Error instances', () => {
+      const objectError = {
+        additionalData: { type: 'studio:panel:opened' },
+        message: 'Something went wrong',
+      }
+
+      sinon.stub(studio, 'initializeRoutes').throws(objectError)
+      sinon.stub(studio, 'reportError')
+
+      studioManager.initializeRoutes({} as any)
+
+      expect(studioManager.status).to.eq('IN_ERROR')
+      expect(studio.reportError).to.be.calledWithMatch(
+        sinon.match((error) => {
+          return error instanceof Error
+        }),
+        'initializeRoutes',
+        {},
+      )
+    })
   })
 
   describe('asynchronous method invocation', () => {
@@ -92,6 +113,27 @@ describe('lib/cloud/studio', () => {
       expect(studio.reportError).to.be.calledWithMatch(error, 'initializeStudioAI', {})
     })
 
+    it('handles non-Error objects in async methods by converting them to Error instances', async () => {
+      const objectError = {
+        additionalData: { type: 'studio:panel:opened' },
+        message: 'Async error occurred',
+      }
+
+      sinon.stub(studio, 'initializeStudioAI').throws(objectError)
+      sinon.stub(studio, 'reportError')
+
+      await studioManager.initializeStudioAI({} as any)
+
+      expect(studioManager.status).to.eq('IN_ERROR')
+      expect(studio.reportError).to.be.calledWithMatch(
+        sinon.match((error) => {
+          return error instanceof Error
+        }),
+        'initializeStudioAI',
+        {},
+      )
+    })
+
     it('does not set state IN_ERROR when a non-essential async method fails', async () => {
       const error = new Error('foo')
 
@@ -100,6 +142,27 @@ describe('lib/cloud/studio', () => {
       await studioManager.captureStudioEvent({} as any)
 
       expect(studioManager.status).to.eq('ENABLED')
+    })
+
+    it('handles non-Error objects in non-essential async methods without changing status', async () => {
+      const objectError = {
+        additionalData: { type: 'studio:panel:opened' },
+        message: 'Non-essential error occurred',
+      }
+
+      sinon.stub(studio, 'captureStudioEvent').throws(objectError)
+      sinon.stub(studio, 'reportError')
+
+      await studioManager.captureStudioEvent({} as any)
+
+      expect(studioManager.status).to.eq('ENABLED')
+      expect(studio.reportError).to.be.calledWithMatch(
+        sinon.match((error) => {
+          return error instanceof Error
+        }),
+        'captureStudioEvent',
+        {},
+      )
     })
   })
 

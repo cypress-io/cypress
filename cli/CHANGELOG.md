@@ -7,6 +7,10 @@ _Released 10/21/2025 (PENDING)_
 
 - When running `cypress` in Cypress development environments, or when `ELECTRON_ENABLE_LOGGING` is otherwise set to 1, certain messages written to `stderr` will no longer be bracketed with verbose tags. Addresses [#32569](https://github.com/cypress-io/cypress/issues/32569). Addressed in [#32674](https://github.com/cypress-io/cypress/pull/32674).
 
+**Misc:**
+
+Browser detection in Cypress now always prefers 64-bit browser installs to 32-bit browser installs. Addressed in [#32656](https://github.com/cypress-io/cypress/pull/32656).
+
 ## 15.4.0
 
 _Released 10/7/2025_
