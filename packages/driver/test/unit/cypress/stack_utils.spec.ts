@@ -64,6 +64,32 @@ describe('stack_utils', () => {
         })
       })
     }
+
+    it('returns the correct invocation details for a grep stack trace', () => {
+      const stack = `Error\n
+at itGrep (http://localhost:3000/__cypress/tests?p=cypress/support/e2e.js:444:14)\n 
+at eval (http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js:14:1)\n
+at eval (http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js:18:12)\n
+at eval (<anonymous>)\n
+at eval (cypress:///../driver/src/cypress/script_utils.ts:38:23)`
+
+      class GrepError {
+        get stack () {
+          return stack
+        }
+      }
+
+      stack_utils.getInvocationDetails(
+        { Error: GrepError, Cypress: {} },
+        config,
+      )
+
+      expect(source_map_utils.getSourcePosition).toHaveBeenCalledWith('http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js', expect.objectContaining({
+        column: 1,
+        line: 14,
+        file: 'http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js',
+      }))
+    })
   })
 
   describe('normalizedUserInvocationStack', () => {

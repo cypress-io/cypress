@@ -63,6 +63,12 @@ const stackWithLinesRemoved = (stack, cb) => {
   return unsplitStack(messageLines, remainingStackLines)
 }
 
+const stackWithGrepLinesRemoved = (stack) => {
+  return stackWithLinesRemoved(stack, (lines) => {
+    return _.reject(lines, (line) => line.includes('itGrep'))
+  })
+}
+
 const stackWithLinesDroppedFromMarker = (stack, marker, includeLast = false) => {
   return stackWithLinesRemoved(stack, (lines) => {
     // drop lines above the marker
@@ -147,6 +153,12 @@ const getInvocationDetails = (specWindow, config): InvocationDetails | undefined
         // CT error contexts include the `__cypress` marker but not the `/tests` portion
         stack = stackWithLinesDroppedFromMarker(stack, '__cypress', true)
       }
+    }
+
+    // if the stack includes the 'itGrep' function, remove any lines that include it
+    // so that the first line in the stack is the spec invocation
+    if (stack.includes('itGrep')) {
+      stack = stackWithGrepLinesRemoved(stack)
     }
 
     const details: Omit<InvocationDetails, 'stack'> = getSourceDetailsForFirstLine(stack, config('projectRoot')) || {};
