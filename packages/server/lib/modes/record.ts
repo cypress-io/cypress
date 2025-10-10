@@ -11,8 +11,8 @@ import { hideKeys } from '@packages/config'
 
 import { default as api } from '../cloud/api'
 import exception from '../cloud/exception'
-import { getError, AllCypressErrorNames } from '@packages/errors'
-
+import { getError } from '@packages/errors'
+import type { AllCypressErrorNames } from '@packages/errors'
 import { get as getErrors, warning as errorsWarning, throwErr } from '../errors'
 import capture from '../capture'
 import { getResolvedRuntimeConfig } from '../config'
