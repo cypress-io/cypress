@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { Telemetry } from '../src'
+import { Telemetry } from '../src/telemetry'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
 
@@ -16,6 +16,7 @@ describe('init', () => {
       exporter,
       version: 'version',
       SpanProcessor: BatchSpanProcessor,
+      isVerbose: false,
     })
 
     expect(tel).toBeDefined()
@@ -40,6 +41,7 @@ describe('init', () => {
       version: 'version',
       rootContextObject: { context: { traceparent: '00-a14c8519972996a2a0748f2c8db5a775-4ad8bd26672a01b0-01' }, attributes: { yes: 'no' } },
       SpanProcessor: BatchSpanProcessor,
+      isVerbose: false,
     })
 
     expect(tel).toBeDefined()
@@ -60,6 +62,7 @@ describe('startSpan', () => {
       version: 'version',
       rootContextObject: { context: { traceparent: '00-a14c8519972996a2a0748f2c8db5a775-4ad8bd26672a01b0-01' } },
       SpanProcessor: BatchSpanProcessor,
+      isVerbose: false,
     })
 
     const span = tel.startSpan({ name: 'span' })
@@ -83,6 +86,7 @@ describe('startSpan', () => {
       exporter,
       version: 'version',
       SpanProcessor: BatchSpanProcessor,
+      isVerbose: false,
     })
 
     const span = tel.startSpan({ name: 'span' })
@@ -103,6 +107,7 @@ describe('startSpan', () => {
       exporter,
       version: 'version',
       SpanProcessor: BatchSpanProcessor,
+      isVerbose: false,
     })
 
     const parentSpan = tel.startSpan({ name: 'parentSpan' })
@@ -126,6 +131,7 @@ describe('startSpan', () => {
       exporter,
       version: 'version',
       SpanProcessor: BatchSpanProcessor,
+      isVerbose: false,
     })
 
     const span = tel.startSpan({ name: 'span', active: true })
@@ -169,6 +175,7 @@ describe('startSpan', () => {
       exporter,
       version: 'version',
       SpanProcessor: BatchSpanProcessor,
+      isVerbose: false,
     })
 
     const span = tel.startSpan({ name: 'span', key: 'key' })
@@ -192,6 +199,7 @@ describe('getSpan', () => {
       detectors: [],
       exporter,
       version: 'version',
+      // @ts-expect-error
       rootContextObject: { traceparent: 'id' },
       SpanProcessor: BatchSpanProcessor,
     })
@@ -216,6 +224,7 @@ describe('findActiveSpan', () => {
       version: 'version',
       rootContextObject: { context: { traceparent: 'id' } },
       SpanProcessor: BatchSpanProcessor,
+      isVerbose: false,
     })
 
     const spanny = tel.startSpan({ name: 'spanny', active: true })
@@ -242,6 +251,7 @@ describe('endActiveSpanAndChildren', () => {
       version: 'version',
       rootContextObject: { context: { traceparent: 'id' } },
       SpanProcessor: BatchSpanProcessor,
+      isVerbose: false,
     })
 
     const spanny = tel.startSpan({ name: 'spanny', active: true })
@@ -274,6 +284,7 @@ describe('getActiveContextObject', () => {
       version: 'version',
       rootContextObject: { context: { traceparent: 'id' } },
       SpanProcessor: BatchSpanProcessor,
+      isVerbose: false,
     })
 
     const emptyContext = tel.getActiveContextObject()
@@ -298,12 +309,14 @@ describe('getResources', () => {
       detectors: [],
       exporter,
       version: 'version',
+      // @ts-expect-error
       rootContextObject: { traceparent: 'id' },
       SpanProcessor: BatchSpanProcessor,
       resources: {
         herp: 'derp',
         'service.name': 'not overridden',
       },
+      isVerbose: false,
     })
 
     expect(tel.getResources()).toEqual(expect.objectContaining({
@@ -327,8 +340,10 @@ describe('shutdown', () => {
       detectors: [],
       exporter,
       version: 'version',
+      // @ts-expect-error
       rootContextObject: { traceparent: 'id' },
       SpanProcessor: BatchSpanProcessor,
+      isVerbose: false,
     })
 
     let shutdownCalled = false
@@ -356,8 +371,10 @@ describe('getExporter', () => {
       detectors: [],
       exporter,
       version: 'version',
+      // @ts-expect-error
       rootContextObject: { traceparent: 'id' },
       SpanProcessor: BatchSpanProcessor,
+      isVerbose: false,
     })
 
     expect(tel.getExporter()).toEqual(exporter)
@@ -376,6 +393,7 @@ describe('setRootContext', () => {
       version: 'version',
       rootContextObject: { context: { traceparent: '00-a14c8519972996a2a0748f2c8db5a775-4ad8bd26672a01b0-01' } },
       SpanProcessor: BatchSpanProcessor,
+      isVerbose: false,
     })
 
     // @ts-expect-error
@@ -398,6 +416,7 @@ describe('setRootContext', () => {
       version: 'version',
       rootContextObject: { context: { traceparent: '00-a14c8519972996a2a0748f2c8db5a775-4ad8bd26672a01b0-01' } },
       SpanProcessor: BatchSpanProcessor,
+      isVerbose: false,
     })
 
     // @ts-expect-error

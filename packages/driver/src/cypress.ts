@@ -48,7 +48,7 @@ import type { CachedTestState, ReporterRunState, RunState } from '@packages/type
 import { DocumentDomainInjection } from '@packages/network/lib/document-domain-injection'
 import { setSpecContentSecurityPolicy } from './util/privileged_channel'
 
-import { telemetry } from '@packages/telemetry/src/browser'
+import { telemetry } from '@packages/telemetry/browser/client'
 
 const debug = debugFn('cypress:driver:cypress')
 

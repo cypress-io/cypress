@@ -13,7 +13,7 @@ import Toast, { POSITION } from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
 import { createWebsocket } from './runner'
 import { getRunnerConfigFromWindow } from './runner/get-runner-config-from-window'
-import { telemetry } from '@packages/telemetry/src/browser'
+import { telemetry } from '@packages/telemetry/browser/client'
 
 // Grab the time just before loading config to include that in the cypress:app span
 const now = performance.now()

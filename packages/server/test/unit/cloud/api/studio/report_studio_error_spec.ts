@@ -149,6 +149,45 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
       )
     })
 
+    it('converts non-Error objects to Error instances', () => {
+      const objectError = {
+        additionalData: { type: 'studio:panel:opened' },
+        message: 'Something went wrong',
+        code: 'TELEMETRY_ERROR',
+      }
+
+      reportStudioError({
+        cloudApi,
+        studioHash: 'abc123',
+        projectSlug: 'test-project',
+        error: objectError,
+        studioMethod: 'telemetryService',
+      })
+
+      expect(cloudRequestStub).to.be.calledWithMatch(
+        'http://localhost:1234/studio/errors',
+        {
+          studioHash: 'abc123',
+          projectSlug: 'test-project',
+          errors: [{
+            name: 'Error',
+            message: sinon.match.string,
+            stack: sinon.match((stack) => stack.includes('<stripped-path>report_studio_error_spec.ts')),
+            code: undefined,
+            errno: undefined,
+            studioMethod: 'telemetryService',
+            studioMethodArgs: undefined,
+          }],
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'x-cypress-version': '1.2.3',
+          },
+        },
+      )
+    })
+
     it('handles Error objects correctly', () => {
       const error = new Error('test error')
 
