@@ -3460,6 +3460,7 @@
     "./node_modules/send/node_modules/debug/node_modules/ms/index.js",
     "./node_modules/send/node_modules/debug/src/debug.js",
     "./node_modules/send/node_modules/encodeurl/index.js",
+    "./node_modules/serialize-error/index.js",
     "./node_modules/serve-static/index.js",
     "./node_modules/server-destroy/index.js",
     "./node_modules/setprototypeof/index.js",
@@ -4355,5 +4356,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "1e3c55486eafb49439d262dcc52d18588254325ee01eb44ad3258d7ff82f469e"
+  "deferredHash": "c353653b61cdd0af874a0bde6c10bcb0b21f40bcb4add3b87a29380702febc35"
 }
