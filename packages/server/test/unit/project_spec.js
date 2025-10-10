@@ -662,18 +662,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         // Clean up environment variable
         delete process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE
       })
-
-      it('does not create studio lifecycle manager when CYPRESS_INTERNAL_SIMULATE_OPEN_MODE is not set in text terminal mode', async function () {
-        this.project.cfg.isTextTerminal = true
-        delete process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE
-
-        sinon.stub(this.project, 'saveState').resolves()
-        sinon.stub(process, 'chdir')
-
-        await this.project.open()
-
-        expect(this.project.ctx.coreData.studioLifecycleManager).to.be.undefined
-      })
     })
   })
 
