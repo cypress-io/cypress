@@ -387,7 +387,7 @@ const createRun = Promise.method((options: any = {}) => {
               link: billingLink(orgId),
             })
           default:
-            throw throwErr('CLOUD_UNKNOWN_INVALID_REQUEST', {
+            return throwErr('CLOUD_UNKNOWN_INVALID_REQUEST', {
               response: err,
               flags: {
                 group,

@@ -502,7 +502,7 @@ describe('lib/cypress', () => {
         '--posix-exit-codes',
       ])
       .then(() => {
-        this.expectExitWith(112)
+        this.expectExitWith(1)
       })
     })
 
