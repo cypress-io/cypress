@@ -11,7 +11,8 @@
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "size": "t=\"cypress-v0.0.0.tgz\"; yarn pack --filename \"${t}\"; wc -c \"cli/${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "test": "yarn test-unit",
-    "test-unit": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
+    "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0",
+    "test-unit": "vitest run",
     "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "dependencies": {
@@ -29,13 +30,9 @@
     "@packages/data-context": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
     "@packages/types": "0.0.0-development",
-    "chai": "3.5.0",
-    "chai-as-promised": "7.1.1",
-    "mocha": "3.5.3",
     "mock-fs": "5.4.0",
-    "sinon": "^10.0.0",
-    "sinon-chai": "3.7.0",
-    "typescript": "~5.4.5"
+    "typescript": "~5.4.5",
+    "vitest": "^3.2.4"
   },
   "files": [
     "index.js",

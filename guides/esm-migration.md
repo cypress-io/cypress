@@ -46,9 +46,8 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [ ] packages/example
 - [ ] packages/extension
 - [ ] packages/frontend-shared **PARTIAL** - entry point is JS
-- [ ] packages/https-proxy - higher priority
 - [x] packages/electron ✅ **COMPLETED**
-- [ ] packages/https-proxy **PARTIAL** - entry point is JS
+- [ ] packages/https-proxy - higher priority
 - [x] packages/icons ✅ **COMPLETED**
 - [x] packages/launcher ✅ **COMPLETED**
 - [x] packages/launchpad ✅ **COMPLETED**
@@ -98,9 +97,8 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [ ] packages/extension
 - [ ] packages/https-proxy
 - [x] packages/electron ✅ **COMPLETED**
-- [ ] packages/https-proxy
-- [ ] packages/icons
-- [ ] packages/launcher
+- [x] packages/icons ✅ **COMPLETED**
+- [x] packages/launcher ✅ **COMPLETED**
 - [ ] packages/net-stubbing
 - [x] packages/network ✅ **COMPLETED**
 - [ ] packages/packherd-require
@@ -113,7 +111,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] packages/telemetry ✅ **COMPLETED**
 - [ ] packages/ts - ultimate goal is removal and likely not worth the effort to convert
 - [x] packages/types ✅ **COMPLETED**
-- [ ] packages/v8-snapshot-require
+- [x] packages/v8-snapshot-require ✅ **COMPLETED**
 
 ### Phase 3: Bundle ESM/CJS versions of NPM packages 
 

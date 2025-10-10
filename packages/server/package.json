@@ -118,6 +118,7 @@
     "sanitize-filename": "1.6.3",
     "semver": "^7.7.1",
     "send": "0.19.0",
+    "serialize-error": "^7.0.1",
     "shell-env": "3.0.1",
     "signal-exit": "3.0.7",
     "squirrelly": "7.9.2",
