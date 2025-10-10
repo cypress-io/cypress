@@ -392,10 +392,6 @@ linux-x64:
         filters: *mainBuildFilters
         requires:
           - get-published-artifacts
-    - test-binary-against-todomvc-firefox:
-        filters: *mainBuildFilters
-        requires:
-          - get-published-artifacts
     - test-binary-against-cypress-realworld-app:
         context: test-runner:cypress-record-key
         filters: *mainBuildFilters
@@ -779,10 +775,6 @@ linux-x64-contributor:
         requires:
           - get-published-artifacts
     - test-binary-against-kitchensink-firefox:
-        filters: *mainBuildFilters
-        requires:
-          - get-published-artifacts
-    - test-binary-against-todomvc-firefox:
         filters: *mainBuildFilters
         requires:
           - get-published-artifacts

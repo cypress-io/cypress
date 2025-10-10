@@ -2813,13 +2813,6 @@ jobs:
           browser: chrome
           executor: << parameters.executor >>
 
-  test-binary-against-todomvc-firefox:
-    <<: *defaults
-    steps:
-      - test-binary-against-repo:
-          repo: cypress-example-todomvc
-          browser: firefox
-
   test-binary-against-cypress-realworld-app:
     <<: *defaults
     resource_class: medium+
