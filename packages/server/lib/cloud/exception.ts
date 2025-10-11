@@ -6,7 +6,36 @@ import user from './user'
 import system from '../util/system'
 import { stripPath } from './strip_path'
 
+const { serializeError } = require('serialize-error')
+
 export = {
+  /**
+   * Safely serializes an error object to a string, handling circular references
+   * and other non-serializable values that would cause JSON.stringify to throw.
+   */
+  safeErrorSerialize (error: unknown): string {
+    if (typeof error === 'string') {
+      return error
+    }
+
+    try {
+      // Use serialize-error package to handle complex error objects safely
+      const serialized = serializeError(error)
+
+      const result = JSON.stringify(serialized)
+
+      // JSON.stringify returns undefined for undefined input, but we need to return a string
+      if (typeof result === 'undefined') {
+        return 'undefined'
+      }
+
+      return result
+    } catch (e) {
+      // If even serialize-error fails, use a generic fallback
+      return `[Non-serializable object: ${error?.constructor?.name || 'Object'}]`
+    }
+  },
+
   getErr (err: Error) {
     return {
       name: stripPath(err.name),

@@ -8,7 +8,7 @@
 
 import _ from 'lodash'
 import UrlParse from 'url-parse'
-import * as cors from '@packages/network/lib/cors'
+import { getSuperDomain, getSuperDomainOrigin } from '@packages/network-tools'
 
 const reHttp = /^https?:\/\//
 const reWww = /^www/
@@ -106,11 +106,11 @@ export class $Location {
   }
 
   getSuperDomainOrigin () {
-    return cors.getSuperDomainOrigin(this.remote.href)
+    return getSuperDomainOrigin(this.remote.href)
   }
 
   getSuperDomain () {
-    return cors.getSuperDomain(this.remote.href)
+    return getSuperDomain(this.remote.href)
   }
 
   getToString () {

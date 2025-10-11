@@ -4,7 +4,7 @@ import _ from 'lodash'
 import Bluebird from 'bluebird'
 import type { Protocol } from 'devtools-protocol'
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
-import { cors, uri } from '@packages/network'
+import { parseDomain, isLocalhost as isLocalhostNetworkTools } from '@packages/network-tools'
 import debugModule from 'debug'
 import { URL } from 'url'
 import { performance } from 'perf_hooks'
@@ -61,7 +61,7 @@ function convertSameSiteCdpToExtension (str: Protocol.Network.CookieSameSite): c
 export function isHostOnlyCookie (cookie) {
   if (cookie.domain[0] === '.') return false
 
-  const parsedDomain = cors.parseDomain(cookie.domain)
+  const parsedDomain = parseDomain(cookie.domain)
 
   // make every cookie non-hostOnly
   // unless it's a top-level domain (localhost, ...) or IP address
@@ -380,7 +380,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       urls: [url],
     })
     .then((result: Protocol.Network.GetCookiesResponse) => {
-      const isLocalhost = uri.isLocalhost(new URL(url))
+      const isLocalhost = isLocalhostNetworkTools(new URL(url))
 
       return normalizeGetCookies(result.cookies)
       .filter((cookie) => {

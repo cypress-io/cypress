@@ -14,7 +14,7 @@ import { useStudioStore } from '../store/studio-store'
 import { getAutIframeModel } from '.'
 import { handlePausing } from './events/pausing'
 import { addTelemetryListeners } from './events/telemetry'
-import { telemetry } from '@packages/telemetry/src/browser'
+import { telemetry } from '@packages/telemetry/browser/client'
 import { addCaptureProtocolListeners } from './events/capture-protocol'
 import { getRunnerConfigFromWindow } from './get-runner-config-from-window'
 import { usePromptStore } from '../store/prompt-store'
@@ -883,6 +883,7 @@ export class EventManager {
       numPending: runState.pending,
       autoScrollingEnabled: runState.autoScrollingEnabled,
       isSpecsListOpen: runState.isSpecsListOpen,
+      showFetchRequests: runState.showFetchRequests,
       scrollTop: runState.scrollTop,
       studioActive: hasActiveStudio,
       studioSingleTestActive,

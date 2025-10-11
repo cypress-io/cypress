@@ -1,4 +1,4 @@
-import Bluebird from 'bluebird'
+import { promisify } from 'util'
 import express from 'express'
 import http from 'http'
 import https from 'https'
@@ -58,17 +58,25 @@ export class Servers {
       getCAInformation(),
     ])
 
-    this.httpServer = Bluebird.promisifyAll(
-      allowDestroy(http.createServer(app)),
-    ) as http.Server & AsyncServer
+    const httpServer = allowDestroy(http.createServer(app))
+
+    this.httpServer = Object.assign(httpServer, {
+      closeAsync: promisify(httpServer.close.bind(httpServer)),
+      destroyAsync: promisify(httpServer.destroy.bind(httpServer)),
+      listenAsync: promisify(httpServer.listen.bind(httpServer)),
+    }) as http.Server & AsyncServer
 
     this.wsServer = new SocketIOServer(this.httpServer)
 
     this.caCertificatePath = caCertificatePath
     this.https = { cert: serverCertificateKeys[0], key: serverCertificateKeys[1] }
-    this.httpsServer = Bluebird.promisifyAll(
-      allowDestroy(https.createServer(this.https, <http.RequestListener>app)),
-    ) as https.Server & AsyncServer
+    const httpsServer = allowDestroy(https.createServer(this.https, <http.RequestListener>app))
+
+    this.httpsServer = Object.assign(httpsServer, {
+      closeAsync: promisify(httpsServer.close.bind(httpsServer)),
+      destroyAsync: promisify(httpsServer.destroy.bind(httpsServer)),
+      listenAsync: promisify(httpsServer.listen.bind(httpsServer)),
+    }) as https.Server & AsyncServer
 
     this.wssServer = new SocketIOServer(this.httpsServer)
 
