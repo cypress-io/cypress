@@ -7,7 +7,7 @@
     </picture>
   </a>
 </p>
-<p align="center">
+<p align="center">p
   <a href="https://on.cypress.io">Documentation</a> |
   <a href="https://on.cypress.io/changelog">Changelog</a> |
   <a href="https://on.cypress.io/roadmap">Roadmap</a>
