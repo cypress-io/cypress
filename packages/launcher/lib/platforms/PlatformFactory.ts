@@ -1,6 +1,6 @@
 import os from 'os'
 import type { Platform } from './Platform'
-import { Darwin } from './XDarwin'
+import { Darwin } from './Darwin'
 import { Linux } from './Linux'
 import { Windows } from './Windows'
 
