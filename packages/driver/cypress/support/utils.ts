@@ -123,21 +123,41 @@ export const keyEvents = [
   'textInput',
 ]
 
+export const mouseClickEvents = ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click']
+
+export const mouseHoverEvents = [
+  'pointerout',
+  'pointerleave',
+  'pointerover',
+  'pointerenter',
+  'mouseout',
+  'mouseleave',
+  'mouseover',
+  'mouseenter',
+  'pointermove',
+  'mousemove',
+]
+
+export const focusEvents = ['focus', 'focusin']
+
 export const attachKeyListeners = attachListeners(keyEvents)
+
+export const attachFocusListeners = attachListeners(focusEvents)
+
+export const attachMouseClickListeners = attachListeners(mouseClickEvents)
+
+export const attachMouseHoverListeners = attachListeners(mouseHoverEvents)
+
+// Browser detection utilities
+export const isFirefox = Cypress.isBrowser('firefox')
+
+export const isWebKit = Cypress.isBrowser('webkit')
 
 // trim new lines at the end of innerText
 // due to changing browser versions implementing
 // this differently
 export const trimInnerText = ($el) => {
   return _.trimEnd($el.get(0).innerText, '\n')
-}
-
-export const expectCaret = (start: number) => {
-  return ($el) => {
-    const end = start
-
-    expect(Cypress.dom.getSelectionBounds($el.get(0))).to.deep.eq({ start, end })
-  }
 }
 
 export const makeRequestForCookieBehaviorTests = (
