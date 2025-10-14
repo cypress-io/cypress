@@ -1,8 +1,8 @@
 import openTelemetry from '@opentelemetry/api'
 import { detectResourcesSync, Resource } from '@opentelemetry/resources'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
-import { OnStartSpanProcessor } from './processors/on-start-span-processor'
-import { ConsoleTraceLinkExporter } from './span-exporters/console-trace-link-exporter'
+import { OnStartSpanProcessor } from '../processors/on-start-span-processor'
+import { ConsoleTraceLinkExporter } from '../span-exporters/console-trace-link-exporter'
 
 import type { Span, SpanOptions, Tracer, Context, Attributes } from '@opentelemetry/api'
 import type { BasicTracerProvider, SimpleSpanProcessor, BatchSpanProcessor, SpanExporter } from '@opentelemetry/sdk-trace-base'
@@ -350,29 +350,31 @@ export class Telemetry implements TelemetryApi {
  * all operations.
  */
 export class TelemetryNoop implements TelemetryApi {
-  startSpan () {
+  startSpan (arg: startSpanOptions): Span | undefined {
     return undefined
   }
-  getSpan () {
+  getSpan (name: string): Span | undefined {
     return undefined
   }
-  findActiveSpan () {
+  findActiveSpan (fn: findActiveSpanOptions): Span | undefined {
     return undefined
   }
-  endActiveSpanAndChildren () {
+  endActiveSpanAndChildren (span?: Span | undefined): void {
     return undefined
   }
   getActiveContextObject (): contextObject {
     return {}
   }
-  getResources () {
+  getResources (): Attributes {
     return {}
   }
-  shutdown () {
+  shutdown (): Promise<void> {
     return Promise.resolve()
   }
-  getExporter () {
+  getExporter (): SpanExporter | undefined {
     return undefined
   }
-  setRootContext () {}
+  setRootContext (rootContextObject?: contextObject): void {
+    return undefined
+  }
 }

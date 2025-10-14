@@ -6,7 +6,8 @@ import { PassThrough, Readable } from 'stream'
 import { URL } from 'url'
 import zlib from 'zlib'
 import { InterceptResponse } from '@packages/net-stubbing'
-import { concatStream, cors, httpUtils, DocumentDomainInjection } from '@packages/network'
+import { concatStream, httpUtils } from '@packages/network'
+import { getDomainNameFromUrl, DocumentDomainInjection } from '@packages/network-tools'
 import { toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
 import type { RemoteState } from '@packages/server/lib/remote_states'
 import { telemetry } from '@packages/telemetry'
@@ -838,7 +839,7 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
     const decodedBody = iconv.decode(body, nodeCharset)
     const injectedBody = await rewriter.html(decodedBody, {
       cspNonce: this.res.injectionNonce,
-      domainName: cors.getDomainNameFromUrl(this.req.proxiedUrl),
+      domainName: getDomainNameFromUrl(this.req.proxiedUrl),
       wantsInjection: this.res.wantsInjection,
       wantsSecurityRemoved: this.res.wantsSecurityRemoved,
       isNotJavascript: !resContentTypeIsJavaScript(this.incomingRes),

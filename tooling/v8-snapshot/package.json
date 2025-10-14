@@ -33,7 +33,8 @@
     "cpr": "^3.0.1",
     "mocha": "7.0.1",
     "snap-shot-it": "7.9.10",
-    "stealthy-require": "^1.1.1"
+    "stealthy-require": "^1.1.1",
+    "typescript": "~5.4.5"
   },
   "files": [
     "dist",

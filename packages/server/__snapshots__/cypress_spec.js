@@ -422,14 +422,6 @@ exports['CLOUD_RECOMMENDATION_MESSAGE'] = `
 ----------------------------------------------------------------------------------------------------
 `
 
-exports['RECORD_PARAMS_WITHOUT_RECORDING-no-auto-cancel-after-failures 1'] = `
-You passed the --ci-build-id, --group, --tag, --parallel, or --auto-cancel-after-failures flag without also passing the --record flag.
-
-These flags can only be used when recording to Cypress Cloud.
-
-https://on.cypress.io/record-params-without-recording
-`
-
 exports['RECORD_PARAMS_WITHOUT_RECORDING-auto-cancel-after-failures 1'] = `
 You passed the --ci-build-id, --group, --tag, --parallel, or --auto-cancel-after-failures flag without also passing the --record flag.
 

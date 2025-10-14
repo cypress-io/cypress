@@ -13,6 +13,7 @@ describe('logError', () => {
   afterEach(() => {
     // Restore the original console.error
     consoleErrorSpy.mockRestore()
+    vi.unstubAllEnvs()
   })
 
   describe('START_TAG and END_TAG constants', () => {
@@ -104,6 +105,22 @@ describe('logError', () => {
 
       expect(consoleErrorSpy).toHaveBeenCalledTimes(1)
       expect(consoleErrorSpy).toHaveBeenCalledWith(START_TAG, error, END_TAG)
+    })
+
+    it('does not add tags in CYPRESS_INTERNAL_ENV development mode', () => {
+      vi.stubEnv('CYPRESS_INTERNAL_ENV', 'development')
+      logError('Test error')
+
+      expect(consoleErrorSpy).toHaveBeenCalledTimes(1)
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Test error')
+    })
+
+    it('does not add tags in ELECTRON_ENABLE_LOGGING enabled', () => {
+      vi.stubEnv('ELECTRON_ENABLE_LOGGING', '1')
+      logError('Test error')
+
+      expect(consoleErrorSpy).toHaveBeenCalledTimes(1)
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Test error')
     })
   })
 
