@@ -148,37 +148,16 @@ export const attachMouseClickListeners = attachListeners(mouseClickEvents)
 
 export const attachMouseHoverListeners = attachListeners(mouseHoverEvents)
 
-export const attachContextmenuListeners = attachListeners(['contextmenu'])
-
-export const attachMouseDblclickListeners = attachListeners(['dblclick'])
-
 // Browser detection utilities
 export const isFirefox = Cypress.isBrowser('firefox')
 
 export const isWebKit = Cypress.isBrowser('webkit')
-
-// Utility functions
-export const getMidPoint = (el) => {
-  const box = el.getBoundingClientRect()
-  const midX = Math.ceil(box.left + box.width / 2 + el.ownerDocument.defaultView.scrollX)
-  const midY = Math.ceil(box.top + box.height / 2 + el.ownerDocument.defaultView.scrollY)
-
-  return { x: midX, y: midY }
-}
 
 // trim new lines at the end of innerText
 // due to changing browser versions implementing
 // this differently
 export const trimInnerText = ($el) => {
   return _.trimEnd($el.get(0).innerText, '\n')
-}
-
-export const expectCaret = (start: number) => {
-  return ($el) => {
-    const end = start
-
-    expect(Cypress.dom.getSelectionBounds($el.get(0))).to.deep.eq({ start, end })
-  }
 }
 
 export const makeRequestForCookieBehaviorTests = (

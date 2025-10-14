@@ -11,7 +11,6 @@ import {
   shouldBeCalled,
   shouldBeCalledOnce,
   shouldNotBeCalled,
-  expectCaret,
 } from '../../../support/utils'
 
 const { _, $, Promise } = Cypress
@@ -23,6 +22,14 @@ const fail = function (str) {
 const overlayStyle = { position: 'fixed', top: 0, width: '100%', height: '100%', opacity: 0.5 }
 
 const isChromium116OrLater = Cypress.isBrowser({ family: 'chromium' }) && Cypress.browserMajorVersion() >= 116
+
+const expectCaret = (start: number) => {
+  return ($el) => {
+    const end = start
+
+    expect(Cypress.dom.getSelectionBounds($el.get(0))).to.deep.eq({ start, end })
+  }
+}
 
 describe('src/cy/commands/actions/click', () => {
   beforeEach(() => {

@@ -1,11 +1,13 @@
 import {
   assertLogLength,
+  attachListeners,
   attachMouseClickListeners,
-  attachMouseDblclickListeners,
   clickCommandLog,
 } from '../../../support/utils'
 
 const { _, $, Promise } = Cypress
+
+const attachMouseDblclickListeners = attachListeners(['dblclick'])
 
 describe('src/cy/commands/actions/dblclick', () => {
   beforeEach(() => {

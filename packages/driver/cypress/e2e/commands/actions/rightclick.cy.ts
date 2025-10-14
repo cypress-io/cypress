@@ -1,19 +1,28 @@
 import {
   assertLogLength,
+  attachListeners,
   attachFocusListeners,
   attachMouseClickListeners,
   attachMouseHoverListeners,
-  attachContextmenuListeners,
-  getMidPoint,
+  clickCommandLog,
   isFirefox,
   isWebKit,
-  clickCommandLog,
   shouldBeCalled,
   shouldBeCalledOnce,
   shouldNotBeCalled,
 } from '../../../support/utils'
 
 const { _, $ } = Cypress
+
+const attachContextmenuListeners = attachListeners(['contextmenu'])
+
+const getMidPoint = (el) => {
+  const box = el.getBoundingClientRect()
+  const midX = Math.ceil(box.left + box.width / 2 + el.ownerDocument.defaultView.scrollX)
+  const midY = Math.ceil(box.top + box.height / 2 + el.ownerDocument.defaultView.scrollY)
+
+  return { x: midX, y: midY }
+}
 
 describe('src/cy/commands/actions/rightclick', () => {
   beforeEach(() => {
