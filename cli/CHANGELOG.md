@@ -1,11 +1,16 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.4.1
+## 15.5.0
 
 _Released 10/21/2025 (PENDING)_
+
+**Features:**
+
+- When `cypress run` is used with both `--record` and `--posix-exit-codes` enabled, Cypress will now exit with code `112` when it cannot determine which spec to run next due to network conditions. Addresses [#32485](https://github.com/cypress-io/cypress/issues/32485). Addressed in [#32635](https://github.com/cypress-io/cypress/pull/32635).
 
 **Bugfixes:**
 
 - An error is no longer thrown during command execution when the application under test overwrites the `window.$` property with a non-function. Fixes [#1502](https://github.com/cypress-io/cypress/issues/1502). Fixed in [#32682](https://github.com/cypress-io/cypress/pull/32682).
+- When running `cypress` in Cypress development environments, or when `ELECTRON_ENABLE_LOGGING` is otherwise set to 1, certain messages written to `stderr` will no longer be bracketed with verbose tags. Addresses [#32569](https://github.com/cypress-io/cypress/issues/32569). Addressed in [#32674](https://github.com/cypress-io/cypress/pull/32674).
 - Improve performance of time between specs by not resetting the `file_systems` `StorageType` state when executing the CDP command `Storage.clearDataForOrigin`. Fixed in [#32703](https://github.com/cypress-io/cypress/pull/32703).
 
 **Misc:**

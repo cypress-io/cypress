@@ -468,6 +468,44 @@ describe('lib/cypress', () => {
       })
     })
 
+    it('exits with code 112 for cloud API failures when posix-exit-codes is enabled', function () {
+      // Mock cloud API to fail with a 504 error
+      sinon.stub(api, 'createRun').rejects({
+        statusCode: 504,
+        message: 'Gateway timeout',
+      })
+
+      return cypress.start([
+        `--run-project=${this.todosPath}`,
+        '--record',
+        '--key=test-key',
+        '--posix-exit-codes',
+      ])
+      .then(() => {
+        this.expectExitWith(112)
+      })
+    })
+
+    it('exits with code 1 for parallel cloud API failures when posix-exit-codes is enabled', function () {
+      // Mock cloud API to fail with a 500 error
+      sinon.stub(api, 'createRun').rejects({
+        statusCode: 500,
+        message: 'Cloud service unavailable',
+      })
+
+      return cypress.start([
+        `--run-project=${this.todosPath}`,
+        '--record',
+        '--key=test-key',
+        '--parallel',
+        '--ci-build-id=test-build-id',
+        '--posix-exit-codes',
+      ])
+      .then(() => {
+        this.expectExitWith(1)
+      })
+    })
+
     it('does not add project to the global cache', function () {
       return cache.getProjectRoots()
       .then((projects) => {
