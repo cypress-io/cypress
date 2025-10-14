@@ -13,8 +13,10 @@ export = {
     return cache.setUser(user)
   },
 
-  getBaseLoginUrl (): string {
-    return api.getAuthUrls().get('dashboardAuthUrl')
+  async getBaseLoginUrl (): Promise<string> {
+    const res = await api.getAuthUrls()
+
+    return res!.dashboardAuthUrl
   },
 
   logOut () {

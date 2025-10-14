@@ -58,8 +58,14 @@
   },
   "nx": {
     "implicitDependencies": [
-      "@packages/data-context",
-      "@packages/server"
-    ]
+      "@packages/data-context"
+    ],
+    "targets": {
+      "build": {
+        "dependsOn": [
+          "@packages/server:ensure-cloud-validations"
+        ]
+      }
+    }
   }
 }
