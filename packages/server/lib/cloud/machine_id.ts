@@ -1,12 +1,8 @@
-const nmi = require('node-machine-id')
+import nmi from 'node-machine-id'
 
-function machineId () {
+export function machineId () {
   return nmi.machineId()
   .catch(() => {
     return null
   })
-}
-
-module.exports = {
-  machineId,
 }

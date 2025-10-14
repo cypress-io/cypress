@@ -1,5 +1,5 @@
-const api = require('./api').default
-const { cache } = require('../cache')
+import api from './api'
+import { cache } from '../cache'
 
 import type { CachedUser } from '@packages/types'
 import type Bluebird from 'bluebird'
@@ -9,7 +9,7 @@ export = {
     return cache.getUser()
   },
 
-  set (user: CachedUser): Bluebird<CachedUser> {
+  set (user: CachedUser): Bluebird<void> {
     return cache.setUser(user)
   },
 

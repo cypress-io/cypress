@@ -1,4 +1,4 @@
-import { telemetry } from '@packages/telemetry/src/browser'
+import { telemetry } from '@packages/telemetry/browser/client'
 
 export const addTelemetryListeners = (Cypress: Cypress.Cypress) => {
   Cypress.on('test:before:run', (attributes, test) => {
