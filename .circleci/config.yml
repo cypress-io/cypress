@@ -12,6 +12,11 @@ workflows:
                 requires:
                   - pack-workflows
 
+parameters:
+  publish-binary-branch:
+    type: string
+    default: main
+
 commands:
   persist:
     steps:
@@ -152,4 +157,5 @@ jobs:
                     exit 1
                 fi
           - continuation/continue:
-              configuration_path: .circleci/packed/pipeline.yml
+              configuration_path: .circleci/packed/pipeline.yml 
+              parameters: '{ "target-publish-binary-branch": "<< pipeline.parameters.publish-binary-branch >>" }'

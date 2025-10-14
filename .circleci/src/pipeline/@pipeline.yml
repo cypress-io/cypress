@@ -17,7 +17,7 @@ ubuntu-2004-current: &ubuntu-2004-current ubuntu-2004:2024.11.1
 ubuntu-2004-older: &ubuntu-2004-older ubuntu-2004:2024.05.1
 
 parameters:
-  publish-binary-branch:
+  target-publish-binary-branch:
     type: string
     default: main
 
@@ -2467,7 +2467,7 @@ jobs:
       - check-if-binary-exists
       - setup_should_persist_artifacts
       - trigger-publish-binary-pipeline:
-          target-repo-branch: << pipeline.parameters.publish-binary-branch >>
+          target-repo-branch: << pipeline.parameters.target-publish-binary-branch >>
 
   get-published-artifacts:
     <<: *defaults
