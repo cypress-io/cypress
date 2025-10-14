@@ -79,7 +79,7 @@ export class EarlyExitTerminator {
     this.terminator = pDefer<BaseReporterResults>()
   }
 
-  waitForEarlyExit (project: ProjectBase, exit?: boolean) {
+  waitForEarlyExit (project: ProjectBase) {
     debug('waiting for early exit')
 
     project.on('test:before:run', ({

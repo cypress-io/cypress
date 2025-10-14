@@ -16,7 +16,8 @@ import argsUtils from './util/args'
 import { telemetry } from '@packages/telemetry'
 import { getCtx, hasCtx } from '@packages/data-context'
 import { warning as errorsWarning } from './errors'
-
+import type { CypressError } from '@packages/errors'
+import { toNumber } from 'lodash'
 const debug = Debug('cypress:server:cypress')
 
 type Mode = 'exit' | 'info' | 'interactive' | 'pkg' | 'record' | 'results' | 'run' | 'smokeTest' | 'version' | 'returnPkg' | 'exitWithCode'
@@ -42,6 +43,8 @@ const exit = async (code = 0) => {
     debug('telemetry shutdown errored with: ', err)
   })
 
+  debug('process.exit', code)
+
   return process.exit(code)
 }
 
@@ -66,18 +69,29 @@ const exit0 = () => {
   return exit(0)
 }
 
-const exitErr = (err: any) => {
+function isCypressError (err: unknown): err is CypressError {
+  return (err as CypressError).isCypressErr
+}
+
+async function exitErr (err: unknown, posixExitCodes?: boolean) {
   // log errors to the console
   // and potentially raygun
   // and exit with 1
   debug('exiting with err', err)
 
-  return require('./errors').logException(err)
-  .then(() => {
-    debug('calling exit 1')
+  await require('./errors').logException(err)
 
-    return exit(1)
-  })
+  if (isCypressError(err)) {
+    if (
+      posixExitCodes && (
+      err.type === 'CLOUD_CANNOT_PROCEED_IN_PARALLEL_NETWORK' ||
+      err.type === 'CLOUD_CANNOT_PROCEED_IN_SERIAL_NETWORK'
+    )) {
+      return exit(112)
+    }
+  }
+
+  return exit(1)
 }
 
 export = {
@@ -151,7 +165,7 @@ export = {
       debug('could not parse CLI arguments: %o', argv)
 
       // note - this is promise-returned call
-      return exitErr(argumentsError)
+      return exitErr(argumentsError, Boolean(options?.posixExitCodes))
     }
 
     debug('from argv %o got options %o', argv, options)
@@ -206,55 +220,51 @@ export = {
     })
   },
 
-  startInMode (mode: Mode, options: any) {
+  async startInMode (mode: Mode, options: any) {
     debug('starting in mode %s with options %o', mode, options)
 
-    switch (mode) {
-      case 'version':
-        return require('./modes/pkg')(options)
-        .get('version')
-        .then((version: any) => {
-          return console.log(version) // eslint-disable-line no-console
-        }).then(exit0)
-        .catch(exitErr)
+    if (mode === 'interactive') {
+      return this.runElectron(mode, options)
+    }
 
-      case 'info':
-        return require('./modes/info')(options)
-        .then(exit0)
-        .catch(exitErr)
+    try {
+      switch (mode) {
+        case 'version': {
+          const version = await require('./modes/pkg')(options).get('version')
 
-      case 'smokeTest':
-        return this.runElectron(mode, options)
-        .then((pong: any) => {
+          // eslint-disable-next-line no-console
+          console.log(version)
+          break
+        }
+        case 'info': {
+          await require('./modes/info')(options)
+          break
+        }
+        case 'smokeTest': {
+          const pong = await this.runElectron(mode, options)
+
           if (!this.isCurrentlyRunningElectron()) {
-            return pong
+            return exit(pong)
+          } else if (pong !== options.ping) {
+            return exit(1)
           }
 
-          if (pong === options.ping) {
-            return 0
-          }
+          break
+        }
+        case 'returnPkg': {
+          const pkg = await require('./modes/pkg')(options)
 
-          return 1
-        }).then(exit)
-        .catch(exitErr)
+          // eslint-disable-next-line no-console
+          console.log(JSON.stringify(pkg))
+          break
+        }
+        case 'exitWithCode': {
+          return exit(toNumber(options.exitWithCode))
+          break
+        }
+        case 'run': {
+          const results = await this.runElectron(mode, options)
 
-      case 'returnPkg':
-        return require('./modes/pkg')(options)
-        .then((pkg: any) => {
-          return console.log(JSON.stringify(pkg)) // eslint-disable-line no-console
-        }).then(exit0)
-        .catch(exitErr)
-
-      case 'exitWithCode':
-        return require('./modes/exit')(options)
-        .then(exit)
-        .catch(exitErr)
-
-      case 'run':
-        // run headlessly and exit
-        // with num of totalFailed
-        return this.runElectron(mode, options)
-        .then((results: any) => {
           if (results.runs) {
             const isCanceled = results.runs.filter((run) => run.skippedSpec).length
 
@@ -262,24 +272,27 @@ export = {
               // eslint-disable-next-line no-console
               console.log(require('chalk').magenta('\n  Exiting with non-zero exit code because the run was canceled.'))
 
-              return 1
+              return exit(1)
             }
           }
 
+          debug('results.totalFailed, posix?', results.totalFailed, options.posixExitCodes)
+
           if (options.posixExitCodes) {
-            return results.totalFailed ? 1 : 0
+            return exit(results.totalFailed ? 1 : 0)
           }
 
-          return results.totalFailed
-        })
-        .then(exit)
-        .catch(exitErr)
-
-      case 'interactive':
-        return this.runElectron(mode, options)
-
-      default:
-        throw new Error(`Cannot start. Invalid mode: '${mode}'`)
+          return exit(results.totalFailed ?? 0)
+        }
+        default: {
+            throw new Error(`Cannot start. Invalid mode: '${mode}'`)
+        }
+      }
+    } catch (err) {
+      return exitErr(err, options.posixExitCodes)
     }
+    debug('end of startInMode, exit 0')
+
+    return exit(0)
   },
 }
