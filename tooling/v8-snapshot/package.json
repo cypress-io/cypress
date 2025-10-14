@@ -63,7 +63,10 @@
     "targets": {
       "build": {
         "dependsOn": [
-          "@packages/server:ensure-cloud-validations"
+          "@packages/server:ensure-cloud-validations",
+          "@packages/data-context:build:graphql",
+          "@packages/data-context:build:schema",
+          "@packages/data-context:nexus-build"
         ]
       }
     }
