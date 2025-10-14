@@ -157,5 +157,4 @@ jobs:
                     exit 1
                 fi
           - continuation/continue:
-              configuration_path: .circleci/packed/pipeline.yml 
-              parameters: '{ "target-publish-binary-branch": "<< pipeline.parameters.publish-binary-branch >>" }'
+              configuration_path: .circleci/packed/pipeline.yml
