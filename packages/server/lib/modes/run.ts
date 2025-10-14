@@ -455,7 +455,7 @@ async function listenForProjectEnd (project: ProjectBase, exit: boolean): Promis
           res(results)
         })
       }),
-      earlyExitTerminator.waitForEarlyExit(project, exit),
+      earlyExitTerminator.waitForEarlyExit(project),
     ]).then((results) => {
       if (exit === false) {
         console.log('not exiting due to options.exit being false')
