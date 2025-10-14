@@ -123,7 +123,48 @@ export const keyEvents = [
   'textInput',
 ]
 
+export const mouseClickEvents = ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click']
+
+export const mouseHoverEvents = [
+  'pointerout',
+  'pointerleave',
+  'pointerover',
+  'pointerenter',
+  'mouseout',
+  'mouseleave',
+  'mouseover',
+  'mouseenter',
+  'pointermove',
+  'mousemove',
+]
+
+export const focusEvents = ['focus', 'focusin']
+
 export const attachKeyListeners = attachListeners(keyEvents)
+
+export const attachFocusListeners = attachListeners(focusEvents)
+
+export const attachMouseClickListeners = attachListeners(mouseClickEvents)
+
+export const attachMouseHoverListeners = attachListeners(mouseHoverEvents)
+
+export const attachContextmenuListeners = attachListeners(['contextmenu'])
+
+export const attachMouseDblclickListeners = attachListeners(['dblclick'])
+
+// Browser detection utilities
+export const isFirefox = Cypress.isBrowser('firefox')
+
+export const isWebKit = Cypress.isBrowser('webkit')
+
+// Utility functions
+export const getMidPoint = (el) => {
+  const box = el.getBoundingClientRect()
+  const midX = Math.ceil(box.left + box.width / 2 + el.ownerDocument.defaultView.scrollX)
+  const midY = Math.ceil(box.top + box.height / 2 + el.ownerDocument.defaultView.scrollY)
+
+  return { x: midX, y: midY }
+}
 
 // trim new lines at the end of innerText
 // due to changing browser versions implementing

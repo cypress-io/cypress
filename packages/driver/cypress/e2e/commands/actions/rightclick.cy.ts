@@ -1,43 +1,19 @@
 import {
   assertLogLength,
-  attachListeners,
+  attachFocusListeners,
+  attachMouseClickListeners,
+  attachMouseHoverListeners,
+  attachContextmenuListeners,
+  getMidPoint,
+  isFirefox,
+  isWebKit,
+  clickCommandLog,
   shouldBeCalled,
   shouldBeCalledOnce,
   shouldNotBeCalled,
 } from '../../../support/utils'
 
 const { _, $ } = Cypress
-
-const mouseClickEvents = ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click']
-const mouseHoverEvents = [
-  'pointerout',
-  'pointerleave',
-  'pointerover',
-  'pointerenter',
-  'mouseout',
-  'mouseleave',
-  'mouseover',
-  'mouseenter',
-  'pointermove',
-  'mousemove',
-]
-const focusEvents = ['focus', 'focusin']
-
-const attachFocusListeners = attachListeners(focusEvents)
-const attachMouseClickListeners = attachListeners(mouseClickEvents)
-const attachMouseHoverListeners = attachListeners(mouseHoverEvents)
-const attachContextmenuListeners = attachListeners(['contextmenu'])
-
-const getMidPoint = (el) => {
-  const box = el.getBoundingClientRect()
-  const midX = Math.ceil(box.left + box.width / 2 + el.ownerDocument.defaultView.scrollX)
-  const midY = Math.ceil(box.top + box.height / 2 + el.ownerDocument.defaultView.scrollY)
-
-  return { x: midX, y: midY }
-}
-
-const isFirefox = Cypress.isBrowser('firefox')
-const isWebKit = Cypress.isBrowser('webkit')
 
 describe('src/cy/commands/actions/rightclick', () => {
   beforeEach(() => {
@@ -442,6 +418,40 @@ describe('src/cy/commands/actions/rightclick', () => {
           ])
         })
       })
+
+      it('can print table of keys on rightclick', () => {
+        // @ts-expect-error - TODO: console isn't recognized on top for some reason
+        const spyTableName = cy.spy(top.console, 'group')
+        // @ts-expect-error - TODO: console isn't recognized on top for some reason
+        const spyTableData = cy.spy(top.console, 'table')
+
+        cy.get('input:first').rightclick()
+
+        clickCommandLog('click')
+        .then(() => {
+          expect(spyTableName).calledWith('Mouse Events')
+          expect(spyTableData).calledOnce
+          expect(spyTableData.lastCall.args[0]).property('8').includes({ 'Event Type': 'contextmenu' })
+        })
+      })
     })
+  })
+})
+
+describe('shadow dom', () => {
+  beforeEach(() => {
+    cy.visit('/fixtures/shadow-dom.html')
+  })
+
+  it('composes right click events', (done) => {
+    const el = cy.$$('#shadow-element-3')[0].shadowRoot?.querySelector('p')
+
+    cy.$$('#parent-of-shadow-container-0').on('contextmenu', () => {
+      done()
+    })
+
+    cy
+    .get(`.${el?.className}`, { includeShadowDom: true })
+    .rightclick()
   })
 })
