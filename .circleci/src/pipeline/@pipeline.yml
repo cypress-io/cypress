@@ -1497,9 +1497,6 @@ jobs:
       resource_class:
         type: string
         default: large
-      is_contributor_pr:
-        type: boolean
-        default: false
     resource_class: << parameters.resource_class >>
     steps:
       - restore_cached_workspace
@@ -1518,8 +1515,9 @@ jobs:
           command: yarn list --depth=0 || true
       - run:
           name: Check env canaries
-          command: node ./scripts/circle-env.js --check-canaries --is-contributor-pr <<
-            parameters.is_contributor_pr >>
+          command: |
+            IS_CONTRIBUTOR_PR=$([[ "<< pipeline.git.branch >>" =~ ^pull/[0-9]+$ ]] && echo "true" || echo "false")
+            node ./scripts/circle-env.js --check-canaries --is-contributor-pr $IS_CONTRIBUTOR_PR
       - build-and-persist
 
   lint:
