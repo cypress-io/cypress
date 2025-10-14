@@ -106,7 +106,7 @@
           :id="getIdIfDirectory(row)"
           :key="row.index"
           :data-cy="row.data.isLeaf ? 'spec-list-file' : 'spec-list-directory'"
-          :data-cy-row="row.data.data?.baseName"
+          :data-cy-row="row.data.isLeaf ? row.data.data?.baseName : row.data.name"
           :is-leaf="row.data.isLeaf"
           :is-project-connected="projectConnectionStatus === 'CONNECTED'"
           :grid-columns="row.data.isLeaf ? tableGridColumns : 'grid-cols-[1fr]'"
