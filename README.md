@@ -36,7 +36,7 @@
   </a><br />
 </p>
 
-## What is Cypress?
+## 1What is Cypress?
 
 <p align="center">
   <a href="https://player.vimeo.com/video/237527670">
