@@ -34,7 +34,6 @@ const onRequest = (req: IncomingMessage, res: ServerResponse) => {
 
 export const reset = () => resetProxy()
 
-// TODO: refactor once we have tests running
 export const start = (port: number): Promise<Server> => {
   prx = http.createServer()
 

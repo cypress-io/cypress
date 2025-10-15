@@ -56,9 +56,6 @@ describe('Proxy', () => {
   })
 
   it('can request the googles', async function () {
-    // give some padding to external
-    // network request
-
     await Promise.all([
       request({
         strictSSL: false,
@@ -78,6 +75,8 @@ describe('Proxy', () => {
         url: 'https://google.com',
       }),
     ])
+    // give some padding to external
+    // network request
   }, 10000)
 
   it('can call the httpsDirectly without a proxy', async () => {
