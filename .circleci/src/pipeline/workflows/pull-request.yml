@@ -32,6 +32,7 @@ jobs:
           only: /^pull\/[0-9]+/
   - gateway: # gateway job: wait for either internal or external build to complete
       name: build # github this job to be named named "build"
+      gateway-name: "Build"
       requires:
         - external-pr-build
         - internal-pr-build

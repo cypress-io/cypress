@@ -3,7 +3,7 @@
 docker:
   - image: cimg/base:stable
 resource_class: small
-parameters: 
+parameters:
   gateway-name:
     type: string
     default: "Gateway Job"
