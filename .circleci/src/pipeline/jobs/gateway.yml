@@ -1,0 +1,14 @@
+# This is a "dummy job" that's used as a gateway to wait
+# for multiple jobs to complete
+docker:
+  - image: cimg/base:stable
+resource_class: small
+parameters: 
+  gateway-name:
+    type: string
+    default: "Gateway Job"
+steps:
+  - run:
+      name: "<< parameters.gateway-name >> complete"
+      command: |
+        echo "<< parameters.gateway-name>> complete"
