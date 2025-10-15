@@ -8,6 +8,7 @@ export default defineConfig({
       // which are needed for the proxy.spec.ts tests
       NODE_TLS_REJECT_UNAUTHORIZED: '0',
     },
+    fileParallelism: false,
     include: ['test/**/*.spec.ts'],
     globals: true,
     environment: 'node',

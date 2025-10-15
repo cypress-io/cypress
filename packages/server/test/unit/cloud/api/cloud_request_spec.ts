@@ -16,7 +16,6 @@ import dedent from 'dedent'
 import { PassThrough } from 'stream'
 import fetch from 'cross-fetch'
 import nock from 'nock'
-import { CA } from '@packages/https-proxy'
 import fs from 'fs-extra'
 
 chai.use(sinonChai)
