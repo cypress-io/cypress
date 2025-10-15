@@ -1,4 +1,4 @@
-import { client } from '@packages/socket/lib/browser'
+import { client } from '@packages/socket/browser/client'
 
 export const connect = (host, path, extraOpts = {}) => {
   return client(host, {

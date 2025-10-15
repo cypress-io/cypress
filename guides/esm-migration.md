@@ -12,7 +12,11 @@
 
 #### Notes
 
-When migrating some of these projects away from the `ts-node` entry [see `@packages/scaffold-config` example](https://github.com/cypress-io/cypress/blob/v15.2.0/packages/scaffold-config/index.js), it is somewhat difficult to make separate browser/node entries as the v8-snapshot [tsconfig.json](https://github.com/cypress-io/cypress/blob/v15.2.0/tooling/v8-snapshot/tsconfig.json) is using an older style of module resolution where the `exports` key inside a package's `package.json` is not well supported. Because of this, we need to find ways to bundle code that is needed internally in the browser vs in node without them being a part of the same bundle. This is a temporary work around until we are able to get every package being able to build as an ES Module, which as that point we can re assess how the Cypress binary is being built as well as v8-snapshots, and will allow us to reconfigure this packages to export content in a more proper fashion.
+When migrating some of these projects away from the `ts-node` entry [see `@packages/scaffold-config` example](https://github.com/cypress-io/cypress/blob/v15.2.0/packages/scaffold-config/index.js), it is somewhat difficult to make separate browser/node entries as the v8-snapshot [tsconfig.json](https://github.com/cypress-io/cypress/blob/v15.2.0/tooling/v8-snapshot/tsconfig.json) is using an older style of module resolution where the `exports` key inside a package's `package.json` is not well supported. Because of this, we need to find ways to bundle code that is needed internally in the browser vs in node without them being a part of the same bundle. This is a temporary work around until we are able to get every package being able to build as an ES Module, which as that point we can re assess how the Cypress binary is being built as well as v8-snapshots, and will allow us to reconfigure this packages to export content in a more proper fashion. We are currently doing something similar in the following packages:
+
+* `@packages/scaffold-config`
+* `@packages/socket`
+* `@packages/telemetry`
 
 #### Status
 
@@ -63,7 +67,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] packages/runner ✅ **COMPLETED**
 - [x] packages/scaffold-config ✅ **COMPLETED**
 - [ ] packages/server **PARTIAL** - many source/test files in JS. highest priority
-- [ ] packages/socket **PARTIAL** - entry point is JS. Tests are JS
+- [x] packages/socket ✅ **COMPLETED**
 - [x] packages/stderr-filtering ✅ **COMPLETED**
 - [x] packages/telemetry ✅ **COMPLETED**
 - [ ] packages/ts **PARTIAL** - ultimate goal is removal and likely not worth the effort to convert

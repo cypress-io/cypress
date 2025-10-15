@@ -2,7 +2,7 @@
 require('../../spec_helper')
 const _ = require('lodash')
 const http = require('http')
-const socket = require('@packages/socket')
+const { SocketIOServer } = require('@packages/socket')
 const mockRequire = require('mock-require')
 const client = require('../../../app/v2/client')
 
@@ -38,7 +38,7 @@ describe('app/background', () => {
     global.window = {}
 
     this.httpSrv = http.createServer()
-    this.server = socket.server(this.httpSrv, { path: '/__socket' })
+    this.server = new SocketIOServer(this.httpSrv, { path: '/__socket' })
 
     const ws = {
       on: sinon.stub(),

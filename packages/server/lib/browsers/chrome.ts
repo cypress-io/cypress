@@ -21,7 +21,7 @@ import type { Automation } from '../automation'
 import memory from './memory'
 
 import type { BrowserLaunchOpts, BrowserNewTabOpts, ProtocolManagerShape, CyPromptManagerShape, RunModeVideoApi } from '@packages/types'
-import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
+import type { CDPSocketServer } from '@packages/socket'
 import { DEFAULT_CHROME_FLAGS } from '../util/chromium_flags'
 
 const debug = debugModule('cypress:server:browsers:chrome')
