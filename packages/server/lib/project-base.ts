@@ -180,7 +180,7 @@ export class ProjectBase extends EE {
       })
     }
 
-    if (!cfg.isTextTerminal && this.testingType === 'e2e') {
+    if ((!cfg.isTextTerminal || process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE) && this.testingType === 'e2e') {
       const studioLifecycleManager = new StudioLifecycleManager()
 
       studioLifecycleManager.initializeStudioManager({
