@@ -104,7 +104,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] packages/network ✅ **COMPLETED**
 - [x] packages/network-tools ✅ **COMPLETED**
 - [ ] packages/packherd-require
-- [ ] packages/proxy
+- [x] packages/proxy ✅ **COMPLETED**
 - [x] packages/rewriter ✅ **COMPLETED**
 - [x] packages/scaffold-config ✅ **COMPLETED**
 - [ ] packages/server
