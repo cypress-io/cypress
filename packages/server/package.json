@@ -182,7 +182,7 @@
     "chai-subset": "1.6.0",
     "chai-uuid": "1.0.6",
     "chrome-har-capturer": "0.14.2",
-    "devtools-protocol": "0.0.1459876",
+    "devtools-protocol": "0.0.1528500",
     "esbuild": "^0.25.2",
     "eslint": "^9.31.0",
     "eventsource": "2.0.2",
