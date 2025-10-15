@@ -32,7 +32,6 @@
     "@cypress/debugging-proxy": "2.0.1",
     "@cypress/request": "^3.0.9",
     "@cypress/request-promise": "^5.0.0",
-    "@packages/https-proxy": "0.0.0-development",
     "@packages/network-tools": "0.0.0-development",
     "@packages/socket": "0.0.0-development",
     "@types/concat-stream": "1.6.0",
@@ -48,6 +47,5 @@
     "esm"
   ],
   "types": "./cjs/index.d.ts",
-  "module": "esm/index.js",
-  "nx": {}
+  "module": "esm/index.js"
 }

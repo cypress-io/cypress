@@ -20,7 +20,7 @@ const { createRoutes } = require(`../../lib/routes`)
 
 process.env.CYPRESS_INTERNAL_ENV = 'development'
 
-const CA = require('@packages/https-proxy').CA
+const { CA } = require('@packages/https-proxy')
 const { setupFullConfigWithDefaults } = require('@packages/config')
 const { ServerBase } = require('../../lib/server-base')
 const { SocketE2E } = require('../../lib/socket-e2e')
