@@ -432,7 +432,7 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
   }
 
   const _shouldShowClickMessage = () => {
-    return !appState.isRunning && !!model.hasConsoleProps
+    return !appState.isRunning && !!model.hasConsoleProps && !appState.studioActive
   }
 
   const _toggleColumnPin = () => {
