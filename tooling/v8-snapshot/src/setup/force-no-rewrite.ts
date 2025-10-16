@@ -5,7 +5,7 @@
  * will be compared to the file's path and if they match, the given
  * file will be marked as force no rewritten. If we want to match the full path, we
  * should include the full relative path with respect to the project base (e.g.
- * packages/https-proxy/lib/ca.js). For files where we want to match multiple hoisted
+ * packages/https-proxy/cjs/ca.js). For files where we want to match multiple hoisted
  * locations, we should specify the dependency starting with `* /` (e.g.
  * `* /node_modules/signal-exit/index.js`)
  */
@@ -27,7 +27,7 @@ export default [
   // Has issues depending on the architecture due to how it handles errors
   '*/node_modules/@cypress/get-windows-proxy/src/registry.js',
   // results in recursive call to __get_fs2__
-  'packages/https-proxy/lib/ca.js',
+  'packages/https-proxy/cjs/ca.js',
   // TODO: Figure out why these don't properly get flagged as norewrite: https://github.com/cypress-io/cypress/issues/23986
   '*/node_modules/@cspotcode/source-map-support/source-map-support.js',
   'packages/server/lib/modes/run.ts',
