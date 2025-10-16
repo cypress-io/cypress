@@ -29,7 +29,7 @@
     "pinia": "2.0.0-rc.14"
   },
   "devDependencies": {
-    "@antfu/utils": "^0.7.8",
+    "@antfu/utils": "^0.7.10",
     "@babel/code-frame": "7.27.1",
     "@cypress-design/css": "^1.1.0",
     "@faker-js/faker": "9.6.0",
