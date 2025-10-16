@@ -15,7 +15,7 @@
     "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "dependencies": {
-    "ast-types": "0.13.3",
+    "ast-types": "^0.16.1",
     "bluebird": "3.7.2",
     "debug": "^4.3.4",
     "lodash": "^4.17.19",
