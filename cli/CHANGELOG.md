@@ -17,6 +17,10 @@ _Released 10/21/2025 (PENDING)_
 
 Browser detection in Cypress now always prefers 64-bit browser installs to 32-bit browser installs. Addressed in [#32656](https://github.com/cypress-io/cypress/pull/32656).
 
+**Dependency Updates:**
+
+- Upgraded `tsx` from `4.20.5` to `4.20.6`. Addressed in [#32730](https://github.com/cypress-io/cypress/pull/32730).
+
 ## 15.4.0
 
 _Released 10/7/2025_

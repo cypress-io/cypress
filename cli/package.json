@@ -92,7 +92,7 @@
     "resolve-pkg": "2.0.0",
     "shelljs": "0.8.5",
     "strip-ansi": "6.0.1",
-    "tsx": "4.20.5",
+    "tsx": "4.20.6",
     "typescript": "~5.9.2",
     "vitest": "^3.2.4"
   },
