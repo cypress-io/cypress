@@ -23,14 +23,18 @@ export interface CypressInternalBase extends Cypress.Cypress {
   ) => Promise<any>
   on: InternalActions
   once: InternalActions
+  areSourceMapsAvailable?: boolean
 }
 
-interface CrossOriginCypressInternal extends CypressInternalBase {
+export interface CrossOriginCypressInternal extends CypressInternalBase {
   isCrossOriginSpecBridge: true
-  handleCrossOriginSocketEvent: (
-    Cypress: CypressInternal,
-    eventName: string
-  ) => void
+  specBridgeCommunicator: {
+    toPrimaryPromise: <T>(options: {
+      event: string
+      data: any
+      timeout: number
+    }) => Promise<T>
+  }
 }
 
 interface SameOriginCypressInternal extends CypressInternalBase {
@@ -94,11 +98,20 @@ export interface CyPromptOptions {
   getSourceDetailsForFirstLine: (
     stack: string,
     projectRoot?: string
-  ) => CyPromptStackLineDetail | Promise<CyPromptStackLineDetail | undefined> | undefined
+  ) =>
+  | CyPromptStackLineDetail
+  | Promise<CyPromptStackLineDetail | undefined>
+  | undefined
   onMoreInfoNeeded: (options: CyPromptMoreInfoNeededOptions) => void
 }
 
 type MaybePromise<T> = T | Promise<T>
+
+export interface CyPromptCommandOptions {
+  placeholders?: {
+    [key: string]: string
+  }
+}
 
 export interface CyPromptDriverDefaultShape {
   createCyPrompt: (
@@ -106,7 +119,7 @@ export interface CyPromptDriverDefaultShape {
   ) => MaybePromise<
     (args: {
       steps: string[]
-      commandOptions?: object
+      commandOptions?: CyPromptCommandOptions
       promptCmd: any
     }) => Cypress.Chainable<void>
   >

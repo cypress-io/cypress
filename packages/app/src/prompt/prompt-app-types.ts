@@ -4,6 +4,15 @@
 
 import type Emitter from 'component-emitter'
 
+export interface SpecDirtyDataModule {
+  name: string
+}
+
+export interface SpecDirtyDataStore {
+  setDirtyStateForKey: (key: string, isDirty: boolean) => void
+  getDirtyModules: () => SpecDirtyDataModule[]
+}
+
 export interface CypressInternal extends Cypress.Cypress {
   backendRequestHandler: (
     backendRequestNamespace: string,
@@ -11,13 +20,16 @@ export interface CypressInternal extends Cypress.Cypress {
     ...args: any[]
   ) => Promise<any>
   preserveRunState: (testId: string) => Promise<void>
+  areSourceMapsAvailable?: boolean
 }
 
 export interface GetCodeModalContentsProps {
   Cypress: CypressInternal
+  eventManager: CyPromptEventManager
   testId: string
   logId: string
   onClose: () => void
+  specDirtyDataStore?: SpecDirtyDataStore
 }
 
 export type GetCodeModalContentsShape = (
@@ -36,6 +48,7 @@ export interface MoreInfoNeededModalContentsProps {
   testId: string
   logId: string
   onClose: () => void
+  specDirtyDataStore?: SpecDirtyDataStore
 }
 
 export type MoreInfoNeededModalContentsShape = (

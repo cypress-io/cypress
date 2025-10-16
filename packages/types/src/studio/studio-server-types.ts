@@ -17,6 +17,7 @@ export const StudioMetricsTypes = {
   STUDIO_INTERACTION_RECORDED: 'studio:interaction:recorded',
   STUDIO_ASSERTION_RECORDED: 'studio:assertion:recorded',
   STUDIO_EDITOR_SAVED: 'studio:editor:saved',
+  STUDIO_RECOMMENDATION_EXPANDED: 'studio:recommendation:expanded',
 } as const
 
 export type StudioMetricsType =
@@ -34,6 +35,7 @@ export interface StudioEvent {
     version?: string
   }
   cypressVersion?: string
+  generationId?: string
 }
 
 interface RetryOptions {
@@ -86,11 +88,11 @@ export interface StudioProjectOptions {
 export interface StudioServerOptions {
   studioHash?: string
   studioPath: string
+  getProjectOptions?: () => Promise<StudioProjectOptions>
   /**
    * @deprecated use getProjectOptions instead
    */
   projectSlug?: string
-  getProjectOptions: () => Promise<StudioProjectOptions>
   cloudApi: StudioCloudApi
   betterSqlite3Path: string
   sessionId?: string
@@ -113,6 +115,11 @@ export interface StudioAddSocketListenersOptions {
 export interface StudioServerShape {
   initializeRoutes(router: Router): void
   canAccessStudioAI(browser: Cypress.Browser): Promise<boolean>
+  getAIStatus(): {
+    enabled: boolean
+    reason?: 'ai_disabled'
+    organizationUuid?: string
+  }
   addSocketListeners(options: StudioAddSocketListenersOptions | Socket): void
   initializeStudioAI(options: StudioAIInitializeOptions): Promise<void>
   updateSessionId(sessionId: string): void
