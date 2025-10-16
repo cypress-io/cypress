@@ -4,7 +4,7 @@
   "private": true,
   "browser": "lib/browser.ts",
   "scripts": {
-    "build-prod": "tsc || echo 'built, with type errors' && rm lib/browser.js",
+    "build-prod": "tsc || echo 'built, with type errors'",
     "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean": "rimraf --glob 'lib/*.js'",
     "clean-deps": "rimraf node_modules",
