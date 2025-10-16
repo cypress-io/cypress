@@ -34,7 +34,8 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTestFromSuite 
       cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
       cy.get('[data-cy="runnable-popover-new-test"]').click()
     } else {
-      cy.get('@runnable-wrapper').realHover().findByTestId('create-new-test-from-suite').click()
+      cy.get('@runnable-wrapper').realHover()
+      cy.findByTestId('create-new-test-from-suite').click()
     }
 
     cy.findByTestId('studio-panel').should('be.visible')
