@@ -73,6 +73,7 @@ const getVersions = async ({ core }) => {
   } catch (err) {
     console.log('Errored checking for new Chrome versions:', err.stack)
     core.setOutput('has_update', 'false')
+    process.exit(1)
   }
 }
 
