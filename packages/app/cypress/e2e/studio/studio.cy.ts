@@ -317,7 +317,6 @@ describe('studio functionality', () => {
   })
 
   it('new-test', function() {
-    
     cy.get('#increment').click();
   });
 })`.trim())
