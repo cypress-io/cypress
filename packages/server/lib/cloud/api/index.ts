@@ -8,7 +8,7 @@ import * as RequestErrors from '@cypress/request-promise/errors'
 
 import pkg from '@packages/root'
 
-import * as machineId from '../machine_id'
+import { machineId } from '../machine_id'
 import * as errors from '../../errors'
 
 import Bluebird from 'bluebird'
@@ -607,7 +607,7 @@ export default {
   postLogout (authToken) {
     return Bluebird.join(
       this.getAuthUrls(),
-      machineId.machineId(),
+      machineId(),
       (urls, machineId) => {
         return rp.post({
           url: urls.dashboardLogoutUrl,

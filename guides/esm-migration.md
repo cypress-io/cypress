@@ -47,7 +47,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [ ] packages/extension
 - [ ] packages/frontend-shared **PARTIAL** - entry point is JS
 - [x] packages/electron ✅ **COMPLETED**
-- [ ] packages/https-proxy - higher priority
+- [x] packages/https-proxy - ✅ **COMPLETED**
 - [x] packages/icons ✅ **COMPLETED**
 - [x] packages/launcher ✅ **COMPLETED**
 - [x] packages/launchpad ✅ **COMPLETED**
@@ -96,7 +96,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] packages/electron ✅ **COMPLETED**
 - [x] packages/error ✅ **COMPLETED**
 - [ ] packages/extension
-- [ ] packages/https-proxy
+- [x] packages/https-proxy ✅ **COMPLETED**
 - [x] packages/electron ✅ **COMPLETED**
 - [x] packages/icons ✅ **COMPLETED**
 - [x] packages/launcher ✅ **COMPLETED**

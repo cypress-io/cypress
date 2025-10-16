@@ -29,7 +29,7 @@ const human = require('human-interval')
 const morgan = require('morgan')
 const Bluebird = require('bluebird')
 const debug = require('debug')('cypress:system-tests')
-const httpsProxy = require('@packages/https-proxy')
+const { create: createHttpsServer } = require('@packages/https-proxy/test/helpers/https_server')
 
 const { allowDestroy } = require(`@packages/server/lib/util/server_destroy`)
 const settings = require(`@packages/server/lib/util/settings`)
@@ -386,7 +386,7 @@ const startServer = function (obj) {
 
   const app = Express()
 
-  const srv = https ? httpsProxy.httpsServer(app) : new http.Server(app)
+  const srv = https ? createHttpsServer(app) : new http.Server(app)
 
   allowDestroy(srv)
 
