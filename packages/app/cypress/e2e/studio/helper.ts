@@ -34,7 +34,8 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTestFromSuite 
       cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
       cy.get('[data-cy="runnable-popover-new-test"]').click()
     } else {
-      cy.get('@runnable-wrapper').realHover().findByTestId('create-new-test-from-suite').click()
+      cy.get('@runnable-wrapper').realHover()
+      cy.findByTestId('create-new-test-from-suite').click()
     }
 
     cy.findByTestId('studio-panel').should('be.visible')
@@ -52,6 +53,31 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTestFromSuite 
     // verify recording is enabled to ensure the panel is fully ready
     cy.findByTestId('record-button-recording').should('have.text', 'Recording...')
   }
+}
+
+export function inputNewTestName (name: string = 'new-test') {
+  cy.findByTestId('new-test-button').click()
+  cy.findByTestId('test-name-input').type(name)
+  cy.findByTestId('create-test-button').click()
+
+  // verify recording is enabled to ensure the panel is fully ready
+  cy.findByTestId('record-button-recording').should('have.text', 'Recording...')
+
+  cy.get('.studio-single-test-container').should('be.visible')
+}
+
+export function incrementCounter (initialCount: number) {
+  cy.getAutIframe().within(() => {
+    cy.get('p').contains(`Count is ${initialCount}`)
+
+    // (1) First Studio action - get
+    cy.get('#increment')
+
+    // (2) Second Studio action - click
+    .realClick().then(() => {
+      cy.get('p').contains(`Count is ${initialCount + 1}`)
+    })
+  })
 }
 
 export function assertClosingPanelWithoutChanges () {
