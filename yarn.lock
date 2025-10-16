@@ -14949,10 +14949,10 @@ detective@^5.0.2:
     defined "^1.0.0"
     minimist "^1.1.1"
 
-devtools-protocol@0.0.1159816, devtools-protocol@0.0.1459876, devtools-protocol@0.0.927104:
-  version "0.0.1459876"
-  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1459876.tgz#07f69c1921ae89624f65ddd311d2214e8cb35e1e"
-  integrity sha512-9Dng0X6IdYO8CxlNlOYW+Jc8deGZdOQOL4Sy2UbA+XiCy1Xxi7QtP5CWZKEYv4EEfp7hxp7LhF6RQWfUXK1+/w==
+devtools-protocol@0.0.1159816, devtools-protocol@0.0.1528500, devtools-protocol@0.0.927104:
+  version "0.0.1528500"
+  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1528500.tgz#47a2ac5260d3b2f391228bf2fc01b13b575e359d"
+  integrity sha512-zWbI0sZQngmekg5M5t585E03Ih/OaRyH58QR5lVgYZ5bkFyZP9EjcF+41lvl/OAwvo5JYzKOCqf4bwvIyKDOoQ==
 
 didyoumean@^1.2.2:
   version "1.2.2"
