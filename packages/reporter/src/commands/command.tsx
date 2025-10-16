@@ -547,14 +547,14 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
                     e.stopPropagation()
                     events.emit('prompt:get-code', { testId: model.testId, logId: model.id })
                   }}
-                  className="command-prompt-get-code mr-1 whitespace-nowrap text-[12px]"
+                  className="command-prompt-get-code mr-1 whitespace-nowrap"
                 >
                   <IconTechnologyAngleBrackets
                     className='command-prompt-get-code-indicator pr-1'
                     size='16'
                     strokeColor='white'
                   />
-                  <span>Code</span>
+                  <span className='text-[12px]'>Code</span>
                 </Button>
               )}
             </div>
