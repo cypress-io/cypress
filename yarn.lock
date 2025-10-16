@@ -32897,10 +32897,10 @@ vinyl@^3.0.0:
   optionalDependencies:
     fsevents "~2.3.3"
 
-"vite-6@npm:vite@^6.3.6":
-  version "6.3.6"
-  resolved "https://registry.yarnpkg.com/vite/-/vite-6.3.6.tgz#69a976b64930750d40219fbc68c5200874d315c1"
-  integrity sha512-0msEVHJEScQbhkbVTb/4iHZdJ6SXp/AvxL2sjwYQFfBqleHtnCqv1J3sa9zbWz/6kW1m9Tfzn92vW+kZ1WV6QA==
+"vite-6@npm:vite@^6.4.0":
+  version "6.4.0"
+  resolved "https://registry.yarnpkg.com/vite/-/vite-6.4.0.tgz#cc26fce6fc4bb423b3a5e7bbeada7b3cf2d3ac9c"
+  integrity sha512-oLnWs9Hak/LOlKjeSpOwD6JMks8BeICEdYMJBf6P4Lac/pO9tKiv/XhXnAM7nNfSkZahjlCZu9sS50zL8fSnsw==
   dependencies:
     esbuild "^0.25.0"
     fdir "^6.4.4"

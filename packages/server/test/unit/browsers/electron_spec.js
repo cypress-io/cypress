@@ -517,7 +517,7 @@ describe('lib/browsers/electron', () => {
     it('expects the browser to be reset', function () {
       return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
       .then(() => {
-        expect(this.pageCriClient.send).to.be.calledWith('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' })
+        expect(this.pageCriClient.send).to.be.calledWith('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'cookies,indexeddb,local_storage,shader_cache,service_workers,cache_storage,interest_groups,shared_storage' })
         expect(this.pageCriClient.send).to.be.calledWith('Network.clearBrowserCache')
       })
     })

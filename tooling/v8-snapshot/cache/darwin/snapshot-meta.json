@@ -49,7 +49,7 @@
     "./node_modules/signal-exit/index.js",
     "./node_modules/stream-parser/node_modules/debug/src/node.js",
     "./node_modules/ws/lib/websocket.js",
-    "./packages/https-proxy/lib/ca.js",
+    "./packages/https-proxy/cjs/ca.js",
     "./packages/proxy/lib/http/util/prerequests.ts",
     "./packages/server/lib/browsers/index.ts",
     "./packages/server/lib/browsers/memory/index.ts",
@@ -770,8 +770,7 @@
     "./packages/errors/cjs/index.js",
     "./packages/errors/cjs/stackUtils.js",
     "./packages/errors/node_modules/chalk/source/index.js",
-    "./packages/https-proxy/index.js",
-    "./packages/https-proxy/test/helpers/certs.js",
+    "./packages/https-proxy/cjs/server.js",
     "./packages/icons/index.js",
     "./packages/launcher/lib/browsers.ts",
     "./packages/net-stubbing/lib/internal-types.ts",
@@ -3513,7 +3512,6 @@
     "./node_modules/source-map/source-map.js",
     "./node_modules/squirrelly/dist/squirrelly.min.js",
     "./node_modules/sshpk/lib/ssh-buffer.js",
-    "./node_modules/ssl-root-cas/ssl-root-cas.js",
     "./node_modules/statuses/codes.json",
     "./node_modules/statuses/index.js",
     "./node_modules/stealthy-require/lib/index.js",
@@ -3925,10 +3923,9 @@
     "./packages/frontend-shared/cypress/e2e/prod-dependencies.ts",
     "./packages/frontend-shared/cypress/e2e/v8-snapshot-entry.ts",
     "./packages/frontend-shared/node_modules/cross-fetch/dist/node-ponyfill.js",
-    "./packages/https-proxy/lib/proxy.js",
-    "./packages/https-proxy/lib/server.js",
-    "./packages/https-proxy/lib/util/parse.js",
-    "./packages/https-proxy/test/helpers/https_server.js",
+    "./packages/https-proxy/cjs/index.js",
+    "./packages/https-proxy/cjs/proxy.js",
+    "./packages/https-proxy/cjs/util/parse.js",
     "./packages/launcher/index.ts",
     "./packages/launcher/lib/darwin/index.ts",
     "./packages/launcher/lib/darwin/util.ts",
@@ -4358,5 +4355,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "885be5a2d8a0d33f35972325ea7ef0467933f610940486ce6add9be70dfb8dc5"
+  "deferredHash": "97bd6156ae0360b4fbb5f54dc111320dbba6f63bd0bdecb0ff8dbc8ee601d757"
 }
