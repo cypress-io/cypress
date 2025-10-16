@@ -67,4 +67,21 @@ describe('event-manager', () => {
 
     cy.get('@resetState').should('have.been.calledOnce')
   })
+
+  it('should reset the spec dirty data store', () => {
+    loadSpec({
+      filePath: 'hooks/basic.cy.js',
+      passCount: 2,
+    })
+
+    cy.window().then((win) => {
+      const eventManager = win.getEventManager()
+
+      cy.spy(eventManager['specDirtyDataStore'], 'resetDirtyState').as('resetDirtyState')
+    })
+
+    cy.visitApp(`specs`)
+
+    cy.get('@resetDirtyState').should('have.been.calledOnce')
+  })
 })

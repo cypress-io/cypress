@@ -115,11 +115,6 @@ export interface StudioAddSocketListenersOptions {
 export interface StudioServerShape {
   initializeRoutes(router: Router): void
   canAccessStudioAI(browser: Cypress.Browser): Promise<boolean>
-  getAIStatus(): {
-    enabled: boolean
-    reason?: 'ai_disabled'
-    organizationUuid?: string
-  }
   addSocketListeners(options: StudioAddSocketListenersOptions | Socket): void
   initializeStudioAI(options: StudioAIInitializeOptions): Promise<void>
   updateSessionId(sessionId: string): void
