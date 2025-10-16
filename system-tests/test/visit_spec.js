@@ -1,6 +1,6 @@
 const _ = require('lodash')
 const Bluebird = require('bluebird')
-const cert = require('@packages/https-proxy/test/helpers/certs')
+const { options } = require('@packages/https-proxy/test/helpers/certs')
 const https = require('https')
 const useragent = require('express-useragent')
 const { allowDestroy } = require('@packages/network')
@@ -11,7 +11,7 @@ const startTlsV1Server = (port) => {
   return Bluebird.fromCallback((cb) => {
     const opts = _.merge({
       secureProtocol: 'TLSv1_server_method',
-    }, cert)
+    }, options)
 
     const serv = https.createServer(opts, (req, res) => {
       res.setHeader('content-type', 'text/html')
