@@ -7,7 +7,7 @@ const CHROME_STABLE_KEY = 'chrome-stable-version'
 const CHROME_BETA_KEY = 'chrome-beta-version'
 
 // This is the path to the CircleCI file that contains the browser version anchors
-const CIRCLECI_WORKFLOWS_FILEPATH = path.join(__dirname, '../../.circleci/src/workflows/@workflows.yml')
+const CIRCLECI_WORKFLOWS_FILEPATH = path.join(__dirname, '../../.circleci/src/pipeline/@pipeline.yml')
 
 // https://developer.chrome.com/docs/versionhistory/reference/#platform-identifiers
 const getLatestVersionData = ({ channel, currentVersion }) => {
