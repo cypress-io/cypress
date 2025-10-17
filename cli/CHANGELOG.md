@@ -19,6 +19,7 @@ Browser detection in Cypress now always prefers 64-bit browser installs to 32-bi
 
 **Dependency Updates:**
 
+- Upgraded `recast` from `0.20.4` to `0.23.11`. Addressed in [#32742](https://github.com/cypress-io/cypress/pull/32742).
 - Upgraded `tsx` from `4.20.5` to `4.20.6`. Addressed in [#32730](https://github.com/cypress-io/cypress/pull/32730).
 
 ## 15.4.0
