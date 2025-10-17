@@ -62,7 +62,7 @@
     "test-debug": "lerna exec yarn test-debug --ignore=@packages/{driver,root,static,web-config}",
     "test-integration": "lerna exec yarn test-integration --ignore=@packages/{driver,root,static,web-config}",
     "test-mocha": "mocha --reporter spec scripts/spec.js",
-    "test-npm-package-release-script": "npx lerna exec  --concurrency 1 --scope=@cypress/* -- npx --no-install semantic-release --dry-run",
+    "test-npm-package-release-script": "npx lerna exec --concurrency 1 --scope=@cypress/* -- npx --no-install semantic-release --dry-run",
     "test-scripts": "mocha -r packages/ts/register --reporter spec 'scripts/unit/**/*spec.js'",
     "test-scripts-watch": "yarn test-scripts --watch --watch-extensions 'ts,js'",
     "test-system": "yarn workspace @tooling/system-tests test",
