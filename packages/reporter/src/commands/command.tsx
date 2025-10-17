@@ -554,7 +554,7 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
                     size='16'
                     strokeColor='white'
                   />
-                  <span className='text-[12px]'>Code</span>
+                  <span>Code</span>
                 </Button>
               )}
             </div>
