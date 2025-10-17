@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.5.0
 
-_Released 10/21/2025 (PENDING)_
+_Released 10/17/2025_
 
 **Features:**
 
@@ -16,7 +16,7 @@ _Released 10/21/2025 (PENDING)_
 **Misc:**
 
 - Browser detection in Cypress now always prefers 64-bit browser installs to 32-bit browser installs. Addressed in [#32656](https://github.com/cypress-io/cypress/pull/32656).
-- Update code button styles and rename Get Code for Code on cy.prompt. Addressed in [#32745](https://github.com/cypress-io/cypress/pull/32745)
+- Update code button styles and rename Get Code for Code on cy.prompt. Addressed in [#32745](https://github.com/cypress-io/cypress/pull/32745).
 
 **Dependency Updates:**
 
