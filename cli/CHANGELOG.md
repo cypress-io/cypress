@@ -20,6 +20,7 @@ Browser detection in Cypress now always prefers 64-bit browser installs to 32-bi
 **Dependency Updates:**
 
 - Upgraded `tsx` from `4.20.5` to `4.20.6`. Addressed in [#32730](https://github.com/cypress-io/cypress/pull/32730).
+- Upgraded `better-sqlite3` from `11.10.0` to `12.4.1`. Addressed in [#32755](https://github.com/cypress-io/cypress/pull/32755).
 
 ## 15.4.0
 
