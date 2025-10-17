@@ -34,12 +34,22 @@ export interface RequestProjectAccessMutation {
   }) => Promise<RequestProjectAccessMutationResult>
 }
 
-export interface SpecDirtyDataModule {
-  name: string
-}
+const SPEC_DIRTY_DATA_MODULES = Object.freeze({
+  STUDIO: {
+    name: 'Studio',
+  },
+})
+
+export type SpecDirtyDataModule = (typeof SPEC_DIRTY_DATA_MODULES)[keyof typeof SPEC_DIRTY_DATA_MODULES]
+
+export type SpecDirtyDataModuleKey = keyof typeof SPEC_DIRTY_DATA_MODULES
 
 export interface SpecDirtyDataStore {
-  setDirtyStateForKey: (key: string, isDirty: boolean) => void
+  setDirtyStateForKey: (key: SpecDirtyDataModuleKey, isDirty: boolean) => void
+  getDirtyStateForKey: (key: SpecDirtyDataModuleKey) => boolean
+  getDirtyModules: () => SpecDirtyDataModule[]
+  isDirty: () => boolean
+  resetDirtyState: () => void
 }
 
 export interface StudioPanelProps {
