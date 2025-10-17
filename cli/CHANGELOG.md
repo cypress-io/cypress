@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.5.1
+
+_Released 10/20/2025 (PENDING)_
+
+**Bugfixes:**
+
+- Fixes an issue where grouped command text jumps up and down when expanding and collapsing in the command log. Addressed in [#32757](https://github.com/cypress-io/cypress/pull/32757).
+
 ## 15.5.0
 
 _Released 10/17/2025_
@@ -12,7 +20,6 @@ _Released 10/17/2025_
 - An error is no longer thrown during command execution when the application under test overwrites the `window.$` property with a non-function. Fixes [#1502](https://github.com/cypress-io/cypress/issues/1502). Fixed in [#32682](https://github.com/cypress-io/cypress/pull/32682).
 - When running `cypress` in Cypress development environments, or when `ELECTRON_ENABLE_LOGGING` is otherwise set to 1, certain messages written to `stderr` will no longer be bracketed with verbose tags. Addresses [#32569](https://github.com/cypress-io/cypress/issues/32569). Addressed in [#32674](https://github.com/cypress-io/cypress/pull/32674).
 - Improve performance of time between specs by not resetting the `file_systems` `StorageType` state when executing the CDP command `Storage.clearDataForOrigin`. Fixed in [#32703](https://github.com/cypress-io/cypress/pull/32703).
-- Fixes an issue where grouped command text jumps up and down when expanding and collapsing in the command log. Addressed in [#32757](https://github.com/cypress-io/cypress/pull/32757).
 
 **Misc:**
 
