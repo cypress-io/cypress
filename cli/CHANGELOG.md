@@ -15,7 +15,9 @@ _Released 10/21/2025 (PENDING)_
 
 **Misc:**
 
-Browser detection in Cypress now always prefers 64-bit browser installs to 32-bit browser installs. Addressed in [#32656](https://github.com/cypress-io/cypress/pull/32656).
+- Browser detection in Cypress now always prefers 64-bit browser installs to 32-bit browser installs. Addressed in [#32656](https://github.com/cypress-io/cypress/pull/32656).
+- Disable pinning commands within Studio mode. Addresses [#1206](https://github.com/cypress-io/cypress-services/issues/12026). Addressed in [#32753](https://github.com/cypress-io/cypress/pull/32753).
+- Update the message about snapshots not being available within Studio mode. Addresses [#11364](https://github.com/cypress-io/cypress-services/issues/11364). Addressed in [#32753](https://github.com/cypress-io/cypress/pull/32753).
 
 **Dependency Updates:**
 
