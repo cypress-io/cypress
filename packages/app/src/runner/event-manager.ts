@@ -279,10 +279,8 @@ export class EventManager {
     this.reporterBus.on('studio:init:test', studioInitTest)
     this.localBus.on('studio:init:test', studioInitTest)
 
-    const studioInitSuite = ({ suiteId, showUrlPrompt = true, entrySource }: { suiteId?: string, showUrlPrompt?: boolean, entrySource?: EntrySource }) => {
-      if (suiteId) {
-        this.studioStore.setSuiteId(suiteId)
-      }
+    const studioInitSuite = ({ suiteId, showUrlPrompt = true, entrySource }: { suiteId: string, showUrlPrompt?: boolean, entrySource?: EntrySource }) => {
+      this.studioStore.setSuiteId(suiteId)
 
       if (entrySource) {
         this.studioStore.setEntrySource(entrySource)
