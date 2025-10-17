@@ -3,6 +3,7 @@ import Command from './command'
 import CommandModel from './command-model'
 import type { SessionStatus } from '../sessions/utils'
 import type { TestState } from '@packages/types'
+import appState from '../lib/app-state'
 
 describe('commands', () => {
   describe('test states', () => {
@@ -230,6 +231,141 @@ describe('commands', () => {
 
       cy.get('.command-prompt-get-code').should('not.exist')
       cy.get('.command-prompt-get-code-indicator').should('not.exist')
+    })
+  })
+
+  describe('studio click message', () => {
+    beforeEach(() => {
+      // Reset appState before each test
+      appState.reset()
+      appState.isRunning = false
+    })
+
+    it('should show click message when studio is not active', () => {
+      appState.studioActive = false
+
+      cy.mount(
+        <div>
+          <Command
+            model={
+              new CommandModel({
+                name: 'get',
+                message: '.foo',
+                state: 'passed',
+                hasConsoleProps: true,
+                number: 1,
+                type: 'parent',
+                hookId: '1',
+                testId: '1',
+                id: 1,
+                numElements: 1,
+              })
+            }
+            scrollIntoView={() => {}}
+            aliasesWithDuplicates={[]}
+          />
+        </div>,
+      )
+
+      // Click on the command
+      cy.get('.command-wrapper').click()
+
+      // The tooltip message should appear
+      cy.get('.cy-tooltip').should('contain', 'Printed output to your console')
+    })
+
+    it('should NOT show click message when studio is active', () => {
+      appState.studioActive = true
+
+      cy.mount(
+        <div>
+          <Command
+            model={
+              new CommandModel({
+                name: 'get',
+                message: '.foo',
+                state: 'passed',
+                hasConsoleProps: true,
+                number: 1,
+                type: 'parent',
+                hookId: '1',
+                testId: '1',
+                id: 1,
+                numElements: 1,
+              })
+            }
+            scrollIntoView={() => {}}
+            aliasesWithDuplicates={[]}
+          />
+        </div>,
+      )
+
+      cy.get('.command-wrapper').click()
+
+      cy.get('.cy-tooltip').should('not.exist')
+    })
+
+    it('should NOT show click message when test is running', () => {
+      appState.studioActive = false
+      appState.isRunning = true
+
+      cy.mount(
+        <div>
+          <Command
+            model={
+              new CommandModel({
+                name: 'get',
+                message: '.foo',
+                state: 'passed',
+                hasConsoleProps: true,
+                number: 1,
+                type: 'parent',
+                hookId: '1',
+                testId: '1',
+                id: 1,
+                numElements: 1,
+              })
+            }
+            scrollIntoView={() => {}}
+            aliasesWithDuplicates={[]}
+          />
+        </div>,
+      )
+
+      cy.get('.command-wrapper').click()
+
+      cy.get('.cy-tooltip').should('not.exist')
+    })
+
+    it('should NOT show click message when command has no console props', () => {
+      appState.studioActive = false
+
+      cy.mount(
+        <div>
+          <Command
+            model={
+              new CommandModel({
+                name: 'get',
+                message: '.foo',
+                state: 'passed',
+                hasConsoleProps: false,
+                number: 1,
+                type: 'parent',
+                hookId: '1',
+                testId: '1',
+                id: 1,
+                numElements: 1,
+              })
+            }
+            scrollIntoView={() => {}}
+            aliasesWithDuplicates={[]}
+          />
+        </div>,
+      )
+
+      cy.get('.command-wrapper').click()
+
+      cy.get('.cy-tooltip').should('not.exist')
     })
   })
 })
