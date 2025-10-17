@@ -133,10 +133,10 @@ export class ProtocolManager implements ProtocolManagerShape {
           try {
             await listener(message)
           } catch (error) {
+            debug('error in cdpClient.on %O', { error, event, message })
             if (CAPTURE_ERRORS) {
               this._errors.push({ captureMethod: 'cdpClient.on', fatal: false, error, args: [event, message] })
             } else {
-              debug('error in cdpClient.on %O', { error, event, message })
               throw error
             }
           }
