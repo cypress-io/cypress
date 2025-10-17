@@ -145,7 +145,7 @@ describe('commands', () => {
         </div>,
       )
 
-      cy.get('.command-prompt-get-code').should('be.visible').should('have.text', 'Get code')
+      cy.get('.command-prompt-get-code').should('be.visible').should('have.text', 'Code')
       cy.get('.command-prompt-get-code-indicator').should('be.visible')
 
       cy.percySnapshot()
@@ -173,7 +173,7 @@ describe('commands', () => {
         </div>,
       )
 
-      cy.get('.command-prompt-get-code').should('be.visible').should('have.text', 'Get code')
+      cy.get('.command-prompt-get-code').should('be.visible').should('have.text', 'Code')
       cy.get('.command-prompt-get-code-indicator').should('be.visible')
 
       cy.percySnapshot()

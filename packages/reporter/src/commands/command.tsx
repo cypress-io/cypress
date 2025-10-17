@@ -495,7 +495,7 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
     return null
   }
 
-  let commandContent = (<div className='command-wrapper-container'>
+  const commandContent = (<div className='command-wrapper-container'>
     <div
       className={cs('command-wrapper-text', {
         'command-wrapper-text-group': model.hasChildren && groupId,
@@ -532,7 +532,7 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
           size='16'
           strokeColor='white'
         />
-        <span>Get code</span>
+        <span>Code</span>
       </Button>
     )}
   </div>)
@@ -560,8 +560,8 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
             wrapperClassName={cs('command-pin-target', { 'command-group': !!groupId, 'command-group-no-children': !model.hasChildren && model.group })}
           >
             {commandContent}
-          </FlashOnClick>}
-
+          </FlashOnClick>
+          }
         </div>
         <Progress model={model} />
         {model.hasChildren && model.isOpen && (
