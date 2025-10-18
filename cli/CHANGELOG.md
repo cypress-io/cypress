@@ -7,6 +7,10 @@ _Released 10/20/2025 (PENDING)_
 
 - Fixes an issue where grouped command text jumps up and down when expanding and collapsing in the command log. Addressed in [#32757](https://github.com/cypress-io/cypress/pull/32757).
 
+**Dependency Updates:**
+
+- Upgraded `better-sqlite3` from `11.10.0` to `12.4.1`. Addressed in [#32755](https://github.com/cypress-io/cypress/pull/32755).
+
 ## 15.5.0
 
 _Released 10/17/2025_
@@ -29,7 +33,6 @@ _Released 10/17/2025_
 **Dependency Updates:**
 
 - Upgraded `tsx` from `4.20.5` to `4.20.6`. Addressed in [#32730](https://github.com/cypress-io/cypress/pull/32730).
-- Upgraded `better-sqlite3` from `11.10.0` to `12.4.1`. Addressed in [#32755](https://github.com/cypress-io/cypress/pull/32755).
 
 ## 15.4.0
 
