@@ -487,6 +487,7 @@
     .command-expander {
       color: $gray-500;
       transform: rotate(-90deg);
+      transform-origin: center;
       transition: transform 150ms ease-out;
 
       path {
@@ -514,6 +515,7 @@
     padding: 0;
     align-items: center;
     justify-content: center;
+    height: 28px;
 
     .command-expander {
       margin: 0;
