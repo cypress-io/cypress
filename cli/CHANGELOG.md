@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.5.1
+
+_Released 10/20/2025 (PENDING)_
+
+**Bugfixes:**
+
+- Fixes an issue where grouped command text jumps up and down when expanding and collapsing in the command log. Addressed in [#32757](https://github.com/cypress-io/cypress/pull/32757).
+
 ## 15.5.0
 
 _Released 10/17/2025_
