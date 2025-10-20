@@ -7,6 +7,14 @@ import * as $transform from '../transform'
 const { isElement, isBody, isHTML, isOption, isOptgroup, getParent, getFirstParentWithTagName, isAncestor, isChild, getAllParents, isDescendent, isUndefinedOrHTMLBodyDoc, elOrAncestorIsFixedOrSticky, isFocusable } = $elements
 const { wrap } = $jquery
 
+
+const OVERFLOW_PROPS = ['hidden', 'clip', 'scroll', 'auto']
+
+
+interface VisibilityOptions {
+  checkOpacity: boolean
+}
+
 export function isVisible (el: HTMLElement, methodName = 'isVisible()', options = { checkOpacity: true }): boolean {
   return !isHidden(el, methodName, options)
 }
@@ -104,27 +112,97 @@ export function elHasDisplayNone ($el) {
   return $el.css('display') === 'none'
 }
 
-export function isHiddenByAncestors (el, methodName = 'isHiddenByAncestors()', options = { checkOpacity: true }) {
+export function isHiddenByAncestors (el: HTMLElement, methodName = 'isHiddenByAncestors()', options: VisibilityOptions = { checkOpacity: true }) {
   ensureEl(el, methodName)
   const $el = $jquery.wrap(el)
 
-  // an option is considered hidden by ancestors if its parent select is hidden
+  // get the parent element
+
   if (isOption(el) || isOptgroup(el)) {
     const $select = getFirstSelectParentFromEl($el)
 
     if ($select) {
+      // recursive
       return isHiddenByAncestors($select[0], methodName, options)
     }
   }
 
-  // we do some calculations taking into account the parents
-  // to see if its hidden by a parent
-  if (elIsHiddenByAncestors($el, options.checkOpacity)) {
-    return true // is hidden
+  let $parent = getParent($el)
+
+  while (parent && !isUndefinedOrHTMLBodyDoc($parent)) {
+    if (elHasOpacityZero($parent) && options.checkOpacity) {
+      return true
+    }
+
+    if (elHasOverflowHidden($parent) && !elHasDisplayContents($parent) && elHasNoEffectiveWidthOrHeight($parent)) {
+      // recursive
+      const childrenCheck = !elDescendentsHavePositionFixedOrAbsolute($parent, $el)
+
+      if (childrenCheck) {
+        return true
+      }
+    }
+
+    $parent = getParent($parent)
   }
 
-  if (elOrAncestorIsFixedOrSticky($el)) {
-    return elIsNotElementFromPoint($el)
+  $parent = getParent($el)
+  let stickyOrFixedParent: JQuery<HTMLElement> | undefined = undefined
+
+  while (parent && !isUndefinedOrHTMLBodyDoc($parent)) {
+    const fixedOrSticky = /(fixed|sticky)/.test($parent.css('position'))
+
+    if (fixedOrSticky) {
+      stickyOrFixedParent = $parent
+      break
+    }
+
+    $parent = getParent($parent)
+  }
+
+  if (stickyOrFixedParent) {
+    return elIsNotElementFromPoint(stickyOrFixedParent)
+  }
+
+  $parent = getParent($el)
+
+  while ($parent && !isUndefinedOrHTMLBodyDoc($parent)) {
+    if (elHasDisplayContents($parent)) {
+      return false
+    }
+    if (canClipContent($el, $parent)) {
+      const ancestorProps = $parent.get(0).getBoundingClientRect()
+
+    if (elHasPositionAbsolute($el) && (ancestorProps.width === 0 || ancestorProps.height === 0)) {
+      $parent = getParent($parent)
+      continue
+    }
+
+    const elProps = $el.get(0).getBoundingClientRect()
+
+    // only check if the target el is out of bounds if the overflow is clippable in that direction
+    const checkXOverflow = OVERFLOW_PROPS.includes($ancestor.css('overflow-x'))
+    const checkYOverflow = OVERFLOW_PROPS.includes($ancestor.css('overflow-y'))
+
+    // target el is out of bounds
+    if (
+      // target el is to the right of the ancestor's visible area
+      (checkXOverflow && (elProps.left >= (ancestorProps.width + ancestorProps.left))) ||
+
+      // target el is to the left of the ancestor's visible area
+      (checkXOverflow && ((elProps.left + elProps.width) <= ancestorProps.left)) ||
+
+      // target el is under the ancestor's visible area
+      (checkYOverflow && (elProps.top >= (ancestorProps.height + ancestorProps.top))) ||
+
+      // target el is above the ancestor's visible area
+      (checkYOverflow && ((elProps.top + elProps.height) <= ancestorProps.top))
+    ) {
+      return true
+    }
+
+  if (elIsOutOfBoundsOfAncestorsOverflow($parent)) {
+    return true
   }
 
   // else check if el is outside the bounds
@@ -301,8 +379,6 @@ function elHasPositionStatic ($el: JQuery<HTMLElement>) {
 function elHasPositionAbsolute ($el: JQuery<HTMLElement>) {
   return $el.css('position') === 'absolute'
 }
-
-const OVERFLOW_PROPS = ['hidden', 'clip', 'scroll', 'auto']
 
 function elHasClippableOverflow ($el) {
   return OVERFLOW_PROPS.includes($el.css('overflow')) ||
