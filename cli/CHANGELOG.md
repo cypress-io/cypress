@@ -7,6 +7,10 @@ _Released 10/20/2025 (PENDING)_
 
 - Fixes an issue where grouped command text jumps up and down when expanding and collapsing in the command log. Addressed in [#32757](https://github.com/cypress-io/cypress/pull/32757).
 
+**Misc:**
+
+- Disable pinning commands within Studio mode and update snapshot message. Addresses [#31273](https://github.com/cypress-io/cypress/issues/31273). Addressed in [#32753](https://github.com/cypress-io/cypress/pull/32753).
+
 ## 15.5.0
 
 _Released 10/17/2025_
@@ -25,8 +29,6 @@ _Released 10/17/2025_
 
 - Browser detection in Cypress now always prefers 64-bit browser installs to 32-bit browser installs. Addressed in [#32656](https://github.com/cypress-io/cypress/pull/32656).
 - Update code button styles and rename Get Code for Code on cy.prompt. Addressed in [#32745](https://github.com/cypress-io/cypress/pull/32745).
-- Disable pinning commands within Studio mode. Addresses [#1206](https://github.com/cypress-io/cypress-services/issues/12026). Addressed in [#32753](https://github.com/cypress-io/cypress/pull/32753).
-- Update the message about snapshots not being available within Studio mode. Addresses [#31273](https://github.com/cypress-io/cypress/issues/31273). Addressed in [#32753](https://github.com/cypress-io/cypress/pull/32753).
 
 **Dependency Updates:**
 
