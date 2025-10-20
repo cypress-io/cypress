@@ -40,6 +40,7 @@ import { isNonRetriableCertErrorCode } from '../network/non_retriable_cert_error
 
 const debug = debugModule('cypress:server:cloud:api')
 const debugProtocol = debugModule('cypress:server:protocol')
+const debugVerbose = debugModule('cypress-verbose:server:cloud:api')
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
@@ -164,7 +165,9 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
       cacheResponse(resp, params)
     }
 
-    return debug('response %o', resp)
+    debug(`${params.method} ${params.url}: ${resp ? `${resp.status} ${resp.statusText}` : 'empty response'}`)
+    debugVerbose('response headers: %o', resp ? resp.headers : 'no headers')
+    debugVerbose('body:', resp ? resp.body : 'no body')
   })
 })
 
