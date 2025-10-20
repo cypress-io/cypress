@@ -1,15 +1,15 @@
+import { describe, it, expect } from 'vitest'
 import {
   _doesRouteMatch,
   _getMatchableForRequest,
   getRoutesForRequest,
 } from '../../lib/server/route-matching'
 import { RouteMatcherOptions } from '../../lib/types'
-import { expect } from 'chai'
 import { CypressIncomingRequest } from '@packages/proxy'
 import { BackendRoute } from '../../lib/server/types'
 
 describe('intercept-request', function () {
-  context('._getMatchableForRequest', function () {
+  describe('._getMatchableForRequest', function () {
     it('converts a fully-fledged req into a matchable shape', function () {
       const req = {
         headers: {
@@ -23,7 +23,7 @@ describe('intercept-request', function () {
 
       const matchable = _getMatchableForRequest(req)
 
-      expect(matchable).to.deep.eq({
+      expect(matchable).toEqual({
         auth: {
           username: 'foo',
           password: 'bar',
@@ -43,7 +43,7 @@ describe('intercept-request', function () {
     })
   })
 
-  context('._doesRouteMatch', function () {
+  describe('._doesRouteMatch', function () {
     const tryMatch = (req: Partial<CypressIncomingRequest>, matcher: RouteMatcherOptions, expected = true) => {
       req = {
         method: 'GET',
@@ -51,7 +51,7 @@ describe('intercept-request', function () {
         ...req,
       }
 
-      expect(_doesRouteMatch(matcher, req as CypressIncomingRequest)).to.eq(expected)
+      expect(_doesRouteMatch(matcher, req as CypressIncomingRequest)).toEqual(expected)
     }
 
     it('matches exact URL', function () {
@@ -172,7 +172,7 @@ describe('intercept-request', function () {
     })
   })
 
-  context('.getRoutesForRequest', function () {
+  describe('.getRoutesForRequest', function () {
     it('matches middleware, then handlers', function () {
       const routes: Partial<BackendRoute>[] = [
         {
@@ -216,7 +216,7 @@ describe('intercept-request', function () {
         e.push(route.id)
       }
 
-      expect(e).to.deep.eq(['1', '3', '4', '2'])
+      expect(e).toEqual(['1', '3', '4', '2'])
     })
 
     it('yields identical matches', function () {
@@ -255,7 +255,7 @@ describe('intercept-request', function () {
         matchedRouteIds.push(route.id)
       }
 
-      expect(matchedRouteIds).to.deep.eq(['1', '1'])
+      expect(matchedRouteIds).toEqual(['1', '1'])
     })
   })
 })
