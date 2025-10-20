@@ -1,0 +1,217 @@
+digraph VisibilityAlgorithm {
+  rankdir=TB;
+  node [shape=box, style=filled, fillcolor=lightblue];
+  edge [color=gray];
+  
+  // Entry point
+  isVisible [label="isVisible(el)", fillcolor=lightgreen, style=filled];
+  
+  // Main flow
+  isVisible -> isHidden [label="!isHidden()"];
+  
+  // isHidden branches
+  isHidden -> isStrictlyHidden [label="Check element itself"];
+  isHidden -> isHiddenByAncestors [label="Check ancestors"];
+  
+  // isStrictlyHidden checks
+  isStrictlyHidden -> ensureEl [label="Validate element"];
+  isStrictlyHidden -> bodyHtmlCheck [label="Body/HTML always visible"];
+  isStrictlyHidden -> optionCheck [label="Option/Optgroup handling"];
+  isStrictlyHidden -> sizeCheck [label="Size & dimensions"];
+  isStrictlyHidden -> visibilityCheck [label="Visibility properties"];
+  isStrictlyHidden -> transformCheck [label="Transform scaling"];
+  isStrictlyHidden -> opacityCheck [label="Opacity check"];
+  
+  // Size check details
+  sizeCheck -> elHasNoEffectiveWidthOrHeight [label="Check effective size"];
+  elHasNoEffectiveWidthOrHeight -> elClientWidth [label="Get width"];
+  elHasNoEffectiveWidthOrHeight -> elClientHeight [label="Get height"];
+  elHasNoEffectiveWidthOrHeight -> getClientRects [label="Check rects"];
+  elHasNoEffectiveWidthOrHeight -> transformNone [label="Transform = none"];
+  elHasNoEffectiveWidthOrHeight -> overflowHidden [label="Overflow hidden"];
+  
+  // Visibility check details
+  visibilityCheck -> elHasVisibilityHiddenOrCollapse [label="Check visibility"];
+  elHasVisibilityHiddenOrCollapse -> elHasVisibilityHidden [label="visibility: hidden"];
+  elHasVisibilityHiddenOrCollapse -> elHasVisibilityCollapse [label="visibility: collapse"];
+  
+  // Option handling
+  optionCheck -> elHasDisplayNone [label="Check display: none"];
+  optionCheck -> getFirstSelectParentFromEl [label="Get select parent"];
+  getFirstSelectParentFromEl -> isStrictlyHidden [label="Recursive check", style=dashed];
+  
+  // Ancestor checks
+  isHiddenByAncestors -> optionAncestorCheck [label="Option ancestor handling"];
+  isHiddenByAncestors -> elIsHiddenByAncestors [label="Ancestor chain check"];
+  isHiddenByAncestors -> fixedStickyCheck [label="Fixed/Sticky position"];
+  isHiddenByAncestors -> overflowBoundsCheck [label="Overflow bounds"];
+  
+  // Ancestor chain walking
+  elIsHiddenByAncestors -> parentWalk [label="Walk up parent chain"];
+  parentWalk -> parentOpacity [label="Check parent opacity"];
+  parentWalk -> parentOverflow [label="Check parent overflow"];
+  parentWalk -> parentSize [label="Check parent size"];
+  parentWalk -> positionCheck [label="Check position fixed/absolute"];
+  
+  // Position checks
+  positionCheck -> elDescendentsHavePositionFixedOrAbsolute [label="Check descendants"];
+  elDescendentsHavePositionFixedOrAbsolute -> getAllParents [label="Get all parents"];
+  elDescendentsHavePositionFixedOrAbsolute -> positionRegex [label="Check position regex"];
+  
+  // Fixed/Sticky handling
+  fixedStickyCheck -> elOrAncestorIsFixedOrSticky [label="Check if fixed/sticky"];
+  elOrAncestorIsFixedOrSticky -> elIsNotElementFromPoint [label="Check element coverage"];
+  elIsNotElementFromPoint -> elAtCenterPoint [label="Get element at center"];
+  elAtCenterPoint -> getDocumentFromElement [label="Get document"];
+  elAtCenterPoint -> getElementPositioning [label="Get positioning"];
+  elAtCenterPoint -> getElementAtPointFromViewport [label="Get element at point"];
+  
+  // Overflow bounds checking
+  overflowBoundsCheck -> elIsOutOfBoundsOfAncestorsOverflow [label="Check bounds"];
+  elIsOutOfBoundsOfAncestorsOverflow -> ancestorWalk [label="Walk ancestors"];
+  ancestorWalk -> canClipContent [label="Check if can clip"];
+  canClipContent -> elHasClippableOverflow [label="Check overflow props"];
+  canClipContent -> elHasDisplayContents [label="Check display: contents"];
+  canClipContent -> offsetParentCheck [label="Check offset parent"];
+  
+  // Offset parent checks
+  offsetParentCheck -> elHasPositionRelative [label="Check position: relative"];
+  offsetParentCheck -> elHasPositionAbsolute [label="Check position: absolute"];
+  offsetParentCheck -> isAncestor [label="Check ancestor relationship"];
+  offsetParentCheck -> isChild [label="Check child relationship"];
+  offsetParentCheck -> isDescendent [label="Check descendant relationship"];
+  
+  // Bounds calculation
+  ancestorWalk -> getBoundingClientRect [label="Get ancestor bounds"];
+  ancestorWalk -> getBoundingClientRect2 [label="Get element bounds"];
+  ancestorWalk -> overflowXCheck [label="Check overflow-x"];
+  ancestorWalk -> overflowYCheck [label="Check overflow-y"];
+  ancestorWalk -> boundsComparison [label="Compare bounds"];
+  
+  // Helper functions for property checks
+  elHasDisplayNone -> cssDisplay [label="Check CSS display"];
+  elHasVisibilityHidden -> cssVisibility [label="Check CSS visibility"];
+  elHasVisibilityCollapse -> cssVisibility2 [label="Check CSS visibility"];
+  elHasOpacityZero -> cssOpacity [label="Check CSS opacity"];
+  elHasOverflowHidden -> cssOverflow [label="Check CSS overflow"];
+  
+  // Parent property checks (recursive)
+  parentHasDisplayNone -> parentWalk2 [label="Walk up parents"];
+  parentHasVisibilityHidden -> parentWalk3 [label="Walk up parents"];
+  parentHasVisibilityCollapse -> parentWalk4 [label="Walk up parents"];
+  parentHasOpacityZero -> parentWalk5 [label="Walk up parents"];
+  
+  // Position property checks
+  elHasPositionRelative -> cssPosition [label="Check CSS position"];
+  elHasPositionStatic -> cssPosition2 [label="Check CSS position"];
+  elHasPositionAbsolute -> cssPosition3 [label="Check CSS position"];
+  
+  // Display property checks
+  elHasDisplayContents -> cssDisplay2 [label="Check CSS display"];
+  elHasDisplayInline -> cssDisplay3 [label="Check CSS display"];
+  
+  // Client dimension helpers
+  elClientWidth -> elementBoundingRect [label="Get bounding rect"];
+  elClientHeight -> elementBoundingRect2 [label="Get bounding rect"];
+  elementBoundingRect -> getBoundingClientRect3 [label="Call getBoundingClientRect()"];
+  elementBoundingRect2 -> getBoundingClientRect4 [label="Call getBoundingClientRect()"];
+  
+  // Transform and overflow helpers
+  transformNone -> getComputedStyle [label="Get computed style"];
+  transformNone -> getPropertyValue [label="Get transform value"];
+  overflowHidden -> elHasOverflowHidden [label="Check overflow hidden"];
+  
+  // Constants and regex
+  OVERFLOW_PROPS [label="OVERFLOW_PROPS\n['hidden', 'clip', 'scroll', 'auto']", fillcolor=lightyellow];
+  positionRegex [label="/(fixed|absolute)/", fillcolor=lightyellow];
+  
+  // CSS property checks
+  cssDisplay [label="$el.css('display')", fillcolor=lightcoral];
+  cssVisibility [label="$el.css('visibility')", fillcolor=lightcoral];
+  cssOpacity [label="$el.css('opacity')", fillcolor=lightcoral];
+  cssOverflow [label="$el.css('overflow')", fillcolor=lightcoral];
+  cssPosition [label="$el.css('position')", fillcolor=lightcoral];
+  
+  // DOM API calls
+  getBoundingClientRect [label="getBoundingClientRect()", fillcolor=lightpink];
+  getClientRects [label="getClientRects()", fillcolor=lightpink];
+  getComputedStyle [label="getComputedStyle()", fillcolor=lightpink];
+  
+  // External dependencies
+  transformDetect [label="$transform.detectVisibility()", fillcolor=lightgray];
+  coordinatesAPI [label="$coordinates API", fillcolor=lightgray];
+  documentAPI [label="$document API", fillcolor=lightgray];
+  elementsAPI [label="$elements API", fillcolor=lightgray];
+  
+  // Connect external dependencies
+  transformCheck -> transformDetect;
+  elAtCenterPoint -> coordinatesAPI;
+  elAtCenterPoint -> documentAPI;
+  isStrictlyHidden -> elementsAPI;
+  
+  // Styling for different types of nodes
+  subgraph cluster_checks {
+    label="Element Property Checks";
+    style=filled;
+    fillcolor=lightblue;
+    elHasDisplayNone;
+    elHasVisibilityHidden;
+    elHasVisibilityCollapse;
+    elHasOpacityZero;
+    elHasOverflowHidden;
+  }
+  
+  subgraph cluster_ancestors {
+    label="Ancestor Chain Checks";
+    style=filled;
+    fillcolor=lightgreen;
+    elIsHiddenByAncestors;
+    parentHasDisplayNone;
+    parentHasVisibilityHidden;
+    parentHasVisibilityCollapse;
+    parentHasOpacityZero;
+  }
+  
+  subgraph cluster_position {
+    label="Position & Layout Checks";
+    style=filled;
+    fillcolor=lightyellow;
+    elHasPositionRelative;
+    elHasPositionStatic;
+    elHasPositionAbsolute;
+    elOrAncestorIsFixedOrSticky;
+    elIsNotElementFromPoint;
+  }
+  
+  subgraph cluster_overflow {
+    label="Overflow & Clipping Checks";
+    style=filled;
+    fillcolor=lightcoral;
+    elHasClippableOverflow;
+    canClipContent;
+    elIsOutOfBoundsOfAncestorsOverflow;
+  }
+  
+  subgraph cluster_dimensions {
+    label="Size & Dimension Checks";
+    style=filled;
+    fillcolor=lightpink;
+    elHasNoEffectiveWidthOrHeight;
+    elClientWidth;
+    elClientHeight;
+    elementBoundingRect;
+  }
+  
+  // Performance annotations
+  isVisible [label="isVisible(el)\n[ENTRY POINT]", fillcolor=lightgreen];
+  isHidden [label="isHidden(el)\n[MAIN BRANCH]", fillcolor=lightgreen];
+  isStrictlyHidden [label="isStrictlyHidden(el)\n[ELEMENT CHECKS]", fillcolor=lightblue];
+  isHiddenByAncestors [label="isHiddenByAncestors(el)\n[ANCESTOR CHECKS]", fillcolor=lightgreen];
+  
+  // Add performance notes
+  elIsHiddenByAncestors [label="elIsHiddenByAncestors($el)\n[RECURSIVE - WALKS UP TREE]", fillcolor=orange];
+  elIsOutOfBoundsOfAncestorsOverflow [label="elIsOutOfBoundsOfAncestorsOverflow($el)\n[RECURSIVE - WALKS UP TREE]", fillcolor=orange];
+  elAtCenterPoint [label="elAtCenterPoint($el)\n[EXPENSIVE - DOM QUERY]", fillcolor=red];
+  getBoundingClientRect [label="getBoundingClientRect()\n[EXPENSIVE - LAYOUT CALCULATION]", fillcolor=red];
+  getComputedStyle [label="getComputedStyle()\n[EXPENSIVE - STYLE CALCULATION]", fillcolor=red];
+}
