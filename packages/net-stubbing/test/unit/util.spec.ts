@@ -1,5 +1,5 @@
+import { describe, it, expect } from 'vitest'
 import { getBodyEncoding, parseContentType } from '../../lib/server/util'
-import { expect } from 'chai'
 import { join } from 'path'
 import { readFileSync } from 'fs'
 
@@ -10,7 +10,7 @@ describe('net-stubbing util', () => {
     it('returns application/json', () => {
       const str = JSON.stringify({ foo: 'bar' })
 
-      expect(parseContentType(str)).to.eq('application/json')
+      expect(parseContentType(str)).toEqual('application/json')
     })
 
     it('returns text/html', () => {
@@ -20,23 +20,23 @@ describe('net-stubbing util', () => {
 </html>\
 `
 
-      expect(parseContentType(str)).to.eq('text/html')
+      expect(parseContentType(str)).toEqual('text/html')
     })
 
     it('returns text/plain', () => {
       const str = 'foobar<p>baz'
 
-      expect(parseContentType(str)).to.eq('text/plain')
+      expect(parseContentType(str)).toEqual('text/plain')
     })
 
     it('returns text/plain by default', () => {
-      expect(parseContentType()).to.eq('text/plain')
+      expect(parseContentType()).toEqual('text/plain')
     })
   })
 
-  context('getBodyEncoding', () => {
+  describe('getBodyEncoding', () => {
     it('returns null without data', () => {
-      expect(getBodyEncoding(null)).to.equal(null)
+      expect(getBodyEncoding(null)).toBeNull()
 
       const emptyRequest = {
         body: null,
@@ -46,7 +46,7 @@ describe('net-stubbing util', () => {
         httpVersion: '1.1',
       }
 
-      expect(getBodyEncoding(emptyRequest)).to.equal(null)
+      expect(getBodyEncoding(emptyRequest)).toBeNull()
     })
 
     it('returns utf8', () => {
@@ -70,7 +70,7 @@ describe('net-stubbing util', () => {
           httpVersion: '1.1',
         }
 
-        expect(getBodyEncoding(req), contentType).to.equal('utf8')
+        expect(getBodyEncoding(req), contentType).toEqual('utf8')
       })
     })
 
@@ -83,7 +83,7 @@ describe('net-stubbing util', () => {
         httpVersion: '1.1',
       }
 
-      expect(getBodyEncoding(req), 'text').to.equal('utf8')
+      expect(getBodyEncoding(req), 'text').toEqual('utf8')
     })
 
     it('falls back to inspecting bytes to find image', () => {
@@ -95,7 +95,7 @@ describe('net-stubbing util', () => {
         httpVersion: '1.1',
       }
 
-      expect(getBodyEncoding(req), 'image').to.equal('binary')
+      expect(getBodyEncoding(req), 'image').toEqual('binary')
     })
   })
 })

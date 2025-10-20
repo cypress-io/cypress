@@ -60,8 +60,7 @@ export function inputNewTestName (name: string = 'new-test') {
   cy.findByTestId('test-name-input').type(name)
   cy.findByTestId('create-test-button').click()
 
-  // verify recording is enabled to ensure the panel is fully ready
-  cy.findByTestId('record-button-recording').should('have.text', 'Recording...')
+  cy.findByTestId('record-button-disabled').should('have.text', 'Record')
 
   cy.get('.studio-single-test-container').should('be.visible')
 }

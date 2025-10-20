@@ -1,17 +1,13 @@
-import chai, { expect } from 'chai'
+import { describe, it, expect, vi } from 'vitest'
 import _ from 'lodash'
-import sinon from 'sinon'
-import sinonChai from 'sinon-chai'
 import { InterceptedRequest } from '../../lib/server/intercepted-request'
 import { state as NetStubbingState } from '../../lib/server/state'
 
-chai.use(sinonChai)
-
 describe('InterceptedRequest', () => {
-  context('handleSubscriptions', () => {
+  describe('handleSubscriptions', () => {
     it('handles subscriptions as expected', async () => {
       const socket = {
-        toDriver: sinon.stub(),
+        toDriver: vi.fn(),
       }
       const state = NetStubbingState()
       const interceptedRequest = new InterceptedRequest({
@@ -45,10 +41,10 @@ describe('InterceptedRequest', () => {
 
       const data = { foo: 'bar' }
 
-      socket.toDriver.callsFake((eventName, subEventName, frame) => {
-        expect(eventName).to.eq('net:stubbing:event')
-        expect(subEventName).to.eq('before:request')
-        expect(frame).to.deep.include({
+      socket.toDriver.mockImplementation((eventName, subEventName, frame) => {
+        expect(eventName).toEqual('net:stubbing:event')
+        expect(subEventName).toEqual('before:request')
+        expect(frame).toMatchObject({
           subscription: {
             eventName: 'before:request',
             await: true,
@@ -65,12 +61,12 @@ describe('InterceptedRequest', () => {
         mergeChanges: _.merge,
       })
 
-      expect(socket.toDriver).to.be.calledTwice
+      expect(socket.toDriver).toHaveBeenCalledTimes(2)
     })
 
     it('ignores disabled subscriptions', async () => {
       const socket = {
-        toDriver: sinon.stub(),
+        toDriver: vi.fn(),
       }
       const state = NetStubbingState()
       const interceptedRequest = new InterceptedRequest({
@@ -99,10 +95,10 @@ describe('InterceptedRequest', () => {
 
       const data = { foo: 'bar' }
 
-      socket.toDriver.callsFake((eventName, subEventName, frame) => {
-        expect(eventName).to.eq('net:stubbing:event')
-        expect(subEventName).to.eq('before:request')
-        expect(frame).to.deep.include({
+      socket.toDriver.mockImplementation((eventName, subEventName, frame) => {
+        expect(eventName).toEqual('net:stubbing:event')
+        expect(subEventName).toEqual('before:request')
+        expect(frame).toMatchObject({
           subscription: {
             eventName: 'before:request',
             await: true,
@@ -119,7 +115,7 @@ describe('InterceptedRequest', () => {
         mergeChanges: _.merge,
       })
 
-      expect(socket.toDriver).to.be.calledOnce
+      expect(socket.toDriver).toHaveBeenCalledOnce()
     })
   })
 })
