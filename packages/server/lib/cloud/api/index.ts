@@ -165,9 +165,8 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
       cacheResponse(resp, params)
     }
 
-    debug(`${params.method} ${params.url}: ${resp ? `${resp.status} ${resp.statusText}` : 'empty response'}`)
-    debugVerbose('response headers: %o', resp ? resp.headers : 'no headers')
-    debugVerbose('body:', resp ? resp.body : 'no body')
+    debug(`${params.method} ${params.url} response received`)
+    debugVerbose('response: %o', resp)
   })
 })
 
