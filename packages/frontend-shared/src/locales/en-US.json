@@ -962,7 +962,7 @@
       "snapshotMissingError": "The snapshot is missing. Displaying current state of the DOM.",
       "defaultTitle": "DOM snapshot",
       "pinnedTitle": "Pinned",
-      "studioActiveError": "Command snapshots are not available while in Studio"
+      "studioActiveError": "Cannot show snapshot while creating commands in Studio"
     },
     "selectorPlayground": {
       "matches": "No matches | {n} match | {n} matches",

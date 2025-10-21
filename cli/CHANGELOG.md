@@ -10,7 +10,6 @@ _Released 10/20/2025 (PENDING)_
 **Misc:**
 
 - Add top padding for command log labels. Addressed in [#32774](https://github.com/cypress-io/cypress/pull/32774).
-- Disable pinning commands within Studio mode and update snapshot message. Addresses [#31273](https://github.com/cypress-io/cypress/issues/31273). Addressed in [#32753](https://github.com/cypress-io/cypress/pull/32753).
 
 ## 15.5.0
 

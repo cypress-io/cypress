@@ -3,7 +3,6 @@ import Command from './command'
 import CommandModel from './command-model'
 import type { SessionStatus } from '../sessions/utils'
 import type { TestState } from '@packages/types'
-import appState from '../lib/app-state'
 
 describe('commands', () => {
   describe('test states', () => {
@@ -231,52 +230,6 @@ describe('commands', () => {
 
       cy.get('.command-prompt-get-code').should('not.exist')
       cy.get('.command-prompt-get-code-indicator').should('not.exist')
-    })
-  })
-
-  describe('studio active state', () => {
-    beforeEach(() => {
-      appState.reset()
-
-      cy.mount(
-        <div>
-          <Command
-            model={
-              new CommandModel({
-                name: 'get',
-                message: '.foo',
-                state: 'passed',
-                hasConsoleProps: true,
-                number: 1,
-                type: 'parent',
-                hookId: '1',
-                testId: '1',
-                id: 1,
-                numElements: 1,
-              })
-            }
-            scrollIntoView={() => {}}
-            aliasesWithDuplicates={[]}
-          />
-        </div>,
-      )
-    })
-
-    it('allows pinning command when studio is not active', () => {
-      appState.studioActive = false
-      cy.get('.command-pin-target').should('exist')
-
-      cy.get('.command-pin-target').click()
-
-      cy.contains('Printed output to your console').should('be.visible')
-    })
-
-    it('does not allow pinning when studio is active', () => {
-      appState.studioActive = true
-
-      cy.get('.command-pin-target').should('not.exist')
-
-      cy.get('.command-wrapper-container').should('exist')
     })
   })
 })
