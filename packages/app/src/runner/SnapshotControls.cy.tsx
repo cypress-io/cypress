@@ -110,4 +110,14 @@ describe('SnapshotControls', { viewportHeight: 200, viewportWidth: 500 }, () => 
     .findByText('The snapshot is missing. Displaying current state of the DOM.')
     .should('be.visible')
   })
+
+  it('shows studio active error', () => {
+    mountSnapshotControls()
+    const snapshotStore = useSnapshotStore()
+
+    snapshotStore.setMessage(defaultMessages.runner.snapshot.studioActiveError)
+    cy.get('body')
+    .findByText('Command snapshots are not available while in Studio')
+    .should('be.visible')
+  })
 })
