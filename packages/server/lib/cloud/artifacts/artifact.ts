@@ -63,11 +63,11 @@ export class Artifact<T extends ArtifactUploadStrategy<UploadResponse>, UploadRe
     try {
       const response = await this.uploadStrategy(this.filePath, this.uploadUrl, this.fileSize)
 
-      this.debug('upload succeeded: %O', response)
+      this.debug('upload succeeded: %o', response)
 
       return this.composeSuccessResult(response ?? {}, performance.now() - startTime)
     } catch (e) {
-      this.debug('upload failed: %O', e)
+      this.debug('upload failed: %o', e)
 
       return this.composeFailureResult(e, performance.now() - startTime)
     }

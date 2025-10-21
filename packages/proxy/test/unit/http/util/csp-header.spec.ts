@@ -1,6 +1,5 @@
+import { describe, expect, it } from 'vitest'
 import { generateCspDirectives, parseCspHeaders } from '../../../../lib/http/util/csp-header'
-
-import { expect } from 'chai'
 
 const patchedHeaders = [
   'content-security-policy',
@@ -50,9 +49,9 @@ describe('http/util/csp-header', () => {
           [`${headerName}`]: 'fake-csp-directive fake-csp-value;',
         }, headerName)
 
-        expect(policyArray.length).to.equal(1)
+        expect(policyArray.length).toEqual(1)
         policyArray.forEach((policyMap) => {
-          expect(policyMap.get('fake-csp-directive')).to.have.members(['fake-csp-value'])
+          expect(policyMap.get('fake-csp-directive')).toEqual(['fake-csp-value'])
         }, headerName)
       })
 
@@ -62,9 +61,9 @@ describe('http/util/csp-header', () => {
           [`${headerName}`]: 'fake-csp-directive-0 fake-csp-value-0,fake-csp-directive-1 fake-csp-value-1',
         }, headerName)
 
-        expect(policyArray.length).to.equal(2)
+        expect(policyArray.length).toEqual(2)
         policyArray.forEach((policyMap, idx) => {
-          expect(policyMap.get(`fake-csp-directive-${idx}`)).to.have.members([`fake-csp-value-${idx}`])
+          expect(policyMap.get(`fake-csp-directive-${idx}`)).toEqual([`fake-csp-value-${idx}`])
         }, headerName)
       })
 
@@ -74,10 +73,10 @@ describe('http/util/csp-header', () => {
           [`${headerName}`]: 'fake-csp-directive-0 fake-csp-value-0;fake-csp-directive-1 fake-csp-value-1',
         }, headerName, ['fake-csp-directive-0'])
 
-        expect(policyArray.length).to.equal(1)
+        expect(policyArray.length).toEqual(1)
         policyArray.forEach((policyMap) => {
-          expect(policyMap.has(`fake-csp-directive-0`)).to.equal(false)
-          expect(policyMap.get(`fake-csp-directive-1`)).to.have.members([`fake-csp-value-1`])
+          expect(policyMap.has(`fake-csp-directive-0`)).toBe(false)
+          expect(policyMap.get(`fake-csp-directive-1`)).toEqual([`fake-csp-value-1`])
         })
       })
 
@@ -87,12 +86,12 @@ describe('http/util/csp-header', () => {
           [`${headerName}`]: 'fake-csp-directive-0 fake-csp-value-0,fake-csp-directive-1 fake-csp-value-1',
         }, headerName, ['fake-csp-directive-0'])
 
-        expect(policyArray.length).to.equal(2)
+        expect(policyArray.length).toEqual(2)
         policyArray.forEach((policyMap, idx) => {
           if (idx === 0) {
-            expect(policyMap.has(`fake-csp-directive-0`)).to.equal(false)
+            expect(policyMap.has(`fake-csp-directive-0`)).toBe(false)
           } else {
-            expect(policyMap.get(`fake-csp-directive-1`)).to.have.members([`fake-csp-value-1`])
+            expect(policyMap.get(`fake-csp-directive-1`)).toEqual([`fake-csp-value-1`])
           }
         })
       })
@@ -106,10 +105,10 @@ describe('http/util/csp-header', () => {
                 [`${headerName}`]: `${directive}${value === undefined ? '' : ` ${value}`}`,
               }, headerName)
 
-              expect(policyArray.length).to.equal(1)
+              expect(policyArray.length).toEqual(1)
               policyArray.forEach((policyMap) => {
-                expect(policyMap.has(directive)).to.equal(true)
-                expect(policyMap.get(directive)).to.have.members(value === undefined ? [] : `${value}`.split(' '))
+                expect(policyMap.has(directive)).toBe(true)
+                expect(policyMap.get(directive)).toEqual(value === undefined ? [] : `${value}`.split(' '))
               }, headerName)
             })
 
@@ -119,9 +118,9 @@ describe('http/util/csp-header', () => {
                 [`${headerName}`]: `${directive}${value === undefined ? '' : ` ${value}`}`,
               }, headerName, [directive])
 
-              expect(policyArray.length).to.equal(1)
+              expect(policyArray.length).toEqual(1)
               policyArray.forEach((policyMap) => {
-                expect(policyMap.has(directive)).to.equal(false)
+                expect(policyMap.has(directive)).toBe(false)
               }, headerName)
             })
           })
@@ -137,7 +136,7 @@ describe('http/util/csp-header', () => {
       policyMap.set('fake-csp-directive', ['\'self\'', 'unsafe-inline', 'fake-csp-value'])
       policyMap.set('default', ['\'self\''])
 
-      expect(generateCspDirectives(policyMap)).equal('fake-csp-directive \'self\' unsafe-inline fake-csp-value; default \'self\'')
+      expect(generateCspDirectives(policyMap)).toEqual('fake-csp-directive \'self\' unsafe-inline fake-csp-value; default \'self\'')
     })
   })
 })

@@ -44,7 +44,7 @@ function toggleStudioPanel () {
   if (studioStore.isOpen) {
     props.eventManager.emit('studio:cancel', undefined)
   } else {
-    props.eventManager.emit('studio:init:suite', { suiteId: 'r1', showUrlPrompt: false })
+    props.eventManager.emit('studio:init:suite', { suiteId: 'r1', entrySource: 'welcome', showUrlPrompt: false })
   }
 }
 </script>
