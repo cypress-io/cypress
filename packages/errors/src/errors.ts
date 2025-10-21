@@ -1309,7 +1309,7 @@ export const AllCypressErrors = {
   },
   PLUGINS_RUN_EVENT_ERROR: (arg1: string, arg2: Error) => {
     return errTemplate`\
-        An error was thrown in your plugins file while executing the handler for the ${fmt.highlight(arg1)} event.
+        An error was thrown in your configuration file while executing the handler for the ${fmt.highlight(arg1)} event.
 
         The error we received was:
 

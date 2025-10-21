@@ -144,12 +144,19 @@ async function executeBeforeBrowserLaunch (browser, launchOptions: typeof defaul
       isHeadless: browser.isHeadless,
     })
 
-    const pluginConfigResult = await plugins.execute('before:browser:launch', browser, launchOptions)
+    try {
+      const pluginConfigResult = await plugins.execute('before:browser:launch', browser, launchOptions)
 
-    span?.end()
+      span?.end()
 
-    if (pluginConfigResult) {
-      extendLaunchOptionsFromPlugins(launchOptions, pluginConfigResult, options)
+      if (pluginConfigResult) {
+        extendLaunchOptionsFromPlugins(launchOptions, pluginConfigResult, options)
+      }
+    } catch (err) {
+      span?.end()
+
+      // Re-throw the error with proper context using the existing PLUGINS_RUN_EVENT_ERROR
+      errors.throwErr('PLUGINS_RUN_EVENT_ERROR', 'before:browser:launch', err)
     }
   }
 
@@ -178,35 +185,40 @@ async function executeAfterBrowserLaunch (browser: Browser, options: AfterBrowse
 }
 
 function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, options) {
-  // strip out all the known launch option properties from the resulting object
-  const unexpectedProperties: string[] = _
-  .chain(pluginConfigResult)
-  .omit(KNOWN_LAUNCH_OPTION_PROPERTIES)
-  .keys()
-  .value()
+  try {
+    // strip out all the known launch option properties from the resulting object
+    const unexpectedProperties: string[] = _
+    .chain(pluginConfigResult)
+    .omit(KNOWN_LAUNCH_OPTION_PROPERTIES)
+    .keys()
+    .value()
 
-  if (unexpectedProperties.length) {
-    // error on invalid props
-    errors.throwErr('UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES', unexpectedProperties, KNOWN_LAUNCH_OPTION_PROPERTIES)
-  }
+    if (unexpectedProperties.length) {
+      // error on invalid props
+      errors.throwErr('UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES', unexpectedProperties, KNOWN_LAUNCH_OPTION_PROPERTIES)
+    }
 
-  _.forEach(launchOptions, (val, key) => {
-    const pluginResultValue = pluginConfigResult[key]
+    _.forEach(launchOptions, (val, key) => {
+      const pluginResultValue = pluginConfigResult[key]
 
-    if (pluginResultValue) {
-      if (_.isPlainObject(val)) {
-        launchOptions[key] = _.extend({}, launchOptions[key], pluginResultValue)
+      if (pluginResultValue) {
+        if (_.isPlainObject(val)) {
+          launchOptions[key] = _.extend({}, launchOptions[key], pluginResultValue)
+
+          return
+        }
+
+        launchOptions[key] = pluginResultValue
 
         return
       }
+    })
 
-      launchOptions[key] = pluginResultValue
-
-      return
-    }
-  })
-
-  return launchOptions
+    return launchOptions
+  } catch (err) {
+    // If there's an error during the extension process, wrap it with context
+    errors.throwErr('PLUGINS_RUN_EVENT_ERROR', 'before:browser:launch (extending launch options)', err)
+  }
 }
 
 const wkBrowserVersionRe = /BROWSER_VERSION\s*=\s*(['"])(?<version>[\d.]+)\1/gm

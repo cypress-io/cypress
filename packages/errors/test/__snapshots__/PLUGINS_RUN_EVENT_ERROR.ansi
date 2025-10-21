@@ -1,4 +1,4 @@
-[31mAn error was thrown in your plugins file while executing the handler for the [33mbefore:spec[39m[31m event.[39m
+[31mAn error was thrown in your configuration file while executing the handler for the [33mbefore:spec[39m[31m event.[39m
 [31m[39m
 [31mThe error we received was:[39m
 [35m[39m
