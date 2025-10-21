@@ -156,7 +156,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
     it('grouped commands', () => {
       loadSpec({
         filePath: 'runner/ui-states/commands.cy.js',
-        passCount: 8,
+        passCount: 9,
       })
 
       cy.contains('grouped commands').should('be.visible').click()
