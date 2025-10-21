@@ -31,6 +31,10 @@ export const snapshotReporter = () => {
           // don't display command progress bar in snapshot
           $el.attr('style', 'display: none !important')
         },
+        '.runnable-active .runnable-state-icon': ($el) => {
+          // don't display the spinner icon for an active test
+          $el.attr('style', 'display: none !important')
+        },
       },
     })
   })
