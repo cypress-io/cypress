@@ -961,6 +961,35 @@ describe('commands', { viewportHeight: 1000 }, () => {
         cy.contains('#doesnt-exist').closest('.command-wrapper')
         .should('have.class', 'command-is-pinned')
       })
+
+      it('does not allow pinning when studio is active', () => {
+        cy.get('.reporter.mounted').then(() => {
+          runner.emit('reporter:start', {
+            isSpecsListOpen: false,
+            autoScrollingEnabled: true,
+            scrollTop: 0,
+            studioActive: true,
+            studioSingleTestActive: false,
+            showFetchRequests: true,
+            startTime: new Date().toISOString(),
+          })
+        })
+
+        cy.spy(runner, 'emit')
+        cy.get('.command-name-within').within(() => {
+          cy.contains('within').click()
+        })
+
+        // should not show a tooltip
+        cy.get('.cy-tooltip').should('not.exist')
+
+        // should not print to console
+        cy.wrap(runner.emit).should('not.be.calledWith', 'runner:console:log', 'r3', fakeIdForTest)
+
+        // should not pin the command
+        cy.wrap(runner.emit).should('not.be.calledWith', 'runner:pin:snapshot', 'r3', fakeIdForTest)
+        cy.get('.command-pin').should('not.exist')
+      })
     })
   })
 

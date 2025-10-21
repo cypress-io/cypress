@@ -432,11 +432,11 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
   }
 
   const _shouldShowClickMessage = () => {
-    return !appState.isRunning && !!model.hasConsoleProps
+    return !appState.isRunning && !!model.hasConsoleProps && !appState.studioActive
   }
 
   const _toggleColumnPin = () => {
-    if (appState.isRunning) return
+    if (appState.isRunning || appState.studioActive) return
 
     const { testId, id } = model
 
@@ -495,48 +495,6 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
     return null
   }
 
-  const commandContent = (<div className='command-wrapper-container'>
-    <div
-      className={cs('command-wrapper-text', {
-        'command-wrapper-text-group': model.hasChildren && groupId,
-        'command-wrapper-text-group-parent': model.hasChildren && !groupId,
-      })}
-      onMouseEnter={() => _snapshot(true)}
-      onMouseLeave={() => _snapshot(false)}
-    >
-      {groupPlaceholder}
-
-      {model.hasChildren && groupId && (
-        <div className={cs('command-expander-column-group', { 'nested-group-expander': model.groupLevel })} onClick={(e) => {
-          e.stopPropagation()
-          model.toggleOpen()
-        }}>
-          <ChevronIcon className={cs('command-expander', { 'command-expander-is-open': model.hasChildren && !!model.isOpen })} />
-        </div>
-      )}
-      <CommandDetails model={model} groupId={groupId} aliasesWithDuplicates={aliasesWithDuplicates} />
-      <CommandControls model={model} commandName={commandName} />
-    </div>
-    {model.isCyPrompt && model.state === 'passed' && (
-      <Button
-        variant="indigo-dark-mode"
-        size="20"
-        onClick={(e) => {
-          e.stopPropagation()
-          events.emit('prompt:get-code', { testId: model.testId, logId: model.id })
-        }}
-        className="command-prompt-get-code mr-1 whitespace-nowrap"
-      >
-        <IconTechnologyAngleBrackets
-          className='command-prompt-get-code-indicator pr-1'
-          size='16'
-          strokeColor='white'
-        />
-        <span>Code</span>
-      </Button>
-    )}
-  </div>)
-
   return (
     <>
       <li className={cs('command', `command-name-${commandName}`)}>
@@ -553,15 +511,54 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
           )}
         >
           <NavColumns model={model} isPinned={_isPinned()} toggleColumnPin={_toggleColumnPin} />
-          {appState.studioActive ? commandContent : <FlashOnClick
+          <FlashOnClick
             message='Printed output to your console'
             onClick={_toggleColumnPin}
             shouldShowMessage={_shouldShowClickMessage}
             wrapperClassName={cs('command-pin-target', { 'command-group': !!groupId, 'command-group-no-children': !model.hasChildren && model.group })}
           >
-            {commandContent}
+            <div className='command-wrapper-container'>
+              <div
+                className={cs('command-wrapper-text', {
+                  'command-wrapper-text-group': model.hasChildren && groupId,
+                  'command-wrapper-text-group-parent': model.hasChildren && !groupId,
+                })}
+                onMouseEnter={() => _snapshot(true)}
+                onMouseLeave={() => _snapshot(false)}
+              >
+                {groupPlaceholder}
+
+                {model.hasChildren && groupId && (
+                  <div className={cs('command-expander-column-group', { 'nested-group-expander': model.groupLevel })} onClick={(e) => {
+                    e.stopPropagation()
+                    model.toggleOpen()
+                  }}>
+                    <ChevronIcon className={cs('command-expander', { 'command-expander-is-open': model.hasChildren && !!model.isOpen })} />
+                  </div>
+                )}
+                <CommandDetails model={model} groupId={groupId} aliasesWithDuplicates={aliasesWithDuplicates} />
+                <CommandControls model={model} commandName={commandName} />
+              </div>
+              {model.isCyPrompt && model.state === 'passed' && (
+                <Button
+                  variant="indigo-dark-mode"
+                  size="20"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    events.emit('prompt:get-code', { testId: model.testId, logId: model.id })
+                  }}
+                  className="command-prompt-get-code mr-1 whitespace-nowrap"
+                >
+                  <IconTechnologyAngleBrackets
+                    className='command-prompt-get-code-indicator pr-1'
+                    size='16'
+                    strokeColor='white'
+                  />
+                  <span>Code</span>
+                </Button>
+              )}
+            </div>
           </FlashOnClick>
-          }
         </div>
         <Progress model={model} />
         {model.hasChildren && model.isOpen && (

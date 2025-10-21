@@ -264,19 +264,22 @@ describe('commands', () => {
 
     it('allows pinning command when studio is not active', () => {
       appState.studioActive = false
-      cy.get('.command-pin-target').should('exist')
 
       cy.get('.command-pin-target').click()
 
+      // should print to console
       cy.contains('Printed output to your console').should('be.visible')
+      // should pin the command
+      cy.get('.command-pin').should('be.visible')
     })
 
     it('does not allow pinning when studio is active', () => {
       appState.studioActive = true
 
-      cy.get('.command-pin-target').should('not.exist')
+      cy.get('.command-pin-target').click()
 
-      cy.get('.command-wrapper-container').should('exist')
+      // Verify that the command is not pinned (no pin icon should appear)
+      cy.get('.command-pin').should('not.exist')
     })
   })
 })
