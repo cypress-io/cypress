@@ -7,6 +7,10 @@ _Released 10/20/2025 (PENDING)_
 
 - Fixes an issue where grouped command text jumps up and down when expanding and collapsing in the command log. Addressed in [#32757](https://github.com/cypress-io/cypress/pull/32757).
 
+**Misc:**
+
+- Add top padding for command log labels. Addressed in [#32774](https://github.com/cypress-io/cypress/pull/32774).
+
 ## 15.5.0
 
 _Released 10/17/2025_
