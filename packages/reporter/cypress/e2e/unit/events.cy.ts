@@ -370,7 +370,7 @@ describe('events', () => {
 
     it('emits studio:init:suite with suite id on studio:init:suite', () => {
       events.emit('studio:init:suite', { suiteId: 'suite id' })
-      expect(runner.emit).to.have.been.calledWith('studio:init:suite', { suiteId: 'suite id' })
+      expect(runner.emit).to.have.been.calledWith('studio:init:suite', { suiteId: 'suite id', entrySource: undefined })
     })
 
     it('emits studio:remove:command with command id on studio:remove:command', () => {

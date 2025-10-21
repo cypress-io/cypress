@@ -9,10 +9,9 @@
     "clean": "rimraf --glob 'lib/**/*.js'",
     "clean-deps": "rimraf node_modules",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
-    "run-mocha": "mocha -r @packages/ts/register -r test/pretest.ts --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
-    "test": "CYPRESS_INTERNAL_ENV=test yarn run-mocha \"test/integration/*.spec.ts\" \"test/unit/**/*.spec.ts\"",
-    "test-integration": "CYPRESS_INTERNAL_ENV=test yarn run-mocha \"test/integration/*.spec.ts\"",
-    "test-unit": "CYPRESS_INTERNAL_ENV=test yarn run-mocha \"test/unit/**/*.spec.ts\"",
+    "test": "vitest run",
+    "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0",
+    "test-watch": "vitest watch",
     "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "dependencies": {
@@ -48,7 +47,8 @@
     "devtools-protocol": "0.0.1528500",
     "express": "4.21.0",
     "supertest": "6.0.1",
-    "typescript": "~5.4.5"
+    "typescript": "~5.4.5",
+    "vitest": "^3.2.4"
   },
   "files": [
     "lib"

@@ -11,6 +11,8 @@ import type { ReporterStartInfo, ReporterRunState } from '@packages/types'
 
 const localBus = new EventEmitter()
 
+type StudioEntrySource = 'welcome' | 'new-test-root' | 'new-test-suite' | 'edit'
+
 interface InitEvent {
   appState: AppState
   runnablesStore: RunnablesStore
@@ -222,8 +224,8 @@ const events: Events = {
       runner.emit('studio:init:test', { testId })
     })
 
-    localBus.on('studio:init:suite', ({ suiteId }: { suiteId: string }) => {
-      runner.emit('studio:init:suite', { suiteId })
+    localBus.on('studio:init:suite', ({ suiteId, entrySource }: { suiteId: string, entrySource?: StudioEntrySource }) => {
+      runner.emit('studio:init:suite', { suiteId, entrySource })
     })
 
     localBus.on('studio:remove:command', (commandId) => {

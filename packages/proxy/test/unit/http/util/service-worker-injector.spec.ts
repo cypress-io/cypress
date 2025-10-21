@@ -1,4 +1,4 @@
-import { expect } from 'chai'
+import { describe, expect, it } from 'vitest'
 import { injectIntoServiceWorker } from '../../../../lib/http/util/service-worker-injector'
 
 describe('lib/http/util/service-worker-injector', () => {
@@ -17,7 +17,7 @@ describe('lib/http/util/service-worker-injector', () => {
       foo;
       __cypressIsScriptEvaluated = true;`.replace(/\s/g, ''))
 
-      expect(actual.replace(/\s/g, '')).to.match(expected)
+      expect(actual.replace(/\s/g, '')).toEqual(expect.stringMatching(expected))
     })
   })
 })
