@@ -9,7 +9,7 @@ export const CreateNewTestButton = ({ suiteId, dataCy }: { suiteId: string, data
     e.preventDefault()
     e.stopPropagation()
 
-    events.emit('studio:init:suite', { suiteId })
+    events.emit('studio:init:suite', { suiteId, entrySource: 'new-test-suite' })
   }, [events, suiteId])
 
   return (

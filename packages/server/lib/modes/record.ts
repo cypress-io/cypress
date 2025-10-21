@@ -709,7 +709,7 @@ const createRunAndRecordSpecs = (options: any = {}) => {
             return
           }
 
-          debug('postInstanceResults resp %O', resp)
+          debug('postInstanceResults resp %o', resp)
           const { video, screenshots } = results
           const { videoUploadUrl, captureUploadUrl, screenshotUploadUrls } = resp
 

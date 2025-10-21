@@ -10,7 +10,7 @@ import { logger } from './logger'
 import type { SocketShape } from '@packages/socket/lib/types'
 import { automation, useRunnerUiStore, useSpecStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
-import { useStudioStore } from '../store/studio-store'
+import { EntrySource, useStudioStore } from '../store/studio-store'
 import { getAutIframeModel } from '.'
 import { handlePausing } from './events/pausing'
 import { addTelemetryListeners } from './events/telemetry'
@@ -279,8 +279,13 @@ export class EventManager {
     this.reporterBus.on('studio:init:test', studioInitTest)
     this.localBus.on('studio:init:test', studioInitTest)
 
-    const studioInitSuite = ({ suiteId, showUrlPrompt = true }: { suiteId: string, showUrlPrompt?: boolean }) => {
+    const studioInitSuite = ({ suiteId, showUrlPrompt = true, entrySource }: { suiteId: string, showUrlPrompt?: boolean, entrySource?: EntrySource }) => {
       this.studioStore.setSuiteId(suiteId)
+
+      if (entrySource) {
+        this.studioStore.setEntrySource(entrySource)
+      }
+
       this.studioStore.setShowUrlPrompt(showUrlPrompt)
 
       this.ws.emit('studio:init', { sessionId: this.studioStore.sessionId }, ({ canAccessStudioAI, cloudStudioSessionId, error }) => {
