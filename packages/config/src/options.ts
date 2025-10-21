@@ -254,6 +254,12 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     isExperimental: true,
     requireRestartOnChange: 'server',
   }, {
+    name: 'experimentalFastVisibility',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isExperimental: true,
+    overrideLevel: 'any',
+  }, {
     name: 'fileServerFolder',
     defaultValue: '',
     validation: validate.isString,
