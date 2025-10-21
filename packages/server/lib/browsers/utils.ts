@@ -185,40 +185,35 @@ async function executeAfterBrowserLaunch (browser: Browser, options: AfterBrowse
 }
 
 function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, options) {
-  try {
-    // strip out all the known launch option properties from the resulting object
-    const unexpectedProperties: string[] = _
-    .chain(pluginConfigResult)
-    .omit(KNOWN_LAUNCH_OPTION_PROPERTIES)
-    .keys()
-    .value()
+  // strip out all the known launch option properties from the resulting object
+  const unexpectedProperties: string[] = _
+  .chain(pluginConfigResult)
+  .omit(KNOWN_LAUNCH_OPTION_PROPERTIES)
+  .keys()
+  .value()
 
-    if (unexpectedProperties.length) {
-      // error on invalid props
-      errors.throwErr('UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES', unexpectedProperties, KNOWN_LAUNCH_OPTION_PROPERTIES)
-    }
+  if (unexpectedProperties.length) {
+    // error on invalid props
+    errors.throwErr('UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES', unexpectedProperties, KNOWN_LAUNCH_OPTION_PROPERTIES)
+  }
 
-    _.forEach(launchOptions, (val, key) => {
-      const pluginResultValue = pluginConfigResult[key]
+  _.forEach(launchOptions, (val, key) => {
+    const pluginResultValue = pluginConfigResult[key]
 
-      if (pluginResultValue) {
-        if (_.isPlainObject(val)) {
-          launchOptions[key] = _.extend({}, launchOptions[key], pluginResultValue)
-
-          return
-        }
-
-        launchOptions[key] = pluginResultValue
+    if (pluginResultValue) {
+      if (_.isPlainObject(val)) {
+        launchOptions[key] = _.extend({}, launchOptions[key], pluginResultValue)
 
         return
       }
-    })
 
-    return launchOptions
-  } catch (err) {
-    // If there's an error during the extension process, wrap it with context
-    errors.throwErr('PLUGINS_RUN_EVENT_ERROR', 'before:browser:launch (extending launch options)', err)
-  }
+      launchOptions[key] = pluginResultValue
+
+      return
+    }
+  })
+
+  return launchOptions
 }
 
 const wkBrowserVersionRe = /BROWSER_VERSION\s*=\s*(['"])(?<version>[\d.]+)\1/gm
