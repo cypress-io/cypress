@@ -1,4 +1,4 @@
-import { expect } from 'chai'
+import { describe, beforeEach, expect, it } from 'vitest'
 import { HttpBuffers, HttpBuffer } from '../../../../lib/http/util/buffers'
 
 describe('http/util/buffers', () => {
@@ -8,7 +8,7 @@ describe('http/util/buffers', () => {
     buffers = new HttpBuffers()
   })
 
-  context('#get', () => {
+  describe('#get', () => {
     it('returns buffer by url', () => {
       const obj = { url: 'foo' } as HttpBuffer
 
@@ -16,7 +16,7 @@ describe('http/util/buffers', () => {
 
       const buffer = buffers.get('foo') as HttpBuffer
 
-      expect(buffer.url).to.eq(obj.url)
+      expect(buffer.url).toEqual(obj.url)
     })
 
     it('falls back to setting the port when buffer could not be found', () => {
@@ -26,23 +26,23 @@ describe('http/util/buffers', () => {
 
       const buffer = buffers.get('https://www.google.com:443/') as HttpBuffer
 
-      expect(buffer.url).to.eq(obj.url)
+      expect(buffer.url).toEqual(obj.url)
     })
   })
 
-  context('#take', () => {
+  describe('#take', () => {
     it('removes the found buffer', () => {
       const obj = { url: 'https://www.google.com/' } as HttpBuffer
 
       buffers.set(obj)
 
-      expect(buffers.buffer).to.exist
+      expect(buffers.buffer).toBeDefined()
 
       const buffer = buffers.take('https://www.google.com:443/') as HttpBuffer
 
-      expect(buffer.url).to.eq(obj.url)
+      expect(buffer.url).toEqual(obj.url)
 
-      expect(buffers.buffer).to.be.undefined
+      expect(buffers.buffer).toBeUndefined()
     })
 
     it('does not remove anything when not found', () => {
@@ -50,13 +50,13 @@ describe('http/util/buffers', () => {
 
       buffers.set(obj)
 
-      expect(buffers.buffer).to.exist
+      expect(buffers.buffer).toBeDefined()
 
       const buffer = buffers.take('asdf')
 
-      expect(buffer).to.be.undefined
+      expect(buffer).toBeUndefined()
 
-      expect(buffers.buffer).to.exist
+      expect(buffers.buffer).toBeDefined()
     })
   })
 })

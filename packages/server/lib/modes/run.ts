@@ -445,7 +445,7 @@ async function listenForProjectEnd (project: ProjectBase, exit: boolean): Promis
     Promise.race([
       new Promise((res) => {
         project.once('end', (results) => {
-          debug('project ended with results %O', results)
+          debug('project ended with results %o', results)
           // If the project ends and the spec is skipped, treat the run as cancelled
           // as we do not want to update the dev server unnecessarily for justInTimeCompile.
           if (results?.skippedSpec) {
