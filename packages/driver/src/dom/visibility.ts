@@ -4,24 +4,25 @@ import $document from './document'
 import $elements from './elements'
 import $coordinates from './coordinates'
 import * as $transform from './transform'
-
+//import { isVisible } from './visibility/isVisible'
 const { isElement, isBody, isHTML, isOption, isOptgroup, getParent, getFirstParentWithTagName, isAncestor, isChild, getAllParents, isDescendent, isUndefinedOrHTMLBodyDoc, elOrAncestorIsFixedOrSticky, isDetached, isFocusable, stringify: stringifyElement } = $elements
-
+import { fastIsHidden, fastIsVisible } from './visibility/fastIsVisible'
 const fixedOrAbsoluteRe = /(fixed|absolute)/
 
 const OVERFLOW_PROPS = ['hidden', 'clip', 'scroll', 'auto']
 
-const isVisible = (el) => {
-  return !isHidden(el, 'isVisible()')
-}
-
 const { wrap } = $jquery
+
+const isVisible = (el) => {
+  return isHidden(el, 'isVisible()')
+}
 
 // TODO: we should prob update dom
 // to be passed in $utils as a dependency
 // because of circular references
 // the ignoreOpacity option exists for checking actionability
 // as elements with `opacity: 0` are hidden yet actionable
+
 const isHidden = (el, methodName = 'isHidden()', options = { checkOpacity: true }) => {
   if (isStrictlyHidden(el, methodName, options, isHidden)) {
     return true
@@ -623,6 +624,8 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
 /* eslint-enable no-cond-assign */
 
 export default {
+  fastIsVisible,
+  fastIsHidden,
   isVisible,
   isHidden,
   isStrictlyHidden,
