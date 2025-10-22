@@ -1,6 +1,6 @@
 import $elements from '../elements'
 
-import { unwrap, wrap } from '../jquery'
+import { unwrap, wrap, isJquery } from '../jquery'
 const { isOption, isOptgroup, isBody, isHTML } = $elements
 
 const DEBUG = true
@@ -102,21 +102,23 @@ function visibleToRaycast (el: HTMLElement, rect: DOMRect, maxDepth: number = 2,
   })
 }
 
-export function fastIsHidden (el: JQuery<HTMLElement>, options: { checkOpacity: boolean } = { checkOpacity: true }): boolean {
-  debug('fastIsHidden', el)
+export function fastIsHidden (subject: JQuery<HTMLElement> | HTMLElement, options: { checkOpacity: boolean } = { checkOpacity: true }): boolean {
+  debug('fastIsHidden', subject)
 
   // basic css checks
-  if (isBody(el) || isHTML(el)) {
+  if (isBody(subject) || isHTML(subject)) {
     return false
   }
 
-  const subjects = unwrap(el) as HTMLElement | HTMLElement[]
+  if (isJquery(subject)) {
+    const subjects = unwrap(subject) as HTMLElement | HTMLElement[]
 
-  if (Array.isArray(subjects) && (subjects.length > 1)) {
-    return subjects.some((subject: HTMLElement) => fastIsHidden(wrap(subject), options))
+    if (Array.isArray(subjects)) {
+      return subjects.some((subject: HTMLElement) => fastIsHidden(wrap(subject), options))
+    }
+
+    return fastIsHidden(subject, options)
   }
-
-  const subject: HTMLElement = Array.isArray(subjects) ? subjects[0] : subjects
 
   if (subject.computedStyleMap().get('display')?.toString() === 'none') {
     return true
@@ -155,7 +157,7 @@ export function fastIsHidden (el: JQuery<HTMLElement>, options: { checkOpacity: 
 
   // need to do a more intensive opacity check
   if (options.checkOpacity) {
-    let currentElement: HTMLElement | null = subject
+    let currentElement = subject
     let effectiveOpacity = opacity
 
     while (currentElement) {

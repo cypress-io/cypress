@@ -21,7 +21,7 @@ export const unwrap = function (obj) {
   return obj
 }
 
-const isJquery = (obj) => {
+export const isJquery = (obj: any): obj is JQuery<any> => {
   let hasJqueryProperty = false
 
   try {
