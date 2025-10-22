@@ -1,8 +1,8 @@
 /**
- * React Virtuoso Browser Crash Tests
+ * Virtual Scrolling Browser Crash Tests
  *
  * This test suite is designed to reproduce browser crashes when scrolling
- * with react-virtuoso library, as reported by users.
+ * with virtual scroll libraries, as reported by users.
  *
  * Test scenarios include:
  * - Basic virtual list scrolling
@@ -17,10 +17,8 @@ describe('React Virtuoso Browser Crash Tests', {
   numTestsKeptInMemory: 0,
 }, () => {
   beforeEach(() => {
-    // Visit the react-virtuoso test website
     cy.visit('/fixtures/virtual-scroll-stress-test.html')
 
-    // Wait for React to load
     cy.get('.header').should('be.visible')
 
     // Clear any existing data
