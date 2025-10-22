@@ -14,7 +14,7 @@
 
 describe('React Virtuoso Browser Crash Tests', {
   experimentalFastVisibility: true,
-  numTestsKeptInMemory: 1,
+  numTestsKeptInMemory: 0,
 }, () => {
   beforeEach(() => {
     // Visit the react-virtuoso test website
