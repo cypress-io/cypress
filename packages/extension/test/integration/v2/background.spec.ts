@@ -115,6 +115,7 @@ describe('app/background', () => {
   describe('cookies', () => {
     it('onChanged does not emit when cause is overwrite', async function () {
       const ws = await connectWrapper()
+      // @ts-expect-error
       const fn = browser.cookies.onChanged.addListener.mock.calls[0][0]
 
       fn({ cause: 'overwrite' })

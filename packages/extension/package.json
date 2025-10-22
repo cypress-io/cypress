@@ -9,7 +9,7 @@
     "build:lib": "tsc -p tsconfig.lib.json",
     "build:v2": "webpack-cli",
     "build:v3": "tsc -p tsconfig.app.v3.json",
-    "check-ts": "tsc  -p tsconfig.app.v2.json --noEmit && yarn -s tslint -p tsconfig.app.v2.json",
+    "check-ts": "tsc -p tsconfig.json --noEmit && yarn -s tslint -p tsconfig.json",
     "clean": "gulp clean",
     "clean-deps": "rimraf node_modules",
     "postinstall": "echo '@packages/extension needs: yarn build'",
