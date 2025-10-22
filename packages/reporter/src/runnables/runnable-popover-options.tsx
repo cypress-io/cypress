@@ -57,7 +57,7 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
   }
 
   const handleNewTest = () => {
-    events.emit('studio:init:suite', { suiteId: 'r1' })
+    events.emit('studio:init:suite', { suiteId: 'r1', entrySource: 'new-test-root' })
     setIsOpen(false)
   }
 

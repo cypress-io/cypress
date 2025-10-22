@@ -1,7 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.5.1
+## 15.6.0
 
 _Released 10/20/2025 (PENDING)_
+
+**Features:**
+
+- `cy.prompt()` will now show a warning in the `Get code` modal when there are unsaved changes in `Studio` that will be lost if the user saves the generated code. Addressed in [#32741](https://github.com/cypress-io/cypress/pull/32741).
 
 **Bugfixes:**
 
@@ -11,6 +15,10 @@ _Released 10/20/2025 (PENDING)_
 
 - Add top padding for command log labels. Addressed in [#32774](https://github.com/cypress-io/cypress/pull/32774).
 - Disable pinning commands within Studio mode and update snapshot message. Addresses [#31273](https://github.com/cypress-io/cypress/issues/31273). Addressed in [#32753](https://github.com/cypress-io/cypress/pull/32753).
+
+**Dependency Updates:**
+
+- Upgraded `better-sqlite3` from `11.10.0` to `12.4.1`. Addressed in [#32755](https://github.com/cypress-io/cypress/pull/32755).
 
 ## 15.5.0
 
