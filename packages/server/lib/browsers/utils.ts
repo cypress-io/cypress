@@ -144,19 +144,21 @@ async function executeBeforeBrowserLaunch (browser, launchOptions: typeof defaul
       isHeadless: browser.isHeadless,
     })
 
+    let pluginConfigResult
+
     try {
-      const pluginConfigResult = await plugins.execute('before:browser:launch', browser, launchOptions)
-
-      span?.end()
-
-      if (pluginConfigResult) {
-        extendLaunchOptionsFromPlugins(launchOptions, pluginConfigResult, options)
-      }
+      pluginConfigResult = await plugins.execute('before:browser:launch', browser, launchOptions)
     } catch (err) {
       span?.end()
 
       // Re-throw the error with proper context using the existing PLUGINS_RUN_EVENT_ERROR
       errors.throwErr('PLUGINS_RUN_EVENT_ERROR', 'before:browser:launch', err)
+    }
+
+    span?.end()
+
+    if (pluginConfigResult) {
+      extendLaunchOptionsFromPlugins(launchOptions, pluginConfigResult, options)
     }
   }
 

@@ -49,7 +49,10 @@ exports['deprecated before:browser:launch args / displays errors thrown and abor
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  app.cy.js                                                                       (1 of 2)
-Error thrown from plugins handler
+An error was thrown in your configuration file while executing the handler for the before:browser:launch event.
+
+The error we received was:
+
 Error: Error thrown from plugins handler
       [stack trace lines]
 `
@@ -71,7 +74,10 @@ exports['deprecated before:browser:launch args / displays promises rejected and 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  app.cy.js                                                                       (1 of 2)
-Promise rejected from plugins handler
+An error was thrown in your configuration file while executing the handler for the before:browser:launch event.
+
+The error we received was:
+
 Error: Promise rejected from plugins handler
       [stack trace lines]
 `
