@@ -142,4 +142,18 @@ describe('Command Options and UI Display Tests', () => {
     cy.get('#scroll-horizontal button')
     .should('not.be.visible')
   })
+
+  it('grouped commands', () => {
+    cy.visit('cypress/fixtures/uiStates.html')
+
+    cy.get('html').within(() => {
+      cy.get('body').within(() => {
+        cy.get('form').within(() => {
+          cy.get('select').first().within(() => {
+            cy.get('option')
+          })
+        })
+      })
+    })
+  })
 })

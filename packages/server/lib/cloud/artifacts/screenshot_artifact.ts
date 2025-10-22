@@ -11,7 +11,7 @@ const createScreenshotArtifact = async (filePath: string, uploadUrl: string): Pr
 
     return new Artifact(ArtifactKinds.SCREENSHOTS, filePath, uploadUrl, size, fileUploadStrategy)
   } catch (e) {
-    debug('Error creating screenshot artifact: %O', e)
+    debug('Error creating screenshot artifact: %o', e)
 
     return
   }
