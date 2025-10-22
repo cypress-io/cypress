@@ -14,6 +14,7 @@ _Released 10/20/2025 (PENDING)_
 **Misc:**
 
 - Add top padding for command log labels. Addressed in [#32774](https://github.com/cypress-io/cypress/pull/32774).
+- Have cursor on hover of the AUT URL to show as pointer. Addresses [#32777](https://github.com/cypress-io/cypress/issues/32777). Addressed in [#32782](https://github.com/cypress-io/cypress/pull/32782).
 
 **Dependency Updates:**
 
