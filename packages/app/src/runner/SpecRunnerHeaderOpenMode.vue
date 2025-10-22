@@ -49,6 +49,7 @@
           :placeholder="inputPlaceholder"
           aria-label="url of the application under test"
           class="aut-url-input bg-transparent text-gray-300 outline-none text-base font-normal leading-6 flex grow mr-[12px] max-w-full self-center truncate w-full placeholder:text-gray-400 placeholder:text-base placeholder:font-normal placeholder:leading-6 focus:text-indigo-300 focus-visible:outline-none"
+          :class="[urlReadOnly ? 'cursor-pointer' : 'cursor-text']"
           @input="setStudioUrl"
           @click="openExternally"
           @keyup.enter="visitUrl"
@@ -194,7 +195,9 @@ const activeSpecPath = specStore.activeSpec?.absolute
 
 const isDisabled = computed(() => autStore.isRunning || autStore.isLoading)
 
-const urlReadOnly = computed(() => !studioStore.needsUrl || props.gql.currentTestingType === 'component')
+const urlReadOnly = computed(() => {
+  return !studioStore.needsUrl || props.gql.currentTestingType === 'component'
+})
 
 const inputPlaceholder = computed(() => {
   if (props.gql.currentTestingType === 'component') {
@@ -232,7 +235,7 @@ function visitUrl () {
 }
 
 function openExternally () {
-  if (!autStore.url || studioStore.needsUrl) {
+  if (!urlReadOnly.value) {
     return
   }
 
