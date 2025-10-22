@@ -14,7 +14,7 @@ const OVERFLOW_PROPS = ['hidden', 'clip', 'scroll', 'auto']
 const { wrap } = $jquery
 
 const isVisible = (el) => {
-  return isHidden(el, 'isVisible()')
+  return !isHidden(el, 'isVisible()')
 }
 
 // TODO: we should prob update dom
@@ -24,6 +24,12 @@ const isVisible = (el) => {
 // as elements with `opacity: 0` are hidden yet actionable
 
 const isHidden = (el, methodName = 'isHidden()', options = { checkOpacity: true }) => {
+  if (Cypress.config('experimentalFastVisibility')) {
+    ensureEl(el, methodName)
+
+    return fastIsHidden(el, options)
+  }
+
   if (isStrictlyHidden(el, methodName, options, isHidden)) {
     return true
   }

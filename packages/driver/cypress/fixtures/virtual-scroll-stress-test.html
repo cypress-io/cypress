@@ -424,7 +424,7 @@
             
             setTimeout(() => {
                 container.innerHTML = '';
-                const items = Array.from({ length: 5000 }, (_, i) => ({
+                const items = Array.from({ length: 10000 }, (_, i) => ({
                     id: i,
                     description: `This is item number ${i + 1} with some additional content to make it more realistic. Lorem ipsum dolor sit amet, consectetur adipiscing elit.`
                 }));
@@ -437,6 +437,7 @@
                 
                 // Add scroll listener
                 container.addEventListener('scroll', () => {
+                    console.log('scroll')
                     scrollCounters.basic++;
                     document.getElementById('basicScrolls').textContent = scrollCounters.basic;
                 });

@@ -1,30 +1,38 @@
 import $elements from '../elements'
-import fastdom from 'fastdom'
 
+import { unwrap, wrap } from '../jquery'
 const { isOption, isOptgroup, isBody, isHTML } = $elements
 
-function measure <T> (fn: () => T): Promise<T> {
-  return new Promise((resolve, reject) => {
-    fastdom.measure(() => {
-      try {
-        const result = fn()
+const DEBUG = true
 
-        resolve(result)
-      } catch (error) {
-        reject(error)
-      }
-    })
-  })
+function debug (...args: any[]) {
+  if (DEBUG) {
+    // eslint-disable-next-line no-console
+    console.log('DEBUG:', ...args)
+  }
 }
 
-function isRectVisible (el: HTMLElement, { x, y, width, height }: DOMRect): boolean {
-  const elAtPoint = el.ownerDocument.elementFromPoint(
-    x + width / 2,
-    y + height / 2,
-  )
+function memoize<T> (fn: (...args: any[]) => T): (...args: any[]) => T {
+  const cache = new Map<any, { result: T, timestamp: number }>()
 
-  return (Boolean(elAtPoint) && (elAtPoint === el || el.contains(elAtPoint)))
+  return (...args: any[]) => {
+    const key = args
+
+    const cached = cache.get(key)
+
+    if (cached && cached.timestamp > Date.now() - 100) {
+      return cached.result
+    }
+
+    const result = fn(...args)
+
+    cache.set(key, { result, timestamp: Date.now() })
+
+    return result
+  }
 }
+
+const getBoundingClientRect = memoize((el: HTMLElement) => el.getBoundingClientRect())
 
 function subDivideRect ({ x, y, width, height }: DOMRect): DOMRect[] {
   return [
@@ -52,57 +60,119 @@ function subDivideRect ({ x, y, width, height }: DOMRect): DOMRect[] {
       width: width / 2,
       height: height / 2,
     }),
-  ].filter((rect: DOMRect) => rect.width > 0 && rect.height > 0)
+  ].filter((rect: DOMRect) => rect.width > 1 && rect.height > 1)
 }
 
-export async function fastIsVisible (el: HTMLElement): Promise<boolean> {
-  return !(await fastIsHidden(el))
+function visibleAtPoint (el: HTMLElement, x: number, y: number): boolean {
+  const elAtPoint = el.ownerDocument.elementFromPoint(x, y)
+
+  debug('visibleAtPoint', el, elAtPoint)
+
+  return Boolean(elAtPoint) && (elAtPoint === el || el.contains(elAtPoint))
 }
 
-export async function fastIsHidden (el: HTMLElement, options: { checkOpacity: boolean } = { checkOpacity: true }): Promise<boolean> {
+function visibleToRaycast (el: HTMLElement, rect: DOMRect, maxDepth: number = 2, currentDepth: number = 0): boolean {
+  if (currentDepth >= maxDepth) {
+    return false
+  }
+
+  const { x, y, width, height } = rect
+
+  debug('visibleToRaycast', x, y, width, height)
+  const samples = [
+    [x, y],
+    [x + width, y],
+    [x, y + height],
+    [x + width, y + height],
+    [x + width / 2, y + height / 2],
+  ]
+
+  if (samples.some(([x, y]) => visibleAtPoint(el, x, y))) {
+    debug('some samples are visible')
+
+    return true
+  }
+
+  const subRects = subDivideRect(rect)
+
+  debug('subRects', subRects)
+
+  return subRects.some((subRect: DOMRect) => {
+    return visibleToRaycast(el, subRect, maxDepth, currentDepth + 1)
+  })
+}
+
+export function fastIsHidden (el: JQuery<HTMLElement>, options: { checkOpacity: boolean } = { checkOpacity: true }): boolean {
+  debug('fastIsHidden', el)
+
   // basic css checks
   if (isBody(el) || isHTML(el)) {
     return false
   }
 
-  if (el.computedStyleMap().get('display') === 'none') {
+  const subjects = unwrap(el) as HTMLElement | HTMLElement[]
+
+  if (Array.isArray(subjects) && (subjects.length > 1)) {
+    return subjects.some((subject: HTMLElement) => fastIsHidden(wrap(subject), options))
+  }
+
+  const subject: HTMLElement = Array.isArray(subjects) ? subjects[0] : subjects
+
+  if (subject.computedStyleMap().get('display')?.toString() === 'none') {
     return true
   }
 
-  if (el.computedStyleMap().get('visibility') === 'hidden' || el.computedStyleMap().get('visibility') === 'collapse') {
+  if (subject.computedStyleMap().get('visibility')?.toString() === 'hidden' || subject.computedStyleMap().get('visibility')?.toString() === 'collapse') {
     return true
   }
 
-  if (el.computedStyleMap().get('opacity') === 0 && options.checkOpacity) {
+  const opacity = Number(subject.computedStyleMap().get('opacity')?.toString() || 1)
+
+  if (options.checkOpacity && opacity === 0) {
     return true
   }
 
-  if (isOption(el) || isOptgroup(el)) {
-    const select = el.closest('select')
+  if (isOption(subject) || isOptgroup(subject)) {
+    const select = subject.closest('select')
 
     if (select) {
-      return fastIsHidden(select, options)
+      return fastIsHidden(wrap(select), options)
     }
-
-    return false // should we consider option/optgroup hidden if it does not have a SELECT parent?
   }
+
+  debug('post-option check', subject)
 
   // by boundingClientRect is less accurate than measuring each clientRect
   // individually, but doesn't have the same issues with svg elements.
 
-  const boundingRect = await measure(() => el.getBoundingClientRect())
+  const boundingRect = getBoundingClientRect(subject)
 
-  if (boundingRect.width === 0 && boundingRect.height === 0) {
-    return true
+  if (boundingRect.width === 0 || boundingRect.height === 0) {
+    //return true
   }
 
-  if (isRectVisible(el, boundingRect)) {
-    return false
+  debug('post-boundingClientRect check', subject)
+
+  // need to do a more intensive opacity check
+  if (options.checkOpacity) {
+    let currentElement: HTMLElement | null = subject
+    let effectiveOpacity = opacity
+
+    while (currentElement) {
+      const currentOpacity = Number(currentElement.computedStyleMap().get('opacity')?.toString() || 1)
+
+      effectiveOpacity *= currentOpacity
+      if (effectiveOpacity === 0) {
+        return true
+      }
+
+      currentElement = currentElement.parentElement
+    }
   }
 
-  const subSamples = subDivideRect(boundingRect)
+  if (visibleToRaycast(subject, boundingRect)) {
+    debug('visibleToRaycast', subject, boundingRect)
 
-  if (subSamples.some((rect: DOMRect) => isRectVisible(el, rect))) {
     return false
   }
 
