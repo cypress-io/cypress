@@ -166,6 +166,11 @@ export default class Attempt {
       }
 
       log.update(props)
+
+      // Check if this command was auto-healed and propagate to test
+      if (props.instrument === 'command' && (props as CommandProps).renderProps?.selfHealed) {
+        this.test.setIsSelfHealed(true)
+      }
     }
   }
 
@@ -315,6 +320,11 @@ export default class Attempt {
     // assign number if non existent
     if (hook.hookNumber === undefined) {
       hook.hookNumber = ++this.hookCount[hook.hookName]
+    }
+
+    // Check if this command was self-healed and propagate to test
+    if (props.renderProps?.selfHealed) {
+      this.test.setIsSelfHealed(true)
     }
 
     return command

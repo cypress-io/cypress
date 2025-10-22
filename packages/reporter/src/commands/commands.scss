@@ -155,7 +155,8 @@
   .command-info {
     @include command-info-padding;
 
-    display: -webkit-box;
+    display: inline-flex;
+    align-items: center;
     font-weight: 600;
     margin-left: 0;
     overflow: hidden;
@@ -166,6 +167,8 @@
     .command-aliases,
     .command-message {
       overflow: hidden;
+      display: inline-flex;
+      align-items: center;
 
       .fa-circle {
         padding: 4px;
@@ -547,4 +550,7 @@
     padding: 9px;
     margin: 8px 0;
   }
+
+
+
 }

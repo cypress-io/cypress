@@ -58,6 +58,7 @@ export default class Test extends Runnable {
   _isOpen: boolean | null = null
   isOpenWhenActive: Boolean | null = null
   _isFinished = false
+  _isSelfHealed = false
 
   constructor (props: TestProps, level: number, private store: RunnablesStore) {
     super(props, level)
@@ -80,6 +81,7 @@ export default class Test extends Runnable {
       update: action,
       setIsOpen: action,
       finish: action,
+      _isSelfHealed: observable,
     })
 
     this.invocationDetails = props.invocationDetails
@@ -256,5 +258,13 @@ export default class Test extends Runnable {
     if (attempt) return cb(attempt)
 
     return null
+  }
+
+  setIsSelfHealed (isSelfHealed: boolean) {
+    this._isSelfHealed = isSelfHealed
+  }
+
+  get isSelfHealed () {
+    return this._isSelfHealed
   }
 }

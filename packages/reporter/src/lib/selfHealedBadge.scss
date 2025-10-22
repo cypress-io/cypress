@@ -1,0 +1,17 @@
+.command-self-healed-badge {
+  background-color: $gray-1000;
+  border-radius: 4px;
+  display: flex;
+  height: 20px;
+  border: 1px solid $gray-900;
+  min-width: 110px;
+  gap: 4px;
+  padding: 0 4px;
+  color: $jade-300;
+  font-weight: 400;
+  margin-left: 12px;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  text-transform: none;
+}
