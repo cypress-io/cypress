@@ -1,5 +1,11 @@
 /* eslint-disable no-console */
-require('../lib/environment')
+const { calculateCypressInternalEnv, configureLongStackTraces } = require('../lib/environment')
+
+// TODO: how necessary is this??? CYPRESS_INTERNAL_ENV is set to 'test so long stack traces are not enabled in the testing environment
+process.env['CYPRESS_INTERNAL_ENV'] = calculateCypressInternalEnv()
+configureLongStackTraces(process.env['CYPRESS_INTERNAL_ENV'])
+// and CYPRESS is set to true shouldnt be needed for other tests
+process.env['CYPRESS'] = 'true'
 
 const { enable, mockElectron } = require('./mockery_helper')
 

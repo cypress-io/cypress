@@ -1,9 +1,6 @@
-require('../spec_helper')
-require(`../../lib/cwd`)
-
-const Promise = require('bluebird')
-const cache = require(`../../lib/cache`).cache
-const { fs } = require(`../../lib/util/fs`)
+import Promise from 'bluebird'
+import { cache } from '../../lib/cache'
+import { fs } from '../../lib/util/fs'
 
 describe('lib/cache', () => {
   beforeEach(async () => {

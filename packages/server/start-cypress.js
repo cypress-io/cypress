@@ -3,6 +3,12 @@ const { telemetry, OTLPTraceExporterCloud } = require('@packages/telemetry')
 const { apiRoutes } = require('./lib/cloud/routes')
 const encryption = require('./lib/cloud/encryption')
 
+const { calculateCypressInternalEnv, configureLongStackTraces } = require('./lib/environment')
+
+process.env['CYPRESS_INTERNAL_ENV'] = calculateCypressInternalEnv()
+configureLongStackTraces(process.env['CYPRESS_INTERNAL_ENV'])
+process.env['CYPRESS'] = 'true'
+
 // are we in the main node process or the electron process?
 const isRunningElectron = electronApp.isRunning()
 

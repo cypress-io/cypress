@@ -25,7 +25,7 @@ const settings = require(`../../lib/util/settings`)
 const Windows = require(`../../lib/gui/windows`)
 const interactiveMode = require(`../../lib/modes/interactive`)
 const api = require(`../../lib/cloud/api`).default
-const cwd = require(`../../lib/cwd`)
+const cwd = require(`../../lib/cwd`).getCwd
 const user = require(`../../lib/cloud/user`)
 const cache = require(`../../lib/cache`).cache
 const errors = require(`../../lib/errors`)
@@ -227,6 +227,12 @@ describe('lib/cypress', () => {
 
     Fixtures.remove()
     delete globalThis['CY_TEST_MOCK']
+  })
+
+  context('it sets process.env.CYPRESS on file load', () => {
+    it('sets CYPRESS=true when Cypress runs', () => {
+      expect(process.env['CYPRESS']).to.eq('true')
+    })
   })
 
   context('test browsers', () => {

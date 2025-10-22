@@ -17,6 +17,7 @@ import type { LaunchArgs, Preferences } from '@packages/types'
 
 import debugLib from 'debug'
 import { getPathToDesktopIndex } from '@packages/resolve-dist'
+import { appendElectronSwitches } from '../append_electron_switches'
 
 const debug = debugLib('cypress:server:interactive')
 
@@ -163,6 +164,9 @@ export = {
     if (app.setAppUserModelId) {
       app.setAppUserModelId('Cypress')
     }
+
+    // append default electron switches before starting the app
+    appendElectronSwitches(app)
 
     // Note: We do not await the `_loading` promise here since initializing
     // the data context can significantly delay initial render of the UI
