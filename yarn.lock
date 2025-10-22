@@ -2880,10 +2880,10 @@
     mkdirp "^0.5.1"
     npm-run-all "^4.1.5"
 
-"@cypress/react-tooltip@0.5.3":
-  version "0.5.3"
-  resolved "https://registry.yarnpkg.com/@cypress/react-tooltip/-/react-tooltip-0.5.3.tgz#3e0635304b2bf7dab5b7c251eb1ad23048b05dac"
-  integrity sha512-5/CkKmEtirHAsMh8B6vdzcRHVAYsspviQhv8aw4S+DM/RjAdxALiof8nw941GfmWzgu8qDXGkxgKvv3oxZrfNw==
+"@cypress/react-tooltip@0.5.4":
+  version "0.5.4"
+  resolved "https://registry.yarnpkg.com/@cypress/react-tooltip/-/react-tooltip-0.5.4.tgz#d4657b0275d98e8dfadd6dfa2d137b19b0098855"
+  integrity sha512-DrsvZ0WwdEFaA+Zw4ihO2vPo5snGOvyv1x9/ax8PdPNbt4aBF68L3myifheP5RtxY8QN0Z5jH5S9uw6Z76o3Ww==
   dependencies:
     popper.js "^1.15.0"
 
