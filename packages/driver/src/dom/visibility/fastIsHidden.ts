@@ -3,7 +3,7 @@ import $elements from '../elements'
 import { unwrap, wrap, isJquery } from '../jquery'
 const { isOption, isOptgroup, isBody, isHTML } = $elements
 
-const DEBUG = true
+const DEBUG = false
 
 function debug (...args: any[]) {
   if (DEBUG) {
@@ -71,14 +71,13 @@ function visibleAtPoint (el: HTMLElement, x: number, y: number): boolean {
   return Boolean(elAtPoint) && (elAtPoint === el || el.contains(elAtPoint))
 }
 
-function visibleToRaycast (el: HTMLElement, rect: DOMRect, maxDepth: number = 2, currentDepth: number = 0): boolean {
+function visibleToUser (el: HTMLElement, rect: DOMRect, maxDepth: number = 2, currentDepth: number = 0): boolean {
   if (currentDepth >= maxDepth) {
     return false
   }
 
   const { x, y, width, height } = rect
 
-  debug('visibleToRaycast', x, y, width, height)
   const samples = [
     [x, y],
     [x + width, y],
@@ -98,7 +97,7 @@ function visibleToRaycast (el: HTMLElement, rect: DOMRect, maxDepth: number = 2,
   debug('subRects', subRects)
 
   return subRects.some((subRect: DOMRect) => {
-    return visibleToRaycast(el, subRect, maxDepth, currentDepth + 1)
+    return visibleToUser(el, subRect, maxDepth, currentDepth + 1)
   })
 }
 
@@ -120,17 +119,11 @@ export function fastIsHidden (subject: JQuery<HTMLElement> | HTMLElement, option
     return fastIsHidden(subject, options)
   }
 
-  if (subject.computedStyleMap().get('display')?.toString() === 'none') {
-    return true
-  }
-
-  if (subject.computedStyleMap().get('visibility')?.toString() === 'hidden' || subject.computedStyleMap().get('visibility')?.toString() === 'collapse') {
-    return true
-  }
-
-  const opacity = Number(subject.computedStyleMap().get('opacity')?.toString() || 1)
-
-  if (options.checkOpacity && opacity === 0) {
+  if (!subject.checkVisibility({
+    contentVisibilityAuto: true,
+    opacityProperty: options.checkOpacity,
+    visibilityProperty: true,
+  })) {
     return true
   }
 
@@ -142,20 +135,10 @@ export function fastIsHidden (subject: JQuery<HTMLElement> | HTMLElement, option
     }
   }
 
-  debug('post-option check', subject)
-
-  // by boundingClientRect is less accurate than measuring each clientRect
-  // individually, but doesn't have the same issues with svg elements.
-
   const boundingRect = getBoundingClientRect(subject)
 
-  if (boundingRect.width === 0 || boundingRect.height === 0) {
-    //return true
-  }
-
-  debug('post-boundingClientRect check', subject)
-
-  // need to do a more intensive opacity check
+  // Do we need to do a more intensive opacity check, or is the checkOpacity option enough?
+  /*
   if (options.checkOpacity) {
     let currentElement = subject
     let effectiveOpacity = opacity
@@ -171,19 +154,13 @@ export function fastIsHidden (subject: JQuery<HTMLElement> | HTMLElement, option
       currentElement = currentElement.parentElement
     }
   }
+  */
 
-  if (visibleToRaycast(subject, boundingRect)) {
-    debug('visibleToRaycast', subject, boundingRect)
+  if (visibleToUser(subject, boundingRect)) {
+    debug('visibleToUser', subject, boundingRect)
 
     return false
   }
 
   return true
-
-  // if we want to check each clientRect individually, we have to measure
-  // svg child elements separately.
-  // the viewport for non-outer svg elements is the outer svg element,
-  // so svg elements need to be handled differently - in order to raycast,
-  // we need the bounding rect of the svg element relative to the browser
-  // viewport.
 }

@@ -12,7 +12,7 @@
  * - Rapid scrolling patterns that may cause crashes
  */
 
-describe('React Virtuoso Browser Crash Tests', {
+describe('Virtual Scrolling Stress Tests', {
   experimentalFastVisibility: true,
   numTestsKeptInMemory: 0,
 }, () => {

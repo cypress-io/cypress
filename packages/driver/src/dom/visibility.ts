@@ -4,9 +4,8 @@ import $document from './document'
 import $elements from './elements'
 import $coordinates from './coordinates'
 import * as $transform from './transform'
-//import { isVisible } from './visibility/isVisible'
 const { isElement, isBody, isHTML, isOption, isOptgroup, getParent, getFirstParentWithTagName, isAncestor, isChild, getAllParents, isDescendent, isUndefinedOrHTMLBodyDoc, elOrAncestorIsFixedOrSticky, isDetached, isFocusable, stringify: stringifyElement } = $elements
-import { fastIsHidden, fastIsVisible } from './visibility/fastIsVisible'
+import { fastIsHidden } from './visibility/fastIsHidden'
 const fixedOrAbsoluteRe = /(fixed|absolute)/
 
 const OVERFLOW_PROPS = ['hidden', 'clip', 'scroll', 'auto']
@@ -630,7 +629,6 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
 /* eslint-enable no-cond-assign */
 
 export default {
-  fastIsVisible,
   fastIsHidden,
   isVisible,
   isHidden,
