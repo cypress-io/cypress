@@ -31,7 +31,7 @@
   "devDependencies": {
     "@antfu/utils": "^0.7.10",
     "@babel/code-frame": "7.27.1",
-    "@cypress-design/css": "^1.1.0",
+    "@cypress-design/css": "^1.2.0",
     "@faker-js/faker": "9.6.0",
     "@graphql-codegen/plugin-helpers": "2.3.2",
     "@graphql-typed-document-node/core": "^3.1.0",

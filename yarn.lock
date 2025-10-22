@@ -2768,7 +2768,7 @@
   dependencies:
     "@cypress-design/icon-registry" "^1.5.1"
 
-"@cypress-design/css@1.2.0", "@cypress-design/css@^1.1.0":
+"@cypress-design/css@1.2.0", "@cypress-design/css@^1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@cypress-design/css/-/css-1.2.0.tgz#e70488ba87d87fa3389f1d96a74d777f2cba5dec"
   integrity sha512-7UBmEEzJ8EerqZdC0pfVL2ZEAkmnArFVHJxztK2YmZ/rVOh9ZKBl1A5vcuGgB8jtTsQ+XMyO7JbSTJn3OgH/DA==
