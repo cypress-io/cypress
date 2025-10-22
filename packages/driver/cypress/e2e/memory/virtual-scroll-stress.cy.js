@@ -14,7 +14,7 @@
 
 describe('Virtual Scrolling Stress Tests', {
   experimentalFastVisibility: true,
-  numTestsKeptInMemory: 0,
+  numTestsKeptInMemory: 1,
 }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/virtual-scroll-stress-test.html')
