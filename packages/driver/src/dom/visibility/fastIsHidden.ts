@@ -104,7 +104,6 @@ function visibleToUser (el: HTMLElement, rect: DOMRect, maxDepth: number = 2, cu
 export function fastIsHidden (subject: JQuery<HTMLElement> | HTMLElement, options: { checkOpacity: boolean } = { checkOpacity: true }): boolean {
   debug('fastIsHidden', subject)
 
-  // basic css checks
   if (isBody(subject) || isHTML(subject)) {
     return false
   }
