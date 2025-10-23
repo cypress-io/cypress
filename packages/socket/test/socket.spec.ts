@@ -3,19 +3,14 @@ import fs from 'fs'
 import path from 'path'
 import parser from 'socket.io-parser'
 import { hasBinary } from 'socket.io-parser/dist/is-binary'
-// @ts-expect-error
 import pkg from '../package.json'
-import lib from '../index'
-import * as browserLib from '../lib/browser'
+import * as lib from '../lib/node'
+import * as browserLib from '../lib/client'
 import resolvePkg from 'resolve-pkg'
 
 const { PacketType } = parser
 
 describe('Socket', function () {
-  it('exports server', function () {
-    expect(lib.server).toBeDefined()
-  })
-
   it('exports client from lib/browser', function () {
     expect(browserLib.client).toBeDefined()
   })

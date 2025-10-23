@@ -1,8 +1,6 @@
 import io, { ManagerOptions, SocketOptions } from 'socket.io-client'
 import { CDPBrowserSocket } from './cdp-browser'
-import type { SocketShape } from './types'
-
-export type { Socket } from 'socket.io-client'
+import type { SocketShape } from './cdp-browser'
 
 declare global {
   interface Window {
@@ -26,8 +24,7 @@ export function client (uri: string, opts?: Partial<ManagerOptions & SocketOptio
     // Connect the socket regardless of whether or not we have newly created it
     window.cypressSockets[fullNamespace].connect()
 
-    // @ts-expect-error TODO: fix type
-    return window.cypressSockets[fullNamespace]
+    return window.cypressSockets[fullNamespace] as unknown as SocketShape
   }
 
   return io(uri, opts)
@@ -49,8 +46,7 @@ export function createWebsocket ({ path, browserFamily }: { path: string, browse
     // Connect the socket regardless of whether or not we have newly created it
     window.cypressSockets[fullNamespace].connect()
 
-    // @ts-expect-error TODO: fix type
-    return window.cypressSockets[fullNamespace]
+    return window.cypressSockets[fullNamespace] as unknown as SocketShape
   }
 
   return io({

@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import type { SocketShape } from '@packages/socket/lib/types'
+import type { SocketShape } from '@packages/socket/browser/client'
 import type { ClientOptions } from '@urql/core'
 
 export const urqlFetchSocketAdapter = (io: SocketShape): ClientOptions['fetch'] => {
