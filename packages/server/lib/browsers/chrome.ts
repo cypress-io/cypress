@@ -49,6 +49,29 @@ const pathToTheme = extension.getPathToTheme()
 
 let browserCriClient: BrowserCriClient | undefined
 
+// Generates default Chrome preferences that Cypress applies to all Chrome instances
+const _getDefaultChromePreferences = (): ChromePreferences => {
+  return {
+    default: {
+      autofill: {
+        profile_enabled: false, // Disable Chrome's "Save address" pop up
+        credit_card_enabled: false, // Disable Chrome's "Save card" pop up
+      },
+    },
+    defaultSecure: {},
+    localState: {
+      browser: {
+        // Hide security warnings when potentially dangerous command-line flags are used.
+        command_line_flag_security_warnings_enabled: false,
+        // Setting the policy controls the presentation of promotional content,
+        // including the welcome pages that help users sign in to Google Chrome, set
+        // Google Chrome as users' default browser, or otherwise inform them of product features.
+        promotions_enabled: false,
+      },
+    },
+  }
+}
+
 /**
  * Reads all known preference files (CHROME_PREFERENCE_PATHS) from disk and return
  * @param userDir
@@ -76,6 +99,12 @@ const _getChromePreferences = (userDir: string): Bluebird<ChromePreferences> => 
       throw err
     })
   }))
+  .then((existingPrefs) => {
+    // Merge default preferences with existing preferences
+    const defaultPrefs = _getDefaultChromePreferences()
+
+    return _mergeChromePreferences(defaultPrefs, existingPrefs)
+  })
 }
 
 const _mergeChromePreferences = (originalPrefs: ChromePreferences, newPrefs: ChromePreferences): ChromePreferences => {
@@ -114,14 +143,19 @@ const _writeChromePreferences = (userDir: string, originalPrefs: ChromePreferenc
   }
 
   return Bluebird.map(_.keys(originalPrefs), (key) => {
-    const originalJson = originalPrefs[key]
     const newJson = newPrefs[key]
 
-    if (!newJson || _.isEqual(originalJson, newJson)) {
+    if (!newJson) {
+      debug('skipping writing preferences for %s: no new preferences', key)
+
       return
     }
 
-    return fs.outputJson(path.join(userDir, CHROME_PREFERENCE_PATHS[key]), newJson)
+    const prefPath = path.join(userDir, CHROME_PREFERENCE_PATHS[key])
+
+    debug('writing Chrome preferences to %s: %o', prefPath, newJson)
+
+    return fs.outputJson(prefPath, newJson)
   })
   .return()
 }
@@ -295,6 +329,8 @@ export = {
   _setAutomation,
 
   _getChromePreferences,
+
+  _getDefaultChromePreferences,
 
   _mergeChromePreferences,
 
@@ -554,9 +590,14 @@ export = {
       utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options),
     ])
 
+    // Merge preferences BEFORE writing them to disk
+    let finalPreferences = preferences
+
     if (launchOptions.preferences) {
-      launchOptions.preferences = _mergeChromePreferences(preferences, launchOptions.preferences as ChromePreferences)
+      finalPreferences = _mergeChromePreferences(preferences, launchOptions.preferences as ChromePreferences)
     }
+
+    debug('final Chrome preferences to be written: %o', finalPreferences)
 
     const [extDest] = await Bluebird.all([
       this._writeExtension(
@@ -567,7 +608,8 @@ export = {
       _disableRestorePagesPrompt(userDir),
       // Chrome adds a lock file to the user data dir. If we are restarting the run and browser, we need to remove it.
       fs.unlink(path.join(userDir, 'SingletonLock')).catch(() => {}),
-      _writeChromePreferences(userDir, preferences, launchOptions.preferences as ChromePreferences),
+      // Write the final merged preferences BEFORE launching the browser
+      _writeChromePreferences(userDir, preferences, finalPreferences),
     ])
     // normalize the --load-extensions argument by
     // massaging what the user passed into our own
