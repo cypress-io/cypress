@@ -41,7 +41,6 @@ export default class Hook implements HookProps {
       aliasesWithDuplicates: computed,
       hasFailedCommand: computed,
       showStudioPrompt: computed,
-      isSelfHealed: computed,
     })
 
     this.hookId = props.hookId
@@ -89,10 +88,6 @@ export default class Hook implements HookProps {
 
   get showStudioPrompt () {
     return this.isStudio && !this.hasFailedCommand && (!this.commands.length || (this.commands.length === 1 && this.commands[0].name === 'visit'))
-  }
-
-  get isSelfHealed () {
-    return this.commands.length > 0 && this.commands.some((command) => !!command.renderProps.selfHealed)
   }
 
   addCommand (command: CommandModel) {

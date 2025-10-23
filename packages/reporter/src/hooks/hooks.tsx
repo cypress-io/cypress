@@ -8,7 +8,6 @@ import Collapsible from '../collapsible/collapsible'
 import type HookModel from './hook-model'
 import type { HookName } from './hook-model'
 import { OpenFileInIDEButton } from '../header/OpenFileInIDEButton'
-import { SelfHealedBadge } from '../lib/selfHealedBadge'
 
 export interface HookHeaderProps {
   model: HookModel
@@ -20,9 +19,6 @@ const HookHeader = ({ model, number, isOpen }: HookHeaderProps) => (
   <span className='hook-name' data-cy={`hook-name-${model.hookName}`}>
     {model.hookName} {number && `(${number})`}
     {model.failed && <span className='hook-failed-message'> (failed)</span>}
-    {(!isOpen && model.isSelfHealed) && (
-      <SelfHealedBadge source='hook' />
-    )}
   </span>
 )
 

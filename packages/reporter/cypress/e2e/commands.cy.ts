@@ -1180,21 +1180,16 @@ describe('commands', { viewportHeight: 1000 }, () => {
       })
 
       cy.get('[data-cy="self-healed-badge-command"]').should('exist')
-      cy.get('[data-cy="self-healed-badge-hook"]').should('not.exist')
-      cy.get('[data-cy="self-healed-badge-test"]').should('not.exist')
+      cy.get('[data-cy="self-healed-badge-test"]').should('exist')
 
       cy.percySnapshot('initial state')
 
       cy.get('.command-info').eq(10).within(() => {
         cy.get('[data-cy="self-healed-badge-command"]').should('not.exist')
-        cy.get('[data-cy="self-healed-badge-hook"]').should('not.exist')
-        cy.get('[data-cy="self-healed-badge-test"]').should('not.exist')
       })
 
       cy.get('.command-info').eq(12).within(() => {
         cy.get('[data-cy="self-healed-badge-command"]').should('exist')
-        cy.get('[data-cy="self-healed-badge-hook"]').should('not.exist')
-        cy.get('[data-cy="self-healed-badge-test"]').should('not.exist')
       })
 
       cy.get('.command-expander').eq(1).click()
@@ -1203,8 +1198,6 @@ describe('commands', { viewportHeight: 1000 }, () => {
 
       cy.get('.command-info').eq(10).within(() => {
         cy.get('[data-cy="self-healed-badge-command"]').should('exist')
-        cy.get('[data-cy="self-healed-badge-hook"]').should('not.exist')
-        cy.get('[data-cy="self-healed-badge-test"]').should('not.exist')
       })
 
       cy.get('.collapsible-header-inner').eq(2).click({ force: true })
@@ -1212,13 +1205,11 @@ describe('commands', { viewportHeight: 1000 }, () => {
       cy.percySnapshot('after clicking collapsible header')
 
       cy.get('[data-cy="self-healed-badge-command"]').should('not.exist')
-      cy.get('[data-cy="self-healed-badge-hook"]').should('exist')
-      cy.get('[data-cy="self-healed-badge-test"]').should('not.exist')
+      cy.get('[data-cy="self-healed-badge-test"]').should('exist')
 
       cy.get('.collapsible-header-inner').first().click()
 
       cy.get('[data-cy="self-healed-badge-command"]').should('not.exist')
-      cy.get('[data-cy="self-healed-badge-hook"]').should('not.exist')
       cy.get('[data-cy="self-healed-badge-test"]').should('exist')
 
       cy.percySnapshot()

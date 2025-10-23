@@ -46,7 +46,7 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
       <span className='runnable-title'>
         <span>{model.title}</span>
         <span className='visually-hidden'>{model.state}</span>
-        {model.isSelfHealed && !model.isOpen && (
+        {model.isSelfHealed && (
           <SelfHealedBadge source='test' />
         )}
       </span>
