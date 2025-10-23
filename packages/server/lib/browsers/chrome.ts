@@ -99,6 +99,11 @@ const _getChromePreferences = (userDir: string): Bluebird<ChromePreferences> => 
       throw err
     })
   }))
+}
+
+// Reads raw preferences from disk and merges them with defaults
+const _getChromePreferencesWithDefaults = (userDir: string): Bluebird<ChromePreferences> => {
+  return _getChromePreferences(userDir)
   .then((existingPrefs) => {
     // Merge default preferences with existing preferences
     const defaultPrefs = _getDefaultChromePreferences()
@@ -330,6 +335,8 @@ export = {
   _setAutomation,
 
   _getChromePreferences,
+
+  _getChromePreferencesWithDefaults,
 
   _getDefaultChromePreferences,
 
@@ -572,7 +579,7 @@ export = {
 
     const userDir = utils.getProfileDir(browser, isTextTerminal)
 
-    const [port, preferences] = await Bluebird.all([
+    const [port, rawPreferences] = await Bluebird.all([
       protocol.getRemoteDebuggingPort(),
       _getChromePreferences(userDir),
     ])
@@ -580,7 +587,7 @@ export = {
     const defaultArgs = this._getArgs(browser, options, port)
 
     const defaultLaunchOptions = utils.getDefaultLaunchOptions({
-      preferences,
+      preferences: rawPreferences,
       args: defaultArgs,
     })
 
@@ -592,10 +599,11 @@ export = {
     ])
 
     // Merge preferences BEFORE writing them to disk
-    let finalPreferences = preferences
+    // Start with defaults merged with raw preferences
+    let finalPreferences = _mergeChromePreferences(_getDefaultChromePreferences(), rawPreferences)
 
     if (launchOptions.preferences) {
-      finalPreferences = _mergeChromePreferences(preferences, launchOptions.preferences as ChromePreferences)
+      finalPreferences = _mergeChromePreferences(finalPreferences, launchOptions.preferences as ChromePreferences)
     }
 
     debug('final Chrome preferences to be written: %o', finalPreferences)
@@ -610,7 +618,7 @@ export = {
       // Chrome adds a lock file to the user data dir. If we are restarting the run and browser, we need to remove it.
       fs.unlink(path.join(userDir, 'SingletonLock')).catch(() => {}),
       // Write the final merged preferences BEFORE launching the browser
-      _writeChromePreferences(userDir, preferences, finalPreferences),
+      _writeChromePreferences(userDir, rawPreferences, finalPreferences),
     ])
     // normalize the --load-extensions argument by
     // massaging what the user passed into our own

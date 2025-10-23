@@ -955,5 +955,43 @@ describe('lib/browsers/chrome', () => {
         expect(statePrefs).to.not.be.called
       })
     })
+
+    it('writes default preferences when they do not exist on disk', () => {
+      const outputJson = sinon.stub(fs, 'outputJson')
+      const defaultPrefs = outputJson.withArgs('/foo/Default/Preferences').resolves()
+      const securePrefs = outputJson.withArgs('/foo/Default/Secure Preferences').resolves()
+      const statePrefs = outputJson.withArgs('/foo/Local State').resolves()
+
+      // Simulate empty preferences read from disk (no defaults exist yet)
+      const originalPrefs = {
+        default: {},
+        defaultSecure: {},
+        localState: {},
+      }
+
+      // Get the default preferences that should be written
+      const defaultChromePrefs = chrome._getDefaultChromePreferences()
+
+      expect(chrome._writeChromePreferences('/foo', originalPrefs, defaultChromePrefs)).to.eventually.equal()
+      .then(() => {
+        // Should write default preferences since they don't exist on disk
+        expect(defaultPrefs).to.be.calledWith('/foo/Default/Preferences', {
+          autofill: {
+            profile_enabled: false,
+            credit_card_enabled: false,
+          },
+        })
+
+        // defaultSecure is empty, so it should not be written
+        expect(securePrefs).to.not.be.called
+
+        expect(statePrefs).to.be.calledWith('/foo/Local State', {
+          browser: {
+            command_line_flag_security_warnings_enabled: false,
+            promotions_enabled: false,
+          },
+        })
+      })
+    })
   })
 })
