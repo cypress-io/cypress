@@ -143,10 +143,11 @@ const _writeChromePreferences = (userDir: string, originalPrefs: ChromePreferenc
   }
 
   return Bluebird.map(_.keys(originalPrefs), (key) => {
+    const originalJson = originalPrefs[key]
     const newJson = newPrefs[key]
 
-    if (!newJson) {
-      debug('skipping writing preferences for %s: no new preferences', key)
+    if (!newJson || _.isEqual(originalJson, newJson)) {
+      debug('skipping writing preferences for %s: no changes detected', key)
 
       return
     }
