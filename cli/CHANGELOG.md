@@ -9,7 +9,8 @@ _Released 10/20/2025 (PENDING)_
 
 **Bugfixes:**
 
-- Fixes an issue where grouped command text jumps up and down when expanding and collapsing in the command log. Addressed in [#32757](https://github.com/cypress-io/cypress/pull/32757).
+- Fixed an issue where grouped command text jumps up and down when expanding and collapsing in the command log. Addressed in [#32757](https://github.com/cypress-io/cypress/pull/32757).
+- Fixed an issue where command snapshots were not correctly displayed in Studio. Addressed in [#32808](https://github.com/cypress-io/cypress/pull/32808)
 
 **Misc:**
 
