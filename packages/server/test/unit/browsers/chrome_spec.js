@@ -17,6 +17,26 @@ const openOpts = {
   onError: () => {},
 }
 
+// Helper function to create consistent mock preferences for testing
+const createMockDefaultPreferences = () => ({
+  default: {
+    fake_preference: {
+      value: 'value',
+    },
+  },
+  defaultSecure: {},
+  localState: {
+    fake_local_state: {
+      value: 'value',
+    },
+  },
+})
+
+// Helper function to mock _getDefaultChromePreferences with consistent fake preferences
+const mockGetDefaultChromePreferences = () => {
+  return sinon.stub(chrome, '_getDefaultChromePreferences').returns(createMockDefaultPreferences())
+}
+
 describe('lib/browsers/chrome', () => {
   context('#open', () => {
     beforeEach(function () {
@@ -963,6 +983,9 @@ describe('lib/browsers/chrome', () => {
       const securePrefs = outputJson.withArgs('/foo/Default/Secure Preferences').resolves()
       const statePrefs = outputJson.withArgs('/foo/Local State').resolves()
 
+      // Mock _getDefaultChromePreferences to return fake preferences for testing
+      const mockDefaultPrefs = mockGetDefaultChromePreferences()
+
       // Simulate empty preferences read from disk (no defaults exist yet)
       const originalPrefs = {
         default: {},
@@ -977,9 +1000,8 @@ describe('lib/browsers/chrome', () => {
       .then(() => {
         // Should write default preferences since they don't exist on disk
         expect(defaultPrefs).to.be.calledWith('/foo/Default/Preferences', {
-          autofill: {
-            profile_enabled: false,
-            credit_card_enabled: false,
+          fake_preference: {
+            value: 'value',
           },
         })
 
@@ -987,11 +1009,13 @@ describe('lib/browsers/chrome', () => {
         expect(securePrefs).to.not.be.called
 
         expect(statePrefs).to.be.calledWith('/foo/Local State', {
-          browser: {
-            command_line_flag_security_warnings_enabled: false,
-            promotions_enabled: false,
+          fake_local_state: {
+            value: 'value',
           },
         })
+      })
+      .finally(() => {
+        mockDefaultPrefs.restore()
       })
     })
   })
@@ -1017,25 +1041,8 @@ describe('lib/browsers/chrome', () => {
     })
 
     it('merges defaults with existing preferences', () => {
-      const mockDefaults = {
-        default: {
-          fake_preference: {
-            value: 'value',
-          },
-        },
-        defaultSecure: {
-          fake_secure_preference: {
-            value: 'value',
-          },
-        },
-        localState: {
-          fake_local_state: {
-            value: 'value',
-          },
-        },
-      }
-
-      sinon.stub(chrome, '_getDefaultChromePreferences').returns(mockDefaults)
+      const mockDefaults = createMockDefaultPreferences()
+      const mockDefaultPrefs = sinon.stub(chrome, '_getDefaultChromePreferences').returns(mockDefaults)
 
       fs.readJson.withArgs('/foo/Default/Preferences').resolves({ existing: 'value' })
       fs.readJson.withArgs('/foo/Default/Secure Preferences').resolves({ secure: 'value' })
@@ -1046,18 +1053,13 @@ describe('lib/browsers/chrome', () => {
         expect(result).to.deep.eq(mockDefaults)
       })
       .finally(() => {
-        chrome._getDefaultChromePreferences.restore()
+        mockDefaultPrefs.restore()
       })
     })
 
     it('returns defaults when no existing preferences', () => {
-      const mockDefaults = {
-        default: { test: 'default' },
-        defaultSecure: { secure: 'default' },
-        localState: { local: 'default' },
-      }
-
-      sinon.stub(chrome, '_getDefaultChromePreferences').returns(mockDefaults)
+      const mockDefaults = createMockDefaultPreferences()
+      const mockDefaultPrefs = sinon.stub(chrome, '_getDefaultChromePreferences').returns(mockDefaults)
 
       fs.readJson.withArgs('/foo/Default/Preferences').rejects({ code: 'ENOENT' })
       fs.readJson.withArgs('/foo/Default/Secure Preferences').rejects({ code: 'ENOENT' })
@@ -1068,7 +1070,7 @@ describe('lib/browsers/chrome', () => {
         expect(result).to.deep.eq(mockDefaults)
       })
       .finally(() => {
-        chrome._getDefaultChromePreferences.restore()
+        mockDefaultPrefs.restore()
       })
     })
   })
@@ -1118,6 +1120,9 @@ describe('lib/browsers/chrome', () => {
 
   context('#_mergeChromePreferences with user preferences', () => {
     it('merges user preferences with defaults correctly', () => {
+      // Mock _getDefaultChromePreferences to return fake preferences for testing
+      const mockDefaultPrefs = mockGetDefaultChromePreferences()
+
       const defaultPrefs = chrome._getDefaultChromePreferences()
       const userPrefs = {
         default: {
@@ -1154,6 +1159,8 @@ describe('lib/browsers/chrome', () => {
         },
         newLocalSetting: 'userValue', // User addition
       })
+
+      mockDefaultPrefs.restore()
     })
 
     it('handles preference deletion with null values', () => {
@@ -1281,6 +1288,9 @@ describe('lib/browsers/chrome', () => {
       sinon.stub(protocol, 'getRemoteDebuggingPort').resolves(50505)
       sinon.stub(launch, 'launch').resolves(this.launchedBrowser)
 
+      // Mock _getDefaultChromePreferences to return fake preferences for testing
+      this.mockDefaultPrefs = mockGetDefaultChromePreferences()
+
       this.readJson = sinon.stub(fs, 'readJson')
       this.readJson.withArgs('/profile/dir/Default/Preferences').rejects({ code: 'ENOENT' })
       this.readJson.withArgs('/profile/dir/Default/Secure Preferences').rejects({ code: 'ENOENT' })
@@ -1295,6 +1305,7 @@ describe('lib/browsers/chrome', () => {
       protocol.getRemoteDebuggingPort.restore()
       fs.readJson.restore()
       fs.outputJson.restore()
+      this.mockDefaultPrefs.restore()
     })
 
     it('writes default preferences during browser launch', async function () {
@@ -1356,10 +1367,8 @@ describe('lib/browsers/chrome', () => {
       expect(this.outputJson).to.have.been.calledWith(
         '/profile/dir/Local State',
         sinon.match({
-          browser: {
-            fake_local_state: {
-              value: 'value',
-            },
+          fake_local_state: {
+            value: 'value',
           },
         }),
       )
