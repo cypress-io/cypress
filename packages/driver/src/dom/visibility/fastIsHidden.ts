@@ -63,13 +63,13 @@ function subDivideRect ({ x, y, width, height }: DOMRect): DOMRect[] {
   ].filter((rect: DOMRect) => rect.width > 1 && rect.height > 1)
 }
 
-function visibleAtPoint (el: HTMLElement, x: number, y: number): boolean {
+const visibleAtPoint = memoize(function (el: HTMLElement, x: number, y: number): boolean {
   const elAtPoint = el.ownerDocument.elementFromPoint(x, y)
 
   debug('visibleAtPoint', el, elAtPoint)
 
   return Boolean(elAtPoint) && (elAtPoint === el || el.contains(elAtPoint))
-}
+})
 
 function visibleToUser (el: HTMLElement, rect: DOMRect, maxDepth: number = 2, currentDepth: number = 0): boolean {
   if (currentDepth >= maxDepth) {
@@ -135,25 +135,6 @@ export function fastIsHidden (subject: JQuery<HTMLElement> | HTMLElement, option
   }
 
   const boundingRect = getBoundingClientRect(subject)
-
-  // Do we need to do a more intensive opacity check, or is the checkOpacity option enough?
-  /*
-  if (options.checkOpacity) {
-    let currentElement = subject
-    let effectiveOpacity = opacity
-
-    while (currentElement) {
-      const currentOpacity = Number(currentElement.computedStyleMap().get('opacity')?.toString() || 1)
-
-      effectiveOpacity *= currentOpacity
-      if (effectiveOpacity === 0) {
-        return true
-      }
-
-      currentElement = currentElement.parentElement
-    }
-  }
-  */
 
   if (visibleToUser(subject, boundingRect)) {
     debug('visibleToUser', subject, boundingRect)
