@@ -156,7 +156,7 @@
   .command-info {
     @include command-info-padding;
 
-    display: inline-flex;
+    display: -webkit-box;
     font-weight: 600;
     margin-left: 0;
     overflow: hidden;
