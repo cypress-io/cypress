@@ -29609,7 +29609,7 @@ sinon@7.3.2:
     nise "^1.4.10"
     supports-color "^5.5.0"
 
-sinon@7.5.0, sinon@^7.3.2:
+sinon@7.5.0:
   version "7.5.0"
   resolved "https://registry.yarnpkg.com/sinon/-/sinon-7.5.0.tgz#e9488ea466070ea908fd44a3d6478fd4923c67ec"
   integrity sha512-AoD0oJWerp0/rY9czP/D6hDTTUYGpObhZjMpd7Cl/A6+j0xBE+ayL/ldfggkBXUs0IkvIiM1ljM8+WkOc5k78Q==
