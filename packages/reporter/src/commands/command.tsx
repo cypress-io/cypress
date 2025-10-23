@@ -277,7 +277,7 @@ const Message: React.FC<MessageProps> = observer(({ model }: MessageProps) => (
       />
     )}
     {!!model.displayMessage && <span
-      className="command-message-text"
+      className='command-message-text'
       dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage, model.name) }}
     />}
   </span>
