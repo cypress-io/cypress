@@ -1,6 +1,6 @@
 import type { FileDetails } from '@packages/types'
 import type { ScriptError } from '../store'
-import type { CommandLog, StudioLog } from '../store/studio-store'
+import type { CommandLog, EntrySource, StudioLog } from '../store/studio-store'
 import type { CypressInCypressMochaEvent } from './event-manager'
 
 interface BeforeScreenshot {
@@ -42,7 +42,7 @@ export type LocalBusEmitsMap = {
   'studio:save': StudioSavePayload
   'studio:cancel': undefined
   'studio:copy:to:clipboard': () => void
-  'studio:init:suite': { suiteId: string, showUrlPrompt?: boolean }
+  'studio:init:suite': { suiteId: string, entrySource?: EntrySource, showUrlPrompt?: boolean }
 
   // Reporter Events
   'reporter:log:add': CommandLog

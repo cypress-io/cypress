@@ -1,12 +1,27 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.5.1
+## 15.6.0
 
 _Released 10/20/2025 (PENDING)_
+
+**Features:**
+
+- `cy.prompt()` will now show a warning in the `Get code` modal when there are unsaved changes in `Studio` that will be lost if the user saves the generated code. Addressed in [#32741](https://github.com/cypress-io/cypress/pull/32741).
 
 **Bugfixes:**
 
 - Fixed an issue where grouped command text jumps up and down when expanding and collapsing in the command log. Addressed in [#32757](https://github.com/cypress-io/cypress/pull/32757).
+- Fixed an issue where command snapshots were not correctly displayed in Studio. Addressed in [#32808](https://github.com/cypress-io/cypress/pull/32808).
 - Fixed an issue with grouped console prop items having a hard to read blue color in the console log and duplicate `:` characters being displayed. Addressed in [#32776](https://github.com/cypress-io/cypress/pull/32776).
+
+**Misc:**
+
+- Add top padding for command log labels. Addressed in [#32774](https://github.com/cypress-io/cypress/pull/32774).
+- The hitbox for expanding a grouped command has been widened. Addresses [#32778](https://github.com/cypress-io/cypress/issues/32778). Addressed in [#32783](https://github.com/cypress-io/cypress/pull/32783).
+- Have cursor on hover of the AUT URL to show as pointer. Addresses [#32777](https://github.com/cypress-io/cypress/issues/32777). Addressed in [#32782](https://github.com/cypress-io/cypress/pull/32782).
+
+**Dependency Updates:**
+
+- Upgraded `better-sqlite3` from `11.10.0` to `12.4.1`. Addressed in [#32755](https://github.com/cypress-io/cypress/pull/32755).
 
 ## 15.5.0
 

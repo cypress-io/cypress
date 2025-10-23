@@ -168,7 +168,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
       cy.findByTestId('aut-url-input').invoke('val').should('contain', autUrl)
     })
 
-    it('opens aut url externally', () => {
+    it('opens aut url externally when url is readonly', () => {
       const autStore = useAutStore()
       const autUrl = 'http://localhost:3000/todo'
 
@@ -195,6 +195,34 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
 
       cy.findByTestId('aut-url-input').click()
       cy.wrap(openExternalStub).should('have.been.calledWith', 'http://localhost:3000/todo')
+    })
+
+    it('does not open url externally when url is not readonly', () => {
+      const studioStore = useStudioStore()
+
+      // This emulates the 'needsUrl' state in the studio store
+      studioStore.setActive(true)
+      studioStore.setUrl(undefined)
+      studioStore._hasStarted = true
+
+      cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+        render: (gqlVal) => {
+          return renderWithGql(gqlVal)
+        },
+      })
+
+      const openExternalStub = cy.stub()
+
+      cy.stubMutationResolver(ExternalLink_OpenExternalDocument, (defineResult, { url }) => {
+        openExternalStub(url)
+
+        return defineResult({
+          openExternal: true,
+        })
+      })
+
+      cy.findByTestId('aut-url-input').click()
+      cy.wrap(openExternalStub).should('not.have.been.called')
     })
 
     it('when currentTestingType is component, url has placeholder text', () => {
@@ -234,6 +262,41 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
       cy.findByTestId('aut-url-input').should('have.prop', 'readOnly', false)
       cy.findByTestId('aut-url-input').should('have.prop', 'placeholder', 'Enter URL')
       cy.percySnapshot()
+    })
+
+    it('shows cursor-pointer when url is readonly', () => {
+      const autStore = useAutStore()
+      const autUrl = 'http://localhost:3000'
+
+      autStore.updateUrl(autUrl)
+
+      cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+        onResult: (gql) => {
+          gql.currentTestingType = 'e2e'
+        },
+        render: (gqlVal) => {
+          return renderWithGql(gqlVal)
+        },
+      })
+
+      cy.findByTestId('aut-url-input').should('have.class', 'cursor-pointer')
+    })
+
+    it('shows cursor-text when url is not readonly', () => {
+      const studioStore = useStudioStore()
+
+      // This emulates the 'needsUrl' state in the studio store
+      studioStore.setActive(true)
+      studioStore.setUrl(undefined)
+      studioStore._hasStarted = true
+
+      cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+        render: (gqlVal) => {
+          return renderWithGql(gqlVal)
+        },
+      })
+
+      cy.findByTestId('aut-url-input').should('have.class', 'cursor-text')
     })
   })
 

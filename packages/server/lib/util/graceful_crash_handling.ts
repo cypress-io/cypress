@@ -86,7 +86,7 @@ export class EarlyExitTerminator {
       runnable,
       previousResults,
     }) => {
-      debug('preparing to run test, previous stats reported as %O', previousResults)
+      debug('preparing to run test, previous stats reported as %o', previousResults)
 
       this.intermediateStats = previousResults
       this.pendingRunnable = runnable

@@ -406,7 +406,7 @@ function watchEntryPoint (webpackConfig: Configuration) {
       ignored: [...webpackConfig.watchOptions.ignored.filter((pattern: string) => !/node_modules/.test(pattern)), '**/node_modules/!(@cypress/webpack-dev-server/dist/browser.js)**'],
     }
 
-    debug('found options next.js watchOptions.ignored %O', webpackConfig.watchOptions.ignored)
+    debug('found options next.js watchOptions.ignored %o', webpackConfig.watchOptions.ignored)
   }
 }
 
