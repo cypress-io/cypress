@@ -26,12 +26,6 @@ const disabledFeatures = [
   // https://github.com/cypress-io/cypress/issues/29199
   'PrivacySandboxSettings4',
 
-  'ThirdPartyStoragePartitioning',
-
-  // Disable autofill features to prevent "Save address" and "Save card" popups
-  'AutofillServerCommunication',
-  'AutofillEnableAccountWalletStorage',
-
   // Disable manual option and popup prompt of Chrome translation
   // https://github.com/cypress-io/cypress/issues/28225
   'Translate',
