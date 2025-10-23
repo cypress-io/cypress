@@ -152,6 +152,16 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
       cy.contains('verify element visibility state').should('be.visible').click()
       snapshotReporter()
     })
+
+    it('grouped commands', () => {
+      loadSpec({
+        filePath: 'runner/ui-states/commands.cy.js',
+        passCount: 9,
+      })
+
+      cy.contains('grouped commands').should('be.visible').click()
+      snapshotReporter()
+    })
   })
 
   it('status codes', () => {

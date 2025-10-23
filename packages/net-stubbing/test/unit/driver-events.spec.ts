@@ -1,10 +1,10 @@
+import { describe, it, expect } from 'vitest'
 import {
   _restoreMatcherOptionsTypes,
 } from '../../lib/server/driver-events'
-import { expect } from 'chai'
 
 describe('driver events', function () {
-  context('._restoreMatcherOptionsTypes', function () {
+  describe('._restoreMatcherOptionsTypes', function () {
     it('rehydrates regexes properly', function () {
       const { url } = _restoreMatcherOptionsTypes({
         url: {
@@ -13,8 +13,8 @@ describe('driver events', function () {
         },
       })
 
-      expect(url).to.be.instanceOf(RegExp)
-      .and.include({
+      expect(url).toBeInstanceOf(RegExp)
+      expect(url).toMatchObject({
         flags: 'gim',
         source: 'aaa',
       })
