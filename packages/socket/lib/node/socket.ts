@@ -1,18 +1,15 @@
 import buffer from 'buffer'
 import type http from 'http'
-import server, { Server as SocketIOBaseServer, ServerOptions, Socket, Namespace } from 'socket.io'
+import { Server as SocketIOBaseServer, ServerOptions } from 'socket.io'
 
-export type { Socket, Namespace as SocketIONamespace }
-
+// TODO: this will need to be updated to use an ESM version of the package
 const { version } = require('socket.io-client/package.json')
 const clientSource = require.resolve('socket.io-client/dist/socket.io.js')
-
-export { ServerOptions }
 
 // socket.io types are incorrect
 type PatchedServerOptions = ServerOptions & { cookie: { name: string | boolean } }
 
-class SocketIOServer extends SocketIOBaseServer {
+export class SocketIOServer extends SocketIOBaseServer {
   constructor (srv: http.Server, opts?: Partial<PatchedServerOptions>) {
     opts = opts ?? {}
 
@@ -27,12 +24,6 @@ class SocketIOServer extends SocketIOBaseServer {
   }
 }
 
-export {
-  server,
-  SocketIOServer,
-}
-
-// TODO: I don't know that this is used anywhere?
 export const getPathToClientSource = () => {
   return clientSource
 }

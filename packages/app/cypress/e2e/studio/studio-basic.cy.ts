@@ -163,4 +163,24 @@ describe('studio functionality', () => {
 
     cy.findByTestId('studio-toolbar').should('not.exist')
   })
+
+  it('supports showing and hiding a command snapshot', () => {
+    launchStudio()
+
+    incrementCounter(0)
+
+    // hover over the visit command to show a snapshot
+    cy.get('.command-name-visit').realHover()
+    cy.getAutIframe().within(() => {
+      // verify the count in the snapshot is 0
+      cy.get('p').should('contain', 'Count is 0')
+    })
+
+    // hover over the html element to hide the snapshot
+    cy.get('html').realHover()
+    cy.getAutIframe().within(() => {
+      // verify the count in the live page is 1
+      cy.get('p').should('contain', 'Count is 1')
+    })
+  })
 })

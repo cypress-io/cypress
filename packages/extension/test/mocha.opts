@@ -1,4 +1,0 @@
-test/unit
-test/integration
---reporter spec
---recursive
