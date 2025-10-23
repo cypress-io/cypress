@@ -1,3 +1,4 @@
+import { describe, expect, beforeEach, afterEach, it, vi } from 'vitest'
 import { NetworkProxy } from '../../'
 import {
   netStubbingState as _netStubbingState,
@@ -6,8 +7,6 @@ import {
 } from '@packages/net-stubbing'
 import { defaultMiddleware } from '../../lib/http'
 import express from 'express'
-import sinon from 'sinon'
-import { expect } from 'chai'
 import supertest from 'supertest'
 import { allowDestroy } from '@packages/network'
 import { DocumentDomainInjection } from '@packages/network-tools'
@@ -17,7 +16,7 @@ import { CookieJar } from '@packages/server/lib/util/cookies'
 const Request = require('@packages/server/lib/request')
 const getFixture = async () => {}
 
-context('network stubbing', () => {
+describe('network stubbing', () => {
   let config
   let remoteStates: RemoteStates
   let netStubbingState: NetStubbingState
@@ -39,7 +38,7 @@ context('network stubbing', () => {
     return new RemoteStates(remoteStateConfig, documentDomainInjection)
   }
 
-  beforeEach((done) => {
+  beforeEach(() => {
     config = {
       experimentalCspAllowList: false,
     }
@@ -48,7 +47,7 @@ context('network stubbing', () => {
 
     remoteStates = createRemoteStates()
     socket = new EventEmitter()
-    socket.toDriver = sinon.stub()
+    socket.toDriver = vi.fn()
     app = express()
     netStubbingState = _netStubbingState()
 
@@ -124,36 +123,36 @@ context('network stubbing', () => {
       res.send('<foo>bar</foo>')
     })
 
-    server = allowDestroy(destinationApp.listen(() => {
-      destinationPort = server.address().port
-      remoteStates.set(`http://localhost:${destinationPort}`)
-      remoteStates.set(`http://localhost:${destinationPort}/csp-header-strip`)
-      remoteStates.set(`http://localhost:${destinationPort}/csp-header-none`)
-      remoteStates.set(`http://localhost:${destinationPort}/csp-header-single`)
-      remoteStates.set(`http://localhost:${destinationPort}/csp-header-multiple`)
-      done()
-    }))
+    return new Promise<void>((resolve) => {
+      server = allowDestroy(destinationApp.listen(() => {
+        destinationPort = server.address().port
+        remoteStates.set(`http://localhost:${destinationPort}`)
+        remoteStates.set(`http://localhost:${destinationPort}/csp-header-strip`)
+        remoteStates.set(`http://localhost:${destinationPort}/csp-header-none`)
+        remoteStates.set(`http://localhost:${destinationPort}/csp-header-single`)
+        remoteStates.set(`http://localhost:${destinationPort}/csp-header-multiple`)
+        resolve()
+      }))
+    })
   })
 
   afterEach(() => {
     server.destroy()
   })
 
-  it('can make a vanilla request', (done) => {
-    supertest(app)
-    .get(`/http://localhost:${destinationPort}`)
-    .expect('it worked', done)
+  it('can make a vanilla request', async () => {
+    const resp = await supertest(app).get(`/http://localhost:${destinationPort}`)
+
+    expect(resp.text).toEqual('it worked')
   })
 
-  it('does not add CORS headers to all responses', () => {
-    return supertest(app)
-    .get(`/http://localhost:${destinationPort}`)
-    .then((res) => {
-      expect(res.headers).to.not.have.property('access-control-allow-origin')
-    })
+  it('does not add CORS headers to all responses', async () => {
+    const resp = await supertest(app).get(`/http://localhost:${destinationPort}`)
+
+    expect(resp.headers).not.toHaveProperty('access-control-allow-origin')
   })
 
-  it('adds CORS headers to static stubs', () => {
+  it('adds CORS headers to static stubs', async () => {
     netStubbingState.routes.push({
       id: '1',
       routeMatcher: {
@@ -167,19 +166,18 @@ context('network stubbing', () => {
       matches: 1,
     })
 
-    return supertest(app)
+    const resp = await supertest(app)
     .get(`/http://localhost:${destinationPort}`)
-    .then((res) => {
-      expect(res.headers).to.include({
-        'access-control-allow-origin': '*',
-        'access-control-allow-credentials': 'true',
-      })
 
-      expect(res.text).to.eq('foo')
-    })
+    expect(resp.headers).toEqual(expect.objectContaining({
+      'access-control-allow-origin': '*',
+      'access-control-allow-credentials': 'true',
+    }))
+
+    expect(resp.text).toEqual('foo')
   })
 
-  it('does not override CORS headers', () => {
+  it('does not override CORS headers', async () => {
     netStubbingState.routes.push({
       id: '1',
       routeMatcher: {
@@ -196,16 +194,14 @@ context('network stubbing', () => {
       matches: 1,
     })
 
-    return supertest(app)
-    .get(`/http://localhost:${destinationPort}`)
-    .then((res) => {
-      expect(res.headers).to.include({
-        'access-control-allow-origin': 'something',
-      })
-    })
+    const resp = await supertest(app).get(`/http://localhost:${destinationPort}`)
+
+    expect(resp.headers).toEqual(expect.objectContaining({
+      'access-control-allow-origin': 'something',
+    }))
   })
 
-  it('uses Origin to set CORS header', () => {
+  it('uses Origin to set CORS header', async () => {
     netStubbingState.routes.push({
       id: '1',
       routeMatcher: {
@@ -219,17 +215,14 @@ context('network stubbing', () => {
       matches: 1,
     })
 
-    return supertest(app)
-    .get(`/http://localhost:${destinationPort}`)
-    .set('Origin', 'http://foo.com')
-    .then((res) => {
-      expect(res.headers).to.include({
-        'access-control-allow-origin': 'http://foo.com',
-      })
-    })
+    const resp = await supertest(app).get(`/http://localhost:${destinationPort}`).set('Origin', 'http://foo.com')
+
+    expect(resp.headers).toEqual(expect.objectContaining({
+      'access-control-allow-origin': 'http://foo.com',
+    }))
   })
 
-  it('adds CORS headers to dynamically intercepted requests', () => {
+  it('adds CORS headers to dynamically intercepted requests', async () => {
     netStubbingState.routes.push({
       id: '1',
       routeMatcher: {
@@ -240,7 +233,7 @@ context('network stubbing', () => {
       matches: 1,
     })
 
-    socket.toDriver.callsFake((_, event, data) => {
+    socket.toDriver.mockImplementation((_, event, data) => {
       if (event === 'before:request') {
         onNetStubbingEvent({
           eventName: 'send:static:response',
@@ -262,14 +255,12 @@ context('network stubbing', () => {
       }
     })
 
-    return supertest(app)
-    .get(`/http://localhost:${destinationPort}`)
-    .then((res) => {
-      expect(res.text).to.eq('replaced')
-      expect(res.headers).to.include({
-        'access-control-allow-origin': '*',
-      })
-    })
+    const resp = await supertest(app).get(`/http://localhost:${destinationPort}`)
+
+    expect(resp.text).toEqual('replaced')
+    expect(resp.headers).toEqual(expect.objectContaining({
+      'access-control-allow-origin': '*',
+    }))
   })
 
   it('does not modify multipart/form-data files', async () => {
@@ -311,7 +302,7 @@ context('network stubbing', () => {
       matches: 1,
     })
 
-    socket.toDriver.callsFake((_, event, data) => {
+    socket.toDriver.mockImplementation((_, event, data) => {
       if (event === 'before:request') {
         sendContentLength = data.data.headers['content-length']
         onNetStubbingEvent({
@@ -338,8 +329,8 @@ context('network stubbing', () => {
     .post(`/http://localhost:${destinationPort}`)
     .attach('file', png)
 
-    expect(sendContentLength).to.eq(receivedContentLength)
-    expect(sendContentLength).to.eq(realContentLength)
+    expect(sendContentLength).toEqual(receivedContentLength)
+    expect(sendContentLength).toEqual(realContentLength)
   })
 
   it('does not intercept requests to the dev server', async () => {
@@ -363,20 +354,18 @@ context('network stubbing', () => {
     config.devServerPublicPathRoute = '/__cypress/src'
 
     // request to the dev server does NOT get intercepted
-    await supertest(app)
+    const resp = await supertest(app)
     .get(`/http://localhost:${destinationPort}/__cypress/src/main.js`)
-    .then((res) => {
-      expect(res.status).to.eq(200)
-      expect(res.text).to.eq('it worked')
-    })
+
+    expect(resp.status).toEqual(200)
+    expect(resp.text).toEqual('it worked')
 
     // request NOT to the dev server DOES get intercepted
-    await supertest(app)
+    const resp2 = await supertest(app)
     .get(`/http://localhost:${destinationPort}/`)
-    .then((res) => {
-      expect(res.status).to.eq(200)
-      expect(res.text).to.eq('foo')
-    })
+
+    expect(resp2.status).toEqual(200)
+    expect(resp2.text).toEqual('foo')
   })
 
   describe('CSP Headers', () => {
@@ -388,7 +377,7 @@ context('network stubbing', () => {
       'Content-Security-Policy-Report-Only',
     ].forEach((headerName) => {
       describe(`${headerName}`, () => {
-        it('does not add CSP header if injecting JS and original response had no CSP header', () => {
+        it('does not add CSP header if injecting JS and original response had no CSP header', async () => {
           netStubbingState.routes.push({
             id: '1',
             routeMatcher: {
@@ -402,94 +391,84 @@ context('network stubbing', () => {
             matches: 1,
           })
 
-          return supertest(app)
+          const resp = await supertest(app)
           .get(`/http://localhost:${destinationPort}`)
           .set('Accept', 'text/html,application/xhtml+xml')
-          .then((res) => {
-            expect(res.headers[headerName]).to.be.undefined
-            expect(res.headers[headerName.toLowerCase()]).to.be.undefined
-          })
+
+          expect(resp.headers[headerName]).toBeUndefined()
+          expect(resp.headers[headerName.toLowerCase()]).toBeUndefined()
         })
 
-        it('removes CSP header by default if not injecting JS and original response had CSP header', () => {
-          return supertest(app)
+        it('removes CSP header by default if not injecting JS and original response had CSP header', async () => {
+          const resp = await supertest(app)
           .get(`/http://localhost:${destinationPort}/csp-header-strip?headerName=${headerName}`)
-          .then((res) => {
-            expect(res.headers[headerName]).to.be.undefined
-            expect(res.headers[headerName.toLowerCase()]).to.be.undefined
-          })
+
+          expect(resp.headers[headerName]).toBeUndefined()
+          expect(resp.headers[headerName.toLowerCase()]).toBeUndefined()
         })
 
-        it('removes CSP header by default if injecting JS and original response had CSP header', () => {
-          return supertest(app)
+        it('removes CSP header by default if injecting JS and original response had CSP header', async () => {
+          const resp = await supertest(app)
           .get(`/http://localhost:${destinationPort}/csp-header-strip?headerName=${headerName}`)
-          .then((res) => {
-            expect(res.headers[headerName]).to.be.undefined
-            expect(res.headers[headerName.toLowerCase()]).to.be.undefined
-          })
+
+          expect(resp.headers[headerName]).toBeUndefined()
+          expect(resp.headers[headerName.toLowerCase()]).toBeUndefined()
         })
 
-        it('does not modify CSP header if not injecting JS and original response had CSP header', () => {
-          return supertest(app)
+        it('does not modify CSP header if not injecting JS and original response had CSP header', async () => {
+          const resp = await supertest(app)
           .get(`/http://localhost:${destinationPort}/csp-header-none?headerName=${headerName}`)
-          .then((res) => {
-            expect(res.headers[headerName.toLowerCase()]).to.equal('fake-directive fake-value')
-          })
+
+          expect(resp.headers[headerName.toLowerCase()]).toEqual('fake-directive fake-value')
         })
 
-        it('does not modify a CSP header if injecting JS and original response had CSP header, but did not have a directive affecting script-src', () => {
-          return supertest(app)
+        it('does not modify a CSP header if injecting JS and original response had CSP header, but did not have a directive affecting script-src', async () => {
+          const resp = await supertest(app)
           .get(`/http://localhost:${destinationPort}/csp-header-none?headerName=${headerName}`)
           .set('Accept', 'text/html,application/xhtml+xml')
-          .then((res) => {
-            expect(res.headers[headerName.toLowerCase()]).to.equal('fake-directive fake-value')
-          })
+
+          expect(resp.headers[headerName.toLowerCase()]).toEqual('fake-directive fake-value')
         })
 
-        it('modifies a CSP header if injecting JS and original response had CSP header affecting script-src', () => {
-          return supertest(app)
+        it('modifies a CSP header if injecting JS and original response had CSP header affecting script-src', async () => {
+          const resp = await supertest(app)
           .get(`/http://localhost:${destinationPort}/csp-header-single?headerName=${headerName}`)
           .set('Accept', 'text/html,application/xhtml+xml')
-          .then((res) => {
-            expect(res.headers[headerName.toLowerCase()]).to.match(/^script-src 'self' localhost 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}'$/)
-          })
+
+          expect(resp.headers[headerName.toLowerCase()]).toEqual(expect.stringMatching(/^script-src 'self' localhost 'nonce-[A-Za-z0-9+/=]+|=[^=]|={3,}$'$/))
         })
 
-        it('modifies CSP header if injecting JS and original response had multiple CSP headers and directives', () => {
-          return supertest(app)
+        it('modifies CSP header if injecting JS and original response had multiple CSP headers and directives', async () => {
+          const resp = await supertest(app)
           .get(`/http://localhost:${destinationPort}/csp-header-multiple?headerName=${headerName}`)
           .set('Accept', 'text/html,application/xhtml+xml')
-          .then((res) => {
-            expect(res.headers[headerName.toLowerCase()]).to.match(/^default-src 'self' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}', script-src 'self' localhost 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}'$/)
-          })
+
+          expect(resp.headers[headerName.toLowerCase()]).toEqual(expect.stringMatching(/^default-src 'self' 'nonce-[A-Za-z0-9+/=]+|=[^=]|={3,}', script-src 'self' localhost 'nonce-[A-Za-z0-9+/=]+|=[^=]|={3,}$'$/))
         })
 
         if (headerName !== headerName.toLowerCase()) {
           // Do not add a non-lowercase version of a CSP header, because most-restrictive is used
-          it('removes non-lowercase CSP header to avoid conflicts on unmodified CSP headers', () => {
-            return supertest(app)
+          it('removes non-lowercase CSP header to avoid conflicts on unmodified CSP headers', async () => {
+            const resp = await supertest(app)
             .get(`/http://localhost:${destinationPort}/csp-header-none?headerName=${headerName}`)
-            .then((res) => {
-              expect(res.headers[headerName]).to.be.undefined
-            })
+
+            expect(resp.headers[headerName]).toBeUndefined()
           })
 
-          it('removes non-lowercase CSP header to avoid conflicts on modified CSP headers', () => {
-            return supertest(app)
+          it('removes non-lowercase CSP header to avoid conflicts on modified CSP headers', async () => {
+            const resp = await supertest(app)
             .get(`/http://localhost:${destinationPort}/csp-header-single?headerName=${headerName}`)
             .set('Accept', 'text/html,application/xhtml+xml')
-            .then((res) => {
-              expect(res.headers[headerName]).to.be.undefined
-            })
+
+            expect(resp.headers[headerName]).toBeUndefined()
           })
 
-          it('removes non-lowercase CSP header to avoid conflicts on multiple CSP headers', () => {
-            return supertest(app)
+          it('removes non-lowercase CSP header to avoid conflicts on multiple CSP headers', async () => {
+            const resp = await supertest(app)
             .get(`/http://localhost:${destinationPort}/csp-header-multiple?headerName=${headerName}`)
             .set('Accept', 'text/html,application/xhtml+xml')
-            .then((res) => {
-              expect(res.headers[headerName]).to.be.undefined
-            })
+
+            expect(resp.headers[headerName]).toBeUndefined()
           })
         }
       })

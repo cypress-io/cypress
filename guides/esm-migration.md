@@ -100,11 +100,11 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] packages/electron ✅ **COMPLETED**
 - [x] packages/icons ✅ **COMPLETED**
 - [x] packages/launcher ✅ **COMPLETED**
-- [ ] packages/net-stubbing
+- [x] packages/net-stubbing ✅ **COMPLETED**
 - [x] packages/network ✅ **COMPLETED**
 - [x] packages/network-tools ✅ **COMPLETED**
-- [ ] packages/packherd-require
-- [ ] packages/proxy
+- [x] packages/packherd-require ✅ **COMPLETED**
+- [x] packages/proxy ✅ **COMPLETED**
 - [x] packages/rewriter ✅ **COMPLETED**
 - [x] packages/scaffold-config ✅ **COMPLETED**
 - [ ] packages/server
