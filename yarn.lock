@@ -2768,7 +2768,7 @@
   dependencies:
     "@cypress-design/icon-registry" "^1.5.1"
 
-"@cypress-design/css@1.2.0", "@cypress-design/css@^1.1.0":
+"@cypress-design/css@1.2.0", "@cypress-design/css@^1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@cypress-design/css/-/css-1.2.0.tgz#e70488ba87d87fa3389f1d96a74d777f2cba5dec"
   integrity sha512-7UBmEEzJ8EerqZdC0pfVL2ZEAkmnArFVHJxztK2YmZ/rVOh9ZKBl1A5vcuGgB8jtTsQ+XMyO7JbSTJn3OgH/DA==
@@ -11672,10 +11672,10 @@ before-after-hook@^2.2.0:
   resolved "https://registry.yarnpkg.com/before-after-hook/-/before-after-hook-2.2.2.tgz#a6e8ca41028d90ee2c24222f201c90956091613e"
   integrity sha512-3pZEU3NT5BFUo/AD5ERPWOgQOCZITni6iavr5AUw5AUwQjMlI0kzu5btnyD39AF0gUEsDPwJT+oY1ORBJijPjQ==
 
-better-sqlite3@11.10.0:
-  version "11.10.0"
-  resolved "https://registry.yarnpkg.com/better-sqlite3/-/better-sqlite3-11.10.0.tgz#2b1b14c5acd75a43fd84d12cc291ea98cef57d98"
-  integrity sha512-EwhOpyXiOEL/lKzHz9AW1msWFNzGc/z+LzeB3/jnFJpxu+th2yqvzsSWas1v9jgs9+xiXJcD5A8CJxAG2TaghQ==
+better-sqlite3@12.4.1:
+  version "12.4.1"
+  resolved "https://registry.yarnpkg.com/better-sqlite3/-/better-sqlite3-12.4.1.tgz#f78df6c80530d1a0b750b538033e6199b7d30d26"
+  integrity sha512-3yVdyZhklTiNrtg+4WqHpJpFDd+WHTg2oM7UcR80GqL05AOV0xEJzc6qNvFYoEtE+hRp1n9MpN6/+4yhlGkDXQ==
   dependencies:
     bindings "^1.5.0"
     prebuild-install "^7.1.1"
@@ -31970,10 +31970,15 @@ type-fest@^1.0.1:
   resolved "https://registry.npmjs.org/type-fest/-/type-fest-1.4.0.tgz#e9fb813fe3bf1744ec359d55d1affefa76f14be1"
   integrity sha512-yGSza74xk0UG8k+pLh5oeoYirvIiWo5t0/o3zHHAO2tRDiZcxWP7fywNlXhqb6/r6sWvwi+RsyQMWhVLe4BVuA==
 
-type-fest@^2.12.2, type-fest@^2.13.0, type-fest@^2.3.4:
+type-fest@^2.12.2, type-fest@^2.13.0:
   version "2.19.0"
   resolved "https://registry.npmjs.org/type-fest/-/type-fest-2.19.0.tgz#88068015bb33036a598b952e55e9311a60fd3a9b"
   integrity sha512-RAH822pAdBgcNMAfWnCBU3CFZcfZ/i1eZjwFU/dsLKumyuuP3niueg2UAukXYF0E2AAoc82ZSSf9J0WQBinzHA==
+
+type-fest@^3.13.1:
+  version "3.13.1"
+  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-3.13.1.tgz#bb744c1f0678bea7543a2d1ec24e83e68e8c8706"
+  integrity sha512-tLq3bSNx+xSpwvAJnzrK0Ep5CLNWjvFTOp71URMaAEWBfRb9nnJiBoUe0tF8bI4ZFO3omgBR6NvnbzVUT3Ly4g==
 
 type-fest@^4.26.1, type-fest@^4.41.0, type-fest@^4.6.0, type-fest@^4.7.1:
   version "4.41.0"
