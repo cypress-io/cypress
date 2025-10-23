@@ -1,8 +1,9 @@
 /// <reference lib="dom" />
-import Emitter from 'component-emitter'
 import { v4 as uuidv4 } from 'uuid'
-import { decode, encode } from './utils'
-import type { SocketShape } from './types'
+import { decode, encode } from '../utils'
+import Emitter from 'component-emitter'
+
+export type SocketShape = Emitter
 
 type CDPSocketNamespaceKey = `cypressSocket-${string}`
 type CDPSendToServerNamespaceKey = `cypressSendToServer-${string}`

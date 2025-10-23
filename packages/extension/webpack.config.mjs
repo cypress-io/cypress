@@ -1,9 +1,9 @@
-const path = require('path')
-const webpack = require('webpack')
+import path from 'path'
+import webpack from 'webpack'
 
-module.exports = {
+export default {
   mode: process.env.NODE_ENV || 'development',
-  entry: './app/v2/init.js',
+  entry: './app/v2/init.ts',
   // https://github.com/cypress-io/cypress/issues/15032
   // Default webpack output setting is "eval".
   // Chrome doesn't allow "eval" inside extensions.
@@ -12,7 +12,14 @@ module.exports = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: 'ts-loader',
+        use: [
+          {
+            loader: 'ts-loader',
+            options: {
+              configFile: path.resolve(import.meta.dirname, 'tsconfig.app.v2.json'),
+            },
+          },
+        ],
         exclude: /node_modules/,
       },
     ],
@@ -22,7 +29,7 @@ module.exports = {
   },
   output: {
     filename: 'background.js',
-    path: path.resolve(__dirname, 'dist', 'v2'),
+    path: path.resolve(import.meta.dirname, 'app-dist', 'v2'),
   },
   plugins: [
     new webpack.DefinePlugin({

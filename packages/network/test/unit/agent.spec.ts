@@ -9,7 +9,7 @@ import url from 'url'
 import DebuggingProxy from '@cypress/debugging-proxy'
 import Request from '@cypress/request-promise'
 
-import * as socketIo from '@packages/socket/lib/browser'
+import * as socketIo from '@packages/socket/browser/client'
 import {
   buildConnectReqHead,
   createProxySock,
