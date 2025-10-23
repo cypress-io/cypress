@@ -9,7 +9,8 @@ _Released 10/20/2025 (PENDING)_
 
 **Bugfixes:**
 
-- Fixes an issue where grouped command text jumps up and down when expanding and collapsing in the command log. Addressed in [#32757](https://github.com/cypress-io/cypress/pull/32757).
+- Chrome's autofill popup is now disabled when filling address and credit card forms during test execution. We also added some other Chrome flags and preferences that are common when automating browsers. Fixes [#25608](https://github.com/cypress-io/cypress/issues/25608). Addressed in [#32811](https://github.com/cypress-io/cypress/pull/32811).
+- Fixed an issue where grouped command text jumps up and down when expanding and collapsing in the command log. Addressed in [#32757](https://github.com/cypress-io/cypress/pull/32757).
 
 **Misc:**
 
