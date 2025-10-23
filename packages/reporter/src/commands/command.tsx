@@ -277,12 +277,9 @@ const Message: React.FC<MessageProps> = observer(({ model }: MessageProps) => (
       />
     )}
     {!!model.displayMessage && <span
-      className={cs('command-message-text', { 'command-message-text-self-healed': model.isSelfHealed })}
+      className="command-message-text"
       dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage, model.name) }}
     />}
-    {model.isSelfHealed && (
-      <SelfHealedBadge source='command' />
-    )}
   </span>
 ))
 
@@ -331,7 +328,7 @@ interface CommandProps {
 
 const CommandDetails: React.FC<CommandDetailsProps> = observer(({ model, groupId, aliasesWithDuplicates }) => (
   <span className={cs('command-info')}>
-    <span className={cs('command-method', { 'command-method-child': !model.hasChildren, 'command-method-self-healed': model.isSelfHealed })}>
+    <span className={cs('command-method', { 'command-method-child': !model.hasChildren })}>
       <span>
         {model.event && model.type !== 'system' ? `(${displayName(model)})` : displayName(model)}
       </span>
@@ -540,7 +537,12 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
                     <ChevronIcon className={cs('command-expander', { 'command-expander-is-open': model.hasChildren && !!model.isOpen })} />
                   </div>
                 )}
-                <CommandDetails model={model} groupId={groupId} aliasesWithDuplicates={aliasesWithDuplicates} />
+                <div className='command-details-container'>
+                  <CommandDetails model={model} groupId={groupId} aliasesWithDuplicates={aliasesWithDuplicates} />
+                  {model.isSelfHealed && (
+                    <SelfHealedBadge source='command' />
+                  )}
+                </div>
                 <CommandControls model={model} commandName={commandName} />
               </div>
               {model.isCyPrompt && model.state === 'passed' && (

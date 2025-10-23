@@ -153,6 +153,14 @@
     }
   }
 
+  .command-details-container {
+    display: flex;
+    align-items: baseline;
+    margin-left: 0;
+    overflow: hidden;
+    width: 100%;
+  }
+
   .command-info {
     @include command-info-padding;
 
@@ -160,14 +168,12 @@
     font-weight: 600;
     margin-left: 0;
     overflow: hidden;
-    width: 100%;
     -webkit-line-clamp: 100;
     -webkit-box-orient: vertical;
 
     .command-aliases,
     .command-message {
       overflow: hidden;
-      display: inline-flex;
 
       .fa-circle {
         padding: 4px;
@@ -191,11 +197,6 @@
         color: $indigo-400;
       }
     }
-  }
-
-  .command-message-text-self-healed,
-  .command-method-self-healed {
-    margin-top: 1px;
   }
 
   .command-message-text {

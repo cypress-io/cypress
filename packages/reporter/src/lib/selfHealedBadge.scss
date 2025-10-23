@@ -11,10 +11,14 @@
   font-family: $font-system;
   font-size: 14px;
   font-weight: 400;
-  margin-left: 12px;
+  margin-left: 8px;
   margin-right: 4px;
   align-items: center;
   justify-content: center;
   white-space: nowrap;
   text-transform: none;
+}
+
+.command-self-healed-badge-command {
+  margin-top: 4px;
 }
