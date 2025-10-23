@@ -157,7 +157,6 @@
     @include command-info-padding;
 
     display: inline-flex;
-    align-items: center;
     font-weight: 600;
     margin-left: 0;
     overflow: hidden;
@@ -169,7 +168,6 @@
     .command-message {
       overflow: hidden;
       display: inline-flex;
-      align-items: center;
 
       .fa-circle {
         padding: 4px;
@@ -193,6 +191,11 @@
         color: $indigo-400;
       }
     }
+  }
+
+  .command-message-text-self-healed,
+  .command-method-self-healed {
+    margin-top: 1px;
   }
 
   .command-message-text {
@@ -557,7 +560,4 @@
     padding: 9px;
     margin: 8px 0;
   }
-
-
-
 }

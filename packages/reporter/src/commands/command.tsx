@@ -277,7 +277,7 @@ const Message: React.FC<MessageProps> = observer(({ model }: MessageProps) => (
       />
     )}
     {!!model.displayMessage && <span
-      className='command-message-text'
+      className={cs('command-message-text', { 'command-message-text-self-healed': model.isSelfHealed })}
       dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage, model.name) }}
     />}
     {model.isSelfHealed && (
@@ -331,7 +331,7 @@ interface CommandProps {
 
 const CommandDetails: React.FC<CommandDetailsProps> = observer(({ model, groupId, aliasesWithDuplicates }) => (
   <span className={cs('command-info')}>
-    <span className={cs('command-method', { 'command-method-child': !model.hasChildren })}>
+    <span className={cs('command-method', { 'command-method-child': !model.hasChildren, 'command-method-self-healed': model.isSelfHealed })}>
       <span>
         {model.event && model.type !== 'system' ? `(${displayName(model)})` : displayName(model)}
       </span>

@@ -53,7 +53,6 @@
         .collapsible-header-inner {
           padding: 6px 0 !important;
           width: 100%;
-          max-height: 30px;
         }
 
         &:focus {
@@ -73,7 +72,6 @@
       .hook-name {
         font-weight: 600;
         display: flex;
-        align-items: center;
       }
       
       .hook-failed-message {
