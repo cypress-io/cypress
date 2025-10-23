@@ -1,7 +1,7 @@
 import cs from 'classnames'
 import _ from 'lodash'
 import { observer } from 'mobx-react'
-import React, { useState } from 'react'
+import React from 'react'
 import appState, { AppState } from '../lib/app-state'
 import Command from '../commands/command'
 import Collapsible from '../collapsible/collapsible'
@@ -12,10 +12,9 @@ import { OpenFileInIDEButton } from '../header/OpenFileInIDEButton'
 export interface HookHeaderProps {
   model: HookModel
   number?: number
-  isOpen: boolean
 }
 
-const HookHeader = ({ model, number, isOpen }: HookHeaderProps) => (
+const HookHeader = ({ model, number }: HookHeaderProps) => (
   <span className='hook-name' data-cy={`hook-name-${model.hookName}`}>
     {model.hookName} {number && `(${number})`}
     {model.failed && <span className='hook-failed-message'> (failed)</span>}
@@ -28,33 +27,28 @@ export interface HookProps {
   scrollIntoView: Function
 }
 
-const Hook: React.FC<HookProps> = observer(({ model, showNumber, scrollIntoView }: HookProps) => {
-  const [isOpen, setIsOpen] = useState(true)
-
-  return (
-    <li className={cs('hook-item', { 'hook-failed': model.failed })}>
-      <Collapsible
-        header={
-          <>
-            <HookHeader model={model} number={showNumber ? model.hookNumber : undefined} isOpen={isOpen} />
-            {model.invocationDetails && Cypress.testingType !== 'component' && (
-              <span onClick={(e) => e.stopPropagation()}>
-                <OpenFileInIDEButton fileDetails={model.invocationDetails} className='hook-open-in-ide' />
-              </span>
-            )}
-          </>
-        }
-        headerClass='hook-header'
-        isOpen={isOpen}
-        onOpenStateChangeRequested={(isOpen: boolean) => setIsOpen(isOpen)}
-      >
-        <ul className='commands-container'>
-          {_.map(model.commands, (command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} scrollIntoView={scrollIntoView} />)}
-        </ul>
-      </Collapsible>
-    </li>
-  )
-})
+const Hook: React.FC<HookProps> = observer(({ model, showNumber, scrollIntoView }: HookProps) => (
+  <li className={cs('hook-item', { 'hook-failed': model.failed })}>
+    <Collapsible
+      header={
+        <>
+          <HookHeader model={model} number={showNumber ? model.hookNumber : undefined} />
+          {model.invocationDetails && Cypress.testingType !== 'component' && (
+            <span onClick={(e) => e.stopPropagation()}>
+              <OpenFileInIDEButton fileDetails={model.invocationDetails} className='hook-open-in-ide' />
+            </span>
+          )}
+        </>
+      }
+      headerClass='hook-header'
+      isOpen
+    >
+      <ul className='commands-container'>
+        {_.map(model.commands, (command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} scrollIntoView={scrollIntoView} />)}
+      </ul>
+    </Collapsible>
+  </li>
+))
 
 Hook.displayName = 'Hook'
 
