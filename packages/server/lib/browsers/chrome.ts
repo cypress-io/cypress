@@ -102,14 +102,13 @@ const _getChromePreferences = (userDir: string): Bluebird<ChromePreferences> => 
 }
 
 // Reads raw preferences from disk and merges them with defaults
-const _getChromePreferencesWithDefaults = (userDir: string): Bluebird<ChromePreferences> => {
-  return _getChromePreferences(userDir)
-  .then((existingPrefs) => {
-    // Merge default preferences with existing preferences
-    const defaultPrefs = module.exports._getDefaultChromePreferences()
+const _getChromePreferencesWithDefaults = async (userDir: string): Promise<ChromePreferences> => {
+  const existingPrefs = await _getChromePreferences(userDir)
 
-    return _mergeChromePreferences(defaultPrefs, existingPrefs)
-  })
+  // Merge default preferences with existing preferences
+  const defaultPrefs = module.exports._getDefaultChromePreferences()
+
+  return _mergeChromePreferences(defaultPrefs, existingPrefs)
 }
 
 const _mergeChromePreferences = (originalPrefs: ChromePreferences, newPrefs: ChromePreferences): ChromePreferences => {

@@ -977,7 +977,7 @@ describe('lib/browsers/chrome', () => {
       })
     })
 
-    it('writes default preferences when they do not exist on disk', () => {
+    it('writes default preferences when they do not exist on disk', async () => {
       const outputJson = sinon.stub(fs, 'outputJson')
       const defaultPrefs = outputJson.withArgs('/foo/Default/Preferences').resolves()
       const securePrefs = outputJson.withArgs('/foo/Default/Secure Preferences').resolves()
@@ -996,27 +996,25 @@ describe('lib/browsers/chrome', () => {
       // Get the default preferences that should be written
       const defaultChromePrefs = chrome._getDefaultChromePreferences()
 
-      expect(chrome._writeChromePreferences('/foo', originalPrefs, defaultChromePrefs)).to.eventually.equal()
-      .then(() => {
-        // Should write default preferences since they don't exist on disk
-        expect(defaultPrefs).to.be.calledWith('/foo/Default/Preferences', {
-          fake_preference: {
-            value: 'value',
-          },
-        })
+      await chrome._writeChromePreferences('/foo', originalPrefs, defaultChromePrefs)
 
-        // defaultSecure is empty, so it should not be written
-        expect(securePrefs).to.not.be.called
+      // Should write default preferences since they don't exist on disk
+      expect(defaultPrefs).to.be.calledWith('/foo/Default/Preferences', {
+        fake_preference: {
+          value: 'value',
+        },
+      })
 
-        expect(statePrefs).to.be.calledWith('/foo/Local State', {
-          fake_local_state: {
-            value: 'value',
-          },
-        })
+      // defaultSecure is empty, so it should not be written
+      expect(securePrefs).to.not.be.called
+
+      expect(statePrefs).to.be.calledWith('/foo/Local State', {
+        fake_local_state: {
+          value: 'value',
+        },
       })
-      .finally(() => {
-        mockDefaultPrefs.restore()
-      })
+
+      mockDefaultPrefs.restore()
     })
   })
 
