@@ -79,14 +79,14 @@ export class EarlyExitTerminator {
     this.terminator = pDefer<BaseReporterResults>()
   }
 
-  waitForEarlyExit (project: ProjectBase, exit?: boolean) {
+  waitForEarlyExit (project: ProjectBase) {
     debug('waiting for early exit')
 
     project.on('test:before:run', ({
       runnable,
       previousResults,
     }) => {
-      debug('preparing to run test, previous stats reported as %O', previousResults)
+      debug('preparing to run test, previous stats reported as %o', previousResults)
 
       this.intermediateStats = previousResults
       this.pendingRunnable = runnable

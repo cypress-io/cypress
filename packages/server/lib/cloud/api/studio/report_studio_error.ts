@@ -3,6 +3,7 @@ import Debug from 'debug'
 import { stripPath } from '../../strip_path'
 const debug = Debug('cypress:server:cloud:api:studio:report_studio_errors')
 import { logError } from '@packages/stderr-filtering'
+import exception from '../../exception'
 
 export interface ReportStudioErrorOptions {
   cloudApi: StudioCloudApi
@@ -17,6 +18,8 @@ interface StudioError {
   name: string
   stack: string
   message: string
+  code?: string | number
+  errno?: string | number
   studioMethod: string
   studioMethodArgs?: string
 }
@@ -55,7 +58,10 @@ export function reportStudioError ({
   let errorObject: Error
 
   if (!(error instanceof Error)) {
-    errorObject = new Error(String(error))
+    // Use safe serialization that handles circular references and other edge cases
+    const message = exception.safeErrorSerialize(error)
+
+    errorObject = new Error(message)
   } else {
     errorObject = error
   }
@@ -80,6 +86,8 @@ export function reportStudioError ({
         name: stripPath(errorObject.name ?? `Unknown name`),
         stack: stripPath(errorObject.stack ?? `Unknown stack`),
         message: stripPath(errorObject.message ?? `Unknown message`),
+        code: 'code' in errorObject ? errorObject.code as string | number : undefined,
+        errno: 'errno' in errorObject ? errorObject.errno as string | number : undefined,
         studioMethod,
         studioMethodArgs: studioMethodArgsString ? stripPath(studioMethodArgsString) : undefined,
       }],

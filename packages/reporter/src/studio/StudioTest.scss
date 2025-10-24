@@ -7,7 +7,9 @@
 .studio-header__test-section {
   display: flex;
   align-items: flex-start;
-  border-bottom: 1px solid $gray-900;
+  border: 1px solid $gray-900;
+  border-left: none;
+  border-right: none;
   padding: 16px;
   gap: 8px;
   font-size: 14px;
@@ -15,7 +17,8 @@
   flex-shrink: 0;
 
   .state-icon {
-    margin-top: 3px;
+    height: 32px;
+    min-height: 32px;
   }
 
   svg {
@@ -30,8 +33,19 @@
 .studio-header__test-section-left {
   display: flex;
   flex-grow: 1;
-  gap: 8px;
-  margin-top: 5px;
+  gap: 16px;
+
+  .studio-header__back-button {
+    padding: 0;
+    width: 32px;
+    min-width: 32px;
+    justify-content: center;
+  }
+
+  .studio-header__test-section-left-content {
+    display: flex;
+    gap: 8px;
+  }
 }
 
 .studio-header__test-section-right {
@@ -44,6 +58,8 @@
   color: $white;
   font-weight: 500;
   flex-grow: 1;
+  min-height: 32px;
+  margin-top: 5px;
 }
 
 .studio-header__test-tooltip-wrapper {

@@ -2,6 +2,10 @@
 
 .reporter {
   .hooks-container {
+    .hook-item {
+      padding-top: 4px;
+    }
+    
     .hook-header {
       font-family: $font-system;
       display: flex;
@@ -65,6 +69,10 @@
         }
       }
 
+      .hook-name {
+        font-weight: 600;
+      }
+      
       .hook-failed-message {
         color: $red-400;
       }

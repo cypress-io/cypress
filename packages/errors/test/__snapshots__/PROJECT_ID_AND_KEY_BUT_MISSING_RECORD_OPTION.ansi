@@ -1,0 +1,13 @@
+[31mThis project has been configured to record runs on our Cypress Cloud.[39m
+[31m[39m
+[31mIt currently has the projectId: [33mproject-id-123[39m[31m[39m
+[31m[39m
+[31mYou also provided your Record Key, but you did not pass the [95m--record[39m[31m flag.[39m
+[31m[39m
+[31mThis run will not be recorded.[39m
+[31m[39m
+[31mIf you meant to have this run recorded please additionally pass this flag:[39m
+[31m[39m
+[31m  [90m$[39m[31m [94mcypress run --record[39m[31m[39m
+[31m[39m
+[31mhttps://on.cypress.io/recording-project-runs[39m

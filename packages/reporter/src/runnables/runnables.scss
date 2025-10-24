@@ -579,3 +579,114 @@ $dotted-line-left-padding: 19px;
     }
   }
 }
+
+.runnable-popover-container {
+  position: relative;
+  display: inline-block;
+
+  .runnable-options-button {
+    padding: 0;
+    width: 32px;
+    justify-content: center;
+    color: $gray-500;
+  }
+  
+  .runnable-options-button-border {
+    border-color: rgb(255 255 255 / 0.2);
+  }
+
+  .runnable-options-button-icon {
+   rotate: 90deg;
+  }
+}
+
+.runnable-popover {
+  position: fixed;
+  z-index: 9999;
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  width: 250px;
+  max-width: 250px;
+  padding: 8px;
+  font-family: $font-system;
+  
+  .runnable-popover-section {
+    &:not(:last-child) {
+      border-bottom: 1px solid $gray-50;
+    }
+
+    .runnable-popover-section-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: $gray-600;
+      padding: 8px 6px 6px 6px;
+    }
+  }
+
+  .runnable-popover-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 6px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 400;
+    color: $gray-900;
+    text-align: left;
+
+    &:hover {
+      background-color: $gray-100;
+    }
+
+    svg {
+      flex-shrink: 0;
+      width: 16px;
+      height: 16px;
+    }
+
+    span {
+      flex: 1;
+    }
+  }
+
+  .runnable-popover-item-with-toggle {
+    .runnable-popover-item-with-toggle-content {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      color: $gray-900;
+      padding: 8px 6px;
+
+      .runnable-popover-item-text {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        flex: 1;
+  
+        .runnable-popover-item-label {
+          font-size: 14px;
+          font-weight: 400;
+        }
+      }
+    }
+
+    .runnable-popover-item-description {
+      font-size: 14px;
+      color: $gray-700;
+      line-height: 20px;
+      font-weight: 400;
+      padding: 0 6px;
+      display: block;
+    }
+
+    .switch {
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+  }
+}

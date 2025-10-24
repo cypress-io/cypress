@@ -1,8 +1,8 @@
 import _ from 'lodash'
 import Debug from 'debug'
 import util from '../util'
-import spawn from './spawn'
-import verifyModule from '../tasks/verify'
+import { start as spawnStart } from './spawn'
+import { start } from '../tasks/verify'
 import { exitWithError, errors } from '../errors'
 import { processTestingType, throwInvalidOptionError, checkConfigFile } from './shared'
 
@@ -110,6 +110,10 @@ const processRunOptions = (options: any = {}): string[] => {
     args.push('--parallel')
   }
 
+  if (options.posixExitCodes) {
+    args.push('--posix-exit-codes')
+  }
+
   if (options.port) {
     args.push('--port', options.port)
   }
@@ -164,7 +168,7 @@ const runModule = {
   processRunOptions,
   isValidProject,
   // resolves with the number of failed tests
-  start (options: any = {}): any {
+  async start (options: any = {}): Promise<any> {
     _.defaults(options, {
       key: null,
       spec: null,
@@ -179,7 +183,7 @@ const runModule = {
 
         debug('run to spawn.start args %j', args)
 
-        return spawn.start(args, {
+        return spawnStart(args, {
           dev: options.dev,
         })
       } catch (err: any) {
@@ -195,8 +199,9 @@ const runModule = {
       return run()
     }
 
-    return verifyModule.start()
-    .then(run)
+    await start()
+
+    return run()
   },
 }
 

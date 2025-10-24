@@ -57,7 +57,7 @@ export const cache = {
   getProjectRoots (): Promise<string[]> {
     return fileUtil.transaction((tx: Transaction) => {
       return this._getProjects(tx).then((projects) => {
-        const pathsToRemove = Promise.reduce(projects, (memo: string[], path) => {
+        const pathsToRemove = Promise.reduce(projects, (memo: string[], path: string) => {
           return fs.statAsync(path)
           .catch(() => {
             memo.push(path)

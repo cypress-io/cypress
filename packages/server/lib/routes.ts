@@ -3,7 +3,7 @@ import Debug from 'debug'
 import { ErrorRequestHandler, Request, Router } from 'express'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
-import { cors } from '@packages/network'
+import { domainPropsToHostname } from '@packages/network-tools'
 import type { NetworkProxy } from '@packages/proxy'
 import type { Cfg } from './project-base'
 import xhrs from './controllers/xhrs'
@@ -11,7 +11,7 @@ import { runner } from './controllers/runner'
 import { iframesController } from './controllers/iframes'
 import type { FoundSpec } from '@packages/types'
 import { getCtx } from '@packages/data-context'
-import { graphQLHTTP } from '@packages/graphql/src/makeGraphQLServer'
+import { graphQLHTTP } from '@packages/data-context/graphql/makeGraphQLServer'
 import type { RemoteStates } from './remote_states'
 import bodyParser from 'body-parser'
 import path from 'path'
@@ -86,7 +86,7 @@ export const createCommonRoutes = ({
       return next()
     }
 
-    const primaryHostname = cors.domainPropsToHostname(primary.props)
+    const primaryHostname = domainPropsToHostname(primary.props)
 
     // domain matches (example.com === example.com), but incoming request is
     // https:// (established above), while the domain the user is trying to
@@ -103,10 +103,14 @@ export const createCommonRoutes = ({
     next()
   })
 
-  // If we are in cypress in cypress we need to pass along the studio routes
+  // If we are in cypress in cypress we need to pass along the studio and cy-prompt routes
   // to the child project. We also add a utility route for testing HTTP status code UI
   if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
     router.get('/__cypress-studio/*', async (req, res) => {
+      await networkProxy.handleHttpRequest(req, res)
+    })
+
+    router.get('/__cypress-cy-prompt/*', async (req, res) => {
       await networkProxy.handleHttpRequest(req, res)
     })
 
@@ -116,12 +120,19 @@ export const createCommonRoutes = ({
   } else {
     // express matches routes in order. since this callback executes after the
     // router has already been defined, we need to create a new router to use
-    // for the studio routes
+    // for the studio and cy-prompt routes
     const studioRouter = Router()
 
     router.use('/', studioRouter)
     getCtx().coreData.studioLifecycleManager?.registerStudioReadyListener((studio) => {
       studio.initializeRoutes(studioRouter)
+    })
+
+    const cyPromptRouter = Router()
+
+    router.use('/', cyPromptRouter)
+    getCtx().coreData.cyPromptLifecycleManager?.registerCyPromptReadyListener((cyPrompt) => {
+      cyPrompt.initializeRoutes(cyPromptRouter)
     })
   }
 

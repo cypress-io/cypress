@@ -1,0 +1,5 @@
+[31mYour project does not contain a default [33msupportFile[39m[31m. We expect a file matching [94m/path/to/supportFile/**/*.{js,jsx,ts,tsx}[39m[31m to exist.[39m
+[31m[39m
+[31mIf a support file is not necessary for your project, set [33msupportFile[39m[31m to [95mfalse[39m[31m.[39m
+[31m[39m
+[31mhttps://on.cypress.io/support-file-missing-or-invalid[39m

@@ -4,7 +4,7 @@ contact_links:
     url: https://github.com/cypress-io/cypress/discussions
     about: This issue tracker is not for support questions. Please refer to our Discussions.
   - name: 💬 Chat
-    url: https://on.cypress.io/discord
+    url: https://on.cypress.io/chat
     about: Want to discuss Cypress with others? Check out our chat.
   - name: 📃 Documentation Issue
     url: https://github.com/cypress-io/cypress-documentation/issues/new

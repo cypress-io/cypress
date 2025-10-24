@@ -1,7 +1,8 @@
 /**
- * Standard error logging tags used for stderr filtering.a
+ * Standard error logging tags used for stderr filtering
  */
 import { START_TAG, END_TAG } from './constants'
+import { tagsDisabled } from './tagsDisabled'
 
 /**
  * Logs error messages with special tags for stderr filtering.
@@ -14,12 +15,10 @@ import { START_TAG, END_TAG } from './constants'
  * @param args The arguments to log as an error message
  */
 
-const DISABLE_TAGS = process.env.ELECTRON_ENABLE_LOGGING === '1'
-
 export const logError = (...args: any[]) => {
   // When electron debug is enabled, the output will not be filtered, so
   // these tags are not needed.
-  if (DISABLE_TAGS) {
+  if (tagsDisabled()) {
     // eslint-disable-next-line no-console
     console.error(...args)
   } else {

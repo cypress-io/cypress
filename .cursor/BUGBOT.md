@@ -102,9 +102,7 @@ Essential rules for reviewing code changes in the Cypress monorepo.
 
 ### Data & State Management (Medium Priority)
 - **@packages/data-context**: Data management
-  - Focus: State management patterns, data consistency, application state
-- **@packages/graphql**: GraphQL layer
-  - Focus: GraphQL schema changes, resolver logic, API schema definition
+  - Focus: State management patterns, data consistency, application state, GraphQL schema changes, resolver logic, API schema definition
 - **@packages/socket**: WebSocket communication
   - Focus: Socket security, message handling, real-time communication
 
@@ -133,7 +131,7 @@ Essential rules for reviewing code changes in the Cypress monorepo.
   - Focus: Scaffolding logic, template accuracy, project initialization
 
 ### Utility Packages (Lower Priority)
-- **@packages/root**: Root package (dummy package)
+- **@packages/root**: Root package
   - Focus: Monorepo setup, package coordination
 - **@packages/example**: Example project
   - Focus: Example accuracy, documentation quality, test examples

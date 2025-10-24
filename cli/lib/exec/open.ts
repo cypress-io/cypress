@@ -1,7 +1,7 @@
 import Debug from 'debug'
 import util from '../util'
-import spawn from './spawn'
-import verifyModule from '../tasks/verify'
+import { start as spawnStart } from './spawn'
+import { start as verifyStart } from '../tasks/verify'
 import { processTestingType, checkConfigFile } from './shared'
 import { exitWithError } from '../errors'
 
@@ -74,12 +74,12 @@ export const processOpenOptions = (options: any = {}): string[] => {
   return args
 }
 
-export const start = (options: any = {}): any => {
+export const start = async (options: any = {}): Promise<any> => {
   function open (): any {
     try {
       const args = processOpenOptions(options)
 
-      return spawn.start(args, {
+      return spawnStart(args, {
         dev: options.dev,
         detached: Boolean(options.detached),
       })
@@ -96,8 +96,9 @@ export const start = (options: any = {}): any => {
     return open()
   }
 
-  return verifyModule.start()
-  .then(open)
+  await verifyStart()
+
+  return open()
 }
 
 export default {

@@ -6,7 +6,7 @@ body:
       value: |
         ## If you are a customer of Cypress Cloud please utilize our [Support Portal](https://www.cypress.io/support/) for our fastest support!
         
-        ### Have a question? 👉 [Ask in chat](https://on.cypress.io/discord) or [start a new discussion](https://github.com/cypress-io/cypress/discussions).  
+        ### Have a question? 👉 [Ask in chat](https://on.cypress.io/chat) or [start a new discussion](https://github.com/cypress-io/cypress/discussions).  
         Issues in the Cypress repo are reserved for bugs and feature requests only.  Questions on how to use Cypress will be closed.
   - type: textarea
     id: current-behavior
@@ -36,22 +36,6 @@ body:
       label: Cypress Version
       description: What version of Cypress are you running? Run `cypress version` to see your current version. If possible, please update Cypress to the latest version first.
       placeholder: ex. 10.3.1
-    validations:
-      required: true
-  - type: input
-    id: node-version
-    attributes:
-      label: Node version
-      description: What version of node.js are you using to run Cypress?
-      placeholder: ex. v22.14.0
-    validations:
-      required: true
-  - type: input
-    id: os
-    attributes:
-      label: Operating System
-      description: What operating system is Cypress running on when you are encountering your problem?  The more specific the better.  ie macOS 12.4 or Windows 10.0.19044.1889
-      placeholder: ex. macOS 12.4
     validations:
       required: true
   - type: textarea

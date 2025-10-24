@@ -713,6 +713,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
         it('closed when nested logs that pass', () => {
           const nestedGroupId = addCommand(runner, {
             name: 'session',
+            defaultCollapsedState: 'closed',
             state: 'passed',
             type: 'child',
           })
@@ -727,6 +728,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
 
           const nestedSessionGroupId = addCommand(runner, {
             name: 'session',
+            defaultCollapsedState: 'closed',
             displayName: 'validate',
             type: 'child',
             groupLevel: 2,
@@ -769,6 +771,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
         it('closed when nested logs has failures but last log is successful', () => {
           const nestedGroupId = addCommand(runner, {
             name: 'session',
+            defaultCollapsedState: 'closed',
             state: 'passed',
             type: 'child',
           })
@@ -783,6 +786,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
 
           const nestedSessionGroupId = addCommand(runner, {
             name: 'session',
+            defaultCollapsedState: 'closed',
             displayName: 'validate',
             type: 'child',
             state: 'failed',
@@ -829,6 +833,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
         it('open when last log has failed', () => {
           const nestedGroupId = addCommand(runner, {
             name: 'session',
+            defaultCollapsedState: 'closed',
             state: 'passed',
             type: 'child',
           })
@@ -843,6 +848,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
 
           const nestedSessionGroupId = addCommand(runner, {
             name: 'session',
+            defaultCollapsedState: 'closed',
             displayName: 'validate',
             state: 'failed',
             type: 'system',
@@ -997,6 +1003,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
       cy.fixture('command_error').then((_commandErr) => {
         const groupId = addCommand(runner, {
           name: 'session',
+          defaultCollapsedState: 'closed',
           message: 'mock restore',
           state: 'passed',
           type: 'system',
@@ -1031,6 +1038,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
       cy.fixture('command_error').then((_commandErr) => {
         const groupId = addCommand(runner, {
           name: 'session',
+          defaultCollapsedState: 'closed',
           message: 'mock restore',
           state: 'passed',
           type: 'system',
@@ -1077,6 +1085,61 @@ describe('commands', { viewportHeight: 1000 }, () => {
       cy.contains('recreate session')
 
       cy.percySnapshot()
+    })
+  })
+
+  context('show fetch requests', () => {
+    it('toggles visibility of fetch requests', () => {
+      addCommand(runner, {
+        name: 'visit',
+        renderProps: {
+          message: 'visit https://example.com',
+        },
+      })
+
+      // Add fetch/request commands (event: true means it's a network request)
+      Array.from({ length: 3 }).forEach((_, index) => {
+        addCommand(runner, {
+          name: 'request',
+          event: true,
+          renderProps: {
+            indicator: 'successful',
+            wentToOrigin: true,
+            message: `GET /api/data/${index + 1}`,
+          },
+        })
+      })
+
+      cy.get('.command-name-visit').should('have.length', 2)
+      cy.contains('visit https://example.com').should('be.visible')
+
+      cy.get('.command-name-request').should('have.length', 3)
+      cy.contains('GET /api/data/1').should('be.visible')
+
+      cy.window().its('state.showFetchRequests').should('be.true')
+
+      cy.get('[data-cy="runnable-options-button"]').click()
+      cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
+
+      cy.window().its('state.showFetchRequests').should('be.true')
+
+      cy.get('[data-cy="show-http-requests-switch"]').click()
+
+      cy.window().its('state.showFetchRequests').should('be.false')
+
+      cy.get('.command-name-request').should('not.exist')
+
+      // This one has event = true, so it should be visible
+      cy.contains('(xhr stub)GET --- /posts')
+
+      cy.get('.command-name-visit').should('exist')
+
+      cy.get('[data-cy="show-http-requests-switch"]').click()
+
+      cy.window().its('state.showFetchRequests').should('be.true')
+
+      cy.get('.command-name-request').should('have.length', 3)
+      cy.contains('GET /api/data/1').should('be.visible')
     })
   })
 })

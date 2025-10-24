@@ -11,7 +11,11 @@
   <div v-else-if="props.studioStatus === 'IN_ERROR' || error">
     <StudioErrorPanel
       :event-manager="props.eventManager"
-      :on-retry="handleRetry"
+      :title="errorPanelProps.title"
+      :message="errorPanelProps.message"
+      :icon="errorPanelProps.icon"
+      :learn-more-url="errorPanelProps.learnMoreUrl"
+      :on-retry="errorPanelProps.onRetry"
     />
   </div>
   <div
@@ -25,13 +29,16 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch, computed, h } from 'vue'
 import { init, loadRemote, registerRemotes } from '@module-federation/runtime'
 import type { StudioAppDefaultShape, StudioPanelShape } from './studio-app-types'
+import type { UserProjectStatusStore } from '@cy/store/user-project-status-store'
 import LoadingStudioPanel from './LoadingStudioPanel.vue'
 import StudioErrorPanel from './StudioErrorPanel.vue'
 import type { EventManager } from '../runner/event-manager'
-import { useMutation, gql } from '@urql/vue'
+import { useMutation, gql, UseMutationResponse } from '@urql/vue'
+import { IconCypressStudio } from '@cypress-design/vue-icon'
+import type { SpecDirtyDataStore } from '../store/spec-dirty-data-store'
 
 // Mirrors the ReactDOM.Root type since incorporating those types
 // messes up vue typing elsewhere
@@ -51,8 +58,13 @@ const props = defineProps<{
   onStudioPanelClose: () => void
   eventManager: EventManager
   studioStatus: string | null
+  isCertError?: boolean | null
   cloudStudioSessionId?: string
   autUrlSelector: string
+  userProjectStatusStore: UserProjectStatusStore
+  hasRequestedProjectAccess: boolean
+  requestProjectAccessMutation: UseMutationResponse<any, any>
+  specDirtyDataStore: SpecDirtyDataStore
 }>()
 
 interface StudioApp { default: StudioAppDefaultShape }
@@ -63,6 +75,27 @@ const ReactStudioPanel = ref<StudioPanelShape | null>(null)
 const containerReactRootMap = new WeakMap<HTMLElement, Root>()
 
 const retryStudioMutation = useMutation(retryStudioMutationGql)
+
+const errorPanelProps = computed(() => {
+  if (props.isCertError) {
+    return {
+      title: 'Configure your proxy to use Cypress Studio',
+      message: 'Cypress Studio requires an internet connection. To continue, you may need to configure Cypress with your proxy settings.',
+      icon: () => {
+        return h(IconCypressStudio, {
+          size: '48',
+          'fill-color': 'gray-500',
+        })
+      },
+      learnMoreUrl: 'https://on.cypress.io/proxy-configuration',
+      onRetry: handleRetry,
+    }
+  }
+
+  return {
+    onRetry: handleRetry,
+  }
+})
 
 const maybeRenderReactComponent = () => {
   // Skip rendering if studio is initializing or errored out
@@ -79,6 +112,10 @@ const maybeRenderReactComponent = () => {
     onStudioPanelClose: props.onStudioPanelClose,
     studioSessionId: props.cloudStudioSessionId,
     autUrlSelector: props.autUrlSelector,
+    userProjectStatusStore: props.userProjectStatusStore,
+    hasRequestedProjectAccess: props.hasRequestedProjectAccess,
+    requestProjectAccessMutation: props.requestProjectAccessMutation,
+    specDirtyDataStore: props.specDirtyDataStore,
   })
 
   // Store the react root in a weak map keyed by the container. We do this so that we have a reference

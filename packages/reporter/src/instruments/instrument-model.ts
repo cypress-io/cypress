@@ -9,6 +9,8 @@ export interface AliasObject {
 
 export type Alias = string | Array<string> | null | AliasObject | Array<AliasObject>
 
+export type DefaultCollapsedState = 'closed' | 'open'
+
 export interface InstrumentProps {
   id: number
   alias?: Alias
@@ -23,6 +25,7 @@ export interface InstrumentProps {
   referencesAlias?: Alias
   instrument?: Instrument
   testId: string
+  defaultCollapsedState?: DefaultCollapsedState
 }
 
 export default class Log {
@@ -36,6 +39,7 @@ export default class Log {
   state: string
   referencesAlias?: Alias
   testId: string
+  defaultCollapsedState: DefaultCollapsedState
 
   constructor (props: InstrumentProps) {
     makeObservable(this, {
@@ -48,6 +52,7 @@ export default class Log {
       type: observable,
       state: observable,
       referencesAlias: observable.ref,
+      defaultCollapsedState: observable,
     })
 
     this.id = props.id
@@ -60,6 +65,7 @@ export default class Log {
     this.state = props.state
     this.referencesAlias = props.referencesAlias
     this.testId = props.testId
+    this.defaultCollapsedState = props.defaultCollapsedState || 'open'
   }
 
   update (props: InstrumentProps) {
@@ -71,5 +77,6 @@ export default class Log {
     this.type = props.type
     this.state = props.state
     this.referencesAlias = props.referencesAlias
+    this.defaultCollapsedState = props.defaultCollapsedState || 'open'
   }
 }

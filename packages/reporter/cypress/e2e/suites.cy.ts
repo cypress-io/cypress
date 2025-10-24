@@ -164,7 +164,7 @@ describe('suites', () => {
         cy.get('[data-cy="create-new-test-from-suite"]').click()
       })
 
-      cy.wrap(runner.emit).should('be.calledWith', 'studio:init:suite', { suiteId: 'r2' })
+      cy.wrap(runner.emit).should('be.calledWith', 'studio:init:suite', { suiteId: 'r2', entrySource: 'new-test-suite' })
     })
   })
 })

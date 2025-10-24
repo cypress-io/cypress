@@ -1,4 +1,3 @@
-import Bluebird from 'bluebird'
 import Debug from 'debug'
 import path from 'path'
 import util from '../util'
@@ -7,59 +6,62 @@ import { throwFormErrorText, errors } from '../errors'
 
 const debug = Debug('cypress:cli')
 
-const getVersions = (): any => {
-  return Bluebird.try(() => {
-    if (util.getEnv('CYPRESS_RUN_BINARY')) {
-      let envBinaryPath = path.resolve(util.getEnv('CYPRESS_RUN_BINARY') as string)
+const getBinaryDirectory = async (): Promise<string> => {
+  if (util.getEnv('CYPRESS_RUN_BINARY')) {
+    let envBinaryPath = path.resolve(util.getEnv('CYPRESS_RUN_BINARY') as string)
 
-      return state.parseRealPlatformBinaryFolderAsync(envBinaryPath)
-      .then((envBinaryDir: any) => {
-        if (!envBinaryDir) {
-          return throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath))()
-        }
+    try {
+      const envBinaryDir = await state.parseRealPlatformBinaryFolderAsync(envBinaryPath)
 
-        debug('CYPRESS_RUN_BINARY has binaryDir:', envBinaryDir)
+      if (!envBinaryDir) {
+        const raiseErrorFn = throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath))
 
-        return envBinaryDir
-      })
-      .catch({ code: 'ENOENT' }, (err: any) => {
-        return throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath))(err.message)
-      })
+        await raiseErrorFn()
+      }
+
+      debug('CYPRESS_RUN_BINARY has binaryDir:', envBinaryDir)
+
+      return envBinaryDir
+    } catch (err: any) {
+      const raiseErrorFn = throwFormErrorText(errors.CYPRESS_RUN_BINARY.notValid(envBinaryPath))
+
+      await raiseErrorFn(err.message)
     }
+  }
 
-    return state.getBinaryDir()
-  })
-  .then(state.getBinaryPkgAsync)
-  .then((pkg: any) => {
-    const versions = {
-      binary: state.getBinaryPkgVersion(pkg),
-      electronVersion: state.getBinaryElectronVersion(pkg),
-      electronNodeVersion: state.getBinaryElectronNodeVersion(pkg),
-    }
+  return state.getBinaryDir()
+}
 
-    debug('binary versions %o', versions)
+const getVersions = async (): Promise<any> => {
+  const binDir = await getBinaryDirectory()
 
-    return versions
-  })
-  .then((binaryVersions: any) => {
-    const buildInfo = util.pkgBuildInfo()
+  const pkg = await state.getBinaryPkgAsync(binDir)
 
-    let packageVersion = util.pkgVersion()
+  const versions = {
+    binary: state.getBinaryPkgVersion(pkg),
+    electronVersion: state.getBinaryElectronVersion(pkg),
+    electronNodeVersion: state.getBinaryElectronNodeVersion(pkg),
+  }
 
-    if (!buildInfo) packageVersion += ' (development)'
-    else if (!buildInfo.stable) packageVersion += ' (pre-release)'
+  debug('binary versions %o', versions)
 
-    const versions = {
-      package: packageVersion,
-      binary: binaryVersions.binary || 'not installed',
-      electronVersion: binaryVersions.electronVersion || 'not found',
-      electronNodeVersion: binaryVersions.electronNodeVersion || 'not found',
-    }
+  const buildInfo = util.pkgBuildInfo()
 
-    debug('combined versions %o', versions)
+  let packageVersion = util.pkgVersion()
 
-    return versions
-  })
+  if (!buildInfo) packageVersion += ' (development)'
+  else if (!buildInfo.stable) packageVersion += ' (pre-release)'
+
+  const versionsFinal = {
+    package: packageVersion,
+    binary: versions.binary || 'not installed',
+    electronVersion: versions.electronVersion || 'not found',
+    electronNodeVersion: versions.electronNodeVersion || 'not found',
+  }
+
+  debug('combined versions %o', versions)
+
+  return versionsFinal
 }
 
 const versionsModule = {

@@ -17,6 +17,7 @@ export const StudioMetricsTypes = {
   STUDIO_INTERACTION_RECORDED: 'studio:interaction:recorded',
   STUDIO_ASSERTION_RECORDED: 'studio:assertion:recorded',
   STUDIO_EDITOR_SAVED: 'studio:editor:saved',
+  STUDIO_RECOMMENDATION_EXPANDED: 'studio:recommendation:expanded',
 } as const
 
 export type StudioMetricsType =
@@ -34,6 +35,7 @@ export interface StudioEvent {
     version?: string
   }
   cypressVersion?: string
+  generationId?: string
 }
 
 interface RetryOptions {
@@ -71,9 +73,25 @@ export type StudioElectronApi = {
   createBrowserWindow: () => BrowserWindow
 }
 
+export interface StudioAuthenticatedUserShape {
+  id?: string // Cloud user id
+  name?: string
+  email?: string
+  authToken?: string
+}
+
+export interface StudioProjectOptions {
+  user?: StudioAuthenticatedUserShape
+  projectSlug?: string
+}
+
 export interface StudioServerOptions {
   studioHash?: string
   studioPath: string
+  getProjectOptions?: () => Promise<StudioProjectOptions>
+  /**
+   * @deprecated use getProjectOptions instead
+   */
   projectSlug?: string
   cloudApi: StudioCloudApi
   betterSqlite3Path: string

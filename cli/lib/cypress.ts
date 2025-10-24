@@ -1,14 +1,10 @@
 // https://github.com/cypress-io/cypress/issues/316
-
-import Bluebird from 'bluebird'
-import tmpModule from 'tmp'
-import fs from './fs'
+import tmp from 'tmp'
+import fs from 'fs-extra'
 import openModule from './exec/open'
 import runModule from './exec/run'
 import util from './util'
 import cli from './cli'
-
-const tmp = Bluebird.promisifyAll(tmpModule) as any
 
 const cypressModuleApi = {
   /**
@@ -25,35 +21,30 @@ const cypressModuleApi = {
    * Runs Cypress tests in the current project
    * @see https://on.cypress.io/module-api#cypress-run
    */
-  run (options: any = {}): any {
+  async run (options: any = {}): Promise<any> {
     if (!runModule.isValidProject(options.project)) {
-      return Bluebird.reject(new Error(`Invalid project path parameter: ${options.project}`))
+      throw new Error(`Invalid project path parameter: ${options.project}`)
     }
 
     options = util.normalizeModuleOptions(options)
-
     tmp.setGracefulCleanup()
 
-    return tmp.fileAsync()
-    .then((outputPath: string) => {
-      options.outputPath = outputPath
+    const outputPath: string = tmp.fileSync().name
 
-      return runModule.start(options)
-      .then((failedTests: any) => {
-        return fs.readJsonAsync(outputPath, { throws: false })
-        .then((output: any) => {
-          if (!output) {
-            return {
-              status: 'failed',
-              failures: failedTests,
-              message: 'Could not find Cypress test run results',
-            }
-          }
+    options.outputPath = outputPath
 
-          return output
-        })
-      })
-    })
+    const failedTests = await runModule.start(options)
+    const output = await fs.readJson(outputPath, { throws: false })
+
+    if (!output) {
+      return {
+        status: 'failed',
+        failures: failedTests,
+        message: 'Could not find Cypress test run results',
+      }
+    }
+
+    return output
   },
 
   cli: {

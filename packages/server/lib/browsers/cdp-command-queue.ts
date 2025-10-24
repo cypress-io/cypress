@@ -42,7 +42,7 @@ export class CDPCommandQueue {
     this.queue.push(commandPackage)
 
     debug('Command enqueued; new length: %d', this.queue.length)
-    debugVerbose('Queue Contents: %O', this.queue)
+    debugVerbose('Queue Contents: %o', this.queue)
 
     return deferred.promise
   }

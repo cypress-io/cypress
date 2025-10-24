@@ -1,5 +1,5 @@
+import { describe, expect, it, beforeEach } from '@jest/globals'
 import { parse } from '@babel/parser'
-import { expect } from 'chai'
 import dedent from 'dedent'
 import fs from 'fs-extra'
 import path from 'path'
@@ -73,7 +73,7 @@ describe('code-generator', () => {
       failed: [],
     }
 
-    expect(codeGenResults).deep.eq(expected)
+    expect(codeGenResults).toEqual(expected)
 
     const skippedExpected = {
       ...expected,
@@ -81,7 +81,7 @@ describe('code-generator', () => {
     }
     const skippedCodeGenResults = await codeGenerator(action, codeGenArgs)
 
-    expect(skippedCodeGenResults).deep.eq(skippedExpected)
+    expect(skippedCodeGenResults).toEqual(skippedExpected)
 
     const getMTimes = (files: Array<CodeGenResult>) => {
       return Promise.all(
@@ -91,7 +91,7 @@ describe('code-generator', () => {
     const mTimesBefore = await getMTimes(codeGenResults.files)
     let mTimesAfter = await getMTimes(skippedCodeGenResults.files)
 
-    expect(mTimesBefore).deep.eq(mTimesAfter)
+    expect(mTimesBefore).toEqual(mTimesAfter)
 
     const overwriteAction: Action = { ...action, overwrite: true }
     const overwriteExpected: CodeGenResults = {
@@ -103,11 +103,11 @@ describe('code-generator', () => {
       codeGenArgs,
     )
 
-    expect(overwriteCodeGenResults).deep.eq(overwriteExpected)
+    expect(overwriteCodeGenResults).toEqual(overwriteExpected)
 
     mTimesAfter = await getMTimes(overwriteCodeGenResults.files)
 
-    expect(mTimesBefore).not.deep.eq(mTimesAfter)
+    expect(mTimesBefore).not.toEqual(mTimesAfter)
     mTimesAfter.forEach((time, i) => expect(time > mTimesBefore[i]))
   })
 
@@ -139,13 +139,13 @@ describe('code-generator', () => {
       failed: [],
     }
 
-    expect(codeGenResults).deep.eq(expected)
+    expect(codeGenResults).toEqual(expected)
 
     const fileContent = (await fs.readFile(fileAbsolute)).toString()
 
-    expect(fileContent).eq(expected.files[0].content)
+    expect(fileContent).toEqual(expected.files[0].content)
 
-    expect(() => babelParse(fileContent)).not.throw()
+    expect(() => babelParse(fileContent)).not.toThrow()
   })
 
   it('should generate from empty component template', async () => {
@@ -178,13 +178,13 @@ describe('code-generator', () => {
       failed: [],
     }
 
-    expect(codeGenResults).deep.eq(expected)
+    expect(codeGenResults).toEqual(expected)
 
     const fileContent = (await fs.readFile(fileAbsolute)).toString()
 
-    expect(fileContent).eq(expected.files[0].content)
+    expect(fileContent).toEqual(expected.files[0].content)
 
-    expect(() => babelParse(fileContent)).not.throw()
+    expect(() => babelParse(fileContent)).not.toThrow()
   })
 
   it('should generate from Vue component template', async () => {
@@ -221,13 +221,13 @@ describe('code-generator', () => {
       failed: [],
     }
 
-    expect(codeGenResults).deep.eq(expected)
+    expect(codeGenResults).toEqual(expected)
 
     const fileContent = (await fs.readFile(fileAbsolute)).toString()
 
-    expect(fileContent).eq(expected.files[0].content)
+    expect(fileContent).toEqual(expected.files[0].content)
 
-    expect(() => babelParse(fileContent)).not.throw()
+    expect(() => babelParse(fileContent)).not.toThrow()
   })
 
   it('should generate from React component template', async () => {
@@ -268,13 +268,13 @@ describe('code-generator', () => {
       failed: [],
     }
 
-    expect(codeGenResults).deep.eq(expected)
+    expect(codeGenResults).toEqual(expected)
 
     const fileContent = (await fs.readFile(fileAbsolute)).toString()
 
-    expect(fileContent).eq(expected.files[0].content)
+    expect(fileContent).toEqual(expected.files[0].content)
 
-    expect(() => babelParse(fileContent)).not.throw()
+    expect(() => babelParse(fileContent)).not.toThrow()
   })
 
   it('should generate from React component template with default export', async () => {
@@ -315,13 +315,13 @@ describe('code-generator', () => {
       failed: [],
     }
 
-    expect(codeGenResults).deep.eq(expected)
+    expect(codeGenResults).toEqual(expected)
 
     const fileContent = (await fs.readFile(fileAbsolute)).toString()
 
-    expect(fileContent).eq(expected.files[0].content)
+    expect(fileContent).toEqual(expected.files[0].content)
 
-    expect(() => babelParse(fileContent)).not.throw()
+    expect(() => babelParse(fileContent)).not.toThrow()
   })
 
   it('should generate from e2eExamples', async () => {
@@ -335,13 +335,13 @@ describe('code-generator', () => {
     // https://github.com/cypress-io/cypress-example-kitchensink
     const codeGenResult = await codeGenerator(action, {})
 
-    expect(codeGenResult.files.length).gt(0)
+    expect(codeGenResult.files.length).toBeGreaterThan(0)
     for (const res of codeGenResult.files) {
-      expect(async () => await fs.access(res.file, fs.constants.F_OK)).not.throw()
+      expect(fs.access(res.file, fs.constants.F_OK)).resolves.not.toThrow()
       const shouldParse = ['js', 'ts'].some((ext) => res.file.endsWith(ext))
 
       if (shouldParse) {
-        expect(() => babelParse(res.content)).not.throw()
+        expect(() => babelParse(res.content)).not.toThrow()
       }
     }
   })
@@ -357,6 +357,7 @@ describe('code-generator', () => {
       currentProject: 'path/to/myProject',
       codeGenPath: path.join(__dirname, 'files', 'react', 'Button.jsx'),
       codeGenType: 'component',
+      // @ts-expect-error
       framework: CT_FRAMEWORKS[1],
       isDefaultSpecPattern: true,
       specPattern: [defaultSpecPattern.component],
@@ -366,16 +367,17 @@ describe('code-generator', () => {
 
     const codeGenResult = await codeGenerator(action, codeGenOptions)
 
-    expect(() => babelParse(codeGenResult.files[0].content)).not.throw()
+    expect(() => babelParse(codeGenResult.files[0].content)).not.toThrow()
   })
 
-  context('nonExampleSpecfile', () => {
+  describe('nonExampleSpecfile', () => {
     it('should return true after adding new spec file', async () => {
       const target = path.join(tmpPath, 'spec-check')
 
       const checkBeforeScaffolding = await hasNonExampleSpec(templates.e2eExamples, [])
 
-      expect(checkBeforeScaffolding, 'expected having no spec files to show no non-example specs').to.be.false
+      // expected having no spec files to show no non-example specs
+      expect(checkBeforeScaffolding).toBe(false)
 
       const scaffoldExamplesAction: Action = {
         templateDir: templates.e2eExamples,
@@ -390,13 +392,15 @@ describe('code-generator', () => {
 
       const scaffoldResults = await codeGenerator(scaffoldExamplesAction, {})
 
-      expect(scaffoldResults.files.length, 'expected scaffold files to be created').gt(0)
+      // expected scaffold files to be created
+      expect(scaffoldResults.files.length).toBeGreaterThan(0)
 
       const specs = addTemplatesAsSpecs(scaffoldResults)
 
       const checkAfterScaffolding = await hasNonExampleSpec(templates.e2eExamples, specs)
 
-      expect(checkAfterScaffolding, 'expected only having template files to show no non-example specs').to.be.false
+      // expected only having template files to show no non-example specs
+      expect(checkAfterScaffolding).toBe(false)
 
       const fileName = 'my-test-file.js'
       const scaffoldTemplateAction: Action = {
@@ -411,30 +415,31 @@ describe('code-generator', () => {
 
       const checkAfterTemplate = await hasNonExampleSpec(templates.e2eExamples, specsWithGenerated)
 
-      expect(checkAfterTemplate, 'expected check after adding a new spec to indicate there are now non-example specs').to.be.true
+      // expected check after adding a new spec to indicate there are now non-example specs
+      expect(checkAfterTemplate).toBe(true)
     })
 
-    it('should error if template dir does not exist', async () => {
+    it('should error if template dir does not exist', () => {
       const singleSpec = ['sample.spec.ts']
 
-      expect(async () => await hasNonExampleSpec('', singleSpec)).to.throw
+      expect(hasNonExampleSpec('', singleSpec)).rejects.toThrow()
     })
   })
 
-  context('hasNonExampleSpec', async () => {
+  describe('hasNonExampleSpec', () => {
     it('should error if template dir does not exist', () => {
-      expect(async () => await getExampleSpecPaths('')).to.throw
+      expect(getExampleSpecPaths('')).rejects.toThrow()
     })
 
     it('should return relative paths to example specs', async () => {
       const results = await getExampleSpecPaths(templates.e2eExamples)
 
-      expect(results.length).to.be.greaterThan(0)
+      expect(results.length).toBeGreaterThan(0)
 
       results.forEach((specPath) => {
         const fullPathToSpec = path.join(templates.e2eExamples, specPath)
 
-        expect(fs.pathExistsSync(fullPathToSpec), `expected to find file at ${fullPathToSpec}`).to.be.true
+        expect(fs.pathExistsSync(fullPathToSpec)).toBe(true)
       })
     })
   })

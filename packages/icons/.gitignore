@@ -1,0 +1,5 @@
+**/dist
+index.js
+index.mjs
+index.d.ts
+index.d.mts

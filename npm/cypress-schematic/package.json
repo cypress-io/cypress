@@ -4,8 +4,8 @@
   "description": "Official Cypress schematic for the Angular CLI",
   "main": "./src",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "build:watch": "tsc -p tsconfig.json --watch",
+    "build": "tsc -p tsconfig.build.json",
+    "build:watch": "tsc -p tsconfig.build.json --watch",
     "lint": "eslint",
     "test": "vitest run --no-file-parallelism"
   },
@@ -22,10 +22,10 @@
     "@schematics/angular": "^20.1.6",
     "@types/chai-enzyme": "0.6.13",
     "@types/mocha": "8.0.3",
-    "@types/node": "^22.17.1",
+    "@types/node": "^22.18.7",
     "eslint": "^9.31.0",
     "typescript": "~5.4.5",
-    "vitest": "3.2.4"
+    "vitest": "^3.2.4"
   },
   "peerDependencies": {
     "@angular/cli": ">=18.0.0",

@@ -3,7 +3,7 @@ const auth = require('basic-auth')
 const bodyParser = require('body-parser')
 const express = require('express')
 const http = require('http')
-const httpsProxy = require('@packages/https-proxy')
+const { create: createHttpsServer } = require('@packages/https-proxy/test/helpers/https_server')
 const path = require('path')
 const Promise = require('bluebird')
 const multer = require('multer')
@@ -377,7 +377,7 @@ const createApp = (port) => {
   })
 
   app.get('/aut-commands', async (req, res) => {
-    const script = (await fs.readFileAsync(path.join(__dirname, '..', 'fixtures', 'aut-commands.js'))).toString()
+    const script = (await fs.readFile(path.join(__dirname, '..', 'fixtures', 'aut-commands.js'))).toString()
 
     res.send(`
       <html>
@@ -411,7 +411,7 @@ httpPorts.forEach((port) => {
 // style to make sure we implement cookie handling correctly
 httpsPorts.forEach((port) => {
   const httpsApp = createApp(port)
-  const httpsServer = httpsProxy.httpsServer(httpsApp)
+  const httpsServer = createHttpsServer(httpsApp)
 
   return httpsServer.listen(port, () => {
     // eslint-disable-next-line no-console

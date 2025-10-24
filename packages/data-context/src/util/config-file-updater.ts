@@ -161,7 +161,7 @@ function setRootKeysSplicers (
     })
   })
 
-  debug('keys to update %O', keysToUpdate)
+  debug('keys to update %o', keysToUpdate)
 
   keysToUpdate.forEach(
     (key) => {
@@ -175,7 +175,7 @@ function setRootKeysSplicers (
 
   const keysToInsert = objKeys.filter((key) => !keysToUpdate.includes(key))
 
-  debug('keys to instert %O', keysToInsert)
+  debug('keys to instert %o', keysToInsert)
 
   if (keysToInsert.length) {
     const valuesInserted = `\n${lineStartSpacer}${ keysToInsert.map((key) => `${key}: ${stringify(obj[key])},`).join(`\n${lineStartSpacer}`)}`

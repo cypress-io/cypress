@@ -1,22 +1,21 @@
-const _ = require('lodash')
-const os = require('os')
-const debug = require('debug')('cypress:server:cloud:api')
-const debugProtocol = require('debug')('cypress:server:protocol')
-const request = require('@cypress/request-promise')
-const humanInterval = require('human-interval')
+import _ from 'lodash'
+import os from 'os'
+import debugModule from 'debug'
+import request from '@cypress/request-promise'
+import humanInterval from 'human-interval'
 
-const RequestErrors = require('@cypress/request-promise/errors')
+import * as RequestErrors from '@cypress/request-promise/errors'
 
-const pkg = require('@packages/root')
+import pkg from '@packages/root'
 
-const machineId = require('../machine_id')
-const errors = require('../../errors')
+import { machineId } from '../machine_id'
+import * as errors from '../../errors'
 
 import Bluebird from 'bluebird'
 
 import type { AfterSpecDurations } from '@packages/types'
-import agent from '@packages/network/lib/agent'
-import type { CombinedAgent } from '@packages/network/lib/agent'
+import { agent } from '@packages/network'
+import type { CombinedAgent } from '@packages/network'
 
 import { apiUrl, apiRoutes, makeRoutes } from '../routes'
 import { getText } from '../../util/status_code'
@@ -37,10 +36,18 @@ import type { CreateInstanceRequestBody, CreateInstanceResponse } from './create
 
 import { transformError } from './axios_middleware/transform_error'
 import { DecryptionError } from './cloud_request_errors'
+import { isNonRetriableCertErrorCode } from '../network/non_retriable_cert_error_codes'
+
+const debug = debugModule('cypress:server:cloud:api')
+const debugProtocol = debugModule('cypress:server:protocol')
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
 const TWO_MINUTES = humanInterval('2 minutes')
+
+function defaultTimeout () {
+  return process.env.CYPRESS_INTERNAL_API_TIMEOUT && !isNaN(Number(process.env.CYPRESS_INTERNAL_API_TIMEOUT)) ? Number(process.env.CYPRESS_INTERNAL_API_TIMEOUT) : SIXTY_SECONDS
+}
 
 function retryDelays (): number[] {
   return process.env.API_RETRY_INTERVALS
@@ -169,7 +176,7 @@ const getCachedResponse = (params) => {
   return responseCache[params.url]
 }
 
-const retryWithBackoff = (fn) => {
+const retryWithBackoff = (fn, options: { displayRetryErrors?: boolean } = { displayRetryErrors: true }) => {
   if (process.env.DISABLE_API_RETRIES) {
     debug('api retries disabled')
 
@@ -192,13 +199,15 @@ const retryWithBackoff = (fn) => {
 
       const delayMs = delays[retryIndex]
 
-      errors.warning(
-        'CLOUD_API_RESPONSE_FAILED_RETRYING', {
-          delayMs,
-          tries: delays.length - retryIndex,
-          response: err,
-        },
-      )
+      if (options.displayRetryErrors) {
+        errors.warning(
+          'CLOUD_API_RESPONSE_FAILED_RETRYING', {
+            delayMs,
+            tries: delays.length - retryIndex,
+            response: err,
+          },
+        )
+      }
 
       retryIndex++
 
@@ -224,6 +233,10 @@ const tagError = function (err) {
 // including decryption errors
 const isRetriableError = (err) => {
   if (err instanceof DecryptionError) {
+    return false
+  }
+
+  if (err.cause?.code && isNonRetriableCertErrorCode(err.cause?.code)) {
     return false
   }
 
@@ -404,7 +417,7 @@ export default {
           url: recordRoutes.runs(),
           json: true,
           encrypt: preflightResult.encrypt,
-          timeout: options.timeout ?? SIXTY_SECONDS,
+          timeout: options.timeout ?? defaultTimeout(),
           headers: {
             'x-route-version': '4',
             'x-cypress-request-attempt': attemptIndex,
@@ -478,7 +491,7 @@ export default {
         url: recordRoutes.instances(runId),
         json: true,
         encrypt: preflightResult.encrypt,
-        timeout: timeout ?? SIXTY_SECONDS,
+        timeout: timeout ?? defaultTimeout(),
         headers: {
           'x-route-version': '5',
           'x-cypress-run-id': runId,
@@ -498,7 +511,7 @@ export default {
         url: recordRoutes.instanceTests(instanceId),
         json: true,
         encrypt: preflightResult.encrypt,
-        timeout: timeout ?? SIXTY_SECONDS,
+        timeout: timeout ?? defaultTimeout(),
         headers: {
           'x-route-version': '1',
           'x-cypress-run-id': runId,
@@ -516,7 +529,7 @@ export default {
       return rp.put({
         url: recordRoutes.instanceStdout(options.instanceId),
         json: true,
-        timeout: options.timeout ?? SIXTY_SECONDS,
+        timeout: options.timeout ?? defaultTimeout(),
         body: {
           stdout: options.stdout,
         },
@@ -538,7 +551,7 @@ export default {
       return rp.put({
         url: recordRoutes.instanceArtifacts(options.instanceId),
         json: true,
-        timeout: options.timeout ?? SIXTY_SECONDS,
+        timeout: options.timeout ?? defaultTimeout(),
         body,
         headers: {
           'x-route-version': '1',
@@ -557,7 +570,7 @@ export default {
         url: recordRoutes.instanceResults(options.instanceId),
         json: true,
         encrypt: preflightResult.encrypt,
-        timeout: options.timeout ?? SIXTY_SECONDS,
+        timeout: options.timeout ?? defaultTimeout(),
         headers: {
           'x-route-version': '1',
           'x-cypress-run-id': options.runId,
@@ -594,7 +607,7 @@ export default {
   postLogout (authToken) {
     return Bluebird.join(
       this.getAuthUrls(),
-      machineId.machineId(),
+      machineId(),
       (urls, machineId) => {
         return rp.post({
           url: urls.dashboardLogoutUrl,
@@ -674,7 +687,7 @@ export default {
     })
   },
 
-  async getCaptureProtocolScript (url: string) {
+  async getCaptureProtocolScript (url: string, options: { displayRetryErrors?: boolean } = { displayRetryErrors: true }) {
     // TODO(protocol): Ensure this is removed in production
     if (process.env.CYPRESS_LOCAL_PROTOCOL_PATH) {
       debugProtocol(`Loading protocol via script at local path %s`, process.env.CYPRESS_LOCAL_PROTOCOL_PATH)
@@ -694,7 +707,7 @@ export default {
         encrypt: 'signed',
         resolveWithFullResponse: true,
       })
-    })
+    }, options)
 
     const verified = enc.verifySignature(res.body, res.headers['x-cypress-signature'])
 

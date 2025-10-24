@@ -55,7 +55,7 @@ export class NetworkProxy {
       isVerbose: true,
     })
 
-    await this.http.handleHttpRequest(req, res, span).finally(() => {
+    await this.http.handleHttpRequest(req, res, span || undefined).finally(() => {
       span?.end()
     })
   }

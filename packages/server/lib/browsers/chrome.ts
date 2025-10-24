@@ -1,11 +1,10 @@
 import Bluebird from 'bluebird'
-import check from 'check-more-types'
 import debugModule from 'debug'
 import la from 'lazy-ass'
 import _ from 'lodash'
 import os from 'os'
 import path from 'path'
-import extension from '@packages/extension'
+import * as extension from '@packages/extension'
 import mime from 'mime'
 import { launch } from '@packages/launcher'
 
@@ -21,8 +20,8 @@ import type { CriClient } from './cri-client'
 import type { Automation } from '../automation'
 import memory from './memory'
 
-import type { BrowserLaunchOpts, BrowserNewTabOpts, ProtocolManagerShape, RunModeVideoApi } from '@packages/types'
-import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
+import type { BrowserLaunchOpts, BrowserNewTabOpts, ProtocolManagerShape, CyPromptManagerShape, RunModeVideoApi } from '@packages/types'
+import type { CDPSocketServer } from '@packages/socket'
 import { DEFAULT_CHROME_FLAGS } from '../util/chromium_flags'
 
 const debug = debugModule('cypress:server:browsers:chrome')
@@ -216,8 +215,7 @@ async function _recordVideo (cdpAutomation: CdpAutomation, videoOptions: RunMode
 // a utility function that navigates to the given URL
 // once Chrome remote interface client is passed to it.
 const _navigateUsingCRI = async function (client, url) {
-  // @ts-ignore
-  la(check.url(url), 'missing url to navigate to', url)
+  la(_.isString(url) && url.match(/^https?:\/\/.*$/), 'missing url to navigate to', url)
   la(client, 'could not get CRI client')
   debug('received CRI client')
   debug('navigating to page %s', url)
@@ -411,6 +409,18 @@ export = {
     await options.protocolManager?.connectToBrowser(browserCriClient.currentlyAttachedProtocolTarget)
   },
 
+  async connectCyPromptToBrowser (options: { cyPromptManager?: CyPromptManagerShape }) {
+    const browserCriClient = this._getBrowserCriClient()
+
+    if (!browserCriClient?.currentlyAttachedTarget) throw new Error('Missing pageCriClient in connectCyPromptToBrowser')
+
+    if (!browserCriClient.currentlyAttachedCyPromptTarget) {
+      browserCriClient.currentlyAttachedCyPromptTarget = await browserCriClient.currentlyAttachedTarget.clone()
+    }
+
+    await options.cyPromptManager?.connectToBrowser(browserCriClient.currentlyAttachedCyPromptTarget)
+  },
+
   async closeProtocolConnection () {
     const browserCriClient = this._getBrowserCriClient()
 
@@ -595,15 +605,6 @@ export = {
     })
 
     la(browserCriClient, 'expected Chrome remote interface reference', browserCriClient)
-
-    try {
-      browserCriClient.ensureMinimumProtocolVersion('1.3')
-    } catch (err: any) {
-      // if this minimum chrome version changes, sync it with
-      // packages/web-config/webpack.config.base.ts and
-      // npm/webpack-batteries-included-preprocessor/index.js
-      throw new Error(`Cypress requires at least Chrome 64.\n\nDetails:\n${err.message}`)
-    }
 
     // monkey-patch the .kill method to that the CDP connection is closed
     const originalBrowserKill = launchedBrowser.kill

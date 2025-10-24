@@ -1,4 +1,4 @@
-import { expect } from 'chai'
+import { describe, it, expect } from 'vitest'
 
 // NOTE: these relative paths only work from the ./dist folder
 require('../test/fixtures/normal-deps/hook-require')
@@ -6,7 +6,7 @@ const result = require('../test/fixtures/normal-deps/lib/entry')
 
 describe('Normal Dependency', () => {
   it('is properly processed', () => {
-    expect(result.origin).to.equal('definitions')
-    expect(result.result).to.equal(4)
+    expect(result.origin).toEqual('definitions')
+    expect(result.result).toEqual(4)
   })
 })

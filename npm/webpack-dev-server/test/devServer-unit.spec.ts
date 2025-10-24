@@ -1,6 +1,6 @@
 import path from 'path'
-import proxyquire from 'proxyquire'
 import { expect } from 'chai'
+import sinon from 'sinon'
 
 import { createModuleMatrixResult } from './test-helpers/createModuleMatrixResult'
 import EventEmitter from 'events'
@@ -16,25 +16,29 @@ describe('devServer', function () {
   this.timeout(10 * 1000)
 
   it('creates a new devServer webpack5, webpackDevServer5', async () => {
-    const { devServer } = proxyquire('../src/devServer', {
-      './helpers/sourceRelativeWebpackModules': {
-        sourceDefaultWebpackDependencies: () => {
-          return createModuleMatrixResult({
-            webpack: 5,
-            webpackDevServer: 5,
-          })
-        } },
-    }) as typeof import('../src/devServer')
+    const sourceRelativeWebpackModules = require('../src/helpers/sourceRelativeWebpackModules')
+    const stub = sinon.stub(sourceRelativeWebpackModules, 'sourceDefaultWebpackDependencies')
+    .returns(createModuleMatrixResult({
+      webpack: 5,
+      webpackDevServer: 5,
+    }))
 
-    const result = await devServer.create({
-      specs: [],
-      cypressConfig,
-      webpackConfig: {},
-      devServerEvents: new EventEmitter(),
-    })
+    try {
+      const devServerModule = require('../src/devServer')
+      const { devServer } = devServerModule
 
-    expect(result.server).to.be.instanceOf(require('webpack-dev-server'))
-    expect(result.version).to.eq(5)
+      const result = await devServer.create({
+        specs: [],
+        cypressConfig,
+        webpackConfig: {},
+        devServerEvents: new EventEmitter(),
+      })
+
+      expect(result.server).to.be.instanceOf(require('webpack-dev-server'))
+      expect(result.version).to.eq(5)
+    } finally {
+      stub.restore()
+    }
   })
 
   // Writing to disk includes the correct source map size, where the difference will be made up from stat size vs parsed size
@@ -52,27 +56,28 @@ describe('devServer', function () {
 
     WEBPACK_DEV_SERVER_VERSIONS.forEach((version) => {
       it(`works for webpack-dev-server v${version}`, async () => {
-        const { devServer } = proxyquire('../src/devServer', {
-          './helpers/sourceRelativeWebpackModules': {
-            sourceDefaultWebpackDependencies: () => {
-              // using webpack version to wds version as it really doesn't matter much when testing here.
-              // webpack config is tested separately in makeWebpackConfig tests
-              return createModuleMatrixResult({
-                webpack: version,
-                webpackDevServer: version,
-              })
-            } },
-        }) as typeof import('../src/devServer')
+        const sourceRelativeWebpackModules = require('../src/helpers/sourceRelativeWebpackModules')
+        const stub = sinon.stub(sourceRelativeWebpackModules, 'sourceDefaultWebpackDependencies')
+        .returns(createModuleMatrixResult({
+          webpack: version,
+          webpackDevServer: version,
+        }))
 
-        const result = await devServer.create({
-          specs: [],
-          cypressConfig,
-          webpackConfig: {},
-          devServerEvents: new EventEmitter(),
-        })
+        try {
+          const devServerModule = require('../src/devServer')
+          const { devServer } = devServerModule
 
-        // @ts-expect-error
-        expect(result.server.options.devMiddleware.writeToDisk).to.be.true
+          const result = await devServer.create({
+            specs: [],
+            cypressConfig,
+            webpackConfig: {},
+            devServerEvents: new EventEmitter(),
+          })
+
+          expect(result.server.options.devMiddleware.writeToDisk).to.be.true
+        } finally {
+          stub.restore()
+        }
       })
     })
   })

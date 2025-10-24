@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /// <reference path="./cypress-npm-api.d.ts" />
 /// <reference path="./cypress-eventemitter.d.ts" />
 /// <reference path="./cypress-type-helpers.d.ts" />
@@ -58,6 +57,9 @@ declare namespace Cypress {
   }
   interface ObjectLike {
     [key: string]: any
+  }
+  interface PromptOptions {
+    placeholders?: Record<string, string>
   }
   interface Auth {
     username: string
@@ -684,21 +686,22 @@ declare namespace Cypress {
     Keyboard: {
       defaults(options: Partial<KeyboardDefaultsOptions>): void
       Keys: {
-        DOWN: 'ArrowDown',
-        LEFT: 'ArrowLeft',
-        RIGHT: 'ArrowRight',
-        UP: 'ArrowUp',
-        END: 'End',
-        HOME: 'Home',
-        PAGEDOWN: 'PageDown',
-        PAGEUP: 'PageUp',
-        ENTER: 'Enter',
-        TAB: 'Tab',
-        BACKSPACE: 'Backspace',
-        SPACE: 'Space',
-        DELETE: 'Delete',
-        INSERT: 'Insert',
-      },
+        DOWN: 'ArrowDown'
+        LEFT: 'ArrowLeft'
+        RIGHT: 'ArrowRight'
+        UP: 'ArrowUp'
+        END: 'End'
+        HOME: 'Home'
+        PAGEDOWN: 'PageDown'
+        PAGEUP: 'PageUp'
+        ENTER: 'Enter'
+        TAB: 'Tab'
+        BACKSPACE: 'Backspace'
+        SPACE: 'Space'
+        DELETE: 'Delete'
+        INSERT: 'Insert'
+        ESC: 'Escape'
+      }
     }
 
     /**
@@ -754,7 +757,7 @@ declare namespace Cypress {
      * Trigger action
      * @private
      */
-    action: <T = (any[] | void) >(action: string, ...args: any[]) => T
+    action: <T = (any[] | void)>(action: string, ...args: any[]) => T
 
     /**
      * Load files
@@ -1690,7 +1693,7 @@ declare namespace Cypress {
      *      cy.get('h1').should('equal', 'Example Domain')
      *    })
      */
-    origin<T extends any>(urlOrDomain: string, fn: () => void): Chainable<T>
+    origin<T>(urlOrDomain: string, fn: () => void): Chainable<T>
 
     /**
      * Enables running Cypress commands in a secondary origin.
@@ -1701,7 +1704,7 @@ declare namespace Cypress {
      *      expect(foo).to.equal('foo')
      *    })
      */
-    origin<T, S extends any>(urlOrDomain: string, options: {
+    origin<T, S>(urlOrDomain: string, options: {
       args: T
     }, fn: (args: T) => void): Chainable<S>
 
@@ -1848,7 +1851,12 @@ declare namespace Cypress {
      * @see https://on.cypress.io/prevuntil
      */
     prevUntil<E extends Node = HTMLElement>(element: E | JQuery<E>, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
-
+    /**
+     * An AI-powered command that generates Cypress commands from natural language test steps.
+     *
+     * @see https://on.cypress.io/prompt
+     */
+    prompt<T>(steps: string[], options?: PromptOptions): Chainable<T>
     /**
      * Read a file and yield its contents.
      *
@@ -2897,8 +2905,8 @@ declare namespace Cypress {
   }
 
   type RetryStrategyWithModeSpecs = RetryStrategy & {
-    openMode: boolean; // defaults to false
-    runMode: boolean; // defaults to true
+    openMode: boolean // defaults to false
+    runMode: boolean // defaults to true
   }
 
   type RetryStrategy =
@@ -2906,18 +2914,18 @@ declare namespace Cypress {
     | RetryStrategyDetectFlakeButAlwaysFailType
 
   interface RetryStrategyDetectFlakeAndPassOnThresholdType {
-    experimentalStrategy: "detect-flake-and-pass-on-threshold"
+    experimentalStrategy: 'detect-flake-and-pass-on-threshold'
     experimentalOptions?: {
-      maxRetries: number; // defaults to 2 if experimentalOptions is not provided, must be a whole number > 0
-      passesRequired: number; // defaults to 2 if experimentalOptions is not provided, must be a whole number > 0 and <= maxRetries
+      maxRetries: number // defaults to 2 if experimentalOptions is not provided, must be a whole number > 0
+      passesRequired: number // defaults to 2 if experimentalOptions is not provided, must be a whole number > 0 and <= maxRetries
     }
   }
 
   interface RetryStrategyDetectFlakeButAlwaysFailType {
-    experimentalStrategy: "detect-flake-but-always-fail"
+    experimentalStrategy: 'detect-flake-but-always-fail'
     experimentalOptions?: {
-      maxRetries: number; // defaults to 2 if experimentalOptions is not provided, must be a whole number > 0
-      stopIfAnyPassed: boolean; // defaults to false if experimentalOptions is not provided
+      maxRetries: number // defaults to 2 if experimentalOptions is not provided, must be a whole number > 0
+      stopIfAnyPassed: boolean // defaults to false if experimentalOptions is not provided
     }
   }
   interface ResolvedConfigOptions<ComponentDevServerOpts = any> {
@@ -3139,7 +3147,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/experiments#Experimental-CSP-Allow-List
      * @default false
      */
-    experimentalCspAllowList: boolean | experimentalCspAllowedDirectives[],
+    experimentalCspAllowList: boolean | experimentalCspAllowedDirectives[]
     /**
      * Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file during interactive mode.
      * @default false
@@ -3271,6 +3279,11 @@ declare namespace Cypress {
      * @default false
      */
     experimentalOriginDependencies?: boolean
+    /**
+     * Enables support for `cy.prompt`, an AI-powered command that turns natural language steps into executable Cypress test code.
+     * @default false
+     */
+    experimentalPromptCommand?: boolean
   }
 
   /**

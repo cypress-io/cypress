@@ -11,6 +11,8 @@ import { hideKeys } from '@packages/config'
 
 import { default as api } from '../cloud/api'
 import exception from '../cloud/exception'
+import { getError } from '@packages/errors'
+import type { AllCypressErrorNames } from '@packages/errors'
 import { get as getErrors, warning as errorsWarning, throwErr } from '../errors'
 import capture from '../capture'
 import { getResolvedRuntimeConfig } from '../config'
@@ -480,8 +482,21 @@ const createRun = Promise.method((options: any = {}) => {
             })
         }
       }
-      default:
-        throwCloudCannotProceed({ parallel, ciBuildId, group, err })
+      case 500:
+      case 503: {
+        throw cloudCannotProceedErr({ parallel, ciBuildId, group, err })
+      }
+      default: {
+        const errName: AllCypressErrorNames = parallel ? 'CLOUD_CANNOT_PROCEED_IN_PARALLEL_NETWORK' : 'CLOUD_CANNOT_PROCEED_IN_SERIAL_NETWORK'
+
+        throw getError(errName, {
+          response: err,
+          flags: {
+            group,
+            ciBuildId,
+          },
+        })
+      }
     }
   })
 })
@@ -571,6 +586,7 @@ const createRunAndRecordSpecs = (options: any = {}) => {
     testingType,
     quiet,
     autoCancelAfterFailures,
+    ctx,
   } = options
   const recordKey = options.key
 
@@ -621,6 +637,8 @@ const createRunAndRecordSpecs = (options: any = {}) => {
         })
       }
 
+      ctx.actions.currentRecording.startRun(resp.runId)
+
       const { runUrl, runId, machineId, groupId } = resp
       const protocolCaptureMeta = resp.capture || {}
 
@@ -645,6 +663,7 @@ const createRunAndRecordSpecs = (options: any = {}) => {
         })
         .then((resp: any = {}) => {
           instanceId = resp.instanceId
+          ctx.actions.currentRecording.startInstance(instanceId)
 
           // pull off only what we need
           const result = _
@@ -690,7 +709,7 @@ const createRunAndRecordSpecs = (options: any = {}) => {
             return
           }
 
-          debug('postInstanceResults resp %O', resp)
+          debug('postInstanceResults resp %o', resp)
           const { video, screenshots } = results
           const { videoUploadUrl, captureUploadUrl, screenshotUploadUrls } = resp
 

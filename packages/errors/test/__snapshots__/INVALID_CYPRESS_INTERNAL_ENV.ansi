@@ -1,0 +1,3 @@
+[31mWe have detected an unknown or unsupported [95mCYPRESS_INTERNAL_ENV[39m[31m value: [33mfoo[39m[31m[39m
+[31m[39m
+[31mCYPRESS_INTERNAL_ENV is reserved for internal use and cannot be modified.[39m

@@ -21,14 +21,14 @@ import user from './cloud/user'
 import cohorts from './cohorts'
 import { openProject } from './open_project'
 import { cache } from './cache'
-import { graphqlSchema } from '@packages/graphql/src/schema'
+import { graphqlSchema } from '@packages/data-context/graphql/schema'
 import { openExternal } from './gui/links'
 import { getUserEditor } from './util/editors'
 import * as savedState from './saved_state'
 import appData from './util/app_data'
 import browsers from './browsers'
 import devServer from './plugins/dev-server'
-import { remoteSchemaWrapped } from '@packages/graphql'
+import { remoteSchemaWrapped } from '@packages/data-context/graphql'
 
 const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 

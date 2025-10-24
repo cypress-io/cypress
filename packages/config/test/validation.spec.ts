@@ -1,6 +1,4 @@
-import snapshot from 'snap-shot-it'
-import { expect } from 'chai'
-
+import { describe, it, expect } from 'vitest'
 import * as validation from '../src/validation'
 
 describe('config/src/validation', () => {
@@ -10,8 +8,8 @@ describe('config/src/validation', () => {
     it('returns new validation function that accepts 2 arguments', () => {
       const validate = validation.validateAny(() => true, () => false)
 
-      expect(validate).to.be.a.instanceof(Function)
-      expect(validate.length).to.eq(2)
+      expect(validate).toBeInstanceOf(Function)
+      expect(validate.length).toEqual(2)
     })
 
     it('returned validation function will return true when any validations pass', () => {
@@ -19,11 +17,11 @@ describe('config/src/validation', () => {
       const key = `key_${value}`
       const validatePass1 = validation.validateAny((k, v) => `${value}`, (k, v) => true)
 
-      expect(validatePass1(key, value)).to.equal(true)
+      expect(validatePass1(key, value)).toEqual(true)
 
       const validatePass2 = validation.validateAny((k, v) => true, (k, v) => `${value}`)
 
-      expect(validatePass2(key, value)).to.equal(true)
+      expect(validatePass2(key, value)).toEqual(true)
     })
 
     it('returned validation function will return last failure result when all validations fail', () => {
@@ -31,11 +29,11 @@ describe('config/src/validation', () => {
       const key = `key_${value}`
       const validateFail1 = validation.validateAny((k, v) => `${value}`, (k, v) => false)
 
-      expect(validateFail1(key, value)).to.equal(false)
+      expect(validateFail1(key, value)).toEqual(false)
 
       const validateFail2 = validation.validateAny((k, v) => false, (k, v) => `${value}`)
 
-      expect(validateFail2(key, value)).to.equal(`${value}`)
+      expect(validateFail2(key, value)).toEqual(`${value}`)
     })
   })
 
@@ -43,8 +41,8 @@ describe('config/src/validation', () => {
     it('returns error message for certs not passed as an array array', () => {
       const result = validation.isValidRetriesConfig(mockKey, '1')
 
-      expect(result).to.not.be.true
-      snapshot(result)
+      expect(result).not.toBe(true)
+      expect(result).toMatchSnapshot()
     })
 
     it('returns error message for certs object without url', () => {
@@ -52,8 +50,8 @@ describe('config/src/validation', () => {
         { name: 'cert' },
       ])
 
-      expect(result).to.not.be.true
-      snapshot(result)
+      expect(result).not.toBe(true)
+      expect(result).toMatchSnapshot()
     })
 
     it('returns error message for certs url not matching *', () => {
@@ -61,15 +59,15 @@ describe('config/src/validation', () => {
         { url: 'http://url.com' },
       ])
 
-      expect(result).to.not.be.true
-      snapshot('missing https protocol', result)
+      expect(result).not.toBe(true)
+      expect(result).toMatchSnapshot('missing https protocol')
 
       result = validation.isValidClientCertificatesSet(mockKey, [
         { url: 'not *' },
       ])
 
-      expect(result).to.not.be.true
-      snapshot('invalid url', result)
+      expect(result).not.toBe(true)
+      expect(result).toMatchSnapshot('invalid url')
     })
   })
 
@@ -115,18 +113,22 @@ describe('config/src/validation', () => {
         },
       ]
 
-      // data-driven testing - computers snapshot value for each item in the list passed through the function
-      // https://github.com/bahmutov/snap-shot-it#data-driven-testing
-      return snapshot.apply(null, [validation.isValidBrowser].concat(browsers as any))
+      for (const browser of browsers) {
+        const isValid = validation.isValidBrowser(browser)
+
+        expect({
+          browser,
+          isValid,
+        }).toMatchSnapshot(`isValidBrowser ${browser.name}`)
+      }
     })
   })
 
   describe('.isValidBrowserList', () => {
     it('does not allow empty or not browsers', () => {
-      snapshot('undefined browsers', validation.isValidBrowserList('browsers', undefined))
-      snapshot('empty list of browsers', validation.isValidBrowserList('browsers', []))
-
-      return snapshot('browsers list with a string', validation.isValidBrowserList('browsers', ['foo']))
+      expect(validation.isValidBrowserList('browsers', undefined)).toMatchSnapshot('undefined browsers')
+      expect(validation.isValidBrowserList('browsers', [])).toMatchSnapshot('empty list of browsers')
+      expect(validation.isValidBrowserList('browsers', ['foo'])).toMatchSnapshot('browsers list with a string')
     })
   })
 
@@ -134,60 +136,60 @@ describe('config/src/validation', () => {
     it('returns true for valid retry value', () => {
       let result = validation.isValidRetriesConfig(mockKey, null)
 
-      expect(result).to.be.true
+      expect(result).toBe(true)
 
       result = validation.isValidRetriesConfig(mockKey, 2)
-      expect(result).to.be.true
+      expect(result).toBe(true)
 
       result = validation.isValidRetriesConfig(mockKey, 250)
-      expect(result).to.be.true
+      expect(result).toBe(true)
     })
 
     it('returns true for valid retry objects', () => {
       let result = validation.isValidRetriesConfig(mockKey, { runMode: 1 })
 
-      expect(result).to.be.true
+      expect(result).toBe(true)
 
       result = validation.isValidRetriesConfig(mockKey, { runMode: 250 })
-      expect(result).to.be.true
+      expect(result).toBe(true)
 
       result = validation.isValidRetriesConfig(mockKey, { openMode: 1 })
-      expect(result).to.be.true
+      expect(result).toBe(true)
 
       result = validation.isValidRetriesConfig(mockKey, { openMode: 250 })
-      expect(result).to.be.true
+      expect(result).toBe(true)
 
       result = validation.isValidRetriesConfig(mockKey, {
         runMode: 3,
         openMode: 0,
       })
 
-      expect(result).to.be.true
+      expect(result).toBe(true)
     })
 
     it('returns error message for invalid retry config', () => {
       let result = validation.isValidRetriesConfig(mockKey, '1')
 
-      expect(result).to.not.be.true
-      snapshot('invalid retry value', result)
+      expect(result).not.toBe(true)
+      expect(result).toMatchSnapshot('invalid retry value')
 
       result = validation.isValidRetriesConfig(mockKey, { fakeMode: 1 })
-      expect(result).to.not.be.true
-      snapshot('invalid retry object', result)
+      expect(result).not.toBe(true)
+      expect(result).toMatchSnapshot('invalid retry object')
     })
 
     it('returns error message for openMode as boolean without strategy', () => {
       let result = validation.isValidRetriesConfig(mockKey, { openMode: true })
 
-      expect(result).to.not.be.true
-      snapshot(result)
+      expect(result).not.toBe(true)
+      expect(result).toMatchSnapshot()
     })
 
     it('returns error message for runMode as boolean without strategy', () => {
       let result = validation.isValidRetriesConfig(mockKey, { runMode: true })
 
-      expect(result).to.not.be.true
-      snapshot(result)
+      expect(result).not.toBe(true)
+      expect(result).toMatchSnapshot()
     })
 
     it('returns true for valid retry object with experimental keys (default)', () => {
@@ -198,7 +200,7 @@ describe('config/src/validation', () => {
         experimentalOptions: undefined,
       })
 
-      expect(result).to.be.true
+      expect(result).toBe(true)
     })
 
     describe('experimental options', () => {
@@ -211,13 +213,13 @@ describe('config/src/validation', () => {
               experimentalStrategy: strategy,
             })
 
-            expect(result).to.be.true
+            expect(result).toBe(true)
 
             result = validation.isValidRetriesConfig(mockKey, {
               experimentalStrategy: strategy,
             })
 
-            expect(result).to.be.true
+            expect(result).toBe(true)
           })
 
           it(`experimentalStrategy is "${strategy}" with only "maxRetries" in "experimentalOptions"`, () => {
@@ -228,7 +230,7 @@ describe('config/src/validation', () => {
               },
             })
 
-            expect(result).to.not.be.true
+            expect(result).not.toBe(true)
           })
         })
 
@@ -243,7 +245,7 @@ describe('config/src/validation', () => {
             },
           })
 
-          expect(result).to.be.true
+          expect(result).toBe(true)
 
           result = validation.isValidRetriesConfig(mockKey, {
             experimentalStrategy: 'detect-flake-but-always-fail',
@@ -253,7 +255,7 @@ describe('config/src/validation', () => {
             },
           })
 
-          expect(result).to.be.true
+          expect(result).toBe(true)
         })
 
         it('experimentalStrategy is "detect-flake-and-pass-on-threshold" and has option "passesRequired"', () => {
@@ -267,7 +269,7 @@ describe('config/src/validation', () => {
             },
           })
 
-          expect(result).to.be.true
+          expect(result).toBe(true)
 
           result = validation.isValidRetriesConfig(mockKey, {
             experimentalStrategy: 'detect-flake-and-pass-on-threshold',
@@ -277,7 +279,7 @@ describe('config/src/validation', () => {
             },
           })
 
-          expect(result).to.be.true
+          expect(result).toBe(true)
         })
       })
 
@@ -287,8 +289,8 @@ describe('config/src/validation', () => {
             experimentalStrategy: 'foo',
           })
 
-          expect(result).to.not.be.true
-          snapshot(result)
+          expect(result).not.toBe(true)
+          expect(result).toMatchSnapshot()
         })
 
         it('invalid strategy w/ other options (valid)', () => {
@@ -298,8 +300,8 @@ describe('config/src/validation', () => {
             experimentalStrategy: 'bar',
           })
 
-          expect(result).to.not.be.true
-          snapshot(result)
+          expect(result).not.toBe(true)
+          expect(result).toMatchSnapshot()
         })
 
         ;['detect-flake-but-always-fail', 'detect-flake-and-pass-on-threshold'].forEach((strategy) => {
@@ -310,8 +312,8 @@ describe('config/src/validation', () => {
               experimentalStrategy: strategy,
             })
 
-            expect(result).to.not.be.true
-            snapshot(result)
+            expect(result).not.toBe(true)
+            expect(result).toMatchSnapshot()
           })
 
           it(`${strategy}: maxRetries is negative`, () => {
@@ -322,8 +324,8 @@ describe('config/src/validation', () => {
               },
             })
 
-            expect(result).to.not.be.true
-            snapshot(result)
+            expect(result).not.toBe(true)
+            expect(result).toMatchSnapshot()
           })
 
           it(`${strategy}: maxRetries is 0`, () => {
@@ -334,8 +336,8 @@ describe('config/src/validation', () => {
               },
             })
 
-            expect(result).to.not.be.true
-            snapshot(result)
+            expect(result).not.toBe(true)
+            expect(result).toMatchSnapshot()
           })
 
           it(`${strategy}: maxRetries is floating`, () => {
@@ -346,8 +348,8 @@ describe('config/src/validation', () => {
               },
             })
 
-            expect(result).to.not.be.true
-            snapshot(result)
+            expect(result).not.toBe(true)
+            expect(result).toMatchSnapshot()
           })
         })
 
@@ -361,8 +363,8 @@ describe('config/src/validation', () => {
               },
             })
 
-            expect(result).to.not.be.true
-            snapshot(result)
+            expect(result).not.toBe(true)
+            expect(result).toMatchSnapshot()
           })
 
           it(`passesRequired is 0`, () => {
@@ -374,8 +376,8 @@ describe('config/src/validation', () => {
               },
             })
 
-            expect(result).to.not.be.true
-            snapshot(result)
+            expect(result).not.toBe(true)
+            expect(result).toMatchSnapshot()
           })
 
           it(`passesRequired is floating`, () => {
@@ -387,8 +389,8 @@ describe('config/src/validation', () => {
               },
             })
 
-            expect(result).to.not.be.true
-            snapshot(result)
+            expect(result).not.toBe(true)
+            expect(result).toMatchSnapshot()
           })
 
           it('provides passesRequired without maxRetries', () => {
@@ -399,8 +401,8 @@ describe('config/src/validation', () => {
               },
             })
 
-            expect(result).to.not.be.true
-            snapshot(result)
+            expect(result).not.toBe(true)
+            expect(result).toMatchSnapshot()
           })
 
           it('provides passesRequired that is greater than maxRetries', () => {
@@ -412,8 +414,8 @@ describe('config/src/validation', () => {
               },
             })
 
-            expect(result).to.not.be.true
-            snapshot(result)
+            expect(result).not.toBe(true)
+            expect(result).toMatchSnapshot()
           })
 
           it('provides stopIfAnyPassed option', () => {
@@ -426,8 +428,8 @@ describe('config/src/validation', () => {
               },
             })
 
-            expect(result).to.not.be.true
-            snapshot(result)
+            expect(result).not.toBe(true)
+            expect(result).toMatchSnapshot()
           })
         })
 
@@ -442,8 +444,8 @@ describe('config/src/validation', () => {
               },
             })
 
-            expect(result).to.not.be.true
-            snapshot(result)
+            expect(result).not.toBe(true)
+            expect(result).toMatchSnapshot()
           })
 
           it('provides stopIfAnyPassed without maxRetries', () => {
@@ -454,8 +456,8 @@ describe('config/src/validation', () => {
               },
             })
 
-            expect(result).to.not.be.true
-            snapshot(result)
+            expect(result).not.toBe(true)
+            expect(result).toMatchSnapshot()
           })
 
           it('provides maxRetries without stopIfAnyPassed', () => {
@@ -466,8 +468,8 @@ describe('config/src/validation', () => {
               },
             })
 
-            expect(result).to.not.be.true
-            snapshot(result)
+            expect(result).not.toBe(true)
+            expect(result).toMatchSnapshot()
           })
 
           it('stopIfAnyPassed is a number (0 and 1 do not work)', () => {
@@ -479,8 +481,8 @@ describe('config/src/validation', () => {
               },
             })
 
-            expect(result).to.not.be.true
-            snapshot(result)
+            expect(result).not.toBe(true)
+            expect(result).toMatchSnapshot()
           })
         })
       })
@@ -491,20 +493,20 @@ describe('config/src/validation', () => {
     it('returns true for value=null', () => {
       const result = validation.isPlainObject(mockKey, null)
 
-      expect(result).to.be.true
+      expect(result).toBe(true)
     })
 
     it('returns true for value=number', () => {
       const result = validation.isPlainObject(mockKey, { foo: 'bar' })
 
-      expect(result).to.be.true
+      expect(result).toBe(true)
     })
 
     it('returns error message when value is a not an object', () => {
       const result = validation.isPlainObject(mockKey, 1)
 
-      expect(result).to.not.be.true
-      snapshot(result)
+      expect(result).not.toBe(true)
+      expect(result).toMatchSnapshot()
     })
   })
 
@@ -512,20 +514,20 @@ describe('config/src/validation', () => {
     it('returns true for value=null', () => {
       const result = validation.isNumber(mockKey, null)
 
-      expect(result).to.be.true
+      expect(result).toBe(true)
     })
 
     it('returns true for value=number', () => {
       const result = validation.isNumber(mockKey, 1)
 
-      expect(result).to.be.true
+      expect(result).toBe(true)
     })
 
     it('returns error message when value is a not a number', () => {
       const result = validation.isNumber(mockKey, 'string')
 
-      expect(result).to.not.be.true
-      snapshot(result)
+      expect(result).not.toBe(true)
+      expect(result).toMatchSnapshot()
     })
   })
 
@@ -533,20 +535,20 @@ describe('config/src/validation', () => {
     it('returns true for value=number', () => {
       const result = validation.isNumberOrFalse(mockKey, 1)
 
-      expect(result).to.be.true
+      expect(result).toBe(true)
     })
 
     it('returns true for value=false', () => {
       const result = validation.isNumberOrFalse(mockKey, false)
 
-      expect(result).to.be.true
+      expect(result).toBe(true)
     })
 
     it('returns error message when value is a not number or false', () => {
       const result = validation.isNumberOrFalse(mockKey, null)
 
-      expect(result).to.not.be.true
-      snapshot(result)
+      expect(result).not.toBe(true)
+      expect(result).toMatchSnapshot()
     })
   })
 
@@ -554,26 +556,27 @@ describe('config/src/validation', () => {
     it('returns true for value=null', () => {
       const result = validation.isFullyQualifiedUrl(mockKey, null)
 
-      expect(result).to.be.true
+      expect(result).toBe(true)
     })
 
     it('returns true for value=qualified urls', () => {
       let result = validation.isFullyQualifiedUrl(mockKey, 'https://url.com')
 
-      expect(result).to.be.true
+      expect(result).toBe(true)
       result = validation.isFullyQualifiedUrl(mockKey, 'http://url.com')
-      expect(result).to.be.true
+      expect(result).toBe(true)
     })
 
     it('returns error message when value is a not qualified url', () => {
       let result = validation.isFullyQualifiedUrl(mockKey, 'url.com')
 
-      expect(result).to.not.be.true
-      snapshot('not qualified url', result)
+      expect(result).not.toBe(true)
+      expect(result).toMatchSnapshot('not qualified url')
 
       result = validation.isFullyQualifiedUrl(mockKey, '')
-      expect(result).to.not.be.true
-      snapshot('empty string', result)
+
+      expect(result).not.toBe(true)
+      expect(result).toMatchSnapshot('empty string')
     })
   })
 
@@ -581,26 +584,26 @@ describe('config/src/validation', () => {
     it('returns true for value=null', () => {
       const result = validation.isBoolean(mockKey, null)
 
-      expect(result).to.be.true
+      expect(result).toBe(true)
     })
 
     it('returns true for value=true', () => {
       const result = validation.isBoolean(mockKey, true)
 
-      expect(result).to.be.true
+      expect(result).toBe(true)
     })
 
     it('returns true for value=false', () => {
       const result = validation.isBoolean(mockKey, false)
 
-      expect(result).to.be.true
+      expect(result).toBe(true)
     })
 
     it('returns error message when value is a not a string', () => {
       const result = validation.isString(mockKey, 1)
 
-      expect(result).to.not.be.true
-      snapshot(result)
+      expect(result).not.toBe(true)
+      expect(result).toMatchSnapshot()
     })
   })
 
@@ -608,20 +611,20 @@ describe('config/src/validation', () => {
     it('returns true for value=null', () => {
       const result = validation.isString(mockKey, null)
 
-      expect(result).to.be.true
+      expect(result).toBe(true)
     })
 
     it('returns true for value=array', () => {
       const result = validation.isString(mockKey, 'string')
 
-      expect(result).to.be.true
+      expect(result).toBe(true)
     })
 
     it('returns error message when value is a not a string', () => {
       const result = validation.isString(mockKey, 1)
 
-      expect(result).to.not.be.true
-      snapshot(result)
+      expect(result).not.toBe(true)
+      expect(result).toMatchSnapshot()
     })
   })
 
@@ -629,20 +632,20 @@ describe('config/src/validation', () => {
     it('returns true for value=null', () => {
       const result = validation.isArray(mockKey, null)
 
-      expect(result).to.be.true
+      expect(result).toBe(true)
     })
 
     it('returns true for value=array', () => {
       const result = validation.isArray(mockKey, [1, 2, 3])
 
-      expect(result).to.be.true
+      expect(result).toBe(true)
     })
 
     it('returns error message when value is a non-array', () => {
       const result = validation.isArray(mockKey, 1)
 
-      expect(result).to.not.be.true
-      snapshot(result)
+      expect(result).not.toBe(true)
+      expect(result).toMatchSnapshot()
     })
   })
 
@@ -650,20 +653,20 @@ describe('config/src/validation', () => {
     it('returns true for value=string', () => {
       const result = validation.isStringOrFalse(mockKey, 'string')
 
-      expect(result).to.be.true
+      expect(result).toBe(true)
     })
 
     it('returns true for value=false', () => {
       const result = validation.isStringOrFalse(mockKey, false)
 
-      expect(result).to.be.true
+      expect(result).toBe(true)
     })
 
     it('returns error message when value is neither string nor false', () => {
       const result = validation.isStringOrFalse(mockKey, null)
 
-      expect(result).to.not.be.true
-      snapshot(result)
+      expect(result).not.toBe(true)
+      expect(result).toMatchSnapshot()
     })
   })
 
@@ -671,25 +674,25 @@ describe('config/src/validation', () => {
     it('returns true for value=string', () => {
       const result = validation.isStringOrArrayOfStrings(mockKey, 'string')
 
-      expect(result).to.be.true
+      expect(result).toBe(true)
     })
 
     it('returns true for value=array of strings', () => {
       const result = validation.isStringOrArrayOfStrings(mockKey, ['string', 'other'])
 
-      expect(result).to.be.true
+      expect(result).toBe(true)
     })
 
     it('returns error message when value is neither string nor array of string', () => {
       let result = validation.isStringOrArrayOfStrings(mockKey, null)
 
-      expect(result).to.not.be.true
-      snapshot('not string or array', result)
+      expect(result).not.toBe(true)
+      expect(result).toMatchSnapshot('not string or array')
 
       result = validation.isStringOrArrayOfStrings(mockKey, [1, 2, 3])
 
-      expect(result).to.not.be.true
-      snapshot('array of non-strings', result)
+      expect(result).not.toBe(true)
+      expect(result).toMatchSnapshot('array of non-strings')
     })
   })
 
@@ -698,46 +701,46 @@ describe('config/src/validation', () => {
       const validate = validation.isOneOf('foo', 'bar')
 
       expect(validate).to.be.a('function')
-      expect(validate('test', 'foo')).to.be.true
-      expect(validate('test', 'bar')).to.be.true
+      expect(validate('test', 'foo')).toBe(true)
+      expect(validate('test', 'bar')).toBe(true)
 
       // different value
       let msg = validate('test', 'nope')
 
-      expect(msg).to.not.be.true
-      snapshot('not one of the strings error message', msg)
+      expect(msg).not.toBe(true)
+      expect(msg).toMatchSnapshot('not one of the strings error message')
 
       msg = validate('test', 42)
-      expect(msg).to.not.be.true
-      snapshot('number instead of string', msg)
+      expect(msg).not.toBe(true)
+      expect(msg).toMatchSnapshot('number instead of string')
 
       msg = validate('test', null)
-      expect(msg).to.not.be.true
+      expect(msg).not.toBe(true)
 
-      return snapshot('null instead of string', msg)
+      expect(msg).toMatchSnapshot('null instead of string')
     })
 
     it('validates a number', () => {
       const validate = validation.isOneOf(1, 2, 3)
 
       expect(validate).to.be.a('function')
-      expect(validate('test', 1)).to.be.true
-      expect(validate('test', 3)).to.be.true
+      expect(validate('test', 1)).toBe(true)
+      expect(validate('test', 3)).toBe(true)
 
       // different value
       let msg = validate('test', 4)
 
-      expect(msg).to.not.be.true
-      snapshot('not one of the numbers error message', msg)
+      expect(msg).not.toBe(true)
+      expect(msg).toMatchSnapshot('not one of the numbers error message')
 
       msg = validate('test', 'foo')
-      expect(msg).to.not.be.true
-      snapshot('string instead of a number', msg)
+      expect(msg).not.toBe(true)
+      expect(msg).toMatchSnapshot('string instead of a number')
 
       msg = validate('test', null)
-      expect(msg).to.not.be.true
+      expect(msg).not.toBe(true)
 
-      return snapshot('null instead of a number', msg)
+      return expect(msg).toMatchSnapshot('null instead of a number')
     })
   })
 
@@ -746,7 +749,7 @@ describe('config/src/validation', () => {
       const validate = validation.isArrayIncludingAny(true, false)
 
       expect(validate).to.be.a.instanceof(Function)
-      expect(validate.length).to.eq(2)
+      expect(validate.length).toEqual(2)
     })
 
     it('returned validation function will return true when value is a subset of the provided values', () => {
@@ -754,11 +757,11 @@ describe('config/src/validation', () => {
       const key = 'fakeKey'
       const validatePass1 = validation.isArrayIncludingAny(true, false)
 
-      expect(validatePass1(key, [false])).to.equal(true)
+      expect(validatePass1(key, [false])).toEqual(true)
 
       const validatePass2 = validation.isArrayIncludingAny(value, value + 1, value + 2)
 
-      expect(validatePass2(key, [value])).to.equal(true)
+      expect(validatePass2(key, [value])).toEqual(true)
     })
 
     it('returned validation function will fail if values is not an array', () => {
@@ -768,8 +771,8 @@ describe('config/src/validation', () => {
 
       let msg = validateFail(key, value)
 
-      expect(msg).to.not.be.true
-      snapshot('not an array error message', msg)
+      expect(msg).not.toBe(true)
+      expect(msg).toMatchSnapshot('not an array error message')
     })
 
     it('returned validation function will fail if any values are not present in the provided values', () => {
@@ -779,13 +782,13 @@ describe('config/src/validation', () => {
 
       let msg = validateFail(key, [null])
 
-      expect(msg).to.not.be.true
-      snapshot('not a subset of error message', msg)
+      expect(msg).not.toBe(true)
+      expect(msg).toMatchSnapshot('not a subset of error message')
 
       msg = validateFail(key, [value, value + 1, value + 2, value + 3])
 
-      expect(msg).to.not.be.true
-      snapshot('not all in subset error message', msg)
+      expect(msg).not.toBe(true)
+      expect(msg).toMatchSnapshot('not all in subset error message')
     })
   })
 
@@ -793,9 +796,9 @@ describe('config/src/validation', () => {
     it('validates booleans', () => {
       const validate = validation.isValidCrfOrBoolean
 
-      expect(validate).to.be.a('function')
-      expect(validate('test', false)).to.be.true
-      expect(validate('test', true)).to.be.true
+      expect(validate).toBeInstanceOf(Function)
+      expect(validate('test', false)).toBe(true)
+      expect(validate('test', true)).toBe(true)
     })
 
     it('validates any number between 0 and 51', () => {
@@ -804,7 +807,7 @@ describe('config/src/validation', () => {
       const validConfigNumbers = [...Array(51).keys()]
 
       validConfigNumbers.forEach((num) => {
-        expect(validate('test', num)).to.be.true
+        expect(validate('test', num)).toBe(true)
       })
     })
 
@@ -813,9 +816,9 @@ describe('config/src/validation', () => {
 
       const lowerBoundMsg = validate('test', -1)
 
-      expect(lowerBoundMsg).to.not.be.true
+      expect(lowerBoundMsg).not.toBe(true)
 
-      return snapshot('invalid lower bound', lowerBoundMsg)
+      return expect(lowerBoundMsg).toMatchSnapshot('invalid lower bound')
     })
 
     it('invalidates upper bound', () => {
@@ -823,9 +826,9 @@ describe('config/src/validation', () => {
 
       const upperBoundMsg = validate('test', 52)
 
-      expect(upperBoundMsg).to.not.be.true
+      expect(upperBoundMsg).not.toBe(true)
 
-      return snapshot('invalid upper bound', upperBoundMsg)
+      return expect(upperBoundMsg).toMatchSnapshot('invalid upper bound')
     })
   })
 })

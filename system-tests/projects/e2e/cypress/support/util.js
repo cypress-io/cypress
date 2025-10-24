@@ -24,6 +24,7 @@ export const verify = (title, ctx, options) => {
     column,
     message,
     stack,
+    skipTitleValidation,
   } = options
 
   const codeFrameFileRegex = new RegExp(`${Cypress.spec.relative}:${line}${column ? `:${column}` : ''}`)
@@ -66,7 +67,9 @@ export const verify = (title, ctx, options) => {
       .invoke('text')
       .should('match', codeFrameFileRegex)
 
-      cy.get('.test-err-code-frame pre span').should('include.text', `fail('${title}',this,()=>`)
+      if (!skipTitleValidation) {
+        cy.get('.test-err-code-frame pre span').should('include.text', `fail('${title}',this,()=>`)
+      }
 
       cy.contains('.test-err-code-frame .runnable-err-file-path', openInIdePath.relative)
     })

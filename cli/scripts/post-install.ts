@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // @ts-check
-/* eslint-disable no-console */
+
 import fs from 'fs-extra'
 import { includeTypes } from './utils'
 import shell from 'shelljs'

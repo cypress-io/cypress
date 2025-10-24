@@ -122,12 +122,13 @@ export default (Commands, Cypress, cy, state) => {
       if (err.type === 'existence') {
         // file exists but it shouldn't - or - file doesn't exist but it should
         const errPath = fileResult.contents ? 'files.existent' : 'files.nonexistent'
-        const { message, docsUrl } = $errUtils.cypressErrByPath(errPath, {
+        const { message, docsUrl, docsUrlTitle } = $errUtils.cypressErrByPath(errPath, {
           args: { cmd: 'readFile', file, filePath: fileResult.filePath },
         })
 
         err.message = message
         err.docsUrl = docsUrl
+        err.docsUrlTitle = docsUrlTitle
       }
 
       createFilePromise()

@@ -2,13 +2,18 @@ import { asyncRetry, linearDelay } from '../../../util/async_retry'
 import { isRetryableError } from '../../network/is_retryable_error'
 import fetch from 'cross-fetch'
 import os from 'os'
-import { agent } from '@packages/network'
+import { strictAgent } from '@packages/network'
 import { PUBLIC_KEY_VERSION } from '../../constants'
 import { createWriteStream } from 'fs'
 import { verifySignatureFromFile } from '../../encryption'
+import { HttpError } from '../../network/http_error'
+import { SystemError } from '../../network/system_error'
+import Debug from 'debug'
 
 const pkg = require('@packages/root')
 const _delay = linearDelay(500)
+const debug = Debug('cypress:server:cloud:api:studio:get_studio_bundle')
+
 const DEFAULT_TIMEOUT = 25000
 
 export const getStudioBundle = async ({ studioUrl, bundlePath }: { studioUrl: string, bundlePath: string }): Promise<string> => {
@@ -22,9 +27,11 @@ export const getStudioBundle = async ({ studioUrl, bundlePath }: { studioUrl: st
     }, DEFAULT_TIMEOUT)
 
     try {
+      debug('Fetching studio bundle from %s', studioUrl)
+
       const response = await fetch(studioUrl, {
         // @ts-expect-error - this is supported
-        agent,
+        agent: strictAgent,
         method: 'GET',
         headers: {
           'x-route-version': '1',
@@ -37,7 +44,9 @@ export const getStudioBundle = async ({ studioUrl, bundlePath }: { studioUrl: st
       })
 
       if (!response.ok) {
-        throw new Error(`Failed to download studio bundle: ${response.statusText}`)
+        const err = await HttpError.fromResponse(response)
+
+        throw err
       }
 
       responseSignature = response.headers.get('x-cypress-signature')
@@ -66,9 +75,23 @@ export const getStudioBundle = async ({ studioUrl, bundlePath }: { studioUrl: st
 
       clearTimeout(fetchTimeout)
     } catch (error) {
+      debug('Error fetching studio bundle from %s: %o', studioUrl, error)
+
       clearTimeout(fetchTimeout)
+
       if (error.name === 'AbortError') {
         throw new Error('Studio bundle fetch timed out')
+      }
+
+      if (HttpError.isHttpError(error)) {
+        throw error
+      }
+
+      if (error.errno || error.code) {
+        const sysError = new SystemError(error, studioUrl, error.code, error.errno)
+
+        sysError.stack = error.stack
+        throw sysError
       }
 
       throw error
@@ -92,6 +115,8 @@ export const getStudioBundle = async ({ studioUrl, bundlePath }: { studioUrl: st
   if (!verified) {
     throw new Error('Unable to verify studio signature')
   }
+
+  debug('Studio bundle fetched successfully from %s', studioUrl)
 
   return responseManifestSignature
 }

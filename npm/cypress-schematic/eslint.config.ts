@@ -1,4 +1,4 @@
-import { baseConfig } from '@packages/eslint-config'
+import { baseConfig, cliOverrides } from '@packages/eslint-config'
 import { globalIgnores } from 'eslint/config'
 
 export default [
@@ -6,17 +6,13 @@ export default [
   // dist folder, so we need to ignore them
   globalIgnores(['src/**/*.{js,js.map,d.ts}']),
   ...baseConfig,
+  ...cliOverrides,
   {
     files: ['**/*.spec.ts', '**/*.component.ts'],
     languageOptions: {
       parserOptions: {
-        projectService: false,
+        tsconfigRootDir: __dirname,
       },
-    },
-  },
-  {
-    rules: {
-      'no-console': 'off',
     },
   },
 ]

@@ -19,9 +19,11 @@ const {
   getStudioFileSource,
   validateStudioFile,
   getIndexJscHash,
+  getCyPromptFileSource,
+  validateCyPromptFile,
   DUMMY_INDEX_JSC_HASH,
 } = require('./binary/binary-sources')
-const verify = require('../cli/lib/tasks/verify').default
+const { needsSandbox } = require('../cli/lib/tasks/verify')
 const execa = require('execa')
 const meta = require('./binary/meta')
 
@@ -30,7 +32,7 @@ const CY_ROOT_DIR = path.join(__dirname, '..')
 const createJscFromCypress = async () => {
   const args = []
 
-  if (verify.needsSandbox()) {
+  if (needsSandbox()) {
     args.push('--no-sandbox')
   }
 
@@ -126,6 +128,17 @@ module.exports = async function (params) {
         fs.writeFile(studioPath, studioPathFileSource),
       ])
 
+      // Remove local cy prompt env
+      const cyPromptLifecycleManagerPath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/cy-prompt/CyPromptLifecycleManager.ts')
+      const cyPromptLifecycleManagerFileSource = await getCyPromptFileSource(cyPromptLifecycleManagerPath)
+      const cyPromptManagerPath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/cy-prompt/CyPromptManager.ts')
+      const cyPromptManagerFileSource = await getCyPromptFileSource(cyPromptManagerPath)
+
+      await Promise.all([
+        fs.writeFile(cyPromptLifecycleManagerPath, cyPromptLifecycleManagerFileSource),
+        fs.writeFile(cyPromptManagerPath, cyPromptManagerFileSource),
+      ])
+
       const integrityCheckSource = getIntegrityCheckSource(outputFolder)
 
       await fs.writeFile(path.join(outputFolder, 'index.js'), binaryByteNodeEntryPointSource)
@@ -137,6 +150,8 @@ module.exports = async function (params) {
         validateProtocolFile(cloudProtocolFilePath),
         validateStudioFile(reportStudioErrorPath),
         validateStudioFile(StudioLifecycleManagerPath),
+        validateCyPromptFile(cyPromptLifecycleManagerPath),
+        validateCyPromptFile(cyPromptManagerPath),
         validateStudioFile(studioProtocolFilePath),
         validateStudioFile(studioPath),
       ])

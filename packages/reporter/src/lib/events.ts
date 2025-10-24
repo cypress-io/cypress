@@ -11,6 +11,8 @@ import type { ReporterStartInfo, ReporterRunState } from '@packages/types'
 
 const localBus = new EventEmitter()
 
+type StudioEntrySource = 'welcome' | 'new-test-root' | 'new-test-suite' | 'edit'
+
 interface InitEvent {
   appState: AppState
   runnablesStore: RunnablesStore
@@ -79,6 +81,7 @@ const events: Events = {
     runner.on('run:start', action('run:start', () => {
       if (runnablesStore.hasTests) {
         appState.startRunning()
+        appState.hasBeenPaused = false
       }
     }))
 
@@ -201,6 +204,7 @@ const events: Events = {
         // the "autoScrollingEnabled" key in `savedState` stores to the preference value itself, it is not the same as the "autoScrollingEnabled" variable stored in application state, which can be temporarily deactivated
         autoScrollingEnabled: appState.autoScrollingUserPref,
         isSpecsListOpen: appState.isSpecsListOpen,
+        showFetchRequests: appState.showFetchRequests,
       })
     })
 
@@ -220,8 +224,8 @@ const events: Events = {
       runner.emit('studio:init:test', { testId })
     })
 
-    localBus.on('studio:init:suite', ({ suiteId }: { suiteId: string }) => {
-      runner.emit('studio:init:suite', { suiteId })
+    localBus.on('studio:init:suite', ({ suiteId, entrySource }: { suiteId: string, entrySource?: StudioEntrySource }) => {
+      runner.emit('studio:init:suite', { suiteId, entrySource })
     })
 
     localBus.on('studio:remove:command', (commandId) => {
@@ -238,6 +242,10 @@ const events: Events = {
 
     localBus.on('studio:copy:to:clipboard', (cb) => {
       runner.emit('studio:copy:to:clipboard', cb)
+    })
+
+    localBus.on('prompt:get-code', (args: { testId: string, logId: string }) => {
+      runner.emit('prompt:get-code', args)
     })
   },
 

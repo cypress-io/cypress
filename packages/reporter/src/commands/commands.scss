@@ -70,6 +70,7 @@
     .command-wrapper-text {
       display: flex;
       flex-wrap: nowrap;
+      width: 100%;
     }
 
     .command-interceptions {
@@ -94,6 +95,19 @@
         margin-left: 0;
       }
     }
+
+    .command-wrapper-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+
+      .command-prompt-get-code {
+        cursor: pointer;
+        font-family: $font-system;
+        font-size: 12px;
+      }
+    }
   }
 
   .command-number-column {
@@ -104,7 +118,7 @@
   // when no children, add padding to act as the .command-expander-column's width
   // to prevent adding another element to the page
   .command-number-column + span.command-pin-target {
-    margin-left: 24px;
+    margin-left: $gutter-margin;
   }
 
   .command-pin-target.command-group {
@@ -123,7 +137,7 @@
   }
 
   .command-wrapper-text-group {
-    padding-left: 15px;
+    margin-left: 15px;
     width: 100%;
   }
 
@@ -134,6 +148,7 @@
   .nested-group-expander {
     .command-expander {
       position: relative;
+
       margin-left: -16px !important; // Adjust this value to center the caret on the border
     }
   }
@@ -473,6 +488,7 @@
     .command-expander {
       color: $gray-500;
       transform: rotate(-90deg);
+      transform-origin: center;
       transition: transform 150ms ease-out;
 
       path {
@@ -500,6 +516,11 @@
     padding: 0;
     align-items: center;
     justify-content: center;
+    max-width: 33px;
+    height: 28px;
+    width: 33px;
+    padding-left: 15px;
+    margin-left: -15px;
 
     .command-expander {
       margin: 0;

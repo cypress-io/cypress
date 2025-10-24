@@ -1,0 +1,10 @@
+[31mThe run you are attempting to access is already complete and will not accept new groups.[39m
+[31m[39m
+[31mThe existing run is: [94mhttps://cloud.cypress.io/project/abcd/runs/1[39m[31m[39m
+[31m[39m
+[31mWhen a run finishes all of its groups, it waits for a configurable set of time before finally completing. You must add more groups during that time period.[39m
+[31m[39m
+[31mThe --group flag you passed was: [33mfoo[39m[31m[39m
+[31mThe --parallel flag you passed was: [33mtrue[39m[31m[39m
+[31m[39m
+[31mhttps://on.cypress.io/already-complete[39m

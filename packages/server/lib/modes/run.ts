@@ -159,6 +159,8 @@ const openProjectCreate = (projectRoot, socketId, args) => {
     onWarning,
     spec: args.spec,
     onError: args.onError,
+    record: args.record,
+    key: args.key,
   }
 
   return openProject.create(projectRoot, args, options)
@@ -443,7 +445,7 @@ async function listenForProjectEnd (project: ProjectBase, exit: boolean): Promis
     Promise.race([
       new Promise((res) => {
         project.once('end', (results) => {
-          debug('project ended with results %O', results)
+          debug('project ended with results %o', results)
           // If the project ends and the spec is skipped, treat the run as cancelled
           // as we do not want to update the dev server unnecessarily for justInTimeCompile.
           if (results?.skippedSpec) {
@@ -453,7 +455,7 @@ async function listenForProjectEnd (project: ProjectBase, exit: boolean): Promis
           res(results)
         })
       }),
-      earlyExitTerminator.waitForEarlyExit(project, exit),
+      earlyExitTerminator.waitForEarlyExit(project),
     ]).then((results) => {
       if (exit === false) {
         console.log('not exiting due to options.exit being false')
@@ -1106,7 +1108,6 @@ async function ready (options: ReadyOptions) {
     trashAssets(config),
   ])
 
-  // @ts-expect-error ctx is protected
   const specs = project.ctx.project.specs
 
   if (!specs.length) {
@@ -1182,6 +1183,7 @@ async function ready (options: ReadyOptions) {
       runAllSpecs,
       onError,
       quiet: options.quiet,
+      ctx: project.ctx,
     })
   }
 

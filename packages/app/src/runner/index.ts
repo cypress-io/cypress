@@ -22,7 +22,7 @@ import { getRunnerElement, empty } from './utils'
 import { IframeModel } from './iframe-model'
 import { AutIframe } from './aut-iframe'
 import { EventManager } from './event-manager'
-import { createWebsocket as createWebsocketIo } from '@packages/socket/lib/browser'
+import { createWebsocket as createWebsocketIo } from '@packages/socket/browser/client'
 import type { AutomationElementId } from '@packages/types'
 import { useSnapshotStore } from './snapshot-store'
 import { useStudioStore } from '../store/studio-store'
@@ -190,7 +190,7 @@ function teardownSpec (isRerun: boolean = false) {
 export async function teardown () {
   UnifiedReporterAPI.setInitializedReporter(false)
   _eventManager?.stop()
-  _eventManager?.teardown(getMobxRunnerStore())
+  await _eventManager?.teardown(getMobxRunnerStore())
   await _eventManager?.resetReporter()
   _eventManager = undefined
 }

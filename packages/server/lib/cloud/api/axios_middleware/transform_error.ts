@@ -13,9 +13,15 @@ export const transformError = (err: AxiosError | Error & { error?: any, statusCo
     { data: err.error, status: err.statusCode }
 
   if (isObject(data)) {
-    const body = JSON.stringify(data, null, 2)
+    let body: string | null = null
 
-    err.message = [status, body].join('\n\n')
+    try {
+      body = JSON.stringify(data, null, 2)
+    } catch (e) {
+      // do nothing
+    }
+
+    err.message = body ? [status, body].join('\n\n') : `${status}`
   }
 
   err.isApiError = true

@@ -32,7 +32,6 @@ describe('lib/browsers/chrome', () => {
       this.browserCriClient = {
         attachToTargetUrl: sinon.stub().resolves(this.pageCriClient),
         close: sinon.stub().resolves(),
-        ensureMinimumProtocolVersion: sinon.stub().withArgs('1.3').resolves(),
         getWebSocketDebuggerUrl: sinon.stub().returns('ws://debugger'),
       }
 
@@ -74,7 +73,6 @@ describe('lib/browsers/chrome', () => {
 
     afterEach(function () {
       mockfs.restore()
-      expect(this.browserCriClient.ensureMinimumProtocolVersion).to.be.calledOnce
     })
 
     it('focuses on the page, calls CRI Page.navigate, enables Page/Network/Fetch events, and sets download behavior', function () {
@@ -332,12 +330,6 @@ describe('lib/browsers/chrome', () => {
         expect(this.browserCriClient.close).to.be.calledOnce
         expect(kill).to.be.calledOnce
       })
-    })
-
-    it('rejects if CDP version check fails', function () {
-      this.browserCriClient.ensureMinimumProtocolVersion.throws()
-
-      return expect(chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)).to.be.rejectedWith('Cypress requires at least Chrome 64.')
     })
 
     it('sends after:browser:launch with debugger url', function () {
@@ -662,6 +654,82 @@ describe('lib/browsers/chrome', () => {
 
       expect(chrome.connectProtocolToBrowser({ protocolManager })).to.be.rejectedWith('Missing pageCriClient in connectProtocolToBrowser')
       expect(protocolManager.connectToBrowser).not.to.be.called
+    })
+  })
+
+  context('#connectCyPromptToBrowser', () => {
+    it('connects to the browser cri client', async function () {
+      const cyPromptManager = {
+        connectToBrowser: sinon.stub().resolves(),
+      }
+
+      const mockCurrentlyAttachedCyPromptTarget = {}
+
+      const pageCriClient = {
+        clone: sinon.stub().returns(mockCurrentlyAttachedCyPromptTarget),
+      }
+
+      const browserCriClient = {
+        currentlyAttachedTarget: pageCriClient,
+        currentlyAttachedCyPromptTarget: mockCurrentlyAttachedCyPromptTarget,
+      }
+
+      sinon.stub(chrome, '_getBrowserCriClient').returns(browserCriClient)
+
+      await chrome.connectCyPromptToBrowser({ cyPromptManager })
+
+      expect(pageCriClient.clone).not.to.be.called
+      expect(cyPromptManager.connectToBrowser).to.be.calledWith(mockCurrentlyAttachedCyPromptTarget)
+    })
+
+    it('connects to the browser cri client when the cy prompt target has not been created', async function () {
+      const cyPromptManager = {
+        connectToBrowser: sinon.stub().resolves(),
+      }
+
+      const mockCurrentlyAttachedCyPromptTarget = {}
+
+      const pageCriClient = {
+        clone: sinon.stub().resolves(mockCurrentlyAttachedCyPromptTarget),
+      }
+
+      const browserCriClient = {
+        currentlyAttachedTarget: pageCriClient,
+      }
+
+      sinon.stub(chrome, '_getBrowserCriClient').returns(browserCriClient)
+
+      await chrome.connectCyPromptToBrowser({ cyPromptManager })
+
+      expect(pageCriClient.clone).to.be.called
+      expect(cyPromptManager.connectToBrowser).to.be.calledWith(mockCurrentlyAttachedCyPromptTarget)
+      expect(browserCriClient.currentlyAttachedCyPromptTarget).to.eq(mockCurrentlyAttachedCyPromptTarget)
+    })
+
+    it('throws error if there is no browser cri client', function () {
+      const cyPromptManager = {
+        connectToBrowser: sinon.stub().resolves(),
+      }
+
+      sinon.stub(chrome, '_getBrowserCriClient').returns(null)
+
+      expect(chrome.connectCyPromptToBrowser({ cyPromptManager })).to.be.rejectedWith('Missing pageCriClient in connectCyPromptToBrowser')
+      expect(cyPromptManager.connectToBrowser).not.to.be.called
+    })
+
+    it('throws error if there is no page cri client', function () {
+      const cyPromptManager = {
+        connectToBrowser: sinon.stub().resolves(),
+      }
+
+      const browserCriClient = {
+        currentlyAttachedTarget: null,
+      }
+
+      sinon.stub(chrome, '_getBrowserCriClient').returns(browserCriClient)
+
+      expect(chrome.connectCyPromptToBrowser({ cyPromptManager })).to.be.rejectedWith('Missing pageCriClient in connectCyPromptToBrowser')
+      expect(cyPromptManager.connectToBrowser).not.to.be.called
     })
   })
 

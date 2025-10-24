@@ -7,16 +7,18 @@ import type { LocalBusEmitsMap, LocalBusEventMap, DriverToLocalBus, SocketToDriv
 import type { RunState, CachedTestState, AutomationElementId, FileDetails, ReporterStartInfo, ReporterRunState } from '@packages/types'
 
 import { logger } from './logger'
-import type { SocketShape } from '@packages/socket/lib/types'
+import type { SocketShape } from '@packages/socket/browser/client'
 import { automation, useRunnerUiStore, useSpecStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
-import { useStudioStore } from '../store/studio-store'
+import { EntrySource, useStudioStore } from '../store/studio-store'
 import { getAutIframeModel } from '.'
 import { handlePausing } from './events/pausing'
 import { addTelemetryListeners } from './events/telemetry'
-import { telemetry } from '@packages/telemetry/src/browser'
+import { telemetry } from '@packages/telemetry/browser/client'
 import { addCaptureProtocolListeners } from './events/capture-protocol'
 import { getRunnerConfigFromWindow } from './get-runner-config-from-window'
+import { usePromptStore } from '../store/prompt-store'
+import { useSpecDirtyDataStore } from '../store/spec-dirty-data-store'
 
 export type CypressInCypressMochaEvent = Array<Array<string | Record<string, any>>>
 
@@ -61,6 +63,8 @@ export class EventManager {
   ws: SocketShape
   specStore: ReturnType<typeof useSpecStore>
   studioStore: ReturnType<typeof useStudioStore>
+  promptStore: ReturnType<typeof usePromptStore>
+  specDirtyDataStore: ReturnType<typeof useSpecDirtyDataStore>
 
   constructor (
     // import '@packages/driver'
@@ -75,6 +79,8 @@ export class EventManager {
     this.ws = ws
     this.specStore = useSpecStore()
     this.studioStore = useStudioStore()
+    this.promptStore = usePromptStore()
+    this.specDirtyDataStore = useSpecDirtyDataStore()
   }
 
   getCypress () {
@@ -276,8 +282,13 @@ export class EventManager {
     this.reporterBus.on('studio:init:test', studioInitTest)
     this.localBus.on('studio:init:test', studioInitTest)
 
-    const studioInitSuite = ({ suiteId, showUrlPrompt = true }: { suiteId: string, showUrlPrompt?: boolean }) => {
+    const studioInitSuite = ({ suiteId, showUrlPrompt = true, entrySource }: { suiteId: string, showUrlPrompt?: boolean, entrySource?: EntrySource }) => {
       this.studioStore.setSuiteId(suiteId)
+
+      if (entrySource) {
+        this.studioStore.setEntrySource(entrySource)
+      }
+
       this.studioStore.setShowUrlPrompt(showUrlPrompt)
 
       this.ws.emit('studio:init', { sessionId: this.studioStore.sessionId }, ({ canAccessStudioAI, cloudStudioSessionId, error }) => {
@@ -402,6 +413,8 @@ export class EventManager {
       this._clearAllCookies()
       this._setUnload()
     })
+
+    this.addPromptListeners()
   }
 
   start (config) {
@@ -452,6 +465,12 @@ export class EventManager {
     }
 
     this._addListeners()
+
+    if (Cypress.config('experimentalPromptCommand')) {
+      await new Promise((resolve) => {
+        this.ws.emit('prompt:reset', resolve)
+      })
+    }
   }
 
   isBrowserFamily (family: string) {
@@ -810,21 +829,7 @@ export class EventManager {
       },
     )
 
-    /**
-     * Call a backend request for the requesting spec bridge since we cannot have websockets in the spec bridges.
-     * Return it's response.
-     */
-    Cypress.primaryOriginCommunicator.on('backend:request', async ({ args }, { source, responseEvent }) => {
-      let response
-
-      try {
-        response = await Cypress.backend(...args)
-      } catch (error) {
-        response = { error }
-      }
-
-      Cypress.primaryOriginCommunicator.toSource(source, responseEvent, response)
-    })
+    Cypress.handlePrimaryOriginSocketEvent(Cypress, 'backend:request')
 
     /**
      * Call an automation request for the requesting spec bridge since we cannot have websockets in the spec bridges.
@@ -886,6 +891,7 @@ export class EventManager {
       numPending: runState.pending,
       autoScrollingEnabled: runState.autoScrollingEnabled,
       isSpecsListOpen: runState.isSpecsListOpen,
+      showFetchRequests: runState.showFetchRequests,
       scrollTop: runState.scrollTop,
       studioActive: hasActiveStudio,
       studioSingleTestActive,
@@ -921,6 +927,9 @@ export class EventManager {
     // clean up the cross origin logs in memory to prevent dangling references as the log objects themselves at this point will no longer be needed.
     crossOriginLogs = {}
     this.studioStore.setActive(false)
+    this.promptStore.resetState()
+    this.specDirtyDataStore.resetDirtyState()
+    await new Promise((resolve) => this.ws.emit('prompt:reset', resolve))
   }
 
   resetReporter () {
@@ -935,6 +944,8 @@ export class EventManager {
       // if the tests have been reloaded then there is nothing to rerun
       return
     }
+
+    this.promptStore.resetState()
 
     await this.resetReporter()
 
@@ -983,6 +994,10 @@ export class EventManager {
 
   off (event: string, listener: (...args: any[]) => void) {
     this.localBus.off(event, listener)
+  }
+
+  removeAllListeners (event: string) {
+    this.localBus.removeAllListeners(event)
   }
 
   notifyRunningSpec (specFile) {
@@ -1034,5 +1049,24 @@ export class EventManager {
   // useful for testing
   _testingOnlySetCypress (cypress: any) {
     Cypress = cypress
+  }
+
+  private addPromptListeners () {
+    this.reporterBus.on('prompt:get-code', ({ testId, logId }) => {
+      this.promptStore.openGetCodeModal({
+        testId,
+        logId,
+      })
+    })
+
+    this.localBus.removeAllListeners('prompt:more-info-needed')
+    this.localBus.on('prompt:more-info-needed', ({ testId, logId, onSave, onCancel }) => {
+      this.promptStore.openMoreInfoNeededModal({
+        testId,
+        logId,
+        onSave,
+        onCancel,
+      })
+    })
   }
 }
