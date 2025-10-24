@@ -98,7 +98,7 @@ describe('lib/append_electron_switches', () => {
         commandLine: {
           appendSwitch: sinon.stub(),
         },
-      } as Electron.App
+      } as unknown as Electron.App
 
       appendElectronSwitches(mockApp)
 
@@ -118,7 +118,7 @@ describe('lib/append_electron_switches', () => {
         commandLine: {
           appendSwitch: sinon.stub(),
         },
-      } as Electron.App
+      } as unknown as Electron.App
 
       appendElectronSwitches(mockApp)
       expect(mockApp.commandLine.appendSwitch).to.have.been.calledWith('--foo')
