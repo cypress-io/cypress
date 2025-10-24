@@ -164,6 +164,7 @@ export default class Command extends Instrument {
       hasChildren: computed,
       showError: computed,
       setGroup: action,
+      isSelfHealed: computed,
     })
 
     if (props.err) {
