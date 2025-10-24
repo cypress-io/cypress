@@ -1050,7 +1050,24 @@ describe('lib/browsers/chrome', () => {
 
       return chrome._getChromePreferencesWithDefaults('/foo')
       .then((result) => {
-        expect(result).to.deep.eq(mockDefaults)
+        // Should merge defaults with existing preferences, where existing values take precedence
+        expect(result).to.deep.eq({
+          default: {
+            fake_preference: {
+              value: 'value',
+            },
+            existing: 'value', // existing preference should be merged in
+          },
+          defaultSecure: {
+            secure: 'value', // existing preference should be merged in
+          },
+          localState: {
+            fake_local_state: {
+              value: 'value',
+            },
+            local: 'value', // existing preference should be merged in
+          },
+        })
       })
       .finally(() => {
         mockDefaultPrefs.restore()

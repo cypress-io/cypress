@@ -106,7 +106,7 @@ const _getChromePreferencesWithDefaults = (userDir: string): Bluebird<ChromePref
   return _getChromePreferences(userDir)
   .then((existingPrefs) => {
     // Merge default preferences with existing preferences
-    const defaultPrefs = _getDefaultChromePreferences()
+    const defaultPrefs = module.exports._getDefaultChromePreferences()
 
     return _mergeChromePreferences(defaultPrefs, existingPrefs)
   })
@@ -600,7 +600,7 @@ export = {
 
     // Merge preferences BEFORE writing them to disk
     // Start with defaults merged with raw preferences
-    let finalPreferences = _mergeChromePreferences(_getDefaultChromePreferences(), rawPreferences)
+    let finalPreferences = _mergeChromePreferences(module.exports._getDefaultChromePreferences(), rawPreferences)
 
     if (launchOptions.preferences) {
       finalPreferences = _mergeChromePreferences(finalPreferences, launchOptions.preferences as ChromePreferences)
