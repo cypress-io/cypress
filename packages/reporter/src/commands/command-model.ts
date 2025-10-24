@@ -282,6 +282,6 @@ export default class Command extends Instrument {
   }
 
   get isSelfHealed () {
-    return (!!this.renderProps.selfHealed || (this.hasChildren && !this.isOpen && this.children.some((child) => !!child.renderProps.selfHealed)))
+    return (!!this.renderProps.selfHealed || (this.hasChildren && !this.isOpen && this.children.some((child) => child.isSelfHealed)))
   }
 }
