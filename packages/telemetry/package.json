@@ -17,7 +17,7 @@
     "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0",
     "test-unit": "vitest run",
     "tslint": "tslint --config ../ts/tslint.json --project .",
-    "watch": "tsc --watch"
+    "watch": "yarn build:cjs --watch & yarn build:esm --watch & yarn build:browser -w"
   },
   "dependencies": {
     "@opentelemetry/api": "1.4.1",
