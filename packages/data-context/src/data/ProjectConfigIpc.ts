@@ -370,6 +370,9 @@ export class ProjectConfigIpc extends EventEmitter {
     debug('plugins process error:', err.stack)
 
     this.cleanupIpc()
+    if (err instanceof Error && err.code === 'EPIPE') {
+      return
+    }
 
     err = getError('CONFIG_FILE_UNEXPECTED_ERROR', this.configFile || '(unknown config file)', err)
     err.title = 'Config process error'
