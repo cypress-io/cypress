@@ -1184,11 +1184,11 @@ describe('commands', { viewportHeight: 1000 }, () => {
 
       cy.percySnapshot('initial state')
 
-      cy.get('.command-details-container').eq(10).within(() => {
+      cy.get('.command-message').eq(10).within(() => {
         cy.get('[data-cy="self-healed-badge-command"]').should('not.exist')
       })
 
-      cy.get('.command-details-container').eq(12).within(() => {
+      cy.get('.command-message').eq(12).within(() => {
         cy.get('[data-cy="self-healed-badge-command"]').should('exist')
       })
 
@@ -1196,7 +1196,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
 
       cy.percySnapshot('after clicking command expander')
 
-      cy.get('.command-details-container').eq(10).within(() => {
+      cy.get('.command-message').eq(10).within(() => {
         cy.get('[data-cy="self-healed-badge-command"]').should('exist')
       })
 
@@ -1257,11 +1257,11 @@ describe('commands', { viewportHeight: 1000 }, () => {
 
       cy.percySnapshot('initial state')
 
-      cy.get('.command-details-container').eq(10).within(() => {
+      cy.get('.command-message').eq(10).within(() => {
         cy.get('[data-cy="self-healed-badge-command"]').should('not.exist')
       })
 
-      cy.get('.command-details-container').eq(12).within(() => {
+      cy.get('.command-message').eq(12).within(() => {
         cy.get('[data-cy="self-healed-badge-command"]').should('exist')
       })
 
@@ -1269,7 +1269,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
 
       cy.percySnapshot('after clicking command expander')
 
-      cy.get('.command-details-container').eq(10).within(() => {
+      cy.get('.command-message').eq(10).within(() => {
         cy.get('[data-cy="self-healed-badge-command"]').should('exist')
       })
 
