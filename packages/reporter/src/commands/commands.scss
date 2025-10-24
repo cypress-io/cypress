@@ -153,14 +153,6 @@
     }
   }
 
-  .command-details-container {
-    display: flex;
-    align-items: baseline;
-    margin-left: 0;
-    overflow: hidden;
-    width: 100%;
-  }
-
   .command-info {
     @include command-info-padding;
 
@@ -168,6 +160,7 @@
     font-weight: 600;
     margin-left: 0;
     overflow: hidden;
+    width: 100%;
     -webkit-line-clamp: 100;
     -webkit-box-orient: vertical;
 

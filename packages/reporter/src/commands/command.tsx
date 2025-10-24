@@ -280,6 +280,9 @@ const Message: React.FC<MessageProps> = observer(({ model }: MessageProps) => (
       className='command-message-text'
       dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage, model.name) }}
     />}
+    {model.isSelfHealed && (
+      <SelfHealedBadge source='command' />
+    )}
   </span>
 ))
 
@@ -537,12 +540,7 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
                     <ChevronIcon className={cs('command-expander', { 'command-expander-is-open': model.hasChildren && !!model.isOpen })} />
                   </div>
                 )}
-                <div className='command-details-container'>
-                  <CommandDetails model={model} groupId={groupId} aliasesWithDuplicates={aliasesWithDuplicates} />
-                  {model.isSelfHealed && (
-                    <SelfHealedBadge source='command' />
-                  )}
-                </div>
+                <CommandDetails model={model} groupId={groupId} aliasesWithDuplicates={aliasesWithDuplicates} />
                 <CommandControls model={model} commandName={commandName} />
               </div>
               {model.isCyPrompt && model.state === 'passed' && (
