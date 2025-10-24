@@ -3,7 +3,7 @@ const { enable, mockElectron } = require('./mockery_helper')
 
 const { configureLongStackTraces } = require('../lib/environment')
 
-configureLongStackTraces('development')
+configureLongStackTraces()
 const chai = require('chai')
 
 chai.use(require('chai-subset'))
