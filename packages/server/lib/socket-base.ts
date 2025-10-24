@@ -6,7 +6,7 @@ import { getCtx } from '@packages/data-context'
 import { handleGraphQLSocketRequest } from '@packages/data-context/graphql/makeGraphQLServer'
 import { onNetStubbingEvent } from '@packages/net-stubbing'
 import * as socketIo from '@packages/socket'
-import { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
+import { CDPSocketServer } from '@packages/socket'
 
 import * as errors from './errors'
 import fixture from './fixture'

@@ -1,9 +1,9 @@
-const get = require('lodash/get')
-const once = require('lodash/once')
-const Promise = require('bluebird')
-const browser = require('webextension-polyfill')
+import get from 'lodash/get'
+import once from 'lodash/once'
+import Bluebird from 'bluebird'
+import browser from 'webextension-polyfill'
 
-const client = require('./client')
+import { connect as clientConnect } from './client'
 
 const checkIfFirefox = async () => {
   if (!browser || !get(browser, 'runtime.getBrowserInfo')) {
@@ -15,9 +15,9 @@ const checkIfFirefox = async () => {
   return name === 'Firefox'
 }
 
-const connect = function (host, path, extraOpts) {
+const connect = function (host: string, path: string, extraOpts?: any) {
   const listenToCookieChanges = once(() => {
-    return browser.cookies.onChanged.addListener((info) => {
+    return browser.cookies.onChanged.addListener((info: any) => {
       if (info.cause !== 'overwrite') {
         return ws.emit('automation:push:request', 'change:cookie', info)
       }
@@ -25,7 +25,7 @@ const connect = function (host, path, extraOpts) {
   })
 
   const listenToDownloads = once(() => {
-    browser.downloads.onCreated.addListener((downloadItem) => {
+    browser.downloads.onCreated.addListener((downloadItem: any) => {
       ws.emit('automation:push:request', 'create:download', {
         id: `${downloadItem.id}`,
         filePath: downloadItem.filename,
@@ -34,7 +34,7 @@ const connect = function (host, path, extraOpts) {
       })
     })
 
-    browser.downloads.onChanged.addListener((downloadDelta) => {
+    browser.downloads.onChanged.addListener((downloadDelta: any) => {
       const state = (downloadDelta.state || {}).current
 
       if (state === 'complete') {
@@ -51,7 +51,7 @@ const connect = function (host, path, extraOpts) {
     })
   })
 
-  const fail = (id, err) => {
+  const fail = (id: number, err: any) => {
     return ws.emit('automation:response', id, {
       __error: err.message,
       __stack: err.stack,
@@ -59,21 +59,22 @@ const connect = function (host, path, extraOpts) {
     })
   }
 
-  const invoke = function (method, id, ...args) {
-    const respond = (data) => {
+  const invoke = function (method: string, id: number, ...args: any[]) {
+    const respond = (data: any) => {
       return ws.emit('automation:response', id, { response: data })
     }
 
-    return Promise.try(() => {
+    return Bluebird.try(() => {
+      // @ts-expect-error
       return automation[method].apply(automation, args.concat(respond))
     }).catch((err) => {
       return fail(id, err)
     })
   }
 
-  const ws = client.connect(host, path, extraOpts)
+  const ws = clientConnect(host, path, extraOpts)
 
-  ws.on('automation:request', (id, msg, data) => {
+  ws.on('automation:request', (id: number, msg: string, data: any) => {
     switch (msg) {
       case 'reset:browser:state':
         return invoke('resetBrowserState', id)
@@ -82,7 +83,7 @@ const connect = function (host, path, extraOpts) {
     }
   })
 
-  ws.on('automation:config', async (config) => {
+  ws.on('automation:config', async (config: any) => {
     const isFirefox = await checkIfFirefox()
 
     listenToCookieChanges()
@@ -99,15 +100,13 @@ const connect = function (host, path, extraOpts) {
   return ws
 }
 
-const automation = {
+export const automation = {
   connect,
 
-  resetBrowserState (fn) {
+  resetBrowserState (fn: any) {
     // We remove browser data. Firefox goes through this path, while chrome goes through cdp automation
     // Note that firefox does not support fileSystems or serverBoundCertificates
     // (https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/browsingData/DataTypeSet).
     return browser.browsingData.remove({}, { cache: true, cookies: true, downloads: true, formData: true, history: true, indexedDB: true, localStorage: true, passwords: true, pluginData: true, serviceWorkers: true }).then(fn)
   },
 }
-
-module.exports = automation

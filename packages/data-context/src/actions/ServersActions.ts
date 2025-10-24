@@ -2,9 +2,8 @@ import util from 'util'
 
 import type { AddressInfo } from 'net'
 import type { Server } from 'http'
-import type { SocketIONamespace, SocketIOServer } from '@packages/socket'
+import type { SocketIONamespace, SocketIOServer, CDPSocketServer } from '@packages/socket'
 import type { DataContext } from '..'
-import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
 
 export class ServersActions {
   constructor (private ctx: DataContext) {}

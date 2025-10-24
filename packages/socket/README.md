@@ -1,32 +1,19 @@
 # Socket
 
-This is a shared lib for holding both the `socket.io` server and client.
+This is a shared lib for holding both the `socket.io` Cypress implements of the server and client.
 
 ## Using
 
 ```javascript
 const socket = require("@packages/socket")
 
-// returns
-{
-  server: require("socket.io"),
-  getPathToClientSource: function () {
-    // returns path to the client 'socket.io.js' file
-    // for use in the browser
-  }
-}
-```
-
-```javascript
-const socket = require("@packages/socket")
-
 // server usage
 const srv = require("http").createServer()
-const io = socket.server(srv)
+const io = new SocketIOServer(srv)
 io.on("connection", function(){})
 
 // client usage
-const { client } = require("@packages/socket/lib/client")
+const { client } = require("@packages/socket/browser/client")
 const client = socket.client("http://localhost:2020")
 client.on("connect", function(){})
 client.on("event", function(){})

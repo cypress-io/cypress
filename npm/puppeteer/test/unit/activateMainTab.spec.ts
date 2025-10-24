@@ -1,15 +1,8 @@
-import { expect, use } from 'chai'
-import chaiAsPromised from 'chai-as-promised'
-import sinon from 'sinon'
-import sinonChai from 'sinon-chai'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import type { Browser, Page } from 'puppeteer-core'
 import { activateMainTab, ACTIVATION_TIMEOUT } from '../../src/plugin/activateMainTab'
 
-use(chaiAsPromised)
-use(sinonChai)
-
 describe('activateMainTab', () => {
-  let clock: sinon.SinonFakeTimers
   let prevWin: Window
   let prevDoc: Document
   let prevTop: Window & typeof globalThis
@@ -22,14 +15,12 @@ describe('activateMainTab', () => {
   let mockPage: Partial<Page>
 
   beforeEach(() => {
-    clock = sinon.useFakeTimers()
-
+    vi.useFakeTimers()
     window = {
-      addEventListener: sinon.stub(),
-      removeEventListener: sinon.stub(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
 
-      // @ts-ignore sinon gets confused about postMessage type declaration
-      postMessage: sinon.stub(),
+      postMessage: vi.fn(),
     }
 
     mockDocument = {
@@ -41,60 +32,66 @@ describe('activateMainTab', () => {
     // activateMainTab is eval'd in browser context, but the tests exec in a
     // node context. We don't necessarily need to do this swap, but it makes the
     // tests more portable.
-    // @ts-ignore
     prevWin = global.window
     prevDoc = global.document
-    // @ts-ignore
+    // @ts-expect-error
     prevTop = global.top
-    //@ts-ignore
+    // @ts-expect-error
     global.window = window
     global.document = mockDocument as Document
-    //@ts-ignore
+    // @ts-expect-error
     global.top = mockTop
 
     mockPage = {
-      evaluate: sinon.stub().callsFake((fn, ...args) => fn(...args)),
+      evaluate: vi.fn().mockImplementation((fn, ...args) => fn(...args)),
     }
 
     mockBrowser = {
-      pages: sinon.stub(),
+      pages: vi.fn(),
     }
   })
 
   afterEach(() => {
-    clock.restore()
-    // @ts-ignore
+    vi.clearAllTimers()
+    // @ts-expect-error
     global.window = prevWin
-    // @ts-ignore
     global.top = prevTop
     global.document = prevDoc
   })
 
   it('sends a tab activation request to the plugin, and resolves when the ack event is received', async () => {
-    const pagePromise = Promise.resolve([mockPage])
+    vi.mocked(mockBrowser.pages).mockResolvedValue([mockPage] as Page[])
+    vi.mocked(window.addEventListener).mockImplementation((event, listener) => {
+      if (event === 'message') {
+        // @ts-expect-error
+        listener({ data: { message: 'cypress:extension:main:tab:activated' } })
+      }
+    })
 
-    ;(mockBrowser.pages as sinon.SinonStub).returns(pagePromise)
-    const p = activateMainTab(mockBrowser as Browser)
+    await activateMainTab(mockBrowser as Browser)
 
-    await pagePromise
-    // @ts-ignore
-    window.addEventListener.withArgs('message').yield({ data: { message: 'cypress:extension:main:tab:activated' } })
-    expect(window.postMessage).to.be.calledWith({ message: 'cypress:extension:activate:main:tab' })
-
-    expect(p).to.eventually.be.true
+    expect(window.postMessage).toHaveBeenCalledExactlyOnceWith({ message: 'cypress:extension:activate:main:tab' })
   })
 
   it('sends a tab activation request to the plugin, and rejects if it times out', async () => {
-    const pagePromise = Promise.resolve([mockPage])
+    vi.mocked(mockBrowser.pages).mockResolvedValue([mockPage] as Page[])
 
-    ;(mockBrowser.pages as sinon.SinonStub).returns(pagePromise)
-    await pagePromise
+    return new Promise<void>(async (resolve) => {
+      mockPage.evaluate = vi.fn().mockImplementation(async (fn, ...args) => {
+        try {
+          await fn(...args)
+        } catch (error) {
+          expect(window.removeEventListener).toHaveBeenCalledExactlyOnceWith('message', expect.any(Function))
+          expect(error).toBeUndefined()
+          resolve()
+        }
+      })
 
-    const p = activateMainTab(mockBrowser as Browser)
+        const activationPromise = activateMainTab(mockBrowser as Browser)
 
-    clock.tick(ACTIVATION_TIMEOUT + 1)
-
-    expect(p).to.be.rejected
+        await vi.advanceTimersByTimeAsync(ACTIVATION_TIMEOUT + 1)
+        await activationPromise
+    })
   })
 
   describe('when cy in cy', () => {
@@ -103,16 +100,11 @@ describe('activateMainTab', () => {
     })
 
     it('does not try to send tab activation message', async () => {
-      const pagePromise = Promise.resolve([mockPage])
+      vi.mocked(mockBrowser.pages).mockResolvedValue([mockPage] as Page[])
+      await activateMainTab(mockBrowser as Browser)
 
-      ;(mockBrowser.pages as sinon.SinonStub).returns(pagePromise)
-
-      const p = activateMainTab(mockBrowser as Browser)
-
-      await pagePromise
-      expect(window.postMessage).not.to.be.called
-      expect(window.addEventListener).not.to.be.called
-      await p
+      expect(window.postMessage).not.toHaveBeenCalled()
+      expect(window.addEventListener).not.toHaveBeenCalled()
     })
   })
 })
