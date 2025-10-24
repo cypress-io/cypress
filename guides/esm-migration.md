@@ -86,7 +86,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] npm/cypress-schematic ✅ **COMPLETED**
 - [ ] npm/eslint-plugin-dev
 - [x] npm/grep ✅ **COMPLETED** 
-- [ ] npm/puppeteer
+- [x] npm/puppeteer ✅ **COMPLETED** 
 - [x] npm/vite-dev-server ✅ **COMPLETED** 
 - [ ] npm/webpack-batteries-included-preprocessor
 - [ ] npm/webpack-dev-server
