@@ -1,4 +1,4 @@
-import * as errors from '@packages/server/lib/errors'
+import errors from '@packages/errors'
 
 import type { HttpMiddleware } from '.'
 import type { Readable } from 'stream'

@@ -82,6 +82,8 @@ export interface StudioLog {
   isAssertion?: boolean
 }
 
+export type EntrySource = 'welcome' | 'new-test-root' | 'new-test-suite' | 'edit'
+
 interface StudioRecorderState {
   saveModalIsOpen: boolean
   instructionModalIsOpen: boolean
@@ -112,6 +114,7 @@ interface StudioRecorderState {
   _isStudioCreatedTest: boolean
   newTestLineNumber?: number
   _originalGrepSettings: Record<string, string>
+  entrySource?: EntrySource
 }
 
 function getUrlParams () {
@@ -150,6 +153,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       newTestLineNumber: undefined,
       _isStudioCreatedTest: false,
       _originalGrepSettings: {},
+      entrySource: undefined,
     }
   },
 
@@ -231,6 +235,10 @@ export const useStudioStore = defineStore('studioRecorder', {
 
     setUrl (url?: string) {
       this.url = url
+    },
+
+    setEntrySource (entrySource: EntrySource) {
+      this.entrySource = entrySource
     },
 
     testFailed () {

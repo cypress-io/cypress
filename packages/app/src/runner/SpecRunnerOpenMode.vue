@@ -112,6 +112,7 @@
             :user-project-status-store="userProjectStatusStore"
             :has-requested-project-access="hasRequestedProjectAccess"
             :request-project-access-mutation="requestProjectAccessMutation"
+            :spec-dirty-data-store="specDirtyDataStore"
           />
         </HideDuringScreenshot>
       </template>
@@ -154,6 +155,7 @@ import PromptGetCodeModal from '../prompt/PromptGetCodeModal.vue'
 import PromptMoreInfoNeededModal from '../prompt/PromptMoreInfoNeededModal.vue'
 import { usePromptStore } from '../store/prompt-store'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
+import { useSpecDirtyDataStore } from '../store/spec-dirty-data-store'
 
 // this is used by the StudioPanel to access the AUT URL input
 const autUrlSelector = '.aut-url-input'
@@ -168,6 +170,7 @@ const {
 } = runnerConstants
 
 const userProjectStatusStore = useUserProjectStatusStore()
+const specDirtyDataStore = useSpecDirtyDataStore()
 
 gql`
 fragment SpecRunner_Preferences on Query {

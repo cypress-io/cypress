@@ -27,6 +27,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import type { CyPromptAppDefaultShape, GetCodeModalContentsShape } from './prompt-app-types'
 import { usePromptStore } from '../store/prompt-store'
 import PromptErrorMessage from './PromptErrorMessage.vue'
+import { useSpecDirtyDataStore } from '../store/spec-dirty-data-store'
 
 interface CyPromptApp { default: CyPromptAppDefaultShape }
 
@@ -56,6 +57,7 @@ const hasError = ref<boolean>(false)
 const ReactGetCodeModalContents = ref<GetCodeModalContentsShape | null>(null)
 const containerReactRootMap = new WeakMap<HTMLElement, Root>()
 const promptStore = usePromptStore()
+const specDirtyDataStore = useSpecDirtyDataStore()
 
 const maybeRenderReactComponent = () => {
   if (!ReactGetCodeModalContents.value || !!hasError.value || !container.value) {
@@ -70,6 +72,7 @@ const maybeRenderReactComponent = () => {
     onClose: () => {
       closeModal()
     },
+    specDirtyDataStore,
   })
 
   // Store the react root in a weak map keyed by the container. We do this so that we have a reference

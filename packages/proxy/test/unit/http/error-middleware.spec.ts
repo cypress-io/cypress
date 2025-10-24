@@ -1,18 +1,17 @@
+import { describe, expect, it, vi } from 'vitest'
 import _ from 'lodash'
 import ErrorMiddleware, {
   AbortRequest,
   UnpipeResponse,
   DestroyResponse,
 } from '../../../lib/http/error-middleware'
-import { expect } from 'chai'
-import sinon from 'sinon'
 import {
   testMiddleware,
 } from './helpers'
 
 describe('http/error-middleware', function () {
   it('exports the members in the correct order', function () {
-    expect(_.keys(ErrorMiddleware)).to.have.ordered.members([
+    expect(_.keys(ErrorMiddleware)).toEqual([
       'LogError',
       'SendToDriver',
       'InterceptError',
@@ -22,11 +21,11 @@ describe('http/error-middleware', function () {
     ])
   })
 
-  context('AbortRequest', function () {
-    it('destroys outgoingReq if it exists', function () {
+  describe('AbortRequest', function () {
+    it('destroys outgoingReq if it exists', async function () {
       const ctx = {
         outgoingReq: {
-          abort: sinon.stub(),
+          abort: vi.fn(),
         },
         res: {
           on: (event, listener) => {},
@@ -34,14 +33,12 @@ describe('http/error-middleware', function () {
         },
       }
 
-      return testMiddleware([AbortRequest], ctx)
-      .then(() => {
-        expect(ctx.outgoingReq.abort).to.be.calledOnce
-      })
+      await testMiddleware([AbortRequest], ctx)
+      expect(ctx.outgoingReq.abort).toHaveBeenCalledOnce()
     })
 
-    it('does not destroy outgoingReq if it does not exist', function () {
-      return testMiddleware([AbortRequest], {
+    it('does not destroy outgoingReq if it does not exist', async function () {
+      await testMiddleware([AbortRequest], {
         res: {
           on: (event, listener) => {},
           off: (event, listener) => {},
@@ -50,11 +47,11 @@ describe('http/error-middleware', function () {
     })
   })
 
-  context('UnpipeResponse', function () {
-    it('unpipes incomingRes if it exists', function () {
+  describe('UnpipeResponse', function () {
+    it('unpipes incomingRes if it exists', async function () {
       const ctx = {
         incomingResStream: {
-          unpipe: sinon.stub(),
+          unpipe: vi.fn(),
         },
         res: {
           on: (event, listener) => {},
@@ -62,14 +59,12 @@ describe('http/error-middleware', function () {
         },
       }
 
-      return testMiddleware([UnpipeResponse], ctx)
-      .then(() => {
-        expect(ctx.incomingResStream.unpipe).to.be.calledOnce
-      })
+      await testMiddleware([UnpipeResponse], ctx)
+      expect(ctx.incomingResStream.unpipe).toHaveBeenCalledOnce()
     })
 
-    it('does not unpipe incomingRes if it does not exist', function () {
-      return testMiddleware([UnpipeResponse], {
+    it('does not unpipe incomingRes if it does not exist', async function () {
+      await testMiddleware([UnpipeResponse], {
         res: {
           on: (event, listener) => {},
           off: (event, listener) => {},
@@ -78,20 +73,18 @@ describe('http/error-middleware', function () {
     })
   })
 
-  context('DestroyResponse', function () {
-    it('destroys the response', function () {
+  describe('DestroyResponse', function () {
+    it('destroys the response', async function () {
       const ctx = {
         res: {
-          destroy: sinon.stub(),
+          destroy: vi.fn(),
           on: (event, listener) => {},
           off: (event, listener) => {},
         },
       }
 
-      return testMiddleware([DestroyResponse], ctx)
-      .then(() => {
-        expect(ctx.res.destroy).to.be.calledOnce
-      })
+      await testMiddleware([DestroyResponse], ctx)
+      expect(ctx.res.destroy).toHaveBeenCalledOnce()
     })
   })
 })

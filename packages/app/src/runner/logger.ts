@@ -31,10 +31,13 @@ export const logger = {
   logFormatted (consoleProps: any) {
     if (_.isEmpty(consoleProps)) return
 
-    this._logValues(consoleProps)
-    this._logArgs(consoleProps)
-    this._logGroups(consoleProps)
-    this._logTables(consoleProps)
+    // clone the consoleProps to avoid mutating the original object
+    const clonedConsoleProps = _.cloneDeep(consoleProps)
+
+    this._logValues(clonedConsoleProps)
+    this._logArgs(clonedConsoleProps)
+    this._logGroups(clonedConsoleProps)
+    this._logTables(clonedConsoleProps)
   },
 
   _logValues (consoleProps: any) {
@@ -113,7 +116,7 @@ export const logger = {
         if (group.label === false) {
           this.log(value)
         } else {
-          this.log(`%c${key}`, 'color: blue', value)
+          this.log(`%c${key}`, 'color: #4a90e2', value)
         }
       })
 

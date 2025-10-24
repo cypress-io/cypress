@@ -1,8 +1,7 @@
+import { describe, expect, it } from 'vitest'
 import _ from 'lodash'
 import { concatStream } from '@packages/network'
-import { expect } from 'chai'
-import fs from 'fs'
-import Promise from 'bluebird'
+import fs from 'fs/promises'
 import rp from '@cypress/request-promise'
 import * as regexRewriter from '../../../../lib/http/util/regex-rewriter'
 
@@ -423,15 +422,15 @@ const expectedWithModifyObstructiveThirdPartyCode = `\
 `
 
 describe('http/util/regex-rewriter', () => {
-  context('.strip', () => {
+  describe('.strip', () => {
     it('replaces obstructive code', () => {
-      expect(regexRewriter.strip(original)).to.eq(expected)
+      expect(regexRewriter.strip(original)).toEqual(expected)
     })
 
     it('replaces additional obstructive code with the "modifyObstructiveThirdPartyCode" set', () => {
       expect(regexRewriter.strip(originalWithModifyObstructiveThirdPartyCode, {
         modifyObstructiveThirdPartyCode: true,
-      })).to.eq(expectedWithModifyObstructiveThirdPartyCode)
+      })).toEqual(expectedWithModifyObstructiveThirdPartyCode)
     })
 
     it('replaces jira window getter', () => {
@@ -467,17 +466,17 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
 }\
 `
 
-      expect(regexRewriter.strip(jira)).to.eq(`\
+      expect(regexRewriter.strip(jira)).toEqual(`\
 for (; !function (n) {
   return n === n.parent || n.parent.__Cypress__
 }(n)\
 `)
 
-      expect(regexRewriter.strip(jira2)).to.eq(`\
+      expect(regexRewriter.strip(jira2)).toEqual(`\
 function(n){for(;!function(l){return l===l.parent || l.parent.__Cypress__}(l)&&function(l){try{if(void 0==l.location.href)return!1}catch(l){return!1}return!0}(l.parent);)l=l.parent;return l}\
 `)
 
-      expect(regexRewriter.strip(jira3)).to.eq(`\
+      expect(regexRewriter.strip(jira3)).toEqual(`\
 function satisfiesSameOrigin(w) {
     try {
         // Accessing location.href from a window on another origin will throw an exception.
@@ -559,104 +558,101 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
 
       _.each(libs, (url, lib) => {
         [false, true].forEach((modifyObstructiveThirdPartyCode) => {
-          it(`does not alter code from: '${lib}', with modifyObstructiveThirdPartyCode set to ${modifyObstructiveThirdPartyCode}`, function () {
-            this.timeout(10000)
-
+          it(`does not alter code from: '${lib}', with modifyObstructiveThirdPartyCode set to ${modifyObstructiveThirdPartyCode}`, { timeout: 10000 }, async function () {
             const pathToLib = `/tmp/${lib}`
 
-            const downloadFile = () => {
-              return rp(url)
-              .then((resp) => {
-                return Promise.fromCallback((cb) => {
-                  fs.writeFile(pathToLib, resp, cb)
-                })
-                .return(resp)
-              })
+            let libCode: string
+
+            try {
+              libCode = await fs.readFile(pathToLib, 'utf8')
+            } catch (err) {
+              const resp = await rp(url)
+
+              await fs.writeFile(pathToLib, resp)
+              libCode = await fs.readFile(pathToLib, 'utf8')
             }
 
-            return Promise.fromCallback((cb) => {
-              fs.readFile(pathToLib, 'utf8', cb)
+            let stripped = regexRewriter.strip(libCode, {
+              modifyObstructiveThirdPartyCode,
             })
-            .catch(downloadFile)
-            .then((libCode: string) => {
-              let stripped = regexRewriter.strip(libCode, {
-                modifyObstructiveThirdPartyCode,
-              })
-              // nothing should have changed!
+            // nothing should have changed!
 
-              // TODO: this is currently failing but we're
-              // going to accept this for now and make this
-              // test pass, but need to refactor to using
-              // inline expressions and change the strategy
-              // for removing obstructive code
-              if (lib === 'hugeApp') {
-                stripped = stripped.replace(
-                  'window.self !== window.self',
-                  'window.self !== window.top',
-                )
-              }
+            // TODO: this is currently failing but we're
+            // going to accept this for now and make this
+            // test pass, but need to refactor to using
+            // inline expressions and change the strategy
+            // for removing obstructive code
+            if (lib === 'hugeApp') {
+              stripped = stripped.replace(
+                'window.self !== window.self',
+                'window.self !== window.top',
+              )
+            }
 
-              try {
-                expect(stripped).to.eq(libCode)
-              } catch (err) {
-                throw new Error(`code from '${lib}' was different`)
-              }
-            })
+            try {
+              expect(stripped).toEqual(libCode)
+            } catch (err) {
+              throw new Error(`code from '${lib}' was different`)
+            }
           })
         })
       })
     })
   })
 
-  context('.stripStream', () => {
-    it('replaces obstructive code', (done) => {
-      const haystacks = original.split('\n')
+  describe('.stripStream', () => {
+    it('replaces obstructive code', () => {
+      return new Promise<void>((resolve, reject) => {
+        const haystacks = original.split('\n')
 
-      const replacer = regexRewriter.stripStream()
+        const replacer = regexRewriter.stripStream()
 
-      replacer.pipe(concatStream({ encoding: 'string' }, (str) => {
-        const string = str.toString().trim()
+        replacer.pipe(concatStream({ encoding: 'string' }, (str) => {
+          const string = str.toString().trim()
 
-        try {
-          expect(string).to.eq(expected)
+          try {
+            expect(string).toEqual(expected)
 
-          done()
-        } catch (err) {
-          done(err)
-        }
-      }))
+            resolve()
+          } catch (err) {
+            reject(err)
+          }
+        }))
 
-      haystacks.forEach((haystack) => {
-        replacer.write(`${haystack}\n`)
+        haystacks.forEach((haystack) => {
+          replacer.write(`${haystack}\n`)
+        })
+
+        replacer.end()
       })
-
-      replacer.end()
     })
 
-    it('replaces additional obstructive code with the "modifyObstructiveThirdPartyCode" set', (done) => {
-      const haystacks = originalWithModifyObstructiveThirdPartyCode.split('\n')
+    it('replaces additional obstructive code with the "modifyObstructiveThirdPartyCode" set', () => {
+      return new Promise<void>((resolve, reject) => {
+        const haystacks = originalWithModifyObstructiveThirdPartyCode.split('\n')
 
-      const replacer = regexRewriter.stripStream({
-        modifyObstructiveThirdPartyCode: true,
+        const replacer = regexRewriter.stripStream({
+          modifyObstructiveThirdPartyCode: true,
+        })
+
+        replacer.pipe(concatStream({ encoding: 'string' }, (str) => {
+          const string = str.toString().trim()
+
+          try {
+            expect(string).toEqual(expectedWithModifyObstructiveThirdPartyCode)
+
+            resolve()
+          } catch (err) {
+            reject(err)
+          }
+        }))
+
+        haystacks.forEach((haystack) => {
+          replacer.write(`${haystack}\n`)
+        })
+
+        replacer.end()
       })
-
-      replacer.pipe(concatStream({ encoding: 'string' }, (str) => {
-        const string = str.toString().trim()
-
-        try {
-          expect(string).to.eq(expectedWithModifyObstructiveThirdPartyCode)
-
-          done()
-        } catch (err) {
-          done(err)
-        }
-      }))
-
-      haystacks.forEach((haystack) => {
-        replacer.write(`${haystack}\n`)
-      })
-
-      replacer.end()
     })
   })
 })

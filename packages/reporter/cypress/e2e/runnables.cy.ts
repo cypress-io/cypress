@@ -164,7 +164,7 @@ describe('runnables', () => {
 
         cy.contains('Cypress Studio').click()
 
-        cy.wrap(runner.emit).should('be.calledWith', 'studio:init:suite', { suiteId: 'r1' })
+        cy.wrap(runner.emit).should('be.calledWith', 'studio:init:suite', { suiteId: 'r1', entrySource: undefined })
       })
     })
 

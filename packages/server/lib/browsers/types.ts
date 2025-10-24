@@ -1,7 +1,7 @@
 import type { FoundBrowser, BrowserLaunchOpts, BrowserNewTabOpts, ProtocolManagerShape, CyPromptManagerShape } from '@packages/types'
 import type { EventEmitter } from 'events'
 import type { Automation } from '../automation'
-import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
+import type { CDPSocketServer } from '@packages/socket'
 
 export type Browser = FoundBrowser & {
   majorVersion: number | string

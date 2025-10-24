@@ -626,7 +626,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
           try {
             await this.activateMainTab()
           } catch (e) {
-            debugVerbose('Error while attempting to activate main tab: %O', e)
+            debugVerbose('Error while attempting to activate main tab: %o', e)
           }
         }
 

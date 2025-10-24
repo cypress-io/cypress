@@ -137,7 +137,7 @@
   }
 
   .command-wrapper-text-group {
-    padding-left: 15px;
+    margin-left: 15px;
     width: 100%;
   }
 
@@ -148,6 +148,7 @@
   .nested-group-expander {
     .command-expander {
       position: relative;
+
       margin-left: -16px !important; // Adjust this value to center the caret on the border
     }
   }
@@ -515,7 +516,11 @@
     padding: 0;
     align-items: center;
     justify-content: center;
+    max-width: 33px;
     height: 28px;
+    width: 33px;
+    padding-left: 15px;
+    margin-left: -15px;
 
     .command-expander {
       margin: 0;

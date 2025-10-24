@@ -38,6 +38,7 @@ import StudioErrorPanel from './StudioErrorPanel.vue'
 import type { EventManager } from '../runner/event-manager'
 import { useMutation, gql, UseMutationResponse } from '@urql/vue'
 import { IconCypressStudio } from '@cypress-design/vue-icon'
+import type { SpecDirtyDataStore } from '../store/spec-dirty-data-store'
 
 // Mirrors the ReactDOM.Root type since incorporating those types
 // messes up vue typing elsewhere
@@ -63,6 +64,7 @@ const props = defineProps<{
   userProjectStatusStore: UserProjectStatusStore
   hasRequestedProjectAccess: boolean
   requestProjectAccessMutation: UseMutationResponse<any, any>
+  specDirtyDataStore: SpecDirtyDataStore
 }>()
 
 interface StudioApp { default: StudioAppDefaultShape }
@@ -113,6 +115,7 @@ const maybeRenderReactComponent = () => {
     userProjectStatusStore: props.userProjectStatusStore,
     hasRequestedProjectAccess: props.hasRequestedProjectAccess,
     requestProjectAccessMutation: props.requestProjectAccessMutation,
+    specDirtyDataStore: props.specDirtyDataStore,
   })
 
   // Store the react root in a weak map keyed by the container. We do this so that we have a reference
