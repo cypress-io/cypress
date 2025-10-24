@@ -399,7 +399,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     err = $errUtils.enhanceStack({
       err,
       userInvocationStack,
-      projectRoot: this.config('projectRoot'),
+      projectRoot: this.Cypress.sourceMapProjectRoot,
     })
 
     err = $errUtils.processErr(err, this.config)

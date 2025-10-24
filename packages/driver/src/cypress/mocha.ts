@@ -529,12 +529,12 @@ const patchRunnableClearTimeout = () => {
   }
 }
 
-const patchSuiteAddTest = (specWindow, config) => {
+const patchSuiteAddTest = (specWindow, sourceMapProjectRoot: string) => {
   Suite.prototype.addTest = function (...args) {
     const test = args[0]
 
     if (!test.invocationDetails) {
-      test.invocationDetails = $stackUtils.getInvocationDetails(specWindow, config)
+      test.invocationDetails = $stackUtils.getInvocationDetails(specWindow, sourceMapProjectRoot)
     }
 
     const ret = suiteAddTest.apply(this, args)
@@ -561,12 +561,12 @@ const patchSuiteAddTest = (specWindow, config) => {
   }
 }
 
-const patchSuiteAddSuite = (specWindow, config) => {
+const patchSuiteAddSuite = (specWindow, sourceMapProjectRoot: string) => {
   Suite.prototype.addSuite = function (...args) {
     const suite = args[0]
 
     if (!suite.invocationDetails) {
-      suite.invocationDetails = $stackUtils.getInvocationDetails(specWindow, config)
+      suite.invocationDetails = $stackUtils.getInvocationDetails(specWindow, sourceMapProjectRoot)
     }
 
     return suiteAddSuite.apply(this, args)
@@ -609,7 +609,7 @@ const patchRunnableResetTimeout = () => {
   }
 }
 
-const patchSuiteHooks = (specWindow, config) => {
+const patchSuiteHooks = (specWindow, sourceMapProjectRoot: string) => {
   _.each(['beforeAll', 'beforeEach', 'afterAll', 'afterEach'], (fnName) => {
     const _fn = Suite.prototype[fnName]
 
@@ -622,7 +622,7 @@ const patchSuiteHooks = (specWindow, config) => {
         let invocationStack = hook.invocationDetails?.stack
 
         if (!hook.invocationDetails) {
-          const invocationDetails = $stackUtils.getInvocationDetails(specWindow, config)!
+          const invocationDetails = $stackUtils.getInvocationDetails(specWindow, sourceMapProjectRoot)!
 
           hook.invocationDetails = invocationDetails
           invocationStack = invocationDetails.stack
@@ -674,9 +674,9 @@ const override = (specWindow, Cypress, config) => {
   patchRunnerRunTests()
   patchTestClone()
   createCalculateTestStatus(Cypress)
-  patchSuiteAddTest(specWindow, config)
-  patchSuiteAddSuite(specWindow, config)
-  patchSuiteHooks(specWindow, config)
+  patchSuiteAddTest(specWindow, Cypress.sourceMapProjectRoot)
+  patchSuiteAddSuite(specWindow, Cypress.sourceMapProjectRoot)
+  patchSuiteHooks(specWindow, Cypress.sourceMapProjectRoot)
 }
 
 const create = (specWindow, Cypress, config) => {

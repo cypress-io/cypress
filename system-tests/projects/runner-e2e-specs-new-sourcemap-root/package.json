@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "@cypress/webpack-preprocessor": "file:../../../npm/webpack-preprocessor"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
+    "@babel/preset-react": "^7.25.9",
+    "@babel/preset-typescript": "^7.26.0",
+    "babel-loader": "^10.0.0"
+  },
+  "projectFixtureDirectory": "runner-specs"
+}

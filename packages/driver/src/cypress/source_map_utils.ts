@@ -7,6 +7,8 @@ import mappingsWasm from 'source-map/lib/mappings.wasm'
 
 import $utils from './utils'
 import { toPosix } from './util/to_posix'
+import stackUtils from './stack_utils'
+import path from 'path'
 
 const sourceMapExtractionRegex = /\/\/\s*[@#]\s*sourceMappingURL\s*=\s*(data:[^\s]*)/g
 const regexDataUrl = /data:[^;\n]+(?:;charset=[^;\n]+)?;base64,(.*)/ // matches data urls
@@ -118,6 +120,60 @@ const areSourceMapsAvailable = () => {
   return Object.keys(sourceMapConsumers).length > 0
 }
 
+const sourceMapProjectRoot = (relativePath: string, absolutePath: string) => {
+  const keys = Object.keys(sourceMapConsumers)
+  const key = keys.find((key) => key.endsWith(relativePath))
+
+  if (!key) return null
+
+  const consumer = sourceMapConsumers[key]
+
+  for (let index = 0; index < consumer.sources.length; index++) {
+    const source = consumer.sources[index]
+    const strippedSource = stackUtils.stripCustomProtocol(source)
+
+    if (absolutePath.endsWith(strippedSource)) {
+      // @ts-expect-error
+      const relativeSource = consumer._sources.at(index)
+
+      // get the directory where relativeSource applied to the directory gives you the absolute path
+      const baseDirectory = getBaseDirectory(absolutePath, stackUtils.stripCustomProtocol(relativeSource))
+
+      return baseDirectory
+    }
+  }
+
+  return null
+}
+
+const getBaseDirectory = (absolutePath: string, relativePath: string) => {
+  const absNormalized = path.normalize(absolutePath)
+  const relNormalized = path.normalize(relativePath)
+
+  // Start with the directory of the absolute path
+  let dir = path.dirname(absNormalized)
+  let recurse = true
+
+  // Work backwards: check each parent directory
+  while (recurse) {
+    const resolved = path.resolve(dir, relNormalized)
+
+    if (resolved === absNormalized) {
+      return dir
+    }
+
+    const parent = path.dirname(dir)
+
+    if (parent === dir) {
+      recurse = false
+    } else {
+      dir = parent
+    }
+  }
+
+  return null
+}
+
 export default {
   getSourcePosition,
   getSourceContents,
@@ -125,4 +181,5 @@ export default {
   initializeSourceMapConsumer,
   destroySourceMapConsumers,
   areSourceMapsAvailable,
+  sourceMapProjectRoot,
 }

@@ -127,7 +127,7 @@ type InvocationDetails = {
 }
 
 // used to determine codeframes for hook/test/etc definitions rather than command invocations
-const getInvocationDetails = (specWindow, config): InvocationDetails | undefined => {
+const getInvocationDetails = (specWindow, sourceMapProjectRoot: string): InvocationDetails | undefined => {
   if (specWindow.Error) {
     let stack = (new specWindow.Error()).stack
 
@@ -149,7 +149,7 @@ const getInvocationDetails = (specWindow, config): InvocationDetails | undefined
       }
     }
 
-    const details: Omit<InvocationDetails, 'stack'> = getSourceDetailsForFirstLine(stack, config('projectRoot')) || {};
+    const details: Omit<InvocationDetails, 'stack'> = getSourceDetailsForFirstLine(stack, sourceMapProjectRoot) || {};
 
     (details as any).stack = stack
 
@@ -585,4 +585,5 @@ export default {
   captureUserInvocationStack,
   getInvocationDetails,
   mergeCrossOriginUserInvocationStack,
+  stripCustomProtocol,
 }

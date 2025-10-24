@@ -16,4 +16,11 @@ describe('e2e sourcemaps', () => {
     spec: 'validate-sourcemaps.cy.js',
     configFile: 'cypress-disabled.config.js',
   })
+
+  systemTests.it('detects sourcemaps as enabled with updated sourcemap root', {
+    browser: '!webkit',
+    project: 'sourcemaps',
+    spec: 'validate-sourcemaps.cy.js',
+    configFile: 'cypress-enabled-updated-sourcemap-root.config.js',
+  })
 })

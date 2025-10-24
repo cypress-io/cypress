@@ -263,7 +263,7 @@ export default function (Commands, Cypress, cy) {
               err = $errUtils.enhanceStack({
                 err,
                 userInvocationStack,
-                projectRoot: Cypress.config('projectRoot'),
+                projectRoot: Cypress.sourceMapProjectRoot,
               })
 
               // show validation error and allow sessions workflow to recreate the session

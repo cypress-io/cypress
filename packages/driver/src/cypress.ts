@@ -202,6 +202,7 @@ class $Cypress {
   lolex = fakeTimers
   handlePrimaryOriginSocketEvent = handlePrimaryOriginSocketEvent
   areSourceMapsAvailable: boolean = false
+  sourceMapProjectRoot: string = ''
 
   static $: any
   static utils: any
@@ -409,6 +410,7 @@ class $Cypress {
       })
       .then(() => {
         this.areSourceMapsAvailable = $sourceMapUtils.areSourceMapsAvailable()
+        this.sourceMapProjectRoot = $sourceMapUtils.sourceMapProjectRoot(this.spec.relative, this.spec.absolute) || Cypress.config('projectRoot')
         if (this.testingType === 'e2e') {
           return setSpecContentSecurityPolicy(specWindow)
         }
