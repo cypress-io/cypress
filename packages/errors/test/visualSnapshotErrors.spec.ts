@@ -236,6 +236,17 @@ describe('visual error templates', () => {
         }],
       }
     },
+    CLOUD_CANNOT_PROCEED_IN_PARALLEL_NETWORK: () => {
+      return {
+        default: [{
+          flags: {
+            ciBuildId: 'invalid',
+            group: 'foo',
+          },
+          response: makeErr(),
+        }],
+      }
+    },
     CLOUD_CANNOT_PROCEED_IN_SERIAL: () => {
       return {
         default: [{
@@ -244,6 +255,17 @@ describe('visual error templates', () => {
             group: 'foo',
           },
           response: makeApiErr(),
+        }],
+      }
+    },
+    CLOUD_CANNOT_PROCEED_IN_SERIAL_NETWORK: () => {
+      return {
+        default: [{
+          flags: {
+            ciBuildId: 'invalid',
+            group: 'foo',
+          },
+          response: makeErr(),
         }],
       }
     },

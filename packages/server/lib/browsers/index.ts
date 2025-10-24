@@ -10,7 +10,7 @@ import { BROWSER_FAMILY, BrowserLaunchOpts, BrowserNewTabOpts, FoundBrowser, Pro
 import type { Browser, BrowserInstance, BrowserLauncher } from './types'
 import type { Automation } from '../automation'
 import type { DataContext } from '@packages/data-context'
-import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
+import type { CDPSocketServer } from '@packages/socket'
 
 const debug = Debug('cypress:server:browsers')
 const isBrowserFamily = (browser: string) => BROWSER_FAMILY.includes(browser)

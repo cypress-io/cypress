@@ -1,0 +1,19 @@
+{
+  "include": [
+    "lib/node/**/*.ts",
+    "lib/utils.ts"
+  ],
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDirs": [
+      "./lib/node",
+      "./lib/utils"
+    ],
+    "outDir": "./esm",
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "node",
+    "declaration": true,
+    "noEmit": true
+  }
+}

@@ -560,12 +560,12 @@ context('lib/browsers/cdp_automation', () => {
 
     describe('reset:browser:state', function () {
       it('sends Storage.clearDataForOrigin and Network.clearBrowserCache', async function () {
-        this.sendDebuggerCommand.withArgs('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' }).resolves()
+        this.sendDebuggerCommand.withArgs('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'cookies,indexeddb,local_storage,shader_cache,service_workers,cache_storage,interest_groups,shared_storage' }).resolves()
         this.sendDebuggerCommand.withArgs('Network.clearBrowserCache').resolves()
 
         await this.onRequest('reset:browser:state')
 
-        expect(this.sendDebuggerCommand).to.be.calledWith('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' })
+        expect(this.sendDebuggerCommand).to.be.calledWith('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'cookies,indexeddb,local_storage,shader_cache,service_workers,cache_storage,interest_groups,shared_storage' })
         expect(this.sendDebuggerCommand).to.be.calledWith('Network.clearBrowserCache')
       })
     })

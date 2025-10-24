@@ -5,8 +5,8 @@ version: 2.1
 # the new location and/or names:
 # - ./scripts/github-actions/update-browser-versions.js
 
-chrome-stable-version: &chrome-stable-version "140.0.7339.207"
-chrome-beta-version: &chrome-beta-version "141.0.7390.30"
+chrome-stable-version: &chrome-stable-version "141.0.7390.107"
+chrome-beta-version: &chrome-beta-version "142.0.7444.34"
 firefox-stable-version: &firefox-stable-version "142.0"
 base-internal-bullseye: &base-internal-bullseye cypress/base-internal:22.19.0-bullseye
 base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.19.0-yarn-berry
@@ -1489,9 +1489,6 @@ jobs:
       resource_class:
         type: string
         default: large
-      is_contributor_pr:
-        type: boolean
-        default: false
     resource_class: << parameters.resource_class >>
     steps:
       - restore_cached_workspace
@@ -1510,8 +1507,9 @@ jobs:
           command: yarn list --depth=0 || true
       - run:
           name: Check env canaries
-          command: node ./scripts/circle-env.js --check-canaries --is-contributor-pr <<
-            parameters.is_contributor_pr >>
+          command: |
+            IS_CONTRIBUTOR_PR=$([[ "<< pipeline.git.branch >>" =~ ^pull/[0-9]+$ ]] && echo "true" || echo "false")
+            node ./scripts/circle-env.js --check-canaries --is-contributor-pr $IS_CONTRIBUTOR_PR
       - build-and-persist
 
   lint:
@@ -1779,7 +1777,7 @@ jobs:
                   source ./scripts/ensure-node.sh
                   yarn lerna run types
             - sanitize-verify-and-store-mocha-results:
-                expectedResultCount: 8
+                expectedResultCount: 3
 
   verify-release-readiness:
     <<: *defaults

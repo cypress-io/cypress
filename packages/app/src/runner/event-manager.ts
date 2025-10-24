@@ -7,10 +7,10 @@ import type { LocalBusEmitsMap, LocalBusEventMap, DriverToLocalBus, SocketToDriv
 import type { RunState, CachedTestState, AutomationElementId, FileDetails, ReporterStartInfo, ReporterRunState } from '@packages/types'
 
 import { logger } from './logger'
-import type { SocketShape } from '@packages/socket/lib/types'
+import type { SocketShape } from '@packages/socket/browser/client'
 import { automation, useRunnerUiStore, useSpecStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
-import { useStudioStore } from '../store/studio-store'
+import { EntrySource, useStudioStore } from '../store/studio-store'
 import { getAutIframeModel } from '.'
 import { handlePausing } from './events/pausing'
 import { addTelemetryListeners } from './events/telemetry'
@@ -18,6 +18,7 @@ import { telemetry } from '@packages/telemetry/browser/client'
 import { addCaptureProtocolListeners } from './events/capture-protocol'
 import { getRunnerConfigFromWindow } from './get-runner-config-from-window'
 import { usePromptStore } from '../store/prompt-store'
+import { useSpecDirtyDataStore } from '../store/spec-dirty-data-store'
 
 export type CypressInCypressMochaEvent = Array<Array<string | Record<string, any>>>
 
@@ -63,6 +64,7 @@ export class EventManager {
   specStore: ReturnType<typeof useSpecStore>
   studioStore: ReturnType<typeof useStudioStore>
   promptStore: ReturnType<typeof usePromptStore>
+  specDirtyDataStore: ReturnType<typeof useSpecDirtyDataStore>
 
   constructor (
     // import '@packages/driver'
@@ -78,6 +80,7 @@ export class EventManager {
     this.specStore = useSpecStore()
     this.studioStore = useStudioStore()
     this.promptStore = usePromptStore()
+    this.specDirtyDataStore = useSpecDirtyDataStore()
   }
 
   getCypress () {
@@ -279,8 +282,13 @@ export class EventManager {
     this.reporterBus.on('studio:init:test', studioInitTest)
     this.localBus.on('studio:init:test', studioInitTest)
 
-    const studioInitSuite = ({ suiteId, showUrlPrompt = true }: { suiteId: string, showUrlPrompt?: boolean }) => {
+    const studioInitSuite = ({ suiteId, showUrlPrompt = true, entrySource }: { suiteId: string, showUrlPrompt?: boolean, entrySource?: EntrySource }) => {
       this.studioStore.setSuiteId(suiteId)
+
+      if (entrySource) {
+        this.studioStore.setEntrySource(entrySource)
+      }
+
       this.studioStore.setShowUrlPrompt(showUrlPrompt)
 
       this.ws.emit('studio:init', { sessionId: this.studioStore.sessionId }, ({ canAccessStudioAI, cloudStudioSessionId, error }) => {
@@ -920,6 +928,7 @@ export class EventManager {
     crossOriginLogs = {}
     this.studioStore.setActive(false)
     this.promptStore.resetState()
+    this.specDirtyDataStore.resetDirtyState()
     await new Promise((resolve) => this.ws.emit('prompt:reset', resolve))
   }
 

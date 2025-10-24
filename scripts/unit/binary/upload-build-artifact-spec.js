@@ -1,4 +1,4 @@
-const { sinon } = require('@packages/https-proxy/test/spec_helper')
+const sinon = require('sinon')
 const { expect } = require('chai')
 const hasha = require('hasha')
 const fs = require('fs')
