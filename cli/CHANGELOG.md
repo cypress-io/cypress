@@ -10,6 +10,7 @@ _Released 10/20/2025 (PENDING)_
 **Bugfixes:**
 
 - Fixes an issue where grouped command text jumps up and down when expanding and collapsing in the command log. Addressed in [#32757](https://github.com/cypress-io/cypress/pull/32757).
+- Added more context to the error message shown when `cy.prompt()` fails to download. Addressed in [#](https://github.com/cypress-io/cypress/pull/).
 
 **Misc:**
 
