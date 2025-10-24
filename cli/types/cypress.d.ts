@@ -3284,6 +3284,12 @@ declare namespace Cypress {
      * @default false
      */
     experimentalPromptCommand?: boolean
+
+    /**
+     * Enables an alternative, performance-optimized visibility algorithm.
+     * @default false
+     */
+    experimentalFastVisibility?: boolean
   }
 
   /**
