@@ -2,7 +2,7 @@ import type { CDPClient } from '@packages/types/src/protocol'
 import type Protocol from 'devtools-protocol/types/protocol.d'
 import { EventEmitter } from 'stream'
 import { randomUUID } from 'crypto'
-import { decode, encode } from './utils'
+import { decode, encode } from '../utils'
 import Debug from 'debug'
 
 const debugVerbose = Debug('cypress-verbose:server:socket:cdp-socket')
@@ -36,6 +36,7 @@ export class CDPSocketServer extends EventEmitter {
 
   // @ts-expect-error TODO: fix emit type
   emit = async (event: string, ...args: any[]) => {
+    // tslint:disable-next-line:no-floating-promises
     this._cdpSocket?.emit(event, ...args)
 
     return true

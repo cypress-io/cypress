@@ -1,0 +1,18 @@
+{
+  "include": [
+    "lib/node/**/*.ts",
+    "lib/utils.ts"
+  ],
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDirs": [
+      "./lib/node",
+      "./lib/utils"
+    ],
+    "outDir": "./cjs",
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "declaration": true
+  }
+}
