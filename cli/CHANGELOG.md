@@ -12,6 +12,7 @@ _Released 10/20/2025 (PENDING)_
 - Fixed an issue where grouped command text jumps up and down when expanding and collapsing in the command log. Addressed in [#32757](https://github.com/cypress-io/cypress/pull/32757).
 - Fixed an issue where command snapshots were not correctly displayed in Studio. Addressed in [#32808](https://github.com/cypress-io/cypress/pull/32808).
 - Fixed an issue with grouped console prop items having a hard to read blue color in the console log and duplicate `:` characters being displayed. Addressed in [#32776](https://github.com/cypress-io/cypress/pull/32776).
+- Fixed an issue where `cy.wait('@alias')` could time out when the underlying network request was canceled by navigation (e.g., `cy.visit`, `cy.reload`). Fixes [#19326](https://github.com/cypress-io/cypress/issues/19326).
 
 **Misc:**
 
@@ -126,7 +127,6 @@ _Released 09/02/2025_
 - Fixed an issue where the open Studio button would incorrectly show for component tests. Addressed in [#32315](https://github.com/cypress-io/cypress/pull/32315).
 - Fixed an issue where the TypeScript compiler wasn't being resolved correctly when `@cypress/webpack-batteries-included-preprocessor` was used as a standalone package. Fixes [#32338](https://github.com/cypress-io/cypress/issues/32338).
 - Fixed an issue where `tsx` was not being loaded correctly into the Cypress configuration process due to spaces being present in the path. Fixes [#32398](https://github.com/cypress-io/cypress/issues/32398).
-* Fixed an issue where `cy.wait('@alias')` could time out when the underlying network request was canceled by navigation (e.g., `cy.visit`, `cy.reload`). Fixes [#19326](https://github.com/cypress-io/cypress/issues/19326).
 
 **Misc:**
 
