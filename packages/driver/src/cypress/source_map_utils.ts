@@ -7,7 +7,6 @@ import mappingsWasm from 'source-map/lib/mappings.wasm'
 
 import $utils from './utils'
 import { toPosix } from './util/to_posix'
-import stackUtils from './stack_utils'
 import path from 'path'
 
 const sourceMapExtractionRegex = /\/\/\s*[@#]\s*sourceMappingURL\s*=\s*(data:[^\s]*)/g
@@ -130,16 +129,18 @@ const sourceMapProjectRoot = (relativePath: string, absolutePath: string) => {
 
   for (let index = 0; index < consumer.sources.length; index++) {
     const source = consumer.sources[index]
-    const strippedSource = stackUtils.stripCustomProtocol(source)
+    const strippedSource = $utils.stripCustomProtocol(source)
 
-    if (absolutePath.endsWith(strippedSource)) {
+    if (strippedSource && absolutePath.endsWith(strippedSource)) {
       // @ts-expect-error
       const relativeSource = consumer._sources.at(index)
 
-      // get the directory where relativeSource applied to the directory gives you the absolute path
-      const baseDirectory = getBaseDirectory(absolutePath, stackUtils.stripCustomProtocol(relativeSource))
+      if (relativeSource) {
+        // get the directory where relativeSource applied to the directory gives you the absolute path
+        const baseDirectory = getBaseDirectory(absolutePath, relativeSource)
 
-      return baseDirectory
+        return baseDirectory
+      }
     }
   }
 
@@ -156,7 +157,7 @@ const getBaseDirectory = (absolutePath: string, relativePath: string) => {
 
   // Work backwards: check each parent directory
   while (recurse) {
-    const resolved = path.resolve(dir, relNormalized)
+    const resolved = path.join(dir, relNormalized)
 
     if (resolved === absNormalized) {
       return dir
@@ -182,4 +183,5 @@ export default {
   destroySourceMapConsumers,
   areSourceMapsAvailable,
   sourceMapProjectRoot,
+  getBaseDirectory,
 }
