@@ -341,7 +341,7 @@ const getSourceDetailsForLine = (projectRoot, line): MessageLineDetail | StackLi
   if (relativeFile) {
     relativeFile = path.normalize(relativeFile)
 
-    if (relativeFile.includes(projectRoot)) {
+    if (projectRoot !== '/' && relativeFile.includes(projectRoot)) {
       relativeFile = relativeFile.replace(projectRoot, '').substring(1)
     }
   }
