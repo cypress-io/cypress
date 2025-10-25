@@ -168,6 +168,7 @@ describe('sourcemaps', () => {
 
       // Wait for the error to be fully rendered and interactive
       cy.get('.runnable-err-file-path').eq(1).should('be.visible').and('not.be.disabled')
+      cy.wait(2000)
       cy.get('.runnable-err-file-path').eq(1).click()
       cy.get('@emit').should('have.been.calledWithMatch', 'open:file', {
         absoluteFile: Cypress.sinon.match(new RegExp(`cy-projects/vite7.0.0-react/src/${specName}$`)),
