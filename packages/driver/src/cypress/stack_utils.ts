@@ -146,9 +146,9 @@ const getInvocationDetails = (specWindow, sourceMapProjectRoot: string): Invocat
       }
     }
 
-    const details: Omit<InvocationDetails, 'stack'> = getSourceDetailsForFirstLine(stack, sourceMapProjectRoot) || {};
+    const details: Omit<InvocationDetails, 'stack'> = getSourceDetailsForFirstLine(stack, sourceMapProjectRoot) || {}
 
-    (details as any).stack = stack
+    ;(details as any).stack = stack
 
     return details as (InvocationDetails & { stack: any })
   }

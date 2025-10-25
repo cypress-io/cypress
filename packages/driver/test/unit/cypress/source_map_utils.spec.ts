@@ -196,7 +196,7 @@ describe('source_map_utils', () => {
     })
   })
 
-  describe('sourceMapProjectRoot', () => {
+  describe('setSourceMapProjectRoot', () => {
     it('should return the base directory when source map consumer exists and path matches', async () => {
       withLinuxPaths(async (sourceMapUtils) => {
         await setupSourceMapConsumer(sourceMapUtils, '/project/cypress/integration/test.spec.js', ['src/components/Button.tsx'])
@@ -204,35 +204,41 @@ describe('source_map_utils', () => {
         const relativePath = 'cypress/integration/test.spec.js'
         const absolutePath = '/project/src/components/Button.tsx'
 
-        const result = sourceMapUtils.sourceMapProjectRoot(relativePath, absolutePath)
+        sourceMapUtils.setSourceMapProjectRoot(relativePath, absolutePath, '')
+
+        const result = sourceMapUtils.getSourceMapProjectRoot()
 
         expect(result).toBe('/project')
       })
     })
 
-    it('should return null when no source map consumer exists for the relative path', async () => {
+    it('should return project root when no source map consumer exists for the relative path', async () => {
       withLinuxPaths(async (sourceMapUtils) => {
         await setupSourceMapConsumer(sourceMapUtils, '/project/cypress/integration/test.spec.js', ['src/components/Button.tsx'])
 
         const relativePath = 'cypress/integration/nonexistent.spec.js'
         const absolutePath = '/project/src/components/Button.tsx'
 
-        const result = sourceMapUtils.sourceMapProjectRoot(relativePath, absolutePath)
+        sourceMapUtils.setSourceMapProjectRoot(relativePath, absolutePath, '/project-root')
 
-        expect(result).toBeNull()
+        const result = sourceMapUtils.getSourceMapProjectRoot()
+
+        expect(result).toBe('/project-root')
       })
     })
 
-    it('should return null when absolute path does not match any source in the consumer', async () => {
+    it('should return project root when absolute path does not match any source in the consumer', async () => {
       withLinuxPaths(async (sourceMapUtils) => {
         await setupSourceMapConsumer(sourceMapUtils, '/project/cypress/integration/test.spec.js', ['src/components/Button.tsx'])
 
         const relativePath = 'cypress/integration/test.spec.js'
         const absolutePath = '/different/project/src/components/Input.tsx'
 
-        const result = sourceMapUtils.sourceMapProjectRoot(relativePath, absolutePath)
+        sourceMapUtils.setSourceMapProjectRoot(relativePath, absolutePath, '/project-root')
 
-        expect(result).toBeNull()
+        const result = sourceMapUtils.getSourceMapProjectRoot()
+
+        expect(result).toBe('/project-root')
       })
     })
 
@@ -244,7 +250,9 @@ describe('source_map_utils', () => {
         const relativePath = 'cypress/integration/test2.spec.js'
         const absolutePath = '/project2/src/utils/helper.js'
 
-        const result = sourceMapUtils.sourceMapProjectRoot(relativePath, absolutePath)
+        sourceMapUtils.setSourceMapProjectRoot(relativePath, absolutePath, '/project-root')
+
+        const result = sourceMapUtils.getSourceMapProjectRoot()
 
         expect(result).toBe('/project2')
       })
@@ -255,9 +263,11 @@ describe('source_map_utils', () => {
         const relativePath = 'cypress/integration/test.spec.js'
         const absolutePath = '/project/src/components/Button.tsx'
 
-        const result = sourceMapUtils.sourceMapProjectRoot(relativePath, absolutePath)
+        sourceMapUtils.setSourceMapProjectRoot(relativePath, absolutePath, '/project-root')
 
-        expect(result).toBeNull()
+        const result = sourceMapUtils.getSourceMapProjectRoot()
+
+        expect(result).toBe('/project-root')
       })
     })
 
@@ -268,9 +278,11 @@ describe('source_map_utils', () => {
         const relativePath = 'cypress/integration/test.spec.js'
         const absolutePath = '/project/src/components/Button.tsx'
 
-        const result = sourceMapUtils.sourceMapProjectRoot(relativePath, absolutePath)
+        sourceMapUtils.setSourceMapProjectRoot(relativePath, absolutePath, '/project-root')
 
-        expect(result).toBeNull()
+        const result = sourceMapUtils.getSourceMapProjectRoot()
+
+        expect(result).toBe('/project-root')
       })
     })
 
@@ -281,7 +293,9 @@ describe('source_map_utils', () => {
         const relativePath = 'cypress\\integration\\test.spec.js'
         const absolutePath = 'C:\\project\\src\\components\\Button.tsx'
 
-        const result = sourceMapUtils.sourceMapProjectRoot(relativePath, absolutePath)
+        sourceMapUtils.setSourceMapProjectRoot(relativePath, absolutePath, 'C:\\project-root')
+
+        const result = sourceMapUtils.getSourceMapProjectRoot()
 
         expect(result).toBe('C:\\project')
       })

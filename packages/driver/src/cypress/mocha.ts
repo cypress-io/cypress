@@ -3,6 +3,7 @@ import _ from 'lodash'
 import $errUtils, { CypressError } from './error_utils'
 import $utils from './utils'
 import $stackUtils from './stack_utils'
+import $sourceMapUtils from './source_map_utils'
 
 // in the browser mocha is coming back
 // as window
@@ -529,12 +530,12 @@ const patchRunnableClearTimeout = () => {
   }
 }
 
-const patchSuiteAddTest = (specWindow, sourceMapProjectRoot: string) => {
+const patchSuiteAddTest = (specWindow, Cypress: InternalCypress.Cypress) => {
   Suite.prototype.addTest = function (...args) {
     const test = args[0]
 
     if (!test.invocationDetails) {
-      test.invocationDetails = $stackUtils.getInvocationDetails(specWindow, sourceMapProjectRoot)
+      test.invocationDetails = $stackUtils.getInvocationDetails(specWindow, $sourceMapUtils.getSourceMapProjectRoot())
     }
 
     const ret = suiteAddTest.apply(this, args)
@@ -561,12 +562,12 @@ const patchSuiteAddTest = (specWindow, sourceMapProjectRoot: string) => {
   }
 }
 
-const patchSuiteAddSuite = (specWindow, sourceMapProjectRoot: string) => {
+const patchSuiteAddSuite = (specWindow, Cypress: InternalCypress.Cypress) => {
   Suite.prototype.addSuite = function (...args) {
     const suite = args[0]
 
     if (!suite.invocationDetails) {
-      suite.invocationDetails = $stackUtils.getInvocationDetails(specWindow, sourceMapProjectRoot)
+      suite.invocationDetails = $stackUtils.getInvocationDetails(specWindow, $sourceMapUtils.getSourceMapProjectRoot())
     }
 
     return suiteAddSuite.apply(this, args)
@@ -609,7 +610,7 @@ const patchRunnableResetTimeout = () => {
   }
 }
 
-const patchSuiteHooks = (specWindow, sourceMapProjectRoot: string) => {
+const patchSuiteHooks = (specWindow, Cypress: InternalCypress.Cypress) => {
   _.each(['beforeAll', 'beforeEach', 'afterAll', 'afterEach'], (fnName) => {
     const _fn = Suite.prototype[fnName]
 
@@ -622,7 +623,7 @@ const patchSuiteHooks = (specWindow, sourceMapProjectRoot: string) => {
         let invocationStack = hook.invocationDetails?.stack
 
         if (!hook.invocationDetails) {
-          const invocationDetails = $stackUtils.getInvocationDetails(specWindow, sourceMapProjectRoot)!
+          const invocationDetails = $stackUtils.getInvocationDetails(specWindow, $sourceMapUtils.getSourceMapProjectRoot())!
 
           hook.invocationDetails = invocationDetails
           invocationStack = invocationDetails.stack
@@ -674,9 +675,9 @@ const override = (specWindow, Cypress, config) => {
   patchRunnerRunTests()
   patchTestClone()
   createCalculateTestStatus(Cypress)
-  patchSuiteAddTest(specWindow, Cypress.sourceMapProjectRoot)
-  patchSuiteAddSuite(specWindow, Cypress.sourceMapProjectRoot)
-  patchSuiteHooks(specWindow, Cypress.sourceMapProjectRoot)
+  patchSuiteAddTest(specWindow, Cypress)
+  patchSuiteAddSuite(specWindow, Cypress)
+  patchSuiteHooks(specWindow, Cypress)
 }
 
 const create = (specWindow, Cypress, config) => {

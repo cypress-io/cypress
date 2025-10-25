@@ -407,10 +407,13 @@ class $Cypress {
         scripts,
         specWindow,
         testingType: this.testingType,
+        projectRoot: this.config('projectRoot'),
+        specRelativePath: this.spec.relative,
+        specAbsolutePath: this.spec.absolute,
       })
       .then(() => {
         this.areSourceMapsAvailable = $sourceMapUtils.areSourceMapsAvailable()
-        this.sourceMapProjectRoot = $sourceMapUtils.sourceMapProjectRoot(this.spec.relative, this.spec.absolute) || Cypress.config('projectRoot')
+        this.sourceMapProjectRoot = $sourceMapUtils.getSourceMapProjectRoot()
         if (this.testingType === 'e2e') {
           return setSpecContentSecurityPolicy(specWindow)
         }

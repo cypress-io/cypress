@@ -11,6 +11,7 @@ import { LogUtils } from '../../../cypress/log'
 import logGroup from '../../logGroup'
 import type { StateFunc } from '../../../cypress/state'
 import { runPrivilegedCommand } from '../../../util/privileged_channel'
+import $sourceMapUtils from '../../../cypress/source_map_utils'
 
 const reHttp = /^https?:\/\//
 
@@ -190,7 +191,7 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
             // Attach the spec bridge to the window to be tested.
             communicator.toSpecBridge(origin, 'attach:to:window')
             const fn = isFunction(callbackFn) ? callbackFn.toString() : callbackFn
-            const file = $stackUtils.getSourceDetailsForFirstLine(userInvocationStack, Cypress.sourceMapProjectRoot)?.absoluteFile
+            const file = $stackUtils.getSourceDetailsForFirstLine(userInvocationStack, $sourceMapUtils.getSourceMapProjectRoot())?.absoluteFile
 
             try {
               // origin is a privileged command, meaning it has to be invoked

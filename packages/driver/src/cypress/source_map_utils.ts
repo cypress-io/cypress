@@ -13,6 +13,7 @@ const sourceMapExtractionRegex = /\/\/\s*[@#]\s*sourceMappingURL\s*=\s*(data:[^\
 const regexDataUrl = /data:[^;\n]+(?:;charset=[^;\n]+)?;base64,(.*)/ // matches data urls
 
 let sourceMapConsumers: Record<string, BasicSourceMapConsumer> = {}
+let sourceMapProjectRoot: string = ''
 
 const initializeSourceMapConsumer = async (script, sourceMap): Promise<BasicSourceMapConsumer | null> => {
   if (!sourceMap) return null
@@ -113,17 +114,22 @@ const destroySourceMapConsumers = () => {
   })
 
   sourceMapConsumers = {}
+  sourceMapProjectRoot = ''
 }
 
 const areSourceMapsAvailable = () => {
   return Object.keys(sourceMapConsumers).length > 0
 }
 
-const sourceMapProjectRoot = (relativePath: string, absolutePath: string) => {
+const setSourceMapProjectRoot = (relativePath: string, absolutePath: string, projectRoot: string) => {
   const keys = Object.keys(sourceMapConsumers)
   const key = keys.find((key) => key.endsWith(relativePath))
 
-  if (!key) return null
+  if (!key) {
+    sourceMapProjectRoot = projectRoot
+
+    return
+  }
 
   const consumer = sourceMapConsumers[key]
 
@@ -131,20 +137,29 @@ const sourceMapProjectRoot = (relativePath: string, absolutePath: string) => {
     const source = consumer.sources[index]
     const strippedSource = $utils.stripCustomProtocol(source)
 
-    if (strippedSource && absolutePath.endsWith(strippedSource)) {
+    if (strippedSource !== undefined && absolutePath?.endsWith(strippedSource)) {
       // @ts-expect-error
       const relativeSource = consumer._sources.at(index)
+      const strippedRelativeSource = $utils.stripCustomProtocol(relativeSource)
 
-      if (relativeSource) {
+      if (strippedRelativeSource !== undefined) {
         // get the directory where relativeSource applied to the directory gives you the absolute path
-        const baseDirectory = getBaseDirectory(absolutePath, relativeSource)
+        const baseDirectory = getBaseDirectory(absolutePath, strippedRelativeSource)
 
-        return baseDirectory
+        sourceMapProjectRoot = baseDirectory ?? projectRoot
+
+        return
       }
     }
   }
 
-  return null
+  sourceMapProjectRoot = projectRoot
+
+  return
+}
+
+const getSourceMapProjectRoot = () => {
+  return sourceMapProjectRoot
 }
 
 const getBaseDirectory = (absolutePath: string, relativePath: string) => {
@@ -182,6 +197,7 @@ export default {
   initializeSourceMapConsumer,
   destroySourceMapConsumers,
   areSourceMapsAvailable,
-  sourceMapProjectRoot,
+  setSourceMapProjectRoot,
+  getSourceMapProjectRoot,
   getBaseDirectory,
 }

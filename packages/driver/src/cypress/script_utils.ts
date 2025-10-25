@@ -43,11 +43,15 @@ const evalScripts = (specWindow, scripts: any = []) => {
   })
 }
 
-const runScriptsFromUrls = (specWindow, scripts) => {
+const runScriptsFromUrls = (specWindow, scripts, projectRoot, specRelativePath, specAbsolutePath) => {
   return Bluebird
   .map<any, any>(scripts, (script) => fetchScript(specWindow, script))
   .map(extractSourceMap)
-  .then((scripts) => evalScripts(specWindow, scripts))
+  .then((scripts) => {
+    $sourceMapUtils.setSourceMapProjectRoot(specRelativePath, specAbsolutePath, projectRoot)
+
+    return evalScripts(specWindow, scripts)
+  })
 }
 
 const appendScripts = (specWindow, scripts) => {
@@ -77,11 +81,14 @@ interface RunScriptsOptions {
   scripts: Script[]
   specWindow: Window
   testingType: Cypress.TestingType
+  projectRoot: string
+  specRelativePath: string
+  specAbsolutePath: string
 }
 
 // Supports either scripts as objects or as async import functions
 export default {
-  runScripts: ({ browser, scripts, specWindow, testingType }: RunScriptsOptions) => {
+  runScripts: ({ browser, scripts, specWindow, testingType, projectRoot, specRelativePath, specAbsolutePath }: RunScriptsOptions) => {
     // if scripts contains at least one promise
     if (scripts.length && typeof scripts[0] === 'function') {
       // chain the loading promises
@@ -100,6 +107,6 @@ export default {
     // for other browsers, we get the contents of the scripts so that we can
     // extract and utilize the source maps for better errors and code frames.
     // we then eval the script contents to run them
-    return runScriptsFromUrls(specWindow, scripts)
+    return runScriptsFromUrls(specWindow, scripts, projectRoot, specRelativePath, specAbsolutePath)
   },
 }
