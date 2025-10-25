@@ -122,16 +122,6 @@ describe('sourcemaps', () => {
         'src/JsxErrorSpec.cy.jsx',
         o.testContent,
       )
-
-      await ctx.actions.file.writeFileInProject(
-        'src/TsErrorSpec.cy.ts',
-        `type MyType = { value: string }\n\n${o.testContent}`,
-      )
-
-      await ctx.actions.file.writeFileInProject(
-        'src/TsxErrorSpec.cy.tsx',
-        `type MyType = { value: string }\n\n${o.testContent}`,
-      )
     }, { testContent })
 
     const verifySourcemap = (specName: string, line: number, column: number) => {
@@ -160,9 +150,5 @@ describe('sourcemaps', () => {
     verifySourcemap('JsWithImportErrorSpec.cy.js', 9, 8)
 
     verifySourcemap('JsxErrorSpec.cy.jsx', 7, 8)
-
-    // verifySourcemap('TsErrorSpec.cy.ts', 9, 8)
-
-    // verifySourcemap('TsxErrorSpec.cy.tsx', 9, 8)
   })
 })
