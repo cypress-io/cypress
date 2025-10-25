@@ -16,8 +16,8 @@ const OpenFileInIDE: React.FC<Props> = observer((props) => {
 
   return (
     <span className={props.className} onClick={() => {
-      events.emit('open:file:unified', props.fileDetails)
       console.log('clicked', props.fileDetails)
+      events.emit('open:file:unified', props.fileDetails)
     }}>
       {props.children}
     </span>
