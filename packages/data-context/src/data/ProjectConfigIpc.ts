@@ -370,7 +370,7 @@ export class ProjectConfigIpc extends EventEmitter {
     debug('plugins process error:', err.stack)
 
     this.cleanupIpc()
-    if (err instanceof Error && err.code === 'EPIPE') {
+    if (err.code === 'EPIPE') {
       return
     }
 
