@@ -169,7 +169,12 @@ describe('sourcemaps', () => {
 
       // Wait for the error to be fully rendered and interactive
       cy.get('.runnable-err-file-path').eq(1).should('be.visible').and('not.be.disabled')
-      cy.get('.runnable-err-file-path').eq(1).trigger('click')
+      // Try multiple approaches to trigger the click
+      cy.get('.runnable-err-file-path').eq(1).then(($el) => {
+        // Try triggering click on the span (OpenFileInIDE component)
+        $el.find('span').trigger('click')
+      })
+
       cy.get('@emit').should('have.been.calledWithMatch', 'open:file', {
         absoluteFile: Cypress.sinon.match(new RegExp(`cy-projects/vite7.0.0-react/src/${specName}$`)),
         line,
