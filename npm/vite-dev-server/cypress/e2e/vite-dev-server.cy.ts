@@ -157,7 +157,7 @@ describe('sourcemaps', () => {
       cy.contains(specName).click()
       cy.waitForSpecToFinish()
       cy.get('.failed > .num').should('contain', 2)
-      cy.get('.runnable-err-file-path').should('contain', `${specName}:${line}:${column}`)
+      cy.get('.runnable-err-file-path').eq(1).should('contain', `${specName}:${line}:${column}`)
       cy.window().then((win) => {
         // @ts-expect-error
         if (!win.getEventManager().emit.restore?.sinon) {
@@ -166,7 +166,7 @@ describe('sourcemaps', () => {
         }
       })
 
-      cy.get('.runnable-err-file-path').click()
+      cy.get('.runnable-err-file-path').eq(1).click()
       cy.get('@emit').should('have.been.calledWithMatch', 'open:file', {
         absoluteFile: Cypress.sinon.match(new RegExp(`cy-projects/vite7.0.0-react/src/${specName}$`)),
         line,
