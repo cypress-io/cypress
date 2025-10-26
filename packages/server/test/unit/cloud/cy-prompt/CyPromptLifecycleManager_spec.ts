@@ -566,6 +566,85 @@ describe('CyPromptLifecycleManager', () => {
         },
       })
     })
+
+    it('handles errors from ensureCyPromptBundle', async () => {
+      const actualError = new Error('Test error')
+
+      ensureCyPromptBundleStub.rejects(actualError)
+      cyPromptLifecycleManager.initializeCyPromptManager({
+        cloudDataSource: mockCloudDataSource,
+        ctx: mockCtx,
+        record: false,
+        key: '123e4567-e89b-12d3-a456-426614174000',
+      })
+
+      // @ts-expect-error - accessing private property
+      const cyPromptPromise = cyPromptLifecycleManager.cyPromptManagerPromise
+
+      expect(cyPromptPromise).to.not.be.null
+
+      const { error } = (await cyPromptPromise) as { error: Error }
+
+      expect(error.message).to.equal('Test error')
+
+      expect(reportCyPromptErrorStub).to.be.calledWith({
+        cloudApi: {
+          cloudUrl: 'https://cloud.cypress.io',
+          CloudRequest,
+          createCloudRequest,
+          isRetryableError,
+          asyncRetry,
+        },
+        cyPromptHash: 'abc',
+        projectSlug: 'test-project-id',
+        error: actualError,
+        cyPromptMethod: 'initializeCyPromptManager',
+        cyPromptMethodArgs: [],
+        additionalHeaders: {
+          'Authorization': 'Bearer test-token',
+        },
+      })
+    })
+
+    it('handles AggregateErrors from ensureCyPromptBundle', async () => {
+      const aggregateError = new AggregateError([new Error('Test error'), new Error('Second error')], 'Multiple errors')
+
+      ensureCyPromptBundleStub.rejects(aggregateError)
+
+      cyPromptLifecycleManager.initializeCyPromptManager({
+        cloudDataSource: mockCloudDataSource,
+        ctx: mockCtx,
+        record: false,
+        key: '123e4567-e89b-12d3-a456-426614174000',
+      })
+
+      // @ts-expect-error - accessing private property
+      const cyPromptPromise = cyPromptLifecycleManager.cyPromptManagerPromise
+
+      expect(cyPromptPromise).to.not.be.null
+
+      const { error } = (await cyPromptPromise) as { error: Error }
+
+      expect(error.message).to.equal('Second error')
+
+      expect(reportCyPromptErrorStub).to.be.calledWith({
+        cloudApi: {
+          cloudUrl: 'https://cloud.cypress.io',
+          CloudRequest,
+          createCloudRequest,
+          isRetryableError,
+          asyncRetry,
+        },
+        cyPromptHash: 'abc',
+        projectSlug: 'test-project-id',
+        error: aggregateError.errors[aggregateError.errors.length - 1],
+        cyPromptMethod: 'initializeCyPromptManager',
+        cyPromptMethodArgs: [],
+        additionalHeaders: {
+          'Authorization': 'Bearer test-token',
+        },
+      })
+    })
   })
 
   describe('getCyPrompt', () => {
