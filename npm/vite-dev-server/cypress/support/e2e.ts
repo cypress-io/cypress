@@ -15,5 +15,4 @@
 
 // Import commands.js using ES2015 syntax:
 import '@packages/frontend-shared/cypress/support/e2e'
-import 'cypress-real-events/support'
 import './commands'

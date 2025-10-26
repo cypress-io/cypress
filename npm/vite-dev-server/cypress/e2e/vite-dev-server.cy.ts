@@ -1,5 +1,4 @@
 /// <reference path="../support/e2e.ts" />
-/// <reference types="cypress-real-events" />
 
 import dedent from 'dedent'
 
