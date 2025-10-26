@@ -137,7 +137,10 @@ describe('sourcemaps', () => {
 
       cy.get('.runnable-err-file-path', { timeout: 250 }).eq(1).as('filePath')
       cy.get('@filePath').should('contain', `${specName}:${line}:${column}`)
-      cy.get('@filePath').click()
+      cy.get('@filePath').then(($el) => {
+        $el.find('span').trigger('click')
+      })
+
       cy.get('@emit').should('have.been.calledWithMatch', 'open:file', {
         absoluteFile: Cypress.sinon.match(new RegExp(`cy-projects/webpack5_wds5-react/src/${specName}$`)),
         line,

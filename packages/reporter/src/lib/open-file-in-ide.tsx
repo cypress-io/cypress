@@ -12,13 +12,8 @@ interface Props {
 // Catches click events that bubble from children and emits open file events to
 // be handled by the app.
 const OpenFileInIDE: React.FC<Props> = observer((props) => {
-  console.log('props.fileDetails', props.fileDetails)
-
   return (
-    <span className={props.className} onClick={() => {
-      console.log('clicked', props.fileDetails)
-      events.emit('open:file:unified', props.fileDetails)
-    }}>
+    <span className={props.className} onClick={() => events.emit('open:file:unified', props.fileDetails)}>
       {props.children}
     </span>
   )

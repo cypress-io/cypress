@@ -161,17 +161,12 @@ describe('sourcemaps', () => {
       cy.get('.runnable-err-file-path').eq(1).should('contain', `${specName}:${line}:${column}`)
       cy.window().then((win) => {
         // @ts-expect-error
-        if (!win.getEventManager().emit.restore?.sinon) {
-          // @ts-expect-error
-          cy.stub(win.getEventManager(), 'emit').as('emit')
-        }
+        cy.stub(win.getEventManager(), 'emit').as('emit')
       })
 
-      // Wait for the error to be fully rendered and interactive
-      cy.get('.runnable-err-file-path').eq(1).should('be.visible').and('not.be.disabled')
-      // Try multiple approaches to trigger the click
-      cy.get('.runnable-err-file-path').eq(1).then(($el) => {
-        // Try triggering click on the span (OpenFileInIDE component)
+      cy.get('.runnable-err-file-path', { timeout: 250 }).eq(1).as('filePath')
+      cy.get('@filePath').should('contain', `${specName}:${line}:${column}`)
+      cy.get('@filePath').then(($el) => {
         $el.find('span').trigger('click')
       })
 
