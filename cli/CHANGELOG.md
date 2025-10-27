@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.6.0
 
-_Released 10/20/2025 (PENDING)_
+_Released 11/4/2025 (PENDING)_
 
 **Features:**
 
