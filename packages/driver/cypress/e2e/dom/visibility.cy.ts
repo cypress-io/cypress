@@ -390,7 +390,7 @@ describe('src/cypress/dom/visibility', {
       it('has parent with `visibility: collapse`', function () {
         prepareFixtureSection('table-elements')
         cy.get('[cy-section="table-elements"] tr[style*="visibility: collapse"] td').then(($el) => {
-          reasonIs($el, 'This element `<td>` is not visible because its parent `<tr.testCase>` has CSS property: `visibility: collapse`')
+          reasonIs($el, 'This element `<td.testCase>` is not visible because its parent `<tr.testCase>` has CSS property: `visibility: collapse`')
         })
       })
 
