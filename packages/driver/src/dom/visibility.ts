@@ -604,7 +604,7 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
   if (elOrAncestorIsFixedOrSticky($el)) {
     if (elIsNotElementFromPoint($el)) {
       // show the long element here
-      const covered = stringifyElement(elAtCenterPoint($el), 'long')
+      const covered = stringifyElement(elAtCenterPoint($el))
 
       if (covered) {
         return `This element \`${node}\` is not visible because it has CSS property: \`position: fixed\` and it's being covered by another element:\n\n\`${covered}\``
