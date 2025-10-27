@@ -530,7 +530,7 @@ const patchRunnableClearTimeout = () => {
   }
 }
 
-const patchSuiteAddTest = (specWindow, Cypress: InternalCypress.Cypress) => {
+const patchSuiteAddTest = (specWindow) => {
   Suite.prototype.addTest = function (...args) {
     const test = args[0]
 
@@ -562,7 +562,7 @@ const patchSuiteAddTest = (specWindow, Cypress: InternalCypress.Cypress) => {
   }
 }
 
-const patchSuiteAddSuite = (specWindow, Cypress: InternalCypress.Cypress) => {
+const patchSuiteAddSuite = (specWindow) => {
   Suite.prototype.addSuite = function (...args) {
     const suite = args[0]
 
@@ -610,7 +610,7 @@ const patchRunnableResetTimeout = () => {
   }
 }
 
-const patchSuiteHooks = (specWindow, Cypress: InternalCypress.Cypress) => {
+const patchSuiteHooks = (specWindow) => {
   _.each(['beforeAll', 'beforeEach', 'afterAll', 'afterEach'], (fnName) => {
     const _fn = Suite.prototype[fnName]
 
@@ -675,9 +675,9 @@ const override = (specWindow, Cypress, config) => {
   patchRunnerRunTests()
   patchTestClone()
   createCalculateTestStatus(Cypress)
-  patchSuiteAddTest(specWindow, Cypress)
-  patchSuiteAddSuite(specWindow, Cypress)
-  patchSuiteHooks(specWindow, Cypress)
+  patchSuiteAddTest(specWindow)
+  patchSuiteAddSuite(specWindow)
+  patchSuiteHooks(specWindow)
 }
 
 const create = (specWindow, Cypress, config) => {
