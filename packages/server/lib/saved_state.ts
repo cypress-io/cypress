@@ -3,7 +3,7 @@ import path from 'path'
 import Debug from 'debug'
 import Bluebird from 'bluebird'
 import appData from './util/app_data'
-import cwd from './cwd'
+import { getCwd } from './cwd'
 import FileUtil from './util/file'
 import { fs } from './util/fs'
 import { AllowedState, allowedKeys } from '@packages/types'
@@ -16,7 +16,7 @@ const stateFiles: Record<string, typeof FileUtil> = {}
 
 export const formStatePath = (projectRoot?: string) => {
   return Bluebird.try(() => {
-    debug('making saved state from %s', cwd())
+    debug('making saved state from %s', getCwd())
 
     if (projectRoot) {
       debug('for project path %s', projectRoot)
@@ -26,25 +26,25 @@ export const formStatePath = (projectRoot?: string) => {
 
     debug('missing project path, looking for project here')
 
-    let cypressConfigPath = cwd('cypress.config.js')
+    let cypressConfigPath = getCwd('cypress.config.js')
 
     return fs.pathExistsAsync(cypressConfigPath)
     .then((found) => {
       if (found) {
         debug('found cypress file %s', cypressConfigPath)
-        projectRoot = cwd()
+        projectRoot = getCwd()
 
         return
       }
 
-      cypressConfigPath = cwd('cypress.config.ts')
+      cypressConfigPath = getCwd('cypress.config.ts')
 
       return fs.pathExistsAsync(cypressConfigPath)
     })
     .then((found) => {
       if (found) {
         debug('found cypress file %s', cypressConfigPath)
-        projectRoot = cwd()
+        projectRoot = getCwd()
       }
 
       return projectRoot
