@@ -1,5 +1,3 @@
-require('./environment')
-
 // we are not requiring everything up front
 // to optimize how quickly electron boots while
 // in dev or linux production. the reasoning is

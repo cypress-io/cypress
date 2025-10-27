@@ -1,6 +1,5 @@
 import _ from 'lodash'
 import Debug from 'debug'
-import extension from '@packages/extension'
 import { isHostOnlyCookie } from '../browsers/cdp_automation'
 import type { SerializableAutomationCookie } from '../util/cookies'
 
@@ -30,6 +29,19 @@ const debug = Debug('cypress:server:automation:cookies')
 
 const normalizeCookies = (cookies: (SerializableAutomationCookie | AutomationCookie)[]): AutomationCookie[] => {
   return _.map(cookies, normalizeCookieProps) as AutomationCookie[]
+}
+
+const getCookieUrl = (cookie: {
+  secure?: boolean | null
+  domain?: string | null
+  path?: string | null
+} = {}) => {
+  const prefix = cookie.secure ? 'https://' : 'http://'
+
+  // https://github.com/cypress-io/cypress/issues/6375
+  const host = cookie.domain?.startsWith('.') ? cookie.domain.slice(1) : cookie.domain
+
+  return prefix + host + (cookie.path || '')
 }
 
 const normalizeCookieProps = function (automationCookie: SerializableAutomationCookie | AutomationCookie | null) {
@@ -151,7 +163,7 @@ export class Cookies {
 
     // lets construct the url ourselves right now
     // unless we already have a URL
-    cookie.url = data.url != null ? data.url : extension.getCookieUrl(data)
+    cookie.url = data.url != null ? data.url : getCookieUrl(data)
 
     debug('set:cookie %o', cookie)
 
@@ -175,7 +187,7 @@ export class Cookies {
 
       // lets construct the url ourselves right now
       // unless we already have a URL
-      cookie.url = data.url != null ? data.url : extension.getCookieUrl(data)
+      cookie.url = data.url != null ? data.url : getCookieUrl(data)
 
       return cookie
     })

@@ -1,4 +1,4 @@
-/* global chrome */
+declare let chrome: any
 
 // this background script runs in a service worker. it has access to the
 // extension API, but not direct access the web page or anything else
@@ -9,10 +9,9 @@
 // go to `chrome://extensions` and hit the reload button under the Cypress
 // extension. sometimes that doesn't work and requires re-launching Chrome
 // and then reloading the extension via `chrome://extensions`
-
-async function getFromStorage (key) {
+async function getFromStorage (key: string) {
   return new Promise((resolve) => {
-    chrome.storage.local.get(key, (storage) => {
+    chrome.storage.local.get(key, (storage: any) => {
       resolve(storage[key])
     })
   })
@@ -23,7 +22,7 @@ async function activateMainTab () {
     const url = await getFromStorage('mostRecentUrl')
     const tabs = await chrome.tabs.query({})
 
-    const cypressTab = tabs.find((tab) => tab.url.includes(url))
+    const cypressTab = tabs.find((tab: any) => tab.url.includes(url))
 
     if (!cypressTab) return
 
@@ -41,8 +40,8 @@ async function activateMainTab () {
 
 // here we connect to the content script, which has access to the web page
 // running Cypress, but not the extension API
-chrome.runtime.onConnect.addListener((port) => {
-  port.onMessage.addListener(async ({ message, url }) => {
+chrome.runtime.onConnect.addListener((port: any) => {
+  port.onMessage.addListener(async ({ message, url }: { message: string, url: string }) => {
     if (message === 'activate:main:tab') {
       await activateMainTab()
 

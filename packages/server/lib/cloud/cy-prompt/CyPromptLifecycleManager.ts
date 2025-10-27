@@ -88,6 +88,8 @@ export class CyPromptLifecycleManager {
       const cloudUrl = ctx.cloud.getCloudUrl(cloudEnv)
       const cloudHeaders = await ctx.cloud.additionalHeaders()
 
+      const lastError = error instanceof AggregateError ? error.errors[error.errors.length - 1] : error
+
       reportCyPromptError({
         cloudApi: {
           cloudUrl,
@@ -99,7 +101,7 @@ export class CyPromptLifecycleManager {
         additionalHeaders: cloudHeaders,
         cyPromptHash: this.cyPromptHash,
         projectSlug: (await ctx.project.getConfig()).projectId || undefined,
-        error,
+        error: lastError,
         cyPromptMethod: 'initializeCyPromptManager',
         cyPromptMethodArgs: [],
       })
@@ -107,7 +109,7 @@ export class CyPromptLifecycleManager {
       // Clean up any registered listeners
       this.listeners = []
 
-      return { error }
+      return { error: lastError }
     })
 
     this.cyPromptManagerPromise = cyPromptManagerPromise

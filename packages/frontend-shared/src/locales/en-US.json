@@ -961,8 +961,7 @@
       "testsRunningError": "Cannot show snapshot while tests are running",
       "snapshotMissingError": "The snapshot is missing. Displaying current state of the DOM.",
       "defaultTitle": "DOM snapshot",
-      "pinnedTitle": "Pinned",
-      "studioActiveError": "Cannot show snapshot while creating commands in Studio"
+      "pinnedTitle": "Pinned"
     },
     "selectorPlayground": {
       "matches": "No matches | {n} match | {n} matches",
