@@ -26,7 +26,7 @@ window.addEventListener('message', ({ data, source }) => {
 })
 
 // this listens for messages from the background service worker script
-port.onMessage.addListener(({ message }) => {
+port.onMessage.addListener(({ message }: { message: string }) => {
   // this lets us know the message we sent to the background script to activate
   // the main tab was successful, so we in turn send it on to Cypress
   // via postMessage

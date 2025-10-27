@@ -136,7 +136,7 @@ export class ProtocolManager implements ProtocolManagerShape {
             if (CAPTURE_ERRORS) {
               this._errors.push({ captureMethod: 'cdpClient.on', fatal: false, error, args: [event, message] })
             } else {
-              debug('error in cdpClient.on %O', { error, event, message })
+              debug('error in cdpClient.on %o', { error, event, message })
               throw error
             }
           }
@@ -208,7 +208,7 @@ export class ProtocolManager implements ProtocolManagerShape {
         ...(durations ? durations : {}),
       }
 
-      debug('Persisting after spec durations in state: %O', this._afterSpecDurations)
+      debug('Persisting after spec durations in state: %o', this._afterSpecDurations)
 
       return undefined
     } catch (e) {
@@ -223,7 +223,7 @@ export class ProtocolManager implements ProtocolManagerShape {
 
   async beforeTest (test: { id: string } & Record<string, any>) {
     if (!test.id) {
-      debug('protocolManager beforeTest was invoked with test without id %O', test)
+      debug('protocolManager beforeTest was invoked with test without id %o', test)
     }
 
     this._runnableId = test.id
@@ -327,7 +327,7 @@ export class ProtocolManager implements ProtocolManagerShape {
 
   async uploadCaptureArtifact ({ uploadUrl, fileSize, filePath }: CaptureArtifact) {
     if (!this._protocol || !filePath || !this._db) {
-      debug('not uploading due to one of the following being falsy: %O', {
+      debug('not uploading due to one of the following being falsy: %o', {
         _protocol: !!this._protocol,
         archivePath: !!filePath,
         _db: !!this._db,

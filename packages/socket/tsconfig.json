@@ -1,13 +1,14 @@
 {
-  "extends": "./../ts/tsconfig.json",
-  "compilerOptions": {
-    "noImplicitAny": true,
-    "skipLibCheck": false
-  },
   "include": [
-    "lib/*.ts",
+    "lib/**/*.ts"
   ],
-  "files": [
-    "./../ts/index.d.ts"
-  ]
+  "compilerOptions": {
+    "allowJs": false,
+    "noImplicitAny": true,
+    "noImplicitReturns": false,
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true
+  }
 }

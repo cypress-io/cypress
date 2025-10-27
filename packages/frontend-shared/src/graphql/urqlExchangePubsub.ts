@@ -1,6 +1,6 @@
 import { pipe, tap } from 'wonka'
 import type { Exchange, Operation, OperationResult } from '@urql/core'
-import type { SocketShape } from '@packages/socket/lib/types'
+import type { SocketShape } from '@packages/socket/browser/client'
 import type { DefinitionNode, DocumentNode, OperationDefinitionNode } from 'graphql'
 
 export const pubSubExchange = (io: SocketShape): Exchange => {

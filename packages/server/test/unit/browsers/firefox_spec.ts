@@ -337,7 +337,7 @@ describe('lib/browsers/firefox', () => {
 
     it('writes extension and ensure write access', async function () {
       mockfs({
-        [path.resolve(`${__dirname }../../../../../extension/dist/v2`)]: {
+        [path.resolve(`${__dirname }../../../../../extension/app-dist/v2`)]: {
           'background.js': mockfs.file({
             mode: 0o444,
           }),
