@@ -1,8 +1,9 @@
 /* eslint-disable no-console */
-require('../lib/environment')
-
 const { enable, mockElectron } = require('./mockery_helper')
 
+const { configureLongStackTraces } = require('../lib/environment')
+
+configureLongStackTraces()
 const chai = require('chai')
 
 chai.use(require('chai-subset'))
