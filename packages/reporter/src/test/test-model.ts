@@ -58,7 +58,6 @@ export default class Test extends Runnable {
   _isOpen: boolean | null = null
   isOpenWhenActive: Boolean | null = null
   _isFinished = false
-  _isSelfHealed = false
 
   constructor (props: TestProps, level: number, private store: RunnablesStore) {
     super(props, level)
@@ -77,11 +76,11 @@ export default class Test extends Runnable {
       hasRetried: computed,
       isActive: computed,
       currentRetry: computed,
+      isSelfHealed: computed,
       start: action,
       update: action,
       setIsOpen: action,
       finish: action,
-      _isSelfHealed: observable,
     })
 
     this.invocationDetails = props.invocationDetails
@@ -260,11 +259,11 @@ export default class Test extends Runnable {
     return null
   }
 
-  setIsSelfHealed (isSelfHealed: boolean) {
-    this._isSelfHealed = isSelfHealed
-  }
-
   get isSelfHealed () {
-    return this._isSelfHealed
+    // Compute self-healed status from the commands in all attempts
+    // This ensures the badge is shown correctly even across retries
+    return _.some(this.attempts, (attempt: Attempt) => {
+      return _.some(attempt.commands, (command) => command.isSelfHealed)
+    })
   }
 }
