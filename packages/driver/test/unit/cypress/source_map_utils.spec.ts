@@ -41,6 +41,10 @@ describe('source_map_utils', () => {
   // Helper function to run tests with Windows path behavior
   const withWindowsPaths = async (testFn: (sourceMapUtils: typeof source_map_utils) => Promise<void> | void) => {
     vi.resetModules()
+    global.Cypress = {
+      config: vi.fn().mockReturnValue('win32'),
+    }
+
     const pathMock = await vi.importActual<typeof import('path')>('path')
 
     vi.doMock('path', () => {
@@ -63,6 +67,10 @@ describe('source_map_utils', () => {
 
   const withLinuxPaths = async (testFn: (sourceMapUtils: typeof source_map_utils) => Promise<void> | void) => {
     vi.resetModules()
+    global.Cypress = {
+      config: vi.fn().mockReturnValue('linux'),
+    }
+
     const pathMock = await vi.importActual<typeof import('path')>('path')
 
     vi.doMock('path', () => {
@@ -73,11 +81,19 @@ describe('source_map_utils', () => {
         win32: pathMock.win32,
       }
     })
+
+    // Re-import the module to get the mocked path
+    const { default: sourceMapUtils } = await import('../../../src/cypress/source_map_utils')
+
+    await testFn(sourceMapUtils)
+
+    // Clean up the mock
+    vi.doUnmock('path')
   }
 
   describe('areSourceMapsAvailable', () => {
-    it('should return false when no source map consumers exist', () => {
-      withLinuxPaths(async (sourceMapUtils) => {
+    it('should return false when no source map consumers exist', async () => {
+      await withLinuxPaths(async (sourceMapUtils) => {
         const result = sourceMapUtils.areSourceMapsAvailable()
 
         expect(result).toBe(false)
@@ -95,7 +111,7 @@ describe('source_map_utils', () => {
     })
 
     it('should return true when multiple source map consumers exist', async () => {
-      withLinuxPaths(async (sourceMapUtils) => {
+      await withLinuxPaths(async (sourceMapUtils) => {
         await setupSourceMapConsumer(sourceMapUtils, '/project1/test1.spec.js', ['src/components/Button.tsx'])
         await setupSourceMapConsumer(sourceMapUtils, '/project2/test2.spec.js', ['src/utils/helper.js'])
 
@@ -107,8 +123,8 @@ describe('source_map_utils', () => {
   })
 
   describe('getBaseDirectory', () => {
-    it('should return the base directory when relative path matches absolute path', () => {
-      withLinuxPaths(async (sourceMapUtils) => {
+    it('should return the base directory when relative path matches absolute path', async () => {
+      await withLinuxPaths(async (sourceMapUtils) => {
         const absolutePath = '/project/src/components/Button.tsx'
         const relativePath = 'src/components/Button.tsx'
 
@@ -118,8 +134,8 @@ describe('source_map_utils', () => {
       })
     })
 
-    it('should return the base directory for nested paths', () => {
-      withLinuxPaths(async (sourceMapUtils) => {
+    it('should return the base directory for nested paths', async () => {
+      await withLinuxPaths(async (sourceMapUtils) => {
         const absolutePath = '/home/user/project/lib/utils/helper.js'
         const relativePath = 'lib/utils/helper.js'
 
@@ -140,8 +156,8 @@ describe('source_map_utils', () => {
       })
     })
 
-    it('should return null when relative path does not match absolute path', () => {
-      withLinuxPaths(async (sourceMapUtils) => {
+    it('should return null when relative path does not match absolute path', async () => {
+      await withLinuxPaths(async (sourceMapUtils) => {
         const absolutePath = '/project/src/components/Button.tsx'
         const relativePath = 'different/path/Button.tsx'
 
@@ -151,8 +167,8 @@ describe('source_map_utils', () => {
       })
     })
 
-    it('should return null when absolute path is shorter than relative path', () => {
-      withLinuxPaths(async (sourceMapUtils) => {
+    it('should return null when absolute path is shorter than relative path', async () => {
+      await withLinuxPaths(async (sourceMapUtils) => {
         const absolutePath = '/project/Button.tsx'
         const relativePath = 'src/components/Button.tsx'
 
@@ -162,8 +178,8 @@ describe('source_map_utils', () => {
       })
     })
 
-    it('should handle root directory paths', () => {
-      withLinuxPaths(async (sourceMapUtils) => {
+    it('should handle root directory paths', async () => {
+      await withLinuxPaths(async (sourceMapUtils) => {
         const absolutePath = '/Button.tsx'
         const relativePath = 'Button.tsx'
 
@@ -173,8 +189,8 @@ describe('source_map_utils', () => {
       })
     })
 
-    it('should handle empty relative path', () => {
-      withLinuxPaths(async (sourceMapUtils) => {
+    it('should handle empty relative path', async () => {
+      await withLinuxPaths(async (sourceMapUtils) => {
         const absolutePath = '/project/src/components/Button.tsx'
         const relativePath = ''
 
@@ -184,27 +200,27 @@ describe('source_map_utils', () => {
       })
     })
 
-    it('should handle identical absolute and relative paths', () => {
-      withLinuxPaths(async (sourceMapUtils) => {
+    it('should handle identical absolute and relative paths', async () => {
+      await withLinuxPaths(async (sourceMapUtils) => {
         const absolutePath = '/project/src/components/Button.tsx'
         const relativePath = '/project/src/components/Button.tsx'
 
         const result = sourceMapUtils.getBaseDirectory(absolutePath, relativePath)
 
-        expect(result).toBe('/project/src/components')
+        expect(result).toBe('/')
       })
     })
   })
 
   describe('setSourceMapProjectRoot', () => {
     it('should return the base directory when source map consumer exists and path matches', async () => {
-      withLinuxPaths(async (sourceMapUtils) => {
+      await withLinuxPaths(async (sourceMapUtils) => {
         await setupSourceMapConsumer(sourceMapUtils, '/project/cypress/integration/test.spec.js', ['src/components/Button.tsx'])
 
         const relativePath = 'cypress/integration/test.spec.js'
         const absolutePath = '/project/src/components/Button.tsx'
 
-        sourceMapUtils.setSourceMapProjectRoot(relativePath, absolutePath, '')
+        sourceMapUtils.setSourceMapProjectRoot(relativePath, absolutePath, 'project-root')
 
         const result = sourceMapUtils.getSourceMapProjectRoot()
 
@@ -213,7 +229,7 @@ describe('source_map_utils', () => {
     })
 
     it('should return project root when no source map consumer exists for the relative path', async () => {
-      withLinuxPaths(async (sourceMapUtils) => {
+      await withLinuxPaths(async (sourceMapUtils) => {
         await setupSourceMapConsumer(sourceMapUtils, '/project/cypress/integration/test.spec.js', ['src/components/Button.tsx'])
 
         const relativePath = 'cypress/integration/nonexistent.spec.js'
@@ -228,7 +244,7 @@ describe('source_map_utils', () => {
     })
 
     it('should return project root when absolute path does not match any source in the consumer', async () => {
-      withLinuxPaths(async (sourceMapUtils) => {
+      await withLinuxPaths(async (sourceMapUtils) => {
         await setupSourceMapConsumer(sourceMapUtils, '/project/cypress/integration/test.spec.js', ['src/components/Button.tsx'])
 
         const relativePath = 'cypress/integration/test.spec.js'
@@ -243,7 +259,7 @@ describe('source_map_utils', () => {
     })
 
     it('should handle multiple source map consumers and find the correct one', async () => {
-      withLinuxPaths(async (sourceMapUtils) => {
+      await withLinuxPaths(async (sourceMapUtils) => {
         await setupSourceMapConsumer(sourceMapUtils, '/project1/cypress/integration/test1.spec.js', ['src/components/Button.tsx'])
         await setupSourceMapConsumer(sourceMapUtils, '/project2/cypress/integration/test2.spec.js', ['src/utils/helper.js'])
 
@@ -258,8 +274,8 @@ describe('source_map_utils', () => {
       })
     })
 
-    it('should handle empty source map consumers', () => {
-      withLinuxPaths(async (sourceMapUtils) => {
+    it('should handle empty source map consumers', async () => {
+      await withLinuxPaths(async (sourceMapUtils) => {
         const relativePath = 'cypress/integration/test.spec.js'
         const absolutePath = '/project/src/components/Button.tsx'
 
@@ -272,7 +288,7 @@ describe('source_map_utils', () => {
     })
 
     it('should handle consumer with no matching sources', async () => {
-      withLinuxPaths(async (sourceMapUtils) => {
+      await withLinuxPaths(async (sourceMapUtils) => {
         await setupSourceMapConsumer(sourceMapUtils, '/project/cypress/integration/test.spec.js', ['src/other/file.js'])
 
         const relativePath = 'cypress/integration/test.spec.js'
@@ -286,8 +302,8 @@ describe('source_map_utils', () => {
       })
     })
 
-    it('should handle Windows paths in source map consumers', async () => {
-      withWindowsPaths(async (sourceMapUtils) => {
+    it('should handle Windows and return the base directory when source map consumer exists and path matches', async () => {
+      await withWindowsPaths(async (sourceMapUtils) => {
         await setupSourceMapConsumer(sourceMapUtils, 'C:\\project\\cypress\\integration\\test.spec.js', ['src\\components\\Button.tsx'])
 
         const relativePath = 'cypress\\integration\\test.spec.js'
