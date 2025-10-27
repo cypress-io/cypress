@@ -46,6 +46,7 @@
     "esm/",
     "patches"
   ],
+  "license": "MIT",
   "module": "esm/node/index.js",
   "workspaces": {
     "nohoist": [

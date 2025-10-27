@@ -44,6 +44,7 @@
     "browser"
   ],
   "types": "cjs/node.d.ts",
+  "license": "MIT",
   "module": "esm/node.js",
   "nx": {}
 }

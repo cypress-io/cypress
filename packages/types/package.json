@@ -34,6 +34,7 @@
     "esm/*"
   ],
   "types": "src/index.ts",
+  "license": "MIT",
   "module": "esm/index.js",
   "workspaces": {
     "nohoist": [

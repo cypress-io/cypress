@@ -51,5 +51,6 @@
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
+  "license": "MIT",
   "nx": {}
 }
