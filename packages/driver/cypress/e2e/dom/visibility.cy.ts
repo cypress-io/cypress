@@ -248,8 +248,6 @@ describe('src/cypress/dom/visibility', {
 
           expect(cy.$$('body')).not.to.be.hidden
           expect(cy.$$('body')).to.be.visible
-
-          cy
         })
       })
     })
