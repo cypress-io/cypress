@@ -11,3 +11,11 @@ nav li {
   display: inline-block;
   list-style: none;
 }
+
+[cy-expect="hidden"], [cy-legacy-expect="hidden"], [cy-fast-expect="hidden"] {
+  background-color: lightcoral;
+}
+
+[cy-expect="visible"], [cy-legacy-expect="visible"], [cy-fast-expect="visible"] {
+  background-color: lightgreen;
+}
