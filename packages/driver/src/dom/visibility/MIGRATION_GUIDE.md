@@ -209,6 +209,12 @@ cy.get('.clipping-container').should('be.visible')
 
 **Solution**: Do not assert visibility on elements with `pointer-events:none`, as they cannot be interacted with.
 
+### Issue 7: Shadow DOM incompatibilities
+
+**Problem:**: Elements inside shadow DOMs may not be detected properly as visible or hidden.
+
+**Solution:**: Test shadow dom components in isolation with component testing, and only test if the public interface of the shadow dom component is visible. You wouldn't assert on the visibility of the browser's default video play controls by querying its shadow dom: you would assert on the properties of the video element itself.
+
 ## Rollback Plan
 
 If you encounter issues that can't be easily resolved:
