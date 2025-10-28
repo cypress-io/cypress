@@ -180,7 +180,7 @@ export class StudioLifecycleManager {
     cloudDataSource: CloudDataSource
     cfg: Cfg
     debugData: any
-    getProjectOptions: StudioServerOptions['getProjectOptions']
+    getProjectOptions: Required<StudioServerOptions>['getProjectOptions']
   }): Promise<StudioManager> {
     let studioPath: string
     let manifest: Record<string, string>
@@ -347,7 +347,7 @@ export class StudioLifecycleManager {
     cloudDataSource: CloudDataSource
     cfg: Cfg
     debugData: any
-    getProjectOptions: StudioServerOptions['getProjectOptions']
+    getProjectOptions: Required<StudioServerOptions>['getProjectOptions']
   }) {
     // Don't setup a watcher if the studio bundle is NOT local
     if (!process.env.CYPRESS_LOCAL_STUDIO_PATH) {

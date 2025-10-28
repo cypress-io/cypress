@@ -93,7 +93,7 @@ describe('TagStream', () => {
         const cb = vi.fn()
 
         await tagStream.transform(bufInput, 'buffer', cb)
-        expect(tagStream.push).toHaveBeenCalledWith('')
+        expect(tagStream.push).toHaveBeenCalledWith(Buffer.from(''))
         expect(cb).toHaveBeenCalled()
       })
     })
@@ -112,6 +112,65 @@ describe('TagStream', () => {
 
         await tagStream.transform(bufInput, 'buffer', cb)
         expect(cb).toHaveBeenCalledWith(err)
+      })
+    })
+  })
+
+  describe('disabling tags', () => {
+    afterEach(() => {
+      vi.unstubAllEnvs()
+    })
+
+    it('passes on the string without the tags in CYPRESS_INTERNAL_ENV development mode', async () => {
+      vi.stubEnv('CYPRESS_INTERNAL_ENV', 'development')
+      const cb = vi.fn()
+
+      await tagStream.transform(strInput, 'utf-8', cb)
+      expect(tagStream.push).toHaveBeenCalledWith(Buffer.from(strInput))
+      expect(cb).toHaveBeenCalled()
+    })
+
+    describe('when ELECTRON_ENABLE_LOGGING is enabled', () => {
+      beforeEach(() => {
+        vi.stubEnv('ELECTRON_ENABLE_LOGGING', '1')
+      })
+
+      it('does not add the tags when transforming', async () => {
+        const cb = vi.fn()
+
+        await tagStream.transform(strInput, 'utf-8', cb)
+        expect(tagStream.push).toHaveBeenCalledWith(Buffer.from(strInput))
+        expect(cb).toHaveBeenCalled()
+      })
+
+      it('does not add the tags when flushing', async () => {
+        const cb = vi.fn()
+
+        mockStringDecoder.end.mockReturnValue(strInput)
+        await tagStream.flush(cb)
+        expect(cb).toHaveBeenCalledWith(undefined, Buffer.from(strInput))
+      })
+    })
+
+    describe('when CYPRESS_INTERNAL_ENV is development', () => {
+      beforeEach(() => {
+        vi.stubEnv('CYPRESS_INTERNAL_ENV', 'development')
+      })
+
+      it('does not add the tags when transforming', async () => {
+        const cb = vi.fn()
+
+        await tagStream.transform(strInput, 'utf-8', cb)
+        expect(tagStream.push).toHaveBeenCalledWith(Buffer.from(strInput))
+        expect(cb).toHaveBeenCalled()
+      })
+
+      it('does not add the tags when flushing', async () => {
+        const cb = vi.fn()
+
+        mockStringDecoder.end.mockReturnValue(strInput)
+        await tagStream.flush(cb)
+        expect(cb).toHaveBeenCalledWith(undefined, Buffer.from(strInput))
       })
     })
   })

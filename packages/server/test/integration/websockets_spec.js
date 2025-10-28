@@ -5,7 +5,9 @@ const ws = require('ws')
 const httpsProxyAgent = require('https-proxy-agent')
 const evilDns = require('evil-dns')
 const Promise = require('bluebird')
-const socketIo = require(`@packages/socket/lib/browser`)
+// NOTE: we need to import the client from the lib directory because the browser/client directory is compiled to ESM.
+// we are unable to import ESM into a CommonJS test context, even if we await import() the module.
+const socketIo = require('@packages/socket/lib/client')
 const httpsServer = require(`@packages/https-proxy/test/helpers/https_server`)
 const config = require(`../../lib/config`)
 const { ServerBase } = require(`../../lib/server-base`)

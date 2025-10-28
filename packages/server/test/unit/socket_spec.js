@@ -3,7 +3,10 @@ require('../spec_helper')
 const _ = require('lodash')
 const path = require('path')
 const httpsAgent = require('https-proxy-agent')
-const socketIo = require('@packages/socket/lib/browser')
+// NOTE: we need to import the client from the lib directory because the browser/client directory is compiled to ESM.
+// we are unable to import ESM into a CommonJS test context, even if we await import() the module.
+const socketIo = require('@packages/socket/lib/client')
+
 const Fixtures = require('@tooling/system-tests')
 
 const errors = require('../../lib/errors')
@@ -27,6 +30,19 @@ describe('lib/socket', () => {
     ctx.coreData.activeBrowser = {
       path: 'path-to-browser-one',
     }
+
+    // needed to run these tests locally
+    // sinon.stub(ctx.browser, 'machineBrowsers').resolves([
+    //   {
+    //     channel: 'stable',
+    //     displayName: 'Electron',
+    //     family: 'chromium',
+    //     majorVersion: '123',
+    //     name: 'electron',
+    //     path: 'path-to-browser-one',
+    //     version: '123.45.67',
+    //   },
+    // ])
 
     // Don't bother initializing the child process, etc for this
     sinon.stub(ctx.actions.project, 'initializeActiveProject')

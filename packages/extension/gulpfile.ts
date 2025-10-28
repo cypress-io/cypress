@@ -1,87 +1,82 @@
+import { promisify } from 'util'
+import { exec } from 'child_process'
 import gulp from 'gulp'
 import { rimraf } from 'rimraf'
-import { waitUntilIconsBuilt } from '../../scripts/ensure-icons'
-import cp from 'child_process'
-import * as path from 'path'
+import { getPathToIcon, getPathToLogo } from '@packages/icons'
 
-const nodeWebpack = path.join(__dirname, '..', '..', 'scripts', 'run-webpack.js')
+const execAsync = promisify(exec)
 
-async function cypressIcons () {
-  await waitUntilIconsBuilt()
+export async function clean (): Promise<boolean> {
+  const removedAppDist = await rimraf('app-dist')
+  const removedLibDist = await rimraf('lib-dist')
 
-  return require('@packages/icons')
-}
-
-function clean (): Promise<boolean> {
-  return rimraf('dist')
+  return removedAppDist && removedLibDist
 }
 
 const manifest = (v: 'v2' | 'v3') => {
   return () => {
     return gulp.src(`app/${v}/manifest.json`)
-    .pipe(gulp.dest(`dist/${v}`))
+    .pipe(gulp.dest(`app-dist/${v}`))
   }
 }
 
-const background = (cb) => {
-  cp.fork(nodeWebpack, { stdio: 'inherit' }).on('exit', (code) => {
-    cb(code === 0 ? null : new Error(`Webpack process exited with code ${code}`))
-  })
+const buildAppV2 = async () => {
+  await execAsync('yarn build:v2')
 }
 
-const copyScriptsForV3 = () => {
-  return gulp.src('app/v3/*.js')
-  .pipe(gulp.dest('dist/v3'))
+const buildAppV3 = async () => {
+  await execAsync('yarn build:v3')
+}
+
+const buildLib = async () => {
+  await execAsync('yarn build:lib')
 }
 
 const html = () => {
   return gulp.src('app/**/*.html')
-  .pipe(gulp.dest('dist/v2'))
-  .pipe(gulp.dest('dist/v3'))
+  .pipe(gulp.dest('app-dist/v2'))
+  .pipe(gulp.dest('app-dist/v3'))
 }
 
 const css = () => {
   return gulp.src('app/**/*.css')
-  .pipe(gulp.dest('dist/v2'))
-  .pipe(gulp.dest('dist/v3'))
+  .pipe(gulp.dest('app-dist/v2'))
+  .pipe(gulp.dest('app-dist/v3'))
 }
 
 const icons = async () => {
-  const cyIcons = await cypressIcons()
-
   return gulp.src([
-    cyIcons.getPathToIcon('icon_16x16.png'),
-    cyIcons.getPathToIcon('icon_19x19.png'),
-    cyIcons.getPathToIcon('icon_38x38.png'),
-    cyIcons.getPathToIcon('icon_48x48.png'),
-    cyIcons.getPathToIcon('icon_128x128.png'),
+    getPathToIcon('icon_16x16.png'),
+    getPathToIcon('icon_19x19.png'),
+    getPathToIcon('icon_38x38.png'),
+    getPathToIcon('icon_48x48.png'),
+    getPathToIcon('icon_128x128.png'),
   ])
-  .pipe(gulp.dest('dist/v2/icons'))
-  .pipe(gulp.dest('dist/v3/icons'))
+  .pipe(gulp.dest('app-dist/v2/icons'))
+  .pipe(gulp.dest('app-dist/v3/icons'))
 }
 
 const logos = async () => {
-  const cyIcons = await cypressIcons()
-
   // appease TS
   return gulp.src([
-    cyIcons.getPathToLogo('cypress-bw.png'),
+    getPathToLogo('cypress-bw.png'),
   ])
-  .pipe(gulp.dest('dist/v2/logos'))
-  .pipe(gulp.dest('dist/v3/logos'))
+  .pipe(gulp.dest('app-dist/v2/logos'))
+  .pipe(gulp.dest('app-dist/v3/logos'))
 }
 
-const build = gulp.series(
+export const build = gulp.series(
   clean,
+  buildAppV2,
+  buildAppV3,
   gulp.parallel(
     icons,
     logos,
     manifest('v2'),
     manifest('v3'),
-    background,
-    copyScriptsForV3,
     html,
     css,
+    buildLib,
   ),
 )
 
@@ -89,10 +84,4 @@ const watchBuild = () => {
   return gulp.watch('app/**/*', build)
 }
 
-const watch = gulp.series(build, watchBuild)
-
-module.exports = {
-  build,
-  clean,
-  watch,
-}
+export const watch = gulp.series(build, watchBuild)

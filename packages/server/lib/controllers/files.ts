@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import path from 'path'
-import cwd from '../cwd'
+import { getCwd } from '../cwd'
 import Debug from 'debug'
 import { escapeFilenameInUrl } from '../util/escape_filename'
 import { getCtx } from '@packages/data-context'
@@ -15,7 +15,7 @@ export = {
 
   async handleIframe (req: any, res: any, config: Cfg, remoteStates: RemoteStates, extraOptions: any) {
     const test = req.params[0]
-    const iframePath: string = cwd('lib', 'html', 'iframe.html')
+    const iframePath: string = getCwd('lib', 'html', 'iframe.html')
     const specFilter = _.get(extraOptions, 'specFilter')
 
     debug('handle iframe %o', { test, specFilter, config })
@@ -59,7 +59,7 @@ export = {
   },
 
   async handleCrossOriginIframe (req: any, res: any, config: Cfg) {
-    const iframePath: string = cwd('lib', 'html', 'spec-bridge-iframe.html')
+    const iframePath: string = getCwd('lib', 'html', 'spec-bridge-iframe.html')
     const documentDomainInjection = DocumentDomainInjection.InjectionBehavior(config)
     const superDomain = documentDomainInjection.shouldInjectDocumentDomain(req.proxiedUrl) ?
       documentDomainInjection.getHostname(req.proxiedUrl) :

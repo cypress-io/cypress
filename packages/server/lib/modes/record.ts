@@ -14,7 +14,7 @@ import exception from '../cloud/exception'
 import { getError } from '@packages/errors'
 import type { AllCypressErrorNames } from '@packages/errors'
 import { get as getErrors, warning as errorsWarning, throwErr } from '../errors'
-import capture from '../capture'
+import * as capture from '../capture'
 import { getResolvedRuntimeConfig } from '../config'
 import env from '../util/env'
 import ciProvider from '../util/ci_provider'
@@ -642,7 +642,7 @@ const createRunAndRecordSpecs = (options: any = {}) => {
       const { runUrl, runId, machineId, groupId } = resp
       const protocolCaptureMeta = resp.capture || {}
 
-      let captured = null
+      let captured: ReturnType<typeof capture.stdout> | null = null
       let instanceId = null
 
       const beforeSpecRun = () => {
@@ -709,7 +709,7 @@ const createRunAndRecordSpecs = (options: any = {}) => {
             return
           }
 
-          debug('postInstanceResults resp %O', resp)
+          debug('postInstanceResults resp %o', resp)
           const { video, screenshots } = results
           const { videoUploadUrl, captureUploadUrl, screenshotUploadUrls } = resp
 
