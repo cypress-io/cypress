@@ -39,12 +39,7 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTestFromSuite 
     }
 
     cy.findByTestId('studio-panel').should('be.visible')
-    if (createNewTestFromSuite || createNewTestFromSpecHeader) {
-      // if we are creating a new test from a suite or spec header, we should see the create test button rather than the new test button from the welcome screen
-      cy.findByTestId('create-test-button').should('be.visible')
-    } else {
-      cy.findByTestId('new-test-button').should('not.exist')
-    }
+    cy.findByTestId('create-test-button').should('be.visible')
   } else {
     cy.get('@runnable-wrapper')
     .findByTestId('launch-studio')
