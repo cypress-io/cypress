@@ -10,16 +10,24 @@
   font-family: $font-system;
   font-size: 14px;
   font-weight: 400;
-  margin-left: 8px;
   margin-right: 4px;
   align-items: center;
   justify-content: center;
   white-space: nowrap;
   text-transform: none;
   vertical-align: middle;
+
+  .command-info:hover & {
+    border-color: $gray-800;
+  }
+
 }
 
 .command-self-healed-badge-command {
   height: 16px;
   font-size: 12px;
+}
+
+.command-self-healed-badge-test {
+  margin-left: 8px;
 }
