@@ -132,6 +132,9 @@ describe('studio functionality', () => {
 
     cy.percySnapshot()
 
+    // make sure that the visit has run and we're recording studio commands
+    cy.get('[data-cy="record-button-recording"]').should('be.visible')
+
     incrementCounter(0)
 
     cy.findByTestId('studio-save-button').click()
