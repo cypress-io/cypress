@@ -158,6 +158,9 @@ export class ProjectConfigIpc extends EventEmitter {
       let resolved = false
 
       this._childProcess.on('error', (err) => {
+        if (err.code === 'EPIPE') {
+          return
+        }
         debug('unhandled error in child process %s', err)
         this.handleChildProcessError(err, this, resolved, reject)
         reject(err)
@@ -170,6 +173,9 @@ export class ProjectConfigIpc extends EventEmitter {
        * but it's not.
        */
       this.on('childProcess:unhandledError', (err) => {
+        if (err.code === 'EPIPE') {
+          return
+        }
         debug('unhandled error in child process %s', err)
         this.handleChildProcessError(err, this, resolved, reject)
         reject(err)
@@ -230,6 +236,9 @@ export class ProjectConfigIpc extends EventEmitter {
       let resolved = false
 
       this._childProcess.on('error', (err) => {
+        if (err.code === 'EPIPE') {
+          return
+        }
         this.handleChildProcessError(err, this, resolved, reject)
         reject(err)
       })
@@ -370,9 +379,6 @@ export class ProjectConfigIpc extends EventEmitter {
     debug('plugins process error:', err.stack)
 
     this.cleanupIpc()
-    if (err.code === 'EPIPE') {
-      return
-    }
 
     err = getError('CONFIG_FILE_UNEXPECTED_ERROR', this.configFile || '(unknown config file)', err)
     err.title = 'Config process error'
