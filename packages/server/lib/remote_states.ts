@@ -73,10 +73,7 @@ export class RemoteStates {
   }
 
   get (url: string) {
-    debug('get (origin key)', this.documentDomainInjection.getOrigin(url), this.remoteStates)
     const state = this.remoteStates.get(this.documentDomainInjection.getOrigin(url))
-
-    debug('getting remote state: %o for: %s', state, url)
 
     return _.cloneDeep(state)
   }
@@ -89,8 +86,6 @@ export class RemoteStates {
 
   getPrimary () {
     const state = Array.from(this.remoteStates.entries())[0][1]
-
-    debug('getting primary remote state: %o', state)
 
     return state
   }

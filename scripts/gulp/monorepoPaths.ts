@@ -21,6 +21,7 @@ export const monorepoPaths = {
   pkgLaunchpad: path.join(__dirname, '../../packages/launchpad'),
   pkgNetStubbing: path.join(__dirname, '../../packages/net-stubbing'),
   pkgNetwork: path.join(__dirname, '../../packages/network'),
+  pkgNetworkTools: path.join(__dirname, '../../packages/network-tools'),
   pkgPackherdRequire: path.join(__dirname, '../../packages/packherd-require'),
   pkgProxy: path.join(__dirname, '../../packages/proxy'),
   pkgReporter: path.join(__dirname, '../../packages/reporter'),

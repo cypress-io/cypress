@@ -1,12 +1,34 @@
 const disabledFeatures = [
-  // Disable manual option and popup prompt of Chrome translation
-  // https://github.com/cypress-io/cypress/issues/28225
-  'Translate',
+  // Uncomment to force the deprecation of unload events
+  // 'DeprecateUnloadByUserAndOrigin',
+
+  // Hide toolbar button that opens dialog for controlling media sessions.
+  'GlobalMediaControls',
+
+  // Disables the Interest Feed Content Suggestions,
+  // which is a feature that shows content suggestions based on the user's interests.
+  // https://www.google.com/interests/saved
+  'InterestFeedContentSuggestions',
+
+  // Hides the Lens feature in the URL address bar.
+  'LensOverlay',
+
+  // Avoid the startup dialog for _Do you want the application 'Chromium.app' to accept incoming network connections?_.
+  // Also disables the Chrome Media Router https://chromium.googlesource.com/chromium/src/+/HEAD/docs/media/media_router.md
+  // which creates background networking activity to discover cast targets. A superset of disabling `DialMediaRouteProvider`.
+  'MediaRouter',
+
+  // Disable the Chrome Optimization Guide https://chromium.googlesource.com/chromium/src/+/HEAD/components/optimization_guide/)
+  // and networking with its service API
+  'OptimizationHints',
+
   // Disables "Enhanced ad privacy in Chrome" dialog
   // https://github.com/cypress-io/cypress/issues/29199
   'PrivacySandboxSettings4',
-  // Uncomment to force the deprecation of unload events
-  // 'DeprecateUnloadByUserAndOrigin',
+
+  // Disable manual option and popup prompt of Chrome translation
+  // https://github.com/cypress-io/cypress/issues/28225
+  'Translate',
 ]
 
 // Common Chrome Flags for Automation
@@ -20,6 +42,11 @@ const DEFAULT_FLAGS = [
   'no-first-run',
   'noerrdialogs',
   'enable-fixed-layout',
+  // Disables Domain Reliability Monitoring, which tracks whether the browser has
+  // difficulty contacting Google-owned sites and uploads reports to Google.
+  'disable-domain-reliability',
+  // Disable field trial tests configured in fieldtrial_testing_config.json.
+  'disable-field-trial-config',
   'disable-popup-blocking',
   'disable-password-generation',
   'disable-single-click-autofill',

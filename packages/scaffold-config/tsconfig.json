@@ -1,0 +1,21 @@
+{
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "test",
+    "script"
+  ],
+  "compilerOptions": {
+    "lib": [
+      "esnext"
+    ],
+    "allowJs": false,
+    "noImplicitAny": true,
+    "noUncheckedIndexedAccess": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "declaration": true
+  }
+}

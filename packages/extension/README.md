@@ -6,11 +6,19 @@ This is the WebExtension responsible for automating the browser
 
 ### Watching
 
+Kicks off the gulp watcher that rebuilds the app/lib directories on change.
+
 ```bash
 yarn workspace @packages/extension watch
 ```
 
 ## Building
+
+`@packages/extension` has a few different build processes occurring that are all driven by the [`gulpfile`](./gulpfile.ts).
+* `app` - The web extension piece of the code, has two separate bundles:
+    * `v2`: Version 2 of the web extension which uses [webpack](./webpack.config.mjs) to bundle the `app/v2` directory and output it as `background.js`
+    * `v3`: Version 3 of the web extension, which doesn't have any external dependencies so we are able to compile down to `ESM to run in the browser natively.
+* `lib` - the `@packages/extension` `main` entry that has utility methods on how to find/load the extension. This is transpiled to CommonJS as it is consumed in the Node context.
 
 ```bash
 yarn workspace @packages/extension build

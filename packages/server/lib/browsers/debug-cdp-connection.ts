@@ -58,7 +58,7 @@ export const debugCdpConnection = (namespace: string, cri: DebuggableCDPClient) 
         try {
           return send.call(cri._ws, data, callback)
         } catch (e: any) {
-          debugVerboseSend('Error sending CDP command %o %O', JSON.parse(data), e)
+          debugVerboseSend('Error sending CDP command %o %o', JSON.parse(data), e)
           throw e
         }
       }

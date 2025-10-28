@@ -89,7 +89,7 @@ export async function fetch<
   } catch (e) {
     const err = options.signal?.aborted ? options.signal.reason : e
 
-    debug('Error (sys error? %s) %O', err.errno || err.code, err)
+    debug('Error (sys error? %s) %o', err.errno || err.code, err)
     if (ParseError.isParseError(err) || HttpError.isHttpError(err)) {
       throw err
     }

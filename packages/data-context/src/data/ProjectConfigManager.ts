@@ -449,7 +449,7 @@ export class ProjectConfigManager {
     })
 
     w.on('error', (err) => {
-      debug('error watching config files %O', err)
+      debug('error watching config files %o', err)
       this.options.ctx.onWarning(getError('UNEXPECTED_INTERNAL_ERROR', err))
     })
 
