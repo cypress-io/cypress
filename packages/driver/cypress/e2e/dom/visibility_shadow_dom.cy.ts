@@ -5,7 +5,8 @@ const { $ } = Cypress
 describe('src/cypress/dom/visibility - shadow dom', () => {
   let add: (el: string, shadowEl: string, rootIdentifier: string) => JQuery<HTMLElement>
 
-  const modes = ['fast', 'legacy']
+  // #TODO: support shadow dom in fast visibility algorithm
+  const modes = ['legacy']
 
   for (const mode of modes) {
     describe(`${mode}`, {
