@@ -15,12 +15,12 @@
     "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "dependencies": {
-    "ast-types": "0.13.3",
+    "ast-types": "^0.16.1",
     "bluebird": "3.7.2",
     "debug": "^4.3.4",
     "lodash": "^4.17.19",
     "parse5-html-rewriting-stream": "5.1.1",
-    "recast": "0.20.4"
+    "recast": "0.23.11"
   },
   "devDependencies": {
     "@cypress/request-promise": "^5.0.0",

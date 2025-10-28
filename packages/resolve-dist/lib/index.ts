@@ -1,6 +1,5 @@
 import path from 'path'
-
-let fs: typeof import('fs-extra')
+import fs from 'fs-extra'
 
 export type RunnerPkg = 'app' | 'runner'
 
@@ -11,8 +10,6 @@ export const resolveFromPackages = (...args: string[]) => {
 }
 
 const getRunnerContents = (filename: string) => {
-  fs ??= require('fs-extra') as typeof import('fs-extra')
-
   return fs.readFile(getPathToDist('runner', filename))
 }
 

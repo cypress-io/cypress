@@ -277,7 +277,7 @@
     "**/jquery": "3.7.1",
     "**/socket.io-parser": "4.0.5",
     "**/ua-parser-js": "0.7.33",
-    "@definitelytyped/typescript-versions": "0.1.7",
+    "@definitelytyped/typescript-versions": "0.1.9",
     "@types/react": "18.3.12",
     "browserify-sign": "4.2.2",
     "devtools-protocol": "0.0.1528500",
