@@ -5,7 +5,7 @@ import chaiSubset from 'chai-subset'
 import sinonChai from '@cypress/sinon-chai'
 import sinon from 'sinon'
 
-import shellUtil from '../../../lib/util/shell.js'
+import * as shellUtil from '../../../lib/util/shell'
 import * as envEditors from '../../../lib/util/env-editors'
 import * as savedState from '../../../lib/saved_state'
 

@@ -4,7 +4,7 @@ import debugModule from 'debug'
 
 import type { Editor, EditorsResult } from '@packages/types'
 import { getEnvEditors } from './env-editors'
-import shell from './shell'
+import * as shell from './shell'
 import * as savedState from '../saved_state'
 
 export const osFileSystemExplorer = {

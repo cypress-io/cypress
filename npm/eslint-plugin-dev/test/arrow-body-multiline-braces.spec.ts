@@ -1,8 +1,8 @@
-const path = require('path')
-const eslint = require('eslint')
-const plugin = require('../lib')
-const _ = require('lodash')
-const { expect } = require('chai')
+import { describe, it, expect } from 'vitest'
+import path from 'path'
+import eslint from 'eslint'
+import plugin from '../lib'
+import _ from 'lodash'
 
 const pluginName = '__plugin__'
 const ESLint = eslint.ESLint
@@ -42,14 +42,14 @@ describe('arrow-body-multiline-braces', () => {
       fix: true,
     })
 
-    expect(result.output).to.contain('{')
+    expect(result.output).toContain('{')
   })
 
   it('lint oneline js', async () => {
     const filename = './fixtures/oneline.js'
     const result = await execute(filename, { fix: false })
 
-    expect(result.output).not.ok
-    expect(result.errorCount).eq(0)
+    expect(result.output).toBeUndefined()
+    expect(result.errorCount).toBe(0)
   })
 })
