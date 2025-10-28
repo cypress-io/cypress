@@ -1,8 +1,6 @@
-require('../spec_helper')
-
-const _ = require('lodash')
-const os = require('os')
-const exec = require(`../../lib/exec`)
+import _ from 'lodash'
+import os from 'os'
+import * as exec from '../../lib/exec'
 
 const isWindows = () => {
   return os.platform() === 'win32'

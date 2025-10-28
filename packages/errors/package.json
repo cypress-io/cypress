@@ -9,7 +9,7 @@
     "cjs/*",
     "esm/*"
   ],
-  "types": "src/index.ts",
+  "types": "cjs/index.d.ts",
   "scripts": {
     "build": "yarn build:esm && yarn build:cjs",
     "build-prod": "yarn build",
@@ -21,7 +21,9 @@
     "test": "yarn test-unit",
     "test-unit": "vitest run",
     "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0",
-    "tslint": "tslint --config ../ts/tslint.json --project ."
+    "tslint": "tslint --config ../ts/tslint.json --project .",
+    "watch": "yarn build:cjs --watch & yarn build:esm --watch"
+
   },
   "dependencies": {
     "ansi_up": "5.0.0",

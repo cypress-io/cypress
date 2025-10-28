@@ -14,6 +14,7 @@ import argsUtils from './util/args'
 import { telemetry } from '@packages/telemetry'
 import { getCtx, hasCtx } from '@packages/data-context'
 import { warning as errorsWarning } from './errors'
+import { getCwd } from './cwd'
 import type { CypressError } from '@packages/errors'
 import { toNumber } from 'lodash'
 const debug = Debug('cypress:server:cypress')
@@ -139,7 +140,7 @@ export = {
         debug('electron open arguments %o', args)
 
         // const mainEntryFile = require.main.filename
-        const serverMain = require('./cwd')()
+        const serverMain = getCwd()
 
         return cypressElectron.open(serverMain, args, fn)
       })

@@ -1,9 +1,10 @@
-const _ = require('lodash')
-const Promise = require('bluebird')
-const execa = require('execa')
-const os = require('os')
-const commandExistsModule = require('command-exists')
-const log = require('debug')('cypress:server:util:shell')
+import _ from 'lodash'
+import Promise from 'bluebird'
+import execa from 'execa'
+import os from 'os'
+import commandExistsModule from 'command-exists'
+import debugModule from 'debug'
+const log = debugModule('cypress:server:util:shell')
 
 const isWindows = () => {
   return os.platform() === 'win32'
@@ -17,18 +18,18 @@ const profiles = {
   '~/.config/fish/config.fish': /\/fish$/,
 }
 
-let sourcedProfiles = []
+let sourcedProfiles: string[] = []
 
 // returns true if Cypress application has been started from
 // the terminal shell.
 // returns false if Cypress application has been started
 // from the Finder / Windows Explorer list
 // by double clicking its icon
-const startedNormally = () => {
+export const startedNormally = () => {
   return Boolean(process.env._)
 }
 
-const getProfilePath = function (shellPath) {
+export const getProfilePath = function (shellPath: string) {
   for (let profilePath in profiles) {
     const regex = profiles[profilePath]
 
@@ -36,9 +37,11 @@ const getProfilePath = function (shellPath) {
       return profilePath
     }
   }
+
+  return undefined
 }
 
-const sourceShellCommand = function (cmd, shell) {
+export const sourceShellCommand = function (cmd, shell) {
   if (!shell) {
     return cmd
   }
@@ -46,7 +49,7 @@ const sourceShellCommand = function (cmd, shell) {
   const profilePath = getProfilePath(shell)
 
   log('shell %s profile %s', shell, profilePath)
-  if (sourcedProfiles.includes(profilePath)) {
+  if (sourcedProfiles.includes(profilePath as string)) {
     log('profile has already been sourced')
 
     return cmd
@@ -59,7 +62,7 @@ const sourceShellCommand = function (cmd, shell) {
     // IF THE APP HAS NOT BEEN STARTED BY
     // DOUBLE CLICKING IT FROM FINDER / WINDOWS EXPLORER
     // OTHERWISE NEED TO SOURCE EVERY COMMAND
-    sourcedProfiles.push(profilePath)
+    sourcedProfiles.push(profilePath as string)
   }
 
   // sourcing the profile can output un-needed garbage,
@@ -68,12 +71,12 @@ const sourceShellCommand = function (cmd, shell) {
   return `source ${profilePath} > /dev/null 2>&1; ${cmd}`
 }
 
-const findBash = () => {
+export const findBash = () => {
   return execa('which bash', { shell: true })
   .then((val) => val.stdout)
 }
 
-const getShell = function (shell) {
+export const getShell = function (shell) {
   if (shell) {
     return Promise.resolve(shell)
   }
@@ -95,7 +98,7 @@ const getShell = function (shell) {
   return findBash()
 }
 
-const commandExists = (command) => {
+export const commandExists = (command) => {
   return Promise.resolve(commandExistsModule(command))
   .return(true)
   // commandExists rejects with no error if command does not exist
@@ -104,16 +107,6 @@ const commandExists = (command) => {
 }
 
 // for testing
-const reset = () => {
+export const reset = () => {
   return sourcedProfiles = []
-}
-
-module.exports = {
-  reset,
-  findBash,
-  getShell,
-  getProfilePath,
-  sourceShellCommand,
-  startedNormally,
-  commandExists,
 }
