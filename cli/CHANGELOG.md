@@ -23,6 +23,7 @@ _Released 10/20/2025 (PENDING)_
 **Dependency Updates:**
 
 - Upgraded `better-sqlite3` from `11.10.0` to `12.4.1`. Addressed in [#32755](https://github.com/cypress-io/cypress/pull/32755).
+- Upgraded `recast` from `0.20.4` to `0.23.11`. Addressed in [#32742](https://github.com/cypress-io/cypress/pull/32742).
 
 ## 15.5.0
 

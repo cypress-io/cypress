@@ -23,8 +23,8 @@
     "cjs/*",
     "esm/*"
   ],
-  "types": "./lib/index.ts",
   "license": "MIT",
+  "types": "./cjs/index.d.ts",
   "module": "esm/index.js",
   "nx": {}
 }

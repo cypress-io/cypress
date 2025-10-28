@@ -1,8 +1,8 @@
-const path = require('path')
-const eslint = require('eslint')
-const plugin = require('..')
-const _ = require('lodash')
-const { expect } = require('chai')
+import { describe, it, expect } from 'vitest'
+import path from 'path'
+import eslint from 'eslint'
+import plugin from '../lib'
+import _ from 'lodash'
 
 const ruleName = 'no-only'
 const pluginName = '__plugin__'
@@ -43,11 +43,11 @@ describe('no-only', () => {
       fix: true,
     })
 
-    expect(result.errorCount).eq(3)
-    expect(result.messages[0].message).to.contain('it')
-    expect(result.messages[1].message).to.contain('describe')
-    expect(result.messages[2].message).to.contain('context')
+    expect(result.errorCount).toEqual(3)
+    expect(result.messages[0].message).toContain('it')
+    expect(result.messages[1].message).toContain('describe')
+    expect(result.messages[2].message).toContain('context')
 
-    expect(result.output).not.exist
+    expect(result.output).toBeUndefined()
   })
 })
