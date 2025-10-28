@@ -15,7 +15,8 @@
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "test": "vitest run",
     "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0",
-    "tslint": "tslint --config ../ts/tslint.json --project ."
+    "tslint": "tslint --config ../ts/tslint.json --project .",
+    "watch": "yarn build:cjs --watch & yarn build:esm --watch"
   },
   "dependencies": {
     "compare-versions": "4.1.3",
@@ -38,7 +39,7 @@
     "cjs/*",
     "esm/*"
   ],
-  "types": "src/index.ts",
+  "types": "cjs/index.d.ts",
   "module": "esm/index.js",
   "nx": {}
 }

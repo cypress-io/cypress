@@ -5,6 +5,7 @@
   "compilerOptions": {
     "allowJs": false,
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "declaration": true
   }
 }
