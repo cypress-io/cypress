@@ -1,6 +1,37 @@
 // @ts-ignore
 const { $, dom } = Cypress
 
+/**
+ * Most of the tests in here are declarative. Due to the range of visibility scenarios, test case
+ * understandability is paramount. These test cases are defined declaratively *in the fixture html
+ * file, and are iterated upon with the helper functions in the `visibility scenarios` describe block.
+ *
+ * CSS for test cases are inlined into the DOM purposefully, to ensure easy reference and debugging.
+ *
+ * Test case elements that are expected to be visible typically have a `lightgreen` background color,
+ * while test case elements that are expected to be hidden typically have a `lightcoral` background color.
+ * This helps to quickly identify if a given element's assertions are in-line with browser behavior.
+ *
+ * A test case where the visibility behavior is expected to be identical between the legacy and fast
+ * algorithms:
+ *
+ * <div class="testCase"
+ *   cy-expect="visible"
+ *   cy-label="helpful description for the assertion"
+ *   style="height: 100px; width: 100px;">
+ * </div>
+ *
+ * A test case where the visibility behavior is expected to be different between the legacy and fast
+ * algorithms (note the css of the example does not accurately reflect this visibility behavior):
+ *
+ * <div class="testCase"
+ *   cy-legacy-expect="visible"
+ *   cy-fast-expect="hidden"
+ *   cy-label="helpful description for the assertion"
+ *   style="height: 100px; width: 100px;">
+ * </div>
+ */
+
 describe('src/cypress/dom/visibility', {
   slowTestThreshold: 500,
 }, () => {
@@ -268,9 +299,11 @@ describe('src/cypress/dom/visibility', {
             'visibility-property',
             'display-property',
             'opacity-property',
-            'input-elements',
             'table-elements',
             'box-interactions',
+            'style-filters',
+            'contain-property',
+            'pointer-events-none',
           ])
         })
 
@@ -307,7 +340,8 @@ describe('src/cypress/dom/visibility', {
             'overflow-relative-positioning',
             'overflow-flex-container',
             'overflow-complex-scenarios',
-            'clip-path-scenarios',
+            'clip-scenarios',
+            'viewport-scenarios',
           ])
         })
 
@@ -324,6 +358,8 @@ describe('src/cypress/dom/visibility', {
             'fixed-positioning-with-zero-dimensions',
             'position-absolute-scenarios',
             'position-sticky-scenarios',
+            'positioning-cousin-coverage',
+            'z-index-coverage',
           ])
         })
 
@@ -364,7 +400,6 @@ describe('src/cypress/dom/visibility', {
           })
 
           it('has a parent with `display: none`', function () {
-            cy.visit('/fixtures/visibility/basic-css-properties.html')
             prepareFixtureSection('display-property')
             cy.get('[cy-section="display-property"] .testCase[cy-expect="hidden"] span').then(($el) => {
               reasonIs($el, 'This element `<span.testCase>` is not visible because its parent `<div.testCase>` has CSS property: `display: none`')

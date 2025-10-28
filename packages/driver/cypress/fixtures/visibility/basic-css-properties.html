@@ -36,12 +36,12 @@
     </div>
   </div>
 
-  <div class="test-section" cy-section="input-elements">
-    <h3>Input Elements</h3>
-    <input class="testCase" cy-expect="hidden" cy-label="Hidden input" type="hidden" value="hidden input">
-    <input class="testCase" cy-expect="visible" cy-label="Visible input" type="text" value="visible input">
+  <div class="test-section" cy-section="style-filters">
+    <h3>Style Filters</h3>
+    <!-- while opacity(0) renders the element as fully transparent, it is still considered visible: it has a box model, and it is clickable -->
+    <div class="testCase" cy-expect="visible" cy-label="Hidden by style filter: opacity(0)" style="filter: opacity(0);">Hidden by style filter: opacity(0)</div>
   </div>
-  
+
   <div class="test-section" cy-section="table-elements">
     <h3>Table Elements</h3>
     <table>
@@ -63,5 +63,30 @@
       </span>
     </div>
   </div>
+
+  <div class="test-section" cy-section="pointer-events-none">
+    <h3>Pointer Events: None</h3>
+    <div class="testCase" cy-legacy-expect="visible" cy-fast-expect="hidden" cy-label="Element with pointer-events: none" style="pointer-events: none;">Element with pointer-events: none</div>
+  </div>
+
+  <div class="test-section" cy-section="contain-property">
+    <h3>CSS Contain Property</h3>
+    
+    <!-- Element with contain: layout -->
+    <div class="testCase" cy-expect="visible" cy-label="Element with contain: layout" style="width: 100px; height: 100px; background: lightcoral; contain: layout;">
+      <span class="testCase" cy-expect="visible" cy-label="Child of contain: layout element">contain: layout</span>
+    </div>
+
+    <!-- Element with contain: paint -->
+    <div class="testCase" cy-expect="visible" cy-label="Element with contain: paint" style="width: 100px; height: 100px; background: lightcoral; contain: paint;">
+      <span class="testCase" cy-legacy-expect="visible" cy-fast-expect="hidden" cy-label="Child positioned out of bounds of its `contain: paint` parent" style="position:relative; top:500px">contain: paint</span>
+    </div>
+
+    <!-- Element with contain: strict -->
+    <div class="testCase" cy-expect="visible" cy-label="Element with contain: strict" style="width: 100px; height: 100px; background: lightcoral; contain: strict;">
+      <span class="testCase" cy-expect="visible" cy-label="Child of contain: strict element">contain: strict</span>
+    </div>
+  </div>
+
 </body>
 </html>
