@@ -7,7 +7,7 @@ import path from 'path'
 import send from 'send'
 import { httpUtils } from '@packages/network'
 import { allowDestroy } from './util/server_destroy'
-import random from './util/random'
+import { id as randomId } from './util/random'
 import networkFailures from './util/network_failures'
 import type { AddressInfo } from 'net'
 
@@ -59,7 +59,7 @@ const onRequest = function (req: http.IncomingMessage, res: http.ServerResponse,
 
 export const create = (fileServerFolder: string): Promise<FileServer> => {
   return new Promise(((resolve) => {
-    const token = random.id(64)
+    const token = randomId(64)
 
     const srv = http.createServer(httpUtils.lenientOptions, (req: http.IncomingMessage, res: http.ServerResponse) => {
       return onRequest(req, res, token, fileServerFolder)
@@ -68,23 +68,21 @@ export const create = (fileServerFolder: string): Promise<FileServer> => {
     allowDestroy(srv)
 
     return srv.listen(0, '127.0.0.1', () => {
-      return resolve({
+      const server: FileServer = {
         token,
-
         port () {
           return (srv.address() as AddressInfo).port
         },
-
         address () {
-          // @ts-expect-error - port is defined on the object context
           return `http://localhost:${this.port()}`
         },
-
         close () {
           // @ts-expect-error - destroyAsync is defined when allowDestroy is called
           return srv.destroyAsync()
         },
-      })
+      }
+
+      return resolve(server)
     })
   }))
 }
