@@ -1,6 +1,6 @@
 ## Overview
 Essential rules for reviewing code changes in the Cypress monorepo.
-
+ 
 ## Critical PR Review Rules
 
 ### Security Checklist
