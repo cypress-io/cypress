@@ -84,7 +84,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 
 - [x] cli ✅ **COMPLETED** 
 - [x] npm/cypress-schematic ✅ **COMPLETED**
-- [ ] npm/eslint-plugin-dev
+- [x] npm/eslint-plugin-dev ✅ **COMPLETED**
 - [x] npm/grep ✅ **COMPLETED** 
 - [x] npm/puppeteer ✅ **COMPLETED** 
 - [x] npm/vite-dev-server ✅ **COMPLETED** 
