@@ -9,7 +9,7 @@ on:
 jobs:
   generate_SBOM:
     runs-on: ubuntu-latest
-    env:
+    env: 
           FOSSA_API_KEY: ${{secrets.FOSSAAPIKEY}}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
