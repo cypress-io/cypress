@@ -23,7 +23,7 @@
     "cjs/*",
     "esm/*"
   ],
-  "types": "./lib/index.ts",
+  "types": "./cjs/index.d.ts",
   "module": "esm/index.js",
   "nx": {}
 }

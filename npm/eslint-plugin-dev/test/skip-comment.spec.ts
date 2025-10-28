@@ -1,8 +1,10 @@
-const path = require('path')
-const eslint = require('eslint')
-const plugin = require('..')
-const _ = require('lodash')
-const { expect } = require('chai')
+import { describe, it, expect } from 'vitest'
+
+import path from 'path'
+import eslint from 'eslint'
+import _ from 'lodash'
+
+const plugin = require('../lib')
 
 const ruleName = 'skip-comment'
 const pluginName = '__plugin__'
@@ -43,7 +45,7 @@ describe('skip-comment', () => {
       fix: true,
     })
 
-    expect(result.errorCount).equal(0)
+    expect(result.errorCount).toEqual(0)
   })
 
   it('skip test without comment', async () => {
@@ -52,17 +54,17 @@ describe('skip-comment', () => {
       fix: true,
     })
 
-    expect(result.errorCount).equal(3)
+    expect(result.errorCount).toEqual(3)
 
-    expect(result.messages[0].message).to.contain('it')
-    expect(result.messages[0].message).to.contain('NOTE:')
-    expect(result.messages[0].message).to.contain('TODO:')
-    expect(result.messages[1].message).to.contain('describe')
-    expect(result.messages[1].message).to.contain('NOTE:')
-    expect(result.messages[2].message).to.contain('context')
-    expect(result.messages[2].message).to.contain('NOTE:')
+    expect(result.messages[0].message).toContain('it')
+    expect(result.messages[0].message).toContain('NOTE:')
+    expect(result.messages[0].message).toContain('TODO:')
+    expect(result.messages[1].message).toContain('describe')
+    expect(result.messages[1].message).toContain('NOTE:')
+    expect(result.messages[2].message).toContain('context')
+    expect(result.messages[2].message).toContain('NOTE:')
 
-    expect(result.output).not.not.exist
+    expect(result.output).toBeUndefined()
   })
 
   describe('config', () => {
@@ -81,12 +83,12 @@ describe('skip-comment', () => {
         },
       })
 
-      expect(result.errorCount).equal(1)
+      expect(result.errorCount).toEqual(1)
 
-      expect(result.messages[0].message).to.contain('it')
-      expect(result.messages[0].message).to.contain('FOOBAR:')
+      expect(result.messages[0].message).toContain('it')
+      expect(result.messages[0].message).toContain('FOOBAR:')
 
-      expect(result.output).not.exist
+      expect(result.output).toBeUndefined()
     })
   })
 })
