@@ -1,10 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.6.0
 
-_Released 10/20/2025 (PENDING)_
+_Released 11/4/2025 (PENDING)_
 
 **Features:**
 
+ - Added a 'Self-healed' badge to the Command Log when `cy.prompt()` steps automatically recover after the element they need is not found in the cache. Addressed in [#32802](https://github.com/cypress-io/cypress/pull/32802).
 - `cy.prompt()` will now show a warning in the `Get code` modal when there are unsaved changes in `Studio` that will be lost if the user saves the generated code. Addressed in [#32741](https://github.com/cypress-io/cypress/pull/32741).
 
 **Bugfixes:**
@@ -12,6 +13,7 @@ _Released 10/20/2025 (PENDING)_
 - Fixed an issue where grouped command text jumps up and down when expanding and collapsing in the command log. Addressed in [#32757](https://github.com/cypress-io/cypress/pull/32757).
 - Fixed an issue where command snapshots were not correctly displayed in Studio. Addressed in [#32808](https://github.com/cypress-io/cypress/pull/32808).
 - Fixed an issue with grouped console prop items having a hard to read blue color in the console log and duplicate `:` characters being displayed. Addressed in [#32776](https://github.com/cypress-io/cypress/pull/32776).
+- Added more context to the error message shown when `cy.prompt()` fails to download. Addressed in [#32822](https://github.com/cypress-io/cypress/pull/32822).
 
 **Misc:**
 
@@ -22,6 +24,7 @@ _Released 10/20/2025 (PENDING)_
 **Dependency Updates:**
 
 - Upgraded `better-sqlite3` from `11.10.0` to `12.4.1`. Addressed in [#32755](https://github.com/cypress-io/cypress/pull/32755).
+- Upgraded `recast` from `0.20.4` to `0.23.11`. Addressed in [#32742](https://github.com/cypress-io/cypress/pull/32742).
 
 ## 15.5.0
 
