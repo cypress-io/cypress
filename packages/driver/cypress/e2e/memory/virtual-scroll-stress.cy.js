@@ -13,7 +13,7 @@
  */
 
 describe('Virtual Scrolling Stress Tests', {
-  experimentalFastVisibility: true,
+  experimentalFastVisibility: true, // if this is set to false, this spec will crash the browser
   numTestsKeptInMemory: 1,
 }, () => {
   beforeEach(() => {
