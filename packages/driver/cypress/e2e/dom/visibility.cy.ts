@@ -7,7 +7,9 @@ describe('src/cypress/dom/visibility', {
   function assertVisibilityForEl (el: HTMLElement) {
     // once experimentalFastVisibility is added, switch based on the config value
     // and use `cy-fast-expect` instead of `cy-legacy-expect` when it is enabled.
-    const expected = el.getAttribute('cy-expect') ?? el.getAttribute('cy-legacy-expect')
+    const expected = el.getAttribute('cy-expect') ?? (Cypress.config('experimentalFastVisibility') ?
+      el.getAttribute('cy-fast-expect') :
+      el.getAttribute('cy-legacy-expect'))
 
     if (!expected) {
       throw new Error(`Expected attribute 'cy-expect' or 'cy-legacy-expect' not found on test case_ element ${el.outerHTML}`)

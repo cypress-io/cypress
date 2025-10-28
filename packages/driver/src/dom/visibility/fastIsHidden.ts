@@ -112,10 +112,22 @@ export function fastIsHidden (subject: JQuery<HTMLElement> | HTMLElement, option
     const subjects = unwrap(subject) as HTMLElement | HTMLElement[]
 
     if (Array.isArray(subjects)) {
-      return subjects.some((subject: HTMLElement) => fastIsHidden(wrap(subject), options))
+      return subjects.some((subject: HTMLElement) => fastIsHidden(subject, options))
     }
 
-    return fastIsHidden(subject, options)
+    return fastIsHidden(subjects, options)
+  }
+
+  if (isOption(subject) || isOptgroup(subject)) {
+    if (subject.hasAttribute('style') && subject.style.display === 'none') {
+      return true
+    }
+
+    const select = subject.closest('select')
+
+    if (select) {
+      return fastIsHidden(wrap(select), options)
+    }
   }
 
   if (!subject.checkVisibility({
@@ -124,14 +136,6 @@ export function fastIsHidden (subject: JQuery<HTMLElement> | HTMLElement, option
     visibilityProperty: true,
   })) {
     return true
-  }
-
-  if (isOption(subject) || isOptgroup(subject)) {
-    const select = subject.closest('select')
-
-    if (select) {
-      return fastIsHidden(wrap(select), options)
-    }
   }
 
   const boundingRect = getBoundingClientRect(subject)
