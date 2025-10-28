@@ -1727,7 +1727,7 @@ jobs:
                 name: Run v8 integration tests
                 command: |
                   source ./scripts/ensure-node.sh
-                  yarn test-integration --scope=@tooling/packherd
+                  yarn test-integration --scope=@tooling/packherd 
             - sanitize-verify-and-store-mocha-results:
                 expectedResultCount: 1
 
