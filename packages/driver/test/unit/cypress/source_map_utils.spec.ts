@@ -1,7 +1,7 @@
 /**
  * @vitest-environment jsdom
  */
-import { vi, describe, it, expect } from 'vitest'
+import { vi, describe, it, expect, beforeEach } from 'vitest'
 import source_map_utils from '../../../src/cypress/source_map_utils'
 
 vi.mock('source-map', () => {
@@ -105,7 +105,7 @@ describe('source_map_utils', () => {
     })
 
     it('should return true when source map consumers exist', async () => {
-      withLinuxPaths(async (sourceMapUtils) => {
+      await withLinuxPaths(async (sourceMapUtils) => {
         await setupSourceMapConsumer(sourceMapUtils, '/project/test.spec.js')
 
         const result = sourceMapUtils.areSourceMapsAvailable()
