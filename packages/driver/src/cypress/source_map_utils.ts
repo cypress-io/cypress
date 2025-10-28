@@ -121,6 +121,14 @@ const areSourceMapsAvailable = () => {
   return Object.keys(sourceMapConsumers).length > 0
 }
 
+/**
+ * Establishes the project root from the source map's perspective.
+ *
+ * @param relativePath - The relative path of an anchor file where we know the absolute path.
+ * @param absolutePath - The absolute path of the anchor file.
+ * @param projectRoot - The project root. Used as a back up if we cannot determine the project root from the source map.
+ * @returns The project root from the source map's perspective
+ */
 const setSourceMapProjectRoot = (relativePath: string, absolutePath: string, projectRoot: string) => {
   const keys = Object.keys(sourceMapConsumers)
   const posixRelativePath = toPosix(relativePath)
@@ -134,8 +142,7 @@ const setSourceMapProjectRoot = (relativePath: string, absolutePath: string, pro
 
   const consumer = sourceMapConsumers[key]
 
-  for (let index = 0; index < consumer.sources.length; index++) {
-    const source = consumer.sources[index]
+  for (const [index, source] of consumer.sources.entries()) {
     const strippedSource = $utils.stripCustomProtocol(source)
 
     if (strippedSource !== undefined && absolutePath?.endsWith(strippedSource)) {
@@ -163,29 +170,39 @@ const getSourceMapProjectRoot = () => {
   return sourceMapProjectRoot
 }
 
+/**
+ * Gets the base directory that satisfies the relationship between the absolute and relative paths.
+ *
+ * For example:
+ *
+ * absolutePath: /project/src/components/Button.tsx
+ * relativePath: src/components/Button.tsx
+ *
+ * The base directory is /project
+ *
+ * @param absolutePath - The absolute path.
+ * @param relativePath - The relative path.
+ * @returns The base directory that satisfies the relationship between the absolute and relative paths.
+ */
 const getBaseDirectory = (absolutePath: string, relativePath: string) => {
   const absNormalized = path.normalize(absolutePath)
   const relNormalized = path.normalize(relativePath)
 
-  // Start with the directory of the absolute path
   let dir = path.dirname(absNormalized)
-  let recurse = true
+  let parent = path.dirname(dir)
 
-  // Work backwards: check each parent directory
-  while (recurse) {
-    const resolved = path.join(dir, relNormalized)
-
-    if (resolved === absNormalized) {
+  while (parent !== dir) {
+    if (path.join(dir, relNormalized) === absNormalized) {
       return dir
     }
 
-    const parent = path.dirname(dir)
+    dir = parent
+    parent = path.dirname(dir)
+  }
 
-    if (parent === dir) {
-      recurse = false
-    } else {
-      dir = parent
-    }
+  // Check the root directory
+  if (path.join(dir, relNormalized) === absNormalized) {
+    return dir
   }
 
   return null

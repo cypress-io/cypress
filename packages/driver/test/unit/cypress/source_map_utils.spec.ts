@@ -27,9 +27,11 @@ vi.mock('source-map', () => {
   }
 })
 
-// import source_map_utils from '../../../src/cypress/source_map_utils'
-
 describe('source_map_utils', () => {
+  beforeEach(() => {
+    vi.resetModules()
+  })
+
   // Helper function to set up source map consumers for testing
   const setupSourceMapConsumer = async (sourceMapUtils: typeof source_map_utils, scriptUrl: string, sources: string[] = ['src/components/Button.tsx']) => {
     // Call the actual function to set up the consumer (SourceMapConsumer constructor is mocked)
@@ -40,7 +42,6 @@ describe('source_map_utils', () => {
 
   // Helper function to run tests with Windows path behavior
   const withWindowsPaths = async (testFn: (sourceMapUtils: typeof source_map_utils) => Promise<void> | void) => {
-    vi.resetModules()
     global.Cypress = {
       config: vi.fn().mockReturnValue('win32'),
     }
@@ -59,14 +60,15 @@ describe('source_map_utils', () => {
     // Re-import the module to get the mocked path
     const { default: sourceMapUtils } = await import('../../../src/cypress/source_map_utils')
 
-    await testFn(sourceMapUtils)
-
-    // Clean up the mock
-    vi.doUnmock('path')
+    try {
+      await testFn(sourceMapUtils)
+    } finally {
+      // Clean up the mock
+      vi.doUnmock('path')
+    }
   }
 
   const withLinuxPaths = async (testFn: (sourceMapUtils: typeof source_map_utils) => Promise<void> | void) => {
-    vi.resetModules()
     global.Cypress = {
       config: vi.fn().mockReturnValue('linux'),
     }
@@ -85,10 +87,12 @@ describe('source_map_utils', () => {
     // Re-import the module to get the mocked path
     const { default: sourceMapUtils } = await import('../../../src/cypress/source_map_utils')
 
-    await testFn(sourceMapUtils)
-
-    // Clean up the mock
-    vi.doUnmock('path')
+    try {
+      await testFn(sourceMapUtils)
+    } finally {
+      // Clean up the mock
+      vi.doUnmock('path')
+    }
   }
 
   describe('areSourceMapsAvailable', () => {

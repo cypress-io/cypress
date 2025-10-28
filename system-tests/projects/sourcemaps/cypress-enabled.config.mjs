@@ -1,5 +1,5 @@
-const path = require('path')
-const os = require('os')
+import path from 'node:path'
+import os from 'node:os'
 
 module.exports = {
   e2e: {

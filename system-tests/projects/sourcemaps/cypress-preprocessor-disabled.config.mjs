@@ -1,6 +1,6 @@
-const webpack = require('@cypress/webpack-preprocessor')
+import webpack from '@cypress/webpack-preprocessor'
 
-module.exports = (on, config) => {
+export default (on, config) => {
   const options = {
     webpackOptions: {
       devtool: false, // This disables sourcemaps

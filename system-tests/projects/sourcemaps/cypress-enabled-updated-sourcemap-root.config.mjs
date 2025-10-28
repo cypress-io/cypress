@@ -1,11 +1,12 @@
-const path = require('path')
-const os = require('os')
+import path from 'node:path'
+import os from 'node:os'
+import cypressPreprocessor from './cypress-preprocessor-enabled-updated-sourcemap-root.config.mjs'
 
-module.exports = {
+export default {
   e2e: {
     supportFile: false,
     setupNodeEvents (on, config) {
-      require('./cypress-preprocessor-enabled-updated-sourcemap-root.config.js')(on, config)
+      cypressPreprocessor(on, config)
     },
   },
   env: {

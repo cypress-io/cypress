@@ -1,7 +1,7 @@
-const webpack = require('@cypress/webpack-preprocessor')
-const path = require('path')
+import webpack from '@cypress/webpack-preprocessor'
+import path from 'node:path'
 
-module.exports = (on, config) => {
+export default (on, config) => {
   const options = {
     webpackOptions: {
       context: path.resolve(__dirname, 'cypress'),

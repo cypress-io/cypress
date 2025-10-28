@@ -1,5 +1,5 @@
-const wp = require('@cypress/webpack-preprocessor')
-const path = require('path')
+import wp from '@cypress/webpack-preprocessor'
+import path from 'node:path'
 
 module.exports = {
   numTestsKeptInMemory: 0,
