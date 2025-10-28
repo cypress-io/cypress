@@ -55,9 +55,8 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTestFromSuite 
   }
 }
 
-export function inputNewTestName ({ name = 'new-test', createNewTestFromSuite = false, createNewTestFromSpecHeader = false }:
-{ name?: string, createNewTestFromSuite?: boolean, createNewTestFromSpecHeader?: boolean } = {}) {
-  if (!createNewTestFromSuite && !createNewTestFromSpecHeader) {
+export function inputNewTestName ({ name = 'new-test', creatingNewTestFromWelcomeScreen = true }: { name?: string, creatingNewTestFromWelcomeScreen?: boolean } = {}) {
+  if (creatingNewTestFromWelcomeScreen) {
     // we only need to click the new test button if we are not creating a new test from a suite or spec header
     cy.findByTestId('new-test-button').click()
   }
