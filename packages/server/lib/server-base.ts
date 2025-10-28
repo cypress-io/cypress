@@ -1,4 +1,3 @@
-import './cwd'
 import Bluebird from 'bluebird'
 import compression from 'compression'
 import Debug from 'debug'
@@ -12,7 +11,7 @@ import _ from 'lodash'
 import type { AddressInfo } from 'net'
 import url from 'url'
 import la from 'lazy-ass'
-import httpsProxy from '@packages/https-proxy'
+import { createProxy as createHttpsProxy } from '@packages/https-proxy'
 import { getRoutesForRequest, netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { agent, clientCertificates, httpUtils, concatStream } from '@packages/network'
 import { DocumentDomainInjection, getPath, parseUrlIntoHostProtocolDomainTldPort, removeDefaultPort } from '@packages/network-tools'
@@ -287,7 +286,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       })
       .then((port) => {
         return Bluebird.all([
-          httpsProxy.create(appData.path('proxy'), port, {
+          createHttpsProxy(appData.path('proxy'), port, {
             onRequest: this.callListeners.bind(this),
             onUpgrade: this.onSniUpgrade.bind(this),
           }),

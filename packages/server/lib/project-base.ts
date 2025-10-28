@@ -180,7 +180,7 @@ export class ProjectBase extends EE {
       })
     }
 
-    if (!cfg.isTextTerminal && this.testingType === 'e2e') {
+    if ((!cfg.isTextTerminal || process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE) && this.testingType === 'e2e') {
       const studioLifecycleManager = new StudioLifecycleManager()
 
       studioLifecycleManager.initializeStudioManager({
@@ -613,14 +613,14 @@ export class ProjectBase extends EE {
         reporterInstance.emit(event, runnable)
 
         if (event === 'test:before:run') {
-          debugVerbose('browserPreRequests prior to running %s: %O', runnable.title, this.server.getBrowserPreRequests())
+          debugVerbose('browserPreRequests prior to running %s: %o', runnable.title, this.server.getBrowserPreRequests())
 
           this.emit('test:before:run', {
             runnable,
             previousResults: reporterInstance?.results() || {},
           })
         } else if (event === 'end') {
-          debugVerbose('browserPreRequests at the end: %O', this.server.getBrowserPreRequests())
+          debugVerbose('browserPreRequests at the end: %o', this.server.getBrowserPreRequests())
 
           const [stats = {}] = await Promise.all([
             (reporterInstance != null ? reporterInstance.end() : undefined),

@@ -47,7 +47,7 @@ const toUploadReportPayload = (acc: {
       error = `Failed to upload Test Replay: ${error}`
     }
 
-    debug('protocol report %O', reportWithoutOriginalError)
+    debug('protocol report %o', reportWithoutOriginalError)
 
     return {
       ...acc,
@@ -103,11 +103,11 @@ const extractArtifactsFromOptions = async ({
     try {
       artifacts.push(await createVideoArtifact(video, videoUploadUrl))
     } catch (e) {
-      debug('Error creating video artifact: %O', e)
+      debug('Error creating video artifact: %o', e)
     }
   }
 
-  debug('screenshot metadata: %O', { screenshotUploadUrls, screenshots })
+  debug('screenshot metadata: %o', { screenshotUploadUrls, screenshots })
   debug('found screenshot filenames: %o', screenshots)
   if (screenshots?.length && screenshotUploadUrls?.length) {
     const screenshotArtifacts = await createScreenshotArtifactBatch(screenshotUploadUrls, screenshots)
@@ -143,7 +143,7 @@ const extractArtifactsFromOptions = async ({
       protocolManager?.addFatalError('protocolUploadUrl', err)
     }
   } catch (e) {
-    debug('Error creating protocol artifact: %O', e)
+    debug('Error creating protocol artifact: %o', e)
   }
 
   return artifacts
@@ -197,7 +197,7 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
   }
 
   if (!quiet) {
-    debug('logging upload manifest: %O', {
+    debug('logging upload manifest: %o', {
       artifacts,
       protocolCaptureMeta,
       fatalProtocolError: protocolManager?.getFatalError(),
@@ -206,7 +206,7 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
     logUploadManifest(artifacts, protocolCaptureMeta, protocolManager?.getFatalError())
   }
 
-  debug('preparing to upload artifacts: %O', artifacts)
+  debug('preparing to upload artifacts: %o', artifacts)
 
   let stopUploadActivityOutput: () => void | undefined
 
@@ -260,12 +260,12 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
         projectSlug: projectId,
       })
     } catch (err) {
-      debug('Failed to send protocol errors %O', err)
+      debug('Failed to send protocol errors %o', err)
     }
   }
 
   try {
-    debug('upload report: %O', uploadReport)
+    debug('upload report: %o', uploadReport)
     const res = await api.updateInstanceArtifacts({
       runId, instanceId,
     }, uploadReport)

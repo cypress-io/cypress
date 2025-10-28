@@ -173,7 +173,37 @@ export const AllCypressErrors = {
       ciBuildId: '--ciBuildId',
     })}`
   },
+  CLOUD_CANNOT_PROCEED_IN_PARALLEL_NETWORK: (arg1: { flags: any, response: Error }) => {
+    const message = normalizeNetworkErrorMessage(arg1.response)
+
+    return errTemplate`\
+        We encountered an unexpected error communicating with our servers.
+
+        ${fmt.highlightSecondary(message)}
+
+        Because you passed the ${fmt.flag(`--parallel`)} flag, this run cannot proceed since it requires a valid response from our servers.
+
+        ${fmt.listFlags(arg1.flags, {
+      group: '--group',
+      ciBuildId: '--ciBuildId',
+    })}`
+  },
   CLOUD_CANNOT_PROCEED_IN_SERIAL: (arg1: { flags: any, response: Error }) => {
+    const message = normalizeNetworkErrorMessage(arg1.response)
+
+    return errTemplate`\
+        We encountered an unexpected error communicating with our servers.
+
+        ${fmt.highlightSecondary(message)}
+
+        Because you passed the ${fmt.flag(`--record`)} flag, this run cannot proceed since it requires a valid response from our servers.
+
+        ${fmt.listFlags(arg1.flags, {
+      group: '--group',
+      ciBuildId: '--ciBuildId',
+    })}`
+  },
+  CLOUD_CANNOT_PROCEED_IN_SERIAL_NETWORK: (arg1: { flags: any, response: Error }) => {
     const message = normalizeNetworkErrorMessage(arg1.response)
 
     return errTemplate`\

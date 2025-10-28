@@ -1,5 +1,3 @@
-import '../cwd'
-
 import _ from 'lodash'
 import { EventEmitter } from 'events'
 import path from 'path'

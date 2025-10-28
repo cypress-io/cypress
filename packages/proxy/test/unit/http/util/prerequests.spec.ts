@@ -1,7 +1,6 @@
+import { describe, expect, it, vi } from 'vitest'
 import { CorrelationInformation, PreRequests } from '@packages/proxy/lib/http/util/prerequests'
 import { BrowserPreRequest, CypressIncomingRequest } from '@packages/proxy'
-import { expect } from 'chai'
-import sinon from 'sinon'
 import { performance } from 'perf_hooks'
 import { ProtocolManagerShape } from '@packages/types'
 
@@ -10,16 +9,17 @@ describe('http/util/prerequests', () => {
   let protocolManager: ProtocolManagerShape
 
   function expectPendingCounts (pendingRequests: number, pendingPreRequests: number, pendingWithoutPreRequests = 0, pendingPreRequestsToRemove = 0) {
-    expect(preRequests.pendingRequests.length).to.eq(pendingRequests, 'wrong number of pending requests')
-    expect(preRequests.pendingPreRequests.length).to.eq(pendingPreRequests, 'wrong number of pending prerequests')
-    expect(preRequests.pendingUrlsWithoutPreRequests.length).to.eq(pendingWithoutPreRequests, 'wrong number of pending without prerequests')
-    expect(preRequests.pendingPreRequestsToRemove.size).to.eq(pendingPreRequestsToRemove, 'wrong number of pending prerequests to remove')
+    expect(preRequests.pendingRequests.length, 'wrong number of pending requests').toEqual(pendingRequests)
+    expect(preRequests.pendingPreRequests.length, 'wrong number of pending prerequests').toEqual(pendingPreRequests)
+    expect(preRequests.pendingUrlsWithoutPreRequests.length, 'wrong number of pending without prerequests').toEqual(pendingWithoutPreRequests)
+    expect(preRequests.pendingPreRequestsToRemove.size, 'wrong number of pending prerequests to remove').toEqual(pendingPreRequestsToRemove)
   }
 
   beforeEach(() => {
+    vi.resetAllMocks()
     preRequests = new PreRequests(10)
     protocolManager = {
-      responseStreamTimedOut: sinon.stub(),
+      responseStreamTimedOut: vi.fn(),
     } as any
 
     preRequests.setProtocolManager(protocolManager)
@@ -70,27 +70,25 @@ describe('http/util/prerequests', () => {
 
     expectPendingCounts(0, 3)
 
-    const cb = sinon.stub()
+    const cb = vi.fn()
 
     preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: {} } as CypressIncomingRequest, () => {}, cb)
 
-    const { args } = cb.getCall(0)
-    const browserPreRequest = args[0].browserPreRequest
-    const noPreRequestExpected = args[0].noPreRequestExpected
+    const { browserPreRequest, noPreRequestExpected } = cb.mock.calls[0][0]
 
-    expect(browserPreRequest.requestId).to.eq(secondPreRequest.requestId)
-    expect(browserPreRequest.url).to.eq(secondPreRequest.url)
-    expect(browserPreRequest.method).to.eq(secondPreRequest.method)
-    expect(browserPreRequest.headers).to.deep.eq(secondPreRequest.headers)
-    expect(browserPreRequest.resourceType).to.eq(secondPreRequest.resourceType)
-    expect(browserPreRequest.originalResourceType).to.eq(secondPreRequest.originalResourceType)
-    expect(browserPreRequest.cdpRequestWillBeSentTimestamp).to.eq(secondPreRequest.cdpRequestWillBeSentTimestamp)
-    expect(browserPreRequest.cdpRequestWillBeSentReceivedTimestamp).to.eq(secondPreRequest.cdpRequestWillBeSentReceivedTimestamp)
-    expect(browserPreRequest.proxyRequestReceivedTimestamp).to.be.a('number')
-    expect(browserPreRequest.cdpLagDuration).to.eq(secondPreRequest.cdpRequestWillBeSentReceivedTimestamp - secondPreRequest.cdpRequestWillBeSentTimestamp)
-    expect(browserPreRequest.proxyRequestCorrelationDuration).to.eq(secondPreRequest.cdpRequestWillBeSentReceivedTimestamp - browserPreRequest.proxyRequestReceivedTimestamp)
+    expect(browserPreRequest.requestId).toEqual(secondPreRequest.requestId)
+    expect(browserPreRequest.url).toEqual(secondPreRequest.url)
+    expect(browserPreRequest.method).toEqual(secondPreRequest.method)
+    expect(browserPreRequest.headers).toEqual(secondPreRequest.headers)
+    expect(browserPreRequest.resourceType).toEqual(secondPreRequest.resourceType)
+    expect(browserPreRequest.originalResourceType).toEqual(secondPreRequest.originalResourceType)
+    expect(browserPreRequest.cdpRequestWillBeSentTimestamp).toEqual(secondPreRequest.cdpRequestWillBeSentTimestamp)
+    expect(browserPreRequest.cdpRequestWillBeSentReceivedTimestamp).toEqual(secondPreRequest.cdpRequestWillBeSentReceivedTimestamp)
+    expect(browserPreRequest.proxyRequestReceivedTimestamp).toBeTypeOf('number')
+    expect(browserPreRequest.cdpLagDuration).toEqual(secondPreRequest.cdpRequestWillBeSentReceivedTimestamp - secondPreRequest.cdpRequestWillBeSentTimestamp)
+    expect(browserPreRequest.proxyRequestCorrelationDuration).toEqual(secondPreRequest.cdpRequestWillBeSentReceivedTimestamp - browserPreRequest.proxyRequestReceivedTimestamp)
 
-    expect(noPreRequestExpected).to.be.false
+    expect(noPreRequestExpected).toBe(false)
 
     expectPendingCounts(0, 2)
   })
@@ -103,49 +101,50 @@ describe('http/util/prerequests', () => {
 
     expectPendingCounts(0, 0, 3)
 
-    const cb = sinon.stub()
+    const cb = vi.fn()
 
     preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: {} } as CypressIncomingRequest, () => {}, cb)
 
-    const { args } = cb.getCall(0)
-    const arg = args[0]
+    const { preRequest, noPreRequestExpected } = cb.mock.calls[0][0]
 
-    expect(arg.preRequest).to.be.undefined
-    expect(arg.noPreRequestExpected).to.be.true
+    expect(preRequest).toBeUndefined()
+    expect(noPreRequestExpected).toBe(true)
 
     expectPendingCounts(0, 0, 2)
   })
 
-  it('synchronously matches a pre-request added after the request', (done) => {
-    const cb = ({ browserPreRequest, noPreRequestExpected }: CorrelationInformation) => {
-      expect(browserPreRequest).to.include({ requestId: '1234', url: 'foo', method: 'GET' })
-      expect(noPreRequestExpected).to.be.false
-      expectPendingCounts(0, 0)
-      done()
-    }
+  it('synchronously matches a pre-request added after the request', () => {
+    return new Promise<void>((resolve) => {
+      preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: {} } as CypressIncomingRequest, () => {}, ({ browserPreRequest, noPreRequestExpected }: CorrelationInformation) => {
+        expect(browserPreRequest).toEqual(expect.objectContaining({ requestId: '1234', url: 'foo', method: 'GET' }))
+        expect(noPreRequestExpected).toBe(false)
+        expectPendingCounts(0, 0)
+        resolve()
+      })
 
-    preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: {} } as CypressIncomingRequest, () => {}, cb)
-    preRequests.addPending({ requestId: '1234', url: 'foo', method: 'GET' } as BrowserPreRequest)
+      preRequests.addPending({ requestId: '1234', url: 'foo', method: 'GET' } as BrowserPreRequest)
+    })
   })
 
-  it('synchronously matches a request without a pre-request added after the request', (done) => {
-    const cb = ({ browserPreRequest, noPreRequestExpected }: CorrelationInformation) => {
-      expect(browserPreRequest).to.be.undefined
-      expect(noPreRequestExpected).to.be.true
-      expectPendingCounts(0, 0)
-      done()
-    }
+  it('synchronously matches a request without a pre-request added after the request', () => {
+    return new Promise<void>((resolve) => {
+      preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: {} } as CypressIncomingRequest, () => {}, ({ browserPreRequest, noPreRequestExpected }: CorrelationInformation) => {
+        expect(browserPreRequest).toBeUndefined()
+        expect(noPreRequestExpected).toBe(true)
+        expectPendingCounts(0, 0)
+        resolve()
+      })
 
-    preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: {} } as CypressIncomingRequest, () => {}, cb)
-    preRequests.addPendingUrlWithoutPreRequest('foo')
+      preRequests.addPendingUrlWithoutPreRequest('foo')
+    })
   })
 
   it('invokes a request callback after a timeout if no pre-request occurs', async () => {
     let cb
     const cbPromise = new Promise<void>((resolve) => {
       cb = ({ browserPreRequest, noPreRequestExpected }: CorrelationInformation) => {
-        expect(browserPreRequest).to.be.undefined
-        expect(noPreRequestExpected).to.be.false
+        expect(browserPreRequest).toBeUndefined()
+        expect(noPreRequestExpected).toBe(false)
 
         // we should have keep the pending request to eventually be correlated later, but don't block the body in the meantime
         expectPendingCounts(1, 0)
@@ -174,18 +173,18 @@ describe('http/util/prerequests', () => {
 
     expectPendingCounts(0, 0)
 
-    const arg = (protocolManager.responseStreamTimedOut as any).getCall(0).args[0]
+    const { requestId, timings } = vi.mocked(protocolManager.responseStreamTimedOut).mock.calls[0][0]
 
-    expect(arg.requestId).to.eq(browserPreRequest.requestId)
-    expect(arg.timings.cdpRequestWillBeSentTimestamp).to.eq(browserPreRequest.cdpRequestWillBeSentTimestamp)
-    expect(arg.timings.cdpRequestWillBeSentReceivedTimestamp).to.eq(browserPreRequest.cdpRequestWillBeSentReceivedTimestamp)
-    expect(arg.timings.proxyRequestReceivedTimestamp).to.be.a('number')
-    expect(arg.timings.cdpLagDuration).to.eq(browserPreRequest.cdpRequestWillBeSentReceivedTimestamp - browserPreRequest.cdpRequestWillBeSentTimestamp)
-    expect(arg.timings.proxyRequestCorrelationDuration).to.eq(browserPreRequest.cdpRequestWillBeSentReceivedTimestamp - arg.timings.proxyRequestReceivedTimestamp)
+    expect(requestId).toEqual(browserPreRequest.requestId)
+    expect(timings.cdpRequestWillBeSentTimestamp).toEqual(browserPreRequest.cdpRequestWillBeSentTimestamp)
+    expect(timings.cdpRequestWillBeSentReceivedTimestamp).toEqual(browserPreRequest.cdpRequestWillBeSentReceivedTimestamp)
+    expect(timings.proxyRequestReceivedTimestamp).toBeTypeOf('number')
+    expect(timings.cdpLagDuration).toEqual(browserPreRequest.cdpRequestWillBeSentReceivedTimestamp - browserPreRequest.cdpRequestWillBeSentTimestamp)
+    expect(timings.proxyRequestCorrelationDuration).toEqual(browserPreRequest.cdpRequestWillBeSentReceivedTimestamp - timings.proxyRequestReceivedTimestamp)
   })
 
   // https://github.com/cypress-io/cypress/issues/17853
-  it('eventually discards pre-requests that don\'t match requests', (done) => {
+  it('eventually discards pre-requests that don\'t match requests', () => {
     preRequests = new PreRequests(10, 200)
     preRequests.addPending({ requestId: '1234', url: 'foo', method: 'GET', cdpRequestWillBeSentReceivedTimestamp: performance.now() + performance.timeOrigin } as BrowserPreRequest)
     preRequests.addPendingUrlWithoutPreRequest('bar')
@@ -196,16 +195,18 @@ describe('http/util/prerequests', () => {
     // preRequests garbage collects pre-requests that never matched up with an incoming request after around
     // 2 * requestTimeout. We verify that it's gone (and therefore not leaking memory) by sending in a request
     // and assuring that the pre-request wasn't there to be matched anymore.
-    setTimeout(() => {
-      const cb = ({ browserPreRequest, noPreRequestExpected }: CorrelationInformation) => {
-        expect(browserPreRequest).to.be.undefined
-        expect(noPreRequestExpected).to.be.false
-        expectPendingCounts(1, 0, 0)
-        done()
-      }
+    return new Promise<void>((resolve) => {
+      setTimeout(() => {
+        const cb = ({ browserPreRequest, noPreRequestExpected }: CorrelationInformation) => {
+          expect(browserPreRequest).toBeUndefined()
+          expect(noPreRequestExpected).toBe(false)
+          expectPendingCounts(1, 0, 0)
+          resolve()
+        }
 
-      preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: {} } as CypressIncomingRequest, () => {}, cb)
-    }, 1200)
+        preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: {} } as CypressIncomingRequest, () => {}, cb)
+      }, 1200)
+    })
   })
 
   it('removes a pre-request with a matching requestId', () => {
@@ -250,7 +251,7 @@ describe('http/util/prerequests', () => {
   })
 
   it('removes a pending request', () => {
-    const cb = sinon.stub()
+    const cb = vi.fn()
 
     const firstPreRequest = preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: {} } as CypressIncomingRequest, () => {}, cb)
     const secondPreRequest = preRequests.get({ proxiedUrl: 'foo', method: 'GET', headers: {} } as CypressIncomingRequest, () => {}, cb)
@@ -286,33 +287,33 @@ describe('http/util/prerequests', () => {
 
     expectPendingCounts(0, 0, 0)
 
-    expect(callbackCalled).to.be.true
+    expect(callbackCalled).toBe(true)
   })
 
   it('decodes the proxied url', () => {
     preRequests.get({ proxiedUrl: 'foo%7Cbar', method: 'GET', headers: {} } as CypressIncomingRequest, () => {}, () => {})
 
-    expect(preRequests.pendingRequests.length).to.eq(1)
-    expect(preRequests.pendingRequests.shift('GET-foo|bar')).not.to.be.undefined
+    expect(preRequests.pendingRequests.length).toEqual(1)
+    expect(preRequests.pendingRequests.shift('GET-foo|bar')).toBeDefined()
   })
 
   it('decodes the pending url without pre-request', () => {
     preRequests.addPendingUrlWithoutPreRequest('foo%7Cbar')
 
-    expect(preRequests.pendingUrlsWithoutPreRequests.length).to.eq(1)
-    expect(preRequests.pendingUrlsWithoutPreRequests.shift('GET-foo|bar')).not.to.be.undefined
+    expect(preRequests.pendingUrlsWithoutPreRequests.length).toEqual(1)
+    expect(preRequests.pendingUrlsWithoutPreRequests.shift('GET-foo|bar')).toBeDefined()
   })
 
   it('decodes pending url', () => {
     preRequests.addPending({ requestId: '1234', url: 'foo%7Cbar', method: 'GET' } as BrowserPreRequest)
 
-    expect(preRequests.pendingPreRequests.length).to.eq(1)
-    expect(preRequests.pendingPreRequests.shift('GET-foo|bar')).not.to.be.undefined
+    expect(preRequests.pendingPreRequests.length).toEqual(1)
+    expect(preRequests.pendingPreRequests.shift('GET-foo|bar')).toBeDefined()
   })
 
   it('does not remove pre-requests when sweeping if cdpRequestWillBeSentReceivedTimestamp is 0', async () => {
     // set the current time to 1000 ms
-    sinon.stub(Date, 'now').returns(1000)
+    vi.spyOn(Date, 'now').mockReturnValue(1000)
 
     // set a sweeper timer of 10 ms
     preRequests = new PreRequests(10, 10)
@@ -323,6 +324,6 @@ describe('http/util/prerequests', () => {
     // give the sweeper plenty of time to run. Iur request should still not be removed
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
-    expect(preRequests.pendingPreRequests.length).to.eq(1)
+    expect(preRequests.pendingPreRequests.length).toEqual(1)
   })
 })

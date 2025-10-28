@@ -1,9 +1,6 @@
 import { useSnapshotStore } from './snapshot-store'
 import { useAutStore } from '../store'
 import type { EventManager } from './event-manager'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
-import { useStudioStore } from '../store/studio-store'
 
 export interface AutSnapshot {
   id?: number
@@ -107,7 +104,6 @@ export class IframeModel {
   setSnapshots = (snapshotProps: AutSnapshot) => {
     const snapshotStore = useSnapshotStore()
     const autStore = useAutStore()
-    const studioStore = useStudioStore()
 
     if (snapshotStore.isSnapshotPinned) {
       return
@@ -115,10 +111,6 @@ export class IframeModel {
 
     if (autStore.isRunning) {
       return snapshotStore.setTestsRunningError()
-    }
-
-    if (studioStore.isOpen) {
-      return this._studioOpenError()
     }
 
     const { snapshots } = snapshotProps
@@ -235,14 +227,6 @@ export class IframeModel {
 
   _unpinSnapshot = () => {
     useSnapshotStore().$reset()
-  }
-
-  _studioOpenError () {
-    const snapshotStore = useSnapshotStore()
-
-    snapshotStore.setMessage(
-      defaultMessages.runner.snapshot.studioActiveError,
-    )
   }
 
   _storeOriginalState () {

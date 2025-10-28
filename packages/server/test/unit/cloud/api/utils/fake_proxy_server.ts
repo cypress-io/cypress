@@ -26,7 +26,7 @@ app.get('/error', (req, res) => {
   res.status(404).json({ ok: false })
 })
 
-let ca: ReturnType<typeof CA.create>
+let ca: CA
 
 interface DestroyableProxyOptions {
   keepRequests?: boolean

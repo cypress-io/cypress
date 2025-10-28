@@ -25,7 +25,7 @@ const settings = require(`../../lib/util/settings`)
 const Windows = require(`../../lib/gui/windows`)
 const interactiveMode = require(`../../lib/modes/interactive`)
 const api = require(`../../lib/cloud/api`).default
-const cwd = require(`../../lib/cwd`)
+const cwd = require(`../../lib/cwd`).getCwd
 const user = require(`../../lib/cloud/user`)
 const cache = require(`../../lib/cache`).cache
 const errors = require(`../../lib/errors`)
@@ -465,6 +465,44 @@ describe('lib/cypress', () => {
       return cypress.start([`--run-project=${this.todosPath}`])
       .then(() => {
         this.expectExitWith(10)
+      })
+    })
+
+    it('exits with code 112 for cloud API failures when posix-exit-codes is enabled', function () {
+      // Mock cloud API to fail with a 504 error
+      sinon.stub(api, 'createRun').rejects({
+        statusCode: 504,
+        message: 'Gateway timeout',
+      })
+
+      return cypress.start([
+        `--run-project=${this.todosPath}`,
+        '--record',
+        '--key=test-key',
+        '--posix-exit-codes',
+      ])
+      .then(() => {
+        this.expectExitWith(112)
+      })
+    })
+
+    it('exits with code 1 for parallel cloud API failures when posix-exit-codes is enabled', function () {
+      // Mock cloud API to fail with a 500 error
+      sinon.stub(api, 'createRun').rejects({
+        statusCode: 500,
+        message: 'Cloud service unavailable',
+      })
+
+      return cypress.start([
+        `--run-project=${this.todosPath}`,
+        '--record',
+        '--key=test-key',
+        '--parallel',
+        '--ci-build-id=test-build-id',
+        '--posix-exit-codes',
+      ])
+      .then(() => {
+        this.expectExitWith(1)
       })
     })
 
