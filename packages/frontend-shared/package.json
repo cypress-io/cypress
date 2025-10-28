@@ -36,7 +36,7 @@
     "@graphql-codegen/plugin-helpers": "2.3.2",
     "@graphql-typed-document-node/core": "^3.1.0",
     "@headlessui/vue": "1.4.0",
-    "@iconify-json/logos": "^1.2.4",
+    "@iconify-json/logos": "^1.2.10",
     "@iconify-json/mdi": "^1.2.3",
     "@packages/app": "0.0.0-development",
     "@packages/launcher": "0.0.0-development",
