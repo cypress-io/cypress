@@ -3015,10 +3015,10 @@
     "@types/parsimmon" "^1.10.1"
     parsimmon "^1.13.0"
 
-"@definitelytyped/typescript-versions@0.1.7", "@definitelytyped/typescript-versions@^0.0.71", "@definitelytyped/typescript-versions@latest":
-  version "0.1.7"
-  resolved "https://registry.yarnpkg.com/@definitelytyped/typescript-versions/-/typescript-versions-0.1.7.tgz#bd7a50832a21ed5978c2513e558cf0ac0d80cece"
-  integrity sha512-sBzBi1SBn79OkSr8V0H+FzR7QumHk23syPyRxod/VRBrSkgN9rCliIe+nqLoWRAKN8EeKbp00ketnJNLZhucdA==
+"@definitelytyped/typescript-versions@0.1.9", "@definitelytyped/typescript-versions@^0.0.71", "@definitelytyped/typescript-versions@latest":
+  version "0.1.9"
+  resolved "https://registry.yarnpkg.com/@definitelytyped/typescript-versions/-/typescript-versions-0.1.9.tgz#883354a68a03542a1b436806a340eabd12fe302b"
+  integrity sha512-Qjalw9eNlcTjXhzx0Q6kHKuRCOUt/M5RGGRGKsiYlm/nveGvPX9liZSQlGXZVwyQ5I9qvq/GdaWiPchQ+ZXOrQ==
 
 "@definitelytyped/utils@latest":
   version "0.0.71"
