@@ -15,7 +15,7 @@ describe('Cypress Studio - New Test Creation', () => {
   it('creates a new test from spec header', () => {
     launchStudio({ specName: 'spec-w-visit.cy.js', createNewTestFromSpecHeader: true })
 
-    inputNewTestName()
+    inputNewTestName({ creatingNewTestFromWelcomeScreen: false })
 
     cy.contains('new-test').click()
 
@@ -128,10 +128,10 @@ describe('studio functionality', () => {
   it('creates a new test for a specific suite with the url already defined', () => {
     launchStudio({ specName: 'spec-w-visit.cy.js', createNewTestFromSuite: true })
 
-    // create a new test from a specific suite
-    cy.findByTestId('create-new-test-from-suite').click()
+    inputNewTestName({ creatingNewTestFromWelcomeScreen: false })
 
-    inputNewTestName()
+    // make sure that the visit has run and we're recording studio commands
+    cy.get('[data-cy="record-button-recording"]').should('be.visible')
 
     cy.percySnapshot()
 
