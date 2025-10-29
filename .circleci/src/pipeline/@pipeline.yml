@@ -8,8 +8,8 @@ version: 2.1
 chrome-stable-version: &chrome-stable-version "141.0.7390.107"
 chrome-beta-version: &chrome-beta-version "142.0.7444.34"
 firefox-stable-version: &firefox-stable-version "142.0"
-base-internal-bullseye: &base-internal-bullseye cypress/base-internal:22.19.0-bullseye
-base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.19.0-yarn-berry
+base-internal-trixie: &base-internal-trixie cypress/base-internal:22.19.0-trixie
+base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.19.0-yarn-berry-trixie
 # Lowest Node.js version we support of the minimum major version supported
 # See https://docs.cypress.io/app/get-started/install-cypress#Nodejs
 base-internal-minimum-node: &base-internal-minimum-node cypress/base-internal:20.15.0
@@ -46,7 +46,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: *base-internal-bullseye
+      - image: *base-internal-trixie
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
@@ -54,7 +54,7 @@ executors:
 
   kitchensink-executor:
     docker:
-      - image: *base-internal-bullseye
+      - image: *base-internal-trixie
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
@@ -63,7 +63,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: *base-internal-bullseye
+      - image: *base-internal-trixie
         user: node
     environment:
       PLATFORM: linux
@@ -587,7 +587,7 @@ commands:
                       version: << parameters.google-chrome-for-testing-version >>
                       install_chromedriver: false
 
-  # This code builds better-sqlite3 on Debian 11 (Bullseye). This is necessary because Debian 10 has the oldest glibc version (2.31) that we support.
+  # This code builds better-sqlite3 on Debian 11 (Bullseye). This is necessary because Debian 11 has the oldest glibc version (2.31) that we support.
   #
   # Since this is running Docker remote (because the job running the command may not be using an executor with the appropriate glibc version), we need to 
   # copy the project into the container, and copy the built plugin out of the container because the host running docker does not have access to the 
@@ -1937,7 +1937,7 @@ jobs:
     parallelism: 1
     working_directory: ~/cypress
     docker:
-      - image: *base-internal-bullseye
+      - image: *base-internal-trixie
     environment:
       # needed to inform the bootstrap-docker-container.sh script to link the binary in the system-test project directory
       REPO_DIR: /root/cypress
