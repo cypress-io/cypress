@@ -216,9 +216,13 @@ describe('src/cypress/dom/visibility', {
         cy.visit('/fixtures/empty.html')
       })
 
-      describe('html is display none', () => {
+      describe('when display none', () => {
         beforeEach(() => {
           cy.get('html').then(($el) => {
+            $el.css('display', 'none')
+          })
+
+          cy.get('body').then(($el) => {
             $el.css('display', 'none')
           })
         })
@@ -232,22 +236,35 @@ describe('src/cypress/dom/visibility', {
 
           cy.wrap(cy.$$('html')).should('not.be.hidden')
           cy.wrap(cy.$$('html')).should('be.visible')
-        })
-      })
-
-      describe('body', () => {
-        beforeEach(() => {
-          cy.get('body').then(($el) => {
-            $el.css('display', 'none')
-          })
-        })
-
-        it('is always visible', () => {
           expect(cy.$$('body').is(':hidden')).to.be.false
           expect(cy.$$('body').is(':visible')).to.be.true
 
           expect(cy.$$('body')).not.to.be.hidden
           expect(cy.$$('body')).to.be.visible
+
+          cy.wrap(cy.$$('body')).should('not.be.hidden')
+          cy.wrap(cy.$$('body')).should('be.visible')
+        })
+      })
+
+      describe('when not display none', () => {
+        it('is visible', () => {
+          expect(cy.$$('html').is(':hidden')).to.be.false
+          expect(cy.$$('html').is(':visible')).to.be.true
+
+          expect(cy.$$('html')).not.to.be.hidden
+          expect(cy.$$('html')).to.be.visible
+
+          cy.wrap(cy.$$('html')).should('not.be.hidden')
+          cy.wrap(cy.$$('html')).should('be.visible')
+          expect(cy.$$('body').is(':hidden')).to.be.false
+          expect(cy.$$('body').is(':visible')).to.be.true
+
+          expect(cy.$$('body')).not.to.be.hidden
+          expect(cy.$$('body')).to.be.visible
+
+          cy.wrap(cy.$$('body')).should('not.be.hidden')
+          cy.wrap(cy.$$('body')).should('be.visible')
         })
       })
     })
