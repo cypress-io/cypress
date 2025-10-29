@@ -130,10 +130,10 @@ describe('studio functionality', () => {
 
     inputNewTestName({ creatingNewTestFromWelcomeScreen: false })
 
-    cy.percySnapshot()
-
     // make sure that the visit has run and we're recording studio commands
     cy.get('[data-cy="record-button-recording"]').should('be.visible')
+
+    cy.percySnapshot()
 
     incrementCounter(0)
 
