@@ -43,7 +43,7 @@ describe('Cypress Studio - Navigation and URL Management', () => {
   it('updates the AUT url when creating a new test', () => {
     launchStudio({ specName: 'navigation.cy.js', createNewTestFromSuite: true })
 
-    inputNewTestName()
+    inputNewTestName({ creatingNewTestFromWelcomeScreen: false })
 
     cy.findByTestId('aut-url-input').should('have.focus').type('cypress/e2e/navigation.html{enter}')
 
