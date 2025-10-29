@@ -1,7 +1,12 @@
 import wp from '@cypress/webpack-preprocessor'
 import path from 'node:path'
+import { defineConfig } from 'cypress'
+import { fileURLToPath } from 'node:url'
 
-module.exports = {
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+export default defineConfig({
   numTestsKeptInMemory: 0,
   e2e: {
     supportFile: false,
@@ -40,4 +45,4 @@ module.exports = {
       return config
     },
   },
-}
+})

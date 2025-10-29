@@ -1,7 +1,8 @@
 import path from 'node:path'
 import os from 'node:os'
+import { defineConfig } from 'cypress'
 
-module.exports = {
+export default defineConfig({
   e2e: {
     supportFile: false,
     setupNodeEvents (on, config) {
@@ -11,4 +12,4 @@ module.exports = {
     areSourceMapsAvailable: true,
     sourceMapProjectRoot: path.join(os.tmpdir(), 'cy-projects/sourcemaps'),
   },
-}
+})

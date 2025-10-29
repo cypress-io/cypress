@@ -1,8 +1,9 @@
 import path from 'node:path'
 import os from 'node:os'
 import cypressPreprocessor from './cypress-preprocessor-enabled-updated-sourcemap-root.config.mjs'
+import { defineConfig } from 'cypress'
 
-export default {
+export default defineConfig({
   e2e: {
     supportFile: false,
     setupNodeEvents (on, config) {
@@ -13,4 +14,4 @@ export default {
     areSourceMapsAvailable: true,
     sourceMapProjectRoot: path.join(os.tmpdir(), 'cy-projects/sourcemaps/cypress'),
   },
-}
+})
