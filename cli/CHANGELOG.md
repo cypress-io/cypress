@@ -9,8 +9,9 @@ _Released 10/20/2025 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed an issue where grouped command text jumps up and down when expanding and collapsing in the command log. Addressed in [#32757](https://github.com/cypress-io/cypress/pull/32757).
 - Fixed an issue where command snapshots were not correctly displayed in Studio. Addressed in [#32808](https://github.com/cypress-io/cypress/pull/32808).
+- Chrome's autofill popup is now disabled when filling address and credit card forms during test execution. We also added some other Chrome flags and preferences that are common when automating browsers. Fixes [#25608](https://github.com/cypress-io/cypress/issues/25608). Addressed in [#32811](https://github.com/cypress-io/cypress/pull/32811).
+- Fixed an issue where grouped command text jumps up and down when expanding and collapsing in the command log. Addressed in [#32757](https://github.com/cypress-io/cypress/pull/32757).
 - Fixed an issue with grouped console prop items having a hard to read blue color in the console log and duplicate `:` characters being displayed. Addressed in [#32776](https://github.com/cypress-io/cypress/pull/32776).
 - Added more context to the error message shown when `cy.prompt()` fails to download. Addressed in [#32822](https://github.com/cypress-io/cypress/pull/32822).
 

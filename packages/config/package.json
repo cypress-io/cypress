@@ -18,7 +18,8 @@
     "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0",
     "test-unit": "vitest run",
     "test:clean": "find ./test/__fixtures__ -depth -name 'output.*' -type f -exec rm {} \\;",
-    "tslint": "tslint --config ../ts/tslint.json --project ."
+    "tslint": "tslint --config ../ts/tslint.json --project .",
+    "watch": "yarn build:cjs --watch & yarn build:esm --watch"
   },
   "dependencies": {
     "@babel/core": "^7.28.0",
@@ -53,7 +54,7 @@
     "cjs/*",
     "esm/*"
   ],
-  "types": "src/index.ts",
+  "types": "cjs/index.d.ts",
   "module": "esm/index.js",
   "nx": {}
 }

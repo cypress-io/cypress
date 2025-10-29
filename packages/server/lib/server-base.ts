@@ -1,4 +1,3 @@
-import './cwd'
 import Bluebird from 'bluebird'
 import compression from 'compression'
 import Debug from 'debug'
