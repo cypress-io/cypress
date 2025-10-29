@@ -91,6 +91,8 @@ export default {
   runScripts: ({ browser, scripts, specWindow, testingType, projectRoot, specRelativePath, specAbsolutePath }: RunScriptsOptions) => {
     // if scripts contains at least one promise
     if (scripts.length && typeof scripts[0] === 'function') {
+      $sourceMapUtils.setSourceMapProjectRoot(specRelativePath, specAbsolutePath, projectRoot)
+
       // chain the loading promises
       // NOTE: since in evalScripts, scripts are evaluated in order,
       // we chose to respect this constraint here too.
@@ -101,6 +103,8 @@ export default {
     // in webkit, stack traces for e2e are made pretty much useless if these
     // scripts are eval'd, so we append them as script tags instead
     if (browser.family === 'webkit' && testingType === 'e2e') {
+      $sourceMapUtils.setSourceMapProjectRoot(specRelativePath, specAbsolutePath, projectRoot)
+
       return appendScripts(specWindow, scripts)
     }
 

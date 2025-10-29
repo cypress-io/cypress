@@ -131,6 +131,13 @@ const areSourceMapsAvailable = () => {
  */
 const setSourceMapProjectRoot = (relativePath: string, absolutePath: string, projectRoot: string) => {
   const keys = Object.keys(sourceMapConsumers)
+
+  if (keys.length === 0) {
+    sourceMapProjectRoot = projectRoot
+
+    return
+  }
+
   const posixRelativePath = toPosix(relativePath)
   const key = keys.find((key) => key.endsWith(posixRelativePath))
 
