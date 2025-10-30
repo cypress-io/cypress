@@ -62,6 +62,7 @@ describe('errors ui', {
       hasPreferredIde: true,
       failCount: 3,
       projectName: 'runner-e2e-specs-new-sourcemap-root',
+      configFile: 'cypress.config.mjs',
     })
 
     verifyWithNewSourcemapRoot('with expect().<foo>', {
