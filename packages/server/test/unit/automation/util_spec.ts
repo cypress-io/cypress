@@ -45,5 +45,19 @@ context('lib/automation/util', () => {
 
       expect(cookieMatches(cookie, filter)).to.be.false
     })
+
+    it('strict matches exact domain with strictDomain=true', () => {
+      const cookie = { domain: 'www.example.com' } as CyCookie
+      const filter = { domain: 'www.example.com' }
+
+      expect(cookieMatches(cookie, filter, { strictDomain: true })).to.be.true
+    })
+
+    it('fails apex domain match with strictDomain=true', () => {
+      const cookie = { domain: 'example.com' } as CyCookie
+      const filter = { domain: 'www.example.com' }
+
+      expect(cookieMatches(cookie, filter, { strictDomain: true })).to.be.false
+    })
   })
 })
