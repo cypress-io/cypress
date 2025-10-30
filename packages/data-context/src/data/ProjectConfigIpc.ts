@@ -172,7 +172,7 @@ export class ProjectConfigIpc extends EventEmitter {
        * It's supposed to be caught on lib/modes/run.js:1689,
        * but it's not.
        */
-      this.on('childProcess:unhandledError', (err: NodeJS.ErrnoException) => {
+      this.on('childProcess:unhandledError', (err) => {
         if (err.code === 'EPIPE') {
           return
         }
