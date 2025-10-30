@@ -9,7 +9,7 @@ chrome-stable-version: &chrome-stable-version "141.0.7390.107"
 chrome-beta-version: &chrome-beta-version "142.0.7444.34"
 firefox-stable-version: &firefox-stable-version "142.0"
 base-internal-trixie: &base-internal-trixie cypress/base-internal:22.19.0-trixie
-base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.19.0-yarn-berry-trixie
+base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.19.0-yarn-berry
 # Lowest Node.js version we support of the minimum major version supported
 # See https://docs.cypress.io/app/get-started/install-cypress#Nodejs
 base-internal-minimum-node: &base-internal-minimum-node cypress/base-internal:20.15.0
