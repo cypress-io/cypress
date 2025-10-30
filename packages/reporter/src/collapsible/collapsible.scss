@@ -11,7 +11,7 @@
     transform: rotate(0);
   }
 
-  .runnable > .is-open > .collapsible-header-wrapper {
+  .test > .is-open > .collapsible-header-wrapper {
     @include sticky-header-with-shadow;
   }
 }
