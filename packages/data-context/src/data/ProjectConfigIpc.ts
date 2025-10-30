@@ -174,10 +174,6 @@ export class ProjectConfigIpc extends EventEmitter {
        * but it's not.
        */
       this.on('childProcess:unhandledError', (err) => {
-        if (err.code === 'EPIPE') {
-          return
-        }
-
         debug('unhandled error in child process %s', err)
         this.handleChildProcessError(err, this, resolved, reject)
         reject(err)
