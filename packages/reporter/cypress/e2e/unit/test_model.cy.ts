@@ -368,4 +368,40 @@ describe('Test model', () => {
       expect(test.isOpen).eq(true)
     })
   })
+
+  context('#isSelfHealed', () => {
+    it('false by default', () => {
+      const test = createTest()
+
+      expect(test.isSelfHealed).to.be.false
+    })
+
+    it('true when there is a self-healed command', () => {
+      const test = createTest()
+
+      test.addLog(createCommand({ renderProps: { selfHealed: true } }))
+      expect(test.isSelfHealed).to.be.true
+    })
+
+    it('true when there is a self-healed command in an attempt', () => {
+      const test = createTest({
+        currentRetry: 2,
+        prevAttempts: [
+          { id: 'r3', currentRetry: 0, state: 'failed', hooks: [] },
+          { id: 'r3', currentRetry: 1, state: 'failed', hooks: [] },
+        ],
+      })
+
+      // Add a regular command to the first attempt
+      test.addLog(createCommand({ testCurrentRetry: 0, renderProps: { selfHealed: false } }))
+
+      // Add a self-healed command to the second attempt
+      test.addLog(createCommand({ testCurrentRetry: 1, renderProps: { selfHealed: true } }))
+
+      // Add a regular command to the current (third) attempt
+      test.addLog(createCommand({ testCurrentRetry: 2, renderProps: { selfHealed: false } }))
+
+      expect(test.isSelfHealed).to.be.true
+    })
+  })
 })
