@@ -161,6 +161,7 @@ export class ProjectConfigIpc extends EventEmitter {
         if (err.code === 'EPIPE') {
           return
         }
+
         debug('unhandled error in child process %s', err)
         this.handleChildProcessError(err, this, resolved, reject)
         reject(err)
@@ -176,6 +177,7 @@ export class ProjectConfigIpc extends EventEmitter {
         if (err.code === 'EPIPE') {
           return
         }
+
         debug('unhandled error in child process %s', err)
         this.handleChildProcessError(err, this, resolved, reject)
         reject(err)
@@ -239,6 +241,7 @@ export class ProjectConfigIpc extends EventEmitter {
         if (err.code === 'EPIPE') {
           return
         }
+
         this.handleChildProcessError(err, this, resolved, reject)
         reject(err)
       })
