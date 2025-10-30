@@ -29,6 +29,6 @@ export default [
     },
   },
   {
-    ignores: ['test/support/fixtures/server/**/*'],
+    ignores: ['test/support/fixtures/server/**/*', 'lib/validations/**/*'],
   },
 ]
