@@ -25,6 +25,7 @@ import HiddenIcon from '@packages/frontend-shared/src/assets/icons/general-eye-c
 import PinIcon from '@packages/frontend-shared/src/assets/icons/object-pin_x16.svg'
 import RunningIcon from '@packages/frontend-shared/src/assets/icons/status-running_x16.svg'
 import { IconTechnologyAngleBrackets } from '@cypress-design/react-icon'
+import { SelfHealedBadge } from '../lib/selfHealedBadge'
 
 const displayName = (model: CommandModel) => model.displayName || model.name
 const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
@@ -279,6 +280,9 @@ const Message: React.FC<MessageProps> = observer(({ model }: MessageProps) => (
       className='command-message-text'
       dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage, model.name) }}
     />}
+    {model.isSelfHealed && (
+      <SelfHealedBadge source='command' />
+    )}
   </span>
 ))
 
