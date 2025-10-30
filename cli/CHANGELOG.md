@@ -1,10 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.6.0
 
-_Released 10/20/2025 (PENDING)_
+_Released 11/4/2025 (PENDING)_
 
 **Features:**
 
+ - Added a 'Self-healed' badge to the Command Log when `cy.prompt()` steps automatically recover after the element they need is not found in the cache. Addressed in [#32802](https://github.com/cypress-io/cypress/pull/32802).
 - `cy.prompt()` will now show a warning in the `Get code` modal when there are unsaved changes in `Studio` that will be lost if the user saves the generated code. Addressed in [#32741](https://github.com/cypress-io/cypress/pull/32741).
 
 **Bugfixes:**
