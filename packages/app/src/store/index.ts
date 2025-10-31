@@ -8,8 +8,6 @@ export * from './runner-ui-store'
 
 export * from './mobx-runner-store'
 
-export * from './selector-playground-store'
-
 export * from './screenshot-store'
 
 // Reusable installation function, used as an entry point for tests that

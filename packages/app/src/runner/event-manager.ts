@@ -57,7 +57,6 @@ export class EventManager {
   reporterBus: EventEmitter = new EventEmitter()
   localBus: EventEmitter = new EventEmitter()
   Cypress?: $Cypress
-  selectorPlaygroundModel: any
   cypressInCypressMochaEvents: CypressInCypressMochaEvent[] = []
   // Used for testing the experimentalSingleTabRunMode experiment. Ensures AUT is correctly destroyed between specs.
   ws: SocketShape
@@ -71,11 +70,8 @@ export class EventManager {
     private $CypressDriver: any,
     // import * as MobX
     private Mobx: typeof MobX,
-    // selectorPlaygroundModel singleton
-    selectorPlaygroundModel: any,
     ws: SocketShape,
   ) {
-    this.selectorPlaygroundModel = selectorPlaygroundModel
     this.ws = ws
     this.specStore = useSpecStore()
     this.studioStore = useStudioStore()

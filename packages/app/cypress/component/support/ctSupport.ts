@@ -32,7 +32,6 @@ export const createEventManager = () => {
 }
 
 const mockDom = {
-  addOrUpdateSelectorPlaygroundHighlight: () => {},
   scrollIntoView: () => {},
   getElements: () => {},
 }

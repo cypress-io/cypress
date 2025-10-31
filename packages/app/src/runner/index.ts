@@ -52,7 +52,6 @@ export function initializeEventManager (UnifiedRunner: any) {
   _eventManager = new EventManager(
     UnifiedRunner.CypressDriver,
     UnifiedRunner.MobX,
-    UnifiedRunner.selectorPlaygroundModel,
     window.ws,
   )
 }

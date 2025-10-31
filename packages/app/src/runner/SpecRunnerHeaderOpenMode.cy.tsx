@@ -39,69 +39,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     cy.findByTestId('viewport-size').should('be.visible').contains('500x500')
   })
 
-  describe('selector playground button', () => {
-    it('is enabled by default', () => {
-      cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
-        render: (gqlVal) => {
-          return renderWithGql(gqlVal)
-        },
-      })
-
-      cy.get('[data-cy="playground-activator"]').should('not.be.disabled')
-    })
-
-    it('is disabled when isRunning is true', () => {
-      const autStore = useAutStore()
-
-      autStore.setIsRunning(true)
-
-      cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
-        render: (gqlVal) => {
-          return renderWithGql(gqlVal)
-        },
-      })
-
-      cy.get('[data-cy="playground-activator"]').should('be.disabled')
-    })
-
-    it('is disabled when isLoading is true', () => {
-      const autStore = useAutStore()
-
-      autStore.setIsLoading(true)
-
-      cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
-        render: (gqlVal) => {
-          return renderWithGql(gqlVal)
-        },
-      })
-
-      cy.get('[data-cy="playground-activator"]').should('be.disabled')
-    })
-
-    it('is hidden when studio beta is available', () => {
-      cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
-        render: (gqlVal) => {
-          return renderWithGql(gqlVal, true, true)
-        },
-      })
-
-      cy.get('[data-cy="playground-activator"]').should('not.exist')
-    })
-
-    it('opens and closes selector playground', () => {
-      cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
-        render: (gqlVal) => {
-          return renderWithGql(gqlVal)
-        },
-      })
-
-      cy.findByTestId('playground-activator').click()
-      cy.get('#selector-playground').should('be.visible')
-
-      cy.findByTestId('playground-activator').click()
-      cy.get('#selector-playground').should('not.exist')
-    })
-  })
+  // SelectorPlayground has been removed - all related tests removed
 
   describe('url input', () => {
     it('shows url if currentTestingType is e2e', () => {
@@ -239,7 +177,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
         },
       })
 
-      cy.findByTestId('playground-activator').should('be.visible')
+      // SelectorPlayground button has been removed
       cy.findByTestId('aut-url-input').should('have.prop', 'readOnly', true)
       cy.findByTestId('aut-url-input').should('have.prop', 'placeholder', 'URL navigation disabled in component testing')
       cy.findByTestId('viewport-size').should('be.visible').contains('500x500')

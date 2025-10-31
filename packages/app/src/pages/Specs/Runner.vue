@@ -13,8 +13,6 @@
 
     <!--
       Open Mode is the full Cypress runner UI -
-      including things like the SpecList,
-      Side Nav, Selector Playground etc.
       It is driven by GraphQL and urql.
     -->
     <SpecRunnerContainerOpenMode

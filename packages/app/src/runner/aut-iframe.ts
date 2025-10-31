@@ -1,32 +1,20 @@
-import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import { blankContents } from '../components/Blank'
-import { logger } from './logger'
 import _ from 'lodash'
-/* eslint-disable no-duplicate-imports */
-import type { DebouncedFunc } from 'lodash'
 import { useStudioStore } from '../store/studio-store'
 import { getElementDimensions, setOffset } from './dimensions'
-import { getOrCreateHelperDom, getSelectorHighlightStyles, getZIndex, INT32_MAX } from './dom'
-import highlightMounter from './selector-playground/highlight-mounter'
-import Highlight from './selector-playground/Highlight.ce.vue'
+import { getZIndex, INT32_MAX } from './dom'
 
 // JQuery bundled w/ Cypress
 type $CypressJQuery = any
 
-const sizzleRe = /sizzle/i
-const jQueryRe = /jquery/i
-
 export class AutIframe {
-  debouncedToggleSelectorPlayground: DebouncedFunc<(isEnabled: any) => void>
   $iframe?: JQuery<HTMLIFrameElement>
-  _highlightedEl?: Element
 
   constructor (
     private projectName: string,
     private eventManager: any,
     private $: $CypressJQuery,
   ) {
-    this.debouncedToggleSelectorPlayground = _.debounce(this.toggleSelectorPlayground, 300)
   }
 
   create (): JQuery<HTMLIFrameElement> {
@@ -181,10 +169,6 @@ export class AutIframe {
     this._body()?.remove()
     this._insertBodyStyles(body.get(), bodyStyles)
     $html?.append(body.get())
-
-    const selectorPlaygroundStore = useSelectorPlaygroundStore()
-
-    this.debouncedToggleSelectorPlayground(selectorPlaygroundStore.isEnabled)
   }
 
   // note htmlAttrs is actually `NamedNodeMap`: https://developer.mozilla.org/en-US/docs/Web/API/NamedNodeMap
@@ -331,166 +315,6 @@ export class AutIframe {
     this._contents() && this._contents()?.find('.__cypress-highlight').remove()
   }
 
-  toggleSelectorPlayground = (isEnabled) => {
-    const $body = this._body()
-
-    if (!$body) return
-
-    if (isEnabled) {
-      $body.on('mouseenter', this._resetShowHighlight)
-      $body.on('mousemove', this._onSelectorMouseMove)
-      $body.on('mouseleave', this._clearHighlight)
-    } else {
-      $body.off('mouseenter', this._resetShowHighlight)
-      $body.off('mousemove', this._onSelectorMouseMove)
-      $body.off('mouseleave', this._clearHighlight)
-      if (this._highlightedEl) {
-        this._clearHighlight()
-      }
-    }
-  }
-
-  _resetShowHighlight = () => {
-    const selectorPlaygroundStore = useSelectorPlaygroundStore()
-
-    selectorPlaygroundStore.setShowingHighlight(false)
-  }
-
-  _onSelectorMouseMove = (e: JQuery.MouseMoveEvent) => {
-    const $body = this._body()
-
-    if (!$body) return
-
-    let el = e.target
-    let $el = this.$(el)
-
-    const $ancestorHighlight = $el.closest('.__cypress-selector-playground')
-
-    if ($ancestorHighlight.length) {
-      $el = $ancestorHighlight
-    }
-
-    if ($ancestorHighlight.length || $el.hasClass('__cypress-selector-playground')) {
-      const $highlight = $el
-
-      $highlight.css('display', 'none')
-      el = this._document().elementFromPoint(e.clientX, e.clientY)
-      $el = this.$(el)
-      $highlight.css('display', 'block')
-    }
-
-    if (this._highlightedEl === el) return
-
-    this._highlightedEl = el
-
-    const Cypress = this.eventManager.getCypress()
-
-    const selector = Cypress.ElementSelector._getSelector($el)
-    const selectorPlaygroundStore = useSelectorPlaygroundStore()
-
-    this._addOrUpdateSelectorPlaygroundHighlight({
-      $el,
-      $body,
-      selector,
-      showTooltip: true,
-      onClick: () => {
-        selectorPlaygroundStore.setNumElements(1)
-        selectorPlaygroundStore.resetMethod()
-        selectorPlaygroundStore.setSelector(selector)
-        selectorPlaygroundStore.setValidity(!!el)
-      },
-    })
-  }
-
-  _clearHighlight = () => {
-    const $body = this._body()
-
-    if (!$body) return
-
-    this._addOrUpdateSelectorPlaygroundHighlight({
-      $el: null,
-      $body,
-    })
-
-    if (this._highlightedEl) {
-      this._highlightedEl = undefined
-    }
-  }
-
-  toggleSelectorHighlight (isShowingHighlight: boolean) {
-    const selectorPlaygroundStore = useSelectorPlaygroundStore()
-
-    if (!isShowingHighlight) {
-      this._clearHighlight()
-
-      return
-    }
-
-    const Cypress = this.eventManager.getCypress()
-
-    const $el = this.getElements(Cypress.dom)
-
-    selectorPlaygroundStore.setValidity(!!$el)
-
-    if ($el) {
-      selectorPlaygroundStore.setNumElements($el.length)
-
-      if ($el.length) {
-        this._scrollIntoView(this._window(), $el[0])
-      }
-    }
-
-    this._addOrUpdateSelectorPlaygroundHighlight({
-      $el: $el && $el.length ? $el : null,
-      $body: this._body(),
-      selector: selectorPlaygroundStore.selector,
-      showTooltip: false,
-    })
-  }
-
-  getElements (cypressDom) {
-    const selectorPlaygroundStore = useSelectorPlaygroundStore()
-    const $contents = this._contents()
-
-    if (!$contents || !selectorPlaygroundStore.selector) return
-
-    return this._getElementsForSelector({
-      method: selectorPlaygroundStore.method,
-      selector: selectorPlaygroundStore.selector,
-      cypressDom,
-      $root: $contents,
-    })
-  }
-
-  printSelectorElementsToConsole () {
-    logger.clearLog()
-
-    const Cypress = this.eventManager.getCypress()
-
-    const $el = this.getElements(Cypress.dom)
-
-    const selectorPlaygroundStore = useSelectorPlaygroundStore()
-
-    if (!$el) {
-      return logger.logFormatted({
-        name: selectorPlaygroundStore.command,
-        type: 'command',
-        props: {
-          Yielded: 'Nothing',
-        },
-      })
-    }
-
-    logger.logFormatted({
-      name: selectorPlaygroundStore.command,
-      type: 'command',
-      props: {
-        Elements: $el.length,
-        Yielded: Cypress.dom.getElements($el),
-      },
-    })
-  }
-
   startStudio () {
     const studioStore = useStudioStore()
 
@@ -512,26 +336,6 @@ export class AutIframe {
       rect.bottom <= win.innerHeight &&
       rect.right <= win.innerWidth
     )
-  }
-
-  private _getElementsForSelector ({ $root, selector, method, cypressDom }) {
-    let $el: JQuery<HTMLElement> | null = null
-
-    try {
-      if (method === 'contains') {
-        $el = $root.find(cypressDom.getContainsSelector(selector)) as JQuery<HTMLElement>
-        if ($el.length) {
-          $el = cypressDom.getFirstDeepestElement($el)
-        }
-      } else {
-        $el = $root.find(selector)
-      }
-    } catch (err) {
-      // if not a sizzle or jQuery error, ignore it and let $el be null
-      if (!(sizzleRe.test(err.stack) || jQueryRe.test(err.stack))) throw err
-    }
-
-    return $el
   }
 
   private _addHitBoxLayer (coords: { x: number, y: number }, body: HTMLBodyElement) {
@@ -623,7 +427,7 @@ export class AutIframe {
   }
 
   private _addElementBoxModelLayers ($el, $body) {
-    $body = $body || $('body')
+    $body = $body || this.$('body')
 
     const el = $el.get(0)
     const body = $body.get(0)
@@ -738,44 +542,5 @@ export class AutIframe {
 
   private _getDimensionsFor (dimensions, attr, dimension) {
     return dimensions[`${dimension}With${attr}`]
-  }
-
-  private listeners: any[] = []
-
-  private _addOrUpdateSelectorPlaygroundHighlight ({ $el, $body, selector, showTooltip, onClick }: any) {
-    const { container, vueContainer } = getOrCreateHelperDom({
-      body: $body?.get(0) || document.body,
-      className: '__cypress-selector-playground',
-      css: Highlight.styles[0],
-    })
-
-    const removeContainerClickListeners = () => {
-      this.listeners.forEach((listener) => {
-        vueContainer.removeEventListener('click', listener)
-      })
-
-      this.listeners = []
-    }
-
-    if (!$el) {
-      removeContainerClickListeners()
-      container.remove()
-
-      return
-    }
-
-    const elements = $el.get()
-    const styles = getSelectorHighlightStyles(elements)
-
-    if (elements.length === 1) {
-      removeContainerClickListeners()
-
-      if (onClick) {
-        vueContainer.addEventListener('click', onClick)
-        this.listeners.push(onClick)
-      }
-    }
-
-    highlightMounter.mount(vueContainer, selector, styles)
   }
 }
