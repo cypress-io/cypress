@@ -23,6 +23,7 @@ _Released 11/4/2025 (PENDING)_
 - The hitbox for expanding a grouped command has been widened. Addresses [#32778](https://github.com/cypress-io/cypress/issues/32778). Addressed in [#32783](https://github.com/cypress-io/cypress/pull/32783).
 - Have cursor on hover of the AUT URL to show as pointer. Addresses [#32777](https://github.com/cypress-io/cypress/issues/32777). Addressed in [#32782](https://github.com/cypress-io/cypress/pull/32782).
 - WebKit now prefers a cookie's fully qualified `domain` when requesting a cookie value via [`cy.getCookie()`](https://docs.cypress.io/api/commands/getcookie). If none are found, the cookie's apex domain will be used as a fallback. Addresses [#29954](https://github.com/cypress-io/cypress/issues/29954), [#29973](https://github.com/cypress-io/cypress/issues/29973) and [#30392](https://github.com/cypress-io/cypress/issues/30392). Addressed in [#32852](https://github.com/cypress-io/cypress/pull/32852).
+- The 'Next' tooltip style was updated. Addressed in [#32866](https://github.com/cypress-io/cypress/pull/32866).
 
 **Dependency Updates:**
 
