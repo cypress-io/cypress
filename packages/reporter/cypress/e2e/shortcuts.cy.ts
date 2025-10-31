@@ -133,7 +133,6 @@ describe('shortcuts', function () {
     it('does not run shortcut if typed into an input', () => {
       cy.get('body')
       .then(($body) => {
-        // this realistically happens with the selector playground, but
         // need to add an input since this environment is isolated
         $body.append('<input id="temp-input" />')
       })

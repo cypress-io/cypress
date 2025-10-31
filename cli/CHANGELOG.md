@@ -1735,7 +1735,7 @@ _Released 1/24/2023_
   configured to exclude files with those extensions. Addresses
   [#24495](https://github.com/cypress-io/cypress/issues/24495).
 - Added support for the `data-qa` selector in the
-  [Selector Playground](guides/core-concepts/cypress-app#Selector-Playground) in
+  [Selector Playground](guides/core-concepts/cypress-app) in
   addition to `data-cy`, `data-test` and `data-testid`. Addresses
   [#25305](https://github.com/cypress-io/cypress/issues/25305).
 
