@@ -23,5 +23,6 @@
     "register.js",
     "registerDir.js"
   ],
+  "license": "MIT",
   "nx": {}
 }

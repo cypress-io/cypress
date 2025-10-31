@@ -26,6 +26,7 @@
     "lib"
   ],
   "types": "index.d.ts",
+  "license": "MIT",
   "nx": {
     "targets": {
       "build": {
