@@ -1,9 +1,15 @@
-const webpack = require('@cypress/webpack-preprocessor')
+import webpack from '@cypress/webpack-preprocessor'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-module.exports = (on, config) => {
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+export default (on, config) => {
   const options = {
     webpackOptions: {
-      devtool: false, // This disables sourcemaps
+      context: path.resolve(__dirname, 'cypress'),
+      devtool: 'inline-source-map', // This disables sourcemaps
       resolve: {
         extensions: ['.js', '.ts', '.jsx', '.tsx'],
       },
