@@ -121,6 +121,7 @@
             background: white;
             overflow-y: auto;
             position: relative;
+            height: 400px;
         }
         
         .item {
@@ -248,15 +249,22 @@
                 This still reproduces the same crash scenarios with high-performance scrolling.
             </div>
         </div>
-        
-        <!-- Test Section 1: Basic Virtual List -->
+
         <div class="test-section">
-            <h2 class="section-header">Test 1: Basic Virtual List (10,000 items)</h2>
-            <div class="section-content">
+            <h2 class="section-header">Test Native Scrolling</h2>
+            <div class="section-content" id="test-content">
                 <div class="controls">
-                    <button class="btn btn-primary" onclick="loadBasicList()">Load Basic List</button>
-                    <button class="btn btn-danger" onclick="clearBasicList()">Clear List</button>
-                    <button class="btn btn-success" onclick="stressScrollBasic()">Stress Scroll</button>
+                    <input type="number"  data-cy="item-count" value="10" min="1" max="100000">
+                    <input type="text"  data-cy="list-id" />
+                    <select  data-cy="list-type">
+                        <option value="basic">Basic</option>
+                        <option value="extreme">Extreme</option>
+                        <option value="dynamic">Dynamic</option>
+                    </select>
+                    <button  data-cy="add-list" class="btn btn-primary">Add List</button>
+                    <button  data-cy="clear-all" class="btn btn-primary">Clear All Lists</button>
+                    <button data-cy="stress-scroll" class="btn btn-primary">Stress Scroll</button>
+                    
                 </div>
                 <div class="metrics">
                     <div class="metric">
@@ -267,101 +275,32 @@
                         <div class="metric-value" id="basicScrolls">0</div>
                         <div class="metric-label">Scroll Events</div>
                     </div>
-                </div>
-                <div id="basicList" class="virtual-container" style="height: 400px;"></div>
-            </div>
+                </div></div>
         </div>
-        
-        <!-- Test Section 2: Dynamic Height Virtual List -->
-        <div class="test-section">
-            <h2 class="section-header">Test 2: Dynamic Height Virtual List (5,000 items)</h2>
-            <div class="section-content">
-                <div class="controls">
-                    <button class="btn btn-primary" onclick="loadDynamicList()">Load Dynamic List</button>
-                    <button class="btn btn-danger" onclick="clearDynamicList()">Clear List</button>
-                    <button class="btn btn-success" onclick="stressScrollDynamic()">Rapid Scroll</button>
-                </div>
-                <div class="metrics">
-                    <div class="metric">
-                        <div class="metric-value" id="dynamicItems">0</div>
-                        <div class="metric-label">Items Rendered</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-value" id="dynamicScrolls">0</div>
-                        <div class="metric-label">Scroll Events</div>
-                    </div>
-                </div>
-                <div id="dynamicList" class="virtual-container" style="height: 400px;"></div>
-            </div>
-        </div>
-        
-        <!-- Test Section 3: Multiple Virtual Lists -->
-        <div class="test-section">
-            <h2 class="section-header">Test 3: Multiple Virtual Lists (Crash Test)</h2>
-            <div class="section-content">
-                <div class="controls">
-                    <button class="btn btn-primary" onclick="loadMultipleLists()">Load Multiple Lists</button>
-                    <button class="btn btn-danger" onclick="clearMultipleLists()">Clear All</button>
-                    <button class="btn btn-success" onclick="stressScrollMultiple()">Stress Test All</button>
-                </div>
-                <div class="metrics">
-                    <div class="metric">
-                        <div class="metric-value" id="multipleItems">0</div>
-                        <div class="metric-label">Total Items</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-value" id="multipleScrolls">0</div>
-                        <div class="metric-label">Total Scrolls</div>
-                    </div>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div>
-                        <h4>List A (3,000 items)</h4>
-                        <div id="multipleListA" class="virtual-container" style="height: 300px;"></div>
-                    </div>
-                    <div>
-                        <h4>List B (3,000 items)</h4>
-                        <div id="multipleListB" class="virtual-container" style="height: 300px;"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Test Section 4: Extreme Stress Test -->
-        <div class="test-section">
-            <h2 class="section-header">Test 4: Extreme Stress Test (50,000 items)</h2>
-            <div class="section-content">
-                <div class="controls">
-                    <button class="btn btn-primary" onclick="loadExtremeList()">Load Extreme List</button>
-                    <button class="btn btn-danger" onclick="clearExtremeList()">Clear List</button>
-                    <button class="btn btn-success" onclick="extremeScrollTest()">Extreme Scroll Test</button>
-                </div>
-                <div class="status status-error">
-                    ⚠️ This test uses 50,000 items and aggressive scrolling. It may crash your browser!
-                </div>
-                <div class="metrics">
-                    <div class="metric">
-                        <div class="metric-value" id="extremeItems">0</div>
-                        <div class="metric-label">Items Rendered</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-value" id="extremeScrolls">0</div>
-                        <div class="metric-label">Scroll Events</div>
-                    </div>
-                </div>
-                <div id="extremeList" class="virtual-container" style="height: 500px;"></div>
-            </div>
-        </div>
-    </div>
 
     <script>
-        // Global state for tracking
-        let scrollCounters = {
-            basic: 0,
-            dynamic: 0,
-            multiple: 0,
-            extreme: 0
-        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelector('[data-cy="add-list"]').addEventListener('click', () => {
+                const id = document.querySelector('[data-cy="list-id"]').value;
+                const type = document.querySelector('[data-cy="list-type"]').value;
+                const count = Number(document.querySelector('[data-cy="item-count"]').value);
+                addList(id);
+                const container = document.getElementById(id);
+                if (type === 'basic') {
+                    addBasicItems(count, container);
+                } else if (type === 'extreme') {
+                    addExtremeItems(count, container);
+                } else if (type === 'dynamic') {
+                    addBasicItems(count, container, true);
+                }
+            });
+            document.querySelector('[data-cy="stress-scroll"]').addEventListener('click', () => {
+                const id = document.querySelector('[data-cy="list-id"]').value;
+                const container = document.getElementById(id);
+                stressScrollBasic(container);
+            });
+        });
 
         // Update scroll indicator
         function updateScrollIndicator() {
@@ -393,7 +332,7 @@
                     <button class="item-btn" onclick="console.log('Edit', ${index})">Edit</button>
                 </div>
             `;
-            
+
             return itemDiv;
         }
 
@@ -417,43 +356,58 @@
             return itemDiv;
         }
 
-        // Basic List Functions
-        function loadBasicList() {
-            const container = document.getElementById('basicList');
+        function addBasicItems(count, container, isDynamic = false)
+        {
+            container.innerHTML = '<div class="loading">Loading items...</div>';
+
+            
+            setTimeout(() => {
+                const fragment = document.createDocumentFragment();
+                for (let i = 0; i < count; i++) {
+                    fragment.appendChild(createItem(i, { id: i, description: `This is item number ${i + 1} with some additional content to make it more realistic. Lorem ipsum dolor sit amet, consectetur adipiscing elit.` }));
+                }
+                container.innerHTML = '';
+                container.appendChild(fragment);
+            })
+        }
+
+        function addExtremeItems(count, container)
+        {
             container.innerHTML = '<div class="loading">Loading items...</div>';
             
             setTimeout(() => {
+                const fragment = document.createDocumentFragment();
                 container.innerHTML = '';
-                const items = Array.from({ length: 10000 }, (_, i) => ({
-                    id: i,
-                    description: `This is item number ${i + 1} with some additional content to make it more realistic. Lorem ipsum dolor sit amet, consectetur adipiscing elit.`
-                }));
-                
-                items.forEach((item, index) => {
-                    container.appendChild(createItem(index, item));
-                });
-                
-                document.getElementById('basicItems').textContent = items.length;
-                
-                // Add scroll listener
-                container.addEventListener('scroll', () => {
-                    console.log('scroll')
-                    scrollCounters.basic++;
-                    document.getElementById('basicScrolls').textContent = scrollCounters.basic;
-                });
-            }, 100);
+                for (let i = 0; i < count; i++) {
+                    container.appendChild(createExtremeItem(i, { id: i, description: `This is item number ${i + 1} with some additional content to make it more realistic. Lorem ipsum dolor sit amet, consectetur adipiscing elit.` }));
+                }
+                container.innerHTML = '';
+                container.appendChild(fragment);
+            })
         }
 
-        function clearBasicList() {
-            const container = document.getElementById('basicList');
-            container.innerHTML = '';
-            document.getElementById('basicItems').textContent = '0';
-            document.getElementById('basicScrolls').textContent = '0';
-            scrollCounters.basic = 0;
+        function addList(id)
+        {
+            const list = document.createElement('div');
+            list.setAttribute('id', id);
+            list.setAttribute('data-cy', 'list-container');
+            list.classList.add('virtual-container');
+
+                document.getElementById('test-content').appendChild(list);
+
         }
 
-        function stressScrollBasic() {
-            const container = document.getElementById('basicList');
+        function clearAllLists()
+        {
+            const [, ...listsToClear] = Array.from(document.querySelectorAll('[data-cy="list-container"]'))
+            for (const list of listsToClear) {
+                list.remove();
+            }
+            document.getElementById('nativeScrollingLists').textContent = '1';
+        }
+
+
+        function stressScrollBasic(container) {
             if (container.children.length > 0) {
                 let scrollPosition = 0;
                 const interval = setInterval(() => {
@@ -514,62 +468,6 @@
             }
         }
 
-        // Multiple Lists Functions
-        function loadMultipleLists() {
-            const containerA = document.getElementById('multipleListA');
-            const containerB = document.getElementById('multipleListB');
-            
-            containerA.innerHTML = '<div class="loading">Loading List A...</div>';
-            containerB.innerHTML = '<div class="loading">Loading List B...</div>';
-            
-            setTimeout(() => {
-                containerA.innerHTML = '';
-                containerB.innerHTML = '';
-                
-                const itemsA = Array.from({ length: 3000 }, (_, i) => ({
-                    id: i,
-                    description: `List A Item ${i + 1}`
-                }));
-                
-                const itemsB = Array.from({ length: 3000 }, (_, i) => ({
-                    id: i,
-                    description: `List B Item ${i + 1}`
-                }));
-                
-                itemsA.forEach((item, index) => {
-                    containerA.appendChild(createItem(index, item));
-                });
-                
-                itemsB.forEach((item, index) => {
-                    containerB.appendChild(createItem(index, item));
-                });
-                
-                document.getElementById('multipleItems').textContent = itemsA.length + itemsB.length;
-                
-                // Add scroll listeners
-                containerA.addEventListener('scroll', () => {
-                    scrollCounters.multiple++;
-                    document.getElementById('multipleScrolls').textContent = scrollCounters.multiple;
-                });
-                
-                containerB.addEventListener('scroll', () => {
-                    scrollCounters.multiple++;
-                    document.getElementById('multipleScrolls').textContent = scrollCounters.multiple;
-                });
-            }, 100);
-        }
-
-        function clearMultipleLists() {
-            const containerA = document.getElementById('multipleListA');
-            const containerB = document.getElementById('multipleListB');
-            
-            containerA.innerHTML = '';
-            containerB.innerHTML = '';
-            
-            document.getElementById('multipleItems').textContent = '0';
-            document.getElementById('multipleScrolls').textContent = '0';
-            scrollCounters.multiple = 0;
-        }
 
         function stressScrollMultiple() {
             const containerA = document.getElementById('multipleListA');
@@ -593,43 +491,8 @@
             }
         }
 
-        // Extreme List Functions
-        function loadExtremeList() {
-            const container = document.getElementById('extremeList');
-            container.innerHTML = '<div class="loading">Loading extreme test items...</div>';
-            
-            setTimeout(() => {
-                container.innerHTML = '';
-                const items = Array.from({ length: 50000 }, (_, i) => ({
-                    id: i,
-                    description: `Extreme test item ${i + 1} with complex data and heavy operations`,
-                    complexData: `Complex-${i}-${Math.random().toString(36).substr(2, 9)}`
-                }));
-                
-                items.forEach((item, index) => {
-                    container.appendChild(createExtremeItem(index, item));
-                });
-                
-                document.getElementById('extremeItems').textContent = items.length;
-                
-                // Add scroll listener
-                container.addEventListener('scroll', () => {
-                    scrollCounters.extreme++;
-                    document.getElementById('extremeScrolls').textContent = scrollCounters.extreme;
-                });
-            }, 100);
-        }
 
-        function clearExtremeList() {
-            const container = document.getElementById('extremeList');
-            container.innerHTML = '';
-            document.getElementById('extremeItems').textContent = '0';
-            document.getElementById('extremeScrolls').textContent = '0';
-            scrollCounters.extreme = 0;
-        }
-
-        function extremeScrollTest() {
-            const container = document.getElementById('extremeList');
+        function extremeScrollTest(container) {
             if (container.children.length > 0) {
                 let scrollPosition = 0;
                 const interval = setInterval(() => {
