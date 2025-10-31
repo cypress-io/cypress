@@ -26,7 +26,6 @@ describe('SpecRunnerHeaderRunMode', { viewportHeight: 500 }, () => {
       cy.get('[data-cy="select-browser"]')
       .find('title').should('have.text', 'Chrome 1')
 
-      cy.get('[data-cy="playground-activator"]').should('not.exist')
       // confirm expected content is rendered
       cy.contains('1000x660').should('be.visible')
       cy.contains('40%').should('be.visible')
@@ -56,7 +55,6 @@ describe('SpecRunnerHeaderRunMode', { viewportHeight: 500 }, () => {
 
       cy.contains('URL navigation disabled in component testing').should('be.visible')
 
-      cy.get('[data-cy="playground-activator"]').should('not.exist')
       // confirm expected content is rendered
       cy.contains('500x500').should('be.visible')
       cy.contains('40%').should('be.visible')

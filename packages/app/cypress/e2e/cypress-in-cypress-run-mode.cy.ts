@@ -12,7 +12,6 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     cy.waitForSpecToFinish()
 
     cy.findByTestId('aut-url').should('be.visible')
-    cy.findByTestId('playground-activator').should('not.exist')
 
     cy.findByLabelText('Stats').within(() => {
       cy.get('.passed .num', { timeout: 10000 }).should('have.text', '1')
@@ -41,7 +40,6 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
 
     cy.waitForSpecToFinish()
     cy.findByTestId('aut-url').contains('URL navigation disabled in component testing').should('be.visible')
-    cy.findByTestId('playground-activator').should('not.exist')
 
     cy.findByLabelText('Stats').within(() => {
       cy.get('.passed .num', { timeout: 10000 }).should('have.text', '1')

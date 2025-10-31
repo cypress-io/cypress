@@ -39,8 +39,6 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     cy.findByTestId('viewport-size').should('be.visible').contains('500x500')
   })
 
-  // SelectorPlayground has been removed - all related tests removed
-
   describe('url input', () => {
     it('shows url if currentTestingType is e2e', () => {
       const autStore = useAutStore()
@@ -177,7 +175,6 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
         },
       })
 
-      // SelectorPlayground button has been removed
       cy.findByTestId('aut-url-input').should('have.prop', 'readOnly', true)
       cy.findByTestId('aut-url-input').should('have.prop', 'placeholder', 'URL navigation disabled in component testing')
       cy.findByTestId('viewport-size').should('be.visible').contains('500x500')

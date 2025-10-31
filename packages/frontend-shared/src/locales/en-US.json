@@ -963,17 +963,6 @@
       "defaultTitle": "DOM snapshot",
       "pinnedTitle": "Pinned"
     },
-    "selectorPlayground": {
-      "matches": "No matches | {n} match | {n} matches",
-      "playgroundTooltip": "Click an element to see a suggested selector",
-      "copyTooltip": "Copy to clipboard",
-      "copyTooltipAction": "Copied!",
-      "printTooltip": "Print to console",
-      "printTooltipAction": "Printed!",
-      "invalidSelector": "Invalid",
-      "selectorMethodsLabel": "Selector methods",
-      "toggle": "Toggle playground"
-    },
     "automation": {
       "disconnected": {
         "title": "The Cypress extension has disconnected.",
