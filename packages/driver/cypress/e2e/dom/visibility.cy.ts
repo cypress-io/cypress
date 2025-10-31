@@ -1,13 +1,54 @@
 // @ts-ignore
 const { $, dom } = Cypress
 
-describe('src/cypress/dom/visibility', () => {
-  const add = (el) => {
-    return $(el).appendTo(cy.$$('body'))
+describe('src/cypress/dom/visibility', {
+  slowTestThreshold: 500,
+}, () => {
+  function assertVisibilityForEl (el: HTMLElement) {
+    // once experimentalFastVisibility is added, switch based on the config value
+    // and use `cy-fast-expect` instead of `cy-legacy-expect` when it is enabled.
+    const expected = el.getAttribute('cy-expect') ?? el.getAttribute('cy-legacy-expect')
+
+    if (!expected) {
+      throw new Error(`Expected attribute 'cy-expect' or 'cy-legacy-expect' not found on test case_ element ${el.outerHTML}`)
+    }
+
+    expect(
+      $(el).is(`:${expected}`),
+      `${el.getAttribute('cy-label') ?? el.textContent ?? 'empty text content'} should be ${expected}`,
+    ).to.be.true
+
+    expect(el).to.be[expected]
+
+    cy.wrap(el).should(`be.${expected}`)
+
+    const opposite = expected === 'hidden' ? 'visible' : 'hidden'
+
+    expect(
+      $(el).is(`:${opposite}`),
+      `${el.getAttribute('cy-label') ?? el.textContent ?? 'empty text content'} should not be ${opposite}`,
+    ).to.be.false
+
+    expect(el).to.not.be[opposite]
+
+    cy.wrap(el).should(`not.be.${opposite}`)
   }
 
-  const reasonIs = ($el: JQuery, str: string) => {
-    expect(dom.getReasonIsHidden($el)).to.eq(str)
+  function prepareFixtureSection (section: string) {
+    cy.get('.test-section').each((el) => el.removeClass('active'))
+    cy.get(`[cy-section="${section}"]`).then((el) => el.addClass('active'))
+    cy.get(`[cy-section="${section}"]`).scrollIntoView()
+  }
+
+  function assertVisibilityForSections (sections: string[]) {
+    for (const section of sections) {
+      it(`detects visibility for ${section} test cases`, () => {
+        prepareFixtureSection(section)
+        cy.get(`[cy-section="${section}"] .testCase`).then((els) => {
+          els.get().forEach(assertVisibilityForEl)
+        })
+      })
+    }
   }
 
   beforeEach(() => {
@@ -169,1337 +210,303 @@ describe('src/cypress/dom/visibility', () => {
     })
   })
 
-  context('hidden/visible overrides', () => {
-    beforeEach(function () {
-      // ensure all tests run against a scrollable window
-      const scrollThisIntoView = add('<div style="height: 1000px;"></div><div>Should be in view</div>')
-
-      this.$visHidden = add('<ul style="visibility: hidden;"></ul>')
-      this.$parentVisHidden = add('<div class="invis" style="visibility: hidden;"><button>parent visibility: hidden</button></div>')
-      this.$displayNone = add('<button style="display: none">display: none</button>')
-      this.$inputHidden = add('<input type="hidden" value="abcdef">')
-      this.$divNoWidth = add('<div style="width: 0; height: 100px;"></div>')
-      this.$divNoHeight = add('<div style="width: 50px; height: 0px;"></div>')
-      this.$divDetached = $('<div>foo</div>')
-      this.$divVisible = add(`<div>visible</div>`)
-
-      this.$optionInSelect = add(`\
-<select>
-  <option>Naruto</option>
-</select>\
-`)
-
-      this.$optgroupInSelect = add(`\
-<select>
-  <optgroup label='Shinobi'>
-    <option>Naruto</option>
-  </optgroup>
-</select>\
-`)
-
-      this.$optionInHiddenSelect = add(`\
-<select style='display: none'>
-  <option>Sasuke</option>
-</select>\
-`)
-
-      this.$optionOutsideSelect = add(`\
-<div style='display: none'>
-  <option id='option-hidden'>Sasuke</option>
-</div>
-<div>
-  <option id='option-visible'>Naruto</option>
-</div>\
-`)
-
-      this.$optionHiddenInSelect = add(`\
-<select>
-  <option>--Select--</option>
-  <option id="hidden-opt" style='display: none'>Sakura</option>
-</select>\
-`)
-
-      this.$btnOpacityZero = add(`\
-<button style="opacity: 0;">opacity: 0</button>\
-`)
-
-      this.$btnOpacityHalf = add(`\
-<button style="opacity: 0.5;">opacity: 0.5</button>\
-`)
-
-      this.$parentOpacityZero = add(`\
-<div style="opacity: 0;">
-  <button>parent opacity: 0</button>
-</div>\
-`)
-
-      this.$tableVisCollapse = add(`\
-<table>
-  <tr>
-    <td>Naruto</td>
-    <td class='collapse' style='visibility: collapse;'>Sasuke</td>
-    <td>Sakura</td>
-  </tr>
-  <tr class='collapse' style='visibility: collapse;'>
-    <td>Kaguya</td>
-    <td><span id='collapse-span'>Madara</span></td>
-    <td>Orochimaro</td>
-  </tr>
-</table>\
-`)
-
-      this.$parentNoWidth = add(`\
-<div style='width: 0; height: 100px; overflow: hidden;'>
-    <span>parent width: 0</span>
-</div>`)
-
-      this.$parentNoHeight = add(`\
-<div style='width: 100px; height: 0px; overflow: hidden;'>
-  <span>parent height: 0</span>
-</div>`)
-
-      this.$parentNoWidthHeightOverflowAuto = add(`\
-<div style='width: 0; height: 0px; overflow: auto;'>
-  <span>parent no size, overflow: auto</span>
-</div>`)
-
-      this.$parentWithWidthHeightNoOverflow = add(`\
-<div style='width: 100px; height: 100px; overflow: hidden;'>
-    <span>parent with size, overflow: hidden</span>
-</div>`)
-
-      this.$ancestorWithWidthHeightNoOverflow = add(`\
-      <div style='width: 100px; height: 100px'>
-          <div><span>parent with size, overflow: hidden</span></div>
-      </div>`)
-
-      this.$ancestorNoWidth = add(`\
-      <div style='width: 0; height: 100px; overflow: hidden;'>
-        <div>
-          <span>ancestor width: 0</span>
-        </div>
-      </div>`)
-
-      this.$ancestorNoHeight = add(`\
-      <div style='width: 100px; height: 0px; overflow: hidden;'>
-        <div>
-          <span>ancestor height: 0</span>
-        </div>
-      </div>`)
-
-      this.$childPosAbs = add(`\
-<div style='width: 0; height: 100px; overflow: hidden;'>
-  <div style='height: 500px; width: 500px;'>
-    <span style='position: absolute;'>position: absolute</span>
-  </div>
-</div>`)
-
-      this.$childPosFixed = add(`\
-<div id="childPosFixed" style='width: 100px; height: 100px; overflow: hidden;'>
-  <button style='position: fixed; top: 0;'>position: fixed</button>
-</div>`)
-
-      this.$childPointerEventsNone = add(`\
-<div style="position: fixed; top: 60px;">
-  <span style="pointer-events: none;">child pointer-events: none</span>
-</div>\
-`)
-
-      this.$descendentPosAbs = add(`\
-<div style='width: 0; height: 100px; overflow: hidden;'>
-  <div style='height: 500px; width: 500px; position: absolute;'>
-    <span>no width, descendant position: absolute</span>
-  </div>
-</div>`)
-
-      this.$descendentPosFixed = add(`\
-<div id="descendentPosFixed" style='width: 0; height: 100px; overflow: hidden;'>
-  <div style='height: 500px; width: 500px; position: fixed; top: 0; right: 0;'>
-    <button>no width, descendant position: fixed</button>
-  </div>
-</div>`)
-
-      this.$descendantInPosFixed = add(`\
-<div>
-  <div id="descendantInPosFixed" style="width: 200px; position: fixed; bottom: 0; right: 0">
-    underneath
-    <div style="width: 200px; position: fixed; bottom: 0; right: 0">on top of the other</div>
-  </div>
-</div>\
-`)
-
-      this.$coveredUpPosFixed = add(`\
-<div>
-  <div id="coveredUpPosFixed" style="position: fixed; bottom: 0; left: 0">underneath</div>
-  <div style="position: fixed; bottom: 0; left: 0">on top</div>
-</div>\
-`)
-
-      this.$offScreenPosFixed = add(`\
-<div id="offScreenPosFixed" style="position: fixed; bottom: 0; left: -100px;">off screen</div>\
-`)
-
-      this.$parentPosAbs = add(`\
-<div style='width: 0; height: 100px; overflow: hidden; position: absolute;'>
-  <div style='height: 500px; width: 500px;'>
-    <span>parent position: absolute</span>
-  </div>
-</div>`)
-
-      this.$parentDisplayNone = add(`\
-<div id="none" style='display: none;'>
-  <span>parent display: none</span>
-</div>\
-`)
-
-      this.$parentPointerEventsNone = add(`\
-<div style="pointer-events: none">
-  <span style="position: fixed; left: 0; top: 50%;">parent pointer-events: none</span>
-</div>\
-`)
-
-      this.$parentPointerEventsNoneCovered = add(`\
-<div style="pointer-events: none;">
-  <span style="position: fixed; top: 40px;">parent pointer-events: none</span>
-</div>
-<span style="position: fixed; top: 40px; background: red;">covering the element with pointer-events: none</span>\
-`)
-
-      this.$parentDisplayInlineChildDisplayBlock = add(`\
-<div>
-  <span>
-    <label style="display: block;">display: block</label>
-  </span>
-</div>\
-`)
-
-      this.$elOutOfParentBoundsToLeft = add(`\
-<div style='width: 100px; height: 100px; overflow: hidden; position: relative;'>
-  <span style='position: absolute; width: 100px; height: 100px; left: -100px; top: 0px;'>position: absolute, out of bounds left</span>
-</div>\
-`)
-
-      this.$elOutOfParentBoundsToRight = add(`\
-<div id="elOutOfParentBoundsToRight" style='width: 100px; height: 100px; overflow: hidden; position: relative;'>
-  <span style='position: absolute; width: 100px; height: 100px; right: -100px; top: 0px;'>position: absolute, out of bounds right</span>
-</div>\
-`)
-
-      this.$elOutOfParentBoundsAbove = add(`\
-<div style='width: 100px; height: 100px; overflow: hidden; position: fixed;'>
-  <span id='elOutOfParentBoundsAbove' style='position: absolute; width: 100px; height: 100px; left: 0px; top: -100px;'>position: absolute, out of bounds above</span>
-</div>\
-`)
-
-      this.$elOutOfParentBoundsBelow = add(`\
-<div id="elOutOfParentBoundsBelow" style='width: 100px; height: 100px; overflow: hidden; position: relative;'>
-  <span style='position: absolute; width: 100px; height: 100px; left: 0px; bottom: -100px;'>position: absolute, out of bounds below</span>
-</div>\
-`)
-
-      this.$elOutOfParentWithOverflowYHiddenBounds = add(`\
-<div style='width: 100px; height: 100px; overflow-y: hidden; position: relative;'>
-  <span style='position: absolute; left: 0px; top: 200px;'>position: absolute, out of bounds below</span>
-</div>\
-`)
-
-      this.$elOutOfParentWithOverflowXHiddenBounds = add(`\
-<div style='width: 100px; height: 100px; overflow-x: hidden; position: relative;'>
-  <span style='position: absolute; left: 200px; top: 0;'>position: absolute, out of bounds below</span>
-</div>\
-`)
-
-      this.$elOutOfParentWithFlexAndOverflowHiddenBounds = add(`\
-<div style="display: flex; overflow: hidden;">
-  <div id="red" style="flex: 0 0 80%; background-color: red;">red</div>
-  <div id="green" style="flex: 0 0 80%; background-color: green;">green</div>
-  <div id="blue" style="background-color: blue;">blue</div>
-</div>\
-`)
-
-      this.$elOutOfParentWithOverflowHiddenBoundsButCloserPositionAbsoluteParent = add(`\
-<div style="border: 1px solid red; width: 200px; height: 200px; overflow: hidden;">
-  <div style="position: absolute; left: 300px; border: 1px solid blue; width: 200px; height: 200px;">
-    <span style="border: 1px solid green;">Hello</span>
-  </div>\
-`)
-
-      this.$elOutOfAncestorOverflowAutoBounds = add(`\
-<div style='width: 100px; height: 100px; overflow: auto;'>
-  <div style='width: 1000px; position: relative;'>
-    <span style='position: absolute; left: 300px; top: 0px;'>out of bounds, parent wide, ancestor overflow: auto</span>
-  </div>
-</div>\
-`)
-
-      this.$elInPosAbsParentsBounds = add(`\
-<div style='width: 200px; height: 200px; overflow: hidden; position: relative;'>
-  <div style='position: absolute;'>
-    <div style='position: absolute;'>
-      <span style='position: absolute; left: 50px; top: 50px;'>in bounds, parent position: absolute</span>
-    </div>
-  </div>
-</div>\
-`)
-
-      this.$elOutOfPosAbsParentsBounds = add(`\
-<div style='width: 100px; height: 100px; overflow: hidden; position: relative; top: 700px; left: 700px;'>
-  <div style='position: absolute;'>
-    <div style='position: absolute;'>
-      <span style='position: absolute; left: -350px; top: 0px;'>out of bounds, parent position: absolute</span>
-    </div>
-  </div>
-</div>\
-`)
-
-      this.$elInParentBounds = add(`\
-<div style='width: 100px; height: 100px; overflow: hidden; position: relative;'>
-  <span style='position: absolute; left: 0px; top: 0px;'>in bounds, position: absolute</span>
-</div>\
-`)
-
-      this.$elOutOfScrollingParentBounds = add(`\
-<div style='width: 100px; height: 100px; overflow: scroll; position: relative; top: 700px; left: 700px;'>
-  <div style='position: absolute;'>
-    <div style='position: absolute;'>
-      <span style='position: absolute; left: 300px; top: 0px;'>out of scrolling bounds, position: absolute</span>
-    </div>
-  </div>
-</div>\
-`)
-
-      this.$elIsOutOfBoundsOfAncestorsOverflowButWithinRelativeAncestor = add(`\
-<div style='padding: 100px; position: relative;'>
-  <div style='overflow: hidden;'>
-    <div>
-      <span style='position: absolute; left: 0; top: 0;'>in bounds of ancestor, position: absolute, parent overflow: hidden</span>
-    </div>
-  </div>
-</div>\
-`)
-
-      this.$elIsRelativeAndOutOfBoundsOfAncestorOverflow = add(`\
-<div style='overflow: hidden;'>
-  <div>
-    <span style='position: relative; left: 0; top: -200px;'>out of bounds, position: relative</span>
-  </div>
-</div>\
-`)
-
-      this.$elIsRelativeAndOutOfBoundsOfAncestorButAncestorShowsOverflow = add(`\
-<div>
-  <div>
-    <span style='position: relative; left: 0; top: -200px;'>out of bounds but visible, position: relative</span>
-  </div>
-</div>\
-`)
-
-      this.$parentOutOfBoundsButElInBounds = add(`\
-<div style='position: relative; padding: 20px;'>
-  <div style='overflow: hidden;'>
-    <div style='position: relative; left: 0; top: -100px;'>
-      <span style='position: relative; left: 0; top: 100px;'>in bounds of ancestor, parent out of bounds</span>
-    </div>
-  </div>
-</div>\
-`)
-
-      this.$parentWithClipPathAbsolutePositionElOutsideClipPath = add(`\
-<div style="position: absolute; clip-path: polygon(0 0, 0 0, 0 0, 0 0);">
-  <span>clip-path</span>
-</div>\
-`)
-
-      this.$parentWithClipPathAbsolutePositionElInsideClipPath = add(`\
-<div style="position: absolute; clip-path: circle(100%);">
-  <span>clip-path</span>
-</div>\
-`)
-
-      this.$parentWithTransformScaleElOutsideScale = add(`\
-<div style="transform: scale(0,0)">
-  <span>TRANSFORMERS</span>
-</div>\
-`)
-
-      this.$parentWithTransformScaleElInsideScale = add(`\
-<div style="transform: scale(1,1)">
-  <span>TRANSFORMERS</span>
-</div>\
-`)
-
-      this.$ancestorTransformMakesElOutOfBoundsOfAncestor = add(`\
-<div style='margin-left: 100px; overflow: hidden; width: 100px;'>
-  <div style='transform: translateX(-100px); width: 200px;'>
-    <div style='width: 100px;'>
-      <span>out of ancestor's bounds due to ancestor translate</span>
-    </div>
-  </div>
-</div>\
-`)
-
-      this.$ancestorTransformMakesElInBoundsOfAncestor = add(`\
-<div style='margin-left: 100px; overflow: hidden; width: 100px;'>
-  <div style='transform: translateX(-100px); width: 300px;'>
-    <div style='display: inline-block; width: 100px;'>
-      <span>out of ancestor's bounds due to ancestor translate</span>
-    </div>
-    <div id='inbounds' style='display: inline-block; width: 100px;'>
-      <span>in ancestor's bounds due to ancestor translate</span>
-    </div>
-  </div>
-</div>\
-`)
-
-      // scroll the 2nd element into view so that
-      // there is always a scrollTop so we ensure
-      // its factored in (window vs viewport) calculations
-      scrollThisIntoView.get(1).scrollIntoView()
-    })
-
-    describe('html or body', () => {
-      it('is visible if html', () => {
-        expect(cy.$$('html').is(':hidden')).to.be.false
-        expect(cy.$$('html').is(':visible')).to.be.true
-
-        expect(cy.$$('html')).not.to.be.hidden
-        expect(cy.$$('html')).to.be.visible
-
-        cy.wrap(cy.$$('html')).should('not.be.hidden')
-        cy.wrap(cy.$$('html')).should('be.visible')
-      })
-
-      it('is visible if body', () => {
-        expect(cy.$$('body').is(':hidden')).to.be.false
-        expect(cy.$$('body').is(':visible')).to.be.true
-
-        expect(cy.$$('body')).not.to.be.hidden
-        expect(cy.$$('body')).to.be.visible
-
-        cy.wrap(cy.$$('body')).should('not.be.hidden')
-        cy.wrap(cy.$$('body')).should('be.visible')
-      })
-
-      it('is visible if display none on body or html', () => {
-        cy.$$('html').css('display', 'none')
-        cy.$$('body').css('display', 'none')
-
-        expect(cy.$$('html')).not.to.be.hidden
-        expect(cy.$$('html')).to.be.visible
-
-        expect(cy.$$('body')).not.to.be.hidden
-        expect(cy.$$('body')).to.be.visible
-      })
-    })
-
-    describe('css visibility', () => {
-      it('is hidden if .css(visibility) is hidden', function () {
-        expect(this.$visHidden.is(':hidden')).to.be.true
-        expect(this.$visHidden.is(':visible')).to.be.false
-
-        expect(this.$visHidden).to.be.hidden
-        expect(this.$visHidden).to.not.be.visible
-
-        cy.wrap(this.$visHidden).should('be.hidden')
-        cy.wrap(this.$visHidden).should('not.be.visible')
-      })
-
-      it('is hidden if parents have .css(visibility) hidden', function () {
-        expect(this.$parentVisHidden.find('button').is(':hidden')).to.be.true
-        expect(this.$parentVisHidden.find('button').is(':visible')).to.be.false
-
-        expect(this.$parentVisHidden.find('button')).to.be.hidden
-        expect(this.$parentVisHidden.find('button')).to.not.be.visible
-
-        cy.wrap(this.$parentVisHidden).find('button').should('be.hidden')
-        cy.wrap(this.$parentVisHidden).find('button').should('not.be.visible')
-      })
-
-      it('is hidden if visibility collapse', function () {
-        expect(this.$tableVisCollapse.find('td.collapse')).to.be.hidden
-        expect(this.$tableVisCollapse.find('td.collapse')).to.not.be.visible
-
-        expect(this.$tableVisCollapse.find('tr.collapse')).to.be.hidden
-        expect(this.$tableVisCollapse.find('tr.collapse')).to.not.be.visible
-
-        expect(this.$tableVisCollapse.find('tr.collapse td')).to.be.hidden
-        expect(this.$tableVisCollapse.find('tr.collapse td')).to.not.be.visible
-      })
-
-      it('is hidden if parent has visibility collapse', function () {
-        expect(this.$tableVisCollapse.find('tr.collapse td')).to.be.hidden
-        expect(this.$tableVisCollapse.find('tr.collapse td')).to.not.be.visible
-
-        expect(this.$tableVisCollapse.find('#collapse-span')).to.be.hidden
-        expect(this.$tableVisCollapse.find('#collapse-span')).to.not.be.visible
-      })
-
-      it('is hidden if input type hidden', function () {
-        expect(this.$inputHidden.is(':hidden')).to.be.true
-        expect(this.$inputHidden.is(':visible')).to.be.false
-
-        expect(this.$inputHidden).to.be.hidden
-        expect(this.$inputHidden).to.not.be.visible
-
-        cy.wrap(this.$inputHidden).should('be.hidden')
-        cy.wrap(this.$inputHidden).should('not.be.visible')
-      })
-    })
-
-    describe('option and optgroup', () => {
-      it('is visible if option in visible select', function () {
-        expect(this.$optionInSelect.find('option').is(':hidden')).to.be.false
-        expect(this.$optionInSelect.find('option').is(':visible')).to.be.true
-
-        expect(this.$optionInSelect.find('option')).not.to.be.hidden
-        expect(this.$optionInSelect.find('option')).to.be.visible
-
-        cy.wrap(this.$optionInSelect.find('option')).should('not.be.hidden')
-        cy.wrap(this.$optionInSelect.find('option')).should('be.visible')
-      })
-
-      it('is visible if optgroup in visible select', function () {
-        expect(this.$optgroupInSelect.find('optgroup').is(':hidden')).to.be.false
-        expect(this.$optgroupInSelect.find('optgroup').is(':visible')).to.be.true
-
-        expect(this.$optgroupInSelect.find('optgroup')).not.to.be.hidden
-        expect(this.$optgroupInSelect.find('optgroup')).to.be.visible
-
-        cy.wrap(this.$optgroupInSelect.find('optgroup')).should('not.be.hidden')
-        cy.wrap(this.$optgroupInSelect.find('optgroup')).should('be.visible')
-      })
-
-      it('is hidden if option in hidden select', function () {
-        expect(this.$optionInHiddenSelect.find('option').is(':hidden')).to.be.true
-        expect(this.$optionInHiddenSelect.find('option').is(':visible')).to.be.false
-
-        expect(this.$optionInHiddenSelect.find('option')).to.be.hidden
-        expect(this.$optionInHiddenSelect.find('option')).not.to.be.visible
-
-        cy.wrap(this.$optionInHiddenSelect.find('option')).should('be.hidden')
-        cy.wrap(this.$optionInHiddenSelect.find('option')).should('not.be.visible')
-      })
-
-      it('is hidden if option is display none', function () {
-        expect(this.$optionHiddenInSelect.find('#hidden-opt').is(':hidden')).to.be.true
-        expect(this.$optionHiddenInSelect.find('#hidden-opt').is(':visible')).to.be.false
-
-        expect(this.$optionHiddenInSelect.find('#hidden-opt')).to.be.hidden
-        expect(this.$optionHiddenInSelect.find('#hidden-opt')).not.to.be.visible
-
-        cy.wrap(this.$optionHiddenInSelect.find('#hidden-opt')).should('be.hidden')
-        cy.wrap(this.$optionHiddenInSelect.find('#hidden-opt')).should('not.be.visible')
-      })
-
-      it('follows regular visibility logic if option outside of select', { browser: '!webkit' }, function () {
-        expect(this.$optionOutsideSelect.find('#option-hidden').is(':hidden')).to.be.true
-        expect(this.$optionOutsideSelect.find('#option-hidden')).to.be.hidden
-        cy.wrap(this.$optionOutsideSelect.find('#option-hidden')).should('be.hidden')
-
-        expect(this.$optionOutsideSelect.find('#option-visible').is(':visible')).to.be.true
-        expect(this.$optionOutsideSelect.find('#option-visible')).to.be.visible
-
-        cy.wrap(this.$optionOutsideSelect.find('#option-visible')).should('be.visible')
-      })
-    })
-
-    describe('css opacity', () => {
-      it('is hidden if opacity is 0', function () {
-        expect(this.$btnOpacityZero.is(':hidden')).to.be.true
-        expect(this.$btnOpacityZero.is(':visible')).to.be.false
-
-        expect(this.$btnOpacityZero).to.be.hidden
-        expect(this.$btnOpacityZero).not.to.be.visible
-
-        cy.wrap(this.$btnOpacityZero).should('be.hidden')
-        cy.wrap(this.$btnOpacityZero).should('not.be.visible')
-      })
-
-      it('is hidden if parent has `opacity: 0`', function () {
-        expect(this.$parentOpacityZero.find('button').is(':hidden')).to.be.true
-        expect(this.$parentOpacityZero.find('button').is(':visible')).to.be.false
-
-        expect(this.$parentOpacityZero.find('button')).to.be.hidden
-        expect(this.$parentOpacityZero.find('button')).not.to.be.visible
-
-        cy.wrap(this.$parentOpacityZero.find('button')).should('be.hidden')
-        cy.wrap(this.$parentOpacityZero.find('button')).should('not.be.visible')
-      })
-
-      it('is visible if opacity is greater than 0 but less than 1', function () {
-        expect(this.$btnOpacityHalf.is(':visible')).to.be.true
-        expect(this.$btnOpacityHalf.is(':hidden')).to.be.false
-
-        expect(this.$btnOpacityHalf).to.be.visible
-        expect(this.$btnOpacityHalf).not.to.be.hidden
-
-        cy.wrap(this.$btnOpacityHalf).should('be.visible')
-        cy.wrap(this.$btnOpacityHalf).should('not.be.hidden')
-      })
-    })
-
-    describe('width and height', () => {
-      it('is visible when el.textContent, even if offsetWidth is 0', function () {
-        this.$divNoWidthTextContent = add('<div style="width: 0; height: 100px;">width: 0</div>')
-
-        expect(this.$divNoWidthTextContent.is(':hidden')).to.be.false
-        expect(this.$divNoWidthTextContent.is(':visible')).to.be.true
-
-        expect(this.$divNoWidthTextContent).to.not.be.hidden
-        expect(this.$divNoWidthTextContent).to.be.visible
-
-        cy.wrap(this.$divNoWidthTextContent).should('be.not.hidden')
-        cy.wrap(this.$divNoWidthTextContent).should('be.visible')
-      })
-
-      it('is visible when el.textContent, even if offsetHeight is 0', function () {
-        this.$divNoHeightTextContent = add('<div style="width: 50px; height: 0px;">height: 0</div>')
-
-        expect(this.$divNoHeightTextContent.is(':hidden')).to.be.false
-        expect(this.$divNoHeightTextContent.is(':visible')).to.be.true
-
-        expect(this.$divNoHeightTextContent).to.not.be.hidden
-        expect(this.$divNoHeightTextContent).to.be.visible
-
-        cy.wrap(this.$divNoHeightTextContent).should('be.not.hidden')
-        cy.wrap(this.$divNoHeightTextContent).should('be.visible')
-      })
-
-      it('is hidden when when el.textContent contains only whitespace and offsetWidth is 0', function () {
-        this.$divNoHeightBlankTextContent = add('<div style="width: 0px; height: 50px;">   \n   \t  </div>')
-
-        expect(this.$divNoHeightBlankTextContent.is(':hidden')).to.be.true
-        expect(this.$divNoHeightBlankTextContent.is(':visible')).to.be.false
-
-        expect(this.$divNoHeightBlankTextContent).to.be.hidden
-        expect(this.$divNoHeightBlankTextContent).to.not.be.visible
-
-        cy.wrap(this.$divNoHeightBlankTextContent).should('be.hidden')
-        cy.wrap(this.$divNoHeightBlankTextContent).should('not.be.visible')
-      })
-
-      it('is hidden when no el.textContent with offsetHeight is 0', function () {
-        expect(this.$divNoHeight.is(':hidden')).to.be.true
-        expect(this.$divNoHeight.is(':visible')).to.be.false
-
-        expect(this.$divNoHeight).to.be.hidden
-        expect(this.$divNoHeight).to.not.be.visible
-
-        cy.wrap(this.$divNoHeight).should('be.hidden')
-        cy.wrap(this.$divNoHeight).should('not.be.visible')
-      })
-
-      it('is hidden when no el.textContent with offsetWidth is 0', function () {
-        expect(this.$divNoWidth.is(':hidden')).to.be.true
-        expect(this.$divNoWidth.is(':visible')).to.be.false
-
-        expect(this.$divNoWidth).to.be.hidden
-        expect(this.$divNoWidth).to.not.be.visible
-
-        cy.wrap(this.$divNoWidth).should('be.hidden')
-        cy.wrap(this.$divNoWidth).should('not.be.visible')
-      })
-
-      it('is hidden if parent has overflow: hidden and no width', function () {
-        expect(this.$parentNoWidth.find('span')).to.be.hidden
-        expect(this.$parentNoWidth.find('span')).to.not.be.visible
-      })
-
-      it('is hidden if parent has overflow: hidden and no height', function () {
-        expect(this.$parentNoHeight.find('span')).to.be.hidden
-        expect(this.$parentNoHeight.find('span')).to.not.be.visible
-      })
-
-      it('is hidden if ancestor has overflow:hidden and no width', function () {
-        expect(this.$ancestorNoWidth.find('span')).to.be.hidden
-        expect(this.$ancestorNoWidth.find('span')).to.not.be.visible
-      })
-
-      it('is hidden if ancestor has overflow:hidden and no height', function () {
-        expect(this.$ancestorNoHeight.find('span')).to.be.hidden
-        expect(this.$ancestorNoHeight.find('span')).to.not.be.visible
-      })
-
-      it('is visible when parent has positive dimensions even with overflow hidden', function () {
-        expect(this.$parentWithWidthHeightNoOverflow.find('span')).to.be.visible
-        expect(this.$parentWithWidthHeightNoOverflow.find('span')).to.not.be.hidden
-      })
-
-      it('is visible when ancestor has positive dimensions even with overflow hidden', function () {
-        expect(this.$ancestorWithWidthHeightNoOverflow.find('span')).to.be.visible
-        expect(this.$ancestorWithWidthHeightNoOverflow.find('span')).to.not.be.hidden
-      })
-    })
-
-    describe('css position', () => {
-      it('is visible if child has position: absolute', function () {
-        expect(this.$childPosAbs.find('span')).to.be.visible
-        expect(this.$childPosAbs.find('span')).not.be.hidden
-      })
-
-      it('is visible if child has position: fixed', function () {
-        expect(this.$childPosFixed.find('button')).to.be.visible
-        expect(this.$childPosFixed.find('button')).not.to.be.hidden
-      })
-
-      it('is visible if descendent from parent has position: fixed', function () {
-        expect(this.$descendentPosFixed.find('button')).to.be.visible
-        expect(this.$descendentPosFixed.find('button')).not.to.be.hidden
-      })
-
-      it('is visible if has position: fixed and descendent is found', function () {
-        expect(this.$descendantInPosFixed.find('#descendantInPosFixed')).to.be.visible
-        expect(this.$descendantInPosFixed.find('#descendantInPosFixed')).not.to.be.hidden
-      })
-
-      it('is hidden if position: fixed and covered up', function () {
-        expect(this.$coveredUpPosFixed.find('#coveredUpPosFixed')).to.be.hidden
-        expect(this.$coveredUpPosFixed.find('#coveredUpPosFixed')).not.to.be.visible
-      })
-
-      it('is hidden if position: fixed and off screen', function () {
-        expect(this.$offScreenPosFixed).to.be.hidden
-        expect(this.$offScreenPosFixed).not.to.be.visible
-      })
-
-      it('is visible if descendent from parent has position: absolute', function () {
-        expect(this.$descendentPosAbs.find('span')).to.be.visible
-        expect(this.$descendentPosAbs.find('span')).to.not.be.hidden
-      })
-
-      it('is hidden if only the parent has position absolute', function () {
-        expect(this.$parentPosAbs.find('span')).to.be.hidden
-        expect(this.$parentPosAbs.find('span')).to.not.be.visible
-      })
-
-      it('is visible if position: fixed and parent has pointer-events: none', function () {
-        expect(this.$parentPointerEventsNone.find('span')).to.be.visible
-        expect(this.$parentPointerEventsNone.find('span')).to.not.be.hidden
-      })
-
-      it('is not visible if covered when position: fixed and parent has pointer-events: none', function () {
-        expect(this.$parentPointerEventsNoneCovered.find('span')).to.be.hidden
-        expect(this.$parentPointerEventsNoneCovered.find('span')).to.not.be.visible
-      })
-
-      it('is visible if pointer-events: none and parent has position: fixed', function () {
-        expect(this.$childPointerEventsNone.find('span')).to.be.visible
-        expect(this.$childPointerEventsNone.find('span')).to.not.be.hidden
-      })
-
-      it('is visible when position: sticky', () => {
-        cy.visit('fixtures/sticky.html')
-        cy.get('#button').should('be.visible')
-      })
-    })
-
-    describe('css display', function () {
-      // https://github.com/cypress-io/cypress/issues/6183
-      it('parent is visible if display inline and child has display block', function () {
-        expect(this.$parentDisplayInlineChildDisplayBlock.find('span')).to.be.visible
-        expect(this.$parentDisplayInlineChildDisplayBlock.find('span')).to.not.be.hidden
-      })
-    })
-
-    describe('css overflow', () => {
-      it('is hidden when parent overflow auto and no width/height', function () {
-        expect(this.$parentNoWidthHeightOverflowAuto.find('span')).to.not.be.visible
-        expect(this.$parentNoWidthHeightOverflowAuto.find('span')).to.be.hidden
-      })
-
-      it('is hidden when parent overflow hidden and out of bounds to left', function () {
-        expect(this.$elOutOfParentBoundsToLeft.find('span')).to.be.hidden
-      })
-
-      it('is hidden when parent overflow hidden and out of bounds to right', function () {
-        expect(this.$elOutOfParentBoundsToRight.find('span')).to.be.hidden
-      })
-
-      it('is hidden when parent overflow hidden and out of bounds above', function () {
-        expect(this.$elOutOfParentBoundsAbove.find('span#elOutOfParentBoundsAbove')).to.be.hidden
-      })
-
-      it('is hidden when parent overflow hidden and out of bounds below', function () {
-        expect(this.$elOutOfParentBoundsBelow.find('span')).to.be.hidden
-      })
-
-      it('is hidden when parent overflow-y hidden and out of bounds', function () {
-        expect(this.$elOutOfParentWithOverflowYHiddenBounds.find('span')).to.be.hidden
-      })
-
-      it('is hidden when parent overflow-x hidden and out of bounds', function () {
-        expect(this.$elOutOfParentWithOverflowXHiddenBounds.find('span')).to.be.hidden
-      })
-
-      it('is visible when parent overflow hidden but el in a closer parent with position absolute', function () {
-        expect(this.$elOutOfParentWithOverflowHiddenBoundsButCloserPositionAbsoluteParent.find('span')).to.be.visible
-      })
-
-      it('is hidden when parent flex and overflow hidden and el out of bounds', function () {
-        expect(this.$elOutOfParentWithFlexAndOverflowHiddenBounds.find('#red')).to.be.visible
-        expect(this.$elOutOfParentWithFlexAndOverflowHiddenBounds.find('#green')).to.be.visible
-        expect(this.$elOutOfParentWithFlexAndOverflowHiddenBounds.find('#blue')).to.be.hidden
-      })
-
-      it('is hidden when parent is wide and ancestor is overflow auto', function () {
-        expect(this.$elOutOfAncestorOverflowAutoBounds.find('span')).to.be.hidden
-      })
-
-      it('is hidden when parent overflow scroll and out of bounds', function () {
-        expect(this.$elOutOfScrollingParentBounds.find('span')).to.be.hidden
-      })
-
-      it('is hidden when parent absolutely positioned and overflow hidden and out of bounds', function () {
-        expect(this.$elOutOfPosAbsParentsBounds.find('span')).to.be.hidden
-      })
-
-      it('is visible when parent absolutely positioned and overflow hidden and not out of bounds', function () {
-        expect(this.$elInPosAbsParentsBounds.find('span')).to.be.visible
-      })
-
-      it('is visible when parent overflow hidden and not out of bounds', function () {
-        expect(this.$elInParentBounds.find('span')).to.be.visible
-      })
-
-      it('is hidden when parent overflow clip and height is 0', function () {
-        cy.$$('body').empty()
-
-        const el = add('<div style="height: 0; overflow: clip;"><div id="hidden">I am not visible</div></div>')
-
-        expect(el.find('#hidden')).to.be.hidden
-        reasonIs(el.find('#hidden'), 'This element `<div#hidden>` is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: `hidden`, `clip`, `scroll` or `auto`')
-      })
-
-      it('is visible when parent overflow clip and height is non-0', function () {
-        cy.$$('body').empty()
-
-        const el = add('<div style="height: 5px; overflow: clip;"><div id="visible">I am visible</div></div>')
-
-        expect(el.find('#visible')).to.be.visible
-      })
-
-      it('is visible when ancestor is overflow hidden but more distant ancestor is the offset parent', function () {
-        expect(this.$elIsOutOfBoundsOfAncestorsOverflowButWithinRelativeAncestor.find('span')).to.be.visible
-      })
-
-      it('is hidden when relatively positioned outside ancestor with overflow hidden', function () {
-        expect(this.$elIsRelativeAndOutOfBoundsOfAncestorOverflow.find('span')).to.be.hidden
-      })
-
-      it('is visible when el is relatively positioned outside ancestor that does not hide overflow', function () {
-        expect(this.$elIsRelativeAndOutOfBoundsOfAncestorButAncestorShowsOverflow.find('span')).to.be.visible
-      })
-
-      it('is visible when parent is relatively positioned out of bounds but el is relatively positioned back in bounds', function () {
-        expect(this.$parentOutOfBoundsButElInBounds.find('span')).to.be.visible
-      })
-
-      it('is visible when element is statically positioned and parent element is absolutely positioned and ancestor has overflow hidden', function () {
-        cy.$$('body').empty()
-
-        const el = add(`
-          <div id="breaking-container" style="overflow: hidden">
-            <div>
-              <div style="position: absolute; bottom: 5px">
-                <button id="visible-button">Try me</button>
-              </div>
-            </div>
-          </div>
-        `)
-
-        expect(el.find('#visible-button')).to.be.visible
-      })
-
-      it('is visible when element is relatively positioned and parent element is absolutely positioned and ancestor has overflow auto', function () {
-        cy.$$('body').empty()
-
-        const el = add(`
-          <div style="height: 200px; position: relative; display: flex">
-            <div style="border: 5px solid red">
-              <div
-                id="breaking-container"
-                style="overflow: auto; border: 5px solid green"
-              >
-                <div>
-                  <h1>Example</h1>
-                  <div style="position: absolute; bottom: 5px">
-                    <button id="visible-button" style="position: relative">
-                      Try me
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        `)
-
-        expect(el.find('#visible-button')).to.be.visible
-      })
-
-      it('is hidden when parent element is absolutely position and offset parent is a decendent of the ancestor', function () {
-        cy.$$('body').empty()
-
-        add(`
-          <div style="display: grid; grid-template-columns: 332px 1fr; grid-template-rows: 62px 1fr;">
-            <div style="overflow-y: auto;">
-              <div style="height: 297px; position: relative;">
-                <div style="height: 96px; position: absolute; left: 0; top: 0;">
-                  <a href="">test test-1</a>
-                </div>
-                <div style="height: 36px; position: absolute; left: 0; top: 96px; background-color: red;">
-                  <a href="">test test-2</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        `)
-
-        cy.contains('test-2').should('not.be.visible')
-        cy.contains('test-1').should('be.visible')
-      })
-
-      it('is hidden when element is an option and the parent has overflow clip', function () {
-        cy.$$('body').empty()
-
-        add(`
-          <div style="width: 150px; height: 20px; overflow: clip;">
-            <div style="width: 150px; height: 25px;"></div>
-            <select>
-              <optgroup label='Shinobi'>
-                <option>Naruto</option>
-              </optgroup>
-            </select>
-          </div>
-        `)
-
-        cy.get('option').should('not.be.visible').then(($el) => {
-          reasonIs($el, 'This element `<option>` is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: `hidden`, `clip`, `scroll` or `auto`')
-        })
-
-        cy.get('optgroup').should('not.be.visible').then(($el) => {
-          reasonIs($el, 'This element `<optgroup>` is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: `hidden`, `clip`, `scroll` or `auto`')
-        })
-
-        cy.get('select').should('not.be.visible').then(($el) => {
-          reasonIs($el, 'This element `<select>` is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: `hidden`, `clip`, `scroll` or `auto`')
-        })
-      })
-
-      it('is visible when element is an option and the parent has overflow clip but is within the bounds', function () {
-        cy.$$('body').empty()
-
-        add(`
-          <div style="width: 150px; height: 20px; overflow: clip;">
-            <select>
-              <optgroup label='Shinobi'>
-                <option>Naruto</option>
-              </optgroup>
-            </select>
-          </div>
-        `)
-
-        cy.get('option').should('be.visible')
-        cy.get('optgroup').should('be.visible')
-        cy.get('select').should('be.visible')
-      })
-
-      it('is visible when x direction is clip but element is visible in y direction', () => {
-        cy.$$('body').empty()
-
-        add(`
-          <div style="overflow-x: clip">
-            <div style="height: 100px; width: 500px;">
-              <div style="height: 100px; width: 500px;"></div>
-              <input type="radio"/>
-              <label>Visible</label>
-            </div>
-          </div>
-        `)
-
-        cy.get('label').should('be.visible')
-      })
-
-      it('is hidden when x direction is hidden and y direction is coerced by browser to auto', () => {
-        cy.$$('body').empty()
-
-        add(`
-          <div style="overflow-x: hidden">
-            <div style="height: 100px; width: 500px;">
-              <div style="height: 100px; width: 500px;"></div>
-              <input type="radio"/>
-              <label>Hidden</label>
-            </div>
-          </div>
-        `)
-
-        cy.get('label').should('not.be.visible')
-      })
-
-      it('is hidden when x direction is auto and y direction is coerced by browser to auto', () => {
-        cy.$$('body').empty()
-
-        add(`
-          <div style="overflow-x: auto">
-            <div style="height: 100px; width: 500px;">
-              <div style="height: 100px; width: 500px;"></div>
-              <input type="radio"/>
-              <label>Hidden</label>
-            </div>
-          </div>
-        `)
-
-        cy.get('label').should('not.be.visible')
-      })
-
-      it('is hidden when y direction is hidden and x direction is set to clip but coerced by browser to hidden', () => {
-        cy.$$('body').empty()
-
-        add(`
-          <div style="overflow-x: clip; overflow-y: hidden">
-            <div style="height: 100px; width: 500px;">
-              <div style="height: 100px; width: 500px;"></div>
-              <input type="radio"/>
-              <label>Hidden</label>
-            </div>
-          </div>
-        `)
-
-        cy.get('label').should('not.be.visible')
-      })
-
-      it('is hidden when y direction is auto and x direction is set to clip but coerced by browser to hidden', () => {
-        cy.$$('body').empty()
-
-        add(`
-          <div style="overflow-x: clip; overflow-y: auto">
-            <div style="height: 100px; width: 500px;">
-              <div style="height: 100px; width: 500px;"></div>
-              <input type="radio"/>
-              <label>Hidden</label>
-            </div>
-          </div>
-        `)
-
-        cy.get('label').should('not.be.visible')
-      })
-
-      it('is visible when x direction is clip and y direction is visible', () => {
-        cy.$$('body').empty()
-
-        add(`
-          <div style="overflow-x: clip; overflow-y: visible">
-            <div style="height: 100px; width: 500px;">
-              <div style="height: 100px; width: 500px;"></div>
-              <input type="radio"/>
-              <label>Visible</label>
-            </div>
-          </div>
-        `)
-
-        cy.get('label').should('be.visible')
-      })
-
-      it('is hidden when y direction is overriden by setting overflow to clip', () => {
-        cy.$$('body').empty()
-
-        add(`
-          <div style="overflow-y: visible; overflow: clip;">
-            <div style="height: 100px; width: 500px;">
-              <div style="height: 100px; width: 500px;"></div>
-              <input type="radio"/>
-              <label>Hidden</label>
-            </div>
-          </div>
-        `)
-
-        cy.get('label').should('not.be.visible')
-      })
-    })
-
-    describe('css clip-path', () => {
-      // TODO: handle clip path 'hidden' equivalents
-      it.skip('is hidden when outside of parents clip-path', function () {
-        expect(this.$parentWithClipPathAbsolutePositionElOutsideClipPath.find('span')).to.be.hidden
-      })
-
-      it('is visible when inside of parents clip-path', function () {
-        expect(this.$parentWithClipPathAbsolutePositionElInsideClipPath.find('span')).to.be.visible
-      })
-    })
-
-    describe('css transform', () => {
-      describe('element visibility by css transform', () => {
-        it('is visible when an element is translated a bit', () => {
-          const el = add(`<div style="transform: translate(10px, 10px)">Translated</div>`)
-
-          expect(el).to.be.visible
-        })
-
-        it('is visible when an element is only skewed', () => {
-          const el = add(`<div style="transform: skew(10deg, 15deg)">Skewed</div>`)
-
-          expect(el).to.be.visible
-        })
-
-        it('is visible when an element is only rotated', () => {
-          const el = add(`<div style="transform: rotate(20deg)">Rotated</div>`)
-
-          expect(el).to.be.visible
-        })
-
-        it('is visible when an element is scaled by non-zero', () => {
-          const el = add(`<div style="transform: scale(2, 3)">Scaled</div>`)
-
-          expect(el).to.be.visible
-        })
-
-        it('is visible when an element is transformed in multiple ways but not scaled to zero', () => {
-          const el = add(`<div style="transform: translate(10px, 15px) skew(30deg) rotate(30deg) scale(4, 1)">Multiple transform</div>`)
-
-          expect(el).to.be.visible
-        })
-
-        it('is visible when an element is rotateZ(90deg)', () => {
-          const el = add(`<div style="transform: rotateZ(90deg)">rotateZ(90deg)</div>`)
-
-          expect(el).to.be.visible
-        })
-
-        // https://github.com/cypress-io/cypress/issues/6745
-        it('is visible even if there is a dangling element in the tree', () => {
-          cy.visit('/fixtures/dangling-element.html')
-          cy.get('.hello')
-        })
-
-        it('is hidden when an element is scaled to X axis in 0', () => {
-          const el = add(`<div style="transform: scaleX(0)">ScaleX(0)</div>`)
-
-          expect(el).to.be.hidden
-        })
-
-        it('is hidden when an element is scaled to Y axis in 0', () => {
-          const el = add(`<div style="transform: scaleY(0)">ScaleY(0)</div>`)
-
-          expect(el).to.be.hidden
-        })
-
-        it('is hidden when an element is scaled to Z axis in 0', () => {
-          const el = add(`<div style="transform: scaleZ(0)">ScaleZ(0)</div>`)
-
-          expect(el).to.be.hidden
-        })
-
-        it('is hidden when an element is transformed in multiple ways but scaled to 0 in one axis', () => {
-          const el = add(`<div style="transform: translate(15px, 30px) skew(20deg) rotate(40deg) scale(0, 0)">Multiple 2</div>`)
-
-          expect(el).to.be.hidden
-        })
-
-        it('is hidden when an element is rotateX(90deg)', () => {
-          const el = add(`<div style="transform: rotateX(90deg)">rotateX(90deg)</div>`)
-
-          expect(el).to.be.hidden
-        })
-
-        it('is hidden when an element is rotateY(90deg)', () => {
-          const el = add(`<div style="transform: rotateX(90deg)">rotateY(90deg)</div>`)
-
-          expect(el).to.be.hidden
-        })
-
-        it('is hidden when an element is rotateX(90deg) rotateY(90deg)', () => {
-          const el = add(`<div style="transform: rotateX(90deg) rotateY(90deg)">rotateX(90deg)</div>`)
-
-          expect(el).to.be.hidden
-        })
-
-        it('is hidden when an element is transformed in multiple ways but rotated to 90 deg in X or Y axis', () => {
-          const el = add(`<div style="transform: rotateX(90deg) skew(30deg, 50deg) translate(15px, 60px) scale(3.5)">rotateX(90deg)</div>`)
-
-          expect(el).to.be.hidden
-
-          const el2 = add(`<div style="transform: rotateY(90deg) skew(30deg, 50deg) translate(15px, 60px) scale(3.5)">rotateX(90deg)</div>`)
-
-          expect(el2).to.be.hidden
-
-          const el3 = add(`<div style="transform: rotateX(90deg) rotateY(90deg) skew(30deg, 50deg) translate(15px, 60px) scale(3.5)">rotateX(90deg)</div>`)
-
-          expect(el3).to.be.hidden
-        })
-      })
-
-      describe('when height/width is set', () => {
-        it('is visible when transform is not 0, but height is 0', () => {
-          const el = add('<div style="transform: translate(0, 0); height: 0;">Text</div>')
-
-          expect(el).to.be.visible
-        })
-
-        it('is visible when transform is not 0, but width is 0', () => {
-          const el = add('<p style="transform: rotateX(30deg); width: 0;">Text</p>')
-
-          expect(el).to.be.visible
-        })
-
-        it('is visible when parent transform is not 0, but height is 0', () => {
-          const el = add('<div style="transform: translate(0, 0); height: 0;"><p id="tr-p-0">Text</p></div>')
-
-          expect(el.find('#tr-p-0')).to.be.visible
-        })
-
-        it('is visible when parent transform is not 0, but width is 0', () => {
-          const el = add('<div style="transform: translate(0, 0); height: 0%;"><p id="tr-p-1">Test</p></div>')
-
-          expect(el.find('#tr-p-1')).to.be.visible
-        })
-
-        it('is invisible when parent transform is 0, but height is not 0', () => {
-          const el = add('<div style="transform: scaleX(0); height: 10px"><p id="tr-p-2">Test</p></div>')
-
-          expect(el.find('#tr-p-2')).to.be.hidden
-        })
-
-        describe('invisible when overflow: hidden', () => {
-          it('height: 0 + overflow', () => {
-            const el = add('<div style="height: 0px; transform: translate(1, 2); overflow: hidden"><p id="h0th">Test</p></div>')
-
-            expect(el.find('#h0th')).to.be.hidden
+  describe('visibility scenarios', () => {
+    describe('html and body overrides', () => {
+      beforeEach(() => {
+        cy.visit('/fixtures/empty.html')
+      })
+
+      describe('when display none', () => {
+        beforeEach(() => {
+          cy.get('html').then(($el) => {
+            $el.css('display', 'none')
           })
 
-          it('height: 0 + overflow-x', () => {
-            const el = add('<div style="height: 0px; transform: translate(1, 2); overflow-x: hidden"><p id="h0th">Test</p></div>')
-
-            expect(el.find('#h0th')).to.be.hidden
+          cy.get('body').then(($el) => {
+            $el.css('display', 'none')
           })
+        })
 
-          it('height: 0 + overflow-y', () => {
-            const el = add('<div style="height: 0px; transform: translate(1, 2); overflow-y: hidden"><p id="h0th">Test</p></div>')
+        it('is always visible', () => {
+          expect(cy.$$('html').is(':hidden')).to.be.false
+          expect(cy.$$('html').is(':visible')).to.be.true
 
-            expect(el.find('#h0th')).to.be.hidden
-          })
+          expect(cy.$$('html')).not.to.be.hidden
+          expect(cy.$$('html')).to.be.visible
 
-          it('width: 0 + overflow', () => {
-            const el = add('<div style="width: 0px; transform: translate(1, 2); overflow: hidden"><p id="h0th">Test</p></div>')
+          cy.wrap(cy.$$('html')).should('not.be.hidden')
+          cy.wrap(cy.$$('html')).should('be.visible')
+          expect(cy.$$('body').is(':hidden')).to.be.false
+          expect(cy.$$('body').is(':visible')).to.be.true
 
-            expect(el.find('#h0th')).to.be.hidden
-          })
+          expect(cy.$$('body')).not.to.be.hidden
+          expect(cy.$$('body')).to.be.visible
 
-          it('width: 0 + overflow-x', () => {
-            const el = add('<div style="width: 0px; transform: translate(1, 2); overflow-x: hidden"><p id="h0th">Test</p></div>')
-
-            expect(el.find('#h0th')).to.be.hidden
-          })
-
-          it('width: 0 + overflow-y', () => {
-            const el = add('<div style="width: 0px; transform: translate(1, 2); overflow-y: hidden"><p id="h0th">Test</p></div>')
-
-            expect(el.find('#h0th')).to.be.hidden
-          })
+          cy.wrap(cy.$$('body')).should('not.be.hidden')
+          cy.wrap(cy.$$('body')).should('be.visible')
         })
       })
 
-      it('is hidden when outside parents transform scale', function () {
-        expect(this.$parentWithTransformScaleElOutsideScale.find('span')).to.be.hidden
-      })
+      describe('when not display none', () => {
+        it('is visible', () => {
+          expect(cy.$$('html').is(':hidden')).to.be.false
+          expect(cy.$$('html').is(':visible')).to.be.true
 
-      it('is visible when inside of parents transform scale', function () {
-        expect(this.$parentWithTransformScaleElInsideScale.find('span')).to.be.visible
-      })
+          expect(cy.$$('html')).not.to.be.hidden
+          expect(cy.$$('html')).to.be.visible
 
-      it('is hidden when out of ancestor\'s bounds due to ancestor\'s transform', function () {
-        expect(this.$ancestorTransformMakesElOutOfBoundsOfAncestor.find('span')).to.be.hidden
-      })
+          cy.wrap(cy.$$('html')).should('not.be.hidden')
+          cy.wrap(cy.$$('html')).should('be.visible')
+          expect(cy.$$('body').is(':hidden')).to.be.false
+          expect(cy.$$('body').is(':visible')).to.be.true
 
-      it('is visible when in ancestor\'s bounds due to ancestor\'s transform', function () {
-        expect(this.$ancestorTransformMakesElInBoundsOfAncestor.find('#inbounds')).to.be.visible
+          expect(cy.$$('body')).not.to.be.hidden
+          expect(cy.$$('body')).to.be.visible
+
+          cy.wrap(cy.$$('body')).should('not.be.hidden')
+          cy.wrap(cy.$$('body')).should('be.visible')
+        })
       })
     })
 
-    describe('#getReasonIsHidden', () => {
+    describe('basic CSS properties', () => {
+      beforeEach(() => {
+        cy.visit('/fixtures/visibility/basic-css-properties.html')
+      })
+
+      assertVisibilityForSections([
+        'visibility-property',
+        'display-property',
+        'opacity-property',
+        'input-elements',
+        'table-elements',
+        'box-interactions',
+      ])
+    })
+
+    describe('form elements', () => {
+      beforeEach(() => {
+        cy.visit('/fixtures/visibility/form-elements.html')
+      })
+
+      assertVisibilityForSections([
+        'select-and-option-elements',
+        'optgroup-elements',
+        'options-outside-select',
+        'hidden-options-within-visible-select',
+        'input-elements',
+      ])
+    })
+
+    describe('overflow', () => {
+      beforeEach(() => {
+        cy.visit('/fixtures/visibility/overflow.html')
+      })
+
+      assertVisibilityForSections([
+        'zero-dimensions-with-overflow-hidden',
+        'text-content-with-zero-dimensions',
+        'positive-dimensions-with-overflow-hidden',
+        'overflow-auto-with-zero-dimensions',
+        'mixed-dimension-scenarios',
+        'overflow-hidden',
+        'overflow-y-hidden',
+        'overflow-x-hidden',
+        'overflow-auto-scenarios',
+        'overflow-scroll-scenarios',
+        'overflow-relative-positioning',
+        'overflow-flex-container',
+        'overflow-complex-scenarios',
+        'clip-path-scenarios',
+      ])
+    })
+
+    describe('positioning', () => {
+      beforeEach(() => {
+        cy.visit('/fixtures/visibility/positioning.html')
+      })
+
+      assertVisibilityForSections([
+        'position-fixed-element-covered-by-another',
+        'static-ancestor-fixed-descendant',
+        'static-parent-fixed-child',
+        'positioning-with-zero-dimensions',
+        'fixed-positioning-with-zero-dimensions',
+        'position-absolute-scenarios',
+        'position-sticky-scenarios',
+      ])
+    })
+
+    describe('transforms', () => {
+      beforeEach(() => {
+        cy.visit('/fixtures/visibility/transforms.html')
+      })
+
+      assertVisibilityForSections([
+        'scaling',
+        'translation',
+        'rotation',
+        'skew',
+        'matrix',
+        'perspective',
+        'multiple',
+        'multiple-3d',
+        'backface-visibility',
+      ])
+    })
+  })
+
+  context('#getReasonIsHidden', () => {
+    const reasonIs = ($el: JQuery, str: string) => {
+      expect(dom.getReasonIsHidden($el)).to.eq(str)
+    }
+
+    describe('basic css / box model', () => {
+      beforeEach(() => {
+        cy.visit('/fixtures/visibility/basic-css-properties.html')
+      })
+
       it('has `display: none`', function () {
-        reasonIs(this.$displayNone, 'This element `<button>` is not visible because it has CSS property: `display: none`')
+        prepareFixtureSection('display-property')
+        cy.get('[cy-section="display-property"] .testCase[cy-expect="hidden"]:first').then(($el) => {
+          reasonIs($el, 'This element `<div.testCase>` is not visible because it has CSS property: `display: none`')
+        })
       })
 
       it('has a parent with `display: none`', function () {
-        reasonIs(this.$parentDisplayNone.find('span'), 'This element `<span>` is not visible because its parent `<div#none>` has CSS property: `display: none`')
+        cy.visit('/fixtures/visibility/basic-css-properties.html')
+        prepareFixtureSection('display-property')
+        cy.get('[cy-section="display-property"] .testCase[cy-expect="hidden"] span').then(($el) => {
+          reasonIs($el, 'This element `<span.testCase>` is not visible because its parent `<div.testCase>` has CSS property: `display: none`')
+        })
       })
 
       it('has `visibility: hidden`', function () {
-        reasonIs(this.$visHidden, 'This element `<ul>` is not visible because it has CSS property: `visibility: hidden`')
+        prepareFixtureSection('visibility-property')
+        cy.get('[cy-section="visibility-property"] .testCase[cy-expect="hidden"]').then((el) => {
+          reasonIs($(el).first(), 'This element `<div.testCase>` is not visible because it has CSS property: `visibility: hidden`')
+        })
       })
 
       it('has parent with `visibility: hidden`', function () {
-        reasonIs(this.$parentVisHidden.find('button'), 'This element `<button>` is not visible because its parent `<div.invis>` has CSS property: `visibility: hidden`')
+        prepareFixtureSection('visibility-property')
+        cy.get('[cy-section="visibility-property"] .testCase[cy-expect="hidden"] button').then((el) => {
+          reasonIs($(el).first(), 'This element `<button.testCase>` is not visible because its parent `<div.testCase>` has CSS property: `visibility: hidden`')
+        })
       })
 
       it('has `visibility: collapse`', function () {
-        reasonIs(this.$tableVisCollapse.find('td.collapse'), 'This element `<td.collapse>` is not visible because it has CSS property: `visibility: collapse`')
+        prepareFixtureSection('table-elements')
+        cy.get('[cy-section="table-elements"] td[style*="visibility: collapse"]').then(($el) => {
+          reasonIs($el, 'This element `<td.testCase>` is not visible because it has CSS property: `visibility: collapse`')
+        })
       })
 
       it('has parent with `visibility: collapse`', function () {
-        reasonIs(this.$tableVisCollapse.find('tr.collapse td:first'), 'This element `<td>` is not visible because its parent `<tr.collapse>` has CSS property: `visibility: collapse`')
+        prepareFixtureSection('table-elements')
+        cy.get('[cy-section="table-elements"] tr[style*="visibility: collapse"] td').then(($el) => {
+          reasonIs($el, 'This element `<td.testCase>` is not visible because its parent `<tr.testCase>` has CSS property: `visibility: collapse`')
+        })
       })
 
       it('has `opacity: 0`', function () {
-        reasonIs(this.$btnOpacityZero, 'This element `<button>` is not visible because it has CSS property: `opacity: 0`')
+        prepareFixtureSection('opacity-property')
+        cy.get('[cy-section="opacity-property"] .testCase[cy-expect="hidden"]').then(($el) => {
+          reasonIs($($el).first(), 'This element `<div.testCase>` is not visible because it has CSS property: `opacity: 0`')
+        })
       })
 
       it('has parent with `opacity: 0`', function () {
-        reasonIs(this.$parentOpacityZero.find('button'), 'This element `<button>` is not visible because its parent `<div>` has CSS property: `opacity: 0`')
+        prepareFixtureSection('opacity-property')
+        cy.get('[cy-section="opacity-property"] .testCase[cy-expect="hidden"] button').then(($el) => {
+          reasonIs($el, 'This element `<button.testCase>` is not visible because its parent `<div.testCase>` has CSS property: `opacity: 0`')
+        })
       })
+    })
 
-      it('is detached from the DOM', function () {
-        reasonIs(this.$divDetached, 'This element `<div>` is not visible because it is detached from the DOM')
+    it('is detached from the DOM', function () {
+      const divDetached = $('<div>Detached</div>')
+
+      reasonIs(divDetached, 'This element `<div>` is not visible because it is detached from the DOM')
+    })
+
+    describe('overflow-related', () => {
+      beforeEach(() => {
+        cy.visit('/fixtures/visibility/overflow.html')
       })
 
       it('has effective zero width', function () {
-        reasonIs(this.$divNoWidth, 'This element `<div>` is not visible because it has an effective width and height of: `0 x 100` pixels.')
+        prepareFixtureSection('zero-dimensions-with-overflow-hidden')
+        cy.get('[cy-section="zero-dimensions-with-overflow-hidden"] .testCase[cy-label="Zero width ancestor, parent, self"]').then(($el) => {
+          reasonIs($el, 'This element `<div.testCase>` is not visible because it has an effective width and height of: `0 x 100` pixels.')
+        })
       })
 
       it('has effective zero height', function () {
-        reasonIs(this.$divNoHeight, 'This element `<div>` is not visible because it has an effective width and height of: `50 x 0` pixels.')
+        prepareFixtureSection('zero-dimensions-with-overflow-hidden')
+        cy.get('[cy-section="zero-dimensions-with-overflow-hidden"] .testCase[cy-label="Zero height ancestor, parent, self"]').then(($el) => {
+          reasonIs($el, 'This element `<div.testCase>` is not visible because it has an effective width and height of: `100 x 0` pixels.')
+        })
       })
 
       it('has a parent with an effective zero width and overflow: hidden', function () {
-        reasonIs(this.$parentNoHeight.find('span'), 'This element `<span>` is not visible because its parent `<div>` has CSS property: `overflow: hidden` and an effective width and height of: `100 x 0` pixels.')
+        prepareFixtureSection('zero-dimensions-with-overflow-hidden')
+        cy.get('[cy-section="zero-dimensions-with-overflow-hidden"] .testCase[cy-label="Zero height ancestor, parent, self"] span').then(($el) => {
+          reasonIs($el, 'This element `<span.testCase>` is not visible because its parent `<div.testCase>` has CSS property: `overflow: hidden` and an effective width and height of: `100 x 0` pixels.')
+        })
       })
 
       it('element sits outside boundaries of parent with overflow clipping', function () {
-        reasonIs(this.$elOutOfParentBoundsToRight.find('span'), 'This element `<span>` is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: `hidden`, `clip`, `scroll` or `auto`')
+        prepareFixtureSection('overflow-hidden')
+        cy.get('[cy-section="overflow-hidden"] .testCase[cy-label="Element out of bounds right"]').then(($el) => {
+          reasonIs($el, 'This element `<div.testCase>` is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: `hidden`, `clip`, `scroll` or `auto`')
+        })
       })
+    })
 
-      it('is hidden because it is backface', function () {
-        const el = cy.$$('body').append(`<div id="backface-invisible" style="backface-visibility:hidden; transform: rotateX(180deg)">Hello world</div>`)
-
-        reasonIs(el.find('#backface-invisible'), `This element \`<div#backface-invisible>\` is not visible because it is rotated and its backface is hidden.`)
+    it('is hidden because it is backface', function () {
+      cy.visit('/fixtures/visibility/transforms.html')
+      prepareFixtureSection('backface-visibility')
+      cy.get('[cy-section="backface-visibility"] .testCase[cy-label="RotateX 180deg with hidden backface"]').then(($el) => {
+        reasonIs($el, 'This element `<div.testCase>` is not visible because it is rotated and its backface is hidden.')
       })
+    })
 
-      it('is hidden by transform', function () {
-        const el = cy.$$('body').append(`<div id="invisible-transform" style="transform: scaleX(0)">Hello world</div>`)
-
-        reasonIs(el.find('#invisible-transform'), `This element \`<div#invisible-transform>\` is not visible because it is hidden by transform.`)
+    it('is hidden by transform', function () {
+      cy.visit('/fixtures/visibility/transforms.html')
+      prepareFixtureSection('scaling')
+      cy.get('[cy-section="scaling"] .testCase[cy-label="ScaleX to zero"]').then(($el) => {
+        reasonIs($el, 'This element `<div.testCase>` is not visible because it is hidden by transform.')
       })
+    })
 
-      it('element is fixed and being covered', function () {
-        reasonIs(this.$coveredUpPosFixed.find('#coveredUpPosFixed'), `\This element \`<div#coveredUpPosFixed>\` is not visible because it has CSS property: \`position: fixed\` and it's being covered by another element:\n\n\`<div style="position: fixed; bottom: 0; left: 0">on top</div>\``)
+    it('element is fixed and being covered', function () {
+      cy.visit('/fixtures/visibility/positioning.html')
+      prepareFixtureSection('position-fixed-element-covered-by-another')
+      cy.get('[cy-section="position-fixed-element-covered-by-another"] .testCase[cy-label="Fixed positioned element covered by another"]').then(($el) => {
+        reasonIs($el, 'This element `<div.testCase>` is not visible because it has CSS property: `position: fixed` and it\'s being covered by another element:\n\n`<div class="testCase" cy-expect="visible" cy-label="Element covering fixed positioned element" style="position: fixed; bottom: 0; left: 0; background: lightskyblue; width: 100px; height: 100px;">on top</div>`')
       })
+    })
 
-      it('needs scroll', function () {
-        const el = cy.$$('body').append(`
+    it('needs scroll', function () {
+      cy.visit('/fixtures/visibility/empty.html')
+      const el = cy.$$('body').append(`
           <div style="position: fixed; top: 0; right: 0; bottom: 0; left: 0; overflow-x: hidden; overflow-y: auto;">
             <div style="height: 800px">Big Element</div>
             <button id="needsScroll">MyButton</button>
           </div>
         `)
 
-        reasonIs(el.find('#needsScroll'), `This element \`<button#needsScroll>\` is not visible because its ancestor has \`position: fixed\` CSS property and it is overflowed by other elements. How about scrolling to the element with \`cy.scrollIntoView()\`?`)
-      })
+      reasonIs(el.find('#needsScroll'), `This element \`<button#needsScroll>\` is not visible because its ancestor has \`position: fixed\` CSS property and it is overflowed by other elements. How about scrolling to the element with \`cy.scrollIntoView()\`?`)
+    })
 
-      it('cannot determine why element is not visible', function () {
-        // this element is actually visible
-        // but used here as an example that does not match any of the above
-        reasonIs(this.$divVisible, 'This element `<div>` is not visible.')
-      })
+    it('cannot determine why element is not visible', function () {
+      // this element is actually visible
+      // but used here as an example that does not match any of the above
+      const visible = cy.$$('<div>Visible</div>')
+
+      cy.$$('body').append(visible)
+      reasonIs(visible, 'This element `<div>` is not visible.')
     })
   })
 })

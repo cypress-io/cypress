@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Basic CSS Properties Visibility Tests</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./ux.js"></script>
+</head>
+<body>
+  <h1>Basic CSS Properties Visibility Tests</h1>
+  
+  <div class="test-section" cy-section="visibility-property">
+    <h3>Visibility Property</h3>
+    <div class="testCase" cy-expect="hidden" cy-label="Hidden by visibility" style="visibility: hidden;">Hidden by visibility</div>
+    <div class="testCase" cy-expect="visible" cy-label="Visible by visibility" style="visibility: visible;">Visible by visibility</div>
+    <div class="testCase" cy-expect="hidden" cy-label="Parent hidden by visibility" style="visibility: hidden;">
+      <button class="testCase" cy-expect="hidden" cy-label="Child of hidden parent">Child of hidden parent</button>
+    </div>
+  </div>
+
+  <div class="test-section" cy-section="display-property">
+    <h3>Display Property</h3>
+    <div class="testCase" cy-expect="hidden" cy-label="Hidden by display: none" style="display: none;">Hidden by display: none</div>
+    <div class="testCase" cy-expect="visible" cy-label="Visible by display: block" style="display: block;">Visible by display: block</div>
+    <div class="testCase" cy-expect="hidden" cy-label="Parent hidden by display: none" style="display: none;">
+      <span class="testCase" cy-expect="hidden" cy-label="Child of display: none parent">Child of display: none parent</span>
+    </div>
+  </div>
+
+  <div class="test-section" cy-section="opacity-property">
+    <h3>Opacity Property</h3>
+    <div class="testCase" cy-expect="hidden" cy-label="Hidden by opacity: 0" style="opacity: 0;">Hidden by opacity: 0</div>
+    <div class="testCase" cy-expect="visible" cy-label="Semi-transparent (opacity: 0.5)" style="opacity: 0.5;">Semi-transparent (opacity: 0.5)</div>
+    <div class="testCase" cy-expect="visible" cy-label="Fully opaque (opacity: 1)" style="opacity: 1;">Fully opaque (opacity: 1)</div>
+    <div class="testCase" cy-expect="hidden" cy-label="Parent hidden by opacity: 0" style="opacity: 0;">
+      <button class="testCase" cy-expect="hidden" cy-label="Child of opacity: 0 parent">Child of opacity: 0 parent</button>
+    </div>
+  </div>
+
+  <div class="test-section" cy-section="input-elements">
+    <h3>Input Elements</h3>
+    <input class="testCase" cy-expect="hidden" cy-label="Hidden input" type="hidden" value="hidden input">
+    <input class="testCase" cy-expect="visible" cy-label="Visible input" type="text" value="visible input">
+  </div>
+  
+  <div class="test-section" cy-section="table-elements">
+    <h3>Table Elements</h3>
+    <table>
+      <tr>
+        <td class="testCase" cy-expect="visible" cy-label="Normal Cell">Normal Cell</td>
+        <td class="testCase" cy-expect="visible" cy-label="Normal Cell">Normal Cell</td>
+        <td class="testCase" cy-expect="hidden" cy-label="Cell by visibility: collapse" style="visibility: collapse;">Cell by visibility: collapse</td>
+      </tr>
+
+      <tr class="testCase" cy-expect="hidden" cy-label="Row hidden by visibility: collapse" style="visibility: collapse;">
+        <td class="testCase" cy-expect="hidden" cy-label="Cell hidden by row's visibility: collapse">Cell hidden by row's visibility: collapse</td>
+      </tr>
+    </table>
+  </div>
+  <div class="test-section" cy-section="box-interactions">
+    <div>
+      <span class="testCase" cy-expect="visible" cy-label="Span container for block element">
+        <label class="testCase" cy-expect="visible" cy-label="Block element inside an inline element" style="display: block">Block element inside an inline element</label>
+      </span>
+    </div>
+  </div>
+</body>
+</html>
