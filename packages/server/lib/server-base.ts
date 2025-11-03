@@ -12,6 +12,7 @@ import type { AddressInfo } from 'net'
 import url from 'url'
 import la from 'lazy-ass'
 import { createProxy as createHttpsProxy } from '@packages/https-proxy'
+import type { Server as HttpsProxyServer } from '@packages/https-proxy'
 import { getRoutesForRequest, netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { agent, clientCertificates, httpUtils, concatStream } from '@packages/network'
 import { DocumentDomainInjection, getPath, parseUrlIntoHostProtocolDomainTldPort, removeDefaultPort } from '@packages/network-tools'
@@ -33,7 +34,7 @@ import type { Server as WebSocketServer } from 'ws'
 import { RemoteStates, RemoteState } from './remote_states'
 import { cookieJar, SerializableAutomationCookie } from './util/cookies'
 import { resourceTypeAndCredentialManager, ResourceTypeAndCredentialManager } from './util/resourceTypeAndCredentialManager'
-import fileServer from './file_server'
+import * as fileServer from './file_server'
 import appData from './util/app_data'
 import { graphqlWS } from '@packages/data-context/graphql/makeGraphQLServer'
 import statusCode from './util/status_code'
@@ -291,11 +292,11 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
             onUpgrade: this.onSniUpgrade.bind(this),
           }),
 
-          fileServer.create(fileServerFolder),
+          fileServer.create(fileServerFolder as string),
         ])
         .spread((httpsProxy, fileServer) => {
-          this._httpsProxy = httpsProxy
-          this._fileServer = fileServer
+          this._httpsProxy = httpsProxy as HttpsProxyServer
+          this._fileServer = fileServer as FileServer
 
           // if we have a baseUrl let's go ahead
           // and make sure the server is connectable!
