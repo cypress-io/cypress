@@ -78,7 +78,7 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
               </span>
               <Button size='24' variant='outline-dark' className='px-[8px] mt-[12px] mb-[8px]' onClick={() => {}}>
                 <span className='text-indigo-300'>
-                  Got it
+                  Got it, don't show this again.
                 </span>
               </Button>
             </div>
