@@ -9,7 +9,7 @@ const url = require('url')
 const { shell } = require('electron')
 
 const machineId = require('./machine_id')
-const random = require('../util/random')
+import { id as randomId } from '../util/random'
 const user = require('./user')
 
 let app
@@ -29,7 +29,7 @@ const buildFullLoginUrl = (baseLoginUrl, server, utmSource, utmMedium, utmConten
   const { port } = server.address()
 
   if (!authState) {
-    authState = random.id(32)
+    authState = randomId(32)
   }
 
   const authUrl = url.parse(baseLoginUrl)

@@ -1,0 +1,33 @@
+.command-self-healed-badge {
+  background-color: $gray-1000;
+  border-radius: 4px;
+  display: inline-flex;
+  height: 20px;
+  border: 1px solid $gray-900;
+  gap: 4px;
+  padding: 0 4px;
+  color: $jade-300;
+  font-family: $font-system;
+  font-size: 14px;
+  font-weight: 400;
+  margin-right: 4px;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  text-transform: none;
+  vertical-align: middle;
+
+  .command-info:hover & {
+    border-color: $gray-800;
+  }
+
+}
+
+.command-self-healed-badge-command {
+  height: 16px;
+  font-size: 12px;
+}
+
+.command-self-healed-badge-test {
+  margin-left: 8px;
+}

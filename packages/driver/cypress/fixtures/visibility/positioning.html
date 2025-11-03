@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Positioning Visibility Tests</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./ux.js"></script>
+</head>
+<body>
+    <h1>Positioning Visibility Tests</h1>
+    <div class="test-section" cy-section="positioning-with-zero-dimensions">
+      <h3>Positioning with Zero Dimensions</h3>
+      <div class="testCase" cy-legacy-expect="visible" cy-fast-expect="hidden" cy-label="Zero dimensions parent with absolute positioned child" style="width: 0; height: 0; background: lightyellow">
+        <span class="testCase" cy-expect="visible" cy-label="Absolute positioned child under zero dimensions parent" style="position: absolute; top: 10px; left: 10px; background: white; padding: 5px;">Child with absolute positioning</span>
+      </div>
+    </div>
+  
+  <div class="test-section" cy-section="fixed-positioning-with-zero-dimensions">
+    <h3>Fixed Positioning with Zero Dimensions</h3>
+    
+    <!-- Zero dimensions parent with absolute positioned child -->
+
+    <!-- Zero dimensions ancestor with fixed positioned child -->
+    <div class="testCase" cy-legacy-expect="visible" cy-fast-expect="hidden" cy-label="Zero dimensions ancestor with fixed positioned child" style="width: 0; height: 0; position: relative; background: green">
+      <div class="testCase" cy-legacy-expect="visible" cy-fast-expect="hidden" cy-label="Parent under zero dimensions ancestor">
+        <span class="testCase" cy-expect="visible" cy-label="Fixed positioned child under zero dimensions ancestor" style="position: fixed; top: 10px; left: 10px; background: white; padding: 5px;">Child with position: fixed</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="test-section" cy-section="static-ancestor-fixed-descendant">
+    <h3>Static ancestor with fixed positioned descendant</h3>
+    <!-- Position fixed descendant under normal ancestor -->
+    <div class="testCase" cy-expect="visible" cy-label="Normal ancestor with fixed positioned descendant" style="width: 100px; height: 100px; overflow: hidden; background: lightgreen;">
+      <div class="testCase" cy-expect="hidden" cy-label="Parent under normal ancestor">
+        <button class="testCase" cy-expect="visible" cy-label="Fixed positioned descendant under normal ancestor" style="position: fixed; top: 0; right: 0;">no width, descendant position: fixed</button>
+      </div>
+    </div>
+  </div>  
+
+  <div class="test-section" cy-section="position-fixed-element-covered-by-another">
+
+    <!-- Position fixed element covered by another element -->
+    <div class="testCase" cy-expect="hidden" cy-label="Fixed positioned element covered by another" style="position: fixed; bottom: 0; left: 0; background: lightcoral; width: 100px; height: 100px;">underneath</div>
+    <div class="testCase" cy-expect="visible" cy-label="Element covering fixed positioned element" style="position: fixed; bottom: 0; left: 0; background: lightskyblue; width: 100px; height: 100px;">on top</div>
+  </div>
+
+  <div class="test-section" cy-section="static-parent-fixed-child">
+    <h3>Static parent with a fixed child</h3>
+    
+    <!-- Position fixed child under normal parent -->
+    <div class="testCase" cy-expect="visible" cy-label="Normal parent with fixed positioned child" style="width: 100px; height: 100px; overflow: hidden; background: lightblue;">
+      <button class="testCase" cy-expect="visible" cy-label="Fixed positioned child under normal parent" style="position: fixed; top: 0;">position: fixed</button>
+    </div>
+  </div>
+  <div class="test-section" cy-section="position-fixed-element-off-screen">
+    <!-- Position fixed element off screen -->
+    <div class="testCase" cy-expect="hidden" cy-label="Fixed positioned element off screen" style="position: fixed; bottom: 0; left: -100px; background: lightgray;">off screen</div>
+
+    <!-- Position fixed element with pointer-events: none -->
+    <div class="testCase" cy-expect="visible" cy-label="Fixed positioned element with pointer-events none" style="position: fixed; top: 60px; background: lightcyan;">
+      <span class="testCase" cy-expect="visible" cy-label="Child with pointer-events none" style="pointer-events: none;">child pointer-events: none</span>
+    </div>
+  </div>
+  <div class="test-section" cy-section="parent-with-pointer-events-none">
+    <h3>Parent with pointer-events: none</h3>
+      <!-- Parent with pointer-events: none containing fixed positioned child -->
+      <div class="testCase" cy-expect="visible" cy-label="Parent with pointer-events none containing fixed child" style="pointer-events: none; background: lightyellow;">
+        <span class="testCase" cy-expect="visible" cy-label="Fixed child under pointer-events none parent" style="position: fixed; left: 0; top: 50%;">parent pointer-events: none</span>
+      </div>
+
+      <!-- Parent with pointer-events: none covered by another element -->
+      <div class="testCase" cy-expect="hidden" cy-label="Fixed child under pointer-events none parent covered by another" style="pointer-events: none; background: lightsteelblue;">
+        <span class="testCase" cy-expect="hidden" cy-label="Fixed child covered by another element" style="position: fixed; top: 40px;">parent pointer-events: none</span>
+      </div>
+      <div class="testCase" cy-expect="visible" cy-label="Element covering fixed child with pointer-events none parent" style="position: fixed; top: 40px; background: red;">covering the element with pointer-events: none</div>
+
+  </div>
+  <div class="test-section" cy-section="position-absolute-scenarios">
+    <h3>Position Absolute Scenarios</h3>
+    
+    <!-- Position absolute child under normal parent -->
+    <div class="testCase" cy-legacy-expect="hidden" cy-fast-expect="visible" cy-label="Normal parent with absolute positioned child" style="width: 0; height: 100px; overflow: hidden; background: lightblue;">
+      <div class="testCase" cy-legacy-expect="hidden" cy-fast-expect="visible" cy-label="Parent container for absolute child" style="height: 500px; width: 500px;">
+        <span class="testCase" cy-expect="visible" cy-label="Absolute positioned child" style="position: absolute;">position: absolute</span>
+      </div>
+    </div>
+
+    <!-- Position absolute descendant under normal ancestor -->
+    <div class="testCase" cy-legacy-expect="hidden" cy-fast-expect="visible" cy-label="Normal ancestor with absolute positioned descendant" style="width: 0; height: 100px; overflow: hidden; background: lightgreen;">
+      <div class="testCase" cy-expect="visible" cy-label="Parent container for absolute descendant" style="height: 500px; width: 500px; position: absolute;">
+        <span class="testCase" cy-expect="visible" cy-label="Absolute positioned descendant" style="position: absolute;">no width, descendant position: absolute</span>
+      </div>
+    </div>
+
+    <!-- Parent with position absolute but child not positioned -->
+    <div class="testCase" cy-expect="hidden" cy-label="Parent with absolute positioning but child not positioned" style="width: 0; height: 100px; overflow: hidden; position: absolute; background: lightcoral;">
+      <div class="testCase" cy-expect="hidden" cy-label="Child container under absolute parent" style="height: 500px; width: 500px;">
+        <span class="testCase" cy-expect="hidden" cy-label="Non-positioned child under absolute parent">parent position: absolute</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="test-section" cy-section="position-sticky-scenarios">
+    <h3>Position Sticky Scenarios</h3>
+    
+    <!-- Position sticky element -->
+    <div class="testCase" cy-expect="visible" cy-label="Sticky positioned element" style="position: sticky; top: 0; background: lightcyan; padding: 10px;">
+      <button class="testCase" cy-expect="visible" cy-label="Button inside sticky element" id="button">Sticky Button</button>
+    </div>
+  </div>
+
+</body>
+</html>

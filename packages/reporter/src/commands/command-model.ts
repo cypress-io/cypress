@@ -21,6 +21,7 @@ export interface RenderProps {
   }>
   status?: InterceptStatuses | XHRStatuses
   wentToOrigin?: boolean
+  selfHealed?: boolean
 }
 
 export interface CommandProps extends InstrumentProps {
@@ -163,6 +164,7 @@ export default class Command extends Instrument {
       hasChildren: computed,
       showError: computed,
       setGroup: action,
+      isSelfHealed: computed,
     })
 
     if (props.err) {
@@ -277,5 +279,9 @@ export default class Command extends Instrument {
 
   _isPending () {
     return this.state === 'pending'
+  }
+
+  get isSelfHealed () {
+    return (!!this.renderProps.selfHealed || (this.hasChildren && !this.isOpen && this.children.some((child) => child.isSelfHealed)))
   }
 }

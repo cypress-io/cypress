@@ -3,7 +3,7 @@ require('../spec_helper')
 const path = require('path')
 const Promise = require('bluebird')
 const { fs } = require(`../../lib/util/fs`)
-const FileUtil = require(`../../lib/util/file`)
+const FileUtil = require(`../../lib/util/file`).File
 const appData = require(`../../lib/util/app_data`)
 const { START_TAG, END_TAG } = require(`@packages/stderr-filtering`)
 const savedState = require(`../../lib/saved_state`)

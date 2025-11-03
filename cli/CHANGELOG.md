@@ -1,10 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.6.0
 
-_Released 10/20/2025 (PENDING)_
+_Released 11/4/2025 (PENDING)_
 
 **Features:**
 
+ - Added a 'Self-healed' badge to the Command Log when `cy.prompt()` steps automatically recover after the element they need is not found in the cache. Addressed in [#32802](https://github.com/cypress-io/cypress/pull/32802).
 - `cy.prompt()` will now show a warning in the `Get code` modal when there are unsaved changes in `Studio` that will be lost if the user saves the generated code. Addressed in [#32741](https://github.com/cypress-io/cypress/pull/32741).
 
 **Bugfixes:**
@@ -14,12 +15,15 @@ _Released 10/20/2025 (PENDING)_
 - Fixed an issue where grouped command text jumps up and down when expanding and collapsing in the command log. Addressed in [#32757](https://github.com/cypress-io/cypress/pull/32757).
 - Fixed an issue with grouped console prop items having a hard to read blue color in the console log and duplicate `:` characters being displayed. Addressed in [#32776](https://github.com/cypress-io/cypress/pull/32776).
 - Added more context to the error message shown when `cy.prompt()` fails to download. Addressed in [#32822](https://github.com/cypress-io/cypress/pull/32822).
+- Fixed an issue where absolute file paths were not correctly determined from the source map when the source map root was updated. Fixes [#32809](https://github.com/cypress-io/cypress/issues/32809).
 
 **Misc:**
 
 - Add top padding for command log labels. Addressed in [#32774](https://github.com/cypress-io/cypress/pull/32774).
 - The hitbox for expanding a grouped command has been widened. Addresses [#32778](https://github.com/cypress-io/cypress/issues/32778). Addressed in [#32783](https://github.com/cypress-io/cypress/pull/32783).
 - Have cursor on hover of the AUT URL to show as pointer. Addresses [#32777](https://github.com/cypress-io/cypress/issues/32777). Addressed in [#32782](https://github.com/cypress-io/cypress/pull/32782).
+- WebKit now prefers a cookie's fully qualified `domain` when requesting a cookie value via [`cy.getCookie()`](https://docs.cypress.io/api/commands/getcookie). If none are found, the cookie's apex domain will be used as a fallback. Addresses [#29954](https://github.com/cypress-io/cypress/issues/29954), [#29973](https://github.com/cypress-io/cypress/issues/29973) and [#30392](https://github.com/cypress-io/cypress/issues/30392). Addressed in [#32852](https://github.com/cypress-io/cypress/pull/32852).
+- The 'Next' tooltip style was updated. Addressed in [#32866](https://github.com/cypress-io/cypress/pull/32866).
 
 **Dependency Updates:**
 

@@ -54,6 +54,7 @@
     "lib"
   ],
   "types": "./lib/index.ts",
+  "license": "MIT",
   "workspaces": {
     "nohoist": [
       "devtools-protocol"

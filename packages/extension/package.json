@@ -45,6 +45,7 @@
     "lib-dist",
     "theme"
   ],
+  "license": "MIT",
   "nx": {
     "implicitDependencies": [
       "@packages/server",
