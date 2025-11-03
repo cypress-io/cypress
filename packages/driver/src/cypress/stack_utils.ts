@@ -65,7 +65,22 @@ const stackWithLinesRemoved = (stack, cb) => {
 
 const stackWithGrepLinesRemoved = (stack) => {
   return stackWithLinesRemoved(stack, (lines) => {
-    return _.reject(lines, (line) => line.includes('itGrep'))
+    // Remove any lines containing 'itGrep' first
+    let cleanedLines = _.reject(lines, (line) => line.includes('itGrep'))
+
+    // There are cases where there are other lines in the stack trace before the invocation (eg. `context.it.only`, `createRunnable`, etc)
+    // Remove lines from the start until the top line starts with 'at eval' or 'at Suite.eval' so that we only keep the actual invocation line.
+    while (
+      cleanedLines.length > 0 &&
+      !(
+        cleanedLines[0].trim().startsWith('at eval') ||
+        cleanedLines[0].trim().startsWith('at Suite.eval')
+      )
+    ) {
+      cleanedLines.shift()
+    }
+
+    return cleanedLines
   })
 }
 
@@ -155,8 +170,9 @@ const getInvocationDetails = (specWindow, config): InvocationDetails | undefined
       }
     }
 
-    // if the stack includes the 'itGrep' function, remove any lines that include it
-    // so that the first line in the stack is the spec invocation
+    // if the stack includes the 'itGrep' function, this suggests that the user has registered
+    // the @cypress/grep plugin. In this case, we need to remove the lines that include 'itGrep'
+    // so that the first line in the stack is the spec invocation.
     if (stack.includes('itGrep')) {
       stack = stackWithGrepLinesRemoved(stack)
     }

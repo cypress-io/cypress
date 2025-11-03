@@ -90,6 +90,58 @@ at eval (cypress:///../driver/src/cypress/script_utils.ts:38:23)`
         file: 'http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js',
       }))
     })
+
+    it('returns the correct invocation details for a grep stack trace for suites', () => {
+      const stack = `Error
+    at itGrep (http://localhost:3000/__cypress/tests?p=cypress/support/e2e.js:444:14)
+    at context.it.only (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:98:46)
+    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)
+    at itGrep.eval [as only] (cypress:///../driver/src/cypress/mocha.ts:187:14)
+    at Suite.eval (http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js:12:6)`
+
+      class GrepError {
+        get stack () {
+          return stack
+        }
+      }
+
+      stack_utils.getInvocationDetails(
+        { Error: GrepError, Cypress: {} },
+        config,
+      )
+
+      expect(source_map_utils.getSourcePosition).toHaveBeenCalledWith('http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js', expect.objectContaining({
+        column: 6,
+        line: 12,
+        file: 'http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js',
+      }))
+    })
+
+    it('returns the correct invocation details for a grep stack trace for tests with only', () => {
+      const stack = `Error
+    at itGrep (http://localhost:3000/__cypress/tests?p=cypress/support/e2e.js:444:14)
+    at context.it.only (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:98:46)
+    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)
+    at itGrep.eval [as only] (cypress:///../driver/src/cypress/mocha.ts:187:14)
+    at eval (http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js:11:4)`
+
+      class GrepError {
+        get stack () {
+          return stack
+        }
+      }
+
+      stack_utils.getInvocationDetails(
+        { Error: GrepError, Cypress: {} },
+        config,
+      )
+
+      expect(source_map_utils.getSourcePosition).toHaveBeenCalledWith('http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js', expect.objectContaining({
+        column: 4,
+        line: 11,
+        file: 'http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js',
+      }))
+    })
   })
 
   describe('normalizedUserInvocationStack', () => {
