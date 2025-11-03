@@ -12,7 +12,7 @@ export const LaunchStudioIcon: React.FC<LaunchStudioIconProps> = ({ content, onC
   return (
     <Tooltip
       placement='right'
-      className='cy-tooltip'
+      className='launch-studio-tooltip cy-tooltip'
       title={content}
     >
       <a

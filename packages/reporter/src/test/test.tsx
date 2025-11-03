@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import React, { MouseEvent, useCallback } from 'react'
-import { IconCypressStudio } from '@cypress-design/react-icon'
+import { IconGeneralSparkleSingleLarge } from '@cypress-design/react-icon'
 
 import events, { Events } from '../lib/events'
 import appState, { AppState } from '../lib/app-state'
@@ -11,6 +11,7 @@ import StateIcon from '../lib/state-icon'
 import { LaunchStudioIcon } from '../components/LaunchStudioIcon'
 import { useScrollIntoView } from '../lib/useScrollIntoView'
 import { SelfHealedBadge } from '../lib/selfHealedBadge'
+import Button from '@cypress-design/react-button'
 
 interface TestProps {
   events?: Events
@@ -65,9 +66,21 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
         <LaunchStudioIcon
           key={`studio-command-${model}`}
           content={
-            <div className='flex items-center py-[8px] px-[8px]'>
-              <div><IconCypressStudio strokeColor="gray-500" className="mr-[10px]" /></div>
-              <div className='text-sm text-gray-700'>Edit in Studio</div>
+            <div
+              className='flex items-start py-[8px] px-[8px] flex-col gap-[2px]'
+            >
+              <div className='flex items-center text-white text-[16px] font-medium'>
+                <IconGeneralSparkleSingleLarge strokeColor="gray-500" fillColor='gray-900' className="mr-[10px]" />
+                Edit test in studio
+              </div>
+              <span className='text-gray-300 text-[14px] text-left'>
+              Open a test in Studio to refine it with AI recommendations.
+              </span>
+              <Button size='24' variant='outline-dark' className='px-[8px] mt-[12px] mb-[8px]' onClick={() => {}}>
+                <span className='text-indigo-300'>
+                  Got it
+                </span>
+              </Button>
             </div>
           }
           onClick={_launchStudio}
