@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Table Visibility Tests</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./ux.js"></script>
+</head>
+<body>
+  <h1>Table Visibility Tests</h1>
+  
+  <div class="test-section">
+    <h3>Visibility Collapse on Table Cells</h3>
+    <table>
+      <tr>
+        <td>Normal Cell</td>
+        <td id="collapse-cell" style="visibility: collapse;">Collapsed Cell</td>
+        <td>Another Normal Cell</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="test-section">
+    <h3>Visibility Collapse on Table Rows</h3>
+    <table>
+      <tr>
+        <td>Normal Row</td>
+        <td>Normal Row</td>
+      </tr>
+      <tr id="collapse-row" style="visibility: collapse;">
+        <td>Hidden Row Cell 1</td>
+        <td id="collapse-row-cell">Hidden Row Cell 2</td>
+      </tr>
+      <tr>
+        <td>Another Normal Row</td>
+        <td>Another Normal Row</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="test-section">
+    <h3>Mixed Visibility States</h3>
+    <table>
+      <tr>
+        <td>Normal</td>
+        <td id="mixed-collapse-cell" style="visibility: collapse;">Collapsed</td>
+        <td>Normal</td>
+      </tr>
+      <tr id="mixed-collapse-row" style="visibility: collapse;">
+        <td>Hidden Row</td>
+        <td id="mixed-collapse-row-cell">Hidden Row Cell</td>
+        <td>Hidden Row</td>
+      </tr>
+      <tr>
+        <td>Normal</td>
+        <td>Normal</td>
+        <td>Normal</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="test-section">
+    <h3>Normal Table (All Visible)</h3>
+    <table>
+      <tr>
+        <td>Normal Cell 1</td>
+        <td>Normal Cell 2</td>
+        <td>Normal Cell 3</td>
+      </tr>
+      <tr>
+        <td>Normal Row 2</td>
+        <td>Normal Row 2</td>
+        <td>Normal Row 2</td>
+      </tr>
+    </table>
+  </div>
+</body>
+</html>

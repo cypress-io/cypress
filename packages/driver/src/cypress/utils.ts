@@ -9,6 +9,10 @@ import $jquery from '../dom/jquery'
 import { $Location } from './location'
 import $errUtils from './error_utils'
 
+const customProtocolRegex = /^[^:\/]+:\/{1,3}/
+// Find 'namespace' values (like `_N_E` for Next apps) without adjusting relative paths (like `../`)
+const webpackDevtoolNamespaceRegex = /webpack:\/{2}([^.]*)?\.\//
+
 const tagOpen = /\[([a-z\s='"-]+)\]/g
 const tagClosed = /\[\/([a-z]+)\]/g
 
@@ -419,5 +423,30 @@ export default {
   isPromiseLike (ret) {
     // @ts-ignore
     return ret && _.isObject(ret) && 'then' in ret && _.isFunction(ret.then) && 'catch' in ret && _.isFunction(ret.catch)
+  },
+
+  stripCustomProtocol (filePath: string) {
+    if (!filePath) {
+      return
+    }
+
+    // if the file path (after all said and done)
+    // still starts with "http://" or "https://" then
+    // it is an URL and we have no idea how it maps
+    // to a physical file location on disk. Let it be.
+    const httpProtocolRegex = /^https?:\/\//
+
+    if (httpProtocolRegex.test(filePath)) {
+      return
+    }
+
+    // Check the path to see if custom namespaces have been applied and, if so, remove them
+    // For example, in Next.js we end up with paths like `_N_E/pages/index.cy.js`, and we
+    // need to strip off the `_N_E` so that "Open in IDE" links work correctly
+    if (webpackDevtoolNamespaceRegex.test(filePath)) {
+      return filePath.replace(webpackDevtoolNamespaceRegex, '')
+    }
+
+    return filePath.replace(customProtocolRegex, '')
   },
 }

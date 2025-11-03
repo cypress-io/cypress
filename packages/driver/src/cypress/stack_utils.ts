@@ -20,9 +20,6 @@ import { toPosix } from './util/to_posix'
 import { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitStack, stackLineRegex } from '@packages/errors/src/stackUtils'
 
 const whitespaceRegex = /^(\s*)*/
-const customProtocolRegex = /^[^:\/]+:\/{1,3}/
-// Find 'namespace' values (like `_N_E` for Next apps) without adjusting relative paths (like `../`)
-const webpackDevtoolNamespaceRegex = /webpack:\/{2}([^.]*)?\.\//
 const percentNotEncodedRegex = /%(?![0-9A-F][0-9A-F])/g
 const webkitStackLineRegex = /(.*)@(.*)(\n?)/g
 
@@ -127,7 +124,7 @@ type InvocationDetails = {
 }
 
 // used to determine codeframes for hook/test/etc definitions rather than command invocations
-const getInvocationDetails = (specWindow, config): InvocationDetails | undefined => {
+const getInvocationDetails = (specWindow, sourceMapProjectRoot: string): InvocationDetails | undefined => {
   if (specWindow.Error) {
     let stack = (new specWindow.Error()).stack
 
@@ -149,9 +146,9 @@ const getInvocationDetails = (specWindow, config): InvocationDetails | undefined
       }
     }
 
-    const details: Omit<InvocationDetails, 'stack'> = getSourceDetailsForFirstLine(stack, config('projectRoot')) || {};
+    const details: Omit<InvocationDetails, 'stack'> = getSourceDetailsForFirstLine(stack, sourceMapProjectRoot) || {}
 
-    (details as any).stack = stack
+    ;(details as any).stack = stack
 
     return details as (InvocationDetails & { stack: any })
   }
@@ -307,31 +304,6 @@ const parseLine = (line) => {
   }
 }
 
-const stripCustomProtocol = (filePath) => {
-  if (!filePath) {
-    return
-  }
-
-  // if the file path (after all said and done)
-  // still starts with "http://" or "https://" then
-  // it is an URL and we have no idea how it maps
-  // to a physical file location on disk. Let it be.
-  const httpProtocolRegex = /^https?:\/\//
-
-  if (httpProtocolRegex.test(filePath)) {
-    return
-  }
-
-  // Check the path to see if custom namespaces have been applied and, if so, remove them
-  // For example, in Next.js we end up with paths like `_N_E/pages/index.cy.js`, and we
-  // need to strip off the `_N_E` so that "Open in IDE" links work correctly
-  if (webpackDevtoolNamespaceRegex.test(filePath)) {
-    return filePath.replace(webpackDevtoolNamespaceRegex, '')
-  }
-
-  return filePath.replace(customProtocolRegex, '')
-}
-
 interface MessageLineDetail {
   message: any
   whitespace: any
@@ -364,12 +336,12 @@ const getSourceDetailsForLine = (projectRoot, line): MessageLineDetail | StackLi
 
   const originalFile = sourceDetails.file
 
-  let relativeFile = stripCustomProtocol(originalFile)
+  let relativeFile = $utils.stripCustomProtocol(originalFile)
 
   if (relativeFile) {
     relativeFile = path.normalize(relativeFile)
 
-    if (relativeFile.includes(projectRoot)) {
+    if (projectRoot && projectRoot !== '/' && relativeFile.includes(projectRoot)) {
       relativeFile = relativeFile.replace(projectRoot, '').substring(1)
     }
   }
@@ -378,11 +350,10 @@ const getSourceDetailsForLine = (projectRoot, line): MessageLineDetail | StackLi
 
   // WebKit stacks may include an `<unknown>` or `[native code]` location that is not navigable.
   // We ensure that the absolute path is not set in this case.
-  const canBuildAbsolutePath = relativeFile && projectRoot && (
+  if (relativeFile &&
+    projectRoot && (
     !Cypress.isBrowser('webkit') || (relativeFile !== '<unknown>' && relativeFile !== '[native code]')
-  )
-
-  if (canBuildAbsolutePath) {
+  )) {
     absoluteFile = path.resolve(projectRoot, relativeFile)
 
     // rollup-plugin-node-builtins/src/es6/path.js only support POSIX, we have

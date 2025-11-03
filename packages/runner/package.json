@@ -43,6 +43,7 @@
   "files": [
     "dist"
   ],
+  "license": "MIT",
   "nx": {
     "implicitDependencies": [
       "@packages/driver",

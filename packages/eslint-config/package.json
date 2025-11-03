@@ -28,6 +28,7 @@
   "peerDependencies": {
     "eslint": "^9.31.0"
   },
+  "license": "MIT",
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   }

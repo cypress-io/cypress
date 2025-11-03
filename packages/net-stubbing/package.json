@@ -33,5 +33,6 @@
   "files": [
     "lib"
   ],
+  "license": "MIT",
   "nx": {}
 }

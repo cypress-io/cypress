@@ -107,6 +107,7 @@
     "vue-tsc": "^2.0.19",
     "wonka": "^4.0.15"
   },
+  "license": "MIT",
   "module": "es2020",
   "workspaces": {
     "nohoist": [
