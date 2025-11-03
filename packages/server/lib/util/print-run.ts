@@ -8,7 +8,7 @@ import pkg from '@packages/root'
 import humanTime from './human_time'
 import duration from './duration'
 import newlines from './newlines'
-import env from './env'
+import * as env from './env'
 import terminal from './terminal'
 import { getIsCi } from './ci_provider'
 import * as experiments from '../experiments'
@@ -704,7 +704,7 @@ export const beginUploadActivityOutput = () => {
   process.stdout.write(chalk.bold.blue('. '))
   const uploadActivityInterval = setInterval(() => {
     process.stdout.write(chalk.bold.blue('. '))
-  }, UPLOAD_ACTIVITY_INTERVAL)
+  }, Number(UPLOAD_ACTIVITY_INTERVAL))
 
   return () => {
     if (uploadActivityInterval) {

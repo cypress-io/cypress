@@ -1,13 +1,13 @@
-require('../../spec_helper')
+import os from 'os'
+import path from 'path'
+import Promise from 'bluebird'
+import lockFileModule from 'lockfile'
+import { fs } from '../../../lib/util/fs'
+import * as env from '../../../lib/util/env'
+import exit from '../../../lib/util/exit'
+import { File as FileUtil } from '../../../lib/util/file'
 
-const os = require('os')
-const path = require('path')
-const Promise = require('bluebird')
-const lockFile = Promise.promisifyAll(require('lockfile'))
-const { fs } = require(`../../../lib/util/fs`)
-const env = require(`../../../lib/util/env`)
-const exit = require(`../../../lib/util/exit`)
-const FileUtil = require(`../../../lib/util/file`)
+const lockFile = Promise.promisifyAll(lockFileModule)
 
 describe('lib/util/file', () => {
   beforeEach(function () {

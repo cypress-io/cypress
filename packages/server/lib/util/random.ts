@@ -1,13 +1,9 @@
-const random = require('randomstring')
+import random from 'randomstring'
 
 // return a random id
-const id = (length = 5) => {
+export const id = (length = 5): string => {
   return random.generate({
     length,
     capitalization: 'lowercase',
   })
-}
-
-module.exports = {
-  id,
 }
