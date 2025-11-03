@@ -157,7 +157,11 @@ export class ProjectConfigIpc extends EventEmitter {
 
       let resolved = false
 
-      this._childProcess.on('error', (err) => {
+      this._childProcess.on('error', (err: NodeJS.ErrnoException) => {
+        if (err.code === 'EPIPE') {
+          return
+        }
+
         debug('unhandled error in child process %s', err)
         this.handleChildProcessError(err, this, resolved, reject)
         reject(err)
@@ -229,7 +233,11 @@ export class ProjectConfigIpc extends EventEmitter {
     return new Promise((resolve, reject) => {
       let resolved = false
 
-      this._childProcess.on('error', (err) => {
+      this._childProcess.on('error', (err: NodeJS.ErrnoException) => {
+        if (err.code === 'EPIPE') {
+          return
+        }
+
         this.handleChildProcessError(err, this, resolved, reject)
         reject(err)
       })
