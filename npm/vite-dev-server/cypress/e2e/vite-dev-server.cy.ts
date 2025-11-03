@@ -126,27 +126,27 @@ describe('sourcemaps', () => {
 
     cy.withCtx(async (ctx, o) => {
       await ctx.actions.file.writeFileInProject(
-        'JsErrorSpec.cy.js',
+        'src/JsErrorSpec.cy.js',
         o.testContent,
       )
 
       await ctx.actions.file.writeFileInProject(
-        'JsWithImportErrorSpec.cy.js',
+        'src/JsWithImportErrorSpec.cy.js',
         `import React from 'react';\n\n${o.testContent}`,
       )
 
       await ctx.actions.file.writeFileInProject(
-        'JsxErrorSpec.cy.jsx',
+        'src/JsxErrorSpec.cy.jsx',
         o.testContent,
       )
 
       await ctx.actions.file.writeFileInProject(
-        'TsErrorSpec.cy.ts',
+        'src/TsErrorSpec.cy.ts',
         `type MyType = { value: string }\n\n${o.testContent}`,
       )
 
       await ctx.actions.file.writeFileInProject(
-        'TsxErrorSpec.cy.tsx',
+        'src/TsxErrorSpec.cy.tsx',
         `type MyType = { value: string }\n\n${o.testContent}`,
       )
     }, { testContent })
@@ -157,7 +157,23 @@ describe('sourcemaps', () => {
       cy.contains(specName).click()
       cy.waitForSpecToFinish()
       cy.get('.failed > .num').should('contain', 2)
-      cy.get('.runnable-err-file-path', { timeout: 250 }).should('contain', `${specName}:${line}:${column}`)
+      cy.get('.runnable-err-file-path').eq(1).should('contain', `${specName}:${line}:${column}`)
+      cy.window().then((win) => {
+        // @ts-expect-error
+        cy.stub(win.getEventManager(), 'emit').as('emit')
+      })
+
+      cy.get('.runnable-err-file-path', { timeout: 250 }).eq(1).as('filePath')
+      cy.get('@filePath').should('contain', `${specName}:${line}:${column}`)
+      cy.get('@filePath').then(($el) => {
+        $el.find('span').trigger('click')
+      })
+
+      cy.get('@emit').should('have.been.calledWithMatch', 'open:file', {
+        absoluteFile: Cypress.sinon.match(new RegExp(`cy-projects/vite7.0.0-react/src/${specName}$`)),
+        line,
+        column,
+      })
     }
 
     verifySourcemap('JsErrorSpec.cy.js', 7, 8)

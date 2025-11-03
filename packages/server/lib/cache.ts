@@ -3,7 +3,7 @@ import Promise from 'bluebird'
 import { globalPubSub } from '@packages/data-context'
 import { fs } from './util/fs'
 import appData from './util/app_data'
-import FileUtil from './util/file'
+import { File as FileUtil } from './util/file'
 import type { Cache, CachedUser, Preferences, Cohort } from '@packages/types'
 
 interface Transaction {
@@ -55,6 +55,7 @@ export const cache = {
   },
 
   getProjectRoots (): Promise<string[]> {
+    // @ts-expect-error - transaction is untyped currently
     return fileUtil.transaction((tx: Transaction) => {
       return this._getProjects(tx).then((projects) => {
         const pathsToRemove = Promise.reduce(projects, (memo: string[], path: string) => {
@@ -76,6 +77,7 @@ export const cache = {
   },
 
   removeProject (path: string): Promise<void> {
+    // @ts-expect-error - transaction is untyped currently
     return fileUtil.transaction((tx: Transaction) => {
       return this._getProjects(tx).then((projects) => {
         return this._removeProjects(tx, projects, path)
@@ -84,6 +86,7 @@ export const cache = {
   },
 
   insertProject (path: string): Promise<void> {
+    // @ts-expect-error - transaction is untyped currently
     return fileUtil.transaction((tx: Transaction) => {
       return this._getProjects(tx).then((projects) => {
         // projects are sorted by most recently used, so add a project to
@@ -124,6 +127,7 @@ export const cache = {
   },
 
   insertProjectPreferences (projectTitle: string, projectPreferences: Preferences): Promise<void> {
+    // @ts-expect-error - transaction is untyped currently
     return fileUtil.transaction((tx: Transaction) => {
       return tx.get('PROJECT_PREFERENCES', {}).then((preferences) => {
         return tx.set('PROJECT_PREFERENCES', {
@@ -163,6 +167,7 @@ export const cache = {
   },
 
   insertCohort (cohort: Cohort): Promise<void> {
+    // @ts-expect-error - transaction is untyped currently
     return fileUtil.transaction((tx: Transaction) => {
       return tx.get('COHORTS', {}).then((cohorts) => {
         return tx.set('COHORTS', {
