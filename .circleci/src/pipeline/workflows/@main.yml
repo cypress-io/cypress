@@ -309,7 +309,7 @@ linux-x64:
                 # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
                 - 'update-v8-snapshot-cache-on-develop'
                 - 'feat/cy-prompt'
-        context: test-runner:npm-release
+        context: [test-runner:npm-release, org-npm-credentials]
         requires:
           - ready-to-release
 
