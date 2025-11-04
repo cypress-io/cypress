@@ -300,6 +300,7 @@ export class EventManager {
         this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
         this.studioStore.setSessionId(cloudStudioSessionId)
         this.studioStore.setActive(true)
+        this.reporterBus.emit('reporter:set:app:state', { isStudioNewTestPageActive: true })
       })
     }
 
@@ -310,6 +311,7 @@ export class EventManager {
       const needsReload = this.studioStore.needsProtocolCleanup()
 
       this.studioStore.cancel()
+      this.reporterBus.emit('reporter:set:app:state', { isStudioNewTestPageActive: false })
 
       // only reload the page if Studio has actually been used for recording
       if (needsReload) {
@@ -500,6 +502,10 @@ export class EventManager {
 
         this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
         this.studioStore.setSessionId(cloudStudioSessionId)
+
+        if (suiteId) {
+          this.reporterBus.emit('reporter:set:app:state', { isStudioNewTestPageActive: true })
+        }
 
         cb()
       })

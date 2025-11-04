@@ -86,20 +86,31 @@ const Suite: React.FC<SuiteProps> = observer(({ eventManager = events, model, st
     )
   }, [getHeaderIcon, model.title, studioEnabled, appState.studioActive])
 
-  const runnablesList = useMemo(() => (
-    <ul className='runnables'>
-      {_.map(model.children, (runnable, index) => {
-        return (<Runnable
-          key={runnable.id}
-          model={runnable}
-          studioEnabled={studioEnabled}
-          canSaveStudioLogs={canSaveStudioLogs}
-          shouldShowConnectingDots={shouldShowConnectionDots(model.children, runnable, index)}
-          spec={spec}
-        />)
-      })}
-    </ul>
-  ), [model.children, studioEnabled, canSaveStudioLogs])
+  const runnablesList = useMemo(() => {
+    let foundFirstTest = false
+
+    return (
+      <ul className='runnables'>
+        {_.map(model.children, (runnable, index) => {
+          const isFirstTest = !foundFirstTest && runnable.type === 'test'
+
+          if (isFirstTest) {
+            foundFirstTest = true
+          }
+
+          return (<Runnable
+            key={runnable.id}
+            model={runnable}
+            studioEnabled={studioEnabled}
+            canSaveStudioLogs={canSaveStudioLogs}
+            shouldShowConnectingDots={shouldShowConnectionDots(model.children, runnable, index)}
+            isFirstTest={isFirstTest}
+            spec={spec}
+          />)
+        })}
+      </ul>
+    )
+  }, [model.children, studioEnabled, canSaveStudioLogs])
 
   return (
     // we don't want to show the collapsible if there are no tests in the suite
@@ -126,13 +137,14 @@ export interface RunnableProps {
   canSaveStudioLogs: boolean
   shouldShowConnectingDots: boolean
   spec?: Cypress.Cypress['spec']
+  isFirstTest: boolean
 }
 
 // NOTE: some of the driver tests dig into the React instance for this component
 // in order to mess with its internal state. converting it to a functional
 // component breaks that, so it needs to stay a Class-based component or
 // else the driver tests need to be refactored to support it being functional
-const Runnable: React.FC<RunnableProps> = observer(({ model, studioEnabled, canSaveStudioLogs, shouldShowConnectingDots, spec }) => {
+const Runnable: React.FC<RunnableProps> = observer(({ model, studioEnabled, canSaveStudioLogs, shouldShowConnectingDots, spec, isFirstTest }) => {
   return (<>
     <li
       className={cs(`${model.type} runnable runnable-${model.state}`, {
@@ -142,7 +154,7 @@ const Runnable: React.FC<RunnableProps> = observer(({ model, studioEnabled, canS
       data-model-state={model.state}
     >
       {model.type === 'test'
-        ? <Test model={model as TestModel} studioEnabled={studioEnabled} spec={spec}/>
+        ? <Test model={model as TestModel} studioEnabled={studioEnabled} spec={spec} isFirstTest={isFirstTest}/>
         : <Suite model={model as SuiteModel}
           studioEnabled={studioEnabled}
           canSaveStudioLogs={canSaveStudioLogs}

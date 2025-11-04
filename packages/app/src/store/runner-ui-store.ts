@@ -23,6 +23,7 @@ export interface RunnerUiState {
   autoScrollingEnabled: boolean
   isSpecsListOpen: boolean
   showFetchRequests: boolean
+  studioTooltipDismissed: boolean
   specListWidth: number
   reporterWidth: number
   studioWidth: number
@@ -41,6 +42,7 @@ export const useRunnerUiStore = defineStore({
       autoScrollingEnabled: true,
       isSpecsListOpen: false,
       showFetchRequests: true,
+      studioTooltipDismissed: false,
       specListWidth: runnerConstants.defaultSpecListWidth,
       reporterWidth: runnerConstants.defaultReporterWidth,
       studioWidth: runnerConstants.defaultStudioWidth,

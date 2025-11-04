@@ -48,6 +48,7 @@ function renderReporter (
     autoScrollingEnabled: runnerUiStore.autoScrollingEnabled,
     isSpecsListOpen: runnerUiStore.isSpecsListOpen,
     showFetchRequests: runnerUiStore.showFetchRequests,
+    studioTooltipDismissed: runnerUiStore.studioTooltipDismissed,
     error: null,
     resetStatsOnSpecChange: true,
     // Studio can only be enabled for e2e testing

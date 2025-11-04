@@ -8,6 +8,7 @@ interface DefaultAppState {
   pinnedSnapshotId: number | string | null
   studioActive: boolean
   studioSingleTestActive: boolean
+  isStudioNewTestPageActive: boolean
   hasBeenPaused: boolean
 }
 
@@ -20,6 +21,7 @@ const defaults: DefaultAppState = {
   pinnedSnapshotId: null,
   studioActive: false,
   studioSingleTestActive: false,
+  isStudioNewTestPageActive: false,
   hasBeenPaused: false,
 }
 
@@ -33,9 +35,11 @@ class AppState {
   pinnedSnapshotId = defaults.pinnedSnapshotId
   studioActive = defaults.studioActive
   studioSingleTestActive = defaults.studioSingleTestActive
+  isStudioNewTestPageActive = defaults.isStudioNewTestPageActive
   showFetchRequests = true
   isStopped = false
   hasBeenPaused = defaults.hasBeenPaused
+  studioTooltipDismissed = false
   _resetAutoScrollingEnabledTo = true;
   [key: string]: any
 
@@ -50,8 +54,10 @@ class AppState {
       pinnedSnapshotId: observable,
       studioActive: observable,
       studioSingleTestActive: observable,
+      isStudioNewTestPageActive: observable,
       showFetchRequests: observable,
       hasBeenPaused: observable,
+      studioTooltipDismissed: observable,
     })
   }
 
@@ -134,12 +140,20 @@ class AppState {
     this.studioSingleTestActive = studioSingleTestActive
   }
 
+  setIsStudioNewTestPageActive (isStudioNewTestPageActive: boolean) {
+    this.isStudioNewTestPageActive = isStudioNewTestPageActive
+  }
+
   toggleShowFetchRequests () {
     this.showFetchRequests = !this.showFetchRequests
   }
 
   setShowFetchRequests (showFetchRequests: boolean) {
     this.showFetchRequests = showFetchRequests
+  }
+
+  setStudioTooltipDismissed (dismissed: boolean) {
+    this.studioTooltipDismissed = dismissed
   }
 
   reset () {

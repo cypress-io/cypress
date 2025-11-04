@@ -54,6 +54,7 @@ export const allowedKeys: Readonly<Array<keyof AllowedState>> = [
   'notifyWhenRunStartsFailing',
   'notifyWhenRunCompletes',
   'studioFirstUseInstructionsDismissed',
+  'studioTooltipDismissed',
 ] as const
 
 type Maybe<T> = T | null | undefined
@@ -98,4 +99,5 @@ export type AllowedState = Partial<{
   notifyWhenRunStartsFailing: Maybe<boolean>
   notifyWhenRunCompletes: Maybe<NotifyWhenRunCompletes[]>
   studioFirstUseInstructionsDismissed: Maybe<boolean>
+  studioTooltipDismissed: Maybe<boolean>
 }>

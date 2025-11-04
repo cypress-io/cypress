@@ -1425,6 +1425,7 @@ type LocalSettingsPreferences {
   shouldLaunchBrowserFromOpenBrowser: Boolean
   showFetchRequests: Boolean
   specListWidth: Int
+  studioTooltipDismissed: Boolean
   studioWidth: Int
   wasBrowserSetInCLI: Boolean
 }

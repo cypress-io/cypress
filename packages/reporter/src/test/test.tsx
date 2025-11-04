@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
-import React, { MouseEvent, useCallback } from 'react'
-import { IconGeneralSparkleSingleLarge } from '@cypress-design/react-icon'
+import React, { MouseEvent, useCallback, useState } from 'react'
+import { IconCypressStudio, IconGeneralSparkleSingleLarge } from '@cypress-design/react-icon'
 
 import events, { Events } from '../lib/events'
 import appState, { AppState } from '../lib/app-state'
@@ -19,14 +19,17 @@ interface TestProps {
   model: TestModel
   studioEnabled: boolean
   spec?: Cypress.Cypress['spec']
+  isFirstTest: boolean
 }
 
-const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = events, appState: appStateProps = appState, studioEnabled, spec }) => {
+const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = events, appState: appStateProps = appState, studioEnabled, spec, isFirstTest }) => {
   const { containerRef, isMounted, scrollIntoView } = useScrollIntoView({
     appState: appStateProps,
     testState: model.state,
     isStudioActive: appStateProps.studioActive,
   })
+
+  const [firstTestTooltipVisible, setFirstTestTooltipVisible] = useState(true)
 
   const _launchStudio = useCallback((e: MouseEvent) => {
     e.preventDefault()
@@ -34,6 +37,15 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
 
     eventsProps.emit('studio:init:test', { testId: model.id })
   }, [eventsProps, model.id])
+
+  const _handleDismissStudioTooltip = useCallback((e: MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    setFirstTestTooltipVisible(false)
+    appStateProps.setStudioTooltipDismissed(true)
+    eventsProps.emit('save:state')
+  }, [eventsProps, appStateProps])
 
   React.useEffect(() => {
     if (isMounted) {
@@ -62,11 +74,11 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
     const isRunningAllSpecs = spec?.relative === '__all'
 
     if (studioEnabled && !appStateProps.studioActive && model.state !== 'pending' && !isRunningAllSpecs) {
-      controls.push(
-        <LaunchStudioIcon
-          key={`studio-command-${model}`}
-          content={
-            <div
+      if (appStateProps.isStudioNewTestPageActive && isFirstTest && !appStateProps.studioTooltipDismissed) {
+        controls.push(
+          <LaunchStudioIcon
+            key={`studio-command-${model}`}
+            content={ <div
               className='flex items-start py-[8px] px-[8px] flex-col gap-[2px]'
             >
               <div className='flex items-center text-white text-[16px] font-medium'>
@@ -76,16 +88,32 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
               <span className='text-gray-300 text-[14px] text-left'>
               Open a test in Studio to refine it with AI recommendations.
               </span>
-              <Button size='24' variant='outline-dark' className='px-[8px] mt-[12px] mb-[8px]' onClick={() => {}}>
+              <Button size='24' variant='outline-dark' className='px-[8px] mt-[12px] mb-[8px]' onClick={_handleDismissStudioTooltip}>
                 <span className='text-indigo-300'>
                   Got it, don't show this again.
                 </span>
               </Button>
-            </div>
-          }
-          onClick={_launchStudio}
-        />,
-      )
+            </div>}
+            onClick={(e) => {
+              _handleDismissStudioTooltip(e)
+              _launchStudio(e)
+            }}
+            className='launch-studio-tooltip'
+            wrapperClassName='edit-in-studio-tooltip'
+            visible={firstTestTooltipVisible}
+          />,
+        )
+      } else {
+        controls.push(
+          <LaunchStudioIcon
+            key={`studio-command-${model}`}
+            content={ <div className='flex items-center py-[8px] px-[8px]'>
+              <div><IconCypressStudio strokeColor="gray-500" className="mr-[10px]" /></div>
+              <div className='text-sm text-gray-700'>Edit in Studio</div></div>}
+            onClick={_launchStudio}
+          />,
+        )
+      }
     }
 
     if (controls.length === 0) {

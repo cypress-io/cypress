@@ -93,18 +93,30 @@ interface RunnablesListProps {
 }
 
 const RunnablesList: React.FC<RunnablesListProps> = observer(({ runnables, studioEnabled, canSaveStudioLogs, spec }: RunnablesListProps) => {
+  let foundFirstTest = false
+
   return (
     <div className='wrap'>
       <ul className='runnables'>
-        {_.map(runnables, (runnable, index) =>
-          (<Runnable
-            key={runnable.id}
-            model={runnable}
-            canSaveStudioLogs={canSaveStudioLogs}
-            studioEnabled={studioEnabled}
-            shouldShowConnectingDots={shouldShowConnectionDots(runnables, runnable, index)}
-            spec={spec}
-          />))}
+        {_.map(runnables, (runnable, index) => {
+          const isFirstTest = !foundFirstTest && runnable.type === 'test'
+
+          if (isFirstTest) {
+            foundFirstTest = true
+          }
+
+          return (
+            <Runnable
+              key={runnable.id}
+              model={runnable}
+              canSaveStudioLogs={canSaveStudioLogs}
+              studioEnabled={studioEnabled}
+              shouldShowConnectingDots={shouldShowConnectionDots(runnables, runnable, index)}
+              spec={spec}
+              isFirstTest={isFirstTest}
+            />
+          )
+        })}
       </ul>
     </div>
   )

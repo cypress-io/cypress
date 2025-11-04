@@ -1,0 +1,26 @@
+@import "../lib/variables.scss";
+
+.launch-studio-tooltip {
+  background-color: $gray-900;
+  border-color: $gray-900;
+  min-width: 272px;
+
+  .cy-tooltip-arrow {
+    svg {
+      fill: $gray-900;
+      stroke: $gray-900;
+    }
+  }
+}
+
+.edit-in-studio-tooltip {
+  border: 2px solid #9aa2fc !important;
+  align-items: center;
+  box-shadow: 0 0 0 3px #6470f366;
+  padding: 0 !important;
+  justify-content: center;
+
+  svg {
+    flex-shrink: 0 !important;
+  }
+}

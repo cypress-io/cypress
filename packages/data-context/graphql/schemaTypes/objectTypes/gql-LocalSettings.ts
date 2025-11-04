@@ -66,6 +66,8 @@ export const LocalSettingsPreferences = objectType({
         return ctx.coreData.localSettings.preferences.notifyWhenRunCompletes || []
       },
     })
+
+    t.boolean('studioTooltipDismissed')
   },
 })
 

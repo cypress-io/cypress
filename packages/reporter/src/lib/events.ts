@@ -134,6 +134,14 @@ const events: Events = {
       appState.pinnedSnapshotId = null
     }))
 
+    runner.on('reporter:set:app:state', action('reporter:set:app:state', (stateUpdates: Partial<AppState>) => {
+      Object.keys(stateUpdates).forEach((key) => {
+        if (key in appState) {
+          appState[key] = stateUpdates[key]
+        }
+      })
+    }))
+
     localBus.on('resume', action('resume', () => {
       appState.resume()
       statsStore.resume()
@@ -205,6 +213,7 @@ const events: Events = {
         autoScrollingEnabled: appState.autoScrollingUserPref,
         isSpecsListOpen: appState.isSpecsListOpen,
         showFetchRequests: appState.showFetchRequests,
+        studioTooltipDismissed: appState.studioTooltipDismissed,
       })
     })
 
