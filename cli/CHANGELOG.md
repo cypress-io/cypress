@@ -1,12 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.6.0
 
-_Released 11/4/2025 (PENDING)_
+_Released 11/4/2025_
 
 **Features:**
 
- - Added a 'Self-healed' badge to the Command Log when `cy.prompt()` steps automatically recover after the element they need is not found in the cache. Addressed in [#32802](https://github.com/cypress-io/cypress/pull/32802).
-- `cy.prompt()` will now show a warning in the `Get code` modal when there are unsaved changes in `Studio` that will be lost if the user saves the generated code. Addressed in [#32741](https://github.com/cypress-io/cypress/pull/32741).
+ - Added a 'Self-healed' badge to the Command Log when [`cy.prompt()`](https://docs.cypress.io/api/commands/prompt) steps automatically recover after the element they need is not found in the cache. Addressed in [#32802](https://github.com/cypress-io/cypress/pull/32802).
+- [`cy.prompt()`](https://docs.cypress.io/api/commands/prompt) will now show a warning in the `Get code` modal when there are unsaved changes in `Studio` that will be lost if the user saves the generated code. Addressed in [#32741](https://github.com/cypress-io/cypress/pull/32741).
 
 **Bugfixes:**
 
@@ -14,7 +14,7 @@ _Released 11/4/2025 (PENDING)_
 - Chrome's autofill popup is now disabled when filling address and credit card forms during test execution. We also added some other Chrome flags and preferences that are common when automating browsers. Fixes [#25608](https://github.com/cypress-io/cypress/issues/25608). Addressed in [#32811](https://github.com/cypress-io/cypress/pull/32811).
 - Fixed an issue where grouped command text jumps up and down when expanding and collapsing in the command log. Addressed in [#32757](https://github.com/cypress-io/cypress/pull/32757).
 - Fixed an issue with grouped console prop items having a hard to read blue color in the console log and duplicate `:` characters being displayed. Addressed in [#32776](https://github.com/cypress-io/cypress/pull/32776).
-- Added more context to the error message shown when `cy.prompt()` fails to download. Addressed in [#32822](https://github.com/cypress-io/cypress/pull/32822).
+- Added more context to the error message shown when [`cy.prompt()`](https://docs.cypress.io/api/commands/prompt) fails to download. Addressed in [#32822](https://github.com/cypress-io/cypress/pull/32822).
 - Fixed an issue where absolute file paths were not correctly determined from the source map when the source map root was updated. Fixes [#32809](https://github.com/cypress-io/cypress/issues/32809).
 
 **Misc:**
@@ -25,7 +25,7 @@ _Released 11/4/2025 (PENDING)_
 - WebKit now prefers a cookie's fully qualified `domain` when requesting a cookie value via [`cy.getCookie()`](https://docs.cypress.io/api/commands/getcookie). If none are found, the cookie's apex domain will be used as a fallback. Addresses [#29954](https://github.com/cypress-io/cypress/issues/29954), [#29973](https://github.com/cypress-io/cypress/issues/29973) and [#30392](https://github.com/cypress-io/cypress/issues/30392). Addressed in [#32852](https://github.com/cypress-io/cypress/pull/32852).
 - The 'Next' tooltip style was updated. Addressed in [#32866](https://github.com/cypress-io/cypress/pull/32866).
 - Make test name header sticky in studio mode and in the tests list. Addresses [#32591](https://github.com/cypress-io/cypress/issues/32591). Addressed in [#32840](https://github.com/cypress-io/cypress/pull/32840)
-- The `cy.exec()` type now reflects the correct yielded response type of `exitCode`. Addresses [#32875](https://github.com/cypress-io/cypress/issues/32875). Addressed in [#32885](https://github.com/cypress-io/cypress/pull/32885).
+- The [`cy.exec()`](https://docs.cypress.io/api/commands/exec) type now reflects the correct yielded response type of `exitCode`. Addresses [#32875](https://github.com/cypress-io/cypress/issues/32875). Addressed in [#32885](https://github.com/cypress-io/cypress/pull/32885).
 
 **Dependency Updates:**
 
@@ -49,7 +49,7 @@ _Released 10/17/2025_
 **Misc:**
 
 - Browser detection in Cypress now always prefers 64-bit browser installs to 32-bit browser installs. Addressed in [#32656](https://github.com/cypress-io/cypress/pull/32656).
-- Update code button styles and rename Get Code for Code on cy.prompt. Addressed in [#32745](https://github.com/cypress-io/cypress/pull/32745).
+- Update code button styles and rename Get Code for Code on [`cy.prompt()`](https://docs.cypress.io/api/commands/prompt). Addressed in [#32745](https://github.com/cypress-io/cypress/pull/32745).
 
 **Dependency Updates:**
 
@@ -69,7 +69,7 @@ _Released 10/7/2025_
 **Bugfixes:**
 
 - Fixed a regression introduced in [`15.0.0`](https://docs.cypress.io/guides/references/changelog#15-0-0) where `dbus` connection error messages appear in docker containers when launching Cypress. Fixes [#32290](https://github.com/cypress-io/cypress/issues/32290).
-- Fixed code frames in `cy.origin` so that failed commands will show the correct line/column within the corresponding spec file. Addressed in [#32597](https://github.com/cypress-io/cypress/pull/32597).
+- Fixed code frames in [`cy.origin()`](https://docs.cypress.io/api/commands/origin) so that failed commands will show the correct line/column within the corresponding spec file. Addressed in [#32597](https://github.com/cypress-io/cypress/pull/32597).
 - Fixed Cypress cloud requests so that they properly verify SSL certificates. Addressed in [#32629](https://github.com/cypress-io/cypress/pull/32629).
 
 **Misc:**
@@ -77,7 +77,7 @@ _Released 10/7/2025_
 - Added a dropdown menu in the Command Log that includes actions like Open in IDE and Add New Test in Studio, along with test preferences such as Auto-Scroll and Hide HTTP Requests. Addresses [#32556](https://github.com/cypress-io/cypress/issues/32556) and [#32558](https://github.com/cypress-io/cypress/issues/32558). Addressed in [#32611](https://github.com/cypress-io/cypress/pull/32611).
 - Updated the Studio test editing header to include a Back button. This change ensures the Specs button remains functional for expanding or collapsing the specs panel. Addresses [#32556](https://github.com/cypress-io/cypress/issues/32556) and [#32558](https://github.com/cypress-io/cypress/issues/32558). Addressed in [#32611](https://github.com/cypress-io/cypress/pull/32611).
 - Fixed the Studio panel resizing when dragging. Addressed in [#32584](https://github.com/cypress-io/cypress/pull/32584).
-- The Next button now maintains consistent visibility during stepping sessions when using `cy.pause`, staying visible but disabled when no immediate next command is available, providing clear visual feedback to users about stepping state. Addresses [#32476](https://github.com/cypress-io/cypress/issues/32476). Addressed in [#32536](https://github.com/cypress-io/cypress/pull/32536).
+- The Next button now maintains consistent visibility during stepping sessions when using [`cy.pause()`](https://docs.cypress.io/api/commands/pause), staying visible but disabled when no immediate next command is available, providing clear visual feedback to users about stepping state. Addresses [#32476](https://github.com/cypress-io/cypress/issues/32476). Addressed in [#32536](https://github.com/cypress-io/cypress/pull/32536).
 
 **Dependency Updates:**
 
@@ -114,7 +114,7 @@ _Released 9/9/2025_
 
 **Bugfixes:**
 
-- We now properly partition the `host` with `port` when caching family DNS lookups. This resolves issues where some `localhost` URLs were not resolving in `cy.visit()` in Cypress when they should have. Fixes [#25397](https://github.com/cypress-io/cypress/issues/25397). Addressed in [#32403](https://github.com/cypress-io/cypress/pull/32403).
+- We now properly partition the `host` with `port` when caching family DNS lookups. This resolves issues where some `localhost` URLs were not resolving in [`cy.visit()`](https://docs.cypress.io/api/commands/visit) in Cypress when they should have. Fixes [#25397](https://github.com/cypress-io/cypress/issues/25397). Addressed in [#32403](https://github.com/cypress-io/cypress/pull/32403).
 
 **Dependency Updates:**
 
@@ -126,7 +126,7 @@ _Released 09/02/2025_
 
 **Features:**
 
-- Expanded `cy.press()` to support more key types. Addresses [#31051](https://github.com/cypress-io/cypress/issues/31051) and [#31488](https://github.com/cypress-io/cypress/issues/31488). Addressed in [#31496](https://github.com/cypress-io/cypress/pull/31496).
+- Expanded [`cy.press()`](https://docs.cypress.io/api/commands/press) to support more key types. Addresses [#31051](https://github.com/cypress-io/cypress/issues/31051) and [#31488](https://github.com/cypress-io/cypress/issues/31488). Addressed in [#31496](https://github.com/cypress-io/cypress/pull/31496).
 
 **Bugfixes:**
 
