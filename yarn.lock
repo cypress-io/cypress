@@ -6486,12 +6486,12 @@
     rimraf "^3.0.2"
     ws "^8.0.0"
 
-"@percy/cypress@^3.1.3":
-  version "3.1.3"
-  resolved "https://registry.yarnpkg.com/@percy/cypress/-/cypress-3.1.3.tgz#0f50b4e15335a6c0e4da617ef70b34d8adbe4bd3"
-  integrity sha512-IboiK03dCvG+7Dy9rmuAuq7J+DAqZ0MaZxGF8u7VhVp9EeiXk3frKfTXH9EGH2vwalC1/r6yV54/y2IfdN1V2w==
+"@percy/cypress@^3.1.6":
+  version "3.1.6"
+  resolved "https://registry.yarnpkg.com/@percy/cypress/-/cypress-3.1.6.tgz#2c5ebe6851d3ffabaab9e39323ec928c049663ac"
+  integrity sha512-kMc2tXQ7LAH31lB7FckqMpdvguIyxwV4MLTs7s8QLXVChQjpE78HbKyvLtYh5uLOF6Ka6mWyMvD2bkhmd0JJJg==
   dependencies:
-    "@percy/sdk-utils" "^1.3.1"
+    "@percy/sdk-utils" "1.30.9"
 
 "@percy/dom@1.27.4":
   version "1.27.4"
@@ -6532,10 +6532,15 @@
   resolved "https://registry.yarnpkg.com/@percy/sdk-utils/-/sdk-utils-1.27.4.tgz#7396d743aa6916ae7fad639b0fa86f206a9b2aca"
   integrity sha512-vhPcdtmJlvTYJ5VOqiVzo02ujdtBFNw1/Bj+2ybiZgn7PkCDPFcITfXoWWPea319EIibGC4ZHjWHctRBgtW/tQ==
 
-"@percy/sdk-utils@1.27.6", "@percy/sdk-utils@^1.3.1":
+"@percy/sdk-utils@1.27.6":
   version "1.27.6"
   resolved "https://registry.yarnpkg.com/@percy/sdk-utils/-/sdk-utils-1.27.6.tgz#f6daa7f81fde65d61e7c2817ad1215eda4eed7fe"
   integrity sha512-oZwd9u+KnFdMbA8HmisiWY5un4qB00kNUJtn/6CsXSpLwMi4qhOiBp8xjex0Aq5dqQc3vklWdlPu7JFxGwQq4Q==
+
+"@percy/sdk-utils@1.30.9":
+  version "1.30.9"
+  resolved "https://registry.yarnpkg.com/@percy/sdk-utils/-/sdk-utils-1.30.9.tgz#fdc65afbeb8db96cc34cebd3e206564eadd30e1c"
+  integrity sha512-vgzWUa1eDWRS+q/zlVILwP4QDFdmxPIiH7FbQ2UGA4rh3mDYporIq5OY+x2YMMV9/Q4uhi1p3ZxXW2Svg6cOHw==
 
 "@percy/webdriver-utils@1.27.4":
   version "1.27.4"
