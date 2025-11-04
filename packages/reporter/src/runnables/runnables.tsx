@@ -1,11 +1,11 @@
 import _ from 'lodash'
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
-import React, { MouseEvent, useCallback, useEffect, useRef } from 'react'
+import React, { MouseEvent, useCallback, useEffect, useMemo, useRef } from 'react'
 
 import events, { Events } from '../lib/events'
 import { RunnablesError, RunnablesErrorModel } from './runnable-error'
-import Runnable, { shouldShowConnectionDots } from './runnable-and-suite'
+import Runnable, { shouldShowConnectionDots, findFirstTestId } from './runnable-and-suite'
 import type { RunnablesStore, RunnableArray } from './runnables-store'
 import type { StatsStore } from '../header/stats-store'
 import type { Scroller, UserScrollCallback } from '../lib/scroller'
@@ -93,30 +93,22 @@ interface RunnablesListProps {
 }
 
 const RunnablesList: React.FC<RunnablesListProps> = observer(({ runnables, studioEnabled, canSaveStudioLogs, spec }: RunnablesListProps) => {
-  let foundFirstTest = false
+  const firstTestId = useMemo(() => findFirstTestId(runnables), [runnables])
 
   return (
     <div className='wrap'>
       <ul className='runnables'>
-        {_.map(runnables, (runnable, index) => {
-          const isFirstTest = !foundFirstTest && runnable.type === 'test'
-
-          if (isFirstTest) {
-            foundFirstTest = true
-          }
-
-          return (
-            <Runnable
-              key={runnable.id}
-              model={runnable}
-              canSaveStudioLogs={canSaveStudioLogs}
-              studioEnabled={studioEnabled}
-              shouldShowConnectingDots={shouldShowConnectionDots(runnables, runnable, index)}
-              spec={spec}
-              isFirstTest={isFirstTest}
-            />
-          )
-        })}
+        {_.map(runnables, (runnable, index) => (
+          <Runnable
+            key={runnable.id}
+            model={runnable}
+            canSaveStudioLogs={canSaveStudioLogs}
+            studioEnabled={studioEnabled}
+            shouldShowConnectingDots={shouldShowConnectionDots(runnables, runnable, index)}
+            spec={spec}
+            firstTestId={firstTestId}
+          />
+        ))}
       </ul>
     </div>
   )

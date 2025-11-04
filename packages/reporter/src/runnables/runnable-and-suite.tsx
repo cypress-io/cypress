@@ -20,12 +20,31 @@ export const shouldShowConnectionDots = (runnables: RunnableArray, runnable: Sui
   return runnable.type === 'test' && runnableIndex !== runnables.length - 1 && runnables[runnableIndex + 1].type === 'test'
 }
 
+// Recursively find the ID of the first test in the runnable tree
+export const findFirstTestId = (runnables: RunnableArray): string | null => {
+  for (const runnable of runnables) {
+    if (runnable.type === 'test') {
+      return runnable.id
+    }
+
+    if (runnable.type === 'suite') {
+      const suite = runnable as SuiteModel
+      const firstTestId = findFirstTestId(suite.children)
+
+      if (firstTestId) return firstTestId
+    }
+  }
+
+  return null
+}
+
 interface SuiteProps {
   eventManager?: Events
   model: SuiteModel
   studioEnabled: boolean
   canSaveStudioLogs: boolean
   spec?: Cypress.Cypress['spec']
+  firstTestId: string | null
 }
 
 const headerIconDefaultProps = {
@@ -34,7 +53,7 @@ const headerIconDefaultProps = {
   className: 'header-icon',
 }
 
-const Suite: React.FC<SuiteProps> = observer(({ eventManager = events, model, studioEnabled, canSaveStudioLogs, spec }: SuiteProps) => {
+const Suite: React.FC<SuiteProps> = observer(({ eventManager = events, model, studioEnabled, canSaveStudioLogs, spec, firstTestId }: SuiteProps) => {
   const headerIconStyle = {
     marginTop: '1px',
   }
@@ -87,30 +106,22 @@ const Suite: React.FC<SuiteProps> = observer(({ eventManager = events, model, st
   }, [getHeaderIcon, model.title, studioEnabled, appState.studioActive])
 
   const runnablesList = useMemo(() => {
-    let foundFirstTest = false
-
     return (
       <ul className='runnables'>
-        {_.map(model.children, (runnable, index) => {
-          const isFirstTest = !foundFirstTest && runnable.type === 'test'
-
-          if (isFirstTest) {
-            foundFirstTest = true
-          }
-
-          return (<Runnable
+        {_.map(model.children, (runnable, index) => (
+          <Runnable
             key={runnable.id}
             model={runnable}
             studioEnabled={studioEnabled}
             canSaveStudioLogs={canSaveStudioLogs}
             shouldShowConnectingDots={shouldShowConnectionDots(model.children, runnable, index)}
-            isFirstTest={isFirstTest}
             spec={spec}
-          />)
-        })}
+            firstTestId={firstTestId}
+          />
+        ))}
       </ul>
     )
-  }, [model.children, studioEnabled, canSaveStudioLogs])
+  }, [model.children, studioEnabled, canSaveStudioLogs, firstTestId])
 
   return (
     // we don't want to show the collapsible if there are no tests in the suite
@@ -137,14 +148,16 @@ export interface RunnableProps {
   canSaveStudioLogs: boolean
   shouldShowConnectingDots: boolean
   spec?: Cypress.Cypress['spec']
-  isFirstTest: boolean
+  firstTestId: string | null
 }
 
 // NOTE: some of the driver tests dig into the React instance for this component
 // in order to mess with its internal state. converting it to a functional
 // component breaks that, so it needs to stay a Class-based component or
 // else the driver tests need to be refactored to support it being functional
-const Runnable: React.FC<RunnableProps> = observer(({ model, studioEnabled, canSaveStudioLogs, shouldShowConnectingDots, spec, isFirstTest }) => {
+const Runnable: React.FC<RunnableProps> = observer(({ model, studioEnabled, canSaveStudioLogs, shouldShowConnectingDots, spec, firstTestId }) => {
+  const isFirstTest = model.type === 'test' && model.id === firstTestId
+
   return (<>
     <li
       className={cs(`${model.type} runnable runnable-${model.state}`, {
@@ -159,6 +172,7 @@ const Runnable: React.FC<RunnableProps> = observer(({ model, studioEnabled, canS
           studioEnabled={studioEnabled}
           canSaveStudioLogs={canSaveStudioLogs}
           spec={spec}
+          firstTestId={firstTestId}
         />}
     </li>
     {shouldShowConnectingDots && <div className='runnable-dotted-line' />}
