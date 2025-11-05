@@ -1994,7 +1994,7 @@ export default {
             test.pending = true
           } else {
             // set the current retry to the retry that we are resuming at
-            test._currentRetry = currentRetry
+            test._currentRetry = currentRetry ?? 0
 
             // bail so we can stop now
             return
