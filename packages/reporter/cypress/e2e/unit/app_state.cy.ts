@@ -218,4 +218,15 @@ describe('app state', () => {
       expect(instance.studioActive).to.be.false
     })
   })
+
+  context('#setStudioTooltipDismissed', () => {
+    it('sets studioTooltipDismissed', () => {
+      const instance = new AppState()
+
+      expect(instance.studioTooltipDismissed).to.eq(false)
+
+      instance.setStudioTooltipDismissed(true)
+      expect(instance.studioTooltipDismissed).to.eq(true)
+    })
+  })
 })
