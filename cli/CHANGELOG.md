@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.6.1
+
+_Released 11/18/2025_
+
+**Misc:**
+
+- The keyboard shortcuts modal now displays the keyboard shortcut for saving Studio changes - `⌘` + `s` for Mac or `Ctrl` + `s` for Windows/Linux. Addressed [#32862](https://github.com/cypress-io/cypress/issues/32862). Addressed in [#32864](https://github.com/cypress-io/cypress/pull/32864).
+
 ## 15.6.0
 
 _Released 11/4/2025_
