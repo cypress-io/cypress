@@ -43,7 +43,7 @@
     "@packages/telemetry": "0.0.0-development",
     "@packages/types": "0.0.0-development",
     "@percy/cypress": "^3.1.6",
-    "@popperjs/core": "2.11.6",
+    "@popperjs/core": "2.11.8",
     "@testing-library/cypress": "10.1.0",
     "@tooling/system-tests": "0.0.0-development",
     "@urql/core": "2.4.4",
