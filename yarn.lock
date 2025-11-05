@@ -7918,10 +7918,10 @@
   resolved "https://registry.yarnpkg.com/@tootallnate/quickjs-emscripten/-/quickjs-emscripten-0.23.0.tgz#db4ecfd499a9765ab24002c3b696d02e6d32a12c"
   integrity sha512-C5Mc6rdnsaJDjO3UpGW/CQTHtCKaYlScZTly4JIu97Jxo/odCiH0ITnDXSJPTOrEKk/ycSZ0AOgTmkDtkOsvIA==
 
-"@toycode/markdown-it-class@1.2.3":
-  version "1.2.3"
-  resolved "https://registry.yarnpkg.com/@toycode/markdown-it-class/-/markdown-it-class-1.2.3.tgz#272082b46d1242d2607a3aca281aae9d208fc182"
-  integrity sha512-9N7iI5iGzjmYpeEFE93/76SkiSZkywkIiKUxahoU4h5WDUJyruXO+Ce4o/nFkFdKQnmsTmyxhdCtXVikl67XGw==
+"@toycode/markdown-it-class@1.2.4":
+  version "1.2.4"
+  resolved "https://registry.yarnpkg.com/@toycode/markdown-it-class/-/markdown-it-class-1.2.4.tgz#6d9bc162d0b980695a2e6b2622f49eb1c3f349c8"
+  integrity sha512-hA4gHBK8moObkOYdWTjhy1wYcYy0MJeM3JjSKbsXHRpRMvIKhk6Jm+t3bXsSScTdz/byWqQbs8YIwVYjHp+SlQ==
 
 "@trysound/sax@0.2.0":
   version "0.2.0"
