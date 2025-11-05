@@ -88,3 +88,21 @@
   background: $linear-gradient;
   z-index: 0;
 }
+
+@mixin sticky-header-with-shadow {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: $gray-1100;
+
+  &.shadow-active::after {
+    content: "";
+    position: absolute;
+    top: 101%;
+    left: 0;
+    right: 0;
+    height: 16px;
+    background: linear-gradient(to bottom, $gray-1100 0%, rgba(22, 24, 39, 0.3) 100%);
+    pointer-events: none;
+  }
+}

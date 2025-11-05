@@ -1,3 +1,5 @@
+@import "../lib/mixins.scss";
+
 .reporter {
   .collapsible-indicator {
     margin-right: 8px;
@@ -7,5 +9,9 @@
 
   .is-open > .collapsible-header-wrapper > .collapsible-header > .collapsible-header-inner > .collapsible-indicator {
     transform: rotate(0);
+  }
+
+  .test > .is-open > .collapsible-header-wrapper {
+    @include sticky-header-with-shadow;
   }
 }

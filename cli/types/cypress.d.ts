@@ -6476,7 +6476,7 @@ declare namespace Cypress {
   }
 
   interface Exec {
-    code: number
+    exitCode: number
     stdout: string
     stderr: string
   }
