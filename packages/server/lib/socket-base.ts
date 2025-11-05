@@ -617,7 +617,7 @@ export class SocketBase {
             // the test state on the protocol manager and prompt manager
             if (s.currentId) {
               const testId = s.currentId
-              const currentRetry = s.currentRetry
+              const currentRetry = s.currentRetry ?? undefined
 
               this._protocolManager?.resetTest(testId, currentRetry)
 
