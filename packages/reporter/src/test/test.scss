@@ -3,7 +3,8 @@
 .launch-studio-tooltip {
   background-color: $gray-900;
   border-color: $gray-900;
-  min-width: 272px;
+  min-width: 375px;
+  padding: 0;
 
   .cy-tooltip-arrow {
     svg {

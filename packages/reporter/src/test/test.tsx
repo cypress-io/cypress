@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react'
 import React, { MouseEvent, useCallback, useState } from 'react'
-import { IconCypressStudio, IconGeneralSparkleSingleLarge } from '@cypress-design/react-icon'
+import { IconActionDeleteSmall, IconCypressStudio, IconGeneralSparkleSingleLarge } from '@cypress-design/react-icon'
 
 import events, { Events } from '../lib/events'
 import appState, { AppState } from '../lib/app-state'
@@ -79,14 +79,22 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
           <LaunchStudioIcon
             key={`studio-command-${model}`}
             content={ <div
-              className='flex items-start py-[8px] px-[8px] flex-col gap-[2px]'
+              className='flex items-start flex-col gap-[4px] py-[12px] pl-[16px]'
             >
-              <div className='flex items-center text-white text-[16px] font-medium'>
-                <IconGeneralSparkleSingleLarge strokeColor="gray-500" fillColor='gray-900' className="mr-[10px]" />
+              <div className='flex items-center justify-between text-white text-[16px] font-medium w-full relative'>
                 Edit test in studio
+                <Button size='24' variant='link' className='absolute right-0 bottom-[8px]' onClick={_handleDismissStudioTooltip}>
+                  <IconActionDeleteSmall size='16' strokeColor="gray-500" />
+                </Button>
               </div>
-              <span className='text-gray-300 text-[14px] text-left'>
-              Open a test in Studio to refine it with AI recommendations.
+              <span className="flex items-center flex-row gap-[8px] text-gray-300 text-[14px] text-left justify-start">
+                <IconCypressStudio fillColor="gray-500" />
+              Open a test in Studio to make edits
+              </span>
+              <span className='flex items-center flex-row gap-[8px] text-gray-300 text-[14px] text-left'>
+                <IconGeneralSparkleSingleLarge strokeColor="gray-500" fillColor='gray-900' />
+                  Refine test with AI recommendations
+                <span className='text-gray-300 bg-gray-950 font-medium border border-gray-800 rounded-[4px] px-[4px] text-[12px] font-medium'>Coming soon</span>
               </span>
               <Button size='24' variant='outline-dark' className='px-[8px] mt-[12px] mb-[8px]' onClick={_handleDismissStudioTooltip}>
                 <span className='text-indigo-300'>
@@ -108,7 +116,7 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
           <LaunchStudioIcon
             key={`studio-command-${model}`}
             content={ <div className='flex items-center py-[8px] px-[8px]'>
-              <div><IconCypressStudio strokeColor="gray-500" className="mr-[10px]" /></div>
+              <div><IconCypressStudio fillColor="gray-500" className="mr-[10px]" /></div>
               <div className='text-sm text-gray-700'>Edit in Studio</div></div>}
             onClick={_launchStudio}
           />,
