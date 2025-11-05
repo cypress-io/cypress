@@ -16,7 +16,7 @@ Before starting, gather the following information:
 
 ### Finding Version Information
 
-**IMPORTANT**: The target Electron version, Chromium version, and Node.js verions must be specified in the chat prompt.
+**IMPORTANT**: The target Electron version, Chromium version, and Node.js versions must be specified in the chat prompt.
 
 ## Step 1: Update Core Electron Version
 
@@ -147,18 +147,18 @@ An Electron upgrade is **NOT a breaking change** if:
 ```markdown
 ## Breaking Changes
 
-- Upgraded `electron` from `OLD_VERSION` to `NEW_VERSION`
-- Upgraded bundled Node.js version from `OLD_NODE_VERSION` to `NEW_NODE_VERSION`
-- Upgraded bundled Chromium version from `OLD_CHROMIUM_VERSION` to `NEW_CHROMIUM_VERSION`
+- Upgraded `electron`
+- Upgraded bundled Node.js version
+- Upgraded bundled Chromium version
 ```
 
 **For Non-Breaking Changes**:
 ```markdown
 ## Dependency Updates
 
-- Upgraded `electron` from `OLD_VERSION` to `NEW_VERSION`
-- Upgraded bundled Node.js version from `OLD_NODE_VERSION` to `NEW_NODE_VERSION`
-- Upgraded bundled Chromium version from `OLD_CHROMIUM_VERSION` to `NEW_CHROMIUM_VERSION`
+- Upgraded `electron`
+- Upgraded bundled Node.js version
+- Upgraded bundled Chromium version
 ```
 
 ## Step 10: Testing and Validation
