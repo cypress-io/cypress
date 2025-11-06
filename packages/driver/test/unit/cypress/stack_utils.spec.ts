@@ -20,6 +20,7 @@ describe('stack_utils', () => {
     // @ts-expect-error
     global.Cypress = {
       config: vi.fn(),
+      isBrowser: vi.fn(() => true),
     }
 
     vi.resetAllMocks()
@@ -37,7 +38,7 @@ describe('stack_utils', () => {
         return stack
       }
     }
-    const config = () => projectRoot
+    const config = projectRoot
 
     for (const scenario of scenarios) {
       const { browser, build, specFrame, stack: scenarioStack } = scenario
@@ -66,8 +67,7 @@ describe('stack_utils', () => {
     }
 
     it('returns the correct invocation details for a grep stack trace', () => {
-      const stack = `Error\n
-at itGrep (http://localhost:3000/__cypress/tests?p=cypress/support/e2e.js:444:14)\n 
+      const stack = `Error\n at itGrep (http://localhost:3000/__cypress/tests?p=cypress/support/e2e.js:444:14)\n 
 at eval (http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js:14:1)\n
 at eval (http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js:18:12)\n
 at eval (<anonymous>)\n
@@ -82,6 +82,7 @@ at eval (cypress:///../driver/src/cypress/script_utils.ts:38:23)`
       stack_utils.getInvocationDetails(
         { Error: GrepError, Cypress: {} },
         config,
+        'test-body',
       )
 
       expect(source_map_utils.getSourcePosition).toHaveBeenCalledWith('http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js', expect.objectContaining({
@@ -91,9 +92,8 @@ at eval (cypress:///../driver/src/cypress/script_utils.ts:38:23)`
       }))
     })
 
-    it('returns the correct invocation details for a grep stack trace for suites', () => {
-      const stack = `Error
-    at itGrep (http://localhost:3000/__cypress/tests?p=cypress/support/e2e.js:444:14)
+    it('returns the correct invocation details for a grep stack trace for a test body', () => {
+      const stack = `Error at itGrep (http://localhost:3000/__cypress/tests?p=cypress/support/e2e.js:444:14)
     at context.it.only (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:98:46)
     at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)
     at itGrep.eval [as only] (cypress:///../driver/src/cypress/mocha.ts:187:14)
@@ -108,6 +108,7 @@ at eval (cypress:///../driver/src/cypress/script_utils.ts:38:23)`
       stack_utils.getInvocationDetails(
         { Error: GrepError, Cypress: {} },
         config,
+        'test-body',
       )
 
       expect(source_map_utils.getSourcePosition).toHaveBeenCalledWith('http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js', expect.objectContaining({
@@ -117,13 +118,12 @@ at eval (cypress:///../driver/src/cypress/script_utils.ts:38:23)`
       }))
     })
 
-    it('returns the correct invocation details for a grep stack trace for tests with only', () => {
-      const stack = `Error
-    at itGrep (http://localhost:3000/__cypress/tests?p=cypress/support/e2e.js:444:14)
+    it('returns the original stack if it cannot be normalized for a test body', () => {
+      const stack = `Error at itGrep (http://localhost:3000/__cypress/tests?p=cypress/support/e2e.js:444:14)
     at context.it.only (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:98:46)
     at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)
     at itGrep.eval [as only] (cypress:///../driver/src/cypress/mocha.ts:187:14)
-    at eval (http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js:11:4)`
+    at somethingElse (http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js:12:6)`
 
       class GrepError {
         get stack () {
@@ -131,16 +131,13 @@ at eval (cypress:///../driver/src/cypress/script_utils.ts:38:23)`
         }
       }
 
-      stack_utils.getInvocationDetails(
+      const result = stack_utils.getInvocationDetails(
         { Error: GrepError, Cypress: {} },
         config,
+        'test-body',
       )
 
-      expect(source_map_utils.getSourcePosition).toHaveBeenCalledWith('http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js', expect.objectContaining({
-        column: 4,
-        line: 11,
-        file: 'http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js',
-      }))
+      expect(result.stack).toEqual(stack)
     })
   })
 

@@ -60,25 +60,51 @@ const stackWithLinesRemoved = (stack, cb) => {
   return unsplitStack(messageLines, remainingStackLines)
 }
 
-const stackWithGrepLinesRemoved = (stack) => {
-  return stackWithLinesRemoved(stack, (lines) => {
-    // Remove any lines containing 'itGrep' first
-    let cleanedLines = _.reject(lines, (line) => line.includes('itGrep'))
-
+const stackWithWrappingLinesRemoved = (stack) => {
+  const modifiedStack = stackWithLinesRemoved(stack, (lines) => {
+    if (Cypress.isBrowser('chrome')) {
     // There are cases where there are other lines in the stack trace before the invocation (eg. `context.it.only`, `createRunnable`, etc)
     // Remove lines from the start until the top line starts with 'at eval' or 'at Suite.eval' so that we only keep the actual invocation line.
-    while (
-      cleanedLines.length > 0 &&
+      while (
+        lines.length > 0 &&
       !(
-        cleanedLines[0].trim().startsWith('at eval') ||
-        cleanedLines[0].trim().startsWith('at Suite.eval')
+        lines[0].trim().startsWith('at eval') ||
+        lines[0].trim().startsWith('at Suite.eval')
       )
-    ) {
-      cleanedLines.shift()
+      ) {
+        lines.shift()
+      }
+    } else if (Cypress.isBrowser('firefox')) {
+      const isTestInvocationLine = (line: string) => {
+        const splitAtAt = line.split('@')
+
+        // firefox stacks traces look like:
+        // functionName@https://aicotravel.com/__cypress/tests?p=cypress/support/e2e.js:444:14
+        // @https://aicotravel.com/__cypress/tests?p=cypress/e2e/spec.cy.js:43:3
+        // @https://aicotravel.com/__cypress/tests?p=cypress/e2e/spec.cy.js:45:12
+        // evalScripts/<@cypress:///../driver/src/cypress/script_utils.ts:38:23
+        //
+        // the actual invocation details will be at the first line with no function name
+        return splitAtAt.length > 1 && splitAtAt[0].trim().length === 0
+      }
+
+      while (
+        lines.length > 0 &&
+        !isTestInvocationLine(lines[0])
+      ) {
+        lines.shift()
+      }
     }
 
-    return cleanedLines
+    return lines
   })
+
+  // if we removed all the lines then something went wrong. return the original stack instead
+  if (modifiedStack.length === 0) {
+    return stack
+  }
+
+  return modifiedStack
 }
 
 const stackWithLinesDroppedFromMarker = (stack, marker, includeLast = false) => {
@@ -145,7 +171,7 @@ type InvocationDetails = {
 }
 
 // used to determine codeframes for hook/test/etc definitions rather than command invocations
-const getInvocationDetails = (specWindow, sourceMapProjectRoot: string): InvocationDetails | undefined => {
+const getInvocationDetails = (specWindow, sourceMapProjectRoot: string, type?: 'test-body'): InvocationDetails | undefined => {
   if (specWindow.Error) {
     let stack = (new specWindow.Error()).stack
 
@@ -167,11 +193,9 @@ const getInvocationDetails = (specWindow, sourceMapProjectRoot: string): Invocat
       }
     }
 
-    // if the stack includes the 'itGrep' function, this suggests that the user has registered
-    // the @cypress/grep plugin. In this case, we need to remove the lines that include 'itGrep'
-    // so that the first line in the stack is the spec invocation.
-    if (stack.includes('itGrep')) {
-      stack = stackWithGrepLinesRemoved(stack)
+    // if the hook is the test body, we will try to remove the lines that are not the actual invocation of the test
+    if (type === 'test-body') {
+      stack = stackWithWrappingLinesRemoved(stack)
     }
 
     const details: Omit<InvocationDetails, 'stack'> = getSourceDetailsForFirstLine(stack, sourceMapProjectRoot) || {}
