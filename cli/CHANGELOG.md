@@ -3,6 +3,10 @@
 
 _Released 11/18/2025 (PENDING)_
 
+**Features:**
+
+- Added discriminated union types for CLI error handling to improve type safety and eliminate `any` types. Addressed in [#32909](https://github.com/cypress-io/cypress/pull/32909).
+
 **Misc:**
 
 - The keyboard shortcuts modal now displays the keyboard shortcut for saving Studio changes - `⌘` + `s` for Mac or `Ctrl` + `s` for Windows/Linux. Addressed [#32862](https://github.com/cypress-io/cypress/issues/32862). Addressed in [#32864](https://github.com/cypress-io/cypress/pull/32864).
