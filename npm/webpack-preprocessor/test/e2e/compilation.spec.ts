@@ -3,6 +3,7 @@ import { EventEmitter } from 'events'
 import fs from 'fs-extra'
 import path from 'path'
 import Bluebird from 'bluebird'
+import stripAnsi from 'strip-ansi'
 import preprocessor from '../../dist/index'
 
 const normalizeErrMessage = (message) => {
@@ -68,7 +69,7 @@ describe('webpack preprocessor - e2e', () => {
       await preprocessor({})(file)
       throw new Error('Should not resolve')
     } catch (err) {
-      expect(normalizeErrMessage(err.message)).toMatchSnapshot()
+      expect(stripAnsi(normalizeErrMessage(err.message))).toMatchSnapshot()
     }
   })
 
