@@ -330,6 +330,7 @@ describe('studio controls', () => {
 
       cy.get('[data-cy="studio-tooltip-guide"]').click({ force: true })
       assertStudioTooltipDismissed()
+      cy.wrap(runner.emit).should('be.calledWith', 'studio:init:test', { testId: 'r3' })
     })
   })
 })
