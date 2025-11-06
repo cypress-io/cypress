@@ -4,13 +4,23 @@ import _ from 'lodash'
 import assert from 'assert'
 import util from './util'
 import state from './tasks/state'
+import type { 
+  CypressCliError, 
+  BinaryNotFoundError,
+  BinaryNotExecutableError,
+  NotInstalledCIError,
+  VerifyFailedError,
+  SmokeTestDisplayError,
+  VersionMismatchError,
+  ChildProcessKilledError,
+  InvalidCypressEnvError,
+  CypressRunBinaryError,
+  ErrorFactories,
+} from '../types/error-types'
 
 const docsUrl = 'https://on.cypress.io'
 const requiredDependenciesUrl = `${docsUrl}/required-dependencies`
 const runDocumentationUrl = `${docsUrl}/cypress-run`
-
-// TODO it would be nice if all error objects could be enforced via types
-// to only have description + solution properties
 
 export const hr = '----------'
 
@@ -64,8 +74,11 @@ const failedUnzipWindowsMaxPathLength = {
   Read here for solutions to this problem: https://on.cypress.io/win-max-path-length-error`,
 }
 
-const missingApp = (binaryDir: string): any => {
+const missingApp = (binaryDir: string): BinaryNotFoundError => {
   return {
+    type: 'BINARY_NOT_FOUND',
+    code: 'E_BINARY_MISSING',
+    binaryDir,
     description: `No version of Cypress is installed in: ${chalk.cyan(
       binaryDir,
     )}`,
@@ -75,8 +88,11 @@ const missingApp = (binaryDir: string): any => {
   }
 }
 
-const binaryNotExecutable = (executable: string): any => {
+const binaryNotExecutable = (executable: string): BinaryNotExecutableError => {
   return {
+    type: 'BINARY_NOT_EXECUTABLE',
+    code: 'E_BINARY_PERMISSIONS',
+    executable,
     description: `Cypress cannot run because this binary file does not have executable permissions here:\n\n${executable}`,
     solution: stripIndent`\n
     Reasons this may happen:
@@ -91,8 +107,11 @@ const binaryNotExecutable = (executable: string): any => {
   }
 }
 
-const notInstalledCI = (executable: string): any => {
+const notInstalledCI = (executable: string): NotInstalledCIError => {
   return {
+    type: 'NOT_INSTALLED_CI',
+    code: 'E_CI_MISSING_BINARY',
+    executable,
     description:
       'The cypress npm package is installed, but the Cypress binary is missing.',
     solution: stripIndent`\n
@@ -134,8 +153,12 @@ const missingXvfb = {
     `,
 }
 
-const smokeTestFailure = (smokeTestCommand: string, timedOut: boolean): any => {
+const smokeTestFailure = (smokeTestCommand: string, timedOut: boolean): VerifyFailedError => {
   return {
+    type: 'VERIFY_FAILED',
+    code: 'E_VERIFY_FAILED',
+    smokeTestCommand,
+    timedOut,
     description: `Cypress verification ${timedOut ? 'timed out' : 'failed'}.`,
     solution: stripIndent`
     This command failed with the following output:
@@ -146,10 +169,11 @@ const smokeTestFailure = (smokeTestCommand: string, timedOut: boolean): any => {
   }
 }
 
-const invalidSmokeTestDisplayError = {
+const invalidSmokeTestDisplayError: SmokeTestDisplayError = {
+  type: 'SMOKE_TEST_DISPLAY_ERROR',
   code: 'INVALID_SMOKE_TEST_DISPLAY_ERROR',
   description: 'Cypress verification failed.',
-  solution (msg: string): string {
+  solution (msg?: string): string {
     return stripIndent`
       Cypress failed to start after spawning a new Xvfb server.
 
@@ -157,7 +181,7 @@ const invalidSmokeTestDisplayError = {
 
       ${hr}
 
-      ${msg}
+      ${msg || 'No additional error details'}
 
       ${hr}
 
@@ -214,7 +238,9 @@ const unexpected = {
   solution: solutionUnknown,
 }
 
-const invalidCypressEnv = {
+const invalidCypressEnv: InvalidCypressEnvError = {
+  type: 'INVALID_CYPRESS_ENV',
+  code: 'E_INVALID_ENV',
   description:
     chalk.red('The environment variable with the reserved name "CYPRESS_INTERNAL_ENV" is set.'),
   solution: chalk.red('Unset the "CYPRESS_INTERNAL_ENV" environment variable and run Cypress again.'),
@@ -248,25 +274,32 @@ const invalidConfigFile = {
  * @param {'close'|'event'} eventName Child close event name
  * @param {string} signal Signal that closed the child process, like "SIGBUS"
 */
-const childProcessKilled = (eventName: string, signal: string): any => {
+const childProcessKilled = (eventName: string, signal: string): ChildProcessKilledError => {
   return {
+    type: 'CHILD_PROCESS_KILLED',
+    code: 'E_CHILD_KILLED',
+    eventName,
+    signal,
     description: `The Test Runner unexpectedly exited via a ${chalk.cyan(eventName)} event with signal ${chalk.cyan(signal)}`,
     solution: solutionUnknown,
   }
 }
 
 const CYPRESS_RUN_BINARY = {
-  notValid: (value: string): any => {
+  notValid: (value: string): CypressRunBinaryError => {
     const properFormat = `**/${state.getPlatformExecutable()}`
 
     return {
+      type: 'CYPRESS_RUN_BINARY_ERROR',
+      code: 'E_RUN_BINARY_INVALID',
+      value,
       description: `Could not run binary set by environment variable: CYPRESS_RUN_BINARY=${value}`,
       solution: `Ensure the environment variable is a path to the Cypress binary, matching ${properFormat}`,
     }
   },
 }
 
-async function addPlatformInformation (info: any): Promise<any> {
+async function addPlatformInformation (info: CypressCliError): Promise<CypressCliError & { platform: any }> {
   const platform = await util.getPlatformInfo()
 
   return { ...info, platform }
@@ -275,7 +308,7 @@ async function addPlatformInformation (info: any): Promise<any> {
 /**
  * Given an error object (see the errors above), forms error message text with details,
  * then resolves with Error instance you can throw or reject with.
- * @param {object} errorObject
+ * @param {CypressCliError} errorObject
  * @returns {Promise<Error>} resolves with an Error
  * @example
   ```js
@@ -284,7 +317,7 @@ async function addPlatformInformation (info: any): Promise<any> {
   return getError(errorObject).then(reject)
   ```
  */
-export async function getError (errorObject: any): Promise<Error> {
+export async function getError (errorObject: CypressCliError): Promise<Error> {
   const errorMessage = await formErrorText(errorObject)
 
   const err: any = new Error(errorMessage)
@@ -298,7 +331,7 @@ export async function getError (errorObject: any): Promise<Error> {
  * Forms nice error message with error and platform information,
  * and if possible a way to solve it. Resolves with a string.
  */
-export async function formErrorText (info: any, msg?: string, prevMessage?: string): Promise<string> {
+export async function formErrorText (info: CypressCliError, msg?: string, prevMessage?: string): Promise<string> {
   const infoWithPlatform = await addPlatformInformation(info)
 
   const formatted: string[] = []
@@ -311,7 +344,7 @@ export async function formErrorText (info: any, msg?: string, prevMessage?: stri
 
   // assuming that if there the solution is a function it will handle
   // error message and (optional previous error message)
-  if (_.isFunction(infoWithPlatform.solution)) {
+  if (typeof infoWithPlatform.solution === 'function') {
     const text = infoWithPlatform.solution(msg, prevMessage)
 
     assert.ok(_.isString(text) && !_.isEmpty(text), 'expected solution to be text.')
@@ -360,7 +393,7 @@ export async function formErrorText (info: any, msg?: string, prevMessage?: stri
   return formatted.join('\n\n')
 }
 
-export const raise = (info: any) => {
+export const raise = (info: CypressCliError) => {
   return (text: string) => {
     const err: any = new Error(text)
 
@@ -373,7 +406,7 @@ export const raise = (info: any) => {
   }
 }
 
-export const throwFormErrorText = (info: any) => {
+export const throwFormErrorText = (info: CypressCliError) => {
   return async (msg?: string, prevMessage?: string) => {
     const errorText = await formErrorText(info, msg, prevMessage)
 
@@ -384,16 +417,46 @@ export const throwFormErrorText = (info: any) => {
 /**
  * Forms full error message with error and OS details, prints to the error output
  * and then exits the process.
- * @param {ErrorInformation} info Error information {description, solution}
+ * @param {CypressCliError} info Error information {description, solution}
  * @example return exitWithError(errors.invalidCypressEnv)('foo')
  */
-export const exitWithError = (info: any) => {
+export const exitWithError = (info: CypressCliError) => {
   return async (msg?: string) => {
     const text: string = await formErrorText(info, msg)
 
     // eslint-disable-next-line no-console
     console.error(text)
     process.exit(info.exitCode || 1)
+  }
+}
+
+/**
+ * Utility function to normalize unknown errors into typed CLI errors
+ * @param e - Unknown error object or value
+ * @returns Typed CypressCliError with standardized structure
+ */
+export function asCliError(e: unknown): CypressCliError {
+  // If it's already a typed error, return as-is
+  if (typeof e === 'object' && e !== null && 'type' in e) {
+    return e as CypressCliError
+  }
+
+  // If it's an Error object, wrap it
+  if (e instanceof Error) {
+    return {
+      type: 'UNEXPECTED',
+      code: 'E_UNEXPECTED',
+      description: e.message || 'An unexpected error occurred while verifying the Cypress executable.',
+      solution: solutionUnknown,
+    }
+  }
+
+  // Fallback for unknown types
+  return {
+    type: 'UNKNOWN',
+    code: 'E_UNKNOWN',
+    description: 'Unknown Cypress CLI error',
+    solution: genericErrorSolution,
   }
 }
 
