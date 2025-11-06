@@ -300,7 +300,7 @@ export class EventManager {
         this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
         this.studioStore.setSessionId(cloudStudioSessionId)
         this.studioStore.setActive(true)
-        this.reporterBus.emit('reporter:set:studio:new:test:page:active', true)
+        this.reporterBus.emit('reporter:set:studio:welcome:panel:active', entrySource === 'welcome')
       })
     }
 
@@ -311,7 +311,7 @@ export class EventManager {
       const needsReload = this.studioStore.needsProtocolCleanup()
 
       this.studioStore.cancel()
-      this.reporterBus.emit('reporter:set:studio:new:test:page:active', false)
+      this.reporterBus.emit('reporter:set:studio:welcome:panel:active', false)
 
       // only reload the page if Studio has actually been used for recording
       if (needsReload) {
@@ -502,10 +502,6 @@ export class EventManager {
 
         this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
         this.studioStore.setSessionId(cloudStudioSessionId)
-
-        if (suiteId) {
-          this.reporterBus.emit('reporter:set:studio:new:test:page:active', true)
-        }
 
         cb()
       })
@@ -889,7 +885,7 @@ export class EventManager {
                            !!this.studioStore.newTestLineNumber
 
     const studioSingleTestActive = this.studioStore.newTestLineNumber != null || !!this.studioStore.testId
-    const isStudioNewTestPageActive = this.studioStore.isActive && !!this.studioStore.suiteId
+    const isStudioWelcomePanelActive = this.studioStore.isActive && !!this.studioStore.suiteId && (this.studioStore.entrySource === 'welcome' || !this.studioStore.entrySource)
 
     this.reporterBus.emit('reporter:start', {
       startTime: Cypress.runner.getStartTime(),
@@ -902,7 +898,7 @@ export class EventManager {
       scrollTop: runState.scrollTop,
       studioActive: hasActiveStudio,
       studioSingleTestActive,
-      isStudioNewTestPageActive,
+      isStudioWelcomePanelActive,
     } as ReporterStartInfo)
   }
 

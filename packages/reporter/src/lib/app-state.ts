@@ -8,7 +8,7 @@ interface DefaultAppState {
   pinnedSnapshotId: number | string | null
   studioActive: boolean
   studioSingleTestActive: boolean
-  isStudioNewTestPageActive: boolean
+  isStudioWelcomePanelActive: boolean
   hasBeenPaused: boolean
 }
 
@@ -21,7 +21,7 @@ const defaults: DefaultAppState = {
   pinnedSnapshotId: null,
   studioActive: false,
   studioSingleTestActive: false,
-  isStudioNewTestPageActive: false,
+  isStudioWelcomePanelActive: false,
   hasBeenPaused: false,
 }
 
@@ -35,7 +35,7 @@ class AppState {
   pinnedSnapshotId = defaults.pinnedSnapshotId
   studioActive = defaults.studioActive
   studioSingleTestActive = defaults.studioSingleTestActive
-  isStudioNewTestPageActive = defaults.isStudioNewTestPageActive
+  isStudioWelcomePanelActive = defaults.isStudioWelcomePanelActive
   showFetchRequests = true
   isStopped = false
   hasBeenPaused = defaults.hasBeenPaused
@@ -54,7 +54,7 @@ class AppState {
       pinnedSnapshotId: observable,
       studioActive: observable,
       studioSingleTestActive: observable,
-      isStudioNewTestPageActive: observable,
+      isStudioWelcomePanelActive: observable,
       showFetchRequests: observable,
       hasBeenPaused: observable,
       studioTooltipDismissed: observable,
@@ -140,8 +140,8 @@ class AppState {
     this.studioSingleTestActive = studioSingleTestActive
   }
 
-  setIsStudioNewTestPageActive (isStudioNewTestPageActive: boolean) {
-    this.isStudioNewTestPageActive = isStudioNewTestPageActive
+  setIsStudioWelcomePanelActive (isStudioWelcomePanelActive: boolean) {
+    this.isStudioWelcomePanelActive = isStudioWelcomePanelActive
   }
 
   toggleShowFetchRequests () {

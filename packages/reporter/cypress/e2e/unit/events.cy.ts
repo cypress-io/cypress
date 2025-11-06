@@ -27,7 +27,7 @@ type AppStateStub = AppState & {
   temporarilySetAutoScrolling: SinonSpy
   setStudioActive: SinonSpy
   setStudioSingleTestActive: SinonSpy
-  setIsStudioNewTestPageActive: SinonSpy
+  setIsStudioWelcomePanelActive: SinonSpy
   stop: SinonSpy
 }
 
@@ -42,7 +42,7 @@ const appStateStub = () => {
     setStudioActive: sinon.spy(),
     setStudioSingleTestActive: sinon.spy(),
     stop: sinon.spy(),
-    setIsStudioNewTestPageActive: sinon.spy(),
+    setIsStudioWelcomePanelActive: sinon.spy(),
   } as AppStateStub
 }
 
@@ -268,10 +268,10 @@ describe('events', () => {
       expect(appState.pinnedSnapshotId).to.be.null
     })
 
-    it('sets isStudioNewTestPageActive on the app state on reporter:set:studio:new:test:page:active', () => {
-      appState.isStudioNewTestPageActive = false
-      runner.on.withArgs('reporter:set:studio:new:test:page:active').callArgWith(1, true)
-      expect(appState.setIsStudioNewTestPageActive).to.have.been.calledWith(true)
+    it('sets isStudioWelcomePanelActive on the app state on reporter:set:studio:welcome:panel:active', () => {
+      appState.isStudioWelcomePanelActive = false
+      runner.on.withArgs('reporter:set:studio:welcome:panel:active').callArgWith(1, true)
+      expect(appState.setIsStudioWelcomePanelActive).to.have.been.calledWith(true)
     })
   })
 

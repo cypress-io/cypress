@@ -85,7 +85,7 @@ describe('test/test.tsx', () => {
 
     const appState = {
       studioActive: false,
-      isStudioNewTestPageActive: true,
+      isStudioWelcomePanelActive: true,
       studioTooltipDismissed: false,
     } as AppState
 
@@ -118,7 +118,7 @@ describe('test/test.tsx', () => {
 
     const appState = {
       studioActive: false,
-      isStudioNewTestPageActive: true,
+      isStudioWelcomePanelActive: true,
       studioTooltipDismissed: false,
       setStudioTooltipDismissed: cy.stub().as('setStudioTooltipDismissed'),
     } as unknown as AppState

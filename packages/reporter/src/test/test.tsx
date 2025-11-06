@@ -74,7 +74,7 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
     const isRunningAllSpecs = spec?.relative === '__all'
 
     if (studioEnabled && !appStateProps.studioActive && model.state !== 'pending' && !isRunningAllSpecs) {
-      if (appStateProps.isStudioNewTestPageActive && isFirstTest && !appStateProps.studioTooltipDismissed) {
+      if (appStateProps.isStudioWelcomePanelActive && isFirstTest && !appStateProps.studioTooltipDismissed) {
         controls.push(
           <LaunchStudioIcon
             key={`studio-command-${model}`}

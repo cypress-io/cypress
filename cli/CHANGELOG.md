@@ -6,7 +6,7 @@ _Released 11/18/2025 (PENDING)_
 **Misc:**
 
 - The keyboard shortcuts modal now displays the keyboard shortcut for saving Studio changes - `⌘` + `s` for Mac or `Ctrl` + `s` for Windows/Linux. Addressed [#32862](https://github.com/cypress-io/cypress/issues/32862). Addressed in [#32864](https://github.com/cypress-io/cypress/pull/32864).
-- Popup tooltip guide when creating new test in Studio to let the user know they can edit tests in studio. Addresses [#11906](https://github.com/cypress-io/cypress-services/issues/11906). Addressed in [#32905](https://github.com/cypress-io/cypress/pull/32905).
+- Popup tooltip guide when opening the welcome to studio panel. Addresses [#11906](https://github.com/cypress-io/cypress-services/issues/11906). Addressed in [#32905](https://github.com/cypress-io/cypress/pull/32905).
 
 ## 15.6.0
 

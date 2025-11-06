@@ -90,7 +90,7 @@ const events: Events = {
       runnablesStore.setInitialScrollTop(startInfo.scrollTop)
       appState.setStudioActive(startInfo.studioActive)
       appState.setStudioSingleTestActive(startInfo.studioSingleTestActive)
-      appState.setIsStudioNewTestPageActive(startInfo.isStudioNewTestPageActive)
+      appState.setIsStudioWelcomePanelActive(startInfo.isStudioWelcomePanelActive)
 
       if (runnablesStore.hasTests) {
         statsStore.start(startInfo)
@@ -135,8 +135,8 @@ const events: Events = {
       appState.pinnedSnapshotId = null
     }))
 
-    runner.on('reporter:set:studio:new:test:page:active', action('reporter:set:studio:new:test:page:active', (isStudioNewTestPageActive: boolean) => {
-      appState.setIsStudioNewTestPageActive(isStudioNewTestPageActive)
+    runner.on('reporter:set:studio:welcome:panel:active', action('reporter:set:studio:welcome:panel:active', (isStudioWelcomePanelActive: boolean) => {
+      appState.setIsStudioWelcomePanelActive(isStudioWelcomePanelActive)
     }))
 
     localBus.on('resume', action('resume', () => {

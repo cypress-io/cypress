@@ -5,7 +5,7 @@ import { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 let runner: EventEmitter
 let runnables: RootRunnable
 
-function visitAndRenderReporter (studioEnabled: boolean = false, studioActive: boolean = false, specRelative: string = 'relative/path/to/foo.js', isStudioNewTestPageActive: boolean = false) {
+function visitAndRenderReporter (studioEnabled: boolean = false, studioActive: boolean = false, specRelative: string = 'relative/path/to/foo.js', isStudioWelcomePanelActive: boolean = false) {
   cy.fixture('runnables').then((_runnables) => {
     runnables = _runnables
   })
@@ -30,7 +30,7 @@ function visitAndRenderReporter (studioEnabled: boolean = false, studioActive: b
 
   cy.get('.reporter.mounted').then(() => {
     runner.emit('runnables:ready', runnables)
-    runner.emit('reporter:start', { studioActive, isStudioNewTestPageActive })
+    runner.emit('reporter:start', { studioActive, isStudioWelcomePanelActive })
   })
 
   return runnerStore
