@@ -2,11 +2,14 @@ import debugFn from 'debug'
 import type { ModuleNode, PluginOption, ViteDevServer } from 'vite-7'
 import type { Vite } from '../getVite.js'
 import { parse, HTMLElement } from 'node-html-parser'
-import fs from 'fs/promises'
+import fs from 'fs'
+import { promisify } from 'util'
 
 import type { ViteDevServerConfig } from '../devServer.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
+
+const readFile = promisify(fs.readFile)
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -47,7 +50,7 @@ export const Cypress = (
   // Load the init file asynchronously with proper error handling
   const loadInitFile = async (): Promise<string> => {
     try {
-      const content = await fs.readFile(INIT_FILEPATH, 'utf8')
+      const content = await readFile(INIT_FILEPATH, 'utf8')
       debug(`Successfully loaded init file from ${INIT_FILEPATH}`)
       return content
     } catch (error) {
@@ -92,7 +95,7 @@ export const Cypress = (
 
       debug('resolved the indexHtmlPath as', indexHtmlPath, 'from', indexHtmlFile)
 
-      let indexHtmlContent = await fs.readFile(indexHtmlPath, { encoding: 'utf8' })
+      let indexHtmlContent = await readFile(indexHtmlPath, 'utf8')
 
       // Inject the script tags
       indexHtmlContent = indexHtmlContent.replace(
