@@ -101,7 +101,7 @@
     "@reach/dialog": "0.10.5",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
-    "@types/better-sqlite3": "^7.6.3",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/bluebird": "3.5.29",
     "@types/chai-enzyme": "0.6.7",
     "@types/debug": "4.1.7",
