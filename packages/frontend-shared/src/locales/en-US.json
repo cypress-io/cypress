@@ -285,7 +285,8 @@
       "title": "Keyboard shortcuts",
       "rerun": "Re-run tests",
       "stop": "Stop tests",
-      "toggle": "Toggle specs list"
+      "toggle": "Toggle specs list",
+      "studioSave": "Save Studio changes"
     },
     "toggleLabel": {
       "expanded": "Collapse sidebar",
