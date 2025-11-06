@@ -5,7 +5,7 @@ import { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 let runner: EventEmitter
 let runnables: RootRunnable
 
-function visitAndRenderReporter (studioEnabled: boolean = false, studioActive: boolean = false, specRelative: string = 'relative/path/to/foo.js') {
+function visitAndRenderReporter (studioEnabled: boolean = false, studioActive: boolean = false, specRelative: string = 'relative/path/to/foo.js', isStudioNewTestPageActive: boolean = false) {
   cy.fixture('runnables').then((_runnables) => {
     runnables = _runnables
   })
@@ -30,7 +30,7 @@ function visitAndRenderReporter (studioEnabled: boolean = false, studioActive: b
 
   cy.get('.reporter.mounted').then(() => {
     runner.emit('runnables:ready', runnables)
-    runner.emit('reporter:start', { studioActive })
+    runner.emit('reporter:start', { studioActive, isStudioNewTestPageActive })
   })
 
   return runnerStore
@@ -263,6 +263,39 @@ describe('studio controls', () => {
       .find('.runnable-controls-studio').click()
 
       cy.wrap(runner.emit).should('be.calledWith', 'studio:init:test', { testId: 'r3' })
+    })
+  })
+
+  describe('display studio tooltip guide for new test page', () => {
+    beforeEach(() => {
+      const runnerStore = visitAndRenderReporter(true, false, 'relative/path/to/foo.js', true)
+
+      runnerStore.setCanSaveStudioLogs(false)
+    })
+
+    it('displays studio tooltip guide for new test page', () => {
+      const assertNewTestPageTooltip = () => {
+        cy.get('.cy-tooltip').first().contains('Edit test in studio')
+        cy.get('.cy-tooltip').first().contains('Open a test in Studio to make edits')
+        cy.get('.cy-tooltip').first().contains('Refine test with AI recommendations')
+      }
+
+      // when just entering the new test page, the tooltip should be displayed
+
+      cy.get('.cy-tooltip').should('have.length', 1)
+      assertNewTestPageTooltip()
+
+      // when hovering over other tests, the Edit in Studio tooltip should be displayed as well
+      cy.contains('failed with retries')
+      .closest('.collapsible-header')
+      .find('.runnable-controls-studio')
+      .realHover()
+      .should('be.visible')
+      .should('have.css', 'opacity', '1')
+
+      cy.get('.cy-tooltip').should('have.length', 2)
+      assertNewTestPageTooltip()
+      cy.get('.cy-tooltip').eq(1).contains('Edit in Studio')
     })
   })
 })

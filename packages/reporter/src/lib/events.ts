@@ -90,6 +90,7 @@ const events: Events = {
       runnablesStore.setInitialScrollTop(startInfo.scrollTop)
       appState.setStudioActive(startInfo.studioActive)
       appState.setStudioSingleTestActive(startInfo.studioSingleTestActive)
+      appState.setIsStudioNewTestPageActive(startInfo.isStudioNewTestPageActive)
 
       if (runnablesStore.hasTests) {
         statsStore.start(startInfo)

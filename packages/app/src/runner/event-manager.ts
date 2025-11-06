@@ -889,6 +889,7 @@ export class EventManager {
                            !!this.studioStore.newTestLineNumber
 
     const studioSingleTestActive = this.studioStore.newTestLineNumber != null || !!this.studioStore.testId
+    const isStudioNewTestPageActive = this.studioStore.isActive && !!this.studioStore.suiteId
 
     this.reporterBus.emit('reporter:start', {
       startTime: Cypress.runner.getStartTime(),
@@ -901,6 +902,7 @@ export class EventManager {
       scrollTop: runState.scrollTop,
       studioActive: hasActiveStudio,
       studioSingleTestActive,
+      isStudioNewTestPageActive,
     } as ReporterStartInfo)
   }
 
