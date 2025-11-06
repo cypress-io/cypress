@@ -49,7 +49,7 @@
     "@percy/cypress": "^3.1.6",
     "@testing-library/cypress": "10.1.0",
     "@tooling/system-tests": "0.0.0-development",
-    "@toycode/markdown-it-class": "1.2.3",
+    "@toycode/markdown-it-class": "1.2.4",
     "@urql/core": "2.4.4",
     "@urql/exchange-execute": "1.1.0",
     "@urql/exchange-graphcache": "4.3.6",
