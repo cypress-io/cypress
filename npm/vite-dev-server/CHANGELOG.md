@@ -1,3 +1,10 @@
+# [@cypress/vite-dev-server-v7.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v7.0.0...@cypress/vite-dev-server-v7.0.1) (2025-11-04)
+
+
+### Bug Fixes
+
+* ensure that absolute paths can be found via source maps ([#32820](https://github.com/cypress-io/cypress/issues/32820)) ([e6e91a0](https://github.com/cypress-io/cypress/commit/e6e91a0c976eee43ad23b4dc654e83fe29016856))
+
 # [@cypress/vite-dev-server-v7.0.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v6.0.3...@cypress/vite-dev-server-v7.0.0) (2025-08-08)
 
 
