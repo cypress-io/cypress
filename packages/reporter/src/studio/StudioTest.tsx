@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { observer } from 'mobx-react'
 import { RunnablesStore } from '../runnables/runnables-store'
 import { Duration } from '../duration/duration'
@@ -65,6 +65,8 @@ export const StudioTest = observer(({ appState, runnablesStore, statsStore }: St
   // Single we're in single test mode, the current test is the first test in the runnablesStore._tests
   const currentTest = Object.values(runnablesStore._tests)[0]
   const tooltipRef = useRef<HTMLUListElement>(null)
+  const testSectionRef = useRef<HTMLDivElement>(null)
+  const fixedElementRef = useRef<HTMLDivElement>(null)
 
   const { containerRef, isMounted, scrollIntoView } = useScrollIntoView({
     appState,
@@ -89,10 +91,28 @@ export const StudioTest = observer(({ appState, runnablesStore, statsStore }: St
 
   const testTitle = currentTest ? <span data-cy='studio-single-test-title' className='studio-header__test-title'>{currentTest.title}</span> : null
 
+  const toggleHeaderShadow = (entries) => {
+    const [entry] = entries
+
+    testSectionRef.current?.classList.toggle('shadow-active', !entry.isIntersecting)
+  }
+
+  useEffect(() => {
+    if (!fixedElementRef.current) return
+
+    const observer = new IntersectionObserver(toggleHeaderShadow)
+
+    observer.observe(fixedElementRef.current)
+
+    return () => observer.disconnect()
+  }, [])
+
   return (
-    currentTest && (
-      <div className='studio-single-test-container' >
-        <div className='studio-header__test-section'>
+    currentTest && (<>
+      {/* This empty div acts as an intersection observer target to toggle the header shadow based on scroll position */}
+      <div ref={fixedElementRef} />
+      <div className='studio-single-test-container'>
+        <div className='studio-header__test-section' ref={testSectionRef}>
           <div className='studio-header__test-section-left'>
 
             <Tooltip placement='bottom' title={<p>All tests</p>} className='cy-tooltip'>
@@ -126,6 +146,7 @@ export const StudioTest = observer(({ appState, runnablesStore, statsStore }: St
           <Attempts isSingleStudioTest test={currentTest} scrollIntoView={scrollIntoView} />
         </div>
       </div>
+    </>
     )
   )
 })

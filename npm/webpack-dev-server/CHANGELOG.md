@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v5.1.4](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.1.3...@cypress/webpack-dev-server-v5.1.4) (2025-11-04)
+
+
+### Bug Fixes
+
+* ensure that absolute paths can be found via source maps ([#32820](https://github.com/cypress-io/cypress/issues/32820)) ([e6e91a0](https://github.com/cypress-io/cypress/commit/e6e91a0c976eee43ad23b4dc654e83fe29016856))
+
 # [@cypress/webpack-dev-server-v5.1.3](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.1.2...@cypress/webpack-dev-server-v5.1.3) (2025-10-03)
 
 # [@cypress/webpack-dev-server-v5.1.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.1.1...@cypress/webpack-dev-server-v5.1.2) (2025-09-18)
