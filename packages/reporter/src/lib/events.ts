@@ -134,12 +134,8 @@ const events: Events = {
       appState.pinnedSnapshotId = null
     }))
 
-    runner.on('reporter:set:app:state', action('reporter:set:app:state', (stateUpdates: Partial<AppState>) => {
-      Object.keys(stateUpdates).forEach((key) => {
-        if (key in appState) {
-          appState[key] = stateUpdates[key]
-        }
-      })
+    runner.on('reporter:set:studio:new:test:page:active', action('reporter:set:studio:new:test:page:active', (isStudioNewTestPageActive: boolean) => {
+      appState.setIsStudioNewTestPageActive(isStudioNewTestPageActive)
     }))
 
     localBus.on('resume', action('resume', () => {

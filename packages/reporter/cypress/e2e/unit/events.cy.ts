@@ -27,6 +27,7 @@ type AppStateStub = AppState & {
   temporarilySetAutoScrolling: SinonSpy
   setStudioActive: SinonSpy
   setStudioSingleTestActive: SinonSpy
+  setIsStudioNewTestPageActive: SinonSpy
   stop: SinonSpy
 }
 
@@ -41,6 +42,7 @@ const appStateStub = () => {
     setStudioActive: sinon.spy(),
     setStudioSingleTestActive: sinon.spy(),
     stop: sinon.spy(),
+    setIsStudioNewTestPageActive: sinon.spy(),
   } as AppStateStub
 }
 
@@ -264,6 +266,12 @@ describe('events', () => {
       appState.pinnedSnapshotId = 'c1'
       runner.on.withArgs('reporter:snapshot:unpinned').callArgWith(1)
       expect(appState.pinnedSnapshotId).to.be.null
+    })
+
+    it('sets isStudioNewTestPageActive on the app state on reporter:set:studio:new:test:page:active', () => {
+      appState.isStudioNewTestPageActive = false
+      runner.on.withArgs('reporter:set:studio:new:test:page:active').callArgWith(1, true)
+      expect(appState.setIsStudioNewTestPageActive).to.have.been.calledWith(true)
     })
   })
 
