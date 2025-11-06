@@ -94,7 +94,7 @@ at eval (cypress:///../driver/src/cypress/script_utils.ts:38:23)`
 
     it('returns the correct invocation details for a grep stack trace for a test body', () => {
       const stack = `Error at itGrep (http://localhost:3000/__cypress/tests?p=cypress/support/e2e.js:444:14)
-    at context.it.only (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:98:46)
+    at context.notIt.only (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:98:46)
     at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)
     at itGrep.eval [as only] (cypress:///../driver/src/cypress/mocha.ts:187:14)
     at Suite.eval (http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js:12:6)`
@@ -120,7 +120,7 @@ at eval (cypress:///../driver/src/cypress/script_utils.ts:38:23)`
 
     it('returns the original stack if it cannot be normalized for a test body', () => {
       const stack = `Error at itGrep (http://localhost:3000/__cypress/tests?p=cypress/support/e2e.js:444:14)
-    at context.it.only (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:98:46)
+    at context.notIt.only (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:98:46)
     at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)
     at itGrep.eval [as only] (cypress:///../driver/src/cypress/mocha.ts:187:14)
     at somethingElse (http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js:12:6)`
