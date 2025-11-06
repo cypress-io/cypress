@@ -892,8 +892,68 @@ describe('lib/tasks/verify', () => {
   })
 })
 
-// TODO this needs documentation with examples badly.
-function createfs ({ alreadyVerified, executable, packageVersion, customDir }: any) {
+/**
+ * Creates a mock file system for testing Cypress binary verification
+ * 
+ * This utility function sets up a mock file system that mimics the structure
+ * of a Cypress installation, including the binary state file and package.json.
+ * It's used throughout the verify tests to simulate different installation states.
+ * 
+ * ## File System Structure Created:
+ * 
+ * ```
+ * /cache/Cypress/1.2.3/
+ * ├── binary_state.json          # Contains verification status
+ * └── Cypress.app/               # Application bundle
+ *     └── Contents/
+ *         ├── MacOS/
+ *         │   └── Cypress        # Executable binary (optional)
+ *         └── Resources/
+ *             └── app/
+ *                 └── package.json # Contains version info
+ * ```
+ * 
+ * @param options - Configuration for the mock file system
+ * @param options.alreadyVerified - Whether binary should be marked as already verified
+ * @param options.executable - Mock executable content (true for default, false/undefined for missing)
+ * @param options.packageVersion - Version string to put in package.json
+ * @param options.customDir - Custom installation directory (optional)
+ * 
+ * @returns Mock file system instance from mock-fs
+ * 
+ * @example
+ * // Test case: Binary exists and is already verified
+ * createfs({
+ *   alreadyVerified: true,
+ *   executable: true,
+ *   packageVersion: '13.0.0'
+ * })
+ * 
+ * @example
+ * // Test case: Binary missing (first install)
+ * createfs({
+ *   alreadyVerified: false,
+ *   executable: false,
+ *   packageVersion: '13.0.0'
+ * })
+ * 
+ * @example
+ * // Test case: Custom installation directory
+ * createfs({
+ *   alreadyVerified: false,
+ *   executable: true,
+ *   packageVersion: '13.0.0',
+ *   customDir: '/custom/cypress/location'
+ * })
+ */
+interface CreateFileSystemOptions {
+  alreadyVerified: boolean
+  executable?: boolean | string
+  packageVersion: string
+  customDir?: string
+}
+
+function createfs ({ alreadyVerified, executable, packageVersion, customDir }: CreateFileSystemOptions) {
   if (!customDir) {
     customDir = '/cache/Cypress/1.2.3/Cypress.app'
   }
