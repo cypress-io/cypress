@@ -27,6 +27,7 @@ type AppStateStub = AppState & {
   temporarilySetAutoScrolling: SinonSpy
   setStudioActive: SinonSpy
   setStudioSingleTestActive: SinonSpy
+  setStudioTooltipDismissed: SinonSpy
   stop: SinonSpy
 }
 
@@ -40,6 +41,7 @@ const appStateStub = () => {
     temporarilySetAutoScrolling: sinon.spy(),
     setStudioActive: sinon.spy(),
     setStudioSingleTestActive: sinon.spy(),
+    setStudioTooltipDismissed: sinon.spy(),
     stop: sinon.spy(),
   } as AppStateStub
 }
@@ -264,6 +266,12 @@ describe('events', () => {
       appState.pinnedSnapshotId = 'c1'
       runner.on.withArgs('reporter:snapshot:unpinned').callArgWith(1)
       expect(appState.pinnedSnapshotId).to.be.null
+    })
+
+    it('sets studioTooltipDismissed on the app state on reporter:set:app:state', () => {
+      expect(appState.studioTooltipDismissed).to.not.exist
+      runner.on.withArgs('reporter:set:app:state').callArgWith(1, { studioTooltipDismissed: true })
+      expect(appState.setStudioTooltipDismissed).to.have.been.calledWith(true)
     })
   })
 
