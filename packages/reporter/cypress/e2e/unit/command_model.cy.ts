@@ -1,6 +1,7 @@
 import sinon, { SinonFakeTimers } from 'sinon'
 
 import CommandModel, { CommandProps } from '../../../src/commands/command-model'
+import { MAX_VISIBILITY_CHECK_ELEMENTS } from '@packages/types'
 
 const LONG_RUNNING_THRESHOLD = 1000
 
@@ -42,6 +43,15 @@ describe('Command model', () => {
 
     it('sets visible to true for command that does not associate with visibility', () => {
       command = new CommandModel(commandProps({ visible: undefined }))
+      expect(command.visible).to.be.true
+    })
+
+    it('sets visible to true when visibility check is skipped due to large element set', () => {
+      command = new CommandModel(commandProps({
+        visible: undefined,
+        numElements: MAX_VISIBILITY_CHECK_ELEMENTS,
+      }))
+
       expect(command.visible).to.be.true
     })
   })

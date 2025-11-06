@@ -435,6 +435,27 @@ describe('commands', { viewportHeight: 1000 }, () => {
       .should('be.visible')
       .should('have.text', 'One or more matched elements are not visible.')
     })
+
+    it('displays icon and tooltip when visibility check is skipped for large element set', () => {
+      cy.get('.reporter.mounted').then(() => {
+        addCommand(runner, {
+          id: 200,
+          name: 'get',
+          message: '.large-element-set',
+          state: 'passed',
+          numElements: 64, // MAX_VISIBILITY_CHECK_ELEMENTS
+          visible: undefined, // visibility check was skipped
+        })
+      })
+
+      cy.contains('.large-element-set').closest('.command').find('.command-invisible')
+      .should('be.visible')
+
+      cy.contains('.large-element-set').closest('.command').find('.command-invisible').trigger('mouseover')
+      cy.get('.cy-tooltip')
+      .should('be.visible')
+      .should('include.text', 'Visibility check skipped for 64 elements (limit: 64)')
+    })
   })
 
   context('elements indicator', () => {
