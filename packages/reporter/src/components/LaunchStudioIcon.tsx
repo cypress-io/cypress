@@ -10,9 +10,10 @@ interface LaunchStudioIconProps {
   wrapperClassName?: string
   className?: string
   visible?: boolean
+  dataCy?: string
 }
 
-export const LaunchStudioIcon: React.FC<LaunchStudioIconProps> = ({ content, onClick, className, wrapperClassName, visible }) => {
+export const LaunchStudioIcon: React.FC<LaunchStudioIconProps> = ({ content, onClick, className, wrapperClassName, visible, dataCy = 'launch-studio' }) => {
   return (
     <Tooltip
       placement='right'
@@ -23,7 +24,7 @@ export const LaunchStudioIcon: React.FC<LaunchStudioIconProps> = ({ content, onC
       <a
         onClick={onClick}
         className={cx('runnable-controls-studio', wrapperClassName)}
-        data-cy='launch-studio'
+        data-cy={dataCy}
       >
         <IconChevronRightMedium style={{ marginTop: '-1px' }} />
       </a>

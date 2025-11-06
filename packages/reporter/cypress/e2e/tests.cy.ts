@@ -273,15 +273,24 @@ describe('studio controls', () => {
       runnerStore.setCanSaveStudioLogs(false)
     })
 
+    const assertNewTestPageTooltip = () => {
+      // studio tooltip guide should be displayed for the first test in the new test page
+      cy.get('.test').first().within(() => {
+        cy.get('[data-cy="studio-tooltip-guide"]').should('exist')
+      })
+
+      cy.get('.cy-tooltip').first().contains('Edit test in studio')
+      cy.get('.cy-tooltip').first().contains('Open a test in Studio to make edits')
+      cy.get('.cy-tooltip').first().contains('Refine test with AI recommendations')
+    }
+
+    const assertStudioTooltipDismissed = () => {
+      cy.wrap(runner.emit).should('be.calledWith', 'save:state')
+      cy.get('[data-cy="studio-tooltip-guide"]').should('not.exist')
+    }
+
     it('displays studio tooltip guide for new test page', () => {
-      const assertNewTestPageTooltip = () => {
-        cy.get('.cy-tooltip').first().contains('Edit test in studio')
-        cy.get('.cy-tooltip').first().contains('Open a test in Studio to make edits')
-        cy.get('.cy-tooltip').first().contains('Refine test with AI recommendations')
-      }
-
       // when just entering the new test page, the tooltip should be displayed
-
       cy.get('.cy-tooltip').should('have.length', 1)
       assertNewTestPageTooltip()
 
@@ -296,6 +305,32 @@ describe('studio controls', () => {
       cy.get('.cy-tooltip').should('have.length', 2)
       assertNewTestPageTooltip()
       cy.get('.cy-tooltip').eq(1).contains('Edit in Studio')
+    })
+
+    it('dismisses studio tooltip guide with dismiss icon for new test page', () => {
+      cy.stub(runner, 'emit')
+      assertNewTestPageTooltip()
+
+      cy.get('[data-cy="dismiss-studio-tooltip-icon"]').click()
+      assertStudioTooltipDismissed()
+    })
+
+    it('dismisses studio tooltip guide with got it button for new test page', () => {
+      cy.stub(runner, 'emit')
+
+      assertNewTestPageTooltip()
+      cy.get('[data-cy="got-it-dont-show-again-button"]').click()
+      assertStudioTooltipDismissed()
+    })
+
+    it('dismisses studio tooltip guide when clicking on the test', () => {
+      cy.stub(runner, 'emit')
+      cy.stub(appState, 'setStudioTooltipDismissed').as('setStudioTooltipDismissed')
+
+      assertNewTestPageTooltip()
+
+      cy.get('[data-cy="studio-tooltip-guide"]').click({ force: true })
+      assertStudioTooltipDismissed()
     })
   })
 })

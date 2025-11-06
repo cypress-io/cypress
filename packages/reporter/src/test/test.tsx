@@ -83,7 +83,7 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
             >
               <div className='flex items-center justify-between text-white text-[16px] font-medium w-full relative'>
                 Edit test in studio
-                <Button size='24' variant='link' className='absolute right-0 bottom-[8px]' onClick={_handleDismissStudioTooltip}>
+                <Button size='24' variant='link' className='absolute right-0 bottom-[8px]' onClick={_handleDismissStudioTooltip} data-cy="dismiss-studio-tooltip-icon">
                   <IconActionDeleteSmall size='16' strokeColor="gray-500" />
                 </Button>
               </div>
@@ -96,7 +96,7 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
                   Refine test with AI recommendations
                 <span className='text-gray-300 bg-gray-950 font-medium border border-gray-800 rounded-[4px] px-[4px] text-[12px] font-medium'>Coming soon</span>
               </span>
-              <Button size='24' variant='outline-dark' className='px-[8px] mt-[12px] mb-[8px]' onClick={_handleDismissStudioTooltip}>
+              <Button size='24' variant='outline-dark' className='px-[8px] mt-[12px] mb-[8px]' onClick={_handleDismissStudioTooltip} data-cy="got-it-dont-show-again-button">
                 <span className='text-indigo-300'>
                   Got it, don't show this again.
                 </span>
@@ -109,6 +109,7 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
             className='launch-studio-tooltip'
             wrapperClassName='edit-in-studio-tooltip'
             visible={firstTestTooltipVisible}
+            dataCy="studio-tooltip-guide"
           />,
         )
       } else {
