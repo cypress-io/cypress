@@ -17,6 +17,8 @@ describe('Cypress Studio - New Test Creation', () => {
 
     inputNewTestName({ creatingNewTestFromWelcomeScreen: false })
 
+    cy.findByTestId('studio-tooltip-guide').should('not.exist')
+
     cy.contains('new-test').click()
 
     cy.percySnapshot()
@@ -129,6 +131,8 @@ describe('studio functionality', () => {
     launchStudio({ specName: 'spec-w-visit.cy.js', createNewTestFromSuite: true })
 
     inputNewTestName({ creatingNewTestFromWelcomeScreen: false })
+
+    cy.findByTestId('studio-tooltip-guide').should('not.exist')
 
     // make sure that the visit has run and we're recording studio commands
     cy.get('[data-cy="record-button-recording"]').should('be.visible')

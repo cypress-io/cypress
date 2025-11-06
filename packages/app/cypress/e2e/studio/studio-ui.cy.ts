@@ -42,6 +42,9 @@ describe('studio functionality', () => {
     cy.findByTestId('studio-button').should('be.visible').click()
     cy.findByTestId('studio-panel').should('be.visible')
 
+    // studio guide tooltip should be visible
+    cy.findByTestId('studio-tooltip-guide').should('be.visible')
+
     cy.contains('New test')
 
     cy.percySnapshot()
