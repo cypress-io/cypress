@@ -8118,10 +8118,10 @@
     "@types/enzyme" "*"
     "@types/react" "*"
 
-"@types/chai-jquery@1.1.40":
-  version "1.1.40"
-  resolved "https://registry.yarnpkg.com/@types/chai-jquery/-/chai-jquery-1.1.40.tgz#445bedcbbb2ae4e3027f46fa2c1733c43481ffa1"
-  integrity sha512-mCNEZ3GKP7T7kftKeIs7QmfZZQM7hslGSpYzKbOlR2a2HCFf9ph4nlMRA9UnuOETeOQYJVhJQK7MwGqNZVyUtQ==
+"@types/chai-jquery@1.1.43":
+  version "1.1.43"
+  resolved "https://registry.yarnpkg.com/@types/chai-jquery/-/chai-jquery-1.1.43.tgz#ddd09ee6039633c3c1620100d1141dabe296f8dd"
+  integrity sha512-8A7HAQfmqEyeYX6eJ5Lz0jK703CfLrekGSYZLn5ayAIbpMxmNmJ9WGXlaIcBm+wKAlyALgBiKYHdvlVyNNQk3g==
   dependencies:
     "@types/chai" "*"
     "@types/jquery" "*"
