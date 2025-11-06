@@ -325,7 +325,6 @@ describe('studio controls', () => {
 
     it('dismisses studio tooltip guide when clicking on the test', () => {
       cy.stub(runner, 'emit')
-      cy.stub(appState, 'setStudioTooltipDismissed').as('setStudioTooltipDismissed')
 
       assertNewTestPageTooltip()
 
