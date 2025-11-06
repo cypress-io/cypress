@@ -28,7 +28,7 @@ const requestSpecFile = (file: string, port: number) => {
       })
     }
 
-    // give webpack a little time (200ms)to compile before sending the request so the spec is available in the file system.
+    // give webpack a little time (200ms) to compile before sending the request so the spec is available in the file system.
     // alternative would be to listen to a compile event or check stdout to see if webpack compiled successfully
     setTimeout(() => {
       http.request(opts, callback).end()
