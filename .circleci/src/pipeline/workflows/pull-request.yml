@@ -63,7 +63,7 @@ jobs:
         - external-pr-build
         - approve-contributor-pr
   - verify-release-readiness:
-      context: test-runner:npm-release
+      context: [test-runner:npm-release, org-npm-credentials]
       requires:
         - internal-pr-build
         - external-pr-build
