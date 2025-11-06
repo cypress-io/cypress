@@ -184,7 +184,7 @@ export async function getAngularCliModules (projectRoot: string) {
   ] = await Promise.all(angularCLiModules.map(async (dep) => {
     try {
       const depPath = require.resolve(dep, { paths: [projectRoot] })
-      // NOTE: @cypress/webpack-dev-server is a CJS package, but we need to import some ESM files and absolute imports .
+      // NOTE: @cypress/webpack-dev-server is a CJS package, but we need to import some ESM files and absolute imports.
       // since import statements in TypeScript will get transpiled down to CommonJS require statements, we want to use tsx to leverage
       // an ESM style import here, which supports CommonJS and ESM.
       const { tsImport } = require('tsx/esm/api')
