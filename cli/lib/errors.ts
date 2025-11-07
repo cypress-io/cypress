@@ -16,7 +16,7 @@ import type {
   InvalidCypressEnvError,
   CypressRunBinaryError,
   ErrorFactories,
-} from '../types/error-types'
+} from './error-types'
 
 const docsUrl = 'https://on.cypress.io'
 const requiredDependenciesUrl = `${docsUrl}/required-dependencies`
