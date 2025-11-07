@@ -36,7 +36,7 @@ export const Cypress = (
   vite: Vite,
 ): PluginOption => {
   let base = '/'
-  let loaderPromise: Promise<string>
+  let loaderPromise: Promise<string> | null = null
 
   const projectRoot = options.cypressConfig.projectRoot
   const supportFilePath = options.cypressConfig.supportFile ? path.resolve(projectRoot, options.cypressConfig.supportFile) : false
@@ -51,16 +51,25 @@ export const Cypress = (
   const loadInitFile = async (): Promise<string> => {
     try {
       const content = await readFile(INIT_FILEPATH, 'utf8')
+
       debug(`Successfully loaded init file from ${INIT_FILEPATH}`)
+
       return content
     } catch (error) {
       debug(`Failed to load init file from ${INIT_FILEPATH}:`, error)
+
       throw new Error(`Failed to load Cypress init file: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 
-  // Initialize loader promise
-  loaderPromise = loadInitFile()
+  // Get or create the loader promise (lazy initialization)
+  const getLoaderPromise = (): Promise<string> => {
+    if (!loaderPromise) {
+      loaderPromise = loadInitFile()
+    }
+
+    return loaderPromise
+  }
 
   devServerEvents.on('dev-server:specs:changed', ({ specs, options }: { specs: Spec[], options?: { neededForJustInTimeCompile: boolean }}) => {
     if (options?.neededForJustInTimeCompile) {
@@ -109,7 +118,7 @@ export const Cypress = (
       const endOfBody = indexHtmlContent.lastIndexOf('</body>')
 
       // Get the loader content asynchronously
-      const loader = await loaderPromise
+      const loader = await getLoaderPromise()
 
       // insert the script in the end of the body
       const newHtml = `
