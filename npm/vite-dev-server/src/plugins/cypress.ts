@@ -62,10 +62,15 @@ export const Cypress = (
     }
   }
 
-  // Get or create the loader promise (lazy initialization)
+  // Get or create the loader promise (lazy initialization with proper error handling)
   const getLoaderPromise = (): Promise<string> => {
     if (!loaderPromise) {
-      loaderPromise = loadInitFile()
+      loaderPromise = loadInitFile().catch((error) => {
+        // Reset the promise so it can be retried later
+        loaderPromise = null
+
+        throw error
+      })
     }
 
     return loaderPromise
