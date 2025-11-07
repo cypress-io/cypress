@@ -784,7 +784,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(get:cached:test:state)', () => {
+    describe('on(get:cached:test:state)', () => {
       it('returns cached test state', async function () {
         await new Promise((resolve) => {
           this.client.emit('backend:request', 'preserve:run:state', {
