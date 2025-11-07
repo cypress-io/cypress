@@ -232,15 +232,18 @@ export default {
         return `jQuery{${(value as JQueryStatic).length}}`
       }
 
+      // Check for circular reference first to prevent infinite recursion
+      if (visitedSet.has(value)) {
+        return '[Circular]'
+      }
+
       const len = _.keys(value).length
 
       if (len > 2) {
-        return `Object{${len}}`
-      }
+        // Add to visited set to prevent infinite recursion in nested structures
+        visitedSet.add(value)
 
-      // Check for circular reference before recursing to prevent infinite loops
-      if (visitedSet.has(value)) {
-        return '[Circular]'
+        return `Object{${len}}`
       }
 
       // Add to visited set before recursing

@@ -111,6 +111,25 @@ describe('driver/src/cypress/utils', () => {
         expect(this.str(obj)).to.eq('Object{3}')
       })
 
+      it('same object with >2 keys referenced multiple times shows [Circular] on subsequent references', function () {
+        const sharedObj = {
+          a: 1,
+          b: 2,
+          c: 3,
+        }
+
+        const container = {
+          first: sharedObj,
+          second: sharedObj,
+        }
+
+        const result = this.str(container)
+
+        // First reference should show Object{3}, second should show [Circular]
+        expect(result).to.include('Object{3}')
+        expect(result).to.include('[Circular]')
+      })
+
       it('multiple circular references in same object', function () {
         const obj = {
           a: {},
