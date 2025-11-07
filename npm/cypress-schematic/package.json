@@ -20,7 +20,7 @@
     "@angular-devkit/schematics-cli": "^20.1.6",
     "@angular/cli": "^20.1.6",
     "@schematics/angular": "^20.1.6",
-    "@types/chai-enzyme": "0.6.13",
+    "@types/chai-enzyme": "0.6.14",
     "@types/mocha": "8.0.3",
     "@types/node": "^22.18.7",
     "eslint": "^9.31.0",
