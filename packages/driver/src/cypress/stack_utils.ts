@@ -60,9 +60,14 @@ const stackWithLinesRemoved = (stack, cb) => {
   return unsplitStack(messageLines, remainingStackLines)
 }
 
-const stackWithWrappingLinesRemoved = (stack) => {
+const stackWithWrappingLinesRemoved = (stack, specWindow) => {
   const modifiedStack = stackWithLinesRemoved(stack, (lines) => {
-    if (Cypress.isBrowser('chrome')) {
+    // Guard against Cypress being undefined/null (can happen when users quickly reload tests)
+    if (!specWindow?.Cypress) {
+      return lines
+    }
+
+    if (specWindow.Cypress.isBrowser('chrome')) {
     // There are cases where there are other lines in the stack trace before the invocation (eg. `context.it.only`, `createRunnable`, etc)
     // Remove lines from the start until the top line starts with 'at eval' or 'at Suite.eval' so that we only keep the actual invocation line.
       while (
@@ -74,7 +79,7 @@ const stackWithWrappingLinesRemoved = (stack) => {
       ) {
         lines.shift()
       }
-    } else if (Cypress.isBrowser('firefox')) {
+    } else if (specWindow.Cypress.isBrowser('firefox')) {
       const isTestInvocationLine = (line: string) => {
         const splitAtAt = line.split('@')
 
@@ -195,7 +200,7 @@ const getInvocationDetails = (specWindow, sourceMapProjectRoot: string, type?: '
 
     // if the hook is the test body, we will try to remove the lines that are not the actual invocation of the test
     if (type === 'test-body') {
-      stack = stackWithWrappingLinesRemoved(stack)
+      stack = stackWithWrappingLinesRemoved(stack, specWindow)
     }
 
     const details: Omit<InvocationDetails, 'stack'> = getSourceDetailsForFirstLine(stack, sourceMapProjectRoot) || {}

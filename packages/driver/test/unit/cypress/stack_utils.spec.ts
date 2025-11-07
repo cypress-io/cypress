@@ -80,7 +80,7 @@ at eval (cypress:///../driver/src/cypress/script_utils.ts:38:23)`
       }
 
       stack_utils.getInvocationDetails(
-        { Error: GrepError, Cypress: {} },
+        { Error: GrepError, Cypress: { isBrowser: vi.fn(() => true) } },
         config,
         'test-body',
       )
@@ -106,7 +106,7 @@ at eval (cypress:///../driver/src/cypress/script_utils.ts:38:23)`
       }
 
       stack_utils.getInvocationDetails(
-        { Error: GrepError, Cypress: {} },
+        { Error: GrepError, Cypress: { isBrowser: vi.fn(() => true) } },
         config,
         'test-body',
       )
@@ -132,7 +132,7 @@ at eval (cypress:///../driver/src/cypress/script_utils.ts:38:23)`
       }
 
       const result = stack_utils.getInvocationDetails(
-        { Error: GrepError, Cypress: {} },
+        { Error: GrepError, Cypress: { isBrowser: vi.fn(() => true) } },
         config,
         'test-body',
       )
