@@ -1,13 +1,11 @@
-require('../../spec_helper')
-
-const randomstring = require('randomstring')
-const random = require(`../../../lib/util/random`)
+import randomstring from 'randomstring'
+import { id as randomId } from '../../../lib/util/random'
 
 context('.id', () => {
   it('returns random.generate string with length 5 by default', () => {
     sinon.spy(randomstring, 'generate')
 
-    const id = random.id()
+    const id = randomId()
 
     expect(id.length).to.eq(5)
 
@@ -20,7 +18,7 @@ context('.id', () => {
   it('passes the length parameter if supplied', () => {
     sinon.spy(randomstring, 'generate')
 
-    const id = random.id(32)
+    const id = randomId(32)
 
     expect(id.length).to.eq(32)
 

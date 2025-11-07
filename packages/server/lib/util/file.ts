@@ -1,21 +1,24 @@
-const _ = require('lodash')
-const os = require('os')
-const md5 = require('md5')
-const path = require('path')
-const debugVerbose = require('debug')('cypress-verbose:server:util:file')
-const Promise = require('bluebird')
-const lockFile = Promise.promisifyAll(require('lockfile'))
-const { fs } = require('./fs')
-const env = require('./env')
-const exit = require('./exit')
-const { default: pQueue } = require('p-queue')
+import _ from 'lodash'
+import os from 'os'
+import md5 from 'md5'
+import path from 'path'
+import debugModule from 'debug'
+import Promise from 'bluebird'
+import lockFileModule from 'lockfile'
+import { fs } from './fs'
+import * as env from './env'
+import exit from './exit'
+import pQueue from 'p-queue'
+const lockFile = Promise.promisifyAll(lockFileModule)
+
+const debugVerbose = debugModule('cypress-verbose:server:util:file')
 
 const DEBOUNCE_LIMIT = 1000
 const LOCK_TIMEOUT = 2000
 
 function getUid () {
   try {
-    // eslint-disable-next-line no-restricted-properties
+    // @ts-expect-error - process.geteuid is defined
     return process.geteuid()
   } catch (err) {
     // process.geteuid() can fail, return a constant
@@ -24,8 +27,28 @@ function getUid () {
   }
 }
 
-class File {
-  constructor (options = {}) {
+export class File {
+  _lockFileDir!: string
+  _lockFilePath!: string
+  _queue!: pQueue
+  _cache!: Record<string, any>
+  _lastRead!: number
+  path: string
+
+  static noopFile = {
+    get () {
+      return Promise.resolve({})
+    },
+    set () {
+      return Promise.resolve()
+    },
+    transaction () {},
+    remove () {
+      return Promise.resolve()
+    },
+  }
+
+  constructor (options: { path?: string } = {}) {
     if (!options.path) {
       throw new Error('Must specify path to file when creating new FileUtil()')
     }
@@ -70,13 +93,13 @@ class File {
   get (...args) {
     debugVerbose('get values from %s', this.path)
 
-    return this._get(false, ...args)
+    return this._get(false, ...(args as [string, any]))
   }
 
   set (...args) {
     debugVerbose('set values in %s', this.path)
 
-    return this._set(false, ...args)
+    return this._set(false, ...(args as [string, any]))
   }
 
   remove () {
@@ -136,6 +159,7 @@ class File {
     .then(() => {
       debugVerbose('read %s', this.path)
 
+      // @ts-expect-error
       return fs.readJsonAsync(this.path, 'utf8')
     })
     .catch((err) => {
@@ -208,6 +232,7 @@ class File {
     .then(() => {
       debugVerbose('write %s', this.path)
 
+      // @ts-expect-error
       return fs.outputJsonAsync(this.path, this._cache, { spaces: 2 })
     })
     .finally(() => {
@@ -221,6 +246,7 @@ class File {
     debugVerbose('attempt to get lock on %s', this.path)
 
     return fs
+    // @ts-expect-error
     .ensureDirAsync(this._lockFileDir)
     .then(() => {
       // polls every 100ms up to 2000ms to obtain lock, otherwise rejects
@@ -245,18 +271,3 @@ class File {
     })
   }
 }
-
-File.noopFile = {
-  get () {
-    return Promise.resolve({})
-  },
-  set () {
-    return Promise.resolve()
-  },
-  transaction () {},
-  remove () {
-    return Promise.resolve()
-  },
-}
-
-module.exports = File

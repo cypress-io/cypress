@@ -134,7 +134,8 @@ jobs:
     resource_class: small
     steps:
         - cancel-draft-prs
-        - checkout
+        - checkout:
+            method: blobless
         - restore-src-checksum-cache
         - persist-to-workspace-and-exit-early
         - pack-workflows

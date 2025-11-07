@@ -102,6 +102,7 @@
   "files": [
     "patches"
   ],
+  "license": "MIT",
   "workspaces": {
     "nohoist": [
       "*"

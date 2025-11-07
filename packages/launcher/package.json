@@ -39,6 +39,7 @@
     "lib"
   ],
   "types": "index.ts",
+  "license": "MIT",
   "nx": {
     "implicitDependencies": [
       "@packages/data-context"
