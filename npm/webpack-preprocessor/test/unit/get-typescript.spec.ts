@@ -14,11 +14,15 @@ describe('./lib/get-typescript', () => {
         createProgram: vi.fn(),
       }
 
-      mockRequire('typescript', mockTypeScript)
+      const tsResolvedPath = require.resolve('typescript')
+
+      mockRequire(tsResolvedPath, mockTypeScript)
 
       const resolvedTypeScript = getTypescript()
 
       expect(mockTypeScript.createProgram).toEqual(resolvedTypeScript.createProgram)
+
+      mockRequire.stop(tsResolvedPath)
     })
 
     it('requires typescript from typescript option if specified', () => {
@@ -34,6 +38,8 @@ describe('./lib/get-typescript', () => {
       const resolvedTypeScript = getTypescript('./test/fixtures/mock_user_tsconfig.json')
 
       expect(mockTypeScript.createProgram).toEqual(resolvedTypeScript.createProgram)
+
+      mockRequire.stop(fullPathToMockUserTsconfig)
     })
   })
 })
