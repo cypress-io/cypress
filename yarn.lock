@@ -8098,25 +8098,15 @@
   dependencies:
     "@types/chai" "*"
 
-"@types/chai-enzyme@0.6.13":
-  version "0.6.13"
-  resolved "https://registry.npmjs.org/@types/chai-enzyme/-/chai-enzyme-0.6.13.tgz#47225ace7949a696a99bcf25494dab7d813952ab"
-  integrity sha512-3dtkDFzXe7TS0dnqN56dFZAiEXlpHnWUoCsmoFMIyWeRHBYwd80UG+X3KNVkm7Nc3DOIpLTgLkVKUekK9mm1CQ==
+"@types/chai-enzyme@0.6.14":
+  version "0.6.14"
+  resolved "https://registry.yarnpkg.com/@types/chai-enzyme/-/chai-enzyme-0.6.14.tgz#69a94d13dc150e7eda2299b16d8966b910e99341"
+  integrity sha512-bbhadcCOjkXF2XTadQjmqDnhm7XFwwuLUd2SupfEbA5zA5m5XLRjvQw3DkeWWyVAk8dI0jv/yjwMx7R6Q6v7/Q==
   dependencies:
     "@types/chai" "*"
-    "@types/cheerio" "*"
+    "@types/cheerio" "<1"
     "@types/enzyme" "*"
     "@types/react" "^16"
-
-"@types/chai-enzyme@0.6.7":
-  version "0.6.7"
-  resolved "https://registry.yarnpkg.com/@types/chai-enzyme/-/chai-enzyme-0.6.7.tgz#3a7d2e67b453e7a4ab93057a44fed2d214163f6f"
-  integrity sha512-vV64mBF86MfmjaIijZY/3iPaJ9SwoXx35wt//KPXKicKtYb2K7xoh/ocXOXGnqRRszTTJSDPMHoJKyeLNx0rYQ==
-  dependencies:
-    "@types/chai" "*"
-    "@types/cheerio" "*"
-    "@types/enzyme" "*"
-    "@types/react" "*"
 
 "@types/chai-jquery@1.1.40":
   version "1.1.40"
@@ -8152,7 +8142,7 @@
   dependencies:
     "@types/deep-eql" "*"
 
-"@types/cheerio@*", "@types/cheerio@0.22.21":
+"@types/cheerio@*", "@types/cheerio@0.22.21", "@types/cheerio@<1":
   version "0.22.21"
   resolved "https://registry.yarnpkg.com/@types/cheerio/-/cheerio-0.22.21.tgz#5e37887de309ba11b2e19a6e14cad7874b31a8a3"
   integrity sha512-aGI3DfswwqgKPiEOTaiHV2ZPC9KEhprpgEbJnv0fZl3SGX0cGgEva1126dGrMC6AJM6v/aihlUgJn9M5DbDZ/Q==

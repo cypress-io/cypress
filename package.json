@@ -103,7 +103,7 @@
     "@semantic-release/git": "10.0.1",
     "@types/better-sqlite3": "^7.6.13",
     "@types/bluebird": "3.5.29",
-    "@types/chai-enzyme": "0.6.7",
+    "@types/chai-enzyme": "0.6.14",
     "@types/debug": "4.1.7",
     "@types/enzyme-adapter-react-16": "1.0.5",
     "@types/fluent-ffmpeg": "^2.1.18",
