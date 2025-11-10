@@ -18,7 +18,10 @@ const makeImport = (file: Cypress.Cypress['spec'], filename: string, chunkName: 
   const magicComments = chunkName ? `/* webpackChunkName: "${chunkName}" */` : ''
 
   return `"${filename}": {
-    shouldLoad: () => new URLSearchParams(document.location.search).get("specPath") === "${file.absolute}",
+    shouldLoad: () => {
+      const specPath = new URLSearchParams(document.location.search).get("specPath")
+      return specPath === "__all" || specPath === "${file.absolute}"
+    },
     load: () => import("${file.absolute}" ${magicComments}),
     absolute: "${file.absolute.split(path.sep).join(path.posix.sep)}",
     relative: "${file.relative.split(path.sep).join(path.posix.sep)}",
