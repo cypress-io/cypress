@@ -34,9 +34,14 @@ const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
 
   this.req.isAUTFrame = !!this.req.headers['x-cypress-is-aut-frame']
   this.req.isFromExtraTarget = !!this.req.headers['x-cypress-is-from-extra-target']
+  this.req.isSyncRequest = !!this.req.headers['x-cypress-is-sync-request']
 
   if (this.req.headers['x-cypress-is-aut-frame']) {
     delete this.req.headers['x-cypress-is-aut-frame']
+  }
+
+  if (this.req.headers['x-cypress-is-sync-request']) {
+    delete this.req.headers['x-cypress-is-sync-request']
   }
 
   span?.setAttributes({

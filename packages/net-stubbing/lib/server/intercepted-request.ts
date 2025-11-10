@@ -173,7 +173,7 @@ export class InterceptedRequest {
 
         const _emit = () => emit(this.socket, eventName, eventFrame)
 
-        if (!subscription.await) {
+        if (!subscription.await || this.req.isSyncRequest) {
           _emit()
 
           return
