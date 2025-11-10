@@ -6,6 +6,7 @@ _Released 11/18/2025 (PENDING)_
 **Bugfixes:**
 
 - Fixed an issue where top changes on test retries could cause attempt numbers to show up more than one time in the reporter and cause attempts to be lost in Test Replay. Addressed in [#32888](https://github.com/cypress-io/cypress/pull/32888).
+- Fixed an issue where the browser will freeze when Cypress intercepts a synchronous request where a routeHandler is used. Addressed in [#32925](https://github.com/cypress-io/cypress/pull/32925).
 
 **Misc:**
 
