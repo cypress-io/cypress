@@ -14,6 +14,11 @@ base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.19.
 # See https://docs.cypress.io/app/get-started/install-cypress#Nodejs
 base-internal-minimum-node: &base-internal-minimum-node cypress/base-internal:20.15.0
 
+parameters:
+  publish-binary-branch:
+    type: string
+    default: main
+
 orbs:
   browser-tools: circleci/browser-tools@2.3.1
 
@@ -1364,19 +1369,6 @@ commands:
           paths:
             - cypress/cypress.zip
 
-  trigger-publish-binary-pipeline:
-    steps:
-      - run:
-          name: "Trigger publish-binary pipeline"
-          command: |
-            source ./scripts/ensure-node.sh
-            echo $SHOULD_PERSIST_ARTIFACTS
-            node ./scripts/binary/trigger-publish-binary-pipeline.js
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - triggered_pipeline.json
-
   build-cypress-npm-package:
     parameters:
       executor:
@@ -2470,7 +2462,8 @@ jobs:
       - restore_cached_workspace
       - check-if-binary-exists
       - setup_should_persist_artifacts
-      - trigger-publish-binary-pipeline
+      - trigger-publish-binary-pipeline:
+          target-repo-branch: << pipeline.parameters.publish-binary-branch >>
 
   get-published-artifacts:
     <<: *defaults

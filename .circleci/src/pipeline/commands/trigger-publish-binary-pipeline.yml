@@ -1,0 +1,74 @@
+parameters:
+  target-repo-branch:
+    type: string
+    default: main
+
+steps:
+  - run:
+      name: Trigger publish-binary pipeline
+      command: |
+        if [[ -z "$CIRCLE_TOKEN" ]] || \
+          [[ -z "$CIRCLE_SHA1" ]] || \
+          [[ -z "$CIRCLE_JOB" ]] || \
+          [[ -z "$CIRCLE_WORKFLOW_ID" ]] || \
+          [[ -z "$CIRCLE_BUILD_URL" ]] || \
+          [[ -z "$CIRCLE_BRANCH" ]]; then
+          
+          echo "Missing required environment variables. Skipping pipeline trigger."
+          exit 1
+        fi
+        if [[ -n "$SHOULD_PERSIST_ARTIFACTS" && "$SHOULD_PERSIST_ARTIFACTS" != "true" && "$SHOULD_PERSIST_ARTIFACTS" != "false" ]]; then
+          echo "SHOULD_PERSIST_ARTIFACTS must be true, false, or undefined. Skipping pipeline trigger."
+          exit 1
+        fi
+        if [[ -z $(which node) ]] || [[ -z $(which curl) ]] || [[ -z $(which jq) ]]; then
+          echo "Missing required commands. Skipping pipeline trigger. Ensure jq, curl, and node are installed."
+          exit 1
+        fi
+        echo "Determining next binary version..."
+        export NEXT_VERSION=$(node ./scripts/get-next-version.js)
+        if [[ $? != 0 ]]; then
+          echo "Failed to determine next binary version. Skipping pipeline trigger."
+          exit 1
+        fi
+        echo "Next binary version: $NEXT_VERSION"
+        export BODY=$(cat \<<JSON_BODY_EOF
+        {
+          "branch": "<< parameters.target-repo-branch >>",
+          "parameters": {
+            "temp_dir": "${TMPDIR:-/tmp}",
+            "sha": "$CIRCLE_SHA1",
+            "job_name": "$CIRCLE_JOB",
+            "triggered_workflow_id": "$CIRCLE_WORKFLOW_ID",
+            "triggered_job_url": "$CIRCLE_BUILD_URL",
+            "branch": "$CIRCLE_BRANCH",
+            "should_persist_artifacts": ${SHOULD_PERSIST_ARTIFACTS:-false},
+            "binary_version": "$NEXT_VERSION"
+          }
+        }
+        JSON_BODY_EOF
+        )
+        if [[ $? != 0 ]]; then
+          echo "Failed to compose the request body. Skipping pipeline trigger."
+          exit 1
+        fi
+
+        echo "Triggering new pipeline in cypress-publish-binary project on branch << parameters.target-repo-branch >>..."
+        curl -X POST \
+          -o ~/triggered_pipeline.json \
+          -H "Circle-Token: $CIRCLE_TOKEN" \
+          -H "Content-Type: application/json" \
+          -d "$BODY" \
+          https://circleci.com/api/v2/project/github/cypress-io/cypress-publish-binary/pipeline
+
+        if [[ $? != 0 ]]; then
+          echo "Failed to trigger new pipeline. Skipping pipeline trigger."
+          exit 1
+        fi
+
+        echo "Pipeline saved to triggered_pipeline.json"
+        echo "Triggered pipeline: https://app.circleci.com/pipelines/github/cypress-io/cypress-publish-binary/$(jq -r '.number' triggered_pipeline.json)"
+  - persist_to_workspace:
+      root: ~/
+      paths:
+        - triggered_pipeline.json
