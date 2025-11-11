@@ -8092,12 +8092,10 @@
     "@types/chai" "*"
     "@types/jquery" "*"
 
-"@types/chai-subset@1.3.5":
-  version "1.3.5"
-  resolved "https://registry.yarnpkg.com/@types/chai-subset/-/chai-subset-1.3.5.tgz#3fc044451f26985f45625230a7f22284808b0a9a"
-  integrity sha512-c2mPnw+xHtXDoHmdtcCXGwyLMiauiAyxWMzhGpqHC4nqI/Y5G2XhTampslK2rb59kpcuHon03UH8W6iYUzw88A==
-  dependencies:
-    "@types/chai" "*"
+"@types/chai-subset@1.3.6":
+  version "1.3.6"
+  resolved "https://registry.yarnpkg.com/@types/chai-subset/-/chai-subset-1.3.6.tgz#fc50f637ebd038ed58700f826d7bab2caa8a8d7e"
+  integrity sha512-m8lERkkQj+uek18hXOZuec3W/fCRTrU4hrnXjH3qhHy96ytuPaPiWGgu7sJb7tZxZonO75vYAjCvpe/e4VUwRw==
 
 "@types/chai@*", "@types/chai@^5.2.2":
   version "5.2.2"
