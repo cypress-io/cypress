@@ -1,7 +1,7 @@
-const execa = require('execa')
-const path = require('path')
-const pkg = require('../package.json')
-const fs = require('fs')
+import execa from 'execa'
+import path from 'path'
+import pkg from '../package.json'
+import fs from 'fs'
 
 const pkgJsonPath = path.join(__dirname, '..', 'package.json')
 
@@ -57,6 +57,4 @@ const main = async () => {
 }
 
 // execute main function if called from command line
-if (require.main === module) {
-  main()
-}
+main()

@@ -1,16 +1,10 @@
-const EventEmitter = require('events').EventEmitter
-const chai = require('chai')
-const fs = require('fs-extra')
-const path = require('path')
-const snapshot = require('snap-shot-it')
-const sinon = require('sinon')
-const Bluebird = require('bluebird')
-const sinonChai = require('sinon-chai')
-
-chai.use(sinonChai)
-const { expect } = chai
-
-const preprocessor = require('../../dist/index')
+import { describe, beforeEach, afterEach, it, expect } from 'vitest'
+import { EventEmitter } from 'events'
+import fs from 'fs-extra'
+import path from 'path'
+import Bluebird from 'bluebird'
+import stripAnsi from 'strip-ansi'
+import preprocessor from '../../dist/index'
 
 const normalizeErrMessage = (message) => {
   return message.replace(/\/\S+\/_test/g, '<path>/_test')
@@ -31,6 +25,7 @@ describe('webpack preprocessor - e2e', () => {
   let file
 
   beforeEach(async () => {
+    // @ts-expect-error
     preprocessor.__reset()
 
     await fs.remove(outputDir)
@@ -45,43 +40,42 @@ describe('webpack preprocessor - e2e', () => {
     }
   })
 
-  it('correctly preprocesses the file', () => {
+  it('correctly preprocesses the file', async () => {
     const options = preprocessor.defaultOptions
 
     options.webpackOptions.mode = 'production' // snapshot will be minified
     file = createFile()
 
-    return preprocessor(options)(file).then((outputPath) => {
-      snapshot(fs.readFileSync(outputPath).toString())
-    })
+    const outputPath = await preprocessor(options)(file)
+
+    expect(fs.readFileSync(outputPath).toString()).toMatchSnapshot()
   })
 
-  it('has less verbose "Module not found" error', () => {
+  it('has less verbose "Module not found" error', async () => {
     file = createFile({ name: 'imports_nonexistent_file_spec.js' })
 
-    return preprocessor()(file)
-    .then(() => {
+    try {
+      await preprocessor({})(file)
       throw new Error('Should not resolve')
-    })
-    .catch((err) => {
-      snapshot(normalizeErrMessage(err.message))
-    })
+    } catch (err) {
+      expect(normalizeErrMessage(err.message)).toMatchSnapshot()
+    }
   })
 
-  it('has less verbose syntax error', () => {
+  it('has less verbose syntax error', async () => {
     file = createFile({ name: 'syntax_error_spec.js' })
 
-    return preprocessor()(file)
-    .then(() => {
+    try {
+      await preprocessor({})(file)
       throw new Error('Should not resolve')
-    })
-    .catch((err) => {
-      snapshot(normalizeErrMessage(err.message))
-    })
+    } catch (err) {
+      expect(stripAnsi(normalizeErrMessage(err.message))).toMatchSnapshot()
+    }
   })
 
   it('allows attaching catch later on syntax error without triggering unhandled rejection', async () => {
     process.on('unhandledRejection', (err) => {
+      // @ts-expect-error
       // eslint-disable-next-line no-console
       console.error('Unhandled Rejection:', err.stack)
       throw new Error('Should not have trigger unhandled rejection')
@@ -89,12 +83,12 @@ describe('webpack preprocessor - e2e', () => {
 
     file = createFile({ shouldWatch: true })
 
-    await preprocessor()(file)
+    await preprocessor({})(file)
     await fs.outputFile(file.filePath, '{')
 
-    await new Promise((resolve) => {
+    await new Promise<void>((resolve) => {
       setTimeout(() => {
-        preprocessor()(file)
+        preprocessor({})(file)
         .catch((err) => {
           expect(err.stack).to.include('Unexpected token')
           resolve()
@@ -106,26 +100,26 @@ describe('webpack preprocessor - e2e', () => {
   it('triggers rerun on syntax error', async () => {
     file = createFile({ shouldWatch: true })
 
-    await preprocessor()(file)
+    await preprocessor({})(file)
 
-    const _emit = sinon.spy(file, 'emit')
+    const _emit = vi.spyOn(file, 'emit')
 
     await fs.outputFile(file.filePath, '{')
 
-    await retry(() => expect(_emit).calledWith('rerun'))
+    await retry(() => expect(_emit).toHaveBeenCalledWith('rerun'))
   })
 
   it('does not call rerun on initial build, but on subsequent builds', async () => {
     file = createFile({ shouldWatch: true })
-    const _emit = sinon.spy(file, 'emit')
+    const _emit = vi.spyOn(file, 'emit')
 
-    await preprocessor()(file)
+    await preprocessor({})(file)
 
-    expect(_emit).not.to.be.calledWith('rerun')
+    expect(_emit).not.toHaveBeenCalledWith('rerun')
 
     await fs.outputFile(file.filePath, 'console.log()')
 
-    await retry(() => expect(_emit).calledWith('rerun'))
+    await retry(() => expect(_emit).toHaveBeenCalledWith('rerun'))
   })
 })
 
