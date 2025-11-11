@@ -84,9 +84,9 @@ const stackWithWrappingLinesRemoved = (stack, specWindow) => {
         const splitAtAt = line.split('@')
 
         // firefox stacks traces look like:
-        // functionName@https://aicotravel.com/__cypress/tests?p=cypress/support/e2e.js:444:14
-        // @https://aicotravel.com/__cypress/tests?p=cypress/e2e/spec.cy.js:43:3
-        // @https://aicotravel.com/__cypress/tests?p=cypress/e2e/spec.cy.js:45:12
+        // functionName@http://localhost:3000/__cypress/tests?p=cypress/support/e2e.js:444:14
+        // @http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js:43:3
+        // @http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js:45:12
         // evalScripts/<@cypress:///../driver/src/cypress/script_utils.ts:38:23
         //
         // the actual invocation details will be at the first line with no function name
