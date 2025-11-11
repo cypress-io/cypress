@@ -1,3 +1,5 @@
+# [@cypress/webpack-preprocessor-v7.0.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v7.0.1...@cypress/webpack-preprocessor-v7.0.2) (2025-11-07)
+
 # [@cypress/webpack-preprocessor-v7.0.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v7.0.0...@cypress/webpack-preprocessor-v7.0.1) (2025-08-19)
 
 
