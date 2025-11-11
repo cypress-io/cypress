@@ -719,6 +719,11 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
     return this.next()
   }
 
+  if (this.req.isSyncRequest) {
+    span?.end()
+    return this.next()
+  }
+
   // we want to set the cookies via automation so they exist in the browser
   // itself. however, firefox will hang if we try to use the extension
   // to set cookies on a url that's in-flight, so we send the cookies down to
