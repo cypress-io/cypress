@@ -19,6 +19,8 @@ let ctx
 
 describe('lib/screenshots', () => {
   before(async function () {
+    this.timeout(60000)
+
     const { setCtx, makeDataContext, clearCtx } = require('../../lib/makeDataContext')
 
     // Clear and set up DataContext
@@ -82,12 +84,14 @@ describe('lib/screenshots', () => {
   context('.capture', () => {
     beforeEach(function () {
       this.getPixelColor = sinon.stub()
+      const lastPixelIndex = this.jimpImage.bitmap.width - 1
+
       this.getPixelColor.withArgs(0, 0).returns('grey')
       this.getPixelColor.withArgs(1, 0).returns('white')
       this.getPixelColor.withArgs(0, 1).returns('white')
-      this.getPixelColor.withArgs(40, 0).returns('white')
-      this.getPixelColor.withArgs(0, 40).returns('white')
-      this.getPixelColor.withArgs(40, 40).returns('black')
+      this.getPixelColor.withArgs(lastPixelIndex, 0).returns('white')
+      this.getPixelColor.withArgs(0, lastPixelIndex).returns('white')
+      this.getPixelColor.withArgs(lastPixelIndex, lastPixelIndex).returns('black')
       this.jimpImage.getPixelColor = this.getPixelColor
 
       sinon.stub(Jimp, 'read').resolves(this.jimpImage)
@@ -155,6 +159,32 @@ describe('lib/screenshots', () => {
 
         expect(details.takenAt).to.match(iso8601Regex)
       })
+    })
+
+    it('does not read helper pixels outside the bitmap bounds', function () {
+      this.getPixelColor.restore()
+
+      const maxX = this.jimpImage.bitmap.width - 1
+      const maxY = this.jimpImage.bitmap.height - 1
+      const pixelColors = new Map([
+        ['0,0', 'white'],
+        ['1,0', 'white'],
+        ['0,1', 'white'],
+        [`${maxX},0`, 'white'],
+        [`0,${maxY}`, 'white'],
+        [`${maxX},${maxY}`, 'black'],
+      ])
+
+      this.getPixelColor = sinon.stub().callsFake((x, y) => {
+        expect(x).to.be.within(0, maxX)
+        expect(y).to.be.within(0, maxY)
+
+        return pixelColors.get(`${x},${y}`) || 'white'
+      })
+
+      this.jimpImage.getPixelColor = this.getPixelColor
+
+      return screenshots.capture(this.appData, this.automate)
     })
 
     describe('runner hidden', () => {

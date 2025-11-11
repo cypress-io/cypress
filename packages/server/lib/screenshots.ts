@@ -103,12 +103,22 @@ const intToRGBA = function (int: number): RGBAWithName {
 // when taking a 'runner' capture, we ensure the pixels ARE there
 
 const hasHelperPixels = function (image, pixelRatio) {
-  const topLeft = intToRGBA(image.getPixelColor(0, 0))
-  const topLeftRight = intToRGBA(image.getPixelColor(1 * pixelRatio, 0))
-  const topLeftDown = intToRGBA(image.getPixelColor(0, 1 * pixelRatio))
-  const bottomLeft = intToRGBA(image.getPixelColor(0, image.bitmap.height))
-  const topRight = intToRGBA(image.getPixelColor(image.bitmap.width, 0))
-  const bottomRight = intToRGBA(image.getPixelColor(image.bitmap.width, image.bitmap.height))
+  const maxX = image.bitmap.width - 1
+  const maxY = image.bitmap.height - 1
+
+  const getClampedPixel = (x: number, y: number) => {
+    const clampedX = Math.max(0, Math.min(Math.round(x), maxX))
+    const clampedY = Math.max(0, Math.min(Math.round(y), maxY))
+
+    return intToRGBA(image.getPixelColor(clampedX, clampedY))
+  }
+
+  const topLeft = getClampedPixel(0, 0)
+  const topLeftRight = getClampedPixel(1 * pixelRatio, 0)
+  const topLeftDown = getClampedPixel(0, 1 * pixelRatio)
+  const bottomLeft = getClampedPixel(0, maxY)
+  const topRight = getClampedPixel(maxX, 0)
+  const bottomRight = getClampedPixel(maxX, maxY)
 
   topLeft.isNotWhite = !isWhite(topLeft)
   topLeftRight.isWhite = isWhite(topLeftRight)
