@@ -318,6 +318,9 @@ jobs:
       requires:
         - node_modules_install
         - internal-pr-build
+      filters:
+        branches:
+          ignore: /^pull\/[0-9]+/
   - wait-for-binary-publish:
       type: approval
       requires:
