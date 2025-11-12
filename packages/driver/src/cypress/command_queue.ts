@@ -403,11 +403,11 @@ export class CommandQueue extends Queue<$Command> {
       const duration = performance.now() - startTime
 
       Cypress.automation('log:command:performance', {
-        name: `command:run:${command.attributes.name}`,
+        name: command?.attributes?.name ?? 'unknown',
         startTime,
         duration,
         detail: {
-          runnable: this.state('runnable'),
+          runnable: this.state('runnable') ?? {},
           spec: Cypress.spec.relative,
           numElements,
         },

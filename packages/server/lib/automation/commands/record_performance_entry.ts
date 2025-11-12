@@ -19,7 +19,7 @@ const COLUMNS = [
   'duration',
   'name',
   'numElements',
-  'runnable',
+  'runnableTitle',
   'spec',
 ]
 
@@ -49,7 +49,6 @@ export async function recordPerformanceEntry (entry: CommandPerformanceEntry) {
       numElements,
       runnable: {
         title,
-        type,
       },
       spec,
     },
@@ -57,7 +56,7 @@ export async function recordPerformanceEntry (entry: CommandPerformanceEntry) {
 
   await fs.writeFile(
     path.join(logFilePath(), 'performance.log'),
-    [startTime, duration, name, numElements, `${title} (${type})`, spec].join(',') + '\n',
+    [startTime, duration, name, numElements, title, spec].join(',') + '\n',
     { flag: 'a' },
   )
 }
