@@ -272,7 +272,7 @@
     ".circleci/*.yml": "circleci config validate"
   },
   "resolutions": {
-    "**/@types/cheerio": "0.22.21",
+    "**/@types/cheerio": "0.22.35",
     "**/@types/enzyme": "3.10.5",
     "**/jquery": "3.7.1",
     "**/socket.io-parser": "4.0.5",
