@@ -12,6 +12,10 @@ _Released 11/18/2025 (PENDING)_
 
 - The keyboard shortcuts modal now displays the keyboard shortcut for saving Studio changes - `⌘` + `s` for Mac or `Ctrl` + `s` for Windows/Linux. Addressed [#32862](https://github.com/cypress-io/cypress/issues/32862). Addressed in [#32864](https://github.com/cypress-io/cypress/pull/32864).
 
+**Dependency Updates:**
+
+- Upgraded `mime` from `3.0.0` to `4.1.0`. Addresses [#30144](https://github.com/cypress-io/cypress/issues/30144).
+
 ## 15.6.0
 
 _Released 11/4/2025_
