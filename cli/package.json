@@ -54,7 +54,7 @@
     "process": "^0.11.10",
     "proxy-from-env": "1.0.0",
     "request-progress": "^3.0.0",
-    "semver": "^7.7.1",
+    "semver": "^7.7.3",
     "supports-color": "^8.1.1",
     "systeminformation": "5.27.7",
     "tmp": "~0.2.4",
