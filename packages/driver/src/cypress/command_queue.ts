@@ -229,6 +229,7 @@ export class CommandQueue extends Queue<$Command> {
   }
 
   private runCommand (command: $Command) {
+    const startTime = performance.now()
     const isQuery = command.get('query')
     const name = command.get('name')
 
@@ -362,6 +363,8 @@ export class CommandQueue extends Queue<$Command> {
       command.set({ subject })
       command.pass()
 
+      const numElements = subject ? subject.length ?? 1 : 0
+
       // end / snapshot our logs if they need it
       command.finishLogs()
 
@@ -395,6 +398,19 @@ export class CommandQueue extends Queue<$Command> {
         nestedIndex: null,
         // we're finished with the current command so set it back to null
         current: null,
+      })
+
+      const duration = performance.now() - startTime
+
+      Cypress.automation('log:command:performance', {
+        name: `command:run:${command.attributes.name}`,
+        startTime,
+        duration,
+        detail: {
+          runnable: this.state('runnable'),
+          spec: Cypress.spec.relative,
+          numElements,
+        },
       })
 
       return subject

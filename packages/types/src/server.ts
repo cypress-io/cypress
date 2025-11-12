@@ -127,10 +127,16 @@ export interface KeyPressParams {
 
 export interface CommandPerformanceEntry {
   name: string
-  spec: string
-  numElements: number
-  duration: number
   startTime: number
+  duration: number
+  detail: {
+    runnable: {
+      type: string
+      title: string
+    }
+    spec: string
+    numElements: number
+  }
 }
 
 export interface AutomationCommands {

@@ -17,8 +17,9 @@ function performanceLogsEnabled () {
 const COLUMNS = [
   'startTime',
   'duration',
-  'command',
+  'name',
   'numElements',
+  'runnable',
   'spec',
 ]
 
@@ -26,6 +27,8 @@ export function initializePerformanceLogFile () {
   if (!performanceLogsEnabled()) {
     return
   }
+
+  debug('initializing performance log file: %s', path.join(logFilePath(), 'performance.log'))
 
   fsSync.mkdirSync(logFilePath(), { recursive: true })
   fsSync.writeFileSync(path.join(logFilePath(), 'performance.log'), `${COLUMNS.join(',')}\n`, { flag: 'w' })
@@ -38,9 +41,23 @@ export async function recordPerformanceEntry (entry: CommandPerformanceEntry) {
     return
   }
 
+  const {
+    startTime,
+    duration,
+    name,
+    detail: {
+      numElements,
+      runnable: {
+        title,
+        type,
+      },
+      spec,
+    },
+  } = entry
+
   await fs.writeFile(
     path.join(logFilePath(), 'performance.log'),
-    `${entry.startTime},${entry.duration},${entry.command},${entry.numElements},${entry.spec}\n`,
+    [startTime, duration, name, numElements, `${title} (${type})`, spec].join(',') + '\n',
     { flag: 'a' },
   )
 }
