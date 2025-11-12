@@ -60,8 +60,8 @@ const stackWithLinesRemoved = (stack, cb) => {
   return unsplitStack(messageLines, remainingStackLines)
 }
 
-const stackTrimmedToTestInvocation = (stack, specWindow) => {
-  const modifiedStack = stackWithLinesRemoved(stack, (lines) => {
+const stackTrimmedToTestInvocation = (stack: string, specWindow) => {
+  const modifiedStack = stackWithLinesRemoved(stack, (lines: string[]) => {
     // Guard against Cypress being undefined/null (can happen when users quickly reload tests)
     if (!specWindow?.Cypress) {
       return lines
@@ -71,16 +71,15 @@ const stackTrimmedToTestInvocation = (stack, specWindow) => {
     // There are cases where there are other lines in the stack trace before the invocation (eg. `context.it.only`, `createRunnable`, etc)
     // The actual test invocation line starts with either 'at eval' or 'at Suite.eval',
     // so remove all lines until we reach the test invocation line
-      while (
-        lines.length > 0 &&
-      !(
-        lines[0].trim().startsWith('at eval') ||
-        lines[0].trim().startsWith('at Suite.eval')
-      )
-      ) {
-        lines.shift()
-      }
-    } else if (specWindow.Cypress.isBrowser({ family: 'firefox' })) {
+      return _.dropWhile(lines, (line) => {
+        return !(
+          line.trim().startsWith('at eval') ||
+          line.trim().startsWith('at Suite.eval')
+        )
+      })
+    }
+
+    if (specWindow.Cypress.isBrowser({ family: 'firefox' })) {
       const isTestInvocationLine = (line: string) => {
         const splitAtAt = line.split('@')
 
@@ -94,19 +93,16 @@ const stackTrimmedToTestInvocation = (stack, specWindow) => {
         return splitAtAt.length > 1 && splitAtAt[0].trim().length === 0
       }
 
-      while (
-        lines.length > 0 &&
-        !isTestInvocationLine(lines[0])
-      ) {
-        lines.shift()
-      }
+      return _.dropWhile(lines, (line) => {
+        return !isTestInvocationLine(line)
+      })
     }
 
     return lines
   })
 
   // if we removed all the lines then something went wrong. return the original stack instead
-  if (modifiedStack.length === 0) {
+  if (modifiedStack.trim() === 'Error') {
     return stack
   }
 
@@ -177,7 +173,7 @@ type InvocationDetails = {
 }
 
 // used to determine codeframes for hook/test/etc definitions rather than command invocations
-const getInvocationDetails = (specWindow, sourceMapProjectRoot: string, type?: 'test-body'): InvocationDetails | undefined => {
+const getInvocationDetails = (specWindow, sourceMapProjectRoot: string, type?: 'test'): InvocationDetails | undefined => {
   if (specWindow.Error) {
     let stack = (new specWindow.Error()).stack
 
@@ -199,9 +195,9 @@ const getInvocationDetails = (specWindow, sourceMapProjectRoot: string, type?: '
       }
     }
 
-    // if the hook is the test body, we will try to remove the lines that are not the actual invocation of the test
-    if (type === 'test-body') {
-      stack = stackWithWrappingLinesRemoved(stack, specWindow)
+    // if the hook is the test, we will try to remove the lines that are not the actual invocation of the test
+    if (type === 'test') {
+      stack = stackTrimmedToTestInvocation(stack, specWindow)
     }
 
     const details: Omit<InvocationDetails, 'stack'> = getSourceDetailsForFirstLine(stack, sourceMapProjectRoot) || {}

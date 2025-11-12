@@ -82,7 +82,7 @@ at eval (cypress:///../driver/src/cypress/script_utils.ts:38:23)`
       stack_utils.getInvocationDetails(
         { Error: GrepError, Cypress: { isBrowser: vi.fn(() => true) } },
         config,
-        'test-body',
+        'test',
       )
 
       expect(source_map_utils.getSourcePosition).toHaveBeenCalledWith('http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js', expect.objectContaining({
@@ -92,8 +92,9 @@ at eval (cypress:///../driver/src/cypress/script_utils.ts:38:23)`
       }))
     })
 
-    it('returns the correct invocation details for a grep stack trace for a test body', () => {
-      const stack = `Error at itGrep (http://localhost:3000/__cypress/tests?p=cypress/support/e2e.js:444:14)
+    it('returns the correct invocation details for a test with a stack that needs to be trimmed', () => {
+      const stack = `Error
+    at itGrep (http://localhost:3000/__cypress/tests?p=cypress/support/e2e.js:444:14)
     at context.notIt.only (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:98:46)
     at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)
     at itGrep.eval [as only] (cypress:///../driver/src/cypress/mocha.ts:187:14)
@@ -108,7 +109,7 @@ at eval (cypress:///../driver/src/cypress/script_utils.ts:38:23)`
       stack_utils.getInvocationDetails(
         { Error: GrepError, Cypress: { isBrowser: vi.fn(() => true) } },
         config,
-        'test-body',
+        'test',
       )
 
       expect(source_map_utils.getSourcePosition).toHaveBeenCalledWith('http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js', expect.objectContaining({
@@ -118,8 +119,9 @@ at eval (cypress:///../driver/src/cypress/script_utils.ts:38:23)`
       }))
     })
 
-    it('returns the original stack if it cannot be normalized for a test body', () => {
-      const stack = `Error at itGrep (http://localhost:3000/__cypress/tests?p=cypress/support/e2e.js:444:14)
+    it('returns the original stack if it cannot be normalized for a test', () => {
+      const stack = `Error
+    at itGrep (http://localhost:3000/__cypress/tests?p=cypress/support/e2e.js:444:14)
     at context.notIt.only (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:98:46)
     at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)
     at itGrep.eval [as only] (cypress:///../driver/src/cypress/mocha.ts:187:14)
@@ -134,7 +136,7 @@ at eval (cypress:///../driver/src/cypress/script_utils.ts:38:23)`
       const result = stack_utils.getInvocationDetails(
         { Error: GrepError, Cypress: { isBrowser: vi.fn(() => true) } },
         config,
-        'test-body',
+        'test',
       )
 
       expect(result.stack).toEqual(stack)
