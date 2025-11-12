@@ -67,7 +67,7 @@ const stackWithWrappingLinesRemoved = (stack, specWindow) => {
       return lines
     }
 
-    if (specWindow.Cypress.isBrowser('chrome')) {
+    if (specWindow.Cypress.isBrowser({ family: 'chromium' })) {
     // There are cases where there are other lines in the stack trace before the invocation (eg. `context.it.only`, `createRunnable`, etc)
     // Remove lines from the start until the top line starts with 'at eval' or 'at Suite.eval' so that we only keep the actual invocation line.
       while (
