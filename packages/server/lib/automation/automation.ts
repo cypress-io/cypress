@@ -8,6 +8,7 @@ import { cookieJar } from '../util/cookies'
 import type { ServiceWorkerEventHandler } from '@packages/proxy/lib/http/util/service-worker-manager'
 import Debug from 'debug'
 import { AutomationNotImplemented } from './automation_not_implemented'
+import { recordPerformanceEntry } from './commands/record_performance_entry'
 
 const debug = Debug('cypress:server:automation')
 
@@ -174,6 +175,8 @@ export class Automation {
         case 'canceled:download':
         case 'complete:download':
           return data
+        case 'log:command:performance':
+          return recordPerformanceEntry(data)
         default:
           return automate(data)
       }

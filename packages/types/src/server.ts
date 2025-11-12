@@ -125,6 +125,14 @@ export interface KeyPressParams {
   key: SupportedKey
 }
 
+export interface CommandPerformanceEntry {
+  name: string
+  spec: string
+  numElements: number
+  duration: number
+  startTime: number
+}
+
 export interface AutomationCommands {
   'take:screenshot': CommandSignature
   'get:cookies': CommandSignature
@@ -151,6 +159,7 @@ export interface AutomationCommands {
   'reload:aut:frame': CommandSignature<{ forceReload: boolean }, void>
   'navigate:aut:history': CommandSignature<{ historyNumber: number }, void>
   'get:aut:title': CommandSignature<void, string>
+  'log:command:performance': CommandSignature<CommandPerformanceEntry, void>
 }
 
 export type OnRequestEvent = <T extends keyof AutomationCommands>(message: T, data: AutomationCommands[T]['dataType']) => Promise<AutomationCommands[T]['returnType']>
