@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events'
 import { RootRunnable } from '../../src/runnables/runnables-store'
 import { addCommand } from '../support/utils'
+import { MAX_VISIBILITY_CHECK_ELEMENTS } from '@packages/types'
 
 describe('commands', { viewportHeight: 1000 }, () => {
   let runner: EventEmitter
@@ -443,7 +444,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
           name: 'get',
           message: '.large-element-set',
           state: 'passed',
-          numElements: 64, // MAX_VISIBILITY_CHECK_ELEMENTS
+          numElements: MAX_VISIBILITY_CHECK_ELEMENTS,
           visible: undefined, // visibility check was skipped
         })
       })
@@ -454,7 +455,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
       cy.contains('.large-element-set').closest('.command').find('.command-invisible').trigger('mouseover')
       cy.get('.cy-tooltip')
       .should('be.visible')
-      .should('include.text', 'Visibility check skipped for 64 elements (limit: 64)')
+      .should('include.text', `Visibility check skipped for ${MAX_VISIBILITY_CHECK_ELEMENTS} elements (limit: ${MAX_VISIBILITY_CHECK_ELEMENTS})`)
     })
   })
 
