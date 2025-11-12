@@ -16,6 +16,7 @@ const image = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+
 const iso8601Regex = /^\d{4}\-\d{2}\-\d{2}T\d{2}\:\d{2}\:\d{2}\.?\d*Z?$/
 
 let ctx
+let originalGetBrowsers
 
 describe('lib/screenshots', () => {
   before(async function () {
@@ -27,6 +28,19 @@ describe('lib/screenshots', () => {
     await clearCtx()
     setCtx(makeDataContext({}))
     ctx = require('../../lib/makeDataContext').getCtx()
+    // Provide a deterministic browser list so BrowserDataSource can resolve in CI environments
+    const availableBrowsers = [{
+      name: 'chrome',
+      family: 'chromium',
+      channel: 'stable',
+      displayName: 'Chrome',
+      path: '/path/to/chrome',
+      version: '123.0.0',
+      majorVersion: '123',
+    }]
+
+    originalGetBrowsers = ctx._apis.browserApi.getBrowsers
+    ctx._apis.browserApi.getBrowsers = async () => availableBrowsers
 
     Fixtures.scaffold()
     this.todosPath = Fixtures.projectPath('todos')
@@ -71,19 +85,26 @@ describe('lib/screenshots', () => {
       clone: () => {
         return this.jimpImage
       },
+      getPixelColor () {
+        throw new Error('getPixelColor should be stubbed')
+      },
     }
 
     Jimp.prototype.composite = sinon.stub()
     // Jimp.prototype.getBuffer = sinon.stub().resolves(@buffer)
   })
 
-  after(() => {
+  after(function () {
+    if (originalGetBrowsers) {
+      ctx._apis.browserApi.getBrowsers = originalGetBrowsers
+    }
+
     return Fixtures.remove()
   })
 
   context('.capture', () => {
     beforeEach(function () {
-      this.getPixelColor = sinon.stub()
+      this.getPixelColor = sinon.stub(this.jimpImage, 'getPixelColor')
       const lastPixelIndex = this.jimpImage.bitmap.width - 1
 
       this.getPixelColor.withArgs(0, 0).returns('grey')
@@ -92,7 +113,6 @@ describe('lib/screenshots', () => {
       this.getPixelColor.withArgs(lastPixelIndex, 0).returns('white')
       this.getPixelColor.withArgs(0, lastPixelIndex).returns('white')
       this.getPixelColor.withArgs(lastPixelIndex, lastPixelIndex).returns('black')
-      this.jimpImage.getPixelColor = this.getPixelColor
 
       sinon.stub(Jimp, 'read').resolves(this.jimpImage)
       const intToRGBA = sinon.stub(Jimp, 'intToRGBA')
