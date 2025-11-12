@@ -1,8 +1,8 @@
-import termSize from 'term-size'
+import terminalSize from 'terminal-size'
 import * as env from './env'
 
 export const get = (): { columns: number, rows: number } => {
-  const obj = termSize()
+  const obj = terminalSize()
 
   if (env.get('CI')) {
     // reset to 100
