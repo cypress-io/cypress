@@ -721,6 +721,7 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
 
   if (this.req.isSyncRequest) {
     span?.end()
+
     return this.next()
   }
 

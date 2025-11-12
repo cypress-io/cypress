@@ -14,10 +14,12 @@ export const patchXmlHttpRequest = (window: Window) => {
       this._url = captureFullRequestUrl(args[1], window)
     } finally {
       const result = originalXmlHttpRequestOpen.apply(this, args as any)
+
       if (args[2] === false) {
         this.setRequestHeader('x-cypress-is-sync-request', 'true')
         this._isSyncRequest = true
       }
+
       return result
     }
   }
