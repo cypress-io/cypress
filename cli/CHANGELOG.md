@@ -6,6 +6,7 @@ _Released 11/18/2025 (PENDING)_
 **Bugfixes:**
 
 - Fixed an issue where top changes on test retries could cause attempt numbers to show up more than one time in the reporter and cause attempts to be lost in Test Replay. Addressed in [#32888](https://github.com/cypress-io/cypress/pull/32888).
+- Fixed a regression where screenshot helper pixels were read outside the bitmap bounds, which also caused the associated unit test to throw `this.getPixelColor.restore is not a function`. Addresses [#32927](https://github.com/cypress-io/cypress/issues/32927).
 
 **Misc:**
 
