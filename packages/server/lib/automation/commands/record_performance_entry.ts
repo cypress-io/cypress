@@ -41,14 +41,18 @@ function escapeCsvValue (value: string | number): string {
 }
 
 export function initializePerformanceLogFile () {
-  if (!performanceLogsEnabled()) {
-    return
+  try {
+    if (!performanceLogsEnabled()) {
+      return
+    }
+
+    debug('initializing performance log file: %s', path.join(logFilePath(), 'performance.log'))
+
+    fsSync.mkdirSync(logFilePath(), { recursive: true })
+    fsSync.writeFileSync(path.join(logFilePath(), 'performance.log'), `${COLUMNS.join(',')}\n`, { flag: 'w' })
+  } catch (error) {
+    debug('error initializing performance log file: %s', error)
   }
-
-  debug('initializing performance log file: %s', path.join(logFilePath(), 'performance.log'))
-
-  fsSync.mkdirSync(logFilePath(), { recursive: true })
-  fsSync.writeFileSync(path.join(logFilePath(), 'performance.log'), `${COLUMNS.join(',')}\n`, { flag: 'w' })
 }
 
 export async function recordPerformanceEntry (entry: CommandPerformanceEntry) {
