@@ -554,7 +554,7 @@ export class EventManager {
             // if we have a currentId it means
             // we need to tell the Cypress to skip
             // ahead to that test
-            Cypress.runner.resumeAtTest(runState.currentId, runState.emissions)
+            Cypress.runner.resumeAtTest(runState.currentId, runState.currentRetry, runState.emissions)
           }
 
           return run()

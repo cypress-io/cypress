@@ -323,6 +323,153 @@ describe('src/cy/commands/misc', () => {
       })
     })
 
+    describe('circular references', () => {
+      beforeEach(function () {
+        this.logs = []
+
+        cy.on('log:added', (attrs, log) => {
+          this.lastLog = log
+          this.logs.push(log)
+        })
+      })
+
+      it('handles simple circular reference without throwing', function () {
+        const obj = {}
+
+        obj.self = obj
+
+        cy.wrap(obj).then((subject) => {
+          expect(subject).to.eq(obj)
+          // Find the wrap log, not any assertion logs
+          const wrapLog = this.logs.find((log) => log.get('name') === 'wrap')
+
+          expect(wrapLog).to.exist
+          expect(wrapLog.get('message')).to.include('[Circular]')
+        })
+      })
+
+      it('handles nested circular reference (Node-like structure)', function () {
+        class Node {
+          constructor () {
+            this.parent = null
+            this.children = []
+          }
+
+          appendChild (child) {
+            child.parent = this
+            this.children.push(child)
+
+            return child
+          }
+        }
+
+        const rootNode = new Node()
+
+        rootNode.appendChild(new Node()).appendChild(new Node())
+
+        cy.wrap(rootNode).then((subject) => {
+          expect(subject).to.eq(rootNode)
+
+          const wrapLog = this.logs.find((log) => log.get('name') === 'wrap')
+
+          expect(wrapLog).to.exist
+          expect(wrapLog.get('message')).to.include('[Circular]')
+        })
+      })
+
+      it('handles circular reference in arrays', function () {
+        const arr = [1, 2, 3]
+
+        arr.push(arr)
+
+        cy.wrap(arr).then((subject) => {
+          expect(subject).to.eq(arr)
+
+          const wrapLog = this.logs.find((log) => log.get('name') === 'wrap')
+
+          expect(wrapLog).to.exist
+          const message = wrapLog.get('message')
+
+          expect(message).to.include('Array[4]')
+          // Should not hang or crash - the exact format may vary but should be safe
+          expect(message).to.be.a('string')
+        })
+      })
+
+      it('handles circular reference in objects with >2 keys', function () {
+        const obj = {
+          a: 1,
+          b: 2,
+          c: {},
+        }
+
+        obj.c.self = obj
+
+        cy.wrap(obj).then((subject) => {
+          expect(subject).to.eq(obj)
+
+          const wrapLog = this.logs.find((log) => log.get('name') === 'wrap')
+
+          expect(wrapLog).to.exist
+          expect(wrapLog.get('message')).to.eq('Object{3}')
+        })
+      })
+
+      it('handles multiple circular references in same object', function () {
+        const obj = {
+          a: {},
+          b: {},
+        }
+
+        obj.a.self = obj
+        obj.b.self = obj
+
+        cy.wrap(obj).then((subject) => {
+          expect(subject).to.eq(obj)
+
+          const wrapLog = this.logs.find((log) => log.get('name') === 'wrap')
+
+          expect(wrapLog).to.exist
+          expect(wrapLog.get('message')).to.include('[Circular]')
+        })
+      })
+
+      it('handles circular reference through multiple levels', function () {
+        const obj = {
+          level1: {
+            level2: {
+              level3: {},
+            },
+          },
+        }
+
+        obj.level1.level2.level3.root = obj
+
+        cy.wrap(obj).then((subject) => {
+          expect(subject).to.eq(obj)
+
+          const wrapLog = this.logs.find((log) => log.get('name') === 'wrap')
+
+          expect(wrapLog).to.exist
+          expect(wrapLog.get('message')).to.include('[Circular]')
+        })
+      })
+
+      it('wrapped subject with circular reference can be chained', function () {
+        const obj = {}
+
+        obj.self = obj
+
+        cy.wrap(obj).then((subject) => {
+          expect(subject).to.eq(obj)
+          expect(subject.self).to.eq(obj)
+        }).then((subject) => {
+          // Subject should still be accessible in subsequent commands
+          expect(subject).to.eq(obj)
+        })
+      })
+    })
+
     describe('.log', () => {
       beforeEach(function () {
         this.logs = []

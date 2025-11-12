@@ -3,9 +3,13 @@
   "version": "0.0.0-development",
   "description": "Cypress preprocessor for bundling JavaScript via webpack with dependencies included and support for various ES features, TypeScript, and CoffeeScript",
   "private": false,
+  "main": "index.js",
+  "types": "index.d.ts",
   "scripts": {
+    "build": "tsc || echo 'built, with errors'",
+    "check-ts": "tsc --noEmit",
     "lint": "eslint",
-    "test": "mocha test/**/*.spec.* --timeout 4000"
+    "test": "yarn build && mocha test/**/*.spec.* --timeout 4000"
   },
   "dependencies": {
     "@babel/core": "^7.28.0",
@@ -52,7 +56,7 @@
   },
   "files": [
     "index.js",
-    "empty.js"
+    "index.d.ts"
   ],
   "license": "MIT",
   "repository": {

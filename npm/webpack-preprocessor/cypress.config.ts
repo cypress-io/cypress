@@ -1,11 +1,10 @@
-const { defineConfig } = require('cypress')
+import { defineConfig } from 'cypress'
+import webpackPreprocessor from './index'
 
-module.exports = defineConfig({
+export default defineConfig({
   e2e: {
     specPattern: 'cypress/tests/**/*',
     setupNodeEvents (on, config) {
-      const webpackPreprocessor = require('./index')
-
       on('file:preprocessor', webpackPreprocessor())
 
       return config

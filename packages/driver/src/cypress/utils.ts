@@ -168,11 +168,14 @@ export default {
     return obj
   },
 
-  stringifyActualObj (obj) {
+  stringifyActualObj (obj, visited?: WeakSet<any>) {
+    // Ensure visited is always a WeakSet - create new one if not provided or invalid
+    const visitedSet = (visited && visited instanceof WeakSet) ? visited : new WeakSet()
+
     obj = this.normalizeObjWithLength(obj)
 
     const str = _.reduce(obj, (memo, value, key) => {
-      memo.push(`${`${key}`.toLowerCase()}: ${this.stringifyActual(value)}`)
+      memo.push(`${`${key}`.toLowerCase()}: ${this.stringifyActual(value, visitedSet)}`)
 
       return memo
     }, [] as string[])
@@ -180,7 +183,10 @@ export default {
     return `{${str.join(', ')}}`
   },
 
-  stringifyActual (value) {
+  stringifyActual (value, visited?: WeakSet<any>) {
+    // Ensure visited is always a WeakSet - create new one if not provided or invalid
+    const visitedSet = (visited && visited instanceof WeakSet) ? visited : new WeakSet()
+
     if ($dom.isDom(value)) {
       return $dom.stringify(value, 'short')
     }
@@ -190,13 +196,30 @@ export default {
     }
 
     if (_.isArray(value)) {
+      // Check for circular reference first to prevent infinite recursion
+      if (visitedSet.has(value)) {
+        return '[Circular]'
+      }
+
       const len = value.length
 
       if (len > 3) {
+        // Add to visited set to prevent infinite recursion in nested structures
+        visitedSet.add(value)
+
         return `Array[${len}]`
       }
 
-      return `[${_.map(value, _.bind(this.stringifyActual, this)).join(', ')}]`
+      // For arrays with length <= 3, recurse into elements
+      // Add to visited set before recursing
+      visitedSet.add(value)
+
+      const result = `[${_.map(value, (item) => this.stringifyActual(item, visitedSet)).join(', ')}]`
+
+      // Note: We don't remove from visited set because WeakSet automatically handles cleanup
+      // and we want to detect circular references even after the first level
+
+      return result
     }
 
     if (_.isRegExp(value)) {
@@ -209,14 +232,30 @@ export default {
         return `jQuery{${(value as JQueryStatic).length}}`
       }
 
+      // Check for circular reference first to prevent infinite recursion
+      if (visitedSet.has(value)) {
+        return '[Circular]'
+      }
+
       const len = _.keys(value).length
 
       if (len > 2) {
+        // Add to visited set to prevent infinite recursion in nested structures
+        visitedSet.add(value)
+
         return `Object{${len}}`
       }
 
+      // Add to visited set before recursing
+      visitedSet.add(value)
+
       try {
-        return this.stringifyActualObj(value)
+        const result = this.stringifyActualObj(value, visitedSet)
+
+        // Note: We don't remove from visited set because WeakSet automatically handles cleanup
+        // and we want to detect circular references even after the first level
+
+        return result
       } catch (err) {
         return String(value)
       }
