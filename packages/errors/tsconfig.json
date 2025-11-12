@@ -1,0 +1,15 @@
+{
+  "include": [
+    "src",
+  ],
+  "compilerOptions": {
+    "allowJs": false,
+    "noImplicitAny": true,
+    "noImplicitReturns": false,
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "declaration": true
+  }
+}

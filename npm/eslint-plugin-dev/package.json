@@ -7,7 +7,7 @@
     "lint": "eslint --ext .js,json,.eslintrc .",
     "lint-changed": "node ./lib/scripts/lint-changed",
     "lint-fix": "npm run lint -- --fix",
-    "test": "mocha"
+    "test": "vitest"
   },
   "dependencies": {
     "bluebird": "3.5.5",
@@ -22,8 +22,7 @@
     "eslint-plugin-json-format": "^2.0.0",
     "eslint-plugin-mocha": "^8.2.0",
     "eslint-plugin-promise": "^4.2.1",
-    "sinon": "^7.3.2",
-    "sinon-chai": "^3.7.0"
+    "vitest": "^3.2.4"
   },
   "peerDependencies": {
     "@babel/eslint-parser": "^7.28.0",

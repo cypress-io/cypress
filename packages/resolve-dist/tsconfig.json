@@ -1,0 +1,11 @@
+{
+  "include": [
+    "lib/**/*.ts"
+  ],
+  "compilerOptions": {
+    "allowJs": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "declaration": true
+  }
+}

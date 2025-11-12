@@ -270,11 +270,19 @@ export class WebKitAutomation {
 
     if (!cookies.length) return null
 
-    const cookie = cookies.find((cookie) => {
-      return cookieMatches(cookie, filter)
+    // first attempt to match cookie on strict domain
+    let cookie = cookies.find((cookie) => {
+      return cookieMatches(cookie, filter, { strictDomain: true })
     })
 
-    if (!cookie) return null
+    if (!cookie) {
+      cookie = cookies.find((cookie) => {
+          // if unable to match closest via strict domain, then return a cookie that matches the apex domain
+        return cookieMatches(cookie, filter)
+      })
+
+      if (!cookie) return null
+    }
 
     return normalizeGetCookieProps(cookie)
   }

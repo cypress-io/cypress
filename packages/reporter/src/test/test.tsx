@@ -10,6 +10,7 @@ import Attempts from '../attempts/attempts'
 import StateIcon from '../lib/state-icon'
 import { LaunchStudioIcon } from '../components/LaunchStudioIcon'
 import { useScrollIntoView } from '../lib/useScrollIntoView'
+import { SelfHealedBadge } from '../lib/selfHealedBadge'
 
 interface TestProps {
   events?: Events
@@ -45,6 +46,9 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
       <span className='runnable-title'>
         <span>{model.title}</span>
         <span className='visually-hidden'>{model.state}</span>
+        {model.isSelfHealed && (
+          <SelfHealedBadge source='test' />
+        )}
       </span>
       {_controls()}
     </>)

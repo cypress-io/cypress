@@ -10,10 +10,31 @@ const utils = require(`../../../lib/browsers/utils`)
 const chrome = require(`../../../lib/browsers/chrome`)
 const { fs } = require(`../../../lib/util/fs`)
 const { BrowserCriClient } = require('../../../lib/browsers/browser-cri-client')
+const protocol = require(`../../../lib/browsers/protocol`)
 const { expect } = require('chai')
 
 const openOpts = {
   onError: () => {},
+}
+
+// Helper function to create consistent mock preferences for testing
+const createMockDefaultPreferences = () => ({
+  default: {
+    fake_preference: {
+      value: 'value',
+    },
+  },
+  defaultSecure: {},
+  localState: {
+    fake_local_state: {
+      value: 'value',
+    },
+  },
+})
+
+// Helper function to mock _getDefaultChromePreferences with consistent fake preferences
+const mockGetDefaultChromePreferences = () => {
+  return sinon.stub(chrome, '_getDefaultChromePreferences').returns(createMockDefaultPreferences())
 }
 
 describe('lib/browsers/chrome', () => {
@@ -954,6 +975,418 @@ describe('lib/browsers/chrome', () => {
         // no changes were made
         expect(statePrefs).to.not.be.called
       })
+    })
+
+    it('writes default preferences when they do not exist on disk', async () => {
+      const outputJson = sinon.stub(fs, 'outputJson')
+      const defaultPrefs = outputJson.withArgs('/foo/Default/Preferences').resolves()
+      const securePrefs = outputJson.withArgs('/foo/Default/Secure Preferences').resolves()
+      const statePrefs = outputJson.withArgs('/foo/Local State').resolves()
+
+      // Mock _getDefaultChromePreferences to return fake preferences for testing
+      const mockDefaultPrefs = mockGetDefaultChromePreferences()
+
+      // Simulate empty preferences read from disk (no defaults exist yet)
+      const originalPrefs = {
+        default: {},
+        defaultSecure: {},
+        localState: {},
+      }
+
+      // Get the default preferences that should be written
+      const defaultChromePrefs = chrome._getDefaultChromePreferences()
+
+      await chrome._writeChromePreferences('/foo', originalPrefs, defaultChromePrefs)
+
+      // Should write default preferences since they don't exist on disk
+      expect(defaultPrefs).to.be.calledWith('/foo/Default/Preferences', {
+        fake_preference: {
+          value: 'value',
+        },
+      })
+
+      // defaultSecure is empty, so it should not be written
+      expect(securePrefs).to.not.be.called
+
+      expect(statePrefs).to.be.calledWith('/foo/Local State', {
+        fake_local_state: {
+          value: 'value',
+        },
+      })
+
+      mockDefaultPrefs.restore()
+    })
+  })
+
+  context('#_getDefaultChromePreferences', () => {
+    it('returns expected default preferences', () => {
+      const defaultPrefs = chrome._getDefaultChromePreferences()
+
+      expect(defaultPrefs).to.be.an('object')
+      expect(defaultPrefs).to.have.property('default')
+      expect(defaultPrefs).to.have.property('defaultSecure')
+      expect(defaultPrefs).to.have.property('localState')
+    })
+  })
+
+  context('#_getChromePreferencesWithDefaults', () => {
+    beforeEach(() => {
+      sinon.stub(fs, 'readJson')
+    })
+
+    afterEach(() => {
+      fs.readJson.restore()
+    })
+
+    it('merges defaults with existing preferences', () => {
+      const mockDefaults = createMockDefaultPreferences()
+      const mockDefaultPrefs = sinon.stub(chrome, '_getDefaultChromePreferences').returns(mockDefaults)
+
+      fs.readJson.withArgs('/foo/Default/Preferences').resolves({ existing: 'value' })
+      fs.readJson.withArgs('/foo/Default/Secure Preferences').resolves({ secure: 'value' })
+      fs.readJson.withArgs('/foo/Local State').resolves({ local: 'value' })
+
+      return chrome._getChromePreferencesWithDefaults('/foo')
+      .then((result) => {
+        // Should merge defaults with existing preferences, where existing values take precedence
+        expect(result).to.deep.eq({
+          default: {
+            fake_preference: {
+              value: 'value',
+            },
+            existing: 'value', // existing preference should be merged in
+          },
+          defaultSecure: {
+            secure: 'value', // existing preference should be merged in
+          },
+          localState: {
+            fake_local_state: {
+              value: 'value',
+            },
+            local: 'value', // existing preference should be merged in
+          },
+        })
+      })
+      .finally(() => {
+        mockDefaultPrefs.restore()
+      })
+    })
+
+    it('returns defaults when no existing preferences', () => {
+      const mockDefaults = createMockDefaultPreferences()
+      const mockDefaultPrefs = sinon.stub(chrome, '_getDefaultChromePreferences').returns(mockDefaults)
+
+      fs.readJson.withArgs('/foo/Default/Preferences').rejects({ code: 'ENOENT' })
+      fs.readJson.withArgs('/foo/Default/Secure Preferences').rejects({ code: 'ENOENT' })
+      fs.readJson.withArgs('/foo/Local State').rejects({ code: 'ENOENT' })
+
+      return chrome._getChromePreferencesWithDefaults('/foo')
+      .then((result) => {
+        expect(result).to.deep.eq(mockDefaults)
+      })
+      .finally(() => {
+        mockDefaultPrefs.restore()
+      })
+    })
+  })
+
+  context('#_getChromePreferences with IGNORE_CHROME_PREFERENCES', () => {
+    beforeEach(() => {
+      process.env.IGNORE_CHROME_PREFERENCES = 'true'
+    })
+
+    afterEach(() => {
+      delete process.env.IGNORE_CHROME_PREFERENCES
+    })
+
+    it('returns empty preferences when IGNORE_CHROME_PREFERENCES is set', () => {
+      return chrome._getChromePreferences('/foo')
+      .then((result) => {
+        expect(result).to.deep.eq({
+          default: {},
+          defaultSecure: {},
+          localState: {},
+        })
+      })
+    })
+  })
+
+  context('#_writeChromePreferences with IGNORE_CHROME_PREFERENCES', () => {
+    beforeEach(() => {
+      process.env.IGNORE_CHROME_PREFERENCES = 'true'
+    })
+
+    afterEach(() => {
+      delete process.env.IGNORE_CHROME_PREFERENCES
+    })
+
+    it('does not write preferences when IGNORE_CHROME_PREFERENCES is set', () => {
+      const outputJson = sinon.stub(fs, 'outputJson')
+
+      const originalPrefs = { default: {}, defaultSecure: {}, localState: {} }
+      const newPrefs = { default: { test: 'value' }, defaultSecure: {}, localState: {} }
+
+      return chrome._writeChromePreferences('/foo', originalPrefs, newPrefs)
+      .then(() => {
+        expect(outputJson).to.not.be.called
+      })
+    })
+  })
+
+  context('#_mergeChromePreferences with user preferences', () => {
+    it('merges user preferences with defaults correctly', () => {
+      // Mock _getDefaultChromePreferences to return fake preferences for testing
+      const mockDefaultPrefs = mockGetDefaultChromePreferences()
+
+      const defaultPrefs = chrome._getDefaultChromePreferences()
+      const userPrefs = {
+        default: {
+          fake_preference: {
+            value: 'value',
+          },
+          newSetting: 'userValue', // User adds new setting
+        },
+        defaultSecure: {
+          fake_secure_preference: {
+            value: 'value',
+          },
+        },
+        localState: {
+          fake_local_state: {
+            value: 'value',
+          },
+          newLocalSetting: 'userValue', // User adds new setting
+        },
+      }
+
+      const result = chrome._mergeChromePreferences(defaultPrefs, userPrefs)
+
+      expect(result.default).to.deep.eq({
+        fake_preference: {
+          value: 'value',
+        },
+        newSetting: 'userValue', // User addition
+      })
+
+      expect(result.localState).to.deep.eq({
+        fake_local_state: {
+          value: 'value',
+        },
+        newLocalSetting: 'userValue', // User addition
+      })
+
+      mockDefaultPrefs.restore()
+    })
+
+    it('handles preference deletion with null values', () => {
+      const originalPrefs = {
+        default: {
+          keepThis: 'value',
+          deleteThis: 'value',
+        },
+        defaultSecure: {
+          keepThis: 'value',
+          deleteThis: 'value',
+        },
+        localState: {
+          keepThis: 'value',
+          deleteThis: 'value',
+        },
+      }
+
+      const newPrefs = {
+        default: {
+          deleteThis: null, // Should be deleted
+          addThis: 'newValue',
+        },
+        defaultSecure: {
+          deleteThis: null, // Should be deleted
+        },
+        localState: {
+          deleteThis: null, // Should be deleted
+          addThis: 'newValue',
+        },
+      }
+
+      const result = chrome._mergeChromePreferences(originalPrefs, newPrefs)
+
+      expect(result.default).to.deep.eq({
+        keepThis: 'value',
+        addThis: 'newValue',
+      })
+
+      expect(result.defaultSecure).to.deep.eq({
+        keepThis: 'value',
+      })
+
+      expect(result.localState).to.deep.eq({
+        keepThis: 'value',
+        addThis: 'newValue',
+      })
+    })
+  })
+
+  context('#_getChromePreferences error handling', () => {
+    beforeEach(() => {
+      sinon.stub(fs, 'readJson')
+    })
+
+    afterEach(() => {
+      fs.readJson.restore()
+    })
+
+    it('handles corrupted preference files gracefully', () => {
+      fs.readJson.withArgs('/foo/Default/Preferences').rejects({ code: 'ENOENT' })
+      fs.readJson.withArgs('/foo/Default/Secure Preferences').rejects(new Error('Invalid JSON'))
+      fs.readJson.withArgs('/foo/Local State').resolves({ valid: 'data' })
+
+      return chrome._getChromePreferences('/foo')
+      .then(() => {
+        expect.fail('Should have thrown an error for corrupted file')
+      })
+      .catch((err) => {
+        expect(err.message).to.include('Invalid JSON')
+      })
+    })
+
+    it('handles missing files gracefully', () => {
+      fs.readJson.withArgs('/foo/Default/Preferences').rejects({ code: 'ENOENT' })
+      fs.readJson.withArgs('/foo/Default/Secure Preferences').rejects({ code: 'ENOENT' })
+      fs.readJson.withArgs('/foo/Local State').rejects({ code: 'ENOENT' })
+
+      return chrome._getChromePreferences('/foo')
+      .then((result) => {
+        expect(result).to.deep.eq({
+          default: {},
+          defaultSecure: {},
+          localState: {},
+        })
+      })
+    })
+  })
+
+  context('#open integration with preferences', () => {
+    beforeEach(function () {
+      // Mock all the dependencies
+      this.pageCriClient = {
+        send: sinon.stub().resolves(),
+        Page: { screencastFrame: sinon.stub().returns() },
+        close: sinon.stub().resolves(),
+        on: sinon.stub(),
+      }
+
+      this.browserCriClient = {
+        attachToTargetUrl: sinon.stub().resolves(this.pageCriClient),
+        close: sinon.stub().resolves(),
+        getWebSocketDebuggerUrl: sinon.stub().returns('ws://debugger'),
+        resetBrowserTargets: sinon.stub().resolves(),
+      }
+
+      this.automation = {
+        push: sinon.stub(),
+        use: sinon.stub().returns(),
+        onServiceWorkerClientEvent: sinon.stub(),
+      }
+
+      this.launchedBrowser = {
+        kill: sinon.stub().returns(),
+      }
+
+      sinon.stub(chrome, '_writeExtension').resolves('/path/to/ext')
+      sinon.stub(BrowserCriClient, 'create').resolves(this.browserCriClient)
+      sinon.stub(utils, 'getProfileDir').returns('/profile/dir')
+      sinon.stub(utils, 'ensureCleanCache').resolves('/profile/dir/CypressCache')
+      sinon.stub(utils, 'initializeCDP').resolves()
+      sinon.stub(utils, 'getDefaultLaunchOptions').returns({ args: [], preferences: null })
+      sinon.stub(utils, 'executeBeforeBrowserLaunch').resolves({ args: [], preferences: null })
+      sinon.stub(utils, 'executeAfterBrowserLaunch').resolves()
+      sinon.stub(protocol, 'getRemoteDebuggingPort').resolves(50505)
+      sinon.stub(launch, 'launch').resolves(this.launchedBrowser)
+
+      // Mock _getDefaultChromePreferences to return fake preferences for testing
+      this.mockDefaultPrefs = mockGetDefaultChromePreferences()
+
+      this.readJson = sinon.stub(fs, 'readJson')
+      this.readJson.withArgs('/profile/dir/Default/Preferences').rejects({ code: 'ENOENT' })
+      this.readJson.withArgs('/profile/dir/Default/Secure Preferences').rejects({ code: 'ENOENT' })
+      this.readJson.withArgs('/profile/dir/Local State').rejects({ code: 'ENOENT' })
+
+      this.outputJson = sinon.stub(fs, 'outputJson')
+      this.outputJson.resolves()
+    })
+
+    afterEach(function () {
+      launch.launch.restore()
+      protocol.getRemoteDebuggingPort.restore()
+      fs.readJson.restore()
+      fs.outputJson.restore()
+      this.mockDefaultPrefs.restore()
+    })
+
+    it('writes default preferences during browser launch', async function () {
+      await chrome.open({ isHeadless: true }, 'http://localhost:3000', openOpts, this.automation)
+
+      // Verify that default preferences were written
+      expect(this.outputJson).to.have.been.calledWith(
+        '/profile/dir/Default/Preferences',
+        sinon.match({
+          fake_preference: {
+            value: 'value',
+          },
+        }),
+      )
+
+      expect(this.outputJson).to.have.been.calledWith(
+        '/profile/dir/Local State',
+        sinon.match({
+          fake_local_state: {
+            value: 'value',
+          },
+        }),
+      )
+    })
+
+    it('merges user preferences with defaults during launch', async function () {
+      const userPreferences = {
+        default: {
+          fake_preference: {
+            value: 'value',
+          },
+          customSetting: 'userValue',
+        },
+        localState: {
+          fake_local_state: {
+            value: 'value',
+          },
+        },
+      }
+
+      utils.executeBeforeBrowserLaunch.resolves({
+        args: [],
+        preferences: userPreferences,
+      })
+
+      await chrome.open({ isHeadless: true }, 'http://localhost:3000', openOpts, this.automation)
+
+      // Verify that merged preferences were written
+      expect(this.outputJson).to.have.been.calledWith(
+        '/profile/dir/Default/Preferences',
+        sinon.match({
+          fake_preference: {
+            value: 'value',
+          },
+          customSetting: 'userValue', // User addition
+        }),
+      )
+
+      expect(this.outputJson).to.have.been.calledWith(
+        '/profile/dir/Local State',
+        sinon.match({
+          fake_local_state: {
+            value: 'value',
+          },
+        }),
+      )
     })
   })
 })

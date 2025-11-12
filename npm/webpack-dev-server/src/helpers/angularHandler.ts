@@ -3,7 +3,6 @@ import { tmpdir } from 'os'
 import * as path from 'path'
 import type { Configuration, RuleSetRule } from 'webpack'
 import type { PresetHandlerResult, WebpackDevServerConfig } from '../devServer'
-import { dynamicAbsoluteImport, dynamicImport } from '../dynamic-import'
 import { sourceDefaultWebpackDependencies } from './sourceRelativeWebpackModules'
 import debugLib from 'debug'
 import type { logging as AngularLogging } from '@angular-devkit/core'
@@ -182,11 +181,17 @@ export async function getAngularCliModules (projectRoot: string) {
     { getCommonConfig },
     { getStylesConfig },
     { logging },
-  ] = await Promise.all(angularCLiModules.map((dep) => {
+  ] = await Promise.all(angularCLiModules.map(async (dep) => {
     try {
       const depPath = require.resolve(dep, { paths: [projectRoot] })
+      // NOTE: @cypress/webpack-dev-server is a CJS package, but we need to import some ESM files and absolute imports.
+      // since import statements in TypeScript will get transpiled down to CommonJS require statements, we want to use tsx to leverage
+      // an ESM style import here, which supports CommonJS and ESM.
+      const { tsImport } = require('tsx/esm/api')
 
-      return dynamicAbsoluteImport(depPath)
+      const module = await tsImport(depPath, __filename)
+
+      return module
     } catch (e) {
       throw new Error(`Could not resolve "${dep}". Do you have "@angular-devkit/build-angular" and "@angular-devkit/core" installed?`)
     }
@@ -201,7 +206,12 @@ export async function getAngularCliModules (projectRoot: string) {
 }
 
 export async function getAngularJson (projectRoot: string): Promise<AngularJson> {
-  const { findUp } = await dynamicImport<typeof import('find-up')>('find-up')
+  // NOTE: @cypress/webpack-dev-server is a CJS package, but find-up +6.0.0 is an ESM only package.
+  // In order to dynamically import the find-up package, we need to use tsx to do so until @cypress/webpack-dev-server is an ESM-only package,
+  // which would be a breaking change to @cypress/webpack-dev-server and cypress.
+  const { tsImport } = require('tsx/esm/api')
+
+  const { findUp } = await tsImport('find-up', __filename) as typeof import('find-up')
 
   const angularJsonPath = await findUp('angular.json', { cwd: projectRoot })
 

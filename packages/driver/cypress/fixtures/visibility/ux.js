@@ -24,8 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
 })
 
 document.addEventListener('click', (ev) => {
-  // eslint-disable-next-line no-console
-  console.log('click', ev.target)
   const [, section] = ev.target?.href?.split('#') ?? []
 
   if (!section) return

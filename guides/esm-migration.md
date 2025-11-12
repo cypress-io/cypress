@@ -34,7 +34,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] npm/vite-dev-server ✅ **COMPLETED** 
 - [x] vite-plugin-cypress-esm ✅ **COMPLETED** 
 - [x] npm/vue ✅ **COMPLETED** 
-- [ ] npm/webpack-batteries-included-preprocessor
+- [x] npm/webpack-batteries-included-preprocessor ✅ **COMPLETED**
 - [x] npm/webpack-dev-server ✅ **COMPLETED** 
 - [ ] npm/webpack-preprocessor **PARTIAL** 
 
@@ -84,13 +84,13 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 
 - [x] cli ✅ **COMPLETED** 
 - [x] npm/cypress-schematic ✅ **COMPLETED**
-- [ ] npm/eslint-plugin-dev
+- [x] npm/eslint-plugin-dev ✅ **COMPLETED**
 - [x] npm/grep ✅ **COMPLETED** 
 - [x] npm/puppeteer ✅ **COMPLETED** 
 - [x] npm/vite-dev-server ✅ **COMPLETED** 
 - [ ] npm/webpack-batteries-included-preprocessor
-- [ ] npm/webpack-dev-server
-- [ ] npm/webpack-preprocessor
+- [x] npm/webpack-dev-server ✅ **COMPLETED** 
+- [x] npm/webpack-preprocessor ✅ **COMPLETED**
 
 ##### Binary Packages
 

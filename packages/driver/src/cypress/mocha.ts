@@ -3,6 +3,7 @@ import _ from 'lodash'
 import $errUtils, { CypressError } from './error_utils'
 import $utils from './utils'
 import $stackUtils from './stack_utils'
+import $sourceMapUtils from './source_map_utils'
 
 // in the browser mocha is coming back
 // as window
@@ -529,12 +530,12 @@ const patchRunnableClearTimeout = () => {
   }
 }
 
-const patchSuiteAddTest = (specWindow, config) => {
+const patchSuiteAddTest = (specWindow) => {
   Suite.prototype.addTest = function (...args) {
     const test = args[0]
 
     if (!test.invocationDetails) {
-      test.invocationDetails = $stackUtils.getInvocationDetails(specWindow, config)
+      test.invocationDetails = $stackUtils.getInvocationDetails(specWindow, $sourceMapUtils.getSourceMapProjectRoot())
     }
 
     const ret = suiteAddTest.apply(this, args)
@@ -561,12 +562,12 @@ const patchSuiteAddTest = (specWindow, config) => {
   }
 }
 
-const patchSuiteAddSuite = (specWindow, config) => {
+const patchSuiteAddSuite = (specWindow) => {
   Suite.prototype.addSuite = function (...args) {
     const suite = args[0]
 
     if (!suite.invocationDetails) {
-      suite.invocationDetails = $stackUtils.getInvocationDetails(specWindow, config)
+      suite.invocationDetails = $stackUtils.getInvocationDetails(specWindow, $sourceMapUtils.getSourceMapProjectRoot())
     }
 
     return suiteAddSuite.apply(this, args)
@@ -609,7 +610,7 @@ const patchRunnableResetTimeout = () => {
   }
 }
 
-const patchSuiteHooks = (specWindow, config) => {
+const patchSuiteHooks = (specWindow) => {
   _.each(['beforeAll', 'beforeEach', 'afterAll', 'afterEach'], (fnName) => {
     const _fn = Suite.prototype[fnName]
 
@@ -622,7 +623,7 @@ const patchSuiteHooks = (specWindow, config) => {
         let invocationStack = hook.invocationDetails?.stack
 
         if (!hook.invocationDetails) {
-          const invocationDetails = $stackUtils.getInvocationDetails(specWindow, config)!
+          const invocationDetails = $stackUtils.getInvocationDetails(specWindow, $sourceMapUtils.getSourceMapProjectRoot())!
 
           hook.invocationDetails = invocationDetails
           invocationStack = invocationDetails.stack
@@ -674,9 +675,9 @@ const override = (specWindow, Cypress, config) => {
   patchRunnerRunTests()
   patchTestClone()
   createCalculateTestStatus(Cypress)
-  patchSuiteAddTest(specWindow, config)
-  patchSuiteAddSuite(specWindow, config)
-  patchSuiteHooks(specWindow, config)
+  patchSuiteAddTest(specWindow)
+  patchSuiteAddSuite(specWindow)
+  patchSuiteHooks(specWindow)
 }
 
 const create = (specWindow, Cypress, config) => {

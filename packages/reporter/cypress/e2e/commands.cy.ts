@@ -1142,4 +1142,150 @@ describe('commands', { viewportHeight: 1000 }, () => {
       cy.contains('GET /api/data/1').should('be.visible')
     })
   })
+
+  context('self-healed badge', () => {
+    it('renders the self-healed badge when the command is self-healed and move to top level when is closed', () => {
+      const nestedGroupId = addCommand(runner, {
+        name: 'session',
+        defaultCollapsedState: 'open',
+        state: 'passed',
+        type: 'child',
+      })
+
+      addCommand(runner, {
+        name: 'get',
+        message: 'do something',
+        state: 'passed',
+        groupLevel: 1,
+        group: nestedGroupId,
+      })
+
+      const nestedSessionGroupId = addCommand(runner, {
+        name: 'session',
+        defaultCollapsedState: 'open',
+        displayName: 'validate',
+        type: 'child',
+        groupLevel: 2,
+        group: nestedGroupId,
+        renderProps: {
+          selfHealed: true,
+        },
+      })
+
+      addCommand(runner, {
+        name: 'log',
+        message: 'inside of group',
+        state: 'passed',
+        group: nestedSessionGroupId,
+      })
+
+      cy.get('[data-cy="self-healed-badge-command"]').should('exist')
+      cy.get('[data-cy="self-healed-badge-test"]').should('exist')
+
+      cy.percySnapshot('initial state')
+
+      cy.get('.command-message').eq(10).within(() => {
+        cy.get('[data-cy="self-healed-badge-command"]').should('not.exist')
+      })
+
+      cy.get('.command-message').eq(12).within(() => {
+        cy.get('[data-cy="self-healed-badge-command"]').should('exist')
+      })
+
+      cy.get('.command-expander').eq(1).click()
+
+      cy.percySnapshot('after clicking command expander')
+
+      cy.get('.command-message').eq(10).within(() => {
+        cy.get('[data-cy="self-healed-badge-command"]').should('exist')
+      })
+
+      cy.get('.collapsible-header-inner').eq(2).click({ force: true })
+
+      cy.percySnapshot('after clicking collapsible header')
+
+      cy.get('[data-cy="self-healed-badge-command"]').should('not.exist')
+      cy.get('[data-cy="self-healed-badge-test"]').should('exist')
+
+      cy.get('.collapsible-header-inner').first().click()
+
+      cy.get('[data-cy="self-healed-badge-command"]').should('not.exist')
+      cy.get('[data-cy="self-healed-badge-test"]').should('exist')
+
+      cy.percySnapshot()
+    })
+
+    it('renders the self-healed badge when the command is self-healed and long text and move to top level when is closed', () => {
+      const nestedGroupId = addCommand(runner, {
+        name: 'session',
+        defaultCollapsedState: 'open',
+        state: 'passed',
+        type: 'child',
+        message: 'with long text to show wrapping works as expected and move to top level when is closed and is self-healed and is long text to show wrapping works as expected',
+      })
+
+      addCommand(runner, {
+        name: 'get',
+        message: 'do something',
+        state: 'passed',
+        groupLevel: 1,
+        group: nestedGroupId,
+      })
+
+      const nestedSessionGroupId = addCommand(runner, {
+        name: 'session',
+        defaultCollapsedState: 'open',
+        displayName: 'validate',
+        type: 'child',
+        groupLevel: 2,
+        group: nestedGroupId,
+        message: 'with long text to show wrapping works as expected and move to top level when is closed and is self-healed and is long text to show wrapping works as expected',
+        renderProps: {
+          selfHealed: true,
+        },
+      })
+
+      addCommand(runner, {
+        name: 'log',
+        message: 'inside of group',
+        state: 'passed',
+        group: nestedSessionGroupId,
+      })
+
+      cy.get('[data-cy="self-healed-badge-command"]').should('exist')
+      cy.get('[data-cy="self-healed-badge-test"]').should('exist')
+
+      cy.percySnapshot('initial state')
+
+      cy.get('.command-message').eq(10).within(() => {
+        cy.get('[data-cy="self-healed-badge-command"]').should('not.exist')
+      })
+
+      cy.get('.command-message').eq(12).within(() => {
+        cy.get('[data-cy="self-healed-badge-command"]').should('exist')
+      })
+
+      cy.get('.command-expander').eq(1).click()
+
+      cy.percySnapshot('after clicking command expander')
+
+      cy.get('.command-message').eq(10).within(() => {
+        cy.get('[data-cy="self-healed-badge-command"]').should('exist')
+      })
+
+      cy.get('.collapsible-header-inner').eq(2).click({ force: true })
+
+      cy.percySnapshot('after clicking collapsible header')
+
+      cy.get('[data-cy="self-healed-badge-command"]').should('not.exist')
+      cy.get('[data-cy="self-healed-badge-test"]').should('exist')
+
+      cy.get('.collapsible-header-inner').first().click()
+
+      cy.get('[data-cy="self-healed-badge-command"]').should('not.exist')
+      cy.get('[data-cy="self-healed-badge-test"]').should('exist')
+
+      cy.percySnapshot()
+    })
+  })
 })

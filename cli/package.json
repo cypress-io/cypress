@@ -74,7 +74,7 @@
     "@packages/root": "0.0.0-development",
     "@types/bluebird": "3.5.33",
     "@types/chai": "4.2.15",
-    "@types/chai-jquery": "1.1.40",
+    "@types/chai-jquery": "1.1.43",
     "@types/jquery": "3.3.31",
     "@types/lodash": "4.14.168",
     "@types/minimatch": "3.0.5",

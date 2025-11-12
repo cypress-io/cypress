@@ -1,4 +1,3 @@
-const env = require('./env')
 const debug = require('debug')('cypress:server:plugins')
 
 module.exports = {
@@ -9,7 +8,7 @@ module.exports = {
    * @returns {string|null} path if typescript exists, otherwise null
    */
   typescript: (projectRoot) => {
-    if (env.get('CYPRESS_INTERNAL_NO_TYPESCRIPT') === '1' || !projectRoot) {
+    if (process.env['CYPRESS_INTERNAL_NO_TYPESCRIPT'] === '1' || !projectRoot) {
       return null
     }
 
