@@ -317,9 +317,7 @@ jobs:
         - publish-binary
       requires:
         - node_modules_install
-        - approve-contributor-pr
         - internal-pr-build
-        - external-pr-build
   - wait-for-binary-publish:
       type: approval
       requires:
