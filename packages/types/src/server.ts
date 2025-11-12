@@ -130,10 +130,7 @@ export interface CommandPerformanceEntry {
   startTime: number
   duration: number
   detail: {
-    runnable: {
-      type: string
-      title: string
-    }
+    runnableTitle: string
     spec: string
     numElements: number
   }

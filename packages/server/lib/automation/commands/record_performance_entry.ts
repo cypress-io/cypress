@@ -68,9 +68,7 @@ export async function recordPerformanceEntry (entry: CommandPerformanceEntry) {
     name,
     detail: {
       numElements,
-      runnable: {
-        title,
-      },
+      runnableTitle,
       spec,
     },
   } = entry
@@ -80,7 +78,7 @@ export async function recordPerformanceEntry (entry: CommandPerformanceEntry) {
     duration,
     name,
     numElements,
-    title,
+    runnableTitle,
     spec,
   ].map(escapeCsvValue).join(',')
 

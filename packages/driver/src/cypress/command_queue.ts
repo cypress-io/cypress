@@ -407,7 +407,7 @@ export class CommandQueue extends Queue<$Command> {
         startTime,
         duration,
         detail: {
-          runnable: this.state('runnable') ?? {},
+          runnableTitle: (this.state('runnable') ?? {}).title ?? 'unknown',
           spec: Cypress.spec.relative,
           numElements,
         },
