@@ -79,7 +79,7 @@ const stackWithWrappingLinesRemoved = (stack, specWindow) => {
       ) {
         lines.shift()
       }
-    } else if (specWindow.Cypress.isBrowser('firefox')) {
+    } else if (specWindow.Cypress.isBrowser({ family: 'firefox' })) {
       const isTestInvocationLine = (line: string) => {
         const splitAtAt = line.split('@')
 
