@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Website - Browser Crash Reproduction</title>
+    <title>DOM Stress Test</title>
     <style>
         body {
             margin: 0;
@@ -115,7 +115,7 @@
             border: 1px solid #f5c6cb;
         }
         
-        .virtual-container {
+        .list-container {
             border: 2px solid #e0e0e0;
             border-radius: 4px;
             background: white;
@@ -222,10 +222,10 @@
             z-index: 1000;
         }
         
-        .fallback-message {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
+        .info-message {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
             padding: 15px;
             border-radius: 4px;
             margin-bottom: 20px;
@@ -239,19 +239,18 @@
     
     <div class="container">
         <div class="header">
-            <h1>Browser Crash Test</h1>
-            <p>This website is designed to reproduce browser crashes when scrolling with virtual scrolling libraries</p>
+            <h1>DOM Stress Test</h1>
+            <p>This test page creates non-virtualized lists with thousands to hundreds of thousands of DOM elements rendered simultaneously. This tests browser stability and Cypress performance when dealing with extremely large DOM trees.</p>
             <div class="status status-warning">
                 ⚠️ Warning: This test may cause browser crashes or performance issues. Use with caution!
             </div>
-            <div class="fallback-message">
-                <strong>Fallback Mode:</strong> Using native scrolling simulation.
-                This still reproduces the same crash scenarios with high-performance scrolling.
+            <div class="info-message">
+                <strong>Note:</strong> This test intentionally creates anti-patterns (rendering all DOM elements at once) to stress-test browser stability. In production applications, virtual scrolling should be used for large lists.
             </div>
         </div>
 
         <div class="test-section">
-            <h2 class="section-header">Test Native Scrolling</h2>
+            <h2 class="section-header">Test Large DOM Tree</h2>
             <div class="section-content" id="test-content">
                 <div class="controls">
                     <input type="number"  data-cy="item-count" value="10" min="1" max="100000">
@@ -356,6 +355,7 @@
             return itemDiv;
         }
 
+        // Add all items to DOM at once (non-virtualized - creates large DOM tree)
         function addBasicItems(count, container, isDynamic = false)
         {
             container.innerHTML = '<div class="loading">Loading items...</div>';
@@ -371,6 +371,7 @@
             })
         }
 
+        // Add all extreme items to DOM at once (non-virtualized - creates large DOM tree)
         function addExtremeItems(count, container)
         {
             container.innerHTML = '<div class="loading">Loading items...</div>';
@@ -391,7 +392,7 @@
             const list = document.createElement('div');
             list.setAttribute('id', id);
             list.setAttribute('data-cy', 'list-container');
-            list.classList.add('virtual-container');
+            list.classList.add('list-container');
 
                 document.getElementById('test-content').appendChild(list);
 
@@ -506,13 +507,9 @@
         }
 
         // Initialize
-        console.log('Test Website loaded in fallback mode');
-        console.log('All functions are available:', {
-            loadBasicList: typeof loadBasicList,
-            loadDynamicList: typeof loadDynamicList,
-            loadMultipleLists: typeof loadMultipleLists,
-            loadExtremeList: typeof loadExtremeList
-        });
+        console.log('DOM Stress Test loaded');
+        console.log('This test creates non-virtualized lists with all DOM elements rendered simultaneously');
     </script>
 </body>
 </html>
+
