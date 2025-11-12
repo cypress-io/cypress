@@ -60,7 +60,7 @@ const stackWithLinesRemoved = (stack, cb) => {
   return unsplitStack(messageLines, remainingStackLines)
 }
 
-const stackWithWrappingLinesRemoved = (stack, specWindow) => {
+const stackTrimmedToTestInvocation = (stack, specWindow) => {
   const modifiedStack = stackWithLinesRemoved(stack, (lines) => {
     // Guard against Cypress being undefined/null (can happen when users quickly reload tests)
     if (!specWindow?.Cypress) {
