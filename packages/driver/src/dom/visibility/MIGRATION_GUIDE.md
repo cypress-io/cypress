@@ -46,16 +46,17 @@ While comprehensive, this list may not be complete. Additional discrepancies may
 | **[position-absolute-scenarios](../../../cypress/fixtures/visibility/positioning.html)** | Normal parent with absolute positioned child | ❌ No | ✅ Yes | ❌ No | Element that is hidden by its parents overflow, but has an absolutely positioned child element. |
 | **[position-absolute-scenarios](../../../cypress/fixtures/visibility/positioning.html)** | Parent container for absolute child | ❌ No | ✅ Yes | ❌ No | Container element for the absolute positioned child  |
 | **[position-absolute-scenarios](../../../cypress/fixtures/visibility/positioning.html)** | Normal ancestor with absolute positioned descendant | ❌ No | ✅ Yes | ✅ Yes | Ancestor has `width: 0; height: 100px; overflow: hidden` with absolute positioned descendant |
-| **[positioning-cousin-coverage](../../../cypress/fixtures/visibility/positioning.html)** | Covered by an absolutely positioned cousin | ✅ Yes | ❌ No | ❌ No | Element covered by a sibling with `position: absolute` and higher z-index |
+| **[positioning](../../../cypress/fixtures/visibility/positioning.html)** | Covered by an absolutely positioned cousin | ✅ Yes | ❌ No | ❌ No | Element covered by a sibling with `position: absolute` and higher z-index |
 | **[overflow-auto-with-zero-dimensions](../../../cypress/fixtures/visibility/overflow.html)** | Zero dimensions with overflow auto | ✅ Yes | ❌ No | ❌ No | Element with `width: 0; height: 0px; overflow: auto`, but no absolutely positioned children |
-| **[clip-path-scenarios](../../../cypress/fixtures/visibility/overflow.html)** | Parent with clip-path polygon that clips everything | ✅ Yes | ❌ No | ❌ No | `clip-path: polygon(0 0, 0 0, 0 0, 0 0)`  |
-| **[clip-path-scenarios](../../../cypress/fixtures/visibility/overflow.html)** | Element outside clip-path polygon | ✅ Yes | ❌ No | ❌ No | Child element of polygon clip-path parent |
-| **[clip-path-scenarios](../../../cypress/fixtures/visibility/overflow.html)** | Element outside clip-path inset | ✅ Yes | ❌ No | ❌ No | Child element of `clip-path: inset(25% 25% 25% 25%)` |
+| **[overflow-scroll-scenarios](../../../cypress/fixtures/visibility/overflow.html)** | Parent with clip-path polygon that clips everything | ✅ Yes | ❌ No | ❌ No | `clip-path: polygon(0 0, 0 0, 0 0, 0 0)`  |
+| **[overflow-scroll-scenarios](../../../cypress/fixtures/visibility/overflow.html)** | Element outside clip-path polygon | ✅ Yes | ❌ No | ❌ No | Child element of polygon clip-path parent |
+| **[overflow-scroll-scenarios](../../../cypress/fixtures/visibility/overflow.html)** | Element outside clip-path inset | ✅ Yes | ❌ No | ❌ No | Child element of `clip-path: inset(25% 25% 25% 25%)` |
 | **[viewport-scenarios](../../../cypress/fixtures/visibility/overflow.html)** | Absolutely positioned element outside of the viewport | ✅ Yes | ❌ No | ❌ No | Elements that are outside of the viewport must be scrolled to before the fast algorithm will consider them visible. This is aligned with scroll-container visibility. |
 | **[z-index-coverage](../../../cypress/fixtures/visibility/positioning.html)** | Covered by higher z-index element |  ✅ Yes | ❌ No | ❌ No | Element covered by another element with higher z-index |
-| **[clip-path-scenarios](../../../cypress/fixtures/visibility/overflow.html)** | Element clipped by CSS clip property |  ✅ Yes | ❌ No | ❌ No | Element with `clip: rect(0, 0, 0, 0)` or similar clipping |
-| **[translation](../../../cypress/fixtures/visibility/transforms.html)** | Element transformed outside viewport | ✅ Yes | ❌ No | ❌ No | Element with `transform: translateY(-9999px)` or similar |
+| **[clip-scenarios](../../../cypress/fixtures/visibility/overflow.html)** | Element clipped by CSS clip property |  ✅ Yes | ❌ No | ❌ No | Element with `clip: rect(0, 0, 0, 0)` or similar clipping |
+| **[transform](../../../cypress/fixtures/visibility/transforms.html)** | Element transformed outside viewport | ✅ Yes | ❌ No | ❌ No | Element with `transform: translateX(-9999px)` or similar |
 | **[contain](../../../cypress/fixtures/visibility/basic-css-properties.html)** | Element with CSS contain:paint property | ✅ Yes | ❌ No | ❌ No | Element positioned outside of a parent that has the `contain: paint` property |
+| **[backdrop-filter](../../../cypress/fixtures/visibility/basic-css-properties.html)** | Element covered by an element with with backdrop-filter opacity(0) | ✅ Yes | ❌ No | ❌ No|  |
 | **[pointer-events-none](../../../cypress/fixtures/visibility/basic-css-properties.html)** | Element with pointer-events: none | ✅ Yes | ❌ No | ❌ No | Element has dimensions and is visible to the user, but cannot receive pointer events. |
 
 ## Migration Steps
