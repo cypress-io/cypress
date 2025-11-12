@@ -69,7 +69,8 @@ const stackTrimmedToTestInvocation = (stack, specWindow) => {
 
     if (specWindow.Cypress.isBrowser({ family: 'chromium' })) {
     // There are cases where there are other lines in the stack trace before the invocation (eg. `context.it.only`, `createRunnable`, etc)
-    // Remove lines from the start until the top line starts with 'at eval' or 'at Suite.eval' so that we only keep the actual invocation line.
+    // The actual test invocation line starts with either 'at eval' or 'at Suite.eval',
+    // so remove all lines until we reach the test invocation line
       while (
         lines.length > 0 &&
       !(
