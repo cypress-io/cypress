@@ -13,7 +13,7 @@ export const patchXmlHttpRequest = (window: Window) => {
       // we need to store a reference here to what we need in the send method
       this._url = captureFullRequestUrl(args[1], window)
     } finally {
-      const result = originalXmlHttpRequestOpen.apply(this, args as any)
+      const result = originalXmlHttpRequestOpen.apply(this, args)
       if (args[2] === false) {
         this.setRequestHeader('x-cypress-is-sync-request', 'true')
         this._isSyncRequest = true
