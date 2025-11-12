@@ -23,6 +23,23 @@ const COLUMNS = [
   'spec',
 ]
 
+/**
+ * Escapes a value for CSV format according to RFC 4180.
+ * - If the value contains comma, newline, or double quote, wrap it in double quotes
+ * - Escape any double quotes within the value by doubling them
+ */
+function escapeCsvValue (value: string | number): string {
+  const stringValue = String(value)
+
+  // If value contains comma, newline, or double quote, wrap in quotes
+  if (stringValue.includes(',') || stringValue.includes('\n') || stringValue.includes('"')) {
+    // Escape double quotes by doubling them
+    return `"${stringValue.replace(/"/g, '""')}"`
+  }
+
+  return stringValue
+}
+
 export function initializePerformanceLogFile () {
   if (!performanceLogsEnabled()) {
     return
@@ -54,9 +71,18 @@ export async function recordPerformanceEntry (entry: CommandPerformanceEntry) {
     },
   } = entry
 
+  const row = [
+    startTime,
+    duration,
+    name,
+    numElements,
+    title,
+    spec,
+  ].map(escapeCsvValue).join(',')
+
   await fs.writeFile(
     path.join(logFilePath(), 'performance.log'),
-    [startTime, duration, name, numElements, title, spec].join(',') + '\n',
+    `${row}\n`,
     { flag: 'a' },
   )
 }
