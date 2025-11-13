@@ -3,13 +3,15 @@
   "version": "0.0.0-development",
   "description": "Cypress preprocessor for bundling JavaScript via webpack with dependencies included and support for various ES features, TypeScript, and CoffeeScript",
   "private": false,
-  "main": "index.js",
-  "types": "index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc || echo 'built, with errors'",
     "check-ts": "tsc --noEmit",
     "lint": "eslint",
-    "test": "yarn build && mocha test/**/*.spec.* --timeout 4000"
+    "test": "vitest run",
+    "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0"
+
   },
   "dependencies": {
     "@babel/core": "^7.28.0",
@@ -40,23 +42,18 @@
     "@packages/eslint-config": "0.0.0-development",
     "@types/mocha": "^8.0.2",
     "@types/webpack": "^5.28.1",
-    "chai": "^4.2.0",
-    "decache": "^4.6.2",
     "eslint": "^9.31.0",
     "globals": "^15.12.0",
     "jiti": "^2.4.2",
-    "mocha": "^8.1.1",
-    "mock-require": "3.0.3",
     "react": "^16.13.1",
-    "sinon": "18.0.0",
-    "typescript": "~5.4.5"
+    "typescript": "~5.4.5",
+    "vitest": "^3.2.4"
   },
   "peerDependencies": {
     "@cypress/webpack-preprocessor": "^6.0.4"
   },
   "files": [
-    "index.js",
-    "index.d.ts"
+    "dist/*"
   ],
   "license": "MIT",
   "repository": {
