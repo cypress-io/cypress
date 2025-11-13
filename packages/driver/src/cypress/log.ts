@@ -464,11 +464,11 @@ export class Log {
     return err.stack || err.message
   }
 
-  setElAttrs () {
+  setElAttrs (): Log {
     const $el = this.get('$el')
 
     if (!$el) {
-      return
+      return this
     }
 
     if (_.isElement($el)) {
@@ -488,7 +488,7 @@ export class Log {
     return this.set({
       highlightAttr: HIGHLIGHT_ATTR,
       numElements: $el.length,
-      visible: this.get('visible') ?? $el.length === $el.filter(':visible').length,
+      visible: this.get('hidden') ? undefined : this.get('visible') ?? $el.length === $el.filter(':visible').length,
     })
   }
 

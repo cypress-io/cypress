@@ -182,6 +182,19 @@ describe('src/cypress/log', function () {
       expect(this.fireChangeEvent).to.have.been.called
     })
 
+    describe('when log is hidden', function () {
+      it('does not filter by :visible when setting el attributes', function () {
+        const log = new Log(this.createSnapshot, this.state, this.config, this.fireChangeEvent)
+
+        log.set({ hidden: true })
+        const el = cy.$$('<div />')
+
+        cy.spy(el, 'filter')
+        log.set({ $el: el })
+        expect(el.filter).not.to.have.been.called
+      })
+    })
+
     describe('when protocol is disabled', function () {
       it('does not truncate message value', function () {
         this.state.withArgs('isProtocolEnabled').returns(false)
