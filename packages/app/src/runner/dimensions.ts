@@ -43,6 +43,10 @@ export const getElementDimensions = (el: HTMLElement) => {
     // offset disregards margin but takes into account border + padding
     offset: getOffset(el),
 
+    // Include original offsetWidth/offsetHeight for direct access (equivalent to widthWithBorder/heightWithBorder)
+    offsetWidth,
+    offsetHeight,
+
     paddingTop,
     paddingRight,
     paddingBottom,
@@ -65,6 +69,9 @@ export const getElementDimensions = (el: HTMLElement) => {
     widthWithPadding,
     widthWithBorder,
     widthWithMargin,
+
+    // Include display property from computed style to avoid additional getComputedStyle calls
+    display: computedStyle.display,
   }
 }
 

@@ -307,17 +307,17 @@ export class AutIframe {
       // bail if our el no longer exists in the parent body
       if (!this.$.contains(body, element)) return
 
-      // switch to using offsetWidth + offsetHeight
-      // because we want to highlight our element even
-      // if it only has margin and zero content height / width
-      const dimensions = this._getOffsetSize($_el.get(0))
+      // Get all dimensions and computed styles in one call to avoid multiple getComputedStyle calls
+      const dimensions = getElementDimensions($_el.get(0))
 
       // dont show anything if our element displaces nothing
-      if (dimensions.width === 0 || dimensions.height === 0 || $_el.css('display') === 'none') {
+      // Use offsetWidth/offsetHeight to check because we want to highlight our element even
+      // if it only has margin and zero content height / width
+      if (dimensions.offsetWidth === 0 || dimensions.offsetHeight === 0 || dimensions.display === 'none') {
         return
       }
 
-      this._addElementBoxModelLayers($_el, $body).setAttribute('data-highlight-el', `true`)
+      this._addElementBoxModelLayers($_el, $body, dimensions).setAttribute('data-highlight-el', `true`)
     })
 
     if (coords) {
@@ -622,13 +622,16 @@ export class AutIframe {
     }
   }
 
-  private _addElementBoxModelLayers ($el, $body) {
+  private _addElementBoxModelLayers ($el, $body, dimensions?: ReturnType<typeof getElementDimensions>) {
     $body = $body || $('body')
 
     const el = $el.get(0)
     const body = $body.get(0)
 
-    const dimensions = getElementDimensions(el)
+    // Use existing dimensions if provided to avoid redundant getComputedStyle calls
+    if (!dimensions) {
+      dimensions = getElementDimensions(el)
+    }
 
     const container = document.createElement('div')
 
