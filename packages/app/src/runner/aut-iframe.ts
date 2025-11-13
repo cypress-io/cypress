@@ -167,18 +167,24 @@ export class AutIframe {
     const Cypress = this.eventManager.getCypress()
     const { headStyles = undefined, bodyStyles = undefined } = Cypress ? Cypress.cy.getStyles(snapshot) : {}
     const { body, htmlAttrs } = snapshot
-    const contents = this._contents()
-    const $html = contents?.find('html') as any as JQuery<HTMLHtmlElement>
+    const $contents = this._contents()
+
+    if (!$contents) return
+
+    // Cache DOM queries to avoid redundant _contents() calls
+    const $html = $contents.find('html') as any as JQuery<HTMLHtmlElement>
+    const $head = $contents.find('head') as any as JQuery<HTMLElement>
+    const $body = $contents.find('body') as unknown as JQuery<HTMLBodyElement>
 
     if ($html) {
       this._replaceHtmlAttrs($html, htmlAttrs)
     }
 
-    this._replaceHeadStyles(headStyles)
+    // Pass $head to avoid _replaceHeadStyles calling _contents() again
+    this._replaceHeadStyles(headStyles, $head)
 
     // remove the old body and replace with restored one
-
-    this._body()?.remove()
+    $body?.remove()
     this._insertBodyStyles(body.get(), bodyStyles)
     $html?.append(body.get())
 
@@ -209,8 +215,12 @@ export class AutIframe {
     })
   }
 
-  _replaceHeadStyles (styles: Record<string, any> = {}) {
-    const $head = this._contents()?.find('head')
+  _replaceHeadStyles (styles: Record<string, any> = {}, $head?: JQuery<HTMLElement>) {
+    // Use provided $head if available, otherwise query for it
+    if (!$head) {
+      $head = this._contents()?.find('head') as any as JQuery<HTMLElement>
+    }
+
     const existingStyles = $head?.find('link[rel="stylesheet"],style')
 
     _.each(styles, (style, index) => {
