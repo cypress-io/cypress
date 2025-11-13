@@ -444,7 +444,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
           name: 'get',
           message: '.large-element-set',
           state: 'passed',
-          numElements: MAX_VISIBILITY_CHECK_ELEMENTS,
+          numElements: MAX_VISIBILITY_CHECK_ELEMENTS + 1,
           visible: undefined, // visibility check was skipped
         })
       })

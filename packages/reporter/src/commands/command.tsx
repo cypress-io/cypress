@@ -365,7 +365,7 @@ const CommandControls: React.FC<CommandControlsProps> = observer(({ model, comma
           type={determineTagType(model.state)}
         />
       )}
-      {(!model.visible || model.numElements >= MAX_VISIBILITY_CHECK_ELEMENTS) && (
+      {(!model.visible || model.numElements > MAX_VISIBILITY_CHECK_ELEMENTS) && (
         <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
           <span>
             <HiddenIcon className='command-invisible' />
