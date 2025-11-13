@@ -83,7 +83,7 @@ describe('hooks', {
       })
     })
 
-    it.only('sends the correct invocation details for wrapped it', () => {
+    it('sends the correct invocation details for wrapped it', () => {
       loadSpec({
         filePath: 'hooks/wrapped-it.cy.js',
         passCount: 2,
