@@ -438,13 +438,15 @@ describe('commands', { viewportHeight: 1000 }, () => {
     })
 
     it('displays icon and tooltip when visibility check is skipped for large element set', () => {
+      const numElements = MAX_VISIBILITY_CHECK_ELEMENTS + 1
+
       cy.get('.reporter.mounted').then(() => {
         addCommand(runner, {
           id: 200,
           name: 'get',
           message: '.large-element-set',
           state: 'passed',
-          numElements: MAX_VISIBILITY_CHECK_ELEMENTS + 1,
+          numElements,
           visible: undefined, // visibility check was skipped
         })
       })
@@ -455,7 +457,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
       cy.contains('.large-element-set').closest('.command').find('.command-invisible').trigger('mouseover')
       cy.get('.cy-tooltip')
       .should('be.visible')
-      .should('include.text', `Visibility check skipped for ${MAX_VISIBILITY_CHECK_ELEMENTS} elements (limit: ${MAX_VISIBILITY_CHECK_ELEMENTS})`)
+      .should('include.text', `Visibility check skipped for ${numElements} elements (limit: ${MAX_VISIBILITY_CHECK_ELEMENTS})`)
     })
   })
 

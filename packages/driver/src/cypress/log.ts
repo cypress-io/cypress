@@ -485,17 +485,16 @@ export class Log {
       return this.unset('$el')
     }
 
-    // make sure all $el elements are visible!
-    // Skip expensive visibility check if numElements exceeds the limit
     const numElements = $el.length
 
-    // If numElements > MAX_VISIBILITY_CHECK_ELEMENTS, visible remains undefined
-    // to indicate the check was skipped
+    const visible = this.get('visible') ?? (
+      numElements <= MAX_VISIBILITY_CHECK_ELEMENTS ? numElements === $el.filter(':visible').length : undefined
+    )
 
     return this.set({
       highlightAttr: HIGHLIGHT_ATTR,
       numElements,
-      visible: this.get('visible') ?? numElements <= MAX_VISIBILITY_CHECK_ELEMENTS ? numElements === $el.filter(':visible').length : undefined,
+      visible,
     })
   }
 
