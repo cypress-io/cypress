@@ -328,7 +328,9 @@ export class AutIframe {
   }
 
   removeHighlights = () => {
-    this._contents() && this._contents()?.find('.__cypress-highlight').remove()
+    const $contents = this._contents()
+
+    $contents?.find('.__cypress-highlight').remove()
   }
 
   toggleSelectorPlayground = (isEnabled) => {
