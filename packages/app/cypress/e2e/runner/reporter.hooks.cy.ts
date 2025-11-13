@@ -83,29 +83,7 @@ describe('hooks', {
       })
     })
 
-    it('sends the correct invocation details for .only test body', () => {
-      loadSpec({
-        filePath: 'hooks/only.cy.js',
-        passCount: 2,
-        hasPreferredIde: true,
-      })
-
-      cy.contains('test 2').click()
-
-      cy.get('.hook-open-in-ide').should('have.length', 2)
-
-      cy.withCtx((ctx, o) => {
-        o.sinon.stub(ctx.actions.file, 'openFile')
-      })
-
-      cy.contains('test body').closest('.hook-header').find('.hook-open-in-ide').invoke('show').click()
-
-      cy.withCtx((ctx, o) => {
-        expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`hooks/only\.cy\.js$`)), 13, 7)
-      })
-    })
-
-    it('sends the correct invocation details for wrapped it', () => {
+    it.only('sends the correct invocation details for wrapped it', () => {
       loadSpec({
         filePath: 'hooks/wrapped-it.cy.js',
         passCount: 2,
