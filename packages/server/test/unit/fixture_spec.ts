@@ -1,28 +1,40 @@
-require('../spec_helper')
-
-const path = require('path')
-const Promise = require('bluebird')
-const fixture = require(`../../lib/fixture`)
-const { fs } = require(`../../lib/util/fs`)
-const FixturesHelper = require('@tooling/system-tests')
-const snapshot = require('snap-shot-it')
+import path from 'path'
+import Promise from 'bluebird'
+import * as fixture from '../../lib/fixture'
+import { fs } from '../../lib/util/fs'
+import FixturesHelper from '@tooling/system-tests'
+import snapshot from 'snap-shot-it'
+import { setCtx, makeDataContext, clearCtx } from '../../lib/makeDataContext'
+import { getCtx } from '@packages/data-context'
 
 let ctx
 
 describe('lib/fixture', () => {
   before(async function () {
-    const { setCtx, makeDataContext, clearCtx } = require('../../lib/makeDataContext')
-
     // Clear and set up DataContext
     await clearCtx()
+    // @ts-expect-error
     setCtx(makeDataContext({}))
-    ctx = require('../../lib/makeDataContext').getCtx()
+    ctx = getCtx()
 
     FixturesHelper.scaffold()
 
     this.todosPath = FixturesHelper.projectPath('todos')
 
     await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
+
+    // needed to run these tests locally
+    // sinon.stub(ctx.browser, 'machineBrowsers').resolves([
+    //   {
+    //     channel: 'stable',
+    //     displayName: 'Electron',
+    //     family: 'chromium',
+    //     majorVersion: '123',
+    //     name: 'electron',
+    //     path: 'path-to-browser-one',
+    //     version: '123.45.67',
+    //   },
+    // ])
 
     const cfg = await ctx.lifecycleManager.getFullInitialConfig()
 
@@ -162,6 +174,18 @@ describe('lib/fixture', () => {
 
     // https://github.com/cypress-io/cypress/issues/3739
     it('can load a fixture with no extension when a same-named folder also exists', async () => {
+      // needed to run these tests locally
+      // sinon.stub(ctx.browser, 'machineBrowsers').resolves([
+      //   {
+      //     channel: 'stable',
+      //     displayName: 'Electron',
+      //     family: 'chromium',
+      //     majorVersion: '123',
+      //     name: 'electron',
+      //     path: 'path-to-browser-one',
+      //     version: '123.45.67',
+      //   },
+      // ])
       const projectPath = FixturesHelper.projectPath('folder-same-as-fixture')
 
       await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(projectPath)

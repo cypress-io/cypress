@@ -1,7 +1,7 @@
 import { parseContentType } from '@packages/net-stubbing/lib/server/util'
 import _ from 'lodash'
 import Promise from 'bluebird'
-import fixture from '../fixture'
+import { get as fixtureGet } from '../fixture'
 
 const fixturesRe = /^(fx:|fixture:)/
 
@@ -81,7 +81,8 @@ export = {
       options.encoding = encoding
     }
 
-    return fixture.get(config.fixturesFolder, filePath, options)
+    // @ts-expect-error
+    return fixtureGet(config.fixturesFolder, filePath, options)
     .then((bytes: any) => {
       return {
         data: bytes,
