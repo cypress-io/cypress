@@ -66,7 +66,7 @@ describe('stack_utils', () => {
       })
     }
 
-    it('returns the correct invocation details for a grep stack trace', () => {
+    it('returns the correct invocation details for a test stack trace that needs to be trimmed', () => {
       const stack = `Error\n at itGrep (http://localhost:3000/__cypress/tests?p=cypress/support/e2e.js:444:14)\n 
 at eval (http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js:14:1)\n
 at eval (http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js:18:12)\n
@@ -92,7 +92,7 @@ at eval (cypress:///../driver/src/cypress/script_utils.ts:38:23)`
       }))
     })
 
-    it('returns the correct invocation details for a test with a stack that needs to be trimmed', () => {
+    it('returns the correct invocation details for a .only test with a stack that needs to be trimmed', () => {
       const stack = `Error
     at itGrep (http://localhost:3000/__cypress/tests?p=cypress/support/e2e.js:444:14)
     at context.notIt.only (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:98:46)
