@@ -55,7 +55,7 @@ export function initializePerformanceLogFile () {
   }
 }
 
-export async function recordPerformanceEntry (entry: CommandPerformanceEntry) {
+export function recordPerformanceEntry (entry: CommandPerformanceEntry) {
   debug('recording performance entry %o', entry)
 
   if (!performanceLogsEnabled()) {
@@ -82,9 +82,13 @@ export async function recordPerformanceEntry (entry: CommandPerformanceEntry) {
     spec,
   ].map(escapeCsvValue).join(',')
 
-  await fs.writeFile(
-    path.join(logFilePath(), 'performance.log'),
-    `${row}\n`,
-    { flag: 'a' },
-  )
+  try {
+    fsSync.writeFile(
+      path.join(logFilePath(), 'performance.log'),
+      `${row}\n`,
+      { flag: 'a' },
+    )
+  } catch (error) {
+    debug('error recording performance entry: %s', error)
+  }
 }
