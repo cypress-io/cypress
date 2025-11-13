@@ -3,6 +3,10 @@
 
 _Released 11/18/2025 (PENDING)_
 
+**Performance:**
+
+- Hidden command log entries (for commands with `log: false`) will no longer perform expensive visibility assessments for subject elements. Addressed in [#32948](https://github.com/cypress-io/cypress/pull/32948).
+
 **Bugfixes:**
 
 - Fixed an issue where [`cy.wrap()`](https://docs.cypress.io/api/commands/wrap) would cause infinite recursion and freeze the Cypress App when called with objects containing circular references. Fixes [#24715](https://github.com/cypress-io/cypress/issues/24715). Addressed in [#32917](https://github.com/cypress-io/cypress/pull/32917).
