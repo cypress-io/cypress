@@ -8,6 +8,8 @@ describe('stack_utils getInvocationDetails', () => {
       const details = $stackUtils.getInvocationDetails(window, $sourceMapUtils.getSourceMapProjectRoot(), 'test')
 
       expect(details).to.exist
+      if (!details) return
+
       expect(details.line).to.be.a('number')
       expect(details.column).to.be.a('number')
       expect(details.stack).to.be.a('string')
@@ -18,6 +20,8 @@ describe('stack_utils getInvocationDetails', () => {
       const firstStackLine = stackLines.find((line) => line.trim().startsWith('at'))
 
       expect(firstStackLine).to.exist
+      if (!firstStackLine) return
+
       expect(firstStackLine.trim()).to.satisfy((line: string) => {
         return line.startsWith('at eval') || line.startsWith('at Suite.eval')
       }, 'Chrome stack should start with "at eval" or "at Suite.eval"')
@@ -41,6 +45,8 @@ describe('stack_utils getInvocationDetails', () => {
       const details = $stackUtils.getInvocationDetails(window, $sourceMapUtils.getSourceMapProjectRoot(), 'test')
 
       expect(details).to.exist
+      if (!details) return
+
       expect(details.line).to.be.a('number')
       expect(details.column).to.be.a('number')
       expect(details.stack).to.be.a('string')
@@ -51,6 +57,8 @@ describe('stack_utils getInvocationDetails', () => {
       const firstStackLine = stackLines.find((line) => line.includes('@'))
 
       expect(firstStackLine).to.exist
+      if (!firstStackLine) return
+
       const splitAtAt = firstStackLine.split('@')
 
       expect(splitAtAt.length).to.be.greaterThan(1)
@@ -82,6 +90,8 @@ describe('stack_utils getInvocationDetails', () => {
       const details = $stackUtils.getInvocationDetails(window, $sourceMapUtils.getSourceMapProjectRoot(), 'test')
 
       expect(details).to.exist
+      if (!details) return
+
       expect(details.line).to.be.a('number')
       expect(details.column).to.be.a('number')
 
@@ -91,6 +101,8 @@ describe('stack_utils getInvocationDetails', () => {
       const firstStackLine = stackLines.find((line) => line.trim().startsWith('at'))
 
       expect(firstStackLine).to.exist
+      if (!firstStackLine) return
+
       expect(firstStackLine.trim()).to.satisfy((line: string) => {
         return line.startsWith('at eval') || line.startsWith('at Suite.eval')
       }, 'Chrome stack should start with "at eval" or "at Suite.eval" even with wrapped it')
@@ -100,6 +112,8 @@ describe('stack_utils getInvocationDetails', () => {
       const details = $stackUtils.getInvocationDetails(window, $sourceMapUtils.getSourceMapProjectRoot(), 'test')
 
       expect(details).to.exist
+      if (!details) return
+
       expect(details.line).to.be.a('number')
       expect(details.column).to.be.a('number')
 
@@ -108,6 +122,8 @@ describe('stack_utils getInvocationDetails', () => {
       const firstStackLine = stackLines.find((line) => line.includes('@'))
 
       expect(firstStackLine).to.exist
+      if (!firstStackLine) return
+
       const splitAtAt = firstStackLine.split('@')
 
       expect(splitAtAt.length).to.be.greaterThan(1)
@@ -122,6 +138,8 @@ describe('stack_utils getInvocationDetails', () => {
           const details = $stackUtils.getInvocationDetails(window, $sourceMapUtils.getSourceMapProjectRoot(), 'test')
 
           expect(details).to.exist
+          if (!details) return
+
           expect(details.line).to.be.a('number')
           expect(details.column).to.be.a('number')
 
@@ -129,6 +147,8 @@ describe('stack_utils getInvocationDetails', () => {
           const firstStackLine = details.stack.split('\n').find((line) => line.trim().startsWith('at'))
 
           expect(firstStackLine).to.exist
+          if (!firstStackLine) return
+
           expect(firstStackLine.trim()).to.satisfy((line: string) => {
             return line.startsWith('at eval') || line.startsWith('at Suite.eval')
           }, 'Chrome stack should start with "at eval" or "at Suite.eval" in nested describes')
@@ -138,6 +158,8 @@ describe('stack_utils getInvocationDetails', () => {
           const details = $stackUtils.getInvocationDetails(window, $sourceMapUtils.getSourceMapProjectRoot(), 'test')
 
           expect(details).to.exist
+          if (!details) return
+
           expect(details.line).to.be.a('number')
           expect(details.column).to.be.a('number')
 
@@ -146,6 +168,8 @@ describe('stack_utils getInvocationDetails', () => {
           const firstStackLine = stackLines.find((line) => line.includes('@'))
 
           expect(firstStackLine).to.exist
+          if (!firstStackLine) return
+
           const splitAtAt = firstStackLine.split('@')
 
           expect(splitAtAt.length).to.be.greaterThan(1)
