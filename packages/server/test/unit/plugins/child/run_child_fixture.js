@@ -1,13 +1,19 @@
 const childProcess = require('child_process')
 const path = require('path')
 
+// load with tsx?
 const REQUIRE_ASYNC_CHILD_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
 
 let proc
 
 process.on('message', (msg) => {
   if (msg.msg === 'spawn') {
-    proc = childProcess.fork(REQUIRE_ASYNC_CHILD_PATH, ['--projectRoot', msg.data.projectRoot, '--file', path.join(msg.data.projectRoot, 'cypress.config.js')])
+    proc = childProcess.fork(REQUIRE_ASYNC_CHILD_PATH, ['--projectRoot', msg.data.projectRoot, '--file', path.join(msg.data.projectRoot, 'cypress.config.js')], {
+      env: {
+        NODE_OPTIONS: '--import tsx',
+      },
+    })
+
     proc.on('message', (msg) => {
       process.send({ childMessage: msg })
     })

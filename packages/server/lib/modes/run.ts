@@ -1131,6 +1131,7 @@ async function ready (options: ReadyOptions) {
       socketId,
       parallel,
       onError,
+      // @ts-expect-error - browser is not typed correctly
       browser,
       project,
       runUrl,
