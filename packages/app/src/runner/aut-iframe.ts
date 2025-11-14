@@ -20,6 +20,7 @@ export class AutIframe {
   debouncedToggleSelectorPlayground: DebouncedFunc<(isEnabled: any) => void>
   $iframe?: JQuery<HTMLIFrameElement>
   _highlightedEl?: Element
+  private _highlightingCancelled: boolean = false
 
   constructor (
     private projectName: string,
@@ -286,7 +287,11 @@ export class AutIframe {
   }
 
   highlightEl = ({ body }, { $el, coords, highlightAttr, scrollBy }) => {
+    // Cancel any ongoing highlighting operation
+    this._highlightingCancelled = true
     this.removeHighlights()
+    // Reset cancellation flag for this new highlighting operation
+    this._highlightingCancelled = false
 
     if (body) {
       $el = body.get().find(`[${highlightAttr}]`)
@@ -357,15 +362,53 @@ export class AutIframe {
       body.appendChild(fragment)
 
       // Now that containers are in DOM, set offsets using setOffset (which uses getBoundingClientRect)
-      containers.forEach((container) => {
-        for (let i = 0; i < container.children.length; i++) {
-          const childEl = container.children[i] as HTMLElement
-          const top = parseFloat(childEl.getAttribute('data-top')!)
-          const left = parseFloat(childEl.getAttribute('data-left')!)
+      // Batch setOffset calls to avoid layout thrashing - process in chunks using requestAnimationFrame
+      const OFFSET_BATCH_SIZE = 100
+      let offsetIndex = 0
 
-          setOffset(childEl, { top, left })
+      const processOffsetBatch = () => {
+        // Check if highlighting was cancelled (e.g., user switched to different snapshot)
+        if (this._highlightingCancelled) {
+          return
         }
-      })
+
+        const endIndex = Math.min(offsetIndex + OFFSET_BATCH_SIZE, containers.length)
+
+        for (let j = offsetIndex; j < endIndex; j++) {
+          const container = containers[j]
+
+          // Check if container is still in the DOM (might have been removed by removeHighlights)
+          if (!container.isConnected) {
+            continue
+          }
+
+          for (let i = 0; i < container.children.length; i++) {
+            const childEl = container.children[i] as HTMLElement
+
+            // Check if element is still in the DOM before positioning
+            if (!childEl.isConnected) {
+              continue
+            }
+
+            const top = parseFloat(childEl.getAttribute('data-top')!)
+            const left = parseFloat(childEl.getAttribute('data-left')!)
+
+            setOffset(childEl, { top, left })
+          }
+        }
+
+        offsetIndex = endIndex
+
+        if (offsetIndex < containers.length) {
+          // Process next batch on next frame to avoid blocking
+          requestAnimationFrame(processOffsetBatch)
+        } else {
+          // All highlights have been positioned
+        }
+      }
+
+      // Start processing offsets in batches
+      processOffsetBatch()
     }
 
     if (coords) {
