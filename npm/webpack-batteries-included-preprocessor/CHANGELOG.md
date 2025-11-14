@@ -1,3 +1,5 @@
+# [@cypress/webpack-batteries-included-preprocessor-v4.0.4](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v4.0.3...@cypress/webpack-batteries-included-preprocessor-v4.0.4) (2025-11-13)
+
 # [@cypress/webpack-batteries-included-preprocessor-v4.0.3](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v4.0.2...@cypress/webpack-batteries-included-preprocessor-v4.0.3) (2025-11-07)
 
 # [@cypress/webpack-batteries-included-preprocessor-v4.0.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v4.0.1...@cypress/webpack-batteries-included-preprocessor-v4.0.2) (2025-08-27)
