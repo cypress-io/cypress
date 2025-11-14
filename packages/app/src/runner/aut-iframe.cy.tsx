@@ -97,8 +97,11 @@ describe('AutIframe._addElementBoxModelLayers', () => {
 
     layers.forEach((layer) => {
       expect(layer.style.position).to.equal('absolute')
-      expect(layer.style.top).to.match(/^\d+px$/, 'Top should be set as pixels')
-      expect(layer.style.left).to.match(/^\d+px$/, 'Left should be set as pixels')
+      // Verify positions are stored in data attributes (not style properties)
+      expect(layer.getAttribute('data-top')).to.exist
+      expect(layer.getAttribute('data-left')).to.exist
+      expect(parseFloat(layer.getAttribute('data-top')!)).to.be.a('number')
+      expect(parseFloat(layer.getAttribute('data-left')!)).to.be.a('number')
       expect(layer.getAttribute('data-layer')).to.exist
       // Verify transform and zIndex were applied from dimensions
       expect(layer.style.transform).to.equal('translateX(10px)')
