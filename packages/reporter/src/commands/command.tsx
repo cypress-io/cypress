@@ -83,8 +83,8 @@ export const formattedMessage = (message: string, name?: string) => {
 }
 
 const invisibleMessage = (model: CommandModel) => {
-  if (model.numElements >= MAX_VISIBILITY_CHECK_ELEMENTS) {
-    return `Visibility check skipped for ${model.numElements} elements (limit: ${MAX_VISIBILITY_CHECK_ELEMENTS})`
+  if (model.numElements > MAX_VISIBILITY_CHECK_ELEMENTS) {
+    return `Too many elements matched for this command to determine visibility. Some elements may not be visible.`
   }
 
   return model.numElements > 1 ?

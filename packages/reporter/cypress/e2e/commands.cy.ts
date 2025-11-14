@@ -457,7 +457,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
       cy.contains('.large-element-set').closest('.command').find('.command-invisible').trigger('mouseover')
       cy.get('.cy-tooltip')
       .should('be.visible')
-      .should('include.text', `Visibility check skipped for ${numElements} elements (limit: ${MAX_VISIBILITY_CHECK_ELEMENTS})`)
+      .should('include.text', `Too many elements matched for this command to determine visibility. Some elements may not be visible.`)
     })
   })
 
