@@ -46,13 +46,13 @@ describe('Command model', () => {
       expect(command.visible).to.be.true
     })
 
-    it('sets visible to true when visibility check is skipped due to large element set', () => {
+    it('sets visible to undefined when visibility check is skipped due to large element set', () => {
       command = new CommandModel(commandProps({
         visible: undefined,
-        numElements: MAX_VISIBILITY_CHECK_ELEMENTS,
+        numElements: MAX_VISIBILITY_CHECK_ELEMENTS + 1,
       }))
 
-      expect(command.visible).to.be.true
+      expect(command.visible).to.be.undefined
     })
   })
 

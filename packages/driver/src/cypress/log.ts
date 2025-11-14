@@ -487,15 +487,27 @@ export class Log {
 
     const numElements = $el.length
 
-    const visible = this.get('visible') ?? (
-      numElements <= MAX_VISIBILITY_CHECK_ELEMENTS ? numElements === $el.filter(':visible').length : undefined
-    )
-
     return this.set({
       highlightAttr: HIGHLIGHT_ATTR,
       numElements,
-      visible,
+      visible: this.isVisible($el, numElements),
     })
+  }
+
+  private isVisible ($el: JQuery<Element>, numElements: number): boolean | undefined {
+    if (this.get('hidden')) {
+      return undefined
+    }
+
+    if (this.get('visible') !== undefined) {
+      return this.get('visible')
+    }
+
+    if (numElements <= MAX_VISIBILITY_CHECK_ELEMENTS) {
+      return numElements === $el.filter(':visible').length
+    }
+
+    return undefined
   }
 
   merge (log) {

@@ -188,6 +188,19 @@ describe('src/cypress/log', function () {
       expect(attrs.visible).to.be.undefined
     })
 
+    describe('when log is hidden', function () {
+      it('does not filter by :visible when setting el attributes', function () {
+        const log = new Log(this.createSnapshot, this.state, this.config, this.fireChangeEvent)
+
+        log.set({ hidden: true })
+        const el = cy.$$('<div />')
+
+        cy.spy(el, 'filter')
+        log.set({ $el: el })
+        expect(el.filter).not.to.have.been.called
+      })
+    })
+
     it('performs visibility check when numElements is within limit', function () {
       const log = new Log(this.createSnapshot, this.state, this.config, this.fireChangeEvent)
       const $el = Cypress.$('<div />')
