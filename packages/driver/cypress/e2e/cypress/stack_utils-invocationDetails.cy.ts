@@ -1,4 +1,4 @@
-import { InvocationDetails } from '../../../src/cypress/stack_utils'
+import type { InvocationDetails } from '../../../src/cypress/stack_utils'
 
 // Note: the tests in this spec assert against their own invocation details. So if any of the line numbers change in this file, the assertions will need to be updated.
 describe('stack_utils getInvocationDetails', () => {
