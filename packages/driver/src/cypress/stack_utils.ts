@@ -76,7 +76,9 @@ const stackTrimmedToTestInvocation = (stack: string, specWindow) => {
       processedLines = _.dropWhile(lines, (line) => {
         return !(
           line.trim().startsWith('at eval ') ||
-          line.trim().startsWith('at Suite.eval ')
+          line.trim().startsWith('at Suite.eval ') ||
+          // component tests have the invocation details at the Suite.<anonymous> line
+          line.trim().startsWith('at Suite.<anonymous> ')
         )
       })
     } else if (specWindow.Cypress.isBrowser({ family: 'firefox' })) {
