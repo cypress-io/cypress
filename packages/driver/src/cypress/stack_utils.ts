@@ -76,9 +76,7 @@ const stackTrimmedToTestInvocation = (stack: string, specWindow) => {
       processedLines = _.dropWhile(lines, (line) => {
         return !(
           line.trim().startsWith('at eval ') ||
-          line.trim().startsWith('at Suite.eval ') ||
-          // component tests have the invocation details at the Suite.<anonymous> line
-          line.trim().startsWith('at Suite.<anonymous> ')
+          line.trim().startsWith('at Suite.eval ')
         )
       })
     } else if (specWindow.Cypress.isBrowser({ family: 'firefox' })) {
@@ -201,8 +199,8 @@ const getInvocationDetails = (specWindow, sourceMapProjectRoot: string, type?: '
       }
     }
 
-    // if the hook is the test, we will try to remove the lines that are not the actual invocation of the test
-    if (type === 'test') {
+    // if the hook is the test, and it's an e2e test,, we will try to remove the lines that are not the actual invocation of the test
+    if (type === 'test' && specWindow.Cypress.testingType !== 'component') {
       stack = stackTrimmedToTestInvocation(stack, specWindow)
     }
 
