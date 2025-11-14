@@ -67,11 +67,12 @@ describe('stack_utils', () => {
     }
 
     it('returns the correct invocation details for a test stack trace that needs to be trimmed', () => {
-      const stack = `Error\n at itGrep (http://localhost:3000/__cypress/tests?p=cypress/support/e2e.js:444:14)\n 
-at eval (http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js:14:1)\n
-at eval (http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js:18:12)\n
-at eval (<anonymous>)\n
-at eval (cypress:///../driver/src/cypress/script_utils.ts:38:23)`
+      const stack = `Error
+    at itGrep (http://localhost:3000/__cypress/tests?p=cypress/support/e2e.js:444:14)
+    at eval (http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js:14:1)
+    at eval (http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js:18:12)
+    at eval (<anonymous>)
+    at eval (cypress:///../driver/src/cypress/script_utils.ts:38:23)`
 
       class GrepError {
         get stack () {

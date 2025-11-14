@@ -67,19 +67,19 @@ const stackTrimmedToTestInvocation = (stack: string, specWindow) => {
       return lines
     }
 
+    const originalLines = lines
+    let processedLines: string[]
+
     if (specWindow.Cypress.isBrowser({ family: 'chromium' })) {
-    // There are cases where there are other lines in the stack trace before the invocation (eg. `context.it.only`, `createRunnable`, etc)
-    // The actual test invocation line starts with either 'at eval' or 'at Suite.eval',
-    // so remove all lines until we reach the test invocation line
-      return _.dropWhile(lines, (line) => {
+      // The actual test invocation line starts with either 'at eval' or 'at Suite.eval',
+      // so remove all lines until we reach the test invocation line
+      processedLines = _.dropWhile(lines, (line) => {
         return !(
-          line.trim().startsWith('at eval') ||
-          line.trim().startsWith('at Suite.eval')
+          line.trim().startsWith('at eval ') ||
+          line.trim().startsWith('at Suite.eval ')
         )
       })
-    }
-
-    if (specWindow.Cypress.isBrowser({ family: 'firefox' })) {
+    } else if (specWindow.Cypress.isBrowser({ family: 'firefox' })) {
       const isTestInvocationLine = (line: string) => {
         const splitAtAt = line.split('@')
 
@@ -93,18 +93,20 @@ const stackTrimmedToTestInvocation = (stack: string, specWindow) => {
         return splitAtAt.length > 1 && splitAtAt[0].trim().length === 0
       }
 
-      return _.dropWhile(lines, (line) => {
+      processedLines = _.dropWhile(lines, (line) => {
         return !isTestInvocationLine(line)
       })
+    } else {
+      processedLines = lines
     }
 
-    return lines
-  })
+    // if we removed all the lines then something went wrong with parsing. Return the original lines instead
+    if (processedLines.length === 0) {
+      return originalLines
+    }
 
-  // if we removed all the lines then something went wrong. return the original stack instead
-  if (modifiedStack.trim() === 'Error') {
-    return stack
-  }
+    return processedLines
+  })
 
   return modifiedStack
 }
