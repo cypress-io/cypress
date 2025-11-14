@@ -259,8 +259,8 @@ export class ProtocolManager implements ProtocolManagerShape {
     this.invokeSync('pageLoading', { isEssential: false }, input)
   }
 
-  resetTest (testId: string): void {
-    this.invokeSync('resetTest', { isEssential: false }, testId)
+  resetTest (testId: string, currentRetry?: number): void {
+    this.invokeSync('resetTest', { isEssential: false }, testId, currentRetry)
   }
 
   responseEndedWithEmptyBody (options: ResponseEndedWithEmptyBodyOptions): void {

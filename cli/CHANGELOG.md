@@ -3,9 +3,15 @@
 
 _Released 11/18/2025 (PENDING)_
 
+**Bugfixes:**
+
+- Fixed an issue where [`cy.wrap()`](https://docs.cypress.io/api/commands/wrap) would cause infinite recursion and freeze the Cypress App when called with objects containing circular references. Fixes [#24715](https://github.com/cypress-io/cypress/issues/24715). Addressed in [#32917](https://github.com/cypress-io/cypress/pull/32917).
+- Fixed an issue where top changes on test retries could cause attempt numbers to show up more than one time in the reporter and cause attempts to be lost in Test Replay. Addressed in [#32888](https://github.com/cypress-io/cypress/pull/32888).
+
 **Misc:**
 
 - The keyboard shortcuts modal now displays the keyboard shortcut for saving Studio changes - `⌘` + `s` for Mac or `Ctrl` + `s` for Windows/Linux. Addressed [#32862](https://github.com/cypress-io/cypress/issues/32862). Addressed in [#32864](https://github.com/cypress-io/cypress/pull/32864).
+- The Cursor logo now correctly displays in the External editor dropdown. Addresses [#32062](https://github.com/cypress-io/cypress/issues/32062). Addressed in [#32911](https://github.com/cypress-io/cypress/pull/32911).
 
 ## 15.6.0
 

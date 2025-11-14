@@ -12,6 +12,11 @@ workflows:
                 requires:
                   - pack-workflows
 
+parameters:
+  publish-binary-branch:
+    type: string
+    default: main
+
 commands:
   persist:
     steps:
@@ -154,7 +159,3 @@ jobs:
                 fi
           - continuation/continue:
               configuration_path: .circleci/packed/pipeline.yml
-
-
-  
-

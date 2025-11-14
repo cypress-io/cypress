@@ -783,6 +783,40 @@ describe('lib/socket', () => {
         })
       })
     })
+
+    describe('on(get:cached:test:state)', () => {
+      it('returns cached test state', async function () {
+        await new Promise((resolve) => {
+          this.client.emit('backend:request', 'preserve:run:state', {
+            currentId: 'test',
+            currentRetry: 0,
+          }, resolve)
+        })
+
+        const mockProtocolManager = {
+          resetTest: sinon.stub(),
+        }
+
+        this.socket['_protocolManager'] = mockProtocolManager
+
+        await new Promise((resolve) => {
+          this.client.emit('get:cached:test:state', (runState, testState) => {
+            expect(runState).to.deep.eq({
+              currentId: 'test',
+              currentRetry: 0,
+            })
+
+            expect(testState).to.deep.eq({
+              activeSessions: {},
+            })
+
+            expect(mockProtocolManager.resetTest).to.be.calledWith('test', 0)
+
+            resolve()
+          })
+        })
+      })
+    })
   })
 
   context('unit', () => {

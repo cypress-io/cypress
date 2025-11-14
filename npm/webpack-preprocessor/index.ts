@@ -182,7 +182,7 @@ interface FileEvent extends events.EventEmitter {
  */
 type FilePreprocessor = (file: FileEvent) => Bluebird<FilePath>
 
-type WebpackPreprocessorFn = (options: PreprocessorOptions) => FilePreprocessor
+type WebpackPreprocessorFn = (options?: PreprocessorOptions) => FilePreprocessor
 
 /**
  * Cypress file preprocessor that can bundle specs
@@ -216,7 +216,7 @@ interface WebpackPreprocessor extends WebpackPreprocessorFn {
   ```
  */
 // @ts-ignore
-const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): FilePreprocessor => {
+const preprocessor: WebpackPreprocessor = (options?: PreprocessorOptions = {}): FilePreprocessor => {
   debug('user options: %o', options)
 
   // we return function that accepts the arguments provided by
@@ -523,4 +523,5 @@ function cleanseError (err: string | webpack.StatsError) {
   return msg.replace(/\n\s*at.*/g, '').replace(/From previous event:\n?/g, '')
 }
 
+// NOTE: needs to be changed to support ESM when the time comes, but will be considered a breaking change.
 export = preprocessor

@@ -1,12 +1,20 @@
-const path = require('path')
-const Debug = require('debug')
-const getTsConfig = require('get-tsconfig')
-const webpack = require('webpack')
-const webpackPreprocessor = require('@cypress/webpack-preprocessor')
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
+import path from 'path'
+import Debug from 'debug'
+import type { EventEmitter } from 'events'
+import getTsConfig from 'get-tsconfig'
+import webpack from 'webpack'
+import webpackPreprocessor from '@cypress/webpack-preprocessor'
+import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
 
 const debug = Debug('cypress:webpack-batteries-included-preprocessor')
 const WBADebugNamespace = 'cypress-verbose:webpack-batteries-included-preprocessor:bundle-analyzer'
+
+// NOTE: these types are duplicated from @cypress/webpack-preprocessor as we are unable to currently export them from the main entry.
+interface FileEvent extends EventEmitter {
+  filePath: string
+  outputPath: string
+  shouldWatch: boolean
+}
 
 class TsConfigNotFoundError extends Error {
   constructor () {
@@ -24,17 +32,20 @@ class TypeScriptNotFoundError extends Error {
 
 const typescriptExtensionRegex = /\.m?tsx?$/
 
-const hasTsLoader = (rules) => {
+const hasTsLoader = (rules: any[]) => {
   return rules.some((rule) => {
     if (!rule.use || !Array.isArray(rule.use)) return false
 
-    return rule.use.some((use) => {
+    return rule.use.some((use: any) => {
       return use.loader && use.loader.match(/(^|[^a-zA-Z])ts-loader([^a-zA-Z]|$)/)
     })
   })
 }
 
-const addTypeScriptConfig = (file, options) => {
+const addTypeScriptConfig = (file: { filePath: string }, options: {
+  typescript?: string | boolean
+  webpackOptions?: any
+}) => {
   // returns null if tsconfig cannot be found in the path/parent hierarchy
   const configFile = getTsConfig.getTsconfig(file.filePath)
 
@@ -46,14 +57,15 @@ const addTypeScriptConfig = (file, options) => {
 
   debug(`found user tsconfig.json at ${configFile?.path} with compilerOptions: ${JSON.stringify(configFile?.config?.compilerOptions)}`)
 
-  let typeScriptPath = null
+  let typeScriptPath: string | boolean | undefined | null = null
 
   try {
     if (options.typescript === true) {
-      const configFileDirectory = path.dirname(configFile?.path)
+      const configFileDirectory = path.dirname(configFile?.path ?? '')
 
       // attempt to resolve typescript from the user's tsconfig.json file / project directory
       typeScriptPath = require.resolve('typescript', { paths: [configFileDirectory] })
+      options.typescript = typeScriptPath
     } else {
       typeScriptPath = options.typescript
     }
@@ -65,6 +77,7 @@ const addTypeScriptConfig = (file, options) => {
     throw new TypeScriptNotFoundError()
   }
   // shortcut if we know we've already added typescript support
+  // @ts-expect-error - not typed intentionally
   if (options.__typescriptSupportAdded) return options
 
   const webpackOptions = options.webpackOptions
@@ -117,6 +130,7 @@ const addTypeScriptConfig = (file, options) => {
     silent: true,
   })]
 
+  // @ts-expect-error - not typed intentionally
   options.__typescriptSupportAdded = true
 
   return options
@@ -148,7 +162,7 @@ const getDefaultWebpackOptions = () => {
                 'babel-plugin-add-module-exports',
                 '@babel/plugin-transform-class-properties',
                 '@babel/plugin-transform-object-rest-spread',
-              ].map(require.resolve),
+              ].map((plugin) => require.resolve(plugin)),
               [require.resolve('@babel/plugin-transform-runtime'), {
                 absoluteRuntime: path.dirname(require.resolve('@babel/runtime/package')),
               }],
@@ -239,8 +253,11 @@ const getDefaultWebpackOptions = () => {
   }
 }
 
-const preprocessor = (options = {}) => {
-  return (file) => {
+const preprocessor = (options: {
+  typescript?: string | boolean
+  webpackOptions?: any
+} = {}) => {
+  return (file: FileEvent) => {
     if (!options.typescript && typescriptExtensionRegex.test(file.filePath)) {
       return Promise.reject(new Error(`You are attempting to run a TypeScript file, but do not have TypeScript installed. Ensure you have 'typescript' installed to enable TypeScript support.\n\nThe file: ${file.filePath}`))
     }
@@ -251,6 +268,7 @@ const preprocessor = (options = {}) => {
       options = addTypeScriptConfig(file, options)
     }
 
+    // @ts-expect-error - typescript is casted back to a string | undefined inside addTypeScriptConfig
     return webpackPreprocessor(options)(file)
   }
 }
@@ -260,10 +278,10 @@ preprocessor.defaultOptions = {
   watchOptions: {},
 }
 
-preprocessor.getFullWebpackOptions = (filePath, typescript) => {
+preprocessor.getFullWebpackOptions = (filePath?: string, typescript?: string | boolean) => {
   const webpackOptions = getDefaultWebpackOptions()
 
-  if (typescript) {
+  if (typescript && filePath) {
     return addTypeScriptConfig({ filePath }, { typescript, webpackOptions }).webpackOptions
   }
 
@@ -271,6 +289,7 @@ preprocessor.getFullWebpackOptions = (filePath, typescript) => {
 }
 
 // for testing purposes, but do not add this to the typescript interface
+// @ts-expect-error - not typed intentionally
 preprocessor.__reset = webpackPreprocessor.__reset
 
-module.exports = preprocessor
+export = preprocessor
