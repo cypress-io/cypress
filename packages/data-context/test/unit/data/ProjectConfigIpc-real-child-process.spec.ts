@@ -58,6 +58,7 @@ describe('ProjectConfigIpc', () => {
         if (evt === 'setupTestingType:reply') {
           return listener()
         }
+
         return OG_once.apply(this, [evt, listener])
       }
 
