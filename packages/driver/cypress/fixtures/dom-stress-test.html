@@ -277,17 +277,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             document.querySelector('[data-cy="add-list"]').addEventListener('click', () => {
                 const id = document.querySelector('[data-cy="list-id"]').value;
-                const type = document.querySelector('[data-cy="list-type"]').value;
                 const count = Number(document.querySelector('[data-cy="item-count"]').value);
                 addList(id);
                 const container = document.getElementById(id);
-                if (type === 'basic') {
-                    addBasicItems(count, container);
-                } else if (type === 'extreme') {
-                    addExtremeItems(count, container);
-                } else if (type === 'dynamic') {
-                    addBasicItems(count, container, true);
-                }
+                addBasicItems(count, container);
             });
             document.querySelector('[data-cy="stress-scroll"]').addEventListener('click', () => {
                 const id = document.querySelector('[data-cy="list-id"]').value;
