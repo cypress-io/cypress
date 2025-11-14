@@ -39,6 +39,16 @@ export const getElementDimensions = (el: HTMLElement) => {
   const widthWithBorder = widthWithPadding + borderLeft + borderRight
   const widthWithMargin = widthWithBorder + marginLeft + marginRight
 
+  // Extract transform and z-index from computed style to avoid additional getComputedStyle calls
+  // Use .transform property directly to match original behavior (getComputedStyle(el, null).transform)
+  // Ensure it's always a string (fallback to 'none' if undefined/null)
+  const transform = computedStyle.transform || 'none'
+  const zIndexValue = computedStyle.getPropertyValue('z-index')
+  // Use INT32_MAX for auto/0 z-index values (matching getZIndex behavior)
+  const INT32_MAX = 2147483647
+  const parsedZIndex = parseFloat(zIndexValue)
+  const zIndex = /^(auto|0)$/.test(zIndexValue) || isNaN(parsedZIndex) ? INT32_MAX : parsedZIndex
+
   return {
     // offset disregards margin but takes into account border + padding
     offset: getOffset(el),
@@ -70,8 +80,10 @@ export const getElementDimensions = (el: HTMLElement) => {
     widthWithBorder,
     widthWithMargin,
 
-    // Include display property from computed style to avoid additional getComputedStyle calls
+    // Include display, transform, and zIndex from computed style to avoid additional getComputedStyle calls
     display: computedStyle.display,
+    transform,
+    zIndex,
   }
 }
 

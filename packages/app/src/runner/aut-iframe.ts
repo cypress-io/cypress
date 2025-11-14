@@ -6,7 +6,7 @@ import _ from 'lodash'
 import type { DebouncedFunc } from 'lodash'
 import { useStudioStore } from '../store/studio-store'
 import { getElementDimensions, setOffset } from './dimensions'
-import { getOrCreateHelperDom, getSelectorHighlightStyles, getZIndex, INT32_MAX } from './dom'
+import { getOrCreateHelperDom, getSelectorHighlightStyles, INT32_MAX } from './dom'
 import highlightMounter from './selector-playground/highlight-mounter'
 import Highlight from './selector-playground/Highlight.ce.vue'
 
@@ -320,7 +320,9 @@ export class AutIframe {
       const $_el = this.$(element)
 
       // bail if our el no longer exists in the parent body
-      if (!this.$.contains(body, element)) return
+      if (!this.$.contains(body, element)) {
+        return
+      }
 
       // Get all dimensions and computed styles in one call to avoid multiple getComputedStyle calls
       const dimensions = getElementDimensions($_el.get(0))
@@ -353,6 +355,17 @@ export class AutIframe {
       })
 
       body.appendChild(fragment)
+
+      // Now that containers are in DOM, set offsets using setOffset (which uses getBoundingClientRect)
+      containers.forEach((container) => {
+        for (let i = 0; i < container.children.length; i++) {
+          const childEl = container.children[i] as HTMLElement
+          const top = parseFloat(childEl.getAttribute('data-top')!)
+          const left = parseFloat(childEl.getAttribute('data-left')!)
+
+          setOffset(childEl, { top, left })
+        }
+      })
     }
 
     if (coords) {
@@ -663,29 +676,25 @@ export class AutIframe {
     return box
   }
 
-  private _getOffsetSize (el: HTMLElement) {
-    return {
-      width: el.offsetWidth,
-      height: el.offsetHeight,
-    }
-  }
-
   private _addElementBoxModelLayers ($el, $body, dimensions?: ReturnType<typeof getElementDimensions>) {
     $body = $body || $('body')
 
     const el = $el.get(0)
 
     // Use existing dimensions if provided to avoid redundant getComputedStyle calls
-    // Assign to non-optional variable so TypeScript knows it's defined
     const elementDimensions: ReturnType<typeof getElementDimensions> = dimensions || getElementDimensions(el)
+
+    // Ensure transform and zIndex are valid (should always be set by getElementDimensions)
+    const transform = elementDimensions.transform || 'none'
+    const zIndex = elementDimensions.zIndex ?? 2147483647
 
     const container = document.createElement('div')
 
     container.classList.add('__cypress-highlight')
 
-    container.style.opacity = `0.7`
+    container.style.opacity = '0.7'
     container.style.position = 'absolute'
-    container.style.zIndex = `${INT32_MAX}`
+    container.style.zIndex = INT32_MAX.toString()
 
     const layers = {
       Content: '#9FC4E7',
@@ -734,36 +743,32 @@ export class AutIframe {
 
       // bail if the dimensions of this layer match the previous one
       // so we dont create unnecessary layers
-      if (this._dimensionsMatchPreviousLayer(obj, container)) return
+      if (this._dimensionsMatchPreviousLayer(obj, container)) {
+        return
+      }
 
-      this._createLayer($el.get(0), attr, color, container, obj)
+      this._createLayer(attr, color, container, obj, transform, zIndex)
     })
 
-    // Set offsets before appending to DOM to avoid layout thrashing
-    // This way all layout calculations happen off-DOM, then we append once
-    for (let i = 0; i < container.children.length; i++) {
-      const childEl = container.children[i] as HTMLElement
-      const top = parseFloat(childEl.getAttribute('data-top')!)
-      const left = parseFloat(childEl.getAttribute('data-left')!)
-
-      setOffset(childEl, { top, left })
-    }
-
+    // Note: setOffset will be called after container is appended to DOM
+    // The offsets are stored in data-top/data-left attributes for now
     return container
   }
 
-  private _createLayer (el, attr, color, container, dimensions) {
+  private _createLayer (attr, color, container, dimensions, transform: string, zIndex: number) {
     const div = document.createElement('div')
 
-    div.style.transform = getComputedStyle(el, null).transform
+    // Set transform directly (original code always set it, even if 'none')
+    div.style.transform = transform
+
     div.style.width = `${dimensions.width}px`
     div.style.height = `${dimensions.height}px`
     div.style.position = 'absolute'
-    div.style.zIndex = `${getZIndex(el)}`
+    div.style.zIndex = `${zIndex}`
     div.style.backgroundColor = color
 
-    div.setAttribute('data-top', dimensions.top)
-    div.setAttribute('data-left', dimensions.left)
+    div.setAttribute('data-top', dimensions.top.toString())
+    div.setAttribute('data-left', dimensions.left.toString())
     div.setAttribute('data-layer', attr)
 
     container.prepend(div)
