@@ -20,7 +20,7 @@ export class AutIframe {
   debouncedToggleSelectorPlayground: DebouncedFunc<(isEnabled: any) => void>
   $iframe?: JQuery<HTMLIFrameElement>
   _highlightedEl?: Element
-  private _highlightingCancelled: boolean = false
+  private _currentHighlightingId: number = 0
 
   constructor (
     private projectName: string,
@@ -287,11 +287,13 @@ export class AutIframe {
   }
 
   highlightEl = ({ body }, { $el, coords, highlightAttr, scrollBy }) => {
-    // Cancel any ongoing highlighting operation
-    this._highlightingCancelled = true
+    // Cancel any ongoing highlighting operation by incrementing the operation ID
+    // This ensures any async work from previous calls will see a different ID and stop processing
+    this._currentHighlightingId++
     this.removeHighlights()
-    // Reset cancellation flag for this new highlighting operation
-    this._highlightingCancelled = false
+
+    // Capture the current operation ID for this highlighting operation
+    const highlightingId = this._currentHighlightingId
 
     if (body) {
       $el = body.get().find(`[${highlightAttr}]`)
@@ -367,8 +369,9 @@ export class AutIframe {
       let offsetIndex = 0
 
       const processOffsetBatch = () => {
-        // Check if highlighting was cancelled (e.g., user switched to different snapshot)
-        if (this._highlightingCancelled) {
+        // Check if this highlighting operation was cancelled (e.g., user switched to different snapshot)
+        // by comparing the captured operation ID with the current one
+        if (this._currentHighlightingId !== highlightingId) {
           return
         }
 
@@ -413,6 +416,11 @@ export class AutIframe {
 
     if (coords) {
       requestAnimationFrame(() => {
+        // Check if this highlighting operation was cancelled before adding hitbox
+        if (this._currentHighlightingId !== highlightingId) {
+          return
+        }
+
         this._addHitBoxLayer(coords, $body.get(0)).setAttribute('data-highlight-hitbox', 'true')
       })
     }
