@@ -31,7 +31,6 @@ describe(`DOM Stress Tests`, () => {
         cy.visit('/fixtures/dom-stress-test.html')
         cy.get('input[data-cy="item-count"]').clear().type(count)
         cy.get('input[data-cy="list-id"]').clear().type('basic-list')
-        cy.get('select[data-cy="list-type"]').select('basic')
         cy.get('button[data-cy="add-list"]').click()
       })
 
