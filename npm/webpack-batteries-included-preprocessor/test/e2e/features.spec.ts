@@ -1,14 +1,13 @@
-const EventEmitter = require('events').EventEmitter
-const { expect } = require('chai')
-const fs = require('fs-extra')
-const path = require('path')
-
-const preprocessor = require('../../index')
+import { describe, it, beforeEach, expect } from 'vitest'
+import { EventEmitter } from 'events'
+import fs from 'fs-extra'
+import path from 'path'
+import preprocessor from '../../dist/index'
 
 const fixturesDir = path.join(__dirname, '..', 'fixtures')
 const outputDir = path.join(__dirname, '..', '_test-output')
 
-const run = (fileName, options) => {
+const run = (fileName: string, options?: any) => {
   const file = Object.assign(new EventEmitter(), {
     filePath: path.join(outputDir, fileName),
     outputPath: path.join(outputDir, fileName.replace('.', '_output.')),
@@ -17,7 +16,7 @@ const run = (fileName, options) => {
   return preprocessor(options)(file)
 }
 
-const runAndEval = async (fileName, options) => {
+const runAndEval = async (fileName: string, options?: any) => {
   const outputPath = await run(fileName, options)
   const contents = await fs.readFile(outputPath)
 
@@ -64,7 +63,7 @@ describe('webpack-batteries-included-preprocessor features', () => {
     const outputPath = await run('es_features_spec.js')
     const contents = await fs.readFile(outputPath)
 
-    expect(contents.toString()).to.include('//# sourceMappingURL=data:application/json;charset=utf-8;base64')
+    expect(contents.toString()).toContain('//# sourceMappingURL=data:application/json;charset=utf-8;base64')
   })
 
   describe('with typescript option set', () => {
@@ -72,6 +71,7 @@ describe('webpack-batteries-included-preprocessor features', () => {
       throw new Error('Should error, should not resolve')
     }
 
+    // TODO: will need to use the module API in the future to replace this
     const options = { typescript: require.resolve('typescript') }
 
     it('handles typescript (and tsconfig paths)', async () => {
@@ -105,22 +105,24 @@ describe('webpack-batteries-included-preprocessor features', () => {
       await runAndEval('tsx_spec.tsx', { ...options, ...preprocessor.defaultOptions })
     })
 
-    it('errors when processing .ts file and typescript option is not set', () => {
-      return run('ts_spec.ts')
-      .then(shouldntResolve)
-      .catch((err) => {
-        expect(err.message).to.include(`You are attempting to run a TypeScript file, but do not have TypeScript installed. Ensure you have 'typescript' installed to enable TypeScript support`)
-        expect(err.message).to.include('ts_spec.ts')
-      })
+    it('errors when processing .ts file and typescript option is not set', async () => {
+      try {
+        await run('ts_spec.ts')
+        shouldntResolve()
+      } catch (err) {
+        expect(err.message).toContain('You are attempting to run a TypeScript file, but do not have TypeScript installed. Ensure you have \'typescript\' installed to enable TypeScript support')
+        expect(err.message).toContain('ts_spec.ts')
+      }
     })
 
-    it('errors when processing .tsx file and typescript option is not set', () => {
-      return run('tsx_spec.tsx')
-      .then(shouldntResolve)
-      .catch((err) => {
-        expect(err.message).to.include(`You are attempting to run a TypeScript file, but do not have TypeScript installed. Ensure you have 'typescript' installed to enable TypeScript support`)
-        expect(err.message).to.include('tsx_spec.tsx')
-      })
+    it('errors when processing .tsx file and typescript option is not set', async () => {
+      try {
+        await run('tsx_spec.tsx')
+        shouldntResolve()
+      } catch (err) {
+        expect(err.message).toContain('You are attempting to run a TypeScript file, but do not have TypeScript installed. Ensure you have \'typescript\' installed to enable TypeScript support')
+        expect(err.message).toContain('tsx_spec.tsx')
+      }
     })
   })
 })
