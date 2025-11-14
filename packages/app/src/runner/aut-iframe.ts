@@ -311,6 +311,11 @@ export class AutIframe {
       }
     }
 
+    // Collect all containers first, then append in a single batch to minimize reflows
+    const containers: HTMLElement[] = []
+    const elementsToProcess: Array<{ $el: any, dimensions: ReturnType<typeof getElementDimensions> }> = []
+
+    // collect all valid elements and their dimensions
     $el.each((__, element) => {
       const $_el = this.$(element)
 
@@ -327,8 +332,28 @@ export class AutIframe {
         return
       }
 
-      this._addElementBoxModelLayers($_el, $body, dimensions).setAttribute('data-highlight-el', `true`)
+      elementsToProcess.push({ $el: $_el, dimensions })
     })
+
+    // create all containers (off-DOM)
+    elementsToProcess.forEach(({ $el: $_el, dimensions }) => {
+      const container = this._addElementBoxModelLayers($_el, $body, dimensions)
+
+      container.setAttribute('data-highlight-el', `true`)
+      containers.push(container)
+    })
+
+    // batch append all containers at once to minimize reflows
+    if (containers.length > 0) {
+      // Use DocumentFragment for even better performance when appending many elements
+      const fragment = document.createDocumentFragment()
+
+      containers.forEach((container) => {
+        fragment.appendChild(container)
+      })
+
+      body.appendChild(fragment)
+    }
 
     if (coords) {
       requestAnimationFrame(() => {
@@ -340,7 +365,18 @@ export class AutIframe {
   removeHighlights = () => {
     const $contents = this._contents()
 
-    $contents?.find('.__cypress-highlight').remove()
+    if (!$contents) return
+
+    const contentsElement = $contents[0] as Document | Element
+
+    if (!contentsElement || typeof contentsElement.querySelectorAll !== 'function') {
+      return
+    }
+
+    const highlights = contentsElement.querySelectorAll('.__cypress-highlight')
+
+    // Batch remove using native DOM API
+    highlights.forEach((el) => el.remove())
   }
 
   toggleSelectorPlayground = (isEnabled) => {
@@ -638,7 +674,6 @@ export class AutIframe {
     $body = $body || $('body')
 
     const el = $el.get(0)
-    const body = $body.get(0)
 
     // Use existing dimensions if provided to avoid redundant getComputedStyle calls
     // Assign to non-optional variable so TypeScript knows it's defined
@@ -704,14 +739,14 @@ export class AutIframe {
       this._createLayer($el.get(0), attr, color, container, obj)
     })
 
-    body.appendChild(container)
-
+    // Set offsets before appending to DOM to avoid layout thrashing
+    // This way all layout calculations happen off-DOM, then we append once
     for (let i = 0; i < container.children.length; i++) {
-      const el = container.children[i] as HTMLElement
-      const top = parseFloat(el.getAttribute('data-top')!)
-      const left = parseFloat(el.getAttribute('data-left')!)
+      const childEl = container.children[i] as HTMLElement
+      const top = parseFloat(childEl.getAttribute('data-top')!)
+      const left = parseFloat(childEl.getAttribute('data-left')!)
 
-      setOffset(el, { top, left })
+      setOffset(childEl, { top, left })
     }
 
     return container
