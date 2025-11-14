@@ -1,6 +1,4 @@
-require('../spec_helper')
-
-const statusCode = require(`../../lib/util/status_code`)
+import * as statusCode from '../../lib/util/status_code'
 
 describe('lib/util/status_code', () => {
   context('.isOk', () => {
