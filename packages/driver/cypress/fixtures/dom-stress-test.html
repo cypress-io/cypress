@@ -255,11 +255,6 @@
                 <div class="controls">
                     <input type="number"  data-cy="item-count" value="10" min="1" max="100000">
                     <input type="text"  data-cy="list-id" />
-                    <select  data-cy="list-type">
-                        <option value="basic">Basic</option>
-                        <option value="extreme">Extreme</option>
-                        <option value="dynamic">Dynamic</option>
-                    </select>
                     <button  data-cy="add-list" class="btn btn-primary">Add List</button>
                     <button  data-cy="clear-all" class="btn btn-primary">Clear All Lists</button>
                     <button data-cy="stress-scroll" class="btn btn-primary">Stress Scroll</button>
@@ -335,27 +330,7 @@
             return itemDiv;
         }
 
-        // Create extreme item element
-        function createExtremeItem(index, item) {
-            const itemDiv = document.createElement('div');
-            itemDiv.className = 'item';
-            itemDiv.style.padding = '10px';
-            
-            itemDiv.innerHTML = `
-                <div class="item-content">
-                    <div class="item-title">Extreme Item #${index + 1}</div>
-                    <div class="item-description">${item.description}</div>
-                    <div style="font-size: 12px; color: #999;">Complex data: ${item.complexData}</div>
-                </div>
-                <div class="item-actions">
-                    <button class="item-btn" onclick="for(let i = 0; i < 1000; i++) Math.random();">Heavy</button>
-                </div>
-            `;
-            
-            return itemDiv;
-        }
-
-        // Add all items to DOM at once (non-virtualized - creates large DOM tree)
+        // Add all items to DOM at once
         function addBasicItems(count, container, isDynamic = false)
         {
             container.innerHTML = '<div class="loading">Loading items...</div>';
@@ -366,23 +341,6 @@
                 for (let i = 0; i < count; i++) {
                     fragment.appendChild(createItem(i, { id: i, description: `This is item number ${i + 1} with some additional content to make it more realistic. Lorem ipsum dolor sit amet, consectetur adipiscing elit.` }));
                 }
-                container.innerHTML = '';
-                container.appendChild(fragment);
-            })
-        }
-
-        // Add all extreme items to DOM at once (non-virtualized - creates large DOM tree)
-        function addExtremeItems(count, container)
-        {
-            container.innerHTML = '<div class="loading">Loading items...</div>';
-            
-            setTimeout(() => {
-                const fragment = document.createDocumentFragment();
-                container.innerHTML = '';
-                for (let i = 0; i < count; i++) {
-                    container.appendChild(createExtremeItem(i, { id: i, description: `This is item number ${i + 1} with some additional content to make it more realistic. Lorem ipsum dolor sit amet, consectetur adipiscing elit.` }));
-                }
-                container.innerHTML = '';
                 container.appendChild(fragment);
             })
         }
@@ -394,8 +352,7 @@
             list.setAttribute('data-cy', 'list-container');
             list.classList.add('list-container');
 
-                document.getElementById('test-content').appendChild(list);
-
+            document.getElementById('test-content').appendChild(list);
         }
 
         function clearAllLists()
@@ -420,92 +377,6 @@
                 }, 10);
             }
         }
-
-        // Dynamic List Functions
-        function loadDynamicList() {
-            const container = document.getElementById('dynamicList');
-            container.innerHTML = '<div class="loading">Loading dynamic items...</div>';
-            
-            setTimeout(() => {
-                container.innerHTML = '';
-                const items = Array.from({ length: 5000 }, (_, i) => ({
-                    id: i,
-                    description: `Dynamic item ${i + 1} with variable height content. This item has different heights to test dynamic sizing.`
-                }));
-                
-                items.forEach((item, index) => {
-                    container.appendChild(createItem(index, item, true));
-                });
-                
-                document.getElementById('dynamicItems').textContent = items.length;
-                
-                // Add scroll listener
-                container.addEventListener('scroll', () => {
-                    scrollCounters.dynamic++;
-                    document.getElementById('dynamicScrolls').textContent = scrollCounters.dynamic;
-                });
-            }, 100);
-        }
-
-        function clearDynamicList() {
-            const container = document.getElementById('dynamicList');
-            container.innerHTML = '';
-            document.getElementById('dynamicItems').textContent = '0';
-            document.getElementById('dynamicScrolls').textContent = '0';
-            scrollCounters.dynamic = 0;
-        }
-
-        function stressScrollDynamic() {
-            const container = document.getElementById('dynamicList');
-            if (container.children.length > 0) {
-                let scrollPosition = 0;
-                const interval = setInterval(() => {
-                    scrollPosition += 50;
-                    container.scrollTop = scrollPosition;
-                    if (scrollPosition > 5000) {
-                        clearInterval(interval);
-                    }
-                }, 5);
-            }
-        }
-
-
-        function stressScrollMultiple() {
-            const containerA = document.getElementById('multipleListA');
-            const containerB = document.getElementById('multipleListB');
-            
-            if (containerA.children.length > 0 && containerB.children.length > 0) {
-                let scrollPositionA = 0;
-                let scrollPositionB = 0;
-                
-                const interval = setInterval(() => {
-                    scrollPositionA += 100;
-                    scrollPositionB += 150;
-                    
-                    containerA.scrollTop = scrollPositionA;
-                    containerB.scrollTop = scrollPositionB;
-                    
-                    if (scrollPositionA > 5000 && scrollPositionB > 5000) {
-                        clearInterval(interval);
-                    }
-                }, 10);
-            }
-        }
-
-
-        function extremeScrollTest(container) {
-            if (container.children.length > 0) {
-                let scrollPosition = 0;
-                const interval = setInterval(() => {
-                    scrollPosition += 200;
-                    container.scrollTop = scrollPosition;
-                    if (scrollPosition > 100000) {
-                        clearInterval(interval);
-                    }
-                }, 1); // Very fast scrolling
-            }
-        }
-
         // Initialize
         console.log('DOM Stress Test loaded');
         console.log('This test creates non-virtualized lists with all DOM elements rendered simultaneously');
