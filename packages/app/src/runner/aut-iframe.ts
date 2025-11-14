@@ -641,9 +641,8 @@ export class AutIframe {
     const body = $body.get(0)
 
     // Use existing dimensions if provided to avoid redundant getComputedStyle calls
-    if (!dimensions) {
-      dimensions = getElementDimensions(el)
-    }
+    // Assign to non-optional variable so TypeScript knows it's defined
+    const elementDimensions: ReturnType<typeof getElementDimensions> = dimensions || getElementDimensions(el)
 
     const container = document.createElement('div')
 
@@ -669,19 +668,19 @@ export class AutIframe {
           // rearrange the contents offset so
           // its inside of our border + padding
           obj = {
-            width: dimensions.width,
-            height: dimensions.height,
-            top: dimensions.offset.top + dimensions.borderTop + dimensions.paddingTop,
-            left: dimensions.offset.left + dimensions.borderLeft + dimensions.paddingLeft,
+            width: elementDimensions.width,
+            height: elementDimensions.height,
+            top: elementDimensions.offset.top + elementDimensions.borderTop + elementDimensions.paddingTop,
+            left: elementDimensions.offset.left + elementDimensions.borderLeft + elementDimensions.paddingLeft,
           }
 
           break
         default:
           obj = {
-            width: this._getDimensionsFor(dimensions, attr, 'width'),
-            height: this._getDimensionsFor(dimensions, attr, 'height'),
-            top: dimensions.offset.top,
-            left: dimensions.offset.left,
+            width: this._getDimensionsFor(elementDimensions, attr, 'width'),
+            height: this._getDimensionsFor(elementDimensions, attr, 'height'),
+            top: elementDimensions.offset.top,
+            left: elementDimensions.offset.left,
           }
       }
 
@@ -689,13 +688,13 @@ export class AutIframe {
       // subtract what the actual marginTop + marginLeft
       // values are, since offset disregards margin completely
       if (attr === 'Margin') {
-        obj.top -= dimensions.marginTop
-        obj.left -= dimensions.marginLeft
+        obj.top -= elementDimensions.marginTop
+        obj.left -= elementDimensions.marginLeft
       }
 
       if (attr === 'Padding') {
-        obj.top += dimensions.borderTop
-        obj.left += dimensions.borderLeft
+        obj.top += elementDimensions.borderTop
+        obj.left += elementDimensions.borderLeft
       }
 
       // bail if the dimensions of this layer match the previous one
