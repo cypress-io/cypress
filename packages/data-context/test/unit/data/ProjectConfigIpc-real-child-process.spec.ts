@@ -14,6 +14,7 @@ jest.mock('debug', () => {
       if (namespace === 'cypress:lifecycle:ProjectConfigIpc') {
         globalThis.debugMessages.push(message)
       }
+
       originalDebug(message)
     })
   }
@@ -48,15 +49,16 @@ describe('ProjectConfigIpc', () => {
 
     it('EPIPE error test', async () => {
       const err: NodeJS.ErrnoException = new Error
+
       err.code = 'EPIPE'
 
       const OG_once = projectConfigIpc.once
-      projectConfigIpc.once = function(evt, listener) {
+
+      projectConfigIpc.once = function (evt, listener) {
         if (evt === 'setupTestingType:reply') {
           return listener()
-        } else {
-          return OG_once.apply(this, [evt, listener])
         }
+        return OG_once.apply(this, [evt, listener])
       }
 
       await projectConfigIpc.loadConfig()
