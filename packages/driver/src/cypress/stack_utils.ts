@@ -163,7 +163,9 @@ const stackWithUserInvocationStackSpliced = (err, userInvocationStack): StackAnd
   }
 }
 
-type InvocationDetails = {
+export type InvocationDetails = {
+  function?: string
+  fileUrl?: string
   absoluteFile?: string
   column?: number
   line?: number
