@@ -3,6 +3,10 @@
 
 _Released 11/18/2025 (PENDING)_
 
+**Performance:**
+
+- Limits the number of matched elements that are tested for visibility when added to a command log entry. Fixes a crash scenario related to rapid successive DOM additions in conjunction with a large number of elements returned from a query. Addressed in [#32937](https://github.com/cypress-io/cypress/pull/32937).
+
 **Bugfixes:**
 
 - Fixed an issue where [`cy.wrap()`](https://docs.cypress.io/api/commands/wrap) would cause infinite recursion and freeze the Cypress App when called with objects containing circular references. Fixes [#24715](https://github.com/cypress-io/cypress/issues/24715). Addressed in [#32917](https://github.com/cypress-io/cypress/pull/32917).
