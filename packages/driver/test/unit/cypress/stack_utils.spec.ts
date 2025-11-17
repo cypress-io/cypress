@@ -6,6 +6,7 @@ import { vi, describe, it, expect, beforeEach } from 'vitest'
 import source_map_utils from '../../../src/cypress/source_map_utils'
 import stack_utils from '../../../src/cypress/stack_utils'
 import stackFrameFixture from './__fixtures__/getInvocationDetails_spec_stackframes.json'
+import { Browser } from '@packages/types'
 
 vi.mock('../../../src/cypress/source_map_utils', () => {
   return {
@@ -21,6 +22,7 @@ describe('stack_utils', () => {
     global.Cypress = {
       config: vi.fn(),
       isBrowser: vi.fn(() => true),
+      testingType: 'e2e',
     }
 
     vi.resetAllMocks()
@@ -66,81 +68,182 @@ describe('stack_utils', () => {
       })
     }
 
-    it('returns the correct invocation details for a test stack trace that needs to be trimmed', () => {
-      const stack = `Error
+    describe('stack trimming', () => {
+      let CypressWindow: Partial<Cypress.Cypress>
+
+      describe('chromium', () => {
+        beforeEach(() => {
+          CypressWindow = {
+            isBrowser: vi.fn(({ family }: Browser) => family === 'chromium') as any,
+            testingType: 'e2e',
+          }
+        })
+
+        it('returns the correct invocation details for a test stack trace that needs to be trimmed', () => {
+          const stack = `Error
     at itGrep (http://localhost:3000/__cypress/tests?p=cypress/support/e2e.js:444:14)
     at eval (http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js:14:1)
     at eval (http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js:18:12)
     at eval (<anonymous>)
     at eval (cypress:///../driver/src/cypress/script_utils.ts:38:23)`
 
-      class GrepError {
-        get stack () {
-          return stack
-        }
-      }
+          class MockError {
+            get stack () {
+              return stack
+            }
+          }
 
-      stack_utils.getInvocationDetails(
-        { Error: GrepError, Cypress: { isBrowser: vi.fn(() => true) } },
-        config,
-        'test',
-      )
+          stack_utils.getInvocationDetails(
+            { Error: MockError, Cypress: CypressWindow },
+            config,
+            'test',
+          )
 
-      expect(source_map_utils.getSourcePosition).toHaveBeenCalledWith('http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js', expect.objectContaining({
-        column: 1,
-        line: 14,
-        file: 'http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js',
-      }))
-    })
+          expect(source_map_utils.getSourcePosition).toHaveBeenCalledWith('http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js', expect.objectContaining({
+            column: 1,
+            line: 14,
+            file: 'http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js',
+          }))
+        })
 
-    it('returns the correct invocation details for a .only test with a stack that needs to be trimmed', () => {
-      const stack = `Error
-    at itGrep (http://localhost:3000/__cypress/tests?p=cypress/support/e2e.js:444:14)
-    at context.notIt.only (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:98:46)
-    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)
-    at itGrep.eval [as only] (cypress:///../driver/src/cypress/mocha.ts:187:14)
-    at Suite.eval (http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js:12:6)`
+        it('does not trim component testing stack traces', () => {
+          CypressWindow = {
+            isBrowser: vi.fn(({ family }: Browser) => family === 'chromium') as any,
+            testingType: 'component',
+          }
 
-      class GrepError {
-        get stack () {
-          return stack
-        }
-      }
+          const stack = `Error
+            at itGrep (http://localhost:3000/__cypress/tests?p=cypress/support/e2e.js:444:14)
+            at context.notIt.only (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:98:46)
+            at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)
+            at itGrep.eval [as only] (cypress:///../driver/src/cypress/mocha.ts:187:14)
+            at Suite.eval (http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js:12:6)`
 
-      stack_utils.getInvocationDetails(
-        { Error: GrepError, Cypress: { isBrowser: vi.fn(() => true) } },
-        config,
-        'test',
-      )
+          class MockError {
+            get stack () {
+              return stack
+            }
+          }
 
-      expect(source_map_utils.getSourcePosition).toHaveBeenCalledWith('http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js', expect.objectContaining({
-        column: 6,
-        line: 12,
-        file: 'http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js',
-      }))
-    })
+          stack_utils.getInvocationDetails(
+            { Error: MockError, Cypress: CypressWindow },
+            config,
+            'test',
+          )
 
-    it('returns the original stack if it cannot be normalized for a test', () => {
-      const stack = `Error
-    at itGrep (http://localhost:3000/__cypress/tests?p=cypress/support/e2e.js:444:14)
-    at context.notIt.only (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:98:46)
-    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)
-    at itGrep.eval [as only] (cypress:///../driver/src/cypress/mocha.ts:187:14)
-    at somethingElse (http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js:12:6)`
+          // calls `getSourcePosition` with the top line of the stack because it was not modified
+          expect(source_map_utils.getSourcePosition).toHaveBeenCalledWith('http://localhost:3000/__cypress/tests?p=cypress/support/e2e.js', expect.objectContaining({
+            column: 14,
+            line: 444,
+            file: 'http://localhost:3000/__cypress/tests?p=cypress/support/e2e.js',
+          }))
+        })
 
-      class GrepError {
-        get stack () {
-          return stack
-        }
-      }
+        it('returns the correct invocation details for a .only test with a stack that needs to be trimmed', () => {
+          const stack = `Error
+        at itGrep (http://localhost:3000/__cypress/tests?p=cypress/support/e2e.js:444:14)
+        at context.notIt.only (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:98:46)
+        at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)
+        at itGrep.eval [as only] (cypress:///../driver/src/cypress/mocha.ts:187:14)
+        at Suite.eval (http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js:12:6)`
 
-      const result = stack_utils.getInvocationDetails(
-        { Error: GrepError, Cypress: { isBrowser: vi.fn(() => true) } },
-        config,
-        'test',
-      )
+          class MockError {
+            get stack () {
+              return stack
+            }
+          }
 
-      expect(result.stack).toEqual(stack)
+          stack_utils.getInvocationDetails(
+            { Error: MockError, Cypress: CypressWindow },
+            config,
+            'test',
+          )
+
+          expect(source_map_utils.getSourcePosition).toHaveBeenCalledWith('http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js', expect.objectContaining({
+            column: 6,
+            line: 12,
+            file: 'http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js',
+          }))
+        })
+
+        it('returns the original stack if it cannot be normalized for a test', () => {
+          const stack = `Error
+        at itGrep (http://localhost:3000/__cypress/tests?p=cypress/support/e2e.js:444:14)
+        at context.notIt.only (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:98:46)
+        at createRunnable (cypress:///../driver/src/cypress/mocha.ts:126:31)
+        at itGrep.eval [as only] (cypress:///../driver/src/cypress/mocha.ts:187:14)
+        at somethingElse (http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js:12:6)`
+
+          class MockError {
+            get stack () {
+              return stack
+            }
+          }
+
+          const result = stack_utils.getInvocationDetails(
+            { Error: MockError, Cypress: CypressWindow },
+            config,
+            'test',
+          )
+
+          expect(result.stack).toEqual(stack)
+        })
+      })
+
+      describe('firefox', () => {
+        beforeEach(() => {
+          CypressWindow = {
+            isBrowser: vi.fn(({ family }: Browser) => family === 'firefox') as any,
+            testingType: 'e2e',
+          }
+        })
+
+        it('returns the correct invocation details for a test stack trace that needs to be trimmed', () => {
+          const stack = `myIt@http://localhost:3500/__cypress/tests?p=cypress/e2e/cypress/stack_utils-invocationDetails.cy.ts:84:11
+          @http://localhost:3500/__cypress/tests?p=cypress/e2e/cypress/stack_utils-invocationDetails.cy.ts:87:9
+          create@cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:141:19
+          bddInterface/</context.context@cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:42:27`
+
+          class MockError {
+            get stack () {
+              return stack
+            }
+          }
+
+          stack_utils.getInvocationDetails(
+            { Error: MockError, Cypress: CypressWindow },
+            config,
+            'test',
+          )
+
+          expect(source_map_utils.getSourcePosition).toHaveBeenCalledWith('http://localhost:3500/__cypress/tests?p=cypress/e2e/cypress/stack_utils-invocationDetails.cy.ts', expect.objectContaining({
+            column: 9,
+            line: 87,
+            file: 'http://localhost:3500/__cypress/tests?p=cypress/e2e/cypress/stack_utils-invocationDetails.cy.ts',
+          }))
+        })
+
+        it('returns the original stack if it cannot be normalized for a test', () => {
+          // stack does not contain the invocation details that we're looking for, so we should return the original stack
+          const stack = `myIt@http://localhost:3500/__cypress/tests?p=cypress/e2e/cypress/stack_utils-invocationDetails.cy.ts:84:11
+          create@cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:141:19
+          bddInterface/</context.context@cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:42:27`
+
+          class MockError {
+            get stack () {
+              return stack
+            }
+          }
+
+          const result = stack_utils.getInvocationDetails(
+            { Error: MockError, Cypress: CypressWindow },
+            config,
+            'test',
+          )
+
+          expect(result.stack).toEqual(stack)
+        })
+      })
     })
   })
 
