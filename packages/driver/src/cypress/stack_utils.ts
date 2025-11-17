@@ -197,11 +197,11 @@ const getInvocationDetails = (specWindow, sourceMapProjectRoot: string, type?: '
         // CT error contexts include the `__cypress` marker but not the `/tests` portion
         stack = stackWithLinesDroppedFromMarker(stack, '__cypress', true)
       }
-    }
 
-    // if the hook is the test, and it's an e2e test,, we will try to remove the lines that are not the actual invocation of the test
-    if (type === 'test' && specWindow.Cypress.testingType !== 'component') {
-      stack = stackTrimmedToTestInvocation(stack, specWindow)
+      // if the hook is the test, and it's an e2e test, we will try to remove the lines that are not the actual invocation of the test
+      if (type === 'test' && specWindow.Cypress.testingType === 'e2e') {
+        stack = stackTrimmedToTestInvocation(stack, specWindow)
+      }
     }
 
     const details: Omit<InvocationDetails, 'stack'> = getSourceDetailsForFirstLine(stack, sourceMapProjectRoot) || {}
