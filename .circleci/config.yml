@@ -15,7 +15,10 @@ workflows:
 parameters:
   publish-binary-branch:
     type: string
-    default: main
+    default: main 
+  force-persist-artifacts:
+    type: boolean
+    default: false
 
 commands:
   persist:

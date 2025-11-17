@@ -326,6 +326,7 @@ jobs:
       requires:
         - create-and-trigger-packaging-artifacts
   - get-published-artifacts:
+      force-persist-artifacts: << pipeline.parameters.force-persist-artifacts >>
       context:
         - publish-binary
         - test-runner:commit-status-checks
