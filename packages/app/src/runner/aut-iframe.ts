@@ -421,7 +421,13 @@ export class AutIframe {
           return
         }
 
-        this._addHitBoxLayer(coords, $body.get(0)).setAttribute('data-highlight-hitbox', 'true')
+        const bodyElement = $body.get(0)
+
+        if (!bodyElement) {
+          return
+        }
+
+        this._addHitBoxLayer(coords, bodyElement).setAttribute('data-highlight-hitbox', 'true')
       })
     }
   }
