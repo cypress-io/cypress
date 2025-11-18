@@ -15,7 +15,6 @@ import { hasServiceWorkerHeader, isVerboseTelemetry as isVerbose } from '.'
 import { CookiesHelper } from './util/cookies'
 import * as rewriter from './util/rewriter'
 import { doesTopNeedToBeSimulated } from './util/top-simulation'
-import chalk from 'chalk'
 
 import type Debug from 'debug'
 import type { CookieOptions } from 'express'
@@ -721,7 +720,7 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
   }
 
   if (this.req.isSyncRequest) {
-    process.stdout.write(chalk.yellow('WARNING: cross-origin cookies may not have been applied\n'))
+    process.stdout.write('WARNING: cross-origin cookies may not have been applied\n')
 
     span?.end()
 
