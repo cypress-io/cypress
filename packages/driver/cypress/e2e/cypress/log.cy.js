@@ -1,4 +1,5 @@
 const { create, Log, LogUtils } = require('@packages/driver/src/cypress/log')
+const { MAX_VISIBILITY_CHECK_ELEMENTS } = require('@packages/types')
 
 const objectDiff = (newAttrs, oldAttrs) => {
   return Object.entries(newAttrs).reduce(
@@ -167,6 +168,55 @@ describe('src/cypress/log', function () {
       log.setElAttrs = cy.stub()
       log.set({ $el: 'button' })
       expect(log.setElAttrs).to.have.been.called
+    })
+
+    it('skips visibility check when numElements exceeds MAX_VISIBILITY_CHECK_ELEMENTS', function () {
+      const log = new Log(this.createSnapshot, this.state, this.config, this.fireChangeEvent)
+      const $el = Cypress.$('<div />')
+
+      // Create a jQuery object with more elements than the limit
+      const $largeSet = Cypress.$()
+
+      for (let i = 0; i < MAX_VISIBILITY_CHECK_ELEMENTS + 1; i++) {
+        $largeSet.push($el.clone()[0])
+      }
+
+      log.set({ $el: $largeSet })
+      const attrs = log.get()
+
+      expect(attrs.numElements).to.eq(MAX_VISIBILITY_CHECK_ELEMENTS + 1)
+      expect(attrs.visible).to.be.undefined
+    })
+
+    describe('when log is hidden', function () {
+      it('does not filter by :visible when setting el attributes', function () {
+        const log = new Log(this.createSnapshot, this.state, this.config, this.fireChangeEvent)
+
+        log.set({ hidden: true })
+        const el = cy.$$('<div />')
+
+        cy.spy(el, 'filter')
+        log.set({ $el: el })
+        expect(el.filter).not.to.have.been.called
+      })
+    })
+
+    it('performs visibility check when numElements is within limit', function () {
+      const log = new Log(this.createSnapshot, this.state, this.config, this.fireChangeEvent)
+      const $el = Cypress.$('<div />')
+
+      // Create a jQuery object with elements within the limit
+      const $smallSet = Cypress.$()
+
+      for (let i = 0; i < MAX_VISIBILITY_CHECK_ELEMENTS; i++) {
+        $smallSet.push($el.clone()[0])
+      }
+
+      log.set({ $el: $smallSet })
+      const attrs = log.get()
+
+      expect(attrs.numElements).to.eq(MAX_VISIBILITY_CHECK_ELEMENTS)
+      expect(attrs.visible).to.be.a('boolean')
     })
 
     it('only triggers change event if the log has already triggered the add event', function () {
