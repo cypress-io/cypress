@@ -40,7 +40,7 @@ export function filterRuntimeConfigForRecoding (config) {
       ...resultConfig.resolved,
       env: _.mapValues(resultConfig.resolved.env ?? {}, (val, key) => ({
         ...val,
-        value: typeof val === 'boolean' ? val : `omitted: ${typeof val}`,
+        value: typeof val.value === 'boolean' ? val.value : `omitted: ${typeof val.value}`,
       })),
     }
   }
