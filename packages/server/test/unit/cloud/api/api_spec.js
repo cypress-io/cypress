@@ -8,6 +8,7 @@ require('../../../spec_helper')
 const _ = require('lodash')
 const os = require('os')
 const encryption = require('../../../../lib/cloud/encryption')
+const { filterRuntimeConfigForRecoding } = require('../../../../lib/config')
 
 const {
   agent,
@@ -987,7 +988,7 @@ describe('lib/cloud/api', () => {
       this.bodyProps = _.omit(this.props, 'instanceId', 'runId')
     })
 
-    it('POSTs /instances/:id/results', function () {
+    it('POSTs /instances/:id/tests', function () {
       nock(API_BASEURL)
       .matchHeader('x-route-version', '1')
       .matchHeader('x-cypress-run-id', this.props.runId)
@@ -995,6 +996,44 @@ describe('lib/cloud/api', () => {
       .matchHeader('x-os-name', OS_PLATFORM)
       .matchHeader('x-cypress-version', pkg.version)
       .post('/instances/instance-id-123/tests', this.bodyProps)
+      .reply(200)
+
+      return api.postInstanceTests(this.props)
+    })
+
+    it('POSTs /instances/:id/tests strips arbitrarily large config values', function () {
+      this.props.config = {
+        devServer: {
+          bundler: 'webpack',
+          framework: 'react',
+          webpackConfig: 'a'.repeat(10000),
+        },
+        env: {
+          NUMERIC_VALUE: 1,
+          TRUTHY_VALUE: true,
+          SOME_REALLY_LONG_VALUE: 'a'.repeat(10000),
+        },
+        resolved: {
+          env: {
+            'NUMERIC_VALUE': { 'value': 1, 'from': 'env' },
+            'TRUTHY_VALUE': { 'value': true, 'from': 'env' },
+            'SOME_REALLY_LONG_VALUE': { 'value': 'a'.repeat(10000), 'from': 'env' },
+          },
+        },
+      }
+
+      this.props.config.rawJson = _.cloneDeep(this.props.config)
+
+      nock(API_BASEURL)
+      .matchHeader('x-route-version', '1')
+      .matchHeader('x-cypress-run-id', this.props.runId)
+      .matchHeader('x-cypress-request-attempt', '0')
+      .matchHeader('x-os-name', OS_PLATFORM)
+      .matchHeader('x-cypress-version', pkg.version)
+      .post('/instances/instance-id-123/tests', {
+        ...this.bodyProps,
+        config: filterRuntimeConfigForRecoding(this.props.config),
+      })
       .reply(200)
 
       return api.postInstanceTests(this.props)
