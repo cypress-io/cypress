@@ -720,6 +720,8 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
   }
 
   if (this.req.isSyncRequest) {
+    console.warn('WARNING: Cross-origin cookies may not have been applied')
+
     span?.end()
 
     return this.next()
