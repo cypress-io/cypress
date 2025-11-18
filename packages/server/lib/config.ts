@@ -21,7 +21,7 @@ export function filterRuntimeConfigForRecoding (config) {
   const resultConfig = { ...configRest }
 
   if (env) {
-    resultConfig.env = _.mapValues(env ?? {}, (val, key) => `omitted: ${typeof val}`)
+    resultConfig.env = _.mapValues(env ?? {}, (val, key) => typeof val === 'boolean' ? val : `omitted: ${typeof val}`)
   }
 
   if (devServer) {
@@ -40,7 +40,7 @@ export function filterRuntimeConfigForRecoding (config) {
       ...resultConfig.resolved,
       env: _.mapValues(resultConfig.resolved.env ?? {}, (val, key) => ({
         ...val,
-        value: `omitted: ${typeof val.value}`,
+        value: typeof val === 'boolean' ? val : `omitted: ${typeof val}`,
       })),
     }
   }

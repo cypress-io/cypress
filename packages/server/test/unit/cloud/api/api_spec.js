@@ -1024,6 +1024,8 @@ describe('lib/cloud/api', () => {
 
       this.props.config.rawJson = _.cloneDeep(this.props.config)
 
+      const expectedConfig = filterRuntimeConfigForRecoding(this.props.config)
+
       nock(API_BASEURL)
       .matchHeader('x-route-version', '1')
       .matchHeader('x-cypress-run-id', this.props.runId)
@@ -1032,9 +1034,11 @@ describe('lib/cloud/api', () => {
       .matchHeader('x-cypress-version', pkg.version)
       .post('/instances/instance-id-123/tests', {
         ...this.bodyProps,
-        config: filterRuntimeConfigForRecoding(this.props.config),
+        config: expectedConfig,
       })
       .reply(200)
+
+      expect(expectedConfig.env.TRUTHY_VALUE).to.equal(true)
 
       return api.postInstanceTests(this.props)
     })
