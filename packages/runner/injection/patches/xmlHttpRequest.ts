@@ -15,10 +15,7 @@ export const patchXmlHttpRequest = (window: Window) => {
     } finally {
       const result = originalXmlHttpRequestOpen.apply(this, args as any)
 
-      if (args[2] === false) {
-        this.setRequestHeader('x-cypress-is-sync-request', 'true')
-        this._isSyncRequest = true
-      }
+      this._isSyncRequest = args[2] === false
 
       return result
     }
