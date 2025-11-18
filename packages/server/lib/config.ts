@@ -15,7 +15,7 @@ export function getResolvedRuntimeConfig (config, runtimeConfig) {
 }
 
 // Strips out values that can be aribitrarily sized from config payload sent for recording
-export function filterRuntimeConfigForRecoding (config) {
+export function filterRuntimeConfigForRecording (config) {
   const { rawJson, devServer, env, ...configRest } = config
   const { webpackConfig, viteConfig, ...devServerRest } = devServer ?? {}
   const resultConfig = { ...configRest }

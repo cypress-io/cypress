@@ -8,7 +8,7 @@ require('../../../spec_helper')
 const _ = require('lodash')
 const os = require('os')
 const encryption = require('../../../../lib/cloud/encryption')
-const { filterRuntimeConfigForRecoding } = require('../../../../lib/config')
+const { filterRuntimeConfigForRecording } = require('../../../../lib/config')
 
 const {
   agent,
@@ -1024,7 +1024,7 @@ describe('lib/cloud/api', () => {
 
       this.props.config.rawJson = _.cloneDeep(this.props.config)
 
-      const expectedConfig = filterRuntimeConfigForRecoding(this.props.config)
+      const expectedConfig = filterRuntimeConfigForRecording(this.props.config)
 
       nock(API_BASEURL)
       .matchHeader('x-route-version', '1')
