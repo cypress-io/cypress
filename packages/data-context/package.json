@@ -98,7 +98,7 @@
     "@packages/types": "0.0.0-development",
     "@tooling/system-tests": "0.0.0-development",
     "@types/babel__code-frame": "^7.0.6",
-    "@types/dedent": "^0.7.0",
+    "@types/dedent": "^0.7.2",
     "@types/ejs": "^3.1.2",
     "@types/fs-extra": "^8.0.1",
     "@types/graphql-resolve-batch": "1.1.6",

@@ -38,25 +38,69 @@ describe('hooks', {
     cy.contains('after all (2)').closest('.collapsible').should('contain', 'afterHook 1')
   })
 
-  it('creates open in IDE button', () => {
-    loadSpec({
-      filePath: 'hooks/basic.cy.js',
-      passCount: 2,
-      hasPreferredIde: true,
+  describe('open in IDE button', () => {
+    it('sends the correct invocation details for before hook', () => {
+      loadSpec({
+        filePath: 'hooks/basic.cy.js',
+        passCount: 2,
+        hasPreferredIde: true,
+      })
+
+      cy.contains('tests 1').click()
+
+      cy.get('.hook-open-in-ide').should('have.length', 4)
+
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx.actions.file, 'openFile')
+      })
+
+      cy.contains('before all').closest('.hook-header').find('.hook-open-in-ide').invoke('show').click()
+
+      cy.withCtx((ctx, o) => {
+        expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`hooks/basic\.cy\.js$`)), 2, 2)
+      })
     })
 
-    cy.contains('tests 1').click()
+    it('sends the correct invocation details for basic test body', () => {
+      loadSpec({
+        filePath: 'hooks/basic.cy.js',
+        passCount: 2,
+        hasPreferredIde: true,
+      })
 
-    cy.get('.hook-open-in-ide').should('have.length', 4)
+      cy.contains('tests 1').click()
 
-    cy.withCtx((ctx, o) => {
-      o.sinon.stub(ctx.actions.file, 'openFile')
+      cy.get('.hook-open-in-ide').should('have.length', 4)
+
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx.actions.file, 'openFile')
+      })
+
+      cy.contains('test body').closest('.hook-header').find('.hook-open-in-ide').invoke('show').click()
+
+      cy.withCtx((ctx, o) => {
+        expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`hooks/basic\.cy\.js$`)), 10, 2)
+      })
     })
 
-    cy.get('.hook-open-in-ide').first().invoke('show').click()
+    it('sends the correct invocation details for wrapped it', () => {
+      loadSpec({
+        filePath: 'hooks/wrapped-it.cy.js',
+        passCount: 2,
+        hasPreferredIde: true,
+      })
 
-    cy.withCtx((ctx, o) => {
-      expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`hooks/basic\.cy\.js$`)), 2, 2)
+      cy.contains('test 1').click()
+
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx.actions.file, 'openFile')
+      })
+
+      cy.contains('test body').closest('.hook-header').find('.hook-open-in-ide').invoke('show').click()
+
+      cy.withCtx((ctx, o) => {
+        expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`hooks/wrapped-it\.cy\.js$`)), 5, 1)
+      })
     })
   })
 
