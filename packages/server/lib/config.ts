@@ -16,11 +16,13 @@ export function getResolvedRuntimeConfig (config, runtimeConfig) {
 
 // Strips out values that can be aribitrarily sized from config payload sent for recording
 export function filterRuntimeConfigForRecoding (config) {
-  const { rawJson, devServer, env, resolved = {}, ...configRest } = config
+  const { rawJson, devServer, env, ...configRest } = config
   const { webpackConfig, viteConfig, ...devServerRest } = devServer ?? {}
   const resultConfig = { ...configRest }
 
-  resultConfig.env = _.mapValues(env ?? {}, (val, key) => `omitted: ${typeof val}`)
+  if (env) {
+    resultConfig.env = _.mapValues(env ?? {}, (val, key) => `omitted: ${typeof val}`)
+  }
 
   if (devServer) {
     resultConfig.devServer = { ...devServerRest }
@@ -33,12 +35,14 @@ export function filterRuntimeConfigForRecoding (config) {
     }
   }
 
-  resultConfig.resolved = {
-    ...resolved,
-    env: _.mapValues(resolved.env ?? {}, (val, key) => ({
-      ...val,
-      value: `omitted: ${typeof val.value}`,
-    })),
+  if (resultConfig.resolved?.env) {
+    resultConfig.resolved = {
+      ...resultConfig.resolved,
+      env: _.mapValues(resultConfig.resolved.env ?? {}, (val, key) => ({
+        ...val,
+        value: `omitted: ${typeof val.value}`,
+      })),
+    }
   }
 
   return resultConfig

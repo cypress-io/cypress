@@ -522,7 +522,7 @@ export default {
         },
         body: {
           ...body,
-          config: filterRuntimeConfigForRecoding(config),
+          config: filterRuntimeConfigForRecoding(config ?? {}),
         },
       })
       .catch(RequestErrors.StatusCodeError, transformError)
