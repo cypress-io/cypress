@@ -49,3 +49,11 @@ export const CY_IN_CY_SIMULATE_RUN_MODE = 'CY_IN_CY_SIMULATE_RUN_MODE'
 export const CYPRESS_REMOTE_MANIFEST_URL = 'https://download.cypress.io/desktop.json'
 
 export const NPM_CYPRESS_REGISTRY_URL = 'https://registry.npmjs.org/cypress'
+
+/**
+ * Maximum number of elements to check for visibility for the command log.
+ * Beyond this limit, the visibility check is skipped to prevent browser crashes
+ * when dealing with very large element sets.
+ * This number is fairly arbitrary.
+ */
+export const MAX_VISIBILITY_CHECK_ELEMENTS = 50

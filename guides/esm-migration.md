@@ -28,7 +28,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [ ] npm/eslint-plugin-dev
 - [x] npm/grep ✅ **COMPLETED** 
 - [x] npm/mount-utils ✅ **COMPLETED**  
-- [ ] npm/puppeteer **PARTIAL** 
+- [x] npm/puppeteer ✅ **COMPLETED** 
 - [x] npm/react ✅ **COMPLETED** 
 - [x] npm/svelte ✅ **COMPLETED** 
 - [x] npm/vite-dev-server ✅ **COMPLETED** 
@@ -36,7 +36,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] npm/vue ✅ **COMPLETED** 
 - [x] npm/webpack-batteries-included-preprocessor ✅ **COMPLETED**
 - [x] npm/webpack-dev-server ✅ **COMPLETED** 
-- [ ] npm/webpack-preprocessor **PARTIAL** 
+- [x] npm/webpack-preprocessor ✅ **COMPLETED** 
 
 ##### Binary Packages
 
