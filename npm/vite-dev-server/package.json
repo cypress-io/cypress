@@ -17,7 +17,7 @@
     "debug": "^4.3.4",
     "find-up": "6.3.0",
     "node-html-parser": "5.3.3",
-    "semver": "^7.7.1"
+    "semver": "^7.7.3"
   },
   "devDependencies": {
     "cross-env": "7.0.3",
