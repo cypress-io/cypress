@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events'
 import { RootRunnable } from '../../src/runnables/runnables-store'
 import { addCommand } from '../support/utils'
+import { MAX_VISIBILITY_CHECK_ELEMENTS } from '@packages/types'
 
 describe('commands', { viewportHeight: 1000 }, () => {
   let runner: EventEmitter
@@ -434,6 +435,29 @@ describe('commands', { viewportHeight: 1000 }, () => {
       cy.get('.cy-tooltip')
       .should('be.visible')
       .should('have.text', 'One or more matched elements are not visible.')
+    })
+
+    it('displays icon and tooltip when visibility check is skipped for large element set', () => {
+      const numElements = MAX_VISIBILITY_CHECK_ELEMENTS + 1
+
+      cy.get('.reporter.mounted').then(() => {
+        addCommand(runner, {
+          id: 200,
+          name: 'get',
+          message: '.large-element-set',
+          state: 'passed',
+          numElements,
+          visible: undefined, // visibility check was skipped
+        })
+      })
+
+      cy.contains('.large-element-set').closest('.command').find('.command-invisible')
+      .should('be.visible')
+
+      cy.contains('.large-element-set').closest('.command').find('.command-invisible').trigger('mouseover')
+      cy.get('.cy-tooltip')
+      .should('be.visible')
+      .should('include.text', `Too many elements matched for this command to determine visibility. Some elements may not be visible.`)
     })
   })
 

@@ -60,6 +60,57 @@ const stackWithLinesRemoved = (stack, cb) => {
   return unsplitStack(messageLines, remainingStackLines)
 }
 
+const stackTrimmedToTestInvocation = (stack: string, specWindow) => {
+  const modifiedStack = stackWithLinesRemoved(stack, (lines: string[]) => {
+    // Guard against Cypress being undefined/null (can happen when users quickly reload tests)
+    if (!specWindow?.Cypress) {
+      return lines
+    }
+
+    const originalLines = lines
+    let processedLines: string[]
+
+    if (specWindow.Cypress.isBrowser({ family: 'chromium' })) {
+      // The actual test invocation line starts with either 'at eval' or 'at Suite.eval',
+      // so remove all lines until we reach the test invocation line
+      processedLines = _.dropWhile(lines, (line) => {
+        return !(
+          line.trim().startsWith('at eval ') ||
+          line.trim().startsWith('at Suite.eval ')
+        )
+      })
+    } else if (specWindow.Cypress.isBrowser({ family: 'firefox' })) {
+      const isTestInvocationLine = (line: string) => {
+        const splitAtAt = line.split('@')
+
+        // firefox stacks traces look like:
+        // functionName@http://localhost:3000/__cypress/tests?p=cypress/support/e2e.js:444:14
+        // @http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js:43:3
+        // @http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js:45:12
+        // evalScripts/<@cypress:///../driver/src/cypress/script_utils.ts:38:23
+        //
+        // the actual invocation details will be at the first line with no function name
+        return splitAtAt.length > 1 && splitAtAt[0].trim().length === 0
+      }
+
+      processedLines = _.dropWhile(lines, (line) => {
+        return !isTestInvocationLine(line)
+      })
+    } else {
+      processedLines = lines
+    }
+
+    // if we removed all the lines then something went wrong with parsing. Return the original lines instead
+    if (processedLines.length === 0) {
+      return originalLines
+    }
+
+    return processedLines
+  })
+
+  return modifiedStack
+}
+
 const stackWithLinesDroppedFromMarker = (stack, marker, includeLast = false) => {
   return stackWithLinesRemoved(stack, (lines) => {
     // drop lines above the marker
@@ -114,7 +165,9 @@ const stackWithUserInvocationStackSpliced = (err, userInvocationStack): StackAnd
   }
 }
 
-type InvocationDetails = {
+export type InvocationDetails = {
+  function?: string
+  fileUrl?: string
   absoluteFile?: string
   column?: number
   line?: number
@@ -124,7 +177,7 @@ type InvocationDetails = {
 }
 
 // used to determine codeframes for hook/test/etc definitions rather than command invocations
-const getInvocationDetails = (specWindow, sourceMapProjectRoot: string): InvocationDetails | undefined => {
+const getInvocationDetails = (specWindow, sourceMapProjectRoot: string, type?: 'test'): InvocationDetails | undefined => {
   if (specWindow.Error) {
     let stack = (new specWindow.Error()).stack
 
@@ -143,6 +196,11 @@ const getInvocationDetails = (specWindow, sourceMapProjectRoot: string): Invocat
       } else {
         // CT error contexts include the `__cypress` marker but not the `/tests` portion
         stack = stackWithLinesDroppedFromMarker(stack, '__cypress', true)
+      }
+
+      // if the hook is the test, and it's an e2e test, we will try to remove the lines that are not the actual invocation of the test
+      if (type === 'test' && specWindow.Cypress.testingType === 'e2e') {
+        stack = stackTrimmedToTestInvocation(stack, specWindow)
       }
     }
 
