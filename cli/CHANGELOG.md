@@ -5,12 +5,14 @@ _Released 11/18/2025 (PENDING)_
 
 **Performance:**
 
+- Limits the number of matched elements that are tested for visibility when added to a command log entry. Fixes a crash scenario related to rapid successive DOM additions in conjunction with a large number of elements returned from a query. Addressed in [#32937](https://github.com/cypress-io/cypress/pull/32937).
 - Improved performance when viewing command snapshots in the Command Log. Element highlighting is now significantly faster, especially when highlighting multiple elements or complex pages. This is achieved by reducing redundant style calculations and batching DOM operations to minimize browser reflows. Addressed in [#32951](https://github.com/cypress-io/cypress/pull/32951).
 
 **Bugfixes:**
 
 - Fixed an issue where [`cy.wrap()`](https://docs.cypress.io/api/commands/wrap) would cause infinite recursion and freeze the Cypress App when called with objects containing circular references. Fixes [#24715](https://github.com/cypress-io/cypress/issues/24715). Addressed in [#32917](https://github.com/cypress-io/cypress/pull/32917).
 - Fixed an issue where top changes on test retries could cause attempt numbers to show up more than one time in the reporter and cause attempts to be lost in Test Replay. Addressed in [#32888](https://github.com/cypress-io/cypress/pull/32888).
+- Fixed an issue where stack traces that are used to determine a test's invocation details are sometimes incorrect. Addressed in [#32699](https://github.com/cypress-io/cypress/pull/32699)
 
 **Misc:**
 
