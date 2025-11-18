@@ -13,7 +13,6 @@ import type { BackendRoute, NetStubbingState } from './types'
 import { emit, sendStaticResponse } from './util'
 import type CyServer from '@packages/server'
 import type { BackendStaticResponse } from '../internal-types'
-import chalk from 'chalk'
 
 export class InterceptedRequest {
   id: string
@@ -74,7 +73,7 @@ export class InterceptedRequest {
     }
 
     if (this.req.isSyncRequest) {
-      process.stdout.write(chalk.yellow('WARNING: sync request was not intercepted\n'))
+      process.stdout.write('WARNING: sync request was not intercepted\n')
 
       return
     }
