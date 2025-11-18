@@ -141,25 +141,6 @@ describe('app state', () => {
     })
   })
 
-  context('#togglePreferencesMenu', () => {
-    it('toggles isPreferencesMenuOpen', () => {
-      const instance = new AppState()
-
-      instance.togglePreferencesMenu()
-      expect(instance.isPreferencesMenuOpen).to.be.true
-      instance.togglePreferencesMenu()
-      expect(instance.isPreferencesMenuOpen).to.be.false
-    })
-
-    it('sets reset value for autoScrollingEnabled', () => {
-      const instance = new AppState()
-
-      instance.togglePreferencesMenu()
-      instance.reset()
-      expect(instance.autoScrollingEnabled).to.be.true
-    })
-  })
-
   context('#setStudioActive', () => {
     it('sets studioActive', () => {
       const instance = new AppState()
@@ -168,6 +149,15 @@ describe('app state', () => {
       expect(instance.studioActive).to.eq(true)
       instance.setStudioActive(false)
       expect(instance.studioActive).to.eq(false)
+    })
+  })
+
+  context('#setShowFetchRequests', () => {
+    it('sets showFetchRequests', () => {
+      const instance = new AppState()
+
+      instance.setShowFetchRequests(true)
+      expect(instance.showFetchRequests).to.eq(true)
     })
   })
 

@@ -7,6 +7,8 @@ export class SystemError extends Error {
   constructor (
     public readonly originalError: Error,
     public readonly url: string,
+    public readonly code: string | number | undefined,
+    public readonly errno: string | number | undefined,
   ) {
     super(originalError.message)
   }

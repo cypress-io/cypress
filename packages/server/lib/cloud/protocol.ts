@@ -6,16 +6,15 @@ import Debug from 'debug'
 import fs from 'fs-extra'
 import os from 'os'
 import path from 'path'
-import { agent } from '@packages/network'
+import { strictAgent } from '@packages/network'
 import pkg from '@packages/root'
-import env from '../util/env'
+import * as env from '../util/env'
 import { putProtocolArtifact } from './api/put_protocol_artifact'
 import { requireScript } from './require_script'
+import * as routes from './routes'
 
 import type { Readable } from 'stream'
 import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions, ResponseEndedWithEmptyBodyOptions, ResponseStreamTimedOutOptions, AfterSpecDurations, FoundSpec } from '@packages/types'
-
-const routes = require('./routes')
 
 const debug = Debug('cypress:server:protocol')
 const debugVerbose = Debug('cypress-verbose:server:protocol')
@@ -137,7 +136,7 @@ export class ProtocolManager implements ProtocolManagerShape {
             if (CAPTURE_ERRORS) {
               this._errors.push({ captureMethod: 'cdpClient.on', fatal: false, error, args: [event, message] })
             } else {
-              debug('error in cdpClient.on %O', { error, event, message })
+              debug('error in cdpClient.on %o', { error, event, message })
               throw error
             }
           }
@@ -209,7 +208,7 @@ export class ProtocolManager implements ProtocolManagerShape {
         ...(durations ? durations : {}),
       }
 
-      debug('Persisting after spec durations in state: %O', this._afterSpecDurations)
+      debug('Persisting after spec durations in state: %o', this._afterSpecDurations)
 
       return undefined
     } catch (e) {
@@ -224,7 +223,7 @@ export class ProtocolManager implements ProtocolManagerShape {
 
   async beforeTest (test: { id: string } & Record<string, any>) {
     if (!test.id) {
-      debug('protocolManager beforeTest was invoked with test without id %O', test)
+      debug('protocolManager beforeTest was invoked with test without id %o', test)
     }
 
     this._runnableId = test.id
@@ -260,8 +259,8 @@ export class ProtocolManager implements ProtocolManagerShape {
     this.invokeSync('pageLoading', { isEssential: false }, input)
   }
 
-  resetTest (testId: string): void {
-    this.invokeSync('resetTest', { isEssential: false }, testId)
+  resetTest (testId: string, currentRetry?: number): void {
+    this.invokeSync('resetTest', { isEssential: false }, testId, currentRetry)
   }
 
   responseEndedWithEmptyBody (options: ResponseEndedWithEmptyBodyOptions): void {
@@ -328,7 +327,7 @@ export class ProtocolManager implements ProtocolManagerShape {
 
   async uploadCaptureArtifact ({ uploadUrl, fileSize, filePath }: CaptureArtifact) {
     if (!this._protocol || !filePath || !this._db) {
-      debug('not uploading due to one of the following being falsy: %O', {
+      debug('not uploading due to one of the following being falsy: %o', {
         _protocol: !!this._protocol,
         archivePath: !!filePath,
         _db: !!this._db,
@@ -416,7 +415,7 @@ export class ProtocolManager implements ProtocolManagerShape {
 
       await fetch(routes.apiRoutes.captureProtocolErrors() as string, {
         // @ts-expect-error - this is supported
-        agent,
+        agent: strictAgent,
         method: 'POST',
         body,
         headers: {

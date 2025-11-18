@@ -53,6 +53,7 @@ declare namespace Cypress {
     utils: CypressUtils
     events: Events
     specBridgeCommunicator: import('../src/cross-origin/communicator').SpecBridgeCommunicator
+    handleCrossOriginSocketEvent?: typeof handleCrossOriginSocketEvent
     mocha: $Mocha
     configure: (config: Cypress.ObjectLike) => void
     isCrossOriginSpecBridge: boolean
@@ -107,6 +108,7 @@ declare namespace Cypress {
 
 declare namespace InternalCypress {
   interface Cypress extends Cypress.Cypress, NodeEventEmitter {
+    sourceMapProjectRoot: string
     backend: (eventName: string, ...args: any[]) => Promise<any>
   }
 

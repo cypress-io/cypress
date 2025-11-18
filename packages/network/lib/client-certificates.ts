@@ -2,9 +2,7 @@ import { URL, Url } from 'url'
 import debugModule from 'debug'
 import minimatch from 'minimatch'
 import fs from 'fs-extra'
-import { clientCertificateStore } from './agent'
-
-const { pki, asn1, pkcs12, util } = require('node-forge')
+import { pki, asn1, pkcs12, util } from 'node-forge'
 
 const debug = debugModule('cypress:network:client-certificates')
 
@@ -188,19 +186,36 @@ export class ClientCertificateStore {
   }
 }
 
+export const clientCertificateStoreSingleton = new ClientCertificateStore()
+
 /**
  * Load and parse the client certificate configuration.  The structure and content of this
  * has already been validated; this function reads cert content from file and adds it to the
  * network ClientCertificateStore
  * @param config
  */
-export function loadClientCertificateConfig (config) {
+
+type Config = {
+  projectRoot: string
+  clientCertificates?: Array<{
+    url: string
+    ca: string[]
+    certs: Array<{
+      cert: string
+      key: string
+      passphrase: string
+      pfx: string
+    }>
+  }>
+}
+
+export function loadClientCertificateConfig (config: Config) {
   const { clientCertificates } = config
 
   let index = 0
 
   try {
-    clientCertificateStore.clear()
+    clientCertificateStoreSingleton.clear()
 
     // The basic validation of the certificate configuration has already been done by this point
     // within the 'isValidClientCertificatesSet' function within packages/config/src/validation.js
@@ -217,7 +232,7 @@ export function loadClientCertificateConfig (config) {
               const caRaw = loadBinaryFromFile(ca)
 
               try {
-                pki.certificateFromPem(caRaw)
+                pki.certificateFromPem(caRaw.toString())
               } catch (error: any) {
                 throw new Error(`Cannot parse CA cert: ${error.message}`)
               }
@@ -247,10 +262,10 @@ export function loadClientCertificateConfig (config) {
 
             debug(`loading PEM cert from '${cert.cert}'`)
             const pemRaw = loadBinaryFromFile(cert.cert)
-            let pemParsed = undefined
+            let pemParsed: pki.Certificate | undefined = undefined
 
             try {
-              pemParsed = pki.certificateFromPem(pemRaw)
+              pemParsed = pki.certificateFromPem(pemRaw.toString())
             } catch (error: any) {
               throw new Error(`Cannot parse PEM cert: ${error.message}`)
             }
@@ -269,13 +284,13 @@ export function loadClientCertificateConfig (config) {
 
             try {
               if (passphrase) {
-                if (!pki.decryptRsaPrivateKey(pemKeyRaw, passphrase)) {
+                if (!pki.decryptRsaPrivateKey(pemKeyRaw.toString(), passphrase)) {
                   throw new Error(
                     `Cannot decrypt PEM key with supplied passphrase (check the passphrase file content and that it doesn't have unexpected whitespace at the end)`,
                   )
                 }
               } else {
-                if (!pki.privateKeyFromPem(pemKeyRaw)) {
+                if (!pki.privateKeyFromPem(pemKeyRaw.toString())) {
                   throw new Error('Cannot load PEM key')
                 }
               }
@@ -324,12 +339,12 @@ export function loadClientCertificateConfig (config) {
           }
         })
 
-        clientCertificateStore.addClientCertificatesForUrl(urlClientCertificates)
+        clientCertificateStoreSingleton.addClientCertificatesForUrl(urlClientCertificates)
         index++
       })
 
       debug(
-        `loaded client certificates for ${clientCertificateStore.getCertCount()} URL(s)`,
+        `loaded client certificates for ${clientCertificateStoreSingleton.getCertCount()} URL(s)`,
       )
     }
   } catch (e: any) {
@@ -362,7 +377,7 @@ function loadTextFromFile (filepath: string): string {
 /**
  * Extract subject from supplied pem instance
  */
-function extractSubjectFromPem (pem): string {
+function extractSubjectFromPem (pem: pki.Certificate): string {
   try {
     return pem.subject.attributes
     .map((attr) => [attr.shortName, attr.value].join('='))
@@ -390,9 +405,16 @@ function loadPfx (pfx: Buffer, passphrase: string | undefined) {
 /**
  * Extract subject from supplied pfx instance
  */
-function extractSubjectFromPfx (pfx) {
+function extractSubjectFromPfx (pfx: pkcs12.Pkcs12Pfx) {
   try {
-    const certs = pfx.getBags({ bagType: pki.oids.certBag })[pki.oids.certBag].map((item) => item.cert)
+    const bags = pfx.getBags({ bagType: pki.oids.certBag })
+    const certBag = bags[pki.oids.certBag]
+
+    if (!certBag || certBag.length === 0) {
+      throw new Error('No certificate bag found in PFX file')
+    }
+
+    const certs = certBag.map((item) => item.cert) as pki.Certificate[]
 
     return certs[0].subject.attributes.map((attr) => [attr.shortName, attr.value].join('=')).join(', ')
   } catch (e: any) {

@@ -1,11 +1,21 @@
 {
-  "extends": "./../ts/tsconfig.json",
   "include": [
-    "*.ts",
-    "lib/*.ts",
-    "lib/**/*.ts"
+    "lib/*.ts"
   ],
   "files": [
     "./../ts/index.d.ts"
-  ]
+  ],
+  "compilerOptions": {
+    "types": [
+      "node"
+    ],
+    "esModuleInterop": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "useUnknownInCatchVariables": true,
+    "noUnusedLocals": true,
+    "noImplicitReturns": true,
+    "declaration": true,
+    "skipLibCheck": true
+  }
 }

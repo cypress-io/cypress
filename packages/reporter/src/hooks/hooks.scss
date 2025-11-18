@@ -2,6 +2,10 @@
 
 .reporter {
   .hooks-container {
+    .hook-item {
+      padding-top: 4px;
+    }
+    
     .hook-header {
       font-family: $font-system;
       display: flex;

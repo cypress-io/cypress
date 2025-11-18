@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/dependencies.ts"
+  ],
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./browser",
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "node",
+    "declaration": true,
+    "types": [
+      "cypress"
+    ]
+  }
+}

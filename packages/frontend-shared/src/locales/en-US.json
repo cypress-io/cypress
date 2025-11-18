@@ -285,7 +285,8 @@
       "title": "Keyboard shortcuts",
       "rerun": "Re-run tests",
       "stop": "Stop tests",
-      "toggle": "Toggle specs list"
+      "toggle": "Toggle specs list",
+      "studioSave": "Save Studio changes"
     },
     "toggleLabel": {
       "expanded": "Collapse sidebar",
@@ -609,9 +610,9 @@
         "name": "Source rewriting",
         "description": "Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm. See [#5273](https://github.com/cypress-io/cypress/issues/5273) for details."
       },
-      "experimentalStudio": {
-        "name": "Studio",
-        "description": "Generate and save commands directly to your test suite by interacting with your app as an end user would."
+      "experimentalPromptCommand": {
+        "name": "Prompt command",
+        "description": "Enables support for `cy.prompt`, an AI-powered command that turns natural language steps into executable Cypress test code."
       },
       "experimentalWebKitSupport": {
         "name": "WebKit Support",
@@ -961,8 +962,7 @@
       "testsRunningError": "Cannot show snapshot while tests are running",
       "snapshotMissingError": "The snapshot is missing. Displaying current state of the DOM.",
       "defaultTitle": "DOM snapshot",
-      "pinnedTitle": "Pinned",
-      "studioActiveError": "Cannot show snapshot while creating commands in Studio"
+      "pinnedTitle": "Pinned"
     },
     "selectorPlayground": {
       "matches": "No matches | {n} match | {n} matches",

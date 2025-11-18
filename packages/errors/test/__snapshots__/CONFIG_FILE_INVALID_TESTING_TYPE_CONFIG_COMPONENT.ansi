@@ -1,0 +1,9 @@
+[31mThe [33mcomponent.baseUrl[39m[31m configuration option is not valid for component testing.[39m
+[31m[39m
+[31mPlease remove this option or add this as an e2e testing type property: [95me2e.baseUrl[39m[31m[39m
+[31m[39m
+[31m[94m{[39m[31m[39m
+[31m[94m  e2e: {[39m[31m[39m
+[31m[94m    baseUrl: '...',[39m[31m[39m
+[31m[94m  }[39m[31m[39m
+[31m[94m}[39m[31m[39m

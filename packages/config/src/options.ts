@@ -1,7 +1,5 @@
 import os from 'os'
 import path from 'path'
-
-// @ts-ignore
 import pkg from '@packages/root'
 import type { AllCypressErrorNames } from '@packages/errors'
 import type { TestingType } from '@packages/types'
@@ -18,6 +16,7 @@ const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
   'EXPERIMENTAL_SINGLE_TAB_RUN_MODE',
   'VIDEO_UPLOAD_ON_PASSES_REMOVED',
   'RENAMED_CONFIG_OPTION',
+  'EXPERIMENTAL_STUDIO_REMOVED',
 ] as const
 
 type ValidationOptions = {
@@ -231,6 +230,12 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     overrideLevel: 'any',
     requireRestartOnChange: 'browser',
   }, {
+    name: 'experimentalPromptCommand',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isExperimental: true,
+    requireRestartOnChange: 'server',
+  }, {
     name: 'experimentalSourceRewriting',
     defaultValue: false,
     validation: validate.isBoolean,
@@ -238,12 +243,6 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     requireRestartOnChange: 'server',
   }, {
     name: 'experimentalSingleTabRunMode',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isExperimental: true,
-    requireRestartOnChange: 'server',
-  }, {
-    name: 'experimentalStudio',
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
@@ -485,7 +484,7 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     // having the final config that has the e2e property flattened/compacted
     // we may not be able to get the value to ignore.
     name: 'additionalIgnorePattern',
-    defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? defaultSpecPattern.e2e : [],
+    defaultValue: (options: Record<string, any> = {}): string | any[] => options.testingType === 'component' ? defaultSpecPattern.e2e : [],
     validation: validate.isStringOrArrayOfStrings,
     isInternal: true,
   }, {
@@ -622,6 +621,11 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
     errorKey: 'VIDEO_UPLOAD_ON_PASSES_REMOVED',
     isWarning: true,
   },
+  {
+    name: 'experimentalStudio',
+    errorKey: 'EXPERIMENTAL_STUDIO_REMOVED',
+    isWarning: true,
+  },
 ] as const
 
 export const breakingRootOptions: Array<BreakingOption> = [
@@ -673,6 +677,12 @@ export const breakingRootOptions: Array<BreakingOption> = [
     testingTypes: ['e2e'],
   },
   {
+    name: 'experimentalPromptCommand',
+    errorKey: 'EXPERIMENTAL_PROMPT_COMMAND_E2E_ONLY',
+    isWarning: false,
+    testingTypes: ['e2e'],
+  },
+  {
     name: 'justInTimeCompile',
     errorKey: 'JIT_COMPONENT_TESTING',
     isWarning: false,
@@ -710,11 +720,6 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
       isWarning: false,
     },
     {
-      name: 'experimentalStudio',
-      errorKey: 'EXPERIMENTAL_STUDIO_E2E_ONLY',
-      isWarning: false,
-    },
-    {
       name: 'testIsolation',
       errorKey: 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT',
       isWarning: false,
@@ -727,6 +732,11 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
     {
       name: 'experimentalOriginDependencies',
       errorKey: 'EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY',
+      isWarning: false,
+    },
+    {
+      name: 'experimentalPromptCommand',
+      errorKey: 'EXPERIMENTAL_PROMPT_COMMAND_E2E_ONLY',
       isWarning: false,
     },
     {

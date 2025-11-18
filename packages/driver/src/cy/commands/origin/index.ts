@@ -11,6 +11,7 @@ import { LogUtils } from '../../../cypress/log'
 import logGroup from '../../logGroup'
 import type { StateFunc } from '../../../cypress/state'
 import { runPrivilegedCommand } from '../../../util/privileged_channel'
+import $sourceMapUtils from '../../../cypress/source_map_utils'
 
 const reHttp = /^https?:\/\//
 
@@ -28,7 +29,7 @@ const normalizeOrigin = (urlOrDomain) => {
 type OptionsOrFn<T> = { args: T } | (() => {})
 type Fn<T> = (args?: T) => {}
 
-export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: StateFunc, config: Cypress.InternalConfig) => {
+export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, state: StateFunc, config: Cypress.InternalConfig) => {
   const communicator = Cypress.primaryOriginCommunicator
 
   Commands.addAll({
@@ -118,8 +119,10 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
           reject(err)
         }
 
-        const onQueueFinished = ({ err, subject, unserializableSubjectType }) => {
+        const onQueueFinished = ({ err, crossOriginUserInvocationStack, subject, unserializableSubjectType }) => {
           if (err) {
+            err.crossOriginUserInvocationStack = crossOriginUserInvocationStack
+
             return _reject(err)
           }
 
@@ -188,7 +191,7 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
             // Attach the spec bridge to the window to be tested.
             communicator.toSpecBridge(origin, 'attach:to:window')
             const fn = isFunction(callbackFn) ? callbackFn.toString() : callbackFn
-            const file = $stackUtils.getSourceDetailsForFirstLine(userInvocationStack, config('projectRoot'))?.absoluteFile
+            const file = $stackUtils.getSourceDetailsForFirstLine(userInvocationStack, $sourceMapUtils.getSourceMapProjectRoot())?.absoluteFile
 
             try {
               // origin is a privileged command, meaning it has to be invoked
@@ -223,6 +226,7 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
                   autLocation: Cypress.state('autLocation')?.href,
                   crossOriginCookies: Cypress.state('crossOriginCookies'),
                   isProtocolEnabled: Cypress.state('isProtocolEnabled'),
+                  originUserInvocationStack: userInvocationStack,
                 },
                 config: preprocessConfig(Cypress.config()),
                 env: preprocessEnv(Cypress.env()),

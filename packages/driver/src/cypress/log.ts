@@ -6,6 +6,7 @@ import { HIGHLIGHT_ATTR, type ISnapshots } from '../cy/snapshots'
 import $dom from '../dom'
 import $utils from './utils'
 import $errUtils from './error_utils'
+import { MAX_VISIBILITY_CHECK_ELEMENTS } from '@packages/types'
 
 import type { StateFunc } from './state'
 
@@ -14,7 +15,7 @@ import type { StateFunc } from './state'
 const groupsOrTableRe = /^(groups|table)$/
 const parentOrChildRe = /parent|child|system/
 const SNAPSHOT_PROPS = 'id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
-const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName groupLevel hookId instrument isStubbed group hidden message method name numElements numResponses referencesAlias renderProps sessionInfo state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
+const DISPLAY_PROPS = 'id alias aliasType callCount defaultCollapsedState displayName end err event functionName groupLevel hookId instrument isStubbed group hidden message method name numElements numResponses referencesAlias renderProps sessionInfo state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
 const PROTOCOL_PROPS = DISPLAY_PROPS.concat(['snapshots', 'createdAtTimestamp', 'updatedAtTimestamp', 'scrollBy', 'coords', 'highlightAttr'])
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
@@ -196,6 +197,7 @@ const defaults = function (state: StateFunc, config, obj) {
     id: `log-${window.location.origin}-${counter}`,
     chainerId,
     state: 'pending',
+    defaultCollapsedState: 'open',
     hidden: false,
     instrument: 'command',
     url: state('url'),
@@ -483,12 +485,29 @@ export class Log {
       return this.unset('$el')
     }
 
-    // make sure all $el elements are visible!
+    const numElements = $el.length
+
     return this.set({
       highlightAttr: HIGHLIGHT_ATTR,
-      numElements: $el.length,
-      visible: this.get('visible') ?? $el.length === $el.filter(':visible').length,
+      numElements,
+      visible: this.isVisible($el, numElements),
     })
+  }
+
+  private isVisible ($el: JQuery<Element>, numElements: number): boolean | undefined {
+    if (this.get('hidden')) {
+      return undefined
+    }
+
+    if (this.get('visible') !== undefined) {
+      return this.get('visible')
+    }
+
+    if (numElements <= MAX_VISIBILITY_CHECK_ELEMENTS) {
+      return numElements === $el.filter(':visible').length
+    }
+
+    return undefined
   }
 
   merge (log) {

@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events'
 import { RootRunnable } from '../../src/runnables/runnables-store'
 import { addCommand } from '../support/utils'
+import { MAX_VISIBILITY_CHECK_ELEMENTS } from '@packages/types'
 
 describe('commands', { viewportHeight: 1000 }, () => {
   let runner: EventEmitter
@@ -435,6 +436,29 @@ describe('commands', { viewportHeight: 1000 }, () => {
       .should('be.visible')
       .should('have.text', 'One or more matched elements are not visible.')
     })
+
+    it('displays icon and tooltip when visibility check is skipped for large element set', () => {
+      const numElements = MAX_VISIBILITY_CHECK_ELEMENTS + 1
+
+      cy.get('.reporter.mounted').then(() => {
+        addCommand(runner, {
+          id: 200,
+          name: 'get',
+          message: '.large-element-set',
+          state: 'passed',
+          numElements,
+          visible: undefined, // visibility check was skipped
+        })
+      })
+
+      cy.contains('.large-element-set').closest('.command').find('.command-invisible')
+      .should('be.visible')
+
+      cy.contains('.large-element-set').closest('.command').find('.command-invisible').trigger('mouseover')
+      cy.get('.cy-tooltip')
+      .should('be.visible')
+      .should('include.text', `Too many elements matched for this command to determine visibility. Some elements may not be visible.`)
+    })
   })
 
   context('elements indicator', () => {
@@ -713,6 +737,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
         it('closed when nested logs that pass', () => {
           const nestedGroupId = addCommand(runner, {
             name: 'session',
+            defaultCollapsedState: 'closed',
             state: 'passed',
             type: 'child',
           })
@@ -727,6 +752,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
 
           const nestedSessionGroupId = addCommand(runner, {
             name: 'session',
+            defaultCollapsedState: 'closed',
             displayName: 'validate',
             type: 'child',
             groupLevel: 2,
@@ -769,6 +795,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
         it('closed when nested logs has failures but last log is successful', () => {
           const nestedGroupId = addCommand(runner, {
             name: 'session',
+            defaultCollapsedState: 'closed',
             state: 'passed',
             type: 'child',
           })
@@ -783,6 +810,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
 
           const nestedSessionGroupId = addCommand(runner, {
             name: 'session',
+            defaultCollapsedState: 'closed',
             displayName: 'validate',
             type: 'child',
             state: 'failed',
@@ -829,6 +857,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
         it('open when last log has failed', () => {
           const nestedGroupId = addCommand(runner, {
             name: 'session',
+            defaultCollapsedState: 'closed',
             state: 'passed',
             type: 'child',
           })
@@ -843,6 +872,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
 
           const nestedSessionGroupId = addCommand(runner, {
             name: 'session',
+            defaultCollapsedState: 'closed',
             displayName: 'validate',
             state: 'failed',
             type: 'system',
@@ -997,6 +1027,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
       cy.fixture('command_error').then((_commandErr) => {
         const groupId = addCommand(runner, {
           name: 'session',
+          defaultCollapsedState: 'closed',
           message: 'mock restore',
           state: 'passed',
           type: 'system',
@@ -1031,6 +1062,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
       cy.fixture('command_error').then((_commandErr) => {
         const groupId = addCommand(runner, {
           name: 'session',
+          defaultCollapsedState: 'closed',
           message: 'mock restore',
           state: 'passed',
           type: 'system',
@@ -1075,6 +1107,207 @@ describe('commands', { viewportHeight: 1000 }, () => {
       })
 
       cy.contains('recreate session')
+
+      cy.percySnapshot()
+    })
+  })
+
+  context('show fetch requests', () => {
+    it('toggles visibility of fetch requests', () => {
+      addCommand(runner, {
+        name: 'visit',
+        renderProps: {
+          message: 'visit https://example.com',
+        },
+      })
+
+      // Add fetch/request commands (event: true means it's a network request)
+      Array.from({ length: 3 }).forEach((_, index) => {
+        addCommand(runner, {
+          name: 'request',
+          event: true,
+          renderProps: {
+            indicator: 'successful',
+            wentToOrigin: true,
+            message: `GET /api/data/${index + 1}`,
+          },
+        })
+      })
+
+      cy.get('.command-name-visit').should('have.length', 2)
+      cy.contains('visit https://example.com').should('be.visible')
+
+      cy.get('.command-name-request').should('have.length', 3)
+      cy.contains('GET /api/data/1').should('be.visible')
+
+      cy.window().its('state.showFetchRequests').should('be.true')
+
+      cy.get('[data-cy="runnable-options-button"]').click()
+      cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
+
+      cy.window().its('state.showFetchRequests').should('be.true')
+
+      cy.get('[data-cy="show-http-requests-switch"]').click()
+
+      cy.window().its('state.showFetchRequests').should('be.false')
+
+      cy.get('.command-name-request').should('not.exist')
+
+      // This one has event = true, so it should be visible
+      cy.contains('(xhr stub)GET --- /posts')
+
+      cy.get('.command-name-visit').should('exist')
+
+      cy.get('[data-cy="show-http-requests-switch"]').click()
+
+      cy.window().its('state.showFetchRequests').should('be.true')
+
+      cy.get('.command-name-request').should('have.length', 3)
+      cy.contains('GET /api/data/1').should('be.visible')
+    })
+  })
+
+  context('self-healed badge', () => {
+    it('renders the self-healed badge when the command is self-healed and move to top level when is closed', () => {
+      const nestedGroupId = addCommand(runner, {
+        name: 'session',
+        defaultCollapsedState: 'open',
+        state: 'passed',
+        type: 'child',
+      })
+
+      addCommand(runner, {
+        name: 'get',
+        message: 'do something',
+        state: 'passed',
+        groupLevel: 1,
+        group: nestedGroupId,
+      })
+
+      const nestedSessionGroupId = addCommand(runner, {
+        name: 'session',
+        defaultCollapsedState: 'open',
+        displayName: 'validate',
+        type: 'child',
+        groupLevel: 2,
+        group: nestedGroupId,
+        renderProps: {
+          selfHealed: true,
+        },
+      })
+
+      addCommand(runner, {
+        name: 'log',
+        message: 'inside of group',
+        state: 'passed',
+        group: nestedSessionGroupId,
+      })
+
+      cy.get('[data-cy="self-healed-badge-command"]').should('exist')
+      cy.get('[data-cy="self-healed-badge-test"]').should('exist')
+
+      cy.percySnapshot('initial state')
+
+      cy.get('.command-message').eq(10).within(() => {
+        cy.get('[data-cy="self-healed-badge-command"]').should('not.exist')
+      })
+
+      cy.get('.command-message').eq(12).within(() => {
+        cy.get('[data-cy="self-healed-badge-command"]').should('exist')
+      })
+
+      cy.get('.command-expander').eq(1).click()
+
+      cy.percySnapshot('after clicking command expander')
+
+      cy.get('.command-message').eq(10).within(() => {
+        cy.get('[data-cy="self-healed-badge-command"]').should('exist')
+      })
+
+      cy.get('.collapsible-header-inner').eq(2).click({ force: true })
+
+      cy.percySnapshot('after clicking collapsible header')
+
+      cy.get('[data-cy="self-healed-badge-command"]').should('not.exist')
+      cy.get('[data-cy="self-healed-badge-test"]').should('exist')
+
+      cy.get('.collapsible-header-inner').first().click()
+
+      cy.get('[data-cy="self-healed-badge-command"]').should('not.exist')
+      cy.get('[data-cy="self-healed-badge-test"]').should('exist')
+
+      cy.percySnapshot()
+    })
+
+    it('renders the self-healed badge when the command is self-healed and long text and move to top level when is closed', () => {
+      const nestedGroupId = addCommand(runner, {
+        name: 'session',
+        defaultCollapsedState: 'open',
+        state: 'passed',
+        type: 'child',
+        message: 'with long text to show wrapping works as expected and move to top level when is closed and is self-healed and is long text to show wrapping works as expected',
+      })
+
+      addCommand(runner, {
+        name: 'get',
+        message: 'do something',
+        state: 'passed',
+        groupLevel: 1,
+        group: nestedGroupId,
+      })
+
+      const nestedSessionGroupId = addCommand(runner, {
+        name: 'session',
+        defaultCollapsedState: 'open',
+        displayName: 'validate',
+        type: 'child',
+        groupLevel: 2,
+        group: nestedGroupId,
+        message: 'with long text to show wrapping works as expected and move to top level when is closed and is self-healed and is long text to show wrapping works as expected',
+        renderProps: {
+          selfHealed: true,
+        },
+      })
+
+      addCommand(runner, {
+        name: 'log',
+        message: 'inside of group',
+        state: 'passed',
+        group: nestedSessionGroupId,
+      })
+
+      cy.get('[data-cy="self-healed-badge-command"]').should('exist')
+      cy.get('[data-cy="self-healed-badge-test"]').should('exist')
+
+      cy.percySnapshot('initial state')
+
+      cy.get('.command-message').eq(10).within(() => {
+        cy.get('[data-cy="self-healed-badge-command"]').should('not.exist')
+      })
+
+      cy.get('.command-message').eq(12).within(() => {
+        cy.get('[data-cy="self-healed-badge-command"]').should('exist')
+      })
+
+      cy.get('.command-expander').eq(1).click()
+
+      cy.percySnapshot('after clicking command expander')
+
+      cy.get('.command-message').eq(10).within(() => {
+        cy.get('[data-cy="self-healed-badge-command"]').should('exist')
+      })
+
+      cy.get('.collapsible-header-inner').eq(2).click({ force: true })
+
+      cy.percySnapshot('after clicking collapsible header')
+
+      cy.get('[data-cy="self-healed-badge-command"]').should('not.exist')
+      cy.get('[data-cy="self-healed-badge-test"]').should('exist')
+
+      cy.get('.collapsible-header-inner').first().click()
+
+      cy.get('[data-cy="self-healed-badge-command"]').should('not.exist')
+      cy.get('[data-cy="self-healed-badge-test"]').should('exist')
 
       cy.percySnapshot()
     })

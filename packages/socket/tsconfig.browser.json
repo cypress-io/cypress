@@ -1,0 +1,18 @@
+{
+  "include": [
+    "lib/client/**/*.ts",
+    "lib/utils.ts"
+  ],
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDirs": [
+      "./lib/client",
+      "./lib/utils"
+    ],
+    "outDir": "./browser",
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "node",
+    "declaration": true
+  }
+}

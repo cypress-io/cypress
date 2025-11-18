@@ -117,7 +117,7 @@ export const s3helpers = {
    * Returns user metadata for the given S3 object.
    * Note: on S3 when adding user metadata, each key is prefixed with "x-amz-meta-"
    * but the returned object has these prefixes stripped. Thus if we set
-   * a single "x-amz-meta-user: gleb", the resolved object will be simply {user: "gleb"}
+   * a single "x-amz-meta-user: cy", the resolved object will be simply {user: "cy"}
   */
   getUserMetadata (bucket: string, key: string, s3: S3): Promise<Record<string, string>> {
     return new Promise((resole, reject) => {

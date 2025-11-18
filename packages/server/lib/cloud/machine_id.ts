@@ -1,12 +1,11 @@
-const nmi = require('node-machine-id')
+import { machineId as nodeMachineId } from 'node-machine-id'
 
-function machineId () {
-  return nmi.machineId()
-  .catch(() => {
+export async function machineId () {
+  try {
+    const machineId = await nodeMachineId()
+
+    return machineId
+  } catch (error) {
     return null
-  })
-}
-
-module.exports = {
-  machineId,
+  }
 }

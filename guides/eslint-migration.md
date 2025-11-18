@@ -158,7 +158,6 @@ After all packages are migrated, simplify the lint-staged configuration in root 
 {
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
-    "*workflows.yml": "node scripts/format-workflow-file.js"
   }
 }
 ```

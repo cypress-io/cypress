@@ -30,13 +30,16 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTestFromSuite 
 
   if (createNewTestFromSuite || createNewTestFromSpecHeader) {
     if (createNewTestFromSpecHeader) {
-      cy.findByTestId('create-new-test-from-spec-header').click()
+      cy.get('[data-cy="runnable-options-button"]').click()
+      cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
+      cy.get('[data-cy="runnable-popover-new-test"]').click()
     } else {
-      cy.get('@runnable-wrapper').realHover().findByTestId('create-new-test-from-suite').click()
+      cy.get('@runnable-wrapper').realHover()
+      cy.findByTestId('create-new-test-from-suite').click()
     }
 
     cy.findByTestId('studio-panel').should('be.visible')
-    cy.findByTestId('new-test-button').should('be.visible')
+    cy.findByTestId('create-test-button').should('be.visible')
   } else {
     cy.get('@runnable-wrapper')
     .findByTestId('launch-studio')
@@ -50,6 +53,34 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTestFromSuite 
     // verify recording is enabled to ensure the panel is fully ready
     cy.findByTestId('record-button-recording').should('have.text', 'Recording...')
   }
+}
+
+export function inputNewTestName ({ name = 'new-test', creatingNewTestFromWelcomeScreen = true }: { name?: string, creatingNewTestFromWelcomeScreen?: boolean } = {}) {
+  if (creatingNewTestFromWelcomeScreen) {
+    // we only need to click the new test button if we are not creating a new test from a suite or spec header
+    cy.findByTestId('new-test-button').click()
+  }
+
+  cy.findByTestId('test-name-input').type(name)
+  cy.findByTestId('create-test-button').click()
+
+  cy.findByTestId('record-button-disabled').should('have.text', 'Record')
+
+  cy.get('.studio-single-test-container').should('be.visible')
+}
+
+export function incrementCounter (initialCount: number) {
+  cy.getAutIframe().within(() => {
+    cy.get('p').contains(`Count is ${initialCount}`)
+
+    // (1) First Studio action - get
+    cy.get('#increment')
+
+    // (2) Second Studio action - click
+    .realClick().then(() => {
+      cy.get('p').contains(`Count is ${initialCount + 1}`)
+    })
+  })
 }
 
 export function assertClosingPanelWithoutChanges () {

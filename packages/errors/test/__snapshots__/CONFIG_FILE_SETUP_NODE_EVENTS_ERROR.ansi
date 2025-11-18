@@ -1,0 +1,7 @@
+[31mYour [95mconfigFile[39m[31m threw an error from: [94m/path/to/cypress.config.js[39m[31m[39m
+[31m[39m
+[31mThe error was thrown while executing your [33me2e.setupNodeEvents()[39m[31m function:[39m
+[35m[39m
+[35mError: fail whale[39m
+[35m    at makeErr (cypress/packages/errors/test/visualSnapshotErrors.spec.ts)[39m
+[35m    at CONFIG_FILE_SETUP_NODE_EVENTS_ERROR (cypress/packages/errors/test/visualSnapshotErrors.spec.ts)[39m

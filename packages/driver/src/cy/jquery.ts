@@ -29,6 +29,12 @@ export const create = (state: StateFunc) => ({
     const remoteJQuery = state('jQuery') || state('window').$
 
     if (remoteJQueryisNotSameAsGlobal(remoteJQuery)) {
+      // Check if remoteJQuery is actually a function before calling it
+      // https://github.com/cypress-io/cypress/issues/1502
+      if (typeof remoteJQuery !== 'function') {
+        return
+      }
+
       const remoteSubject = remoteJQuery(subject)
 
       return remoteSubject

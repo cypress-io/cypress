@@ -33,6 +33,7 @@ import { historyNavigationTriggeredHashChange } from '../cy/navigation'
 import { EventEmitter2 } from 'eventemitter2'
 import { handleCrossOriginCookies } from '../cross-origin/events/cookies'
 import { trackTopUrl } from '../util/trackTopUrl'
+import $sourceMapUtils from './source_map_utils'
 
 import type { ICypress } from '../cypress'
 import type { ICookies } from './cookies'
@@ -390,12 +391,16 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     err.stack = $stackUtils.normalizedStack(err)
 
-    const userInvocationStack = $errUtils.getUserInvocationStack(err, this.state)
+    let userInvocationStack = err.crossOriginUserInvocationStack
+
+    if (!userInvocationStack) {
+      userInvocationStack = $errUtils.getUserInvocationStack(err, this.state)
+    }
 
     err = $errUtils.enhanceStack({
       err,
       userInvocationStack,
-      projectRoot: this.config('projectRoot'),
+      projectRoot: $sourceMapUtils.getSourceMapProjectRoot(),
     })
 
     err = $errUtils.processErr(err, this.config)
@@ -740,7 +745,11 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         cy.linkSubject(chainer.chainerId, cy.state('chainerId'))
       }
 
-      const userInvocationStack = $stackUtils.captureUserInvocationStack(cy.specWindow.Error)
+      let userInvocationStack = $stackUtils.captureUserInvocationStack(cy.specWindow.Error)
+
+      if (cy.state('originUserInvocationStack')) {
+        userInvocationStack = $stackUtils.mergeCrossOriginUserInvocationStack(userInvocationStack, cy.state('originUserInvocationStack'))
+      }
 
       callback(chainer, userInvocationStack, args, privilegeVerification, true)
 
@@ -843,7 +852,11 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         cy.linkSubject(chainer.chainerId, cy.state('chainerId'))
       }
 
-      const userInvocationStack = $stackUtils.captureUserInvocationStack(cy.specWindow.Error)
+      let userInvocationStack = $stackUtils.captureUserInvocationStack(cy.specWindow.Error)
+
+      if (cy.state('originUserInvocationStack')) {
+        userInvocationStack = $stackUtils.mergeCrossOriginUserInvocationStack(userInvocationStack, cy.state('originUserInvocationStack'))
+      }
 
       callback(chainer, userInvocationStack, args, privilegeVerification)
 

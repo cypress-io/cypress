@@ -1,9 +1,9 @@
 import Debug from 'debug'
 import { notInstalledErr } from '../errors'
 import { utils } from '../utils'
-import * as fs from 'fs-extra'
-import * as path from 'path'
-import * as plist from 'plist'
+import fs from 'fs-extra'
+import path from 'path'
+import plist from 'plist'
 
 const debugVerbose = Debug('cypress-verbose:launcher:darwin:util')
 

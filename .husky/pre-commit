@@ -3,39 +3,7 @@
 
 # Pack CircleCI config if any files in .circleci/src were changed
 if git diff --cached --name-only | grep -q "^\.circleci/src/"; then
-  if ! which circleci > /dev/null; then
-    echo "❌ Warning: CircleCI CLI not found! Install the CircleCi CLI to edit the CircleCI configuration."
-    exit 1
-  fi
-
-  echo "Processing CircleCI configurations..."
-  
-  # Find all directories in .circleci/src
-  for dir in ./.circleci/src/*/; do
-    if [ -d "$dir" ]; then
-      dirname=$(basename "$dir")
-      output_file="./.circleci/${dirname}.yml"
-      
-      echo "📦 Packing ${dirname}.yml configuration..."
-      if ! circleci config pack "$dir" > "$output_file"; then
-        echo "  ❌ Failed to pack ${output_file}"
-        exit 1
-      fi
-      echo "  ✅ Packed ${output_file}"
-      
-      echo "  🔍 Validating ${output_file}"
-      if ! circleci config validate "$output_file"; then
-        echo "    ❌ Validating ${output_file} failed"
-        exit 1
-      fi
-      echo "    ✅ ${dirname}.yml configuration validated successfully"
-      
-      git add "$output_file"
-      echo "  📝 ${output_file} staged for commit"
-    fi
-  done
-  
-  echo "🎉 All CircleCI configurations processed successfully!"
+  yarn pack-ci --validate
 fi
 
 npx lint-staged

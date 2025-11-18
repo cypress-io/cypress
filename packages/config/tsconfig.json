@@ -1,5 +1,4 @@
 {
-  "extends": "../ts/tsconfig.json",
   "include": [
     "src/*.ts"
   ],
@@ -7,13 +6,15 @@
     "test"
   ],
   "compilerOptions": {
-    "allowJs": false,
-    "rootDir": "src",
+    "strict": true,
     "noImplicitAny": true,
+    "esModuleInterop": true,
     "noUncheckedIndexedAccess": true,
-    "types": ["node"],
-    "typeRoots": [
-      "../../node_modules/@types"
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "types": [
+      "node"
     ],
+    "declaration": true
   }
 }

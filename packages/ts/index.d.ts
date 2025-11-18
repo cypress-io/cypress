@@ -1,5 +1,4 @@
 // missing type definitions for libraries
-// https://glebbahmutov.com/blog/trying-typescript/#manual-types-for-3rd-party-libraries
 
 declare module '@cypress/get-windows-proxy' {
   type ProxyConfig = {
@@ -13,13 +12,14 @@ declare module '@cypress/get-windows-proxy' {
 declare module 'http' {
   import { Socket } from 'net'
   import { Url } from 'url'
+  import { Duplex } from 'stream'
 
     type SocketCallback = (err: Optional<Error>, sock: Optional<Socket>) => void
 
     interface Agent {
       addRequest(req: ClientRequest, options: RequestOptions): void
       createSocket(req: ClientRequest, options: RequestOptions, cb: SocketCallback): void
-      createConnection(options: RequestOptions, cb: Optional<SocketCallback>): void
+      createConnection(options: RequestOptions, callback?: ((err: Error | null, stream: Duplex) => void) | undefined): Duplex | null | undefined
       protocol: 'http:' | 'https:' | string
     }
 

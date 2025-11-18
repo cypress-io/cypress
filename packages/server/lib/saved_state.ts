@@ -3,8 +3,8 @@ import path from 'path'
 import Debug from 'debug'
 import Bluebird from 'bluebird'
 import appData from './util/app_data'
-import cwd from './cwd'
-import FileUtil from './util/file'
+import { getCwd } from './cwd'
+import { File as FileUtil } from './util/file'
 import { fs } from './util/fs'
 import { AllowedState, allowedKeys } from '@packages/types'
 import { globalPubSub } from '@packages/data-context'
@@ -16,7 +16,7 @@ const stateFiles: Record<string, typeof FileUtil> = {}
 
 export const formStatePath = (projectRoot?: string) => {
   return Bluebird.try(() => {
-    debug('making saved state from %s', cwd())
+    debug('making saved state from %s', getCwd())
 
     if (projectRoot) {
       debug('for project path %s', projectRoot)
@@ -26,25 +26,25 @@ export const formStatePath = (projectRoot?: string) => {
 
     debug('missing project path, looking for project here')
 
-    let cypressConfigPath = cwd('cypress.config.js')
+    let cypressConfigPath = getCwd('cypress.config.js')
 
     return fs.pathExistsAsync(cypressConfigPath)
     .then((found) => {
       if (found) {
         debug('found cypress file %s', cypressConfigPath)
-        projectRoot = cwd()
+        projectRoot = getCwd()
 
         return
       }
 
-      cypressConfigPath = cwd('cypress.config.ts')
+      cypressConfigPath = getCwd('cypress.config.ts')
 
       return fs.pathExistsAsync(cypressConfigPath)
     })
     .then((found) => {
       if (found) {
         debug('found cypress file %s', cypressConfigPath)
-        projectRoot = cwd()
+        projectRoot = getCwd()
       }
 
       return projectRoot
@@ -100,6 +100,8 @@ export const create = (projectRoot?: string, isTextTerminal: boolean = false): B
     return Bluebird.resolve(FileUtil.noopFile)
   }
 
+  // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
+  // After some package refactoring, we should be able to remove this.
   return formStatePath(projectRoot)
   .then((statePath: string) => {
     const fullStatePath = appData.projectsPath(statePath)
@@ -120,6 +122,8 @@ export const create = (projectRoot?: string, isTextTerminal: boolean = false): B
 
     stateFile.set = _.wrap(stateFile.set.bind(stateFile), normalizeAndAllowSet)
 
+    // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
+    // After some package refactoring, we should be able to remove this.
     stateFiles[fullStatePath] = stateFile
 
     return stateFile as SavedStateAPI

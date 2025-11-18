@@ -4,11 +4,11 @@ import { observable, makeObservable } from 'mobx'
 interface DefaultAppState {
   isPaused: boolean
   isRunning: boolean
-  isPreferencesMenuOpen: boolean
   nextCommandName: string | null | undefined
   pinnedSnapshotId: number | string | null
   studioActive: boolean
   studioSingleTestActive: boolean
+  hasBeenPaused: boolean
 }
 
 // these are used for the `reset` method
@@ -16,11 +16,11 @@ interface DefaultAppState {
 const defaults: DefaultAppState = {
   isPaused: false,
   isRunning: false,
-  isPreferencesMenuOpen: false,
   nextCommandName: null,
   pinnedSnapshotId: null,
   studioActive: false,
   studioSingleTestActive: false,
+  hasBeenPaused: false,
 }
 
 class AppState {
@@ -29,12 +29,13 @@ class AppState {
   isSpecsListOpen = false
   isPaused = defaults.isPaused
   isRunning = defaults.isRunning
-  isPreferencesMenuOpen = defaults.isPreferencesMenuOpen
   nextCommandName = defaults.nextCommandName
   pinnedSnapshotId = defaults.pinnedSnapshotId
   studioActive = defaults.studioActive
   studioSingleTestActive = defaults.studioSingleTestActive
+  showFetchRequests = true
   isStopped = false
+  hasBeenPaused = defaults.hasBeenPaused
   _resetAutoScrollingEnabledTo = true;
   [key: string]: any
 
@@ -45,11 +46,12 @@ class AppState {
       isSpecsListOpen: observable,
       isPaused: observable,
       isRunning: observable,
-      isPreferencesMenuOpen: observable,
       nextCommandName: observable,
       pinnedSnapshotId: observable,
       studioActive: observable,
       studioSingleTestActive: observable,
+      showFetchRequests: observable,
+      hasBeenPaused: observable,
     })
   }
 
@@ -61,6 +63,7 @@ class AppState {
   pause (nextCommandName?: string) {
     this.isPaused = true
     this.nextCommandName = nextCommandName
+    this.hasBeenPaused = true
   }
 
   resume () {
@@ -99,10 +102,6 @@ class AppState {
     this.isSpecsListOpen = !this.isSpecsListOpen
   }
 
-  togglePreferencesMenu () {
-    this.isPreferencesMenuOpen = !this.isPreferencesMenuOpen
-  }
-
   setSpecsList (status: boolean) {
     this.isSpecsListOpen = status
   }
@@ -133,6 +132,14 @@ class AppState {
 
   setStudioSingleTestActive (studioSingleTestActive: boolean) {
     this.studioSingleTestActive = studioSingleTestActive
+  }
+
+  toggleShowFetchRequests () {
+    this.showFetchRequests = !this.showFetchRequests
+  }
+
+  setShowFetchRequests (showFetchRequests: boolean) {
+    this.showFetchRequests = showFetchRequests
   }
 
   reset () {

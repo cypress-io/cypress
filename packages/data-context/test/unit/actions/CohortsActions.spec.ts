@@ -1,29 +1,26 @@
+import { describe, expect, it, beforeEach, jest } from '@jest/globals'
 import type { DataContext } from '../../../src'
 import { CohortsActions } from '../../../src/actions/CohortsActions'
 import { createTestDataContext } from '../helper'
-import { expect } from 'chai'
-import sinon, { SinonStub, match } from 'sinon'
 
 describe('CohortsActions', () => {
   let ctx: DataContext
   let actions: CohortsActions
 
   beforeEach(() => {
-    sinon.restore()
-
     ctx = createTestDataContext('open')
 
     actions = new CohortsActions(ctx)
   })
 
-  context('getCohort', () => {
+  describe('getCohort', () => {
     it('should return null if name not found', async () => {
       const name = '123'
 
       const cohort = await actions.getCohort(name)
 
-      expect(cohort).to.be.undefined
-      expect(ctx.config.cohortsApi.getCohort).to.have.been.calledWith(name)
+      expect(cohort).toBeUndefined()
+      expect(ctx.config.cohortsApi.getCohort).toHaveBeenCalledWith(name)
     })
 
     it('should return cohort if in cache', async () => {
@@ -32,16 +29,16 @@ describe('CohortsActions', () => {
         cohort: 'A',
       }
 
-      ;(ctx._apis.cohortsApi.getCohort as SinonStub).resolves(cohort)
+      jest.spyOn(ctx._apis.cohortsApi, 'getCohort').mockResolvedValue(cohort)
 
       const cohortReturned = await actions.getCohort(cohort.name)
 
-      expect(cohortReturned).to.eq(cohort)
-      expect(ctx.config.cohortsApi.getCohort).to.have.been.calledWith(cohort.name)
+      expect(cohortReturned).toEqual(cohort)
+      expect(ctx.config.cohortsApi.getCohort).toHaveBeenCalledWith(cohort.name)
     })
   })
 
-  context('determineCohort', () => {
+  describe('determineCohort', () => {
     it('should determine cohort', async () => {
       const cohortConfig = {
         name: 'loginBanner',
@@ -50,8 +47,8 @@ describe('CohortsActions', () => {
 
       const pickedCohort = await actions.determineCohort(cohortConfig.name, cohortConfig.cohorts)
 
-      expect(ctx.config.cohortsApi.insertCohort).to.have.been.calledOnceWith({ name: cohortConfig.name, cohort: match.string })
-      expect(cohortConfig.cohorts.includes(pickedCohort.cohort)).to.be.true
+      expect(ctx.config.cohortsApi.insertCohort).toHaveBeenNthCalledWith(1, { name: cohortConfig.name, cohort: expect.any(String) })
+      expect(cohortConfig.cohorts.includes(pickedCohort.cohort)).toBe(true)
     })
   })
 })

@@ -1,4 +1,3 @@
-import './cwd'
 import Bluebird from 'bluebird'
 import compression from 'compression'
 import Debug from 'debug'
@@ -12,9 +11,11 @@ import _ from 'lodash'
 import type { AddressInfo } from 'net'
 import url from 'url'
 import la from 'lazy-ass'
-import httpsProxy from '@packages/https-proxy'
+import { createProxy as createHttpsProxy } from '@packages/https-proxy'
+import type { Server as HttpsProxyServer } from '@packages/https-proxy'
 import { getRoutesForRequest, netStubbingState, NetStubbingState } from '@packages/net-stubbing'
-import { agent, clientCertificates, cors, httpUtils, uri, concatStream, DocumentDomainInjection } from '@packages/network'
+import { agent, clientCertificates, httpUtils, concatStream } from '@packages/network'
+import { DocumentDomainInjection, getPath, parseUrlIntoHostProtocolDomainTldPort, removeDefaultPort } from '@packages/network-tools'
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import type { SocketCt } from './socket-ct'
 import * as errors from './errors'
@@ -33,7 +34,7 @@ import type { Server as WebSocketServer } from 'ws'
 import { RemoteStates, RemoteState } from './remote_states'
 import { cookieJar, SerializableAutomationCookie } from './util/cookies'
 import { resourceTypeAndCredentialManager, ResourceTypeAndCredentialManager } from './util/resourceTypeAndCredentialManager'
-import fileServer from './file_server'
+import * as fileServer from './file_server'
 import appData from './util/app_data'
 import { graphqlWS } from '@packages/data-context/graphql/makeGraphQLServer'
 import statusCode from './util/status_code'
@@ -123,9 +124,9 @@ const setProxiedUrl = function (req) {
   // and only leave the path which is
   // how browsers would normally send
   // use their url
-  req.proxiedUrl = uri.removeDefaultPort(req.url).format()
+  req.proxiedUrl = removeDefaultPort(req.url).format()
 
-  req.url = uri.getPath(req.url)
+  req.url = getPath(req.url)
 }
 
 const notSSE = (req, res) => {
@@ -163,6 +164,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _nodeProxy?: httpProxy
   protected _networkProxy?: NetworkProxy
   protected _netStubbingState?: NetStubbingState
+  // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
+  // After some package refactoring, we should be able to remove this.
   protected _httpsProxy?: httpsProxy
   protected _graphqlWS?: WebSocketServer
   protected _eventBus: EventEmitter
@@ -284,16 +287,16 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       })
       .then((port) => {
         return Bluebird.all([
-          httpsProxy.create(appData.path('proxy'), port, {
+          createHttpsProxy(appData.path('proxy'), port, {
             onRequest: this.callListeners.bind(this),
             onUpgrade: this.onSniUpgrade.bind(this),
           }),
 
-          fileServer.create(fileServerFolder),
+          fileServer.create(fileServerFolder as string),
         ])
         .spread((httpsProxy, fileServer) => {
-          this._httpsProxy = httpsProxy
-          this._fileServer = fileServer
+          this._httpsProxy = httpsProxy as HttpsProxyServer
+          this._fileServer = fileServer as FileServer
 
           // if we have a baseUrl let's go ahead
           // and make sure the server is connectable!
@@ -620,7 +623,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       // get the port & hostname from host header
       const fullUrl = `${req.connection.encrypted ? 'https' : 'http'}://${host}`
       const { hostname, protocol } = url.parse(fullUrl)
-      const { port } = cors.parseUrlIntoHostProtocolDomainTldPort(fullUrl)
+      const { port } = parseUrlIntoHostProtocolDomainTldPort(fullUrl)
 
       const onProxyErr = (err, req, res) => {
         return debug('Got ERROR proxying websocket connection', { err, port, protocol, hostname, req })
@@ -1016,6 +1019,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       debug('sending request with options %o', options)
 
       return runPhase(() => {
+        // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
+        // After some package refactoring, we should be able to remove this.
         return request.sendStream(userAgent, automationRequest, options)
         .then((createReqStream) => {
           const stream = createReqStream()

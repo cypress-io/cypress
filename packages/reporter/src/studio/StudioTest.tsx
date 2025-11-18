@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { observer } from 'mobx-react'
 import { RunnablesStore } from '../runnables/runnables-store'
 import { Duration } from '../duration/duration'
@@ -8,9 +8,11 @@ import Tooltip from '@cypress/react-tooltip'
 import cx from 'classnames'
 import Attempts from '../attempts/attempts'
 import { useScrollIntoView } from '../lib/useScrollIntoView'
-import { IconChevronDownSmall, IconStatusFailedSolid, IconStatusPassedSolid, IconStatusQueuedOutline, IconStatusRunningOutline } from '@cypress-design/react-icon'
+import { IconArrowLeft, IconChevronDownSmall, IconStatusFailedSolid, IconStatusPassedSolid, IconStatusQueuedOutline, IconStatusRunningOutline } from '@cypress-design/react-icon'
 import Test from '../test/test-model'
 import { StatsStore } from '../header/stats-store'
+import Button from '@cypress-design/react-button'
+import events from '../lib/events'
 
 const getConnectors = (num: number) => {
   let connectors: JSX.Element[] = []
@@ -63,12 +65,20 @@ export const StudioTest = observer(({ appState, runnablesStore, statsStore }: St
   // Single we're in single test mode, the current test is the first test in the runnablesStore._tests
   const currentTest = Object.values(runnablesStore._tests)[0]
   const tooltipRef = useRef<HTMLUListElement>(null)
+  const testSectionRef = useRef<HTMLDivElement>(null)
+  const fixedElementRef = useRef<HTMLDivElement>(null)
 
   const { containerRef, isMounted, scrollIntoView } = useScrollIntoView({
     appState,
     testState: currentTest?.state,
     isStudioActive: appState.studioActive,
   })
+
+  const handleBackButton = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault()
+
+    events.emit('studio:cancel', undefined)
+  }, [])
 
   // Call callbackAfterUpdate when mounted and test changes
   React.useEffect(() => {
@@ -81,32 +91,62 @@ export const StudioTest = observer(({ appState, runnablesStore, statsStore }: St
 
   const testTitle = currentTest ? <span data-cy='studio-single-test-title' className='studio-header__test-title'>{currentTest.title}</span> : null
 
+  const toggleHeaderShadow = (entries) => {
+    const [entry] = entries
+
+    testSectionRef.current?.classList.toggle('shadow-active', !entry.isIntersecting)
+  }
+
+  useEffect(() => {
+    if (!fixedElementRef.current) return
+
+    const observer = new IntersectionObserver(toggleHeaderShadow)
+
+    observer.observe(fixedElementRef.current)
+
+    return () => observer.disconnect()
+  }, [])
+
   return (
-    currentTest && (
-      <div className='studio-single-test-container' >
-        <div className='studio-header__test-section'>
+    currentTest && (<>
+      {/* This empty div acts as an intersection observer target to toggle the header shadow based on scroll position */}
+      <div ref={fixedElementRef} />
+      <div className='studio-single-test-container'>
+        <div className='studio-header__test-section' ref={testSectionRef}>
           <div className='studio-header__test-section-left'>
-            <StatusIcon test={currentTest} />
-            {parentTitles.length > 0 ? (
-              <Tooltip title={<ul className='studio-tooltip__breadcrumb-list' ref={tooltipRef}>
-                {getParentTitlesListElements(parentTitles)}
-              </ul>}
-              wrapperClassName='studio-header__test-tooltip-wrapper' className={cx(
-                'studio-tooltip cy-tooltip',
-              )}>
-                {testTitle}
-              </Tooltip>
-            ) : testTitle}
+
+            <Tooltip placement='bottom' title={<p>All tests</p>} className='cy-tooltip'>
+              <div>
+                <Button data-cy='studio-back-button' size='32' variant='outline-indigo' className='studio-header__back-button' onClick={handleBackButton}>
+                  <IconArrowLeft size='16' strokeColor='indigo-400' />
+                </Button>
+              </div>
+            </Tooltip>
+
+            <div className='studio-header__test-section-left-content'>
+              <StatusIcon test={currentTest} />
+              {parentTitles.length > 0 ? (
+                <Tooltip title={<ul className='studio-tooltip__breadcrumb-list' ref={tooltipRef}>
+                  {getParentTitlesListElements(parentTitles)}
+                </ul>}
+                wrapperClassName='studio-header__test-tooltip-wrapper' className={cx(
+                  'studio-tooltip cy-tooltip',
+                )}>
+                  {testTitle}
+                </Tooltip>
+              ) : testTitle}
+            </div>
           </div>
           <div className='studio-header__test-section-right'>
             <Duration duration={statsStore.duration} />
-            <Controls appState={appState} displayPreferencesButton={false} />
+            <Controls appState={appState} />
           </div>
         </div>
         <div className='studio-single-test-attempts' ref={containerRef}>
           <Attempts isSingleStudioTest test={currentTest} scrollIntoView={scrollIntoView} />
         </div>
       </div>
+    </>
     )
   )
 })

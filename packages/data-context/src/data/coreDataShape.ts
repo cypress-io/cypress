@@ -1,15 +1,14 @@
-import type { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, StudioLifecycleManagerShape } from '@packages/types'
+import type { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, StudioLifecycleManagerShape, CyPromptLifecycleManagerShape } from '@packages/types'
 import { WizardBundler, CT_FRAMEWORKS, resolveComponentFrameworkDefinition, ErroredFramework } from '@packages/scaffold-config'
 import type { NexusGenObjects } from '../gen/nxs.gen'
 // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
 import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
-import type { SocketIONamespace, SocketIOServer } from '@packages/socket'
+import type { SocketIONamespace, SocketIOServer, CDPSocketServer } from '@packages/socket'
 import type { Server } from 'http'
 import type { ErrorWrapperSource } from '@packages/errors'
 import type { EventCollectorSource, GitDataSource } from '../sources'
 import { machineId as getMachineId } from 'node-machine-id'
-import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
 
 export type Maybe<T> = T | null | undefined
 
@@ -112,6 +111,11 @@ interface CloudDataShape {
   }
 }
 
+interface RecordingInfo {
+  runId?: string
+  instanceId?: string
+}
+
 export interface CoreDataShape {
   cliBrowser: string | null
   cliTestingType: string | null
@@ -144,6 +148,8 @@ export interface CoreDataShape {
   eventCollectorSource: EventCollectorSource | null
   didBrowserPreviouslyHaveUnexpectedExit: boolean
   studioLifecycleManager?: StudioLifecycleManagerShape
+  cyPromptLifecycleManager?: CyPromptLifecycleManagerShape
+  currentRecordingInfo: RecordingInfo
 }
 
 /**
@@ -210,6 +216,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     eventCollectorSource: null,
     didBrowserPreviouslyHaveUnexpectedExit: false,
     studioLifecycleManager: undefined,
+    currentRecordingInfo: {},
   }
 
   async function machineId (): Promise<string | null> {

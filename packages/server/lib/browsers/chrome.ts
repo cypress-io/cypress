@@ -1,11 +1,10 @@
 import Bluebird from 'bluebird'
-import check from 'check-more-types'
 import debugModule from 'debug'
 import la from 'lazy-ass'
 import _ from 'lodash'
 import os from 'os'
 import path from 'path'
-import extension from '@packages/extension'
+import * as extension from '@packages/extension'
 import mime from 'mime'
 import { launch } from '@packages/launcher'
 
@@ -21,8 +20,8 @@ import type { CriClient } from './cri-client'
 import type { Automation } from '../automation'
 import memory from './memory'
 
-import type { BrowserLaunchOpts, BrowserNewTabOpts, ProtocolManagerShape, RunModeVideoApi } from '@packages/types'
-import type { CDPSocketServer } from '@packages/socket/lib/cdp-socket'
+import type { BrowserLaunchOpts, BrowserNewTabOpts, ProtocolManagerShape, CyPromptManagerShape, RunModeVideoApi } from '@packages/types'
+import type { CDPSocketServer } from '@packages/socket'
 import { DEFAULT_CHROME_FLAGS } from '../util/chromium_flags'
 
 const debug = debugModule('cypress:server:browsers:chrome')
@@ -49,6 +48,29 @@ const pathToExtension = extension.getPathToV3Extension()
 const pathToTheme = extension.getPathToTheme()
 
 let browserCriClient: BrowserCriClient | undefined
+
+// Generates default Chrome preferences that Cypress applies to all Chrome instances
+const _getDefaultChromePreferences = (): ChromePreferences => {
+  return {
+    default: {
+      autofill: {
+        profile_enabled: false, // Disable Chrome's "Save address" pop up
+        credit_card_enabled: false, // Disable Chrome's "Save card" pop up
+      },
+    },
+    defaultSecure: {},
+    localState: {
+      browser: {
+        // Hide security warnings when potentially dangerous command-line flags are used.
+        command_line_flag_security_warnings_enabled: false,
+        // Setting the policy controls the presentation of promotional content,
+        // including the welcome pages that help users sign in to Google Chrome, set
+        // Google Chrome as users' default browser, or otherwise inform them of product features.
+        promotions_enabled: false,
+      },
+    },
+  }
+}
 
 /**
  * Reads all known preference files (CHROME_PREFERENCE_PATHS) from disk and return
@@ -77,6 +99,16 @@ const _getChromePreferences = (userDir: string): Bluebird<ChromePreferences> => 
       throw err
     })
   }))
+}
+
+// Reads raw preferences from disk and merges them with defaults
+const _getChromePreferencesWithDefaults = async (userDir: string): Promise<ChromePreferences> => {
+  const existingPrefs = await _getChromePreferences(userDir)
+
+  // Merge default preferences with existing preferences
+  const defaultPrefs = module.exports._getDefaultChromePreferences()
+
+  return _mergeChromePreferences(defaultPrefs, existingPrefs)
 }
 
 const _mergeChromePreferences = (originalPrefs: ChromePreferences, newPrefs: ChromePreferences): ChromePreferences => {
@@ -119,10 +151,16 @@ const _writeChromePreferences = (userDir: string, originalPrefs: ChromePreferenc
     const newJson = newPrefs[key]
 
     if (!newJson || _.isEqual(originalJson, newJson)) {
+      debug('skipping writing preferences for %s: no changes detected', key)
+
       return
     }
 
-    return fs.outputJson(path.join(userDir, CHROME_PREFERENCE_PATHS[key]), newJson)
+    const prefPath = path.join(userDir, CHROME_PREFERENCE_PATHS[key])
+
+    debug('writing Chrome preferences to %s: %o', prefPath, newJson)
+
+    return fs.outputJson(prefPath, newJson)
   })
   .return()
 }
@@ -216,8 +254,7 @@ async function _recordVideo (cdpAutomation: CdpAutomation, videoOptions: RunMode
 // a utility function that navigates to the given URL
 // once Chrome remote interface client is passed to it.
 const _navigateUsingCRI = async function (client, url) {
-  // @ts-ignore
-  la(check.url(url), 'missing url to navigate to', url)
+  la(_.isString(url) && url.match(/^https?:\/\/.*$/), 'missing url to navigate to', url)
   la(client, 'could not get CRI client')
   debug('received CRI client')
   debug('navigating to page %s', url)
@@ -297,6 +334,10 @@ export = {
   _setAutomation,
 
   _getChromePreferences,
+
+  _getChromePreferencesWithDefaults,
+
+  _getDefaultChromePreferences,
 
   _mergeChromePreferences,
 
@@ -409,6 +450,18 @@ export = {
     }
 
     await options.protocolManager?.connectToBrowser(browserCriClient.currentlyAttachedProtocolTarget)
+  },
+
+  async connectCyPromptToBrowser (options: { cyPromptManager?: CyPromptManagerShape }) {
+    const browserCriClient = this._getBrowserCriClient()
+
+    if (!browserCriClient?.currentlyAttachedTarget) throw new Error('Missing pageCriClient in connectCyPromptToBrowser')
+
+    if (!browserCriClient.currentlyAttachedCyPromptTarget) {
+      browserCriClient.currentlyAttachedCyPromptTarget = await browserCriClient.currentlyAttachedTarget.clone()
+    }
+
+    await options.cyPromptManager?.connectToBrowser(browserCriClient.currentlyAttachedCyPromptTarget)
   },
 
   async closeProtocolConnection () {
@@ -525,7 +578,7 @@ export = {
 
     const userDir = utils.getProfileDir(browser, isTextTerminal)
 
-    const [port, preferences] = await Bluebird.all([
+    const [port, rawPreferences] = await Bluebird.all([
       protocol.getRemoteDebuggingPort(),
       _getChromePreferences(userDir),
     ])
@@ -533,7 +586,7 @@ export = {
     const defaultArgs = this._getArgs(browser, options, port)
 
     const defaultLaunchOptions = utils.getDefaultLaunchOptions({
-      preferences,
+      preferences: rawPreferences,
       args: defaultArgs,
     })
 
@@ -544,9 +597,15 @@ export = {
       utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options),
     ])
 
+    // Merge preferences BEFORE writing them to disk
+    // Start with defaults merged with raw preferences
+    let finalPreferences = _mergeChromePreferences(module.exports._getDefaultChromePreferences(), rawPreferences)
+
     if (launchOptions.preferences) {
-      launchOptions.preferences = _mergeChromePreferences(preferences, launchOptions.preferences as ChromePreferences)
+      finalPreferences = _mergeChromePreferences(finalPreferences, launchOptions.preferences as ChromePreferences)
     }
+
+    debug('final Chrome preferences to be written: %o', finalPreferences)
 
     const [extDest] = await Bluebird.all([
       this._writeExtension(
@@ -557,7 +616,8 @@ export = {
       _disableRestorePagesPrompt(userDir),
       // Chrome adds a lock file to the user data dir. If we are restarting the run and browser, we need to remove it.
       fs.unlink(path.join(userDir, 'SingletonLock')).catch(() => {}),
-      _writeChromePreferences(userDir, preferences, launchOptions.preferences as ChromePreferences),
+      // Write the final merged preferences BEFORE launching the browser
+      _writeChromePreferences(userDir, rawPreferences, finalPreferences),
     ])
     // normalize the --load-extensions argument by
     // massaging what the user passed into our own
@@ -595,15 +655,6 @@ export = {
     })
 
     la(browserCriClient, 'expected Chrome remote interface reference', browserCriClient)
-
-    try {
-      browserCriClient.ensureMinimumProtocolVersion('1.3')
-    } catch (err: any) {
-      // if this minimum chrome version changes, sync it with
-      // packages/web-config/webpack.config.base.ts and
-      // npm/webpack-batteries-included-preprocessor/index.js
-      throw new Error(`Cypress requires at least Chrome 64.\n\nDetails:\n${err.message}`)
-    }
 
     // monkey-patch the .kill method to that the CDP connection is closed
     const originalBrowserKill = launchedBrowser.kill

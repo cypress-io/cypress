@@ -1,0 +1,9 @@
+[31mYour [33msupportFile[39m[31m is missing or invalid: [94m/path/to/supportFile[39m[31m[39m
+[31m[39m
+[31mThe supportFile must be a .js, .ts, .coffee file or be supported by your preprocessor plugin (if configured).[39m
+[31m[39m
+[31mFix your support file, or set supportFile to [95mfalse[39m[31m if a support file is not necessary for your project.[39m
+[31m[39m
+[31mIf you have just renamed the extension of your supportFile, restart Cypress.[39m
+[31m[39m
+[31mhttps://on.cypress.io/support-file-missing-or-invalid[39m

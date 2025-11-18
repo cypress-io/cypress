@@ -30,7 +30,7 @@ const slotContents = {
   panel4: () => <div class="h-full bg-yellow-100">panel4</div>,
 }
 
-describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 4000 }, () => {
+describe('<ResizablePanels />', { viewportWidth: 1500 }, () => {
   describe('the panels resize as expected', () => {
     beforeEach(() => {
       cy.mount(() => (
@@ -110,7 +110,7 @@ describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 40
     })
   })
 
-  describe('when panel 4 is shown', () => {
+  describe('when panel 4 is shown', { viewportWidth: 2000 }, () => {
     beforeEach(() => {
       cy.mount(() => (
         <div class="flex">
@@ -209,6 +209,7 @@ describe('<ResizablePanels />', { viewportWidth: 1500, defaultCommandTimeout: 40
       dragHandleToClientX('panel4', 1400)
       assertWidth('panel4', 600)
       dragHandleToClientX('panel4', 1660)
+      assertWidth('panel4', minPanel4Width)
       dragHandleToClientX('panel4', 1800)
       assertWidth('panel4', minPanel4Width)
       dragHandleToClientX('panel4', 1900)

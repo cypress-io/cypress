@@ -18,7 +18,7 @@ import type {
 import browserUtils from './browsers/utils'
 import auth from './cloud/auth'
 import user from './cloud/user'
-import cohorts from './cohorts'
+import * as cohorts from './cohorts'
 import { openProject } from './open_project'
 import { cache } from './cache'
 import { graphqlSchema } from '@packages/data-context/graphql/schema'

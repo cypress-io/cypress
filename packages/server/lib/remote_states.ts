@@ -1,8 +1,7 @@
-import { cors, uri } from '@packages/network'
+import { origin, getDomainNameFromParsedHost, parseUrlIntoHostProtocolDomainTldPort } from '@packages/network-tools'
 import Debug from 'debug'
 import _ from 'lodash'
-import type { ParsedHostWithProtocolAndHost } from '@packages/network/lib/types'
-import type { DocumentDomainInjection } from '@packages/network'
+import type { DocumentDomainInjection, ParsedHostWithProtocolAndHost } from '@packages/network-tools'
 
 export const DEFAULT_DOMAIN_NAME = 'localhost'
 
@@ -74,10 +73,7 @@ export class RemoteStates {
   }
 
   get (url: string) {
-    debug('get (origin key)', this.documentDomainInjection.getOrigin(url), this.remoteStates)
     const state = this.remoteStates.get(this.documentDomainInjection.getOrigin(url))
-
-    debug('getting remote state: %o for: %s', state, url)
 
     return _.cloneDeep(state)
   }
@@ -90,8 +86,6 @@ export class RemoteStates {
 
   getPrimary () {
     const state = Array.from(this.remoteStates.entries())[0][1]
-
-    debug('getting primary remote state: %o', state)
 
     return state
   }
@@ -115,8 +109,8 @@ export class RemoteStates {
   }
 
   private _stateFromUrl (url: string): RemoteState {
-    const remoteOrigin = uri.origin(url)
-    const remoteProps = cors.parseUrlIntoHostProtocolDomainTldPort(remoteOrigin)
+    const remoteOrigin = origin(url)
+    const remoteProps = parseUrlIntoHostProtocolDomainTldPort(remoteOrigin)
 
     if ((url === '<root>') || !fullyQualifiedRe.test(url)) {
       return {
@@ -132,7 +126,7 @@ export class RemoteStates {
       origin: remoteOrigin,
       strategy: 'http',
       fileServer: null,
-      domainName: cors.getDomainNameFromParsedHost(remoteProps),
+      domainName: getDomainNameFromParsedHost(remoteProps),
       props: remoteProps,
     }
   }

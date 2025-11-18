@@ -22,9 +22,13 @@ export class $Chainer {
     $Chainer.prototype[key] = function (...args) {
       const privilegeVerification = Cypress.emitMap('command:invocation', { name: key, args })
 
-      const userInvocationStack = $stackUtils.normalizedUserInvocationStack(
+      let userInvocationStack = $stackUtils.normalizedUserInvocationStack(
         (new this.specWindow.Error('command invocation stack')).stack,
       )
+
+      if (cy.state('originUserInvocationStack')) {
+        userInvocationStack = $stackUtils.mergeCrossOriginUserInvocationStack(userInvocationStack, cy.state('originUserInvocationStack'))
+      }
 
       // call back the original function with our new args
       // pass args an as array and not a destructured invocation

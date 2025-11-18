@@ -60,19 +60,18 @@ describe('spec title', () => {
       cy.percySnapshot()
     })
 
-    it('displays Open in IDE button on spec name hover', () => {
-      cy.get('.open-in-ide-button').should('have.css', 'opacity', '0')
-
-      cy.get('.spec-file-name').realHover()
-      cy.get('.open-in-ide-button').should('have.css', 'opacity', '1')
-      cy.get('.open-in-ide-button').contains('Open in IDE')
+    it('displays Open in IDE button on more actions button', () => {
+      cy.get('[data-cy="runnable-options-button"]').click()
+      cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
+      cy.get('[data-cy="runnable-popover-open-ide"]').contains('Open in IDE')
 
       cy.percySnapshot()
     })
 
     itHandlesFileOpening({
       getRunner: () => runner,
-      selector: '.open-in-ide-button',
+      previousClickSelector: '[data-cy="runnable-options-button"]',
+      selector: '[data-cy="runnable-popover-open-ide"]',
       file: {
         file: '/absolute/path/to/foo.js',
         line: 0,

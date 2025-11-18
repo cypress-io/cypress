@@ -1,0 +1,4 @@
+[31mThe [33minjectDocumentDomain[39m[31m option is only available for E2E testing.[39m
+[31m[39m
+[31mRead the documentation for the injectDocumentDomain configuration option: https://on.cypress.io/inject-document-domain-configuration[39m
+[31m[39m

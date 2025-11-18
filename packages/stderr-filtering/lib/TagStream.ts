@@ -2,8 +2,10 @@ import { Transform } from 'stream'
 import { START_TAG, END_TAG } from './constants'
 import { StringDecoder } from 'string_decoder'
 import Debug from 'debug'
+import { tagsDisabled } from './tagsDisabled'
 
 const debug = Debug('cypress:stderr-filtering:TagStream')
+const debugVerbose = Debug('cypress-verbose:stderr-filtering:TagStream')
 
 /**
  * A Transform stream that wraps input data with start and end tags.
@@ -66,13 +68,13 @@ export class TagStream extends Transform {
       const out = chunk instanceof Buffer ?
         this.initializedDecoder.write(chunk) :
         chunk
-      const transformed = `${this.startTag}${out}${this.endTag}`
+      const transformed = out ? this.tag(out) : Buffer.from('')
 
-      debug(`transformed: "${transformed.replaceAll('\n', '\\n')}"`)
-      const canWrite = this.push(out ? Buffer.from(transformed) : '')
+      debugVerbose(`transformed: "${transformed.toString().replaceAll('\n', '\\n')}"`)
+      const canWrite = this.push(transformed)
 
       if (!canWrite) {
-        debug('waiting for drain')
+        debugVerbose('waiting for drain')
         await new Promise((resolve) => this.once('drain', resolve))
       }
 
@@ -95,6 +97,10 @@ export class TagStream extends Transform {
     debug('flushing')
     const out = this.initializedDecoder.end()
 
-    callback(undefined, Buffer.from(`${this.startTag}${out}${this.endTag}`))
+    callback(undefined, out ? this.tag(out) : Buffer.from(''))
+  }
+
+  private tag (str: string): Buffer {
+    return tagsDisabled() ? Buffer.from(str) : Buffer.from(`${this.startTag}${str}${this.endTag}`)
   }
 }

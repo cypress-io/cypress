@@ -11,6 +11,7 @@ import {
   SESSION_STEPS,
   statusMap,
 } from './utils'
+import $sourceMapUtils from '../../../cypress/source_map_utils'
 
 /**
  * Session data should be cleared with spec browser launch.
@@ -151,6 +152,7 @@ export default function (Commands, Cypress, cy) {
           displayName: statusMap.stepName(step),
           message: '',
           type: 'system',
+          defaultCollapsedState: 'closed',
         }, (setupLogGroup) => {
           return cy.then({ timeout: INTERNAL_COMMAND_TIMEOUT }, async () => {
             // Catch when a cypress command fails in the setup function to correctly update log status
@@ -213,6 +215,7 @@ export default function (Commands, Cypress, cy) {
           displayName: 'Restore saved session',
           message: '',
           type: 'system',
+          defaultCollapsedState: 'closed',
           consoleProps: () => {
             return {
               Step: 'Restore saved session',
@@ -238,6 +241,7 @@ export default function (Commands, Cypress, cy) {
           displayName: 'Validate session',
           message: '',
           type: 'system',
+          defaultCollapsedState: 'closed',
           consoleProps: () => {
             return {
               Step: 'Validate Session',
@@ -260,7 +264,7 @@ export default function (Commands, Cypress, cy) {
               err = $errUtils.enhanceStack({
                 err,
                 userInvocationStack,
-                projectRoot: Cypress.config('projectRoot'),
+                projectRoot: $sourceMapUtils.getSourceMapProjectRoot(),
               })
 
               // show validation error and allow sessions workflow to recreate the session
@@ -495,6 +499,7 @@ export default function (Commands, Cypress, cy) {
       let _log
       const groupDetails = {
         message: `${session.id.length > 50 ? `${session.id.substring(0, 47)}...` : session.id}`,
+        defaultCollapsedState: 'closed' as const,
       }
 
       return logGroup(Cypress, groupDetails, (log) => {

@@ -7,7 +7,7 @@ import { getProxyForUrl } from 'proxy-from-env'
 import url from 'url'
 import { createRetryingSocket, getAddress } from './connect'
 import { lenientOptions } from './http-utils'
-import { ClientCertificateStore } from './client-certificates'
+import { clientCertificateStoreSingleton } from './client-certificates'
 import { CaOptions, getCaOptions } from './ca'
 
 const debug = debugModule('cypress:network:agent')
@@ -15,23 +15,27 @@ const CRLF = '\r\n'
 const statusCodeRe = /^HTTP\/1.[01] (\d*)/
 
 let baseCaOptions: CaOptions | undefined
-const getCaOptionsPromise = (): Promise<CaOptions> => {
-  return getCaOptions().then((options: CaOptions) => {
+const getCaOptionsAsync = async (): Promise<CaOptions> => {
+  try {
+    const options = await getCaOptions()
+
     baseCaOptions = options
 
     return options
-  }).catch(() => {
+  } catch (error) {
+    debug('Error getting CA options', error)
+
     // Errors reading the config are treated as warnings by npm and node and handled by those processes separately
     // from what we're doing here.
-    return {}
-  })
+    return {} as CaOptions
+  }
 }
-let baseCaOptionsPromise: Promise<CaOptions> = getCaOptionsPromise()
+let baseCaOptionsPromise: Promise<CaOptions> = getCaOptionsAsync()
 
 // This is for testing purposes only
 export const _resetBaseCaOptionsPromise = () => {
   baseCaOptions = undefined
-  baseCaOptionsPromise = getCaOptionsPromise()
+  baseCaOptionsPromise = getCaOptionsAsync()
 }
 
 const mergeCAOptions = (options: https.RequestOptions, caOptions: CaOptions): https.RequestOptions => {
@@ -54,8 +58,6 @@ const mergeCAOptions = (options: https.RequestOptions, caOptions: CaOptions): ht
     ca: [...caArray, ...caOptions.ca],
   }
 }
-
-export const clientCertificateStore = new ClientCertificateStore()
 
 type WithProxyOpts<RequestOptions> = RequestOptions & {
   proxy: string
@@ -148,6 +150,7 @@ export const regenerateRequestHead = (req: http.ClientRequest) => {
   }
 }
 
+// this function has to be sync via callback because it is called by the Agent.addRequest method, which expect a sync function
 export const getFirstWorkingFamily = (
   { port, host }: Pick<http.RequestOptions, 'port' | 'host'>,
   familyCache: FamilyCache,
@@ -198,6 +201,7 @@ export class CombinedAgent {
   }
 
   // called by Node.js whenever a new request is made internally
+  // NOTE: this function has to be sync via callback because it is called by the Agent.addRequest method, which expect a sync function
   addRequest (req: http.ClientRequest, options: http.RequestOptions, port?: number, localAddress?: string) {
     _.merge(req, lenientOptions)
 
@@ -254,7 +258,7 @@ export class CombinedAgent {
       debug('got family %o', _.pick(options, 'family', 'href'))
 
       if (isHttps) {
-        _.assign(options, clientCertificateStore.getClientCertificateAgentOptionsForUrl(uri))
+        _.assign(options, clientCertificateStoreSingleton.getClientCertificateAgentOptionsForUrl(uri))
 
         return this.httpsAgent.addRequest(req, options as https.RequestOptions)
       }
@@ -264,7 +268,7 @@ export class CombinedAgent {
   }
 }
 
-const getProxyOrTargetOverrideForUrl = (href) => {
+const getProxyOrTargetOverrideForUrl = (href: string) => {
   // HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS is used for Cypress in Cypress E2E testing and will
   // force the parent Cypress server to treat the child Cypress server like a proxy without
   // having HTTP_PROXY set and will force traffic ONLY bound to that origin to behave
@@ -329,7 +333,7 @@ class HttpAgent extends http.Agent {
 
     if (proxy.protocol === 'https:') {
       // gonna have to use the https module to reach the proxy, even though this is an http req
-      req.agent = this.httpsAgent
+      req.agent = this.httpsAgent as any
 
       return this.httpsAgent.addRequest(req, options)
     }
@@ -397,7 +401,7 @@ class HttpsAgent extends https.Agent {
     const port = options.uri?.port || '443'
     const hostname = options.uri?.hostname || 'localhost'
 
-    createProxySock({ proxy, shouldRetry: options.shouldRetry }, (originalErr?, proxySocket?, triggerRetry?) => {
+    createProxySock({ proxy, shouldRetry: options.shouldRetry }, (originalErr?: Error, proxySocket?: net.Socket, triggerRetry?: (err: Error) => void) => {
       if (originalErr) {
         const err: any = new Error(`A connection to the upstream proxy could not be established: ${originalErr.message}`)
 
@@ -408,12 +412,12 @@ class HttpsAgent extends https.Agent {
       }
 
       const onClose = () => {
-        triggerRetry(new Error('ERR_EMPTY_RESPONSE: The upstream proxy closed the socket after connecting but before sending a response.'))
+        triggerRetry?.(new Error('ERR_EMPTY_RESPONSE: The upstream proxy closed the socket after connecting but before sending a response.'))
       }
 
       const onError = (err: Error) => {
-        triggerRetry(err)
-        proxySocket.destroy()
+        triggerRetry?.(err)
+        proxySocket?.destroy()
       }
 
       let buffer = ''
@@ -425,15 +429,15 @@ class HttpsAgent extends https.Agent {
 
         if (!_.includes(buffer, _.repeat(CRLF, 2))) {
           // haven't received end of headers yet, keep buffering
-          proxySocket.once('data', onData)
+          proxySocket?.once('data', onData)
 
           return
         }
 
         // we've now gotten enough of a response not to retry
         // connecting to the proxy
-        proxySocket.removeListener('error', onError)
-        proxySocket.removeListener('close', onClose)
+        proxySocket?.removeListener('error', onError)
+        proxySocket?.removeListener('close', onClose)
 
         if (!isResponseStatusCode200(buffer)) {
           return cb(new Error(`Error establishing proxy connection. Response from server was: ${buffer}`), undefined)
@@ -455,18 +459,30 @@ class HttpsAgent extends https.Agent {
         cb(undefined, proxySocket)
       }
 
-      proxySocket.once('close', onClose)
-      proxySocket.once('error', onError)
-      proxySocket.once('data', onData)
+      proxySocket?.once('close', onClose)
+      proxySocket?.once('error', onError)
+      proxySocket?.once('data', onData)
 
       const connectReq = buildConnectReqHead(hostname, port, proxy)
 
-      proxySocket.setNoDelay(true)
-      proxySocket.write(connectReq)
+      proxySocket?.setNoDelay(true)
+      proxySocket?.write(connectReq)
     })
   }
 }
 
+// NODE_TLS_REJECT_UNAUTHORIZED is set to '0' in Cypress to cover
+// all traffic to the user's app and `agent` honors this by default.
+// Calls to the Cloud should use the `strictAgent` or `api/index`'s
+// request promise implementation instead as they override
+// this functionality to actually reject in unauthorized situations.
 const agent = new CombinedAgent()
 
+// This agent always rejects unauthorized certificates.
+const strictAgent = new CombinedAgent({}, {
+  rejectUnauthorized: true,
+})
+
 export default agent
+
+export { strictAgent }

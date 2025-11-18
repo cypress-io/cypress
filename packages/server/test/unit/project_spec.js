@@ -15,6 +15,7 @@ const runEvents = require(`../../lib/plugins/run_events`).default
 const system = require(`../../lib/util/system`)
 const { getCtx } = require(`../../lib/makeDataContext`)
 const browsers = require('../../lib/browsers')
+const { CyPromptLifecycleManager } = require('../../lib/cloud/cy-prompt/CyPromptLifecycleManager')
 const { StudioLifecycleManager } = require('../../lib/cloud/studio/StudioLifecycleManager')
 const { StudioManager } = require('../../lib/cloud/studio/studio')
 const { telemetryManager, MARK_NAMES, TELEMETRY_GROUP_NAMES } = require('../../lib/cloud/studio/telemetry/TelemetryManager')
@@ -26,6 +27,7 @@ let ctx
 describe('lib/project-base', () => {
   beforeEach(async function () {
     delete process.env.CYPRESS_LOCAL_STUDIO_PATH
+    delete process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE
 
     ctx = getCtx()
     Fixtures.scaffold()
@@ -513,6 +515,45 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
     })
 
+    describe('CyPromptLifecycleManager', function () {
+      let initializeCyPromptManagerStub
+
+      afterEach(function () {
+        initializeCyPromptManagerStub.restore()
+      })
+
+      it('initializes cy prompt lifecycle manager if experimentalPromptCommand is enabled', function () {
+        this.config.projectId = 'abc123'
+        this.config.experimentalPromptCommand = true
+        this.project.options.record = true
+        this.project.options.key = '123e4567-e89b-12d3-a456-426614174000'
+
+        initializeCyPromptManagerStub = sinon.stub(CyPromptLifecycleManager.prototype, 'initializeCyPromptManager')
+
+        return this.project.open()
+        .then(() => {
+          expect(initializeCyPromptManagerStub).to.be.calledWith({
+            cloudDataSource: ctx.cloud,
+            ctx,
+            record: true,
+            key: '123e4567-e89b-12d3-a456-426614174000',
+          })
+        })
+      })
+
+      it('does not initialize cy prompt lifecycle manager if experimentalPromptCommand is not enabled', function () {
+        this.config.projectId = 'abc123'
+        this.config.experimentalPromptCommand = false
+
+        initializeCyPromptManagerStub = sinon.stub(CyPromptLifecycleManager.prototype, 'initializeCyPromptManager')
+
+        return this.project.open()
+        .then(() => {
+          expect(initializeCyPromptManagerStub).not.to.be.called
+        })
+      })
+    })
+
     describe('saved state', function () {
       beforeEach(function () {
         this._time = 1609459200000
@@ -574,19 +615,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     describe('studio initialization', function () {
-      it('does not create studio lifecycle manager when experimental flag is disabled', async function () {
-        const cfg = {
-          isTextTerminal: false,
-          resolved: {
-            experimentalStudio: {
-              value: false,
-            },
-          },
-          projectId: 'test-project',
-          port: 8080,
-        }
-
-        sinon.stub(this.project, 'initializeConfig').resolves(cfg)
+      it('does not create studio lifecycle manager when in text terminal mode', async function () {
+        this.project.cfg.isTextTerminal = true
         sinon.stub(this.project, 'saveState').resolves()
 
         sinon.stub(process, 'chdir')
@@ -596,19 +626,9 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         expect(this.project.ctx.coreData.studioLifecycleManager).to.be.undefined
       })
 
-      it('does not create studio lifecycle manager when in text terminal mode', async function () {
-        const cfg = {
-          isTextTerminal: true,
-          resolved: {
-            experimentalStudio: {
-              value: true,
-            },
-          },
-          projectId: 'test-project',
-          port: 8080,
-        }
+      it('does not create studio lifecycle manager for component testing', async function () {
+        this.project.testingType = 'component'
 
-        sinon.stub(this.project, 'initializeConfig').resolves(cfg)
         sinon.stub(this.project, 'saveState').resolves()
 
         sinon.stub(process, 'chdir')
@@ -616,6 +636,31 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         await this.project.open()
 
         expect(this.project.ctx.coreData.studioLifecycleManager).to.be.undefined
+      })
+
+      it('creates studio lifecycle manager for e2e testing', async function () {
+        sinon.stub(this.project, 'saveState').resolves()
+
+        sinon.stub(process, 'chdir')
+
+        await this.project.open()
+
+        expect(this.project.ctx.coreData.studioLifecycleManager).to.not.be.undefined
+      })
+
+      it('creates studio lifecycle manager when CYPRESS_INTERNAL_SIMULATE_OPEN_MODE is set even in text terminal mode', async function () {
+        this.project.cfg.isTextTerminal = true
+        process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE = '1'
+
+        sinon.stub(this.project, 'saveState').resolves()
+        sinon.stub(process, 'chdir')
+
+        await this.project.open()
+
+        expect(this.project.ctx.coreData.studioLifecycleManager).to.not.be.undefined
+
+        // Clean up environment variable
+        delete process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE
       })
     })
   })
@@ -784,6 +829,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         const mockBeforeSpec = sinon.stub()
         const mockAccessStudioAI = sinon.stub().resolves(true)
         const mockCaptureStudioEvent = sinon.stub().resolves()
+        const mockUpdateSessionId = sinon.stub()
 
         this.project.spec = {}
 
@@ -802,6 +848,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
           db: { test: 'db' },
           dbPath: 'test-db-path',
         }
+
+        studioManager.updateSessionId = mockUpdateSessionId
 
         const studioLifecycleManager = new StudioLifecycleManager()
 
@@ -849,6 +897,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
           name: 'chrome',
         })
 
+        expect(mockUpdateSessionId.getCall(0).args[0]).to.be.a.uuid()
+
         expect(browsers.connectProtocolToBrowser).to.be.calledWith({
           browser: this.project.browser,
           foundBrowsers: this.project.options.browsers,
@@ -876,6 +926,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         const mockBeforeSpec = sinon.stub()
         const mockAccessStudioAI = sinon.stub().resolves(true)
         const mockCaptureStudioEvent = sinon.stub().resolves()
+        const mockUpdateSessionId = sinon.stub()
 
         this.project.spec = {}
 
@@ -894,6 +945,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
           db: { test: 'db' },
           dbPath: 'test-db-path',
         }
+
+        studioManager.updateSessionId = mockUpdateSessionId
 
         const studioLifecycleManager = new StudioLifecycleManager()
 
@@ -933,6 +986,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         const { cloudStudioSessionId } = await studioInitPromise
 
         expect(cloudStudioSessionId).to.equal('existing-session-id')
+        expect(mockUpdateSessionId).to.be.calledOnceWith('existing-session-id')
       })
 
       it('calls resetBrowserState during onStudioInit when AI is enabled', async function () {
@@ -1297,6 +1351,40 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         expect(studioManager.destroy).not.to.have.been.called
         expect(browsers.closeProtocolConnection).not.to.have.been.called
         expect(protocolManager.close).not.to.have.been.called
+      })
+    })
+
+    it('passes onCyPromptReady callback', async function () {
+      const mockCyPromptManager = {
+        foo: 'bar',
+      }
+
+      // Create a browser object
+      this.project.browser = {
+        name: 'chrome',
+        family: 'chromium',
+      }
+
+      this.project.options = { browsers: [this.project.browser] }
+
+      sinon.stub(browsers, 'connectCyPromptToBrowser')
+
+      // Modify the startWebsockets stub to track the callbacks
+      const callbackPromise = new Promise((resolve) => {
+        this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
+          await callbacks.onCyPromptReady(mockCyPromptManager)
+          resolve()
+        })
+      })
+
+      this.project.startWebsockets({}, {})
+
+      await callbackPromise
+
+      expect(browsers.connectCyPromptToBrowser).to.have.been.calledWith({
+        browser: this.project.browser,
+        foundBrowsers: this.project.options.browsers,
+        cyPromptManager: mockCyPromptManager,
       })
     })
   })
