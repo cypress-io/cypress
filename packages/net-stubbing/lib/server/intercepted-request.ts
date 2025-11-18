@@ -72,6 +72,12 @@ export class InterceptedRequest {
       return
     }
 
+    if (this.req.isSyncRequest) {
+      console.warn('WARNING: Sync Request not intercepted')
+
+      return
+    }
+
     for (const route of this.req.matchingRoutes) {
       if (route.disabled) {
         continue
@@ -173,7 +179,7 @@ export class InterceptedRequest {
 
         const _emit = () => emit(this.socket, eventName, eventFrame)
 
-        if (!subscription.await || this.req.isSyncRequest) {
+        if (!subscription.await) {
           _emit()
 
           return
