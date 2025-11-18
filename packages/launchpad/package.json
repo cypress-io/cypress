@@ -39,7 +39,7 @@
     "@tooling/system-tests": "0.0.0-development",
     "@toycode/markdown-it-class": "1.2.4",
     "@types/dedent": "^0.7.2",
-    "@types/fs-extra": "^8.0.1",
+    "@types/fs-extra": "^8.1.5",
     "@urql/core": "2.4.4",
     "@urql/devtools": "2.0.3",
     "@urql/vue": "0.6.2",
