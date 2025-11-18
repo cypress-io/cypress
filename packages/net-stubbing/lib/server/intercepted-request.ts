@@ -73,7 +73,7 @@ export class InterceptedRequest {
     }
 
     if (this.req.isSyncRequest) {
-      console.warn('WARNING: Sync Request not intercepted')
+      console.warn('WARNING: Sync Request was not intercepted')
 
       return
     }
