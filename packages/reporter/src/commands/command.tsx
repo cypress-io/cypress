@@ -15,6 +15,7 @@ import type { TimeoutID } from '../lib/types'
 import runnablesStore from '../runnables/runnables-store'
 import type { Alias, AliasObject } from '../instruments/instrument-model'
 import { determineTagType } from '../sessions/utils'
+import { MAX_VISIBILITY_CHECK_ELEMENTS } from '@packages/types'
 
 import type CommandModel from './command-model'
 import type { RenderProps } from './command-model'
@@ -82,6 +83,10 @@ export const formattedMessage = (message: string, name?: string) => {
 }
 
 const invisibleMessage = (model: CommandModel) => {
+  if (model.numElements > MAX_VISIBILITY_CHECK_ELEMENTS) {
+    return `Too many elements matched for this command to determine visibility. Some elements may not be visible.`
+  }
+
   return model.numElements > 1 ?
     'One or more matched elements are not visible.' :
     'This element is not visible.'
@@ -360,7 +365,7 @@ const CommandControls: React.FC<CommandControlsProps> = observer(({ model, comma
           type={determineTagType(model.state)}
         />
       )}
-      {!model.visible && (
+      {(!model.visible || model.numElements > MAX_VISIBILITY_CHECK_ELEMENTS) && (
         <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
           <span>
             <HiddenIcon className='command-invisible' />

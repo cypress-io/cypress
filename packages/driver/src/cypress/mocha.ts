@@ -535,7 +535,7 @@ const patchSuiteAddTest = (specWindow) => {
     const test = args[0]
 
     if (!test.invocationDetails) {
-      test.invocationDetails = $stackUtils.getInvocationDetails(specWindow, $sourceMapUtils.getSourceMapProjectRoot())
+      test.invocationDetails = $stackUtils.getInvocationDetails(specWindow, $sourceMapUtils.getSourceMapProjectRoot(), 'test')
     }
 
     const ret = suiteAddTest.apply(this, args)
