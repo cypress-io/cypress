@@ -38,7 +38,7 @@
     "@testing-library/cypress": "10.1.0",
     "@tooling/system-tests": "0.0.0-development",
     "@toycode/markdown-it-class": "1.2.4",
-    "@types/dedent": "^0.7.0",
+    "@types/dedent": "^0.7.2",
     "@types/fs-extra": "^8.0.1",
     "@urql/core": "2.4.4",
     "@urql/devtools": "2.0.3",
