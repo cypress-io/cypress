@@ -1,11 +1,15 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.6.1
+## 15.7.0
 
 _Released 11/18/2025 (PENDING)_
 
 **Performance:**
 
 - Limits the number of matched elements that are tested for visibility when added to a command log entry. Fixes a crash scenario related to rapid successive DOM additions in conjunction with a large number of elements returned from a query. Addressed in [#32937](https://github.com/cypress-io/cypress/pull/32937).
+
+**Features:**
+
+- `Next.js` version 16 is now supported within component testing. Currently, `webpack` is used to bundle Next.js components. Turbopack, the [new default](https://nextjs.org/docs/app/guides/upgrading/version-16#turbopack-by-default) inside Next.js 16, is not yet supported within Cypress. Addresses [#32857](https://github.com/cypress-io/cypress/issues/32857).
 
 **Bugfixes:**
 
@@ -24,7 +28,7 @@ _Released 11/4/2025_
 
 **Features:**
 
- - Added a 'Self-healed' badge to the Command Log when [`cy.prompt()`](https://docs.cypress.io/api/commands/prompt) steps automatically recover after the element they need is not found in the cache. Addressed in [#32802](https://github.com/cypress-io/cypress/pull/32802).
+- Added a 'Self-healed' badge to the Command Log when [`cy.prompt()`](https://docs.cypress.io/api/commands/prompt) steps automatically recover after the element they need is not found in the cache. Addressed in [#32802](https://github.com/cypress-io/cypress/pull/32802).
 - [`cy.prompt()`](https://docs.cypress.io/api/commands/prompt) will now show a warning in the `Get code` modal when there are unsaved changes in `Studio` that will be lost if the user saves the generated code. Addressed in [#32741](https://github.com/cypress-io/cypress/pull/32741).
 
 **Bugfixes:**
