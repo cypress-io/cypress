@@ -119,16 +119,12 @@ commands:
   # This command inserts SHOULD_PERSIST_ARTIFACTS into BASH_ENV. This way, we can define the variable in one place and use it in multiple steps.
   # Run this command in a job before you want to use the SHOULD_PERSIST_ARTIFACTS variable.
   setup_should_persist_artifacts:
-    parameters:
-      force-persist-artifacts:
-        type: boolean
-        default: false
     steps:
       - run:
           name: Set environment variable to determine whether or not to persist artifacts
           command: |
             echo "Setting SHOULD_PERSIST_ARTIFACTS variable"
-            if [[ "<< parameters.force-persist-artifacts >>" == "true" ]]; then
+            if [[ "<< pipeline.parameters.force-persist-artifacts >>" == "true" ]]; then
               echo 'export SHOULD_PERSIST_ARTIFACTS=true' >> "$BASH_ENV"
             else
               echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* ]]; then
@@ -2483,9 +2479,6 @@ jobs:
       resource_class:
         type: string
         default: medium
-      force-persist-artifacts:
-        type: boolean
-        default: false
     resource_class: << parameters.resource_class >>
     steps:
       - maybe_skip_binary_jobs
@@ -2493,8 +2486,7 @@ jobs:
       - run:
           name: Check pipeline info
           command: cat ~/triggered_pipeline.json
-      - setup_should_persist_artifacts:
-          force-persist-artifacts: << parameters.force-persist-artifacts >>
+      - setup_should_persist_artifacts
       - run:
           name: Download binary artifacts
           command: |
