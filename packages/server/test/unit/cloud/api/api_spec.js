@@ -1003,10 +1003,12 @@ describe('lib/cloud/api', () => {
 
     it('POSTs /instances/:id/tests strips arbitrarily large config values', function () {
       this.props.config = {
+        projectId: 'abcd1234',
         devServer: {
           bundler: 'webpack',
           framework: 'react',
           webpackConfig: 'a'.repeat(10000),
+          viteConfig: 'a'.repeat(10000),
         },
         env: {
           NUMERIC_VALUE: 1,
@@ -1038,7 +1040,16 @@ describe('lib/cloud/api', () => {
       })
       .reply(200)
 
-      expect(expectedConfig.env.TRUTHY_VALUE).to.equal(true)
+      expect(expectedConfig.projectId).to.eq('abcd1234')
+      expect(expectedConfig.env).to.eql({
+        NUMERIC_VALUE: `omitted: number`,
+        TRUTHY_VALUE: `omitted: boolean`,
+        SOME_REALLY_LONG_VALUE: `omitted: string`,
+      })
+
+      expect(expectedConfig.resolved).to.be.undefined
+      expect(expectedConfig.devServer.webpackConfig).to.equal('omitted')
+      expect(expectedConfig.devServer.viteConfig).to.equal('omitted')
 
       return api.postInstanceTests(this.props)
     })
