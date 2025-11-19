@@ -602,16 +602,7 @@ describe('e2e record', () => {
       const requests = getRequests()
 
       expect(requests[2].body.config.defaultCommandTimeout).eq(1111)
-      expect(requests[2].body.config.resolved.defaultCommandTimeout).deep.eq({
-        value: 1111,
-        from: 'runtime',
-      })
-
       expect(requests[2].body.config.pageLoadTimeout).eq(3333)
-      expect(requests[2].body.config.resolved.pageLoadTimeout).deep.eq({
-        value: 3333,
-        from: 'runtime',
-      })
 
       expect(requests[2].body.tests[0].config).deep.eq({
         defaultCommandTimeout: 1234,

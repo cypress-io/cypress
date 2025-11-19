@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v5.2.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.1.5...@cypress/webpack-dev-server-v5.2.0) (2025-11-19)
+
+
+### Features
+
+* support Next.js 16 inside component testing ([#32955](https://github.com/cypress-io/cypress/issues/32955)) ([12f72f2](https://github.com/cypress-io/cypress/commit/12f72f23784f32faead8437579e29cb592fb62d1))
+
 # [@cypress/webpack-dev-server-v5.1.5](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.1.4...@cypress/webpack-dev-server-v5.1.5) (2025-11-07)
 
 # [@cypress/webpack-dev-server-v5.1.4](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.1.3...@cypress/webpack-dev-server-v5.1.4) (2025-11-04)
