@@ -61,7 +61,7 @@ export const WIZARD_DEPENDENCY_NEXT = {
   // next 15.0.0 -> 15.0.3 use the React 19 RC as a dependency
   // Since we do not support the React 19 RC and only the official React 19 release,
   // we will only be supporting Next.js 15.0.4 officially (the others previously mentioned should still work)
-  minVersion: '^14.0.0 || ^15.0.4',
+  minVersion: '^14.0.0 || ^15.0.4 || ^16.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_ANGULAR_CLI = {
