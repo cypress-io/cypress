@@ -73,7 +73,7 @@ export type StudioElectronApi = {
   createBrowserWindow: () => BrowserWindow
 }
 
-export interface CDPClient {
+export interface CDPInternalClient {
   send<T extends string>(
     command: T,
     params?: any
@@ -88,7 +88,7 @@ export interface StudioCDPApi {
   /**
    * Get the CDP client for executing commands in the browser
    */
-  getCDPClient: () => CDPClient | null
+  getCDPClient: () => CDPInternalClient | null
   /**
    * Find the snapshot iframe frame ID from the frame tree
    */

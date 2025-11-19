@@ -1,5 +1,5 @@
 import Debug from 'debug'
-import type { StudioCDPApi, CDPClient } from '@packages/types/src/studio/studio-server-types'
+import type { StudioCDPApi, CDPInternalClient } from '@packages/types/src/studio/studio-server-types'
 
 const debug = Debug('cypress:server:studio:cdp')
 
@@ -10,17 +10,17 @@ const AUT_FRAME_NAME_IDENTIFIER = 'Your project:'
  * for rendering snapshots in an iframe within the AUT window.
  */
 export class StudioCDP implements StudioCDPApi {
-  private cdpClient: CDPClient | null = null
+  private cdpClient: CDPInternalClient | null = null
 
   /**
    * Set the CDP client when it becomes available (e.g., when browser connects)
    */
-  setCDPClient (cdpClient: CDPClient | null) {
+  setCDPClient (cdpClient: CDPInternalClient | null) {
     this.cdpClient = cdpClient
     debug('CDP client set:', !!cdpClient, cdpClient ? 'client available' : 'client cleared')
   }
 
-  getCDPClient (): CDPClient | null {
+  getCDPClient (): CDPInternalClient | null {
     // If CDP client is not set, try to get it from the browser CRI client
     // This is a fallback for cases where setCDPClient wasn't called yet
     if (!this.cdpClient) {

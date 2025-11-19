@@ -140,7 +140,7 @@ export = {
     return this.getBrowserInstance()
   },
 
-  async connectProtocolToBrowser (options: { browser: Browser, foundBrowsers?: FoundBrowser[], protocolManager?: ProtocolManagerShape, studioManager?: { setCDPClient: (cdpClient: any) => void } }) {
+  async connectProtocolToBrowser (options: { browser: Browser, foundBrowsers?: FoundBrowser[], protocolManager?: ProtocolManagerShape, studioManager?: any }) {
     const browserLauncher = await getBrowserLauncher(options.browser, options.foundBrowsers || [])
 
     await browserLauncher.connectProtocolToBrowser(options)
