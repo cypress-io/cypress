@@ -1,0 +1,21 @@
+body { margin: 20px; font-family: Arial, sans-serif; }
+.test-section { display:none; margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
+.test-section h3 { margin-top: 0; }
+.test-section.active { display: block; }
+table { border-collapse: collapse; margin: 10px 0; }
+td, th { border: 1px solid #ccc; padding: 5px; }
+nav {
+  display: block;
+}
+nav li {
+  display: inline-block;
+  list-style: none;
+}
+
+[cy-expect="hidden"], [cy-legacy-expect="hidden"], [cy-fast-expect="hidden"] {
+  background-color: lightcoral;
+}
+
+[cy-expect="visible"], [cy-legacy-expect="visible"], [cy-fast-expect="visible"] {
+  background-color: lightgreen;
+}

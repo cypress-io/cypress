@@ -15,9 +15,9 @@ import { openProject } from '../open_project'
 import * as videoCapture from '../video_capture'
 import { fs, getPath } from '../util/fs'
 import runEvents from '../plugins/run_events'
-import env from '../util/env'
+import * as env from '../util/env'
 import trash from '../util/trash'
-import random from '../util/random'
+import { id as randomId } from '../util/random'
 import system from '../util/system'
 import chromePolicyCheck from '../util/chrome_policy_check'
 import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser, BrowserVideoController, VideoRecording, ProcessOptions, ProtocolManagerShape, AutomationCommands } from '@packages/types'
@@ -764,7 +764,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
 
 function screenshotMetadata (data: any, resp: any) {
   return {
-    screenshotId: random.id(),
+    screenshotId: randomId(),
     name: data.name || null,
     testId: data.testId,
     testAttemptIndex: data.testAttemptIndex,

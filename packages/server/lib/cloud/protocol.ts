@@ -8,7 +8,7 @@ import os from 'os'
 import path from 'path'
 import { strictAgent } from '@packages/network'
 import pkg from '@packages/root'
-import env from '../util/env'
+import * as env from '../util/env'
 import { putProtocolArtifact } from './api/put_protocol_artifact'
 import { requireScript } from './require_script'
 import * as routes from './routes'
@@ -259,8 +259,8 @@ export class ProtocolManager implements ProtocolManagerShape {
     this.invokeSync('pageLoading', { isEssential: false }, input)
   }
 
-  resetTest (testId: string): void {
-    this.invokeSync('resetTest', { isEssential: false }, testId)
+  resetTest (testId: string, currentRetry?: number): void {
+    this.invokeSync('resetTest', { isEssential: false }, testId, currentRetry)
   }
 
   responseEndedWithEmptyBody (options: ResponseEndedWithEmptyBodyOptions): void {

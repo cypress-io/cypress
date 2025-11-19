@@ -15,6 +15,7 @@ import type { TimeoutID } from '../lib/types'
 import runnablesStore from '../runnables/runnables-store'
 import type { Alias, AliasObject } from '../instruments/instrument-model'
 import { determineTagType } from '../sessions/utils'
+import { MAX_VISIBILITY_CHECK_ELEMENTS } from '@packages/types'
 
 import type CommandModel from './command-model'
 import type { RenderProps } from './command-model'
@@ -25,6 +26,7 @@ import HiddenIcon from '@packages/frontend-shared/src/assets/icons/general-eye-c
 import PinIcon from '@packages/frontend-shared/src/assets/icons/object-pin_x16.svg'
 import RunningIcon from '@packages/frontend-shared/src/assets/icons/status-running_x16.svg'
 import { IconTechnologyAngleBrackets } from '@cypress-design/react-icon'
+import { SelfHealedBadge } from '../lib/selfHealedBadge'
 
 const displayName = (model: CommandModel) => model.displayName || model.name
 const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
@@ -81,6 +83,10 @@ export const formattedMessage = (message: string, name?: string) => {
 }
 
 const invisibleMessage = (model: CommandModel) => {
+  if (model.numElements > MAX_VISIBILITY_CHECK_ELEMENTS) {
+    return `Too many elements matched for this command to determine visibility. Some elements may not be visible.`
+  }
+
   return model.numElements > 1 ?
     'One or more matched elements are not visible.' :
     'This element is not visible.'
@@ -279,6 +285,9 @@ const Message: React.FC<MessageProps> = observer(({ model }: MessageProps) => (
       className='command-message-text'
       dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage, model.name) }}
     />}
+    {model.isSelfHealed && (
+      <SelfHealedBadge source='command' />
+    )}
   </span>
 ))
 
@@ -356,7 +365,7 @@ const CommandControls: React.FC<CommandControlsProps> = observer(({ model, comma
           type={determineTagType(model.state)}
         />
       )}
-      {!model.visible && (
+      {(!model.visible || model.numElements > MAX_VISIBILITY_CHECK_ELEMENTS) && (
         <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
           <span>
             <HiddenIcon className='command-invisible' />

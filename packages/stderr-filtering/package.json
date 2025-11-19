@@ -26,6 +26,7 @@
     "dist"
   ],
   "types": "dist/index.d.ts",
+  "license": "MIT",
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix"
   }

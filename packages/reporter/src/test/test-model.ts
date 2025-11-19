@@ -51,7 +51,6 @@ export default class Test extends Runnable {
   type = 'test'
 
   _callbackAfterUpdate: UpdateTestCallback | null = null
-  hooks: HookProps[]
   invocationDetails?: FileDetails
 
   attempts: Attempt[] = []
@@ -76,6 +75,7 @@ export default class Test extends Runnable {
       hasRetried: computed,
       isActive: computed,
       currentRetry: computed,
+      isSelfHealed: computed,
       start: action,
       update: action,
       setIsOpen: action,
@@ -256,5 +256,13 @@ export default class Test extends Runnable {
     if (attempt) return cb(attempt)
 
     return null
+  }
+
+  get isSelfHealed () {
+    // Compute self-healed status from the commands in all attempts
+    // This ensures the badge is shown correctly even across retries
+    return _.some(this.attempts, (attempt: Attempt) => {
+      return _.some(attempt.commands, (command) => command.isSelfHealed)
+    })
   }
 }

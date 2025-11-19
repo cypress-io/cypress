@@ -26,7 +26,7 @@ export type LoadSpecOptions = {
   failCount?: number | string
   pendingCount?: number | string
   hasPreferredIde?: boolean
-  projectName?: 'runner-e2e-specs' | 'runner-ct-specs' | 'session-and-origin-e2e-specs' | ExperimentalRetriesProjects
+  projectName?: 'runner-e2e-specs' | 'runner-e2e-specs-new-sourcemap-root' | 'runner-ct-specs' | 'session-and-origin-e2e-specs' | ExperimentalRetriesProjects
   mode?: 'e2e' | 'component'
   configFile?: string
   scaffold?: boolean

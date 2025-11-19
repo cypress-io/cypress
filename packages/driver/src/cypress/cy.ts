@@ -33,6 +33,7 @@ import { historyNavigationTriggeredHashChange } from '../cy/navigation'
 import { EventEmitter2 } from 'eventemitter2'
 import { handleCrossOriginCookies } from '../cross-origin/events/cookies'
 import { trackTopUrl } from '../util/trackTopUrl'
+import $sourceMapUtils from './source_map_utils'
 
 import type { ICypress } from '../cypress'
 import type { ICookies } from './cookies'
@@ -399,7 +400,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     err = $errUtils.enhanceStack({
       err,
       userInvocationStack,
-      projectRoot: this.config('projectRoot'),
+      projectRoot: $sourceMapUtils.getSourceMapProjectRoot(),
     })
 
     err = $errUtils.processErr(err, this.config)
