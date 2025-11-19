@@ -161,6 +161,8 @@ export class ProjectConfigIpc extends EventEmitter {
         if (err.code === 'EPIPE') {
           debug('EPIPE error in loadConfig() of child process %s', err)
 
+          resolve()
+
           return
         }
 
@@ -238,6 +240,8 @@ export class ProjectConfigIpc extends EventEmitter {
       this._childProcess.on('error', (err: NodeJS.ErrnoException) => {
         if (err.code === 'EPIPE') {
           debug('EPIPE error in registerSetupIpcHandlers() of child process %s', err)
+
+          resolve()
 
           return
         }
