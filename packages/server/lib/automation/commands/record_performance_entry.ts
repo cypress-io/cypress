@@ -83,10 +83,9 @@ export function recordPerformanceEntry (entry: CommandPerformanceEntry) {
   ].map(escapeCsvValue).join(',')
 
   try {
-    fsSync.writeFile(
+    fsSync.appendFileSync(
       path.join(logFilePath(), 'performance.log'),
       `${row}\n`,
-      { flag: 'a' },
     )
   } catch (error) {
     debug('error recording performance entry: %s', error)

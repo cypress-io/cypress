@@ -11,7 +11,6 @@ import type $Command from './command'
 import type { StateFunc } from './state'
 import type { $Cy } from './cy'
 import type { IStability } from '../cy/stability'
-import { isJquery } from '../dom/jquery'
 
 const debugErrors = Debug('cypress:driver:errors')
 
@@ -229,8 +228,9 @@ export class CommandQueue extends Queue<$Command> {
     this.state('isStable', true)
   }
 
-  private async runCommand (command: $Command) {
+  private runCommand (command: $Command) {
     const startTime = performance.now()
+
     const isQuery = command.get('query')
     const name = command.get('name')
 
@@ -245,178 +245,174 @@ export class CommandQueue extends Queue<$Command> {
     this.state('current', command)
     this.state('chainerId', command.get('chainerId'))
 
-    let args = await new Promise<any>((resolve, reject) => {
-      try {
-        this.stability.whenStable(() => {
-          this.state('nestedIndex', this.index)
-          resolve(command.get('args'))
-        })
-      } catch (err) {
-        reject(err)
-      }
+    return this.stability.whenStable(() => {
+      this.state('nestedIndex', this.index)
+
+      return command.get('args')
     })
+    .then((args: any) => {
+      // store this if we enqueue new commands
+      // to check for promise violations
+      let ret
+      let enqueuedCmd
 
-    // store this if we enqueue new commands
-    // to check for promise violations
-    let subject
-    let enqueuedCmd
+      // Queries can invoke other queries - they are synchronous, and get added to the subject chain without
+      // issue. But they cannot contain commands, which are async.
+      // This callback watches to ensure users don't try and invoke any commands while inside a query.
+      const commandEnqueued = (obj: Cypress.EnqueuedCommandAttributes) => {
+        if (isQuery && !obj.query) {
+          $errUtils.throwErrByPath(
+            'query_command.invoked_action', {
+              args: {
+                name,
+                action: obj.name,
+              },
+            },
+          )
+        }
 
-    // Queries can invoke other queries - they are synchronous, and get added to the subject chain without
-    // issue. But they cannot contain commands, which are async.
-    // This callback watches to ensure users don't try and invoke any commands while inside a query.
-    const commandEnqueued = (obj: Cypress.EnqueuedCommandAttributes) => {
-      if (isQuery && !obj.query) {
+        return enqueuedCmd = obj
+      }
+
+      // only check for command enqueuing when none
+      // of our args are functions else commands
+      // like cy.then or cy.each would always fail
+      // since they return promises and queue more
+      // new commands
+      if ($utils.noArgsAreAFunction(args)) {
+        Cypress.once('command:enqueued', commandEnqueued)
+      }
+
+      args = [command.get('chainerId'), ...args]
+
+      // run the command's fn with runnable's context
+      try {
+        command.start()
+        ret = __stackReplacementMarker(command.get('fn'), args)
+
+        // Queries return a function which takes the current subject and returns the next subject. We wrap this in
+        // retryQuery() - and let it retry until it passes, times out or is cancelled.
+        // We save the original return value on the $Command though - it's what gets added to the subject chain later.
+        if (isQuery) {
+          command.set('queryFn', ret)
+          ret = retryQuery(command, ret, this.cy)
+        }
+      } catch (err) {
+        throw err
+      } finally {
+        // always remove this listener
+        Cypress.removeListener('command:enqueued', commandEnqueued)
+      }
+
+      this.state('commandIntermediateValue', ret)
+
+      // we cannot pass our cypress instance or our chainer
+      // back into bluebird else it will create a thenable
+      // which is never resolved
+      if (this.cy.isCy(ret)) {
+        return null
+      }
+
+      if (!(!enqueuedCmd || !$utils.isPromiseLike(ret))) {
         $errUtils.throwErrByPath(
-          'query_command.invoked_action', {
+          'miscellaneous.command_returned_promise_and_commands', {
             args: {
-              name,
-              action: obj.name,
+              current: name,
+              called: enqueuedCmd.name,
             },
           },
         )
       }
 
-      return enqueuedCmd = obj
-    }
+      if (!(!enqueuedCmd || !!_.isUndefined(ret))) {
+        ret = _.isFunction(ret) ?
+          ret.toString() :
+          $utils.stringify(ret)
 
-    // only check for command enqueuing when none
-    // of our args are functions else commands
-    // like cy.then or cy.each would always fail
-    // since they return promises and queue more
-    // new commands
-    if ($utils.noArgsAreAFunction(args)) {
-      Cypress.once('command:enqueued', commandEnqueued)
-    }
-
-    args = [command.get('chainerId'), ...args]
-
-    // run the command's fn with runnable's context
-    try {
-      command.start()
-      subject = __stackReplacementMarker(command.get('fn'), args)
-
-      // Queries return a function which takes the current subject and returns the next subject. We wrap this in
-      // retryQuery() - and let it retry until it passes, times out or is cancelled.
-      // We save the original return value on the $Command though - it's what gets added to the subject chain later.
-      if (isQuery) {
-        command.set('queryFn', subject)
-        subject = retryQuery(command, subject, this.cy)
-      }
-    } catch (err) {
-      throw err
-    } finally {
-      // always remove this listener
-      Cypress.removeListener('command:enqueued', commandEnqueued)
-    }
-
-    this.state('commandIntermediateValue', subject)
-
-    // we cannot pass our cypress instance or our chainer
-    // back into bluebird else it will create a thenable
-    // which is never resolved
-    if (this.cy.isCy(subject)) {
-      return null
-    }
-
-    if (!(!enqueuedCmd || !$utils.isPromiseLike(subject))) {
-      $errUtils.throwErrByPath(
-        'miscellaneous.command_returned_promise_and_commands', {
-          args: {
-            current: name,
-            called: enqueuedCmd.name,
+        // if we got a return value and we enqueued
+        // a new command and we didn't return cy
+        // or an undefined value then throw
+        $errUtils.throwErrByPath(
+          'miscellaneous.returned_value_and_commands_from_custom_command', {
+            args: { current: name, returned: ret },
           },
-        },
-      )
-    }
+        )
+      }
 
-    if (!(!enqueuedCmd || !!_.isUndefined(subject))) {
-      subject = _.isFunction(subject) ?
-        subject.toString() :
-        $utils.stringify(subject)
-
-      // if we got a return value and we enqueued
-      // a new command and we didn't return cy
-      // or an undefined value then throw
-      $errUtils.throwErrByPath(
-        'miscellaneous.returned_value_and_commands_from_custom_command', {
-          args: { current: name, returned: subject },
-        },
-      )
-    }
-
-    // we may be given a regular array here so
-    // we need to re-wrap the array in jquery
-    // if that's the case if the first item
-    // in this subject is a jquery element.
-    // we want to do this because in 3.1.2 there
-    // was a regression when wrapping an array of elements
-    const firstSubject = $utils.unwrapFirst(subject)
-
-    // if ret is a DOM element and its not an instance of our own jQuery
-    if (subject && $dom.isElement(firstSubject) && !$utils.isInstanceOf(subject, $)) {
-      // set it back to our own jquery object
-      // to prevent it from being passed downstream
-      // TODO: enable turning this off
-      // wrapSubjectsInJquery: false
-      // which will just pass subjects downstream
-      // without modifying them
-      subject = $dom.wrap(subject)
-    }
-
-    command.set({ subject })
-    command.pass()
-
-    const numElements = isJquery(subject) ? subject.length : 0
-
-    // end / snapshot our logs if they need it
-    command.finishLogs()
-
-    if (isQuery) {
-      subject = command.get('queryFn')
-      // For queries, the "subject" here is the query's return value, which is a function which
-      // accepts a subject and returns a subject, and can be re-invoked at any time.
-
-      subject.commandName = name
-      subject.args = command.get('args')
-
-      // Even though we've snapshotted, we only end the logs a query's logs if we're at the end of a query
-      // chain - either there is no next command (end of a test), the next command is an action, or the next
-      // command belongs to another chainer (end of a chain).
-
-      // This is done so that any query's logs remain in the 'pending' state until the subject chain is finished.
-      this.cy.addQueryToChainer(command.get('chainerId'), subject)
-    } else {
-      // For commands, the "subject" here is the command's return value, which replaces
-      // the current subject chain. We cannot re-invoke commands - the return value here is final.
-      this.cy.setSubjectForChainer(command.get('chainerId'), [subject])
-    }
-
-    // TODO: This line was causing subjects to be cleaned up prematurely in some instances (Specifically seen on the within command)
-    // The command log would print the yielded value as null if checked outside of the current command chain.
-    // this.cleanSubjects()
-
-    this.state({
-      commandIntermediateValue: undefined,
-      // reset the nestedIndex back to null
-      nestedIndex: null,
-      // we're finished with the current command so set it back to null
-      current: null,
+      return ret
     })
+    .then((subject) => {
+      // we may be given a regular array here so
+      // we need to re-wrap the array in jquery
+      // if that's the case if the first item
+      // in this subject is a jquery element.
+      // we want to do this because in 3.1.2 there
+      // was a regression when wrapping an array of elements
+      const firstSubject = $utils.unwrapFirst(subject)
 
-    const duration = performance.now() - startTime
+      // if ret is a DOM element and its not an instance of our own jQuery
+      if (subject && $dom.isElement(firstSubject) && !$utils.isInstanceOf(subject, $)) {
+        // set it back to our own jquery object
+        // to prevent it from being passed downstream
+        // TODO: enable turning this off
+        // wrapSubjectsInJquery: false
+        // which will just pass subjects downstream
+        // without modifying them
+        subject = $dom.wrap(subject)
+      }
 
-    await Cypress.automation('log:command:performance', {
-      name: command?.attributes?.name ?? 'unknown',
-      startTime,
-      duration,
-      detail: {
-        runnableTitle: (this.state('runnable') ?? {}).title ?? 'unknown',
-        spec: Cypress.spec.relative,
-        numElements,
-      },
+      command.set({ subject })
+      command.pass()
+
+      // end / snapshot our logs if they need it
+      command.finishLogs()
+
+      if (isQuery) {
+        subject = command.get('queryFn')
+        // For queries, the "subject" here is the query's return value, which is a function which
+        // accepts a subject and returns a subject, and can be re-invoked at any time.
+
+        subject.commandName = name
+        subject.args = command.get('args')
+
+        // Even though we've snapshotted, we only end the logs a query's logs if we're at the end of a query
+        // chain - either there is no next command (end of a test), the next command is an action, or the next
+        // command belongs to another chainer (end of a chain).
+
+        // This is done so that any query's logs remain in the 'pending' state until the subject chain is finished.
+        this.cy.addQueryToChainer(command.get('chainerId'), subject)
+      } else {
+        // For commands, the "subject" here is the command's return value, which replaces
+        // the current subject chain. We cannot re-invoke commands - the return value here is final.
+        this.cy.setSubjectForChainer(command.get('chainerId'), [subject])
+      }
+
+      // TODO: This line was causing subjects to be cleaned up prematurely in some instances (Specifically seen on the within command)
+      // The command log would print the yielded value as null if checked outside of the current command chain.
+      // this.cleanSubjects()
+
+      this.state({
+        commandIntermediateValue: undefined,
+        // reset the nestedIndex back to null
+        nestedIndex: null,
+        // we're finished with the current command so set it back to null
+        current: null,
+      })
+
+      const duration = performance.now() - startTime
+      const numElements = subject?.length ?? 0
+
+      return Cypress.automation('log:command:performance', {
+        name: command?.attributes?.name ?? 'unknown',
+        startTime,
+        duration,
+        detail: {
+          runnableTitle: (this.state('runnable') ?? {}).title ?? 'unknown',
+          spec: Cypress.spec.relative,
+          numElements,
+        },
+      }).then(() => subject)
     })
-
-    return subject
   }
 
   // TypeScript doesn't allow overriding functions with different type signatures
