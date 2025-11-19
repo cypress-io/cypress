@@ -1,5 +1,5 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.6.1
+## 15.7.0
 
 _Released 11/18/2025 (PENDING)_
 
@@ -7,12 +7,18 @@ _Released 11/18/2025 (PENDING)_
 
 - Limits the number of matched elements that are tested for visibility when added to a command log entry. Fixes a crash scenario related to rapid successive DOM additions in conjunction with a large number of elements returned from a query. Addressed in [#32937](https://github.com/cypress-io/cypress/pull/32937).
 
+**Features:**
+
+- `Next.js` version 16 is now supported within component testing. Currently, `webpack` is used to bundle Next.js components. Turbopack, the [new default](https://nextjs.org/docs/app/guides/upgrading/version-16#turbopack-by-default) inside Next.js 16, is not yet supported within Cypress. Addresses [#32857](https://github.com/cypress-io/cypress/issues/32857).
+
 **Bugfixes:**
 
 - Fixed an issue where [`cy.wrap()`](https://docs.cypress.io/api/commands/wrap) would cause infinite recursion and freeze the Cypress App when called with objects containing circular references. Fixes [#24715](https://github.com/cypress-io/cypress/issues/24715). Addressed in [#32917](https://github.com/cypress-io/cypress/pull/32917).
 - Fixed an issue where top changes on test retries could cause attempt numbers to show up more than one time in the reporter and cause attempts to be lost in Test Replay. Addressed in [#32888](https://github.com/cypress-io/cypress/pull/32888).
 - Fixed an issue where stack traces that are used to determine a test's invocation details are sometimes incorrect. Addressed in [#32699](https://github.com/cypress-io/cypress/pull/32699)
 - Fixed an issue where the browser will freeze when Cypress intercepts a synchronous request and a routeHandler is used. Fixes [#32874](https://github.com/cypress-io/cypress/issues/32874). Addressed in [#32925](https://github.com/cypress-io/cypress/pull/32925).
+- Fixed an issue where larger than expected config values were causing issues in certain cases when recording to the Cypress Cloud. Addressed in [#32957](https://github.com/cypress-io/cypress/pull/32957)
+
 
 **Misc:**
 
@@ -25,7 +31,7 @@ _Released 11/4/2025_
 
 **Features:**
 
- - Added a 'Self-healed' badge to the Command Log when [`cy.prompt()`](https://docs.cypress.io/api/commands/prompt) steps automatically recover after the element they need is not found in the cache. Addressed in [#32802](https://github.com/cypress-io/cypress/pull/32802).
+- Added a 'Self-healed' badge to the Command Log when [`cy.prompt()`](https://docs.cypress.io/api/commands/prompt) steps automatically recover after the element they need is not found in the cache. Addressed in [#32802](https://github.com/cypress-io/cypress/pull/32802).
 - [`cy.prompt()`](https://docs.cypress.io/api/commands/prompt) will now show a warning in the `Get code` modal when there are unsaved changes in `Studio` that will be lost if the user saves the generated code. Addressed in [#32741](https://github.com/cypress-io/cypress/pull/32741).
 
 **Bugfixes:**

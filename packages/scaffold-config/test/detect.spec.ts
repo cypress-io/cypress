@@ -69,12 +69,12 @@ describe('detectFramework', () => {
     expect(actual.bundler).toEqual('vite')
   })
 
-  ;['14.0.0', '15.0.4'].forEach((v) => {
+  ;['15.0.4', '16.0.0'].forEach((v) => {
     it(`Next.js v${v}`, async () => {
       const projectPath = await scaffoldMigrationProject('nextjs-unconfigured')
 
       fakeDepsInNodeModules(projectPath, [
-        { dependency: 'react', version: v === '15.0.0' ? '19.0.0' : '18.0.0' },
+        { dependency: 'react', version: '19.0.0' },
         { dependency: 'next', version: v },
       ])
 

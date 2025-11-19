@@ -100,7 +100,7 @@
     "@types/babel__code-frame": "^7.0.6",
     "@types/dedent": "^0.7.2",
     "@types/ejs": "^3.1.2",
-    "@types/fs-extra": "^8.0.1",
+    "@types/fs-extra": "^8.1.5",
     "@types/graphql-resolve-batch": "1.1.6",
     "@types/jest": "^30.0.0",
     "@types/micromatch": "4.0.9",
