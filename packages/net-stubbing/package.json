@@ -18,7 +18,7 @@
     "is-html": "^2.0.0",
     "istextorbinary": "6.0.0",
     "lodash": "^4.17.15",
-    "mime": "^4.1.0",
+    "mime": "^3.0.0",
     "minimatch": "^3.1.2",
     "throttle": "^1.0.3"
   },
@@ -27,6 +27,7 @@
     "@packages/proxy": "0.0.0-development",
     "@packages/server": "0.0.0-development",
     "@packages/telemetry": "0.0.0-development",
+    "@types/mime": "^3.0.1",
     "vitest": "^3.2.4"
   },
   "files": [
