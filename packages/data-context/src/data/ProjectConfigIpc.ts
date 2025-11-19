@@ -161,6 +161,7 @@ export class ProjectConfigIpc extends EventEmitter {
         if (err.code === 'EPIPE') {
           debug('EPIPE error in loadConfig() of child process %s', err)
 
+          // @ts-ignore
           resolve()
 
           return
@@ -241,6 +242,7 @@ export class ProjectConfigIpc extends EventEmitter {
         if (err.code === 'EPIPE') {
           debug('EPIPE error in registerSetupIpcHandlers() of child process %s', err)
 
+          // @ts-ignore
           resolve()
 
           return
