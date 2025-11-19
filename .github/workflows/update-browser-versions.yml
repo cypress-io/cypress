@@ -36,8 +36,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: .node-version
-      - name: install dependencies
-        run: CI=true yarn
+      - name: Install yaml dependency
+        run: npm install yaml@2.8.0
       - name: Check for new Chrome versions
         id: get-versions
         uses: actions/github-script@v7
