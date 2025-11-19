@@ -15,7 +15,6 @@ import { getError } from '@packages/errors'
 import type { AllCypressErrorNames } from '@packages/errors'
 import { get as getErrors, warning as errorsWarning, throwErr } from '../errors'
 import * as capture from '../capture'
-import { getResolvedRuntimeConfig } from '../config'
 import * as env from '../util/env'
 import ciProvider from '../util/ci_provider'
 import { flattenSuiteIntoRunnables } from '../util/tests_utils'
@@ -754,7 +753,7 @@ const createRunAndRecordSpecs = (options: any = {}) => {
 
         const r = flattenSuiteIntoRunnables(runnables)
         const runtimeConfig = runnables.runtimeConfig
-        const resolvedRuntimeConfig = getResolvedRuntimeConfig(config, runtimeConfig)
+        const resolvedRuntimeConfig = { ...config, ...runtimeConfig }
 
         const tests = _.chain(r[0])
         .uniqBy('id')

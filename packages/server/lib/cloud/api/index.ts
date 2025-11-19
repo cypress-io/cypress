@@ -37,6 +37,7 @@ import type { CreateInstanceRequestBody, CreateInstanceResponse } from './create
 import { transformError } from './axios_middleware/transform_error'
 import { DecryptionError } from './cloud_request_errors'
 import { isNonRetriableCertErrorCode } from '../network/non_retriable_cert_error_codes'
+import { filterRuntimeConfigForRecording } from '../../config'
 
 const debug = debugModule('cypress:server:cloud:api')
 const debugProtocol = debugModule('cypress:server:protocol')
@@ -506,7 +507,7 @@ export default {
   },
 
   postInstanceTests (options) {
-    const { instanceId, runId, timeout, ...body } = options
+    const { instanceId, runId, timeout, config, ...body } = options
 
     return retryWithBackoff((attemptIndex) => {
       return rp.post({
@@ -519,7 +520,10 @@ export default {
           'x-cypress-run-id': runId,
           'x-cypress-request-attempt': attemptIndex,
         },
-        body,
+        body: {
+          ...body,
+          config: filterRuntimeConfigForRecording(config ?? {}),
+        },
       })
       .catch(RequestErrors.StatusCodeError, transformError)
       .catch(tagError)

@@ -67,7 +67,7 @@ steps:
         fi
 
         echo "Pipeline saved to triggered_pipeline.json"
-        echo "Triggered pipeline: https://app.circleci.com/pipelines/github/cypress-io/cypress-publish-binary/$(jq -r '.number' triggered_pipeline.json)"
+        echo "Triggered pipeline: https://app.circleci.com/pipelines/github/cypress-io/cypress-publish-binary/$(jq -r '.number' ~/triggered_pipeline.json)"
   - persist_to_workspace:
       root: ~/
       paths:
