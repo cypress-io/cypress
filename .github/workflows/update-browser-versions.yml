@@ -7,6 +7,8 @@ on:
 jobs:
   update-browser-versions:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     env:
       CYPRESS_BOT_APP_ID: ${{ secrets.CYPRESS_BOT_APP_ID }}
       BASE_BRANCH: develop
