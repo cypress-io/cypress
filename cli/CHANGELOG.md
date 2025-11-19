@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.7.0
 
-_Released 11/18/2025 (PENDING)_
+_Released 11/19/2025_
 
 **Performance:**
 
@@ -15,9 +15,8 @@ _Released 11/18/2025 (PENDING)_
 
 - Fixed an issue where [`cy.wrap()`](https://docs.cypress.io/api/commands/wrap) would cause infinite recursion and freeze the Cypress App when called with objects containing circular references. Fixes [#24715](https://github.com/cypress-io/cypress/issues/24715). Addressed in [#32917](https://github.com/cypress-io/cypress/pull/32917).
 - Fixed an issue where top changes on test retries could cause attempt numbers to show up more than one time in the reporter and cause attempts to be lost in Test Replay. Addressed in [#32888](https://github.com/cypress-io/cypress/pull/32888).
-- Fixed an issue where stack traces that are used to determine a test's invocation details are sometimes incorrect. Addressed in [#32699](https://github.com/cypress-io/cypress/pull/32699)
-- Fixed an issue where larger than expected config values were causing issues in certain cases when recording to the Cypress Cloud. Addressed in [#32957](https://github.com/cypress-io/cypress/pull/32957)
-
+- Fixed an issue where stack traces that are used to determine a test's invocation details are sometimes incorrect. Addressed in [#32699](https://github.com/cypress-io/cypress/pull/32699).
+- Fixed an issue where larger than expected config values were causing issues in certain cases when recording to the Cypress Cloud. Addressed in [#32957](https://github.com/cypress-io/cypress/pull/32957).
 
 **Misc:**
 
