@@ -487,7 +487,7 @@ export = {
     throw new Error('Attempting to connect to existing browser for Cypress in Cypress which is not yet implemented for electron')
   },
 
-  async connectProtocolToBrowser (options: { protocolManager?: ProtocolManagerShape }) {
+  async connectProtocolToBrowser (options: { protocolManager?: ProtocolManagerShape, studioManager?: { setCDPClient: (cdpClient: any) => void } }) {
     const browserCriClient = this._getBrowserCriClient()
 
     if (!browserCriClient?.currentlyAttachedTarget) throw new Error('Missing pageCriClient in connectProtocolToBrowser')
@@ -500,6 +500,17 @@ export = {
     }
 
     await options.protocolManager?.connectToBrowser(browserCriClient.currentlyAttachedProtocolTarget)
+
+    // Set the CDP client on the studio manager if provided
+    if (options.studioManager && browserCriClient.currentlyAttachedProtocolTarget) {
+      debug('Setting CDP client on studio manager')
+      options.studioManager.setCDPClient(browserCriClient.currentlyAttachedProtocolTarget)
+    } else {
+      debug('Not setting CDP client:', {
+        hasStudioManager: !!options.studioManager,
+        hasProtocolTarget: !!browserCriClient.currentlyAttachedProtocolTarget,
+      })
+    }
   },
 
   async connectCyPromptToBrowser (options: { cyPromptManager?: CyPromptManagerShape }) {

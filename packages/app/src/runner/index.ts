@@ -304,6 +304,12 @@ async function runSpecE2E (config, spec: SpecFile) {
 
   const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
 
+  // create snapshot AUT iframe
+  const $snapshotIframe = autIframe.createSnapshotIframe()
+
+  $snapshotIframe.appendTo($container)
+  $snapshotIframe.hide() // Hide it initially
+
   // Remove the spec bridge iframe
   document.querySelectorAll('iframe.spec-bridge-iframe').forEach((el) => {
     el.remove()
@@ -327,7 +333,7 @@ async function runSpecE2E (config, spec: SpecFile) {
   })
 
   // initialize Cypress (driver) with the AUT!
-  getEventManager().initialize($autIframe, config)
+  getEventManager().initialize($autIframe, config, $snapshotIframe)
 }
 
 /**

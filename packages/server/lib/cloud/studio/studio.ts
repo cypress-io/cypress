@@ -3,9 +3,9 @@ import type { Router } from 'express'
 import Debug from 'debug'
 import { requireScript } from '../require_script'
 import path from 'path'
-import { reportStudioError, ReportStudioErrorOptions } from '../api/studio/report_studio_error'
 import crypto, { BinaryLike } from 'crypto'
 import { StudioElectron } from './StudioElectron'
+import { StudioCDP } from './StudioCDP'
 import exception from '../exception'
 
 interface StudioServer { default: StudioServerDefaultShape }
@@ -26,6 +26,7 @@ export class StudioManager implements StudioManagerShape {
   protocolManager: ProtocolManagerShape | undefined
   private _studioServer: StudioServerShape | undefined
   private _studioElectron: StudioElectron | undefined
+  private _studioCDP: StudioCDP | undefined
 
   async setup ({ script, studioPath, studioHash, cloudApi, manifest, getProjectOptions }: SetupOptions): Promise<void> {
     const { createStudioServer } = requireScript<StudioServer>(script).default
@@ -82,10 +83,25 @@ export class StudioManager implements StudioManagerShape {
       this._studioElectron = new StudioElectron()
     }
 
+    // Create StudioCDP instance for iframe rendering mode
+    if (!this._studioCDP) {
+      this._studioCDP = new StudioCDP()
+    }
+
     await this.invokeAsync('initializeStudioAI', { isEssential: true }, {
       ...options,
       studioElectron: this._studioElectron,
+      studioCDP: this._studioCDP,
     })
+  }
+
+  /**
+   * Set the CDP client when it becomes available from the browser connection
+   */
+  setCDPClient (cdpClient: any): void {
+    if (this._studioCDP) {
+      this._studioCDP.setCDPClient(cdpClient)
+    }
   }
 
   updateSessionId (sessionId: string): void {
@@ -119,6 +135,8 @@ export class StudioManager implements StudioManagerShape {
     }
 
     try {
+      debug('invoking sync method %s with args %o', method, args)
+
       // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
       return this._studioServer[method].apply(this._studioServer, args)
     } catch (error: unknown) {
@@ -152,6 +170,8 @@ export class StudioManager implements StudioManagerShape {
     }
 
     try {
+      debug('invoking async method %s with args %o', method, args)
+
       // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
       return await this._studioServer[method].apply(this._studioServer, args)
     } catch (error: unknown) {

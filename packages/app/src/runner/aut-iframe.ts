@@ -19,6 +19,7 @@ const jQueryRe = /jquery/i
 export class AutIframe {
   debouncedToggleSelectorPlayground: DebouncedFunc<(isEnabled: any) => void>
   $iframe?: JQuery<HTMLIFrameElement>
+  $snapshotIframe?: JQuery<HTMLIFrameElement>
   _highlightedEl?: Element
 
   constructor (
@@ -41,12 +42,30 @@ export class AutIframe {
     return $iframe
   }
 
+  createSnapshotIframe (): JQuery<HTMLIFrameElement> {
+    const $snapshotIframe: JQuery<HTMLIFrameElement> = this.$('<iframe>', {
+      id: `AUT Snapshot: '${this.projectName}'`,
+      title: `AUT Snapshot: '${this.projectName}'`,
+      class: 'aut-iframe',
+    })
+
+    this.$snapshotIframe = $snapshotIframe
+
+    return $snapshotIframe
+  }
+
   destroy () {
     if (!this.$iframe) {
       throw Error(`Cannot call #remove without first calling #create`)
     }
 
     this.$iframe.remove()
+
+    // Also remove the snapshot iframe if it exists
+    if (this.$snapshotIframe) {
+      this.$snapshotIframe.remove()
+      this.$snapshotIframe = undefined
+    }
   }
 
   _showInitialBlankPage () {

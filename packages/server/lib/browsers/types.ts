@@ -44,7 +44,7 @@ export type BrowserLauncher = {
   /**
    * Used to connect the protocol to an existing browser.
    */
-  connectProtocolToBrowser: (options: { protocolManager?: ProtocolManagerShape }) => Promise<void>
+  connectProtocolToBrowser: (options: { protocolManager?: ProtocolManagerShape, studioManager?: { setCDPClient: (cdpClient: any) => void } }) => Promise<void>
   /**
    * Used to connect the cy prompt to an existing browser.
    */

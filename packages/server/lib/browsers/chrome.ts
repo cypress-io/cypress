@@ -437,7 +437,7 @@ export = {
     browserCriClient = undefined
   },
 
-  async connectProtocolToBrowser (options: { protocolManager?: ProtocolManagerShape }) {
+  async connectProtocolToBrowser (options: { protocolManager?: ProtocolManagerShape, studioManager?: { setCDPClient: (cdpClient: any) => void } }) {
     const browserCriClient = this._getBrowserCriClient()
 
     if (!browserCriClient?.currentlyAttachedTarget) throw new Error('Missing pageCriClient in connectProtocolToBrowser')
@@ -450,6 +450,11 @@ export = {
     }
 
     await options.protocolManager?.connectToBrowser(browserCriClient.currentlyAttachedProtocolTarget)
+
+    // Set the CDP client on the studio manager if provided
+    if (options.studioManager && browserCriClient.currentlyAttachedProtocolTarget) {
+      options.studioManager.setCDPClient(browserCriClient.currentlyAttachedProtocolTarget)
+    }
   },
 
   async connectCyPromptToBrowser (options: { cyPromptManager?: CyPromptManagerShape }) {

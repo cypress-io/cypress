@@ -520,7 +520,13 @@ export class ProjectBase extends EE {
             })
 
             telemetryManager.mark(INITIALIZATION_MARK_NAMES.CONNECT_PROTOCOL_TO_BROWSER_START)
-            await browsers.connectProtocolToBrowser({ browser: this.browser, foundBrowsers: this.options.browsers, protocolManager: studio.protocolManager })
+            await browsers.connectProtocolToBrowser({
+              browser: this.browser,
+              foundBrowsers: this.options.browsers,
+              protocolManager: studio.protocolManager,
+              studioManager: studio,
+            })
+
             telemetryManager.mark(INITIALIZATION_MARK_NAMES.CONNECT_PROTOCOL_TO_BROWSER_END)
 
             if (!studio.protocolManager.dbPath) {

@@ -73,6 +73,28 @@ export type StudioElectronApi = {
   createBrowserWindow: () => BrowserWindow
 }
 
+export interface CDPClient {
+  send<T extends string>(
+    command: T,
+    params?: any
+  ): Promise<any>
+  on<T extends string>(
+    eventName: T,
+    cb: (event: any) => void | Promise<unknown>
+  ): void
+}
+
+export interface StudioCDPApi {
+  /**
+   * Get the CDP client for executing commands in the browser
+   */
+  getCDPClient: () => CDPClient | null
+  /**
+   * Find the snapshot iframe frame ID from the frame tree
+   */
+  findSnapshotIframeFrameId: () => Promise<string | null>
+}
+
 export interface StudioAuthenticatedUserShape {
   id?: string // Cloud user id
   name?: string
@@ -104,6 +126,7 @@ export interface StudioServerOptions {
 export interface StudioAIInitializeOptions {
   protocolDbPath: string
   studioElectron?: StudioElectronApi
+  studioCDP?: StudioCDPApi
 }
 
 export interface StudioAddSocketListenersOptions {
