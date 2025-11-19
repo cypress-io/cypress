@@ -15,7 +15,7 @@ export const patchXmlHttpRequest = (window: Window) => {
     } finally {
       const result = originalXmlHttpRequestOpen.apply(this, args as any)
 
-      this._isSyncRequest = args[2] === false
+      this._isSyncRequest = args.length > 2 && !args[2]
 
       return result
     }
