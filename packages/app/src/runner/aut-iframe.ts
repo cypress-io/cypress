@@ -734,7 +734,7 @@ export class AutIframe {
   }
 
   private _addElementBoxModelLayers ($el, $body, dimensions?: ReturnType<typeof getElementDimensions>) {
-    $body = $body || $('body')
+    $body = $body || this.$('body')
 
     const el = $el.get(0)
 

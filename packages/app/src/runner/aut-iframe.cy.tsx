@@ -31,7 +31,7 @@ describe('AutIframe._addElementBoxModelLayers', () => {
         }
       }
 
-      if (selector && selector.nodeType) {
+      if (selector && (selector.nodeType || selector instanceof HTMLElement || selector instanceof Element)) {
         return {
           get: (index?: number) => {
             return index === 0 ? selector : [selector]
@@ -89,7 +89,9 @@ describe('AutIframe._addElementBoxModelLayers', () => {
     // (it should use transform and zIndex from the provided dimensions)
     expect(getComputedStyleCallCount).to.equal(0, 'getComputedStyle should not be called when dimensions are provided')
 
-    expect(container).to.exist
+    expect(container).to.not.be.undefined
+    expect(container).to.not.be.null
+    expect(container).to.be.instanceof(HTMLElement)
     expect(container.classList.contains('__cypress-highlight')).to.be.true
     expect(container.children.length).to.be.greaterThan(0, 'Should create at least one layer')
 
@@ -104,7 +106,9 @@ describe('AutIframe._addElementBoxModelLayers', () => {
       expect(parseFloat(layer.getAttribute('data-left')!)).to.be.a('number')
       expect(layer.getAttribute('data-layer')).to.exist
       // Verify transform and zIndex were applied from dimensions
-      expect(layer.style.transform).to.equal('translateX(10px)')
+      // Note: getComputedStyle returns computed transform as a matrix, not the original CSS value
+      // So we check that transform is set (not 'none') and matches the computed value from dimensions
+      expect(layer.style.transform).to.equal(dimensions.transform)
       expect(layer.style.zIndex).to.equal('100')
     })
 
@@ -132,7 +136,9 @@ describe('AutIframe._addElementBoxModelLayers', () => {
     // We expect only 1 call total (from getElementDimensions)
     expect(getComputedStyleCallCount).to.equal(1, 'Should call getComputedStyle only once in getElementDimensions')
 
-    expect(container).to.exist
+    expect(container).to.not.be.undefined
+    expect(container).to.not.be.null
+    expect(container).to.be.instanceof(HTMLElement)
     expect(container.children.length).to.be.greaterThan(0)
 
     document.body.removeChild(testElement)

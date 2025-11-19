@@ -106,9 +106,17 @@ export const getOffset = (el: HTMLElement) => {
   const rect = el.getBoundingClientRect()
   const win = el.ownerDocument.defaultView
 
+  // Handle test environments where defaultView might be null
+  if (!win) {
+    return {
+      top: rect.top,
+      left: rect.left,
+    }
+  }
+
   return {
-    top: rect.top + win!.scrollY,
-    left: rect.left + win!.scrollX,
+    top: rect.top + win.scrollY,
+    left: rect.left + win.scrollX,
   }
 }
 
