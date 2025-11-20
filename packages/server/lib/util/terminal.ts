@@ -186,7 +186,7 @@ export const header = (message: string, options: { color?: string[] | null } = {
   message = `  (${chalk.underline.bold(message)})`
 
   if (options.color) {
-    // @ts-expect-error
+    // @ts-expect-error type is cast incorrectly to never
     const colors = <string[]>[].concat(options.color)
 
     message = _.reduce(colors, (memo, color) => {

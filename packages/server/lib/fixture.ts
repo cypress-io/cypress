@@ -90,7 +90,7 @@ export async function fileExists (p: string) {
   if (stat?.isDirectory()) {
     const err = new Error()
 
-    // @ts-expect-error
+    // @ts-expect-error - code isn't typed on Error
     err.code = 'ENOENT'
     throw err
   }

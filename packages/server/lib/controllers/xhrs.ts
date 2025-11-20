@@ -70,18 +70,18 @@ export = {
     return respond()
   },
 
-  _get (resp: string, config: { fixturesFolder: string }): Promise<{ data: any, encoding?: string }> {
-    const options: { encoding?: string } = {}
+  _get (resp: string, config: { fixturesFolder: string }): Promise<{ data: any, encoding?: BufferEncoding }> {
+    const options: { encoding?: BufferEncoding } = {}
 
     const file = resp.replace(fixturesRe, '')
 
     const [filePath, encoding] = file.split(',')
 
     if (encoding) {
-      options.encoding = encoding
+      options.encoding = encoding as BufferEncoding
     }
 
-    // @ts-expect-error
+    // @ts-expect-error - bluebird to promise type mismatch
     return fixtureGet(config.fixturesFolder, filePath, options)
     .then((bytes: any) => {
       return {
