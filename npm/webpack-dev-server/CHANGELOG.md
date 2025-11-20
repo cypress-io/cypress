@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v5.2.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.2.0...@cypress/webpack-dev-server-v5.2.1) (2025-11-19)
+
+
+### Bug Fixes
+
+* make sure angular project configs can resolve correctly on windows ([#32971](https://github.com/cypress-io/cypress/issues/32971)) ([71a393e](https://github.com/cypress-io/cypress/commit/71a393ee566dd5eff4e0579fdc6a23bf73cffa51))
+
 # [@cypress/webpack-dev-server-v5.2.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.1.5...@cypress/webpack-dev-server-v5.2.0) (2025-11-19)
 
 

@@ -196,7 +196,7 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
     - [cypress-realworld-app](https://github.com/cypress-io/cypress-realworld-app/issues/41)
     - [cypress-example-recipes](https://github.com/cypress-io/cypress-example-recipes/issues/225)
 
-26. Be sure to rotate the `NPM_TOKEN` variable inside the `org-npm-credentials` context inside CircleCI.
+26. Be sure to rotate the `NPM_TOKEN` variable inside the `org-npm-credentials` context inside CircleCI. If an npm token was created when logging in, please delete this token now.
 
 Take a break, you deserve it! 👉😎👉
 
