@@ -341,7 +341,7 @@ export class CommandQueue extends Queue<$Command> {
 
       return ret
     })
-    .then((subject) => {
+    .then(async (subject) => {
       // we may be given a regular array here so
       // we need to re-wrap the array in jquery
       // if that's the case if the first item
@@ -402,16 +402,22 @@ export class CommandQueue extends Queue<$Command> {
       const duration = performance.now() - startTime
       const numElements = subject?.length ?? 0
 
-      return Cypress.automation('log:command:performance', {
-        name: command?.attributes?.name ?? 'unknown',
-        startTime,
-        duration,
-        detail: {
-          runnableTitle: (this.state('runnable') ?? {}).title ?? 'unknown',
-          spec: Cypress.spec.relative,
-          numElements,
-        },
-      }).then(() => subject)
+      try {
+        await Cypress.automation('log:command:performance', {
+          name: command?.attributes?.name ?? 'unknown',
+          startTime,
+          duration,
+          detail: {
+            runnableTitle: (this.state('runnable') ?? {}).title ?? 'unknown',
+            spec: Cypress.spec.relative,
+            numElements,
+          },
+        })
+      } catch (err) {
+        debugErrors('error logging command performance: %o', err)
+      }
+
+      return subject
     })
   }
 
