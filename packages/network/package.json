@@ -34,7 +34,7 @@
     "@cypress/request-promise": "^5.0.0",
     "@packages/network-tools": "0.0.0-development",
     "@packages/socket": "0.0.0-development",
-    "@types/concat-stream": "1.6.0",
+    "@types/concat-stream": "1.6.1",
     "@types/node": "22.18.0",
     "@types/proxy-from-env": "1.0.4",
     "express": "4.21.0",
