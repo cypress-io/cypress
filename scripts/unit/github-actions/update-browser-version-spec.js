@@ -59,6 +59,9 @@ describe('update browser version github action', () => {
   beforeEach(() => {
     sinon.restore()
     mockfs.restore()
+  })
+
+  afterEach(() => {
     if (global.originalFetch) {
       global.fetch = global.originalFetch
       delete global.originalFetch
