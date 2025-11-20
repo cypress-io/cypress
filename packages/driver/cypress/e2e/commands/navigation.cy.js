@@ -2780,10 +2780,22 @@ describe('src/cy/commands/navigation', () => {
   })
 
   context('resets state', () => {
-    it('resets the server state', () => {
+    it('resets the server state before test runs', () => {
       cy.stub(Cypress, 'backend').log(false).callThrough()
 
       Cypress.emitThen('test:before:run:async', {
+        id: 'r1',
+        currentRetry: 1,
+      })
+      .then(() => {
+        expect(Cypress.backend).to.be.calledWith('reset:server:state')
+      })
+    })
+
+    it('resets the server state after test completes', () => {
+      cy.stub(Cypress, 'backend').log(false).callThrough()
+
+      Cypress.emitThen('test:after:run:async', {
         id: 'r1',
         currentRetry: 1,
       })
