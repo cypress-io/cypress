@@ -79,23 +79,23 @@ const insertAfter = (originalString, match, stringToInsert) => {
   return `${originalString.slice(0, index)} ${stringToInsert}${originalString.slice(index)}`
 }
 
-const isScriptTopLevel = (scriptMatch, headMatch) => {
+const isScriptTopLevel = (scriptMatch, htmlMatch) => {
   if (!scriptMatch) {
     return false
   }
 
-  if (!headMatch) {
+  if (!htmlMatch) {
     return true
   }
 
   const scriptIndex = scriptMatch.index
-  const headIndex = headMatch.index
+  const htmlIndex = htmlMatch.index
 
-  if (scriptIndex === undefined || headIndex === undefined) {
+  if (scriptIndex === undefined || htmlIndex === undefined) {
     return false
   }
 
-  return scriptIndex < headIndex
+  return scriptIndex < htmlIndex
 }
 
 export async function html (html: string, opts: SecurityOpts & InjectionOpts) {
@@ -114,11 +114,13 @@ export async function html (html: string, opts: SecurityOpts & InjectionOpts) {
   // TODO: move this into regex-rewriting and have ast-rewriting handle this in its own way
 
   const scriptMatch = html.match(scriptRe)
-  const headMatch = html.match(headRe)
+  const htmlMatch = html.match(htmlRe)
 
-  if (isScriptTopLevel(scriptMatch, headMatch)) {
+  if (isScriptTopLevel(scriptMatch, htmlMatch)) {
     return insertBefore(html, scriptMatch, htmlToInject)
   }
+
+  const headMatch = html.match(headRe)
 
   if (headMatch) {
     return insertAfter(html, headMatch, htmlToInject)
@@ -129,8 +131,6 @@ export async function html (html: string, opts: SecurityOpts & InjectionOpts) {
   if (bodyMatch) {
     return insertBefore(html, bodyMatch, `<head> ${htmlToInject} </head>`)
   }
-
-  const htmlMatch = html.match(htmlRe)
 
   if (htmlMatch) {
     return insertAfter(html, htmlMatch, `<head> ${htmlToInject} </head>`)
