@@ -8365,10 +8365,10 @@
     "@types/minimatch" "*"
     "@types/node" "*"
 
-"@types/graphql-resolve-batch@1.1.6":
-  version "1.1.6"
-  resolved "https://registry.yarnpkg.com/@types/graphql-resolve-batch/-/graphql-resolve-batch-1.1.6.tgz#b53099b57a8b1c02bbb39f3cf7c8f89a6c076d33"
-  integrity sha512-5wnYqk1zkutWyj16Llm8l95Gr2tVsu8PmFwMKmzh3OPm0/Nd02CKYXiZtoLX2Zv4tdkzAsIPOpev8Jk9N9am5Q==
+"@types/graphql-resolve-batch@1.1.11":
+  version "1.1.11"
+  resolved "https://registry.yarnpkg.com/@types/graphql-resolve-batch/-/graphql-resolve-batch-1.1.11.tgz#008b16868ca2552c0aee6844f60df1b3da53e042"
+  integrity sha512-zGbJbrSb/oh9SMTj0rt0kEl+QlGhysxsVbD1NbjtZO3bqwjzACpU/k4xbiaI+dSmtp9EY1BvdTpVj3MJ6k4/CA==
   dependencies:
     graphql ">=14"
 
