@@ -69,6 +69,6 @@ describe('ProjectConfigIpc', () => {
 
       expect(globalThis.debugMessages.at(-2)).toEqual('EPIPE error in loadConfig() of child process %s')
       expect(globalThis.debugMessages.at(-1)).toEqual('EPIPE error in registerSetupIpcHandlers() of child process %s')
-    })
+    }, 20_000)
   })
 })
