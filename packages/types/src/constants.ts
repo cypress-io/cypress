@@ -56,4 +56,4 @@ export const NPM_CYPRESS_REGISTRY_URL = 'https://registry.npmjs.org/cypress'
  * when dealing with very large element sets.
  * This number is fairly arbitrary.
  */
-export const MAX_VISIBILITY_CHECK_ELEMENTS = 50
+export const MAX_VISIBILITY_CHECK_ELEMENTS = 10

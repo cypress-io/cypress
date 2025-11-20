@@ -1,10 +1,10 @@
-const tty = require('tty')
-const terminalSize = require('./terminal-size')
+import tty from 'tty'
+import { get as getTerminalSize } from './terminal-size'
 
 // polyfills node's getWindowSize
 // by returning an array of columns/rows
-function getWindowSize () {
-  const { columns, rows } = terminalSize.get()
+export function getWindowSize () {
+  const { columns, rows } = getTerminalSize()
 
   return [columns, rows]
 }
@@ -17,7 +17,7 @@ function patchStream (patched, name) {
   patched[stream.fd] = true
 }
 
-const override = () => {
+export function override () {
   const isatty = tty.isatty
 
   const patched = {
@@ -53,10 +53,4 @@ const override = () => {
   if (process.env.FORCE_STDERR_TTY === '1') patchStream(patched, 'stderr')
 
   return
-}
-
-module.exports = {
-  override,
-
-  getWindowSize,
 }

@@ -25,6 +25,7 @@ interface PromisifiedFsExtra {
   writeFileAsync: Promisified<typeof fsExtra.writeFileSync>
   pathExistsAsync: Promisified<typeof fsExtra.pathExistsSync>
   outputFileAsync: Promisified<typeof fsExtra.outputFileSync>
+  readJsonAsync: Promisified<typeof fsExtra.readJsonSync>
 }
 
 interface Clip {
