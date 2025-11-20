@@ -665,6 +665,15 @@ export default (Commands, Cypress, cy, state, config) => {
     return Cypress.backend('reset:server:state')
   })
 
+  // Clear ServiceWorkerManager state immediately after test completion
+  // to prevent memory accumulation that can cause browser crashes
+  // This is in addition to the cleanup in test:before:run:async
+  Cypress.on('test:after:run:async', () => {
+    // Clear service worker manager state to prevent memory leaks
+    // This helps prevent crashes that occur during cleanup/teardown
+    return Cypress.backend('reset:server:state')
+  })
+
   Cypress.on('test:before:run', reset)
 
   Cypress.on('stability:changed', async (bool, event) => {
