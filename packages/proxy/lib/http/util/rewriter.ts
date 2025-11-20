@@ -98,7 +98,7 @@ const isScriptTopLevel = (scriptMatch, htmlMatch) => {
   return scriptIndex < htmlIndex
 }
 
-export async function html (html: string, opts: SecurityOpts & InjectionOpts, mockedHtmlToInject: string = "") {
+export async function html (html: string, opts: SecurityOpts & InjectionOpts, mockedHtmlToInject: string = '') {
   const htmlToInject = mockedHtmlToInject || await Promise.resolve(getHtmlToInject(opts))
 
   // strip clickjacking and framebusting
