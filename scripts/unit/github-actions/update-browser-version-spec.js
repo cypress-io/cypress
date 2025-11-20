@@ -1,7 +1,6 @@
 const chai = require('chai')
 const fs = require('fs')
 const mockfs = require('mock-fs')
-const nock = require('nock')
 const sinon = require('sinon')
 
 chai.use(require('sinon-chai'))
@@ -22,10 +21,10 @@ const coreStub = () => {
   }
 }
 
+let mockResponses = {}
+
 const stubChromeVersionResult = (channel, result) => {
-  nock('https://versionhistory.googleapis.com')
-  .get((uri) => uri.includes(channel))
-  .reply(200, result)
+  mockResponses[channel] = result
 }
 
 const stubRepoVersions = ({ betaVersion, stableVersion }) => {
@@ -35,6 +34,13 @@ const stubRepoVersions = ({ betaVersion, stableVersion }) => {
 }
 
 const stubChromeVersions = ({ betaVersion, stableVersion }) => {
+  mockResponses = {}
+
+  if (!global.originalFetch) {
+    global.originalFetch = global.fetch
+  }
+
+  // Set up mock responses
   stubChromeVersionResult('stable',
     {
       versions: stableVersion ? [
@@ -56,13 +62,45 @@ const stubChromeVersions = ({ betaVersion, stableVersion }) => {
       ] : [],
       nextPageToken: '',
     })
+
+  // Mock fetch to return the appropriate response based on URL
+  global.fetch = sinon.stub().callsFake((url) => {
+    if (typeof url === 'string') {
+      if (url.includes('/channels/stable/')) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          text: () => Promise.resolve(JSON.stringify(mockResponses.stable || { versions: [], nextPageToken: '' })),
+        })
+      }
+
+      if (url.includes('/channels/beta/')) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          text: () => Promise.resolve(JSON.stringify(mockResponses.beta || { versions: [], nextPageToken: '' })),
+        })
+      }
+    }
+
+    // For other URLs, return error
+    return Promise.resolve({
+      ok: false,
+      status: 404,
+      text: () => Promise.resolve(''),
+    })
+  })
 }
 
 describe('update browser version github action', () => {
   beforeEach(() => {
     sinon.restore()
     mockfs.restore()
-    nock.cleanAll()
+    mockResponses = {}
+    if (global.originalFetch) {
+      global.fetch = global.originalFetch
+      delete global.originalFetch
+    }
   })
 
   context('.getVersions', () => {
