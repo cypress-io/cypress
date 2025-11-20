@@ -720,8 +720,11 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
     return this.next()
   }
 
+  // if the request is sync, we cannot wait on the cross:origin:cookies:received
+  // event since the sync request is blocking. This means that the cross-origin cookies
+  // may not have been applied.
   if (this.req.isSyncRequest) {
-    process.stdout.write(styleText('yellow', 'WARNING: cross-origin cookies may not have been applied\n'))
+    process.stdout.write(styleText('yellow', `WARNING: cross-origin cookies may not have been applied for sync request: ${this.req.proxiedUrl}\n`))
 
     span?.end()
 

@@ -73,14 +73,16 @@ export class InterceptedRequest {
       return
     }
 
-    if (this.req.isSyncRequest) {
-      process.stdout.write(styleText('yellow', 'WARNING: sync request was not intercepted\n'))
-
-      return
-    }
-
     for (const route of this.req.matchingRoutes) {
       if (route.disabled) {
+        continue
+      }
+
+      // if the request is sync and the route has an interceptor (i.e. routeHandler), then skip the intercept
+      // because the we cannot wait on the before:request event when the sync request is blocking
+      if (this.req.isSyncRequest && route.hasInterceptor) {
+        process.stdout.write(styleText('yellow', `WARNING: sync XHR request was not intercepted for url: ${this.req.proxiedUrl}\n`))
+
         continue
       }
 
