@@ -21,12 +21,6 @@ const coreStub = () => {
   }
 }
 
-let mockResponses = {}
-
-const stubChromeVersionResult = (channel, result) => {
-  mockResponses[channel] = result
-}
-
 const stubRepoVersions = ({ betaVersion, stableVersion }) => {
   mockfs({
     [CIRCLECI_WORKFLOWS_FILEPATH]: `chrome-stable-version: &chrome-stable-version "${stableVersion}"\nchrome-beta-version: &chrome-beta-version "${betaVersion}"\n`,
@@ -34,61 +28,30 @@ const stubRepoVersions = ({ betaVersion, stableVersion }) => {
 }
 
 const stubChromeVersions = ({ betaVersion, stableVersion }) => {
-  mockResponses = {}
-
   if (!global.originalFetch) {
     global.originalFetch = global.fetch
   }
 
-  // Set up mock responses
-  stubChromeVersionResult('stable',
-    {
-      versions: stableVersion ? [
-        {
-          name: `chrome/platforms/linux/channels/stable/versions/${stableVersion}`,
-          version: stableVersion,
-        },
-      ] : [],
-      nextPageToken: '',
-    })
+  const stableResponse = {
+    versions: stableVersion ? [{ name: `chrome/platforms/linux/channels/stable/versions/${stableVersion}`, version: stableVersion }] : [],
+    nextPageToken: '',
+  }
 
-  stubChromeVersionResult('beta',
-    {
-      versions: betaVersion ? [
-        {
-          name: `chrome/platforms/linux/channels/beta/versions/${betaVersion}`,
-          version: betaVersion,
-        },
-      ] : [],
-      nextPageToken: '',
-    })
+  const betaResponse = {
+    versions: betaVersion ? [{ name: `chrome/platforms/linux/channels/beta/versions/${betaVersion}`, version: betaVersion }] : [],
+    nextPageToken: '',
+  }
 
-  // Mock fetch to return the appropriate response based on URL
   global.fetch = sinon.stub().callsFake((url) => {
-    if (typeof url === 'string') {
-      if (url.includes('/channels/stable/')) {
-        return Promise.resolve({
-          ok: true,
-          status: 200,
-          text: () => Promise.resolve(JSON.stringify(mockResponses.stable || { versions: [], nextPageToken: '' })),
-        })
-      }
-
-      if (url.includes('/channels/beta/')) {
-        return Promise.resolve({
-          ok: true,
-          status: 200,
-          text: () => Promise.resolve(JSON.stringify(mockResponses.beta || { versions: [], nextPageToken: '' })),
-        })
-      }
+    if (url.includes('/channels/stable/')) {
+      return Promise.resolve({ ok: true, status: 200, text: () => Promise.resolve(JSON.stringify(stableResponse)) })
     }
 
-    // For other URLs, return error
-    return Promise.resolve({
-      ok: false,
-      status: 404,
-      text: () => Promise.resolve(''),
-    })
+    if (url.includes('/channels/beta/')) {
+      return Promise.resolve({ ok: true, status: 200, text: () => Promise.resolve(JSON.stringify(betaResponse)) })
+    }
+
+    throw new Error(`Unexpected fetch URL: ${url}`)
   })
 }
 
@@ -96,7 +59,6 @@ describe('update browser version github action', () => {
   beforeEach(() => {
     sinon.restore()
     mockfs.restore()
-    mockResponses = {}
     if (global.originalFetch) {
       global.fetch = global.originalFetch
       delete global.originalFetch
