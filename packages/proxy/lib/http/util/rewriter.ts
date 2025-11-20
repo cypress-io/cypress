@@ -23,6 +23,7 @@ export type InjectionOpts = {
 }
 
 const doctypeRe = /<\!doctype.*?>/i
+const scriptRe = /<script.*?>/i
 const headRe = /<head(?!er).*?>/i
 const bodyRe = /<body.*?>/i
 const htmlRe = /<html.*?>/i
@@ -78,6 +79,25 @@ const insertAfter = (originalString, match, stringToInsert) => {
   return `${originalString.slice(0, index)} ${stringToInsert}${originalString.slice(index)}`
 }
 
+const isScriptTopLevel = (scriptMatch, headMatch) => {
+  if (!scriptMatch) {
+    return false
+  }
+
+  if (!headMatch) {
+    return true
+  }
+
+  const scriptIndex = scriptMatch.index
+  const headIndex = headMatch.index
+
+  if (scriptIndex === undefined || headIndex === undefined) {
+    return false
+  }
+
+  return scriptIndex < headIndex
+}
+
 export async function html (html: string, opts: SecurityOpts & InjectionOpts) {
   const htmlToInject = await Promise.resolve(getHtmlToInject(opts))
 
@@ -93,7 +113,12 @@ export async function html (html: string, opts: SecurityOpts & InjectionOpts) {
 
   // TODO: move this into regex-rewriting and have ast-rewriting handle this in its own way
 
+  const scriptMatch = html.match(scriptRe)
   const headMatch = html.match(headRe)
+
+  if (isScriptTopLevel(scriptMatch, headMatch)) {
+    return insertBefore(html, scriptMatch, htmlToInject)
+  }
 
   if (headMatch) {
     return insertAfter(html, headMatch, htmlToInject)
