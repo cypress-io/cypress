@@ -8218,10 +8218,10 @@
   resolved "https://registry.yarnpkg.com/@types/doctrine/-/doctrine-0.0.6.tgz#12ede1f7cd3797be5856277c85f031299ccd2641"
   integrity sha512-KlEqPtaNBHBJ2/fVA4yLdD0Tc8zw34pKU4K5SHBIEwtLJ8xxumIC1xeG+4S+/9qhVj2MqC7O3Ld8WvDG4HqlgA==
 
-"@types/ejs@^3.1.2":
-  version "3.1.2"
-  resolved "https://registry.yarnpkg.com/@types/ejs/-/ejs-3.1.2.tgz#75d277b030bc11b3be38c807e10071f45ebc78d9"
-  integrity sha512-ZmiaE3wglXVWBM9fyVC17aGPkLo/UgaOjEiI2FXQfyczrCefORPxIe+2dVmnmk3zkVIbizjrlQzmPGhSYGXG5g==
+"@types/ejs@^3.1.5":
+  version "3.1.5"
+  resolved "https://registry.yarnpkg.com/@types/ejs/-/ejs-3.1.5.tgz#49d738257cc73bafe45c13cb8ff240683b4d5117"
+  integrity sha512-nv+GSx77ZtXiJzwKdsASqi+YQ5Z7vwHsTP0JY2SiQgjGckkBRKZnk8nIM+7oUZ1VCtuTz0+By4qVR7fqzp/Dfg==
 
 "@types/enzyme-adapter-react-16@1.0.5":
   version "1.0.5"
@@ -8341,10 +8341,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/getenv@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@types/getenv/-/getenv-1.0.0.tgz#fa5e6901e9fb84bfb40205d4952fd06c8afcf006"
-  integrity sha512-w8qs+09o4pfFb/4XkHJzsHEZ2m36s/d9vJhglbOeSiSe9mPu0OmCQbU4iEgGl2DNP9WfOHCVd6fBwIvBd4AZhg==
+"@types/getenv@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@types/getenv/-/getenv-1.0.3.tgz#9fe071e4143f249309bbea99644ed139ded246ba"
+  integrity sha512-aCe60hc2U/xtdnGYbcZBFm6Xkm/MFuWqKMbhupcGt7DJ1QojADIXFKthtlgTwyXkEi6vr8lMXtOI218Ua9qx6w==
   dependencies:
     "@types/node" "*"
 
