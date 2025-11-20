@@ -3,7 +3,7 @@ import Bluebird from 'bluebird'
 import pkg from '@packages/root'
 import api from './api'
 import user from './user'
-import system from '../util/system'
+import * as system from '../util/system'
 import { stripPath } from './strip_path'
 
 const { serializeError } = require('serialize-error')

@@ -1,16 +1,6 @@
 import $ from 'jquery'
 import $dimensions from './dimensions'
 
-const resetStyles = `
-  border: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
-`
-
-const styles = (styleString) => {
-  return styleString.replace(/\s*\n\s*/g, '')
-}
-
 function addBlackoutForElement ($body: JQuery<HTMLBodyElement>, $el: JQuery<HTMLElement>) {
   const dimensions = $dimensions.getElementDimensions($el)
   const width = dimensions.widthWithBorder
@@ -18,18 +8,13 @@ function addBlackoutForElement ($body: JQuery<HTMLBodyElement>, $el: JQuery<HTML
   const top = dimensions.offset?.top
   const left = dimensions.offset?.left
 
-  const style = styles(`
-    ${resetStyles}
-    position: absolute;
-    top: ${top}px;
-    left: ${left}px;
-    width: ${width}px;
-    height: ${height}px;
-    background-color: black;
-    z-index: 2147483647;
-  `)
+  const style = `border: none !important; margin: 0 !important; padding: 0 !important; position: absolute; top: ${top}px; left: ${left}px; width: ${width}px; height: ${height}px; background-color: black; z-index: 2147483647;`
 
-  $(`<div class="__cypress-blackout" style="${style}">`).appendTo($body)
+  const div = document.createElement('div')
+
+  div.className = '__cypress-blackout'
+  div.style.cssText = style
+  $body.append(div)
 }
 
 function addBlackouts ($body: JQuery<HTMLBodyElement>, $container: JQuery<HTMLElement>, selector: string) {

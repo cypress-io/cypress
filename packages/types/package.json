@@ -16,7 +16,7 @@
     "watch": "yarn build:cjs --watch & yarn build:esm --watch"
   },
   "dependencies": {
-    "semver": "^7.7.1"
+    "semver": "^7.7.3"
   },
   "devDependencies": {
     "@packages/root": "0.0.0-development",
