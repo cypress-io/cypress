@@ -8372,12 +8372,13 @@
   dependencies:
     graphql ">=14"
 
-"@types/gulp@^4.0.9":
-  version "4.0.9"
-  resolved "https://registry.yarnpkg.com/@types/gulp/-/gulp-4.0.9.tgz#a2f9667bcc26bc72b4899dd16216d6584a12346c"
-  integrity sha512-zzT+wfQ8uwoXjDhRK9Zkmmk09/fbLLmN/yDHFizJiEKIve85qutOnXcP/TM2sKPBTU+Jc16vfPbOMkORMUBN7Q==
+"@types/gulp@^4.0.18":
+  version "4.0.18"
+  resolved "https://registry.yarnpkg.com/@types/gulp/-/gulp-4.0.18.tgz#2dd43f432452f10412ef2479d44e4d4f0c8f53f6"
+  integrity sha512-IqkYa4sXkwH2uwqO2aXYOoAisJpLX13BPaS6lmEAoG4BbgOay3qqGQFsT9LMSSQVMQlEKU7wTUW0sPV46V0olw==
   dependencies:
-    "@types/undertaker" "*"
+    "@types/node" "*"
+    "@types/undertaker" ">=1.2.6"
     "@types/vinyl-fs" "*"
     chokidar "^3.3.1"
 
@@ -8950,10 +8951,10 @@
   resolved "https://registry.yarnpkg.com/@types/undertaker-registry/-/undertaker-registry-1.0.1.tgz#4306d4a03d7acedb974b66530832b90729e1d1da"
   integrity sha512-Z4TYuEKn9+RbNVk1Ll2SS4x1JeLHecolIbM/a8gveaHsW0Hr+RQMraZACwTO2VD7JvepgA6UO1A1VrbktQrIbQ==
 
-"@types/undertaker@*":
-  version "1.2.7"
-  resolved "https://registry.yarnpkg.com/@types/undertaker/-/undertaker-1.2.7.tgz#89c37fd3be556141a4092b38f8bc503076803d21"
-  integrity sha512-xuY7nBwo1zSRoY2aitp/HArHfTulFAKql2Fr4b4mWbBBP+F50n7Jm6nwISTTMaDk2xvl92O10TTejVF0Q9mInw==
+"@types/undertaker@>=1.2.6":
+  version "1.2.12"
+  resolved "https://registry.yarnpkg.com/@types/undertaker/-/undertaker-1.2.12.tgz#dcd9e6e85a994fbb170dd01bdd5cbc4a970c1b44"
+  integrity sha512-52BiBni1srlIx/o7anEB1Y230yr3+21P0utA4VXLyeyeR2gHANKi5kJ/e0FakD4RYEXX0D9dOC7PDrVqL1j98Q==
   dependencies:
     "@types/node" "*"
     "@types/undertaker-registry" "*"
