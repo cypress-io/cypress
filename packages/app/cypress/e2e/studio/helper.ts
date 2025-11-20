@@ -14,7 +14,7 @@ export function loadProjectAndRunSpec ({ projectName = 'experimental-studio' as 
   cy.waitForSpecToFinish()
 }
 
-export function launchStudio ({ specName = 'spec.cy.js', createNewTestFromSuite = false, createNewTestFromSpecHeader = false, cliArgs = [''] } = {}) {
+export function launchStudio ({ specName = 'spec.cy.js', createNewTestFromSuite = false, createNewTestFromSpecHeader = false, cliArgs = [''], dismissConnectToCloud = true } = {}) {
   loadProjectAndRunSpec({ specName, cliArgs })
 
   const testTitle = 'visits a basic html page'
@@ -52,6 +52,14 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTestFromSuite 
 
     // verify recording is enabled to ensure the panel is fully ready
     cy.findByTestId('record-button-recording').should('have.text', 'Recording...')
+  }
+
+  if (dismissConnectToCloud) {
+    // since we aren't logged in, we need to close the connect to cloud panel
+    cy.get('[data-cy="studio-error"]').within(() => {
+      cy.contains('Connect to Cypress Cloud').should('be.visible')
+      cy.get('[aria-label="Close"]').click()
+    })
   }
 }
 
