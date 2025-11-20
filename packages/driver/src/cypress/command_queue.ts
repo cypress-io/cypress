@@ -400,7 +400,6 @@ export class CommandQueue extends Queue<$Command> {
       })
 
       const duration = performance.now() - startTime
-      const numElements = subject?.length ?? 0
 
       try {
         await Cypress.automation('log:command:performance', {
@@ -410,7 +409,6 @@ export class CommandQueue extends Queue<$Command> {
           detail: {
             runnableTitle: (this.state('runnable') ?? {}).title ?? 'unknown',
             spec: Cypress.spec.relative,
-            numElements,
           },
         })
       } catch (err) {

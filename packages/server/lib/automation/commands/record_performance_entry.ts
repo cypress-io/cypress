@@ -1,7 +1,6 @@
 import Debug from 'debug'
 import type { CommandPerformanceEntry } from '@packages/types'
 import path from 'path'
-import fs from 'fs/promises'
 import fsSync from 'fs'
 
 const debug = Debug('cypress-verbose:server:automation:commands:record_performance_entry')
@@ -18,7 +17,6 @@ const COLUMNS = [
   'startTime',
   'duration',
   'name',
-  'numElements',
   'runnableTitle',
   'spec',
 ]
@@ -67,7 +65,6 @@ export function recordPerformanceEntry (entry: CommandPerformanceEntry) {
     duration,
     name,
     detail: {
-      numElements,
       runnableTitle,
       spec,
     },
@@ -77,7 +74,6 @@ export function recordPerformanceEntry (entry: CommandPerformanceEntry) {
     startTime,
     duration,
     name,
-    numElements,
     runnableTitle,
     spec,
   ].map(escapeCsvValue).join(',')

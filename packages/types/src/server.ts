@@ -132,7 +132,6 @@ export interface CommandPerformanceEntry {
   detail: {
     runnableTitle: string
     spec: string
-    numElements: number
   }
 }
 
