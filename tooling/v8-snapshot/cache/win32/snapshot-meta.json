@@ -4082,8 +4082,8 @@
     "./packages/server/lib/exec.ts",
     "./packages/server/lib/experiments.ts",
     "./packages/server/lib/file_server.ts",
-    "./packages/server/lib/files.js",
-    "./packages/server/lib/fixture.js",
+    "./packages/server/lib/files.ts",
+    "./packages/server/lib/fixture.ts",
     "./packages/server/lib/gui/links.ts",
     "./packages/server/lib/gui/menu.ts",
     "./packages/server/lib/gui/windows.ts",
@@ -4146,14 +4146,14 @@
     "./packages/server/lib/util/shell.ts",
     "./packages/server/lib/util/socket_allowed.ts",
     "./packages/server/lib/util/spec_writer.ts",
-    "./packages/server/lib/util/status_code.js",
+    "./packages/server/lib/util/status_code.ts",
     "./packages/server/lib/util/stream_buffer.ts",
-    "./packages/server/lib/util/system.js",
+    "./packages/server/lib/util/system.ts",
     "./packages/server/lib/util/terminal-size.ts",
-    "./packages/server/lib/util/terminal.js",
+    "./packages/server/lib/util/terminal.ts",
     "./packages/server/lib/util/tests_utils.ts",
     "./packages/server/lib/util/trash.ts",
-    "./packages/server/lib/util/tty.js",
+    "./packages/server/lib/util/tty.ts",
     "./packages/server/node_modules/@babel/parser/lib/index.js",
     "./packages/server/node_modules/ast-types/def/babel-core.js",
     "./packages/server/node_modules/ast-types/def/babel.js",
@@ -4359,5 +4359,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "ea6473155b02ef7751db0e8735c3555090ffcb9ba860d86e26f085eeaaad1213"
+  "deferredHash": "e687b38af49b78363a8f9ecc0de4199d8f2e8f616c8e5c58f4b75fe2e3446e65"
 }
