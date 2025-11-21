@@ -201,7 +201,7 @@ describe('studio functionality', () => {
       body: { AI: { enabled: false, disabledReason: 'studio_ai_feature_flag_disabled' }, featureFlags: { studioAI: false } },
     })
 
-    launchStudio({ dismissConnectToCloud: false })
+    launchStudio()
 
     // Verify that AI is coming soon
     cy.get('[data-cy="ai-status-text"]').should('contain.text', 'Coming soon')
