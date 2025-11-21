@@ -937,7 +937,10 @@ const MaybeInjectServiceWorker: ResponseMiddleware = function () {
 }
 
 const GzipBody: ResponseMiddleware = async function () {
-  if (this.protocolManager && this.req.browserPreRequest?.requestId) {
+  // Only process streams through protocol manager if it's actually enabled
+  // Protocol manager is only enabled when Studio is active (setupProtocol() has been called)
+  // This prevents intercepting streams when Studio panel is not open
+  if (this.protocolManager?.isProtocolEnabled && this.req.browserPreRequest?.requestId) {
     const preRequest = this.req.browserPreRequest
     const requestId = getOriginalRequestId(preRequest.requestId)
 
