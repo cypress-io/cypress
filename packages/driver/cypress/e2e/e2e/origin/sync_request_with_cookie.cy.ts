@@ -9,16 +9,18 @@ describe('Sync Request in cy.origin that sets cookie', () => {
           Page 1 / 2
         </body>
         </html>
-      `
+      `,
     })
+
     cy.visit('https://foo.site.com')
 
     cy.intercept('https://test.site.com/sync', {
       headers: {
         'set-cookie': 'TEST=foo',
       },
-      body: ''
+      body: '',
     })
+
     cy.intercept('https://test.site.com/bar', {
       body: `
         <!DOCTYPE html>
@@ -32,8 +34,9 @@ describe('Sync Request in cy.origin that sets cookie', () => {
           </script>
         </body>
         </html>
-      `
+      `,
     })
+
     cy.origin('https://test.site.com', () => {
       cy.visit('https://test.site.com/bar')
       cy.wrap(0).should('eq', 0)

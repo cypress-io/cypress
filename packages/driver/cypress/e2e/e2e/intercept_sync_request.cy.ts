@@ -29,8 +29,9 @@ describe('intercept sync request', () => {
         </script>
         </body>
         </html>
-      `
+      `,
     })
+
     cy.intercept('/', () => {})
     cy.visit('/app')
     cy.get('#sync-request-button').click()
