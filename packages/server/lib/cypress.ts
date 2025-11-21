@@ -17,6 +17,7 @@ import { warning as errorsWarning } from './errors'
 import { getCwd } from './cwd'
 import type { CypressError } from '@packages/errors'
 import { toNumber } from 'lodash'
+import { PerformanceLogger } from './automation/performance_logger'
 const debug = Debug('cypress:server:cypress')
 
 type Mode = 'exit' | 'info' | 'interactive' | 'pkg' | 'record' | 'results' | 'run' | 'smokeTest' | 'version' | 'returnPkg' | 'exitWithCode'
@@ -38,9 +39,11 @@ const exit = async (code = 0) => {
   span?.setAttribute('exitCode', code)
   span?.end()
 
-  await telemetry.shutdown().catch((err: any) => {
-    debug('telemetry shutdown errored with: ', err)
-  })
+  try {
+    await Promise.all([telemetry.shutdown(), PerformanceLogger.close()])
+  } catch (error) {
+    debug('error shutting down telemetry or performance logger: %s', error)
+  }
 
   debug('process.exit', code)
 

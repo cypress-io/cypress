@@ -129,10 +129,6 @@ export interface CommandPerformanceEntry {
   name: string
   startTime: number
   duration: number
-  detail: {
-    runnableTitle: string
-    spec: string
-  }
 }
 
 export interface AutomationCommands {

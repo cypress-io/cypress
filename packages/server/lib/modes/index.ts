@@ -4,7 +4,6 @@ import _ from 'lodash'
 import { makeDataContext } from '../makeDataContext'
 import { id as randomId } from '../util/random'
 import { telemetry } from '@packages/telemetry'
-import { initializePerformanceLogFile } from '../automation/commands/record_performance_entry'
 
 export = (mode, options) => {
   if (mode === 'smokeTest') {
@@ -25,8 +24,6 @@ export = (mode, options) => {
   }
 
   const span = telemetry.startSpan({ name: `initialize:mode:${mode}` })
-
-  initializePerformanceLogFile()
 
   const ctx = setCtx(makeDataContext({ mode: mode === 'run' ? mode : 'open', modeOptions: options }))
 

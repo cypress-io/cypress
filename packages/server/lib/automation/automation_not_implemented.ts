@@ -2,7 +2,7 @@ const AutomationNotImplementedKind = 'AutomationNotImplemented'
 
 export class AutomationNotImplemented extends Error {
   readonly kind = AutomationNotImplementedKind
-  constructor (message: string, automationType: string, ...args) {
+  constructor (message: any, automationType: string, ...args) {
     super(`Automation command '${message}' not implemented by ${automationType}`)
   }
 

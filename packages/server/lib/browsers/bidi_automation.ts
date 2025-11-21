@@ -25,7 +25,6 @@ import { bidiGetUrl } from '../automation/commands/get_url'
 import { bidiReloadFrame } from '../automation/commands/reload_frame'
 import { bidiNavigateHistory } from '../automation/commands/navigate_history'
 import { bidiGetFrameTitle } from '../automation/commands/get_frame_title'
-import { recordPerformanceEntry } from '../automation/commands/record_performance_entry'
 
 import type { StorageCookieFilter, StoragePartialCookie as BidiStoragePartialCookie } from 'webdriver/build/bidi/remoteTypes'
 
@@ -729,7 +728,7 @@ export class BidiAutomation {
           throw new Error('Cannot get AUT title no AUT context initialized')
         }
         case 'log:command:performance':
-          return recordPerformanceEntry(data)
+          return PerformanceLogger.write(data)
         default:
           debug('BiDi automation not implemented for message: %s', message)
           throw new AutomationNotImplemented(message, 'BiDiAutomation')

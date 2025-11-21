@@ -10,7 +10,7 @@ import * as Windows from '../gui/windows'
 import { makeGraphQLServer } from '@packages/data-context/graphql/makeGraphQLServer'
 import { globalPubSub, getCtx, clearCtx } from '@packages/data-context'
 import { telemetry } from '@packages/telemetry'
-
+import { PerformanceLogger } from '../automation/performance_logger'
 // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
 import type { WebContents } from 'electron'
 import type { LaunchArgs, Preferences } from '@packages/types'
@@ -202,7 +202,11 @@ export = {
 
         telemetry.getSpan('cypress')?.end()
 
-        await telemetry.shutdown()
+        try {
+         await Promise.all([telemetry.shutdown(), PerformanceLogger.close()])
+        } catch (error) {
+          debug('error shutting down telemetry or performance logger: %s', error)
+        }
 
         app.quit()
       })

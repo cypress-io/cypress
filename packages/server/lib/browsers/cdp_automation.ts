@@ -8,7 +8,6 @@ import { parseDomain, isLocalhost as isLocalhostNetworkTools } from '@packages/n
 import debugModule from 'debug'
 import { URL } from 'url'
 import { performance } from 'perf_hooks'
-import { recordPerformanceEntry } from '../automation/commands/record_performance_entry'
 import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
 import type { CDPClient, ProtocolManagerShape, WriteVideoFrame, AutomationMiddleware, AutomationCommands } from '@packages/types'
 import type { Automation } from '../automation'
@@ -23,6 +22,7 @@ import { cdpGetUrl } from '../automation/commands/get_url'
 import { cdpReloadFrame } from '../automation/commands/reload_frame'
 import { cdpNavigateHistory } from '../automation/commands/navigate_history'
 import { cdpGetFrameTitle } from '../automation/commands/get_frame_title'
+import { AutomationNotImplemented } from '../automation/automation_not_implemented'
 
 export type CdpCommand = keyof ProtocolMapping.Commands
 
@@ -662,10 +662,9 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
         return cdpNavigateHistory(this.sendDebuggerCommandFn, this.executionContexts, await this._getAutFrame(), data.historyNumber)
       case 'get:aut:title':
         return cdpGetFrameTitle(this.sendDebuggerCommandFn, this.executionContexts, await this._getAutFrame())
-      case 'log:command:performance':
-        return recordPerformanceEntry(data)
       default:
-        throw new Error(`No automation handler registered for: '${message}'`)
+        debugVerbose('CDP automation not implemented for message: %s', message)
+        throw new AutomationNotImplemented(message, 'CDPAutomation')
     }
   }
 }
