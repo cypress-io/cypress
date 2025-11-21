@@ -1533,6 +1533,15 @@ jobs:
           name: Check TS Types
           command: NODE_OPTIONS=--max_old_space_size=4096 yarn check-ts --concurrency=1
 
+  health-check:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - install-required-node
+      - run:
+          name: Health Check (Knip)
+          command: yarn health-check
+
   # a special job that closes the Percy build started by the required jobs
   percy-finalize:
     <<: *defaults
