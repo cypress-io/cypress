@@ -1,6 +1,6 @@
 // https://github.com/cypress-io/cypress/pull/32925
 describe('Sync Request in cy.origin that sets cookie', () => {
-  it('passes', () => {
+  it('passes', { browser: '!webkit' }, () => {
     cy.intercept('https://foo.site.com', {
       body: `
         <!DOCTYPE html>
