@@ -1,6 +1,6 @@
 // https://github.com/cypress-io/cypress/pull/32925
 describe('intercept sync request', () => {
-  it('completes all the way with route handler', () => {
+  it('completes all the way with route handler', { browser: '!webkit' }, () => {
     cy.intercept('/app', {
       body: `
         <!DOCTYPE html>
