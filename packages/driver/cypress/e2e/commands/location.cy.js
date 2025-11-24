@@ -424,7 +424,7 @@ describe('src/cy/commands/location', () => {
         // 1. initial call cy.location('pathname')
         // 2. the should() assertion
         // 3. the then() callback
-        expect(Cypress.automation).to.have.been.calledThrice
+        expect(Cypress.automation.withArgs('get:aut:url')).to.have.been.calledThrice
       })
     })
 

@@ -727,8 +727,6 @@ export class BidiAutomation {
 
           throw new Error('Cannot get AUT title no AUT context initialized')
         }
-        case 'log:command:performance':
-          return PerformanceLogger.write(data)
         default:
           debug('BiDi automation not implemented for message: %s', message)
           throw new AutomationNotImplemented(message, 'BiDiAutomation')
