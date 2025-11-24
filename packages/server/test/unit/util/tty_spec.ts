@@ -1,8 +1,6 @@
-require('../../spec_helper')
-
-const tty = require('tty')
-const ttyUtil = require(`../../../lib/util/tty`)
-const terminalSize = require(`../../../lib/util/terminal-size`)
+import tty from 'tty'
+import * as ttyUtil from '../../../lib/util/tty'
+import * as terminalSize from '../../../lib/util/terminal-size'
 
 const ttys = [process.stdin.isTTY, process.stdout.isTTY, process.stderr.isTTY]
 

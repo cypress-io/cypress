@@ -18,7 +18,7 @@ import runEvents from '../plugins/run_events'
 import * as env from '../util/env'
 import trash from '../util/trash'
 import { id as randomId } from '../util/random'
-import system from '../util/system'
+import * as system from '../util/system'
 import chromePolicyCheck from '../util/chrome_policy_check'
 import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser, BrowserVideoController, VideoRecording, ProcessOptions, ProtocolManagerShape, AutomationCommands } from '@packages/types'
 import type { Cfg, ProjectBase } from '../project-base'
@@ -1131,6 +1131,7 @@ async function ready (options: ReadyOptions) {
       socketId,
       parallel,
       onError,
+      // @ts-expect-error - browser is not typed correctly
       browser,
       project,
       runUrl,
