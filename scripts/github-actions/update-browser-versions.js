@@ -1,4 +1,3 @@
-const https = require('https')
 const fs = require('fs')
 const yaml = require('yaml')
 const path = require('path')
@@ -10,33 +9,16 @@ const CHROME_BETA_KEY = 'chrome-beta-version'
 const CIRCLECI_WORKFLOWS_FILEPATH = path.join(__dirname, '../../.circleci/src/pipeline/@pipeline.yml')
 
 // https://developer.chrome.com/docs/versionhistory/reference/#platform-identifiers
-const getLatestVersionData = ({ channel, currentVersion }) => {
-  const options = {
-    hostname: 'versionhistory.googleapis.com',
-    port: 443,
-    path: `/v1/chrome/platforms/linux/channels/${channel}/versions?filter=version>${currentVersion}&order_by=version%20desc`,
-    method: 'GET',
+const getLatestVersionData = async ({ channel, currentVersion }) => {
+  const url = `https://versionhistory.googleapis.com/v1/chrome/platforms/linux/channels/${channel}/versions?filter=version>${currentVersion}&order_by=version%20desc`
+
+  const response = await fetch(url)
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`)
   }
 
-  return new Promise((resolve, reject) => {
-    const req = https.request(options, (res) => {
-      let response = ''
-
-      res.on('data', (d) => {
-        response += d.toString()
-      })
-
-      res.on('end', () => {
-        resolve(response)
-      })
-    })
-
-    req.on('error', (err) => {
-      reject(err)
-    })
-
-    req.end()
-  })
+  return await response.text()
 }
 
 const getVersions = async ({ core }) => {

@@ -5,8 +5,8 @@ version: 2.1
 # the new location and/or names:
 # - ./scripts/github-actions/update-browser-versions.js
 
-chrome-stable-version: &chrome-stable-version "141.0.7390.107"
-chrome-beta-version: &chrome-beta-version "142.0.7444.34"
+chrome-stable-version: &chrome-stable-version "142.0.7444.175"
+chrome-beta-version: &chrome-beta-version "143.0.7499.25"
 firefox-stable-version: &firefox-stable-version "142.0"
 base-internal-trixie: &base-internal-trixie cypress/base-internal:22.19.0-trixie
 base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.19.0-yarn-berry
