@@ -788,22 +788,44 @@ const ClearCyInitialCookie: ResponseMiddleware = function () {
 
 const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
   if (httpUtils.responseMustHaveEmptyBody(this.req, this.incomingRes)) {
-    if (this.protocolManager && this.req.browserPreRequest?.requestId) {
-      const requestId = getOriginalRequestId(this.req.browserPreRequest.requestId)
+    // For empty body responses (204, 304, HEAD), we must end the response immediately
+    // Optionally notify protocol manager if it's enabled and Studio is active
+    const protocolManager = this.protocolManager
 
-      this.protocolManager.responseEndedWithEmptyBody({
-        requestId,
-        isCached: this.incomingRes.statusCode === 304,
-        timings: {
-          cdpRequestWillBeSentTimestamp: this.req.browserPreRequest.cdpRequestWillBeSentTimestamp,
-          cdpRequestWillBeSentReceivedTimestamp: this.req.browserPreRequest.cdpRequestWillBeSentReceivedTimestamp,
-          proxyRequestReceivedTimestamp: this.req.browserPreRequest.proxyRequestReceivedTimestamp,
-          cdpLagDuration: this.req.browserPreRequest.cdpLagDuration,
-          proxyRequestCorrelationDuration: this.req.browserPreRequest.proxyRequestCorrelationDuration,
-        },
-      })
+    if (protocolManager && this.req.browserPreRequest?.requestId) {
+      const isEnabled = protocolManager.isProtocolEnabled
+      const mode = (protocolManager as any).mode as 'record' | 'studio' | undefined
+
+      // For studio mode, verify Studio is actually active before processing
+      // isProtocolEnabled already checks if _protocol exists (set in setupProtocol)
+      // setupProtocol is only called when Studio is initialized and canAccessStudioAI is true
+      // So if isProtocolEnabled is true in studio mode, Studio must be active
+      // However, we add an extra safety check for dbPath to ensure Studio is fully initialized
+      const hasDbPath = !!protocolManager.dbPath
+      const isStudioActive = mode === 'studio' ? hasDbPath : true
+      const shouldProcess = isEnabled && isStudioActive
+
+      if (shouldProcess) {
+        const browserPreRequest = this.req.browserPreRequest
+        const requestId = getOriginalRequestId(browserPreRequest.requestId)
+
+        this.debug('response-middleware:response-ended-with-empty-body:protocol-notification %o', { requestId })
+
+        protocolManager.responseEndedWithEmptyBody({
+          requestId,
+          isCached: this.incomingRes.statusCode === 304,
+          timings: {
+            cdpRequestWillBeSentTimestamp: browserPreRequest.cdpRequestWillBeSentTimestamp,
+            cdpRequestWillBeSentReceivedTimestamp: browserPreRequest.cdpRequestWillBeSentReceivedTimestamp,
+            proxyRequestReceivedTimestamp: browserPreRequest.proxyRequestReceivedTimestamp,
+            cdpLagDuration: browserPreRequest.cdpLagDuration,
+            proxyRequestCorrelationDuration: browserPreRequest.proxyRequestCorrelationDuration,
+          },
+        })
+      }
     }
 
+    // Always end empty body responses, regardless of protocol manager state
     this.res.end()
 
     return this.end()
@@ -937,36 +959,73 @@ const MaybeInjectServiceWorker: ResponseMiddleware = function () {
 }
 
 const GzipBody: ResponseMiddleware = async function () {
-  // Only process streams through protocol manager if it's actually enabled
-  // Protocol manager is only enabled when Studio is active (setupProtocol() has been called)
-  // This prevents intercepting streams when Studio panel is not open
-  if (this.protocolManager?.isProtocolEnabled && this.req.browserPreRequest?.requestId) {
-    const preRequest = this.req.browserPreRequest
+  // Call protocol manager if it exists and we have a browser pre-request
+  // The protocol manager's invokeSync will return undefined if _protocol doesn't exist,
+  // so it's safe to call even when the protocol is not enabled
+  // However, for studio mode, we only want to actually process/record when Studio is active
+  const protocolManager = this.protocolManager
+
+  if (protocolManager && this.req.browserPreRequest?.requestId) {
+    const preRequest = this.req.browserPreRequest!
     const requestId = getOriginalRequestId(preRequest.requestId)
+    const mode = (protocolManager as any).mode as 'record' | 'studio' | undefined
+    const isEnabled = protocolManager.isProtocolEnabled
+    const hasDbPath = !!protocolManager.dbPath
 
-    const span = telemetry.startSpan({ name: 'gzip:body:protocol-notification', parentSpan: this.resMiddlewareSpan, isVerbose })
+    // For studio mode, only actually process if Studio is active (dbPath exists)
+    // For record mode, process if protocol is enabled
+    // Note: We still call responseStreamReceived even if shouldProcess is false,
+    // because invokeSync will return undefined safely, but we skip the telemetry/logging
+    const shouldProcess = mode === 'studio'
+      ? (isEnabled && hasDbPath) // Studio mode: need both enabled and dbPath
+      : isEnabled // Record mode: just need enabled
 
-    const resultingStream = this.protocolManager.responseStreamReceived({
-      requestId,
-      responseHeaders: this.incomingRes.headers,
-      isAlreadyGunzipped: this.isGunzipped,
-      responseStream: this.incomingResStream,
-      res: this.res,
-      timings: {
-        cdpRequestWillBeSentTimestamp: preRequest.cdpRequestWillBeSentTimestamp,
-        cdpRequestWillBeSentReceivedTimestamp: preRequest.cdpRequestWillBeSentReceivedTimestamp,
-        proxyRequestReceivedTimestamp: preRequest.proxyRequestReceivedTimestamp,
-        cdpLagDuration: preRequest.cdpLagDuration,
-        proxyRequestCorrelationDuration: preRequest.proxyRequestCorrelationDuration,
-      },
-    })
+    if (shouldProcess) {
+      const span = telemetry.startSpan({ name: 'gzip:body:protocol-notification', parentSpan: this.resMiddlewareSpan, isVerbose })
 
-    if (resultingStream) {
-      this.incomingResStream = resultingStream.on('error', this.onError).once('close', () => {
-        span?.end()
+      this.debug('response-middleware:gzip:body:protocol-notification %o', { requestId })
+
+      const resultingStream = protocolManager.responseStreamReceived({
+        requestId,
+        responseHeaders: this.incomingRes.headers,
+        isAlreadyGunzipped: this.isGunzipped,
+        responseStream: this.incomingResStream,
+        res: this.res,
+        timings: {
+          cdpRequestWillBeSentTimestamp: preRequest.cdpRequestWillBeSentTimestamp,
+          cdpRequestWillBeSentReceivedTimestamp: preRequest.cdpRequestWillBeSentReceivedTimestamp,
+          proxyRequestReceivedTimestamp: preRequest.proxyRequestReceivedTimestamp,
+          cdpLagDuration: preRequest.cdpLagDuration,
+          proxyRequestCorrelationDuration: preRequest.proxyRequestCorrelationDuration,
+        },
       })
+
+      if (resultingStream) {
+        this.incomingResStream = resultingStream.on('error', this.onError).once('close', () => {
+          span?.end()
+        })
+      } else {
+        span?.end()
+      }
     } else {
-      span?.end()
+      // Protocol manager exists but shouldn't process (e.g., studio mode without active Studio)
+      // Still call responseStreamReceived - it will return undefined safely via invokeSync
+      // This maintains the original behavior and ensures stream flow is not disrupted
+      protocolManager.responseStreamReceived({
+        requestId,
+        responseHeaders: this.incomingRes.headers,
+        isAlreadyGunzipped: this.isGunzipped,
+        responseStream: this.incomingResStream,
+        res: this.res,
+        timings: {
+          cdpRequestWillBeSentTimestamp: preRequest.cdpRequestWillBeSentTimestamp,
+          cdpRequestWillBeSentReceivedTimestamp: preRequest.cdpRequestWillBeSentReceivedTimestamp,
+          proxyRequestReceivedTimestamp: preRequest.proxyRequestReceivedTimestamp,
+          cdpLagDuration: preRequest.cdpLagDuration,
+          proxyRequestCorrelationDuration: preRequest.proxyRequestCorrelationDuration,
+        },
+      })
+      // resultingStream will be undefined, so we continue with original stream
     }
   }
 

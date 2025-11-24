@@ -49,9 +49,22 @@ export class ProtocolManager implements ProtocolManagerShape {
 
   private AppCaptureProtocol: AppCaptureProtocolConstructor | undefined
   private options: ProtocolManagerOptions | undefined
+  private _canAccessStudioAI: boolean = false
 
   get isProtocolEnabled (): boolean {
     return !!this._protocol
+  }
+
+  get mode (): 'record' | 'studio' | undefined {
+    return this.options?.mode
+  }
+
+  get canAccessStudioAI (): boolean {
+    return this._canAccessStudioAI
+  }
+
+  setCanAccessStudioAI (canAccess: boolean): void {
+    this._canAccessStudioAI = canAccess
   }
 
   get networkEnableOptions () {
@@ -451,6 +464,7 @@ export class ProtocolManager implements ProtocolManagerShape {
     this._runId = undefined
     this._errors = []
     this._protocol = undefined
+    this._canAccessStudioAI = false
   }
 
   /**

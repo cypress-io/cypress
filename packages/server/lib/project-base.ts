@@ -513,6 +513,7 @@ export class ProjectBase extends EE {
             }
 
             this.protocolManager = studio.protocolManager
+            this.protocolManager.setCanAccessStudioAI(canAccessStudioAI)
             this.protocolManager.setupProtocol()
             this.protocolManager.beforeSpec({
               ...this.spec,

@@ -128,6 +128,9 @@ export type AfterSpecDurations = {
 
 export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
   isProtocolEnabled: boolean
+  mode?: 'record' | 'studio'
+  canAccessStudioAI: boolean
+  setCanAccessStudioAI(canAccess: boolean): void
   networkEnableOptions?: { maxTotalBufferSize: number, maxResourceBufferSize: number, maxPostDataSize: number }
   setupProtocol(): void
   prepareProtocol (script: string, options: ProtocolManagerOptions): Promise<void>
