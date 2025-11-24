@@ -68,8 +68,9 @@ describe('angular mount', () => {
       return cy.contains('h1', 'Hello World from Spec').wrap(fixture)
     })
     .then((fixture) => {
-      fixture.componentInstance.msg = 'I just changed!'
-      fixture.detectChanges()
+      // NOTE: the correct way to set an input is to use the componentRef.setInput method so angular change detection runs properly.
+      // @see https://github.com/cypress-io/cypress/issues/32391 thread for more details.
+      fixture.componentRef.setInput('msg', 'I just changed!')
       cy.contains('h1', 'I just changed!')
     })
   })
