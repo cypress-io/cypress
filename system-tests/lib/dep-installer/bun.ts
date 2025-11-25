@@ -6,16 +6,22 @@ export function getBunCommand (opts: {
   updateLockFile: boolean
   isCI: boolean
   runScripts: boolean
-}): string {
+}): { cmd: string, env?: Record<string, string> } {
   let cmd = 'bun install'
 
   if (!opts.runScripts) cmd += ' --ignore-scripts'
 
   if (!opts.updateLockFile) cmd += ' --frozen-lockfile'
 
-  // Bun uses different cache structure than npm/yarn
-  if (opts.isCI) cmd += ` --cache=${homedir()}/.bun/install/cache`
-  else cmd += ` --cache=${path.join(tempDir, 'cy-system-tests-bun-cache', String(Date.now()))}`
+  // Bun configures cache directory via BUN_INSTALL_CACHE_DIR environment variable, not a flag
+  const cacheDir = opts.isCI
+    ? path.join(homedir(), '.bun', 'install', 'cache')
+    : path.join(tempDir, 'cy-system-tests-bun-cache', String(Date.now()))
 
-  return cmd
+  return {
+    cmd,
+    env: {
+      BUN_INSTALL_CACHE_DIR: cacheDir,
+    },
+  }
 }

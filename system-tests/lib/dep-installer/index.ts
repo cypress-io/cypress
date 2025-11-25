@@ -176,9 +176,25 @@ export async function scaffoldProjectNodeModules ({
   )
   const projectPkgJsonPath = path.join(projectDir, 'package.json')
 
-  const runCmd = async (cmd) => {
-    log(`Running "${cmd}" in ${projectDir}`)
-    await execa(cmd, { cwd: projectDir, stdio: 'inherit', shell: true })
+  const runCmd = async (cmd: string | { cmd: string, env?: Record<string, string> }, env?: Record<string, string>) => {
+    let command: string
+    let commandEnv: Record<string, string> | undefined
+
+    if (typeof cmd === 'string') {
+      command = cmd
+      commandEnv = env
+    } else {
+      command = cmd.cmd
+      commandEnv = { ...cmd.env, ...env }
+    }
+
+    log(`Running "${command}" in ${projectDir}`)
+    await execa(command, {
+      cwd: projectDir,
+      stdio: 'inherit',
+      shell: true,
+      env: commandEnv ? { ...process.env, ...commandEnv } : undefined,
+    })
   }
 
   const cacheNodeModulesDir = path.join('/tmp', 'cy-system-tests-node-modules', project, 'node_modules')
