@@ -17,9 +17,20 @@ describe('TimeoutDiagnostics', () => {
 
       expect(suggestions).toHaveLength(1)
       expect(suggestions[0].reason).toContain('dynamic/loading content')
-      expect(suggestions[0].suggestions).toContain(
-        'Wait for the loading state to complete: cy.get(\'.loading-spinner\').should(\'not.exist\')',
-      )
+      expect(suggestions[0].suggestions.some((s) => s.includes('wait for the loading indicator to disappear'))).toBe(true)
+    })
+
+    it('escapes quotes in dynamic content selector suggestions', () => {
+      const context = {
+        command: 'get',
+        selector: "[data-test='loading']",
+        timeout: 4000,
+      }
+
+      const suggestions = TimeoutDiagnostics.analyze(context)
+
+      expect(suggestions).toHaveLength(1)
+      expect(suggestions[0].suggestions.some((s) => s.includes("\\'"))).toBe(true)
     })
 
     it('detects complex selectors', () => {
@@ -226,6 +237,22 @@ describe('TimeoutDiagnostics', () => {
       const suggestions = TimeoutDiagnostics.analyze(context)
 
       expect(suggestions).toHaveLength(1)
+    })
+
+    it('escapes quotes in code suggestions to prevent syntax errors', () => {
+      const context = {
+        command: 'get',
+        selector: "[data-test='value']",
+        timeout: 4000,
+      }
+
+      const suggestions = TimeoutDiagnostics.analyze(context)
+      const formatted = TimeoutDiagnostics.formatSuggestions(suggestions)
+
+      // Verify quotes are escaped in suggestions
+      expect(formatted.includes("\\'")).toBe(true)
+      // Verify no unescaped single quotes that would break JS
+      expect(formatted.match(/cy\.get\('\[data-test='value'\]'\)/)).toBe(null)
     })
 
     it('combines multiple diagnostic issues', () => {

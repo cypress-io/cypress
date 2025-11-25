@@ -126,11 +126,21 @@ export const Cypress = (
       const loader = await getLoaderPromise()
 
       // insert the script in the end of the body
-      const newHtml = `
+      let newHtml: string
+
+      if (endOfBody === -1) {
+        // No closing body tag found, append at the end
+        debug('No closing body tag found, appending script at end of HTML')
+        newHtml = `${indexHtmlContent}
+        <script>${loader}</script>`
+      } else {
+        // Insert before closing body tag
+        newHtml = `
         ${indexHtmlContent.substring(0, endOfBody)}
         <script>${loader}</script>
         ${indexHtmlContent.substring(endOfBody)}
       `
+      }
 
       return newHtml
     },

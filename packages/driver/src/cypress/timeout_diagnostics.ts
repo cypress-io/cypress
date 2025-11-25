@@ -78,12 +78,15 @@ export class TimeoutDiagnostics {
 
     // Check for dynamic content indicators
     if (this.COMMON_PATTERNS.dynamicContent.test(selector)) {
+      const escapedSelector = selector.replace(/'/g, "\\'");
+
       suggestions.push({
-        reason: 'The selector appears to target dynamic/loading content',
+        reason: 'The selector appears to target dynamic/loading content that may not be ready yet',
         suggestions: [
-          `Wait for the loading state to complete: cy.get('${selector}').should('not.exist')`,
+          `If waiting for content to load, wait for the loading indicator to disappear first: cy.get('${escapedSelector}').should('not.exist').then(() => cy.get('[data-cy="content"]'))`,
+          'Or wait for the API request: cy.intercept("GET", "/api/*").as("loadData"); cy.wait("@loadData")',
           'Consider using data-cy attributes instead of class names that indicate loading states',
-          'Use cy.intercept() to wait for the API request that populates this content',
+          `If you need the loading element itself, ensure it exists before trying to interact: cy.get('${escapedSelector}').should('exist')`,
         ],
         docsUrl: 'https://on.cypress.io/best-practices#Selecting-Elements',
       })
@@ -91,12 +94,15 @@ export class TimeoutDiagnostics {
 
     // Check for potentially incorrect selectors
     if (selector.includes(' ') && !selector.includes('[') && command === 'get') {
+      const escapedFirst = selector.split(' ')[0].replace(/'/g, "\\'");
+      const escapedRest = selector.split(' ').slice(1).join(' ').replace(/'/g, "\\'");
+
       suggestions.push({
         reason: 'Complex selector detected - might be fragile or incorrect',
         suggestions: [
           'Verify the selector in DevTools: copy and paste it into the console',
           'Consider using data-cy attributes for more reliable selection',
-          `Break down into multiple steps: cy.get('${selector.split(' ')[0]}').find('${selector.split(' ').slice(1).join(' ')}')`,
+          `Break down into multiple steps: cy.get('${escapedFirst}').find('${escapedRest}')`,
         ],
         docsUrl: 'https://on.cypress.io/best-practices#Selecting-Elements',
       })
@@ -104,12 +110,15 @@ export class TimeoutDiagnostics {
 
     // Check for ID selectors that might be dynamic
     if (selector.startsWith('#') && /\d{3,}/.test(selector)) {
+      const prefix = selector.split(/\d/)[0];
+      const escapedPrefix = prefix.replace(/'/g, "\\'");
+
       suggestions.push({
         reason: 'Selector uses an ID with numbers - might be dynamically generated',
         suggestions: [
           'Dynamic IDs change between sessions and will cause flaky tests',
           'Use a data-cy attribute or a more stable selector instead',
-          'If the ID is dynamic, use a partial match: cy.get(\'[id^="prefix-"]\').first()',
+          `If the ID is dynamic, use a partial match: cy.get('[id^="${escapedPrefix}"]').first()`,
         ],
       })
     }
@@ -190,8 +199,10 @@ export class TimeoutDiagnostics {
 
     // Add command-specific suggestions
     if (['get', 'contains'].includes(command) && selector) {
+      const escapedSelector = selector.replace(/'/g, "\\'");
+
       generalSuggestions.unshift(
-        `Verify selector in DevTools: document.querySelector('${selector}')`,
+        `Verify selector in DevTools: document.querySelector('${escapedSelector}')`,
         'Ensure the element is not hidden by CSS (display: none, visibility: hidden)',
       )
     }
