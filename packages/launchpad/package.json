@@ -15,7 +15,7 @@
     "dev": "yarn cypress:run-cypress-in-cypress gulp dev --project .",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "start": "echo 'run yarn dev from the root' && exit 1",
-    "test": "yarn cypress:run:ct && yarn types",
+    "test": "yarn cypress:run:ct",
     "tslint": "tslint --config ../ts/tslint.json --project . --exclude ../graphql/src/gen/nxs.gen.ts",
     "watch": "echo 'run yarn dev from the root' && exit 1"
   },
