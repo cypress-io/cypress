@@ -7,7 +7,6 @@
     "build-cli": "tsc -p tsconfig.build.json && tsc -p tsconfig.esm.json && tsx ./scripts/build.ts && tsx ./scripts/post-build.ts",
     "clean": "tsx ./scripts/clean.ts",
     "dtslint": "dtslint types",
-    "health-check": "knip --workspace cli",
     "lint": "eslint",
     "postinstall": "patch-package && tsx ./scripts/post-install.ts",
     "prebuild": "yarn postinstall && tsx ./scripts/start-build.ts",
