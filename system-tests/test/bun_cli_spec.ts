@@ -7,27 +7,27 @@ describe('bun CLI commands', () => {
     snapshot: false,
     browser: 'electron',
     project: 'bun-with-deps',
-    command: 'bunx cypress open',
+    command: 'bun run cypress open',
   })
 
   systemTests.it('can run cypress run with bun', {
     snapshot: false,
     browser: 'electron',
     project: 'bun-with-deps',
-    command: 'bunx cypress run',
+    command: 'bun run cypress run',
   })
 
   systemTests.it('can install cypress binary with bun', {
     snapshot: false,
     browser: 'electron',
     project: 'bun-with-deps',
-    command: 'bunx cypress install',
+    command: 'bun run cypress install',
   })
 
   systemTests.it('can verify cypress installation with bun', {
     snapshot: false,
     browser: 'electron',
     project: 'bun-with-deps',
-    command: 'bunx cypress verify',
+    command: 'bun run cypress verify',
   })
 })
