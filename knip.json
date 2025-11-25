@@ -1,0 +1,493 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "workspaces": {
+    ".": {
+      "entry": [
+        "gulpfile.js"
+      ]
+    },
+    "cli": {
+      "entry": [
+        "bin/cypress",
+        "lib/bin/cypress.ts",
+        "lib/index.ts",
+        "lib/cli.ts",
+        "scripts/**/*.{ts,js}",
+        "types/tests/**/*.ts"
+      ],
+      "project": [
+        "lib/**/*.{ts,js}",
+        "scripts/**/*.{ts,js}",
+        "types/**/*.ts"
+      ]
+    },
+    "packages/app": {
+      "entry": [
+        "src/main.ts",
+        "src/router/router.ts",
+        "src/pages/**/*.vue",
+        "src/layouts/**/*.vue",
+        "src/**/*.cy.{ts,tsx,js,jsx}"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx,vue}",
+        "*.{ts,tsx,js,jsx,mjs}"
+      ]
+    },
+    "packages/frontend-shared": {
+      "entry": [
+        "index.js",
+        "src/index.ts",
+        "src/**/*.cy.{ts,tsx,js,jsx}"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx,vue}",
+        "*.{ts,tsx,js,jsx,mjs}"
+      ]
+    },
+    "packages/server": {
+      "entry": [
+        "start-cypress.js",
+        "lib/cypress.ts",
+        "lib/modes/**/*.ts",
+        "lib/browsers/**/*.ts",
+        "lib/capture.ts",
+        "lib/runner-ct.ts",
+        "lib/cloud/artifacts/upload_artifacts.ts",
+        "lib/cloud/network/nonretriable_cert_error_codes.ts",
+        "lib/plugins/child/default_plugins_file.js",
+        "lib/privileged-commands/privileged-channel.js",
+        "lib/util/**/*.{ts,js}"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/launchpad": {
+      "entry": [
+        "src/main.ts",
+        "src/Main.vue",
+        "src/**/*.cy.{ts,tsx,js,jsx}"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx,vue}",
+        "*.{ts,tsx,js,jsx,mjs}"
+      ]
+    },
+    "packages/example": {
+      "entry": [
+        "gulpfile.js",
+        "lib/example.d.ts"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}",
+        "bin/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/icons": {
+      "project": [
+        "scripts/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/root": {
+      "project": [
+        "*.{ts,tsx,js,jsx,mjs}"
+      ]
+    },
+    "packages/ts": {
+      "project": [
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/extension": {
+      "entry": [
+        "gulpfile.ts",
+        "app/v3/**/*.ts"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}",
+        "app/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/web-config": {
+      "entry": [
+        "webpack.config.base.ts",
+        "node-register.js"
+      ],
+      "project": [
+        "**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/reporter": {
+      "entry": [
+        "src/**/*.cy.{ts,tsx,js,jsx}"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/config": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/driver": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/runner": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/errors": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/net-stubbing": {
+      "entry": [
+        "lib/server/index.ts"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/proxy": {
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/data-context": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/launcher": {
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/https-proxy": {
+      "entry": [
+        "lib/index.ts"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/network": {
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/v8-snapshot-require": {
+      "entry": [
+        "src/constants.ts"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/scaffold-config": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/electron": {
+      "entry": [
+        "src/index.ts",
+        "src/print-node-version.ts"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/socket": {
+      "entry": [
+        "lib/node/index.ts",
+        "lib/client/index.ts"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/packherd-require": {
+      "entry": [
+        "src/sourcemap-support.ts",
+        "src/transpile-ts.ts"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/stderr-filtering": {
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/telemetry": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/types": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/eslint-config": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/network-tools": {
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/resolve-dist": {
+      "entry": [
+        "lib/index.ts"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/rewriter": {
+      "entry": [
+        "lib/threads/worker.ts"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/*": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "lib/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "npm/eslint-plugin-dev": {
+      "entry": [
+        "lib/custom-rules/**/*.js"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "npm/webpack-dev-server": {
+      "entry": [
+        "src/browser.ts",
+        "src/loader.ts",
+        "src/aut-runner.ts"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "npm/cypress-schematic": {
+      "entry": [
+        "src/schematics/**/*.ts",
+        "src/builders/**/*.ts"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "npm/webpack-batteries-included-preprocessor": {
+      "entry": [
+        "index.ts",
+        "test/**/*.{ts,tsx,js,jsx,coffee,mjs,mts}"
+      ],
+      "project": [
+        "**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "npm/webpack-preprocessor": {
+      "entry": [
+        "index.ts"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "npm/vite-dev-server": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "npm/puppeteer": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "npm/svelte": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "npm/react": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "npm/grep": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "npm/vue": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "npm/angular": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "npm/mount-utils": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "npm/vite-plugin-cypress-esm": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "npm/*": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "lib/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "tooling/v8-snapshot": {
+      "entry": [
+        "src/generator/blueprint.ts",
+        "src/blueprint/**/*.js"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "tooling/electron-mksnapshot": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "tooling/packherd": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "tooling/*": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "lib/**/*.{ts,tsx,js,jsx}",
+        "scripts/**/*.{ts,js}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "system-tests": {
+      "entry": [
+        "test/**/*.{ts,js}",
+        "lib/**/*.{ts,js}",
+        "scripts/**/*.{ts,js}"
+      ],
+      "project": [
+        "test/**/*.{ts,js}",
+        "lib/**/*.{ts,js}",
+        "scripts/**/*.{ts,js}",
+        "projects/**/*.{ts,js}"
+      ]
+    }
+  },
+  "ignore": [
+    "**/dist/**",
+    "**/build/**",
+    "**/cjs/**",
+    "**/esm/**",
+    "**/browser/**",
+    "**/node_modules/**",
+    "**/__snapshots__/**",
+    "**/cypress.config.{ts,js}",
+    "**/cypress.config-*.{ts,js}",
+    "**/.releaserc.js",
+    "**/index.d.ts",
+    "**/postcss.config.{js,ts,cjs,mjs}",
+    "**/apollo.config.{js,ts}",
+    "**/webpack.config.{js,ts,mjs}",
+    "**/gulpfile.{js,ts}",
+    "scripts/**",
+    "**/patches/**",
+    "packages/frontend-shared/src/components/**/*.vue",
+    "packages/frontend-shared/src/gql-components/**/*.vue",
+    "packages/frontend-shared/src/composables/examples/**/*.vue",
+    "packages/frontend-shared/src/graphql/urqlDetailedDebugExchange.ts",
+    "packages/frontend-shared/src/gql-components/composables/useCohorts.ts",
+    "packages/frontend-shared/src/gql-components/composables/usePromptManager.ts",
+    "packages/frontend-shared/src/locales/schema.ts",
+    "packages/frontend-shared/src/utils/base64.ts",
+    "packages/frontend-shared/src/utils/isAllowedFeature.ts",
+    "packages/frontend-shared/src/utils/isRunMode.ts",
+    "packages/frontend-shared/src/utils/isWindows.ts",
+    "packages/frontend-shared/src/utils/time.ts",
+    "packages/example/bin/convert.js",
+    "packages/extension/app/v3/content.ts",
+    "packages/extension/app/v3/service-worker.ts",
+    "npm/eslint-plugin-dev/lib/scripts/lint-pre-push.js",
+    "npm/eslint-plugin-dev/lib/scripts/lint-staged.js",
+    "**/*.gen.ts",
+    "**/*.gen.js",
+    "**/project-fixtures/**",
+    "**/projects/**"
+  ],
+  "ignoreDependencies": [
+    "@types/*",
+    "eslint-*",
+    "prettier",
+    "mocha",
+    "chai",
+    "sinon",
+    "cypress",
+    "@cypress/*",
+    "@packages/*",
+    "@tooling/*"
+  ],
+  "ignoreBinaries": [
+    "cypress"
+  ],
+  "rules": {
+    "files": "warn",
+    "dependencies": "warn",
+    "unlisted": "warn",
+    "exports": "warn",
+    "types": "warn",
+    "duplicates": "warn",
+    "classMembers": "warn",
+    "enumMembers": "warn"
+  }
+}
