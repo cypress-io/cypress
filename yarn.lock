@@ -6683,12 +6683,12 @@
     rimraf "^3.0.2"
     ws "^8.0.0"
 
-"@percy/cypress@^3.1.6":
-  version "3.1.6"
-  resolved "https://registry.yarnpkg.com/@percy/cypress/-/cypress-3.1.6.tgz#2c5ebe6851d3ffabaab9e39323ec928c049663ac"
-  integrity sha512-kMc2tXQ7LAH31lB7FckqMpdvguIyxwV4MLTs7s8QLXVChQjpE78HbKyvLtYh5uLOF6Ka6mWyMvD2bkhmd0JJJg==
+"@percy/cypress@^3.1.7":
+  version "3.1.7"
+  resolved "https://registry.yarnpkg.com/@percy/cypress/-/cypress-3.1.7.tgz#438cc8707a8340df7430620765eb7e852e63e6a2"
+  integrity sha512-UXPE7egnOOX/nv5oSwhTG7BEGio/HjnFdMuBR1Vbm2Izj3pUwMkxGqZRJsNtFuGl2iVckwbh9SuFoeKIdcaTcg==
   dependencies:
-    "@percy/sdk-utils" "1.30.9"
+    "@percy/sdk-utils" "1.31.4"
 
 "@percy/dom@1.27.4":
   version "1.27.4"
@@ -6734,10 +6734,12 @@
   resolved "https://registry.yarnpkg.com/@percy/sdk-utils/-/sdk-utils-1.27.6.tgz#f6daa7f81fde65d61e7c2817ad1215eda4eed7fe"
   integrity sha512-oZwd9u+KnFdMbA8HmisiWY5un4qB00kNUJtn/6CsXSpLwMi4qhOiBp8xjex0Aq5dqQc3vklWdlPu7JFxGwQq4Q==
 
-"@percy/sdk-utils@1.30.9":
-  version "1.30.9"
-  resolved "https://registry.yarnpkg.com/@percy/sdk-utils/-/sdk-utils-1.30.9.tgz#fdc65afbeb8db96cc34cebd3e206564eadd30e1c"
-  integrity sha512-vgzWUa1eDWRS+q/zlVILwP4QDFdmxPIiH7FbQ2UGA4rh3mDYporIq5OY+x2YMMV9/Q4uhi1p3ZxXW2Svg6cOHw==
+"@percy/sdk-utils@1.31.4":
+  version "1.31.4"
+  resolved "https://registry.yarnpkg.com/@percy/sdk-utils/-/sdk-utils-1.31.4.tgz#1f42d29c28179b6394c141fc515836172e226422"
+  integrity sha512-IBzSQZ8jx1pnSyyn7tF4UX8BVffbw0xjsNsPl/MuYuFuE5rW/D8arc+sH6xI1Kog0+tECt2XdAf4hMGWij2lxw==
+  dependencies:
+    pac-proxy-agent "^7.0.2"
 
 "@percy/webdriver-utils@1.27.4":
   version "1.27.4"
@@ -10537,7 +10539,7 @@ agent-base@^4.3.0:
   dependencies:
     es6-promisify "^5.0.0"
 
-agent-base@^7.0.2, agent-base@^7.1.0, agent-base@^7.1.1, agent-base@^7.1.2:
+agent-base@^7.0.2, agent-base@^7.1.0, agent-base@^7.1.2:
   version "7.1.3"
   resolved "https://registry.yarnpkg.com/agent-base/-/agent-base-7.1.3.tgz#29435eb821bc4194633a5b89e5bc4703bafc25a1"
   integrity sha512-jRR5wdylq8CkOe6hei19GGZnxM6rBGwFl3Bg0YItGDimvjGtAvdZk4Pu6Cl4u4Igsws4a1fd1Vq3ezrhn4KmFw==
@@ -20112,11 +20114,6 @@ ip-regex@^5.0.0:
   resolved "https://registry.npmjs.org/ip-regex/-/ip-regex-5.0.0.tgz#cd313b2ae9c80c07bd3851e12bf4fa4dc5480632"
   integrity sha512-fOCG6lhoKKakwv+C6KdsOnGvgXnmgfmp0myi3bcNwj3qfwPAxRKWEuFhvEFF7ceYIz6+1jRZ+yguLFAmUNPEfw==
 
-ip@^1.1.8:
-  version "1.1.9"
-  resolved "https://registry.yarnpkg.com/ip/-/ip-1.1.9.tgz#8dfbcc99a754d07f425310b86a99546b1151e396"
-  integrity sha512-cyRxvOEpNHNtchU3Ln9KC/auJgup87llfQpQ+t5ghoC/UhL16SWzbueiCsdTnWmqAWl7LadfuwhlqmtOaqMHdQ==
-
 ipaddr.js@1.9.1:
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/ipaddr.js/-/ipaddr.js-1.9.1.tgz#bff38543eeb8984825079ff3a2a8e6cbd46781b3"
@@ -26073,27 +26070,26 @@ p-waterfall@2.1.1:
   dependencies:
     p-reduce "^2.0.0"
 
-pac-proxy-agent@^7.0.1:
-  version "7.0.1"
-  resolved "https://registry.yarnpkg.com/pac-proxy-agent/-/pac-proxy-agent-7.0.1.tgz#6b9ddc002ec3ff0ba5fdf4a8a21d363bcc612d75"
-  integrity sha512-ASV8yU4LLKBAjqIPMbrgtaKIvxQri/yh2OpI+S6hVa9JRkUI3Y3NPFbfngDtY7oFtSMD3w31Xns89mDa3Feo5A==
+pac-proxy-agent@^7.0.1, pac-proxy-agent@^7.0.2:
+  version "7.2.0"
+  resolved "https://registry.yarnpkg.com/pac-proxy-agent/-/pac-proxy-agent-7.2.0.tgz#9cfaf33ff25da36f6147a20844230ec92c06e5df"
+  integrity sha512-TEB8ESquiLMc0lV8vcd5Ql/JAKAoyzHFXaStwjkzpOpC5Yv+pIzLfHvjTSdf3vpa2bMiUQrg9i6276yn8666aA==
   dependencies:
     "@tootallnate/quickjs-emscripten" "^0.23.0"
-    agent-base "^7.0.2"
+    agent-base "^7.1.2"
     debug "^4.3.4"
     get-uri "^6.0.1"
     http-proxy-agent "^7.0.0"
-    https-proxy-agent "^7.0.2"
-    pac-resolver "^7.0.0"
-    socks-proxy-agent "^8.0.2"
+    https-proxy-agent "^7.0.6"
+    pac-resolver "^7.0.1"
+    socks-proxy-agent "^8.0.5"
 
-pac-resolver@^7.0.0:
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/pac-resolver/-/pac-resolver-7.0.0.tgz#79376f1ca26baf245b96b34c339d79bff25e900c"
-  integrity sha512-Fd9lT9vJbHYRACT8OhCbZBbxr6KRSawSovFpy8nDGshaK99S/EBhVIHp9+crhxrsZOuvLpgL1n23iyPg6Rl2hg==
+pac-resolver@^7.0.1:
+  version "7.0.1"
+  resolved "https://registry.yarnpkg.com/pac-resolver/-/pac-resolver-7.0.1.tgz#54675558ea368b64d210fd9c92a640b5f3b8abb6"
+  integrity sha512-5NPgf87AT2STgwa2ntRMr45jTKrYBGkVU36yT0ig/n/GMAa3oPqhZfIQ2kMEimReg0+t9kZViDVZ83qfVUlckg==
   dependencies:
     degenerator "^5.0.0"
-    ip "^1.1.8"
     netmask "^2.0.2"
 
 package-json-from-dist@^1.0.0:
@@ -29999,12 +29995,12 @@ socks-proxy-agent@^7.0.0:
     debug "^4.3.3"
     socks "^2.6.2"
 
-socks-proxy-agent@^8.0.2, socks-proxy-agent@^8.0.3:
-  version "8.0.4"
-  resolved "https://registry.npmjs.org/socks-proxy-agent/-/socks-proxy-agent-8.0.4.tgz#9071dca17af95f483300316f4b063578fa0db08c"
-  integrity sha512-GNAq/eg8Udq2x0eNiFkr9gRg5bA7PXEWagQdeRX4cPSG+X/8V38v637gim9bjFptMk1QWsCTr0ttrJEiXbNnRw==
+socks-proxy-agent@^8.0.2, socks-proxy-agent@^8.0.3, socks-proxy-agent@^8.0.5:
+  version "8.0.5"
+  resolved "https://registry.yarnpkg.com/socks-proxy-agent/-/socks-proxy-agent-8.0.5.tgz#b9cdb4e7e998509d7659d689ce7697ac21645bee"
+  integrity sha512-HehCEsotFqbPW9sJ8WVYB6UbmIMv7kUUORIF2Nncq4VQvBfNBLibW9YZR5dlYCSUhwcD628pRllm7n+E+YTzJw==
   dependencies:
-    agent-base "^7.1.1"
+    agent-base "^7.1.2"
     debug "^4.3.4"
     socks "^2.8.3"
 
