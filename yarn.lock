@@ -8706,10 +8706,10 @@
   resolved "https://registry.yarnpkg.com/@types/mdurl/-/mdurl-1.0.2.tgz#e2ce9d83a613bacf284c7be7d491945e39e1f8e9"
   integrity sha512-eC4U9MlIcu2q0KQmXszyn5Akca/0jrQmwDRgpAMJai7qBWq4amIQhZyNau4VYGtCeALvW1/NtjzJJ567aZxfKA==
 
-"@types/micromatch@4.0.9":
-  version "4.0.9"
-  resolved "https://registry.yarnpkg.com/@types/micromatch/-/micromatch-4.0.9.tgz#8e5763a8c1fc7fbf26144d9215a01ab0ff702dbb"
-  integrity sha512-7V+8ncr22h4UoYRLnLXSpTxjQrNUXtWHGeMPRJt1nULXI57G9bIcpyrHlmrQ7QK24EyyuXvYcSSWAM8GA9nqCg==
+"@types/micromatch@4.0.10":
+  version "4.0.10"
+  resolved "https://registry.yarnpkg.com/@types/micromatch/-/micromatch-4.0.10.tgz#f83b8b05cea1face2a7cf3b7e866ff97d204b632"
+  integrity sha512-5jOhFDElqr4DKTrTEbnW8DZ4Hz5LRUEmyrGpCMrD/NphYv3nUnaF08xmSLx1rGGnyEs/kFnhiw6dCgcDqMr5PQ==
   dependencies:
     "@types/braces" "*"
 
