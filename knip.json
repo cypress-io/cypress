@@ -478,7 +478,10 @@
     "@tooling/*"
   ],
   "ignoreBinaries": [
-    "cypress"
+    "cypress",
+    "tar",
+    "wc",
+    "rm"
   ],
   "rules": {
     "files": "warn",
