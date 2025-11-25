@@ -481,7 +481,8 @@
     "cypress",
     "tar",
     "wc",
-    "rm"
+    "rm",
+    "circleci"
   ],
   "rules": {
     "files": "warn",
