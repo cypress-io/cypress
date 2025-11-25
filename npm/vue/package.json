@@ -23,6 +23,7 @@
     "cypress": "0.0.0-development",
     "debug": "^4.3.4",
     "globby": "^11.0.1",
+    "rollup": "3.29.5",
     "tailwindcss": "1.1.4",
     "typescript": "~5.4.5",
     "vite": "6.3.5",
