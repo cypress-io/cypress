@@ -8,7 +8,7 @@ describe('bun TypeScript support', () => {
     browser: 'chrome',
     project: 'bun-component-testing',
     testingType: 'component',
-    spec: '**/*.cy.ts',
+    spec: '**/*.cy.{ts,tsx}',
   })
 
   systemTests.it('can handle TypeScript config files with bun', {

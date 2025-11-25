@@ -9,7 +9,28 @@ const { scaffoldProjectNodeModules } = require('../lib/dep-installer')
 const logTag = '[update-cache.js]'
 const log = (...args) => console.log(logTag, ...args)
 
-;(async () => {
+async function isWorkspacePackage (projectDir, projectsDir) {
+  const lockfiles = ['yarn.lock', 'package-lock.json', 'pnpm-lock.yaml', 'bun.lock']
+  let currentDir = path.dirname(projectDir)
+
+  // Check parent directories up to but not including the projectsDir
+  while (currentDir !== projectsDir && currentDir.startsWith(projectsDir)) {
+    for (const lockfile of lockfiles) {
+      const lockfilePath = path.join(currentDir, lockfile)
+      const hasLockfile = await fs.stat(lockfilePath).catch(() => false)
+
+      if (hasLockfile) {
+        return true
+      }
+    }
+
+    currentDir = path.dirname(currentDir)
+  }
+
+  return false
+}
+
+(async () => {
   /**
    * For all system test projects that have a package.json, check and update
    * the node_modules cache using `yarn`.
@@ -30,6 +51,13 @@ const log = (...args) => console.log(logTag, ...args)
     if (project.includes('yarn-v4.3.1-pnp-dep-resolution')) {
       log('found project yarn-v4.3.1-pnp-dep-resolution, skipping dependency install as this requires corepack for yarn 4')
       log('this project is an exception and tested inside a docker container with corepack and yarn 4 installed against the built cypress binary')
+      continue
+    }
+
+    // Skip workspace packages - if there's a lockfile in a parent directory, this is a workspace package
+    // and should be handled by the workspace root, not processed individually
+    if (await isWorkspacePackage(projectDir, projectsDir)) {
+      log(`found workspace package ${project}, skipping as it will be handled by workspace root`)
       continue
     }
 
@@ -55,3 +83,6 @@ const log = (...args) => console.log(logTag, ...args)
 
   log('Updated node_modules for', packageJsons.length, 'projects.')
 })()
+
+// Export for testing
+module.exports = { isWorkspacePackage }
