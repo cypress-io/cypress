@@ -76,7 +76,7 @@ export class TimeoutDiagnostics {
 
     // Check for dynamic content indicators
     if (this.COMMON_PATTERNS.dynamicContent.test(selector)) {
-      const escapedSelector = selector.replace(/'/g, '\\\'')
+      const escapedSelector = this.escapeSelector(selector)
 
       suggestions.push({
         reason: 'The selector appears to target dynamic/loading content that may not be ready yet',
@@ -92,8 +92,8 @@ export class TimeoutDiagnostics {
 
     // Check for potentially incorrect selectors
     if (selector.includes(' ') && !selector.includes('[') && command === 'get') {
-      const escapedFirst = selector.split(' ')[0].replace(/'/g, '\\\'')
-      const escapedRest = selector.split(' ').slice(1).join(' ').replace(/'/g, '\\\'')
+      const escapedFirst = this.escapeSelector(selector.split(' ')[0])
+      const escapedRest = this.escapeSelector(selector.split(' ').slice(1).join(' '))
 
       suggestions.push({
         reason: 'Complex selector detected - might be fragile or incorrect',
@@ -107,18 +107,21 @@ export class TimeoutDiagnostics {
     }
 
     // Check for ID selectors that might be dynamic
-    if (selector.startsWith('#') && /\d{3,}/.test(selector)) {
-      const prefix = selector.split(/\d/)[0]
-      const escapedPrefix = prefix.replace(/'/g, '\\\'')
+    if (selector.startsWith('#')) {
+      const prefixMatch = selector.match(/^#([^\d]+)\d{3,}/)
 
-      suggestions.push({
-        reason: 'Selector uses an ID with numbers - might be dynamically generated',
-        suggestions: [
-          'Dynamic IDs change between sessions and will cause flaky tests',
-          'Use a data-cy attribute or a more stable selector instead',
-          `If the ID is dynamic, use a partial match: cy.get('[id^="${escapedPrefix}"]').first()`,
-        ],
-      })
+      if (prefixMatch) {
+        const escapedPrefix = this.escapeSelector(prefixMatch[1])
+
+        suggestions.push({
+          reason: 'Selector uses an ID with numbers - might be dynamically generated',
+          suggestions: [
+            'Dynamic IDs change between sessions and will cause flaky tests',
+            'Use a data-cy attribute or a more stable selector instead',
+              `If the ID is dynamic, use a partial match: cy.get('[id^="${escapedPrefix}"]').first()`,
+          ],
+        })
+      }
     }
 
     return suggestions
@@ -187,37 +190,17 @@ export class TimeoutDiagnostics {
 
   private static getGeneralSuggestions (context: TimeoutContext): DiagnosticSuggestion {
     const { command, timeout, selector } = context
-    const escapedSelector = selector?.replace(/'/g, '\\\'')
-    const actionCommands = new Set([
-      'click', 'type', 'dblclick', 'rightclick', 'check', 'uncheck',
-      'select', 'focus', 'blur', 'submit', 'trigger',
-    ])
-
-    const timeoutSuggestion = (() => {
-      if (escapedSelector && actionCommands.has(command)) {
-        return `Increase timeout if needed: cy.get('${escapedSelector}').${command}({ timeout: ${timeout * 2} })`
-      }
-
-      const args: string[] = []
-
-      if (escapedSelector) {
-        args.push(`'${escapedSelector}'`)
-      }
-
-      args.push(`{ timeout: ${timeout * 2} }`)
-
-      return `Increase timeout if needed: cy.${command}(${args.join(', ')})`
-    })()
+    const escapedSelector = selector ? this.escapeSelector(selector) : undefined
 
     const generalSuggestions = [
-      timeoutSuggestion,
+      `Increase timeout if needed: cy.${command}(${escapedSelector ? `'${escapedSelector}', ` : ''}{ timeout: ${timeout * 2} })`,
       'Verify the element/condition you\'re waiting for actually appears',
       'Check the browser console and Network tab for errors',
       'Use .debug() before the failing command to inspect the state: cy.debug()',
     ]
 
     // Add command-specific suggestions
-    if (['get', 'contains'].includes(command) && escapedSelector) {
+    if (command === 'get' && escapedSelector) {
       generalSuggestions.unshift(
         `Verify selector in DevTools: document.querySelector('${escapedSelector}')`,
         'Ensure the element is not hidden by CSS (display: none, visibility: hidden)',
@@ -236,6 +219,14 @@ export class TimeoutDiagnostics {
       suggestions: generalSuggestions,
       docsUrl: `https://on.cypress.io/${command}`,
     }
+  }
+
+  private static escapeSelector (selector: string): string {
+    return selector
+    .replace(/\\/g, '\\\\')
+    .replace(/`/g, '\\`')
+    .replace(/\$\{/g, '\\${')
+    .replace(/'/g, '\\\'')
   }
 
   /**
