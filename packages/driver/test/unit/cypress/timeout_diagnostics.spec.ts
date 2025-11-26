@@ -23,14 +23,33 @@ describe('TimeoutDiagnostics', () => {
     it('escapes quotes in dynamic content selector suggestions', () => {
       const context = {
         command: 'get',
-        selector: "[data-test='loading']",
+        selector: '[data-test=\'loading\']',
         timeout: 4000,
       }
 
       const suggestions = TimeoutDiagnostics.analyze(context)
 
       expect(suggestions).toHaveLength(1)
-      expect(suggestions[0].suggestions.some((s) => s.includes("\\'"))).toBe(true)
+      expect(suggestions[0].suggestions.some((s) => s.includes('\\\''))).toBe(true)
+    })
+
+    it('preserves template literal characters in selector suggestions', () => {
+      const context = {
+        command: 'get',
+        selector: '[data-test=`value-${state}`]',
+        timeout: 4000,
+      }
+
+      const suggestions = TimeoutDiagnostics.analyze(context)
+      const combined = suggestions.reduce<string[]>((acc, suggestion) => {
+        acc.push(...suggestion.suggestions)
+
+        return acc
+      }, []).join('\n')
+
+      expect(combined).toContain('`value-${state}`')
+      expect(combined).not.toContain('\\`')
+      expect(combined).not.toContain('\\${')
     })
 
     it('detects complex selectors', () => {
@@ -55,6 +74,9 @@ describe('TimeoutDiagnostics', () => {
       const suggestions = TimeoutDiagnostics.analyze(context)
 
       expect(suggestions.some((s) => s.reason.includes('dynamically generated'))).toBe(true)
+      const dynamicIdSuggestion = suggestions.find((s) => s.reason.includes('dynamically generated'))
+
+      expect(dynamicIdSuggestion?.suggestions.some((tip) => tip.includes('[id^="user-"'))).toBe(true)
     })
 
     it('detects network issues with many pending requests', () => {
@@ -94,9 +116,9 @@ describe('TimeoutDiagnostics', () => {
       const suggestions = TimeoutDiagnostics.analyze(context)
 
       expect(suggestions.some((s) => s.reason.includes('Animations are still running'))).toBe(true)
-      expect(suggestions.some((s) => 
-        s.suggestions.some((sug) => sug.includes('waitForAnimations: false')),
-      )).toBe(true)
+      expect(suggestions.some((s) => {
+        return s.suggestions.some((sug) => sug.includes('waitForAnimations: false'))
+      })).toBe(true)
     })
 
     it('detects excessive DOM mutations', () => {
@@ -126,6 +148,21 @@ describe('TimeoutDiagnostics', () => {
       expect(suggestions[0].suggestions.length).toBeGreaterThan(0)
     })
 
+    it('avoids document.querySelector advice for contains text queries', () => {
+      const context = {
+        command: 'contains',
+        selector: 'Success',
+        timeout: 4000,
+      }
+
+      const suggestions = TimeoutDiagnostics.analyze(context)
+
+      expect(suggestions).toHaveLength(1)
+      const combinedSuggestions = suggestions[0].suggestions.join('\n')
+
+      expect(combinedSuggestions.includes('document.querySelector')).toBe(false)
+    })
+
     it('provides command-specific suggestions for click', () => {
       const context = {
         command: 'click',
@@ -135,9 +172,9 @@ describe('TimeoutDiagnostics', () => {
 
       const suggestions = TimeoutDiagnostics.analyze(context)
 
-      expect(suggestions[0].suggestions.some((s) => 
-        s.includes('visible, enabled, and not covered'),
-      )).toBe(true)
+      expect(suggestions[0].suggestions.some((s) => {
+        return s.includes('visible, enabled, and not covered')
+      })).toBe(true)
     })
   })
 
@@ -242,7 +279,7 @@ describe('TimeoutDiagnostics', () => {
     it('escapes quotes in code suggestions to prevent syntax errors', () => {
       const context = {
         command: 'get',
-        selector: "[data-test='value']",
+        selector: '[data-test=\'value\']',
         timeout: 4000,
       }
 
@@ -250,7 +287,7 @@ describe('TimeoutDiagnostics', () => {
       const formatted = TimeoutDiagnostics.formatSuggestions(suggestions)
 
       // Verify quotes are escaped in suggestions
-      expect(formatted.includes("\\'")).toBe(true)
+      expect(formatted.includes('\\\'')).toBe(true)
       // Verify no unescaped single quotes that would break JS
       expect(formatted.match(/cy\.get\('\[data-test='value'\]'\)/)).toBe(null)
     })
