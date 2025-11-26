@@ -1,18 +1,19 @@
-# Timeout Diagnostics - Smart Error Messages
+<!-- NOTE: This file documents a work-in-progress experimental feature. It is NOT integrated into the main Cypress error pipeline yet. -->
+# Timeout Diagnostics — Smart Timeout Error Messages (WIP)
 
-## 🎯 Objetivo
+## Objective
 
-Melhorar dramaticamente a experiência do desenvolvedor ao lidar com erros de timeout no Cypress, fornecendo **sugestões contextuais e acionáveis** baseadas na análise do contexto do erro.
+Improve the developer experience when dealing with timeout errors in Cypress by providing actionable, context-aware suggestions based on analysis of the failure context.
 
-## 🚀 Motivação
+## Motivation
 
-Erros de timeout são extremamente comuns em testes Cypress, mas as mensagens tradicionais são genéricas:
+Timeout errors are extremely common in Cypress tests, yet default messages are often generic and unhelpful:
 
 ```
 cy.get() timed out waiting 4000ms
 ```
 
-Com este sistema, os desenvolvedores recebem diagnósticos inteligentes:
+This diagnostics system aims to enrich those messages with intelligent, actionable suggestions:
 
 ```
 cy.get() timed out waiting 4000ms
@@ -27,172 +28,120 @@ cy.get() timed out waiting 4000ms
 
 2. 8 network requests are still pending
    a) Wait for specific API calls to complete using cy.intercept()
-   b) Consider increasing the timeout if the requests are expected to be slow
-   c) Check if some requests are failing or hanging in the Network tab
-   d) Example: cy.intercept("GET", "/api/data").as("getData"); cy.wait("@getData")
-   📚 Learn more: https://on.cypress.io/intercept
-```
+  <!-- NOTE: This file documents a work-in-progress experimental feature. It is NOT integrated into the main Cypress error pipeline yet. -->
+  # Timeout Diagnostics — Smart Timeout Error Messages (WIP)
 
-## ✨ Funcionalidades
+  Status: Work‑in‑progress (not yet integrated into Cypress). This document describes an experimental timeout diagnostics system that analyzes command context (selectors, network, animations, DOM mutations) and produces contextual recommendations to help users address flaky or timing-related failures.
 
-### 1. **Detecção de Seletores Problemáticos**
-- Identifica seletores que apontam para conteúdo dinâmico (loading, spinner, skeleton)
-- Detecta seletores complexos e frágeis
-- Alerta sobre IDs dinâmicos (ex: `#user-12345`)
+  Objective
+  ---------
+  Improve the developer experience for timeout errors by producing actionable, context-aware suggestions when a command times out. Instead of a generic message like `cy.get() timed out waiting 4000ms`, diagnostics should indicate likely causes (dynamic content, pending network requests, animations, etc.) and suggest concrete fixes.
 
-### 2. **Análise de Problemas de Rede**
-- Detecta múltiplas requisições pendentes
-- Identifica timeouts longos que sugerem operações assíncronas
-- Sugere uso de `cy.intercept()` para melhor controle
+  Motivation
+  ----------
+  Timeouts are a frequent source of confusion in end-to-end tests. The goal of this feature is to reduce debugging time and teach best practices inline by providing targeted suggestions and examples.
 
-### 3. **Diagnóstico de Animações**
-- Identifica quando animações estão causando delays
-- Sugere configurações para desabilitar animações em testes
+  Example enhanced output
+  -----------------------
+  ```
+  cy.get('.user-list') timed out waiting 4000ms
 
-### 4. **Detecção de Mutações Excessivas do DOM**
-- Identifica quando o DOM está mudando rapidamente
-- Sugere esperar por estabilização antes de interagir
+  Diagnostic suggestions:
 
-### 5. **Sugestões Específicas por Comando**
-- Sugestões customizadas para cada tipo de comando (`get`, `click`, `type`, etc.)
-- Links para documentação relevante
+  1) Selector likely targets dynamic content
+     • Wait for the loading state: cy.get('.loading-spinner').should('not.exist')
+     • Prefer stable data attributes: e.g. [data-cy="user-list"]
+     • Consider intercepting the API call that populates this content
 
-## 📦 Estrutura
+  2) Network requests pending (8)
+     • Use cy.intercept('GET', '/api/users').as('getUsers') and cy.wait('@getUsers')
+     • If requests are expected to be slow, either wait for the specific request or increase the timeout
 
-```
-packages/driver/src/cypress/
-└── timeout_diagnostics.ts       # Lógica principal
+  Learn more: https://on.cypress.io/intercept
+  ```
 
-packages/driver/test/unit/cypress/
-└── timeout_diagnostics.spec.ts  # Testes unitários
-```
+  Features
+  --------
+  - Problematic selector detection (loading spinners, skeletons, dynamic IDs)
+  - Network analysis (pending requests, slow/long-running requests)
+  - Animation detection and guidance to reduce timing flakiness
+  - Detection of excessive DOM mutations and recommendations to wait for stability
+  - Command-specific suggestions (get, click, type, etc.) and doc links
 
-## 🔧 API
+  Project structure (implementation sketch)
+  ----------------------------------------
+  ```
+  packages/driver/src/cypress/
+    timeout_diagnostics.ts        — core analysis + formatting (WIP)
 
-```typescript
-import { TimeoutDiagnostics } from './timeout_diagnostics'
+  packages/driver/test/unit/cypress/
+    timeout_diagnostics.spec.ts   — unit tests
+  ```
 
-// Analisar contexto e obter sugestões
-const suggestions = TimeoutDiagnostics.analyze({
-  command: 'get',
-  selector: '.loading-spinner',
-  timeout: 4000,
-  networkRequests: 5,
-  animationsRunning: true,
-})
+  API sketch
+  ----------
+  ```ts
+  // analyze context and produce suggestions
+  const suggestions = TimeoutDiagnostics.analyze({
+    command: 'get',
+    selector: '.loading-spinner',
+    timeout: 4000,
+    networkRequests: 5,
+    animationsRunning: true,
+  })
 
-// Formatar sugestões para exibição
-const formatted = TimeoutDiagnostics.formatSuggestions(suggestions)
+  const formatted = TimeoutDiagnostics.formatSuggestions(suggestions)
 
-// Enriquecer mensagem de erro existente
-const enhanced = TimeoutDiagnostics.enhanceTimeoutError(
-  'cy.get() timed out',
-  context
-)
-```
+  // enhance base timeout message with suggestions
+  const enhanced = TimeoutDiagnostics.enhanceTimeoutError('cy.get() timed out', context)
+  ```
 
-## 🎨 Exemplos de Uso
+  Integration notes
+  -----------------
+  To integrate this into Cypress's existing error pipeline we would:
 
-### Exemplo 1: Conteúdo Dinâmico
-```typescript
-// Teste que falha
-cy.get('.loading-spinner').click()
+  1. Extend `error_utils` (or the error creation path) to provide additional context (selector, pending network count, DOM mutation rate, animation state) when creating a timeout error.
+  2. Call `TimeoutDiagnostics.analyze(context)` and append the returned suggestions to the error message (optionally behind a feature flag).
+  3. Add a configuration option to opt in/out of diagnostics in CI or local environments.
 
-// Erro melhorado sugere:
-// "Wait for the loading state to complete: 
-//  cy.get('.loading-spinner').should('not.exist')"
-```
+  Integration example (pseudo):
+  ```ts
+  import TimeoutDiagnostics from './timeout_diagnostics'
 
-### Exemplo 2: Problemas de Rede
-```typescript
-// Teste aguardando resposta API
-cy.get('.user-data').should('be.visible')
+  function createTimeoutError(cmd, ms) {
+    const context = {
+      command: cmd.get('name'),
+      selector: cmd.get('selector'),
+      timeout: ms,
+      networkRequests: getNetworkMonitor().pendingCount(),
+      animationsRunning: hasRunningAnimations(),
+      domMutations: getDOMMutationCount(),
+    }
 
-// Erro melhorado sugere:
-// "Use cy.intercept() to wait for the specific request:
-//  cy.intercept('GET', '/api/users').as('getUsers')
-//  cy.wait('@getUsers')"
-```
-
-### Exemplo 3: Animações
-```typescript
-// Elemento animando quando clica
-cy.get('.modal-button').click()
-
-// Erro melhorado sugere:
-// "Disable animations: .click({ waitForAnimations: false })
-//  Or globally: Cypress.config('animationDistanceThreshold', 0)"
-```
-
-## 🔮 Integração Futura
-
-Para integrar completamente no Cypress, seria necessário:
-
-1. **Modificar `error_utils.ts`** para capturar contexto adicional durante timeouts
-2. **Coletar métricas** de rede, DOM e animações durante execução do comando
-3. **Integrar na pipeline de erro** existente do Cypress
-4. **Adicionar configuração** para habilitar/desabilitar diagnósticos
-
-```typescript
-// Exemplo de integração em error_utils.ts
-import TimeoutDiagnostics from './timeout_diagnostics'
-
-const createTimeoutError = (cmd, ms) => {
-  const context = {
-    command: cmd.get('name'),
-    selector: cmd.get('selector'),
-    timeout: ms,
-    networkRequests: getNetworkMonitor().pendingCount(),
-    animationsRunning: hasRunningAnimations(),
-    domMutations: getDOMMutationCount(),
+    const baseMessage = `cy.${cmd.get('name')}() timed out waiting ${ms}ms`
+    return TimeoutDiagnostics.enhanceTimeoutError(baseMessage, context)
   }
-  
-  const baseMessage = `cy.${cmd.get('name')}() timed out waiting ${ms}ms`
-  return TimeoutDiagnostics.enhanceTimeoutError(baseMessage, context)
-}
-```
+  ```
 
-## 📊 Benefícios
+  Tests
+  -----
+  Run unit tests for the diagnostics module:
 
-1. **Reduz tempo de debugging**: Desenvolvedores identificam problemas mais rapidamente
-2. **Educação inline**: Ensina melhores práticas durante o desenvolvimento
-3. **Menos frustração**: Erros mais claros = desenvolvedores mais felizes
-4. **Reduz issues no GitHub**: Menos perguntas sobre "por que meu teste timeout?"
-5. **Melhora adoção**: Desenvolvedores iniciantes aprendem mais rápido
+  ```powershell
+  cd packages/driver
+  yarn test timeout_diagnostics.spec.ts
+  ```
 
-## 🧪 Testes
+  Notes & next steps
+  ------------------
+  - This README documents the experimental design and examples. The feature is intentionally left out of the main error flow until heuristics and runtime metric collection are reviewed.
+  - Next: finalize analysis heuristics, expand unit tests, and implement an opt-in integration path in `error_utils`.
 
-Execute os testes unitários:
+  License
+  -------
+  MIT — consistent with the Cypress project
 
-```bash
-cd packages/driver
-yarn test timeout_diagnostics.spec.ts
-```
-
-Cobertura inclui:
-- ✅ Detecção de todos os tipos de problemas
-- ✅ Formatação de mensagens
-- ✅ Casos extremos e edge cases
-- ✅ Combinação de múltiplos diagnósticos
-
-## 🚀 Próximos Passos
-
-1. ✅ Criar módulo de diagnósticos com testes
-2. ⏳ Integrar com sistema de erros existente
-3. ⏳ Adicionar coleta de métricas de contexto
-4. ⏳ Criar configuração para habilitar/desabilitar
-5. ⏳ Adicionar mais padrões e sugestões baseado em feedback
-6. ⏳ Documentação para usuários finais
-
-## 🤝 Contribuindo
-
-Este é um sistema extensível. Para adicionar novos diagnósticos:
-
-1. Adicione padrão em `COMMON_PATTERNS`
-2. Crie método `analyze*Issues()`
-3. Adicione testes correspondentes
-4. Documente o novo diagnóstico
-
-## 📝 Licença
-
-MIT - Consistente com o projeto Cypress
+  If you'd like, I can also:
+  - normalize the file encoding/artifacts (there were some garbled characters in the original), and
+  - open a small PR on the `feat/timeout-diagnostics` branch with this cleaned README.
+    animationsRunning: hasRunningAnimations(),
