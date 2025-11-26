@@ -79,6 +79,21 @@ describe('TimeoutDiagnostics', () => {
       expect(dynamicIdSuggestion?.suggestions.some((tip) => tip.includes('[id^="user-"'))).toBe(true)
     })
 
+    it('escapes double quotes in dynamic ID suggestions', () => {
+      const context = {
+        command: 'get',
+        selector: '#user"test-12345',
+        timeout: 4000,
+      }
+
+      const suggestions = TimeoutDiagnostics.analyze(context)
+      const dynamicIdSuggestion = suggestions.find((s) => s.reason.includes('dynamically generated'))
+      const combinedTips = dynamicIdSuggestion?.suggestions.join('\n') ?? ''
+
+      expect(combinedTips).toContain('\\"')
+      expect(combinedTips).toContain('[id^="user\\"test-"]')
+    })
+
     it('detects network issues with many pending requests', () => {
       const context = {
         command: 'get',
