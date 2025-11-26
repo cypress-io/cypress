@@ -1,11 +1,9 @@
 /**
  * Timeout Diagnostics - Smart suggestions for timeout errors
- * 
+ *
  * This module provides contextual diagnostics and actionable suggestions
  * when commands timeout, helping developers quickly identify and fix issues.
  */
-
-import _ from 'lodash'
 
 interface TimeoutContext {
   command: string
@@ -32,7 +30,7 @@ export class TimeoutDiagnostics {
     dynamicContent: /loading|spinner|skeleton|placeholder/i,
     asyncLoad: /fetch|api|graphql|ajax/i,
     animation: /fade|slide|animate|transition/i,
-    
+
     // Network patterns
     slowNetwork: 3000, // threshold in ms
     manyRequests: 5,
@@ -41,7 +39,7 @@ export class TimeoutDiagnostics {
   /**
    * Generate diagnostic suggestions based on timeout context
    */
-  static analyze(context: TimeoutContext): DiagnosticSuggestion[] {
+  static analyze (context: TimeoutContext): DiagnosticSuggestion[] {
     const suggestions: DiagnosticSuggestion[] = []
 
     // Check for common selector issues
@@ -72,13 +70,13 @@ export class TimeoutDiagnostics {
     return suggestions
   }
 
-  private static analyzeSelectorIssues(context: TimeoutContext): DiagnosticSuggestion[] {
+  private static analyzeSelectorIssues (context: TimeoutContext): DiagnosticSuggestion[] {
     const suggestions: DiagnosticSuggestion[] = []
     const { selector = '', command } = context
 
     // Check for dynamic content indicators
     if (this.COMMON_PATTERNS.dynamicContent.test(selector)) {
-      const escapedSelector = selector.replace(/'/g, "\\'");
+      const escapedSelector = selector.replace(/'/g, '\\\'')
 
       suggestions.push({
         reason: 'The selector appears to target dynamic/loading content that may not be ready yet',
@@ -94,8 +92,8 @@ export class TimeoutDiagnostics {
 
     // Check for potentially incorrect selectors
     if (selector.includes(' ') && !selector.includes('[') && command === 'get') {
-      const escapedFirst = selector.split(' ')[0].replace(/'/g, "\\'");
-      const escapedRest = selector.split(' ').slice(1).join(' ').replace(/'/g, "\\'");
+      const escapedFirst = selector.split(' ')[0].replace(/'/g, '\\\'')
+      const escapedRest = selector.split(' ').slice(1).join(' ').replace(/'/g, '\\\'')
 
       suggestions.push({
         reason: 'Complex selector detected - might be fragile or incorrect',
@@ -110,8 +108,8 @@ export class TimeoutDiagnostics {
 
     // Check for ID selectors that might be dynamic
     if (selector.startsWith('#') && /\d{3,}/.test(selector)) {
-      const prefix = selector.split(/\d/)[0];
-      const escapedPrefix = prefix.replace(/'/g, "\\'");
+      const prefix = selector.split(/\d/)[0]
+      const escapedPrefix = prefix.replace(/'/g, '\\\'')
 
       suggestions.push({
         reason: 'Selector uses an ID with numbers - might be dynamically generated',
@@ -126,7 +124,7 @@ export class TimeoutDiagnostics {
     return suggestions
   }
 
-  private static analyzeNetworkIssues(context: TimeoutContext): DiagnosticSuggestion[] {
+  private static analyzeNetworkIssues (context: TimeoutContext): DiagnosticSuggestion[] {
     const suggestions: DiagnosticSuggestion[] = []
     const { networkRequests = 0, timeout } = context
 
@@ -161,7 +159,7 @@ export class TimeoutDiagnostics {
     return suggestions
   }
 
-  private static analyzeAnimationIssues(context: TimeoutContext): DiagnosticSuggestion[] {
+  private static analyzeAnimationIssues (context: TimeoutContext): DiagnosticSuggestion[] {
     return [{
       reason: 'Animations are still running when the command timed out',
       suggestions: [
@@ -174,7 +172,7 @@ export class TimeoutDiagnostics {
     }]
   }
 
-  private static analyzeDOMMutationIssues(context: TimeoutContext): DiagnosticSuggestion {
+  private static analyzeDOMMutationIssues (context: TimeoutContext): DiagnosticSuggestion {
     return {
       reason: `The DOM is changing rapidly (${context.domMutations} mutations detected)`,
       suggestions: [
@@ -187,21 +185,39 @@ export class TimeoutDiagnostics {
     }
   }
 
-  private static getGeneralSuggestions(context: TimeoutContext): DiagnosticSuggestion {
+  private static getGeneralSuggestions (context: TimeoutContext): DiagnosticSuggestion {
     const { command, timeout, selector } = context
-    const escapedSelector = selector?.replace(/'/g, "\\'")
+    const escapedSelector = selector?.replace(/'/g, '\\\'')
+    const actionCommands = new Set([
+      'click', 'type', 'dblclick', 'rightclick', 'check', 'uncheck',
+      'select', 'focus', 'blur', 'submit', 'trigger',
+    ])
+
+    const timeoutSuggestion = (() => {
+      if (escapedSelector && actionCommands.has(command)) {
+        return `Increase timeout if needed: cy.get('${escapedSelector}').${command}({ timeout: ${timeout * 2} })`
+      }
+
+      const args: string[] = []
+
+      if (escapedSelector) {
+        args.push(`'${escapedSelector}'`)
+      }
+
+      args.push(`{ timeout: ${timeout * 2} }`)
+
+      return `Increase timeout if needed: cy.${command}(${args.join(', ')})`
+    })()
 
     const generalSuggestions = [
-      `Increase timeout if needed: cy.${command}(${escapedSelector ? `'${escapedSelector}', ` : ''}{ timeout: ${timeout * 2} })`,
+      timeoutSuggestion,
       'Verify the element/condition you\'re waiting for actually appears',
       'Check the browser console and Network tab for errors',
       'Use .debug() before the failing command to inspect the state: cy.debug()',
     ]
 
     // Add command-specific suggestions
-    if (['get', 'contains'].includes(command) && selector) {
-      const escapedSelector = selector.replace(/'/g, "\\'");
-
+    if (['get', 'contains'].includes(command) && escapedSelector) {
       generalSuggestions.unshift(
         `Verify selector in DevTools: document.querySelector('${escapedSelector}')`,
         'Ensure the element is not hidden by CSS (display: none, visibility: hidden)',
@@ -225,14 +241,14 @@ export class TimeoutDiagnostics {
   /**
    * Format diagnostic suggestions into a readable message
    */
-  static formatSuggestions(suggestions: DiagnosticSuggestion[]): string {
+  static formatSuggestions (suggestions: DiagnosticSuggestion[]): string {
     if (suggestions.length === 0) return ''
 
     let output = '\n\n🔍 Diagnostic Suggestions:\n'
 
     suggestions.forEach((suggestion, index) => {
       output += `\n${index + 1}. ${suggestion.reason}\n`
-      
+
       suggestion.suggestions.forEach((tip, tipIndex) => {
         output += `   ${String.fromCharCode(97 + tipIndex)}) ${tip}\n`
       })
@@ -248,10 +264,10 @@ export class TimeoutDiagnostics {
   /**
    * Enhanced error message with diagnostics
    */
-  static enhanceTimeoutError(originalMessage: string, context: TimeoutContext): string {
+  static enhanceTimeoutError (originalMessage: string, context: TimeoutContext): string {
     const suggestions = this.analyze(context)
     const diagnostics = this.formatSuggestions(suggestions)
-    
+
     return originalMessage + diagnostics
   }
 }
