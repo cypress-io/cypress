@@ -189,9 +189,10 @@ export class TimeoutDiagnostics {
 
   private static getGeneralSuggestions(context: TimeoutContext): DiagnosticSuggestion {
     const { command, timeout, selector } = context
+    const escapedSelector = selector?.replace(/'/g, "\\'")
 
     const generalSuggestions = [
-      `Increase timeout if needed: cy.${command}(${selector ? `'${selector}', ` : ''}{ timeout: ${timeout * 2} })`,
+      `Increase timeout if needed: cy.${command}(${escapedSelector ? `'${escapedSelector}', ` : ''}{ timeout: ${timeout * 2} })`,
       'Verify the element/condition you\'re waiting for actually appears',
       'Check the browser console and Network tab for errors',
       'Use .debug() before the failing command to inspect the state: cy.debug()',
