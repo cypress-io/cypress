@@ -12,8 +12,8 @@
       "architect": {
         "build": {
           "builder": "@angular/build:application",
-          "tsConfig": "tsconfig.app.json",
           "options": {
+            "tsConfig": "tsconfig.app.json",
             "browser": "src/main.ts",
             "assets": [
               "src/favicon.ico",
