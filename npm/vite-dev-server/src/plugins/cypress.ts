@@ -134,12 +134,13 @@ export const Cypress = (
         newHtml = `${indexHtmlContent}
         <script>${loader}</script>`
       } else {
-        // Insert before closing body tag
-        newHtml = `
-        ${indexHtmlContent.substring(0, endOfBody)}
+        // Insert before closing body tag without extra leading whitespace
+        const beforeBody = indexHtmlContent.substring(0, endOfBody)
+        const afterBody = indexHtmlContent.substring(endOfBody)
+
+        newHtml = `${beforeBody}
         <script>${loader}</script>
-        ${indexHtmlContent.substring(endOfBody)}
-      `
+${afterBody}`
       }
 
       return newHtml
