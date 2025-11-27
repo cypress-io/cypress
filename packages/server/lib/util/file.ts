@@ -159,7 +159,6 @@ export class File {
     .then(() => {
       debugVerbose('read %s', this.path)
 
-      // @ts-expect-error
       return fs.readJsonAsync(this.path, 'utf8')
     })
     .catch((err) => {

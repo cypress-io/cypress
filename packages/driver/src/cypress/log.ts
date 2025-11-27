@@ -6,6 +6,7 @@ import { HIGHLIGHT_ATTR, type ISnapshots } from '../cy/snapshots'
 import $dom from '../dom'
 import $utils from './utils'
 import $errUtils from './error_utils'
+import { MAX_VISIBILITY_CHECK_ELEMENTS } from '@packages/types'
 
 import type { StateFunc } from './state'
 
@@ -484,12 +485,29 @@ export class Log {
       return this.unset('$el')
     }
 
-    // make sure all $el elements are visible!
+    const numElements = $el.length
+
     return this.set({
       highlightAttr: HIGHLIGHT_ATTR,
-      numElements: $el.length,
-      visible: this.get('visible') ?? $el.length === $el.filter(':visible').length,
+      numElements,
+      visible: this.isVisible($el, numElements),
     })
+  }
+
+  private isVisible ($el: JQuery<Element>, numElements: number): boolean | undefined {
+    if (this.get('hidden')) {
+      return undefined
+    }
+
+    if (this.get('visible') !== undefined) {
+      return this.get('visible')
+    }
+
+    if (numElements <= MAX_VISIBILITY_CHECK_ELEMENTS) {
+      return numElements === $el.filter(':visible').length
+    }
+
+    return undefined
   }
 
   merge (log) {

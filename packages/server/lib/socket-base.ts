@@ -9,7 +9,7 @@ import * as socketIo from '@packages/socket'
 import { CDPSocketServer } from '@packages/socket'
 
 import * as errors from './errors'
-import fixture from './fixture'
+import { get as fixtureGet } from './fixture'
 import { ensureProp } from './util/class-helpers'
 import { getUserEditor, setUserEditor } from './util/editors'
 import { openFile, OpenFileDetails } from './util/file-opener'
@@ -202,7 +202,7 @@ export class SocketBase {
       return automation.request(message, data, onAutomationClientRequestCallback)
     }
 
-    const getFixture = (path, opts) => fixture.get(config.fixturesFolder, path, opts)
+    const getFixture = (path, opts) => fixtureGet(config.fixturesFolder, path, opts)
 
     this.getIos().forEach((io) => {
       io?.on('connection', (socket: Socket & { inReporterRoom?: boolean, inRunnerRoom?: boolean }) => {
@@ -617,8 +617,9 @@ export class SocketBase {
             // the test state on the protocol manager and prompt manager
             if (s.currentId) {
               const testId = s.currentId
+              const currentRetry = s.currentRetry ?? undefined
 
-              this._protocolManager?.resetTest(testId)
+              this._protocolManager?.resetTest(testId, currentRetry)
 
               try {
                 const cyPrompt = await getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt()
