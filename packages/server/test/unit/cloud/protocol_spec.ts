@@ -310,14 +310,27 @@ describe('lib/cloud/protocol', () => {
     expect(protocol.pageLoading).to.be.calledWith(input)
   })
 
-  it('should be able to reset the test', () => {
-    sinon.stub(protocol, 'resetTest')
+  describe('.resetTest', () => {
+    it('should be able to reset the test with no current retry', () => {
+      sinon.stub(protocol, 'resetTest')
 
-    const testId = 'r3'
+      const testId = 'r3'
 
-    protocolManager.resetTest(testId)
+      protocolManager.resetTest(testId)
 
-    expect(protocol.resetTest).to.be.calledWith(testId)
+      expect(protocol.resetTest).to.be.calledWith(testId)
+    })
+
+    it('should be able to reset the test with a current retry', () => {
+      sinon.stub(protocol, 'resetTest')
+
+      const testId = 'r3'
+      const currentRetry = 1
+
+      protocolManager.resetTest(testId, currentRetry)
+
+      expect(protocol.resetTest).to.be.calledWith(testId, currentRetry)
+    })
   })
 
   describe('.reset', () => {

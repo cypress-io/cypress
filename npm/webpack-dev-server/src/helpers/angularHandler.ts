@@ -1,5 +1,5 @@
 import * as fs from 'fs-extra'
-import { tmpdir } from 'os'
+import { tmpdir, platform } from 'os'
 import * as path from 'path'
 import type { Configuration, RuleSetRule } from 'webpack'
 import type { PresetHandlerResult, WebpackDevServerConfig } from '../devServer'
@@ -183,11 +183,14 @@ export async function getAngularCliModules (projectRoot: string) {
     { logging },
   ] = await Promise.all(angularCLiModules.map(async (dep) => {
     try {
-      const depPath = require.resolve(dep, { paths: [projectRoot] })
+      let depPath = require.resolve(dep, { paths: [projectRoot] })
       // NOTE: @cypress/webpack-dev-server is a CJS package, but we need to import some ESM files and absolute imports.
       // since import statements in TypeScript will get transpiled down to CommonJS require statements, we want to use tsx to leverage
       // an ESM style import here, which supports CommonJS and ESM.
       const { tsImport } = require('tsx/esm/api')
+
+      // NOTE: on Windows, fully qualified paths (ex: C:\Users\username\project\blah) need to be prefixed with `file://` to be properly resolved.
+      depPath = platform() === 'win32' ? `file://${toPosix(depPath)}` : depPath
 
       const module = await tsImport(depPath, __filename)
 

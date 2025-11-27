@@ -34,6 +34,10 @@ jobs:
       requires:
         - internal-pr-build
         - external-pr-build
+  - health-check:
+      requires:
+        - internal-pr-build
+        - external-pr-build
   - lint:
       name: linux-lint
       requires:
@@ -317,9 +321,10 @@ jobs:
         - publish-binary
       requires:
         - node_modules_install
-        - approve-contributor-pr
         - internal-pr-build
-        - external-pr-build
+      filters:
+        branches:
+          ignore: /^pull\/[0-9]+/
   - wait-for-binary-publish:
       type: approval
       requires:
