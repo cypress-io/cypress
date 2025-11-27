@@ -33,22 +33,27 @@ const getElementDimensions = ($el: JQuery<HTMLElement>) => {
 
   const { offsetHeight, offsetWidth } = el
 
+  // Call getComputedStyle once and cache the result to avoid
+  // multiple layout/reflow operations.
+  const computedStyle: CSSStyleDeclaration = getComputedStyle(el, null)
+
   const box: Box = {
     // offset disregards margin but takes into account border + padding
     offset: $el.offset(),
     // dont use jquery here for width/height because it uses getBoundingClientRect() which returns scaled values.
-    paddingTop: getPadding($el, 'top'),
-    paddingRight: getPadding($el, 'right'),
-    paddingBottom: getPadding($el, 'bottom'),
-    paddingLeft: getPadding($el, 'left'),
-    borderTop: getBorder($el, 'top'),
-    borderRight: getBorder($el, 'right'),
-    borderBottom: getBorder($el, 'bottom'),
-    borderLeft: getBorder($el, 'left'),
-    marginTop: getMargin($el, 'top'),
-    marginRight: getMargin($el, 'right'),
-    marginBottom: getMargin($el, 'bottom'),
-    marginLeft: getMargin($el, 'left'),
+    // Use cached computedStyle instead of calling $el.css() multiple times
+    paddingTop: getPaddingFromStyle(computedStyle, 'top'),
+    paddingRight: getPaddingFromStyle(computedStyle, 'right'),
+    paddingBottom: getPaddingFromStyle(computedStyle, 'bottom'),
+    paddingLeft: getPaddingFromStyle(computedStyle, 'left'),
+    borderTop: getBorderFromStyle(computedStyle, 'top'),
+    borderRight: getBorderFromStyle(computedStyle, 'right'),
+    borderBottom: getBorderFromStyle(computedStyle, 'bottom'),
+    borderLeft: getBorderFromStyle(computedStyle, 'left'),
+    marginTop: getMarginFromStyle(computedStyle, 'top'),
+    marginRight: getMarginFromStyle(computedStyle, 'right'),
+    marginBottom: getMarginFromStyle(computedStyle, 'bottom'),
+    marginLeft: getMarginFromStyle(computedStyle, 'left'),
   }
 
   // NOTE: offsetWidth/height always give us content + padding + border, so subtract them
@@ -81,11 +86,13 @@ const getElementDimensions = ($el: JQuery<HTMLElement>) => {
 }
 
 type dir = 'top' | 'right' | 'bottom' | 'left'
-type attr = `padding-${dir}` | `border-${dir}-width` | `margin-${dir}`
 
-const getNumAttrValue = ($el: JQuery<HTMLElement>, attr: attr) => {
+// Helper to extract numeric value from computed style property
+// Replicates the behavior of $el.css(attr).replace(/[^0-9\.-]+/, '')
+const getStylePropertyNumber = (computedStyle: CSSStyleDeclaration, property: string): number => {
+  const value = computedStyle.getPropertyValue(property)
   // nuke anything thats not a number or a negative symbol
-  const num = _.toNumber($el.css(attr).replace(/[^0-9\.-]+/, ''))
+  const num = _.toNumber(value.replace(/[^0-9\.-]+/, ''))
 
   if (!_.isFinite(num)) {
     throw new Error('Element attr did not return a valid number')
@@ -94,16 +101,17 @@ const getNumAttrValue = ($el: JQuery<HTMLElement>, attr: attr) => {
   return num
 }
 
-const getPadding = ($el: JQuery<HTMLElement>, dir: dir) => {
-  return getNumAttrValue($el, `padding-${dir}`)
+// Optimized versions that read from cached computedStyle
+const getPaddingFromStyle = (computedStyle: CSSStyleDeclaration, dir: dir): number => {
+  return getStylePropertyNumber(computedStyle, `padding-${dir}`)
 }
 
-const getBorder = ($el: JQuery<HTMLElement>, dir: dir) => {
-  return getNumAttrValue($el, `border-${dir}-width`)
+const getBorderFromStyle = (computedStyle: CSSStyleDeclaration, dir: dir): number => {
+  return getStylePropertyNumber(computedStyle, `border-${dir}-width`)
 }
 
-const getMargin = ($el: JQuery<HTMLElement>, dir: dir) => {
-  return getNumAttrValue($el, `margin-${dir}`)
+const getMarginFromStyle = (computedStyle: CSSStyleDeclaration, dir: dir): number => {
+  return getStylePropertyNumber(computedStyle, `margin-${dir}`)
 }
 
 export default {

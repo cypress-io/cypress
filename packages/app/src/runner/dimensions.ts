@@ -1,18 +1,22 @@
 export const getElementDimensions = (el: HTMLElement) => {
   const { offsetHeight, offsetWidth } = el
 
-  const paddingTop = getStylePropertyNumber(el, 'padding-top')
-  const paddingRight = getStylePropertyNumber(el, 'padding-right')
-  const paddingBottom = getStylePropertyNumber(el, 'padding-bottom')
-  const paddingLeft = getStylePropertyNumber(el, 'padding-left')
-  const borderTop = getStylePropertyNumber(el, 'border-top-width')
-  const borderRight = getStylePropertyNumber(el, 'border-right-width')
-  const borderBottom = getStylePropertyNumber(el, 'border-bottom-width')
-  const borderLeft = getStylePropertyNumber(el, 'border-left-width')
-  const marginTop = getStylePropertyNumber(el, 'margin-top')
-  const marginRight = getStylePropertyNumber(el, 'margin-right')
-  const marginBottom = getStylePropertyNumber(el, 'margin-bottom')
-  const marginLeft = getStylePropertyNumber(el, 'margin-left')
+  // Call getComputedStyle once and cache the result to avoid
+  // multiple layout/reflow operations.
+  const computedStyle: CSSStyleDeclaration = getComputedStyle(el, null)
+
+  const paddingTop = getStylePropertyNumberFromStyle(computedStyle, 'padding-top')
+  const paddingRight = getStylePropertyNumberFromStyle(computedStyle, 'padding-right')
+  const paddingBottom = getStylePropertyNumberFromStyle(computedStyle, 'padding-bottom')
+  const paddingLeft = getStylePropertyNumberFromStyle(computedStyle, 'padding-left')
+  const borderTop = getStylePropertyNumberFromStyle(computedStyle, 'border-top-width')
+  const borderRight = getStylePropertyNumberFromStyle(computedStyle, 'border-right-width')
+  const borderBottom = getStylePropertyNumberFromStyle(computedStyle, 'border-bottom-width')
+  const borderLeft = getStylePropertyNumberFromStyle(computedStyle, 'border-left-width')
+  const marginTop = getStylePropertyNumberFromStyle(computedStyle, 'margin-top')
+  const marginRight = getStylePropertyNumberFromStyle(computedStyle, 'margin-right')
+  const marginBottom = getStylePropertyNumberFromStyle(computedStyle, 'margin-bottom')
+  const marginLeft = getStylePropertyNumberFromStyle(computedStyle, 'margin-left')
 
   // NOTE: offsetWidth/height always give us content + padding + border, so subtract them
   // to get the true "clientHeight" and "clientWidth".
@@ -35,9 +39,23 @@ export const getElementDimensions = (el: HTMLElement) => {
   const widthWithBorder = widthWithPadding + borderLeft + borderRight
   const widthWithMargin = widthWithBorder + marginLeft + marginRight
 
+  // Extract transform and z-index from computed style to avoid additional getComputedStyle calls
+  // Use .transform property directly to match original behavior (getComputedStyle(el, null).transform)
+  // Ensure it's always a string (fallback to 'none' if undefined/null)
+  const transform = computedStyle.transform || 'none'
+  const zIndexValue = computedStyle.getPropertyValue('z-index')
+  // Use INT32_MAX for auto/0 z-index values (matching getZIndex behavior)
+  const INT32_MAX = 2147483647
+  const parsedZIndex = parseFloat(zIndexValue)
+  const zIndex = /^(auto|0)$/.test(zIndexValue) || isNaN(parsedZIndex) ? INT32_MAX : parsedZIndex
+
   return {
     // offset disregards margin but takes into account border + padding
     offset: getOffset(el),
+
+    // Include original offsetWidth/offsetHeight for direct access (equivalent to widthWithBorder/heightWithBorder)
+    offsetWidth,
+    offsetHeight,
 
     paddingTop,
     paddingRight,
@@ -61,6 +79,11 @@ export const getElementDimensions = (el: HTMLElement) => {
     widthWithPadding,
     widthWithBorder,
     widthWithMargin,
+
+    // Include display, transform, and zIndex from computed style to avoid additional getComputedStyle calls
+    display: computedStyle.display,
+    transform,
+    zIndex,
   }
 }
 
@@ -68,8 +91,10 @@ export const getElementDimensions = (el: HTMLElement) => {
 export const setOffset = (el: HTMLElement, offset: { top: number, left: number }) => {
   const curOffset = getOffset(el)
 
-  const curTop = parseFloat(getComputedStyle(el, null).top)
-  const curLeft = parseFloat(getComputedStyle(el, null).left)
+  // Cache getComputedStyle result to avoid multiple layout operations
+  const computedStyle: CSSStyleDeclaration = getComputedStyle(el, null)
+  const curTop = parseFloat(computedStyle.top)
+  const curLeft = parseFloat(computedStyle.left)
 
   el.style.top = `${offset.top - curOffset.top + curTop}px`
   el.style.left = `${offset.left - curOffset.left + curLeft}px`
@@ -81,14 +106,22 @@ export const getOffset = (el: HTMLElement) => {
   const rect = el.getBoundingClientRect()
   const win = el.ownerDocument.defaultView
 
+  // Handle test environments where defaultView might be null
+  if (!win) {
+    return {
+      top: rect.top,
+      left: rect.left,
+    }
+  }
+
   return {
-    top: rect.top + win!.scrollY,
-    left: rect.left + win!.scrollX,
+    top: rect.top + win.scrollY,
+    left: rect.left + win.scrollX,
   }
 }
 
-const getStylePropertyNumber = (el: HTMLElement, property: string) => {
-  const value = parseFloat(getComputedStyle(el, null).getPropertyValue(property))
+const getStylePropertyNumberFromStyle = (computedStyle: CSSStyleDeclaration, property: string): number => {
+  const value = parseFloat(computedStyle.getPropertyValue(property))
 
   if (isNaN(value)) {
     throw new Error('Element attr did not return a valid number')

@@ -6,7 +6,7 @@ import _ from 'lodash'
 import type { DebouncedFunc } from 'lodash'
 import { useStudioStore } from '../store/studio-store'
 import { getElementDimensions, setOffset } from './dimensions'
-import { getOrCreateHelperDom, getSelectorHighlightStyles, getZIndex, INT32_MAX } from './dom'
+import { getOrCreateHelperDom, getSelectorHighlightStyles, INT32_MAX } from './dom'
 import highlightMounter from './selector-playground/highlight-mounter'
 import Highlight from './selector-playground/Highlight.ce.vue'
 
@@ -20,6 +20,7 @@ export class AutIframe {
   debouncedToggleSelectorPlayground: DebouncedFunc<(isEnabled: any) => void>
   $iframe?: JQuery<HTMLIFrameElement>
   _highlightedEl?: Element
+  private _currentHighlightingId: number = 0
 
   constructor (
     private projectName: string,
@@ -167,18 +168,24 @@ export class AutIframe {
     const Cypress = this.eventManager.getCypress()
     const { headStyles = undefined, bodyStyles = undefined } = Cypress ? Cypress.cy.getStyles(snapshot) : {}
     const { body, htmlAttrs } = snapshot
-    const contents = this._contents()
-    const $html = contents?.find('html') as any as JQuery<HTMLHtmlElement>
+    const $contents = this._contents()
+
+    if (!$contents) return
+
+    // Cache DOM queries to avoid redundant _contents() calls
+    const $html = $contents.find('html') as any as JQuery<HTMLHtmlElement>
+    const $head = $contents.find('head') as any as JQuery<HTMLElement>
+    const $body = $contents.find('body') as unknown as JQuery<HTMLBodyElement>
 
     if ($html) {
       this._replaceHtmlAttrs($html, htmlAttrs)
     }
 
-    this._replaceHeadStyles(headStyles)
+    // Pass $head to avoid _replaceHeadStyles calling _contents() again
+    this._replaceHeadStyles(headStyles, $head)
 
     // remove the old body and replace with restored one
-
-    this._body()?.remove()
+    $body?.remove()
     this._insertBodyStyles(body.get(), bodyStyles)
     $html?.append(body.get())
 
@@ -209,8 +216,12 @@ export class AutIframe {
     })
   }
 
-  _replaceHeadStyles (styles: Record<string, any> = {}) {
-    const $head = this._contents()?.find('head')
+  _replaceHeadStyles (styles: Record<string, any> = {}, $head?: JQuery<HTMLElement>) {
+    // Use provided $head if available, otherwise query for it
+    if (!$head) {
+      $head = this._contents()?.find('head') as any as JQuery<HTMLElement>
+    }
+
     const existingStyles = $head?.find('link[rel="stylesheet"],style')
 
     _.each(styles, (style, index) => {
@@ -276,7 +287,13 @@ export class AutIframe {
   }
 
   highlightEl = ({ body }, { $el, coords, highlightAttr, scrollBy }) => {
+    // Cancel any ongoing highlighting operation by incrementing the operation ID
+    // This ensures any async work from previous calls will see a different ID and stop processing
+    this._currentHighlightingId++
     this.removeHighlights()
+
+    // Capture the current operation ID for this highlighting operation
+    const highlightingId = this._currentHighlightingId
 
     if (body) {
       $el = body.get().find(`[${highlightAttr}]`)
@@ -301,34 +318,135 @@ export class AutIframe {
       }
     }
 
+    // Collect all containers first, then append in a single batch to minimize reflows
+    const containers: HTMLElement[] = []
+    const elementsToProcess: Array<{ $el: any, dimensions: ReturnType<typeof getElementDimensions> }> = []
+
+    // collect all valid elements and their dimensions
     $el.each((__, element) => {
       const $_el = this.$(element)
 
       // bail if our el no longer exists in the parent body
-      if (!this.$.contains(body, element)) return
-
-      // switch to using offsetWidth + offsetHeight
-      // because we want to highlight our element even
-      // if it only has margin and zero content height / width
-      const dimensions = this._getOffsetSize($_el.get(0))
-
-      // dont show anything if our element displaces nothing
-      if (dimensions.width === 0 || dimensions.height === 0 || $_el.css('display') === 'none') {
+      if (!this.$.contains(body, element)) {
         return
       }
 
-      this._addElementBoxModelLayers($_el, $body).setAttribute('data-highlight-el', `true`)
+      // Get all dimensions and computed styles in one call to avoid multiple getComputedStyle calls
+      const dimensions = getElementDimensions($_el.get(0))
+
+      // dont show anything if our element displaces nothing
+      // Use offsetWidth/offsetHeight to check because we want to highlight our element even
+      // if it only has margin and zero content height / width
+      if (dimensions.offsetWidth === 0 || dimensions.offsetHeight === 0 || dimensions.display === 'none') {
+        return
+      }
+
+      elementsToProcess.push({ $el: $_el, dimensions })
     })
+
+    // create all containers (off-DOM)
+    elementsToProcess.forEach(({ $el: $_el, dimensions }) => {
+      const container = this._addElementBoxModelLayers($_el, $body, dimensions)
+
+      container.setAttribute('data-highlight-el', `true`)
+      containers.push(container)
+    })
+
+    // batch append all containers at once to minimize reflows
+    if (containers.length > 0) {
+      // Use DocumentFragment for even better performance when appending many elements
+      const fragment = document.createDocumentFragment()
+
+      containers.forEach((container) => {
+        fragment.appendChild(container)
+      })
+
+      body.appendChild(fragment)
+
+      // Now that containers are in DOM, set offsets using setOffset (which uses getBoundingClientRect)
+      // Batch setOffset calls to avoid layout thrashing - process in chunks using requestAnimationFrame
+      const OFFSET_BATCH_SIZE = 100
+      let offsetIndex = 0
+
+      const processOffsetBatch = () => {
+        // Check if this highlighting operation was cancelled (e.g., user switched to different snapshot)
+        // by comparing the captured operation ID with the current one
+        if (this._currentHighlightingId !== highlightingId) {
+          return
+        }
+
+        const endIndex = Math.min(offsetIndex + OFFSET_BATCH_SIZE, containers.length)
+
+        for (let j = offsetIndex; j < endIndex; j++) {
+          const container = containers[j]
+
+          // Check if container is still in the DOM (might have been removed by removeHighlights)
+          if (!container.isConnected) {
+            continue
+          }
+
+          for (let i = 0; i < container.children.length; i++) {
+            const childEl = container.children[i] as HTMLElement
+
+            // Check if element is still in the DOM before positioning
+            if (!childEl.isConnected) {
+              continue
+            }
+
+            const top = parseFloat(childEl.getAttribute('data-top')!)
+            const left = parseFloat(childEl.getAttribute('data-left')!)
+
+            setOffset(childEl, { top, left })
+          }
+        }
+
+        offsetIndex = endIndex
+
+        if (offsetIndex < containers.length) {
+          // Process next batch on next frame to avoid blocking
+          requestAnimationFrame(processOffsetBatch)
+        } else {
+          // All highlights have been positioned
+        }
+      }
+
+      // Start processing offsets in batches
+      processOffsetBatch()
+    }
 
     if (coords) {
       requestAnimationFrame(() => {
-        this._addHitBoxLayer(coords, $body.get(0)).setAttribute('data-highlight-hitbox', 'true')
+        // Check if this highlighting operation was cancelled before adding hitbox
+        if (this._currentHighlightingId !== highlightingId) {
+          return
+        }
+
+        const bodyElement = $body.get(0)
+
+        if (!bodyElement) {
+          return
+        }
+
+        this._addHitBoxLayer(coords, bodyElement).setAttribute('data-highlight-hitbox', 'true')
       })
     }
   }
 
   removeHighlights = () => {
-    this._contents() && this._contents()?.find('.__cypress-highlight').remove()
+    const $contents = this._contents()
+
+    if (!$contents) return
+
+    const contentsElement = $contents[0] as Document | Element
+
+    if (!contentsElement || typeof contentsElement.querySelectorAll !== 'function') {
+      return
+    }
+
+    const highlights = contentsElement.querySelectorAll('.__cypress-highlight')
+
+    // Batch remove using native DOM API
+    highlights.forEach((el) => el.remove())
   }
 
   toggleSelectorPlayground = (isEnabled) => {
@@ -615,28 +733,25 @@ export class AutIframe {
     return box
   }
 
-  private _getOffsetSize (el: HTMLElement) {
-    return {
-      width: el.offsetWidth,
-      height: el.offsetHeight,
-    }
-  }
-
-  private _addElementBoxModelLayers ($el, $body) {
-    $body = $body || $('body')
+  private _addElementBoxModelLayers ($el, $body, dimensions?: ReturnType<typeof getElementDimensions>) {
+    $body = $body || this.$('body')
 
     const el = $el.get(0)
-    const body = $body.get(0)
 
-    const dimensions = getElementDimensions(el)
+    // Use existing dimensions if provided to avoid redundant getComputedStyle calls
+    const elementDimensions: ReturnType<typeof getElementDimensions> = dimensions || getElementDimensions(el)
+
+    // Ensure transform and zIndex are valid (should always be set by getElementDimensions)
+    const transform = elementDimensions.transform || 'none'
+    const zIndex = elementDimensions.zIndex ?? 2147483647
 
     const container = document.createElement('div')
 
     container.classList.add('__cypress-highlight')
 
-    container.style.opacity = `0.7`
+    container.style.opacity = '0.7'
     container.style.position = 'absolute'
-    container.style.zIndex = `${INT32_MAX}`
+    container.style.zIndex = INT32_MAX.toString()
 
     const layers = {
       Content: '#9FC4E7',
@@ -654,19 +769,19 @@ export class AutIframe {
           // rearrange the contents offset so
           // its inside of our border + padding
           obj = {
-            width: dimensions.width,
-            height: dimensions.height,
-            top: dimensions.offset.top + dimensions.borderTop + dimensions.paddingTop,
-            left: dimensions.offset.left + dimensions.borderLeft + dimensions.paddingLeft,
+            width: elementDimensions.width,
+            height: elementDimensions.height,
+            top: elementDimensions.offset.top + elementDimensions.borderTop + elementDimensions.paddingTop,
+            left: elementDimensions.offset.left + elementDimensions.borderLeft + elementDimensions.paddingLeft,
           }
 
           break
         default:
           obj = {
-            width: this._getDimensionsFor(dimensions, attr, 'width'),
-            height: this._getDimensionsFor(dimensions, attr, 'height'),
-            top: dimensions.offset.top,
-            left: dimensions.offset.left,
+            width: this._getDimensionsFor(elementDimensions, attr, 'width'),
+            height: this._getDimensionsFor(elementDimensions, attr, 'height'),
+            top: elementDimensions.offset.top,
+            left: elementDimensions.offset.left,
           }
       }
 
@@ -674,47 +789,43 @@ export class AutIframe {
       // subtract what the actual marginTop + marginLeft
       // values are, since offset disregards margin completely
       if (attr === 'Margin') {
-        obj.top -= dimensions.marginTop
-        obj.left -= dimensions.marginLeft
+        obj.top -= elementDimensions.marginTop
+        obj.left -= elementDimensions.marginLeft
       }
 
       if (attr === 'Padding') {
-        obj.top += dimensions.borderTop
-        obj.left += dimensions.borderLeft
+        obj.top += elementDimensions.borderTop
+        obj.left += elementDimensions.borderLeft
       }
 
       // bail if the dimensions of this layer match the previous one
       // so we dont create unnecessary layers
-      if (this._dimensionsMatchPreviousLayer(obj, container)) return
+      if (this._dimensionsMatchPreviousLayer(obj, container)) {
+        return
+      }
 
-      this._createLayer($el.get(0), attr, color, container, obj)
+      this._createLayer(attr, color, container, obj, transform, zIndex)
     })
 
-    body.appendChild(container)
-
-    for (let i = 0; i < container.children.length; i++) {
-      const el = container.children[i] as HTMLElement
-      const top = parseFloat(el.getAttribute('data-top')!)
-      const left = parseFloat(el.getAttribute('data-left')!)
-
-      setOffset(el, { top, left })
-    }
-
+    // Note: setOffset will be called after container is appended to DOM
+    // The offsets are stored in data-top/data-left attributes for now
     return container
   }
 
-  private _createLayer (el, attr, color, container, dimensions) {
+  private _createLayer (attr, color, container, dimensions, transform: string, zIndex: number) {
     const div = document.createElement('div')
 
-    div.style.transform = getComputedStyle(el, null).transform
+    // Set transform directly (original code always set it, even if 'none')
+    div.style.transform = transform
+
     div.style.width = `${dimensions.width}px`
     div.style.height = `${dimensions.height}px`
     div.style.position = 'absolute'
-    div.style.zIndex = `${getZIndex(el)}`
+    div.style.zIndex = `${zIndex}`
     div.style.backgroundColor = color
 
-    div.setAttribute('data-top', dimensions.top)
-    div.setAttribute('data-left', dimensions.left)
+    div.setAttribute('data-top', dimensions.top.toString())
+    div.setAttribute('data-left', dimensions.left.toString())
     div.setAttribute('data-layer', attr)
 
     container.prepend(div)
