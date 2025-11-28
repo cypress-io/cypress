@@ -48,7 +48,9 @@ export const Cypress = (
   const loadInitFile = async (): Promise<string> => {
     try {
       const content = await fs.readFile(INIT_FILEPATH, 'utf8')
+
       debug(`Successfully loaded init file from ${INIT_FILEPATH}`)
+
       return content
     } catch (error) {
       debug(`Failed to load init file from ${INIT_FILEPATH}:`, error)
