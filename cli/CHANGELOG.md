@@ -3,6 +3,10 @@
 
 _Released 12/2/2025 (PENDING)_
 
+**Features:**
+
+- Added intelligent timeout diagnostics that surface contextual suggestions when commands exceed their timeouts, helping users resolve failures faster. Addressed in [#33022](https://github.com/cypress-io/cypress/pull/33022).
+
 **Performance:**
 
 - Improved performance when viewing command snapshots in the Command Log. Element highlighting is now significantly faster, especially when highlighting multiple elements or complex pages. This is achieved by reducing redundant style calculations and batching DOM operations to minimize browser reflows. Addressed in [#32951](https://github.com/cypress-io/cypress/pull/32951).
