@@ -8808,10 +8808,10 @@
   resolved "https://registry.npmjs.org/@types/normalize-package-data/-/normalize-package-data-2.4.4.tgz#56e2cc26c397c038fab0e3a917a12d5c5909e901"
   integrity sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==
 
-"@types/parse-glob@3.0.29":
-  version "3.0.29"
-  resolved "https://registry.yarnpkg.com/@types/parse-glob/-/parse-glob-3.0.29.tgz#6a40ec7ebd2418ee69ee397e48e42169268a10bf"
-  integrity sha1-akDsfr0kGO5p7jl+SOQhaSaKEL8=
+"@types/parse-glob@3.0.32":
+  version "3.0.32"
+  resolved "https://registry.yarnpkg.com/@types/parse-glob/-/parse-glob-3.0.32.tgz#2f1f79157470d3e8d73239a19e84e34b0a93fc06"
+  integrity sha512-n4xmml2WKR12XeQprN8L/sfiVPa8FHS3k+fxp4kSr/PA2GsGUgFND+bvISJxM0y5QdvzNEGjEVU3eIrcKks/pA==
 
 "@types/parse-json@^4.0.0":
   version "4.0.0"
