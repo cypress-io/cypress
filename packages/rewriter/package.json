@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@cypress/request-promise": "^5.0.0",
-    "@types/parse5-html-rewriting-stream": "5.1.1",
+    "@types/parse5-html-rewriting-stream": "5.1.2",
     "fs-extra": "9.1.0",
     "vitest": "^3.2.4"
   },
