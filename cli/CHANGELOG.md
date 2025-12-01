@@ -9,7 +9,7 @@ _Released 12/2/2025 (PENDING)_
 
 **Bugfixes:**
 
-- Updated the error message shown when the `cy.prompt()` and Studio bundles are deleted while in use. Ensured that the bundles are written atomically to avoid concurrent downloads causing issues. Addressed in [#33034](https://github.com/cypress-io/cypress/pull/33034).
+- Updated the error message shown when the `cy.prompt()` bundle is deleted while in use. Ensured that the Cloud bundles are written atomically to avoid concurrent downloads causing issues. Addressed in [#33034](https://github.com/cypress-io/cypress/pull/33034).
 
 ## 15.7.0
 
