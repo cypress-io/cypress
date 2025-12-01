@@ -8991,10 +8991,10 @@
     "@types/node" "*"
     "@types/send" "*"
 
-"@types/server-destroy@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@types/server-destroy/-/server-destroy-1.0.1.tgz#6010a89e2df4f2c15a265fe73c70fd3641486530"
-  integrity sha512-77QGr7waZbE0Y0uF+G+uH3H3SmhyA78Jf2r5r7QSrpg0U3kSXduWpGjzP9PvPLR/KCy+kHjjpnugRHsYTnHopg==
+"@types/server-destroy@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@types/server-destroy/-/server-destroy-1.0.4.tgz#bd94af933e73e04795042edf38af267ddebd4e98"
+  integrity sha512-+x8oAQ4Xp1wtDi2Hlmi7gUNXZNVhB5EoSQpi0qEmINdDN5Ab724WLGAalEdT1SudVY/NzMhbfZO7vU+klT0R+A==
   dependencies:
     "@types/node" "*"
 
