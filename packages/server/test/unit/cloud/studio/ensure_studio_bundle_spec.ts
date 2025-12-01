@@ -40,14 +40,14 @@ describe('ensureStudioBundle', () => {
         readFile: readFileStub.resolves(JSON.stringify(mockManifest)),
         pathExists: pathExistsStub.resolves(true),
       },
-      tar: {
-        extract: extractStub.resolves(),
-      },
       '../api/studio/get_studio_bundle': {
         getStudioBundle: getStudioBundleStub.resolves(mockResponseSignature),
       },
       '../encryption': {
         verifySignature: verifySignatureStub.resolves(true),
+      },
+      '../extract_atomic': {
+        extractAtomic: extractStub.resolves(),
       },
     })).ensureStudioBundle
   })
@@ -70,11 +70,7 @@ describe('ensureStudioBundle', () => {
       bundlePath,
     })
 
-    expect(extractStub).to.be.calledWith({
-      file: bundlePath,
-      cwd: studioPath,
-      keep: true,
-    })
+    expect(extractStub).to.be.calledWith(bundlePath, studioPath)
 
     expect(verifySignatureStub).to.be.calledWith(JSON.stringify(mockManifest), mockResponseSignature)
 

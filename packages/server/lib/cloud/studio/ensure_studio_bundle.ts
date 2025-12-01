@@ -4,6 +4,7 @@ import tar from 'tar'
 import { getStudioBundle } from '../api/studio/get_studio_bundle'
 import path from 'path'
 import { verifySignature } from '../encryption'
+import { extractAtomic } from '../extract_atomic'
 
 interface EnsureStudioBundleOptions {
   studioUrl: string
@@ -32,11 +33,7 @@ export const ensureStudioBundle = async ({
     bundlePath,
   })
 
-  await tar.extract({
-    file: bundlePath,
-    cwd: studioPath,
-    keep: true,
-  })
+  await extractAtomic(bundlePath, studioPath)
 
   const manifestPath = path.join(studioPath, 'manifest.json')
 

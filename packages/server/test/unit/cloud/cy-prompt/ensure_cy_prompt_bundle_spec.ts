@@ -37,14 +37,14 @@ describe('ensureCyPromptBundle', () => {
         readFile: readFileStub.resolves(JSON.stringify(mockManifest)),
         pathExists: pathExistsStub.resolves(true),
       },
-      tar: {
-        extract: extractStub.resolves(),
-      },
       '../api/cy-prompt/get_cy_prompt_bundle': {
         getCyPromptBundle: getCyPromptBundleStub.resolves(mockResponseSignature),
       },
       '../encryption': {
         verifySignature: verifySignatureStub.resolves(true),
+      },
+      '../extract_atomic': {
+        extractAtomic: extractStub.resolves(),
       },
     })).ensureCyPromptBundle
   })
@@ -68,11 +68,7 @@ describe('ensureCyPromptBundle', () => {
       bundlePath,
     })
 
-    expect(extractStub).to.be.calledWith({
-      file: bundlePath,
-      cwd: cyPromptPath,
-      keep: true,
-    })
+    expect(extractStub).to.be.calledWith(bundlePath, cyPromptPath)
 
     expect(verifySignatureStub).to.be.calledWith(JSON.stringify(mockManifest), mockResponseSignature)
 
