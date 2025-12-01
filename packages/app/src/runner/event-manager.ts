@@ -582,7 +582,7 @@ export class EventManager {
 
     Cypress.on('collect:run:state', () => {
       if (Cypress.config('hideCommandLog')) {
-        return Bluebird.resolve()
+        return Promise.resolve()
       }
 
       return new Bluebird((resolve) => {

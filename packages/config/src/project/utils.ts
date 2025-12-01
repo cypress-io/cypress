@@ -274,7 +274,7 @@ export function relativeToProjectRoot (projectRoot: string, file: string) {
 // async function
 export async function setSupportFileAndFolder (obj: Config, getFilesByGlob: any) {
   if (!obj.supportFile) {
-    return Bluebird.resolve(obj)
+    return Promise.resolve(obj)
   }
 
   obj = _.clone(obj)
