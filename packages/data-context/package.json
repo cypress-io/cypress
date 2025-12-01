@@ -105,7 +105,7 @@
     "@types/graphql-resolve-batch": "1.1.11",
     "@types/jest": "^30.0.0",
     "@types/micromatch": "4.0.10",
-    "@types/parse-glob": "3.0.29",
+    "@types/parse-glob": "3.0.32",
     "@types/prettier": "2.4.3",
     "@types/server-destroy": "^1.0.1",
     "@types/stringify-object": "^3.0.0",
