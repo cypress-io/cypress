@@ -7,7 +7,7 @@ version: 2.1
 
 chrome-stable-version: &chrome-stable-version "142.0.7444.175"
 chrome-beta-version: &chrome-beta-version "143.0.7499.40"
-firefox-stable-version: &firefox-stable-version "142.0"
+firefox-stable-version: &firefox-stable-version "145.0.2"
 base-internal-trixie: &base-internal-trixie cypress/base-internal:22.19.0-trixie
 base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.19.0-yarn-berry
 # Lowest Node.js version we support of the minimum major version supported
