@@ -45,6 +45,10 @@ export const extractAtomic = async (archivePath: string, destinationPath: string
   // Wait for parser to finish and all entry writes to complete
   await new Promise<void>((resolve, reject) => {
     parser.on('end', resolve)
+    // Parser extends NodeJS.ReadWriteStream (EventEmitter), so it supports 'error' events
+    // even though the types don't explicitly declare it
+
+    ;(parser as NodeJS.ReadWriteStream).on('error', reject)
     stream.on('error', reject)
   })
 

@@ -328,6 +328,20 @@ describe('extractAtomic', () => {
     await expect(extractPromise).to.be.rejectedWith('Stream error')
   })
 
+  it('should handle parser errors', async () => {
+    const archivePath = '/path/to/archive.tar'
+    const destinationPath = '/path/to/destination'
+    const parserError = new Error('Parser error')
+
+    const extractPromise = extractAtomic(archivePath, destinationPath)
+
+    setImmediate(() => {
+      mockParser.emit('error', parserError)
+    })
+
+    await expect(extractPromise).to.be.rejectedWith('Parser error')
+  })
+
   it('should handle write errors', async () => {
     const archivePath = '/path/to/archive.tar'
     const destinationPath = '/path/to/destination'

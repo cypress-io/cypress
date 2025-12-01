@@ -1,6 +1,4 @@
 import { remove, ensureDir, readFile, pathExists } from 'fs-extra'
-
-import tar from 'tar'
 import { getStudioBundle } from '../api/studio/get_studio_bundle'
 import path from 'path'
 import { verifySignature } from '../encryption'
@@ -28,12 +26,14 @@ export const ensureStudioBundle = async ({
 
   await ensureDir(studioPath)
 
-  const responseManifestSignature = await getStudioBundle({
+  const uniqueBundlePath = `${bundlePath}-${Math.random().toString(36).substring(2, 15)}`
+  const responseManifestSignature: string = await getStudioBundle({
     studioUrl,
-    bundlePath,
+    bundlePath: uniqueBundlePath,
   })
 
-  await extractAtomic(bundlePath, studioPath)
+  await extractAtomic(uniqueBundlePath, studioPath)
+  await remove(uniqueBundlePath).catch(() => { /* ignore */ })
 
   const manifestPath = path.join(studioPath, 'manifest.json')
 

@@ -1,4 +1,4 @@
-import { ensureDir, readFile, pathExists } from 'fs-extra'
+import { ensureDir, readFile, pathExists, remove } from 'fs-extra'
 import { getCyPromptBundle } from '../api/cy-prompt/get_cy_prompt_bundle'
 import path from 'path'
 import { verifySignature } from '../encryption'
@@ -22,13 +22,15 @@ export const ensureCyPromptBundle = async ({ cyPromptPath, cyPromptUrl, projectI
 
   await ensureDir(cyPromptPath)
 
+  const uniqueBundlePath = `${bundlePath}-${Math.random().toString(36).substring(2, 15)}`
   const responseManifestSignature: string = await getCyPromptBundle({
     cyPromptUrl,
     projectId,
-    bundlePath,
+    bundlePath: uniqueBundlePath,
   })
 
-  await extractAtomic(bundlePath, cyPromptPath)
+  await extractAtomic(uniqueBundlePath, cyPromptPath)
+  await remove(uniqueBundlePath).catch(() => { /* ignore */ })
 
   const manifestPath = path.join(cyPromptPath, 'manifest.json')
 
