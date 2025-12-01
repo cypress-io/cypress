@@ -30,7 +30,7 @@ export interface AppCaptureProtocolCommon {
   afterTest(test: Record<string, any>): Promise<void>
   afterSpec (): Promise<{ durations: AfterSpecDurations } | undefined>
   pageLoading (input: any): void
-  resetTest (testId: string): void
+  resetTest (testId: string, currentRetry?: number): void
   responseEndedWithEmptyBody: (options: ResponseEndedWithEmptyBodyOptions) => void
   responseStreamReceived (options: ResponseStreamOptions): Readable | undefined
   responseStreamTimedOut (options: ResponseStreamTimedOutOptions): void

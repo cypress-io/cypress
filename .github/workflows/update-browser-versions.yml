@@ -7,6 +7,8 @@ on:
 jobs:
   update-browser-versions:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     env:
       CYPRESS_BOT_APP_ID: ${{ secrets.CYPRESS_BOT_APP_ID }}
       BASE_BRANCH: develop
@@ -47,7 +49,7 @@ jobs:
       - name: Determine name of new branch and if it already exists
         id: check-branch
         env:
-          BRANCH_NAME: update-chrome-stable-from-${{ steps.get-versions.outputs.current_stable_version }}-beta-from-${{ steps.get-versions.outputs.current_beta_version }}
+          BRANCH_NAME: update-chrome-stable-from-${{ steps.get-versions.outputs.latest_stable_version }}-beta-from-${{ steps.get-versions.outputs.latest_beta_version }}
         run: |
           echo "branch_name=${{ env.BRANCH_NAME }}" >> $GITHUB_OUTPUT
           echo "branch_exists=$(git show-ref --verify --quiet refs/remotes/origin/${{ env.BRANCH_NAME }} && echo 'true')" >> $GITHUB_OUTPUT
@@ -127,5 +129,4 @@ jobs:
               branchName: '${{ steps.check-branch.outputs.branch_name }}',
               description: '${{ steps.get-versions.outputs.description }}',
               body: 'This PR was auto-generated to update the version(s) of Chrome for driver tests',
-              addToProjectBoard: true,
             })

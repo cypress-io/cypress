@@ -1980,7 +1980,7 @@ export default {
         return
       },
 
-      resumeAtTest (id, emissions: Emissions = {
+      resumeAtTest (id: string, currentRetry: number, emissions: Emissions = {
         started: {},
         ended: {},
       }) {
@@ -1993,6 +1993,9 @@ export default {
             test._ALREADY_RAN = true
             test.pending = true
           } else {
+            // set the current retry to the retry that we are resuming at
+            test._currentRetry = currentRetry ?? 0
+
             // bail so we can stop now
             return
           }
