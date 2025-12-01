@@ -33,7 +33,7 @@ export const Cypress = (
   vite: Vite,
 ): PluginOption => {
   let base = '/'
-  let loaderPromise: Promise<string>
+  let loaderPromise: Promise<string> | null = null
 
   const projectRoot = options.cypressConfig.projectRoot
   const supportFilePath = options.cypressConfig.supportFile ? path.resolve(projectRoot, options.cypressConfig.supportFile) : false
@@ -58,8 +58,13 @@ export const Cypress = (
     }
   }
 
-  // Initialize loader promise
-  loaderPromise = loadInitFile()
+  const getLoaderPromise = () => {
+    if (!loaderPromise) {
+      loaderPromise = loadInitFile()
+    }
+
+    return loaderPromise
+  }
 
   devServerEvents.on('dev-server:specs:changed', ({ specs, options }: { specs: Spec[], options?: { neededForJustInTimeCompile: boolean }}) => {
     if (options?.neededForJustInTimeCompile) {
@@ -108,7 +113,7 @@ export const Cypress = (
       const endOfBody = indexHtmlContent.lastIndexOf('</body>')
 
       // Get the loader content asynchronously
-      const loader = await loaderPromise
+      const loader = await getLoaderPromise()
 
       // insert the script in the end of the body
       const newHtml = `
