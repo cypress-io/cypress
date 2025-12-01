@@ -21,8 +21,6 @@ interface EnsureCyPromptBundleOptions {
 export const ensureCyPromptBundle = async ({ cyPromptPath, cyPromptUrl, projectId }: EnsureCyPromptBundleOptions): Promise<Record<string, string>> => {
   const bundlePath = path.join(cyPromptPath, 'bundle.tar')
 
-  // First remove cyPromptPath to ensure we have a clean slate
-  await remove(cyPromptPath)
   await ensureDir(cyPromptPath)
 
   const responseManifestSignature: string = await getCyPromptBundle({
@@ -34,6 +32,7 @@ export const ensureCyPromptBundle = async ({ cyPromptPath, cyPromptUrl, projectI
   await tar.extract({
     file: bundlePath,
     cwd: cyPromptPath,
+    keep: true,
   })
 
   const manifestPath = path.join(cyPromptPath, 'manifest.json')

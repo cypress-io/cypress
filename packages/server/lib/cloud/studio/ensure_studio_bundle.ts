@@ -25,8 +25,6 @@ export const ensureStudioBundle = async ({
 }: EnsureStudioBundleOptions): Promise<Record<string, string>> => {
   const bundlePath = path.join(studioPath, 'bundle.tar')
 
-  // First remove studioPath to ensure we have a clean slate
-  await remove(studioPath)
   await ensureDir(studioPath)
 
   const responseManifestSignature = await getStudioBundle({
@@ -37,6 +35,7 @@ export const ensureStudioBundle = async ({
   await tar.extract({
     file: bundlePath,
     cwd: studioPath,
+    keep: true,
   })
 
   const manifestPath = path.join(studioPath, 'manifest.json')

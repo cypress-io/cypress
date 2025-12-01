@@ -62,7 +62,7 @@ describe('ensureStudioBundle', () => {
       projectId: '123',
     })
 
-    expect(rmStub).to.be.calledWith(studioPath)
+    expect(rmStub).not.to.be.called
     expect(ensureStub).to.be.calledWith(studioPath)
     expect(readFileStub).to.be.calledWith(path.join(studioPath, 'manifest.json'), 'utf8')
     expect(getStudioBundleStub).to.be.calledWith({
@@ -73,6 +73,7 @@ describe('ensureStudioBundle', () => {
     expect(extractStub).to.be.calledWith({
       file: bundlePath,
       cwd: studioPath,
+      keep: true,
     })
 
     expect(verifySignatureStub).to.be.calledWith(JSON.stringify(mockManifest), mockResponseSignature)

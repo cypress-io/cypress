@@ -59,7 +59,7 @@ describe('ensureCyPromptBundle', () => {
       projectId: '123',
     })
 
-    expect(rmStub).to.be.calledWith(cyPromptPath)
+    expect(rmStub).not.to.be.called
     expect(ensureStub).to.be.calledWith(cyPromptPath)
     expect(readFileStub).to.be.calledWith(path.join(cyPromptPath, 'manifest.json'), 'utf8')
     expect(getCyPromptBundleStub).to.be.calledWith({
@@ -71,6 +71,7 @@ describe('ensureCyPromptBundle', () => {
     expect(extractStub).to.be.calledWith({
       file: bundlePath,
       cwd: cyPromptPath,
+      keep: true,
     })
 
     expect(verifySignatureStub).to.be.calledWith(JSON.stringify(mockManifest), mockResponseSignature)
