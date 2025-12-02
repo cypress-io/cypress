@@ -1,4 +1,4 @@
-import Bluebird from 'bluebird'
+
 import Debug from 'debug'
 import fs from 'fs-extra'
 import _ from 'lodash'
@@ -274,7 +274,7 @@ export function relativeToProjectRoot (projectRoot: string, file: string) {
 // async function
 export async function setSupportFileAndFolder (obj: Config, getFilesByGlob: any) {
   if (!obj.supportFile) {
-    return Bluebird.resolve(obj)
+    return Promise.resolve(obj)
   }
 
   obj = _.clone(obj)
@@ -299,17 +299,40 @@ export async function setSupportFileAndFolder (obj: Config, getFilesByGlob: any)
   debug(`setting support file ${sf}`)
   debug(`for project root ${obj.projectRoot}`)
 
-  return Bluebird
-  .try(() => {
-    // resolve full path with extension
-    obj.supportFile = resolveModule(sf)
+  let resolved
 
-    return debug('resolved support file %s', obj.supportFile)
-  }).then(() => {
-    if (!checkIfResolveChangedRootFolder(obj.supportFile, sf)) {
-      return
+  // Bluebird.try() equivalent
+  try {
+    resolved = resolveModule(sf)
+  } catch (err: any) {
+    // Bluebird.catch({ code: "MODULE_NOT_FOUND" })
+    if (err.code === 'MODULE_NOT_FOUND') {
+      debug('support JS module %s does not load', sf)
+
+      const result = await discoverModuleFile({
+        filename: sf,
+        projectRoot: obj.projectRoot,
+      })
+
+      if (result === null) {
+        return errors.throwErr('SUPPORT_FILE_NOT_FOUND', relativeToProjectRoot(obj.projectRoot, sf))
+      }
+
+      debug('setting support file to %o', { result })
+      obj.supportFile = result
+      obj.supportFolder = path.dirname(obj.supportFile)
+      debug(`set support folder ${obj.supportFolder}`)
+      return obj
     }
 
+    throw err
+  }
+
+  // original .then() chain continues here
+  obj.supportFile = resolved
+  debug('resolved support file %s', obj.supportFile)
+
+  if (checkIfResolveChangedRootFolder(obj.supportFile, sf)) {
     debug('require.resolve switched support folder from %s to %s', sf, obj.supportFile)
     // this means the path was probably symlinked, like
     // /tmp/foo -> /private/tmp/foo
@@ -320,41 +343,19 @@ export async function setSupportFileAndFolder (obj: Config, getFilesByGlob: any)
 
     obj.supportFile = path.join(base || '', supportFileName)
 
-    return fs.pathExists(obj.supportFile)
-    .then((found) => {
-      if (!found) {
-        errors.throwErr('SUPPORT_FILE_NOT_FOUND', relativeToProjectRoot(obj.projectRoot, obj.supportFile))
-      }
-
-      return debug('switching to found file %s', obj.supportFile)
-    })
-  }).catch({ code: 'MODULE_NOT_FOUND' }, () => {
-    debug('support JS module %s does not load', sf)
-
-    return discoverModuleFile({
-      filename: sf,
-      projectRoot: obj.projectRoot,
-    })
-    .then((result) => {
-      if (result === null) {
-        return errors.throwErr('SUPPORT_FILE_NOT_FOUND', relativeToProjectRoot(obj.projectRoot, sf))
-      }
-
-      debug('setting support file to %o', { result })
-      obj.supportFile = result
-
-      return obj
-    })
-  })
-  .then(() => {
-    if (obj.supportFile) {
-      // set config.supportFolder to its directory
-      obj.supportFolder = path.dirname(obj.supportFile)
-      debug(`set support folder ${obj.supportFolder}`)
+    const found = await fs.pathExists(obj.supportFile)
+    if (!found) {
+      errors.throwErr('SUPPORT_FILE_NOT_FOUND', relativeToProjectRoot(obj.projectRoot, obj.supportFile))
     }
 
-    return obj
-  })
+    debug('switching to found file %s', obj.supportFile)
+  }
+
+  // final then() equivalent
+  obj.supportFolder = path.dirname(obj.supportFile)
+  debug(`set support folder ${obj.supportFolder}`)
+
+  return obj
 }
 
 export function mergeDefaults (
