@@ -9,6 +9,7 @@ _Released 12/2/2025 (PENDING)_
 
 **Bugfixes:**
 
+- Updated the error message shown when the `cy.prompt()` bundle is deleted while in use. Ensured that the Cloud bundles are written atomically to avoid concurrent downloads causing issues. Addressed in [#33034](https://github.com/cypress-io/cypress/pull/33034).
 - Fixed an issue where the browser will freeze when Cypress intercepts a synchronous request and a routeHandler is used. Fixes [#32874](https://github.com/cypress-io/cypress/issues/32874). Addressed in [#32925](https://github.com/cypress-io/cypress/pull/32925).
 
 ## 15.7.0
