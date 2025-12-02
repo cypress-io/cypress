@@ -24,21 +24,24 @@ exports['e2e xhr / passes in global mode'] = `
     ✓ does not inject into json's contents from file server even requesting text/html
     ✓ works prior to visit
     ✓ can stub a 100kb response
+WARNING: sync XHR request was not intercepted for url: http://www.foobar.com:1919/json
+WARNING: cross-origin cookies may not have been applied for sync request: http://www.foobar.com:1919/json
+    ✓ displays warnings in the terminal when using sync XHR requests
     server with 1 visit
       ✓ response body
       ✓ request body
       - aborts
 
 
-  8 passing
+  9 passing
   1 pending
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        9                                                                                │
-  │ Passing:      8                                                                                │
+  │ Tests:        10                                                                               │
+  │ Passing:      9                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      1                                                                                │
   │ Skipped:      0                                                                                │
@@ -56,9 +59,9 @@ exports['e2e xhr / passes in global mode'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  xhr.cy.js                                XX:XX        9        8        -        1        - │
+  │ ✔  xhr.cy.js                                XX:XX       10        9        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        9        8        -        1        -  
+    ✔  All specs passed!                        XX:XX       10        9        -        1        -  
 
 
 `
@@ -89,21 +92,24 @@ exports['e2e xhr / passes through CLI'] = `
     ✓ does not inject into json's contents from file server even requesting text/html
     ✓ works prior to visit
     ✓ can stub a 100kb response
+WARNING: sync XHR request was not intercepted for url: http://www.foobar.com:1919/json
+WARNING: cross-origin cookies may not have been applied for sync request: http://www.foobar.com:1919/json
+    ✓ displays warnings in the terminal when using sync XHR requests
     server with 1 visit
       ✓ response body
       ✓ request body
       - aborts
 
 
-  8 passing
+  9 passing
   1 pending
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        9                                                                                │
-  │ Passing:      8                                                                                │
+  │ Tests:        10                                                                               │
+  │ Passing:      9                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      1                                                                                │
   │ Skipped:      0                                                                                │
@@ -121,9 +127,9 @@ exports['e2e xhr / passes through CLI'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  xhr.cy.js                                XX:XX        9        8        -        1        - │
+  │ ✔  xhr.cy.js                                XX:XX       10        9        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        9        8        -        1        -  
+    ✔  All specs passed!                        XX:XX       10        9        -        1        -  
 
 
 `
