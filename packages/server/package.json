@@ -172,7 +172,7 @@
     "@types/chrome-remote-interface": "0.31.14",
     "@types/http-proxy": "1.17.17",
     "@types/node": "22.18.7",
-    "@types/request-promise": "^4.1.48",
+    "@types/request-promise": "^4.1.51",
     "@types/tar": "^6.1.0",
     "babel-loader": "10.0.0",
     "chai": "3.5.0",

@@ -107,7 +107,7 @@
     "@types/micromatch": "4.0.10",
     "@types/parse-glob": "3.0.32",
     "@types/prettier": "2.4.3",
-    "@types/server-destroy": "^1.0.1",
+    "@types/server-destroy": "^1.0.4",
     "@types/stringify-object": "^3.0.0",
     "chokidar": "3.6.0",
     "fs-extra": "9.1.0",
