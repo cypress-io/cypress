@@ -60,7 +60,10 @@ export const Cypress = (
 
   const getLoaderPromise = () => {
     if (!loaderPromise) {
-      loaderPromise = loadInitFile()
+      loaderPromise = loadInitFile().catch((err) => {
+        loaderPromise = null
+        throw err
+      })
     }
 
     return loaderPromise
