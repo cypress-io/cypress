@@ -1,9 +1,8 @@
 import { remove, ensureDir, readFile, pathExists } from 'fs-extra'
-
-import tar from 'tar'
 import { getStudioBundle } from '../api/studio/get_studio_bundle'
 import path from 'path'
 import { verifySignature } from '../encryption'
+import { extractAtomic } from '../extract_atomic'
 
 interface EnsureStudioBundleOptions {
   studioUrl: string
@@ -25,18 +24,16 @@ export const ensureStudioBundle = async ({
 }: EnsureStudioBundleOptions): Promise<Record<string, string>> => {
   const bundlePath = path.join(studioPath, 'bundle.tar')
 
-  // First remove studioPath to ensure we have a clean slate
-  await remove(studioPath)
   await ensureDir(studioPath)
 
-  const responseManifestSignature = await getStudioBundle({
+  const uniqueBundlePath = `${bundlePath}-${Math.random().toString(36).substring(2, 15)}`
+  const responseManifestSignature: string = await getStudioBundle({
     studioUrl,
-    bundlePath,
+    bundlePath: uniqueBundlePath,
   })
 
-  await tar.extract({
-    file: bundlePath,
-    cwd: studioPath,
+  await extractAtomic(uniqueBundlePath, studioPath).finally(async () => {
+    await remove(uniqueBundlePath).catch(() => { /* ignore */ })
   })
 
   const manifestPath = path.join(studioPath, 'manifest.json')
