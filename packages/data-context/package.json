@@ -80,7 +80,6 @@
     "stringify-object": "^3.0.0",
     "tsx": "4.20.6",
     "underscore.string": "^3.3.6",
-    "wonka": "^4.0.15",
     "ws": "^8.5.0"
   },
   "devDependencies": {
