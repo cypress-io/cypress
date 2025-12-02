@@ -13,6 +13,8 @@ describe('ensureStudioBundle', () => {
   let readFileStub: sinon.SinonStub = sinon.stub()
   let verifySignatureStub: sinon.SinonStub = sinon.stub()
   let pathExistsStub: sinon.SinonStub = sinon.stub()
+  const mockRandom: number = 0.123
+  const mockRandomString: string = mockRandom.toString(36).substring(2, 15)
   const mockResponseSignature = '159'
   const mockManifest = {
     'server/index.js': 'abcdefg',
@@ -27,6 +29,7 @@ describe('ensureStudioBundle', () => {
     getStudioBundleStub = sinon.stub()
     verifySignatureStub = sinon.stub()
     pathExistsStub = sinon.stub()
+    sinon.stub(Math, 'random').returns(mockRandom)
 
     ensureStudioBundle = (proxyquire('../lib/cloud/studio/ensure_studio_bundle', {
       os: {
@@ -40,14 +43,14 @@ describe('ensureStudioBundle', () => {
         readFile: readFileStub.resolves(JSON.stringify(mockManifest)),
         pathExists: pathExistsStub.resolves(true),
       },
-      tar: {
-        extract: extractStub.resolves(),
-      },
       '../api/studio/get_studio_bundle': {
         getStudioBundle: getStudioBundleStub.resolves(mockResponseSignature),
       },
       '../encryption': {
         verifySignature: verifySignatureStub.resolves(true),
+      },
+      '../extract_atomic': {
+        extractAtomic: extractStub.resolves(),
       },
     })).ensureStudioBundle
   })
@@ -62,18 +65,15 @@ describe('ensureStudioBundle', () => {
       projectId: '123',
     })
 
-    expect(rmStub).to.be.calledWith(studioPath)
     expect(ensureStub).to.be.calledWith(studioPath)
     expect(readFileStub).to.be.calledWith(path.join(studioPath, 'manifest.json'), 'utf8')
     expect(getStudioBundleStub).to.be.calledWith({
       studioUrl: 'https://cypress.io/studio',
-      bundlePath,
+      bundlePath: `${bundlePath}-${mockRandomString}`,
     })
 
-    expect(extractStub).to.be.calledWith({
-      file: bundlePath,
-      cwd: studioPath,
-    })
+    expect(extractStub).to.be.calledWith(`${bundlePath}-${mockRandomString}`, studioPath)
+    expect(rmStub).to.be.calledWith(`${bundlePath}-${mockRandomString}`)
 
     expect(verifySignatureStub).to.be.calledWith(JSON.stringify(mockManifest), mockResponseSignature)
 

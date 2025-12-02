@@ -7,6 +7,10 @@ _Released 12/2/2025 (PENDING)_
 
 - Improved performance when viewing command snapshots in the Command Log. Element highlighting is now significantly faster, especially when highlighting multiple elements or complex pages. This is achieved by reducing redundant style calculations and batching DOM operations to minimize browser reflows. Addressed in [#32951](https://github.com/cypress-io/cypress/pull/32951).
 
+**Bugfixes:**
+
+- Updated the error message shown when the `cy.prompt()` bundle is deleted while in use. Ensured that the Cloud bundles are written atomically to avoid concurrent downloads causing issues. Addressed in [#33034](https://github.com/cypress-io/cypress/pull/33034).
+
 ## 15.7.0
 
 _Released 11/19/2025_
