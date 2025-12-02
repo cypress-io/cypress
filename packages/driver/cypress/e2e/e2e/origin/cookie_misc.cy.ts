@@ -38,6 +38,64 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
     })
   })
 
+  it('cookies are not set for XHR sync requests', { browser: '!webkit' }, () => {
+    cy.intercept('http://www.foobar.com:3500/', {
+      body: `
+        <!DOCTYPE html>
+        <html>
+        <body>
+          <div id="response"></div>
+          <script>
+            let xhr = new window.XMLHttpRequest()
+            xhr.open('GET', '/fixtures/valid.json', false)
+            xhr.send()
+            document.querySelector('#response').innerHTML = JSON.stringify(JSON.parse(xhr.responseText))
+
+            let xhr2 = new window.XMLHttpRequest()
+            xhr2.open('GET', '/async', true)
+            xhr2.send()
+          </script>
+        </body>
+        </html>
+      `,
+    })
+
+    // this intercept won't get hit because the request is sync
+    cy.intercept('http://www.foobar.com:3500/fixtures/valid.json', (req) => {
+      req.reply({
+        headers: {
+          'set-cookie': 'SYNC_COOKIE=sync',
+        },
+        body: '',
+      })
+    })
+
+    cy.intercept('http://www.foobar.com:3500/async', {
+      headers: {
+        'set-cookie': 'ASYNC_COOKIE=async',
+      },
+      body: '',
+    }).as('async')
+
+    cy.visit('http://localhost:3500/fixtures/empty.html')
+    cy.origin('http://www.foobar.com:3500', () => {
+      cy.visit('http://www.foobar.com:3500/')
+      cy.get('#response').should('contain', '{"foo":1,"bar":{"baz":"cypress"}}')
+    })
+
+    // cy.getAllCookies does not wait for the cookies to be set, so we need to wait manually
+    cy.wait(500)
+
+    // only the async cookie will be set
+    cy.getAllCookies().then((cookies) => {
+      expect(cookies).to.have.length(1)
+      expect(cookies[0].name).to.eq('ASYNC_COOKIE')
+      expect(cookies[0].value).to.eq('async')
+    })
+
+    cy.wait('@async')
+  })
+
   /**
    * FIXES:
    * https://github.com/cypress-io/cypress/issues/25205 (cookies set with expired time with value deleted show up as set with value deleted)

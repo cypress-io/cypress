@@ -335,6 +335,70 @@ describe('network stubbing', { retries: 15 }, function () {
       })
     })
 
+    it('does not intercept an XHR sync request with a route handler', () => {
+      cy.intercept('/', {
+        body: `
+          <!DOCTYPE html>
+          <html>
+          <body>
+            <div id="response"></div>
+            <script>
+              let xhr = new window.XMLHttpRequest()
+              xhr.open('GET', '/fixtures/valid.json', false)
+              xhr.send()
+              document.querySelector('#response').innerHTML = JSON.stringify(JSON.parse(xhr.responseText))
+            </script>
+          </body>
+          </html>
+        `,
+      })
+
+      // this intercept won't get hit because the request is sync
+      cy.intercept('/fixtures/valid.json', () => {}).as('sync')
+
+      cy.visit('/')
+      cy.get('#response').should('contain', '{"foo":1,"bar":{"baz":"cypress"}}')
+    })
+
+    it('does not intercept a cross-origin XHR sync request with a route handler', { browser: '!webkit' }, () => {
+      cy.intercept('http://www.foobar.com:3500/', {
+        body: `
+          <!DOCTYPE html>
+          <html>
+          <body>
+            <div id="response"></div>
+            <script>
+              let xhr = new window.XMLHttpRequest()
+              xhr.open('GET', '/fixtures/valid.json', false)
+              xhr.send()
+              document.querySelector('#response').innerHTML = JSON.stringify(JSON.parse(xhr.responseText))
+
+              let xhr2 = new window.XMLHttpRequest()
+              xhr2.open('GET', '/async', true)
+              xhr2.send()
+            </script>
+          </body>
+          </html>
+        `,
+      })
+
+      // this intercept won't get hit because the request is sync
+      cy.intercept('http://www.foobar.com:3500/fixtures/valid.json', (req) => {
+        req.reply({ body: '' })
+      })
+
+      cy.intercept('http://www.foobar.com:3500/async', {
+        body: '',
+      }).as('async')
+
+      cy.origin('http://www.foobar.com:3500', () => {
+        cy.visit('http://www.foobar.com:3500/')
+        cy.get('#response').should('contain', '{"foo":1,"bar":{"baz":"cypress"}}')
+      })
+
+      cy.wait('@async')
+    })
+
     context('overrides', function () {
       it('chains middleware with string matcher as expected', function () {
         const e: string[] = []
