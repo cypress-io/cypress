@@ -36,6 +36,27 @@ export class TimeoutDiagnostics {
     manyRequests: 5,
   }
 
+  private static readonly PARENT_COMMANDS = new Set([
+    'get',
+    'contains',
+  ])
+
+  private static readonly CHILD_COMMANDS = new Set([
+    'click',
+    'dblclick',
+    'rightclick',
+    'type',
+    'check',
+    'uncheck',
+    'select',
+    'clear',
+    'submit',
+    'focus',
+    'blur',
+    'trigger',
+    'scrollTo',
+  ])
+
   /**
    * Generate diagnostic suggestions based on timeout context
    */
@@ -192,12 +213,14 @@ export class TimeoutDiagnostics {
     const { command, timeout, selector } = context
     const escapedSelector = selector ? this.escapeSelector(selector) : undefined
 
+    const timeoutSuggestion = this.buildTimeoutSuggestion(command, timeout, escapedSelector)
+
     const generalSuggestions = [
-      `Increase timeout if needed: cy.${command}(${escapedSelector ? `'${escapedSelector}', ` : ''}{ timeout: ${timeout * 2} })`,
+      timeoutSuggestion,
       'Verify the element/condition you\'re waiting for actually appears',
       'Check the browser console and Network tab for errors',
       'Use .debug() before the failing command to inspect the state: cy.debug()',
-    ]
+    ].filter(Boolean) as string[]
 
     // Add command-specific suggestions
     if (command === 'get' && escapedSelector) {
@@ -223,9 +246,29 @@ export class TimeoutDiagnostics {
 
   private static escapeSelector (selector: string): string {
     return selector
-    .replace(/\\/g, '\\\\')
-    .replace(/"/g, '\\\\\\"')
-    .replace(/'/g, '\\'')
+      .replace(/\\/g, '\\\\')
+      .replace(/"/g, String.raw`\\"`)
+      .replace(/'/g, '\\'')
+  }
+
+  private static buildTimeoutSuggestion (command: string, timeout: number, escapedSelector?: string): string {
+    const doubledTimeout = timeout * 2
+
+    if (this.PARENT_COMMANDS.has(command)) {
+      const selectorArg = escapedSelector ? `'${escapedSelector}', ` : ''
+
+      return `Increase timeout if needed: cy.${command}(${selectorArg}{ timeout: ${doubledTimeout} })`
+    }
+
+    if (this.CHILD_COMMANDS.has(command)) {
+      if (escapedSelector) {
+        return `Increase timeout on the query before ${command}: cy.get('${escapedSelector}').${command}({ timeout: ${doubledTimeout} })`
+      }
+
+      return `Increase timeout on the preceding query before ${command}: cy.get(/* selector */).${command}({ timeout: ${doubledTimeout} })`
+    }
+
+    return `Increase timeout if needed: cy.${command}({ timeout: ${doubledTimeout} })`
   }
 
   /**

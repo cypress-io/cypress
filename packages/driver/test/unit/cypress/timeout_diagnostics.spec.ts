@@ -191,6 +191,31 @@ describe('TimeoutDiagnostics', () => {
         return s.includes('visible, enabled, and not covered')
       })).toBe(true)
     })
+
+    it('suggests increasing timeout on the querying command for child actions', () => {
+      const context = {
+        command: 'click',
+        selector: '.button',
+        timeout: 4000,
+      }
+
+      const suggestions = TimeoutDiagnostics.analyze(context)
+      const combined = suggestions.flatMap((s) => s.suggestions).join('\n')
+
+      expect(combined).toContain(`cy.get('.button').click({ timeout: 8000 })`)
+    })
+
+    it('falls back to a placeholder selector when child actions lack context', () => {
+      const context = {
+        command: 'click',
+        timeout: 4000,
+      }
+
+      const suggestions = TimeoutDiagnostics.analyze(context)
+      const combined = suggestions.flatMap((s) => s.suggestions).join('\n')
+
+      expect(combined).toContain('cy.get(/* selector */).click({ timeout: 8000 })')
+    })
   })
 
   describe('formatSuggestions', () => {
