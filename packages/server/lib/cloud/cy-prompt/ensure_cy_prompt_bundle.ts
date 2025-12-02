@@ -29,8 +29,9 @@ export const ensureCyPromptBundle = async ({ cyPromptPath, cyPromptUrl, projectI
     bundlePath: uniqueBundlePath,
   })
 
-  await extractAtomic(uniqueBundlePath, cyPromptPath)
-  await remove(uniqueBundlePath).catch(() => { /* ignore */ })
+  await extractAtomic(uniqueBundlePath, cyPromptPath).finally(async () => {
+    await remove(uniqueBundlePath).catch(() => { /* ignore */ })
+  })
 
   const manifestPath = path.join(cyPromptPath, 'manifest.json')
 

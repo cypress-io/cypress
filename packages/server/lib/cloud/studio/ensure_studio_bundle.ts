@@ -32,8 +32,9 @@ export const ensureStudioBundle = async ({
     bundlePath: uniqueBundlePath,
   })
 
-  await extractAtomic(uniqueBundlePath, studioPath)
-  await remove(uniqueBundlePath).catch(() => { /* ignore */ })
+  await extractAtomic(uniqueBundlePath, studioPath).finally(async () => {
+    await remove(uniqueBundlePath).catch(() => { /* ignore */ })
+  })
 
   const manifestPath = path.join(studioPath, 'manifest.json')
 
