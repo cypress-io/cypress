@@ -226,6 +226,7 @@ export class TimeoutDiagnostics {
     .replace(/\\/g, '\\\\')
     .replace(/`/g, '\\`')
     .replace(/\$\{/g, '\\${')
+    .replace(/"/g, '\\"')
     .replace(/'/g, '\\\'')
   }
 
