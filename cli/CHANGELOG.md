@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.7.1
 
-_Released 12/2/2025 (PENDING)_
+_Released 12/2/2025_
 
 **Performance:**
 
@@ -9,7 +9,7 @@ _Released 12/2/2025 (PENDING)_
 
 **Bugfixes:**
 
-- Updated the error message shown when the `cy.prompt()` bundle is deleted while in use. Ensured that the Cloud bundles are written atomically to avoid concurrent downloads causing issues. Addressed in [#33034](https://github.com/cypress-io/cypress/pull/33034).
+- Updated the error message shown when the [`cy.prompt()`](https://docs.cypress.io/api/commands/prompt) bundle is deleted while in use. Ensured that the Cloud bundles are written atomically to avoid concurrent downloads causing issues. Addressed in [#33034](https://github.com/cypress-io/cypress/pull/33034).
 
 ## 15.7.0
 
