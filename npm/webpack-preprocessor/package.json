@@ -8,7 +8,6 @@
     "build": "rimraf dist && tsc || echo 'built, with errors'",
     "check-ts": "tsc --noEmit",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
-    "secure": "nsp check",
     "semantic-release": "semantic-release",
     "size": "npm pack --dry",
     "test": "tsx ./scripts/test-webpack-5.ts",
@@ -36,6 +35,7 @@
     "mock-require": "3.0.3",
     "semantic-release": "22.0.12",
     "strip-ansi": "6.0.1",
+    "tsx": "4.20.6",
     "typescript": "~5.4.5",
     "vitest": "^3.2.4",
     "webpack": "^5.39.0"

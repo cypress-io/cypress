@@ -478,7 +478,12 @@
     "@tooling/*"
   ],
   "ignoreBinaries": [
-    "cypress"
+    "circleci",
+    "cypress",
+    "rm",
+    "tar",
+    "tslint",
+    "wc"
   ],
   "rules": {
     "files": "warn",
