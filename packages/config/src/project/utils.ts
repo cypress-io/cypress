@@ -1,4 +1,3 @@
-
 import Debug from 'debug'
 import fs from 'fs-extra'
 import _ from 'lodash'
