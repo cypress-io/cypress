@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.7.2
+
+_Released 1/31/2026 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where commented HTML code breaks Cypress from injecting the DOM properly. Fixes [#33000](https://github.com/cypress-io/cypress/issues/33000). Addressed in [#33057](https://github.com/cypress-io/cypress/pull/33057).
+
 ## 15.7.1
 
 _Released 12/2/2025_
