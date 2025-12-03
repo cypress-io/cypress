@@ -72,9 +72,9 @@ export function handleInvalidTarget (el: HTMLFormElement | HTMLAnchorElement) {
     if (k === 'target') {
       targetSet = false
       targetValue = ''
-
-      // We're not using `$elements.callNativeMethod` here because it disallows `removeAttribute`.
     }
+
+    // We're not using `$elements.callNativeMethod` here because it disallows `removeAttribute`.
     return removeAttribute.call(this, k)
   }
 
