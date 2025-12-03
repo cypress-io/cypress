@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.7.1
 
-_Released 12/2/2025 (PENDING)_
+_Released 12/2/2025_
 
 **Performance:**
 
@@ -9,7 +9,11 @@ _Released 12/2/2025 (PENDING)_
 
 **Bugfixes:**
 
-- Updated the error message shown when the `cy.prompt()` bundle is deleted while in use. Ensured that the Cloud bundles are written atomically to avoid concurrent downloads causing issues. Addressed in [#33034](https://github.com/cypress-io/cypress/pull/33034).
+- Updated the error message shown when the [`cy.prompt()`](https://docs.cypress.io/api/commands/prompt) bundle is deleted while in use. Ensured that the Cloud bundles are written atomically to avoid concurrent downloads causing issues. Addressed in [#33034](https://github.com/cypress-io/cypress/pull/33034).
+
+**Dependency Updates:**
+
+- Upgraded `yargs-unparser` from `1.6.0` to `1.6.4` (which upgraded `flat` from `4.1.1` to `5.0.2`) to resolve [CVE-2020-36632](https://github.com/advisories/GHSA-52f5-9888-hmc6). Addressed [#27763](https://github.com/cypress-io/cypress/issues/27763).
 
 ## 15.7.0
 
