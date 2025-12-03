@@ -66,7 +66,7 @@ function getHtmlToInject (opts: InjectionOpts & SecurityOpts) {
 const insertAfter = (originalString, match, stringToInsert) => {
   const index = (match.index || 0) + match[0].length
 
-  return `${originalString.slice(0, index)}\n${stringToInsert}${originalString.slice(index)}`
+  return `${originalString.slice(0, index)} ${stringToInsert}${originalString.slice(index)}`
 }
 
 export async function html (html: string, opts: SecurityOpts & InjectionOpts) {
