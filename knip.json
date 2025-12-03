@@ -491,7 +491,8 @@
     "@iconify-json/logos",
     "@percy/cypress",
     "@vue/compiler-core",
-    "@vue/compiler-dom"
+    "@vue/compiler-dom",
+    "@vue/compiler-sfc"
   ],
   "ignoreBinaries": [
     "circleci",
