@@ -88,7 +88,7 @@ export async function html (html: string, opts: SecurityOpts & InjectionOpts) {
     return insertAfter(html, doctypeMatch, htmlToInject)
   }
 
-  return `${htmlToInject}\n${html}`
+  return `${htmlToInject} ${html}`
 }
 
 export function security (opts: SecurityOpts) {
