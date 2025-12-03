@@ -69,7 +69,7 @@ const insertAfter = (originalString, match, stringToInsert) => {
   return `${originalString.slice(0, index)} ${stringToInsert}${originalString.slice(index)}`
 }
 
-export function htmlHelper (html, htmlToInject) {
+export function htmlHelper (html: string, htmlToInject: string | undefined) {
   if (!htmlToInject) {
     return html
   }
