@@ -27,10 +27,13 @@
         "src/router/router.ts",
         "src/pages/**/*.vue",
         "src/layouts/**/*.vue",
-        "src/**/*.cy.{ts,tsx,js,jsx}"
+        "src/**/*.cy.{ts,tsx,js,jsx}",
+        "src/generated/**/*.ts",
+        "cypress/**/*.{ts,tsx,js,jsx}"
       ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx,vue}",
+        "cypress/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx,mjs}"
       ]
     },
@@ -38,10 +41,15 @@
       "entry": [
         "index.js",
         "src/index.ts",
-        "src/**/*.cy.{ts,tsx,js,jsx}"
+        "src/**/*.cy.{ts,tsx,js,jsx}",
+        "src/utils/**/*.ts",
+        "cypress/**/*.{ts,tsx,js,jsx}",
+        "script/**/*.{ts,tsx,js,jsx}"
       ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx,vue}",
+        "cypress/**/*.{ts,tsx,js,jsx}",
+        "script/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx,mjs}"
       ]
     },
@@ -68,10 +76,13 @@
       "entry": [
         "src/main.ts",
         "src/Main.vue",
-        "src/**/*.cy.{ts,tsx,js,jsx}"
+        "src/**/*.cy.{ts,tsx,js,jsx}",
+        "src/generated/**/*.ts",
+        "cypress/**/*.{ts,tsx,js,jsx}"
       ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx,vue}",
+        "cypress/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx,mjs}"
       ]
     },
@@ -475,7 +486,12 @@
     "cypress",
     "@cypress/*",
     "@packages/*",
-    "@tooling/*"
+    "@tooling/*",
+    "@iconify-json/mdi",
+    "@iconify-json/logos",
+    "@percy/cypress",
+    "@vue/compiler-core",
+    "@vue/compiler-dom"
   ],
   "ignoreBinaries": [
     "circleci",
