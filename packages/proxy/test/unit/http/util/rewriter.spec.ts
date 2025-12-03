@@ -22,7 +22,7 @@ describe('http/util/rewriter', () => {
     })
 
     it('commented DOCTYPE tag and HTML text', () => {
-      expect(htmlHelper('<!-- <!DOCTYPE html> -->HTML', injected)).toEqual(`${injected} <!-- <!DOCTYPE html> --> HTML`)
+      expect(htmlHelper('<!-- <!DOCTYPE html> -->HTML', injected)).toEqual(`${injected} <!-- <!DOCTYPE html> -->HTML`)
     })
   })
 })
