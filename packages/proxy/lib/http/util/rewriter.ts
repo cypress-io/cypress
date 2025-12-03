@@ -69,6 +69,20 @@ const insertAfter = (originalString, match, stringToInsert) => {
   return `${originalString.slice(0, index)} ${stringToInsert}${originalString.slice(index)}`
 }
 
+export function htmlHelper (html, htmlToInject) {
+  if (!htmlToInject) {
+    return html
+  }
+
+  const doctypeMatch = html.match(doctypeRe)
+
+  if (doctypeMatch) {
+    return insertAfter(html, doctypeMatch, htmlToInject)
+  }
+
+  return `${htmlToInject} ${html}`
+}
+
 export async function html (html: string, opts: SecurityOpts & InjectionOpts) {
   const htmlToInject = await Promise.resolve(getHtmlToInject(opts))
 
@@ -88,7 +102,7 @@ export async function html (html: string, opts: SecurityOpts & InjectionOpts) {
     return insertAfter(html, doctypeMatch, htmlToInject)
   }
 
-  return `${htmlToInject} ${html}`
+  return htmlHelper(html, htmlToInject)
 }
 
 export function security (opts: SecurityOpts) {
