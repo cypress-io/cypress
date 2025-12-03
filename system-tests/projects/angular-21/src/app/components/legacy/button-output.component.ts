@@ -6,5 +6,6 @@ import { Component, EventEmitter, Output } from '@angular/core'
   template: `<button (click)="clicked.emit(true)">Click Me</button>`,
 })
 export class ButtonOutputComponent {
+  // Used to test legacy @Output() decorators
   @Output() clicked: EventEmitter<boolean> = new EventEmitter()
 }

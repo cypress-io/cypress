@@ -225,15 +225,13 @@ function createComponentFixture<T> (
 
  * @returns {Promise<ComponentFixture<T>>} ComponentFixture
  */
-async function setupFixture<T> (
+function setupFixture<T> (
   component: Type<T>,
   config: MountConfig<T>,
-): Promise<ComponentFixture<T>> {
+): ComponentFixture<T> {
   const fixture = getTestBed().createComponent(component)
 
   setupComponent(config, fixture)
-
-  await fixture.whenStable()
 
   return fixture
 }
@@ -497,11 +495,13 @@ export function mount<T> (
     mountResponsePromiseRejector = reject
   })
 
-  setupFixture(componentFixture, config).then((fixture) => {
-    activeFixture = fixture
+  const fixture = setupFixture(componentFixture, config)
+
+  activeFixture = fixture
+  fixture.whenStable().then(() => {
     const mountResponse: MountResponse<T> = {
-      fixture: activeFixture,
-      component: activeFixture.componentInstance,
+      fixture,
+      component: fixture.componentInstance,
     }
 
     const logMessage = typeof component === 'string' ? 'Component' : componentFixture.name

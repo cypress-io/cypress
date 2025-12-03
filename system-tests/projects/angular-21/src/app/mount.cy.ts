@@ -1,5 +1,6 @@
 import { createOutputSpy } from 'cypress/angular-zoneless'
 import { EventEmitter, Component } from '@angular/core'
+import type { InputSignal } from '@angular/core'
 import { TestBed } from '@angular/core/testing'
 
 import { ParentChildModule } from './components/legacy/modules/parent-child.module'
@@ -290,7 +291,7 @@ it('can use a test double for a child component with a provider override', () =>
 it('handles ngOnChanges on mount', () => {
   cy.mount(LifecycleComponent, {
     componentProperties: {
-      name: 'Angular',
+      name: 'Angular' as unknown as InputSignal<string>,
     },
   })
 
@@ -311,7 +312,7 @@ it('handles ngOnChanges on mount with templates', () => {
 it('creates simpleChanges from componentProperties and calls ngOnChanges on Mount', () => {
   cy.mount(LifecycleComponent, {
     componentProperties: {
-      name: 'CONDITIONAL NAME',
+      name: 'CONDITIONAL NAME' as unknown as InputSignal<string>,
     },
   })
 

@@ -1,8 +1,9 @@
+import type { InputSignal } from '@angular/core'
 import { ErrorsComponent } from './components/errors'
 
 describe('Errors', () => {
   it('error on mount', () => {
-    cy.mount(ErrorsComponent, { componentProperties: { throwError: true } })
+    cy.mount(ErrorsComponent, { componentProperties: { throwError: true as unknown as InputSignal<boolean> } })
   })
 
   it('sync error', () => {
