@@ -22,7 +22,7 @@ export type InjectionOpts = {
   shouldInjectDocumentDomain: boolean
 }
 
-const doctypeRe = /<\!doctype.*?>/i
+const doctypeRe = /^[\s]*?<\!doctype.*?>/i
 
 function getRewriter (useAstSourceRewriting: boolean) {
   return useAstSourceRewriting ? astRewriter : regexRewriter
