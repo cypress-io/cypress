@@ -246,11 +246,11 @@ export class TimeoutDiagnostics {
 
   private static escapeSelector (selector: string): string {
     return selector
-      .replace(/\\/g, '\\\\')
-      .replace(/`/g, '\\`')
-      .replace(/\$\{/g, '\\${')
-      .replace(/"/g, '\\\\' + '\\"')
-      .replace(/'/g, "\\'")
+    .replace(/\\/g, '\\\\')
+    .replace(/`/g, '\\`')
+    .replace(/\$\{/g, '\\${')
+    .replace(/"/g, '\\"')
+    .replace(/'/g, '\\\'')
   }
 
   private static buildTimeoutSuggestion (command: string, timeout: number, escapedSelector?: string): string {
