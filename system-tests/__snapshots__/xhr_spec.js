@@ -24,9 +24,12 @@ exports['e2e xhr / passes in global mode'] = `
     ✓ does not inject into json's contents from file server even requesting text/html
     ✓ works prior to visit
     ✓ can stub a 100kb response
-WARNING: cross-origin cookies may not have been applied to synchronous XHR request: http://www.foobar.com:1919/json
-WARNING: synchronous XHR request was not intercepted: http://www.foobar.com:1919/json
-WARNING: cross-origin cookies may not have been set for synchronous XHR response: http://www.foobar.com:1919/json
+Warning: Cookies may not have been applied to synchronous XHR request: http://www.foobar.com:1919/json. Learn more: https://on.cypress.io/synchronous-xhr-requests
+
+Warning: Synchronous XHR request was not intercepted: http://www.foobar.com:1919/json. Learn more: https://on.cypress.io/synchronous-xhr-requests
+
+Warning: Cookies may not have been set for synchronous XHR response: http://www.foobar.com:1919/json. Learn more: https://on.cypress.io/synchronous-xhr-requests
+
     ✓ displays warnings in the terminal when using sync XHR requests
     server with 1 visit
       ✓ response body
@@ -93,9 +96,12 @@ exports['e2e xhr / passes through CLI'] = `
     ✓ does not inject into json's contents from file server even requesting text/html
     ✓ works prior to visit
     ✓ can stub a 100kb response
-WARNING: cross-origin cookies may not have been applied to synchronous XHR request: http://www.foobar.com:1919/json
-WARNING: synchronous XHR request was not intercepted: http://www.foobar.com:1919/json
-WARNING: cross-origin cookies may not have been set for synchronous XHR response: http://www.foobar.com:1919/json
+Warning: Cookies may not have been applied to synchronous XHR request: http://www.foobar.com:1919/json. Learn more: https://on.cypress.io/synchronous-xhr-requests
+
+Warning: Synchronous XHR request was not intercepted: http://www.foobar.com:1919/json. Learn more: https://on.cypress.io/synchronous-xhr-requests
+
+Warning: Cookies may not have been set for synchronous XHR response: http://www.foobar.com:1919/json. Learn more: https://on.cypress.io/synchronous-xhr-requests
+
     ✓ displays warnings in the terminal when using sync XHR requests
     server with 1 visit
       ✓ response body

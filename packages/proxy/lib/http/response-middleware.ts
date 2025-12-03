@@ -15,7 +15,7 @@ import { hasServiceWorkerHeader, isVerboseTelemetry as isVerbose } from '.'
 import { CookiesHelper } from './util/cookies'
 import * as rewriter from './util/rewriter'
 import { doesTopNeedToBeSimulated } from './util/top-simulation'
-import chalk from 'chalk'
+import * as errors from '@packages/errors'
 
 import type Debug from 'debug'
 import type { CookieOptions } from 'express'
@@ -724,7 +724,7 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
   // event since the sync request is blocking. This means that the cross-origin cookies
   // may not have been applied.
   if (this.req.isSyncRequest) {
-    process.stdout.write(chalk.yellow(`WARNING: cross-origin cookies may not have been set for synchronous XHR response: ${this.req.proxiedUrl}\n`))
+    errors.warning('SYNCHRONOUS_XHR_REQUEST_COOKIES_NOT_SET', this.req.proxiedUrl)
 
     span?.end()
 

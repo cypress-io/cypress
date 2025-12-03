@@ -13,7 +13,7 @@ import type { BackendRoute, NetStubbingState } from './types'
 import { emit, sendStaticResponse } from './util'
 import type CyServer from '@packages/server'
 import type { BackendStaticResponse } from '../internal-types'
-import chalk from 'chalk'
+import * as errors from '@packages/errors'
 
 export class InterceptedRequest {
   id: string
@@ -81,7 +81,7 @@ export class InterceptedRequest {
       // if the request is sync and the route has an interceptor (i.e. routeHandler), then skip the intercept
       // because the we cannot wait on the before:request event when the sync request is blocking
       if (this.req.isSyncRequest && route.hasInterceptor) {
-        process.stdout.write(chalk.yellow(`WARNING: synchronous XHR request was not intercepted: ${this.req.proxiedUrl}\n`))
+        errors.warning('SYNCHRONOUS_XHR_REQUEST_NOT_INTERCEPTED', this.req.proxiedUrl)
 
         continue
       }

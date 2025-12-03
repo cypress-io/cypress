@@ -11,7 +11,7 @@ import { doesTopNeedToBeSimulated } from './util/top-simulation'
 import type { HttpMiddleware } from './'
 import type { CypressIncomingRequest } from '../types'
 import { urlMatchesOriginProtectionSpace } from '@packages/network-tools'
-import chalk from 'chalk'
+import * as errors from '@packages/errors'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
@@ -227,7 +227,7 @@ const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
   }
 
   if (this.req.isSyncRequest) {
-    process.stdout.write(chalk.yellow(`WARNING: cross-origin cookies may not have been applied to synchronous XHR request: ${this.req.proxiedUrl}\n`))
+    errors.warning('SYNCHRONOUS_XHR_REQUEST_COOKIES_NOT_APPLIED', this.req.proxiedUrl)
   }
 
   // Top needs to be simulated since the AUT is in a cross origin state. Get the "requested with" and credentials and see what cookies need to be attached
