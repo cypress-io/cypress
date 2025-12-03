@@ -7,7 +7,6 @@
 // essentially do it all again when we boot the correct
 // mode.
 
-import Promise from 'bluebird'
 import Debug from 'debug'
 import { getPublicConfigKeys } from '@packages/config'
 import argsUtils from './util/args'
