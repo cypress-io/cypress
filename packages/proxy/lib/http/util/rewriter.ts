@@ -23,9 +23,6 @@ export type InjectionOpts = {
 }
 
 const doctypeRe = /<\!doctype.*?>/i
-const headRe = /<head(?!er).*?>/i
-const bodyRe = /<body.*?>/i
-const htmlRe = /<html.*?>/i
 
 function getRewriter (useAstSourceRewriting: boolean) {
   return useAstSourceRewriting ? astRewriter : regexRewriter
@@ -66,12 +63,6 @@ function getHtmlToInject (opts: InjectionOpts & SecurityOpts) {
   }
 }
 
-const insertBefore = (originalString, match, stringToInsert) => {
-  const index = match.index || 0
-
-  return `${originalString.slice(0, index)}${stringToInsert} ${originalString.slice(index)}`
-}
-
 const insertAfter = (originalString, match, stringToInsert) => {
   const index = (match.index || 0) + match[0].length
 
@@ -91,32 +82,13 @@ export async function html (html: string, opts: SecurityOpts & InjectionOpts) {
     return html
   }
 
-  // TODO: move this into regex-rewriting and have ast-rewriting handle this in its own way
+  const doctypeMatch = html.match(doctypeRe)
 
-  const headMatch = html.match(headRe)
-
-  if (headMatch) {
-    return insertAfter(html, headMatch, htmlToInject)
+  if (doctypeMatch) {
+    return insertAfter(html, doctypeMatch, htmlToInject)
   }
 
-  const bodyMatch = html.match(bodyRe)
-
-  if (bodyMatch) {
-    return insertBefore(html, bodyMatch, `<head> ${htmlToInject} </head>`)
-  }
-
-  const htmlMatch = html.match(htmlRe)
-
-  if (htmlMatch) {
-    return insertAfter(html, htmlMatch, `<head> ${htmlToInject} </head>`)
-  }
-
-  // if only <!DOCTYPE> content, inject <head> after doctype
-  if (doctypeRe.test(html)) {
-    return `${html}<head> ${htmlToInject} </head>`
-  }
-
-  return `<head> ${htmlToInject} </head>${html}`
+  return htmlToInject + '\n' + html
 }
 
 export function security (opts: SecurityOpts) {
