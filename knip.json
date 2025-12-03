@@ -43,6 +43,7 @@
         "src/index.ts",
         "src/**/*.cy.{ts,tsx,js,jsx}",
         "src/utils/**/*.ts",
+        "src/graphql/urqlDetailedDebugExchange.ts",
         "cypress/**/*.{ts,tsx,js,jsx}",
         "script/**/*.{ts,tsx,js,jsx}"
       ],
@@ -457,7 +458,6 @@
     "packages/frontend-shared/src/components/**/*.vue",
     "packages/frontend-shared/src/gql-components/**/*.vue",
     "packages/frontend-shared/src/composables/examples/**/*.vue",
-    "packages/frontend-shared/src/graphql/urqlDetailedDebugExchange.ts",
     "packages/frontend-shared/src/gql-components/composables/useCohorts.ts",
     "packages/frontend-shared/src/gql-components/composables/usePromptManager.ts",
     "packages/frontend-shared/src/locales/schema.ts",
