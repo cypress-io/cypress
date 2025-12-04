@@ -6,6 +6,7 @@ _Released 12/16/2025 (PENDING)_
 **Features:**
 
 - `Angular` version 21 is now supported within component testing. Addressed in [#33004](https://github.com/cypress-io/cypress/pull/33004).
+- Timeout diagnostics now surface actionable suggestions directly inside timeout error messages, helping you quickly resolve slow or hanging commands. Addressed in [#33023](https://github.com/cypress-io/cypress/pull/33023).
 
 ## 15.7.1
 
@@ -14,10 +15,6 @@ _Released 12/3/2025 (PENDING)_
 **Performance:**
 
 - Improved performance when viewing command snapshots in the Command Log. Element highlighting is now significantly faster, especially when highlighting multiple elements or complex pages. This is achieved by reducing redundant style calculations and batching DOM operations to minimize browser reflows. Addressed in [#32951](https://github.com/cypress-io/cypress/pull/32951).
-
-**Features:**
-
-- Timeout diagnostics now surface actionable suggestions directly inside timeout error messages, helping you quickly resolve slow or hanging commands. Addressed in [#33023](https://github.com/cypress-io/cypress/pull/33023).
 
 ## 15.7.0
 
