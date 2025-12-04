@@ -1,11 +1,9 @@
-require('../../spec_helper')
-
-const snapshot = require('snap-shot-it')
-const stripAnsi = require('strip-ansi')
-const widestLine = require('widest-line')
-const env = require(`../../../lib/util/env`)
-const terminal = require(`../../../lib/util/terminal`)
-const terminalSize = require(`../../../lib/util/terminal-size`)
+import snapshot from 'snap-shot-it'
+import stripAnsi from 'strip-ansi'
+import widestLine from 'widest-line'
+import * as env from '../../../lib/util/env'
+import * as terminal from '../../../lib/util/terminal'
+import * as terminalSize from '../../../lib/util/terminal-size'
 
 const sanitizeSnapshot = (str) => {
   return snapshot(stripAnsi(str))

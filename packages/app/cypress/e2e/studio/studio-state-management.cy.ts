@@ -68,6 +68,12 @@ describe('Cypress Studio - State Management', () => {
   it('remains in studio mode when the test name is changed on the file system and file watching is disabled', () => {
     launchStudio({ cliArgs: ['--config', 'watchForFileChanges=false'] })
 
+    // since we aren't logged in, we need to close the connect to cloud panel
+    cy.get('[data-cy="studio-error"]').within(() => {
+      cy.contains('Connect to Cypress Cloud').should('be.visible')
+      cy.get('[aria-label="Close"]').click()
+    })
+
     cy.findByTestId('record-button-recording').should('be.visible')
 
     incrementCounter(0)

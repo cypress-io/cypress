@@ -1,11 +1,31 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.8.0
+
+_Released 12/16/2025 (PENDING)_
+
+**Features:**
+
+- `Angular` version 21 is now supported within component testing. Addressed in [#33004](https://github.com/cypress-io/cypress/pull/33004).
+
+**Bugfixes:**
+
+- Fixed an issue where a EPIPE error shows up after CTRL+C is done in terminal. Fixes [#30659](https://github.com/cypress-io/cypress/issues/30659). Addressed in [#32873](https://github.com/cypress-io/cypress/pull/32873).
+
 ## 15.7.1
 
-_Released 12/2/2025 (PENDING)_
+_Released 12/2/2025_
 
 **Performance:**
 
 - Improved performance when viewing command snapshots in the Command Log. Element highlighting is now significantly faster, especially when highlighting multiple elements or complex pages. This is achieved by reducing redundant style calculations and batching DOM operations to minimize browser reflows. Addressed in [#32951](https://github.com/cypress-io/cypress/pull/32951).
+
+**Bugfixes:**
+
+- Updated the error message shown when the [`cy.prompt()`](https://docs.cypress.io/api/commands/prompt) bundle is deleted while in use. Ensured that the Cloud bundles are written atomically to avoid concurrent downloads causing issues. Addressed in [#33034](https://github.com/cypress-io/cypress/pull/33034).
+
+**Dependency Updates:**
+
+- Upgraded `yargs-unparser` from `1.6.0` to `1.6.4` (which upgraded `flat` from `4.1.1` to `5.0.2`) to resolve [CVE-2020-36632](https://github.com/advisories/GHSA-52f5-9888-hmc6). Addressed [#27763](https://github.com/cypress-io/cypress/issues/27763).
 
 ## 15.7.0
 

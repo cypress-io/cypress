@@ -93,11 +93,11 @@ interface SavedStateAPI {
   set: (stateToSet: AllowedState) => Bluebird<void>
 }
 
-export const create = (projectRoot?: string, isTextTerminal: boolean = false): Bluebird<SavedStateAPI> => {
+export const create = (projectRoot?: string, isTextTerminal: boolean = false): Promise<SavedStateAPI> => {
   if (isTextTerminal) {
     debug('noop saved state')
 
-    return Bluebird.resolve(FileUtil.noopFile)
+    return Promise.resolve(FileUtil.noopFile)
   }
 
   // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package

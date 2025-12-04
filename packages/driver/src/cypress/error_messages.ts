@@ -1354,6 +1354,11 @@ export default {
         docsUrl: 'https://on.cypress.io/prompt-download-error',
       }
     },
+    promptBundleNeedsRefresh: stripIndent`\
+      Your \`cy.prompt\` Cloud code needs to be refreshed.
+
+      Please restart the app to get the latest version.
+    `,
     promptProxyError: {
       message: stripIndent`\
       \`cy.prompt\` requires an internet connection. To continue, you may need to configure Cypress with your proxy settings.

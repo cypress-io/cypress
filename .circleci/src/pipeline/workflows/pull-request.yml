@@ -34,6 +34,10 @@ jobs:
       requires:
         - internal-pr-build
         - external-pr-build
+  - health-check:
+      requires:
+        - internal-pr-build
+        - external-pr-build
   - lint:
       name: linux-lint
       requires:

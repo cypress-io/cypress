@@ -1,17 +1,18 @@
-const _ = require('lodash')
-const chalk = require('chalk')
-const Table = require('cli-table3')
-const utils = require('cli-table3/src/utils')
-const widestLine = require('widest-line')
-const terminalSize = require('./terminal-size')
+import _ from 'lodash'
+import chalk from 'chalk'
+import Table from 'cli-table3'
+import utils from 'cli-table3/src/utils'
+import widestLine from 'widest-line'
+import { get as getTerminalSize } from './terminal-size'
+import type { HorizontalAlignment } from 'cli-table3'
 
 const MAXIMUM_SIZE = 100
 const EXPECTED_SUM = 100
 
-const getMaximumColumns = () => {
+export const getMaximumColumns = () => {
   // get the maximum amount of columns
   // that can fit in the terminal
-  return Math.min(MAXIMUM_SIZE, terminalSize.get().columns)
+  return Math.min(MAXIMUM_SIZE, getTerminalSize().columns)
 }
 
 const getBordersLength = (left, right) => {
@@ -23,9 +24,9 @@ const getBordersLength = (left, right) => {
   .value()
 }
 
-const renderTables = (...tables) => {
+export const renderTables = (...tables) => {
   return _
-  .chain([])
+  .chain<string[]>([])
   .concat(tables)
   .invokeMap('toString')
   .join('\n')
@@ -130,7 +131,7 @@ const wrapBordersInGray = (chars) => {
   })
 }
 
-const table = (options = {}) => {
+export const table = (options: { type: string, colWidths?: number[], colAligns?: HorizontalAlignment[], head?: string[], chars?: Record<string, string>, style?: { [key: string]: any } }) => {
   const { type } = options
   const defaults = utils.mergeOptions({})
 
@@ -161,7 +162,7 @@ const table = (options = {}) => {
     if (bordersLength > 0) {
       // redistribute the columns to account for borders on each side...
       // and subtract  borders size from the largest width cell
-      const largestCellWidth = _.max(colWidths)
+      const largestCellWidth = _.max(colWidths) ?? 0
 
       const index = _.indexOf(colWidths, largestCellWidth)
 
@@ -177,7 +178,7 @@ const table = (options = {}) => {
   return new Table(options)
 }
 
-const header = (message, options = {}) => {
+export const header = (message: string, options: { color?: string[] | null } = {}) => {
   _.defaults(options, {
     color: null,
   })
@@ -185,7 +186,8 @@ const header = (message, options = {}) => {
   message = `  (${chalk.underline.bold(message)})`
 
   if (options.color) {
-    const colors = [].concat(options.color)
+    // @ts-expect-error type is cast incorrectly to never
+    const colors = <string[]>[].concat(options.color)
 
     message = _.reduce(colors, (memo, color) => {
       return chalk[color](memo)
@@ -195,21 +197,9 @@ const header = (message, options = {}) => {
   console.log(message) // eslint-disable-line no-console
 }
 
-const divider = (symbol, color = 'gray') => {
+export const divider = (symbol, color = 'gray') => {
   const cols = getMaximumColumns()
   const str = symbol.repeat(cols)
 
   console.log(chalk[color](str)) // eslint-disable-line no-console
-}
-
-module.exports = {
-  table,
-
-  header,
-
-  divider,
-
-  renderTables,
-
-  getMaximumColumns,
 }
