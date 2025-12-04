@@ -4,7 +4,7 @@ linux-x64:
       - equal: [ develop, << pipeline.git.branch >> ]
       # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-      - equal: [ 'chore/remove_unused_anchors', << pipeline.git.branch >> ]
+      - equal: [ 'feat/support_angular_21', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
@@ -16,6 +16,9 @@ linux-x64:
         requires:
           - node_modules_install
     - check-ts:
+        requires:
+          - build
+    - health-check:
         requires:
           - build
     - lint:
@@ -253,6 +256,7 @@ linux-x64:
         # filters: *mainBuildFilters
         requires:
           - check-ts
+          - health-check
           - npm-angular
           - npm-eslint-plugin-dev
           - npm-puppeteer-unit-tests

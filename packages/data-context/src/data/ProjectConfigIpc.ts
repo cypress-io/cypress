@@ -264,6 +264,7 @@ export class ProjectConfigIpc extends EventEmitter {
       })
 
       this.once('file:preprocessor:overridden', ({ handlerText }) => {
+        debug('file:preprocessor:overridden: %s', handlerText)
         this.onDebugData({
           filePreprocessorHandlerText: handlerText,
         })

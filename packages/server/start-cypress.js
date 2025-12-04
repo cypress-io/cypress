@@ -2,6 +2,7 @@ const electronApp = require('./lib/util/electron-app')
 const { telemetry, OTLPTraceExporterCloud } = require('@packages/telemetry')
 const { apiRoutes } = require('./lib/cloud/routes')
 const encryption = require('./lib/cloud/encryption')
+const { override: overrideTty } = require('./lib/util/tty')
 
 const { calculateCypressInternalEnv, configureLongStackTraces } = require('./lib/environment')
 
@@ -64,7 +65,7 @@ const fs = require('fs')
 patchFs(fs)
 
 // override tty if we're being forced to
-require('./lib/util/tty').override()
+overrideTty()
 
 if (process.env.CY_NET_PROFILE && isRunningElectron) {
   const netProfiler = require('./lib/util/net_profiler')()

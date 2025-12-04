@@ -1,3 +1,24 @@
+# [@cypress/webpack-dev-server-v5.3.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.2.1...@cypress/webpack-dev-server-v5.3.0) (2025-12-03)
+
+
+### Features
+
+* add support for Angular 21 ([#33004](https://github.com/cypress-io/cypress/issues/33004)) ([b1d85c9](https://github.com/cypress-io/cypress/commit/b1d85c9af17acde6305ec6dfa3800cc523f6abba))
+
+# [@cypress/webpack-dev-server-v5.2.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.2.0...@cypress/webpack-dev-server-v5.2.1) (2025-11-19)
+
+
+### Bug Fixes
+
+* make sure angular project configs can resolve correctly on windows ([#32971](https://github.com/cypress-io/cypress/issues/32971)) ([71a393e](https://github.com/cypress-io/cypress/commit/71a393ee566dd5eff4e0579fdc6a23bf73cffa51))
+
+# [@cypress/webpack-dev-server-v5.2.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.1.5...@cypress/webpack-dev-server-v5.2.0) (2025-11-19)
+
+
+### Features
+
+* support Next.js 16 inside component testing ([#32955](https://github.com/cypress-io/cypress/issues/32955)) ([12f72f2](https://github.com/cypress-io/cypress/commit/12f72f23784f32faead8437579e29cb592fb62d1))
+
 # [@cypress/webpack-dev-server-v5.1.5](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.1.4...@cypress/webpack-dev-server-v5.1.5) (2025-11-07)
 
 # [@cypress/webpack-dev-server-v5.1.4](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.1.3...@cypress/webpack-dev-server-v5.1.4) (2025-11-04)

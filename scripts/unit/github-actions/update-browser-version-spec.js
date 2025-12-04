@@ -1,7 +1,6 @@
 const chai = require('chai')
 const fs = require('fs')
 const mockfs = require('mock-fs')
-const nock = require('nock')
 const sinon = require('sinon')
 
 chai.use(require('sinon-chai'))
@@ -22,12 +21,6 @@ const coreStub = () => {
   }
 }
 
-const stubChromeVersionResult = (channel, result) => {
-  nock('https://versionhistory.googleapis.com')
-  .get((uri) => uri.includes(channel))
-  .reply(200, result)
-}
-
 const stubRepoVersions = ({ betaVersion, stableVersion }) => {
   mockfs({
     [CIRCLECI_WORKFLOWS_FILEPATH]: `chrome-stable-version: &chrome-stable-version "${stableVersion}"\nchrome-beta-version: &chrome-beta-version "${betaVersion}"\n`,
@@ -35,34 +28,44 @@ const stubRepoVersions = ({ betaVersion, stableVersion }) => {
 }
 
 const stubChromeVersions = ({ betaVersion, stableVersion }) => {
-  stubChromeVersionResult('stable',
-    {
-      versions: stableVersion ? [
-        {
-          name: `chrome/platforms/linux/channels/stable/versions/${stableVersion}`,
-          version: stableVersion,
-        },
-      ] : [],
-      nextPageToken: '',
-    })
+  if (!global.originalFetch) {
+    global.originalFetch = global.fetch
+  }
 
-  stubChromeVersionResult('beta',
-    {
-      versions: betaVersion ? [
-        {
-          name: `chrome/platforms/linux/channels/beta/versions/${betaVersion}`,
-          version: betaVersion,
-        },
-      ] : [],
-      nextPageToken: '',
-    })
+  const stableResponse = {
+    versions: stableVersion ? [{ name: `chrome/platforms/linux/channels/stable/versions/${stableVersion}`, version: stableVersion }] : [],
+    nextPageToken: '',
+  }
+
+  const betaResponse = {
+    versions: betaVersion ? [{ name: `chrome/platforms/linux/channels/beta/versions/${betaVersion}`, version: betaVersion }] : [],
+    nextPageToken: '',
+  }
+
+  global.fetch = sinon.stub().callsFake((url) => {
+    if (url.includes('/channels/stable/')) {
+      return Promise.resolve({ ok: true, status: 200, text: () => Promise.resolve(JSON.stringify(stableResponse)) })
+    }
+
+    if (url.includes('/channels/beta/')) {
+      return Promise.resolve({ ok: true, status: 200, text: () => Promise.resolve(JSON.stringify(betaResponse)) })
+    }
+
+    throw new Error(`Unexpected fetch URL: ${url}`)
+  })
 }
 
 describe('update browser version github action', () => {
   beforeEach(() => {
     sinon.restore()
     mockfs.restore()
-    nock.cleanAll()
+  })
+
+  afterEach(() => {
+    if (global.originalFetch) {
+      global.fetch = global.originalFetch
+      delete global.originalFetch
+    }
   })
 
   context('.getVersions', () => {

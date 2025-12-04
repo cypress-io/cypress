@@ -14,6 +14,9 @@
 - Any implementation details to explain?
 -->
 
+<!-- CURSOR_SUMMARY -->
+<!-- /CURSOR_SUMMARY -->
+
 ### Steps to test
 <!--
 For non-trivial behavior changes, list the steps that a reviewer should follow to validate the new behavior.
