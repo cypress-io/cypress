@@ -13,46 +13,40 @@ const debug = Debug('cypress:server:saved_state')
 
 const stateFiles: Record<string, typeof FileUtil> = {}
 
-export const formStatePath = async (projectRoot?: string): Promise<string> => {
-  let resolvedPath = projectRoot
-
+export const formStatePath = async (projectRoot?: string) => {
   debug('making saved state from %s', getCwd())
 
-    if (resolvedPath) {
-      debug('for project path %s', resolvedPath)
+  if (projectRoot) {
+    debug('for project path %s', projectRoot)
 
-      return resolvedPath
-    }
+    return path.join(appData.toHashName(projectRoot), 'state.json')
+  }
 
-    debug('missing project path, looking for project here')
+  debug('missing project path, looking for project here')
 
-    let cypressConfigPath = getCwd('cypress.config.js')
+  const cwd = getCwd()
 
-    let found = await fsExtra.pathExists(cypressConfigPath)
+  const jsConfig = getCwd('cypress.config.js')
 
-    if (found) {
-      debug('found cypress file %s', cypressConfigPath)
-        projectRoot = getCwd()
-      }
+  if (await fsExtra.pathExists(jsConfig)) {
+    debug('found cypress file %s', jsConfig)
+    const root = cwd
 
-    cypressConfigPath = getCwd('cypress.config.ts')
-    found = await fsExtra.pathExists(cypressConfigPath)
-      if (found) {
-        debug('found cypress file %s', cypressConfigPath)
-        projectRoot = getCwd()
-      }
+    return path.join(appData.toHashName(root), 'state.json')
+  }
 
-    const fileName = 'state.json'
+  const tsConfig = getCwd('cypress.config.ts')
 
-    if (projectRoot) {
-      debug(`state path for project ${projectRoot}`)
+  if (await fsExtra.pathExists(tsConfig)) {
+    debug('found cypress file %s', tsConfig)
+    const root = cwd
 
-      return path.join(appData.toHashName(projectRoot), fileName)
-    }
+    return path.join(appData.toHashName(root), 'state.json')
+  }
 
-    debug('state path for global mode')
+  debug('state path for global mode')
 
-    return path.join('__global__', fileName)
+  return path.join('__global__', 'state.json')
 }
 
 const normalizeAndAllowSet = (set, key, value) => {
