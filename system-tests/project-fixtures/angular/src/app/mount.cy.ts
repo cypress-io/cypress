@@ -431,7 +431,7 @@ describe('angular mount', () => {
         },
       }
 
-      cy.mount(ProductComponent, { providers: [{ provider: Cart, useValue: cartFake }] })
+      cy.mount(ProductComponent, { providers: [{ provide: Cart, useValue: cartFake }] })
 
       cy.get('[data-testid=btn-buy]').click().then(() => {
         const cart = TestBed.inject(Cart)
