@@ -16,6 +16,7 @@ import { warning as errorsWarning } from './errors'
 import { getCwd } from './cwd'
 import type { CypressError } from '@packages/errors'
 import { toNumber } from 'lodash'
+import Bluebird from 'bluebird'
 const debug = Debug('cypress:server:cypress')
 
 type Mode = 'exit' | 'info' | 'interactive' | 'pkg' | 'record' | 'results' | 'run' | 'smokeTest' | 'version' | 'returnPkg' | 'exitWithCode'
@@ -101,47 +102,47 @@ export = {
     // wrap all of this in a promise to force the
     // promise interface - even if it doesn't matter
     // in dev mode due to cp.spawn
-    return Promise.try(() => {
+    return Promise.resolve().then(() => {
       // if we have the electron property on versions
       // that means we're already running in electron
       // like in production and we shouldn't spawn a new
       // process
       if (this.isCurrentlyRunningElectron()) {
-        // if we weren't invoked from the CLI
-        // then display a warning to the user
-        if (!options.invokedFromCli) {
-          errorsWarning('INVOKED_BINARY_OUTSIDE_NPM_MODULE')
-        }
+      // if we weren't invoked from the CLI
+      // then display a warning to the user
+      if (!options.invokedFromCli) {
+        errorsWarning('INVOKED_BINARY_OUTSIDE_NPM_MODULE')
+      }
 
-        debug('running Electron currently')
+      debug('running Electron currently')
 
-        return require('./modes')(mode, options)
+      return require('./modes')(mode, options)
       }
 
       return new Promise((resolve) => {
-        debug('starting Electron')
-        const cypressElectron = require('@packages/electron')
+      debug('starting Electron')
+      const cypressElectron = require('@packages/electron')
 
-        const fn = (code: number) => {
-          // juggle up the totalFailed since our outer
-          // promise is expecting this object structure
-          debug('electron finished with', code)
+      const fn = (code: number) => {
+        // juggle up the totalFailed since our outer
+        // promise is expecting this object structure
+        debug('electron finished with', code)
 
-          if (mode === 'smokeTest') {
-            return resolve(code)
-          }
-
-          return resolve({ totalFailed: code })
+        if (mode === 'smokeTest') {
+        return resolve(code)
         }
 
-        const args = require('./util/args').toArray(options)
+        return resolve({ totalFailed: code })
+      }
 
-        debug('electron open arguments %o', args)
+      const args = require('./util/args').toArray(options)
 
-        // const mainEntryFile = require.main.filename
-        const serverMain = getCwd()
+      debug('electron open arguments %o', args)
 
-        return cypressElectron.open(serverMain, args, fn)
+      // const mainEntryFile = require.main.filename
+      const serverMain = getCwd()
+
+      return cypressElectron.open(serverMain, args, fn)
       })
     })
   },
