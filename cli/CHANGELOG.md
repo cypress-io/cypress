@@ -8,6 +8,10 @@ _Released 12/16/2025 (PENDING)_
 - `Angular` version 21 is now supported within component testing. Addressed in [#33004](https://github.com/cypress-io/cypress/pull/33004).
 - Added intelligent timeout diagnostics that surface contextual suggestions when commands exceed their timeouts and introduced an async Vite dev-server plugin loader to avoid blocking startup. Addressed in [#33022](https://github.com/cypress-io/cypress/pull/33022).
 
+**Bugfixes:**
+
+- Fixed an issue where a EPIPE error shows up after CTRL+C is done in terminal. Fixes [#30659](https://github.com/cypress-io/cypress/issues/30659). Addressed in [#32873](https://github.com/cypress-io/cypress/pull/32873).
+
 ## 15.7.1
 
 _Released 12/4/2025 (PENDING)_
