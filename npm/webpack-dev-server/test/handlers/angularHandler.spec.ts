@@ -84,7 +84,7 @@ describe('angularHandler', { timeout: 60000 }, function () {
         browser: 'src/main.ts',
         tsConfig: 'tsconfig.app.json',
         assets: ['src/favicon.ico', 'src/assets'],
-        styles: ['src/styles.scss'],
+        styles: ['src/styles.css'],
         optimization: false,
         extractLicenses: false,
         sourceMap: true,

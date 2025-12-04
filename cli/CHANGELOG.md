@@ -6,6 +6,7 @@ _Released 12/16/2025 (PENDING)_
 **Features:**
 
 - `Angular` version 21 is now supported within component testing. Addressed in [#33004](https://github.com/cypress-io/cypress/pull/33004).
+- Adds zoneless support for `Angular` Component Testing through the `angular-zoneless` mount function. Addresses [#31504](https://github.com/cypress-io/cypress/issues/31504) and [#30070](https://github.com/cypress-io/cypress/issues/30070).
 
 **Bugfixes:**
 
