@@ -14,12 +14,14 @@ const debug = Debug('cypress:server:saved_state')
 const stateFiles: Record<string, typeof FileUtil> = {}
 
 export const formStatePath = async (projectRoot?: string): Promise<string> => {
-    debug('making saved state from %s', getCwd())
+  let resolvedPath = projectRoot
 
-    if (projectRoot) {
-      debug('for project path %s', projectRoot)
+  debug('making saved state from %s', getCwd())
 
-      projectRoot
+    if (resolvedPath) {
+      debug('for project path %s', resolvedPath)
+
+      return resolvedPath
     }
 
     debug('missing project path, looking for project here')
@@ -33,8 +35,7 @@ export const formStatePath = async (projectRoot?: string): Promise<string> => {
         projectRoot = getCwd()
       }
 
-      cypressConfigPath = getCwd('cypress.config.ts')
-
+    cypressConfigPath = getCwd('cypress.config.ts')
     found = await fsExtra.pathExists(cypressConfigPath)
       if (found) {
         debug('found cypress file %s', cypressConfigPath)
