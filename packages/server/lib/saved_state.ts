@@ -1,11 +1,11 @@
 import _ from 'lodash'
 import path from 'path'
 import Debug from 'debug'
-import Bluebird from 'bluebird'
 import appData from './util/app_data'
 import { getCwd } from './cwd'
 import { File as FileUtil } from './util/file'
 import { fs } from './util/fs'
+import fsExtra from 'fs-extra'
 import { AllowedState, allowedKeys } from '@packages/types'
 import { globalPubSub } from '@packages/data-context'
 import { logError } from '@packages/stderr-filtering'
@@ -15,7 +15,7 @@ const debug = Debug('cypress:server:saved_state')
 const stateFiles: Record<string, typeof FileUtil> = {}
 
 export const formStatePath = (projectRoot?: string) => {
-  return Bluebird.try(() => {
+  return Promise.try(() => {
     debug('making saved state from %s', getCwd())
 
     if (projectRoot) {
@@ -89,15 +89,15 @@ const normalizeAndAllowSet = (set, key, value) => {
 }
 
 interface SavedStateAPI {
-  get: () => Bluebird<AllowedState>
-  set: (stateToSet: AllowedState) => Bluebird<void>
+  get: () => Promise<AllowedState>
+  set: (stateToSet: AllowedState) => Promise<void>
 }
 
-export const create = (projectRoot?: string, isTextTerminal: boolean = false): Bluebird<SavedStateAPI> => {
+export const create = (projectRoot?: string, isTextTerminal: boolean = false): Promise<SavedStateAPI> => {
   if (isTextTerminal) {
     debug('noop saved state')
 
-    return Bluebird.resolve(FileUtil.noopFile)
+    return Promise.resolve(FileUtil.noopFile)
   }
 
   // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
