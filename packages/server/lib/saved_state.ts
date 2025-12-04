@@ -4,7 +4,6 @@ import Debug from 'debug'
 import appData from './util/app_data'
 import { getCwd } from './cwd'
 import { File as FileUtil } from './util/file'
-import { fs } from './util/fs'
 import fsExtra from 'fs-extra'
 import { AllowedState, allowedKeys } from '@packages/types'
 import { globalPubSub } from '@packages/data-context'
@@ -28,7 +27,7 @@ export const formStatePath = (projectRoot?: string) => {
 
     let cypressConfigPath = getCwd('cypress.config.js')
 
-    return fs.pathExistsAsync(cypressConfigPath)
+    return fsExtra.pathExists(cypressConfigPath)
     .then((found) => {
       if (found) {
         debug('found cypress file %s', cypressConfigPath)
@@ -39,7 +38,7 @@ export const formStatePath = (projectRoot?: string) => {
 
       cypressConfigPath = getCwd('cypress.config.ts')
 
-      return fs.pathExistsAsync(cypressConfigPath)
+      return fsExtra.pathExists(cypressConfigPath)
     })
     .then((found) => {
       if (found) {
