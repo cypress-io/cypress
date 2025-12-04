@@ -1,4 +1,13 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+
+## 15.7.2
+
+_Released 12/16/2025 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where the error message for `not.have.length` was not correctly displaying the expected length in the Command Log. Addressed in [#18927](https://github.com/cypress-io/cypress/issues/18927).
+
 ## 15.7.1
 
 _Released 12/2/2025 (PENDING)_
