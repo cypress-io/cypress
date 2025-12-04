@@ -8,6 +8,10 @@ _Released 12/16/2025 (PENDING)_
 - `Angular` version 21 is now supported within component testing. Addressed in [#33004](https://github.com/cypress-io/cypress/pull/33004).
 - Timeout diagnostics now surface actionable suggestions directly inside timeout error messages, helping you quickly resolve slow or hanging commands. Addressed in [#33023](https://github.com/cypress-io/cypress/pull/33023).
 
+**Bugfixes:**
+
+- Fixed an issue where a EPIPE error shows up after CTRL+C is done in terminal. Fixes [#30659](https://github.com/cypress-io/cypress/issues/30659). Addressed in [#32873](https://github.com/cypress-io/cypress/pull/32873).
+
 ## 15.7.1
 
 _Released 12/3/2025 (PENDING)_
