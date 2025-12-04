@@ -1,7 +1,6 @@
 import { ParentChildModule } from './components/parent-child.module'
 import { ParentComponent } from './components/parent.component'
 import { CounterComponent } from './components/counter.component'
-import { CounterService } from './components/counter.service'
 import { ChildComponent } from './components/child.component'
 import { WithDirectivesComponent } from './components/with-directives.component'
 import { ButtonOutputComponent } from './components/button-output.component'
@@ -10,8 +9,6 @@ import { EventEmitter, Component } from '@angular/core'
 import { ProjectionComponent } from './components/projection.component'
 import { ChildProvidersComponent } from './components/child-providers.component'
 import { ParentProvidersComponent } from './components/parent-providers.component'
-import { HttpClientModule } from '@angular/common/http'
-import { of } from 'rxjs'
 import { ChildProvidersService } from './components/child-providers.service'
 import { AnotherChildProvidersComponent } from './components/another-child-providers.component'
 import { TestBed } from '@angular/core/testing'
@@ -28,7 +25,7 @@ import { UrlImageComponent } from './components/url-image.component'
 })
 class WrapperComponent {}
 
-// Staring with Angular v19, standalone = true is the new default behavior.
+// Starting with Angular v19, standalone = true is the new default behavior.
 // This means that the ng module configurations, including test module configurations,
 // do not work by default with components. Cypress for non standalone components
 // injects the CommonModule by default and allows users to add module declarations.
@@ -58,7 +55,7 @@ describe('angular mount', () => {
   })
 
   it('accepts providers', () => {
-    cy.mount(CounterComponent, { providers: [CounterService] })
+    cy.mount(CounterComponent)
     cy.contains('button', 'Increment: 0').click().contains('Increment: 1')
   })
 
@@ -68,8 +65,9 @@ describe('angular mount', () => {
       return cy.contains('h1', 'Hello World from Spec').wrap(fixture)
     })
     .then((fixture) => {
-      fixture.componentInstance.msg = 'I just changed!'
-      fixture.detectChanges()
+      // NOTE: the correct way to set an input is to use the componentRef.setInput method so angular change detection runs properly.
+      // @see https://github.com/cypress-io/cypress/issues/32391 thread for more details.
+      fixture.componentRef.setInput('msg', 'I just changed!')
       cy.contains('h1', 'I just changed!')
     })
   })
@@ -202,7 +200,6 @@ describe('angular mount', () => {
     })
 
     cy.mount(ChildProvidersComponent, {
-      imports: [HttpClientModule],
       providers: [ChildProvidersService],
     })
 
@@ -219,7 +216,6 @@ describe('angular mount', () => {
 
     cy.mount(ParentProvidersComponent, {
       declarations: [ChildProvidersComponent, AnotherChildProvidersComponent],
-      imports: [HttpClientModule],
       providers: [ChildProvidersService],
     })
 
@@ -230,13 +226,12 @@ describe('angular mount', () => {
   it('can make test doubles for child components', () => {
     cy.mount(ParentProvidersComponent, {
       declarations: [ChildProvidersComponent, AnotherChildProvidersComponent],
-      imports: [HttpClientModule],
       providers: [
         {
           provide: ChildProvidersService,
           useValue: {
-            getMessage () {
-              return of('test')
+            async getMessage (): Promise<string> {
+              return 'test'
             },
           } as ChildProvidersService,
         },
@@ -256,7 +251,6 @@ describe('angular mount', () => {
     })
 
     cy.mount(AnotherChildProvidersComponent, {
-      imports: [HttpClientModule],
       providers: [ChildProvidersService],
     })
 
@@ -265,12 +259,12 @@ describe('angular mount', () => {
   })
 
   it('can use a test double for a component with a provider override', () => {
-    cy.mount(AnotherChildProvidersComponent, { imports: [HttpClientModule] })
+    cy.mount(AnotherChildProvidersComponent)
     TestBed.overrideComponent(AnotherChildProvidersComponent, { add: { providers: [{
       provide: ChildProvidersService,
       useValue: {
-        getMessage () {
-          return of('test')
+        async getMessage (): Promise<string> {
+          return 'test'
         },
       },
     }] } })
@@ -289,7 +283,6 @@ describe('angular mount', () => {
 
     cy.mount(ParentProvidersComponent, {
       declarations: [ChildProvidersComponent, AnotherChildProvidersComponent],
-      imports: [HttpClientModule],
       providers: [ChildProvidersService],
     })
 
@@ -300,15 +293,14 @@ describe('angular mount', () => {
   it('can use a test double for a child component with a provider override', () => {
     TestBed.overrideProvider(ChildProvidersService, {
       useValue: {
-        getMessage () {
-          return of('test')
+        async getMessage (): Promise<string> {
+          return 'test'
         },
       } as ChildProvidersService,
     })
 
     cy.mount(ParentProvidersComponent, {
       declarations: [ChildProvidersComponent, AnotherChildProvidersComponent],
-      imports: [HttpClientModule],
     })
 
     cy.get('button').contains('default another child message').click()

@@ -80,7 +80,7 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
   if (params.cacheable && (resp = getCachedResponse(params))) {
     debug('resolving with cached response for %o', { url: params.url })
 
-    return Bluebird.resolve(resp)
+    return Promise.resolve(resp)
   }
 
   _.defaults(params, {
