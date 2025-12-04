@@ -1,7 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.7.2
+## 15.8.0
 
-_Released 1/31/2026 (PENDING)_
+_Released 12/16/2025 (PENDING)_
+
+**Features:**
+
+- `Angular` version 21 is now supported within component testing. Addressed in [#33004](https://github.com/cypress-io/cypress/pull/33004).
 
 **Bugfixes:**
 
