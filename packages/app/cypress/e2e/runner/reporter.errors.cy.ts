@@ -204,7 +204,7 @@ describe('errors ui', {
 
     verify('spec Bluebird unhandled rejection', {
       uncaught: true,
-      column: 21,
+      column: 20,
       originalMessage: 'Unhandled promise rejection from the spec',
       message: [
         'The following error originated from your test code',
@@ -214,7 +214,7 @@ describe('errors ui', {
 
     verify('spec Bluebird unhandled rejection with done', {
       uncaught: true,
-      column: 21,
+      column: 20,
       originalMessage: 'Unhandled promise rejection from the spec',
       message: [
         'The following error originated from your test code',

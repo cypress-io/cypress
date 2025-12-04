@@ -1,3 +1,10 @@
+# [@cypress/schematic-v4.2.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v4.1.4...@cypress/schematic-v4.2.0) (2025-12-03)
+
+
+### Features
+
+* add support for Angular 21 ([#33004](https://github.com/cypress-io/cypress/issues/33004)) ([b1d85c9](https://github.com/cypress-io/cypress/commit/b1d85c9af17acde6305ec6dfa3800cc523f6abba))
+
 # [@cypress/schematic-v4.1.4](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v4.1.3...@cypress/schematic-v4.1.4) (2025-10-03)
 
 # [@cypress/schematic-v4.1.3](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v4.1.2...@cypress/schematic-v4.1.3) (2025-09-18)
