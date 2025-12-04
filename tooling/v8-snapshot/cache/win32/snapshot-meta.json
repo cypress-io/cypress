@@ -905,6 +905,7 @@
     "./packages/server/node_modules/readdirp/index.js",
     "./packages/server/node_modules/supports-color/index.js",
     "./packages/server/node_modules/tough-cookie/lib/cookie.js",
+    "./packages/server/node_modules/write-file-atomic/node_modules/signal-exit/dist/cjs/signals.js",
     "./packages/server/start-cypress.js",
     "./packages/server/v8-snapshot-entry.js",
     "./packages/socket/cjs/node/cdp-socket.js",
@@ -2341,6 +2342,7 @@
     "./node_modules/image-size/dist/types/tiff.js",
     "./node_modules/image-size/dist/types/webp.js",
     "./node_modules/image-size/dist/utils/bit-reader.js",
+    "./node_modules/imurmurhash/imurmurhash.js",
     "./node_modules/indent-string/index.js",
     "./node_modules/inflight/inflight.js",
     "./node_modules/inherits/inherits.js",
@@ -4046,6 +4048,7 @@
     "./packages/server/lib/cloud/cy-prompt/ensure_cy_prompt_bundle.ts",
     "./packages/server/lib/cloud/encryption.ts",
     "./packages/server/lib/cloud/environment.ts",
+    "./packages/server/lib/cloud/extract_atomic.ts",
     "./packages/server/lib/cloud/get_cloud_metadata.ts",
     "./packages/server/lib/cloud/machine_id.ts",
     "./packages/server/lib/cloud/network/fetch.ts",
@@ -4289,6 +4292,8 @@
     "./packages/server/node_modules/whatwg-url/lib/public-api.js",
     "./packages/server/node_modules/whatwg-url/lib/url-state-machine.js",
     "./packages/server/node_modules/whatwg-url/lib/utils.js",
+    "./packages/server/node_modules/write-file-atomic/lib/index.js",
+    "./packages/server/node_modules/write-file-atomic/node_modules/signal-exit/dist/cjs/index.js",
     "./packages/socket/cjs/node/index.js",
     "./packages/socket/cjs/utils.js",
     "./packages/socket/node_modules/engine.io-parser/lib/commons.js",
@@ -4356,5 +4361,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "9cf54f3378ace78bd207c7cceb59dc4ac1a6a23501841b57e8879fd7e25ca944"
+  "deferredHash": "f2333802e34cc593f494f3089f9df0d7174668cd5fe4b85d96d1725fe9b0f47b"
 }
