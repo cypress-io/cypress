@@ -263,7 +263,7 @@ If you do not disable these restrictions for the affected Ubuntu versions, then 
 
 Follow the instructions in [Using Python on Windows](https://docs.python.org/3/using/windows.html) to install the current [version of Python](https://www.python.org/downloads/) (`3.14`).
 
-Install the [Visual Studio Community 2022](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=Community) edition, selecting the `Desktop development with C++` workload.
+Install [Visual Studio 2022 Build Tools](https://aka.ms/vs/17/release/vs_buildtools.exe), selecting the `Desktop development with C++` workload.
 
 Refer to the `node-gyp` [Windows](https://github.com/nodejs/node-gyp/blob/main/README.md#on-windows) documentation section for a description of alternate ways of providing the `node-gyp` execution environment and for troubleshooting information.
 

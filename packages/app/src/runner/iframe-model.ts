@@ -153,7 +153,6 @@ export class IframeModel {
     this._showSnapshotVue(snapshots[0], snapshotProps)
   }
 
-  /// todo(lachlan): UNIFY-1318 - figure out shape of these two args
   _showSnapshotVue = (snapshot: any, snapshotProps: AutSnapshot) => {
     const snapshotStore = useSnapshotStore()
 

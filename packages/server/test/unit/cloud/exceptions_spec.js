@@ -1,5 +1,3 @@
-require('../../spec_helper')
-
 delete global.fs
 
 const api = require('../../../lib/cloud/api').default

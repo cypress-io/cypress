@@ -70,7 +70,7 @@ To ensure that we get the same results from our Studio AI calls every time, we s
 
 ```js
 const aiOutput = 'cy.get(\'button\').should(\'have.text\', \'Increment\')'
-cy.mockNodeCloudStreamingRequest({
+cy.mockNodeCloudRequest({
   url: '/studio/testgen/n69px6/generate',
   method: 'post',
   body: { recommendations: [{ content: aiOutput }] },

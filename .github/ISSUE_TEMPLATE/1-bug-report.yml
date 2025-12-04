@@ -5,14 +5,14 @@ body:
     attributes:
       value: |
         ## If you are a customer of Cypress Cloud please utilize our [Support Portal](https://www.cypress.io/support/) for our fastest support!
-        
-        ### Have a question? 👉 [Ask in chat](https://on.cypress.io/chat) or [start a new discussion](https://github.com/cypress-io/cypress/discussions).  
+
+        ### Have a question? 👉 [Ask in chat](https://on.cypress.io/chat) or [start a new discussion](https://github.com/cypress-io/cypress/discussions).
         Issues in the Cypress repo are reserved for bugs and feature requests only.  Questions on how to use Cypress will be closed.
   - type: textarea
     id: current-behavior
     attributes:
       label: Current behavior
-      description: Please provide a description including screenshots, stack traces, etc. [Troubleshooting tips](https://on.cypress.io/troubleshooting).
+      description: Please provide a description including screenshots, stack traces, etc. [Troubleshooting tips](https://docs.cypress.io/app/references/troubleshooting).
       placeholder: Currently...
     validations:
       required: true

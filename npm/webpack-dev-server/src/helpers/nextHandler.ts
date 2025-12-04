@@ -3,6 +3,7 @@ import Module from 'module'
 import type { Configuration } from 'webpack'
 import * as fs from 'fs'
 import * as path from 'path'
+import semver from 'semver'
 import type { PresetHandlerResult, WebpackDevServerConfig } from '../devServer'
 import { cypressWebpackPath, getMajorVersion, ModuleClass, SourcedDependency, SourcedWebpack, sourceFramework, sourceHtmlWebpackPlugin, sourceWebpackDevServer } from './sourceRelativeWebpackModules'
 
@@ -74,114 +75,41 @@ function getNextJsPackages (devServerConfig: WebpackDevServerConfig) {
 
 /**
  * Types for `getNextJsBaseWebpackConfig` based on version:
- * - v11.1.4
-  [
-    dir: string,
-    options: {
-      buildId: string
-      config: NextConfigComplete
-      dev?: boolean
-      isServer?: boolean
-      pagesDir: string
-      target?: string
-      reactProductionProfiling?: boolean
-      entrypoints: WebpackEntrypoints
-      rewrites: CustomRoutes['rewrites']
-      isDevFallback?: boolean
-      runWebpackSpan: Span
-    }
-  ]
-
- * - v12.0.0 = Same as v11.1.4
-
- * - v12.1.6
-  [
-    dir: string,
-    options: {
-      buildId: string
-      config: NextConfigComplete
-      compilerType: 'client' | 'server' | 'edge-server'
-      dev?: boolean
-      entrypoints: webpack5.EntryObject
-      hasReactRoot: boolean
-      isDevFallback?: boolean
-      pagesDir: string
-      reactProductionProfiling?: boolean
-      rewrites: CustomRoutes['rewrites']
-      runWebpackSpan: Span
-      target?: string
-    }
-  ]
-
- * - v13.0.0
-  [
-    dir: string,
-    options: {
-      buildId: string
-      config: NextConfigComplete
-      compilerType: CompilerNameValues
-      dev?: boolean
-      entrypoints: webpack.EntryObject
-      hasReactRoot: boolean
-      isDevFallback?: boolean
-      pagesDir?: string
-      reactProductionProfiling?: boolean
-      rewrites: CustomRoutes['rewrites']
-      runWebpackSpan: Span
-      target?: string
-      appDir?: string
-      middlewareMatchers?: MiddlewareMatcher[]
-    }
-  ]
-
- * - v13.0.1
-  [
-    dir: string,
-    options: {
-      buildId: string
-      config: NextConfigComplete
-      compilerType: CompilerNameValues
-      dev?: boolean
-      entrypoints: webpack.EntryObject
-      isDevFallback?: boolean
-      pagesDir?: string
-      reactProductionProfiling?: boolean
-      rewrites: CustomRoutes['rewrites']
-      runWebpackSpan: Span
-      target?: string
-      appDir?: string
-      middlewareMatchers?: MiddlewareMatcher[]
-    }
-  ]
-
- * - v13.2.1
+ * - v14.0.0, v15.0.0, and v16.0.0
   [
     dir: string,
     options:  {
-    buildId: string
-    config: NextConfigComplete
-    compilerType: CompilerNameValues
-    dev?: boolean
-    entrypoints: webpack.EntryObject
-    isDevFallback?: boolean
-    pagesDir?: string
-    reactProductionProfiling?: boolean
-    rewrites: CustomRoutes['rewrites']
-    runWebpackSpan: Span
-    target?: string
-    appDir?: string
-    middlewareMatchers?: MiddlewareMatcher[]
-    noMangling?: boolean
-    jsConfig: any
-    resolvedBaseUrl: string | undefined
-    supportedBrowsers: string[] | undefined
-    clientRouterFilters?: {
-        staticFilter: ReturnType<
-          import('../shared/lib/bloom-filter').BloomFilter['export']
-        >
-        dynamicFilter: ReturnType<
-          import('../shared/lib/bloom-filter').BloomFilter['export']
-        >
+      buildId: string
+      encryptionKey: string
+      config: NextConfigComplete
+      compilerType: CompilerNameValues
+      dev?: boolean
+      entrypoints: webpack.EntryObject
+      isDevFallback?: boolean
+      pagesDir?: string
+      reactProductionProfiling?: boolean
+      rewrites: CustomRoutes['rewrites']
+      originalRewrites?: CustomRoutes['rewrites']
+      originalRedirects?: CustomRoutes['redirects']
+      runWebpackSpan: Span
+      appDir?: string
+      middlewareMatchers?: ProxyMatcher[]
+      noMangling?: boolean
+      jsConfig: any
+      jsConfigPath?: string
+      resolvedBaseUrl: ResolvedBaseUrl
+      supportedBrowsers: string[] | undefined
+      clientRouterFilters?: {
+          staticFilter: ReturnType<
+            import('../shared/lib/bloom-filter').BloomFilter['export']
+          >
+          dynamicFilter: ReturnType<
+            import('../shared/lib/bloom-filter').BloomFilter['export']
+          >
+        }
+      fetchCacheKeyPrefix?: string
+      isCompileMode?: boolean
+      previewProps: NonNullable<(typeof NextBuildContext)['previewProps']>;
       }
     }
   ]
@@ -210,7 +138,7 @@ async function loadWebpackConfig (devServerConfig: WebpackDevServerConfig): Prom
       // Client webpack config for Next.js > 12.1.5
       compilerType: 'client',
       // Required for Next.js > 13
-      hasReactRoot: reactVersion === 18,
+      hasReactRoot: Boolean(reactVersion && reactVersion >= 18),
       // Required for Next.js > 13.2.0 to respect TS/JS config
       jsConfig: jsConfigResult.jsConfig,
       // Required for Next.js > 13.2.0 to respect tsconfig.compilerOptions.baseUrl
@@ -338,34 +266,23 @@ function sourceNextWebpack (devServerConfig: WebpackDevServerConfig, framework: 
     throw e
   }
 
-  // Next 11 allows the choice of webpack@4 or webpack@5, depending on the "webpack5" property in their next.config.js
-  // The webpackModule.init" for Next 11 returns a webpack@4 or webpack@4 compiler instance based on this boolean
-  let webpack5 = true
   const importPath = path.join(path.dirname(webpackJsonPath), 'webpack.js')
   const webpackModule = require(importPath)
 
-  try {
-    const nextConfig = require(path.resolve(devServerConfig.cypressConfig.projectRoot, 'next.config.js'))
-
-    debug('NextWebpack: next.config.js found - %o', nextConfig)
-
-    if (nextConfig.webpack5 === false) {
-      webpack5 = false
-    }
-  } catch (e) {
-    // No next.config.js, assume webpack 5
+  // If Next.js is 16 and greater, webpack.js runs the required code previously inside init() on require().
+  // init() no longer exists and has the same affect on import, so we don't/can't invoke it
+  if (semver.lt(framework.packageJson.version, '16.0.0')) {
+    // for next 15 and down, we need to initialize the webpack module
+    webpackModule.init(true)
   }
-
-  debug('NextWebpack: webpack5 - %s', webpack5)
-  webpackModule.init(webpack5)
 
   const packageJson = require(webpackJsonPath)
 
   webpack.importPath = importPath
   // The package.json of "next/dist/compiled/webpack/package.json" has no version so we supply the version for later use
-  webpack.packageJson = { ...packageJson, version: webpack5 ? '5' : '4' }
+  webpack.packageJson = { ...packageJson, version: '5' }
   webpack.module = webpackModule.webpack
-  webpack.majorVersion = getMajorVersion(webpack.packageJson, [4, 5])
+  webpack.majorVersion = getMajorVersion(webpack.packageJson, [5])
 
   debug('NextWebpack: Successfully loaded NextWebpack - %o', webpack)
 

@@ -1,20 +1,19 @@
-import { Component } from '@angular/core'
+import { Component, signal } from '@angular/core'
 import { ChildProvidersService } from './child-providers.service'
-import { take } from 'rxjs/operators'
 
 @Component({
   selector: 'app-child-providers',
   standalone: false,
-  template: `<button (click)="handleClick()">{{ message }}</button>`,
+  template: `<button (click)="handleClick()">{{ message() }}</button>`,
 })
 export class ChildProvidersComponent {
-  message = 'default message'
+  message = signal('default message')
 
   constructor (private readonly service: ChildProvidersService) {}
 
-  handleClick (): void {
-    this.service.getMessage().pipe(
-      take(1),
-    ).subscribe((message) => this.message = message)
+  async handleClick (): Promise<void> {
+    const message = await this.service.getMessage()
+
+    this.message.set(message)
   }
 }
