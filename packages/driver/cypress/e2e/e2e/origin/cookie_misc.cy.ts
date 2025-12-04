@@ -39,29 +39,8 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
   })
 
   it('cookies are not set for XHR sync requests', { browser: '!webkit' }, () => {
-    cy.intercept('http://www.foobar.com:3500/', {
-      body: `
-        <!DOCTYPE html>
-        <html>
-        <body>
-          <div id="response"></div>
-          <script>
-            let xhr = new window.XMLHttpRequest()
-            xhr.open('GET', '/fixtures/valid.json', false)
-            xhr.send()
-            document.querySelector('#response').innerHTML = JSON.stringify(JSON.parse(xhr.responseText))
-
-            let xhr2 = new window.XMLHttpRequest()
-            xhr2.open('GET', '/async', true)
-            xhr2.send()
-          </script>
-        </body>
-        </html>
-      `,
-    })
-
     // this intercept won't get hit because the request is sync
-    cy.intercept('http://www.foobar.com:3500/fixtures/valid.json', (req) => {
+    cy.intercept('http://www.foobar.com:3500/set-cookie*', (req) => {
       req.reply({
         headers: {
           'set-cookie': 'SYNC_COOKIE=sync',
@@ -80,17 +59,37 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
     cy.visit('http://localhost:3500/fixtures/empty.html')
     cy.origin('http://www.foobar.com:3500', () => {
       cy.visit('http://www.foobar.com:3500/')
-      cy.get('#response').should('contain', '{"foo":1,"bar":{"baz":"cypress"}}')
+      cy.window().then((win) => {
+        const xhr = new win.XMLHttpRequest()
+
+        xhr.open('GET', '/set-cookie?cookie=foo=bar', false)
+        xhr.send()
+
+        const xhr2 = new win.XMLHttpRequest()
+
+        xhr2.open('GET', '/async', true)
+        xhr2.send()
+      })
     })
 
     // cy.getAllCookies does not wait for the cookies to be set, so we need to wait manually
     cy.wait(500)
 
-    // only the async cookie will be set
+    // only the ASYNC_COOKIE=async cookie will be set
+    // SYNC_COOKIE=sync is not set because the intercept is not hit
+    // foo=bar is not set because the request is sync and we are not able to sync the cookie with the automation
     cy.getAllCookies().then((cookies) => {
       expect(cookies).to.have.length(1)
-      expect(cookies[0].name).to.eq('ASYNC_COOKIE')
-      expect(cookies[0].value).to.eq('async')
+      expect(cookies[0]).to.deep.equal({
+        name: 'ASYNC_COOKIE',
+        value: 'async',
+        domain: 'www.foobar.com',
+        path: '/',
+        httpOnly: false,
+        hostOnly: true,
+        secure: false,
+        sameSite: 'lax',
+      })
     })
 
     cy.wait('@async')
