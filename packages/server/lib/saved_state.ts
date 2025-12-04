@@ -13,42 +13,34 @@ const debug = Debug('cypress:server:saved_state')
 
 const stateFiles: Record<string, typeof FileUtil> = {}
 
-export const formStatePath = (projectRoot?: string) => {
-  return Promise.try(() => {
+export const formStatePath = async (projectRoot?: string): Promise<string> => {
     debug('making saved state from %s', getCwd())
 
     if (projectRoot) {
       debug('for project path %s', projectRoot)
 
-      return projectRoot
+      projectRoot
     }
 
     debug('missing project path, looking for project here')
 
     let cypressConfigPath = getCwd('cypress.config.js')
 
-    return fsExtra.pathExists(cypressConfigPath)
-    .then((found) => {
-      if (found) {
-        debug('found cypress file %s', cypressConfigPath)
-        projectRoot = getCwd()
+    let found = await fsExtra.pathExists(cypressConfigPath)
 
-        return
+    if (found) {
+      debug('found cypress file %s', cypressConfigPath)
+        projectRoot = getCwd()
       }
 
       cypressConfigPath = getCwd('cypress.config.ts')
 
-      return fsExtra.pathExists(cypressConfigPath)
-    })
-    .then((found) => {
+    found = await fsExtra.pathExists(cypressConfigPath)
       if (found) {
         debug('found cypress file %s', cypressConfigPath)
         projectRoot = getCwd()
       }
 
-      return projectRoot
-    })
-  }).then((projectRoot) => {
     const fileName = 'state.json'
 
     if (projectRoot) {
@@ -60,7 +52,6 @@ export const formStatePath = (projectRoot?: string) => {
     debug('state path for global mode')
 
     return path.join('__global__', fileName)
-  })
 }
 
 const normalizeAndAllowSet = (set, key, value) => {
