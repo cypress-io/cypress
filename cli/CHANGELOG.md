@@ -9,6 +9,7 @@ _Released 12/16/2025 (PENDING)_
 
 **Bugfixes:**
 
+- Fixed an issue where a EPIPE error shows up after CTRL+C is done in terminal. Fixes [#30659](https://github.com/cypress-io/cypress/issues/30659). Addressed in [#32873](https://github.com/cypress-io/cypress/pull/32873).
 - Fixed an issue where the browser would freeze when Cypress intercepts a synchronous XHR request and a `routeHandler` is used. Fixes [#32874](https://github.com/cypress-io/cypress/issues/32874). Addressed in [#32925](https://github.com/cypress-io/cypress/pull/32925).
 
 ## 15.7.1

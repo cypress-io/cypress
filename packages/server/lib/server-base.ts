@@ -662,7 +662,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // bail early we dont have a server or we're not
     // currently listening
     if (!this._server || !this.isListening) {
-      return Bluebird.resolve(true)
+      return Promise.resolve(true)
     }
 
     this.reset()
