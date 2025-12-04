@@ -81,23 +81,23 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
       const asyncCookie = {
         name: 'ASYNC_COOKIE',
         value: 'async',
-        domain: 'www.foobar.com',
         path: '/',
-        httpOnly: false,
-        hostOnly: true,
         secure: false,
-        sameSite: isFirefox ? 'no_restriction' : 'lax',
+        hostOnly: true,
+        httpOnly: false,
+        domain: 'www.foobar.com',
+        sameSite: isFirefox ? 'unspecified' : 'lax',
       }
 
       const fooBarCookie = {
         name: 'foo',
         value: 'bar',
-        domain: 'www.foobar.com',
         path: '/',
-        httpOnly: false,
-        hostOnly: true,
         secure: false,
-        sameSite: isFirefox ? 'no_restriction' : 'lax',
+        hostOnly: true,
+        httpOnly: false,
+        domain: 'www.foobar.com',
+        sameSite: isFirefox ? 'unspecified' : 'lax',
       }
 
       if (isFirefox) {
