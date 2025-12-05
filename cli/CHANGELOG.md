@@ -7,6 +7,7 @@ _Released 12/16/2025 (PENDING)_
 
 - `Angular` version 21 is now supported within component testing. Addressed in [#33004](https://github.com/cypress-io/cypress/pull/33004).
 - Adds zoneless support for `Angular` Component Testing through the `angular-zoneless` mount function. Addresses [#31504](https://github.com/cypress-io/cypress/issues/31504) and [#30070](https://github.com/cypress-io/cypress/issues/30070).
+- After receiving feedback on its usefulness, the Selector Playground is now available for all users in open mode. When opened, the playground automatically enables interactive mode to help you build and test selectors directly in your application. Addresses [#32672](https://github.com/cypress-io/cypress/issues/32672). Addressed in [#33073](https://github.com/cypress-io/cypress/pull/33073).
 
 **Bugfixes:**
 
