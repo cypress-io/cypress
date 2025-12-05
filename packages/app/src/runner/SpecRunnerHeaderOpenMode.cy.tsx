@@ -6,7 +6,7 @@ import { createEventManager, createTestAutIframe } from '../../cypress/component
 import { ExternalLink_OpenExternalDocument } from '@packages/frontend-shared/src/generated/graphql'
 import { cyGeneralGlobeX16 } from '@cypress-design/icon-registry'
 
-function renderWithGql (gqlVal: SpecRunnerHeaderFragment, shouldShowStudioButton = false, studioBetaAvailable = false) {
+function renderWithGql (gqlVal: SpecRunnerHeaderFragment, shouldShowStudioButton = false) {
   const eventManager = createEventManager()
   const autIframe = createTestAutIframe()
 
@@ -18,7 +18,6 @@ function renderWithGql (gqlVal: SpecRunnerHeaderFragment, shouldShowStudioButton
     eventManager={eventManager}
     getAutIframe={() => autIframe}
     shouldShowStudioButton={shouldShowStudioButton}
-    studioBetaAvailable={studioBetaAvailable}
   />)
 }
 
@@ -78,14 +77,14 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
       cy.get('[data-cy="playground-activator"]').should('be.disabled')
     })
 
-    it('is hidden when studio beta is available', () => {
+    it('is visible when studio beta is available', () => {
       cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
         render: (gqlVal) => {
-          return renderWithGql(gqlVal, true, true)
+          return renderWithGql(gqlVal, true)
         },
       })
 
-      cy.get('[data-cy="playground-activator"]').should('not.exist')
+      cy.get('[data-cy="playground-activator"]').should('be.visible')
     })
 
     it('opens and closes selector playground', () => {

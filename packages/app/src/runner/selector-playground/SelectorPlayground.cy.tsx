@@ -30,18 +30,20 @@ describe('SelectorPlayground', () => {
     cy.get('[data-cy="playground-selector"]').should('have.value', 'body')
   })
 
-  it('toggles enabled', () => {
+  it('is enabled when playground is open', () => {
     const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
-    expect(selectorPlaygroundStore.isEnabled).to.be.false
+    // Reset to disabled state before mounting
+    selectorPlaygroundStore.setEnabled(false)
 
     const { autIframe } = mountSelectorPlayground()
 
     cy.spy(autIframe, 'toggleSelectorPlayground')
 
-    cy.get('[data-cy="playground-toggle"]').click().then(() => {
+    // When the playground component is mounted (visible), it should automatically be enabled
+    cy.then(() => {
       expect(selectorPlaygroundStore.isEnabled).to.be.true
-      expect(autIframe.toggleSelectorPlayground).to.have.been.called
+      expect(autIframe.toggleSelectorPlayground).to.have.been.calledWith(true)
     })
   })
 

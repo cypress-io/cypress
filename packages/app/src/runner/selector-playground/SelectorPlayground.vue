@@ -1,24 +1,8 @@
 <template>
   <div
     id="selector-playground"
-    class="border-t border-b bg-gray-1000 border-gray-800 h-[56px] grid py-[12px] px-[16px] gap-[12px] grid-cols-[40px,1fr,auto] items-center "
+    class="border-t border-b bg-gray-1000 border-gray-800 h-[56px] grid py-[12px] px-[16px] gap-[12px] grid-cols-[1fr,auto] items-center "
   >
-    <SelectorPlaygroundTooltip
-      color="light"
-      placement="top"
-      :hover-text="t('runner.selectorPlayground.playgroundTooltip')"
-      class="flex h-full"
-    >
-      <button
-        class="border rounded-md flex h-full outline-solid outline-indigo-500 transition w-[40px] duration-150 items-center justify-center hover:bg-gray-800"
-        :aria-label="selectorPlaygroundStore.isEnabled ? 'click to interact with the application and build test cases' : 'click to exit interactive test building mode'"
-        data-cy="playground-toggle"
-        :class="{ 'bg-gray-800 border-gray-700': selectorPlaygroundStore.isEnabled, 'bg-gray-900 border-gray-800': !selectorPlaygroundStore.isEnabled }"
-        @click="toggleEnabled"
-      >
-        <i-cy-selector_x16 class="icon-dark-gray-300" />
-      </button>
-    </SelectorPlaygroundTooltip>
     <div
       class="flex h-full flex-1 w-full relative items-center"
       @mouseover="setShowingHighlight"
@@ -136,7 +120,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
 import { useSelectorPlaygroundStore } from '../../store/selector-playground-store'
 import type { AutIframe } from '../aut-iframe'
 import type { EventManager } from '../event-manager'
@@ -181,6 +165,14 @@ const leftOffsetForClosingParens = computed(() => {
   return leftOfInputText.value + selector.value.length
 })
 
+// Ensure the playground is always enabled when it's open (visible)
+onMounted(() => {
+  if (!selectorPlaygroundStore.isEnabled) {
+    selectorPlaygroundStore.setEnabled(true)
+    props.getAutIframe().toggleSelectorPlayground(true)
+  }
+})
+
 watch(() => selectorPlaygroundStore.method, () => {
   props.getAutIframe().toggleSelectorHighlight(true)
 })
@@ -207,14 +199,6 @@ const selector = computed({
 function setShowingHighlight () {
   selectorPlaygroundStore.setShowingHighlight(true)
   props.getAutIframe().toggleSelectorHighlight(true)
-}
-
-function toggleEnabled () {
-  const newVal = !selectorPlaygroundStore.isEnabled
-
-  selectorPlaygroundStore.setEnabled(newVal)
-
-  props.getAutIframe().toggleSelectorPlayground(newVal)
 }
 
 function printSelected () {
