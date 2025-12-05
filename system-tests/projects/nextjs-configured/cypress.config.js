@@ -1,8 +1,6 @@
 import { defineConfig } from 'cypress'
 import path from 'path'
 
-console.log(path.resolve(__dirname, './node_modules/react'))
-
 export default defineConfig({
   fixturesFolder: false,
   component: {
