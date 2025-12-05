@@ -15,8 +15,14 @@ const onServer = function (app) {
     })
   })
 
-  return app.post('/html', (req, res) => {
+  app.post('/html', (req, res) => {
     return res.json({ content: '<html>content</html>' })
+  })
+
+  app.get('/json', (req, res) => {
+    res.setHeader('Set-Cookie', 'foo=bar')
+
+    return res.json({ content: 'json' })
   })
 }
 
@@ -25,6 +31,12 @@ describe('e2e xhr', () => {
     servers: {
       port: 1919,
       onServer,
+    },
+    settings: {
+      hosts: {
+        '*.foobar.com': '127.0.0.1',
+      },
+      e2e: {},
     },
   })
 

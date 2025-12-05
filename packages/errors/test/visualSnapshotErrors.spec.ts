@@ -1121,5 +1121,20 @@ describe('visual error templates', () => {
         default: [],
       }
     },
+    SYNCHRONOUS_XHR_REQUEST_NOT_INTERCEPTED: () => {
+      return {
+        default: ['http://localhost:8080'],
+      }
+    },
+    SYNCHRONOUS_XHR_REQUEST_COOKIES_NOT_APPLIED: () => {
+      return {
+        default: ['http://localhost:8080'],
+      }
+    },
+    SYNCHRONOUS_XHR_REQUEST_COOKIES_NOT_SET: () => {
+      return {
+        default: ['http://localhost:8080'],
+      }
+    },
   })
 })
