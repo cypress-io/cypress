@@ -92,16 +92,6 @@ export async function html (html: string, opts: SecurityOpts & InjectionOpts) {
     html = await Promise.resolve(getRewriter(opts.useAstSourceRewriting).strip(html, opts))
   }
 
-  if (!htmlToInject) {
-    return html
-  }
-
-  const doctypeMatch = html.match(doctypeRe)
-
-  if (doctypeMatch) {
-    return insertAfter(html, doctypeMatch, htmlToInject)
-  }
-
   return htmlHelper(html, htmlToInject)
 }
 
