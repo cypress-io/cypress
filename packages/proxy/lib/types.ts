@@ -28,6 +28,7 @@ export type CypressIncomingRequest = Request & {
    * Stack-ordered list of `cy.intercept()`s matching this request.
    */
   matchingRoutes?: BackendRoute[]
+  isSyncRequest: boolean
 }
 
 export type RequestCredentialLevel = 'same-origin' | 'include' | 'omit' | boolean
