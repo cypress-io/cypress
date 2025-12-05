@@ -36,9 +36,12 @@ describe('SelectorPlayground', () => {
     // Reset to disabled state before mounting
     selectorPlaygroundStore.setEnabled(false)
 
-    const { autIframe } = mountSelectorPlayground()
+    // Create autIframe and set up spy BEFORE mounting, since onMounted will call toggleSelectorPlayground
+    const autIframe = createTestAutIframe()
 
     cy.spy(autIframe, 'toggleSelectorPlayground')
+
+    mountSelectorPlayground(createEventManager(), autIframe)
 
     // When the playground component is mounted (visible), it should automatically be enabled
     cy.then(() => {
