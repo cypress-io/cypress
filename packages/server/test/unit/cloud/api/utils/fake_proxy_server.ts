@@ -27,6 +27,9 @@ app.get('/error', (req, res) => {
 })
 
 let ca: CA
+let caPromise: Promise<CA> | null = null
+// Cache certificate generation promises per hostname to prevent parallel writes
+const certPromises: Map<string, Promise<{ cert: string, key: string }>> = new Map()
 
 interface DestroyableProxyOptions {
   keepRequests?: boolean
@@ -139,10 +142,27 @@ export async function fakeProxy (opts: FakeProxyOptions) {
 }
 
 async function getHttpsOptions () {
-  ca = await CA.create()
-  const [cert, key] = await ca.generateServerCertificateKeys('localhost')
+  // Ensure CA is only created once, even if called in parallel
+  if (!caPromise) {
+    caPromise = CA.create().then((createdCa) => {
+      ca = createdCa
 
-  return { cert, key }
+      return createdCa
+    })
+  }
+
+  const currentCa = await caPromise
+  const hostname = 'localhost'
+
+  // Serialize certificate generation for the same hostname to prevent file corruption
+  // when multiple HTTPS servers are created in parallel
+  if (!certPromises.has(hostname)) {
+    certPromises.set(hostname, currentCa.generateServerCertificateKeys(hostname).then(([cert, key]) => {
+      return { cert, key }
+    }))
+  }
+
+  return certPromises.get(hostname)!
 }
 
 export function getCA () {

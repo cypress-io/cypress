@@ -124,7 +124,7 @@ describe('lib/open_project', () => {
       it('executes after:spec on browser close if in interactive mode', function () {
         this.config.experimentalInteractiveRunEvents = true
         this.config.isTextTerminal = false
-        const onBrowserClose = () => Bluebird.resolve()
+        const onBrowserClose = () => Promise.resolve()
 
         return openProject.launch(this.browser, this.spec, { onBrowserClose })
         .then(() => {
@@ -138,7 +138,7 @@ describe('lib/open_project', () => {
       it('does not execute after:spec on browser close if not in interactive mode', function () {
         this.config.experimentalInteractiveRunEvents = true
         this.config.isTextTerminal = true
-        const onBrowserClose = () => Bluebird.resolve()
+        const onBrowserClose = () => Promise.resolve()
 
         return openProject.launch(this.browser, this.spec, { onBrowserClose })
         .then(() => {
@@ -152,7 +152,7 @@ describe('lib/open_project', () => {
       it('does not execute after:spec on browser close if experimental flag is not enabled', function () {
         this.config.experimentalInteractiveRunEvents = false
         this.config.isTextTerminal = false
-        const onBrowserClose = () => Bluebird.resolve()
+        const onBrowserClose = () => Promise.resolve()
 
         return openProject.launch(this.browser, this.spec, { onBrowserClose })
         .then(() => {
@@ -166,7 +166,7 @@ describe('lib/open_project', () => {
       it('does not execute after:spec on browser close if the project is no longer open', function () {
         this.config.experimentalInteractiveRunEvents = true
         this.config.isTextTerminal = false
-        const onBrowserClose = () => Bluebird.resolve()
+        const onBrowserClose = () => Promise.resolve()
 
         return openProject.launch(this.browser, this.spec, { onBrowserClose })
         .then(() => {

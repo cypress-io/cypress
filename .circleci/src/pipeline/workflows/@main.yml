@@ -4,7 +4,7 @@ linux-x64:
       - equal: [ develop, << pipeline.git.branch >> ]
       # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-      - equal: [ 'feat/support_angular_21', << pipeline.git.branch >> ]
+      - equal: [ 'feat/add_zoneless_angular_harness', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
@@ -236,6 +236,9 @@ linux-x64:
     - npm-angular:
         requires:
           - build
+    - npm-angular-zoneless:
+        requires:
+          - build
     - npm-mount-utils:
         requires:
           - build
@@ -258,6 +261,7 @@ linux-x64:
           - check-ts
           - health-check
           - npm-angular
+          - npm-angular-zoneless
           - npm-eslint-plugin-dev
           - npm-puppeteer-unit-tests
           - npm-puppeteer-cypress-tests
