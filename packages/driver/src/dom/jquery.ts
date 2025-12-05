@@ -2,7 +2,7 @@ import $ from 'jquery'
 import _ from 'lodash'
 
 // wrap the object in jquery
-export const wrap = <T extends HTMLElement | Window | Document>(obj: T): JQuery<T> => {
+export function wrap (obj) {
   return $(obj)
 }
 
