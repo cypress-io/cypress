@@ -130,11 +130,12 @@ export function fastIsHidden (subject: JQuery<HTMLElement> | HTMLElement, option
     }
   }
 
+  // contentVisibilityAuto is a valid browser API but not yet in TypeScript's CheckVisibilityOptions
   if (!subject.checkVisibility({
     contentVisibilityAuto: true,
     opacityProperty: options.checkOpacity,
     visibilityProperty: true,
-  })) {
+  } as CheckVisibilityOptions)) {
     return true
   }
 
