@@ -37,8 +37,16 @@ describe('http/util/rewriter', () => {
       expect(htmlHelper('<?xml version="1.0" encoding="iso-8859-1"?><!DOCTYPE html>HTML', injected)).toEqual(`<?xml version="1.0" encoding="iso-8859-1"?><!DOCTYPE html> ${injected}HTML`)
     })
 
-    it('XML declaration before DOCTYPE with comments', () => {
+    it('comments before and after XML declaration that happens before DOCTYPE', () => {
       expect(htmlHelper('<!-- Comment 1 --><?xml version="1.0" encoding="iso-8859-1"?><!-- Comment 2 --><!DOCTYPE html>HTML', injected)).toEqual(`<!-- Comment 1 --><?xml version="1.0" encoding="iso-8859-1"?><!-- Comment 2 --><!DOCTYPE html> ${injected}HTML`)
+    })
+
+    it('comment before XML declaration that happens before DOCTYPE', () => {
+      expect(htmlHelper('<!-- Comment --><?xml ...?><!DOCTYPE html>HTML', injected)).toEqual(`<!-- Comment --><?xml ...?><!DOCTYPE html> ${injected}HTML`)
+    })
+
+    it('comment after XML declaration but before DOCTYPE', () => {
+      expect(htmlHelper('<?xml ...?><!-- Comment --><!DOCTYPE html>HTML', injected)).toEqual(`<?xml ...?><!-- Comment --><!DOCTYPE html> ${injected}HTML`)
     })
   })
 })
