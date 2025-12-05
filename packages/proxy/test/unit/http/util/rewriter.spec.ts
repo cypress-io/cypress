@@ -24,5 +24,13 @@ describe('http/util/rewriter', () => {
     it('commented DOCTYPE tag and HTML text', () => {
       expect(htmlHelper('<!-- <!DOCTYPE html> -->HTML', injected)).toEqual(`${injected} <!-- <!DOCTYPE html> -->HTML`)
     })
+
+    it('comment and DOCTYPE tag with HTML text', () => {
+      expect(htmlHelper('<!-- Comment --><!DOCTYPE html>HTML', injected)).toEqual(`<!-- Comment --><!DOCTYPE html> ${injected}HTML`)
+    })
+
+    it('commented DOCTYPE tag and DOCTYPE tag with HTML text', () => {
+      expect(htmlHelper('<!-- <!DOCTYPE foo> --><!DOCTYPE html>HTML', injected)).toEqual(`<!-- <!DOCTYPE foo> --><!DOCTYPE html> ${injected}HTML`)
+    })
   })
 })
