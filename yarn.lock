@@ -9139,10 +9139,10 @@
   dependencies:
     source-map "^0.6.1"
 
-"@types/underscore.string@0.0.38":
-  version "0.0.38"
-  resolved "https://registry.yarnpkg.com/@types/underscore.string/-/underscore.string-0.0.38.tgz#4081755f005f5691fb7fbd4eff3aabe6066a6c63"
-  integrity sha512-QPMttDInBYkulH/3nON0KnYpEd/RlyE5kUrhuts5d76B/stpjXpDticq+iTluoAsVnVXuGECFhPtuX+aDJdx+A==
+"@types/underscore.string@0.0.42":
+  version "0.0.42"
+  resolved "https://registry.yarnpkg.com/@types/underscore.string/-/underscore.string-0.0.42.tgz#aab74808623f3f765ca0cd1deabf8fcd4840d443"
+  integrity sha512-BvTLC6msS2whJkRbom5aDdXPH3E4P6t/DO0ngAHKdSk3S3I9eZZFW/inpXZIL6+GCJvD0796n1N5SUQr+BT5KA==
   dependencies:
     "@types/underscore" "*"
 
