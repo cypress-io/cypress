@@ -293,34 +293,33 @@ export async function setSupportFileAndFolder (obj: Config, getFilesByGlob: any)
   }
 
   // TODO move this logic to find support file into util/path_helpers
-  const sf: string = supportFilesByGlob[0]!
+  const originalSupportFilePath: string = supportFilesByGlob[0]!
 
-  debug(`setting support file ${sf}`)
-  debug(`for project root ${obj.projectRoot}`)
+  debug('setting support file %s for project root %s', originalSupportFilePath, obj.projectRoot)
 
-  let resolved
+  let resolvedPath: string
 
-  // Bluebird.try() equivalent
   try {
-    resolved = resolveModule(sf)
-  } catch (err: any) {
-    // Bluebird.catch({ code: "MODULE_NOT_FOUND" })
-    if (err.code === 'MODULE_NOT_FOUND') {
-      debug('support JS module %s does not load', sf)
+    resolvedPath = resolveModule(originalSupportFilePath)
+  } catch (err: unknown) {
+    const error = err as NodeJS.ErrnoException
 
-      const result = await discoverModuleFile({
-        filename: sf,
+    if (error.code === 'MODULE_NOT_FOUND') {
+      debug('support JS module %s does not load', originalSupportFilePath)
+
+      const discoveredPath = await discoverModuleFile({
+        filename: originalSupportFilePath,
         projectRoot: obj.projectRoot,
       })
 
-      if (result === null) {
-        return errors.throwErr('SUPPORT_FILE_NOT_FOUND', relativeToProjectRoot(obj.projectRoot, sf))
+      if (discoveredPath === null) {
+        return errors.throwErr('SUPPORT_FILE_NOT_FOUND', relativeToProjectRoot(obj.projectRoot, originalSupportFilePath))
       }
 
-      debug('setting support file to %o', { result })
-      obj.supportFile = result
+      debug('setting support file to %o', { discoveredPath })
+      obj.supportFile = discoveredPath
       obj.supportFolder = path.dirname(obj.supportFile)
-      debug(`set support folder ${obj.supportFolder}`)
+      debug('set support folder %s', obj.supportFolder)
 
       return obj
     }
@@ -328,34 +327,28 @@ export async function setSupportFileAndFolder (obj: Config, getFilesByGlob: any)
     throw err
   }
 
-  // original .then() chain continues here
-
-  obj.supportFile = resolved
+  obj.supportFile = resolvedPath
   debug('resolved support file %s', obj.supportFile)
 
-  if (checkIfResolveChangedRootFolder(obj.supportFile, sf)) {
-    debug('require.resolve switched support folder from %s to %s', sf, obj.supportFile)
-    // this means the path was probably symlinked, like
-    // /tmp/foo -> /private/tmp/foo
-    // which can confuse the rest of the code
-    // switch it back to "normal" file
-    const supportFileName = path.basename(obj.supportFile)
-    const base = sf?.endsWith(supportFileName) ? path.dirname(sf) : sf
+  // Handle symlink resolution: require.resolve may follow symlinks (e.g., /tmp/foo -> /private/tmp/foo on macOS)
+  // which can confuse the rest of the code. Switch back to the original path if it changed.
+  if (checkIfResolveChangedRootFolder(obj.supportFile, originalSupportFilePath)) {
+    debug('require.resolve switched support folder from %s to %s', originalSupportFilePath, obj.supportFile)
 
-    obj.supportFile = path.join(base || '', supportFileName)
+    const correctedPath = correctSymlinkedPath(obj.supportFile, originalSupportFilePath)
 
-    const found = await fs.pathExists(obj.supportFile)
+    const found = await fs.pathExists(correctedPath)
 
     if (!found) {
-      errors.throwErr('SUPPORT_FILE_NOT_FOUND', relativeToProjectRoot(obj.projectRoot, obj.supportFile))
+      errors.throwErr('SUPPORT_FILE_NOT_FOUND', relativeToProjectRoot(obj.projectRoot, correctedPath))
     }
 
-    debug('switching to found file %s', obj.supportFile)
+    obj.supportFile = correctedPath
+    debug('switched to corrected file path %s', obj.supportFile)
   }
 
-  // final then() equivalent
   obj.supportFolder = path.dirname(obj.supportFile)
-  debug(`set support folder ${obj.supportFolder}`)
+  debug('set support folder %s', obj.supportFolder)
 
   return obj
 }
@@ -524,4 +517,14 @@ export const checkIfResolveChangedRootFolder = (resolved: string, initial: strin
   return path.isAbsolute(resolved) &&
   path.isAbsolute(initial) &&
   !resolved.startsWith(initial)
+}
+
+export function correctSymlinkedPath (resolvedPath: string, originalPath: string): string {
+  const fileName = path.basename(resolvedPath)
+
+  // If the original path ends with the filename, use its directory
+  // Otherwise, use the original path as-is (it might be a directory)
+  const basePath = originalPath.endsWith(fileName) ? path.dirname(originalPath) : originalPath
+
+  return path.join(basePath, fileName)
 }
