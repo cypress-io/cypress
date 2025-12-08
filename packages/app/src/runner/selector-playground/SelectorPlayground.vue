@@ -120,7 +120,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch, onMounted } from 'vue'
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import { useSelectorPlaygroundStore } from '../../store/selector-playground-store'
 import type { AutIframe } from '../aut-iframe'
 import type { EventManager } from '../event-manager'
@@ -172,6 +172,16 @@ onMounted(() => {
     props.getAutIframe().toggleSelectorPlayground(true)
     selectorPlaygroundStore.setShowingHighlight(true)
     props.getAutIframe().toggleSelectorHighlight(true)
+  }
+})
+
+// Defensive cleanup in case component is unmounted without going through togglePlayground
+onUnmounted(() => {
+  if (selectorPlaygroundStore.isEnabled) {
+    props.getAutIframe().toggleSelectorPlayground(false)
+    selectorPlaygroundStore.setEnabled(false)
+    selectorPlaygroundStore.setShowingHighlight(false)
+    props.getAutIframe().toggleSelectorHighlight(false)
   }
 })
 
