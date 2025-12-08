@@ -347,7 +347,7 @@ chai.use((chai, u) => {
             return this.assert(
               obj.length === length,
               `expected '${node}' to have a length of \#{exp} but got \#{act}`,
-              `expected '${node}' to not have a length of \#{act}`,
+              `expected '${node}' to not have a length of \#{exp}`,
               length,
               obj.length,
             )
