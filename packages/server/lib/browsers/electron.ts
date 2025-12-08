@@ -12,7 +12,7 @@ import type { Browser, BrowserInstance, GracefulShutdownOptions } from './types'
 // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
 import type { BrowserWindow } from 'electron'
 import type { Automation } from '../automation'
-import type { BrowserLaunchOpts, Preferences, ProtocolManagerShape, CyPromptManagerShape, RunModeVideoApi } from '@packages/types'
+import type { BrowserLaunchOpts, Preferences, ProtocolManagerShape, CyPromptManagerShape, StudioManagerShape, RunModeVideoApi } from '@packages/types'
 import type { CDPSocketServer } from '@packages/socket'
 import memory from './memory'
 import { BrowserCriClient } from './browser-cri-client'
@@ -487,7 +487,7 @@ export = {
     throw new Error('Attempting to connect to existing browser for Cypress in Cypress which is not yet implemented for electron')
   },
 
-  async connectProtocolToBrowser (options: { protocolManager?: ProtocolManagerShape, studioManager?: { setCDPClient: (cdpClient: any) => void } }) {
+  async connectProtocolToBrowser (options: { protocolManager?: ProtocolManagerShape }) {
     const browserCriClient = this._getBrowserCriClient()
 
     if (!browserCriClient?.currentlyAttachedTarget) throw new Error('Missing pageCriClient in connectProtocolToBrowser')
@@ -500,17 +500,6 @@ export = {
     }
 
     await options.protocolManager?.connectToBrowser(browserCriClient.currentlyAttachedProtocolTarget)
-
-    // Set the CDP client on the studio manager if provided
-    if (options.studioManager && browserCriClient.currentlyAttachedProtocolTarget) {
-      debug('Setting CDP client on studio manager')
-      options.studioManager.setCDPClient(browserCriClient.currentlyAttachedProtocolTarget)
-    } else {
-      debug('Not setting CDP client:', {
-        hasStudioManager: !!options.studioManager,
-        hasProtocolTarget: !!browserCriClient.currentlyAttachedProtocolTarget,
-      })
-    }
   },
 
   async connectCyPromptToBrowser (options: { cyPromptManager?: CyPromptManagerShape }) {
@@ -524,6 +513,19 @@ export = {
     }
 
     await options.cyPromptManager?.connectToBrowser(browserCriClient.currentlyAttachedCyPromptTarget)
+  },
+
+  async connectStudioToBrowser (options: { studioManager?: StudioManagerShape }) {
+    const browserCriClient = this._getBrowserCriClient()
+
+    if (!browserCriClient?.currentlyAttachedTarget) throw new Error('Missing pageCriClient in connectStudioToBrowser')
+
+    // Clone the target here so that we separate the studio client and the main client.
+    if (!browserCriClient.currentlyAttachedStudioTarget) {
+      browserCriClient.currentlyAttachedStudioTarget = await browserCriClient.currentlyAttachedTarget.clone()
+    }
+
+    await options.studioManager?.connectToBrowser(browserCriClient.currentlyAttachedStudioTarget)
   },
 
   async closeProtocolConnection () {

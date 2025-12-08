@@ -1,4 +1,4 @@
-import type { FoundBrowser, BrowserLaunchOpts, BrowserNewTabOpts, ProtocolManagerShape, CyPromptManagerShape } from '@packages/types'
+import type { FoundBrowser, BrowserLaunchOpts, BrowserNewTabOpts, ProtocolManagerShape, CyPromptManagerShape, StudioManagerShape } from '@packages/types'
 import type { EventEmitter } from 'events'
 import type { Automation } from '../automation'
 import type { CDPSocketServer } from '@packages/socket'
@@ -44,11 +44,15 @@ export type BrowserLauncher = {
   /**
    * Used to connect the protocol to an existing browser.
    */
-  connectProtocolToBrowser: (options: { protocolManager?: ProtocolManagerShape, studioManager?: { setCDPClient: (cdpClient: any) => void } }) => Promise<void>
+  connectProtocolToBrowser: (options: { protocolManager?: ProtocolManagerShape }) => Promise<void>
   /**
    * Used to connect the cy prompt to an existing browser.
    */
   connectCyPromptToBrowser: (options: { cyPromptManager?: CyPromptManagerShape }) => Promise<void>
+  /**
+   * Used to connect studio to an existing browser.
+   */
+  connectStudioToBrowser: (options: { studioManager?: StudioManagerShape }) => Promise<void>
   /**
    * Closes the protocol connection to the browser.
    */

@@ -1,11 +1,10 @@
-import type { StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape, StudioCloudApi, StudioAIInitializeOptions, StudioEvent, StudioAddSocketListenersOptions, StudioServerOptions } from '@packages/types'
+import type { StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape, StudioCloudApi, StudioAIInitializeOptions, StudioEvent, StudioAddSocketListenersOptions, StudioServerOptions, StudioCDPClient } from '@packages/types'
 import type { Router } from 'express'
 import Debug from 'debug'
 import { requireScript } from '../require_script'
 import path from 'path'
 import crypto, { BinaryLike } from 'crypto'
 import { StudioElectron } from './StudioElectron'
-import { StudioCDP } from './StudioCDP'
 import exception from '../exception'
 
 interface StudioServer { default: StudioServerDefaultShape }
@@ -26,7 +25,6 @@ export class StudioManager implements StudioManagerShape {
   protocolManager: ProtocolManagerShape | undefined
   private _studioServer: StudioServerShape | undefined
   private _studioElectron: StudioElectron | undefined
-  private _studioCDP: StudioCDP | undefined
 
   async setup ({ script, studioPath, studioHash, cloudApi, manifest, getProjectOptions }: SetupOptions): Promise<void> {
     const { createStudioServer } = requireScript<StudioServer>(script).default
@@ -77,31 +75,22 @@ export class StudioManager implements StudioManagerShape {
     return !!(await this.invokeAsync('canAccessStudioAI', { isEssential: true }, browser))
   }
 
+  connectToBrowser (target: StudioCDPClient): void {
+    if (this._studioServer) {
+      return this.invokeSync('connectToBrowser', { isEssential: true }, target)
+    }
+  }
+
   async initializeStudioAI (options: StudioAIInitializeOptions): Promise<void> {
     // Only create a studio electron instance when studio AI is enabled
     if (!this._studioElectron) {
       this._studioElectron = new StudioElectron()
     }
 
-    // Create StudioCDP instance for iframe rendering mode
-    if (!this._studioCDP) {
-      this._studioCDP = new StudioCDP()
-    }
-
     await this.invokeAsync('initializeStudioAI', { isEssential: true }, {
       ...options,
       studioElectron: this._studioElectron,
-      studioCDP: this._studioCDP,
     })
-  }
-
-  /**
-   * Set the CDP client when it becomes available from the browser connection
-   */
-  setCDPClient (cdpClient: any): void {
-    if (this._studioCDP) {
-      this._studioCDP.setCDPClient(cdpClient)
-    }
   }
 
   updateSessionId (sessionId: string): void {

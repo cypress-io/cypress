@@ -4,6 +4,7 @@
 
 /// <reference types="cypress" />
 
+import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping.d'
 import type { Router } from 'express'
 import type { AxiosInstance } from 'axios'
 import type { Socket } from 'socket.io'
@@ -73,28 +74,6 @@ export type StudioElectronApi = {
   createBrowserWindow: () => BrowserWindow
 }
 
-export interface CDPInternalClient {
-  send<T extends string>(
-    command: T,
-    params?: any
-  ): Promise<any>
-  on<T extends string>(
-    eventName: T,
-    cb: (event: any) => void | Promise<unknown>
-  ): void
-}
-
-export interface StudioCDPApi {
-  /**
-   * Get the CDP client for executing commands in the browser
-   */
-  getCDPClient: () => CDPInternalClient | null
-  /**
-   * Find the snapshot iframe frame ID from the frame tree
-   */
-  findSnapshotIframeFrameId: () => Promise<string | null>
-}
-
 export interface StudioAuthenticatedUserShape {
   id?: string // Cloud user id
   name?: string
@@ -126,7 +105,6 @@ export interface StudioServerOptions {
 export interface StudioAIInitializeOptions {
   protocolDbPath: string
   studioElectron?: StudioElectronApi
-  studioCDP?: StudioCDPApi
 }
 
 export interface StudioAddSocketListenersOptions {
@@ -135,11 +113,36 @@ export interface StudioAddSocketListenersOptions {
   onAfterSave: (options: { error?: Error }) => void
 }
 
+export type StudioCDPCommands = ProtocolMapping.Commands
+
+export type StudioCDPCommand<T extends keyof StudioCDPCommands> =
+  StudioCDPCommands[T]
+
+export type StudioCDPEvents = ProtocolMapping.Events
+
+export type StudioCDPEvent<T extends keyof StudioCDPEvents> = StudioCDPEvents[T]
+
+export interface StudioCDPClient {
+  send<T extends Extract<keyof StudioCDPCommands, string>>(
+    command: T,
+    params?: StudioCDPCommand<T>['paramsType'][0]
+  ): Promise<StudioCDPCommand<T>['returnType']>
+  on<T extends Extract<keyof StudioCDPEvents, string>>(
+    eventName: T,
+    cb: (event: StudioCDPEvent<T>[0]) => void | Promise<unknown>
+  ): void
+  off<T extends Extract<keyof StudioCDPEvents, string>>(
+    eventName: T,
+    cb: (event: StudioCDPEvent<T>[0]) => void | Promise<unknown>
+  ): void
+}
+
 export interface StudioServerShape {
   initializeRoutes(router: Router): void
   canAccessStudioAI(browser: Cypress.Browser): Promise<boolean>
   addSocketListeners(options: StudioAddSocketListenersOptions | Socket): void
   initializeStudioAI(options: StudioAIInitializeOptions): Promise<void>
+  connectToBrowser(cdpClient: StudioCDPClient): void
   updateSessionId(sessionId: string): void
   reportError(
     error: unknown,

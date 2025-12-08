@@ -20,7 +20,7 @@ import type { CriClient } from './cri-client'
 import type { Automation } from '../automation'
 import memory from './memory'
 
-import type { BrowserLaunchOpts, BrowserNewTabOpts, ProtocolManagerShape, CyPromptManagerShape, RunModeVideoApi } from '@packages/types'
+import type { BrowserLaunchOpts, BrowserNewTabOpts, ProtocolManagerShape, CyPromptManagerShape, StudioManagerShape, RunModeVideoApi } from '@packages/types'
 import type { CDPSocketServer } from '@packages/socket'
 import { DEFAULT_CHROME_FLAGS } from '../util/chromium_flags'
 
@@ -437,7 +437,7 @@ export = {
     browserCriClient = undefined
   },
 
-  async connectProtocolToBrowser (options: { protocolManager?: ProtocolManagerShape, studioManager?: { setCDPClient: (cdpClient: any) => void } }) {
+  async connectProtocolToBrowser (options: { protocolManager?: ProtocolManagerShape }) {
     const browserCriClient = this._getBrowserCriClient()
 
     if (!browserCriClient?.currentlyAttachedTarget) throw new Error('Missing pageCriClient in connectProtocolToBrowser')
@@ -450,11 +450,6 @@ export = {
     }
 
     await options.protocolManager?.connectToBrowser(browserCriClient.currentlyAttachedProtocolTarget)
-
-    // Set the CDP client on the studio manager if provided
-    if (options.studioManager && browserCriClient.currentlyAttachedProtocolTarget) {
-      options.studioManager.setCDPClient(browserCriClient.currentlyAttachedProtocolTarget)
-    }
   },
 
   async connectCyPromptToBrowser (options: { cyPromptManager?: CyPromptManagerShape }) {
@@ -467,6 +462,18 @@ export = {
     }
 
     await options.cyPromptManager?.connectToBrowser(browserCriClient.currentlyAttachedCyPromptTarget)
+  },
+
+  async connectStudioToBrowser (options: { studioManager?: StudioManagerShape }) {
+    const browserCriClient = this._getBrowserCriClient()
+
+    if (!browserCriClient?.currentlyAttachedTarget) throw new Error('Missing pageCriClient in connectStudioToBrowser')
+
+    if (!browserCriClient.currentlyAttachedStudioTarget) {
+      browserCriClient.currentlyAttachedStudioTarget = await browserCriClient.currentlyAttachedTarget.clone()
+    }
+
+    await options.studioManager?.connectToBrowser(browserCriClient.currentlyAttachedStudioTarget)
   },
 
   async closeProtocolConnection () {
