@@ -77,7 +77,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
       cy.get('[data-cy="playground-activator"]').should('be.disabled')
     })
 
-    it('is visible when studio beta is available', () => {
+    it('is visible by default', () => {
       cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
         render: (gqlVal) => {
           return renderWithGql(gqlVal, true)
