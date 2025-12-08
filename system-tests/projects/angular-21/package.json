@@ -27,8 +27,6 @@
     "@angular/platform-browser-dynamic": "^21.0.0",
     "jsdom": "^27.1.0",
     "typescript": "~5.9.2",
-    "vitest": "^4.0.8",
-    "zone.js": "~0.15.0"
-  },
-  "projectFixtureDirectory": "angular"
+    "vitest": "^4.0.8"
+  }
 }
