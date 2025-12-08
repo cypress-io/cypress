@@ -16,7 +16,6 @@ import { warning as errorsWarning } from './errors'
 import { getCwd } from './cwd'
 import type { CypressError } from '@packages/errors'
 import { toNumber } from 'lodash'
-import Bluebird from 'bluebird'
 const debug = Debug('cypress:server:cypress')
 
 type Mode = 'exit' | 'info' | 'interactive' | 'pkg' | 'record' | 'results' | 'run' | 'smokeTest' | 'version' | 'returnPkg' | 'exitWithCode'
