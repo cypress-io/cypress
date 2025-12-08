@@ -123,7 +123,7 @@
     "@types/send": "^0.17.1",
     "@types/sinon-chai": "3.2.12",
     "@types/through2": "^2.0.41",
-    "@types/underscore.string": "0.0.38",
+    "@types/underscore.string": "0.0.42",
     "@typescript-eslint/eslint-plugin": "7.2.0",
     "@typescript-eslint/parser": "7.2.0",
     "@urql/introspection": "^0.3.0",
