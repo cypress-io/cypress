@@ -194,4 +194,64 @@ describe('SelectorPlayground', () => {
 
     cy.get('[data-cy="playground-selector"]').should('have.attr', 'autocomplete', 'off')
   })
+
+  it('triggers highlight on mouseover', () => {
+    const selectorPlaygroundStore = useSelectorPlaygroundStore()
+    const { autIframe } = mountSelectorPlayground()
+
+    cy.spy(autIframe, 'toggleSelectorHighlight')
+    cy.spy(selectorPlaygroundStore, 'setShowingHighlight')
+
+    cy.get('[data-cy="playground-selector"]').parent().trigger('mouseover')
+
+    cy.then(() => {
+      expect(selectorPlaygroundStore.setShowingHighlight).to.have.been.calledWith(true)
+      expect(autIframe.toggleSelectorHighlight).to.have.been.calledWith(true)
+    })
+  })
+
+  it('updates store and triggers highlight when typing', () => {
+    const selectorPlaygroundStore = useSelectorPlaygroundStore()
+    const { autIframe } = mountSelectorPlayground()
+
+    cy.spy(autIframe, 'toggleSelectorHighlight')
+
+    cy.get('[data-cy="playground-selector"]').clear().type('.test-selector')
+
+    cy.then(() => {
+      expect(selectorPlaygroundStore.getSelector).to.eq('.test-selector')
+      expect(autIframe.toggleSelectorHighlight).to.have.been.calledWith(true)
+    })
+  })
+
+  it('shows correct selector value when switching methods', () => {
+    const selectorPlaygroundStore = useSelectorPlaygroundStore()
+
+    selectorPlaygroundStore.getSelector = '.get-selector'
+    selectorPlaygroundStore.containsSelector = '.contains-selector'
+
+    mountSelectorPlayground()
+
+    cy.get('[data-cy="playground-selector"]').should('have.value', '.get-selector')
+
+    cy.get('[aria-label="Selector methods"]').click()
+    cy.findByRole('menuitem', { name: 'cy.contains' }).click()
+
+    cy.get('[data-cy="playground-selector"]').should('have.value', '.contains-selector')
+
+    cy.get('[aria-label="Selector methods"]').click()
+    cy.findByRole('menuitem', { name: 'cy.get' }).click()
+
+    cy.get('[data-cy="playground-selector"]').should('have.value', '.get-selector')
+  })
+
+  it('has correct input attributes to prevent autocomplete', () => {
+    mountSelectorPlayground()
+
+    cy.get('[data-cy="playground-selector"]')
+    .should('have.attr', 'autocomplete', 'off')
+    .should('have.attr', 'autocapitalize', 'none')
+    .should('have.attr', 'autocorrect', 'off')
+    .should('have.attr', 'spellcheck', 'false')
+  })
 })
