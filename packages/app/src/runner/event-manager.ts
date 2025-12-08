@@ -477,7 +477,7 @@ export class EventManager {
     return getRunnerConfigFromWindow()?.browser?.family === family
   }
 
-  initialize ($autIframe: JQuery<HTMLIFrameElement>, config: Record<string, any>, $snapshotIframe: JQuery<HTMLIFrameElement>) {
+  initialize ($autIframe: JQuery<HTMLIFrameElement>, config: Record<string, any>, $snapshotIframe?: JQuery<HTMLIFrameElement>) {
     performance.mark('initialize-start')
 
     const testFilter = this.specStore.testFilter

@@ -46,7 +46,7 @@ export class AutIframe {
     const $snapshotIframe: JQuery<HTMLIFrameElement> = this.$('<iframe>', {
       id: `AUT Snapshot: '${this.projectName}'`,
       title: `AUT Snapshot: '${this.projectName}'`,
-      class: 'aut-iframe',
+      class: 'aut-iframe', // TODO: should this be aut-snapshot-iframe since we have code that looks for aut-iframe?
     })
 
     this.$snapshotIframe = $snapshotIframe
