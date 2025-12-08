@@ -170,6 +170,8 @@ onMounted(() => {
   if (!selectorPlaygroundStore.isEnabled) {
     selectorPlaygroundStore.setEnabled(true)
     props.getAutIframe().toggleSelectorPlayground(true)
+    selectorPlaygroundStore.setShowingHighlight(true)
+    props.getAutIframe().toggleSelectorHighlight(true)
   }
 })
 

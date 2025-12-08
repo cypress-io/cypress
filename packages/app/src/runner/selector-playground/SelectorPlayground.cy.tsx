@@ -35,18 +35,24 @@ describe('SelectorPlayground', () => {
 
     // Reset to disabled state before mounting
     selectorPlaygroundStore.setEnabled(false)
+    selectorPlaygroundStore.setShowingHighlight(false)
 
-    // Create autIframe and set up spy BEFORE mounting, since onMounted will call toggleSelectorPlayground
+    // Create autIframe and set up spies BEFORE mounting, since onMounted will call these methods
     const autIframe = createTestAutIframe()
 
     cy.spy(autIframe, 'toggleSelectorPlayground')
+    cy.spy(autIframe, 'toggleSelectorHighlight')
+    cy.spy(selectorPlaygroundStore, 'setShowingHighlight')
 
     mountSelectorPlayground(createEventManager(), autIframe)
 
     // When the playground component is mounted (visible), it should automatically be enabled
+    // and initialize highlighting functionality
     cy.then(() => {
       expect(selectorPlaygroundStore.isEnabled).to.be.true
       expect(autIframe.toggleSelectorPlayground).to.have.been.calledWith(true)
+      expect(selectorPlaygroundStore.setShowingHighlight).to.have.been.calledWith(true)
+      expect(autIframe.toggleSelectorHighlight).to.have.been.calledWith(true)
     })
   })
 
