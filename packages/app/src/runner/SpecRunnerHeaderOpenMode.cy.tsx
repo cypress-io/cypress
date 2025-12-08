@@ -97,6 +97,8 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
       cy.findByTestId('playground-activator').click()
       cy.get('#selector-playground').should('be.visible')
 
+      cy.percySnapshot()
+
       cy.findByTestId('playground-activator').click()
       cy.get('#selector-playground').should('not.exist')
     })
