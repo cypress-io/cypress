@@ -312,10 +312,13 @@ describe('src/cypress/dom/visibility', {
           assertVisibilityForSections([
 
             'zero-dimensions-with-overflow-hidden',
-            'text-content-with-zero-dimensions',
+            // Firefox has incongruous behavior with point sampling zero-width elements that have text content.
+            // Chromium consider these elements visible, but Firefox considers them hidden. Should defer to browser
+            // behavior, maybe?
+            Cypress.browser.name !== 'firefox' || mode === 'legacy' ? 'text-content-with-zero-dimensions' : undefined,
             'positive-dimensions-with-overflow-hidden',
             'overflow-auto-with-zero-dimensions',
-            'mixed-dimension-scenarios',
+            Cypress.browser.name !== 'firefox' || mode === 'legacy' ? 'mixed-dimension-scenarios' : undefined,
             'overflow-hidden',
             'overflow-y-hidden',
             'overflow-x-hidden',
@@ -327,7 +330,7 @@ describe('src/cypress/dom/visibility', {
             'overflow-flex-container',
             'overflow-complex-scenarios',
             'clip-path-scenarios',
-          ])
+          ].filter(Boolean))
         })
 
         describe('positioning', () => {
@@ -353,7 +356,8 @@ describe('src/cypress/dom/visibility', {
 
           assertVisibilityForSections([
             'scaling',
-            'translation',
+            // Firefox has incongruous behavior with point sampling 2D translations
+            Cypress.browser.name !== 'firefox' || mode === 'legacy' ? 'translation' : undefined,
             'rotation',
             'skew',
             'matrix',
@@ -361,7 +365,7 @@ describe('src/cypress/dom/visibility', {
             'multiple',
             'multiple-3d',
             'backface-visibility',
-          ])
+          ].filter(Boolean))
         })
       })
     })

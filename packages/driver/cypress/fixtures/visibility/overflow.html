@@ -105,15 +105,14 @@
     
     <!-- Zero width, positive height -->
     <div class="testCase" cy-expect="visible" cy-label="Zero width with text content" style="width: 0; height: 100px; background: lightgreen;">Zero width</div>
+    
     <div class="testCase" cy-expect="visible" cy-label="Zero width with text content (blue)" style="width: 0; height: 100px; background: lightgreen;">Has text content</div>
     <div class="testCase" cy-expect="hidden" cy-label="Zero width with whitespace only" style="width: 0; height: 50px; background: lightcoral;">      </div>
 
-    <!-- Positive width, zero height -->
     <div class="testCase" cy-expect="hidden" cy-label="Zero height without text content" style="width: 100px; height: 0; background: lightcoral;"></div>
     <div class="testCase" cy-expect="visible" cy-label="Zero height with text content" style="width: 100px; height: 0; background: lightgreen;">Has text content</div>
     <div class="testCase" cy-expect="hidden" cy-label="Zero height with whitespace only" style="width: 50px; height: 0; background: lightcoral;">        </div>
 
-    <!-- Zero dimensions -->
     <div style="width: 10; height: 10; background: lightyellow">
       <div class="testCase" cy-expect="hidden" cy-label="Zero dimensions without content" style="width:0; height:0"></div>
     </div>
