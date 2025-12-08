@@ -3289,7 +3289,6 @@ declare namespace Cypress {
      * @default false
      */
     experimentalPromptCommand?: boolean
-
   }
 
   /**
