@@ -9108,10 +9108,10 @@
     "@types/node" "*"
     minipass "^4.0.0"
 
-"@types/through2@^2.0.36":
-  version "2.0.36"
-  resolved "https://registry.yarnpkg.com/@types/through2/-/through2-2.0.36.tgz#35fda0db635827d44c0e08e2c94653e647574a00"
-  integrity sha512-vuifQksQHJXhV9McpVsXKuhnf3lsoX70PnhcqIAbs9dqLH2NgrGz0DzZPDY3+Yh6eaRqcE1gnCQ6QhBn1/PT5A==
+"@types/through2@^2.0.41":
+  version "2.0.41"
+  resolved "https://registry.yarnpkg.com/@types/through2/-/through2-2.0.41.tgz#3e5e1720d71ffdfa03c22f2aad6593d12a47034f"
+  integrity sha512-ryQ0tidWkb1O1JuYvWKyMLYEtOWDqF5mHerJzKz/gQpoAaJq2l/dsMPBF0B5BNVT34rbARYJ5/tsZwLfUi2kwQ==
   dependencies:
     "@types/node" "*"
 
@@ -9120,10 +9120,10 @@
   resolved "https://registry.yarnpkg.com/@types/tmp/-/tmp-0.2.6.tgz#d785ee90c52d7cc020e249c948c36f7b32d1e217"
   integrity sha512-chhaNf2oKHlRkDGt+tiKE2Z5aJ6qalm7Z9rlLdBwmOiAAf09YQvvoLXjWK4HWPF1xU/fqvMgfNfpVoBscA/tKA==
 
-"@types/to-ico@^1.1.1":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@types/to-ico/-/to-ico-1.1.1.tgz#486397c906bddd8aee38e43cda1afe5c38cd1c05"
-  integrity sha512-WQbdkUB4RjE2rrM9rNqm5OutcxWWZ3J9olDtYA+zDxiPobD7o/RHC+GlGOM5rL1ASP/AoudkDLKw5DbFV3DO8w==
+"@types/to-ico@^1.1.3":
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/@types/to-ico/-/to-ico-1.1.3.tgz#3a158b4dfa2ba3d1c900dfac81104f5fc7ddc959"
+  integrity sha512-3Ew8Hsz/qiDGzwvz75pjRU+6Ocfvrit6hHfirauEdJXxdro73MTe5XdcANh4GZ2wdJqWw9BIuHwWgKAfjUXoGw==
   dependencies:
     "@types/node" "*"
 
@@ -9139,10 +9139,10 @@
   dependencies:
     source-map "^0.6.1"
 
-"@types/underscore.string@0.0.38":
-  version "0.0.38"
-  resolved "https://registry.yarnpkg.com/@types/underscore.string/-/underscore.string-0.0.38.tgz#4081755f005f5691fb7fbd4eff3aabe6066a6c63"
-  integrity sha512-QPMttDInBYkulH/3nON0KnYpEd/RlyE5kUrhuts5d76B/stpjXpDticq+iTluoAsVnVXuGECFhPtuX+aDJdx+A==
+"@types/underscore.string@0.0.42":
+  version "0.0.42"
+  resolved "https://registry.yarnpkg.com/@types/underscore.string/-/underscore.string-0.0.42.tgz#aab74808623f3f765ca0cd1deabf8fcd4840d443"
+  integrity sha512-BvTLC6msS2whJkRbom5aDdXPH3E4P6t/DO0ngAHKdSk3S3I9eZZFW/inpXZIL6+GCJvD0796n1N5SUQr+BT5KA==
   dependencies:
     "@types/underscore" "*"
 
