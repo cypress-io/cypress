@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v5.4.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.4.0...@cypress/webpack-dev-server-v5.4.1) (2025-12-08)
+
+
+### Bug Fixes
+
+* call installBindings for Next.js 16.0.3+ compatibility ([#33072](https://github.com/cypress-io/cypress/issues/33072)) ([2d58d9f](https://github.com/cypress-io/cypress/commit/2d58d9f024547b2e9593f01aa08e2063efef6f5e)), closes [#32968](https://github.com/cypress-io/cypress/issues/32968)
+
 # [@cypress/webpack-dev-server-v5.4.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.3.0...@cypress/webpack-dev-server-v5.4.0) (2025-12-05)
 
 
