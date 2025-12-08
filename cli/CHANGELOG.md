@@ -15,6 +15,7 @@ _Released 12/16/2025 (PENDING)_
 - Fixed an issue where `Next.js` Component Testing would not load correctly without a TypeScript-based Next config in versions 16.0.3 and up. Fixes [#32968](https://github.com/cypress-io/cypress/issues/32968).
 - Fixed an issue where the error message for `not.have.length` was not correctly displaying the expected length in the Command Log. Addressed in [#18927](https://github.com/cypress-io/cypress/issues/18927).
 - Fixed an issue where commented HTML code breaks Cypress from injecting the DOM properly. Fixes [#33000](https://github.com/cypress-io/cypress/issues/33000). Addressed in [#33057](https://github.com/cypress-io/cypress/pull/33057).
+- Fixed an issue where `removeAttribute()` would not work for attributes other than `target` on anchor or form elements after clicking links with `target="_top"` or `target="_parent"`. Fixes [#26206](https://github.com/cypress-io/cypress/issues/26206). Addressed in [#33051](https://github.com/cypress-io/cypress/pull/33051).
 
 ## 15.7.1
 
