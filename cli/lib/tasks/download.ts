@@ -202,7 +202,7 @@ const verifyDownloadedFile = async (filename: string, expectedSize?: number, exp
 // {filename: ..., downloaded: true}
 const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redirectTTL = defaultMaxRedirects }: any): any => {
   if (redirectTTL <= 0) {
-    return Bluebird.reject(new Error(
+    return Promise.reject(new Error(
       stripIndent`
           Failed downloading the Cypress binary.
           There were too many redirects. The default allowance is ${defaultMaxRedirects}.

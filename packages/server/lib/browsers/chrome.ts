@@ -76,14 +76,14 @@ const _getDefaultChromePreferences = (): ChromePreferences => {
  * Reads all known preference files (CHROME_PREFERENCE_PATHS) from disk and return
  * @param userDir
  */
-const _getChromePreferences = (userDir: string): Bluebird<ChromePreferences> => {
+const _getChromePreferences = (userDir: string): Promise<ChromePreferences> => {
   // skip reading the preferences if requested by the user,
   // typically used when the AUT encrypts the user data dir, causing relaunches of the browser not to work
   // see https://github.com/cypress-io/cypress/issues/29330
   if (process.env.IGNORE_CHROME_PREFERENCES) {
     debug('ignoring chrome preferences: not reading from chrome preference files')
 
-    return Bluebird.resolve(_.mapValues(CHROME_PREFERENCE_PATHS, () => ({})))
+    return Promise.resolve(_.mapValues(CHROME_PREFERENCE_PATHS, () => ({})))
   }
 
   debug('reading chrome preferences... %o', { userDir, CHROME_PREFERENCE_PATHS })

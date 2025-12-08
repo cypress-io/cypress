@@ -1,3 +1,31 @@
+# [@cypress/webpack-dev-server-v5.4.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.4.0...@cypress/webpack-dev-server-v5.4.1) (2025-12-08)
+
+
+### Bug Fixes
+
+* call installBindings for Next.js 16.0.3+ compatibility ([#33072](https://github.com/cypress-io/cypress/issues/33072)) ([2d58d9f](https://github.com/cypress-io/cypress/commit/2d58d9f024547b2e9593f01aa08e2063efef6f5e)), closes [#32968](https://github.com/cypress-io/cypress/issues/32968)
+
+# [@cypress/webpack-dev-server-v5.4.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.3.0...@cypress/webpack-dev-server-v5.4.0) (2025-12-05)
+
+
+### Features
+
+* add `cypress/angular-zoneless` testing harness for Angular 21 (also supports Angular 20) ([#33025](https://github.com/cypress-io/cypress/issues/33025)) ([0f215f3](https://github.com/cypress-io/cypress/commit/0f215f3f554e3f99624b25e19c03ecfd771aba52))
+
+# [@cypress/webpack-dev-server-v5.3.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.2.1...@cypress/webpack-dev-server-v5.3.0) (2025-12-03)
+
+
+### Features
+
+* add support for Angular 21 ([#33004](https://github.com/cypress-io/cypress/issues/33004)) ([b1d85c9](https://github.com/cypress-io/cypress/commit/b1d85c9af17acde6305ec6dfa3800cc523f6abba))
+
+# [@cypress/webpack-dev-server-v5.2.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.2.0...@cypress/webpack-dev-server-v5.2.1) (2025-11-19)
+
+
+### Bug Fixes
+
+* make sure angular project configs can resolve correctly on windows ([#32971](https://github.com/cypress-io/cypress/issues/32971)) ([71a393e](https://github.com/cypress-io/cypress/commit/71a393ee566dd5eff4e0579fdc6a23bf73cffa51))
+
 # [@cypress/webpack-dev-server-v5.2.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.1.5...@cypress/webpack-dev-server-v5.2.0) (2025-11-19)
 
 

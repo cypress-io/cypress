@@ -63,23 +63,29 @@ const initializeModule = async (Cypress: Cypress.Cypress): Promise<CyPromptDrive
     })
   }
 
+  let module: CyPromptDriver | null = null
+
   // Once the cy prompt bundle is downloaded and ready,
   // we can initialize it via the module federation runtime
-  init({
-    remotes: [{
-      alias: 'cy-prompt',
-      type: 'module',
-      name: 'cy-prompt',
-      entryGlobalName: 'cy-prompt',
-      entry: '/__cypress-cy-prompt/driver/cy-prompt.js',
-      shareScope: 'default',
-    }],
-    name: 'driver',
-  })
+  try {
+    init({
+      remotes: [{
+        alias: 'cy-prompt',
+        type: 'module',
+        name: 'cy-prompt',
+        entryGlobalName: 'cy-prompt',
+        entry: '/__cypress-cy-prompt/driver/cy-prompt.js',
+        shareScope: 'default',
+      }],
+      name: 'driver',
+    })
 
-  // This cy-prompt.js file and any subsequent files are
-  // served from the cy prompt bundle.
-  const module = await loadRemote<CyPromptDriver>('cy-prompt')
+    // This cy-prompt.js file and any subsequent files are
+    // served from the cy prompt bundle.
+    module = await loadRemote<CyPromptDriver>('cy-prompt')
+  } catch (error) {
+    $errUtils.throwErrByPath('prompt.promptBundleNeedsRefresh')
+  }
 
   if (!module?.default) {
     $errUtils.throwErrByPath('prompt.promptDownloadError', {

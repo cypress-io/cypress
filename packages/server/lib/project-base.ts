@@ -15,7 +15,7 @@ import * as savedState from './saved_state'
 import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
-import system from './util/system'
+import * as system from './util/system'
 import type {
   BannersState,
   FoundBrowser,

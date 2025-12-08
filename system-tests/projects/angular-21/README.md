@@ -1,0 +1,1 @@
+NOTE: Angular-21 comes zoneless by default, meaning the application is zoneless but `cypress/angular` currently is not. When the zoneless angular handler is added, we will need to reference it here and likely not set the project up through fixture. We also need to remove the zone dependencies and cypress config resolution.

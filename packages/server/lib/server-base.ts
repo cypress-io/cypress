@@ -37,7 +37,7 @@ import { resourceTypeAndCredentialManager, ResourceTypeAndCredentialManager } fr
 import * as fileServer from './file_server'
 import appData from './util/app_data'
 import { graphqlWS } from '@packages/data-context/graphql/makeGraphQLServer'
-import statusCode from './util/status_code'
+import * as statusCode from './util/status_code'
 import headersUtil from './util/headers'
 import stream from 'stream'
 import isHtml from 'is-html'
@@ -662,7 +662,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // bail early we dont have a server or we're not
     // currently listening
     if (!this._server || !this.isListening) {
-      return Bluebird.resolve(true)
+      return Promise.resolve(true)
     }
 
     this.reset()

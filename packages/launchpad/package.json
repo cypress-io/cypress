@@ -15,7 +15,7 @@
     "dev": "yarn cypress:run-cypress-in-cypress gulp dev --project .",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "start": "echo 'run yarn dev from the root' && exit 1",
-    "test": "yarn cypress:run:ct && yarn types",
+    "test": "yarn cypress:run:ct",
     "tslint": "tslint --config ../ts/tslint.json --project . --exclude ../graphql/src/gen/nxs.gen.ts",
     "watch": "echo 'run yarn dev from the root' && exit 1"
   },
@@ -33,7 +33,7 @@
     "@packages/root": "0.0.0-development",
     "@packages/scaffold-config": "0.0.0-development",
     "@packages/types": "0.0.0-development",
-    "@percy/cypress": "^3.1.6",
+    "@percy/cypress": "^3.1.7",
     "@purge-icons/generated": "0.8.1",
     "@testing-library/cypress": "10.1.0",
     "@tooling/system-tests": "0.0.0-development",
