@@ -14,29 +14,34 @@ The changelog should include anything that was merged into the `develop` branch 
 - `perf` - A code change that improves performance
 
 ## Writing Guidelines
+
 1. The changelog is formatted like the following. If there is not a pending changelog for the next release, add these sections.
-```md
-## <RELEASE_VERSION>
 
-_Released <RELEASE_DATE> (PENDING)_
+    ```md
+    ## <RELEASE_VERSION>
 
-**<CHANGE_SECTION:**
+    _Released <RELEASE_DATE> (PENDING)_
 
-- <CHANGELOG_ENTRY>
-```
+    **<CHANGE_SECTION:**
+
+    - <CHANGELOG_ENTRY>
+    ```
+
+    The `RELEASE_DATE` follows the `MM/DD/YYYY` format (two-digit month, two-digit day, four-digit year), including leading zeros for any single-digit month or day.
+
 2. Each changelog entry is written and merged with the associated user-facing code change in [`cli/CHANGELOG.md`](../cli/CHANGELOG.md).
 3. The changelog entry should be added to the associated change section. The supported change sections for the changelog (that should be listed in the order below) are:
 
-  | change type (by order of impact) | change section | details |
-  | -- | -- | --|
-  | -- | Summary | A description of the overall changes. This is usually only provided for **breaking changes** or **large features**. This should be written in coordination with Cypress's marketing and match the language used around the release. It may also link to relevant blogs. [Example](https://docs.cypress.io/guides/references/changelog#7-0-0) |
-  | `breaking` | Breaking Changes | Link to the Migration Guide (if any) at the beginning of this section. For each one explain the change, how it affects users, and how users can mitigate the effects of the change (unless it's covered in the Migration Guide). [Example](https://docs.cypress.io/guides/references/changelog#6-0-0) |
-  | `deprecation` | Deprecations | Explain each deprecation and that it will be removed in a future release. [Example](https://docs.cypress.io/guides/references/changelog#6-0-0) |
-  | `perf` | Performance | [Example](https://docs.cypress.io/guides/references/changelog#7-2-0) |
-  | `feat` | Features | [Example](https://docs.cypress.io/guides/references/changelog#8-6-0) |
-  | `fix` | Bugfixes | [Example](https://docs.cypress.io/guides/references/changelog#9-1-0) |
-  | `misc` | Misc | We don't use this section as much as we used to, but if there is a change that is not necessarily a feature or a bugfix, it would go here. (Like the design of the browser picker changed). [Example](https://docs.cypress.io/guides/references/changelog#6-7-0) |
-  | `dependency` | Dependency Updates | A list of dependencies that were updated, downgraded, or removed as well as the version it was changed from. [Example](https://docs.cypress.io/guides/references/changelog#7-2-0) |
+    | change type (by order of impact) | change section | details |
+    | -- | -- | --|
+    | -- | Summary | A description of the overall changes. This is usually only provided for **breaking changes** or **large features**. This should be written in coordination with Cypress's marketing and match the language used around the release. It may also link to relevant blogs. [Example](https://docs.cypress.io/guides/references/changelog#7-0-0) |
+    | `breaking` | Breaking Changes | Link to the Migration Guide (if any) at the beginning of this section. For each one explain the change, how it affects users, and how users can mitigate the effects of the change (unless it's covered in the Migration Guide). [Example](https://docs.cypress.io/guides/references/changelog#6-0-0) |
+    | `deprecation` | Deprecations | Explain each deprecation and that it will be removed in a future release. [Example](https://docs.cypress.io/guides/references/changelog#6-0-0) |
+    | `perf` | Performance | [Example](https://docs.cypress.io/guides/references/changelog#7-2-0) |
+    | `feat` | Features | [Example](https://docs.cypress.io/guides/references/changelog#8-6-0) |
+    | `fix` | Bugfixes | [Example](https://docs.cypress.io/guides/references/changelog#9-1-0) |
+    | `misc` | Misc | We don't use this section as much as we used to, but if there is a change that is not necessarily a feature or a bugfix, it would go here. (Like the design of the browser picker changed). [Example](https://docs.cypress.io/guides/references/changelog#6-7-0) |
+    | `dependency` | Dependency Updates | A list of dependencies that were updated, downgraded, or removed as well as the version it was changed from. [Example](https://docs.cypress.io/guides/references/changelog#7-2-0) |
 4. You may have several changes around a feature that make sense to group. Feel free to do so to make more sense to users consuming the changelog. [Example](https://docs.cypress.io/guides/references/changelog#8-7-0)
 5. Do not refer to 'we' when writing a changelog item. We want to phrase the changelog in a way that emphasizes how the user is impacted. Additionally 'we' may not have addressed the issue, an outside contributor may have.
     - _Example:_ Instead of 'We fixed a situation where a cross-origin error could incorrectly throw in Chrome' write 'Cross-origin errors will no longer incorrectly throw in Chrome in certain situations'.

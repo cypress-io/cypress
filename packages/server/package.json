@@ -7,7 +7,6 @@
     "build-prod": "tsc || echo 'built, with type errors'",
     "check-ts": "tsc --noEmit",
     "clean-deps": "rimraf node_modules",
-    "codecov": "codecov",
     "dev": "node index.js",
     "docker": "cd ../.. && WORKING_DIR=/packages/server ./scripts/run-docker-local.sh",
     "postinstall": "patch-package",
@@ -137,7 +136,8 @@
     "wait-port": "1.1.0",
     "webdriver": "9.14.0",
     "webpack-virtual-modules": "0.5.0",
-    "widest-line": "3.1.0"
+    "widest-line": "3.1.0",
+    "write-file-atomic": "7.0.0"
   },
   "devDependencies": {
     "@babel/core": "7.28.0",
@@ -173,8 +173,8 @@
     "@types/chrome-remote-interface": "0.31.14",
     "@types/http-proxy": "1.17.17",
     "@types/node": "22.18.7",
-    "@types/request-promise": "^4.1.48",
-    "@types/tar": "^6.1.0",
+    "@types/request-promise": "^4.1.51",
+    "@types/tar": "^6.1.13",
     "babel-loader": "10.0.0",
     "chai": "3.5.0",
     "chai-as-promised": "7.1.1",
