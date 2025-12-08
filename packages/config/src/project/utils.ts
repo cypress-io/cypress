@@ -321,6 +321,7 @@ export async function setSupportFileAndFolder (obj: Config, getFilesByGlob: any)
       obj.supportFile = result
       obj.supportFolder = path.dirname(obj.supportFile)
       debug(`set support folder ${obj.supportFolder}`)
+
       return obj
     }
 
@@ -343,6 +344,7 @@ export async function setSupportFileAndFolder (obj: Config, getFilesByGlob: any)
     obj.supportFile = path.join(base || '', supportFileName)
 
     const found = await fs.pathExists(obj.supportFile)
+
     if (!found) {
       errors.throwErr('SUPPORT_FILE_NOT_FOUND', relativeToProjectRoot(obj.projectRoot, obj.supportFile))
     }
