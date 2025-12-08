@@ -126,7 +126,7 @@
     "@types/underscore.string": "0.0.42",
     "@typescript-eslint/eslint-plugin": "7.2.0",
     "@typescript-eslint/parser": "7.2.0",
-    "@urql/introspection": "^0.3.0",
+    "@urql/introspection": "^0.3.3",
     "@vitest/coverage-v8": "^3.2.4",
     "ascii-table": "0.0.9",
     "autobarrel": "^1.1.0",
