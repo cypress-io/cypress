@@ -11,6 +11,7 @@ import { doesTopNeedToBeSimulated } from './util/top-simulation'
 import type { HttpMiddleware } from './'
 import type { CypressIncomingRequest } from '../types'
 import { urlMatchesOriginProtectionSpace } from '@packages/network-tools'
+import * as errors from '@packages/errors'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
@@ -34,9 +35,14 @@ const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
 
   this.req.isAUTFrame = !!this.req.headers['x-cypress-is-aut-frame']
   this.req.isFromExtraTarget = !!this.req.headers['x-cypress-is-from-extra-target']
+  this.req.isSyncRequest = !!this.req.headers['x-cypress-is-sync-request']
 
   if (this.req.headers['x-cypress-is-aut-frame']) {
     delete this.req.headers['x-cypress-is-aut-frame']
+  }
+
+  if (this.req.headers['x-cypress-is-sync-request']) {
+    delete this.req.headers['x-cypress-is-sync-request']
   }
 
   span?.setAttributes({
@@ -218,6 +224,10 @@ const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
     span?.end()
 
     return this.next()
+  }
+
+  if (this.req.isSyncRequest) {
+    errors.warning('SYNCHRONOUS_XHR_REQUEST_COOKIES_NOT_APPLIED', this.req.proxiedUrl)
   }
 
   // Top needs to be simulated since the AUT is in a cross origin state. Get the "requested with" and credentials and see what cookies need to be attached

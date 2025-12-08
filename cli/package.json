@@ -62,6 +62,7 @@
   },
   "devDependencies": {
     "@cypress/angular": "0.0.0-development",
+    "@cypress/angular-zoneless": "0.0.0-development",
     "@cypress/grep": "0.0.0-development",
     "@cypress/mount-utils": "0.0.0-development",
     "@cypress/react": "0.0.0-development",
@@ -102,6 +103,7 @@
     "vue",
     "react",
     "angular",
+    "angular-zoneless",
     "svelte"
   ],
   "bin": {
@@ -142,6 +144,11 @@
       "types": "./angular/dist/index.d.ts",
       "import": "./angular/dist/index.js",
       "require": "./angular/dist/index.js"
+    },
+    "./angular-zoneless": {
+      "types": "./angular-zoneless/dist/index.d.ts",
+      "import": "./angular-zoneless/dist/index.js",
+      "require": "./angular-zoneless/dist/index.js"
     },
     "./svelte": {
       "types": "./svelte/dist/index.d.ts",

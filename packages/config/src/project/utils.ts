@@ -329,6 +329,7 @@ export async function setSupportFileAndFolder (obj: Config, getFilesByGlob: any)
   }
 
   // original .then() chain continues here
+
   obj.supportFile = resolved
   debug('resolved support file %s', obj.supportFile)
 

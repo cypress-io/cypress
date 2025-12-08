@@ -437,7 +437,7 @@ function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot,
 }
 
 async function listenForProjectEnd (project: ProjectBase, exit: boolean): Promise<any> {
-  if (globalThis.CY_TEST_MOCK?.listenForProjectEnd) return Bluebird.resolve(globalThis.CY_TEST_MOCK.listenForProjectEnd)
+  if (globalThis.CY_TEST_MOCK?.listenForProjectEnd) return Promise.resolve(globalThis.CY_TEST_MOCK.listenForProjectEnd)
 
   // if exit is false, we need to intercept the resolution of tests - whether
   // an early exit with intermediate results, or a full run.
