@@ -11,6 +11,7 @@ const npmModulesToCopy: string[] = [
   'react',
   'vue',
   'angular',
+  'angular-zoneless',
   'svelte',
 ]
 

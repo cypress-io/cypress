@@ -369,11 +369,13 @@ function detectAndRegisterOutputSpyToSignal<T> (config: MountConfig<T>, componen
       // we will create a subscriber that will emit an event every time the value inside the signal changes. We only do this
       // if the signal is writable and not an input signal.
       if (isWritableSignal(componentValue) && !isInputSignal(componentValue)) {
-        toObservable(componentValue, {
-          injector,
-        }).subscribe((value) => {
-          component[expectedChangeKey]?.emit(value)
-        })
+        activeInternalSubscriptions.push(
+          toObservable(componentValue, {
+            injector,
+          }).subscribe((value) => {
+            component[expectedChangeKey]?.emit(value)
+          }),
+        )
       }
     }
   }

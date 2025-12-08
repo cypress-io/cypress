@@ -1,0 +1,564 @@
+import { CommonModule } from '@angular/common'
+import { Component, ErrorHandler, EventEmitter, Injectable, SimpleChange, SimpleChanges, Type, OnChanges, Injector, InputSignal, WritableSignal, provideZonelessChangeDetection } from '@angular/core'
+import { toObservable } from '@angular/core/rxjs-interop'
+import {
+  ComponentFixture,
+  getTestBed,
+  TestModuleMetadata,
+  TestBed,
+  TestComponentRenderer,
+} from '@angular/core/testing'
+// NOTE: @angular/platform-browser-dynamic is deprecated and needs to be updated to @angular/platform-browser in a breaking change of Cypress.
+// @see https://github.com/cypress-io/cypress/issues/33006
+import {
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting,
+} from '@angular/platform-browser-dynamic/testing'
+import {
+  setupHooks,
+  getContainerEl,
+} from '@cypress/mount-utils'
+import type { Subscription } from 'rxjs'
+
+/**
+ * Additional module configurations needed while mounting the component, like
+ * providers, declarations, imports and even component @Inputs()
+ *
+ * @interface MountConfig
+ * @see https://angular.io/api/core/testing/TestModuleMetadata
+ */
+export interface MountConfig<T> extends TestModuleMetadata {
+  /**
+   * @memberof MountConfig
+   * @example
+   * import { ButtonComponent } from 'button/button.component'
+   * it('renders a button with Save text', () => {
+   *  cy.mount(ButtonComponent, { componentProperties: { text: 'Save' }})
+   *  cy.get('button').contains('Save')
+   * })
+   *
+   * it('renders a button with a cy.spy() replacing EventEmitter', () => {
+   *  cy.mount(ButtonComponent, {
+   *    componentProperties: {
+   *      clicked: cy.spy().as('mySpy)
+   *    }
+   *  })
+   *  cy.get('button').click()
+   *  cy.get('@mySpy').should('have.been.called')
+   * })
+   */
+  // allow InputSignals to be type primitive and WritableSignal for type compliance
+  componentProperties?: Partial<{ [P in keyof T]: T[P] extends InputSignal<infer V> ? InputSignal<V> | WritableSignal<V> | V : T[P]}>
+}
+
+let activeFixture: ComponentFixture<any> | null = null
+let activeInternalSubscriptions: Subscription[] = []
+
+function cleanup () {
+  // Not public, we need to call this to remove the last component from the DOM
+  try {
+    (getTestBed() as any).tearDownTestingModule()
+  } catch (e) {
+    const notSupportedError = new Error(`Failed to teardown component. The version of Angular you are using may not be officially supported.`)
+
+    ;(notSupportedError as any).docsUrl = 'https://on.cypress.io/frameworks'
+    throw notSupportedError
+  }
+
+  // clean up internal subscriptions if any exist. We use this for two-way data binding for
+  // signal() models
+  activeInternalSubscriptions.forEach((subscription) => {
+    subscription.unsubscribe()
+  })
+
+  getTestBed().resetTestingModule()
+  activeFixture = null
+  activeInternalSubscriptions = []
+}
+
+/**
+ * Type that the `mount` function returns
+ * @type MountResponse<T>
+ */
+export type MountResponse<T> = {
+  /**
+   * Fixture for debugging and testing a component.
+   *
+   * @memberof MountResponse
+   * @see https://angular.io/api/core/testing/ComponentFixture
+   */
+  fixture: ComponentFixture<T>
+
+  /**
+   * The instance of the root component class
+   *
+   * @memberof MountResponse
+   * @see https://angular.io/api/core/testing/ComponentFixture#componentInstance
+   */
+  component: T
+};
+
+@Injectable()
+class CypressAngularErrorHandler implements ErrorHandler {
+  handleError (error: Error): void {
+    throw error
+  }
+}
+
+/**
+ * Bootstraps the TestModuleMetaData passed to the TestBed
+ *
+ * @param {Type<T>} component Angular component being mounted
+ * @param {MountConfig} config TestBed configuration passed into the mount function
+ * @returns {MountConfig} MountConfig
+ */
+function bootstrapModule<T> (
+  component: Type<T>,
+  config: MountConfig<T>,
+): MountConfig<T> {
+  const { componentProperties, ...testModuleMetaData } = config
+
+  if (!testModuleMetaData.declarations) {
+    testModuleMetaData.declarations = []
+  }
+
+  if (!testModuleMetaData.imports) {
+    testModuleMetaData.imports = []
+  }
+
+  if (!testModuleMetaData.providers) {
+    testModuleMetaData.providers = []
+  }
+
+  // Replace default error handler since it will swallow uncaught exceptions.
+  // We want these to be uncaught so Cypress catches it and fails the test
+  testModuleMetaData.providers.push({
+    provide: ErrorHandler,
+    useClass: CypressAngularErrorHandler,
+  })
+
+  // allow for zoneless change detection inside the testing module.
+  // @see https://angular.dev/guide/zoneless#using-zoneless-in-testbed
+  testModuleMetaData.providers.push(provideZonelessChangeDetection())
+
+  // check if the component is a standalone component
+  if ((component as any).ɵcmp?.standalone) {
+    testModuleMetaData.imports.push(component)
+  } else {
+    testModuleMetaData.declarations.push(component)
+  }
+
+  if (!testModuleMetaData.imports.includes(CommonModule)) {
+    testModuleMetaData.imports.push(CommonModule)
+  }
+
+  return testModuleMetaData
+}
+
+@Injectable()
+export class CypressTestComponentRenderer extends TestComponentRenderer {
+  override insertRootElement (rootElId: string) {
+    this.removeAllRootElements()
+
+    const rootElement = getContainerEl()
+
+    rootElement.setAttribute('id', rootElId)
+  }
+
+  override removeAllRootElements () {
+    getContainerEl().innerHTML = ''
+  }
+}
+
+/**
+ * Initializes the TestBed
+ *
+ * @param {Type<T> | string} component Angular component being mounted or its template
+ * @param {MountConfig} config TestBed configuration passed into the mount function
+ * @returns {Type<T>} componentFixture
+ */
+function initTestBed<T> (
+  component: Type<T> | string,
+  config: MountConfig<T>,
+): Type<T> {
+  const componentFixture = createComponentFixture(component) as Type<T>
+
+  getTestBed().configureTestingModule({
+    ...bootstrapModule(componentFixture, config),
+  })
+
+  getTestBed().overrideProvider(TestComponentRenderer, { useValue: new CypressTestComponentRenderer() })
+
+  return componentFixture
+}
+
+// if using the Wrapper Component (template strings), the component itself cannot be
+// a standalone component
+@Component({ selector: 'cy-wrapper-component', template: '', standalone: false })
+class WrapperComponent { }
+
+/**
+ * Returns the Component if Type<T> or creates a WrapperComponent
+ *
+ * @param {Type<T> | string} component The component you want to create a fixture of
+ * @returns {Type<T> | WrapperComponent}
+ */
+function createComponentFixture<T> (
+  component: Type<T> | string,
+): Type<T | WrapperComponent> {
+  if (typeof component === 'string') {
+    // getTestBed().overrideTemplate is available in v14+
+    // The static TestBed.overrideTemplate is available across versions
+    TestBed.overrideTemplate(WrapperComponent, component)
+
+    return WrapperComponent
+  }
+
+  return component
+}
+
+/**
+ * Creates the ComponentFixture
+ *
+ * @param {Type<T>} component Angular component being mounted
+ * @param {MountConfig<T>} config MountConfig
+
+ * @returns {Promise<ComponentFixture<T>>} ComponentFixture
+ */
+function setupFixture<T> (
+  component: Type<T>,
+  config: MountConfig<T>,
+): ComponentFixture<T> {
+  const fixture = getTestBed().createComponent(component)
+
+  setupComponent(config, fixture)
+
+  return fixture
+}
+
+// Best known way to currently detect whether or not a function is a signal is if the signal symbol exists.
+// From there, we can take our best guess based on what exists on the object itself.
+// @see https://github.com/cypress-io/cypress/issues/29731.
+function isSignal (prop: any): boolean {
+  try {
+    const symbol = Object.getOwnPropertySymbols(prop).find((symbol) => symbol.toString() === 'Symbol(SIGNAL)')
+
+    return !!symbol
+  } catch (e) {
+    // likely a primitive type, object, array, or something else (i.e. not a signal).
+    // We can return false here.
+    return false
+  }
+}
+
+// currently not a great way to detect if a function is an InputSignal.
+// @see https://github.com/cypress-io/cypress/issues/29731.
+function isInputSignal (prop: any): boolean {
+  return isSignal(prop) && typeof prop === 'function' && prop['name'] === 'inputValueFn'
+}
+
+// currently not a great way to detect if a function is a Model Signal.
+// @see https://github.com/cypress-io/cypress/issues/29731.
+function isModelSignal (prop: any): boolean {
+  return isSignal(prop) && isWritableSignal(prop) && typeof prop.subscribe === 'function'
+}
+
+// currently not a great way to detect if a function is a Writable Signal.
+// @see https://github.com/cypress-io/cypress/issues/29731.
+function isWritableSignal (prop: any): boolean {
+  return isSignal(prop) && typeof prop === 'function' && typeof prop.set === 'function'
+}
+
+function registerSignalEventsIfNeeded<T> (
+  propKey: string,
+  propValue: any,
+  componentValue: any,
+  injector: Injector,
+  fixture: ComponentFixture<T>,
+) {
+  const isPropValueASignal = isSignal(propValue)
+
+  if (isPropValueASignal) {
+    // propValue -> componentValue
+    const convertedToObservable = toObservable(propValue, {
+      // @ts-expect-error - monorepo clashing types between Angular 18 and Angular 21
+      injector,
+    })
+
+    // push the subscription into an array to be cleaned up at the end of the test
+    // to prevent a memory leak
+    activeInternalSubscriptions.push(
+      convertedToObservable.subscribe((value) => {
+        // keep the component up to date as prop signal changes
+        fixture.componentRef.setInput(propKey, value)
+      }),
+    )
+  }
+
+  const isComponentValueAModelSignal = isModelSignal(componentValue)
+
+  if (isPropValueASignal && isComponentValueAModelSignal) {
+    // propValue <- componentValue
+    const modelChanged$ = toObservable(componentValue, {
+      // @ts-expect-error - monorepo clashing types between Angular 18 and Angular 21
+      injector,
+    })
+
+    activeInternalSubscriptions.push(
+      modelChanged$.subscribe((value) => {
+        propValue.set(value)
+      }),
+    )
+  }
+}
+
+// In the case of signals, if we need to create an output spy, we need to check first whether or not a user has one defined first or has it created through
+// autoSpyOutputs. If so, we need to subscribe to the writable signal to push updates into the event emitter. We do NOT observe input signals and output spies will not
+// work for input signals.
+function detectAndRegisterOutputSpyToSignal<T> (config: MountConfig<T>, component: { [key: string]: any } & Partial<OnChanges>, key: string, injector: Injector): void {
+  if (config.componentProperties) {
+    const expectedChangeKey = `${key}Change`
+    let changeKeyIfExists = !!Object.keys(config.componentProperties).find(
+      (componentKey) => componentKey === expectedChangeKey,
+    )
+
+    if (changeKeyIfExists) {
+      component[expectedChangeKey] =
+        // @ts-expect-error
+        config.componentProperties[expectedChangeKey]
+    }
+
+    if (changeKeyIfExists) {
+      const componentValue = component[key]
+
+      // if the user passed in a change key or we created one due to config.autoSpyOutputs being set to true for a given signal,
+      // we will create a subscriber that will emit an event every time the value inside the signal changes. We only do this
+      // if the signal is writable and not an input signal.
+      if (isWritableSignal(componentValue) && !isInputSignal(componentValue)) {
+        activeInternalSubscriptions.push(
+          toObservable(componentValue, {
+            // @ts-expect-error - monorepo clashing types between Angular 18 and Angular 21
+            injector,
+          }).subscribe((value) => {
+            component[expectedChangeKey]?.emit(value)
+          }),
+        )
+      }
+    }
+  }
+}
+
+/**
+ * Gets the componentInstance and Object.assigns any componentProperties() passed in the MountConfig
+ *
+ * @param {MountConfig} config TestBed configuration passed into the mount function
+ * @param {ComponentFixture<T>} fixture Fixture for debugging and testing a component.
+ * @returns {T} Component being mounted
+ */
+function setupComponent<T> (
+  config: MountConfig<T>,
+  fixture: ComponentFixture<T>,
+): void {
+  let component = fixture.componentInstance as unknown as { [key: string]: any } & Partial<OnChanges>
+  const injector = fixture.componentRef.injector
+
+  if (config?.componentProperties) {
+    if (component instanceof WrapperComponent) {
+      component = Object.assign(component, config.componentProperties)
+    }
+
+    getComponentInputs(fixture.componentRef.componentType).forEach((key) => {
+      // only assign props if they are passed into the component
+      if (config?.componentProperties?.hasOwnProperty(key)) {
+        // @ts-expect-error
+        const passedInValue = config?.componentProperties[key]
+
+        registerSignalEventsIfNeeded(
+          key,
+          passedInValue,
+          component[key],
+          injector,
+          fixture,
+        )
+
+        detectAndRegisterOutputSpyToSignal(config, component, key, injector)
+
+        fixture.componentRef.setInput(
+          key,
+          isSignal(passedInValue) ? passedInValue() : passedInValue,
+        )
+      }
+    })
+
+    getComponentOutputs(fixture.componentRef.componentType).forEach((key) => {
+      const property = component[key]
+
+      // With the introduction of https://github.com/cypress-io/cypress/pull/31993, we want to make sure that component inputs are reference safe inside cy.mount().
+      // However, the exception to this is if the user passes in a Cypress output spy as a property in order to maintain backwards compatibility.
+      // @ts-expect-error
+      if (property instanceof EventEmitter || (config?.componentProperties?.hasOwnProperty(key) && config?.componentProperties[key] instanceof EventEmitter)) {
+      // only assign props if they are passed into the component
+        if (config?.componentProperties?.hasOwnProperty(key)) {
+        // @ts-expect-error
+          const passedInValue = config?.componentProperties[key]
+
+          component[key] = passedInValue
+        }
+      }
+    })
+  }
+
+  // Manually call ngOnChanges when mounting components using the class syntax.
+  // This is necessary because we are assigning input values to the class directly
+  // on mount and therefore the ngOnChanges() lifecycle is not triggered.
+  if (component.ngOnChanges && config.componentProperties) {
+    const { componentProperties } = config
+
+    const simpleChanges: SimpleChanges = Object.entries(componentProperties).reduce((acc, [key, value]) => {
+      acc[key] = new SimpleChange(null, value, true)
+
+      return acc
+    }, {} as {[key: string]: SimpleChange})
+
+    if (Object.keys(componentProperties).length > 0) {
+      component.ngOnChanges(simpleChanges)
+    }
+  }
+}
+
+/**
+ * Gets the input properties of a component - cannot rely on Object.keys() because inclusion of optional properties depends on useDefineForClassFields=true
+ *   Since Angular 15, useDefineForClassFields=false
+ * @param componentType
+ * @returns array of input property names
+ */
+function getComponentInputs (componentType: Type<any>): string[] {
+  // Access Angular's metadata to get input properties
+  const propMetadata = (componentType as any).ɵcmp?.inputs || {}
+
+  return Object.keys(propMetadata)
+}
+
+function getComponentOutputs (componentType: Type<any>): string[] {
+  // Access Angular's metadata to get output properties
+  const propMetadata = (componentType as any).ɵcmp?.outputs || {}
+
+  return Object.keys(propMetadata)
+}
+
+/**
+ * Mounts an Angular component inside Cypress browser
+ *
+ * @param component Angular component being mounted or its template
+ * @param config configuration used to configure the TestBed
+ * @example
+ * import { mount } from '@cypress/angular'
+ * import { StepperComponent } from './stepper.component'
+ * import { MyService } from 'services/my.service'
+ * import { SharedModule } from 'shared/shared.module';
+ * it('mounts', () => {
+ *    mount(StepperComponent, {
+ *      providers: [MyService],
+ *      imports: [SharedModule]
+ *    })
+ *    cy.get('[data-cy=increment]').click()
+ *    cy.get('[data-cy=counter]').should('have.text', '1')
+ * })
+ *
+ * // or
+ *
+ * it('mounts with template', () => {
+ *   mount('<app-stepper></app-stepper>', {
+ *     declarations: [StepperComponent],
+ *   })
+ * })
+ *
+ * @see {@link https://on.cypress.io/mounting-angular} for more details.
+ *
+ * @returns A component and component fixture
+ */
+export function mount<T> (
+  component: Type<T> | string,
+  config: MountConfig<T> = { },
+): Cypress.Chainable<MountResponse<T>> {
+  // Remove last mounted component if cy.mount is called more than once in a test
+  if (activeFixture) {
+    cleanup()
+  }
+
+  const componentFixture = initTestBed(component, config)
+
+  let mountResponsePromiseResolver: any
+  let mountResponsePromiseRejector: any
+  let mountResponsePromise: Promise<MountResponse<T>> = new Promise((resolve, reject) => {
+    mountResponsePromiseResolver = resolve
+    mountResponsePromiseRejector = reject
+  })
+
+  const fixture = setupFixture(componentFixture, config)
+
+  activeFixture = fixture
+  fixture.whenStable().then(() => {
+    const mountResponse: MountResponse<T> = {
+      fixture,
+      component: fixture.componentInstance,
+    }
+
+    const logMessage = typeof component === 'string' ? 'Component' : componentFixture.name
+
+    Cypress.log({
+      name: 'mount',
+      message: logMessage,
+      consoleProps: () => ({ result: mountResponse }),
+    })
+
+    mountResponsePromiseResolver(mountResponse)
+  }).catch((error) => {
+    mountResponsePromiseRejector(error)
+  })
+
+  return cy.wrap(mountResponsePromise, { log: false })
+}
+
+/**
+ * Creates a new Event Emitter and then spies on it's `emit` method
+ *
+ * @param {string} alias name you want to use for your cy.spy() alias
+ * @returns EventEmitter<T>
+ * @example
+ * import { StepperComponent } from './stepper.component'
+ * import { mount, createOutputSpy } from '@cypress/angular'
+ *
+ * it('Has spy', () => {
+ *   mount(StepperComponent, { componentProperties: { change: createOutputSpy('changeSpy') } })
+ *   cy.get('[data-cy=increment]').click()
+ *   cy.get('@changeSpy').should('have.been.called')
+ * })
+ *
+ * // Or for use with Angular Signals following the output nomenclature.
+ * // see https://v17.angular.io/guide/model-inputs#differences-between-model-and-input/
+ *
+ * it('Has spy', () => {
+ *   mount(StepperComponent, { componentProperties: { count: signal(0), countChange: createOutputSpy('countChange') } })
+ *   cy.get('[data-cy=increment]').click()
+ *   cy.get('@countChange').should('have.been.called')
+ * })
+ */
+export const createOutputSpy = <T>(alias: string) => {
+  const emitter = new EventEmitter<T>()
+
+  cy.spy(emitter, 'emit').as(alias)
+
+  return emitter as any
+}
+
+// Only needs to run once, we reset before each test
+getTestBed().initTestEnvironment(
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting(),
+  {
+    teardown: { destroyAfterEach: false },
+  },
+)
+
+setupHooks(cleanup)
