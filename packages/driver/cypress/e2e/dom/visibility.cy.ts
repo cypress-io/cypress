@@ -41,8 +41,12 @@ describe('src/cypress/dom/visibility', {
     cy.get(`[cy-section="${section}"]`).scrollIntoView()
   }
 
-  function assertVisibilityForSections (sections: string[]) {
+  function assertVisibilityForSections (sections: (string | undefined)[]) {
     for (const section of sections) {
+      if (!section) {
+        continue
+      }
+
       it(`detects visibility for ${section} test cases`, () => {
         prepareFixtureSection(section)
         cy.get(`[cy-section="${section}"] .testCase`).then((els) => {
@@ -330,7 +334,7 @@ describe('src/cypress/dom/visibility', {
             'overflow-flex-container',
             'overflow-complex-scenarios',
             'clip-path-scenarios',
-          ].filter(Boolean))
+          ])
         })
 
         describe('positioning', () => {
@@ -365,7 +369,7 @@ describe('src/cypress/dom/visibility', {
             'multiple',
             'multiple-3d',
             'backface-visibility',
-          ].filter(Boolean))
+          ])
         })
       })
     })
