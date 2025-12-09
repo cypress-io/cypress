@@ -1731,8 +1731,8 @@ describe('Routes', () => {
             expect(res.body).to.include('Cypress errored trying to serve this file from your system:')
             expect(res.body).to.include('/Users/bmann/Dev/projects/foo/views/test/index.html')
             expect(res.body).to.include('The file was not found.')
-            expect(res.body).to.include('<html>\n<head> <script')
-            expect(res.body).to.include('</script> </head> <body>')
+            expect(res.body).to.include('<!DOCTYPE html> <script')
+            expect(res.body).to.include('</script>\n<html>\n<body>')
           })
         })
       }) // should continue to inject
@@ -2936,7 +2936,7 @@ describe('Routes', () => {
             expect(res.statusCode).to.eq(200)
 
             expect(res.body).to.include('Cypress=parent.Cypress')
-            expect(res.body).to.include('</script> </head> <BODY>hello from bar!</BODY> </HTML>')
+            expect(res.body).to.include('</script> <HTML> <BODY>hello from bar!</BODY> </HTML>')
           })
         })
 
