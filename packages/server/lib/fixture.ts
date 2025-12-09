@@ -2,7 +2,6 @@ import path from 'path'
 import check from 'syntax-error'
 import debugModule from 'debug'
 import coffee from 'coffeescript'
-import Bluebird from 'bluebird'
 import jsonParseBetterErrors from 'json-parse-even-better-errors'
 import stripAnsi from 'strip-ansi'
 import * as errors from './errors'
@@ -98,7 +97,7 @@ export async function fileExists (p: string) {
 
 export async function parseFile (p: string, fixture: string, options: { encoding?: (ObjectEncodingOptions & { flag?: string | undefined }) | BufferEncoding | null } = {}) {
   if (queue[p]) {
-    await Bluebird.delay(1)
+    await new Promise<void>((resolve) => setTimeout(resolve, 1))
 
     return parseFile(p, fixture, options)
   }
