@@ -6,14 +6,19 @@ _Released 12/16/2025 (PENDING)_
 **Features:**
 
 - `Angular` version 21 is now supported within component testing. Addressed in [#33004](https://github.com/cypress-io/cypress/pull/33004).
+- Adds zoneless support for `Angular` Component Testing through the `angular-zoneless` mount function. Addresses [#31504](https://github.com/cypress-io/cypress/issues/31504) and [#30070](https://github.com/cypress-io/cypress/issues/30070).
 
 **Bugfixes:**
 
 - Fixed an issue where a EPIPE error shows up after CTRL+C is done in terminal. Fixes [#30659](https://github.com/cypress-io/cypress/issues/30659). Addressed in [#32873](https://github.com/cypress-io/cypress/pull/32873).
+- Fixed an issue where the browser would freeze when Cypress intercepts a synchronous XHR request and a `routeHandler` is used. Fixes [#32874](https://github.com/cypress-io/cypress/issues/32874). Addressed in [#32925](https://github.com/cypress-io/cypress/pull/32925).
+- Fixed an issue where `Next.js` Component Testing would not load correctly without a TypeScript-based Next config in versions 16.0.3 and up. Fixes [#32968](https://github.com/cypress-io/cypress/issues/32968).
+- Fixed an issue where the error message for `not.have.length` was not correctly displaying the expected length in the Command Log. Addressed in [#18927](https://github.com/cypress-io/cypress/issues/18927).
+- Fixed an issue where `removeAttribute()` would not work for attributes other than `target` on anchor or form elements after clicking links with `target="_top"` or `target="_parent"`. Fixes [#26206](https://github.com/cypress-io/cypress/issues/26206). Addressed in [#33051](https://github.com/cypress-io/cypress/pull/33051).
 
 ## 15.7.1
 
-_Released 12/2/2025_
+_Released 12/02/2025_
 
 **Performance:**
 
@@ -53,7 +58,7 @@ _Released 11/19/2025_
 
 ## 15.6.0
 
-_Released 11/4/2025_
+_Released 11/04/2025_
 
 **Features:**
 
@@ -108,7 +113,7 @@ _Released 10/17/2025_
 
 ## 15.4.0
 
-_Released 10/7/2025_
+_Released 10/07/2025_
 
 **Features:**
 
@@ -138,7 +143,7 @@ _Released 10/7/2025_
 
 ## 15.3.0
 
-_Released 9/23/2025_
+_Released 09/23/2025_
 
 **Features:**
 
@@ -157,7 +162,7 @@ _Released 9/23/2025_
 
 ## 15.2.0
 
-_Released 9/9/2025_
+_Released 09/09/2025_
 
 **Features:**
 
@@ -260,7 +265,7 @@ _Released 08/20/2025_
 
 ## 14.5.4
 
-_Released 8/07/2025_
+_Released 08/07/2025_
 
 **Dependency Updates:**
 
@@ -268,7 +273,7 @@ _Released 8/07/2025_
 
 ## 14.5.3
 
-_Released 7/25/2025_
+_Released 07/25/2025_
 
 **Bugfixes:**
 
@@ -282,7 +287,7 @@ _Released 7/25/2025_
 
 ## 14.5.2
 
-_Released 7/15/2025_
+_Released 07/15/2025_
 
 **Bugfixes:**
 
@@ -291,7 +296,7 @@ _Released 7/15/2025_
 
 ## 14.5.1
 
-_Released 7/01/2025_
+_Released 07/01/2025_
 
 **Bugfixes:**
 
@@ -303,7 +308,7 @@ _Released 7/01/2025_
 
 ## 14.5.0
 
-_Released 6/17/2025_
+_Released 06/17/2025_
 
 **Features:**
 
@@ -315,7 +320,7 @@ _Released 6/17/2025_
 
 ## 14.4.1
 
-_Released 6/3/2025_
+_Released 06/03/2025_
 
 **Bugfixes:**
 
@@ -331,7 +336,7 @@ _Released 6/3/2025_
 
 ## 14.4.0
 
-_Released 5/20/2025_
+_Released 05/20/2025_
 
 **Features:**
 
@@ -357,7 +362,7 @@ _Released 5/20/2025_
 
 ## 14.3.3
 
-_Released 5/6/2025_
+_Released 05/06/2025_
 
 **Performance:**
 
@@ -380,7 +385,7 @@ _Released 5/6/2025_
 
 ## 14.3.2
 
-_Released 4/22/2025_
+_Released 04/22/2025_
 
 **Bugfixes:**
 
@@ -389,7 +394,7 @@ _Released 4/22/2025_
 
 ## 14.3.1
 
-_Released 4/17/2025_
+_Released 04/17/2025_
 
 **Performance:**
 
@@ -408,7 +413,7 @@ _Released 4/17/2025_
 
 ## 14.3.0
 
-_Released 4/8/2025_
+_Released 04/08/2025_
 
 **Features:**
 
@@ -433,7 +438,7 @@ _Released 4/8/2025_
 
 ## 14.2.1
 
-_Released 3/26/2025_
+_Released 03/26/2025_
 
 **Bugfixes:**
 
@@ -456,7 +461,7 @@ _Released 3/26/2025_
 
 ## 14.2.0
 
-_Released 3/12/2025_
+_Released 03/12/2025_
 
 **Features:**
 
@@ -475,7 +480,7 @@ _Released 3/12/2025_
 
 ## 14.1.0
 
-_Released 2/25/2025_
+_Released 02/25/2025_
 
 **Features:**
 
@@ -499,7 +504,7 @@ _Released 2/25/2025_
 
 ## 14.0.3
 
-_Released 2/11/2025_
+_Released 02/11/2025_
 
 **Bugfixes:**
 
@@ -512,7 +517,7 @@ _Released 2/11/2025_
 
 ## 14.0.2
 
-_Released 2/05/2025_
+_Released 02/05/2025_
 
 **Bugfixes:**
 
@@ -531,7 +536,7 @@ _Released 2/05/2025_
 
 ## 14.0.1
 
-_Released 1/28/2025_
+_Released 01/28/2025_
 
 **Bugfixes:**
 
@@ -548,7 +553,7 @@ _Released 1/28/2025_
 
 ## 14.0.0
 
-_Released 1/16/2025_
+_Released 01/16/2025_
 
 **Breaking Changes:**
 
@@ -664,7 +669,7 @@ _Released 11/19/2024_
 
 ## 13.15.2
 
-_Released 11/5/2024_
+_Released 11/05/2024_
 
 **Bugfixes:**
 
@@ -701,7 +706,7 @@ _Released 10/24/2024_
 
 ## 13.15.0
 
-_Released 9/25/2024_
+_Released 09/25/2024_
 
 **Features:**
 
@@ -726,7 +731,7 @@ _Released 9/25/2024_
 
 ## 13.14.2
 
-_Released 9/4/2024_
+_Released 09/04/2024_
 
 **Bugfixes:**
 
@@ -735,7 +740,7 @@ _Released 9/4/2024_
 
 ## 13.14.1
 
-_Released 8/29/2024_
+_Released 08/29/2024_
 
 **Bugfixes:**
 
@@ -743,7 +748,7 @@ _Released 8/29/2024_
 
 ## 13.14.0
 
-_Released 8/27/2024_
+_Released 08/27/2024_
 
 **Performance:**
 
@@ -775,7 +780,7 @@ _Released 8/27/2024_
 
 ## 13.13.3
 
-_Released 8/14/2024_
+_Released 08/14/2024_
 
 **Bugfixes:**
 
@@ -792,7 +797,7 @@ _Released 8/14/2024_
 
 ## 13.13.2
 
-_Released 7/31/2024_
+_Released 07/31/2024_
 
 **Performance:**
 
@@ -812,7 +817,7 @@ _Released 7/31/2024_
 
 ## 13.13.1
 
-_Released 7/16/2024_
+_Released 07/16/2024_
 
 **Bugfixes:**
 
@@ -829,7 +834,7 @@ _Released 7/16/2024_
 
 ## 13.13.0
 
-_Released 7/01/2024_
+_Released 07/01/2024_
 
 **Performance:**
 
@@ -853,7 +858,7 @@ _Released 7/01/2024_
 
 ## 13.12.0
 
-_Released 6/18/2024_
+_Released 06/18/2024_
 
 **Features:**
 
@@ -879,7 +884,7 @@ _Released 6/18/2024_
 
 ## 13.11.0
 
-_Released 6/4/2024_
+_Released 06/04/2024_
 
 **Performance:**
 
@@ -901,7 +906,7 @@ _Released 6/4/2024_
 
 ## 13.10.0
 
-_Released 5/21/2024_
+_Released 05/21/2024_
 
 **Features:**
 
@@ -922,7 +927,7 @@ _Released 5/21/2024_
 
 ## 13.9.0
 
-_Released 5/7/2024_
+_Released 05/07/2024_
 
 **Features:**
 
@@ -945,7 +950,7 @@ _Released 5/7/2024_
 
 ## 13.8.1
 
-_Released 4/23/2024_
+_Released 04/23/2024_
 
 **Performance:**
 
@@ -966,7 +971,7 @@ _Released 4/23/2024_
 
 ## 13.8.0
 
-_Released 4/18/2024_
+_Released 04/18/2024_
 
 **Features:**
 
@@ -982,7 +987,7 @@ _Released 4/18/2024_
 
 ## 13.7.3
 
-_Released 4/11/2024_
+_Released 04/11/2024_
 
 **Bugfixes:**
 
@@ -996,7 +1001,7 @@ _Released 4/11/2024_
 
 ## 13.7.2
 
-_Released 4/2/2024_
+_Released 04/02/2024_
 
 **Performance:**
 
@@ -1015,7 +1020,7 @@ _Released 4/2/2024_
 
 ## 13.7.1
 
-_Released 3/21/2024_
+_Released 03/21/2024_
 
 **Bugfixes:**
 
@@ -1028,7 +1033,7 @@ _Released 3/21/2024_
 
 ## 13.7.0
 
-_Released 3/13/2024_
+_Released 03/13/2024_
 
 **Features:**
 
@@ -1061,7 +1066,7 @@ _Released 3/13/2024_
 
 ## 13.6.6
 
-_Released 2/22/2024_
+_Released 02/22/2024_
 
 **Bugfixes:**
 
@@ -1069,7 +1074,7 @@ _Released 2/22/2024_
 
 ## 13.6.5
 
-_Released 2/20/2024_
+_Released 02/20/2024_
 
 **Bugfixes:**
 
@@ -1095,7 +1100,7 @@ _Released 2/20/2024_
 
 ## 13.6.4
 
-_Released 1/30/2024_
+_Released 01/30/2024_
 
 **Performance:**
 
@@ -1111,7 +1116,7 @@ _Released 1/30/2024_
 
 ## 13.6.3
 
-_Released 1/16/2024_
+_Released 01/16/2024_
 
 **Bugfixes:**
 
@@ -1163,7 +1168,7 @@ _Released 12/26/2023_
 
 ## 13.6.1
 
-_Released 12/5/2023_
+_Released 12/05/2023_
 
 **Bugfixes:**
 
@@ -1215,7 +1220,7 @@ _Released 11/14/2023_
 
 ## 13.5.0
 
-_Released 11/8/2023_
+_Released 11/08/2023_
 
 **Features:**
 
@@ -1751,7 +1756,7 @@ _Released 01/27/2023_
 
 ## 12.4.0
 
-_Released 1/24/2023_
+_Released 01/24/2023_
 
 **Features:**
 

@@ -36,6 +36,7 @@ export default [
       '**/build/**/*',
       'package.json',
       '**/angular/**/*',
+      '**/angular-zoneless/**/*',
       '**/react/**/*',
       '**/vue/**/*',
       '**/svelte/**/*',
