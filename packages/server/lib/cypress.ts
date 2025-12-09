@@ -107,41 +107,41 @@ export = {
       // like in production and we shouldn't spawn a new
       // process
       if (this.isCurrentlyRunningElectron()) {
-      // if we weren't invoked from the CLI
-      // then display a warning to the user
-      if (!options.invokedFromCli) {
-        errorsWarning('INVOKED_BINARY_OUTSIDE_NPM_MODULE')
-      }
+        // if we weren't invoked from the CLI
+        // then display a warning to the user
+        if (!options.invokedFromCli) {
+          errorsWarning('INVOKED_BINARY_OUTSIDE_NPM_MODULE')
+        }
 
-      debug('running Electron currently')
+        debug('running Electron currently')
 
-      return require('./modes')(mode, options)
+        return require('./modes')(mode, options)
       }
 
       return new Promise((resolve) => {
-      debug('starting Electron')
-      const cypressElectron = require('@packages/electron')
+        debug('starting Electron')
+        const cypressElectron = require('@packages/electron')
 
-      const fn = (code: number) => {
-        // juggle up the totalFailed since our outer
-        // promise is expecting this object structure
-        debug('electron finished with', code)
+        const fn = (code: number) => {
+          // juggle up the totalFailed since our outer
+          // promise is expecting this object structure
+          debug('electron finished with', code)
 
-        if (mode === 'smokeTest') {
-        return resolve(code)
+          if (mode === 'smokeTest') {
+            return resolve(code)
+          }
+
+          return resolve({ totalFailed: code })
         }
 
-        return resolve({ totalFailed: code })
-      }
+        const args = require('./util/args').toArray(options)
 
-      const args = require('./util/args').toArray(options)
+        debug('electron open arguments %o', args)
 
-      debug('electron open arguments %o', args)
+        // const mainEntryFile = require.main.filename
+        const serverMain = getCwd()
 
-      // const mainEntryFile = require.main.filename
-      const serverMain = getCwd()
-
-      return cypressElectron.open(serverMain, args, fn)
+        return cypressElectron.open(serverMain, args, fn)
       })
     })
   },
@@ -283,7 +283,7 @@ export = {
           return exit(results.totalFailed ?? 0)
         }
         default: {
-            throw new Error(`Cannot start. Invalid mode: '${mode}'`)
+          throw new Error(`Cannot start. Invalid mode: '${mode}'`)
         }
       }
     } catch (err) {
