@@ -124,6 +124,7 @@ import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import { useSelectorPlaygroundStore } from '../../store/selector-playground-store'
 import type { AutIframe } from '../aut-iframe'
 import type { EventManager } from '../event-manager'
+import { openPlayground, closePlayground, SELECTOR_METHODS, getMethodPrefixLength } from './utils'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import { useElementSize } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
@@ -137,15 +138,7 @@ const props = defineProps<{
   getAutIframe: () => AutIframe
 }>()
 
-const methods = [
-  {
-    display: 'cy.get',
-    value: 'get',
-  }, {
-    display: 'cy.contains',
-    value: 'contains',
-  },
-] as const
+const methods = SELECTOR_METHODS
 
 const selectorPlaygroundStore = useSelectorPlaygroundStore()
 const match = ref<HTMLDivElement>()
@@ -153,7 +146,7 @@ const { width: matcherWidth } = useElementSize(match)
 
 // Text that is printed to the LEFT of the input
 const leftOfInputText = computed(() => {
-  return (selectorPlaygroundStore.method === 'get' ? 'cy.get(‘' : 'cy.contains(’').length + 1
+  return getMethodPrefixLength(selectorPlaygroundStore.method)
 })
 
 const widthOfMatchesHelperText = computed(() => {
@@ -168,21 +161,19 @@ const leftOffsetForClosingParens = computed(() => {
 // Ensure the playground is always enabled when it's open (visible)
 onMounted(() => {
   if (!selectorPlaygroundStore.isEnabled) {
-    selectorPlaygroundStore.setEnabled(true)
-    props.getAutIframe().toggleSelectorPlayground(true)
-    selectorPlaygroundStore.setShowingHighlight(true)
-    props.getAutIframe().toggleSelectorHighlight(true)
+    openPlayground(props.getAutIframe())
   }
 })
 
 // Defensive cleanup in case component is unmounted without going through togglePlayground
 onUnmounted(() => {
   if (selectorPlaygroundStore.isEnabled) {
-    props.getAutIframe().toggleSelectorPlayground(false)
-    selectorPlaygroundStore.setEnabled(false)
-    selectorPlaygroundStore.setShowingHighlight(false)
-    props.getAutIframe().toggleSelectorHighlight(false)
+    closePlayground(props.getAutIframe())
   }
+
+  // Always reset show state when component unmounts to prevent inconsistent state
+  // where show=true but component is not rendered, causing unexpected re-appearance
+  selectorPlaygroundStore.setShow(false)
 })
 
 watch(() => selectorPlaygroundStore.method, () => {

@@ -108,7 +108,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watchEffect } from 'vue'
+import { computed, ref, watch, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAutStore, useSpecStore, useSelectorPlaygroundStore } from '../store'
 import { useAutHeader } from './useAutHeader'
@@ -117,7 +117,7 @@ import { useI18n } from 'vue-i18n'
 import type { SpecRunnerHeaderFragment } from '../generated/graphql'
 import type { EventManager } from './event-manager'
 import type { AutIframe } from './aut-iframe'
-import { togglePlayground as _togglePlayground } from './utils'
+import { togglePlayground as _togglePlayground, closePlayground } from './selector-playground/utils'
 import Tag from '@cypress-design/vue-tag'
 import Button from '@cypress-design/vue-button'
 import SelectorPlayground from './selector-playground/SelectorPlayground.vue'
@@ -188,6 +188,14 @@ const autUrl = computed(() => {
 const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
 const togglePlayground = () => _togglePlayground(autIframe)
+
+// Close Selector Playground when Studio recording is manually turned on
+watch(() => studioStore.isActive, (isActive) => {
+  if (isActive && selectorPlaygroundStore.show) {
+    // Close the playground and turn off highlighting when Studio recording starts
+    closePlayground(autIframe)
+  }
+})
 
 // Have to spread gql props since binding it to v-model causes error when testing
 const selectedBrowser = ref({ ...props.gql.activeBrowser })

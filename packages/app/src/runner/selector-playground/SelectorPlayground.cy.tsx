@@ -260,4 +260,34 @@ describe('SelectorPlayground', () => {
     .should('have.attr', 'autocorrect', 'off')
     .should('have.attr', 'spellcheck', 'false')
   })
+
+  it('resets show state when component unmounts to prevent inconsistent state', () => {
+    const selectorPlaygroundStore = useSelectorPlaygroundStore()
+
+    // Set up initial state: show=true and component is enabled
+    selectorPlaygroundStore.setShow(true)
+    selectorPlaygroundStore.setEnabled(true)
+
+    const { element } = mountSelectorPlayground()
+
+    // Verify component is visible and state is consistent
+    cy.get('#selector-playground').should('be.visible')
+    cy.then(() => {
+      expect(selectorPlaygroundStore.show).to.be.true
+      expect(selectorPlaygroundStore.isEnabled).to.be.true
+    })
+
+    // Unmount the component (simulating navigation or parent unmount)
+    // This should trigger onUnmounted which calls setShow(false)
+    // In Cypress Vue component testing, cy.mount returns { wrapper, component }
+    element.then(({ wrapper }) => {
+      wrapper.unmount()
+    })
+
+    // After unmount, show should be false to prevent inconsistent state
+    // where show=true but component is not rendered, causing unexpected re-appearance
+    cy.then(() => {
+      expect(selectorPlaygroundStore.show).to.be.false
+    })
+  })
 })
