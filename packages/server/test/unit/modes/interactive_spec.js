@@ -122,7 +122,7 @@ describe('gui/interactive', () => {
   })
 
   context('.ready', () => {
-    beforeEach(function () {
+    beforeEach(async function () {
       this.win = {}
       this.state = {}
 
@@ -130,7 +130,7 @@ describe('gui/interactive', () => {
       sinon.stub(Windows, 'open').resolves(this.win)
       sinon.stub(Windows, 'trackState')
 
-      const state = savedState.create()
+      const state = await savedState.create()
 
       sinon.stub(state, 'get').resolves(this.state)
     })

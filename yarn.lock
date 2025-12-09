@@ -9625,10 +9625,10 @@
   resolved "https://registry.yarnpkg.com/@urql/introspection/-/introspection-0.3.3.tgz#5bcedfebd515161eecf9b193169c2765bf5674f1"
   integrity sha512-tekSLLqWnusfV6V7xaEnLJQSdXOD/lWy7f8JYQwrX+88Md+voGSCSx5WJXI7KLBN3Tat2OV08tAr8UROykls4Q==
 
-"@urql/vue@0.6.2":
-  version "0.6.2"
-  resolved "https://registry.yarnpkg.com/@urql/vue/-/vue-0.6.2.tgz#991b474644bbcc11322eab68f9ff41ca3eff4bb2"
-  integrity sha512-hrVysup75sgnNgOhhvVfI2ChOM1JDx+/+D9qKIKrTHn/IsykIjm9IrYK5+CcYoQmzXX6lfnJ8d1F3uu8k4flyA==
+"@urql/vue@0.6.4":
+  version "0.6.4"
+  resolved "https://registry.yarnpkg.com/@urql/vue/-/vue-0.6.4.tgz#96af561551cbccd37842c3d5349598c0d20592f0"
+  integrity sha512-xxySZhUvmB/hJbMvjm06T46LIU9gw2x/uHeG9lc8GbOhg6FTcJ+cxW6nzlsBrxM7ISIMDKmgnnXo1v7rzjmi8w==
   dependencies:
     "@urql/core" "^2.3.6"
     wonka "^4.0.14"
