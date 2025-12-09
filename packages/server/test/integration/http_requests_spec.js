@@ -2912,9 +2912,8 @@ describe('Routes', () => {
           .then((res) => {
             expect(res.statusCode).to.eq(200)
 
-            expect(res.body).to.include('<html> <head>')
             expect(res.body).to.include('Cypress=parent.Cypress')
-            expect(res.body).to.include('</head> <body><nav>some nav</nav><header>header</header></body> </html>')
+            expect(res.body).to.include('</script> <html> <body><nav>some nav</nav><header>header</header></body> </html>')
           })
         })
 
@@ -2958,9 +2957,7 @@ describe('Routes', () => {
             expect(res.statusCode).to.eq(200)
 
             expect(res.body).to.include('Cypress=parent.Cypress')
-            expect(res.body).to.include('<HTML> <head> <script')
-
-            expect(res.body).to.include('</head>hello from bar!</HTML>')
+            expect(res.body).to.include('</script> <HTML>hello from bar!</HTML>')
           })
         })
 
@@ -2981,10 +2978,8 @@ describe('Routes', () => {
           .then((res) => {
             expect(res.statusCode).to.eq(200)
 
-            expect(res.body).to.include('<head>')
             expect(res.body).to.include('Cypress=parent.Cypress')
-
-            expect(res.body).to.include('</head><div>hello from bar!</div>')
+            expect(res.body).to.include('</script> <div>hello from bar!</div>')
           })
         })
 
@@ -3005,7 +3000,7 @@ describe('Routes', () => {
           .then((res) => {
             expect(res.statusCode).to.eq(200)
 
-            expect(res.body).to.include('<!DOCTYPE><head> <script')
+            expect(res.body).to.include('<!DOCTYPE> <script')
             expect(res.body).to.include('Cypress=parent.Cypress')
           })
         })
@@ -3183,7 +3178,7 @@ describe('Routes', () => {
             .then((res) => {
               expect(res.statusCode).to.eq(500)
 
-              expect(res.body).to.include('<html><head> <script type=\'text/javascript\'>')
+              expect(res.body).to.include('<script type=\'text/javascript\'> </script> <html><head>')
             })
           })
         })
@@ -3281,7 +3276,7 @@ describe('Routes', () => {
 
               const body = cleanResponseBody(res.body)
 
-              expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = \'foobar.com\'; </script></head><body>https server</body></html>')
+              expect(body).to.eq('<script type=\'text/javascript\'> document.domain = \'foobar.com\'; </script> <html><head></head><body>https server</body></html>')
             })
           })
         })
@@ -3306,7 +3301,7 @@ describe('Routes', () => {
 
             const body = cleanResponseBody(res.body)
 
-            expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = \'cypress.io\'; </script></head></html>')
+            expect(body).to.eq('<script type=\'text/javascript\'> document.domain = \'cypress.io\'; </script> <html><head></head></html>')
           })
         })
 
@@ -3355,7 +3350,8 @@ describe('Routes', () => {
 
             const body = cleanResponseBody(res.body)
 
-            expect(body).to.include(`<html><head> <script type='text/javascript'> document.domain = 'foobar.com';`)
+            expect(body).to.include(`<script type=\'text/javascript\'> document.domain = \'foobar.com\';`)
+            expect(body).to.include(`</script> <html><head>`)
           })
         })
 
@@ -3475,7 +3471,7 @@ describe('Routes', () => {
 
               const body = cleanResponseBody(res.body)
 
-              expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = \'foo.com\'; </script></head></html>')
+              expect(body).to.eq('<script type=\'text/javascript\'> document.domain = \'foo.com\'; </script> <html><head></head></html>')
             })
           })
         })
