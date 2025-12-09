@@ -42,7 +42,7 @@
     "@types/fs-extra": "^8.1.5",
     "@urql/core": "2.4.4",
     "@urql/devtools": "2.0.3",
-    "@urql/vue": "0.6.2",
+    "@urql/vue": "0.6.4",
     "@vitejs/plugin-vue": "6.0.0",
     "@vitejs/plugin-vue-jsx": "5.0.1",
     "@vue/compiler-core": "3.2.47",

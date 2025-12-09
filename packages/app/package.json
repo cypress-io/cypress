@@ -47,7 +47,7 @@
     "@testing-library/cypress": "10.1.0",
     "@tooling/system-tests": "0.0.0-development",
     "@urql/core": "2.4.4",
-    "@urql/vue": "0.6.2",
+    "@urql/vue": "0.6.4",
     "@vitejs/plugin-legacy": "7.0.0",
     "@vitejs/plugin-vue": "6.0.0",
     "@vitejs/plugin-vue-jsx": "5.0.1",
