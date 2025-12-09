@@ -2,7 +2,6 @@ import _ from 'lodash'
 import os from 'os'
 import cp from 'child_process'
 import path from 'path'
-import Bluebird from 'bluebird'
 import Debug from 'debug'
 import util from '../util'
 import state from '../tasks/state'
@@ -58,7 +57,7 @@ function createSpawnFunction (
   options: any,
 ) {
   return (overrides: any = {}): any => {
-    return new Bluebird((resolve: any, reject: any) => {
+    return new Promise((resolve: any, reject: any) => {
       _.defaults(overrides, {
         onStderrData: false,
       })

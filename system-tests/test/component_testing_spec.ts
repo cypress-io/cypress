@@ -74,7 +74,7 @@ describe(`React major versions with Webpack`, function () {
   }
 })
 
-const ANGULAR_VERSIONS = ['18', '19', '20', '21'] as const
+const ANGULAR_VERSIONS = ['18', '19', '20'] as const
 
 describe(`Angular CLI versions`, () => {
   systemTests.setup()
@@ -88,6 +88,16 @@ describe(`Angular CLI versions`, () => {
       expectedExitCode: 0,
     })
   }
+
+  // NOTE: Angular 21 has to be tested separate because it uses the zoneless mount function,
+  // which doesn't support zone.js any longer OR support autoDetectChanges or autoSpyOutputs
+  systemTests.it(`v21 with mount tests`, {
+    project: `angular-21`,
+    spec: 'src/**/*.cy.ts,!src/app/errors.cy.ts',
+    testingType: 'component',
+    browser: 'chrome',
+    expectedExitCode: 0,
+  })
 
   systemTests.it('angular 19 custom config', {
     project: 'angular-custom-config',

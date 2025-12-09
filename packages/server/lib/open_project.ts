@@ -135,7 +135,7 @@ export class OpenProject {
 
     const afterSpec = () => {
       if (!this.projectBase || cfg.isTextTerminal || !cfg.experimentalInteractiveRunEvents) {
-        return Bluebird.resolve()
+        return Promise.resolve()
       }
 
       return runEvents.execute('after:spec', spec)

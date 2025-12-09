@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@packages/types": "0.0.0-development",
-    "@types/uuid": "8.3.2",
+    "@types/uuid": "8.3.4",
     "cross-env": "7.0.3",
     "devtools-protocol": "0.0.1528500",
     "resolve-pkg": "2.0.0",
