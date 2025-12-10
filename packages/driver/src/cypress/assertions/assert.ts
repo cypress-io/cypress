@@ -69,7 +69,7 @@ export function assert (ctx: Chai.AssertionStatic, utils: Chai.ChaiUtils, callba
       ctx._obj = selector ?? 'subject'
       // if no element found, fail the existence check
       // depends on the negate flag
-      ctx.assert(!!chai.util.flag(ctx, 'negate'), ...args)
+      ctx.assert(!!utils.flag(ctx, 'negate'), ...args)
     }
 
     // apply the assertion
