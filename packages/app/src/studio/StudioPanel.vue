@@ -39,6 +39,9 @@ import type { EventManager } from '../runner/event-manager'
 import { useMutation, gql, UseMutationResponse } from '@urql/vue'
 import { IconCypressStudio } from '@cypress-design/vue-icon'
 import type { SpecDirtyDataStore } from '../store/spec-dirty-data-store'
+import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
+import { getAutIframeModel } from '../runner'
+import { closePlayground } from '../runner/selector-playground/utils'
 
 // Mirrors the ReactDOM.Root type since incorporating those types
 // messes up vue typing elsewhere
@@ -75,6 +78,21 @@ const ReactStudioPanel = ref<StudioPanelShape | null>(null)
 const containerReactRootMap = new WeakMap<HTMLElement, Root>()
 
 const retryStudioMutation = useMutation(retryStudioMutationGql)
+
+const selectorPlaygroundStore = useSelectorPlaygroundStore()
+
+const isSelectorPlaygroundOpen = computed(() => {
+  return selectorPlaygroundStore.show
+})
+
+// Callback to close Selector Playground when Studio recording starts
+const onCloseSelectorPlayground = () => {
+  const autIframe = getAutIframeModel()
+
+  if (autIframe) {
+    closePlayground(autIframe)
+  }
+}
 
 const errorPanelProps = computed(() => {
   if (props.isCertError) {
@@ -116,6 +134,8 @@ const maybeRenderReactComponent = () => {
     hasRequestedProjectAccess: props.hasRequestedProjectAccess,
     requestProjectAccessMutation: props.requestProjectAccessMutation,
     specDirtyDataStore: props.specDirtyDataStore,
+    isSelectorPlaygroundOpen: isSelectorPlaygroundOpen.value,
+    onCloseSelectorPlayground,
   })
 
   // Store the react root in a weak map keyed by the container. We do this so that we have a reference
@@ -134,6 +154,7 @@ const maybeRenderReactComponent = () => {
 
 watch(() => props.canAccessStudioAI, maybeRenderReactComponent)
 watch(() => props.cloudStudioSessionId, maybeRenderReactComponent)
+watch(() => isSelectorPlaygroundOpen.value, maybeRenderReactComponent)
 
 const unmountReactComponent = () => {
   if (!ReactStudioPanel.value || !container.value) {

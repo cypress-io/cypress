@@ -690,76 +690,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
       })
     })
 
-    it('closes selector playground and turns off highlighting when studio recording is manually turned on', () => {
-      const studioStore = useStudioStore()
-      const selectorPlaygroundStore = useSelectorPlaygroundStore()
-      const autIframe = createTestAutIframe()
-
-      cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
-        render: (gqlVal) => {
-          const eventManager = createEventManager()
-
-          return (<SpecRunnerHeaderOpenMode
-            gql={{
-              ...gqlVal,
-              configFile: gqlVal.configFile || 'cypress.config.ts',
-            }}
-            eventManager={eventManager}
-            getAutIframe={() => autIframe}
-            shouldShowStudioButton={true}
-          />)
-        },
-      })
-
-      // Open Selector Playground first
-      cy.findByTestId('playground-activator').click()
-
-      cy.then(() => {
-        expect(selectorPlaygroundStore.show).to.be.true
-        expect(selectorPlaygroundStore.isEnabled).to.be.true
-      })
-
-      // Verify playground is visible
-      cy.get('#selector-playground').should('be.visible')
-
-      // Set up spies AFTER opening playground to capture only the close calls
-      const toggleSelectorPlaygroundSpy = cy.spy(autIframe, 'toggleSelectorPlayground')
-      const toggleSelectorHighlightSpy = cy.spy(autIframe, 'toggleSelectorHighlight')
-      const setShowSpy = cy.spy(selectorPlaygroundStore, 'setShow')
-      const setEnabledSpy = cy.spy(selectorPlaygroundStore, 'setEnabled')
-      const setShowingHighlightSpy = cy.spy(selectorPlaygroundStore, 'setShowingHighlight')
-
-      // Manually turn on Studio recording
-      cy.then(() => {
-        studioStore.setActive(true)
-      })
-
-      // Wait for Vue reactivity to process the watcher
-      cy.wait(0)
-
-      // Verify Selector Playground is closed and highlighting is turned off
-      cy.then(() => {
-        // Verify setShow was called with false (checking the actual state and spy calls)
-        expect(setShowSpy).to.have.been.called
-
-        // Check that the last call or one of the calls was with false
-        const calls = setShowSpy.getCalls()
-        const calledWithFalse = calls.some((call) => call.args[0] === false)
-
-        expect(calledWithFalse).to.be.true
-        expect(toggleSelectorPlaygroundSpy).to.have.been.calledWith(false)
-        expect(setEnabledSpy).to.have.been.calledWith(false)
-        expect(setShowingHighlightSpy).to.have.been.calledWith(false)
-        expect(toggleSelectorHighlightSpy).to.have.been.calledWith(false)
-        expect(selectorPlaygroundStore.show).to.be.false
-        expect(selectorPlaygroundStore.isEnabled).to.be.false
-      })
-
-      // Verify playground is no longer visible
-      cy.get('#selector-playground').should('not.exist')
-    })
-
-    it('does not close selector playground when studio recording is already active', () => {
+    it('allows selector playground to remain open when studio is active', () => {
       const studioStore = useStudioStore()
       const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
@@ -772,22 +703,19 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
         },
       })
 
+      // Open Selector Playground while Studio is active
       cy.findByTestId('playground-activator').click()
 
       cy.then(() => {
         expect(selectorPlaygroundStore.show).to.be.true
         expect(studioStore.isActive).to.be.true
+        // Recording should be disabled when Selector Playground is open
+        expect(studioStore.canRecord).to.be.false
       })
 
       cy.get('#selector-playground').should('be.visible')
 
-      // Setting active to true again should not close the playground
-      // (the watcher only triggers on change from false to true)
-      cy.then(() => {
-        studioStore.setActive(true)
-      })
-
-      // Playground should still be visible (watcher doesn't fire if already true)
+      // Playground should remain open - Studio will handle closing it when recording starts
       cy.then(() => {
         expect(selectorPlaygroundStore.show).to.be.true
       })

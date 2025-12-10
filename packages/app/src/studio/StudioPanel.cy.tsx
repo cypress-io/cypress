@@ -3,6 +3,7 @@ import type { EventManager } from '../runner/event-manager'
 import type { UseMutationResponse } from '@urql/vue'
 import StudioPanel from './StudioPanel.vue'
 import type { SpecDirtyDataStore } from '../store/spec-dirty-data-store'
+import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 
 describe('StudioPanel', () => {
   it('renders the error panel with a certificate error', () => {
@@ -32,5 +33,46 @@ describe('StudioPanel', () => {
     cy.findByTestId('studio-error-retry-button').should('have.text', ' Retry ')
 
     cy.percySnapshot()
+  })
+
+  describe('Selector Playground integration', () => {
+    it('tracks Selector Playground state and passes it to Studio', () => {
+      const selectorPlaygroundStore = useSelectorPlaygroundStore()
+      const mockEventManager = {} as unknown as EventManager
+      const mockUserProjectStatusStore = {} as unknown as UserProjectStatusStore
+      const mockRequestProjectAccessMutation = {} as unknown as UseMutationResponse<any, any>
+      const mockSpecDirtyDataStore = {} as unknown as SpecDirtyDataStore
+
+      selectorPlaygroundStore.setShow(false)
+
+      cy.mount(<StudioPanel
+        eventManager={mockEventManager}
+        studioStatus="ENABLED"
+        onStudioPanelClose={() => {}}
+        canAccessStudioAI={true}
+        userProjectStatusStore={mockUserProjectStatusStore}
+        hasRequestedProjectAccess={false}
+        requestProjectAccessMutation={mockRequestProjectAccessMutation}
+        autUrlSelector="https://example.com"
+        specDirtyDataStore={mockSpecDirtyDataStore}
+      />)
+
+      // Component should render without errors
+      cy.get('[data-cy="studio-panel"]')
+
+      cy.then(() => {
+        selectorPlaygroundStore.setShow(true)
+      })
+
+      // Component should handle state change without errors
+      cy.get('[data-cy="studio-panel"]')
+
+      cy.then(() => {
+        selectorPlaygroundStore.setShow(false)
+      })
+
+      // Component should handle state change without errors
+      cy.get('[data-cy="studio-panel"]')
+    })
   })
 })
