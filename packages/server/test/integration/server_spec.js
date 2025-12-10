@@ -164,7 +164,7 @@ describe('Server', () => {
         expect(res.headers['cache-control']).to.eq('no-cache, no-store, must-revalidate')
         expect(res.body).to.include('index.html content')
         expect(res.body).to.include('.action("app:window:before:load",window)')
-        expect(res.body).to.include('</script>\n  </head>')
+        expect(res.body).to.include('</script> <html>\n  <head>')
       })
 
       it('sends back the content type', async function () {
@@ -454,7 +454,7 @@ describe('Server', () => {
             expect(res.body).to.include('content')
 
             expect(res.body).to.include('.action("app:window:before:load",window)')
-            expect(res.body).to.include('</head>content</html>')
+            expect(res.body).to.include('</script> <html>content</html>')
           })
         })
       })
@@ -588,7 +588,7 @@ describe('Server', () => {
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include('content')
             expect(res.body).to.include('.action("app:window:before:load",window)')
-            expect(res.body).to.include('</head>content</html>')
+            expect(res.body).to.include('</script> <html>content</html>')
 
             expect(this.server.remoteStates.current()).to.deep.eq({
               auth: undefined,
@@ -675,7 +675,7 @@ describe('Server', () => {
           .then((res) => {
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include('.action("app:window:before:load",window)')
-            expect(res.body).to.include('</script></head><body>espn</body></html>')
+            expect(res.body).to.include('</script> <html><head></head><body>espn</body></html>')
 
             expect(this.buffers.buffer).to.be.undefined
           })
@@ -851,7 +851,7 @@ describe('Server', () => {
             expect(res.body).to.include('content')
 
             expect(res.body).to.include('.action("app:window:before:load",window)')
-            expect(res.body).to.include('</head>content</html>')
+            expect(res.body).to.include('</script> <html>content</html>')
           })
         })
       })
@@ -1311,7 +1311,7 @@ describe('Server', () => {
             expect(res.statusCode).to.eq(200)
 
             expect(res.body).to.include('.action("app:window:before:load",window)')
-            expect(res.body).to.include('</script></head><body>cypress</body></html>')
+            expect(res.body).to.include('</script> <html><head></head><body>cypress</body></html>')
           })
         }).then(() => {
           expect(this.server.remoteStates.current()).to.deep.eq({
@@ -1424,7 +1424,7 @@ describe('Server', () => {
           .then((res) => {
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include('.action("app:window:before:load",window)')
-            expect(res.body).to.include('</script></head><body>https server</body></html>')
+            expect(res.body).to.include('</script> <html><head></head><body>https server</body></html>')
           })
         }).then(() => {
           expect(this.server.remoteStates.current()).to.deep.eq({
