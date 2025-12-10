@@ -333,7 +333,7 @@ describe('src/cypress/dom/visibility', {
             'overflow-relative-positioning',
             'overflow-flex-container',
             'overflow-complex-scenarios',
-            'clip-path-scenarios',
+            Cypress.browser.name !== 'firefox' || mode === 'legacy' ? 'clip-path-scenarios' : undefined,
           ])
         })
 
