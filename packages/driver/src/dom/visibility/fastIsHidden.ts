@@ -13,10 +13,33 @@ function debug (...args: any[]) {
 }
 
 function memoize<T> (fn: (...args: any[]) => T): (...args: any[]) => T {
-  const cache = new Map<string, { result: T, timestamp: number }>()
+  const objIds = new WeakMap<any, number>()
+  let nextObjId = 0
+  const cache = new WeakMap<any, { result: T, timestamp: number }>()
+
+  function composeKey (...args: any[]): { key } {
+    return {
+      key: args.map((arg) => {
+        if (typeof arg === 'object' && arg !== null) {
+          return `${typeof arg}:${arg}`
+        }
+
+        if (typeof arg === 'object') {
+          if (!objIds.has(arg)) {
+            objIds.set(arg, nextObjId)
+            nextObjId++
+          }
+
+          return `obj:${objIds.get(arg)}`
+        }
+
+        return `${typeof arg}:${String(arg)}`
+      }).join('|'),
+    }
+  }
 
   return (...args: any[]) => {
-    const key = args.map((arg) => arg.toString()).join('')
+    const key = composeKey(args)
 
     const cached = cache.get(key)
 

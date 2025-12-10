@@ -413,7 +413,7 @@ chai.use((chai, u) => {
 
           try {
             return this.assert(
-              (isAttached = $dom.isAttached(obj)),
+              (isAttached = $dom.isAttached($obj)),
               'expected \#{act} to exist in the DOM',
               'expected \#{act} not to exist in the DOM',
               node,
