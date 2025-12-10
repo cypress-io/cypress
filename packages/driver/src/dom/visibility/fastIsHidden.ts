@@ -24,16 +24,16 @@ function memoize<T> (fn: (...args: any[]) => T): (...args: any[]) => T {
           return `${typeof arg}:${arg}`
         }
 
-        if (typeof arg === 'object') {
-          if (!objIds.has(arg)) {
-            objIds.set(arg, nextObjId)
-            nextObjId++
-          }
-
-          return `obj:${objIds.get(arg)}`
+        if (['number', 'string', 'boolean'].includes(typeof arg)) {
+          return `${typeof arg}:${String(arg)}`
         }
 
-        return `${typeof arg}:${String(arg)}`
+        if (!objIds.has(arg)) {
+          objIds.set(arg, nextObjId)
+          nextObjId++
+        }
+
+        return `obj:${objIds.get(arg)}`
       }).join('|'),
     }
   }
