@@ -27,10 +27,13 @@
         "src/router/router.ts",
         "src/pages/**/*.vue",
         "src/layouts/**/*.vue",
-        "src/**/*.cy.{ts,tsx,js,jsx}"
+        "src/**/*.cy.{ts,tsx,js,jsx}",
+        "src/generated/**/*.ts",
+        "cypress/**/*.{ts,tsx,js,jsx}"
       ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx,vue}",
+        "cypress/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx,mjs}"
       ]
     },
@@ -38,10 +41,16 @@
       "entry": [
         "index.js",
         "src/index.ts",
-        "src/**/*.cy.{ts,tsx,js,jsx}"
+        "src/**/*.cy.{ts,tsx,js,jsx}",
+        "src/utils/**/*.ts",
+        "src/graphql/urqlDetailedDebugExchange.ts",
+        "cypress/**/*.{ts,tsx,js,jsx}",
+        "script/**/*.{ts,tsx,js,jsx}"
       ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx,vue}",
+        "cypress/**/*.{ts,tsx,js,jsx}",
+        "script/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx,mjs}"
       ]
     },
@@ -68,10 +77,13 @@
       "entry": [
         "src/main.ts",
         "src/Main.vue",
-        "src/**/*.cy.{ts,tsx,js,jsx}"
+        "src/**/*.cy.{ts,tsx,js,jsx}",
+        "src/generated/**/*.ts",
+        "cypress/**/*.{ts,tsx,js,jsx}"
       ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx,vue}",
+        "cypress/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx,mjs}"
       ]
     },
@@ -446,7 +458,6 @@
     "packages/frontend-shared/src/components/**/*.vue",
     "packages/frontend-shared/src/gql-components/**/*.vue",
     "packages/frontend-shared/src/composables/examples/**/*.vue",
-    "packages/frontend-shared/src/graphql/urqlDetailedDebugExchange.ts",
     "packages/frontend-shared/src/gql-components/composables/useCohorts.ts",
     "packages/frontend-shared/src/gql-components/composables/usePromptManager.ts",
     "packages/frontend-shared/src/locales/schema.ts",
@@ -475,7 +486,13 @@
     "cypress",
     "@cypress/*",
     "@packages/*",
-    "@tooling/*"
+    "@tooling/*",
+    "@iconify-json/mdi",
+    "@iconify-json/logos",
+    "@percy/cypress",
+    "@vue/compiler-core",
+    "@vue/compiler-dom",
+    "@vue/compiler-sfc"
   ],
   "ignoreBinaries": [
     "circleci",

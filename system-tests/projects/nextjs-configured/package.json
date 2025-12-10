@@ -4,20 +4,12 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "lint": "next lint",
     "start": "next start"
   },
   "dependencies": {
-    "next": "^15.5.7",
-    "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "next": "^16.0.7",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1"
   },
-  "devDependencies": {
-    "@cypress/webpack-dev-server": "file:../../../npm/webpack-dev-server",
-    "eslint": "8.9.0",
-    "eslint-config-next": "15.2.3",
-    "html-webpack-plugin": "^5.6.3",
-    "webpack": "^5.91.0",
-    "webpack-dev-server": "^5.1.0"
-  }
+  "type": "module"
 }

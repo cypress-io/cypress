@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<body>
+  <script>
+    function removeNonTargetAttribute(e) {
+      e.target.removeAttribute('data-bar')
+      document.getElementById('result').innerHTML = e.target.hasAttribute('data-bar') ? 'has-attribute' : 'removed'
+    }
+  </script>
+
+  <div>
+    <a href="#" id="link" target="_top" data-bar="baz" onclick="removeNonTargetAttribute(event)">link</a>
+    <div id="result"></div>
+  </div>
+</body>
+</html>

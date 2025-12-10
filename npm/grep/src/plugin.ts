@@ -68,7 +68,7 @@ export function plugin (config: CypressConfigOptions): CypressConfigOptions {
   const { specPattern, excludeSpecPattern } = config
   const integrationFolder = env.grepIntegrationFolder || process.cwd()
 
-  const grepFilterSpecs = env.grepFilterSpecs === true
+  const grepFilterSpecs = env.grepFilterSpecs === true || String(env.grepFilterSpecs).toLowerCase() === 'true'
 
   if (grepFilterSpecs) {
     debug('specPattern', specPattern)

@@ -80,7 +80,6 @@
     "@types/mocha": "8.0.3",
     "@types/sinon": "9.0.9",
     "@types/sinon-chai": "3.2.12",
-    "cross-env": "7.0.3",
     "dtslint": "4.2.1",
     "eslint": "^9.31.0",
     "execa-wrap": "1.4.0",

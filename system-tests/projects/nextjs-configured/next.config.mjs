@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  webpack5: true,
+  /* config options here */
   reactStrictMode: true,
 }
 
-module.exports = nextConfig
+export default nextConfig

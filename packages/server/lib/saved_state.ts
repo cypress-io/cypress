@@ -1,11 +1,10 @@
 import _ from 'lodash'
 import path from 'path'
 import Debug from 'debug'
-import Bluebird from 'bluebird'
 import appData from './util/app_data'
 import { getCwd } from './cwd'
 import { File as FileUtil } from './util/file'
-import { fs } from './util/fs'
+import fsExtra from 'fs-extra'
 import { AllowedState, allowedKeys } from '@packages/types'
 import { globalPubSub } from '@packages/data-context'
 import { logError } from '@packages/stderr-filtering'
@@ -14,54 +13,40 @@ const debug = Debug('cypress:server:saved_state')
 
 const stateFiles: Record<string, typeof FileUtil> = {}
 
-export const formStatePath = (projectRoot?: string) => {
-  return Bluebird.try(() => {
-    debug('making saved state from %s', getCwd())
+export const formStatePath = async (projectRoot?: string) => {
+  debug('making saved state from %s', getCwd())
 
-    if (projectRoot) {
-      debug('for project path %s', projectRoot)
+  if (projectRoot) {
+    debug('for project path %s', projectRoot)
 
-      return projectRoot
-    }
+    return path.join(appData.toHashName(projectRoot), 'state.json')
+  }
 
-    debug('missing project path, looking for project here')
+  debug('missing project path, looking for project here')
 
-    let cypressConfigPath = getCwd('cypress.config.js')
+  const cwd = getCwd()
 
-    return fs.pathExistsAsync(cypressConfigPath)
-    .then((found) => {
-      if (found) {
-        debug('found cypress file %s', cypressConfigPath)
-        projectRoot = getCwd()
+  const jsConfig = getCwd('cypress.config.js')
 
-        return
-      }
+  if (await fsExtra.pathExists(jsConfig)) {
+    debug('found cypress file %s', jsConfig)
+    const root = cwd
 
-      cypressConfigPath = getCwd('cypress.config.ts')
+    return path.join(appData.toHashName(root), 'state.json')
+  }
 
-      return fs.pathExistsAsync(cypressConfigPath)
-    })
-    .then((found) => {
-      if (found) {
-        debug('found cypress file %s', cypressConfigPath)
-        projectRoot = getCwd()
-      }
+  const tsConfig = getCwd('cypress.config.ts')
 
-      return projectRoot
-    })
-  }).then((projectRoot) => {
-    const fileName = 'state.json'
+  if (await fsExtra.pathExists(tsConfig)) {
+    debug('found cypress file %s', tsConfig)
+    const root = cwd
 
-    if (projectRoot) {
-      debug(`state path for project ${projectRoot}`)
+    return path.join(appData.toHashName(root), 'state.json')
+  }
 
-      return path.join(appData.toHashName(projectRoot), fileName)
-    }
+  debug('state path for global mode')
 
-    debug('state path for global mode')
-
-    return path.join('__global__', fileName)
-  })
+  return path.join('__global__', 'state.json')
 }
 
 const normalizeAndAllowSet = (set, key, value) => {
@@ -89,8 +74,8 @@ const normalizeAndAllowSet = (set, key, value) => {
 }
 
 interface SavedStateAPI {
-  get: () => Bluebird<AllowedState>
-  set: (stateToSet: AllowedState) => Bluebird<void>
+  get: () => Promise<AllowedState>
+  set: (stateToSet: AllowedState) => Promise<void>
 }
 
 export const create = (projectRoot?: string, isTextTerminal: boolean = false): Promise<SavedStateAPI> => {

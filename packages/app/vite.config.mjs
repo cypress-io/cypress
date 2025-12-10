@@ -8,7 +8,6 @@ import { resolve } from 'path'
 const config = makeConfig({
   optimizeDeps: {
     include: [
-      'javascript-time-ago',
       'ansi-to-html',
       'fuzzysort',
       '@cypress-design/**',
