@@ -1,4 +1,4 @@
-import { expect, describe } from 'vitest'
+import { expect, describe, it } from 'vitest'
 import {
   parseGrep,
   parseTitleGrep,
@@ -8,6 +8,7 @@ import {
   shouldTestRunTags,
   shouldTestRunTitle,
 } from '../src/utils'
+import { plugin } from '../src/plugin'
 
 describe('utils', () => {
   describe('parseTitleGrep', () => {
@@ -433,6 +434,86 @@ describe('utils', () => {
     it('passes for substring', () => {
       shouldIt('hello w', 'hello world', true)
       shouldIt('-hello w', 'hello world', false)
+    })
+  })
+
+  describe('plugin', () => {
+    describe('grepFilterSpecs handling', () => {
+      const mockConfig = {
+        specPattern: ['**/*.cy.ts'],
+        excludeSpecPattern: [],
+        env: {},
+      }
+
+      it('handles boolean true', () => {
+        const config = {
+          ...mockConfig,
+          env: { grepFilterSpecs: true },
+        }
+        const result = plugin(config)
+
+        expect(result).toBeDefined()
+      })
+
+      it('handles string "true"', () => {
+        const config = {
+          ...mockConfig,
+          env: { grepFilterSpecs: 'true' },
+        }
+        const result = plugin(config)
+
+        expect(result).toBeDefined()
+      })
+
+      it('handles string "TRUE"', () => {
+        const config = {
+          ...mockConfig,
+          env: { grepFilterSpecs: 'TRUE' },
+        }
+        const result = plugin(config)
+
+        expect(result).toBeDefined()
+      })
+
+      it('handles string "True" (mixed case)', () => {
+        const config = {
+          ...mockConfig,
+          env: { grepFilterSpecs: 'True' },
+        }
+        const result = plugin(config)
+
+        expect(result).toBeDefined()
+      })
+
+      it('handles boolean false', () => {
+        const config = {
+          ...mockConfig,
+          env: { grepFilterSpecs: false },
+        }
+        const result = plugin(config)
+
+        expect(result).toBeDefined()
+      })
+
+      it('handles string "false"', () => {
+        const config = {
+          ...mockConfig,
+          env: { grepFilterSpecs: 'false' },
+        }
+        const result = plugin(config)
+
+        expect(result).toBeDefined()
+      })
+
+      it('handles undefined', () => {
+        const config = {
+          ...mockConfig,
+          env: {},
+        }
+        const result = plugin(config)
+
+        expect(result).toBeDefined()
+      })
     })
   })
 })

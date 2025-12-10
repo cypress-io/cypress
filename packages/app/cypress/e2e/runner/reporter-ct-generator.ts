@@ -631,7 +631,7 @@ export const generateCtUncaughtErrorTests = (server: 'Webpack' | 'Vite', configF
 
     verify('spec Bluebird unhandled rejection', {
       uncaught: true,
-      column: [21, 22],
+      column: [19, 20, 21],
       originalMessage: 'Unhandled promise rejection from the spec',
       message: [
         'The following error originated from your application code',
@@ -642,7 +642,7 @@ export const generateCtUncaughtErrorTests = (server: 'Webpack' | 'Vite', configF
 
     verify('spec Bluebird unhandled rejection with done', {
       uncaught: true,
-      column: [21, 22],
+      column: [19, 20, 21],
       originalMessage: 'Unhandled promise rejection from the spec',
       message: [
         'The following error originated from your application code',

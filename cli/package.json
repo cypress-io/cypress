@@ -7,13 +7,12 @@
     "build-cli": "tsc -p tsconfig.build.json && tsc -p tsconfig.esm.json && tsx ./scripts/build.ts && tsx ./scripts/post-build.ts",
     "clean": "tsx ./scripts/clean.ts",
     "dtslint": "dtslint types",
-    "postinstall": "patch-package && tsx ./scripts/post-install.ts",
     "lint": "eslint",
+    "postinstall": "patch-package && tsx ./scripts/post-install.ts",
     "prebuild": "yarn postinstall && tsx ./scripts/start-build.ts",
     "size": "t=\"cypress-v0.0.0.tgz\"; yarn pack --filename \"${t}\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "test": "yarn test-unit",
     "test-debug": "npx vitest --inspect-brk --no-file-parallelism --test-timeout=0",
-    "test-dependencies": "dependency-check . --missing --no-dev --verbose",
     "test-unit": "vitest run",
     "types": "yarn dtslint"
   },
@@ -63,6 +62,7 @@
   },
   "devDependencies": {
     "@cypress/angular": "0.0.0-development",
+    "@cypress/angular-zoneless": "0.0.0-development",
     "@cypress/grep": "0.0.0-development",
     "@cypress/mount-utils": "0.0.0-development",
     "@cypress/react": "0.0.0-development",
@@ -80,8 +80,6 @@
     "@types/mocha": "8.0.3",
     "@types/sinon": "9.0.9",
     "@types/sinon-chai": "3.2.12",
-    "cross-env": "7.0.3",
-    "dependency-check": "4.1.0",
     "dtslint": "4.2.1",
     "eslint": "^9.31.0",
     "execa-wrap": "1.4.0",
@@ -104,6 +102,7 @@
     "vue",
     "react",
     "angular",
+    "angular-zoneless",
     "svelte"
   ],
   "bin": {
@@ -144,6 +143,11 @@
       "types": "./angular/dist/index.d.ts",
       "import": "./angular/dist/index.js",
       "require": "./angular/dist/index.js"
+    },
+    "./angular-zoneless": {
+      "types": "./angular-zoneless/dist/index.d.ts",
+      "import": "./angular-zoneless/dist/index.js",
+      "require": "./angular-zoneless/dist/index.js"
     },
     "./svelte": {
       "types": "./svelte/dist/index.d.ts",

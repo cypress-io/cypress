@@ -18,6 +18,9 @@ linux-x64:
     - check-ts:
         requires:
           - build
+    - health-check:
+        requires:
+          - build
     - lint:
         name: linux-lint
         requires:
@@ -233,6 +236,9 @@ linux-x64:
     - npm-angular:
         requires:
           - build
+    - npm-angular-zoneless:
+        requires:
+          - build
     - npm-mount-utils:
         requires:
           - build
@@ -253,7 +259,9 @@ linux-x64:
         # filters: *mainBuildFilters
         requires:
           - check-ts
+          - health-check
           - npm-angular
+          - npm-angular-zoneless
           - npm-eslint-plugin-dev
           - npm-puppeteer-unit-tests
           - npm-puppeteer-cypress-tests

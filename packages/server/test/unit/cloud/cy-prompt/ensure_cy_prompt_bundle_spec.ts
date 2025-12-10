@@ -12,6 +12,8 @@ describe('ensureCyPromptBundle', () => {
   let readFileStub: sinon.SinonStub = sinon.stub()
   let verifySignatureStub: sinon.SinonStub = sinon.stub()
   let pathExistsStub: sinon.SinonStub = sinon.stub()
+  const mockRandom: number = 0.123
+  const mockRandomString: string = mockRandom.toString(36).substring(2, 15)
   const mockResponseSignature = '159'
   const mockManifest = {
     'server/index.js': 'abcdefg',
@@ -25,6 +27,7 @@ describe('ensureCyPromptBundle', () => {
     readFileStub = sinon.stub()
     verifySignatureStub = sinon.stub()
     pathExistsStub = sinon.stub()
+    sinon.stub(Math, 'random').returns(mockRandom)
 
     ensureCyPromptBundle = (proxyquire('../lib/cloud/cy-prompt/ensure_cy_prompt_bundle', {
       os: {
@@ -37,14 +40,14 @@ describe('ensureCyPromptBundle', () => {
         readFile: readFileStub.resolves(JSON.stringify(mockManifest)),
         pathExists: pathExistsStub.resolves(true),
       },
-      tar: {
-        extract: extractStub.resolves(),
-      },
       '../api/cy-prompt/get_cy_prompt_bundle': {
         getCyPromptBundle: getCyPromptBundleStub.resolves(mockResponseSignature),
       },
       '../encryption': {
         verifySignature: verifySignatureStub.resolves(true),
+      },
+      '../extract_atomic': {
+        extractAtomic: extractStub.resolves(),
       },
     })).ensureCyPromptBundle
   })
@@ -59,19 +62,16 @@ describe('ensureCyPromptBundle', () => {
       projectId: '123',
     })
 
-    expect(rmStub).to.be.calledWith(cyPromptPath)
     expect(ensureStub).to.be.calledWith(cyPromptPath)
     expect(readFileStub).to.be.calledWith(path.join(cyPromptPath, 'manifest.json'), 'utf8')
     expect(getCyPromptBundleStub).to.be.calledWith({
       cyPromptUrl: 'https://cypress.io/cy-prompt',
       projectId: '123',
-      bundlePath,
+      bundlePath: `${bundlePath}-${mockRandomString}`,
     })
 
-    expect(extractStub).to.be.calledWith({
-      file: bundlePath,
-      cwd: cyPromptPath,
-    })
+    expect(extractStub).to.be.calledWith(`${bundlePath}-${mockRandomString}`, cyPromptPath)
+    expect(rmStub).to.be.calledWith(`${bundlePath}-${mockRandomString}`)
 
     expect(verifySignatureStub).to.be.calledWith(JSON.stringify(mockManifest), mockResponseSignature)
 

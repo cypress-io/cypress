@@ -582,6 +582,8 @@ export class EventManager {
 
     Cypress.on('collect:run:state', () => {
       if (Cypress.config('hideCommandLog')) {
+        // TODO: Need more refactoring to use native Promise here since
+        // this goes to events.emitThen = map(Bluebird.map) which expect a Bluebird promise
         return Bluebird.resolve()
       }
 

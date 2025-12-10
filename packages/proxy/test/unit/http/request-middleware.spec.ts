@@ -110,6 +110,28 @@ describe('http/request-middleware', () => {
         expect(ctx.req.isFromExtraTarget).toBe(false)
       })
     })
+
+    describe('x-cypress-is-sync-request', () => {
+      it('when it exists, removes header and sets in on the req', async () => {
+        const ctx = prepareContext({
+          'x-cypress-is-sync-request': 'true',
+        })
+
+        await testMiddleware([ExtractCypressMetadataHeaders], ctx)
+
+        expect(ctx.req.headers!['x-cypress-is-sync-request']).toBeUndefined()
+        expect(ctx.req.isSyncRequest).toBe(true)
+      })
+
+      it('when it does not exist, sets in on the req', async () => {
+        const ctx = prepareContext()
+
+        await testMiddleware([ExtractCypressMetadataHeaders], ctx)
+
+        expect(ctx.req.headers!['x-cypress-is-sync-request']).toBeUndefined()
+        expect(ctx.req.isSyncRequest).toBe(false)
+      })
+    })
   })
 
   describe('CalculateCredentialLevelIfApplicable', () => {

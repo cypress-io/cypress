@@ -36,6 +36,10 @@ jobs:
       requires:
         - internal-pr-build
         - external-pr-build
+  - health-check:
+      requires:
+        - internal-pr-build
+        - external-pr-build
   - lint:
       name: linux-lint
       requires:
@@ -284,6 +288,11 @@ jobs:
         - external-pr-build
         - approve-contributor-pr
   - npm-angular:
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - npm-angular-zoneless:
       requires:
         - internal-pr-build
         - external-pr-build

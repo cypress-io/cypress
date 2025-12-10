@@ -8,6 +8,7 @@ const config = {
     '@angular/platform-browser-dynamic/testing',
     'zone.js',
     'zone.js/testing',
+    '@angular/core/rxjs-interop',
   ],
 }
 

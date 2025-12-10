@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "15.7.0",
+  "version": "15.7.1",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -43,6 +43,7 @@
     "ensure-deps": "./scripts/ensure-dependencies.sh",
     "get-next-version": "node scripts/get-next-version.js",
     "gulp:debug": "node --inspect-brk ./node_modules/.bin/gulp",
+    "health-check": "knip --no-exit-code",
     "postinstall": "node ./scripts/run-postInstall.js",
     "lint": "lerna run lint --no-bail --concurrency 2",
     "lint:base": "lerna run lint --no-bail",
@@ -118,14 +119,14 @@
     "@types/prismjs": "1.16.0",
     "@types/react": "18.3.12",
     "@types/react-dom": "18.3.1",
-    "@types/request-promise": "4.1.45",
+    "@types/request-promise": "4.1.51",
     "@types/send": "^0.17.1",
     "@types/sinon-chai": "3.2.12",
-    "@types/through2": "^2.0.36",
-    "@types/underscore.string": "0.0.38",
+    "@types/through2": "^2.0.41",
+    "@types/underscore.string": "0.0.42",
     "@typescript-eslint/eslint-plugin": "7.2.0",
     "@typescript-eslint/parser": "7.2.0",
-    "@urql/introspection": "^0.3.0",
+    "@urql/introspection": "^0.3.3",
     "@vitest/coverage-v8": "^3.2.4",
     "ascii-table": "0.0.9",
     "autobarrel": "^1.1.0",
@@ -173,6 +174,7 @@
     "husky": "7.0.2",
     "inquirer": "8.2.4",
     "inquirer-confirm": "2.0.3",
+    "knip": "5.70.1",
     "lazy-ass": "1.6.0",
     "lerna": "8.1.9",
     "lint-staged": "^16",
@@ -282,7 +284,8 @@
     "browserify-sign": "4.2.2",
     "devtools-protocol": "0.0.1528500",
     "node-abi": "4.9.0",
-    "vue-template-compiler": "2.6.12"
+    "vue-template-compiler": "2.6.12",
+    "yargs-unparser": "1.6.4"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

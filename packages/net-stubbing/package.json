@@ -23,6 +23,7 @@
     "throttle": "^1.0.3"
   },
   "devDependencies": {
+    "@packages/errors": "0.0.0-development",
     "@packages/network": "0.0.0-development",
     "@packages/proxy": "0.0.0-development",
     "@packages/server": "0.0.0-development",
