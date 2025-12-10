@@ -1381,7 +1381,7 @@ describe('Server', () => {
               expect(res.statusCode).to.eq(200)
 
               expect(res.body).to.include('.action("app:window:before:load",window)')
-              expect(res.body).to.include('</script></head><body>cypress</body></html>')
+              expect(res.body).to.include('</script> <html><head></head><body>cypress</body></html>')
             })
           }).then(() => {
             expect(this.server.remoteStates.current()).to.deep.eq({
@@ -1493,7 +1493,7 @@ describe('Server', () => {
             .then((res) => {
               expect(res.statusCode).to.eq(200)
               expect(res.body).to.include('.action("app:window:before:load",window)')
-              expect(res.body).to.include('</script></head><body>https server</body></html>')
+              expect(res.body).to.include('</script> <html><head></head><body>https server</body></html>')
             })
           }).then(() => {
             expect(this.server.remoteStates.current()).to.deep.eq({
