@@ -13,10 +13,10 @@ function debug (...args: any[]) {
 }
 
 function memoize<T> (fn: (...args: any[]) => T): (...args: any[]) => T {
-  const cache = new Map<any, { result: T, timestamp: number }>()
+  const cache = new Map<string, { result: T, timestamp: number }>()
 
   return (...args: any[]) => {
-    const key = args
+    const key = args.map((arg) => arg.toString()).join('')
 
     const cached = cache.get(key)
 
