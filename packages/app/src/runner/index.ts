@@ -240,7 +240,10 @@ function runSpecCT (config, spec: SpecFile) {
 
   // create new AUT
   const autIframe = getAutIframeModel()
-  const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
+
+  const { autIframe: $autIframe } = autIframe.create()
+
+  $autIframe.appendTo($container)
 
   // the iframe controller will forward the specpath via header to the devserver.
   // using a query parameter allows us to recognize relative requests and proxy them to the devserver.
@@ -255,7 +258,7 @@ function runSpecCT (config, spec: SpecFile) {
   $autIframe.prop('src', specSrc)
 
   // initialize Cypress (driver) with the AUT!
-  getEventManager().initialize($autIframe, config)
+  getEventManager().initialize({ $autIframe, config })
 }
 
 /**
@@ -302,13 +305,10 @@ async function runSpecE2E (config, spec: SpecFile) {
   // create new AUT
   const autIframe = getAutIframeModel()
 
-  const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
+  const { autIframe: $autIframe, autSnapshotIframe: $autSnapshotIframe } = autIframe.create()
 
-  // create snapshot AUT iframe
-  const $snapshotIframe = autIframe.createSnapshotIframe()
-
-  $snapshotIframe.appendTo($container)
-  $snapshotIframe.hide() // Hide it initially
+  $autIframe.appendTo($container)
+  $autSnapshotIframe.appendTo($container)
 
   // Remove the spec bridge iframe
   document.querySelectorAll('iframe.spec-bridge-iframe').forEach((el) => {
@@ -333,7 +333,7 @@ async function runSpecE2E (config, spec: SpecFile) {
   })
 
   // initialize Cypress (driver) with the AUT!
-  getEventManager().initialize($autIframe, config, $snapshotIframe)
+  getEventManager().initialize({ $autIframe, $autSnapshotIframe, config })
 }
 
 /**

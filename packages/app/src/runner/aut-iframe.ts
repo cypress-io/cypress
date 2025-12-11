@@ -31,7 +31,7 @@ export class AutIframe {
     this.debouncedToggleSelectorPlayground = _.debounce(this.toggleSelectorPlayground, 300)
   }
 
-  create (): JQuery<HTMLIFrameElement> {
+  create (): { autIframe: JQuery<HTMLIFrameElement>, autSnapshotIframe: JQuery<HTMLIFrameElement> } {
     const $iframe = this.$('<iframe>', {
       id: `Your project: '${this.projectName}'`,
       title: `Your project: '${this.projectName}'`,
@@ -40,19 +40,19 @@ export class AutIframe {
 
     this.$iframe = $iframe
 
-    return $iframe
-  }
-
-  createSnapshotIframe (): JQuery<HTMLIFrameElement> {
     const $snapshotIframe: JQuery<HTMLIFrameElement> = this.$('<iframe>', {
       id: `AUT Snapshot: '${this.projectName}'`,
       title: `AUT Snapshot: '${this.projectName}'`,
-      class: 'aut-iframe', // TODO: should this be aut-snapshot-iframe since we have code that looks for aut-iframe?
+      class: 'aut-snapshot-iframe',
     })
 
+    $snapshotIframe.hide() // Auto-hide the snapshot iframe
     this.$snapshotIframe = $snapshotIframe
 
-    return $snapshotIframe
+    return {
+      autIframe: $iframe,
+      autSnapshotIframe: $snapshotIframe,
+    }
   }
 
   destroy () {
