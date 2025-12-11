@@ -409,7 +409,7 @@ const util = {
   },
 
   isExecutableAsync (filePath: string): any {
-    return Bluebird.resolve(executable(filePath))
+    return Promise.resolve(executable(filePath))
   },
 
   isLinux,
