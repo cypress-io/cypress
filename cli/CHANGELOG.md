@@ -7,6 +7,7 @@ _Released 12/16/2025 (PENDING)_
 
 - `Angular` version 21 is now supported within component testing. Addressed in [#33004](https://github.com/cypress-io/cypress/pull/33004).
 - Adds zoneless support for `Angular` Component Testing through the `angular-zoneless` mount function. Addresses [#31504](https://github.com/cypress-io/cypress/issues/31504) and [#30070](https://github.com/cypress-io/cypress/issues/30070).
+ - The `experimentalRunAllSpecs` option can now be used for component testing as well as e2e testing. Addresses [#25636](https://github.com/cypress-io/cypress/issues/25636).
 
 **Bugfixes:**
 
@@ -35,10 +36,6 @@ _Released 12/02/2025_
 ## 15.7.0
 
 _Released 11/19/2025_
-
-**Features:**
-
- - The `experimentalRunAllSpecs` option can now be used for component testing as well as e2e testing. Addresses [#25636](https://github.com/cypress-io/cypress/issues/25636).
 
 **Performance:**
 
