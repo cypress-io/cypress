@@ -1676,6 +1676,7 @@
     "./node_modules/base64url/dist/base64url.js",
     "./node_modules/base64url/dist/pad-string.js",
     "./node_modules/base64url/index.js",
+    "./node_modules/baseline-browser-mapping/dist/index.cjs",
     "./node_modules/basic-auth/index.js",
     "./node_modules/bcrypt-pbkdf/index.js",
     "./node_modules/better-sqlite3/lib/database.js",
@@ -4327,5 +4328,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "937c8f96b397665d77547a80a73b067c1bbbe51d12e3bc174a69852cd4bad3de"
+  "deferredHash": "b25c4003f1d6f53a3ee0a880f48ba1c6d12f1b40052c00c5d8fe262a134d685d"
 }
