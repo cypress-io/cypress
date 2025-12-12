@@ -87,10 +87,14 @@ const isSelectorPlaygroundOpen = computed(() => {
 
 // Callback to close Selector Playground when Studio recording starts
 const onCloseSelectorPlayground = () => {
-  const autIframe = getAutIframeModel()
+  try {
+    const autIframe = getAutIframeModel()
 
-  if (autIframe) {
-    closePlayground(autIframe)
+    if (autIframe) {
+      closePlayground(autIframe)
+    }
+  } catch {
+    // If the AUT iframe isn't initialized yet, skip the operation silently
   }
 }
 
