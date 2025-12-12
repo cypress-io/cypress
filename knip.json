@@ -116,6 +116,9 @@
     "packages/ts": {
       "project": [
         "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "typescript-cached-transpile"
       ]
     },
     "packages/extension": {
